@@ -28,5 +28,23 @@ defmodule Console.Logs.Provider.ElasticTest do
                  Query.new(query: "request_id_123", operator: :and)
                )
     end
+
+    test "filters by node on any common node field" do
+      expect(Req, :post, fn _, opts ->
+        filters = get_in(Jason.decode!(opts[:body]), ["query", "bool", "filter"])
+        [%{"bool" => %{"should" => should, "minimum_should_match" => 1}}] =
+          Enum.filter(filters, &Map.has_key?(&1, "bool"))
+
+        fields = Enum.flat_map(should, fn %{"term" => term} -> Map.keys(term) end)
+        assert "kubernetes.node.name" in fields
+        assert "kubernetes.host.keyword" in fields
+        assert "k8s.node.name.keyword" in fields
+        assert Enum.all?(should, fn %{"term" => term} -> Map.values(term) == ["node-1"] end)
+
+        {:ok, %Req.Response{status: 200, body: Jason.encode!(%{"hits" => %{"hits" => []}})}}
+      end)
+
+      assert {:ok, []} = Elastic.query(Elastic.new(@conn), Query.new(node: "node-1"))
+    end
   end
 end

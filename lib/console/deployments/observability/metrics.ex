@@ -8,9 +8,14 @@ defmodule Console.Deployments.Observability.Metrics do
   @service_selector ~s|cluster="${cluster}",namespace="${namespace}"|
   @pod_selector ~s|cluster="${cluster}",namespace="${namespace}",pod="${name}"|
 
+  # node-exporter isn't always scraped (k8s-monitoring only does with `hostMetrics.linuxHosts`), so host
+  # cpu and memory fall back to the kubelet's resource metrics against kube-state-metrics node capacity
+  @cluster_capacity_cpu ~s|sum(max by (node) (kube_node_status_capacity{resource="cpu",unit="core",cluster="${cluster}"}))|
+  @cluster_capacity_memory ~s|sum(max by (node) (kube_node_status_capacity{resource="memory",unit="byte",cluster="${cluster}"}))|
+
   @cluster post_process([
-    cpu: ~s|1 - avg(irate(node_cpu_seconds_total{mode="idle",cluster="${cluster}"}[${rate}]))|,
-    memory: ~s|(sum(node_memory_MemTotal_bytes{cluster="${cluster}"}) - sum(node_memory_MemAvailable_bytes{cluster="${cluster}"})) / sum(node_memory_MemTotal_bytes{cluster="${cluster}"})|,
+    cpu: ~s|(1 - avg(irate(node_cpu_seconds_total{mode="idle",cluster="${cluster}"}[${rate}]))) or (sum(max by (node) (rate(node_cpu_usage_seconds_total{cluster="${cluster}"}[${rate}]))) / #{@cluster_capacity_cpu})|,
+    memory: ~s|((sum(node_memory_MemTotal_bytes{cluster="${cluster}"}) - sum(node_memory_MemAvailable_bytes{cluster="${cluster}"})) / sum(node_memory_MemTotal_bytes{cluster="${cluster}"})) or (sum(max by (node) (node_memory_working_set_bytes{cluster="${cluster}"})) / #{@cluster_capacity_memory})|,
     cpu_requests: reservation(:requests, :cpu, ~s|cluster="${cluster}"|),
     memory_requests: reservation(:requests, :memory, ~s|cluster="${cluster}"|),
     cpu_limits: reservation(:limits, :cpu, ~s|cluster="${cluster}"|),
@@ -20,11 +25,16 @@ defmodule Console.Deployments.Observability.Metrics do
     memory_usage: ~s|sum(container_memory_working_set_bytes{image!="",cluster="${cluster}",container!=""})|
   ])
 
+  # k8s-monitoring's default cAdvisor allowlist drops machine_cpu_cores
+  @instance_selector ~s|cluster="${cluster}",node="${instance}"|
+  @instance_cores ~s|(max(machine_cpu_cores{#{@instance_selector}}) or max(kube_node_status_capacity{resource="cpu",unit="core",#{@instance_selector}}))|
+  @instance_memory ~s|(max(machine_memory_bytes{#{@instance_selector}}) or max(kube_node_status_capacity{resource="memory",unit="byte",#{@instance_selector}}))|
+
   @node post_process([
-    cpu: ~s|sum (rate (container_cpu_usage_seconds_total{container!="",cluster="${cluster}",node="${instance}"}[${rate}])) / sum (machine_cpu_cores{node="${instance}",cluster="${cluster}"})|,
-    memory: ~s|sum (container_memory_working_set_bytes{image!="",container!="",node="${instance}",cluster="${cluster}"}) / sum (machine_memory_bytes{node="${instance}",cluster="${cluster}"})|,
-    cpu_usage: ~s|sum(rate(container_cpu_usage_seconds_total{container!="",node="${instance}",cluster="${cluster}"}[${rate}]))|,
-    memory_usage: ~s|sum(container_memory_working_set_bytes{image!="",container!="",node="${instance}"})|
+    cpu: ~s|sum (rate (container_cpu_usage_seconds_total{container!="",#{@instance_selector}}[${rate}])) / #{@instance_cores}|,
+    memory: ~s|sum (container_memory_working_set_bytes{image!="",container!="",#{@instance_selector}}) / #{@instance_memory}|,
+    cpu_usage: ~s|sum(rate(container_cpu_usage_seconds_total{container!="",#{@instance_selector}}[${rate}]))|,
+    memory_usage: ~s|sum(container_memory_working_set_bytes{image!="",container!="",#{@instance_selector}})|
   ])
 
   @component post_process([
@@ -101,25 +111,39 @@ defmodule Console.Deployments.Observability.Metrics do
     memory: ~s|sum(container_memory_working_set_bytes{cluster="${cluster}",image!="",container!=""}) / sum(kube_pod_container_resource_requests_memory_bytes{cluster="${cluster}"}) by (pod)|
   ])
 
-  # node-exporter series are labeled by scrape `instance` rather than node name, so they're
-  # matched to the node through node_uname_info's `nodename`
-  @node_exporter ~s|* on (instance) group_left () max by (instance) (node_uname_info{cluster="${cluster}",nodename="${node}"})|
+  # Shippers label node-exporter series with the node name differently: grafana's k8s-monitoring
+  # sets `instance` to it, kube-prometheus-stack adds `nodename`, victoria-metrics' stack adds
+  # `node`, and bare scrape configs only have node_uname_info's `nodename` to join through (which
+  # k8s-monitoring's default allowlist drops).  Failing all of those, a host-network node-exporter's
+  # `ip:port` instance matches the node's internal ip in kube_node_info.  Each is tried, keyed by instance.
+  @node_instances [
+                    ~s|node_cpu_seconds_total{mode="idle",cluster="${cluster}",instance="${node}"}|,
+                    ~s|node_cpu_seconds_total{mode="idle",cluster="${cluster}",nodename="${node}"}|,
+                    ~s|node_cpu_seconds_total{mode="idle",cluster="${cluster}",node="${node}"}|,
+                    ~s|node_uname_info{cluster="${cluster}",nodename="${node}"}|,
+                    ~s|(label_replace(node_cpu_seconds_total{mode="idle",cluster="${cluster}"}, "internal_ip", "$1", "instance", "(.+):[0-9]+") and on (internal_ip) kube_node_info{cluster="${cluster}",node="${node}"})|
+                  ]
+                  |> Enum.join(" or ")
+  @node_exporter ~s|and on (instance) max by (instance) (#{@node_instances})|
   @node_selector ~s|cluster="${cluster}",node="${node}"|
+  @node_capacity_cpu ~s|max(kube_node_status_capacity{resource="cpu",unit="core",#{@node_selector}})|
   @host_fs ~s<fstype!~"tmpfs|overlay|squashfs|ramfs|nsfs|fuse.*",mountpoint!~"/(run|var/lib/kubelet)/.*",cluster="${cluster}">
   # physical interfaces only; virtual pod and overlay interfaces double count pod traffic
   @host_nic ~s<device!~"lo|veth.*|cali.*|cilium.*|lxc.*|flannel.*|cni.*|docker.*|br-.*|tunl.*|vxlan.*|genev.*|kube-.*|eni.*|gke.*|azv.*",cluster="${cluster}">
   @node_pods ~s|on (namespace, pod) group_left () max by (namespace, pod) (kube_pod_info{#{@node_selector}})|
 
-  # host-level series that no pod or namespace grouping applies to
+  # host-level series that no pod or namespace grouping applies to.  Without node-exporter, cpu and
+  # memory fall back to the kubelet's resource metrics and kube-state-metrics node capacity; the
+  # rest have no equivalent and stay empty
   @node_host [
-    cpu_utilization: ~s|1 - avg(rate(node_cpu_seconds_total{mode="idle",cluster="${cluster}"}[${rate}]) #{@node_exporter})|,
+    cpu_utilization: ~s|(1 - avg(rate(node_cpu_seconds_total{mode="idle",cluster="${cluster}"}[${rate}]) #{@node_exporter})) or (max(rate(node_cpu_usage_seconds_total{#{@node_selector}}[${rate}])) / #{@node_capacity_cpu})|,
     cpu_modes: ~s|sum by (mode) (rate(node_cpu_seconds_total{mode!="idle",cluster="${cluster}"}[${rate}]) #{@node_exporter}) / scalar(count(node_cpu_seconds_total{mode="idle",cluster="${cluster}"} #{@node_exporter}))|,
-    cpu_cores: ~s|count(node_cpu_seconds_total{mode="idle",cluster="${cluster}"} #{@node_exporter})|,
+    cpu_cores: ~s|count(node_cpu_seconds_total{mode="idle",cluster="${cluster}"} #{@node_exporter}) or max(machine_cpu_cores{#{@node_selector}}) or #{@node_capacity_cpu}|,
     load1: ~s|max(node_load1{cluster="${cluster}"} #{@node_exporter})|,
     load5: ~s|max(node_load5{cluster="${cluster}"} #{@node_exporter})|,
     load15: ~s|max(node_load15{cluster="${cluster}"} #{@node_exporter})|,
-    memory_total: ~s|max(node_memory_MemTotal_bytes{cluster="${cluster}"} #{@node_exporter})|,
-    memory_used: ~s|max((node_memory_MemTotal_bytes{cluster="${cluster}"} - node_memory_MemAvailable_bytes{cluster="${cluster}"}) #{@node_exporter})|,
+    memory_total: ~s|max(node_memory_MemTotal_bytes{cluster="${cluster}"} #{@node_exporter}) or max(machine_memory_bytes{#{@node_selector}}) or max(kube_node_status_capacity{resource="memory",unit="byte",#{@node_selector}})|,
+    memory_used: ~s|max((node_memory_MemTotal_bytes{cluster="${cluster}"} - node_memory_MemAvailable_bytes{cluster="${cluster}"}) #{@node_exporter}) or max(node_memory_working_set_bytes{#{@node_selector}})|,
     memory_cached: ~s|max((node_memory_Cached_bytes{cluster="${cluster}"} + node_memory_Buffers_bytes{cluster="${cluster}"}) #{@node_exporter})|,
     major_page_faults: ~s|max(rate(node_vmstat_pgmajfault{cluster="${cluster}"}[${rate}]) #{@node_exporter})|,
     filesystem_fullness: ~s|max by (mountpoint) ((1 - node_filesystem_avail_bytes{#{@host_fs}} / node_filesystem_size_bytes{#{@host_fs}}) #{@node_exporter})|,

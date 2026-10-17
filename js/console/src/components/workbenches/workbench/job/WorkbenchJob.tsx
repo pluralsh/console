@@ -126,6 +126,9 @@ export function WorkbenchJob() {
               second={job && <WorkbenchJobMeta job={job} />}
               secondColor="text-xlight"
               secondPartialType="body2"
+              css={{
+                '& > :first-child': { textBox: 'trim-start cap alphabetic' },
+              }}
             />
             <Flex
               align="center"

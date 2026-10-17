@@ -7124,8 +7124,8 @@ export type NodeUsage = {
 };
 
 /**
- * Prometheus timeseries for a single node. Host fields come from node-exporter (matched to the node through
- * node_uname_info's nodename), the rest from cAdvisor and kube-state-metrics. Fields marked grouped are broken
+ * Prometheus timeseries for a single node. Host fields come from node-exporter (matched to the node by an
+ * `instance`, `nodename` or `node` label, or node_uname_info), the rest from cAdvisor and kube-state-metrics. Fields marked grouped are broken
  * out by the `groupBy` argument and labeled by `namespace` (and `pod`) accordingly; the rest are node-wide.
  */
 export type NodeUsageMetrics = {
@@ -13149,6 +13149,7 @@ export type RootQueryTypeLogAggregationArgs = {
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   facets?: InputMaybe<Array<InputMaybe<LogFacetInput>>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
+  node?: InputMaybe<Scalars['String']['input']>;
   operator?: InputMaybe<LogQueryOperator>;
   query?: InputMaybe<Scalars['String']['input']>;
   serviceId?: InputMaybe<Scalars['ID']['input']>;
@@ -13160,6 +13161,7 @@ export type RootQueryTypeLogAggregationBucketsArgs = {
   aggregation?: InputMaybe<LogAggregationInput>;
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   facets?: InputMaybe<Array<InputMaybe<LogFacetInput>>>;
+  node?: InputMaybe<Scalars['String']['input']>;
   operator?: InputMaybe<LogQueryOperator>;
   query?: InputMaybe<Scalars['String']['input']>;
   serviceId?: InputMaybe<Scalars['ID']['input']>;
@@ -13170,6 +13172,7 @@ export type RootQueryTypeLogAggregationBucketsArgs = {
 export type RootQueryTypeLogLabelsArgs = {
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   field: Scalars['String']['input'];
+  node?: InputMaybe<Scalars['String']['input']>;
   query?: InputMaybe<Scalars['String']['input']>;
   serviceId?: InputMaybe<Scalars['ID']['input']>;
   time?: InputMaybe<LogTimeRange>;
@@ -22691,6 +22694,7 @@ export type LogAggregationQueryVariables = Exact<{
   time?: InputMaybe<LogTimeRange>;
   operator?: InputMaybe<LogQueryOperator>;
   facets?: InputMaybe<Array<InputMaybe<LogFacetInput>> | InputMaybe<LogFacetInput>>;
+  node?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -22702,6 +22706,7 @@ export type LogLabelsQueryVariables = Exact<{
   serviceId?: InputMaybe<Scalars['ID']['input']>;
   query?: InputMaybe<Scalars['String']['input']>;
   time?: InputMaybe<LogTimeRange>;
+  node?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -22715,6 +22720,7 @@ export type LogAggregationBucketsQueryVariables = Exact<{
   operator?: InputMaybe<LogQueryOperator>;
   aggregation?: InputMaybe<LogAggregationInput>;
   facets?: InputMaybe<Array<InputMaybe<LogFacetInput>> | InputMaybe<LogFacetInput>>;
+  node?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -43746,7 +43752,7 @@ export type LoginLinkMutationHookResult = ReturnType<typeof useLoginLinkMutation
 export type LoginLinkMutationResult = Apollo.MutationResult<LoginLinkMutation>;
 export type LoginLinkMutationOptions = Apollo.BaseMutationOptions<LoginLinkMutation, LoginLinkMutationVariables>;
 export const LogAggregationDocument = gql`
-    query LogAggregation($clusterId: ID, $limit: Int, $query: String, $serviceId: ID, $time: LogTimeRange, $operator: LogQueryOperator, $facets: [LogFacetInput]) {
+    query LogAggregation($clusterId: ID, $limit: Int, $query: String, $serviceId: ID, $time: LogTimeRange, $operator: LogQueryOperator, $facets: [LogFacetInput], $node: String) {
   logAggregation(
     clusterId: $clusterId
     limit: $limit
@@ -43755,6 +43761,7 @@ export const LogAggregationDocument = gql`
     time: $time
     facets: $facets
     operator: $operator
+    node: $node
   ) {
     ...LogLine
   }
@@ -43780,6 +43787,7 @@ export const LogAggregationDocument = gql`
  *      time: // value for 'time'
  *      operator: // value for 'operator'
  *      facets: // value for 'facets'
+ *      node: // value for 'node'
  *   },
  * });
  */
@@ -43803,13 +43811,14 @@ export type LogAggregationLazyQueryHookResult = ReturnType<typeof useLogAggregat
 export type LogAggregationSuspenseQueryHookResult = ReturnType<typeof useLogAggregationSuspenseQuery>;
 export type LogAggregationQueryResult = Apollo.QueryResult<LogAggregationQuery, LogAggregationQueryVariables>;
 export const LogLabelsDocument = gql`
-    query LogLabels($field: String!, $clusterId: ID, $serviceId: ID, $query: String, $time: LogTimeRange) {
+    query LogLabels($field: String!, $clusterId: ID, $serviceId: ID, $query: String, $time: LogTimeRange, $node: String) {
   logLabels(
     field: $field
     clusterId: $clusterId
     serviceId: $serviceId
     query: $query
     time: $time
+    node: $node
   ) {
     ...LogFacetDetail
   }
@@ -43833,6 +43842,7 @@ export const LogLabelsDocument = gql`
  *      serviceId: // value for 'serviceId'
  *      query: // value for 'query'
  *      time: // value for 'time'
+ *      node: // value for 'node'
  *   },
  * });
  */
@@ -43856,7 +43866,7 @@ export type LogLabelsLazyQueryHookResult = ReturnType<typeof useLogLabelsLazyQue
 export type LogLabelsSuspenseQueryHookResult = ReturnType<typeof useLogLabelsSuspenseQuery>;
 export type LogLabelsQueryResult = Apollo.QueryResult<LogLabelsQuery, LogLabelsQueryVariables>;
 export const LogAggregationBucketsDocument = gql`
-    query LogAggregationBuckets($serviceId: ID, $clusterId: ID, $query: String, $time: LogTimeRange, $operator: LogQueryOperator, $aggregation: LogAggregationInput, $facets: [LogFacetInput]) {
+    query LogAggregationBuckets($serviceId: ID, $clusterId: ID, $query: String, $time: LogTimeRange, $operator: LogQueryOperator, $aggregation: LogAggregationInput, $facets: [LogFacetInput], $node: String) {
   logAggregationBuckets(
     serviceId: $serviceId
     clusterId: $clusterId
@@ -43865,6 +43875,7 @@ export const LogAggregationBucketsDocument = gql`
     aggregation: $aggregation
     operator: $operator
     facets: $facets
+    node: $node
   ) {
     ...LogAggregationBucket
   }
@@ -43890,6 +43901,7 @@ export const LogAggregationBucketsDocument = gql`
  *      operator: // value for 'operator'
  *      aggregation: // value for 'aggregation'
  *      facets: // value for 'facets'
+ *      node: // value for 'node'
  *   },
  * });
  */

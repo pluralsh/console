@@ -3,6 +3,9 @@ defmodule Console.Deployments.Observability.MetricsTest do
   alias Console.Deployments.Observability.Metrics
   alias Prometheus.Client
 
+  # label_replace's "$1" is a regex capture reference rather than a template variable
+  @unsubstituted ~r/\$(\{|[A-Za-z_])/
+
   describe "request/limit queries" do
     test "they dedupe kube-state-metrics series per container before summing" do
       for scope <- [:cluster, :component, :service, :pod],
@@ -54,11 +57,35 @@ defmodule Console.Deployments.Observability.MetricsTest do
           order <- [vars, Enum.reverse(vars)],
           {key, query} <- Metrics.queries(scope) do
         result = Client.variable_subst(query, order)
-        refute result =~ "$", "#{scope}.#{key} left a variable unsubstituted: #{result}"
+        refute result =~ @unsubstituted, "#{scope}.#{key} left a variable unsubstituted: #{result}"
       end
 
       result = Client.variable_subst(Map.new(Metrics.queries(:pod))[:memory], Enum.reverse(vars))
       assert result =~ ~s|cluster="c",namespace="ns",pod="pod-1"|
+    end
+  end
+
+  describe "cluster and node summary queries" do
+    test "cluster cpu and memory fall back to kubelet resource metrics without node-exporter" do
+      cluster = Map.new(Metrics.queries(:cluster))
+
+      assert cluster[:cpu] =~ ~s|(1 - avg(irate(node_cpu_seconds_total{mode="idle",cluster="${cluster}"}[${rate}]))) or (|
+      assert cluster[:cpu] =~
+        ~s|sum(max by (node) (rate(node_cpu_usage_seconds_total{cluster="${cluster}"}[${rate}]))) / sum(max by (node) (kube_node_status_capacity{resource="cpu",unit="core",cluster="${cluster}"}))|
+      assert cluster[:memory] =~
+        ~s|) or (sum(max by (node) (node_memory_working_set_bytes{cluster="${cluster}"})) / sum(max by (node) (kube_node_status_capacity{resource="memory",unit="byte",cluster="${cluster}"})))|
+    end
+
+    test "node queries are cluster scoped and fall back to node capacity for machine_* series" do
+      node = Map.new(Metrics.queries(:node))
+      sel = ~s|cluster="${cluster}",node="${instance}"|
+
+      for {key, query} <- node, do: assert(query =~ sel, "node.#{key} isn't cluster and node scoped: #{query}")
+
+      assert node[:cpu] =~
+        ~s|/ (max(machine_cpu_cores{#{sel}}) or max(kube_node_status_capacity{resource="cpu",unit="core",#{sel}}))|
+      assert node[:memory] =~
+        ~s|/ (max(machine_memory_bytes{#{sel}}) or max(kube_node_status_capacity{resource="memory",unit="byte",#{sel}}))|
     end
   end
 
@@ -123,8 +150,14 @@ defmodule Console.Deployments.Observability.MetricsTest do
         assert query =~ ~s|cluster="${cluster}"|, "#{grouping}.#{key} isn't cluster scoped: #{query}"
         assert query =~ ~s|node="${node}"| or query =~ ~s|nodename="${node}"|,
                "#{grouping}.#{key} isn't node scoped: #{query}"
-        refute Client.variable_subst(query, vars) =~ "$", "#{grouping}.#{key} left a variable unsubstituted"
+        refute Client.variable_subst(query, vars) =~ @unsubstituted, "#{grouping}.#{key} left a variable unsubstituted"
       end
+    end
+
+    test "label_replace's capture reference survives substitution" do
+      query = Keyword.fetch!(Metrics.queries(:node_usage, :node), :cpu_utilization)
+      assert Client.variable_subst(query, cluster: "c", node: "n", rate: "5m") =~
+        ~s|label_replace(node_cpu_seconds_total{mode="idle",cluster="c"}, "internal_ip", "$1", "instance", "(.+):[0-9]+")|
     end
 
     test "pod usage is grouped while host and capacity series stay node-wide" do
@@ -140,13 +173,32 @@ defmodule Console.Deployments.Observability.MetricsTest do
       end
     end
 
-    test "node-exporter series are matched to the node through node_uname_info" do
+    test "node-exporter series are matched on every common node labeling" do
       node = Map.new(Metrics.queries(:node_usage, :node))
 
-      for key <- @host_keys do
-        assert node[key] =~ ~s|group_left () max by (instance) (node_uname_info{cluster="${cluster}",nodename="${node}"})|,
-               "node_usage.#{key} isn't joined to node_uname_info"
+      for key <- @host_keys, matcher <- [~s|instance="${node}"|, ~s|nodename="${node}"|, ~s|,node="${node}"|] do
+        assert node[key] =~ "and on (instance) max by (instance) (", "node_usage.#{key} isn't matched by instance"
+        assert node[key] =~ matcher, "node_usage.#{key} doesn't try #{matcher}"
+        assert node[key] =~ ~s|node_uname_info{cluster="${cluster}",nodename="${node}"}|,
+               "node_usage.#{key} doesn't fall back to node_uname_info"
+        assert node[key] =~ ~s|and on (internal_ip) kube_node_info{cluster="${cluster}",node="${node}"}|,
+               "node_usage.#{key} doesn't fall back to the node's internal ip"
       end
+    end
+
+    test "host cpu and memory fall back to kubelet resource metrics and node capacity without node-exporter" do
+      node = Map.new(Metrics.queries(:node_usage, :node))
+      sel = ~s|cluster="${cluster}",node="${node}"|
+
+      assert node[:cpu_utilization] =~
+        ~s|) or (max(rate(node_cpu_usage_seconds_total{#{sel}}[${rate}])) / max(kube_node_status_capacity{resource="cpu",unit="core",#{sel}}))|
+      assert node[:cpu_cores] =~ ~s|) or max(machine_cpu_cores{#{sel}}) or max(kube_node_status_capacity{resource="cpu",unit="core",#{sel}})|
+      assert node[:memory_total] =~
+        ~s|) or max(machine_memory_bytes{#{sel}}) or max(kube_node_status_capacity{resource="memory",unit="byte",#{sel}})|
+      assert node[:memory_used] =~ ~s|) or max(node_memory_working_set_bytes{#{sel}})|
+
+      for key <- ~w(cpu_modes load1 memory_cached disk_read network_receive)a,
+        do: refute(node[key] =~ " or max(", "node_usage.#{key} has no node-exporter-free equivalent")
     end
 
     test "kubernetes series use the node label and dedupe reservations" do

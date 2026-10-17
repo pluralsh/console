@@ -106,7 +106,7 @@ const NODE_SECTIONS: NodeMetricSection[] = [
         key: 'cpu-utilization',
         title: 'CPU utilization',
         tooltip:
-          'Host cpu time spent busy (node_cpu_seconds_total), with pod cpu requests as a share of allocatable cpu',
+          'Host cpu time spent busy (node_cpu_seconds_total, or the kubelet node_cpu_usage_seconds_total against cpu capacity without node-exporter), with pod cpu requests as a share of allocatable cpu',
         format: 'percent',
         fields: ['cpuUtilization', 'cpuRequests', 'cpuAllocatable'],
         series: (m) => [
@@ -166,7 +166,7 @@ const NODE_SECTIONS: NodeMetricSection[] = [
         key: 'memory-utilization',
         title: 'Memory utilization',
         tooltip:
-          'Host memory in use (MemTotal less MemAvailable) as a share of total, with pod memory requests as a share of allocatable memory',
+          'Host memory in use (MemTotal less MemAvailable, or the kubelet node_memory_working_set_bytes without node-exporter) as a share of total, with pod memory requests as a share of allocatable memory',
         format: 'percent',
         fields: [
           'memoryUsed',

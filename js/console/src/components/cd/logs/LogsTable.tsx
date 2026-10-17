@@ -28,6 +28,7 @@ export function LogsTable({
   labels,
   clusterId,
   serviceId,
+  node,
 }: {
   logs: LogLineFragment[]
   loading?: boolean
@@ -45,6 +46,7 @@ export function LogsTable({
   labels: LogFacetInput[]
   clusterId?: string
   serviceId?: string
+  node?: string
 }) {
   const theme = useTheme()
   const [contextPanelOpen, setContextPanelOpen] = useState(false)
@@ -138,6 +140,7 @@ export function LogsTable({
             queryVars={{
               clusterId,
               serviceId,
+              node,
               facets: labels,
               operator: queryOperator,
             }}
