@@ -81,7 +81,7 @@ defmodule Console.AI.Workbench.MCP.ClientsTest do
       assert_receive {:DOWN, ^ref, :process, ^pid, :normal}, @stop_timeout
       assert_receive {:DOWN, ^client_ref, :process, ^client, _}, @stop_timeout
       # our DOWN can arrive before the supervisor has handled the worker's EXIT
-      assert children_drained?()
+      assert child_removed?(pid)
 
       {:ok, fresh} = Clients.ensure_started(tool)
       refute fresh == pid
@@ -116,14 +116,19 @@ defmodule Console.AI.Workbench.MCP.ClientsTest do
     end
   end
 
-  defp children_drained?(attempts \\ 50)
-  defp children_drained?(0), do: DynamicSupervisor.which_children(Clients) == []
-  defp children_drained?(attempts) do
-    case DynamicSupervisor.which_children(Clients) do
-      [] -> true
-      _ ->
+  # Clients is app-wide, so clients other modules started (eg workbench engine runs) can
+  # still be supervised here; only this worker's removal matters
+  defp child_removed?(pid, attempts \\ 50)
+  defp child_removed?(pid, 0), do: not supervised?(pid)
+  defp child_removed?(pid, attempts) do
+    case supervised?(pid) do
+      false -> true
+      true ->
         Process.sleep(20)
-        children_drained?(attempts - 1)
+        child_removed?(pid, attempts - 1)
     end
   end
+
+  defp supervised?(pid),
+    do: Enum.any?(DynamicSupervisor.which_children(Clients), &match?({_, ^pid, _, _}, &1))
 end

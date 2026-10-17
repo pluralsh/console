@@ -18,6 +18,7 @@ import { useTheme } from 'styled-components'
 
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import { GaugeWrap } from '../../cluster/Gauges'
+import { NodeMetrics } from '../../cluster/nodes/NodeMetrics'
 import { cpuFmt, roundToTwoPlaces } from '../../cluster/utils'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import RadialBarChart from '../../utils/RadialBarChart'
@@ -54,6 +55,7 @@ import {
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },
+  { path: 'metrics', label: 'Metrics' },
   { path: 'conditions', label: 'Conditions' },
   { path: 'images', label: 'Container images' },
   { path: 'pods', label: 'Pods' },
@@ -299,6 +301,17 @@ export function NodeInfo() {
         </Card>
       </section>
     </>
+  )
+}
+
+export function NodeMetricsView() {
+  const { clusterId = '', name = '' } = useParams()
+
+  return (
+    <NodeMetrics
+      clusterId={clusterId}
+      node={name}
+    />
   )
 }
 

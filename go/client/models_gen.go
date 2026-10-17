@@ -2239,7 +2239,9 @@ type Cluster struct {
 	// cluster-wide prometheus timeseries for cpu, memory, network, storage and pod health, optionally broken out by namespace or node
 	ClusterUsageMetrics *ClusterUsageMetrics `json:"clusterUsageMetrics,omitempty"`
 	ClusterNodeMetrics  *ClusterNodeMetrics  `json:"clusterNodeMetrics,omitempty"`
-	NetworkGraph        []*NetworkMeshEdge   `json:"networkGraph,omitempty"`
+	// host, resource, workload and health prometheus timeseries for a single node
+	NodeUsageMetrics *NodeUsageMetrics  `json:"nodeUsageMetrics,omitempty"`
+	NetworkGraph     []*NetworkMeshEdge `json:"networkGraph,omitempty"`
 	// a list of node healthstatistics for this cluster
 	NodeStatistics []*NodeStatistic `json:"nodeStatistics,omitempty"`
 	// A pod-level set of utilization metrics for this cluster for rendering a heat map
@@ -5826,6 +5828,74 @@ type NodeStatus struct {
 type NodeUsage struct {
 	CPU    *string `json:"cpu,omitempty"`
 	Memory *string `json:"memory,omitempty"`
+}
+
+// Prometheus timeseries for a single node. Host fields come from node-exporter (matched to the node through
+// node_uname_info's nodename), the rest from cAdvisor and kube-state-metrics. Fields marked grouped are broken
+// out by the `groupBy` argument and labeled by `namespace` (and `pod`) accordingly; the rest are node-wide.
+type NodeUsageMetrics struct {
+	// fraction (0-1) of host cpu time spent busy
+	CPUUtilization []*MetricResponse `json:"cpuUtilization,omitempty"`
+	// fraction (0-1) of host cpu time per non-idle mode, labeled by `mode`
+	CPUModes []*MetricResponse `json:"cpuModes,omitempty"`
+	// host cpu count
+	CPUCores []*MetricResponse `json:"cpuCores,omitempty"`
+	// 1m host load average
+	Load1 []*MetricResponse `json:"load1,omitempty"`
+	// 5m host load average
+	Load5 []*MetricResponse `json:"load5,omitempty"`
+	// 15m host load average
+	Load15 []*MetricResponse `json:"load15,omitempty"`
+	// host memory in bytes
+	MemoryTotal []*MetricResponse `json:"memoryTotal,omitempty"`
+	// host memory in use (total less available) in bytes
+	MemoryUsed []*MetricResponse `json:"memoryUsed,omitempty"`
+	// host page cache and buffers in bytes
+	MemoryCached []*MetricResponse `json:"memoryCached,omitempty"`
+	// major page faults per second
+	MajorPageFaults []*MetricResponse `json:"majorPageFaults,omitempty"`
+	// fraction (0-1) of each host filesystem used, labeled by `mountpoint`
+	FilesystemFullness []*MetricResponse `json:"filesystemFullness,omitempty"`
+	// host disk read throughput in bytes/s
+	DiskRead []*MetricResponse `json:"diskRead,omitempty"`
+	// host disk write throughput in bytes/s
+	DiskWrite []*MetricResponse `json:"diskWrite,omitempty"`
+	// fraction (0-1) of time the busiest disk spent doing I/O
+	DiskBusy []*MetricResponse `json:"diskBusy,omitempty"`
+	// physical interface receive throughput in bytes/s
+	NetworkReceive []*MetricResponse `json:"networkReceive,omitempty"`
+	// physical interface transmit throughput in bytes/s
+	NetworkTransmit []*MetricResponse `json:"networkTransmit,omitempty"`
+	// physical interface receive and transmit errors per second
+	NetworkErrors []*MetricResponse `json:"networkErrors,omitempty"`
+	// physical interface receive and transmit drops per second
+	NetworkDropped []*MetricResponse `json:"networkDropped,omitempty"`
+	// allocatable node cpu in cores
+	CPUAllocatable []*MetricResponse `json:"cpuAllocatable,omitempty"`
+	// allocatable node memory in bytes
+	MemoryAllocatable []*MetricResponse `json:"memoryAllocatable,omitempty"`
+	// pod capacity of the node
+	PodsAllocatable []*MetricResponse `json:"podsAllocatable,omitempty"`
+	// 1 while each node condition holds, labeled by `condition`
+	Conditions []*MetricResponse `json:"conditions,omitempty"`
+	// container cpu usage in cores (grouped)
+	CPU []*MetricResponse `json:"cpu,omitempty"`
+	// cpu requests of pods on the node in cores (grouped)
+	CPURequests []*MetricResponse `json:"cpuRequests,omitempty"`
+	// cpu limits of pods on the node in cores (grouped)
+	CPULimits []*MetricResponse `json:"cpuLimits,omitempty"`
+	// container working set memory in bytes (grouped)
+	Memory []*MetricResponse `json:"memory,omitempty"`
+	// memory requests of pods on the node in bytes (grouped)
+	MemoryRequests []*MetricResponse `json:"memoryRequests,omitempty"`
+	// memory limits of pods on the node in bytes (grouped)
+	MemoryLimits []*MetricResponse `json:"memoryLimits,omitempty"`
+	// container OOM kills within each rate window (grouped)
+	OomKills []*MetricResponse `json:"oomKills,omitempty"`
+	// running pods on the node (grouped)
+	PodsRunning []*MetricResponse `json:"podsRunning,omitempty"`
+	// container restarts on the node within each rate window (grouped)
+	Restarts []*MetricResponse `json:"restarts,omitempty"`
 }
 
 type Notification struct {
@@ -16776,6 +16846,65 @@ func (e *MonitorType) UnmarshalJSON(b []byte) error {
 }
 
 func (e MonitorType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type NodeMetricsGrouping string
+
+const (
+	// a single node-wide series
+	NodeMetricsGroupingNode      NodeMetricsGrouping = "NODE"
+	NodeMetricsGroupingNamespace NodeMetricsGrouping = "NAMESPACE"
+	// one series per pod, labeled by `namespace` and `pod`
+	NodeMetricsGroupingPod NodeMetricsGrouping = "POD"
+)
+
+var AllNodeMetricsGrouping = []NodeMetricsGrouping{
+	NodeMetricsGroupingNode,
+	NodeMetricsGroupingNamespace,
+	NodeMetricsGroupingPod,
+}
+
+func (e NodeMetricsGrouping) IsValid() bool {
+	switch e {
+	case NodeMetricsGroupingNode, NodeMetricsGroupingNamespace, NodeMetricsGroupingPod:
+		return true
+	}
+	return false
+}
+
+func (e NodeMetricsGrouping) String() string {
+	return string(e)
+}
+
+func (e *NodeMetricsGrouping) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = NodeMetricsGrouping(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid NodeMetricsGrouping", str)
+	}
+	return nil
+}
+
+func (e NodeMetricsGrouping) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *NodeMetricsGrouping) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e NodeMetricsGrouping) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

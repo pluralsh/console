@@ -165,8 +165,8 @@ export const PageToolbarSC = styled.div(({ theme }) => ({
   zIndex: 1,
 }))
 
-// a divider separates the heading from the tabs, which pull left by their own
-// padding
+// tabs pull left by their own padding, so marginRight alone is the gap between
+// the divider and the active tab's background; keep it equal to paddingRight
 const ToolbarHeadingSC = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
@@ -175,8 +175,8 @@ const ToolbarHeadingSC = styled.div(({ theme }) => ({
   maxWidth: 280,
   minWidth: 0,
   height: 24,
-  paddingRight: theme.spacing.medium,
-  marginRight: theme.spacing.xsmall,
+  paddingRight: theme.spacing.small,
+  marginRight: theme.spacing.small,
   borderRight: theme.borders.default,
 }))
 
