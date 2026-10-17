@@ -3,6 +3,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Docker.ToolsTest do
 
   alias Console.AI.Tools.Workbench.Integration.Docker.{
     FetchManifest,
+    LatestTags,
     Tools,
     SearchTags
   }
@@ -54,6 +55,43 @@ defmodule Console.AI.Tools.Workbench.Integration.Docker.ToolsTest do
     end
   end
 
+  describe "latest_tags/1" do
+    test "sorts by semver precedence rather than lexically" do
+      tags = ["1.9.0", "latest", "1.10.0", "v1.10.1", "1.2", "1.10.0-rc.1", "alpine", "1.11.0-alpine"]
+
+      assert LatestTags.latest(tags) == ["v1.10.1", "1.10.0", "1.9.0", "1.2"]
+      assert LatestTags.latest(tags, true) == ["1.11.0-alpine", "v1.10.1", "1.10.0", "1.10.0-rc.1", "1.9.0", "1.2"]
+    end
+
+    test "finds the latest public Docker Hub tags across every page" do
+      assert {:ok, json} =
+               LatestTags.implement(%LatestTags{
+                 tool: docker_tool(),
+                 repository_slug: @repository,
+                 limit: 5
+               })
+
+      assert %{"tags" => [_ | _] = tags, "tags_scanned" => scanned, "truncated" => false} = Jason.decode!(json)
+      assert length(tags) == 5
+      assert scanned > 1000
+      assert tags == LatestTags.latest(tags)
+    end
+
+    test "ranks variants when filtered by query" do
+      assert {:ok, json} =
+               LatestTags.implement(%LatestTags{
+                 tool: docker_tool(),
+                 repository_slug: @repository,
+                 query: "alpine",
+                 include_prerelease: true,
+                 limit: 3
+               })
+
+      assert %{"tags" => [_ | _] = tags} = Jason.decode!(json)
+      assert Enum.all?(tags, &String.contains?(&1, "alpine"))
+    end
+  end
+
   defp assert_paginates(tool, repository) do
     search = %SearchTags{tool: tool, repository_slug: repository, page_size: 5}
 
@@ -100,7 +138,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Docker.ToolsTest do
     test "only exposes broadly supported Docker registry tools" do
       tools = Tools.expand(docker_tool())
 
-      assert [%SearchTags{}, %FetchManifest{}] = tools
+      assert [%SearchTags{}, %LatestTags{}, %FetchManifest{}] = tools
     end
   end
 

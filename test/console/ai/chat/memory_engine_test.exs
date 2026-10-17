@@ -146,6 +146,34 @@ defmodule Console.AI.Chat.MemoryEngineTest do
              |> MemoryEngine.reduce([{:user, "start"}], reducer)
   end
 
+  test "compacts long threads before calling the model" do
+    stub(Provider, :context_window, fn _ -> 4_000 end)
+
+    history =
+      Enum.flat_map(0..7, fn i ->
+        [
+          Context.assistant(String.duplicate("a", 1_500), tool_calls: [ToolCall.new("call-#{i}", "echo", "{}")]),
+          Context.tool_result("call-#{i}", "echo", String.duplicate("o", 1_000))
+        ]
+      end)
+
+    expect(Provider, :reqllm_completion, fn context, _opts ->
+      assert [%Message{role: :system}, %Message{role: :user}, %Message{role: :user} = summary | rest] = context.messages
+      assert Enum.map_join(summary.content, & &1.text) =~ "compacted summary"
+      assert length(rest) < length(history)
+
+      {:ok, response(context, Context.assistant("done"), :stop)}
+    end)
+
+    reducer = fn [{:assistant, "done"}], _ -> {:halt, :done} end
+
+    assert {:ok, {:done, %Context{messages: messages}}} =
+             MemoryEngine.new([], 1, system_prompt: "test", acc: [], summarizer: fn _ -> {:ok, "compacted summary"} end)
+             |> MemoryEngine.reduce_with_context(Context.new([Context.user("start") | history]), reducer)
+
+    assert %Message{role: :assistant} = List.last(messages)
+  end
+
   test "sizes canonical messages from model payloads rather than Erlang structs" do
     stub(Provider, :context_window, fn :tool -> 40 end)
 
