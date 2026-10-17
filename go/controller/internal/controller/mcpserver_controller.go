@@ -76,6 +76,13 @@ func (r *MCPServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, r.handleDelete(ctx, mcpServer)
 	}
 
+	// A spec error can't resolve itself and the generation predicate re-triggers on the fix, so don't requeue.
+	if err := validateProtocol(mcpServer); err != nil {
+		logger.Error(err, "invalid MCP server spec")
+		utils.MarkCondition(mcpServer.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return ctrl.Result{}, nil
+	}
+
 	attrs, err := r.Attributes(ctx, mcpServer)
 	if err != nil {
 		return common.HandleRequeue(nil, err, mcpServer.SetCondition)
@@ -104,6 +111,13 @@ func (r *MCPServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	utils.MarkCondition(mcpServer.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
 	return mcpServer.Spec.Reconciliation.Requeue(), nil
+}
+
+func validateProtocol(mcp *v1alpha1.MCPServer) error {
+	if mcp.Spec.Protocol != nil && *mcp.Spec.Protocol == console.McpServerProtocolSse {
+		return fmt.Errorf("the SSE protocol is no longer supported, set spec.protocol to %s or omit it", console.McpServerProtocolStreamableHTTP)
+	}
+	return nil
 }
 
 func (r *MCPServerReconciler) Attributes(ctx context.Context, mcp *v1alpha1.MCPServer) (*console.McpServerAttributes, error) {

@@ -80,7 +80,8 @@ defmodule Console.AI.Workbench.MCP.ClientsTest do
 
       assert_receive {:DOWN, ^ref, :process, ^pid, :normal}, @stop_timeout
       assert_receive {:DOWN, ^client_ref, :process, ^client, _}, @stop_timeout
-      assert DynamicSupervisor.which_children(Clients) == []
+      # our DOWN can arrive before the supervisor has handled the worker's EXIT
+      assert children_drained?()
 
       {:ok, fresh} = Clients.ensure_started(tool)
       refute fresh == pid
@@ -112,6 +113,17 @@ defmodule Console.AI.Workbench.MCP.ClientsTest do
 
       {:ok, claims} = Console.Jwt.MCP.exchange(jwt)
       assert claims["sub"] == Console.Services.Users.get_bot!("console").email
+    end
+  end
+
+  defp children_drained?(attempts \\ 50)
+  defp children_drained?(0), do: DynamicSupervisor.which_children(Clients) == []
+  defp children_drained?(attempts) do
+    case DynamicSupervisor.which_children(Clients) do
+      [] -> true
+      _ ->
+        Process.sleep(20)
+        children_drained?(attempts - 1)
     end
   end
 end

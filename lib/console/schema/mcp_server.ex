@@ -9,7 +9,7 @@ defmodule Console.Schema.McpServer do
   defenum Protocol, sse: 0, streamable_http: 1
 
   schema "mcp_servers" do
-    field :protocol, Protocol, default: :sse
+    field :protocol, Protocol, default: :streamable_http
     field :name,    :string
     field :url,     :string
     field :confirm, :boolean, default: false
@@ -71,6 +71,13 @@ defmodule Console.Schema.McpServer do
   def ordered(query \\ __MODULE__, order \\ [asc: :name]) do
     from(m in query, order_by: ^order)
   end
+
+  @doc """
+  The anubis client transport for a server.  Anubis dropped the legacy HTTP+SSE transport, so `sse` servers
+  connect over streamable HTTP, which still streams responses over SSE.
+  """
+  @spec transport(t()) :: :streamable_http
+  def transport(%__MODULE__{}), do: :streamable_http
 
   def obfuscated_header_value, do: @obfuscated_header_value
 

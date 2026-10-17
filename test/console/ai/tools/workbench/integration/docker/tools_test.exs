@@ -1,5 +1,6 @@
 defmodule Console.AI.Tools.Workbench.Integration.Docker.ToolsTest do
   use ExUnit.Case, async: false
+  use Mimic
 
   alias Console.AI.Tools.Workbench.Integration.Docker.{
     FetchManifest,
@@ -36,12 +37,14 @@ defmodule Console.AI.Tools.Workbench.Integration.Docker.ToolsTest do
     end
 
     test "searches a page of public.ecr.aws tags" do
+      stub_ecr_public()
+
       assert {:ok, json} =
                SearchTags.implement(%SearchTags{
                  tool: ecr_public_tool(),
                  repository_slug: @ecr_repository,
                  query: "alpine",
-                 page_size: 1000
+                 page_size: 10
                })
 
       assert %{"repository" => @ecr_repository, "tags" => [_ | _] = tags, "next_cursor" => cursor} =
@@ -51,6 +54,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Docker.ToolsTest do
     end
 
     test "paginates public.ecr.aws tags with a cursor" do
+      stub_ecr_public()
       assert_paginates(ecr_public_tool(), @ecr_repository)
     end
   end
@@ -108,6 +112,8 @@ defmodule Console.AI.Tools.Workbench.Integration.Docker.ToolsTest do
 
   describe "fetch_manifest/1" do
     test "fetches the manifest for a public.ecr.aws tag" do
+      stub_ecr_public()
+
       assert {:ok, json} =
                FetchManifest.implement(%FetchManifest{
                  tool: ecr_public_tool(),
@@ -115,8 +121,9 @@ defmodule Console.AI.Tools.Workbench.Integration.Docker.ToolsTest do
                  tag: "latest"
                })
 
-      assert %{"manifest" => manifest} = Jason.decode!(json)
+      assert %{"repository" => @ecr_repository, "tag" => "latest", "manifest" => manifest} = Jason.decode!(json)
       assert manifest["schemaVersion"] == 2
+      assert [%{"digest" => "sha256:" <> _} | _] = manifest["manifests"]
     end
 
     test "fetches the manifest for a public Docker Hub tag" do
@@ -152,6 +159,56 @@ defmodule Console.AI.Tools.Workbench.Integration.Docker.ToolsTest do
         }
       }
     }
+  end
+
+  @ecr_tags Enum.flat_map(1..30, &["1.#{&1}.0", "1.#{&1}.0-alpine"])
+
+  # public.ecr.aws enforces a per-ip anonymous data limit that shared CI runners routinely
+  # exhaust, so emulate it, including its quirks: json is served as text/plain and the
+  # `last` pagination cursor is an opaque token only available from the link header.
+  defp stub_ecr_public do
+    stub(Req, :get, fn %Req.Request{options: %{base_url: "https://public.ecr.aws", dkr_repo: @ecr_repository}}, opts ->
+      %URI{path: path, query: query} = URI.parse(opts[:url])
+      ecr_response(path, URI.decode_query(query || ""))
+    end)
+  end
+
+  defp ecr_response("/v2/:repo/tags/list", params) do
+    size = String.to_integer(params["n"] || "100")
+    offset = case params["last"] do
+      nil -> 0
+      token -> token |> Base.url_decode64!() |> String.to_integer()
+    end
+
+    page = Enum.slice(@ecr_tags, offset, size)
+    next = offset + length(page)
+    headers =
+      if next < length(@ecr_tags),
+        do: %{"link" => ["</v2/#{@ecr_repository}/tags/list?#{URI.encode_query(%{n: size, last: Base.url_encode64("#{next}")})}>; rel=\"next\""]},
+        else: %{}
+
+    {:ok, %Req.Response{
+      status: 200,
+      headers: Map.put(headers, "content-type", ["text/plain; charset=utf-8"]),
+      body: Jason.encode!(%{name: @ecr_repository, tags: page})
+    }}
+  end
+
+  defp ecr_response("/v2/:repo/manifests/latest", _) do
+    {:ok, %Req.Response{
+      status: 200,
+      headers: %{"content-type" => ["application/vnd.oci.image.index.v1+json"]},
+      body: %{
+        "schemaVersion" => 2,
+        "mediaType" => "application/vnd.oci.image.index.v1+json",
+        "manifests" => [%{
+          "mediaType" => "application/vnd.oci.image.manifest.v1+json",
+          "digest" => "sha256:#{String.duplicate("a", 64)}",
+          "size" => 1234,
+          "platform" => %{"architecture" => "amd64", "os" => "linux"}
+        }]
+      }
+    }}
   end
 
   defp ecr_public_tool do
