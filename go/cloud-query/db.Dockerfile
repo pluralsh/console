@@ -1,5 +1,5 @@
 ARG POSTGRES_MAJOR_VERSION=15
-ARG POSTGRES_VERSION=${POSTGRES_MAJOR_VERSION}.18
+ARG POSTGRES_VERSION=${POSTGRES_MAJOR_VERSION}.19
 
 FROM golang:1.27.1 AS libraries
 
@@ -14,26 +14,6 @@ WORKDIR /workspace
 
 COPY hack/ hack/
 
-ARG TARGETOS
-ARG TARGETARCH
-
-# Install dependencies required by the installer script
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        bash \
-        curl \
-        ca-certificates
-
-# Set gcloud CLI download URL based on architecture
-RUN case ${TARGETARCH} in \
-            amd64) GCLOUD_ARCH=x86_64 ;; \
-            arm64) GCLOUD_ARCH=arm ;; \
-            *) GCLOUD_ARCH=${TARGETARCH} ;; \
-        esac && \
-    curl https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-${TARGETOS}-${GCLOUD_ARCH}.tar.gz | tar -xz && \
-    mv google-cloud-sdk /opt/google-cloud-sdk && \
-    /opt/google-cloud-sdk/install.sh --quiet
-
 # Run installer script and install
 # provider extensions for AWS, Azure, and GCP
 RUN mkdir -p /workspace/lib && \
@@ -42,21 +22,18 @@ RUN mkdir -p /workspace/lib && \
     /workspace/hack/postgres.sh -p gcp -v ${GCP_VERSION} -d /workspace/lib/ && \
     /workspace/hack/postgres.sh -p vsphere -v ${VSPHERE_VERSION} -d /workspace/lib/
 
-FROM dhi.io/postgres:${POSTGRES_VERSION}
+FROM reg.mini.dev/postgres:${POSTGRES_VERSION}
 
 ARG POSTGRES_MAJOR_VERSION
 
 COPY --chmod=755 hack/init.sh /usr/local/bin/startup.sh
 
 # Copy extension libraries
-COPY --from=libraries /workspace/lib/steampipe_postgres_*.so /opt/postgresql/${POSTGRES_MAJOR_VERSION}/lib/
+COPY --from=libraries /workspace/lib/steampipe_postgres_*.so /usr/lib/postgresql${POSTGRES_MAJOR_VERSION}/
 
 # Copy extension SQL and control files
-COPY --from=libraries /workspace/lib/steampipe_postgres_*.sql /opt/postgresql/${POSTGRES_MAJOR_VERSION}/share/extension/
-COPY --from=libraries /workspace/lib/steampipe_postgres_*.control /opt/postgresql/${POSTGRES_MAJOR_VERSION}/share/extension/
-
-# Copy gcloud CLI
-COPY --from=libraries /opt/google-cloud-sdk/bin/gcloud /usr/local/bin/gcloud
+COPY --from=libraries /workspace/lib/steampipe_postgres_*.sql /usr/share/postgresql${POSTGRES_MAJOR_VERSION}/extension/
+COPY --from=libraries /workspace/lib/steampipe_postgres_*.control /usr/share/postgresql${POSTGRES_MAJOR_VERSION}/extension/
 
 # Switch to the postgres user
 USER postgres
