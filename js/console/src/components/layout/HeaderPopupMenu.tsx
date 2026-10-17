@@ -2,7 +2,7 @@ import { Card, CardProps } from '@pluralsh/design-system'
 import { useKeyDown } from '@react-hooks-library/core'
 import { animated, useTransition } from '@react-spring/web'
 import { Dispatch, ReactNode, SetStateAction } from 'react'
-import styled, { useTheme } from 'styled-components'
+import styled from 'styled-components'
 
 export function SimplePopupMenu({
   isOpen,
@@ -18,7 +18,6 @@ export function SimplePopupMenu({
   linkStyles?: boolean
   children: ReactNode
 } & CardProps) {
-  const theme = useTheme()
   useKeyDown(['Escape'], () => setIsOpen(false))
 
   const transitions = useTransition(isOpen ? [true] : [], {
@@ -36,7 +35,7 @@ export function SimplePopupMenu({
       style={styles}
     >
       <MenuCardSC
-        fillLevel={theme.mode === 'light' ? 1 : 2}
+        fillLevel={1}
         {...props}
         $linkStyles={linkStyles}
       >

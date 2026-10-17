@@ -596,6 +596,63 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
       refute Enum.empty?(found["clusterNodeMetrics"]["cpu"])
     end
 
+    test "it only queries the selected node usage metrics, scoped to the node" do
+      user = admin_user()
+      cluster = insert(:cluster)
+      deployment_settings(prometheus_connection: %{url: "example.com"})
+
+      expect(Req, :post, 3, fn _, opts ->
+        [{"query", query} | _] = opts[:form]
+        assert query =~ ~s|cluster="#{cluster.handle}"|
+        assert query =~ ~s|node="ip-10-0-1-2.ec2.internal"| or query =~ ~s|nodename="ip-10-0-1-2.ec2.internal"|
+        if query =~ "kube_pod_container_resource_requests",
+          do: assert(query =~ "sum by (namespace, pod) (")
+
+        {:ok, %Req.Response{status: 200, body: Poison.encode!(%{data: %{result: [
+          %{metric: %{mountpoint: "/"}, values: [[1, "0.5"]]}
+        ]}})}}
+      end)
+
+      {:ok, %{data: %{"cluster" => found}}} = run_query("""
+        query cluster($id: ID!) {
+          cluster(id: $id) {
+            id
+            nodeUsageMetrics(node: "ip-10-0-1-2.ec2.internal", groupBy: POD) {
+              cpuUtilization { values { timestamp value } }
+              memoryRequests { values { timestamp value } }
+              filesystemFullness { metric values { timestamp value } }
+            }
+          }
+        }
+      """, %{"id" => cluster.id}, %{current_user: user})
+
+      metrics = found["nodeUsageMetrics"]
+      assert hd(metrics["filesystemFullness"])["metric"]["mountpoint"] == "/"
+      refute Enum.empty?(metrics["cpuUtilization"])
+      refute Enum.empty?(metrics["memoryRequests"])
+    end
+
+    test "it rejects node names that could inject promql" do
+      user = admin_user()
+      cluster = insert(:cluster)
+      deployment_settings(prometheus_connection: %{url: "example.com"})
+
+      reject(Req, :post, 2)
+
+      {:ok, %{errors: [%{message: message} | _]}} = run_query("""
+        query cluster($id: ID!) {
+          cluster(id: $id) {
+            id
+            nodeUsageMetrics(node: "x\\"} or vector(1) or up{a=\\"") {
+              cpu { values { timestamp value } }
+            }
+          }
+        }
+      """, %{"id" => cluster.id}, %{current_user: user})
+
+      assert message =~ "invalid node name"
+    end
+
     test "it can filter by upgradeability" do
       user = admin_user()
       cluster = insert(:cluster)

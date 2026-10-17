@@ -101,13 +101,57 @@ defmodule Console.Deployments.Observability.Metrics do
     memory: ~s|sum(container_memory_working_set_bytes{cluster="${cluster}",image!="",container!=""}) / sum(kube_pod_container_resource_requests_memory_bytes{cluster="${cluster}"}) by (pod)|
   ])
 
+  # Shippers label node-exporter series with the node name differently: grafana's k8s-monitoring
+  # sets `instance` to it, kube-prometheus-stack adds `nodename`, victoria-metrics' stack adds
+  # `node`, and bare scrape configs only have node_uname_info's `nodename` to join through (which
+  # k8s-monitoring's default allowlist drops).  Each is tried, keyed by instance.
+  @node_instances [
+                    ~s|node_cpu_seconds_total{mode="idle",cluster="${cluster}",instance="${node}"}|,
+                    ~s|node_cpu_seconds_total{mode="idle",cluster="${cluster}",nodename="${node}"}|,
+                    ~s|node_cpu_seconds_total{mode="idle",cluster="${cluster}",node="${node}"}|,
+                    ~s|node_uname_info{cluster="${cluster}",nodename="${node}"}|
+                  ]
+                  |> Enum.join(" or ")
+  @node_exporter ~s|and on (instance) max by (instance) (#{@node_instances})|
+  @node_selector ~s|cluster="${cluster}",node="${node}"|
+  @host_fs ~s<fstype!~"tmpfs|overlay|squashfs|ramfs|nsfs|fuse.*",mountpoint!~"/(run|var/lib/kubelet)/.*",cluster="${cluster}">
+  # physical interfaces only; virtual pod and overlay interfaces double count pod traffic
+  @host_nic ~s<device!~"lo|veth.*|cali.*|cilium.*|lxc.*|flannel.*|cni.*|docker.*|br-.*|tunl.*|vxlan.*|genev.*|kube-.*|eni.*|gke.*|azv.*",cluster="${cluster}">
+  @node_pods ~s|on (namespace, pod) group_left () max by (namespace, pod) (kube_pod_info{#{@node_selector}})|
+
+  # host-level series that no pod or namespace grouping applies to
+  @node_host [
+    cpu_utilization: ~s|1 - avg(rate(node_cpu_seconds_total{mode="idle",cluster="${cluster}"}[${rate}]) #{@node_exporter})|,
+    cpu_modes: ~s|sum by (mode) (rate(node_cpu_seconds_total{mode!="idle",cluster="${cluster}"}[${rate}]) #{@node_exporter}) / scalar(count(node_cpu_seconds_total{mode="idle",cluster="${cluster}"} #{@node_exporter}))|,
+    cpu_cores: ~s|count(node_cpu_seconds_total{mode="idle",cluster="${cluster}"} #{@node_exporter})|,
+    load1: ~s|max(node_load1{cluster="${cluster}"} #{@node_exporter})|,
+    load5: ~s|max(node_load5{cluster="${cluster}"} #{@node_exporter})|,
+    load15: ~s|max(node_load15{cluster="${cluster}"} #{@node_exporter})|,
+    memory_total: ~s|max(node_memory_MemTotal_bytes{cluster="${cluster}"} #{@node_exporter})|,
+    memory_used: ~s|max((node_memory_MemTotal_bytes{cluster="${cluster}"} - node_memory_MemAvailable_bytes{cluster="${cluster}"}) #{@node_exporter})|,
+    memory_cached: ~s|max((node_memory_Cached_bytes{cluster="${cluster}"} + node_memory_Buffers_bytes{cluster="${cluster}"}) #{@node_exporter})|,
+    major_page_faults: ~s|max(rate(node_vmstat_pgmajfault{cluster="${cluster}"}[${rate}]) #{@node_exporter})|,
+    filesystem_fullness: ~s|max by (mountpoint) ((1 - node_filesystem_avail_bytes{#{@host_fs}} / node_filesystem_size_bytes{#{@host_fs}}) #{@node_exporter})|,
+    disk_read: ~s|sum(rate(node_disk_read_bytes_total{cluster="${cluster}"}[${rate}]) #{@node_exporter})|,
+    disk_write: ~s|sum(rate(node_disk_written_bytes_total{cluster="${cluster}"}[${rate}]) #{@node_exporter})|,
+    disk_busy: ~s|max(rate(node_disk_io_time_seconds_total{cluster="${cluster}"}[${rate}]) #{@node_exporter})|,
+    network_receive: ~s|sum(rate(node_network_receive_bytes_total{#{@host_nic}}[${rate}]) #{@node_exporter})|,
+    network_transmit: ~s|sum(rate(node_network_transmit_bytes_total{#{@host_nic}}[${rate}]) #{@node_exporter})|,
+    network_errors: ~s|sum(rate(node_network_receive_errs_total{#{@host_nic}}[${rate}]) #{@node_exporter}) + sum(rate(node_network_transmit_errs_total{#{@host_nic}}[${rate}]) #{@node_exporter})|,
+    network_dropped: ~s|sum(rate(node_network_receive_drop_total{#{@host_nic}}[${rate}]) #{@node_exporter}) + sum(rate(node_network_transmit_drop_total{#{@host_nic}}[${rate}]) #{@node_exporter})|,
+
+    cpu_allocatable: ~s|max(kube_node_status_allocatable{resource="cpu",unit="core",#{@node_selector}})|,
+    memory_allocatable: ~s|max(kube_node_status_allocatable{resource="memory",unit="byte",#{@node_selector}})|,
+    pods_allocatable: ~s|max(kube_node_status_allocatable{resource="pods",#{@node_selector}})|,
+    conditions: ~s|max by (condition) (kube_node_status_condition{status="true",#{@node_selector}})|
+  ]
+
   def queries(:cluster), do: @cluster
   def queries(:node), do: @node
   def queries(:component), do: @component
   def queries(:service), do: @service
   def queries(:pod), do: @pod
   def queries(:noisy), do: @noisy
-
   def queries(:heat, :pod), do: @heat
   def queries(:heat, :namespace), do: @heat_ns
   def queries(:heat, :node), do: @heat_node
@@ -117,6 +161,32 @@ defmodule Console.Deployments.Observability.Metrics do
 
   def queries(:service_usage, grouping) when grouping in [:service, :pod],
     do: service_usage(grouping)
+
+  def queries(:node_usage, grouping) when grouping in [:node, :namespace, :pod],
+    do: node_usage(grouping)
+
+  # a node's host series plus its pods' usage and reservations, the latter broken out by
+  # `grouping` (`:node` is a single total series)
+  defp node_usage(grouping) do
+    by = node_group_label(grouping)
+
+    post_process(@node_host ++ [
+      cpu: sum_by(by, ~s|rate(container_cpu_usage_seconds_total{container!="",#{@node_selector}}[${rate}])|),
+      cpu_requests: reservation(:requests, :cpu, @node_selector, by),
+      cpu_limits: reservation(:limits, :cpu, @node_selector, by),
+      memory: sum_by(by, ~s|container_memory_working_set_bytes{image!="",container!="",#{@node_selector}}|),
+      memory_requests: reservation(:requests, :memory, @node_selector, by),
+      memory_limits: reservation(:limits, :memory, @node_selector, by),
+      oom_kills: sum_by(by, ~s|increase(container_oom_events_total{container!="",#{@node_selector}}[${rate}])|),
+      pods_running: sum_by(by, ~s|max by (namespace, pod) (kube_pod_status_phase{phase="Running",cluster="${cluster}"}) * #{@node_pods}|),
+      restarts: sum_by(by, ~s|max by (namespace, pod, container) (increase(kube_pod_container_status_restarts_total{cluster="${cluster}"}[${rate}])) * #{@node_pods}|)
+    ])
+  end
+
+  defp node_group_label(:node), do: ""
+  defp node_group_label(:namespace), do: "namespace"
+  # pod names only stay unique within a namespace
+  defp node_group_label(:pod), do: "namespace, pod"
 
   @cluster_selector ~s|cluster="${cluster}"|
 

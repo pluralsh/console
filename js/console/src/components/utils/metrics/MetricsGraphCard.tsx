@@ -54,6 +54,6 @@ export const MetricsScrollSC = styled.div(({ theme }) => ({
 const GraphCardSC = styled(MetricsCard)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing.xsmall,
+  gap: theme.spacing.small,
   padding: theme.spacing.medium,
 }))

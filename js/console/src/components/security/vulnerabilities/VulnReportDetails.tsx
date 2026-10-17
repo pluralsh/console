@@ -263,5 +263,5 @@ const WrapperSC = styled.div(({ theme }) => ({
   maxWidth: 1280,
   margin: '0 auto',
   overflow: 'hidden',
-  padding: `${theme.spacing.large}px ${theme.spacing.xxlarge}px`,
+  padding: theme.spacing.large,
 }))

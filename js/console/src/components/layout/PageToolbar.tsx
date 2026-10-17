@@ -21,10 +21,12 @@ const SEARCH_WIDTH = 200
 const SEARCH_EXPANDED_WIDTH = 360
 
 // The bar under the header holding a page's tabs, its primary inputs and its
-// actions. `children` sit at the end of the bar, `start` right after the tabs.
-// Pass `slotRef` to let nested routes render into the bar through
-// `PageToolbarPortal`, ahead of `children`.
+// actions. `heading` names the page's subject ahead of the tabs, `children` sit
+// at the end of the bar and `start` right after the tabs. Pass `slotRef` to let
+// nested routes render into the bar through `PageToolbarPortal`, ahead of
+// `children`.
 export function PageToolbar({
+  heading,
   tabs,
   activeFn,
   start,
@@ -32,6 +34,7 @@ export function PageToolbar({
   children,
   ...props
 }: {
+  heading?: ReactNode
   tabs?: SubtabDirectory
   activeFn?: (path: string, route: string) => boolean
   start?: ReactNode
@@ -40,6 +43,7 @@ export function PageToolbar({
 } & ComponentProps<typeof PageToolbarSC>) {
   return (
     <PageToolbarSC {...props}>
+      {heading && <ToolbarHeadingSC>{heading}</ToolbarHeadingSC>}
       {tabs && (
         <ToolbarTabs
           directory={tabs}
@@ -159,6 +163,21 @@ export const PageToolbarSC = styled.div(({ theme }) => ({
   borderBottom: theme.borders.hairline,
   position: 'relative',
   zIndex: 1,
+}))
+
+// tabs pull left by their own padding, so marginRight alone is the gap between
+// the divider and the active tab's background; keep it equal to paddingRight
+const ToolbarHeadingSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing.xsmall,
+  flexShrink: 0,
+  maxWidth: 280,
+  minWidth: 0,
+  height: 24,
+  paddingRight: theme.spacing.small,
+  marginRight: theme.spacing.small,
+  borderRight: theme.borders.default,
 }))
 
 const ToolbarEndSC = styled.div(({ theme }) => ({

@@ -9,7 +9,7 @@ export function PodEvents() {
   const { pod } = useOutletContext() as { pod: Pod }
 
   return (
-    <ScrollablePage>
+    <ScrollablePage contentStyles={{ paddingTop: 0 }}>
       <EventsTable events={pod.events || []} />
     </ScrollablePage>
   )

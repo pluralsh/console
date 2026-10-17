@@ -9,22 +9,21 @@ import {
 } from 'components/utils/metrics/metricFormats'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import type { TimeRangeState } from 'components/utils/timerange/useTimeRange'
-import type { ClusterUsageMetricsFragment } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import { useMemo } from 'react'
 
-import type { ClusterMetricGraph } from './clusterMetricsGraphs'
+import type { MetricGraph } from './clusterMetricsGraphs'
 
-/** Renders one usage graph; callers own fetching so cluster and service scopes can share it. */
-export function UsageMetricGraphCard({
+/** Renders one usage graph; callers own fetching so cluster, service and node scopes can share it. */
+export function UsageMetricGraphCard<M>({
   graph: { title, tooltip, format, series },
   metrics,
   loading,
   error,
   timeRange,
 }: {
-  graph: ClusterMetricGraph
-  metrics: Nullable<ClusterUsageMetricsFragment>
+  graph: MetricGraph<M, string>
+  metrics: Nullable<M>
   loading: boolean
   error?: ApolloError
   timeRange: TimeRangeState

@@ -8,8 +8,39 @@ import { toPanelGraph } from './DashboardGraphSource'
 import {
   dashboardGraphNeedsFetch,
   dashboardPanelIsWaitingForData,
+  dashboardLegendMode,
   dashboardPanelVisibleData,
 } from './WorkbenchDashboardPanels'
+
+describe('dashboard legend mode', () => {
+  const many = Array.from(
+    { length: 12 },
+    (_, i) => `entrypoint=operation_${i}, operation_type=query`
+  )
+
+  it('hides the legend on narrow grid panels', () => {
+    expect(dashboardLegendMode(320, false, ['metric'])).toBe('none')
+  })
+
+  it('uses a single row on regular grid panels, including before measuring', () => {
+    expect(dashboardLegendMode(0, false, many)).toBe('row')
+    expect(dashboardLegendMode(500, false, many)).toBe('row')
+  })
+
+  it('keeps a legend that fits on one line under the plot, even when wide', () => {
+    expect(dashboardLegendMode(1200, false, ['metric'])).toBe('row')
+    expect(dashboardLegendMode(1200, true, ['metric'])).toBe('row')
+  })
+
+  it('lists overflowing series beside wide panels', () => {
+    expect(dashboardLegendMode(1200, false, many)).toBe('side')
+    expect(dashboardLegendMode(1200, true, many)).toBe('side')
+  })
+
+  it('wraps an overflowing legend in a narrow fullscreen view', () => {
+    expect(dashboardLegendMode(600, true, many)).toBe('wrap')
+  })
+})
 
 describe('dashboard panel loading', () => {
   it('renders a loading panel without fetching until inputs are ready', () => {

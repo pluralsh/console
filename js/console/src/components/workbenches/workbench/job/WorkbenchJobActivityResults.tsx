@@ -32,7 +32,10 @@ import { LogLine } from 'components/cd/logs/LogLine'
 import { GqlError } from 'components/utils/Alert'
 import { SeriesSliceTooltip, SliceTooltip } from 'components/utils/ChartTooltip'
 import { dateFormat, useGraphTheme } from 'components/utils/Graph'
-import { GraphLegend } from 'components/utils/GraphLegend'
+import {
+  GraphLegend,
+  type GraphLegendLayout,
+} from 'components/utils/GraphLegend'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { Body1P, Body2P, CaptionP } from 'components/utils/typography/Text'
 import {
@@ -57,7 +60,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { COLORS } from 'utils/color'
 import { formatDateTime, toDateOrUndef } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
@@ -109,6 +112,7 @@ export function ExpandableUserPrompt({
   attachments?: Nullable<Nullable<AttachmentFragment>[]>
   fullWidth?: boolean
 } & ComponentPropsWithRef<typeof PromptWrapperSC>) {
+  const { mode } = useTheme()
   const workbenchId = useContext(WorkbenchFileContext)
   const [isExpanded, setIsExpanded] = useState(false)
   const [showActions, setShowActions] = useState(false)
@@ -146,6 +150,7 @@ export function ExpandableUserPrompt({
       onMouseLeave={() => setShowActions(false)}
     >
       <PromptCardSC
+        fillLevel={mode === 'dark' ? 0 : undefined}
         cornerSize="large"
         $fullWidth={fullWidth}
         $isExpanded={isExpandable && isExpanded}
@@ -795,12 +800,16 @@ export function WorkbenchJobMetricsLegend({
   selectedId,
   onSelect,
   paddingLeft,
+  layout,
+  className,
 }: {
   series: MetricSeries[]
   maxHeight?: number
   selectedId?: string | null
   onSelect?: (id: string) => void
   paddingLeft?: number
+  layout?: GraphLegendLayout
+  className?: string
 }) {
   return (
     <GraphLegend
@@ -813,6 +822,8 @@ export function WorkbenchJobMetricsLegend({
       selectedId={selectedId}
       onSelect={onSelect}
       maxHeight={maxHeight}
+      layout={layout}
+      className={className}
       style={{ paddingLeft }}
     />
   )

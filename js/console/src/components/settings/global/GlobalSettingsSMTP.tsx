@@ -55,7 +55,7 @@ export function GlobalSettingsSMTP() {
   }
 
   return (
-    <ScrollablePage>
+    <ScrollablePage contentStyles={{ paddingTop: 0 }}>
       <form onSubmit={handleSubmit}>
         <Card
           css={{

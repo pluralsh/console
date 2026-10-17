@@ -1,22 +1,22 @@
 import {
-  Card,
   CloseIcon,
   DocsIcon,
   ExpandIcon,
   Flex,
   IconFrame,
-  InfoIcon,
   ModalWrapper,
-  Tooltip,
+  useResizeObserver,
 } from '@pluralsh/design-system'
 import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import { ChatMarkdown } from 'components/ai/chatbot/ChatMarkdown'
 import { GqlError } from 'components/utils/Alert'
+import GraphHeader from 'components/utils/GraphHeader'
+import type { GraphLegendLayout } from 'components/utils/GraphLegend'
+import { MetricsCard } from 'components/utils/metrics/MetricsCard'
 import { MetricsSection } from 'components/utils/metrics/MetricsSection'
 import { PieChart } from 'components/utils/PieChart'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
-import { TRUNCATE } from 'components/utils/truncate'
-import { Body1P, Body2P, CaptionP } from 'components/utils/typography/Text'
+import { Body2P, CaptionP } from 'components/utils/typography/Text'
 import {
   DashboardGraphType,
   DashboardGraphUnit,
@@ -26,7 +26,7 @@ import {
   WorkbenchJobActivityTraceFragment,
 } from 'generated/graphql'
 import { groupBy, isEmpty, maxBy, sortBy } from 'lodash'
-import { useMemo, useRef, useState } from 'react'
+import { type ReactNode, useMemo, useRef, useState } from 'react'
 import styled from 'styled-components'
 import { COLORS } from 'utils/color'
 import { isNonNullable } from 'utils/isNonNullable'
@@ -207,9 +207,6 @@ function DashboardGraphGrid({
                 queriesEnabled={queriesEnabled}
                 onRangeSelect={onRangeSelect}
                 onUpdate={onUpdate}
-                reserveDescription={rowGraphs.some(
-                  ({ description }) => !!description
-                )}
               />
             </CellSC>
           ))}
@@ -236,8 +233,6 @@ type DashboardPanelProps = {
   queriesEnabled: boolean
   onRangeSelect?: (start: Date, end: Date) => void
   onUpdate?: () => void
-  /** another panel in the row has a description, so keep headers the same height */
-  reserveDescription?: boolean
 }
 
 function DashboardPanel(props: DashboardPanelProps) {
@@ -262,7 +257,6 @@ function DataDashboardPanel({
   queriesEnabled,
   onRangeSelect,
   onUpdate,
-  reserveDescription = false,
 }: DashboardPanelProps) {
   const { useGraphData, readOnly } = useDashboardGraphSource()
   const needsFetch = dashboardGraphNeedsFetch(
@@ -318,85 +312,64 @@ function DataDashboardPanel({
 
   const panel = (
     <PanelCardSC $fullscreen={fullscreen}>
-      <PanelHeaderSC>
-        <Flex
-          direction="column"
-          gap="xxsmall"
-          minWidth={0}
-          flex={1}
-        >
-          <PanelTitleSC>{graph.title || graph.identifier}</PanelTitleSC>
-          {(graph.description || reserveDescription) && !fullscreen && (
-            <PanelDescriptionSC
-              $color="text-xlight"
-              title={graph.description ?? undefined}
-            >
-              {graph.description}
-            </PanelDescriptionSC>
-          )}
-          {graph.description && fullscreen && (
-            <CaptionP $color="text-xlight">{graph.description}</CaptionP>
-          )}
-        </Flex>
-        <PanelActionsSC>
-          {fullscreen ? (
-            <IconFrame
-              clickable
-              size="small"
-              type="tertiary"
-              icon={<CloseIcon />}
-              textValue="Close full screen"
-              tooltip="Close full screen"
-              onClick={() => setFullscreen(false)}
-            />
-          ) : (
-            <IconFrame
-              ref={fullscreenTriggerRef}
-              clickable
-              size="small"
-              type="tertiary"
-              icon={<ExpandIcon size={16} />}
-              textValue="Full screen"
-              tooltip="Full screen"
-              onClick={() => setFullscreen(true)}
-            />
-          )}
-          {query ? (
-            <IconFrame
-              clickable
-              size="small"
-              type="tertiary"
-              icon={
-                toolType ? (
-                  <DashboardToolIcon
-                    tool={toolType}
-                    size={16}
-                    fallback
-                  />
-                ) : (
-                  <DocsIcon />
-                )
-              }
-              textValue="Query"
-              onClick={() => setQueryOpen(true)}
-            />
-          ) : (
-            graph.description && (
-              <Tooltip
-                label={graph.description}
-                placement="top"
-              >
+      <Flex
+        direction="column"
+        gap="xxsmall"
+      >
+        <GraphHeader
+          title={graph.title || graph.identifier}
+          tooltip={fullscreen ? null : graph.description}
+          actions={
+            <>
+              {fullscreen ? (
                 <IconFrame
+                  clickable
                   size="small"
                   type="tertiary"
-                  icon={<InfoIcon />}
-                  textValue={graph.description}
+                  icon={<CloseIcon />}
+                  textValue="Close full screen"
+                  tooltip="Close full screen"
+                  onClick={() => setFullscreen(false)}
                 />
-              </Tooltip>
-            )
-          )}
-        </PanelActionsSC>
-      </PanelHeaderSC>
+              ) : (
+                <IconFrame
+                  ref={fullscreenTriggerRef}
+                  clickable
+                  size="small"
+                  type="tertiary"
+                  icon={<ExpandIcon size={16} />}
+                  textValue="Full screen"
+                  tooltip="Full screen"
+                  onClick={() => setFullscreen(true)}
+                />
+              )}
+              {query ? (
+                <IconFrame
+                  clickable
+                  size="small"
+                  type="tertiary"
+                  icon={
+                    toolType ? (
+                      <DashboardToolIcon
+                        tool={toolType}
+                        size={16}
+                        fallback
+                      />
+                    ) : (
+                      <DocsIcon />
+                    )
+                  }
+                  textValue="Query"
+                  onClick={() => setQueryOpen(true)}
+                />
+              ) : null}
+            </>
+          }
+        />
+        {graph.description && fullscreen && (
+          <CaptionP $color="text-xlight">{graph.description}</CaptionP>
+        )}
+      </Flex>
       <PanelBodySC aria-busy={loading}>
         {!graph.hasDatasource ? (
           <WorkbenchEmptyState
@@ -637,32 +610,106 @@ function PanelContent({
     default:
       if (isEmpty(metrics)) return <NoDataState />
       return (
-        <Flex
-          direction="column"
-          gap="xsmall"
-          width="100%"
+        <TimeseriesPanelContent
+          series={series}
+          fullscreen={fullscreen}
+          selectedId={effectiveSelectedId}
+          onSelectSeries={onSelectSeries}
         >
           <DashboardTimeseriesChart
             metrics={visibleMetrics}
             timeWindow={timeWindow}
             unit={unit}
             onRangeSelect={onRangeSelect}
-            css={{
-              height: fullscreen
-                ? 'min(650px, calc(100vh - 260px))'
-                : CHART_HEIGHT_PX,
-            }}
+            css={{ height: '100%' }}
             lineProps={lineProps}
           />
-          <WorkbenchJobMetricsLegend
-            series={series}
-            maxHeight={fullscreen ? 160 : 88}
-            selectedId={effectiveSelectedId}
-            onSelect={onSelectSeries}
-          />
-        </Flex>
+        </TimeseriesPanelContent>
       )
   }
+}
+
+export type DashboardLegendMode = 'none' | 'row' | 'wrap' | 'side'
+
+const HIDE_LEGEND_BELOW_PX = 360
+const SIDE_LEGEND_FROM_PX = 900
+// GraphLegend at 12px: swatch, gaps and padding around each label
+const LEGEND_CHAR_PX = 7
+const LEGEND_ITEM_CHROME_PX = 36
+const LEGEND_ITEM_MAX_PX = 220
+
+function legendRowWidth(labels: string[]) {
+  return labels.reduce(
+    (sum, label) =>
+      sum +
+      Math.min(
+        label.length * LEGEND_CHAR_PX + LEGEND_ITEM_CHROME_PX,
+        LEGEND_ITEM_MAX_PX
+      ),
+    0
+  )
+}
+
+/**
+ * Like Datadog's automatic legend: narrow panels rely on the hover tooltip,
+ * a legend that fits on one line sits under the plot, and only one that
+ * overflows it moves beside the plot on wide panels.
+ */
+export function dashboardLegendMode(
+  width: number,
+  fullscreen: boolean,
+  labels: string[]
+): DashboardLegendMode {
+  // not measured yet
+  if (width === 0) return 'row'
+  if (!fullscreen && width < HIDE_LEGEND_BELOW_PX) return 'none'
+  if (legendRowWidth(labels) <= width) return 'row'
+  if (width >= SIDE_LEGEND_FROM_PX) return 'side'
+  return fullscreen ? 'wrap' : 'row'
+}
+
+function TimeseriesPanelContent({
+  series,
+  fullscreen,
+  selectedId,
+  onSelectSeries,
+  children,
+}: {
+  series: ReturnType<typeof getMetricSeries>
+  fullscreen: boolean
+  selectedId: string | null
+  onSelectSeries: (id: string) => void
+  children: ReactNode
+}) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [width, setWidth] = useState(0)
+  useResizeObserver(ref, ({ width }) => setWidth(Math.floor(width)))
+  const mode = dashboardLegendMode(
+    width,
+    fullscreen,
+    series.map(({ shortLabel }) => shortLabel)
+  )
+  const legend = (layout: GraphLegendLayout, maxHeight?: number) => (
+    <WorkbenchJobMetricsLegend
+      series={series}
+      layout={layout}
+      maxHeight={maxHeight}
+      selectedId={selectedId}
+      onSelect={onSelectSeries}
+    />
+  )
+
+  return (
+    <TimeseriesSC
+      ref={ref}
+      $side={mode === 'side'}
+    >
+      <PlotAreaSC $fullscreen={fullscreen}>{children}</PlotAreaSC>
+      {mode === 'side' && <SideLegendSC>{legend('column')}</SideLegendSC>}
+      {mode === 'row' && legend('row')}
+      {mode === 'wrap' && legend('wrap', 160)}
+    </TimeseriesSC>
+  )
 }
 
 function StatContent({
@@ -815,39 +862,19 @@ const CellSC = styled.div<{ $x: number; $w: number }>(({ $x, $w }) => ({
   },
 }))
 
-const PanelCardSC = styled(Card)<{ $fullscreen: boolean }>(
+const PanelCardSC = styled(MetricsCard)<{ $fullscreen: boolean }>(
   ({ theme, $fullscreen }) => ({
-    backgroundColor: theme.colors['fill-zero'],
     display: 'flex',
     flexDirection: 'column',
     flex: $fullscreen ? undefined : 1,
-    gap: theme.spacing.medium,
+    gap: $fullscreen ? theme.spacing.medium : theme.spacing.small,
     height: $fullscreen ? '100%' : 'auto',
     minWidth: 0,
     overflow: $fullscreen ? 'auto' : undefined,
-    padding: theme.spacing.large,
+    padding: $fullscreen ? theme.spacing.large : theme.spacing.medium,
     width: '100%',
   })
 )
-
-const PanelHeaderSC = styled.div({
-  alignItems: 'flex-start',
-  display: 'flex',
-  gap: 16,
-  width: '100%',
-})
-
-const PanelActionsSC = styled.div(({ theme }) => ({
-  alignItems: 'center',
-  display: 'flex',
-  flexShrink: 0,
-  gap: theme.spacing.xsmall,
-}))
-
-const PanelTitleSC = styled(Body1P)({
-  ...TRUNCATE,
-  margin: 0,
-})
 
 const PanelBodySC = styled.div({
   display: 'flex',
@@ -857,15 +884,31 @@ const PanelBodySC = styled.div({
   width: '100%',
 })
 
-// a fixed two lines, so charts stay level across a row whatever the description length
-const PanelDescriptionSC = styled(CaptionP)({
-  display: '-webkit-box',
-  height: '2lh',
-  overflow: 'hidden',
-  WebkitBoxOrient: 'vertical',
-  WebkitLineClamp: 2,
-})
+const TimeseriesSC = styled.div<{ $side: boolean }>(({ theme, $side }) => ({
+  display: 'flex',
+  flex: 1,
+  flexDirection: $side ? 'row' : 'column',
+  gap: $side ? theme.spacing.medium : theme.spacing.xsmall,
+  minHeight: 0,
+  width: '100%',
+}))
 
+// the chart is absolutely positioned so it fills whatever height the row gives
+// the card without its own height feeding back into the row
+const PlotAreaSC = styled.div<{ $fullscreen: boolean }>(({ $fullscreen }) => ({
+  flex: 1,
+  minHeight: $fullscreen ? 240 : CHART_HEIGHT_PX,
+  minWidth: 0,
+  position: 'relative',
+  '&& > *': { inset: 0, position: 'absolute' },
+}))
+
+const SideLegendSC = styled.div({
+  flex: '0 0 clamp(200px, 28%, 320px)',
+  minWidth: 0,
+  position: 'relative',
+  '&& > *': { inset: 0, overflowY: 'auto', position: 'absolute' },
+})
 const SkeletonStackSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',

@@ -813,6 +813,7 @@ fragment WorkbenchJob on WorkbenchJob {
   workbench {
     id
     name
+    filesystemEnabled
     tools {
       ...WorkbenchToolTiny
     }

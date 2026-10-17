@@ -8,6 +8,7 @@ import (
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
 	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
@@ -158,4 +159,59 @@ var _ = Describe("MCP Server Controller", Ordered, func() {
 
 	})
 
+	Context("When reconciling a resource with the SSE protocol", func() {
+		const (
+			mcpServerName = "test-sse"
+			namespace     = "default"
+		)
+
+		ctx := context.Background()
+		typeNamespacedName := types.NamespacedName{Name: mcpServerName, Namespace: namespace}
+
+		BeforeAll(func() {
+			Expect(common.MaybeCreate(k8sClient, &v1alpha1.MCPServer{
+				ObjectMeta: metav1.ObjectMeta{Name: mcpServerName, Namespace: namespace},
+				Spec: v1alpha1.MCPServerSpec{
+					URL:      "test.url.com",
+					Protocol: lo.ToPtr(gqlclient.McpServerProtocolSse),
+				},
+			}, nil)).To(Succeed())
+		})
+
+		AfterAll(func() {
+			mcpServer := &v1alpha1.MCPServer{}
+			if err := k8sClient.Get(ctx, typeNamespacedName, mcpServer); err == nil {
+				Expect(k8sClient.Delete(ctx, mcpServer)).To(Succeed())
+			}
+		})
+
+		It("should mark the resource as failing to synchronize without upserting it", func() {
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+
+			reconciler := &controller.MCPServerReconciler{
+				Client:        k8sClient,
+				Scheme:        k8sClient.Scheme(),
+				ConsoleClient: fakeConsoleClient,
+			}
+
+			result, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: typeNamespacedName})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(result).To(Equal(reconcile.Result{}))
+
+			mcpServer := &v1alpha1.MCPServer{}
+			Expect(k8sClient.Get(ctx, typeNamespacedName, mcpServer)).To(Succeed())
+			Expect(mcpServer.Status.ID).To(BeNil())
+
+			synced := meta.FindStatusCondition(mcpServer.Status.Conditions, v1alpha1.SynchronizedConditionType.String())
+			Expect(synced).NotTo(BeNil())
+			Expect(synced.Status).To(Equal(metav1.ConditionFalse))
+			Expect(synced.Reason).To(Equal(v1alpha1.SynchronizedConditionReasonError.String()))
+			Expect(synced.Message).To(ContainSubstring("SSE protocol is no longer supported"))
+
+			ready := meta.FindStatusCondition(mcpServer.Status.Conditions, v1alpha1.ReadyConditionType.String())
+			Expect(ready).NotTo(BeNil())
+			Expect(ready.Status).To(Equal(metav1.ConditionFalse))
+		})
+	})
 })

@@ -246,8 +246,12 @@ const DurationChipSC = styled.span(({ theme }) => ({
 }))
 
 const MenuSC = styled.div(({ theme }) => ({
-  backgroundColor: theme.colors['fill-two'],
-  border: theme.borders['fill-two'],
+  backgroundColor:
+    theme.mode === 'dark' ? theme.colors['fill-one'] : theme.colors['fill-two'],
+  border:
+    theme.mode === 'dark'
+      ? theme.borders['fill-one']
+      : theme.borders['fill-two'],
   borderRadius: theme.borderRadiuses.large,
   boxShadow: theme.boxShadows.moderate,
   display: 'flex',
@@ -272,7 +276,9 @@ const MenuItemSC = styled.div<{ $highlighted: boolean }>(
     ...theme.partials.text.body2,
     alignItems: 'center',
     backgroundColor: $highlighted
-      ? theme.colors['fill-two-hover']
+      ? theme.colors[
+          theme.mode === 'dark' ? 'fill-one-hover' : 'fill-two-hover'
+        ]
       : 'transparent',
     color: theme.colors.text,
     cursor: 'pointer',

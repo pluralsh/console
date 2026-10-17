@@ -206,14 +206,6 @@ export function WorkbenchPageLayout({
         label: 'Monitoring',
         path: `${workbenchBasePath}/${WORKBENCHES_MONITORING_REL_PATH}`,
       },
-      {
-        label: 'Issues',
-        path: `${workbenchBasePath}/${WORKBENCHES_ISSUES_REL_PATH}`,
-      },
-      {
-        label: 'Alerts',
-        path: `${workbenchBasePath}/${WORKBENCHES_ALERTS_REL_PATH}`,
-      },
       ...(workbench?.filesystemEnabled
         ? [
             {
@@ -222,6 +214,14 @@ export function WorkbenchPageLayout({
             },
           ]
         : []),
+      {
+        label: 'Issues',
+        path: `${workbenchBasePath}/${WORKBENCHES_ISSUES_REL_PATH}`,
+      },
+      {
+        label: 'Alerts',
+        path: `${workbenchBasePath}/${WORKBENCHES_ALERTS_REL_PATH}`,
+      },
       {
         label: 'Evals',
         path: `${workbenchBasePath}/${WORKBENCHES_EVALS_REL_PATH}`,

@@ -137,6 +137,20 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
     Observability.query({:usage, service, args[:group_by] || :service, keys}, start, stop, step)
   end
 
+  # node names are interpolated straight into promql, so anything that isn't a valid
+  # kubernetes node name (a DNS-1123 subdomain) is rejected before querying
+  @node_name ~r/^[a-z0-9]([-a-z0-9.]{0,251}[a-z0-9])?$/
+
+  def node_usage_metrics(%Cluster{} = cluster, %{node: node} = args, info) do
+    case String.match?(node, @node_name) do
+      true ->
+        {start, stop, step} = prom_args(args)
+        keys = Enum.map(Absinthe.Resolution.project(info), & &1.schema_node.identifier)
+        Observability.query({:node_usage, cluster, node, args[:group_by] || :node, keys}, start, stop, step)
+      false -> {:error, "invalid node name #{inspect(node)}"}
+    end
+  end
+
   def metrics(%Cluster{} = cluster, %{node: node} = args, _) when is_binary(node) do
     {start, stop, step} = prom_args(args)
     Observability.query({cluster, node}, start, stop, step)

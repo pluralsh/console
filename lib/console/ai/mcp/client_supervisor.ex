@@ -19,15 +19,13 @@ defmodule Console.AI.MCP.ClientSupervisor do
     |> Supervisor.init(strategy: :one_for_one)
   end
 
-  def server_child(%ChatThread{} = t, %McpServer{url: url, protocol: proto} = s) do
-    proto = proto || :sse
-
+  def server_child(%ChatThread{} = t, %McpServer{url: url} = s) do
     %{
       id: Agent.name(:client, t, s),
       start: {Anubis.Client, :start_link, [[
         name: Agent.name(:client, t, s),
         transport_name: Agent.name(:transport, t, s),
-        transport: {proto, [headers: auth_headers(t, s)] ++ url_arguments(url)}
+        transport: {McpServer.transport(s), [headers: auth_headers(t, s)] ++ url_arguments(url)}
       ] ++ mcp_configuration(s, client_name(t, s))]},
       restart: :transient
     }
@@ -47,14 +45,6 @@ defmodule Console.AI.MCP.ClientSupervisor do
   defp uri_path(_, _), do: "/"
 
   @mcp_client_version "1.0.0"
-
-  def mcp_configuration(%McpServer{protocol: protocol}, client_name) do
-    [client_info: %{"name" => client_name, "version" => @mcp_client_version}]
-    |> Keyword.put(
-      :protocol_version,
-      if(protocol == :sse, do: "2024-11-05", else: "2025-06-18")
-    )
-  end
 
   def mcp_configuration(_, client_name),
     do: [client_info: %{"name" => client_name, "version" => @mcp_client_version}, protocol_version: "2025-06-18"]

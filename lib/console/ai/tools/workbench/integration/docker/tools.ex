@@ -5,6 +5,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Docker.Tools do
 
   @modules [
     Console.AI.Tools.Workbench.Integration.Docker.SearchTags,
+    Console.AI.Tools.Workbench.Integration.Docker.LatestTags,
     Console.AI.Tools.Workbench.Integration.Docker.FetchManifest
   ]
 
