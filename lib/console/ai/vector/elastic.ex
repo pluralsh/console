@@ -83,6 +83,7 @@ defmodule Console.AI.Vector.Elastic do
         "#{datatype}": Console.mapify(data)
       }, filters, conn)), decode_body: false, retry: false)
       |> handle_response("could not insert vector into elasticsearch:")
+      |> handle_missing_index(conn)
     end
   end
 
@@ -100,13 +101,13 @@ defmodule Console.AI.Vector.Elastic do
     do: Map.merge(docs, Map.new(auth))
   defp add_auth_filters(docs, _, _), do: docs
 
-  def fetch(%__MODULE__{conn: %Elastic{} = es} = conn, text, opts) do
+  def fetch(%__MODULE__{conn: %Elastic{}} = conn, text, opts) do
     count = Keyword.get(opts, :count, 5)
     filters = Keyword.get(opts, :filters, [])
     n_candidates = Keyword.get(opts, :n_candidates, 100)
     with {:ok, [{_, embedding} | _]} <- Provider.embeddings(text),
          query = vector_query(embedding, count, filters, n_candidates, vector_authz(opts[:user], conn.version)),
-         {:ok, %Snap.SearchResponse{hits: hits}} <- Console.Logs.Provider.Elastic.search(es, query) do
+         {:ok, %Snap.SearchResponse{hits: hits}} <- search(conn, query) do
       Enum.map(hits, fn %Snap.Hit{source: source} ->
         datatype = source["datatype"]
         case source[datatype] do
@@ -119,16 +120,22 @@ defmodule Console.AI.Vector.Elastic do
     end
   end
 
-  def delete(%__MODULE__{conn: %Elastic{} = es}, opts) do
+  defp search(%__MODULE__{conn: es} = conn, query) do
+    Console.Logs.Provider.Elastic.search(es, query)
+    |> handle_missing_index(conn)
+  end
+
+  def delete(%__MODULE__{conn: %Elastic{} = es} = conn, opts) do
     filters = Keyword.get(opts, :filters, [])
     not_filters = Keyword.get(opts, :not, [])
     query = %{query: %{bool: add_not(%{must: filters(filters)}, not_filters)}}
     Elastic.url(es, "#{es.index}/_delete_by_query")
     |> Req.post(headers: Elastic.headers(es, @headers), body: Jason.encode!(query), decode_body: false, retry: false)
     |> handle_response("could not delete vectors from elasticsearch:")
+    |> handle_missing_index(conn)
   end
 
-  def expire(%__MODULE__{conn: %Elastic{} = es}, opts) do
+  def expire(%__MODULE__{conn: %Elastic{} = es} = conn, opts) do
     filters = Keyword.get(opts, :filters, [])
     not_filters = Keyword.get(opts, :not, [])
     expiry = Keyword.get(opts, :expiry) || Timex.now() |> Timex.shift(hours: -10)
@@ -142,6 +149,7 @@ defmodule Console.AI.Vector.Elastic do
     Elastic.url(es, "#{es.index}/_delete_by_query")
     |> Req.post(headers: Elastic.headers(es, @headers), body: Jason.encode!(query), decode_body: false, retry: false)
     |> handle_response("could not delete vectors from elasticsearch:")
+    |> handle_missing_index(conn)
   end
 
   defp vector_query(embedding, count, filters, n_candidates, auth) do
