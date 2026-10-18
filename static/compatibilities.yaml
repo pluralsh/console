@@ -58,7 +58,7 @@ addons:
           previously exposed the dashboard via a Service/Ingress using a custom Helm
           chart or other method, you must add `--address 0.0.0.0` to make it listen
           on all interfaces again.']
-    chart_version: 2.43.7
+    chart_version: 2.43.8
     images: ['quay.io/argoproj/argo-rollouts:v1.10.1']
   - version: 1.10.0
     kube: ['1.35', '1.34', '1.33', '1.32']
@@ -1059,24 +1059,15 @@ addons:
   release_url: https://github.com/kubernetes-sigs/aws-efs-csi-driver/releases/tag/v{vsn}
   helm_repository_url: https://kubernetes-sigs.github.io/aws-efs-csi-driver
   versions:
-  - version: 3.5.1
-    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
-      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18',
-      '1.17']
+  - version: 3.5.2
+    kube: []
     requirements: []
     incompatibilities: []
-    summary:
-      helm_changes: ''
-      chart_updates: []
-      features: [No specific feature details provided in the release notes; v3.5.1
-          references the project CHANGELOG for the full list of changes.]
-      breaking_changes: [No breaking changes are mentioned in the provided release
-          notes; verify the upstream CHANGELOG for any behavioral or configuration
-          changes between v3.5.0 and v3.5.1.]
-    chart_version: 4.5.1
-    images: ['public.ecr.aws/csi-components/csi-node-driver-registrar:v2.17.0-eksbuild.7',
-      'public.ecr.aws/csi-components/csi-provisioner:v6.3.0-eksbuild.7', 'public.ecr.aws/csi-components/livenessprobe:v2.19.0-eksbuild.7',
-      'public.ecr.aws/efs-csi-driver/amazon/aws-efs-csi-driver:v3.5.1']
+    summary: null
+    chart_version: 4.5.2
+    images: ['public.ecr.aws/csi-components/csi-node-driver-registrar:v2.18.0-eksbuild.1',
+      'public.ecr.aws/csi-components/csi-provisioner:v6.4.0-eksbuild.1', 'public.ecr.aws/csi-components/livenessprobe:v2.20.0-eksbuild.1',
+      'public.ecr.aws/efs-csi-driver/amazon/aws-efs-csi-driver:v3.5.2']
   - version: 3.5.0
     kube: []
     requirements: []
@@ -1923,6 +1914,125 @@ addons:
   git_url: https://repo1.dso.mil/big-bang/bigbang
   release_url: https://repo1.dso.mil/big-bang/bigbang/-/releases/{vsn}
   versions:
+  - version: 3.35.0
+    kube: ['1.36']
+    requirements:
+    - name: Alloy
+      version: 4.3.2-bb.2
+    - name: Anchore Enterprise
+      version: 4.1.2-bb.2
+    - name: Argocd
+      version: 10.2.1-bb.2
+    - name: Authservice
+      version: 1.1.8-bb.3
+    - name: Cert Manager
+      version: v1.20.3-bb.2
+    - name: Eck Operator
+      version: 3.5.0-bb.2
+    - name: Elasticsearch Kibana
+      version: 1.44.0-bb.1
+    - name: External Secrets Operator
+      version: 2.12.0-bb.0
+    - name: Fluentbit
+      version: 0.58.3-bb.0
+    - name: Fortify
+      version: 26.2.0-bb.6
+    - name: Gatekeeper
+      version: 3.23.1-bb.1
+    - name: Gateway Api
+      version: 1.6.2-bb.0
+    - name: Gitlab
+      version: 10.4.2-bb.0
+    - name: Gitlab Runner
+      version: 0.91.2-bb.3
+    - name: Grafana
+      version: 13.2.4-bb.0
+    - name: Harbor
+      version: 1.19.2-bb.3
+    - name: Headlamp
+      version: 0.45.0-bb.1
+    - name: Istio Cni
+      version: 1.31.1-bb.0
+    - name: Istio Crds
+      version: 1.31.1-bb.0
+    - name: Istio Egress Gateway
+      version: 0.1.5-bb.0
+    - name: Istio Gateway
+      version: 1.31.1-bb.0
+    - name: Istiod
+      version: 1.31.1-bb.0
+    - name: Keycloak
+      version: 7.3.2-bb.1
+    - name: Kiali
+      version: 2.32.0-bb.0
+    - name: Kyverno
+      version: 3.9.1-bb.1
+    - name: Kyverno Policies
+      version: 3.3.4-bb.87
+    - name: Kyverno Reporter
+      version: 3.10.0-bb.2
+    - name: Loki
+      version: 6.55.0-bb.9
+    - name: Mattermost
+      version: 11.11.0-bb.0
+    - name: Mattermost Operator
+      version: 1.25.9-bb.1
+    - name: Metrics Server
+      version: 3.14.0-bb.1
+    - name: Mimir
+      version: 6.2.1-bb.1
+    - name: Minio
+      version: 7.1.1-bb.25
+    - name: Minio Operator
+      version: 7.1.1-bb.11
+    - name: Monitoring
+      version: 91.4.1-bb.1
+    - name: Neuvector
+      version: 2.11.2-bb.0
+    - name: Prometheus Operator Crds
+      version: 31.0.1-bb.0
+    - name: Renovate
+      version: 46.316.0-bb.0
+    - name: Sonarqube
+      version: 2026.4.1-bb.4
+    - name: Tempo
+      version: 2.1.0-bb.3
+    - name: Thanos
+      version: 17.6.0-bb.3
+    - name: Twistlock
+      version: 0.31.0-bb.0
+    - name: Vault
+      version: 0.34.1-bb.2
+    - name: Velero
+      version: 12.2.1-bb.0
+    - name: Wrapper
+      version: 0.4.15
+    - name: Ztunnel
+      version: 1.31.1-bb.0
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ["Bump component package versions across the Big Bang umbrella\
+          \ chart from 3.34.0 to 3.35.0 (see list below), notably Istio 1.30.4 \u2192\
+          \ 1.31.1, Mimir 6.1.0 \u2192 6.2.1, Velero 12.1.0 \u2192 12.2.1, External\
+          \ Secrets Operator 2.11.0 \u2192 2.12.0, and Twistlock 0.30.0 \u2192 0.31.0.",
+        "Most other changes are bb patch bumps (e.g., -bb.0 \u2192 -bb.1/2/3), suggesting\
+          \ packaging/overlay fixes rather than upstream feature jumps."]
+      features: ['Istio stack updated to 1.31.1, which may include performance, security,
+          and compatibility fixes over 1.30.4.', 'External Secrets Operator updated
+          to 2.12.0, potentially adding provider improvements and bug fixes.', 'Velero
+          updated to 12.2.1, potentially adding backup/restore fixes and plugin compatibility
+          improvements.', 'Mimir updated to 6.2.1, potentially including stability
+          and performance improvements.']
+      breaking_changes: ["Potential breaking changes may come from the Istio minor\
+          \ version jump (1.30 \u2192 1.31); review Istio 1.31 release notes for API/deprecation\
+          \ and mesh behavior changes before upgrading.", "Twistlock major/minor bump\
+          \ (0.30 \u2192 0.31) could include behavioral changes or required reconfiguration;\
+          \ validate Console/Defender compatibility and cluster admission policies.",
+        "External Secrets Operator 2.11 \u2192 2.12 could include CRD/schema changes;\
+          \ confirm CRDs are updated and any deprecated fields are not used."]
+    chart_version: 3.35.0
+    images: ['registry1.dso.mil/ironbank/big-bang/p1-keycloak-plugin:3.7.32', 'registry1.dso.mil/ironbank/big-bang/base:2.1.0']
   - version: 3.34.0
     kube: ['1.36']
     requirements:
@@ -15288,37 +15398,46 @@ addons:
   helm_repository_url: https://charts.chaos-mesh.org
   chart_name: chaos-mesh
   versions:
-  - version: 2.8.4
+  - version: 2.8.5
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30']
     requirements: []
     incompatibilities: []
     summary:
-      helm_changes: "- **New capability:** Helm chart can now deploy **extra Kubernetes\
-        \ objects** (see #4649). If you use this, ensure your values reference the\
-        \ chart\u2019s render helper correctly; **v2.8.4 fixes** an `include`/render-function\
-        \ issue for extra objects (#4780).\n- **Default change:** `enableCtrlServer`\
-        \ is now **`false` by default** in the Helm chart (#4702). If you relied on\
-        \ the controller server being enabled previously, you must explicitly set\
-        \ this value back to `true`.\n- **Template fix:** Prior helm values references\
-        \ in the Prometheus template were wrong and were fixed (#4543). If you had\
-        \ local chart patches/workarounds, re-check and drop them if no longer needed.\n"
-      chart_updates: ['Helm chart enhancement: support deploying extra Kubernetes
-          objects via chart templates (#4649).', 'Chart behavior change: `enableCtrlServer`
-          default set to `false` (#4702).', 'Chart fix in v2.8.4: extra objects template
-          `include` now uses the correct render function (#4780).', 'Prometheus template:
-          corrected wrong helm values references (#4543).']
-      features: ["Helm chart can deploy additional, user-supplied Kubernetes manifests\
-          \ (\u201Cextra objects\u201D), reducing the need for separate manifests/kustomize\
-          \ for companion resources.", 'Workflows: labels can now be added to `workflow.spec.templates.task`,
-          improving filtering/selection and metadata consistency.']
-      breaking_changes: [Helm chart default for `enableCtrlServer` changed to `false`;
-          installs/upgrades that previously depended on the controller server being
-          enabled must now set it explicitly to preserve behavior., "Operational/tooling\
-          \ change: `chaosctl` was removed; if your workflows/scripts used it, you\u2019\
-          ll need an alternative (e.g., kubectl + CRDs/API or documented CLI replacements)."]
-    chart_version: 2.8.4
-    images: ['ghcr.io/chaos-mesh/chaos-coredns:v0.2.8', 'ghcr.io/chaos-mesh/chaos-daemon:v2.8.4',
-      'ghcr.io/chaos-mesh/chaos-dashboard:v2.8.4', 'ghcr.io/chaos-mesh/chaos-mesh:v2.8.4']
+      helm_changes: '- **Helm chart now supports deploying extra Kubernetes objects**
+        (v2.8.0, `#4649`). If you need to ship additional CRDs/ConfigMaps/Secrets/etc.
+        alongside Chaos Mesh, look for new chart values related to rendering extra
+        manifests (commonly something like `extraObjects`, `extraManifests`, or templated
+        resources).
+
+        - **`enableCtrlServer` default changed to `false`** (v2.8.0, `#4702`). If
+        you previously relied on the controller server being enabled implicitly, you
+        must now set `enableCtrlServer: true` explicitly in your `values.yaml`.
+
+        - **Service rendering uses label templates** for `chaos-dashboard` (v2.8.0,
+        `#4708`). If you customize Service labels/selector labels, verify the values
+        keys you use still apply and that labels render as expected.
+
+        - **Prometheus template helm values reference fixes** (v2.8.0, `#4543`). If
+        you use chart-provided ServiceMonitors/Prometheus rules, re-check your values
+        and generated manifests during diff/upgrade.
+
+        '
+      chart_updates: [Chart adds capability to deploy extra Kubernetes objects (`#4649`).,
+        'Helm chart default behavior changed: `enableCtrlServer` now defaults to `false`
+          (`#4702`).', Dashboard Service templates updated to use label templates
+          (`#4708`)., Prometheus-related templates corrected to reference the right
+          Helm values (`#4543`).]
+      features: [Helm chart can deploy extra Kubernetes objects alongside Chaos Mesh
+          resources., Workflow task templates can now be labeled via `workflow.spec.templates.task`
+          labels.]
+      breaking_changes: ['`enableCtrlServer` defaults to `false` in the Helm chart;
+          clusters that depended on the controller server being enabled by default
+          will lose that endpoint unless explicitly enabled.', Removal of `chaosctl`
+          in v2.8.0 may break any automation/scripts that relied on it (migrate to
+          supported alternatives).]
+    chart_version: 2.8.5
+    images: ['ghcr.io/chaos-mesh/chaos-coredns:v0.2.8', 'ghcr.io/chaos-mesh/chaos-daemon:v2.8.5',
+      'ghcr.io/chaos-mesh/chaos-dashboard:v2.8.5', 'ghcr.io/chaos-mesh/chaos-mesh:v2.8.5']
   - version: 2.8.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30']
     requirements: []
@@ -17949,6 +18068,35 @@ addons:
   release_url: https://github.com/external-secrets/external-secrets/releases/tag/v{vsn}
   helm_repository_url: https://charts.external-secrets.io
   versions:
+  - version: 2.13.0
+    kube: ['1.36']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ["Validation tightened around templating/Secret manifest candidates:\
+          \ v2.13.0 adds additional validation of \u201Cmanifest Secret candidates\u201D\
+          \ and restricts v1beta1 Secret template targets; v2.12.0 also added \u201C\
+          Validate Secret before writing.\u201D Expect previously-accepted but invalid\
+          \ Secret templates/manifests to fail reconciliation and surface errors.",
+        'Provider-specific fix: BeyondTrust Workload Credentials provider now uses
+          the `/site/{siteID}/wlc` API endpoint (may fix integrations that were previously
+          failing).', 'Dependency/runtime bumps: Go toolchain updated (1.26.9 + x/net
+          bump, then Go 1.27); image rebuild implied. No chart-facing behavioral change
+          expected aside from new images.']
+      features: [No major new end-user features called out in v2.13.0; primary changes
+          are validation hardening and dependency updates., '(From v2.12.0 context)
+          Password generator gained optional prefix/suffix, and chart gained `rbac.leaderElection.create`
+          toggle plus a warning when replicas > 1 without leader election. These remain
+          available when moving to v2.13.0.']
+      breaking_changes: ['Potentially breaking: stricter validation and restrictions
+          on v1beta1 Secret template targets can cause existing ExternalSecrets/SecretStore
+          setups with nonconforming templates/manifests to start failing reconciliation
+          after upgrade.', 'Potentially breaking in practice: additional validation
+          of Secret candidates may reject resources that previously reconciled despite
+          producing invalid Secret specs/data.']
+    chart_version: 2.13.0
+    images: ['ghcr.io/external-secrets/external-secrets:v2.13.0']
   - version: 2.12.0
     kube: ['1.36']
     requirements: []
@@ -19528,9 +19676,21 @@ addons:
     kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: []
+      breaking_changes: []
     chart_version: 1.31.2
     images: ['docker.io/istio/pilot:1.31.2']
+    eolAt: '2027-02-28'
+  - version: 1.31.1
+    kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 1.31.1
+    images: ['docker.io/istio/pilot:1.31.1']
     eolAt: '2027-02-28'
   - version: 1.31.0
     kube: ['1.36', '1.35', '1.34', '1.33', '1.32']
@@ -19583,7 +19743,7 @@ addons:
           could affect your cluster.']
     chart_version: 1.29.0
     images: ['docker.io/istio/pilot:1.29.0']
-    eolAt: '2026-10-31'
+    eolAt: '2026-10-15'
   - version: 1.28.0
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30']
     requirements: []
@@ -20537,6 +20697,24 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
+  - version: 92.10.1
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: [Grafana image tag updated from v14 to v14.0.1 (chart change
+          only).]
+      features: ['Grafana dependency bumped to 14.0.1, bringing the latest patch-level
+          fixes included in Grafana 14.0.1.']
+      breaking_changes: []
+    chart_version: 92.10.1
+    images: ['docker.io/bats/bats:1.14.0', 'docker.io/grafana/grafana:13.2.4-distroless',
+      'ghcr.io/jkroepke/kube-webhook-certgen:1.11.0', 'quay.io/kiwigrid/k8s-sidecar:2.14.1',
+      'quay.io/prometheus-operator/prometheus-operator:v0.94.1', 'quay.io/prometheus/alertmanager:v0.34.1',
+      'quay.io/prometheus/node-exporter:v1.12.1-distroless', 'quay.io/prometheus/prometheus:v3.15.0-distroless',
+      'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
   - version: 92.9.0
     kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
       '1.27', '1.26', '1.25']
