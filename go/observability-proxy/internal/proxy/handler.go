@@ -108,11 +108,12 @@ func (h *Handler) elasticIngest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var target *url.URL
-	if cfg.LokiHost != "" {
+	switch {
+	case cfg.LokiHost != "":
 		target, err = BuildLokiElasticTarget(cfg.LokiHost, mappedSuffix)
-	} else if cfg.ElasticHost != "" {
+	case cfg.ElasticHost != "":
 		target, err = BuildElasticTarget(cfg.ElasticHost, mappedSuffix)
-	} else {
+	default:
 		err = fmt.Errorf("no elastic or loki host configured")
 	}
 	if err != nil {
