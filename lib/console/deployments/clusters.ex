@@ -753,6 +753,7 @@ defmodule Console.Deployments.Clusters do
   defp add_callout(result, _), do: result
 
   defp template_values(values, %Cluster{} = cluster) when is_binary(values) do
+    cluster = Repo.preload(cluster, [:tags])
     with {:ok, tpl} <- Solid.parse(values),
          {:ok, res, _} <- Solid.render(tpl, %{"cluster" => cluster}, [strict_variables: false, strict_filters: true]) do
       IO.iodata_to_binary(res)
@@ -1213,7 +1214,7 @@ defmodule Console.Deployments.Clusters do
     # can't make this a transaction because there's no true time boundary on it
     Service.agent()
     |> Service.stream()
-    |> Service.preloaded([:cluster])
+    |> Service.preloaded([cluster: :tags])
     |> Repo.stream(method: :keyset)
     |> Console.throttle(count: 100, pause: :timer.seconds(10))
     |> Task.async_stream(fn svc ->

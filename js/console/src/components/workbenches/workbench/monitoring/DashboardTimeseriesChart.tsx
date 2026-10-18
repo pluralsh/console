@@ -1,4 +1,8 @@
-import { seriesExtent } from 'components/utils/axisTicks'
+import {
+  seriesExtent,
+  xAxisOverhang,
+  yAxisLabelsWidth,
+} from 'components/utils/axisTicks'
 import {
   ChartRangeSelect,
   timeAxisFormat,
@@ -13,12 +17,10 @@ import {
   JobActivityMetricsChart,
   METRICS_CHART_MARGIN,
 } from '../job/WorkbenchJobActivityResults'
-import {
-  formatUnitValue,
-  unitAxis,
-  xAxisOverhang,
-  yAxisLabelsWidth,
-} from './dashboardUnits'
+import { formatUnitValue, unitAxis } from './dashboardUnits'
+
+// tick (5) + tick padding (5) + an 11px label line
+const X_AXIS_HEIGHT_PX = 24
 
 /** Metrics chart pinned to the dashboard window, with drag-to-zoom. */
 export const DashboardTimeseriesChart = memo(function DashboardTimeseriesChart({
@@ -42,6 +44,7 @@ export const DashboardTimeseriesChart = memo(function DashboardTimeseriesChart({
   const margin = useMemo(
     () => ({
       ...METRICS_CHART_MARGIN,
+      bottom: X_AXIS_HEIGHT_PX,
       left: yAxisLabelsWidth(
         yAxis.ticks.map((tick) => formatUnitValue(tick, unit))
       ),

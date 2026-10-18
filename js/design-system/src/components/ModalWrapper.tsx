@@ -72,6 +72,9 @@ const ContentSC = styled(Dialog.Content)(({ theme }) => ({
   flexDirection: 'column',
   overflow: 'auto',
   boxShadow: theme.boxShadows.modal,
+  // radix focuses the content itself when the focused child unmounts (eg a submitted form
+  // swapping views), which otherwise draws the browser's focus ring around the whole dialog
+  '&:focus, &:focus-visible': { outline: 'none' },
   '@keyframes popIn': {
     from: { transform: 'scale(0.8)' },
     to: { transform: 'scale(1)' },

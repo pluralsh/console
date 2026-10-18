@@ -19,14 +19,14 @@ export function workbenchPromptPanelSurfaces(theme: DefaultTheme) {
   return {
     panelBackground: isLight
       ? theme.colors['fill-zero']
-      : theme.colors['fill-two'],
+      : theme.colors['fill-one'],
     detailBackground: isLight
       ? theme.colors['fill-zero-hover']
-      : theme.colors['fill-two-selected'],
+      : theme.colors['fill-one-selected'],
     modeItemBackground: isLight
       ? theme.colors['fill-zero-selected']
-      : theme.colors['fill-two-hover'],
-    panelBorder: isLight ? theme.borders.input : theme.borders['fill-two'],
+      : theme.colors['fill-one-hover'],
+    panelBorder: isLight ? theme.borders.input : theme.borders['fill-one'],
   }
 }
 

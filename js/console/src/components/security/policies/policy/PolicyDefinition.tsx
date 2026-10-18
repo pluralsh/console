@@ -494,7 +494,7 @@ const EditorBodySC = styled.div(({ theme }) => ({
   gap: theme.spacing.small,
   minHeight: 0,
   overflow: 'hidden',
-  padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
+  padding: theme.spacing.large,
 }))
 
 const SimulatorBodySC = styled.div(({ theme }) => ({

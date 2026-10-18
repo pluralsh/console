@@ -37,7 +37,7 @@ export function WorkbenchJobTriggerChatbot({
           trigger={
             <Flex
               align="center"
-              gap="medium"
+              gap="small"
             >
               <TriggerCardIconWrapperSC>
                 <BotIcon />

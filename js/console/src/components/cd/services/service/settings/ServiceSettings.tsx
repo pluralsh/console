@@ -39,7 +39,7 @@ const getDirectory = ({
   personaType: ServicePersonaType
 }): SubtabDirectory => {
   const gitEnabled = !!service.repository
-  const helmEnabled = !!service.helm?.chart
+  const helmEnabled = !!service.helm
   const healthyDependencies =
     service.dependencies?.filter(
       (dep) => dep?.status === ServiceDeploymentStatus.Healthy

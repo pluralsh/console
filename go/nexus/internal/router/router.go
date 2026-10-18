@@ -172,13 +172,23 @@ func (in *GenericRouter) RegisterRoutes(r chi.Router) {
 	}
 }
 
+func newRequestContext(r *http.Request) (*schemas.BifrostContext, context.CancelFunc) {
+	bifrostCtx, cancel := schemas.NewBifrostContextWithCancel(r.Context())
+	if userAgent := r.Header.Get("User-Agent"); userAgent != "" {
+		bifrostCtx.SetValue(schemas.BifrostContextKeyUserAgent, userAgent)
+	}
+
+	// Newer Claude models reject a trailing assistant message, and without a model capability
+	// catalog bifrost assumes prefill is supported and forwards it. Clients such as Codex can end
+	// a turn on an assistant message, so have bifrost strip it for Anthropic models.
+	bifrostCtx.SetValue(schemas.BifrostContextKeySupportsAssistantPrefill, false)
+	return bifrostCtx, cancel
+}
+
 func (in *GenericRouter) createHandler(config RouteConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		req := config.GetRequestTypeInstance()
-		bifrostCtx, cancel := schemas.NewBifrostContextWithCancel(r.Context())
-		if userAgent := r.Header.Get("User-Agent"); userAgent != "" {
-			bifrostCtx.SetValue(schemas.BifrostContextKeyUserAgent, userAgent)
-		}
+		bifrostCtx, cancel := newRequestContext(r)
 
 		if config.RequestParser != nil {
 			if err := config.RequestParser(r, req); err != nil {

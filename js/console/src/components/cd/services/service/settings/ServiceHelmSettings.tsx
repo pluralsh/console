@@ -49,19 +49,26 @@ export function ServiceHelmSettings() {
     if (helmSettingsData) reset()
   }, [helmSettingsData, reset])
 
+  // git-sourced services (eg the deploy-operator) carry helm values without a chart
+  const isChart = !!service?.helm?.chart
+
   const attributes = useMemo(() => {
+    const values = {
+      values: state.helmValues ?? '',
+      valuesFiles: state.helmValuesFiles?.filter(isNonNullable) ?? [],
+    }
+    if (!isChart) return { helm: values }
     return state.helmChart && state.helmVersion
       ? {
           helm: {
             ...(state.helmUrl ? { url: state.helmUrl } : {}),
             chart: state.helmChart,
             version: state.helmVersion,
-            values: state.helmValues ?? '',
-            valuesFiles: state.helmValuesFiles?.filter(isNonNullable) ?? [],
+            ...values,
           },
         }
       : {}
-  }, [state])
+  }, [isChart, state])
 
   const [mutation, { loading, error }] = useUpdateServiceDeploymentMutation({
     variables: {
@@ -80,11 +87,8 @@ export function ServiceHelmSettings() {
     },
   })
 
-  const formIsValid = !!(
-    state.helmChart &&
-    state.helmVersion &&
-    !helmValueErrors
-  )
+  const formIsValid =
+    !helmValueErrors && (!isChart || !!(state.helmChart && state.helmVersion))
 
   return (
     <form
@@ -110,14 +114,16 @@ export function ServiceHelmSettings() {
           >
             <Overline>helm settings</Overline>
           </Flex>
-          <ChartForm
-            url={state.helmUrl}
-            setUrl={(url) => updateState({ helmUrl: url })}
-            chart={state.helmChart ?? ''}
-            setChart={(chart) => updateState({ helmChart: chart })}
-            version={state.helmVersion ?? ''}
-            setVersion={(vsn) => updateState({ helmVersion: vsn })}
-          />
+          {isChart && (
+            <ChartForm
+              url={state.helmUrl}
+              setUrl={(url) => updateState({ helmUrl: url })}
+              chart={state.helmChart ?? ''}
+              setChart={(chart) => updateState({ helmChart: chart })}
+              version={state.helmVersion ?? ''}
+              setVersion={(vsn) => updateState({ helmVersion: vsn })}
+            />
+          )}
           {isAdmin && (
             <ServiceSettingsHelmValues
               helmValues={state.helmValues ?? ''}

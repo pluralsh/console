@@ -52,13 +52,56 @@ type RootQueryType {
   metric(query: String!, offset: Int, step: String, clusterId: ID): [MetricResponse]
 
   logAggregation(
-    serviceId: ID, clusterId: ID, query: String, time: LogTimeRange, limit: Int, operator: LogQueryOperator, facets: [LogFacetInput]
+    serviceId: ID
+
+    clusterId: ID
+
+    query: String
+
+    time: LogTimeRange
+
+    limit: Int
+
+    operator: LogQueryOperator
+
+    facets: [LogFacetInput]
+
+    "only logs from pods on this node"
+    node: String
   ): [LogLine]
 
-  logLabels(serviceId: ID, clusterId: ID, query: String, time: LogTimeRange, field: String!): [LogFacetDetail]
+  logLabels(
+    serviceId: ID
+
+    clusterId: ID
+
+    query: String
+
+    time: LogTimeRange
+
+    field: String!
+
+    "only logs from pods on this node"
+    node: String
+  ): [LogFacetDetail]
 
   logAggregationBuckets(
-    serviceId: ID, clusterId: ID, query: String, time: LogTimeRange, aggregation: LogAggregationInput, operator: LogQueryOperator, facets: [LogFacetInput]
+    serviceId: ID
+
+    clusterId: ID
+
+    query: String
+
+    time: LogTimeRange
+
+    aggregation: LogAggregationInput
+
+    operator: LogQueryOperator
+
+    facets: [LogFacetInput]
+
+    "only logs from pods on this node"
+    node: String
   ): [LogAggregationBucket]
 
   logs(query: String!, start: Long, end: Long, limit: Int!, clusterId: ID): [LogStream]
@@ -13239,6 +13282,16 @@ enum ClusterMetricsGrouping {
   NODE
 }
 
+enum NodeMetricsGrouping {
+  "a single node-wide series"
+  NODE
+
+  NAMESPACE
+
+  "one series per pod, labeled by `namespace` and `pod`"
+  POD
+}
+
 enum VersionCompliance {
   LATEST
   COMPLIANT
@@ -13945,6 +13998,106 @@ type ClusterUsageMetrics {
   restarts: [MetricResponse]
 }
 
+"""
+Prometheus timeseries for a single node. Host fields come from node-exporter (matched to the node by an
+`instance`, `nodename` or `node` label, or node_uname_info), the rest from cAdvisor and kube-state-metrics. Fields marked grouped are broken
+out by the `groupBy` argument and labeled by `namespace` (and `pod`) accordingly; the rest are node-wide.
+"""
+type NodeUsageMetrics {
+  "fraction (0-1) of host cpu time spent busy"
+  cpuUtilization: [MetricResponse]
+
+  "fraction (0-1) of host cpu time per non-idle mode, labeled by `mode`"
+  cpuModes: [MetricResponse]
+
+  "host cpu count"
+  cpuCores: [MetricResponse]
+
+  "1m host load average"
+  load1: [MetricResponse]
+
+  "5m host load average"
+  load5: [MetricResponse]
+
+  "15m host load average"
+  load15: [MetricResponse]
+
+  "host memory in bytes"
+  memoryTotal: [MetricResponse]
+
+  "host memory in use (total less available) in bytes"
+  memoryUsed: [MetricResponse]
+
+  "host page cache and buffers in bytes"
+  memoryCached: [MetricResponse]
+
+  "major page faults per second"
+  majorPageFaults: [MetricResponse]
+
+  "fraction (0-1) of each host filesystem used, labeled by `mountpoint`"
+  filesystemFullness: [MetricResponse]
+
+  "host disk read throughput in bytes\/s"
+  diskRead: [MetricResponse]
+
+  "host disk write throughput in bytes\/s"
+  diskWrite: [MetricResponse]
+
+  "fraction (0-1) of time the busiest disk spent doing I\/O"
+  diskBusy: [MetricResponse]
+
+  "physical interface receive throughput in bytes\/s"
+  networkReceive: [MetricResponse]
+
+  "physical interface transmit throughput in bytes\/s"
+  networkTransmit: [MetricResponse]
+
+  "physical interface receive and transmit errors per second"
+  networkErrors: [MetricResponse]
+
+  "physical interface receive and transmit drops per second"
+  networkDropped: [MetricResponse]
+
+  "allocatable node cpu in cores"
+  cpuAllocatable: [MetricResponse]
+
+  "allocatable node memory in bytes"
+  memoryAllocatable: [MetricResponse]
+
+  "pod capacity of the node"
+  podsAllocatable: [MetricResponse]
+
+  "1 while each node condition holds, labeled by `condition`"
+  conditions: [MetricResponse]
+
+  "container cpu usage in cores (grouped)"
+  cpu: [MetricResponse]
+
+  "cpu requests of pods on the node in cores (grouped)"
+  cpuRequests: [MetricResponse]
+
+  "cpu limits of pods on the node in cores (grouped)"
+  cpuLimits: [MetricResponse]
+
+  "container working set memory in bytes (grouped)"
+  memory: [MetricResponse]
+
+  "memory requests of pods on the node in bytes (grouped)"
+  memoryRequests: [MetricResponse]
+
+  "memory limits of pods on the node in bytes (grouped)"
+  memoryLimits: [MetricResponse]
+
+  "container OOM kills within each rate window (grouped)"
+  oomKills: [MetricResponse]
+
+  "running pods on the node (grouped)"
+  podsRunning: [MetricResponse]
+
+  "container restarts on the node within each rate window (grouped)"
+  restarts: [MetricResponse]
+}
+
 type ClusterNodeMetrics {
   cpu: [MetricResponse]
   memory: [MetricResponse]
@@ -14201,6 +14354,9 @@ type Cluster {
   clusterUsageMetrics(groupBy: ClusterMetricsGrouping, start: DateTime, stop: DateTime, step: String): ClusterUsageMetrics
 
   clusterNodeMetrics(node: String!, start: DateTime, stop: DateTime, step: String): ClusterNodeMetrics
+
+  "host, resource, workload and health prometheus timeseries for a single node"
+  nodeUsageMetrics(node: String!, start: DateTime, stop: DateTime, step: String, groupBy: NodeMetricsGrouping): NodeUsageMetrics
 
   networkGraph(namespace: String, time: DateTime): [NetworkMeshEdge]
 
