@@ -13,9 +13,25 @@ defmodule ConsoleWeb.IngestController do
     do_proxy(conn, prom)
   end
 
+  @elastic_info %{
+    name: "plural-logs",
+    cluster_name: "plural-logs",
+    version: %{
+      number: "8.11.0",
+      build_flavor: "default",
+      minimum_wire_compatibility_version: "7.17.0",
+      minimum_index_compatibility_version: "7.0.0"
+    },
+    tagline: "You Know, for Search"
+  }
+
+  @elastic_license %{license: %{status: "active", type: "basic"}}
+
   def es_root(conn, _) do
-    elastic = Ingest.elastic_url("/")
-    do_proxy(conn, elastic)
+    case Console.plural_o11y?() do
+      true -> elastic_compatibility(conn, @elastic_info)
+      _ -> do_proxy(conn, Ingest.elastic_url("/"))
+    end
   end
 
   def es_bulk(conn, _) do
@@ -24,11 +40,26 @@ defmodule ConsoleWeb.IngestController do
   end
 
   def es_license(conn, _) do
-    elastic = Ingest.elastic_url("/_license")
-    do_proxy(conn, elastic)
+    case Console.plural_o11y?() do
+      true -> elastic_compatibility(conn, @elastic_license)
+      _ -> do_proxy(conn, Ingest.elastic_url("/_license"))
+    end
   end
 
-  defp do_proxy(conn, upstream, meter \\ false) do
+  def loki_push(conn, _) do
+    loki = Ingest.loki_push_url()
+    do_proxy(conn, loki, true)
+  end
+
+  defp elastic_compatibility(conn, body) do
+    conn
+    |> put_resp_header("x-elastic-product", "Elasticsearch")
+    |> json(body)
+    |> halt()
+  end
+
+  defp do_proxy(conn, upstream, meter \\ false)
+  defp do_proxy(conn, upstream, meter) when is_binary(upstream) do
     opts = ReverseProxyPlug.init(upstream: upstream, response_mode: :stream)
     {body, conn} = ReverseProxyPlug.read_body(conn)
     if meter do
@@ -44,6 +75,12 @@ defmodule ConsoleWeb.IngestController do
     }
     |> Req.request_stream()
     |> ReverseProxyPlug.response(conn, opts)
+    |> halt()
+  end
+
+  defp do_proxy(conn, _, _) do
+    conn
+    |> send_resp(503, "ingest target unavailable")
     |> halt()
   end
 

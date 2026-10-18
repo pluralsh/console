@@ -3,6 +3,7 @@ package proxy
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httputil"
@@ -99,16 +100,20 @@ func (h *Handler) elasticIngest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if cfg.ElasticHost == "" && cfg.LokiHost != "" && r.Method == http.MethodGet {
+	// loki takes precedence: once logs are served by plural telemetry, elastic is only
+	// emulated, even if console still advertises an elastic host
+	if cfg.LokiHost != "" && r.Method == http.MethodGet {
 		h.elasticCompatibility(w, mappedSuffix)
 		return
 	}
 
 	var target *url.URL
-	if r.Method == http.MethodPost && suffix == "/_bulk" && cfg.LokiHost != "" {
+	if cfg.LokiHost != "" {
 		target, err = BuildLokiElasticTarget(cfg.LokiHost, mappedSuffix)
-	} else {
+	} else if cfg.ElasticHost != "" {
 		target, err = BuildElasticTarget(cfg.ElasticHost, mappedSuffix)
+	} else {
+		err = fmt.Errorf("no elastic or loki host configured")
 	}
 	if err != nil {
 		klog.Errorf("invalid elastic target: %v", err)
