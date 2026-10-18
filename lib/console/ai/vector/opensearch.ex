@@ -103,15 +103,16 @@ defmodule Console.AI.Vector.Opensearch do
       ])
       |> Req.post()
       |> handle_response("could not insert vector into elasticsearch:")
+      |> handle_missing_index(conn)
     end
   end
 
-  def fetch(%__MODULE__{conn: %Opensearch{} = os} = conn, text, opts) do
+  def fetch(%__MODULE__{conn: %Opensearch{}} = conn, text, opts) do
     count = Keyword.get(opts, :count, 5)
     filters = Keyword.get(opts, :filters, [])
     with {:ok, [{_, embedding} | _]} <- Provider.embeddings(text),
          query = vector_query(embedding, count, filters, vector_authz(opts[:user], conn.version)),
-         {:ok, %Snap.SearchResponse{hits: hits}} <- Console.Logs.Provider.Opensearch.search(os, query) do
+         {:ok, %Snap.SearchResponse{hits: hits}} <- search(conn, query) do
       Enum.map(hits, fn %Snap.Hit{source: source} ->
         datatype = source["datatype"]
         case source[datatype] do
@@ -124,12 +125,18 @@ defmodule Console.AI.Vector.Opensearch do
     end
   end
 
+  defp search(%__MODULE__{conn: os} = conn, query) do
+    Console.Logs.Provider.Opensearch.search(os, query)
+    |> handle_missing_index(conn)
+  end
+
   def delete(_, _), do: :ok
 
   def expire(_, _), do: :ok
 
   defp handle_response({:ok, %Req.Response{status: code}}, _) when code >= 200 and code < 300, do: :ok
-  defp handle_response({:ok, %Req.Response{body: body}}, modifier), do: {:error, "#{modifier}: #{body}"}
+  defp handle_response({:ok, %Req.Response{body: body}}, modifier),
+    do: {:error, "#{modifier}: #{Console.Logs.Provider.Opensearch.error_body(body)}"}
   defp handle_response(_, modifier), do: {:error, "#{modifier}: opensearch error"}
 
   defp vector_query(embedding, count, filters, auth) do

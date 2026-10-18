@@ -59,8 +59,11 @@ defmodule Console.Logs.Provider.Opensearch do
   defp search_response({:ok, %Req.Response{status: 200, body: body}}) do
     {:ok, Snap.SearchResponse.new(body)}
   end
-  defp search_response({:ok, %Req.Response{body: body}}), do: {:error, "opensearch failure: #{body}"}
+  defp search_response({:ok, %Req.Response{body: body}}), do: {:error, "opensearch failure: #{error_body(body)}"}
   defp search_response(_), do: {:error, "network failure"}
+
+  def error_body(body) when is_binary(body), do: body
+  def error_body(body), do: Jason.encode!(body)
 
   defp format_hits(%Snap.SearchResponse{hits: %Snap.Hits{hits: hits}}) do
     Enum.map(hits, fn %Snap.Hit{source: source} ->

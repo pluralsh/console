@@ -118,6 +118,59 @@ func TestElasticCompatibilityEndpointsWhenOnlyLokiIsConfigured(t *testing.T) {
 	}
 }
 
+func TestElasticCompatibilityEndpointsPreferLokiOverElasticHost(t *testing.T) {
+	var elasticCalls atomic.Int64
+	elastic := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		elasticCalls.Add(1)
+		w.WriteHeader(http.StatusUnauthorized)
+	}))
+	defer elastic.Close()
+
+	provider := staticProvider{
+		cfg: console.ObservabilityConfig{
+			ElasticHost: elastic.URL,
+			LokiHost:    "http://logs.example.com/write/ns/tenant-a",
+		},
+	}
+	handler := NewHandler(provider, 5*time.Second, nil)
+
+	mux := http.NewServeMux()
+	handler.Register(mux)
+
+	for _, path := range []string{"/ext/v1/ingest/elastic/", "/ext/v1/ingest/elastic/_license"} {
+		req := httptest.NewRequest(http.MethodGet, path, nil)
+		rec := httptest.NewRecorder()
+		mux.ServeHTTP(rec, req)
+
+		if rec.Code != http.StatusOK {
+			t.Fatalf("unexpected status for %s: got %d want %d", path, rec.Code, http.StatusOK)
+		}
+		if got := rec.Header().Get("X-Elastic-Product"); got != "Elasticsearch" {
+			t.Fatalf("unexpected product header for %s: got %q", path, got)
+		}
+	}
+
+	if elasticCalls.Load() != 0 {
+		t.Fatalf("elastic host should not be called when loki is configured, got %d calls", elasticCalls.Load())
+	}
+}
+
+func TestElasticIngestUnavailableWithoutHosts(t *testing.T) {
+	provider := staticProvider{cfg: console.ObservabilityConfig{PrometheusHost: "http://example.com/select/t/prometheus"}}
+	handler := NewHandler(provider, 5*time.Second, nil)
+
+	mux := http.NewServeMux()
+	handler.Register(mux)
+
+	req := httptest.NewRequest(http.MethodPost, "/ext/v1/ingest/elastic/_bulk", strings.NewReader("{}\n"))
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusServiceUnavailable {
+		t.Fatalf("unexpected status: got %d want %d", rec.Code, http.StatusServiceUnavailable)
+	}
+}
+
 func TestLokiPushForwardsExpectedUpstreamPath(t *testing.T) {
 	var gotPath string
 	var gotContentType string
