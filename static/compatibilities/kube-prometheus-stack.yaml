@@ -5,6 +5,23 @@ readme_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/m
 helm_repository_url: https://prometheus-community.github.io/helm-charts
 chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
 versions:
+- version: 92.10.1
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [Grafana image tag updated from v14.0.0 (chart 92.9.0) to v14.0.1
+        (chart 92.10.1).]
+    features: []
+    breaking_changes: []
+  chart_version: 92.10.1
+  images: ['docker.io/bats/bats:1.14.0', 'docker.io/grafana/grafana:13.2.4-distroless',
+    'ghcr.io/jkroepke/kube-webhook-certgen:1.11.0', 'quay.io/kiwigrid/k8s-sidecar:2.14.1',
+    'quay.io/prometheus-operator/prometheus-operator:v0.94.1', 'quay.io/prometheus/alertmanager:v0.34.1',
+    'quay.io/prometheus/node-exporter:v1.12.1-distroless', 'quay.io/prometheus/prometheus:v3.15.0-distroless',
+    'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
 - version: 92.9.0
   kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
     '1.26', '1.25']
@@ -123,8 +140,8 @@ versions:
     'quay.io/prometheus/node-exporter:v1.12.1-distroless', 'quay.io/prometheus/prometheus:v3.15.0-distroless',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
 - version: 91.9.0
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -223,8 +240,8 @@ versions:
     'quay.io/prometheus/alertmanager:v0.34.0', 'quay.io/prometheus/node-exporter:v1.12.1-distroless',
     'quay.io/prometheus/prometheus:v3.14.0-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
 - version: 90.2.0
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -278,6 +295,25 @@ versions:
     'quay.io/kiwigrid/k8s-sidecar:2.11.2', 'quay.io/prometheus-operator/prometheus-operator:v0.93.1',
     'quay.io/prometheus/alertmanager:v0.34.0', 'quay.io/prometheus/node-exporter:v1.12.1-distroless',
     'quay.io/prometheus/prometheus:v3.14.0-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
+- version: 89.2.4
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [Synchronized common repository files from prometheus/prometheus
+        (housekeeping; no functional change expected)., Updated CI tooling (prometheus/promci
+        action to v0.10.0); no runtime impact., Bumped bundled Grafana image/tag from
+        v13.2.1 (in 89.2.2) to v13.2.2 (in 89.2.4).]
+    features: ['Grafana is updated to 13.2.2, which may include minor fixes and security
+        patches over 13.2.1.']
+    breaking_changes: []
+  chart_version: 89.2.4
+  images: ['docker.io/grafana/grafana:13.2.1-distroless', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.8',
+    'quay.io/kiwigrid/k8s-sidecar:2.11.2', 'quay.io/prometheus-operator/prometheus-operator:v0.93.1',
+    'quay.io/prometheus/alertmanager:v0.34.0', 'quay.io/prometheus/node-exporter:v1.12.1-distroless',
+    'quay.io/prometheus/prometheus:v3.14.0-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
 - version: 89.2.2
   kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
     '1.26', '1.25']
@@ -322,6 +358,26 @@ versions:
   chart_version: 89.1.0
   images: ['docker.io/grafana/grafana:13.2.1-distroless', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.8',
     'quay.io/kiwigrid/k8s-sidecar:2.10.3', 'quay.io/prometheus-operator/prometheus-operator:v0.93.1',
+    'quay.io/prometheus/alertmanager:v0.34.0', 'quay.io/prometheus/node-exporter:v1.12.1-distroless',
+    'quay.io/prometheus/prometheus:v3.14.0-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
+- version: 88.6.5
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ["Adds support for configuring the cert-manager private key used\
+        \ by kube-prometheus-stack\u2019s cert-manager integration (PR #7216).", 'Adds
+        HTTPRoute timeout support (Gateway API) (PR #7221).']
+    features: ['You can now configure the cert-manager private key (e.g., for the
+        certificate issuer/secret generation flow) via chart values.', HTTPRoute resources
+        can now include timeout configuration when rendered by the chart (Gateway
+        API support).]
+    breaking_changes: []
+  chart_version: 88.6.5
+  images: ['docker.io/grafana/grafana:13.2.0', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.8',
+    'quay.io/kiwigrid/k8s-sidecar:2.10.1', 'quay.io/prometheus-operator/prometheus-operator:v0.93.1',
     'quay.io/prometheus/alertmanager:v0.34.0', 'quay.io/prometheus/node-exporter:v1.12.1-distroless',
     'quay.io/prometheus/prometheus:v3.14.0-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
 - version: 88.6.0
@@ -456,8 +512,8 @@ versions:
     'quay.io/prometheus/alertmanager:v0.33.1', 'quay.io/prometheus/node-exporter:v1.12.1-distroless',
     'quay.io/prometheus/prometheus:v3.13.2-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.19.1']
 - version: 87.21.0
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -737,8 +793,8 @@ versions:
     'quay.io/prometheus/alertmanager:v0.33.0', 'quay.io/prometheus/node-exporter:v1.11.1-distroless',
     'quay.io/prometheus/prometheus:v3.12.0-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.19.1']
 - version: 86.3.2
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -818,8 +874,8 @@ versions:
     'quay.io/prometheus/alertmanager:v0.32.1', 'quay.io/prometheus/node-exporter:v1.11.1-distroless',
     'quay.io/prometheus/prometheus:v3.11.3-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.19.0']
 - version: 85.4.0
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -913,8 +969,8 @@ versions:
     'quay.io/prometheus/alertmanager:v0.32.1', 'quay.io/prometheus/node-exporter:v1.11.1-distroless',
     'quay.io/prometheus/prometheus:v3.11.3-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.18.0']
 - version: 84.5.0
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1020,8 +1076,8 @@ versions:
     'quay.io/prometheus/alertmanager:v0.32.0', 'quay.io/prometheus/node-exporter:v1.11.1',
     'quay.io/prometheus/prometheus:v3.11.2', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.18.0']
 - version: 83.7.0
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1103,8 +1159,8 @@ versions:
     'quay.io/prometheus/alertmanager:v0.32.0', 'quay.io/prometheus/node-exporter:v1.11.1',
     'quay.io/prometheus/prometheus:v3.11.2', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.18.0']
 - version: 82.18.0
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1145,8 +1201,8 @@ versions:
     'quay.io/prometheus/alertmanager:v0.31.1', 'quay.io/prometheus/node-exporter:v1.10.2',
     'quay.io/prometheus/prometheus:v3.9.1', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.18.0']
 - version: 81.6.9
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1256,8 +1312,8 @@ versions:
     'quay.io/prometheus/alertmanager:v0.30.1', 'quay.io/prometheus/node-exporter:v1.10.2',
     'quay.io/prometheus/prometheus:v3.9.1', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.18.0']
 - version: 80.14.4
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1485,8 +1541,8 @@ versions:
     'quay.io/prometheus/node-exporter:v1.10.2', 'quay.io/prometheus/prometheus:v3.8.0',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.5', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.17.0']
 - version: 79.12.0
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1517,8 +1573,8 @@ versions:
   incompatibilities: []
   summary: null
 - version: 78.5.0
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1539,8 +1595,8 @@ versions:
     'quay.io/prometheus/node-exporter:v1.9.1', 'quay.io/prometheus/prometheus:v3.7.2',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.3', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.17.0']
 - version: 77.14.0
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1558,8 +1614,8 @@ versions:
     'quay.io/prometheus/node-exporter:v1.9.1', 'quay.io/prometheus/prometheus:v3.6.0',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.3', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.17.0']
 - version: 76.5.1
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1578,8 +1634,8 @@ versions:
     'quay.io/prometheus/node-exporter:v1.9.1', 'quay.io/prometheus/prometheus:v3.5.0',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.1', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.16.0']
 - version: 75.18.1
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1596,8 +1652,8 @@ versions:
     'quay.io/prometheus/node-exporter:v1.9.1', 'quay.io/prometheus/prometheus:v3.5.0',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.0', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.16.0']
 - version: 74.2.2
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1616,8 +1672,8 @@ versions:
     'quay.io/prometheus/node-exporter:v1.9.1', 'quay.io/prometheus/prometheus:v3.4.1',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.5.4', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.15.0']
 - version: 73.2.3
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -1643,8 +1699,8 @@ versions:
     'quay.io/prometheus/node-exporter:v1.9.1', 'quay.io/prometheus/prometheus:v3.4.1',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.5.4', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.15.0']
 - version: 72.9.1
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
   summary:
@@ -1667,8 +1723,8 @@ versions:
     'quay.io/prometheus/prometheus:v3.4.1', 'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.5.3',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.15.0']
 - version: 71.2.0
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
   summary:
@@ -1685,8 +1741,8 @@ versions:
     'quay.io/prometheus/node-exporter:v1.9.1', 'quay.io/prometheus/prometheus:v3.3.1',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.5.3', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.15.0']
 - version: 70.10.0
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
   summary:
@@ -1705,8 +1761,8 @@ versions:
     'quay.io/prometheus/node-exporter:v1.9.1', 'quay.io/prometheus/prometheus:v3.3.0',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.5.2', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.15.0']
 - version: 69.8.2
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
   summary:
@@ -1723,8 +1779,8 @@ versions:
     'quay.io/prometheus/node-exporter:v1.9.0', 'quay.io/prometheus/prometheus:v3.2.1',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.5.1', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.15.0']
 - version: 68.5.0
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
   summary:
@@ -1741,8 +1797,8 @@ versions:
     'quay.io/prometheus/node-exporter:v1.8.2', 'quay.io/prometheus/prometheus:v3.1.0',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.5.1', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.14.0']
 - version: 67.11.0
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
   summary:
@@ -1761,8 +1817,8 @@ versions:
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.14.0']
 - version: 66.7.1
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
   summary:
@@ -1780,8 +1836,8 @@ versions:
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.14.0']
 - version: 65.8.1
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
   summary:
@@ -1805,8 +1861,8 @@ versions:
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.13.0']
 - version: 64.0.0
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
   summary:
@@ -1831,8 +1887,8 @@ versions:
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.13.0']
 - version: 63.1.0
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
   summary:
@@ -1858,8 +1914,8 @@ versions:
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.13.0']
 - version: 62.7.0
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
   summary:
@@ -1884,8 +1940,8 @@ versions:
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.13.0']
 - version: 61.9.0
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
   summary:
@@ -1904,8 +1960,8 @@ versions:
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.13.0']
 - version: 60.5.0
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
   summary:
@@ -1934,8 +1990,8 @@ versions:
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.12.0']
 - version: 59.1.0
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
   summary:
@@ -1954,8 +2010,8 @@ versions:
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.12.0']
 - version: 58.7.2
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
   summary:
@@ -1972,8 +2028,8 @@ versions:
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.12.0']
 - version: 57.2.1
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
   summary:
@@ -1988,8 +2044,8 @@ versions:
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.12.0']
 - version: 56.21.4
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
   summary:
@@ -2015,8 +2071,8 @@ versions:
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.10.1']
 - version: 55.11.0
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
   summary:
@@ -2033,8 +2089,8 @@ versions:
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.10.1']
 - version: 54.2.2
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
   summary: null

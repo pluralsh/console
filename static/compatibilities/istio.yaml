@@ -13,6 +13,21 @@ versions:
   chart_version: 1.31.2
   images: ['docker.io/istio/pilot:1.31.2']
   eolAt: '2027-02-28'
+- version: 1.31.1
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [No functional changes captured in the provided release notes; only
+        artifact listings for 1.31.0 and 1.31.1 were included.]
+    breaking_changes: ['None mentioned in the provided release notes; no changelog
+        entries beyond artifacts were provided, so breaking changes cannot be assessed
+        from this data.']
+  chart_version: 1.31.1
+  images: ['docker.io/istio/pilot:1.31.1']
+  eolAt: '2027-02-28'
 - version: 1.31.0
   kube: ['1.36', '1.35', '1.34', '1.33', '1.32']
   requirements: []
@@ -64,7 +79,7 @@ versions:
         affect your cluster.']
   chart_version: 1.29.0
   images: ['docker.io/istio/pilot:1.29.0']
-  eolAt: '2026-10-31'
+  eolAt: '2026-10-15'
 - version: 1.28.0
   kube: ['1.34', '1.33', '1.32', '1.31', '1.30']
   requirements: []
