@@ -9,10 +9,10 @@ defmodule Console.Schema.BindingPolicy do
     field :interval,     :string, default: "1h"
     field :next_poll_at, :utc_datetime_usec
 
-    embeds_one :matches, Spec, on_replace: :update do
-      embeds_one :workbench, WorkbenchPolicy.Matches, on_replace: :update
+    embeds_one :matches, Spec, on_replace: :delete do
+      embeds_one :workbench, WorkbenchPolicy.Matches, on_replace: :delete
 
-      embeds_one :stack, StackSpec, on_replace: :update do
+      embeds_one :stack, StackSpec, on_replace: :delete do
         field :type, StackPolicy.Type, default: :approval
       end
     end
@@ -36,6 +36,10 @@ defmodule Console.Schema.BindingPolicy do
 
   def for_type(query \\ __MODULE__, type) do
     from(p in query, where: p.type == ^type)
+  end
+
+  def excluding(query \\ __MODULE__, id) do
+    from(p in query, where: p.id != ^id)
   end
 
   def match_counts_for_bind_policies([]), do: %{}

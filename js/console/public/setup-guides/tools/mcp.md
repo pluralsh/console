@@ -4,7 +4,7 @@ Use this integration to connect Workbench agents to an MCP server that is not co
 
 ## Requirements
 
-- The MCP server must expose a reachable HTTP endpoint (SSE or streamable HTTP transport).
+- The MCP server must expose a reachable HTTP endpoint using the streamable HTTP transport. The legacy SSE transport is not supported.
 - Plural must be able to reach that endpoint over the network from wherever Console is hosted (for example, your cluster or SaaS deployment).
 - If the server requires authentication, add the necessary headers when creating the MCP server connection.
 

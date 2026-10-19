@@ -70,8 +70,8 @@ type MCPServerSpec struct {
 	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty"`
 
-	// Protocol specifies the MCP transport protocol (SSE or STREAMABLE_HTTP).
-	// STREAMABLE_HTTP is the modern protocol and is the default when omitted.
+	// Protocol specifies the MCP transport protocol. Only STREAMABLE_HTTP is supported and it is the default
+	// when omitted. SSE is no longer supported and will fail to synchronize.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=STREAMABLE_HTTP
 	// +kubebuilder:validation:Enum=SSE;STREAMABLE_HTTP

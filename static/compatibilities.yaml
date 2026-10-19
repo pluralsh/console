@@ -252,7 +252,13 @@ addons:
       '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No specific features were provided in the supplied release notes;
+          both versions refer to an external CHANGELOG for details.]
+      breaking_changes: [No breaking changes were provided in the supplied release
+          notes; both versions refer to an external CHANGELOG for details.]
     chart_version: 2.67.0
     images: ['public.ecr.aws/csi-components/csi-attacher:v4.13.0-eksbuild.1', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.18.0-eksbuild.1',
       'public.ecr.aws/csi-components/csi-provisioner:v6.4.0-eksbuild.1', 'public.ecr.aws/csi-components/csi-resizer:v2.3.0-eksbuild.1',
@@ -1072,7 +1078,9 @@ addons:
       'public.ecr.aws/csi-components/csi-provisioner:v6.3.0-eksbuild.7', 'public.ecr.aws/csi-components/livenessprobe:v2.19.0-eksbuild.7',
       'public.ecr.aws/efs-csi-driver/amazon/aws-efs-csi-driver:v3.5.1']
   - version: 3.5.0
-    kube: []
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18',
+      '1.17']
     requirements: []
     incompatibilities: []
     summary:
@@ -1088,7 +1096,9 @@ addons:
       'public.ecr.aws/csi-components/csi-provisioner:v6.3.0-eksbuild.7', 'public.ecr.aws/csi-components/livenessprobe:v2.19.0-eksbuild.7',
       'public.ecr.aws/efs-csi-driver/amazon/aws-efs-csi-driver:v3.5.0']
   - version: 3.4.0
-    kube: []
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18',
+      '1.17']
     requirements: []
     incompatibilities: []
     summary:
@@ -1103,7 +1113,9 @@ addons:
       'public.ecr.aws/csi-components/csi-provisioner:v6.3.0-eksbuild.1', 'public.ecr.aws/csi-components/livenessprobe:v2.19.0-eksbuild.2',
       'public.ecr.aws/efs-csi-driver/amazon/aws-efs-csi-driver:v3.4.0']
   - version: 3.3.0
-    kube: []
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18',
+      '1.17']
     requirements: []
     incompatibilities: []
     summary:
@@ -1118,7 +1130,9 @@ addons:
       'public.ecr.aws/csi-components/csi-provisioner:v6.2.0-eksbuild.7', 'public.ecr.aws/csi-components/livenessprobe:v2.19.0-eksbuild.2',
       'public.ecr.aws/efs-csi-driver/amazon/aws-efs-csi-driver:v3.3.0']
   - version: 3.2.0
-    kube: []
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18',
+      '1.17']
     requirements: []
     incompatibilities: []
     summary:
@@ -1134,7 +1148,9 @@ addons:
       'public.ecr.aws/csi-components/csi-provisioner:v6.2.0-eksbuild.3', 'public.ecr.aws/csi-components/livenessprobe:v2.18.0-eksbuild.4',
       'public.ecr.aws/efs-csi-driver/amazon/aws-efs-csi-driver:v3.2.0']
   - version: 3.1.0
-    kube: []
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18',
+      '1.17']
     requirements: []
     incompatibilities: []
     summary:
@@ -1149,7 +1165,9 @@ addons:
       'public.ecr.aws/csi-components/csi-provisioner:v6.2.0-eksbuild.3', 'public.ecr.aws/csi-components/livenessprobe:v2.18.0-eksbuild.4',
       'public.ecr.aws/efs-csi-driver/amazon/aws-efs-csi-driver:v3.1.0']
   - version: 3.0.0
-    kube: []
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18',
+      '1.17']
     requirements: []
     incompatibilities: []
     summary:
@@ -1166,7 +1184,9 @@ addons:
       'public.ecr.aws/csi-components/csi-provisioner:v6.1.0-eksbuild.2', 'public.ecr.aws/csi-components/livenessprobe:v2.17.0-eksbuild.3',
       'public.ecr.aws/efs-csi-driver/amazon/aws-efs-csi-driver:v3.0.0']
   - version: 2.3.0
-    kube: []
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18',
+      '1.17']
     requirements: []
     incompatibilities: []
     summary:
@@ -13268,6 +13288,36 @@ addons:
   helm_values: debug.verbose=flow
   eolApiSlug: cilium
   versions:
+  - version: 1.20.3
+    kube: ['1.37', '1.36', '1.35']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: "- No Helm chart changelog was provided for 1.20.2 \u2192 1.20.3,\
+        \ so **no explicit values changes can be confirmed** from the data above.\n\
+        - One Helm-related fix is called out in the *application* notes: **`hubble.tls.auto.privateKey`\
+        \ is no longer ignored when using cert-manager-generated Hubble certificates**.\
+        \ If you set this value, re-check that the rendered cert-manager resources\
+        \ now pick it up as intended.\n- A policy validation change: **CiliumLocalRedirectPolicy\
+        \ `redirectBackend.toPorts: []` is now rejected** (agent will error instead\
+        \ of panicking). If you generate this via Helm templating, fix templates/values\
+        \ to avoid empty arrays.\n"
+      chart_updates: []
+      features: ['Alibaba Cloud: added support for IMDSv2 (token-based) instance metadata
+          access.', 'Gateway API: BackendTLSPolicy can now use system CA certificates
+          (helps when relying on node/system trust bundle).', 'Gateway API: HTTPRoute
+          ordering is now deterministic, reducing config churn and hard-to-reproduce
+          behavior.']
+      breaking_changes: [CiliumLocalRedirectPolicy with `redirectBackend.toPorts`
+          set to an empty array is now rejected (previously could trigger an agent
+          panic). Update/validate any such CRs before upgrade., 'Operator behavior
+          change: CNPs with a `nodeSelector` will no longer silently enforce nothing;
+          mis-scoped policies may begin enforcing as expected (or surface as errors),
+          so validate nodeSelector-based policies in staging.']
+    chart_version: 1.20.3
+    images: ['quay.io/cilium/cilium-envoy:v1.38.6-1791537840-00e749f11f69334c625e53fc1ce2fc6c7f34a51f@sha256:d6c8c0c91954d1885026d82a31b341f37dcd34a4b127fdaf1587e43ddd224cef',
+      'quay.io/cilium/cilium:v1.20.3@sha256:95cfa5c2427cc6b452c00908778d0566311f572589284af949d06a013db1a849',
+      'quay.io/cilium/operator-generic:v1.20.3@sha256:efdd8d89d6d8f63d21a065fa2f9e17614a2b3ac9371b221af9355f63829e2dbc']
   - version: 1.20.2
     kube: ['1.37', '1.36', '1.35']
     requirements: []
@@ -19488,13 +19538,13 @@ addons:
   chart_name: istiod
   eolApiSlug: istio
   versions:
-  - version: 1.31.1
-    kube: ['1.36', '1.35', '1.34', '1.33', '1.32']
+  - version: 1.31.2
+    kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
     summary: null
-    chart_version: 1.31.1
-    images: ['docker.io/istio/pilot:1.31.1']
+    chart_version: 1.31.2
+    images: ['docker.io/istio/pilot:1.31.2']
     eolAt: '2027-02-28'
   - version: 1.31.0
     kube: ['1.36', '1.35', '1.34', '1.33', '1.32']
@@ -20052,7 +20102,7 @@ addons:
           \ behavior changes\u2014confirm by reviewing intermediate versions\u2019\
           \ upgrade guides and CRD diffs before applying in production."]
     chart_version: 1.13.0
-    images: ['public.ecr.aws/karpenter/controller:1.13.0@sha256:ea731b0cd813add8b2947a76bfe861c38069d85922b01d0c1647d1466279b7fe']
+    images: []
   - version: 1.9.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31']
     requirements: []
@@ -20076,7 +20126,7 @@ addons:
           applied/reconciled. Treat this as an upgrade prerequisite and verify permissions
           before rolling out.]
     chart_version: 1.9.0
-    images: ['public.ecr.aws/karpenter/controller:1.9.0@sha256:30a506c64fbb1d8026cbfd9a1d662be3ab6e33a7999290a104085d78b49a69d7']
+    images: []
   - version: 1.8.0
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28']
     requirements: []
@@ -20136,7 +20186,7 @@ addons:
         Helm chart now **requires `settings.clusterName`**; upgrades/installs will
           fail if it is not provided.]
     chart_version: 1.6.0
-    images: ['public.ecr.aws/karpenter/controller:1.6.0@sha256:37c761a3a0b485fd34db1390317ef6149141f532c5a699c528b98fb8f9cc722a']
+    images: []
   - version: 1.5.0
     kube: ['1.33', '1.32', '1.31']
     requirements: []
@@ -20169,7 +20219,7 @@ addons:
           can fail if `settings.clusterName` is not set; this is an intentional enforcement
           change.]
     chart_version: 1.5.0
-    images: ['public.ecr.aws/karpenter/controller:1.5.0@sha256:339aef3f5ecdf6f94d1c7cc9d0e1d359c281b4f9b842877bdbf2acd3fa360521']
+    images: []
   - version: 1.2.0
     kube: ['1.32', '1.31']
     requirements: []
@@ -20183,7 +20233,7 @@ addons:
           health/repair related integrations).]
       breaking_changes: []
     chart_version: 1.2.0
-    images: ['public.ecr.aws/karpenter/controller:1.2.0@sha256:24b8fe57f02b70fc4ab3cd6d5aa0d73a6f3d0c62ca5d23d7ffc8853eac01e324']
+    images: []
   - version: 1.0.5
     kube: ['1.31']
     requirements: []
@@ -20200,7 +20250,7 @@ addons:
       breaking_changes: ['v0.37.0: EC2NodeClass gains a readiness condition, which
           requires upgrading CRDs as part of the upgrade.']
     chart_version: 1.0.5
-    images: ['public.ecr.aws/karpenter/controller:1.0.5@sha256:f2df98735b232b143d37f0c6819a6cae2be4740e3c8b38297bceb365cf3f668b']
+    images: []
   - version: 0.37.0
     kube: ['1.30']
     requirements: []
@@ -20501,6 +20551,28 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
+  - version: 92.9.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: [Grafana image tag updated from **v13.6.0** (chart 92.7.0) to
+          **v14** (chart 92.9.0).]
+      features: ['Grafana is upgraded to major version 14, bringing the Grafana v14
+          feature set (UI/UX changes and new capabilities) as provided by upstream
+          Grafana.']
+      breaking_changes: ["Grafana major version bump **13.x \u2192 14** may introduce\
+          \ breaking changes (plugins, dashboards, alerting/permissions behavior,\
+          \ and configuration defaults). Validate compatibility of any custom Grafana\
+          \ plugins, provisioning, and dashboards before/after upgrade."]
+    chart_version: 92.9.0
+    images: ['docker.io/bats/bats:1.14.0', 'docker.io/grafana/grafana:13.2.4-distroless',
+      'ghcr.io/jkroepke/kube-webhook-certgen:1.11.0', 'quay.io/kiwigrid/k8s-sidecar:2.14.1',
+      'quay.io/prometheus-operator/prometheus-operator:v0.94.1', 'quay.io/prometheus/alertmanager:v0.34.1',
+      'quay.io/prometheus/node-exporter:v1.12.1-distroless', 'quay.io/prometheus/prometheus:v3.15.0-distroless',
+      'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
   - version: 92.7.0
     kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
       '1.27', '1.26', '1.25']
@@ -25489,7 +25561,7 @@ addons:
           change around encoded/suspicious characters rejection became opt-in and
           includes new warnings; review entryPoint/server encoded characters settings
           to avoid unexpected 4xx/rejections after upgrade.]
-    chart_version: 41.7.1
+    chart_version: 42.0.0
     images: ['docker.io/traefik:v3.7.14']
   - version: 3.7.0
     kube: ['1.36', '1.35', '1.34', '1.33']
@@ -27495,7 +27567,7 @@ addons:
           the provided notes; changes are primarily reliability, caching, and security/UX
           bug fixes plus dependency bumps.']
       breaking_changes: []
-    chart_version: 10.10.3
+    chart_version: 10.10.5
     images: ['ecr-public.aws.com/docker/library/redis:8.6.4-alpine', 'ghcr.io/dexidp/dex:v2.46.0',
       'quay.io/argoproj/argocd:v3.5.5']
   - version: 3.5.1

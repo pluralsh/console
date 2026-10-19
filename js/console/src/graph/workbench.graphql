@@ -279,6 +279,10 @@ fragment WorkbenchToolConfigurationFields on WorkbenchToolConfiguration {
   jiraDatacenter {
     url
   }
+  serviceNow {
+    url
+    username
+  }
   linear {
     url
   }
@@ -809,6 +813,7 @@ fragment WorkbenchJob on WorkbenchJob {
   workbench {
     id
     name
+    filesystemEnabled
     tools {
       ...WorkbenchToolTiny
     }

@@ -57,6 +57,40 @@ defmodule Console.Schema.WorkbenchPolicy do
     |> validate_required([:policy_id, :workbench_id])
   end
 
+  def upsert(attrs) do
+    %__MODULE__{}
+    |> changeset(attrs)
+    |> Console.Repo.insert(
+      on_conflict: on_conflict_matches(),
+      conflict_target: [:policy_id, :workbench_id],
+      returning: true,
+      stale_error_field: :id
+    )
+    |> normalize_upsert()
+  end
+
+  defp on_conflict_matches do
+    from(w in __MODULE__,
+      update: [set: [
+        matches: fragment("EXCLUDED.matches"),
+        updated_at: fragment("EXCLUDED.updated_at")
+      ]],
+      where: fragment("? = EXCLUDED.binding_policy_id", w.binding_policy_id),
+      where: fragment("? IS DISTINCT FROM EXCLUDED.matches", w.matches)
+    )
+  end
+
+  defp normalize_upsert({:error, %Ecto.Changeset{errors: errors} = changeset}) do
+    case Enum.any?(errors, &stale_error?/1) do
+      true -> :ok
+      false -> {:error, changeset}
+    end
+  end
+  defp normalize_upsert(result), do: result
+
+  defp stale_error?({_, {_, opts}}), do: opts[:stale] == true
+  defp stale_error?(_), do: false
+
   def matches_changeset(model, attrs) do
     model
     |> cast(attrs, [:regexes, :ignore])

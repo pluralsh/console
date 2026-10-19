@@ -40,6 +40,7 @@ type ChartBucket = { timestamp: Date; count: number }
 export function LogsMetricsChart({
   clusterId,
   serviceId,
+  node,
   query,
   time,
   operator,
@@ -50,6 +51,7 @@ export function LogsMetricsChart({
 }: {
   clusterId?: string
   serviceId?: string
+  node?: string
   query: string
   time: LogTimeRange
   operator: LogQueryOperator
@@ -80,6 +82,7 @@ export function LogsMetricsChart({
       aggregation: { bucketSize },
       operator,
       facets,
+      node,
     },
     fetchPolicy: 'cache-and-network',
     pollInterval,

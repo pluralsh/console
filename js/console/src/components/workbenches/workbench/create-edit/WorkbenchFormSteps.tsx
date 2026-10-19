@@ -60,7 +60,7 @@ import {
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 
-import { EmptyStateCompact } from 'components/ai/AIThreads'
+import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import { FillLevelDiv } from 'components/utils/FillLevelDiv'
 import { Link } from 'react-router-dom'
 import {
@@ -857,12 +857,13 @@ export function WorkbenchAttachToolsStep({
   }
 
   return tools.length === 0 ? (
-    <EmptyStateCompact
-      message="You have not set up any tools yet"
-      description="You can set up tools by clicking the button below. Tools can also be added later."
-      cssProps={{ '& *': { textWrap: 'pretty' } }}
+    <WorkbenchEmptyState
+      inset={false}
+      message="No tools set up yet"
+      description="Tools give this workbench's agents access to your systems. You can also add them later."
     >
       <Button
+        small
         secondary
         endIcon={<ArrowTopRightIcon size={16} />}
         as={Link}
@@ -870,7 +871,7 @@ export function WorkbenchAttachToolsStep({
       >
         Set up tools
       </Button>
-    </EmptyStateCompact>
+    </WorkbenchEmptyState>
   ) : (
     <Flex
       direction="column"

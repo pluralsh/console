@@ -20,6 +20,7 @@ defmodule ConsoleWeb.ProxyRouter do
         pipe_through [:ingest]
 
         post "/prometheus", IngestController, :prometheus
+        post "/loki/api/v1/push", IngestController, :loki_push
         scope "/elastic" do
           get  "/_license", IngestController, :es_license
           post "/_bulk",    IngestController, :es_bulk

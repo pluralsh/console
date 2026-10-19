@@ -97,6 +97,10 @@ type BindingPolicyMatches struct {
 	// Workbench defines match criteria for workbench-type binding policies.
 	// +kubebuilder:validation:Optional
 	Workbench *WorkbenchBindingPolicyMatches `json:"workbench,omitempty"`
+
+	// Stack defines match criteria for stack-type binding policies, including the evaluation stage.
+	// +kubebuilder:validation:Optional
+	Stack *StackBindingPolicyMatches `json:"stack,omitempty"`
 }
 
 // WorkbenchBindingPolicyMatches defines regex-based selection criteria for workbench targets.
@@ -104,4 +108,12 @@ type WorkbenchBindingPolicyMatches struct {
 	// Regexes is a list of regular expressions that select workbench inputs for this policy.
 	// +kubebuilder:validation:Optional
 	Regexes []*string `json:"regexes,omitempty"`
+}
+
+// StackBindingPolicyMatches defines the stack policy evaluation stage attached by a BindingPolicy.
+type StackBindingPolicyMatches struct {
+	// Type is the stack policy evaluation stage. Valid values: APPROVAL, RUN.
+	// APPROVAL evaluates after the plan. RUN evaluates before a run is created.
+	// +kubebuilder:validation:Optional
+	Type *console.StackPolicyType `json:"type,omitempty"`
 }

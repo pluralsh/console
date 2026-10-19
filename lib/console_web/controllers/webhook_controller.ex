@@ -225,5 +225,32 @@ defmodule ConsoleWeb.WebhookController do
   defp verify(conn, %IssueWebhook{provider: :bitbucket_datacenter, secret: secret}),
     do: verify(conn, %ScmWebhook{type: :bitbucket_datacenter, hmac: secret})
 
+  # A signature header, when present, must be valid: it never falls back to the shared secret.
+  defp verify(conn, %IssueWebhook{provider: :service_now, secret: secret}) do
+    case {get_req_header(conn, "x-plural-signature"), get_req_header(conn, "x-plural-webhook-secret")} do
+      {[signature], _} -> verify_service_now_signature(conn, signature, secret)
+      {[], [token]} -> secure_verify(token, secret)
+      _ -> :reject
+    end
+  end
+
   defp verify(_, _), do: :reject
+
+  defp verify_service_now_signature(conn, signature, secret) do
+    mac = :crypto.mac(:hmac, :sha256, secret, Enum.reverse(conn.assigns.raw_body))
+    signature = signature |> String.trim() |> String.replace_prefix("sha256=", "")
+
+    case Plug.Crypto.secure_compare(String.downcase(signature), Base.encode16(mac, case: :lower)) or
+           Plug.Crypto.secure_compare(signature, Base.encode64(mac)) do
+      true -> :ok
+      false -> :reject
+    end
+  end
+
+  defp secure_verify(token, secret) do
+    case Plug.Crypto.secure_compare(token, secret) do
+      true -> :ok
+      false -> :reject
+    end
+  end
 end

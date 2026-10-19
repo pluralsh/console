@@ -28,6 +28,7 @@ const ISSUE_SETUP_GUIDE_PATHS: Record<IssueWebhookProvider, string> = {
   [IssueWebhookProvider.Gitlab]: '/setup-guides/webhooks/gitlab.md',
   [IssueWebhookProvider.Jira]: '/setup-guides/webhooks/jira.md',
   [IssueWebhookProvider.Linear]: '/setup-guides/webhooks/linear.md',
+  [IssueWebhookProvider.ServiceNow]: '/setup-guides/webhooks/service_now.md',
 }
 
 const OBSERVABILITY_SETUP_GUIDE_DOCUMENTATION_URLS: Partial<
@@ -48,6 +49,8 @@ const ISSUE_SETUP_GUIDE_DOCUMENTATION_URLS: Partial<
     'https://support.atlassian.com/bitbucket-cloud/docs/manage-webhooks',
   [IssueWebhookProvider.BitbucketDatacenter]:
     'https://confluence.atlassian.com/display/BitbucketServer/Manage+webhooks',
+  [IssueWebhookProvider.ServiceNow]:
+    'https://docs.plural.sh/plural-features/workbenches/integrations/webhooks/service-now',
 }
 
 export function getSetupGuideMarkdownPath({

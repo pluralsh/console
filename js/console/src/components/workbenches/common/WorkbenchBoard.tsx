@@ -1,4 +1,4 @@
-import { Button, EmptyState, Flex, Spinner } from '@pluralsh/design-system'
+import { Button, Flex, Spinner } from '@pluralsh/design-system'
 import { isNil } from 'lodash'
 import {
   ReactNode,
@@ -11,6 +11,8 @@ import {
 } from 'react'
 import { Link } from 'react-router-dom'
 import styled, { DefaultTheme } from 'styled-components'
+
+import { WorkbenchEmptyState, WorkbenchEmptyText } from './WorkbenchEmptyState'
 
 // Shared building blocks for the workbench Board views (issues, jobs, alerts).
 
@@ -138,14 +140,37 @@ export type EmptyListState = {
   onResetFilters: () => void
 }
 
-function emptyListMessage(
+function emptyListCopy(
   noun: string,
   { searching, filtered }: { searching: boolean; filtered: boolean }
 ) {
-  if (searching && filtered) return `No ${noun} match your search and filters.`
-  if (searching) return `No matching ${noun} found.`
-  if (filtered) return `No ${noun} match the current filters.`
-  return `No ${noun} found.`
+  if (searching && filtered)
+    return {
+      message: `No ${noun} match your search and filters`,
+      description: 'Try a different search, or reset filters.',
+    }
+  if (searching)
+    return {
+      message: `No ${noun} match your search`,
+      description: 'Try a different search term.',
+    }
+  if (filtered)
+    return {
+      message: `No ${noun} match your filters`,
+      description: `Reset filters to see all ${noun}.`,
+    }
+  return {
+    message: `No ${noun} yet`,
+    description:
+      UNFILTERED_EMPTY_DESCRIPTIONS[noun] ??
+      `${noun[0].toUpperCase()}${noun.slice(1)} will show up here.`,
+  }
+}
+
+const UNFILTERED_EMPTY_DESCRIPTIONS: Record<string, string> = {
+  jobs: 'Jobs show up here when this workbench runs from a prompt, schedule, or trigger.',
+  alerts: 'Alerts routed to this workbench will show up here.',
+  issues: 'Issues routed to this workbench will show up here.',
 }
 
 // The empty (or first loading) state of a list, naming what emptied it.
@@ -153,28 +178,47 @@ export function BoardEmptyList({
   noun,
   loading,
   emptyState: { searching, filtered, onResetFilters },
+  sidebar = false,
 }: {
   noun: string
   loading: boolean
   emptyState: EmptyListState
+  // a narrow list column rather than a full board
+  sidebar?: boolean
 }) {
-  return loading ? (
-    <BoardCenteredSC>
-      <Spinner />
-    </BoardCenteredSC>
+  if (loading)
+    return (
+      <BoardCenteredSC>
+        <Spinner />
+      </BoardCenteredSC>
+    )
+
+  const { message, description } = emptyListCopy(noun, { searching, filtered })
+  // offers to reset the display filters, when they narrowed the list
+  const reset = filtered && (
+    <Button
+      small
+      onClick={onResetFilters}
+    >
+      Reset filters
+    </Button>
+  )
+
+  return sidebar ? (
+    <Flex
+      direction="column"
+      align="center"
+    >
+      <WorkbenchEmptyText>{message}</WorkbenchEmptyText>
+      {reset}
+    </Flex>
   ) : (
-    <EmptyState message={emptyListMessage(noun, { searching, filtered })}>
-      {/* offers to reset the display filters, when they narrowed the list */}
-      {filtered && (
-        <Button
-          small
-          secondary
-          onClick={onResetFilters}
-        >
-          Reset filters
-        </Button>
-      )}
-    </EmptyState>
+    <WorkbenchEmptyState
+      message={message}
+      description={description}
+    >
+      {reset}
+    </WorkbenchEmptyState>
   )
 }
 

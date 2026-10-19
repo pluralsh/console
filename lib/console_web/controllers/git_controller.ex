@@ -79,7 +79,7 @@ defmodule ConsoleWeb.GitController do
         ])
         agent_bootstrapping(conn)
       {{:error, :rate_limited}, svc} ->
-        Services.add_errors(svc, [%{source: "git", message: "Rate limited"}])
+        Services.add_errors(svc, [%{source: "git", message: "Rate limited", warning: true}])
         rate_limited(conn)
       {{:error, err}, svc} ->
         Services.add_errors(svc, [%{source: "git", message: stringify(err)}])
@@ -103,7 +103,7 @@ defmodule ConsoleWeb.GitController do
         ])
         agent_bootstrapping(conn)
       {{:error, :rate_limited}, svc} ->
-        Services.add_errors(svc, [%{source: "git", message: "Rate limited"}])
+        Services.add_errors(svc, [%{source: "git", message: "Rate limited", warning: true}])
         rate_limited(conn)
       {{:error, {:dependencies, err}}, svc} ->
         Services.add_errors(svc, [%{source: "git", message: stringify(err), warning: true}])

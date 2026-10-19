@@ -3,7 +3,6 @@ import {
   Chip,
   ChipSeverity,
   DocsIcon,
-  EmptyState,
   ErrorIcon,
   ExpandIcon,
   Flex,
@@ -15,6 +14,7 @@ import {
   Tooltip,
   useResizeObserver,
 } from '@pluralsh/design-system'
+import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import { Line } from '@nivo/line'
 import { RunStatusIcon } from 'components/ai/agent-runs/AgentRunInfoDisplays'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
@@ -160,7 +160,10 @@ export function MonitorDetail({
   if (!monitor)
     return (
       <MainSC>
-        <EmptyState message="Monitor not found." />
+        <WorkbenchEmptyState
+          message="Monitor not found"
+          description="It may have been deleted from this workbench."
+        />
       </MainSC>
     )
 
@@ -447,7 +450,12 @@ function MonitorThresholdChart({
 
   if (!isLog) {
     return (
-      <EmptyState message="Threshold preview is available for log monitors with a linked service." />
+      <WorkbenchEmptyState
+        variant="plain"
+        inset={false}
+        message="Threshold preview unavailable"
+        description="Previews are only available for log monitors with a linked service."
+      />
     )
   }
 
@@ -531,9 +539,13 @@ function MetricsThresholdPreview({
   if (error && !data) return <GqlError error={error} />
   if (isEmpty(graphData[0].data))
     return (
-      <EmptyState
-        message="No metric data found for this query."
-        description={emptyDescription}
+      <WorkbenchEmptyState
+        variant="plain"
+        inset={false}
+        message="No metric data"
+        description={
+          emptyDescription ?? 'This query returned no data for the time range.'
+        }
       />
     )
 
@@ -664,7 +676,14 @@ function LogThresholdPreview({
     )
   if (error && !data) return <GqlError error={error} />
   if (isEmpty(graphData[0].data))
-    return <EmptyState message="No log data found for this query." />
+    return (
+      <WorkbenchEmptyState
+        variant="plain"
+        inset={false}
+        message="No log data"
+        description="This query returned no logs for the time range."
+      />
+    )
 
   return (
     <GraphWrapperSC ref={chartRef}>

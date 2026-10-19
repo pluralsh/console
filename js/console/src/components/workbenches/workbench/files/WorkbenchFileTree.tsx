@@ -9,6 +9,7 @@ import {
   Tooltip,
   TrashCanIcon,
 } from '@pluralsh/design-system'
+import { WorkbenchEmptyText } from 'components/workbenches/common/WorkbenchEmptyState'
 import {
   FileTypeIcon,
   fileTreeMuiTheme,
@@ -25,8 +26,9 @@ import {
 import { uniq } from 'lodash'
 import { ReactNode, useState } from 'react'
 import { PAGE_TOOLBAR_HEIGHT } from 'components/layout/PageToolbar'
+import { DragHandleSC } from 'components/ai/chatbot/SidePanelShared'
+import { useResizablePane } from 'components/ai/chatbot/useResizeableChatPane'
 import styled from 'styled-components'
-import { WORKBENCH_SIDEBAR_WIDTH } from '../WorkbenchSidePanel'
 import { ancestorDirectories } from './workbenchFilePaths'
 
 // directories and status rows get prefixed item ids so selection can tell them from files
@@ -35,6 +37,10 @@ const STATUS_PREFIX = 'status:'
 const dirItemId = (path: string) => `${DIR_PREFIX}${path}`
 
 export const WORKBENCH_FILES_HEADER_HEIGHT = PAGE_TOOLBAR_HEIGHT
+
+// matches the evals sidebar
+const FILE_TREE_MIN_WIDTH = 350
+const FILE_TREE_MAX_WIDTH_VW = 50
 
 export function WorkbenchFileTree({
   workbenchId,
@@ -48,6 +54,11 @@ export function WorkbenchFileTree({
   onDelete: (file: WorkbenchFileFragment) => void
 }) {
   const client = useApolloClient()
+  const { calculatedPanelWidth, dragHandleProps, isDragging } =
+    useResizablePane(FILE_TREE_MIN_WIDTH, FILE_TREE_MAX_WIDTH_VW, undefined, {
+      storageKey: 'workbench-file-tree-width',
+      handleEdge: 'right',
+    })
   const [refreshing, setRefreshing] = useState(false)
   const [expanded, setExpanded] = useState<string[]>(() =>
     ancestorDirectories(selectedPath).map(dirItemId)
@@ -72,7 +83,7 @@ export function WorkbenchFileTree({
   }
 
   return (
-    <WrapperSC>
+    <WrapperSC style={{ width: calculatedPanelWidth }}>
       <HeaderSC>
         <Body2BoldP>Files</Body2BoldP>
         <IconFrame
@@ -110,6 +121,12 @@ export function WorkbenchFileTree({
           </StyledTreeView>
         </MuiThemeProvider>
       </TreeScrollSC>
+      <DragHandleSC
+        tabIndex={0}
+        $isDragging={isDragging}
+        css={{ left: 'auto', right: 0 }}
+        {...dragHandleProps}
+      />
     </WrapperSC>
   )
 }
@@ -153,10 +170,14 @@ function DirectoryEntries({
       />
     )
   if (!files?.length)
-    return (
+    return path === '/' ? (
+      <WorkbenchEmptyText>
+        No files yet. Attachments and agent outputs will show up here.
+      </WorkbenchEmptyText>
+    ) : (
       <StatusItem
         path={path}
-        label="Empty"
+        label="Empty folder"
       />
     )
 
@@ -295,9 +316,7 @@ const WrapperSC = styled.div(({ theme }) => ({
   height: '100%',
   minHeight: 0,
   overflow: 'hidden',
-  width: WORKBENCH_SIDEBAR_WIDTH,
-  maxWidth: WORKBENCH_SIDEBAR_WIDTH,
-  minWidth: WORKBENCH_SIDEBAR_WIDTH,
+  position: 'relative',
 }))
 
 const HeaderSC = styled.div(({ theme }) => ({

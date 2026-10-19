@@ -545,12 +545,22 @@ defmodule Console.GraphQl.Deployments.StackMutationsTest do
 
       {:ok, %{data: %{"createStackPolicy" => association}}} = run_query("""
         mutation CreateStackPolicy($stackId: ID!, $attributes: StackPolicyAttributes!) {
-          createStackPolicy(stackId: $stackId, attributes: $attributes) { id stack { id } policy { id } }
+          createStackPolicy(stackId: $stackId, attributes: $attributes) { id type stack { id } policy { id } }
         }
       """, %{"stackId" => stack.id, "attributes" => %{"policyId" => policy.id}}, %{current_user: user})
 
       assert association["stack"]["id"] == stack.id
       assert association["policy"]["id"] == policy.id
+      assert association["type"] == "APPROVAL"
+
+      {:ok, %{data: %{"createStackPolicy" => run_association}}} = run_query("""
+        mutation CreateStackPolicy($stackId: ID!, $attributes: StackPolicyAttributes!) {
+          createStackPolicy(stackId: $stackId, attributes: $attributes) { id type policy { id } }
+        }
+      """, %{"stackId" => stack.id, "attributes" => %{"policyId" => policy.id, "type" => "RUN"}}, %{current_user: user})
+
+      assert run_association["type"] == "RUN"
+      assert run_association["policy"]["id"] == policy.id
 
       {:ok, %{data: %{"updateStackPolicy" => updated}}} = run_query("""
         mutation UpdateStackPolicy($id: ID!, $attributes: StackPolicyAttributes!) {

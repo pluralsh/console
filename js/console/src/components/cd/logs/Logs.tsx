@@ -47,9 +47,12 @@ const DEFAULT_LOG_RANGE: TimeRange = { live: true, durationMs: 15 * 60 * 1000 }
 export function Logs({
   serviceId,
   clusterId,
+  node,
 }: {
   serviceId?: string
   clusterId?: string
+  /** only logs from pods scheduled on this node */
+  node?: string
 }) {
   const { popToast } = useSimpleToast()
 
@@ -102,6 +105,7 @@ export function Logs({
       time,
       facets: labels,
       operator: queryOperator,
+      node,
     },
     fetchPolicy: 'cache-and-network',
     notifyOnNetworkStatusChange: true,
@@ -154,6 +158,7 @@ export function Logs({
           logs={logs}
           clusterId={clusterId}
           serviceId={serviceId}
+          node={node}
           query={throttledQ}
           time={time}
           addLabel={addLabel}
@@ -202,6 +207,7 @@ export function Logs({
               <LogsMetricsChart
                 clusterId={clusterId}
                 serviceId={serviceId}
+                node={node}
                 query={throttledQ}
                 time={time}
                 operator={queryOperator}
@@ -227,6 +233,7 @@ export function Logs({
                 labels={labels}
                 clusterId={clusterId}
                 serviceId={serviceId}
+                node={node}
               />
             </LogsTableWrapSC>
           </LogsBodySC>

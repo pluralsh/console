@@ -1,7 +1,6 @@
 import {
   Button,
   CodeEditor,
-  EmptyState,
   Flex,
   FormField,
   Input,
@@ -9,6 +8,7 @@ import {
   Switch,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
@@ -118,7 +118,12 @@ export function WorkbenchEvalSettings() {
   )
 
   if (!workbenchId || error?.message?.includes('could not find resource')) {
-    return <EmptyState message="Workbench not found." />
+    return (
+      <WorkbenchEmptyState
+        message="Workbench not found"
+        description="It may have been deleted, or you may not have access to it."
+      />
+    )
   }
 
   if (evalError) return <GqlError error={evalError} />

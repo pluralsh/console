@@ -18,3 +18,24 @@ spec:
     name: workbench-allow-policy
   bindPolicyRef:
     name: workbench-binding-selector
+---
+# Stack BindingPolicy: attaches a stack policy before a run is created.
+apiVersion: deployments.plural.sh/v1alpha1
+kind: BindingPolicy
+metadata:
+  labels:
+    app.kubernetes.io/name: bindingpolicy
+    app.kubernetes.io/instance: bindingpolicy-stack-run
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: stack-run-binding-policy-minimal
+spec:
+  type: STACK
+  policyRef:
+    name: stack-freeze-policy
+  bindPolicyRef:
+    name: stack-binding-selector
+  matches:
+    stack:
+      type: RUN

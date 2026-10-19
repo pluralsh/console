@@ -144,9 +144,7 @@ function IssueCard({
 function EmptyColumnCard() {
   return (
     <EmptyCardSC>
-      <EmptyCardTextSC>
-        No tickets available in this status yet.
-      </EmptyCardTextSC>
+      <EmptyCardTextSC>No issues in this status yet.</EmptyCardTextSC>
     </EmptyCardSC>
   )
 }

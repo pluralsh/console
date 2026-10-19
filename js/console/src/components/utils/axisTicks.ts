@@ -1,3 +1,5 @@
+import { AXIS_CHAR_PX } from './timeTicks'
+
 export type TickBase = 'decimal' | 'binary' | 'duration' | 'integer'
 
 export type NiceAxis = {
@@ -112,6 +114,20 @@ export function niceAxis(
   )
 
   return { min: start, max: end, step, ticks }
+}
+
+const AXIS_TICK_PX = 14
+
+/** Left margin wide enough for the longest of the given y tick labels. */
+export function yAxisLabelsWidth(labels: string[]) {
+  if (labels.length === 0) return 40
+  const chars = Math.max(...labels.map((label) => label.length))
+  return Math.min(Math.max(chars * AXIS_CHAR_PX + AXIS_TICK_PX, 32), 96)
+}
+
+/** Right margin so the last x tick label (centered on the edge) isn't clipped. */
+export function xAxisOverhang(labelChars: number) {
+  return Math.max(Math.ceil((labelChars * AXIS_CHAR_PX) / 2) + 4, 16)
 }
 
 export function seriesExtent(values: Iterable<unknown>) {

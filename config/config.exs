@@ -126,6 +126,10 @@ config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
 
+# anubis' per-category `:logging` levels are overridden by hardcoded warning/error levels and by
+# remote servers' own log notifications, so this is the only effective way to quiet it
+config :anubis_mcp, log: false
+
 config :phoenix, :json_library, JSON
 
 config :console, Console.Guardian,

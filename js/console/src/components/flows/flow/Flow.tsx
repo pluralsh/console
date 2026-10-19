@@ -1,8 +1,14 @@
 import {
+  AppIcon,
+  type Breadcrumb,
   Button,
   EmptyState,
+  FlowIcon,
+  InfoOutlineIcon,
+  ListBoxItem,
   PeopleIcon,
   ReturnIcon,
+  Tooltip,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { PageHeaderContext } from 'components/cd/ContinuousDeployment'
@@ -12,24 +18,34 @@ import {
 } from 'components/cd/utils/PermissionsModal'
 import { useLogin } from 'components/contexts'
 import { useCurrentFlow } from 'components/flows/hooks/useCurrentFlow'
+import { CrumbSelect } from 'components/layout/CrumbSelect'
 import { PageWithSidebar } from 'components/layout/PageLayout'
 import { PageToolbar } from 'components/layout/PageToolbar'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { hasAccess } from 'components/utils/persona'
 import { SubtabDirectory } from 'components/utils/SubTabs'
+import { TRUNCATE } from 'components/utils/truncate'
 import {
   FlowBasicWithBindingsFragment,
   PersonaConfigurationFragment,
+  useFlowsQuery,
 } from 'generated/graphql'
 import { ReactNode, createContext, use, useMemo, useState } from 'react'
-import { Link, Outlet, useLocation, useMatch } from 'react-router-dom'
+import {
+  Link,
+  Outlet,
+  useLocation,
+  useMatch,
+  useNavigate,
+} from 'react-router-dom'
 import {
   FLOW_WORKBENCHES_REL_PATH,
   FLOWS_ABS_PATH,
 } from 'routes/flowRoutesConsts'
 import { VULNERABILITY_REPORTS_REL_PATH } from 'routes/securityRoutesConsts'
 import styled from 'styled-components'
+import { mapExistingNodes } from 'utils/graphql'
 import { FlowWorkbenchJobLauncher } from './FlowWorkbenchJobLauncher'
 
 function getDirectory(
@@ -82,14 +98,69 @@ export function useFlowSidePanel() {
   return use(FlowSidePanelContext)
 }
 
-export const getFlowBreadcrumbs = (flowName: string = '', tab: string = '') =>
+/** `switchable` turns the flow crumb into a menu for switching flow in place. */
+export const getFlowBreadcrumbs = (
+  flowName: string = '',
+  tab: string = '',
+  switchable = false
+): Breadcrumb[] =>
   flowName
     ? [
         { label: 'flows', url: FLOWS_ABS_PATH },
-        { label: flowName, url: `${FLOWS_ABS_PATH}/${flowName}` },
+        switchable
+          ? {
+              label: (
+                <FlowCrumbSelect
+                  flowName={flowName}
+                  tab={tab}
+                />
+              ),
+              textValue: flowName,
+            }
+          : { label: flowName, url: `${FLOWS_ABS_PATH}/${flowName}` },
         { label: tab, url: `${FLOWS_ABS_PATH}/${flowName}/${tab}` },
       ]
     : []
+
+function FlowCrumbSelect({ flowName, tab }: { flowName: string; tab: string }) {
+  const navigate = useNavigate()
+  const { data } = useFlowsQuery({
+    variables: { first: 100 },
+    fetchPolicy: 'cache-first',
+  })
+  const flows = useMemo(() => {
+    const options = mapExistingNodes(data?.flows)
+    return options.some(({ name }) => name === flowName)
+      ? options
+      : [{ name: flowName, icon: null }, ...options]
+  }, [data?.flows, flowName])
+
+  return (
+    <CrumbSelect
+      ariaLabel="Flow"
+      label={flowName}
+      selectedKey={flowName}
+      onSelectionChange={(name) =>
+        navigate(`${FLOWS_ABS_PATH}/${name}/${tab || 'services'}`)
+      }
+    >
+      {flows.map(({ name, icon }) => (
+        <ListBoxItem
+          key={name}
+          label={name}
+          textValue={name}
+          leftContent={
+            <AppIcon
+              size="xxsmall"
+              url={icon ?? ''}
+              icon={<FlowIcon />}
+            />
+          }
+        />
+      ))}
+    </CrumbSelect>
+  )
+}
 
 export function Flow() {
   const { search } = useLocation()
@@ -126,7 +197,10 @@ export function Flow() {
   )
 
   useSetBreadcrumbs(
-    useMemo(() => getFlowBreadcrumbs(flow?.name || '', tab), [flow?.name, tab])
+    useMemo(
+      () => getFlowBreadcrumbs(flow?.name || '', tab, true),
+      [flow?.name, tab]
+    )
   )
 
   if (error) return <GqlError error={error} />
@@ -158,6 +232,7 @@ export function Flow() {
           }
           toolbar={
             <PageToolbar
+              heading={<FlowToolbarTitle flow={flow} />}
               tabs={tabs}
               activeFn={(path) => path === `${flowPath}/${tab}`}
             >
@@ -193,6 +268,39 @@ export function Flow() {
     </PageHeaderContext>
   )
 }
+
+function FlowToolbarTitle({ flow }: { flow: FlowBasicWithBindingsFragment }) {
+  return (
+    <>
+      <AppIcon
+        size="xxsmall"
+        url={flow.icon ?? ''}
+        icon={<FlowIcon />}
+      />
+      <FlowNameSC title={flow.name}>{flow.name}</FlowNameSC>
+      {flow.description && (
+        <Tooltip
+          label={flow.description}
+          placement="bottom"
+        >
+          <InfoOutlineIcon
+            size={14}
+            color="icon-xlight"
+            aria-label={flow.description}
+            css={{ flexShrink: 0 }}
+          />
+        </Tooltip>
+      )}
+    </>
+  )
+}
+
+const FlowNameSC = styled.span(({ theme }) => ({
+  ...theme.partials.text.body2Bold,
+  ...TRUNCATE,
+  color: theme.colors.text,
+  minWidth: 0,
+}))
 
 const SidePanelWrapSC = styled.div<{ $open: boolean }>(({ $open }) => ({
   display: 'flex',

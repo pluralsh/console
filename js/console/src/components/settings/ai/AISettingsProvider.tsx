@@ -173,7 +173,7 @@ export function AISettingsProvider() {
   }
 
   return (
-    <ScrollablePage>
+    <ScrollablePage contentStyles={{ paddingTop: 0 }}>
       <Flex
         direction="column"
         gap="medium"
