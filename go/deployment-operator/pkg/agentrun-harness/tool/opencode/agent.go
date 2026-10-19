@@ -157,15 +157,15 @@ func (agent *Agent) Import(ctx context.Context, request toolv1.ImportRequest) (s
 	if request.Manifest == nil {
 		return "", fmt.Errorf("opencode session manifest is not set")
 	}
+	if request.ExtractDir == "" {
+		return "", fmt.Errorf("opencode session extract directory is not set")
+	}
 	if _, err := agent.configWithOpenCode(); err != nil {
 		return "", err
 	}
-	archivePath := request.Manifest.Session.ArchivePath
-	if archivePath == "" {
-		archivePath = "opencode"
-	}
-	destination := filepath.Join(agent.providerPath(agent.config), "sessions")
-	if err := artifacts.RestoreArchiveTree(ctx, request.ExtractDir, archivePath, destination); err != nil {
+
+	sessionJSON := agent.sessionExportPath(request.ExtractDir, request.Manifest.Session.ArchivePath)
+	if err := agent.importSession(ctx, agent.config, sessionJSON); err != nil {
 		return "", fmt.Errorf("import opencode session: %w", err)
 	}
 	return request.Manifest.Session.ID, nil
