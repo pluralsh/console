@@ -55,7 +55,7 @@ func newConsoleExtAllowlist(agentRunID string, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if err := rebuildConsoleExtRequest(r, agentRunID); err != nil {
 			status := http.StatusForbidden
-			var rejected *consoleExtRejection
+			var rejected *consoleExtStatusError
 			if errors.As(err, &rejected) {
 				status = rejected.status
 			}
@@ -69,19 +69,19 @@ func newConsoleExtAllowlist(agentRunID string, next http.Handler) http.Handler {
 	})
 }
 
-// consoleExtRejection is a refused request that isn't an allowlist violation, answered with its own status.
+// consoleExtStatusError is a refused request that isn't an allowlist violation, answered with its own status.
 // Every other error is answered with 403.
-type consoleExtRejection struct {
+type consoleExtStatusError struct {
 	status int
 	err    error
 }
 
-func (e *consoleExtRejection) Error() string { return e.err.Error() }
+func (e *consoleExtStatusError) Error() string { return e.err.Error() }
 
-func (e *consoleExtRejection) Unwrap() error { return e.err }
+func (e *consoleExtStatusError) Unwrap() error { return e.err }
 
 func reject(status int, format string, args ...any) error {
-	return &consoleExtRejection{status: status, err: fmt.Errorf(format, args...)}
+	return &consoleExtStatusError{status: status, err: fmt.Errorf(format, args...)}
 }
 
 func rebuildConsoleExtRequest(r *http.Request, agentRunID string) error {
