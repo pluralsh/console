@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { WorkbenchJobActivityMetricFragment } from 'generated/graphql'
-import { getMetricSeries } from './workbenchJobMetrics'
+import {
+  filterMetricSeriesByDuration,
+  getMetricSeries,
+  getMetricSeriesFromResponses,
+} from './workbenchJobMetrics'
 
 function metric(
   overrides: Partial<WorkbenchJobActivityMetricFragment>
@@ -41,6 +45,64 @@ describe('getMetricSeries', () => {
       id: 'requests{method:GET,status:success}',
       label: 'method=GET, status=success',
     })
+  })
+})
+
+describe('getMetricSeriesFromResponses', () => {
+  it('matches flat-point series ids and labels and parses unix-second points', () => {
+    const series = getMetricSeriesFromResponses([
+      {
+        name: 'requests',
+        metric: { status: 'success', method: 'GET' },
+        values: [
+          { timestamp: '1788000000', value: '1.5' },
+          { timestamp: '1788000030', value: 'NaN' },
+          null,
+        ],
+      },
+      null,
+      { name: 'requests', metric: { status: 'error' }, values: null },
+    ])
+
+    expect(series).toEqual([
+      {
+        id: 'requests{method:GET,status:success}',
+        label: 'method=GET, status=success',
+        shortLabel: 'method=GET, status=success',
+        data: [{ x: new Date(1788000000 * 1000), y: 1.5 }],
+      },
+      {
+        id: 'requests{status:error}',
+        label: 'status=error',
+        shortLabel: 'status=error',
+        data: [],
+      },
+    ])
+  })
+})
+
+describe('filterMetricSeriesByDuration', () => {
+  it('keeps points within the duration of the latest point across series', () => {
+    const at = (seconds: number) => ({ x: new Date(seconds * 1000), y: 1 })
+    const series = [
+      { id: 'a', label: 'a', shortLabel: 'a', data: [at(0), at(3_000)] },
+      { id: 'b', label: 'b', shortLabel: 'b', data: [at(1_000)] },
+      { id: 'c', label: 'c', shortLabel: 'c', data: [at(3_600)] },
+    ]
+
+    expect(
+      filterMetricSeriesByDuration(series, 3_000_000).map(({ id, data }) => ({
+        id,
+        data,
+      }))
+    ).toEqual([
+      { id: 'a', data: [at(3_000)] },
+      { id: 'b', data: [at(1_000)] },
+      { id: 'c', data: [at(3_600)] },
+    ])
+    expect(
+      filterMetricSeriesByDuration(series, 1_000_000).map(({ id }) => id)
+    ).toEqual(['a', 'c'])
   })
 })
 

@@ -8,39 +8,40 @@ import {
   timeAxisFormat,
 } from 'components/utils/timerange/ChartRangeSelect'
 import type { TimeWindow } from 'components/utils/timerange/timeRange'
-import {
-  DashboardGraphUnit,
-  WorkbenchJobActivityMetricFragment,
-} from 'generated/graphql'
+import { DashboardGraphUnit } from 'generated/graphql'
 import { type ComponentProps, memo, useMemo } from 'react'
 import {
   JobActivityMetricsChart,
   METRICS_CHART_MARGIN,
 } from '../job/WorkbenchJobActivityResults'
+import type { MetricSeries } from '../job/workbenchJobMetrics'
 import { formatUnitValue, unitAxis } from './dashboardUnits'
 
 // tick (5) + tick padding (5) + an 11px label line
 const X_AXIS_HEIGHT_PX = 24
 
+function* seriesValues(series: MetricSeries[]) {
+  for (const { data } of series) for (const { y } of data) yield y
+}
+
 /** Metrics chart pinned to the dashboard window, with drag-to-zoom. */
 export const DashboardTimeseriesChart = memo(function DashboardTimeseriesChart({
-  metrics,
+  series,
   timeWindow,
   unit,
   onRangeSelect,
   lineProps,
   ...props
 }: {
-  metrics: WorkbenchJobActivityMetricFragment[]
   timeWindow: TimeWindow
   unit?: Nullable<DashboardGraphUnit>
   onRangeSelect?: (start: Date, end: Date) => void
 } & ComponentProps<typeof JobActivityMetricsChart>) {
   const xFormat = timeAxisFormat(timeWindow)
   const yAxis = useMemo(() => {
-    const { min, max } = seriesExtent(metrics.map(({ value }) => value))
+    const { min, max } = seriesExtent(seriesValues(series))
     return unitAxis(min, max, unit)
-  }, [metrics, unit])
+  }, [series, unit])
   const margin = useMemo(
     () => ({
       ...METRICS_CHART_MARGIN,
@@ -60,7 +61,7 @@ export const DashboardTimeseriesChart = memo(function DashboardTimeseriesChart({
       onRangeSelect={onRangeSelect}
     >
       <JobActivityMetricsChart
-        metrics={metrics}
+        series={series}
         lineProps={{
           xScale: {
             type: 'time',

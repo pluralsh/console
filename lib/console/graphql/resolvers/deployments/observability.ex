@@ -19,6 +19,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
   alias Console.Deployments.Observability.Dashboard, as: DashboardRuntime
   alias Console.Deployments.Observability.Webhook.Grafana
   alias Console.Services.Observability, as: ObsSvc
+  alias Console.AI.Tools.Workbench.Observability.Metrics
 
   @default_offset 30 * 60
   @nano 1_000_000_000
@@ -243,6 +244,10 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
         %{context: %{current_user: user}}
       ),
       do: DashboardRuntime.graph(dashboard, identifier, input, time_range, user)
+
+  def dashboard_graph_metrics(%{series: series}, _, _) when is_list(series),
+    do: {:ok, Metrics.flatten_series(series)}
+  def dashboard_graph_metrics(result, _, _), do: {:ok, Map.get(result, :metrics)}
 
   def dashboard_input(
         %Dashboard{} = dashboard,

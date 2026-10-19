@@ -3,7 +3,15 @@ defmodule Console.AI.Tools.Workbench.Observability.Metrics do
   alias Console.AI.Tools.Workbench.Observability.TimeRange
   alias CloudQuery.Client
   alias Toolquery.ToolQuery.{Stub}
-  alias Toolquery.{MetricsQueryInput, MetricsQueryOutput, MetricsOptions, AzureMetricsOptions, MetricPoint}
+  alias Toolquery.{
+    MetricsQueryInput,
+    MetricsQueryOutput,
+    MetricsSeriesOutput,
+    MetricSeries,
+    MetricsOptions,
+    AzureMetricsOptions,
+    MetricPoint
+  }
   alias Console.AI.Workbench.Conversion
   alias Console.AI.Tools.Workbench.Output
 
@@ -84,8 +92,39 @@ defmodule Console.AI.Tools.Workbench.Observability.Metrics do
     end
   end
 
+  @doc """
+  Like `structured/1`, but grouped by series: `%{name, metric, samples: [%{timestamp, value}]}`,
+  where `metric` holds the series labels.
+  """
+  def structured_series(%__MODULE__{} = tool) do
+    with {:ok, conn} <- Client.connect(),
+         {:ok, input} <- input(TimeRange.ensure(tool)),
+         {:ok, %MetricsSeriesOutput{} = output} <- Stub.metrics_series(conn, input, Client.metrics_rpc_opts()) do
+      {:ok, Enum.flat_map(output.series, &mapify_series/1)}
+    end
+  end
+
+  @doc "Expands series from `structured_series/1` into the per-point shape of `structured/1`."
+  def flatten_series(series) when is_list(series) do
+    Enum.flat_map(series, fn %{name: name, metric: labels, samples: samples} ->
+      Enum.map(samples, &%{timestamp: &1.timestamp, name: name, value: &1.value, labels: labels})
+    end)
+  end
+
   defp finite_metrics(metrics),
     do: Enum.reject(metrics, &(&1.value in @non_finite_values))
+
+  defp mapify_series(%MetricSeries{samples: samples} = series) do
+    case finite_metrics(samples) do
+      [] -> []
+      samples ->
+        [%{
+          name: series.name,
+          metric: series.labels,
+          samples: Enum.map(samples, &%{timestamp: TimeRange.to_datetime(&1.timestamp), value: &1.value})
+        }]
+    end
+  end
 
   defp mapify(%MetricPoint{} = metric) do
     %{

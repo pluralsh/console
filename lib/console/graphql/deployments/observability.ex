@@ -452,8 +452,12 @@ defmodule Console.GraphQl.Deployments.Observability do
   end
 
   object :workbench_dashboard_graph_result do
+    field :series, list_of(:metric_response),
+      description: "Metric series returned by a metrics datasource, with labels sent once per series"
+
     field :metrics, list_of(:workbench_job_activity_metric),
-      description: "Metric points returned by a metrics datasource"
+      description: "Metric points returned by a metrics datasource, one entry per point (prefer series)",
+      resolve: &Deployments.dashboard_graph_metrics/3
 
     field :logs, list_of(:workbench_job_activity_log),
       description: "Log entries returned by a logs datasource"

@@ -1490,11 +1490,11 @@ query WorkbenchJob($id: ID!) {
   }
 }
 
-query WorkbenchJobMetricsTool($id: ID!, $name: String, $arguments: Json) {
+query WorkbenchJobMetricsSeriesTool($id: ID!, $name: String, $arguments: Json) {
   workbenchJob(id: $id) {
     id
-    metricsTool(name: $name, arguments: $arguments) {
-      ...WorkbenchJobActivityMetric
+    metricsSeriesTool(name: $name, arguments: $arguments) {
+      ...MetricSeries
     }
   }
 }

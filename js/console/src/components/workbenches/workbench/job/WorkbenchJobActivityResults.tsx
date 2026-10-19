@@ -44,7 +44,7 @@ import {
 } from 'components/utils/useChartSize'
 import {
   useWorkbenchJobLogsToolQuery,
-  useWorkbenchJobMetricsToolQuery,
+  useWorkbenchJobMetricsSeriesToolQuery,
   useWorkbenchJobTracesToolQuery,
   WorkbenchJobActivityLogFragment,
   WorkbenchJobActivityMetricFragment,
@@ -66,13 +66,14 @@ import {
 } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { COLORS } from 'utils/color'
-import { formatDateTime, toDateOrUndef } from 'utils/datetime'
+import { formatDateTime } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
 import { getOldContentFromTextDiff } from 'utils/textDiff'
 import { formatUnitValue, yAxisWidth } from '../monitoring/dashboardUnits'
 import {
+  filterMetricSeriesByDuration,
   getMetricSeries,
-  metricSeriesId,
+  getMetricSeriesFromResponses,
   type MetricSeries,
 } from './workbenchJobMetrics'
 import { TraceWaterfall } from './WorkbenchJobTraces'
@@ -356,11 +357,11 @@ export const METRICS_CHART_MARGIN = {
 } as const
 
 export function JobActivityMetricsChart({
-  metrics,
+  series,
   lineProps,
   ...props
 }: {
-  metrics: WorkbenchJobActivityMetricFragment[]
+  series: MetricSeries[]
   lineProps?: Partial<
     ComponentPropsWithRef<typeof Line> &
       ComponentPropsWithRef<typeof LineCanvas>
@@ -369,25 +370,25 @@ export function JobActivityMetricsChart({
   const graphTheme = useGraphTheme()
   const [chartRef, size] = useChartSize<HTMLDivElement>()
 
-  const graphData = useMemo(() => {
-    return getMetricSeries(metrics)
-  }, [metrics])
-  const leftMargin = useMemo(() => {
+  const { leftMargin, pointCount } = useMemo(() => {
     let min = Infinity
     let max = -Infinity
-    for (const { value } of metrics) {
-      if (typeof value !== 'number') continue
-      if (value < min) min = value
-      if (value > max) max = value
+    let count = 0
+    for (const { data } of series) {
+      count += data.length
+      for (const { y } of data) {
+        if (y < min) min = y
+        if (y > max) max = y
+      }
     }
-    return yAxisWidth(min, max, null)
-  }, [metrics])
+    return { leftMargin: yAxisWidth(min, max, null), pointCount: count }
+  }, [series])
 
-  if (isEmpty(metrics)) return null
+  if (pointCount === 0) return null
 
   const sharedProps = {
     theme: graphTheme,
-    data: graphData,
+    data: series,
     colors: COLORS,
     margin: { ...METRICS_CHART_MARGIN, left: leftMargin, right: 32 },
     xScale: { type: 'time' as const, format: 'native' as const },
@@ -414,7 +415,7 @@ export function JobActivityMetricsChart({
         .join(' ')}
     >
       {ready &&
-        (metrics.length > CANVAS_THRESHOLD ? (
+        (pointCount > CANVAS_THRESHOLD ? (
           <LineCanvas
             width={size.width}
             height={size.height}
@@ -460,9 +461,9 @@ export function ExpandableJobActivityMetrics({
     ({ id }) => id === selectedSeriesId
   )
   const effectiveSelectedId = selectedSeriesIndex >= 0 ? selectedSeriesId : null
-  const visibleMetrics = effectiveSelectedId
-    ? metrics.filter((metric) => metricSeriesId(metric) === effectiveSelectedId)
-    : metrics
+  const visibleSeries = effectiveSelectedId
+    ? series.filter(({ id }) => id === effectiveSelectedId)
+    : series
 
   const close = () => {
     setOpen(false)
@@ -492,7 +493,7 @@ export function ExpandableJobActivityMetrics({
               }}
             />
           </Flex>
-          <JobActivityMetricsChart metrics={metrics} />
+          <JobActivityMetricsChart series={series} />
         </Flex>
       </MetricsPanelSC>
       <Modal
@@ -521,7 +522,7 @@ export function ExpandableJobActivityMetrics({
             gap="small"
           >
             <JobActivityMetricsChart
-              metrics={visibleMetrics}
+              series={visibleSeries}
               css={{ height: 240 }}
               lineProps={{
                 margin: { top: 10, right: 25, bottom: 30, left: 30 },
@@ -585,7 +586,7 @@ export function JobActivityMetrics({
   const shouldRunQuery =
     !!jobId && fetchWhen && hasWorkbenchMetricsToolQuery(metricsQuery)
 
-  const { data, loading, error } = useWorkbenchJobMetricsToolQuery({
+  const { data, loading, error } = useWorkbenchJobMetricsSeriesToolQuery({
     variables: {
       id: jobId,
       name: metricsQuery?.toolName?.trim(),
@@ -609,8 +610,6 @@ export function JobActivityMetrics({
       />
     )
 
-  const metrics = data?.workbenchJob?.metricsTool?.filter(isNonNullable) ?? []
-
   if (loading || !data)
     return (
       <RectangleSkeleton
@@ -619,11 +618,13 @@ export function JobActivityMetrics({
       />
     )
 
-  const visibleMetrics = filterMetricsByRange(metrics, timeRange)
+  const series = filterMetricSeriesByDuration(
+    getMetricSeriesFromResponses(data.workbenchJob?.metricsSeriesTool),
+    METRICS_RANGE_DURATION_MS[timeRange]
+  )
 
-  if (isEmpty(visibleMetrics)) return null
+  if (isEmpty(series)) return null
 
-  const series = getMetricSeries(visibleMetrics)
   const summaryText = withSummary ? metricsQuery?.summary?.trim() : undefined
   const legend = (
     <WorkbenchJobMetricsLegend
@@ -651,7 +652,7 @@ export function JobActivityMetrics({
       )}
       {withLegend && legend}
       <JobActivityMetricsChart
-        metrics={visibleMetrics}
+        series={series}
         lineProps={lineProps}
         {...props}
       />
@@ -702,31 +703,12 @@ export function MetricsRangeControl({
   )
 }
 
-function filterMetricsByRange(
-  metrics: WorkbenchJobActivityMetricFragment[],
-  range: MetricsTimeRange
-) {
-  const latest = Math.max(
-    ...metrics
-      .map((metric) => toDateOrUndef(metric.timestamp)?.getTime())
-      .filter(isNonNullable)
-  )
-
-  if (!Number.isFinite(latest)) return metrics
-
-  const durationByRange: Record<MetricsTimeRange, number> = {
-    '1h': 60 * 60 * 1_000,
-    '2h': 2 * 60 * 60 * 1_000,
-    '6h': 6 * 60 * 60 * 1_000,
-    '1d': 24 * 60 * 60 * 1_000,
-    '7d': 7 * 24 * 60 * 60 * 1_000,
-  }
-  const from = latest - durationByRange[range]
-
-  return metrics.filter((metric) => {
-    const timestamp = toDateOrUndef(metric.timestamp)?.getTime()
-    return timestamp != null && timestamp >= from
-  })
+const METRICS_RANGE_DURATION_MS: Record<MetricsTimeRange, number> = {
+  '1h': 60 * 60 * 1_000,
+  '2h': 2 * 60 * 60 * 1_000,
+  '6h': 6 * 60 * 60 * 1_000,
+  '1d': 24 * 60 * 60 * 1_000,
+  '7d': 7 * 24 * 60 * 60 * 1_000,
 }
 
 /**

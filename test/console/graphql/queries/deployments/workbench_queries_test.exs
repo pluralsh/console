@@ -3,7 +3,15 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
   use Mimic
   alias CloudQuery.Client
   alias Toolquery.ToolQuery.Stub
-  alias Toolquery.{MetricPoint, MetricsQueryOutput, TraceSpan, TracesQueryOutput}
+  alias Toolquery.{
+    MetricPoint,
+    MetricsQueryOutput,
+    MetricSample,
+    MetricSeries,
+    MetricsSeriesOutput,
+    TraceSpan,
+    TracesQueryOutput
+  }
 
   describe "workbenches" do
     test "it can fetch workbenches" do
@@ -1699,6 +1707,73 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
         "id" => job.id,
         "arguments" => Jason.encode!(%{"query" => "sum(rate(http_requests_total[5m]))", "step" => "30s"})
       }, %{current_user: admin_user()})
+    end
+
+    test "it resolves metricsSeriesTool as grouped series without non-finite samples" do
+      workbench = insert(:workbench)
+      tool = insert(:workbench_tool,
+        project: workbench.project,
+        name: "prom",
+        tool: :prometheus,
+        categories: [:metrics],
+        configuration: %{
+          prometheus: %{url: "https://prom.example.com", token: "token", tenant_id: nil}
+        }
+      )
+
+      insert(:workbench_tool_association, workbench: workbench, tool: tool)
+      job = insert(:workbench_job, workbench: workbench)
+      now = DateTime.utc_now() |> DateTime.truncate(:second)
+
+      expect(Client, :connect, fn -> {:ok, :mock_conn} end)
+      expect(Stub, :metrics_series, fn :mock_conn, input, opts ->
+        assert opts[:timeout] == :timer.seconds(30)
+        assert input.query == "sum(rate(http_requests_total[5m])) by (method)"
+        assert input.step == "30s"
+
+        {:ok,
+         %MetricsSeriesOutput{
+           series: [
+             %MetricSeries{
+               name: "http_requests_total",
+               labels: %{"method" => "GET"},
+               samples: [
+                 %MetricSample{timestamp: Google.Protobuf.from_datetime(now), value: :nan},
+                 %MetricSample{timestamp: Google.Protobuf.from_datetime(now), value: 42.5}
+               ]
+             },
+             %MetricSeries{
+               name: "http_requests_total",
+               labels: %{"method" => "POST"},
+               samples: [%MetricSample{timestamp: Google.Protobuf.from_datetime(now), value: :negative_infinity}]
+             }
+           ]
+         }}
+      end)
+
+      {:ok, %{data: %{"workbenchJob" => found}}} = run_query("""
+        query WorkbenchJob($id: ID!, $name: String!, $arguments: Json) {
+          workbenchJob(id: $id) {
+            metricsSeriesTool(name: $name, arguments: $arguments) {
+              name
+              metric
+              values { timestamp value }
+            }
+          }
+        }
+      """, %{
+        "id" => job.id,
+        "name" => "workbench_observability_metrics_prom",
+        "arguments" => Jason.encode!(%{"query" => "sum(rate(http_requests_total[5m])) by (method)", "step" => "30s"})
+      }, %{current_user: admin_user()})
+
+      assert found["metricsSeriesTool"] == [
+               %{
+                 "name" => "http_requests_total",
+                 "metric" => %{"method" => "GET"},
+                 "values" => [%{"timestamp" => "#{DateTime.to_unix(now)}", "value" => "42.5"}]
+               }
+             ]
     end
 
     test "it returns gRPC metrics errors as GraphQL errors" do

@@ -352,6 +352,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   def metrics_tool(%WorkbenchJob{} = job, %{name: name, arguments: args}, %{context: %{current_user: user}}),
     do: Toolchain.metrics(job, name, args, user)
 
+  def metrics_series_tool(%WorkbenchJob{} = job, %{name: name, arguments: args}, %{context: %{current_user: user}}),
+    do: Toolchain.metrics_series(job, name, args, user)
+
   def logs_tool(%WorkbenchJob{} = job, %{name: name, arguments: args}, %{context: %{current_user: user}}),
     do: Toolchain.logs(job, name, args, user)
 

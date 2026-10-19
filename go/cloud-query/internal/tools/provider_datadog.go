@@ -23,7 +23,7 @@ func NewDatadogProvider(conn *toolquery.DatadogConnection) *DatadogProvider {
 	return &DatadogProvider{conn: conn}
 }
 
-func (in *DatadogProvider) Metrics(ctx context.Context, input *toolquery.MetricsQueryInput) (*toolquery.MetricsQueryOutput, error) {
+func (in *DatadogProvider) MetricsSeries(ctx context.Context, input *toolquery.MetricsQueryInput) (*toolquery.MetricsSeriesOutput, error) {
 	if in.conn == nil {
 		return nil, ErrInvalidArgument
 	}
@@ -47,7 +47,7 @@ func (in *DatadogProvider) Metrics(ctx context.Context, input *toolquery.Metrics
 		return nil, err
 	}
 
-	return in.toMetricsQueryOutput(resp), nil
+	return in.toMetricsSeriesOutput(resp), nil
 }
 
 func (in *DatadogProvider) MetricsSearch(ctx context.Context, input *toolquery.MetricsSearchInput) (*toolquery.MetricsSearchOutput, error) {
@@ -109,8 +109,8 @@ func (in *DatadogProvider) MetricsLabelSearch(ctx context.Context, input *toolqu
 	return newMetricsLabelSearchOutput(values, input.GetQuery(), metricsLabelSearchLimit(input.GetLimit())), nil
 }
 
-func (in *DatadogProvider) toMetricsQueryOutput(resp datadogV1.MetricsQueryResponse) *toolquery.MetricsQueryOutput {
-	metrics := make([]*toolquery.MetricPoint, 0)
+func (in *DatadogProvider) toMetricsSeriesOutput(resp datadogV1.MetricsQueryResponse) *toolquery.MetricsSeriesOutput {
+	output := make([]*toolquery.MetricSeries, 0, len(resp.GetSeries()))
 
 	for _, series := range resp.GetSeries() {
 		labels := in.tagsToLabels(series.TagSet)
@@ -120,23 +120,29 @@ func (in *DatadogProvider) toMetricsQueryOutput(resp datadogV1.MetricsQueryRespo
 			}
 		}
 
-		metricName := series.GetMetric()
+		samples := make([]*toolquery.MetricSample, 0, len(series.Pointlist))
 		for _, pair := range series.Pointlist {
 			if len(pair) < 2 || pair[0] == nil || pair[1] == nil {
 				continue
 			}
 
-			ts := timestamppb.New(time.Unix(0, int64(*pair[0])*int64(time.Millisecond)))
-			metrics = append(metrics, &toolquery.MetricPoint{
-				Timestamp: ts,
-				Name:      metricName,
+			samples = append(samples, &toolquery.MetricSample{
+				Timestamp: timestamppb.New(time.Unix(0, int64(*pair[0])*int64(time.Millisecond))),
 				Value:     *pair[1],
-				Labels:    labels,
 			})
 		}
+		if len(samples) == 0 {
+			continue
+		}
+
+		output = append(output, &toolquery.MetricSeries{
+			Name:    series.GetMetric(),
+			Labels:  labels,
+			Samples: samples,
+		})
 	}
 
-	return &toolquery.MetricsQueryOutput{Metrics: metrics}
+	return &toolquery.MetricsSeriesOutput{Series: output}
 }
 
 func (in *DatadogProvider) Logs(ctx context.Context, input *toolquery.LogsQueryInput) (*toolquery.LogsQueryOutput, error) {

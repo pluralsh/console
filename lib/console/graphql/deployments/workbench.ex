@@ -859,6 +859,13 @@ defmodule Console.GraphQl.Deployments.Workbench do
       resolve &Deployments.metrics_tool/3
     end
 
+    field :metrics_series_tool, list_of(:metric_response) do
+      arg :name,      :string, description: "the name of the metrics tool"
+      arg :arguments, :json,   description: "the arguments for the metrics tool"
+
+      resolve &Deployments.metrics_series_tool/3
+    end
+
     field :logs_tool, list_of(:workbench_job_activity_log) do
       arg :name,      :string, description: "the name of the logs tool"
       arg :arguments, :json,   description: "the arguments for the logs tool"

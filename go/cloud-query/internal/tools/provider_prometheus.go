@@ -45,7 +45,7 @@ func (in *PrometheusProvider) newClient() (v1.API, error) {
 	return v1.NewAPI(apiClient), nil
 }
 
-func (in *PrometheusProvider) Metrics(ctx context.Context, input *toolquery.MetricsQueryInput) (*toolquery.MetricsQueryOutput, error) {
+func (in *PrometheusProvider) MetricsSeries(ctx context.Context, input *toolquery.MetricsQueryInput) (*toolquery.MetricsSeriesOutput, error) {
 	if in.conn == nil {
 		return nil, fmt.Errorf("%w: prometheus connection is required", ErrInvalidArgument)
 	}
@@ -77,7 +77,7 @@ func (in *PrometheusProvider) Metrics(ctx context.Context, input *toolquery.Metr
 		return nil, err
 	}
 
-	return in.toMetricsQueryOutput(value)
+	return in.toMetricsSeriesOutput(value)
 }
 
 func (in *PrometheusProvider) MetricsSearch(ctx context.Context, input *toolquery.MetricsSearchInput) (*toolquery.MetricsSearchOutput, error) {
@@ -200,15 +200,18 @@ func ceilTime(timestamp time.Time, step time.Duration) time.Time {
 	return time.Unix(0, nanos+step.Nanoseconds()-remainder).UTC()
 }
 
-func (in *PrometheusProvider) toMetricsQueryOutput(value model.Value) (*toolquery.MetricsQueryOutput, error) {
+func (in *PrometheusProvider) toMetricsSeriesOutput(value model.Value) (*toolquery.MetricsSeriesOutput, error) {
 	matrix, ok := value.(model.Matrix)
 	if !ok {
 		return nil, fmt.Errorf("unexpected prometheus result type %T", value)
 	}
 
-	metrics := make([]*toolquery.MetricPoint, 0)
+	output := make([]*toolquery.MetricSeries, 0, len(matrix))
 	for _, stream := range matrix {
-		name := string(stream.Metric[model.MetricNameLabel])
+		if len(stream.Values) == 0 {
+			continue
+		}
+
 		labels := make(map[string]string, len(stream.Metric))
 		for k, v := range stream.Metric {
 			if k == model.MetricNameLabel {
@@ -217,16 +220,21 @@ func (in *PrometheusProvider) toMetricsQueryOutput(value model.Value) (*toolquer
 			labels[string(k)] = string(v)
 		}
 
+		samples := make([]*toolquery.MetricSample, 0, len(stream.Values))
 		for _, sample := range stream.Values {
 			ts := time.Unix(0, int64(sample.Timestamp)*int64(time.Millisecond))
-			metrics = append(metrics, &toolquery.MetricPoint{
+			samples = append(samples, &toolquery.MetricSample{
 				Timestamp: timestamppb.New(ts),
-				Name:      name,
 				Value:     float64(sample.Value),
-				Labels:    labels,
 			})
 		}
+
+		output = append(output, &toolquery.MetricSeries{
+			Name:    string(stream.Metric[model.MetricNameLabel]),
+			Labels:  labels,
+			Samples: samples,
+		})
 	}
 
-	return &toolquery.MetricsQueryOutput{Metrics: metrics}, nil
+	return &toolquery.MetricsSeriesOutput{Series: output}, nil
 }

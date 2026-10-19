@@ -34,8 +34,8 @@ query PublicWorkbenchDashboardGraph(
   publicWorkbenchDashboard(publicId: $publicId) {
     name
     graph(identifier: $identifier, timeRange: $timeRange) {
-      metrics {
-        ...WorkbenchJobActivityMetric
+      series {
+        ...MetricSeries
       }
       logs {
         ...WorkbenchJobActivityLog

@@ -4609,6 +4609,14 @@ type WorkbenchJob {
     arguments: Json
   ): [WorkbenchJobActivityMetric]
 
+  metricsSeriesTool(
+    "the name of the metrics tool"
+    name: String
+
+    "the arguments for the metrics tool"
+    arguments: Json
+  ): [MetricResponse]
+
   logsTool(
     "the name of the logs tool"
     name: String
@@ -8919,7 +8927,10 @@ type PublicWorkbenchDashboardGraph {
 }
 
 type WorkbenchDashboardGraphResult {
-  "Metric points returned by a metrics datasource"
+  "Metric series returned by a metrics datasource, with labels sent once per series"
+  series: [MetricResponse]
+
+  "Metric points returned by a metrics datasource, one entry per point (prefer series)"
   metrics: [WorkbenchJobActivityMetric]
 
   "Log entries returned by a logs datasource"
@@ -17682,7 +17693,11 @@ type DashboardMetric {
 }
 
 type MetricResponse {
+  "the metric name, for backends that report it separately from the labels in `metric`"
+  name: String
+
   metric: Map
+
   values: [MetricResult]
 }
 

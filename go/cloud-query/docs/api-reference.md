@@ -400,6 +400,7 @@ ToolQuery uses the following clients/SDKs and endpoints for each integration:
 ```protobuf
 service ToolQuery {
   rpc Metrics(MetricsQueryInput) returns (MetricsQueryOutput) {}
+  rpc MetricsSeries(MetricsQueryInput) returns (MetricsSeriesOutput) {}
   rpc MetricsSearch(MetricsSearchInput) returns (MetricsSearchOutput) {}
   rpc MetricsLabelSearch(MetricsLabelSearchInput) returns (MetricsLabelSearchOutput) {}
   rpc Logs(LogsQueryInput) returns (LogsQueryOutput) {}
@@ -563,6 +564,22 @@ message MetricPoint {
 
 message MetricsQueryOutput {
   repeated MetricPoint metrics = 1;
+}
+
+message MetricSample {
+  google.protobuf.Timestamp timestamp = 1;
+  double value = 2;
+}
+
+// A metric series with its labels sent once rather than on every sample.
+message MetricSeries {
+  string name = 1;
+  map<string, string> labels = 2;
+  repeated MetricSample samples = 3;
+}
+
+message MetricsSeriesOutput {
+  repeated MetricSeries series = 1;
 }
 
 message MetricsSearchInput {
