@@ -187,11 +187,13 @@ func createServerOptions(
 		agent.WithVersion(Version),
 	}
 
-	if helpers.GetPluralEnvBool(controller.EnvStreamingProxy, false) {
+	run := new(v1.AgentRun).FromAgentRunFragment(agentRun)
+	// Both proxies send the deploy token, so a run that doesn't use the Console AI proxy must not get them.
+	if run.IsStreamingProxyEnabled() {
 		opts = append(opts, agent.WithOpenAIProxy(args.ConsoleURL()+"/ext/ai/v1/chat/completions", args.ConsoleURL()+"/ext/ai/v1/responses", args.DeployToken))
 	}
 	// The AI proxy accepts the deploy token of a cluster with an agent runtime, which doesn't expire like the user token.
-	if new(v1.AgentRun).FromAgentRunFragment(agentRun).IsProxyEnabled() {
+	if run.IsProxyEnabled() {
 		opts = append(opts, agent.WithConsoleAIProxy(args.ConsoleURL()+"/ext/ai", args.DeployToken))
 	}
 	opts = append(opts, agent.WithConsoleExtProxy(args.ConsoleExtApiURL(), args.DeployToken, args.AgentRunID()))

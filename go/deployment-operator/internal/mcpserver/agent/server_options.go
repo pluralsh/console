@@ -2,6 +2,7 @@ package agent
 
 import (
 	"net/http"
+	"strings"
 
 	"k8s.io/klog/v2"
 
@@ -39,6 +40,10 @@ func WithVersion(version string) Option {
 // authenticating with the deploy token instead of the caller's.
 func WithOpenAIProxy(chatCompletionsURL, responsesURL string, token func() string) Option {
 	return func(s *Server) {
+		if token == nil || strings.TrimSpace(token()) == "" {
+			klog.Fatalf("openai proxy requires a token")
+		}
+
 		if chatCompletionsURL != "" {
 			handler, err := openaiproxy.NewHandler(openaiproxy.Config{UpstreamURL: chatCompletionsURL})
 			if err != nil {
