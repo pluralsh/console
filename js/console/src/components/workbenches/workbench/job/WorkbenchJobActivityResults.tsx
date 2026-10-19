@@ -14,7 +14,6 @@ import {
   Modal,
   NotebookIcon,
   useCopyText,
-  useResizeObserver,
   WrapWithIf,
 } from '@pluralsh/design-system'
 import {
@@ -30,14 +29,19 @@ import {
 } from 'components/ai/chatbot/ToolCallContent'
 import { LogLine } from 'components/cd/logs/LogLine'
 import { GqlError } from 'components/utils/Alert'
-import { SeriesSliceTooltip, SliceTooltip } from 'components/utils/ChartTooltip'
+import { SliceTooltip } from 'components/utils/ChartTooltip'
 import { dateFormat, useGraphTheme } from 'components/utils/Graph'
 import {
   GraphLegend,
   type GraphLegendLayout,
 } from 'components/utils/GraphLegend'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
+import { SliceHover } from 'components/utils/SliceHover'
 import { Body1P, Body2P, CaptionP } from 'components/utils/typography/Text'
+import {
+  CHART_REPLAY_BLOCK_CLASS,
+  useChartSize,
+} from 'components/utils/useChartSize'
 import {
   useWorkbenchJobLogsToolQuery,
   useWorkbenchJobMetricsToolQuery,
@@ -363,16 +367,7 @@ export function JobActivityMetricsChart({
   >
 } & ComponentPropsWithRef<typeof MetricsChartSC>) {
   const graphTheme = useGraphTheme()
-  const chartRef = useRef<HTMLDivElement>(null)
-  const [size, setSize] = useState({ width: 0, height: 0 })
-
-  useResizeObserver(chartRef, (rect) => {
-    const width = Math.floor(rect.width)
-    const height = Math.floor(rect.height)
-    setSize((prev) =>
-      prev.width === width && prev.height === height ? prev : { width, height }
-    )
-  })
+  const [chartRef, size] = useChartSize<HTMLDivElement>()
 
   const graphData = useMemo(() => {
     return getMetricSeries(metrics)
@@ -414,6 +409,9 @@ export function JobActivityMetricsChart({
     <MetricsChartSC
       ref={chartRef}
       {...props}
+      className={[CHART_REPLAY_BLOCK_CLASS, props.className]
+        .filter(Boolean)
+        .join(' ')}
     >
       {ready &&
         (metrics.length > CANVAS_THRESHOLD ? (
@@ -428,10 +426,18 @@ export function JobActivityMetricsChart({
             width={size.width}
             height={size.height}
             {...sharedProps}
-            // one hover target per timestamp rather than a Delaunay mesh over
-            // every point of every series
+            // hover by timestamp rather than a Delaunay mesh over every point
+            // of every series; SliceHover renders the hover target
             enableSlices="x"
-            sliceTooltip={SeriesSliceTooltip}
+            layers={[
+              'grid',
+              'markers',
+              'axes',
+              'areas',
+              'crosshair',
+              'lines',
+              SliceHover,
+            ]}
             {...lineProps}
           />
         ))}
