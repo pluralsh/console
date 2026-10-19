@@ -326,6 +326,20 @@ func (ar *AgentRun) IsProxyEnabled() bool {
 	return ar.Runtime.AiProxy
 }
 
+// UsesConsoleAIProxy reports whether the agent's model calls go to the Console AI proxy, which the
+// sidecar serves. OpenCode falls back to the Plural provider when none is set, even with aiProxy off.
+func (ar *AgentRun) UsesConsoleAIProxy() bool {
+	if ar.IsProxyEnabled() {
+		return true
+	}
+	if ar == nil || ar.Runtime == nil || ar.Runtime.Config == nil || ar.Runtime.Config.OpenCode == nil {
+		return false
+	}
+
+	openCode := ar.Runtime.Config.OpenCode
+	return !openCode.OpenAICompatible && (openCode.Provider == "" || openCode.Provider == "plural")
+}
+
 func (ar *AgentRun) IsStreamingProxyEnabled() bool {
 	return ar.IsProxyEnabled() && ar.Runtime != nil && ar.Runtime.StreamingProxy
 }

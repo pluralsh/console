@@ -193,7 +193,7 @@ func createServerOptions(
 		opts = append(opts, agent.WithOpenAIProxy(args.ConsoleURL()+"/ext/ai/v1/chat/completions", args.ConsoleURL()+"/ext/ai/v1/responses", args.DeployToken))
 	}
 	// The AI proxy accepts the deploy token of a cluster with an agent runtime, which doesn't expire like the user token.
-	if run.IsProxyEnabled() {
+	if run.UsesConsoleAIProxy() {
 		opts = append(opts, agent.WithConsoleAIProxy(args.ConsoleURL()+"/ext/ai", args.DeployToken))
 	}
 	opts = append(opts, agent.WithConsoleExtProxy(args.ConsoleExtApiURL(), args.DeployToken, args.AgentRunID()))
