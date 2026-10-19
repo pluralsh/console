@@ -20,7 +20,7 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.TransitionRecord do
 
   def description(%__MODULE__{tool: %WorkbenchTool{name: name}}),
     do:
-      "Move a ServiceNow ticket to another state using the #{name} connection. The target state is checked against list_states when ServiceNow reports them, and a rejection by ServiceNow (for example a missing close_code or close_notes when resolving an incident) is returned as is. Pass the fields the transition needs in fields."
+      "Move a ServiceNow ticket to another state using the #{name} connection. The target state is checked against list_states when ServiceNow reports them, and a rejection by ServiceNow (for example a missing close_code or close_notes when resolving an incident) is returned as is. Pass the fields the transition needs in fields. Resolution codes differ per instance, read the valid close_code values with list_states and its field argument first."
 
   def json_schema(%__MODULE__{}), do: @json_schema
 

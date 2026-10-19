@@ -56,6 +56,7 @@ Plural does not check timestamps, so a captured request could be replayed.
 * **Four tables only.** Records from any other table are acknowledged and ignored.
 * **Links must be http(s).** A `url` or `instance_url` with any other scheme is dropped, and the issue is created without a link.
 * **Custom states map by label.** Send `state` as a `{value, display_value}` pair. A custom label that Plural does not recognize shows the ticket as open.
+* **Tickets without a matching trigger are dropped.** If no workbench trigger matches the ticket title and description, Plural does not store the ticket and the request answers `{"ignored": true}` with status 200. The same answer comes back for records from other tables and for payloads Plural cannot read.
 * **Delivery is one-shot.** `executeAsync` does not retry, so a failed request is not redelivered. Use a scheduled job in ServiceNow if you need reconciliation.
 * **No deletes.** A deleted ticket is not removed from Plural.
 

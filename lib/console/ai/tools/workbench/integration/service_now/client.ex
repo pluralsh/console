@@ -17,6 +17,8 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.Client do
   @sys_id ~r/\A[0-9a-f]{32}\z/i
   # record numbers are interpolated into an encoded query, so `^` and `=` must never get through
   @number ~r/\A[A-Za-z0-9_-]+\z/
+  # column names are interpolated into an encoded query as well
+  @field ~r/\A[a-z][a-z0-9_]*\z/
 
   @type t :: %{
           base_url: String.t(),
@@ -130,14 +132,29 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.Client do
   the `task` choices are used.
   """
   @spec state_choices(t, String.t()) :: {:ok, [map()]} | {:error, String.t()}
-  def state_choices(client, table) do
-    with {:ok, []} <- choices(client, table),
-         do: choices(client, "task")
-  end
+  def state_choices(client, table), do: field_choices(client, table, "state")
 
-  defp choices(client, name) do
+  @doc """
+  Lists the choices of any choice field of a ticket table, for example the resolution code
+  `close_code`. Values differ per instance, so they have to be read, not guessed. A table without
+  choices of its own uses the ones of `task`, as ServiceNow does. The field name is interpolated
+  into an encoded query, so only plain column names are accepted.
+  """
+  @spec field_choices(t, String.t(), String.t()) :: {:ok, [map()]} | {:error, String.t()}
+  def field_choices(client, table, field) when is_binary(field) do
+    case Regex.match?(@field, field) do
+      true ->
+        with {:ok, []} <- choices(client, table, field),
+             do: choices(client, "task", field)
+      false ->
+        {:error, "ServiceNow field must be a plain column name, got #{inspect(field)}."}
+    end
+  end
+  def field_choices(_, _, field), do: {:error, "ServiceNow field must be a plain column name, got #{inspect(field)}."}
+
+  defp choices(client, name, field) do
     query = %{
-      sysparm_query: "name=#{name}^element=state^inactive=false^language=en^ORDERBYsequence",
+      sysparm_query: "name=#{name}^element=#{field}^inactive=false^language=en^ORDERBYsequence",
       sysparm_fields: "value,label,sequence",
       sysparm_limit: 100
     }

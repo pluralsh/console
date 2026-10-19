@@ -23,7 +23,7 @@
     "fields": {
       "type": "object",
       "additionalProperties": true,
-      "description": "Extra fields the transition needs, for example {\"close_code\": \"Solved (Permanently)\", \"close_notes\": \"...\"} to resolve an incident, or {\"close_code\": \"successful\", \"close_notes\": \"...\"} to close a change."
+      "description": "Extra fields the transition needs, for example {\"close_code\": \"<a valid code>\", \"close_notes\": \"...\"} to resolve an incident, or {\"close_code\": \"successful\", \"close_notes\": \"...\"} to close a change. The valid close_code values of an incident differ per instance, list them with list_states and field close_code first, because ServiceNow ignores a value that is not one of them and then reports the code as missing."
     }
   },
   "required": [
