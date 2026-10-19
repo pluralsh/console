@@ -3,12 +3,13 @@ import {
   ReturnIcon,
   Table,
   useSetBreadcrumbs,
-  Flex,
   Button,
   CopyIcon,
   AiSparkleFilledIcon,
 } from '@pluralsh/design-system'
 import { ColExpander } from 'components/cd/cluster/pod/PodContainers'
+import { PageColumnSC } from 'components/layout/PageLayout'
+import { PageToolbar } from 'components/layout/PageToolbar'
 import { GqlError } from 'components/utils/Alert'
 import { StackedText } from 'components/utils/table/StackedText'
 import pluralize from 'pluralize'
@@ -126,78 +127,87 @@ export function VulnerabilityReportDetails() {
   if (error) return <GqlError error={error} />
 
   return (
-    <WrapperSC>
-      <HeaderSC>
-        <StackedText
-          loading={loading && !data}
-          first={data?.vulnerabilityReport?.artifactUrl}
-          firstPartialType="body2Bold"
-          second={
-            flowData
-              ? `flow: ${flowData.flow?.name ?? ''}`
-              : `cluster: ${cluster?.name} (${cluster?.handle})`
-          }
-          icon={
-            <IconFrame
-              as={Link}
-              size="large"
-              clickable
-              type="secondary"
-              to={getVulnerabilityReportsPath({ clusterId, flowIdOrName })}
-              tooltip={`Return to ${flowIdOrName ? 'flow' : 'security'}`}
-              icon={<ReturnIcon />}
-              style={{ flexShrink: 0 }}
-            />
-          }
-          css={{ minWidth: 0, flex: 1 }}
-        />
+    <PageColumnSC>
+      <PageToolbar
+        start={
+          <StackedText
+            truncate
+            loading={loading && !data}
+            first={data?.vulnerabilityReport?.artifactUrl}
+            firstPartialType="body2Bold"
+            second={
+              flowData
+                ? `flow: ${flowData.flow?.name ?? ''}`
+                : `cluster: ${cluster?.name} (${cluster?.handle})`
+            }
+            icon={
+              <IconFrame
+                as={Link}
+                size="small"
+                clickable
+                type="secondary"
+                to={getVulnerabilityReportsPath({ clusterId, flowIdOrName })}
+                tooltip={`Return to ${flowIdOrName ? 'flow' : 'security'}`}
+                icon={<ReturnIcon />}
+                style={{ flexShrink: 0 }}
+              />
+            }
+            css={{ minWidth: 0, flex: 1 }}
+          />
+        }
+      >
         <Button
+          small
           {...(bulkSelectMode
             ? { secondary: true }
-            : { floating: true, startIcon: <CopyIcon size={16} /> })}
+            : { floating: true, startIcon: <CopyIcon size={12} /> })}
           onClick={() =>
             bulkSelectMode ? exitBulkSelectMode() : setBulkSelectMode(true)
           }
         >
           {bulkSelectMode ? 'Exit selection' : 'Bulk select'}
         </Button>
-      </HeaderSC>
-      <TableWrapperSC>
-        <Table
-          key={bulkSelectMode ? 'bulk-select' : 'default'}
-          fullHeightWrap
-          virtualizeRows
-          data={vulnerabilities}
-          columns={columns}
-          loading={loading && !data}
-          getRowCanExpand={() => true}
-          renderExpanded={({ row }) => <VulnDetailExpanded row={row} />}
-          onRowClick={(_, row) => row.getToggleExpandedHandler()()}
-          emptyStateProps={{ message: 'No vulnerabilities found.' }}
-          expandedBgColor="fill-zero"
-          expandedRowType="custom"
-          reactTableOptions={{
-            enableRowSelection: bulkSelectMode,
-            enableMultiRowSelection: true,
-            onRowSelectionChange: setRowSelection,
-            onExpandedChange: setExpanded,
-            state: { rowSelection, expanded },
-          }}
-        />
-        {bulkSelectMode && (
-          <BulkSelectionBarSC>
-            <SelectionCountSC>{selectedVulns.length} selected</SelectionCountSC>
-            <Button
-              small
-              startIcon={<AiSparkleFilledIcon />}
-              disabled={selectedVulns.length === 0 || !!fixVulns}
-              onClick={() => openFix(selectedVulns)}
-            >
-              Fix {pluralize('vulnerability', selectedVulns.length)}
-            </Button>
-          </BulkSelectionBarSC>
-        )}
-      </TableWrapperSC>
+      </PageToolbar>
+      <WrapperSC>
+        <TableWrapperSC>
+          <Table
+            key={bulkSelectMode ? 'bulk-select' : 'default'}
+            fullHeightWrap
+            virtualizeRows
+            data={vulnerabilities}
+            columns={columns}
+            loading={loading && !data}
+            getRowCanExpand={() => true}
+            renderExpanded={({ row }) => <VulnDetailExpanded row={row} />}
+            onRowClick={(_, row) => row.getToggleExpandedHandler()()}
+            emptyStateProps={{ message: 'No vulnerabilities found.' }}
+            expandedBgColor="fill-zero"
+            expandedRowType="custom"
+            reactTableOptions={{
+              enableRowSelection: bulkSelectMode,
+              enableMultiRowSelection: true,
+              onRowSelectionChange: setRowSelection,
+              onExpandedChange: setExpanded,
+              state: { rowSelection, expanded },
+            }}
+          />
+          {bulkSelectMode && (
+            <BulkSelectionBarSC>
+              <SelectionCountSC>
+                {selectedVulns.length} selected
+              </SelectionCountSC>
+              <Button
+                small
+                startIcon={<AiSparkleFilledIcon />}
+                disabled={selectedVulns.length === 0 || !!fixVulns}
+                onClick={() => openFix(selectedVulns)}
+              >
+                Fix {pluralize('vulnerability', selectedVulns.length)}
+              </Button>
+            </BulkSelectionBarSC>
+          )}
+        </TableWrapperSC>
+      </WrapperSC>
       {fixVulns && (
         <VulnFixModal
           open
@@ -207,15 +217,9 @@ export function VulnerabilityReportDetails() {
           flowId={flowData?.flow?.id}
         />
       )}
-    </WrapperSC>
+    </PageColumnSC>
   )
 }
-
-const HeaderSC = styled(Flex)(({ theme }) => ({
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  gap: theme.spacing.medium,
-}))
 
 const TableWrapperSC = styled.div(() => ({
   position: 'relative',
@@ -253,11 +257,11 @@ const SelectionCountSC = styled.span(({ theme }) => ({
 const WrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing.small,
-  height: '100%',
+  flex: 1,
+  minHeight: 0,
   width: '100%',
   maxWidth: 1280,
-  margin: 'auto',
+  margin: '0 auto',
   overflow: 'hidden',
-  padding: `${theme.spacing.large}px ${theme.spacing.xxlarge}px`,
+  padding: theme.spacing.large,
 }))

@@ -76,6 +76,8 @@ export function getPolicyEvalToolName(input?: PolicyEvalMap | null): string {
       asString(get(tool, 'name')),
       asString(tool),
       asString(rec?.run_type),
+      asString(get(rec, 'trigger.source')),
+      asString(rec?.stage),
       getPolicyEvalTarget(rec),
     ]) ?? 'Evaluation'
   )

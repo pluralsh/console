@@ -1,4 +1,5 @@
-import { EmptyState, Flex } from '@pluralsh/design-system'
+import { Flex } from '@pluralsh/design-system'
+import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import { TimeRangeControl } from 'components/utils/timerange/TimeRangeControl'
 import {
   DEFAULT_TIME_RANGE,
@@ -38,7 +39,10 @@ export function PublicWorkbenchDashboard() {
   if (error || !dashboard)
     return (
       <PageSC>
-        <EmptyState message="This dashboard isn't available" />
+        <WorkbenchEmptyState
+          message="Dashboard unavailable"
+          description="This link may have expired, or the dashboard is no longer shared publicly."
+        />
       </PageSC>
     )
 

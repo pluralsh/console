@@ -1,5 +1,6 @@
 import { ResponsiveLine, type LineCustomSvgLayerProps } from '@nivo/line'
 import { Card, Flex, ProgressBar } from '@pluralsh/design-system'
+import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 import { ChartTooltip } from 'components/utils/ChartTooltip'
 import { ButtonGroup } from 'components/utils/ButtonGroup'
 import { useChartTheme } from 'components/utils/charts'
@@ -59,6 +60,18 @@ export function WorkbenchesUsage() {
   )
   const totals = useMemo(() => deriveTotals(entries), [entries])
 
+  useSetPageHeaderContent(
+    useMemo(
+      () => (
+        <RangeButtonGroup
+          range={range}
+          setRange={setRange}
+        />
+      ),
+      [range]
+    )
+  )
+
   if (error) return <GqlError error={error} />
 
   return (
@@ -98,12 +111,6 @@ export function WorkbenchesUsage() {
       <WorkbenchGraphCard
         title="Token & cost usage"
         hint="Aggregated across all workbenches. Cost is estimated from token counts."
-        rightContent={
-          <RangeButtonGroup
-            range={range}
-            setRange={setRange}
-          />
-        }
         loading={loading}
         minContentHeight={layout.graphMinHeight}
       >
@@ -146,8 +153,6 @@ export function WorkbenchesUsage() {
       </WorkbenchGraphCard>
       <UsageByWorkbenchCard
         entries={entries}
-        range={range}
-        setRange={setRange}
         loading={loading}
       />
     </Flex>
@@ -365,13 +370,9 @@ function UsageLineChart({
 
 function UsageByWorkbenchCard({
   entries,
-  range,
-  setRange,
   loading,
 }: {
   entries: UsageEntry[]
-  range: UsageRangeOption
-  setRange: (range: UsageRangeOption) => void
   loading: boolean
 }) {
   const theme = useTheme()
@@ -395,12 +396,6 @@ function UsageByWorkbenchCard({
         </CaptionP>
       }
       minContentHeight={layout.summaryCardMinHeight}
-      rightContent={
-        <RangeButtonGroup
-          range={range}
-          setRange={setRange}
-        />
-      }
       loading={loading}
     >
       {hasData ? (

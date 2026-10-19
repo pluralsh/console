@@ -17,12 +17,12 @@ export const semanticColorsLight = {
   'fill-zero': '#FFFFFF',
   'fill-zero-raised': grey[25],
   'fill-zero-hover': grey[40],
-  'fill-zero-selected': grey[45],
+  'fill-zero-selected': grey[30],
   // fill-one
   'fill-one': '#FFFFFF',
   'fill-one-raised': grey[25],
   'fill-one-hover': grey[40],
-  'fill-one-selected': grey[45],
+  'fill-one-selected': grey[30],
   // fill-two
   'fill-two': grey[30],
   'fill-two-raised': grey[30],

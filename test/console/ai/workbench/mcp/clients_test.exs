@@ -4,6 +4,9 @@ defmodule Console.AI.Workbench.MCP.ClientsTest do
   alias Console.AI.Workbench.MCP.Clients
   alias Console.Schema.{McpServer, WorkbenchTool}
 
+  # stopping a client closes its transport, which can outlast assert_receive's default
+  @stop_timeout :timer.seconds(5)
+
   setup do
     on_exit(fn ->
       for {_, pid, _, _} <- DynamicSupervisor.which_children(Clients),
@@ -45,7 +48,7 @@ defmodule Console.AI.Workbench.MCP.ClientsTest do
       {:ok, server} = McpServer.changeset(server, %{url: "http://localhost:3002/mcp"}) |> Repo.update()
       {:ok, replacement} = Clients.ensure_started(%{tool | mcp_server: server})
 
-      assert_receive {:DOWN, ^ref, :process, ^pid, _}
+      assert_receive {:DOWN, ^ref, :process, ^pid, _}, @stop_timeout
       refute replacement == pid
     end
 
@@ -75,9 +78,10 @@ defmodule Console.AI.Workbench.MCP.ClientsTest do
       :sys.replace_state(pid, fn state -> %{state | used: state.used - :timer.hours(1)} end)
       send(pid, :check)
 
-      assert_receive {:DOWN, ^ref, :process, ^pid, :normal}
-      assert_receive {:DOWN, ^client_ref, :process, ^client, _}
-      assert DynamicSupervisor.which_children(Clients) == []
+      assert_receive {:DOWN, ^ref, :process, ^pid, :normal}, @stop_timeout
+      assert_receive {:DOWN, ^client_ref, :process, ^client, _}, @stop_timeout
+      # our DOWN can arrive before the supervisor has handled the worker's EXIT
+      assert child_removed?(pid)
 
       {:ok, fresh} = Clients.ensure_started(tool)
       refute fresh == pid
@@ -111,4 +115,20 @@ defmodule Console.AI.Workbench.MCP.ClientsTest do
       assert claims["sub"] == Console.Services.Users.get_bot!("console").email
     end
   end
+
+  # Clients is app-wide, so clients other modules started (eg workbench engine runs) can
+  # still be supervised here; only this worker's removal matters
+  defp child_removed?(pid, attempts \\ 50)
+  defp child_removed?(pid, 0), do: not supervised?(pid)
+  defp child_removed?(pid, attempts) do
+    case supervised?(pid) do
+      false -> true
+      true ->
+        Process.sleep(20)
+        child_removed?(pid, attempts - 1)
+    end
+  end
+
+  defp supervised?(pid),
+    do: Enum.any?(DynamicSupervisor.which_children(Clients), &match?({_, ^pid, _, _}, &1))
 end

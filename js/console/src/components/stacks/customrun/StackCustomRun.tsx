@@ -10,6 +10,7 @@ export default function StackCustomRun({ stackId }: { stackId: string }) {
     <>
       <Button
         secondary
+        small
         onClick={() => setIsOpen(true)}
       >
         Custom run

@@ -12,16 +12,11 @@ export const TriggerCardSC = styled.div(({ theme }) => ({
   backgroundColor: theme.colors['fill-zero'],
 }))
 
-export const TriggerCardIconWrapperSC = styled.div(({ theme }) => ({
-  width: 36,
-  height: 36,
-  minWidth: 36,
+export const TriggerCardIconWrapperSC = styled.div({
   display: 'flex',
   alignItems: 'center',
-  justifyContent: 'center',
-  borderRadius: '50%',
-  border: theme.borders.input,
-}))
+  flexShrink: 0,
+})
 
 export const TriggerAccordionSC = styled(Accordion)({
   background: 'none',

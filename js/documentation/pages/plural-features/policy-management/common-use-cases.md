@@ -1,6 +1,6 @@
 ---
 title: Common policy use cases
-description: Patterns for governing workbench tools and infrastructure stack approvals
+description: Patterns for governing workbench tools, stack run creation, and infrastructure stack approvals
 ---
 
 Policies are most useful when they encode a narrow, explainable rule around a high-impact operation. Start with guardrails that can be evaluated from explicit input fields, then expand coverage as you observe real evaluations in the simulator.
@@ -48,16 +48,28 @@ Use binding policies to attach these guardrails automatically based on workbench
 
 ## Stack policies
 
+### Prevent runs from starting
+
+Attach the policy at the **Run** stage so a denial blocks run creation. Git and pull-request polls do not consume the detected SHA when denied, which lets freeze windows retry after they reopen.
+
+Examples include:
+
+- Blocking production applies during a weekend or holiday freeze
+- Rejecting runs from blocked committers such as Dependabot
+- Requiring variables, environment names, or files before a run is created
+- Allowing destroy or dry-run operations while freezing normal applies
+
+Use `input.stage == "run"` together with `input.now`, `input.commit`, `input.variables`, and `input.trigger.source`.
+
 ### Enforce change-management requirements
 
-Inspect the actor, stack, commit, run type, and plan to require the evidence your organization expects before infrastructure changes proceed.
+Inspect the actor, stack, commit, run type, and plan to require the evidence your organization expects before infrastructure changes proceed. Attach these rules at the **Approval** stage when they depend on plan contents.
 
 Examples include:
 
 - Rejecting production applies without an approved change reference
 - Restricting destroy runs to a designated operations group
 - Requiring sensitive stacks to follow a specific repository or branch workflow
-- Blocking changes during a freeze window when the required context is present in policy input
 
 ### Streamline approval of known-safe plans
 

@@ -42,6 +42,7 @@ export function ImportGit() {
     <>
       <Button
         primary
+        small
         onClick={() => setIsOpen(true)}
       >
         Import Git

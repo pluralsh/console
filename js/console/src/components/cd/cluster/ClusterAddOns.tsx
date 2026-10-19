@@ -1,4 +1,9 @@
-import { Flex, Tab, TabList } from '@pluralsh/design-system'
+import {
+  PageSidebarHeaderSC,
+  PageSidebarSC,
+} from 'components/layout/PageLayout'
+import { ToolbarTabs } from 'components/layout/PageToolbar'
+import { Body2BoldP } from 'components/utils/typography/Text'
 import {
   CloudAddonFragment,
   ClusterDistro,
@@ -7,7 +12,7 @@ import {
   useRuntimeServicesQuery,
 } from 'generated/graphql'
 import { isEmpty } from 'lodash'
-import { useLayoutEffect, useMemo, useRef } from 'react'
+import { useLayoutEffect, useMemo } from 'react'
 import {
   Outlet,
   useMatch,
@@ -15,7 +20,7 @@ import {
   useOutletContext,
   useParams,
 } from 'react-router-dom'
-import { useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import {
   CLUSTER_ADDONS_PARAM_ID,
@@ -27,11 +32,10 @@ import {
   getClusterDetailsPath,
 } from '../../../routes/cdRoutesConsts'
 import { GqlError } from '../../utils/Alert'
-import { LinkTabWrap } from '../../utils/Tabs'
 import { getClusterKubeVersion } from '../clusters/runtime/RuntimeServices'
 
 import { POLL_INTERVAL } from '../ContinuousDeployment'
-import { useClusterContext } from './Cluster.tsx'
+import { ClusterSidebarPortal, useClusterContext } from './Cluster.tsx'
 import ClusterAddOnsEntry from './ClusterAddOnsEntry'
 
 export type AddonContextType = {
@@ -54,7 +58,6 @@ export default function ClusterAddOns() {
   const navigate = useNavigate()
   const { cluster, clusterLoading } = useClusterContext()
   const kubeVersion = getClusterKubeVersion(cluster) ?? ''
-  const tabStateRef = useRef<any>(null)
   const params = useParams()
   const addOnId = params[CLUSTER_ADDONS_PARAM_ID] as string
   const clusterId = params[CLUSTER_PARAM_ID] as string
@@ -114,99 +117,74 @@ export default function ClusterAddOns() {
   if (error) return <GqlError error={error} />
 
   return (
-    <Flex
-      height="100%"
-      width="100%"
-      overflow="hidden"
-      gap="medium"
-    >
-      <div
-        css={{
-          height: '100%',
-          maxWidth: 320,
-          minWidth: 320,
-          overflow: 'hidden',
-        }}
-      >
-        {supportsCloudAddons && (
-          <TabList
-            stateRef={tabStateRef}
-            stateProps={{
-              orientation: 'horizontal',
-              selectedKey: currentTab?.path,
-            }}
-          >
-            {directory.map(({ path, label }) => (
-              <LinkTabWrap
-                key={path}
-                textValue={label}
-                to={path}
-                css={{ width: '100%' }}
-              >
-                <Tab key={path}>
-                  <div css={{ textAlign: 'center', width: '100%' }}>
-                    {label}
-                  </div>
-                </Tab>
-              </LinkTabWrap>
-            ))}
-          </TabList>
-        )}
-        <div
-          css={{
-            borderTop: supportsCloudAddons ? undefined : theme.borders.default,
-            flexShrink: 0,
-            overflowY: 'auto',
-            height: '100%',
-          }}
-        >
-          {!isEmpty(addOns) ? (
-            addOns.map((addon: RuntimeServiceFragment | CloudAddonFragment) => (
-              <ClusterAddOnsEntry
-                key={addon.id}
-                id={addon.id}
-                name={addon.name}
-                icon={
-                  addon.__typename === 'RuntimeService'
-                    ? addon.addon?.icon
-                    : undefined
-                }
-                blocking={
-                  addon.__typename === 'RuntimeService'
-                    ? addon.addonVersion?.blocking
-                    : addon.__typename === 'CloudAddon'
-                      ? addon.versionInfo?.blocking
-                      : undefined
-                }
-                active={addon.id === addOnId}
-                cloudAddon={addon.__typename === 'CloudAddon'}
-                loading={loading}
+    <>
+      <ClusterSidebarPortal>
+        <PageSidebarSC $width={320}>
+          <PageSidebarHeaderSC>
+            {supportsCloudAddons ? (
+              <ToolbarTabs
+                directory={directory}
+                activeFn={(path) => path === currentTab?.path}
               />
-            ))
-          ) : isLoading ? (
-            Array.from({ length: 5 }).map((_, index) => (
-              <ClusterAddOnsEntry
-                loading
-                key={index}
-                id={`x`.repeat(index)}
-                name=""
-                active={index === 0}
-                cloudAddon={isCloudAddon}
-              />
-            ))
-          ) : (
-            <div
-              css={{
-                border: theme.borders.default,
-                borderTop: 'none',
-                padding: theme.spacing.xlarge,
-                textAlign: 'center',
-              }}
-            >{`No ${isCloudAddon ? 'cloud ' : ''}add-ons found.`}</div>
-          )}
-        </div>
-      </div>
+            ) : (
+              <Body2BoldP>Add-ons</Body2BoldP>
+            )}
+          </PageSidebarHeaderSC>
+          <ListSC>
+            {!isEmpty(addOns) ? (
+              addOns.map(
+                (addon: RuntimeServiceFragment | CloudAddonFragment) => (
+                  <ClusterAddOnsEntry
+                    key={addon.id}
+                    id={addon.id}
+                    name={addon.name}
+                    icon={
+                      addon.__typename === 'RuntimeService'
+                        ? addon.addon?.icon
+                        : undefined
+                    }
+                    blocking={
+                      addon.__typename === 'RuntimeService'
+                        ? addon.addonVersion?.blocking
+                        : addon.__typename === 'CloudAddon'
+                          ? addon.versionInfo?.blocking
+                          : undefined
+                    }
+                    active={addon.id === addOnId}
+                    cloudAddon={addon.__typename === 'CloudAddon'}
+                    loading={loading}
+                  />
+                )
+              )
+            ) : isLoading ? (
+              Array.from({ length: 5 }).map((_, index) => (
+                <ClusterAddOnsEntry
+                  loading
+                  key={index}
+                  id={`x`.repeat(index)}
+                  name=""
+                  active={index === 0}
+                  cloudAddon={isCloudAddon}
+                />
+              ))
+            ) : (
+              <div
+                css={{
+                  padding: theme.spacing.xlarge,
+                  textAlign: 'center',
+                }}
+              >{`No ${isCloudAddon ? 'cloud ' : ''}add-ons found.`}</div>
+            )}
+          </ListSC>
+        </PageSidebarSC>
+      </ClusterSidebarPortal>
       <Outlet context={context} />
-    </Flex>
+    </>
   )
 }
+
+const ListSC = styled.div({
+  flex: 1,
+  minHeight: 0,
+  overflowY: 'auto',
+})

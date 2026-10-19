@@ -1,14 +1,12 @@
 import {
   Button,
   EmptyState,
-  Flex,
   SidePanelOpenIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
+import { PageToolbarPortal } from 'components/layout/PageToolbar'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
-import { StackedTextSC } from 'components/utils/table/StackedText'
 import { useWebhookSetupGuidePanel } from 'components/workbenches/workbench/webhooks/WebhookSetupGuidePanel'
 import { useChatProviderConnectionQuery } from 'generated/graphql'
 import { useEffect, useEffectEvent, useMemo } from 'react'
@@ -18,14 +16,12 @@ import {
   CHATBOTS_SETTINGS_CHATBOT_ID_PARAM_ID,
   getChatbotsSettingsEditAbsPath,
 } from 'routes/settingsRoutesConst'
-import { useTheme } from 'styled-components'
-import { SETTINGS_BREADCRUMBS } from '../Settings'
+import { SETTINGS_BREADCRUMBS, SettingsDescription } from '../Settings'
 import { ChatbotConnectionForm } from './ChatbotConnectionForm'
 import { chatbotSetupGuide } from './chatbotSetupGuide'
 
 export function ChatbotEditSettings() {
   const navigate = useNavigate()
-  const theme = useTheme()
   const params = useParams()
   const chatbotId = params[CHATBOTS_SETTINGS_CHATBOT_ID_PARAM_ID]
   const { isOpen, openSetupGuidePanel, closeSetupGuidePanel } =
@@ -53,35 +49,6 @@ export function ChatbotEditSettings() {
       [editPath]
     )
   )
-  useSetPageHeaderContent(
-    useMemo(
-      () => (
-        <Flex justifyContent="space-between">
-          <StackedTextSC>
-            <span
-              css={{
-                ...theme.partials.text.body2,
-                color: theme.colors['text-light'],
-              }}
-            >
-              Edit chatbot integration credentials and access policy.
-            </span>
-          </StackedTextSC>
-          {!isOpen && (
-            <Button
-              secondary
-              startIcon={<SidePanelOpenIcon />}
-              onClick={() => openSetupGuidePanel(setupGuide)}
-              css={{ whiteSpace: 'nowrap' }}
-            >
-              Setup guide
-            </Button>
-          )}
-        </Flex>
-      ),
-      [isOpen, openSetupGuidePanel, setupGuide, theme]
-    )
-  )
 
   const onUnmount = useEffectEvent(() => {
     if (isOpen) closeSetupGuidePanel()
@@ -94,16 +61,36 @@ export function ChatbotEditSettings() {
     openSetupGuidePanel(setupGuide)
   }, [isOpen, openSetupGuidePanel, setupGuide])
 
-  if (error) return <GqlError error={error} />
-  if (loading && !chatbot) return <LoadingIndicator />
-
-  return chatbot ? (
-    <ChatbotConnectionForm existingConnection={chatbot} />
-  ) : (
-    <EmptyState message="Chatbot not found.">
-      <Button onClick={() => navigate(CHATBOTS_SETTINGS_ABS_PATH)}>
-        Back to all chatbots
-      </Button>
-    </EmptyState>
+  return (
+    <>
+      <SettingsDescription>
+        Edit chatbot integration credentials and access policy.
+      </SettingsDescription>
+      {!isOpen && (
+        <PageToolbarPortal>
+          <Button
+            secondary
+            small
+            startIcon={<SidePanelOpenIcon />}
+            onClick={() => openSetupGuidePanel(setupGuide)}
+          >
+            Setup guide
+          </Button>
+        </PageToolbarPortal>
+      )}
+      {error ? (
+        <GqlError error={error} />
+      ) : loading && !chatbot ? (
+        <LoadingIndicator />
+      ) : chatbot ? (
+        <ChatbotConnectionForm existingConnection={chatbot} />
+      ) : (
+        <EmptyState message="Chatbot not found.">
+          <Button onClick={() => navigate(CHATBOTS_SETTINGS_ABS_PATH)}>
+            Back to all chatbots
+          </Button>
+        </EmptyState>
+      )}
+    </>
   )
 }

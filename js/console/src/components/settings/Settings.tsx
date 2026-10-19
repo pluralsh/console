@@ -1,23 +1,32 @@
-import {
-  ArrowTopRightIcon,
-  Breadcrumb,
-  Button,
-  Sidecar,
-  SidecarItem,
-} from '@pluralsh/design-system'
+import { ArrowTopRightIcon, Breadcrumb, Button } from '@pluralsh/design-system'
 import { BillingSubscriptionChip } from 'components/billing/BillingSubscriptionChip'
 import { PageHeaderContext } from 'components/cd/ContinuousDeployment'
 import { useLogin } from 'components/contexts'
-import { Directory, SideNavEntries } from 'components/layout/SideNavEntries'
-import ConsolePageTitle from 'components/utils/layout/ConsolePageTitle'
 import {
-  GridHeaderWithSideNav,
-  GridLayoutWithSideNav,
-} from 'components/utils/layout/ResponsiveGridLayouts'
-import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
+  PageContentSC,
+  PageSidebarHeaderSC,
+  PageSidebarSC,
+  PageWithSidebar,
+} from 'components/layout/PageLayout'
+import {
+  PageToolbar,
+  PageToolbarSlotContext,
+  ToolbarTabs,
+} from 'components/layout/PageToolbar'
+import { PageSidebarNav } from 'components/layout/PageSidebarNav'
+import { Directory } from 'components/layout/SideNavEntries'
 import { hasAccess } from 'components/utils/persona'
+import { SubtabDirectory } from 'components/utils/SubTabs'
+import { TRUNCATE } from 'components/utils/truncate'
+import {
+  Body1P,
+  Body2BoldP,
+  Body2P,
+  CaptionP,
+} from 'components/utils/typography/Text'
 import { PersonaConfigurationFragment } from 'generated/graphql'
-import { ReactNode, useMemo, useState } from 'react'
+import { createContext, ReactNode, useContext, useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import {
   ACCESS_TOKENS_REL_PATH,
@@ -97,91 +106,120 @@ export const SETTINGS_BREADCRUMBS: Breadcrumb[] = [
   { label: 'settings', url: SETTINGS_ABS_PATH },
 ]
 
-export default function Settings() {
-  const { personaConfiguration, me, configuration } = useLogin()
+const SettingsToolbarStartContext = createContext<Nullable<HTMLElement>>(null)
+
+// renders at the start of the settings toolbar, e.g. a section's subtabs
+export function SettingsToolbarStart({ children }: { children: ReactNode }) {
+  const slot = useContext(SettingsToolbarStartContext)
+
+  return slot ? createPortal(children, slot) : null
+}
+
+export function SettingsToolbarTabs({
+  directory,
+}: {
+  directory: SubtabDirectory
+}) {
   const { pathname } = useLocation()
+
+  return (
+    <SettingsToolbarStart>
+      <ToolbarTabs
+        directory={directory}
+        activeFn={(path) =>
+          pathname === path || pathname.startsWith(`${path}/`)
+        }
+      />
+    </SettingsToolbarStart>
+  )
+}
+
+export function SettingsDescription({ children }: { children: ReactNode }) {
+  return <Body1P $color="text-light">{children}</Body1P>
+}
+
+export default function Settings() {
+  const theme = useTheme()
+  const { personaConfiguration, me, configuration } = useLogin()
   const [headerContent, setHeaderContent] = useState<ReactNode>()
+  const [startSlot, setStartSlot] = useState<HTMLDivElement | null>(null)
+  const [toolbarSlot, setToolbarSlot] = useState<HTMLDivElement | null>(null)
 
   const pageHeaderContext = useMemo(() => ({ setHeaderContent }), [])
 
   return (
-    <GridLayoutWithSideNav>
-      <GridHeaderWithSideNav>
-        <div />
-        <MainHeaderContentSC>{headerContent}</MainHeaderContentSC>
-        <SidecarColWrapperSC>
-          {configuration?.pluralLogin && (
-            <Button
-              secondary
-              as={Link}
-              to="https://app.plural.sh/account/edit"
-              target="_blank"
-              rel="noopener noreferrer"
-              endIcon={<ArrowTopRightIcon />}
-            >
-              Edit account
-            </Button>
-          )}
-        </SidecarColWrapperSC>
-      </GridHeaderWithSideNav>
-      <SideNavEntries
-        directory={getDirectory(personaConfiguration)}
-        pathname={pathname}
-        pathPrefix={SETTINGS_ABS_PATH}
-      />
-      <MainColWrapperSC>
-        <PageHeaderContext.Provider value={pageHeaderContext}>
-          <Outlet />
-        </PageHeaderContext.Provider>
-      </MainColWrapperSC>
-      <SidecarColWrapperSC>
-        <Sidecar>
-          <SidecarItem heading="Account name">{me?.name}</SidecarItem>
-          <SidecarItem heading="Plan">
-            <BillingSubscriptionChip asLink />
-          </SidecarItem>
-        </Sidecar>
-      </SidecarColWrapperSC>
-    </GridLayoutWithSideNav>
+    <PageWithSidebar
+      sidebar={
+        <PageSidebarSC>
+          <PageSidebarHeaderSC>
+            <Body2BoldP>Settings</Body2BoldP>
+          </PageSidebarHeaderSC>
+          <PageSidebarNav
+            directory={getDirectory(personaConfiguration)}
+            pathPrefix={SETTINGS_ABS_PATH}
+          />
+          <SidebarFooterSC>
+            <div>
+              <CaptionP $color="text-xlight">Account name</CaptionP>
+              <Body2P css={TRUNCATE}>{me?.name}</Body2P>
+            </div>
+            <div>
+              <CaptionP
+                $color="text-xlight"
+                css={{ marginBottom: theme.spacing.xxsmall }}
+              >
+                Plan
+              </CaptionP>
+              <BillingSubscriptionChip asLink />
+            </div>
+            {configuration?.pluralLogin && (
+              <Button
+                secondary
+                small
+                as={Link}
+                to="https://app.plural.sh/account/edit"
+                target="_blank"
+                rel="noopener noreferrer"
+                endIcon={<ArrowTopRightIcon />}
+              >
+                Edit account
+              </Button>
+            )}
+          </SidebarFooterSC>
+        </PageSidebarSC>
+      }
+      toolbar={
+        <PageToolbar
+          start={
+            <div
+              ref={setStartSlot}
+              css={{ display: 'contents' }}
+            />
+          }
+          slotRef={setToolbarSlot}
+        >
+          {headerContent}
+        </PageToolbar>
+      }
+    >
+      <PageContentSC $maxWidth={theme.breakpoints.desktopLarge}>
+        <PageHeaderContext value={pageHeaderContext}>
+          <PageToolbarSlotContext value={toolbarSlot}>
+            <SettingsToolbarStartContext value={startSlot}>
+              <Outlet />
+            </SettingsToolbarStartContext>
+          </PageToolbarSlotContext>
+        </PageHeaderContext>
+      </PageContentSC>
+    </PageWithSidebar>
   )
 }
 
-const MainHeaderContentSC = styled.div(({ theme }) => ({
-  borderBottom: theme.borders.default,
-  overflow: 'hidden',
-}))
-
-const MainColWrapperSC = styled.main({
+const SidebarFooterSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  overflow: 'auto',
-})
-
-const SidecarColWrapperSC = styled(ResponsiveLayoutSidecarContainer)({
-  margin: 0,
-})
-
-export function SettingsPageHeader({
-  heading,
-  children,
-}: {
-  heading?: ReactNode
-  children?: ReactNode
-}) {
-  const theme = useTheme()
-
-  return (
-    <ConsolePageTitle
-      heading={heading}
-      headingProps={{ alignSelf: 'center' }}
-      css={{
-        display: 'flex',
-        alignItems: 'flex-end',
-        gap: theme.spacing.medium,
-        marginBottom: theme.spacing.medium,
-      }}
-    >
-      {children}
-    </ConsolePageTitle>
-  )
-}
+  gap: theme.spacing.small,
+  flexShrink: 0,
+  padding: theme.spacing.medium,
+  borderTop: theme.borders.default,
+}))

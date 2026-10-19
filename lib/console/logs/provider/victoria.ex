@@ -39,6 +39,7 @@ defmodule Console.Logs.Provider.Victoria do
 
   defp build_query(%Query{query: query} = q) do
     add_resource([query], q)
+    |> add_node(q)
     |> add_time(q)
     |> maybe_reverse(q)
     |> Enum.join(" ")
@@ -46,8 +47,8 @@ defmodule Console.Logs.Provider.Victoria do
 
   defp line(%{"_msg" => log, "_time" => time} = line) do
     facets =
-      Map.drop(line, ~w(_msg _time _stream))
-      |> Map.merge(line["_stream"] || %{})
+      Map.drop(line, ~w(_msg _time _stream _stream_id))
+      |> Map.merge(stream_fields(line["_stream"]))
       |> facets()
 
     %Line{
@@ -56,6 +57,10 @@ defmodule Console.Logs.Provider.Victoria do
       facets: facets
     }
   end
+
+  # victoria logs serializes the stream as a `{k="v",...}` string, whose fields are also top-level
+  defp stream_fields(%{} = stream), do: stream
+  defp stream_fields(_), do: %{}
 
   defp add_resource(io, %Query{resource: %Cluster{} = cluster}),
     do: [cluster_label(cluster) | io]
@@ -66,6 +71,13 @@ defmodule Console.Logs.Provider.Victoria do
   defp add_resource(io, _), do: io
 
   defp cluster_label(%Cluster{handle: h}), do: ~s("cluster":"#{h}")
+
+  # vector: kubernetes.pod_node_name, fluent-bit: kubernetes.host, promtail: node_name, otel: k8s.node.name
+  @node_fields ~w(kubernetes.pod_node_name kubernetes.host node_name k8s.node.name)
+
+  defp add_node(io, %Query{node: node}) when is_binary(node) and byte_size(node) > 0,
+    do: ["(" <> Enum.map_join(@node_fields, " or ", &~s("#{&1}":=#{Jason.encode!(node)})) <> ")" | io]
+  defp add_node(io, _), do: io
 
   defp add_time(io, %Query{time: %Time{after: a, before: b}}) when is_binary(a) and is_binary(b),
     do: [~s(_time:[#{a}, #{b}]) | io]

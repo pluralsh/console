@@ -4,8 +4,6 @@ import {
   GitCommitIcon,
   GraphQLToast,
   ReloadIcon,
-  SubTab,
-  TabList,
 } from '@pluralsh/design-system'
 
 import {
@@ -15,8 +13,8 @@ import {
 import { InsightsTabLabel } from 'components/utils/AiInsights'
 
 import { isEmpty } from 'lodash'
-import { ReactNode, useMemo, useRef, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { ReactNode, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import {
   StackRunDetailsFragment,
@@ -35,11 +33,10 @@ import {
   STACK_RUNS_STATE_REL_PATH,
   STACK_RUNS_VIOLATIONS_REL_PATH,
 } from '../../../routes/stacksRoutesConsts'
-import { LinkTabWrap } from '../../utils/Tabs'
 import { TRUNCATE } from '../../utils/truncate'
 import StackRunIcon from '../common/StackRunIcon.tsx'
 
-function getDirectory(stackRun: StackRunDetailsFragment) {
+export function getStackRunDirectory(stackRun: StackRunDetailsFragment) {
   return [
     { path: '', label: 'Progress' },
     {
@@ -84,8 +81,9 @@ interface StackRunHeaderProps {
 
 export default function StackRunHeader({
   stackRun,
-  refetch,
-}: StackRunHeaderProps): ReactNode {
+}: {
+  stackRun: StackRunDetailsFragment
+}): ReactNode {
   const theme = useTheme()
 
   return (
@@ -111,10 +109,6 @@ export default function StackRunHeader({
           size="small"
         />
         <StackRunHeaderInfo stackRun={stackRun} />
-        <StackRunHeaderButtons
-          stackRun={stackRun}
-          refetch={refetch}
-        />
       </div>
       {stackRun.cancellationReason && (
         <Callout
@@ -124,7 +118,6 @@ export default function StackRunHeader({
           {stackRun.cancellationReason}
         </Callout>
       )}
-      <StackRunNav stackRun={stackRun} />
     </div>
   )
 }
@@ -176,7 +169,10 @@ function StackRunHeaderInfo({ stackRun }): ReactNode {
   )
 }
 
-function StackRunHeaderButtons({ stackRun, refetch }: StackRunHeaderProps) {
+export function StackRunHeaderButtons({
+  stackRun,
+  refetch,
+}: StackRunHeaderProps) {
   const theme = useTheme()
   const navigate = useNavigate()
   const [serviceErrorsOpen, setServiceErrorsOpen] = useState(false)
@@ -228,8 +224,8 @@ function StackRunHeaderButtons({ stackRun, refetch }: StackRunHeaderProps) {
       <div
         css={{
           display: 'flex',
-          height: 'fit-content',
-          gap: theme.spacing.medium,
+          alignItems: 'center',
+          gap: theme.spacing.small,
         }}
       >
         {!isEmpty(stackRun.errors) && (
@@ -250,9 +246,10 @@ function StackRunHeaderButtons({ stackRun, refetch }: StackRunHeaderProps) {
         {terminal && (
           <Button
             secondary
+            small
             onClick={() => restart()}
             loading={restartLoading}
-            startIcon={<ReloadIcon />}
+            startIcon={<ReloadIcon size={12} />}
           >
             Restart Run
           </Button>
@@ -260,6 +257,7 @@ function StackRunHeaderButtons({ stackRun, refetch }: StackRunHeaderProps) {
         {!terminal && (
           <Button
             secondary
+            small
             onClick={() => cancel()}
             loading={cancelLoading}
           >
@@ -269,6 +267,7 @@ function StackRunHeaderButtons({ stackRun, refetch }: StackRunHeaderProps) {
         {stackRun.status === StackStatus.PendingApproval &&
           !stackRun.approvedAt && (
             <Button
+              small
               onClick={() => mutation()}
               loading={loading}
             >
@@ -277,44 +276,5 @@ function StackRunHeaderButtons({ stackRun, refetch }: StackRunHeaderProps) {
           )}
       </div>
     </>
-  )
-}
-
-function StackRunNav({
-  stackRun,
-}: {
-  stackRun: StackRunDetailsFragment
-}): ReactNode {
-  const { pathname } = useLocation()
-  const tabStateRef = useRef<any>(null)
-  const directory = getDirectory(stackRun)
-  const currentTab = useMemo(
-    () =>
-      directory.find((d) => d.path && pathname.includes(d.path)) ??
-      directory[0],
-    [directory, pathname]
-  )
-
-  return (
-    <TabList
-      scrollable
-      stateRef={tabStateRef}
-      stateProps={{
-        orientation: 'horizontal',
-        selectedKey: currentTab?.path,
-      }}
-    >
-      {directory
-        .filter((d) => d.condition?.(stackRun) ?? true)
-        .map(({ label, path }) => (
-          <LinkTabWrap
-            subTab
-            key={path}
-            to={path}
-          >
-            <SubTab key={path}>{label}</SubTab>
-          </LinkTabWrap>
-        ))}
-    </TabList>
   )
 }

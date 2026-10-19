@@ -5,8 +5,6 @@ import {
   EyeClosedIcon,
   EyeIcon,
   IconFrame,
-  Input,
-  SearchIcon,
   Table,
   useCopyText,
   useSetBreadcrumbs,
@@ -17,6 +15,10 @@ import { useTheme } from 'styled-components'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useDebounce } from '@react-hooks-library/core'
 import CopyButton from 'components/utils/CopyButton'
+import {
+  PageToolbarPortal,
+  ToolbarSearchInput,
+} from 'components/layout/PageToolbar'
 import { ObscuredToken } from 'components/profile/ObscuredToken'
 
 import {
@@ -89,7 +91,8 @@ function CopyOutputsButton({ outputs }: { outputs: StackOutputT[] }) {
   return (
     <Button
       secondary
-      startIcon={copied ? <CheckIcon /> : <CopyIcon />}
+      small
+      startIcon={copied ? <CheckIcon size={12} /> : <CopyIcon size={12} />}
       onClick={handleCopy}
     >
       {copied ? 'Copied!' : 'Copy All'}
@@ -130,7 +133,6 @@ function OutputValue({ value, secret }: { value: string; secret?: boolean }) {
 }
 
 export default function StackOutput() {
-  const theme = useTheme()
   const { stack } = useOutletContext() as StackOutletContextT
   const [filterString, setFilterString] = useState('')
   const debouncedFilterString = useDebounce(filterString, 100)
@@ -159,41 +161,24 @@ export default function StackOutput() {
   if (loading) return <LoadingIndicator />
 
   return (
-    <div css={{ overflow: 'hidden' }}>
-      <div
-        css={{
-          display: 'flex',
-          flexDirection: 'column',
-          rowGap: theme.spacing.medium,
-          height: '100%',
-        }}
-      >
-        <div
-          css={{
-            display: 'flex',
-            columnGap: theme.spacing.medium,
-            flexShrink: 0,
-          }}
-        >
-          <Input
-            placeholder="Search"
-            startIcon={<SearchIcon />}
-            value={filterString}
-            onChange={(e) => setFilterString(e.currentTarget.value)}
-            css={{ flexGrow: 1 }}
-          />
-          {output?.length > 0 && <CopyOutputsButton outputs={output} />}
-        </div>
-        <Table
-          fullHeightWrap
-          data={output}
-          columns={columns}
-          reactTableOptions={{
-            state: { globalFilter: debouncedFilterString },
-          }}
-          emptyStateProps={{ message: 'No outputs found.' }}
+    <div css={{ overflow: 'hidden', height: '100%' }}>
+      <PageToolbarPortal>
+        <ToolbarSearchInput
+          placeholder="Search outputs"
+          value={filterString}
+          onChange={setFilterString}
         />
-      </div>
+        {output?.length > 0 && <CopyOutputsButton outputs={output} />}
+      </PageToolbarPortal>
+      <Table
+        fullHeightWrap
+        data={output}
+        columns={columns}
+        reactTableOptions={{
+          state: { globalFilter: debouncedFilterString },
+        }}
+        emptyStateProps={{ message: 'No outputs found.' }}
+      />
     </div>
   )
 }

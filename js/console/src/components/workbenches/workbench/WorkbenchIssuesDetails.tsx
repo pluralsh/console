@@ -1,4 +1,4 @@
-import { EmptyState } from '@pluralsh/design-system'
+import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import { getIssueWebhookProviderIcon } from 'components/settings/webhooks/webhookIcons'
 import { IssueStatusIcon } from 'components/workbenches/common/IssueStatusChip'
 import {
@@ -89,6 +89,7 @@ export function useWorkbenchIssuesDetails({
             noun="issues"
             loading={loading}
             emptyState={emptyState}
+            sidebar
           />
         ) : (
           issues.map((issue) => (
@@ -133,7 +134,15 @@ export function useWorkbenchIssuesDetails({
     </DetailsListSC>
   )
 
-  const content = (
+  const content = !selected ? (
+    !loading && (
+      <BoardEmptyList
+        noun="issues"
+        loading={false}
+        emptyState={emptyState}
+      />
+    )
+  ) : (
     <DetailsLayoutSC $panelCount={detailsOpen ? 2 : 1}>
       {selected &&
         (selectedJob ? (
@@ -149,7 +158,10 @@ export function useWorkbenchIssuesDetails({
             <DetailsPanelHeader title="Conclusion">
               {expandButton}
             </DetailsPanelHeader>
-            <EmptyState message="No job has been run for this issue yet." />
+            <WorkbenchEmptyState
+              message="No conclusion yet"
+              description="A conclusion will show up here once a job has run for this issue."
+            />
           </DetailsColumnSC>
         ))}
       {selected && detailsOpen && (

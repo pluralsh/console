@@ -171,8 +171,11 @@ export function SecretData(): ReactElement<any> {
   const headerContent = useMemo(
     () => (
       <Button
-        floating
-        startIcon={revealAll ? <EyeClosedIcon /> : <EyeIcon />}
+        secondary
+        small
+        startIcon={
+          revealAll ? <EyeClosedIcon size={12} /> : <EyeIcon size={12} />
+        }
         onClick={() => setRevealAll(!revealAll)}
       >
         {revealAll ? 'Hide all' : 'Reveal all'}

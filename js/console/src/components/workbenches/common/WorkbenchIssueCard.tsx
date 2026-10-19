@@ -94,7 +94,7 @@ const HeaderIconSC = styled.div(({ theme }) => ({
   flexShrink: 0,
   width: 32,
   height: 32,
-  borderRadius: '50%',
+  borderRadius: theme.borderRadiuses.medium,
   border: theme.borders.default,
   color: theme.colors['icon-default'],
 }))

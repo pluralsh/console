@@ -157,13 +157,7 @@ export function WorkbenchJobPrs({
           gap="medium"
         >
           <StackedText
-            icon={
-              <IconFrame
-                circle
-                type="secondary"
-                icon={<PrIcon />}
-              />
-            }
+            icon={<PrIcon />}
             first={<Body2BoldP>Generated pull requests</Body2BoldP>}
           />
           {generatedPrs.map((pr) => (
@@ -208,13 +202,7 @@ export function WorkbenchJobPrs({
           }
         >
           <StackedText
-            icon={
-              <IconFrame
-                circle
-                type="secondary"
-                icon={<PrOpenIcon />}
-              />
-            }
+            icon={<PrOpenIcon />}
             first={
               <Body2BoldP>Draft pull requests waiting for approvals</Body2BoldP>
             }

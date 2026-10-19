@@ -7,14 +7,9 @@ import {
   useState,
 } from 'react'
 
-import {
-  FiltersIcon,
-  Flex,
-  SearchIcon,
-  usePrevious,
-} from '@pluralsh/design-system'
+import { NamespaceIcon, usePrevious } from '@pluralsh/design-system'
 
-import { ExpandedInput, IconExpander } from 'components/utils/IconExpander'
+import { ToolbarSearchInput } from 'components/layout/PageToolbar'
 import { useDebounce } from '@react-hooks-library/core'
 
 import { useNamespaces } from '../Cluster'
@@ -84,6 +79,23 @@ export function DataSelectInputs() {
   const routeHasChanged = (usePrevious(pathname) ?? pathname) !== pathname
   const clusterHasChanged = (usePrevious(clusterId) ?? clusterId) !== clusterId
   useLayoutEffect(() => {
+    // setting params navigates, which would cancel a pending index-route
+    // redirect, so skip it unless the query would actually change
+    const current = new URLSearchParams(window.location.search)
+    const hasFilter = !!current.get(FILTER_PARAM)
+    const nsMatches = (current.get(NAMESPACE_PARAM) ?? '') === (nsState ?? '')
+    const filterMatches = (current.get(FILTER_PARAM) ?? '') === debFilterState
+    const unchanged = clusterHasChanged
+      ? !current.has(NAMESPACE_PARAM) &&
+        (routeHasChanged ? !hasFilter : filterMatches)
+      : routeHasChanged
+        ? !hasFilter
+        : nsMatches && filterMatches
+    if (unchanged) {
+      if (routeHasChanged) setFilterState('')
+      if (clusterHasChanged) setNsState('')
+      return
+    }
     setParams((params) => {
       if (routeHasChanged) {
         setFilterState('')
@@ -103,32 +115,22 @@ export function DataSelectInputs() {
   }, [clusterHasChanged, debFilterState, nsState, routeHasChanged, setParams])
 
   return (
-    <Flex gap="medium">
-      <IconExpander
-        showIndicator
-        icon={<SearchIcon />}
-        active={!!filterState}
-        onClear={() => setFilterState('')}
-      >
-        <ExpandedInput
-          inputValue={filterState}
-          onChange={setFilterState}
-        />
-      </IconExpander>
+    <>
+      <ToolbarSearchInput
+        placeholder="Filter by name"
+        value={filterState}
+        onChange={setFilterState}
+      />
       {namespaced && (
-        <IconExpander
-          showIndicator
-          icon={<FiltersIcon />}
-          active={!!nsState}
-          onClear={() => setNsState('')}
-        >
-          <NamespaceFilter
-            namespaces={namespaces}
-            namespace={nsState}
-            onChange={setNsState}
-          />
-        </IconExpander>
+        <NamespaceFilter
+          namespaces={namespaces}
+          namespace={nsState}
+          onChange={setNsState}
+          startIcon={<NamespaceIcon size={12} />}
+          inputProps={{ small: true, placeholder: 'Namespace' }}
+          containerProps={{ style: { width: 160 } }}
+        />
       )}
-    </Flex>
+    </>
   )
 }

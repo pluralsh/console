@@ -47,6 +47,15 @@ defmodule Console.Logs.Provider.LokiTest do
         ~s({cluster="prod", namespace=~"a\\\\.b|c", container="app", k8s_node="n1"})
     end
 
+    test "it filters by node on every common node label, after the line filter" do
+      cluster = insert(:cluster, handle: "prod")
+      q = %{Query.new(query: "oom", node: "ip-10-0-1-2.ec2.internal") | resource: cluster}
+
+      assert Loki.build_query(@conn, q) ==
+        ~s<{cluster="prod"} |~ "(?i)oom" | k8s_node_name="ip-10-0-1-2.ec2.internal" or node_name="ip-10-0-1-2.ec2.internal" or > <>
+        ~s<node="ip-10-0-1-2.ec2.internal" or nodename="ip-10-0-1-2.ec2.internal" or kubernetes_host="ip-10-0-1-2.ec2.internal">
+    end
+
     test "it ors whitespace separated terms by default" do
       assert Loki.build_query(@conn, Query.new(query: "connection  refused")) ==
         ~s<{cluster=~".+"} |~ "(?i)connection" or "(?i)refused">

@@ -5,10 +5,12 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net"
+	"slices"
 	"time"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/encoding/gzip"
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/reflection"
 	"k8s.io/klog/v2"
@@ -74,6 +76,18 @@ func (in *Server) register() {
 	klog.V(log.LogLevelVerbose).InfoS("gRPC services registered", "count", len(in.services))
 }
 
+// compressResponses gzips unary responses for clients that advertise gzip in grpc-accept-encoding.
+// grpc-go otherwise only compresses responses to compressed requests.
+func compressResponses(ctx context.Context, req any, _ *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
+	if supported, err := grpc.ClientSupportedCompressors(ctx); err == nil && slices.Contains(supported, gzip.Name) {
+		if err := grpc.SetSendCompressor(ctx, gzip.Name); err != nil {
+			klog.V(log.LogLevelExtended).InfoS("failed to enable response compression", "error", err)
+		}
+	}
+
+	return handler(ctx, req)
+}
+
 func (in *Server) init() (*Server, error) {
 	opts := []grpc.ServerOption{
 		grpc.KeepaliveParams(keepalive.ServerParameters{
@@ -82,6 +96,13 @@ func (in *Server) init() (*Server, error) {
 			Time:                  in.config.KeepAlive,
 			Timeout:               in.config.KeepAliveTimeout,
 		}),
+		// the console pings every 15s (even when idle) to detect dead connections, the grpc-go default
+		// (5m, streams only) would GOAWAY it with too_many_pings
+		grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{
+			MinTime:             10 * time.Second,
+			PermitWithoutStream: true,
+		}),
+		grpc.ChainUnaryInterceptor(compressResponses),
 	}
 
 	// Add TLS credentials if certificates are provided

@@ -27,6 +27,9 @@ import {
   formatChatbotChannelLabel,
 } from './chatbots/utils'
 
+// shared by the Launch (tools) and Monitoring sidebars
+export const WORKBENCH_SIDEBAR_WIDTH = 250
+
 export function WorkbenchSidePanel({
   workbenchId,
   onOpenToolsEdit,
@@ -288,11 +291,11 @@ const WrapperSC = styled.div(({ theme }) => ({
   flexDirection: 'column',
   flexShrink: 0,
   height: '100%',
-  maxWidth: 250,
+  maxWidth: WORKBENCH_SIDEBAR_WIDTH,
   minHeight: 0,
-  minWidth: 250,
+  minWidth: WORKBENCH_SIDEBAR_WIDTH,
   overflow: 'hidden',
-  width: 250,
+  width: WORKBENCH_SIDEBAR_WIDTH,
 }))
 
 const ContentSC = styled.div(({ theme }) => ({

@@ -173,6 +173,7 @@ config :console, ConsoleWeb.Endpoint,
   Keyword.merge(
     [
       url: endpoint_url,
+      secret_key_base: Console.secret_key_base(get_env("SECRET_KEY_BASE"), get_env("JWT_SECRET")),
       check_origin: [
         "//#{get_env("HOST")}",
         "//#{get_env("EXT_HOST") || get_env("HOST")}",
@@ -459,11 +460,16 @@ if is_set("CONSOLE_AZURE_STORAGE_ACCOUNT") do
     object_store: true,
     object_store_path: get_env("CONSOLE_OBJECT_STORE_PATH") || "plrl"
 
+  # without an access key, auth comes from workload identity
   config :waffle,
-    storage: Waffle.Storage.Azure,
+    storage: (if is_set("CONSOLE_AZURE_STORAGE_ACCESS_KEY"), do: Waffle.Storage.Azure, else: Console.Storage.Azure),
     storage_account: get_env("CONSOLE_AZURE_STORAGE_ACCOUNT"),
     container: get_env("CONSOLE_AZURE_STORAGE_CONTAINER"),
     access_key: get_env("CONSOLE_AZURE_STORAGE_ACCESS_KEY")
+end
+
+if is_set("CONSOLE_PSEUDOFS_ADDR") do
+  config :console, pseudofs: get_env("CONSOLE_PSEUDOFS_ADDR")
 end
 
 if is_set("CONSOLE_INSTANCE_DETAILS") do

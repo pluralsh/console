@@ -53,6 +53,7 @@ export default function ConfigureClusterBackups({
         <div>
           <Button
             primary
+            small
             {...buttonProps}
             {...(disabled ? { disabled: true } : {})}
           >

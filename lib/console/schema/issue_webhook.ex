@@ -3,7 +3,7 @@ defmodule Console.Schema.IssueWebhook do
   alias Console.Deployments.Policies.Rbac
   alias Console.Schema.{PolicyBinding, User}
 
-  defenum Provider, linear: 0, jira: 1, asana: 2, github: 3, gitlab: 4, azure_devops: 5, bitbucket: 6, bitbucket_datacenter: 7
+  defenum Provider, linear: 0, jira: 1, asana: 2, github: 3, gitlab: 4, azure_devops: 5, bitbucket: 6, bitbucket_datacenter: 7, service_now: 8
 
   schema "issue_webhooks" do
     field :provider,    Provider

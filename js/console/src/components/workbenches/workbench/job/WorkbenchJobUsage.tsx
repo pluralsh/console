@@ -1,10 +1,5 @@
-import {
-  Card,
-  Divider,
-  EmptyState,
-  Flex,
-  ProgressBar,
-} from '@pluralsh/design-system'
+import { Card, Divider, Flex, ProgressBar } from '@pluralsh/design-system'
+import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import {
   Body1P,
   Body2BoldP,
@@ -47,7 +42,13 @@ export function WorkbenchJobUsage({
     )
 
   if (!hasUsage) {
-    return <EmptyState message="No usage data reported for this job." />
+    return (
+      <WorkbenchEmptyState
+        inset={false}
+        message="No usage data"
+        description="This job didn't report any token usage or cost."
+      />
+    )
   }
 
   return (
@@ -112,9 +113,11 @@ function TokenBreakdown({
 
   if (!hasAnyTokens) {
     return (
-      <Card>
-        <EmptyState message="Token usage is not available for this job." />
-      </Card>
+      <WorkbenchEmptyState
+        inset={false}
+        message="Token usage unavailable"
+        description="This job didn't report token counts."
+      />
     )
   }
 
@@ -217,9 +220,11 @@ function CostBreakdown({
 
   if (!hasAnyCost) {
     return (
-      <Card>
-        <EmptyState message="Cost cannot be estimated for this job. Token usage is still available." />
-      </Card>
+      <WorkbenchEmptyState
+        inset={false}
+        message="Cost unavailable"
+        description="Cost can't be estimated for this job, but token usage is still available."
+      />
     )
   }
 

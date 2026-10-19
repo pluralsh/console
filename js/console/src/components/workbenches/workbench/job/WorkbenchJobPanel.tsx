@@ -13,6 +13,7 @@ import {
   usePrevious,
 } from '@pluralsh/design-system'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
+import { WorkbenchFileContext } from 'components/ai/chatbot/PlrlFileChip'
 import {
   PanelHeaderSC,
   SidePanelContent,
@@ -137,31 +138,35 @@ export function WorkbenchJobPanelContent() {
         />
       </PanelHeaderSC>
       <ContentWrapperSC>
-        <ContentInnerSC>
-          {selectedTab === 'Result' &&
-            (isLoading || hasWorkbenchJobResultContent(job)) && (
-              <WorkbenchJobResult
-                job={job}
-                loading={isLoading}
+        <WorkbenchFileContext.Provider
+          value={job?.workbench?.filesystemEnabled ? job.workbench.id : null}
+        >
+          <ContentInnerSC>
+            {selectedTab === 'Result' &&
+              (isLoading || hasWorkbenchJobResultContent(job)) && (
+                <WorkbenchJobResult
+                  job={job}
+                  loading={isLoading}
+                />
+              )}
+            {selectedTab === 'Pull requests' && job?.id && (
+              <WorkbenchJobPrs
+                generatedPrs={data.generatedPrs}
+                draftPrs={data.draftPrs}
+                workbenchId={job.workbench?.id ?? ''}
+                workbenchName={job.workbench?.name ?? ''}
+                jobId={job.id}
               />
             )}
-          {selectedTab === 'Pull requests' && job?.id && (
-            <WorkbenchJobPrs
-              generatedPrs={data.generatedPrs}
-              draftPrs={data.draftPrs}
-              workbenchId={job.workbench?.id ?? ''}
-              workbenchName={job.workbench?.name ?? ''}
-              jobId={job.id}
+            {selectedTab === 'Usage' && job?.usage && (
+              <WorkbenchJobUsage usage={job.usage} />
+            )}
+            <WorkbenchJobCommonTabContent
+              tab={selectedTab}
+              job={job}
             />
-          )}
-          {selectedTab === 'Usage' && job?.usage && (
-            <WorkbenchJobUsage usage={job.usage} />
-          )}
-          <WorkbenchJobCommonTabContent
-            tab={selectedTab}
-            job={job}
-          />
-        </ContentInnerSC>
+          </ContentInnerSC>
+        </WorkbenchFileContext.Provider>
       </ContentWrapperSC>
     </SidePanelContent>
   )
@@ -397,7 +402,7 @@ const PanelSubTabSC = styled(SubTab)(({ theme }) => ({
   minWidth: 'max-content',
   outline: 'none',
   boxShadow: 'none',
-  borderRadius: 20,
+  borderRadius: theme.borderRadiuses.medium,
   backgroundColor: 'transparent',
   padding: `${theme.spacing.xxsmall}px ${theme.spacing.small}px`,
   display: 'inline-flex',

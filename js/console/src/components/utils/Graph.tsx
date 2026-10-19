@@ -1,15 +1,21 @@
 import {
-  ResponsiveLine,
+  Line,
   type LineCustomSvgLayerProps,
   type LineSvgProps,
 } from '@nivo/line'
 import { type PartialTheme as NivoThemeType } from '@nivo/theming'
 import dayjs from 'dayjs'
-import { useLayoutEffect, useMemo, useState } from 'react'
+import { memo, useLayoutEffect, useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
 import { COLORS } from 'utils/color'
-import { niceAxis, seriesExtent, type TickBase } from './axisTicks'
-import { SliceTooltip } from './ChartTooltip'
+import {
+  niceAxis,
+  seriesExtent,
+  type TickBase,
+  xAxisOverhang,
+  yAxisLabelsWidth,
+} from './axisTicks'
+import { SeriesSliceTooltip } from './ChartTooltip'
 import { ChartRangeSelect } from './timerange/ChartRangeSelect'
 import type { TimeWindow } from './timerange/timeRange'
 import { niceTimeTicks } from './timeTicks'
@@ -97,22 +103,30 @@ export function useGraphTheme(): NivoThemeType {
   }
 }
 
-const GRAPH_MARGIN = { top: 20, right: 20, bottom: 30, left: 50 } as const
+// bottom: tick (5) + tick padding (5) + an 11px label line
+const GRAPH_MARGIN = { top: 10, bottom: 24 } as const
+// before the x ticks are known, enough for an HH:MM label
+const DEFAULT_X_LABEL_CHARS = 5
 
-function useElementWidth<T extends HTMLElement>() {
+function useElementSize<T extends HTMLElement>() {
   const [el, setEl] = useState<T | null>(null)
-  const [width, setWidth] = useState(0)
+  const [size, setSize] = useState({ width: 0, height: 0 })
 
   useLayoutEffect(() => {
     if (!el) return
-    const observer = new ResizeObserver(([entry]) =>
-      setWidth(entry.contentRect.width)
-    )
+    const observer = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect
+      setSize((prev) =>
+        prev.width === width && prev.height === height
+          ? prev
+          : { width, height }
+      )
+    })
     observer.observe(el)
     return () => observer.disconnect()
   }, [el])
 
-  return [setEl, width] as const
+  return [setEl, size] as const
 }
 
 function dataWindow(series: GraphSeries[]): TimeWindow | null {
@@ -130,7 +144,7 @@ function dataWindow(series: GraphSeries[]): TimeWindow | null {
     : null
 }
 
-export function Graph({
+export const Graph = memo(function Graph({
   data,
   yFormat,
   timeWindow,
@@ -165,31 +179,54 @@ export function Graph({
     ])
     return niceAxis(min, max, { base: yTickBase })
   }, [graph, markers, yTickBase])
-  const [plotRef, chartWidth] = useElementWidth<HTMLDivElement>()
+  const [plotRef, { width: chartWidth, height: chartHeight }] =
+    useElementSize<HTMLDivElement>()
+  const left = useMemo(
+    () =>
+      yAxisLabelsWidth(
+        yAxis.ticks.map((tick) =>
+          String(typeof yFormat === 'function' ? yFormat(tick) : tick)
+        )
+      ),
+    [yAxis, yFormat]
+  )
   const xAxis = useMemo(() => {
     const window = timeWindow ?? dataWindow(graph)
     if (!window) return null
-    return niceTimeTicks(
-      window.start,
-      window.end,
-      chartWidth - GRAPH_MARGIN.left - GRAPH_MARGIN.right,
-      { overhangPx: { left: GRAPH_MARGIN.left, right: GRAPH_MARGIN.right } }
-    )
-  }, [chartWidth, graph, timeWindow])
+    const right = xAxisOverhang(DEFAULT_X_LABEL_CHARS)
+    return niceTimeTicks(window.start, window.end, chartWidth - left - right, {
+      overhangPx: { left, right },
+    })
+  }, [chartWidth, graph, left, timeWindow])
+  const margin = useMemo(
+    () => ({
+      ...GRAPH_MARGIN,
+      left,
+      right: xAxisOverhang(xAxis?.labelChars ?? DEFAULT_X_LABEL_CHARS),
+    }),
+    [left, xAxis]
+  )
 
   if (graph.length === 0) return <CaptionP>no data</CaptionP>
 
   const toggleSelected = (id: string) => setSelected(selected ? null : id)
   const hasDashedSeries = graph.some(({ dashed }) => dashed)
-  const chart = (
-    <ResponsiveLine
+  // Sized from our own measurement: ResponsiveLine would measure the same
+  // box again and render once at zero size first.
+  const chart = chartWidth > 0 && chartHeight > 0 && (
+    <Line
+      width={chartWidth}
+      height={chartHeight}
       data={graph}
-      margin={GRAPH_MARGIN}
+      margin={margin}
       lineWidth={1}
       enablePoints={false}
       enableArea
       areaOpacity={0.05}
-      useMesh
+      // One hover target per timestamp rather than a Delaunay mesh over
+      // every point of every series.
+      enableSlices="x"
+      sliceTooltip={SeriesSliceTooltip}
       animate={!timeWindow}
       xScale={{
         type: 'time',
@@ -207,7 +244,6 @@ export function Graph({
       colors={COLORS}
       yFormat={yFormat}
       xFormat={dateFormat}
-      tooltip={SliceTooltip}
       markers={markers}
       layers={
         hasDashedSeries
@@ -218,21 +254,9 @@ export function Graph({
               AreasWithoutDashedSeries,
               'crosshair',
               StyledLines,
-              'points',
               'slices',
-              'mesh',
             ]
-          : [
-              'grid',
-              'markers',
-              'axes',
-              'areas',
-              'crosshair',
-              'lines',
-              'points',
-              'slices',
-              'mesh',
-            ]
+          : ['grid', 'markers', 'axes', 'areas', 'crosshair', 'lines', 'slices']
       }
       axisLeft={{
         tickSize: 0,
@@ -272,7 +296,7 @@ export function Graph({
           {timeWindow && onRangeSelect ? (
             <ChartRangeSelect
               timeWindow={timeWindow}
-              margin={GRAPH_MARGIN}
+              margin={margin}
               onRangeSelect={onRangeSelect}
               style={{ height: '100%' }}
             >
@@ -294,10 +318,10 @@ export function Graph({
         onSelect={toggleSelected}
         maxHeight={42}
         style={{
-          paddingLeft: GRAPH_MARGIN.left,
-          paddingRight: GRAPH_MARGIN.right,
+          paddingLeft: margin.left,
+          paddingRight: margin.right,
         }}
       />
     </div>
   )
-}
+})

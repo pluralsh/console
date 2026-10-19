@@ -25,6 +25,10 @@ const (
 	// copied on the shared emptyDir (manifest.json plus cloned git repos).
 	AgentRunRepositoryPrebakeDir = AgentRunSharedWorkDir + "/repos"
 
+	// AgentRunAttachmentsDir is where files attached to an agent run or its
+	// prompts are downloaded, outside the repository so they're never committed.
+	AgentRunAttachmentsDir = AgentRunSharedWorkDir + "/attachments"
+
 	CodebaseMemoryMCPServerName = "codebase-memory-mcp"
 	CodebaseMemoryMCPCommand    = "/usr/local/bin/codebase-memory-mcp"
 	CodebaseMemoryCacheEnv      = "CBM_CACHE_DIR"

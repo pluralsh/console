@@ -1,14 +1,11 @@
 import {
   ArrowTopRightIcon,
   Breadcrumb,
-  Flex,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
-import { useTheme } from 'styled-components'
-import { SETTINGS_BREADCRUMBS } from '../Settings'
+import { PageToolbarPortal } from 'components/layout/PageToolbar'
+import { SETTINGS_BREADCRUMBS, SettingsDescription } from '../Settings'
 import { CHATBOTS_SETTINGS_ABS_PATH } from '../../../routes/settingsRoutesConst'
-import { StackedTextSC } from '../../utils/table/StackedText'
 import { AddChatbotButton, ChatbotsList } from './ChatbotsList'
 
 const CHATBOTS_SETTINGS_BREADCRUMBS: Breadcrumb[] = [
@@ -17,30 +14,24 @@ const CHATBOTS_SETTINGS_BREADCRUMBS: Breadcrumb[] = [
 ]
 
 export default function ChatbotsSettings() {
-  const theme = useTheme()
-
   useSetBreadcrumbs(CHATBOTS_SETTINGS_BREADCRUMBS)
-  useSetPageHeaderContent(
-    <Flex justifyContent="space-between">
-      <StackedTextSC>
-        <span
-          css={{
-            ...theme.partials.text.body2,
-            color: theme.colors['text-light'],
-          }}
-        >
-          Manage all your chatbot integrations and settings here. Use them
-          within workbenches to trigger jobs from chat.
-        </span>
-      </StackedTextSC>
-      <AddChatbotButton
-        buttonProps={{
-          secondary: true,
-          endIcon: <ArrowTopRightIcon />,
-        }}
-      />
-    </Flex>
-  )
 
-  return <ChatbotsList />
+  return (
+    <>
+      <SettingsDescription>
+        Manage all your chatbot integrations and settings here. Use them within
+        workbenches to trigger jobs from chat.
+      </SettingsDescription>
+      <PageToolbarPortal>
+        <AddChatbotButton
+          buttonProps={{
+            secondary: true,
+            small: true,
+            endIcon: <ArrowTopRightIcon />,
+          }}
+        />
+      </PageToolbarPortal>
+      <ChatbotsList />
+    </>
+  )
 }

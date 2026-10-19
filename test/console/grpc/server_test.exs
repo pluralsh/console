@@ -1,5 +1,6 @@
 defmodule Console.GRPC.ServerTest do
   use Console.DataCase, async: true
+  use Mimic
 
   alias Console.AI.Provider
   alias Console.GRPC.Server
@@ -153,5 +154,43 @@ defmodule Console.GRPC.ServerTest do
 
       assert error.status == GRPC.Status.unauthenticated()
     end
+  end
+
+  describe "get_observability_config/2" do
+    test "it uses elastic and victoria metrics for legacy cloud o11y" do
+      stub_o11y_conf(false)
+
+      config = Server.get_observability_config(%Plrl.ObservabilityConfigRequest{}, nil)
+
+      assert config.elasticHost == "http://test.es.com"
+      assert config.elasticUsername == "plrl-test"
+      assert config.prometheusHost == "http://vmetrics.example.com/select/tenant/prometheus"
+      refute config.lokiHost
+    end
+
+    test "it omits elastic config when plural telemetry is enabled" do
+      stub_o11y_conf(true)
+
+      config = Server.get_observability_config(%Plrl.ObservabilityConfigRequest{}, nil)
+
+      refute config.elasticHost
+      refute config.elasticPassword
+      assert config.lokiHost == "https://telemetry.example.com/logs/write/ns/test"
+      assert config.prometheusHost == "https://telemetry.example.com/metrics/read/ns/test"
+      assert config.prometheusUsername == "plrl"
+    end
+  end
+
+  defp stub_o11y_conf(plural) do
+    stub(Console, :conf, fn
+      :cloud_instance -> "test"
+      :plural_o11y -> plural
+      :telemetry_url -> "https://telemetry.example.com"
+      :es_url -> "http://test.es.com"
+      :es_password -> "secret"
+      :vmetrics_url -> "http://vmetrics.example.com"
+      :vmetrics_tenant -> "tenant"
+      key -> Application.get_env(:console, key, nil)
+    end)
   end
 end

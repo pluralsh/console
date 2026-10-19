@@ -1,24 +1,20 @@
 import {
-  Button,
   Card,
   Chip,
   ChipSeverity,
   DocsIcon,
-  EmptyState,
   ErrorIcon,
   ExpandIcon,
   Flex,
   GearTrainIcon,
   HamburgerMenuCollapsedIcon,
   IconFrame,
-  Markdown,
-  Modal,
-  PaperCheckIcon,
   PrClosedIcon,
   PrIcon,
   Tooltip,
   useResizeObserver,
 } from '@pluralsh/design-system'
+import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import { Line } from '@nivo/line'
 import { RunStatusIcon } from 'components/ai/agent-runs/AgentRunInfoDisplays'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
@@ -164,7 +160,10 @@ export function MonitorDetail({
   if (!monitor)
     return (
       <MainSC>
-        <EmptyState message="Monitor not found." />
+        <WorkbenchEmptyState
+          message="Monitor not found"
+          description="It may have been deleted from this workbench."
+        />
       </MainSC>
     )
 
@@ -451,7 +450,12 @@ function MonitorThresholdChart({
 
   if (!isLog) {
     return (
-      <EmptyState message="Threshold preview is available for log monitors with a linked service." />
+      <WorkbenchEmptyState
+        variant="plain"
+        inset={false}
+        message="Threshold preview unavailable"
+        description="Previews are only available for log monitors with a linked service."
+      />
     )
   }
 
@@ -535,9 +539,13 @@ function MetricsThresholdPreview({
   if (error && !data) return <GqlError error={error} />
   if (isEmpty(graphData[0].data))
     return (
-      <EmptyState
-        message="No metric data found for this query."
-        description={emptyDescription}
+      <WorkbenchEmptyState
+        variant="plain"
+        inset={false}
+        message="No metric data"
+        description={
+          emptyDescription ?? 'This query returned no data for the time range.'
+        }
       />
     )
 
@@ -668,7 +676,14 @@ function LogThresholdPreview({
     )
   if (error && !data) return <GqlError error={error} />
   if (isEmpty(graphData[0].data))
-    return <EmptyState message="No log data found for this query." />
+    return (
+      <WorkbenchEmptyState
+        variant="plain"
+        inset={false}
+        message="No log data"
+        description="This query returned no logs for the time range."
+      />
+    )
 
   return (
     <GraphWrapperSC ref={chartRef}>
@@ -908,9 +923,6 @@ function MonitorJobFooter({ job }: { job: WorkbenchJobTinyFragment }) {
         e.stopPropagation()
       }}
     >
-      {job.result?.conclusion && (
-        <ConclusionButton conclusion={job.result.conclusion} />
-      )}
       {singlePr && (
         <IconFrame
           clickable
@@ -983,47 +995,6 @@ function MonitorJobFooter({ job }: { job: WorkbenchJobTinyFragment }) {
         />
       )}
     </JobFooterSC>
-  )
-}
-
-function ConclusionButton({ conclusion }: { conclusion: string }) {
-  const theme = useTheme()
-  const [open, setOpen] = useState(false)
-
-  return (
-    <>
-      <IconFrame
-        clickable
-        size="medium"
-        type="tertiary"
-        tooltip="View conclusion"
-        textValue="View conclusion"
-        icon={<PaperCheckIcon color="icon-xlight" />}
-        onClick={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
-          setOpen(true)
-        }}
-      />
-      <Modal
-        header="Conclusion"
-        size="large"
-        open={open}
-        onClose={() => setOpen(false)}
-        actions={
-          <Button
-            secondary
-            onClick={() => setOpen(false)}
-          >
-            Close
-          </Button>
-        }
-      >
-        <Card css={{ padding: theme.spacing.large, overflow: 'auto' }}>
-          <Markdown text={conclusion} />
-        </Card>
-      </Modal>
-    </>
   )
 }
 

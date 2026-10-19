@@ -112,6 +112,12 @@ func (in *agentRunController) prepare(ctx context.Context) error {
 		// oldest pending prompt itself and advances lastPromptSeq.
 		in.initializePromptCursor()
 	}
+	prepareAttachmentsDir()
+	attachDir := "run"
+	if resumeFollowup {
+		attachDir = promptAttachmentsDir(in.lastPromptSeq)
+	}
+	in.agentRun.Prompt = in.withAttachments(ctx, attachDir, in.agentRun.Prompt, in.agentRun.Attachments)
 	if in.tool, err = tool.New(in.agentRun.Runtime.Type, toolv1.Config{
 		WorkDir:        in.dir,
 		RepositoryDir:  repositoryDir,
@@ -121,7 +127,7 @@ func (in *agentRunController) prepare(ctx context.Context) error {
 		Usage:          in.usage,
 		ResumeFollowup: resumeFollowup,
 	}); err != nil {
-		klog.Fatal(err)
+		return err
 	}
 
 	if err := in.tool.Configure(in.consoleUrl, *in.agentRun.PluralCreds.Token); err != nil {

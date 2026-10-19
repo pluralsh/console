@@ -78,7 +78,7 @@ type FederatedCredentialSpec struct {
 	Scopes []string `json:"scopes,omitempty"`
 
 	// ClaimsLike is a JSON expression that matches the claims in the token.
-	// All the value strings should be a valid regular expression.
+	// All the value strings should be a valid regular expression, which must match the entire claim value.
 	//
 	// Example:
 	// 	...

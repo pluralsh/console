@@ -1,10 +1,10 @@
 import {
-  EmptyState,
   ExpandIcon,
   Flex,
   HamburgerMenuCollapsedIcon,
   IconFrame,
 } from '@pluralsh/design-system'
+import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { CaptionP } from 'components/utils/typography/Text'
@@ -73,7 +73,10 @@ export function DashboardDetail({
   if (!dashboard)
     return (
       <MainSC>
-        <EmptyState message="Dashboard not found." />
+        <WorkbenchEmptyState
+          message="Dashboard not found"
+          description="It may have been deleted from this workbench."
+        />
       </MainSC>
     )
 

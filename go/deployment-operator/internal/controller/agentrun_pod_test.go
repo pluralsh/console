@@ -332,6 +332,8 @@ template:
 	assert.Contains(t, defaultC.VolumeMounts, expectedMount)
 	assert.Contains(t, mcpServer.VolumeMounts, expectedMount)
 	assert.Contains(t, bootstrap.VolumeMounts, expectedMount)
+	assert.Equal(t, corev1.TerminationMessageFallbackToLogsOnError, defaultC.TerminationMessagePolicy)
+	assert.Equal(t, corev1.TerminationMessageFallbackToLogsOnError, bootstrap.TerminationMessagePolicy)
 
 	volume := requireVolume(t, pod.Spec.Volumes, "ca-certificate-only")
 	if assert.NotNil(t, volume.ConfigMap) {
@@ -413,10 +415,12 @@ func TestBuildAgentRunPod_IncludesMCPServerSidecar(t *testing.T) {
 	assert.Equal(t, []string{"/agent-bootstrap"}, bootstrap.Command)
 	assert.Contains(t, bootstrap.Args, "--working-dir")
 	assert.Contains(t, bootstrap.Args, common.AgentRunSharedWorkDir)
+	assert.Equal(t, corev1.TerminationMessageFallbackToLogsOnError, bootstrap.TerminationMessagePolicy)
 	assertAgentBootstrapRestrictedSecurityContext(t, *bootstrap)
 	assert.Contains(t, bootstrap.Env, corev1.EnvVar{Name: "HOME", Value: defaultTmpVolumePath})
 
 	defaultC := requireContainer(t, pod.Spec.Containers, defaultContainer)
+	assert.Equal(t, corev1.TerminationMessageFallbackToLogsOnError, defaultC.TerminationMessagePolicy)
 	if assert.NotNil(t, defaultC.SecurityContext) && assert.NotNil(t, defaultC.SecurityContext.ReadOnlyRootFilesystem) {
 		assert.False(t, *defaultC.SecurityContext.ReadOnlyRootFilesystem)
 	}
@@ -820,6 +824,68 @@ func TestGetAgentRunPodCompletion(t *testing.T) {
 			wantReason: "init container \"agent-bootstrap\" failed with exit code 1: bootstrap failed",
 			wantOK:     true,
 			wantDelay:  true,
+		},
+		{
+			name: "completes failed harness container",
+			pod: &corev1.Pod{
+				Status: corev1.PodStatus{
+					Phase:   corev1.PodFailed,
+					Message: "agent run pod failed",
+					ContainerStatuses: []corev1.ContainerStatus{
+						{
+							Name: defaultContainer,
+							State: corev1.ContainerState{
+								Terminated: &corev1.ContainerStateTerminated{
+									ExitCode: 255,
+									Message:  "agent run failed: could not start",
+								},
+							},
+						},
+					},
+				},
+			},
+			wantStatus: console.AgentRunStatusFailed,
+			wantPhase:  v1alpha1.AgentRunPhaseFailed,
+			wantReason: "container \"default\" failed with exit code 255: agent run failed: could not start",
+			wantOK:     true,
+		},
+		{
+			name: "prefers eviction message over container exit",
+			pod: &corev1.Pod{
+				Status: corev1.PodStatus{
+					Phase:   corev1.PodFailed,
+					Reason:  "Evicted",
+					Message: "The node was low on resource: memory.",
+					ContainerStatuses: []corev1.ContainerStatus{
+						{
+							Name: defaultContainer,
+							State: corev1.ContainerState{
+								Terminated: &corev1.ContainerStateTerminated{
+									ExitCode: 137,
+									Message:  "agent run failed: signal: killed",
+								},
+							},
+						},
+					},
+				},
+			},
+			wantStatus: console.AgentRunStatusFailed,
+			wantPhase:  v1alpha1.AgentRunPhaseFailed,
+			wantReason: "The node was low on resource: memory.",
+			wantOK:     true,
+		},
+		{
+			name: "falls back to pod message when no container failed",
+			pod: &corev1.Pod{
+				Status: corev1.PodStatus{
+					Phase:   corev1.PodFailed,
+					Message: "evicted",
+				},
+			},
+			wantStatus: console.AgentRunStatusFailed,
+			wantPhase:  v1alpha1.AgentRunPhaseFailed,
+			wantReason: "evicted",
+			wantOK:     true,
 		},
 		{
 			name: "completes timed out pod",

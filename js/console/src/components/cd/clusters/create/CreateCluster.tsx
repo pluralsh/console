@@ -394,6 +394,7 @@ export default function CreateCluster() {
     <>
       <Button
         primary
+        small
         {...buttonProps}
       >
         Import Cluster

@@ -1,8 +1,6 @@
 import {
   ArrowTopRightIcon,
   Button,
-  Card,
-  EmptyState,
   Flex,
   IconFrame,
   PencilIcon,
@@ -10,6 +8,7 @@ import {
   TrashCanIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import { createColumnHelper } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
@@ -124,34 +123,30 @@ export function WebhookTriggers() {
           gap="xxsmall"
         />
         {!!data && isEmpty(webhooks) ? (
-          <Card>
-            <EmptyState
-              message="No webhooks yet"
-              description="No webhook connected. Select an existing webhook or manage webhook integrations in settings."
-              css={{ margin: '0 auto', width: 500 }}
-            >
-              <Flex gap="small">
-                <Button
-                  small
-                  secondary
-                  endIcon={<ArrowTopRightIcon />}
-                  onClick={() => navigate(WEBHOOKS_SETTINGS_ABS_PATH)}
-                >
-                  Manage webhooks
-                </Button>
-                <Button
-                  small
-                  onClick={() =>
-                    navigate(
-                      getWorkbenchWebhookTriggerCreateAbsPath(workbenchId)
-                    )
-                  }
-                >
-                  Select existing webhook
-                </Button>
-              </Flex>
-            </EmptyState>
-          </Card>
+          <WorkbenchEmptyState
+            inset={false}
+            message="No webhooks yet"
+            description="Connect a webhook to trigger this workbench from external events. Select an existing webhook, or manage webhook integrations in settings."
+          >
+            <Flex gap="small">
+              <Button
+                small
+                secondary
+                endIcon={<ArrowTopRightIcon />}
+                onClick={() => navigate(WEBHOOKS_SETTINGS_ABS_PATH)}
+              >
+                Manage webhooks
+              </Button>
+              <Button
+                small
+                onClick={() =>
+                  navigate(getWorkbenchWebhookTriggerCreateAbsPath(workbenchId))
+                }
+              >
+                Select existing webhook
+              </Button>
+            </Flex>
+          </WorkbenchEmptyState>
         ) : (
           <StretchedFlex
             direction="column"
@@ -234,7 +229,6 @@ function getColumns({
         return (
           <IconFrame
             type="secondary"
-            css={{ borderRadius: '50%' }}
             icon={webhookTypeIcon(webhook)}
             tooltip={webhookTypeLabel(webhook)}
           />

@@ -28,6 +28,7 @@ func (in *agentRunController) applyFollowupBootPrompt() bool {
 	}
 
 	in.agentRun.Prompt = prompt.Prompt
+	in.agentRun.Attachments = prompt.Attachments
 	in.lastPromptSeq = prompt.Seq
 	klog.V(log.LogLevelInfo).InfoS(
 		"configured follow-up boot prompt",
