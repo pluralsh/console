@@ -14,7 +14,7 @@ func TestAgentExportStagesNativeSession(t *testing.T) {
 	binDir := t.TempDir()
 	opencodePath := filepath.Join(binDir, "opencode")
 	script := "#!/bin/sh\n" +
-		"if [ \"$1\" = \"session\" ] && [ \"$2\" = \"export\" ]; then\n" +
+		"if [ \"$1\" = \"export\" ]; then\n" +
 		"  printf '%s' '{\"id\":\"session-1\"}'\n" +
 		"  exit 0\n" +
 		"fi\n" +
@@ -51,7 +51,7 @@ func TestAgentImportRunsSessionImport(t *testing.T) {
 		"printf '%s\\n' \"$*\" > " + logPath + "\n" +
 		"printf '%s\\n' \"$XDG_DATA_HOME\" >> " + logPath + "\n" +
 		"printf '%s\\n' \"$PWD\" >> " + logPath + "\n" +
-		"if [ \"$1\" = \"session\" ] && [ \"$2\" = \"import\" ]; then\n" +
+		"if [ \"$1\" = \"import\" ]; then\n" +
 		"  exit 0\n" +
 		"fi\n" +
 		"exit 1\n"
@@ -94,8 +94,8 @@ func TestAgentImportRunsSessionImport(t *testing.T) {
 	if len(lines) < 3 {
 		t.Fatalf("opencode log = %q", logData)
 	}
-	if !strings.HasPrefix(lines[0], "session import ") || !strings.Contains(lines[0], sessionJSON) || !strings.Contains(lines[0], "--directory") {
-		t.Fatalf("import args = %q", lines[0])
+	if lines[0] != "import "+sessionJSON {
+		t.Fatalf("import args = %q, want %q", lines[0], "import "+sessionJSON)
 	}
 	wantDataHome := filepath.Join(workDir, ".local", "share")
 	if lines[1] != wantDataHome {

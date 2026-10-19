@@ -13,8 +13,8 @@ import (
 )
 
 // exportSession writes an OpenCode session export JSON to outputPath.
-// OpenCode stores sessions in its XDG data SQLite DB; the CLI export is the
-// portable form used by artifact uploads.
+// OpenCode 1.18.x registers this as a top-level CLI command (`opencode export`),
+// not under `opencode session`.
 func (agent *Agent) exportSession(ctx context.Context, config toolv1.Config, sessionID, outputPath string) error {
 	if sessionID == "" {
 		return fmt.Errorf("opencode session id is not set")
@@ -30,7 +30,7 @@ func (agent *Agent) exportSession(ctx context.Context, config toolv1.Config, ses
 	}
 	defer file.Close()
 
-	cmd := stdexec.CommandContext(ctx, "opencode", "session", "export", sessionID)
+	cmd := stdexec.CommandContext(ctx, "opencode", "export", sessionID)
 	cmd.Env = append(os.Environ(), agent.env(config, configPath)...)
 	cmd.Dir = config.RepositoryDir
 	cmd.Stdout = file
@@ -47,6 +47,9 @@ func (agent *Agent) exportSession(ctx context.Context, config toolv1.Config, ses
 // data home so ACP session/resume can find it. Copying the JSON into
 // .opencode/sessions is not enough — OpenCode looks the session up in its
 // SQLite store under XDG_DATA_HOME.
+//
+// OpenCode 1.18.x uses the top-level `opencode import` command and takes the
+// project directory from the process working directory.
 func (agent *Agent) importSession(ctx context.Context, config toolv1.Config, sessionJSON string) error {
 	if sessionJSON == "" {
 		return fmt.Errorf("opencode session export path is not set")
@@ -68,7 +71,7 @@ func (agent *Agent) importSession(ctx context.Context, config toolv1.Config, ses
 		return fmt.Errorf("create opencode data home: %w", err)
 	}
 
-	cmd := stdexec.CommandContext(ctx, "opencode", "session", "import", sessionJSON, "--directory", repositoryDir)
+	cmd := stdexec.CommandContext(ctx, "opencode", "import", sessionJSON)
 	cmd.Env = append(os.Environ(), agent.env(config, configPath)...)
 	cmd.Dir = repositoryDir
 	var stderr bytes.Buffer
