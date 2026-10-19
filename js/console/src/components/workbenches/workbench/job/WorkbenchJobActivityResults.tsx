@@ -70,7 +70,6 @@ import { isNonNullable } from 'utils/isNonNullable'
 import { getOldContentFromTextDiff } from 'utils/textDiff'
 import { formatUnitValue, yAxisWidth } from '../monitoring/dashboardUnits'
 import {
-  filterMetricSeriesByDuration,
   getMetricSeriesFromResponses,
   type MetricSeries,
 } from './workbenchJobMetrics'
@@ -559,7 +558,6 @@ export function JobActivityMetrics({
   fetchWhen = true,
   withLegend = false,
   withSummary = true,
-  withTimeRange = false,
   title,
   lineProps,
   skeletonHeight = 160,
@@ -571,7 +569,6 @@ export function JobActivityMetrics({
   fetchWhen?: boolean
   withLegend?: boolean
   withSummary?: boolean
-  withTimeRange?: boolean
   title?: Nullable<string>
   skeletonHeight?: number
   lineProps?: Partial<
@@ -579,7 +576,6 @@ export function JobActivityMetrics({
       ComponentPropsWithRef<typeof LineCanvas>
   >
 } & ComponentPropsWithRef<typeof MetricsChartSC>) {
-  const [timeRange, setTimeRange] = useState<MetricsTimeRange>('1d')
   const shouldRunQuery =
     !!jobId && fetchWhen && hasWorkbenchMetricsToolQuery(metricsQuery)
 
@@ -615,9 +611,8 @@ export function JobActivityMetrics({
       />
     )
 
-  const series = filterMetricSeriesByDuration(
-    getMetricSeriesFromResponses(data.workbenchJob?.metricsSeriesTool),
-    METRICS_RANGE_DURATION_MS[timeRange]
+  const series = getMetricSeriesFromResponses(
+    data.workbenchJob?.metricsSeriesTool
   )
 
   if (isEmpty(series)) return null
@@ -636,17 +631,7 @@ export function JobActivityMetrics({
       gap="xsmall"
       width="100%"
     >
-      {(title || withTimeRange) && (
-        <MetricsChartHeaderSC>
-          {title && <Body1P>{title}</Body1P>}
-          {withTimeRange && (
-            <MetricsRangeControl
-              value={timeRange}
-              onChange={setTimeRange}
-            />
-          )}
-        </MetricsChartHeaderSC>
-      )}
+      {title && <Body1P>{title}</Body1P>}
       {withLegend && legend}
       <JobActivityMetricsChart
         series={series}
@@ -665,47 +650,6 @@ export function JobActivityMetrics({
   )
 
   return chartBlock
-}
-
-export type MetricsTimeRange = '1h' | '2h' | '6h' | '1d' | '7d'
-
-const METRICS_TIME_RANGES: { label: string; value: MetricsTimeRange }[] = [
-  { label: '1H', value: '1h' },
-  { label: '2H', value: '2h' },
-  { label: '6H', value: '6h' },
-  { label: '1D', value: '1d' },
-  { label: '7D', value: '7d' },
-]
-
-export function MetricsRangeControl({
-  value,
-  onChange,
-}: {
-  value: MetricsTimeRange
-  onChange: (value: MetricsTimeRange) => void
-}) {
-  return (
-    <MetricsRangeControlSC aria-label="Metrics time range">
-      {METRICS_TIME_RANGES.map(({ label, value: range }) => (
-        <MetricsRangeButtonSC
-          key={range}
-          $active={range === value}
-          type="button"
-          onClick={() => onChange(range)}
-        >
-          {label}
-        </MetricsRangeButtonSC>
-      ))}
-    </MetricsRangeControlSC>
-  )
-}
-
-const METRICS_RANGE_DURATION_MS: Record<MetricsTimeRange, number> = {
-  '1h': 60 * 60 * 1_000,
-  '2h': 2 * 60 * 60 * 1_000,
-  '6h': 6 * 60 * 60 * 1_000,
-  '1d': 24 * 60 * 60 * 1_000,
-  '7d': 7 * 24 * 60 * 60 * 1_000,
 }
 
 /**
@@ -918,44 +862,6 @@ const MetricsChartSC = styled.div(() => ({
   height: 160,
   width: '100%',
 }))
-
-const MetricsChartHeaderSC = styled.div(({ theme }) => ({
-  alignItems: 'center',
-  display: 'flex',
-  gap: theme.spacing.small,
-  justifyContent: 'space-between',
-  minWidth: 0,
-  width: '100%',
-}))
-
-const MetricsRangeControlSC = styled.div(({ theme }) => ({
-  alignItems: 'center',
-  background: theme.colors['fill-zero'],
-  border: `1px solid ${theme.colors.border}`,
-  borderRadius: theme.borderRadiuses.medium,
-  display: 'flex',
-  flexShrink: 0,
-  gap: 2,
-  padding: 2,
-}))
-
-const MetricsRangeButtonSC = styled.button<{ $active: boolean }>(
-  ({ theme, $active }) => ({
-    ...theme.partials.reset.button,
-    ...theme.partials.text.buttonSmall,
-    background: $active ? theme.colors['fill-three'] : 'transparent',
-    borderRadius: theme.borderRadiuses.medium,
-    color: theme.colors['text-light'],
-    cursor: $active ? 'default' : 'pointer',
-    minHeight: 32,
-    minWidth: 32,
-    padding: `0 ${theme.spacing.xsmall}px`,
-    '&:focus-visible': {
-      outline: `1px solid ${theme.colors['border-outline-focused']}`,
-      outlineOffset: 1,
-    },
-  })
-)
 
 const CanvasLogPanelSC = styled.div(({ theme }) => ({
   background: theme.colors['fill-one'],

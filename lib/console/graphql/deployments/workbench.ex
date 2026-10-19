@@ -1136,10 +1136,14 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_canvas_block do
-    field :identifier, :string
-    field :type,       :workbench_canvas_block_type
-    field :layout,     :workbench_canvas_block_layout
-    field :content,    :workbench_canvas_block_content
+    field :identifier,  :string
+    field :type,        :workbench_canvas_block_type
+    field :title,       :string, description: "the header of a section block"
+    field :description, :string, description: "an explanation of what this block shows"
+    field :section_id,  :string, description: "the identifier of the section block this block belongs to"
+    field :collapsed,   :boolean, description: "whether a section block starts collapsed"
+    field :layout,      :workbench_canvas_block_layout
+    field :content,     :workbench_canvas_block_content
   end
 
   object :workbench_job_result_todo do

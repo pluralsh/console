@@ -442,6 +442,10 @@ fragment WorkbenchCanvasToolGraph on WorkbenchCanvasToolGraph {
 fragment WorkbenchCanvasBlock on WorkbenchCanvasBlock {
   identifier
   type
+  title
+  description
+  sectionId
+  collapsed
   layout {
     x
     y

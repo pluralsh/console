@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { MetricSeriesFragment } from 'generated/graphql'
-import {
-  filterMetricSeriesByDuration,
-  getMetricSeriesFromResponses,
-} from './workbenchJobMetrics'
+import { getMetricSeriesFromResponses } from './workbenchJobMetrics'
 
 function metric({
   name = 'requests',
@@ -76,31 +73,6 @@ describe('getMetricSeriesFromResponses', () => {
         data: [],
       },
     ])
-  })
-})
-
-describe('filterMetricSeriesByDuration', () => {
-  it('keeps points within the duration of the latest point across series', () => {
-    const at = (seconds: number) => ({ x: new Date(seconds * 1000), y: 1 })
-    const series = [
-      { id: 'a', label: 'a', shortLabel: 'a', data: [at(0), at(3_000)] },
-      { id: 'b', label: 'b', shortLabel: 'b', data: [at(1_000)] },
-      { id: 'c', label: 'c', shortLabel: 'c', data: [at(3_600)] },
-    ]
-
-    expect(
-      filterMetricSeriesByDuration(series, 3_000_000).map(({ id, data }) => ({
-        id,
-        data,
-      }))
-    ).toEqual([
-      { id: 'a', data: [at(3_000)] },
-      { id: 'b', data: [at(1_000)] },
-      { id: 'c', data: [at(3_600)] },
-    ])
-    expect(
-      filterMetricSeriesByDuration(series, 1_000_000).map(({ id }) => id)
-    ).toEqual(['a', 'c'])
   })
 })
 

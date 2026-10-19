@@ -3153,6 +3153,7 @@ enum WorkbenchCanvasBlockType {
   TRACES
   PIE
   BAR
+  SECTION
 }
 
 enum WorkbenchSkillSubagent {
@@ -5091,8 +5092,23 @@ type WorkbenchCanvasBlockContent {
 
 type WorkbenchCanvasBlock {
   identifier: String
+
   type: WorkbenchCanvasBlockType
+
+  "the header of a section block"
+  title: String
+
+  "an explanation of what this block shows"
+  description: String
+
+  "the identifier of the section block this block belongs to"
+  sectionId: String
+
+  "whether a section block starts collapsed"
+  collapsed: Boolean
+
   layout: WorkbenchCanvasBlockLayout
+
   content: WorkbenchCanvasBlockContent
 }
 

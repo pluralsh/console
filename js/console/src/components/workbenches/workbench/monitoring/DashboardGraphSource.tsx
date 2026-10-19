@@ -31,9 +31,11 @@ export type DashboardPanelGraph = Pick<
   // authenticated only, for the query modal
   datasource?: WorkbenchDashboardGraph['datasource']
   workbenchTool?: WorkbenchDashboardGraph['workbenchTool']
+  /** Rendered as the panel body instead of fetched data, e.g. job canvas charts with inline data. */
+  staticContent?: ReactNode
 }
 
-type GraphResult = NonNullable<
+export type GraphResult = NonNullable<
   NonNullable<WorkbenchDashboardGraphQuery['workbenchDashboard']>['graph']
 >
 

@@ -51,25 +51,6 @@ function metricSeriesId({ name, labels }: MetricSeriesKey): string {
     .join(',')}}`
 }
 
-/**
- * Restricts every series to points within `durationMs` of the latest point,
- * dropping series left without points.
- */
-export function filterMetricSeriesByDuration(
-  series: MetricSeries[],
-  durationMs: number
-): MetricSeries[] {
-  let latest = -Infinity
-  for (const { data } of series)
-    for (const { x } of data) latest = Math.max(latest, x.getTime())
-
-  const from = latest - durationMs
-
-  return series
-    .map((s) => ({ ...s, data: s.data.filter(({ x }) => x.getTime() >= from) }))
-    .filter(({ data }) => data.length > 0)
-}
-
 function metricSeriesLabel({ name, labels }: MetricSeriesKey): string {
   const label = metricLabelEntries(labels)
     .map(([key, value]) => `${key}=${value}`)
