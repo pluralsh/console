@@ -5,7 +5,7 @@ description: Receive ServiceNow ticket events in Plural
 
 A ServiceNow webhook delivers ticket changes from ServiceNow into Plural. ServiceNow has no built-in outbound webhook, so you send records from a Business Rule. Plural accepts records from four tables: incidents (`incident`), change requests (`change_request`), problems (`problem`), and catalog tasks (`sc_task`). Records from other tables are acknowledged and ignored.
 
-A ticket event does not start a job by itself. A job starts only when a [webhook trigger](/plural-features/workbenches/automation#webhook-triggers) on a workbench matches the ticket.
+A ticket event does not start a job by itself. A job starts only when a [webhook trigger](/plural-features/workbenches/automation#webhook-triggers) on a workbench matches the ticket, and only while the ticket is open: a ticket in state New or On Hold that just became open starts one job. Later updates to a ticket that is already in progress, resolved, or cancelled do not start another one, so the agent's own work notes and state changes do not re-trigger it.
 
 ## What Plural reads from the payload
 
@@ -75,6 +75,8 @@ Open **System Properties** (`sys_properties.list`) and create a string property,
 ### Create a Business Rule
 
 Open **System Definition → Business Rules** and create a rule for each table you want to send. Set **Advanced**, run it `async`, and check **Insert** and **Update**.
+
+Add a condition so the rule only sends the tickets you want, for example `Short description contains [plural]` for a trigger that matches that text, and `Updated by is not plural.agent` so the rule does not send the changes the agent makes itself with the integration user. Plural only starts a job for a ticket that is open, so these updates do not start another job, but they would still be sent.
 
 ```javascript
 (function executeRule(current, previous) {
