@@ -20,8 +20,10 @@ import {
 } from 'components/ai/chatbot/SidePanelShared'
 import {
   SidePanel,
+  SidePanelAutoOpen,
+  useSidePanelAutoOpen,
   useTopLevelSidePanel,
-} from 'components/layout/TopLevelSidePanel'
+} from 'components/layout/TopLevelSidePanelState'
 import { TabLabelWithIndicatorDot } from 'components/workbenches/common/TabLabelWithIndicatorDot'
 import {
   AgentRunStatus,
@@ -30,12 +32,11 @@ import {
   useWorkbenchJobQuery,
   WorkbenchJobFragment,
 } from 'generated/graphql'
-import { isEmpty, isNil, uniqBy } from 'lodash'
+import { isEmpty, uniqBy } from 'lodash'
 import {
   ReactElement,
   useCallback,
   useEffect,
-  useEffectEvent,
   useMemo,
   useRef,
   useState,
@@ -355,24 +356,22 @@ export function WorkbenchJobCommonTabContent({
   }
 }
 
-export function useWorkbenchJobPanel(autoOpen?: Nullable<boolean>) {
-  const { sidePanel, setSidePanel } = useTopLevelSidePanel()
+export function useWorkbenchJobPanel(autoOpen?: Nullable<SidePanelAutoOpen>) {
+  const { sidePanel, setSidePanel, closeSidePanel } = useTopLevelSidePanel()
   const isOpen = sidePanel === SIDE_PANEL_TYPE
   const setOpen = useCallback(
-    (open: boolean) => setSidePanel(open ? SIDE_PANEL_TYPE : null),
-    [setSidePanel]
+    (open: boolean) =>
+      open ? setSidePanel(SIDE_PANEL_TYPE) : closeSidePanel(SIDE_PANEL_TYPE),
+    [setSidePanel, closeSidePanel]
   )
-
-  const onAutoOpen = useEffectEvent(() => setOpen(true))
-  const onUnmount = useEffectEvent(() => setOpen(false))
-  useEffect(() => {
-    if (!!autoOpen) onAutoOpen()
-    return () => {
-      if (!isNil(autoOpen)) onUnmount()
-    }
-  }, [autoOpen])
+  useSidePanelAutoOpen(SIDE_PANEL_TYPE, autoOpen)
 
   return { isOpen, setOpen }
+}
+
+// Whether the panel has a tab to show once loaded, matching `getPanelTabs`.
+export function hasWorkbenchJobPanelTabs(data: WorkbenchJobTabsData) {
+  return !isEmpty(getPanelTabs({ ...data, isLoading: false }))
 }
 
 const ContentWrapperSC = styled.div(() => ({

@@ -27,9 +27,11 @@ import { SaveWorkbenchPromptButton } from '../SaveWorkbenchPromptButton'
 import { WorkbenchJobActivities } from './WorkbenchJobActivities'
 import { WorkbenchJobMeta } from './WorkbenchJobMeta'
 import { isJobRunning } from './WorkbenchJobActivity'
-import { useWorkbenchJobPanel } from './WorkbenchJobPanel'
-import { hasWorkbenchJobPanelContent } from './workbenchJobResultUtils'
-import { useWorkbenchJobActionSummary } from './useWorkbenchJobActionSummary'
+import {
+  hasWorkbenchJobPanelTabs,
+  useWorkbenchJobPanel,
+  useWorkbenchJobTabsData,
+} from './WorkbenchJobPanel'
 
 export function WorkbenchJob() {
   const theme = useTheme()
@@ -47,10 +49,14 @@ export function WorkbenchJob() {
 
   const job = data?.workbenchJob
   const isLoading = loading && !job
-  const { hasActions } = useWorkbenchJobActionSummary(jobId)
-  const hasPanelContent = hasWorkbenchJobPanelContent(job, hasActions)
+  const panelData = useWorkbenchJobTabsData(jobId)
+  const hasPanelContent = !!job?.id && hasWorkbenchJobPanelTabs(panelData)
 
-  const { isOpen, setOpen } = useWorkbenchJobPanel(!!job?.id && hasPanelContent)
+  const { isOpen, setOpen } = useWorkbenchJobPanel({
+    hasContent: hasPanelContent,
+    loading: isLoading || panelData.isLoading || panelData.areActionsLoading,
+    key: jobId,
+  })
   useSidePanelWidth({
     maxWidthVw: 60,
     initialWidthVw:
@@ -151,7 +157,7 @@ export function WorkbenchJob() {
           />
         </WrapperSC>
       </MainColumnSC>
-      {!!job?.id && hasPanelContent && !isOpen && (
+      {hasPanelContent && !isOpen && (
         <PanelOpenBtnSC
           tertiary
           onClick={() => setOpen(true)}
