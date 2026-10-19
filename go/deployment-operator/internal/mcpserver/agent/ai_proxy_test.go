@@ -24,7 +24,7 @@ func TestConsoleAIProxyInjectsTokenAndKeepsPath(t *testing.T) {
 	token := "plural-token"
 	srv := NewServer(nil, WithConsoleAIProxy(upstream.URL+"/ext/ai", func() string { return token }))
 
-	request := httptest.NewRequest(http.MethodPost, common.AgentConsoleAIPath+"anthropic/v1/messages?beta=true", strings.NewReader(`{"model":"claude"}`))
+	request := localRequest(http.MethodPost, common.AgentConsoleAIPath+"anthropic/v1/messages?beta=true", strings.NewReader(`{"model":"claude"}`))
 	request.Header.Set("Authorization", "Bearer "+common.AgentAIProxyAPIKey)
 	request.Header.Set("X-Api-Key", common.AgentAIProxyAPIKey)
 	response := httptest.NewRecorder()
@@ -47,7 +47,7 @@ func TestConsoleAIProxyInjectsTokenAndKeepsPath(t *testing.T) {
 	}
 
 	token = "refreshed-token"
-	srv.httpServer.Handler.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(http.MethodGet, common.AgentConsoleAIPath+"v1/models", nil))
+	srv.httpServer.Handler.ServeHTTP(httptest.NewRecorder(), localRequest(http.MethodGet, common.AgentConsoleAIPath+"v1/models", nil))
 	if got := received.Header.Get("Authorization"); got != "Bearer refreshed-token" {
 		t.Fatalf("refreshed authorization = %q", got)
 	}
@@ -91,7 +91,7 @@ func TestOpenAIProxyReplacesCallerCredential(t *testing.T) {
 
 	srv := NewServer(nil, WithOpenAIProxy(upstream.URL, "", func() string { return "plural-token" }))
 
-	request := httptest.NewRequest(http.MethodPost, common.AgentOpenAIChatCompletionsPath, strings.NewReader(`{"model":"gpt-4","messages":[]}`))
+	request := localRequest(http.MethodPost, common.AgentOpenAIChatCompletionsPath, strings.NewReader(`{"model":"gpt-4","messages":[]}`))
 	request.Header.Set("Authorization", "Bearer "+common.AgentAIProxyAPIKey)
 	srv.httpServer.Handler.ServeHTTP(httptest.NewRecorder(), request)
 

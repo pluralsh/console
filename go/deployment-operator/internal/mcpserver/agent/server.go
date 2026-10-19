@@ -3,6 +3,7 @@ package agent
 import (
 	"context"
 	"fmt"
+	"net"
 	"net/http"
 
 	"github.com/mark3labs/mcp-go/server"
@@ -114,7 +115,7 @@ func (in *Server) init() *Server {
 		klog.V(log.LogLevelDefault).InfoS("registered openai responses proxy", "path", common.AgentOpenAIResponsesPath)
 	}
 
-	in.httpServer = &http.Server{Handler: mux}
+	in.httpServer = &http.Server{Handler: loopbackOnly(mux)}
 	return in
 }
 
@@ -131,4 +132,18 @@ func NewServer(client console.Client, options ...Option) *Server {
 	}
 
 	return mcpServer.init()
+}
+
+// loopbackOnly rejects callers that are not in the pod itself. The listener stays on all interfaces
+// because the kubelet's startup probe dials the pod IP, but the proxies behind it inject the deploy
+// token and must not be usable by other pods.
+func loopbackOnly(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		host, _, err := net.SplitHostPort(r.RemoteAddr)
+		if ip := net.ParseIP(host); err != nil || ip == nil || !ip.IsLoopback() {
+			http.Error(w, "only local callers are allowed", http.StatusForbidden)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
 }

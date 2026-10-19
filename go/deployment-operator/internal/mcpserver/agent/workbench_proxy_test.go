@@ -98,7 +98,7 @@ func TestWorkbenchMCPProxyKeepsOperatorToolFilter(t *testing.T) {
 	))
 
 	for _, target := range []string{"", "?tools=raw_kube_get", "?categories=infrastructure"} {
-		srv.httpServer.Handler.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(
+		srv.httpServer.Handler.ServeHTTP(httptest.NewRecorder(), localRequest(
 			http.MethodPost,
 			common.AgentWorkbenchMCPPath+target,
 			strings.NewReader(`{"jsonrpc":"2.0"}`),
