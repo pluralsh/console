@@ -378,8 +378,8 @@ fragment WorkbenchJobThought on WorkbenchJobThought {
     logs {
       ...WorkbenchJobActivityLog
     }
-    metrics {
-      ...WorkbenchJobActivityMetric
+    series {
+      ...MetricSeries
     }
     traces {
       ...WorkbenchJobActivityTrace

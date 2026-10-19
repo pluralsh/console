@@ -971,7 +971,12 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_job_thought_attributes do
-    field :metrics, list_of(:workbench_job_activity_metric), description: "metrics for the thought"
+    field :series, list_of(:metric_response),
+      description: "metric series for the thought, with labels sent once per series",
+      resolve: &Deployments.thought_metric_series/3
+    field :metrics, list_of(:workbench_job_activity_metric),
+      description: "metrics for the thought, one entry per point (prefer series)",
+      resolve: &Deployments.thought_metrics/3
     field :logs,    list_of(:workbench_job_activity_log), description: "logs for the thought"
     field :traces,  list_of(:workbench_job_activity_trace), description: "traces for the thought"
   end

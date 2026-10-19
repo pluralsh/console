@@ -1,5 +1,5 @@
 defmodule Console.Schema.RouterFilter do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{Cluster, Service, Pipeline, NotificationRouter, Stack}
 
   schema "router_filters" do
@@ -34,6 +34,7 @@ defmodule Console.Schema.RouterFilter do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> validate_uuids(~w(cluster_id service_id pipeline_id router_id)a)
     |> foreign_key_constraint(:cluster_id)
     |> foreign_key_constraint(:service_id)
     |> foreign_key_constraint(:pipeline_id)

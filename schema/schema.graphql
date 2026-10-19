@@ -4819,7 +4819,10 @@ type WorkbenchJobThought {
 }
 
 type WorkbenchJobThoughtAttributes {
-  "metrics for the thought"
+  "metric series for the thought, with labels sent once per series"
+  series: [MetricResponse]
+
+  "metrics for the thought, one entry per point (prefer series)"
   metrics: [WorkbenchJobActivityMetric]
 
   "logs for the thought"

@@ -67,7 +67,10 @@ defmodule Console.GraphQl.Observability do
 
   object :metric_response do
     field :name,   :string, description: "the metric name, for backends that report it separately from the labels in `metric`"
-    field :metric, :map
+    field :metric, :map, resolve: fn
+      %{labels: labels}, _, _ -> {:ok, labels}
+      result, _, _ -> {:ok, Map.get(result, :metric)}
+    end
     field :values, list_of(:metric_result), resolve: fn
       %{samples: samples}, _, _ when is_list(samples) ->
         {:ok, Enum.map(samples, &%{timestamp: DateTime.to_unix(&1.timestamp, :millisecond) / 1000, value: &1.value})}

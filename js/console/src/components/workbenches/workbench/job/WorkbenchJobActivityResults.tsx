@@ -47,7 +47,6 @@ import {
   useWorkbenchJobMetricsSeriesToolQuery,
   useWorkbenchJobTracesToolQuery,
   WorkbenchJobActivityLogFragment,
-  WorkbenchJobActivityMetricFragment,
   WorkbenchJobActivityResultFragment,
   WorkbenchJobActivityTraceFragment,
   WorkbenchToolQueryData,
@@ -72,7 +71,6 @@ import { getOldContentFromTextDiff } from 'utils/textDiff'
 import { formatUnitValue, yAxisWidth } from '../monitoring/dashboardUnits'
 import {
   filterMetricSeriesByDuration,
-  getMetricSeries,
   getMetricSeriesFromResponses,
   type MetricSeries,
 } from './workbenchJobMetrics'
@@ -448,15 +446,14 @@ export function JobActivityMetricsChart({
 
 /** Inline metrics chart that opens in the same modal as activity metrics. */
 export function ExpandableJobActivityMetrics({
-  metrics,
+  series,
 }: {
-  metrics: WorkbenchJobActivityMetricFragment[]
+  series: MetricSeries[]
 }) {
   const [open, setOpen] = useState(false)
   const [finishedAnimating, setFinishedAnimating] = useState(false)
   const [selectedSeriesId, setSelectedSeriesId] = useState<string | null>(null)
   const expandTriggerRef = useRef<HTMLDivElement>(null)
-  const series = useMemo(() => getMetricSeries(metrics), [metrics])
   const selectedSeriesIndex = series.findIndex(
     ({ id }) => id === selectedSeriesId
   )
