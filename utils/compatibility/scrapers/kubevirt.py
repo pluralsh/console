@@ -8,6 +8,7 @@ from packaging.version import Version
 
 from utils import (
     fetch_page,
+    github_headers,
     print_error,
     update_compatibility_info,
 )
@@ -39,6 +40,7 @@ def latest_stable_release_by_minor() -> dict[str, str]:
         response = requests.get(
             "https://api.github.com/repos/kubevirt/kubevirt/releases",
             params={"page": page, "per_page": 100},
+            headers=github_headers(),
             timeout=REQUEST_TIMEOUT,
         )
         if response.status_code != 200:
