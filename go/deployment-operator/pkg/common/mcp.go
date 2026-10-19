@@ -15,14 +15,16 @@ const (
 	AgentOpenAIResponsesURL        = "http://127.0.0.1:8080/v1/responses"
 	AgentOpenAIBaseURL             = "http://127.0.0.1:8080/v1"
 
-	// AgentConsoleExtGQLPath proxies the harness's Console ext API calls; the sidecar injects the deploy token.
+	// AgentConsoleProxyURL stands in for the Console URL in the harness and in agent AI provider config.
+	// The sidecar forwards the paths below to Console and injects the deploy token.
+	AgentConsoleProxyURL = "http://127.0.0.1:8080/plural"
+
+	// AgentConsoleExtGQLPath proxies the harness's Console ext API calls.
 	AgentConsoleExtGQLPath = "/plural/ext/gql"
 	AgentConsoleExtGQLURL  = AgentConsoleProxyURL + "/ext/gql"
 
-	// AgentConsoleProxyURL stands in for the Console URL in agent AI provider config. The sidecar
-	// forwards AgentConsoleAIPath to the Console AI proxy and injects the deploy token.
-	AgentConsoleProxyURL = "http://127.0.0.1:8080/plural"
-	AgentConsoleAIPath   = "/plural/ext/ai/"
+	// AgentConsoleAIPath proxies the agent's model calls to the Console AI proxy.
+	AgentConsoleAIPath = "/plural/ext/ai/"
 	// AgentAIProxyAPIKey is the placeholder API key agents send to the sidecar, which replaces it.
 	AgentAIProxyAPIKey = "plural-sidecar"
 

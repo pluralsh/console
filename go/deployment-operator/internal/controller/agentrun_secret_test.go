@@ -8,12 +8,15 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
+	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 )
 
@@ -68,22 +71,26 @@ func TestReconcileSecretsCreateOwnedSecrets(t *testing.T) {
 	assert.Equal(t, "uid-x", runSecret.Annotations[agentRunUIDAnnotation])
 	// The fake client stores StringData as sent; the API server would merge it into Data.
 	assert.NotContains(t, runSecret.StringData, EnvDeployToken)
+	assert.NotContains(t, runSecret.StringData, EnvConsoleURL)
 
 	pluralSecret := getTestSecret(t, r, pluralSecretName("x"))
 	assert.Equal(t, "uid-x", pluralSecret.Annotations[agentRunUIDAnnotation])
 	assert.Equal(t, "deploy-token", pluralSecret.StringData[EnvDeployToken])
+	assert.Equal(t, "https://console.test.com", pluralSecret.StringData[EnvConsoleURL])
 }
 
 func TestReconcilePluralSecretUpdatesOwnToken(t *testing.T) {
 	existing := &corev1.Secret{
 		ObjectMeta: runSecretMeta(pluralSecretName("x"), newSecretTestRun("x", "uid-x")),
-		Data:       map[string][]byte{EnvDeployToken: []byte("old-token")},
+		Data:       map[string][]byte{EnvDeployToken: []byte("old-token"), EnvConsoleURL: []byte("https://old.test.com")},
 	}
 	r := newSecretTestReconciler(t, existing)
 
 	_, err := r.reconcilePluralSecret(context.Background(), newSecretTestRun("x", "uid-x"))
 	require.NoError(t, err)
-	assert.Equal(t, "deploy-token", getTestSecret(t, r, pluralSecretName("x")).StringData[EnvDeployToken])
+	secret := getTestSecret(t, r, pluralSecretName("x"))
+	assert.Equal(t, "deploy-token", secret.StringData[EnvDeployToken])
+	assert.Equal(t, "https://console.test.com", secret.StringData[EnvConsoleURL])
 }
 
 func TestReconcileSecretsRejectSecretsOfAnotherRun(t *testing.T) {
@@ -115,5 +122,51 @@ func TestReconcileSecretsRejectSecretsOfAnotherRun(t *testing.T) {
 				assert.Equal(t, map[string][]byte{"other": []byte("data")}, secret.Data, secretName)
 			}
 		})
+	}
+}
+
+func TestDeleteRunSecretsRemovesOnlyThisRunsSecrets(t *testing.T) {
+	run := newSecretTestRun("x", "uid-x")
+	own := &corev1.Secret{ObjectMeta: runSecretMeta(pluralSecretName("x"), run)}
+	foreign := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{
+		Name: runSecretName("x"), Namespace: "ns", Annotations: map[string]string{agentRunUIDAnnotation: "uid-other"},
+	}}
+	r := newSecretTestReconciler(t, own, foreign)
+
+	require.NoError(t, r.deleteRunSecrets(context.Background(), run))
+
+	err := r.Get(context.Background(), types.NamespacedName{Name: pluralSecretName("x"), Namespace: "ns"}, &corev1.Secret{})
+	assert.True(t, apierrors.IsNotFound(err), "own plural secret should be deleted, got %v", err)
+	getTestSecret(t, r, runSecretName("x"))
+
+	// Nothing left to delete is not an error.
+	require.NoError(t, r.deleteRunSecrets(context.Background(), newSecretTestRun("y", "uid-y")))
+}
+
+// A run deleted before its pod existed has no pod to garbage-collect its secrets with.
+func TestReconcileDeletesSecretsOfRunWithoutPod(t *testing.T) {
+	scheme := runtime.NewScheme()
+	require.NoError(t, corev1.AddToScheme(scheme))
+	require.NoError(t, v1alpha1.AddToScheme(scheme))
+
+	run := newSecretTestRun("x", "uid-x")
+	run.Spec.Mode = console.AgentRunModeWrite
+	run.Finalizers = []string{AgentRunFinalizer}
+	run.DeletionTimestamp = lo.ToPtr(metav1.Now())
+	r := &AgentRunReconciler{
+		Client: fake.NewClientBuilder().WithScheme(scheme).WithObjects(
+			run,
+			&corev1.Secret{ObjectMeta: runSecretMeta(runSecretName("x"), run)},
+			&corev1.Secret{ObjectMeta: runSecretMeta(pluralSecretName("x"), run)},
+		).WithStatusSubresource(&v1alpha1.AgentRun{}).Build(),
+		Scheme: scheme,
+	}
+
+	_, err := r.Reconcile(context.Background(), ctrl.Request{NamespacedName: types.NamespacedName{Name: "x", Namespace: "ns"}})
+	require.NoError(t, err)
+
+	for _, name := range []string{runSecretName("x"), pluralSecretName("x")} {
+		err := r.Get(context.Background(), types.NamespacedName{Name: name, Namespace: "ns"}, &corev1.Secret{})
+		assert.True(t, apierrors.IsNotFound(err), "%s should be deleted, got %v", name, err)
 	}
 }

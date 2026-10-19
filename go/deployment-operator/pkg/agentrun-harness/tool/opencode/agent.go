@@ -80,8 +80,7 @@ func (agent *Agent) Configure(ctx context.Context, request toolv1.ConfigureReque
 		return fmt.Errorf("unsupported opencode configuration phase %q", request.Phase)
 	}
 	if request.Phase == toolv1.ConfigurePhaseBabysit {
-		// Babysit reuses the provider configuration written during the initial
-		// pass. Rewriting it would discard the transient proxy token.
+		// Babysit reuses the provider configuration written during the initial pass.
 		return nil
 	}
 

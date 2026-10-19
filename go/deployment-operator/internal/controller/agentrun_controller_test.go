@@ -155,13 +155,14 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 			// Verify secret was created
 			secret := &corev1.Secret{}
 			Expect(kClient.Get(ctx, types.NamespacedName{Name: runSecretName(runNamespacedName.Name), Namespace: runNamespacedName.Namespace}, secret)).NotTo(HaveOccurred())
-			Expect(string(secret.Data[EnvConsoleURL])).Should(Equal(consoleURL))
+			Expect(secret.Data).ShouldNot(HaveKey(EnvConsoleURL))
 			Expect(secret.Data).ShouldNot(HaveKey(EnvDeployToken))
 			Expect(string(secret.Data[EnvAgentRunID])).Should(Equal(runID))
 
 			pluralSecret := &corev1.Secret{}
 			Expect(kClient.Get(ctx, types.NamespacedName{Name: pluralSecretName(runName), Namespace: runNamespacedName.Namespace}, pluralSecret)).NotTo(HaveOccurred())
 			Expect(string(pluralSecret.Data[EnvDeployToken])).Should(Equal(deployToken))
+			Expect(string(pluralSecret.Data[EnvConsoleURL])).Should(Equal(consoleURL))
 
 			// Verify pod was created
 			pod := &corev1.Pod{}
@@ -724,8 +725,8 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 			run.Status.ID = lo.ToPtr("run-456")
 
 			data := reconciler.getSecretData(run, nil, console.AgentRuntimeTypeClaude, nil, nil, nil)
-			Expect(data).Should(HaveLen(2))
-			Expect(data[EnvConsoleURL]).Should(Equal("https://console.test.com"))
+			Expect(data).Should(HaveLen(1))
+			Expect(data).ShouldNot(HaveKey(EnvConsoleURL))
 			Expect(data).ShouldNot(HaveKey(EnvDeployToken))
 			Expect(data[EnvAgentRunID]).Should(Equal("run-456"))
 		})
@@ -739,22 +740,13 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 			run.Status.ID = lo.ToPtr("run-789")
 
 			secretData := map[string][]byte{
-				EnvConsoleURL: []byte("https://console.test.com"),
 				EnvAgentRunID: []byte("run-789"),
 			}
 
 			Expect(reconciler.hasSecretData(secretData, run)).Should(BeTrue())
 
-			// Wrong URL
-			wrongSecretData := map[string][]byte{
-				EnvConsoleURL: []byte("https://wrong.url.com"),
-				EnvAgentRunID: []byte("run-789"),
-			}
-			Expect(reconciler.hasSecretData(wrongSecretData, run)).Should(BeFalse())
-
 			// Wrong run ID
 			wrongRunIDData := map[string][]byte{
-				EnvConsoleURL: []byte("https://console.test.com"),
 				EnvAgentRunID: []byte("wrong-run-id"),
 			}
 			Expect(reconciler.hasSecretData(wrongRunIDData, run)).Should(BeFalse())

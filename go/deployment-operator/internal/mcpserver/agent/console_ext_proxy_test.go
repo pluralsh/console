@@ -169,6 +169,13 @@ func TestConsoleExtProxyRejectsOtherOperations(t *testing.T) {
 		}(),
 	}
 
+	// Requests the allowlist can't even parse get their own status; everything else is a 403.
+	wantStatus := map[string]int{
+		"batched":      http.StatusBadRequest,
+		"form encoded": http.StatusUnsupportedMediaType,
+		"get":          http.StatusMethodNotAllowed,
+	}
+
 	for name, request := range cases {
 		t.Run(name, func(t *testing.T) {
 			response, err := http.DefaultClient.Do(request)
@@ -176,8 +183,15 @@ func TestConsoleExtProxyRejectsOtherOperations(t *testing.T) {
 				t.Fatal(err)
 			}
 			_ = response.Body.Close()
-			if response.StatusCode != http.StatusForbidden {
-				t.Fatalf("status = %d, want 403", response.StatusCode)
+			want, ok := wantStatus[name]
+			if !ok {
+				want = http.StatusForbidden
+			}
+			if response.StatusCode != want {
+				t.Fatalf("status = %d, want %d", response.StatusCode, want)
+			}
+			if want == http.StatusMethodNotAllowed && response.Header.Get("Allow") != http.MethodPost {
+				t.Fatalf("Allow = %q, want POST", response.Header.Get("Allow"))
 			}
 		})
 	}
@@ -234,6 +248,22 @@ func TestConsoleExtProxyRejectsUnexpectedMultipartParts(t *testing.T) {
 			_ = w.WriteField("map", `{"0":["variables.patch"]}`)
 			_ = w.WriteField("documentId", client.HashQuery(client.GetAgentRuntimeDocument))
 		},
+		"duplicate file part": func(w *multipart.Writer) {
+			_ = w.WriteField("map", `{"0":["variables.patch"]}`)
+			for range 2 {
+				file, _ := w.CreateFormFile("0", "patch.diff")
+				_, _ = file.Write([]byte("diff"))
+			}
+		},
+		"file part not in the map": func(w *multipart.Writer) {
+			_ = w.WriteField("map", `{"0":["variables.patch"]}`)
+			file, _ := w.CreateFormFile("1", "patch.diff")
+			_, _ = file.Write([]byte("diff"))
+		},
+		"mapped part is not a file": func(w *multipart.Writer) {
+			_ = w.WriteField("map", `{"0":["variables.patch"]}`)
+			_ = w.WriteField("0", "diff")
+		},
 	}
 
 	for name, parts := range cases {
@@ -270,4 +300,95 @@ func jsonRequest(url string, body any) *http.Request {
 	r, _ := http.NewRequest(http.MethodPost, url, bytes.NewReader(payload))
 	r.Header.Set("Content-Type", "application/json")
 	return r
+}
+
+func TestConsoleExtProxyRejectsBadRequestsWithTheirStatus(t *testing.T) {
+	upload := func(variables map[string]any, fields ...[2]string) *http.Request {
+		operations, _ := json.Marshal(map[string]any{"query": client.CreateAgentRunUploadDocument, "variables": variables})
+		body := &bytes.Buffer{}
+		writer := multipart.NewWriter(body)
+		if len(fields) == 0 {
+			fields = [][2]string{{"operations", string(operations)}, {"map", `{"0":["variables.patch"]}`}}
+		}
+		for _, field := range fields {
+			_ = writer.WriteField(field[0], field[1])
+		}
+		file, _ := writer.CreateFormFile("0", "patch.diff")
+		_, _ = file.Write([]byte("diff"))
+		_ = writer.Close()
+		r, _ := http.NewRequest(http.MethodPost, "", body)
+		r.Header.Set("Content-Type", writer.FormDataContentType())
+		return r
+	}
+	ownUpload := map[string]any{"runId": testAgentRunID, "patch": nil}
+	oversize := strings.Repeat("a", maxConsoleExtOperationBytes+1)
+
+	cases := map[string]struct {
+		request func(url string) *http.Request
+		status  int
+	}{
+		"oversize operation": {func(url string) *http.Request {
+			r, _ := http.NewRequest(http.MethodPost, url, strings.NewReader(`{"query":"`+oversize+`"}`))
+			r.Header.Set("Content-Type", "application/json")
+			return r
+		}, http.StatusRequestEntityTooLarge},
+		"malformed JSON": {func(url string) *http.Request {
+			r, _ := http.NewRequest(http.MethodPost, url, strings.NewReader(`{"query":`))
+			r.Header.Set("Content-Type", "application/json")
+			return r
+		}, http.StatusBadRequest},
+		"multipart without a boundary": {func(url string) *http.Request {
+			r, _ := http.NewRequest(http.MethodPost, url, strings.NewReader("x"))
+			r.Header.Set("Content-Type", "multipart/form-data")
+			return r
+		}, http.StatusBadRequest},
+		"oversize multipart operations": {func(url string) *http.Request {
+			return upload(nil, [2]string{"operations", oversize})
+		}, http.StatusRequestEntityTooLarge},
+		"map before operations": {func(url string) *http.Request {
+			operations, _ := json.Marshal(map[string]any{"query": client.CreateAgentRunUploadDocument, "variables": ownUpload})
+			return upload(nil, [2]string{"map", `{"0":["variables.patch"]}`}, [2]string{"operations", string(operations)})
+		}, http.StatusBadRequest},
+		"upload variable already set": {func(url string) *http.Request {
+			return upload(map[string]any{"runId": testAgentRunID, "patch": "inline"})
+		}, http.StatusForbidden},
+		"upload for another run": {func(url string) *http.Request {
+			return upload(map[string]any{"runId": "other-run", "patch": nil})
+		}, http.StatusForbidden},
+		"message for another run": {func(url string) *http.Request {
+			return jsonRequest(url, map[string]any{
+				"query":     client.CreateAgentMessageDocument,
+				"variables": map[string]any{"runId": "other-run", "attributes": map[string]any{}},
+			})
+		}, http.StatusForbidden},
+		"run update for another run": {func(url string) *http.Request {
+			return jsonRequest(url, map[string]any{
+				"query":     client.UpdateAgentRunDocument,
+				"variables": map[string]any{"id": "other-run", "attributes": map[string]any{}},
+			})
+		}, http.StatusForbidden},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			sidecar, received := newConsoleExtTestSidecar(t)
+			request := tc.request(sidecar.URL)
+			if request.URL.Host == "" {
+				request.URL, _ = request.URL.Parse(sidecar.URL)
+			}
+
+			response, err := http.DefaultClient.Do(request)
+			if err != nil {
+				t.Fatal(err)
+			}
+			body, _ := io.ReadAll(response.Body)
+			_ = response.Body.Close()
+			if response.StatusCode != tc.status {
+				t.Fatalf("status = %d, want %d; body = %q", response.StatusCode, tc.status, body)
+			}
+			if requests := received(); len(requests) != 0 {
+				t.Fatalf("upstream received %d requests, want 0", len(requests))
+			}
+		})
+	}
 }

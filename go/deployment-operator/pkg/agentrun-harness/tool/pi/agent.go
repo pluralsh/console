@@ -80,8 +80,7 @@ func (agent *Agent) Prepare(ctx context.Context, request toolv1.FileSystemReques
 }
 
 // Configure writes Pi's native model and MCP configuration for the initial
-// phase. Babysit runs reuse that configuration so transient proxy credentials
-// are not replaced.
+// phase. Babysit runs reuse that configuration.
 func (agent *Agent) Configure(ctx context.Context, request toolv1.ConfigureRequest) error {
 	if err := agent.contextError(ctx); err != nil {
 		return err

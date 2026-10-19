@@ -150,6 +150,9 @@ func (r *AgentRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 		controllerutil.AddFinalizer(run, AgentRunFinalizer)
 	}
 	if !run.GetDeletionTimestamp().IsZero() {
+		if err := r.deleteRunSecrets(ctx, run); err != nil {
+			return ctrl.Result{}, err
+		}
 		controllerutil.RemoveFinalizer(run, AgentRunFinalizer)
 		return ctrl.Result{}, nil
 	}
@@ -640,7 +643,6 @@ func (r *AgentRunReconciler) resolveSigningKey(ctx context.Context, runtime *v1a
 
 func (r *AgentRunReconciler) getSecretData(run *v1alpha1.AgentRun, config *v1alpha1.AgentRuntimeConfigRaw, runtimeType console.AgentRuntimeType, signingKey []byte, exaConnection *v1alpha1.ExaConnectionRaw, mcpServers []mcp.Server) map[string]string {
 	result := map[string]string{
-		EnvConsoleURL: r.ConsoleURL,
 		EnvAgentRunID: run.Status.GetID(),
 	}
 
@@ -767,8 +769,11 @@ func (r *AgentRunReconciler) getSecretData(run *v1alpha1.AgentRun, config *v1alp
 	return result
 }
 
-// reconcilePluralSecret keeps the deploy token in a separate secret that is never mounted into the default container.
+// reconcilePluralSecret keeps the deploy token and Console URL in a separate secret that is never mounted
+// into the default container. Only the sidecar and bootstrap talk to Console directly.
 func (r *AgentRunReconciler) reconcilePluralSecret(ctx context.Context, run *v1alpha1.AgentRun) (*corev1.Secret, error) {
+	data := map[string]string{EnvDeployToken: r.DeployToken, EnvConsoleURL: r.ConsoleURL}
+
 	secret := &corev1.Secret{}
 	if err := r.Get(ctx, types.NamespacedName{Name: pluralSecretName(run.Name), Namespace: run.Namespace}, secret); err != nil {
 		if !errors.IsNotFound(err) {
@@ -777,7 +782,7 @@ func (r *AgentRunReconciler) reconcilePluralSecret(ctx context.Context, run *v1a
 
 		secret = &corev1.Secret{
 			ObjectMeta: runSecretMeta(pluralSecretName(run.Name), run),
-			StringData: map[string]string{EnvDeployToken: r.DeployToken},
+			StringData: data,
 		}
 		if err = r.Create(ctx, secret); err != nil {
 			return nil, fmt.Errorf("failed to create plural secret: %w", err)
@@ -789,8 +794,8 @@ func (r *AgentRunReconciler) reconcilePluralSecret(ctx context.Context, run *v1a
 		return nil, err
 	}
 
-	if string(secret.Data[EnvDeployToken]) != r.DeployToken {
-		secret.StringData = map[string]string{EnvDeployToken: r.DeployToken}
+	if string(secret.Data[EnvDeployToken]) != r.DeployToken || string(secret.Data[EnvConsoleURL]) != r.ConsoleURL {
+		secret.StringData = data
 		if err := r.Update(ctx, secret); err != nil {
 			return nil, fmt.Errorf("failed to update plural secret: %w", err)
 		}
@@ -819,8 +824,27 @@ func checkRunSecretOwner(secret *corev1.Secret, run *v1alpha1.AgentRun) error {
 }
 
 func (r *AgentRunReconciler) hasSecretData(data map[string][]byte, run *v1alpha1.AgentRun) bool {
-	url, hasUrl := data[EnvConsoleURL]
 	id, hasID := data[EnvAgentRunID]
-	return hasUrl && hasID &&
-		string(url) == r.ConsoleURL && string(id) == run.Status.GetID()
+	return hasID && string(id) == run.Status.GetID()
+}
+
+// deleteRunSecrets removes this run's secrets. They are owned by the pod, so this only matters when the
+// pod was never created, which would otherwise leave the deploy token behind.
+func (r *AgentRunReconciler) deleteRunSecrets(ctx context.Context, run *v1alpha1.AgentRun) error {
+	for _, name := range []string{runSecretName(run.Name), pluralSecretName(run.Name)} {
+		secret := &corev1.Secret{}
+		if err := r.Get(ctx, types.NamespacedName{Name: name, Namespace: run.Namespace}, secret); err != nil {
+			if errors.IsNotFound(err) {
+				continue
+			}
+			return fmt.Errorf("failed to get secret %s: %w", name, err)
+		}
+		if checkRunSecretOwner(secret, run) != nil {
+			continue
+		}
+		if err := r.Delete(ctx, secret); err != nil && !errors.IsNotFound(err) {
+			return fmt.Errorf("failed to delete secret %s: %w", name, err)
+		}
+	}
+	return nil
 }

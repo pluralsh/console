@@ -67,6 +67,9 @@ func TestConsoleAIProxyRejectsPathsOutsideAI(t *testing.T) {
 		common.AgentConsoleAIPath + "../gql",
 		common.AgentConsoleAIPath + "%2e%2e/gql",
 		common.AgentConsoleAIPath + "v1/./../../gql",
+		common.AgentConsoleAIPath + "%2f..%2fgql",
+		common.AgentConsoleAIPath + "..%2fgql",
+		common.AgentConsoleAIPath + "v1/..",
 		"/plural/ext/gql",
 	} {
 		response := httptest.NewRecorder()

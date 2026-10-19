@@ -54,31 +54,54 @@ type consoleExtRequest struct {
 func newConsoleExtAllowlist(agentRunID string, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if err := rebuildConsoleExtRequest(r, agentRunID); err != nil {
-			http.Error(w, err.Error(), http.StatusForbidden)
+			status := http.StatusForbidden
+			var rejected *consoleExtRejection
+			if errors.As(err, &rejected) {
+				status = rejected.status
+			}
+			if status == http.StatusMethodNotAllowed {
+				w.Header().Set("Allow", http.MethodPost)
+			}
+			http.Error(w, err.Error(), status)
 			return
 		}
 		next.ServeHTTP(w, r)
 	})
 }
 
+// consoleExtRejection is a refused request that isn't an allowlist violation, answered with its own status.
+// Every other error is answered with 403.
+type consoleExtRejection struct {
+	status int
+	err    error
+}
+
+func (e *consoleExtRejection) Error() string { return e.err.Error() }
+
+func (e *consoleExtRejection) Unwrap() error { return e.err }
+
+func reject(status int, format string, args ...any) error {
+	return &consoleExtRejection{status: status, err: fmt.Errorf(format, args...)}
+}
+
 func rebuildConsoleExtRequest(r *http.Request, agentRunID string) error {
 	if r.Method != http.MethodPost {
-		return fmt.Errorf("method %s is not allowed", r.Method)
+		return reject(http.StatusMethodNotAllowed, "method %s is not allowed", r.Method)
 	}
 
 	mediaType, params, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
 	if err != nil {
-		return fmt.Errorf("invalid content type: %w", err)
+		return reject(http.StatusBadRequest, "invalid content type: %w", err)
 	}
 
 	switch mediaType {
 	case "application/json":
 		body, err := io.ReadAll(io.LimitReader(r.Body, maxConsoleExtOperationBytes+1))
 		if err != nil {
-			return fmt.Errorf("could not read request: %w", err)
+			return reject(http.StatusBadRequest, "could not read request: %w", err)
 		}
 		if len(body) > maxConsoleExtOperationBytes {
-			return fmt.Errorf("request is too large")
+			return reject(http.StatusRequestEntityTooLarge, "request is too large")
 		}
 		request, hash, err := checkConsoleExtOperation(body, agentRunID, nil)
 		if err != nil {
@@ -93,7 +116,7 @@ func rebuildConsoleExtRequest(r *http.Request, agentRunID string) error {
 	case "multipart/form-data":
 		return rebuildConsoleExtMultipart(r, agentRunID, params["boundary"])
 	default:
-		return fmt.Errorf("content type %s is not allowed", mediaType)
+		return reject(http.StatusUnsupportedMediaType, "content type %s is not allowed", mediaType)
 	}
 }
 
@@ -102,7 +125,7 @@ func rebuildConsoleExtRequest(r *http.Request, agentRunID string) error {
 func checkConsoleExtOperation(body []byte, agentRunID string, uploadMap map[string][]string) (*consoleExtRequest, string, error) {
 	request := &consoleExtRequest{}
 	if err := json.Unmarshal(body, request); err != nil {
-		return nil, "", fmt.Errorf("invalid operation: %w", err)
+		return nil, "", reject(http.StatusBadRequest, "invalid operation: %w", err)
 	}
 
 	hash := client.HashQuery(request.Query)
@@ -131,7 +154,7 @@ func checkConsoleExtOperation(body []byte, agentRunID string, uploadMap map[stri
 // mapped file parts upstream. A bad file part aborts the upstream body so Console never runs it.
 func rebuildConsoleExtMultipart(r *http.Request, agentRunID, boundary string) error {
 	if boundary == "" {
-		return fmt.Errorf("multipart request has no boundary")
+		return reject(http.StatusBadRequest, "multipart request has no boundary")
 	}
 	reader := multipart.NewReader(r.Body, boundary)
 
@@ -145,7 +168,7 @@ func rebuildConsoleExtMultipart(r *http.Request, agentRunID, boundary string) er
 	}
 	uploadMap := map[string][]string{}
 	if err := json.Unmarshal(rawMap, &uploadMap); err != nil {
-		return fmt.Errorf("invalid upload map: %w", err)
+		return reject(http.StatusBadRequest, "invalid upload map: %w", err)
 	}
 
 	request, hash, err := checkConsoleExtOperation(operations, agentRunID, uploadMap)
@@ -204,17 +227,17 @@ func writeConsoleExtMultipart(writer *multipart.Writer, reader *multipart.Reader
 func readFormField(reader *multipart.Reader, name string) ([]byte, error) {
 	part, err := reader.NextPart()
 	if err != nil {
-		return nil, fmt.Errorf("could not read multipart %q field: %w", name, err)
+		return nil, reject(http.StatusBadRequest, "could not read multipart %q field: %w", name, err)
 	}
 	if part.FormName() != name || part.FileName() != "" {
-		return nil, fmt.Errorf("expected multipart %q field, got %q", name, part.FormName())
+		return nil, reject(http.StatusBadRequest, "expected multipart %q field, got %q", name, part.FormName())
 	}
 	value, err := io.ReadAll(io.LimitReader(part, maxConsoleExtOperationBytes+1))
 	if err != nil {
-		return nil, fmt.Errorf("could not read multipart %q field: %w", name, err)
+		return nil, reject(http.StatusBadRequest, "could not read multipart %q field: %w", name, err)
 	}
 	if len(value) > maxConsoleExtOperationBytes {
-		return nil, fmt.Errorf("multipart %q field is too large", name)
+		return nil, reject(http.StatusRequestEntityTooLarge, "multipart %q field is too large", name)
 	}
 	return value, nil
 }
