@@ -168,11 +168,12 @@ func (in *Gemini) start(ctx context.Context, options ...exec.Option) {
 		env = append(env, fmt.Sprintf("GEMINI_API_BASE_URL=%s", *in.Config.Run.Runtime.Config.Gemini.Endpoint))
 	}
 
+	resume := in.Config.ResumeFollowup && in.sessionID != ""
 	in.executable = exec.NewExecutable(
 		"gemini",
 		append(
 			options,
-			exec.WithArgs(in.args("", false)),
+			exec.WithArgs(in.args("", resume)),
 			exec.WithDir(in.Config.WorkDir),
 			exec.WithEnv(env),
 			exec.WithTimeout(in.Config.Run.Runtime.Config.Gemini.Timeout),
@@ -181,8 +182,8 @@ func (in *Gemini) start(ctx context.Context, options ...exec.Option) {
 
 	klog.V(log.LogLevelInfo).InfoS("Gemini executable configured", "timeout", in.Config.Run.Runtime.Config.Gemini.Timeout)
 
-	// Send the initial prompt as a message too
-	if in.onMessage != nil {
+	// Cold-start follow-ups already persist the user prompt via createAgentRunPrompt.
+	if !in.Config.ResumeFollowup && in.onMessage != nil {
 		in.onMessage(&console.AgentMessageAttributes{Message: in.Config.Run.Prompt, Role: console.AiRoleUser}, "")
 	}
 

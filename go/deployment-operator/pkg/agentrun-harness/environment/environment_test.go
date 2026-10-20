@@ -496,13 +496,58 @@ func TestCloneRepositoryChecksOutFollowupHeadBranch(t *testing.T) {
 	}
 }
 
-func TestCheckoutFollowupBranchRequiresHeadBranch(t *testing.T) {
+func TestCheckoutFollowupBranchSkipsWhenNoBranch(t *testing.T) {
 	env := &environment{agentRun: &v1.AgentRun{Followup: true}}
 
-	err := env.checkoutFollowupBranch(t.TempDir())
-
-	if err == nil || err.Error() != "follow-up agent run requires a head branch to check out" {
+	if err := env.checkoutFollowupBranch(t.TempDir()); err != nil {
 		t.Fatalf("checkoutFollowupBranch() error = %v", err)
+	}
+}
+
+func TestCheckoutFollowupBranchFallsBackToBranch(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	t.Setenv("GIT_CONFIG_NOSYSTEM", "1")
+	t.Setenv("TMPDIR", t.TempDir())
+	runGit(t, home, "config", "--global", "--add", "safe.directory", "*")
+
+	origin := initGitRepo(t, "main")
+	runGit(t, origin, "checkout", "-b", "analyze-base")
+	if err := os.WriteFile(filepath.Join(origin, "README"), []byte("base\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	runGit(t, origin, "add", "README")
+	runGit(t, origin, "commit", "-m", "base")
+	runGit(t, origin, "checkout", "main")
+
+	baseBranch := "analyze-base"
+	workDir := t.TempDir()
+	env := &environment{
+		agentRun: &v1.AgentRun{
+			Repository: origin,
+			Branch:     &baseBranch,
+			Followup:   true,
+		},
+		dir: workDir,
+	}
+	if err := env.cloneRepository(); err != nil {
+		t.Fatalf("cloneRepository() failed: %v", err)
+	}
+
+	dest := filepath.Join(workDir, "repository")
+	contents, err := os.ReadFile(filepath.Join(dest, "README"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(contents) != "base\n" {
+		t.Fatalf("copied README = %q, want base after falling back to branch", contents)
+	}
+	current, err := exec.Command("git", "-C", dest, "branch", "--show-current").Output()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := strings.TrimSpace(string(current)); got != baseBranch {
+		t.Fatalf("branch = %q, want %s", got, baseBranch)
 	}
 }
 

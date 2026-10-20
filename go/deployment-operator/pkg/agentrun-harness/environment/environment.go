@@ -308,9 +308,14 @@ func (in *environment) checkoutFollowupBranch(repoDirPath string) error {
 		return nil
 	}
 
+	// Prefer the PR head branch when present (write/review follow-ups). Analyze
+	// and other runs without a head branch stay on the default clone / Branch.
 	headBranch := strings.TrimSpace(lo.FromPtr(in.agentRun.HeadBranch))
 	if headBranch == "" {
-		return fmt.Errorf("follow-up agent run requires a head branch to check out")
+		headBranch = strings.TrimSpace(lo.FromPtr(in.agentRun.Branch))
+	}
+	if headBranch == "" {
+		return nil
 	}
 
 	if output, err := exec.NewExecutable("git",

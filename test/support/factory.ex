@@ -1211,6 +1211,13 @@ defmodule Console.Factory do
     }
   end
 
+  def agent_prompt_factory do
+    %Schema.AgentPrompt{
+      agent_run: build(:agent_run),
+      prompt: "a queued prompt"
+    }
+  end
+
   def agent_message_factory do
     %Schema.AgentMessage{
       agent_run: build(:agent_run),

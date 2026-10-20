@@ -45,6 +45,8 @@ defmodule Console.GraphQl.Configuration do
     field :plural_login,            :boolean
     field :vpn_enabled,             :boolean
     field :sentry_enabled,          :boolean
+    field :object_store_enabled,    :boolean,
+      description: "whether object store is configured for session uploads and agent run reprompting"
     field :installed,               :boolean,
       resolve: fn _, _, _ -> {:ok, Console.Deployments.Clusters.installed?()} end,
       description: "whether at least one cluster has been installed, false if a user hasn't fully onboarded"

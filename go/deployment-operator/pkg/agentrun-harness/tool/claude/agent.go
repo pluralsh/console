@@ -128,6 +128,28 @@ func (agent *Agent) Export(ctx context.Context, request toolv1.ExportRequest) (t
 	}}, nil
 }
 
+func (agent *Agent) Import(ctx context.Context, request toolv1.ImportRequest) (string, error) {
+	if err := agent.contextError(ctx); err != nil {
+		return "", err
+	}
+	if request.Manifest == nil {
+		return "", errors.New("claude session manifest is not set")
+	}
+	config, err := agent.configWithClaude()
+	if err != nil {
+		return "", err
+	}
+	archivePath := request.Manifest.Session.ArchivePath
+	if archivePath == "" {
+		archivePath = claudeProjectsDir
+	}
+	destination := filepath.Join(agent.configPath(config), claudeProjectsDir)
+	if err := artifacts.RestoreArchiveTree(ctx, request.ExtractDir, archivePath, destination); err != nil {
+		return "", fmt.Errorf("import claude session: %w", err)
+	}
+	return request.Manifest.Session.ID, nil
+}
+
 func (agent *Agent) configWithClaude() (toolv1.Config, error) {
 	if agent.config.WorkDir == "" {
 		return toolv1.Config{}, errors.New("work directory is not set")

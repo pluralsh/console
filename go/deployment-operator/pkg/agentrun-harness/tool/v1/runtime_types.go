@@ -112,6 +112,13 @@ type ExportResult struct {
 	SessionSource artifacts.SessionSource
 }
 
+// ImportRequest asks an agent to restore native session files from an
+// extracted session archive so a follow-up turn can resume prior history.
+type ImportRequest struct {
+	Manifest   *artifacts.SessionManifest
+	ExtractDir string
+}
+
 // TurnSink receives provider-neutral events from Transport. Every callback
 // is optional; Runtime supplies a nil-safe implementation when it starts a
 // turn.
@@ -151,6 +158,9 @@ type Agent interface {
 	ResolveSettings(*agentrunv1.AgentRun) (Settings, error)
 	Configure(context.Context, ConfigureRequest) error
 	Export(context.Context, ExportRequest) (ExportResult, error)
+	// Import restores provider-native session files from an extracted archive.
+	// It returns the session ID that should be used for subsequent resume turns.
+	Import(context.Context, ImportRequest) (sessionID string, err error)
 }
 
 // Transport owns one agent invocation protocol. Runtime serializes calls to

@@ -91,6 +91,12 @@ type Tool interface {
 	// best-effort artifacts for createAgentRunUpload. Failures must not be
 	// written to ErrorChan; the controller logs them without failing the run.
 	UploadArtifacts(ctx context.Context) (*artifacts.UploadArtifacts, error)
+
+	// RestoreSession downloads and restores a prior session archive so a
+	// follow-up cold start can resume provider history. Returns the restored
+	// session ID. Failures are returned to the caller and must not be written
+	// to ErrorChan.
+	RestoreSession(ctx context.Context, sessionURL string) (sessionID string, err error)
 }
 
 // DefaultTool is a partial base implementation of the Tool interface.
@@ -139,4 +145,9 @@ type Config struct {
 	// completion immediately. Use this in tests to jump straight to babysitLoop
 	// without needing a real Claude/Gemini/Codex process.
 	SkipInitialRun bool
+
+	// ResumeFollowup runs the configured prompt as a follow-up turn that
+	// resumes a restored session instead of emitting a fresh initial user
+	// message. Used when cold-starting a terminal reprompt.
+	ResumeFollowup bool
 }

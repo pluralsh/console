@@ -808,6 +808,98 @@ defmodule Console.Deployments.AgentsTest do
 
       {:error, _} = Agents.create_prompt("a prompt", run.id, user)
     end
+
+    test "terminal runs are requeued to pending with followup when session uploads are enabled" do
+      user = insert(:user)
+      run = insert(:agent_run,
+        user: user,
+        status: :successful,
+        error: "prior error",
+        approved_at: Timex.now(),
+        pod_reference: %{name: "agent-pod", namespace: "plrl-runtime"}
+      )
+      insert(:agent_run_upload, agent_run: run)
+      insert(:agent_prompt, agent_run: run, prompt: "old queued prompt")
+
+      stub(Console, :conf, fn :object_store -> true end)
+
+      {:ok, prompt} = Agents.create_prompt("continue from here", run.id, user)
+
+      assert prompt.prompt == "continue from here"
+      requeued = refetch(run)
+      assert requeued.status == :pending
+      assert requeued.followup
+      assert is_nil(requeued.error)
+      assert is_nil(requeued.approved_at)
+      assert is_nil(requeued.pod_reference)
+
+      prompts = AgentPrompt.for_run(run.id) |> Repo.all()
+      assert length(prompts) == 1
+      assert hd(prompts).prompt == "continue from here"
+    end
+
+    test "terminal runs cannot be requeued without object store" do
+      user = insert(:user)
+      run = insert(:agent_run, user: user, status: :failed)
+      insert(:agent_run_upload, agent_run: run)
+
+      stub(Console, :conf, fn :object_store -> false end)
+
+      {:error, "object store is not enabled" <> _} =
+        Agents.create_prompt("continue", run.id, user)
+    end
+
+    test "terminal runs cannot be requeued without a session upload" do
+      user = insert(:user)
+      run = insert(:agent_run, user: user, status: :cancelled)
+
+      stub(Console, :conf, fn :object_store -> true end)
+
+      {:error, "agent run has no uploaded session to restore"} =
+        Agents.create_prompt("continue", run.id, user)
+    end
+
+    test "terminal runs cannot be requeued with an empty session upload" do
+      user = insert(:user)
+      run = insert(:agent_run, user: user, status: :failed)
+      insert(:agent_run_upload, agent_run: run, session: "")
+
+      stub(Console, :conf, fn :object_store -> true end)
+
+      {:error, "agent run has no uploaded session to restore"} =
+        Agents.create_prompt("continue", run.id, user)
+    end
+
+    test "review mode terminal runs cannot be requeued" do
+      user = insert(:user)
+      run = insert(:agent_run, user: user, status: :successful, mode: :review)
+      insert(:agent_run_upload, agent_run: run)
+
+      stub(Console, :conf, fn :object_store -> true end)
+
+      {:error, "review mode agent runs cannot be reprompted"} =
+        Agents.create_prompt("continue", run.id, user)
+    end
+
+    test "prompts queued after requeue are preserved" do
+      user = insert(:user)
+      run = insert(:agent_run, user: user, status: :successful)
+      insert(:agent_run_upload, agent_run: run)
+
+      stub(Console, :conf, fn :object_store -> true end)
+
+      {:ok, _} = Agents.create_prompt("first follow-up", run.id, user)
+      {:ok, _} = Agents.create_prompt("second follow-up", run.id, user)
+
+      prompts =
+        AgentPrompt.for_run(run.id)
+        |> Repo.all()
+        |> Enum.sort_by(& &1.seq)
+
+      assert Enum.map(prompts, & &1.prompt) == ["first follow-up", "second follow-up"]
+      assert refetch(run).status == :pending
+      assert refetch(run).followup
+    end
   end
 
   describe "share_agent_run/3" do

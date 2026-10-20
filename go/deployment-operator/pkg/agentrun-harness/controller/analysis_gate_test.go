@@ -132,6 +132,10 @@ func (t *recordingTool) UploadArtifacts(context.Context) (*artifacts.UploadArtif
 	return nil, nil
 }
 
+func (t *recordingTool) RestoreSession(context.Context, string) (string, error) {
+	return "", nil
+}
+
 type fakeBabysitGRPCClient struct {
 	details map[string]*scm.PRDetails
 }

@@ -56,7 +56,7 @@ func maxPromptSeq(prompts []*gqlclient.AgentPromptFragment) int64 {
 func nextPrompt(prompts []*gqlclient.AgentPromptFragment, after int64) *gqlclient.AgentPromptFragment {
 	var next *gqlclient.AgentPromptFragment
 	for _, prompt := range prompts {
-		if prompt == nil || prompt.Seq <= after {
+		if prompt == nil || prompt.Seq <= after || strings.TrimSpace(prompt.Prompt) == "" {
 			continue
 		}
 		if next == nil || prompt.Seq < next.Seq {
