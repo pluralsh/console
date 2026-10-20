@@ -92,11 +92,4 @@ With everything, you should start seeing both metrics data and log aggregations 
 
 ![](/assets/getting-started/metrics.png)
 
-To see a log aggregation, either navigate to a cluster or to an individual service, and find the `Logs` tab, you'll see a log aggregation view like:
-
-![](/assets/getting-started/log-tail.png)
-
-
-And you can tune the log view with the filter modal like:
-
-![](/assets/getting-started/log-filters.png)
+To see a log aggregation, either navigate to a cluster or to an individual service, and find the `Logs` tab, you'll see a log aggregation view. You can tune the log view with the filter modal.
