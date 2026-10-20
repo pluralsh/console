@@ -6,6 +6,9 @@
     "outDir": "dist",
     // Override parent tsconfig.app.json (keeps noImplicitAny off for console)
     "noImplicitAny": true,
+    // Emit .d.ts into dist for the published package (JS comes from vite)
+    "noEmit": false,
+    "emitDeclarationOnly": true,
     "paths": {
       "*": ["./*"]
     }

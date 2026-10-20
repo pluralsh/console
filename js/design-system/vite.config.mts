@@ -3,7 +3,6 @@ import { resolve } from 'path'
 import { defineConfig } from 'vite'
 import react, { reactCompilerPreset } from '@vitejs/plugin-react'
 import babel from '@rolldown/plugin-babel'
-import dts from 'vite-plugin-dts'
 
 export default defineConfig({
   build: {
@@ -34,15 +33,6 @@ export default defineConfig({
       presets: [reactCompilerPreset({ panicThreshold: 'all_errors' })],
       plugins: ['styled-components'],
       exclude: [/[/\\]node_modules[/\\]/],
-    }),
-    dts({
-      insertTypesEntry: true,
-      include: ['src'],
-      exclude: ['**/*.stories.tsx', '**/*.test.tsx'],
-      beforeWriteFile: (filePath, content) => ({
-        filePath: filePath.replace(/src/, 'dist'),
-        content,
-      }),
     }),
   ],
 })
