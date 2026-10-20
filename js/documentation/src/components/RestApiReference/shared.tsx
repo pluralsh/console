@@ -4,28 +4,16 @@
 
 import styled from 'styled-components'
 
+import { brand } from '@src/theme/docsTheme'
+
 // ─── Status colors ───────────────────────────────────────────────────────────
 
-const STATUS_COLORS: Record<number, string> = {
-  200: '#3DD68C',
-  201: '#3DD68C',
-  400: '#FF8B3E',
-  401: '#FF8B3E',
-  403: '#FF8B3E',
-  404: '#FF8B3E',
-  422: '#FF8B3E',
-  500: '#FF6369',
-  502: '#FF6369',
-  503: '#FF6369',
-}
-
 export function getStatusColor(status: number): string {
-  if (STATUS_COLORS[status]) return STATUS_COLORS[status]
-  if (status >= 200 && status < 300) return '#3DD68C'
-  if (status >= 400 && status < 500) return '#FF8B3E'
-  if (status >= 500) return '#FF6369'
+  if (status >= 200 && status < 300) return brand.success
+  if (status >= 400 && status < 500) return brand.warning
+  if (status >= 500) return brand.danger
 
-  return '#9E8CFC'
+  return brand.violet
 }
 
 // ─── Status tabs ─────────────────────────────────────────────────────────────
@@ -50,9 +38,10 @@ export const StatusTab = styled.button<{ $active: boolean }>(
       : '2px solid transparent',
     marginBottom: -1,
     cursor: 'pointer',
-    ...theme.partials.text.body2Bold,
-    color: $active ? theme.colors.text : theme.colors['text-light'],
-    '&:hover': { color: theme.colors.text },
+    ...theme.partials.text.body2,
+    fontWeight: 500,
+    color: $active ? brand.ink : brand.muted,
+    '&:hover': { color: brand.ink },
   })
 )
 
@@ -90,10 +79,9 @@ export const Td = styled.td(({ theme }) => ({
 
 export const TypeTag = styled.span(({ theme }) => ({
   ...theme.partials.text.caption,
-  color: theme.colors['text-xlight'],
-  background: theme.colors['fill-one'],
-  padding: '2px 6px',
-  borderRadius: theme.borderRadiuses.medium,
+  fontFamily: theme.fontFamilies.mono,
+  fontVariantLigatures: 'none',
+  color: brand.ink,
 }))
 
 export const TdLight = styled(Td)(({ theme }) => ({

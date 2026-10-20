@@ -4,6 +4,8 @@ import { GitHubLogoIcon } from '@pluralsh/design-system'
 
 import styled from 'styled-components'
 
+import { brand, docsText } from '@src/theme/docsTheme'
+
 function PageFooter({ className }: { className?: string }) {
   return (
     <footer
@@ -31,15 +33,14 @@ function PageFooter({ className }: { className?: string }) {
   )
 }
 
-export const FooterLink = styled.a(({ theme }) => ({
+export const FooterLink = styled.a((_) => ({
   '&, &:any-link': {
-    ...theme.partials.text.body2,
-    color: theme.colors['text-xlight'],
+    ...docsText.eyebrow,
     textDecoration: 'none',
+    transition: 'color 0.2s ease-out',
   },
   '&:any-link:hover': {
-    color: theme.colors['text-light'],
-    textDecoration: 'underline',
+    color: brand.ink,
   },
 }))
 
@@ -60,7 +61,9 @@ export default styled(PageFooter)(({ theme }) => ({
   position: 'sticky',
   top: '100vh',
   display: 'flex',
-  gap: theme.spacing.medium,
+  gap: theme.spacing.large,
   flexWrap: 'wrap',
+  paddingTop: 20,
   marginBottom: theme.spacing.large,
+  borderTop: `1px solid ${brand.line}`,
 }))

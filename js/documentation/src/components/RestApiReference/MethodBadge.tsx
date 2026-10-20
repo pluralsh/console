@@ -5,19 +5,20 @@
 import styled from 'styled-components'
 
 import type { HttpMethod } from '@src/lib/openapi-rest'
+import { brand } from '@src/theme/docsTheme'
 
 export type { HttpMethod }
 
-const METHOD_STYLES: Record<
-  HttpMethod,
-  { bg: string; border: string; color: string }
-> = {
-  GET: { bg: '#074F37', border: '#0A6B4A', color: '#99F5D5' },
-  POST: { bg: '#004166', border: '#006199', color: '#99DAFF' },
-  DELETE: { bg: '#660A19', border: '#8B0E23', color: '#FAC7D0' },
-  PATCH: { bg: '#7B341E', border: '#9C4221', color: '#FEEBC8' },
-  PUT: { bg: '#553C9A', border: '#6B46C1', color: '#F1F1FE' },
+const METHOD_COLORS: Record<HttpMethod, string> = {
+  GET: brand.success,
+  POST: brand['accent-ink'],
+  DELETE: brand.danger,
+  PATCH: brand.warning,
+  PUT: brand.violet,
 }
+
+const tint = (color: string, percent: number) =>
+  `color-mix(in srgb, ${color} ${percent}%, transparent)`
 
 const METHOD_LABELS: Record<HttpMethod, string> = {
   GET: 'GET',
@@ -27,21 +28,22 @@ const METHOD_LABELS: Record<HttpMethod, string> = {
   PUT: 'PUT',
 }
 
-const Badge = styled.span<{ $method: HttpMethod }>(({ $method }) => ({
+const Badge = styled.span<{ $method: HttpMethod }>(({ theme, $method }) => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   gap: 8,
-  padding: '2px 4px',
-  borderRadius: 6,
-  border: `0.75px solid ${METHOD_STYLES[$method].border}`,
-  background: METHOD_STYLES[$method].bg,
-  color: METHOD_STYLES[$method].color,
-  fontFamily: 'Inter, sans-serif',
-  fontSize: 11,
-  fontWeight: 400,
+  padding: '2px 6px',
+  borderRadius: 4,
+  border: `1px solid ${tint(METHOD_COLORS[$method], 18)}`,
+  background: tint(METHOD_COLORS[$method], 10),
+  color: METHOD_COLORS[$method],
+  fontFamily: theme.fontFamilies.mono,
+  fontVariantLigatures: 'none',
+  fontSize: 10,
+  fontWeight: 500,
   lineHeight: '16px',
-  letterSpacing: '1.25px',
+  letterSpacing: '0.06em',
   textTransform: 'uppercase' as const,
 }))
 

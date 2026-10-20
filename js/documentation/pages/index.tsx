@@ -21,18 +21,23 @@ import Link, { type LinkProps } from 'next/link'
 import styled, { useTheme } from 'styled-components'
 
 import { mqs } from '@src/components/Breakpoints'
+import { brand, docsText } from '@src/theme/docsTheme'
+import { brandTokens } from '@src/theme/palette'
 
 const { Heading: MarkdocHeading } = markdocComponents
 
+// The hero art is a dark product shot, so like the marketing site's product
+// mocks it stays dark in both color modes.
 const Hero = styled.div(({ theme }) => ({
   background: 'url(/images/landing/hero-bg-sm.png)',
   backgroundSize: '100% 100%',
   borderRadius: theme.borderRadiuses.large,
-  border: theme.borders['fill-one'],
+  border: `1px solid ${brand.line}`,
   overflow: 'hidden',
   h1: {
     margin: 0,
     marginBottom: theme.spacing.xsmall,
+    color: brandTokens.dark.ink,
   },
   '.contentWrap': {
     width: '100%',
@@ -44,7 +49,7 @@ const Hero = styled.div(({ theme }) => ({
     padding: `${theme.spacing.xlarge}px ${theme.spacing.large}px `,
     p: {
       ...theme.partials.marketingText.body1,
-      color: theme.colors['text-light'],
+      color: brandTokens.dark.body,
       margin: 0,
     },
   },
@@ -58,7 +63,8 @@ const Hero = styled.div(({ theme }) => ({
     display: 'flex',
     '& > *': { flexShrink: 0 },
     h1: {
-      ...theme.partials.marketingText.hero2,
+      ...docsText.pageTitle,
+      color: brandTokens.dark.ink,
     },
     '.content': {
       maxWidth: '48.2%',
@@ -110,10 +116,14 @@ const CardLink = styled(CardLinkUnstyled)(({ theme }) => ({
   columnGap: theme.spacing.large,
   padding: theme.spacing.large,
   alignItems: 'flex-start',
-  backgroundColor: theme.colors['fill-one'],
-  borderRadius: theme.borderRadiuses.large,
+  backgroundColor: brand.surface,
+  border: `1px solid ${brand['line-strong']}`,
+  borderRadius: 4,
+  textDecoration: 'none',
+  transition: 'border-color 0.2s ease-out',
   '&:hover': {
-    backgroundColor: theme.colors['fill-one-hover'],
+    borderColor: brand['accent-line'],
+    '.heading': { color: brand['accent-ink'] },
   },
   '.icon': {
     flexShrink: 0,
@@ -124,13 +134,14 @@ const CardLink = styled(CardLinkUnstyled)(({ theme }) => ({
   '.heading': {
     margin: 0,
     ...theme.partials.marketingText.body2Bold,
-    color: theme.colors.text,
+    color: brand.ink,
+    transition: 'color 0.2s ease-out',
   },
   p: {
     margin: 0,
     ...theme.partials.marketingText.componentText,
     textWrap: 'pretty',
-    color: theme.colors['text-light'],
+    color: brand.muted,
   },
 }))
 
@@ -173,8 +184,7 @@ function Index() {
               {tableOfContents[0].title}
             </MarkdocHeading>
             <p>
-              Get started with Plural Console, the enterprise Kubernetes
-              management platform.
+              Get Started with Plural: the agentic platform engineering toolkit.
             </p>
           </div>
         </div>

@@ -3,7 +3,7 @@ import { GitHubLogoIcon } from '@pluralsh/design-system'
 import styled from 'styled-components'
 import useSWR from 'swr'
 
-import { ButtonFillTwo } from './PageHeaderButtons'
+import { brand } from '@src/theme/docsTheme'
 
 type GithubRepoData = {
   stargazers_count: number
@@ -54,46 +54,48 @@ export function isGithubRepoData(obj: unknown): obj is GithubRepoData {
   return !!(obj && typeof obj === 'object' && 'stargazers_count' in obj)
 }
 
-const GithubLink = styled(ButtonFillTwo)<{ $loading: boolean }>(
-  ({ theme, $loading }) => ({
-    height: theme.spacing.xlarge,
-    borderRadius: theme.borderRadiuses.medium,
-    width: 'auto',
+const GithubLink = styled.div<{ $loading: boolean }>(({ theme, $loading }) => ({
+  height: 36,
+  borderRadius: 4,
+  border: `1px solid ${brand['line-strong']}`,
+  background: brand.surface,
+  overflow: 'hidden',
+  display: 'flex',
+  alignItems: 'center',
+  flexDirection: 'row',
+  '.left, .right': {
+    fontFamily: theme.fontFamilies.sans,
+    fontSize: 14,
+    fontWeight: 500,
+    lineHeight: 1,
+    color: brand.ink,
+    textDecoration: 'none',
+    height: '100%',
     display: 'flex',
     alignItems: 'center',
     flexDirection: 'row',
-    '.left, .right': {
-      ...theme.partials.text.buttonSmall,
-      color: theme.colors.text,
-      textDecoration: 'none',
-      fontWeight: '600',
-      height: theme.spacing.xlarge - theme.borderWidths.default * 2,
-      display: 'flex',
-      alignItems: 'center',
-      flexDirection: 'row',
-      paddingLeft: theme.spacing.small,
-      paddingRight: theme.spacing.small,
-      gap: theme.spacing.small,
+    paddingLeft: theme.spacing.small,
+    paddingRight: theme.spacing.small,
+    gap: theme.spacing.xsmall,
+    transition: 'background-color 0.2s ease-out',
+    '&:hover': {
+      backgroundColor: brand['surface-hover'],
     },
-    '.right': {
-      backgroundColor: theme.colors['fill-one'],
-      '&:hover ': {
-        backgroundColor: theme.colors['fill-one-hover'],
-      },
-    },
-    '.left': {
-      backgroundColor: theme.colors['fill-two'],
-      '&:hover': {
-        backgroundColor: theme.colors['fill-two-hover'],
-      },
-      ...(!$loading
-        ? {
-            borderRight: theme.borders['fill-two'],
-          }
-        : {}),
-    },
-  })
-)
+  },
+  '.right': {
+    ...theme.partials.text.mono,
+    fontSize: 12,
+    fontWeight: 400,
+    color: brand.muted,
+  },
+  ...(!$loading
+    ? {
+        '.left': {
+          borderRight: `1px solid ${brand.line}`,
+        },
+      }
+    : {}),
+}))
 
 export default function GithubStars({ account = 'pluralsh', repo = 'plural' }) {
   const { data, error } = useSWR(
@@ -104,10 +106,7 @@ export default function GithubStars({ account = 'pluralsh', repo = 'plural' }) {
   const loading = error || !isGithubRepoData(data)
 
   return (
-    <GithubLink
-      $loading={loading}
-      as="div"
-    >
+    <GithubLink $loading={loading}>
       <a
         className="left"
         target="_blank"

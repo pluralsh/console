@@ -1,6 +1,7 @@
 import {
   type ComponentProps,
   type ComponentType,
+  type ReactNode,
   type Ref,
   Suspense,
   useEffect,
@@ -14,7 +15,6 @@ import {
   NavigationContextProvider,
   type NavigationContextValue,
   GlobalStyle as PluralGlobalStyle,
-  styledTheme,
 } from '@pluralsh/design-system'
 import type { AppProps } from 'next/app'
 import NextLink from 'next/link'
@@ -61,6 +61,12 @@ import { NavDataProvider } from '@src/contexts/NavDataContext'
 import { RestNavProvider } from '@src/contexts/RestNavContext'
 import { collectHeadings } from '@src/markdoc/utils/parseHeadings'
 import { getNavData } from '@src/NavData'
+import {
+  ColorModeProvider,
+  DocsColorVars,
+  useColorMode,
+} from '@src/theme/colorMode'
+import { docsThemeDark, docsThemeLight } from '@src/theme/docsTheme'
 
 /** Page component type; some pages opt into a full-width custom layout (e.g. REST API reference). */
 type PageComponentWithLayout = ComponentType<MyPageProps> & {
@@ -86,7 +92,17 @@ export type MarkdocHeading = {
   title?: string
 }
 
-const docsStyledTheme = { ...styledTheme, ...{ docs: { topNavHeight: 72 } } }
+function DocsThemeProvider({ children }: { children: ReactNode }) {
+  const { mode } = useColorMode()
+
+  return (
+    <StyledThemeProvider
+      theme={mode === 'dark' ? docsThemeDark : docsThemeLight}
+    >
+      {children}
+    </StyledThemeProvider>
+  )
+}
 
 const Page = styled.div(() => ({}))
 
@@ -154,6 +170,7 @@ function App({ Component, pageProps = {}, swrConfig }: MyAppProps) {
   const app = (
     <>
       <PluralGlobalStyle />
+      <DocsColorVars />
       <GlobalStyles />
       <PagePropsContext.Provider value={pageProps}>
         <HtmlHead {...headProps} />
@@ -222,9 +239,11 @@ function App({ Component, pageProps = {}, swrConfig }: MyAppProps) {
             <NavDataProvider value={navData}>
               <RestNavProvider>
                 <BreakpointProvider>
-                  <StyledThemeProvider theme={docsStyledTheme}>
-                    <FillLevelProvider value={0}>{app}</FillLevelProvider>
-                  </StyledThemeProvider>
+                  <ColorModeProvider>
+                    <DocsThemeProvider>
+                      <FillLevelProvider value={0}>{app}</FillLevelProvider>
+                    </DocsThemeProvider>
+                  </ColorModeProvider>
                 </BreakpointProvider>
               </RestNavProvider>
             </NavDataProvider>

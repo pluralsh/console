@@ -3,6 +3,12 @@ import Document, { Head, Html, Main, NextScript } from 'next/document'
 
 import { ServerStyleSheet } from 'styled-components'
 
+import {
+  COLOR_MODE_KEY,
+  colorModeScript,
+  DEFAULT_COLOR_MODE,
+} from '@src/theme/colorMode'
+
 class MyDocument extends Document {
   static async getInitialProps(ctx) {
     const sheet = new ServerStyleSheet()
@@ -29,11 +35,28 @@ class MyDocument extends Document {
   // Using gtag with Cookiebot: https://support.cookiebot.com/hc/en-us/articles/360003979074-Using-Google-Gtag-with-Cookiebot
   render() {
     return (
-      <Html data-theme="dark">
+      <Html {...{ [`data-${COLOR_MODE_KEY}`]: DEFAULT_COLOR_MODE }}>
         <Head>
+          <script dangerouslySetInnerHTML={{ __html: colorModeScript }} />
           <link
-            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+            rel="preconnect"
+            href="https://fonts.googleapis.com"
+          />
+          <link
+            rel="preconnect"
+            href="https://fonts.gstatic.com"
+            crossOrigin="anonymous"
+          />
+          <link
+            href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400&display=swap"
             rel="stylesheet"
+          />
+          <link
+            rel="preload"
+            href="/fonts/Articulat-Normal.woff2"
+            as="font"
+            type="font/woff2"
+            crossOrigin="anonymous"
           />
           <script
             id="Cookiebot"

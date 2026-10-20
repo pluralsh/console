@@ -5,6 +5,7 @@ import { useRouter } from 'next/router'
 
 import styled from 'styled-components'
 
+import { brand, docsText } from '@src/theme/docsTheme'
 import { useNavMenu } from '../contexts/NavDataContext'
 import type { NavItem } from '../NavData'
 import { getBarePathFromPath, removeTrailingSlashes } from '../utils/text'
@@ -39,8 +40,9 @@ export const ArticleList = styled.ul(({ theme }) => ({
 }))
 
 export const Title = styled.h2(({ theme }) => ({
-  ...theme.partials.marketingText.label,
-  marginBottom: theme.spacing.medium,
+  ...docsText.label,
+  margin: 0,
+  marginBottom: theme.spacing.small,
 }))
 
 function ArticlesInSection({
@@ -73,7 +75,7 @@ function ArticlesInSection({
       className={className}
       {...props}
     >
-      {title && <Title>{title}:</Title>}
+      {title && <Title>{title}</Title>}
       <ArticleList>
         {articles &&
           articles.map((article) => (
@@ -97,7 +99,7 @@ function ArticlesInSection({
 export default styled(ArticlesInSection)(({ theme, hasContent }) => ({
   marginTop: theme.spacing.large,
   paddingBottom: hasContent ? theme.spacing.xlarge : 0,
-  borderBottom: hasContent ? theme.borders.default : 'none',
+  borderBottom: hasContent ? `1px solid ${brand.line}` : 'none',
   'ol, li': {
     margin: 0,
     padding: 0,

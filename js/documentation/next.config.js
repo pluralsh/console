@@ -12,7 +12,8 @@ const { redirects } = require('./src/routing/docs-structure')
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ['@pluralsh/design-system'],
+  // layout-elk is ESM-only; bundling it avoids a require() of its import-only exports on the server.
+  transpilePackages: ['@pluralsh/design-system', '@mermaid-js/layout-elk'],
   reactStrictMode: false,
   // Linting runs via Biome in the build:next script.
   eslint: { ignoreDuringBuilds: true },

@@ -7,6 +7,7 @@ import {
 
 import styled from 'styled-components'
 
+import { brand } from '@src/theme/docsTheme'
 import { mqs } from './Breakpoints'
 
 function SearchTrigger({ compact = false }: { compact?: boolean }) {
@@ -34,7 +35,7 @@ function SearchTrigger({ compact = false }: { compact?: boolean }) {
         size={16}
         className="searchIcon"
       />
-      <span className="placeholder">Search docs...</span>
+      <span className="placeholder">Search docs…</span>
       <Kbd>⌘K</Kbd>
     </SearchBar>
   )
@@ -86,31 +87,43 @@ export function DocsSearch() {
   )
 }
 
-const AskAiButton = styled(Button)({
-  height: 40,
-  minHeight: 40,
-})
+const AskAiButton = styled(Button)((_) => ({
+  height: 36,
+  minHeight: 36,
+  borderRadius: 4,
+  borderColor: brand['line-strong'],
+  background: brand.surface,
+  fontWeight: 500,
+  '&:hover': {
+    background: brand.surface,
+    borderColor: brand.subtle,
+  },
+}))
 
 const SearchBar = styled.button(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   gap: theme.spacing.small,
-  width: 220,
+  width: 240,
   [mqs.threeColumn]: {
-    width: 360,
-    maxWidth: '32vw',
+    width: 300,
+    maxWidth: '26vw',
   },
-  height: 40,
-  padding: `0 ${theme.spacing.xsmall}px 0 ${theme.spacing.medium}px`,
-  border: theme.borders.input,
-  borderRadius: theme.borderRadiuses.medium,
-  background: theme.colors['fill-one'],
-  color: theme.colors['text-xlight'],
+  height: 36,
+  padding: `0 ${theme.spacing.xsmall}px 0 ${theme.spacing.small}px`,
+  border: `1px solid ${brand['line-strong']}`,
+  borderRadius: 4,
+  background: brand.surface,
+  color: brand.muted,
   cursor: 'pointer',
-  ...theme.partials.text.body2,
+  fontFamily: theme.fontFamilies.sans,
+  fontSize: 14,
+  lineHeight: 1.4,
+  letterSpacing: '0.01em',
+  transition: 'border-color 0.2s ease-out, color 0.2s ease-out',
   '.searchIcon': {
     flexShrink: 0,
-    color: theme.colors['text-light'],
+    color: brand.muted,
   },
   '.placeholder': {
     flex: 1,
@@ -121,29 +134,30 @@ const SearchBar = styled.button(({ theme }) => ({
     whiteSpace: 'nowrap',
   },
   '&:hover': {
-    background: theme.colors['fill-one-hover'],
-    color: theme.colors['text-light'],
+    borderColor: brand.subtle,
+    color: brand.ink,
   },
   '&:focus, &:focus-visible': {
     outline: 'none',
   },
   '&:focus-visible': {
-    ...theme.partials.focus.default,
+    outline: `2px solid ${brand.accent}`,
+    outlineOffset: 2,
   },
 }))
 
-const Kbd = styled.span(({ theme }) => ({
-  ...theme.partials.text.caption,
+const Kbd = styled.kbd(({ theme }) => ({
+  ...theme.partials.text.mono,
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
   flexShrink: 0,
-  minWidth: 28,
-  height: 22,
-  padding: `0 ${theme.spacing.xsmall}px`,
-  borderRadius: theme.borderRadiuses.medium,
-  background: theme.colors['fill-two'],
-  color: theme.colors['text-xlight'],
+  padding: '1px 6px',
+  fontSize: 11,
+  lineHeight: 1.4,
+  borderRadius: 3,
+  border: `1px solid ${brand['line-strong']}`,
+  color: brand.muted,
 }))
 
 const CenterCluster = styled.div(({ theme }) => ({
@@ -151,12 +165,7 @@ const CenterCluster = styled.div(({ theme }) => ({
   [mqs.fullHeader]: {
     display: 'flex',
     alignItems: 'center',
-    gap: theme.spacing.small,
-    position: 'absolute',
-    left: '50%',
-    top: '50%',
-    transform: 'translate(-50%, -50%)',
-    zIndex: 1,
+    gap: theme.spacing.xsmall,
   },
 }))
 
