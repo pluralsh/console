@@ -435,13 +435,6 @@ export const docsStructure: DocSection[] = [
       { path: 'product-updates', title: 'Product Updates' },
       { path: 'security', title: 'Plural Security Certifications' },
       // { path: 'paid-tiers', title: 'Plural Pricing Model' },
-      {
-        path: 'architecture',
-        title: 'Advanced Architecture',
-        sections: [
-          { path: 'gitops-architecture', title: 'GitOps Architecture' },
-        ],
-      },
     ],
   },
 ]
@@ -474,6 +467,16 @@ export const redirects = [
   {
     source: '/reference/architecture',
     destination: '/',
+    permanent: true,
+  },
+  {
+    source: '/resources/architecture',
+    destination: '/overview/architecture',
+    permanent: true,
+  },
+  {
+    source: '/resources/architecture/gitops-architecture',
+    destination: '/overview/architecture',
     permanent: true,
   },
   {

@@ -16,7 +16,7 @@ Navigate to **Workbenches → Integrations** to browse the available tool types,
 
 ### Plural native integrations
 
-These capabilities are built directly into the workbench runtime and require no external credentials or tool setup. They are enabled per-workbench via the capability toggles in [Step 1 of the creation wizard](/plural-features/workbenches/configuration#step-1-workbench-setup).
+These capabilities are built directly into the workbench runtime and require no external credentials or tool setup. They are enabled per workbench via the capability toggles in [Step 1 of the creation wizard](/plural-features/workbenches/configuration#step-1-workbench-setup).
 
 | Capability | What the agent can access |
 |---|---|

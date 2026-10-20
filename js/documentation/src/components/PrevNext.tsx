@@ -6,14 +6,27 @@ import { useRouter } from 'next/router'
 import styled from 'styled-components'
 
 import { brand, docsText } from '@src/theme/docsTheme'
+import routes from '../../generated/routes.json'
 import { useNavMenu } from '../contexts/NavDataContext'
 import type { NavItem } from '../NavData'
 import { getBarePathFromPath, removeTrailingSlashes } from '../utils/text'
 
+const routeIndex: Record<string, { relPath: string | null }> = routes
+
+// Leaf routes without markdown (e.g. /api-reference/rest) are custom Next
+// pages, so only headings that group children can lack a page.
+const isPagelessHeading = (href: string, sections?: NavItem[]) =>
+  !!sections?.length && routeIndex[href]?.relPath === null
+
 // Sidebar order, depth-first, so prev/next walks the docs the way the nav reads.
 function flattenNav(items: NavItem[], out: { title: string; href: string }[]) {
   for (const { title, href, sections } of items) {
-    if (title && href && !href.startsWith('http')) {
+    if (
+      title &&
+      href &&
+      !href.startsWith('http') &&
+      !isPagelessHeading(href, sections)
+    ) {
       out.push({ title, href: removeTrailingSlashes(href) })
     }
     if (sections) flattenNav(sections, out)

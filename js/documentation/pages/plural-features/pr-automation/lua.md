@@ -3,17 +3,17 @@ title: Lua-based Pre-Processing
 description: Use Lua for complex Turing-complete PR Automations
 ---
 
-The standard way PR automations work is deterministic templates defined via YAML. This can go a long way to handling any code generation needed for a large set of repeatable platform engineering tasks, but occasionally you need to go further by:
+PR automations normally work through deterministic templates defined in YAML. This goes a long way toward handling the code generation needed for a large set of repeatable platform engineering tasks, but occasionally you need to go further by:
 
-* generating code contextual on other configuration files in a repo
-* add content based error handling
-* auto-infer inputs based on complex, custom rules
+* generating code based on other configuration files in a repo
+* adding content-based error handling
+* auto-inferring inputs based on complex, custom rules
 
-For all these cases, Plural uses its Lua integration to allow developers to fill the gap with a sandboxed, turing complete programming language interface.
+For all these cases, Plural's Lua integration lets developers fill the gap with a sandboxed, Turing-complete programming language.
 
 ## Configuring a lua-based PR Automation
 
-The simplest example of using a lua based pr automation is below:
+The simplest example of a Lua-based PR automation is below:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -46,7 +46,7 @@ spec:
     documentation: The images to update
 ```
 
-This will trigger it to use all lua code in the configured folder, this can use all the capabilities in our core lua docs [here](/plural-features/continuous-deployment/lua).  Some example lua code might look like:
+This will use all Lua code in the configured folder, which can use all the capabilities described in our core Lua docs [here](/plural-features/continuous-deployment/lua).  Some example Lua code might look like:
 
 ```lua
 local images, err = encoding.jsonDecode(context.images)
@@ -98,6 +98,6 @@ end
 
 Lua scripts should generate one of two fields:
 
-* `prAutomation` - this is an overlay on the PrAutomation spec you define in our API.  The pr automation process will deep merge it on the original, adding any additional updates, creates, and deletes.
-* `context` - similar to `prAutomation`, any values set in this variable will be merged into the base pr automations context field (usually configuration fields set by the user).  This can be useful for inferring inputs that can reduce human error in filling our your pr automation forms.
+* `prAutomation` - an overlay on the PrAutomation spec you define in our API.  The PR automation process will deep merge it onto the original, adding any additional updates, creates, and deletes.
+* `context` - similar to `prAutomation`, any values set in this variable will be merged into the base PR automation's context field (usually configuration fields set by the user).  This can be useful for inferring inputs to reduce human error when filling out your PR automation forms.
 

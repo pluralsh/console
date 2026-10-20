@@ -1,6 +1,12 @@
-import { type ReactNode, useMemo } from 'react'
+import {
+  type ReactNode,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 
-import { Button, DocumentIcon } from '@pluralsh/design-system'
+import { DocumentIcon } from '@pluralsh/design-system'
 import { useRouter } from 'next/router'
 
 import styled from 'styled-components'
@@ -30,13 +36,42 @@ function findArticlesIn(
   return undefined
 }
 
-export const ArticleList = styled.ul(({ theme }) => ({
+const COLLAPSED_ROWS = 2
+const ARTICLE_GAP = 8
+
+export const ArticleList = styled.ul({
   margin: 0,
   padding: 0,
   display: 'flex',
   flexWrap: 'wrap',
-  gap: theme.spacing.small,
-  marginBottom: theme.spacing.medium,
+  gap: ARTICLE_GAP,
+  overflow: 'hidden',
+})
+
+const ExpandButton = styled.button(({ theme }) => ({
+  ...docsText.label,
+  marginTop: theme.spacing.small,
+  padding: 0,
+  border: 'none',
+  background: 'none',
+  cursor: 'pointer',
+  '&:hover': { color: brand.ink },
+}))
+
+const ArticleChip = styled.a(({ theme }) => ({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: theme.spacing.xsmall,
+  padding: `6px ${theme.spacing.small}px`,
+  border: `1px solid ${brand['line-strong']}`,
+  borderRadius: 4,
+  background: brand.surface,
+  color: brand.ink,
+  fontSize: 13,
+  lineHeight: 1.4,
+  textDecoration: 'none',
+  '.icon, svg': { color: brand.muted, flexShrink: 0 },
+  '&:hover': { borderColor: brand.ink },
 }))
 
 export const Title = styled.h2(({ theme }) => ({
@@ -66,9 +101,43 @@ function ArticlesInSection({
     [navData, pathname]
   )
 
+  const listRef = useRef<HTMLUListElement>(null)
+  const [expanded, setExpanded] = useState(false)
+  const [clip, setClip] = useState<{ height: number; firstHidden: number }>()
+
+  useLayoutEffect(() => {
+    const list = listRef.current
+
+    if (!list) return
+    const measure = () => {
+      const items = Array.from(list.children) as HTMLElement[]
+      const rowTops = [...new Set(items.map((item) => item.offsetTop))]
+
+      if (rowTops.length <= COLLAPSED_ROWS) {
+        setClip(undefined)
+
+        return
+      }
+      const cutoffTop = rowTops[COLLAPSED_ROWS]
+
+      setClip({
+        height: cutoffTop - rowTops[0] - ARTICLE_GAP,
+        firstHidden: items.findIndex((item) => item.offsetTop >= cutoffTop),
+      })
+    }
+    const observer = new ResizeObserver(measure)
+
+    measure()
+    observer.observe(list)
+
+    return () => observer.disconnect()
+  }, [articles])
+
   if (!articles || articles.length <= 0) {
     return null
   }
+
+  const collapsed = !!clip && !expanded
 
   return (
     <nav
@@ -76,22 +145,38 @@ function ArticlesInSection({
       {...props}
     >
       {title && <Title>{title}</Title>}
-      <ArticleList>
+      <ArticleList
+        ref={listRef}
+        style={collapsed ? { maxHeight: clip.height } : undefined}
+      >
         {articles &&
-          articles.map((article) => (
-            <li key={article.href}>
-              <Button
-                floating
-                small
-                startIcon={article.icon || <DocumentIcon />}
-                as="a"
-                href={article.href}
-              >
+          articles.map((article, i) => (
+            <li
+              key={article.href}
+              style={
+                collapsed && i >= clip.firstHidden
+                  ? { visibility: 'hidden' }
+                  : undefined
+              }
+            >
+              <ArticleChip href={article.href}>
+                {article.icon || <DocumentIcon size={14} />}
                 {article.title}
-              </Button>
+              </ArticleChip>
             </li>
           ))}
       </ArticleList>
+      {clip && (
+        <ExpandButton
+          type="button"
+          aria-expanded={expanded}
+          onClick={() => setExpanded((e) => !e)}
+        >
+          {expanded
+            ? 'Show less'
+            : `Show ${articles.length - clip.firstHidden} more`}
+        </ExpandButton>
+      )}
     </nav>
   )
 }

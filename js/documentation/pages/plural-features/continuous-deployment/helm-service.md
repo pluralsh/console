@@ -1,11 +1,11 @@
 ---
 title: Helm-sourced services
-description: Source manifests from a helm repository registered anywhere
+description: Source manifests from a Helm repository registered anywhere
 ---
 
-You can also source manifests from a https or OCI-compatible helm repository. This is very useful for provisioning
-kubernetes add-ons, which are usually packaged using helm, or occasionally for complex release processes where Helm's
-versioning independent of git can be valuable. 
+You can also source manifests from an HTTPS or OCI-compatible Helm repository. This is very useful for provisioning
+Kubernetes add-ons, which are usually packaged using Helm, or occasionally for complex release processes where Helm's
+versioning independent of Git can be valuable. 
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -118,13 +118,13 @@ See [Service Warnings](lua.md#service-warnings) for the Lua reference.
 
 ## Multi-Source Helm
 
-Say you want to source the helm templates from an upstream helm repository, but the values files from a Git repository.  In that case, you can define a multi-sourced service, which has both a git and helm repository defined.  It would look like so:
+Say you want to source the Helm templates from an upstream Helm repository, but the values files from a Git repository. In that case, you can define a multi-sourced service, which has both a Git and a Helm repository defined. It would look like this:
 
 For more advanced compositions—such as deploying an operator from Helm alongside custom resources from Git using explicit `sources` and `renderers`—see [Multi-source services](multi-source-services.md).
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
-kind: GitReposiotry
+kind: GitRepository
 metadata:
   name: infra
   namespace: infra
@@ -162,7 +162,7 @@ spec:
 
 ## Helm Repositories Stored in Git
 
-It's also quite common for users to store helm charts in Git repos.  In that case, you simply create a standard git service pointing to that folder and our agent will auto-detect it's a helm chart, and use helm to template the manifests then apply.  You're also free to add additional values overrides like any other chart, or customize the `release` name of the helm install.  Here's an example:
+It's also quite common for users to store Helm charts in Git repos. In that case, create a standard Git service pointing to that folder; our agent will auto-detect that it's a Helm chart, use Helm to template the manifests, and then apply them. You're also free to add additional values overrides like any other chart, or customize the `release` name of the Helm install.  Here's an example:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1

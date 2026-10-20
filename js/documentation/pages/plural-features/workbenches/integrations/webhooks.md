@@ -16,7 +16,7 @@ Observability webhook sources are also documented under [Observability Webhooks]
 
 ## Setup
 
-Console shows an inline setup guide while you create a webhook source. Follow that guide for the provider's URL, authentication, and required permissions.
+The Console shows an inline setup guide while you create a webhook source. Follow that guide for the provider's URL, authentication, and required permissions.
 
 ## Related
 

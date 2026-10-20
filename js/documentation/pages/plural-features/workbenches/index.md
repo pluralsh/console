@@ -7,7 +7,7 @@ description: Configurable AI agent environments for automated infrastructure ope
 
 Workbenches are named, project-scoped environments for running AI-driven operations against your infrastructure. Each workbench bundles a system prompt, a set of capabilities, connected tools, and automation triggers into a reusable workspace.
 
-At runtime, a **job** is created — the agent executes using the configured capabilities and tools, emitting a live stream of activities as it works. When finished it produces a structured conclusion that can include summaries, dashboards, follow-up todos, topology pointers, and opened pull requests.
+At runtime, a **job** is created — the agent executes using the configured capabilities and tools, emitting a live stream of activities as it works. When finished, it produces a structured conclusion that can include summaries, dashboards, follow-up todos, topology pointers, and opened pull requests.
 
 ![](/assets/workbenches/workbenches-overview.png)
 

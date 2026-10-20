@@ -20,7 +20,7 @@ Before you begin, make sure you have:
 
 1. In PagerDuty, go to **Integrations → API Access Keys → Create New API Key**.
 2. Enter a description such as `plural-workbench-readonly`.
-3. Choose **Read-only** if you only need incident lookup and do not require write operations.
+3. Choose **Read-only** if you only need to look up incidents.
 4. Copy the key immediately. PagerDuty will not show it again.
 
 The key needs permission to read incidents for the services the workbench will query. A read-only user API key or account key is typically sufficient.

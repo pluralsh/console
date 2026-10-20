@@ -11,7 +11,7 @@ This is distinct from the [management controller](/plural-features/continuous-de
 
 Per-cluster tuning — poll intervals, concurrency limits, image registry overrides for job pods, and websocket behavior — is configured with the cluster-scoped `AgentConfiguration` CRD. See [AgentConfiguration](agent-configuration) for the required singleton name and full spec reference.
 
-Global settings that affect the entire fleet (including default agent helm values) are configured on the management cluster via [DeploymentSettings](/plural-features/continuous-deployment/management-controller/deployment-settings).
+Global settings that affect the entire fleet (including default agent Helm values) are configured on the management cluster via [DeploymentSettings](/plural-features/continuous-deployment/management-controller/deployment-settings).
 
 ## API reference
 
@@ -19,4 +19,4 @@ Agent-scoped CRDs are documented in the {% doclink to="overview_agent_api_refere
 
 ## Full working example
 
-The `plural up` command is the simplest way to generate a full repository from the ground up. It includes terraform for the management cluster, workload clusters, and bootstrap manifests for both the management controller and deployment agents. A public reference is available in [our demo repo](https://github.com/pluralsh/plural-up-demo).
+The `plural up` command is the simplest way to generate a full repository from the ground up. It includes Terraform for the management cluster and workload clusters, plus bootstrap manifests for both the management controller and deployment agents. A public reference is available in [our demo repo](https://github.com/pluralsh/plural-up-demo).

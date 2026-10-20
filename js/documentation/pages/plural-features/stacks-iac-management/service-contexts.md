@@ -1,17 +1,17 @@
 ---
 title: Terraform interop with service contexts
-description: Communicate data between terraform and kubernetes using Service Contexts
+description: Communicate data between Terraform and Kubernetes using Service Contexts
 ---
 
 # Overview
 
-A common and incredibly frustrating challenge with managing kubernetes, especially at scale, is sharing state between terraform and the common tools used to manage Kubernetes configuration like helm and kustomize, or with other independent sections of terraform code. 
+A common and incredibly frustrating challenge with managing Kubernetes, especially at scale, is sharing state between Terraform and the common tools used to manage Kubernetes configuration, like Helm and Kustomize, or with other independent sections of Terraform code. 
 
-We've created an API called Service Contexts to facilitate this. At its core, it is simply named bundles of configuration that can be created via api (thus easily integrated with Terraform or Pulumi) and mounted to Plural services, or imported as data resources in other stacks. This will guide you through how to leverage the api throughout your IAC Usage.
+We've created an API called Service Contexts to facilitate this. At its core, a service context is a named bundle of configuration that can be created via the API (and thus easily integrated with Terraform or Pulumi) and mounted to Plural services, or imported as a data resource in other stacks. This guide walks you through how to use the API throughout your IaC usage.
 
 ## Defining a service context
 
-Here's a simple example, involving setting up an IRSA role for external-dns:
+Here's a simple example that sets up an IRSA role for external-dns:
 
 ```tf
 module "assumable_role_externaldns" {
@@ -27,21 +27,21 @@ module "assumable_role_externaldns" {
 resource "plural_service_context" "externaldns" {
     name = "externaldns"
     configuration = {
-        roleArn = module.assumeable_role_externaldns.this_iam_role_arn
+        roleArn = module.assumable_role_externaldns.this_iam_role_arn
     }
 }
 ```
 
 ## Using in another Plural Terraform stack
 
-Refering a service context in another stack is simple:
+Referencing a service context in another stack is simple:
 
 ```tf
-data "plural_service_context "externaldns" {
+data "plural_service_context" "externaldns" {
   name = "externaldns"
 }
 
-local {
+locals {
   # can wire it in wherever, this is just an example
   external_dns_arn = data.plural_service_context.externaldns.configuration.roleArn 
 }
@@ -81,10 +81,10 @@ spec:
 ```
 
 {% callout severity="info" %}
-The `.liquid` extension on `external-dns.yaml.liquid` tells the deployment agent to attempt to template the values file, otherwise it will interpret it as plain yaml.
+The `.liquid` extension on `external-dns.yaml.liquid` tells the deployment agent to attempt to template the values file; otherwise, it will interpret it as plain YAML.
 {% /callout %}
 
-Then in `helm/external-dns.yaml.liquid` you could easily template in the role arn like so:
+Then in `helm/external-dns.yaml.liquid` you could template in the role ARN like so:
 
 ```yaml
 serviceAccount:
@@ -93,7 +93,7 @@ serviceAccount:
     eks.amazonaws.com/role-arn: {{ contexts.externaldns.roleArn }}
 ```
 
-(You can of course layer on any additional externaldns configuration you'd like, we're only interested in the eks iam role attachment here)
+(You can of course layer on any additional external-dns configuration you'd like; we're only interested in the EKS IAM role attachment here.)
 
 
-Under the hood, on each attempt to retemplate the service, we're pulling the current value of the context alongside the service and injecting it into the passed values file. Ensuring your k8s configuration is always in sync with the desired state in the upstream cloud infrastructure.
+Under the hood, on each attempt to retemplate the service, we pull the current value of the context alongside the service and inject it into the passed values file, ensuring your Kubernetes configuration is always in sync with the desired state in the upstream cloud infrastructure.

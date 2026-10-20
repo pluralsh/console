@@ -11,7 +11,7 @@ The `Logs` tab includes standard features like text-based search, facet filterin
 
 ![](/assets/getting-started/log-tab.png)
 
-By default, live logs refresh every 10 seconds, which is ideal for monitoring deployments or watching for real-time issues. To view historical logs, simply scroll down. The view displays logs from the last 15 minutes by default. To adjust the lookback window (for example, when investigating an incident from an hour ago), use the time window modal:
+By default, live logs refresh every 10 seconds, which is ideal for monitoring deployments or watching for real-time issues. To view historical logs, scroll down. The view displays logs from the last 15 minutes by default. To adjust the lookback window (for example, when investigating an incident from an hour ago), use the time window modal:
 
 ![](/assets/getting-started/log-retention.png)
 
@@ -41,21 +41,21 @@ Click any label to filter by that attribute. For example, click a namespace labe
 
 ## Deploy out of our Service Catalog
 
-Plural ships by default with a full [Service catalog](/plural-features/service-catalog) to easily deploy solutions across your stack, among them a setup of ElasticSearch + Logstash using to support robust multi-cluster log aggregation.  This has an additional benefit of also serving as a vector store for additional data used by our AI engine if you wish to enable that.  In total this will set up:
+Plural ships by default with a full [Service catalog](/plural-features/service-catalog) to easily deploy solutions across your stack, among them a setup of ElasticSearch + Logstash to support robust multi-cluster log aggregation.  This has the additional benefit of serving as a vector store for additional data used by our AI engine, if you wish to enable that.  In total, this will set up:
 
 * ElasticSearch using the [ECK operator](https://www.elastic.co/guide/en/cloud-on-k8s/current/k8s-deploy-eck.html)
-* Logstash (also using ECK) to aggregate logs at the cluster level and ship them to the singular ElasticSearch Instance
+* Logstash (also using ECK) to aggregate logs at the cluster level and ship them to the single ElasticSearch instance
 
 {% callout severity="info" %}
-The system is made to be modular, and can support other logging backends.  If you're interested in using another one, let us know and we'll add it to our roadmap!
+The system is designed to be modular and can support other logging backends.  If you're interested in using another one, let us know and we'll add it to our roadmap!
 {% /callout %}
 
-To deploy out of our storage catalog, go to `Self Service` -> `Service Catalog` -> `devops` -> `elastic` -> `create PR` and fill out the wizard, it should look something like this:
+To deploy out of our service catalog, go to `Self Service` -> `Service Catalog` -> `devops` -> `elastic` -> `create PR` and fill out the wizard. It should look something like this:
 
 ![elastic-setup](/assets/observability/elastic-setup.png)
 
 {% callout severity="warning" %}
-We recommend using at least 100Gi for storage if you have a fairly large fleet, this is simply due to the log volume emitted by Kubernetes being quite large at the baseline.  ECK can very easily be tuned post-hoc if you size it too small as well.
+We recommend using at least 100Gi for storage if you have a fairly large fleet, since the baseline log volume emitted by Kubernetes is quite large.  ECK can also be easily tuned post hoc if you size it too small.
 
 Also be sure the cluster you're deploying to has a working ingress setup, since it'll assume external-dns + cert-manager are there to set up DNS and TLS.
 {% /callout %}
@@ -68,7 +68,7 @@ The generated PR will have configured:
 
 ## Custom Resource Configuration
 
-If you were to do this manually with an existing ElasticSearch setup, you'd need to manually wire configuration like the following:
+To do this manually with an existing ElasticSearch setup, you'd need to wire configuration like the following:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -101,7 +101,7 @@ Each monitor is attached to a Service Deployment and is composed of three pieces
 * **Threshold** -- an `aggregate` function (`max`, `min`, or `avg`) applied across the bucketed counts and a numeric `value` the aggregate must cross to trigger the alert.
 * **Schedule** -- a standard cron expression (for example `*/5 * * * *` or `@daily`) that controls how often the monitor is re-evaluated.
 
-On every tick, Plural runs the log query against your configured logging driver, builds a vector of per-bucket counts, and aggregates that vector into a single number. If it crosses the threshold the monitor transitions to `firing` and a Plural alert is created (or updated); when the next evaluation comes back under the threshold, the alert is automatically marked `resolved`. Alerts produced this way are first-class `Alert` objects in the Plural Console -- they show up alongside Datadog/Grafana alerts and can be routed through your existing notification routers, attached to AI insights, and surfaced in service dashboards.
+On every tick, Plural runs the log query against your configured logging driver, builds a vector of per-bucket counts, and aggregates that vector into a single number. If it crosses the threshold, the monitor transitions to `firing` and a Plural alert is created (or updated); when the next evaluation comes back under the threshold, the alert is automatically marked `resolved`. Alerts produced this way are first-class `Alert` objects in the Plural Console -- they show up alongside Datadog/Grafana alerts and can be routed through your existing notification routers, attached to AI insights, and surfaced in service dashboards.
 
 ### Creating a monitor in the UI
 
@@ -149,7 +149,7 @@ This makes log-based monitors a particularly low-friction way to bootstrap alert
 
 Beyond the single-pane-of-glass benefits, log data significantly enhances the dataset used by Plural AI, which is why we highly recommend enabling log aggregation for production deployments. We lean on ElasticSearch as the default log store because it's a broadly usable data store with recent support for vector search, enabling Plural AI to:
 
-* Vectorize and search historical Pull Requests (gathered from [establishing a SCM webhook](/getting-started/how-to-use/scm-connection#add-an-scm-provider-webhook))
+* Vectorize and search historical Pull Requests (gathered from [establishing an SCM webhook](/getting-started/how-to-use/scm-connection#add-an-scm-provider-webhook))
 * Vectorize and search historical alert resolutions
 * Provide Root Cause Analysis (RCA) and troubleshooting via Plural AI Insights
 * ...and more coming soon!

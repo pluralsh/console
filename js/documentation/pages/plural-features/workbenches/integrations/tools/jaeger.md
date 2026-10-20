@@ -97,7 +97,7 @@ The Jaeger tool is read-only. It cannot create, modify, or delete traces.
 Keep these query behaviors in mind:
 
 * **Service name is required** — every query must specify a service name (the `query` parameter).
-* **Time range is required** — provide an explicit time range in your prompt (for example, "last 30 minutes" or "between 2pm and 3pm today"). Queries without a time range will fail.
+* **Time range is required** — provide an explicit time range in your prompt (for example, "last 30 minutes" or "between 2pm and 3pm today"). Queries without a time range fail.
 * **Results are spans** — the tool returns individual trace spans with their trace ID, span ID, parent ID, service, operation name, start and end timestamps, and tags. It does not reconstruct full trace trees or hierarchies.
 * **Optional filters** — you can narrow results with operation name, minimum and maximum duration (for example, `10ms`, `1.5s`), and dynamic span attributes (key-value tag pairs).
 * **Limit parameter** — the agent can request a maximum number of traces. The default is 100, but Jaeger may impose its own limits.
@@ -123,7 +123,7 @@ Keep these query behaviors in mind:
 * Open the failed Jaeger activity in the job and inspect the API error before retrying.
 * Start with a simple query (service name and time range only) and add filters incrementally.
 * When filtering by duration, use the protobuf duration format (`10ms`, `1.5s`, `500ms`).
-* Verify span attribute names and values match what is indexed in your Jaeger backend.
+* Verify that span attribute names and values match what is indexed in your Jaeger backend.
 
 ### The Jaeger tool is unavailable
 

@@ -3,7 +3,7 @@ title: Set Up and Configure Plural AI
 description: Configure Plural AI and mix models to optimize cost and performance
 ---
 
-The current state of GenerativeAI is a sprawl of vendors offering products with different specialties and price points, and its common to have an optimal AI setup involve usage of models across multiple different vendors or multiple models within the same vendor.  Plural provides a number of knobs that are designed to make that degree of customization seamless, and compatible w/in a GitOps workflow.
+The current state of generative AI is a sprawl of vendors offering products with different specialties and price points, and an optimal AI setup commonly uses models from multiple vendors or multiple models from the same vendor.  Plural provides several knobs designed to make that degree of customization seamless and compatible with a GitOps workflow.
 
 ## Set Up Plural AI
 
@@ -58,13 +58,13 @@ The full `DeploymentSettings` schema is available in the [Management API referen
 
 ## Provider Selection within Plural AI
 
-There are three main usecases where we can differentiate models:
+There are three main use cases where we can differentiate models:
 
-1. High-volume insight inference - usually a smaller, cheaper model is the right choice here (gpt-4.1-mini for instance)
-2. On-demand agentic, tool-calling - this is used in Plural AI chat, pr generation, and similar features within the platform.  Here a user very likely will want to use a capable model like Anthropic Claude Sonnet 4.5.
-3. Embedding - Plural also consistently vector embeds your infra data derived from GitOps and data scraping.  Its possible you'll need to configure a dedicated embedding model provider if the base provider doesn't support it.
+1. High-volume insight inference - a smaller, cheaper model is usually the right choice here (gpt-4.1-mini, for instance)
+2. On-demand agentic tool calling - this is used in Plural AI chat, PR generation, and similar features within the platform.  Here you will very likely want a capable model like Anthropic Claude Sonnet 4.5.
+3. Embedding - Plural also consistently vector-embeds your infra data derived from GitOps and data scraping.  You may need to configure a dedicated embedding model provider if the base provider doesn't support embeddings.
 
-Often toggling these individual can give you the best cost/feature tradeoff for your usecase.
+Tuning each of these individually often gives you the best cost/feature tradeoff for your use case.
 
 ## Configure Models in the Console
 
@@ -93,7 +93,7 @@ Use the **Disable AI in Plural** toggle on the AI providers page to turn off AI 
 
 ## Configure Multiple Providers with DeploymentSettings
 
-To tune your AI configuration, the recommended approach is to do it within a GitOps workflow using our `DeploymentSettings` Kubernetes CRD.  If you set up Plural with `plural up`, this will already be defined for you at `bootstrap/settings.yaml`.  Here's a basically complete example of how to configure its AI model settings:
+The recommended way to tune your AI configuration is within a GitOps workflow using our `DeploymentSettings` Kubernetes CRD.  If you set up Plural with `plural up`, this is already defined for you at `bootstrap/settings.yaml`.  Here's a nearly complete example of how to configure its AI model settings:
 
 
 ```yaml
@@ -142,7 +142,7 @@ spec:
 
 ## Model Selection Logic
 
-The model selected is generally a waterfall like so.
+Model selection generally follows a waterfall like this:
 
 1. For a use-case demanding a tool-capable model:
 
@@ -154,7 +154,7 @@ The model selected is generally a waterfall like so.
 | default  | no         | yes          |
 
 
-2. For a high-volume usecase, the tool provider is ignored, and the table above is recognized for just the default provider usecases
+2. For a high-volume use case, the tool provider is ignored, and only the default provider rows of the table above apply.
 
 3. For embedding model selection, the logic is:
 
@@ -173,22 +173,22 @@ We've found decent success with the following combinations:
 
 For OpenAI:
 
-1. Any openai model above gpt-4.1-mini, but a tuned setup would chose gpt-4.1 or above for tools, and gpt-4.1-mini for the default
+1. Any OpenAI model above gpt-4.1-mini works, but a tuned setup would choose gpt-4.1 or above for tools, and gpt-4.1-mini for the default
 2. For embeddings, we default to `text-embedding-3-large`
 
-For VertexAI:
+For Vertex AI:
 
-1. High volume usecases with `gemini-2.5-flash` and tools with `anthropic/claude-sonnet-4-5` is a realistic combo.
-2. You can use OpenAI as your embedding provider, or any of the Vertex embedding model's as well.
+1. `gemini-2.5-flash` for high-volume use cases and `anthropic/claude-sonnet-4-5` for tools is a realistic combo.
+2. You can use OpenAI as your embedding provider, or any of the Vertex embedding models.
 
-For Anthropic, its important to note they have no embedding model, so you'll always have to mix providers. This is a decent setup:
+Note that Anthropic has no embedding model, so you'll always have to mix providers. This is a decent setup:
 
 1. Configure `claude-sonnet-4-5` for tools (set as `toolProvider`)
-2. OpenAI gpt-4.1-mini for volume, which is our default (it's cheaper than most anthropic models) (set as `provider`)
-3. OpenAI `text-embedding-3-large` as your embedding model, which is our default, and would be selected as its the base provider.
+2. OpenAI gpt-4.1-mini for volume, which is our default (it's cheaper than most Anthropic models) (set as `provider`)
+3. OpenAI `text-embedding-3-large` as your embedding model, which is our default and would be selected since OpenAI is the base provider.
 
 {% callout severity="info" %}
-Configuring a default model is usually optional, we chose sane defaults for all major providers.
+Configuring a default model is usually optional; we chose sane defaults for all major providers.
 {% /callout %}
 
 ## Learn More

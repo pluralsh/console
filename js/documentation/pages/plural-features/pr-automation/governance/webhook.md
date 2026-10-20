@@ -3,15 +3,15 @@ title: Custom Webhook Governance
 description: Implementing Webhook Based Custom Governance Controllers
 ---
 
-Some enterprise require bespoke governance, either because they are not standardized on ServiceNow or because they leverage it in a unique, tailor-built way.  Plural allows you to bridge that gap with a simple webhook based protocol. Before implementing, it's worth just looking through the [docs on PR governance](/plural-features/pr-automation/governance) briefly to familiarize yourself with the model.
+Some enterprises require bespoke governance, either because they are not standardized on ServiceNow or because they use it in a unique, tailor-built way.  Plural allows you to bridge that gap with a simple webhook-based protocol. Before implementing, it's worth briefly looking through the [docs on PR governance](/plural-features/pr-automation/governance) to familiarize yourself with the model.
 
 {% callout severity="info" header="Ensure Webhook Present!" %}
-For this to work, it's assumed you have an SCM webhook configured to provide Plural with an event stream for pull request/merge requests from you SCM provider.  We support all major SCM providers, and they're easy to set up at Self Service -> SCM Management.  Most SCM providers also have ways to limit the scope of webhook events to individual repository sets in case it cannot be implemented organization-wide.
+For this to work, it's assumed you have an SCM webhook configured to provide Plural with an event stream for pull requests/merge requests from your SCM provider.  We support all major SCM providers, and webhooks are easy to set up at Self Service -> SCM Management.  Most SCM providers also have ways to limit the scope of webhook events to individual repository sets in case it cannot be implemented organization-wide.
 {% /callout %}
 
 # Defining a PrGovernance CRD
 
-The Governance CRD utilizing SericeNow is relatively straightforward, here's an example:
+The webhook-based Governance CRD is relatively straightforward. Here's an example:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -29,21 +29,21 @@ spec:
 
 
 {% callout severity="info" %}
-At the moment, this is only feasible on self-hosted instances of Plural
+At the moment, this is only feasible on self-hosted instances of Plural.
 {% /callout %}
 
 From there, to tie it to a pull request, you'll need:
 
-1. To ensure there's a SCM webhook for the repository pointing to Plural (this can be created in Self Service -> SCM Management in you Plural Console instance)
-2. Add the `Plural governance: webhook` tag to your PR description so that we'll identify it as requiring governance.
+1. An SCM webhook for the repository pointing to Plural (this can be created in Self Service -> SCM Management in your Plural Console instance).
+2. The `Plural governance: webhook` tag in your PR description, so that we identify it as requiring governance.
 
 # Webhook Controller Implementation
 
 The webhook expects three REST-like APIs to be present:
 
 * POST /v1/open - called when a PR is created
-* POST /v1/confirm - called when a PR is open, and will allow auto-approval if it returns 200
-* POST /v1/close - called once a PR is merged or closed, and allows your implementation to cleanup any needed resources 
+* POST /v1/confirm - called while a PR is open; allows auto-approval if it returns 200
+* POST /v1/close - called once a PR is merged or closed, allowing your implementation to clean up any needed resources 
 
 Throughout the request flow, we will persist the results from prior calls as state, and provide a JSON-encoded request body in the following format:
 
@@ -89,5 +89,5 @@ stateDiagram-v2
 {% /mermaid %}
 
 {% callout severity="info" %}
-For this to gate pull request merges appropriately, you'll need to ensure the SCM credential given to the governance controller is a required approver of the repository or at least a CODEOWNER of the files that are being changed  
+For this to gate pull request merges appropriately, you'll need to ensure the SCM credential given to the governance controller is a required approver of the repository, or at least a CODEOWNER of the files being changed.
 {% /callout %}

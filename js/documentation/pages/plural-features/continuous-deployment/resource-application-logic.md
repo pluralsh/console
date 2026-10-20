@@ -24,7 +24,7 @@ Supported options:
 - `Force=True` - If apply/replace fails (for example due to immutable field changes), the operator will delete and recreate the resource.
 - `Prune=False` - Keep the live resource when it is removed from the service's desired manifests. With the default `Delete=True`, it remains in the service inventory so service deletion can still act on it; with `Delete=False`, it is detached from the inventory.
 - `Delete=False` - Keep the live resource when the entire service is deleted.
-- `detach` - Keep the live resource and detach it from the service inventory when it is removed from the desired manifests. This option is available through `deployment.plural.sh/sync-options`. It is an equivalent of `Delete=False, Prune=False`.
+- `detach` - Keep the live resource and detach it from the service inventory when it is removed from the desired manifests. This option is available through `deployment.plural.sh/sync-options`. It is equivalent to `Delete=False, Prune=False`.
 
 The existing `client.lifecycle.config.k8s.io/deletion: detach` annotation is an alias for both `Prune=False` and `Delete=False`.
 
@@ -52,17 +52,17 @@ metadata:
 
 Sync waves allow you to define the order within a sync phase in which resources are applied. Lower waves run first.
 
-You can use sync waves on any Kubernetes resource by simply adding the `deployment.plural.sh/sync-wave` annotation.
+You can use sync waves on any Kubernetes resource by adding the `deployment.plural.sh/sync-wave` annotation.
 We also support the Argo CD `argocd.argoproj.io/sync-wave` and Helm `helm.sh/hook-weight` annotations for compatibility.
 The value is an integer (as a quoted string) and can be negative.
 
 Annotations are checked in that order of precedence, with `deployment.plural.sh/sync-wave`
 taking the highest precedence, then `argocd.argoproj.io/sync-wave`, then `helm.sh/hook-weight`. If none is set,
-then the default ordering will be used.
+the default ordering is used.
 
 Default wave ordering is:
 - 0 - Non-namespaced resources (namespaces, CRDs, persistent volumes, cluster roles, etc.).
-- 1 - Core namespaced configuration resources (config maps, secrets, roles etc.).
+- 1 - Core namespaced configuration resources (config maps, secrets, roles, etc.).
 - 2 - Core namespaced workload resources (deployments, daemon sets, jobs, pods, etc.).
 - 3 - Core namespaced networking resources (services, ingresses, etc.).
 - 4 - All other resources.
@@ -112,8 +112,8 @@ A resource may belong to multiple phases, for example `pre-sync,post-sync`.
 A resource can be both a hook and have a sync wave. This allows you to control the ordering of hooks relative
 to other hooks and resources.
 
-The operator executes hooks starting in the described order and proceeds to the next phase only when all hooks
-in the current phase will apply and achieve a healthy state.
+The operator executes hooks in the described order and proceeds to the next phase only when all hooks
+in the current phase have been applied and reached a healthy state.
 
 ### Example
 
@@ -147,7 +147,7 @@ If no delete policy is set, the resource will be kept.
 
 Only jobs and pods can be automatically deleted. Other resources need to be deleted manually or via other automation.
 
-When a manifest of a hook is updated, the operator will reapply the resource even if it has already completed.
+When a hook's manifest is updated, the operator will reapply the resource even if it has already completed.
 
 {% callout severity="warning" %}
 If a job manifest sets `ttlSecondsAfterFinished`, Kubernetes will delete it after it completes.
