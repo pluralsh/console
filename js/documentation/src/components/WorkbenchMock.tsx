@@ -135,7 +135,11 @@ const jobGroups: {
 
 // Brand logos pick their full-color variant from theme.mode; the mock is
 // always dark.
-const forceDark = (theme: DefaultTheme) => ({ ...theme, mode: 'dark' as const })
+const forceDark = (theme?: DefaultTheme): DefaultTheme => {
+  if (!theme) throw new Error('WorkbenchMock requires a theme')
+
+  return { ...theme, mode: 'dark' }
+}
 
 export function WorkbenchMock() {
   return (

@@ -1,6 +1,7 @@
 import type { ComponentType, ReactNode } from 'react'
 
 import {
+  Button,
   ErrorIcon,
   InfoOutlineIcon,
   MagicWandIcon,
@@ -8,16 +9,26 @@ import {
   TestTubeIcon,
   WarningIcon,
 } from '@pluralsh/design-system'
+import NextLink from 'next/link'
 
 import styled from 'styled-components'
 
 import { brand, docsText } from '@src/theme/docsTheme'
+import { isExternalUrl } from '@src/utils/text'
 
 type DocsSeverity = 'info' | 'tip' | 'warning' | 'danger' | 'beta'
+type CalloutSize = 'full' | 'compact'
+
+type Cta = {
+  title?: string
+  href?: string
+}
 
 type CalloutProps = {
   severity?: string
+  size?: string
   title?: ReactNode
+  ctas?: Cta[]
   children?: ReactNode
 }
 
@@ -57,43 +68,106 @@ export const callout = {
   },
 }
 
-function DocsCallout({ severity = 'info', title, children }: CalloutProps) {
+function DocsCallout({
+  severity = 'info',
+  size = 'full',
+  title,
+  ctas,
+  children,
+}: CalloutProps) {
   const normalized =
     severityAliases[severity] ||
     (severity in variants ? (severity as DocsSeverity) : 'info')
   const { color, label, Icon } = variants[normalized]
+  const compact = size === 'compact'
+  const buttons = (ctas ?? []).filter((cta): cta is Cta & { href: string } =>
+    Boolean(cta.href)
+  )
+
+  const icon = (
+    <IconWrap $color={color}>
+      <Icon
+        size={16}
+        color="currentColor"
+      />
+    </IconWrap>
+  )
 
   return (
     <CalloutSC
       $color={color}
+      $size={compact ? 'compact' : 'full'}
       role="note"
       aria-label={label}
     >
-      <Header>
-        <IconWrap $color={color}>
-          <Icon
-            size={16}
-            color="currentColor"
-          />
-        </IconWrap>
-        <Label style={{ color }}>{label}</Label>
-      </Header>
-      {title ? <Title>{title}</Title> : null}
-      {children ? <Body className="children">{children}</Body> : null}
+      {compact ? (
+        <CompactRow>
+          {icon}
+          <div>
+            {title ? <Title>{title}</Title> : null}
+            {children ? <Body className="children">{children}</Body> : null}
+          </div>
+        </CompactRow>
+      ) : (
+        <>
+          <Header>
+            {icon}
+            <Label style={{ color }}>{label}</Label>
+          </Header>
+          {title ? <Title>{title}</Title> : null}
+          {children ? <Body className="children">{children}</Body> : null}
+        </>
+      )}
+      {buttons.length > 0 && (
+        <ButtonArea>
+          {buttons.map((cta) => (
+            <Button
+              key={`${cta.href}-${cta.title}`}
+              small
+              secondary
+              as={isExternalUrl(cta.href) ? 'a' : NextLink}
+              href={cta.href}
+              {...(isExternalUrl(cta.href)
+                ? { target: '_blank', rel: 'noopener noreferrer' }
+                : {})}
+            >
+              {cta.title}
+            </Button>
+          ))}
+        </ButtonArea>
+      )}
     </CalloutSC>
   )
 }
 
-const CalloutSC = styled.aside<{ $color: string }>(({ theme, $color }) => ({
+const CalloutSC = styled.aside<{ $color: string; $size: CalloutSize }>(
+  ({ theme, $color, $size }) => ({
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing.xsmall,
+    margin: `${theme.spacing.large}px 0`,
+    padding:
+      $size === 'compact'
+        ? `${theme.spacing.xsmall}px ${theme.spacing.medium}px`
+        : `${theme.spacing.medium}px`,
+    borderRadius: theme.borderRadiuses.medium,
+    backgroundColor: `color-mix(in srgb, ${$color} var(--callout-tint), ${brand.surface})`,
+    border: `1px solid color-mix(in srgb, ${$color} var(--callout-border), transparent)`,
+    boxShadow: 'none',
+  })
+)
+
+const CompactRow = styled.div(({ theme }) => ({
   display: 'flex',
-  flexDirection: 'column',
+  alignItems: 'flex-start',
   gap: theme.spacing.xsmall,
-  margin: `${theme.spacing.large}px 0`,
-  padding: `${theme.spacing.medium}px`,
-  borderRadius: theme.borderRadiuses.medium,
-  backgroundColor: `color-mix(in srgb, ${$color} var(--callout-tint), ${brand.surface})`,
-  border: `1px solid color-mix(in srgb, ${$color} var(--callout-border), transparent)`,
-  boxShadow: 'none',
+}))
+
+const ButtonArea = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: theme.spacing.xsmall,
+  marginTop: theme.spacing.small,
 }))
 
 const Header = styled.div(({ theme }) => ({

@@ -63,50 +63,6 @@ const GlobalStyles = createGlobalStyle(({ theme }) => ({
     alignItems: 'center',
     justifyContent: 'flex-start',
   },
-  '.primary-content div:has(> [class*="Table__TableSC"])': {
-    marginBottom: theme.spacing.large,
-  },
-  // Docs tables: full grid — outer stroke, column dividers, filled header,
-  // zebra body rows. Fills are ink washes so they work on both canvases.
-  '.primary-content [class*="Table__TableSC"]': {
-    border: '1px solid var(--table-line) !important',
-    // Same corner as code cards (borderRadiuses.large).
-    borderRadius: `${theme.borderRadiuses.large}px !important`,
-    backgroundColor: 'transparent !important',
-    boxShadow: 'none !important',
-    // The last header cell's ::before paints the fill across the whole row;
-    // filling the cells too would double the translucent header.
-    '.thOuterWrap': {
-      backgroundColor: 'transparent !important',
-      color: `${brand.ink} !important`,
-      fontSize: 14,
-      fontWeight: 500,
-      height: 44,
-      minHeight: 44,
-      padding: '0 16px',
-      borderBottom: 'none !important',
-    },
-    'th:last-child::before': {
-      backgroundColor: 'var(--table-header) !important',
-      borderBottom: '1px solid var(--table-line) !important',
-    },
-    'th + th .thOuterWrap, td + td': {
-      borderLeft: '1px solid var(--table-line)',
-    },
-    'tbody tr:nth-child(odd) td': {
-      backgroundColor: 'transparent !important',
-    },
-    'tbody tr:nth-child(even) td': {
-      backgroundColor: 'var(--table-stripe) !important',
-    },
-    td: {
-      padding: '12px 16px',
-      borderTop: '1px solid var(--table-line) !important',
-    },
-    'tbody tr:first-child td': {
-      borderTop: 'none !important',
-    },
-  },
   html: {
     ...fillAvailable('height'),
   },
