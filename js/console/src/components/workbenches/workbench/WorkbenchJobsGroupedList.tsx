@@ -97,6 +97,7 @@ type JobQueryFilters = {
   q?: string
   prStates?: WorkbenchJobPrState[]
   direction?: SortDirection
+  insertedAfter?: string
 }
 
 export function WorkbenchJobsGroupedList({
@@ -104,14 +105,28 @@ export function WorkbenchJobsGroupedList({
   statuses,
   filters,
   emptyState,
+  pageSize = WORKBENCH_JOBS_PAGE_SIZE,
+  capped = false,
+  fill = true,
+  defaultCollapsed = DEFAULT_COLLAPSED,
 }: {
   workbenchId: string
   statuses: WorkbenchJobStatus[]
   filters: JobQueryFilters
   emptyState: EmptyListState
+  pageSize?: number
+  // one page per status, with no control to load the rest
+  capped?: boolean
+  fill?: boolean
+  defaultCollapsed?: Partial<Record<WorkbenchJobStatus, boolean>>
 }) {
   const { data, previousData, loading } = useWorkbenchJobStatusCountsQuery({
-    variables: { id: workbenchId, q: filters.q, prStates: filters.prStates },
+    variables: {
+      id: workbenchId,
+      q: filters.q,
+      prStates: filters.prStates,
+      insertedAfter: filters.insertedAfter,
+    },
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   })
@@ -142,13 +157,16 @@ export function WorkbenchJobsGroupedList({
       loading={loading}
       noun="jobs"
       emptyState={emptyState}
-      defaultCollapsed={DEFAULT_COLLAPSED}
+      defaultCollapsed={defaultCollapsed}
+      fill={fill}
       renderGroup={(group, scrollEl) => (
         <JobStatusGroup
           workbenchId={workbenchId}
           status={group.key}
           count={group.count}
           filters={filters}
+          pageSize={pageSize}
+          capped={capped}
           scrollEl={scrollEl}
         />
       )}
@@ -161,12 +179,16 @@ function JobStatusGroup({
   status,
   count,
   filters,
+  pageSize,
+  capped,
   scrollEl,
 }: {
   workbenchId: string
   status: WorkbenchJobStatus
   count: number
   filters: JobQueryFilters
+  pageSize: number
+  capped: boolean
   scrollEl: HTMLDivElement | null
 }) {
   const { data, loading, pageInfo, fetchNextPage, fetchingMore } =
@@ -174,7 +196,7 @@ function JobStatusGroup({
       {
         queryHook: useWorkbenchJobsForStatusQuery,
         keyPath: RUNS_KEY_PATH,
-        pageSize: WORKBENCH_JOBS_PAGE_SIZE,
+        pageSize,
         keepLoadedPages: true,
       },
       { id: workbenchId, status, ...filters }
@@ -186,7 +208,7 @@ function JobStatusGroup({
       items={jobs}
       loading={!data && loading}
       count={count}
-      pageInfo={pageInfo}
+      pageInfo={capped ? undefined : pageInfo}
       fetchingMore={fetchingMore}
       fetchNextPage={fetchNextPage}
       scrollEl={scrollEl}

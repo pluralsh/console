@@ -8,7 +8,7 @@ import { useMemo } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 
-const RECENT_JOBS_FOR_WARNING = 3
+export const RECENT_JOBS_FOR_WARNING = 3
 
 export function WorkbenchBudgetSpendCapWarning({
   workbenchId,

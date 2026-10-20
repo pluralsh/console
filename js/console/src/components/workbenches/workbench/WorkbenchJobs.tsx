@@ -37,7 +37,9 @@ import {
   WORKBENCH_JOBS_PAGE_SIZE,
 } from './workbenchJobsDisplay'
 
-const WORKBENCH_JOBS_VIEW_STORAGE_KEY = 'workbench-jobs-view'
+// bumped when the default moved to list, so a stored board view from the
+// previous default doesn't keep hiding it
+const WORKBENCH_JOBS_VIEW_STORAGE_KEY = 'workbench-jobs-view-v2'
 const SEARCH_LIMIT = 50
 const noop = () => {}
 // stable, so the paginated data callbacks don't change every render

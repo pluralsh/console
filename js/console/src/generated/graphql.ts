@@ -17236,6 +17236,7 @@ export type WorkbenchPromptsArgs = {
 
 
 export type WorkbenchRunCountsArgs = {
+  insertedAfter?: InputMaybe<Scalars['DateTime']['input']>;
   prStates?: InputMaybe<Array<InputMaybe<WorkbenchJobPrState>>>;
   q?: InputMaybe<Scalars['String']['input']>;
 };
@@ -17247,6 +17248,7 @@ export type WorkbenchRunsArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   direction?: InputMaybe<SortDirection>;
   first?: InputMaybe<Scalars['Int']['input']>;
+  insertedAfter?: InputMaybe<Scalars['DateTime']['input']>;
   issue?: InputMaybe<Scalars['Boolean']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   monitorId?: InputMaybe<Scalars['ID']['input']>;
@@ -23937,6 +23939,7 @@ export type WorkbenchJobStatusCountsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
   q?: InputMaybe<Scalars['String']['input']>;
   prStates?: InputMaybe<Array<InputMaybe<WorkbenchJobPrState>> | InputMaybe<WorkbenchJobPrState>>;
+  insertedAfter?: InputMaybe<Scalars['DateTime']['input']>;
 }>;
 
 
@@ -23948,6 +23951,7 @@ export type WorkbenchJobsForStatusQueryVariables = Exact<{
   q?: InputMaybe<Scalars['String']['input']>;
   prStates?: InputMaybe<Array<InputMaybe<WorkbenchJobPrState>> | InputMaybe<WorkbenchJobPrState>>;
   direction?: InputMaybe<SortDirection>;
+  insertedAfter?: InputMaybe<Scalars['DateTime']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
 }>;
@@ -49277,10 +49281,10 @@ export type WorkbenchJobCountsLazyQueryHookResult = ReturnType<typeof useWorkben
 export type WorkbenchJobCountsSuspenseQueryHookResult = ReturnType<typeof useWorkbenchJobCountsSuspenseQuery>;
 export type WorkbenchJobCountsQueryResult = Apollo.QueryResult<WorkbenchJobCountsQuery, WorkbenchJobCountsQueryVariables>;
 export const WorkbenchJobStatusCountsDocument = gql`
-    query WorkbenchJobStatusCounts($id: ID!, $q: String, $prStates: [WorkbenchJobPrState]) {
+    query WorkbenchJobStatusCounts($id: ID!, $q: String, $prStates: [WorkbenchJobPrState], $insertedAfter: DateTime) {
   workbench(id: $id) {
     id
-    runCounts(q: $q, prStates: $prStates) {
+    runCounts(q: $q, prStates: $prStates, insertedAfter: $insertedAfter) {
       statuses {
         status
         count
@@ -49305,6 +49309,7 @@ export const WorkbenchJobStatusCountsDocument = gql`
  *      id: // value for 'id'
  *      q: // value for 'q'
  *      prStates: // value for 'prStates'
+ *      insertedAfter: // value for 'insertedAfter'
  *   },
  * });
  */
@@ -49328,7 +49333,7 @@ export type WorkbenchJobStatusCountsLazyQueryHookResult = ReturnType<typeof useW
 export type WorkbenchJobStatusCountsSuspenseQueryHookResult = ReturnType<typeof useWorkbenchJobStatusCountsSuspenseQuery>;
 export type WorkbenchJobStatusCountsQueryResult = Apollo.QueryResult<WorkbenchJobStatusCountsQuery, WorkbenchJobStatusCountsQueryVariables>;
 export const WorkbenchJobsForStatusDocument = gql`
-    query WorkbenchJobsForStatus($id: ID!, $status: WorkbenchJobStatus!, $q: String, $prStates: [WorkbenchJobPrState], $direction: SortDirection, $first: Int = 50, $after: String) {
+    query WorkbenchJobsForStatus($id: ID!, $status: WorkbenchJobStatus!, $q: String, $prStates: [WorkbenchJobPrState], $direction: SortDirection, $insertedAfter: DateTime, $first: Int = 50, $after: String) {
   workbench(id: $id) {
     id
     runs(
@@ -49338,6 +49343,7 @@ export const WorkbenchJobsForStatusDocument = gql`
       statuses: [$status]
       prStates: $prStates
       direction: $direction
+      insertedAfter: $insertedAfter
     ) {
       pageInfo {
         ...PageInfo
@@ -49370,6 +49376,7 @@ ${WorkbenchJobTinyFragmentDoc}`;
  *      q: // value for 'q'
  *      prStates: // value for 'prStates'
  *      direction: // value for 'direction'
+ *      insertedAfter: // value for 'insertedAfter'
  *      first: // value for 'first'
  *      after: // value for 'after'
  *   },

@@ -79,7 +79,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     jobs =
       WorkbenchJob.for_workbench(id)
       |> maybe_job_search(args)
-      |> workbench_job_filters(Map.take(args, [:pr_states]))
+      |> workbench_job_filters(Map.take(args, [:pr_states, :inserted_after]))
     none = Repo.aggregate(WorkbenchJob.without_pull_requests(jobs), :count)
 
     {:ok, %{
@@ -601,6 +601,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
       {:monitor_id, id}, q when is_binary(id) -> WorkbenchJob.for_monitor(q, id)
       {:statuses, s}, q when is_list(s) -> WorkbenchJob.for_statuses(q, s)
       {:pr_states, s}, q when is_list(s) -> WorkbenchJob.for_pr_states(q, s)
+      {:inserted_after, ts}, q when not is_nil(ts) -> WorkbenchJob.inserted_after(q, ts)
       _, q -> q
     end)
   end

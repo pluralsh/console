@@ -4367,6 +4367,9 @@ type Workbench {
 
     "case-insensitive substring search over job prompts"
     q: String
+
+    "only runs created at or after this time"
+    insertedAfter: DateTime
   ): WorkbenchJobConnection
 
   runCounts(
@@ -4375,6 +4378,9 @@ type Workbench {
 
     "only count runs with pull requests in these states"
     prStates: [WorkbenchJobPrState]
+
+    "only count runs created at or after this time"
+    insertedAfter: DateTime
   ): WorkbenchJobCounts
 
   crons(after: String, first: Int, before: String, last: Int): WorkbenchCronConnection

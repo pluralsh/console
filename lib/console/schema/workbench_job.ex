@@ -175,6 +175,10 @@ defmodule Console.Schema.WorkbenchJob do
     from(j in query, where: j.status in ^statuses)
   end
 
+  def inserted_after(query \\ __MODULE__, ts)
+  def inserted_after(query, nil), do: query
+  def inserted_after(query, ts), do: from(j in query, where: j.inserted_at >= ^ts)
+
   @doc """
   Jobs with at least one pull request in one of the given states, `:none` matching jobs without any pull requests.
   """

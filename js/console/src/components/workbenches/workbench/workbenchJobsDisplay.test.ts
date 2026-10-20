@@ -11,8 +11,8 @@ import {
 } from './workbenchJobsDisplay'
 
 describe('workbenchJobsDisplay', () => {
-  it('defaults to the board view', () => {
-    expect(DEFAULT_WORKBENCH_JOBS_DISPLAY.view).toBe('board')
+  it('defaults to the list view', () => {
+    expect(DEFAULT_WORKBENCH_JOBS_DISPLAY.view).toBe('list')
   })
 
   it('sends no filters when everything is selected', () => {
