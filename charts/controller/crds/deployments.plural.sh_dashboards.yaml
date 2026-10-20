@@ -158,6 +158,17 @@ spec:
                       - SECTION
                       maxLength: 16
                       type: string
+                    unit:
+                      description: |-
+                        Unit of the plotted values, used to format axes and tooltips. TIME is in seconds,
+                        CPU is in cores, and PERCENT is on a 0-100 scale.
+                      enum:
+                      - NONE
+                      - BYTES
+                      - TIME
+                      - CPU
+                      - PERCENT
+                      type: string
                   required:
                   - identifier
                   - layout

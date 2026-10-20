@@ -1,14 +1,15 @@
 import { EmptyState, Flex } from '@pluralsh/design-system'
 import { useLogin } from 'components/contexts'
 import FractionalChip from 'components/utils/FractionalChip'
-import { SubtabDirectory, SubTabs } from 'components/utils/SubTabs'
+import { ToolbarTabs } from 'components/layout/PageToolbar'
+import { SubtabDirectory } from 'components/utils/SubTabs'
 import {
   ServiceDeploymentDetailsFragment,
   ServiceDeploymentStatus,
 } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
 import { useMemo } from 'react'
-import { Navigate, Outlet } from 'react-router-dom'
+import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import {
   SERVICE_SETTINGS_CONTEXTS_REL_PATH,
   SERVICE_SETTINGS_DEPENDENCIES_REL_PATH,
@@ -19,10 +20,16 @@ import {
   SERVICE_SETTINGS_STACK_IMPORTS_REL_PATH,
 } from 'routes/cdRoutesConsts'
 import { useServiceSubPageBreadcrumbs } from '../ServiceDetails'
-import { useServiceContext } from '../ServiceDetailsContext'
+import {
+  ServiceToolbarStartPortal,
+  useServiceContext,
+} from '../ServiceDetailsContext'
 
 type ServicePersonaType =
-  'all-settings' | 'secrets-only' | 'exclude-secrets' | 'no-settings'
+  | 'all-settings'
+  | 'secrets-only'
+  | 'exclude-secrets'
+  | 'no-settings'
 
 const getDirectory = ({
   service,
@@ -32,7 +39,7 @@ const getDirectory = ({
   personaType: ServicePersonaType
 }): SubtabDirectory => {
   const gitEnabled = !!service.repository
-  const helmEnabled = !!service.helm?.chart
+  const helmEnabled = !!service.helm
   const healthyDependencies =
     service.dependencies?.filter(
       (dep) => dep?.status === ServiceDeploymentStatus.Healthy
@@ -82,6 +89,7 @@ const getDirectory = ({
 export function ServiceSettings() {
   const ctx = useServiceContext()
   const { tab } = useServiceSubPageBreadcrumbs('settings')
+  const { pathname } = useLocation()
 
   const personaType = useServicePersonaType()
 
@@ -100,11 +108,15 @@ export function ServiceSettings() {
   return (
     <Flex
       direction="column"
-      gap="large"
       height="100%"
       width="100%"
     >
-      <SubTabs directory={directory} />
+      <ServiceToolbarStartPortal>
+        <ToolbarTabs
+          directory={directory}
+          activeFn={(path) => pathname.split('/').includes(path)}
+        />
+      </ServiceToolbarStartPortal>
       {personaType === 'no-settings' ? (
         <EmptyState message="Service settings are not enabled for your persona." />
       ) : (

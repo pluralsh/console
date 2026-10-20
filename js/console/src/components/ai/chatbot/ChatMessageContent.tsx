@@ -65,6 +65,7 @@ type ChatMessageContentProps = {
   userMsgWrapperStyle?: StyledObject
   isPending?: boolean
   toolRuntime?: string
+  standaloneCommand?: boolean
 }
 
 export function ChatMessageContent({
@@ -88,6 +89,7 @@ export function ChatMessageContent({
   userMsgWrapperStyle,
   isPending,
   toolRuntime,
+  standaloneCommand,
 }: ChatMessageContentProps) {
   const { colors } = useTheme()
   switch (type) {
@@ -124,6 +126,7 @@ export function ChatMessageContent({
           serverName={serverName}
           isPending={isPending}
           toolRuntime={toolRuntime}
+          standaloneCommand={standaloneCommand}
         />
       )
     case ChatType.PrCall:
@@ -456,6 +459,7 @@ function SimpleToolMessageContent({
   serverName,
   isPending,
   toolRuntime,
+  standaloneCommand,
 }: ChatMessageContentProps) {
   const pendingConfirmation = confirm && !confirmedAt
   const customResultBody = getToolMessageDetailsBody(content, attributes)
@@ -484,6 +488,7 @@ function SimpleToolMessageContent({
         attributes={attributes}
         isPending={isPending}
         toolRuntime={toolRuntime}
+        standaloneCommand={standaloneCommand}
         customLabel={
           serverName || pendingConfirmation ? (
             <ToolCallLabel

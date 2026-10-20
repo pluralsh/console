@@ -104,12 +104,14 @@ type ServiceHelm struct {
 	// LuaScript to use to generate Helm configuration.
 	// This can ultimately return a lua table with keys "values" and "valuesFiles"
 	// to supply overlays for either dynamically based on git state or other metadata.
+	// The script can call warn(message) to report non-fatal service warnings, which mark the service as stale.
 	// +kubebuilder:validation:Optional
 	LuaScript *string `json:"luaScript,omitempty"`
 
 	// LuaFile to use to generate Helm configuration.
 	// This can ultimately return a Lua table with keys "values" and "valuesFiles"
 	// to supply overlays for either dynamically based on Git state or other metadata.
+	// The script can call warn(message) to report non-fatal service warnings, which mark the service as stale.
 	// +kubebuilder:validation:Optional
 	LuaFile *string `json:"luaFile,omitempty"`
 
@@ -120,12 +122,14 @@ type ServiceHelm struct {
 	// PythonScript to use to generate Helm configuration.
 	// This can ultimately return a dict with keys "values" and "valuesFiles"
 	// to supply overlays for either dynamically based on git state or other metadata.
+	// The script can call warn(message) to report non-fatal service warnings, which mark the service as stale.
 	// +kubebuilder:validation:Optional
 	PythonScript *string `json:"pythonScript,omitempty"`
 
 	// PythonFile to use to generate Helm configuration.
 	// This can ultimately return a dict with keys "values" and "valuesFiles"
 	// to supply overlays for either dynamically based on Git state or other metadata.
+	// The script can call warn(message) to report non-fatal service warnings, which mark the service as stale.
 	// +kubebuilder:validation:Optional
 	PythonFile *string `json:"pythonFile,omitempty"`
 

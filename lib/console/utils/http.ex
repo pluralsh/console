@@ -74,6 +74,7 @@ defmodule Console.Utils.HTTP do
   proxy is configured or the request host matches a `noproxy` entry.
   """
   @spec proxy_options(map | nil, binary) :: keyword
+  def proxy_options(%{enabled: false}, _), do: []
   def proxy_options(%{url: proxy} = config, url) when is_binary(proxy) and proxy != "" do
     case no_proxy?(config, url) do
       true -> []

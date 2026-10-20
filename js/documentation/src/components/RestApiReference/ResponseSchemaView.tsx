@@ -8,7 +8,9 @@ import { useEffect, useState } from 'react'
 import isEmpty from 'lodash/isEmpty'
 import styled from 'styled-components'
 
+import type { ResponseSchemaInfo, SchemaProperty } from '@src/lib/openapi-rest'
 import {
+  getStatusColor,
   StatusDot,
   StatusTab,
   StatusTabs,
@@ -17,10 +19,7 @@ import {
   TdLight,
   Th,
   TypeTag,
-  getStatusColor,
 } from './shared'
-
-import type { ResponseSchemaInfo, SchemaProperty } from '@src/lib/openapi-rest'
 
 /* ─── Styled Components ──────────────────────────────────────────────────── */
 
@@ -47,12 +46,12 @@ const ContentTypeBadge = styled.span(({ theme }) => ({
   background: theme.colors['fill-one'],
   padding: '2px 8px',
   borderRadius: theme.borderRadiuses.medium,
-  fontFamily: 'Monument Semi-Mono, monospace',
+  ...theme.partials.text.mono,
 }))
 
 const EnumBadge = styled.span(({ theme }) => ({
   ...theme.partials.text.caption,
-  fontFamily: 'Monument Semi-Mono, monospace',
+  ...theme.partials.text.mono,
   color: theme.colors['text-light'],
   background: theme.colors['fill-two'],
   padding: '1px 6px',

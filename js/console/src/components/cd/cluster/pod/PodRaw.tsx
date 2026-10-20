@@ -10,7 +10,10 @@ export default function PodRaw() {
   const content = stringify(JSON.parse(pod.raw))
 
   return (
-    <ScrollablePage scrollable={false}>
+    <ScrollablePage
+      scrollable={false}
+      contentStyles={{ paddingTop: 0 }}
+    >
       <RawPageCode>{content}</RawPageCode>
     </ScrollablePage>
   )

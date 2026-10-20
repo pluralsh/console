@@ -21,6 +21,7 @@ defmodule Console.GRPC.Server do
     %Plrl.ObservabilityConfig{}
     |> add_prometheus_configs(inst)
     |> add_elastic_configs(inst)
+    |> add_loki_configs()
   end
 
   def proxy_authentication(%Plrl.ProxyAuthenticationRequest{token: token}, _) do
@@ -49,7 +50,20 @@ defmodule Console.GRPC.Server do
   def verify_cluster(_, _),
     do: raise(GRPC.RPCError, status: :unauthenticated, message: "invalid cluster access token")
 
-  defp add_prometheus_configs(%Plrl.ObservabilityConfig{} = pb, inst) when is_binary(inst) do
+  defp add_prometheus_configs(%Plrl.ObservabilityConfig{} = pb, inst) when is_binary(inst),
+    do: add_prometheus_configs(pb, inst, Console.plural_o11y?())
+  defp add_prometheus_configs(%Plrl.ObservabilityConfig{} = pb, _), do: pb
+
+  defp add_prometheus_configs(%Plrl.ObservabilityConfig{} = pb, _inst, true) do
+    with {:ok, _, pass} <- Console.es_creds(),
+         {:ok, url} <- Console.telemetry_url(:metrics, :read) do
+      %Plrl.ObservabilityConfig{pb | prometheusUsername: Console.telemetry_user(), prometheusPassword: pass, prometheusHost: url}
+    else
+      _ -> pb
+    end
+  end
+
+  defp add_prometheus_configs(%Plrl.ObservabilityConfig{} = pb, inst, _) do
     with {:ok, _, pass} <- Console.es_creds(),
          {:ok, url, vtenant} <- Console.vmetrics_creds() do
       %Plrl.ObservabilityConfig{pb | prometheusUsername: "plrl-#{inst}", prometheusPassword: pass, prometheusHost: "#{url}/select/#{vtenant}/prometheus"}
@@ -57,9 +71,13 @@ defmodule Console.GRPC.Server do
       _ -> pb
     end
   end
-  defp add_prometheus_configs(%Plrl.ObservabilityConfig{} = pb, _), do: pb
 
-  defp add_elastic_configs(%Plrl.ObservabilityConfig{} = pb, inst) when is_binary(inst) do
+  defp add_elastic_configs(%Plrl.ObservabilityConfig{} = pb, inst) when is_binary(inst),
+    do: add_elastic_configs(pb, inst, Console.plural_o11y?())
+  defp add_elastic_configs(%Plrl.ObservabilityConfig{} = pb, _), do: pb
+
+  defp add_elastic_configs(%Plrl.ObservabilityConfig{} = pb, _inst, true), do: pb
+  defp add_elastic_configs(%Plrl.ObservabilityConfig{} = pb, inst, _) do
     case Console.es_creds() do
       {:ok, url, pass} ->
         %Plrl.ObservabilityConfig{pb | elasticUsername: "plrl-#{inst}", elasticPassword: pass, elasticIndex: "plrl-#{inst}-logs-*", elasticHost: url}
@@ -67,7 +85,13 @@ defmodule Console.GRPC.Server do
         pb
     end
   end
-  defp add_elastic_configs(%Plrl.ObservabilityConfig{} = pb, _), do: pb
+
+  defp add_loki_configs(%Plrl.ObservabilityConfig{} = pb) do
+    case Console.telemetry_url(:logs, :write) do
+      {:ok, url} -> %Plrl.ObservabilityConfig{pb | lokiHost: url}
+      _ -> pb
+    end
+  end
 
   defp to_pb(%DeploymentSettings{ai: %{enabled: true} = ai}) do
     %Plrl.AiConfig{
@@ -95,7 +119,8 @@ defmodule Console.GRPC.Server do
       baseUrl: Map.get(openai, :base_url),
       proxyModels: proxy_models(openai, defaults),
       tokenExchange: to_openai_token_exchange_pb(Map.get(openai, :token_exchange)),
-      method: openai_method_to_pb(Map.get(openai, :method))
+      method: openai_method_to_pb(Map.get(openai, :method)),
+      proxy: to_proxy_pb(Map.get(openai, :proxy))
     }
   end
   defp to_openai_pb(_, _), do: nil
@@ -127,7 +152,8 @@ defmodule Console.GRPC.Server do
       model: Map.get(anthropic, :model) || defaults[:model],
       toolModel: Map.get(anthropic, :tool_model) || defaults[:tool_model],
       baseUrl: Map.get(anthropic, :base_url),
-      proxyModels: proxy_models(anthropic, defaults)
+      proxyModels: proxy_models(anthropic, defaults),
+      proxy: to_proxy_pb(Map.get(anthropic, :proxy))
     }
   end
   defp to_anthropic_pb(_), do: nil
@@ -143,7 +169,8 @@ defmodule Console.GRPC.Server do
       embeddingModel: Map.get(vertex_ai, :embedding_model) || defaults[:embedding_model],
       project: Map.get(vertex_ai, :project),
       location: Map.get(vertex_ai, :location),
-      proxyModels: proxy_models(vertex_ai, defaults)
+      proxyModels: proxy_models(vertex_ai, defaults),
+      proxy: to_proxy_pb(Map.get(vertex_ai, :proxy))
     }
   end
   defp to_vertex_pb(_), do: nil
@@ -162,7 +189,8 @@ defmodule Console.GRPC.Server do
       proxyModels: proxy_models(bedrock, defaults),
       deployments: to_string_map(Map.get(bedrock, :deployments)),
       endpoint: bedrock_endpoint_to_pb(Map.get(bedrock, :endpoint)),
-      modelSettings: bedrock_model_settings(Map.get(bedrock, :model_settings))
+      modelSettings: bedrock_model_settings(Map.get(bedrock, :model_settings)),
+      proxy: to_proxy_pb(Map.get(bedrock, :proxy))
     }
   end
   defp to_bedrock_pb(_), do: nil
@@ -177,7 +205,8 @@ defmodule Console.GRPC.Server do
       toolModel: Map.get(azure, :tool_model) || defaults[:tool_model],
       accessToken: Map.get(azure, :access_token),
       deployments: to_string_map(Map.get(azure, :deployments)),
-      proxyModels: proxy_models(azure, defaults)
+      proxyModels: proxy_models(azure, defaults),
+      proxy: to_proxy_pb(Map.get(azure, :proxy))
     }
   end
   defp to_azure_pb(_), do: nil
@@ -195,6 +224,15 @@ defmodule Console.GRPC.Server do
   defp proxy_models(%{proxy_models: [_ | _] = models}, _), do: models
   defp proxy_models(_, %{proxy_models: models}) when is_list(models), do: models
   defp proxy_models(_, _), do: []
+
+  defp to_proxy_pb(%{url: url} = proxy) when is_binary(url) do
+    %Plrl.HttpProxyConfig{
+      url: url,
+      noProxy: Map.get(proxy, :noproxy),
+      enabled: Map.get(proxy, :enabled, true)
+    }
+  end
+  defp to_proxy_pb(_), do: nil
 
   defp to_string_map(%{} = map) do
     Enum.filter(map, fn {k, v} -> is_binary(k) and is_binary(v) end)

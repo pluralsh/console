@@ -179,8 +179,8 @@ defmodule Console.Deployments.Git.Cmd do
 
   defp opts(%GitRepository{dir: dir} = repo), do: [env: env(repo), cd: dir, stderr_to_stdout: true]
 
-  defp env(%GitRepository{connection: %ScmConnection{proxy: %ScmConnection.Proxy{url: url}}} = repo)
-    when is_binary(url), do: [{"HTTP_PROXY", url}, {"HTTPS_PROXY", url} | env(%{repo | connection: nil})]
+  defp env(%GitRepository{connection: %ScmConnection{proxy: %ScmConnection.Proxy{enabled: enabled, url: url}}} = repo)
+    when enabled != false and is_binary(url), do: [{"HTTP_PROXY", url}, {"HTTPS_PROXY", url} | env(%{repo | connection: nil})]
   defp env(%GitRepository{auth_method: :basic, password: password}) when is_binary(password),
     do: [{"GIT_ACCESS_TOKEN", password}, {"GIT_ASKPASS", git_askpass()}]
   defp env(%GitRepository{auth_method: :ssh, private_key_file: pk_file} = git) when is_binary(pk_file),

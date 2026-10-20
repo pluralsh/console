@@ -21,3 +21,4 @@ EXPOSE 8080
 USER nonroot:nonroot
 
 ENTRYPOINT ["/app/observability-proxy"]
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD ["/app/observability-proxy", "--help"]

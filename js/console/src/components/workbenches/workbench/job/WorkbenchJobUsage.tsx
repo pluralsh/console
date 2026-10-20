@@ -1,10 +1,5 @@
-import {
-  Card,
-  Divider,
-  EmptyState,
-  Flex,
-  ProgressBar,
-} from '@pluralsh/design-system'
+import { Card, Divider, Flex, ProgressBar } from '@pluralsh/design-system'
+import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import {
   Body1P,
   Body2BoldP,
@@ -47,52 +42,56 @@ export function WorkbenchJobUsage({
     )
 
   if (!hasUsage) {
-    return <EmptyState message="No usage data reported for this job." />
+    return (
+      <WorkbenchEmptyState
+        inset={false}
+        message="No usage data"
+        description="This job didn't report any token usage or cost."
+      />
+    )
   }
 
   return (
-    <>
+    <Flex
+      direction="column"
+      gap="medium"
+    >
       <Body1P $color="text-long-form">
         Token consumption and estimated cost for this job.
       </Body1P>
-      <Flex
-        direction="column"
-        gap="large"
+      <div
+        css={{
+          display: 'grid',
+          gridTemplateColumns: `repeat(auto-fit, minmax(160px, 1fr))`,
+          gap: theme.spacing.medium,
+        }}
       >
-        <div
-          css={{
-            display: 'grid',
-            gridTemplateColumns: `repeat(auto-fit, minmax(160px, 1fr))`,
-            gap: theme.spacing.medium,
-          }}
-        >
-          <UsageMetricCard
-            label="Input tokens"
-            value={formatTokenCount(usage?.inputTokens)}
-            footer={
-              usage?.inputTokens
-                ? new Intl.NumberFormat('en-US').format(usage.inputTokens)
-                : undefined
-            }
-          />
-          <UsageMetricCard
-            label="Output tokens"
-            value={formatTokenCount(usage?.outputTokens)}
-            footer={
-              usage?.outputTokens
-                ? new Intl.NumberFormat('en-US').format(usage.outputTokens)
-                : undefined
-            }
-          />
-          <UsageMetricCard
-            label="Est cost"
-            value={formatTokenCost(usage?.totalCost)}
-          />
-        </div>
-        <TokenBreakdown usage={usage} />
-        <CostBreakdown usage={usage} />
-      </Flex>
-    </>
+        <UsageMetricCard
+          label="Input tokens"
+          value={formatTokenCount(usage?.inputTokens)}
+          footer={
+            usage?.inputTokens
+              ? new Intl.NumberFormat('en-US').format(usage.inputTokens)
+              : undefined
+          }
+        />
+        <UsageMetricCard
+          label="Output tokens"
+          value={formatTokenCount(usage?.outputTokens)}
+          footer={
+            usage?.outputTokens
+              ? new Intl.NumberFormat('en-US').format(usage.outputTokens)
+              : undefined
+          }
+        />
+        <UsageMetricCard
+          label="Est cost"
+          value={formatTokenCost(usage?.totalCost)}
+        />
+      </div>
+      <TokenBreakdown usage={usage} />
+      <CostBreakdown usage={usage} />
+    </Flex>
   )
 }
 
@@ -114,9 +113,11 @@ function TokenBreakdown({
 
   if (!hasAnyTokens) {
     return (
-      <Card>
-        <EmptyState message="Token usage is not available for this job." />
-      </Card>
+      <WorkbenchEmptyState
+        inset={false}
+        message="Token usage unavailable"
+        description="This job didn't report token counts."
+      />
     )
   }
 
@@ -161,7 +162,7 @@ function TokenBreakdown({
                 <CaptionP
                   $color="text-light"
                   css={{
-                    fontFamily: theme.fontFamilies.mono,
+                    ...theme.partials.text.mono,
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
                   }}
@@ -172,7 +173,7 @@ function TokenBreakdown({
                   <CaptionP
                     $color="text-input-disabled"
                     css={{
-                      fontFamily: theme.fontFamilies.mono,
+                      ...theme.partials.text.mono,
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap',
                     }}
@@ -184,7 +185,7 @@ function TokenBreakdown({
               <CaptionP
                 $color="text"
                 css={{
-                  fontFamily: theme.fontFamilies.mono,
+                  ...theme.partials.text.mono,
                 }}
               >
                 {formatTokenCount(row.value)}
@@ -219,9 +220,11 @@ function CostBreakdown({
 
   if (!hasAnyCost) {
     return (
-      <Card>
-        <EmptyState message="Cost cannot be estimated for this job. Token usage is still available." />
-      </Card>
+      <WorkbenchEmptyState
+        inset={false}
+        message="Cost unavailable"
+        description="Cost can't be estimated for this job, but token usage is still available."
+      />
     )
   }
 

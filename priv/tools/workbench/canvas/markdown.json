@@ -6,6 +6,14 @@
             "type": "string",
             "description": "Unique key for this canvas block (e.g. `summary`, `root_cause`, `timeline`). Must be unique among canvas blocks in this job."
         },
+        "section_id": {
+            "type": "string",
+            "description": "Optional identifier of the section (from add_section_block) this block belongs to. Layout coordinates are then relative to that section's grid."
+        },
+        "description": {
+            "type": "string",
+            "description": "Optional one-sentence explanation of what this block shows and why it matters, shown behind an info icon next to its title."
+        },
         "markdown": {
             "type": "string",
             "description": "GitHub-flavored markdown body shown in the block. Prefer headings, bullet lists, and short sections so the canvas stays scannable."

@@ -1,6 +1,6 @@
 defmodule Console.Logs.Provider do
   alias Console.Logs.{Query, Line}
-  alias Console.Logs.Provider.{Victoria, Elastic}
+  alias Console.Logs.Provider.{Victoria, Elastic, Loki}
   alias Console.Schema.{User, DeploymentSettings}
 
   @type error :: Console.error
@@ -45,5 +45,7 @@ defmodule Console.Logs.Provider do
     do: {:ok, Victoria.new(victoria)}
   def client(%DeploymentSettings{logging: %{enabled: true, driver: :elastic, elastic: %{} = elastic}}),
     do: {:ok, Elastic.new(elastic)}
+  def client(%DeploymentSettings{logging: %{enabled: true, driver: :loki, loki: %{} = loki}}),
+    do: {:ok, Loki.new(loki)}
   def client(_), do: {:error, "Plural logging integration not yet configured"}
 end

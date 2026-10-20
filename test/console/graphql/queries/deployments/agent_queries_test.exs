@@ -1,6 +1,7 @@
 defmodule Console.GraphQL.Queries.Deployments.AgentQueriesTest do
   use Console.DataCase, async: true
   alias Console.Deployments.Workbenches
+  alias Console.Schema.ScmConnection
 
   describe "agentRuntimes" do
     test "it can list runtimes a user can access" do
@@ -83,7 +84,10 @@ defmodule Console.GraphQL.Queries.Deployments.AgentQueriesTest do
       cluster = insert(:cluster)
       runtime = insert(:agent_runtime, cluster: cluster)
       run = insert(:agent_run, runtime: runtime)
-      conn = insert(:scm_connection, default: true)
+      conn = insert(:scm_connection,
+        default: true,
+        proxy: %ScmConnection.Proxy{url: "http://proxy.example.com:8080", noproxy: "github.internal"}
+      )
 
       {:ok, %{data: %{"agentRun" => found}}} = run_query("""
         query AgentRun($id: ID!) {
@@ -92,6 +96,11 @@ defmodule Console.GraphQL.Queries.Deployments.AgentQueriesTest do
             scmCreds {
               username
               token
+              proxy {
+                enabled
+                url
+                noproxy
+              }
             }
             pluralCreds {
               token
@@ -104,8 +113,71 @@ defmodule Console.GraphQL.Queries.Deployments.AgentQueriesTest do
       assert found["id"] == run.id
       assert found["scmCreds"]["username"] == "apikey"
       assert found["scmCreds"]["token"] == conn.token
+      assert found["scmCreds"]["proxy"] == %{
+        "enabled" => true,
+        "url" => "http://proxy.example.com:8080",
+        "noproxy" => "github.internal"
+      }
       assert found["pluralCreds"]["token"]
       assert found["pluralCreds"]["url"]
+    end
+
+    test "clusters only get download urls for attachments of agent runs they run" do
+      cluster = insert(:cluster)
+      run = insert(:agent_run, runtime: insert(:agent_runtime, cluster: cluster))
+      prompt = Console.Repo.insert!(%Console.Schema.AgentPrompt{agent_run_id: run.id, prompt: "more", seq: 1})
+      other = insert(:agent_run, runtime: insert(:agent_runtime, cluster: insert(:cluster)))
+      insert(:attachment, agent_run: other, agent_prompt: prompt)
+
+      {:ok, %{data: %{"agentRun" => found}}} = run_query("""
+        query AgentRun($id: ID!) {
+          agentRun(id: $id) { prompts { attachments { id downloadUrl } } }
+        }
+      """, %{"id" => run.id}, %{cluster: cluster})
+
+      assert [%{"attachments" => [%{"id" => _, "downloadUrl" => nil}]}] = found["prompts"]
+    end
+
+    test "a cluster can't read the attachments of an agent run it doesn't run" do
+      run = insert(:agent_run, runtime: insert(:agent_runtime, cluster: insert(:cluster)))
+      insert(:attachment, agent_run: run)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query AgentRun($id: ID!) {
+          agentRun(id: $id) { attachments { downloadUrl } }
+        }
+      """, %{"id" => run.id}, %{cluster: insert(:cluster)})
+    end
+
+    test "a runner cluster can download run and prompt attachments as the run's user" do
+      cluster = insert(:cluster)
+      user = insert(:user)
+      runtime = insert(:agent_runtime, cluster: cluster)
+      run = insert(:agent_run, runtime: runtime, user: user)
+      prompt = Console.Repo.insert!(%Console.Schema.AgentPrompt{agent_run_id: run.id, prompt: "more", seq: 1})
+      workbench = insert(:workbench)
+      att = insert(:attachment, workbench: workbench, agent_run: run, path: "/reports/a.md", filename: "a.md")
+      patt = insert(:attachment, workbench: workbench, agent_run: run, agent_prompt: prompt)
+
+      {:ok, %{data: %{"agentRun" => found}}} = run_query("""
+        query AgentRun($id: ID!) {
+          agentRun(id: $id) {
+            attachments { id filename path downloadUrl }
+            prompts { attachments { id downloadUrl } }
+          }
+        }
+      """, %{"id" => run.id}, %{cluster: cluster})
+
+      assert [%{"id" => id, "filename" => "a.md", "downloadUrl" => url}] = found["attachments"]
+      assert id == att.id
+      %{query: query} = URI.parse(url)
+      {:ok, {wid, "/reports/a.md", uid}} = Console.Deployments.WorkbenchFiles.verify_download_token(URI.decode_query(query)["token"])
+      assert wid == workbench.id
+      assert uid == user.id
+
+      assert [%{"attachments" => [%{"id" => pid, "downloadUrl" => purl}]}] = found["prompts"]
+      assert pid == patt.id
+      assert purl
     end
 
     test "a cluster receives scm creds from the runtime's bound connection" do

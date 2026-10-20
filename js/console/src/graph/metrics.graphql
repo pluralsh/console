@@ -6,6 +6,15 @@ fragment MetricResponse on MetricResponse {
   }
 }
 
+fragment MetricSeries on MetricResponse {
+  name
+  metric
+  values {
+    timestamp
+    value
+  }
+}
+
 fragment MetricPointResponse on MetricPointResponse {
   metric
   value {
@@ -50,10 +59,15 @@ query ServiceHeatMap($serviceId: ID!, $flavor: HeatMapFlavor!) {
   }
 }
 
-query ServiceMetrics($id: ID!, $step: String, $start: DateTime) {
+query ServiceMetrics(
+  $id: ID!
+  $step: String
+  $start: DateTime
+  $stop: DateTime
+) {
   serviceDeployment(id: $id) {
     id
-    serviceMetrics(step: $step, start: $start) {
+    serviceMetrics(step: $step, start: $start, stop: $stop) {
       cpu {
         ...MetricResponse
       }

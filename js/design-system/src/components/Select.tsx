@@ -57,7 +57,8 @@ type SelectButtonProps = {
 
 export type SelectProps = Exclude<SelectButtonProps, 'children'> & {
   children:
-    ReactElement<ListBoxItemBaseProps> | ReactElement<ListBoxItemBaseProps>[]
+    | ReactElement<ListBoxItemBaseProps>
+    | ReactElement<ListBoxItemBaseProps>[]
   dropdownHeaderFixed?: ReactNode
   dropdownFooterFixed?: ReactNode
   dropdownHeader?: ReactElement<any>
@@ -170,8 +171,17 @@ const SelectButtonInner = styled.div<{
       flexShrink: 1,
       padding: `${size === 'medium' ? 9 : 5}px ${theme.spacing.medium}px`,
       width: '100%',
+      minWidth: 0,
+      // a trigger is one line tall; long labels truncate rather than wrap
       '.children': {
         flexGrow: 1,
+        minWidth: 0,
+        overflow: 'hidden',
+        whiteSpace: 'nowrap',
+        textOverflow: 'ellipsis',
+      },
+      '.leftContent, .rightContent, .arrow': {
+        flexShrink: 0,
       },
       '.leftContent, .rightContent': {
         display: 'flex',
@@ -186,7 +196,8 @@ const SelectButtonInner = styled.div<{
       },
       '.arrow': {
         display: 'flex',
-        marginLeft: theme.spacing.medium,
+        marginLeft:
+          size === 'small' ? theme.spacing.small : theme.spacing.medium,
         alignItems: 'center',
         ...theme.partials.dropdown.arrowTransition({ isOpen }),
       },
@@ -252,7 +263,7 @@ function SelectButton({
         {rightContent && <div className="rightContent">{rightContent}</div>}
         {showArrow && (
           <div className="arrow">
-            <CaretDownIcon size={16} />
+            <CaretDownIcon size={size === 'small' ? 12 : 16} />
           </div>
         )}
       </div>

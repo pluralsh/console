@@ -23,7 +23,7 @@ func NewDynatraceProvider(conn *toolquery.DynatraceConnection) *DynatraceProvide
 	return &DynatraceProvider{client: client.NewDynatraceClient(conn.Url, conn.PlatformToken)}
 }
 
-func (in *DynatraceProvider) Metrics(ctx context.Context, input *toolquery.MetricsQueryInput) (*toolquery.MetricsQueryOutput, error) {
+func (in *DynatraceProvider) MetricsSeries(ctx context.Context, input *toolquery.MetricsQueryInput) (*toolquery.MetricsSeriesOutput, error) {
 	if err := in.validateMetricsInput(input); err != nil {
 		return nil, err
 	}
@@ -33,7 +33,7 @@ func (in *DynatraceProvider) Metrics(ctx context.Context, input *toolquery.Metri
 		return nil, err
 	}
 
-	return metricsResp.ToMetricsQueryOutput(), nil
+	return metricsResp.ToMetricsSeriesOutput(), nil
 }
 
 func (in *DynatraceProvider) validateMetricsInput(input *toolquery.MetricsQueryInput) error {

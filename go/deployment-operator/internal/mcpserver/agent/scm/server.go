@@ -16,12 +16,12 @@ import (
 type Server struct {
 	*grpc.Server
 
-	token string
+	clientProvider func() scm.Client
 }
 
 func (in *Server) Start() (<-chan error, error) {
 	in.Server = grpc.NewServer()
-	scm.RegisterGRPCServer(in.Server)
+	scm.RegisterGRPCServer(in.Server, in.clientProvider)
 
 	listener, err := net.Listen("tcp", args.GRPCAddress())
 	if err != nil {
@@ -56,6 +56,6 @@ func (in *Server) Stop() {
 	in.Server.Stop()
 }
 
-func NewServer() *Server {
-	return &Server{}
+func NewServer(clientProvider func() scm.Client) *Server {
+	return &Server{clientProvider: clientProvider}
 }

@@ -2,12 +2,15 @@ defmodule Console.AI.Tools.Workbench.Observability.Plrl.MetricsLabelSearch do
   use Console.AI.Tools.Workbench.Base
   import Console.AI.Tools.Workbench.Observability.Plrl.Metrics, only: [build_tool_connection: 0]
   alias Console.AI.Tools.Workbench.Observability.MetricsLabelSearch
+  alias Console.AI.Tools.Workbench.Observability.TimeRange
 
   embedded_schema do
     field :metric, :string
     field :query, :string
     field :label, :string
     field :limit, :integer
+
+    embeds_one :time_range, TimeRange, on_replace: :update
   end
 
   @valid ~w(metric query label limit)a
@@ -21,19 +24,35 @@ defmodule Console.AI.Tools.Workbench.Observability.Plrl.MetricsLabelSearch do
   def changeset(model, attrs) do
     model
     |> cast(attrs, @valid)
+    |> cast_embed(:time_range)
     |> validate_required([:metric])
   end
 
-  def implement(%__MODULE__{metric: m, query: q, label: label, limit: l}) do
+  def implement(%__MODULE__{metric: m, query: q, label: label, limit: l, time_range: time_range}) do
     with {:ok, conn} <- build_tool_connection() do
-      tool = %MetricsLabelSearch{tool: conn, metric: m, query: q, label: label, limit: l}
+      tool = %MetricsLabelSearch{
+        tool: conn,
+        metric: m,
+        query: q,
+        label: label,
+        limit: l,
+        time_range: time_range
+      }
+
       MetricsLabelSearch.implement(tool)
     end
   end
 
-  def structured(%__MODULE__{metric: m, query: q, label: label, limit: l}) do
+  def structured(%__MODULE__{metric: m, query: q, label: label, limit: l, time_range: time_range}) do
     with {:ok, conn} <- build_tool_connection() do
-      %MetricsLabelSearch{tool: conn, metric: m, query: q, label: label, limit: l}
+      %MetricsLabelSearch{
+        tool: conn,
+        metric: m,
+        query: q,
+        label: label,
+        limit: l,
+        time_range: time_range
+      }
       |> MetricsLabelSearch.structured()
     end
   end

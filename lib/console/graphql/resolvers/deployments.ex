@@ -254,6 +254,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(Issue, _), do: Issue.ordered()
   def query(Monitor, _), do: Monitor
   def query(Dashboard, _), do: Dashboard.ordered()
+  def query(Console.Schema.Attachment, _), do: Console.Schema.Attachment.ordered()
   def query(_, _), do: Cluster
 
   delegates Console.GraphQl.Resolvers.Deployments.Git

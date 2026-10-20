@@ -5,7 +5,7 @@ defmodule Console.AI.Ollama do
   @behaviour Console.AI.Provider
   import Console.AI.Provider.Base
 
-  defstruct [:url, :model, :tool_model, :authorization]
+  defstruct [:url, :model, :tool_model, :authorization, :proxy]
 
   def defaults(), do: %{}
 
@@ -16,7 +16,8 @@ defmodule Console.AI.Ollama do
       url: opts.url,
       model: opts.model,
       tool_model: opts.tool_model,
-      authorization: opts.authorization
+      authorization: opts.authorization,
+      proxy: Map.get(opts, :proxy)
     }
   end
 
@@ -56,7 +57,16 @@ defmodule Console.AI.Ollama do
   end
   defp ollama_url(_), do: nil
 
-  defp request_opts(%__MODULE__{authorization: auth}) when is_binary(auth),
-    do: [req_http_options: [headers: [{"authorization", auth}]]]
-  defp request_opts(_), do: []
+  defp request_opts(%__MODULE__{} = ollama) do
+    case ollama.authorization do
+      auth when is_binary(auth) ->
+        Keyword.update(
+          http_options(ollama),
+          :req_http_options,
+          [headers: [{"authorization", auth}]],
+          &Keyword.put(&1, :headers, [{"authorization", auth}])
+        )
+      _ -> http_options(ollama)
+    end
+  end
 end

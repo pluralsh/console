@@ -117,3 +117,5 @@ ENTRYPOINT ["/kas"]
 # 8154 - Kubernetes API
 # 8155 - Internal API
 EXPOSE 8000 8001 8150 8151 8153 8154 8155
+USER nonroot:nonroot
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD ["/kas", "--help"]

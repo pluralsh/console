@@ -18,6 +18,7 @@ fragment WorkbenchFragment on Workbench {
             repositories
         }
         infrastructure {
+            selfService
             services
             stacks
             kubernetes
@@ -53,6 +54,7 @@ fragment WorkbenchToolFragment on WorkbenchTool {
     name
     tool
     categories
+    approval
     project {
         ...TinyProjectFragment
     }

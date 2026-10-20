@@ -137,6 +137,8 @@ defmodule ConsoleWeb.Router do
     scope "/v1", ConsoleWeb do
       get "/compliance/report", ComplianceController, :report
       get "/compliance/report/:name", ComplianceController, :report
+
+      get "/workbenches/files/download", WorkbenchFileController, :download
     end
 
     scope "/v1", ConsoleWeb do

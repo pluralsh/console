@@ -25,14 +25,6 @@ func SetObjectMetaLookup(fn ObjectMetaLookup) {
 	objectMetaLookup.Unlock()
 }
 
-func (p *Pool) feedOptions() monty.FeedOptions {
-	return monty.FeedOptions{
-		Functions: map[string]monty.ExternalFunction{
-			"k8s_object_meta": k8sObjectMeta,
-		},
-	}
-}
-
 func k8sObjectMeta(_ context.Context, call monty.Call) (monty.Result, error) {
 	if len(call.Args) != 5 {
 		return raise("TypeError", "k8s_object_meta() takes 5 string arguments")
@@ -74,7 +66,7 @@ func k8sObjectMeta(_ context.Context, call monty.Call) (monty.Result, error) {
 		return monty.Return(monty.None()), nil
 	}
 
-	return monty.Return(goMapToValue(meta)), nil
+	return monty.Return(goToValue(meta)), nil
 }
 
 func stringArg(args []monty.Value, index int) (string, error) {
@@ -91,27 +83,4 @@ func stringArg(args []monty.Value, index int) (string, error) {
 
 func raise(kind, message string) (monty.Result, error) {
 	return monty.Raise(monty.Exception{Type: kind, Arg: &message}), nil
-}
-
-func goMapToValue(value any) monty.Value {
-	switch typed := value.(type) {
-	case nil:
-		return monty.None()
-	case string:
-		return monty.String(typed)
-	case map[string]string:
-		items := make(monty.Dict, 0, len(typed))
-		for key, item := range typed {
-			items = append(items, monty.Pair{Key: monty.String(key), Value: monty.String(item)})
-		}
-		return monty.DictValue(items)
-	case map[string]any:
-		items := make(monty.Dict, 0, len(typed))
-		for key, item := range typed {
-			items = append(items, monty.Pair{Key: monty.String(key), Value: goMapToValue(item)})
-		}
-		return monty.DictValue(items)
-	default:
-		return monty.None()
-	}
 }

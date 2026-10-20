@@ -3,7 +3,6 @@ package tool
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
@@ -17,6 +16,7 @@ import (
 type ReactToComment struct {
 	id          ID
 	description string
+	client      SCMClientProvider
 }
 
 func (in *ReactToComment) ID() ID { return in.id }
@@ -69,12 +69,7 @@ func (in *ReactToComment) handler(ctx context.Context, request mcp.CallToolReque
 		return mcp.NewToolResultError(fmt.Sprintf("invalid state %q: must be 'working' or 'complete'", stateStr)), nil
 	}
 
-	token := os.Getenv(envGitAccessToken)
-	if token == "" {
-		return mcp.NewToolResultError("GIT_ACCESS_TOKEN is not set; cannot authenticate with SCM provider"), nil
-	}
-
-	client := scm.NewClient(token)
+	client := in.client()
 	if err := client.ReactToComment(ctx, prURL, commentID, state); err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("failed to add reaction: %v", err)), nil
 	}
@@ -87,12 +82,13 @@ func (in *ReactToComment) handler(ctx context.Context, request mcp.CallToolReque
 	return mcp.NewToolResultText(fmt.Sprintf("Reacted with %s to comment %s", emoji, commentID)), nil
 }
 
-func NewReactToComment() Tool {
+func NewReactToComment(client SCMClientProvider) Tool {
 	return &ReactToComment{
 		id: ReactToCommentTool,
 		description: "Adds an emoji reaction to a pull request comment. " +
 			"Call with state='working' as soon as you start addressing a comment, " +
 			"and state='complete' when you have finished. " +
 			"Use the reactable commentId from the getPRState tool.",
+		client: client,
 	}
 }

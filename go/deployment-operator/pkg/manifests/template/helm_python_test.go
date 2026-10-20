@@ -210,9 +210,8 @@ func TestPythonValuesErrorIsContextualized(t *testing.T) {
 	}
 }
 
-func TestTemplateValuesRunsLuaBeforePython(t *testing.T) {
+func TestTemplateValuesPrefersPythonOverLua(t *testing.T) {
 	dir := t.TempDir()
-	writePythonFile(t, dir, "lua.yaml", "fromLua: true\n")
 	writePythonFile(t, dir, "python.yaml", "fromPython: true\n")
 
 	p, err := python.NewPoolWithConfig(python.Config{WorkerCount: 1, QueueSize: 1})
@@ -223,6 +222,9 @@ func TestTemplateValuesRunsLuaBeforePython(t *testing.T) {
 
 	svc := &console.ServiceDeploymentForAgent{
 		Helm: &console.ServiceDeploymentForAgent_Helm{
+			// Stale luaFile must be ignored when python is configured, even if the
+			// lua file is missing from the manifest directory.
+			LuaFile: lo.ToPtr("values.lua"),
 			LuaScript: lo.ToPtr(`values["collision"] = "lua"
 valuesFiles[1] = "lua.yaml"`),
 			PythonScript: lo.ToPtr(`values["collision"] = "python"
@@ -233,7 +235,29 @@ valuesFiles.append("python.yaml")`),
 	if err != nil {
 		t.Fatalf("templateValues: %v", err)
 	}
-	if result["collision"] != "python" || result["fromLua"] != true || result["fromPython"] != true {
+	if result["collision"] != "python" || result["fromPython"] != true {
+		t.Fatalf("unexpected merged values: %#v", result)
+	}
+	if _, ok := result["fromLua"]; ok {
+		t.Fatalf("expected lua values to be skipped when python is configured: %#v", result)
+	}
+}
+
+func TestTemplateValuesFallsBackToLuaWhenPythonAbsent(t *testing.T) {
+	dir := t.TempDir()
+	writePythonFile(t, dir, "lua.yaml", "fromLua: true\n")
+
+	svc := &console.ServiceDeploymentForAgent{
+		Helm: &console.ServiceDeploymentForAgent_Helm{
+			LuaScript: lo.ToPtr(`values["collision"] = "lua"
+valuesFiles[1] = "lua.yaml"`),
+		},
+	}
+	result, err := (&helm{dir: dir}).templateValues(svc)
+	if err != nil {
+		t.Fatalf("templateValues: %v", err)
+	}
+	if result["collision"] != "lua" || result["fromLua"] != true {
 		t.Fatalf("unexpected merged values: %#v", result)
 	}
 }
@@ -339,5 +363,38 @@ func writePythonFile(t *testing.T, dir, name, contents string) {
 	}
 	if err := os.WriteFile(path, []byte(contents), 0o644); err != nil {
 		t.Fatalf("WriteFile: %v", err)
+	}
+}
+
+func TestPythonValuesWarnings(t *testing.T) {
+	p, err := python.NewPoolWithConfig(python.Config{WorkerCount: 1, QueueSize: 1})
+	if err != nil {
+		t.Fatalf("NewPoolWithConfig: %v", err)
+	}
+	t.Cleanup(func() { _ = p.Close() })
+
+	svc := &console.ServiceDeploymentForAgent{
+		Helm: &console.ServiceDeploymentForAgent_Helm{
+			PythonScript: lo.ToPtr(`
+values["key"] = "value"
+warn("first warning")
+warn("second warning")
+`),
+		},
+	}
+
+	h := &helm{dir: t.TempDir(), pythonPool: p}
+	if _, _, err := h.pythonValues(context.Background(), svc); err != nil {
+		t.Fatalf("pythonValues: %v", err)
+	}
+
+	warnings := h.Warnings()
+	if len(warnings) != 2 {
+		t.Fatalf("unexpected warnings: %#v", warnings)
+	}
+	for i, message := range []string{"first warning", "second warning"} {
+		if warnings[i].Source != pythonWarningSource || warnings[i].Message != message || !lo.FromPtr(warnings[i].Warning) {
+			t.Fatalf("unexpected warning %d: %#v", i, warnings[i])
+		}
 	}
 }

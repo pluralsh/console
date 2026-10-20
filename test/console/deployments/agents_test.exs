@@ -3,7 +3,7 @@ defmodule Console.Deployments.AgentsTest do
   alias Console.Deployments.Agents
   alias Console.Deployments.Pr.Review
   alias Console.PubSub
-  alias Console.Schema.{AgentMessage, AgentPrompt, AgentPromptHistory, WorkbenchJobActivity, WorkbenchJobActivityAgentRun}
+  alias Console.Schema.{AgentMessage, AgentPrompt, AgentPromptHistory, ScmConnection, WorkbenchJobActivity, WorkbenchJobActivityAgentRun}
   use Mimic
 
   describe "upsert_agent_runtime/3" do
@@ -692,13 +692,20 @@ defmodule Console.Deployments.AgentsTest do
     test "it uses the runtime's bound scm connection" do
       cluster = insert(:cluster)
       default = insert(:scm_connection, default: true, token: "default-token")
-      runtime_conn = insert(:scm_connection, name: "runtime-github", token: "runtime-token")
+      runtime_conn = insert(:scm_connection,
+        name: "runtime-github",
+        token: "runtime-token",
+        proxy: %ScmConnection.Proxy{url: "http://proxy.example.com:8080", noproxy: "github.internal"}
+      )
       runtime = insert(:agent_runtime, cluster: cluster, connection: runtime_conn)
       run = insert(:agent_run, runtime: runtime)
 
       {:ok, creds} = Agents.scm_creds(run, cluster)
 
       assert creds.token == "runtime-token"
+      assert creds.proxy.enabled
+      assert creds.proxy.url == "http://proxy.example.com:8080"
+      assert creds.proxy.noproxy == "github.internal"
       refute creds.token == default.token
     end
   end

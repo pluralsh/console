@@ -1,7 +1,6 @@
 import {
   Button,
   EmptyState,
-  Flex,
   IconFrame,
   InfoIcon,
   ListIcon,
@@ -30,10 +29,10 @@ import { useLocation } from 'react-router-dom'
 
 import {
   SETTINGS_BREADCRUMBS,
-  SettingsPageHeader,
+  SettingsDescription,
 } from 'components/settings/Settings'
 
-import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
+import { PageToolbarPortal } from 'components/layout/PageToolbar'
 
 import { Confirm } from 'components/utils/Confirm'
 import { DeleteIconButton } from 'components/utils/IconButtons'
@@ -257,47 +256,40 @@ export function AccessTokens() {
     [data?.accessTokens]
   )
 
-  const headingContent = (
-    <SettingsPageHeader
-      heading={
-        <Flex gap="small">
-          Access tokens
+  return (
+    <div
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 16,
+        height: '100%',
+      }}
+    >
+      {isInSettings && <SettingsDescription>{TOOLTIP}</SettingsDescription>}
+      <PageToolbarPortal>
+        {!isInSettings && (
           <Tooltip
             css={{ width: 315 }}
             label={TOOLTIP}
           >
             <InfoIcon />
           </Tooltip>
-        </Flex>
-      }
-    >
-      {!isEmpty(tokensList) && (
-        <Button
-          secondary
-          onClick={openModal}
-        >
-          Create access token
-        </Button>
-      )}
-    </SettingsPageHeader>
-  )
-
-  // this will throw a warning from the profile route but that's fine
-  useSetPageHeaderContent(headingContent)
-
-  if (!data && loading) return <LoadingIndicator />
-  if (error) return <GqlError error={error} />
-
-  return (
-    <div
-      css={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-      }}
-    >
-      {!isInSettings && headingContent}
-      {!isEmpty(tokensList) ? (
+        )}
+        {!isEmpty(tokensList) && (
+          <Button
+            secondary
+            small
+            onClick={openModal}
+          >
+            Create access token
+          </Button>
+        )}
+      </PageToolbarPortal>
+      {!data && loading ? (
+        <LoadingIndicator />
+      ) : error ? (
+        <GqlError error={error} />
+      ) : !isEmpty(tokensList) ? (
         <Table
           fullHeightWrap
           virtualizeRows

@@ -90,7 +90,11 @@ export function AIAgentRun() {
   const runLoading = !data && loading
   const run = data?.agentRun
   const showSidePanel = hasAgentRunPanelContent(run)
-  const { isOpen, setOpen, setApproval } = useAgentRunPanel(showSidePanel, id)
+  const { isOpen, setOpen, setApproval } = useAgentRunPanel({
+    hasContent: showSidePanel,
+    loading: runLoading,
+    key: id,
+  })
 
   useEffect(() => {
     if (!id) return
@@ -103,12 +107,12 @@ export function AIAgentRun() {
     return () => setApproval(null)
   }, [id, approving, setApproval, approveAgentRun])
   const isRunning =
-    run?.status == AgentRunStatus.Running ||
-    run?.status == AgentRunStatus.Pending
+    run?.status === AgentRunStatus.Running ||
+    run?.status === AgentRunStatus.Pending
 
   const isCancellable =
     isRunning ||
-    run?.status == AgentRunStatus.Babysitting ||
+    run?.status === AgentRunStatus.Babysitting ||
     (run?.status === AgentRunStatus.PendingApproval && !run.approvedAt)
   const isPromptConsuming =
     (run?.status === AgentRunStatus.PendingApproval && !run.approvedAt) ||

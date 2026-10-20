@@ -1,11 +1,12 @@
-import { Breadcrumb, SubTab, TabList, TabPanel } from '@pluralsh/design-system'
+import { Breadcrumb } from '@pluralsh/design-system'
 
 import { useLogin } from 'components/contexts'
 
+import { PageColumnSC } from 'components/layout/PageLayout'
+import { PageToolbar } from 'components/layout/PageToolbar'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { MakeInert } from 'components/utils/MakeInert'
-import { LinkTabWrap } from 'components/utils/Tabs'
 import {
   createContext,
   Dispatch,
@@ -15,7 +16,6 @@ import {
   useContext,
   useLayoutEffect,
   useMemo,
-  useRef,
   useState,
 } from 'react'
 import { Outlet, useMatch } from 'react-router-dom'
@@ -23,7 +23,6 @@ import { Outlet, useMatch } from 'react-router-dom'
 import {
   CD_ABS_PATH,
   CD_DEFAULT_ABS_PATH,
-  CD_DEFAULT_REL_PATH,
   CLUSTERS_REL_PATH,
   GLOBAL_SERVICES_REL_PATH,
   OBSERVERS_REL_PATH,
@@ -31,7 +30,6 @@ import {
   REPOS_REL_PATH,
   SERVICES_REL_PATH,
 } from 'routes/cdRoutesConsts'
-import { useTheme } from 'styled-components'
 import { PluralErrorBoundary } from './PluralErrorBoundary'
 
 import { useCDEnabled } from './utils/useCDEnabled'
@@ -206,7 +204,6 @@ function useDirectory({ filtered = true }: { filtered?: boolean } = {}) {
 }
 
 export default function ContinuousDeployment() {
-  const theme = useTheme()
   const [headerContent, setHeaderContent] = useState<ReactNode>()
   const [scrollable, setScrollable] = useState(false)
 
@@ -227,68 +224,28 @@ export default function ContinuousDeployment() {
   const cdEnabled = useCDEnabled()
   const directory = useDirectory({ filtered: true })
 
-  const tabStateRef = useRef<any>(null)
   const tab = useCurrentTab()
-  const currentTab = directory.find(({ path }) => path === tab)
+  const tabs = useMemo(
+    () =>
+      directory.map(({ label, path }) => ({
+        label,
+        path: `${CD_ABS_PATH}/${path}`,
+      })),
+    [directory]
+  )
 
   return (
-    <ResponsivePageFullWidth
-      scrollable={scrollable}
-      headingContent={
-        <MakeInert inert={!cdEnabled}>
-          <div
-            css={{
-              display: 'flex',
-              gap: theme.spacing.large,
-              flexGrow: 1,
-              width: '100%',
-              justifyContent: 'space-between',
-            }}
-          >
-            <TabList
-              scrollable
-              stateRef={tabStateRef}
-              stateProps={{
-                orientation: 'horizontal',
-                selectedKey: currentTab?.path,
-              }}
-            >
-              {directory.map(({ label, path }) => (
-                <LinkTabWrap
-                  css={{
-                    minWidth: 'fit-content',
-                  }}
-                  subTab
-                  key={path}
-                  textValue={label}
-                  to={!cdEnabled ? '' : `${CD_ABS_PATH}/${path}`}
-                >
-                  <SubTab
-                    key={path}
-                    textValue={label}
-                    disabled={!cdEnabled && path !== CD_DEFAULT_REL_PATH}
-                  >
-                    {label}
-                  </SubTab>
-                </LinkTabWrap>
-              ))}
-            </TabList>
-            <div
-              css={{
-                flexShrink: 0,
-              }}
-            >
-              {headerContent}
-            </div>
-          </div>
-        </MakeInert>
-      }
-    >
-      <PluralErrorBoundary>
-        <TabPanel
-          css={{ height: '100%' }}
-          stateRef={tabStateRef}
+    <PageColumnSC>
+      <MakeInert inert={!cdEnabled}>
+        <PageToolbar
+          tabs={tabs}
+          activeFn={(path) => path === `${CD_ABS_PATH}/${tab}`}
         >
+          {headerContent}
+        </PageToolbar>
+      </MakeInert>
+      <ResponsivePageFullWidth scrollable={scrollable}>
+        <PluralErrorBoundary>
           <PageHeaderContext.Provider value={pageHeaderContext}>
             <PageScrollableContext.Provider value={pageScrollableContext}>
               <Suspense fallback={<LoadingIndicator />}>
@@ -296,8 +253,8 @@ export default function ContinuousDeployment() {
               </Suspense>
             </PageScrollableContext.Provider>
           </PageHeaderContext.Provider>
-        </TabPanel>
-      </PluralErrorBoundary>
-    </ResponsivePageFullWidth>
+        </PluralErrorBoundary>
+      </ResponsivePageFullWidth>
+    </PageColumnSC>
   )
 }

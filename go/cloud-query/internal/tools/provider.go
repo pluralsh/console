@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/pluralsh/console/go/cloud-query/internal/proto/toolquery"
+	"github.com/pluralsh/console/go/cloud-query/internal/tools/series"
 )
 
 var (
@@ -32,7 +33,7 @@ func defaultLogQuery(query, fallback string) string {
 }
 
 type MetricsProvider interface {
-	Metrics(ctx context.Context, input *toolquery.MetricsQueryInput) (*toolquery.MetricsQueryOutput, error)
+	MetricsSeries(ctx context.Context, input *toolquery.MetricsQueryInput) (*toolquery.MetricsSeriesOutput, error)
 	MetricsSearch(ctx context.Context, input *toolquery.MetricsSearchInput) (*toolquery.MetricsSearchOutput, error)
 	MetricsLabelSearch(ctx context.Context, input *toolquery.MetricsLabelSearchInput) (*toolquery.MetricsLabelSearchOutput, error)
 }
@@ -104,6 +105,7 @@ func newTracesProvider(conn *toolquery.ToolConnection) TracesProvider {
 }
 
 type Provider interface {
+	Metrics(ctx context.Context, input *toolquery.MetricsQueryInput) (*toolquery.MetricsQueryOutput, error)
 	MetricsProvider
 	LogsProvider
 	TracesProvider
@@ -116,11 +118,20 @@ type toolProvider struct {
 }
 
 func (p *toolProvider) Metrics(ctx context.Context, input *toolquery.MetricsQueryInput) (*toolquery.MetricsQueryOutput, error) {
+	output, err := p.MetricsSeries(ctx, input)
+	if err != nil {
+		return nil, err
+	}
+
+	return series.Flatten(output), nil
+}
+
+func (p *toolProvider) MetricsSeries(ctx context.Context, input *toolquery.MetricsQueryInput) (*toolquery.MetricsSeriesOutput, error) {
 	if p.metrics == nil {
 		return nil, ErrUnsupportedOperation
 	}
 
-	return p.metrics.Metrics(ctx, input)
+	return p.metrics.MetricsSeries(ctx, input)
 }
 
 func (p *toolProvider) MetricsSearch(ctx context.Context, input *toolquery.MetricsSearchInput) (*toolquery.MetricsSearchOutput, error) {

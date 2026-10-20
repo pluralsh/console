@@ -1,13 +1,13 @@
 import {
   Button,
   Card,
-  EmptyState,
   Flex,
   FormField,
   Input,
   ReturnIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import { GqlError } from 'components/utils/Alert'
 import { prettifyPrompt } from 'components/utils/contentEditableChips'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
@@ -194,8 +194,12 @@ export function CronScheduleForm({ mode }: { mode: 'create' | 'edit' }) {
 
   if (mode === 'edit' && !cronLoading && !cron)
     return (
-      <EmptyState message="Schedule not found">
+      <WorkbenchEmptyState
+        message="Schedule not found"
+        description="It may have been removed from this workbench."
+      >
         <Button
+          small
           startIcon={<ReturnIcon />}
           onClick={() =>
             navigate(getWorkbenchCronSchedulesAbsPath(workbenchId))
@@ -203,7 +207,7 @@ export function CronScheduleForm({ mode }: { mode: 'create' | 'edit' }) {
         >
           Back to all schedules
         </Button>
-      </EmptyState>
+      </WorkbenchEmptyState>
     )
 
   const isLoading =
@@ -348,7 +352,7 @@ export function CronScheduleForm({ mode }: { mode: 'create' | 'edit' }) {
                           placeholder={CRON_PLACEHOLDER}
                           css={{
                             color: theme.colors['code-block-purple'],
-                            fontFamily: theme.fontFamilies.mono,
+                            ...theme.partials.text.mono,
                             '&:focus-within': {
                               border: theme.borders['outline-focused'],
                               borderColor: hasCronError
@@ -359,7 +363,7 @@ export function CronScheduleForm({ mode }: { mode: 'create' | 'edit' }) {
                               minHeight: 54,
                               paddingLeft: 16,
                               paddingRight: 16,
-                              fontFamily: theme.fontFamilies.mono,
+                              ...theme.partials.text.mono,
                             },
                           }}
                         />

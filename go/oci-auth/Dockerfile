@@ -28,3 +28,4 @@ COPY --from=builder /workspace/oci-auth/oci-auth .
 USER 65532:65532
 
 ENTRYPOINT ["/oci-auth"]
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD ["/oci-auth", "--help"]

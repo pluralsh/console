@@ -1,0 +1,51 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "table": {
+      "type": "string",
+      "enum": [
+        "incident",
+        "change_request",
+        "problem",
+        "sc_task"
+      ],
+      "description": "ServiceNow ticket table: incident, change_request, problem or sc_task (catalog task)."
+    },
+    "query": {
+      "type": "string",
+      "description": "ServiceNow encoded query, for example active=true^priority=1^ORDERBYDESCsys_created_on. Conditions are joined with ^, OR conditions use ^OR."
+    },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Fields to return, for example number, short_description, state, priority, assigned_to. Omit for all fields."
+    },
+    "display_value": {
+      "type": "string",
+      "enum": [
+        "true",
+        "false",
+        "all"
+      ],
+      "default": "true",
+      "description": "true returns display values (labels such as \"In Progress\"), false returns raw stored values (such as state 2), all returns both as {display_value, value} pairs. Use false or all when you need raw values for an update."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "nextCursor from a previous response (a non-negative numeric offset)."
+    },
+    "limit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100,
+      "default": 20,
+      "description": "Maximum records to return."
+    }
+  },
+  "required": [
+    "table"
+  ]
+}

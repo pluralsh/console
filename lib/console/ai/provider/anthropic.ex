@@ -15,6 +15,7 @@ defmodule Console.AI.Anthropic do
     :stream,
     :full_url,
     :base_url,
+    :proxy,
     body: %{}
   ]
 
@@ -29,6 +30,8 @@ defmodule Console.AI.Anthropic do
       model: opts.model || model_defaults[:model],
       tool_model: opts.tool_model || model_defaults[:tool_model],
       full_url: Map.get(opts, :full_url),
+      base_url: Map.get(opts, :base_url),
+      proxy: Map.get(opts, :proxy),
       body: Map.get(opts, :body, %{}),
       stream: Stream.stream()
     }
@@ -63,7 +66,7 @@ defmodule Console.AI.Anthropic do
 
   def tools?(), do: true
 
-  def provider_options(%__MODULE__{base_url: base_url, access_key: key}) do
-    Enum.filter([base_url: base_url, api_key: key], fn {_, v} -> not is_nil(v) end)
+  def provider_options(%__MODULE__{} = anthropic) do
+    Enum.filter([base_url: anthropic.base_url, api_key: anthropic.access_key] ++ http_options(anthropic), fn {_, v} -> not is_nil(v) end)
   end
 end

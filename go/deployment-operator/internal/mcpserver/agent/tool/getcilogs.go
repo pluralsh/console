@@ -3,13 +3,10 @@ package tool
 import (
 	"context"
 	"fmt"
-	"os"
 	"strconv"
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
-
-	"github.com/pluralsh/console/go/deployment-operator/pkg/scm"
 )
 
 // GetCILogs is an MCP tool that fetches the raw log output for a single
@@ -17,6 +14,7 @@ import (
 type GetCILogs struct {
 	id          ID
 	description string
+	client      SCMClientProvider
 }
 
 func (in *GetCILogs) ID() ID { return in.id }
@@ -55,12 +53,7 @@ func (in *GetCILogs) handler(ctx context.Context, request mcp.CallToolRequest) (
 		return mcp.NewToolResultError(fmt.Sprintf("invalid checkRunId %q: must be a numeric ID from getPRState", checkRunIDStr)), nil
 	}
 
-	token := os.Getenv(envGitAccessToken)
-	if token == "" {
-		return mcp.NewToolResultError("GIT_ACCESS_TOKEN is not set; cannot authenticate with SCM provider"), nil
-	}
-
-	client := scm.NewClient(token)
+	client := in.client()
 	logs, err := client.GetCILogs(ctx, prURL, checkRunID)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("failed to fetch CI logs: %v", err)), nil
@@ -69,9 +62,10 @@ func (in *GetCILogs) handler(ctx context.Context, request mcp.CallToolRequest) (
 	return mcp.NewToolResultText(logs), nil
 }
 
-func NewGetCILogs() Tool {
+func NewGetCILogs(client SCMClientProvider) Tool {
 	return &GetCILogs{
 		id:          GetCILogsTool,
 		description: "Fetches the raw log output for a failing CI job. Use the checkRunId from getPRState. Inspect logs to distinguish real PR defects from CI flakes (transient network/registry errors, third-party outages, runner issues); do not push a fix for flakes. Logs are capped at 512 KB.",
+		client:      client,
 	}
 }

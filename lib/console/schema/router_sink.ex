@@ -1,5 +1,5 @@
 defmodule Console.Schema.RouterSink do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{NotificationRouter, NotificationSink}
 
   schema "router_sinks" do
@@ -14,6 +14,7 @@ defmodule Console.Schema.RouterSink do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> validate_uuids(@valid)
     |> foreign_key_constraint(:router_id)
     |> foreign_key_constraint(:sink_id)
   end

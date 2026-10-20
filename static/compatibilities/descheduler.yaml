@@ -4,6 +4,42 @@ release_url: https://github.com/kubernetes-sigs/descheduler/releases/tag/v{vsn}
 helm_repository_url: https://kubernetes-sigs.github.io/descheduler
 chart_name: descheduler
 versions:
+- version: 0.37.0
+  kube: ['1.37', '1.36', '1.35']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "## Helm values / chart behavior changes (0.36.0 \u2192 0.37.0)\n\
+      - **New (opt-in) PodDisruptionBudget support** in the Helm chart. Expect new\
+      \ values to enable/configure a PDB (e.g., `pdb.enabled` plus min/max availability\
+      \ settings). If you already manage a PDB externally, ensure you don\u2019t create\
+      \ a duplicate.\n- **New (opt-in) `schedulerName` and `runtimeClassName`** for\
+      \ the descheduler Pod via Helm values. Only set these if you need non-default\
+      \ scheduling/runtime behavior.\n- **New (opt-in) `hostUsers`** setting for the\
+      \ Pod spec via Helm values (relevant for user namespaces / host user mappings).\
+      \ Leave unset unless you know you need it.\n- **New `revisionHistoryLimit` value**\
+      \ to control Deployment revision retention.\n\n(From 0.36.0 release notes, already\
+      \ in your starting version but relevant if you didn\u2019t enable it yet)\n\
+      - **Init containers support** added to the Helm chart.\n- **ServiceMonitor `apiVersion`\
+      \ override** became configurable.\n"
+    chart_updates: ['Helm chart updated for v0.37.0 with several new optional Pod/Deployment
+        knobs (PDB, schedulerName, runtimeClassName, hostUsers, revisionHistoryLimit).',
+      'RBAC tightened: ClusterRole no longer includes an unnecessary `pods/delete`
+        permission (may affect environments relying on that permission indirectly).']
+    features: ['Helm chart: opt-in PodDisruptionBudget support to protect descheduler
+        availability during voluntary disruptions.', 'Helm chart: optional `schedulerName`
+        and `runtimeClassName` fields for the descheduler Pod.', 'Helm chart: optional
+        `hostUsers` support and configurable `revisionHistoryLimit` for the Deployment.',
+      'Eviction observability improvements: metrics emitted for background evictions
+        that never get deleted.']
+    breaking_changes: ["RBAC change: removal of `pods/delete` from the ClusterRole\
+        \ could break setups that (incorrectly) depended on descheduler having direct\
+        \ Pod delete permissions; verify your policies/automation don\u2019t rely\
+        \ on that capability.", "Internal cleanup: `EvictionRequests` removed (may\
+        \ impact anyone depending on that internal type/behavior in forks or integrations,\
+        \ though typical users shouldn\u2019t be affected)."]
+  chart_version: 0.37.0
+  images: ['registry.k8s.io/descheduler/descheduler:v0.37.0']
 - version: 0.36.0
   kube: ['1.36', '1.35', '1.34']
   requirements: []

@@ -14,10 +14,8 @@ COPY js/.yarn/ ./.yarn/
 COPY js/console/package.json ./console/package.json
 COPY js/design-system/package.json ./design-system/package.json
 COPY js/documentation/package.json ./documentation/package.json
-COPY js/eslint-config/package.json ./eslint-config/package.json
-COPY js/stylelint-config/package.json ./stylelint-config/package.json
 
-# Focus skips documentation, Storybook, ESLint, and Stylelint. Vite bundles
+# Focus skips documentation and Storybook. Vite bundles
 # the design system from source, so the image only needs those two workspaces.
 # Immutable installs match `yarn install --immutable` (CI is unset in Docker).
 RUN corepack enable \
@@ -91,7 +89,7 @@ RUN mix do db.certs, agent.chart, sentry.package_source_code, release
 FROM alpine:3.21.3 as tools
 
 ARG TARGETARCH=amd64
-ENV CLI_VERSION=v0.12.66
+ENV CLI_VERSION=v0.12.67
 
 COPY AGENT_VERSION AGENT_VERSION
 
@@ -118,7 +116,7 @@ COPY --from=tools /usr/local/bin/plural /usr/local/bin/plural
 
 WORKDIR /opt/app
 
-RUN [ "$OS_VARIANT" = "alpine" ] && apk update && apk upgrade --no-cache libexpat zlib musl musl-utils || true
+RUN [ "$OS_VARIANT" = "alpine" ] && apk update && apk upgrade --no-cache libexpat zlib=1.3.2-r1 musl musl-utils || true
 
 COPY bin/setup/${OS_VARIANT}.sh /opt/app/bin/setup.sh
 RUN /bin/sh /opt/app/bin/setup.sh && rm /opt/app/bin/setup.sh
@@ -153,3 +151,4 @@ USER console
 EXPOSE 4000 6000 4369 50051
 
 CMD mkdir -p /tmp/sqlite; /opt/app/bin/console start
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 CMD ["/bin/sh", "-c", "wget -q -O /dev/null http://127.0.0.1:4000/health || wget -q -O /dev/null http://127.0.0.1:4000/"]

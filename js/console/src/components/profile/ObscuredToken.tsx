@@ -15,7 +15,7 @@ export function ObscuredToken({
   reveal?: boolean
   reducedOpacity?: boolean
 }) {
-  length = length || 0 > 0 ? length || 0 : (token || '').length
+  length = (length || 0) > 0 ? length || 0 : (token || '').length
 
   const firstCount = Math.min(
     length,

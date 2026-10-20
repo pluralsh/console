@@ -4,13 +4,13 @@ import {
   Flex,
   ListBoxItem,
   PrOpenIcon,
-  SubTab,
-  TabList,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { ReactFlowProvider } from '@xyflow/react'
-import { ComponentProps, useEffect, useMemo, useRef, useState } from 'react'
+import { ComponentProps, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { PageColumnSC } from 'components/layout/PageLayout'
+import { PageToolbar } from 'components/layout/PageToolbar'
 import { useTheme } from 'styled-components'
 
 import {
@@ -35,61 +35,35 @@ import { PIPELINES_CRUMBS } from './Pipelines'
 import { POLL_INTERVAL } from '../ContinuousDeployment'
 import { GqlError } from 'components/utils/Alert'
 
-function PipelineHeading({
-  pipeline,
-}: {
-  pipeline: Nullable<PipelineFragment>
-}) {
-  return (
-    <Flex justify="space-between">
-      <PipelineSelector pipeline={pipeline} />
-      <PipelineTabs />
-    </Flex>
-  )
-}
-
 const tabs = {
   split: 'Split',
   graph: 'Graph',
   contexts: 'Contexts',
 } as const
 
-function PipelineTabs() {
-  const [searchParams, setSearchParams] = useSearchParams()
-  const tabStateRef = useRef<any>(null)
+const tabDirectory = Object.entries(tabs).map(([key, label]) => ({
+  path: `?view=${key}`,
+  label,
+}))
 
+function PipelineToolbar({
+  pipeline,
+}: {
+  pipeline: Nullable<PipelineFragment>
+}) {
+  const [searchParams] = useSearchParams()
   const view = searchParams.get('view') ?? 'graph'
-  const tabKey = view && tabs[view] ? (view as keyof typeof tabs) : 'graph'
+  const tabKey = view && tabs[view] ? view : 'graph'
 
   return (
-    <TabList
-      stateRef={tabStateRef}
-      stateProps={{
-        orientation: 'horizontal',
-        selectedKey: tabKey,
-        onSelectionChange: (key) => {
-          setSearchParams((params) => {
-            if (!key) {
-              params.delete('view')
-
-              return params
-            }
-            params.set('view', key as string)
-
-            return params
-          })
-        },
-      }}
+    <PageToolbar
+      tabs={tabDirectory}
+      activeFn={(path) => path === `?view=${tabKey}`}
     >
-      {Object.entries(tabs).map(([tabKey, tabLabel]) => (
-        <SubTab
-          key={tabKey}
-          textValue={tabLabel}
-        >
-          {tabLabel}
-        </SubTab>
-      ))}
-    </TabList>
+      <div css={{ width: 280 }}>
+        <PipelineSelector pipeline={pipeline} />
+      </div>
+    </PageToolbar>
   )
 }
 
@@ -148,6 +122,7 @@ function PipelineSelector({
         </div>
       }
       inputProps={{
+        small: true,
         placeholder: pipeline ? pipeline.name : 'Select pipeline',
       }}
     >
@@ -195,42 +170,45 @@ function PipelineDetailsBase() {
     )
 
   return (
-    <Flex
-      direction="column"
-      height="100%"
-      gap="medium"
-      padding="large"
-    >
-      <PipelineHeading pipeline={pipeline} />
-      {!pipeline ? (
-        loading ? (
-          <RectangleSkeleton
-            $height={500}
-            $width="100%"
-          />
-        ) : (
-          <EmptyState message="Pipeline not found." />
-        )
-      ) : view === 'graph' ? (
-        <Pipeline
-          pipeline={pipeline}
-          key={pipeline.id}
-        />
-      ) : view === 'contexts' ? (
-        <PipelineContexts pipeline={pipeline} />
-      ) : (
-        <SplitPane
-          id="pipeline-details"
-          pane1={
-            <Pipeline
-              pipeline={pipeline}
-              key={pipeline.id}
+    <PageColumnSC>
+      <PipelineToolbar pipeline={pipeline} />
+      <Flex
+        direction="column"
+        flex={1}
+        minHeight={0}
+        gap="medium"
+        padding="large"
+      >
+        {!pipeline ? (
+          loading ? (
+            <RectangleSkeleton
+              $height={500}
+              $width="100%"
             />
-          }
-          pane2={<PipelineContexts pipeline={pipeline} />}
-        />
-      )}
-    </Flex>
+          ) : (
+            <EmptyState message="Pipeline not found." />
+          )
+        ) : view === 'graph' ? (
+          <Pipeline
+            pipeline={pipeline}
+            key={pipeline.id}
+          />
+        ) : view === 'contexts' ? (
+          <PipelineContexts pipeline={pipeline} />
+        ) : (
+          <SplitPane
+            id="pipeline-details"
+            pane1={
+              <Pipeline
+                pipeline={pipeline}
+                key={pipeline.id}
+              />
+            }
+            pane2={<PipelineContexts pipeline={pipeline} />}
+          />
+        )}
+      </Flex>
+    </PageColumnSC>
   )
 }
 

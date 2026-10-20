@@ -1,6 +1,6 @@
 defmodule Console.GraphQl.Kubernetes.Pod do
   use Console.GraphQl.Schema.Base
-  alias Console.GraphQl.Resolvers.Kubernetes
+  alias Console.GraphQl.Resolvers.{Kubernetes, Deployments}
   import Console.GraphQl.Kubernetes.Base
 
   object :pod do
@@ -20,6 +20,36 @@ defmodule Console.GraphQl.Kubernetes.Pod do
     field :events, list_of(:event), resolve: fn
       model, _, _ -> Kubernetes.list_events(model)
     end
+
+    @desc "prometheus timeseries for this pod, only available when the pod is queried with a cluster or service id"
+    field :metrics, :pod_metrics do
+      arg :start, :datetime
+      arg :stop,  :datetime
+      arg :step,  :string
+
+      resolve &Deployments.pod_metrics/3
+    end
+  end
+
+  @desc "Pod-level prometheus timeseries; container-scoped series carry a `container` label"
+  object :pod_metrics do
+    field :cpu, list_of(:metric_response), description: "cpu usage in cores, by container"
+    field :cpu_requests, list_of(:metric_response), description: "cpu requests in cores, by container"
+    field :cpu_limits, list_of(:metric_response), description: "cpu limits in cores, by container"
+    field :cpu_throttling, list_of(:metric_response), description: "fraction (0-1) of CFS periods throttled, by container"
+    field :memory, list_of(:metric_response), description: "working set memory in bytes, by container"
+    field :memory_requests, list_of(:metric_response), description: "memory requests in bytes, by container"
+    field :memory_limits, list_of(:metric_response), description: "memory limits in bytes, by container"
+    field :ephemeral_storage, list_of(:metric_response), description: "container filesystem usage in bytes, by container"
+    field :ephemeral_storage_requests, list_of(:metric_response), description: "ephemeral storage requests in bytes, by container"
+    field :ephemeral_storage_limits, list_of(:metric_response), description: "ephemeral storage limits in bytes, by container"
+    field :fs_reads, list_of(:metric_response), description: "filesystem read throughput in bytes/s, by container"
+    field :fs_writes, list_of(:metric_response), description: "filesystem write throughput in bytes/s, by container"
+    field :network_receive, list_of(:metric_response), description: "pod network receive throughput in bytes/s"
+    field :network_transmit, list_of(:metric_response), description: "pod network transmit throughput in bytes/s"
+    field :network_receive_dropped, list_of(:metric_response), description: "pod received packets dropped per second"
+    field :network_transmit_dropped, list_of(:metric_response), description: "pod transmitted packets dropped per second"
+    field :restarts, list_of(:metric_response), description: "cumulative restart count, by container"
   end
 
   object :pod_status do

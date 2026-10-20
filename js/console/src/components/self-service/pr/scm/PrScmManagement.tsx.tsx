@@ -6,7 +6,7 @@ import { GqlError } from 'components/utils/Alert'
 
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 
-import { StretchedFlex } from 'components/utils/StretchedFlex'
+import { PageToolbarPortal } from 'components/layout/PageToolbar'
 import { ReactNode } from 'react'
 import styled from 'styled-components'
 import { CreateScmConnection } from './CreateScmConnection'
@@ -31,10 +31,11 @@ export function ScmManagement() {
       gap="small"
       height="100%"
     >
-      <SectionCard
-        title="connections"
-        action={<CreateScmConnection refetch={connectionsQ.refetch} />}
-      >
+      <PageToolbarPortal>
+        <CreateScmWebhook refetch={webhooksQ.refetch} />
+        <CreateScmConnection refetch={connectionsQ.refetch} />
+      </PageToolbarPortal>
+      <SectionCard title="connections">
         {connectionsQ.error ? (
           <GqlError error={connectionsQ.error} />
         ) : (
@@ -54,10 +55,7 @@ export function ScmManagement() {
           />
         )}
       </SectionCard>
-      <SectionCard
-        title="webhooks"
-        action={<CreateScmWebhook refetch={webhooksQ.refetch} />}
-      >
+      <SectionCard title="webhooks">
         {webhooksQ.error ? (
           <GqlError error={webhooksQ.error} />
         ) : (
@@ -84,11 +82,9 @@ export function ScmManagement() {
 
 const SectionCard = ({
   title,
-  action,
   children,
 }: {
   title: string
-  action: ReactNode
   children: ReactNode
 }) => {
   return (
@@ -96,12 +92,7 @@ const SectionCard = ({
       header={{
         size: 'large',
         outerProps: { style: { minHeight: 450 } },
-        content: (
-          <StretchedFlex>
-            <span>{title}</span>
-            {action}
-          </StretchedFlex>
-        ),
+        content: title,
       }}
     >
       {children}

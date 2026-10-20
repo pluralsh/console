@@ -34,7 +34,10 @@ export default function PodShell() {
   const clusterId = serviceData?.serviceDeployment?.cluster?.id
 
   return (
-    <ScrollablePage scrollable={false}>
+    <ScrollablePage
+      scrollable={false}
+      contentStyles={{ paddingTop: 0 }}
+    >
       <div
         css={{
           display: 'flex',

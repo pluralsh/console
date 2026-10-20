@@ -2,7 +2,6 @@ package scm
 
 import (
 	"context"
-	"os"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -11,18 +10,16 @@ import (
 	pb "github.com/pluralsh/console/go/deployment-operator/internal/proto/scm"
 )
 
-func RegisterGRPCServer(registrar grpc.ServiceRegistrar) {
+func RegisterGRPCServer(registrar grpc.ServiceRegistrar, clientProvider func() Client) {
 	pb.RegisterScmServiceServer(registrar, &scmGRPCServer{
-		tokenProvider: func() string {
-			return os.Getenv(envGitAccessToken)
-		},
+		clientProvider: clientProvider,
 	})
 }
 
 type scmGRPCServer struct {
 	pb.UnimplementedScmServiceServer
 
-	tokenProvider func() string
+	clientProvider func() Client
 }
 
 func (in *scmGRPCServer) GetPRDetails(ctx context.Context, req *pb.GetPRDetailsRequest) (*pb.GetPRDetailsResponse, error) {
@@ -30,15 +27,11 @@ func (in *scmGRPCServer) GetPRDetails(ctx context.Context, req *pb.GetPRDetailsR
 		return nil, status.Error(codes.InvalidArgument, "pr_url is required")
 	}
 
-	token := ""
-	if in.tokenProvider != nil {
-		token = in.tokenProvider()
-	}
-	if token == "" {
-		return nil, status.Error(codes.FailedPrecondition, "GIT_ACCESS_TOKEN is not set; cannot authenticate with SCM provider")
+	if in.clientProvider == nil {
+		return nil, status.Error(codes.FailedPrecondition, "SCM client is not configured")
 	}
 
-	details, err := NewClient(token).GetPRDetails(ctx, req.GetPrUrl())
+	details, err := in.clientProvider().GetPRDetails(ctx, req.GetPrUrl())
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to fetch PR details from SCM: %v", err)
 	}

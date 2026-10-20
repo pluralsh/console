@@ -761,7 +761,7 @@ defmodule Console.GraphQl.Deployments.StackQueriesTest do
         query StackPolicies($id: ID!) {
           infrastructureStack(id: $id) {
             stackPolicies(first: 5) {
-              edges { node { id policy { id } } }
+              edges { node { id type policy { id } } }
             }
           }
         }
@@ -769,6 +769,7 @@ defmodule Console.GraphQl.Deployments.StackQueriesTest do
 
       [node] = from_connection(found)
       assert node["id"] == association.id
+      assert node["type"] == "APPROVAL"
       assert node["policy"]["id"] == policy.id
     end
   end

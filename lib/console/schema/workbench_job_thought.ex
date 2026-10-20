@@ -15,7 +15,19 @@ defmodule Console.Schema.WorkbenchJobThought do
     end
 
     embeds_one :attributes, Attributes, on_replace: :update do
+      # legacy per-point metrics; new thoughts store `series`
       embeds_many :metrics, Metric, on_replace: :delete
+
+      embeds_many :series, Series, on_replace: :delete, primary_key: false do
+        field :name,   :string
+        field :labels, :map
+
+        embeds_many :samples, Sample, on_replace: :delete, primary_key: false do
+          field :timestamp, :utc_datetime_usec
+          field :value,     :float
+        end
+      end
+
       embeds_many :logs, Log, on_replace: :delete
       embeds_many :traces, Trace, on_replace: :delete
     end
@@ -51,7 +63,17 @@ defmodule Console.Schema.WorkbenchJobThought do
     model
     |> cast(attrs, [])
     |> cast_embed(:metrics, with: &WorkbenchJobActivity.metric_changeset/2)
+    |> cast_embed(:series, with: &series_changeset/2)
     |> cast_embed(:logs, with: &WorkbenchJobActivity.log_changeset/2)
     |> cast_embed(:traces, with: &WorkbenchJobActivity.trace_changeset/2)
   end
+
+  defp series_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(name labels)a)
+    |> sanitize_text([:name, :labels])
+    |> cast_embed(:samples, with: &sample_changeset/2)
+  end
+
+  defp sample_changeset(model, attrs), do: cast(model, attrs, ~w(timestamp value)a)
 end

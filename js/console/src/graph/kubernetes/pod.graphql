@@ -34,6 +34,81 @@ query PodLogs(
   }
 }
 
+fragment PodMetrics on PodMetrics {
+  cpu {
+    ...MetricResponse
+  }
+  cpuRequests {
+    ...MetricResponse
+  }
+  cpuLimits {
+    ...MetricResponse
+  }
+  cpuThrottling {
+    ...MetricResponse
+  }
+  memory {
+    ...MetricResponse
+  }
+  memoryRequests {
+    ...MetricResponse
+  }
+  memoryLimits {
+    ...MetricResponse
+  }
+  ephemeralStorage {
+    ...MetricResponse
+  }
+  ephemeralStorageRequests {
+    ...MetricResponse
+  }
+  ephemeralStorageLimits {
+    ...MetricResponse
+  }
+  fsReads {
+    ...MetricResponse
+  }
+  fsWrites {
+    ...MetricResponse
+  }
+  networkReceive {
+    ...MetricResponse
+  }
+  networkTransmit {
+    ...MetricResponse
+  }
+  networkReceiveDropped {
+    ...MetricResponse
+  }
+  networkTransmitDropped {
+    ...MetricResponse
+  }
+  restarts {
+    ...MetricResponse
+  }
+}
+
+query PodMetrics(
+  $name: String!
+  $namespace: String!
+  $clusterId: ID
+  $serviceId: ID
+  $start: DateTime
+  $stop: DateTime
+  $step: String
+) {
+  pod(
+    name: $name
+    namespace: $namespace
+    clusterId: $clusterId
+    serviceId: $serviceId
+  ) {
+    metrics(start: $start, stop: $stop, step: $step) {
+      ...PodMetrics
+    }
+  }
+}
+
 mutation DeletePod($name: String!, $namespace: String!, $serviceId: ID) {
   deletePod(name: $name, namespace: $namespace, serviceId: $serviceId) {
     ...Pod

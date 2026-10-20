@@ -51,6 +51,31 @@ defmodule Console.Schema.MonitorTest do
       refute changeset.valid?
       assert "does not match monitor type log" in errors_on(changeset).query.metrics
     end
+
+    test "reports a missing type without crashing query validation" do
+      changeset =
+        Monitor.changeset(%Monitor{}, attrs(%{
+          type: nil,
+          query: %{metrics: %{query: "up"}}
+        }))
+
+      refute changeset.valid?
+      assert "can't be blank" in errors_on(changeset).type
+    end
+
+    test "validates database-backed string lengths" do
+      changeset =
+        Monitor.changeset(%Monitor{}, attrs(%{
+          name: String.duplicate("n", 256),
+          description: String.duplicate("d", 10_001),
+          evaluation_cron: String.duplicate("*", 256)
+        }))
+
+      refute changeset.valid?
+      assert "should be at most 255 character(s)" in errors_on(changeset).name
+      assert "should be at most 10000 character(s)" in errors_on(changeset).description
+      assert "should be at most 255 character(s)" in errors_on(changeset).evaluation_cron
+    end
   end
 
   defp attrs(overrides) do

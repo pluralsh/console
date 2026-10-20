@@ -1,24 +1,20 @@
 import {
-  Button,
   Card,
   Chip,
   ChipSeverity,
   DocsIcon,
-  EmptyState,
   ErrorIcon,
   ExpandIcon,
   Flex,
   GearTrainIcon,
   HamburgerMenuCollapsedIcon,
   IconFrame,
-  Markdown,
-  Modal,
-  PaperCheckIcon,
   PrClosedIcon,
   PrIcon,
   Tooltip,
   useResizeObserver,
 } from '@pluralsh/design-system'
+import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import { Line } from '@nivo/line'
 import { RunStatusIcon } from 'components/ai/agent-runs/AgentRunInfoDisplays'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
@@ -27,6 +23,7 @@ import { alertSeverityToChipSeverity } from 'components/utils/alerts/AlertsTable
 import { SliceTooltip } from 'components/utils/ChartTooltip'
 import { dateFormat, useGraphTheme } from 'components/utils/Graph'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
+import { niceTimeTicks } from 'components/utils/timeTicks'
 import { Body1P, Body2P, CaptionP } from 'components/utils/typography/Text'
 import { evalGradeToColor } from 'components/workbenches/common/evalGrade'
 import { IssueStatusChip } from 'components/workbenches/common/IssueStatusChip'
@@ -72,6 +69,7 @@ import { DashboardToolIcon, toolDisplayName } from './dashboardToolIcon'
 import { monitorDefinitionYaml } from './definitionYaml'
 import { ExitFullscreenButton } from './ExitFullscreenButton'
 import { QueryDefinitionModal } from './QueryDefinitionModal'
+import { thresholdYScale } from './thresholdScale'
 import {
   DefinitionPanelShell,
   useDefinitionPanelContainer,
@@ -80,7 +78,51 @@ import {
 import { WorkbenchMonitoringSharePopover } from './WorkbenchMonitoringSharePopover'
 
 const CHART_HEIGHT_PX = 280
+const THRESHOLD_CHART_MARGIN = { top: 20, right: 20, bottom: 32, left: 48 }
+
+function thresholdTimeAxis(points: { x: Date }[], width: number) {
+  if (isEmpty(points)) return { axisBottom: { tickRotation: 0 } }
+  const { ticks, format } = niceTimeTicks(
+    points[0].x,
+    points[points.length - 1].x,
+    width - THRESHOLD_CHART_MARGIN.left - THRESHOLD_CHART_MARGIN.right,
+    {
+      overhangPx: {
+        left: THRESHOLD_CHART_MARGIN.left,
+        right: THRESHOLD_CHART_MARGIN.right,
+      },
+    }
+  )
+  return {
+    gridXValues: ticks,
+    axisBottom: { format, tickValues: ticks, tickRotation: 0, tickPadding: 8 },
+  }
+}
 const RECENT_JOBS_COUNT = 6
+
+function useThresholdLayer(value: number) {
+  const { colors } = useTheme()
+  return useCallback(
+    ({
+      yScale,
+      innerWidth,
+    }: {
+      yScale: (v: number) => number
+      innerWidth: number
+    }) => (
+      <text
+        x={innerWidth}
+        y={yScale(value)}
+        dy="-0.5em"
+        textAnchor="end"
+        css={{ fill: colors['border-danger'], fontSize: 11 }}
+      >
+        Threshold {value}
+      </text>
+    ),
+    [colors, value]
+  )
+}
 
 function recentJobTime(date: string) {
   const elapsedMs = Date.now() - new Date(date).getTime()
@@ -118,7 +160,10 @@ export function MonitorDetail({
   if (!monitor)
     return (
       <MainSC>
-        <EmptyState message="Monitor not found." />
+        <WorkbenchEmptyState
+          message="Monitor not found"
+          description="It may have been deleted from this workbench."
+        />
       </MainSC>
     )
 
@@ -405,7 +450,12 @@ function MonitorThresholdChart({
 
   if (!isLog) {
     return (
-      <EmptyState message="Threshold preview is available for log monitors with a linked service." />
+      <WorkbenchEmptyState
+        variant="plain"
+        inset={false}
+        message="Threshold preview unavailable"
+        description="Previews are only available for log monitors with a linked service."
+      />
     )
   }
 
@@ -467,26 +517,7 @@ function MetricsThresholdPreview({
     ]
   }, [data])
 
-  const thresholdLayer = useCallback(
-    ({ yScale }: { yScale: (v: number) => number }) => {
-      const y = yScale(threshold.value)
-      return (
-        <text
-          y={y}
-          textAnchor="end"
-          css={{ fill: colors['border-danger'], fontSize: 11 }}
-        >
-          <tspan
-            x={-8}
-            dy="-0.5em"
-          >
-            Threshold {threshold.value}
-          </tspan>
-        </text>
-      )
-    },
-    [colors, threshold.value]
-  )
+  const thresholdLayer = useThresholdLayer(threshold.value)
 
   const chartRef = useRef<HTMLDivElement>(null)
   const [size, setSize] = useState({ width: 0, height: 0 })
@@ -508,9 +539,13 @@ function MetricsThresholdPreview({
   if (error && !data) return <GqlError error={error} />
   if (isEmpty(graphData[0].data))
     return (
-      <EmptyState
-        message="No metric data found for this query."
-        description={emptyDescription}
+      <WorkbenchEmptyState
+        variant="plain"
+        inset={false}
+        message="No metric data"
+        description={
+          emptyDescription ?? 'This query returned no data for the time range.'
+        }
       />
     )
 
@@ -536,14 +571,17 @@ function MetricsThresholdPreview({
             'slices',
             'mesh',
           ]}
-          margin={{ top: 20, right: 20, bottom: 48, left: 48 }}
+          margin={THRESHOLD_CHART_MARGIN}
           xScale={{ type: 'time', format: 'native' }}
-          yScale={{ type: 'linear', min: 'auto', max: 'auto' }}
+          yScale={thresholdYScale(
+            graphData[0].data.map((point) => point.y),
+            threshold.value
+          )}
           xFormat={dateFormat}
           lineWidth={1}
           enablePoints={false}
           useMesh
-          axisBottom={{ format: '%H:%M', tickRotation: 20 }}
+          {...thresholdTimeAxis(graphData[0].data, size.width)}
           markers={[
             {
               axis: 'y',
@@ -617,26 +655,7 @@ function LogThresholdPreview({
     [buckets]
   )
 
-  const thresholdLayer = useCallback(
-    ({ yScale }: { yScale: (v: number) => number }) => {
-      const y = yScale(threshold.value)
-      return (
-        <text
-          y={y}
-          textAnchor="end"
-          css={{ fill: colors['border-danger'], fontSize: 11 }}
-        >
-          <tspan
-            x={-8}
-            dy="-0.5em"
-          >
-            Threshold {threshold.value}
-          </tspan>
-        </text>
-      )
-    },
-    [colors, threshold.value]
-  )
+  const thresholdLayer = useThresholdLayer(threshold.value)
 
   const chartRef = useRef<HTMLDivElement>(null)
   const [size, setSize] = useState({ width: 0, height: 0 })
@@ -657,7 +676,14 @@ function LogThresholdPreview({
     )
   if (error && !data) return <GqlError error={error} />
   if (isEmpty(graphData[0].data))
-    return <EmptyState message="No log data found for this query." />
+    return (
+      <WorkbenchEmptyState
+        variant="plain"
+        inset={false}
+        message="No log data"
+        description="This query returned no logs for the time range."
+      />
+    )
 
   return (
     <GraphWrapperSC ref={chartRef}>
@@ -681,14 +707,18 @@ function LogThresholdPreview({
             'slices',
             'mesh',
           ]}
-          margin={{ top: 20, right: 20, bottom: 48, left: 48 }}
+          margin={THRESHOLD_CHART_MARGIN}
           xScale={{ type: 'time', format: 'native' }}
-          yScale={{ type: 'linear', min: 0, max: 'auto' }}
+          yScale={thresholdYScale(
+            graphData[0].data.map((point) => point.y),
+            threshold.value,
+            0
+          )}
           xFormat={dateFormat}
           lineWidth={1}
           enablePoints={false}
           useMesh
-          axisBottom={{ format: '%H:%M', tickRotation: 20 }}
+          {...thresholdTimeAxis(graphData[0].data, size.width)}
           markers={[
             {
               axis: 'y',
@@ -893,9 +923,6 @@ function MonitorJobFooter({ job }: { job: WorkbenchJobTinyFragment }) {
         e.stopPropagation()
       }}
     >
-      {job.result?.conclusion && (
-        <ConclusionButton conclusion={job.result.conclusion} />
-      )}
       {singlePr && (
         <IconFrame
           clickable
@@ -968,47 +995,6 @@ function MonitorJobFooter({ job }: { job: WorkbenchJobTinyFragment }) {
         />
       )}
     </JobFooterSC>
-  )
-}
-
-function ConclusionButton({ conclusion }: { conclusion: string }) {
-  const theme = useTheme()
-  const [open, setOpen] = useState(false)
-
-  return (
-    <>
-      <IconFrame
-        clickable
-        size="medium"
-        type="tertiary"
-        tooltip="View conclusion"
-        textValue="View conclusion"
-        icon={<PaperCheckIcon color="icon-xlight" />}
-        onClick={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
-          setOpen(true)
-        }}
-      />
-      <Modal
-        header="Conclusion"
-        size="large"
-        open={open}
-        onClose={() => setOpen(false)}
-        actions={
-          <Button
-            secondary
-            onClick={() => setOpen(false)}
-          >
-            Close
-          </Button>
-        }
-      >
-        <Card css={{ padding: theme.spacing.large, overflow: 'auto' }}>
-          <Markdown text={conclusion} />
-        </Card>
-      </Modal>
-    </>
   )
 }
 
@@ -1086,7 +1072,7 @@ const MainSC = styled.div<{ $fullscreen?: boolean }>(
 const StripSC = styled.div(({ theme }) => ({
   alignItems: 'center',
   boxSizing: 'border-box',
-  backgroundColor: theme.colors['fill-one-selected'],
+  backgroundColor: theme.colors['fill-one'],
   borderBottom: theme.borders.default,
   borderTop: theme.borders.default,
   display: 'flex',
@@ -1195,7 +1181,7 @@ const TitleRowSC = styled.div(({ theme }) => ({
 
 const TitleSC = styled.h2(({ theme }) => ({
   color: theme.colors.text,
-  fontFamily: theme.fontFamilies.mono,
+  ...theme.partials.text.mono,
   fontSize: 18,
   fontWeight: 400,
   lineHeight: '24px',
@@ -1306,7 +1292,7 @@ const RecentSectionSC = styled.div(({ theme }) => ({
 
 const SectionTitleSC = styled.h3(({ theme }) => ({
   color: theme.colors.text,
-  fontFamily: theme.fontFamilies.mono,
+  ...theme.partials.text.mono,
   fontSize: 18,
   fontWeight: 400,
   lineHeight: '24px',

@@ -6,17 +6,6 @@ import (
 	"sync"
 	"time"
 
-	console "github.com/pluralsh/console/go/client"
-	"github.com/pluralsh/console/go/deployment-operator/internal/errors"
-	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
-	"github.com/pluralsh/console/go/deployment-operator/internal/utils"
-	discoverycache "github.com/pluralsh/console/go/deployment-operator/pkg/cache/discovery"
-	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
-	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
-	"github.com/pluralsh/console/go/deployment-operator/pkg/manifests/template"
-	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline"
-	smcommon "github.com/pluralsh/console/go/deployment-operator/pkg/streamline/common"
-	"github.com/pluralsh/console/go/polly/cache"
 	"github.com/samber/lo"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -28,6 +17,18 @@ import (
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/klog/v2"
+
+	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/deployment-operator/internal/errors"
+	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
+	"github.com/pluralsh/console/go/deployment-operator/internal/utils"
+	discoverycache "github.com/pluralsh/console/go/deployment-operator/pkg/cache/discovery"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/manifests/template"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline"
+	smcommon "github.com/pluralsh/console/go/deployment-operator/pkg/streamline/common"
+	"github.com/pluralsh/console/go/polly/cache"
 )
 
 type WaveType string
@@ -312,13 +313,39 @@ func (in *WaveProcessor) onDelete(ctx context.Context, resource unstructured.Uns
 		return
 	}
 
-	if live.GetAnnotations() != nil && live.GetAnnotations()[smcommon.LifecycleDeleteAnnotation] == smcommon.PreventDeletion {
+	pruneDisabled := smcommon.HasPruneDisabledSyncOption(*live)
+	deleteDisabled := smcommon.HasDeleteDisabledSyncOption(*live)
+	detached := smcommon.HasDetachOption(*live)
+
+	// Delete component from store when detached (prune: false + delete: false is the same as detach).
+	if detached || (pruneDisabled && deleteDisabled) {
+		if in.dryRun {
+			in.waveStatistics.deleted++
+			return
+		}
+
+		// Clear live ownership before removing the store record so watch updates cannot restore it.
+		annotations := live.GetAnnotations()
+		delete(annotations, smcommon.OwningInventoryKey)
+		live.SetAnnotations(annotations)
+		if _, err := in.client.Resource(helpers.GVRFromGVK(live.GroupVersionKind())).
+			Namespace(live.GetNamespace()).Update(ctx, live, metav1.UpdateOptions{}); err != nil {
+			in.errorsChan <- console.ServiceErrorAttributes{
+				Source:  "delete",
+				Message: fmt.Sprintf("failed to detach %s/%s: %s", live.GetNamespace(), live.GetName(), err.Error()),
+				Warning: new(false),
+			}
+			return
+		}
+
 		if err := streamline.GetGlobalStore().DeleteComponent(smcommon.NewStoreKeyFromUnstructured(lo.FromPtr(live))); err != nil {
 			klog.V(log.LogLevelDefault).ErrorS(err, "failed to delete component", "resource", live.GetUID())
 		}
+	}
 
-		// skip deletion when prevented by annotation
-		in.waveStatistics.deleted++ // In statistics, count as deleted
+	// Skip Kubernetes deletion when resource is detached or prune is disabled.
+	if detached || pruneDisabled {
+		in.waveStatistics.deleted++ // Count retained resources as handled by the delete wave.
 		return
 	}
 
@@ -327,6 +354,7 @@ func (in *WaveProcessor) onDelete(ctx context.Context, resource unstructured.Uns
 		in.errorsChan <- console.ServiceErrorAttributes{
 			Source:  "delete",
 			Message: fmt.Sprintf("failed to build client for resource %s/%s: %s", live.GetNamespace(), live.GetName(), err.Error()),
+			Warning: new(false),
 		}
 		return
 	}
@@ -338,6 +366,7 @@ func (in *WaveProcessor) onDelete(ctx context.Context, resource unstructured.Uns
 		in.errorsChan <- console.ServiceErrorAttributes{
 			Source:  "delete",
 			Message: fmt.Sprintf("failed to delete %s/%s: %s", live.GetNamespace(), live.GetName(), err.Error()),
+			Warning: new(false),
 		}
 		return
 	}
@@ -359,7 +388,7 @@ func (in *WaveProcessor) onApply(ctx context.Context, resource unstructured.Unst
 		warning := fmt.Sprintf("resource %s/%s is already managed by another service %s", resource.GetKind(), resource.GetName(), entry.ServiceID)
 		klog.V(log.LogLevelDebug).Info(warning)
 		if !template.IsCRD(&resource) {
-			in.errorsChan <- console.ServiceErrorAttributes{Source: "apply", Message: warning, Warning: lo.ToPtr(true)}
+			in.errorsChan <- console.ServiceErrorAttributes{Source: "apply", Message: warning, Warning: new(true)}
 		}
 
 		resource.SetUID(types.UID(entry.UID))
@@ -372,6 +401,7 @@ func (in *WaveProcessor) onApply(ctx context.Context, resource unstructured.Unst
 		in.errorsChan <- console.ServiceErrorAttributes{
 			Source:  in.phase.String(),
 			Message: fmt.Sprintf("failed to build client for resource %s/%s: %s", resource.GetNamespace(), resource.GetName(), err.Error()),
+			Warning: new(false),
 		}
 		return
 	}
@@ -385,6 +415,7 @@ func (in *WaveProcessor) onApply(ctx context.Context, resource unstructured.Unst
 		in.errorsChan <- console.ServiceErrorAttributes{
 			Source:  in.phase.String(),
 			Message: fmt.Sprintf("failed to apply %s/%s: %s", resource.GetNamespace(), resource.GetName(), err.Error()),
+			Warning: new(false),
 		}
 
 		return

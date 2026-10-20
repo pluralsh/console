@@ -1,7 +1,9 @@
 import {
   AppIcon,
   Flex,
+  InfoOutlineIcon,
   Table,
+  Tooltip,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
@@ -12,7 +14,6 @@ import { InlineLink } from 'components/utils/typography/InlineLink'
 import { AuditFragment, useAuditsQuery } from 'generated/graphql'
 import { useCallback, useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { useTheme } from 'styled-components'
 import { formatLocation } from 'utils/geo'
 import { extendConnection, mapExistingNodes } from 'utils/graphql'
 
@@ -26,26 +27,32 @@ const FETCH_MARGIN = 30
 
 const COLUMN_HELPER = createColumnHelper<AuditFragment>()
 
+function HeaderWithInfo({ label, info }: { label: string; info: string }) {
+  return (
+    <Flex
+      align="center"
+      gap="xsmall"
+    >
+      <span>{label}</span>
+      <Tooltip label={info}>
+        <InfoOutlineIcon
+          color="icon-xlight"
+          size={12}
+        />
+      </Tooltip>
+    </Flex>
+  )
+}
+
 const columns = [
   COLUMN_HELPER.accessor((audit) => audit, {
     id: 'action',
-    header: function Cell() {
-      const theme = useTheme()
-
-      return (
-        <div>
-          <div>Action</div>
-          <div
-            css={{
-              ...theme.partials.text.caption,
-              color: theme.colors['text-light'],
-            }}
-          >
-            Type
-          </div>
-        </div>
-      )
-    },
+    header: () => (
+      <HeaderWithInfo
+        label="Action"
+        info="Action shown on top, type shown on bottom"
+      />
+    ),
     cell: (audit) => {
       const { action, type } = audit.getValue()
 
@@ -98,23 +105,12 @@ const columns = [
   }),
   COLUMN_HELPER.accessor((audit) => audit, {
     id: 'locationIp',
-    header: function Cell() {
-      const theme = useTheme()
-
-      return (
-        <div>
-          <div>Location</div>
-          <div
-            css={{
-              ...theme.partials.text.caption,
-              color: theme.colors['text-light'],
-            }}
-          >
-            IP
-          </div>
-        </div>
-      )
-    },
+    header: () => (
+      <HeaderWithInfo
+        label="Location"
+        info="Location shown on top, IP address shown on bottom"
+      />
+    ),
     cell: (audit: any) => {
       const { ip, country, city } = audit.getValue()
 

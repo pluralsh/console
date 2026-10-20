@@ -35,5 +35,12 @@ defmodule Console.Utils.HTTPTest do
       assert HTTP.proxy_options(%{url: nil}, "https://registry.example.com") == []
       assert HTTP.proxy_options(%{url: ""}, "https://registry.example.com") == []
     end
+
+    test "only ignores a configured proxy when explicitly disabled" do
+      proxy = %{enabled: false, url: "http://proxy.example.com:3128"}
+
+      assert HTTP.proxy_options(proxy, "https://registry.example.com") == []
+      assert HTTP.proxy_options(Map.delete(proxy, :enabled), "https://registry.example.com")[:connect_options][:proxy]
+    end
   end
 end

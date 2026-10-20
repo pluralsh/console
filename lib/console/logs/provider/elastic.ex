@@ -102,6 +102,7 @@ defmodule Console.Logs.Provider.Elastic do
       query: maybe_query(q)
              |> add_terms(q)
              |> add_pod(q)
+             |> add_node(q)
              |> add_range(q)
              |> add_namespaces(q)
              |> add_facets(q),
@@ -123,6 +124,16 @@ defmodule Console.Logs.Provider.Elastic do
   defp add_pod(query, %Query{pod: pod}) when is_binary(pod) and byte_size(pod) > 0,
     do: add_filter(query, %{term: %{"kubernetes.pod.name.keyword" => pod}})
   defp add_pod(query, _), do: query
+
+  # filebeat/elastic agent: kubernetes.node.name, fluent-bit/fluentd: kubernetes.host, otel: k8s.node.name;
+  # each may be mapped as a keyword or as text with a .keyword subfield
+  @node_fields ~w(kubernetes.node.name kubernetes.host k8s.node.name)
+
+  defp add_node(query, %Query{node: node}) when is_binary(node) and byte_size(node) > 0 do
+    terms = Enum.flat_map(@node_fields, &[%{term: %{&1 => node}}, %{term: %{"#{&1}.keyword" => node}}])
+    add_filter(query, %{bool: %{should: terms, minimum_should_match: 1}})
+  end
+  defp add_node(query, _), do: query
 
   defp add_namespaces(query, %Query{namespaces: [_ | _] = ns}), do: add_filter(query, %{terms: %{"kubernetes.namespace.keyword" => ns}})
   defp add_namespaces(query, _), do: query
@@ -166,7 +177,7 @@ defmodule Console.Logs.Provider.Elastic do
   defp add_filter(q, f), do: put_in(q[:bool][:filter], [f])
 
   defp maybe_query(%Query{query: q, operator: op}) when is_binary(q) and byte_size(q) > 0,
-    do: %{bool: %{must: %{match: %{message: %{query: q, analyzer: "stop", operator: Query.elastic_operator(op)}}}}}
+    do: %{bool: %{must: %{match: %{message: %{query: q, operator: Query.elastic_operator(op)}}}}}
   defp maybe_query(_), do: %{bool: %{}}
 
   defp maybe_dur(dir, ts, duration) when is_binary(duration) or is_map(duration) do

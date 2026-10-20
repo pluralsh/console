@@ -236,7 +236,6 @@ defmodule Console.GraphQl.Deployments.Pipeline do
     @desc "the kubernetes job running this gate (should only be fetched lazily as this is a heavy operation)"
     field :job, :job do
       resolve fn gate, _, _ -> Pipelines.gate_job(gate) end
-      middleware ErrorHandler
     end
 
     field :sentinel,     :sentinel, description: "the sentinel this gate will execute", resolve: dataloader(Deployments)

@@ -262,10 +262,10 @@ defmodule Console.GraphQl.Deployments.Agent do
     @desc "the kubernetes pod running this agent (should only be fetched lazily as this is a heavy operation)"
     field :pod, :pod do
       resolve fn run, _, _ -> Agents.run_pod(run) end
-      middleware ErrorHandler
     end
 
     field :prompts,  list_of(:agent_prompt), resolve: dataloader(Deployments), description: "the prompts this agent run has received"
+    field :attachments, list_of(:attachment), resolve: dataloader(Deployments), description: "files attached to this agent run's initial prompt, downloadable by its harness"
     field :messages, list_of(:agent_message), resolve: dataloader(Deployments), description: "the messages this agent run has generated during its run"
     field :upload,   :agent_run_upload, resolve: dataloader(Deployments), description: "the upload bundle this agent run has generated"
     field :runtime,  :agent_runtime, resolve: dataloader(Deployments), description: "the runtime this agent is using"
@@ -296,6 +296,7 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :base_url, :string, description: "the base url of the scm connection"
     field :username, non_null(:string)
     field :token,    non_null(:string)
+    field :proxy,    :http_proxy_configuration, description: "the proxy to use for git and SCM API requests"
 
     field :exa_key, :string, description: "the exa key for the agent", resolve: fn
       _, _, _ -> {:ok, Console.conf(:exa_api_key)}
@@ -358,6 +359,8 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :id,     non_null(:id)
     field :prompt, non_null(:string), description: "the prompt to give this agent run"
     field :seq,    non_null(:integer), description: "the sequence number of the prompt"
+
+    field :attachments, list_of(:attachment), resolve: dataloader(Deployments), description: "files attached to this prompt"
 
     timestamps()
   end
@@ -604,8 +607,10 @@ defmodule Console.GraphQl.Deployments.Agent do
       middleware Scope,
         resource: :agent,
         action: :write
-      arg :id,     non_null(:id)
-      arg :prompt, non_null(:string)
+      arg :id,          non_null(:id)
+      arg :prompt,      non_null(:string)
+      arg :attachments, list_of(:upload), description: "files to attach to this prompt, only supported for agent runs spawned by a workbench"
+      arg :files,       list_of(:string), description: "sandbox paths (eg /workbench/reports/summary.md) of existing workbench files to attach to this prompt, only supported for agent runs spawned by a workbench"
 
       resolve &Deployments.create_agent_run_prompt/2
     end

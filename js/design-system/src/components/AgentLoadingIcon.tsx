@@ -21,7 +21,11 @@ export type AgentLoadingVariant =
   | 'paperLong'
   | 'aaron'
 export type AgentLoadingState =
-  'working' | 'waiting' | 'idle' | 'success' | 'error'
+  | 'working'
+  | 'waiting'
+  | 'idle'
+  | 'success'
+  | 'error'
 
 const DOTS = 9
 

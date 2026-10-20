@@ -56,3 +56,7 @@ EXPOSE 80
 # The upstream image provides the text-embeddings-router entrypoint and its
 # default --json-output argument. MODEL_ID and SERVED_MODEL_NAME are supplied
 # through the environment so this wrapper does not replace that entrypoint.
+
+# TEI's upstream image provides an unprivileged runtime user; retain model read access.
+USER 1000
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 CMD ["/usr/local/bin/text-embeddings-router", "--help"]

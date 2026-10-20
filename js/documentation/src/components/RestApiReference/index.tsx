@@ -18,7 +18,11 @@ import {
 } from '@src/components/PageGrid'
 import { useSetRestNav } from '@src/contexts/RestNavContext'
 import { useCopyText } from '@src/hooks/useCopyText'
-
+import type {
+  ApiSection,
+  EndpointDetail,
+  Parameter,
+} from '@src/lib/openapi-rest'
 import { AuthPageContent } from './AuthPageContent'
 import { MethodBadge } from './MethodBadge'
 import { ParameterTable } from './ParameterTable'
@@ -38,12 +42,6 @@ import {
   TabBar,
 } from './RestApiReference.styles'
 import { AUTH_PAGE_ID, SidebarNav } from './SidebarNav'
-
-import type {
-  ApiSection,
-  EndpointDetail,
-  Parameter,
-} from '@src/lib/openapi-rest'
 
 type TabId = 'query' | 'responses'
 

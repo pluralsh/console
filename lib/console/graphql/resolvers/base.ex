@@ -34,6 +34,18 @@ defmodule Console.GraphQl.Resolvers.Base do
     Relay.Connection.from_query(query, &Console.Repo.all/1, args)
   end
 
+  @doc """
+  Paginates like `paginate/2`, keeping the query so the connection's `totalCount` can count it when selected.
+  """
+  def paginate_with_total(query, args) do
+    with {:ok, conn} <- paginate(query, args),
+      do: {:ok, Map.put(conn, :total_query, query)}
+  end
+
+  def total_count(%{total_query: query}, _, _),
+    do: {:ok, Console.Repo.aggregate(Ecto.Query.exclude(query, :order_by), :count)}
+  def total_count(_, _, _), do: {:ok, nil}
+
   def all(query) do
     {:ok, Console.Repo.all(query)}
   end

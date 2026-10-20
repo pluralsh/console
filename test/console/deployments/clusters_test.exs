@@ -2,7 +2,7 @@ defmodule Console.Deployments.ClustersTest do
   use Console.DataCase, async: true
   use Mimic
   alias Console.PubSub
-  alias Console.Deployments.{Clusters, Services, Settings}
+  alias Console.Deployments.{Clusters, Services, Settings, Compatibilities}
   alias Kazan.Apis.Core.V1, as: CoreV1
   import KubernetesScaffolds
 
@@ -315,6 +315,33 @@ defmodule Console.Deployments.ClustersTest do
       assert svc.git.ref == Console.Deployments.Settings.agent_ref()
       assert svc.git.folder == "charts/deployment-operator"
       assert svc.helm.values == "cluster:\n  name: test\n"
+    end
+
+    test "it can template agent helm values with cluster tags, metadata and distro" do
+      user = admin_user()
+      git = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+
+      insert(:deployment_settings,
+        agent_helm_values: """
+        env: {{ cluster.tags.env }}
+        region: {{ cluster.metadata.region }}
+        distro: {{ cluster.distro }}
+        {% if cluster.distro == "OPENSHIFT" %}openshift: true{% endif %}
+        """,
+        agent_helm_values_templateable: true,
+        deployer_repository: git
+      )
+
+      {:ok, cluster} = Clusters.create_cluster(%{
+        name: "test",
+        distro: :openshift,
+        metadata: %{"region" => "us-east-1"},
+        tags: [%{name: "env", value: "prod"}]
+      }, user)
+
+      [svc] = Clusters.services(cluster)
+
+      assert svc.helm.values == "env: prod\nregion: us-east-1\ndistro: OPENSHIFT\nopenshift: true\n"
     end
 
     test "it will error if the cluster limit is exceeded" do
@@ -1245,6 +1272,32 @@ defmodule Console.Deployments.ClustersTest do
       assert services["test2"].helm.values == "migrated:\n  cluster: test2\n"
     end
 
+    test "it can template helm vals migrations with cluster tags and distro" do
+      user = admin_user()
+      insert(:user, bot_name: "console", roles: %{admin: true})
+      git = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+
+      insert(:deployment_settings,
+        agent_helm_values: "initial: true\n",
+        agent_helm_values_templateable: true,
+        deployer_repository: git
+      )
+
+      {:ok, _} = Clusters.create_cluster(%{name: "test", distro: :eks, tags: [%{name: "env", value: "prod"}]}, user)
+
+      migration =
+        insert(:agent_migration,
+          ref: nil,
+          helm_values: "env: {{ cluster.tags.env }}\ndistro: {{ cluster.distro }}\n"
+        )
+
+      {:ok, _} = Clusters.apply_migration(migration)
+
+      [svc] = Console.Repo.all(Console.Schema.Service.agent())
+
+      assert svc.helm.values == "env: prod\ndistro: EKS\n"
+    end
+
     test "it can migrate helm vals and ref" do
       user = admin_user()
       insert(:user, bot_name: "console", roles: %{admin: true})
@@ -1481,8 +1534,17 @@ defmodule Console.Deployments.ClustersTest do
 
     test "it errors if the upgrade plan is not ready" do
       user = admin_user()
-      cluster = insert(:cluster, current_version: "1.36.1", write_bindings: [%{user_id: user.id}])
-      insert(:cloud_addon, cluster: cluster, name: "coredns", version: "v1.14.3-eksbuild.2", distro: :eks)
+
+      # the compatibility matrix is updated continuously, so derive a cluster version whose next
+      # minor has no known coredns release instead of hardcoding one
+      %{versions: [_ | _] = vsns} = Compatibilities.CloudAddOns.fetch("eks", "coredns")
+      {addon_version, kube} =
+        vsns
+        |> Enum.flat_map(fn %{version: v, compatibilities: kube} -> Enum.map(kube || [], &{v, &1}) end)
+        |> Enum.max_by(fn {_, kube} -> Version.parse!("#{kube}.0") end, Version)
+
+      cluster = insert(:cluster, current_version: "#{kube}.1", write_bindings: [%{user_id: user.id}])
+      insert(:cloud_addon, cluster: cluster, name: "coredns", version: addon_version, distro: :eks)
 
       {:error, msg} = Clusters.create_cluster_upgrade(cluster.id, user)
 

@@ -7,6 +7,7 @@ defmodule Console.AI.Tools.Workbench.Observability.PlrlToolsTest do
     LogsAggregate,
     LogLabels,
     Metrics,
+    MetricsLabelSearch,
     MetricsSearch
   }
 
@@ -54,8 +55,11 @@ defmodule Console.AI.Tools.Workbench.Observability.PlrlToolsTest do
       assert Map.has_key?(props, "service_id")
     end
 
-    test "logs_query accepts default time range" do
-      assert %{time: %{after: %DateTime{}, before: %DateTime{}}} =
+    test "logs_query preserves authorization scope and default time range" do
+      assert %{service_id: "svc-1", time: %{after: %DateTime{}, before: %DateTime{}}} =
+               Logs.logs_query(%Logs{service_id: "svc-1"})
+
+      assert %{cluster_id: "cluster-1", time: %{after: %DateTime{}, before: %DateTime{}}} =
                Logs.logs_query(%Logs{cluster_id: "cluster-1"})
     end
   end
@@ -140,6 +144,20 @@ defmodule Console.AI.Tools.Workbench.Observability.PlrlToolsTest do
 
     test "json_schema loads" do
       assert %{"properties" => %{"query" => _}} = Tool.json_schema(MetricsSearch)
+    end
+  end
+
+  describe "MetricsLabelSearch (plrl_metric_label_search)" do
+    test "changeset casts an optional time range" do
+      assert {:ok, %MetricsLabelSearch{time_range: %{start: %DateTime{}, end: %DateTime{}}}} =
+               Tool.validate(MetricsLabelSearch, %{
+                 "metric" => "kube_pod_info",
+                 "label" => "namespace",
+                 "time_range" => %{
+                   "start" => "2025-01-01T00:00:00Z",
+                   "end" => "2025-01-01T01:00:00Z"
+                 }
+               })
     end
   end
 

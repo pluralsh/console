@@ -3,8 +3,9 @@ package common
 import (
 	"strings"
 
-	"github.com/pluralsh/console/go/polly/containers"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+
+	"github.com/pluralsh/console/go/polly/containers"
 )
 
 const (
@@ -22,6 +23,15 @@ const (
 	// It removes fields missing from the desired state.
 	// With force=true, a failed replace escalates to delete and recreate.
 	SyncOptionReplace = "replace=true"
+
+	// SyncOptionPruneDisabled skips deletion of resources removed from the desired state.
+	SyncOptionPruneDisabled = "prune=false"
+
+	// SyncOptionDeleteDisabled skips deletion of resources when a service is destroyed.
+	SyncOptionDeleteDisabled = "delete=false"
+
+	// SyncOptionDetach retains a resource while removing its association with the service.
+	SyncOptionDetach = "detach"
 
 	// ResyncInProgressAnnotation contains an annotation for a resource that was deleted forcefully
 	// and will be recreated in the next reconciling.
@@ -53,7 +63,7 @@ func getArgoSyncOptions(annotations map[string]string) containers.Set[string] {
 }
 
 func parseSyncOptions(annotation string) containers.Set[string] {
-	options := strings.ToLower(strings.ReplaceAll(annotation, " ", ""))
+	options := strings.ToLower(strings.Join(strings.Fields(annotation), ""))
 	return containers.ToSet(strings.Split(options, ","))
 }
 
@@ -72,6 +82,35 @@ func HasForceSyncOption(u unstructured.Unstructured) bool {
 
 func HasReplaceSyncOption(u unstructured.Unstructured) bool {
 	return HasSyncOption(u, SyncOptionReplace)
+}
+
+// HasPruneDisabledSyncOption reports whether a resource should be kept when it is removed from the desired state.
+func HasPruneDisabledSyncOption(u unstructured.Unstructured) bool {
+	return HasSyncOption(u, SyncOptionPruneDisabled)
+}
+
+// HasDeleteDisabledSyncOption reports whether a resource should be kept when its service is destroyed.
+func HasDeleteDisabledSyncOption(u unstructured.Unstructured) bool {
+	return HasSyncOption(u, SyncOptionDeleteDisabled)
+}
+
+// HasDetachOption reports whether a resource should be detached from its service.
+// It recognizes the legacy lifecycle annotation and Plural's sync-options annotation.
+func HasDetachOption(u unstructured.Unstructured) bool {
+	annotations := u.GetAnnotations()
+	if annotations == nil {
+		return false
+	}
+	if annotations[LifecycleDeleteAnnotation] == PreventDeletion {
+		return true
+	}
+
+	annotation, ok := annotations[SyncOptionsAnnotation]
+	if !ok {
+		return false
+	}
+
+	return parseSyncOptions(annotation).Has(SyncOptionDetach)
 }
 
 func HasResyncInProgressAnnotation(u *unstructured.Unstructured) bool {

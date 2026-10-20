@@ -42,3 +42,5 @@ RUN claude-agent-acp --version
 
 # The entrypoint remains the agent-harness binary
 # The agent-harness launches claude-agent-acp, which uses the pinned Claude CLI.
+
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD ["claude-agent-acp", "--version"]

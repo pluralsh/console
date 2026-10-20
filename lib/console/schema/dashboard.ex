@@ -2,6 +2,9 @@ defmodule Console.Schema.Dashboard do
   use Console.Schema.Base
   alias Console.Schema.Workbench
 
+  @name_max 255
+  @description_max 10_000
+
   defmodule Datasource do
     use Console.Schema.Base
 
@@ -37,6 +40,8 @@ defmodule Console.Schema.Dashboard do
       traces: 9,
       section: 10
 
+    defenum Unit, none: 0, bytes: 1, time: 2, cpu: 3, percent: 4, milliseconds: 5
+
     defmodule Layout do
       use Console.Schema.Base
 
@@ -63,6 +68,7 @@ defmodule Console.Schema.Dashboard do
       field :title,       :string
       field :description, :string
       field :type,        Type
+      field :unit,        Unit
       field :markdown,    :string
       field :options,     :map
       field :section_id,  :string
@@ -74,7 +80,7 @@ defmodule Console.Schema.Dashboard do
 
     def changeset(model, attrs) do
       model
-      |> cast(attrs, [:identifier, :title, :description, :type, :markdown, :options, :section_id])
+      |> cast(attrs, [:identifier, :title, :description, :type, :unit, :markdown, :options, :section_id])
       |> cast_embed(:layout, required: true)
       |> cast_embed(:datasource)
       |> validate_required([:identifier, :type])
@@ -123,6 +129,7 @@ defmodule Console.Schema.Dashboard do
   schema "dashboards" do
     field :name,        :string
     field :description, :string
+    field :public_id,   :string
 
     embeds_many :graphs, Graph, on_replace: :delete
     embeds_many :inputs, Input, on_replace: :delete
@@ -154,9 +161,17 @@ defmodule Console.Schema.Dashboard do
     |> foreign_key_constraint(:workbench_id)
     |> unique_constraint([:workbench_id, :name])
     |> validate_required([:name, :workbench_id])
+    |> validate_length(:name, max: @name_max)
+    |> validate_length(:description, max: @description_max)
     |> validate_unique_graph_identifiers()
     |> validate_graph_sections()
     |> validate_graph_intersections()
+  end
+
+  def share_changeset(model, public_id) do
+    model
+    |> cast(%{public_id: public_id}, [:public_id])
+    |> unique_constraint(:public_id)
   end
 
   defp validate_unique_graph_identifiers(changeset) do

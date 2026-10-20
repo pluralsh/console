@@ -1,8 +1,8 @@
 import {
+  Breadcrumb,
   BookmarkIcon,
   BotIcon,
   Button,
-  EmptyState,
   EventScheduleIcon,
   Flex,
   GearTrainIcon,
@@ -15,25 +15,29 @@ import {
   WebhooksIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import {
-  useWorkbenchJobsQuery,
+  useWorkbenchJobCountsQuery,
   WorkbenchJobStatus,
   useDeleteWorkbenchMutation,
   useWorkbenchQuery,
   WorkbenchQuery,
   WorkbenchTinyFragment,
 } from 'generated/graphql'
+import { WorkbenchFileContext } from 'components/ai/chatbot/PlrlFileChip'
 import { GqlError } from 'components/utils/Alert'
 import { Confirm } from 'components/utils/Confirm'
 import { MoreMenu } from 'components/utils/MoreMenu'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
-import { SubTabs } from 'components/utils/SubTabs'
+import { CrumbSelect } from 'components/layout/CrumbSelect'
+import { PageWithSidecar } from 'components/layout/PageLayout'
+import { PageToolbar } from 'components/layout/PageToolbar'
+import { useWorkbenchOptions } from 'components/workbenches/useWorkbenchOptions'
+import { getTabCrumb } from 'utils/getTabCrumb'
 import { Key, ReactNode, useCallback, useMemo, useState } from 'react'
-import { mapExistingNodes } from 'utils/graphql'
 import {
   Link,
   Outlet,
-  useLocation,
   useMatch,
   useNavigate,
   useOutletContext,
@@ -52,22 +56,59 @@ import {
   WORKBENCHES_ALERTS_REL_PATH,
   WORKBENCHES_EDIT_REL_PATH,
   WORKBENCHES_EVALS_REL_PATH,
+  WORKBENCHES_FILES_REL_PATH,
   WORKBENCHES_ISSUES_REL_PATH,
   WORKBENCHES_MONITORING_REL_PATH,
 } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
+import { WorkbenchSidebarSlot } from './WorkbenchSidebarSlot'
 import { WorkbenchSidePanel } from './WorkbenchSidePanel'
 import { WorkbenchToolsEditModal } from './WorkbenchToolsEditModal'
 import { useWorkbenchJobsDelta } from './useWorkbenchJobsDelta'
 
 export const getWorkbenchBreadcrumbs = (
   workbench: Nullable<WorkbenchTinyFragment>
-) => [
+): Breadcrumb[] => [
   { label: 'workbenches', url: WORKBENCHES_ABS_PATH },
   ...(workbench
-    ? [{ label: workbench.name, url: getWorkbenchAbsPath(workbench?.id) }]
+    ? [
+        {
+          label: <WorkbenchCrumbSelect workbench={workbench} />,
+          textValue: workbench.name,
+        },
+      ]
     : []),
 ]
+
+// the workbench crumb, switching to another workbench in place
+function WorkbenchCrumbSelect({
+  workbench,
+}: {
+  workbench: WorkbenchTinyFragment
+}) {
+  const navigate = useNavigate()
+  const { workbenches } = useWorkbenchOptions()
+
+  return (
+    <CrumbSelect
+      ariaLabel="Workbench"
+      label={workbench.name}
+      selectedKey={workbench.id}
+      onSelectionChange={(id) => navigate(getWorkbenchAbsPath(id))}
+    >
+      {(workbenches.some(({ id }) => id === workbench.id)
+        ? workbenches
+        : [workbench, ...workbenches]
+      ).map(({ id, name }) => (
+        <ListBoxItem
+          key={id}
+          label={name}
+          textValue={name}
+        />
+      ))}
+    </CrumbSelect>
+  )
+}
 
 export type WorkbenchOutletContext = {
   workbenchId: string
@@ -88,8 +129,9 @@ export enum WorkbenchMoreMenuKey {
   Delete = 'delete',
 }
 
+// `tools`: tools, webhooks, chatbots and crons, only relevant when launching
 export type WorkbenchSidebar =
-  | { kind: 'default' }
+  | { kind: 'tools' }
   | { kind: 'none' }
   | { kind: 'custom'; content: ReactNode }
 
@@ -98,18 +140,17 @@ export type WorkbenchPageLayoutProps = {
   showEditWorkbenchButton?: boolean
   headerActions?: ReactNode
   contentBackground?: SemanticColorKey
-  tabStripBackground?: SemanticColorKey
-  tabStripHeight?: number
+  // docked to the right of the content, e.g. display options
+  sidecar?: ReactNode
   children?: ReactNode
 }
 
 export function WorkbenchPageLayout({
-  sidebar = { kind: 'default' },
+  sidebar = { kind: 'none' },
   showEditWorkbenchButton = true,
   headerActions,
   contentBackground,
-  tabStripBackground,
-  tabStripHeight,
+  sidecar,
   children,
 }: WorkbenchPageLayoutProps) {
   const theme = useTheme()
@@ -121,12 +162,27 @@ export function WorkbenchPageLayout({
     useMatch(`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/:tab?/*`)
       ?.params ?? {}
 
+  // set by the tab layout rather than the parent route, so pages without it
+  // (e.g. a job) can set their own, deeper breadcrumbs
+  useSetBreadcrumbs(
+    useMemo(
+      () => [
+        ...getWorkbenchBreadcrumbs(workbench),
+        ...(!workbench
+          ? []
+          : tab
+            ? getTabCrumb(getWorkbenchAbsPath(workbench.id), tab)
+            : [{ label: 'launch', url: getWorkbenchAbsPath(workbench.id) }]),
+      ],
+      [workbench, tab]
+    )
+  )
+
   const sidebarNode = renderWorkbenchSidebar(
     sidebar,
     workbenchId,
     openToolsEdit
   )
-
   const workbenchBasePath = getWorkbenchAbsPath(workbenchId)
   const jobsTabPath = `${workbenchBasePath}/${WORKBENCH_JOBS_REL_PATH}`
   const hasInProgressJobs = useWorkbenchHasInProgressJobs(workbenchId)
@@ -150,6 +206,14 @@ export function WorkbenchPageLayout({
         label: 'Monitoring',
         path: `${workbenchBasePath}/${WORKBENCHES_MONITORING_REL_PATH}`,
       },
+      ...(workbench?.filesystemEnabled
+        ? [
+            {
+              label: 'Files',
+              path: `${workbenchBasePath}/${WORKBENCHES_FILES_REL_PATH}`,
+            },
+          ]
+        : []),
       {
         label: 'Issues',
         path: `${workbenchBasePath}/${WORKBENCHES_ISSUES_REL_PATH}`,
@@ -163,7 +227,12 @@ export function WorkbenchPageLayout({
         path: `${workbenchBasePath}/${WORKBENCHES_EVALS_REL_PATH}`,
       },
     ],
-    [workbenchBasePath, jobsTabPath, hasInProgressJobs]
+    [
+      workbenchBasePath,
+      jobsTabPath,
+      hasInProgressJobs,
+      workbench?.filesystemEnabled,
+    ]
   )
 
   const handleMoreMenuSelection = useCallback(
@@ -207,49 +276,33 @@ export function WorkbenchPageLayout({
       minHeight={0}
       overflow="hidden"
     >
-      {sidebarNode}
+      <WorkbenchSidebarSlot>{sidebarNode}</WorkbenchSidebarSlot>
       <Flex
         direction="column"
         flex={1}
         minHeight={0}
         minWidth={0}
         overflow="auto"
-        css={
-          contentBackground
-            ? { backgroundColor: theme.colors[contentBackground] }
-            : undefined
-        }
+        css={{
+          backgroundColor: contentBackground
+            ? theme.colors[contentBackground]
+            : theme.mode === 'light'
+              ? theme.colors['page-background']
+              : theme.colors['fill-zero'],
+        }}
       >
-        <Flex
-          align="center"
-          gap="small"
-          css={{
-            backgroundColor:
-              tabStripBackground && theme.colors[tabStripBackground],
-            ...(tabStripHeight
-              ? {
-                  height: tabStripHeight,
-                  padding: `0 ${theme.spacing.large}px`,
-                }
-              : {
-                  padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
-                }),
-            position: 'relative',
-            zIndex: 1,
+        <PageToolbar
+          tabs={subTabDirectory}
+          activeFn={(path) => {
+            if (path === workbenchBasePath) return !tab
+            if (path === jobsTabPath) return tab === WORKBENCH_JOBS_REL_PATH
+            return path === `${workbenchBasePath}/${tab}`
           }}
         >
-          <SubTabs
-            directory={subTabDirectory}
-            activeFn={(path) => {
-              if (path === workbenchBasePath) return !tab
-              if (path === jobsTabPath) return tab === WORKBENCH_JOBS_REL_PATH
-              return path === `${workbenchBasePath}/${tab}`
-            }}
-          />
-          <Flex grow={1} />
           {showEditWorkbenchButton && (
             <Button
               secondary
+              small
               as={Link}
               to={`${workbenchBasePath}/${WORKBENCHES_EDIT_REL_PATH}`}
             >
@@ -260,7 +313,7 @@ export function WorkbenchPageLayout({
           <MoreMenu
             disabled={!workbench}
             maxHeight="min(80vh, 520px)"
-            triggerProps={{ iconFrameType: 'secondary', size: 'large' }}
+            triggerProps={{ iconFrameType: 'secondary', size: 'medium' }}
             onSelectionChange={handleMoreMenuSelection}
           >
             {!showEditWorkbenchButton && (
@@ -307,28 +360,37 @@ export function WorkbenchPageLayout({
               label="Delete workbench"
             />
           </MoreMenu>
-        </Flex>
-        {children}
+        </PageToolbar>
+        {sidecar ? (
+          <PageWithSidecar sidecar={sidecar}>{children}</PageWithSidecar>
+        ) : (
+          children
+        )}
       </Flex>
     </Flex>
   )
 }
 
+// reads the status counts rather than a page of jobs, so this poll never
+// overwrites the paginated jobs list in the cache
 function useWorkbenchHasInProgressJobs(workbenchId: string) {
-  const { data } = useWorkbenchJobsQuery({
-    variables: { id: workbenchId, first: 50 },
+  const { data } = useWorkbenchJobCountsQuery({
+    variables: { id: workbenchId },
     skip: !workbenchId,
     pollInterval: 5_000,
     fetchPolicy: 'cache-and-network',
   })
 
-  return useMemo(() => {
-    return mapExistingNodes(data?.workbench?.runs).some(
-      (job) =>
-        job.status === WorkbenchJobStatus.Pending ||
-        job.status === WorkbenchJobStatus.Running
-    )
-  }, [data])
+  return useMemo(
+    () =>
+      (data?.workbench?.runCounts?.statuses ?? []).some(
+        (entry) =>
+          !!entry?.count &&
+          (entry.status === WorkbenchJobStatus.Pending ||
+            entry.status === WorkbenchJobStatus.Running)
+      ),
+    [data]
+  )
 }
 
 const InProgressDotSC = styled.span(({ theme }) => ({
@@ -347,7 +409,7 @@ function renderWorkbenchSidebar(
   switch (sidebar.kind) {
     case 'none':
       return null
-    case 'default':
+    case 'tools':
       return (
         <WorkbenchSidePanel
           workbenchId={workbenchId}
@@ -361,7 +423,6 @@ function renderWorkbenchSidebar(
 
 export function Workbench() {
   const id = useParams()[WORKBENCH_PARAM_ID]
-  const { pathname } = useLocation()
   const navigate = useNavigate()
   const { popToast } = useSimpleToast()
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
@@ -393,11 +454,14 @@ export function Workbench() {
       },
     })
 
+  // tabs set breadcrumbs through WorkbenchPageLayout; the not-found and error
+  // states below render without it, so set them here instead
+  const notFound = !id || !!error?.message?.includes('could not find resource')
   useSetBreadcrumbs(
-    useMemo(() => {
-      void pathname
-      return getWorkbenchBreadcrumbs(workbench)
-    }, [pathname, workbench])
+    useMemo(
+      () => (notFound || error ? getWorkbenchBreadcrumbs(null) : undefined),
+      [error, notFound]
+    )
   )
 
   const outletContext = useMemo<WorkbenchOutletContext>(
@@ -411,17 +475,21 @@ export function Workbench() {
     [id, isLoading, workbench, openToolsEdit, openDelete]
   )
 
-  if (!id || error?.message?.includes('could not find resource'))
+  if (notFound)
     return (
-      <EmptyState message="Workbench not found.">
+      <WorkbenchEmptyState
+        message="Workbench not found"
+        description="It may have been deleted, or you may not have access to it."
+      >
         <Button
+          small
           as={Link}
           to={WORKBENCHES_ABS_PATH}
           startIcon={<ReturnIcon />}
         >
           View all workbenches
         </Button>
-      </EmptyState>
+      </WorkbenchEmptyState>
     )
   if (error)
     return (
@@ -433,7 +501,11 @@ export function Workbench() {
 
   return (
     <>
-      <Outlet context={outletContext} />
+      <WorkbenchFileContext.Provider
+        value={workbench?.filesystemEnabled ? (id ?? null) : null}
+      >
+        <Outlet context={outletContext} />
+      </WorkbenchFileContext.Provider>
       <Confirm
         open={deleteModalOpen}
         close={() => setDeleteModalOpen(false)}

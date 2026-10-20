@@ -47,7 +47,7 @@ export default function IngressClasses() {
     useDefaultColumns(columnHelper)
   const columns = useMemo(
     () => [colName, colController, colLabels, colCreationTimestamp, colAction],
-    [colName, colController, colLabels, colCreationTimestamp, colAction]
+    [colName, colLabels, colCreationTimestamp, colAction]
   )
 
   return (

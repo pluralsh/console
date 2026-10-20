@@ -3,6 +3,7 @@ package environment
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"os"
 	osexec "os/exec"
 	"path"
@@ -87,25 +88,13 @@ func (in *environment) cloneRepository() error {
 		return in.finalizeRepository(repoDirPath, userName, userEmail)
 	}
 
-	// Set proxy for clone via environment variable so it takes effect immediately.
-	// The same proxy is later written into the repo-local git config so that
-	// subsequent push/fetch operations inside the cloned repo also use it.
-	if proxy := os.Getenv("PLRL_GIT_PROXY"); proxy != "" {
-		if err := os.Setenv("https_proxy", proxy); err != nil {
-			return err
-		}
-		if err := os.Setenv("http_proxy", proxy); err != nil {
-			return err
-		}
-	}
-
 	cloneArgs := []string{"clone"}
 	if branch := strings.TrimSpace(lo.FromPtr(in.agentRun.Branch)); branch != "" {
 		cloneArgs = append(cloneArgs, "--branch", branch)
 	}
 	cloneArgs = append(cloneArgs, in.agentRun.Repository, repoDir)
 
-	if err := exec.NewExecutable("git", exec.WithArgs(cloneArgs), exec.WithDir(in.dir)).Run(context.Background()); err != nil {
+	if err := exec.NewExecutable("git", exec.WithArgs(in.gitNetworkArgs(cloneArgs)), exec.WithDir(in.dir)).Run(context.Background()); err != nil {
 		return err
 	}
 
@@ -202,7 +191,7 @@ func copyPrebakedRepository(src, dst string) error {
 // is fetched from origin like `git clone --branch`. Failures keep the local copy.
 func (in *environment) updateFromOrigin(repoDirPath string) {
 	if out, err := exec.NewExecutable("git",
-		exec.WithArgs([]string{"fetch", "origin"}),
+		exec.WithArgs(in.gitNetworkArgs([]string{"fetch", "origin"})),
 		exec.WithDir(repoDirPath),
 	).RunWithOutput(context.Background()); err != nil {
 		klog.InfoS("prebake fetch failed, using local copy", "dir", repoDirPath, "err", err, "out", string(out))
@@ -291,7 +280,7 @@ func (in *environment) checkoutRequestedBranch(repoDirPath string) error {
 	}
 
 	if out, err := exec.NewExecutable("git",
-		exec.WithArgs([]string{"fetch", "origin", branch}),
+		exec.WithArgs(in.gitNetworkArgs([]string{"fetch", "origin", branch})),
 		exec.WithDir(repoDirPath),
 	).RunWithOutput(context.Background()); err != nil {
 		return fmt.Errorf("failed to fetch branch %s: %w: %s", branch, err, out)
@@ -325,7 +314,7 @@ func (in *environment) checkoutFollowupBranch(repoDirPath string) error {
 	}
 
 	if output, err := exec.NewExecutable("git",
-		exec.WithArgs([]string{"fetch", "origin", headBranch}),
+		exec.WithArgs(in.gitNetworkArgs([]string{"fetch", "origin", headBranch})),
 		exec.WithDir(repoDirPath),
 	).RunWithOutput(context.Background()); err != nil {
 		return fmt.Errorf("fetch follow-up head branch %q: %w: %s", headBranch, err, output)
@@ -495,12 +484,10 @@ func (in *environment) configureGitSigning(repoDirPath string) error {
 }
 
 // configureGitProxy writes http.proxy into the repo-local git config so that
-// push/fetch operations inside the already-cloned repository use the proxy.
-// The proxy is also applied to the git clone itself via https_proxy/http_proxy
-// environment variables set earlier in cloneRepository.
+// later push/fetch operations inside the repository use the proxy.
 func (in *environment) configureGitProxy(repoDirPath string) error {
-	proxy := os.Getenv("PLRL_GIT_PROXY")
-	if proxy == "" {
+	proxy, noProxy := in.scmProxy()
+	if proxy == "" || proxyBypassed(in.agentRun.Repository, noProxy) {
 		return nil
 	}
 
@@ -509,6 +496,44 @@ func (in *environment) configureGitProxy(repoDirPath string) error {
 		exec.WithArgs([]string{"config", "http.proxy", proxy}),
 		exec.WithDir(repoDirPath),
 	).Run(context.Background())
+}
+
+// gitNetworkArgs applies the proxy only to this git invocation. This is needed
+// before the repository exists and avoids leaking proxy configuration to other
+// processes in the harness container.
+func (in *environment) gitNetworkArgs(args []string) []string {
+	proxy, noProxy := in.scmProxy()
+	if proxy == "" || proxyBypassed(in.agentRun.Repository, noProxy) {
+		return args
+	}
+
+	return append([]string{"-c", "http.proxy=" + proxy}, args...)
+}
+
+func (in *environment) scmProxy() (string, string) {
+	if in.agentRun.ScmCreds != nil && in.agentRun.ScmCreds.Proxy != nil && in.agentRun.ScmCreds.Proxy.Enabled {
+		proxy := strings.TrimSpace(in.agentRun.ScmCreds.Proxy.URL)
+		if proxy != "" {
+			return proxy, strings.TrimSpace(lo.FromPtr(in.agentRun.ScmCreds.Proxy.Noproxy))
+		}
+	}
+
+	return strings.TrimSpace(os.Getenv("PLRL_GIT_PROXY")), strings.TrimSpace(os.Getenv(EnvNoProxy))
+}
+
+func proxyBypassed(target, noProxy string) bool {
+	parsed, err := url.Parse(target)
+	if err != nil || parsed.Hostname() == "" {
+		return false
+	}
+	host := strings.ToLower(parsed.Hostname())
+	for entry := range strings.SplitSeq(noProxy, ",") {
+		entry = strings.TrimPrefix(strings.ToLower(strings.TrimSpace(entry)), ".")
+		if entry != "" && (host == entry || strings.HasSuffix(host, "."+entry)) {
+			return true
+		}
+	}
+	return false
 }
 
 func configureCodebaseMemoryGitExclude(repoDirPath string) error {

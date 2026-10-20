@@ -177,6 +177,7 @@ export default function ClusterSelector({
           }
           setInputValue('')
         }}
+        arrowSize="small"
         {...props}
       >
         {clusters.map((cluster) => (

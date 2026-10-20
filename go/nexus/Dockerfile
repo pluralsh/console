@@ -65,3 +65,4 @@ USER nonroot:nonroot
 ENTRYPOINT ["/app/nexus"]
 CMD ["--config", "/app/config/config.yaml"]
 
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD ["/app/nexus", "--help"]

@@ -2,16 +2,17 @@ import {
   Chip,
   FillLevelProvider,
   Flex,
-  Input,
-  SearchIcon,
   SubTab,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 import { ClusterSelect } from 'components/cd/utils/ClusterSelect'
 import { useThrottle } from 'components/hooks/useThrottle'
 import { useClusters, useNamespaces } from 'components/kubernetes/Cluster'
 import { NamespaceMultiSelect } from 'components/kubernetes/common/NamespaceMultiSelect'
+import {
+  PageToolbarPortal,
+  ToolbarSearchInput,
+} from 'components/layout/PageToolbar'
 import {
   useVulnerabilityStatisticsQuery,
   VulnReportGrade,
@@ -69,61 +70,50 @@ export function VulnerabilityReports() {
     { total: 0 }
   ) ?? { total: 0 }
 
-  const header = useMemo(
-    () => (
-      <Flex
-        gap="medium"
-        minWidth="fit-content"
-      >
-        <ClusterSelect
-          clusters={clusters}
-          selectedKey={clusterId}
-          onSelectionChange={(id) =>
-            navigate(pathname.replace(clusterId, id as string))
-          }
-          withoutTitleContent
+  return (
+    <ContentWrapperSC>
+      <PageToolbarPortal>
+        <ToolbarSearchInput
+          placeholder="Search vulnerability reports"
+          value={reportsQ}
+          onChange={setReportsQ}
         />
+        <ClusterSelectWrapperSC>
+          <ClusterSelect
+            size="small"
+            clusters={clusters}
+            selectedKey={clusterId}
+            onSelectionChange={(id) =>
+              navigate(pathname.replace(clusterId, id as string))
+            }
+            withoutTitleContent
+          />
+        </ClusterSelectWrapperSC>
         <NamespaceMultiSelect
           allNamespaces={namespaces}
           selectedNamespaces={selectedNamespaces}
           setSelectedNamespaces={setSelectedNamespaces}
         />
-      </Flex>
-    ),
-    [clusterId, clusters, namespaces, navigate, pathname, selectedNamespaces]
-  )
-  useSetPageHeaderContent(header)
-
-  return (
-    <ContentWrapperSC>
-      <FiltersWrapperSC>
-        <Input
-          startIcon={<SearchIcon color="icon-light" />}
-          placeholder="Search vulnerability reports"
-          value={reportsQ}
-          onChange={(e) => setReportsQ(e.target.value)}
-          css={{ flex: 1 }}
-        />
-        <Flex>
-          <FillLevelProvider value={1}>
+      </PageToolbarPortal>
+      <Flex>
+        <FillLevelProvider value={1}>
+          <GradeSelectSubtab
+            grade="All"
+            count={gradeToCountMap.total}
+            active={selectedGrade === 'All'}
+            onClick={() => setSelectedGrade('All')}
+          />
+          {Object.values(VulnReportGrade).map((grade) => (
             <GradeSelectSubtab
-              grade="All"
-              count={gradeToCountMap.total}
-              active={selectedGrade === 'All'}
-              onClick={() => setSelectedGrade('All')}
+              key={grade}
+              grade={grade}
+              count={gradeToCountMap[grade] ?? 0}
+              active={selectedGrade === grade}
+              onClick={() => setSelectedGrade(grade)}
             />
-            {Object.values(VulnReportGrade).map((grade) => (
-              <GradeSelectSubtab
-                key={grade}
-                grade={grade}
-                count={gradeToCountMap[grade] ?? 0}
-                active={selectedGrade === grade}
-                onClick={() => setSelectedGrade(grade)}
-              />
-            ))}
-          </FillLevelProvider>
-        </Flex>
-      </FiltersWrapperSC>
+          ))}
+        </FillLevelProvider>
+      </Flex>
       <VulneratbilityReportsTable
         selectedClusters={selectedClusters}
         selectedNamespaces={selectedNamespaces}
@@ -172,13 +162,12 @@ function GradeSelectSubtab({
 const ContentWrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing.large,
+  gap: theme.spacing.medium,
   height: '100%',
   overflow: 'hidden',
 }))
 
-const FiltersWrapperSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  gap: theme.spacing.medium,
-  width: '100%',
-}))
+const ClusterSelectWrapperSC = styled.div({
+  width: 220,
+  flexShrink: 0,
+})

@@ -121,6 +121,7 @@ export type WorkbenchFormState = Omit<
   writeBindings: PolicyBindingFragment[]
   workbenchSkills: WorkbenchFormSkill[]
   workbenchKnowledge: WorkbenchFormKnowledge[]
+  filesystemEnabled: boolean
 }
 
 export function WorkbenchCreateOrEdit({ mode }: { mode: 'create' | 'edit' }) {
@@ -494,6 +495,7 @@ function formStateToAttributes(
     modes,
     workbenchSkills,
     workbenchKnowledge: _workbenchKnowledge,
+    filesystemEnabled: _filesystemEnabled,
     ...rest
   } = state
 
@@ -552,14 +554,20 @@ function sanitizeInitialForm({
   budget,
   workbenchSkills,
   workbenchKnowledge,
+  filesystemEnabled,
   tools,
   readBindings,
   writeBindings,
 }: WorkbenchFragment): WorkbenchFormState {
-  const { infrastructure, coding, observability, selfService } =
-    configuration ?? {}
-  const { kubernetes, services, stacks, podLogs, vulnerabilities } =
-    infrastructure ?? {}
+  const { infrastructure, coding, observability } = configuration ?? {}
+  const {
+    selfService,
+    kubernetes,
+    services,
+    stacks,
+    podLogs,
+    vulnerabilities,
+  } = infrastructure ?? {}
   const { logs, metrics } = observability ?? {}
   const { mode, repositories, enableBabysitting } = coding ?? {}
   const { files, ref } = skills ?? {}
@@ -598,8 +606,8 @@ function sanitizeInitialForm({
     repositoryId: repository?.id ?? null,
     overrideBotUser: false,
     configuration: {
-      selfService: selfService ?? false,
       infrastructure: {
+        selfService: selfService ?? false,
         kubernetes,
         services,
         stacks,
@@ -632,5 +640,6 @@ function sanitizeInitialForm({
       ]) ?? [],
     workbenchSkills: resolvedWorkbenchSkills,
     workbenchKnowledge: resolvedWorkbenchKnowledge,
+    filesystemEnabled: !!filesystemEnabled,
   }
 }

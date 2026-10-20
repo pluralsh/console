@@ -4,7 +4,23 @@ defmodule Prometheus.Client do
   require Logger
 
   @headers [{"content-type", "application/x-www-form-urlencoded"}]
-  @timeouts [connect_options: [timeout: :timer.seconds(30)], receive_timeout: :timer.seconds(30), decode_body: false, retry: false]
+  @query_timeout :timer.seconds(30)
+  # range queries over grouped/joined usage metrics can run long; matches prometheus' default 2m -query.timeout
+  @range_query_timeout :timer.minutes(2)
+  @timeouts [
+    connect_options: [timeout: :timer.seconds(30)],
+    receive_timeout: @query_timeout,
+    compressed: true,
+    decode_body: false,
+    retry: false
+  ]
+  @range_timeouts Keyword.put(@timeouts, :receive_timeout, @range_query_timeout)
+
+  @doc "upper bound on a single instant query, for callers awaiting it in a task"
+  def query_timeout(), do: @query_timeout
+
+  @doc "upper bound on a single range query, for callers awaiting it in a task"
+  def range_query_timeout(), do: @range_query_timeout
 
   defstruct [:host, :user, :password]
 
@@ -31,6 +47,7 @@ defmodule Prometheus.Client do
 
   def query(client \\ nil, query, start, end_t, step, variables) do
     query = variable_subst(query, variables)
+    {start, end_t} = Console.TimeRange.align_range(start, end_t, step)
     Logger.info "Issuing prometheus query: #{query}"
     Req.post(
       Path.join(host(client), "/api/v1/query_range"),
@@ -40,7 +57,7 @@ defmodule Prometheus.Client do
         {"start", DateTime.to_iso8601(start)},
         {"step", step}
       ],
-      headers: @headers ++ auth(client)] ++ @timeouts
+      headers: @headers ++ auth(client)] ++ @range_timeouts
     )
     |> case do
       {:ok, %{body: body, status: 200}} -> Poison.decode(body, as: Response.spec())
@@ -62,12 +79,21 @@ defmodule Prometheus.Client do
     end
   end
 
+  @variable ~r/\$\{([^}]+)\}|\$(\w+)/
+
+  @doc """
+  Interpolates `${var}` (or bare `$var`, for grafana-style dashboard queries) in a single pass,
+  matching whole variable names so the result doesn't depend on variable order.  Unknown
+  variables are left untouched and substituted values are never re-scanned.
+  """
   def variable_subst(value, variables) do
-    Enum.reduce(variables, value, fn
-      %{name: key, value: value}, str ->
-        String.replace(str, "$#{key}", value)
-      {key, value}, str -> String.replace(str, "$#{key}", value)
-      _, str -> str
+    vars = Map.new(variables || [], &subst_pair/1)
+    Regex.replace(@variable, value, fn whole, braced, bare ->
+      Map.get(vars, if(braced == "", do: bare, else: braced), whole)
     end)
   end
+
+  defp subst_pair(%{name: key, value: value}), do: {to_string(key), to_string(value)}
+  defp subst_pair({key, value}), do: {to_string(key), to_string(value)}
+  defp subst_pair(_), do: {nil, nil}
 end

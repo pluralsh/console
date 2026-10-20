@@ -1,0 +1,27 @@
+{
+    "type": "object",
+    "description": "Adds or updates a collapsible section that groups related canvas blocks under a titled header (CanvasBlock with type section). Add the section before any block that references it. Blocks join a section by setting their `section_id` to this section's `identifier`; each section lays out its blocks on its own 3-column grid starting at row 0.",
+    "properties": {
+        "identifier": {
+            "type": "string",
+            "description": "Unique key for this section (e.g. `saturation`, `error_rates`). Must be unique among canvas blocks in this job."
+        },
+        "title": {
+            "type": "string",
+            "description": "Section header shown above its blocks (e.g. `Saturation`)."
+        },
+        "description": {
+            "type": "string",
+            "description": "Optional one-sentence explanation of what the section shows, shown behind an info icon."
+        },
+        "position": {
+            "type": "integer",
+            "description": "Order of this section among sections (0-based). Sections render below any unsectioned blocks."
+        },
+        "collapsed": {
+            "type": "boolean",
+            "description": "Whether the section starts collapsed. Use for supporting detail the reader rarely needs."
+        }
+    },
+    "required": ["identifier", "title", "position"]
+}

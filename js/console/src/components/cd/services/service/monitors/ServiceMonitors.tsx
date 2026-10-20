@@ -2,9 +2,7 @@ import {
   Button,
   Flex,
   IconFrame,
-  Input,
   PencilIcon,
-  SearchIcon,
   Spinner,
   Table,
   TrashCanIcon,
@@ -15,9 +13,12 @@ import { GqlError } from 'components/utils/Alert'
 import { AlertStateChip } from 'components/utils/alerts/AlertStateChip'
 import { Confirm } from 'components/utils/Confirm'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
-import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { Body1P, StrongSC } from 'components/utils/typography/Text'
+import {
+  PageToolbarPortal,
+  ToolbarSearchInput,
+} from 'components/layout/PageToolbar'
 import {
   MonitorTinyFragment,
   useDeleteMonitorMutation,
@@ -44,24 +45,24 @@ export function ServiceMonitors() {
     )
   return (
     <WrapperSC>
-      <StretchedFlex>
-        <Body1P $color="text-light">
-          Create and manage log-based monitors for this service.
-        </Body1P>
+      <PageToolbarPortal>
+        <ToolbarSearchInput
+          placeholder="Search monitors"
+          value={q}
+          onChange={setQ}
+        />
         <Button
           floating
+          small
           as={Link}
           to="create"
         >
           Create Monitor
         </Button>
-      </StretchedFlex>
-      <Input
-        startIcon={<SearchIcon />}
-        placeholder="Search monitors"
-        value={q}
-        onChange={(e) => setQ(e.target.value)}
-      />
+      </PageToolbarPortal>
+      <Body1P $color="text-light">
+        Create and manage log-based monitors for this service.
+      </Body1P>
       {error ? (
         <GqlError error={error} />
       ) : (

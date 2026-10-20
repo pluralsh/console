@@ -1,7 +1,7 @@
 /** Union of primitives to skip with deep omit utilities. */
 type Primitive =
   | string
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+  // oxlint-disable-next-line typescript/no-unsafe-function-type -- any callable should be skipped
   | Function
   | number
   | boolean

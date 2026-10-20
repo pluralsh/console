@@ -2,9 +2,7 @@ import {
   Breadcrumb,
   Button,
   Flex,
-  GearTrainIcon,
   HeatMapIcon,
-  IconFrame,
   Table,
   TableProps,
   WrapWithIf,
@@ -39,7 +37,7 @@ import { Edge } from 'utils/graphql'
 
 import { isEmpty } from 'lodash'
 
-import { GLOBAL_SETTINGS_ABS_PATH } from 'routes/settingsRoutesConst'
+import { ToolbarSearchInput } from 'components/layout/PageToolbar'
 
 import {
   POLL_INTERVAL,
@@ -137,8 +135,8 @@ export default function Clusters() {
   const [upgradeableFilter, setUpgradeableFilter] =
     useState<UpgradeableFilterKey>('ALL')
 
-  const [searchString, setSearchString] = useState<string>()
-  const debouncedSearchString = useDebounce(searchString, 100) || undefined
+  const [searchString, setSearchString] = useState('')
+  const debouncedSearchString = useDebounce(searchString, 400) || undefined
 
   const searchTags = useMemo(
     () => keySetToTagArray(selectedTagKeys),
@@ -222,32 +220,26 @@ export default function Clusters() {
   const headerActions = useMemo(
     () =>
       cdIsEnabled ? (
-        <Flex
-          justify="flex-end"
-          gap="medium"
-        >
+        <>
+          <ToolbarSearchInput
+            placeholder="Search clusters"
+            value={searchString}
+            onChange={setSearchString}
+          />
           {canShowCharts && !showingCharts && (
             <Button
               secondary
+              small
               endIcon={<HeatMapIcon />}
               onClick={() => setShowingCharts(true)}
             >
               Show charts
             </Button>
           )}
-          <IconFrame
-            type="secondary"
-            size="large"
-            tooltip="Global settings"
-            clickable
-            icon={<GearTrainIcon />}
-            as={Link}
-            to={GLOBAL_SETTINGS_ABS_PATH}
-          />
           <CreateCluster />
-        </Flex>
+        </>
       ) : null,
-    [cdIsEnabled, canShowCharts, showingCharts, setShowingCharts]
+    [cdIsEnabled, searchString, canShowCharts, showingCharts, setShowingCharts]
   )
 
   useSetPageHeaderContent(headerActions)
@@ -270,7 +262,6 @@ export default function Clusters() {
       )}
       <ClustersFilters
         setQueryStatusFilter={setStatusFilter}
-        setQueryString={setSearchString}
         statusCounts={statusCounts}
         selectedTagKeys={selectedTagKeys}
         setSelectedTagKeys={setSelectedTagKeys}

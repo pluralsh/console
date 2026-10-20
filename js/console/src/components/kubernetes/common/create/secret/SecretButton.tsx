@@ -36,11 +36,7 @@ export function CreateSecretButton({ text, refetch }: CreateSecretButtonProps) {
       <Button
         onClick={() => setOpen(true)}
         secondary
-        floating
-        css={{
-          // align with the data select buttons
-          height: '42px',
-        }}
+        small
       >
         {text}
       </Button>

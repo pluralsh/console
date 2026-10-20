@@ -119,6 +119,7 @@ defmodule Console.Schema.WorkbenchJob do
     has_many :monitors,        through: [:associations, :monitor]
     has_many :pull_requests,   PullRequest, on_replace: :delete
     has_many :queued_prompts,  QueuedPrompt, on_replace: :delete
+    has_many :attachments,     Console.Schema.Attachment, where: [workbench_job_activity_id: nil]
 
     timestamps()
   end
@@ -151,8 +152,58 @@ defmodule Console.Schema.WorkbenchJob do
     from(j in query, where: j.workbench_id == ^workbench_id)
   end
 
+  @doc """
+  Case-insensitive substring match on the prompt. It's a binary column and decoding it (`convert_from`)
+  fails the whole query on invalid UTF-8, so it's matched without decoding: through its escaped ASCII
+  form, and byte-for-byte for anything else (e.g. non-ASCII text).
+  """
+  def search(query \\ __MODULE__, q) do
+    like = "%#{escape_like(q)}%"
+    from(j in query,
+      where: fragment("encode(?, 'escape') ILIKE ?", j.prompt, ^like) or
+        fragment("position(convert_to(?, 'UTF8') in ?) > 0", ^q, j.prompt)
+    )
+  end
+
+  defp escape_like(q), do: String.replace(q, ["\\", "%", "_"], &"\\#{&1}")
+
   def for_status(query \\ __MODULE__, status) do
     from(j in query, where: j.status == ^status)
+  end
+
+  def for_statuses(query \\ __MODULE__, statuses) do
+    from(j in query, where: j.status in ^statuses)
+  end
+
+  @doc """
+  Jobs with at least one pull request in one of the given states, `:none` matching jobs without any pull requests.
+  """
+  def for_pr_states(query \\ __MODULE__, states) do
+    {none, statuses} = Enum.split_with(states, &(&1 == :none))
+    with_prs = PullRequest.for_statuses(statuses) |> PullRequest.workbench_job_ids()
+
+    case none do
+      [] -> from(j in query, where: j.id in subquery(with_prs))
+      _ -> from(j in query, where: j.id in subquery(with_prs) or j.id not in subquery(pr_job_ids()))
+    end
+  end
+
+  def without_pull_requests(query \\ __MODULE__) do
+    from(j in query, where: j.id not in subquery(pr_job_ids()))
+  end
+
+  defp pr_job_ids(), do: PullRequest.with_workbench() |> PullRequest.workbench_job_ids()
+
+  def count_by_status(query \\ __MODULE__) do
+    from(j in query, group_by: j.status, select: %{status: j.status, count: count(j.id)})
+  end
+
+  def count_by_pr_state(query \\ __MODULE__) do
+    from(j in query,
+      join: pr in assoc(j, :pull_requests),
+      group_by: pr.status,
+      select: %{state: pr.status, count: count(j.id, :distinct)}
+    )
   end
 
   def for_monitor(query \\ __MODULE__, monitor_id) do

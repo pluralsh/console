@@ -52,13 +52,15 @@ jobs:
           token_format: "access_token"
           create_credentials_file: true
       - uses: google-github-actions/setup-gcloud@v3.0.1
-      - name: Login to gcr
-        run: gcloud auth configure-docker -q
+      - name: Configure gcr.io authentication
+        run: gcloud auth configure-docker gcr.io -q
       - name: Helm Login
         id: helm_login
         run: |
-          gcloud auth application-default print-access-token | helm registry login -u oauth2accesstoken --password-stdin https://gcr.io
-          echo "token=$(gcloud auth application-default print-access-token)" >> $GITHUB_OUTPUT
+          token="$(gcloud auth application-default print-access-token)"
+          echo "::add-mask::$token"
+          printf '%s' "$token" | helm registry login -u oauth2accesstoken --password-stdin gcr.io
+          echo "token=$token" >> "$GITHUB_OUTPUT"
       - name: Chart | Check
         id: chart_exists
         run: |

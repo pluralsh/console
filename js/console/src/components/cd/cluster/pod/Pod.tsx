@@ -1,18 +1,12 @@
-import {
-  EmptyState,
-  Tab,
-  TabList,
-  TabPanel,
-  useSetBreadcrumbs,
-} from '@pluralsh/design-system'
+import { EmptyState, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { PageColumnSC, PageRowSC } from 'components/layout/PageLayout'
+import { PageToolbar } from 'components/layout/PageToolbar'
 import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
-import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
 import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
-import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
 import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
-import { useMemo, useRef } from 'react'
+import { useMemo } from 'react'
 import { Outlet, useMatch, useParams } from 'react-router-dom'
-import { useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
@@ -28,7 +22,6 @@ import {
 } from '../../../../generated/graphql'
 import { useCurrentFlow } from 'components/flows/hooks/useCurrentFlow'
 import { getPodDetailsPath } from '../../../../routes/cdRoutesConsts'
-import { LinkTabWrap } from '../../../utils/Tabs'
 import { LogsLegend } from '../../logs/LogsLegend.tsx'
 import { getClusterBreadcrumbs } from '../Cluster'
 import PodSidecar from './PodSidecar.tsx'
@@ -37,15 +30,18 @@ import { getAgentRunBreadcrumbs } from 'components/ai/agent-runs/details/AIAgent
 
 const DIRECTORY = [
   { path: '', label: 'Info' },
+  { path: 'metrics', label: 'Metrics' },
   { path: 'events', label: 'Events' },
   { path: 'raw', label: 'Raw' },
   { path: 'logs', label: 'Logs' },
   { path: 'shell', label: 'Shell' },
 ]
 
+// agent run pods are fetched without a cluster/service scope, which metrics need
+const AGENT_RUN_DIRECTORY = DIRECTORY.filter(({ path }) => path !== 'metrics')
+
 export default function Pod() {
   const theme = useTheme()
-  const tabStateRef = useRef<any>(undefined)
 
   const {
     clusterId: clusterIdParam,
@@ -66,7 +62,7 @@ export default function Pod() {
     useMatch(
       `${getPodDetailsPath({ type, clusterId: clusterIdParam, serviceId, flowIdOrName, agentRunId: runId, name, namespace })}/:tab`
     )?.params?.tab || ''
-  const currentTab = DIRECTORY.find(({ path }) => path === tab)
+  const directory = type === 'agent-run' ? AGENT_RUN_DIRECTORY : DIRECTORY
 
   const { data: serviceData } = useServiceDeploymentTinyQuery({
     variables: { id: serviceId ?? '' },
@@ -165,57 +161,46 @@ export default function Pod() {
     )
 
   return (
-    <ResponsiveLayoutPage>
-      <ResponsiveLayoutSidenavContainer
-        css={{ paddingTop: theme.spacing.medium }}
-      >
-        <TabList
-          stateRef={tabStateRef}
-          stateProps={{
-            orientation: 'vertical',
-            selectedKey: currentTab?.path,
+    <PageColumnSC>
+      <PageToolbar
+        tabs={directory}
+        activeFn={(path) => path === tab}
+      />
+      <BodySC>
+        <ResponsiveLayoutSpacer />
+        <ResponsiveLayoutContentContainer
+          role="main"
+          css={{ overflow: 'visible' }}
+        >
+          <Outlet context={{ pod }} />
+          {tab === 'logs' && (
+            <div
+              css={{
+                padding: `${theme.spacing.small}px 0 ${theme.spacing.xlarge}px`,
+              }}
+            >
+              <LogsLegend />
+            </div>
+          )}
+        </ResponsiveLayoutContentContainer>
+        <ResponsiveLayoutSpacer />
+        <ResponsiveLayoutSidecarContainer
+          css={{
+            gap: theme.spacing.medium,
+            display: 'flex',
+            flexDirection: 'column',
           }}
         >
-          {DIRECTORY.map(({ label, path }) => (
-            <LinkTabWrap
-              key={path}
-              textValue={label}
-              to={path}
-            >
-              <Tab>{label}</Tab>
-            </LinkTabWrap>
-          ))}
-        </TabList>
-      </ResponsiveLayoutSidenavContainer>
-      <ResponsiveLayoutSpacer />
-      <TabPanel
-        as={<ResponsiveLayoutContentContainer css={{ overflow: 'visible' }} />}
-        stateRef={tabStateRef}
-      >
-        <Outlet context={{ pod }} />
-        {tab === 'logs' && (
-          <div
-            css={{
-              padding: `${theme.spacing.small}px 0 ${theme.spacing.xlarge}px`,
-            }}
-          >
-            <LogsLegend />
-          </div>
-        )}
-      </TabPanel>
-      <ResponsiveLayoutSpacer />
-      <ResponsiveLayoutSidecarContainer
-        css={{
-          gap: theme.spacing.medium,
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      >
-        <PodSidecar
-          pod={pod}
-          clusterId={clusterId}
-        />
-      </ResponsiveLayoutSidecarContainer>
-    </ResponsiveLayoutPage>
+          <PodSidecar
+            pod={pod}
+            clusterId={clusterId}
+          />
+        </ResponsiveLayoutSidecarContainer>
+      </BodySC>
+    </PageColumnSC>
   )
 }
+
+const BodySC = styled(PageRowSC)(({ theme }) => ({
+  padding: `${theme.spacing.large}px ${theme.spacing.large}px 0`,
+}))

@@ -50,6 +50,102 @@ func TestHandleOpenAIKeys_noAPIKey(t *testing.T) {
 	require.Empty(t, keys[0].Value.Val)
 }
 
+func TestAccountProviderProxy(t *testing.T) {
+	acct := &Account{
+		consoleClient: &mockConsoleClient{cfg: &pb.AiConfig{
+			Enabled: true,
+			Openai: &pb.OpenAiConfig{
+				Proxy: &pb.HttpProxyConfig{Url: "http://proxy.example.com:8080"},
+			},
+		}},
+		tokenCache: tokenexchange.NewCache(),
+		logger:     zap.NewNop(),
+	}
+
+	providerConfig, err := acct.GetConfigForProvider(schemas.OpenAI)
+	require.NoError(t, err)
+	require.NotNil(t, providerConfig.ProxyConfig)
+	require.Equal(t, schemas.HTTPProxy, providerConfig.ProxyConfig.Type)
+	require.Equal(t, "http://proxy.example.com:8080", providerConfig.ProxyConfig.URL.GetValue())
+}
+
+func TestAccountWiresProxyToEveryConfiguredBifrostProvider(t *testing.T) {
+	proxy := func() *pb.HttpProxyConfig {
+		return &pb.HttpProxyConfig{Url: "http://proxy.example.com:8080"}
+	}
+	tests := []struct {
+		name     string
+		provider schemas.ModelProvider
+		config   *pb.AiConfig
+	}{
+		{name: "openai", provider: schemas.OpenAI, config: &pb.AiConfig{Openai: &pb.OpenAiConfig{Proxy: proxy()}}},
+		{name: "openai compatible", provider: openAICompatibleProvider, config: &pb.AiConfig{OpenaiCompatible: &pb.OpenAiConfig{Proxy: proxy()}}},
+		{name: "xai", provider: schemas.XAI, config: &pb.AiConfig{Xai: &pb.OpenAiConfig{Proxy: proxy()}}},
+		{name: "anthropic", provider: schemas.Anthropic, config: &pb.AiConfig{Anthropic: &pb.AnthropicConfig{Proxy: proxy()}}},
+		{name: "vertex", provider: schemas.Vertex, config: &pb.AiConfig{VertexAi: &pb.VertexAiConfig{Proxy: proxy()}}},
+		{name: "bedrock", provider: schemas.Bedrock, config: &pb.AiConfig{Bedrock: &pb.BedrockConfig{Proxy: proxy()}}},
+		{name: "azure", provider: schemas.Azure, config: &pb.AiConfig{Azure: &pb.AzureOpenAiConfig{Proxy: proxy()}}},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			test.config.Enabled = true
+			acct := &Account{
+				consoleClient: &mockConsoleClient{cfg: test.config},
+				tokenCache:    tokenexchange.NewCache(),
+				logger:        zap.NewNop(),
+			}
+
+			providerConfig, err := acct.GetConfigForProvider(test.provider)
+			require.NoError(t, err)
+			require.NotNil(t, providerConfig.ProxyConfig)
+			require.Equal(t, schemas.HTTPProxy, providerConfig.ProxyConfig.Type)
+			require.Equal(t, "http://proxy.example.com:8080", providerConfig.ProxyConfig.URL.GetValue())
+		})
+	}
+}
+
+func TestAccountProviderProxyHonorsNoProxy(t *testing.T) {
+	acct := &Account{
+		consoleClient: &mockConsoleClient{cfg: &pb.AiConfig{
+			Enabled: true,
+			Openai: &pb.OpenAiConfig{
+				BaseUrl: lo.ToPtr("https://models.internal/v1"),
+				Proxy: &pb.HttpProxyConfig{
+					Url:     "http://proxy.example.com:8080",
+					NoProxy: lo.ToPtr(".internal"),
+				},
+			},
+		}},
+		tokenCache: tokenexchange.NewCache(),
+		logger:     zap.NewNop(),
+	}
+
+	providerConfig, err := acct.GetConfigForProvider(schemas.OpenAI)
+	require.NoError(t, err)
+	require.Nil(t, providerConfig.ProxyConfig)
+}
+
+func TestAccountProviderProxyCanBeDisabled(t *testing.T) {
+	acct := &Account{
+		consoleClient: &mockConsoleClient{cfg: &pb.AiConfig{
+			Enabled: true,
+			Openai: &pb.OpenAiConfig{
+				Proxy: &pb.HttpProxyConfig{
+					Url:     "http://proxy.example.com:8080",
+					Enabled: lo.ToPtr(false),
+				},
+			},
+		}},
+		tokenCache: tokenexchange.NewCache(),
+		logger:     zap.NewNop(),
+	}
+
+	providerConfig, err := acct.GetConfigForProvider(schemas.OpenAI)
+	require.NoError(t, err)
+	require.Nil(t, providerConfig.ProxyConfig)
+}
+
 func TestHandleOpenAIKeys_tokenExchangeUsesCache(t *testing.T) {
 	var tokenCalls atomic.Int32
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

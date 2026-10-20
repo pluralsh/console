@@ -1,4 +1,8 @@
-import { Flex, Input, SearchIcon, Table } from '@pluralsh/design-system'
+import { Table } from '@pluralsh/design-system'
+import {
+  PageToolbarPortal,
+  ToolbarSearchInput,
+} from 'components/layout/PageToolbar'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { usePullRequestsQuery } from 'generated/graphql'
 import { ComponentProps, useState } from 'react'
@@ -53,35 +57,28 @@ export function ServicePRs() {
   return (
     <ScrollablePage
       scrollable={false}
-      heading="Pull requests"
+      noPadding
     >
-      <Flex
-        flexDirection="column"
-        gap="medium"
-        height="100%"
-      >
-        <Input
-          placeholder="Search"
-          startIcon={<SearchIcon />}
-          showClearButton
+      <PageToolbarPortal>
+        <ToolbarSearchInput
+          placeholder="Search pull requests"
           value={searchString}
-          onChange={(e) => setSearchString(e.currentTarget.value)}
-          css={{ flexShrink: 0 }}
+          onChange={setSearchString}
         />
-        <Table
-          virtualizeRows
-          fullHeightWrap
-          columns={columns}
-          data={data?.pullRequests?.edges || []}
-          loading={!data && loading}
-          reactTableOptions={reactTableOptions}
-          hasNextPage={pageInfo?.hasNextPage}
-          fetchNextPage={fetchNextPage}
-          isFetchingNextPage={loading}
-          onVirtualSliceChange={setVirtualSlice}
-          emptyStateProps={{ message: 'No pull requests found' }}
-        />
-      </Flex>
+      </PageToolbarPortal>
+      <Table
+        virtualizeRows
+        fullHeightWrap
+        columns={columns}
+        data={data?.pullRequests?.edges || []}
+        loading={!data && loading}
+        reactTableOptions={reactTableOptions}
+        hasNextPage={pageInfo?.hasNextPage}
+        fetchNextPage={fetchNextPage}
+        isFetchingNextPage={loading}
+        onVirtualSliceChange={setVirtualSlice}
+        emptyStateProps={{ message: 'No pull requests found' }}
+      />
     </ScrollablePage>
   )
 }

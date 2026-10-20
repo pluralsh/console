@@ -456,6 +456,55 @@ defmodule Toolquery.MetricsQueryOutput do
   field :metrics, 1, repeated: true, type: Toolquery.MetricPoint
 end
 
+defmodule Toolquery.MetricSample do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "toolquery.MetricSample",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :timestamp, 1, type: Google.Protobuf.Timestamp
+  field :value, 2, type: :double
+end
+
+defmodule Toolquery.MetricSeries.LabelsEntry do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "toolquery.MetricSeries.LabelsEntry",
+    map: true,
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :key, 1, type: :string
+  field :value, 2, type: :string
+end
+
+defmodule Toolquery.MetricSeries do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "toolquery.MetricSeries",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :name, 1, type: :string
+  field :labels, 2, repeated: true, type: Toolquery.MetricSeries.LabelsEntry, map: true
+  field :samples, 3, repeated: true, type: Toolquery.MetricSample
+end
+
+defmodule Toolquery.MetricsSeriesOutput do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "toolquery.MetricsSeriesOutput",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :series, 1, repeated: true, type: Toolquery.MetricSeries
+end
+
 defmodule Toolquery.MetricsSearchInput do
   @moduledoc false
 
@@ -529,6 +578,7 @@ defmodule Toolquery.MetricsLabelSearchInput do
   field :label, 4, proto3_optional: true, type: :string
   field :limit, 5, proto3_optional: true, type: :int64
   field :options, 6, proto3_optional: true, type: Toolquery.MetricsLabelSearchOptions
+  field :range, 7, proto3_optional: true, type: Toolquery.TimeRange
 end
 
 defmodule Toolquery.MetricsLabelSearchOptions do
@@ -733,6 +783,8 @@ defmodule Toolquery.ToolQuery.Service do
   use GRPC.Service, name: "toolquery.ToolQuery", protoc_gen_elixir_version: "0.16.0"
 
   rpc :Metrics, Toolquery.MetricsQueryInput, Toolquery.MetricsQueryOutput
+
+  rpc :MetricsSeries, Toolquery.MetricsQueryInput, Toolquery.MetricsSeriesOutput
 
   rpc :MetricsSearch, Toolquery.MetricsSearchInput, Toolquery.MetricsSearchOutput
 

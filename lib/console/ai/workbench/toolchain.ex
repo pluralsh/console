@@ -19,17 +19,32 @@ defmodule Console.AI.Workbench.Toolchain do
     Observability.Plrl.LogLabels
   ]
 
-  def metrics(resource, name, args, %User{} = user) when is_struct(resource, WorkbenchJob) or is_struct(resource, Workbench),
+  @doc """
+  Runs a metrics, logs or traces tool on the fly. A nil user is an anonymous caller (public dashboards):
+  Plural-native log tools are unavailable to it, and workbench policies are skipped because the caller
+  can only execute a persisted dashboard datasource with server-controlled variables.
+  """
+  def metrics(resource, name, args, user)
+      when (is_struct(resource, WorkbenchJob) or is_struct(resource, Workbench)) and (is_nil(user) or is_struct(user, User)),
     do: execute(resource, name, args, user, @metrics_tools)
 
-  def logs(resource, name, args, %User{} = user) when is_struct(resource, WorkbenchJob) or is_struct(resource, Workbench),
+  @doc "Runs a metrics tool on the fly like metrics/4, returning samples grouped by series."
+  def metrics_series(resource, name, args, user)
+      when (is_struct(resource, WorkbenchJob) or is_struct(resource, Workbench)) and (is_nil(user) or is_struct(user, User)),
+    do: execute(resource, name, args, user, @metrics_tools, :structured_series)
+
+  @doc "Runs a logs tool on the fly; a nil user is anonymous, see metrics/4."
+  def logs(resource, name, args, user)
+      when (is_struct(resource, WorkbenchJob) or is_struct(resource, Workbench)) and (is_nil(user) or is_struct(user, User)),
     do: execute(resource, name, args, user, @logs_tools)
 
   def log_aggregate(resource, name, args, %User{} = user)
       when is_struct(resource, WorkbenchJob) or is_struct(resource, Workbench),
       do: execute(resource, name, args, user, @log_aggregate_tools)
 
-  def traces(resource, name, args, %User{} = user) when is_struct(resource, WorkbenchJob) or is_struct(resource, Workbench),
+  @doc "Runs a traces tool on the fly; a nil user is anonymous, see metrics/4."
+  def traces(resource, name, args, user)
+      when (is_struct(resource, WorkbenchJob) or is_struct(resource, Workbench)) and (is_nil(user) or is_struct(user, User)),
     do: execute(resource, name, args, user, @traces_tools)
 
   def labels(%Workbench{} = workbench, name, args, %User{} = user),
@@ -84,10 +99,10 @@ defmodule Console.AI.Workbench.Toolchain do
     end)
   end
 
-  defp execute(resource, name, args, user, allowed) do
+  defp execute(resource, name, args, user, allowed, fun \\ :structured) do
     with {:ok, %mod{} = tool} <- validate_call(resource, name, args, user, allowed) do
-      tool
-      |> mod.structured()
+      mod
+      |> apply(fun, [tool])
       |> normalize_error()
     end
   end
@@ -97,7 +112,7 @@ defmodule Console.AI.Workbench.Toolchain do
     Tool.context(user: Rbac.preload(user), job: environment.job)
 
     with tool when not is_nil(tool) <- Enum.find(tools, & Tool.name(&1) == name),
-         {:ok, tool} <- Tool.policy(tool, args, environment.policies),
+         {:ok, tool} <- apply_policy(tool, args, user, environment.policies),
          {:ok, %mod{} = t} <- Tool.validate(tool, args),
          true <- mod in allowed do
       {:ok, t}
@@ -107,6 +122,11 @@ defmodule Console.AI.Workbench.Toolchain do
       _ -> {:error, "tool #{name} not valid for querying on the fly"}
     end
   end
+
+  # Anonymous calls come exclusively from public dashboards. Their datasource input is persisted
+  # by an authenticated editor, while public viewers can only select a server-bounded time range.
+  defp apply_policy(tool, _, nil, _), do: {:ok, tool}
+  defp apply_policy(tool, args, %User{}, policies), do: Tool.policy(tool, args, policies)
 
   defp allowed_tools(:metrics), do: @metrics_tools
   defp allowed_tools(:logs), do: @logs_tools
@@ -119,7 +139,7 @@ defmodule Console.AI.Workbench.Toolchain do
     {Subagents.Observability.tools(environment, user), environment}
   end
 
-  defp execution(%Workbench{} = workbench, %User{} = user) do
+  defp execution(%Workbench{} = workbench, user) when is_nil(user) or is_struct(user, User) do
     workbench = Repo.preload(workbench, [tools: :mcp_server])
     job = %WorkbenchJob{workbench_id: workbench.id, workbench: workbench, user: user}
     environment = Environment.new(job, workbench.tools, [])

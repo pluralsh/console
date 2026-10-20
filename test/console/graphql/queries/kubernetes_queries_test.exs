@@ -93,6 +93,55 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
   end
 
   describe "deployment" do
+    @tag :capture_log
+    test "it surfaces failed kas requests in nested fields as graphql errors" do
+      user = insert(:user)
+      svc = insert(:service, namespace: "namespace", read_bindings: [%{user_id: user.id}])
+
+      insert(:service_component,
+        service: svc,
+        group: "apps",
+        version: "v1",
+        kind: "Deployment",
+        namespace: "namespace",
+        name: "name"
+      )
+
+      expect(Kazan, :run, 3, fn %Kazan.Request{path: path}, _ ->
+        cond do
+          String.ends_with?(path, "/events") -> {:error, %HTTPoison.Error{reason: :timeout}}
+          String.ends_with?(path, "/pods") ->
+            raise Kazan.RemoteError, reason: {:http_error, 503, %{"message" => "kas unavailable"}}
+          true -> {:ok, deployment("namespace", "name")}
+        end
+      end)
+      expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
+
+      {:ok, %{data: %{"deployment" => deployment}, errors: errors}} =
+        run_query(
+          """
+            query deployment($serviceId: ID!) {
+              deployment(serviceId: $serviceId, namespace: "namespace", name: "name") {
+                metadata { name }
+                raw
+                events { message }
+                pods { metadata { name } }
+              }
+            }
+          """,
+          %{"serviceId" => svc.id},
+          %{current_user: user}
+        )
+
+      assert deployment["metadata"]["name"] == "name"
+      assert deployment["raw"]
+      assert is_nil(deployment["events"])
+      assert is_nil(deployment["pods"])
+
+      messages = Enum.map(errors, & &1.message) |> Enum.sort()
+      assert messages == ["kas unavailable", "upstream request failed: :timeout"]
+    end
+
     test "it can fetch deployments by namespace/name" do
       user = insert(:user)
       svc = insert(:service, namespace: "namespace", read_bindings: [%{user_id: user.id}])
@@ -674,6 +723,60 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
       [first, second] = pod["logs"]
       assert first == "some logs"
       assert second == "returned"
+    end
+
+    test "it can query pod metrics w/ cd auth" do
+      user = insert(:user)
+      cluster = insert(:cluster, read_bindings: [%{user_id: user.id}])
+      deployment_settings(prometheus_connection: %{url: "example.com"})
+      expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
+      expect(Kube.Utils, :run, fn _ -> {:ok, pod("name")} end)
+
+      expect(Req, :post, 17, fn _, opts ->
+        [{"query", query} | _] = opts[:form]
+        assert query =~ ~s|cluster="#{cluster.handle}",namespace="name",pod="name"|
+        {:ok, %Req.Response{status: 200, body: Poison.encode!(%{data: %{result: [
+          %{metric: %{container: "app"}, values: [[1, "1"]]}
+        ]}})}}
+      end)
+
+      {:ok, %{data: %{"pod" => pod}}} =
+        run_query(
+          """
+            query Pod($name: String!, $clusterId: ID!) {
+              pod(name: $name, namespace: $name, clusterId: $clusterId) {
+                metadata { name }
+                metrics {
+                  cpu { metric values { timestamp value } }
+                  cpuRequests { values { value } }
+                  cpuLimits { values { value } }
+                  cpuThrottling { values { value } }
+                  memory { values { value } }
+                  memoryRequests { values { value } }
+                  memoryLimits { values { value } }
+                  ephemeralStorage { values { value } }
+                  ephemeralStorageRequests { values { value } }
+                  ephemeralStorageLimits { values { value } }
+                  fsReads { values { value } }
+                  fsWrites { values { value } }
+                  networkReceive { values { value } }
+                  networkTransmit { values { value } }
+                  networkReceiveDropped { values { value } }
+                  networkTransmitDropped { values { value } }
+                  restarts { values { value } }
+                }
+              }
+            }
+          """,
+          %{"name" => "name", "clusterId" => cluster.id},
+          %{current_user: user}
+        )
+
+      assert pod["metadata"]["name"] == "name"
+      [%{"metric" => %{"container" => "app"}, "values" => [%{"value" => "1"}]}] = pod["metrics"]["cpu"]
+
+      for {_, series} <- pod["metrics"],
+        do: assert [%{"values" => [_]}] = series
     end
 
     test "it can query pod logs w/ cd auth" do

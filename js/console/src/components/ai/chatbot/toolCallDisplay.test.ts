@@ -1,12 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import {
-  humanizeToolName,
   resolveToolCallKind,
   shouldUnfurlCmdTool,
   toolCallDisplayDescription,
   toolCallDisplaySubtitle,
-  toolCallDisplayTitle,
   toolCallGroupHeader,
+  toolCallTitle,
 } from './toolCallDisplay'
 
 describe('resolveToolCallKind', () => {
@@ -31,35 +30,59 @@ describe('resolveToolCallKind', () => {
   })
 })
 
-describe('toolCallDisplayTitle', () => {
+describe('toolCallTitle', () => {
   it('uses Cursor-style verbs for common tools', () => {
-    expect(toolCallDisplayTitle('subagent', 'workbench_subagent')).toBe(
-      'subagent'
-    )
     expect(
-      toolCallDisplayTitle('subagent', 'workbench_subagent', {
-        subagent: 'coding',
+      toolCallTitle({ kind: 'subagent', name: 'workbench_subagent' })
+    ).toBe('subagent')
+    expect(
+      toolCallTitle({
+        kind: 'subagent',
+        name: 'workbench_subagent',
+        args: { subagent: 'coding' },
       })
     ).toBe('subagent')
     expect(
-      toolCallDisplayTitle(
-        'subagent',
-        'workbench_subagent',
-        { subagent: 'coding' },
-        true
-      )
+      toolCallTitle({
+        kind: 'subagent',
+        name: 'workbench_subagent',
+        args: { subagent: 'coding' },
+        pending: true,
+      })
     ).toBe('Coding subagent')
-    expect(toolCallDisplayTitle('read', 'Read')).toBe('read')
-    expect(toolCallDisplayTitle('python_sandbox', 'python_sandbox')).toBe(
-      'python sandbox'
-    )
+    expect(toolCallTitle({ kind: 'read', name: 'Read' })).toBe('read')
+    expect(
+      toolCallTitle({ kind: 'python_sandbox', name: 'python_sandbox' })
+    ).toBe('python sandbox')
   })
 
-  it('humanizes workbench snake_case tools', () => {
-    expect(toolCallDisplayTitle('generic', 'plrl_logs')).toBe('logs')
+  it('styles workbench snake_case tools', () => {
+    expect(toolCallTitle({ name: 'plrl_logs' })).toBe('fetch logs')
     expect(
-      toolCallDisplayTitle('generic', 'workbench_observability_metrics_datadog')
+      toolCallTitle({ name: 'workbench_observability_metrics_datadog' })
     ).toBe('metrics datadog')
+    expect(
+      toolCallTitle({
+        name: 'workbench_observability_metric_label_search',
+        hiddenWords: ['prometheus'],
+      })
+    ).toBe('search metric label')
+    expect(
+      toolCallTitle({
+        name: 'workbench_observability_metrics',
+        hiddenWords: ['prometheus'],
+      })
+    ).toBe('fetch metrics')
+    expect(
+      toolCallTitle({
+        name: 'workbench_observability_log_aggregate',
+        hiddenWords: ['elasticsearch'],
+      })
+    ).toBe('aggregate log')
+    expect(toolCallTitle({ name: 'plrl_sentinel_run' })).toBe('sentinel run')
+    expect(toolCallTitle({ name: 'workbench_activity_search' })).toBe(
+      'search activity'
+    )
   })
 })
 
@@ -101,15 +124,6 @@ describe('toolCallDisplayDescription', () => {
         command: 'git log --oneline',
       })
     ).toBe('')
-  })
-})
-
-describe('humanizeToolName', () => {
-  it('strips workbench prefixes', () => {
-    expect(humanizeToolName('workbench_subagent')).toBe('subagent')
-    expect(humanizeToolName('workbench_activity_search')).toBe(
-      'activity search'
-    )
   })
 })
 

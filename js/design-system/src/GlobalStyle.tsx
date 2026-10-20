@@ -159,7 +159,13 @@ const GlobalStyleSheet = createGlobalStyle`
       margin: 0,
       color: 'inherit',
     },
-    'a, a:visited, a:hover, a:active': {
+    // The mono font ships with ligatures; code must render as typed.
+    'code, pre, kbd, samp': {
+      fontVariantLigatures: 'none',
+    },
+    // :where() keeps this at element specificity, so a link's own class
+    // styles (e.g. a muted tab color) still win once it's visited or hovered
+    'a, a:where(:visited, :hover, :active)': {
       color: 'inherit',
       textDecoration: 'inherit',
     },

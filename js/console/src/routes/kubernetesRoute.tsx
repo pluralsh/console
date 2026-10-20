@@ -38,6 +38,8 @@ import Node, {
   NodeContainerImages,
   NodeEvents,
   NodeInfo,
+  NodeLogs,
+  NodeMetricsView,
   NodePods,
 } from '../components/kubernetes/cluster/Node'
 import Nodes from '../components/kubernetes/cluster/Nodes'
@@ -119,6 +121,7 @@ import {
   PodExec,
   PodInfo,
   PodLogs,
+  PodMetricsView,
 } from '../components/kubernetes/workloads/Pod'
 import Pods from '../components/kubernetes/workloads/Pods'
 import ReplicaSet, {
@@ -142,6 +145,14 @@ import StatefulSet, {
 import StatefulSets from '../components/kubernetes/workloads/StatefulSets'
 import Workloads from '../components/kubernetes/workloads/Workloads'
 import PodDisruptionBudgets from '../components/kubernetes/cluster/PodDisruptionBudgets.tsx'
+import {
+  ClusterLogs,
+  ClusterMetrics,
+} from '../components/kubernetes/observability/ClusterObservability'
+import {
+  ClusterMetricsHeatmap,
+  ClusterMetricsTimeseries,
+} from '../components/cd/cluster/ClusterMetrics'
 
 import {
   AUDIT_REL_PATH,
@@ -160,6 +171,8 @@ import {
   INGRESSES_REL_PATH,
   JOBS_REL_PATH,
   KUBERNETES_ABS_PATH,
+  LOGS_REL_PATH,
+  METRICS_REL_PATH,
   NAMESPACED_RESOURCE_DETAILS_REL_PATH,
   NAMESPACES_REL_PATH,
   NETWORK_POLICIES_REL_PATH,
@@ -400,6 +413,32 @@ export const kubernetesRoutes = (
         element={<CustomResourceDefinitions />}
       />
       <Route
+        path={METRICS_REL_PATH}
+        element={<ClusterMetrics />}
+      >
+        <Route
+          index
+          element={
+            <Navigate
+              replace
+              to="timeseries"
+            />
+          }
+        />
+        <Route
+          path="timeseries"
+          element={<ClusterMetricsTimeseries />}
+        />
+        <Route
+          path="heatmap"
+          element={<ClusterMetricsHeatmap />}
+        />
+      </Route>
+      <Route
+        path={LOGS_REL_PATH}
+        element={<ClusterLogs />}
+      />
+      <Route
         path={AUDIT_REL_PATH}
         element={<Audit />}
       />
@@ -412,6 +451,10 @@ export const kubernetesRoutes = (
         index
         path=""
         element={<PodInfo />}
+      />
+      <Route
+        path="metrics"
+        element={<PodMetricsView />}
       />
       <Route
         path="containers"
@@ -797,6 +840,14 @@ export const kubernetesRoutes = (
         index
         path=""
         element={<NodeInfo />}
+      />
+      <Route
+        path="metrics"
+        element={<NodeMetricsView />}
+      />
+      <Route
+        path="logs"
+        element={<NodeLogs />}
       />
       <Route
         path="conditions"

@@ -8,6 +8,10 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/samber/lo"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"sigs.k8s.io/controller-runtime/pkg/log"
+
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/deployment-operator/internal/utils"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/cache"
@@ -15,9 +19,6 @@ import (
 	plrlerrors "github.com/pluralsh/console/go/deployment-operator/pkg/errors"
 	plrlog "github.com/pluralsh/console/go/deployment-operator/pkg/log"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/metadata"
-	"github.com/samber/lo"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 const (
@@ -39,7 +40,7 @@ func errorAttributes(source string, err error) *console.ServiceErrorAttributes {
 	return &console.ServiceErrorAttributes{
 		Source:  source,
 		Message: err.Error(),
-		Warning: lo.ToPtr(plrlerrors.IsWarning(err)),
+		Warning: new(plrlerrors.IsWarning(err)),
 	}
 }
 

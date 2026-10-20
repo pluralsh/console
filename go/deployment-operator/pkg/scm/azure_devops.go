@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
@@ -62,15 +63,16 @@ func parseADOPRURL(prURL string) (adoParsedURL, error) {
 // portion (after the colon) is extracted and used; otherwise the whole value
 // is treated as a bare PAT.
 type azureDevOpsClient struct {
-	pat string // bare Personal Access Token
+	pat        string // bare Personal Access Token
+	httpClient *http.Client
 }
 
-func newAzureDevOpsClient(token string) *azureDevOpsClient {
+func newAzureDevOpsClient(token string, httpClient *http.Client) *azureDevOpsClient {
 	pat := token
 	if idx := strings.Index(token, ":"); idx >= 0 {
 		pat = token[idx+1:]
 	}
-	return &azureDevOpsClient{pat: pat}
+	return &azureDevOpsClient{pat: pat, httpClient: httpClient}
 }
 
 // connection creates an SDK connection scoped to the given organisation URL.
@@ -80,12 +82,24 @@ func (c *azureDevOpsClient) connection(orgURL string) *azuredevops.Connection {
 
 // gitClient returns an SDK Git client for the given organisation.
 func (c *azureDevOpsClient) gitClient(ctx context.Context, orgURL string) (adogit.Client, error) {
-	return adogit.NewClient(ctx, c.connection(orgURL))
+	connection := c.connection(orgURL)
+	client := azuredevops.NewClientWithOptions(
+		connection,
+		connection.BaseUrl,
+		azuredevops.WithHTTPClient(c.httpClient),
+	)
+	return &adogit.ClientImpl{Client: *client}, nil
 }
 
 // buildClient returns an SDK Build client for the given organisation.
 func (c *azureDevOpsClient) buildClient(ctx context.Context, orgURL string) (adobuild.Client, error) {
-	return adobuild.NewClient(ctx, c.connection(orgURL))
+	connection := c.connection(orgURL)
+	client := azuredevops.NewClientWithOptions(
+		connection,
+		connection.BaseUrl,
+		azuredevops.WithHTTPClient(c.httpClient),
+	)
+	return &adobuild.ClientImpl{Client: *client}, nil
 }
 
 func (c *azureDevOpsClient) GetPRDetails(ctx context.Context, prURL string) (*PRDetails, error) {

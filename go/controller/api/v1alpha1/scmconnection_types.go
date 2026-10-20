@@ -216,6 +216,11 @@ type BitbucketDatacenterSettings struct {
 }
 
 type HttpProxyConfiguration struct {
+	// Enabled controls whether this proxy is used. It defaults to true.
+	// +kubebuilder:default=true
+	// +kubebuilder:validation:Optional
+	Enabled *bool `json:"enabled,omitempty"`
+
 	// The url of your HTTP proxy.
 	// +kubebuilder:validation:Required
 	URL string `json:"url"`
@@ -231,6 +236,7 @@ func (in *HttpProxyConfiguration) Attributes() *console.HTTPProxyAttributes {
 	}
 
 	return &console.HTTPProxyAttributes{
+		Enabled: in.Enabled,
 		URL:     in.URL,
 		Noproxy: in.NoProxy,
 	}

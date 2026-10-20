@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"slices"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -43,7 +44,9 @@ func New(cfg *config.ServerConfig, consoleClient console.Client) *Server {
 func (s *Server) SetupRoutes() {
 	r := s.router
 
-	r.Use(middleware.StripPrefix(s.config.Path))
+	// health endpoints are also served unprefixed so load balancers sharing a health check path
+	// across backends (e.g. an ALB on the console ingress) can probe nexus directly
+	r.Use(stripPrefixExcept(s.config.Path, "/health", "/healthz", "/ready"))
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
 	r.Use(nexusmw.RequestLogger())
@@ -53,6 +56,7 @@ func (s *Server) SetupRoutes() {
 	r.Group(func(r chi.Router) {
 		r.Use(middleware.Timeout(30 * time.Second)) // Short timeout for health checks
 		r.Get("/health", HealthHandler())
+		r.Get("/healthz", HealthHandler())
 		r.Get("/ready", ReadyHandler(s.consoleClient))
 	})
 
@@ -64,6 +68,20 @@ func (s *Server) SetupRoutes() {
 		r.Use(nexusmw.Auth(s.consoleClient))
 		r.Mount("/", s.bifrostHandler)
 	})
+}
+
+// stripPrefixExcept behaves like middleware.StripPrefix but leaves the given exact paths untouched
+func stripPrefixExcept(prefix string, paths ...string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		stripped := http.StripPrefix(prefix, next)
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if slices.Contains(paths, r.URL.Path) {
+				next.ServeHTTP(w, r)
+				return
+			}
+			stripped.ServeHTTP(w, r)
+		})
+	}
 }
 
 // Start initializes and starts the HTTP server

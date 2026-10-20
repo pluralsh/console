@@ -104,6 +104,8 @@ func (in *agentRunController) prepare(ctx context.Context) error {
 	if err := environment.ConfigurePrebakeGitSafeDirectories(); err != nil {
 		return fmt.Errorf("configure prebake git safe directories: %w", err)
 	}
+	prepareAttachmentsDir()
+	in.agentRun.Prompt = in.withAttachments(ctx, "run", in.agentRun.Prompt, in.agentRun.Attachments)
 	if in.tool, err = tool.New(in.agentRun.Runtime.Type, toolv1.Config{
 		WorkDir:       in.dir,
 		RepositoryDir: repositoryDir,
@@ -112,7 +114,7 @@ func (in *agentRunController) prepare(ctx context.Context) error {
 		Run:           in.agentRun,
 		Usage:         in.usage,
 	}); err != nil {
-		klog.Fatal(err)
+		return err
 	}
 
 	return in.tool.Configure(in.consoleUrl, *in.agentRun.PluralCreds.Token)

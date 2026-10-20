@@ -60,6 +60,11 @@ defmodule Console.GraphQl.Deployments.Policy do
 
   input_object :binding_policy_matches_attributes do
     field :workbench, :workbench_policy_matches_attributes
+    field :stack, :stack_policy_matches_attributes
+  end
+
+  input_object :stack_policy_matches_attributes do
+    field :type, :stack_policy_type, description: "stack policy evaluation stage to attach: approval (after plan) or run (before a run is created). Defaults to APPROVAL"
   end
 
   input_object :constraint_ref_attributes do
@@ -232,6 +237,11 @@ defmodule Console.GraphQl.Deployments.Policy do
 
   object :binding_policy_matches do
     field :workbench, :workbench_policy_matches
+    field :stack, :stack_policy_matches
+  end
+
+  object :stack_policy_matches do
+    field :type, :stack_policy_type, description: "stack policy evaluation stage attached by this binding"
   end
 
   @desc "A sampled policy decision for a tool invocation."
@@ -256,7 +266,6 @@ defmodule Console.GraphQl.Deployments.Policy do
     @desc "Fetches the live constraint object from K8s, this is an expensive query and should not be done in list endpoints"
     field :object, :kubernetes_unstructured do
       resolve &Deployments.fetch_constraint/3
-      middleware ErrorHandler
     end
 
     field :ref, :constraint_ref, description: "pointer to the kubernetes resource itself"

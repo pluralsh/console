@@ -3,6 +3,40 @@ git_url: https://github.com/vectordotdev/vector/
 release_url: https://github.com/vectordotdev/vector/releases/tag/v{vsn}
 helm_repository_url: https://helm.vector.dev/
 versions:
+- version: 0.60.0
+  kube: ['1.37', '1.36', '1.35']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Vector 0.60.0 introduces 2 new features (details not included in the
+        provided notes), which may add new configuration options or components to
+        the pipeline.', 'Release includes 6 enhancements and 10 bug fixes, which may
+        improve performance/stability of existing sources/transforms/sinks.']
+    breaking_changes: [Vector 0.60.0 contains 2 breaking changes (specifics not included
+        in the provided notes); review the official 0.60.0 upgrade guide and diff
+        your config against it before deploying., Vector 0.60.0 includes 1 security
+        change; ensure any image/tag updates and required permissions/secrets align
+        with your cluster policies.]
+  chart_version: 0.60.0
+  images: ['docker.io/timberio/vector:0.60.0-distroless-libc']
+- version: 0.59.0
+  kube: ['1.37', '1.36', '1.35']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [No feature details were provided in the supplied v0.59.0 notes (they
+        only list assets). Treat this as a routine version bump unless you find the
+        full upstream release notes diff.]
+    breaking_changes: ['No breaking-change details were provided in the supplied v0.59.0
+        notes (they only list assets). Before upgrading in production, review the
+        full v0.59.0 release notes/CHANGELOG for config/schema changes and deprecated
+        components.']
+  chart_version: 0.59.0
+  images: ['docker.io/timberio/vector:0.59.0-distroless-libc']
 - version: 0.58.0
   kube: ['1.37', '1.36', '1.35']
   requirements: []

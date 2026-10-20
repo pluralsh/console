@@ -1,12 +1,12 @@
 import {
   type ComponentProps,
+  createContext,
   type Dispatch,
   type Key,
   type MutableRefObject,
   type ReactElement,
+  type Ref,
   type SetStateAction,
-  createContext,
-  forwardRef,
   useCallback,
   useContext,
   useEffect,
@@ -28,10 +28,9 @@ import classNames from 'classnames'
 import useMeasure from 'react-use-measure'
 import styled, { useTheme } from 'styled-components'
 
+import type { MenuId, NavItem, NavMenu } from '../NavData'
 import scrollIntoContainerView from '../utils/scrollIntoContainerView'
 import { getBarePathFromPath, removeTrailingSlashes } from '../utils/text'
-
-import type { MenuId, NavItem, NavMenu } from '../NavData'
 
 export type SideNavProps = {
   navData: NavMenu
@@ -94,26 +93,32 @@ type LinkBaseProps = Partial<ComponentProps<typeof StyledLink>> & {
   iconRight?: ReactElement
 }
 
-const LinkBase = forwardRef<HTMLAnchorElement, LinkBaseProps>(
-  ({ className, children, iconLeft, iconRight, href, ...props }, ref) => {
-    const { keyboardNavigable } = useContext(KeyboardNavContext)
-    const content = (
-      <StyledLink
-        href={href}
-        className={className}
-        tabIndex={keyboardNavigable ? 0 : -1}
-        ref={ref}
-        {...props}
-      >
-        {iconLeft && iconLeft}
-        {children}
-        <div className="iconRight">{iconRight && iconRight}</div>
-      </StyledLink>
-    )
+const LinkBase = ({
+  className,
+  children,
+  iconLeft,
+  iconRight,
+  href,
+  ref,
+  ...props
+}: LinkBaseProps & { ref?: Ref<HTMLAnchorElement> }) => {
+  const { keyboardNavigable } = useContext(KeyboardNavContext)
+  const content = (
+    <StyledLink
+      href={href}
+      className={className}
+      tabIndex={keyboardNavigable ? 0 : -1}
+      ref={ref}
+      {...props}
+    >
+      {iconLeft && iconLeft}
+      {children}
+      <div className="iconRight">{iconRight && iconRight}</div>
+    </StyledLink>
+  )
 
-    return content
-  }
-)
+  return content
+}
 
 const CaretButton = styled(
   ({ isOpen = false, mode: _mode, className, ...props }) => {
@@ -345,34 +350,39 @@ function isPathnameInSections(
   return false
 }
 
-const SubSectionsList = styled(
-  forwardRef<
-    HTMLUListElement,
-    { sections: NavItem[]; indentLevel?: number; className?: string }
-  >(({ className, sections, indentLevel = 0 }, ref) => {
-    const pathname = useContext(NavContext).optimisticPathname
+const SubSectionsList = styled((({
+  className,
+  sections,
+  indentLevel = 0,
+  ref,
+}: {
+  sections: NavItem[]
+  indentLevel?: number
+  className?: string
+  ref?: Ref<HTMLUListElement>
+}) => {
+  const pathname = useContext(NavContext).optimisticPathname
 
-    return (
-      <ul
-        ref={ref}
-        className={className}
-      >
-        {sections.map((subSection) => {
-          const defaultOpen = isPathnameInSections(pathname, [subSection])
+  return (
+    <ul
+      ref={ref}
+      className={className}
+    >
+      {sections.map((subSection) => {
+        const defaultOpen = isPathnameInSections(pathname, [subSection])
 
-          return (
-            <SubSection
-              key={`${subSection.href || ''}-${subSection.title || ''}`}
-              defaultOpen={defaultOpen}
-              {...subSection}
-              indentLevel={indentLevel + 1}
-            />
-          )
-        })}
-      </ul>
-    )
-  }) as any
-)(({ theme, indentLevel }) => ({
+        return (
+          <SubSection
+            key={`${subSection.href || ''}-${subSection.title || ''}`}
+            defaultOpen={defaultOpen}
+            {...subSection}
+            indentLevel={indentLevel + 1}
+          />
+        )
+      })}
+    </ul>
+  )
+}) as any)(({ theme, indentLevel }) => ({
   margin: 0,
   padding: 0,
   listStyle: 'none',

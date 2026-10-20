@@ -106,7 +106,7 @@ export function ClusterUpgradeAgentFlyover({
               fillLevel={2}
               severity={statusToChipSeverity[clusterUpgrade.status]}
               loading={
-                clusterUpgrade.status == ClusterUpgradeStatus.InProgress ||
+                clusterUpgrade.status === ClusterUpgradeStatus.InProgress ||
                 clusterUpgrade.status === ClusterUpgradeStatus.Pending
               }
             >
@@ -283,6 +283,9 @@ function AgentRunLinkButton({
           tooltip="View agent run details"
         />
       )
+    case AgentRunStatus.Babysitting:
+    case AgentRunStatus.PendingApproval:
+      return null
   }
 }
 

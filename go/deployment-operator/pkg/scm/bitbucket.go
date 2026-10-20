@@ -22,19 +22,21 @@ var bbCloudPRPattern = regexp.MustCompile(`bitbucket\.org/([^/]+)/([^/]+)/pull-r
 var bbDCPRPattern = regexp.MustCompile(`/projects/([^/]+)/repos/([^/]+)/pull-requests?/(\d+)`)
 
 // newBitBucketClient returns a Cloud or Data Center client based on the host.
-func newBitBucketClient(token, host string) Client {
+func newBitBucketClient(token, host string, client *http.Client) Client {
 	if host == "bitbucket.org" {
-		return &bitBucketCloudClient{token: token}
+		return &bitBucketCloudClient{token: token, client: client}
 	}
 	return &bitBucketDCClient{
 		token:   token,
 		baseURL: fmt.Sprintf("https://%s/rest", host),
+		client:  client,
 	}
 }
 
 type bitBucketCloudClient struct {
 	token   string
 	apiBase string // defaults to bbCloudAPIBase; tests override with httptest
+	client  *http.Client
 }
 
 func (c *bitBucketCloudClient) cloudAPI() string {
@@ -226,7 +228,7 @@ func (c *bitBucketCloudClient) ReactToComment(_ context.Context, _ string, _ str
 }
 
 func (c *bitBucketCloudClient) get(ctx context.Context, u string, out any) error {
-	return bbGet(ctx, c.token, u, out)
+	return bbGet(ctx, c.client, c.token, u, out)
 }
 
 func parseCloudPRURL(prURL string) (workspace, repo string, prID int64, err error) {
@@ -264,6 +266,7 @@ func parseBBCloudTime(s string) time.Time {
 type bitBucketDCClient struct {
 	token   string // Bearer token or "email:token"
 	baseURL string // e.g. https://bitbucket.company.com/rest
+	client  *http.Client
 }
 
 // bbDCPage is the standard DC paginated response envelope.
@@ -445,7 +448,7 @@ func (c *bitBucketDCClient) ReactToComment(_ context.Context, _ string, _ string
 }
 
 func (c *bitBucketDCClient) get(ctx context.Context, u string, out any) error {
-	return bbGet(ctx, c.token, u, out)
+	return bbGet(ctx, c.client, c.token, u, out)
 }
 
 func parseDCPRURL(prURL string) (project, repo string, prID int64, err error) {
@@ -473,7 +476,10 @@ func bbDCState(s string) PRState {
 
 // bbGet performs an authenticated GET and JSON-decodes the response body.
 // Supports Bearer tokens and "username:password" Basic auth.
-func bbGet(ctx context.Context, token, u string, out any) error {
+func bbGet(ctx context.Context, client *http.Client, token, u string, out any) error {
+	if client == nil {
+		client = newHTTPClient(&clientOptions{})
+	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
 	if err != nil {
 		return err
@@ -486,7 +492,7 @@ func bbGet(ctx context.Context, token, u string, out any) error {
 	}
 	req.Header.Set("Accept", "application/json")
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		return err
 	}

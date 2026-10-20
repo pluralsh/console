@@ -151,7 +151,8 @@ const MainHeaderSC = styled.div(({ theme }) => ({
   display: 'flex',
   gap: theme.spacing.small,
   alignItems: 'center',
-  padding: theme.spacing.medium,
+  padding: `0 ${theme.spacing.medium}px`,
   borderBottom: theme.borders.hairline,
-  maxHeight: SIDE_PANEL_HEADER_HEIGHT,
+  height: SIDE_PANEL_HEADER_HEIGHT,
+  flexShrink: 0,
 }))

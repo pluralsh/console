@@ -6,6 +6,11 @@ import {
   IconFrame,
   WorkbenchIcon,
 } from '@pluralsh/design-system'
+import {
+  PageSidebarBodySC,
+  PageSidebarHeaderSC,
+  PageSidebarSC,
+} from 'components/layout/PageLayout'
 import { WorkbenchToolIcon } from 'components/workbenches/tools/workbenchToolsUtils'
 import { MetadataIcons } from 'components/utils/MetadataIcons'
 import { TRUNCATE } from 'components/utils/truncate'
@@ -30,28 +35,33 @@ export function FlowSidePanel({
   const hasWorkbenches = !isEmpty(workbenches)
 
   return (
-    <WrapperSC>
-      <ContentSC>
-        <SectionSC $first>
-          <Flex
-            align="center"
-            justify="space-between"
-            css={{
-              ...theme.partials.text.caption,
-              color: theme.colors['text-xlight'],
-            }}
-          >
-            <span>Workbenches</span>
-            {hasWorkbenches && (
-              <IconFrame
-                clickable
-                size="small"
-                icon={<AddIcon size={12} />}
-                tooltip="Attach workbench"
-                onClick={onAttachWorkbench}
-              />
-            )}
-          </Flex>
+    <PageSidebarSC $width={250}>
+      <PageSidebarHeaderSC>
+        <Flex
+          align="center"
+          justify="space-between"
+          css={{
+            ...theme.partials.text.body2Bold,
+            color: theme.colors.text,
+          }}
+        >
+          <span>Workbenches</span>
+          {hasWorkbenches && (
+            <IconFrame
+              clickable
+              size="small"
+              icon={<AddIcon size={12} />}
+              tooltip="Attach workbench"
+              onClick={onAttachWorkbench}
+            />
+          )}
+        </Flex>
+      </PageSidebarHeaderSC>
+      <PageSidebarBodySC>
+        <Flex
+          direction="column"
+          gap="small"
+        >
           {hasWorkbenches ? (
             <Flex
               gap="large"
@@ -117,9 +127,9 @@ export function FlowSidePanel({
               </Flex>
             </>
           )}
-        </SectionSC>
-      </ContentSC>
-    </WrapperSC>
+        </Flex>
+      </PageSidebarBodySC>
+    </PageSidebarSC>
   )
 }
 
@@ -214,38 +224,6 @@ function WorkbenchPanelItem({
     </Flex>
   )
 }
-
-const WrapperSC = styled.div(({ theme }) => ({
-  backgroundColor: theme.colors['fill-accent'],
-  borderRight: theme.borders.hairline,
-  display: 'flex',
-  flexDirection: 'column',
-  flexGrow: 1,
-  minHeight: 0,
-  minWidth: 250,
-  maxWidth: 250,
-  overflowX: 'hidden',
-  overflowY: 'auto',
-}))
-
-const ContentSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.large,
-  minHeight: '100%',
-  padding: `${theme.spacing.medium}px ${theme.spacing.small}px`,
-}))
-
-const SectionSC = styled.div<{ $first?: boolean }>(({ theme, $first }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.small,
-
-  ...(!$first && {
-    borderTop: theme.borders.hairline,
-    paddingTop: theme.spacing.medium,
-  }),
-}))
 
 const WorkbenchNameButtonSC = styled.button(({ theme }) => ({
   ...theme.partials.reset.button,

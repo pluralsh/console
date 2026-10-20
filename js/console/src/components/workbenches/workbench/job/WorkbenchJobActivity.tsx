@@ -1,7 +1,6 @@
 import {
   AccordionItem,
   AgentLoadingIcon,
-  Card,
   CaretDownIcon,
   DiffMethod,
   DiffViewer,
@@ -24,7 +23,7 @@ import {
 } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
 import {
   getSearchQuery,
-  humanizeToolName,
+  toolCallTitle,
   resolveToolCallKind,
   toolCallGroupHeader,
 } from 'components/ai/chatbot/toolCallDisplay'
@@ -41,7 +40,11 @@ import { GqlError } from 'components/utils/Alert'
 import { prettifyPrompt } from 'components/utils/contentEditableChips'
 import { StackedText } from 'components/utils/table/StackedText'
 import { EaseIn } from 'components/utils/EaseIn'
-import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
+import {
+  Body2BoldP,
+  Body2P,
+  shimmerWithinCss,
+} from 'components/utils/typography/Text'
 import {
   AgentRunStatus,
   useWorkbenchJobActivityQuery,
@@ -54,7 +57,7 @@ import {
   WorkbenchToolTinyFragment,
 } from 'generated/graphql'
 import { isEmpty, startCase } from 'lodash'
-import { type ReactNode, useEffect, useMemo, useState } from 'react'
+import { type ReactNode, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getAgentRunAbsPath } from 'routes/aiRoutesConsts'
 import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
@@ -66,12 +69,13 @@ import {
   hasWorkbenchMetricsToolQuery,
   JobActivityLogs,
   JobActivityMetrics,
-  JobActivityMetricsChart,
+  ExpandableJobActivityMetrics,
   JobActivityPrompt,
   JobActivityTraces,
   MemoActivityIcon,
   ExpandableUserPrompt,
 } from './WorkbenchJobActivityResults'
+import { getMetricSeriesFromResponses } from './workbenchJobMetrics'
 import { WorkbenchJobCanvas } from './WorkbenchJobCanvas'
 import { WorkbenchJobInlineActionCard } from './WorkbenchJobInlineActionCard'
 
@@ -92,7 +96,8 @@ export function WorkbenchJobActivity({
   workbenchId: string
   workbenchName: string
 }) {
-  const { spacing } = useTheme()
+  const theme = useTheme()
+  const { spacing } = theme
   const { id, status, type, prompt, agentRun, result } = activity
   const isRunning = isJobRunning(status)
 
@@ -107,7 +112,7 @@ export function WorkbenchJobActivity({
     return (
       <div
         css={{
-          padding: `${spacing.small}px ${spacing.medium}px 0 0`,
+          paddingRight: spacing.medium,
         }}
       >
         <WorkbenchJobActivityResult
@@ -123,6 +128,7 @@ export function WorkbenchJobActivity({
       <ExpandableUserPrompt
         prompt={activity.prompt}
         timestamp={activity.insertedAt}
+        attachments={activity.attachments}
       />
     )
 
@@ -202,7 +208,7 @@ export function WorkbenchJobActivity({
       triggerWrapperStyles={{
         justifyContent: 'flex-start',
         gap: 10,
-        padding: `${spacing.xxsmall}px 0`,
+        padding: 0,
         width: 'fit-content',
         maxWidth: '100%',
       }}
@@ -214,22 +220,16 @@ export function WorkbenchJobActivity({
               gap="xsmall"
               alignItems="center"
               minWidth={0}
-              css={{ flex: '1 1 auto', maxWidth: '100%' }}
+              css={{ flex: '0 1 auto', maxWidth: '100%' }}
             >
               <Body2BoldP
                 as="span"
                 className="type"
                 $color="text-xlight"
+                $shimmer={isRunning}
               >
                 {typeLabel}
               </Body2BoldP>
-              <Body2P
-                as="span"
-                className="kind"
-                $color="text-disabled"
-              >
-                subagent
-              </Body2P>
               {trailingIcons}
               {isRunning && !agentRun && latestThought && (
                 <ActivityLatestTool thought={latestThought} />
@@ -255,31 +255,43 @@ export function WorkbenchJobActivity({
     >
       <Flex
         direction="column"
-        gap="small"
+        gap="large"
+        marginTop={spacing.small}
       >
-        {prompt && <JobActivityPrompt prompt={prompt} />}
-        <WorkbenchJobActivityThoughts
-          activityId={id}
-          skip={!isOpen}
-        />
-        {textStream && (
-          <Flex
-            direction="column"
-            maxHeight={120}
-            overflow="auto"
-          >
-            <SimplifiedMarkdown
-              text={textStream}
-              tone="thought"
-            />
-          </Flex>
+        {prompt && (
+          <JobActivityPrompt
+            prompt={prompt}
+            shimmer={isRunning}
+          />
         )}
+        <CollapseWhenEmptySC
+          direction="column"
+          gap="small"
+        >
+          <WorkbenchJobActivityThoughts
+            activityId={id}
+            skip={!isOpen}
+          />
+          {textStream && (
+            <Flex
+              direction="column"
+              maxHeight={120}
+              overflow="auto"
+              css={isRunning ? shimmerWithinCss(theme) : undefined}
+            >
+              <SimplifiedMarkdown
+                text={textStream}
+                tone="thought"
+              />
+            </Flex>
+          )}
+          {isRunning && <AILoadingText activityId={id} />}
+        </CollapseWhenEmptySC>
         <WorkbenchJobActivityResult
           activity={activity}
           jobId={jobId}
           metricsFetchEnabled={isOpen}
         />
-        {isRunning && <AILoadingText activityId={id} />}
       </Flex>
     </AccordionItem>
   )
@@ -302,7 +314,7 @@ export function WorkbenchJobMemoGroup({
       <MemoGroupSC>
         <Flex
           direction="column"
-          gap="xsmall"
+          gap="small"
         >
           {activities.map((activity) => (
             <WorkbenchJobMemo
@@ -318,15 +330,18 @@ export function WorkbenchJobMemoGroup({
   return (
     <MemoGroupSC>
       <SimpleAccordion
-        label={`${activities.length} memos`}
+        label={
+          <MemoLabelSC as="span">{`${activities.length} memos`}</MemoLabelSC>
+        }
         isOpen={isExpanded}
         setIsOpen={setIsExpanded}
         hoverCaret
+        triggerWrapperStyles={memoTriggerStyles}
       >
         <Flex
           direction="column"
-          gap="xsmall"
-          marginTop={spacing.xsmall}
+          gap="small"
+          marginTop={spacing.small}
         >
           {activities.map((activity) => (
             <WorkbenchJobMemo
@@ -389,11 +404,7 @@ function WorkbenchJobMemo({
       hoverCaret
       isOpen={isExpanded}
       setIsOpen={setIsExpanded}
-      triggerWrapperStyles={{
-        justifyContent: 'flex-start',
-        width: 'fit-content',
-        maxWidth: '100%',
-      }}
+      triggerWrapperStyles={memoTriggerStyles}
       label={
         <Flex
           alignItems="center"
@@ -413,7 +424,7 @@ function WorkbenchJobMemo({
       <Flex
         direction="column"
         gap="small"
-        marginTop={spacing.xsmall}
+        marginTop={spacing.small}
         minWidth={0}
       >
         {result?.error && (
@@ -460,7 +471,7 @@ function WorkbenchJobActivityResult({
   )
   const hasCanvasBlocks = !isEmpty((result?.canvas ?? []).filter(isNonNullable))
   return (
-    <Flex
+    <CollapseWhenEmptySC
       direction="column"
       gap="small"
     >
@@ -470,7 +481,7 @@ function WorkbenchJobActivityResult({
           css={{ wordBreak: 'break-word' }}
         />
       )}
-      {!hasCanvasBlocks && (
+      {!hasCanvasBlocks && result?.output && (
         <div>
           {markdownType === 'simplified' ? (
             <SimplifiedMarkdown
@@ -521,9 +532,17 @@ function WorkbenchJobActivityResult({
         fillLevel={1}
         agentRun={agentRun}
       />
-    </Flex>
+    </CollapseWhenEmptySC>
   )
 }
+
+// Keep ellipsis horizontal so glyphs and icons are not clipped vertically.
+const clipInlineCss = { overflowX: 'clip', overflowY: 'visible' } as const
+
+// children that render null leave an empty box that still takes a gap slot in the parent
+const CollapseWhenEmptySC = styled(Flex)({
+  '&:empty': { display: 'none' },
+})
 
 const MemoGroupSC = styled.div(({ theme }) => ({
   width: '100%',
@@ -536,10 +555,17 @@ const MemoLabelSC = styled(Body2P)(({ theme }) => ({
   display: 'block',
   minWidth: 0,
   maxWidth: '100%',
-  overflow: 'hidden',
+  ...clipInlineCss,
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
 }))
+
+const memoTriggerStyles = {
+  justifyContent: 'flex-start',
+  width: 'fit-content',
+  maxWidth: '100%',
+  '& > span': clipInlineCss,
+} as const
 
 function WorkbenchJobActivityThoughts({
   activityId,
@@ -580,7 +606,7 @@ function WorkbenchJobActivityThoughts({
           tool: thought.tool,
         })
       } else if (!isEmpty(thought.attributes?.logs)) numWithLogs += 1
-      else if (!isEmpty(thought.attributes?.metrics)) numWithMetrics += 1
+      else if (!isEmpty(thought.attributes?.series)) numWithMetrics += 1
       else {
         otherThoughts.push({
           name: thought.toolName,
@@ -591,9 +617,9 @@ function WorkbenchJobActivityThoughts({
     const textParts = [
       toolCallGroupHeader(otherThoughts),
       numWithLogs > 0 &&
-        `${numWithLogs} fetched ${pluralize('log', numWithLogs)}`,
+        `${numWithLogs} fetch ${pluralize('log', numWithLogs)}`,
       numWithMetrics > 0 &&
-        `${numWithMetrics} fetched ${pluralize('metric', numWithMetrics)}`,
+        `${numWithMetrics} fetch ${pluralize('metric', numWithMetrics)}`,
     ].filter((part): part is string => !!part)
     const toolCounts = [...configuredToolCounts.values()]
     return {
@@ -606,8 +632,13 @@ function WorkbenchJobActivityThoughts({
             textParts={textParts}
           />
         ) : (
-          textParts.join(', ') ||
-          `${thoughts.length} tool ${pluralize('call', thoughts.length)}`
+          <Body2P
+            as="span"
+            $color="text-xlight"
+          >
+            {textParts.join(', ') ||
+              `${thoughts.length} tool ${pluralize('call', thoughts.length)}`}
+          </Body2P>
         ),
     }
   }, [activity?.thoughts])
@@ -624,7 +655,10 @@ function WorkbenchJobActivityThoughts({
     )
 
   return (
-    <>
+    <Flex
+      direction="column"
+      gap="small"
+    >
       <SimpleAccordion
         label={header}
         loading={isLoading}
@@ -634,8 +668,8 @@ function WorkbenchJobActivityThoughts({
       >
         <Flex
           direction="column"
-          gap="xsmall"
-          marginTop={spacing.xsmall}
+          gap="small"
+          marginTop={spacing.medium}
         >
           {thoughts.map((thought, i) => (
             <WorkbenchJobActivityThought
@@ -650,7 +684,7 @@ function WorkbenchJobActivityThoughts({
           <WorkbenchJobActivityThought thought={lastThought} />
         </EaseIn>
       )}
-    </>
+    </Flex>
   )
 }
 
@@ -660,53 +694,119 @@ function WorkbenchJobActivityThought({
   thought: WorkbenchJobThoughtFragment
 }) {
   const { id, content, toolName, toolArgs, attributes, tool } = thought
-  const metrics = attributes?.metrics?.filter(isNonNullable) ?? []
+  const series = useMemo(
+    () => getMetricSeriesFromResponses(attributes?.series),
+    [attributes?.series]
+  )
   const logs = attributes?.logs?.filter(isNonNullable) ?? []
   const query = getSearchQuery(toolArgs)
   const toolIcon = thoughtToolIcon({ tool, toolName, toolArgs })
+  const title =
+    toolName || tool ? workbenchToolCallTitle(toolName, tool) : undefined
+  const blankResult = isBlankToolPayload(content)
+  const isMetricsFetch =
+    !isEmpty(series) || isObservabilityFetch(toolName, 'metrics')
+  const metricSeriesCount = isMetricsFetch ? series.length : undefined
+  const noLogs =
+    isObservabilityFetch(toolName, 'logs') && isEmpty(logs) && blankResult
   return (
     <SimpleToolCall
       content={content}
       attributes={{ tool: { name: toolName, arguments: toolArgs } }}
-      customTitle={
-        tool ? compactWorkbenchToolCallTitle(toolName, tool) : undefined
-      }
+      customTitle={title}
       leadingIcon={toolIcon}
-      {...(!isEmpty(metrics) && {
+      {...(metricSeriesCount != null && {
         customLabel: (
           <WorkbenchObservabilityToolLabel
             icon={toolIcon}
-            title="Fetched metrics"
+            title={`fetch metrics (${metricSeriesCount})`}
             query={query}
           />
         ),
-        customResultBody: (
-          <Card>
-            <JobActivityMetricsChart
-              metrics={metrics}
-              lineProps={{
-                margin: { top: 20, right: 16, bottom: 25, left: 35 },
-              }}
-            />
-          </Card>
-        ),
+        ...(metricSeriesCount > 0 && {
+          customResultBody: <ExpandableJobActivityMetrics series={series} />,
+        }),
       })}
-      {...(!isEmpty(logs) && {
-        customLabel: (
-          <WorkbenchObservabilityToolLabel
-            icon={toolIcon}
-            title="Fetched logs"
-            query={query}
-          />
-        ),
-        customResultBody: (
-          <PreviewablePanel contentKey={`logs:${id}:${logs.length}`}>
-            <JobActivityLogs logs={logs} />
-          </PreviewablePanel>
-        ),
-      })}
+      {...(noLogs
+        ? {
+            customLabel: (
+              <WorkbenchObservabilityToolLabel
+                icon={toolIcon}
+                title="no logs"
+                query={query}
+              />
+            ),
+            customResultBody: <EmptyToolResult message="No logs" />,
+          }
+        : !isEmpty(logs) && {
+            customLabel: (
+              <WorkbenchObservabilityToolLabel
+                icon={toolIcon}
+                title={title ?? 'fetch logs'}
+                query={query}
+              />
+            ),
+            customResultBody: (
+              <PreviewablePanel
+                contentKey={`logs:${id}:${logs.length}`}
+                subtle
+              >
+                <JobActivityLogs logs={logs} />
+              </PreviewablePanel>
+            ),
+          })}
     />
   )
+}
+
+function EmptyToolResult({ message }: { message: string }) {
+  return (
+    <PreviewablePanel
+      contentKey={message}
+      subtle
+      unclamped
+    >
+      <Body2P
+        as="span"
+        $color="text-disabled"
+        css={{ fontStyle: 'italic' }}
+      >
+        {message}
+      </Body2P>
+    </PreviewablePanel>
+  )
+}
+
+// Matches the tool names the API gives the native and per-connection fetch tools.
+function isObservabilityFetch(
+  toolName: Nullable<string>,
+  kind: 'logs' | 'metrics'
+) {
+  return (
+    toolName === `plrl_${kind}` ||
+    !!toolName?.startsWith(`workbench_observability_${kind}_`)
+  )
+}
+
+function isBlankToolPayload(content?: string | null) {
+  const text = content?.trim() ?? ''
+  if (!text) return true
+
+  try {
+    return isBlankValue(JSON.parse(text))
+  } catch {
+    return false
+  }
+}
+
+function isBlankValue(value: unknown): boolean {
+  if (value == null || value === '') return true
+  if (Array.isArray(value)) return value.every(isBlankValue)
+  if (typeof value === 'object') {
+    return Object.values(value as Record<string, unknown>).every(isBlankValue)
+  }
+
+  return false
 }
 
 function WorkbenchObservabilityToolLabel({
@@ -821,7 +921,7 @@ function WorkbenchToolCallSummary({
           <WorkbenchToolIcon
             type={tool.tool}
             provider={tool.cloudConnection?.provider}
-            size={12}
+            size={14}
             css={{ marginLeft: spacing.xxsmall }}
           />
         </span>
@@ -838,9 +938,7 @@ function ActivityLatestTool({
   const { toolName, toolArgs, tool } = thought
   if (!toolName && !tool) return null
 
-  const title = tool
-    ? compactWorkbenchToolCallTitle(toolName, tool)
-    : humanizeToolName(toolName ?? '')
+  const title = workbenchToolCallTitle(toolName, tool)
 
   return (
     <ActivityLatestToolSC title={title}>
@@ -848,7 +946,6 @@ function ActivityLatestTool({
       <Body2P
         as="span"
         $color="text-disabled"
-        $shimmer
         css={{
           minWidth: 0,
           overflow: 'hidden',
@@ -885,7 +982,7 @@ function thoughtToolIcon({
       <WorkbenchToolIcon
         type={tool.tool}
         provider={tool.cloudConnection?.provider}
-        size={12}
+        size={14}
         css={{ flexShrink: 0 }}
       />
     )
@@ -896,99 +993,90 @@ function thoughtToolIcon({
   )
 }
 
-function compactWorkbenchToolCallTitle(
+function workbenchToolCallTitle(
   toolName: Nullable<string>,
-  tool: WorkbenchToolTinyFragment
+  tool?: Nullable<WorkbenchToolTinyFragment>
 ): string {
-  const title = humanizeToolName(toolName ?? '')
-  const toolLabel = getWorkbenchToolLabel(
-    tool.tool,
-    tool.cloudConnection?.provider
-  )
-  const hiddenWords = new Set(
-    [toolLabel, startCase(tool.tool.replace(/_/g, ' ')), tool.name, 'gh']
-      .flatMap((value) => value.toLowerCase().split(/\s+/))
-      .filter(Boolean)
-  )
-  const withoutToolLabel = title
-    .split(/\s+/)
-    .filter((word) => !hiddenWords.has(word.toLowerCase()))
-    .join(' ')
+  const toolLabel = tool
+    ? getWorkbenchToolLabel(tool.tool, tool.cloudConnection?.provider)
+    : undefined
 
-  return withoutToolLabel || 'tool call'
-}
-
-/** Cycles 1 → 2 → 3 dots every second for the job-level thinking label. */
-function useThinkingEllipsisCount() {
-  const [count, setCount] = useState(1)
-  useEffect(() => {
-    const id = window.setInterval(() => {
-      setCount((n) => (n >= 3 ? 1 : n + 1))
-    }, 1000)
-    return () => window.clearInterval(id)
-  }, [])
-  return count
+  return toolCallTitle({
+    name: toolName,
+    hiddenWords: tool
+      ? [toolLabel, startCase(tool.tool.replace(/_/g, ' ')), tool.name, 'gh']
+      : [],
+  })
 }
 
 /**
- * Job-level tool progress (between activities): same accordion + SimpleToolCall UI as
- * activity thoughts, with a fixed "thinking" label instead of the tool-call count header.
+ * Job-level status at the bottom of the transcript. "Thinking" and
+ * "Planning next moves" share one line so the change slides upward
+ * like a tool call, instead of swapping the whole block.
  */
 export function WorkbenchJobJobLevelThinking({
   items,
   jobRunning,
+  planning = false,
+  jobId,
 }: {
   items: Array<WorkbenchJobProgressFragment & { localKey: number }>
   jobRunning: boolean
+  planning?: boolean
+  jobId?: string
 }) {
   const { spacing } = useTheme()
   const [isExpanded, setIsExpanded] = useState(false)
   const last = items.at(-1)
-  const ellipsisCount = useThinkingEllipsisCount()
+  const showThinking = !planning && items.length > 0
 
-  if (isEmpty(items)) return null
+  if (!showThinking && !planning) return null
 
   return (
-    <>
-      <SimpleAccordion
-        label={
-          <>
-            Thinking
-            <span
-              style={{
-                display: 'inline-block',
-                minWidth: '3ch',
-                textAlign: 'left',
-              }}
+    <Flex
+      direction="column"
+      gap="small"
+    >
+      <EaseIn currentKey={showThinking ? 'thinking' : 'planning'}>
+        {showThinking ? (
+          <SimpleAccordion
+            label={
+              <Body2P
+                as="span"
+                $color="text-xlight"
+                $shimmer={jobRunning}
+              >
+                Thinking
+              </Body2P>
+            }
+            loading={false}
+            isOpen={isExpanded}
+            setIsOpen={setIsExpanded}
+            hoverCaret
+          >
+            <Flex
+              direction="column"
+              gap="small"
+              marginTop={spacing.xsmall}
             >
-              {'.'.repeat(ellipsisCount)}
-            </span>
-          </>
-        }
-        loading={false}
-        isOpen={isExpanded}
-        setIsOpen={setIsExpanded}
-        hoverCaret
-      >
-        <Flex
-          direction="column"
-          gap="xsmall"
-          marginTop={spacing.xsmall}
-        >
-          {items.map((item) => (
-            <WorkbenchJobLevelThinkingCall
-              key={item.localKey}
-              item={item}
-            />
-          ))}
-        </Flex>
-      </SimpleAccordion>
-      {!isExpanded && last && jobRunning && (
+              {items.map((item) => (
+                <WorkbenchJobLevelThinkingCall
+                  key={item.localKey}
+                  item={item}
+                />
+              ))}
+            </Flex>
+          </SimpleAccordion>
+        ) : (
+          <AILoadingText jobId={jobId} />
+        )}
+      </EaseIn>
+      {showThinking && !isExpanded && last && jobRunning && (
         <EaseIn currentKey={last.localKey}>
           <WorkbenchJobLevelThinkingCall item={last} />
         </EaseIn>
       )}
-    </>
+    </Flex>
   )
 }
 
@@ -1015,7 +1103,7 @@ export const isJobRunning = (
   >
 ) => status === 'PENDING' || status === 'RUNNING'
 
-const ACTIVITY_STATUS_ICON_SIZE = 14
+const ACTIVITY_STATUS_ICON_SIZE = 10
 
 function ActivityStatusIcon({
   status,
@@ -1111,24 +1199,21 @@ const ActivityHeaderSC = styled.span<{ $hasStatusIcon: boolean }>(
   ({ theme, $hasStatusIcon }) => ({
     display: 'flex',
     flexDirection: 'column',
-    gap: theme.spacing.xxsmall,
+    gap: theme.spacing.small,
     minWidth: 0,
     maxWidth: '100%',
-    overflow: 'hidden',
+    ...clipInlineCss,
     [`&:hover ${ActivityCaretSC}`]: {
       opacity: 1,
     },
     '.type': {
       flexShrink: 0,
     },
-    '.kind': {
-      flexShrink: 0,
-    },
     '.summary': {
       display: 'block',
       minWidth: 0,
       maxWidth: '64ch',
-      overflow: 'hidden',
+      ...clipInlineCss,
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap',
       ...($hasStatusIcon && {
@@ -1144,5 +1229,5 @@ const ActivityTitleRowSC = styled.span(({ theme }) => ({
   gap: theme.spacing.xsmall,
   minWidth: 0,
   maxWidth: '100%',
-  overflow: 'hidden',
+  ...clipInlineCss,
 }))

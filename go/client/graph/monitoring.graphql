@@ -84,6 +84,7 @@ fragment WorkbenchDashboardGraphFragment on WorkbenchDashboardGraph {
     title
     description
     type
+    unit
     sectionId
     markdown
     options

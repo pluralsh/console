@@ -127,6 +127,9 @@ function GatekeeperFilter({
         display: 'flex',
         flexDirection: 'column',
         maxHeight: 'fit-content',
+        border: 'none',
+        borderRadius: 0,
+        backgroundColor: 'transparent',
       }}
     >
       <AccordionItem
@@ -159,6 +162,7 @@ function GatekeeperFilter({
           gap="small"
         >
           <Input
+            size="small"
             placeholder="Filter clusters"
             value={searchString}
             onChange={(e) => setSearchString?.(e.currentTarget.value)}

@@ -507,4 +507,41 @@ defmodule Console.GraphQl.Deployments.ObservabilityMutationsTest do
       refute refetch(dashboard)
     end
   end
+
+  describe "shareWorkbenchDashboard" do
+    test "writers can share and unshare a dashboard" do
+      user = insert(:user)
+      dashboard = insert(:dashboard, workbench: insert(:workbench, write_bindings: [%{user_id: user.id}]))
+
+      mutation = """
+        mutation Share($id: ID!, $shared: Boolean!) {
+          shareWorkbenchDashboard(id: $id, shared: $shared) { id publicId }
+        }
+      """
+
+      {:ok, %{data: %{"shareWorkbenchDashboard" => shared}}} =
+        run_query(mutation, %{"id" => dashboard.id, "shared" => true}, %{current_user: user})
+
+      assert is_binary(shared["publicId"])
+
+      {:ok, %{data: %{"shareWorkbenchDashboard" => unshared}}} =
+        run_query(mutation, %{"id" => dashboard.id, "shared" => false}, %{current_user: user})
+
+      assert unshared["publicId"] == nil
+    end
+
+    test "readers cannot share a dashboard" do
+      user = insert(:user)
+      dashboard = insert(:dashboard, workbench: insert(:workbench, read_bindings: [%{user_id: user.id}]))
+
+      {:ok, %{errors: [_ | _]}} =
+        run_query("""
+          mutation Share($id: ID!) {
+            shareWorkbenchDashboard(id: $id, shared: true) { id publicId }
+          }
+        """, %{"id" => dashboard.id}, %{current_user: user})
+
+      refute refetch(dashboard).public_id
+    end
+  end
 end

@@ -108,6 +108,16 @@ jobs:
       #       OS_VARIANT=ubuntu
       #       VITE_PROD_SECRET_KEY=${{ secrets.VITE_PROD_SECRET_KEY }}
 
+  vendor-pseudofs:
+    needs: [vouch]
+    name: Vendor pseudofs image
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+    uses: ./.github/workflows/pseudofs-vendor.yaml
+    secrets: inherit
+
   test:
     needs: [vouch]
     name: Test
@@ -142,6 +152,7 @@ jobs:
       - run: mix test
         env:
           TEST_CHART_OCI_PASSWORD: ${{ secrets.GITHUB_TOKEN}}
+          PSEUDOFS_TEST_ADDR: localhost:9093
       - name: Verify Changed files
         run: |
           git diff --exit-code -- priv ':(exclude)priv/agent-service-chart.tgz' || {

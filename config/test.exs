@@ -538,6 +538,10 @@ config :console,
 config :console, Console.AI.Tools.Workbench.Observability.External.Sentry,
   plug: {Req.Test, Console.AI.Tools.Workbench.Observability.External.Sentry}
 
+config :console, Console.Storage.Azure,
+  plug: {Req.Test, Console.Storage.Azure},
+  retry: false
+
 config :elasticsearch,
   host: System.get_env("ELASTICSEARCH_HOST", "http://localhost:9200"),
   index: "testindex",
@@ -557,3 +561,5 @@ config :opensearch,
   aws_secret_access_key: "test-secret-key",
   aws_session_token: "test-session-token",
   aws_region: "us-east-1"
+
+config :console, public_dashboard_rate_limit: 3

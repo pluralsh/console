@@ -30,6 +30,10 @@ You are also given a tool to list all prs previously generated, which can be use
 <%= if @review do %>
 * Review mode is not a follow-up. Do not set `followup` for a review run. Provide `base_branch` (PR head) and `pr_url` instead.
 <% end %>
+<%= if @filesystem do %>
+* The coding agent can't see the workbench filesystem. When your task references workbench files (`<plrl-file>` tags or `/workbench/...` paths), pass their paths in the `attachments` param of `workbench_coding_agent`. They're downloaded into the coding agent's environment and listed in its prompt, so refer to them by filename rather than pasting their contents. Attach only files that are relevant to that run.
+<% end %>
+
 You should also assume the coding agent just has coding related capabilities.  It does not have broad SCM access, ability to query IaaS data or anything else, so it's your responsibility to request that upstream first.
 
 In addition, you have access to a bag of skills that can help you know how to make the right prompt to send to the coding agent.

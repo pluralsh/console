@@ -1,6 +1,15 @@
-import { Chip, ErrorIcon, Flex } from '@pluralsh/design-system'
+import {
+  CheckOutlineIcon,
+  Chip,
+  ErrorIcon,
+  Flex,
+  IconFrame,
+} from '@pluralsh/design-system'
 import { AlertState } from 'generated/graphql'
 import { ComponentProps } from 'react'
+
+export const alertStateLabel = (state: AlertState) =>
+  state === AlertState.Firing ? 'Firing' : 'Resolved'
 
 export function AlertStateChip({
   state,
@@ -22,8 +31,29 @@ export function AlertStateChip({
         align="center"
       >
         {firing && <ErrorIcon size={12} />}
-        {firing ? 'Firing' : 'Non-firing'}
+        {alertStateLabel(state)}
       </Flex>
     </Chip>
+  )
+}
+
+export function AlertStateIcon({ state }: { state: AlertState }) {
+  const firing = state === AlertState.Firing
+  const label = alertStateLabel(state)
+
+  return (
+    <IconFrame
+      type="tertiary"
+      size="small"
+      textValue={label}
+      tooltip={label}
+      icon={
+        firing ? (
+          <ErrorIcon color="icon-danger" />
+        ) : (
+          <CheckOutlineIcon color="icon-light" />
+        )
+      }
+    />
   )
 }

@@ -242,6 +242,7 @@ const InputBaseSC = styled.input<{
   ...fieldBaseStyles({ theme, $padStart, $padEnd }),
   minHeight: 22,
   lineHeight: `${FIELD_LINE_HEIGHT}px`,
+  textOverflow: 'ellipsis',
 }))
 
 const TextAreaBaseSC = styled.textarea<{
@@ -259,6 +260,7 @@ const TextAreaBaseSC = styled.textarea<{
 const BaseIcon = styled.div((_) => ({
   alignSelf: 'stretch',
   display: 'flex',
+  flexShrink: 0,
   alignItems: 'center',
   justifyContent: 'center',
   gap: 'small',
@@ -477,7 +479,10 @@ function Input({
   })
   const fieldPad = {
     $padStart: (!inputContent ? inputPadStart : 'xsmall') as
-      'xsmall' | 'small' | 'medium' | null,
+      | 'xsmall'
+      | 'small'
+      | 'medium'
+      | null,
     $padEnd: inputPadEnd,
   }
   const nativeFieldProps = {

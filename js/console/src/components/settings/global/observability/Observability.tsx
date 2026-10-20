@@ -1,6 +1,5 @@
 import styled from 'styled-components'
 
-import { SettingsPageHeader } from 'components/settings/Settings'
 import { Outlet, useOutletContext } from 'react-router-dom'
 
 export default function Observability() {
@@ -8,7 +7,6 @@ export default function Observability() {
 
   return (
     <ObservabilityWrapperSC>
-      <SettingsPageHeader heading="Observability" />
       <Outlet context={curContext} />
     </ObservabilityWrapperSC>
   )

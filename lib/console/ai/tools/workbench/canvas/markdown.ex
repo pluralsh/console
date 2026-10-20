@@ -5,6 +5,8 @@ defmodule Console.AI.Tools.Workbench.Canvas.MarkdownBlock do
 
   embedded_schema do
     field :identifier, :string
+    field :section_id, :string
+    field :description, :string
     field :markdown, :string
 
     embeds_one :layout, CanvasBlock.Layout, on_replace: :update
@@ -20,7 +22,7 @@ defmodule Console.AI.Tools.Workbench.Canvas.MarkdownBlock do
 
   def changeset(model, attrs) do
     model
-    |> cast(attrs, [:identifier, :markdown])
+    |> cast(attrs, [:identifier, :markdown, :section_id, :description])
     |> cast_embed(:layout, required: true)
     |> validate_required([:markdown, :identifier])
   end
@@ -28,6 +30,8 @@ defmodule Console.AI.Tools.Workbench.Canvas.MarkdownBlock do
   def implement(%__MODULE__{layout: layout, markdown: markdown} = model) do
     case Canvas.insert(Canvas.canvas(), %CanvasBlock{
            identifier: model.identifier,
+           section_id: model.section_id,
+           description: model.description,
            type: :markdown,
            layout: layout,
            content: %CanvasBlock.Content{markdown: markdown}

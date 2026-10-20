@@ -52,6 +52,22 @@ defmodule Console.GraphQl.Deployments.NotificationMutationsTest do
       assert router["events"] == ["service.update"]
       assert router["sinks"] == [%{"id" => sink.id}]
     end
+
+    test "malformed filter and sink ids are validation errors rather than crashes" do
+      {:ok, %{errors: [_ | _] = errors}} = run_query("""
+        mutation Upsert($attrs: NotificationRouterAttributes!) {
+          upsertNotificationRouter(attributes: $attrs) { id }
+        }
+      """, %{"attrs" => %{
+        "name" => "router",
+        "events" => ["service.update"],
+        "filters" => [%{"clusterId" => "nope"}],
+        "routerSinks" => [%{"sinkId" => "nope"}]
+      }}, %{current_user: admin_user()})
+
+      assert Enum.any?(errors, &(&1.message =~ "not a valid id"))
+      refute Console.Deployments.Notifications.get_router_by_name("router")
+    end
   end
 
   describe "deleteNotificationSink" do

@@ -51,7 +51,9 @@ import { ServiceMonitorPreview } from './ServiceMonitorPreview'
 import { isNonNullable } from 'utils/isNonNullable'
 
 export type ServiceMonitorStepKey =
-  'description' | 'threshold-config' | 'log-query'
+  | 'description'
+  | 'threshold-config'
+  | 'log-query'
 
 export type ServiceMonitorAttributes = Omit<
   MonitorAttributes,

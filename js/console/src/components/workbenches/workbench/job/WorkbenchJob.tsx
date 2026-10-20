@@ -1,21 +1,19 @@
 import {
   Button,
-  EmptyState,
   Flex,
   SidePanelOpenIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import { RunStatusIcon } from 'components/ai/agent-runs/AgentRunInfoDisplays'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { useSidePanelWidth } from 'components/layout/TopLevelSidePanel'
 import { GqlError } from 'components/utils/Alert'
 import { prettifyPrompt } from 'components/utils/contentEditableChips'
-import { MetadataIcons } from 'components/utils/MetadataIcons'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
-import { WorkbenchToolIcon } from 'components/workbenches/tools/workbenchToolsUtils'
 import { useWorkbenchJobQuery } from 'generated/graphql'
-import { isEmpty, truncate } from 'lodash'
+import { truncate } from 'lodash'
 import { useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import {
@@ -25,14 +23,15 @@ import {
   WORKBENCHES_ABS_PATH,
 } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
-import { formatDateTime } from 'utils/datetime'
-import { isNonNullable } from 'utils/isNonNullable'
 import { SaveWorkbenchPromptButton } from '../SaveWorkbenchPromptButton'
 import { WorkbenchJobActivities } from './WorkbenchJobActivities'
+import { WorkbenchJobMeta } from './WorkbenchJobMeta'
 import { isJobRunning } from './WorkbenchJobActivity'
-import { useWorkbenchJobPanel } from './WorkbenchJobPanel'
-import { hasWorkbenchJobPanelContent } from './workbenchJobResultUtils'
-import { useWorkbenchJobActionSummary } from './useWorkbenchJobActionSummary'
+import {
+  hasWorkbenchJobPanelTabs,
+  useWorkbenchJobPanel,
+  useWorkbenchJobTabsData,
+} from './WorkbenchJobPanel'
 
 export function WorkbenchJob() {
   const theme = useTheme()
@@ -50,10 +49,14 @@ export function WorkbenchJob() {
 
   const job = data?.workbenchJob
   const isLoading = loading && !job
-  const { hasActions } = useWorkbenchJobActionSummary(jobId)
-  const hasPanelContent = hasWorkbenchJobPanelContent(job, hasActions)
+  const panelData = useWorkbenchJobTabsData(jobId)
+  const hasPanelContent = !!job?.id && hasWorkbenchJobPanelTabs(panelData)
 
-  const { isOpen, setOpen } = useWorkbenchJobPanel(!!job?.id && hasPanelContent)
+  const { isOpen, setOpen } = useWorkbenchJobPanel({
+    hasContent: hasPanelContent,
+    loading: isLoading || panelData.isLoading || panelData.areActionsLoading,
+    key: jobId,
+  })
   useSidePanelWidth({
     maxWidthVw: 60,
     initialWidthVw:
@@ -66,8 +69,6 @@ export function WorkbenchJob() {
   const workbenchName = job?.workbench?.name ?? 'workbench'
   const trimmedPrompt = job?.prompt?.trim() ?? ''
   const breadcrumbPrompt = prettifyPrompt(trimmedPrompt) || 'workbench job'
-
-  const jobTools = job?.workbench?.tools?.filter(isNonNullable) ?? []
 
   useSetBreadcrumbs(
     useMemo(
@@ -86,7 +87,10 @@ export function WorkbenchJob() {
   if (!(job || loading))
     return !jobId ||
       queryError?.message?.includes('could not find resource') ? (
-      <EmptyState message="Workbench job not found." />
+      <WorkbenchEmptyState
+        message="Job not found"
+        description="This job may have been deleted, or the link is out of date."
+      />
     ) : (
       <GqlError
         header="Failed to load workbench job"
@@ -115,7 +119,7 @@ export function WorkbenchJob() {
             gap="xlarge"
             css={{
               borderBottom: theme.borders.default,
-              paddingBottom: theme.spacing.large,
+              paddingBottom: theme.spacing.medium,
             }}
           >
             <StackedText
@@ -125,60 +129,12 @@ export function WorkbenchJob() {
               first={job?.workbench?.name}
               firstColor="text"
               firstPartialType="subtitle2"
-              second={
-                job && (
-                  <Flex
-                    gap="medium"
-                    css={{
-                      ...theme.partials.text.body2,
-                      color: theme.colors['text-xlight'],
-                    }}
-                  >
-                    {job.user?.name?.trim() && (
-                      <span>{job.user.name.trim()}</span>
-                    )}
-                    {job.insertedAt && (
-                      <span>
-                        {formatDateTime(
-                          job.insertedAt,
-                          'YYYY-MM-DD ',
-                          false,
-                          true
-                        )}
-                        <span
-                          css={{ color: theme.colors['code-block-purple'] }}
-                        >
-                          {formatDateTime(
-                            job.insertedAt,
-                            'HH:mm:ss',
-                            false,
-                            true
-                          )}
-                        </span>
-                        {formatDateTime(job.insertedAt, ' [UTC]', false, true)}
-                      </span>
-                    )}
-                    {!isEmpty(jobTools) && (
-                      <MetadataIcons
-                        maxVisibleItems={3}
-                        items={jobTools.map((tool) => ({
-                          id: tool.id,
-                          label: tool.name,
-                          icon: (
-                            <WorkbenchToolIcon
-                              type={tool.tool}
-                              provider={tool.cloudConnection?.provider}
-                              size={12}
-                            />
-                          ),
-                        }))}
-                      />
-                    )}
-                  </Flex>
-                )
-              }
+              second={job && <WorkbenchJobMeta job={job} />}
               secondColor="text-xlight"
               secondPartialType="body2"
+              css={{
+                '& > :first-child': { textBox: 'trim-start cap alphabetic' },
+              }}
             />
             <Flex
               align="center"
@@ -201,7 +157,7 @@ export function WorkbenchJob() {
           />
         </WrapperSC>
       </MainColumnSC>
-      {!!job?.id && hasPanelContent && !isOpen && (
+      {hasPanelContent && !isOpen && (
         <PanelOpenBtnSC
           tertiary
           onClick={() => setOpen(true)}

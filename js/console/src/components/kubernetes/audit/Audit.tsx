@@ -1,7 +1,6 @@
 import { Flex, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { CellContext, createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
-import { useTheme } from 'styled-components'
 import {
   ClusterAuditLog,
   useKubernetesClusterAuditLogsQuery,
@@ -48,7 +47,6 @@ const userColumn = columnHelper.accessor((log) => log?.actor, {
 const columns = [methodColumn, pathColumn, userColumn, insertedAtColumn]
 
 export default function Audit() {
-  const { spacing } = useTheme()
   const cluster = useCluster()
 
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
@@ -79,7 +77,6 @@ export default function Audit() {
       direction="column"
       height="100%"
       gap="medium"
-      paddingBottom={spacing.large}
     >
       {error && <GqlError error={error} />}
       <Table

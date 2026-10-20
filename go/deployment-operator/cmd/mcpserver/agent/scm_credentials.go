@@ -12,6 +12,7 @@ import (
 	consoleclient "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/environment"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/scm"
 	"k8s.io/klog/v2"
 )
 
@@ -22,12 +23,20 @@ type agentRunFetcher interface {
 }
 
 type credentialStore struct {
-	pluralToken atomic.Value
+	pluralToken   atomic.Value
+	scmCredential atomic.Value
+}
+
+type scmCredential struct {
+	token    string
+	proxyURL string
+	noProxy  string
 }
 
 func newCredentialStore(pluralToken string) *credentialStore {
 	store := &credentialStore{}
 	store.pluralToken.Store(pluralToken)
+	store.scmCredential.Store(scmCredential{})
 	return store
 }
 
@@ -45,14 +54,41 @@ func (s *credentialStore) updatePluralToken(agentRun *consoleclient.AgentRunFrag
 	return nil
 }
 
-func updateSCMCredentials(agentRun *consoleclient.AgentRunFragment) error {
+func (s *credentialStore) updateSCMCredentials(agentRun *consoleclient.AgentRunFragment) error {
 	if agentRun == nil || agentRun.ScmCreds == nil || agentRun.ScmCreds.Token == "" {
 		return fmt.Errorf("agent run does not have scm creds")
 	}
 	if err := os.Setenv(environment.EnvGitAccessToken, agentRun.ScmCreds.Token); err != nil {
 		return fmt.Errorf("could not set SCM access token: %w", err)
 	}
+
+	proxyURL, noProxy := scmProxy(agentRun)
+	s.scmCredential.Store(scmCredential{
+		token:    agentRun.ScmCreds.Token,
+		proxyURL: proxyURL,
+		noProxy:  noProxy,
+	})
 	return nil
+}
+
+func (s *credentialStore) SCMClient() scm.Client {
+	credential, _ := s.scmCredential.Load().(scmCredential)
+	if credential.proxyURL == "" {
+		return scm.NewClient(credential.token)
+	}
+	return scm.NewClient(credential.token, scm.WithHTTPProxy(credential.proxyURL, credential.noProxy))
+}
+
+func scmProxy(agentRun *consoleclient.AgentRunFragment) (string, string) {
+	if proxy := agentRun.ScmCreds.Proxy; proxy != nil && proxy.Enabled && strings.TrimSpace(proxy.URL) != "" {
+		noProxy := ""
+		if proxy.Noproxy != nil {
+			noProxy = strings.TrimSpace(*proxy.Noproxy)
+		}
+		return strings.TrimSpace(proxy.URL), noProxy
+	}
+
+	return strings.TrimSpace(os.Getenv("PLRL_GIT_PROXY")), strings.TrimSpace(os.Getenv(environment.EnvNoProxy))
 }
 
 // startCredentialsRefresh keeps the credentials used by the sidecar's SCM
@@ -85,7 +121,7 @@ func refreshCredentials(ctx context.Context, client agentRunFetcher, runID strin
 		return fmt.Errorf("credential store is not configured")
 	}
 	err = errors.Join(
-		updateSCMCredentials(agentRun),
+		credentials.updateSCMCredentials(agentRun),
 		credentials.updatePluralToken(agentRun),
 	)
 	if err != nil {

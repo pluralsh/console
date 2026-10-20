@@ -93,3 +93,44 @@ values["missing"] = missing == nil
 		}
 	})
 }
+
+func TestLuaValuesWarnings(t *testing.T) {
+	svc := &console.ServiceDeploymentForAgent{
+		Helm: &console.ServiceDeploymentForAgent_Helm{
+			LuaScript: lo.ToPtr(`
+values["key"] = "value"
+warn("first warning")
+warn("second warning")
+`),
+		},
+	}
+
+	h := &helm{dir: t.TempDir()}
+	if _, _, err := h.luaValues(svc); err != nil {
+		t.Fatalf("luaValues: %v", err)
+	}
+
+	warnings := h.Warnings()
+	if len(warnings) != 2 {
+		t.Fatalf("unexpected warnings: %#v", warnings)
+	}
+	for i, message := range []string{"first warning", "second warning"} {
+		if warnings[i].Source != luaWarningSource || warnings[i].Message != message || !lo.FromPtr(warnings[i].Warning) {
+			t.Fatalf("unexpected warning %d: %#v", i, warnings[i])
+		}
+	}
+}
+
+func TestLuaWarnRequiresString(t *testing.T) {
+	for _, script := range []string{`warn({})`, `warn(1)`, `warn()`} {
+		svc := &console.ServiceDeploymentForAgent{
+			Helm: &console.ServiceDeploymentForAgent_Helm{
+				LuaScript: lo.ToPtr(script),
+			},
+		}
+
+		if _, _, err := (&helm{dir: t.TempDir()}).luaValues(svc); err == nil {
+			t.Fatalf("expected error for %s", script)
+		}
+	}
+}

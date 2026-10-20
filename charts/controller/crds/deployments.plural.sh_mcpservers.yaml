@@ -232,8 +232,8 @@ spec:
               protocol:
                 default: STREAMABLE_HTTP
                 description: |-
-                  Protocol specifies the MCP transport protocol (SSE or STREAMABLE_HTTP).
-                  STREAMABLE_HTTP is the modern protocol and is the default when omitted.
+                  Protocol specifies the MCP transport protocol. Only STREAMABLE_HTTP is supported and it is the default
+                  when omitted. SSE is no longer supported and will fail to synchronize.
                 enum:
                 - SSE
                 - STREAMABLE_HTTP

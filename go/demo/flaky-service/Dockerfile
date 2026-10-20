@@ -17,13 +17,14 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o flaky-service .
 
 # Step 2: Create a smaller image to run the application
-FROM alpine:latest
+FROM alpine:3.22
 
 # Install necessary dependencies to run Go binaries
 RUN apk --no-cache add ca-certificates
 
 # Set the Current Working Directory inside the container
-WORKDIR /root/
+WORKDIR /app
+RUN adduser -D -u 65532 flaky && chown flaky:flaky /app
 
 # Copy the Go binary from the build stage
 COPY --from=build /app/flaky-service .
@@ -34,3 +35,5 @@ EXPOSE 8081
 
 # Command to run the application
 CMD ["./flaky-service", "--response-behavior-modifier=timestamp", "--behavior-modifier-timestamp-modulus=3"]
+USER flaky
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 CMD ["/bin/sh", "-c", "wget -q -O /dev/null http://127.0.0.1:8081/metrics"]

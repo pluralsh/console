@@ -30,7 +30,12 @@ import {
 export { getActionPolicyToolName } from './workbenchJobActionPolicyUtils'
 
 export type WorkbenchJobActionSectionKey =
-  'awaiting' | 'pending' | 'running' | 'failed' | 'succeeded' | 'denied'
+  | 'awaiting'
+  | 'pending'
+  | 'running'
+  | 'failed'
+  | 'succeeded'
+  | 'denied'
 
 export const WORKBENCH_JOB_ACTION_REFETCH_QUERIES = [
   'WorkbenchJobActivities',

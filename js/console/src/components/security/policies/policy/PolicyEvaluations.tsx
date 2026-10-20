@@ -301,15 +301,14 @@ function SummaryPanel({
   )
 }
 
-const WrapperSC = styled.div(({ theme }) => ({
+const WrapperSC = styled.div({
   display: 'flex',
   flex: 1,
   minHeight: 0,
   minWidth: 0,
   height: '100%',
   overflow: 'hidden',
-  borderTop: theme.borders.default,
-}))
+})
 
 const ColumnsSC = styled.div({
   display: 'grid',

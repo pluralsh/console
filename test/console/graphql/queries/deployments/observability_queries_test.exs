@@ -7,10 +7,11 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
   alias Toolquery.{
     LogEntry,
     LogsQueryOutput,
-    MetricPoint,
+    MetricSample,
+    MetricSeries,
     MetricsLabelSearchOutput,
     MetricsLabelSearchResult,
-    MetricsQueryOutput,
+    MetricsSeriesOutput,
     TraceSpan,
     TracesQueryOutput
   }
@@ -392,7 +393,7 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
 
       expect(Client, :connect, 2, fn -> {:ok, :mock_conn} end)
 
-      expect(Stub, :metrics, fn :mock_conn, input, opts ->
+      expect(Stub, :metrics_series, fn :mock_conn, input, opts ->
         assert opts[:timeout] == :timer.seconds(30)
         assert input.query == "sum(rate(http_requests_total{namespace=\"production\"}[5m]))"
         assert input.step == "30s"
@@ -400,13 +401,21 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
         assert DateTime.compare(Google.Protobuf.to_datetime(input.range.end), end_at) == :eq
 
         {:ok,
-         %MetricsQueryOutput{
-           metrics: [
-             %MetricPoint{
-               timestamp: Google.Protobuf.from_datetime(end_at),
+         %MetricsSeriesOutput{
+           series: [
+             %MetricSeries{
                name: "http_requests_total",
-               value: 42.0,
-               labels: %{"namespace" => "production"}
+               labels: %{"namespace" => "production"},
+               samples: [
+                 %MetricSample{timestamp: Google.Protobuf.from_datetime(DateTime.add(end_at, -30)), value: 41.5},
+                 %MetricSample{timestamp: Google.Protobuf.from_datetime(end_at), value: 42.0},
+                 %MetricSample{timestamp: Google.Protobuf.from_datetime(end_at), value: :nan}
+               ]
+             },
+             %MetricSeries{
+               name: "http_requests_total",
+               labels: %{"namespace" => "staging"},
+               samples: [%MetricSample{timestamp: Google.Protobuf.from_datetime(end_at), value: :infinity}]
              }
            ]
          }}
@@ -416,6 +425,8 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
         assert opts[:timeout] == :timer.seconds(30)
         assert input.metric == "kube_pod_info"
         assert input.label == "namespace"
+        assert DateTime.compare(Google.Protobuf.to_datetime(input.range.start), start_at) == :eq
+        assert DateTime.compare(Google.Protobuf.to_datetime(input.range.end), end_at) == :eq
 
         {:ok,
          %MetricsLabelSearchOutput{
@@ -432,6 +443,7 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
           query Dashboard($id: ID!, $input: Json!, $timeRange: DashboardTimeRangeAttributes!) {
             workbenchDashboard(id: $id) {
               graphData: graph(identifier: "requests", input: $input, timeRange: $timeRange) {
+                series { name metric values { timestamp value } }
                 metrics { timestamp name value labels }
                 logs { timestamp message labels }
                 traces { traceId spanId name }
@@ -451,7 +463,15 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
           %{current_user: admin_user()}
         )
 
-      assert [metric] = found["graphData"]["metrics"]
+      assert [series] = found["graphData"]["series"]
+      assert series["name"] == "http_requests_total"
+      assert series["metric"] == %{"namespace" => "production"}
+      assert series["values"] == [
+               %{"timestamp" => "#{DateTime.to_unix(end_at) - 30}", "value" => "41.5"},
+               %{"timestamp" => "#{DateTime.to_unix(end_at)}", "value" => "42.0"}
+             ]
+
+      assert [_, metric] = found["graphData"]["metrics"]
       assert metric["name"] == "http_requests_total"
       assert metric["value"] == 42.0
       assert metric["labels"] == %{"namespace" => "production"}
@@ -525,7 +545,7 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
 
       expect(Client, :connect, 2, fn -> {:ok, :mock_conn} end)
 
-      expect(Stub, :metrics, 2, fn :mock_conn, input, _opts ->
+      expect(Stub, :metrics_series, 2, fn :mock_conn, input, _opts ->
         case input.query do
           "azure_cpu" ->
             assert input.step == "PT15S"
@@ -535,7 +555,7 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
             assert is_nil(input.range)
         end
 
-        {:ok, %MetricsQueryOutput{metrics: []}}
+        {:ok, %MetricsSeriesOutput{series: []}}
       end)
 
       {:ok, %{data: %{"workbenchDashboard" => found}}} =
@@ -827,6 +847,297 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
         )
 
       assert Enum.any?(errors, &String.contains?(&1.message, "Policy denied"))
+    end
+  end
+
+  describe "publicWorkbenchDashboard" do
+    @graph_query """
+      query PublicGraph($publicId: String!, $timeRange: DashboardTimeRangeAttributes!) {
+        publicWorkbenchDashboard(publicId: $publicId) {
+          graph(identifier: "errors", timeRange: $timeRange) {
+            logs { message labels }
+          }
+        }
+      }
+    """
+
+    @public_query """
+      query Public($publicId: String!) {
+        publicWorkbenchDashboard(publicId: $publicId) {
+          name
+          graphs { identifier hasDatasource }
+        }
+      }
+    """
+
+    test "returns a shared dashboard without a user" do
+      dashboard = insert(:dashboard, public_id: Console.rand_str(32))
+
+      {:ok, %{data: %{"publicWorkbenchDashboard" => found}}} =
+        run_query(@public_query, %{"publicId" => dashboard.public_id}, %{})
+
+      assert found["name"] == dashboard.name
+      assert [%{"identifier" => "requests", "hasDatasource" => true}] = found["graphs"]
+    end
+
+    test "returns not found for unknown, unshared and deleted dashboards" do
+      unshared = insert(:dashboard)
+      deleted = insert(:dashboard, public_id: Console.rand_str(32))
+      Console.Repo.delete(deleted)
+
+      for id <- ["unknown", unshared.id, deleted.public_id] do
+        {:ok, %{errors: [%{message: "not found"}]}} =
+          run_query(@public_query, %{"publicId" => id}, %{})
+      end
+    end
+
+    test "resolves public ids containing =, - and _" do
+      dashboard = insert(:dashboard, public_id: "abc-_=" <> Console.rand_str(8))
+
+      {:ok, %{data: %{"publicWorkbenchDashboard" => found}}} =
+        run_query(@public_query, %{"publicId" => dashboard.public_id}, %{})
+
+      assert found["name"] == dashboard.name
+    end
+
+    test "does not expose private fields" do
+      dashboard = insert(:dashboard, public_id: Console.rand_str(32))
+
+      for field <- ["datasource", "inputs", "workbench", "id"] do
+        {:ok, %{errors: [_ | _]}} =
+          run_query("""
+            query Public($publicId: String!) {
+              publicWorkbenchDashboard(publicId: $publicId) { #{field} }
+            }
+          """, %{"publicId" => dashboard.public_id}, %{})
+      end
+    end
+
+    test "graph runs with input defaults" do
+      workbench = insert(:workbench)
+
+      tool =
+        insert(:workbench_tool,
+          project: workbench.project,
+          name: "loki",
+          tool: :loki,
+          categories: [:logs],
+          configuration: %{loki: %{url: "https://loki.example.com"}}
+        )
+
+      insert(:workbench_tool_association, workbench: workbench, tool: tool)
+
+      dashboard =
+        insert(:dashboard,
+          workbench: workbench,
+          public_id: Console.rand_str(32),
+          inputs: [%Dashboard.Input{name: "namespace", type: :text, default: "production"}],
+          graphs: [
+            %Dashboard.Graph{
+              identifier: "errors",
+              type: :logs,
+              layout: %Dashboard.Graph.Layout{x: 0, y: 0, w: 2, h: 2},
+              datasource: %Dashboard.Datasource{
+                type: :logs,
+                tool: "workbench_observability_logs_loki",
+                input: %{"query" => "{namespace=\"${namespace}\"}", "limit" => 50}
+              }
+            }
+          ]
+        )
+
+      expect(Client, :connect, fn -> {:ok, :mock_conn} end)
+
+      expect(Stub, :logs, fn :mock_conn, input, _opts ->
+        assert input.query == "{namespace=\"production\"}"
+
+        {:ok,
+         %LogsQueryOutput{
+           logs: [
+             %LogEntry{
+               timestamp: Google.Protobuf.from_datetime(~U[2026-09-07 22:00:00Z]),
+               message: "request failed",
+               labels: %{"namespace" => "production"}
+             }
+           ]
+         }}
+      end)
+
+      {:ok, %{data: %{"publicWorkbenchDashboard" => found}}} =
+        run_query(@graph_query, %{
+          "publicId" => dashboard.public_id,
+          "timeRange" => %{"start" => "2026-09-07T21:00:00Z", "end" => "2026-09-07T22:00:00Z"}
+        }, %{})
+
+      assert [%{"message" => "request failed"}] = found["graph"]["logs"]
+    end
+
+    test "graph runs persisted datasources without actor policies and hides missing panels" do
+      workbench = insert(:workbench)
+      tool = insert(:workbench_tool,
+        project: workbench.project,
+        name: "loki",
+        tool: :loki,
+        categories: [:logs],
+        configuration: %{loki: %{url: "https://loki.example.com"}}
+      )
+      insert(:workbench_tool_association, workbench: workbench, tool: tool)
+      policy = insert(:policy, project: workbench.project, policy: "package plrl.workbench\n\nsample := 0\n")
+      insert(:workbench_policy,
+        workbench: workbench,
+        policy: policy,
+        matches: %{regexes: ["^workbench_observability_logs_loki$"]}
+      )
+
+      dashboard =
+        insert(:dashboard,
+          workbench: workbench,
+          public_id: Console.rand_str(32),
+          graphs: [
+            %Dashboard.Graph{
+              identifier: "errors",
+              type: :logs,
+              layout: %Dashboard.Graph.Layout{x: 0, y: 0, w: 2, h: 2},
+              datasource: %Dashboard.Datasource{
+                type: :logs,
+                tool: "workbench_observability_logs_loki",
+                input: %{"query" => "{app=\"public-dashboard\"}"}
+              }
+            }
+          ]
+        )
+
+      expect(Client, :connect, fn -> {:ok, :mock_conn} end)
+
+      expect(Stub, :logs, fn :mock_conn, input, _opts ->
+        assert input.query == "{app=\"public-dashboard\"}"
+
+        {:ok,
+         %LogsQueryOutput{
+           logs: [
+             %LogEntry{
+               timestamp: Google.Protobuf.from_datetime(~U[2026-09-07 22:00:00Z]),
+               message: "public result",
+               labels: %{}
+             }
+           ]
+         }}
+      end)
+
+      vars = %{
+        "publicId" => dashboard.public_id,
+        "timeRange" => %{"start" => "2026-09-07T21:00:00Z", "end" => "2026-09-07T22:00:00Z"}
+      }
+
+      {:ok, %{data: %{"publicWorkbenchDashboard" => found}}} = run_query(@graph_query, vars, %{})
+      assert [%{"message" => "public result"}] = found["graph"]["logs"]
+
+      {:ok, %{errors: [%{message: "not available on public dashboards"}]}} =
+        run_query(String.replace(@graph_query, ~s("errors"), ~s("missing")), vars, %{})
+    end
+
+    test "graph hides upstream failures behind a fixed error" do
+      workbench = insert(:workbench)
+      tool = insert(:workbench_tool,
+        project: workbench.project,
+        name: "loki",
+        tool: :loki,
+        categories: [:logs],
+        configuration: %{loki: %{url: "https://loki.example.com"}}
+      )
+      insert(:workbench_tool_association, workbench: workbench, tool: tool)
+
+      dashboard =
+        insert(:dashboard,
+          workbench: workbench,
+          public_id: Console.rand_str(32),
+          graphs: [
+            %Dashboard.Graph{
+              identifier: "errors",
+              type: :logs,
+              layout: %Dashboard.Graph.Layout{x: 0, y: 0, w: 2, h: 2},
+              datasource: %Dashboard.Datasource{type: :logs, tool: "workbench_observability_logs_loki", input: %{"query" => "{app=\"x\"}"}}
+            }
+          ]
+        )
+
+      expect(Client, :connect, fn -> {:ok, :mock_conn} end)
+      expect(Stub, :logs, fn :mock_conn, _input, _opts ->
+        {:error, %GRPC.RPCError{status: 2, message: "dial tcp loki.internal:3100: connection refused"}}
+      end)
+
+      {:ok, %{errors: [%{message: "failed to load data"}]}} =
+        run_query(@graph_query, %{
+          "publicId" => dashboard.public_id,
+          "timeRange" => %{"start" => "2026-09-07T21:00:00Z", "end" => "2026-09-07T22:00:00Z"}
+        }, %{})
+    end
+
+    test "graph calls are capped by query complexity" do
+      dashboard = insert(:dashboard, public_id: Console.rand_str(32))
+      graph_query = fn count ->
+        fields =
+          Enum.map_join(1..count, "\n", fn i ->
+            ~s|g#{i}: graph(identifier: "requests", timeRange: $timeRange) { metrics { timestamp } }|
+          end)
+
+        """
+          query PublicGraphs($publicId: String!, $timeRange: DashboardTimeRangeAttributes!) {
+            publicWorkbenchDashboard(publicId: $publicId) { #{fields} }
+          }
+        """
+      end
+      opts = [
+        variables: %{
+          "publicId" => dashboard.public_id,
+          "timeRange" => %{"start" => "2026-09-07T21:00:00Z", "end" => "2026-09-07T22:00:00Z"}
+        },
+        context: %{},
+        analyze_complexity: true,
+        max_complexity: 650
+      ]
+
+      {:ok, %{errors: errors}} = Absinthe.run(graph_query.(7), Console.GraphQl, opts)
+      assert Enum.any?(errors, &(&1.message =~ "complexity"))
+
+      {:ok, result} = Absinthe.run(graph_query.(6), Console.GraphQl, opts)
+      refute Enum.any?(result[:errors] || [], &(&1.message =~ "complexity"))
+    end
+
+    test "graph rejects ranges over 30 days" do
+      dashboard =
+        insert(:dashboard,
+          public_id: Console.rand_str(32),
+          graphs: [
+            %Dashboard.Graph{
+              identifier: "errors",
+              type: :logs,
+              layout: %Dashboard.Graph.Layout{x: 0, y: 0, w: 2, h: 2},
+              datasource: %Dashboard.Datasource{type: :logs, tool: "workbench_observability_logs_loki", input: %{}}
+            }
+          ]
+        )
+
+      {:ok, %{errors: [%{message: message}]}} =
+        run_query(@graph_query, %{
+          "publicId" => dashboard.public_id,
+          "timeRange" => %{"start" => "2026-07-01T00:00:00Z", "end" => "2026-08-01T00:00:00Z"}
+        }, %{})
+
+      assert message == "time range cannot exceed 30 days"
+    end
+
+    test "graph is rate limited per public id" do
+      dashboard = insert(:dashboard, public_id: Console.rand_str(32))
+      vars = %{
+        "publicId" => dashboard.public_id,
+        "timeRange" => %{"start" => "2026-07-01T00:00:00Z", "end" => "2026-08-01T00:00:00Z"}
+      }
+
+      for _ <- 1..3, do: run_query(@graph_query, vars, %{})
+
+      {:ok, %{errors: errors}} = run_query(@graph_query, vars, %{})
+      assert Enum.any?(errors, &(&1.message == "rate limited"))
     end
   end
 end

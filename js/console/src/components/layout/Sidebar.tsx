@@ -315,13 +315,14 @@ export function Sidebar() {
               e.stopPropagation()
               setIsExpanded((x: boolean) => !x)
             }}
-            aria-label={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
+            aria-label={isExpanded ? undefined : 'Expand sidebar'}
           >
             {isExpanded ? (
               <MenuCollapseIcon color="icon-xlight" />
             ) : (
               <MenuOpenIcon color="icon-xlight" />
             )}
+            {isExpanded ? 'Collapse' : null}
           </ToggleSidebarButtonSC>
         </WrapWithIf>
       </div>
@@ -336,21 +337,30 @@ function ConsoleVersion({ version }: { version: string }) {
       condition={!isExpanded}
       wrapper={<Tooltip label={`Console version: v${version}`} />}
     >
-      <ConsoleVersionSC>
+      <ConsoleVersionSC $isExpanded={isExpanded}>
         {isExpanded ? 'Console version: ' : 'v'}
         {version}
       </ConsoleVersionSC>
     </WrapWithIf>
   )
 }
-const ConsoleVersionSC = styled.span(({ theme }) => ({
-  ...TRUNCATE,
-  color: theme.colors['text-xlight'],
-  fontSize: 10,
-  letterSpacing: '-0.35px',
-  margin: theme.spacing.xsmall,
-  textAlign: 'center',
-}))
+// expanded, it starts where the item icons do (see `sidebarItemLayout`)
+const ConsoleVersionSC = styled.span<{ $isExpanded: boolean }>(
+  ({ theme, $isExpanded }) => ({
+    ...TRUNCATE,
+    color: theme.colors['text-xlight'],
+    fontSize: 10,
+    letterSpacing: '-0.35px',
+    margin: theme.spacing.xsmall,
+    textAlign: 'center',
+    ...($isExpanded && {
+      alignSelf: 'stretch',
+      margin: `${theme.spacing.xsmall}px 0`,
+      paddingLeft: theme.spacing.small - theme.spacing.xsmall,
+      textAlign: 'left',
+    }),
+  })
+)
 
 const SidebarLogoSC = styled.img({
   width: 24,
@@ -368,9 +378,11 @@ const ToggleSidebarButtonSC = styled.button<{
   height: '100%',
   display: 'flex',
   alignItems: 'center',
-  justifyContent: $isExpanded ? 'flex-end' : 'center',
-  padding: theme.spacing.small,
-  color: theme.colors['icon-xlight'],
+  justifyContent: $isExpanded ? 'flex-start' : 'center',
+  gap: theme.spacing.xsmall,
+  padding: $isExpanded ? `0 ${theme.spacing.medium}px` : theme.spacing.small,
+  whiteSpace: 'nowrap',
+  color: theme.colors['text-xlight'],
   cursor: 'pointer',
   '&:hover': {
     background: theme.colors['fill-zero-hover'],

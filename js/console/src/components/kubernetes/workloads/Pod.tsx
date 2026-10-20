@@ -9,6 +9,7 @@ import {
 import { Key } from '@react-types/shared'
 
 import { ContainerLogsTable } from 'components/cd/cluster/pod/logs/ContainerLogs'
+import { PodMetrics } from 'components/cd/cluster/pod/PodMetrics'
 
 import { GqlError } from 'components/utils/Alert'
 
@@ -66,6 +67,7 @@ import { toReadiness } from './utils'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },
+  { path: 'metrics', label: 'Metrics' },
   { path: 'containers', label: 'Containers' },
   { path: 'events', label: 'Events' },
   { path: 'logs', label: 'Logs' },
@@ -214,6 +216,18 @@ export function PodInfo(): ReactElement<any> {
         />
       </section>
     </>
+  )
+}
+
+export function PodMetricsView(): ReactElement<any> {
+  const { clusterId = '', name = '', namespace = '' } = useParams()
+
+  return (
+    <PodMetrics
+      clusterId={clusterId}
+      name={name}
+      namespace={namespace}
+    />
   )
 }
 

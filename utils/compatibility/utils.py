@@ -1,3 +1,4 @@
+import os
 import re
 import yaml
 import requests
@@ -28,9 +29,17 @@ def print_success(message):
 def print_warning(message):
     print(Fore.YELLOW + "⛔️" + Style.RESET_ALL + f" {message}")
 
+def github_headers(url="https://api.github.com"):
+    # Unauthenticated GitHub API calls are limited to 60/hour per IP, which a full scrape run exceeds.
+    token = os.getenv("GITHUB_TOKEN") or os.getenv("GH_TOKEN")
+    if not token or not url.startswith("https://api.github.com"):
+        return {}
+    return {"Authorization": f"Bearer {token}"}
+
+
 @lru_cache(maxsize=None)
 def fetch_page(url):
-    response = requests.get(url)
+    response = requests.get(url, headers=github_headers(url))
     if response.status_code != 200:
         print_error(
             f"Failed to fetch the page. Status code: {response.status_code}"
@@ -253,7 +262,7 @@ def find_nested_images(objs: Any) -> List[str]:
 
 def get_github_releases(repo_owner, repo_name):
     url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/releases"
-    response = requests.get(url)
+    response = requests.get(url, headers=github_headers())
 
     if response.status_code == 200:
         releases = []
@@ -278,6 +287,10 @@ def get_kube_release_info():
             seen.add(cleaned)
             result.append(kube_release)
 
+    # Raising (rather than returning []) keeps lru_cache from pinning an empty list for the rest of the run.
+    if not result:
+        raise Exception("Failed to fetch kubernetes releases from GitHub")
+
     def sorter(tupe):
         validated = validate_semver(tupe[0].lstrip("v"))
         return (validated.major, validated.minor, validated.patch, tupe[1])
@@ -287,18 +300,21 @@ def get_kube_release_info():
 def get_github_releases_timestamps(repo_owner, repo_name):
     for page in range(1, 3):
         url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/releases"
-        response = requests.get(url, params={"page": page, "per_page": 100})
-        if response.status_code == 200:
-            releases = response.json()
-            for release in releases:
-                created_at = release.get("created_at")
-                if not created_at:
-                    continue
-                print(created_at)
-                # created_at = created_at.replace("Z", "+00:00")
-                yield (release["tag_name"], datetime.fromisoformat(created_at))
-        else:
+        response = requests.get(url, params={"page": page, "per_page": 100}, headers=github_headers())
+        if response.status_code != 200:
+            raise Exception(
+                f"Failed to fetch releases for {repo_owner}/{repo_name}: {response.status_code}"
+            )
+        releases = response.json()
+        if not releases:
             return
+        for release in releases:
+            created_at = release.get("created_at")
+            if not created_at:
+                continue
+            print(created_at)
+            # created_at = created_at.replace("Z", "+00:00")
+            yield (release["tag_name"], datetime.fromisoformat(created_at))
 
 def find_last_n_releases(releases, ts, n=3):
     for i in range(len(releases)):
@@ -311,7 +327,7 @@ def find_last_n_releases(releases, ts, n=3):
 
 def get_latest_github_release(repo_owner, repo_name):
     url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/releases/latest"
-    response = requests.get(url)
+    response = requests.get(url, headers=github_headers())
 
     if response.status_code == 200:
         latest_release = response.json()
@@ -424,14 +440,17 @@ def sort_versions(versions):
         v["version"] = str(v["version"])
         if v.get("chart_version"):
             v["chart_version"] = str(v["chart_version"])
-    return sorted(versions, key=lambda v: (Version(v["version"]), Version(v["chart_version"]) if v.get("chart_version") else None), reverse=True)
+    return sorted(versions, key=lambda v: (Version(v["version"]), Version(v["chart_version"]) if v.get("chart_version") else Version("0")), reverse=True)
 
 
 def merge_versions(existing_versions, new_versions):
     for new_version in new_versions:
         version_num = new_version["version"]
-        if existing_versions.get(version_num):
-            new_version["summary"] = existing_versions[version_num].get("summary")
+        existing = existing_versions.get(version_num)
+        if existing:
+            new_version["summary"] = existing.get("summary")
+            if not new_version.get("kube") and existing.get("kube"):
+                new_version["kube"] = existing["kube"]
         existing_versions[version_num] = new_version
     return existing_versions
 

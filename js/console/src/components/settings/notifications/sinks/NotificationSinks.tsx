@@ -89,6 +89,7 @@ function CreateSinkButton() {
     <>
       <Button
         primary
+        small
         onClick={() => {
           setOpen(true)
         }}

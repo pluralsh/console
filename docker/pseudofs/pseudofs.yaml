@@ -1,0 +1,30 @@
+# PseudoFS for the live test suite, storing everything in the compose minio bucket.
+listener: 0.0.0.0:9093
+
+filesystem:
+  storage:
+    type: SlateDb
+    path: plrl/fs
+    object_store:
+      type: Aws
+      region: us-east-1
+      bucket: console-test
+      endpoint: http://minio:9000
+      allow_http: true
+      virtual_hosted_style: false
+  metastore_wal_path: /tmp/pseudofs/wal
+  blobs:
+    local_path: /tmp/pseudofs/blobs
+    cache_capacity_bytes: 268435456
+    upload_concurrency: 2
+    gc_grace_seconds: 300
+  inline_threshold_bytes: 16384
+  chunk_size_bytes: 1048576
+  max_file_size_bytes: 1073741824
+  max_append_generations: 64
+
+max_unary_file_size_bytes: 8388608
+max_decoding_message_bytes: 16777216
+max_encoding_message_bytes: 16777216
+
+search: {}

@@ -397,9 +397,10 @@ defmodule Console.Deployments.Settings do
     user = Users.cached_user_by_email!(email)
 
     with {:token, {:ok, %{"iss" => issuer, "aud" => aud}}} <- {:token, Joken.peek_claims(token)},
+         {:token, {:ok, client_id}} <- {:token, client_id(aud)},
          {:config, {:ok, {conf, jwks}}} <- {:config, issuer_configuration(issuer)},
          opts = %{client_jwks: JOSE.JWK.generate_key(16)},
-         ctx = Oidcc.ClientContext.from_manual(conf, jwks, aud, "dummy_secret", opts),
+         ctx = Oidcc.ClientContext.from_manual(conf, jwks, client_id, "dummy_secret", opts),
          opts = %{signing_algs: ctx.provider_configuration.id_token_signing_alg_values_supported},
          {:validate, {:ok, claims}} <- {:validate, Oidcc.Token.validate_jwt(token, ctx, opts)} do
       FederatedCredential.for_issuer(issuer)
@@ -431,6 +432,12 @@ defmodule Console.Deployments.Settings do
     end
   end
 
+  # `aud` may be a single string or a list (kubernetes service account tokens always use a list).
+  # oidcc only checks that the token's audience contains the client id, so any one of them will do.
+  defp client_id(aud) when is_binary(aud), do: {:ok, aud}
+  defp client_id([aud | _]) when is_binary(aud), do: {:ok, aud}
+  defp client_id(_), do: :error
+
   defp sign_token(user, scopes) do
     case Console.Guardian.encode_and_sign(user, %{"scopes" => scopes}, ttl: {1, :hour}) do
       {:ok, token, _} -> {:ok, token}
@@ -443,7 +450,10 @@ defmodule Console.Deployments.Settings do
       allow_issuer_mismatch: true,
       document_overrides: %{
         # needed for atypical oidc implementations like Github's
-        "authorization_endpoint" => "https://example.com/ignore/oauth/authorize"
+        "authorization_endpoint" => "https://example.com/ignore/oauth/authorize",
+        # kubernetes service account issuers don't publish scopes, which oidcc requires (with openid
+        # included); we only validate jwts against the issuer's jwks, so the value is never used
+        "scopes_supported" => ["openid"]
       }
     }
   }
@@ -453,6 +463,9 @@ defmodule Console.Deployments.Settings do
   """
   def issuer_configuration(issuer),
     do: Console.OIDC.ProviderConfiguration.fetch(issuer, @quirks)
+
+  @doc false
+  def issuer_quirks(), do: @quirks
 
   @decorate cache_evict(cache: @cache_adapter, key: :deployment_settings)
   def update(attrs) do

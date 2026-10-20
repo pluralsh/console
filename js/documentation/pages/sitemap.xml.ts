@@ -1,4 +1,7 @@
 import routes from '../generated/routes.json'
+import { redirects } from '../src/routing/docs-structure'
+
+const redirectSources = new Set(redirects.map(({ source }) => source))
 
 const S_MAXAGE = 1 * 60 * 60 // 1s * 60s/m * 60m/h = 1 hour
 const STALE_WHILE_REVALIDATE = S_MAXAGE * 2
@@ -35,7 +38,9 @@ export default function SiteMap() {
 function generateSiteMap() {
   const sitemap = wrapSiteMap(
     Object.entries(routes)
-      .filter(([_, info]) => info.relPath !== null) // filter out routes without a filepath
+      .filter(
+        ([route, info]) => info.relPath !== null && !redirectSources.has(route)
+      )
       .map(([route, info]) =>
         urlTag({ location: route, lastmod: info.lastmod })
       )

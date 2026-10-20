@@ -18,6 +18,7 @@ package service_test
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"runtime"
 	"testing"
@@ -50,6 +51,10 @@ var (
 	mapper          meta.RESTMapper
 	clientSet       kubernetes.Interface
 	discoveryClient discovery.DiscoveryInterface
+
+	originalKubeconfig string
+	hadKubeconfig      bool
+	testKubeconfig     string
 )
 
 func TestStacks(t *testing.T) {
@@ -70,6 +75,20 @@ var _ = BeforeSuite(func() {
 	cfg, err = testEnv.Start()
 	Expect(err).NotTo(HaveOccurred())
 	Expect(cfg).NotTo(BeNil())
+
+	// Helm's EnvSettings follows KUBECONFIG. Point it at the test environment
+	// instead of allowing the developer's active cluster configuration to leak into this suite.
+	user, err := testEnv.ControlPlane.AddUser(envtest.User{Name: "helm", Groups: []string{"system:masters"}}, nil)
+	Expect(err).NotTo(HaveOccurred())
+	kubeconfigData, err := user.KubeConfig()
+	Expect(err).NotTo(HaveOccurred())
+	kubeconfig, err := os.CreateTemp("", "service-test-kubeconfig-*")
+	Expect(err).NotTo(HaveOccurred())
+	testKubeconfig = kubeconfig.Name()
+	Expect(kubeconfig.Close()).To(Succeed())
+	Expect(os.WriteFile(testKubeconfig, kubeconfigData, 0600)).To(Succeed())
+	originalKubeconfig, hadKubeconfig = os.LookupEnv("KUBECONFIG")
+	Expect(os.Setenv("KUBECONFIG", testKubeconfig)).To(Succeed())
 
 	err = velerov1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
@@ -100,4 +119,10 @@ var _ = AfterSuite(func() {
 	By("tearing down the test environment")
 	err := testEnv.Stop()
 	Expect(err).NotTo(HaveOccurred())
+	Expect(os.Remove(testKubeconfig)).To(Succeed())
+	if hadKubeconfig {
+		Expect(os.Setenv("KUBECONFIG", originalKubeconfig)).To(Succeed())
+	} else {
+		Expect(os.Unsetenv("KUBECONFIG")).To(Succeed())
+	}
 })

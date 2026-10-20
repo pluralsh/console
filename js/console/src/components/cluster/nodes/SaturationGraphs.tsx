@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 
 import { Graph } from 'components/utils/Graph'
+import type { TimeWindow } from 'components/utils/timerange/timeRange'
 
 import { MetricResult } from '../../../generated/graphql'
 import { datum } from '../utils'
@@ -22,11 +23,15 @@ export function SaturationGraphs({
   memTotal,
   cpuUsage,
   memUsage,
+  timeWindow,
+  onRangeSelect,
 }: {
   cpuTotal: number
   memTotal: number
   cpuUsage: Array<MetricResult>
   memUsage: Array<MetricResult>
+  timeWindow?: TimeWindow
+  onRangeSelect?: (start: Date, end: Date) => void
 }) {
   const result = useMemo(() => {
     if (!cpuUsage || !memUsage || cpuTotal === 0 || memTotal === 0) {
@@ -64,6 +69,8 @@ export function SaturationGraphs({
       <Graph
         data={result}
         yFormat={(v) => format(v, 'percent')}
+        timeWindow={timeWindow}
+        onRangeSelect={onRangeSelect}
       />
     </div>
   )

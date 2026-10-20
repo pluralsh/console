@@ -32,7 +32,8 @@ defmodule Console.AI.Workbench.Tools do
     Docker,
     Sentry,
     Slack,
-    Jira
+    Jira,
+    ServiceNow
   }
   alias Console.Repo
   alias Console.Schema.{Workbench, WorkbenchJob, WorkbenchTool}
@@ -43,7 +44,7 @@ defmodule Console.AI.Workbench.Tools do
   @tool_preloads [:cloud_connection, :mcp_server, :scm_connection]
 
   @obs_categories MapSet.new(~w(metrics logs traces error_tracking)a)
-  @integration_tools ~w(http slack pagerduty github gitlab bitbucket bitbucket_datacenter teams azure_devops docker jira jira_datacenter)a
+  @integration_tools ~w(http slack pagerduty github gitlab bitbucket bitbucket_datacenter teams azure_devops docker jira jira_datacenter service_now)a
 
   @doc """
   Maps each constructed tool name to `{module, workbench_tool}`.
@@ -177,6 +178,8 @@ defmodule Console.AI.Workbench.Tools do
   @doc "Expands MCP-backed workbench tools (generic MCP, Linear, Atlassian, Exa) for a job."
   @spec mcp_tools(Workbench.t | [WorkbenchTool.t] | map, WorkbenchJob.t | nil) :: [struct]
   def mcp_tools(_, nil), do: []
+  # unsaved jobs back ad hoc queries like dashboards, which never call MCP tools, so don't start clients for them
+  def mcp_tools(_, %WorkbenchJob{id: nil}), do: []
   def mcp_tools(%Workbench{tools: tools}, %WorkbenchJob{} = job), do: mcp_tools(tools, job)
   def mcp_tools(tools, %WorkbenchJob{} = job), do: MCP.expand_tools(tools, job)
   def mcp_tools(_, _), do: []
@@ -213,6 +216,7 @@ defmodule Console.AI.Workbench.Tools do
   defp expand_integration(%WorkbenchTool{tool: type} = tool)
        when type in [:jira, :jira_datacenter],
        do: Jira.Tools.expand(tool)
+  defp expand_integration(%WorkbenchTool{tool: :service_now} = tool), do: ServiceNow.Tools.expand(tool)
 
   defp expand_integration(_), do: []
 

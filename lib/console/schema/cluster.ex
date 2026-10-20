@@ -614,11 +614,14 @@ defmodule Console.Schema.Cluster do
   defimpl Solid.Matcher do
     def match(cluster, ["name"]), do: {:ok, cluster.name}
     def match(cluster, ["handle"]), do: {:ok, cluster.handle}
+    def match(%{distro: distro}, ["distro"]) when is_atom(distro) and not is_nil(distro),
+      do: {:ok, String.upcase(to_string(distro))}
     def match(cluster, ["distro"]), do: {:ok, cluster.distro}
     def match(cluster, ["version"]), do: {:ok, cluster.version}
     def match(cluster, ["currentVersion"]), do: {:ok, cluster.current_version}
     def match(cluster, ["kubeletVersion"]), do: {:ok, cluster.kubelet_version}
     def match(cluster, ["metadata" | rest]), do: @protocol.match(cluster.metadata, rest)
+    def match(%{tags: tags}, ["tags" | rest]), do: @protocol.match(Console.Schema.Tag.as_map(tags), rest)
     def match(_, _), do: {:error, :not_found}
   end
 end

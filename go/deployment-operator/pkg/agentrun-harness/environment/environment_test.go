@@ -162,6 +162,91 @@ func TestCommitIdentityFallsBackToScmCredentials(t *testing.T) {
 	}
 }
 
+func TestSCMProxyPrefersCredentialProxy(t *testing.T) {
+	t.Setenv("PLRL_GIT_PROXY", "http://runtime-proxy.example.com:8080")
+	noProxy := "github.internal"
+	env := &environment{
+		agentRun: &v1.AgentRun{
+			ScmCreds: &console.ScmCredentialFragment{
+				Proxy: &console.ScmCredentialFragment_Proxy{
+					Enabled: true,
+					URL:     "http://credential-proxy.example.com:8080",
+					Noproxy: &noProxy,
+				},
+			},
+		},
+	}
+
+	proxy, excluded := env.scmProxy()
+	if proxy != "http://credential-proxy.example.com:8080" {
+		t.Fatalf("scmProxy() proxy = %q, want credential proxy", proxy)
+	}
+	if excluded != noProxy {
+		t.Fatalf("scmProxy() no proxy = %q, want %q", excluded, noProxy)
+	}
+}
+
+func TestSCMProxyDisabledFallsBackToRuntimeProxy(t *testing.T) {
+	t.Setenv("PLRL_GIT_PROXY", "http://runtime-proxy.example.com:8080")
+	env := &environment{
+		agentRun: &v1.AgentRun{
+			ScmCreds: &console.ScmCredentialFragment{
+				Proxy: &console.ScmCredentialFragment_Proxy{
+					Enabled: false,
+					URL:     "http://credential-proxy.example.com:8080",
+				},
+			},
+		},
+	}
+
+	proxy, _ := env.scmProxy()
+	if proxy != "http://runtime-proxy.example.com:8080" {
+		t.Fatalf("scmProxy() proxy = %q, want runtime fallback", proxy)
+	}
+}
+
+func TestGitNetworkArgsScopesProxyToCommand(t *testing.T) {
+	noProxy := "github.internal"
+	env := &environment{
+		agentRun: &v1.AgentRun{
+			Repository: "https://github.com/pluralsh/console.git",
+			ScmCreds: &console.ScmCredentialFragment{
+				Proxy: &console.ScmCredentialFragment_Proxy{
+					Enabled: true,
+					URL:     "http://credential-proxy.example.com:8080",
+					Noproxy: &noProxy,
+				},
+			},
+		},
+	}
+
+	args := env.gitNetworkArgs([]string{"clone", env.agentRun.Repository, "repository"})
+	if got, want := strings.Join(args, " "), "-c http.proxy=http://credential-proxy.example.com:8080 clone https://github.com/pluralsh/console.git repository"; got != want {
+		t.Fatalf("gitNetworkArgs() = %q, want %q", got, want)
+	}
+}
+
+func TestGitNetworkArgsHonorsNoProxy(t *testing.T) {
+	noProxy := "github.com"
+	env := &environment{
+		agentRun: &v1.AgentRun{
+			Repository: "https://github.com/pluralsh/console.git",
+			ScmCreds: &console.ScmCredentialFragment{
+				Proxy: &console.ScmCredentialFragment_Proxy{
+					Enabled: true,
+					URL:     "http://credential-proxy.example.com:8080",
+					Noproxy: &noProxy,
+				},
+			},
+		},
+	}
+
+	args := env.gitNetworkArgs([]string{"fetch", "origin"})
+	if got, want := strings.Join(args, " "), "fetch origin"; got != want {
+		t.Fatalf("gitNetworkArgs() = %q, want %q", got, want)
+	}
+}
+
 func TestCloneRepositoryCopiesPrebakeMatch(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)

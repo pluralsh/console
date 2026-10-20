@@ -3,6 +3,7 @@ defmodule Console.AI.Tools.Workbench.Codemode do
   alias Console.AI.Tools.Workbench.OutputType
   alias Console.AI.Tools.Workbench.Output
   alias Console.AI.Tool
+  alias Console.AI.Workbench.Filesystem
 
   require EEx
 
@@ -12,11 +13,19 @@ defmodule Console.AI.Tools.Workbench.Codemode do
   embedded_schema do
     field(:tools, {:array, :map}, virtual: true)
     field(:policies, {:array, :map}, virtual: true)
+    field(:workbench_id, :binary_id, virtual: true)
     field(:python, :string)
   end
 
   def name(_), do: "python_sandbox"
-  def description(%__MODULE__{tools: tools}), do: code_mode_prompt(tools: tools || [])
+  def description(%__MODULE__{tools: tools, workbench_id: wid}) do
+    code_mode_prompt(
+      tools: tools || [],
+      filesystem: Filesystem.enabled?(wid),
+      fs_root: Filesystem.root(),
+      uploads: Filesystem.virtual(Filesystem.uploads())
+    )
+  end
 
   @json_schema Console.priv_file!("tools/workbench/codemode.json") |> Jason.decode!()
 
@@ -28,20 +37,22 @@ defmodule Console.AI.Tools.Workbench.Codemode do
     |> validate_required([:python])
   end
 
-  def implement(%__MODULE__{tools: tools, policies: policies, python: python}) do
+  def implement(%__MODULE__{tools: tools, policies: policies, python: python, workbench_id: wid}) do
     ExMonty.Sandbox.run(
       python,
-      functions: build_funcs(tools, policies),
-      mounts: mounts(),
-      callback_timeout: @max_runtime_ms,
-      limits: %{
-        # execution-time budget (always enforced)
-        max_duration_secs: 60.0,
-        # ~100MB memory limit (see note below)
-        max_memory: 100_000_000,
-        # call stack depth limit
-        max_recursion_depth: 100
-      }
+      [
+        functions: Map.merge(build_funcs(tools, policies), fs_funcs(wid)),
+        mounts: mounts(),
+        callback_timeout: @max_runtime_ms,
+        limits: %{
+          # execution-time budget (always enforced)
+          max_duration_secs: 60.0,
+          # ~100MB memory limit (see note below)
+          max_memory: 100_000_000,
+          # call stack depth limit
+          max_recursion_depth: 100
+        }
+      ] ++ fs_os(wid)
     )
     |> case do
       {:ok, result, stdo} ->
@@ -81,6 +92,20 @@ defmodule Console.AI.Tools.Workbench.Codemode do
     else
       {:error, err} ->
         {:error, :value_error, "Failed to execute tool: #{Tool.name(tool)}: #{inspect(err)}"}
+    end
+  end
+
+  defp fs_funcs(wid) do
+    case Filesystem.enabled?(wid) do
+      true -> Filesystem.functions(wid)
+      false -> %{}
+    end
+  end
+
+  defp fs_os(wid) do
+    case Filesystem.enabled?(wid) do
+      true -> [os: Filesystem.os(wid)]
+      false -> []
     end
   end
 

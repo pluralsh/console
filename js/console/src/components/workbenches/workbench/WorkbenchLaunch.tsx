@@ -9,7 +9,7 @@ export function WorkbenchLaunch() {
   const { workbenchId, isLoading } = useOutletContext<WorkbenchOutletContext>()
 
   return (
-    <WorkbenchPageLayout>
+    <WorkbenchPageLayout sidebar={{ kind: 'tools' }}>
       <WrapperSC>
         <WorkbenchJobCreateInput
           workbenchId={workbenchId}
@@ -28,5 +28,5 @@ const WrapperSC = styled(Flex)(({ theme }) => ({
   flex: 1,
   minHeight: 400,
   overflow: 'auto',
-  padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
+  padding: theme.spacing.large,
 }))
