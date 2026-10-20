@@ -624,8 +624,8 @@
     "lastmod": "2026-09-02T10:37:22.000Z"
   },
   "/plural-features/observability/observability-webhooks": {
-    "relPath": null,
-    "lastmod": null
+    "relPath": "/plural-features/observability/observability-webhooks/index.md",
+    "lastmod": "2026-10-20T13:20:50.080Z"
   },
   "/plural-features/observability/observability-webhooks/datadog": {
     "relPath": "/plural-features/observability/observability-webhooks/datadog.md",
