@@ -20,5 +20,5 @@ type StyledTheme = typeof styledTheme
 // extend original module declarations
 declare module 'styled-components' {
   export interface DefaultTheme extends StyledTheme {}
-  export declare function useTheme(): DefaultTheme
+  export function useTheme(): DefaultTheme
 }
