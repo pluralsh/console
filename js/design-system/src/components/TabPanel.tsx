@@ -22,6 +22,21 @@ import { type Key } from '@react-types/shared'
 
 import { type MakeOptional, type Renderer, type TabStateRef } from './TabList'
 
+// TabList calls a single stateRef.current.updateTabPanel, but in multipanel mode
+// every panel must re-render on selection change (memoized parents won't do it).
+const panelUpdaters = new WeakMap<TabStateRef, Set<() => void>>()
+
+function getPanelUpdaters(stateRef: TabStateRef) {
+  let updaters = panelUpdaters.get(stateRef)
+
+  if (!updaters) {
+    updaters = new Set()
+    panelUpdaters.set(stateRef, updaters)
+  }
+
+  return updaters
+}
+
 /*
 mode='multipanel'
   Use when you want all tab content visible in the DOM at all times (such as for
@@ -136,6 +151,16 @@ function TabPanel({
   const [, forceUpdate] = useReducer((x) => x + 1, 0)
   const updateTabPanel = useCallback(() => forceUpdate(), [forceUpdate])
 
+  useEffect(() => {
+    const updaters = getPanelUpdaters(stateRef)
+
+    updaters.add(updateTabPanel)
+
+    return () => {
+      updaters.delete(updateTabPanel)
+    }
+  }, [stateRef, updateTabPanel])
+
   if (mode === 'multipanel' && !tabKey) {
     throw new Error("TabPanel: tabKey prop must be set when mode='multipanel'")
   }
@@ -164,7 +189,10 @@ function TabPanel({
   }
 
   if (stateRef.current) {
-    stateRef.current.updateTabPanel = updateTabPanel
+    const updaters = getPanelUpdaters(stateRef)
+
+    stateRef.current.updateTabPanel = () =>
+      updaters.forEach((update) => update())
 
     return (
       <WrappedTabPanel
