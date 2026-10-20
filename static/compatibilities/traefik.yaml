@@ -5,7 +5,7 @@ helm_repository_url: https://traefik.github.io/charts
 eolApiSlug: traefik
 versions:
 - version: 3.7.14
-  kube: ['1.36', '1.35', '1.34', '1.33']
+  kube: ['1.37', '1.36', '1.35', '1.34']
   requirements: []
   incompatibilities: []
   summary:
@@ -28,6 +28,28 @@ versions:
         unexpected 4xx/rejections after upgrade.]
   chart_version: 42.0.0
   images: ['docker.io/traefik:v3.7.14']
+- version: 3.7.4
+  kube: ['1.37', '1.36', '1.35', '1.34']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['Traefik app upgrade within the 3.7 patch line: v3.7.0 -> v3.7.4.',
+      No chart-specific changelog provided in the notes you shared; assume chart update
+        is primarily the Traefik image/tag bump and any templating adjustments would
+        be minimal/patch-level.]
+    features: [No new features called out between v3.7.0 and v3.7.4 in the notes you
+        shared; v3.7.4 is bugfix-only., 'v3.7.0 introduced many new capabilities (Ingress-NGINX
+        annotation compatibility expansions, Gateway API enhancements, new/extended
+        middlewares, retries enhancements, ACME CertificateTimeout, providers routing
+        precedence, UI improvements). If you were already on 3.7.0, these are already
+        present.']
+    breaking_changes: [None explicitly called out for v3.7.4; it appears to be a patch
+        release with bug fixes only., 'For 3.7.0 itself, the release notes say to
+        read the migration guide; treat this as a potential source of breaking changes
+        if you are coming from <3.7.0 (not the case for 3.7.0 -> 3.7.4).']
+  chart_version: 40.3.0
+  images: ['docker.io/traefik:v3.7.4']
 - version: 3.7.0
   kube: ['1.36', '1.35', '1.34', '1.33']
   requirements: []
