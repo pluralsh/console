@@ -4,7 +4,7 @@ defmodule Console.AI.Workbench.MCP do
   alias Console.AI.Workbench.MCP.{Basic, Linear, Atlassian, Exa, Github, Clients}
   alias Console.Schema.{WorkbenchTool, WorkbenchJob}
 
-  @callback transport(%WorkbenchTool{}) :: {:sse, list} | {:streamable_http, list}
+  @callback transport(%WorkbenchTool{}) :: {:streamable_http, list}
 
   def mcp?(%WorkbenchTool{tool: :mcp}), do: true
   def mcp?(%WorkbenchTool{tool: :linear}), do: true

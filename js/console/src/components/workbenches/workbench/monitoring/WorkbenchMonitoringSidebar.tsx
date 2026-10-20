@@ -3,13 +3,13 @@ import {
   Button,
   CheckIcon,
   CloseIcon,
-  EmptyState,
   Flex,
   IconFrame,
   Input,
   SearchIcon,
   TrashCanIcon,
 } from '@pluralsh/design-system'
+import { WorkbenchEmptyText } from 'components/workbenches/common/WorkbenchEmptyState'
 import { useThrottle } from 'components/hooks/useThrottle'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
@@ -148,7 +148,9 @@ export function WorkbenchMonitoringSidebar({
       <GroupsSC>
         {showNoMatches ? (
           <NoMatchesSC>
-            <EmptyState message={`No results for "${trimmedFilter}".`} />
+            <WorkbenchEmptyText>
+              No dashboards or monitors match “{trimmedFilter}”.
+            </WorkbenchEmptyText>
           </NoMatchesSC>
         ) : (
           <>

@@ -95,8 +95,16 @@ defmodule Console.Logs.Provider.Loki do
       |> Enum.reverse()
       |> ensure_matcher(labels)
 
-    "{#{Enum.join(matchers, ", ")}}#{line_filter(q)}"
+    "{#{Enum.join(matchers, ", ")}}#{line_filter(q)}#{node_filter(q)}"
   end
+
+  # shippers name the node label differently (promtail: node_name, alloy/otlp: k8s_node_name, ...),
+  # and some ship it as structured metadata, which only a label filter (not a stream selector) can match
+  @node_labels ~w(k8s_node_name node_name node nodename kubernetes_host)
+
+  defp node_filter(%Query{node: node}) when is_binary(node) and byte_size(node) > 0,
+    do: " | " <> Enum.map_join(@node_labels, " or ", &matcher(&1, node))
+  defp node_filter(_), do: ""
 
   defp add_resource(ms, %Query{resource: %Cluster{handle: h}}, {cl, _}), do: [matcher(cl, h) | ms]
   defp add_resource(ms, %Query{resource: %Service{} = svc}, {cl, nl}) do

@@ -105,13 +105,13 @@ const SIDE_PANEL_TYPE: SidePanel = 'ai-chat'
 function ChatbotContextProvider({ children }: { children: ReactNode }) {
   const { spacing } = useTheme()
   const { setIsExpanded: setSidebarExpanded } = use(SidebarContext)
-  const { sidePanel, setSidePanel } = useTopLevelSidePanel()
+  const { sidePanel, setSidePanel, closeSidePanel } = useTopLevelSidePanel()
   const legacyChatEnabled = useLegacyAiChatEnabled()
   const open = sidePanel === SIDE_PANEL_TYPE
 
   useEffect(() => {
-    if (!legacyChatEnabled && open) setSidePanel(null)
-  }, [legacyChatEnabled, open, setSidePanel])
+    if (!legacyChatEnabled && open) closeSidePanel(SIDE_PANEL_TYPE)
+  }, [legacyChatEnabled, open, closeSidePanel])
 
   const [viewType, setViewType] = usePersistedState<AIViewTypes>(
     'plural-ai-view-type',
@@ -185,7 +185,7 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
             if (!legacyChatEnabled) return
             setSidePanel(SIDE_PANEL_TYPE)
             setSidebarExpanded(false)
-          } else setSidePanel(null)
+          } else closeSidePanel(SIDE_PANEL_TYPE)
         },
         currentThread,
         currentThreadLoading,

@@ -75,7 +75,7 @@ import {
   MemoActivityIcon,
   ExpandableUserPrompt,
 } from './WorkbenchJobActivityResults'
-import { getMetricSeries } from './workbenchJobMetrics'
+import { getMetricSeriesFromResponses } from './workbenchJobMetrics'
 import { WorkbenchJobCanvas } from './WorkbenchJobCanvas'
 import { WorkbenchJobInlineActionCard } from './WorkbenchJobInlineActionCard'
 
@@ -606,7 +606,7 @@ function WorkbenchJobActivityThoughts({
           tool: thought.tool,
         })
       } else if (!isEmpty(thought.attributes?.logs)) numWithLogs += 1
-      else if (!isEmpty(thought.attributes?.metrics)) numWithMetrics += 1
+      else if (!isEmpty(thought.attributes?.series)) numWithMetrics += 1
       else {
         otherThoughts.push({
           name: thought.toolName,
@@ -694,7 +694,10 @@ function WorkbenchJobActivityThought({
   thought: WorkbenchJobThoughtFragment
 }) {
   const { id, content, toolName, toolArgs, attributes, tool } = thought
-  const metrics = attributes?.metrics?.filter(isNonNullable) ?? []
+  const series = useMemo(
+    () => getMetricSeriesFromResponses(attributes?.series),
+    [attributes?.series]
+  )
   const logs = attributes?.logs?.filter(isNonNullable) ?? []
   const query = getSearchQuery(toolArgs)
   const toolIcon = thoughtToolIcon({ tool, toolName, toolArgs })
@@ -702,10 +705,8 @@ function WorkbenchJobActivityThought({
     toolName || tool ? workbenchToolCallTitle(toolName, tool) : undefined
   const blankResult = isBlankToolPayload(content)
   const isMetricsFetch =
-    !isEmpty(metrics) || isObservabilityFetch(toolName, 'metrics')
-  const metricSeriesCount = isMetricsFetch
-    ? getMetricSeries(metrics).length
-    : undefined
+    !isEmpty(series) || isObservabilityFetch(toolName, 'metrics')
+  const metricSeriesCount = isMetricsFetch ? series.length : undefined
   const noLogs =
     isObservabilityFetch(toolName, 'logs') && isEmpty(logs) && blankResult
   return (
@@ -723,7 +724,7 @@ function WorkbenchJobActivityThought({
           />
         ),
         ...(metricSeriesCount > 0 && {
-          customResultBody: <ExpandableJobActivityMetrics metrics={metrics} />,
+          customResultBody: <ExpandableJobActivityMetrics series={series} />,
         }),
       })}
       {...(noLogs

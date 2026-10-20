@@ -4,7 +4,7 @@ release_url: https://github.com/longhorn/longhorn/releases/tag/v{vsn}
 helm_repository_url: https://charts.longhorn.io
 versions:
 - version: 1.13.0
-  kube: ['1.36', '1.35', '1.34']
+  kube: ['1.37', '1.36', '1.35', '1.34']
   requirements: []
   incompatibilities: []
   summary:
@@ -65,8 +65,8 @@ versions:
   images: ['docker.io/longhornio/longhorn-manager:v1.13.0', 'docker.io/longhornio/longhorn-share-manager:v1.13.0',
     'docker.io/longhornio/longhorn-ui:v1.13.0']
 - version: 1.12.0
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -129,8 +129,8 @@ versions:
   images: ['docker.io/longhornio/longhorn-manager:v1.12.0', 'docker.io/longhornio/longhorn-share-manager:v1.12.0',
     'docker.io/longhornio/longhorn-ui:v1.12.0']
 - version: 1.11.0
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -196,8 +196,8 @@ versions:
   images: ['docker.io/longhornio/longhorn-manager:v1.11.0', 'docker.io/longhornio/longhorn-share-manager:v1.11.0',
     'docker.io/longhornio/longhorn-ui:v1.11.0']
 - version: 1.10.0
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -248,8 +248,8 @@ versions:
   images: ['longhornio/longhorn-manager:v1.10.0', 'longhornio/longhorn-share-manager:v1.10.0',
     'longhornio/longhorn-ui:v1.10.0']
 - version: 1.9.0
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -289,8 +289,8 @@ versions:
   images: ['longhornio/longhorn-manager:v1.9.0', 'longhornio/longhorn-share-manager:v1.9.0',
     'longhornio/longhorn-ui:v1.9.0']
 - version: 1.8.0
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
@@ -347,8 +347,8 @@ versions:
   images: ['longhornio/longhorn-manager:v1.8.0', 'longhornio/longhorn-share-manager:v1.8.0',
     'longhornio/longhorn-ui:v1.8.0']
 - version: 1.7.0
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
   requirements: []
   incompatibilities: []
   summary:
@@ -381,8 +381,8 @@ versions:
   images: ['longhornio/longhorn-manager:v1.7.0', 'longhornio/longhorn-share-manager:v1.7.0',
     'longhornio/longhorn-ui:v1.7.0']
 - version: 1.6.0
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
   requirements: []
   incompatibilities: []
   summary:
@@ -430,8 +430,8 @@ versions:
   chart_version: 1.6.0
   images: ['longhornio/longhorn-manager:v1.6.0', 'longhornio/longhorn-ui:v1.6.0']
 - version: 1.5.0
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
   requirements: []
   incompatibilities: []
   summary:
@@ -475,8 +475,8 @@ versions:
   chart_version: 1.5.0
   images: ['longhornio/longhorn-manager:v1.5.0', 'longhornio/longhorn-ui:v1.5.0']
 - version: 1.4.0
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
   requirements: []
   incompatibilities: []
   summary:
@@ -546,8 +546,8 @@ versions:
   chart_version: 1.3.2
   images: []
 - version: 1.3.0
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
   requirements: []
   incompatibilities: []
   summary:
@@ -619,8 +619,8 @@ versions:
   chart_version: 1.2.6
   images: []
 - version: 1.2.0
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
   requirements: []
   incompatibilities: []
   summary:
@@ -677,9 +677,9 @@ versions:
   chart_version: 1.1.3
   images: []
 - version: 1.1.0
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17',
-    '1.16']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18',
+    '1.17', '1.16']
   requirements: []
   incompatibilities: []
   summary:
@@ -709,9 +709,9 @@ versions:
   chart_version: 1.1.0
   images: ['longhornio/longhorn-manager:v1.1.0', 'longhornio/longhorn-ui:v1.1.0']
 - version: 1.0.0
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17',
-    '1.16', '1.15', '1.14']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18',
+    '1.17', '1.16', '1.15', '1.14']
   requirements: []
   incompatibilities: []
   summary: null

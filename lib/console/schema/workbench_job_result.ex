@@ -88,7 +88,7 @@ defmodule Console.Schema.WorkbenchJobResult do
     use Console.Schema.Base
     alias Console.Schema.WorkbenchJobResult.{ToolGraph, DataPoint}
 
-    defenum Type, markdown: 0, metrics: 1, logs: 2, traces: 3, pie: 4, bar: 5
+    defenum Type, markdown: 0, metrics: 1, logs: 2, traces: 3, pie: 4, bar: 5, section: 6
 
     defmodule Layout do
       use Console.Schema.Base
@@ -126,8 +126,12 @@ defmodule Console.Schema.WorkbenchJobResult do
     end
 
     embedded_schema do
-      field :identifier, :string
-      field :type,       Type
+      field :identifier,  :string
+      field :type,        Type
+      field :title,       :string
+      field :description, :string
+      field :section_id,  :string
+      field :collapsed,   :boolean
 
       embeds_one :layout, Layout, on_replace: :update
 
@@ -145,7 +149,8 @@ defmodule Console.Schema.WorkbenchJobResult do
 
     def changeset(model, attrs) do
       model
-      |> cast(attrs, [:type, :identifier])
+      |> cast(attrs, [:type, :identifier, :title, :description, :section_id, :collapsed])
+      |> sanitize_text([:title, :description])
       |> cast_embed(:content, with: &content_changeset/2)
       |> cast_embed(:layout)
       |> validate_required([:type, :identifier])

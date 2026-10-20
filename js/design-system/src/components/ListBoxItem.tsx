@@ -43,11 +43,7 @@ const ListBoxItemInner = styled.div<Partial<ListBoxItemProps>>(
     backgroundColor: 'none',
     cursor: 'pointer',
     '&:hover': {
-      backgroundColor: !disabled
-        ? theme.mode === 'light'
-          ? theme.colors['fill-one-hover']
-          : theme.colors['fill-two-hover']
-        : 'none',
+      backgroundColor: !disabled ? theme.colors['fill-one-hover'] : 'none',
     },
     '&:focus, &:focus-visible': {
       outline: 'none',
@@ -147,10 +143,7 @@ const ListBoxFooterInner = styled.button<{ $focused?: boolean }>(
     width: '100%',
     padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
     '&:hover': {
-      backgroundColor:
-        theme.mode === 'light'
-          ? theme.colors['fill-one-hover']
-          : theme.colors['fill-two-hover'],
+      backgroundColor: theme.colors['fill-one-hover'],
     },
     '.children': {
       flexGrow: 1,

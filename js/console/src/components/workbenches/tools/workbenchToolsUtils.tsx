@@ -29,6 +29,7 @@ import {
   SlackLogoIcon,
   SplunkLogoIcon,
   TempoLogoIcon,
+  TicketIcon,
   ToolsFilledIcon,
   VictoriaLogsLogoIcon,
   VSphereLogoIcon,
@@ -57,6 +58,7 @@ const CONFIGURABLE_WORKBENCH_TOOL_TYPES = [
   WorkbenchToolType.Atlassian,
   WorkbenchToolType.Jira,
   WorkbenchToolType.JiraDatacenter,
+  WorkbenchToolType.ServiceNow,
   WorkbenchToolType.Linear,
   WorkbenchToolType.Slack,
   WorkbenchToolType.Pagerduty,
@@ -102,6 +104,7 @@ export const CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY = {
   [WorkbenchToolType.Atlassian]: 'atlassian',
   [WorkbenchToolType.Jira]: 'jira',
   [WorkbenchToolType.JiraDatacenter]: 'jiraDatacenter',
+  [WorkbenchToolType.ServiceNow]: 'serviceNow',
   [WorkbenchToolType.Exa]: 'exa',
   [WorkbenchToolType.Github]: 'github',
   [WorkbenchToolType.Gitlab]: 'gitlab',
@@ -181,6 +184,7 @@ const WORKBENCH_TOOL_LABELS: Record<
   [WorkbenchToolType.Atlassian]: 'Atlassian',
   [WorkbenchToolType.Jira]: 'Jira Cloud',
   [WorkbenchToolType.JiraDatacenter]: 'Jira Data Center',
+  [WorkbenchToolType.ServiceNow]: 'ServiceNow',
   [WorkbenchToolType.Linear]: 'Linear',
   [WorkbenchToolType.Slack]: 'Slack',
   [WorkbenchToolType.Pagerduty]: 'PagerDuty',
@@ -255,6 +259,7 @@ export const TOOL_TYPE_TO_CATEGORIES: Record<
   [WorkbenchToolType.Atlassian]: [WorkbenchToolCategory.Ticketing],
   [WorkbenchToolType.Jira]: [WorkbenchToolCategory.Ticketing],
   [WorkbenchToolType.JiraDatacenter]: [WorkbenchToolCategory.Ticketing],
+  [WorkbenchToolType.ServiceNow]: [WorkbenchToolCategory.Ticketing],
   [WorkbenchToolType.Linear]: [WorkbenchToolCategory.Ticketing],
   [WorkbenchToolType.Slack]: [WorkbenchToolCategory.Chat],
   [WorkbenchToolType.Pagerduty]: [WorkbenchToolCategory.Integration],
@@ -318,6 +323,8 @@ const CONFIGURABLE_TOOL_TYPE_CARD_DESCRIPTIONS: Record<
     'Manage Jira Cloud issues and comments through the Jira REST API.',
   [WorkbenchToolType.JiraDatacenter]:
     'Manage Jira Data Center issues and comments through the Jira REST API.',
+  [WorkbenchToolType.ServiceNow]:
+    'Manage ServiceNow incidents, change requests, problems, and catalog tasks through the Table API.',
   [WorkbenchToolType.Linear]:
     'Connect to Linear for issue tracking and project management.',
   [WorkbenchToolType.Slack]:
@@ -537,6 +544,7 @@ const toolToIcon: Record<
   [WorkbenchToolType.Atlassian]: AtlassianLogoIcon,
   [WorkbenchToolType.Jira]: JiraLogoIcon,
   [WorkbenchToolType.JiraDatacenter]: JiraLogoIcon,
+  [WorkbenchToolType.ServiceNow]: TicketIcon,
   [WorkbenchToolType.Linear]: LinearLogoIcon,
   [WorkbenchToolType.Slack]: SlackLogoIcon,
   [WorkbenchToolType.Pagerduty]: PagerdutyLogoIcon,

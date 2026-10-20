@@ -198,7 +198,7 @@ export function SimpleToolCall({
             transparent
             maxOutputHeight={standaloneCommand && !isPending ? undefined : 240}
             collapsedOutputLines={
-              standaloneCommand && !isPending ? 1 : undefined
+              standaloneCommand && !isPending ? 5 : undefined
             }
             ansiOutput
           />

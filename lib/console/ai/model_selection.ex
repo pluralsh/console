@@ -34,6 +34,20 @@ defmodule Console.AI.ModelSelection do
   defp settings_tool_model(_, _), do: nil
 
   @doc """
+  Resolves the provider and base model of the default client, used for cheaper auxiliary calls like compaction.
+  """
+  @spec base_model(DeploymentSettings.t() | nil) :: %{provider: atom, model: binary} | nil
+  def base_model(%DeploymentSettings{ai: %{provider: provider} = ai}) do
+    with config when is_map(config) <- Map.get(ai, provider),
+         model when is_binary(model) <- Map.get(config, :model) || Map.get(config, :model_id) do
+      %{provider: provider, model: model}
+    else
+      _ -> nil
+    end
+  end
+  def base_model(_), do: nil
+
+  @doc """
   Resolves the provider and model used by an agent runtime.
 
   Coding-agent runs report token counts but often omit cost. This is the model those

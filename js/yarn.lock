@@ -9146,6 +9146,7 @@ __metadata:
     "@nivo/pie": "npm:0.99.0"
     "@nivo/radial-bar": "npm:0.99.0"
     "@nivo/theming": "npm:0.99.0"
+    "@nivo/tooltip": "npm:0.99.0"
     "@nivo/treemap": "npm:0.99.0"
     "@pluralsh/design-system": "workspace:*"
     "@react-hooks-library/core": "npm:0.6.2"

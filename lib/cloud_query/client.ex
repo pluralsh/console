@@ -17,9 +17,14 @@ defmodule CloudQuery.Client do
     end
   end
 
-  def metrics_rpc_opts, do: [timeout: @metrics_timeout]
-  def cloud_query_rpc_opts, do: [timeout: @cloud_query_timeout]
-  def logs_rpc_opts, do: [timeout: @logs_timeout]
-  def lambda_rpc_opts, do: [timeout: @lambda_timeout]
+  def metrics_rpc_opts, do: [timeout: @metrics_timeout] ++ compression()
+  def cloud_query_rpc_opts, do: [timeout: @cloud_query_timeout] ++ compression()
+  def logs_rpc_opts, do: [timeout: @logs_timeout] ++ compression()
+  def lambda_rpc_opts, do: [timeout: @lambda_timeout] ++ compression()
+
+  # only advertise gzip (via grpc-accept-encoding) so the server compresses responses, requests stay
+  # uncompressed so older servers without a gzip decompressor keep working. Unary only: the gun
+  # adapter can't decompress server-streamed messages
+  defp compression, do: [accepted_compressors: [GRPC.Compressor.Gzip]]
 
 end

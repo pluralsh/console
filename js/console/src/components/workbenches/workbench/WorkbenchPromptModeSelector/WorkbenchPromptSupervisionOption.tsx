@@ -35,12 +35,7 @@ export function WorkbenchPromptSupervisionOption({
         backgroundColor: 'unset',
         cursor: 'pointer',
         textAlign: 'left',
-        '&:hover': {
-          backgroundColor:
-            theme.mode === 'light'
-              ? modeItemBackground
-              : theme.colors['fill-three-hover'],
-        },
+        '&:hover': { backgroundColor: modeItemBackground },
       }}
     >
       <div onClick={(e) => e.stopPropagation()}>

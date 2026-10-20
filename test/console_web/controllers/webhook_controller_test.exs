@@ -2201,6 +2201,99 @@ defmodule ConsoleWeb.WebhookControllerTest do
     end
   end
 
+  describe "#issue/2 (ServiceNow)" do
+    test "it returns 403 without a secret or signature", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :service_now)
+
+      conn
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/issues/service_now/#{hook.external_id}", Jason.encode!(service_now_payload()))
+      |> response(403)
+    end
+
+    test "it returns 403 when the shared secret is invalid", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :service_now)
+
+      conn
+      |> put_req_header("x-plural-webhook-secret", "invalid-secret")
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/issues/service_now/#{hook.external_id}", Jason.encode!(service_now_payload()))
+      |> response(403)
+    end
+
+    test "an invalid signature is rejected even with a valid shared secret", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :service_now)
+
+      conn
+      |> put_req_header("x-plural-signature", "invalid")
+      |> put_req_header("x-plural-webhook-secret", hook.secret)
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/issues/service_now/#{hook.external_id}", Jason.encode!(service_now_payload()))
+      |> response(403)
+    end
+
+    test "it persists an incident authenticated with the shared secret", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :service_now)
+      insert(:workbench_webhook, issue_webhook: hook, matches: %{substring: "Checkout"})
+
+      result =
+        conn
+        |> put_req_header("x-plural-webhook-secret", hook.secret)
+        |> put_req_header("content-type", "application/json")
+        |> post("/ext/v1/webhooks/issues/service_now/#{hook.external_id}", Jason.encode!(service_now_payload()))
+        |> json_response(200)
+
+      assert result["message"] == "persisted issue"
+
+      [issue] = Console.Repo.all(Console.Schema.Issue)
+      assert issue.provider == :service_now
+      assert issue.external_id == "#{hook.id}:incident:0123456789abcdef0123456789abcdef"
+      assert issue.title == "Checkout is down"
+      assert issue.body == "500s from the payments service"
+      assert issue.status == :in_progress
+      assert issue.url ==
+               "https://example.service-now.com/nav_to.do?uri=incident.do%3Fsys_id%3D0123456789abcdef0123456789abcdef"
+    end
+
+    for encoding <- [:hex, :base64] do
+      test "it accepts a #{encoding} HMAC-SHA256 signature", %{conn: conn} do
+        hook = insert(:issue_webhook, provider: :service_now)
+        insert(:workbench_webhook, issue_webhook: hook, matches: %{substring: "Checkout"})
+        payload = Jason.encode!(service_now_payload(%{"state" => %{"value" => "6", "display_value" => "Resolved"}}))
+        mac = :crypto.mac(:hmac, :sha256, hook.secret, payload)
+        signature = if unquote(encoding) == :hex, do: Base.encode16(mac, case: :lower), else: Base.encode64(mac)
+
+        result =
+          conn
+          |> put_req_header("x-plural-signature", signature)
+          |> put_req_header("content-type", "application/json")
+          |> post("/ext/v1/webhooks/issues/service_now/#{hook.external_id}", payload)
+          |> json_response(200)
+
+        refute result["ignored"]
+        [issue] = Console.Repo.all(Console.Schema.Issue)
+        assert issue.status == :completed
+      end
+    end
+
+    test "it ignores tables outside the ticket tables", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :service_now)
+
+      result =
+        conn
+        |> put_req_header("x-plural-webhook-secret", hook.secret)
+        |> put_req_header("content-type", "application/json")
+        |> post(
+          "/ext/v1/webhooks/issues/service_now/#{hook.external_id}",
+          Jason.encode!(service_now_payload(%{"table" => "sys_user"}))
+        )
+        |> json_response(200)
+
+      assert result["ignored"]
+      [] = Console.Repo.all(Console.Schema.Issue)
+    end
+  end
+
   describe "#issue/2 (Azure DevOps)" do
     test "it returns 403 without basic auth", %{conn: conn} do
       hook = insert(:issue_webhook, provider: :azure_devops)
@@ -2430,5 +2523,20 @@ defmodule ConsoleWeb.WebhookControllerTest do
         }
       }
     }
+  end
+
+  defp service_now_payload(attrs \\ %{}) do
+    Map.merge(
+      %{
+        "table" => "incident",
+        "instance_url" => "https://example.service-now.com/",
+        "sys_id" => "0123456789abcdef0123456789abcdef",
+        "number" => "INC0010001",
+        "short_description" => "Checkout is down",
+        "description" => "500s from the payments service",
+        "state" => "2"
+      },
+      attrs
+    )
   end
 end

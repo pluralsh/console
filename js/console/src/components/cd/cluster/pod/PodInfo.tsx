@@ -93,7 +93,7 @@ export default function PodInfo() {
   const conditions = pod?.status?.conditions || []
 
   return (
-    <ScrollablePage>
+    <ScrollablePage contentStyles={{ paddingTop: 0 }}>
       <Flex
         direction="column"
         gap="xlarge"

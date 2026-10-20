@@ -241,7 +241,9 @@ function IssueWebhookFields({
               : formState.issueProvider ===
                   IssueWebhookProvider.BitbucketDatacenter
                 ? 'Use this value as the HTTP Basic authentication password in Bitbucket Data Center webhook settings. Any username is accepted.'
-                : undefined
+                : formState.issueProvider === IssueWebhookProvider.ServiceNow
+                  ? 'Your ServiceNow Business Rule sends this value in the x-plural-webhook-secret header, or uses it as the key for an HMAC-SHA256 x-plural-signature header.'
+                  : undefined
         }
       >
         <SecretInputWithGenerate

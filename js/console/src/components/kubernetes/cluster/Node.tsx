@@ -14,10 +14,12 @@ import { filesize } from 'filesize'
 import { useMemo, useState } from 'react'
 
 import { Outlet, useOutletContext, useParams } from 'react-router-dom'
-import { useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
+import { Logs } from '../../cd/logs/Logs'
 import { GaugeWrap } from '../../cluster/Gauges'
+import { NodeMetrics } from '../../cluster/nodes/NodeMetrics'
 import { cpuFmt, roundToTwoPlaces } from '../../cluster/utils'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import RadialBarChart from '../../utils/RadialBarChart'
@@ -54,6 +56,8 @@ import {
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },
+  { path: 'metrics', label: 'Metrics' },
+  { path: 'logs', label: 'Logs' },
   { path: 'conditions', label: 'Conditions' },
   { path: 'images', label: 'Container images' },
   { path: 'pods', label: 'Pods' },
@@ -301,6 +305,48 @@ export function NodeInfo() {
     </>
   )
 }
+
+export function NodeMetricsView() {
+  const { clusterId = '', name = '' } = useParams()
+
+  return (
+    <NodeMetrics
+      clusterId={clusterId}
+      node={name}
+    />
+  )
+}
+
+export function NodeLogs() {
+  const { clusterId = '', name = '' } = useParams()
+
+  return (
+    <FillSC>
+      <FillContentSC>
+        <Logs
+          clusterId={clusterId}
+          node={name}
+        />
+      </FillContentSC>
+    </FillSC>
+  )
+}
+
+// absolutely filled so the logs view gets a definite height inside the scrolling tab content
+const FillSC = styled.div({
+  flex: 1,
+  minHeight: 0,
+  position: 'relative',
+  width: '100%',
+})
+
+const FillContentSC = styled.div({
+  display: 'flex',
+  flexDirection: 'column',
+  inset: 0,
+  overflow: 'hidden',
+  position: 'absolute',
+})
 
 export function NodeConditions() {
   const node = useOutletContext<NodeNodeDetail>()

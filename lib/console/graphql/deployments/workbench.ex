@@ -267,6 +267,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :atlassian,            :workbench_tool_atlassian_connection_attributes, description: "atlassian/jira connection (ticketing)"
     field :jira,                 :workbench_tool_jira_connection_attributes, description: "jira cloud connection (ticketing)"
     field :jira_datacenter,      :workbench_tool_jira_datacenter_connection_attributes, description: "jira data center connection (ticketing)"
+    field :service_now,          :workbench_tool_service_now_connection_attributes, description: "servicenow connection (ticketing)"
     field :exa,                  :workbench_tool_exa_connection_attributes, description: "exa connection (search)"
     field :github,               :workbench_tool_github_connection_attributes, description: "github connection (integration)"
     field :gitlab,               :workbench_tool_gitlab_connection_attributes, description: "gitlab connection (scm)"
@@ -418,6 +419,12 @@ defmodule Console.GraphQl.Deployments.Workbench do
   input_object :workbench_tool_jira_datacenter_connection_attributes do
     field :url,       non_null(:string), description: "jira data center base URL"
     field :api_token, :string, description: "jira data center personal access token"
+  end
+
+  input_object :workbench_tool_service_now_connection_attributes do
+    field :url,      non_null(:string), description: "servicenow instance URL (for example, https://example.service-now.com)"
+    field :username, :string, description: "servicenow user for basic auth (required if not using OAuth token exchange)"
+    field :password, :string, description: "servicenow password for basic auth (required if not using OAuth token exchange)"
   end
 
   input_object :workbench_tool_exa_connection_attributes do
@@ -852,6 +859,13 @@ defmodule Console.GraphQl.Deployments.Workbench do
       resolve &Deployments.metrics_tool/3
     end
 
+    field :metrics_series_tool, list_of(:metric_response) do
+      arg :name,      :string, description: "the name of the metrics tool"
+      arg :arguments, :json,   description: "the arguments for the metrics tool"
+
+      resolve &Deployments.metrics_series_tool/3
+    end
+
     field :logs_tool, list_of(:workbench_job_activity_log) do
       arg :name,      :string, description: "the name of the logs tool"
       arg :arguments, :json,   description: "the arguments for the logs tool"
@@ -957,7 +971,12 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_job_thought_attributes do
-    field :metrics, list_of(:workbench_job_activity_metric), description: "metrics for the thought"
+    field :series, list_of(:metric_response),
+      description: "metric series for the thought, with labels sent once per series",
+      resolve: &Deployments.thought_metric_series/3
+    field :metrics, list_of(:workbench_job_activity_metric),
+      description: "metrics for the thought, one entry per point (prefer series)",
+      resolve: &Deployments.thought_metrics/3
     field :logs,    list_of(:workbench_job_activity_log), description: "logs for the thought"
     field :traces,  list_of(:workbench_job_activity_trace), description: "traces for the thought"
   end
@@ -1117,10 +1136,14 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_canvas_block do
-    field :identifier, :string
-    field :type,       :workbench_canvas_block_type
-    field :layout,     :workbench_canvas_block_layout
-    field :content,    :workbench_canvas_block_content
+    field :identifier,  :string
+    field :type,        :workbench_canvas_block_type
+    field :title,       :string, description: "the header of a section block"
+    field :description, :string, description: "an explanation of what this block shows"
+    field :section_id,  :string, description: "the identifier of the section block this block belongs to"
+    field :collapsed,   :boolean, description: "whether a section block starts collapsed"
+    field :layout,      :workbench_canvas_block_layout
+    field :content,     :workbench_canvas_block_content
   end
 
   object :workbench_job_result_todo do
@@ -1430,6 +1453,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :jira,      :workbench_tool_jira_connection, description: "jira cloud connection (no secrets)"
     field :jira_datacenter, :workbench_tool_jira_datacenter_connection,
       description: "jira data center connection (no secrets)"
+    field :service_now, :workbench_tool_service_now_connection, description: "servicenow connection (no secrets)"
     field :exa,       :workbench_tool_exa_connection, description: "exa connection (no secrets)"
     field :github,    :workbench_tool_github_connection, description: "github connection (no secrets)"
     field :gitlab,    :workbench_tool_gitlab_connection, description: "gitlab connection (no secrets)"
@@ -1562,6 +1586,11 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
   object :workbench_tool_jira_datacenter_connection do
     field :url, non_null(:string), description: "jira data center base URL (PAT never exposed)"
+  end
+
+  object :workbench_tool_service_now_connection do
+    field :url,      non_null(:string), description: "servicenow instance URL"
+    field :username, :string, description: "servicenow basic auth user (password never exposed)"
   end
 
   object :workbench_tool_exa_connection do

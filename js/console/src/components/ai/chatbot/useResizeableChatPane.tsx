@@ -5,16 +5,24 @@ import { useCallback, useState } from 'react'
 
 const STORAGE_KEY = 'chatbot-panel-width'
 
+export type ResizablePaneOptions = {
+  storageKey?: string
+  // the pane edge the drag handle sits on
+  handleEdge?: 'left' | 'right'
+}
+
 export function useResizablePane(
   minWidthPx: number,
   maxWidthVw: number,
-  initialWidthVw?: number
+  initialWidthVw?: number,
+  { storageKey = STORAGE_KEY, handleEdge = 'left' }: ResizablePaneOptions = {}
 ) {
   const [isDragging, setIsDragging] = useState(false)
   const [dragStart, setDragStart] = useState({ x: 0, width: 0 })
+  const direction = handleEdge === 'left' ? -1 : 1
 
   const [calculatedPanelWidth, setCalculatedPanelWidthState] =
-    usePersistedState(STORAGE_KEY, minWidthPx, 1000)
+    usePersistedState(storageKey, minWidthPx, 1000)
   const setPanelWidth = useCallback(
     (newWidth: number) =>
       setCalculatedPanelWidthState(
@@ -55,14 +63,17 @@ export function useResizablePane(
   }
 
   const handlePointerMove = (e: React.PointerEvent) => {
-    if (isDragging) setPanelWidth(dragStart.width + (dragStart.x - e.clientX))
+    if (isDragging)
+      setPanelWidth(dragStart.width + direction * (e.clientX - dragStart.x))
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
       e.preventDefault()
       e.stopPropagation()
-      setPanelWidth(calculatedPanelWidth + (e.key === 'ArrowLeft' ? 10 : -10))
+      setPanelWidth(
+        calculatedPanelWidth + direction * (e.key === 'ArrowRight' ? 10 : -10)
+      )
     }
   }
 

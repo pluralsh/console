@@ -56,13 +56,18 @@ const graph = (
   name: 'Shared',
   graph: {
     __typename: 'WorkbenchDashboardGraphResult',
-    metrics: [
+    series: [
       {
-        __typename: 'WorkbenchJobActivityMetric',
-        timestamp: timeRange.start,
+        __typename: 'MetricResponse',
         name: 'requests',
-        value,
-        labels: null,
+        metric: null,
+        values: [
+          {
+            __typename: 'MetricResult',
+            timestamp: String(Date.parse(timeRange.start) / 1000),
+            value: String(value),
+          },
+        ],
       },
     ],
     logs: null,

@@ -317,6 +317,33 @@ defmodule Console.Deployments.ClustersTest do
       assert svc.helm.values == "cluster:\n  name: test\n"
     end
 
+    test "it can template agent helm values with cluster tags, metadata and distro" do
+      user = admin_user()
+      git = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+
+      insert(:deployment_settings,
+        agent_helm_values: """
+        env: {{ cluster.tags.env }}
+        region: {{ cluster.metadata.region }}
+        distro: {{ cluster.distro }}
+        {% if cluster.distro == "OPENSHIFT" %}openshift: true{% endif %}
+        """,
+        agent_helm_values_templateable: true,
+        deployer_repository: git
+      )
+
+      {:ok, cluster} = Clusters.create_cluster(%{
+        name: "test",
+        distro: :openshift,
+        metadata: %{"region" => "us-east-1"},
+        tags: [%{name: "env", value: "prod"}]
+      }, user)
+
+      [svc] = Clusters.services(cluster)
+
+      assert svc.helm.values == "env: prod\nregion: us-east-1\ndistro: OPENSHIFT\nopenshift: true\n"
+    end
+
     test "it will error if the cluster limit is exceeded" do
       user = admin_user()
       insert(:user, bot_name: "console", roles: %{admin: true})
@@ -1243,6 +1270,32 @@ defmodule Console.Deployments.ClustersTest do
 
       assert services["test"].helm.values == "migrated:\n  cluster: test\n"
       assert services["test2"].helm.values == "migrated:\n  cluster: test2\n"
+    end
+
+    test "it can template helm vals migrations with cluster tags and distro" do
+      user = admin_user()
+      insert(:user, bot_name: "console", roles: %{admin: true})
+      git = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+
+      insert(:deployment_settings,
+        agent_helm_values: "initial: true\n",
+        agent_helm_values_templateable: true,
+        deployer_repository: git
+      )
+
+      {:ok, _} = Clusters.create_cluster(%{name: "test", distro: :eks, tags: [%{name: "env", value: "prod"}]}, user)
+
+      migration =
+        insert(:agent_migration,
+          ref: nil,
+          helm_values: "env: {{ cluster.tags.env }}\ndistro: {{ cluster.distro }}\n"
+        )
+
+      {:ok, _} = Clusters.apply_migration(migration)
+
+      [svc] = Console.Repo.all(Console.Schema.Service.agent())
+
+      assert svc.helm.values == "env: prod\ndistro: EKS\n"
     end
 
     test "it can migrate helm vals and ref" do

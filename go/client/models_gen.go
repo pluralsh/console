@@ -1598,10 +1598,12 @@ type BindingPolicyEdge struct {
 
 type BindingPolicyMatches struct {
 	Workbench *WorkbenchPolicyMatches `json:"workbench,omitempty"`
+	Stack     *StackPolicyMatches     `json:"stack,omitempty"`
 }
 
 type BindingPolicyMatchesAttributes struct {
 	Workbench *WorkbenchPolicyMatchesAttributes `json:"workbench,omitempty"`
+	Stack     *StackPolicyMatchesAttributes     `json:"stack,omitempty"`
 }
 
 type BindingPolicyUpdateAttributes struct {
@@ -2237,7 +2239,9 @@ type Cluster struct {
 	// cluster-wide prometheus timeseries for cpu, memory, network, storage and pod health, optionally broken out by namespace or node
 	ClusterUsageMetrics *ClusterUsageMetrics `json:"clusterUsageMetrics,omitempty"`
 	ClusterNodeMetrics  *ClusterNodeMetrics  `json:"clusterNodeMetrics,omitempty"`
-	NetworkGraph        []*NetworkMeshEdge   `json:"networkGraph,omitempty"`
+	// host, resource, workload and health prometheus timeseries for a single node
+	NodeUsageMetrics *NodeUsageMetrics  `json:"nodeUsageMetrics,omitempty"`
+	NetworkGraph     []*NetworkMeshEdge `json:"networkGraph,omitempty"`
 	// a list of node healthstatistics for this cluster
 	NodeStatistics []*NodeStatistic `json:"nodeStatistics,omitempty"`
 	// A pod-level set of utilization metrics for this cluster for rendering a heat map
@@ -5824,6 +5828,74 @@ type NodeStatus struct {
 type NodeUsage struct {
 	CPU    *string `json:"cpu,omitempty"`
 	Memory *string `json:"memory,omitempty"`
+}
+
+// Prometheus timeseries for a single node. Host fields come from node-exporter (matched to the node by an
+// `instance`, `nodename` or `node` label, or node_uname_info), the rest from cAdvisor and kube-state-metrics. Fields marked grouped are broken
+// out by the `groupBy` argument and labeled by `namespace` (and `pod`) accordingly; the rest are node-wide.
+type NodeUsageMetrics struct {
+	// fraction (0-1) of host cpu time spent busy
+	CPUUtilization []*MetricResponse `json:"cpuUtilization,omitempty"`
+	// fraction (0-1) of host cpu time per non-idle mode, labeled by `mode`
+	CPUModes []*MetricResponse `json:"cpuModes,omitempty"`
+	// host cpu count
+	CPUCores []*MetricResponse `json:"cpuCores,omitempty"`
+	// 1m host load average
+	Load1 []*MetricResponse `json:"load1,omitempty"`
+	// 5m host load average
+	Load5 []*MetricResponse `json:"load5,omitempty"`
+	// 15m host load average
+	Load15 []*MetricResponse `json:"load15,omitempty"`
+	// host memory in bytes
+	MemoryTotal []*MetricResponse `json:"memoryTotal,omitempty"`
+	// host memory in use (total less available) in bytes
+	MemoryUsed []*MetricResponse `json:"memoryUsed,omitempty"`
+	// host page cache and buffers in bytes
+	MemoryCached []*MetricResponse `json:"memoryCached,omitempty"`
+	// major page faults per second
+	MajorPageFaults []*MetricResponse `json:"majorPageFaults,omitempty"`
+	// fraction (0-1) of each host filesystem used, labeled by `mountpoint`
+	FilesystemFullness []*MetricResponse `json:"filesystemFullness,omitempty"`
+	// host disk read throughput in bytes/s
+	DiskRead []*MetricResponse `json:"diskRead,omitempty"`
+	// host disk write throughput in bytes/s
+	DiskWrite []*MetricResponse `json:"diskWrite,omitempty"`
+	// fraction (0-1) of time the busiest disk spent doing I/O
+	DiskBusy []*MetricResponse `json:"diskBusy,omitempty"`
+	// physical interface receive throughput in bytes/s
+	NetworkReceive []*MetricResponse `json:"networkReceive,omitempty"`
+	// physical interface transmit throughput in bytes/s
+	NetworkTransmit []*MetricResponse `json:"networkTransmit,omitempty"`
+	// physical interface receive and transmit errors per second
+	NetworkErrors []*MetricResponse `json:"networkErrors,omitempty"`
+	// physical interface receive and transmit drops per second
+	NetworkDropped []*MetricResponse `json:"networkDropped,omitempty"`
+	// allocatable node cpu in cores
+	CPUAllocatable []*MetricResponse `json:"cpuAllocatable,omitempty"`
+	// allocatable node memory in bytes
+	MemoryAllocatable []*MetricResponse `json:"memoryAllocatable,omitempty"`
+	// pod capacity of the node
+	PodsAllocatable []*MetricResponse `json:"podsAllocatable,omitempty"`
+	// 1 while each node condition holds, labeled by `condition`
+	Conditions []*MetricResponse `json:"conditions,omitempty"`
+	// container cpu usage in cores (grouped)
+	CPU []*MetricResponse `json:"cpu,omitempty"`
+	// cpu requests of pods on the node in cores (grouped)
+	CPURequests []*MetricResponse `json:"cpuRequests,omitempty"`
+	// cpu limits of pods on the node in cores (grouped)
+	CPULimits []*MetricResponse `json:"cpuLimits,omitempty"`
+	// container working set memory in bytes (grouped)
+	Memory []*MetricResponse `json:"memory,omitempty"`
+	// memory requests of pods on the node in bytes (grouped)
+	MemoryRequests []*MetricResponse `json:"memoryRequests,omitempty"`
+	// memory limits of pods on the node in bytes (grouped)
+	MemoryLimits []*MetricResponse `json:"memoryLimits,omitempty"`
+	// container OOM kills within each rate window (grouped)
+	OomKills []*MetricResponse `json:"oomKills,omitempty"`
+	// running pods on the node (grouped)
+	PodsRunning []*MetricResponse `json:"podsRunning,omitempty"`
+	// container restarts on the node within each rate window (grouped)
+	Restarts []*MetricResponse `json:"restarts,omitempty"`
 }
 
 type Notification struct {
@@ -9829,7 +9901,9 @@ type StackOverridesAttributes struct {
 }
 
 type StackPolicy struct {
-	ID         string               `json:"id"`
+	ID string `json:"id"`
+	// when this policy is evaluated: approval (after plan) or run (before a run is created)
+	Type       StackPolicyType      `json:"type"`
 	Policy     *Policy              `json:"policy,omitempty"`
 	Stack      *InfrastructureStack `json:"stack,omitempty"`
 	InsertedAt *string              `json:"insertedAt,omitempty"`
@@ -9839,6 +9913,8 @@ type StackPolicy struct {
 type StackPolicyAttributes struct {
 	// the policy to associate with this stack
 	PolicyID string `json:"policyId"`
+	// when this policy is evaluated: approval (after plan) or run (before a run is created). Defaults to APPROVAL
+	Type *StackPolicyType `json:"type,omitempty"`
 }
 
 type StackPolicyConnection struct {
@@ -9849,6 +9925,16 @@ type StackPolicyConnection struct {
 type StackPolicyEdge struct {
 	Node   *StackPolicy `json:"node,omitempty"`
 	Cursor *string      `json:"cursor,omitempty"`
+}
+
+type StackPolicyMatches struct {
+	// stack policy evaluation stage attached by this binding
+	Type *StackPolicyType `json:"type,omitempty"`
+}
+
+type StackPolicyMatchesAttributes struct {
+	// stack policy evaluation stage to attach: approval (after plan) or run (before a run is created). Defaults to APPROVAL
+	Type *StackPolicyType `json:"type,omitempty"`
 }
 
 type StackPolicyViolation struct {
@@ -12391,6 +12477,8 @@ type WorkbenchToolConfiguration struct {
 	Jira *WorkbenchToolJiraConnection `json:"jira,omitempty"`
 	// jira data center connection (no secrets)
 	JiraDatacenter *WorkbenchToolJiraDatacenterConnection `json:"jiraDatacenter,omitempty"`
+	// servicenow connection (no secrets)
+	ServiceNow *WorkbenchToolServiceNowConnection `json:"serviceNow,omitempty"`
 	// exa connection (no secrets)
 	Exa *WorkbenchToolExaConnection `json:"exa,omitempty"`
 	// github connection (no secrets)
@@ -12456,6 +12544,8 @@ type WorkbenchToolConfigurationAttributes struct {
 	Jira *WorkbenchToolJiraConnectionAttributes `json:"jira,omitempty"`
 	// jira data center connection (ticketing)
 	JiraDatacenter *WorkbenchToolJiraDatacenterConnectionAttributes `json:"jiraDatacenter,omitempty"`
+	// servicenow connection (ticketing)
+	ServiceNow *WorkbenchToolServiceNowConnectionAttributes `json:"serviceNow,omitempty"`
 	// exa connection (search)
 	Exa *WorkbenchToolExaConnectionAttributes `json:"exa,omitempty"`
 	// github connection (integration)
@@ -12833,6 +12923,22 @@ type WorkbenchToolSentryConnectionAttributes struct {
 	URL *string `json:"url,omitempty"`
 	// Sentry user auth token or internal integration token (encrypted at rest)
 	AccessToken *string `json:"accessToken,omitempty"`
+}
+
+type WorkbenchToolServiceNowConnection struct {
+	// servicenow instance URL
+	URL string `json:"url"`
+	// servicenow basic auth user (password never exposed)
+	Username *string `json:"username,omitempty"`
+}
+
+type WorkbenchToolServiceNowConnectionAttributes struct {
+	// servicenow instance URL (for example, https://example.service-now.com)
+	URL string `json:"url"`
+	// servicenow user for basic auth (required if not using OAuth token exchange)
+	Username *string `json:"username,omitempty"`
+	// servicenow password for basic auth (required if not using OAuth token exchange)
+	Password *string `json:"password,omitempty"`
 }
 
 type WorkbenchToolSlackConnection struct {
@@ -16239,6 +16345,7 @@ const (
 	IssueWebhookProviderAzureDevops         IssueWebhookProvider = "AZURE_DEVOPS"
 	IssueWebhookProviderBitbucket           IssueWebhookProvider = "BITBUCKET"
 	IssueWebhookProviderBitbucketDatacenter IssueWebhookProvider = "BITBUCKET_DATACENTER"
+	IssueWebhookProviderServiceNow          IssueWebhookProvider = "SERVICE_NOW"
 )
 
 var AllIssueWebhookProvider = []IssueWebhookProvider{
@@ -16250,11 +16357,12 @@ var AllIssueWebhookProvider = []IssueWebhookProvider{
 	IssueWebhookProviderAzureDevops,
 	IssueWebhookProviderBitbucket,
 	IssueWebhookProviderBitbucketDatacenter,
+	IssueWebhookProviderServiceNow,
 }
 
 func (e IssueWebhookProvider) IsValid() bool {
 	switch e {
-	case IssueWebhookProviderLinear, IssueWebhookProviderJira, IssueWebhookProviderAsana, IssueWebhookProviderGithub, IssueWebhookProviderGitlab, IssueWebhookProviderAzureDevops, IssueWebhookProviderBitbucket, IssueWebhookProviderBitbucketDatacenter:
+	case IssueWebhookProviderLinear, IssueWebhookProviderJira, IssueWebhookProviderAsana, IssueWebhookProviderGithub, IssueWebhookProviderGitlab, IssueWebhookProviderAzureDevops, IssueWebhookProviderBitbucket, IssueWebhookProviderBitbucketDatacenter, IssueWebhookProviderServiceNow:
 		return true
 	}
 	return false
@@ -16738,6 +16846,65 @@ func (e *MonitorType) UnmarshalJSON(b []byte) error {
 }
 
 func (e MonitorType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type NodeMetricsGrouping string
+
+const (
+	// a single node-wide series
+	NodeMetricsGroupingNode      NodeMetricsGrouping = "NODE"
+	NodeMetricsGroupingNamespace NodeMetricsGrouping = "NAMESPACE"
+	// one series per pod, labeled by `namespace` and `pod`
+	NodeMetricsGroupingPod NodeMetricsGrouping = "POD"
+)
+
+var AllNodeMetricsGrouping = []NodeMetricsGrouping{
+	NodeMetricsGroupingNode,
+	NodeMetricsGroupingNamespace,
+	NodeMetricsGroupingPod,
+}
+
+func (e NodeMetricsGrouping) IsValid() bool {
+	switch e {
+	case NodeMetricsGroupingNode, NodeMetricsGroupingNamespace, NodeMetricsGroupingPod:
+		return true
+	}
+	return false
+}
+
+func (e NodeMetricsGrouping) String() string {
+	return string(e)
+}
+
+func (e *NodeMetricsGrouping) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = NodeMetricsGrouping(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid NodeMetricsGrouping", str)
+	}
+	return nil
+}
+
+func (e NodeMetricsGrouping) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *NodeMetricsGrouping) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e NodeMetricsGrouping) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil
@@ -19281,6 +19448,61 @@ func (e SplunkTokenType) MarshalJSON() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+type StackPolicyType string
+
+const (
+	StackPolicyTypeApproval StackPolicyType = "APPROVAL"
+	StackPolicyTypeRun      StackPolicyType = "RUN"
+)
+
+var AllStackPolicyType = []StackPolicyType{
+	StackPolicyTypeApproval,
+	StackPolicyTypeRun,
+}
+
+func (e StackPolicyType) IsValid() bool {
+	switch e {
+	case StackPolicyTypeApproval, StackPolicyTypeRun:
+		return true
+	}
+	return false
+}
+
+func (e StackPolicyType) String() string {
+	return string(e)
+}
+
+func (e *StackPolicyType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = StackPolicyType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid StackPolicyType", str)
+	}
+	return nil
+}
+
+func (e StackPolicyType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *StackPolicyType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e StackPolicyType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
 type StackStatus string
 
 const (
@@ -20804,6 +21026,7 @@ const (
 	WorkbenchToolTypeVictoriaLogs        WorkbenchToolType = "VICTORIA_LOGS"
 	WorkbenchToolTypeJira                WorkbenchToolType = "JIRA"
 	WorkbenchToolTypeJiraDatacenter      WorkbenchToolType = "JIRA_DATACENTER"
+	WorkbenchToolTypeServiceNow          WorkbenchToolType = "SERVICE_NOW"
 )
 
 var AllWorkbenchToolType = []WorkbenchToolType{
@@ -20840,11 +21063,12 @@ var AllWorkbenchToolType = []WorkbenchToolType{
 	WorkbenchToolTypeVictoriaLogs,
 	WorkbenchToolTypeJira,
 	WorkbenchToolTypeJiraDatacenter,
+	WorkbenchToolTypeServiceNow,
 }
 
 func (e WorkbenchToolType) IsValid() bool {
 	switch e {
-	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch, WorkbenchToolTypeAzure, WorkbenchToolTypeCloud, WorkbenchToolTypeJaeger, WorkbenchToolTypeExa, WorkbenchToolTypeGithub, WorkbenchToolTypeSLACk, WorkbenchToolTypeTeams, WorkbenchToolTypeGitlab, WorkbenchToolTypeBitbucket, WorkbenchToolTypeBitbucketDatacenter, WorkbenchToolTypeAzureDevops, WorkbenchToolTypePagerduty, WorkbenchToolTypeOpensearch, WorkbenchToolTypeLambda, WorkbenchToolTypeCloudRun, WorkbenchToolTypeAzureFunction, WorkbenchToolTypeDocker, WorkbenchToolTypeVictoriaLogs, WorkbenchToolTypeJira, WorkbenchToolTypeJiraDatacenter:
+	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch, WorkbenchToolTypeAzure, WorkbenchToolTypeCloud, WorkbenchToolTypeJaeger, WorkbenchToolTypeExa, WorkbenchToolTypeGithub, WorkbenchToolTypeSLACk, WorkbenchToolTypeTeams, WorkbenchToolTypeGitlab, WorkbenchToolTypeBitbucket, WorkbenchToolTypeBitbucketDatacenter, WorkbenchToolTypeAzureDevops, WorkbenchToolTypePagerduty, WorkbenchToolTypeOpensearch, WorkbenchToolTypeLambda, WorkbenchToolTypeCloudRun, WorkbenchToolTypeAzureFunction, WorkbenchToolTypeDocker, WorkbenchToolTypeVictoriaLogs, WorkbenchToolTypeJira, WorkbenchToolTypeJiraDatacenter, WorkbenchToolTypeServiceNow:
 		return true
 	}
 	return false

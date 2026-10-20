@@ -65,13 +65,10 @@ const ListBoxCard = styled(Card)(({ theme }) => ({
   background:
     theme.mode === 'light'
       ? theme.colors['fill-zero']
-      : theme.colors['fill-two'],
+      : theme.colors['fill-one'],
   borderRadius: theme.borderRadiuses.medium,
   '.footerFixed': {
-    borderTop:
-      theme.mode === 'light'
-        ? theme.borders['fill-one']
-        : theme.borders['fill-two'],
+    borderTop: theme.borders['fill-one'],
   },
 }))
 
@@ -80,7 +77,7 @@ type ScrollContainerProps = {
 }
 const ScrollContainer = styled.div<ScrollContainerProps>(
   ({ theme, extendStyle }) => ({
-    ...theme.partials.scrollBar({ fillLevel: theme.mode === 'light' ? 0 : 2 }),
+    ...theme.partials.scrollBar({ fillLevel: theme.mode === 'light' ? 0 : 1 }),
     position: 'relative',
     overflow: 'auto',
     flexShrink: 1,

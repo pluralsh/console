@@ -1,6 +1,5 @@
 import {
   Button,
-  EmptyState,
   Flex,
   HamburgerMenuCollapsedIcon,
   HamburgerMenuCollapseIcon,
@@ -9,6 +8,7 @@ import {
   Tab,
   TabList,
 } from '@pluralsh/design-system'
+import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   Link,
@@ -148,14 +148,10 @@ export function WorkbenchEvals() {
       ) : (
         <EvalsContentSC>
           {!selectedEvalRow ? (
-            <Flex
-              align="center"
-              flex={1}
-              justify="center"
-              minHeight={0}
-            >
-              <EmptyState message="No evals available yet." />
-            </Flex>
+            <WorkbenchEmptyState
+              message="No evals yet"
+              description="Evals grade finished jobs. Results will show up here once a job has been evaluated."
+            />
           ) : (
             <ColumnsSC $qualityCollapsed={qualityBreakdownCollapsed}>
               <PanelSC $trimRightBorder={qualityBreakdownCollapsed}>

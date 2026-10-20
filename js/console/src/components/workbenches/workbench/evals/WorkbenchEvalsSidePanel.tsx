@@ -1,8 +1,8 @@
 import { Chip, Flex } from '@pluralsh/design-system'
+import { WorkbenchEmptyText } from 'components/workbenches/common/WorkbenchEmptyState'
 import { type ComponentProps, useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { WorkbenchStoredPromptMarkdown } from '../WorkbenchStoredPromptMarkdown'
-import { Body2P } from 'components/utils/typography/Text'
 import {
   evalGradeToCategory,
   EvalGradeCategory,
@@ -153,14 +153,11 @@ export function WorkbenchEvalsSidePanel({
             )}
           />
         ) : (
-          <Body2P
-            $color="text-xlight"
-            css={{ margin: `${theme.spacing.large}px auto` }}
-          >
+          <WorkbenchEmptyText>
             {activeFilter === 'all'
-              ? 'No evals available yet.'
-              : 'No evals available for this filter.'}
-          </Body2P>
+              ? 'No evals yet. Graded jobs will show up here.'
+              : 'No evals match this filter.'}
+          </WorkbenchEmptyText>
         )}
       </Flex>
     </Flex>

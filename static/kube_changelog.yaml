@@ -1,4 +1,111 @@
 kube_changelog:
+- version: '1.37'
+  summary:
+    major_changes: ['SELinuxMount graduated to GA and is enabled by default in v1.37,
+        changing SELinux volume labeling semantics and potentially breaking workloads
+        on SELinux-enabled clusters unless audited or opted out pre-upgrade.', 'Workload-aware
+        scheduling APIs in scheduling.k8s.io advanced (v1alpha2 removed; v1alpha3
+        introduced and core Workload/PodGroup promoted to v1beta1), requiring API
+        object cleanup and client/controller compatibility checks before upgrading.',
+      'Dynamic Resource Allocation (DRA) reaches broader maturity with multiple GA
+        promotions (extended resources, device taints/tolerations) plus notable API/behavior
+        changes in allocators and health reporting that affect device plugin/driver
+        implementations and scheduling outcomes.', 'Control plane and node components
+        get significant dependency and performance/security hardening updates (etcd
+        3.7 default, grpc 1.82.1, watch cache/list improvements, webhook routing changes),
+        impacting operational characteristics and some configuration/flag behaviors.']
+    breaking_changes: ['ACTION REQUIRED: SELinuxMount enabled by default may break
+        existing pods using SELinux volume relabeling expectations; workloads must
+        be audited/updated or SELinuxMount behavior explicitly managed before/at upgrade.',
+      'ACTION REQUIRED: scheduling.k8s.io v1alpha2 is dropped; all v1alpha2 objects
+        must be removed from the apiserver prior to upgrading to v1.37 (also includes
+        DisruptionMode field shape change from enum to struct).', 'Kubelet configuration
+        change: eventRecordQPS=0 is now treated as unlimited (per docs) rather than
+        defaulting; clusters relying on prior implicit rate limiting must set an explicit
+        non-zero value.', Kubelet now logs its effective configuration at startup;
+        restrict RBAC for nodes/logs to trusted users to avoid leaking sensitive configuration
+        details., Kubelet embedded cAdvisor switch to github.com/google/cadvisor/lib
+        removes deprecated flags (kubelet fails to start if they are still set) and
+        drops certain cadvisor/custom/application metrics and specific metric series.,
+      'PodCertificateRequest GA: PKIXPublicKey and ProofOfPossession fields removed
+        from v1 API; clients must stop sending them before upgrade.', DRAResourceHealth
+        kubelet gRPC API promoted to v1 and Go plugin interface now requires DRAPlugin.WatchHealthStatus
+        method; existing DRA drivers must implement/adjust or disable health service
+        to compile/run., 'Removed/locked feature gates: GangScheduling and WorkloadAwarePreemption
+        gates removed in favor of GenericWorkload; various locked GA apiserver feature
+        gates removed; SidecarContainers gate removed (feature remains unconditionally
+        enabled).']
+    deprecations: ['kube-proxy: explicit mode setting is now encouraged; kube-proxy
+        warns when mode is not set, and kubeadm now defaults empty/unspecified mode
+        to iptables in preparation for a future default shift to nftables.', kube-proxy
+        IPVS mode remains on a deprecation path; kubeadm adds warnings and Kubernetes
+        introduces KubeProxyIPVS feature gate plumbing ahead of eventual deactivation/removal.,
+      'kubectl run: deprecated ignored --filename/-f flag.', 'client-go leader election:
+        MultiLock, UnknownLeader, ConcatRawRecord deprecated.', DRAResourceHealth
+        v1alpha1 API deprecated with planned removal around v1.40 (kubelet consumes
+        v1 by preference in v1.37).]
+    removals: [scheduling.k8s.io/v1alpha2 removed (replaced by v1alpha3 and v1beta1
+        for core WAS types)., Removed GA feature gate AnyVolumeDataSource (was locked
+        enabled since v1.33)., 'Removed PodStatusResult API type (unused, no REST
+        endpoint).', 'Removed/cleaned up several locked GA apiserver feature gates
+        (RetryGenerateName, BtreeWatchCache, OrderedNamespaceDeletion, StreamingCollectionEncodingToJSON/Protobuf,
+        APIServerTracing, ResilientWatchCacheInitialization, ConsistentListFromCache)
+        and PreventStaticPodAPIReferences gate (behavior now permanent).', Removed
+        SidecarContainers feature gate (was unconditionally enabled since v1.33).]
+    features: ['Watch/List performance & observability: WatchList gzip compression
+        (Beta, enabled by default) and new/updated apiserver list/watch cache metrics;
+        EtcdRangeStream promoted to Beta and enabled by default for faster watch cache
+        initialization.', 'Admission/webhooks: aggregator routing now round-robins
+        across webhook endpoints (with opt-out feature gate); admission webhooks skip
+        auth/authz virtual resources by default (Beta, opt-out).', 'Scheduling: Workload-aware
+        scheduling building blocks expanded (Workload/PodGroup/CompositePodGroup,
+        disruption/preemption policy fields, new PodGroup extension points), plus
+        multiple scheduler performance improvements and new queue/entity metrics.',
+      'Node/runtime: Pod certificates GA (projected podCertificate volume flow), PodReadyToStartContainers
+        GA improvements, PLEGOnDemandRelist GA, new kubelet allocatedPods debug endpoint
+        (feature-gated), gRPC probe TLS (feature-gated), and additional safe sysctls.',
+      'Apps/Autoscaling: HPA scaling to/from zero enabled by default; HPA tolerance
+        configurable is GA; PVC unused-since reporting promoted to Beta and enabled
+        by default.', 'Networking: nftables kube-proxy backend performance improvements
+        including netlink-based rule listing (Beta on by default) and localhost NodePort
+        userspace TCP proxy option; Windows kube-proxy metrics improvements.', 'Storage:
+        VolumeLimitScaling promoted to Beta; new mount option controls per volumeMount
+        (noexec/nodev/nosuid) and emptyDir directory mode bits support; APIs added
+        toward volume health reporting.', 'Build/deps: Kubernetes built with Go 1.26.x
+        across 1.37.0 and Go 1.26.8 in 1.37.1; CoreDNS updated to 1.14.6; etcd default
+        to 3.7.0.']
+    bug_fixes: ["DRA correctness and safety: multiple fixes for consumable/shared\
+        \ counter accounting, allocator cache keying, partitionable device exclusivity,\
+        \ and scheduler panics\u2014important for clusters using DRA features to avoid\
+        \ misallocation, stuck Pending pods, or crashes.", 'kubelet stability: fixed
+        v1.36 kubelet memory leak (context leak per pod sync), several panics (image
+        pull parallelism >31, DRA validation edge cases), and improved shutdown behavior
+        (goroutine/D-Bus leak fixes).', 'Networking: kube-proxy fixes for UDP conntrack
+        blackholing on scale-to-zero, nftables long comment truncation, large-cluster
+        full-sync avoidance, IPVS performance improvements, and Windows HNS reconciliation
+        robustness (including 1.37.1 winkernel panic fix).', 'Storage/controllers:
+        PVC protection vs binder 409 conflicts fixed; kubelet subPath recovery improvements;
+        CSI republish error handling fix; VolumeAttachment validation message correction.',
+      "Security/robustness: apiserver SIGTERM hang fix when identity lease can\u2019\
+        t be created; improved audit logging handling; kubectl cluster-info dump permissions\
+        \ hardened (0600/0700).", 'v1.37.1 specific: DeviceTaintRule with missing
+        deviceSelector no longer matches all devices (prevents cluster-wide DRA device
+        unschedulability); scheduler int overflow handling for ResourceClaim device
+        counts; kubeadm no longer persists node-specific resolvConf path cluster-wide.']
+    api_updates:
+      scheduling.k8s.io: v1alpha2 removed; v1alpha3 introduced; core Workload/PodGroup
+        promoted to v1beta1; DisruptionMode changed from enum to struct; requires
+        removal of v1alpha2 stored objects before upgrade.
+      resource.k8s.io / DRA: Extended resources and device taints/tolerations GA;
+        DRA metadata API Beta; DRAResourceHealth kubelet API promoted to v1 with plugin
+        interface change; multiple new alpha gates (compatibility groups, resource
+        pool status, optional node ops, derived attributes) and allocator/validation
+        behavior changes.
+      metrics.k8s.io: Promoted from v1beta1 to v1 with no schema changes; kubectl
+        top adds support for metrics.k8s.io/v1.
+      PodCertificateRequest: Feature GA with v1 API field removals (PKIXPublicKey,
+        ProofOfPossession) and NodeRestriction tightening for signerName usage.
+      CRI RuntimeService (v1): Adds CheckpointPod/RestorePod RPCs for pod-level checkpoint/restore.
 - version: '1.36'
   summary:
     major_changes: ['Kubernetes v1.36 is a feature-heavy minor release with significant

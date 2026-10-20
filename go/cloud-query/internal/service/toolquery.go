@@ -58,6 +58,28 @@ func (in *ToolQueryService) Metrics(ctx context.Context, input *toolquery.Metric
 	return output, nil
 }
 
+func (in *ToolQueryService) MetricsSeries(ctx context.Context, input *toolquery.MetricsQueryInput) (*toolquery.MetricsSeriesOutput, error) {
+	if input == nil {
+		return nil, status.Error(codes.InvalidArgument, "input is required")
+	}
+
+	if err := in.validateInput(input.GetConnection(), input.GetQuery(), input.GetRange()); err != nil {
+		return nil, err
+	}
+
+	provider, err := tools.NewProvider(input.GetConnection())
+	if err != nil {
+		return nil, in.mapError("metrics_series", err)
+	}
+
+	output, err := provider.MetricsSeries(ctx, input)
+	if err != nil {
+		return nil, in.mapError("metrics_series", err)
+	}
+
+	return output, nil
+}
+
 func (in *ToolQueryService) MetricsSearch(ctx context.Context, input *toolquery.MetricsSearchInput) (*toolquery.MetricsSearchOutput, error) {
 	if input == nil {
 		return nil, status.Error(codes.InvalidArgument, "input is required")

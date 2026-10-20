@@ -14,6 +14,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/pluralsh/console/go/cloud-query/internal/proto/toolquery"
+	"github.com/pluralsh/console/go/cloud-query/internal/tools/series"
 )
 
 type AzureMetricsRequest struct {
@@ -126,8 +127,8 @@ type AzureMetricsResponse struct {
 	azmetrics.QueryResourcesResponse
 }
 
-func (r *AzureMetricsResponse) ToMetricsQueryOutput() *toolquery.MetricsQueryOutput {
-	metrics := make([]*toolquery.MetricPoint, 0)
+func (r *AzureMetricsResponse) ToMetricsSeriesOutput() *toolquery.MetricsSeriesOutput {
+	builder := series.NewBuilder()
 	for _, metricData := range r.Values {
 		resourceURI := strings.TrimSpace(lo.FromPtr(metricData.ResourceID))
 		for _, metric := range metricData.Values {
@@ -136,7 +137,7 @@ func (r *AzureMetricsResponse) ToMetricsQueryOutput() *toolquery.MetricsQueryOut
 				continue
 			}
 
-			for _, series := range metric.TimeSeries {
+			for _, timeSeries := range metric.TimeSeries {
 				baseLabels := map[string]string{
 					"resource_uri": resourceURI,
 				}
@@ -144,7 +145,7 @@ func (r *AzureMetricsResponse) ToMetricsQueryOutput() *toolquery.MetricsQueryOut
 					baseLabels["metric_namespace"] = namespace
 				}
 
-				for _, metadata := range series.MetadataValues {
+				for _, metadata := range timeSeries.MetadataValues {
 					key := lo.FromPtr(metadata.Name.Value)
 					value := lo.FromPtr(metadata.Value)
 					if key == "" || value == "" {
@@ -154,49 +155,39 @@ func (r *AzureMetricsResponse) ToMetricsQueryOutput() *toolquery.MetricsQueryOut
 					baseLabels[key] = value
 				}
 
-				for _, point := range series.Data {
+				labels := make([]map[string]string, len(azureAggregations))
+				for i, aggregation := range azureAggregations {
+					labels[i] = make(map[string]string, len(baseLabels)+1)
+					for key, val := range baseLabels {
+						labels[i][key] = val
+					}
+					labels[i]["aggregation"] = aggregation
+				}
+
+				for _, point := range timeSeries.Data {
 					if point.TimeStamp == nil {
 						continue
 					}
-					r.appendAzureMetricPoints(&metrics, name, baseLabels, &point)
+
+					timestamp := point.TimeStamp.UTC()
+					for i, value := range azureAggregationValues(&point) {
+						if value != nil {
+							builder.Add(name, labels[i], timestamp, *value)
+						}
+					}
 				}
 			}
 		}
 	}
 
-	return &toolquery.MetricsQueryOutput{Metrics: metrics}
+	return builder.Output()
 }
 
-func (r *AzureMetricsResponse) appendAzureMetricPoints(dst *[]*toolquery.MetricPoint, name string, baseLabels map[string]string, point *azmetrics.MetricValue) {
-	if point == nil || point.TimeStamp == nil {
-		return
-	}
+var azureAggregations = []string{"average", "minimum", "maximum", "total", "count"}
 
-	timestamp := point.TimeStamp.UTC()
-	r.appendAzureMetricPoint(dst, timestamp, name, baseLabels, "average", point.Average)
-	r.appendAzureMetricPoint(dst, timestamp, name, baseLabels, "minimum", point.Minimum)
-	r.appendAzureMetricPoint(dst, timestamp, name, baseLabels, "maximum", point.Maximum)
-	r.appendAzureMetricPoint(dst, timestamp, name, baseLabels, "total", point.Total)
-	r.appendAzureMetricPoint(dst, timestamp, name, baseLabels, "count", point.Count)
-}
-
-func (r *AzureMetricsResponse) appendAzureMetricPoint(dst *[]*toolquery.MetricPoint, timestamp time.Time, name string, baseLabels map[string]string, aggregation string, value *float64) {
-	if value == nil {
-		return
-	}
-
-	labels := make(map[string]string, len(baseLabels)+1)
-	for key, val := range baseLabels {
-		labels[key] = val
-	}
-	labels["aggregation"] = aggregation
-
-	*dst = append(*dst, &toolquery.MetricPoint{
-		Timestamp: timestamppb.New(timestamp),
-		Name:      name,
-		Value:     *value,
-		Labels:    labels,
-	})
+// azureAggregationValues returns the point's values in azureAggregations order.
+func azureAggregationValues(point *azmetrics.MetricValue) []*float64 {
+	return []*float64{point.Average, point.Minimum, point.Maximum, point.Total, point.Count}
 }
 
 func NewAzureMetricsResponse(response azmetrics.QueryResourcesResponse) *AzureMetricsResponse {

@@ -6,8 +6,8 @@ defmodule Console.AI.Workbench.MCP.Basic do
   alias Console.Schema.DeploymentSettings.OauthToken
   alias Console.Schema.{WorkbenchTool, McpServer}
 
-  def transport(%WorkbenchTool{tool: :mcp, mcp_server: %McpServer{protocol: proto, url: url} = srv}),
-    do: {proto || :sse, [base_url: normalize_url(url), headers: auth_headers(srv), enable_sse: true]}
+  def transport(%WorkbenchTool{tool: :mcp, mcp_server: %McpServer{url: url} = srv}),
+    do: {McpServer.transport(srv), [base_url: normalize_url(url), headers: auth_headers(srv), enable_sse: true]}
 
   def normalize_url(url), do: String.trim_trailing(url, "/mcp")
 

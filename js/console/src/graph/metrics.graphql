@@ -6,6 +6,15 @@ fragment MetricResponse on MetricResponse {
   }
 }
 
+fragment MetricSeries on MetricResponse {
+  name
+  metric
+  values {
+    timestamp
+    value
+  }
+}
+
 fragment MetricPointResponse on MetricPointResponse {
   metric
   value {

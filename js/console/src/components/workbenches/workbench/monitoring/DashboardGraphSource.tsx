@@ -9,6 +9,10 @@ import {
 } from 'generated/graphql'
 import { authlessClient } from 'helpers/client'
 import { createContext, ReactNode, use } from 'react'
+import {
+  type JobCanvasGraphQueries,
+  useJobCanvasGraphData,
+} from '../job/useJobCanvasGraphData'
 
 type WorkbenchDashboardGraph = NonNullable<
   NonNullable<WorkbenchDashboardDetailsFragment['graphs']>[number]
@@ -31,9 +35,11 @@ export type DashboardPanelGraph = Pick<
   // authenticated only, for the query modal
   datasource?: WorkbenchDashboardGraph['datasource']
   workbenchTool?: WorkbenchDashboardGraph['workbenchTool']
+  /** Rendered as the panel body instead of fetched data, e.g. job canvas charts with inline data. */
+  staticContent?: ReactNode
 }
 
-type GraphResult = NonNullable<
+export type GraphResult = NonNullable<
   NonNullable<WorkbenchDashboardGraphQuery['workbenchDashboard']>['graph']
 >
 
@@ -56,30 +62,32 @@ export type GraphDataArgs = {
 const GRAPH_FETCH_POLICY = 'no-cache'
 
 type DashboardGraphSource =
-  | { dashboardId: string; publicId?: never; readOnly: false }
-  | { publicId: string; dashboardId?: never; readOnly: true }
+  | { dashboardId: string; publicId?: never; job?: never; readOnly: false }
+  | { publicId: string; dashboardId?: never; job?: never; readOnly: true }
+  | {
+      job: JobCanvasGraphQueries
+      dashboardId?: never
+      publicId?: never
+      readOnly: true
+    }
 
-const DashboardGraphSourceContext = createContext<DashboardGraphSource | null>(
-  null
-)
+export const DashboardGraphSourceContext =
+  createContext<DashboardGraphSource | null>(null)
 
 export function useDashboardGraphSource() {
   const source = use(DashboardGraphSourceContext)
   if (!source)
     throw new Error(
-      'useDashboardGraphSource must be used within a DashboardGraphSourceProvider'
+      'useDashboardGraphSource must be used within a graph source (AuthenticatedGraphSource, PublicGraphSource or JobCanvasGraphSource)'
     )
   return source
 }
 
-// Runs the authenticated or the public graph query, depending on the source.
-export function useGraphData({
-  identifier,
-  variables,
-  timeRange,
-  skip,
-}: GraphDataArgs): GraphDataResult {
-  const { dashboardId, publicId } = useDashboardGraphSource()
+// Runs the authenticated, public or job canvas query, depending on the source.
+// Every query hook is called on each render; the ones for other sources are skipped.
+export function useGraphData(args: GraphDataArgs): GraphDataResult {
+  const { identifier, variables, timeRange, skip } = args
+  const { dashboardId, publicId, job } = useDashboardGraphSource()
   const authenticated = useWorkbenchDashboardGraphQuery({
     variables: {
       id: dashboardId ?? '',
@@ -97,6 +105,9 @@ export function useGraphData({
     skip: skip || !publicId,
     fetchPolicy: GRAPH_FETCH_POLICY,
   })
+  const jobGraph = useJobCanvasGraphData(job, args)
+
+  if (job) return jobGraph
 
   if (publicId) {
     const { data, previousData, loading, error } = publicGraph

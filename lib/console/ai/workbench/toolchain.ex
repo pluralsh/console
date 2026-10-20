@@ -28,6 +28,11 @@ defmodule Console.AI.Workbench.Toolchain do
       when (is_struct(resource, WorkbenchJob) or is_struct(resource, Workbench)) and (is_nil(user) or is_struct(user, User)),
     do: execute(resource, name, args, user, @metrics_tools)
 
+  @doc "Runs a metrics tool on the fly like metrics/4, returning samples grouped by series."
+  def metrics_series(resource, name, args, user)
+      when (is_struct(resource, WorkbenchJob) or is_struct(resource, Workbench)) and (is_nil(user) or is_struct(user, User)),
+    do: execute(resource, name, args, user, @metrics_tools, :structured_series)
+
   @doc "Runs a logs tool on the fly; a nil user is anonymous, see metrics/4."
   def logs(resource, name, args, user)
       when (is_struct(resource, WorkbenchJob) or is_struct(resource, Workbench)) and (is_nil(user) or is_struct(user, User)),
@@ -94,10 +99,10 @@ defmodule Console.AI.Workbench.Toolchain do
     end)
   end
 
-  defp execute(resource, name, args, user, allowed) do
+  defp execute(resource, name, args, user, allowed, fun \\ :structured) do
     with {:ok, %mod{} = tool} <- validate_call(resource, name, args, user, allowed) do
-      tool
-      |> mod.structured()
+      mod
+      |> apply(fun, [tool])
       |> normalize_error()
     end
   end

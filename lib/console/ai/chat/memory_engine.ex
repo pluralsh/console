@@ -6,7 +6,7 @@ defmodule Console.AI.Chat.MemoryEngine do
   import Console.GraphQl.Helpers, only: [resolve_changeset: 1]
   alias Console.AI.Provider.Base
   alias Console.AI.{Provider, Tool}
-  alias Console.AI.Chat.EnabledTools
+  alias Console.AI.Chat.{EnabledTools, Thread}
   alias Console.AI.Tools.{EnableTools, ToolSearch}
   alias ReqLLM.{Context, Response}
   require Logger
@@ -25,6 +25,10 @@ defmodule Console.AI.Chat.MemoryEngine do
     :provider,
     :model,
     :usage_callback,
+    :thread,
+    :summarizer,
+    :last_system,
+    compaction_opts: [],
     continue_msg: "looks like we aren't done let's continue",
     context: %Context{messages: [], tools: []},
     pre_enable: [],
@@ -126,7 +130,7 @@ defmodule Console.AI.Chat.MemoryEngine do
   defp loop(
          %__MODULE__{
            max_iterations: max,
-           context: %Context{messages: [_ | _]} = context,
+           thread: %Thread{} = thread,
            system_prompt: preface,
            acc: acc
          } = engine,
@@ -135,11 +139,18 @@ defmodule Console.AI.Chat.MemoryEngine do
        when iter < max do
     preface = build_preface(preface, Map.put(engine, :iteration, iter))
     tools = determine_tools(engine)
+    reserved = system_tokens(preface)
 
-    context
-    |> append_continue(engine)
-    |> put_system_prompt(preface)
-    |> fit_context_window(preface)
+    thread =
+      thread
+      |> append_continue(engine)
+      |> Thread.compact(reserved: reserved, summarizer: summarizer(engine), summary_window: fn -> Provider.context_window(:default) end)
+
+    engine = %{engine | thread: thread, last_system: preface}
+    estimated = Thread.tokens(thread) + reserved
+
+    thread
+    |> request_context(preface)
     |> Provider.reqllm_completion(
       preface: :ignore,
       plural: tools,
@@ -150,6 +161,7 @@ defmodule Console.AI.Chat.MemoryEngine do
     |> case do
       {:ok, %Response{} = response} ->
         content = Response.text(response)
+        engine = calibrate(engine, response, estimated)
 
         case Response.tool_calls(response) do
           [_ | _] = calls ->
@@ -157,14 +169,14 @@ defmodule Console.AI.Chat.MemoryEngine do
 
             case call_tools(engine, calls, tools) do
               {:ok, tool_msgs, context_msgs, engine} ->
-                engine = %{engine | context: Context.append(response.context, context_msgs)}
+                engine = %{engine | thread: Thread.append(engine.thread, [assistant_message(response) | context_msgs])}
                 {maybe_prepend(content, tool_msgs), engine}
 
               err -> err
             end
 
           _ when is_binary(content) ->
-            {[callback(engine, {:assistant, content})], %{engine | context: response.context}}
+            {[callback(engine, {:assistant, content})], %{engine | thread: Thread.append(engine.thread, assistant_message(response))}}
 
           _ ->
             {:error, "no text or tool results in response"}
@@ -214,44 +226,64 @@ defmodule Console.AI.Chat.MemoryEngine do
     end
   end
 
-  defp append_continue(
-         %Context{messages: [_ | _] = messages} = context,
-         %__MODULE__{continue_msg: cont}
-       ) do
-    case List.last(messages) do
-      %ReqLLM.Message{role: :assistant} -> Context.append(context, Context.user(cont))
-      _ -> context
+  defp append_continue(%Thread{} = thread, %__MODULE__{continue_msg: cont}) do
+    case Thread.last_role(thread) do
+      :assistant -> Thread.append(thread, Context.user(cont))
+      _ -> thread
     end
   end
 
-  defp append_continue(context, _), do: context
+  defp request_context(%Thread{} = thread, preface),
+    do: put_system_prompt(Context.new(Thread.to_messages(thread)), preface)
 
-  defp finish(%__MODULE__{return_context: true, context: %Context{} = context}, result),
-    do: {:ok, {result, context}}
+  defp assistant_message(%Response{message: %ReqLLM.Message{} = message}), do: message
+  defp assistant_message(%Response{context: %Context{messages: messages}}), do: List.last(messages)
+
+  defp calibrate(%__MODULE__{thread: thread} = engine, %Response{} = response, estimated) do
+    case Response.usage(response) do
+      %{input_tokens: observed} -> %{engine | thread: Thread.calibrate(thread, estimated, observed)}
+      _ -> engine
+    end
+  end
+
+  defp summarizer(%__MODULE__{summarizer: fun}) when is_function(fun, 1), do: fun
+  # summaries use the default client's base model rather than the engine's (usually pricier) tool model
+  defp summarizer(%__MODULE__{compaction_opts: opts}) do
+    fn transcript ->
+      Provider.completion([{:user, transcript}], Keyword.merge([preface: Thread.compaction_prompt()], opts))
+    end
+  end
+
+  defp system_tokens(preface) when is_binary(preface), do: Thread.estimate_tokens(byte_size(preface)) + 4
+  defp system_tokens(_), do: 0
+
+  defp finish(%__MODULE__{return_context: true, thread: %Thread{} = thread, last_system: preface}, result),
+    do: {:ok, {result, request_context(thread, preface)}}
   defp finish(_, result), do: {:ok, result}
 
   defp build_preface(str, _) when is_binary(str), do: str
   defp build_preface(fun, engine) when is_function(fun, 1), do: fun.(engine)
 
-  defp append_context(%__MODULE__{context: %Context{} = context} = engine, %Context{} = incoming) do
-    %{engine | context: Context.concat(context, incoming)}
-  end
+  defp append_context(%__MODULE__{context: %Context{} = context} = engine, %Context{} = incoming),
+    do: with_thread(%{engine | context: Context.concat(context, incoming)})
 
   defp append_context(%__MODULE__{context: %Context{} = context} = engine, messages)
-       when is_list(messages) do
-    %{engine | context: Context.concat(context, Base.reqllm_messages(messages))}
-  end
+       when is_list(messages),
+       do: with_thread(%{engine | context: Context.concat(context, Base.reqllm_messages(messages))})
 
-  defp append_reducer_messages(%__MODULE__{context: %Context{} = context} = engine, messages) do
-    Enum.reduce(messages, context, fn
-      {:tool, content, %{call_id: id, name: name}}, context
+  defp with_thread(%__MODULE__{context: %Context{messages: messages}} = engine),
+    do: %{engine | thread: Thread.from_messages(messages, Provider.context_window(:tool))}
+
+  defp append_reducer_messages(%__MODULE__{thread: %Thread{} = thread} = engine, messages) do
+    Enum.reduce(messages, thread, fn
+      {:tool, content, %{call_id: id, name: name}}, thread
       when is_binary(content) and is_binary(id) ->
-        Context.append(context, Context.tool_result(id, name, content))
+        Thread.append(thread, Context.tool_result(id, name, content))
 
-      message, context ->
-        Context.append(context, Base.reqllm_messages([message]).messages)
+      message, thread ->
+        Thread.append(thread, Base.reqllm_messages([message]).messages)
     end)
-    |> then(& %{engine | context: &1})
+    |> then(& %{engine | thread: &1})
   end
 
   defp put_system_prompt(%Context{messages: [%ReqLLM.Message{role: :system} | rest]} = context, preface)
@@ -402,78 +434,18 @@ defmodule Console.AI.Chat.MemoryEngine do
     |> Enum.drop_while(&match?(%ReqLLM.Message{role: :tool}, &1))
   end
 
-  # @tkn_model "o200k_base"
-
-  defp msg_size(%ReqLLM.Message{} = message) do
-    content_size = Enum.sum_by(message.content || [], &content_part_size/1)
-    tool_calls_size = Enum.sum_by(message.tool_calls || [], &tool_call_size/1)
-
-    payload_size =
-      content_size +
-        tool_calls_size +
-        value_size(message.name) +
-        value_size(message.tool_call_id) +
-        encoded_size(message.reasoning_details)
-
-    # ReqLLM does not expose a tokenizer-independent counter. Context windows are
-    # token counts, so estimate from the values that providers actually encode
-    # rather than the Erlang heap representation of the structs.
-    estimate_tokens(payload_size) + 4
-  end
+  defp msg_size(%ReqLLM.Message{} = message), do: Thread.message_tokens(message)
 
   defp msg_size(%{content: content}) when is_binary(content),
-    do: estimate_tokens(byte_size(content))
+    do: Thread.estimate_tokens(byte_size(content))
 
   defp msg_size({_, content}) when is_binary(content),
-    do: estimate_tokens(byte_size(content))
+    do: Thread.estimate_tokens(byte_size(content))
 
   defp msg_size({_, content, args}) when is_binary(content),
-    do:
-      estimate_tokens(
-        byte_size(content) + encoded_size(Map.take(args, [:name, :arguments]))
-      )
+    do: Thread.estimate_tokens(byte_size(content) + Thread.encoded_size(Map.take(args, [:name, :arguments])))
 
   defp msg_size(_), do: 0
-
-  # providers bill images by resolution rather than encoded size, topping out around 1.6k tokens
-  defp content_part_size(%{type: :image}), do: 1_600 * 4
-  defp content_part_size(part) do
-    value_size(Map.get(part, :text)) +
-      value_size(Map.get(part, :url)) +
-      encoded_binary_size(Map.get(part, :data)) +
-      value_size(Map.get(part, :file_id)) +
-      value_size(Map.get(part, :media_type)) +
-      value_size(Map.get(part, :filename))
-  end
-
-  defp tool_call_size(%ReqLLM.ToolCall{
-         id: id,
-         type: type,
-         function: %{name: name, arguments: arguments}
-       }) do
-    value_size(id) + value_size(type) + value_size(name) + value_size(arguments)
-  end
-
-  defp tool_call_size(tool_call), do: encoded_size(tool_call)
-
-  defp value_size(value) when is_binary(value), do: byte_size(value)
-  defp value_size(_), do: 0
-
-  defp encoded_binary_size(value) when is_binary(value),
-    do: div(byte_size(value) * 4 + 2, 3)
-
-  defp encoded_binary_size(_), do: 0
-
-  defp encoded_size(nil), do: 0
-  defp encoded_size(value) do
-    case Jason.encode(value) do
-      {:ok, encoded} -> byte_size(encoded)
-      _ -> 0
-    end
-  end
-
-  defp estimate_tokens(0), do: 0
-  defp estimate_tokens(bytes), do: div(bytes + 3, 4)
 
   defp sleep(), do: :timer.sleep(@sleep + Console.jitter(@sleep))
 

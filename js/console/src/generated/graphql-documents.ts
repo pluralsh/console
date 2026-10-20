@@ -1991,6 +1991,103 @@ export const ClusterKubernetesMetricsFragmentDoc = /*#__PURE__*/ gql`
   }
 }
     ${MetricResponseFragmentDoc}` as unknown as DocumentNode<Types.ClusterKubernetesMetricsFragment, unknown>;
+export const NodeUsageMetricsFragmentDoc = /*#__PURE__*/ gql`
+    fragment NodeUsageMetrics on NodeUsageMetrics {
+  cpuUtilization @include(if: $cpuUtilization) {
+    ...MetricResponse
+  }
+  cpuModes @include(if: $cpuModes) {
+    ...MetricResponse
+  }
+  cpuCores @include(if: $cpuCores) {
+    ...MetricResponse
+  }
+  load1 @include(if: $load1) {
+    ...MetricResponse
+  }
+  load5 @include(if: $load5) {
+    ...MetricResponse
+  }
+  load15 @include(if: $load15) {
+    ...MetricResponse
+  }
+  memoryTotal @include(if: $memoryTotal) {
+    ...MetricResponse
+  }
+  memoryUsed @include(if: $memoryUsed) {
+    ...MetricResponse
+  }
+  memoryCached @include(if: $memoryCached) {
+    ...MetricResponse
+  }
+  majorPageFaults @include(if: $majorPageFaults) {
+    ...MetricResponse
+  }
+  filesystemFullness @include(if: $filesystemFullness) {
+    ...MetricResponse
+  }
+  diskRead @include(if: $diskRead) {
+    ...MetricResponse
+  }
+  diskWrite @include(if: $diskWrite) {
+    ...MetricResponse
+  }
+  diskBusy @include(if: $diskBusy) {
+    ...MetricResponse
+  }
+  networkReceive @include(if: $networkReceive) {
+    ...MetricResponse
+  }
+  networkTransmit @include(if: $networkTransmit) {
+    ...MetricResponse
+  }
+  networkErrors @include(if: $networkErrors) {
+    ...MetricResponse
+  }
+  networkDropped @include(if: $networkDropped) {
+    ...MetricResponse
+  }
+  cpu @include(if: $cpu) {
+    ...MetricResponse
+  }
+  cpuRequests @include(if: $cpuRequests) {
+    ...MetricResponse
+  }
+  cpuLimits @include(if: $cpuLimits) {
+    ...MetricResponse
+  }
+  cpuAllocatable @include(if: $cpuAllocatable) {
+    ...MetricResponse
+  }
+  memory @include(if: $memory) {
+    ...MetricResponse
+  }
+  memoryRequests @include(if: $memoryRequests) {
+    ...MetricResponse
+  }
+  memoryLimits @include(if: $memoryLimits) {
+    ...MetricResponse
+  }
+  memoryAllocatable @include(if: $memoryAllocatable) {
+    ...MetricResponse
+  }
+  oomKills @include(if: $oomKills) {
+    ...MetricResponse
+  }
+  podsRunning @include(if: $podsRunning) {
+    ...MetricResponse
+  }
+  podsAllocatable @include(if: $podsAllocatable) {
+    ...MetricResponse
+  }
+  restarts @include(if: $restarts) {
+    ...MetricResponse
+  }
+  conditions @include(if: $conditions) {
+    ...MetricResponse
+  }
+}
+    ${MetricResponseFragmentDoc}` as unknown as DocumentNode<Types.NodeUsageMetricsFragment, unknown>;
 export const ComponentMetricsFragmentFragmentDoc = /*#__PURE__*/ gql`
     fragment ComponentMetricsFragment on ServiceDeployment {
   componentMetrics(
@@ -4738,6 +4835,9 @@ export const BindingPolicyFragmentDoc = /*#__PURE__*/ gql`
     workbench {
       regexes
     }
+    stack {
+      type
+    }
   }
 }
     ${BindingPolicyTinyFragmentDoc}` as unknown as DocumentNode<Types.BindingPolicyFragment, unknown>;
@@ -5510,6 +5610,10 @@ export const WorkbenchToolConfigurationFieldsFragmentDoc = /*#__PURE__*/ gql`
   jiraDatacenter {
     url
   }
+  serviceNow {
+    url
+    username
+  }
   linear {
     url
   }
@@ -5716,6 +5820,14 @@ export const WorkbenchFragmentDoc = /*#__PURE__*/ gql`
 ${WorkbenchJobModesFieldsFragmentDoc}
 ${WorkbenchToolFragmentDoc}
 ${PolicyBindingFragmentDoc}` as unknown as DocumentNode<Types.WorkbenchFragment, unknown>;
+export const WorkbenchJobActivityMetricFragmentDoc = /*#__PURE__*/ gql`
+    fragment WorkbenchJobActivityMetric on WorkbenchJobActivityMetric {
+  timestamp
+  name
+  value
+  labels
+}
+    ` as unknown as DocumentNode<Types.WorkbenchJobActivityMetricFragment, unknown>;
 export const AttachmentFragmentDoc = /*#__PURE__*/ gql`
     fragment Attachment on Attachment {
   id
@@ -5774,6 +5886,10 @@ export const WorkbenchCanvasBlockFragmentDoc = /*#__PURE__*/ gql`
     fragment WorkbenchCanvasBlock on WorkbenchCanvasBlock {
   identifier
   type
+  title
+  description
+  sectionId
+  collapsed
   layout {
     x
     y
@@ -5900,14 +6016,16 @@ export const WorkbenchJobActivityFragmentDoc = /*#__PURE__*/ gql`
 ${UserTinyFragmentDoc}
 ${WorkbenchJobActivityResultFragmentDoc}
 ${AgentRunTinyFragmentDoc}` as unknown as DocumentNode<Types.WorkbenchJobActivityFragment, unknown>;
-export const WorkbenchJobActivityMetricFragmentDoc = /*#__PURE__*/ gql`
-    fragment WorkbenchJobActivityMetric on WorkbenchJobActivityMetric {
-  timestamp
+export const MetricSeriesFragmentDoc = /*#__PURE__*/ gql`
+    fragment MetricSeries on MetricResponse {
   name
-  value
-  labels
+  metric
+  values {
+    timestamp
+    value
+  }
 }
-    ` as unknown as DocumentNode<Types.WorkbenchJobActivityMetricFragment, unknown>;
+    ` as unknown as DocumentNode<Types.MetricSeriesFragment, unknown>;
 export const WorkbenchJobThoughtFragmentDoc = /*#__PURE__*/ gql`
     fragment WorkbenchJobThought on WorkbenchJobThought {
   id
@@ -5924,8 +6042,8 @@ export const WorkbenchJobThoughtFragmentDoc = /*#__PURE__*/ gql`
     logs {
       ...WorkbenchJobActivityLog
     }
-    metrics {
-      ...WorkbenchJobActivityMetric
+    series {
+      ...MetricSeries
     }
     traces {
       ...WorkbenchJobActivityTrace
@@ -5934,7 +6052,7 @@ export const WorkbenchJobThoughtFragmentDoc = /*#__PURE__*/ gql`
 }
     ${WorkbenchToolTinyFragmentDoc}
 ${WorkbenchJobActivityLogFragmentDoc}
-${WorkbenchJobActivityMetricFragmentDoc}
+${MetricSeriesFragmentDoc}
 ${WorkbenchJobActivityTraceFragmentDoc}` as unknown as DocumentNode<Types.WorkbenchJobThoughtFragment, unknown>;
 export const WorkbenchJobActivityWithThoughtsFragmentDoc = /*#__PURE__*/ gql`
     fragment WorkbenchJobActivityWithThoughts on WorkbenchJobActivity {
@@ -6234,6 +6352,7 @@ export const WorkbenchJobFragmentDoc = /*#__PURE__*/ gql`
   workbench {
     id
     name
+    filesystemEnabled
     tools {
       ...WorkbenchToolTiny
     }
@@ -7870,6 +7989,22 @@ export const ClusterKubernetesMetricsDocument = /*#__PURE__*/ gql`
   }
 }
     ${ClusterKubernetesMetricsFragmentDoc}` as unknown as DocumentNode<Types.ClusterKubernetesMetricsQuery, Types.ClusterKubernetesMetricsQueryVariables>;
+export const NodeUsageMetricsDocument = /*#__PURE__*/ gql`
+    query NodeUsageMetrics($clusterId: ID!, $node: String!, $start: DateTime, $stop: DateTime, $step: String, $groupBy: NodeMetricsGrouping, $cpuUtilization: Boolean! = false, $cpuModes: Boolean! = false, $cpuCores: Boolean! = false, $load1: Boolean! = false, $load5: Boolean! = false, $load15: Boolean! = false, $memoryTotal: Boolean! = false, $memoryUsed: Boolean! = false, $memoryCached: Boolean! = false, $majorPageFaults: Boolean! = false, $filesystemFullness: Boolean! = false, $diskRead: Boolean! = false, $diskWrite: Boolean! = false, $diskBusy: Boolean! = false, $networkReceive: Boolean! = false, $networkTransmit: Boolean! = false, $networkErrors: Boolean! = false, $networkDropped: Boolean! = false, $cpu: Boolean! = false, $cpuRequests: Boolean! = false, $cpuLimits: Boolean! = false, $cpuAllocatable: Boolean! = false, $memory: Boolean! = false, $memoryRequests: Boolean! = false, $memoryLimits: Boolean! = false, $memoryAllocatable: Boolean! = false, $oomKills: Boolean! = false, $podsRunning: Boolean! = false, $podsAllocatable: Boolean! = false, $restarts: Boolean! = false, $conditions: Boolean! = false) {
+  cluster(id: $clusterId) {
+    id
+    nodeUsageMetrics(
+      node: $node
+      start: $start
+      stop: $stop
+      step: $step
+      groupBy: $groupBy
+    ) {
+      ...NodeUsageMetrics
+    }
+  }
+}
+    ${NodeUsageMetricsFragmentDoc}` as unknown as DocumentNode<Types.NodeUsageMetricsQuery, Types.NodeUsageMetricsQueryVariables>;
 export const ServiceDeploymentComponentMetricsDocument = /*#__PURE__*/ gql`
     query ServiceDeploymentComponentMetrics($id: ID, $name: String, $cluster: String, $componentId: ID!, $start: DateTime, $stop: DateTime, $step: String) {
   serviceDeployment(id: $id, name: $name, cluster: $cluster) {
@@ -9417,7 +9552,7 @@ export const LoginLinkDocument = /*#__PURE__*/ gql`
     ${UserFragmentDoc}
 ${RefreshTokenFragmentDoc}` as unknown as DocumentNode<Types.LoginLinkMutation, Types.LoginLinkMutationVariables>;
 export const LogAggregationDocument = /*#__PURE__*/ gql`
-    query LogAggregation($clusterId: ID, $limit: Int, $query: String, $serviceId: ID, $time: LogTimeRange, $operator: LogQueryOperator, $facets: [LogFacetInput]) {
+    query LogAggregation($clusterId: ID, $limit: Int, $query: String, $serviceId: ID, $time: LogTimeRange, $operator: LogQueryOperator, $facets: [LogFacetInput], $node: String) {
   logAggregation(
     clusterId: $clusterId
     limit: $limit
@@ -9426,26 +9561,28 @@ export const LogAggregationDocument = /*#__PURE__*/ gql`
     time: $time
     facets: $facets
     operator: $operator
+    node: $node
   ) {
     ...LogLine
   }
 }
     ${LogLineFragmentDoc}` as unknown as DocumentNode<Types.LogAggregationQuery, Types.LogAggregationQueryVariables>;
 export const LogLabelsDocument = /*#__PURE__*/ gql`
-    query LogLabels($field: String!, $clusterId: ID, $serviceId: ID, $query: String, $time: LogTimeRange) {
+    query LogLabels($field: String!, $clusterId: ID, $serviceId: ID, $query: String, $time: LogTimeRange, $node: String) {
   logLabels(
     field: $field
     clusterId: $clusterId
     serviceId: $serviceId
     query: $query
     time: $time
+    node: $node
   ) {
     ...LogFacetDetail
   }
 }
     ${LogFacetDetailFragmentDoc}` as unknown as DocumentNode<Types.LogLabelsQuery, Types.LogLabelsQueryVariables>;
 export const LogAggregationBucketsDocument = /*#__PURE__*/ gql`
-    query LogAggregationBuckets($serviceId: ID, $clusterId: ID, $query: String, $time: LogTimeRange, $operator: LogQueryOperator, $aggregation: LogAggregationInput, $facets: [LogFacetInput]) {
+    query LogAggregationBuckets($serviceId: ID, $clusterId: ID, $query: String, $time: LogTimeRange, $operator: LogQueryOperator, $aggregation: LogAggregationInput, $facets: [LogFacetInput], $node: String) {
   logAggregationBuckets(
     serviceId: $serviceId
     clusterId: $clusterId
@@ -9454,6 +9591,7 @@ export const LogAggregationBucketsDocument = /*#__PURE__*/ gql`
     aggregation: $aggregation
     operator: $operator
     facets: $facets
+    node: $node
   ) {
     ...LogAggregationBucket
   }
@@ -9959,6 +10097,7 @@ export const PolicyStackAttachmentsDocument = /*#__PURE__*/ gql`
       edges {
         node {
           id
+          type
           stack {
             id
             name
@@ -10139,8 +10278,8 @@ export const PublicWorkbenchDashboardGraphDocument = /*#__PURE__*/ gql`
   publicWorkbenchDashboard(publicId: $publicId) {
     name
     graph(identifier: $identifier, timeRange: $timeRange) {
-      metrics {
-        ...WorkbenchJobActivityMetric
+      series {
+        ...MetricSeries
       }
       logs {
         ...WorkbenchJobActivityLog
@@ -10151,7 +10290,7 @@ export const PublicWorkbenchDashboardGraphDocument = /*#__PURE__*/ gql`
     }
   }
 }
-    ${WorkbenchJobActivityMetricFragmentDoc}
+    ${MetricSeriesFragmentDoc}
 ${WorkbenchJobActivityLogFragmentDoc}
 ${WorkbenchJobActivityTraceFragmentDoc}` as unknown as DocumentNode<Types.PublicWorkbenchDashboardGraphQuery, Types.PublicWorkbenchDashboardGraphQueryVariables>;
 export const UpdateRbacDocument = /*#__PURE__*/ gql`
@@ -11236,16 +11375,16 @@ export const WorkbenchJobDocument = /*#__PURE__*/ gql`
   }
 }
     ${WorkbenchJobFragmentDoc}` as unknown as DocumentNode<Types.WorkbenchJobQuery, Types.WorkbenchJobQueryVariables>;
-export const WorkbenchJobMetricsToolDocument = /*#__PURE__*/ gql`
-    query WorkbenchJobMetricsTool($id: ID!, $name: String, $arguments: Json) {
+export const WorkbenchJobMetricsSeriesToolDocument = /*#__PURE__*/ gql`
+    query WorkbenchJobMetricsSeriesTool($id: ID!, $name: String, $arguments: Json) {
   workbenchJob(id: $id) {
     id
-    metricsTool(name: $name, arguments: $arguments) {
-      ...WorkbenchJobActivityMetric
+    metricsSeriesTool(name: $name, arguments: $arguments) {
+      ...MetricSeries
     }
   }
 }
-    ${WorkbenchJobActivityMetricFragmentDoc}` as unknown as DocumentNode<Types.WorkbenchJobMetricsToolQuery, Types.WorkbenchJobMetricsToolQueryVariables>;
+    ${MetricSeriesFragmentDoc}` as unknown as DocumentNode<Types.WorkbenchJobMetricsSeriesToolQuery, Types.WorkbenchJobMetricsSeriesToolQueryVariables>;
 export const WorkbenchJobLogsToolDocument = /*#__PURE__*/ gql`
     query WorkbenchJobLogsTool($id: ID!, $name: String, $arguments: Json) {
   workbenchJob(id: $id) {
@@ -11951,8 +12090,8 @@ export const WorkbenchDashboardGraphDocument = /*#__PURE__*/ gql`
   workbenchDashboard(id: $id) {
     id
     graph(identifier: $identifier, input: $input, timeRange: $timeRange) {
-      metrics {
-        ...WorkbenchJobActivityMetric
+      series {
+        ...MetricSeries
       }
       logs {
         ...WorkbenchJobActivityLog
@@ -11963,7 +12102,7 @@ export const WorkbenchDashboardGraphDocument = /*#__PURE__*/ gql`
     }
   }
 }
-    ${WorkbenchJobActivityMetricFragmentDoc}
+    ${MetricSeriesFragmentDoc}
 ${WorkbenchJobActivityLogFragmentDoc}
 ${WorkbenchJobActivityTraceFragmentDoc}` as unknown as DocumentNode<Types.WorkbenchDashboardGraphQuery, Types.WorkbenchDashboardGraphQueryVariables>;
 export const WorkbenchDashboardInputDocument = /*#__PURE__*/ gql`

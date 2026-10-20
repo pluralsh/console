@@ -283,7 +283,9 @@ function formStateToAttributes(
     ...(workbenchToolSupportsApproval(type) ? { approval: !!approval } : {}),
     readBindings: readBindings.map(bindingToBindingAttributes),
     writeBindings: writeBindings.map(bindingToBindingAttributes),
-    ...(type === WorkbenchToolType.JiraDatacenter && oauth
+    ...((type === WorkbenchToolType.JiraDatacenter ||
+      type === WorkbenchToolType.ServiceNow) &&
+    oauth
       ? { oauth: deepOmitBlank(oauth) }
       : {}),
   }

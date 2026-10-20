@@ -1,0 +1,38 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "table": {
+      "type": "string",
+      "enum": [
+        "incident",
+        "change_request",
+        "problem",
+        "sc_task"
+      ],
+      "description": "ServiceNow ticket table: incident, change_request, problem or sc_task (catalog task)."
+    },
+    "record_id": {
+      "type": "string",
+      "description": "Record sys_id (32 hex characters) or record number, for example INC0010001 or CHG0030002."
+    },
+    "body": {
+      "type": "string",
+      "description": "Comment text."
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "work_notes",
+        "comments"
+      ],
+      "default": "work_notes",
+      "description": "work_notes are internal to the fulfiller team; comments (additional comments) are visible to the caller or requester."
+    }
+  },
+  "required": [
+    "table",
+    "record_id",
+    "body"
+  ]
+}

@@ -171,34 +171,52 @@ func (in *BindingPolicyReconciler) attributes(bindingPolicy *v1alpha1.BindingPol
 		Interval:     bindingPolicy.Spec.Interval,
 	}
 
-	if bindingPolicy.Spec.Matches != nil && bindingPolicy.Spec.Matches.Workbench != nil {
-		attrs.Matches = &console.BindingPolicyMatchesAttributes{
-			Workbench: &console.WorkbenchPolicyMatchesAttributes{
-				Regexes: bindingPolicy.Spec.Matches.Workbench.Regexes,
-			},
-		}
+	if bindingPolicy.Spec.Matches != nil {
+		attrs.Matches = matchesAttrs(bindingPolicy.Spec.Matches)
 	}
 
 	return attrs
 }
 
 func (in *BindingPolicyReconciler) updateAttributes(bindingPolicy *v1alpha1.BindingPolicy, policyID, bindPolicyID string) console.BindingPolicyUpdateAttributes {
-	attrs := console.BindingPolicyUpdateAttributes{
+	return console.BindingPolicyUpdateAttributes{
 		PolicyID:     lo.ToPtr(policyID),
 		BindPolicyID: lo.ToPtr(bindPolicyID),
 		Type:         bindingPolicy.Spec.Type,
 		Interval:     bindingPolicy.Spec.Interval,
+		Matches:      updateMatchesAttrs(bindingPolicy.Spec.Matches),
+	}
+}
+
+func matchesAttrs(matches *v1alpha1.BindingPolicyMatches) *console.BindingPolicyMatchesAttributes {
+	if matches == nil {
+		return nil
 	}
 
-	if bindingPolicy.Spec.Matches != nil && bindingPolicy.Spec.Matches.Workbench != nil {
-		attrs.Matches = &console.BindingPolicyMatchesAttributes{
-			Workbench: &console.WorkbenchPolicyMatchesAttributes{
-				Regexes: bindingPolicy.Spec.Matches.Workbench.Regexes,
-			},
+	attrs := &console.BindingPolicyMatchesAttributes{}
+	if matches.Workbench != nil {
+		attrs.Workbench = &console.WorkbenchPolicyMatchesAttributes{
+			Regexes: matches.Workbench.Regexes,
 		}
+	}
+	if matches.Stack != nil {
+		attrs.Stack = &console.StackPolicyMatchesAttributes{
+			Type: matches.Stack.Type,
+		}
+	}
+	if attrs.Workbench == nil && attrs.Stack == nil {
+		return nil
 	}
 
 	return attrs
+}
+
+func updateMatchesAttrs(matches *v1alpha1.BindingPolicyMatches) *console.BindingPolicyMatchesAttributes {
+	if attrs := matchesAttrs(matches); attrs != nil {
+		return attrs
+	}
+
+	return &console.BindingPolicyMatchesAttributes{}
 }
 
 func (in *BindingPolicyReconciler) sync(ctx context.Context, bindingPolicy *v1alpha1.BindingPolicy, policyID, bindPolicyID string, changed bool) (*console.BindingPolicyFragment, error) {

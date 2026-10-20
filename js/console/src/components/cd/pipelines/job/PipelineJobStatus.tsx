@@ -12,7 +12,7 @@ export default function PipelineJobStatus() {
   const { status, metadata } = usePipelineJob()
 
   return (
-    <ScrollablePage>
+    <ScrollablePage contentStyles={{ paddingTop: 0 }}>
       <div
         css={{
           display: 'flex',

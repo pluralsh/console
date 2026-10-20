@@ -62,7 +62,7 @@ export function WebhookSetupGuidePanelProvider({
 }: {
   children: ReactNode
 }) {
-  const { sidePanel, setSidePanel } = useTopLevelSidePanel()
+  const { sidePanel, setSidePanel, closeSidePanel } = useTopLevelSidePanel()
   const [documentationUrl, setDocumentationUrl] = useState<string | undefined>()
   const [markdownPath, setMarkdownPath] = useState<Nullable<string>>(null)
 
@@ -78,9 +78,9 @@ export function WebhookSetupGuidePanelProvider({
         setMarkdownPath(panel.markdownPath)
         setSidePanel(SIDE_PANEL_TYPE)
       },
-      closeSetupGuidePanel: () => setSidePanel(null),
+      closeSetupGuidePanel: () => closeSidePanel(SIDE_PANEL_TYPE),
     }),
-    [isOpen, documentationUrl, markdownPath, setSidePanel]
+    [isOpen, documentationUrl, markdownPath, setSidePanel, closeSidePanel]
   )
 
   return (
