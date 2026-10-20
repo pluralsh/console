@@ -11,12 +11,12 @@ Observability webhook sources are also documented under [Observability Webhooks]
 
 ## Capabilities
 
-* **Observability** — receive alert payloads from an external monitoring system. Sources: [AlertOps](/plural-features/workbenches/integrations/webhooks/alertops), [Datadog](/plural-features/workbenches/integrations/webhooks/datadog), [Grafana](/plural-features/workbenches/integrations/webhooks/grafana), [New Relic](/plural-features/workbenches/integrations/webhooks/new-relic), [PagerDuty](/plural-features/workbenches/integrations/webhooks/pagerduty), [Plural](/plural-features/workbenches/integrations/webhooks/plural), and [Sentry](/plural-features/workbenches/integrations/webhooks/sentry).
+* **Observability** — receive alert payloads from an external monitoring system. Sources: [AlertOps](/plural-features/workbenches/integrations/webhooks/alertops), [Datadog](/plural-features/workbenches/integrations/webhooks/datadog) monitor notifications, [Grafana](/plural-features/workbenches/integrations/webhooks/grafana) contact points, [New Relic](/plural-features/workbenches/integrations/webhooks/new-relic) workflows, [PagerDuty](/plural-features/workbenches/integrations/webhooks/pagerduty) V3 incident events, and [Sentry](/plural-features/workbenches/integrations/webhooks/sentry) issue alerts from an internal integration. Plural's own monitor alerts are raised internally and need no webhook; see [Plural](/plural-features/workbenches/integrations/webhooks/plural).
 * **Issue** — receive issue events from a tracker ([Asana](/plural-features/workbenches/integrations/webhooks/asana), [Azure DevOps](/plural-features/workbenches/integrations/webhooks/azure-devops), [Jira](/plural-features/workbenches/integrations/webhooks/jira), [Linear](/plural-features/workbenches/integrations/webhooks/linear), [ServiceNow](/plural-features/workbenches/integrations/webhooks/service-now)), or pull-request events from a source-control provider ([Bitbucket Cloud](/plural-features/workbenches/integrations/webhooks/bitbucket), [Bitbucket Data Center](/plural-features/workbenches/integrations/webhooks/bitbucket-datacenter), [GitHub](/plural-features/workbenches/integrations/webhooks/github), [GitLab](/plural-features/workbenches/integrations/webhooks/gitlab)).
 
 ## Setup
 
-The Console shows an inline setup guide while you create a webhook source. Follow that guide for the provider's URL, authentication, and required permissions.
+Each provider page above walks through creating the source in Console, registering the URL and secret in the provider, and troubleshooting failed deliveries. Console also shows an inline setup guide while you create a webhook source.
 
 ## Related
 

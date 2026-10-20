@@ -11,11 +11,11 @@ AlertOps outbound webhook payloads are user-configurable in the Outbound Integra
 
 In Plural:
 
-1. Set **Type** to `Observability`.
-2. Set **Provider** to `ALERTOPS`.
+1. Set **Type of webhook** to `Observability`.
+2. Set **Provider type** to `AlertOps`.
 3. Enter a webhook **Name**.
-4. Enter a **Signing secret**.
-5. Click **Create new webhook**.
+4. Enter or generate a **Secret**.
+5. Click **Create**.
 
 Copy the generated Plural webhook URL.
 
@@ -27,7 +27,7 @@ In your AlertOps account (`https://app.alertops.com/`):
 2. Set **Service Name** to something recognizable (e.g. `Plural`)
 3. Set **Web Security Type** to **Basic**
    - **UserName**: any non-empty value (e.g. `plrl`)
-   - **Password**: the Plural **Signing secret** from step 1
+   - **Password**: the Plural **Secret** from step 1
 4. Click **Save**
 
 ## 3. Add a method that POSTs to Plural
@@ -58,7 +58,7 @@ On the new outbound integration:
    }
    ```
 
-   Replace the `plrl_*` values with the matching Plural project name, cluster handle, and `cluster-handle/service-name` reference. If you cannot inject them as top-level keys, embed `Plural Cluster: <handle>` / `Plural Service: <handle>/<name>` markers in `IncidentLongText` and Plural will scrape them as a fallback.
+   Replace the `plrl_*` values with the matching Plural project name, cluster handle, and service name. `plrl_service` is the plain service name, looked up on the `plrl_cluster` cluster. If you cannot inject them as top-level keys, embed `Plural Cluster: <handle>` / `Plural Service: <name>` markers in `IncidentLongText` and Plural will scrape them as a fallback. A service marker only resolves when the cluster marker is also present.
 
 ## 4. Attach the method to a workflow
 

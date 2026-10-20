@@ -25,4 +25,9 @@ If you use cross-account access, configure role trust with `sts:AssumeRole` and 
 
 - `Region`: AWS region (for example `us-east-1`)
 - Role fields and/or key fields
-- `Default log groups`: optional newline-delimited list used for default log queries
+- `Default log groups`: optional newline-delimited list used for default log queries.
+  Log queries fail unless you set this or the query itself selects log groups with `SOURCE`.
+
+Dashboard and alarm lookups do not assume `Role ARN`. They use the access keys when set,
+otherwise Console's own AWS identity, so that identity also needs CloudWatch read access
+if you want those lookups to work.
