@@ -5,7 +5,7 @@ description: Receive ServiceNow ticket events in Plural
 
 A ServiceNow webhook delivers ticket changes from ServiceNow into Plural. ServiceNow has no built-in outbound webhook, so you send records from a Business Rule. Plural accepts records from four tables: incidents (`incident`), change requests (`change_request`), problems (`problem`), and catalog tasks (`sc_task`). Records from other tables are acknowledged and ignored.
 
-A ticket event does not start a job by itself. A job starts only when a [webhook trigger](/plural-features/workbenches/automation#webhook-triggers) on a workbench matches the ticket.
+A ticket event does not start a job by itself. A job starts only when a [webhook trigger](/plural-features/workbenches/automation#webhook-triggers) on a workbench matches the ticket, and only while the ticket is open: a ticket in state New or On Hold that just became open starts one job. Later updates to a ticket that is already in progress, resolved, or cancelled do not start another one, so the agent's own work notes and state changes do not re-trigger it.
 
 ## What Plural reads from the payload
 
@@ -56,6 +56,7 @@ Plural does not check timestamps, so a captured request could be replayed.
 * **Four tables only.** Records from any other table are acknowledged and ignored.
 * **Links must be http(s).** A `url` or `instance_url` with any other scheme is dropped, and the issue is created without a link.
 * **Custom states map by label.** Send `state` as a `{value, display_value}` pair. A custom label that Plural does not recognize shows the ticket as open.
+* **New tickets need a workbench or flow association.** Plural drops a new ticket only when it has no workbench or flow association, returning `{"ignored": true}` with status 200. A ticket gets a workbench when a workbench trigger matches its title and description. Existing tickets can still update without a matching workbench trigger. The same ignored response comes back for records from other tables and for payloads Plural cannot read.
 * **Delivery is one-shot.** `executeAsync` does not retry, so a failed request is not redelivered. Use a scheduled job in ServiceNow if you need reconciliation.
 * **No deletes.** A deleted ticket is not removed from Plural.
 
@@ -74,6 +75,8 @@ Open **System Properties** (`sys_properties.list`) and create a string property,
 ### Create a Business Rule
 
 Open **System Definition → Business Rules** and create a rule for each table you want to send. Set **Advanced**, run it `async`, and check **Insert** and **Update**.
+
+Add a condition so the rule only sends the tickets you want, for example `Short description contains [plural]` for a trigger that matches that text, and `Updated by is not plural.agent` so the rule does not send the changes the agent makes itself with the integration user. Plural only starts a job for a ticket that is open, so these updates do not start another job, but they would still be sent.
 
 ```javascript
 (function executeRule(current, previous) {

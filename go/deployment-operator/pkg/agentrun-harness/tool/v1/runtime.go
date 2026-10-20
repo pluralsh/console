@@ -92,9 +92,14 @@ func (runtime *Runtime) Run(ctx context.Context, options ...exec.Option) {
 		}
 
 		prompt := runtime.Config.Run.Prompt
-		runtime.emitMessage(&console.AgentMessageAttributes{Message: prompt, Role: console.AiRoleUser}, "")
+		kind := TurnKindInitial
+		if runtime.Config.ResumeFollowup {
+			kind = TurnKindFollowup
+		} else {
+			runtime.emitMessage(&console.AgentMessageAttributes{Message: prompt, Role: console.AiRoleUser}, "")
+		}
 		if err := runtime.turn(ctx, TurnRequest{
-			Kind:    TurnKindInitial,
+			Kind:    kind,
 			Prompt:  prompt,
 			Options: initialOptions,
 		}); err != nil {
@@ -119,14 +124,9 @@ func (runtime *Runtime) BabysitRun(ctx context.Context, babysit *BabysitContext)
 	return false
 }
 
-// Configure performs the initial provider configuration. Credentials are
-// passed to the Agent for this call only and are not retained by Runtime.
-func (runtime *Runtime) Configure(consoleURL, consoleToken string) error {
-	return runtime.configure(context.Background(), ConfigureRequest{
-		Phase:        ConfigurePhaseInitial,
-		ConsoleURL:   consoleURL,
-		ConsoleToken: consoleToken,
-	})
+// Configure performs the initial provider configuration.
+func (runtime *Runtime) Configure() error {
+	return runtime.configure(context.Background(), ConfigureRequest{Phase: ConfigurePhaseInitial})
 }
 
 // ConfigureBabysitRun performs the provider's babysit configuration pass.
@@ -148,6 +148,38 @@ func (runtime *Runtime) OnMessage(callback MessageCallback) {
 // the caller. It deliberately does not emit the user prompt.
 func (runtime *Runtime) FollowUpRun(ctx context.Context, prompt string) error {
 	return runtime.turn(ctx, TurnRequest{Kind: TurnKindFollowup, Prompt: prompt})
+}
+
+// RestoreSession downloads a prior session archive, restores provider-native
+// files through the Agent, and seeds the runtime session ID for resume.
+func (runtime *Runtime) RestoreSession(ctx context.Context, sessionURL string) (string, error) {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	restored, err := artifacts.DownloadAndExtractSession(ctx, sessionURL, runtime.Config.WorkDir)
+	if err != nil {
+		return "", err
+	}
+	defer os.RemoveAll(restored.ExtractDir)
+
+	sessionID, err := runtime.agent.Import(ctx, ImportRequest{
+		Manifest:   restored.Manifest,
+		ExtractDir: restored.ExtractDir,
+	})
+	if err != nil {
+		return "", err
+	}
+	if sessionID == "" && restored.Manifest != nil {
+		sessionID = restored.Manifest.Session.ID
+	}
+	if sessionID == "" {
+		return "", errors.New("restored session id is empty")
+	}
+
+	runtime.mu.Lock()
+	runtime.sessionID = sessionID
+	runtime.mu.Unlock()
+	return sessionID, nil
 }
 
 // UploadArtifacts exports provider-native state into a temporary staging

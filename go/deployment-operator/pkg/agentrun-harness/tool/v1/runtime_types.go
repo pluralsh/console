@@ -93,13 +93,11 @@ type TransportCapabilities struct {
 	FileSystemWrite         bool
 }
 
-// ConfigureRequest carries one configuration pass. ConsoleToken is transient
-// input and must not be copied into Settings or retained by Runtime.
+// ConfigureRequest carries one configuration pass. Agents reach the Console AI
+// proxy through the mcpserver sidecar, so no Console credentials are passed here.
 type ConfigureRequest struct {
-	Phase        ConfigurePhase
-	ConsoleURL   string
-	ConsoleToken string
-	Settings     Settings
+	Phase    ConfigurePhase
+	Settings Settings
 }
 
 // ExportRequest asks an agent to stage its native session under OutputDir.
@@ -112,6 +110,13 @@ type ExportRequest struct {
 // ExportResult contains the source directory returned by an Agent.Export.
 type ExportResult struct {
 	SessionSource artifacts.SessionSource
+}
+
+// ImportRequest asks an agent to restore native session files from an
+// extracted session archive so a follow-up turn can resume prior history.
+type ImportRequest struct {
+	Manifest   *artifacts.SessionManifest
+	ExtractDir string
 }
 
 // TurnSink receives provider-neutral events from Transport. Every callback
@@ -153,6 +158,9 @@ type Agent interface {
 	ResolveSettings(*agentrunv1.AgentRun) (Settings, error)
 	Configure(context.Context, ConfigureRequest) error
 	Export(context.Context, ExportRequest) (ExportResult, error)
+	// Import restores provider-native session files from an extracted archive.
+	// It returns the session ID that should be used for subsequent resume turns.
+	Import(context.Context, ImportRequest) (sessionID string, err error)
 }
 
 // Transport owns one agent invocation protocol. Runtime serializes calls to

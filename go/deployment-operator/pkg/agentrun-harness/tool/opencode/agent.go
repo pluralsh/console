@@ -71,8 +71,7 @@ func (agent *Agent) Prepare(ctx context.Context, request toolv1.FileSystemReques
 }
 
 // Configure writes the native OpenCode provider configuration. Shared prompt
-// and skill files are prepared by Prepare, while ConsoleToken is used only for
-// this configuration pass when the Plural proxy is selected.
+// and skill files are prepared by Prepare.
 func (agent *Agent) Configure(ctx context.Context, request toolv1.ConfigureRequest) error {
 	if ctx != nil && ctx.Err() != nil {
 		return ctx.Err()
@@ -81,8 +80,7 @@ func (agent *Agent) Configure(ctx context.Context, request toolv1.ConfigureReque
 		return fmt.Errorf("unsupported opencode configuration phase %q", request.Phase)
 	}
 	if request.Phase == toolv1.ConfigurePhaseBabysit {
-		// Babysit reuses the provider configuration written during the initial
-		// pass. Rewriting it would discard the transient proxy token.
+		// Babysit reuses the provider configuration written during the initial pass.
 		return nil
 	}
 
@@ -101,8 +99,6 @@ func (agent *Agent) Configure(ctx context.Context, request toolv1.ConfigureReque
 	// runtime supplies the already resolved model for this configuration pass.
 	if err := agent.configureNative(
 		agent.config,
-		request.ConsoleURL,
-		request.ConsoleToken,
 		resolved.provider,
 		model,
 		resolved.openaiCompatible,
@@ -145,4 +141,28 @@ func (agent *Agent) Export(ctx context.Context, request toolv1.ExportRequest) (t
 		Path:        request.OutputDir,
 		ArchivePath: "opencode",
 	}}, nil
+}
+
+func (agent *Agent) Import(ctx context.Context, request toolv1.ImportRequest) (string, error) {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	if err := ctx.Err(); err != nil {
+		return "", err
+	}
+	if request.Manifest == nil {
+		return "", fmt.Errorf("opencode session manifest is not set")
+	}
+	if request.ExtractDir == "" {
+		return "", fmt.Errorf("opencode session extract directory is not set")
+	}
+	if _, err := agent.configWithOpenCode(); err != nil {
+		return "", err
+	}
+
+	sessionJSON := agent.sessionExportPath(request.ExtractDir, request.Manifest.Session.ArchivePath)
+	if err := agent.importSession(ctx, agent.config, sessionJSON); err != nil {
+		return "", fmt.Errorf("import opencode session: %w", err)
+	}
+	return request.Manifest.Session.ID, nil
 }

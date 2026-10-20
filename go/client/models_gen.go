@@ -3163,6 +3163,8 @@ type ConsoleConfiguration struct {
 	PluralLogin    *bool   `json:"pluralLogin,omitempty"`
 	VpnEnabled     *bool   `json:"vpnEnabled,omitempty"`
 	SentryEnabled  *bool   `json:"sentryEnabled,omitempty"`
+	// whether object store is configured for session uploads and agent run reprompting
+	ObjectStoreEnabled *bool `json:"objectStoreEnabled,omitempty"`
 	// whether at least one cluster has been installed, false if a user hasn't fully onboarded
 	Installed             *bool                        `json:"installed,omitempty"`
 	Cloud                 *bool                        `json:"cloud,omitempty"`

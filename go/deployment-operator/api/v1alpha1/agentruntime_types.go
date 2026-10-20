@@ -52,7 +52,7 @@ type AgentRuntimeSpec struct {
 	Config *AgentRuntimeConfig `json:"config,omitempty"`
 
 	// AiProxy routes LLM requests through the Console AI proxy (/ext/ai) using the deploy token,
-	// so provider API keys in spec.config are optional.
+	// which the in-pod mcpserver sidecar adds, so provider API keys in spec.config are optional.
 	//
 	// Set the model on the runtime-specific config block (for example spec.config.codex.model).
 	// The proxy expects models in provider/name format (for example openai/gpt-5.4,
@@ -779,7 +779,8 @@ type OpenCodeConfig struct {
 	//
 	// When the parent AgentRuntime has spec.aiProxy enabled, the harness ignores this field and
 	// autowires provider "plural", routing requests through the Console AI proxy at /ext/ai/v1
-	// using the deploy token. Set spec.config.opencode.model to a bare model id; the harness
+	// using the deploy token, which the in-pod mcpserver sidecar adds. Set
+	// spec.config.opencode.model to a bare model id; the harness
 	// prefixes it for proxy routing based on runtime type (for example gpt-5.4 -> openai/gpt-5.4).
 	//
 	// When aiProxy is false, this selects the native OpenCode provider block; credentials come from

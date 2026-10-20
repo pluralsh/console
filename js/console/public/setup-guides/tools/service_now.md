@@ -15,9 +15,19 @@ states a change can move to next and to move it. Agents cannot delete tickets.
 4. Grant the `itil` role, or a custom role with read and write access to the
    four ticket tables.
 
-To let the agent read comments and work notes, the user also needs read
-access to `sys_journal_field`. Base instances usually restrict that table, so
-you may need an ACL for it.
+### Comments and work notes (`sys_journal_field`)
+
+The agent can write work notes without extra access, but reading them back
+needs read access to `sys_journal_field`. Base instances restrict that table
+and answer with an empty list, not an error, so a ticket with comments looks
+like one without.
+
+To allow it, elevate to `security_admin`, open **System Security → Access
+Control (ACL)** and create one rule with **New**: type `record`, operation
+`read`, decision type `Allow If`. For **Name**, pick the table
+`Journal Entry [sys_journal_field]` in the first dropdown and `-- None --` in
+the second. Under **Requires role**, click **Insert a new row...** and add the
+`itil` role or a dedicated role that the integration user has.
 
 ### State choices (`sys_choice`)
 
@@ -26,7 +36,9 @@ values such as `2` for incidents, problems and catalog tasks. The `itil` role
 usually cannot query that table through the API: the request fails with
 `Field(s) present in the query do not have permission to be read`. Without
 access, `list_states` fails for those tables and `transition_record` accepts
-raw state values only. Change requests are not affected.
+raw state values only, and it cannot look up other choice fields such as the
+`close_code` resolution codes needed to resolve an incident. The next states of
+a change request do not need this access.
 
 To allow it:
 

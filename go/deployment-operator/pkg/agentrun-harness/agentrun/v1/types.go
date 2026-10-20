@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"strings"
 	"time"
 
 	"github.com/samber/lo"
@@ -63,6 +64,9 @@ type AgentRun struct {
 	ApprovedAt      *string
 	Followup        bool
 	PRURL           string
+	// SessionURL is the signed download URL for the uploaded agent session
+	// archive, when object-store uploads are enabled.
+	SessionURL string
 }
 
 // AgentUser is the Console user who initiated the agent run. Git commits
@@ -142,6 +146,14 @@ type PiConfig struct {
 	Timeout  time.Duration `json:"timeout"`
 }
 
+// WithCredentials sets the run's SCM and Plural credentials, which are fetched
+// separately from the run so only agent-bootstrap and the mcpserver sidecar get them.
+func (ar *AgentRun) WithCredentials(credentials *console.AgentRunCredentialsFragment) *AgentRun {
+	ar.ScmCreds = credentials.GetScmCreds()
+	ar.PluralCreds = credentials.GetPluralCreds()
+	return ar
+}
+
 // FromAgentRunFragment converts Console API fragment to harness type
 func (ar *AgentRun) FromAgentRunFragment(fragment *console.AgentRunFragment) *AgentRun {
 	run := &AgentRun{
@@ -153,8 +165,6 @@ func (ar *AgentRun) FromAgentRunFragment(fragment *console.AgentRunFragment) *Ag
 		Mode:        fragment.Mode,
 		ReviewDepth: console.AgentReviewDepthMedium,
 		Status:      fragment.Status,
-		ScmCreds:    fragment.ScmCreds,
-		PluralCreds: fragment.PluralCreds,
 		Runtime:     &AgentRuntime{},
 		Prompts:     fragment.Prompts,
 		Attachments: fragment.Attachments,
@@ -214,6 +224,9 @@ func (ar *AgentRun) FromAgentRunFragment(fragment *console.AgentRunFragment) *Ag
 	}
 	if fragment.FollowupPrURL != nil {
 		run.PRURL = *fragment.FollowupPrURL
+	}
+	if fragment.Upload != nil && fragment.Upload.Session != nil {
+		run.SessionURL = strings.TrimSpace(*fragment.Upload.Session)
 	}
 
 	return run
@@ -318,6 +331,20 @@ func (ar *AgentRun) IsProxyEnabled() bool {
 	}
 
 	return ar.Runtime.AiProxy
+}
+
+// UsesConsoleAIProxy reports whether the agent's model calls go to the Console AI proxy, which the
+// sidecar serves. OpenCode falls back to the Plural provider when none is set, even with aiProxy off.
+func (ar *AgentRun) UsesConsoleAIProxy() bool {
+	if ar.IsProxyEnabled() {
+		return true
+	}
+	if ar == nil || ar.Runtime == nil || ar.Runtime.Config == nil || ar.Runtime.Config.OpenCode == nil {
+		return false
+	}
+
+	openCode := ar.Runtime.Config.OpenCode
+	return !openCode.OpenAICompatible && (openCode.Provider == "" || openCode.Provider == "plural")
 }
 
 func (ar *AgentRun) IsStreamingProxyEnabled() bool {

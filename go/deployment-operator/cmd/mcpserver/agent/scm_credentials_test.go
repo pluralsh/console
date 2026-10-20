@@ -11,11 +11,11 @@ import (
 )
 
 type agentRunFetcherStub struct {
-	agentRun *consoleclient.AgentRunFragment
+	agentRun *consoleclient.AgentRunCredentialsFragment
 	err      error
 }
 
-func (s agentRunFetcherStub) GetAgentRun(context.Context, string) (*consoleclient.AgentRunFragment, error) {
+func (s agentRunFetcherStub) GetAgentRunCredentials(context.Context, string) (*consoleclient.AgentRunCredentialsFragment, error) {
 	return s.agentRun, s.err
 }
 
@@ -26,7 +26,7 @@ func TestRefreshCredentials(t *testing.T) {
 	pluralToken := "new-plural-token"
 	noProxy := "github.internal"
 	client := agentRunFetcherStub{
-		agentRun: &consoleclient.AgentRunFragment{
+		agentRun: &consoleclient.AgentRunCredentialsFragment{
 			ScmCreds: &consoleclient.ScmCredentialFragment{
 				Token: "new-token",
 				Proxy: &consoleclient.ScmCredentialFragment_Proxy{
@@ -68,7 +68,7 @@ func TestRefreshCredentialsRequiresSCMCreds(t *testing.T) {
 	pluralToken := "new-plural-token"
 	credentials := newCredentialStore("old-plural-token")
 	err := refreshCredentials(context.Background(), agentRunFetcherStub{
-		agentRun: &consoleclient.AgentRunFragment{
+		agentRun: &consoleclient.AgentRunCredentialsFragment{
 			PluralCreds: &consoleclient.PluralCredsFragment{Token: &pluralToken},
 		},
 	}, "run-id", credentials)
@@ -84,7 +84,7 @@ func TestRefreshCredentialsRequiresSCMCreds(t *testing.T) {
 func TestRefreshCredentialsRequiresPluralCreds(t *testing.T) {
 	t.Setenv(environment.EnvGitAccessToken, "old-token")
 	err := refreshCredentials(context.Background(), agentRunFetcherStub{
-		agentRun: &consoleclient.AgentRunFragment{
+		agentRun: &consoleclient.AgentRunCredentialsFragment{
 			ScmCreds: &consoleclient.ScmCredentialFragment{Token: "new-token"},
 		},
 	}, "run-id", newCredentialStore("old-token"))

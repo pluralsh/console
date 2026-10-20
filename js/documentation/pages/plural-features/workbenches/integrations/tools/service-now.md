@@ -22,7 +22,19 @@ Use a dedicated service account with the narrowest role that works. The agent ca
 3. Set a password.
 4. Grant the `itil` role, or a custom role with read and write access to the four ticket tables.
 
-Comments and work notes are stored in the `sys_journal_field` table. Base instances usually restrict that table, so add an ACL that lets the integration user read it if you want the agent to read ticket history. The same goes for the state choices in `sys_choice`, which `list_states` and `transition_record` read to resolve state labels such as `In Progress`. See [Allow reading state choices](#allow-reading-state-choices).
+Comments and work notes are stored in the `sys_journal_field` table. Base instances usually restrict that table, so the agent can write notes but reads back an empty list. See [Allow reading comments](#allow-reading-comments). The same goes for the state choices in `sys_choice`, which `list_states` and `transition_record` read to resolve state labels such as `In Progress`. See [Allow reading state choices](#allow-reading-state-choices).
+
+### Allow reading comments
+
+`add_comment` writes through the ticket record and works without extra access. `list_comments` reads `sys_journal_field`, and without access ServiceNow answers with an empty list, not an error. The agent then reports a ticket with no history, even when it has work notes. To allow it, elevate to `security_admin` and create one ACL in **System Security → Access Control (ACL)**:
+
+* **Type:** `record`.
+* **Operation:** `read`.
+* **Decision Type:** `Allow If`.
+* **Name:** the table `Journal Entry [sys_journal_field]` in the first dropdown, and `-- None --` in the second one. This is a rule for the table rows.
+* **Requires role:** `itil`, or a dedicated role that the integration user has.
+
+This one rule was enough on a Zurich instance. Check it by asking the agent to list the comments of a ticket that has a work note.
 
 ### Allow reading state choices
 
@@ -33,7 +45,7 @@ Insufficient rights to query records
 Field(s) present in the query do not have permission to be read
 ```
 
-Without access, `list_states` fails for incidents, problems, and catalog tasks, and `transition_record` accepts raw state values such as `2` but not labels. Change requests are not affected, their states come from the Change Management API.
+Without access, `list_states` fails for incidents, problems, and catalog tasks, and `transition_record` accepts raw state values such as `2` but not labels. The agent also cannot read the other choice fields it needs, such as the `close_code` resolution codes of an incident, which makes resolving an incident a guess. The next states of a change request come from the Change Management API and do not need this access.
 
 The tool filters the table on `name`, `element`, `language`, and `inactive`, sorts by `sequence`, and returns `value` and `label`. ServiceNow checks [query ACLs](https://www.servicenow.com/docs/r/platform-security/access-control/query-acl-rule.html) on the filtered fields, and read access on the returned ones. Grant the integration user all three:
 
@@ -56,7 +68,7 @@ The tool filters the table on `name`, `element`, `language`, and `inactive`, sor
 
    A `result` list with state values means it works. The same error as above means a rule still blocks it. To find which one, open **System Security → Debug Security Rules**, repeat the request, and read the rules that were evaluated for `sys_choice`.
 
-The agent keeps working without this access, so you can skip it if you give the agent raw state values in the workbench prompt.
+The agent keeps working without this access for simple moves, but it cannot look up resolution codes, and ServiceNow rejects a resolve with an invalid code as a missing one. Skip it only if you give the agent the raw state values and valid codes in the workbench prompt.
 
 ### Optional: OAuth client credentials
 
@@ -81,8 +93,8 @@ These work on all four tables.
 | `update_record` | Changes fields on a ticket: assignment, priority, close codes, and so on. |
 | `list_comments` | Lists additional comments and work notes on a ticket, newest first. |
 | `add_comment` | Adds a work note (internal, the default) or an additional comment (visible to the caller). |
-| `list_states` | Lists the states a table can have. For a change request it lists the states that change can move to next. |
-| `transition_record` | Moves a ticket to another state. The target is checked against the states from `list_states` when ServiceNow reports them, and a rejection from ServiceNow, such as a missing `close_code` or `close_notes`, is returned to the agent. |
+| `list_states` | Lists the states a table can have. For a change request it lists the states that change can move to next. With `field` it lists the choices of another field instead, such as the `close_code` resolution codes of an incident. |
+| `transition_record` | Moves a ticket to another state. The target is checked against the states from `list_states` when ServiceNow reports them, and a rejection from ServiceNow, such as a missing `close_code` or `close_notes`, is returned to the agent. Resolution codes differ per instance, so the agent reads them with `list_states` first. ServiceNow ignores a code that is not one of them and then reports the code as missing. |
 
 The read-only operations are `list_records`, `get_record`, `list_comments`, and `list_states`. The others change data in ServiceNow and are left out of read-only surfaces such as the workbench MCP server. The tool cannot delete tickets. Agents close or cancel them with `transition_record` instead.
 
@@ -101,9 +113,9 @@ Moving a change request uses the [Change Management API](https://www.servicenow.
 
 * **Four tables only.** `incident`, `change_request`, `problem`, and `sc_task`. Other tables, including custom ones, are rejected.
 * **Paging uses offsets.** `list_records` and `list_comments` return a `nextCursor` whenever a page is full, so reading an exact multiple of the page size ends with one empty page. Page size is capped at 100.
-* **Comment history needs an ACL.** `list_comments` reads `sys_journal_field`, which base instances restrict. Without read access the call returns a 403 or an empty list.
+* **Comment history needs an ACL.** `list_comments` reads `sys_journal_field`, which base instances restrict. Without read access the call returns an empty list, so a ticket with comments looks like one without.
 * **Transition checks are best effort.** A change is checked against the states it can move to next, as reported by the Change Management API. For incidents, problems, and catalog tasks ServiceNow has no transition API, so `transition_record` checks the target against the table's state choices, and ServiceNow business rules decide whether the move is allowed. When the integration user cannot read the state choices (`sys_choice`) or the next states cannot be read, the state is sent as given and ServiceNow decides. The error message is passed back to the agent.
-* **`list_states` for tables other than changes.** It always returns the state choices of the table. The next states are only available for a change request when a `record_id` is given.
+* **`list_states` returns choices, not transitions, except for changes.** It returns the state choices of the table, or the choices of the field given in `field`. The next states are only available for a change request when a `record_id` is given and no other field is asked for.
 * **Custom states.** State values and labels can differ per instance, and change models can add their own states. `list_states` shows what the instance has.
 * **No deletes, attachments, or approvals.** The tool has no operation to delete tickets, read or write attachments, or approve and reject approvals. Because `update_record` and `transition_record` write any field the integration user can write, keep approval fields read-only for that user with ACLs. A normal change that needs approval is meant to be approved in ServiceNow before it can move past authorization.
 * **Basic auth or client credentials only.** Authorization code and JWT grants are not supported.

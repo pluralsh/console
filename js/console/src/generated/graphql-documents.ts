@@ -9444,6 +9444,7 @@ export const MeDocument = /*#__PURE__*/ gql`
     installed
     consoleVersion
     sentryEnabled
+    objectStoreEnabled
     healthmapClusterCount
     manifest {
       ...Manifest
