@@ -1509,7 +1509,9 @@ kas:
 # ferrotunnel is the reverse-tunnel server. It has its own internet-facing load balancer.
 # Port 7835 is the TLS control plane. Port 80 is the HTTP ingress and forwards to the process on 8080.
 # The API writes Secret existingSecret.
-# host empty becomes ferrotunnel.<ingress.console_dns>, which is also the server certificate name.
+# host empty becomes tunnel.<domain> (first label of ingress.console_dns stripped),
+# which is also the server certificate name. Example: console.example.com -> tunnel.example.com.
+
 ferrotunnel:
   enabled: true
   host: ""

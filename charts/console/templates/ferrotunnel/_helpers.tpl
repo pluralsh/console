@@ -1,18 +1,18 @@
 {{/*
-Expand the name of the ferrotunnel component, based on console.name with a -ferrotunnel suffix.
+Expand the name of the tunnel component, based on console.name with a -tunnel suffix.
 */}}
 {{- define "ferrotunnel.name" -}}
-{{- printf "%s-ferrotunnel" (include "console.name" .) | trunc 63 | trimSuffix "-" }}
+{{- printf "%s-tunnel" (include "console.name" .) | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
-Create a default fully qualified name for the ferrotunnel component.
+Create a default fully qualified name for the tunnel component.
 */}}
 {{- define "ferrotunnel.fullname" -}}
 {{- if .Values.ferrotunnel.fullnameOverride }}
 {{- .Values.ferrotunnel.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
-{{- printf "%s-ferrotunnel" (include "console.fullname" .) | trunc 63 | trimSuffix "-" }}
+{{- printf "%s-tunnel" (include "console.fullname" .) | trunc 63 | trimSuffix "-" }}
 {{- end }}
 {{- end }}
 
@@ -42,6 +42,21 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 
 {{- define "ferrotunnel.controlServiceName" -}}
 {{- printf "%s-control" (include "ferrotunnel.fullname" .) }}
+{{- end }}
+
+{{/*
+Default public hostname: tunnel.<domain>, stripping the first label of console DNS
+so it stays under wildcard certs (console.example.com -> tunnel.example.com).
+*/}}
+{{- define "ferrotunnel.host" -}}
+{{- if .Values.ferrotunnel.host }}
+{{- .Values.ferrotunnel.host }}
+{{- else }}
+{{- $parts := splitList "." (.Values.ingress.console_dns | default "") }}
+{{- if gt (len $parts) 1 }}
+{{- printf "tunnel.%s" (rest $parts | join ".") }}
+{{- end }}
+{{- end }}
 {{- end }}
 
 {{- define "ferrotunnel.serviceAccountName" -}}

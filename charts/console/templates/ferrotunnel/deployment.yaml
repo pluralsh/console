@@ -20,7 +20,7 @@ spec:
       securityContext:
         {{- toYaml .Values.ferrotunnel.podSecurityContext | nindent 8 }}
       containers:
-        - name: ferrotunnel
+        - name: tunnel
           image: {{ .Values.ferrotunnel.image.repository }}:{{ .Values.ferrotunnel.image.tag }}
           imagePullPolicy: {{ .Values.ferrotunnel.image.pullPolicy }}
           args:

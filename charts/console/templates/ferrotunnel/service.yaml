@@ -1,8 +1,5 @@
 {{- if .Values.ferrotunnel.enabled }}
-{{- $host := .Values.ferrotunnel.host }}
-{{- if not $host }}
-{{- $host = printf "ferrotunnel.%s" (.Values.ingress.console_dns | default "") }}
-{{- end }}
+{{- $host := include "ferrotunnel.host" . }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -14,7 +11,7 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
     {{- with $host }}
-    plural.sh/ferrotunnel-host: {{ . | quote }}
+    plural.sh/tunnel-host: {{ . | quote }}
     external-dns.alpha.kubernetes.io/hostname: {{ . | quote }}
     {{- end }}
 spec:

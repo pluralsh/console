@@ -208,9 +208,17 @@ defmodule Console.Deployments.FerroTunnel do
     }
   end
 
+  # console.example.com -> tunnel.example.com so the name stays under *.example.com wildcards.
   defp hostname() do
     case Console.conf(:hostname) do
-      host when is_binary(host) and host != "" -> "ferrotunnel." <> host
+      host when is_binary(host) and host != "" -> tunnel_hostname(host)
+      _ -> nil
+    end
+  end
+
+  defp tunnel_hostname(host) do
+    case String.split(host, ".") do
+      [_label | rest] when rest != [] -> "tunnel." <> Enum.join(rest, ".")
       _ -> nil
     end
   end

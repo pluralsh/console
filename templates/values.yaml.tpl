@@ -63,7 +63,7 @@ kas:
 
 ferrotunnel:
   enabled: true
-  host: ferrotunnel.{{ .Values.consoleDns }}
+  # host empty: chart derives tunnel.<domain> from ingress.console_dns
   {{ if eq .Values.provider "aws" }}
   # Internet-facing NLB for agent control (7835) and HTTP ingress (80).
   # Do not set aws-load-balancer-proxy-protocol; it breaks the TLS handshake on 7835.
