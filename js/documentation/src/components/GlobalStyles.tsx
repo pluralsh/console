@@ -1,6 +1,7 @@
 import { createGlobalStyle } from 'styled-components'
 
 import { brand } from '@src/theme/docsTheme'
+import { brandTokens } from '@src/theme/palette'
 
 const fillAvailable = (prop) => ({
   [`${prop} `]: '-webkit-fill-available',
@@ -16,6 +17,14 @@ const GlobalStyles = createGlobalStyle(({ theme }) => ({
     background: brand['accent-tint'],
     color: brand.ink,
   },
+  // Design-system hljs selection is a fixed navy with code-block-light-grey
+  // text. That token is near-black in light mode, and the rule is nested under
+  // the Highlight component so it beats a plain .hljs selector. Force light
+  // text on the navy in both modes.
+  'html .hljs ::selection, html .hljs::selection': {
+    backgroundColor: '#383a62 !important',
+    color: `${brandTokens.dark.ink} !important`,
+  },
   '*:focus': {
     outline: 'none',
   },
@@ -27,6 +36,21 @@ const GlobalStyles = createGlobalStyle(({ theme }) => ({
     '--menu-extra-bpad': '0px',
     '--docs-sidenav-width': '272px',
     '--docs-sidecar-width': '220px',
+    '--callout-tint': '7%',
+    '--callout-border': '25%',
+    // Translucent so fills sit on the grain like the rest of the page.
+    '--table-header':
+      'color-mix(in srgb, color-mix(in srgb, var(--color-accent) 35%, var(--color-ink)) 8%, transparent)',
+    '--table-stripe': 'color-mix(in srgb, var(--color-ink) 4%, transparent)',
+    '--table-line':
+      'color-mix(in srgb, color-mix(in srgb, var(--color-accent) 35%, var(--color-ink)) 16%, transparent)',
+  },
+  'html[data-theme-mode="dark"]': {
+    '--callout-tint': '12%',
+    '--callout-border': '40%',
+    '--table-header': 'color-mix(in srgb, var(--color-ink) 9%, transparent)',
+    '--table-stripe': 'color-mix(in srgb, var(--color-ink) 5%, transparent)',
+    '--table-line': 'color-mix(in srgb, var(--color-ink) 14%, transparent)',
   },
   'a:any-link': {
     color: 'unset',

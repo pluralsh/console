@@ -11,7 +11,9 @@ import type { MarkdocHeading } from '../../pages/_app'
 import { exists } from '../utils/typescript'
 
 const Title = styled.h2(({ theme }) => ({
-  ...docsText.label,
+  ...docsText.eyebrow,
+  textTransform: 'uppercase' as const,
+  letterSpacing: '0.04em',
   marginTop: 36,
   marginBottom: theme.spacing.small,
   '&::after': {
@@ -55,7 +57,7 @@ const StyledLink = styled(NextLink as any)<{ $active: boolean }>(
     position: 'relative',
     display: 'block',
     fontFamily: theme.fontFamilies.sans,
-    fontSize: 13,
+    fontSize: 14,
     lineHeight: 1.45,
     letterSpacing: '0.01em',
     color: brand.muted,

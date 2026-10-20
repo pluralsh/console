@@ -30,10 +30,14 @@ export const DocsColorVars = createGlobalStyle`
   html:root:root,
   html[${ATTR}='light']:root:root {
     ${colorVarsForMode('light')}
+    --callout-tint: 7%;
+    --callout-border: 25%;
     color-scheme: light;
   }
   html[${ATTR}='dark']:root:root {
     ${colorVarsForMode('dark')}
+    --callout-tint: 12%;
+    --callout-border: 40%;
     color-scheme: dark;
   }
 `

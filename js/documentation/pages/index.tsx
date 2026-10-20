@@ -21,19 +21,30 @@ import Link, { type LinkProps } from 'next/link'
 import styled, { useTheme } from 'styled-components'
 
 import { mqs } from '@src/components/Breakpoints'
+import { WorkbenchMock } from '@src/components/WorkbenchMock'
 import { brand, docsText } from '@src/theme/docsTheme'
 import { brandTokens } from '@src/theme/palette'
 
 const { Heading: MarkdocHeading } = markdocComponents
 
+const HERO_FILL = [
+  'url(/images/landing/hero-lines.svg) center / cover no-repeat',
+  'linear-gradient(95deg, #1e2749 0%, #1f2f4a 40%, #224443 100%)',
+].join(', ')
+
 // The hero art is a dark product shot, so like the marketing site's product
 // mocks it stays dark in both color modes.
 const Hero = styled.div(({ theme }) => ({
-  background: 'url(/images/landing/hero-bg-sm.png)',
-  backgroundSize: '100% 100%',
+  position: 'relative',
+  background: HERO_FILL,
   borderRadius: theme.borderRadiuses.large,
   border: `1px solid ${brand.line}`,
   overflow: 'hidden',
+  // Hero stays dark in both modes; selection must stay light-on-dark.
+  '& ::selection': {
+    background: brandTokens.dark['accent-tint'],
+    color: brandTokens.dark.ink,
+  },
   h1: {
     margin: 0,
     marginBottom: theme.spacing.xsmall,
@@ -53,29 +64,35 @@ const Hero = styled.div(({ theme }) => ({
       margin: 0,
     },
   },
-  picture: {
-    display: 'contents',
-  },
-  '.bgImgLg': {
+  '.shot': {
     display: 'none',
   },
   [mqs.md]: {
     display: 'flex',
+    minHeight: 320,
     '& > *': { flexShrink: 0 },
     h1: {
       ...docsText.pageTitle,
       color: brandTokens.dark.ink,
     },
     '.content': {
-      maxWidth: '48.2%',
+      maxWidth: '46%',
       textWrap: 'balance',
     },
-    background: 'none',
-    '.bgImgLg': {
+    // The mock renders at a fixed size and is scaled down; it sits in the
+    // right half and bleeds off the right and bottom edges.
+    '.shot': {
       display: 'block',
-      width: '100%',
-      transform: 'translateX(-100%)',
+      position: 'absolute',
+      top: 64,
+      left: '48%',
       zIndex: 0,
+      transform: 'scale(0.62)',
+      transformOrigin: 'top left',
+      borderTopLeftRadius: 16,
+      overflow: 'hidden',
+      boxShadow:
+        '0 0 0 1px rgb(255 255 255 / 0.12), 0 30px 80px rgb(8 10 40 / 0.6)',
     },
   },
 }))
@@ -188,18 +205,9 @@ function Index() {
             </p>
           </div>
         </div>
-        <picture>
-          <source
-            type="image/avif"
-            srcSet="/images/landing/docs-hero.avif"
-          />
-          <img
-            className="bgImgLg"
-            aria-hidden="true"
-            alt=""
-            src="/images/landing/docs-hero.png"
-          />
-        </picture>
+        <div className="shot">
+          <WorkbenchMock />
+        </div>
       </Hero>
       <Section>
         <SectionHeading>
