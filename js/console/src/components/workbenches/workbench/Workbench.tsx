@@ -30,11 +30,26 @@ import { Confirm } from 'components/utils/Confirm'
 import { MoreMenu } from 'components/utils/MoreMenu'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { CrumbSelect } from 'components/layout/CrumbSelect'
-import { PageWithSidecar } from 'components/layout/PageLayout'
+import {
+  PAGE_SIDECAR_WIDTH,
+  PageColumnSC,
+  PageRowSC,
+  PageSidecarSC,
+} from 'components/layout/PageLayout'
 import { PageToolbar } from 'components/layout/PageToolbar'
 import { useWorkbenchOptions } from 'components/workbenches/useWorkbenchOptions'
 import { getTabCrumb } from 'utils/getTabCrumb'
-import { Key, ReactNode, useCallback, useMemo, useState } from 'react'
+import {
+  createContext,
+  Key,
+  ReactNode,
+  useCallback,
+  useContext,
+  useLayoutEffect,
+  useMemo,
+  useState,
+} from 'react'
+import { createPortal } from 'react-dom'
 import {
   Link,
   Outlet,
@@ -61,8 +76,11 @@ import {
   WORKBENCHES_MONITORING_REL_PATH,
 } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
-import { WorkbenchSidebarSlot } from './WorkbenchSidebarSlot'
-import { WorkbenchSidePanel } from './WorkbenchSidePanel'
+import { WorkbenchPanelSlot } from './WorkbenchPanelSlot'
+import {
+  WORKBENCH_SIDEBAR_WIDTH,
+  WorkbenchSidePanel,
+} from './WorkbenchSidePanel'
 import { WorkbenchToolsEditModal } from './WorkbenchToolsEditModal'
 import { useWorkbenchJobsDelta } from './useWorkbenchJobsDelta'
 
@@ -129,11 +147,17 @@ export enum WorkbenchMoreMenuKey {
   Delete = 'delete',
 }
 
-// `tools`: tools, webhooks, chatbots and crons, only relevant when launching
+// `tools`: tools, webhooks, chatbots and crons, only relevant when launching.
+// Custom sidebars declare their width, as CSS can only transition explicit ones
 export type WorkbenchSidebar =
   | { kind: 'tools' }
   | { kind: 'none' }
-  | { kind: 'custom'; content: ReactNode }
+  | {
+      kind: 'custom'
+      content: ReactNode
+      width: number
+      resizing?: boolean
+    }
 
 export type WorkbenchPageLayoutProps = {
   sidebar?: WorkbenchSidebar
@@ -145,6 +169,33 @@ export type WorkbenchPageLayoutProps = {
   children?: ReactNode
 }
 
+type WorkbenchTabsLayout = {
+  sidebarWidth: number
+  sidebarResizing: boolean
+  sidecarWidth: number
+  showEditWorkbenchButton: boolean
+  contentBackground?: SemanticColorKey
+}
+
+const EMPTY_TABS_LAYOUT: WorkbenchTabsLayout = {
+  sidebarWidth: 0,
+  sidebarResizing: false,
+  sidecarWidth: 0,
+  showEditWorkbenchButton: true,
+}
+
+type WorkbenchTabsContextValue = {
+  sidebarEl: HTMLDivElement | null
+  sidecarEl: HTMLDivElement | null
+  headerActionsEl: HTMLDivElement | null
+  setLayout: (layout: WorkbenchTabsLayout) => void
+}
+
+const WorkbenchTabsContext =
+  createContext<Nullable<WorkbenchTabsContextValue>>(null)
+
+// A tab's page: its content renders in place, while its panels and header
+// actions are portaled into WorkbenchTabs, which outlives tab switches
 export function WorkbenchPageLayout({
   sidebar = { kind: 'none' },
   showEditWorkbenchButton = true,
@@ -153,17 +204,78 @@ export function WorkbenchPageLayout({
   sidecar,
   children,
 }: WorkbenchPageLayoutProps) {
+  const tabs = useContext(WorkbenchTabsContext)
+  const { workbenchId, openToolsEdit } =
+    useOutletContext<WorkbenchOutletContext>()
+  const {
+    node: sidebarNode,
+    width: sidebarWidth,
+    resizing: sidebarResizing,
+  } = renderWorkbenchSidebar(sidebar, workbenchId, openToolsEdit)
+  const sidecarWidth = sidecar ? PAGE_SIDECAR_WIDTH : 0
+  const setLayout = tabs?.setLayout
+
+  // a layout effect, so the frame is never painted with the previous tab's
+  // layout; the next tab's layout replaces the reset within the same commit
+  useLayoutEffect(() => {
+    setLayout?.({
+      sidebarWidth,
+      sidebarResizing,
+      sidecarWidth,
+      showEditWorkbenchButton,
+      contentBackground,
+    })
+    return () => setLayout?.(EMPTY_TABS_LAYOUT)
+  }, [
+    setLayout,
+    sidebarWidth,
+    sidebarResizing,
+    sidecarWidth,
+    showEditWorkbenchButton,
+    contentBackground,
+  ])
+
+  return (
+    <>
+      {children}
+      {tabs?.sidebarEl &&
+        sidebarNode &&
+        createPortal(sidebarNode, tabs.sidebarEl)}
+      {tabs?.sidecarEl &&
+        sidecar &&
+        createPortal(<PageSidecarSC>{sidecar}</PageSidecarSC>, tabs.sidecarEl)}
+      {tabs?.headerActionsEl &&
+        headerActions &&
+        createPortal(headerActions, tabs.headerActionsEl)}
+    </>
+  )
+}
+
+// The frame around the workbench tabs, a layout route so its panel slots stay
+// mounted (and transition) as tabs switch
+export function WorkbenchTabs() {
   const theme = useTheme()
   const navigate = useNavigate()
-  const { workbenchId, workbench, openToolsEdit, openDelete } =
-    useOutletContext<WorkbenchOutletContext>()
+  const outletContext = useOutletContext<WorkbenchOutletContext>()
+  const { workbenchId, workbench, openToolsEdit, openDelete } = outletContext
+  const [layout, setLayout] = useState(EMPTY_TABS_LAYOUT)
+  const [sidebarEl, setSidebarEl] = useState<HTMLDivElement | null>(null)
+  const [sidecarEl, setSidecarEl] = useState<HTMLDivElement | null>(null)
+  const [headerActionsEl, setHeaderActionsEl] = useState<HTMLDivElement | null>(
+    null
+  )
+  const tabsContext = useMemo(
+    () => ({ sidebarEl, sidecarEl, headerActionsEl, setLayout }),
+    [sidebarEl, sidecarEl, headerActionsEl]
+  )
+  const { showEditWorkbenchButton, contentBackground } = layout
 
   const { tab = '' } =
     useMatch(`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/:tab?/*`)
       ?.params ?? {}
 
-  // set by the tab layout rather than the parent route, so pages without it
-  // (e.g. a job) can set their own, deeper breadcrumbs
+  // set by the tabs rather than the parent route, so pages outside them (e.g.
+  // a job) can set their own, deeper breadcrumbs
   useSetBreadcrumbs(
     useMemo(
       () => [
@@ -178,11 +290,6 @@ export function WorkbenchPageLayout({
     )
   )
 
-  const sidebarNode = renderWorkbenchSidebar(
-    sidebar,
-    workbenchId,
-    openToolsEdit
-  )
   const workbenchBasePath = getWorkbenchAbsPath(workbenchId)
   const jobsTabPath = `${workbenchBasePath}/${WORKBENCH_JOBS_REL_PATH}`
   const hasInProgressJobs = useWorkbenchHasInProgressJobs(workbenchId)
@@ -270,104 +377,116 @@ export function WorkbenchPageLayout({
   )
 
   return (
-    <Flex
-      align="stretch"
-      height="100%"
-      minHeight={0}
-      overflow="hidden"
-    >
-      <WorkbenchSidebarSlot>{sidebarNode}</WorkbenchSidebarSlot>
+    <WorkbenchTabsContext.Provider value={tabsContext}>
       <Flex
-        direction="column"
-        flex={1}
+        align="stretch"
+        height="100%"
         minHeight={0}
-        minWidth={0}
-        overflow="auto"
-        css={{
-          backgroundColor: contentBackground
-            ? theme.colors[contentBackground]
-            : theme.mode === 'light'
-              ? theme.colors['page-background']
-              : theme.colors['fill-zero'],
-        }}
+        overflow="hidden"
       >
-        <PageToolbar
-          tabs={subTabDirectory}
-          activeFn={(path) => {
-            if (path === workbenchBasePath) return !tab
-            if (path === jobsTabPath) return tab === WORKBENCH_JOBS_REL_PATH
-            return path === `${workbenchBasePath}/${tab}`
+        <WorkbenchPanelSlot
+          ref={setSidebarEl}
+          edge="left"
+          width={layout.sidebarWidth}
+          resizing={layout.sidebarResizing}
+        />
+        <Flex
+          direction="column"
+          flex={1}
+          minHeight={0}
+          minWidth={0}
+          overflow="auto"
+          css={{
+            backgroundColor: contentBackground
+              ? theme.colors[contentBackground]
+              : theme.mode === 'light'
+                ? theme.colors['page-background']
+                : theme.colors['fill-zero'],
           }}
         >
-          {showEditWorkbenchButton && (
-            <Button
-              secondary
-              small
-              as={Link}
-              to={`${workbenchBasePath}/${WORKBENCHES_EDIT_REL_PATH}`}
-            >
-              Edit workbench
-            </Button>
-          )}
-          {headerActions}
-          <MoreMenu
-            disabled={!workbench}
-            maxHeight="min(80vh, 520px)"
-            triggerProps={{ iconFrameType: 'secondary', size: 'medium' }}
-            onSelectionChange={handleMoreMenuSelection}
+          <PageToolbar
+            tabs={subTabDirectory}
+            activeFn={(path) => {
+              if (path === workbenchBasePath) return !tab
+              if (path === jobsTabPath) return tab === WORKBENCH_JOBS_REL_PATH
+              return path === `${workbenchBasePath}/${tab}`
+            }}
           >
-            {!showEditWorkbenchButton && (
-              <ListBoxItem
-                key={WorkbenchMoreMenuKey.Edit}
-                leftContent={<GearTrainIcon />}
-                label="Edit workbench"
-              />
+            {showEditWorkbenchButton && (
+              <Button
+                secondary
+                small
+                as={Link}
+                to={`${workbenchBasePath}/${WORKBENCHES_EDIT_REL_PATH}`}
+              >
+                Edit workbench
+              </Button>
             )}
-            <ListBoxItem
-              key={WorkbenchMoreMenuKey.Tools}
-              leftContent={<ToolsIcon />}
-              label="Tools"
+            <HeaderActionsSC ref={setHeaderActionsEl} />
+            <MoreMenu
+              disabled={!workbench}
+              maxHeight="min(80vh, 520px)"
+              triggerProps={{ iconFrameType: 'secondary', size: 'medium' }}
+              onSelectionChange={handleMoreMenuSelection}
+            >
+              {!showEditWorkbenchButton && (
+                <ListBoxItem
+                  key={WorkbenchMoreMenuKey.Edit}
+                  leftContent={<GearTrainIcon />}
+                  label="Edit workbench"
+                />
+              )}
+              <ListBoxItem
+                key={WorkbenchMoreMenuKey.Tools}
+                leftContent={<ToolsIcon />}
+                label="Tools"
+              />
+              <ListBoxItem
+                key={WorkbenchMoreMenuKey.Cron}
+                leftContent={<EventScheduleIcon />}
+                label="Cron schedules"
+              />
+              <ListBoxItem
+                key={WorkbenchMoreMenuKey.Webhook}
+                leftContent={<WebhooksIcon />}
+                label="Webhook triggers"
+              />
+              <ListBoxItem
+                key={WorkbenchMoreMenuKey.Chatbots}
+                leftContent={<BotIcon />}
+                label="Chatbots"
+              />
+              <ListBoxItem
+                key={WorkbenchMoreMenuKey.SavedPrompts}
+                leftContent={<BookmarkIcon />}
+                label="Saved prompts"
+              />
+              <ListBoxItem
+                key={WorkbenchMoreMenuKey.EvalSettings}
+                leftContent={<TuningIcon />}
+                label="Eval settings"
+              />
+              <ListBoxItem
+                key={WorkbenchMoreMenuKey.Delete}
+                destructive
+                leftContent={<TrashCanIcon color="icon-danger" />}
+                label="Delete workbench"
+              />
+            </MoreMenu>
+          </PageToolbar>
+          <PageRowSC>
+            <ContentColumnSC>
+              <Outlet context={outletContext} />
+            </ContentColumnSC>
+            <WorkbenchPanelSlot
+              ref={setSidecarEl}
+              edge="right"
+              width={layout.sidecarWidth}
             />
-            <ListBoxItem
-              key={WorkbenchMoreMenuKey.Cron}
-              leftContent={<EventScheduleIcon />}
-              label="Cron schedules"
-            />
-            <ListBoxItem
-              key={WorkbenchMoreMenuKey.Webhook}
-              leftContent={<WebhooksIcon />}
-              label="Webhook triggers"
-            />
-            <ListBoxItem
-              key={WorkbenchMoreMenuKey.Chatbots}
-              leftContent={<BotIcon />}
-              label="Chatbots"
-            />
-            <ListBoxItem
-              key={WorkbenchMoreMenuKey.SavedPrompts}
-              leftContent={<BookmarkIcon />}
-              label="Saved prompts"
-            />
-            <ListBoxItem
-              key={WorkbenchMoreMenuKey.EvalSettings}
-              leftContent={<TuningIcon />}
-              label="Eval settings"
-            />
-            <ListBoxItem
-              key={WorkbenchMoreMenuKey.Delete}
-              destructive
-              leftContent={<TrashCanIcon color="icon-danger" />}
-              label="Delete workbench"
-            />
-          </MoreMenu>
-        </PageToolbar>
-        {sidecar ? (
-          <PageWithSidecar sidecar={sidecar}>{children}</PageWithSidecar>
-        ) : (
-          children
-        )}
+          </PageRowSC>
+        </Flex>
       </Flex>
-    </Flex>
+    </WorkbenchTabsContext.Provider>
   )
 }
 
@@ -393,6 +512,11 @@ function useWorkbenchHasInProgressJobs(workbenchId: string) {
   )
 }
 
+// scrolls in place of the page column, which the sidecar row clips
+const ContentColumnSC = styled(PageColumnSC)({ overflow: 'auto' })
+
+const HeaderActionsSC = styled.div({ display: 'contents' })
+
 const InProgressDotSC = styled.span(({ theme }) => ({
   width: 6,
   height: 6,
@@ -405,19 +529,27 @@ function renderWorkbenchSidebar(
   sidebar: WorkbenchSidebar,
   workbenchId: string,
   onOpenToolsEdit: () => void
-): ReactNode {
+): { node: ReactNode; width: number; resizing: boolean } {
   switch (sidebar.kind) {
     case 'none':
-      return null
+      return { node: null, width: 0, resizing: false }
     case 'tools':
-      return (
-        <WorkbenchSidePanel
-          workbenchId={workbenchId}
-          onOpenToolsEdit={onOpenToolsEdit}
-        />
-      )
+      return {
+        node: (
+          <WorkbenchSidePanel
+            workbenchId={workbenchId}
+            onOpenToolsEdit={onOpenToolsEdit}
+          />
+        ),
+        width: WORKBENCH_SIDEBAR_WIDTH,
+        resizing: false,
+      }
     case 'custom':
-      return sidebar.content
+      return {
+        node: sidebar.content,
+        width: sidebar.width,
+        resizing: !!sidebar.resizing,
+      }
   }
 }
 

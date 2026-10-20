@@ -193,10 +193,56 @@ message AzureLogsOptions {
 
 message TracesQueryInput {
   ToolConnection connection = 1;
+  // Provider-native query (TraceQL, Datadog span search, DQL, or the Jaeger
+  // service name). Optional when filters are set.
   string query = 2;
   TimeRange range = 3;
   optional int32 limit = 4;
   optional TracesOptions options = 5;
+  optional TraceFilters filters = 6;
+}
+
+// Provider-agnostic trace search, compiled to each provider's native query.
+// Attribute names follow OpenTelemetry conventions, e.g. `http.route`.
+message TraceFilters {
+  optional string service = 1;
+  // span (operation) name
+  optional string operation = 2;
+  repeated TraceAttributeFilter attributes = 3;
+  // minimum and maximum span duration, e.g. `10ms`, `1.5s`
+  optional string duration_min = 4;
+  optional string duration_max = 5;
+  optional bool errors_only = 6;
+  // fetches a single trace, ignoring the other filters
+  optional string trace_id = 7;
+}
+
+message TraceAttributeFilter {
+  string name = 1;
+  string value = 2;
+}
+
+message TraceFacetsInput {
+  ToolConnection connection = 1;
+  optional TimeRange range = 2;
+  // The attribute whose values to list: `service.name` lists services and
+  // `name` lists span names. Omit to list searchable attribute names.
+  optional string attribute = 3;
+  // scopes the values, e.g. the span names of one service
+  optional TraceFilters filters = 4;
+  // case-insensitive substring filter on the returned names
+  optional string query = 5;
+  optional int64 limit = 6;
+}
+
+message TraceFacetValue {
+  string name = 1;
+  // matching spans, where the provider reports it
+  optional int64 count = 2;
+}
+
+message TraceFacetsOutput {
+  repeated TraceFacetValue values = 1;
 }
 
 message TracesOptions {
@@ -365,6 +411,7 @@ service ToolQuery {
   rpc Logs(LogsQueryInput) returns (LogsQueryOutput) {}
   rpc LogAggregate(LogAggregateInput) returns (LogAggregateOutput) {}
   rpc Traces(TracesQueryInput) returns (TracesQueryOutput) {}
+  rpc TraceFacets(TraceFacetsInput) returns (TraceFacetsOutput) {}
   rpc InvokeLambda(InvokeLambdaInput) returns (InvokeLambdaOutput) {}
   rpc RunLua(RunLuaInput) returns (RunLuaOutput) {}
 }

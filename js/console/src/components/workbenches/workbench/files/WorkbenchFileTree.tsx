@@ -42,23 +42,27 @@ export const WORKBENCH_FILES_HEADER_HEIGHT = PAGE_TOOLBAR_HEIGHT
 const FILE_TREE_MIN_WIDTH = 350
 const FILE_TREE_MAX_WIDTH_VW = 50
 
+// owned by the page, which hands the tree's width to the sidebar slot
+export const useWorkbenchFileTreePane = () =>
+  useResizablePane(FILE_TREE_MIN_WIDTH, FILE_TREE_MAX_WIDTH_VW, undefined, {
+    storageKey: 'workbench-file-tree-width',
+    handleEdge: 'right',
+  })
+
 export function WorkbenchFileTree({
   workbenchId,
   selectedPath,
   onSelect,
   onDelete,
+  pane: { calculatedPanelWidth, dragHandleProps, isDragging },
 }: {
   workbenchId: string
   selectedPath: Nullable<string>
   onSelect: (path: string) => void
   onDelete: (file: WorkbenchFileFragment) => void
+  pane: ReturnType<typeof useWorkbenchFileTreePane>
 }) {
   const client = useApolloClient()
-  const { calculatedPanelWidth, dragHandleProps, isDragging } =
-    useResizablePane(FILE_TREE_MIN_WIDTH, FILE_TREE_MAX_WIDTH_VW, undefined, {
-      storageKey: 'workbench-file-tree-width',
-      handleEdge: 'right',
-    })
   const [refreshing, setRefreshing] = useState(false)
   const [expanded, setExpanded] = useState<string[]>(() =>
     ancestorDirectories(selectedPath).map(dirItemId)

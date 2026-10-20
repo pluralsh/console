@@ -3,7 +3,7 @@
     "properties": {
         "query": {
             "type": "string",
-            "description": "The provider-specific query to use to gather traces. For Jaeger, this is the service name."
+            "description": "The service name to search. Optional when filters.service is set."
         },
         "limit": {
             "type": "integer",
@@ -11,7 +11,7 @@
         },
         "options": {
             "type": "object",
-            "description": "Provider-specific query options.",
+            "description": "Legacy Jaeger options; prefer filters.",
             "properties": {
                 "jaeger": {
                     "type": "object",
@@ -44,7 +44,10 @@
                                         "description": "Tag/attribute value"
                                     }
                                 },
-                                "required": ["name", "value"]
+                                "required": [
+                                    "name",
+                                    "value"
+                                ]
                             }
                         }
                     }
@@ -63,7 +66,60 @@
                     "description": "The end time to use to filter traces. Provide in RFC3339 format, e.g. `2023-01-01T00:00:00Z`."
                 }
             }
+        },
+        "filters": {
+            "type": "object",
+            "description": "Structured filters, translated to the provider's query language. All set filters must match.",
+            "properties": {
+                "service": {
+                    "type": "string",
+                    "description": "Service name (`service.name`). Discover values with trace facets on `service.name`."
+                },
+                "operation": {
+                    "type": "string",
+                    "description": "Span (operation) name, e.g. `GET /api/orders`. Discover values with trace facets on `name`."
+                },
+                "attributes": {
+                    "type": "array",
+                    "description": "Exact-match span or resource attribute filters, e.g. `http.route` = `/orders` or `k8s.namespace.name` = `prod`.",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "type": "string",
+                                "description": "Attribute name"
+                            },
+                            "value": {
+                                "type": "string",
+                                "description": "Attribute value"
+                            }
+                        },
+                        "required": [
+                            "name",
+                            "value"
+                        ]
+                    }
+                },
+                "duration_min": {
+                    "type": "string",
+                    "description": "Minimum span duration, e.g. `250ms` or `1.5s`."
+                },
+                "duration_max": {
+                    "type": "string",
+                    "description": "Maximum span duration, e.g. `10s`."
+                },
+                "errors_only": {
+                    "type": "boolean",
+                    "description": "Only match spans with an error status."
+                },
+                "trace_id": {
+                    "type": "string",
+                    "description": "Fetch one whole trace by id; other filters and the query are ignored."
+                }
+            }
         }
     },
-    "required": ["query", "time_range"]
+    "required": [
+        "time_range"
+    ]
 }

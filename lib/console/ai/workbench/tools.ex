@@ -18,7 +18,8 @@ defmodule Console.AI.Workbench.Tools do
     ExternalDashboards,
     ExternalMonitor,
     ExternalMonitors,
-    Traces
+    Traces,
+    TraceFacets
   }
   alias Console.AI.Tools.Workbench.Infrastructure.{CloudSchemas, RawCloudQuery, CloudTables}
   alias Console.AI.Tools.Workbench.Integration.{
@@ -188,7 +189,7 @@ defmodule Console.AI.Workbench.Tools do
     do: [%Metrics{tool: tool}, %MetricsSearch{tool: tool}, %MetricsLabelSearch{tool: tool}]
   defp obs_category_tools(%WorkbenchTool{} = tool, :logs),
     do: [%Logs{tool: tool}, %LogAggregate{tool: tool}]
-  defp obs_category_tools(%WorkbenchTool{} = tool, :traces), do: [%Traces{tool: tool}]
+  defp obs_category_tools(%WorkbenchTool{} = tool, :traces), do: [%Traces{tool: tool}, %TraceFacets{tool: tool}]
   defp obs_category_tools(_, _), do: []
 
   defp external_observability_tools(%WorkbenchTool{tool: provider} = tool)

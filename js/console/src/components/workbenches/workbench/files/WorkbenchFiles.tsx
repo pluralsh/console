@@ -7,7 +7,10 @@ import { useState } from 'react'
 import { useOutletContext, useSearchParams } from 'react-router-dom'
 import { WORKBENCH_FILES_PATH_QUERY_PARAM } from 'routes/workbenchesRoutesConsts'
 import { WorkbenchOutletContext, WorkbenchPageLayout } from '../Workbench'
-import { WorkbenchFileTree } from './WorkbenchFileTree'
+import {
+  useWorkbenchFileTreePane,
+  WorkbenchFileTree,
+} from './WorkbenchFileTree'
 import { WorkbenchFileViewer } from './WorkbenchFileViewer'
 import { WorkbenchEmptyState } from '../../common/WorkbenchEmptyState'
 import { DeleteWorkbenchFileModal } from './DeleteWorkbenchFileModal'
@@ -26,6 +29,7 @@ export function WorkbenchFiles() {
     skip: !workbenchId || !workbench?.filesystemEnabled,
   })
   const hasFiles = !!rootData?.workbench?.files?.some(Boolean)
+  const treePane = useWorkbenchFileTreePane()
 
   const select = (path: Nullable<string>) =>
     setSearchParams(
@@ -64,8 +68,11 @@ export function WorkbenchFiles() {
             selectedPath={selectedPath}
             onSelect={select}
             onDelete={setToDelete}
+            pane={treePane}
           />
         ),
+        width: treePane.calculatedPanelWidth,
+        resizing: treePane.isDragging,
       }}
     >
       {isLoading ? (

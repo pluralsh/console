@@ -87,6 +87,7 @@ func newLogsProvider(conn *toolquery.ToolConnection) (LogsProvider, error) {
 
 type TracesProvider interface {
 	Traces(ctx context.Context, input *toolquery.TracesQueryInput) (*toolquery.TracesQueryOutput, error)
+	TraceFacets(ctx context.Context, input *toolquery.TraceFacetsInput) (*toolquery.TraceFacetsOutput, error)
 }
 
 func newTracesProvider(conn *toolquery.ToolConnection) TracesProvider {
@@ -172,6 +173,14 @@ func (p *toolProvider) Traces(ctx context.Context, input *toolquery.TracesQueryI
 	}
 
 	return p.traces.Traces(ctx, input)
+}
+
+func (p *toolProvider) TraceFacets(ctx context.Context, input *toolquery.TraceFacetsInput) (*toolquery.TraceFacetsOutput, error) {
+	if p.traces == nil {
+		return nil, ErrUnsupportedOperation
+	}
+
+	return p.traces.TraceFacets(ctx, input)
 }
 
 func NewProvider(conn *toolquery.ToolConnection) (Provider, error) {

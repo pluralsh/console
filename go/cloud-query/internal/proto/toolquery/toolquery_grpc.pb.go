@@ -26,6 +26,7 @@ const (
 	ToolQuery_Logs_FullMethodName               = "/toolquery.ToolQuery/Logs"
 	ToolQuery_LogAggregate_FullMethodName       = "/toolquery.ToolQuery/LogAggregate"
 	ToolQuery_Traces_FullMethodName             = "/toolquery.ToolQuery/Traces"
+	ToolQuery_TraceFacets_FullMethodName        = "/toolquery.ToolQuery/TraceFacets"
 	ToolQuery_InvokeLambda_FullMethodName       = "/toolquery.ToolQuery/InvokeLambda"
 	ToolQuery_RunLua_FullMethodName             = "/toolquery.ToolQuery/RunLua"
 )
@@ -41,6 +42,7 @@ type ToolQueryClient interface {
 	Logs(ctx context.Context, in *LogsQueryInput, opts ...grpc.CallOption) (*LogsQueryOutput, error)
 	LogAggregate(ctx context.Context, in *LogAggregateInput, opts ...grpc.CallOption) (*LogAggregateOutput, error)
 	Traces(ctx context.Context, in *TracesQueryInput, opts ...grpc.CallOption) (*TracesQueryOutput, error)
+	TraceFacets(ctx context.Context, in *TraceFacetsInput, opts ...grpc.CallOption) (*TraceFacetsOutput, error)
 	InvokeLambda(ctx context.Context, in *InvokeLambdaInput, opts ...grpc.CallOption) (*InvokeLambdaOutput, error)
 	RunLua(ctx context.Context, in *RunLuaInput, opts ...grpc.CallOption) (*RunLuaOutput, error)
 }
@@ -123,6 +125,16 @@ func (c *toolQueryClient) Traces(ctx context.Context, in *TracesQueryInput, opts
 	return out, nil
 }
 
+func (c *toolQueryClient) TraceFacets(ctx context.Context, in *TraceFacetsInput, opts ...grpc.CallOption) (*TraceFacetsOutput, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(TraceFacetsOutput)
+	err := c.cc.Invoke(ctx, ToolQuery_TraceFacets_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *toolQueryClient) InvokeLambda(ctx context.Context, in *InvokeLambdaInput, opts ...grpc.CallOption) (*InvokeLambdaOutput, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(InvokeLambdaOutput)
@@ -154,6 +166,7 @@ type ToolQueryServer interface {
 	Logs(context.Context, *LogsQueryInput) (*LogsQueryOutput, error)
 	LogAggregate(context.Context, *LogAggregateInput) (*LogAggregateOutput, error)
 	Traces(context.Context, *TracesQueryInput) (*TracesQueryOutput, error)
+	TraceFacets(context.Context, *TraceFacetsInput) (*TraceFacetsOutput, error)
 	InvokeLambda(context.Context, *InvokeLambdaInput) (*InvokeLambdaOutput, error)
 	RunLua(context.Context, *RunLuaInput) (*RunLuaOutput, error)
 	mustEmbedUnimplementedToolQueryServer()
@@ -186,6 +199,9 @@ func (UnimplementedToolQueryServer) LogAggregate(context.Context, *LogAggregateI
 }
 func (UnimplementedToolQueryServer) Traces(context.Context, *TracesQueryInput) (*TracesQueryOutput, error) {
 	return nil, status.Error(codes.Unimplemented, "method Traces not implemented")
+}
+func (UnimplementedToolQueryServer) TraceFacets(context.Context, *TraceFacetsInput) (*TraceFacetsOutput, error) {
+	return nil, status.Error(codes.Unimplemented, "method TraceFacets not implemented")
 }
 func (UnimplementedToolQueryServer) InvokeLambda(context.Context, *InvokeLambdaInput) (*InvokeLambdaOutput, error) {
 	return nil, status.Error(codes.Unimplemented, "method InvokeLambda not implemented")
@@ -340,6 +356,24 @@ func _ToolQuery_Traces_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ToolQuery_TraceFacets_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TraceFacetsInput)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ToolQueryServer).TraceFacets(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ToolQuery_TraceFacets_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ToolQueryServer).TraceFacets(ctx, req.(*TraceFacetsInput))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _ToolQuery_InvokeLambda_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(InvokeLambdaInput)
 	if err := dec(in); err != nil {
@@ -410,6 +444,10 @@ var ToolQuery_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Traces",
 			Handler:    _ToolQuery_Traces_Handler,
+		},
+		{
+			MethodName: "TraceFacets",
+			Handler:    _ToolQuery_TraceFacets_Handler,
 		},
 		{
 			MethodName: "InvokeLambda",

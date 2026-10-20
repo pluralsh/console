@@ -18,6 +18,8 @@ type EvalRow = WorkbenchEvalResultRowFragment & {
   workbenchJob: NonNullable<WorkbenchEvalResultRowFragment['workbenchJob']>
 }
 
+export const WORKBENCH_EVALS_SIDE_PANEL_WIDTH = 350
+
 type EvalFilter = 'all' | EvalGradeCategory
 type ChipSeverity = NonNullable<ComponentProps<typeof Chip>['severity']>
 
@@ -85,8 +87,8 @@ export function WorkbenchEvalsSidePanel({
       css={{
         backgroundColor: theme.colors['fill-accent'],
         borderRight: theme.borders.default,
-        minWidth: 350,
-        maxWidth: 350,
+        minWidth: WORKBENCH_EVALS_SIDE_PANEL_WIDTH,
+        maxWidth: WORKBENCH_EVALS_SIDE_PANEL_WIDTH,
       }}
     >
       <Flex

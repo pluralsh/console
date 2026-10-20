@@ -18,7 +18,7 @@ import { BoardTitleSC } from './WorkbenchBoard'
 // Shared building blocks for the workbench Details views (jobs, issues,
 // alerts): a selectable list on the left and detail panels on the right.
 
-const DETAILS_LIST_WIDTH = 350
+export const DETAILS_LIST_WIDTH = 350
 const STATUS_GUTTER_SIZE = 10
 const DETAILS_PANEL_HEADER_HEIGHT = 44
 // the list's search row, level with the page toolbar beside it

@@ -37,7 +37,10 @@ import {
   getMetricSeriesFromResponses,
   type MetricSeries,
 } from '../job/workbenchJobMetrics'
-import { TraceWaterfall } from '../job/WorkbenchJobTraces'
+import {
+  type TraceFullscreenControl,
+  TraceWaterfall,
+} from '../job/WorkbenchJobTraces'
 import {
   DashboardPanelGraph,
   useDashboardGraphSource,
@@ -357,19 +360,23 @@ function DataDashboardPanel({
   )
   const tool = graph.datasource?.tool
   const toolType = graph.workbenchTool?.tool ?? tool
+  // trace panels open the trace view's own full screen layout instead
+  const traceFullscreen =
+    graph.type === DashboardGraphType.Traces && !isEmpty(traces)
+  const panelFullscreen = fullscreen && !traceFullscreen
 
   const panel = (
-    <PanelCardSC $fullscreen={fullscreen}>
+    <PanelCardSC $fullscreen={panelFullscreen}>
       <Flex
         direction="column"
         gap="xxsmall"
       >
         <GraphHeader
           title={graph.title || graph.identifier}
-          tooltip={fullscreen ? null : graph.description}
+          tooltip={panelFullscreen ? null : graph.description}
           actions={
             <>
-              {fullscreen ? (
+              {panelFullscreen ? (
                 <IconFrame
                   clickable
                   size="small"
@@ -414,7 +421,7 @@ function DataDashboardPanel({
             </>
           }
         />
-        {graph.description && fullscreen && (
+        {graph.description && panelFullscreen && (
           <CaptionP $color="text-xlight">{graph.description}</CaptionP>
         )}
       </Flex>
@@ -433,7 +440,7 @@ function DataDashboardPanel({
             loading,
             hasData: !!data,
           }) ? (
-          <DashboardPanelSkeleton fullscreen={fullscreen} />
+          <DashboardPanelSkeleton fullscreen={panelFullscreen} />
         ) : error && !data ? (
           readOnly &&
           /not available on public dashboards/i.test(error.message) ? (
@@ -456,7 +463,13 @@ function DataDashboardPanel({
             series={series}
             logs={logs}
             traces={traces}
-            fullscreen={fullscreen}
+            fullscreen={panelFullscreen}
+            traceFullscreen={{
+              open: fullscreen && traceFullscreen,
+              onOpenChange: setFullscreen,
+              title: graph.title || graph.identifier,
+              returnFocusRef: fullscreenTriggerRef,
+            }}
             timeRange={timeRange}
             onRangeSelect={panelRangeSelect}
             selectedSeriesId={selectedSeriesId}
@@ -471,9 +484,9 @@ function DataDashboardPanel({
 
   return (
     <>
-      {!fullscreen && panel}
+      {!panelFullscreen && panel}
       <ModalWrapper
-        open={fullscreen}
+        open={panelFullscreen}
         onOpenChange={setFullscreen}
         title={graph.title || graph.identifier}
         aria-describedby={undefined}
@@ -488,7 +501,7 @@ function DataDashboardPanel({
           width: 'min(1500px, 100%)',
         }}
       >
-        {fullscreen && panel}
+        {panelFullscreen && panel}
       </ModalWrapper>
       {query && (
         <QueryDefinitionModal
@@ -581,6 +594,7 @@ function PanelContent({
   logs,
   traces,
   fullscreen,
+  traceFullscreen,
   timeRange,
   onRangeSelect,
   selectedSeriesId,
@@ -592,6 +606,7 @@ function PanelContent({
   logs: WorkbenchJobActivityLogFragment[]
   traces: WorkbenchJobActivityTraceFragment[]
   fullscreen: boolean
+  traceFullscreen: TraceFullscreenControl
   timeRange: DashboardTimeRangeAttributes
   onRangeSelect?: (start: Date, end: Date) => void
   selectedSeriesId: string | null
@@ -633,7 +648,12 @@ function PanelContent({
       )
     case DashboardGraphType.Traces:
       if (isEmpty(traces)) return <NoDataState />
-      return <TraceWaterfall traces={traces} />
+      return (
+        <TraceWaterfall
+          traces={traces}
+          fullscreenControl={traceFullscreen}
+        />
+      )
     case DashboardGraphType.Stat:
       return (
         <StatContent

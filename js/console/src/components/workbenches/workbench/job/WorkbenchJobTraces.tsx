@@ -17,7 +17,13 @@ import {
   TreeViewIcon,
   WarningIcon,
 } from '@pluralsh/design-system'
-import { type ReactNode, useMemo, useRef, useState } from 'react'
+import {
+  type ReactNode,
+  type RefObject,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import styled from 'styled-components'
 import { TraceTopology } from './WorkbenchJobTraceTopology'
 import { traceBarColor } from './workbenchJobTraceColors'
@@ -32,6 +38,8 @@ import {
   orderTraceSpans,
   serviceName,
   shortTraceId,
+  spanDescription,
+  spanLabel,
   traceBarPosition,
   traceBounds,
   type TraceSeverity,
@@ -45,17 +53,30 @@ import {
   traceTreeMeta,
 } from './workbenchJobTraceUtils'
 
+// for containers with their own full screen button, which opens the trace's
+// full screen layout rather than enlarging the container
+export type TraceFullscreenControl = {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  title?: string
+  returnFocusRef?: RefObject<HTMLElement | null>
+}
+
 export function TraceWaterfall({
   traces,
   summary,
+  fullscreenControl,
 }: {
   traces: TraceSpan[]
   summary?: Nullable<string>
+  fullscreenControl?: TraceFullscreenControl
 }) {
   const traceGroups = useMemo(() => groupTraces(traces), [traces])
   const [selectedTraceId, setSelectedTraceId] = useState<string>()
   const [view, setView] = useState<TraceView>('timeline')
-  const [fullscreen, setFullscreen] = useState(false)
+  const [ownFullscreen, setOwnFullscreen] = useState(false)
+  const fullscreen = fullscreenControl?.open ?? ownFullscreen
+  const setFullscreen = fullscreenControl?.onOpenChange ?? setOwnFullscreen
   const fullscreenTriggerRef = useRef<HTMLDivElement>(null)
   const [detailsOpen, setDetailsOpen] = useState(false)
   const activeTrace =
@@ -137,17 +158,19 @@ export function TraceWaterfall({
               Exit full screen
             </Button>
           ) : (
-            <IconFrame
-              clickable
-              type="tertiary"
-              size="large"
-              icon={<ExpandIcon size={16} />}
-              tooltip="Full screen"
-              aria-label="Full screen"
-              ref={fullscreenTriggerRef}
-              onClick={() => setFullscreen(true)}
-              css={{ marginLeft: 'auto' }}
-            />
+            !fullscreenControl && (
+              <IconFrame
+                clickable
+                type="tertiary"
+                size="large"
+                icon={<ExpandIcon size={16} />}
+                tooltip="Full screen"
+                aria-label="Full screen"
+                ref={fullscreenTriggerRef}
+                onClick={() => setFullscreen(true)}
+                css={{ marginLeft: 'auto' }}
+              />
+            )
           )}
         </TraceToolbarActionsSC>
       </TraceHeaderSC>
@@ -176,6 +199,8 @@ export function TraceWaterfall({
               const { left, width } = traceBarPosition(row, bounds)
               const severity = traceSeverity(row.span.tags)
               const color = traceBarColor(service)
+              const label = spanLabel(row.span)
+              const description = spanDescription(row.span)
 
               return (
                 <TraceRowSC
@@ -197,9 +222,14 @@ export function TraceWaterfall({
                       {tree[index]?.hasChildren && <TraceDotDownSC />}
                       <ServiceDotSC $color={color.accent} />
                     </TraceDotWrapSC>
-                    <TraceNameSC title={row.span.name ?? 'Unnamed span'}>
-                      {row.span.name ?? 'Unnamed span'}
-                    </TraceNameSC>
+                    <TraceNameStackSC
+                      title={description ? `${label}\n${description}` : label}
+                    >
+                      <TraceNameSC>{label}</TraceNameSC>
+                      {description && (
+                        <TraceDescriptionSC>{description}</TraceDescriptionSC>
+                      )}
+                    </TraceNameStackSC>
                     <TraceBarStatusIcon severity={severity} />
                     <TraceDurationSC>
                       {formatDuration(duration)}
@@ -211,10 +241,10 @@ export function TraceWaterfall({
                       $fill={color.fill}
                       $left={left}
                       $width={width}
-                      title={`${service} · ${formatDuration(duration)}`}
+                      title={`${label} · ${service} · ${formatDuration(duration)}`}
                     >
                       <TraceBarTextSC $color={color.text}>
-                        {row.span.name ?? 'Unnamed span'}
+                        {label}
                       </TraceBarTextSC>
                       <TraceBarServiceSC $color={color.text}>
                         {service}
@@ -231,7 +261,7 @@ export function TraceWaterfall({
               <TraceDetailHeaderSC>
                 <TraceDetailTitleSC>
                   <Body2P $color="text-light">
-                    {selectedRow.span.name ?? 'Unnamed span'}
+                    {spanLabel(selectedRow.span)}
                   </Body2P>
                   <IconFrame
                     clickable
@@ -284,7 +314,7 @@ export function TraceWaterfall({
                           )
                         }
                       >
-                        {selectedParent.span.name}
+                        {spanLabel(selectedParent.span)}
                       </TraceParentButtonSC>
                     </>
                   )}
@@ -319,11 +349,13 @@ export function TraceWaterfall({
       <ModalWrapper
         open={fullscreen}
         onOpenChange={setFullscreen}
-        title="Trace visualization"
+        title={fullscreenControl?.title ?? 'Trace visualization'}
         aria-describedby={undefined}
         onCloseAutoFocus={(event) => {
           event.preventDefault()
-          requestAnimationFrame(() => fullscreenTriggerRef.current?.focus())
+          const returnFocusRef =
+            fullscreenControl?.returnFocusRef ?? fullscreenTriggerRef
+          requestAnimationFrame(() => returnFocusRef.current?.focus())
         }}
         css={{
           width: 'min(1500px, 100%)',
@@ -849,13 +881,27 @@ const ServiceDotSC = styled.span<{ $color: string }>(({ $color }) => ({
   width: 8,
 }))
 
+const TraceNameStackSC = styled.span({
+  display: 'flex',
+  flexDirection: 'column',
+  minWidth: 0,
+  marginRight: 8,
+})
+
 const TraceNameSC = styled.span(({ theme }) => ({
   ...theme.partials.text.body2,
   color: theme.colors['text-light'],
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
-  marginRight: 8,
+}))
+
+const TraceDescriptionSC = styled.span(({ theme }) => ({
+  ...theme.partials.text.caption,
+  color: theme.colors['text-xlight'],
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
 }))
 
 const TraceDurationSC = styled.span(({ theme }) => ({
