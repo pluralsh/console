@@ -5,10 +5,10 @@ import (
 	"strings"
 
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 )
 
 const (
-	consoleTokenEnv    = "PLRL_CONSOLE_TOKEN"
 	openAIAPIKeyEnv    = "OPENAI_API_KEY"
 	anthropicAPIKeyEnv = "ANTHROPIC_API_KEY"
 	azureAPIKeyEnv     = "AZURE_OPENAI_API_KEY"
@@ -23,12 +23,12 @@ func (agent *Agent) env(config toolv1.Config) []string {
 		apiKey = pi.APIKey
 	}
 	if config.Run.IsProxyEnabled() {
-		apiKey = agent.consoleToken
+		// The sidecar replaces the placeholder key with the deploy token.
+		apiKey = common.AgentAIProxyAPIKey
 	}
 
 	env := []string{
 		fmt.Sprintf("PI_CODING_AGENT_DIR=%s", agent.piHome(config)),
-		fmt.Sprintf("%s=%s", consoleTokenEnv, agent.consoleToken),
 		fmt.Sprintf("%s=%s", openAIAPIKeyEnv, apiKey),
 	}
 	switch strings.ToLower(agent.resolvedProvider(config)) {

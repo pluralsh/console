@@ -99,7 +99,11 @@ export function AIAgentRun() {
   const runLoading = !data && loading
   const run = data?.agentRun
   const showSidePanel = hasAgentRunPanelContent(run)
-  const { isOpen, setOpen, setApproval } = useAgentRunPanel(showSidePanel, id)
+  const { isOpen, setOpen, setApproval } = useAgentRunPanel({
+    hasContent: showSidePanel,
+    loading: runLoading,
+    key: id,
+  })
 
   useEffect(() => {
     if (!id) return

@@ -3,6 +3,7 @@ package datasource
 import (
 	"encoding/json"
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -10,6 +11,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/pluralsh/console/go/cloud-query/internal/proto/toolquery"
+	"github.com/pluralsh/console/go/cloud-query/internal/tools/series"
 )
 
 type DynatraceQueryState string
@@ -257,12 +259,11 @@ func (r *DynatraceLogsQueryRecord) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (r *DynatraceMetricsQueryResponse) ToMetricsQueryOutput() *toolquery.MetricsQueryOutput {
+func (r *DynatraceMetricsQueryResponse) ToMetricsSeriesOutput() *toolquery.MetricsSeriesOutput {
 	if r == nil {
-		return &toolquery.MetricsQueryOutput{}
+		return &toolquery.MetricsSeriesOutput{}
 	}
 
-	output := &toolquery.MetricsQueryOutput{}
 	metricNames := make(map[string]string, len(r.Result.Metadata.Metrics))
 	for _, metric := range r.Result.Metadata.Metrics {
 		if metric.FieldName != "" && metric.MetricKey != "" {
@@ -270,11 +271,12 @@ func (r *DynatraceMetricsQueryResponse) ToMetricsQueryOutput() *toolquery.Metric
 		}
 	}
 
+	builder := series.NewBuilder()
 	for _, record := range r.Result.Records {
-		output.Metrics = append(output.Metrics, record.ToMetricPoints(metricNames)...)
+		record.addMetricSeries(builder, metricNames)
 	}
 
-	return output
+	return builder.Output()
 }
 
 func (r *DynatraceMetricsSearchResponse) ToMetricsSearchOutput() *toolquery.MetricsSearchOutput {
@@ -318,58 +320,49 @@ func (r *DynatraceTracesQueryResponse) ToTracesQueryOutput() *toolquery.TracesQu
 	return output
 }
 
-func (r *DynatraceMetricsQueryRecord) ToMetricPoints(metricNames map[string]string) []*toolquery.MetricPoint {
-	points := make([]*toolquery.MetricPoint, 0)
-
+func (r *DynatraceMetricsQueryRecord) addMetricSeries(builder *series.Builder, metricNames map[string]string) {
 	start, hasStart := parseTimestamp(r.Timeframe.Start)
-	if hasStart && len(r.Series) > 0 {
-		interval, hasInterval := parseDynatraceDuration(r.Interval)
-
-		labels := make(map[string]string, len(r.Dimensions)+len(r.Fields))
-		for k, v := range r.Dimensions {
-			labels[k] = v
-		}
-		for k, v := range r.Fields {
-			labels[k] = fmt.Sprint(v)
-		}
-
-		for fieldName, series := range r.Series {
-			name := fieldName
-			if metricName, ok := metricNames[fieldName]; ok && metricName != "" {
-				name = metricName
-			} else if derived, ok := deriveMetricKeyFromSeriesField(fieldName); ok {
-				name = derived
-			}
-
-			for i, value := range series {
-				if value == nil {
-					continue
-				}
-
-				timestamp := start
-				if hasInterval {
-					timestamp = timestamp.Add(time.Duration(i) * interval)
-				}
-
-				point := &toolquery.MetricPoint{
-					Timestamp: timestamppb.New(timestamp),
-					Name:      name,
-					Value:     *value,
-					Labels:    make(map[string]string, len(labels)),
-				}
-				for k, v := range labels {
-					point.Labels[k] = v
-				}
-				points = append(points, point)
-			}
-		}
+	if !hasStart || len(r.Series) == 0 {
+		return
 	}
 
-	if len(points) > 0 {
-		return points
+	interval, hasInterval := parseDynatraceDuration(r.Interval)
+
+	labels := make(map[string]string, len(r.Dimensions)+len(r.Fields))
+	for k, v := range r.Dimensions {
+		labels[k] = v
+	}
+	for k, v := range r.Fields {
+		labels[k] = fmt.Sprint(v)
 	}
 
-	return nil
+	fieldNames := make([]string, 0, len(r.Series))
+	for fieldName := range r.Series {
+		fieldNames = append(fieldNames, fieldName)
+	}
+	sort.Strings(fieldNames)
+
+	for _, fieldName := range fieldNames {
+		name := fieldName
+		if metricName, ok := metricNames[fieldName]; ok && metricName != "" {
+			name = metricName
+		} else if derived, ok := deriveMetricKeyFromSeriesField(fieldName); ok {
+			name = derived
+		}
+
+		for i, value := range r.Series[fieldName] {
+			if value == nil {
+				continue
+			}
+
+			timestamp := start
+			if hasInterval {
+				timestamp = timestamp.Add(time.Duration(i) * interval)
+			}
+
+			builder.Add(name, labels, timestamp, *value)
+		}
+	}
 }
 
 func (r *DynatraceLogsQueryRecord) ToLogEntry() *toolquery.LogEntry {

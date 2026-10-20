@@ -255,7 +255,7 @@ func (in *Gemini) includeDirectories() []string {
 	return dirs
 }
 
-func (in *Gemini) Configure(_, _ string) error {
+func (in *Gemini) Configure() error {
 	if err := in.ConfigureSystemPrompt(console.AgentRuntimeTypeGemini); err != nil {
 		return err
 	}

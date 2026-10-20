@@ -16,6 +16,7 @@ KUBEBUILDER_VERSION := 4.5.1
 tools: ## install required tools
 tools: --tool install-kubebuilder install-protoc
 
+# Tools are built inside this module so the dependency pins in go.mod (e.g. golang.org/x/tools) apply.
 .PHONY: --tool
 %--tool: TOOL = .*
 --tool: --ensure-binaries-dir # INTERNAL: installs tool with name provided via $(TOOL) variable or all tools.
@@ -27,7 +28,7 @@ tools: --tool install-kubebuilder install-protoc
   		  if echo $${path} | grep -qE "$${match}"; then \
   		  	if echo $${path} | grep -q $${dependency}; then \
 			  echo Installing $${path}@$${version} ;\
-  		  	  GOBIN=$(BINARIES_DIR) go install $${path}@$${version} ;\
+  		  	  (cd $(TOOLS_DIR) && GOBIN=$(BINARIES_DIR) go install $${path}) ;\
   		  	fi ;\
   		  fi ;\
   		done ;\

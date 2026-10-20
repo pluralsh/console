@@ -130,7 +130,7 @@ func (in *agentRunController) prepare(ctx context.Context) error {
 		return err
 	}
 
-	if err := in.tool.Configure(in.consoleUrl, *in.agentRun.PluralCreds.Token); err != nil {
+	if err := in.tool.Configure(); err != nil {
 		return err
 	}
 	return in.restoreFollowupSession(ctx)

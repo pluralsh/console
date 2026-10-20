@@ -109,6 +109,7 @@ type Client interface {
 	ListAgentRuntimePendingRuns(ctx context.Context, id string, after *string, first *int64) (*console.ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns, error)
 	IsAgentRunExists(ctx context.Context, id string) (bool, error)
 	GetAgentRun(ctx context.Context, id string) (*console.AgentRunFragment, error)
+	GetAgentRunCredentials(ctx context.Context, id string) (*console.AgentRunCredentialsFragment, error)
 	GetAgentRunTodos(ctx context.Context, id string) ([]*console.AgentTodoFragment, error)
 	CancelAgentRun(ctx context.Context, id string) error
 	CreateAgentRun(ctx context.Context, runtimeID string, attrs console.AgentRunAttributes) (*console.AgentRunFragment, error)

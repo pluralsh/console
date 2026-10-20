@@ -8,6 +8,7 @@ from utils import (
     update_compatibility_info,
     get_chart_versions,
     current_kube_version,
+    github_headers,
 )
 
 GITHUB_REPO_URL = "https://github.com/kubernetes-sigs/external-dns"
@@ -17,7 +18,7 @@ GITHUB_API_TAGS_URL = (
 
 
 def fetch_github_tags():
-    response = requests.get(GITHUB_API_TAGS_URL)
+    response = requests.get(GITHUB_API_TAGS_URL, headers=github_headers())
     if response.status_code != 200:
         print_error(
             f"Failed to fetch GitHub tags. Status code: {response.status_code}"

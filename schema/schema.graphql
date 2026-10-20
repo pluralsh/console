@@ -3153,6 +3153,7 @@ enum WorkbenchCanvasBlockType {
   TRACES
   PIE
   BAR
+  SECTION
 }
 
 enum WorkbenchSkillSubagent {
@@ -4609,6 +4610,14 @@ type WorkbenchJob {
     arguments: Json
   ): [WorkbenchJobActivityMetric]
 
+  metricsSeriesTool(
+    "the name of the metrics tool"
+    name: String
+
+    "the arguments for the metrics tool"
+    arguments: Json
+  ): [MetricResponse]
+
   logsTool(
     "the name of the logs tool"
     name: String
@@ -4811,7 +4820,10 @@ type WorkbenchJobThought {
 }
 
 type WorkbenchJobThoughtAttributes {
-  "metrics for the thought"
+  "metric series for the thought, with labels sent once per series"
+  series: [MetricResponse]
+
+  "metrics for the thought, one entry per point (prefer series)"
   metrics: [WorkbenchJobActivityMetric]
 
   "logs for the thought"
@@ -5080,8 +5092,23 @@ type WorkbenchCanvasBlockContent {
 
 type WorkbenchCanvasBlock {
   identifier: String
+
   type: WorkbenchCanvasBlockType
+
+  "the header of a section block"
+  title: String
+
+  "an explanation of what this block shows"
+  description: String
+
+  "the identifier of the section block this block belongs to"
+  sectionId: String
+
+  "whether a section block starts collapsed"
+  collapsed: Boolean
+
   layout: WorkbenchCanvasBlockLayout
+
   content: WorkbenchCanvasBlockContent
 }
 
@@ -8919,7 +8946,10 @@ type PublicWorkbenchDashboardGraph {
 }
 
 type WorkbenchDashboardGraphResult {
-  "Metric points returned by a metrics datasource"
+  "Metric series returned by a metrics datasource, with labels sent once per series"
+  series: [MetricResponse]
+
+  "Metric points returned by a metrics datasource, one entry per point (prefer series)"
   metrics: [WorkbenchJobActivityMetric]
 
   "Log entries returned by a logs datasource"
@@ -17682,7 +17712,11 @@ type DashboardMetric {
 }
 
 type MetricResponse {
+  "the metric name, for backends that report it separately from the labels in `metric`"
+  name: String
+
   metric: Map
+
   values: [MetricResult]
 }
 

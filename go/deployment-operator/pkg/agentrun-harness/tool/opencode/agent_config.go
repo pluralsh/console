@@ -24,10 +24,11 @@ const ConfigFileName = "opencode.json"
 
 // configureNative writes only the provider-native OpenCode configuration. The
 // shared prompt and skill files are prepared separately by Agent.Prepare.
-func (agent *Agent) configureNative(config toolv1.Config, consoleURL, consoleToken string, provider Provider, model string, openaiCompatible bool, token string) error {
+func (agent *Agent) configureNative(config toolv1.Config, provider Provider, model string, openaiCompatible bool, token string) error {
 	input := &ConfigTemplateInput{
-		ConsoleURL:            consoleURL,
-		ConsoleToken:          consoleToken,
+		// The sidecar forwards these to the Console AI proxy and replaces the key with the deploy token.
+		ConsoleURL:            common.AgentConsoleProxyURL,
+		ConsoleToken:          common.AgentAIProxyAPIKey,
 		AgentRunID:            config.Run.ID,
 		ReadOnlyDirectories:   append(prebake.ExtraReadDirs(), attachments.ReadDirs()...),
 		Provider:              provider,

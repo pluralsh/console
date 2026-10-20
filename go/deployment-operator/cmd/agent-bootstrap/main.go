@@ -34,7 +34,12 @@ func run(ctx context.Context, consoleClient client.Client, agentRunID, workingDi
 		return fmt.Errorf("could not fetch agent run (%s): %w", agentRunID, err)
 	}
 
-	agentRun := (&agentrunv1.AgentRun{}).FromAgentRunFragment(fragment)
+	credentials, err := consoleClient.GetAgentRunCredentials(ctx, agentRunID)
+	if err != nil {
+		return fmt.Errorf("could not fetch agent run credentials (%s): %w", agentRunID, err)
+	}
+
+	agentRun := (&agentrunv1.AgentRun{}).FromAgentRunFragment(fragment).WithCredentials(credentials)
 	if err := agentrunenv.New(
 		agentrunenv.WithAgentRun(agentRun),
 		agentrunenv.WithWorkingDir(workingDir),

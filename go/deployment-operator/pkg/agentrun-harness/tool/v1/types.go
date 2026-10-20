@@ -69,7 +69,7 @@ type Tool interface {
 	ConfigureBabysitRun() error
 
 	// Configure configures the provider CLI.
-	Configure(consoleURL, consoleToken string) error
+	Configure() error
 
 	// OnMessage registers a callback called when a new message is received.
 	// callID correlates a tool start (RUNNING/PENDING) with its completion update.

@@ -93,13 +93,11 @@ type TransportCapabilities struct {
 	FileSystemWrite         bool
 }
 
-// ConfigureRequest carries one configuration pass. ConsoleToken is transient
-// input and must not be copied into Settings or retained by Runtime.
+// ConfigureRequest carries one configuration pass. Agents reach the Console AI
+// proxy through the mcpserver sidecar, so no Console credentials are passed here.
 type ConfigureRequest struct {
-	Phase        ConfigurePhase
-	ConsoleURL   string
-	ConsoleToken string
-	Settings     Settings
+	Phase    ConfigurePhase
+	Settings Settings
 }
 
 // ExportRequest asks an agent to stage its native session under OutputDir.

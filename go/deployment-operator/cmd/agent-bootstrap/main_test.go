@@ -49,3 +49,20 @@ func TestRunReturnsFetchError(t *testing.T) {
 	require.Contains(t, err.Error(), "could not fetch agent run (run-1)")
 	require.Contains(t, err.Error(), "not found")
 }
+
+func TestRunReturnsCredentialsFetchError(t *testing.T) {
+	t.Parallel()
+
+	m := mocks.NewClientMock(t)
+	m.On("GetAgentRun", mock.Anything, "run-1").
+		Return(&gqlclient.AgentRunFragment{ID: "run-1"}, nil).
+		Once()
+	m.On("GetAgentRunCredentials", mock.Anything, "run-1").
+		Return((*gqlclient.AgentRunCredentialsFragment)(nil), errors.New("forbidden")).
+		Once()
+
+	err := run(context.Background(), m, "run-1", t.TempDir())
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "could not fetch agent run credentials (run-1)")
+	require.Contains(t, err.Error(), "forbidden")
+}

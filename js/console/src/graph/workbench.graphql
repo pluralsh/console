@@ -378,8 +378,8 @@ fragment WorkbenchJobThought on WorkbenchJobThought {
     logs {
       ...WorkbenchJobActivityLog
     }
-    metrics {
-      ...WorkbenchJobActivityMetric
+    series {
+      ...MetricSeries
     }
     traces {
       ...WorkbenchJobActivityTrace
@@ -442,6 +442,10 @@ fragment WorkbenchCanvasToolGraph on WorkbenchCanvasToolGraph {
 fragment WorkbenchCanvasBlock on WorkbenchCanvasBlock {
   identifier
   type
+  title
+  description
+  sectionId
+  collapsed
   layout {
     x
     y
@@ -1490,11 +1494,11 @@ query WorkbenchJob($id: ID!) {
   }
 }
 
-query WorkbenchJobMetricsTool($id: ID!, $name: String, $arguments: Json) {
+query WorkbenchJobMetricsSeriesTool($id: ID!, $name: String, $arguments: Json) {
   workbenchJob(id: $id) {
     id
-    metricsTool(name: $name, arguments: $arguments) {
-      ...WorkbenchJobActivityMetric
+    metricsSeriesTool(name: $name, arguments: $arguments) {
+      ...MetricSeries
     }
   }
 }

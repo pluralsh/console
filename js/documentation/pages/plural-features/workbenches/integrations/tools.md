@@ -36,8 +36,10 @@ All native integrations respect your existing RBAC — enabling a capability her
 |---|---|
 | **[Prometheus](/plural-features/workbenches/integrations/tools/prometheus)** | Query metrics from a Prometheus-compatible endpoint |
 | **[Datadog](/plural-features/workbenches/integrations/tools/datadog)** | Query metrics, logs, and traces from the Datadog API |
-| **[Loki](/plural-features/workbenches/integrations/tools/loki)** | Query log streams from a Loki-compatible endpoint |
-| **[Elastic](/plural-features/workbenches/integrations/tools/elastic)** | Query and search indices in an Elasticsearch cluster |
+| **[Loki](/plural-features/workbenches/integrations/tools/loki)** | Query log streams and aggregate log counts from a Loki-compatible endpoint using LogQL |
+| **[Elastic](/plural-features/workbenches/integrations/tools/elastic)** | Search logs and aggregate log counts from an Elasticsearch index with text queries and exact-match facets |
+| **[Splunk](/plural-features/workbenches/integrations/tools/splunk)** | Search logs stored in Splunk Enterprise or Splunk Cloud using SPL queries via the management REST API |
+| **[VictoriaLogs](/plural-features/workbenches/integrations/tools/victoria-logs)** | Query logs and aggregate log counts from a VictoriaLogs endpoint using LogsQL |
 | **[Tempo](/plural-features/workbenches/integrations/tools/tempo)** | Query distributed trace spans from a Grafana Tempo endpoint |
 | **[Jaeger](/plural-features/workbenches/integrations/tools/jaeger)** | Query distributed trace spans from a Jaeger backend with filters for service, operation, duration, and attributes |
 
@@ -68,7 +70,9 @@ All native integrations respect your existing RBAC — enabling a capability her
 
 | Tool | What the agent can do |
 |---|---|
-| **[Atlassian (Jira)](/plural-features/workbenches/integrations/tools/atlassian)** | Create, read, and update Jira issues |
+| **[Atlassian](/plural-features/workbenches/integrations/tools/atlassian)** | Call Jira and Confluence Cloud via Atlassian's MCP server — search, create, and update issues; read and edit pages |
+| **[Jira Cloud](/plural-features/workbenches/integrations/tools/jira)** | Search, create, update, comment on, and transition Jira Cloud issues with JQL queries |
+| **[Jira Data Center](/plural-features/workbenches/integrations/tools/jira-datacenter)** | Search, create, update, comment on, and transition Jira Data Center issues on self-hosted instances |
 | **[Linear](/plural-features/workbenches/integrations/tools/linear)** | Create and update Linear issues |
 | **[ServiceNow](/plural-features/workbenches/integrations/tools/service-now)** | Create, read, update, and comment on incidents, change requests, problems, and catalog tasks |
 
