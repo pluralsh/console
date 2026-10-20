@@ -65,6 +65,78 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.StateToolsTest do
       assert {:ok, encoded} = run(ListStates, %{"table" => "change_request", "record_id" => @sys_id})
       assert %{"nextStates" => %{"available_states" => ["-5", "-4"]}} = Jason.decode!(encoded)
     end
+
+    test "lists the choices of another field, such as the resolution code" do
+      expect(Req, :request, fn opts ->
+        query = URI.decode_query(URI.parse(opts[:url]).query)
+        assert query["sysparm_query"] =~ "name=incident^element=close_code^inactive=false^language=en"
+
+        {:ok,
+         %Req.Response{
+           status: 200,
+           body: ~s({"result":[{"value":"Solution provided","label":"Solution provided"},{"value":"Duplicate","label":"Duplicate"}]})
+         }}
+      end)
+
+      assert {:ok, encoded} = run(ListStates, %{"table" => "incident", "field" => "close_code"})
+
+      assert %{"field" => "close_code", "choices" => [%{"value" => "Solution provided"}, %{"value" => "Duplicate"}]} =
+               Jason.decode!(encoded)
+    end
+
+    test "falls back to the task choices for another field too" do
+      expect(Req, :request, fn opts ->
+        assert URI.decode_query(URI.parse(opts[:url]).query)["sysparm_query"] =~ "name=sc_task^element=priority^"
+        {:ok, %Req.Response{status: 200, body: ~s({"result":[]})}}
+      end)
+
+      expect(Req, :request, fn opts ->
+        assert URI.decode_query(URI.parse(opts[:url]).query)["sysparm_query"] =~ "name=task^element=priority^"
+        {:ok, %Req.Response{status: 200, body: ~s({"result":[{"value":"1","label":"1 - Critical"}]})}}
+      end)
+
+      assert {:ok, encoded} = run(ListStates, %{"table" => "sc_task", "field" => "priority"})
+      assert %{"choices" => [%{"value" => "1"}]} = Jason.decode!(encoded)
+    end
+
+    test "field state answers like a call without a field" do
+      expect(Req, :request, fn _ -> {:ok, %Req.Response{status: 200, body: @choices}} end)
+
+      assert {:ok, encoded} = run(ListStates, %{"table" => "incident", "field" => "state"})
+      assert %{"states" => [_, _, _]} = Jason.decode!(encoded)
+    end
+
+    test "field state on a change with a record reads the next states" do
+      expect(Req, :request, fn opts ->
+        assert opts[:url] == "#{@change}/change/#{@sys_id}/nextstates"
+        {:ok, %Req.Response{status: 200, body: @next_states}}
+      end)
+
+      assert {:ok, encoded} =
+               run(ListStates, %{"table" => "change_request", "record_id" => @sys_id, "field" => "state"})
+
+      assert %{"nextStates" => _} = Jason.decode!(encoded)
+    end
+
+    test "rejects a field that is not a plain column name" do
+      reject(&Req.request/1)
+
+      assert {:error, msg} = run(ListStates, %{"table" => "incident", "field" => "state^ORactive=true"})
+      assert msg =~ "plain column name"
+    end
+
+    test "reads the choices of a field for a change when asked for one" do
+      expect(Req, :request, fn opts ->
+        assert URI.parse(opts[:url]).path == "/api/now/table/sys_choice"
+        assert URI.decode_query(URI.parse(opts[:url]).query)["sysparm_query"] =~ "name=change_request^element=close_code^"
+        {:ok, %Req.Response{status: 200, body: ~s({"result":[{"value":"successful","label":"Successful"}]})}}
+      end)
+
+      assert {:ok, encoded} =
+               run(ListStates, %{"table" => "change_request", "record_id" => @sys_id, "field" => "close_code"})
+
+      assert %{"field" => "close_code", "choices" => [%{"value" => "successful"}]} = Jason.decode!(encoded)
+    end
   end
 
   describe "transition_record" do
@@ -80,7 +152,7 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.StateToolsTest do
 
         assert Jason.decode!(opts[:body]) == %{
                  "state" => "6",
-                 "close_code" => "Solved (Permanently)",
+                 "close_code" => "Solution provided",
                  "close_notes" => "fixed"
                }
 
@@ -92,7 +164,7 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.StateToolsTest do
                  "table" => "incident",
                  "record_id" => @sys_id,
                  "state" => "resolved",
-                 "fields" => %{"close_code" => "Solved (Permanently)", "close_notes" => "fixed"}
+                 "fields" => %{"close_code" => "Solution provided", "close_notes" => "fixed"}
                })
 
       assert %{"state" => "6", "record" => %{"state" => "6"}} = Jason.decode!(encoded)
