@@ -205,7 +205,7 @@ function DashboardGraphGrid({
           >
             {rowGraphs.map((graph) => (
               <CellSC
-                key={graph.identifier}
+                key={dashboardGraphDataKey(graph)}
                 $x={graph.layout?.x ?? 0}
                 $w={graph.layout?.w ?? columns}
                 $collapseAt={collapseAt}
@@ -226,6 +226,28 @@ function DashboardGraphGrid({
       })}
     </GraphGridSC>
   )
+}
+
+/**
+ * A panel's identity, including what its data is fetched from. Panel data is
+ * fetched once by identifier and isn't cached, so a panel whose query is edited
+ * in place (e.g. by a job) remounts to fetch the new query's data.
+ */
+export function dashboardGraphDataKey(
+  graph: Pick<DashboardPanelGraph, 'identifier' | 'type' | 'datasource'> & {
+    toolId?: Nullable<string>
+  }
+) {
+  const { type, tool, input } = graph.datasource ?? {}
+
+  return JSON.stringify([
+    graph.identifier,
+    graph.type,
+    graph.toolId ?? null,
+    type ?? null,
+    tool ?? null,
+    input ?? null,
+  ])
 }
 
 /** Row width below which its narrowest panel would be under MIN_PANEL_WIDTH_PX. */

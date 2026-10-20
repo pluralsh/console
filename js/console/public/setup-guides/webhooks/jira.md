@@ -1,10 +1,16 @@
 # Jira Webhook Setup for Plural
 
 References:
+- [Atlassian Developer - Jira Cloud webhooks](https://developer.atlassian.com/cloud/jira/platform/webhooks/)
 - [Atlassian Support - Jira automation actions (Send web request)](https://support.atlassian.com/cloud-automation/docs/jira-automation-actions/)
 - [Atlassian Support - Issue data (Jira format) payload](https://support.atlassian.com/cloud-automation/docs/issue-data-jira-format-payload-for-send-web-request-action/)
 
-Plural authenticates Jira requests with an `X-Atlassian-Webhook-Secret` header that must equal the Plural secret. Jira admin webhooks can't send custom headers (their optional secret produces an `X-Hub-Signature`, which Plural does not check), so every admin webhook delivery is rejected with `403`. Use a Jira Automation rule with the **Send web request** action instead.
+Plural accepts two ways of authenticating Jira requests:
+
+- **Admin webhook with a secret**: Jira signs each delivery with the secret in an `X-Hub-Signature` header (`sha256=<hex>`). An admin webhook without a secret is rejected with `403`.
+- **Automation rule**: the **Send web request** action sends an `X-Atlassian-Webhook-Secret` header equal to the Plural secret.
+
+If `X-Hub-Signature` is present it must be valid; Plural does not fall back to the secret header.
 
 ## 1. Create the webhook in Plural first
 
@@ -18,7 +24,16 @@ In Plural:
 
 Copy the generated Plural webhook URL and secret.
 
-## 2. Create an automation rule in Jira
+## 2a. Admin webhook (requires Jira admin)
+
+In Jira, open **Settings** -> **System** -> **WebHooks** and click **Create a WebHook**:
+
+- **URL**: the Plural webhook URL
+- **Secret**: the Plural secret
+- **Events**: **Issue** created and updated (comment and worklog events also carry the issue and are recorded as updates)
+- Optional JQL filter, for example `project = OPS AND labels = plural`
+
+## 2b. Automation rule
 
 In the Jira project, open **Project settings** -> **Automation** and create a rule:
 
@@ -37,6 +52,6 @@ Plural reads the top-level `issue` object (`key`, `self`, `fields.summary`, `fie
 
 Create and transition a test issue in Jira, then confirm in Plural:
 
-- request accepted (check the rule's **Audit log**; `403` means the header is missing or wrong)
+- request accepted (`403` means the secret is missing or wrong; for an automation rule, check the rule's **Audit log**)
 - expected issue metadata is present
 - workflow/trigger behavior matches expectations

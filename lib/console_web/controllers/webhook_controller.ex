@@ -59,7 +59,25 @@ defmodule ConsoleWeb.WebhookController do
   end
 
   def issue(conn, %{"id" => id}) do
-    with %IssueWebhook{} = hook <- Integrations.get_issue_webhook_by_ext_id(id),
+    case {Integrations.get_issue_webhook_by_ext_id(id), get_req_header(conn, "x-hook-secret")} do
+      {%IssueWebhook{provider: :asana} = hook, [secret]} -> asana_handshake(conn, hook, secret)
+      {hook, _} -> handle_issue(conn, hook)
+    end
+  end
+
+  # Asana's handshake is unauthenticated, so only the first one is trusted (see Integrations.record_handshake_secret/2)
+  defp asana_handshake(conn, hook, secret) do
+    case Integrations.record_handshake_secret(hook, secret) do
+      {:ok, _} ->
+        conn
+        |> put_resp_header("x-hook-secret", secret)
+        |> send_resp(200, "")
+      _ -> send_resp(conn, 403, "Forbidden")
+    end
+  end
+
+  defp handle_issue(conn, hook) do
+    with %IssueWebhook{} <- hook,
          :ok <- verify(conn, hook),
          {:ok, attrs} <- Issues.Webhook.payload(hook, conn.body_params),
          {:ok, _} <- Integrations.upsert_issue(attrs) do
@@ -190,20 +208,21 @@ defmodule ConsoleWeb.WebhookController do
     end
   end
 
+  # Admin webhooks sign the body (X-Hub-Signature); automation rules send the secret as a header.
+  # A signature header, when present, must be valid: it never falls back to the shared secret.
   defp verify(conn, %IssueWebhook{provider: :jira, secret: secret}) do
-    with [token] <- get_req_header(conn, "x-atlassian-webhook-secret"),
-         true <- Plug.Crypto.secure_compare(token, secret) do
-      :ok
-    else
+    case {get_req_header(conn, "x-hub-signature"), get_req_header(conn, "x-atlassian-webhook-secret")} do
+      {[signature], _} -> verify_websub_signature(conn, signature, secret)
+      {[], [token]} -> secure_verify(token, secret)
       _ -> :reject
     end
   end
 
-  defp verify(conn, %IssueWebhook{provider: :asana, secret: secret}) do
+  # Asana signs with the secret from its handshake; relays sign with the webhook's own secret
+  defp verify(conn, %IssueWebhook{provider: :asana, secret: secret, handshake_secret: handshake}) do
     with [signature] <- get_req_header(conn, "x-hook-signature"),
-         mac = :crypto.mac(:hmac, :sha256, secret, Enum.reverse(conn.assigns.raw_body)),
-         computed_signature = Base.encode16(mac, case: :lower),
-         true <- Plug.Crypto.secure_compare(signature, computed_signature) do
+         body = Enum.reverse(conn.assigns.raw_body),
+         true <- Enum.any?([secret, handshake], &valid_asana_signature?(&1, body, signature)) do
       :ok
     else
       _ -> :reject
@@ -246,6 +265,25 @@ defmodule ConsoleWeb.WebhookController do
       false -> :reject
     end
   end
+
+  @websub_methods %{"sha1" => :sha, "sha256" => :sha256, "sha384" => :sha384, "sha512" => :sha512}
+
+  defp verify_websub_signature(conn, signature, secret) do
+    with [method, sig] <- String.split(String.trim(signature), "=", parts: 2),
+         {:ok, alg} <- Map.fetch(@websub_methods, String.downcase(method)),
+         mac = :crypto.mac(:hmac, alg, secret, Enum.reverse(conn.assigns.raw_body)),
+         true <- Plug.Crypto.secure_compare(String.downcase(sig), Base.encode16(mac, case: :lower)) do
+      :ok
+    else
+      _ -> :reject
+    end
+  end
+
+  defp valid_asana_signature?(secret, body, signature) when is_binary(secret) do
+    mac = :crypto.mac(:hmac, :sha256, secret, body)
+    Plug.Crypto.secure_compare(signature, Base.encode16(mac, case: :lower))
+  end
+  defp valid_asana_signature?(_, _, _), do: false
 
   defp secure_verify(token, secret) do
     case Plug.Crypto.secure_compare(token, secret) do
