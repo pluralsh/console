@@ -3,7 +3,15 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
   use Mimic
   alias CloudQuery.Client
   alias Toolquery.ToolQuery.Stub
-  alias Toolquery.{MetricPoint, MetricsQueryOutput, TraceSpan, TracesQueryOutput}
+  alias Toolquery.{
+    MetricPoint,
+    MetricsQueryOutput,
+    MetricSample,
+    MetricSeries,
+    MetricsSeriesOutput,
+    TraceSpan,
+    TracesQueryOutput
+  }
 
   describe "workbenches" do
     test "it can fetch workbenches" do
@@ -1701,6 +1709,73 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       }, %{current_user: admin_user()})
     end
 
+    test "it resolves metricsSeriesTool as grouped series without non-finite samples" do
+      workbench = insert(:workbench)
+      tool = insert(:workbench_tool,
+        project: workbench.project,
+        name: "prom",
+        tool: :prometheus,
+        categories: [:metrics],
+        configuration: %{
+          prometheus: %{url: "https://prom.example.com", token: "token", tenant_id: nil}
+        }
+      )
+
+      insert(:workbench_tool_association, workbench: workbench, tool: tool)
+      job = insert(:workbench_job, workbench: workbench)
+      now = DateTime.utc_now() |> DateTime.truncate(:second)
+
+      expect(Client, :connect, fn -> {:ok, :mock_conn} end)
+      expect(Stub, :metrics_series, fn :mock_conn, input, opts ->
+        assert opts[:timeout] == :timer.seconds(30)
+        assert input.query == "sum(rate(http_requests_total[5m])) by (method)"
+        assert input.step == "30s"
+
+        {:ok,
+         %MetricsSeriesOutput{
+           series: [
+             %MetricSeries{
+               name: "http_requests_total",
+               labels: %{"method" => "GET"},
+               samples: [
+                 %MetricSample{timestamp: Google.Protobuf.from_datetime(now), value: :nan},
+                 %MetricSample{timestamp: Google.Protobuf.from_datetime(now), value: 42.5}
+               ]
+             },
+             %MetricSeries{
+               name: "http_requests_total",
+               labels: %{"method" => "POST"},
+               samples: [%MetricSample{timestamp: Google.Protobuf.from_datetime(now), value: :negative_infinity}]
+             }
+           ]
+         }}
+      end)
+
+      {:ok, %{data: %{"workbenchJob" => found}}} = run_query("""
+        query WorkbenchJob($id: ID!, $name: String!, $arguments: Json) {
+          workbenchJob(id: $id) {
+            metricsSeriesTool(name: $name, arguments: $arguments) {
+              name
+              metric
+              values { timestamp value }
+            }
+          }
+        }
+      """, %{
+        "id" => job.id,
+        "name" => "workbench_observability_metrics_prom",
+        "arguments" => Jason.encode!(%{"query" => "sum(rate(http_requests_total[5m])) by (method)", "step" => "30s"})
+      }, %{current_user: admin_user()})
+
+      assert found["metricsSeriesTool"] == [
+               %{
+                 "name" => "http_requests_total",
+                 "metric" => %{"method" => "GET"},
+                 "values" => [%{"timestamp" => "#{DateTime.to_unix(now)}", "value" => "42.5"}]
+               }
+             ]
+    end
+
     test "it returns gRPC metrics errors as GraphQL errors" do
       workbench = insert(:workbench)
 
@@ -1894,6 +1969,59 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert found["type"] == "CODING"
       assert found["prompt"] == "fix the bug"
       assert found["user"]["id"] == user.id
+    end
+
+    test "thought metrics resolve as series and flat points for both stored shapes" do
+      activity = insert(:workbench_job_activity, workbench_job: insert(:workbench_job), type: :coding)
+      t1 = ~U[2026-10-19 00:00:00Z]
+      t2 = ~U[2026-10-19 00:01:00Z]
+
+      {:ok, _} =
+        %Console.Schema.WorkbenchJobThought{}
+        |> Console.Schema.WorkbenchJobThought.changeset(%{
+          activity_id: activity.id,
+          content: "series",
+          attributes: %{series: [%{name: "up", labels: %{"pod" => "a"}, samples: [%{timestamp: t1, value: 1.0}, %{timestamp: t2, value: 2.0}]}]}
+        })
+        |> Console.Repo.insert()
+
+      {:ok, _} =
+        %Console.Schema.WorkbenchJobThought{}
+        |> Console.Schema.WorkbenchJobThought.changeset(%{
+          activity_id: activity.id,
+          content: "legacy",
+          attributes: %{metrics: [
+            %{name: "up", labels: %{"pod" => "b"}, timestamp: t1, value: 3.0},
+            %{name: "up", labels: %{"pod" => "b"}, timestamp: t2, value: 4.0}
+          ]}
+        })
+        |> Console.Repo.insert()
+
+      {:ok, %{data: %{"workbenchJobActivity" => found}}} = run_query("""
+        query WorkbenchJobActivity($id: ID!) {
+          workbenchJobActivity(id: $id) {
+            thoughts {
+              content
+              attributes {
+                series { name metric values { timestamp value } }
+                metrics { name value labels }
+              }
+            }
+          }
+        }
+      """, %{"id" => activity.id}, %{current_user: admin_user()})
+
+      by_content = Map.new(found["thoughts"], &{&1["content"], &1["attributes"]})
+      values = fn a, b -> [%{"timestamp" => "#{DateTime.to_unix(t1)}", "value" => a}, %{"timestamp" => "#{DateTime.to_unix(t2)}", "value" => b}] end
+
+      assert by_content["series"]["series"] == [%{"name" => "up", "metric" => %{"pod" => "a"}, "values" => values.("1.0", "2.0")}]
+      assert by_content["series"]["metrics"] == [
+               %{"name" => "up", "value" => 1.0, "labels" => %{"pod" => "a"}},
+               %{"name" => "up", "value" => 2.0, "labels" => %{"pod" => "a"}}
+             ]
+
+      assert by_content["legacy"]["series"] == [%{"name" => "up", "metric" => %{"pod" => "b"}, "values" => values.("3.0", "4.0")}]
+      assert length(by_content["legacy"]["metrics"]) == 2
     end
 
     test "users with read access to the workbench can fetch workbench job activities" do

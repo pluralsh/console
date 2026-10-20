@@ -16,9 +16,11 @@ import {
 } from 'components/ai/chatbot/SidePanelShared'
 import {
   SidePanel,
+  SidePanelAutoOpen,
+  useSidePanelAutoOpen,
   useSidePanelWidth,
   useTopLevelSidePanel,
-} from 'components/layout/TopLevelSidePanel'
+} from 'components/layout/TopLevelSidePanelState'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { isJobRunning } from 'components/workbenches/workbench/job/WorkbenchJobActivity'
 import {
@@ -26,14 +28,13 @@ import {
   AgentRunStatus,
   useAgentRunQuery,
 } from 'generated/graphql'
-import { isEmpty, isNil } from 'lodash'
+import { isEmpty } from 'lodash'
 import {
   createContext,
   type ReactNode,
   use,
   useCallback,
   useEffect,
-  useEffectEvent,
   useMemo,
   useRef,
   useState,
@@ -91,7 +92,7 @@ const AgentRunPanelContext = createContext<AgentRunPanelContextT>({
 })
 
 export function AgentRunPanelProvider({ children }: { children: ReactNode }) {
-  const { sidePanel, setSidePanel } = useTopLevelSidePanel()
+  const { sidePanel, setSidePanel, closeSidePanel } = useTopLevelSidePanel()
   const [selectedTab, setSelectedTab] = useState<AgentRunPanelTab>(
     AgentRunPanelTab.ImplementationPlan
   )
@@ -110,10 +111,13 @@ export function AgentRunPanelProvider({ children }: { children: ReactNode }) {
         setRequestedTab(tab)
         setSelectedTab(tab)
       }
-      if (!open) setRequestedTab(null)
-      setSidePanel(open ? SIDE_PANEL_TYPE : null)
+      if (open) setSidePanel(SIDE_PANEL_TYPE)
+      else {
+        setRequestedTab(null)
+        closeSidePanel(SIDE_PANEL_TYPE)
+      }
     },
-    [setSidePanel]
+    [setSidePanel, closeSidePanel]
   )
 
   const ctx = useMemo(
@@ -459,22 +463,10 @@ export function AgentRunPanelContent() {
   )
 }
 
-export function useAgentRunPanel(
-  autoOpen?: Nullable<boolean>,
-  autoOpenKey?: Nullable<string>
-) {
-  const ctx = use(AgentRunPanelContext)
+export function useAgentRunPanel(autoOpen?: Nullable<SidePanelAutoOpen>) {
+  useSidePanelAutoOpen(SIDE_PANEL_TYPE, autoOpen)
 
-  const onAutoOpen = useEffectEvent(() => ctx.setOpen(true))
-  const onUnmount = useEffectEvent(() => ctx.setOpen(false))
-  useEffect(() => {
-    if (!!autoOpen) onAutoOpen()
-    return () => {
-      if (!isNil(autoOpen)) onUnmount()
-    }
-  }, [autoOpen, autoOpenKey])
-
-  return ctx
+  return use(AgentRunPanelContext)
 }
 
 const ContentWrapperSC = styled.div(() => ({

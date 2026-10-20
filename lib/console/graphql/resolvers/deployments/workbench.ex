@@ -6,6 +6,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   alias Console.Deployments.{Clusters, Workbenches, WorkbenchFiles}
   alias Console.AI.Workbench.{Toolchain, Skills}
   alias Console.AI.Tools.Workbench.Infrastructure.KubeGet
+  alias Console.AI.Tools.Workbench.Observability.Metrics
   alias Console.Schema.{
     Alert,
     Cluster,
@@ -351,6 +352,17 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
 
   def metrics_tool(%WorkbenchJob{} = job, %{name: name, arguments: args}, %{context: %{current_user: user}}),
     do: Toolchain.metrics(job, name, args, user)
+
+  def metrics_series_tool(%WorkbenchJob{} = job, %{name: name, arguments: args}, %{context: %{current_user: user}}),
+    do: Toolchain.metrics_series(job, name, args, user)
+
+  def thought_metric_series(%{series: [_ | _] = series}, _, _), do: {:ok, series}
+  def thought_metric_series(%{metrics: [_ | _] = metrics}, _, _), do: {:ok, Metrics.group_points(metrics)}
+  def thought_metric_series(_, _, _), do: {:ok, []}
+
+  def thought_metrics(%{metrics: [_ | _] = metrics}, _, _), do: {:ok, metrics}
+  def thought_metrics(%{series: [_ | _] = series}, _, _), do: {:ok, Metrics.flatten_series(series)}
+  def thought_metrics(_, _, _), do: {:ok, []}
 
   def logs_tool(%WorkbenchJob{} = job, %{name: name, arguments: args}, %{context: %{current_user: user}}),
     do: Toolchain.logs(job, name, args, user)

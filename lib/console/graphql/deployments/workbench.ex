@@ -859,6 +859,13 @@ defmodule Console.GraphQl.Deployments.Workbench do
       resolve &Deployments.metrics_tool/3
     end
 
+    field :metrics_series_tool, list_of(:metric_response) do
+      arg :name,      :string, description: "the name of the metrics tool"
+      arg :arguments, :json,   description: "the arguments for the metrics tool"
+
+      resolve &Deployments.metrics_series_tool/3
+    end
+
     field :logs_tool, list_of(:workbench_job_activity_log) do
       arg :name,      :string, description: "the name of the logs tool"
       arg :arguments, :json,   description: "the arguments for the logs tool"
@@ -964,7 +971,12 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_job_thought_attributes do
-    field :metrics, list_of(:workbench_job_activity_metric), description: "metrics for the thought"
+    field :series, list_of(:metric_response),
+      description: "metric series for the thought, with labels sent once per series",
+      resolve: &Deployments.thought_metric_series/3
+    field :metrics, list_of(:workbench_job_activity_metric),
+      description: "metrics for the thought, one entry per point (prefer series)",
+      resolve: &Deployments.thought_metrics/3
     field :logs,    list_of(:workbench_job_activity_log), description: "logs for the thought"
     field :traces,  list_of(:workbench_job_activity_trace), description: "traces for the thought"
   end
@@ -1124,10 +1136,14 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_canvas_block do
-    field :identifier, :string
-    field :type,       :workbench_canvas_block_type
-    field :layout,     :workbench_canvas_block_layout
-    field :content,    :workbench_canvas_block_content
+    field :identifier,  :string
+    field :type,        :workbench_canvas_block_type
+    field :title,       :string, description: "the header of a section block"
+    field :description, :string, description: "an explanation of what this block shows"
+    field :section_id,  :string, description: "the identifier of the section block this block belongs to"
+    field :collapsed,   :boolean, description: "whether a section block starts collapsed"
+    field :layout,      :workbench_canvas_block_layout
+    field :content,     :workbench_canvas_block_content
   end
 
   object :workbench_job_result_todo do

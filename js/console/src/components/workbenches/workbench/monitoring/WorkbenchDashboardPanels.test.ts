@@ -10,7 +10,28 @@ import {
   dashboardPanelIsWaitingForData,
   dashboardLegendMode,
   dashboardPanelVisibleData,
+  rowCollapseWidth,
 } from './WorkbenchDashboardPanels'
+
+describe('row collapse width', () => {
+  const panels = (...widths: number[]) =>
+    widths.map((w, i) => ({
+      identifier: `p${i}`,
+      type: DashboardGraphType.Timeseries,
+      hasDatasource: true,
+      layout: { x: 0, y: 0, w, h: 1 },
+    }))
+
+  it('keeps the base breakpoint for wide panels', () => {
+    expect(rowCollapseWidth(2, panels(1, 1))).toBe(640)
+    expect(rowCollapseWidth(3, panels(3))).toBe(640)
+  })
+
+  it('collapses earlier when the narrowest panel would get too small', () => {
+    expect(rowCollapseWidth(3, panels(1, 1, 1))).toBe(840)
+    expect(rowCollapseWidth(4, panels(1, 3))).toBe(1120)
+  })
+})
 
 describe('dashboard legend mode', () => {
   const many = Array.from(

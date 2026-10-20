@@ -42,6 +42,13 @@ defmodule Console.AI.Tools.Workbench.Observability.Plrl.Metrics do
     end
   end
 
+  def structured_series(%__MODULE__{query: q, step: s, time_range: tr}) do
+    with {:ok, conn} <- build_tool_connection() do
+      metrics = %Metrics{tool: conn, query: q, step: s, time_range: tr}
+      Metrics.structured_series(metrics)
+    end
+  end
+
   def build_tool_connection() do
     case Settings.fetch() do
       %DeploymentSettings{prometheus_connection: %{host: url, user: user, password: pass}}

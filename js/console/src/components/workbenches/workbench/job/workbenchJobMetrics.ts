@@ -1,53 +1,57 @@
-import { WorkbenchJobActivityMetricFragment } from 'generated/graphql'
-import { groupBy, isNil, uniq } from 'lodash'
-import { toDateOrUndef } from 'utils/datetime'
+import { MetricSeriesFragment } from 'generated/graphql'
+import { uniq } from 'lodash'
+import { isNonNullable } from 'utils/isNonNullable'
+
+export type MetricPoint = { x: Date; y: number }
 
 export type MetricSeries = {
-  data: { x: Date; y: number }[]
+  data: MetricPoint[]
   id: string
   label: string
   /** Label reduced to the tags that distinguish this series from the others. */
   shortLabel: string
 }
 
+type MetricSeriesKey = {
+  name?: Nullable<string>
+  labels?: Nullable<Record<string, unknown>>
+}
+
 const SHORT_LABEL_MAX_TAGS = 3
 const SHORT_LABEL_MAX_VALUE_LENGTH = 32
 const TRUNCATION_MARKER = '…'
 
-export function getMetricSeries(
-  metrics: WorkbenchJobActivityMetricFragment[]
+/** Builds chart series from `MetricResponse` series (labels sent once per series). */
+export function getMetricSeriesFromResponses(
+  responses: Nullable<Nullable<MetricSeriesFragment>[]>
 ): MetricSeries[] {
-  const grouped = Object.entries(groupBy(metrics, metricSeriesId))
-  const shortLabels = metricSeriesShortLabels(
-    grouped.map(([, points]) => points[0])
-  )
+  const nonEmpty = (responses ?? []).filter(isNonNullable)
+  const keys = nonEmpty.map(({ name, metric }) => ({ name, labels: metric }))
+  const shortLabels = metricSeriesShortLabels(keys)
 
-  return grouped.map(([id, points], i) => ({
-    id,
-    label: metricSeriesLabel(points[0]),
+  return nonEmpty.map(({ values }, i) => ({
+    id: metricSeriesId(keys[i]),
+    label: metricSeriesLabel(keys[i]),
     shortLabel: shortLabels[i],
-    data: points
-      .map((point) => ({ x: toDateOrUndef(point.timestamp), y: point.value }))
-      .filter(
-        (point): point is { x: Date; y: number } =>
-          !isNil(point.x) && !isNil(point.y)
-      ),
+    data: (values ?? [])
+      .filter(isNonNullable)
+      .flatMap(({ timestamp, value }) => {
+        const x = Number(timestamp)
+        const y = Number(value)
+        return value != null && Number.isFinite(x) && Number.isFinite(y)
+          ? [{ x: new Date(x * 1000), y }]
+          : []
+      }),
   }))
 }
 
-export function metricSeriesId({
-  name,
-  labels,
-}: WorkbenchJobActivityMetricFragment): string {
+function metricSeriesId({ name, labels }: MetricSeriesKey): string {
   return `${name ?? 'metric'}{${metricLabelEntries(labels)
     .map(([key, value]) => `${key}:${value}`)
     .join(',')}}`
 }
 
-function metricSeriesLabel({
-  name,
-  labels,
-}: WorkbenchJobActivityMetricFragment): string {
+function metricSeriesLabel({ name, labels }: MetricSeriesKey): string {
   const label = metricLabelEntries(labels)
     .map(([key, value]) => `${key}=${value}`)
     .join(', ')
@@ -59,9 +63,7 @@ function metricSeriesLabel({
  * Drops tags shared by every series, then keeps the most distinguishing
  * remaining tags (highest cardinality first) up to SHORT_LABEL_MAX_TAGS.
  */
-function metricSeriesShortLabels(
-  metrics: WorkbenchJobActivityMetricFragment[]
-): string[] {
+function metricSeriesShortLabels(metrics: MetricSeriesKey[]): string[] {
   const tagMaps = metrics.map(
     ({ labels }) => new Map(metricLabelEntries(labels).map(stringifyEntry))
   )

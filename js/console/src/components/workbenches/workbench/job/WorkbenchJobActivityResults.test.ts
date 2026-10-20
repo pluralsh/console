@@ -1,25 +1,27 @@
 import { describe, expect, it } from 'vitest'
-import { WorkbenchJobActivityMetricFragment } from 'generated/graphql'
-import { getMetricSeries } from './workbenchJobMetrics'
+import { MetricSeriesFragment } from 'generated/graphql'
+import { getMetricSeriesFromResponses } from './workbenchJobMetrics'
 
-function metric(
-  overrides: Partial<WorkbenchJobActivityMetricFragment>
-): WorkbenchJobActivityMetricFragment {
+function metric({
+  name = 'requests',
+  labels,
+}: {
+  name?: string
+  labels?: Nullable<Record<string, unknown>>
+}): MetricSeriesFragment {
   return {
-    name: 'requests',
-    timestamp: '2026-09-04T10:00:00Z',
-    value: 1,
-    ...overrides,
+    name,
+    metric: labels,
+    values: [{ timestamp: '1788000000', value: '1' }],
   }
 }
 
-describe('getMetricSeries', () => {
+describe('series ids and labels', () => {
   it('uses the chart series identifiers and order for labeled legend entries', () => {
-    const series = getMetricSeries([
+    const series = getMetricSeriesFromResponses([
       metric({ labels: { status: 'success' } }),
-      metric({ labels: { status: 'success' }, value: 2 }),
-      metric({ labels: { status: 'error' }, value: 3 }),
-      metric({ name: 'cpu_usage', labels: null, value: 4 }),
+      metric({ labels: { status: 'error' } }),
+      metric({ name: 'cpu_usage', labels: null }),
     ])
 
     expect(series.map(({ id, label }) => ({ id, label }))).toEqual([
@@ -27,26 +29,56 @@ describe('getMetricSeries', () => {
       { id: 'requests{status:error}', label: 'status=error' },
       { id: 'cpu_usage{}', label: 'cpu_usage' },
     ])
-    expect(series[0].data).toHaveLength(2)
   })
 
-  it('treats differently ordered label maps as a single series', () => {
-    const series = getMetricSeries([
-      metric({ labels: { method: 'GET', status: 'success' } }),
-      metric({ labels: { status: 'success', method: 'GET' }, value: 2 }),
+  it('ids do not depend on label order', () => {
+    const [series] = getMetricSeriesFromResponses([
+      metric({ labels: { status: 'success', method: 'GET' } }),
     ])
 
-    expect(series).toHaveLength(1)
-    expect(series[0]).toMatchObject({
+    expect(series).toMatchObject({
       id: 'requests{method:GET,status:success}',
       label: 'method=GET, status=success',
     })
   })
 })
 
-describe('getMetricSeries short labels', () => {
-  const shortLabels = (metrics: WorkbenchJobActivityMetricFragment[]) =>
-    getMetricSeries(metrics).map(({ shortLabel }) => shortLabel)
+describe('getMetricSeriesFromResponses', () => {
+  it('matches flat-point series ids and labels and parses unix-second points', () => {
+    const series = getMetricSeriesFromResponses([
+      {
+        name: 'requests',
+        metric: { status: 'success', method: 'GET' },
+        values: [
+          { timestamp: '1788000000', value: '1.5' },
+          { timestamp: '1788000030', value: 'NaN' },
+          null,
+        ],
+      },
+      null,
+      { name: 'requests', metric: { status: 'error' }, values: null },
+    ])
+
+    expect(series).toEqual([
+      {
+        id: 'requests{method:GET,status:success}',
+        label: 'method=GET, status=success',
+        shortLabel: 'method=GET, status=success',
+        data: [{ x: new Date(1788000000 * 1000), y: 1.5 }],
+      },
+      {
+        id: 'requests{status:error}',
+        label: 'status=error',
+        shortLabel: 'status=error',
+        data: [],
+      },
+    ])
+  })
+})
+
+describe('series short labels', () => {
+  const shortLabels = (series: MetricSeriesFragment[]) =>
+    getMetricSeriesFromResponses(series).map(({ shortLabel }) => shortLabel)
 
   it('drops tags shared by every series', () => {
     expect(

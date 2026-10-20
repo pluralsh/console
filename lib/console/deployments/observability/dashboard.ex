@@ -12,7 +12,7 @@ defmodule Console.Deployments.Observability.Dashboard do
   def graph(%Dashboard{} = dashboard, identifier, input, time_range, user) when is_nil(user) or is_struct(user, User) do
     with %Graph{datasource: %Datasource{} = datasource} <- find(dashboard.graphs, identifier),
          {:ok, data} <- execute_graph(dashboard, datasource, input, time_range, user) do
-      {:ok, %{datasource.type => data}}
+      {:ok, graph_result(datasource.type, data)}
     else
       nil -> {:error, "graph #{identifier} not found"}
       %Graph{} -> {:error, "graph #{identifier} does not have a datasource"}
@@ -108,6 +108,9 @@ defmodule Console.Deployments.Observability.Dashboard do
   defp execute_graph(_, _, _, _, _),
     do: {:error, "graph datasource must return metrics, logs, or traces"}
 
+  defp graph_result(:metrics, series), do: %{series: series}
+  defp graph_result(type, data), do: %{type => data}
+
   @metric_target_points 240
   @metric_step_candidates [
     15,
@@ -136,7 +139,7 @@ defmodule Console.Deployments.Observability.Dashboard do
       |> maybe_put_metric_step(datasource, dashboard.workbench, time_range)
 
     case datasource.type do
-      :metrics -> Toolchain.metrics(dashboard.workbench, datasource.tool, args, user)
+      :metrics -> Toolchain.metrics_series(dashboard.workbench, datasource.tool, args, user)
       :logs -> Toolchain.logs(dashboard.workbench, datasource.tool, args, user)
       :traces -> Toolchain.traces(dashboard.workbench, datasource.tool, args, user)
       :labels -> Toolchain.labels(dashboard.workbench, datasource.tool, args, user)

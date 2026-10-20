@@ -22,7 +22,6 @@ import {
   DashboardGraphUnit,
   DashboardTimeRangeAttributes,
   WorkbenchJobActivityLogFragment,
-  WorkbenchJobActivityMetricFragment,
   WorkbenchJobActivityTraceFragment,
 } from 'generated/graphql'
 import { groupBy, isEmpty, maxBy, sortBy } from 'lodash'
@@ -34,7 +33,10 @@ import {
   JobActivityLogs,
   WorkbenchJobMetricsLegend,
 } from '../job/WorkbenchJobActivityResults'
-import { getMetricSeries, metricSeriesId } from '../job/workbenchJobMetrics'
+import {
+  getMetricSeriesFromResponses,
+  type MetricSeries,
+} from '../job/workbenchJobMetrics'
 import { TraceWaterfall } from '../job/WorkbenchJobTraces'
 import {
   DashboardPanelGraph,
@@ -61,6 +63,8 @@ function parseJson(input: string): unknown {
 }
 
 const COLLAPSE_AT_PX = 640
+// narrow enough for ~4 unsquished time labels next to the y axis
+const MIN_PANEL_WIDTH_PX = 280
 const CHART_HEIGHT_PX = 238
 const PIE_HEIGHT_PX = 200
 
@@ -72,6 +76,8 @@ type DashboardPanelsProps = {
   queriesEnabled: boolean
   onRangeSelect?: (start: Date, end: Date) => void
   onUpdate?: () => void
+  /** Minimum grid columns; otherwise each grid is as wide as its widest row. */
+  columns?: number
 }
 
 export function WorkbenchDashboardPanels(props: DashboardPanelsProps) {
@@ -163,16 +169,17 @@ function DashboardGraphGrid({
   queriesEnabled,
   onRangeSelect,
   onUpdate,
+  columns: minColumns = 1,
 }: DashboardPanelsProps) {
   const columns = useMemo(
     () =>
       Math.max(
-        1,
+        minColumns,
         ...graphs.map(
           (graph) => (graph.layout?.x ?? 0) + (graph.layout?.w ?? 1)
         )
       ),
-    [graphs]
+    [graphs, minColumns]
   )
 
   const rows = useMemo(() => {
@@ -188,31 +195,50 @@ function DashboardGraphGrid({
 
   return (
     <GraphGridSC>
-      {rows.map(({ y, graphs: rowGraphs }) => (
-        <RowSC
-          key={y}
-          $columns={columns}
-        >
-          {rowGraphs.map((graph) => (
-            <CellSC
-              key={graph.identifier}
-              $x={graph.layout?.x ?? 0}
-              $w={graph.layout?.w ?? columns}
-            >
-              <DashboardPanel
-                graph={graph}
-                variables={variables}
-                timeRange={timeRange}
-                rangeRevision={rangeRevision}
-                queriesEnabled={queriesEnabled}
-                onRangeSelect={onRangeSelect}
-                onUpdate={onUpdate}
-              />
-            </CellSC>
-          ))}
-        </RowSC>
-      ))}
+      {rows.map(({ y, graphs: rowGraphs }) => {
+        const collapseAt = rowCollapseWidth(columns, rowGraphs)
+        return (
+          <RowSC
+            key={y}
+            $columns={columns}
+            $collapseAt={collapseAt}
+          >
+            {rowGraphs.map((graph) => (
+              <CellSC
+                key={graph.identifier}
+                $x={graph.layout?.x ?? 0}
+                $w={graph.layout?.w ?? columns}
+                $collapseAt={collapseAt}
+              >
+                <DashboardPanel
+                  graph={graph}
+                  variables={variables}
+                  timeRange={timeRange}
+                  rangeRevision={rangeRevision}
+                  queriesEnabled={queriesEnabled}
+                  onRangeSelect={onRangeSelect}
+                  onUpdate={onUpdate}
+                />
+              </CellSC>
+            ))}
+          </RowSC>
+        )
+      })}
     </GraphGridSC>
+  )
+}
+
+/** Row width below which its narrowest panel would be under MIN_PANEL_WIDTH_PX. */
+export function rowCollapseWidth(
+  columns: number,
+  graphs: DashboardPanelGraph[]
+) {
+  const narrowest = Math.min(
+    ...graphs.map((graph) => Math.max(1, graph.layout?.w ?? columns))
+  )
+  return Math.max(
+    COLLAPSE_AT_PX,
+    Math.ceil((MIN_PANEL_WIDTH_PX * columns) / Math.min(narrowest, columns))
   )
 }
 
@@ -290,9 +316,9 @@ function DataDashboardPanel({
   const [fullscreen, setFullscreen] = useState(false)
   const [selectedSeriesId, setSelectedSeriesId] = useState<string | null>(null)
   const fullscreenTriggerRef = useRef<HTMLDivElement>(null)
-  const { metrics, logs, traces } = useMemo(
+  const { series, logs, traces } = useMemo(
     () => ({
-      metrics: data?.metrics?.filter(isNonNullable) ?? [],
+      series: getMetricSeriesFromResponses(data?.series),
       logs: data?.logs?.filter(isNonNullable) ?? [],
       traces: data?.traces?.filter(isNonNullable) ?? [],
     }),
@@ -371,7 +397,9 @@ function DataDashboardPanel({
         )}
       </Flex>
       <PanelBodySC aria-busy={loading}>
-        {!graph.hasDatasource ? (
+        {graph.staticContent ? (
+          graph.staticContent
+        ) : !graph.hasDatasource ? (
           <WorkbenchEmptyState
             variant="plain"
             inset={false}
@@ -403,7 +431,7 @@ function DataDashboardPanel({
           <PanelContent
             type={graph.type}
             unit={graph.unit}
-            metrics={metrics}
+            series={series}
             logs={logs}
             traces={traces}
             fullscreen={fullscreen}
@@ -527,7 +555,7 @@ function DashboardPanelSkeleton({ fullscreen }: { fullscreen: boolean }) {
 function PanelContent({
   type,
   unit,
-  metrics,
+  series,
   logs,
   traces,
   fullscreen,
@@ -538,7 +566,7 @@ function PanelContent({
 }: {
   type: DashboardGraphType
   unit: Nullable<DashboardGraphUnit>
-  metrics: WorkbenchJobActivityMetricFragment[]
+  series: MetricSeries[]
   logs: WorkbenchJobActivityLogFragment[]
   traces: WorkbenchJobActivityTraceFragment[]
   fullscreen: boolean
@@ -547,19 +575,16 @@ function PanelContent({
   selectedSeriesId: string | null
   onSelectSeries: (id: string) => void
 }) {
-  const series = useMemo(() => getMetricSeries(metrics), [metrics])
   const selectedSeriesIndex = series.findIndex(
     ({ id }) => id === selectedSeriesId
   )
   const effectiveSelectedId = selectedSeriesIndex >= 0 ? selectedSeriesId : null
-  const visibleMetrics = useMemo(
+  const visibleSeries = useMemo(
     () =>
       effectiveSelectedId
-        ? metrics.filter(
-            (metric) => metricSeriesId(metric) === effectiveSelectedId
-          )
-        : metrics,
-    [metrics, effectiveSelectedId]
+        ? series.filter(({ id }) => id === effectiveSelectedId)
+        : series,
+    [series, effectiveSelectedId]
   )
   const timeWindow = useMemo(
     () => ({ start: new Date(timeRange.start), end: new Date(timeRange.end) }),
@@ -590,16 +615,16 @@ function PanelContent({
     case DashboardGraphType.Stat:
       return (
         <StatContent
-          metrics={metrics}
+          series={series}
           unit={unit}
         />
       )
     case DashboardGraphType.Pie:
-      return <PieContent metrics={metrics} />
+      return <PieContent series={series} />
     case DashboardGraphType.Table:
       return (
         <TableContent
-          metrics={metrics}
+          series={series}
           unit={unit}
         />
       )
@@ -608,7 +633,7 @@ function PanelContent({
     case DashboardGraphType.Heatmap:
     case DashboardGraphType.Timeseries:
     default:
-      if (isEmpty(metrics)) return <NoDataState />
+      if (isEmpty(series)) return <NoDataState />
       return (
         <TimeseriesPanelContent
           series={series}
@@ -617,7 +642,7 @@ function PanelContent({
           onSelectSeries={onSelectSeries}
         >
           <DashboardTimeseriesChart
-            metrics={visibleMetrics}
+            series={visibleSeries}
             timeWindow={timeWindow}
             unit={unit}
             onRangeSelect={onRangeSelect}
@@ -675,7 +700,7 @@ function TimeseriesPanelContent({
   onSelectSeries,
   children,
 }: {
-  series: ReturnType<typeof getMetricSeries>
+  series: MetricSeries[]
   fullscreen: boolean
   selectedId: string | null
   onSelectSeries: (id: string) => void
@@ -713,43 +738,36 @@ function TimeseriesPanelContent({
 }
 
 function StatContent({
-  metrics,
+  series,
   unit,
 }: {
-  metrics: WorkbenchJobActivityMetricFragment[]
+  series: MetricSeries[]
   unit: Nullable<DashboardGraphUnit>
 }) {
-  if (isEmpty(metrics)) return <NoDataState />
-  const latest = maxBy(metrics, (metric) => metric.timestamp ?? '')
-  const series = getMetricSeries(metrics)
+  if (isEmpty(series)) return <NoDataState />
+  const latest = maxBy(
+    series.flatMap((s) => s.data),
+    ({ x }) => x.getTime()
+  )
 
   return (
     <Flex
       direction="column"
       gap="xsmall"
     >
-      <StatValueSC>
-        {latest?.value != null ? formatStat(latest.value, unit) : '—'}
-      </StatValueSC>
-      {series[0] && (
-        <Body2P
-          $color="text-light"
-          title={series[0].label}
-        >
-          {series[0].shortLabel}
-        </Body2P>
-      )}
+      <StatValueSC>{latest ? formatStat(latest.y, unit) : '—'}</StatValueSC>
+      <Body2P
+        $color="text-light"
+        title={series[0].label}
+      >
+        {series[0].shortLabel}
+      </Body2P>
     </Flex>
   )
 }
 
-function PieContent({
-  metrics,
-}: {
-  metrics: WorkbenchJobActivityMetricFragment[]
-}) {
-  if (isEmpty(metrics)) return <NoDataState />
-  const series = getMetricSeries(metrics)
+function PieContent({ series }: { series: MetricSeries[] }) {
+  if (isEmpty(series)) return <NoDataState />
   const data = series.map((s, i) => ({
     id: s.id,
     label: s.label,
@@ -768,14 +786,13 @@ function PieContent({
 }
 
 function TableContent({
-  metrics,
+  series,
   unit,
 }: {
-  metrics: WorkbenchJobActivityMetricFragment[]
+  series: MetricSeries[]
   unit: Nullable<DashboardGraphUnit>
 }) {
-  if (isEmpty(metrics)) return <NoDataState />
-  const series = getMetricSeries(metrics)
+  if (isEmpty(series)) return <NoDataState />
 
   return (
     <TableSC>
@@ -840,27 +857,31 @@ const GraphGridSC = styled.div(({ theme }) => ({
   width: '100%',
 }))
 
-const RowSC = styled.div<{ $columns: number }>(({ theme, $columns }) => ({
-  alignItems: 'stretch',
-  containerType: 'inline-size',
-  display: 'grid',
-  gap: theme.spacing.medium,
-  gridTemplateColumns: `repeat(${$columns}, minmax(0, 1fr))`,
-  width: '100%',
-  [`@container (max-width: ${COLLAPSE_AT_PX}px)`]: {
-    gridTemplateColumns: '1fr',
-  },
-}))
+const RowSC = styled.div<{ $columns: number; $collapseAt: number }>(
+  ({ theme, $columns, $collapseAt }) => ({
+    alignItems: 'stretch',
+    containerType: 'inline-size',
+    display: 'grid',
+    gap: theme.spacing.medium,
+    gridTemplateColumns: `repeat(${$columns}, minmax(0, 1fr))`,
+    width: '100%',
+    [`@container (max-width: ${$collapseAt}px)`]: {
+      gridTemplateColumns: '1fr',
+    },
+  })
+)
 
-const CellSC = styled.div<{ $x: number; $w: number }>(({ $x, $w }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gridColumn: `${Math.max(1, $x + 1)} / span ${Math.max(1, $w)}`,
-  minWidth: 0,
-  [`@container (max-width: ${COLLAPSE_AT_PX}px)`]: {
-    gridColumn: '1 / -1',
-  },
-}))
+const CellSC = styled.div<{ $x: number; $w: number; $collapseAt: number }>(
+  ({ $x, $w, $collapseAt }) => ({
+    display: 'flex',
+    flexDirection: 'column',
+    gridColumn: `${Math.max(1, $x + 1)} / span ${Math.max(1, $w)}`,
+    minWidth: 0,
+    [`@container (max-width: ${$collapseAt}px)`]: {
+      gridColumn: '1 / -1',
+    },
+  })
+)
 
 const PanelCardSC = styled(MetricsCard)<{ $fullscreen: boolean }>(
   ({ theme, $fullscreen }) => ({

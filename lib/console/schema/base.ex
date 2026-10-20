@@ -101,6 +101,21 @@ defmodule Console.Schema.Base do
   end
 
 
+  @doc """
+  `:binary_id` casts accept any string and only fail when dumped on insert, so
+  reject malformed ids up front as changeset errors.
+  """
+  def validate_uuids(cs, fields) do
+    Enum.reduce(fields, cs, fn field, cs ->
+      validate_change(cs, field, fn ^field, value ->
+        case Ecto.UUID.cast(value) do
+          {:ok, _} -> []
+          :error -> [{field, "is not a valid id"}]
+        end
+      end)
+    end)
+  end
+
   def kubernetes_duration(cs, field) do
     validate_format(cs, field, ~r/^\d+[mhsd]/, message: "invalid kubernetes duration")
   end

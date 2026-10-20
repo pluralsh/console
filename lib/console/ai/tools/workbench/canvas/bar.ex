@@ -5,6 +5,8 @@ defmodule Console.AI.Tools.Workbench.Canvas.BarBlock do
 
   embedded_schema do
     field :identifier, :string
+    field :section_id, :string
+    field :description, :string
 
     embeds_one :layout, CanvasBlock.Layout, on_replace: :update
     embeds_one :props, CanvasBlock.Graph, on_replace: :update
@@ -20,7 +22,7 @@ defmodule Console.AI.Tools.Workbench.Canvas.BarBlock do
 
   def changeset(model, attrs) do
     model
-    |> cast(attrs, [:identifier])
+    |> cast(attrs, [:identifier, :section_id, :description])
     |> cast_embed(:layout, required: true)
     |> cast_embed(:props, required: true)
     |> validate_required([:identifier])
@@ -29,6 +31,8 @@ defmodule Console.AI.Tools.Workbench.Canvas.BarBlock do
   def implement(%__MODULE__{layout: layout, props: props} = model) do
     case Canvas.insert(Canvas.canvas(), %CanvasBlock{
            identifier: model.identifier,
+           section_id: model.section_id,
+           description: model.description,
            type: :bar,
            layout: layout,
            content: %CanvasBlock.Content{bar: props}
