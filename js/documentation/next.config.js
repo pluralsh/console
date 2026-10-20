@@ -1,14 +1,7 @@
-// allows us to read the redirects object from the ts file
 const path = require('path')
 
-require('ts-node').register({
-  compilerOptions: {
-    module: 'commonjs',
-    target: 'es2017',
-  },
-})
-
-const { redirects } = require('./src/routing/docs-structure')
+// Node strips the types when requiring the ts file
+const { redirects } = require('./src/routing/docs-structure.ts')
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
