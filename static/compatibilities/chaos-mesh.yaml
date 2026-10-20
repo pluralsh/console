@@ -4,37 +4,35 @@ release_url: https://github.com/chaos-mesh/chaos-mesh/releases/tag/v{vsn}
 helm_repository_url: https://charts.chaos-mesh.org
 chart_name: chaos-mesh
 versions:
-- version: 2.8.4
+- version: 2.8.5
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
   summary:
-    helm_changes: "- **New capability:** Helm chart can now deploy **extra Kubernetes\
-      \ objects** (see #4649). If you use this, ensure your values reference the chart\u2019\
-      s render helper correctly; **v2.8.4 fixes** an `include`/render-function issue\
-      \ for extra objects (#4780).\n- **Default change:** `enableCtrlServer` is now\
-      \ **`false` by default** in the Helm chart (#4702). If you relied on the controller\
-      \ server being enabled previously, you must explicitly set this value back to\
-      \ `true`.\n- **Template fix:** Prior helm values references in the Prometheus\
-      \ template were wrong and were fixed (#4543). If you had local chart patches/workarounds,\
-      \ re-check and drop them if no longer needed.\n"
-    chart_updates: ['Helm chart enhancement: support deploying extra Kubernetes objects
-        via chart templates (#4649).', 'Chart behavior change: `enableCtrlServer`
-        default set to `false` (#4702).', 'Chart fix in v2.8.4: extra objects template
-        `include` now uses the correct render function (#4780).', 'Prometheus template:
-        corrected wrong helm values references (#4543).']
-    features: ["Helm chart can deploy additional, user-supplied Kubernetes manifests\
-        \ (\u201Cextra objects\u201D), reducing the need for separate manifests/kustomize\
-        \ for companion resources.", 'Workflows: labels can now be added to `workflow.spec.templates.task`,
-        improving filtering/selection and metadata consistency.']
-    breaking_changes: [Helm chart default for `enableCtrlServer` changed to `false`;
-        installs/upgrades that previously depended on the controller server being
-        enabled must now set it explicitly to preserve behavior., "Operational/tooling\
-        \ change: `chaosctl` was removed; if your workflows/scripts used it, you\u2019\
-        ll need an alternative (e.g., kubectl + CRDs/API or documented CLI replacements)."]
-  chart_version: 2.8.4
-  images: ['ghcr.io/chaos-mesh/chaos-coredns:v0.2.8', 'ghcr.io/chaos-mesh/chaos-daemon:v2.8.4',
-    'ghcr.io/chaos-mesh/chaos-dashboard:v2.8.4', 'ghcr.io/chaos-mesh/chaos-mesh:v2.8.4']
+    helm_changes: "- If you were using the controller\u2019s gRPC/ctrl server, note\
+      \ that **`enableCtrlServer` is `false` by default** starting in v2.8.0. Verify\
+      \ whether you need it enabled and set the value explicitly if required.\n- v2.8.0\
+      \ adds **support for deploying extra Kubernetes objects via the Helm chart**.\
+      \ Consider using this instead of separate manifests if you currently deploy\
+      \ addon resources alongside Chaos Mesh.\n- Fix in v2.8.0: **Prometheus template\
+      \ referenced wrong Helm values**. If you customized metrics/ServiceMonitor/PrometheusRule\
+      \ values, re-check rendered manifests after upgrade.\n- v2.8.5: Dashboard auth:\
+      \ **Secret references and inline credentials behavior changed/fixed**, plus\
+      \ **additional environment sources supported**. Review your Dashboard auth configuration/Secrets\
+      \ and confirm the chart no longer overwrites Secret refs.\n"
+    chart_updates: [Helm chart can now deploy extra Kubernetes objects (v2.8.0).,
+      Default for `enableCtrlServer` changed to false in the Helm chart (v2.8.0).,
+      Prometheus template Helm values reference bug fixed (v2.8.0)., 'Dashboard auth
+        Secret reference overwrite fixed and extra env sources supported (v2.8.5,
+        impacts charted Dashboard configuration).']
+    features: ['Helm chart can deploy extra Kubernetes objects, reducing the need
+        for separate post-install manifests.', 'Workflow task templates can now receive
+        labels via `workflow.spec.templates.task`, improving selection/organization.']
+    breaking_changes: ['`enableCtrlServer` now defaults to `false` in Helm; environments
+        relying on the ctrl server must explicitly enable it after upgrade.']
+  chart_version: 2.8.5
+  images: ['ghcr.io/chaos-mesh/chaos-coredns:v0.2.8', 'ghcr.io/chaos-mesh/chaos-daemon:v2.8.5',
+    'ghcr.io/chaos-mesh/chaos-dashboard:v2.8.5', 'ghcr.io/chaos-mesh/chaos-mesh:v2.8.5']
 - version: 2.8.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30']
   requirements: []
