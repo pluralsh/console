@@ -1,5 +1,8 @@
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
-import { WorkbenchFileFragment } from 'generated/graphql'
+import {
+  useWorkbenchFilesQuery,
+  WorkbenchFileFragment,
+} from 'generated/graphql'
 import { useState } from 'react'
 import { useOutletContext, useSearchParams } from 'react-router-dom'
 import { WORKBENCH_FILES_PATH_QUERY_PARAM } from 'routes/workbenchesRoutesConsts'
@@ -17,6 +20,12 @@ export function WorkbenchFiles() {
   const rawPath = searchParams.get(WORKBENCH_FILES_PATH_QUERY_PARAM)
   const selectedPath = rawPath ? toWorkbenchPath(rawPath) : null
   const [toDelete, setToDelete] = useState<Nullable<WorkbenchFileFragment>>()
+  // the tree's root listing, read from the cache it shares with the sidebar
+  const { data: rootData } = useWorkbenchFilesQuery({
+    variables: { id: workbenchId, path: '/' },
+    skip: !workbenchId || !workbench?.filesystemEnabled,
+  })
+  const hasFiles = !!rootData?.workbench?.files?.some(Boolean)
 
   const select = (path: Nullable<string>) =>
     setSearchParams(
@@ -70,6 +79,11 @@ export function WorkbenchFiles() {
           workbenchId={workbenchId}
           path={selectedPath}
           onDelete={setToDelete}
+        />
+      ) : hasFiles ? (
+        <WorkbenchEmptyState
+          message="Explore the filesystem"
+          description="Select a file in the sidebar to view anything in this workbench's long-term memory."
         />
       ) : (
         <WorkbenchEmptyState

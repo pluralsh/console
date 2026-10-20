@@ -36,6 +36,7 @@ export function WorkbenchGroupedList<K extends string>({
   noun,
   emptyState,
   defaultCollapsed,
+  fill = true,
   renderGroup,
 }: {
   groups: Nullable<ListGroup<K>[]>
@@ -43,6 +44,9 @@ export function WorkbenchGroupedList<K extends string>({
   noun: string
   emptyState: EmptyListState
   defaultCollapsed?: Partial<Record<K, boolean>>
+  // fills its parent and scrolls. Otherwise it scrolls itself once it
+  // outgrows a preview height, so it can sit under other page content
+  fill?: boolean
   renderGroup: (
     group: ListGroup<K>,
     scrollEl: HTMLDivElement | null
@@ -64,7 +68,10 @@ export function WorkbenchGroupedList<K extends string>({
   }
 
   return (
-    <ListSC ref={setScrollEl}>
+    <ListSC
+      ref={setScrollEl}
+      $fill={fill}
+    >
       {groups.map((group) => {
         const isCollapsed = !!collapsed[group.key]
 
@@ -236,16 +243,25 @@ function VirtualRows<T>({
   )
 }
 
-const ListSC = styled.div({
+const ListSC = styled.div<{ $fill: boolean }>(({ $fill }) => ({
   display: 'flex',
   flexDirection: 'column',
-  flex: 1,
   width: '100%',
   minWidth: 0,
-  minHeight: 0,
-  overflowX: 'hidden',
-  overflowY: 'auto',
-})
+  ...($fill
+    ? {
+        flex: 1,
+        minHeight: 0,
+        overflowX: 'hidden',
+        overflowY: 'auto',
+      }
+    : {
+        flexShrink: 0,
+        maxHeight: 560,
+        overflowX: 'hidden',
+        overflowY: 'auto',
+      }),
+}))
 
 // the sticky header's containing block, so the next group pushes it out
 const GroupSC = styled.div({

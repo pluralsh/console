@@ -8,12 +8,12 @@ import {
 } from 'generated/graphql'
 import { appendConnection } from 'utils/graphql'
 import { WORKBENCH_JOBS_PAGE_SIZE } from './workbenchJobsDisplay'
-import { LAUNCH_RECENT_JOBS_COUNT } from './WorkbenchLaunchRecentJobs'
+import { RECENT_JOBS_FOR_WARNING } from './WorkbenchPromptModeSelector/WorkbenchBudgetSpendCapWarning'
 
-// the launch tab's recent jobs and budget warning, and the jobs tab's
-// unfiltered, newest-first list (its first page size)
+// the budget warning's recent jobs (read cache-first, so only updated here),
+// and the jobs tab's unfiltered, newest-first list (its first page size)
 const WORKBENCH_JOBS_FIRST_VALUES = [
-  LAUNCH_RECENT_JOBS_COUNT,
+  RECENT_JOBS_FOR_WARNING,
   WORKBENCH_JOBS_PAGE_SIZE,
 ] as const
 

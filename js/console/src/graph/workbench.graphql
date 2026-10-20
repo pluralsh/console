@@ -1032,10 +1032,11 @@ query WorkbenchJobStatusCounts(
   $id: ID!
   $q: String
   $prStates: [WorkbenchJobPrState]
+  $insertedAfter: DateTime
 ) {
   workbench(id: $id) {
     id
-    runCounts(q: $q, prStates: $prStates) {
+    runCounts(q: $q, prStates: $prStates, insertedAfter: $insertedAfter) {
       statuses {
         status
         count
@@ -1050,6 +1051,7 @@ query WorkbenchJobsForStatus(
   $q: String
   $prStates: [WorkbenchJobPrState]
   $direction: SortDirection
+  $insertedAfter: DateTime
   $first: Int = 50
   $after: String
 ) {
@@ -1062,6 +1064,7 @@ query WorkbenchJobsForStatus(
       statuses: [$status]
       prStates: $prStates
       direction: $direction
+      insertedAfter: $insertedAfter
     ) {
       pageInfo {
         ...PageInfo
