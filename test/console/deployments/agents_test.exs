@@ -862,7 +862,7 @@ defmodule Console.Deployments.AgentsTest do
     test "terminal runs cannot be requeued with an empty session upload" do
       user = insert(:user)
       run = insert(:agent_run, user: user, status: :failed)
-      insert(:agent_run_upload, agent_run: run, session: "")
+      insert(:agent_run_upload, agent_run: run, session: %{file_name: "", updated_at: nil})
 
       stub(Console, :conf, fn :object_store -> true end)
 
