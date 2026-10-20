@@ -5,7 +5,7 @@ description: What is included with Plural paid offerings?
 
 In addition to Plural's open-source offering, there are two paid tiers that provide additional features and support over our baseline.
 
-See below for a comparison of different tiers, and you can find more information [on our pricing page](https://www.plural.sh/pricing).
+See below for a comparison of the different tiers. You can find more information [on our pricing page](https://www.plural.sh/pricing).
 
 ## Plural Open-source
 

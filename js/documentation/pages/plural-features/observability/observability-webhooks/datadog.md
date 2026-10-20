@@ -1,6 +1,6 @@
 ---
 title: Datadog Observability Webhook Integration
-description: Configure Datadog webhook to view metrics, logs, and alerts inside the Plural Console. 
+description: Configure a Datadog webhook to view metrics, logs, and alerts inside the Plural Console. 
 ---
 
 ## Quick Setup 

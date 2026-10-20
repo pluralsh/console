@@ -21,6 +21,7 @@ import { useOutletContext } from 'react-router-dom'
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import { WorkbenchOutletContext, WorkbenchPageLayout } from './Workbench'
+import { DETAILS_LIST_WIDTH } from '../common/WorkbenchDetailsView'
 import {
   BOARD_RECENT_JOBS_COUNT,
   WorkbenchJobsBoard,
@@ -196,7 +197,11 @@ export function WorkbenchJobs() {
       }
       showEditWorkbenchButton={false}
       {...(showDetails && {
-        sidebar: { kind: 'custom', content: details.sidebar },
+        sidebar: {
+          kind: 'custom',
+          content: details.sidebar,
+          width: DETAILS_LIST_WIDTH,
+        },
       })}
       headerActions={
         <>

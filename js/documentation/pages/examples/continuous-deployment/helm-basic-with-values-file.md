@@ -1,5 +1,5 @@
 ---
-title: Deploy a helm chart with git-sourced values file
+title: Deploy a Helm chart with a Git-sourced values file
 description: 'Learn how to deploy a Grafana instance using Helm chart with configuration values stored in a separate values file, including ingress setup and TLS configuration'
 ---
 
@@ -13,18 +13,18 @@ configuration changes over time.
 ## Prerequisites
 
 Before you begin, make sure to cover [prerequisites and setup](../#prerequisites), and that you have:
-- `cert-manager`, ingress controller and `externaldns` installed in the target cluster.
+- `cert-manager`, an ingress controller and `externaldns` installed in the target cluster.
 
 {% callout severity="info" %}
-When using `plural up` and the `mgmt` as the target cluster `cert-manager`, `nginx-ingress` and `externaldns` will already be installed.
+When using `plural up` with `mgmt` as the target cluster, `cert-manager`, `nginx-ingress` and `externaldns` will already be installed.
 {% /callout %}
 
 ## Step-by-Step Guide: Deploying Grafana with External Values File
-Let's walk through deploying Grafana using a Helm chart with an external values file. Feel free to adjust provided file
+Let's walk through deploying Grafana using a Helm chart with an external values file. Feel free to adjust the provided file
 examples according to your needs and commit them to your configured Git repository under the `apps` directory. There is a
 default `apps` service that deploys all resources from that directory.
 
-### Step 1: Create values file for your Grafana configuration
+### Step 1: Create a values file for your Grafana configuration
 Create a separate values file to store your Grafana configuration. This approach keeps your configuration neatly separated from the deployment definition.
 
 ##### [helm-values/plrl-02-grafana.yaml.liquid](https://github.com/pluralsh/scaffolds/blob/main/examples/helm-basic-with-values-file/helm-values/plrl-02-grafana.yaml.liquid)
@@ -78,7 +78,7 @@ spec:
 ```
 
 ### Step 3: Check Plural Console and access Grafana
-After a couple of minutes, service should be deployed and running.
+After a couple of minutes, the service should be deployed and running.
 ![](/assets/examples/plrl-02-console.png 'CD tab -> mgmt cluster -> plrl-02-grafana service')
 
 Grafana should now be accessible at the configured address.
@@ -87,16 +87,16 @@ Grafana should now be accessible at the configured address.
 ## Advantages of External Values Files
 Using external values files offers several benefits:
 1. **Separation of concerns** - Keep deployment logic separate from configuration
-3. **Reusability** - Reuse the same values file for multiple deployments
-4. **Security** - Store sensitive configuration in separate, properly secured files
-5. **Readability** - Maintain cleaner, more organized deployment files
+2. **Reusability** - Reuse the same values file for multiple deployments
+3. **Security** - Store sensitive configuration in separate, properly secured files
+4. **Readability** - Maintain cleaner, more organized deployment files
 
 ## Key Takeaways
 Congratulations! You've just learned how to:
 - Deploy an application (Grafana) using Helm charts in Plural
 - Store and manage configuration in an external values file
 - Connect your deployment to a specific cluster
-- Set up secure access to your application with TLS (https)
+- Set up secure access to your application with TLS (HTTPS)
 - Monitor your deployment using Plural Console
 
 This approach scales well for managing complex applications or multiple deployments. As your configuration grows, you can further organize your values files by splitting them into environment-specific versions or by application component.

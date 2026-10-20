@@ -18,6 +18,7 @@ import {
 } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
 import { WorkbenchOutletContext, WorkbenchPageLayout } from '../Workbench'
+import { WORKBENCH_SIDEBAR_WIDTH } from '../WorkbenchSidePanel'
 import { DashboardDetail } from './WorkbenchDashboardDetail'
 import { MonitorDetail } from './WorkbenchMonitorDetail'
 import { WorkbenchMonitoringBuild } from './WorkbenchMonitoringBuild'
@@ -84,6 +85,7 @@ export function WorkbenchMonitoring() {
       sidebar={{
         kind: 'custom',
         content: <WorkbenchMonitoringSidebar workbenchId={workbenchId} />,
+        width: WORKBENCH_SIDEBAR_WIDTH,
       }}
       headerActions={
         updateTarget ? (

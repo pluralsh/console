@@ -3,13 +3,13 @@ title: Customize stack runners
 description: Configure runner pods to enable workload identity or EKS IRSA
 ---
 
-All stacks are run in a dedicated pod to support seamless scalability and enhance security.  That said, you'll likely need to customize the definitions of those pods for a few usecases:
+All stacks are run in a dedicated pod to support seamless scalability and enhance security.  That said, you'll likely need to customize the definitions of those pods for a few use cases:
 
 * Needing to add wiring to meet your existing OPA policy constraints around things like custom labels or `securityContext`
 * Needing to configure the pod with service accounts preconfigured for IRSA, GKE workload identity or similar secure cloud credential issuance systems
 * Needing to use your own base image
 
-The process is simple and can be done per-stack or globally
+The process is simple and can be done per-stack or globally.
 
 ## Configure the base image of your stack
 
@@ -33,7 +33,7 @@ spec:
 
 ## Configure Runner for a single stack
 
-The `jobSpec` field with a stack spec can configure that stacks runner, like so:
+The `jobSpec` field within a stack spec can configure that stack's runner, like so:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -67,7 +67,7 @@ spec:
       deployment.plural.sh/needed-label: "finally-set"
 ```
 
-The expectation being that the service account was preconfigured for IRSA like so:
+This assumes the service account was preconfigured for IRSA like so:
 
 ```yaml
 apiVersion: v1
@@ -79,7 +79,7 @@ metadata:
     eks.amazonaws.com/role-arn: arn:aws:iam::{your-account-id}:role/plrl-stacks
 ```
 
-This will add a service account and labels to the pod, but you can configure more information up to a full k8s JobTemplateSpec object.  We encourage referencing our {% doclink to="plural_features_continuous_deployment_deployment_architecture" %}CRD docs{% /doclink %} if you want to learn all the knobs available.
+This will add a service account and labels to the pod, but you can configure more information up to a full Kubernetes JobTemplateSpec object.  We encourage referencing our {% doclink to="plural_features_continuous_deployment_deployment_architecture" %}CRD docs{% /doclink %} if you want to learn all the knobs available.
 
 ## Configure Runner Pods Globally
 
@@ -98,4 +98,4 @@ spec:
         deployment.plural.sh/needed-label: "finally-set"
 ```
 
-Configuration at the stack-level will always take priority, and global configuration is used as the next fallback before finally our hardcoded defaults.
+Configuration at the stack level always takes priority, with global configuration as the next fallback, and finally our hardcoded defaults.

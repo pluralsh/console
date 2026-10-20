@@ -124,7 +124,7 @@ Keep these query behaviors in mind:
 
 * Open the failed Tempo activity in the job and inspect the API error before retrying.
 * Start with a simple query and add filters incrementally.
-* Verify attribute names and values match what is indexed in your Tempo backend.
+* Verify that attribute names and values match what is indexed in your Tempo backend.
 * Check that the time range is formatted correctly (ISO 8601, for example `2023-01-01T00:00:00Z`).
 
 ### The Tempo tool is unavailable

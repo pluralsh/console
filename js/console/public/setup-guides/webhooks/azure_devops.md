@@ -6,17 +6,17 @@ References:
 - [Service hooks events](https://learn.microsoft.com/en-us/azure/devops/service-hooks/events?view=azure-devops) (work item event types and payload shape)
 - [Create a service hook subscription programmatically](https://learn.microsoft.com/en-us/azure/devops/service-hooks/create-subscription?view=azure-devops) (optional REST API flow)
 
-Azure DevOps delivers work item notifications as JSON service hook envelopes (`eventType`, `resource`, and related metadata). Plural accepts **work item** events whose `eventType` begins with `workitem.` (for example `workitem.created`, `workitem.updated`).
+Azure DevOps delivers work item notifications as JSON service hook envelopes (`eventType`, `resource`, and related metadata). Plural accepts **work item** events whose `eventType` begins with `workitem.` (for example `workitem.created`, `workitem.updated`) and **Pull request commented on** events. Other events are ignored.
 
 ## 1. Create the webhook in Plural first
 
 In Plural:
 
-1. Set **Type** to `Ticketing`.
-2. Set **Provider** to `AZURE_DEVOPS`.
+1. Set **Type of webhook** to `Ticketing`.
+2. Set **Provider type** to `Azure DevOps`.
 3. Enter a webhook **Name**.
-4. Enter a **Secret**. This must be a strong value you also configure in Azure DevOps: Plural verifies each request using **HTTP Basic authentication**, where the **password** must match this secret (the username is ignored).
-5. Click **Create new webhook**.
+4. Generate or enter a **Secret**. This must be a strong value you also configure in Azure DevOps: Plural verifies each request using **HTTP Basic authentication**, where the **password** must match this secret (the username is ignored).
+5. Click **Create**.
 
 Plural generates the webhook **URL** only after the webhook is created. Copy that URL from the confirmation screen; you will paste it into Azure DevOps in the next step.
 
@@ -37,7 +37,7 @@ Webhooks cannot target `localhost` or certain reserved IP ranges; the endpoint m
 
 ## 3. Permissions
 
-Creating service hooks in a project typically requires sufficient project or collection permissions (for example **Project Collection Administrators** for organization-wide configuration, depending on your organization’s policies). See Microsoft’s webhook documentation for current permission requirements.
+Creating service hooks in a project requires membership in the **Project Administrators** or **Project Collection Administrators** group. See Microsoft’s webhook documentation for current permission requirements.
 
 ## 4. Validate
 

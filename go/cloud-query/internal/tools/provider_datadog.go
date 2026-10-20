@@ -293,8 +293,37 @@ func (in *DatadogProvider) Traces(ctx context.Context, input *toolquery.TracesQu
 	if in.conn == nil {
 		return nil, ErrInvalidArgument
 	}
-	if input == nil || input.Query == "" {
+	if input == nil || (input.Query == "" && !HasTraceFilters(input.GetFilters())) {
 		return nil, ErrInvalidArgument
+	}
+
+	query, err := toDatadogQuery(input.GetQuery(), input.GetFilters())
+	if err != nil {
+		return nil, err
+	}
+
+	return in.listSpans(ctx, query, input.GetRange(), input.GetLimit())
+}
+
+// TraceFacets counts spans per facet value with span analytics. Datadog has
+// no API listing span attributes, so names are sampled from recent spans.
+func (in *DatadogProvider) TraceFacets(ctx context.Context, input *toolquery.TraceFacetsInput) (*toolquery.TraceFacetsOutput, error) {
+	if in.conn == nil || input == nil {
+		return nil, ErrInvalidArgument
+	}
+
+	query, err := toDatadogQuery("", input.GetFilters())
+	if err != nil {
+		return nil, err
+	}
+
+	attribute := strings.TrimSpace(input.GetAttribute())
+	if attribute == "" {
+		output, err := in.listSpans(ctx, query, input.GetRange(), datadogSpanSampleSize)
+		if err != nil {
+			return nil, err
+		}
+		return facetValues(input, spanAttributeNames(output.GetSpans())), nil
 	}
 
 	ctx, client, err := in.newDatadogClient(ctx, in.conn)
@@ -302,17 +331,73 @@ func (in *DatadogProvider) Traces(ctx context.Context, input *toolquery.TracesQu
 		return nil, err
 	}
 
+	facet := datadogFacet(attribute)
+	filter := in.spansFilter(query, input.GetRange())
+	groupBy := datadogV2.NewSpansGroupBy(facet)
+	groupBy.SetLimit(int64(traceFacetLimit(input)))
+
+	attrs := datadogV2.NewSpansAggregateRequestAttributes()
+	attrs.SetFilter(*filter)
+	attrs.SetCompute([]datadogV2.SpansCompute{*datadogV2.NewSpansCompute(datadogV2.SPANSAGGREGATIONFUNCTION_COUNT)})
+	attrs.SetGroupBy([]datadogV2.SpansGroupBy{*groupBy})
+
+	data := datadogV2.NewSpansAggregateData()
+	data.SetAttributes(*attrs)
+	request := datadogV2.NewSpansAggregateRequest()
+	request.SetData(*data)
+
+	resp, _, err := datadogV2.NewSpansApi(client).AggregateSpans(ctx, *request)
+	if err != nil {
+		return nil, err
+	}
+
+	values := make([]*toolquery.TraceFacetValue, 0, len(resp.GetData()))
+	for _, bucket := range resp.GetData() {
+		bucketAttrs := bucket.GetAttributes()
+		value, ok := bucketAttrs.GetBy()[facet]
+		if !ok || value == nil {
+			continue
+		}
+
+		facetValue := &toolquery.TraceFacetValue{Name: fmt.Sprint(value)}
+		for _, compute := range bucketAttrs.GetComputes() {
+			if compute.SpansAggregateBucketValueSingleNumber != nil {
+				count := int64(*compute.SpansAggregateBucketValueSingleNumber)
+				facetValue.Count = &count
+				break
+			}
+		}
+		values = append(values, facetValue)
+	}
+
+	return facetValues(input, values), nil
+}
+
+const datadogSpanSampleSize = 200
+
+func (in *DatadogProvider) spansFilter(query string, timeRange *toolquery.TimeRange) *datadogV2.SpansQueryFilter {
 	filter := datadogV2.NewSpansQueryFilter()
-	filter.SetFrom(input.GetRange().GetStart().AsTime().UTC().Format(time.RFC3339Nano))
-	filter.SetTo(input.GetRange().GetEnd().AsTime().UTC().Format(time.RFC3339Nano))
-	filter.SetQuery(input.Query)
+	if timeRange.GetStart() != nil && timeRange.GetEnd() != nil {
+		filter.SetFrom(timeRange.GetStart().AsTime().UTC().Format(time.RFC3339Nano))
+		filter.SetTo(timeRange.GetEnd().AsTime().UTC().Format(time.RFC3339Nano))
+	}
+	filter.SetQuery(query)
+
+	return filter
+}
+
+func (in *DatadogProvider) listSpans(ctx context.Context, query string, timeRange *toolquery.TimeRange, limit int32) (*toolquery.TracesQueryOutput, error) {
+	ctx, client, err := in.newDatadogClient(ctx, in.conn)
+	if err != nil {
+		return nil, err
+	}
 
 	attrs := datadogV2.NewSpansListRequestAttributes()
-	attrs.SetFilter(*filter)
+	attrs.SetFilter(*in.spansFilter(query, timeRange))
 
-	if input.GetLimit() > 0 {
+	if limit > 0 {
 		page := datadogV2.NewSpansListRequestPage()
-		page.SetLimit(input.GetLimit())
+		page.SetLimit(limit)
 		attrs.SetPage(*page)
 	}
 

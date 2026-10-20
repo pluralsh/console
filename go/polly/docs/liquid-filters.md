@@ -79,7 +79,7 @@ _Example_: `add1 3` returns `4`.
 _Implementation_: `github.com/Masterminds/sprig/v3.init.func14`
 
 ##  `add1f`
-Increments float number by 1.
+Increments a float number by 1.
 
 
 _Parameters_:
@@ -89,7 +89,7 @@ _Parameters_:
 
 
 
-_Example_: `add1 3.0` returns `4.0`.
+_Example_: `add1f 3.0` returns `4.0`.
 
 
 
@@ -110,14 +110,14 @@ _Parameters_:
 
 
 
-_Example_: `add 1.1 2.2 3.3` returns `6.6`.
+_Example_: `addf 1.1 2.2 3.3` returns `6.6`.
 
 
 
 _Implementation_: `github.com/Masterminds/sprig/v3.init.func22`
 
 ##  `adler32sum`
-Computes Adler-32 checksum of a string.
+Computes the Adler-32 checksum of a string.
 
 
 _Parameters_:
@@ -134,7 +134,7 @@ _Example_: `adler32sum "Hello world!"`.
 _Implementation_: `github.com/Masterminds/sprig/v3.adler32sum`
 
 ##  `ago`
-Returns duration from current time (`time.Now`) in seconds resolution.
+Returns duration from current time (`time.Now`) with seconds resolution.
 
 
 _Parameters_:
@@ -151,7 +151,7 @@ _Example_: `ago .CreatedAt` will return something like `2h34m7s`.
 _Implementation_: `github.com/Masterminds/sprig/v3.dateAgo`
 
 ##  `all`
-Takes a list of values ad returns true if all values are non-empty.
+Takes a list of values and returns true if all values are non-empty.
 
 
 _Parameters_:
@@ -166,7 +166,7 @@ _Parameters_:
 _Implementation_: `github.com/Masterminds/sprig/v3.all`
 
 ##  `any`
-Takes a list of values ad returns true if any values are non-empty.
+Takes a list of values and returns true if any values are non-empty.
 
 
 _Parameters_:
@@ -196,7 +196,7 @@ _Parameters_:
 _Implementation_: `github.com/Masterminds/sprig/v3.init.func12`
 
 ##  `b32dec`
-Decodes string from Base32 format.
+Decodes a string from Base32 format.
 
 
 _Parameters_:
@@ -211,7 +211,7 @@ _Parameters_:
 _Implementation_: `github.com/Masterminds/sprig/v3.base32decode`
 
 ##  `b32enc`
-Encodes string with Base32 format.
+Encodes a string in Base32 format.
 
 
 _Parameters_:
@@ -226,7 +226,7 @@ _Parameters_:
 _Implementation_: `github.com/Masterminds/sprig/v3.base32encode`
 
 ##  `b64dec`
-Decodes string from Base64 format.
+Decodes a string from Base64 format.
 
 
 _Parameters_:
@@ -241,7 +241,7 @@ _Parameters_:
 _Implementation_: `github.com/Masterminds/sprig/v3.base64decode`
 
 ##  `b64enc`
-Encodes string with Base64 format.
+Encodes a string in Base64 format.
 
 
 _Parameters_:
@@ -273,7 +273,7 @@ _Example_: `base "foo/bar/baz"` returns `baz`.
 _Implementation_: `path.Base`
 
 ##  `bcrypt`
-Generates bcrypt hash of a string.
+Generates a bcrypt hash of a string.
 
 
 _Parameters_:
@@ -298,7 +298,7 @@ _Implementation_: `github.com/Masterminds/sprig/v3.bcrypt`
 _Implementation_: `github.com/Masterminds/sprig/v3.max`
 
 ##  `buildCustomCert`
-Allows customizing the certificate. It returns object with PEM-encoded certificate and key. Note that the returned object can be passed to the `genSignedCert` function to sign a certificate using this CA.
+Allows customizing the certificate. It returns an object with PEM-encoded certificate and key. Note that the returned object can be passed to the `genSignedCert` function to sign a certificate using this CA.
 
 
 _Parameters_:
@@ -317,7 +317,7 @@ _Example_: `$ca := buildCustomCert "base64-encoded-ca-crt" "base64-encoded-ca-ke
 _Implementation_: `github.com/Masterminds/sprig/v3.buildCustomCertificate`
 
 ##  `camelcase`
-Converts a string from snake_case to camelCase.
+Converts a string from snake_case to PascalCase.
 
 
 _Parameters_:
@@ -344,7 +344,7 @@ _Implementation_: `github.com/huandu/xstrings.ToPascalCase`
 _Implementation_: `github.com/Masterminds/sprig/v3.cat`
 
 ##  `ceil`
-Returns greatest float value greater than or equal to input value.
+Returns the smallest float value greater than or equal to the input value.
 
 
 _Parameters_:
@@ -406,7 +406,7 @@ _Parameters_:
 _Implementation_: `github.com/Masterminds/sprig/v3.compact`
 
 ##  `concat`
-Concatenates arbitrary number of lists into one.
+Concatenates an arbitrary number of lists into one.
 
 
 _Parameters_:
@@ -423,7 +423,7 @@ _Parameters_:
 _Implementation_: `github.com/Masterminds/sprig/v3.concat`
 
 ##  `contains`
-Tests if one string is contained inside of another.
+Tests if one string is contained inside another.
 
 
 _Parameters_:
@@ -442,7 +442,7 @@ _Example_: `contains "cat" "catch"` returns `true`.
 _Implementation_: `github.com/Masterminds/sprig/v3.init.func9`
 
 ##  `date`
-Formats date. See https://pauladamsmith.com/blog/2011/05/go_time.html.
+Formats a date. See https://pauladamsmith.com/blog/2011/05/go_time.html.
 
 
 _Parameters_:
@@ -512,7 +512,7 @@ _Parameters_:
 _Implementation_: `github.com/Masterminds/sprig/v3.decryptAES`
 
 ##  `deepCopy`
-Makes deep copy of the value. This includes maps and other structures. It will panic if there is a problem.
+Makes a deep copy of the value. This includes maps and other structures. It will panic if there is a problem.
 
 
 _Parameters_:
@@ -609,12 +609,12 @@ Performs float number division.
 _Implementation_: `github.com/Masterminds/sprig/v3.init.func24`
 
 ##  `duration`
-Formats a given amount of seconds as a `time.Duration`.
+Formats a given number of seconds as a `time.Duration`.
 
 
 _Parameters_:
 
-- Amount of seconds
+- Number of seconds
 
 
 
@@ -636,7 +636,7 @@ _Implementation_: `github.com/Masterminds/sprig/v3.duration`
 _Implementation_: `github.com/Masterminds/sprig/v3.durationRound`
 
 ##  `empty`
-Returns true if given value has the zero value for its type.
+Returns true if the given value has the zero value for its type.
 
 
 _Parameters_:
@@ -672,7 +672,7 @@ _Example_: `encryptAES "secretkey" "plaintext"`.
 _Implementation_: `github.com/Masterminds/sprig/v3.encryptAES`
 
 ##  `env`
-Reads environment variable.
+Reads an environment variable.
 
 
 _Parameters_:
@@ -689,7 +689,7 @@ _Example_: `env "HOME"`
 _Implementation_: `os.Getenv`
 
 ##  `expandenv`
-Substitutes environment variable in a string.
+Substitutes environment variables in a string.
 
 
 _Parameters_:
@@ -706,7 +706,7 @@ _Example_: `expandenv "Your path is set to $PATH"`
 _Implementation_: `os.ExpandEnv`
 
 ##  `ext`
-Returns file extension.
+Returns the file extension.
 
 
 _Parameters_:
@@ -740,7 +740,7 @@ _Example_: `fail "Please accept the end user license agreement"`
 _Implementation_: `github.com/Masterminds/sprig/v3.init.func26`
 
 ##  `first`
-Returns head item on a list.
+Returns the head item of a list.
 
 
 _Parameters_:
@@ -755,12 +755,12 @@ _Parameters_:
 _Implementation_: `github.com/Masterminds/sprig/v3.first`
 
 ##  `float64`
-Converts to a `float64`
+Converts to a `float64`.
 
 
 _Parameters_:
 
-- Value to convert, it can be for example an integer or a string
+- Value to convert; for example, an integer or a string
 
 
 
@@ -770,7 +770,7 @@ _Parameters_:
 _Implementation_: `github.com/Masterminds/sprig/v3.toFloat64`
 
 ##  `floor`
-Returns the greatest float value greater than or equal to input value.
+Returns the greatest float value less than or equal to the input value.
 
 
 _Parameters_:
@@ -787,7 +787,7 @@ _Example_: `floor 123.9999` will return `123.0`
 _Implementation_: `github.com/Masterminds/sprig/v3.floor`
 
 ##  `fromJson`
-Decodes a JSON document into a structure. If the input cannot be decoded as JSON the function will return an empty string.
+Decodes a JSON document into a structure. If the input cannot be decoded as JSON, the function will return an empty string.
 
 
 _Parameters_:
@@ -804,7 +804,7 @@ _Aliases_: `from_json`\
 _Implementation_: `github.com/Masterminds/sprig/v3.fromJson`
 
 ##  `genCA`
-Generates a new, self-signed x509 SSL Certificate Authority using 2048-bit RSA private key. It returns object with PEM-encoded certificate and key. Note that the returned object can be passed to the `genSignedCert` function to sign a certificate using this CA.
+Generates a new, self-signed x509 SSL Certificate Authority using a 2048-bit RSA private key. It returns an object with PEM-encoded certificate and key. Note that the returned object can be passed to the `genSignedCert` function to sign a certificate using this CA.
 
 
 _Parameters_:
@@ -821,7 +821,7 @@ _Parameters_:
 _Implementation_: `github.com/Masterminds/sprig/v3.generateCertificateAuthority`
 
 ##  `genCAWithKey`
-Generates a new, self-signed x509 SSL Certificate Authority using given private key. It returns object with PEM-encoded certificate and key. Note that the returned object can be passed to the `genSignedCert` function to sign a certificate using this CA.
+Generates a new, self-signed x509 SSL Certificate Authority using the given private key. It returns an object with PEM-encoded certificate and key. Note that the returned object can be passed to the `genSignedCert` function to sign a certificate using this CA.
 
 
 _Parameters_:
@@ -830,7 +830,7 @@ _Parameters_:
 
 - Cert validity duration in days
 
-- private key (PEM-encoded; DSA keys are not supported)
+- Private key (PEM-encoded; DSA keys are not supported)
 
 
 
@@ -934,7 +934,7 @@ _Example_: `has 4 $myList`
 _Implementation_: `github.com/Masterminds/sprig/v3.has`
 
 ##  `hasKey`
-Checks if given dictionary contains given key.
+Checks if the given dictionary contains the given key.
 
 
 _Parameters_:
@@ -951,7 +951,7 @@ _Parameters_:
 _Implementation_: `github.com/Masterminds/sprig/v3.hasKey`
 
 ##  `hasPrefix`
-Check if string has given prefix.
+Checks if a string has the given prefix.
 
 
 _Parameters_:
@@ -968,14 +968,14 @@ _Parameters_:
 _Implementation_: `github.com/Masterminds/sprig/v3.init.func10`
 
 ##  `hasSuffix`
-Check if string has given suffix.
+Checks if a string has the given suffix.
 
 
 _Parameters_:
 
-- Prefix
-
 - Suffix
+
+- String
 
 
 
@@ -985,7 +985,7 @@ _Parameters_:
 _Implementation_: `github.com/Masterminds/sprig/v3.init.func11`
 
 ##  `htmlDate`
-Formats a date for inserting into HTML date picker input field.
+Formats a date for inserting into an HTML date picker input field.
 
 
 _Parameters_:
@@ -1041,7 +1041,7 @@ _Implementation_: `github.com/Masterminds/sprig/v3.htpasswd`
 _Implementation_: `github.com/pluralsh/console/go/polly/template.indent`
 
 ##  `initial`
-Compliments `last` by retuning all but the last element. It will panic if there is a problem.
+Complements `last` by returning all but the last element. It will panic if there is a problem.
 
 
 _Parameters_:
@@ -1066,7 +1066,7 @@ _Implementation_: `github.com/Masterminds/sprig/v3.initial`
 _Implementation_: `github.com/Masterminds/sprig/v3.initials`
 
 ##  `int`
-Converts to a `int`.
+Converts to an `int`.
 
 
 _Parameters_:
@@ -1081,7 +1081,7 @@ _Parameters_:
 _Implementation_: `github.com/Masterminds/sprig/v3.toInt`
 
 ##  `int64`
-Converts to a `int64`.
+Converts to an `int64`.
 
 
 _Parameters_:
@@ -1128,7 +1128,7 @@ _Example_: `kebabcase "FirstName"` returns `first-name`.
 _Implementation_: `github.com/huandu/xstrings.ToKebabCase`
 
 ##  `keys`
-Returns list of all keys from a map.
+Returns a list of all keys from a map.
 
 
 _Parameters_:
@@ -1193,7 +1193,7 @@ _Parameters_:
 
 
 
-_Example_: `upper \"HELLO\"` will return `hello`.
+_Example_: `lower "HELLO"` will return `hello`.
 
 
 
@@ -1235,7 +1235,7 @@ _Parameters_:
 
 
 
-_Example_: `max 1 2 3.65` will return `3.65`.
+_Example_: `maxf 1 2 3.65` will return `3.65`.
 
 
 
@@ -1297,7 +1297,7 @@ _Parameters_:
 
 
 
-_Example_: `min 1.3 2 3` will return `1.3`.
+_Example_: `minf 1.3 2 3` will return `1.3`.
 
 
 
@@ -1356,7 +1356,7 @@ _Example_: `mulf 1.5 2 2` returns `6`.
 _Implementation_: `github.com/Masterminds/sprig/v3.init.func25`
 
 ##  `mustAppend`
-Appends a new item to existing list, creating a new list. It will return an error to the template engine if there is a problem.
+Appends a new item to an existing list, creating a new list. It will return an error to the template engine if there is a problem.
 
 
 _Parameters_:
@@ -1420,7 +1420,7 @@ _Implementation_: `github.com/Masterminds/sprig/v3.mustDateModify`
 _Implementation_: `github.com/Masterminds/sprig/v3.mustDeepCopy`
 
 ##  `mustFirst`
-Returns head item on a list. It will return an error to the template engine if there is a problem.
+Returns the head item of a list. It will return an error to the template engine if there is a problem.
 
 
 _Parameters_:
@@ -1466,7 +1466,7 @@ _Example_: `mustHas 4 $myList`
 _Implementation_: `github.com/Masterminds/sprig/v3.mustHas`
 
 ##  `mustInitial`
-Compliments `last` by retuning all but the last element. It will return an error to the template engine ifd there is a problem.
+Complements `last` by returning all but the last element. It will return an error to the template engine if there is a problem.
 
 
 _Parameters_:
@@ -1593,7 +1593,7 @@ _Implementation_: `github.com/Masterminds/sprig/v3.mustRegexReplaceAllLiteral`
 _Implementation_: `github.com/Masterminds/sprig/v3.mustRegexSplit`
 
 ##  `mustRest`
-Gets tail of the list (everything but the first item). It will return an error to the template engine if there is a problem.
+Gets the tail of the list (everything but the first item). It will return an error to the template engine if there is a problem.
 
 
 _Parameters_:
@@ -1637,7 +1637,7 @@ _Implementation_: `github.com/Masterminds/sprig/v3.mustReverse`
 _Implementation_: `github.com/Masterminds/sprig/v3.mustSlice`
 
 ##  `mustToDate`
-Converts a string to a date. If the string can’t be converted it returns the zero value. It will return an error to the template engine if there is a problem.
+Converts a string to a date. If the string can’t be converted, it returns the zero value. It will return an error to the template engine if there is a problem.
 
 
 _Parameters_:
@@ -1704,7 +1704,7 @@ Filters items out of a list. It will return an error to the template engine if t
 
 _Parameters_:
 
-- CList
+- List
 
 - Item to filter out
 
@@ -1765,7 +1765,7 @@ _Parameters_:
 
 
 
-_Example_: `osClean "/foo/bar/../baz"` and `osClean "C:\\foo\\bar\\..\\baz"` will resolve the `..` and return `foo/baz` on Linux and `C:\foo\baz` on Windows.
+_Example_: `osBase "/foo/bar/baz"` returns `baz` on Linux, and `osBase "C:\\foo\\bar\\baz"` returns `baz` on Windows.
 
 
 
@@ -1806,7 +1806,7 @@ _Example_: `osDir "/foo/bar/baz"` returns `/foo/bar` on Linux, and `osDir "C:\\f
 _Implementation_: `path/filepath.Dir`
 
 ##  `osExt`
-Return the file extension.
+Returns the file extension.
 
 
 _Parameters_:
@@ -1928,7 +1928,7 @@ _Implementation_: `github.com/Masterminds/sprig/v3.randAlphaNumeric`
 _Implementation_: `github.com/Masterminds/sprig/v3.randAscii`
 
 ##  `randBytes`
-Accepts a count and generates cryptographically secure random sequence of bytes. The sequence is returned as a Base64 encoded string.
+Accepts a count and generates a cryptographically secure random sequence of bytes. The sequence is returned as a Base64 encoded string.
 
 
 _Parameters_:
@@ -1955,7 +1955,7 @@ _Parameters_:
 
 
 
-_Example_:  `randInt 12 30` will produce a random number in the range from 12 to 30.
+_Example_: `randInt 12 30` will produce a random number from 12 to 29.
 
 
 
@@ -2062,7 +2062,7 @@ _Implementation_: `github.com/Masterminds/sprig/v3.init.func2`
 _Implementation_: `strings.ReplaceAll`
 
 ##  `rest`
-Gets tail of the list (everything but the first item).
+Gets the tail of the list (everything but the first item).
 
 
 _Parameters_:
@@ -2092,7 +2092,7 @@ _Parameters_:
 _Implementation_: `github.com/Masterminds/sprig/v3.reverse`
 
 ##  `round`
-Returns a float value with the remainder rounded to the given number to digits after the decimal point.
+Returns a float value with the remainder rounded to the given number of digits after the decimal point.
 
 
 _Parameters_:
@@ -2131,7 +2131,7 @@ _Aliases_: `semver_compare`\
 _Implementation_: `github.com/Masterminds/sprig/v3.semverCompare`
 
 ##  `seq`
-Works like Bash `seq` command. Specify 1 parameter (`end`) to generate all counting integers between 1 and `end` inclusive. Specify 2 parameters (`start` and `end`) to generate all counting integers between `start` and `end` inclusive incrementing or decrementing by 1. Specify 3 parameters (`start`, `step` and `end`) to generate all counting integers between `start` and `end` inclusive incrementing or decrementing by `step`.
+Works like the Bash `seq` command. Specify 1 parameter (`end`) to generate all counting integers between 1 and `end` inclusive. Specify 2 parameters (`start` and `end`) to generate all counting integers between `start` and `end` inclusive incrementing or decrementing by 1. Specify 3 parameters (`start`, `step` and `end`) to generate all counting integers between `start` and `end` inclusive incrementing or decrementing by `step`.
 
 
 
@@ -2161,7 +2161,7 @@ _Implementation_: `github.com/Masterminds/sprig/v3.set`
 _Implementation_: `github.com/Masterminds/sprig/v3.sha1sum`
 
 ##  `sha256sum`
-Generates SHA256 hash of an input.
+Generates a SHA256 hash of an input.
 
 
 _Parameters_:
@@ -2176,7 +2176,7 @@ _Aliases_: `sha26sum`\
 _Implementation_: `github.com/Masterminds/sprig/v3.sha256sum`
 
 ##  `sha512sum`
-Generates SHA512 hash of an input.
+Generates a SHA512 hash of an input.
 
 
 _Parameters_:
@@ -2230,7 +2230,7 @@ _Parameters_:
 
 
 
-_Example_: `camelcase "FirstName"` returns `first_name`.
+_Example_: `snakecase "FirstName"` returns `first_name`.
 
 
 
@@ -2307,7 +2307,7 @@ _Implementation_: `github.com/Masterminds/sprig/v3.init.func23`
 _Implementation_: `github.com/Masterminds/sprig/v3.substring`
 
 ##  `swapcase`
-Swaps the case of a string using a word based algorithm.
+Swaps the case of a string using a word-based algorithm.
 
 
 _Parameters_:
@@ -2362,7 +2362,7 @@ _Example_: `title "hello world"` returns `"Hello World"`.
 _Implementation_: `strings.Title`
 
 ##  `toDate`
-Converts a string to a date. If the string can’t be converted it returns the zero value.
+Converts a string to a date. If the string can’t be converted, it returns the zero value.
 
 
 _Parameters_:
@@ -2379,7 +2379,7 @@ _Parameters_:
 _Implementation_: `github.com/Masterminds/sprig/v3.toDate`
 
 ##  `toDecimal`
-Converts a Unix octal to a `int64`.
+Converts a Unix octal to an `int64`.
 
 
 _Parameters_:
@@ -2396,7 +2396,7 @@ _Example_: `"0777" | toDecimal` will convert `0777` to `511` and return the valu
 _Implementation_: `github.com/Masterminds/sprig/v3.toDecimal`
 
 ##  `toJson`
-Encodes an item into JSON string. If the item cannot be converted to JSON the function will return an empty string.
+Encodes an item into a JSON string. If the item cannot be converted to JSON, the function will return an empty string.
 
 
 _Parameters_:
@@ -2413,7 +2413,7 @@ _Aliases_: `to_json`\
 _Implementation_: `github.com/Masterminds/sprig/v3.toJson`
 
 ##  `toPrettyJson`
-Encodes an item into pretty (intended) JSON string.
+Encodes an item into a pretty (indented) JSON string.
 
 
 _Parameters_:
@@ -2423,14 +2423,14 @@ _Parameters_:
 
 
 
-_Example_: `toPrettyJson .Item` returns intended JSON string representation of `.Item`.
+_Example_: `toPrettyJson .Item` returns an indented JSON string representation of `.Item`.
 
 
 
 _Implementation_: `github.com/Masterminds/sprig/v3.toPrettyJson`
 
 ##  `toRawJson`
-Encodes an item into JSON string with HTML characters unescaped.
+Encodes an item into a JSON string with HTML characters unescaped.
 
 
 _Parameters_:
@@ -2472,14 +2472,14 @@ _Parameters_:
 
 
 
-_Example_: `list 1 2 3 | toString` converts `1`, `2` and `3` to strings and then returns them as a list.
+_Example_: `list 1 2 3 | toStrings` converts `1`, `2` and `3` to strings and then returns them as a list.
 
 
 
 _Implementation_: `github.com/Masterminds/sprig/v3.strslice`
 
 ##  `trim`
-Removes space from either side of a string.
+Removes whitespace from both sides of a string.
 
 
 _Parameters_:
@@ -2645,7 +2645,7 @@ _Example_: `now | unixEpoch`
 _Implementation_: `github.com/Masterminds/sprig/v3.unixEpoch`
 
 ##  `unset`
-Given a map and a key it deletes the key from the map. It returns dictionary. Note that if the key is not found this operation will simply return. No error will be generated.
+Given a map and a key, deletes the key from the map and returns the dictionary. If the key is not found, this operation returns without generating an error.
 
 
 _Parameters_:
@@ -2679,7 +2679,7 @@ _Example_: `until 5` will return a list `[0, 1, 2, 3, 4]`.
 _Implementation_: `github.com/Masterminds/sprig/v3.until`
 
 ##  `untilStep`
-Like `until` generates a list of counting integers but it allows to define a start, stop and step.
+Like `until`, generates a list of counting integers, but lets you define a start, stop, and step.
 
 
 _Parameters_:
@@ -2693,7 +2693,7 @@ _Parameters_:
 
 
 
-_Example_: `untilStep 3 6 2` will return `[3, 5]` by starting with 3 and adding 2 until it is equal or greater than 6.
+_Example_: `untilStep 3 6 2` will return `[3, 5]` by starting with 3 and adding 2 until it is equal to or greater than 6.
 
 
 
@@ -2734,7 +2734,7 @@ _Example_: `upper "hello"` returns `HELLO`
 _Implementation_: `strings.ToUpper`
 
 ##  `urlJoin`
-Joins map produced by `urlParse` to produce URL string.
+Joins a map produced by `urlParse` into a URL string.
 
 
 _Parameters_:
@@ -2744,14 +2744,14 @@ _Parameters_:
 
 
 
-_Example_: `urlJoin (dict "fragment" "fragment" "host" "host:80" "path" "/path" "query" "query" "scheme" "http")` returns `proto://host:80/path?query#fragment`.
+_Example_: `urlJoin (dict "fragment" "fragment" "host" "host:80" "path" "/path" "query" "query" "scheme" "http")` returns `http://host:80/path?query#fragment`.
 
 
 
 _Implementation_: `github.com/Masterminds/sprig/v3.urlJoin`
 
 ##  `urlParse`
-Parses string for URL and produces dict with URL parts. For more info check https://golang.org/pkg/net/url/#URL.
+Parses a URL string and produces a dict with the URL parts. For more info, see https://golang.org/pkg/net/url/#URL.
 
 
 _Parameters_:
@@ -2766,7 +2766,7 @@ _Parameters_:
 _Implementation_: `github.com/Masterminds/sprig/v3.urlParse`
 
 ##  `values`
-Returns list of all values from a map.
+Returns a list of all values from a map.
 
 
 _Parameters_:
@@ -2819,7 +2819,7 @@ _Example_: `wrap 80 $text` will wrap the string in `$text` at 80 columns.
 _Implementation_: `github.com/Masterminds/sprig/v3.init.func7`
 
 ##  `wrapWith`
-Works as `wrap` but lets you specify the string to wrap with (`wrap` uses `\n`).
+Works like `wrap`, but lets you specify the string to wrap with (`wrap` uses `\n`).
 
 
 _Parameters_:
@@ -2833,7 +2833,7 @@ _Parameters_:
 
 
 
-_Example_: `wrapWith 5 "\t" "Hello world"` returns `hello world` (where the whitespace is an ASCII tab character).
+_Example_: `wrapWith 5 "\t" "Hello world"` returns `Hello world` (where the whitespace is an ASCII tab character).
 
 
 

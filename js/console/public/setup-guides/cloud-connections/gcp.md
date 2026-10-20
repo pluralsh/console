@@ -58,6 +58,21 @@ resource "google_project_iam_member" "plural_cloud_query_storage_viewer" {
 Apply bindings in every project Cloud Query must inspect. A separate connection is
 needed when you want a different default project or service-account key.
 
+Viewer roles do not allow invoking Cloud Run services. If a Cloud Run workbench tool uses
+this connection, grant `roles/run.invoker` on each service it calls. When the tool
+identifies the service by resource name rather than URL, the service account also needs
+`run.services.get` (included in `roles/viewer` and `roles/run.viewer`):
+
+```terraform
+resource "google_cloud_run_v2_service_iam_member" "plural_cloud_query_invoker" {
+  project  = var.project_id
+  location = "<region>"
+  name     = "<service-name>"
+  role     = "roles/run.invoker"
+  member   = "serviceAccount:${google_service_account.plural_cloud_query.email}"
+}
+```
+
 ## 3) Export and protect the JSON key
 
 The connection currently requires a service-account key JSON payload:

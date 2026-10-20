@@ -3,17 +3,17 @@ title: Sharing Outputs with Continuous Deployment
 description: Export Outputs of a Terraform Stack to a Kubernetes CD Service
 ---
 
-It's frequently necessary to take infrastructure created in a stack and use the data in a Service being deployed to K8s.  A few usecases where this can be important:
+It's frequently necessary to take infrastructure created in a stack and use the data in a Service being deployed to Kubernetes.  A few use cases where this can be important:
 
 * exporting IAM role ARNs for access to various AWS services like S3 or SQS
-* exporting DB connection strings to configure as k8s secrets for a webserver
+* exporting DB connection strings to configure as Kubernetes secrets for a webserver
 * exporting a dynamically created S3 bucket name to use in your deployed service
 
-This also facilitates end-to-end self-service, as you no longer need a human in-the-loop to apply that last mile configuration, plus you get continuous reconciliation in the event a terraform change implies a recreation of those resources.
+This also facilitates end-to-end self-service, as you no longer need a human in the loop to apply that last-mile configuration, plus you get continuous reconciliation in the event a Terraform change implies a recreation of those resources.
 
 ## End To End Example
 
-We do this a lot in our service catalog, available here: https://github.com/pluralsh/scaffolds/tree/main/catalogs.  A basic example would be something like our Airbyte setup, where the terraform stack has an outputs file like so:
+We do this a lot in our service catalog, available here: https://github.com/pluralsh/scaffolds/tree/main/catalogs.  A basic example would be something like our Airbyte setup, where the Terraform stack has an outputs file like so:
 
 ```tf
 output "access_key_id" {
@@ -50,9 +50,9 @@ output "oidc_client_secret" {
 }
 ```
 
-Airbyte needs fixed aws access keys to communicate with S3 and also there's a dynamically generated OIDC client that's used for auth against it's webserver, alongside postgres credentials.
+Airbyte needs fixed AWS access keys to communicate with S3, and there's also a dynamically generated OIDC client that's used for auth against its webserver, alongside Postgres credentials.
 
-with a InfrastructureStack resource will like this:
+The InfrastructureStack resource will look like this:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -76,7 +76,7 @@ spec:
     namespace: infra
 ```
 
-All of this data needs to be used by the service that is actually deployed to K8s, so it will explicitly "import" that stack with its `imports` declaration, like so:
+All of this data needs to be used by the service that is actually deployed to Kubernetes, so it will explicitly "import" that stack with its `imports` declaration, like so:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -116,7 +116,7 @@ spec:
     namespace: infra
 ```
 
-When that is present, it will allow us to template the outputs under the key `imports["airbyte-data"].{output_field_name}` in any .liquid values or yaml file for the service, an example for the airbyte helm chart `airbyte.yaml.liquid` values file:
+When that is present, it will allow us to template the outputs under the key `imports["airbyte-data"].{output_field_name}` in any .liquid values or YAML file for the service. Here's an example for the Airbyte Helm chart's `airbyte.yaml.liquid` values file:
 
 ```yaml
 global:
@@ -171,8 +171,8 @@ webapp:
     security.plural.sh/inject-oauth-sidecar: "true"
 ```
 
-You an read more about templating [here](/plural-features/service-templating).  In this case it's going to pass these variables through helm and configure the necessary secrets and yaml structures with the provided information.
+You can read more about templating [here](/plural-features/service-templating).  In this case, it's going to pass these variables through Helm and configure the necessary secrets and YAML structures with the provided information.
 
 {% callout severity="info" %}
-The imports structure is a map from stack name to stack outputs, eg a nested map type like { string => { string => any } }
+The imports structure is a map from stack name to stack outputs, i.e. a nested map type like { string => { string => any } }
 {% /callout %}

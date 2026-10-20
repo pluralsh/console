@@ -5,7 +5,7 @@ description: Setting up SCM webhooks and automatically linking Pull Requests to 
 
 # Overview
 
-Plural utilizes SCM (Source Control Management) webhooks to monitor pull request events and integrate with your development workflow. This allows Plural Flows to automatically link associated pull requests, enabling codebase root cause investigation in light of an alert or other issue.
+Plural uses SCM (Source Control Management) webhooks to monitor pull request events and integrate with your development workflow. This allows Plural Flows to automatically link associated pull requests, enabling codebase root cause investigation in response to an alert or other issue.
 
 When a pull request is linked to a Flow, Plural automatically creates vector embeddings of the code changes for semantic search and analysis. These indexed changes can be used to identify potential root causes when alerts fire, by finding relevant code modifications that may have contributed to the issue. The vector index is securely stored and access is governed by Flow permissions, ensuring that investigations respect your existing security boundaries and that AI-assisted analysis remains within your configured authorization requirements.
 
@@ -16,7 +16,7 @@ To enable features like automatic PR status labeling and linking PRs to Plural F
 ### Prerequisites
 
 *   **Plural Console `admin` Permissions**
-*   **SCM Provider Personal Access Token** (Refer to provider documentation for creation: [Github](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic), [GitLab](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html#create-a-personal-access-token), [Bitbucket](https://support.atlassian.com/bitbucket-cloud/docs/access-tokens/))
+*   **SCM Provider Personal Access Token** (Refer to provider documentation for creation: [GitHub](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic), [GitLab](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html#create-a-personal-access-token), [Bitbucket](https://support.atlassian.com/bitbucket-cloud/docs/access-tokens/))
 *   **SCM Provider Organization `admin` Permissions** (Required only when creating the webhook initially)
 
 ### Creating the Webhook in Plural
@@ -43,7 +43,7 @@ Now, use the copied Webhook URL and secret to create a webhook within your SCM p
 
 Refer to your SCM provider's documentation for specific instructions:
 
-*   [Github Repository Webhooks](https://docs.github.com/en/webhooks/using-webhooks/creating-webhooks#creating-a-repository-webhook)
+*   [GitHub Repository Webhooks](https://docs.github.com/en/webhooks/using-webhooks/creating-webhooks#creating-a-repository-webhook)
 *   [GitHub Organization Webhooks](https://docs.github.com/en/webhooks/using-webhooks/creating-webhooks#creating-an-organization-webhook)
 *   [GitLab Project Webhooks](https://docs.gitlab.com/ee/user/project/integrations/webhooks.html#configure-a-webhook-in-gitlab) (Ensure "Pull request events" is checked)
 *   [GitLab Group Webhooks](https://docs.gitlab.com/ee/user/project/integrations/webhooks.html#group-webhooks)
@@ -53,7 +53,7 @@ Refer to your SCM provider's documentation for specific instructions:
 
 Once the SCM webhook is correctly configured, Plural can automatically link pull requests to their corresponding Plural Flows.
 
-To link a pull request, simply include the following text anywhere in the **pull request body (description)**:
+To link a pull request, include the following text anywhere in the **pull request body (description)**:
 
 ```
 Plural Flow: {flow-name}

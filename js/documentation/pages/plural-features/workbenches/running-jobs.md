@@ -21,7 +21,7 @@ Open a workbench, select the **Launch** tab, and type your prompt into the new-j
 
 ### Saved prompts
 
-Frequently-used prompts can be saved under **•••  → Saved prompts** so your team can launch common investigations without retyping. When starting a job, select a saved prompt from the dropdown to pre-fill the prompt field.
+Frequently used prompts can be saved under **•••  → Saved prompts** so your team can launch common investigations without retyping. When starting a job, select a saved prompt from the dropdown to pre-fill the prompt field.
 
 
 ## The Jobs tab
@@ -62,7 +62,7 @@ Once a job completes, the **Result** panel appears on the right side of the job 
 
 ## Canvas view
 
-For jobs that produce a topology result, a **Canvas** button appears in the job detail header. The canvas renders an interactive dashboard of the data associated with a workbench job.  This could be timseries metrics, bar/pie charts, or any other visualization the AI considers useful to give you a clean view of a potentially complex analysis.  Think of it as a datadog dashboard on demand whenever you need it.
+For jobs that produce a topology result, a **Canvas** button appears in the job detail header. The canvas renders an interactive dashboard of the data associated with a workbench job. This could be time-series metrics, bar or pie charts, or any other visualization the AI considers useful to give you a clear view of a potentially complex analysis. Think of it as an on-demand Datadog dashboard.
 
 Here's an example for a cost analysis job:
 

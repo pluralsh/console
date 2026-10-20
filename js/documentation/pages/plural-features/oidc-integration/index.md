@@ -26,6 +26,6 @@ By integrating with an IdP via OIDC, Plural eliminates these challenges.
 
 ## Supported Identity Providers
 
-Plural supports any OIDC-compliant identity provider (IdP) for enterprise use. This means it can integrate with common enterprise options as long as they adhere to the OpenID Connect standard.
+Plural supports any OIDC-compliant identity provider (IdP) for enterprise use, so it can integrate with common enterprise options as long as they adhere to the OpenID Connect standard.
 
 > For Okta, see the full [step-by-step guide](okta.md).

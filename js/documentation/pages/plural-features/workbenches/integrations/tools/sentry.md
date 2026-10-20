@@ -46,7 +46,7 @@ The workbench agent can call these operations:
 * **sentry_list_issues** — Lists or searches issues (unresolved errors) using Sentry query syntax. Supports filters for project, environment, sort order, and stats period. Returns paginated results with a `cursor` for fetching additional pages. Use `issue_id` from results with other operations to retrieve details or stack traces. Calls [`GET /api/0/organizations/{org}/issues/`](https://docs.sentry.io/api/events/list-an-organizations-issues/).
 * **sentry_issue_read** — Retrieves issue details including title, status, event counts, and project slug. Does not include stack traces. Use **sentry_get_latest_issue_event** or **sentry_list_issue_events** for stack traces. Calls [`GET /api/0/organizations/{org}/issues/{issue_id}/`](https://docs.sentry.io/api/events/retrieve-an-issue/).
 * **sentry_list_issue_events** — Lists error events for a specific issue. Set `full=true` to include stack traces in the response. Use `event_id` from results with **sentry_event_read** to retrieve a specific occurrence. Supports pagination with `cursor`. Calls [`GET /api/0/organizations/{org}/issues/{issue_id}/events/`](https://docs.sentry.io/api/events/list-an-issues-events/).
-* **sentry_get_latest_issue_event** — Fetches the latest error event with stack trace for an issue. Defaults to `full=true` to include the complete stack trace. Prefer this over listing all events when debugging the current failure. Calls [`GET /api/0/organizations/{org}/issues/{issue_id}/events/latest/`](https://docs.sentry.io/api/events/list-an-issues-events/).
+* **sentry_get_latest_issue_event** — Fetches the latest error event for an issue, with its stack trace. Defaults to `full=true` to include the complete stack trace. Prefer this over listing all events when debugging the current failure. Calls [`GET /api/0/organizations/{org}/issues/{issue_id}/events/latest/`](https://docs.sentry.io/api/events/list-an-issues-events/).
 * **sentry_event_read** — Reads a specific event by project slug and event ID. Returns full event JSON including stack trace. Use this when you have an exact event ID from **sentry_list_issue_events** or a webhook payload. Calls [`GET /api/0/projects/{org}/{project}/events/{event_id}/`](https://docs.sentry.io/api/events/retrieve-an-event-for-a-project/).
 
 All operations require the organization slug, which is the URL-safe identifier for your Sentry organization (visible in your Sentry URLs as `sentry.io/organizations/{org-slug}/`).
@@ -124,9 +124,9 @@ Keep these behaviors in mind when querying Sentry:
 * All operations are read-only. The tool cannot create, modify, resolve, assign, or delete issues.
 * **sentry_list_issues** returns paginated results. Use the `cursor` parameter to fetch additional pages. The default limit is 25 results; you can increase it up to 100 per page.
 * Stack traces are only included when you use **sentry_get_latest_issue_event**, **sentry_list_issue_events** with `full=true`, or **sentry_event_read**.
-* The organization slug is required for all operations. Find it in your Sentry URLs (e.g., `sentry.io/organizations/acme-corp/` uses slug `acme-corp`).
+* The organization slug is required for all operations. Find it in your Sentry URLs (for example, `sentry.io/organizations/acme-corp/` uses slug `acme-corp`).
 * Project identifiers can be numeric IDs or slugs depending on the operation. Use project slugs from **sentry_issue_read** results with **sentry_event_read**.
-* Sentry query syntax supports filters like `is:unresolved`, `is:assigned`, `level:error`, `environment:production`. See [Sentry search syntax](https://docs.sentry.io/product/sentry-basics/search/) for details.
+* Sentry query syntax supports filters such as `is:unresolved`, `is:assigned`, `level:error`, and `environment:production`. See [Sentry search syntax](https://docs.sentry.io/product/sentry-basics/search/) for details.
 
 ## Troubleshooting
 
@@ -140,7 +140,7 @@ Keep these behaviors in mind when querying Sentry:
 
 ### Organization or project not found
 
-* Verify that the organization slug is correct. Check your Sentry URLs for the exact slug (e.g., `sentry.io/organizations/acme-corp/` uses `acme-corp`).
+* Verify that the organization slug is correct. Check your Sentry URLs for the exact slug (for example, `sentry.io/organizations/acme-corp/` uses `acme-corp`).
 * Confirm that the auth token has access to the specified organization and projects.
 * For self-hosted Sentry, ensure the **URL** field points to the correct base URL.
 
@@ -153,7 +153,7 @@ Keep these behaviors in mind when querying Sentry:
 
 ### Empty or incomplete results
 
-* When listing issues, check your query filters for constraints that might exclude expected results (e.g., `is:unresolved`, `environment:production`).
+* When listing issues, check your query filters for constraints that might exclude expected results (for example, `is:unresolved`, `environment:production`).
 * Remember that **sentry_list_issues** and **sentry_list_issue_events** return paginated results. Use the `cursor` parameter to retrieve additional pages.
 * Verify in Sentry that the expected issues and events exist for the same query and filters.
 * Confirm that the required scope (`event:read` or `project:read`) is granted to the auth token.

@@ -73,9 +73,9 @@ Changing `repositoryImage` updates the generated `ImageWarmer`. Removing `prewar
 1. The operator starts a `repository-prebake` init container from `repositoryImage`.
 2. That container copies `/data` into the existing `shared-context` emptyDir at `/plural/shared/repos`. The published base image uses `fcp` to parallelize this small-file-heavy copy and falls back to `cp -a` for compatible custom images without `fcp`.
 3. `agent-bootstrap` matches the run repository URL (https and ssh forms of the same repo are equivalent) and **moves** that tree into `/plural/shared/repository` so the working copy does not duplicate disk. This is normally an instant rename because both paths use the same volume. If rename is not possible, it uses `fcp` when available, then deletes the source. Other prebaked repos stay under `/plural/shared/repos/<path>`.
-4. Fetch of the requested branch is best-effort. An airgapped or stale remote keeps the prebaked copy.
+4. Fetching the requested branch is best-effort. An airgapped or stale remote keeps the prebaked copy.
 
-No extra volume and no Kubernetes image-volume feature gate. Custom images must include `/bin/sh` and either `fcp` or `cp`, with repos under `/data`, owned by uid `65532` so the non-root agent can read them.
+This requires no extra volume and no Kubernetes image-volume feature gate. Custom images must include `/bin/sh` and either `fcp` or `cp`, with repos under `/data`, owned by uid `65532` so the non-root agent can read them.
 
 ## Image layout
 

@@ -6,6 +6,7 @@ import {
 import { describe, expect, it } from 'vitest'
 import { toPanelGraph } from './DashboardGraphSource'
 import {
+  dashboardGraphDataKey,
   dashboardGraphNeedsFetch,
   dashboardPanelIsWaitingForData,
   dashboardLegendMode,
@@ -30,6 +31,46 @@ describe('row collapse width', () => {
   it('collapses earlier when the narrowest panel would get too small', () => {
     expect(rowCollapseWidth(3, panels(1, 1, 1))).toBe(840)
     expect(rowCollapseWidth(4, panels(1, 3))).toBe(1120)
+  })
+})
+
+describe('dashboard graph data key', () => {
+  const graph = {
+    identifier: 'latency',
+    type: DashboardGraphType.Timeseries,
+    toolId: 'tool-1',
+    datasource: {
+      type: DashboardDatasourceType.Metrics,
+      tool: 'prometheus',
+      input: { query: 'rate(requests[5m])' },
+    },
+  }
+
+  it('changes when what the data is fetched from changes', () => {
+    const key = dashboardGraphDataKey(graph)
+
+    expect(
+      dashboardGraphDataKey({
+        ...graph,
+        datasource: { ...graph.datasource, input: { query: 'up' } },
+      })
+    ).not.toBe(key)
+    expect(dashboardGraphDataKey({ ...graph, toolId: 'tool-2' })).not.toBe(key)
+    expect(
+      dashboardGraphDataKey({ ...graph, type: DashboardGraphType.Bar })
+    ).not.toBe(key)
+  })
+
+  it('stays the same for display-only edits and without a datasource', () => {
+    const retitled = { ...graph, title: 'Latency (p99)' }
+
+    expect(dashboardGraphDataKey(retitled)).toBe(dashboardGraphDataKey(graph))
+    expect(
+      dashboardGraphDataKey({
+        identifier: 'latency',
+        type: DashboardGraphType.Timeseries,
+      })
+    ).toBe(dashboardGraphDataKey({ ...graph, toolId: null, datasource: null }))
   })
 })
 

@@ -112,4 +112,4 @@ The following table categorizes resources based on their supported reconciliatio
 ### Legend:
 *   **Standard Creation**: Controller creates the resource if it doesn't exist.
 *   **Read-Only Support**: Controller can link to an existing resource by name/ID without modifying it.
-*   **Adoption Mode Support**: Controller can transition from Read-Only to Ownership if `driftDetection` is enabled or if the logic allows to upsert the resource.
+*   **Adoption Mode Support**: Controller can transition from Read-Only to Ownership if `driftDetection` is enabled or if the logic allows upserting the resource.

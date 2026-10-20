@@ -1,45 +1,8 @@
-# Plural-to-Plural Webhook Setup
+# Plural Webhooks
 
-Use this flow when one Plural environment sends observability webhook events to another Plural environment.
+`Plural` is the alert type for Plural's own alerts, which come from log-based monitors. Those alerts are created inside Plural and do not need a webhook.
 
-## 1. Create the receiving webhook in target Plural
+Plural does not accept deliveries on an observability webhook with provider type `Plural`: every request to its URL is rejected with 403. Plural also has no outbound webhook that could forward alerts to another Plural environment.
 
-In the target Plural environment:
-
-1. Open webhook creation.
-2. Set **Type** to `Observability`.
-3. Set **Provider** to `PLURAL`.
-4. Enter a user-chosen **Name**.
-5. Enter a strong **Signing secret**.
-6. Click **Create new webhook**.
-
-After creation, Plural generates and shows the receiving **Webhook URL**. Copy it.
-
-## 2. Configure outbound webhook in source Plural
-
-In the source Plural environment, create the outbound webhook/contact point:
-
-- **Destination URL:** the target Plural webhook URL from step 1
-- **Authentication:** HTTP Basic Auth
-- **Password:** the same signing secret from step 1
-- **Username:** any non-empty value
-
-Plural validates requests using the Basic Auth password.
-
-## 3. Route events
-
-Enable source routing for the events you want to federate:
-
-- alert firing/opened
-- alert resolved/closed
-- other internal observability events required by your team
-
-Use environment/project filters to avoid duplicate or noisy forwarding.
-
-## 4. Validate
-
-Trigger a controlled test alert in the source environment and confirm in target Plural:
-
-- request is accepted
-- auth validation succeeds
-- event appears in webhook activity/history
+- To alert on Plural data, create a monitor on a service under **Observability** -> **Monitors**.
+- To receive alerts from an external system, create a webhook with that system's provider type instead, such as Datadog, Grafana, or PagerDuty.

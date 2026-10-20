@@ -24,7 +24,7 @@ ignoring because of invalid name, only the default AgentConfiguration will be re
 
 When the name is correct and the spec is valid, expect `Synchronized=True` and `Ready=True` on `status.conditions`.
 
-{% callout severity="warn" %}
+{% callout severity="warning" %}
 Do not create multiple `AgentConfiguration` resources expecting them all to apply. Only `default` is processed. Merge all desired settings into a single `spec`.
 {% /callout %}
 
@@ -152,5 +152,5 @@ Check `status.conditions` for `Ready` and `Synchronized`. If either is `False`, 
 | **Cluster** | Management cluster | Each agent/workload cluster |
 | **Scope** | Namespaced (`plrl-deploy-operator`) | Cluster-scoped |
 | **Singleton name** | `global` | `default` |
-| **Configures** | Console-wide CD settings, fleet agent helm values, AI, observability | Local agent runtime: polls, limits, job image registry |
+| **Configures** | Console-wide CD settings, fleet agent Helm values, AI, observability | Local agent runtime: polls, limits, job image registry |
 | **Docs** | [DeploymentSettings](/plural-features/continuous-deployment/management-controller/deployment-settings) | This page |

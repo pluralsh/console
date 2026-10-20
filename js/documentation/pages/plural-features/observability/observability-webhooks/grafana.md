@@ -1,6 +1,6 @@
 ---
 title: Grafana Observability Webhook Integration
-description: Configure Grafana webhook to view alerts and incidents inside the Plural Console. 
+description: Configure a Grafana webhook to view alerts and incidents inside the Plural Console. 
 ---
 
 ## Quick Setup 

@@ -17,7 +17,8 @@ defmodule Console.AI.Workbench.ToolsTest do
     Metrics,
     MetricsLabelSearch,
     MetricsSearch,
-    Traces
+    Traces,
+    TraceFacets
   }
   alias Console.AI.Tools.Workbench.Infrastructure.{CloudSchemas, RawCloudQuery, CloudTables}
   alias Console.AI.Tools.Workbench.Integration.Github.ListIssues
@@ -121,6 +122,7 @@ defmodule Console.AI.Workbench.ToolsTest do
       assert_indexed(index, "workbench_observability_logs_vlogs", Logs, victoria_logs)
       assert_indexed(index, "workbench_observability_log_aggregate_vlogs", LogAggregate, victoria_logs)
       assert_indexed(index, "workbench_observability_traces_tempo", Traces, tempo)
+      assert_indexed(index, "workbench_observability_trace_facets_tempo", TraceFacets, tempo)
       assert_indexed(
         index,
         "workbench_observability_dashboards_datadog",

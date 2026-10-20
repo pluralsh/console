@@ -1,11 +1,11 @@
 ---
 title: Git-sourced services
-description: Source manifests directly from git
+description: Source manifests directly from Git
 ---
 
-The simplest service you can deploy is just referencing a folder within a git repository. This pattern is great for deploying a simple microservice owned by a dev team, or perhaps setting up an app-of-apps. 
+The simplest service you can deploy references a folder within a Git repository. This pattern is great for deploying a simple microservice owned by a dev team, or perhaps setting up an app-of-apps. 
 
-There are a few different ways this can be done, here is the simplest:
+There are a few ways to do this; here is the simplest:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -22,7 +22,7 @@ spec:
     ref: main
 ```
 
-You can also use custom resource references if you don't want to type out the git repository url each time (this can also be useful to provide a stable name for that repository). The CRs needed to make this work would be:
+You can also use custom resource references if you don't want to type out the Git repository URL each time (this can also be useful to provide a stable name for that repository). The CRs needed to make this work would be:
 
 ```yaml
 # the GitRepository and Cluster resources should ideally be defined elsewhere in your infra repo
@@ -62,4 +62,4 @@ spec:
     namespace: infra
 ```
 
-If the folder just contains a number of `ServiceDeployment` kind structures, you can create a full-blown service of services and provision a wide array of complex resource heirarchies
+If the folder contains several `ServiceDeployment` resources, you can create a full-blown service of services and provision a wide array of complex resource hierarchies.

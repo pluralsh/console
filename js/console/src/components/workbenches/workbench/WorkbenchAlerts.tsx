@@ -29,6 +29,7 @@ import { WORKBENCH_PARAM_ID } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { WorkbenchPageLayout } from './Workbench'
+import { DETAILS_LIST_WIDTH } from '../common/WorkbenchDetailsView'
 import { WorkbenchAlertsBoard } from './WorkbenchAlertsBoard'
 import { useWorkbenchAlertsDetails } from './WorkbenchAlertsDetails'
 import { WorkbenchAlertsDisplayOptions } from './WorkbenchAlertsDisplayOptions'
@@ -176,7 +177,11 @@ export function WorkbenchAlerts() {
         )
       }
       {...(showDetails && {
-        sidebar: { kind: 'custom', content: details.sidebar },
+        sidebar: {
+          kind: 'custom',
+          content: details.sidebar,
+          width: DETAILS_LIST_WIDTH,
+        },
       })}
       headerActions={
         <DisplayButton

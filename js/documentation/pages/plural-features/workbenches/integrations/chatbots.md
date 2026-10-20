@@ -14,7 +14,7 @@ This is separate from the Slack and Microsoft Teams entries under [Messaging](/p
 
 ## Setup
 
-Console shows an inline setup guide while you create a chatbot connection. Follow that guide for the app credentials and channel binding.
+The Console shows an inline setup guide while you create a chatbot connection. Follow that guide for the app credentials and channel binding.
 
 ## Related
 

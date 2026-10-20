@@ -214,19 +214,94 @@ func (in *DynatraceProvider) Traces(ctx context.Context, input *toolquery.Traces
 		return nil, ErrInvalidArgument
 	}
 
-	if err := in.validateTracesInput(input); err != nil {
+	query, err := in.tracesQuery(input)
+	if err != nil {
 		return nil, err
 	}
 
-	resp, err := in.client.Traces(
-		ctx,
-		input.GetQuery(),
-	)
+	resp, err := in.client.Traces(ctx, query)
 	if err != nil {
 		return nil, err
 	}
 
 	return resp.ToTracesQueryOutput(), nil
+}
+
+// tracesQuery is the raw DQL query, or one built from structured filters,
+// which may also refine a raw query.
+func (in *DynatraceProvider) tracesQuery(input *toolquery.TracesQueryInput) (string, error) {
+	if !HasTraceFilters(input.GetFilters()) {
+		if err := in.validateTracesInput(input); err != nil {
+			return "", err
+		}
+		return input.GetQuery(), nil
+	}
+
+	if raw := strings.TrimSpace(input.GetQuery()); raw != "" {
+		if !strings.HasPrefix(raw, "fetch spans") {
+			return "", fmt.Errorf("invalid query: must start with 'fetch spans'")
+		}
+		filter, err := dqlTraceFilter(input.GetFilters())
+		if err != nil {
+			return "", err
+		}
+		return raw + " | filter " + filter, nil
+	}
+
+	return toDQLSpans(input.GetFilters(), input.GetRange(), int64(input.GetLimit()))
+}
+
+const dynatraceSpanSampleSize = 200
+
+func (in *DynatraceProvider) TraceFacets(ctx context.Context, input *toolquery.TraceFacetsInput) (*toolquery.TraceFacetsOutput, error) {
+	if in.client == nil || input == nil {
+		return nil, ErrInvalidArgument
+	}
+
+	attribute := strings.TrimSpace(input.GetAttribute())
+	if attribute == "" {
+		query, err := toDQLSpans(input.GetFilters(), input.GetRange(), dynatraceSpanSampleSize)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := in.client.Traces(ctx, query)
+		if err != nil {
+			return nil, err
+		}
+		return facetValues(input, spanAttributeNames(resp.ToTracesQueryOutput().GetSpans())), nil
+	}
+
+	query, err := toDQLSpans(input.GetFilters(), input.GetRange(), 0)
+	if err != nil {
+		return nil, err
+	}
+	query += fmt.Sprintf(
+		" | summarize count = count(), by:{value = %s} | sort count desc | limit %d",
+		dqlField(attribute),
+		traceFacetLimit(input),
+	)
+
+	records, err := in.client.Records(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+
+	values := make([]*toolquery.TraceFacetValue, 0, len(records))
+	for _, record := range records {
+		value, ok := record["value"]
+		if !ok || value == nil {
+			continue
+		}
+		facetValue := &toolquery.TraceFacetValue{Name: fmt.Sprint(value)}
+		// counts arrive as strings or JSON numbers
+		if count, err := strconv.ParseFloat(fmt.Sprint(record["count"]), 64); err == nil {
+			n := int64(count)
+			facetValue.Count = &n
+		}
+		values = append(values, facetValue)
+	}
+
+	return facetValues(input, values), nil
 }
 
 func (in *DynatraceProvider) validateTracesInput(input *toolquery.TracesQueryInput) error {
