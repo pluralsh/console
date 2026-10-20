@@ -29,11 +29,17 @@ const { Heading: MarkdocHeading } = markdocComponents
 // The hero art is a dark product shot, so like the marketing site's product
 // mocks it stays dark in both color modes.
 const Hero = styled.div(({ theme }) => ({
-  background: 'url(/images/landing/hero-bg-sm.png)',
+  position: 'relative',
+  background: `${brandTokens.dark.canvas} url(/images/landing/hero-bg-sm.png)`,
   backgroundSize: '100% 100%',
   borderRadius: theme.borderRadiuses.large,
   border: `1px solid ${brand.line}`,
   overflow: 'hidden',
+  // Hero stays dark in both modes; selection must stay light-on-dark.
+  '& ::selection': {
+    background: brandTokens.dark['accent-tint'],
+    color: brandTokens.dark.ink,
+  },
   h1: {
     margin: 0,
     marginBottom: theme.spacing.xsmall,
@@ -70,12 +76,23 @@ const Hero = styled.div(({ theme }) => ({
       maxWidth: '48.2%',
       textWrap: 'balance',
     },
-    background: 'none',
+    background: brandTokens.dark.canvas,
     '.bgImgLg': {
       display: 'block',
+      position: 'absolute',
+      inset: 0,
       width: '100%',
-      transform: 'translateX(-100%)',
+      height: '100%',
+      objectFit: 'cover',
+      objectPosition: 'right center',
       zIndex: 0,
+      // Fade into the canvas on the left (headline side) and bottom edge.
+      maskImage:
+        'linear-gradient(to right, transparent 0%, black 42%), linear-gradient(to top, transparent 0%, black 28%)',
+      maskComposite: 'intersect',
+      WebkitMaskImage:
+        'linear-gradient(to right, transparent 0%, black 42%), linear-gradient(to top, transparent 0%, black 28%)',
+      WebkitMaskComposite: 'source-in',
     },
   },
 }))

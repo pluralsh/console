@@ -55,24 +55,32 @@ export const StatusDot = styled.span<{ $color: string }>(({ $color }) => ({
 
 // ─── Table primitives ────────────────────────────────────────────────────────
 
+const tableLine = '1px solid var(--table-line)'
+
 export const Table = styled.table(({ theme }) => ({
   width: '100%',
   borderCollapse: 'collapse',
   marginBottom: theme.spacing.large,
+  border: tableLine,
+  background: 'transparent',
   ...theme.partials.text.body2,
+  'tbody tr:nth-child(even) td': {
+    backgroundColor: 'var(--table-stripe)',
+  },
 }))
 
 export const Th = styled.th(({ theme }) => ({
   textAlign: 'left',
-  padding: `${theme.spacing.small}px 0`,
-  borderBottom: theme.borders.default,
-  color: theme.colors['text-light'],
+  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  border: tableLine,
+  background: 'var(--table-header)',
+  color: brand.ink,
   fontWeight: 500,
 }))
 
 export const Td = styled.td(({ theme }) => ({
-  padding: `${theme.spacing.small}px ${theme.spacing.medium}px ${theme.spacing.small}px 0`,
-  borderBottom: theme.borders.default,
+  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  border: tableLine,
   color: theme.colors.text,
   verticalAlign: 'top',
 }))
