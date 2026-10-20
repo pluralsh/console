@@ -70,7 +70,9 @@ All native integrations respect your existing RBAC — enabling a capability her
 
 | Tool | What the agent can do |
 |---|---|
-| **[Atlassian (Jira)](/plural-features/workbenches/integrations/tools/atlassian)** | Create, read, and update Jira issues |
+| **[Atlassian](/plural-features/workbenches/integrations/tools/atlassian)** | Call Jira and Confluence Cloud via Atlassian's MCP server — search, create, and update issues; read and edit pages |
+| **[Jira Cloud](/plural-features/workbenches/integrations/tools/jira)** | Search, create, update, comment on, and transition Jira Cloud issues with JQL queries |
+| **[Jira Data Center](/plural-features/workbenches/integrations/tools/jira-datacenter)** | Search, create, update, comment on, and transition Jira Data Center issues on self-hosted instances |
 | **[Linear](/plural-features/workbenches/integrations/tools/linear)** | Create and update Linear issues |
 | **[ServiceNow](/plural-features/workbenches/integrations/tools/service-now)** | Create, read, update, and comment on incidents, change requests, problems, and catalog tasks |
 
