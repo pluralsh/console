@@ -2,6 +2,8 @@
  * Shared styled components and helpers used across REST API reference panels.
  */
 
+import type { ComponentPropsWithoutRef } from 'react'
+
 import styled from 'styled-components'
 
 import { brand } from '@src/theme/docsTheme'
@@ -57,11 +59,18 @@ export const StatusDot = styled.span<{ $color: string }>(({ $color }) => ({
 
 const tableLine = '1px solid var(--table-line)'
 
-export const Table = styled.table(({ theme }) => ({
-  width: '100%',
-  borderCollapse: 'collapse',
+// The stroke sits on the frame so it follows the corner. A collapsed table
+// ignores its own radius, and clipping that square stroke leaves a notch.
+const TableFrame = styled.div(({ theme }) => ({
+  borderRadius: theme.borderRadiuses.large,
+  overflow: 'hidden',
   marginBottom: theme.spacing.large,
   border: tableLine,
+}))
+
+const TableEl = styled.table(({ theme }) => ({
+  width: '100%',
+  borderCollapse: 'collapse',
   background: 'transparent',
   ...theme.partials.text.body2,
   'tbody tr:nth-child(even) td': {
@@ -69,20 +78,35 @@ export const Table = styled.table(({ theme }) => ({
   },
 }))
 
+export function Table(props: ComponentPropsWithoutRef<'table'>) {
+  return (
+    <TableFrame>
+      <TableEl {...props} />
+    </TableFrame>
+  )
+}
+
 export const Th = styled.th(({ theme }) => ({
   textAlign: 'left',
   padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
-  border: tableLine,
+  border: 'none',
+  borderRight: tableLine,
+  borderBottom: tableLine,
   background: 'var(--table-header)',
   color: brand.ink,
   fontWeight: 500,
+  '&:last-child': { borderRight: 'none' },
 }))
 
 export const Td = styled.td(({ theme }) => ({
   padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
-  border: tableLine,
+  border: 'none',
+  borderRight: tableLine,
+  borderBottom: tableLine,
   color: theme.colors.text,
   verticalAlign: 'top',
+  '&:last-child': { borderRight: 'none' },
+  'tr:last-child &': { borderBottom: 'none' },
 }))
 
 export const TypeTag = styled.span(({ theme }) => ({

@@ -17,11 +17,13 @@ const GlobalStyles = createGlobalStyle(({ theme }) => ({
     background: brand['accent-tint'],
     color: brand.ink,
   },
-  // Design-system hljs selection uses a fixed navy bg with code-block-light-grey
-  // text; that token is near-black in light mode. Force light text on the navy.
+  // Design-system hljs selection is a fixed navy with code-block-light-grey
+  // text. That token is near-black in light mode, and the rule is nested under
+  // the Highlight component so it beats a plain .hljs selector. Force light
+  // text on the navy in both modes.
   'html .hljs ::selection, html .hljs::selection': {
-    background: '#383a62',
-    color: brandTokens.dark.ink,
+    backgroundColor: '#383a62 !important',
+    color: `${brandTokens.dark.ink} !important`,
   },
   '*:focus': {
     outline: 'none',
@@ -68,7 +70,8 @@ const GlobalStyles = createGlobalStyle(({ theme }) => ({
   // zebra body rows. Fills are ink washes so they work on both canvases.
   '.primary-content [class*="Table__TableSC"]': {
     border: '1px solid var(--table-line) !important',
-    borderRadius: '0 !important',
+    // Same corner as code cards (borderRadiuses.large).
+    borderRadius: `${theme.borderRadiuses.large}px !important`,
     backgroundColor: 'transparent !important',
     boxShadow: 'none !important',
     // The last header cell's ::before paints the fill across the whole row;
