@@ -46,7 +46,7 @@ func TestAgentPrepareConfigureAndExport(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := agent.Configure(context.Background(), toolv1.ConfigureRequest{Phase: toolv1.ConfigurePhaseInitial, ConsoleURL: "https://console.example", ConsoleToken: "console-token", Settings: settings}); err != nil {
+	if err := agent.Configure(context.Background(), toolv1.ConfigureRequest{Phase: toolv1.ConfigurePhaseInitial, Settings: settings}); err != nil {
 		t.Fatal(err)
 	}
 

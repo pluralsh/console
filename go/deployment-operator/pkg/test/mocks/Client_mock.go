@@ -769,6 +769,65 @@ func (_c *ClientMock_GetAgentRun_Call) RunAndReturn(run func(context.Context, st
 	return _c
 }
 
+// GetAgentRunCredentials provides a mock function with given fields: ctx, id
+func (_m *ClientMock) GetAgentRunCredentials(ctx context.Context, id string) (*goclient.AgentRunCredentialsFragment, error) {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetAgentRunCredentials")
+	}
+
+	var r0 *goclient.AgentRunCredentialsFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*goclient.AgentRunCredentialsFragment, error)); ok {
+		return rf(ctx, id)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *goclient.AgentRunCredentialsFragment); ok {
+		r0 = rf(ctx, id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*goclient.AgentRunCredentialsFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ClientMock_GetAgentRunCredentials_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetAgentRunCredentials'
+type ClientMock_GetAgentRunCredentials_Call struct {
+	*mock.Call
+}
+
+// GetAgentRunCredentials is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ClientMock_Expecter) GetAgentRunCredentials(ctx interface{}, id interface{}) *ClientMock_GetAgentRunCredentials_Call {
+	return &ClientMock_GetAgentRunCredentials_Call{Call: _e.mock.On("GetAgentRunCredentials", ctx, id)}
+}
+
+func (_c *ClientMock_GetAgentRunCredentials_Call) Run(run func(ctx context.Context, id string)) *ClientMock_GetAgentRunCredentials_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ClientMock_GetAgentRunCredentials_Call) Return(_a0 *goclient.AgentRunCredentialsFragment, _a1 error) *ClientMock_GetAgentRunCredentials_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ClientMock_GetAgentRunCredentials_Call) RunAndReturn(run func(context.Context, string) (*goclient.AgentRunCredentialsFragment, error)) *ClientMock_GetAgentRunCredentials_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetAgentRunTodos provides a mock function with given fields: ctx, id
 func (_m *ClientMock) GetAgentRunTodos(ctx context.Context, id string) ([]*goclient.AgentTodoFragment, error) {
 	ret := _m.Called(ctx, id)

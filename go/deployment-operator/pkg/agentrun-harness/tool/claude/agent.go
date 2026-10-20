@@ -23,9 +23,7 @@ const (
 // Agent owns Claude's native configuration, prompt and skills preparation,
 // and staging of Claude's provider-owned session state.
 type Agent struct {
-	config       toolv1.Config
-	consoleURL   string
-	consoleToken string
+	config toolv1.Config
 }
 
 var _ toolv1.Agent = (*Agent)(nil)
@@ -95,11 +93,6 @@ func (agent *Agent) Configure(ctx context.Context, request toolv1.ConfigureReque
 	config, err := agent.configWithClaude()
 	if err != nil {
 		return err
-	}
-
-	agent.consoleURL = request.ConsoleURL
-	if request.ConsoleToken != "" {
-		agent.consoleToken = request.ConsoleToken
 	}
 
 	return agent.writeNativeConfig(config, request.Settings.Model.Name)

@@ -119,14 +119,9 @@ func (runtime *Runtime) BabysitRun(ctx context.Context, babysit *BabysitContext)
 	return false
 }
 
-// Configure performs the initial provider configuration. Credentials are
-// passed to the Agent for this call only and are not retained by Runtime.
-func (runtime *Runtime) Configure(consoleURL, consoleToken string) error {
-	return runtime.configure(context.Background(), ConfigureRequest{
-		Phase:        ConfigurePhaseInitial,
-		ConsoleURL:   consoleURL,
-		ConsoleToken: consoleToken,
-	})
+// Configure performs the initial provider configuration.
+func (runtime *Runtime) Configure() error {
+	return runtime.configure(context.Background(), ConfigureRequest{Phase: ConfigurePhaseInitial})
 }
 
 // ConfigureBabysitRun performs the provider's babysit configuration pass.

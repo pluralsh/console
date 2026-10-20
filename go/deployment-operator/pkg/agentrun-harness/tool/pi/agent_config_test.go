@@ -11,6 +11,7 @@ import (
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/mcp"
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 )
 
 func TestAgentConfigure(t *testing.T) {
@@ -28,10 +29,8 @@ func TestAgentConfigure(t *testing.T) {
 		"allowedTools":["list_issues"]
 	}]`)
 	if err := agent.Configure(context.Background(), toolv1.ConfigureRequest{
-		Phase:        toolv1.ConfigurePhaseInitial,
-		ConsoleURL:   "https://console.example",
-		ConsoleToken: "console-token",
-		Settings:     settings,
+		Phase:    toolv1.ConfigurePhaseInitial,
+		Settings: settings,
 	}); err != nil {
 		t.Fatalf("Configure(initial) error = %v", err)
 	}
@@ -45,7 +44,7 @@ func TestAgentConfigure(t *testing.T) {
 		t.Fatalf("decode models config: %v", err)
 	}
 	provider := modelConfig["providers"].(map[string]any)[providerPlural].(map[string]any)
-	if provider["baseUrl"] != "https://console.example/ext/ai/v1" || provider["apiKey"] != "$OPENAI_API_KEY" {
+	if provider["baseUrl"] != common.AgentConsoleProxyURL+"/ext/ai/v1" || provider["apiKey"] != "$OPENAI_API_KEY" {
 		t.Fatalf("proxy provider config = %#v", provider)
 	}
 
@@ -101,9 +100,8 @@ func TestAgentConfigureUsesOpenAIMethodAPI(t *testing.T) {
 				t.Fatalf("ResolveSettings() error = %v", err)
 			}
 			if err := agent.Configure(context.Background(), toolv1.ConfigureRequest{
-				Phase:        toolv1.ConfigurePhaseInitial,
-				ConsoleToken: "console-token",
-				Settings:     settings,
+				Phase:    toolv1.ConfigurePhaseInitial,
+				Settings: settings,
 			}); err != nil {
 				t.Fatalf("Configure(initial) error = %v", err)
 			}

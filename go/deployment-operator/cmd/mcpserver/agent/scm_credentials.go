@@ -19,7 +19,7 @@ import (
 const scmCredentialsRefreshInterval = 30 * time.Minute
 
 type agentRunFetcher interface {
-	GetAgentRun(context.Context, string) (*consoleclient.AgentRunFragment, error)
+	GetAgentRunCredentials(context.Context, string) (*consoleclient.AgentRunCredentialsFragment, error)
 }
 
 type credentialStore struct {
@@ -45,7 +45,7 @@ func (s *credentialStore) PluralToken() string {
 	return token
 }
 
-func (s *credentialStore) updatePluralToken(agentRun *consoleclient.AgentRunFragment) error {
+func (s *credentialStore) updatePluralToken(agentRun *consoleclient.AgentRunCredentialsFragment) error {
 	if agentRun == nil || agentRun.PluralCreds == nil || agentRun.PluralCreds.Token == nil ||
 		strings.TrimSpace(*agentRun.PluralCreds.Token) == "" {
 		return fmt.Errorf("agent run does not have plural creds")
@@ -54,7 +54,7 @@ func (s *credentialStore) updatePluralToken(agentRun *consoleclient.AgentRunFrag
 	return nil
 }
 
-func (s *credentialStore) updateSCMCredentials(agentRun *consoleclient.AgentRunFragment) error {
+func (s *credentialStore) updateSCMCredentials(agentRun *consoleclient.AgentRunCredentialsFragment) error {
 	if agentRun == nil || agentRun.ScmCreds == nil || agentRun.ScmCreds.Token == "" {
 		return fmt.Errorf("agent run does not have scm creds")
 	}
@@ -79,7 +79,7 @@ func (s *credentialStore) SCMClient() scm.Client {
 	return scm.NewClient(credential.token, scm.WithHTTPProxy(credential.proxyURL, credential.noProxy))
 }
 
-func scmProxy(agentRun *consoleclient.AgentRunFragment) (string, string) {
+func scmProxy(agentRun *consoleclient.AgentRunCredentialsFragment) (string, string) {
 	if proxy := agentRun.ScmCreds.Proxy; proxy != nil && proxy.Enabled && strings.TrimSpace(proxy.URL) != "" {
 		noProxy := ""
 		if proxy.Noproxy != nil {
@@ -113,9 +113,9 @@ func startCredentialsRefresh(ctx context.Context, client agentRunFetcher, runID 
 }
 
 func refreshCredentials(ctx context.Context, client agentRunFetcher, runID string, credentials *credentialStore) error {
-	agentRun, err := client.GetAgentRun(ctx, runID)
+	agentRun, err := client.GetAgentRunCredentials(ctx, runID)
 	if err != nil {
-		return fmt.Errorf("could not get agent run: %w", err)
+		return fmt.Errorf("could not get agent run credentials: %w", err)
 	}
 	if credentials == nil {
 		return fmt.Errorf("credential store is not configured")

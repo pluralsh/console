@@ -391,8 +391,7 @@ func TestBuildAgentRunPod_IncludesMCPServerSidecar(t *testing.T) {
 	assert.Contains(t, mcp.Args, common.AgentMCPServerAddress)
 	assert.Contains(t, mcp.Args, "--grpc-address")
 	assert.Contains(t, mcp.Args, common.AgentMCPGRPCServerAddress)
-	assert.Len(t, mcp.EnvFrom, 1)
-	assert.Equal(t, run.Name, mcp.EnvFrom[0].SecretRef.LocalObjectReference.Name)
+	assert.Equal(t, getPrivilegedContainerEnvFrom(run.Name), mcp.EnvFrom)
 
 	var excludeTools string
 	for _, e := range mcp.Env {
@@ -999,4 +998,40 @@ func assertContainerNamesUnique(t *testing.T, pod *corev1.Pod) {
 		}
 		names[container.Name] = struct{}{}
 	}
+}
+
+func TestBuildAgentRunPod_DeployTokenIsolation(t *testing.T) {
+	run := &v1alpha1.AgentRun{ObjectMeta: metav1.ObjectMeta{Name: "run", Namespace: "ns"}}
+	runtime := &v1alpha1.AgentRuntime{Spec: v1alpha1.AgentRuntimeSpec{
+		Template: &corev1.PodTemplateSpec{Spec: corev1.PodSpec{
+			ShareProcessNamespace: lo.ToPtr(true),
+			Containers: []corev1.Container{{
+				Name:    defaultContainer,
+				EnvFrom: getDefaultContainerEnvFrom(pluralSecretName("run")),
+			}},
+		}},
+	}}
+
+	pod := buildAgentRunPod(run, runtime)
+
+	assert.False(t, lo.FromPtr(pod.Spec.ShareProcessNamespace))
+	hasPlural := func(c corev1.Container) bool {
+		return lo.ContainsBy(c.EnvFrom, func(e corev1.EnvFromSource) bool {
+			return e.SecretRef != nil && e.SecretRef.Name == pluralSecretName("run")
+		})
+	}
+	for _, c := range pod.Spec.Containers {
+		if c.Name == defaultContainer {
+			assert.False(t, hasPlural(c))
+			assert.Equal(t, getDefaultContainerEnvFrom(runSecretName("run")), c.EnvFrom)
+		}
+	}
+	found := 0
+	for _, c := range pod.Spec.InitContainers {
+		if c.Name == agentBootstrapContainerName || c.Name == mcpServerContainerName {
+			found++
+			assert.True(t, hasPlural(c), c.Name)
+		}
+	}
+	assert.Equal(t, 2, found)
 }

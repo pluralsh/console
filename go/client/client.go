@@ -16,6 +16,7 @@ type ConsoleClient interface {
 	DeleteAgentRuntime(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteAgentRuntime, error)
 	ListAgentRuntimes(ctx context.Context, after *string, first *int64, before *string, last *int64, q *string, typeArg *AgentRuntimeType, interceptors ...clientv2.RequestInterceptor) (*ListAgentRuntimes, error)
 	GetAgentRun(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRun, error)
+	GetAgentRunCredentials(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRunCredentials, error)
 	GetAgentRunMinimal(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRunMinimal, error)
 	ListAgentRuns(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListAgentRuns, error)
 	ListAgentRunsMinimal(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListAgentRunsMinimal, error)
@@ -736,8 +737,6 @@ type AgentRunFragment struct {
 	Error           *string                    "json:\"error,omitempty\" graphql:\"error\""
 	Analysis        *AgentAnalysisFragment     "json:\"analysis,omitempty\" graphql:\"analysis\""
 	Usage           *AgentRunFragment_Usage    "json:\"usage,omitempty\" graphql:\"usage\""
-	ScmCreds        *ScmCredentialFragment     "json:\"scmCreds,omitempty\" graphql:\"scmCreds\""
-	PluralCreds     *PluralCredsFragment       "json:\"pluralCreds,omitempty\" graphql:\"pluralCreds\""
 	WorkbenchMcpURL *string                    "json:\"workbenchMcpUrl,omitempty\" graphql:\"workbenchMcpUrl\""
 	Runtime         *AgentRuntimeFragment      "json:\"runtime,omitempty\" graphql:\"runtime\""
 	User            *AgentRunFragment_User     "json:\"user,omitempty\" graphql:\"user\""
@@ -860,18 +859,6 @@ func (t *AgentRunFragment) GetUsage() *AgentRunFragment_Usage {
 	}
 	return t.Usage
 }
-func (t *AgentRunFragment) GetScmCreds() *ScmCredentialFragment {
-	if t == nil {
-		t = &AgentRunFragment{}
-	}
-	return t.ScmCreds
-}
-func (t *AgentRunFragment) GetPluralCreds() *PluralCredsFragment {
-	if t == nil {
-		t = &AgentRunFragment{}
-	}
-	return t.PluralCreds
-}
 func (t *AgentRunFragment) GetWorkbenchMcpURL() *string {
 	if t == nil {
 		t = &AgentRunFragment{}
@@ -943,6 +930,24 @@ func (t *AgentRunFragment) GetFollowupPrURL() *string {
 		t = &AgentRunFragment{}
 	}
 	return t.FollowupPrURL
+}
+
+type AgentRunCredentialsFragment struct {
+	ScmCreds    *ScmCredentialFragment "json:\"scmCreds,omitempty\" graphql:\"scmCreds\""
+	PluralCreds *PluralCredsFragment   "json:\"pluralCreds,omitempty\" graphql:\"pluralCreds\""
+}
+
+func (t *AgentRunCredentialsFragment) GetScmCreds() *ScmCredentialFragment {
+	if t == nil {
+		t = &AgentRunCredentialsFragment{}
+	}
+	return t.ScmCreds
+}
+func (t *AgentRunCredentialsFragment) GetPluralCreds() *PluralCredsFragment {
+	if t == nil {
+		t = &AgentRunCredentialsFragment{}
+	}
+	return t.PluralCreds
 }
 
 type AgentRunMinimalFragment struct {
@@ -8015,31 +8020,6 @@ func (t *AgentRunFragment_Usage) GetTotalTokens() *int64 {
 	return t.TotalTokens
 }
 
-type AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy struct {
-	Enabled bool    "json:\"enabled\" graphql:\"enabled\""
-	Noproxy *string "json:\"noproxy,omitempty\" graphql:\"noproxy\""
-	URL     string  "json:\"url\" graphql:\"url\""
-}
-
-func (t *AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetEnabled() bool {
-	if t == nil {
-		t = &AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
-	}
-	return t.Enabled
-}
-func (t *AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetNoproxy() *string {
-	if t == nil {
-		t = &AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
-	}
-	return t.Noproxy
-}
-func (t *AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetURL() string {
-	if t == nil {
-		t = &AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
-	}
-	return t.URL
-}
-
 type AgentRunFragment_User struct {
 	Email string "json:\"email\" graphql:\"email\""
 	ID    string "json:\"id\" graphql:\"id\""
@@ -8081,6 +8061,31 @@ func (t *AgentRunFragment_Flow) GetName() string {
 		t = &AgentRunFragment_Flow{}
 	}
 	return t.Name
+}
+
+type AgentRunCredentialsFragment_ScmCreds_ScmCredentialFragment_Proxy struct {
+	Enabled bool    "json:\"enabled\" graphql:\"enabled\""
+	Noproxy *string "json:\"noproxy,omitempty\" graphql:\"noproxy\""
+	URL     string  "json:\"url\" graphql:\"url\""
+}
+
+func (t *AgentRunCredentialsFragment_ScmCreds_ScmCredentialFragment_Proxy) GetEnabled() bool {
+	if t == nil {
+		t = &AgentRunCredentialsFragment_ScmCreds_ScmCredentialFragment_Proxy{}
+	}
+	return t.Enabled
+}
+func (t *AgentRunCredentialsFragment_ScmCreds_ScmCredentialFragment_Proxy) GetNoproxy() *string {
+	if t == nil {
+		t = &AgentRunCredentialsFragment_ScmCreds_ScmCredentialFragment_Proxy{}
+	}
+	return t.Noproxy
+}
+func (t *AgentRunCredentialsFragment_ScmCreds_ScmCredentialFragment_Proxy) GetURL() string {
+	if t == nil {
+		t = &AgentRunCredentialsFragment_ScmCreds_ScmCredentialFragment_Proxy{}
+	}
+	return t.URL
 }
 
 type AgentRunMinimalFragment_Runtime struct {
@@ -18154,31 +18159,6 @@ func (t *GetAgentRun_AgentRun_AgentRunFragment_Usage) GetTotalTokens() *int64 {
 	return t.TotalTokens
 }
 
-type GetAgentRun_AgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy struct {
-	Enabled bool    "json:\"enabled\" graphql:\"enabled\""
-	Noproxy *string "json:\"noproxy,omitempty\" graphql:\"noproxy\""
-	URL     string  "json:\"url\" graphql:\"url\""
-}
-
-func (t *GetAgentRun_AgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetEnabled() bool {
-	if t == nil {
-		t = &GetAgentRun_AgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
-	}
-	return t.Enabled
-}
-func (t *GetAgentRun_AgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetNoproxy() *string {
-	if t == nil {
-		t = &GetAgentRun_AgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
-	}
-	return t.Noproxy
-}
-func (t *GetAgentRun_AgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetURL() string {
-	if t == nil {
-		t = &GetAgentRun_AgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
-	}
-	return t.URL
-}
-
 type GetAgentRun_AgentRun_AgentRunFragment_User struct {
 	Email string "json:\"email\" graphql:\"email\""
 	ID    string "json:\"id\" graphql:\"id\""
@@ -18220,6 +18200,31 @@ func (t *GetAgentRun_AgentRun_AgentRunFragment_Flow) GetName() string {
 		t = &GetAgentRun_AgentRun_AgentRunFragment_Flow{}
 	}
 	return t.Name
+}
+
+type GetAgentRunCredentials_AgentRun_AgentRunCredentialsFragment_ScmCreds_ScmCredentialFragment_Proxy struct {
+	Enabled bool    "json:\"enabled\" graphql:\"enabled\""
+	Noproxy *string "json:\"noproxy,omitempty\" graphql:\"noproxy\""
+	URL     string  "json:\"url\" graphql:\"url\""
+}
+
+func (t *GetAgentRunCredentials_AgentRun_AgentRunCredentialsFragment_ScmCreds_ScmCredentialFragment_Proxy) GetEnabled() bool {
+	if t == nil {
+		t = &GetAgentRunCredentials_AgentRun_AgentRunCredentialsFragment_ScmCreds_ScmCredentialFragment_Proxy{}
+	}
+	return t.Enabled
+}
+func (t *GetAgentRunCredentials_AgentRun_AgentRunCredentialsFragment_ScmCreds_ScmCredentialFragment_Proxy) GetNoproxy() *string {
+	if t == nil {
+		t = &GetAgentRunCredentials_AgentRun_AgentRunCredentialsFragment_ScmCreds_ScmCredentialFragment_Proxy{}
+	}
+	return t.Noproxy
+}
+func (t *GetAgentRunCredentials_AgentRun_AgentRunCredentialsFragment_ScmCreds_ScmCredentialFragment_Proxy) GetURL() string {
+	if t == nil {
+		t = &GetAgentRunCredentials_AgentRun_AgentRunCredentialsFragment_ScmCreds_ScmCredentialFragment_Proxy{}
+	}
+	return t.URL
 }
 
 type GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_Runtime struct {
@@ -18380,31 +18385,6 @@ func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage) GetTotalToke
 		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage{}
 	}
 	return t.TotalTokens
-}
-
-type ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy struct {
-	Enabled bool    "json:\"enabled\" graphql:\"enabled\""
-	Noproxy *string "json:\"noproxy,omitempty\" graphql:\"noproxy\""
-	URL     string  "json:\"url\" graphql:\"url\""
-}
-
-func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetEnabled() bool {
-	if t == nil {
-		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
-	}
-	return t.Enabled
-}
-func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetNoproxy() *string {
-	if t == nil {
-		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
-	}
-	return t.Noproxy
-}
-func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetURL() string {
-	if t == nil {
-		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
-	}
-	return t.URL
 }
 
 type ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_User struct {
@@ -18668,31 +18648,6 @@ func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRu
 	return t.TotalTokens
 }
 
-type ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy struct {
-	Enabled bool    "json:\"enabled\" graphql:\"enabled\""
-	Noproxy *string "json:\"noproxy,omitempty\" graphql:\"noproxy\""
-	URL     string  "json:\"url\" graphql:\"url\""
-}
-
-func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetEnabled() bool {
-	if t == nil {
-		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
-	}
-	return t.Enabled
-}
-func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetNoproxy() *string {
-	if t == nil {
-		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
-	}
-	return t.Noproxy
-}
-func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetURL() string {
-	if t == nil {
-		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
-	}
-	return t.URL
-}
-
 type ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User struct {
 	Email string "json:\"email\" graphql:\"email\""
 	ID    string "json:\"id\" graphql:\"id\""
@@ -18883,31 +18838,6 @@ func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage) GetTotalTokens() 
 	return t.TotalTokens
 }
 
-type CreateAgentRun_CreateAgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy struct {
-	Enabled bool    "json:\"enabled\" graphql:\"enabled\""
-	Noproxy *string "json:\"noproxy,omitempty\" graphql:\"noproxy\""
-	URL     string  "json:\"url\" graphql:\"url\""
-}
-
-func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetEnabled() bool {
-	if t == nil {
-		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
-	}
-	return t.Enabled
-}
-func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetNoproxy() *string {
-	if t == nil {
-		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
-	}
-	return t.Noproxy
-}
-func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetURL() string {
-	if t == nil {
-		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
-	}
-	return t.URL
-}
-
 type CreateAgentRun_CreateAgentRun_AgentRunFragment_User struct {
 	Email string "json:\"email\" graphql:\"email\""
 	ID    string "json:\"id\" graphql:\"id\""
@@ -19034,31 +18964,6 @@ func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetTotalTokens() 
 		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
 	}
 	return t.TotalTokens
-}
-
-type UpdateAgentRun_UpdateAgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy struct {
-	Enabled bool    "json:\"enabled\" graphql:\"enabled\""
-	Noproxy *string "json:\"noproxy,omitempty\" graphql:\"noproxy\""
-	URL     string  "json:\"url\" graphql:\"url\""
-}
-
-func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetEnabled() bool {
-	if t == nil {
-		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
-	}
-	return t.Enabled
-}
-func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetNoproxy() *string {
-	if t == nil {
-		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
-	}
-	return t.Noproxy
-}
-func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetURL() string {
-	if t == nil {
-		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
-	}
-	return t.URL
 }
 
 type UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User struct {
@@ -47858,6 +47763,17 @@ func (t *GetAgentRun) GetAgentRun() *AgentRunFragment {
 	return t.AgentRun
 }
 
+type GetAgentRunCredentials struct {
+	AgentRun *AgentRunCredentialsFragment "json:\"agentRun,omitempty\" graphql:\"agentRun\""
+}
+
+func (t *GetAgentRunCredentials) GetAgentRun() *AgentRunCredentialsFragment {
+	if t == nil {
+		t = &GetAgentRunCredentials{}
+	}
+	return t.AgentRun
+}
+
 type GetAgentRunMinimal struct {
 	AgentRun *AgentRunMinimalFragment "json:\"agentRun,omitempty\" graphql:\"agentRun\""
 }
@@ -51959,12 +51875,6 @@ fragment AgentRunFragment on AgentRun {
 		outputCost
 		totalCost
 	}
-	scmCreds {
-		... ScmCredentialFragment
-	}
-	pluralCreds {
-		... PluralCredsFragment
-	}
 	workbenchMcpUrl
 	runtime {
 		... AgentRuntimeFragment
@@ -52019,20 +51929,6 @@ fragment AgentAnalysisFragment on AgentAnalysis {
 	summary
 	analysis
 	bullets
-}
-fragment ScmCredentialFragment on ScmCreds {
-	token
-	username
-	exaKey
-	proxy {
-		enabled
-		url
-		noproxy
-	}
-}
-fragment PluralCredsFragment on PluralCreds {
-	token
-	url
 }
 fragment AgentRuntimeFragment on AgentRuntime {
 	id
@@ -52104,6 +52000,52 @@ func (c *Client) GetAgentRun(ctx context.Context, id string, interceptors ...cli
 
 	var res GetAgentRun
 	if err := c.Client.Post(ctx, "GetAgentRun", GetAgentRunDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetAgentRunCredentialsDocument = `query GetAgentRunCredentials ($id: ID!) {
+	agentRun(id: $id) {
+		... AgentRunCredentialsFragment
+	}
+}
+fragment AgentRunCredentialsFragment on AgentRun {
+	scmCreds {
+		... ScmCredentialFragment
+	}
+	pluralCreds {
+		... PluralCredsFragment
+	}
+}
+fragment ScmCredentialFragment on ScmCreds {
+	token
+	username
+	exaKey
+	proxy {
+		enabled
+		url
+		noproxy
+	}
+}
+fragment PluralCredsFragment on PluralCreds {
+	token
+	url
+}
+`
+
+func (c *Client) GetAgentRunCredentials(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRunCredentials, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetAgentRunCredentials
+	if err := c.Client.Post(ctx, "GetAgentRunCredentials", GetAgentRunCredentialsDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -52214,12 +52156,6 @@ fragment AgentRunFragment on AgentRun {
 		outputCost
 		totalCost
 	}
-	scmCreds {
-		... ScmCredentialFragment
-	}
-	pluralCreds {
-		... PluralCredsFragment
-	}
 	workbenchMcpUrl
 	runtime {
 		... AgentRuntimeFragment
@@ -52274,20 +52210,6 @@ fragment AgentAnalysisFragment on AgentAnalysis {
 	summary
 	analysis
 	bullets
-}
-fragment ScmCredentialFragment on ScmCreds {
-	token
-	username
-	exaKey
-	proxy {
-		enabled
-		url
-		noproxy
-	}
-}
-fragment PluralCredsFragment on PluralCreds {
-	token
-	url
 }
 fragment AgentRuntimeFragment on AgentRuntime {
 	id
@@ -52492,12 +52414,6 @@ fragment AgentRunFragment on AgentRun {
 		outputCost
 		totalCost
 	}
-	scmCreds {
-		... ScmCredentialFragment
-	}
-	pluralCreds {
-		... PluralCredsFragment
-	}
 	workbenchMcpUrl
 	runtime {
 		... AgentRuntimeFragment
@@ -52552,20 +52468,6 @@ fragment AgentAnalysisFragment on AgentAnalysis {
 	summary
 	analysis
 	bullets
-}
-fragment ScmCredentialFragment on ScmCreds {
-	token
-	username
-	exaKey
-	proxy {
-		enabled
-		url
-		noproxy
-	}
-}
-fragment PluralCredsFragment on PluralCreds {
-	token
-	url
 }
 fragment AgentRuntimeFragment on AgentRuntime {
 	id
@@ -52757,12 +52659,6 @@ fragment AgentRunFragment on AgentRun {
 		outputCost
 		totalCost
 	}
-	scmCreds {
-		... ScmCredentialFragment
-	}
-	pluralCreds {
-		... PluralCredsFragment
-	}
 	workbenchMcpUrl
 	runtime {
 		... AgentRuntimeFragment
@@ -52817,20 +52713,6 @@ fragment AgentAnalysisFragment on AgentAnalysis {
 	summary
 	analysis
 	bullets
-}
-fragment ScmCredentialFragment on ScmCreds {
-	token
-	username
-	exaKey
-	proxy {
-		enabled
-		url
-		noproxy
-	}
-}
-fragment PluralCredsFragment on PluralCreds {
-	token
-	url
 }
 fragment AgentRuntimeFragment on AgentRuntime {
 	id
@@ -52960,12 +52842,6 @@ fragment AgentRunFragment on AgentRun {
 		outputCost
 		totalCost
 	}
-	scmCreds {
-		... ScmCredentialFragment
-	}
-	pluralCreds {
-		... PluralCredsFragment
-	}
 	workbenchMcpUrl
 	runtime {
 		... AgentRuntimeFragment
@@ -53020,20 +52896,6 @@ fragment AgentAnalysisFragment on AgentAnalysis {
 	summary
 	analysis
 	bullets
-}
-fragment ScmCredentialFragment on ScmCreds {
-	token
-	username
-	exaKey
-	proxy {
-		enabled
-		url
-		noproxy
-	}
-}
-fragment PluralCredsFragment on PluralCreds {
-	token
-	url
 }
 fragment AgentRuntimeFragment on AgentRuntime {
 	id
@@ -78284,6 +78146,7 @@ var DocumentOperationNames = map[string]string{
 	DeleteAgentRuntimeDocument:                        "DeleteAgentRuntime",
 	ListAgentRuntimesDocument:                         "ListAgentRuntimes",
 	GetAgentRunDocument:                               "GetAgentRun",
+	GetAgentRunCredentialsDocument:                    "GetAgentRunCredentials",
 	GetAgentRunMinimalDocument:                        "GetAgentRunMinimal",
 	ListAgentRunsDocument:                             "ListAgentRuns",
 	ListAgentRunsMinimalDocument:                      "ListAgentRunsMinimal",
