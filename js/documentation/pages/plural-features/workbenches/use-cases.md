@@ -75,7 +75,7 @@ Rather than asking the LLM to estimate or recall numbers, the agent queries the 
 
 This SQL + calculator approach is a deliberate design choice to eliminate hallucination. LLMs are unreliable at arithmetic; the agent never does math in its head.
 
-A cron schedule fires weekly (or on demand) and the agent queries cost tables, aggregates by service or team tag, identifies anomalies relative to prior periods, and posts a summary to a Slack channel. The same workbench handles ad-hoc questions from engineers.
+A cron schedule fires weekly (or on demand), and the agent queries cost tables, aggregates by service or team tag, identifies anomalies relative to prior periods, and posts a summary to a Slack channel. The same workbench handles ad-hoc questions from engineers.
 
 ### Setup
 
@@ -83,7 +83,7 @@ A cron schedule fires weekly (or on demand) and the agent queries cost tables, a
 
 **Tools:**
 
-* Attach a [Cloud tool](/plural-features/workbenches/integrations/tools/cloud) (AWS, GCP, or Azure) backed by an IAM role with read-only billing access. For AWS this means `ce:GetCostAndUsage` and `ce:GetCostForecast` on Cost Explorer. For GCP, the Billing Account Viewer role. For Azure, Billing Reader.
+* Attach a [Cloud tool](/plural-features/workbenches/integrations/tools/cloud) (AWS, GCP, or Azure) backed by an IAM role with read-only billing access. For AWS, this means `ce:GetCostAndUsage` and `ce:GetCostForecast` on Cost Explorer. For GCP, the Billing Account Viewer role. For Azure, Billing Reader.
 * Optionally attach a [Datadog](/plural-features/workbenches/integrations/tools/datadog) or [Prometheus](/plural-features/workbenches/integrations/tools/prometheus) tool to correlate cost with resource utilization metrics.
 * Optionally attach a [Slack tool](/plural-features/workbenches/integrations/tools/slack) to deliver reports to a channel automatically.
 
@@ -125,4 +125,4 @@ An engineer creates a Jira or Linear ticket describing the infrastructure change
 
 Register a [Jira issue webhook](/plural-features/workbenches/integrations/webhooks/jira) in Plural and configure the Jira webhook to fire on issue creation. Set the [trigger](/plural-features/workbenches/automation#webhook-triggers) to match on the label or project that signals an infra request — for example, substring match on `"infra-request"` in the payload, or a regex that matches your specific Jira project key.
 
-**Babysitting:** Consider enabling [babysitting](/plural-features/workbenches/coding-agent#babysitting-write-mode-only) on the coding agent while the workbench is new. This lets you review every proposed commit before it lands, giving you confidence in the agent's output before allowing it to operate fully autonomously.
+**Babysitting:** Consider enabling [babysitting](/plural-features/workbenches/coding-agent#babysitting-write-mode-only) on the coding agent while the workbench is new. The agent then stays on each pull request it opens, watching CI and review comments and pushing additional commits until the PR is green, so you don't have to shepherd its early PRs by hand.

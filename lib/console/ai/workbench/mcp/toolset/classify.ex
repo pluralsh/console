@@ -33,6 +33,7 @@ defmodule Console.AI.Workbench.MCP.Toolset.Classify do
     Observability.Logs,
     Observability.LogAggregate,
     Observability.Traces,
+    Observability.TraceFacets,
     Observability.ExternalDashboard,
     Observability.ExternalDashboards,
     Observability.ExternalMonitor,
@@ -64,7 +65,7 @@ defmodule Console.AI.Workbench.MCP.Toolset.Classify do
     Infrastructure.PodLogs
   ]
 
-  @traces [Observability.Traces]
+  @traces [Observability.Traces, Observability.TraceFacets]
 
   @infrastructure [
     Infrastructure.ApiDiscovery,

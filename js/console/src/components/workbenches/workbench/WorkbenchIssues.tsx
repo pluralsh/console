@@ -18,6 +18,7 @@ import { useParams } from 'react-router-dom'
 import { WORKBENCH_PARAM_ID } from 'routes/workbenchesRoutesConsts'
 import { mapExistingNodes } from 'utils/graphql'
 import { WorkbenchPageLayout } from './Workbench'
+import { DETAILS_LIST_WIDTH } from '../common/WorkbenchDetailsView'
 import { useWorkbenchIssuesDetails } from './WorkbenchIssuesDetails'
 import { WorkbenchIssuesDisplayOptions } from './WorkbenchIssuesDisplayOptions'
 import {
@@ -129,7 +130,11 @@ export function WorkbenchIssues() {
       }
       showEditWorkbenchButton={false}
       {...(showDetails && {
-        sidebar: { kind: 'custom', content: details.sidebar },
+        sidebar: {
+          kind: 'custom',
+          content: details.sidebar,
+          width: DETAILS_LIST_WIDTH,
+        },
       })}
       headerActions={
         <>

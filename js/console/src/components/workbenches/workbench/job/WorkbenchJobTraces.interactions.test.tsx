@@ -8,6 +8,7 @@ import {
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { ThemeProvider } from 'styled-components'
 import { styledThemeDark } from '@pluralsh/design-system'
+import type { ComponentProps } from 'react'
 import { TraceWaterfall } from './WorkbenchJobTraces'
 
 // Graph layout requires browser measurements; these tests exercise the shared controls.
@@ -17,10 +18,13 @@ vi.mock('./WorkbenchJobTraceTopology', () => ({
 
 afterEach(cleanup)
 
-function renderTrace() {
+function renderTrace(
+  fullscreenControl?: ComponentProps<typeof TraceWaterfall>['fullscreenControl']
+) {
   return render(
     <ThemeProvider theme={styledThemeDark}>
       <TraceWaterfall
+        fullscreenControl={fullscreenControl}
         traces={[
           {
             traceId: 'trace',
@@ -61,5 +65,33 @@ describe('trace view interactions', () => {
 
     expect(screen.getByRole('dialog')).toBeTruthy()
     expect(screen.getByText('services graph')).toBeTruthy()
+  })
+
+  it('leaves full screen to a container that controls it', () => {
+    const onOpenChange = vi.fn()
+    const { rerender } = renderTrace({ open: false, onOpenChange })
+
+    expect(screen.queryByRole('button', { name: 'Full screen' })).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: /GET \/example/ }))
+    expect(onOpenChange).toHaveBeenCalledWith(true)
+
+    rerender(
+      <ThemeProvider theme={styledThemeDark}>
+        <TraceWaterfall
+          fullscreenControl={{ open: true, onOpenChange, title: 'Requests' }}
+          traces={[
+            {
+              traceId: 'trace',
+              spanId: 'root',
+              name: 'GET /example',
+              service: 'console',
+              start: '2026-09-07T08:00:00Z',
+              end: '2026-09-07T08:00:01Z',
+            },
+          ]}
+        />
+      </ThemeProvider>
+    )
+    expect(screen.getByRole('dialog', { name: 'Requests' })).toBeTruthy()
   })
 })

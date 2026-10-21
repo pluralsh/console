@@ -3,7 +3,7 @@ title: ServiceNow
 description: Create, read, update, and comment on ServiceNow tickets from a workbench
 ---
 
-The ServiceNow tool lets a workbench agent work with tickets in your ServiceNow instance through the [Table API](https://www.servicenow.com/docs/bundle/latest-api-reference/page/integrate/inbound-rest/concept/c_TableAPI.html). It covers four ticket tables: incidents (`incident`), change requests (`change_request`), problems (`problem`), and catalog tasks (`sc_task`). Requests for any other table are rejected before they reach ServiceNow. The tool does not limit which columns a query can read, so the integration user's ACLs are what restrict data, including fields reached through references such as `caller_id.email`.
+The ServiceNow tool lets a workbench agent work with tickets in your ServiceNow instance through the [Table API](https://www.servicenow.com/docs/bundle/latest-api-reference/page/integrate/inbound-rest/concept/c_TableAPI.html). It covers four ticket tables: incidents (`incident`), change requests (`change_request`), problems (`problem`), and catalog tasks (`sc_task`). Requests for any other table are rejected before they reach ServiceNow. The tool does not limit which columns a query can read, so only the integration user's ACLs restrict data, including fields reached through references such as `caller_id.email`.
 
 For the complete list of integrations and general tool behavior, see [Workbench tools](/plural-features/workbenches/integrations/tools).
 
@@ -15,7 +15,7 @@ For the complete list of integrations and general tool behavior, see [Workbench 
 
 ### Create an integration user
 
-Use a dedicated service account with the narrowest role that works. The agent can set any field the account can write, including `assigned_to` and `caller_id`, so its permissions are the limit on what a prompt can change.
+Use a dedicated service account with the narrowest role that works. The agent can set any field the account can write, including `assigned_to` and `caller_id`, so its permissions limit what a prompt can change.
 
 1. In ServiceNow, open **User Administration → Users** and create a dedicated user, for example `plural.agent`.
 2. Check **Web service access only** so the account cannot sign in to the UI.
@@ -38,16 +38,16 @@ This one rule was enough on a Zurich instance. Check it by asking the agent to l
 
 ### Allow reading state choices
 
-State values differ per table and per instance, so the agent looks them up in the `sys_choice` table, for example `2` is `In Progress` on an incident. The `itil` role can usually not query that table through the API. The request fails with:
+State values differ per table and per instance, so the agent looks them up in the `sys_choice` table. For example, `2` is `In Progress` on an incident. The `itil` role usually cannot query that table through the API. The request fails with:
 
 ```text
 Insufficient rights to query records
 Field(s) present in the query do not have permission to be read
 ```
 
-Without access, `list_states` fails for incidents, problems, and catalog tasks, and `transition_record` accepts raw state values such as `2` but not labels. The agent also cannot read the other choice fields it needs, such as the `close_code` resolution codes of an incident, which makes resolving an incident a guess. The next states of a change request come from the Change Management API and do not need this access.
+Without access, `list_states` fails for incidents, problems, and catalog tasks, and `transition_record` accepts raw state values such as `2` but not labels. Change requests are not affected; their states come from the Change Management API.
 
-The tool filters the table on `name`, `element`, `language`, and `inactive`, sorts by `sequence`, and returns `value` and `label`. ServiceNow checks [query ACLs](https://www.servicenow.com/docs/r/platform-security/access-control/query-acl-rule.html) on the filtered fields, and read access on the returned ones. Grant the integration user all three:
+The tool filters the table on `name`, `element`, `language`, and `inactive`, sorts by `sequence`, and returns `value` and `label`. ServiceNow checks [query ACLs](https://www.servicenow.com/docs/r/platform-security/access-control/query-acl-rule.html) on the filtered fields and read access on the returned ones. Grant the integration user all three:
 
 1. Sign in as an admin and elevate to the `security_admin` role (user menu → **Elevate role**). Without it you can open the ACL list but not create or edit rules.
 2. Open **System Security → Access Control (ACL)** and filter **Name** by `sys_choice`. Note the existing rules for the `sys_choice` table and its fields and their **Operation**. A rule that requires a role the integration user does not have is what blocks the query.
@@ -55,7 +55,7 @@ The tool filters the table on `name`, `element`, `language`, and `inactive`, sor
    * **Type:** `record`.
    * **Operation:** `read`, `query_match`, or `query_range`.
    * **Decision Type:** `Allow If`, which is the default.
-   * **Name:** this is two dropdowns. Pick the table `Choice [sys_choice]` in the first one and `*` (all fields) in the second one. Leave the second one on `-- None --` and the rule applies to the table rows instead of its fields, which does not fix the error.
+   * **Name:** this field has two dropdowns. Pick the table `Choice [sys_choice]` in the first one and `*` (all fields) in the second one. If you leave the second one on `-- None --`, the rule applies to the table rows instead of its fields, which does not fix the error.
    * **Requires role:** in the **Conditions** section, click **Insert a new row...** and add `itil`, or a dedicated role that you also grant to the integration user. A dedicated role keeps the access narrow if you do not want to widen `itil`. ServiceNow warns that a rule needs a role, security attribute, data condition, script, or reference field control, and the role satisfies that.
    * Leave **Advanced** unchecked and **Admin overrides** on.
 4. Save. Rules are additive: a user passes when any matching rule passes, so you do not need to change the existing ones.

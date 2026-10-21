@@ -22,7 +22,7 @@ Plural supports major, bleeding-edge agent providers so you can pick the best fi
 
 ## What it can do
 
-Agent can be used in a variety of ways to improve your development workflow and ensure code quality and security.
+Agents can be used in a variety of ways to improve your development workflow and ensure code quality and security.
 
 ### Security and maintenance
 

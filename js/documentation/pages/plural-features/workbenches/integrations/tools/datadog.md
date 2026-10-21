@@ -11,7 +11,7 @@ This guide uses the Plural Console UI. For the complete list of integrations and
 
 Before you begin, make sure you have:
 
-* A Datadog account that is already receiving the metrics, logs, or traces you want the workbench to query. Installing a Datadog Agent is not required specifically for this integration; Plural queries your Datadog account through the Datadog API.
+* A Datadog account that is already receiving the metrics, logs, or traces you want the workbench to query. This integration does not require a Datadog Agent; Plural queries your Datadog account through the Datadog API.
 * Permission in Plural Console to create a configured tool and edit the target workbench.
 * The hostname for your [Datadog site](https://docs.datadoghq.com/getting_started/site/), such as `datadoghq.com`. Enter only the hostname, without `https://`.
 * A [Datadog API key and application key](https://docs.datadoghq.com/account_management/api-app-keys/). Use dedicated, read-only credentials where possible.
@@ -66,7 +66,7 @@ On the **Configuration** step, enter:
 * **API key** — the Datadog API key.
 * **Application key** — the Datadog application key whose owner has the required permissions.
 
-Under **Allowed capabilities**, select one or more of **Metrics**, **Logs**, and **Traces**. All three are selected by default. Enable only capabilities that the application key is authorized to use and that the target workbenches need.
+Under **Allowed capabilities**, select one or more of **Metrics**, **Logs**, and **Traces**. All three are selected by default. Enable only the capabilities that the application key is authorized to use and that the target workbenches need.
 
 Click **Next**.
 

@@ -17238,6 +17238,7 @@ export type WorkbenchPromptsArgs = {
 
 
 export type WorkbenchRunCountsArgs = {
+  insertedAfter?: InputMaybe<Scalars['DateTime']['input']>;
   prStates?: InputMaybe<Array<InputMaybe<WorkbenchJobPrState>>>;
   q?: InputMaybe<Scalars['String']['input']>;
 };
@@ -17249,6 +17250,7 @@ export type WorkbenchRunsArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   direction?: InputMaybe<SortDirection>;
   first?: InputMaybe<Scalars['Int']['input']>;
+  insertedAfter?: InputMaybe<Scalars['DateTime']['input']>;
   issue?: InputMaybe<Scalars['Boolean']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   monitorId?: InputMaybe<Scalars['ID']['input']>;
@@ -23939,6 +23941,7 @@ export type WorkbenchJobStatusCountsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
   q?: InputMaybe<Scalars['String']['input']>;
   prStates?: InputMaybe<Array<InputMaybe<WorkbenchJobPrState>> | InputMaybe<WorkbenchJobPrState>>;
+  insertedAfter?: InputMaybe<Scalars['DateTime']['input']>;
 }>;
 
 
@@ -23950,6 +23953,7 @@ export type WorkbenchJobsForStatusQueryVariables = Exact<{
   q?: InputMaybe<Scalars['String']['input']>;
   prStates?: InputMaybe<Array<InputMaybe<WorkbenchJobPrState>> | InputMaybe<WorkbenchJobPrState>>;
   direction?: InputMaybe<SortDirection>;
+  insertedAfter?: InputMaybe<Scalars['DateTime']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
 }>;
@@ -38346,6 +38350,7 @@ export type WorkbenchJobCountsQueryResult = Apollo.QueryResult<WorkbenchJobCount
  *      id: // value for 'id'
  *      q: // value for 'q'
  *      prStates: // value for 'prStates'
+ *      insertedAfter: // value for 'insertedAfter'
  *   },
  * });
  */
@@ -38386,6 +38391,7 @@ export type WorkbenchJobStatusCountsQueryResult = Apollo.QueryResult<WorkbenchJo
  *      q: // value for 'q'
  *      prStates: // value for 'prStates'
  *      direction: // value for 'direction'
+ *      insertedAfter: // value for 'insertedAfter'
  *      first: // value for 'first'
  *      after: // value for 'after'
  *   },

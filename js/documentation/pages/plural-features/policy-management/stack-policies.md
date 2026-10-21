@@ -18,7 +18,7 @@ Run-stage policies decide whether Plural should create a stack run at all. Typic
 
 A denial is the only decision that changes behavior. If the policy produces no denial, the run is created and later approval-stage policies still apply.
 
-When a git or pull-request poll is denied, Plural does not consume the detected SHA, so the same commit is retried after the window reopens. Cron denials still stamp the last-run time. Manual and restart denials return the policy message to the caller.
+When a Git or pull-request poll is denied, Plural does not consume the detected SHA, so the same commit is retried after the window reopens. Cron denials still stamp the last-run time. Manual and restart denials return the policy message to the caller.
 
 If policy compilation or evaluation fails, run creation continues. Treat that as fail-open: a broken policy will not freeze every stack.
 
@@ -36,7 +36,7 @@ If policy compilation or evaluation fails, run creation continues. Treat that as
 | `input.variables` | Stack variables |
 | `input.environment` | Stack environment variables. Secret values are omitted; only `name` and `secret: true` are present |
 | `input.files` | Stack file paths. File contents are omitted |
-| `input.changes` | Paths changed in git since the last run, when the trigger supplies them |
+| `input.changes` | Paths changed in Git since the last run, when the trigger supplies them |
 
 The `input.actor` object contains:
 

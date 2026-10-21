@@ -5,14 +5,18 @@ const { redirects } = require('./src/routing/docs-structure.ts')
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // layout-elk is ESM-only, so it must be bundled rather than require()d on the server
+  output: 'standalone',
+  // Trace from the yarn workspace root so hoisted deps and the design system
+  // land in .next/standalone.
+  outputFileTracingRoot: path.join(__dirname, '..'),
+  // layout-elk is ESM-only; bundling it avoids a require() of its import-only exports on the server.
   transpilePackages: ['@pluralsh/design-system', '@mermaid-js/layout-elk'],
   reactStrictMode: false,
   experimental: {
     // fail the build instead of silently skipping components the compiler can't handle
     reactCompiler: { panicThreshold: 'ALL_ERRORS' },
   },
-  // Linting runs via Biome in the build:next script.
+  // Linting runs via Biome in the build:next script and the js-ci Lint job.
   eslint: { ignoreDuringBuilds: true },
   compiler: {
     // https://nextjs.org/docs/advanced-features/compiler#styled-components

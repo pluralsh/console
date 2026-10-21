@@ -3,7 +3,7 @@ title: DeploymentSettings
 description: Configure global Plural CD settings via the DeploymentSettings CRD
 ---
 
-`DeploymentSettings` is the global configuration resource for Plural Continuous Deployment. It lives on your **management cluster** and drives Console-wide settings that are not tied to a single service or cluster: agent helm defaults, repository references, RBAC bindings, observability integrations, AI configuration, stack runner defaults, and more.
+`DeploymentSettings` is the global configuration resource for Plural Continuous Deployment. It lives on your **management cluster** and drives Console-wide settings that are not tied to a single service or cluster: agent Helm defaults, repository references, RBAC bindings, observability integrations, AI configuration, stack runner defaults, and more.
 
 If you bootstrapped with `plural up`, you likely already have this resource defined at `bootstrap/settings.yaml` in your management repo.
 
@@ -24,7 +24,7 @@ ignoring because of invalid name/namespace, only the global/plrl-deploy-operator
 
 When the name and namespace are correct and the spec reconciles successfully, expect `Synchronized=True` and `Ready=True` on `status.conditions`.
 
-{% callout severity="warn" %}
+{% callout severity="warning" %}
 Do not create multiple `DeploymentSettings` resources expecting them all to apply. Only `global` in `plrl-deploy-operator` is processed. Use a single manifest and merge all desired configuration into one `spec`.
 {% /callout %}
 

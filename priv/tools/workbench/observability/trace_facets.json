@@ -1,0 +1,82 @@
+{
+    "type": "object",
+    "properties": {
+        "attribute": {
+            "type": "string",
+            "description": "Attribute to list values of: `service.name`, `name` (span name), or any attribute name. Omit to list attribute names."
+        },
+        "query": {
+            "type": "string",
+            "description": "Case-insensitive substring the returned names or values must contain."
+        },
+        "limit": {
+            "type": "integer",
+            "description": "Maximum number of results. Defaults to 100."
+        },
+        "filters": {
+            "type": "object",
+            "description": "Structured filters, translated to the provider's query language. All set filters must match.",
+            "properties": {
+                "service": {
+                    "type": "string",
+                    "description": "Service name (`service.name`). Discover values with trace facets on `service.name`."
+                },
+                "operation": {
+                    "type": "string",
+                    "description": "Span (operation) name, e.g. `GET /api/orders`. Discover values with trace facets on `name`."
+                },
+                "attributes": {
+                    "type": "array",
+                    "description": "Exact-match span or resource attribute filters, e.g. `http.route` = `/orders` or `k8s.namespace.name` = `prod`.",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "type": "string",
+                                "description": "Attribute name"
+                            },
+                            "value": {
+                                "type": "string",
+                                "description": "Attribute value"
+                            }
+                        },
+                        "required": [
+                            "name",
+                            "value"
+                        ]
+                    }
+                },
+                "duration_min": {
+                    "type": "string",
+                    "description": "Minimum span duration, e.g. `250ms` or `1.5s`."
+                },
+                "duration_max": {
+                    "type": "string",
+                    "description": "Maximum span duration, e.g. `10s`."
+                },
+                "errors_only": {
+                    "type": "boolean",
+                    "description": "Only match spans with an error status."
+                },
+                "trace_id": {
+                    "type": "string",
+                    "description": "Fetch one whole trace by id; other filters and the query are ignored."
+                }
+            }
+        },
+        "time_range": {
+            "type": "object",
+            "properties": {
+                "start": {
+                    "type": "string",
+                    "description": "Start of the search window, in RFC3339 format, e.g. `2023-01-01T00:00:00Z`. Defaults to an hour ago."
+                },
+                "end": {
+                    "type": "string",
+                    "description": "End of the search window, in RFC3339 format, e.g. `2023-01-01T00:00:00Z`. Defaults to now."
+                }
+            }
+        }
+    },
+    "required": []
+}

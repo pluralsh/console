@@ -9,7 +9,7 @@ Integrations connect a workbench to systems outside Plural. They are configured 
 
 [Tools](/plural-features/workbenches/integrations/tools) are connections the agent calls while a job is running. Configure a tool once, then attach it to the workbenches that should be allowed to use it. Datadog, GitHub, Slack, and cloud connections are tools.
 
-Capabilities that ship with the workbench runtime, such as Kubernetes, stacks, and pod logs, are not tools. Enable those on the workbench itself. See [Plural native integrations](/plural-features/workbenches/integrations/tools#plural-native-integrations).
+Capabilities that ship with the workbench runtime, such as Kubernetes, Stacks, and pod logs, are not tools. Enable those on the workbench itself. See [Plural native integrations](/plural-features/workbenches/integrations/tools#plural-native-integrations).
 
 ## Webhooks
 

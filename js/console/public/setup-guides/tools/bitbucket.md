@@ -1,37 +1,36 @@
 # Bitbucket Cloud workbench tool setup
 
-This integration calls the **Bitbucket Cloud 2.0 REST API** (`api.bitbucket.org/2.0`) with a **Bearer** token. Registered tools cover **pull requests**, **repository issues** (when the issue tracker is enabled), **comments**, and a **react-to-comment** helper that returns an explicit “unsupported on Cloud” response (Bitbucket Cloud does not document the same reaction endpoints as Data Center).
+This integration calls the **Bitbucket Cloud 2.0 REST API** (`api.bitbucket.org/2.0`) with a **Bearer** token. Registered tools cover reading **pull requests** and **repository issues** (when the issue tracker is enabled) with their comments, creating and editing **comments**, **declining pull requests**, and a **react-to-comment** helper that returns an explicit “unsupported on Cloud” response (Bitbucket Cloud does not document the same reaction endpoints as Data Center).
 
 ## Form fields
 
 - **API URL** — Optional. Defaults to `https://api.bitbucket.org/2.0`. Override only if Atlassian documents a different API root for your account or product tier.
-- **App password or access token** — Use a [Bitbucket Cloud API token](https://support.atlassian.com/bitbucket-cloud/docs/api-tokens/) (recommended) or a legacy [app password](https://support.atlassian.com/bitbucket-cloud/docs/app-passwords/) (stored encrypted). API tokens use granular OAuth-style scopes; app passwords use permission checkboxes.
+- **App password or access token** — Use a [Bitbucket Cloud API token](https://support.atlassian.com/bitbucket-cloud/docs/using-api-tokens/) or a repository, project, or workspace [access token](https://support.atlassian.com/bitbucket-cloud/docs/using-access-tokens/) (stored encrypted). **Do not use an app password**: the token is sent as `Authorization: Bearer <token>` with no username or email, which Bitbucket documents for API tokens and access tokens. App passwords have been replaced by API tokens.
 
 ## Creating credentials
 
 ### API token (recommended)
 
-1. In Bitbucket Cloud, open **Personal settings** → **API tokens** (or **Atlassian account** → **Security** → **API tokens**, depending on navigation).
-2. Create a token with an expiry and the **minimum repository / pull request / issue** permissions you need (see below).
-3. Copy the token into **App password or access token** on the form.
+1. In Bitbucket Cloud, select your profile (upper right) → **Account settings**.
+2. On the Atlassian Account page, open **Security** → **Create and manage API tokens**.
+3. Select **Create API token with scopes**, enter a name and expiry, select **Bitbucket** as the app, and choose the scopes below.
+4. Copy the token into **App password or access token** on the form. It is shown only once.
 
-### App password (legacy)
+### Access token (repository, project, or workspace)
 
-1. **Personal settings** → **App passwords** → **Create app password**.
-2. Grant the permissions listed below.
-3. Copy the generated password into the form.
+To limit the agent to one repository, project, or workspace, create an access token in that resource’s settings with the equivalent permissions below.
 
-See Atlassian’s [API token permissions](https://support.atlassian.com/bitbucket-cloud/docs/api-token-permissions/) and [REST API scopes](https://developer.atlassian.com/cloud/bitbucket/bitbucket-cloud-rest-api-scopes/) for the authoritative scope names available in your UI.
+See Atlassian’s [API token permissions](https://support.atlassian.com/bitbucket-cloud/docs/api-token-permissions/) for the authoritative scope definitions.
 
-## Scopes / permissions vs tools
+## Scopes vs tools
 
-Repository, pull request, and issue permissions are **not fully implied by each other**—grant the combinations you actually use.
+Repository, pull request, and issue scopes are **not implied by each other**—a repository scope does not grant pull request access.
 
-| Capability | Typical API token / app password needs |
+| Tools | API token scopes |
 | --- | --- |
-| Read pull requests and comments | Pull requests **read** (e.g. `read:pullrequest:bitbucket`); add **repository read** if your calls need repository-level endpoints. |
-| Post comments on pull requests | Pull requests **write** (e.g. `write:pullrequest:bitbucket`). |
-| Read issues and comments | **Issue read** / `issue` scope (naming differs between API tokens and app passwords—match the UI). |
-| Post comments on issues | **Issue write** where offered, or the permission set Atlassian documents for creating issue comments. |
+| Read pull requests and comments; create or edit pull request comments | `read:pullrequest:bitbucket` (pull request read includes commenting) |
+| Decline a pull request (`close_pull_request`) | `read:pullrequest:bitbucket` + `write:pullrequest:bitbucket` |
+| Read issues and comments | `read:issue:bitbucket` |
+| Create or edit issue comments | Not documented in Bitbucket’s current REST reference; add `write:issue:bitbucket` if `read:issue:bitbucket` returns `403`. |
 
-Start with the **smallest** set that covers your repositories, then expand if the API returns `401`/`403`.
+The tool has no read-only mode: the token’s scopes are what limit the agent. Start with the **smallest** set that covers your repositories, then expand if the API returns `403`.

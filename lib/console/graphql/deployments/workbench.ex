@@ -671,6 +671,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :pr_states, list_of(:workbench_job_pr_state), description: "filter runs by the state of their pull requests"
       arg :direction, :sort_direction, description: "creation date sort direction"
       arg :q, :string, description: "case-insensitive substring search over job prompts"
+      arg :inserted_after, :datetime, description: "only runs created at or after this time"
 
       resolve &Deployments.list_workbench_runs/3
     end
@@ -679,6 +680,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
       middleware Nested, check: true, msg: "workbench run counts cannot be fetched through a policy"
       arg :q, :string, description: "only count runs whose prompt contains this (case-insensitive)"
       arg :pr_states, list_of(:workbench_job_pr_state), description: "only count runs with pull requests in these states"
+      arg :inserted_after, :datetime, description: "only count runs created at or after this time"
 
       resolve &Deployments.run_counts/3
     end

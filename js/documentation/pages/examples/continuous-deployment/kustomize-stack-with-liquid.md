@@ -1,5 +1,5 @@
 ---
-title: Deploy Wordpress with Kustomize
+title: Deploy WordPress with Kustomize
 description: 'Learn how to deploy WordPress with MySQL using Kustomize and Liquid templates, creating a multi-component application with dynamic configuration'
 ---
 ## Overview
@@ -12,7 +12,7 @@ You'll see how to connect WordPress to MySQL and apply patches to customize your
 Before you begin, make sure to cover [prerequisites and setup](../#prerequisites).
 
 ## Step-by-Step Guide: Deploying WordPress with MySQL using Kustomize and Liquid
-Let's walk through deploying WordPress with MySQL using Kustomize and Liquid templates. Feel free to adjust provided file
+Let's walk through deploying WordPress with MySQL using Kustomize and Liquid templates. Feel free to adjust the provided file
 examples according to your needs and commit them to your configured Git repository.
 
 ### Step 1: Set up Kustomize with WordPress and MySQL
@@ -50,8 +50,8 @@ replacements:
 ```
 
 This kustomization file:
-- Includes resources from the wordpress and mysql directories
-- Applies a patch from patch.yaml
+- Includes resources from the `wordpress` and `mysql` directories
+- Applies a patch from `patch.yaml`
 - Uses replacements to inject the WordPress and MySQL service names into the WordPress deployment
 
 ##### [services/examples/kustomize-stack-with-liquid/patch.yaml](#TODO)
@@ -122,7 +122,7 @@ spec:
         app: wordpress
     spec:
       containers:
-      - image: wordpress:4.8-apache
+      - image: wordpress:{{ configuration.wordpressTag }}
         name: wordpress
         ports:
         - containerPort: 80
@@ -181,7 +181,7 @@ spec:
         app: mysql
     spec:
       containers:
-      - image: mysql:5.6
+      - image: mysql:{{ configuration.mysqlTag }}
         name: mysql
         env:
         - name: MYSQL_ROOT_PASSWORD
@@ -248,12 +248,14 @@ spec:
     mysqlTag: "5.6"
 ```
 
+The `configuration` values are available to every `.liquid` file in the folder, so the `wordpressTag` and `mysqlTag` set here pick the image tags in the two deployment manifests. Plural renders each `.liquid` file and drops the extension before running Kustomize, which is why the `kustomization.yaml` files list `deployment.yaml`.
+
 ### Step 5: Check Plural Console and access WordPress
 After a couple of minutes, the service should be deployed and running. You can check the status in the Plural Console.
 
 ![](/assets/examples/plrl-03-console.png 'CD tab -> mgmt cluster -> plrl-03-wordpress service')
 
-You can access your `wordpress` instance using i.e. `kubectl`.
+You can access your `wordpress` instance using, for example, `kubectl`.
 ```shell
 kubectl -n examples port-forward svc/wordpress 8080:80
 ```

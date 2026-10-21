@@ -38,7 +38,7 @@ Things like [inline links](#), `code highlights`, [`linked code highlights`](#) 
 
 {% /callout %}
 
-{% callout severity="success" title="This is a success callout" %}
+{% callout severity="tip" title="This is a tip callout" %}
 Things like [inline links](#), `code highlights`, [`linked code highlights`](#) and _other_ text **styles** should be **_supported_**. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
 
 - List item 1
@@ -48,38 +48,34 @@ Things like [inline links](#), `code highlights`, [`linked code highlights`](#) 
 
 {% /callout %}
 
+{% callout severity="beta" title="This is a beta callout" %}
+Things like [inline links](#), `code highlights`, [`linked code highlights`](#) and _other_ text **styles** should be **_supported_**. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+
+- List item 1
+- List item 2
+
+{% /callout %}
+
 ## Full size
 
 {% callout severity="info" %}
-Things like [inline links](#), `code highlights`, [`linked code highlights`](#) and _other_ text **styles** should be **_supported_**. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+Cron expressions use UTC. The UI previews upcoming fire times in your local timezone so you can check the schedule.
+{% /callout %}
 
-- List item 1
-- List item 2
-
+{% callout severity="tip" %}
+Start a schedule from a job you already ran manually. It keeps the same prompt and context.
 {% /callout %}
 
 {% callout severity="warning" %}
-Things like [inline links](#), `code highlights`, [`linked code highlights`](#) and _other_ text **styles** should be **_supported_**. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-
-- List item 1
-- List item 2
-
+Jobs run as the selected user, with that user's permissions and credentials.
 {% /callout %}
 
 {% callout severity="danger" %}
-Things like [inline links](#), `code highlights`, [`linked code highlights`](#) and _other_ text **styles** should be **_supported_**. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-
-- List item 1
-- List item 2
-
+Deleting a workbench cancels every scheduled and webhook-triggered job attached to it.
 {% /callout %}
 
-{% callout severity="success" %}
-Things like [inline links](#), `code highlights`, [`linked code highlights`](#) and _other_ text **styles** should be **_supported_**. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-
-- List item 1
-- List item 2
-
+{% callout severity="beta" %}
+Flow-triggered jobs are in beta. Behavior may change before general availability.
 {% /callout %}
 
 ## Compact size

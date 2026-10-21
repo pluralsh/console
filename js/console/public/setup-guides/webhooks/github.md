@@ -6,11 +6,11 @@ Reference: [GitHub - Creating webhooks](https://docs.github.com/en/developers/we
 
 In Plural:
 
-1. Set **Type** to `Ticketing`.
-2. Set **Provider** to `GITHUB`.
+1. Set **Type of webhook** to `Ticketing`.
+2. Set **Provider type** to `GitHub`.
 3. Enter a webhook **Name**.
-4. Enter a **Signing secret**.
-5. Click **Create new webhook**.
+4. Enter a **Secret**. Plural verifies each request using `X-Hub-Signature-256` computed from this secret.
+5. Click **Create**.
 
 Plural generates the webhook URL only after creation. Copy that URL.
 
@@ -21,23 +21,25 @@ Open your GitHub host (for example `https://<your-github-host>/`) and go to repo
 1. **Settings** -> **Webhooks** -> **Add webhook**
 2. **Payload URL**: paste the Plural URL
 3. **Content type**: `application/json`
-4. **Secret**: use the same signing secret from Plural
+4. **Secret**: use the same secret from Plural
 5. Keep webhook **Active**, then save
 
 ## 3. Select events
 
-Enable only events Plural should process, usually:
+Choose **Let me select individual events** and enable only events Plural processes:
 
-- Issues (opened/edited/closed/reopened)
+- Issues
 - Issue comments
-- Pull requests (opened/edited/closed/reopened)
-- Labels
+- Pull requests
+- Pull request review comments
+
+Plural ignores events without an issue or pull request, such as Labels or Push.
 
 Avoid "Send me everything" in production.
 
 ## 4. Validate
 
-Use GitHub's ping delivery and create a test issue or pull request. Confirm in Plural that:
+GitHub's ping delivery returns `{"ignored": true}`, which is expected. Create a test issue or pull request that matches a workbench trigger. Confirm in Plural that:
 
 - the request is accepted
 - signature verification succeeds

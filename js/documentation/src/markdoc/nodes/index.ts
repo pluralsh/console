@@ -2,6 +2,9 @@
 
 import { markdocNodes as designSystemNodes } from '@pluralsh/design-system'
 
+import { DocsTable } from '@src/components/DocsTable'
+
 export const nodes = {
   ...designSystemNodes,
+  table: { ...designSystemNodes.table, render: DocsTable },
 }

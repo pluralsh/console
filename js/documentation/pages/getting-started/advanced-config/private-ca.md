@@ -5,17 +5,17 @@ description: Configure certificate bundles in environments requiring a private C
 
 # Background
 
-Some organizations use fully private DNS and certificate authorities which won't validate using standard OS certificate bundles. The Plural console and agent communicate over standard HTTPs and all http clients will fail w/o certificate validation. The simplest way to manage this (and to manage private CAs generally) is to reconfigure the certificate bundles of the various apps. There are three main steps to this:
+Some organizations use fully private DNS and certificate authorities which won't validate using standard OS certificate bundles. The Plural console and agent communicate over standard HTTPS, and all HTTP clients will fail without certificate validation. The simplest way to manage this (and to manage private CAs generally) is to reconfigure the certificate bundles of the various apps. There are three main steps to this:
 
-- set up cert managers trust manager in the relevant cluster(s)
-- configure a configmap volume to `/etc/ssl/certs` to be mounted to all deployments for your management console
-- configure your agents to use a similar configmap volume
+- set up cert-manager's trust-manager in the relevant cluster(s)
+- configure a ConfigMap volume to `/etc/ssl/certs` to be mounted to all deployments for your management console
+- configure your agents to use a similar ConfigMap volume
 
 ## Installing Trust Manager
 
-trust-manager is a simple operator in the cert manager ecosystem that collates certificate bundles and writes them to secrets or config maps. Certificates are not usually sensitive information, so storing them in config maps is still within best-practices, and that will be how we manage it in this tutorial.
+trust-manager is a simple operator in the cert-manager ecosystem that collates certificate bundles and writes them to Secrets or ConfigMaps. Certificates are not usually sensitive information, so storing them in ConfigMaps is still within best practices, and that will be how we manage it in this tutorial.
 
-To install trust-manager, you can follow cert manager's docs [here](https://cert-manager.io/docs/trust/trust-manager/installation/). It does require an installation of cert-manager as well. Once the operator is installed, you'll want to create a bundle resource, like so:
+To install trust-manager, you can follow cert-manager's docs [here](https://cert-manager.io/docs/trust/trust-manager/installation/). It does require an installation of cert-manager as well. Once the operator is installed, you'll want to create a bundle resource, like so:
 
 ```yaml
 apiVersion: trust.cert-manager.io/v1alpha1
@@ -37,13 +37,13 @@ spec:
       key: 'ca-certificates.crt'
 ```
 
-This will create a ConfigMap named `plrl-bundle` in every namespace, which can then be used by whatever workload, but in this case, we'll focus on the main Plural-specific resources to configure.
+This will create a ConfigMap named `plrl-bundle` in every namespace, which can then be used by any workload; in this case, we'll focus on the main Plural-specific resources to configure.
 
 Note: once you have all these set up and all agents are healthy, you can use Plural to manage these resources long-term.
 
 ## Configure your Console
 
-Our helm chart allows you to reconfigure volumes and volumeMounts globally, which we'll use to mount the cert bundle into `/etc/ssl/certs` for all relevant pods. The helm yaml needed would be:
+Our Helm chart allows you to reconfigure volumes and volumeMounts globally, which we'll use to mount the cert bundle into `/etc/ssl/certs` for all relevant pods. The Helm YAML needed would be:
 
 ```yaml
 global:
@@ -107,7 +107,7 @@ spec:
 
 ## Configure your agents
 
-The agent similarly allows for configuring volumes/volumeMounts. You'll want to modify your installation to use custom values. This involves modifying the global agent settings for your installation then passing custom values as you install the agent via cli or terraform. The documentation {% doclink to="getting_started_advanced_config_sandboxing" %}here{% /doclink %} should provide a good overview of how to do this, geared towards customizing docker image registries.
+The agent similarly allows for configuring volumes/volumeMounts. You'll want to modify your installation to use custom values. This involves modifying the global agent settings for your installation, then passing custom values as you install the agent via CLI or Terraform. The documentation {% doclink to="getting_started_advanced_config_sandboxing" %}here{% /doclink %} should provide a good overview of how to do this, geared towards customizing Docker image registries.
 
 The specific values to bind the CA bundle to the agent container would be:
 
@@ -131,10 +131,10 @@ additionalVolumeMounts:
 
 Plural's deployment-operator can spawn pod-like workloads through two means:
 
-1. InfrastuctureStacks - for running IaC like terraform
+1. InfrastructureStacks - for running IaC like Terraform
 2. AgentRuntimes - for running coding agents
 
-Both of these support providing a full pod template to customize their generated pods, here's an example of how it would work:
+Both of these support providing a full pod template to customize their generated pods. Here's an example of how it would work:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -176,7 +176,7 @@ spec:
               path: ca-certificates.crt
 ```
 
-Similarly for stacks
+Similarly, for stacks:
 
 
 ```yaml

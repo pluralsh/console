@@ -9,7 +9,10 @@ import { McpServerCreateForm } from 'components/workbenches/tools/mcp-server/Mcp
 import { WorkbenchesIntegrations } from 'components/workbenches/WorkbenchesIntegrations'
 import { WorkbenchesConfiguredTools } from 'components/workbenches/WorkbenchesConfiguredTools'
 import { WorkbenchesUsage } from 'components/workbenches/WorkbenchesUsage'
-import { Workbench } from 'components/workbenches/workbench/Workbench'
+import {
+  Workbench,
+  WorkbenchTabs,
+} from 'components/workbenches/workbench/Workbench'
 import { WorkbenchAlerts } from 'components/workbenches/workbench/WorkbenchAlerts'
 import { WorkbenchIssues } from 'components/workbenches/workbench/WorkbenchIssues'
 import { WorkbenchJobs } from 'components/workbenches/workbench/WorkbenchJobs'
@@ -128,49 +131,51 @@ export const workbenchesRoutes = [
     path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}`}
     element={<Workbench />}
   >
-    <Route
-      index
-      element={<WorkbenchLaunch />}
-    />
-    <Route
-      path={WORKBENCH_JOBS_REL_PATH}
-      element={<WorkbenchJobs />}
-    />
-    <Route
-      path={WORKBENCHES_ISSUES_REL_PATH}
-      element={<WorkbenchIssues />}
-    />
-    <Route
-      path={WORKBENCHES_ALERTS_REL_PATH}
-      element={<WorkbenchAlerts />}
-    />
-    <Route
-      path={WORKBENCHES_EVALS_REL_PATH}
-      element={<WorkbenchEvals />}
-    />
-    <Route
-      path={`${WORKBENCHES_EVALS_REL_PATH}/:${WORKBENCH_EVAL_RESULT_PARAM_ID}`}
-      element={<WorkbenchEvals />}
-    />
+    <Route element={<WorkbenchTabs />}>
+      <Route
+        index
+        element={<WorkbenchLaunch />}
+      />
+      <Route
+        path={WORKBENCH_JOBS_REL_PATH}
+        element={<WorkbenchJobs />}
+      />
+      <Route
+        path={WORKBENCHES_ISSUES_REL_PATH}
+        element={<WorkbenchIssues />}
+      />
+      <Route
+        path={WORKBENCHES_ALERTS_REL_PATH}
+        element={<WorkbenchAlerts />}
+      />
+      <Route
+        path={WORKBENCHES_EVALS_REL_PATH}
+        element={<WorkbenchEvals />}
+      />
+      <Route
+        path={`${WORKBENCHES_EVALS_REL_PATH}/:${WORKBENCH_EVAL_RESULT_PARAM_ID}`}
+        element={<WorkbenchEvals />}
+      />
+      <Route
+        path={WORKBENCHES_MONITORING_REL_PATH}
+        element={<WorkbenchMonitoring />}
+      />
+      <Route
+        path={`${WORKBENCHES_MONITORING_REL_PATH}/${WORKBENCH_MONITORING_DASHBOARDS_REL_PATH}/:${WORKBENCH_MONITORING_DASHBOARD_PARAM_ID}`}
+        element={<WorkbenchMonitoring />}
+      />
+      <Route
+        path={`${WORKBENCHES_MONITORING_REL_PATH}/${WORKBENCH_MONITORING_MONITORS_REL_PATH}/:${WORKBENCH_MONITORING_MONITOR_PARAM_ID}`}
+        element={<WorkbenchMonitoring />}
+      />
+      <Route
+        path={WORKBENCHES_FILES_REL_PATH}
+        element={<WorkbenchFiles />}
+      />
+    </Route>
     <Route
       path={`${WORKBENCH_JOBS_REL_PATH}/:${WORKBENCH_JOBS_PARAM_JOB}`}
       element={<WorkbenchJob />}
-    />
-    <Route
-      path={WORKBENCHES_MONITORING_REL_PATH}
-      element={<WorkbenchMonitoring />}
-    />
-    <Route
-      path={`${WORKBENCHES_MONITORING_REL_PATH}/${WORKBENCH_MONITORING_DASHBOARDS_REL_PATH}/:${WORKBENCH_MONITORING_DASHBOARD_PARAM_ID}`}
-      element={<WorkbenchMonitoring />}
-    />
-    <Route
-      path={`${WORKBENCHES_MONITORING_REL_PATH}/${WORKBENCH_MONITORING_MONITORS_REL_PATH}/:${WORKBENCH_MONITORING_MONITOR_PARAM_ID}`}
-      element={<WorkbenchMonitoring />}
-    />
-    <Route
-      path={WORKBENCHES_FILES_REL_PATH}
-      element={<WorkbenchFiles />}
     />
   </Route>,
   <Route

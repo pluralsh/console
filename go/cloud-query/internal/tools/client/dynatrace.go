@@ -87,6 +87,16 @@ func (in *DynatraceClient) Traces(ctx context.Context, query string) (*datasourc
 	return &resp, nil
 }
 
+// Records runs a DQL query whose records have no fixed shape, e.g. summaries.
+func (in *DynatraceClient) Records(ctx context.Context, query string) ([]map[string]any, error) {
+	var resp datasource.DynatraceQueryResponse[map[string]any]
+	if err := in.queryGrail(ctx, query, &resp); err != nil {
+		return nil, err
+	}
+
+	return resp.Result.Records, nil
+}
+
 func (in *DynatraceClient) queryGrail(ctx context.Context, query string, result any) error {
 	return in.queryGrailBody(ctx, map[string]any{"query": query}, result)
 }

@@ -19,6 +19,7 @@ import { useRouter } from 'next/router'
 
 import styled from 'styled-components'
 
+import { brand } from '@src/theme/docsTheme'
 import { useNavData } from '../contexts/NavDataContext'
 import type { MenuId } from '../NavData'
 import { getBarePathFromPath } from '../utils/text'
@@ -48,7 +49,7 @@ function NavButtonsUnstyled({ desktop: _desktop, children, ...props }) {
 export const NavButtons = styled(NavButtonsUnstyled)<{ desktop: boolean }>(
   ({ desktop, theme }) => ({
     padding: theme.spacing.medium,
-    backgroundColor: theme.colors['fill-one'],
+    backgroundColor: brand['surface-sidebar'],
 
     ...(desktop
       ? {

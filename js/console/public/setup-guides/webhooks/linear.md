@@ -19,11 +19,11 @@ In Linear (`https://linear.app/`), open **Settings** -> **API** -> **Webhooks**:
 
 In Plural:
 
-1. Set **Type** to `Ticketing`.
-2. Set **Provider** to `LINEAR`.
+1. Set **Type of webhook** to `Ticketing`.
+2. Set **Provider type** to `Linear`.
 3. Enter webhook **Name**.
-4. Paste the Linear signing secret as Plural **Signing secret**.
-5. Click **Create new webhook**.
+4. Paste the Linear signing secret as the Plural **Secret** (don't generate a new one).
+5. Click **Create**.
 
 Copy the Plural-generated webhook URL.
 

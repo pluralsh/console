@@ -10,11 +10,11 @@ References:
 
 In Plural:
 
-1. Set **Type** to `Ticketing`.
-2. Set **Provider** to `BITBUCKET`.
+1. Set **Type of webhook** to `Ticketing`.
+2. Set **Provider type** to `Bitbucket`.
 3. Enter a webhook **Name**.
 4. Enter a **Secret**. Plural verifies each request using `X-Hub-Signature` (`sha256=<digest>`) computed from this secret.
-5. Click **Create new webhook**.
+5. Click **Create**.
 
 Plural generates the webhook **URL** only after creation. Copy that URL.
 

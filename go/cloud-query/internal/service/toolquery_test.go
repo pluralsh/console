@@ -174,3 +174,43 @@ func TestMetricsSeriesValidation(t *testing.T) {
 	})
 	require.Equal(t, codes.InvalidArgument, status.Code(err))
 }
+
+func TestTracesValidationAcceptsFilters(t *testing.T) {
+	svc := &ToolQueryService{}
+	tempo := &toolquery.ToolConnection{
+		Connection: &toolquery.ToolConnection_Tempo{Tempo: &toolquery.TempoConnection{Url: "https://tempo.example.com"}},
+	}
+	now := time.Now().UTC()
+	timeRange := &toolquery.TimeRange{Start: timestamppb.New(now.Add(-time.Hour)), End: timestamppb.New(now)}
+	service := "checkout"
+	traceID := "abc"
+
+	err := svc.validateTracesInput(&toolquery.TracesQueryInput{Connection: tempo, Range: timeRange})
+	require.Equal(t, codes.InvalidArgument, status.Code(err))
+	require.Contains(t, status.Convert(err).Message(), "query is required")
+
+	require.NoError(t, svc.validateTracesInput(&toolquery.TracesQueryInput{
+		Connection: tempo,
+		Range:      timeRange,
+		Filters:    &toolquery.TraceFilters{Service: &service},
+	}))
+
+	err = svc.validateTracesInput(&toolquery.TracesQueryInput{Connection: tempo, Filters: &toolquery.TraceFilters{Service: &service}})
+	require.Equal(t, codes.InvalidArgument, status.Code(err))
+
+	require.NoError(t, svc.validateTracesInput(&toolquery.TracesQueryInput{
+		Connection: tempo,
+		Filters:    &toolquery.TraceFilters{TraceId: &traceID},
+	}))
+}
+
+func TestTraceFacetsValidation(t *testing.T) {
+	svc := &ToolQueryService{}
+
+	_, err := svc.TraceFacets(context.Background(), nil)
+	require.Equal(t, codes.InvalidArgument, status.Code(err))
+
+	_, err = svc.TraceFacets(context.Background(), &toolquery.TraceFacetsInput{})
+	require.Equal(t, codes.InvalidArgument, status.Code(err))
+	require.Contains(t, status.Convert(err).Message(), "connection is required")
+}

@@ -6,12 +6,13 @@ import isEmpty from 'lodash/isEmpty'
 import styled from 'styled-components'
 
 import type { Parameter } from '@src/lib/openapi-rest'
+import { brand } from '@src/theme/docsTheme'
 import { Table, Td, TdLight, Th, TypeTag } from './shared'
 
 const RequiredBadge = styled.span(() => ({
   fontSize: 10,
   fontWeight: 600,
-  color: '#FF6369',
+  color: brand.danger,
   marginLeft: 8,
 }))
 

@@ -31,7 +31,10 @@ import {
   WorkbenchEvalResultRowFragment,
   useWorkbenchEvalsQuery,
 } from 'generated/graphql'
-import { WorkbenchEvalsSidePanel } from './WorkbenchEvalsSidePanel'
+import {
+  WORKBENCH_EVALS_SIDE_PANEL_WIDTH,
+  WorkbenchEvalsSidePanel,
+} from './WorkbenchEvalsSidePanel'
 import { WorkbenchStoredPromptMarkdown } from '../WorkbenchStoredPromptMarkdown'
 import { Subtitle1H1 } from 'components/utils/typography/Text'
 import { mapExistingNodes } from 'utils/graphql'
@@ -122,6 +125,7 @@ export function WorkbenchEvals() {
             }
           />
         ),
+        width: WORKBENCH_EVALS_SIDE_PANEL_WIDTH,
       }}
       headerActions={
         <>

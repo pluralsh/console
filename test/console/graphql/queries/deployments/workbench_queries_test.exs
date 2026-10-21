@@ -706,6 +706,33 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert found["runCounts"]["statuses"] == [%{"status" => "FAILED", "count" => 1}]
     end
 
+    test "it can filter workbench runs and counts to a creation window" do
+      workbench = insert(:workbench)
+      recent = insert(:workbench_job, workbench: workbench, status: :running)
+      insert(:workbench_job,
+        workbench: workbench,
+        status: :failed,
+        inserted_at: Timex.now() |> Timex.shift(days: -8)
+      )
+      since = Timex.now() |> Timex.shift(days: -7) |> DateTime.to_iso8601()
+
+      {:ok, %{data: %{"workbench" => found}}} = run_query("""
+        query Workbench($id: ID!, $insertedAfter: DateTime) {
+          workbench(id: $id) {
+            runs(first: 10, insertedAfter: $insertedAfter) {
+              edges { node { id } }
+            }
+            runCounts(insertedAfter: $insertedAfter) {
+              statuses { status count }
+            }
+          }
+        }
+      """, %{"id" => workbench.id, "insertedAfter" => since}, %{current_user: admin_user()})
+
+      assert from_connection(found["runs"]) |> ids_equal([recent])
+      assert found["runCounts"]["statuses"] == [%{"status" => "RUNNING", "count" => 1}]
+    end
+
     test "it can search workbench runs by prompt" do
       workbench = insert(:workbench)
       match = insert(:workbench_job, workbench: workbench, status: :running, prompt: "fix the Scraper")

@@ -1,15 +1,15 @@
 ---
 title: Connect a source control provider
-description: Setting up an SCM Connection in Plural to integrate with Github, GitLab, or BitBucket
+description: Setting up an SCM Connection in Plural to integrate with GitHub, GitLab, or Bitbucket
 ---
 
 # Overview
 
-Plural has the ability to spawn pull requests, post review comments, and other functionality to integrate with your standard SCM (Source Control Management) workflows.  The most impactful of these is the PR Automation api, which allows you to spawn templated pull requests to do common tasks like:
+Plural can spawn pull requests, post review comments, and otherwise integrate with your standard SCM (Source Control Management) workflows.  The most impactful of these features is the PR Automation API, which allows you to spawn templated pull requests to do common tasks like:
 
 * provision new clusters
 * drive deployment pipelines
-* in conjunction with Stacks, provision associated kubernetes or cloud infrastructure (databases, IAM, networks)
+* in conjunction with Stacks, provision associated Kubernetes or cloud infrastructure (databases, IAM, networks)
 
 To get this working you'll first need to give your Plural Console scoped access tokens to your SCM.
 
@@ -22,7 +22,7 @@ Some things you'll need to run this tutorial:
 
 * **Plural Console `admin` Permissions**  
 * **SCM Provider Personal Access Token**
-  * [Github](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic)  
+  * [GitHub](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic)  
   * [GitLab](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html#create-a-personal-access-token)  
   * [Bitbucket](https://support.atlassian.com/bitbucket-cloud/docs/access-tokens/)
 * **SCM Provider Organization `admin` Permissions**
@@ -31,11 +31,11 @@ Some things you'll need to run this tutorial:
 
 ## Create a New SCM Connection
 
-Creating an SCM Connection is easiest just using our UI.  You can then reference that created resource via k8s CRD to drive other workflows.  Step by step, you'll want to:
+Creating an SCM Connection is easiest using our UI.  You can then reference that resource via a Kubernetes CRD to drive other workflows.  Step by step, you'll want to:
 
 * **Navigate to `https://{your-console-domain}/pr/scm`**  
 * **Click the _Create Connection_ Button at the Top Right**  
-* **Fil in the Required Fields**
+* **Fill in the Required Fields**
   * **Provider Type**: The SCM Provider Hosting Git Repositories  
   * **Name**: Reference Name for the Provider  
     * ℹ️ **NOTE**: The _cluster-creator_ PR Automation looks for `github` by default, but is arbitrary and can be changed
@@ -45,14 +45,14 @@ Creating an SCM Connection is easiest just using our UI.  You can then reference
 ![Create SCM Connection Modal](/images/how-to/console_create-scm-modal.png)  
 
 {% callout severity="info" %}
-For `github` tokens, the minimal permissions needed will be `repo` permissions.  You can also use a Github App if you'd like the token to not be scoped to a specific user.  For Github Apps, recommended permisions are read/write for Code, Pull Requests and Workflows (so you can write PR Automations for Github Actions, but technically optional).
+For `github` tokens, the minimal permissions needed will be `repo` permissions.  You can also use a GitHub App if you'd like the token to not be scoped to a specific user.  For GitHub Apps, recommended permissions are read/write for Code, Pull Requests and Workflows (Workflows lets you write PR Automations for GitHub Actions, but is technically optional).
 {% /callout %}
 
 ## **Create an {% doclink to="plural_features_continuous_deployment_deployment_architecture" %}`ScmConnection`{% /doclink %} CRD Instance**  
 
-Once the connection is created in the UI we can reference it with a CRD instance
+Once the connection is created in the UI, we can reference it with a CRD instance:
   * ❕ Ensure the Name Provided in the UI matches the `spec.name` in the CRD Exactly
-  * An {% doclink to="plural_features_continuous_deployment_deployment_architecture" %}`ScmConnection`{% /doclink %} yaml template for GitHub exists in `bootstrap/pr-automation/scm.yaml`, you'll simply need to uncomment it. It should look like this:
+  * An {% doclink to="plural_features_continuous_deployment_deployment_architecture" %}`ScmConnection`{% /doclink %} YAML template for GitHub exists in `bootstrap/pr-automation/scm.yaml`; you'll need to uncomment it. It should look like this:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -72,7 +72,7 @@ git push
 ```
 
 {% callout severity="info" %}
-`plural up` by default creates an `apps` service syncing all subfolders of the `bootstrap` folder in the repo it creates.  Since we created this file in `bootstrap/pr-automation` that means that root service-of-services will sync it appropriately and we just need to `git push` to apply the change.
+`plural up` by default creates an `apps` service syncing all subfolders of the `bootstrap` folder in the repo it creates.  Since we created this file in `bootstrap/pr-automation`, the root service-of-services will sync it appropriately, and we only need to `git push` to apply the change.
 
 You can also check this service in the console (CD > Services > apps) to see if the CRD was deployed successfully. You should see 10/10 components in "Running" state.
 {% /callout %}
@@ -82,17 +82,17 @@ You can also check this service in the console (CD > Services > apps) to see if 
 Plural listens to incoming PRs to drive a couple of workflows:
 
 * labeling the status of spawned PRs generated by PR Automations.  Without a webhook, they'll just remain OPEN perpetually.
-* listening for PRs linked to stacks so we can generate `plan` runs for terraform/pulumi/etc, and post-back the results as a PR comment.
+* listening for PRs linked to stacks so we can generate `plan` runs for Terraform/Pulumi/etc. and post back the results as a PR comment.
 
-If you want that functionality, simply add a webhook in your SCM by doing the following:
+If you want that functionality, add a webhook in your SCM by doing the following:
 
 * **Navigate to `https://{your-console-domain}/pr/scm-webhooks`**  
 * **Click the `Create Webhook` Button**  
-* **Fill the Required Fields**
+* **Fill in the Required Fields**
   * **Provider Type**: The SCM Provider Hosting Git Repositories
       * This may be obvious, but you need to select the same provider as the console webhook
   * **Owner**: The Organization or Group Within the SCM Provider
-  * **Secret**: The Webhook Secret to Share, you can generate a cryptographically secure one with `plural crypto random`
+  * **Secret**: The Webhook Secret to Share; you can generate a cryptographically secure one with `plural crypto random`
 ![](/images/how-to/create-scm-webhook-modal-0.png)
 * **Click `Create`**
     * Copy the Webhook URL and note the secret to use within the SCM Provider Webhook 
@@ -100,11 +100,11 @@ If you want that functionality, simply add a webhook in your SCM by doing the fo
 
 * **Create the Webhook with the SCM Provider**  
 
-You can create this webhook at whatever scope you'd prefer.  Depending on the scope, the permissions needed will likely vary.  A simple place to start is just creating a webhook scoped to your `plural up` repository.
+You can create this webhook at whatever scope you'd prefer.  Depending on the scope, the permissions needed will likely vary.  A simple place to start is creating a webhook scoped to your `plural up` repository.
 
-Here's some docs to help you work through the webhook creation process for a lot of SCM providers:
+Here are some docs to help you work through the webhook creation process for several SCM providers:
 
-  * [Github Repository Webhooks](https://docs.github.com/en/webhooks/using-webhooks/creating-webhooks#creating-a-repository-webhook)
+  * [GitHub Repository Webhooks](https://docs.github.com/en/webhooks/using-webhooks/creating-webhooks#creating-a-repository-webhook)
   * [GitHub Organization Webhooks](https://docs.github.com/en/webhooks/using-webhooks/creating-webhooks#creating-an-organization-webhook)
   * [GitLab Group Webhooks](https://docs.gitlab.com/ee/user/project/integrations/webhooks.html#group-webhooks)
   * [Bitbucket Webhooks](https://confluence.atlassian.com/bitbucketserver/manage-webhooks-938025878.html)

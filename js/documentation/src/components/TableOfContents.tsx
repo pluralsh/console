@@ -5,13 +5,16 @@ import { useRouter } from 'next/router'
 
 import styled from 'styled-components'
 
+import { brand, docsText } from '@src/theme/docsTheme'
 import type { MarkdocHeading } from '../../pages/_app'
 import { exists } from '../utils/typescript'
 
 const Title = styled.h2(({ theme }) => ({
-  ...theme.partials.marketingText.label,
-  marginTop: theme.spacing.large,
-  marginBottom: theme.spacing.medium,
+  ...docsText.eyebrow,
+  textTransform: 'uppercase' as const,
+  letterSpacing: '0.04em',
+  marginTop: 36,
+  marginBottom: theme.spacing.small,
   '&::after': {
     // Align baseline with Hero 2 without expanding the title box (Safari).
     ...theme.partials.marketingText.hero2,
@@ -38,7 +41,7 @@ const List = styled.ul(({ theme }) => ({
     top: 0,
     bottom: 0,
     width: '100%',
-    borderLeft: theme.borders.default,
+    borderLeft: `2px solid ${brand.line}`,
   },
 }))
 
@@ -52,41 +55,44 @@ const StyledLink = styled(NextLink as any)<{ $active: boolean }>(
   ({ theme, $active }) => ({
     position: 'relative',
     display: 'block',
-    ...theme.partials.marketingText.componentLinkSmall,
-    color: theme.colors['text-xlight'],
+    fontFamily: theme.fontFamilies.sans,
+    fontSize: 14,
+    lineHeight: 1.45,
+    letterSpacing: '0.01em',
+    color: brand.muted,
     '&&:any-link': {
-      color: theme.colors['text-xlight'],
+      color: brand.muted,
     },
     textDecoration: 'none',
     margin: 0,
-    paddingLeft: theme.spacing.medium,
-    paddingTop: theme.spacing.xxsmall,
-    paddingBottom: theme.spacing.xxsmall,
+    paddingLeft: 12,
+    paddingTop: 4,
+    paddingBottom: 4,
     paddingRight: theme.spacing.small,
+    transition: 'color 0.2s ease-out',
     '&::before': {
       zIndex: 1,
-      borderLeft: `3px solid ${theme.colors['border-primary']}`,
+      borderLeft: `2px solid ${brand.accent}`,
       transform: 'scaleX(0)',
       transformOrigin: 'center left',
       transition: 'transform 0.15s ease-in',
     },
     ...($active
       ? {
-          color: theme.colors.text,
+          color: brand['accent-ink'],
           '&&:any-link': {
-            color: theme.colors.text,
+            color: brand['accent-ink'],
           },
           '&::before ': {
             zIndex: 1,
-            borderLeft: `3px solid ${theme.colors['border-primary']}`,
+            borderLeft: `2px solid ${brand.accent}`,
             transform: 'scaleX(1)',
             transition: 'transform 0.2s ease-out',
           },
         }
       : {}),
     '&:hover, &&:any-link:hover': {
-      textDecoration: 'underline',
-      color: theme.colors.text,
+      color: brand.ink,
     },
     '&::before, &::after': {
       content: '""',

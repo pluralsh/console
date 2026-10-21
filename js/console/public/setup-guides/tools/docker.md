@@ -1,6 +1,6 @@
 # Docker / OCI registry workbench tool setup
 
-This integration lets Workbench agents inspect Docker and OCI registries. Agents can search tags for a repository and fetch a tag manifest.
+This integration lets Workbench agents inspect Docker and OCI registries. Agents can search tags for a repository, find its latest semver tags, and fetch a tag manifest.
 
 ## Registry URL
 
@@ -8,6 +8,7 @@ This integration lets Workbench agents inspect Docker and OCI registries. Agents
 - For Docker Hub, use `registry-1.docker.io`.
 - For GitHub Container Registry, use `ghcr.io`.
 - For a private registry, use its registry host, for example `registry.example.com`.
+- Console always connects over HTTPS on the standard port. Registry URLs with a port, such as `registry.example.com:5000`, are not supported.
 
 Repository slugs are supplied when the agent calls a tool. Examples include:
 

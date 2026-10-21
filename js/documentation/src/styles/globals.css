@@ -5,6 +5,30 @@
 }
 
 @font-face {
+  font-family: Articulat;
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: url('/fonts/Articulat-Normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: Articulat;
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+  src: url('/fonts/Articulat-NormalOblique.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: Articulat;
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  src: url('/fonts/Articulat-Medium.woff2') format('woff2');
+}
+
+@font-face {
   font-family: Monument;
   font-weight: 400;
   src: url('/fonts/monument-regular.otf') format('opentype');

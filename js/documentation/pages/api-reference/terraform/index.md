@@ -1,16 +1,16 @@
 ---
 title: Plural Terraform Provider
 description: >-
-  How to use our terraform provider and other helpful doclinks
+  How to use our Terraform provider and other helpful doclinks
 ---
 
 # Terraform Provider
 
-For ingesting clusters or creating net new infrastructure, our terraform provider is usually the most natural surface for integrating Plural with your existing processes or adopting a full IaC based infrastructure management approach from the ground up.
+For ingesting clusters or creating net-new infrastructure, our Terraform provider is usually the most natural surface for integrating Plural with your existing processes or adopting a full IaC-based infrastructure management approach from the ground up.
 
 Our provider is available on the Terraform Registry's [Plural Provider page](https://registry.terraform.io/providers/pluralsh/plural/latest/docs). It can also be used from Pulumi — see [Using from Pulumi](/api-reference/terraform/pulumi).
 
-You can see snippets throughout our getting started guides, but some common usecases are as follows:
+You can see snippets throughout our getting started guides, but some common use cases are as follows:
 
 ## Configuring the Provider
 
@@ -31,7 +31,7 @@ provider "plural" {
 
 ## Ingesting a new Cluster
 
-Used for ingesting new or existing kubernetes clusters into Plural.
+Used for ingesting new or existing Kubernetes clusters into Plural.
 
 ```terraform
 # ensure kubernetes auth is configured for the plural provider
@@ -53,12 +53,12 @@ resource "plural_cluster" "example" {
 }
 ```
 
-## Call a pr automation
+## Call a PR automation
 
-This is useful if your terraform needs to trigger other changes.  Some usecases:
+This is useful if your Terraform needs to trigger other changes.  Some use cases:
 
-1. Provision infrastructure in another repo using context from terraform derived in the current repo
-2. Self-service provision dev workspaces (create repo with github terraform provider, pr automate github actions, docs, etc).
+1. Provision infrastructure in another repo using context from Terraform derived in the current repo
+2. Self-service provision dev workspaces (create a repo with the GitHub Terraform provider, PR-automate GitHub Actions, docs, etc.).
 
 ```terraform
 data "plural_pr_automation" "this" {
@@ -67,7 +67,7 @@ data "plural_pr_automation" "this" {
 
 resource "plural_pr_automation_trigger" "new" {
     pr_automation_id = data.plural_pr_automation.this.id
-    pr_automation_branc = "plrl/my-pr-automation/this"
+    pr_automation_branch = "plrl/my-pr-automation/this"
     context = {
         input = "some-input-value"
     }
@@ -76,9 +76,9 @@ resource "plural_pr_automation_trigger" "new" {
 
 ## Create/Use a ServiceContext
 
-Service contexts are reusable pieces of configuration which can provide a mechanism to share terraform code between isolated stacks without relying upon a giant state file or brittle cli-based control mechanism.  
+Service contexts are reusable pieces of configuration that provide a mechanism to share Terraform code between isolated stacks without relying on a giant state file or a brittle CLI-based control mechanism.  
 
-They're simple to use, to write to one, here's an example:
+They're simple to use. Here's an example of writing to one:
 
 ```terraform
 # example IRSA binding
@@ -95,19 +95,19 @@ module "assumable_role_externaldns" {
 resource "plural_service_context" "externaldns" {
     name = "plrl/irsa/externaldns"
     configuration = jsonencode({
-        roleArn = module.assumeable_role_externaldns.this_iam_role_arn
+        roleArn = module.assumable_role_externaldns.this_iam_role_arn
     })
 }
 ```
 
-And to read, you canjust do:
+And to read one:
 
 ```terraform
-data "plural_service_context "externaldns" {
+data "plural_service_context" "externaldns" {
   name = "plrl/irsa/externaldns"
 }
 
-local {
+locals {
   externaldns_context = jsondecode(data.plural_service_context.externaldns.configuration) # it is json encoded coming from our api
   external_dns_arn = local.externaldns_context.roleArn 
 }

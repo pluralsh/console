@@ -45,7 +45,7 @@ Plural accepts either of two headers:
 * `x-plural-webhook-secret`: the webhook secret itself.
 * `x-plural-signature`: an HMAC-SHA256 of the raw request body keyed with the webhook secret, hex or base64 encoded.
 
-If `x-plural-signature` is present it must be valid. Plural does not fall back to the shared secret. Requests with neither header are rejected with 403.
+If `x-plural-signature` is present, it must be valid. Plural does not fall back to the shared secret. Requests with neither header are rejected with 403.
 
 Business Rules can't compute an HMAC easily, so most setups send the secret header. That is safe only over HTTPS. Never use a plain `http://` endpoint, and rotate the secret if it may have leaked, since it travels with every request.
 
@@ -64,7 +64,7 @@ Plural does not check timestamps, so a captured request could be replayed.
 
 ### Create the webhook in Plural
 
-1. In Plural Console, create a webhook with **Type** `Ticketing` and **Provider** `ServiceNow`.
+1. In the Plural Console, create a webhook with **Type** `Ticketing` and **Provider** `ServiceNow`.
 2. Enter a name and generate or paste a secret.
 3. Create the webhook and copy its URL.
 

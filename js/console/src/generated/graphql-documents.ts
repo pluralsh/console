@@ -10952,10 +10952,10 @@ export const WorkbenchJobCountsDocument = /*#__PURE__*/ gql`
 }
     ` as unknown as DocumentNode<Types.WorkbenchJobCountsQuery, Types.WorkbenchJobCountsQueryVariables>;
 export const WorkbenchJobStatusCountsDocument = /*#__PURE__*/ gql`
-    query WorkbenchJobStatusCounts($id: ID!, $q: String, $prStates: [WorkbenchJobPrState]) {
+    query WorkbenchJobStatusCounts($id: ID!, $q: String, $prStates: [WorkbenchJobPrState], $insertedAfter: DateTime) {
   workbench(id: $id) {
     id
-    runCounts(q: $q, prStates: $prStates) {
+    runCounts(q: $q, prStates: $prStates, insertedAfter: $insertedAfter) {
       statuses {
         status
         count
@@ -10965,7 +10965,7 @@ export const WorkbenchJobStatusCountsDocument = /*#__PURE__*/ gql`
 }
     ` as unknown as DocumentNode<Types.WorkbenchJobStatusCountsQuery, Types.WorkbenchJobStatusCountsQueryVariables>;
 export const WorkbenchJobsForStatusDocument = /*#__PURE__*/ gql`
-    query WorkbenchJobsForStatus($id: ID!, $status: WorkbenchJobStatus!, $q: String, $prStates: [WorkbenchJobPrState], $direction: SortDirection, $first: Int = 50, $after: String) {
+    query WorkbenchJobsForStatus($id: ID!, $status: WorkbenchJobStatus!, $q: String, $prStates: [WorkbenchJobPrState], $direction: SortDirection, $insertedAfter: DateTime, $first: Int = 50, $after: String) {
   workbench(id: $id) {
     id
     runs(
@@ -10975,6 +10975,7 @@ export const WorkbenchJobsForStatusDocument = /*#__PURE__*/ gql`
       statuses: [$status]
       prStates: $prStates
       direction: $direction
+      insertedAfter: $insertedAfter
     ) {
       pageInfo {
         ...PageInfo
