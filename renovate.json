@@ -44,6 +44,11 @@
       "bumpVersion": "patch"
     },
     {
+      "description": "TODO: @hey-api/openapi-ts is pinned to a next prerelease because 0.99.0 doesn't support TypeScript 7 (https://github.com/hey-api/hey-api/issues/4235). Move to the first stable release with TypeScript 7 support as soon as it's out, then delete this rule.",
+      "matchPackageNames": ["@hey-api/openapi-ts"],
+      "allowedVersions": ">0.99.0"
+    },
+    {
       "matchManagers": ["npm"],
       "additionalBranchPrefix": "frontend/",
       "semanticCommitScope": "frontend",

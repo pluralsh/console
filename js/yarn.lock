@@ -2044,73 +2044,75 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@hey-api/codegen-core@npm:0.9.1":
-  version: 0.9.1
-  resolution: "@hey-api/codegen-core@npm:0.9.1"
+"@hey-api/codegen-cli@npm:0.0.0-next-20260930190945":
+  version: 0.0.0-next-20260930190945
+  resolution: "@hey-api/codegen-cli@npm:0.0.0-next-20260930190945"
   dependencies:
-    "@hey-api/types": "npm:0.1.4"
-    ansi-colors: "npm:4.1.3"
-    c12: "npm:3.3.4"
-    color-support: "npm:1.1.3"
-  checksum: 10/0a976a8703cb98f7bc9c28138d7639e7b89dcd52e88afd93a026ab3f0d6241a5ac8d83dca016634b22da22340f81a5a154ee490ce1ca4d2a3ae686d5f53e405a
+    citty: "npm:0.2.2"
+  checksum: 10/556ee5bac96c16855552ab461af2ed47a80345abc9e45fcc7da8d682e9ada7e33173f8211c05fdf5dd7a0eb967503e32ef5b1c5b7b65381769885bf03763c015
   languageName: node
   linkType: hard
 
-"@hey-api/json-schema-ref-parser@npm:1.4.4":
-  version: 1.4.4
-  resolution: "@hey-api/json-schema-ref-parser@npm:1.4.4"
+"@hey-api/codegen-core@npm:0.0.0-next-20260930190945":
+  version: 0.0.0-next-20260930190945
+  resolution: "@hey-api/codegen-core@npm:0.0.0-next-20260930190945"
+  dependencies:
+    "@hey-api/types": "npm:0.1.4"
+    c12: "npm:3.3.4"
+  checksum: 10/b22426212e4a5d780ecbf82ad0d61d23aa63e2a561d8c2dd657163678950322a74bc169981698cac0d82411f8248e497666740cbc68147da695790157e0939fb
+  languageName: node
+  linkType: hard
+
+"@hey-api/json-schema-ref-parser@npm:0.0.0-next-20260930190945":
+  version: 0.0.0-next-20260930190945
+  resolution: "@hey-api/json-schema-ref-parser@npm:0.0.0-next-20260930190945"
   dependencies:
     "@jsdevtools/ono": "npm:7.1.3"
     "@types/json-schema": "npm:7.0.15"
-    js-yaml: "npm:4.2.0"
-  checksum: 10/f6dac053918d00d7f29fd148b3e88851a1a1ff31d59ca9bd51491de398d76d33f84e5a873aeecb428581c8cb02288ce8d575a5dc022a3386ad258e02a8c614f6
+    js-yaml: "npm:5.3.0"
+  checksum: 10/65c63e35603f1330816ff2b96db384a46490736ef06f5ded74fcdebb69214aa5b80d191e8289dd7da87bbebe9070d7f6d0fb5a565a318c03ff597cc7f9d6a02c
   languageName: node
   linkType: hard
 
-"@hey-api/openapi-ts@npm:0.99.0":
-  version: 0.99.0
-  resolution: "@hey-api/openapi-ts@npm:0.99.0"
+"@hey-api/openapi-ts@npm:0.0.0-next-20260930190945":
+  version: 0.0.0-next-20260930190945
+  resolution: "@hey-api/openapi-ts@npm:0.0.0-next-20260930190945"
   dependencies:
-    "@hey-api/codegen-core": "npm:0.9.1"
-    "@hey-api/json-schema-ref-parser": "npm:1.4.4"
-    "@hey-api/shared": "npm:0.5.0"
-    "@hey-api/spec-types": "npm:0.2.0"
+    "@hey-api/codegen-cli": "npm:0.0.0-next-20260930190945"
+    "@hey-api/codegen-core": "npm:0.0.0-next-20260930190945"
+    "@hey-api/json-schema-ref-parser": "npm:0.0.0-next-20260930190945"
+    "@hey-api/shared": "npm:0.0.0-next-20260930190945"
+    "@hey-api/spec-types": "npm:0.0.0-next-20260930190945"
     "@hey-api/types": "npm:0.1.4"
     "@lukeed/ms": "npm:2.0.2"
-    ansi-colors: "npm:4.1.3"
-    color-support: "npm:1.1.3"
-    commander: "npm:15.0.0"
     get-tsconfig: "npm:4.14.0"
-  peerDependencies:
-    typescript: ">=5.5.3 || >=6.0.0 || 6.0.1-rc"
   bin:
     openapi-ts: ./bin/run.js
-  checksum: 10/f54feb6e6e0d8097b1aabbdc722c4ced41161ad655b3e49e03ba56f52521810c6a0e9d60b34dd1f641129ee5893c1e29b7a37c32d2deccd0ae90cb1f02e17b70
+  checksum: 10/921c1362913001d64eeb59de0a94854c07a4e348e0fb4deb2dfdde48c9a7a59da408e519ba22876dbffc7bc046f4d44bdee93446a5ce40e47e633edfcc6cac63
   languageName: node
   linkType: hard
 
-"@hey-api/shared@npm:0.5.0":
-  version: 0.5.0
-  resolution: "@hey-api/shared@npm:0.5.0"
+"@hey-api/shared@npm:0.0.0-next-20260930190945":
+  version: 0.0.0-next-20260930190945
+  resolution: "@hey-api/shared@npm:0.0.0-next-20260930190945"
   dependencies:
-    "@hey-api/codegen-core": "npm:0.9.1"
-    "@hey-api/json-schema-ref-parser": "npm:1.4.4"
-    "@hey-api/spec-types": "npm:0.2.0"
+    "@hey-api/codegen-core": "npm:0.0.0-next-20260930190945"
+    "@hey-api/json-schema-ref-parser": "npm:0.0.0-next-20260930190945"
+    "@hey-api/spec-types": "npm:0.0.0-next-20260930190945"
     "@hey-api/types": "npm:0.1.4"
-    ansi-colors: "npm:4.1.3"
-    cross-spawn: "npm:7.0.6"
     open: "npm:11.0.0"
-    semver: "npm:7.8.4"
-  checksum: 10/236fa49a4902baadaff08c33c6dd8fc6428e9759b9d16f392e3a03d2e3ef35e8f0e6abdcaab7cf70c13e956da809cc5bacc5dd0f75b31bcacdca7c522b08f21c
+    tinyexec: "npm:1.2.4"
+    verkit: "npm:0.3.0"
+  checksum: 10/e21c99dd5dffbb2ac8e9860ce17682cda9ea75c7624e6b651db402d15af582a8bba8b23ce9c784fe162af46a8cd2bf0894c2b9845de1b6e3f7f12a805c8e3fe2
   languageName: node
   linkType: hard
 
-"@hey-api/spec-types@npm:0.2.0":
-  version: 0.2.0
-  resolution: "@hey-api/spec-types@npm:0.2.0"
+"@hey-api/spec-types@npm:0.0.0-next-20260930190945":
+  version: 0.0.0-next-20260930190945
+  resolution: "@hey-api/spec-types@npm:0.0.0-next-20260930190945"
   dependencies:
     "@hey-api/types": "npm:0.1.4"
-  checksum: 10/02bf094aa0e80ed735d264c1cbde56870dd30c7035bbdd1634e7acccd005ce5a6e7200d162674c184081ef1f656f8e304f312bad1cf8b910c710756ed5185d6f
+  checksum: 10/6170281be59a0a22d82179a47f5f1220a198b2424905f01b439b11afe35a2ccb0f08b032d72c255396b8cd82de019fcfeebcc8015d71bf670f74e670ebb91664
   languageName: node
   linkType: hard
 
@@ -6343,87 +6345,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript/native@npm:typescript@7.0.2, typescript@npm:7.0.2":
-  version: 7.0.2
-  resolution: "typescript@npm:7.0.2"
-  dependencies:
-    "@typescript/typescript-aix-ppc64": "npm:7.0.2"
-    "@typescript/typescript-darwin-arm64": "npm:7.0.2"
-    "@typescript/typescript-darwin-x64": "npm:7.0.2"
-    "@typescript/typescript-freebsd-arm64": "npm:7.0.2"
-    "@typescript/typescript-freebsd-x64": "npm:7.0.2"
-    "@typescript/typescript-linux-arm": "npm:7.0.2"
-    "@typescript/typescript-linux-arm64": "npm:7.0.2"
-    "@typescript/typescript-linux-loong64": "npm:7.0.2"
-    "@typescript/typescript-linux-mips64el": "npm:7.0.2"
-    "@typescript/typescript-linux-ppc64": "npm:7.0.2"
-    "@typescript/typescript-linux-riscv64": "npm:7.0.2"
-    "@typescript/typescript-linux-s390x": "npm:7.0.2"
-    "@typescript/typescript-linux-x64": "npm:7.0.2"
-    "@typescript/typescript-netbsd-arm64": "npm:7.0.2"
-    "@typescript/typescript-netbsd-x64": "npm:7.0.2"
-    "@typescript/typescript-openbsd-arm64": "npm:7.0.2"
-    "@typescript/typescript-openbsd-x64": "npm:7.0.2"
-    "@typescript/typescript-sunos-x64": "npm:7.0.2"
-    "@typescript/typescript-win32-arm64": "npm:7.0.2"
-    "@typescript/typescript-win32-x64": "npm:7.0.2"
-  dependenciesMeta:
-    "@typescript/typescript-aix-ppc64":
-      optional: true
-    "@typescript/typescript-darwin-arm64":
-      optional: true
-    "@typescript/typescript-darwin-x64":
-      optional: true
-    "@typescript/typescript-freebsd-arm64":
-      optional: true
-    "@typescript/typescript-freebsd-x64":
-      optional: true
-    "@typescript/typescript-linux-arm":
-      optional: true
-    "@typescript/typescript-linux-arm64":
-      optional: true
-    "@typescript/typescript-linux-loong64":
-      optional: true
-    "@typescript/typescript-linux-mips64el":
-      optional: true
-    "@typescript/typescript-linux-ppc64":
-      optional: true
-    "@typescript/typescript-linux-riscv64":
-      optional: true
-    "@typescript/typescript-linux-s390x":
-      optional: true
-    "@typescript/typescript-linux-x64":
-      optional: true
-    "@typescript/typescript-netbsd-arm64":
-      optional: true
-    "@typescript/typescript-netbsd-x64":
-      optional: true
-    "@typescript/typescript-openbsd-arm64":
-      optional: true
-    "@typescript/typescript-openbsd-x64":
-      optional: true
-    "@typescript/typescript-sunos-x64":
-      optional: true
-    "@typescript/typescript-win32-arm64":
-      optional: true
-    "@typescript/typescript-win32-x64":
-      optional: true
-  bin:
-    tsc: bin/tsc
-  checksum: 10/b0179005349b43dc1febb35c4e79162cdf89b84eae60f6deac142429109041e07582e69a6aacf5a897e085869686d4512ea444a10acf5b5aa2b60910f82a19ca
-  languageName: node
-  linkType: hard
-
-"@typescript/old@npm:typescript@^6":
-  version: 6.0.3
-  resolution: "typescript@npm:6.0.3"
-  bin:
-    tsc: bin/tsc
-    tsserver: bin/tsserver
-  checksum: 10/0ef2357a4cffd916b52b683a021cdab0f81eea4e9aa35f2d254581c9a5106da02224e3392e1b0ed42b7a48f80c966e5f52b8e1a27941fa0523c1705a9c2e0330
-  languageName: node
-  linkType: hard
-
 "@typescript/typescript-aix-ppc64@npm:7.0.2":
   version: 7.0.2
   resolution: "@typescript/typescript-aix-ppc64@npm:7.0.2"
@@ -6932,13 +6853,6 @@ __metadata:
   version: 2.3.5
   resolution: "anser@npm:2.3.5"
   checksum: 10/55301fd884ea18ac55fb2ececef2133cbb5ea9b9749f57815cc78f22f5f6fee7783f6d0f079f8664cb9a85638f94d321e53836a589315dad80ef6ea5d881194f
-  languageName: node
-  linkType: hard
-
-"ansi-colors@npm:4.1.3":
-  version: 4.1.3
-  resolution: "ansi-colors@npm:4.1.3"
-  checksum: 10/43d6e2fc7b1c6e4dc373de708ee76311ec2e0433e7e8bd3194e7ff123ea6a747428fc61afdcf5969da5be3a5f0fd054602bec56fc0ebe249ce2fcde6e649e3c2
   languageName: node
   linkType: hard
 
@@ -7563,6 +7477,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"citty@npm:0.2.2":
+  version: 0.2.2
+  resolution: "citty@npm:0.2.2"
+  checksum: 10/5e17b66ddb65274170e1ab83baec49ef70a07074b4323e29595063d06dfb7710527f3f403b2647acef06eb66871c8ba81d361d24c7166540f78815572da15221
+  languageName: node
+  linkType: hard
+
 "classcat@npm:^5.0.3":
   version: 5.0.5
   resolution: "classcat@npm:5.0.5"
@@ -7659,15 +7580,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"color-support@npm:1.1.3":
-  version: 1.1.3
-  resolution: "color-support@npm:1.1.3"
-  bin:
-    color-support: bin.js
-  checksum: 10/4bcfe30eea1498fe1cabc852bbda6c9770f230ea0e4faf4611c5858b1b9e4dde3730ac485e65f54ca182f4c50b626c1bea7c8441ceda47367a54a818c248aa7a
-  languageName: node
-  linkType: hard
-
 "colorette@npm:^2.0.20":
   version: 2.0.20
   resolution: "colorette@npm:2.0.20"
@@ -7688,13 +7600,6 @@ __metadata:
   version: 2.0.3
   resolution: "comma-separated-tokens@npm:2.0.3"
   checksum: 10/e3bf9e0332a5c45f49b90e79bcdb4a7a85f28d6a6f0876a94f1bb9b2bfbdbbb9292aac50e1e742d8c0db1e62a0229a106f57917e2d067fca951d81737651700d
-  languageName: node
-  linkType: hard
-
-"commander@npm:15.0.0":
-  version: 15.0.0
-  resolution: "commander@npm:15.0.0"
-  checksum: 10/a5dab1f5c3f1bf2ea19e8089f650f7fb65c3ed88e13ddde62e490d34b20057bcb2cd3de5b6ddc8aae93286083f8256ca0b812df842f574cbebe0e40f5b2f98f7
   languageName: node
   linkType: hard
 
@@ -7731,7 +7636,6 @@ __metadata:
   resolution: "console-workspace@workspace:."
   dependencies:
     "@biomejs/biome": "npm:2.5.15"
-    "@typescript/native": "npm:typescript@7.0.2"
     lint-staged: "npm:17.6.0"
     oxlint: "npm:1.87.0"
     oxlint-tsgolint: "npm:7.0.2004"
@@ -7762,7 +7666,7 @@ __metadata:
     "@graphql-codegen/typescript-operations": "npm:5.1.0"
     "@graphql-codegen/typescript-react-apollo": "npm:4.4.2"
     "@graphql-typed-document-node/core": "npm:3.2.0"
-    "@hey-api/openapi-ts": "npm:0.99.0"
+    "@hey-api/openapi-ts": "npm:0.0.0-next-20260930190945"
     "@mui/material": "npm:7.3.11"
     "@mui/system": "npm:7.3.11"
     "@mui/x-tree-view": "npm:8.29.2"
@@ -7791,7 +7695,6 @@ __metadata:
     "@types/node": "npm:24.10.1"
     "@types/react": "npm:19.2.17"
     "@types/react-dom": "npm:19.2.3"
-    "@typescript/native": "npm:typescript@7.0.2"
     "@vitejs/plugin-basic-ssl": "npm:2.3.0"
     "@vitejs/plugin-react": "npm:6.1.1"
     "@vitest/ui": "npm:5.0.1"
@@ -7853,7 +7756,7 @@ __metadata:
     streamsaver: "npm:2.0.6"
     styled-components: "npm:6.5.3"
     type-fest: "npm:5.9.0"
-    typescript: "npm:@typescript/typescript6@6.0.2"
+    typescript: "npm:7.0.2"
     use-immer: "npm:0.11.0"
     uuid: "npm:14.0.2"
     virtua: "npm:0.51.3"
@@ -8003,7 +7906,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cross-spawn@npm:7.0.6, cross-spawn@npm:^7.0.6":
+"cross-spawn@npm:^7.0.6":
   version: 7.0.6
   resolution: "cross-spawn@npm:7.0.6"
   dependencies:
@@ -13513,15 +13416,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semver@npm:7.8.4":
-  version: 7.8.4
-  resolution: "semver@npm:7.8.4"
-  bin:
-    semver: bin/semver.js
-  checksum: 10/a9c139031d4143932adfacfd2165d6489848c3b84c26d5fc2beef88c6d54c01191ef553e3f71049ccc47df85f0df30748907f84005f46f326095003171c5b673
-  languageName: node
-  linkType: hard
-
 "semver@npm:7.8.5, semver@npm:^7.3.5, semver@npm:^7.7.3, semver@npm:^7.8.5":
   version: 7.8.5
   resolution: "semver@npm:7.8.5"
@@ -14253,6 +14147,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"tinyexec@npm:1.2.4":
+  version: 1.2.4
+  resolution: "tinyexec@npm:1.2.4"
+  checksum: 10/f20b3e6f56f24c3ebe0129d0b6e657e561d225df2cf93c1a10362996232dd6ad4b8af8c9e81d258a64d09020e723772baf6fe0be26512dba7c61bb366d67b1f9
+  languageName: node
+  linkType: hard
+
 "tinyexec@npm:1.3.0":
   version: 1.3.0
   resolution: "tinyexec@npm:1.3.0"
@@ -14444,14 +14345,74 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:@typescript/typescript6@6.0.2":
-  version: 6.0.2
-  resolution: "@typescript/typescript6@npm:6.0.2"
+"typescript@npm:7.0.2":
+  version: 7.0.2
+  resolution: "typescript@npm:7.0.2"
   dependencies:
-    "@typescript/old": "npm:typescript@^6"
+    "@typescript/typescript-aix-ppc64": "npm:7.0.2"
+    "@typescript/typescript-darwin-arm64": "npm:7.0.2"
+    "@typescript/typescript-darwin-x64": "npm:7.0.2"
+    "@typescript/typescript-freebsd-arm64": "npm:7.0.2"
+    "@typescript/typescript-freebsd-x64": "npm:7.0.2"
+    "@typescript/typescript-linux-arm": "npm:7.0.2"
+    "@typescript/typescript-linux-arm64": "npm:7.0.2"
+    "@typescript/typescript-linux-loong64": "npm:7.0.2"
+    "@typescript/typescript-linux-mips64el": "npm:7.0.2"
+    "@typescript/typescript-linux-ppc64": "npm:7.0.2"
+    "@typescript/typescript-linux-riscv64": "npm:7.0.2"
+    "@typescript/typescript-linux-s390x": "npm:7.0.2"
+    "@typescript/typescript-linux-x64": "npm:7.0.2"
+    "@typescript/typescript-netbsd-arm64": "npm:7.0.2"
+    "@typescript/typescript-netbsd-x64": "npm:7.0.2"
+    "@typescript/typescript-openbsd-arm64": "npm:7.0.2"
+    "@typescript/typescript-openbsd-x64": "npm:7.0.2"
+    "@typescript/typescript-sunos-x64": "npm:7.0.2"
+    "@typescript/typescript-win32-arm64": "npm:7.0.2"
+    "@typescript/typescript-win32-x64": "npm:7.0.2"
+  dependenciesMeta:
+    "@typescript/typescript-aix-ppc64":
+      optional: true
+    "@typescript/typescript-darwin-arm64":
+      optional: true
+    "@typescript/typescript-darwin-x64":
+      optional: true
+    "@typescript/typescript-freebsd-arm64":
+      optional: true
+    "@typescript/typescript-freebsd-x64":
+      optional: true
+    "@typescript/typescript-linux-arm":
+      optional: true
+    "@typescript/typescript-linux-arm64":
+      optional: true
+    "@typescript/typescript-linux-loong64":
+      optional: true
+    "@typescript/typescript-linux-mips64el":
+      optional: true
+    "@typescript/typescript-linux-ppc64":
+      optional: true
+    "@typescript/typescript-linux-riscv64":
+      optional: true
+    "@typescript/typescript-linux-s390x":
+      optional: true
+    "@typescript/typescript-linux-x64":
+      optional: true
+    "@typescript/typescript-netbsd-arm64":
+      optional: true
+    "@typescript/typescript-netbsd-x64":
+      optional: true
+    "@typescript/typescript-openbsd-arm64":
+      optional: true
+    "@typescript/typescript-openbsd-x64":
+      optional: true
+    "@typescript/typescript-sunos-x64":
+      optional: true
+    "@typescript/typescript-win32-arm64":
+      optional: true
+    "@typescript/typescript-win32-x64":
+      optional: true
   bin:
-    tsc6: bin/tsc6
-  checksum: 10/e214aa9b2783ac924498ebbb42a4419e1d8681acc10d26daa145e938d6da0ecde46ad36690fc4e9083a4b47cf73cdc83f2c2054f32e07f10920768956c2b00a1
+    tsc: bin/tsc
+  checksum: 10/b0179005349b43dc1febb35c4e79162cdf89b84eae60f6deac142429109041e07582e69a6aacf5a897e085869686d4512ea444a10acf5b5aa2b60910f82a19ca
   languageName: node
   linkType: hard
 
@@ -14523,17 +14484,6 @@ __metadata:
   bin:
     tsc: bin/tsc
   checksum: 10/6d7f3d34ca7fbd3eb4999f06db29340d3dcedd7d40ed71654ea53ecd0f28a330edf0f55a0acf541bf294a2f024f11242075c1a83aed4bd99776fe99af45b994b
-  languageName: node
-  linkType: hard
-
-"typescript@patch:typescript@npm%3A@typescript/typescript6@6.0.2#optional!builtin<compat/typescript>":
-  version: 6.0.2
-  resolution: "typescript@patch:@typescript/typescript6@npm%3A6.0.2#optional!builtin<compat/typescript>::version=6.0.2&hash=5786d5"
-  dependencies:
-    "@typescript/old": "npm:typescript@^6"
-  bin:
-    tsc6: bin/tsc6
-  checksum: 10/b190ec6b713b0fa95c059ff8019b740c17591ea83a3b60e6fe592d51d56d73c360b86abce48f616d25c39697cc5f4bb9efe8e2a231096f493758457cb175e11c
   languageName: node
   linkType: hard
 
@@ -14779,6 +14729,13 @@ __metadata:
   bin:
     uuid: dist-node/bin/uuid
   checksum: 10/e8263a76ad7b2d1f246df5a48a5bdf30d886eedbb1d3d74c75356d02b2966f5fffd7790b85afdb3682e4e732d13fca7974626419814f45de6847f78ce03c745e
+  languageName: node
+  linkType: hard
+
+"verkit@npm:0.3.0":
+  version: 0.3.0
+  resolution: "verkit@npm:0.3.0"
+  checksum: 10/94f81b9916bd3ec2dc44659e5a1aaebe2541242207e9fb85374cd88da7739241b7cc9966e0122adfa17df014900ded62d3b0a47d72a6badd8f6049baa2662a36
   languageName: node
   linkType: hard
 
