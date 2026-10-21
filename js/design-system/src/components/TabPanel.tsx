@@ -182,7 +182,7 @@ function TabPanel({
       }
       recheckStateRef()
     }
-  })
+  }, [numRechecks, stateRef])
 
   if (!renderer && !as) {
     as = <div {...props} />

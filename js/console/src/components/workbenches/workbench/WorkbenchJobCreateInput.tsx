@@ -116,7 +116,8 @@ export function WorkbenchJobCreateInput({
     skip: !workbenchId,
   })
 
-  // user's choice for this workbench, falling back to the workbench defaults
+  // user's choice for this workbench, falling back to the workbench defaults;
+  // the defaults are a fresh object per call, kept stable by React Compiler memoization
   const promptModes =
     promptModesState && promptModesState.workbenchId === workbenchId
       ? promptModesState.modes

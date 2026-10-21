@@ -15,10 +15,6 @@ Once configured, if you go to a compute-related resource and click on the `Metri
 
 ![](/assets/getting-started/metrics.png)
 
-And cluster saturation views will look like:
-
-![](/assets/getting-started/cluster-metrics.png)
-
 # Deploy out of our Service Catalog
 
 Plural ships by default with a full [Service catalog](/plural-features/service-catalog) to easily deploy solutions across your stack, among them a robust, scale-out setup of Prometheus using [VictoriaMetrics](https://docs.victoriametrics.com/).  This solves several key problems with mainline Prometheus:

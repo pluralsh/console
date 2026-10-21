@@ -250,6 +250,8 @@ export function ComponentsFilesView() {
       )
     })
 
+  // must stay referentially stable (useSetSidenavContent sets state on change);
+  // React Compiler memoizes it, so don't opt this component out of the compiler
   const sidenavContent =
     data?.serviceTarball && treeNodes.length > 0 ? (
       <MuiThemeProvider theme={fileTreeMuiTheme}>
