@@ -20,7 +20,6 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { SortingFn } from '@tanstack/table-core'
 import {
   TableCaretLink,
-  TableText,
   TabularNumbers,
 } from 'components/cluster/TableElements'
 import { roundTo } from 'components/cluster/utils.tsx'
@@ -292,12 +291,10 @@ export const ColMemory = columnHelper.accessor(({ node }) => node, {
     return percentage > 0 ? (
       <>
         <SizeTextSc>{display}</SizeTextSc>
-        <TableText>
-          <UsageBar
-            usage={percentage}
-            width={100}
-          />
-        </TableText>
+        <UsageBar
+          usage={percentage}
+          width={100}
+        />
       </>
     ) : (
       display
