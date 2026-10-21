@@ -79,7 +79,7 @@ metadata:
     eks.amazonaws.com/role-arn: arn:aws:iam::{your-account-id}:role/plrl-stacks
 ```
 
-This will add a service account and labels to the pod, but you can configure more information up to a full Kubernetes JobTemplateSpec object.  We encourage referencing our {% doclink to="plural_features_continuous_deployment_deployment_architecture" %}CRD docs{% /doclink %} if you want to learn all the knobs available.
+This will add a service account and labels to the pod, but you can configure more information up to a full Kubernetes JobTemplateSpec object.  We encourage referencing our [CRD docs](/api-reference/kubernetes/management-api-reference#jobspec) if you want to learn all the knobs available.
 
 ## Configure Runner Pods Globally
 

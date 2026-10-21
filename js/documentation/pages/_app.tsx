@@ -57,6 +57,7 @@ import {
   PAGE_TITLE_SUFFIX,
   ROOT_TITLE,
 } from '@src/consts'
+import routes from '../generated/routes.json'
 import { NavDataProvider } from '@src/contexts/NavDataContext'
 import { RestNavProvider } from '@src/contexts/RestNavContext'
 import { collectHeadings } from '@src/markdoc/utils/parseHeadings'
@@ -131,6 +132,19 @@ const Link = ({
     {...props}
   />
 )
+
+const routeIndex: Record<string, { relPath: string | null }> = routes
+
+function relativeLinkBase(pathname: string) {
+  const route = pathname.replace(/\/$/, '') || '/'
+  const relPath = routeIndex[route]?.relPath
+
+  if (relPath?.endsWith('/index.md')) return route
+
+  const parent = route.replace(/\/[^/]+$/, '')
+
+  return parent || '/'
+}
 
 function App({ Component, pageProps = {}, swrConfig }: MyAppProps) {
   const router = useRouter()
@@ -227,7 +241,7 @@ function App({ Component, pageProps = {}, swrConfig }: MyAppProps) {
   )
 
   const navContextVal = useMemo<NavigationContextValue>(
-    () => ({ useNavigate, usePathname, Link }),
+    () => ({ useNavigate, usePathname, Link, relativeLinkBase }),
     []
   )
 

@@ -171,7 +171,7 @@ webapp:
     security.plural.sh/inject-oauth-sidecar: "true"
 ```
 
-You can read more about templating [here](/plural-features/service-templating).  In this case, it's going to pass these variables through Helm and configure the necessary secrets and YAML structures with the provided information.
+You can read more about templating [here](/plural-features/continuous-deployment/service-templating).  In this case, it's going to pass these variables through Helm and configure the necessary secrets and YAML structures with the provided information.
 
 {% callout severity="info" %}
 The imports structure is a map from stack name to stack outputs, i.e. a nested map type like { string => { string => any } }

@@ -17,7 +17,7 @@ Once configured, if you go to a compute-related resource and click on the `Metri
 
 And cluster saturation views will look like:
 
-![](/assets/getting-started/cluster-metrics.png)
+![](/assets/observability/cluster-metrics.png)
 
 # Deploy out of our Service Catalog
 
