@@ -27,6 +27,12 @@ function useImageLoad(src?: string) {
       setResult({ src, error: true })
     }
     img.src = src
+
+    // a late load of a previous src must not overwrite the current result
+    return () => {
+      img.onload = null
+      img.onerror = null
+    }
   }, [src])
 
   return [loaded, error] as const
