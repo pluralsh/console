@@ -85,15 +85,21 @@ export function SavedPromptForm({ mode }: { mode: 'create' | 'edit' }) {
     [prompts, savedPromptId]
   )
 
-  // the user's edits, or null to show the saved prompt (which may load after mount)
-  const [editedForm, setEditedForm] = useState<SavedPromptFormState | null>(
-    null
-  )
+  // the user's edits, tied to the prompt they were made on: the route reuses this
+  // component across prompts, and stale edits must never be saved to another one
+  const formKey = `${workbenchId}:${mode}:${savedPromptId ?? ''}`
+  const [edited, setEdited] = useState<{
+    key: string
+    form: SavedPromptFormState
+  } | null>(null)
+  // otherwise show the saved prompt (which may load after mount)
   const formState =
-    editedForm ?? getInitialFormState(savedPrompt, createRouteState?.prompt)
+    edited?.key === formKey
+      ? edited.form
+      : getInitialFormState(savedPrompt, createRouteState?.prompt)
   const setFormState = (
     update: (prev: SavedPromptFormState) => SavedPromptFormState
-  ) => setEditedForm(update(formState))
+  ) => setEdited({ key: formKey, form: update(formState) })
 
   const attributes = toAttributes(formState)
 

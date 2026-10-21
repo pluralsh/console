@@ -20,12 +20,26 @@ const queryState = vi.hoisted(() => {
               category: 'Infra',
             },
           },
+          {
+            node: {
+              id: 'other-prompt',
+              title: 'Other title',
+              prompt: 'Other instruction',
+              category: 'Ops',
+            },
+          },
         ],
       },
     },
   })
 
-  return { promptsAvailable: true, makeData, data: makeData() }
+  return {
+    promptsAvailable: true,
+    makeData,
+    data: makeData(),
+    savedPromptId: 'prompt',
+    updates: [] as unknown[],
+  }
 })
 
 vi.mock('@pluralsh/design-system', () => ({
@@ -70,7 +84,10 @@ vi.mock(
 vi.mock('react-router-dom', () => ({
   useNavigate: () => () => {},
   useLocation: () => ({}),
-  useParams: () => ({ workbenchId: 'wb', savedPromptId: 'prompt' }),
+  useParams: () => ({
+    workbenchId: 'wb',
+    savedPromptId: queryState.savedPromptId,
+  }),
 }))
 vi.mock('generated/graphql', () => ({
   useCreateWorkbenchJobMutation: () => [vi.fn(), {}],
@@ -80,7 +97,10 @@ vi.mock('generated/graphql', () => ({
     loading: !queryState.promptsAvailable,
   }),
   useCreateWorkbenchPromptMutation: () => [vi.fn(), {}],
-  useUpdateWorkbenchPromptMutation: () => [vi.fn(), {}],
+  useUpdateWorkbenchPromptMutation: (opts: any) => [
+    () => queryState.updates.push(opts.variables),
+    {},
+  ],
 }))
 vi.mock('components/ai/chatbot/input/ChatAttachments', () => ({
   withAttachmentHint: (s: string) => s,
@@ -130,6 +150,8 @@ vi.mock(
 beforeEach(() => {
   queryState.promptsAvailable = true
   queryState.data = queryState.makeData()
+  queryState.savedPromptId = 'prompt'
+  queryState.updates = []
 })
 afterEach(cleanup)
 it('loads a saved prompt when query data is already cached on mount', () => {
@@ -167,6 +189,30 @@ it('loads a saved prompt when query data arrives after mount', () => {
       .getByPlaceholderText('e.g. Summarize recent customer feedback')
       .getAttribute('value')
   ).toBe('Existing title')
+})
+
+it('drops edits when the route switches to another saved prompt', () => {
+  const { rerender } = render(<SavedPromptForm mode="edit" />)
+  const title = screen.getByPlaceholderText(
+    'e.g. Summarize recent customer feedback'
+  )
+  fireEvent.change(title, { target: { value: 'Edited title' } })
+  // same mounted form, new route param (e.g. browser history between prompts)
+  queryState.savedPromptId = 'other-prompt'
+  rerender(<SavedPromptForm mode="edit" />)
+  expect(title.getAttribute('value')).toBe('Other title')
+
+  fireEvent.change(title, { target: { value: 'Other edited' } })
+  fireEvent.click(screen.getByText('Save'))
+  expect(queryState.updates).toEqual([
+    expect.objectContaining({
+      id: 'other-prompt',
+      attributes: expect.objectContaining({
+        title: 'Other edited',
+        prompt: 'Other instruction',
+      }),
+    }),
+  ])
 })
 
 it('keeps saved prompt edits when the query refetches', () => {
