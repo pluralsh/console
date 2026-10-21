@@ -2,7 +2,7 @@
   "name": "@pluralsh/documentation",
   "private": true,
   "engines": {
-    "node": ">=24.11.1"
+    "node": ">=26.12.0"
   },
   "scripts": {
     "dev": "run-s generate:route-index dev:next",
@@ -48,7 +48,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",
-    "@types/node": "24.10.1",
+    "@types/node": "26.6.5",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "babel-plugin-react-compiler": "1.0.0",

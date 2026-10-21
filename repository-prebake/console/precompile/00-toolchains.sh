@@ -8,4 +8,4 @@ export MISE_YES=1
 mise trust --all || true
 mise install
 # Console's .tool-versions does not include Go or Node.
-mise use -g go@1.27.1 node@24.11.1
+mise use -g go@1.27.1 node@26.12.0

@@ -1,4 +1,4 @@
-FROM node:24.11.1-alpine AS base
+FROM node:26.12.0-alpine AS base
 
 WORKDIR /app
 
@@ -26,7 +26,7 @@ ENV NEXT_PUBLIC_GA_ID=$NEXT_PUBLIC_GA_ID
 # Biome is the js-ci Lint job, so the image runs next build directly.
 RUN yarn workspace @pluralsh/documentation next build
 
-FROM node:24.11.1-alpine AS production
+FROM node:26.12.0-alpine AS production
 
 ENV NODE_ENV=production \
     PORT=3000 \
