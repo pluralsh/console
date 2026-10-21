@@ -138,6 +138,7 @@
     "@types/node": "24.10.1",
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
+    "@typescript/native": "npm:typescript@7.0.2",
     "@vitejs/plugin-basic-ssl": "2.3.0",
     "@vitejs/plugin-react": "6.1.1",
     "@vitest/ui": "5.0.1",
@@ -150,7 +151,7 @@
     "oxlint": "1.87.0",
     "oxlint-tsgolint": "7.0.2004",
     "type-fest": "5.9.0",
-    "typescript": "6.0.3",
+    "typescript": "npm:@typescript/typescript6@6.0.2",
     "vite": "8.3.0",
     "vite-bundle-visualizer": "1.2.1",
     "vitest": "5.0.1"
