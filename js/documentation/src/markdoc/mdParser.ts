@@ -26,7 +26,12 @@ export const readMdFileCached = async (
     return cachedVal
   }
 
-  const fullPath = path.join(process.cwd(), filePath)
+  // Scoped to pages/ so output tracing doesn't pull the whole project into the server bundle
+  const fullPath = path.join(
+    process.cwd(),
+    'pages',
+    path.relative('pages', filePath)
+  )
 
   try {
     const file = await fs.readFile(fullPath, 'utf8')

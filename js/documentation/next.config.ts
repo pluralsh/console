@@ -12,34 +12,14 @@ const nextConfig: NextConfig = {
   // layout-elk is ESM-only; bundling it avoids a require() of its import-only exports on the server.
   transpilePackages: ['@pluralsh/design-system', '@mermaid-js/layout-elk'],
   reactStrictMode: false,
-  experimental: {
-    // fail the build instead of silently skipping components the compiler can't handle
-    reactCompiler: { panicThreshold: 'ALL_ERRORS' },
-  },
-  // Linting runs via Biome in the build:next script and the js-ci Lint job.
-  eslint: { ignoreDuringBuilds: true },
+  // fail the build instead of silently skipping components the compiler can't handle
+  reactCompiler: { panicThreshold: 'all_errors' },
   compiler: {
     // https://nextjs.org/docs/advanced-features/compiler#styled-components
     styledComponents: true,
     emotion: true,
   },
   pageExtensions: ['js', 'jsx', 'ts', 'tsx'],
-  webpack: (config) => {
-    // Share the theme context with design-system sources across workspaces.
-    config.resolve.alias['styled-components'] =
-      require.resolve('styled-components')
-    config.resolve.alias['@pluralsh/design-system'] = path.resolve(
-      __dirname,
-      '../design-system/src/index.ts'
-    )
-
-    config.module.rules.push({
-      test: /\.md$/,
-      use: 'raw-loader',
-    })
-
-    return config
-  },
   async redirects() {
     return redirects
   },
