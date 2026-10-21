@@ -34,7 +34,7 @@
   "devDependencies": {
     "@biomejs/biome": "2.5.15",
     "lint-staged": "17.6.0",
-    "oxlint": "1.87.0",
+    "oxlint": "1.89.0",
     "oxlint-tsgolint": "7.0.2004"
   },
   "lint-staged": {
