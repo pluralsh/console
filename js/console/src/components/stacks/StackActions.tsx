@@ -115,15 +115,10 @@ export default function StackActions({
             width={300}
             triggerButton={
               <IconFrame
-                css={{
-                  borderTopLeftRadius: 0,
-                  borderBottomLeftRadius: 0,
-                  // IconFrame forces 16px icons; keep the frame matching the button height
-                  svg: { width: 12, height: 12 },
-                }}
+                css={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
                 type="floating"
                 size="medium"
-                icon={<CaretDownIcon />}
+                icon={<CaretDownIcon size={12} />}
                 clickable
               />
             }

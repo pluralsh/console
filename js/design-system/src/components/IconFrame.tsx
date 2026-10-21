@@ -178,7 +178,7 @@ function IconFrame<E extends ElementType = 'div'>({
   as,
   ...props
 }: IconFrameProps<E>) {
-  icon = cloneElement(icon, { size: sizeToIconSize[size] })
+  icon = cloneElement(icon, { size: icon.props.size ?? sizeToIconSize[size] })
   if (tooltip && typeof tooltip === 'boolean') {
     tooltip = textValue
   }
