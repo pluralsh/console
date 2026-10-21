@@ -5383,8 +5383,6 @@ type MetricPointResponse struct {
 }
 
 type MetricResponse struct {
-	// the metric name, for backends that report it separately from the labels in `metric`
-	Name   *string         `json:"name,omitempty"`
 	Metric map[string]any  `json:"metric,omitempty"`
 	Values []*MetricResult `json:"values,omitempty"`
 }
@@ -11055,18 +11053,10 @@ type WorkbenchBudgetAttributes struct {
 }
 
 type WorkbenchCanvasBlock struct {
-	Identifier *string                   `json:"identifier,omitempty"`
-	Type       *WorkbenchCanvasBlockType `json:"type,omitempty"`
-	// the header of a section block
-	Title *string `json:"title,omitempty"`
-	// an explanation of what this block shows
-	Description *string `json:"description,omitempty"`
-	// the identifier of the section block this block belongs to
-	SectionID *string `json:"sectionId,omitempty"`
-	// whether a section block starts collapsed
-	Collapsed *bool                        `json:"collapsed,omitempty"`
-	Layout    *WorkbenchCanvasBlockLayout  `json:"layout,omitempty"`
-	Content   *WorkbenchCanvasBlockContent `json:"content,omitempty"`
+	Identifier *string                      `json:"identifier,omitempty"`
+	Type       *WorkbenchCanvasBlockType    `json:"type,omitempty"`
+	Layout     *WorkbenchCanvasBlockLayout  `json:"layout,omitempty"`
+	Content    *WorkbenchCanvasBlockContent `json:"content,omitempty"`
 }
 
 type WorkbenchCanvasBlockContent struct {
@@ -11318,9 +11308,7 @@ type WorkbenchDashboardGraphLayout struct {
 }
 
 type WorkbenchDashboardGraphResult struct {
-	// Metric series returned by a metrics datasource, with labels sent once per series
-	Series []*MetricResponse `json:"series,omitempty"`
-	// Metric points returned by a metrics datasource, one entry per point (prefer series)
+	// Metric points returned by a metrics datasource
 	Metrics []*WorkbenchJobActivityMetric `json:"metrics,omitempty"`
 	// Log entries returned by a logs datasource
 	Logs []*WorkbenchJobActivityLog `json:"logs,omitempty"`
@@ -11572,7 +11560,6 @@ type WorkbenchJob struct {
 	// ready/pending breakdown for unconsumed queued prompts
 	QueuedPromptSummary QueuedPromptSummary           `json:"queuedPromptSummary"`
 	MetricsTool         []*WorkbenchJobActivityMetric `json:"metricsTool,omitempty"`
-	MetricsSeriesTool   []*MetricResponse             `json:"metricsSeriesTool,omitempty"`
 	LogsTool            []*WorkbenchJobActivityLog    `json:"logsTool,omitempty"`
 	TracesTool          []*WorkbenchJobActivityTrace  `json:"tracesTool,omitempty"`
 	// whimsically describes current progress for you
@@ -11990,9 +11977,7 @@ type WorkbenchJobThought struct {
 }
 
 type WorkbenchJobThoughtAttributes struct {
-	// metric series for the thought, with labels sent once per series
-	Series []*MetricResponse `json:"series,omitempty"`
-	// metrics for the thought, one entry per point (prefer series)
+	// metrics for the thought
 	Metrics []*WorkbenchJobActivityMetric `json:"metrics,omitempty"`
 	// logs for the thought
 	Logs []*WorkbenchJobActivityLog `json:"logs,omitempty"`
@@ -20351,7 +20336,6 @@ const (
 	WorkbenchCanvasBlockTypeTraces   WorkbenchCanvasBlockType = "TRACES"
 	WorkbenchCanvasBlockTypePie      WorkbenchCanvasBlockType = "PIE"
 	WorkbenchCanvasBlockTypeBar      WorkbenchCanvasBlockType = "BAR"
-	WorkbenchCanvasBlockTypeSection  WorkbenchCanvasBlockType = "SECTION"
 )
 
 var AllWorkbenchCanvasBlockType = []WorkbenchCanvasBlockType{
@@ -20361,12 +20345,11 @@ var AllWorkbenchCanvasBlockType = []WorkbenchCanvasBlockType{
 	WorkbenchCanvasBlockTypeTraces,
 	WorkbenchCanvasBlockTypePie,
 	WorkbenchCanvasBlockTypeBar,
-	WorkbenchCanvasBlockTypeSection,
 }
 
 func (e WorkbenchCanvasBlockType) IsValid() bool {
 	switch e {
-	case WorkbenchCanvasBlockTypeMarkdown, WorkbenchCanvasBlockTypeMetrics, WorkbenchCanvasBlockTypeLogs, WorkbenchCanvasBlockTypeTraces, WorkbenchCanvasBlockTypePie, WorkbenchCanvasBlockTypeBar, WorkbenchCanvasBlockTypeSection:
+	case WorkbenchCanvasBlockTypeMarkdown, WorkbenchCanvasBlockTypeMetrics, WorkbenchCanvasBlockTypeLogs, WorkbenchCanvasBlockTypeTraces, WorkbenchCanvasBlockTypePie, WorkbenchCanvasBlockTypeBar:
 		return true
 	}
 	return false
