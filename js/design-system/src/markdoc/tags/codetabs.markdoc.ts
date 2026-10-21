@@ -6,7 +6,7 @@ import { type BaseSchema, isTag } from '../types'
 export const codetabs: BaseSchema = {
   render: CodeTabs,
   description: 'Display horizontal tabs in a box',
-  children: ['tab'],
+  children: ['tag'],
   attributes: {
     title: { type: String, required: false },
   },
