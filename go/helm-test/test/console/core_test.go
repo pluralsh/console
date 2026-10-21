@@ -6,6 +6,7 @@ import (
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"github.com/pluralsh/console/go/helm-test/internal/common"
 	"github.com/pluralsh/console/go/helm-test/test/console"
@@ -150,3 +151,96 @@ var _ = Describe("Core", func() {
 		})
 	}
 })
+
+var _ = Describe("Object store", func() {
+	var chart console.ChartEntry
+	for _, entry := range console.Charts() {
+		if entry.Name == "Console" {
+			chart = entry
+		}
+	}
+
+	pseudofsConfigMap := common.ManifestKey{
+		Name:      "console-pseudofs",
+		GroupKind: schema.GroupKind{Group: common.GroupCore, Kind: "ConfigMap"},
+	}
+
+	Context("with the gcs provider selected", Ordered, func() {
+		var manifests common.ManifestMap
+
+		BeforeAll(func() {
+			var err error
+			manifests, err = chart.Load(map[string]interface{}{
+				"console": map[string]interface{}{
+					"config": map[string]interface{}{
+						"objectStore": map[string]interface{}{
+							"provider": "gcs",
+							"gcs":      map[string]interface{}{"bucket": "recordings"},
+							"s3":       map[string]interface{}{"bucket": "should-not-emit"},
+							"azure": map[string]interface{}{
+								"storageAccount": "should-not-emit",
+								"container":      "container",
+							},
+						},
+					},
+				},
+			})
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		It("emits only the gcs backend", func() {
+			secret := secretFromManifests(manifests, consoleEnvSecret)
+			Expect(secret.Data).To(HaveKeyWithValue("CONSOLE_OBJECT_STORE_PROVIDER", []byte("gcs")))
+			Expect(secret.Data).To(HaveKeyWithValue("CONSOLE_GCS_BUCKET", []byte("recordings")))
+			Expect(secret.Data).NotTo(HaveKey("CONSOLE_S3_BUCKET"))
+			Expect(secret.Data).NotTo(HaveKey("CONSOLE_AZURE_STORAGE_ACCOUNT"))
+		})
+
+		It("configures the workbench filesystem for google", func() {
+			config := pseudofsConfig(manifests, pseudofsConfigMap)
+			Expect(config).To(ContainSubstring("type: Google"))
+			Expect(config).To(ContainSubstring("recordings"))
+			Expect(config).NotTo(ContainSubstring("type: Aws"))
+			Expect(config).NotTo(ContainSubstring("type: Azure"))
+			Expect(config).NotTo(ContainSubstring("should-not-emit"))
+		})
+	})
+
+	Context("with an inferred s3 backend", Ordered, func() {
+		var manifests common.ManifestMap
+
+		BeforeAll(func() {
+			var err error
+			manifests, err = chart.Load(map[string]interface{}{
+				"console": map[string]interface{}{
+					"config": map[string]interface{}{
+						"objectStore": map[string]interface{}{
+							"s3": map[string]interface{}{"bucket": "recordings"},
+						},
+					},
+				},
+			})
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		It("keeps the s3 env and aws filesystem", func() {
+			secret := secretFromManifests(manifests, consoleEnvSecret)
+			Expect(secret.Data).To(HaveKeyWithValue("CONSOLE_S3_BUCKET", []byte("recordings")))
+			Expect(secret.Data).NotTo(HaveKey("CONSOLE_GCS_BUCKET"))
+			Expect(secret.Data).NotTo(HaveKey("CONSOLE_OBJECT_STORE_PROVIDER"))
+
+			config := pseudofsConfig(manifests, pseudofsConfigMap)
+			Expect(config).To(ContainSubstring("type: Aws"))
+			Expect(config).To(ContainSubstring("recordings"))
+		})
+	})
+})
+
+func pseudofsConfig(manifests common.ManifestMap, key common.ManifestKey) string {
+	raw, exists := manifests[key.String()]
+	Expect(exists).To(BeTrue(), "expected %s to be rendered", key.String())
+	config, found, err := unstructured.NestedString(raw.Object, "data", "pseudofs.yaml")
+	Expect(err).NotTo(HaveOccurred())
+	Expect(found).To(BeTrue())
+	return config
+}

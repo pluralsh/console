@@ -417,7 +417,9 @@ config :console,
   :kas_insecure_skip_tls_verify,
   get_env("KAS_INSECURE_SKIP_TLS_VERIFY") == "true"
 
-if is_set("CONSOLE_S3_BUCKET") do
+object_store_provider = get_env("CONSOLE_OBJECT_STORE_PROVIDER") || ""
+
+if object_store_provider in ["", "s3"] and is_set("CONSOLE_S3_BUCKET") do
   s3_region = get_env("CONSOLE_S3_REGION") || "us-east-1"
   s3_endpoint = get_env("CONSOLE_S3_ENDPOINT")
 
@@ -455,7 +457,7 @@ if is_set("CONSOLE_S3_BUCKET") do
     virtual_host: is_nil(s3_endpoint)
 end
 
-if is_set("CONSOLE_AZURE_STORAGE_ACCOUNT") do
+if object_store_provider in ["", "azure"] and is_set("CONSOLE_AZURE_STORAGE_ACCOUNT") do
   config :console,
     object_store: true,
     object_store_path: get_env("CONSOLE_OBJECT_STORE_PATH") || "plrl"
@@ -466,6 +468,16 @@ if is_set("CONSOLE_AZURE_STORAGE_ACCOUNT") do
     storage_account: get_env("CONSOLE_AZURE_STORAGE_ACCOUNT"),
     container: get_env("CONSOLE_AZURE_STORAGE_CONTAINER"),
     access_key: get_env("CONSOLE_AZURE_STORAGE_ACCESS_KEY")
+end
+
+if object_store_provider in ["", "gcs"] and is_set("CONSOLE_GCS_BUCKET") do
+  config :console,
+    object_store: true,
+    object_store_path: get_env("CONSOLE_OBJECT_STORE_PATH") || "plrl"
+
+  config :waffle,
+    storage: Console.Storage.GCS,
+    bucket: get_env("CONSOLE_GCS_BUCKET")
 end
 
 if is_set("CONSOLE_PSEUDOFS_ADDR") do
