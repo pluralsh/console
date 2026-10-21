@@ -153,6 +153,7 @@ jobs:
         env:
           TEST_CHART_OCI_PASSWORD: ${{ secrets.GITHUB_TOKEN}}
           PSEUDOFS_TEST_ADDR: localhost:9093
+          GCS_TEST_URL: http://localhost:4443
       - name: Verify Changed files
         run: |
           git diff --exit-code -- priv ':(exclude)priv/agent-service-chart.tgz' || {
