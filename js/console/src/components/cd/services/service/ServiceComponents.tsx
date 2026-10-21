@@ -1,4 +1,5 @@
 import {
+  ICON_FRAME_ICON_SIZE,
   AiSparkleFilledIcon,
   Button,
   Callout,
@@ -168,6 +169,7 @@ function ComponentsViewSwitch({ tab, setTab }): ReactNode {
     <FillLevelProvider value={0}>
       <ButtonGroup
         size="small"
+        iconSize={ICON_FRAME_ICON_SIZE.small}
         directory={directory}
         tab={tab}
         onClick={setTab}

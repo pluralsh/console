@@ -82,6 +82,7 @@ function NodeGroup({
         {removable && (
           <IconFrame
             clickable
+            size="small"
             icon={<TrashCanIcon />}
             onClick={() => onRemove?.()}
           />

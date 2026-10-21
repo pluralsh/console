@@ -72,7 +72,9 @@ defmodule Console.AI.Workbench.Engine do
     else
       {:error, {:already_started, _}} = err -> err
       {:error, _} = err ->
-        Workbenches.fail_job("Error loading workbench environment: #{inspect(err)}", job)
+        Logger.warning("Error loading workbench environment: #{inspect(err)}")
+        message = Console.rpc_error_message(err) || inspect(err)
+        Workbenches.fail_job("Error loading workbench environment: #{message}", job)
         err
     end
   end

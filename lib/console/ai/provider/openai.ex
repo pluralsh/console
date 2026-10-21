@@ -51,7 +51,7 @@ defmodule Console.AI.OpenAI do
   @spec completion(t(), Console.AI.Provider.context(), keyword) :: Console.AI.Provider.reqllm_completion_result()
   def completion(%__MODULE__{} = openai, messages, opts) do
     model = openai_model(openai, opts[:model], model_type(opts[:client]))
-    with {:ok, provider_opts} <- request_options(openai, model) do
+    with {:ok, provider_opts} <- request_options(openai, model, opts) do
       messages
       |> reqllm_messages()
       |> generate_text(model, openai.stream, base_opts(provider_opts ++ [tools: tools(opts)], opts))
@@ -67,7 +67,7 @@ defmodule Console.AI.OpenAI do
   @spec tool_call(t(), Console.AI.Provider.history, [atom], keyword) :: {:ok, binary} | {:ok, [Console.AI.Tool.t]} | Console.error
   def tool_call(%__MODULE__{} = openai, messages, tools, opts) do
     model = openai_model(openai, opts[:model], model_type(opts[:client]))
-    with {:ok, provider_opts} <- request_options(openai, model) do
+    with {:ok, provider_opts} <- request_options(openai, model, opts) do
       messages
       |> reqllm_messages()
       |> generate_text(model, openai.stream, base_opts(provider_opts ++ [tools: reqllm_tools(tools), tool_choice: :required], opts))
@@ -98,9 +98,17 @@ defmodule Console.AI.OpenAI do
 
   def tools?(), do: true
 
-  defp request_options(%__MODULE__{} = openai, model) do
-    with {:ok, opts} <- provider_options(openai),
-      do: {:ok, [{:pricing_context, pricing_context(model)} | opts]}
+  defp request_options(%__MODULE__{} = openai, model, request_opts) do
+    with {:ok, opts} <- provider_options(openai) do
+      opts =
+        if request_opts[:stateless] && pricing_api(model) == "responses" do
+          Keyword.put(opts, :provider_options, [store: false])
+        else
+          opts
+        end
+
+      {:ok, [{:pricing_context, pricing_context(model)} | opts]}
+    end
   end
 
   defp provider_options(%__MODULE__{base_url: base_url} = openai) do

@@ -205,6 +205,8 @@ defmodule Console.AI.Provider.BedrockTest do
         assert URI.to_string(request.url) ==
                  "https://bedrock-mantle.#{@region}.api.aws/openai/v1/responses"
 
+        assert body["store"] == false
+        refute Map.has_key?(body, "previous_response_id")
         assert body["reasoning"] == %{"effort" => "low"}
         assert body["max_output_tokens"] == 128_000
 

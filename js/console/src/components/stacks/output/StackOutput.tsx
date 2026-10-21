@@ -67,6 +67,7 @@ const columns = [
         text={getValue() || ''}
         tooltip="Copy value"
         type="tertiary"
+        size="small"
       />
     ),
   }),

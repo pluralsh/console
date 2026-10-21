@@ -2,7 +2,11 @@ import { createColumnHelper } from '@tanstack/react-table'
 
 import { useTheme } from 'styled-components'
 import { useState } from 'react'
-import { ListBoxItem, TrashCanIcon } from '@pluralsh/design-system'
+import {
+  ICON_FRAME_ICON_SIZE,
+  ListBoxItem,
+  TrashCanIcon,
+} from '@pluralsh/design-system'
 
 import { MoreMenu } from 'components/utils/MoreMenu'
 
@@ -126,7 +130,10 @@ export const ColActions = columnHelper.accessor(({ node }) => node?.id, {
           <ListBoxItem
             key={MenuItemKey.Delete}
             leftContent={
-              <TrashCanIcon color={theme.colors['icon-danger-critical']} />
+              <TrashCanIcon
+                size={ICON_FRAME_ICON_SIZE.small}
+                color={theme.colors['icon-danger-critical']}
+              />
             }
             label="Delete backup"
             textValue="Delete backup"

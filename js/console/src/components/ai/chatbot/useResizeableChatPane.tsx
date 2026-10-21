@@ -1,12 +1,14 @@
 import { useResizeObserver } from '@pluralsh/design-system'
 import usePersistedState from 'components/hooks/usePersistedState'
 import { clamp, isNil } from 'lodash'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 const STORAGE_KEY = 'chatbot-panel-width'
 
 export type ResizablePaneOptions = {
+  defaultWidthPx?: number
   storageKey?: string
+  maxWidthPx?: number
   // the pane edge the drag handle sits on
   handleEdge?: 'left' | 'right'
 }
@@ -15,22 +17,44 @@ export function useResizablePane(
   minWidthPx: number,
   maxWidthVw: number,
   initialWidthVw?: number,
-  { storageKey = STORAGE_KEY, handleEdge = 'left' }: ResizablePaneOptions = {}
+  {
+    defaultWidthPx = minWidthPx,
+    storageKey = STORAGE_KEY,
+    maxWidthPx = Number.POSITIVE_INFINITY,
+    handleEdge = 'left',
+  }: ResizablePaneOptions = {}
 ) {
   const [isDragging, setIsDragging] = useState(false)
   const [dragStart, setDragStart] = useState({ x: 0, width: 0 })
   const direction = handleEdge === 'left' ? -1 : 1
 
-  const [calculatedPanelWidth, setCalculatedPanelWidthState] =
-    usePersistedState(storageKey, minWidthPx, 1000)
+  const [storedPanelWidth, setCalculatedPanelWidthState] = usePersistedState(
+    storageKey,
+    defaultWidthPx,
+    1000
+  )
+  const maxPanelWidth = Math.max(
+    minWidthPx,
+    Math.min(maxWidthPx, vwToPx(maxWidthVw))
+  )
+  const calculatedPanelWidth = clamp(
+    storedPanelWidth,
+    minWidthPx,
+    maxPanelWidth
+  )
   const setPanelWidth = useCallback(
     (newWidth: number) =>
       setCalculatedPanelWidthState(
-        // maxWidthVw could be smaller than minWidthPx on narrow screens
-        clamp(newWidth, minWidthPx, Math.max(minWidthPx, vwToPx(maxWidthVw)))
+        // The maximum could be smaller than the minimum on narrow screens.
+        clamp(newWidth, minWidthPx, maxPanelWidth)
       ),
-    [minWidthPx, maxWidthVw, setCalculatedPanelWidthState]
+    [maxPanelWidth, minWidthPx, setCalculatedPanelWidthState]
   )
+
+  useEffect(() => {
+    if (storedPanelWidth !== calculatedPanelWidth)
+      setCalculatedPanelWidthState(calculatedPanelWidth)
+  }, [calculatedPanelWidth, setCalculatedPanelWidthState, storedPanelWidth])
 
   // clamps the current width if necessary when window size changes
   useResizeObserver({ current: document.body }, () =>
@@ -55,11 +79,18 @@ export function useResizablePane(
     e.preventDefault()
     setIsDragging(true)
     setDragStart({ x: e.clientX, width: calculatedPanelWidth })
-    e.currentTarget.setPointerCapture(e.pointerId)
+    e.currentTarget.setPointerCapture?.(e.pointerId)
   }
+  const endDrag = () => setIsDragging(false)
   const handlePointerUp = (e: React.PointerEvent) => {
+    endDrag()
+    if (e.currentTarget.hasPointerCapture?.(e.pointerId))
+      e.currentTarget.releasePointerCapture(e.pointerId)
+  }
+  const handlePointerCancel = (e: React.PointerEvent) => {
     setIsDragging(false)
-    e.currentTarget.releasePointerCapture(e.pointerId)
+    if (e.currentTarget.hasPointerCapture?.(e.pointerId))
+      e.currentTarget.releasePointerCapture(e.pointerId)
   }
 
   const handlePointerMove = (e: React.PointerEvent) => {
@@ -81,6 +112,8 @@ export function useResizablePane(
     onPointerDown: handlePointerDown,
     onPointerMove: handlePointerMove,
     onPointerUp: handlePointerUp,
+    onPointerCancel: handlePointerCancel,
+    onLostPointerCapture: endDrag,
     onKeyDown: handleKeyDown,
   }
 

@@ -70,7 +70,7 @@ export function AccessTokensScopes({ token }: { token: AccessTokenFragment }) {
         textValue="Scopes"
         tooltip
         clickable
-        size="medium"
+        size="small"
         icon={<ArchitectureIcon />}
         onClick={() => setOpen(true)}
       />
