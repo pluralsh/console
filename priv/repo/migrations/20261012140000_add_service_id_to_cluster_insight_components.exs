@@ -3,7 +3,7 @@ defmodule Console.Repo.Migrations.AddServiceIdToClusterInsightComponents do
 
   def change do
     alter table(:cluster_insight_components) do
-      add :service_id, references(:services, type: :uuid, on_delete: :nilify_all)
+      add :service_id, :uuid
     end
 
     create index(:cluster_insight_components, [:service_id])

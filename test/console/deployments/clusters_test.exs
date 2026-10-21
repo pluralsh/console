@@ -1359,15 +1359,15 @@ defmodule Console.Deployments.ClustersTest do
       assert refetch(kept)
     end
 
-    test "it stores the service managing an insight component, but only if it runs on the cluster" do
+    test "it stores the service managing an insight component, and drops malformed ids" do
       cluster = insert(:cluster)
       svc = insert(:service, cluster: cluster)
-      foreign = insert(:service)
+      gone = Ecto.UUID.generate()
 
       {:ok, _} = Clusters.ping(%{
         insight_components: [
           %{group: "apps", version: "v1", kind: "Deployment", namespace: "default", name: "managed", service_id: svc.id},
-          %{group: "apps", version: "v1", kind: "Deployment", namespace: "default", name: "foreign", service_id: foreign.id},
+          %{group: "apps", version: "v1", kind: "Deployment", namespace: "default", name: "deleted", service_id: gone},
           %{group: "apps", version: "v1", kind: "Deployment", namespace: "default", name: "malformed", service_id: "not-a-uuid"},
           %{group: "apps", version: "v1", kind: "Deployment", namespace: "default", name: "unmanaged"}
         ]
@@ -1376,7 +1376,7 @@ defmodule Console.Deployments.ClustersTest do
       by_name = Console.Repo.all(Console.Schema.ClusterInsightComponent.for_cluster(cluster.id))
                 |> Map.new(& {&1.name, &1.service_id})
 
-      assert by_name == %{"managed" => svc.id, "foreign" => nil, "malformed" => nil, "unmanaged" => nil}
+      assert by_name == %{"managed" => svc.id, "deleted" => gone, "malformed" => nil, "unmanaged" => nil}
     end
   end
 

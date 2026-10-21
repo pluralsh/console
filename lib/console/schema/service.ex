@@ -340,10 +340,6 @@ defmodule Console.Schema.Service do
     )
   end
 
-  def ids(query \\ __MODULE__) do
-    from(s in query, select: s.id)
-  end
-
   def for_clusters(query \\ __MODULE__, cluster_ids) do
     from(s in query, where: s.cluster_id in ^cluster_ids)
   end

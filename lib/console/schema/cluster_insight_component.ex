@@ -62,7 +62,6 @@ defmodule Console.Schema.ClusterInsightComponent do
     |> cast(attrs, @valid)
     |> cast_assoc(:insight)
     |> foreign_key_constraint(:cluster_id)
-    |> foreign_key_constraint(:service_id)
     |> validate_required([:kind, :name])
   end
 end
