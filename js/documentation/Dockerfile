@@ -10,7 +10,9 @@ COPY js/documentation/package.json ./documentation/package.json
 
 # Focus skips the console app. The design system is focused too because Next
 # transpiles and type-checks its source, which needs its dev-only type deps.
-RUN corepack enable \
+# Node 25+ no longer bundles corepack
+RUN npm install -g corepack@0.36.0 \
+  && corepack enable \
   && YARN_ENABLE_IMMUTABLE_INSTALLS=true \
     yarn workspaces focus @pluralsh/documentation @pluralsh/design-system
 

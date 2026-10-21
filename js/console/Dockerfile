@@ -8,7 +8,9 @@ COPY js/console/package.json ./console/package.json
 COPY js/design-system/package.json ./design-system/package.json
 COPY js/documentation/package.json ./documentation/package.json
 
-RUN corepack enable \
+# Node 25+ no longer bundles corepack
+RUN npm install -g corepack@0.36.0 \
+  && corepack enable \
   && yarn install --immutable
 
 COPY js/console/ ./console/

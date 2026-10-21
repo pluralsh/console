@@ -82,7 +82,7 @@ jobs:
           node-version-file: js/.tool-versions
           cache: yarn
           cache-dependency-path: js/yarn.lock
-      - run: corepack enable
+      - run: npm install -g corepack@0.36.0 && corepack enable
         working-directory: js
       - run: yarn --immutable
         working-directory: js

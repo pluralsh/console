@@ -59,7 +59,7 @@ jobs:
           node-version-file: js/.tool-versions
           cache: yarn
           cache-dependency-path: js/yarn.lock
-      - run: corepack enable
+      - run: npm install -g corepack@0.36.0 && corepack enable
       # Full install: type-aware oxlint rules need every app's dependencies.
       - run: yarn install --immutable
       - run: yarn dedupe --check
@@ -81,7 +81,7 @@ jobs:
           node-version-file: js/.tool-versions
           cache: yarn
           cache-dependency-path: js/yarn.lock
-      - run: corepack enable
+      - run: npm install -g corepack@0.36.0 && corepack enable
       - run: >-
           YARN_ENABLE_IMMUTABLE_INSTALLS=true
           yarn workspaces focus console @pluralsh/design-system
@@ -102,7 +102,7 @@ jobs:
           node-version-file: js/.tool-versions
           cache: yarn
           cache-dependency-path: js/yarn.lock
-      - run: corepack enable
+      - run: npm install -g corepack@0.36.0 && corepack enable
       - run: >-
           YARN_ENABLE_IMMUTABLE_INSTALLS=true
           yarn workspaces focus console @pluralsh/design-system @pluralsh/documentation

@@ -18,7 +18,9 @@ COPY js/documentation/package.json ./documentation/package.json
 # Focus skips documentation and Storybook. Vite bundles
 # the design system from source, so the image only needs those two workspaces.
 # Immutable installs match `yarn install --immutable` (CI is unset in Docker).
-RUN corepack enable \
+# Node 25+ no longer bundles corepack
+RUN npm install -g corepack@0.36.0 \
+  && corepack enable \
   && YARN_ENABLE_IMMUTABLE_INSTALLS=true \
     yarn workspaces focus console @pluralsh/design-system
 

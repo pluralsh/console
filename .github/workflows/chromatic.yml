@@ -54,7 +54,7 @@ jobs:
           node-version-file: js/.tool-versions
           cache: yarn
           cache-dependency-path: js/yarn.lock
-      - run: corepack enable
+      - run: npm install -g corepack@0.36.0 && corepack enable
       - run: yarn --immutable
       - run: yarn workspace @pluralsh/design-system build:storybook
       - uses: chromaui/action@6b3c2820222d23bad770d57a4ad5e2d1c91f92e9 # v18.9.5
