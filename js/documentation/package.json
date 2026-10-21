@@ -10,6 +10,7 @@
     "build": "run-s generate:route-index build:next",
     "build:next": "biome check --vcs-enabled=false ./src ./pages && next build",
     "start": "next start -p 3000",
+    "typecheck": "next typegen && tsc --build",
     "lint": "run-p lint:biome lint:js",
     "lint:biome": "biome check ./src ./pages",
     "lint:js": "oxlint -c ../.oxlintrc.json src pages",

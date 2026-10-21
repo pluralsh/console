@@ -49,6 +49,36 @@
       "allowedVersions": ">0.99.0"
     },
     {
+      "description": "Node in js/.tool-versions, engines, .nvmrc and Docker images moves together",
+      "matchDepNames": ["node"],
+      "groupName": "Node.js"
+    },
+    {
+      "description": "Adobe releases these in lockstep; separate PRs leave duplicate @internationalized types",
+      "matchPackageNames": ["react-aria", "react-aria-components", "react-stately", "@adobe/react-spectrum", "@react-aria/**", "@react-stately/**", "@react-types/**", "@react-spectrum/**", "@internationalized/**"],
+      "groupName": "react-aria"
+    },
+    {
+      "matchPackageNames": ["react", "react-dom", "@types/react", "@types/react-dom"],
+      "groupName": "react"
+    },
+    {
+      "matchPackageNames": ["storybook", "@storybook/**"],
+      "groupName": "storybook"
+    },
+    {
+      "matchPackageNames": ["vite", "vitest", "@vitest/**", "@vitejs/**"],
+      "groupName": "vite"
+    },
+    {
+      "matchPackageNames": ["oxlint", "oxlint-tsgolint"],
+      "groupName": "oxlint"
+    },
+    {
+      "matchPackageNames": ["@graphql-codegen/**"],
+      "groupName": "graphql-codegen"
+    },
+    {
       "matchManagers": ["npm"],
       "additionalBranchPrefix": "frontend/",
       "semanticCommitScope": "frontend",
@@ -74,6 +104,7 @@
       "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
     }
   ],
+  "postUpdateOptions": ["yarnDedupeHighest"],
   "labels": ["dependencies"],
   "separateMinorPatch": true
 }

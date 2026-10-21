@@ -4,7 +4,29 @@ import { SavedPromptForm } from 'components/workbenches/workbench/prompts/SavedP
 
 import { WorkbenchJobCreateInput } from 'components/workbenches/workbench/WorkbenchJobCreateInput'
 
-const queryState = vi.hoisted(() => ({ promptsAvailable: true }))
+const queryState = vi.hoisted(() => {
+  // a new object per call, like a network refetch returns
+  const makeData = ({ title = 'Existing title', budget = true } = {}) => ({
+    workbench: {
+      id: 'wb',
+      modes: budget ? { budget: { tokens: 1000 } } : {},
+      prompts: {
+        edges: [
+          {
+            node: {
+              id: 'prompt',
+              title,
+              prompt: 'Existing instruction',
+              category: 'Infra',
+            },
+          },
+        ],
+      },
+    },
+  })
+
+  return { promptsAvailable: true, makeData, data: makeData() }
+})
 
 vi.mock('@pluralsh/design-system', () => ({
   Button: ({ children, onClick, disabled }: any) => (
@@ -50,36 +72,16 @@ vi.mock('react-router-dom', () => ({
   useLocation: () => ({}),
   useParams: () => ({ workbenchId: 'wb', savedPromptId: 'prompt' }),
 }))
-vi.mock('generated/graphql', () => {
-  const data = {
-    workbench: {
-      id: 'wb',
-      modes: { budget: { tokens: 1000 } },
-      prompts: {
-        edges: [
-          {
-            node: {
-              id: 'prompt',
-              title: 'Existing title',
-              prompt: 'Existing instruction',
-              category: 'Infra',
-            },
-          },
-        ],
-      },
-    },
-  }
-  return {
-    useCreateWorkbenchJobMutation: () => [vi.fn(), {}],
-    useWorkbenchQuery: () => ({ data, loading: false }),
-    useWorkbenchPromptsQuery: () => ({
-      data: queryState.promptsAvailable ? data : undefined,
-      loading: !queryState.promptsAvailable,
-    }),
-    useCreateWorkbenchPromptMutation: () => [vi.fn(), {}],
-    useUpdateWorkbenchPromptMutation: () => [vi.fn(), {}],
-  }
-})
+vi.mock('generated/graphql', () => ({
+  useCreateWorkbenchJobMutation: () => [vi.fn(), {}],
+  useWorkbenchQuery: () => ({ data: queryState.data, loading: false }),
+  useWorkbenchPromptsQuery: () => ({
+    data: queryState.promptsAvailable ? queryState.data : undefined,
+    loading: !queryState.promptsAvailable,
+  }),
+  useCreateWorkbenchPromptMutation: () => [vi.fn(), {}],
+  useUpdateWorkbenchPromptMutation: () => [vi.fn(), {}],
+}))
 vi.mock('components/ai/chatbot/input/ChatAttachments', () => ({
   withAttachmentHint: (s: string) => s,
 }))
@@ -127,6 +129,7 @@ vi.mock(
 )
 beforeEach(() => {
   queryState.promptsAvailable = true
+  queryState.data = queryState.makeData()
 })
 afterEach(cleanup)
 it('loads a saved prompt when query data is already cached on mount', () => {
@@ -164,6 +167,53 @@ it('loads a saved prompt when query data arrives after mount', () => {
       .getByPlaceholderText('e.g. Summarize recent customer feedback')
       .getAttribute('value')
   ).toBe('Existing title')
+})
+
+it('keeps saved prompt edits when the query refetches', () => {
+  const { rerender } = render(<SavedPromptForm mode="edit" />)
+  const title = screen.getByPlaceholderText(
+    'e.g. Summarize recent customer feedback'
+  )
+  fireEvent.change(title, { target: { value: 'Edited title' } })
+  queryState.data = queryState.makeData({ title: 'Refetched title' })
+  rerender(<SavedPromptForm mode="edit" />)
+  expect(title.getAttribute('value')).toBe('Edited title')
+})
+
+it('follows refetched workbench defaults until the user picks modes', () => {
+  const { rerender } = render(
+    <WorkbenchJobCreateInput
+      workbenchId="wb"
+      workbenchLoading={false}
+    />
+  )
+  expect(screen.queryByText('Limit on')).not.toBeNull()
+  queryState.data = queryState.makeData({ budget: false })
+  rerender(
+    <WorkbenchJobCreateInput
+      workbenchId="wb"
+      workbenchLoading={false}
+    />
+  )
+  expect(screen.queryByText('Limit off')).not.toBeNull()
+})
+
+it('keeps the user-picked modes when workbench defaults refetch', () => {
+  const { rerender } = render(
+    <WorkbenchJobCreateInput
+      workbenchId="wb"
+      workbenchLoading={false}
+    />
+  )
+  fireEvent.click(screen.getByText('Limit on'))
+  queryState.data = queryState.makeData()
+  rerender(
+    <WorkbenchJobCreateInput
+      workbenchId="wb"
+      workbenchLoading={false}
+    />
+  )
+  expect(screen.queryByText('Limit off')).not.toBeNull()
 })
 
 it('allows clearing a workbench default budget', () => {
