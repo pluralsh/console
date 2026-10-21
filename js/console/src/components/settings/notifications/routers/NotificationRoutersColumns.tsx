@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import {
+  ICON_FRAME_ICON_SIZE,
   ListBoxItem,
   PencilIcon,
   Tooltip,
@@ -196,7 +197,7 @@ export const ColActions = columnHelper.accessor(({ node }) => node, {
         <MoreMenu onSelectionChange={(newKey) => setMenuKey(newKey)}>
           <ListBoxItem
             key={MenuItemKey.Edit}
-            leftContent={<PencilIcon size={10} />}
+            leftContent={<PencilIcon size={ICON_FRAME_ICON_SIZE.small} />}
             label="Edit router"
             textValue="Edit router"
           />
@@ -204,7 +205,7 @@ export const ColActions = columnHelper.accessor(({ node }) => node, {
             key={MenuItemKey.Delete}
             leftContent={
               <TrashCanIcon
-                size={10}
+                size={ICON_FRAME_ICON_SIZE.small}
                 color={theme.colors['icon-danger-critical']}
               />
             }

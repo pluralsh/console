@@ -289,14 +289,14 @@ function getColumns({
         >
           <IconFrame
             clickable
-            size="xsmall"
+            size="small"
             tooltip="Edit chatbot"
             icon={<PencilIcon />}
             onClick={() => onEdit(row.original)}
           />
           <IconFrame
             clickable
-            size="xsmall"
+            size="small"
             tooltip="Delete chatbot"
             icon={<TrashCanIcon color="icon-danger" />}
             onClick={() => onDelete(row.original)}

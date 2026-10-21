@@ -1,4 +1,5 @@
 import {
+  ICON_FRAME_ICON_SIZE,
   ArrowTopRightIcon,
   Button,
   CaretDownIcon,
@@ -118,10 +119,10 @@ export default function StackActions({
                 css={{
                   borderTopLeftRadius: 0,
                   borderBottomLeftRadius: 0,
-                  '.icon': { width: 10, height: 10 },
                 }}
                 type="floating"
                 size="medium"
+                iconSize={ICON_FRAME_ICON_SIZE.small}
                 icon={<CaretDownIcon />}
                 clickable
               />
@@ -156,7 +157,7 @@ export default function StackActions({
           small
           as={Link}
           to={getServiceDetailsPath({ serviceId: stack.parent.id })}
-          endIcon={<ArrowTopRightIcon size={10} />}
+          endIcon={<ArrowTopRightIcon size={ICON_FRAME_ICON_SIZE.small} />}
         >
           Parent
         </Button>

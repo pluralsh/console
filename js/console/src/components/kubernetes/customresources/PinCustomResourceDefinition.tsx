@@ -27,7 +27,7 @@ export default function PinCustomResourceDefinition({
           icon={<PushPinFilledIcon />}
           textValue="Pin Custom Resource Definition"
           tooltip
-          size="medium"
+          size="small"
           clickable
           onClick={() => setOpen(true)}
         />

@@ -207,7 +207,7 @@ export function UpdateProvider({
     <>
       <IconFrame
         clickable
-        size="xsmall"
+        size="small"
         tooltip="Configure provider"
         icon={<GearTrainIcon />}
         onClick={() => {

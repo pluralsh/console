@@ -1,4 +1,5 @@
 import {
+  ICON_FRAME_ICON_SIZE,
   Breadcrumb,
   EmptyState,
   GearTrainIcon,
@@ -121,13 +122,13 @@ const getSharedMenuItems = (cluster: ClusterFragment): Array<MoreMenuItem> => [
   {
     key: 'permissions',
     label: 'Permissions',
-    icon: <PersonIcon />,
+    icon: <PersonIcon size={ICON_FRAME_ICON_SIZE.small} />,
     enabled: true,
   },
   {
     key: 'settings',
     label: 'Settings',
-    icon: <GearTrainIcon />,
+    icon: <GearTrainIcon size={ICON_FRAME_ICON_SIZE.small} />,
     enabled: !cluster.self,
   },
 ]
@@ -281,7 +282,11 @@ export function Cluster() {
           {headerContent}
           <MoreMenu
             onSelectionChange={(newKey: string) => setMenuKey(newKey)}
-            triggerProps={{ iconFrameType: 'secondary', size: 'medium' }}
+            triggerProps={{
+              iconFrameType: 'secondary',
+              size: 'medium',
+              iconSize: ICON_FRAME_ICON_SIZE.small,
+            }}
           >
             {moreMenuItems.map((item) => {
               const enabled = isFunction(item.enabled)

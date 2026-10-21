@@ -324,14 +324,14 @@ function PluralSkillRow({
       >
         <IconFrame
           clickable
-          size="xsmall"
+          size="small"
           tooltip="Edit skill"
           icon={<PencilIcon />}
           onClick={onEdit}
         />
         <IconFrame
           clickable
-          size="xsmall"
+          size="small"
           tooltip="Delete skill"
           icon={<TrashCanIcon color="icon-danger" />}
           onClick={onDelete}

@@ -1,4 +1,5 @@
 import {
+  ICON_FRAME_ICON_SIZE,
   Breadcrumb,
   BookmarkIcon,
   BotIcon,
@@ -426,44 +427,52 @@ export function WorkbenchTabs() {
             <MoreMenu
               disabled={!workbench}
               maxHeight="min(80vh, 520px)"
-              triggerProps={{ iconFrameType: 'secondary', size: 'medium' }}
+              triggerProps={{
+                iconFrameType: 'secondary',
+                size: 'medium',
+                iconSize: ICON_FRAME_ICON_SIZE.small,
+              }}
               onSelectionChange={handleMoreMenuSelection}
             >
               {!showEditWorkbenchButton && (
                 <ListBoxItem
                   key={WorkbenchMoreMenuKey.Edit}
-                  leftContent={<GearTrainIcon size={10} />}
+                  leftContent={
+                    <GearTrainIcon size={ICON_FRAME_ICON_SIZE.small} />
+                  }
                   label="Edit workbench"
                 />
               )}
               <ListBoxItem
                 key={WorkbenchMoreMenuKey.Tools}
-                leftContent={<ToolsIcon size={10} />}
+                leftContent={<ToolsIcon size={ICON_FRAME_ICON_SIZE.small} />}
                 label="Tools"
               />
               <ListBoxItem
                 key={WorkbenchMoreMenuKey.Cron}
-                leftContent={<EventScheduleIcon size={10} />}
+                leftContent={
+                  <EventScheduleIcon size={ICON_FRAME_ICON_SIZE.small} />
+                }
                 label="Cron schedules"
               />
               <ListBoxItem
                 key={WorkbenchMoreMenuKey.Webhook}
-                leftContent={<WebhooksIcon size={10} />}
+                leftContent={<WebhooksIcon size={ICON_FRAME_ICON_SIZE.small} />}
                 label="Webhook triggers"
               />
               <ListBoxItem
                 key={WorkbenchMoreMenuKey.Chatbots}
-                leftContent={<BotIcon size={10} />}
+                leftContent={<BotIcon size={ICON_FRAME_ICON_SIZE.small} />}
                 label="Chatbots"
               />
               <ListBoxItem
                 key={WorkbenchMoreMenuKey.SavedPrompts}
-                leftContent={<BookmarkIcon size={10} />}
+                leftContent={<BookmarkIcon size={ICON_FRAME_ICON_SIZE.small} />}
                 label="Saved prompts"
               />
               <ListBoxItem
                 key={WorkbenchMoreMenuKey.EvalSettings}
-                leftContent={<TuningIcon size={10} />}
+                leftContent={<TuningIcon size={ICON_FRAME_ICON_SIZE.small} />}
                 label="Eval settings"
               />
               <ListBoxItem
@@ -471,7 +480,7 @@ export function WorkbenchTabs() {
                 destructive
                 leftContent={
                   <TrashCanIcon
-                    size={10}
+                    size={ICON_FRAME_ICON_SIZE.small}
                     color="icon-danger"
                   />
                 }

@@ -1,4 +1,5 @@
 import {
+  ICON_FRAME_ICON_SIZE,
   ArrowTopRightIcon,
   CaretDownIcon,
   IconFrame,
@@ -91,7 +92,7 @@ const cols = [
       return (
         <TriggerWrapperSC>
           <TriggerArrowSC data-open={row.getIsExpanded()}>
-            <CaretDownIcon size={10} />
+            <CaretDownIcon size={ICON_FRAME_ICON_SIZE.small} />
           </TriggerArrowSC>
           <span css={{ flex: 1 }}>{title}</span>
           <PrStatusChip status={status} />
@@ -99,7 +100,7 @@ const cols = [
           <ResyncStackPr id={id} />
           <IconFrame
             clickable
-            size="xsmall"
+            size="small"
             as={Link}
             icon={<ArrowTopRightIcon />}
             to={url}
@@ -143,7 +144,7 @@ function ResyncStackPr({ id }: { id: string }) {
       <IconFrame
         disabled={loading}
         clickable
-        size="xsmall"
+        size="small"
         type="floating"
         tooltip="Resync"
         icon={<ReloadIcon />}

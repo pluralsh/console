@@ -1,5 +1,6 @@
 import { ReactElement, useEffect, useState } from 'react'
 import {
+  ICON_FRAME_ICON_SIZE,
   AppIcon,
   ArrowRightIcon,
   Button,
@@ -250,7 +251,7 @@ const ColActions = columnHelper.accessor((node) => node, {
         >
           <ListBoxItem
             key={MenuItemKey.Permissions}
-            leftContent={<PeopleIcon size={10} />}
+            leftContent={<PeopleIcon size={ICON_FRAME_ICON_SIZE.small} />}
             label="Permissions"
             textValue="Permissions"
           />
@@ -258,7 +259,7 @@ const ColActions = columnHelper.accessor((node) => node, {
             key={MenuItemKey.Delete}
             leftContent={
               <TrashCanIcon
-                size={10}
+                size={ICON_FRAME_ICON_SIZE.small}
                 color={theme.colors['icon-danger-critical']}
               />
             }

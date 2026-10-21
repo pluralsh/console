@@ -1,4 +1,5 @@
 import {
+  ICON_FRAME_ICON_SIZE,
   Button,
   Chip,
   Code,
@@ -446,7 +447,7 @@ function DefinitionActions({
         <ListBoxItem
           key="edit"
           label="Edit policy"
-          leftContent={<PencilIcon size={10} />}
+          leftContent={<PencilIcon size={ICON_FRAME_ICON_SIZE.small} />}
         />
         <ListBoxItem
           destructive
@@ -454,7 +455,7 @@ function DefinitionActions({
           label="Delete policy"
           leftContent={
             <TrashCanIcon
-              size={10}
+              size={ICON_FRAME_ICON_SIZE.small}
               color={theme.colors['icon-danger']}
             />
           }

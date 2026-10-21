@@ -86,7 +86,12 @@ export function getWebhookColumns({
             onMouseLeave={() => setShowCopy(false)}
           >
             <span css={TRUNCATE}>{getValue()}</span>
-            {showCopy && <CopyButton text={getValue()} />}
+            {showCopy && (
+              <CopyButton
+                text={getValue()}
+                size="small"
+              />
+            )}
           </ColUrlWrapper>
         )
       },
@@ -144,7 +149,7 @@ function WebhookActions({
     >
       <IconFrame
         clickable
-        size="xsmall"
+        size="small"
         tooltip="Edit webhook"
         icon={<PencilIcon />}
         onClick={() =>
@@ -157,7 +162,7 @@ function WebhookActions({
       />
       <IconFrame
         clickable
-        size="xsmall"
+        size="small"
         tooltip="Delete webhook"
         icon={<TrashCanIcon color={theme.colors['icon-danger']} />}
         onClick={() => setDeleting(true)}

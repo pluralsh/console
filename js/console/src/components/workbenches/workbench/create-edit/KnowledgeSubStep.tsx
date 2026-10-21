@@ -272,14 +272,14 @@ function KnowledgeRow({
       >
         <IconFrame
           clickable
-          size="xsmall"
+          size="small"
           tooltip="Edit knowledge"
           icon={<PencilIcon />}
           onClick={onEdit}
         />
         <IconFrame
           clickable
-          size="xsmall"
+          size="small"
           tooltip="Delete knowledge"
           icon={<TrashCanIcon color="icon-danger" />}
           onClick={onDelete}

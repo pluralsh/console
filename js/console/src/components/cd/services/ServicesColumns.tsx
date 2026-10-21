@@ -1,4 +1,5 @@
 import {
+  ICON_FRAME_ICON_SIZE,
   DryRunIcon,
   Flex,
   GearTrainIcon,
@@ -384,28 +385,28 @@ export const ColActions = columnHelper.accessor(({ node }) => node?.id, {
             {!node?.globalService?.id && (
               <ListBoxItem
                 key={MenuItemKey.MakeGlobal}
-                leftContent={<GlobeIcon size={10} />}
+                leftContent={<GlobeIcon size={ICON_FRAME_ICON_SIZE.small} />}
                 label="Make global"
                 textValue="Make global"
               />
             )}
             <ListBoxItem
               key={MenuItemKey.Permissions}
-              leftContent={<PeopleIcon size={10} />}
+              leftContent={<PeopleIcon size={ICON_FRAME_ICON_SIZE.small} />}
               label="Permissions"
               textValue="Permissions"
             />
             {!isEmpty(serviceDeployment.helm?.repository) && (
               <ListBoxItem
                 key={MenuItemKey.HelmValues}
-                leftContent={<ListIcon size={10} />}
+                leftContent={<ListIcon size={ICON_FRAME_ICON_SIZE.small} />}
                 label="Helm values"
                 textValue="Helm values"
               />
             )}
             <ListBoxItem
               key={MenuItemKey.Settings}
-              leftContent={<GearTrainIcon size={10} />}
+              leftContent={<GearTrainIcon size={ICON_FRAME_ICON_SIZE.small} />}
               label="Settings"
               textValue="Settings"
             />
@@ -414,7 +415,7 @@ export const ColActions = columnHelper.accessor(({ node }) => node?.id, {
                 key={MenuItemKey.DeleteGlobal}
                 leftContent={
                   <GlobeIcon
-                    size={10}
+                    size={ICON_FRAME_ICON_SIZE.small}
                     color={theme.colors['icon-danger']}
                   />
                 }
@@ -427,7 +428,7 @@ export const ColActions = columnHelper.accessor(({ node }) => node?.id, {
                 key={MenuItemKey.Detach}
                 leftContent={
                   <ReturnIcon
-                    size={10}
+                    size={ICON_FRAME_ICON_SIZE.small}
                     color={theme.colors['icon-danger-critical']}
                   />
                 }
@@ -440,7 +441,7 @@ export const ColActions = columnHelper.accessor(({ node }) => node?.id, {
                 key={MenuItemKey.Delete}
                 leftContent={
                   <TrashCanIcon
-                    size={10}
+                    size={ICON_FRAME_ICON_SIZE.small}
                     color={theme.colors['icon-danger-critical']}
                   />
                 }

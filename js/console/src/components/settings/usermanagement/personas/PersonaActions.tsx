@@ -50,14 +50,14 @@ export default function PersonaActions({ persona }: { persona: PersonaT }) {
         <Flex gap="xsmall">
           <IconFrame
             clickable
-            size="xsmall"
+            size="small"
             onClick={() => dialogKey === '' && setDialogKey('editAttrs')}
             tooltip="Edit attributes"
             icon={<GearTrainIcon />}
           />
           <IconFrame
             clickable
-            size="xsmall"
+            size="small"
             onClick={() => setDialogKey('editBindings')}
             tooltip="Edit members"
             icon={<PeopleIcon />}

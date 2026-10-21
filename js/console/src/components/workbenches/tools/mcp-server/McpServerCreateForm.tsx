@@ -298,7 +298,7 @@ export function McpServerCreateForm({
                     />
                     {canRemove && (
                       <DeleteIconButton
-                        size="xsmall"
+                        size="small"
                         onClick={() =>
                           setHeaders((prev) =>
                             prev.filter((row) => row.id !== header.id)

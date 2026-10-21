@@ -1,4 +1,5 @@
 import {
+  ICON_FRAME_ICON_SIZE,
   Chip,
   Flex,
   GearTrainIcon,
@@ -511,13 +512,13 @@ export const ColCdTableActions = columnHelper.accessor(({ node }) => node, {
         <MoreMenu onSelectionChange={(newKey) => setMenuKey(newKey)}>
           <ListBoxItem
             key={MenuItemKey.Permissions}
-            leftContent={<PeopleIcon size={10} />}
+            leftContent={<PeopleIcon size={ICON_FRAME_ICON_SIZE.small} />}
             label="Permissions"
             textValue="Permissions"
           />
           <ListBoxItem
             key={MenuItemKey.Settings}
-            leftContent={<GearTrainIcon size={10} />}
+            leftContent={<GearTrainIcon size={ICON_FRAME_ICON_SIZE.small} />}
             label="Settings"
             textValue="Settings"
           />
@@ -526,7 +527,7 @@ export const ColCdTableActions = columnHelper.accessor(({ node }) => node, {
               key={MenuItemKey.Detach}
               leftContent={
                 <ReturnIcon
-                  size={10}
+                  size={ICON_FRAME_ICON_SIZE.small}
                   color={theme.colors['icon-danger-critical']}
                 />
               }
@@ -539,7 +540,7 @@ export const ColCdTableActions = columnHelper.accessor(({ node }) => node, {
               key={MenuItemKey.Delete}
               leftContent={
                 <TrashCanIcon
-                  size={10}
+                  size={ICON_FRAME_ICON_SIZE.small}
                   color={theme.colors['icon-danger-critical']}
                 />
               }
@@ -592,7 +593,7 @@ export const ColHomeTableActions = columnHelper.accessor(({ node }) => node, {
           insight={getValue()?.insight}
         />
         <TableCaretLink
-          size="xsmall"
+          size="small"
           to={getClusterDetailsPath({
             clusterId: cluster?.id,
           })}

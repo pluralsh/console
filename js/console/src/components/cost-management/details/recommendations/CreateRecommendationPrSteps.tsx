@@ -1,4 +1,5 @@
 import {
+  ICON_FRAME_ICON_SIZE,
   AiSparkleFilledIcon,
   ArrowTopRightIcon,
   Button,
@@ -142,7 +143,7 @@ export function SelectPrAutomationStep({
           href={PRA_DOCS_URL}
           target="_blank"
           rel="noopener noreferrer"
-          endIcon={<ArrowTopRightIcon size={10} />}
+          endIcon={<ArrowTopRightIcon size={ICON_FRAME_ICON_SIZE.small} />}
           style={{
             width: 'fit-content',
             color: 'inherit',

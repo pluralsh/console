@@ -1,4 +1,5 @@
 import {
+  ICON_FRAME_ICON_SIZE,
   AiSparkleFilledIcon,
   ArrowTopRightIcon,
   Button,
@@ -138,7 +139,7 @@ export default function StackRunSidecar({
             <Button
               small
               floating
-              endIcon={<ArrowTopRightIcon size={10} />}
+              endIcon={<ArrowTopRightIcon size={ICON_FRAME_ICON_SIZE.small} />}
               as={Link}
               to={pr?.url}
             >

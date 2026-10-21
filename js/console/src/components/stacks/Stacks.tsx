@@ -1,4 +1,5 @@
 import {
+  ICON_FRAME_ICON_SIZE,
   ArrowTopRightIcon,
   Button,
   EmptyState,
@@ -365,6 +366,7 @@ export function Stacks() {
                 textValue="Menu"
                 clickable
                 size="medium"
+                iconSize={ICON_FRAME_ICON_SIZE.small}
                 icon={
                   <MoreIcon
                     color={
@@ -380,7 +382,7 @@ export function Stacks() {
               key={MenuItemKey.ManagePermissions}
               label="Manage permissions"
               textValue="Manage permissions"
-              leftContent={<PeopleIcon size={10} />}
+              leftContent={<PeopleIcon size={ICON_FRAME_ICON_SIZE.small} />}
             />
             <ListBoxItem
               destructive
@@ -389,7 +391,7 @@ export function Stacks() {
               textValue="Detach stack"
               leftContent={
                 <ReturnIcon
-                  size={10}
+                  size={ICON_FRAME_ICON_SIZE.small}
                   color={theme.colors['icon-danger']}
                 />
               }
@@ -401,7 +403,7 @@ export function Stacks() {
               textValue={deleteLabel}
               leftContent={
                 <TrashCanIcon
-                  size={10}
+                  size={ICON_FRAME_ICON_SIZE.small}
                   color={theme.colors['icon-danger']}
                 />
               }

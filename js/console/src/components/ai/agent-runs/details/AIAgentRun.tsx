@@ -392,7 +392,7 @@ function AgentRunRepromptInput({ run }: { run: AgentRunFragment }) {
                   </Body2P>
                   <IconFrame
                     clickable
-                    size="xsmall"
+                    size="small"
                     tooltip="Remove"
                     icon={<TrashCanIcon color="icon-danger" />}
                     onClick={() =>

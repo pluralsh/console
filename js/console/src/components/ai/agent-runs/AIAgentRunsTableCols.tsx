@@ -11,6 +11,7 @@ import {
   Table,
 } from '@pluralsh/design-system'
 import { WorkbenchLinkChip } from 'components/workbenches/common/WorkbenchLinkChip'
+import { WorkbenchJobPrChip } from 'components/workbenches/common/WorkbenchJobPrIcon'
 import { createColumnHelper } from '@tanstack/react-table'
 import {
   ColInsertedAt,
@@ -32,7 +33,6 @@ import { useMemo, useState } from 'react'
 import { Link, LinkProps } from 'react-router-dom'
 import { getPodDetailsPath } from 'routes/cdRoutesConsts'
 import { useTheme } from 'styled-components'
-import { isNonNullable } from 'utils/isNonNullable'
 import { RunStatusIcon } from './AgentRunInfoDisplays'
 
 const columnHelper = createColumnHelper<AgentRunTinyFragment>()
@@ -78,7 +78,7 @@ export const agentRunsCols = [
   columnHelper.accessor((run) => run.pullRequests, {
     id: 'pullRequests',
     cell: function Cell({ getValue }) {
-      return <PRsModalIcon prs={getValue()?.filter(isNonNullable) ?? []} />
+      return <WorkbenchJobPrChip pullRequests={getValue()} />
     },
   }),
   columnHelper.accessor((run) => run, {
@@ -134,7 +134,7 @@ export const agentRunsCols = [
       return (
         <IconFrame
           clickable
-          size="xsmall"
+          size="small"
           tooltip="View  details"
           icon={<CaretRightIcon />}
         />

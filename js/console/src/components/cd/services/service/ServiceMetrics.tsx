@@ -1,4 +1,5 @@
 import {
+  ICON_FRAME_ICON_SIZE,
   DeploymentIcon,
   EmptyState,
   Flex,
@@ -79,6 +80,7 @@ export function ServiceMetrics() {
       () => (
         <ButtonGroup
           size="small"
+          iconSize={ICON_FRAME_ICON_SIZE.small}
           directory={METRICS_DIRECTORY}
           tab={currentTab}
           toPath={(path) => `metrics/${path}`}

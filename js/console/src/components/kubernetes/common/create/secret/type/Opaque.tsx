@@ -79,7 +79,7 @@ function DataEntryUnstyled({
           }}
         />
         <DeleteIconButton
-          size="xsmall"
+          size="small"
           onClick={() => {
             const newData = [...data]
             newData.splice(index, 1)

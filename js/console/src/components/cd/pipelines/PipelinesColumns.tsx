@@ -1,4 +1,5 @@
 import {
+  ICON_FRAME_ICON_SIZE,
   Chip,
   ListBoxItem,
   PeopleIcon,
@@ -105,7 +106,7 @@ export const ColActions = columnHelper.display({
         <MoreMenu onSelectionChange={(newKey) => setMenuKey(newKey)}>
           <ListBoxItem
             key={MenuItemKey.Permissions}
-            leftContent={<PeopleIcon size={10} />}
+            leftContent={<PeopleIcon size={ICON_FRAME_ICON_SIZE.small} />}
             label="Permissions"
             textValue="Permissions"
           />
@@ -113,7 +114,7 @@ export const ColActions = columnHelper.display({
             key={MenuItemKey.Delete}
             leftContent={
               <TrashCanIcon
-                size={10}
+                size={ICON_FRAME_ICON_SIZE.small}
                 color={theme.colors['icon-danger-critical']}
               />
             }

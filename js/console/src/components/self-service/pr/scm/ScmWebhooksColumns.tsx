@@ -1,4 +1,5 @@
 import {
+  ICON_FRAME_ICON_SIZE,
   ArrowTopRightIcon,
   CopyIcon,
   ListBoxItem,
@@ -80,7 +81,10 @@ export const ColUrl = columnHelper.accessor(({ node }) => node?.url, {
         }}
       >
         <TruncateUrl css={{ flexGrow: 1 }}>{url}</TruncateUrl>
-        <CopyButton text={url} />
+        <CopyButton
+          text={url}
+          size="small"
+        />
       </div>
     )
   },
@@ -183,7 +187,7 @@ export const ColActions = columnHelper.display({
             key={MenuItemKey.Manage}
             leftContent={
               <ArrowTopRightIcon
-                size={10}
+                size={ICON_FRAME_ICON_SIZE.small}
                 color="icon-default"
               />
             }
@@ -198,7 +202,7 @@ export const ColActions = columnHelper.display({
             key={MenuItemKey.Copy}
             leftContent={
               <CopyIcon
-                size={10}
+                size={ICON_FRAME_ICON_SIZE.small}
                 color={theme.colors['icon-default']}
               />
             }
@@ -209,7 +213,7 @@ export const ColActions = columnHelper.display({
             key={MenuItemKey.Delete}
             leftContent={
               <TrashCanIcon
-                size={10}
+                size={ICON_FRAME_ICON_SIZE.small}
                 color={theme.colors['icon-danger-critical']}
               />
             }

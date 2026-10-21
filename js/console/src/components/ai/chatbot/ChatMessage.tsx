@@ -189,7 +189,7 @@ export function ChatMessageActions({
       <Flex gap="xxsmall">
         <IconFrame
           clickable
-          size="xsmall"
+          size="small"
           as="div"
           tooltip="Copy to clipboard"
           type={iconFrameType}
@@ -207,7 +207,7 @@ export function ChatMessageActions({
         />
         <IconFrame
           clickable
-          size="xsmall"
+          size="small"
           as="div"
           tooltip="Fork thread from this message"
           type={iconFrameType}
@@ -218,7 +218,7 @@ export function ChatMessageActions({
         />
         <IconFrame
           clickable
-          size="xsmall"
+          size="small"
           as="div"
           tooltip="Delete message"
           type={iconFrameType}

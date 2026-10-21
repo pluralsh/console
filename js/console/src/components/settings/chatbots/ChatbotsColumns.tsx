@@ -71,7 +71,7 @@ function ChatbotActions({
     >
       <IconFrame
         clickable
-        size="xsmall"
+        size="small"
         tooltip="Edit chatbot"
         icon={<PencilIcon />}
         onClick={() =>
@@ -84,7 +84,7 @@ function ChatbotActions({
       />
       <IconFrame
         clickable
-        size="xsmall"
+        size="small"
         tooltip="Delete chatbot"
         icon={<TrashCanIcon color={theme.colors['icon-danger']} />}
         onClick={() => setDeleting(true)}

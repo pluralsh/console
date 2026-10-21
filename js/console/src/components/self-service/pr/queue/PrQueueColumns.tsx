@@ -1,4 +1,5 @@
 import {
+  ICON_FRAME_ICON_SIZE,
   ArrowTopRightIcon,
   Button,
   Chip,
@@ -279,7 +280,7 @@ export const ColActions = columnHelper.accessor(({ node }) => node, {
         <MoreMenu onSelectionChange={(newKey) => setMenuKey(newKey)}>
           <ListBoxItem
             key={MenuItemKey.Update}
-            leftContent={<EditIcon size={10} />}
+            leftContent={<EditIcon size={ICON_FRAME_ICON_SIZE.small} />}
             label="Update"
             textValue="Update"
           />
@@ -288,7 +289,7 @@ export const ColActions = columnHelper.accessor(({ node }) => node, {
             key={MenuItemKey.Delete}
             leftContent={
               <TrashCanIcon
-                size={10}
+                size={ICON_FRAME_ICON_SIZE.small}
                 color="icon-danger"
               />
             }

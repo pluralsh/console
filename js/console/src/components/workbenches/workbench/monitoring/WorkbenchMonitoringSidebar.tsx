@@ -404,7 +404,7 @@ function DashboardRow({
         <InlineConfirmSC className="inline-confirm">
           <IconFrame
             clickable
-            size="xsmall"
+            size="small"
             icon={<CheckIcon color="icon-success" />}
             tooltip="Confirm delete"
             aria-label={`Confirm delete ${dashboard.name}`}
@@ -412,7 +412,7 @@ function DashboardRow({
           />
           <IconFrame
             clickable
-            size="xsmall"
+            size="small"
             icon={<CloseIcon />}
             tooltip="Cancel"
             aria-label="Cancel delete"
@@ -423,7 +423,7 @@ function DashboardRow({
         <DeleteSC className="delete-action">
           <IconFrame
             clickable
-            size="xsmall"
+            size="small"
             icon={<TrashCanIcon color="icon-danger" />}
             tooltip="Delete dashboard"
             aria-label={`Delete ${dashboard.name}`}
@@ -493,7 +493,7 @@ function MonitorRow({
         <InlineConfirmSC className="inline-confirm">
           <IconFrame
             clickable
-            size="xsmall"
+            size="small"
             icon={<CheckIcon color="icon-success" />}
             tooltip="Confirm delete"
             aria-label={`Confirm delete ${monitor.name}`}
@@ -501,7 +501,7 @@ function MonitorRow({
           />
           <IconFrame
             clickable
-            size="xsmall"
+            size="small"
             icon={<CloseIcon />}
             tooltip="Cancel"
             aria-label="Cancel delete"
@@ -512,7 +512,7 @@ function MonitorRow({
         <DeleteSC className="delete-action">
           <IconFrame
             clickable
-            size="xsmall"
+            size="small"
             icon={<TrashCanIcon color="icon-danger" />}
             tooltip="Delete monitor"
             aria-label={`Delete ${monitor.name}`}

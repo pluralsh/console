@@ -164,7 +164,7 @@ const cols = [
     cell: function Cell() {
       return (
         <IconFrame
-          size="xsmall"
+          size="small"
           icon={<CaretRightIcon />}
         />
       )

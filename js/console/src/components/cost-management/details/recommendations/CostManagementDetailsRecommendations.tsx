@@ -1,4 +1,5 @@
 import {
+  ICON_FRAME_ICON_SIZE,
   Flex,
   ListBoxFooterPlus,
   ListBoxItem,
@@ -98,7 +99,9 @@ export function CostManagementDetailsRecommendations() {
             setRecType(type as ScalingRecommendationType)
           }
           dropdownFooter={
-            <ListBoxFooterPlus leftContent={<TrashCanIcon size={10} />}>
+            <ListBoxFooterPlus
+              leftContent={<TrashCanIcon size={ICON_FRAME_ICON_SIZE.small} />}
+            >
               Clear Selection
             </ListBoxFooterPlus>
           }

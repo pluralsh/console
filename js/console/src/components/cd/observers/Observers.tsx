@@ -260,7 +260,7 @@ const columns = [
           {node?.agentRun && (
             <IconFrame
               clickable
-              size="xsmall"
+              size="small"
               type="secondary"
               icon={<DiscoverIcon />}
               as={Link}
@@ -271,7 +271,7 @@ const columns = [
           )}
           <KickButton
             icon
-            iconSize="xsmall"
+            iconSize="small"
             pulledAt={node?.lastRunAt}
             kickMutationHook={useKickObserverMutation}
             tooltipMessage="Resync"
@@ -279,7 +279,7 @@ const columns = [
           />
           <IconFrame
             clickable
-            size="xsmall"
+            size="small"
             icon={<TrashCanIcon color="icon-danger" />}
             onClick={() => setConfirm(true)}
             textValue="Delete"

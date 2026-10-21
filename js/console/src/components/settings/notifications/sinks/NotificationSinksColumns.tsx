@@ -1,5 +1,6 @@
 import { ReactElement, useState } from 'react'
 import {
+  ICON_FRAME_ICON_SIZE,
   IconFrame,
   ListBoxItem,
   MsTeamsLogoIcon,
@@ -170,7 +171,7 @@ export const ColActions = columnHelper.display({
         <MoreMenu onSelectionChange={(newKey) => setMenuKey(newKey)}>
           <ListBoxItem
             key={MenuItemKey.Edit}
-            leftContent={<PencilIcon size={10} />}
+            leftContent={<PencilIcon size={ICON_FRAME_ICON_SIZE.small} />}
             label="Edit sink"
             textValue="Edit sink"
           />
@@ -178,7 +179,7 @@ export const ColActions = columnHelper.display({
             key={MenuItemKey.Delete}
             leftContent={
               <TrashCanIcon
-                size={10}
+                size={ICON_FRAME_ICON_SIZE.small}
                 color={theme.colors['icon-danger-critical']}
               />
             }
@@ -238,7 +239,7 @@ export const RouterSinkActions = columnHelper.display({
             key={MenuItemKey.Delete}
             leftContent={
               <TrashCanIcon
-                size={10}
+                size={ICON_FRAME_ICON_SIZE.small}
                 color={theme.colors['icon-danger-critical']}
               />
             }

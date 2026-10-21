@@ -75,6 +75,7 @@ export function DeleteJob({ name, namespace, refetch }) {
     <>
       <IconFrame
         clickable
+        size="small"
         icon={<TrashCanIcon color="icon-danger" />}
         onClick={() => setConfirm(true)}
         textValue="Delete"

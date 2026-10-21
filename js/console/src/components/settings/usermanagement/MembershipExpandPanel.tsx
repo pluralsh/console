@@ -109,7 +109,7 @@ export const ColMembershipExpander = {
     row.getCanExpand() && (
       <IconFrame
         clickable
-        size="xsmall"
+        size="small"
         type="tertiary"
         tooltip={row.getIsExpanded() ? 'Collapse' : 'Expand'}
         icon={

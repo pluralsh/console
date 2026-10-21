@@ -249,21 +249,21 @@ function getColumns({
         >
           <IconFrame
             clickable={!!row.original.prompt?.trim() && !runLoading}
-            size="xsmall"
+            size="small"
             tooltip="Run saved prompt"
             icon={<ArrowUpIcon />}
             onClick={() => onRun(row.original)}
           />
           <IconFrame
             clickable
-            size="xsmall"
+            size="small"
             tooltip="Edit saved prompt"
             icon={<PencilIcon />}
             onClick={() => onEdit(row.original)}
           />
           <IconFrame
             clickable
-            size="xsmall"
+            size="small"
             tooltip="Delete saved prompt"
             icon={<TrashCanIcon color="icon-danger" />}
             onClick={() => onDelete(row.original)}
