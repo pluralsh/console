@@ -1,10 +1,10 @@
-const path = require('path')
+import path from 'path'
 
-// Node strips the types when requiring the ts file
-const { redirects } = require('./src/routing/docs-structure.ts')
+import type { NextConfig } from 'next'
 
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+import { redirects } from './src/routing/docs-structure'
+
+const nextConfig: NextConfig = {
   output: 'standalone',
   // Trace from the yarn workspace root so hoisted deps and the design system
   // land in .next/standalone.
@@ -58,4 +58,4 @@ const nextConfig = {
   },
 }
 
-module.exports = nextConfig
+export default nextConfig
