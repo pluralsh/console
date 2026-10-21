@@ -120,6 +120,7 @@ function AttachmentRuleActions({
       >
         <IconFrame
           clickable
+          size="xsmall"
           icon={<PencilIcon />}
           tooltip="Edit attachment rule"
           textValue={`Edit ${label}`}
@@ -129,6 +130,7 @@ function AttachmentRuleActions({
         />
         <IconFrame
           clickable
+          size="xsmall"
           tooltip="Delete attachment rule"
           textValue={`Delete ${label}`}
           icon={<TrashCanIcon color={theme.colors['icon-danger']} />}

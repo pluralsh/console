@@ -380,21 +380,31 @@ export function Stacks() {
               key={MenuItemKey.ManagePermissions}
               label="Manage permissions"
               textValue="Manage permissions"
-              leftContent={<PeopleIcon />}
+              leftContent={<PeopleIcon size={10} />}
             />
             <ListBoxItem
               destructive
               key={MenuItemKey.Detach}
               label="Detach stack"
               textValue="Detach stack"
-              leftContent={<ReturnIcon color={theme.colors['icon-danger']} />}
+              leftContent={
+                <ReturnIcon
+                  size={10}
+                  color={theme.colors['icon-danger']}
+                />
+              }
             />
             <ListBoxItem
               destructive
               key={MenuItemKey.Delete}
               label={deleteLabel}
               textValue={deleteLabel}
-              leftContent={<TrashCanIcon color={theme.colors['icon-danger']} />}
+              leftContent={
+                <TrashCanIcon
+                  size={10}
+                  color={theme.colors['icon-danger']}
+                />
+              }
             />
           </MoreMenu>
           {fullStack && (

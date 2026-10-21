@@ -148,12 +148,14 @@ const cols = [
         >
           <IconFrame
             clickable
+            size="xsmall"
             icon={<PencilIcon />}
             onClick={() => navigate(id)}
             tooltip="Edit monitor"
           />
           <IconFrame
             clickable
+            size="xsmall"
             icon={loading ? <Spinner /> : <TrashCanIcon color="icon-danger" />}
             onClick={() => setDeleteOpen(true)}
             tooltip="Delete"

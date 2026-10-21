@@ -105,14 +105,17 @@ export const ColActions = columnHelper.display({
         <MoreMenu onSelectionChange={(newKey) => setMenuKey(newKey)}>
           <ListBoxItem
             key={MenuItemKey.Permissions}
-            leftContent={<PeopleIcon />}
+            leftContent={<PeopleIcon size={10} />}
             label="Permissions"
             textValue="Permissions"
           />
           <ListBoxItem
             key={MenuItemKey.Delete}
             leftContent={
-              <TrashCanIcon color={theme.colors['icon-danger-critical']} />
+              <TrashCanIcon
+                size={10}
+                color={theme.colors['icon-danger-critical']}
+              />
             }
             label="Delete pipeline"
             textValue="Delete pipeline"

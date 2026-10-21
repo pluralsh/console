@@ -66,6 +66,7 @@ const ColActions = columnHelper.accessor((user) => user, {
         </Button>
         <IconFrame
           clickable
+          size="xsmall"
           icon={<TrashCanIcon color="icon-danger" />}
           onClick={() => setConfirmOpen(true)}
           tooltip="Delete"

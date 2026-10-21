@@ -108,7 +108,7 @@ export const ColService = columnHelper.accessor((rec) => rec.service, {
           provider={service.cluster?.provider?.cloud}
         />
         {service.name}
-        <ArrowTopRightIcon />
+        <ArrowTopRightIcon size={10} />
       </a>
     )
   },

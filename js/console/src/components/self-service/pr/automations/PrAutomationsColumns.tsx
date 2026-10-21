@@ -250,14 +250,17 @@ const ColActions = columnHelper.accessor((node) => node, {
         >
           <ListBoxItem
             key={MenuItemKey.Permissions}
-            leftContent={<PeopleIcon />}
+            leftContent={<PeopleIcon size={10} />}
             label="Permissions"
             textValue="Permissions"
           />
           <ListBoxItem
             key={MenuItemKey.Delete}
             leftContent={
-              <TrashCanIcon color={theme.colors['icon-danger-critical']} />
+              <TrashCanIcon
+                size={10}
+                color={theme.colors['icon-danger-critical']}
+              />
             }
             label="Delete automation"
             textValue="Delete automation"

@@ -99,6 +99,7 @@ function EditAction({ server }: { server: McpServerFragment }) {
   return (
     <IconFrame
       clickable
+      size="xsmall"
       as={Link}
       to={getAiSettingsMcpServerEditAbsPath({ mcpServerId: server.id })}
       tooltip="Edit MCP server"
@@ -113,6 +114,7 @@ function AuditAction({ id, name }: { id: string; name: string }) {
     <>
       <IconFrame
         clickable
+        size="xsmall"
         tooltip="Audit trail"
         onClick={() => setShowModal(true)}
         icon={<ListIcon />}
@@ -139,6 +141,7 @@ function PermissionsAction({
     <>
       <IconFrame
         clickable
+        size="xsmall"
         tooltip="Permissions"
         onClick={() => setShowPermissions(true)}
         icon={<PeopleIcon />}
@@ -170,6 +173,7 @@ function RemoveConnectionAction({
   return (
     <IconFrame
       clickable
+      size="xsmall"
       disabled={loading}
       icon={loading ? <Spinner /> : <TrashCanIcon />}
       tooltip="Remove connection"

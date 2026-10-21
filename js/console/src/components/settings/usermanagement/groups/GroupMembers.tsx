@@ -120,7 +120,7 @@ const cols = [
           />
           {!viewOnly && (
             <IconFrame
-              size="medium"
+              size="xsmall"
               clickable
               icon={
                 loading ? <Spinner /> : <TrashCanIcon color="icon-danger" />

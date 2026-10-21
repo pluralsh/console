@@ -187,20 +187,23 @@ export const ColActions = columnHelper.display({
         <MoreMenu onSelectionChange={(newKey) => setMenuKey(newKey)}>
           <ListBoxItem
             key={MenuItemKey.CreateWebhook}
-            leftContent={<WebhooksIcon />}
+            leftContent={<WebhooksIcon size={10} />}
             label="Create webhook"
             textValue="Create webhook"
           />
           <ListBoxItem
             key={MenuItemKey.Edit}
-            leftContent={<PencilIcon />}
+            leftContent={<PencilIcon size={10} />}
             label="Edit connection"
             textValue="Edit connection"
           />
           <ListBoxItem
             key={MenuItemKey.Delete}
             leftContent={
-              <TrashCanIcon color={theme.colors['icon-danger-critical']} />
+              <TrashCanIcon
+                size={10}
+                color={theme.colors['icon-danger-critical']}
+              />
             }
             label="Delete connection"
             textValue="Delete connection"

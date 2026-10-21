@@ -148,7 +148,12 @@ export const ColActions = columnHelper.accessor(({ node }) => node, {
           <ListBoxItem
             destructive
             key={MenuItemKey.Delete}
-            leftContent={<TrashCanIcon color="icon-danger" />}
+            leftContent={
+              <TrashCanIcon
+                size={10}
+                color="icon-danger"
+              />
+            }
             label="Delete"
             textValue="Delete"
           />

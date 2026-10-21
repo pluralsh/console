@@ -134,6 +134,7 @@ export const agentRunsCols = [
       return (
         <IconFrame
           clickable
+          size="xsmall"
           tooltip="View  details"
           icon={<CaretRightIcon />}
         />

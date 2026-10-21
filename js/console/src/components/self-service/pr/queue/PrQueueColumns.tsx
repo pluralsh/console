@@ -279,14 +279,19 @@ export const ColActions = columnHelper.accessor(({ node }) => node, {
         <MoreMenu onSelectionChange={(newKey) => setMenuKey(newKey)}>
           <ListBoxItem
             key={MenuItemKey.Update}
-            leftContent={<EditIcon />}
+            leftContent={<EditIcon size={10} />}
             label="Update"
             textValue="Update"
           />
           <ListBoxItem
             destructive
             key={MenuItemKey.Delete}
-            leftContent={<TrashCanIcon color="icon-danger" />}
+            leftContent={
+              <TrashCanIcon
+                size={10}
+                color="icon-danger"
+              />
+            }
             label="Delete"
             textValue="Delete"
           />

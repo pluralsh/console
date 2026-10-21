@@ -203,6 +203,7 @@ export function WorkbenchFileViewer({
         <CopyPathButton path={file.sandboxPath} />
         <IconFrame
           clickable
+          size="xsmall"
           type="tertiary"
           tooltip="Delete file"
           icon={<TrashCanIcon color="icon-danger" />}
@@ -237,6 +238,7 @@ function CopyPathButton({ path }: { path: string }) {
   return (
     <IconFrame
       clickable
+      size="xsmall"
       type="tertiary"
       tooltip={copied ? 'Copied' : 'Copy sandbox path'}
       icon={<CopyIcon />}

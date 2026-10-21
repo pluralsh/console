@@ -144,6 +144,7 @@ function WebhookActions({
     >
       <IconFrame
         clickable
+        size="xsmall"
         tooltip="Edit webhook"
         icon={<PencilIcon />}
         onClick={() =>
@@ -156,6 +157,7 @@ function WebhookActions({
       />
       <IconFrame
         clickable
+        size="xsmall"
         tooltip="Delete webhook"
         icon={<TrashCanIcon color={theme.colors['icon-danger']} />}
         onClick={() => setDeleting(true)}

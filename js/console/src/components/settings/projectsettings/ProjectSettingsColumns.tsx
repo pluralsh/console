@@ -58,20 +58,23 @@ const ColActions = columnHelper.accessor((project) => project, {
         <MoreMenu onSelectionChange={(newKey) => setMenuKey(newKey)}>
           <ListBoxItem
             key={MenuItemKey.Permissions}
-            leftContent={<PeopleIcon />}
+            leftContent={<PeopleIcon size={10} />}
             label="Permissions"
             textValue="Permissions"
           />
           <ListBoxItem
             key={MenuItemKey.Settings}
-            leftContent={<GearTrainIcon />}
+            leftContent={<GearTrainIcon size={10} />}
             label="Settings"
             textValue="Settings"
           />
           <ListBoxItem
             key={MenuItemKey.Delete}
             leftContent={
-              <TrashCanIcon color={theme.colors['icon-danger-critical']} />
+              <TrashCanIcon
+                size={10}
+                color={theme.colors['icon-danger-critical']}
+              />
             }
             label="Delete project"
             textValue="Delete project"

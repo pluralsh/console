@@ -90,25 +90,40 @@ export function ChatbotThreadMoreMenu() {
       >
         <ListBoxItem
           key={MenuItemKey.Rename}
-          leftContent={<EditIcon />}
+          leftContent={<EditIcon size={10} />}
           label="Rename thread"
         />
         <ListBoxItem
           key={MenuItemKey.Fork}
-          leftContent={forkLoading ? <Spinner /> : <GitForkIcon />}
-          rightContent={<ArrowRightIcon color="icon-default" />}
+          leftContent={forkLoading ? <Spinner /> : <GitForkIcon size={10} />}
+          rightContent={
+            <ArrowRightIcon
+              size={10}
+              color="icon-default"
+            />
+          }
           label="Fork thread"
         />
         <ListBoxItem
           key={MenuItemKey.History}
-          leftContent={<DiffColumnIcon />}
-          rightContent={<ArrowRightIcon color="icon-default" />}
+          leftContent={<DiffColumnIcon size={10} />}
+          rightContent={
+            <ArrowRightIcon
+              size={10}
+              color="icon-default"
+            />
+          }
           label="View history"
         />
         <ListBoxItem
           destructive
           key={MenuItemKey.Delete}
-          leftContent={<TrashCanIcon color="icon-danger" />}
+          leftContent={
+            <TrashCanIcon
+              size={10}
+              color="icon-danger"
+            />
+          }
           label="Delete thread"
         />
       </MoreMenu>

@@ -181,7 +181,12 @@ export const ColActions = columnHelper.display({
         <MoreMenu onSelectionChange={(newKey) => setMenuKey(newKey)}>
           <ListBoxItem
             key={MenuItemKey.Manage}
-            leftContent={<ArrowTopRightIcon color="icon-default" />}
+            leftContent={
+              <ArrowTopRightIcon
+                size={10}
+                color="icon-default"
+              />
+            }
             label={
               <a css={{ textDecoration: 'none', color: 'inherit' }}>
                 {`Manage${scmName ? ` on ${scmName}` : ''}`}
@@ -191,14 +196,22 @@ export const ColActions = columnHelper.display({
           />
           <ListBoxItem
             key={MenuItemKey.Copy}
-            leftContent={<CopyIcon color={theme.colors['icon-default']} />}
+            leftContent={
+              <CopyIcon
+                size={10}
+                color={theme.colors['icon-default']}
+              />
+            }
             label="Copy webhook URL"
             textValue="Copy webhook URL"
           />
           <ListBoxItem
             key={MenuItemKey.Delete}
             leftContent={
-              <TrashCanIcon color={theme.colors['icon-danger-critical']} />
+              <TrashCanIcon
+                size={10}
+                color={theme.colors['icon-danger-critical']}
+              />
             }
             label="Delete webhook"
             textValue="Delete webhook"

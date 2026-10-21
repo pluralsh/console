@@ -98,7 +98,7 @@ export function CostManagementDetailsRecommendations() {
             setRecType(type as ScalingRecommendationType)
           }
           dropdownFooter={
-            <ListBoxFooterPlus leftContent={<TrashCanIcon />}>
+            <ListBoxFooterPlus leftContent={<TrashCanIcon size={10} />}>
               Clear Selection
             </ListBoxFooterPlus>
           }

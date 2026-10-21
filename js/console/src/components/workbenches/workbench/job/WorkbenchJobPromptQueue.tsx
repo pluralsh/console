@@ -192,7 +192,7 @@ function QueueItem({
       </QueueItemContentSC>
       <DeleteButtonSC
         clickable
-        size="small"
+        size="xsmall"
         tooltip="Remove"
         disabled={deleteLoading}
         icon={<TrashCanIcon color="icon-danger" />}

@@ -113,6 +113,7 @@ function EnvironmentActions({ env }: { env: StackEnvironmentT }) {
         text={env.value || ''}
         tooltip="Copy value"
         type="tertiary"
+        size="xsmall"
       />
       <StackEnvironmentEdit env={env} />
       <StackEnvironmentDelete env={env} />

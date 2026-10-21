@@ -116,6 +116,7 @@ const columns = [
         <>
           <IconFrame
             clickable
+            size="xsmall"
             icon={<PeopleIcon />}
             onClick={() => setOpen(true)}
             tooltip="Manage permissions"

@@ -96,13 +96,13 @@ const ColActions = columnHelper.accessor((group) => group, {
             <>
               <IconFrame
                 clickable
-                size="small"
+                size="xsmall"
                 tooltip="Edit group"
                 icon={<PencilIcon />}
                 onClick={() => setGroupEdit(group)}
               />
               <DeleteIconButton
-                size="small"
+                size="xsmall"
                 tooltip="Delete group"
                 onClick={() => setDialogKey('confirmDelete')}
               />
@@ -110,7 +110,7 @@ const ColActions = columnHelper.accessor((group) => group, {
           ) : (
             <IconFrame
               clickable
-              size="small"
+              size="xsmall"
               tooltip="View group"
               icon={<EyeIcon />}
               onClick={() => setDialogKey('viewGroup')}

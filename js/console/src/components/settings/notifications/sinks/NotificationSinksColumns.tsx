@@ -170,14 +170,17 @@ export const ColActions = columnHelper.display({
         <MoreMenu onSelectionChange={(newKey) => setMenuKey(newKey)}>
           <ListBoxItem
             key={MenuItemKey.Edit}
-            leftContent={<PencilIcon />}
+            leftContent={<PencilIcon size={10} />}
             label="Edit sink"
             textValue="Edit sink"
           />
           <ListBoxItem
             key={MenuItemKey.Delete}
             leftContent={
-              <TrashCanIcon color={theme.colors['icon-danger-critical']} />
+              <TrashCanIcon
+                size={10}
+                color={theme.colors['icon-danger-critical']}
+              />
             }
             label="Delete sink"
             textValue="Delete sink"
@@ -234,7 +237,10 @@ export const RouterSinkActions = columnHelper.display({
           <ListBoxItem
             key={MenuItemKey.Delete}
             leftContent={
-              <TrashCanIcon color={theme.colors['icon-danger-critical']} />
+              <TrashCanIcon
+                size={10}
+                color={theme.colors['icon-danger-critical']}
+              />
             }
             label="Remove sink"
             textValue="Remove sink"

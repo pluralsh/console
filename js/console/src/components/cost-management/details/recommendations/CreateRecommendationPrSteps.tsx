@@ -142,7 +142,7 @@ export function SelectPrAutomationStep({
           href={PRA_DOCS_URL}
           target="_blank"
           rel="noopener noreferrer"
-          endIcon={<ArrowTopRightIcon />}
+          endIcon={<ArrowTopRightIcon size={10} />}
           style={{
             width: 'fit-content',
             color: 'inherit',

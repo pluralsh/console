@@ -94,14 +94,17 @@ export const ColActions = columnHelper.accessor(({ node }) => node?.id, {
         <MoreMenu onSelectionChange={(newKey) => setMenuKey(newKey)}>
           <ListBoxItem
             key={MenuItemKey.Settings}
-            leftContent={<GearTrainIcon />}
+            leftContent={<GearTrainIcon size={10} />}
             label="Settings"
             textValue="Settings"
           />
           <ListBoxItem
             key={MenuItemKey.Delete}
             leftContent={
-              <TrashCanIcon color={theme.colors['icon-danger-critical']} />
+              <TrashCanIcon
+                size={10}
+                color={theme.colors['icon-danger-critical']}
+              />
             }
             label="Delete backup"
             textValue="Delete backup"

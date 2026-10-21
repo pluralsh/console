@@ -446,13 +446,18 @@ function DefinitionActions({
         <ListBoxItem
           key="edit"
           label="Edit policy"
-          leftContent={<PencilIcon />}
+          leftContent={<PencilIcon size={10} />}
         />
         <ListBoxItem
           destructive
           key="delete"
           label="Delete policy"
-          leftContent={<TrashCanIcon color={theme.colors['icon-danger']} />}
+          leftContent={
+            <TrashCanIcon
+              size={10}
+              color={theme.colors['icon-danger']}
+            />
+          }
         />
       </MoreMenu>
     </>

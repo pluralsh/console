@@ -126,7 +126,10 @@ export const ColActions = columnHelper.accessor(({ node }) => node?.id, {
           <ListBoxItem
             key={MenuItemKey.Delete}
             leftContent={
-              <TrashCanIcon color={theme.colors['icon-danger-critical']} />
+              <TrashCanIcon
+                size={10}
+                color={theme.colors['icon-danger-critical']}
+              />
             }
             label="Delete backup"
             textValue="Delete backup"

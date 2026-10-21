@@ -162,7 +162,12 @@ const cols = [
   columnHelper.display({
     id: 'actions',
     cell: function Cell() {
-      return <IconFrame icon={<CaretRightIcon />} />
+      return (
+        <IconFrame
+          size="xsmall"
+          icon={<CaretRightIcon />}
+        />
+      )
     },
   }),
 ]

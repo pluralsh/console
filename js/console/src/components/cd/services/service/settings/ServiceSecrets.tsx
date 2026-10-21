@@ -227,6 +227,7 @@ function ChangeSecret({
         <IconFrame
           tooltip="Edit secret"
           clickable
+          size="xsmall"
           icon={<GearTrainIcon />}
           onClick={() => setOpen(true)}
         />
@@ -325,6 +326,7 @@ const ColActions = ({
               text={original.value || ''}
               tooltip="Copy value"
               type="secondary"
+              size="xsmall"
             />
             <ChangeSecret
               serviceDeploymentId={serviceDeploymentId}

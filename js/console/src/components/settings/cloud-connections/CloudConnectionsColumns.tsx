@@ -74,6 +74,7 @@ function CloudConnectionActions({
     >
       <IconFrame
         clickable
+        size="xsmall"
         tooltip="Edit cloud connection"
         icon={<PencilIcon />}
         onClick={() =>
@@ -86,6 +87,7 @@ function CloudConnectionActions({
       />
       <IconFrame
         clickable
+        size="xsmall"
         tooltip="Delete cloud connection"
         icon={<TrashCanIcon color={theme.colors['icon-danger']} />}
         onClick={() => setDeleting(true)}

@@ -511,13 +511,13 @@ export const ColCdTableActions = columnHelper.accessor(({ node }) => node, {
         <MoreMenu onSelectionChange={(newKey) => setMenuKey(newKey)}>
           <ListBoxItem
             key={MenuItemKey.Permissions}
-            leftContent={<PeopleIcon />}
+            leftContent={<PeopleIcon size={10} />}
             label="Permissions"
             textValue="Permissions"
           />
           <ListBoxItem
             key={MenuItemKey.Settings}
-            leftContent={<GearTrainIcon />}
+            leftContent={<GearTrainIcon size={10} />}
             label="Settings"
             textValue="Settings"
           />
@@ -525,7 +525,10 @@ export const ColCdTableActions = columnHelper.accessor(({ node }) => node, {
             <ListBoxItem
               key={MenuItemKey.Detach}
               leftContent={
-                <ReturnIcon color={theme.colors['icon-danger-critical']} />
+                <ReturnIcon
+                  size={10}
+                  color={theme.colors['icon-danger-critical']}
+                />
               }
               label="Detach cluster"
               textValue="Detach cluster"
@@ -535,7 +538,10 @@ export const ColCdTableActions = columnHelper.accessor(({ node }) => node, {
             <ListBoxItem
               key={MenuItemKey.Delete}
               leftContent={
-                <TrashCanIcon color={theme.colors['icon-danger-critical']} />
+                <TrashCanIcon
+                  size={10}
+                  color={theme.colors['icon-danger-critical']}
+                />
               }
               label="Delete cluster"
               textValue="Delete cluster"
@@ -586,6 +592,7 @@ export const ColHomeTableActions = columnHelper.accessor(({ node }) => node, {
           insight={getValue()?.insight}
         />
         <TableCaretLink
+          size="xsmall"
           to={getClusterDetailsPath({
             clusterId: cluster?.id,
           })}

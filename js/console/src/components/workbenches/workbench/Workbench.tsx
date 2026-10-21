@@ -432,44 +432,49 @@ export function WorkbenchTabs() {
               {!showEditWorkbenchButton && (
                 <ListBoxItem
                   key={WorkbenchMoreMenuKey.Edit}
-                  leftContent={<GearTrainIcon />}
+                  leftContent={<GearTrainIcon size={10} />}
                   label="Edit workbench"
                 />
               )}
               <ListBoxItem
                 key={WorkbenchMoreMenuKey.Tools}
-                leftContent={<ToolsIcon />}
+                leftContent={<ToolsIcon size={10} />}
                 label="Tools"
               />
               <ListBoxItem
                 key={WorkbenchMoreMenuKey.Cron}
-                leftContent={<EventScheduleIcon />}
+                leftContent={<EventScheduleIcon size={10} />}
                 label="Cron schedules"
               />
               <ListBoxItem
                 key={WorkbenchMoreMenuKey.Webhook}
-                leftContent={<WebhooksIcon />}
+                leftContent={<WebhooksIcon size={10} />}
                 label="Webhook triggers"
               />
               <ListBoxItem
                 key={WorkbenchMoreMenuKey.Chatbots}
-                leftContent={<BotIcon />}
+                leftContent={<BotIcon size={10} />}
                 label="Chatbots"
               />
               <ListBoxItem
                 key={WorkbenchMoreMenuKey.SavedPrompts}
-                leftContent={<BookmarkIcon />}
+                leftContent={<BookmarkIcon size={10} />}
                 label="Saved prompts"
               />
               <ListBoxItem
                 key={WorkbenchMoreMenuKey.EvalSettings}
-                leftContent={<TuningIcon />}
+                leftContent={<TuningIcon size={10} />}
                 label="Eval settings"
               />
               <ListBoxItem
                 key={WorkbenchMoreMenuKey.Delete}
                 destructive
-                leftContent={<TrashCanIcon color="icon-danger" />}
+                leftContent={
+                  <TrashCanIcon
+                    size={10}
+                    color="icon-danger"
+                  />
+                }
                 label="Delete workbench"
               />
             </MoreMenu>

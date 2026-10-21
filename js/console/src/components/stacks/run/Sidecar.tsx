@@ -138,7 +138,7 @@ export default function StackRunSidecar({
             <Button
               small
               floating
-              endIcon={<ArrowTopRightIcon />}
+              endIcon={<ArrowTopRightIcon size={10} />}
               as={Link}
               to={pr?.url}
             >
