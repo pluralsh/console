@@ -220,7 +220,6 @@ export function WorkbenchEvals() {
                   >
                     <Flex
                       direction="column"
-                      align="flex-start"
                       gap="xxsmall"
                       minWidth={0}
                       width="100%"
@@ -254,6 +253,7 @@ export function WorkbenchEvals() {
                           css={{
                             ...theme.partials.text.caption,
                             color: theme.colors['text-input-disabled'],
+                            alignSelf: 'flex-start',
                             cursor: 'pointer',
                             userSelect: 'none',
                           }}
