@@ -44,8 +44,7 @@ const oldDocIDtoRouteMap: Record<string, string> = {
   overview_management_api_reference:
     '/api-reference/kubernetes/management-api-reference',
   overview_api_reference: '/api-reference/kubernetes/management-api-reference',
-  overview_agent_api_reference:
-    '/api-reference/kubernetes/agent-api-reference',
+  overview_agent_api_reference: '/api-reference/kubernetes/agent-api-reference',
   getting_started_first_steps: '/getting-started/first-steps',
   getting_started_first_steps_cli_quickstart:
     '/getting-started/first-steps/cli-quickstart',
@@ -134,7 +133,8 @@ const oldDocIDtoRouteMap: Record<string, string> = {
     '/plural-features/continuous-deployment/service-templating',
   plural_features_service_templating_templating_filters:
     '/plural-features/continuous-deployment/service-templating/supporting-liquid-filters',
-  'terraform-interop': '/plural-features/stacks-iac-management/service-contexts',
+  'terraform-interop':
+    '/plural-features/stacks-iac-management/service-contexts',
   plural_features_projects_and_multi_tenancy:
     '/plural-features/projects-and-multi-tenancy',
   plural_features_notifications: '/plural-features/notifications',

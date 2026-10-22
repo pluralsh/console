@@ -57,7 +57,6 @@ import {
   PAGE_TITLE_SUFFIX,
   ROOT_TITLE,
 } from '@src/consts'
-import routes from '../generated/routes.json'
 import { NavDataProvider } from '@src/contexts/NavDataContext'
 import { RestNavProvider } from '@src/contexts/RestNavContext'
 import { collectHeadings } from '@src/markdoc/utils/parseHeadings'
@@ -68,6 +67,7 @@ import {
   useColorMode,
 } from '@src/theme/colorMode'
 import { docsThemeDark, docsThemeLight } from '@src/theme/docsTheme'
+import routes from '../generated/routes.json'
 
 /** Page component type; some pages opt into a full-width custom layout (e.g. REST API reference). */
 type PageComponentWithLayout = ComponentType<MyPageProps> & {

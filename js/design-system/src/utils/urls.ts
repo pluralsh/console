@@ -56,7 +56,8 @@ export function normalizeMarkdownHref(
   const splitAt = stripped.search(/[?#]/)
   const suffix = splitAt >= 0 ? stripped.slice(splitAt) : ''
   const relPath = splitAt >= 0 ? stripped.slice(0, splitAt) : stripped
-  const parts = removeTrailingSlashes(basePath)?.split('/').filter(Boolean) ?? []
+  const parts =
+    removeTrailingSlashes(basePath)?.split('/').filter(Boolean) ?? []
 
   relPath.split('/').forEach((part) => {
     if (part === '' || part === '.') return
