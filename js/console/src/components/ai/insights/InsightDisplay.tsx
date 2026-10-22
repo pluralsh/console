@@ -155,7 +155,7 @@ const ContentHeaderSC = styled.div<{ $compact?: boolean }>(
         ? theme.colors['fill-one']
         : theme.colors['fill-two'],
     borderBottom: theme.borders['fill-two'],
-    padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+    padding: `${theme.spacing.small} ${theme.spacing.medium}`,
   })
 )
 

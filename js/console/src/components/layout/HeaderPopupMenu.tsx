@@ -49,7 +49,7 @@ const MenuCardSC = styled(Card)<{ $linkStyles?: boolean }>(
   ({ theme, $linkStyles }) => ({
     '&&': {
       width: 230,
-      padding: `${theme.spacing.xsmall}px 0`,
+      padding: `${theme.spacing.xsmall} 0`,
       borderRadius: theme.borderRadiuses.medium,
       display: 'flex',
       flexDirection: 'column',

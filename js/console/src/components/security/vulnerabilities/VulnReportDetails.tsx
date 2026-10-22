@@ -235,7 +235,7 @@ const BulkSelectionBarSC = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   gap: theme.spacing.large,
-  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  padding: `${theme.spacing.small} ${theme.spacing.medium}`,
   backgroundColor: theme.colors['fill-three'],
   border: theme.borders['fill-three'],
   borderRadius: 12,

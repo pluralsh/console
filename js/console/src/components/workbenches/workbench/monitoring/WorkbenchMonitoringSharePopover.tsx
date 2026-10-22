@@ -57,7 +57,7 @@ export function WorkbenchMonitoringSharePopover({
         <CaptionP
           $color="text-xlight"
           css={{
-            letterSpacing: '0.5px',
+            letterSpacing: '0.03125rem',
             textTransform: 'uppercase',
             margin: 0,
           }}
@@ -109,7 +109,7 @@ const ShareMenuSC = styled(SimplePopupMenu)(({ theme }) => ({
   '&&': {
     width: 411,
     maxWidth: 'min(411px, calc(100vw - 32px))',
-    padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px ${theme.spacing.medium}px`,
+    padding: `${theme.spacing.xsmall} ${theme.spacing.medium} ${theme.spacing.medium}`,
     gap: theme.spacing.medium,
     boxShadow: theme.boxShadows.moderate,
     display: 'flex',

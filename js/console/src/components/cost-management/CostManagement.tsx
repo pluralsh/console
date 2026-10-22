@@ -100,7 +100,7 @@ const InnerSC = styled.div(({ theme }) => ({
   // Room for soft shadows outside cards (must not be on the overflow:auto node)
   padding: theme.spacing.large,
   ...(theme.mode === 'light' && {
-    padding: theme.spacing.large + theme.spacing.small,
+    padding: `calc(${theme.spacing.large} + ${theme.spacing.small})`,
   }),
   minWidth: 0,
   boxSizing: 'border-box',

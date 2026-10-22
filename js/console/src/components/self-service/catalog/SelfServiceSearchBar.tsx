@@ -103,7 +103,7 @@ export function SelfServiceSearchBar({
             padding: theme.spacing.small,
             position: 'absolute',
             right: 0,
-            top: `calc(100% + ${theme.spacing.xxsmall}px)`,
+            top: `calc(100% + ${theme.spacing.xxsmall})`,
             zIndex: theme.zIndexes.selectPopover,
           }}
         >
@@ -116,7 +116,7 @@ export function SelfServiceSearchBar({
             <Body2P
               $color="text-xlight"
               css={{
-                padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
+                padding: `${theme.spacing.xsmall} ${theme.spacing.small}`,
                 textAlign: 'center',
               }}
             >

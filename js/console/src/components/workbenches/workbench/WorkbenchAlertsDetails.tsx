@@ -585,7 +585,7 @@ const SeverityChipsSC = styled.div(({ theme }) => ({
 const SummaryCardSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexWrap: 'wrap',
-  gap: `${theme.spacing.medium}px ${theme.spacing.large}px`,
+  gap: `${theme.spacing.medium} ${theme.spacing.large}`,
   padding: theme.spacing.large,
   borderRadius: theme.borderRadiuses.large,
   border: theme.borders.default,
@@ -605,14 +605,14 @@ const SectionSC = styled.div({
 const SectionTitleSC = styled.h3(({ theme }) => ({
   ...theme.partials.text.body1,
   margin: 0,
-  padding: `${theme.spacing.medium}px 0 ${theme.spacing.small}px`,
+  padding: `${theme.spacing.medium} 0 ${theme.spacing.small}`,
   color: theme.colors['text-xlight'],
 }))
 
 const KeyValueCardSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  padding: `${theme.spacing.xsmall}px ${theme.spacing.large}px`,
+  padding: `${theme.spacing.xsmall} ${theme.spacing.large}`,
   borderRadius: theme.borderRadiuses.large,
   border: theme.borders.default,
   backgroundColor: theme.colors['fill-zero'],
@@ -622,7 +622,7 @@ const KeyValueRowSC = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   gap: theme.spacing.small,
-  padding: `${theme.spacing.small}px 0`,
+  padding: `${theme.spacing.small} 0`,
   borderBottom: theme.borders.default,
   '&:last-child': { borderBottom: 'none' },
 }))
@@ -653,5 +653,5 @@ const JobResultSC = styled.div(({ theme }) => ({
 const ChipsSC = styled.div({
   display: 'flex',
   flexWrap: 'wrap',
-  gap: 10,
+  gap: '0.625rem',
 })

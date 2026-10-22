@@ -162,7 +162,7 @@ export function AIAgentRunMessages({ run }: { run: AgentRunFragment }) {
         }
         itemGap="small"
         style={{
-          padding: `0 ${spacing.large}px ${spacing.large}px`,
+          padding: `0 ${spacing.large} ${spacing.large}`,
         }}
         renderer={({ rowData }) =>
           Array.isArray(rowData) ? (

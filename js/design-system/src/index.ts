@@ -200,6 +200,7 @@ export { green, orange } from './theme/colors-base'
 export { semanticColorCssVars, semanticColorKeys } from './theme/colors'
 export type { SemanticColorCssVar, SemanticColorKey } from './theme/colors'
 export type { SemanticSpacingKey } from './theme/spacing'
+export { getRemPx, pxToRem, REM_BASE_PX } from './theme/rem'
 
 // Utils
 export { default as scrollIntoContainerView } from './utils/scrollIntoContainerView'

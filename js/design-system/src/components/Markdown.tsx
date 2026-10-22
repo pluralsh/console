@@ -87,11 +87,11 @@ const MdBlockquote = styled.blockquote.withConfig(commonCfg)(({ theme }) => ({
   ...theme.partials.text.body1,
   color: theme.colors['text-light'],
   paddingTop: theme.spacing.small,
-  marginLeft: theme.spacing.xlarge - 1,
+  marginLeft: `calc(${theme.spacing.xlarge} - 1px)`,
   boxShadow: 'none',
   '& p': {
     borderLeft: `2px solid ${theme.colors.border}`,
-    paddingLeft: theme.spacing.xlarge - 1,
+    paddingLeft: `calc(${theme.spacing.xlarge} - 1px)`,
     ...theme.partials.text.body1,
     color: theme.colors['text-light'],
   },
@@ -207,7 +207,7 @@ const MdHr = styled.hr.withConfig(commonCfg)(({ theme }) => ({
   height: '1px',
   backgroundColor: theme.colors.border,
   border: 0,
-  margin: `${theme.spacing.medium}px ${theme.spacing.large}px 0`,
+  margin: `${theme.spacing.medium} ${theme.spacing.large} 0`,
 }))
 
 const MdTableWrapper = styled.div(({ theme }) => ({
@@ -246,7 +246,7 @@ const MdTd = styled.td(({ theme }) => ({
     theme.mode === 'light'
       ? theme.colors['fill-one']
       : theme.colors['fill-zero-selected'],
-  padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
+  padding: `${theme.spacing.xsmall} ${theme.spacing.small}`,
   color: theme.colors['text-light'],
   height: 40,
   border: theme.borders['fill-two'],

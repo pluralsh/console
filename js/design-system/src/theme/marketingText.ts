@@ -5,19 +5,19 @@ import { semanticColorCssVars } from './colors'
 
 const body1 = {
   fontFamily: fontFamilies.sans,
-  fontSize: 18,
+  fontSize: '1.125rem',
   lineHeight: '140%',
   fontWeight: 300,
-  letterSpacing: '0.25px',
+  letterSpacing: '0.015625rem',
   color: semanticColorCssVars['text-xlight'],
 } as const satisfies CSSObject
 
 const body2 = {
   fontFamily: fontFamilies.sans,
-  fontSize: 16,
+  fontSize: '1rem',
   lineHeight: '160%',
   fontWeight: 300,
-  letterSpacing: '0.5px',
+  letterSpacing: '0.03125rem',
   color: semanticColorCssVars['text-xlight'],
 } as const satisfies CSSObject
 
@@ -29,7 +29,7 @@ const bodyBold = {
 const marketingTextPartials = {
   bigHeader: {
     fontFamily: fontFamilies.sansHero,
-    fontSize: 62,
+    fontSize: '3.875rem',
     lineHeight: '120%',
     fontWeight: 500,
     letterSpacing: 0,
@@ -37,7 +37,7 @@ const marketingTextPartials = {
   },
   hero1: {
     fontFamily: fontFamilies.sansHero,
-    fontSize: 48,
+    fontSize: '3rem',
     lineHeight: '120%',
     fontWeight: 700,
     letterSpacing: 0,
@@ -45,7 +45,7 @@ const marketingTextPartials = {
   },
   hero2: {
     fontFamily: fontFamilies.sansHero,
-    fontSize: 38,
+    fontSize: '2.375rem',
     lineHeight: '125%',
     fontWeight: 500,
     letterSpacing: 0,
@@ -53,34 +53,34 @@ const marketingTextPartials = {
   },
   title1: {
     fontFamily: fontFamilies.sansHero,
-    fontSize: 30,
+    fontSize: '1.875rem',
     lineHeight: '140%',
     fontWeight: 500,
-    letterSpacing: '0.25px',
+    letterSpacing: '0.015625rem',
     color: semanticColorCssVars.text,
   },
   title2: {
     fontFamily: fontFamilies.sansHero,
-    fontSize: 24,
+    fontSize: '1.5rem',
     lineHeight: '140%',
     fontWeight: 500,
-    letterSpacing: '0.25px',
+    letterSpacing: '0.015625rem',
     color: semanticColorCssVars.text,
   },
   subtitle1: {
     fontFamily: fontFamilies.sans,
-    fontSize: 22,
+    fontSize: '1.375rem',
     lineHeight: '140%',
     fontWeight: 600,
-    letterSpacing: '0.25px',
+    letterSpacing: '0.015625rem',
     color: semanticColorCssVars.text,
   },
   subtitle2: {
     fontFamily: fontFamilies.sans,
-    fontSize: 18,
+    fontSize: '1.125rem',
     lineHeight: '150%',
     fontWeight: 600,
-    letterSpacing: '0.25px',
+    letterSpacing: '0.015625rem',
     color: semanticColorCssVars.text,
   },
   body1,
@@ -109,10 +109,10 @@ const marketingTextPartials = {
   },
   navLink: {
     fontFamily: fontFamilies.sans,
-    fontSize: 16,
+    fontSize: '1rem',
     lineHeight: '150%',
     fontWeight: '300',
-    letterSpacing: '0.5px',
+    letterSpacing: '0.03125rem',
     color: semanticColorCssVars['text-light'],
     '&:hover': {
       color: semanticColorCssVars.text,
@@ -121,10 +121,10 @@ const marketingTextPartials = {
   },
   standaloneLink: {
     fontFamily: fontFamilies.sansHero,
-    fontSize: 16,
+    fontSize: '1rem',
     lineHeight: '150%',
     fontWeight: 500,
-    letterSpacing: '0.5px',
+    letterSpacing: '0.03125rem',
     color: semanticColorCssVars.text,
     cursor: 'pointer',
     '&:hover': {
@@ -133,18 +133,18 @@ const marketingTextPartials = {
   },
   componentText: {
     fontFamily: fontFamilies.sans,
-    fontSize: 14,
+    fontSize: '0.875rem',
     lineHeight: '150%',
     fontWeight: 300,
-    letterSpacing: '0.5px',
+    letterSpacing: '0.03125rem',
     color: semanticColorCssVars['text-xlight'],
   },
   componentLink: {
     fontFamily: fontFamilies.sans,
-    fontSize: 14,
+    fontSize: '0.875rem',
     lineHeight: '150%',
     fontWeight: 600,
-    letterSpacing: '0.25px',
+    letterSpacing: '0.015625rem',
     color: semanticColorCssVars['text-light'],
     cursor: 'pointer',
     '&:hover': {
@@ -153,10 +153,10 @@ const marketingTextPartials = {
   },
   componentLinkSmall: {
     fontFamily: fontFamilies.sans,
-    fontSize: 12,
+    fontSize: '0.75rem',
     lineHeight: '150%',
     fontWeight: 400,
-    letterSpacing: '0.25px',
+    letterSpacing: '0.015625rem',
     color: semanticColorCssVars['text-light'],
     cursor: 'pointer',
     '&:hover': {
@@ -165,10 +165,10 @@ const marketingTextPartials = {
   },
   label: {
     fontFamily: fontFamilies.sans,
-    fontSize: 12,
+    fontSize: '0.75rem',
     lineHeight: '150%',
     fontWeight: 300,
-    letterSpacing: '1px',
+    letterSpacing: '0.0625rem',
     color: semanticColorCssVars['text-xlight'],
     textTransform: 'uppercase',
   },

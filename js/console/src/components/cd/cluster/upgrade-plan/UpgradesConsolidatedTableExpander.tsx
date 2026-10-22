@@ -29,7 +29,7 @@ export function UpgradesConsolidatedTableExpander({
   return (
     <div>
       {callout && (
-        <SectionWrapperSC css={{ gap: spacing.xsmall, paddingTop: 22 }}>
+        <SectionWrapperSC css={{ gap: spacing.xsmall, paddingTop: '1.375rem' }}>
           <CaptionP
             $color="text-xlight"
             css={{ userSelect: 'none' }}
@@ -58,7 +58,7 @@ export function UpgradesConsolidatedTableExpander({
           <Card
             css={{
               background: 'transparent',
-              padding: `${spacing.large}px ${spacing.xlarge}px`,
+              padding: `${spacing.large} ${spacing.xlarge}`,
               overflow: 'auto',
             }}
           >
@@ -85,7 +85,7 @@ export function UpgradesConsolidatedTableExpander({
 
 const SectionWrapperSC = styled.section(({ theme }) => ({
   borderTop: theme.borders.default,
-  padding: `${theme.spacing.xsmall}px 60px ${theme.spacing.medium}px`,
+  padding: `${theme.spacing.xsmall} 3.75rem ${theme.spacing.medium}`,
   display: 'flex',
   flexDirection: 'column',
 }))

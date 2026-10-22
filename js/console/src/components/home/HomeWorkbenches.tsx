@@ -222,7 +222,7 @@ const ContentWrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.xlarge,
-  padding: `${theme.spacing.xxlarge}px ${theme.spacing.large}px 0`,
+  padding: `${theme.spacing.xxlarge} ${theme.spacing.large} 0`,
 }))
 
 const BottomSpacerSC = styled.div(({ theme }) => ({
@@ -235,8 +235,8 @@ const BannerSC = styled(Card)(({ theme }) => ({
   alignItems: 'center',
   justifyContent: 'space-between',
   gap: theme.spacing.medium,
-  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
-  margin: `-${theme.spacing.medium}px 0 -${theme.spacing.xlarge}px`,
+  padding: `${theme.spacing.small} ${theme.spacing.medium}`,
+  margin: `-${theme.spacing.medium} 0 -${theme.spacing.xlarge}`,
   [`@media (max-width: 1500px)`]: { marginBottom: 0 },
 }))
 
@@ -276,7 +276,7 @@ const RecentJobCardSC = styled(Card)(({ theme }) => ({
   flexDirection: 'column',
   gap: theme.spacing.small,
   padding: theme.spacing.medium,
-  paddingRight: `calc(${theme.spacing.medium} + 16px)`,
+  paddingRight: `calc(${theme.spacing.medium} + 1rem)`,
   textDecoration: 'none',
   minHeight: 120,
 }))

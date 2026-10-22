@@ -854,7 +854,7 @@ const MetricsPanelSC = styled.div(({ theme }) => ({
   borderRadius: theme.borderRadiuses.large,
   minWidth: 0,
   overflow: 'hidden',
-  padding: 8,
+  padding: '0.5rem',
   width: '100%',
 }))
 
@@ -871,7 +871,7 @@ const CanvasLogPanelSC = styled.div(({ theme }) => ({
   flexDirection: 'column',
   maxHeight: 300,
   overflowY: 'auto',
-  padding: `${theme.spacing.medium}px 0`,
+  padding: `${theme.spacing.medium} 0`,
   width: '100%',
 }))
 
@@ -887,7 +887,7 @@ const PromptWrapperSC = styled.div<{ $fullWidth?: boolean }>(
     width: '100%',
     // Cancel the compact list gap; the 32px action row remains as dedicated
     // space under both the initial prompt and later user-message activities.
-    marginBottom: -theme.spacing.small,
+    marginBottom: theme.spacing['minus-small'],
   })
 )
 

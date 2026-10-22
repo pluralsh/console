@@ -64,7 +64,7 @@ export function WorkbenchSelector({
             css={{
               width: '100%',
               '.children': { minWidth: 0, overflow: 'hidden' },
-              '.content': { paddingTop: 10, paddingBottom: 10 },
+              '.content': { paddingTop: '0.625rem', paddingBottom: '0.625rem' },
             }}
             rightContent={
               triggerShowsSelected ? (

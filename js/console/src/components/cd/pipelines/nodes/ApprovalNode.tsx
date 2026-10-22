@@ -43,7 +43,7 @@ const ApproverCardSC = styled(StatusCard)(({ theme }) => ({
   '.email': {
     ...theme.partials.text.caption,
     color: theme.colors['text-xlight'],
-    marginTop: -theme.spacing.xxxsmall,
+    marginTop: theme.spacing['minus-xxxsmall'],
   },
 }))
 

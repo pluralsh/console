@@ -38,7 +38,7 @@ export const Th = styled.th<{
       height: 36,
       minHeight: 36,
       whiteSpace: 'nowrap',
-      padding: '0 12px',
+      padding: '0 0.75rem',
       textAlign: 'left',
       ...(cursor ? { cursor } : {}),
       '.thSortIndicatorWrap': {

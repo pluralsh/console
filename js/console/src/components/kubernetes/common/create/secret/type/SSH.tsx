@@ -25,7 +25,7 @@ function SecretSSHForm({ setData, setValid }: SecretSSHFormProps): ReactNode {
         setData([{ key: 'ssh-privatekey', value: v }])
       }}
       css={{
-        padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
+        padding: `${theme.spacing.xsmall} ${theme.spacing.medium}`,
         border: theme.borders.input,
         borderRadius: theme.borderRadiuses.medium,
         backgroundColor: theme.colors['fill-two'],

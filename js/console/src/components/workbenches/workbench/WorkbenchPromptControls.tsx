@@ -9,7 +9,7 @@ export const WorkbenchPromptOptionsGroup = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   flexWrap: 'wrap',
-  columnGap: 6,
+  columnGap: '0.375rem',
   rowGap: theme.spacing.xsmall,
   minHeight: CONTROL_SIZE,
   minWidth: 0,

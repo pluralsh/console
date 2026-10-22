@@ -37,8 +37,8 @@ export const toolSurfaceCss = (theme: DefaultTheme) => ({
 
 export const toolOutputTextCss = (theme: DefaultTheme) => ({
   ...theme.partials.text.mono,
-  fontSize: 13,
-  lineHeight: '18px',
+  fontSize: '0.8125rem',
+  lineHeight: '1.125rem',
   fontWeight: 200,
 })
 
@@ -62,7 +62,7 @@ export function useSlimToolCodeCss() {
     minHeight: 0,
     '& > div > div:first-child': {
       minHeight: 36,
-      padding: 8,
+      padding: '0.5rem',
       color: colors['text-light'],
     },
   } as const
@@ -431,7 +431,7 @@ function SegmentedControlBtn({
   return (
     <Button
       small
-      css={{ padding: `0 ${spacing.xsmall}px`, minHeight: 24 }}
+      css={{ padding: `0 ${spacing.xsmall}`, minHeight: 24 }}
       style={{ ...(active && { pointerEvents: 'none', cursor: 'default' }) }}
       floating={active}
       tertiary={!active}
@@ -482,7 +482,7 @@ const AnsiOutputSC = styled.pre(({ theme }) => ({
 const PreviewHeaderSC = styled.div(({ theme }) => ({
   ...theme.partials.text.body2Bold,
   flexShrink: 0,
-  padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
+  padding: `${theme.spacing.xsmall} ${theme.spacing.small}`,
   color: theme.colors['text-xlight'],
   backgroundColor: theme.colors['fill-one'],
   borderBottom: theme.borders['fill-two'],
@@ -531,7 +531,7 @@ export const ShowMoreSC = styled.button(({ theme }) => ({
   ...theme.partials.reset.button,
   ...theme.partials.text.body2,
   flexShrink: 0,
-  padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px ${theme.spacing.small}px`,
+  padding: `${theme.spacing.xsmall} ${theme.spacing.small} ${theme.spacing.small}`,
   alignSelf: 'flex-start',
   color: theme.colors['text-xlight'],
   cursor: 'pointer',

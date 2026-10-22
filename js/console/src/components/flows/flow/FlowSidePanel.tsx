@@ -99,7 +99,7 @@ export function FlowSidePanel({
               </Button>
               <Divider
                 backgroundColor="border"
-                css={{ margin: `${theme.spacing.small}px 0` }}
+                css={{ margin: `${theme.spacing.small} 0` }}
               />
               <Flex
                 direction="column"

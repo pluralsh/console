@@ -17,10 +17,10 @@ const TooltipContentSC = styled(Card).attrs(() => ({
   '&&': {
     ...theme.partials.text.caption,
     display: 'flex',
-    padding: `${theme.spacing.xxsmall}px ${theme.spacing.xsmall}px`,
+    padding: `${theme.spacing.xxsmall} ${theme.spacing.xsmall}`,
     alignItems: 'center',
     gap: theme.spacing.xsmall,
-    transform: `translate(-50%, calc(-${theme.spacing.small}px - 100%))`,
+    transform: `translate(-50%, calc(-${theme.spacing.small} - 100%))`,
     wordBreak: 'break-word',
   },
 }))

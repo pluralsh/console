@@ -125,7 +125,7 @@ const EvidenceLineSC = styled.div<{ $table: boolean }>(({ theme, $table }) => ({
   alignItems: 'center',
   gap: theme.spacing.small,
   cursor: 'pointer',
-  padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
+  padding: `${theme.spacing.xsmall} ${theme.spacing.small}`,
   borderBottom: $table ? theme.borders.input : 'none',
   ...(theme.mode === 'light' && {
     backgroundColor: theme.colors['fill-zero'],

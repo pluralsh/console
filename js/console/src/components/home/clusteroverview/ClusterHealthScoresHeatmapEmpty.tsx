@@ -193,7 +193,7 @@ const CenteredTextSC = styled.div<{ $textColor: string }>(({ $textColor }) => ({
   justifyContent: 'center',
   zIndex: 1,
   fontWeight: 600,
-  letterSpacing: '0.5px',
+  letterSpacing: '0.03125rem',
   color: $textColor,
   pointerEvents: 'none',
   userSelect: 'none',

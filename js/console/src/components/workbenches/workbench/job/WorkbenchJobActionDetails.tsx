@@ -38,7 +38,7 @@ const DetailsSC = styled.div(({ theme }) => ({
   gap: theme.spacing.xsmall,
   minWidth: 0,
   color: theme.colors['text-xlight'],
-  fontSize: 10,
+  fontSize: '0.625rem',
   strong: {
     color: theme.colors['text-light'],
     fontWeight: 400,

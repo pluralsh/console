@@ -702,7 +702,7 @@ const TraceSummarySC = styled.div<{ $fullscreen: boolean }>(
     flex: 1,
     gap: theme.spacing.large,
     minWidth: 0,
-    padding: `${theme.spacing.xsmall}px 0`,
+    padding: `${theme.spacing.xsmall} 0`,
     '@container trace-view (max-width: 560px)': {
       gap: theme.spacing.xsmall,
       flexWrap: 'wrap',
@@ -715,7 +715,7 @@ const TraceIdChipSC = styled.span(({ theme }) => ({
   flex: 1,
   minWidth: 100,
   overflow: 'hidden',
-  padding: `6px ${theme.spacing.small}px`,
+  padding: `0.375rem ${theme.spacing.small}`,
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
   '> span:last-child': { color: theme.colors['text-xlight'] },
@@ -727,7 +727,7 @@ const TraceMetricSC = styled.div(({ theme }) => ({
   flexShrink: 0,
   flexDirection: 'column',
   gap: theme.spacing.xxsmall,
-  padding: '0 10px',
+  padding: '0 0.625rem',
 }))
 
 const TraceStatusMetricSC = styled(TraceMetricSC)({
@@ -756,7 +756,7 @@ const TraceViewControlSC = styled(RadioGroup)(({ theme }) => ({
   display: 'flex',
   flexShrink: 0,
   height: 40,
-  padding: '2px 4px',
+  padding: '0.125rem 0.25rem',
 }))
 
 const TraceViewOptionSC = styled(SelectItem)(({ theme }) => ({
@@ -806,7 +806,7 @@ const TimelineHeaderSC = styled.div(({ theme }) => ({
     alignItems: 'center',
     display: 'flex',
     borderRight: theme.borders.default,
-    padding: `0 ${theme.spacing.medium}px`,
+    padding: `0 ${theme.spacing.medium}`,
   },
   '@container trace-view (max-width: 560px)': {
     gridTemplateColumns: 'var(--trace-label-width, 256px) minmax(300px, 1fr)',
@@ -816,7 +816,7 @@ const TimelineHeaderSC = styled.div(({ theme }) => ({
 
 const TraceAxisSC = styled.div(({ theme }) => ({
   position: 'relative',
-  margin: `0 ${theme.spacing.medium}px`,
+  margin: `0 ${theme.spacing.medium}`,
 }))
 
 const TraceTickSC = styled.div<{ $position: number }>(
@@ -837,7 +837,7 @@ const TraceTickSC = styled.div<{ $position: number }>(
             ? undefined
             : 'translateX(-50%)',
       background: theme.colors['fill-zero'],
-      paddingBottom: 2,
+      paddingBottom: '0.125rem',
     },
   })
 )
@@ -877,7 +877,7 @@ const TraceLabelSC = styled.div(({ theme }) => ({
   display: 'flex',
   gap: 0,
   minWidth: 0,
-  padding: `0 ${theme.spacing.medium}px`,
+  padding: `0 ${theme.spacing.medium}`,
 }))
 
 const TraceTreeGutterSC = styled.div<{ $depth: number }>(({ $depth }) => ({
@@ -915,7 +915,7 @@ const TraceTreeLineSC = styled.span<{
 })
 
 const TraceDotWrapSC = styled.span({
-  marginRight: 12,
+  marginRight: '0.75rem',
   alignItems: 'center',
   alignSelf: 'stretch',
   display: 'flex',
@@ -944,7 +944,7 @@ const TraceNameStackSC = styled.span({
   display: 'flex',
   flexDirection: 'column',
   minWidth: 0,
-  marginRight: 8,
+  marginRight: '0.5rem',
 })
 
 const TraceNameSC = styled.span(({ theme }) => ({
@@ -966,7 +966,7 @@ const TraceDescriptionSC = styled.span(({ theme }) => ({
 const TraceDurationSC = styled.span(({ theme }) => ({
   color: theme.colors['text-xlight'],
   ...theme.partials.text.mono,
-  fontSize: 12,
+  fontSize: '0.75rem',
   marginLeft: 'auto',
   paddingLeft: theme.spacing.xsmall,
   whiteSpace: 'nowrap',
@@ -977,14 +977,14 @@ const TraceBarAreaSC = styled.div(({ theme }) => ({
   boxSizing: 'border-box',
   display: 'flex',
   minWidth: 0,
-  margin: `0 ${theme.spacing.medium}px`,
+  margin: `0 ${theme.spacing.medium}`,
   height: '100%',
   position: 'relative',
   '&::after': {
     content: '""',
     position: 'absolute',
-    left: -theme.spacing.medium,
-    right: -theme.spacing.medium,
+    left: theme.spacing['minus-medium'],
+    right: theme.spacing['minus-medium'],
     bottom: 0,
     borderBottom: theme.borders.default,
   },
@@ -1007,7 +1007,7 @@ const TraceBarSC = styled.span<{
   height: 20,
   marginLeft: `${$left}%`,
   overflow: 'hidden',
-  padding: `0 8px 0 10px`,
+  padding: `0 0.5rem 0 0.625rem`,
   position: 'absolute',
   minWidth: 3,
   width: `${$width}%`,
@@ -1016,10 +1016,10 @@ const TraceBarSC = styled.span<{
 const TraceBarTextSC = styled.span<{ $color: string }>(({ $color }) => ({
   color: $color,
   flexShrink: 1,
-  fontSize: 12,
+  fontSize: '0.75rem',
   fontWeight: 600,
-  letterSpacing: '0.25px',
-  lineHeight: '16px',
+  letterSpacing: '0.015625rem',
+  lineHeight: '1rem',
   minWidth: 0,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
@@ -1029,9 +1029,9 @@ const TraceBarTextSC = styled.span<{ $color: string }>(({ $color }) => ({
 const TraceBarServiceSC = styled.span<{ $color: string }>(({ $color }) => ({
   color: $color,
   flex: 1,
-  fontSize: 12,
-  letterSpacing: '0.5px',
-  lineHeight: '16px',
+  fontSize: '0.75rem',
+  letterSpacing: '0.03125rem',
+  lineHeight: '1rem',
   minWidth: 0,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
@@ -1084,7 +1084,7 @@ const TraceDetailFieldsSC = styled.div(({ theme }) => ({
   '> *': { minWidth: 0, justifySelf: 'start' },
   alignItems: 'start',
   display: 'grid',
-  gap: `${theme.spacing.xsmall}px ${theme.spacing.xsmall}px`,
+  gap: `${theme.spacing.xsmall} ${theme.spacing.xsmall}`,
   gridTemplateColumns: '77px minmax(0, 1fr)',
 }))
 

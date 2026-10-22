@@ -61,10 +61,10 @@ export default function AwaitingReviewLauncher() {
     setPanelPosition({
       left: opensRight ? launcherRect.left : undefined,
       right: opensRight ? undefined : window.innerWidth - launcherRect.right,
-      top: launcherRect.bottom + theme.spacing.xsmall,
+      top: launcherRect.bottom + theme.spacingPx.xsmall,
       transformOrigin: opensRight ? 'top left' : 'top right',
     })
-  }, [open, sidePanel, theme.spacing.xsmall])
+  }, [open, sidePanel, theme.spacingPx.xsmall])
 
   return (
     <div

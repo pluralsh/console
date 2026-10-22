@@ -16,5 +16,5 @@ const ObservabilityWrapperSC = styled.div({
   display: 'flex',
   flexDirection: 'column',
   overflow: 'auto',
-  paddingRight: '8px',
+  paddingRight: '0.5rem',
 })

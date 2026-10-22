@@ -76,7 +76,7 @@ const WarningSC = styled.div(({ theme }) => ({
   backgroundColor: theme.colors.yellow[900],
   border: `1px solid ${theme.colors.yellow[800]}`,
   flexShrink: 0,
-  '& > svg': { flexShrink: 0, marginTop: 1 },
+  '& > svg': { flexShrink: 0, marginTop: '0.0625rem' },
 }))
 
 const WarningPlaceholderSC = styled.div({

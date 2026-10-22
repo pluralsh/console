@@ -61,6 +61,6 @@ const WrapperSC = styled(Flex)<{ $minHeight: number }>(
     gap: theme.spacing.medium,
     minHeight: $minHeight,
     overflow: 'hidden',
-    padding: `${theme.spacing.large}px ${theme.spacing.large}px ${theme.spacing.medium}px`,
+    padding: `${theme.spacing.large} ${theme.spacing.large} ${theme.spacing.medium}`,
   })
 )

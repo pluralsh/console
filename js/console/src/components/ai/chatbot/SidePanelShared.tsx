@@ -40,7 +40,7 @@ export const PanelHeaderSC = styled.div(({ theme }) => ({
   alignItems: 'center',
   justifyContent: 'space-between',
   height: SIDE_PANEL_HEADER_HEIGHT,
-  padding: `0 ${theme.spacing.medium}px`,
+  padding: `0 ${theme.spacing.medium}`,
   borderBottom: theme.borders.hairline,
   flexShrink: 0,
 }))

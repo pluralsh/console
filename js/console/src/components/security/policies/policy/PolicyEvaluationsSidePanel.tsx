@@ -203,7 +203,7 @@ export function PolicyEvaluationsSidePanel({
         ) : (
           <Body2P
             $color="text-xlight"
-            css={{ margin: `${theme.spacing.large}px auto` }}
+            css={{ margin: `${theme.spacing.large} auto` }}
           >
             {activeFilter === 'all'
               ? 'No evaluations available yet.'
@@ -290,7 +290,7 @@ const EvalLinkSC = styled.button<{ $active?: boolean }>(
     alignItems: 'center',
     gap: theme.spacing.medium,
     width: '100%',
-    padding: `${theme.spacing.small}px ${theme.spacing.large}px ${theme.spacing.small}px ${theme.spacing.medium}px`,
+    padding: `${theme.spacing.small} ${theme.spacing.large} ${theme.spacing.small} ${theme.spacing.medium}`,
     textAlign: 'left',
     backgroundColor: $active ? theme.colors['fill-one-selected'] : undefined,
 

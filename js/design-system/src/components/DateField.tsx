@@ -24,14 +24,14 @@ const DateSegmentSC = styled.div(({ theme }) => {
     padding: `${vPad}px ${xPad}px`,
     margin: `${-vPad * 2}px 0`,
     '&.segment-literal': {
-      padding: '0 1px',
+      padding: '0 0.0625rem',
       margin: '0',
     },
     '&.first': {
-      marginLeft: -2,
+      marginLeft: '-0.125rem',
     },
     '&.last': {
-      marginRight: -2,
+      marginRight: '-0.125rem',
     },
 
     textTransform: 'uppercase',

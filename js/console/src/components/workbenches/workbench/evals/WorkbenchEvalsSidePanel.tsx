@@ -210,7 +210,7 @@ const EvalLinkSC = styled.button<{ $active?: boolean }>(
     alignItems: 'center',
     gap: theme.spacing.small,
     width: '100%',
-    padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+    padding: `${theme.spacing.small} ${theme.spacing.medium}`,
     textAlign: 'left',
     // on the panel's lighter background, as the Monitoring sidebar's rows
     backgroundColor: $active ? theme.colors['fill-two-selected'] : undefined,

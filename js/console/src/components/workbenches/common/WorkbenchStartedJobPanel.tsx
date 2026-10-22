@@ -121,7 +121,7 @@ const StartedJobCardSC = styled.div(({ theme }) => ({
     position: 'absolute',
     inset: 0,
     borderRadius: 'inherit',
-    padding: 1,
+    padding: '0.0625rem',
     background:
       'linear-gradient(315deg, rgba(92, 119, 255, 0) 0%, #494FF2 46%, rgba(143, 214, 255, 0.6) 79%, rgba(82, 244, 217, 0.5) 100%)',
     pointerEvents: 'none',

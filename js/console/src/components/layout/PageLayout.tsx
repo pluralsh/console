@@ -97,7 +97,7 @@ export const PageSidebarHeaderSC = styled.div(({ theme }) => ({
   gap: theme.spacing.small,
   flexShrink: 0,
   height: PAGE_TOOLBAR_HEIGHT,
-  padding: `0 ${theme.spacing.medium}px`,
+  padding: `0 ${theme.spacing.medium}`,
   borderBottom: theme.borders.hairline,
   '& > *': { flex: 1, minWidth: 0 },
 }))

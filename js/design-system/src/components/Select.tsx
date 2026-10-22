@@ -169,7 +169,7 @@ const SelectButtonInner = styled.div<{
       display: 'flex',
       flexDirection: 'row',
       flexShrink: 1,
-      padding: `${size === 'medium' ? 9 : 5}px ${theme.spacing.medium}px`,
+      padding: `${size === 'medium' ? 9 : 5}px ${theme.spacing.medium}`,
       width: '100%',
       minWidth: 0,
       // a trigger is one line tall; long labels truncate rather than wrap

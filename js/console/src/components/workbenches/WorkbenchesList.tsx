@@ -276,7 +276,7 @@ const CardSC = styled(Card)(({ theme }) => ({
 
 const WorkbenchCardSC = styled(CardSC)(({ theme }) => ({
   position: 'relative',
-  paddingRight: `calc(${theme.spacing.medium} + 28px)`,
+  paddingRight: `calc(${theme.spacing.medium} + 1.75rem)`,
 }))
 
 const CardArrowSC = styled.div(({ theme }) => ({

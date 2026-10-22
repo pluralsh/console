@@ -190,7 +190,7 @@ const ColumnSC = styled.div({
 const CardsSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  gap: 10,
+  gap: '0.625rem',
   alignItems: 'stretch',
   paddingBottom: theme.spacing.small,
 }))

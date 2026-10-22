@@ -61,7 +61,7 @@ const FeaturedBorder = styled(
     '& > div': {
       ...theme.partials.text.caption,
       color: theme.colors.blue['200'],
-      padding: `${theme.spacing.xxsmall}px ${theme.spacing.xsmall}px`,
+      padding: `${theme.spacing.xxsmall} ${theme.spacing.xsmall}`,
       borderEndEndRadius: theme.borderRadiuses.large,
       pointerEvents: 'auto',
       backgroundColor: color,
@@ -101,7 +101,7 @@ function RepositoryCard({
       style={{
         flexDirection: 'column',
         paddingTop: featuredLabel
-          ? theme.spacing.large + theme.spacing.medium
+          ? `calc(${theme.spacing.large} + ${theme.spacing.medium})`
           : theme.spacing.large,
         paddingRight: theme.spacing.large,
         paddingBottom: theme.spacing.large,

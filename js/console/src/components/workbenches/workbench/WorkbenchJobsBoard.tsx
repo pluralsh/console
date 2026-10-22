@@ -121,7 +121,7 @@ function VirtualJobsGrid({
     count: rows.length,
     getScrollElement: () => scrollEl,
     estimateSize: () => ESTIMATED_ROW_HEIGHT,
-    gap: theme.spacing.medium,
+    gap: theme.spacingPx.medium,
     overscan: 3,
     scrollMargin,
   })

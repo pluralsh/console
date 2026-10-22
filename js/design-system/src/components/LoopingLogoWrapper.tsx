@@ -1274,7 +1274,7 @@ export const LoopingLogoWrapper = styled.div`
     }
   }
   .plrl-logomark-anim {
-    margin: 30px 0;
+    margin: 1.875rem 0;
   }
   .plrl-logomark-anim.anim01 {
     /* hover effects */

@@ -69,7 +69,7 @@ export function QueryDefinitionModal({
 const HeaderSC = styled.div({
   alignItems: 'center',
   display: 'flex',
-  gap: 16,
+  gap: '1rem',
   justifyContent: 'space-between',
   width: '100%',
 })

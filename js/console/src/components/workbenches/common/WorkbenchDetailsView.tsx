@@ -236,7 +236,7 @@ export const DetailsLinkRowSC = styled.a(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   gap: theme.spacing.small,
-  padding: 10,
+  padding: '0.625rem',
   borderRadius: theme.borderRadiuses.medium,
   textDecoration: 'none',
   '&:hover': { backgroundColor: theme.colors['fill-zero-hover'] },
@@ -289,7 +289,7 @@ export const DetailsListSearchSC = styled.div(({ theme }) => ({
   gap: theme.spacing.small,
   flexShrink: 0,
   height: DETAILS_TAB_STRIP_HEIGHT,
-  padding: `0 ${theme.spacing.medium}px`,
+  padding: `0 ${theme.spacing.medium}`,
   borderBottom: theme.borders.hairline,
   '& > *': { flex: 1, minWidth: 0 },
 }))
@@ -365,7 +365,7 @@ const ListItemSC = styled.button<{ $selected: boolean }>(
     alignItems: 'center',
     gap: theme.spacing.small,
     width: '100%',
-    padding: `${theme.spacing.small}px ${theme.spacing.large}px ${theme.spacing.small}px ${theme.spacing.small}px`,
+    padding: `${theme.spacing.small} ${theme.spacing.large} ${theme.spacing.small} ${theme.spacing.small}`,
     cursor: 'pointer',
     // on the list's lighter background, as the Monitoring sidebar's rows
     backgroundColor: $selected ? theme.colors['fill-two-selected'] : undefined,
@@ -428,7 +428,7 @@ const PanelHeaderSC = styled.div(({ theme }) => ({
   gap: theme.spacing.small,
   flexShrink: 0,
   minHeight: DETAILS_PANEL_HEADER_HEIGHT,
-  padding: `0 ${theme.spacing.medium}px`,
+  padding: `0 ${theme.spacing.medium}`,
   borderBottom: theme.borders.default,
   backgroundColor: theme.colors['fill-one'],
 }))

@@ -31,7 +31,7 @@ function SecretOpaqueForm({
 
 export const DataEntry = styled(DataEntryUnstyled)(({ theme }) => ({
   display: 'flex',
-  gap: '16px',
+  gap: '1rem',
   flexDirection: 'column',
 
   '.inputContainer': {
@@ -45,7 +45,7 @@ export const DataEntry = styled(DataEntryUnstyled)(({ theme }) => ({
   },
 
   '.textArea': {
-    padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
+    padding: `${theme.spacing.xsmall} ${theme.spacing.medium}`,
     border: theme.borders.input,
     borderRadius: theme.borderRadiuses.medium,
     backgroundColor: theme.colors['fill-two'],

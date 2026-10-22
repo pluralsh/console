@@ -21,9 +21,9 @@ export default function ExplainWithAIButton({
 } & ComponentPropsWithRef<typeof Button>) {
   const theme = useTheme()
   const transitions = useTransition(visible ? [true] : [], {
-    from: { opacity: 0, scale: `85%`, marginRight: -100 },
+    from: { opacity: 0, scale: `85%`, marginRight: '-6.25rem' },
     enter: { opacity: 1, scale: '100%', marginRight: 0 },
-    leave: { opacity: 0, scale: `85%`, marginRight: -100 },
+    leave: { opacity: 0, scale: `85%`, marginRight: '-6.25rem' },
   })
 
   return transitions((styles) => (

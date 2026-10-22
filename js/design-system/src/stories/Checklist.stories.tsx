@@ -114,7 +114,7 @@ function Template() {
           >
             <Flex
               gap="medium"
-              css={{ paddingLeft: 24, paddingRight: 24 }}
+              css={{ paddingLeft: '1.5rem', paddingRight: '1.5rem' }}
             >
               <Flex
                 gap="xxsmall"
@@ -133,7 +133,7 @@ function Template() {
             />
             <Flex
               gap="small"
-              css={{ paddingLeft: 24, paddingRight: 24 }}
+              css={{ paddingLeft: '1.5rem', paddingRight: '1.5rem' }}
             >
               <Button
                 small

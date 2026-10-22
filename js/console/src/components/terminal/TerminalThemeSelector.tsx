@@ -50,7 +50,7 @@ function TerminalThemeSelector() {
             css={{
               position: 'absolute',
               width: 460,
-              margin: -1,
+              margin: '-0.0625rem',
               borderTopLeftRadius: 0,
               borderTopRightRadius: 0,
             }}

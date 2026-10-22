@@ -206,7 +206,7 @@ const DetailSC = styled.div({
   display: 'flex',
   flexDirection: 'column',
   flex: 1,
-  marginTop: -1,
+  marginTop: '-0.0625rem',
   minHeight: 0,
   minWidth: 0,
   overflow: 'hidden',

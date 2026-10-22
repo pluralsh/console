@@ -27,7 +27,7 @@ const HeaderContentSC = styled.div(({ theme }) => ({
   alignItems: 'center',
   gap: theme.spacing.small,
   height: HEADER_HEIGHT,
-  padding: `0 ${theme.spacing.medium}px`,
+  padding: `0 ${theme.spacing.medium}`,
 }))
 
 export default function Header() {

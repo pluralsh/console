@@ -375,7 +375,7 @@ const PanelHeaderSC = styled.header(({ theme }) => ({
   flexShrink: 0,
   lineHeight: 1,
   minHeight: 40,
-  padding: `${theme.spacing.xxsmall}px ${theme.spacing.medium}px`,
+  padding: `${theme.spacing.xxsmall} ${theme.spacing.medium}`,
   borderBottom: theme.borders['fill-one'],
   width: '100%',
 }))

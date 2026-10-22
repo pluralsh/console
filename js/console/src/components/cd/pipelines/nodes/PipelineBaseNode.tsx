@@ -83,11 +83,11 @@ export const BaseNodeSC = styled(NodeBaseCardSC)(({ theme }) => ({
 
     gap: theme.spacing.small,
     minHeight: 22,
-    marginTop: -4,
+    marginTop: '-0.25rem',
   },
   '.heading': {
     ...theme.partials.text.overline,
-    lineHeight: '1px',
+    lineHeight: '0.0625rem',
     color: theme.colors['text-xlight'],
   },
   '.subhead': {
@@ -189,7 +189,7 @@ export function IconHeading({
 
 const StatusCardSC = styled(Card)(({ theme }) => ({
   '&&': {
-    padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
+    padding: `${theme.spacing.xsmall} ${theme.spacing.small}`,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',

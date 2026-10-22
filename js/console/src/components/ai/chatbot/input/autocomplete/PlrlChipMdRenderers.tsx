@@ -304,15 +304,15 @@ const ChipBodySC = styled.span(({ theme }) => ({
   alignItems: 'center',
   gap: theme.spacing.xxsmall,
   verticalAlign: 'middle',
-  padding: `${theme.spacing.xxxsmall}px ${theme.spacing.xsmall}px`,
-  fontSize: 12,
-  lineHeight: '16px',
+  padding: `${theme.spacing.xxxsmall} ${theme.spacing.xsmall}`,
+  fontSize: '0.75rem',
+  lineHeight: '1rem',
   color: theme.colors.text,
   border: theme.borders['fill-three'],
   borderRadius: theme.borderRadiuses.medium,
   background: theme.colors['fill-two'],
   transition: 'background 0.1s ease-in-out',
-  margin: 1,
+  margin: '0.0625rem',
 }))
 
 export const ChipLinkSC = styled(Link)(({ theme }) => ({

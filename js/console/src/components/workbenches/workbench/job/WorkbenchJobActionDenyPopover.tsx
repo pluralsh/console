@@ -48,9 +48,9 @@ export function WorkbenchJobActionDenyButton({
     placement: 'top-start',
     strategy: 'fixed',
     middleware: [
-      offset(theme.spacing.small),
-      flip({ padding: theme.spacing.small }),
-      shift({ padding: theme.spacing.small }),
+      offset(theme.spacingPx.small),
+      flip({ padding: theme.spacingPx.small }),
+      shift({ padding: theme.spacingPx.small }),
     ],
     whileElementsMounted: autoUpdate,
   })

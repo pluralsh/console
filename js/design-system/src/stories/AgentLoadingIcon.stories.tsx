@@ -56,7 +56,7 @@ const CellSC = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   gap: theme.spacing.small,
-  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  padding: `${theme.spacing.small} ${theme.spacing.medium}`,
   borderRadius: theme.borderRadiuses.medium,
   background: theme.colors['fill-two'],
   border: theme.borders['fill-two'],
@@ -67,7 +67,7 @@ const CellSC = styled.div(({ theme }) => ({
 const LabelSC = styled.span(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  gap: 2,
+  gap: '0.125rem',
   minWidth: 0,
   '.name': {
     color: theme.colors.text,
@@ -129,7 +129,7 @@ const ChatSC = styled.div(({ theme }) => ({
 const SubagentBlockSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  gap: 4,
+  gap: '0.25rem',
 }))
 
 const TitleRowSC = styled.div(({ theme }) => ({
