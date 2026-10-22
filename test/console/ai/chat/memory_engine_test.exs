@@ -46,7 +46,8 @@ defmodule Console.AI.Chat.MemoryEngineTest do
   test "returns the final ReqLLM context with the reduction" do
     stub(Provider, :context_window, fn :tool -> 100_000 end)
 
-    expect(Provider, :reqllm_completion, fn context, _opts ->
+    expect(Provider, :reqllm_completion, fn context, opts ->
+      assert opts[:stateless]
       {:ok, response(context, Context.assistant("done"), :stop)}
     end)
 

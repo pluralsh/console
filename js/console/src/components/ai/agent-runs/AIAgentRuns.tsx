@@ -1,6 +1,6 @@
 import { Flex, Table } from '@pluralsh/design-system'
+import { PageToolbarPortal } from 'components/layout/PageToolbar'
 import { GqlError } from 'components/utils/Alert'
-import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { AgentRunFragment } from 'generated/graphql'
@@ -42,6 +42,21 @@ export function AIAgentRuns() {
       overflow="auto"
       paddingRight={spacing.small}
     >
+      {!noExistingData && (
+        <PageToolbarPortal>
+          <AIAgentRuntimesSelector
+            allowDeselect
+            size="small"
+            width={240}
+            outerStyles={{
+              width: 240,
+              '.triggerButton .arrow svg': { height: 12, width: 12 },
+            }}
+            selectedRuntimeId={selectedRuntimeId}
+            setSelectedRuntimeId={setSelectedRuntimeId}
+          />
+        </PageToolbarPortal>
+      )}
       <PromptSectionSC>
         <StackedText
           first="Agent Runs"
@@ -72,23 +87,16 @@ export function AIAgentRuns() {
           gap="small"
           minHeight={260}
         >
-          <StretchedFlex>
-            <StackedText
-              first="Agent Run Sessions"
-              firstPartialType="body2Bold"
-              firstColor="text"
-              second="Current and previous agent runs"
-              secondPartialType="body2"
-              secondColor="text-light"
-              gap="xxsmall"
-              loading={isLoading}
-            />
-            <AIAgentRuntimesSelector
-              allowDeselect
-              selectedRuntimeId={selectedRuntimeId}
-              setSelectedRuntimeId={setSelectedRuntimeId}
-            />
-          </StretchedFlex>
+          <StackedText
+            first="Agent Run Sessions"
+            firstPartialType="body2Bold"
+            firstColor="text"
+            second="Current and previous agent runs"
+            secondPartialType="body2"
+            secondColor="text-light"
+            gap="xxsmall"
+            loading={isLoading}
+          />
           {error ? (
             <GqlError error={error} />
           ) : (

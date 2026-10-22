@@ -10,6 +10,7 @@ import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 
 import { getDistroProviderIconUrl } from 'components/utils/ClusterDistro'
 import {
+  ICON_FRAME_ICON_SIZE,
   Chip,
   GlobeIcon,
   ListBoxItem,
@@ -148,7 +149,12 @@ export const ColActions = columnHelper.accessor(({ node }) => node, {
           <ListBoxItem
             destructive
             key={MenuItemKey.Delete}
-            leftContent={<TrashCanIcon color="icon-danger" />}
+            leftContent={
+              <TrashCanIcon
+                size={ICON_FRAME_ICON_SIZE.small}
+                color="icon-danger"
+              />
+            }
             label="Delete"
             textValue="Delete"
           />

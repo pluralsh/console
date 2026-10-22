@@ -183,7 +183,7 @@ function AuditsButton({ token }: { token: AccessTokenFragment }) {
         textValue="Audits"
         tooltip
         clickable
-        size="medium"
+        size="small"
         icon={<ListIcon />}
         onClick={() => setAudits(true)}
       />

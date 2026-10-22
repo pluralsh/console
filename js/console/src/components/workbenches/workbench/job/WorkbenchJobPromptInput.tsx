@@ -54,8 +54,10 @@ export function WorkbenchJobPromptInput({
   const [cancelModalOpen, setCancelModalOpen] = useState(false)
   const [promptModes, setPromptModes] =
     useState<WorkbenchJobModesAttributes | null>(null)
-  const [selectedModel, setSelectedModel] =
-    useState<WorkbenchJobModelAttributes | null>(null)
+  const [selectedModelState, setSelectedModelState] = useState<{
+    jobId: Nullable<string>
+    model: Nullable<WorkbenchJobModelAttributes>
+  }>({ jobId: null, model: null })
   const chatInputRef = useRef<ChatInputSimpleRef>(null)
   const queuedPrompts = queuedPromptsFromJob(job)
   const workbenchId = job?.workbench?.id
@@ -64,9 +66,15 @@ export function WorkbenchJobPromptInput({
     skip: !workbenchId,
   })
   const filesystemEnabled = !!workbenchData?.workbench?.filesystemEnabled
+  const jobModes = modesFormValue(job?.modes)
+  const selectedModel = selectedModelForJob(
+    job?.id ?? null,
+    jobModes?.model ?? null,
+    selectedModelState
+  )
   const effectivePromptModes =
     promptModes ??
-    modesAttributes(modesFormValue(job?.modes)) ??
+    modesAttributes(jobModes) ??
     defaultPromptModesFromWorkbench(
       workbenchData?.workbench,
       workbenchId ?? null
@@ -173,7 +181,12 @@ export function WorkbenchJobPromptInput({
               />
               <WorkbenchModelSelector
                 value={selectedModel}
-                onChange={(model) => setSelectedModel(model ?? null)}
+                onChange={(model) =>
+                  setSelectedModelState({
+                    jobId: job?.id ?? null,
+                    model: model ?? null,
+                  })
+                }
                 disabled={!job || submitLoading}
               />
               <WorkbenchPromptOptionPills
@@ -214,6 +227,17 @@ export function WorkbenchJobPromptInput({
       />
     </>
   )
+}
+
+export function selectedModelForJob(
+  jobId: Nullable<string>,
+  jobModel: Nullable<WorkbenchJobModelAttributes>,
+  selection: {
+    jobId: Nullable<string>
+    model: Nullable<WorkbenchJobModelAttributes>
+  }
+) {
+  return selection.jobId === jobId ? selection.model : jobModel
 }
 
 const PromptComposerSC = styled.div<{ $hasQueue: boolean }>(

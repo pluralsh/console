@@ -9,6 +9,12 @@ export type NavigationContextValue = {
   Link: ComponentType<ComponentProps<'a'>>
   pathname: string
   navigate: (location?: string) => void
+  /**
+   * Directory a relative Markdown link should resolve against.
+   * Leaf pages should pass their parent route; index pages should pass themselves.
+   * When omitted, relative links resolve against the current pathname.
+   */
+  relativeLinkBase?: (pathname: string) => string
 }
 
 const NavigationContext = createContext<NavigationContextValue | null>(null)

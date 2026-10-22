@@ -66,6 +66,7 @@ import {
   useColorMode,
 } from '@src/theme/colorMode'
 import { docsThemeDark, docsThemeLight } from '@src/theme/docsTheme'
+import routes from '../generated/routes.json'
 
 /** Page component type; some pages opt into a full-width custom layout (e.g. REST API reference). */
 type PageComponentWithLayout = ComponentType<MyPageProps> & {
@@ -132,6 +133,19 @@ const Link = ({
 )
 
 const NAV_DATA = getNavData()
+
+const routeIndex: Record<string, { relPath: string | null }> = routes
+
+function relativeLinkBase(pathname: string) {
+  const route = pathname.replace(/\/$/, '') || '/'
+  const relPath = routeIndex[route]?.relPath
+
+  if (relPath?.endsWith('/index.md')) return route
+
+  const parent = route.replace(/\/[^/]+$/, '')
+
+  return parent || '/'
+}
 
 function App({ Component, pageProps = {}, swrConfig }: MyAppProps) {
   const router = useRouter()
@@ -223,7 +237,12 @@ function App({ Component, pageProps = {}, swrConfig }: MyAppProps) {
 
   const navigate = useNavigate()
   const pathname = usePathname()
-  const navContextVal: NavigationContextValue = { navigate, pathname, Link }
+  const navContextVal: NavigationContextValue = {
+    navigate,
+    pathname,
+    Link,
+    relativeLinkBase,
+  }
 
   return (
     <SSRProvider>

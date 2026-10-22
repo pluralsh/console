@@ -73,7 +73,10 @@ export { default as Flyover } from './components/Flyover'
 export { default as FormField } from './components/FormField'
 export { default as Highlight } from './components/Highlight'
 export { default as hljs } from './hljs'
-export { default as IconFrame } from './components/IconFrame'
+export {
+  default as IconFrame,
+  ICON_FRAME_ICON_SIZE,
+} from './components/IconFrame'
 export type { IconFrameProps } from './components/IconFrame'
 export { default as AWSIcon, AWSIconName } from './components/icons/AWSIcon'
 export { default as InlineCode } from './components/InlineCode'

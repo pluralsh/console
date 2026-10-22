@@ -1,4 +1,5 @@
 import {
+  ICON_FRAME_ICON_SIZE,
   DeploymentIcon,
   ListIcon,
   NetworkInterfaceIcon,
@@ -50,7 +51,7 @@ export default function ClusterServices() {
       {
         key: 'deploy',
         label: 'Deploy Service',
-        icon: <DeploymentIcon />,
+        icon: <DeploymentIcon size={ICON_FRAME_ICON_SIZE.small} />,
         enabled: true,
       },
     ])
@@ -86,6 +87,7 @@ export default function ClusterServices() {
           )}
           <ButtonGroup
             size="small"
+            iconSize={ICON_FRAME_ICON_SIZE.small}
             directory={directory}
             toPath={(path) =>
               `${getClusterDetailsPath({ clusterId })}/${CLUSTER_SERVICES_PATH}/${path}`

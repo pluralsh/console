@@ -73,6 +73,7 @@ export const DragHandleSC = styled.div<{ $isDragging?: boolean }>(
     width: HANDLE_THICKNESS,
     height: '100%',
     cursor: 'ew-resize',
+    touchAction: 'none',
     background: 'transparent',
     display: 'flex',
     justifyContent: 'center',

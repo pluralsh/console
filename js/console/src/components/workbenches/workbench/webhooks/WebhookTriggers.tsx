@@ -263,12 +263,14 @@ function getColumns({
         >
           <IconFrame
             clickable
+            size="small"
             tooltip="Edit webhook"
             icon={<PencilIcon />}
             onClick={() => onEdit(row.original)}
           />
           <IconFrame
             clickable
+            size="small"
             tooltip="Delete webhook"
             icon={<TrashCanIcon color="icon-danger" />}
             onClick={() => onDelete(row.original)}

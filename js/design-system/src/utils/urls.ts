@@ -31,6 +31,43 @@ export function isSubrouteOf(route: string, compareRoute: string) {
   return route.startsWith(compareRoute)
 }
 
+/**
+ * Resolve a Markdown href against the directory that contains the current page.
+ * Strips a trailing `.md` (including before a hash or query) and leaves in-page
+ * hashes, external URLs, and absolute paths alone.
+ */
+export function normalizeMarkdownHref(
+  href: string | undefined,
+  basePath: string
+) {
+  if (
+    !href ||
+    isExternalUrl(href) ||
+    href.startsWith('#') ||
+    href.startsWith('?')
+  ) {
+    return href ?? ''
+  }
+
+  const stripped = href.replace(/\.md(?=[?#]|$)/, '')
+
+  if (!isRelativeUrl(stripped)) return stripped
+
+  const splitAt = stripped.search(/[?#]/)
+  const suffix = splitAt >= 0 ? stripped.slice(splitAt) : ''
+  const relPath = splitAt >= 0 ? stripped.slice(0, splitAt) : stripped
+  const parts =
+    removeTrailingSlashes(basePath)?.split('/').filter(Boolean) ?? []
+
+  relPath.split('/').forEach((part) => {
+    if (part === '' || part === '.') return
+    if (part === '..') parts.pop()
+    else parts.push(part)
+  })
+
+  return `/${parts.join('/')}${suffix}`
+}
+
 export function toHtmlId(str: string) {
   const id = str
     .replace(/\W+/g, ' ') //

@@ -5,7 +5,7 @@ export * from '../../utils/urls'
 export const stripMdExtension = (url?: string) => {
   url = url ?? ''
   if (!isExternalUrl(url)) {
-    return url.replace(/.md$/, '')
+    return url.replace(/\.md(?=[?#]|$)/, '')
   }
 
   return url

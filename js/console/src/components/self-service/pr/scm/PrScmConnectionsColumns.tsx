@@ -1,5 +1,6 @@
 import { ReactElement, useState } from 'react'
 import {
+  ICON_FRAME_ICON_SIZE,
   AzureDevopsLogoIcon,
   BitBucketIcon,
   GitHubLogoIcon,
@@ -187,20 +188,23 @@ export const ColActions = columnHelper.display({
         <MoreMenu onSelectionChange={(newKey) => setMenuKey(newKey)}>
           <ListBoxItem
             key={MenuItemKey.CreateWebhook}
-            leftContent={<WebhooksIcon />}
+            leftContent={<WebhooksIcon size={ICON_FRAME_ICON_SIZE.small} />}
             label="Create webhook"
             textValue="Create webhook"
           />
           <ListBoxItem
             key={MenuItemKey.Edit}
-            leftContent={<PencilIcon />}
+            leftContent={<PencilIcon size={ICON_FRAME_ICON_SIZE.small} />}
             label="Edit connection"
             textValue="Edit connection"
           />
           <ListBoxItem
             key={MenuItemKey.Delete}
             leftContent={
-              <TrashCanIcon color={theme.colors['icon-danger-critical']} />
+              <TrashCanIcon
+                size={ICON_FRAME_ICON_SIZE.small}
+                color={theme.colors['icon-danger-critical']}
+              />
             }
             label="Delete connection"
             textValue="Delete connection"

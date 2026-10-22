@@ -491,6 +491,17 @@ defmodule Console do
       else: wrap_rpc(reason)
   end
 
+  def rpc_error_message(:agent_bootstrapping), do: "Git or Helm agent is not ready"
+  def rpc_error_message(:rate_limited), do: "Rate limited"
+  def rpc_error_message(reason) do
+    case handle_rpc(reason) do
+      {:error, :agent_bootstrapping} -> "Git or Helm agent is not ready"
+      {:error, :rate_limited} -> "Rate limited"
+      {:error, {:rpc, _}} -> "Git or Helm agent request failed"
+      _ -> nil
+    end
+  end
+
   # Timeouts and missing processes during git/helm agent RPC are symptoms of a
   # node or genserver recovering from restart. Keep them distinct from actual
   # rate limits so callers can retry them without exposing a 429 externally.
@@ -498,6 +509,7 @@ defmodule Console do
   defp recovering_rpc?({:timeout, _}), do: true
   defp recovering_rpc?({:noproc, _}), do: true
   defp recovering_rpc?({:norproc, _}), do: true
+  defp recovering_rpc?({:shutdown, _}), do: true
   defp recovering_rpc?({:exception, reason}), do: recovering_rpc?(reason)
   defp recovering_rpc?({:exception, reason, _}), do: recovering_rpc?(reason)
   defp recovering_rpc?({:erpc, reason}), do: recovering_rpc?(reason)

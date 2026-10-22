@@ -446,7 +446,7 @@ export const docsStructure: DocSection[] = [
 export const redirects = [
   {
     source: '/getting-started/agent-api-reference',
-    destination: '/overview/agent-api-reference',
+    destination: '/api-reference/kubernetes/agent-api-reference',
     permanent: true,
   },
   {
@@ -481,7 +481,7 @@ export const redirects = [
   },
   {
     source: '/deployments/operator/api',
-    destination: '/overview/api-reference',
+    destination: '/api-reference/kubernetes/management-api-reference',
     permanent: true,
   },
   {
@@ -496,7 +496,7 @@ export const redirects = [
   },
   {
     source: '/getting-started/deployments',
-    destination: '/getting-started/first-steps/index',
+    destination: '/getting-started/first-steps',
     permanent: true,
   },
   {
@@ -541,7 +541,7 @@ export const redirects = [
   },
   {
     source: '/how-to/index',
-    destination: '/getting-started/how-to-use/index',
+    destination: '/getting-started/how-to-use',
     permanent: true,
   },
   {
@@ -588,12 +588,12 @@ export const redirects = [
   },
   {
     source: '/deployments/using-operator',
-    destination: '/plural-features/continuous-deployment/index',
+    destination: '/plural-features/continuous-deployment',
     permanent: true,
   },
   {
     source: '/deployments/deprecations',
-    destination: '/plural-features/k8s-upgrade-assistant/index',
+    destination: '/plural-features/k8s-upgrade-assistant',
     permanent: true,
   },
   {
@@ -633,7 +633,7 @@ export const redirects = [
   },
   {
     source: '/deployments/stacks',
-    destination: '/plural-features/stacks-iac-management/index',
+    destination: '/plural-features/stacks-iac-management',
     permanent: true,
   },
   {
@@ -648,12 +648,12 @@ export const redirects = [
   },
   {
     source: '/service-catalog/overview',
-    destination: '/plural-features/service-catalog/index',
+    destination: '/plural-features/service-catalog',
     permanent: true,
   },
   {
     source: '/deployments/dashboard',
-    destination: '/plural-features/kubernetes-dashboard/index',
+    destination: '/plural-features/kubernetes-dashboard',
     permanent: true,
   },
   {
@@ -693,7 +693,7 @@ export const redirects = [
   },
   {
     source: '/ai/overview',
-    destination: '/plural-features/plural-ai/index',
+    destination: '/plural-features/plural-ai',
     permanent: true,
   },
   {
@@ -713,22 +713,22 @@ export const redirects = [
   },
   {
     source: '/deployments/pr-automation',
-    destination: '/plural-features/pr-automation/index',
+    destination: '/plural-features/pr-automation',
     permanent: true,
   },
   {
     source: '/deployments/templating',
-    destination: '/plural-features/service-templating/index',
+    destination: '/plural-features/continuous-deployment/service-templating',
     permanent: true,
   },
   {
     source: '/deployments/multi-tenancy',
-    destination: '/plural-features/projects-and-multi-tenancy/index',
+    destination: '/plural-features/projects-and-multi-tenancy',
     permanent: true,
   },
   {
     source: '/deployments/notifications',
-    destination: '/plural-features/notifications/index',
+    destination: '/plural-features/notifications',
     permanent: true,
   },
   {

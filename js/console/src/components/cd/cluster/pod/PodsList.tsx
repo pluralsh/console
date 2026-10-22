@@ -62,6 +62,7 @@ function DeletePod({
     <div onClick={(e) => e.stopPropagation()}>
       <IconFrame
         clickable
+        size="small"
         icon={<TrashCanIcon color="icon-danger" />}
         onClick={() => setConfirm(true)}
         textValue="Delete"
