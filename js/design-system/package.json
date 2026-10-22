@@ -1,7 +1,16 @@
 {
   "name": "@pluralsh/design-system",
-  "version": "0.1.0",
+  "version": "0.0.0-semantically-released",
   "description": "Pluralsh Design System",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pluralsh/console.git",
+    "directory": "js/design-system"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "./dist/index.cjs.js",
   "module": "./dist/index.es.js",
   "types": "./dist/index.d.ts",
