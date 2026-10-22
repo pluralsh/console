@@ -1,4 +1,4 @@
-import { Children, ReactElement, ReactNode, useMemo } from 'react'
+import { Children, memo, ReactElement, ReactNode } from 'react'
 import ReactMarkdown, { Options as ReactMarkdownOptions } from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
 import rehypeSanitize, {
@@ -333,63 +333,60 @@ function Markdown({
   sanitizeSchema = markdownSanitizeSchema,
   ...props
 }: MarkdownProps) {
-  return useMemo(
-    () => (
-      <ReactMarkdown
-        {...props}
-        rehypePlugins={[rehypeRaw, [rehypeSanitize, sanitizeSchema]]}
-        remarkPlugins={[remarkGfm]}
-        components={{
-          blockquote: (props) => <MdBlockquote {...props} />,
-          ul: (props) => <MdUl {...props} />,
-          ol: (props) => <MdOl {...props} />,
-          li: (props) => <MdLi {...props} />,
-          h1: (props) => <MdH1 {...props} />,
-          h2: (props) => <MdH2 {...props} />,
-          h3: (props) => <MdH3 {...props} />,
-          h4: (props) => <MdH4 {...props} />,
-          h5: (props) => <MdH5 {...props} />,
-          h6: (props) => <MdH6 {...props} />,
-          img: (props) => (
-            <MarkdownImage
-              {...props}
-              gitUrl={gitUrl}
-              mainBranch={mainBranch}
-            />
-          ),
-          p: (props) => <MdP {...props} />,
-          div: (props) => <MdDiv {...props} />,
-          a: (props) => (
-            <MarkdownLink
-              {...props}
-              gitUrl={gitUrl}
-              mainBranch={mainBranch}
-            />
-          ),
-          span: (props) => <MdSpan {...props} />,
-          code: (props) => <InlineCode {...props} />,
-          pre: ({ node: _, ...props }) => (
-            <MarkdownPreformatted
-              {...props}
-              isStreaming={isStreaming}
-            />
-          ),
-          hr: (props) => <MdHr {...props} />,
-          th: (props) => <MdTh {...props} />,
-          td: (props) => <MdTd {...props} />,
-          table: (props) => (
-            <MdTableWrapper>
-              <MdTable {...props} />
-            </MdTableWrapper>
-          ),
-          ...props.components,
-        }}
-      >
-        {text}
-      </ReactMarkdown>
-    ),
-    [props, text, gitUrl, mainBranch, isStreaming, sanitizeSchema]
+  return (
+    <ReactMarkdown
+      {...props}
+      rehypePlugins={[rehypeRaw, [rehypeSanitize, sanitizeSchema]]}
+      remarkPlugins={[remarkGfm]}
+      components={{
+        blockquote: (props) => <MdBlockquote {...props} />,
+        ul: (props) => <MdUl {...props} />,
+        ol: (props) => <MdOl {...props} />,
+        li: (props) => <MdLi {...props} />,
+        h1: (props) => <MdH1 {...props} />,
+        h2: (props) => <MdH2 {...props} />,
+        h3: (props) => <MdH3 {...props} />,
+        h4: (props) => <MdH4 {...props} />,
+        h5: (props) => <MdH5 {...props} />,
+        h6: (props) => <MdH6 {...props} />,
+        img: (props) => (
+          <MarkdownImage
+            {...props}
+            gitUrl={gitUrl}
+            mainBranch={mainBranch}
+          />
+        ),
+        p: (props) => <MdP {...props} />,
+        div: (props) => <MdDiv {...props} />,
+        a: (props) => (
+          <MarkdownLink
+            {...props}
+            gitUrl={gitUrl}
+            mainBranch={mainBranch}
+          />
+        ),
+        span: (props) => <MdSpan {...props} />,
+        code: (props) => <InlineCode {...props} />,
+        pre: ({ node: _, ...props }) => (
+          <MarkdownPreformatted
+            {...props}
+            isStreaming={isStreaming}
+          />
+        ),
+        hr: (props) => <MdHr {...props} />,
+        th: (props) => <MdTh {...props} />,
+        td: (props) => <MdTd {...props} />,
+        table: (props) => (
+          <MdTableWrapper>
+            <MdTable {...props} />
+          </MdTableWrapper>
+        ),
+        ...props.components,
+      }}
+    >
+      {text}
+    </ReactMarkdown>
   )
 }
 
-export default Markdown
+export default memo(Markdown)

@@ -109,11 +109,12 @@ const Button = memo(
             ? 'floating'
             : 'primary'
 
+    // Reading offsetHeight forces layout, so only measure when the spinner shows.
     useEffect(() => {
-      if (!buttonRef.current) return
+      if (!loading || !buttonRef.current) return
 
       setMeasuredHeight(buttonRef.current.offsetHeight)
-    }, [])
+    }, [loading])
 
     const { rest, css } = resolveSpacersAndSanitizeCss(props, theme)
 

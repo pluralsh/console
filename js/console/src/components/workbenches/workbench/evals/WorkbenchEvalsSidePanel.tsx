@@ -1,6 +1,6 @@
 import { Chip, Flex } from '@pluralsh/design-system'
 import { WorkbenchEmptyText } from 'components/workbenches/common/WorkbenchEmptyState'
-import { type ComponentProps, useMemo, useState } from 'react'
+import { type ComponentProps, memo, useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { WorkbenchStoredPromptMarkdown } from '../WorkbenchStoredPromptMarkdown'
 import {
@@ -23,7 +23,7 @@ export const WORKBENCH_EVALS_SIDE_PANEL_WIDTH = 350
 type EvalFilter = 'all' | EvalGradeCategory
 type ChipSeverity = NonNullable<ComponentProps<typeof Chip>['severity']>
 
-export function WorkbenchEvalsSidePanel({
+export const WorkbenchEvalsSidePanel = memo(function WorkbenchEvalsSidePanel({
   evalRows,
   loading,
   selectedEvalResultId,
@@ -164,7 +164,7 @@ export function WorkbenchEvalsSidePanel({
       </Flex>
     </Flex>
   )
-}
+})
 
 function EvalFilterChip({
   filterKey,
