@@ -4008,6 +4008,7 @@ __metadata:
     chromatic: "npm:18.5.0"
     classnames: "npm:2.5.1"
     dayjs: "npm:1.11.23"
+    dom-to-svg: "npm:0.12.2"
     elkjs: "npm:0.12.0"
     fuse.js: "npm:7.5.0"
     highlight.js: "npm:11.11.1"
@@ -8676,6 +8677,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"dom-to-svg@npm:0.12.2":
+  version: 0.12.2
+  resolution: "dom-to-svg@npm:0.12.2"
+  dependencies:
+    gradient-parser: "npm:^1.0.2"
+    postcss: "npm:^8.2.9"
+    postcss-value-parser: "npm:^4.1.0"
+  checksum: 10/eb0e2a19cc6e164c64322551846f9ac38576c4cfde3f32f526160f81a1f27d6adffda38ec19a03d00479adf1c5c680419245cff29204ec10606abd7a1ea8594c
+  languageName: node
+  linkType: hard
+
 "domelementtype@npm:^2.3.0":
   version: 2.3.0
   resolution: "domelementtype@npm:2.3.0"
@@ -9538,6 +9550,13 @@ __metadata:
   version: 4.2.11
   resolution: "graceful-fs@npm:4.2.11"
   checksum: 10/bf152d0ed1dc159239db1ba1f74fdbc40cb02f626770dcd5815c427ce0688c2635a06ed69af364396da4636d0408fcf7d4afdf7881724c3307e46aff30ca49e2
+  languageName: node
+  linkType: hard
+
+"gradient-parser@npm:^1.0.2":
+  version: 1.2.0
+  resolution: "gradient-parser@npm:1.2.0"
+  checksum: 10/5b5fde8019e5a2ca31e4609457af36ecc6453e4880a912bd9c8d97932b12d266f0b47fd2c003ae558b64b762dae9dea1cd08616996ec4406e37aa2678ec29d14
   languageName: node
   linkType: hard
 
@@ -12503,7 +12522,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"postcss-value-parser@npm:^4.0.2":
+"postcss-value-parser@npm:^4.0.2, postcss-value-parser@npm:^4.1.0":
   version: 4.2.0
   resolution: "postcss-value-parser@npm:4.2.0"
   checksum: 10/e4e4486f33b3163a606a6ed94f9c196ab49a37a7a7163abfcd469e5f113210120d70b8dd5e33d64636f41ad52316a3725655421eb9a1094f1bcab1db2f555c62

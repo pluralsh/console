@@ -13,11 +13,14 @@ const scenarios = [
   'cost-analysis',
   'incident-response',
 ]
+const overviewScreens = ['flow', 'workbench']
 const themes = ['light', 'dark']
 const story = 'product-shots-gallery--environment-hygiene'
+const overviewStory = 'product-shots-overview--flow'
 
 await rm(output, { force: true, recursive: true })
 await mkdir(resolve(output, 'images'), { recursive: true })
+await mkdir(resolve(output, 'svg'), { recursive: true })
 
 const build = spawnSync('yarn', ['build:storybook'], { cwd: root, stdio: 'inherit' })
 if (build.status) process.exit(build.status)
@@ -58,8 +61,43 @@ try {
     }
   }
 
+  const overviewManifest = []
+  await page.setViewportSize({ width: 1440, height: 920 })
+
+  for (const screen of overviewScreens) {
+    for (const theme of themes) {
+      for (const background of [true, false]) {
+        const args = `screen:${screen};theme:${theme};background:${background ? '!true' : '!false'}`
+        await page.goto(`http://127.0.0.1:6106/iframe.html?id=${overviewStory}&args=${args}`, {
+          waitUntil: 'networkidle',
+        })
+        const shot = page.locator('[data-overview-shot]')
+        await shot.waitFor()
+        await page.evaluate(() => document.fonts.ready)
+
+        if (background) {
+          const file = `images/overview-${screen}-${theme}.webp`
+          await shot.screenshot({ path: resolve(output, file), type: 'webp', omitBackground: true })
+          overviewManifest.push({ id: screen, theme, background, file })
+        } else {
+          const file = `svg/overview-${screen}-${theme}.svg`
+          const svg = await page.evaluate(
+            (selector) => globalThis.productShotToSvg(selector),
+            '[data-overview-screen]'
+          )
+          await writeFile(resolve(output, file), svg)
+          overviewManifest.push({ id: screen, theme, background, file })
+        }
+      }
+    }
+  }
+
   await browser.close()
   await writeFile(resolve(output, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`)
+  await writeFile(
+    resolve(output, 'overview-manifest.json'),
+    `${JSON.stringify(overviewManifest, null, 2)}\n`
+  )
   await writeFile(
     resolve(output, 'embed.js'),
     `(()=>{const q=new URLSearchParams(location.search),id=q.get('scenario')||'environment-hygiene',theme=q.get('theme')||'light',root=document.currentScript?.parentElement||document.body,reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;let step=0;root.style.cssText='margin:0;display:block;overflow:hidden;background:transparent';const img=document.createElement('img');img.alt='Plural product workflow';img.style.cssText='display:block;width:100%;height:auto;transition:opacity 240ms ease';root.append(img);const show=()=>{img.src='./images/'+id+'-'+(step+1)+'-'+theme+'.webp';img.dataset.step=String(step)};show();if(!reduce)setInterval(()=>{img.style.opacity='0';setTimeout(()=>{step=(step+1)%4;show();img.style.opacity='1'},240)},4000)})();\n`

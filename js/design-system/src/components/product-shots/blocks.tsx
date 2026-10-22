@@ -178,7 +178,13 @@ const Ellipsis = styled.div({
   whiteSpace: 'nowrap',
 })
 
-function Logo({ logo, size = 18 }: { logo: ProductShotLogo; size?: number }) {
+export function Logo({
+  logo,
+  size = 18,
+}: {
+  logo: ProductShotLogo
+  size?: number
+}) {
   const Icon = logos[logo]
 
   return (

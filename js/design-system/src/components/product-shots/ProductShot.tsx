@@ -13,7 +13,7 @@ import {
 } from '../../icons'
 import { styledThemeDark, styledThemeLight } from '../../theme'
 import { ShotBlock, shotTokens, SkeletonBlock } from './blocks'
-import { CONTOUR_GROUP, CONTOUR_PATHS } from './contours'
+import { Contours } from './Contours'
 import {
   type ProductShotFidelity,
   type ProductShotNav,
@@ -138,32 +138,6 @@ const Cursor = styled.svg<{ $animate: boolean }>(({ $animate }) => ({
   '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
 }))
 
-function Contours({ color }: { color: string }) {
-  return (
-    <svg
-      aria-hidden="true"
-      height={PRODUCT_SHOT_HEIGHT}
-      style={{ left: 0, position: 'absolute', top: 0 }}
-      viewBox={`0 0 ${PRODUCT_SHOT_WIDTH} ${PRODUCT_SHOT_HEIGHT}`}
-      width={PRODUCT_SHOT_WIDTH}
-    >
-      <g
-        fill="none"
-        stroke={color}
-        strokeWidth={CONTOUR_GROUP.strokeWidth}
-        transform={`scale(${PRODUCT_SHOT_WIDTH / CONTOUR_GROUP.frameWidth}) translate(${CONTOUR_GROUP.x} ${CONTOUR_GROUP.y})`}
-      >
-        {CONTOUR_PATHS.map((d) => (
-          <path
-            d={d}
-            key={d}
-          />
-        ))}
-      </g>
-    </svg>
-  )
-}
-
 export function ProductShot({
   scenario: scenarioId,
   step = 0,
@@ -211,7 +185,11 @@ export function ProductShot({
           data-product-shot={`${scenarioId}:${current.id}`}
           data-theme={theme}
         >
-          <Contours color={tokens.contour} />
+          <Contours
+            color={tokens.contour}
+            height={PRODUCT_SHOT_HEIGHT}
+            width={PRODUCT_SHOT_WIDTH}
+          />
           {displayFidelity !== 'abstract' && (
             <Window aria-hidden="true">
               <div className="topbar">

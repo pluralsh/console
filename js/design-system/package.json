@@ -109,6 +109,7 @@
     "@vitest/ui": "5.0.1",
     "babel-plugin-styled-components": "2.3.0",
     "chromatic": "18.5.0",
+    "dom-to-svg": "0.12.2",
     "fuse.js": "7.5.0",
     "http-server": "14.1.1",
     "jsdom": "30.0.1",
