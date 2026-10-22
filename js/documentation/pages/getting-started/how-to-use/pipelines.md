@@ -181,7 +181,7 @@ spec:
 
 ## Use an Observer to Automate Pipeline Context Creation (EXTRA CREDIT)
 
-The {% doclink to="plural_features_continuous_deployment_deployment_architecture" %}Observer{% /doclink %} CRD is designed to poll external registries, like an OCI Docker image registry, or a Helm repository, or even Git, and execute defined actions based on the result. If you've adopted a `semver` based release versioning process, this can simplify the process of picking up new images to deploy, and also enhance security by adopting a "pull" model for deployment, instead of requiring a CI-derived push and the network security issues that creates (having to whitelist all GitHub or CircleCI IP ranges).
+The [Observer](/plural-features/continuous-deployment/observer) CRD is designed to poll external registries, like an OCI Docker image registry, or a Helm repository, or even Git, and execute defined actions based on the result. If you've adopted a `semver` based release versioning process, this can simplify the process of picking up new images to deploy, and also enhance security by adopting a "pull" model for deployment, instead of requiring a CI-derived push and the network security issues that creates (having to whitelist all GitHub or CircleCI IP ranges).
 
 If you want to do this, a simple Observer CRD could be defined at `bootstrap/cd-demo/observer.yaml`:
 

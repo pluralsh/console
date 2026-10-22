@@ -78,7 +78,7 @@ From there, the governance controller will go through its workflow of:
 
 ## PR -> Preview Environment Creation/Deletion
 
-Plural Flows supports a full PR-based preview environment controller.  You can learn more about it in its [dedicated docs page](/plural-features/flows/preview-environment), but specifying one is simple:
+Plural Flows supports a full PR-based preview environment controller.  You can learn more about it in its [dedicated docs page](/plural-features/flows/preview-environments), but specifying one is simple:
 
 ```
 Plural Flow: {flow-name}

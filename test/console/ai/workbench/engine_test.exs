@@ -55,6 +55,18 @@ defmodule Console.AI.Workbench.EngineTest do
       refute refetch(job).status == :failed
     end
 
+    test "formats rpc errors when loading workbench skills fails" do
+      workbench = insert(:workbench)
+      job = insert(:workbench_job, workbench: workbench, status: :running)
+
+      expect(Skills, :skills, fn _ -> {:error, {:rpc, :noconnection}} end)
+
+      assert {:error, {:rpc, :noconnection}} = Engine.new(job)
+
+      assert %{status: :failed, error: error} = refetch(job)
+      assert error == "Error loading workbench environment: Git or Helm agent request failed"
+    end
+
     test "starts MCP clients before indexing workbench tools" do
       server = insert(:mcp_server, name: "example", url: "http://localhost:3001/mcp", protocol: :streamable_http)
       workbench = insert(:workbench)

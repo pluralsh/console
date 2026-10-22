@@ -16,10 +16,14 @@ import {
   StatusOkIcon,
   TreeViewIcon,
   WarningIcon,
+  useResizeObserver,
 } from '@pluralsh/design-system'
+import { DragHandleSC } from 'components/ai/chatbot/SidePanelShared'
+import { useResizablePane } from 'components/ai/chatbot/useResizeableChatPane'
 import {
   type ReactNode,
   type RefObject,
+  useCallback,
   useMemo,
   useRef,
   useState,
@@ -62,6 +66,23 @@ export type TraceFullscreenControl = {
   returnFocusRef?: RefObject<HTMLElement | null>
 }
 
+const TREE_STEP = 20
+const TRACE_LABEL_MIN = 200
+const TRACE_LABEL_DEFAULT = 256
+const TRACE_LABEL_MAX = 560
+// leave the bars enough room that widening the names cannot cover the timeline
+const TRACE_TIMELINE_MIN = 220
+const TRACE_LABEL_STORAGE_KEY = 'workbench-trace-label-width'
+
+function traceLabelMax(containerWidth: number) {
+  if (containerWidth <= 0) return TRACE_LABEL_MAX
+
+  return Math.max(
+    TRACE_LABEL_MIN,
+    Math.min(TRACE_LABEL_MAX, containerWidth - TRACE_TIMELINE_MIN)
+  )
+}
+
 export function TraceWaterfall({
   traces,
   summary,
@@ -97,6 +118,28 @@ export function TraceWaterfall({
   const selectedParent = rows.find(
     ({ span }) => span.spanId === selectedRow?.span.parentId
   )
+  const timelineRef = useRef<HTMLDivElement>(null)
+  const [labelContainerWidth, setLabelContainerWidth] = useState(0)
+  const onLabelContainerWidth = useCallback((next: number) => {
+    setLabelContainerWidth((current) => (current === next ? current : next))
+  }, [])
+  useResizeObserver(timelineRef, ({ width }) =>
+    onLabelContainerWidth(Math.floor(width))
+  )
+  const preferredLabelWidth =
+    TRACE_LABEL_DEFAULT +
+    rows.reduce((max, row) => Math.max(max, row.depth), 0) * TREE_STEP
+  const labelMaxWidth = traceLabelMax(labelContainerWidth)
+  const {
+    calculatedPanelWidth: labelWidth,
+    isDragging,
+    dragHandleProps,
+  } = useResizablePane(TRACE_LABEL_MIN, 100, undefined, {
+    defaultWidthPx: Math.min(preferredLabelWidth, TRACE_LABEL_MAX),
+    storageKey: TRACE_LABEL_STORAGE_KEY,
+    maxWidthPx: labelMaxWidth,
+    handleEdge: 'right',
+  })
 
   if (!activeTrace || !rows.length || !bounds) return null
 
@@ -176,7 +219,24 @@ export function TraceWaterfall({
       </TraceHeaderSC>
       {view === 'timeline' ? (
         <TraceTimelineContentSC $sideDetails={fullscreen && !!selectedRow}>
-          <TimelineSC $fullscreen={fullscreen}>
+          <DragHandleSC
+            role="separator"
+            aria-label="Span list width"
+            aria-orientation="vertical"
+            aria-valuemin={TRACE_LABEL_MIN}
+            aria-valuemax={labelMaxWidth}
+            aria-valuenow={labelWidth}
+            tabIndex={0}
+            title="Drag to resize the span list"
+            $isDragging={isDragging}
+            css={{ left: labelWidth - 10 }}
+            {...dragHandleProps}
+          />
+          <TimelineSC
+            ref={timelineRef}
+            $fullscreen={fullscreen}
+            style={{ '--trace-label-width': `${labelWidth}px` }}
+          >
             <TimelineHeaderSC>
               <CaptionP $color="text-xlight">SPAN</CaptionP>
               <TraceAxisSC>
@@ -595,8 +655,6 @@ function TraceBarStatusIcon({ severity }: { severity: TraceSeverity }) {
   return null
 }
 
-const TREE_STEP = 20
-
 const TraceWaterfallSC = styled.div<{ $fullscreen: boolean }>(
   ({ theme, $fullscreen }) => ({
     containerType: 'inline-size',
@@ -723,6 +781,7 @@ const TraceTimelineContentSC = styled.div<{ $sideDetails: boolean }>(
       overflowY: 'auto',
     },
     minHeight: 0,
+    position: 'relative',
   })
 )
 
@@ -738,7 +797,7 @@ const TimelineHeaderSC = styled.div(({ theme }) => ({
   background: theme.colors['fill-zero'],
   borderBottom: `1px solid ${theme.colors.border}`,
   display: 'grid',
-  gridTemplateColumns: '256px minmax(0, 1fr)',
+  gridTemplateColumns: 'var(--trace-label-width, 256px) minmax(0, 1fr)',
   minHeight: 50,
   position: 'sticky',
   top: 0,
@@ -750,8 +809,8 @@ const TimelineHeaderSC = styled.div(({ theme }) => ({
     padding: `0 ${theme.spacing.medium}px`,
   },
   '@container trace-view (max-width: 560px)': {
-    gridTemplateColumns: '200px minmax(300px, 1fr)',
-    minWidth: 500,
+    gridTemplateColumns: 'var(--trace-label-width, 256px) minmax(300px, 1fr)',
+    minWidth: 'calc(var(--trace-label-width, 256px) + 300px)',
   },
 }))
 
@@ -792,7 +851,7 @@ const TraceRowSC = styled.button<{ $selected: boolean }>(
     color: 'inherit',
     cursor: 'pointer',
     display: 'grid',
-    gridTemplateColumns: '256px minmax(0, 1fr)',
+    gridTemplateColumns: 'var(--trace-label-width, 256px) minmax(0, 1fr)',
     height: 40,
     minHeight: 40,
     padding: 0,
@@ -806,8 +865,8 @@ const TraceRowSC = styled.button<{ $selected: boolean }>(
     },
     '&:last-child > :last-child::after': { display: 'none' },
     '@container trace-view (max-width: 560px)': {
-      gridTemplateColumns: '200px minmax(300px, 1fr)',
-      minWidth: 500,
+      gridTemplateColumns: 'var(--trace-label-width, 256px) minmax(300px, 1fr)',
+      minWidth: 'calc(var(--trace-label-width, 256px) + 300px)',
     },
   })
 )

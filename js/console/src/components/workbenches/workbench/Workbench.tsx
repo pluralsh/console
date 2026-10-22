@@ -1,4 +1,5 @@
 import {
+  ICON_FRAME_ICON_SIZE,
   Breadcrumb,
   BookmarkIcon,
   BotIcon,
@@ -426,50 +427,63 @@ export function WorkbenchTabs() {
             <MoreMenu
               disabled={!workbench}
               maxHeight="min(80vh, 520px)"
-              triggerProps={{ iconFrameType: 'secondary', size: 'medium' }}
+              triggerProps={{
+                iconFrameType: 'secondary',
+                size: 'medium',
+                iconSize: ICON_FRAME_ICON_SIZE.small,
+              }}
               onSelectionChange={handleMoreMenuSelection}
             >
               {!showEditWorkbenchButton && (
                 <ListBoxItem
                   key={WorkbenchMoreMenuKey.Edit}
-                  leftContent={<GearTrainIcon />}
+                  leftContent={
+                    <GearTrainIcon size={ICON_FRAME_ICON_SIZE.small} />
+                  }
                   label="Edit workbench"
                 />
               )}
               <ListBoxItem
                 key={WorkbenchMoreMenuKey.Tools}
-                leftContent={<ToolsIcon />}
+                leftContent={<ToolsIcon size={ICON_FRAME_ICON_SIZE.small} />}
                 label="Tools"
               />
               <ListBoxItem
                 key={WorkbenchMoreMenuKey.Cron}
-                leftContent={<EventScheduleIcon />}
+                leftContent={
+                  <EventScheduleIcon size={ICON_FRAME_ICON_SIZE.small} />
+                }
                 label="Cron schedules"
               />
               <ListBoxItem
                 key={WorkbenchMoreMenuKey.Webhook}
-                leftContent={<WebhooksIcon />}
+                leftContent={<WebhooksIcon size={ICON_FRAME_ICON_SIZE.small} />}
                 label="Webhook triggers"
               />
               <ListBoxItem
                 key={WorkbenchMoreMenuKey.Chatbots}
-                leftContent={<BotIcon />}
+                leftContent={<BotIcon size={ICON_FRAME_ICON_SIZE.small} />}
                 label="Chatbots"
               />
               <ListBoxItem
                 key={WorkbenchMoreMenuKey.SavedPrompts}
-                leftContent={<BookmarkIcon />}
+                leftContent={<BookmarkIcon size={ICON_FRAME_ICON_SIZE.small} />}
                 label="Saved prompts"
               />
               <ListBoxItem
                 key={WorkbenchMoreMenuKey.EvalSettings}
-                leftContent={<TuningIcon />}
+                leftContent={<TuningIcon size={ICON_FRAME_ICON_SIZE.small} />}
                 label="Eval settings"
               />
               <ListBoxItem
                 key={WorkbenchMoreMenuKey.Delete}
                 destructive
-                leftContent={<TrashCanIcon color="icon-danger" />}
+                leftContent={
+                  <TrashCanIcon
+                    size={ICON_FRAME_ICON_SIZE.small}
+                    color="icon-danger"
+                  />
+                }
                 label="Delete workbench"
               />
             </MoreMenu>

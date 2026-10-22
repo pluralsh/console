@@ -171,6 +171,12 @@ defmodule Console.AI.Provider.OpenAITest do
       assert {:ok, "ok"} = Provider.completion([{:user, "ping"}], preface: :ignore)
     end
 
+    test "disables Responses API chaining for stateless OpenAI completions",
+      do: assert_stateless_completion(:openai)
+
+    test "disables Responses API chaining for stateless OpenAI-compatible completions",
+      do: assert_stateless_completion(:openai_compatible)
+
     test "supplies a pricing context that prices the default openai models" do
       defaults = Provider.model_defaults(:openai)
 
@@ -216,5 +222,48 @@ defmodule Console.AI.Provider.OpenAITest do
         assert cost > 0
       end
     end
+  end
+
+  defp assert_stateless_completion(provider) do
+    deployment_settings(
+      ai:
+        Map.put(
+          %{enabled: true, provider: provider},
+          provider,
+          %{access_token: "test-key", model: "gpt-5.4-mini", method: :responses}
+        )
+    )
+
+    context =
+      ReqLLM.Context.new([
+        ReqLLM.Context.user("first"),
+        %{ReqLLM.Context.assistant("answer") | metadata: %{response_id: "resp-previous"}},
+        ReqLLM.Context.user("next")
+      ])
+
+    expect(Req, :request, fn %Req.Request{} = request ->
+      assert request.options[:store] == false
+      refute request.options[:previous_response_id]
+
+      {:ok,
+       %Req.Response{
+         status: 200,
+         body: %Response{
+           id: "test-response",
+           model: "gpt-5.4-mini",
+           context: %ReqLLM.Context{messages: []},
+           message: %Message{
+             role: :assistant,
+             content: [%ContentPart{type: :text, text: "ok"}]
+           },
+           finish_reason: :stop,
+           usage: %{input_tokens: 1, output_tokens: 1, total_tokens: 2},
+           stream?: false
+         }
+       }}
+    end)
+
+    assert {:ok, %Response{}} =
+             Provider.reqllm_completion(context, preface: :ignore, stateless: true)
   end
 end

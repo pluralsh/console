@@ -94,6 +94,7 @@ const columns = [
         <Flex justify="flex-end">
           <IconFrame
             clickable
+            size="small"
             tooltip="Edit provider"
             icon={<PencilIcon />}
             onClick={() => onEdit(row.original.provider)}

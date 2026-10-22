@@ -1,4 +1,5 @@
 import {
+  ICON_FRAME_ICON_SIZE,
   ListIcon,
   NetworkInterfaceIcon,
   useSetBreadcrumbs,
@@ -145,6 +146,7 @@ export default function Services() {
           )}
           <ButtonGroup
             size="small"
+            iconSize={ICON_FRAME_ICON_SIZE.small}
             directory={directory}
             toPath={(path) => `/${CD_REL_PATH}/${SERVICES_REL_PATH}/${path}`}
             tab={tab}

@@ -1,4 +1,5 @@
 import {
+  ICON_FRAME_ICON_SIZE,
   GearTrainIcon,
   ListBoxItem,
   PeopleIcon,
@@ -58,20 +59,23 @@ const ColActions = columnHelper.accessor((project) => project, {
         <MoreMenu onSelectionChange={(newKey) => setMenuKey(newKey)}>
           <ListBoxItem
             key={MenuItemKey.Permissions}
-            leftContent={<PeopleIcon />}
+            leftContent={<PeopleIcon size={ICON_FRAME_ICON_SIZE.small} />}
             label="Permissions"
             textValue="Permissions"
           />
           <ListBoxItem
             key={MenuItemKey.Settings}
-            leftContent={<GearTrainIcon />}
+            leftContent={<GearTrainIcon size={ICON_FRAME_ICON_SIZE.small} />}
             label="Settings"
             textValue="Settings"
           />
           <ListBoxItem
             key={MenuItemKey.Delete}
             leftContent={
-              <TrashCanIcon color={theme.colors['icon-danger-critical']} />
+              <TrashCanIcon
+                size={ICON_FRAME_ICON_SIZE.small}
+                color={theme.colors['icon-danger-critical']}
+              />
             }
             label="Delete project"
             textValue="Delete project"

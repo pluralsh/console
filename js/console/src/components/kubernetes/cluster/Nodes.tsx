@@ -122,6 +122,7 @@ const colActions = columnHelper.accessor(() => null, {
       <>
         <IconFrame
           clickable
+          size="small"
           icon={<SortDescIcon color="icon-danger" />}
           tooltip="Drain node"
           onClick={(e) => {

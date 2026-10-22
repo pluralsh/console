@@ -1,4 +1,5 @@
 import {
+  ICON_FRAME_ICON_SIZE,
   ArrowTopRightIcon,
   CaretDownIcon,
   IconFrame,
@@ -90,13 +91,16 @@ const cols = [
 
       return (
         <TriggerWrapperSC>
-          <TriggerArrowSC data-open={row.getIsExpanded()} />
+          <TriggerArrowSC data-open={row.getIsExpanded()}>
+            <CaretDownIcon size={ICON_FRAME_ICON_SIZE.small} />
+          </TriggerArrowSC>
           <span css={{ flex: 1 }}>{title}</span>
           <PrStatusChip status={status} />
           {creator && <span>created by {creator}</span>}
           <ResyncStackPr id={id} />
           <IconFrame
             clickable
+            size="small"
             as={Link}
             icon={<ArrowTopRightIcon />}
             to={url}
@@ -140,6 +144,7 @@ function ResyncStackPr({ id }: { id: string }) {
       <IconFrame
         disabled={loading}
         clickable
+        size="small"
         type="floating"
         tooltip="Resync"
         icon={<ReloadIcon />}
@@ -178,7 +183,11 @@ const TriggerWrapperSC = styled.div(({ theme }) => ({
   },
 }))
 
-const TriggerArrowSC = styled(CaretDownIcon)(({ theme }) => ({
+const TriggerArrowSC = styled.span(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  flexShrink: 0,
   transition: 'transform 0.25s ease',
   transform: 'rotate(-90deg)',
   width: theme.spacing.medium,

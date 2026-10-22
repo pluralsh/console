@@ -105,6 +105,7 @@ const cols = [
         <Flex gap="xxsmall">
           <IconFrame
             clickable
+            size="small"
             tooltip="Delete provider"
             onClick={(e) => {
               e.stopPropagation()
@@ -114,6 +115,7 @@ const cols = [
           />
           <IconFrame
             clickable
+            size="small"
             tooltip="Go to provider settings"
             icon={<CaretRightIcon />}
           />

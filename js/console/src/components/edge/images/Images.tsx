@@ -51,6 +51,7 @@ const columns = [
           text={getValue()?.password ?? ''}
           tooltip="Copy value"
           type="tertiary"
+          size="small"
         />
       </div>
     ),

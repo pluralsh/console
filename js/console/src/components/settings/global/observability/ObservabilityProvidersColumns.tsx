@@ -1,5 +1,6 @@
 import { ReactElement, useState } from 'react'
 import {
+  ICON_FRAME_ICON_SIZE,
   DatadogLogoIcon,
   HelpIcon,
   IconFrame,
@@ -168,14 +169,17 @@ export const ColActions = columnHelper.display({
         <MoreMenu onSelectionChange={(newKey) => setMenuKey(newKey)}>
           <ListBoxItem
             key={MenuItemKey.Edit}
-            leftContent={<PencilIcon />}
+            leftContent={<PencilIcon size={ICON_FRAME_ICON_SIZE.small} />}
             label="Edit provider"
             textValue="Edit provider"
           />
           <ListBoxItem
             key={MenuItemKey.Delete}
             leftContent={
-              <TrashCanIcon color={theme.colors['icon-danger-critical']} />
+              <TrashCanIcon
+                size={ICON_FRAME_ICON_SIZE.small}
+                color={theme.colors['icon-danger-critical']}
+              />
             }
             label="Delete provider"
             textValue="Delete provider"

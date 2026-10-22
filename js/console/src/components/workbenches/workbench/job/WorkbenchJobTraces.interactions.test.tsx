@@ -5,7 +5,15 @@ import {
   screen,
   waitFor,
 } from '@testing-library/react'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest'
 import { ThemeProvider } from 'styled-components'
 import { styledThemeDark } from '@pluralsh/design-system'
 import type { ComponentProps } from 'react'
@@ -16,7 +24,20 @@ vi.mock('./WorkbenchJobTraceTopology', () => ({
   TraceTopology: ({ mode }: { mode: string }) => <div>{mode} graph</div>,
 }))
 
-afterEach(cleanup)
+beforeAll(() => {
+  vi.stubGlobal(
+    'ResizeObserver',
+    class {
+      observe() {}
+      disconnect() {}
+    }
+  )
+})
+afterAll(() => vi.unstubAllGlobals())
+afterEach(() => {
+  cleanup()
+  localStorage.clear()
+})
 
 function renderTrace(
   fullscreenControl?: ComponentProps<typeof TraceWaterfall>['fullscreenControl']
@@ -94,4 +115,74 @@ describe('trace view interactions', () => {
     )
     expect(screen.getByRole('dialog', { name: 'Requests' })).toBeTruthy()
   })
+
+  it('widens the span list with nesting and stops at a max width', () => {
+    renderTrace()
+    const spanList = () =>
+      screen.getByRole('separator', { name: 'Span list width' })
+    expect(spanList().getAttribute('aria-valuenow')).toBe('256')
+    expect(spanList().getAttribute('aria-valuemax')).toBe('560')
+    expect(spanList().getAttribute('aria-valuemin')).toBe('200')
+
+    cleanup()
+    localStorage.clear()
+    render(traceElement(nestedSpans(4)))
+    expect(spanList().getAttribute('aria-valuenow')).toBe('336')
+
+    cleanup()
+    localStorage.clear()
+    render(traceElement(nestedSpans(30)))
+    expect(spanList().getAttribute('aria-valuenow')).toBe('560')
+
+    fireEvent.keyDown(spanList(), { key: 'ArrowRight' })
+    expect(spanList().getAttribute('aria-valuenow')).toBe('560')
+    fireEvent.keyDown(spanList(), { key: 'ArrowLeft' })
+    expect(spanList().getAttribute('aria-valuenow')).toBe('550')
+
+    for (let step = 0; step < 40; step++)
+      fireEvent.keyDown(spanList(), { key: 'ArrowLeft' })
+    expect(spanList().getAttribute('aria-valuenow')).toBe('200')
+  })
+
+  it('stops resizing when a drag is interrupted', () => {
+    renderTrace()
+    const spanList = () =>
+      screen.getByRole('separator', { name: 'Span list width' })
+
+    fireEvent.pointerDown(spanList(), { clientX: 0, pointerId: 1 })
+    fireEvent.pointerMove(spanList(), { clientX: 32, pointerId: 1 })
+    const dragged = spanList().getAttribute('aria-valuenow')
+    expect(dragged).toBe('288')
+
+    fireEvent.pointerCancel(spanList(), { pointerId: 1 })
+    fireEvent.pointerMove(spanList(), { clientX: 80, pointerId: 1 })
+    expect(spanList().getAttribute('aria-valuenow')).toBe(dragged)
+
+    fireEvent.pointerDown(spanList(), { clientX: 80, pointerId: 1 })
+    fireEvent.pointerMove(spanList(), { clientX: 96, pointerId: 1 })
+    const again = spanList().getAttribute('aria-valuenow')
+    fireEvent.lostPointerCapture(spanList())
+    fireEvent.pointerMove(spanList(), { clientX: 160, pointerId: 1 })
+    expect(spanList().getAttribute('aria-valuenow')).toBe(again)
+  })
 })
+
+function traceElement(traces: ComponentProps<typeof TraceWaterfall>['traces']) {
+  return (
+    <ThemeProvider theme={styledThemeDark}>
+      <TraceWaterfall traces={traces} />
+    </ThemeProvider>
+  )
+}
+
+function nestedSpans(depth: number) {
+  return Array.from({ length: depth + 1 }, (_, index) => ({
+    traceId: 'trace',
+    spanId: `span-${index}`,
+    parentId: index === 0 ? null : `span-${index - 1}`,
+    name: `span ${index}`,
+    service: 'console',
+    start: '2026-09-07T08:00:00Z',
+    end: '2026-09-07T08:00:01Z',
+  }))
+}

@@ -1,4 +1,5 @@
 import {
+  ICON_FRAME_ICON_SIZE,
   ArrowTopRightIcon,
   Button,
   CaretDownIcon,
@@ -115,10 +116,14 @@ export default function StackActions({
             width={300}
             triggerButton={
               <IconFrame
-                css={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
+                css={{
+                  borderTopLeftRadius: 0,
+                  borderBottomLeftRadius: 0,
+                }}
                 type="floating"
                 size="medium"
-                icon={<CaretDownIcon size={12} />}
+                iconSize={ICON_FRAME_ICON_SIZE.small}
+                icon={<CaretDownIcon />}
                 clickable
               />
             }
@@ -152,7 +157,7 @@ export default function StackActions({
           small
           as={Link}
           to={getServiceDetailsPath({ serviceId: stack.parent.id })}
-          endIcon={<ArrowTopRightIcon />}
+          endIcon={<ArrowTopRightIcon size={ICON_FRAME_ICON_SIZE.small} />}
         >
           Parent
         </Button>

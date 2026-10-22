@@ -125,7 +125,7 @@ function SecretDataValue({
       }}
     >
       <IconFrame
-        size="medium"
+        size="small"
         clickable
         tooltip={reveal ? 'Hide value' : 'Reveal value'}
         icon={reveal ? <EyeIcon /> : <EyeClosedIcon />}

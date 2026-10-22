@@ -156,6 +156,7 @@ defmodule Console.AI.Chat.MemoryEngine do
       plural: tools,
       model: engine.model,
       client: engine.provider || :tool,
+      stateless: true,
       usage_callback: engine.usage_callback
     )
     |> case do

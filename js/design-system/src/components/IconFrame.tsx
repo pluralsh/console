@@ -72,13 +72,13 @@ function typeToBorder(theme: DefaultTheme): Record<Type, string> {
   }
 }
 
-const sizeToIconSize: Record<Size, number> = {
+const ICON_FRAME_ICON_SIZE = {
   xsmall: 10,
-  small: 16,
+  small: 12,
   medium: 16,
   large: 16,
   xlarge: 24,
-}
+} as const satisfies Record<Size, number>
 
 const sizeToFrameSize: Record<Size, number> = {
   xsmall: 18,
@@ -93,6 +93,7 @@ type IconFrameBaseProps = {
   disabled?: Nullable<boolean>
   textValue?: string
   icon: ReactElement<any>
+  iconSize?: number
   size?: Size
   tooltip?: boolean | ReactNode
   tooltipProps?: Partial<TooltipProps>
@@ -165,6 +166,7 @@ const IconFrameSC = styled.div<{
 
 function IconFrame<E extends ElementType = 'div'>({
   icon,
+  iconSize,
   size = 'medium',
   textValue = '',
   clickable = false,
@@ -178,7 +180,9 @@ function IconFrame<E extends ElementType = 'div'>({
   as,
   ...props
 }: IconFrameProps<E>) {
-  icon = cloneElement(icon, { size: sizeToIconSize[size] })
+  icon = cloneElement(icon, {
+    size: iconSize ?? ICON_FRAME_ICON_SIZE[size],
+  })
   if (tooltip && typeof tooltip === 'boolean') {
     tooltip = textValue
   }
@@ -224,4 +228,5 @@ function IconFrame<E extends ElementType = 'div'>({
 }
 
 export default IconFrame
+export { ICON_FRAME_ICON_SIZE }
 export type { IconFrameProps }

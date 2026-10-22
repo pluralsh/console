@@ -46,10 +46,35 @@ defmodule ConsoleTest do
       assert Console.handle_rpc(:noproc) == {:error, :agent_bootstrapping}
     end
 
+    test "converts shutdowns during genserver calls into agent bootstrapping errors" do
+      reason =
+        {:shutdown,
+         {GenServer, :call,
+          [
+            self(),
+            {:fetch, %Console.Schema.Service.Git{ref: "main", folder: "skills"}},
+            10_000
+          ]}}
+
+      assert Console.handle_rpc({:rpc, reason}) == {:error, :agent_bootstrapping}
+    end
+
     test "leaves unrelated rpc failures as rpc errors" do
       assert Console.handle_rpc(:noconnection) == {:error, {:rpc, :noconnection}}
       assert Console.handle_rpc({:rpc, :badarg}) == {:error, {:rpc, :badarg}}
       assert Console.handle_rpc({:ok, "sha"}) == {:ok, "sha"}
+    end
+  end
+
+  describe "#rpc_error_message/1" do
+    test "formats normalized agent failures without exposing rpc internals" do
+      assert Console.rpc_error_message({:error, :agent_bootstrapping}) ==
+               "Git or Helm agent is not ready"
+
+      assert Console.rpc_error_message({:error, {:rpc, :noconnection}}) ==
+               "Git or Helm agent request failed"
+
+      assert Console.rpc_error_message({:error, :unrelated}) == nil
     end
   end
 

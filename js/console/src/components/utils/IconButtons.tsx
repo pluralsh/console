@@ -21,7 +21,7 @@ export const DeleteIconButton = ({
   return (
     <IconFrame
       ref={ref}
-      size={size || 'medium'}
+      size={size || 'small'}
       clickable={disabled ? false : clickable === undefined ? true : clickable}
       icon={
         <TrashCanIcon

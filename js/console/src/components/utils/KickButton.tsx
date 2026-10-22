@@ -3,6 +3,7 @@ import {
   Button,
   GraphQLToast,
   IconFrame,
+  IconFrameProps,
   ReloadIcon,
   Spinner,
   Tooltip,
@@ -18,6 +19,7 @@ export default function KickButton({
   tooltipMessage,
   variables,
   mutationOptions,
+  iconSize,
   ...props
 }: {
   pulledAt?: string | null
@@ -27,6 +29,7 @@ export default function KickButton({
   tooltipMessage: string
   variables: any
   mutationOptions?: MutationHookOptions
+  iconSize?: IconFrameProps['size']
 } & ComponentPropsWithRef<typeof Button>) {
   const [mutation, { loading, error }] = kickMutationHook({
     ...mutationOptions,
@@ -60,6 +63,7 @@ export default function KickButton({
       >
         {icon ? (
           <IconFrame
+            size={iconSize}
             icon={
               loading ? (
                 <Spinner />

@@ -48,11 +48,11 @@ Creating an SCM Connection is easiest using our UI.  You can then reference that
 For `github` tokens, the minimal permissions needed will be `repo` permissions.  You can also use a GitHub App if you'd like the token to not be scoped to a specific user.  For GitHub Apps, recommended permissions are read/write for Code, Pull Requests and Workflows (Workflows lets you write PR Automations for GitHub Actions, but is technically optional).
 {% /callout %}
 
-## **Create an {% doclink to="plural_features_continuous_deployment_deployment_architecture" %}`ScmConnection`{% /doclink %} CRD Instance**  
+## **Create an [`ScmConnection`](/api-reference/kubernetes/management-api-reference#scmconnection) CRD Instance**  
 
 Once the connection is created in the UI, we can reference it with a CRD instance:
   * ❕ Ensure the Name Provided in the UI matches the `spec.name` in the CRD Exactly
-  * An {% doclink to="plural_features_continuous_deployment_deployment_architecture" %}`ScmConnection`{% /doclink %} YAML template for GitHub exists in `bootstrap/pr-automation/scm.yaml`; you'll need to uncomment it. It should look like this:
+  * An [`ScmConnection`](/api-reference/kubernetes/management-api-reference#scmconnection) YAML template for GitHub exists in `bootstrap/pr-automation/scm.yaml`; you'll need to uncomment it. It should look like this:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
