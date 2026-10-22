@@ -9,13 +9,13 @@ export function pxToRem(px: number): string {
   return `${+(px / REM_BASE_PX).toFixed(6)}rem`
 }
 
-// Percentages (of the browser default, normally 16px) so user font-size
-// preferences are still honored. Ordered by ascending minWidth.
+// Absolute px so the browser's default font-size setting doesn't rescale the
+// whole UI. Ordered by ascending minWidth.
 export const ROOT_FONT_SIZE_STEPS = [
-  { minWidth: 0, fontSize: '93.75%' }, //  15px
-  { minWidth: 1280, fontSize: '100%' }, // 16px, e.g. 14" MacBook Pro (1512px)
-  { minWidth: 1920, fontSize: '106.25%' }, // 17px
-  { minWidth: 2560, fontSize: '112.5%' }, //  18px
+  { minWidth: 0, fontSize: '15px' },
+  { minWidth: 1280, fontSize: '16px' }, // e.g. 14" MacBook Pro (1512px)
+  { minWidth: 1920, fontSize: '17px' },
+  { minWidth: 2560, fontSize: '18px' },
 ] as const
 
 export function getRemPx(): number {

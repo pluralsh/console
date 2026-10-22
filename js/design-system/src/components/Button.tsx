@@ -384,7 +384,7 @@ const IconSC = styled.span<{
     justifyContent: 'center',
     visibility: $loading ? 'hidden' : 'inherit',
     margin:
-      $position === 'start' ? `0 ${marginSize}px 0 0` : `0 0 0 ${marginSize}px`,
+      $position === 'start' ? `0 ${marginSize} 0 0` : `0 0 0 ${marginSize}`,
   }
 })
 

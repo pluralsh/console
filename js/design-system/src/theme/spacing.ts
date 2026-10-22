@@ -76,7 +76,7 @@ export function resolveSpacersAndSanitizeCss(
     if (spacerKeys.has(propKey))
       spacerCssProps[propKey] =
         typeof propValue === 'string'
-          ? spacing[propValue as SemanticSpacingKey] || 0
+          ? (spacing[propValue as SemanticSpacingKey] ?? propValue)
           : propValue
     else rest[propKey] = propValue
   })
