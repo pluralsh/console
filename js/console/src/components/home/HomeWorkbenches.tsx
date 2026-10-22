@@ -138,6 +138,7 @@ function RecentJobCard({ job }: { job: WorkbenchJobTinyFragment }) {
       <WorkbenchStoredPromptMarkdown
         text={prompt ?? ''}
         density="jobCard"
+        clampLines={2}
       />
       <CaptionP
         $color="text-xlight"
@@ -255,7 +256,7 @@ const HeadingSC = styled.div(({ theme }) => ({
   alignItems: 'center',
   justifyContent: 'center',
   gap: theme.spacing.small,
-  paddingTop: theme.spacing.xxxlarge,
+  paddingTop: theme.spacing.xlarge,
   [`@media (max-width: 1500px)`]: { paddingTop: theme.spacing.small },
 }))
 

@@ -8,7 +8,6 @@ import { CommandPaletteLauncher } from 'components/commandpalette/CommandPalette
 import AwaitingReviewLauncher from '../awaiting-review/AwaitingReviewLauncher'
 import NotificationsLauncher from '../notifications/NotificationsLauncher'
 
-import ExplainWithAI from 'components/ai/explain/ExplainWithAI'
 import { ChatbotLauncher } from 'components/ai/chatbot/Chatbot'
 import DemoBanner from './DemoBanner'
 import { HeaderProjectSelect } from './HeaderProjectSelect'
@@ -65,7 +64,6 @@ export default function Header() {
           gap="small"
           flexShrink={0}
         >
-          <ExplainWithAI />
           <CommandPaletteLauncher />
           <BillingLegacyUserMessage />
           <AwaitingReviewLauncher />

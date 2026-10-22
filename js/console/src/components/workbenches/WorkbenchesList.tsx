@@ -1,4 +1,10 @@
-import { AddIcon, Card, CaretRightIcon, Flex } from '@pluralsh/design-system'
+import {
+  AddIcon,
+  Button,
+  Card,
+  CaretRightIcon,
+  Flex,
+} from '@pluralsh/design-system'
 import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import * as DesignSystem from '@pluralsh/design-system'
 import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
@@ -28,7 +34,7 @@ import {
 } from 'generated/graphql'
 import { Link } from 'react-router-dom'
 import {
-  WORKBENCHES_CREATE_REL_PATH,
+  WORKBENCHES_CREATE_ABS_PATH,
   getWorkbenchAbsPath,
 } from 'routes/workbenchesRoutesConsts'
 import { ComponentType, useMemo, useState } from 'react'
@@ -52,8 +58,6 @@ import {
 
 const WORKBENCH_CARD_MIN_WIDTH = 340
 const WORKBENCH_CARD_DESC_VISIBLE_LINES = 2
-const WORKBENCH_LIST_CARD_MIN_HEIGHT_PX = 168
-
 const WorkbenchIcon = (DesignSystem as { WorkbenchIcon?: ComponentType })
   .WorkbenchIcon
 
@@ -102,6 +106,14 @@ export function WorkbenchesList() {
             expanded={displayOpen}
             onClick={() => setDisplayOpen((open) => !open)}
           />
+          <Button
+            small
+            as={Link}
+            to={WORKBENCHES_CREATE_ABS_PATH}
+            startIcon={<AddIcon />}
+          >
+            Create workbench
+          </Button>
         </Flex>
       ),
       [searchString, displayOpen]
@@ -124,6 +136,22 @@ export function WorkbenchesList() {
           description="Try a different name, or clear the search to see all workbenches."
         />
       )
+    if (workbenches.length === 0 && !pageInfo?.hasNextPage)
+      return (
+        <WorkbenchEmptyState
+          inset={false}
+          message="No workbenches yet"
+          description="Create a workbench to bundle tools and skills for an agent."
+        >
+          <Button
+            as={Link}
+            to={WORKBENCHES_CREATE_ABS_PATH}
+            startIcon={<AddIcon />}
+          >
+            Create workbench
+          </Button>
+        </WorkbenchEmptyState>
+      )
     if (display.view === 'list')
       return (
         <WorkbenchesTable
@@ -144,19 +172,6 @@ export function WorkbenchesList() {
         }
         styles={workbenchToolCardGridStyles(WORKBENCH_CARD_MIN_WIDTH)}
       >
-        <CreateCardSC
-          clickable
-          forwardedAs={Link}
-          to={WORKBENCHES_CREATE_REL_PATH}
-        >
-          <Flex
-            align="center"
-            gap="xsmall"
-          >
-            <AddIcon />
-            <Body2BoldP>Create Workbench</Body2BoldP>
-          </Flex>
-        </CreateCardSC>
         {workbenches.map((workbench) => (
           <WorkbenchCard
             key={workbench.id}
@@ -206,7 +221,8 @@ function WorkbenchesSummary({ projectId }: { projectId?: string }) {
     <div
       css={{
         display: 'grid',
-        gap: theme.spacing.large,
+        // matches CardGrid, so the stat columns line up with the cards below
+        gap: theme.spacing.medium,
         gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
         flexShrink: 0,
       }}
@@ -387,27 +403,6 @@ const MetadataLabelSC = styled.span(({ theme }) => ({
 const MetadataValueSC = styled.div({
   minWidth: 0,
 })
-
-const CreateCardSC = styled(Card)(({ theme }) => ({
-  boxSizing: 'border-box',
-  display: 'flex',
-  flexDirection: 'column',
-  height: '100%',
-  minHeight: WORKBENCH_LIST_CARD_MIN_HEIGHT_PX,
-  padding: theme.spacing.medium,
-  textDecoration: 'none',
-  background: 'transparent',
-  borderStyle: 'dashed',
-  justifyContent: 'center',
-  alignItems: 'center',
-  color: theme.colors['text-xlight'],
-
-  '&:hover': {
-    backgroundColor: theme.colors['fill-zero-hover'],
-    borderStyle: 'solid',
-    color: theme.colors.text,
-  },
-}))
 
 const WrapperSC = styled.div(({ theme }) => ({
   display: 'flex',

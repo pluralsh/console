@@ -1,4 +1,10 @@
-import { CheckIcon, Chip, CloseIcon, Flex } from '@pluralsh/design-system'
+import {
+  CheckIcon,
+  Chip,
+  CloseIcon,
+  Flex,
+  IconFrame,
+} from '@pluralsh/design-system'
 import { TRUNCATE } from 'components/utils/truncate'
 import type { VirtualSlice } from 'components/utils/table/useFetchPaginatedData'
 import { Body2P } from 'components/utils/typography/Text'
@@ -216,34 +222,23 @@ export function PolicyEvaluationsSidePanel({
 }
 
 function DecisionBadge({ decision }: { decision: PolicyEvalDecision }) {
-  const theme = useTheme()
-
   return (
-    <div
-      css={{
-        alignItems: 'center',
-        backgroundColor: theme.colors['fill-two'],
-        border: theme.borders['fill-two'],
-        borderRadius: '50%',
-        display: 'flex',
-        flexShrink: 0,
-        height: 32,
-        justifyContent: 'center',
-        width: 32,
-      }}
-    >
-      {decision.positive ? (
-        <CheckIcon
-          color="icon-success"
-          size={12}
-        />
-      ) : (
-        <CloseIcon
-          color={decision.filterKey === 'deny' ? 'icon-danger' : 'icon-xlight'}
-          size={12}
-        />
-      )}
-    </div>
+    <IconFrame
+      size="medium"
+      type="secondary"
+      css={{ flexShrink: 0 }}
+      icon={
+        decision.positive ? (
+          <CheckIcon color="icon-success" />
+        ) : (
+          <CloseIcon
+            color={
+              decision.filterKey === 'deny' ? 'icon-danger' : 'icon-xlight'
+            }
+          />
+        )
+      }
+    />
   )
 }
 

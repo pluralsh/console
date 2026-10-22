@@ -191,14 +191,17 @@ function TabLabelWithCount({
   count?: number | null
 }) {
   return (
-    <>
+    <TabLabelSC>
       {label}
-      {count == null ? null : (
-        <>
-          {' '}
-          <span css={{ fontWeight: 400 }}>{count}</span>
-        </>
-      )}
-    </>
+      {count != null && <span css={{ fontWeight: 400 }}>{count}</span>}
+    </TabLabelSC>
   )
 }
+
+// an explicit gap, as tabs lay out as flex and drop a plain space between
+// the label and count
+const TabLabelSC = styled.span(({ theme }) => ({
+  display: 'inline-flex',
+  alignItems: 'baseline',
+  gap: theme.spacing.xsmall,
+}))
