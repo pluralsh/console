@@ -37,7 +37,7 @@ try {
   }
 
   const browser = await chromium.launch({ headless: true })
-  const page = await browser.newPage({ viewport: { width: 960, height: 680 }, deviceScaleFactor: 2 })
+  const page = await browser.newPage({ viewport: { width: 1000, height: 760 }, deviceScaleFactor: 2 })
   const manifest = []
 
   for (const scenario of scenarios) {
@@ -49,9 +49,10 @@ try {
         })
         const shot = page.locator('[data-product-shot]')
         await shot.waitFor()
-        const fidelity = await shot.locator('[data-fidelity]').getAttribute('data-fidelity')
+        await page.evaluate(() => document.fonts.ready)
+        const fidelity = await shot.getAttribute('data-fidelity')
         const file = `images/${scenario}-${step + 1}-${theme}.webp`
-        await shot.screenshot({ path: resolve(output, file), type: 'webp' })
+        await shot.screenshot({ path: resolve(output, file), type: 'webp', omitBackground: true })
         manifest.push({ id: scenario, step, fidelity, theme, file })
       }
     }

@@ -8,7 +8,15 @@ const meta: Meta<typeof ProductShot> = {
   parameters: { layout: 'fullscreen' },
   decorators: [
     (Story) => (
-      <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'center', minHeight: '100vh', padding: 40 }}>
+      <div
+        style={{
+          alignItems: 'center',
+          display: 'flex',
+          justifyContent: 'center',
+          minHeight: '100vh',
+          padding: 40,
+        }}
+      >
         <Story />
       </div>
     ),
@@ -29,7 +37,7 @@ export const EnvironmentHygiene: Story = {
 }
 
 export const BacklogExecution: Story = {
-  args: { scenario: 'backlog-execution', step: 0, theme: 'light' },
+  args: { scenario: 'backlog-execution', step: 0, theme: 'dark' },
 }
 
 export const CostAnalysis: Story = {
@@ -37,17 +45,53 @@ export const CostAnalysis: Story = {
 }
 
 export const IncidentResponse: Story = {
-  args: { scenario: 'incident-response', step: 0, theme: 'light' },
+  args: { scenario: 'incident-response', step: 0, theme: 'dark' },
 }
 
-export const FidelityGallery: Story = {
+export const Animated: Story = {
+  args: { scenario: 'environment-hygiene', animate: true, theme: 'dark' },
+}
+
+export const AllSteps: Story = {
+  render: ({ theme }) => (
+    <div
+      style={{
+        display: 'grid',
+        gap: 24,
+        gridTemplateColumns: 'repeat(4, 400px)',
+      }}
+    >
+      {Object.values(productShotScenarios).flatMap((scenario) =>
+        scenario.steps.map((step, index) => (
+          <ProductShot
+            key={`${scenario.id}-${step.id}`}
+            scenario={scenario.id}
+            step={index}
+            theme={theme}
+            width={400}
+          />
+        ))
+      )}
+    </div>
+  ),
+  args: { theme: 'dark' },
+}
+
+export const FidelityLevels: Story = {
   render: (args) => (
-    <div style={{ display: 'grid', gap: 28 }}>
+    <div
+      style={{
+        display: 'grid',
+        gap: 24,
+        gridTemplateColumns: 'repeat(3, 400px)',
+      }}
+    >
       {(['abstract', 'chrome', 'surface'] as const).map((fidelity) => (
         <ProductShot
           {...args}
           fidelity={fidelity}
           key={fidelity}
+          width={400}
         />
       ))}
     </div>
