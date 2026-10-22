@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -115,18 +116,27 @@ func (c *client) DeleteDatabase(dbName string) error {
 		return nil
 	}
 
-	// Terminate existing connections to the database
-	_, err = db.Exec(`
-		SELECT pg_terminate_backend(pid)
-		FROM pg_stat_activity
-		WHERE datname = $1 AND pid <> pg_backend_pid();
-	`, dbName)
+	// The credentials role may not be a true superuser (e.g. RDS), so dropping a database owned by
+	// another role requires membership in that role.
+	var owner string
+	var canDrop bool
+	err = db.QueryRow(`
+		SELECT pg_catalog.pg_get_userbyid(d.datdba), pg_catalog.pg_has_role(d.datdba, 'USAGE')
+		FROM pg_catalog.pg_database d
+		WHERE d.datname = $1
+	`, dbName).Scan(&owner, &canDrop)
 	if err != nil {
-		return fmt.Errorf("failed to terminate connections to %q: %w", dbName, err)
+		return fmt.Errorf("fetching owner of database %q: %w", dbName, err)
 	}
 
-	// Drop the database
-	_, err = db.Exec(fmt.Sprintf(`DROP DATABASE "%s"`, dbName))
+	if !canDrop {
+		if _, err = db.Exec(fmt.Sprintf(`GRANT %s TO CURRENT_USER`, pgx.Identifier{owner}.Sanitize())); err != nil {
+			return fmt.Errorf("granting owner role %q of database %q: %w", owner, dbName, err)
+		}
+	}
+
+	// FORCE terminates open connections atomically with the drop (requires Postgres 13+)
+	_, err = db.Exec(fmt.Sprintf(`DROP DATABASE "%s" WITH (FORCE)`, dbName))
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) && pgErr.Code == ERRCODE_DATABES_NOT_FOUND {
