@@ -22,6 +22,13 @@ defmodule Console.GraphQl.Deployments.Workbench do
     value :none, description: "jobs without any pull requests"
   end
 
+  enum :workbench_sort do
+    value :name
+    value :inserted_at
+    value :updated_at
+    value :favorited
+  end
+
   enum :eval_results_period do
     value :day
     value :week
@@ -1351,6 +1358,12 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
     field :eval_results, :float,
       description: "average eval grade across workbench eval results"
+
+    field :hours_saved, :float,
+      description: "estimated engineering hours saved by merged pull requests, derived from their classified difficulty"
+
+    field :total_tokens, :integer,
+      description: "total tokens consumed by workbench jobs"
   end
 
   object :workbench_usage_timeseries do
@@ -1779,6 +1792,10 @@ defmodule Console.GraphQl.Deployments.Workbench do
         action: :read
       arg :q, :string
       arg :project_id, :id, description: "filter workbenches by project"
+      arg :sort, :workbench_sort, description: "field to sort workbenches by"
+      arg :direction, :sort_direction, description: "sort direction"
+      arg :favorite_ids, list_of(:id),
+        description: "workbench ids to rank first when sorting by favorited"
 
       resolve &Deployments.workbenches/2
     end
@@ -1903,6 +1920,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
       middleware Scope,
         resource: :workbench,
         action: :read
+      arg :project_id, :id, description: "only aggregate workbenches in this project"
 
       resolve &Deployments.aggregates/2
     end

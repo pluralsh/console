@@ -16,7 +16,7 @@ defmodule Console.Schema.PullRequest do
   }
 
   defmodule Aggregate do
-    defstruct [:merged, :merge_rate]
+    defstruct [:merged, :merge_rate, :hours_saved]
   end
 
   defenum Status, open: 0, merged: 1, closed: 2
@@ -212,11 +212,49 @@ defmodule Console.Schema.PullRequest do
     from(pr in query, where: not is_nil(pr.workbench_job_id))
   end
 
+  def for_workbenches(query \\ __MODULE__, workbench_query) do
+    from(pr in query,
+      join: j in WorkbenchJob,
+        on: j.id == pr.workbench_job_id,
+      where: j.workbench_id in subquery(Workbench.ids(workbench_query))
+    )
+  end
+
+  # Hand-authoring rates (changed lines per engineer hour) used to estimate the
+  # time a merged PR saved. Lines are capped so generated or vendored changes
+  # don't dominate, and every PR costs at least @min_pr_hours of context and review.
+  @lines_per_hour %{gitops: 150.0, configuration: 100.0, application: 50.0}
+  @max_pr_lines 2_000
+  @min_pr_hours 0.25
+
   def aggregates(query \\ __MODULE__) do
     from(pr in query,
       select: %Aggregate{
         merged: sum(fragment("case when ? = 1 then 1 else 0 end", pr.status)),
-        merge_rate: fragment("?::float", avg(fragment("case when ? = 1 then 1.0 else 0.0 end", pr.status)))
+        merge_rate: fragment("?::float", avg(fragment("case when ? = 1 then 1.0 else 0.0 end", pr.status))),
+        hours_saved: fragment(
+          """
+          coalesce(sum(case when ? = 1 and ? is not null then greatest(
+            ?::float,
+            least(coalesce((?->>'lines')::integer, 0), ?)::float / case ?->>'type'
+              when '0' then ?::float when 'gitops' then ?::float
+              when '2' then ?::float when 'configuration' then ?::float
+              else ?::float
+            end
+          ) else 0 end), 0)
+          """,
+          pr.status,
+          pr.difficulty,
+          ^@min_pr_hours,
+          pr.difficulty,
+          ^@max_pr_lines,
+          pr.difficulty,
+          ^@lines_per_hour.gitops,
+          ^@lines_per_hour.gitops,
+          ^@lines_per_hour.configuration,
+          ^@lines_per_hour.configuration,
+          ^@lines_per_hour.application
+        )
       }
     )
   end

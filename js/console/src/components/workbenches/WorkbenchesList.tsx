@@ -1,49 +1,55 @@
-import { AddIcon, ArrowRightIcon, Card, Flex } from '@pluralsh/design-system'
+import { AddIcon, Card, CaretRightIcon, Flex } from '@pluralsh/design-system'
 import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import * as DesignSystem from '@pluralsh/design-system'
 import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
+import { useProjectId } from 'components/contexts/ProjectsContext'
+import { FlowFavoriteButton } from 'components/flows/FlowFavoriteButton'
+import { PageSidecarPortal } from 'components/layout/PageLayout'
 import { ToolbarSearchInput } from 'components/layout/PageToolbar'
+import { WorkbenchStatCard } from 'components/workbenches/common/WorkbenchStatCard'
 import { WorkbenchTabHeader } from 'components/workbenches/common/WorkbenchTabHeader'
+import { formatTokenCount } from 'components/workbenches/common/workbenchUsage'
 import {
   CardGrid,
   CardGridSkeleton,
 } from 'components/self-service/catalog/CatalogsGrid'
 import { useThrottle } from 'components/hooks/useThrottle'
-import { runtimeToIcon } from 'components/settings/ai/agent-runtimes/AIAgentRuntimeIcon'
 import { GqlError } from 'components/utils/Alert'
-import { MetadataIcons } from 'components/utils/MetadataIcons'
-import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import { TRUNCATE_LEFT } from 'components/utils/truncate'
-import { Body2BoldP, Body2P, CaptionP } from 'components/utils/typography/Text'
 import {
-  AgentRuntimeType,
+  DisplayButton,
+  useDisplayState,
+} from 'components/utils/display/DisplayPanel'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
+import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
+import {
   WorkbenchTinyFragment,
   useWorkbenchesQuery,
+  useWorkbenchesSummaryQuery,
 } from 'generated/graphql'
 import { Link } from 'react-router-dom'
 import {
   WORKBENCHES_CREATE_REL_PATH,
   getWorkbenchAbsPath,
 } from 'routes/workbenchesRoutesConsts'
-import {
-  cloneElement,
-  ComponentType,
-  isValidElement,
-  ReactElement,
-  useMemo,
-  useState,
-} from 'react'
+import { ComponentType, useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import {
-  WorkbenchToolIcon,
-  workbenchToolCardGridStyles,
-} from './tools/workbenchToolsUtils'
-import { getWebhookIcon } from './workbench/webhooks/utils'
+  WorkbenchCodingAgent,
+  WorkbenchToolIcons,
+} from './common/WorkbenchMetadata'
+import { workbenchToolCardGridStyles } from './tools/workbenchToolsUtils'
+import { WorkbenchActionsMenu } from './WorkbenchActionsMenu'
+import { WorkbenchesDisplayPanel } from './WorkbenchesDisplayPanel'
+import { WorkbenchesTable } from './WorkbenchesTable'
+import {
+  DEFAULT_WORKBENCHES_DISPLAY,
+  WORKBENCHES_VIEW_STORAGE_KEY,
+  toWorkbenchSortVariables,
+  useWorkbenchFavorites,
+} from './workbenchesDisplay'
 
-const MAX_VISIBLE_METADATA_ITEMS = 5
-const METADATA_ICON_SIZE = 12
 const WORKBENCH_CARD_MIN_WIDTH = 340
 const WORKBENCH_CARD_DESC_VISIBLE_LINES = 2
 const WORKBENCH_LIST_CARD_MIN_HEIGHT_PX = 168
@@ -52,31 +58,116 @@ const WorkbenchIcon = (DesignSystem as { WorkbenchIcon?: ComponentType })
   .WorkbenchIcon
 
 export function WorkbenchesList() {
+  const projectId = useProjectId()
   const [searchString, setSearchString] = useState('')
   const debouncedSearchString = useThrottle(searchString, 200)
+  const { display, updateDisplay } = useDisplayState(
+    WORKBENCHES_VIEW_STORAGE_KEY,
+    DEFAULT_WORKBENCHES_DISPLAY
+  )
+  const [displayOpen, setDisplayOpen] = useState(false)
+  const { favoriteIds, toggleFavorite } = useWorkbenchFavorites()
+  const sortVariables = useMemo(
+    () => toWorkbenchSortVariables(display, favoriteIds),
+    [display, favoriteIds]
+  )
 
-  const { data, error, loading, pageInfo, fetchNextPage } =
+  const { data, error, loading, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
       { queryHook: useWorkbenchesQuery, keyPath: ['workbenches'] },
-      { q: debouncedSearchString }
+      { q: debouncedSearchString, projectId, ...sortVariables }
     )
 
-  const workbenches = mapExistingNodes(data?.workbenches)
+  const workbenches = useMemo(
+    () => mapExistingNodes(data?.workbenches),
+    [data?.workbenches]
+  )
   const hasActiveSearch = !!debouncedSearchString
   const showSearchEmptyState = hasActiveSearch && workbenches.length === 0
 
   useSetPageHeaderContent(
     useMemo(
       () => (
-        <ToolbarSearchInput
-          placeholder="Search workbenches"
-          value={searchString}
-          onChange={setSearchString}
-        />
+        <Flex
+          align="center"
+          gap="medium"
+        >
+          <ToolbarSearchInput
+            placeholder="Search workbenches"
+            value={searchString}
+            onChange={setSearchString}
+          />
+          <DisplayButton
+            showDot={false}
+            expanded={displayOpen}
+            onClick={() => setDisplayOpen((open) => !open)}
+          />
+        </Flex>
       ),
-      [searchString]
+      [searchString, displayOpen]
     )
   )
+
+  const content = () => {
+    if (!data && loading)
+      return (
+        <CardGridSkeleton
+          count={6}
+          styles={workbenchToolCardGridStyles(WORKBENCH_CARD_MIN_WIDTH)}
+        />
+      )
+    if (showSearchEmptyState)
+      return (
+        <WorkbenchEmptyState
+          inset={false}
+          message="No workbenches match your search"
+          description="Try a different name, or clear the search to see all workbenches."
+        />
+      )
+    if (display.view === 'list')
+      return (
+        <WorkbenchesTable
+          workbenches={workbenches}
+          loading={loading}
+          hasNextPage={!!pageInfo?.hasNextPage}
+          fetchNextPage={fetchNextPage}
+          setVirtualSlice={setVirtualSlice}
+          favoriteIds={favoriteIds}
+          onToggleFavorite={toggleFavorite}
+        />
+      )
+
+    return (
+      <CardGrid
+        onBottomReached={() =>
+          !loading && pageInfo?.hasNextPage && fetchNextPage()
+        }
+        styles={workbenchToolCardGridStyles(WORKBENCH_CARD_MIN_WIDTH)}
+      >
+        <CreateCardSC
+          clickable
+          forwardedAs={Link}
+          to={WORKBENCHES_CREATE_REL_PATH}
+        >
+          <Flex
+            align="center"
+            gap="xsmall"
+          >
+            <AddIcon />
+            <Body2BoldP>Create Workbench</Body2BoldP>
+          </Flex>
+        </CreateCardSC>
+        {workbenches.map((workbench) => (
+          <WorkbenchCard
+            key={workbench.id}
+            workbench={workbench}
+            favorited={favoriteIds.includes(workbench.id)}
+            onToggleFavorite={() => toggleFavorite(workbench.id)}
+          />
+        ))}
+      </CardGrid>
+    )
+  }
 
   return (
     <WrapperSC>
@@ -85,139 +176,112 @@ export function WorkbenchesList() {
         icon={WorkbenchIcon ? <WorkbenchIcon /> : undefined}
         description="Build-your-own agents for common DevOps tasks. Each workbench bundles tools and skills, and orchestrates subagents tailored to observability, infra analysis, and coding tasks."
       />
+      <WorkbenchesSummary projectId={projectId} />
       {error && <GqlError error={error} />}
-      {!data && loading ? (
-        <CardGridSkeleton
-          count={6}
-          styles={workbenchToolCardGridStyles(WORKBENCH_CARD_MIN_WIDTH)}
-        />
-      ) : showSearchEmptyState ? (
-        <WorkbenchEmptyState
-          inset={false}
-          message="No workbenches match your search"
-          description="Try a different name, or clear the search to see all workbenches."
-        />
-      ) : (
-        <CardGrid
-          onBottomReached={() =>
-            !loading && pageInfo?.hasNextPage && fetchNextPage()
-          }
-          styles={workbenchToolCardGridStyles(WORKBENCH_CARD_MIN_WIDTH)}
-        >
-          <CreateCardSC
-            clickable
-            forwardedAs={Link}
-            to={WORKBENCHES_CREATE_REL_PATH}
-          >
-            <Flex
-              align="center"
-              gap="xsmall"
-            >
-              <AddIcon />
-              <Body2BoldP>Create Workbench</Body2BoldP>
-            </Flex>
-          </CreateCardSC>
-          {workbenches.map((workbench) => (
-            <WorkbenchCard
-              key={workbench.id}
-              workbench={workbench}
-            />
-          ))}
-        </CardGrid>
+      {content()}
+      {displayOpen && (
+        <PageSidecarPortal>
+          <WorkbenchesDisplayPanel
+            state={display}
+            onChange={updateDisplay}
+          />
+        </PageSidecarPortal>
       )}
     </WrapperSC>
   )
 }
 
-export function WorkbenchCard({
-  workbench,
-}: {
-  workbench: WorkbenchTinyFragment
-}) {
+function WorkbenchesSummary({ projectId }: { projectId?: string }) {
   const theme = useTheme()
+  const { data, loading, error } = useWorkbenchesSummaryQuery({
+    variables: { projectId },
+    fetchPolicy: 'cache-and-network',
+  })
+  const aggregates = data?.workbenchAggregates
+  const isLoading = !data && loading
 
-  const {
-    id,
-    name,
-    description,
-    agentRuntime,
-    tools: t,
-    webhooks: w,
-  } = workbench
-
-  const tools = t?.filter(isNonNullable) ?? []
-
-  const webhooks = mapExistingNodes(w)
-
-  const RuntimeIcon =
-    runtimeToIcon[agentRuntime?.type ?? AgentRuntimeType.Custom]
-
-  const hasCodingAgent = Boolean(agentRuntime?.name)
-  const hasWebhooks = webhooks.length > 0
-  const hasTools = tools.length > 0
-  const hasAnyMetadata = hasCodingAgent || hasWebhooks || hasTools
+  if (error) return <GqlError error={error} />
 
   return (
-    <WorkbenchCardSC
-      clickable
-      forwardedAs={Link}
-      to={getWorkbenchAbsPath(id)}
+    <div
+      css={{
+        display: 'grid',
+        gap: theme.spacing.large,
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+        flexShrink: 0,
+      }}
     >
-      <Body2BoldP>{name}</Body2BoldP>
-      <DescriptionReserveSC>
-        {description && (
-          <Body2P
-            css={{
-              color: theme.colors['text-light'],
-              display: '-webkit-box',
-              WebkitBoxOrient: 'vertical',
-              WebkitLineClamp: WORKBENCH_CARD_DESC_VISIBLE_LINES,
-              overflow: 'hidden',
-            }}
-          >
-            {description}
-          </Body2P>
-        )}
-      </DescriptionReserveSC>
-      {hasAnyMetadata && (
-        <MetadataFootSC>
+      <WorkbenchStatCard
+        label="PRs merged"
+        value={(aggregates?.pullRequests ?? 0).toLocaleString()}
+        helper="Over lifetime"
+        loading={isLoading}
+      />
+      <WorkbenchStatCard
+        label="Hours saved"
+        value={formatHours(aggregates?.hoursSaved ?? 0)}
+        helper="Estimated from the size of merged PRs"
+        loading={isLoading}
+      />
+      <WorkbenchStatCard
+        label="Tokens consumed"
+        value={formatTokenCount(aggregates?.totalTokens ?? 0) ?? '0'}
+        helper="Over lifetime"
+        loading={isLoading}
+      />
+    </div>
+  )
+}
+
+function formatHours(hours: number) {
+  if (hours < 10) return `${hours.toFixed(1)}h`
+  return `${Math.round(hours).toLocaleString()}h`
+}
+
+export function WorkbenchCard({
+  workbench,
+  favorited,
+  onToggleFavorite,
+}: {
+  workbench: WorkbenchTinyFragment
+  favorited: boolean
+  onToggleFavorite: () => void
+}) {
+  const theme = useTheme()
+  const { id, name, description, agentRuntime, tools } = workbench
+  const hasCodingAgent = Boolean(agentRuntime?.name)
+  const hasTools = !!tools?.some(isNonNullable)
+
+  return (
+    <WorkbenchCardSC>
+      <CardLinkSC
+        to={getWorkbenchAbsPath(id)}
+        aria-label={name}
+      />
+      <CardContentSC>
+        <Body2BoldP>{name}</Body2BoldP>
+        <DescriptionReserveSC>
+          {description && (
+            <Body2P
+              css={{
+                color: theme.colors['text-light'],
+                display: '-webkit-box',
+                WebkitBoxOrient: 'vertical',
+                WebkitLineClamp: WORKBENCH_CARD_DESC_VISIBLE_LINES,
+                overflow: 'hidden',
+              }}
+            >
+              {description}
+            </Body2P>
+          )}
+        </DescriptionReserveSC>
+        {(hasCodingAgent || hasTools) && (
           <MetadataGridSC>
             {hasCodingAgent && (
               <>
                 <MetadataLabelSC>coding agent</MetadataLabelSC>
                 <MetadataValueSC>
-                  <Flex
-                    align="center"
-                    gap="xxsmall"
-                    minWidth={0}
-                  >
-                    <RuntimeIcon
-                      fullColor
-                      size={12}
-                    />
-                    <CaptionP
-                      $color="text-xlight"
-                      css={{ ...TRUNCATE_LEFT, minWidth: 0 }}
-                    >
-                      {agentRuntime?.name}
-                    </CaptionP>
-                  </Flex>
-                </MetadataValueSC>
-              </>
-            )}
-            {hasWebhooks && (
-              <>
-                <MetadataLabelSC>webhooks</MetadataLabelSC>
-                <MetadataValueSC>
-                  <MetadataIcons
-                    items={webhooks.map((webhook) => ({
-                      id: webhook.id,
-                      label: webhook.name ?? 'Webhook',
-                      icon: (
-                        <span>{withIconSize(getWebhookIcon(webhook))}</span>
-                      ),
-                    }))}
-                  />
+                  <WorkbenchCodingAgent agentRuntime={agentRuntime} />
                 </MetadataValueSC>
               </>
             )}
@@ -225,65 +289,79 @@ export function WorkbenchCard({
               <>
                 <MetadataLabelSC>bound tools</MetadataLabelSC>
                 <MetadataValueSC>
-                  <MetadataIcons
-                    maxVisibleItems={MAX_VISIBLE_METADATA_ITEMS}
-                    items={tools.map((tool) => ({
-                      id: tool.id,
-                      label: tool.name,
-                      icon: (
-                        <WorkbenchToolIcon
-                          type={tool.tool}
-                          provider={tool.cloudConnection?.provider}
-                          size={METADATA_ICON_SIZE}
-                        />
-                      ),
-                    }))}
-                  />
+                  <WorkbenchToolIcons tools={tools} />
                 </MetadataValueSC>
               </>
             )}
           </MetadataGridSC>
-        </MetadataFootSC>
-      )}
-      <CardArrowSC>
-        <ArrowRightIcon
+        )}
+      </CardContentSC>
+      <CardFooterSC>
+        <Flex
+          gap="xsmall"
+          align="center"
+        >
+          <WorkbenchActionsMenu
+            workbenchId={id}
+            favorited={favorited}
+            onToggleFavorite={onToggleFavorite}
+          />
+          <FlowFavoriteButton
+            favorited={favorited}
+            onToggle={onToggleFavorite}
+          />
+        </Flex>
+        <CaretRightIcon
           color="icon-xlight"
-          marginRight="xsmall"
+          size={16}
         />
-      </CardArrowSC>
+      </CardFooterSC>
     </WorkbenchCardSC>
   )
 }
 
-function withIconSize(icon: ReactElement): ReactElement {
-  if (!isValidElement(icon)) return icon
+const CardLinkSC = styled(Link)({
+  position: 'absolute',
+  inset: 0,
+  zIndex: 0,
+})
 
-  return cloneElement(icon as ReactElement<{ size?: number }>, {
-    size: METADATA_ICON_SIZE,
-  })
-}
-
-const CardSC = styled(Card)(({ theme }) => ({
-  boxSizing: 'border-box',
+const CardContentSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
+  flex: 1,
   gap: theme.spacing.small,
   padding: theme.spacing.medium,
-  height: '100%',
-  minHeight: WORKBENCH_LIST_CARD_MIN_HEIGHT_PX,
-  textDecoration: 'none',
+  minWidth: 0,
 }))
 
-const WorkbenchCardSC = styled(CardSC)(({ theme }) => ({
+const CardFooterSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  paddingBlock: theme.spacing.xsmall,
+  paddingInline: theme.spacing.medium,
+  borderTop: theme.borders.default,
+}))
+
+const WorkbenchCardSC = styled(Card)(({ theme }) => ({
   position: 'relative',
-  paddingRight: `calc(${theme.spacing.medium} + 1.75rem)`,
-}))
-
-const CardArrowSC = styled.div(({ theme }) => ({
-  position: 'absolute',
-  right: theme.spacing.medium,
-  bottom: theme.spacing.medium,
-  lineHeight: 0,
+  display: 'flex',
+  flexDirection: 'column',
+  height: '100%',
+  overflow: 'hidden',
+  cursor: 'pointer',
+  '& button': {
+    position: 'relative',
+    zIndex: 1,
+  },
+  '&:hover:not(:has(button:hover))': {
+    backgroundColor: theme.colors['fill-one-hover'],
+    borderColor: theme.colors['border-fill-one'],
+    [`${CardFooterSC}`]: {
+      borderTopColor: theme.colors['border-fill-one'],
+    },
+  },
 }))
 
 const DescriptionReserveSC = styled.div(({ theme }) => ({
@@ -292,16 +370,11 @@ const DescriptionReserveSC = styled.div(({ theme }) => ({
   minWidth: 0,
 }))
 
-const MetadataFootSC = styled.div({
-  flexShrink: 0,
-  minWidth: 0,
-})
-
 const MetadataGridSC = styled.div(({ theme }) => ({
   display: 'grid',
   gridTemplateColumns: 'auto 1fr',
   columnGap: theme.spacing.small,
-  rowGap: theme.spacing.xxsmall,
+  rowGap: theme.spacing.xsmall,
   alignItems: 'center',
   minWidth: 0,
 }))
@@ -315,7 +388,14 @@ const MetadataValueSC = styled.div({
   minWidth: 0,
 })
 
-const CreateCardSC = styled(CardSC)(({ theme }) => ({
+const CreateCardSC = styled(Card)(({ theme }) => ({
+  boxSizing: 'border-box',
+  display: 'flex',
+  flexDirection: 'column',
+  height: '100%',
+  minHeight: WORKBENCH_LIST_CARD_MIN_HEIGHT_PX,
+  padding: theme.spacing.medium,
+  textDecoration: 'none',
   background: 'transparent',
   borderStyle: 'dashed',
   justifyContent: 'center',

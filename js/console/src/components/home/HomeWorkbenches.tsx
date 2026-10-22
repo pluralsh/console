@@ -21,6 +21,7 @@ import {
   Title2H1,
 } from 'components/utils/typography/Text'
 import { WorkbenchCard } from 'components/workbenches/WorkbenchesList'
+import { useWorkbenchFavorites } from 'components/workbenches/workbenchesDisplay'
 import { WorkbenchJobCreateInput } from 'components/workbenches/workbench/WorkbenchJobCreateInput'
 import { WorkbenchStoredPromptMarkdown } from 'components/workbenches/workbench/WorkbenchStoredPromptMarkdown'
 import {
@@ -185,6 +186,7 @@ function YourWorkbenchesSection() {
   const { data, loading, error } = useWorkbenchesQuery({
     fetchPolicy: 'cache-and-network',
   })
+  const { favoriteIds, toggleFavorite } = useWorkbenchFavorites()
   const workbenches = useMemo(
     () => mapExistingNodes(data?.workbenches).slice(0, 3),
     [data]
@@ -209,6 +211,8 @@ function YourWorkbenchesSection() {
               <WorkbenchCard
                 key={workbench.id}
                 workbench={workbench}
+                favorited={favoriteIds.includes(workbench.id)}
+                onToggleFavorite={() => toggleFavorite(workbench.id)}
               />
             ))}
       </CardGridSC>
