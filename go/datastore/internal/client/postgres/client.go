@@ -125,6 +125,9 @@ func (c *client) DeleteDatabase(dbName string) error {
 		FROM pg_catalog.pg_database d
 		WHERE d.datname = $1
 	`, dbName).Scan(&owner, &canDrop)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil
+	}
 	if err != nil {
 		return fmt.Errorf("fetching owner of database %q: %w", dbName, err)
 	}
