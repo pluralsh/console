@@ -29,7 +29,7 @@
 #   docker build -f repository-prebake/base/Dockerfile \
 #     -t docker.io/pluralsh/repository-prebake:local go/repository-prebake
 
-ARG GO_VERSION=1.27.1
+ARG GO_VERSION=1.27.2
 ARG MISE_VERSION=v2026.9.7
 ARG FCP_VERSION=0.2.2
 

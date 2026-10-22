@@ -1,6 +1,6 @@
 module github.com/pluralsh/console/go/cloud-query
 
-go 1.27.1
+go 1.27.2
 
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.21.1
