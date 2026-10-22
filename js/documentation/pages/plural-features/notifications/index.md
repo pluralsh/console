@@ -25,7 +25,7 @@ Enter an incoming webhook URL for Slack or Microsoft Teams and a name for the si
 
 ## Set Up Your first Router
 
-The best way to configure routers is with Kubernetes CRDs. If you're unfamiliar with our operator, it might be worth checking out our docs {% doclink to="plural_features_continuous_deployment_deployment_architecture" %}here{% /doclink %} to understand how it works and how the resources are structured. Once you're ready, the configuration is pretty simple: create two CRDs like the ones below:
+The best way to configure routers is with Kubernetes CRDs. If you're unfamiliar with our operator, it might be worth checking out our docs [here](/plural-features/continuous-deployment/deployment-operator) to understand how it works and how the resources are structured. Once you're ready, the configuration is pretty simple: create two CRDs like the ones below:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1

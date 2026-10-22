@@ -7,6 +7,7 @@ import {
   isValidRepoUrl,
   prettifyRepoUrl,
   removeTrailingSlashes,
+  normalizeMarkdownHref,
   toHtmlId,
 } from './urls'
 
@@ -58,6 +59,45 @@ const externalUrls = [
   'sms:+1.123.345.6342',
   'callto:+1.123.345.6342',
 ]
+
+describe('normalizeMarkdownHref', () => {
+  const directory = '/plural-features/continuous-deployment'
+
+  it('resolves a sibling markdown link and drops the extension', () => {
+    expect(normalizeMarkdownHref('lua.md', directory)).toBe(
+      '/plural-features/continuous-deployment/lua'
+    )
+  })
+
+  it('keeps a fragment on a sibling link', () => {
+    expect(
+      normalizeMarkdownHref('lua.md#kubernetes-object-metadata', directory)
+    ).toBe(
+      '/plural-features/continuous-deployment/lua#kubernetes-object-metadata'
+    )
+  })
+
+  it('leaves in-page hashes on the current page', () => {
+    expect(normalizeMarkdownHref('#reporting-warnings', directory)).toBe(
+      '#reporting-warnings'
+    )
+  })
+
+  it('walks parent segments', () => {
+    expect(
+      normalizeMarkdownHref('../pr-automation/filters.md', directory)
+    ).toBe('/plural-features/pr-automation/filters')
+  })
+
+  it('does not rewrite absolute or external urls', () => {
+    expect(normalizeMarkdownHref('/faq/security', directory)).toBe(
+      '/faq/security'
+    )
+    expect(normalizeMarkdownHref('https://example.com/a.md', directory)).toBe(
+      'https://example.com/a.md'
+    )
+  })
+})
 
 describe('URL utils', () => {
   it('should detect relative urls', () => {
