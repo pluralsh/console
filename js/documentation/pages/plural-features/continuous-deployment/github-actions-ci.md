@@ -24,6 +24,7 @@ metadata:
 spec:
   issuer: https://token.actions.githubusercontent.com # the oidc issuer url for gh actions, can be swapped for any other platform with oidc federation support
   user: ci-bot@example.com # should point to the user email you want the federated credential to auth as
+  # aud: https://console.example.com # optional. When set, only tokens with this audience are exchanged
   scopes:
     - catalog.write
   claimsLike:
@@ -31,6 +32,8 @@ spec:
 ```
 
 Each `claimsLike` value is a regex matched against the corresponding claim in the incoming JWT, and every listed claim must match. Regexes are always anchored, so they must match the entire claim value: the pattern above won't accept tokens from a branch like `master-evil`. Use `.*` explicitly where you want a wildcard, e.g. `repo:pluralsh/console:ref:refs/heads/.*`. Claims whose value is a list, like `aud`, match if any element matches.
+
+`aud` is optional. Set it to the audience this credential should accept, and tokens minted for a different audience are rejected before they are exchanged. Leave it unset to keep accepting any audience. A token from a trusted issuer that was minted for another service can otherwise be replayed here.
 
 {% callout severity="warning" %}
 Bind federated credentials to a dedicated, least-privilege user (like `ci-bot@example.com` here) that is only granted the RBAC this workflow needs. Avoid the built-in `console@plural.sh` user: it is a privileged admin used by Plural internally, and actions it takes are excluded from audit logs, so anything exchanged for its credentials would be both overpowered and untraceable.

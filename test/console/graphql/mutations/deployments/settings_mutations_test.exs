@@ -304,6 +304,7 @@ defmodule Console.GraphQl.Deployments.SettingsMutationsTest do
           createFederatedCredential(attributes: $attrs) {
             id
             issuer
+            aud
             claimsLike
             scopes
             user { id }
@@ -311,6 +312,7 @@ defmodule Console.GraphQl.Deployments.SettingsMutationsTest do
         }
       """, %{"attrs" => %{
         "issuer" => "https://oidc.plural.sh",
+        "aud" => "https://console.plural.sh",
         "claimsLike" => Jason.encode!(%{"sub" => ".*@plural.sh"}),
         "scopes" => ["createPullRequest"],
         "user_id" => user.id
@@ -318,6 +320,7 @@ defmodule Console.GraphQl.Deployments.SettingsMutationsTest do
 
       assert created["id"]
       assert created["issuer"] == "https://oidc.plural.sh"
+      assert created["aud"] == "https://console.plural.sh"
       assert created["claimsLike"] == %{"sub" => ".*@plural.sh"}
       assert created["scopes"] == ["createPullRequest"]
       assert created["user"]["id"] == user.id

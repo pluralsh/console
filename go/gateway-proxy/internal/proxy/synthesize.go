@@ -18,9 +18,9 @@ func SynthesizeEvents(msg *Message) []streamEvent {
 	start.StopReason = nil
 	start.StopSequence = nil
 
-	events := []streamEvent{
-		{"message_start", map[string]any{"type": "message_start", "message": start}},
-	}
+	// message_start, up to five events per block, message_delta and message_stop.
+	events := make([]streamEvent, 0, 3+5*len(msg.Content))
+	events = append(events, streamEvent{"message_start", map[string]any{"type": "message_start", "message": start}})
 
 	for i, raw := range msg.Content {
 		events = append(events, blockEvents(i, raw)...)

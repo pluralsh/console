@@ -4724,6 +4724,8 @@ export type ExtendedSupportInfo = {
 /** A federated credential is a way to authenticate users from an external identity provider */
 export type FederatedCredential = {
   __typename?: 'FederatedCredential';
+  /** expected audience of tokens exchanged with this credential. When unset, any audience is accepted */
+  aud?: Maybe<Scalars['String']['output']>;
   claimsLike?: Maybe<Scalars['Map']['output']>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -4735,6 +4737,8 @@ export type FederatedCredential = {
 
 /** A federated credential is a way to authenticate users from an external identity provider */
 export type FederatedCredentialAttributes = {
+  /** expected audience of tokens exchanged with this credential. When unset, any audience is accepted */
+  aud?: InputMaybe<Scalars['String']['input']>;
   claimsLike?: InputMaybe<Scalars['Json']['input']>;
   issuer: Scalars['String']['input'];
   scopes?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;

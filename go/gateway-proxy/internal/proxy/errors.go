@@ -8,6 +8,19 @@ import (
 	"strings"
 )
 
+// Anthropic API error types.
+const (
+	errInvalidRequest  = "invalid_request_error"
+	errAuthentication  = "authentication_error"
+	errPermission      = "permission_error"
+	errNotFound        = "not_found_error"
+	errRequestTooLarge = "request_too_large"
+	errRateLimit       = "rate_limit_error"
+	errOverloaded      = "overloaded_error"
+	errTimeout         = "timeout_error"
+	errAPI             = "api_error"
+)
+
 // APIError is an error rendered in the Anthropic error format.
 type APIError struct {
 	Status  int
@@ -32,45 +45,45 @@ func (e *APIError) body() anthropicErrorBody {
 }
 
 func invalidRequest(msg string) *APIError {
-	return &APIError{Status: http.StatusBadRequest, Type: "invalid_request_error", Message: msg}
+	return &APIError{Status: http.StatusBadRequest, Type: errInvalidRequest, Message: msg}
 }
 
 func authenticationError(msg string) *APIError {
-	return &APIError{Status: http.StatusUnauthorized, Type: "authentication_error", Message: msg}
+	return &APIError{Status: http.StatusUnauthorized, Type: errAuthentication, Message: msg}
 }
 
 func notFound(msg string) *APIError {
-	return &APIError{Status: http.StatusNotFound, Type: "not_found_error", Message: msg}
+	return &APIError{Status: http.StatusNotFound, Type: errNotFound, Message: msg}
 }
 
 func upstreamFailure(msg string) *APIError {
-	return &APIError{Status: http.StatusBadGateway, Type: "api_error", Message: msg}
+	return &APIError{Status: http.StatusBadGateway, Type: errAPI, Message: msg}
 }
 
 // errorTypeForStatus maps an HTTP status to the Anthropic error type clients expect.
 func errorTypeForStatus(status int) string {
 	switch status {
 	case http.StatusBadRequest:
-		return "invalid_request_error"
+		return errInvalidRequest
 	case http.StatusUnauthorized:
-		return "authentication_error"
+		return errAuthentication
 	case http.StatusForbidden:
-		return "permission_error"
+		return errPermission
 	case http.StatusNotFound:
-		return "not_found_error"
+		return errNotFound
 	case http.StatusRequestEntityTooLarge:
-		return "request_too_large"
+		return errRequestTooLarge
 	case http.StatusTooManyRequests:
-		return "rate_limit_error"
+		return errRateLimit
 	case http.StatusServiceUnavailable, 529:
-		return "overloaded_error"
+		return errOverloaded
 	case http.StatusGatewayTimeout:
-		return "timeout_error"
+		return errTimeout
 	}
 	if status >= 500 {
-		return "api_error"
+		return errAPI
 	}
-	return "invalid_request_error"
+	return errInvalidRequest
 }
 
 // GatewayError converts a non-2xx gateway response into an Anthropic error. The gateway uses
@@ -116,15 +129,15 @@ func gatewayErrorMessage(body []byte) string {
 func streamExceptionType(exception string) string {
 	switch strings.ToLower(exception) {
 	case "throttlingexception":
-		return "rate_limit_error"
+		return errRateLimit
 	case "validationexception":
-		return "invalid_request_error"
+		return errInvalidRequest
 	case "serviceunavailableexception":
-		return "overloaded_error"
+		return errOverloaded
 	case "modeltimeoutexception":
-		return "timeout_error"
+		return errTimeout
 	case "accessdeniedexception":
-		return "permission_error"
+		return errPermission
 	}
-	return "api_error"
+	return errAPI
 }

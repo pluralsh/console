@@ -10,6 +10,11 @@ import styled from 'styled-components'
 import { brand } from '@src/theme/docsTheme'
 import { mqs } from './Breakpoints'
 
+// Kapa's open-selector attributes watch every DOM mutation with a full-document
+// querySelectorAll, which stalls large pages, so the triggers call its API instead.
+const openKapa = (mode: 'search' | 'ai') => () =>
+  window.Kapa?.('open', { mode })
+
 function SearchTrigger({ compact = false }: { compact?: boolean }) {
   if (compact) {
     return (
@@ -20,7 +25,7 @@ function SearchTrigger({ compact = false }: { compact?: boolean }) {
         textValue="Search docs"
         tooltip="Search docs"
         icon={<SearchIcon size={16} />}
-        className="docs-search-trigger"
+        onClick={openKapa('search')}
       />
     )
   }
@@ -28,8 +33,8 @@ function SearchTrigger({ compact = false }: { compact?: boolean }) {
   return (
     <SearchBar
       type="button"
-      className="docs-search-trigger"
       aria-label="Search docs"
+      onClick={openKapa('search')}
     >
       <SearchIcon
         size={16}
@@ -51,14 +56,14 @@ function AskAiTrigger({ compact = false }: { compact?: boolean }) {
         textValue="Ask AI"
         tooltip="Ask AI"
         icon={<AiSparkleFilledIcon size={16} />}
-        className="docs-ai-trigger"
+        onClick={openKapa('ai')}
       />
     )
   }
 
   return (
     <AskAiButton
-      className="docs-ai-trigger"
+      onClick={openKapa('ai')}
       secondary
       startIcon={<AiSparkleFilledIcon size={16} />}
     >

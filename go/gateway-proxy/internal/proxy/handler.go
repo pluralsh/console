@@ -114,7 +114,7 @@ func (h *Handler) messages(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		var tooLarge *http.MaxBytesError
 		if errors.As(err, &tooLarge) {
-			writeError(w, &APIError{Status: http.StatusRequestEntityTooLarge, Type: "request_too_large", Message: "request body too large"}, nil)
+			writeError(w, &APIError{Status: http.StatusRequestEntityTooLarge, Type: errRequestTooLarge, Message: "request body too large"}, nil)
 			return
 		}
 		writeError(w, invalidRequest("failed to read request body"), nil)
@@ -282,12 +282,12 @@ func (h *Handler) streamUpstream(ctx context.Context, w http.ResponseWriter, req
 }
 
 func transportError(ctx context.Context, err error) *APIError {
-	var tokenErr *errTokenUnavailable
+	var tokenErr *tokenUnavailableError
 	switch {
 	case errors.As(err, &tokenErr):
 		return upstreamFailure("failed to obtain gateway OAuth token: " + tokenErr.err.Error())
 	case errors.Is(ctx.Err(), context.DeadlineExceeded):
-		return &APIError{Status: http.StatusGatewayTimeout, Type: "timeout_error", Message: "gateway request timed out"}
+		return &APIError{Status: http.StatusGatewayTimeout, Type: errTimeout, Message: "gateway request timed out"}
 	default:
 		return upstreamFailure("gateway request failed: " + err.Error())
 	}

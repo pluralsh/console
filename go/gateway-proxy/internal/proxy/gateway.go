@@ -32,11 +32,11 @@ type invokeRequest struct {
 	CorrelationID string
 }
 
-// errTokenUnavailable wraps failures obtaining an OAuth token.
-type errTokenUnavailable struct{ err error }
+// tokenUnavailableError wraps failures obtaining an OAuth token.
+type tokenUnavailableError struct{ err error }
 
-func (e *errTokenUnavailable) Error() string { return "fetching gateway token: " + e.err.Error() }
-func (e *errTokenUnavailable) Unwrap() error { return e.err }
+func (e *tokenUnavailableError) Error() string { return "fetching gateway token: " + e.err.Error() }
+func (e *tokenUnavailableError) Unwrap() error { return e.err }
 
 // Invoke posts the request to the gateway. A 401 response is retried once with a freshly fetched
 // token, since the cached token may have been revoked before its advertised expiry.
@@ -57,7 +57,7 @@ func (g *Gateway) Invoke(ctx context.Context, req invokeRequest) (*http.Response
 func (g *Gateway) do(ctx context.Context, req invokeRequest) (*http.Response, string, error) {
 	token, err := g.Tokens.Token(ctx)
 	if err != nil {
-		return nil, "", &errTokenUnavailable{err}
+		return nil, "", &tokenUnavailableError{err}
 	}
 
 	action := "invoke"

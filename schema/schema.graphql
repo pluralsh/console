@@ -7804,8 +7804,14 @@ input VsphereCloudConnectionAttributes {
 "A federated credential is a way to authenticate users from an external identity provider"
 input FederatedCredentialAttributes {
   issuer: String!
+
+  "expected audience of tokens exchanged with this credential. When unset, any audience is accepted"
+  aud: String
+
   claimsLike: Json
+
   scopes: [String]
+
   userId: ID!
 }
 
@@ -8340,11 +8346,20 @@ type VsphereConnectionAttributes {
 "A federated credential is a way to authenticate users from an external identity provider"
 type FederatedCredential {
   id: ID!
+
   issuer: String!
+
+  "expected audience of tokens exchanged with this credential. When unset, any audience is accepted"
+  aud: String
+
   claimsLike: Map
+
   scopes: [String]
+
   user: User
+
   insertedAt: DateTime
+
   updatedAt: DateTime
 }
 
