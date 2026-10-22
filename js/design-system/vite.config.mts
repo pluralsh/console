@@ -8,9 +8,15 @@ import dts from 'vite-plugin-dts'
 export default defineConfig({
   build: {
     lib: {
-      entry: resolve(import.meta.dirname, 'src/index.ts'),
+      entry: {
+        index: resolve(import.meta.dirname, 'src/index.ts'),
+        'product-shots': resolve(
+          import.meta.dirname,
+          'src/components/product-shots/index.ts'
+        ),
+      },
       formats: ['es', 'cjs'],
-      fileName: (format) => `index.${format}.js`,
+      fileName: (format, entryName) => `${entryName}.${format}.js`,
     },
     rollupOptions: {
       external: [

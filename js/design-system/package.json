@@ -10,6 +10,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.es.js",
       "require": "./dist/index.cjs.js"
+    },
+    "./product-shots": {
+      "types": "./dist/components/product-shots/index.d.ts",
+      "import": "./dist/product-shots.es.js",
+      "require": "./dist/product-shots.cjs.js"
     }
   },
   "files": [
@@ -21,6 +26,7 @@
     "build:storybook": "storybook build && yarn build:fix:storybook",
     "build:fix:storybook": "perl -pi -w -e 's/%40/@/g;' storybook-static/index.html",
     "chromatic": "chromatic --storybook-build-dir=storybook-static --exit-once-uploaded",
+    "export:product-shots": "node scripts/export-product-shots.mjs",
     "storybook:serve-static": "yarn build:storybook && http-server storybook-static",
     "build": "rimraf dist && tsc --build && vite build",
     "build:no-tsc": "rimraf dist && vite build",
@@ -110,6 +116,7 @@
     "npm-run-all2": "9.0.3",
     "oxlint": "1.87.0",
     "oxlint-tsgolint": "7.0.2004",
+    "playwright": "^1.64.1",
     "react-router-dom": "7.18.4",
     "react-transition-group": "4.4.5",
     "rimraf": "5.0.10",

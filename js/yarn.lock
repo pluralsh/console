@@ -4021,6 +4021,7 @@ __metadata:
     npm-run-all2: "npm:9.0.3"
     oxlint: "npm:1.87.0"
     oxlint-tsgolint: "npm:7.0.2004"
+    playwright: "npm:^1.64.1"
     react-animate-height: "npm:3.2.4"
     react-aria: "npm:3.50.0"
     react-diff-viewer-continued: "npm:4.4.0"
@@ -12445,6 +12446,26 @@ __metadata:
     exsolve: "npm:^1.0.8"
     pathe: "npm:^2.0.3"
   checksum: 10/59d892b5e18b319a66e745214b66bc68a77c6eccc4bf955582775aa393f79a6a29495184233d71e10a986e9346e44d72f5957d2d0e7104cb0d6ef43b4e92a969
+  languageName: node
+  linkType: hard
+
+"playwright-core@npm:1.64.1":
+  version: 1.64.1
+  resolution: "playwright-core@npm:1.64.1"
+  bin:
+    playwright-core: cli.js
+  checksum: 10/4a173590bc784d8d5bfe2cace53ccc31316dac11475660b59cea24a2e833875d87183d41a957a20355301ac2b339a17940faaf0b42217156fa9c0c3cfdd4633c
+  languageName: node
+  linkType: hard
+
+"playwright@npm:^1.64.1":
+  version: 1.64.1
+  resolution: "playwright@npm:1.64.1"
+  dependencies:
+    playwright-core: "npm:1.64.1"
+  bin:
+    playwright: cli.js
+  checksum: 10/1096fa91e433f84c8677433a26052aa4f269bf0811aa793fe667d7053feb1c2852e9f10f9f0cced77fa2678f8580ed47192f29adbc9c027efa5ba87b38e23e50
   languageName: node
   linkType: hard
 
