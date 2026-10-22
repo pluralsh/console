@@ -37,7 +37,7 @@ export default function DeleteResourceButton({
     <div onClick={(e) => e.stopPropagation()}>
       <IconFrame
         clickable
-        size="small"
+        size="medium"
         icon={<TrashCanIcon color="icon-danger" />}
         onClick={() => setOpen(true)}
         textValue="Delete"
