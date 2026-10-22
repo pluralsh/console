@@ -5,6 +5,33 @@ helm_repository_url: https://aws.github.io/eks-charts
 helm_values: clusterName=example
 chart_name: aws-load-balancer-controller
 versions:
+- version: 3.6.1
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: '- **No Helm values changes called out for v3.6.1.** This is a patch
+      release; upgrade the controller image/chart only.
+
+      - **If upgrading from < v3.6.0:** apply the **v3.6.0 CRD update steps first**
+      (see below) before moving to 3.6.1.'
+    chart_updates: [Patch release focused on dependency/security updates (Go toolchain
+        + `golang.org/x/net`) with no API/CRD/behavior changes., Adds/extends controller
+        metrics (new per-resource reconcile condition gauge) and documentation updates.,
+      'Minor networking reconcile robustness: treat `InvalidGroup.NotFound` as success
+        when releasing auto-generated backend security groups.', 'Internal refactor:
+        shared mTLS parsing helpers for Gateway + Ingress (no behavior change).',
+      'Backend model enhancement: `PodEndpoint` now includes `NodeReadyTime`.']
+    features: [Adds `awslbc_controller_reconcile_condition` metric to show last reconcile
+        success(1)/failure(0) per resource (Ingress/Service/Gateway/TGB/GA)., Exposes
+        node Ready transition time on pod endpoints via `PodEndpoint.NodeReadyTime`
+        (useful for debugging/health/latency analyses).]
+    breaking_changes: ['None in v3.6.1 (explicitly no CRD, API, or behavioral changes).',
+      'Note: v3.6.0 required/strongly recommended CRD re-apply steps; skipping those
+        when coming from <3.6.0 can break Gateway/TGB behavior.']
+  chart_version: 3.6.1
+  images: ['public.ecr.aws/eks/aws-load-balancer-controller:v3.6.1']
 - version: 3.6.0
   kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
     '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']

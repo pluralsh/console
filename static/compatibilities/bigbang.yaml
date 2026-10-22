@@ -6,7 +6,7 @@ versions:
 - version: 3.35.1
   kube: ['1.36']
   requirements:
-  - name: Alloy
+  - name: updated
     version: 4.3.2-bb.2
   - name: Anchore Enterprise
     version: 4.1.2-bb.2
@@ -16,61 +16,55 @@ versions:
     version: 1.1.8-bb.3
   - name: Cert Manager
     version: v1.20.3-bb.2
-  - name: Eck Operator
+  - name: updated
     version: 3.5.0-bb.2
-  - name: Elasticsearch Kibana
+  - name: updated
     version: 1.44.0-bb.1
-  - name: External Secrets Operator
+  - name: updated
     version: 2.12.0-bb.0
-  - name: Fluentbit
+  - name: updated
     version: 0.58.3-bb.0
   - name: Fortify
     version: 26.2.0-bb.6
-  - name: Gatekeeper
+  - name: updated
     version: 3.23.1-bb.1
   - name: Gateway Api
     version: 1.6.2-bb.0
-  - name: Gitlab
+  - name: updated
     version: 10.4.2-bb.0
-  - name: Gitlab Runner
+  - name: updated
     version: 0.91.2-bb.3
   - name: Grafana
     version: 13.2.4-bb.0
-  - name: Harbor
+  - name: updated
     version: 1.19.2-bb.3
-  - name: Headlamp
+  - name: updated
     version: 0.45.0-bb.1
-  - name: Istio Cni
+  - name: updated
     version: 1.31.1-bb.0
-  - name: Istio Crds
-    version: 1.31.1-bb.0
-  - name: Istio Egress Gateway
+  - name: updated
     version: 0.1.5-bb.0
-  - name: Istio Gateway
-    version: 1.31.1-bb.0
-  - name: Istiod
-    version: 1.31.1-bb.0
-  - name: Keycloak
+  - name: updated
     version: 7.3.2-bb.1
   - name: Kiali
     version: 2.32.0-bb.0
-  - name: Kyverno
+  - name: updated
     version: 3.9.1-bb.1
   - name: Kyverno Policies
     version: 3.3.4-bb.87
   - name: Kyverno Reporter
     version: 3.10.0-bb.2
-  - name: Loki
+  - name: updated
     version: 6.55.0-bb.9
   - name: Mattermost
     version: 11.11.0-bb.0
   - name: Mattermost Operator
     version: 1.25.9-bb.1
-  - name: Metrics Server
+  - name: updated
     version: 3.14.0-bb.1
-  - name: Mimir
+  - name: updated
     version: 6.2.1-bb.1
-  - name: Minio
+  - name: updated
     version: 7.1.1-bb.25
   - name: Minio Operator
     version: 7.1.1-bb.11
@@ -88,16 +82,14 @@ versions:
     version: 2.1.0-bb.3
   - name: Thanos
     version: 17.6.0-bb.3
-  - name: Twistlock
+  - name: updated
     version: 0.31.0-bb.0
   - name: Vault
     version: 0.34.1-bb.2
-  - name: Velero
+  - name: updated
     version: 12.2.1-bb.0
   - name: Wrapper
     version: 0.4.15
-  - name: Ztunnel
-    version: 1.31.1-bb.0
   incompatibilities: []
   summary: null
   chart_version: 3.35.1
@@ -105,7 +97,7 @@ versions:
 - version: 3.35.0
   kube: ['1.36']
   requirements:
-  - name: Alloy
+  - name: updated
     version: 4.3.2-bb.2
   - name: Anchore Enterprise
     version: 4.1.2-bb.2
@@ -115,61 +107,55 @@ versions:
     version: 1.1.8-bb.3
   - name: Cert Manager
     version: v1.20.3-bb.2
-  - name: Eck Operator
+  - name: updated
     version: 3.5.0-bb.2
-  - name: Elasticsearch Kibana
+  - name: updated
     version: 1.44.0-bb.1
-  - name: External Secrets Operator
+  - name: updated
     version: 2.12.0-bb.0
-  - name: Fluentbit
+  - name: updated
     version: 0.58.3-bb.0
   - name: Fortify
     version: 26.2.0-bb.6
-  - name: Gatekeeper
+  - name: updated
     version: 3.23.1-bb.1
   - name: Gateway Api
     version: 1.6.2-bb.0
-  - name: Gitlab
+  - name: updated
     version: 10.4.2-bb.0
-  - name: Gitlab Runner
+  - name: updated
     version: 0.91.2-bb.3
   - name: Grafana
     version: 13.2.4-bb.0
-  - name: Harbor
+  - name: updated
     version: 1.19.2-bb.3
-  - name: Headlamp
+  - name: updated
     version: 0.45.0-bb.1
-  - name: Istio Cni
+  - name: updated
     version: 1.31.1-bb.0
-  - name: Istio Crds
-    version: 1.31.1-bb.0
-  - name: Istio Egress Gateway
+  - name: updated
     version: 0.1.5-bb.0
-  - name: Istio Gateway
-    version: 1.31.1-bb.0
-  - name: Istiod
-    version: 1.31.1-bb.0
-  - name: Keycloak
+  - name: updated
     version: 7.3.2-bb.1
   - name: Kiali
     version: 2.32.0-bb.0
-  - name: Kyverno
+  - name: updated
     version: 3.9.1-bb.1
   - name: Kyverno Policies
     version: 3.3.4-bb.87
   - name: Kyverno Reporter
     version: 3.10.0-bb.2
-  - name: Loki
+  - name: updated
     version: 6.55.0-bb.9
   - name: Mattermost
     version: 11.11.0-bb.0
   - name: Mattermost Operator
     version: 1.25.9-bb.1
-  - name: Metrics Server
+  - name: updated
     version: 3.14.0-bb.1
-  - name: Mimir
+  - name: updated
     version: 6.2.1-bb.1
-  - name: Minio
+  - name: updated
     version: 7.1.1-bb.25
   - name: Minio Operator
     version: 7.1.1-bb.11
@@ -187,16 +173,14 @@ versions:
     version: 2.1.0-bb.3
   - name: Thanos
     version: 17.6.0-bb.3
-  - name: Twistlock
+  - name: updated
     version: 0.31.0-bb.0
   - name: Vault
     version: 0.34.1-bb.2
-  - name: Velero
+  - name: updated
     version: 12.2.1-bb.0
   - name: Wrapper
     version: 0.4.15
-  - name: Ztunnel
-    version: 1.31.1-bb.0
   incompatibilities: []
   summary:
     helm_changes: ''
@@ -227,7 +211,7 @@ versions:
   requirements:
   - name: Alloy
     version: 4.3.2-bb.0
-  - name: Anchore Enterprise
+  - name: updated
     version: 4.1.2-bb.2
   - name: Argocd
     version: 10.2.1-bb.2
@@ -235,43 +219,37 @@ versions:
     version: 1.1.8-bb.3
   - name: Cert Manager
     version: v1.20.3-bb.2
-  - name: Eck Operator
+  - name: updated
     version: 3.5.0-bb.1
-  - name: Elasticsearch Kibana
+  - name: updated
     version: 1.44.0-bb.0
-  - name: External Secrets Operator
+  - name: updated
     version: 2.11.0-bb.0
   - name: Fluentbit
     version: 0.58.2-bb.0
-  - name: Fortify
+  - name: updated
     version: 26.2.0-bb.6
   - name: Gatekeeper
     version: 3.23.1-bb.0
-  - name: Gateway Api
+  - name: updated
     version: 1.6.2-bb.0
-  - name: Gitlab
+  - name: updated
     version: 10.4.1-bb.0
   - name: Gitlab Runner
     version: 0.91.2-bb.2
-  - name: Grafana
+  - name: updated
     version: 13.2.4-bb.0
-  - name: Harbor
+  - name: updated
     version: 1.19.2-bb.2
   - name: Headlamp
     version: 0.45.0-bb.0
-  - name: Istio Cni
+  - name: updated
     version: 1.30.4-bb.1
-  - name: Istio Crds
-    version: 1.30.4-bb.1
-  - name: Istio Egress Gateway
+  - name: updated
     version: 0.1.3
-  - name: Istio Gateway
-    version: 1.30.4-bb.1
-  - name: Istiod
-    version: 1.30.4-bb.1
-  - name: Keycloak
+  - name: updated
     version: 7.3.0-bb.2
-  - name: Kiali
+  - name: updated
     version: 2.32.0-bb.0
   - name: Kyverno
     version: 3.9.1-bb.0
@@ -279,44 +257,42 @@ versions:
     version: 3.3.4-bb.87
   - name: Kyverno Reporter
     version: 3.10.0-bb.2
-  - name: Loki
+  - name: updated
     version: 6.55.0-bb.8
-  - name: Mattermost
+  - name: updated
     version: 11.11.0-bb.0
-  - name: Mattermost Operator
+  - name: updated
     version: 1.25.9-bb.1
   - name: Metrics Server
     version: 3.14.0-bb.0
-  - name: Mimir
+  - name: updated
     version: 6.1.0-bb.2
   - name: Minio
     version: 7.1.1-bb.24
-  - name: Minio Operator
+  - name: updated
     version: 7.1.1-bb.11
-  - name: Monitoring
+  - name: updated
     version: 91.4.1-bb.1
-  - name: Neuvector
+  - name: updated
     version: 2.11.2-bb.0
   - name: Prometheus Operator Crds
     version: 31.0.1-bb.0
-  - name: Renovate
+  - name: updated
     version: 46.316.0-bb.0
-  - name: Sonarqube
+  - name: updated
     version: 2026.4.1-bb.4
-  - name: Tempo
+  - name: updated
     version: 2.1.0-bb.3
-  - name: Thanos
+  - name: updated
     version: 17.6.0-bb.3
-  - name: Twistlock
+  - name: updated
     version: 0.30.0-bb.3
-  - name: Vault
+  - name: updated
     version: 0.34.1-bb.2
-  - name: Velero
+  - name: updated
     version: 12.1.0-bb.5
   - name: Wrapper
     version: 0.4.15
-  - name: Ztunnel
-    version: 1.30.4-bb.1
   incompatibilities: []
   summary:
     helm_changes: ''
@@ -345,94 +321,86 @@ versions:
   requirements:
   - name: Alloy
     version: 4.3.2-bb.0
-  - name: Anchore Enterprise
+  - name: updated
     version: 4.1.2-bb.0
-  - name: Argocd
+  - name: updated
     version: 10.2.1-bb.2
-  - name: Authservice
+  - name: updated
     version: 1.1.8-bb.3
   - name: Cert Manager
     version: v1.20.3-bb.2
-  - name: Eck Operator
+  - name: updated
     version: 3.5.0-bb.0
-  - name: Elasticsearch Kibana
+  - name: updated
     version: 1.43.0-bb.0
-  - name: External Secrets Operator
+  - name: updated
     version: 2.10.0-bb.2
-  - name: Fluentbit
+  - name: updated
     version: 0.58.2-bb.0
-  - name: Fortify
+  - name: updated
     version: 26.2.0-bb.4
-  - name: Gatekeeper
+  - name: updated
     version: 3.23.1-bb.0
   - name: Gateway Api
     version: 1.6.1-bb.0
-  - name: Gitlab
+  - name: updated
     version: 10.3.2-bb.1
-  - name: Gitlab Runner
+  - name: updated
     version: 0.91.2-bb.2
-  - name: Grafana
+  - name: updated
     version: 12.10.0-bb.0
-  - name: Harbor
+  - name: updated
     version: 1.19.2-bb.1
-  - name: Headlamp
+  - name: updated
     version: 0.45.0-bb.0
-  - name: Istio Cni
-    version: 1.30.4-bb.0
-  - name: Istio Crds
-    version: 1.30.4-bb.0
-  - name: Istio Gateway
-    version: 1.30.4-bb.0
-  - name: Istiod
+  - name: updated
     version: 1.30.4-bb.0
   - name: Keycloak
     version: 7.3.0-bb.0
-  - name: Kiali
+  - name: updated
     version: 2.31.0-bb.0
-  - name: Kyverno
+  - name: updated
     version: 3.9.1-bb.0
   - name: Kyverno Policies
     version: 3.3.4-bb.87
-  - name: Kyverno Reporter
+  - name: updated
     version: 3.10.0-bb.2
-  - name: Loki
+  - name: updated
     version: 6.55.0-bb.7
-  - name: Mattermost
+  - name: updated
     version: 11.10.1-bb.0
-  - name: Mattermost Operator
+  - name: updated
     version: 1.25.9-bb.0
-  - name: Metrics Server
+  - name: updated
     version: 3.14.0-bb.0
   - name: Mimir
     version: 6.1.0-bb.1
-  - name: Minio
+  - name: updated
     version: 7.1.1-bb.24
-  - name: Minio Operator
+  - name: updated
     version: 7.1.1-bb.10
-  - name: Monitoring
+  - name: updated
     version: 88.6.2-bb.0
-  - name: Neuvector
+  - name: updated
     version: 2.11.1-bb.0
   - name: Prometheus Operator Crds
     version: 31.0.1-bb.0
-  - name: Renovate
+  - name: updated
     version: 46.289.4-bb.0
-  - name: Sonarqube
+  - name: updated
     version: 2026.4.1-bb.1
   - name: Tempo
     version: 2.1.0-bb.2
-  - name: Thanos
+  - name: updated
     version: 17.6.0-bb.1
-  - name: Twistlock
+  - name: updated
     version: 0.30.0-bb.2
-  - name: Vault
+  - name: updated
     version: 0.34.1-bb.1
-  - name: Velero
+  - name: updated
     version: 12.1.0-bb.4
   - name: Wrapper
     version: 0.4.15
-  - name: Ztunnel
-    version: 1.30.4-bb.0
   incompatibilities: []
   summary:
     helm_changes: ''
@@ -453,21 +421,21 @@ versions:
   requirements:
   - name: Alloy
     version: 4.3.2-bb.0
-  - name: Anchore Enterprise
+  - name: updated
     version: 3.25.1-bb.3
   - name: Argocd
     version: 10.2.1-bb.0
-  - name: Authservice
+  - name: updated
     version: 1.1.8-bb.1
-  - name: Cert Manager
+  - name: updated
     version: v1.20.3-bb.2
   - name: Eck Operator
     version: 3.4.1-bb.1
   - name: Elasticsearch Kibana
     version: 1.41.0-bb.0
-  - name: External Secrets Operator
+  - name: updated
     version: 2.9.0-bb.0
-  - name: Fluentbit
+  - name: updated
     version: 0.57.9-bb.1
   - name: Fortify
     version: 26.2.0-bb.2
@@ -477,7 +445,7 @@ versions:
     version: 1.6.1-bb.0
   - name: Gitlab
     version: 10.2.4-bb.0
-  - name: Gitlab Runner
+  - name: updated
     version: 0.91.2-bb.1
   - name: Grafana
     version: 10.5.15-bb.6
@@ -495,15 +463,15 @@ versions:
     version: 1.30.3-bb.0
   - name: Keycloak
     version: 7.3.0-bb.0
-  - name: Kiali
+  - name: updated
     version: 2.30.0-bb.1
-  - name: Kyverno
+  - name: updated
     version: 3.9.0-bb.0
   - name: Kyverno Policies
     version: 3.3.4-bb.87
-  - name: Kyverno Reporter
+  - name: updated
     version: 3.10.0-bb.0
-  - name: Loki
+  - name: updated
     version: 6.55.0-bb.5
   - name: Mattermost
     version: 11.10.0-bb.0
@@ -517,7 +485,7 @@ versions:
     version: 7.1.1-bb.23
   - name: Minio Operator
     version: 7.1.1-bb.9
-  - name: Monitoring
+  - name: updated
     version: 88.3.0-bb.1
   - name: Neuvector
     version: 2.11.0-bb.2
@@ -525,15 +493,15 @@ versions:
     version: 31.0.1-bb.0
   - name: Renovate
     version: 46.251.0-bb.0
-  - name: Sonarqube
+  - name: updated
     version: 2026.4.1-bb.0
   - name: Tempo
     version: 2.1.0-bb.2
-  - name: Thanos
+  - name: updated
     version: 17.6.0-bb.0
-  - name: Twistlock
+  - name: updated
     version: 0.30.0-bb.0
-  - name: Vault
+  - name: updated
     version: 0.34.1-bb.0
   - name: Velero
     version: 12.1.0-bb.3
@@ -562,39 +530,39 @@ versions:
 - version: 3.31.0
   kube: ['1.35']
   requirements:
-  - name: Alloy
+  - name: updated
     version: 4.3.2-bb.0
   - name: Anchore Enterprise
     version: 3.25.1-bb.1
-  - name: Argocd
+  - name: updated
     version: 10.2.1-bb.0
-  - name: Authservice
+  - name: updated
     version: 1.1.5-bb.7
   - name: Bbctl
     version: 3.0.1-bb.3
   - name: Eck Operator
     version: 3.4.1-bb.1
-  - name: Elasticsearch Kibana
+  - name: updated
     version: 1.41.0-bb.0
-  - name: External Secrets Operator
+  - name: updated
     version: 2.8.0-bb.0
   - name: Fluentbit
     version: 0.57.9-bb.0
-  - name: Fortify
+  - name: updated
     version: 26.2.0-bb.2
-  - name: Gatekeeper
+  - name: updated
     version: 3.23.0-bb.0
-  - name: Gateway Api
+  - name: updated
     version: 1.6.1-bb.0
-  - name: Gitlab
+  - name: updated
     version: 10.2.4-bb.0
   - name: Gitlab Runner
     version: 0.88.3-bb.2
   - name: Grafana
     version: 10.5.15-bb.6
-  - name: Harbor
+  - name: updated
     version: 1.19.2-bb.0
-  - name: Headlamp
+  - name: updated
     version: 0.44.0-bb.0
   - name: Istio Cni
     version: 1.30.3-bb.0
@@ -606,47 +574,47 @@ versions:
     version: 1.30.3-bb.0
   - name: Keycloak
     version: 7.2.2-bb.1
-  - name: Kiali
+  - name: updated
     version: 2.30.0-bb.0
-  - name: Kyverno
+  - name: updated
     version: 3.8.2-bb.2
   - name: Kyverno Policies
     version: 3.3.4-bb.87
-  - name: Kyverno Reporter
+  - name: updated
     version: 3.9.0-bb.1
   - name: Loki
     version: 6.55.0-bb.2
-  - name: Mattermost
+  - name: updated
     version: 11.10.0-bb.0
-  - name: Mattermost Operator
+  - name: updated
     version: 1.25.7-bb.3
   - name: Metrics Server
     version: 3.13.1-bb.1
   - name: Mimir
     version: 6.1.0-bb.1
-  - name: Minio
+  - name: updated
     version: 7.1.1-bb.23
-  - name: Minio Operator
+  - name: updated
     version: 7.1.1-bb.9
-  - name: Monitoring
+  - name: updated
     version: 88.3.0-bb.0
   - name: Neuvector
     version: 2.11.0-bb.2
-  - name: Prometheus Operator Crds
+  - name: updated
     version: 31.0.1-bb.0
-  - name: Renovate
+  - name: updated
     version: 46.251.0-bb.0
-  - name: Sonarqube
+  - name: updated
     version: 2026.4.0-bb.0
   - name: Tempo
     version: 2.1.0-bb.2
   - name: Thanos
     version: 17.4.0-bb.3
-  - name: Twistlock
+  - name: updated
     version: 0.28.0-bb.3
-  - name: Vault
+  - name: updated
     version: 0.34.0-bb.0
-  - name: Velero
+  - name: updated
     version: 12.1.0-bb.3
   - name: Wrapper
     version: 0.4.15
@@ -675,25 +643,25 @@ versions:
 - version: 3.30.0
   kube: ['1.35']
   requirements:
-  - name: Alloy
+  - name: updated
     version: 4.3.1-bb.1
-  - name: Anchore Enterprise
+  - name: updated
     version: 3.25.1-bb.1
-  - name: Argocd
+  - name: updated
     version: 10.1.4-bb.1
   - name: Authservice
     version: 1.1.5-bb.5
   - name: Bbctl
     version: 3.0.1-bb.3
-  - name: Eck Operator
+  - name: updated
     version: 3.4.1-bb.1
-  - name: Elasticsearch Kibana
+  - name: updated
     version: 1.40.0-bb.2
   - name: External Secrets Operator
     version: 2.7.0-bb.2
-  - name: Fluentbit
+  - name: updated
     version: 0.57.9-bb.0
-  - name: Fortify
+  - name: updated
     version: 26.2.0-bb.1
   - name: Gatekeeper
     version: 3.22.2-bb.2
@@ -701,49 +669,43 @@ versions:
     version: 1.5.1-bb.1
   - name: Gitlab
     version: 9.11.8-bb.0
-  - name: Gitlab Runner
+  - name: updated
     version: 0.88.3-bb.2
-  - name: Grafana
+  - name: updated
     version: 10.5.15-bb.6
-  - name: Harbor
+  - name: updated
     version: 1.19.1-bb.2
   - name: Headlamp
     version: 0.40.0-bb.2
-  - name: Istio Cni
+  - name: updated
     version: 1.30.3-bb.0
-  - name: Istio Crds
-    version: 1.30.3-bb.0
-  - name: Istio Gateway
-    version: 1.30.3-bb.0
-  - name: Istiod
-    version: 1.30.3-bb.0
-  - name: Keycloak
+  - name: updated
     version: 7.2.2-bb.1
   - name: Kiali
     version: 2.28.0-bb.1
-  - name: Kyverno
+  - name: updated
     version: 3.8.2-bb.0
   - name: Kyverno Policies
     version: 3.3.4-bb.87
-  - name: Kyverno Reporter
+  - name: updated
     version: 3.9.0-bb.0
   - name: Loki
     version: 6.55.0-bb.2
-  - name: Mattermost
+  - name: updated
     version: 11.9.0-bb.5
-  - name: Mattermost Operator
+  - name: updated
     version: 1.25.7-bb.2
-  - name: Metrics Server
+  - name: updated
     version: 3.13.1-bb.1
-  - name: Mimir
+  - name: updated
     version: 6.1.0-bb.1
-  - name: Minio
+  - name: updated
     version: 7.1.1-bb.21
-  - name: Minio Operator
+  - name: updated
     version: 7.1.1-bb.8
-  - name: Monitoring
+  - name: updated
     version: 87.10.1-bb.3
-  - name: Neuvector
+  - name: updated
     version: 2.11.0-bb.2
   - name: Prometheus Operator Crds
     version: 30.0.1-bb.0
@@ -753,18 +715,16 @@ versions:
     version: 2026.3.1-bb.2
   - name: Tempo
     version: 2.1.0-bb.2
-  - name: Thanos
+  - name: updated
     version: 17.4.0-bb.3
-  - name: Twistlock
+  - name: updated
     version: 0.28.0-bb.2
-  - name: Vault
+  - name: updated
     version: 0.33.0-bb.4
-  - name: Velero
+  - name: updated
     version: 12.1.0-bb.2
   - name: Wrapper
     version: 0.4.15
-  - name: Ztunnel
-    version: 1.30.3-bb.0
   incompatibilities: []
   summary:
     helm_changes: ''
@@ -782,11 +742,11 @@ versions:
 - version: 3.29.0
   kube: ['1.35']
   requirements:
-  - name: Alloy
+  - name: updated
     version: 4.2.2-bb.0
-  - name: Anchore Enterprise
+  - name: updated
     version: 3.25.0-bb.1
-  - name: Argocd
+  - name: updated
     version: 10.1.3-bb.0
   - name: Authservice
     version: 1.1.5-bb.5
@@ -796,73 +756,73 @@ versions:
     version: 3.4.1-bb.0
   - name: Elasticsearch Kibana
     version: 1.39.0-bb.0
-  - name: External Secrets Operator
+  - name: updated
     version: 2.7.0-bb.2
   - name: Fluentbit
     version: 0.57.3-bb.0
   - name: Fortify
     version: 26.2.0-bb.0
-  - name: Gatekeeper
+  - name: updated
     version: 3.22.2-bb.2
   - name: Gateway Api
     version: 1.5.1-bb.1
-  - name: Gitlab
+  - name: updated
     version: 9.11.8-bb.0
   - name: Gitlab Runner
     version: 0.88.3-bb.1
-  - name: Grafana
+  - name: updated
     version: 10.5.15-bb.4
-  - name: Harbor
+  - name: updated
     version: 1.19.1-bb.1
-  - name: Headlamp
+  - name: updated
     version: 0.40.0-bb.2
   - name: Istio Cni
     version: 1.30.2-bb.0
   - name: Istio Crds
     version: 1.30.2-bb.0
-  - name: Istio Gateway
+  - name: updated
     version: 1.30.2-bb.2
   - name: Istiod
     version: 1.30.2-bb.0
-  - name: Keycloak
+  - name: updated
     version: 7.2.2-bb.0
-  - name: Kiali
+  - name: updated
     version: 2.28.0-bb.1
-  - name: Kyverno
+  - name: updated
     version: 3.8.1-bb.5
-  - name: Kyverno Policies
+  - name: updated
     version: 3.3.4-bb.87
   - name: Kyverno Reporter
     version: 3.7.4-bb.3
   - name: Loki
     version: 6.55.0-bb.2
-  - name: Mattermost
+  - name: updated
     version: 11.9.0-bb.0
-  - name: Mattermost Operator
+  - name: updated
     version: 1.25.7-bb.1
-  - name: Metrics Server
+  - name: updated
     version: 3.13.1-bb.0
-  - name: Mimir
+  - name: updated
     version: 6.0.6-bb.4
-  - name: Minio
+  - name: updated
     version: 7.1.1-bb.20
-  - name: Minio Operator
+  - name: updated
     version: 7.1.1-bb.7
-  - name: Monitoring
+  - name: updated
     version: 87.10.1-bb.1
-  - name: Neuvector
+  - name: updated
     version: 2.10.3-bb.1
-  - name: Prometheus Operator Crds
+  - name: updated
     version: 30.0.1-bb.0
   - name: Renovate
     version: 46.31.6-bb.5
-  - name: Sonarqube
+  - name: updated
     version: 2026.3.1-bb.2
-  - name: Tempo
+  - name: updated
     version: 2.1.0-bb.2
   - name: Thanos
     version: 17.4.0-bb.2
-  - name: Twistlock
+  - name: updated
     version: 0.28.0-bb.0
   - name: Vault
     version: 0.33.0-bb.2
@@ -890,96 +850,88 @@ versions:
 - version: 3.28.0
   kube: ['1.35']
   requirements:
-  - name: Alloy
+  - name: updated
     version: 4.1.7-bb.0
   - name: Anchore Enterprise
     version: 3.25.0-bb.0
-  - name: Argocd
+  - name: updated
     version: 9.7.0-bb.0
   - name: Authservice
     version: 1.1.5-bb.5
   - name: Bbctl
     version: 3.0.1-bb.3
-  - name: Eck Operator
+  - name: updated
     version: 3.4.1-bb.0
-  - name: Elasticsearch Kibana
+  - name: updated
     version: 1.39.0-bb.0
-  - name: External Secrets Operator
+  - name: updated
     version: 1.3.1-bb.2
   - name: Fluentbit
     version: 0.57.3-bb.0
-  - name: Fortify
+  - name: updated
     version: 26.2.0-bb.0
   - name: Gatekeeper
     version: 3.22.2-bb.1
   - name: Gateway Api
     version: 1.5.1-bb.1
-  - name: Gitlab
+  - name: updated
     version: 9.11.7-bb.0
-  - name: Gitlab Runner
+  - name: updated
     version: 0.88.3-bb.1
   - name: Grafana
     version: 10.5.15-bb.3
-  - name: Harbor
+  - name: updated
     version: 1.19.1-bb.0
   - name: Headlamp
     version: 0.40.0-bb.1
-  - name: Istio Cni
-    version: 1.30.2-bb.0
-  - name: Istio Crds
-    version: 1.30.2-bb.0
-  - name: Istio Gateway
-    version: 1.30.2-bb.0
-  - name: Istiod
+  - name: updated
     version: 1.30.2-bb.0
   - name: Keycloak
     version: 7.2.0-bb.2
-  - name: Kiali
+  - name: updated
     version: 2.28.0-bb.0
-  - name: Kyverno
+  - name: updated
     version: 3.8.1-bb.4
   - name: Kyverno Policies
     version: 3.3.4-bb.65
-  - name: Kyverno Reporter
+  - name: updated
     version: 3.7.4-bb.3
   - name: Loki
     version: 6.55.0-bb.2
-  - name: Mattermost
+  - name: updated
     version: 11.8.2-bb.0
   - name: Mattermost Operator
     version: 1.25.7-bb.0
   - name: Metrics Server
     version: 3.13.0-bb.6
-  - name: Mimir
+  - name: updated
     version: 6.0.6-bb.3
-  - name: Minio
+  - name: updated
     version: 7.1.1-bb.19
   - name: Minio Operator
     version: 7.1.1-bb.6
-  - name: Monitoring
+  - name: updated
     version: 85.3.3-bb.2
-  - name: Neuvector
+  - name: updated
     version: 2.10.3-bb.0
   - name: Prometheus Operator Crds
     version: 28.0.1-bb.0
   - name: Renovate
     version: 46.31.6-bb.5
-  - name: Sonarqube
+  - name: updated
     version: 2026.3.1-bb.1
   - name: Tempo
     version: 2.1.0-bb.1
   - name: Thanos
     version: 17.4.0-bb.2
-  - name: Twistlock
+  - name: updated
     version: 0.27.0-bb.2
-  - name: Vault
+  - name: updated
     version: 0.33.0-bb.2
-  - name: Velero
+  - name: updated
     version: 12.1.0-bb.1
   - name: Wrapper
     version: 0.4.15
-  - name: Ztunnel
-    version: 1.30.2-bb.0
   incompatibilities: []
   summary:
     helm_changes: ''
@@ -1011,11 +963,11 @@ versions:
     version: 4.0.1-bb.0
   - name: Anchore Enterprise
     version: 3.25.0-bb.0
-  - name: Argocd
+  - name: updated
     version: 9.5.21-bb.0
-  - name: Authservice
+  - name: updated
     version: 1.1.5-bb.5
-  - name: Backstage
+  - name: updated
     version: 2.8.1-bb.0
   - name: Bbctl
     version: 3.0.1-bb.3
@@ -1043,15 +995,9 @@ versions:
     version: 1.19.0-bb.0
   - name: Headlamp
     version: 0.40.0-bb.1
-  - name: Istio Cni
+  - name: updated
     version: 1.30.1-bb.0
-  - name: Istio Crds
-    version: 1.30.1-bb.0
-  - name: Istio Gateway
-    version: 1.30.1-bb.0
-  - name: Istiod
-    version: 1.30.1-bb.0
-  - name: Keycloak
+  - name: updated
     version: 7.2.0-bb.2
   - name: Kiali
     version: 2.27.0-bb.0
@@ -1059,17 +1005,17 @@ versions:
     version: 3.8.1-bb.2
   - name: Kyverno Policies
     version: 3.3.4-bb.65
-  - name: Kyverno Reporter
+  - name: updated
     version: 3.7.4-bb.2
   - name: Loki
     version: 6.55.0-bb.2
-  - name: Mattermost
+  - name: updated
     version: 11.7.3-bb.0
-  - name: Mattermost Operator
+  - name: updated
     version: 1.25.7-bb.0
   - name: Metrics Server
     version: 3.13.0-bb.6
-  - name: Mimir
+  - name: updated
     version: 6.0.6-bb.2
   - name: Minio
     version: 7.1.1-bb.18
@@ -1083,7 +1029,7 @@ versions:
     version: 28.0.1-bb.0
   - name: Renovate
     version: 46.31.6-bb.5
-  - name: Sonarqube
+  - name: updated
     version: 2026.3.1-bb.0
   - name: Tempo
     version: 2.1.0-bb.1
@@ -1093,12 +1039,10 @@ versions:
     version: 0.26.0-bb.0
   - name: Vault
     version: 0.32.0-bb.1
-  - name: Velero
+  - name: updated
     version: 12.0.2-bb.1
   - name: Wrapper
     version: 0.4.15
-  - name: Ztunnel
-    version: 1.30.1-bb.0
   incompatibilities: []
   summary:
     helm_changes: ''
@@ -1125,9 +1069,9 @@ versions:
   requirements:
   - name: Alloy
     version: 4.0.1-bb.0
-  - name: Anchore Enterprise
+  - name: updated
     version: 3.25.0-bb.0
-  - name: Argocd
+  - name: updated
     version: 9.5.15-bb.0
   - name: Authservice
     version: 1.1.5-bb.3
@@ -1137,7 +1081,7 @@ versions:
     version: 3.0.1-bb.3
   - name: Eck Operator
     version: 3.4.0-bb.1
-  - name: Elasticsearch Kibana
+  - name: updated
     version: 1.37.0-bb.0
   - name: External Secrets Operator
     version: 1.3.1-bb.1
@@ -1149,13 +1093,13 @@ versions:
     version: 3.22.2-bb.1
   - name: Gateway Api
     version: 1.5.1-bb.1
-  - name: Gitlab
+  - name: updated
     version: 9.11.1-bb.2
   - name: Gitlab Runner
     version: 0.88.1-bb.0
   - name: Grafana
     version: 10.5.15-bb.3
-  - name: Harbor
+  - name: updated
     version: 1.19.0-bb.0
   - name: Headlamp
     version: 0.40.0-bb.1
@@ -1167,19 +1111,19 @@ versions:
     version: 1.29.2-bb.0
   - name: Istiod
     version: 1.29.2-bb.0
-  - name: Keycloak
+  - name: updated
     version: 7.2.0-bb.1
-  - name: Kiali
+  - name: updated
     version: 2.27.0-bb.0
-  - name: Kyverno
+  - name: updated
     version: 3.8.1-bb.2
   - name: Kyverno Policies
     version: 3.3.4-bb.65
-  - name: Kyverno Reporter
+  - name: updated
     version: 3.7.4-bb.1
-  - name: Loki
+  - name: updated
     version: 6.55.0-bb.2
-  - name: Mattermost
+  - name: updated
     version: 11.7.2-bb.0
   - name: Mattermost Operator
     version: 1.25.6-bb.0
@@ -1191,9 +1135,9 @@ versions:
     version: 7.1.1-bb.18
   - name: Minio Operator
     version: 7.1.1-bb.6
-  - name: Monitoring
+  - name: updated
     version: 85.3.3-bb.0
-  - name: Neuvector
+  - name: updated
     version: 2.10.2-bb.0
   - name: Prometheus Operator Crds
     version: 28.0.1-bb.0
@@ -1203,13 +1147,13 @@ versions:
     version: 2026.2.1-bb.0
   - name: Tempo
     version: 2.1.0-bb.1
-  - name: Thanos
+  - name: updated
     version: 17.4.0-bb.2
-  - name: Twistlock
+  - name: updated
     version: 0.26.0-bb.0
   - name: Vault
     version: 0.32.0-bb.1
-  - name: Velero
+  - name: updated
     version: 12.0.1-bb.0
   - name: Wrapper
     version: 0.4.15
@@ -1229,19 +1173,19 @@ versions:
 - version: 3.25.0
   kube: ['1.35']
   requirements:
-  - name: Alloy
+  - name: updated
     version: 4.0.1-bb.0
-  - name: Anchore Enterprise
+  - name: updated
     version: 3.23.0-bb.2
-  - name: Argocd
+  - name: updated
     version: 9.5.11-bb.1
-  - name: Authservice
+  - name: updated
     version: 1.1.5-bb.3
   - name: Backstage
     version: 2.6.3-bb.3
   - name: Bbctl
     version: 3.0.1-bb.3
-  - name: Eck Operator
+  - name: updated
     version: 3.4.0-bb.1
   - name: Elasticsearch Kibana
     version: 1.36.0-bb.1
@@ -1251,11 +1195,11 @@ versions:
     version: 0.57.3-bb.0
   - name: Fortify
     version: 25.4.1-bb.0
-  - name: Gatekeeper
+  - name: updated
     version: 3.22.2-bb.1
   - name: Gateway Api
     version: 1.5.1-bb.1
-  - name: Gitlab
+  - name: updated
     version: 9.11.1-bb.1
   - name: Gitlab Runner
     version: 0.88.1-bb.0
@@ -1275,7 +1219,7 @@ versions:
     version: 1.29.2-bb.0
   - name: Keycloak
     version: 7.1.9-bb.3
-  - name: Kiali
+  - name: updated
     version: 2.26.0-bb.1
   - name: Kyverno
     version: 3.7.2-bb.1
@@ -1285,9 +1229,9 @@ versions:
     version: 3.7.4-bb.0
   - name: Loki
     version: 6.55.0-bb.1
-  - name: Mattermost
+  - name: updated
     version: 11.6.2-bb.0
-  - name: Mattermost Operator
+  - name: updated
     version: 1.25.6-bb.0
   - name: Metrics Server
     version: 3.13.0-bb.6
@@ -1307,7 +1251,7 @@ versions:
     version: 46.31.6-bb.5
   - name: Sonarqube
     version: 2026.2.1-bb.0
-  - name: Tempo
+  - name: updated
     version: 2.1.0-bb.1
   - name: Thanos
     version: 17.3.3-bb.4
@@ -1338,7 +1282,7 @@ versions:
     version: 3.8.4-bb.1
   - name: Anchore Enterprise
     version: 3.23.0-bb.0
-  - name: Argocd
+  - name: updated
     version: 9.5.11-bb.0
   - name: Authservice
     version: 1.1.5-bb.2
@@ -1346,29 +1290,29 @@ versions:
     version: 2.6.3-bb.3
   - name: Bbctl
     version: 3.0.1-bb.3
-  - name: Eck Operator
+  - name: updated
     version: 3.3.2-bb.0
-  - name: Elasticsearch Kibana
+  - name: updated
     version: 1.36.0-bb.1
   - name: External Secrets Operator
     version: 1.3.1-bb.1
-  - name: Fluentbit
+  - name: updated
     version: 0.57.3-bb.0
   - name: Fortify
     version: 25.4.1-bb.0
-  - name: Gatekeeper
+  - name: updated
     version: 3.22.2-bb.0
   - name: Gateway Api
     version: 1.5.1-bb.1
   - name: Gitlab
     version: 9.11.1-bb.0
-  - name: Gitlab Runner
+  - name: updated
     version: 0.88.1-bb.0
   - name: Grafana
     version: 10.5.15-bb.3
   - name: Harbor
     version: 1.18.3-bb.0
-  - name: Headlamp
+  - name: updated
     version: 0.40.0-bb.1
   - name: Istio Cni
     version: 1.29.2-bb.0
@@ -1382,13 +1326,13 @@ versions:
     version: 7.1.9-bb.3
   - name: Kiali
     version: 2.25.0-bb.0
-  - name: Kyverno
+  - name: updated
     version: 3.7.2-bb.1
-  - name: Kyverno Policies
+  - name: updated
     version: 3.3.4-bb.65
-  - name: Kyverno Reporter
+  - name: updated
     version: 3.7.4-bb.0
-  - name: Loki
+  - name: updated
     version: 6.55.0-bb.1
   - name: Mattermost
     version: 11.6.1-bb.0
@@ -1396,27 +1340,27 @@ versions:
     version: 1.25.5-bb.1
   - name: Metrics Server
     version: 3.13.0-bb.6
-  - name: Mimir
+  - name: updated
     version: 6.0.6-bb.0
   - name: Minio
     version: 7.1.1-bb.18
   - name: Minio Operator
     version: 7.1.1-bb.6
-  - name: Monitoring
+  - name: updated
     version: 83.4.0-bb.2
-  - name: Neuvector
+  - name: updated
     version: 2.8.13-bb.1
-  - name: Prometheus Operator Crds
+  - name: updated
     version: 28.0.1-bb.0
-  - name: Renovate
+  - name: updated
     version: 46.31.6-bb.5
   - name: Sonarqube
     version: 2026.2.1-bb.0
-  - name: Tempo
+  - name: updated
     version: 2.1.0-bb.0
   - name: Thanos
     version: 17.3.3-bb.4
-  - name: Twistlock
+  - name: updated
     version: 0.25.0-bb.2
   - name: Vault
     version: 0.32.0-bb.1
