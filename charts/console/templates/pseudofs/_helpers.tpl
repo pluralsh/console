@@ -99,7 +99,7 @@ endpoint: {{ ternary . (printf "https://%s" .) (contains "://" .) | quote }}
 allow_http: {{ or $s3.allowHttp (hasPrefix "http://" ($store.s3.endpoint | default "")) }}
 virtual_hosted_style: {{ $s3.virtualHostedStyle }}
 {{- else if eq $provider "gcs" -}}
-type: Google
+type: Gcp
 bucket: {{ required "console.config.objectStore.gcs.bucket is required for the workbench filesystem" $store.gcs.bucket | quote }}
 {{- else if eq $provider "azure" -}}
 {{- $azure := .Values.pseudofs.objectStore.azure -}}

@@ -198,7 +198,7 @@ var _ = Describe("Object store", func() {
 
 		It("configures the workbench filesystem for google", func() {
 			config := pseudofsConfig(manifests, pseudofsConfigMap)
-			Expect(config).To(ContainSubstring("type: Google"))
+			Expect(config).To(ContainSubstring("type: Gcp"))
 			Expect(config).To(ContainSubstring("recordings"))
 			Expect(config).NotTo(ContainSubstring("type: Aws"))
 			Expect(config).NotTo(ContainSubstring("type: Azure"))
