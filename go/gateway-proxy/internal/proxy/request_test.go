@@ -1,6 +1,7 @@
 package proxy
 
 import (
+	"encoding/json"
 	"net/http"
 	"testing"
 
@@ -91,6 +92,36 @@ func TestPrepareRequestStripsCacheControl(t *testing.T) {
 	assert.NotContains(t, string(stripped.Body), "cache_control")
 	assert.Contains(t, string(stripped.Body), "12345678901234567890", "large numbers survive re-encoding")
 	assert.Contains(t, string(stripped.Body), `"tool_use_id":"t1"`)
+}
+
+func TestPrepareRequestKeepsCacheControlInToolData(t *testing.T) {
+	body := `{
+		"model": "m", "max_tokens": 1,
+		"messages": [{"role": "assistant", "content": [
+			{"type": "tool_use", "id": "t1", "name": "w", "input": {"cache_control": "no-store"}, "cache_control": {"type": "ephemeral"}}
+		]}],
+		"tools": [{"name": "w", "input_schema": {"type": "object", "properties": {"cache_control": {"type": "string"}}}, "cache_control": {"type": "ephemeral"}}]
+	}`
+
+	prep, err := PrepareRequest([]byte(body), http.Header{}, RequestOptions{StripCacheControl: true})
+	require.Nil(t, err)
+
+	var out struct {
+		Messages []struct {
+			Content []map[string]any `json:"content"`
+		} `json:"messages"`
+		Tools []map[string]any `json:"tools"`
+	}
+	require.NoError(t, json.Unmarshal(prep.Body, &out))
+
+	toolUse := out.Messages[0].Content[0]
+	assert.NotContains(t, toolUse, "cache_control")
+	assert.Equal(t, map[string]any{"cache_control": "no-store"}, toolUse["input"])
+
+	tool := out.Tools[0]
+	assert.NotContains(t, tool, "cache_control")
+	props := tool["input_schema"].(map[string]any)["properties"].(map[string]any)
+	assert.Contains(t, props, "cache_control")
 }
 
 func TestPrepareRequestValidation(t *testing.T) {

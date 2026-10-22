@@ -242,9 +242,42 @@ func TestCanceledCallerDoesNotPoisonSharedFetch(t *testing.T) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
-	tok, err := cache.Token(ctx)
+	_, err := cache.Token(ctx)
+	require.ErrorIs(t, err, context.Canceled)
+
+	tok, err := cache.Token(context.Background())
 	require.NoError(t, err)
 	assert.Equal(t, "tok-1", tok)
+	assert.EqualValues(t, 1, ts.calls.Load())
+}
+
+func TestCallerStopsWaitingWhenItsContextEnds(t *testing.T) {
+	ts := newTokenServer(t)
+	ts.set(func(s *tokenServer) { s.delay = time.Second })
+	cache := newCache(t, ts, nil)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Millisecond)
+	defer cancel()
+	start := time.Now()
+	_, err := cache.Token(ctx)
+	require.ErrorIs(t, err, context.DeadlineExceeded)
+	assert.Less(t, time.Since(start), 500*time.Millisecond)
+}
+
+func TestHungTokenEndpointTimesOut(t *testing.T) {
+	ts := newTokenServer(t)
+	ts.set(func(s *tokenServer) { s.delay = time.Second })
+	cache, err := NewCache(
+		Credentials{TokenURL: ts.URL, ClientID: "client", ClientSecret: "secret"},
+		WithHTTPClient(&http.Client{}),
+		WithFetchTimeout(20*time.Millisecond),
+	)
+	require.NoError(t, err)
+
+	start := time.Now()
+	_, err = cache.Token(context.Background())
+	require.Error(t, err)
+	assert.Less(t, time.Since(start), 500*time.Millisecond)
 }
 
 func TestInvalidate(t *testing.T) {

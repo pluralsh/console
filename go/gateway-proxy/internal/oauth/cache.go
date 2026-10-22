@@ -22,6 +22,9 @@ const (
 	// DefaultRefreshMargin refreshes tokens this long before they actually expire so that a
 	// request never leaves the proxy with a token that dies in flight.
 	DefaultRefreshMargin = 30 * time.Second
+	// DefaultFetchTimeout bounds a single token request. The request is shared by every caller
+	// waiting on it, so it can't inherit any one caller's deadline.
+	DefaultFetchTimeout = 30 * time.Second
 )
 
 type Credentials struct {
@@ -51,12 +54,21 @@ func WithRefreshMargin(d time.Duration) Option {
 	return func(cache *Cache) { cache.margin = d }
 }
 
+func WithFetchTimeout(d time.Duration) Option {
+	return func(cache *Cache) {
+		if d > 0 {
+			cache.fetchTimeout = d
+		}
+	}
+}
+
 // Cache hands out a cached access token for a single set of client credentials.
 type Cache struct {
-	creds      Credentials
-	httpClient *http.Client
-	now        func() time.Time
-	margin     time.Duration
+	creds        Credentials
+	httpClient   *http.Client
+	now          func() time.Time
+	margin       time.Duration
+	fetchTimeout time.Duration
 
 	mu        sync.Mutex
 	token     string
@@ -74,10 +86,11 @@ func NewCache(creds Credentials, opts ...Option) (*Cache, error) {
 	}
 
 	c := &Cache{
-		creds:      creds,
-		httpClient: &http.Client{Timeout: 30 * time.Second},
-		now:        time.Now,
-		margin:     DefaultRefreshMargin,
+		creds:        creds,
+		httpClient:   &http.Client{Timeout: DefaultFetchTimeout},
+		now:          time.Now,
+		margin:       DefaultRefreshMargin,
+		fetchTimeout: DefaultFetchTimeout,
 	}
 	for _, opt := range opts {
 		opt(c)
@@ -86,22 +99,31 @@ func NewCache(creds Credentials, opts ...Option) (*Cache, error) {
 }
 
 // Token returns a cached access token, fetching a new one if the cached token is missing or
-// within the refresh margin of its expiry. Concurrent callers share a single token request.
+// within the refresh margin of its expiry. Concurrent callers share a single token request,
+// and each stops waiting when its own context ends without canceling the shared request.
 func (c *Cache) Token(ctx context.Context) (string, error) {
 	if tok, ok := c.cached(); ok {
 		return tok, nil
 	}
 
-	v, err, _ := c.group.Do("token", func() (interface{}, error) {
+	ch := c.group.DoChan("token", func() (interface{}, error) {
 		if tok, ok := c.cached(); ok {
 			return tok, nil
 		}
-		return c.fetch(context.WithoutCancel(ctx))
+		fetchCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), c.fetchTimeout)
+		defer cancel()
+		return c.fetch(fetchCtx)
 	})
-	if err != nil {
-		return "", err
+
+	select {
+	case res := <-ch:
+		if res.Err != nil {
+			return "", res.Err
+		}
+		return res.Val.(string), nil
+	case <-ctx.Done():
+		return "", ctx.Err()
 	}
-	return v.(string), nil
 }
 
 // Invalidate drops the cached token if it is still the given value, so that a token the

@@ -5,6 +5,7 @@ import {
   CaretRightIcon,
   Flex,
 } from '@pluralsh/design-system'
+import { InlineLink } from 'components/utils/typography/InlineLink'
 import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import * as DesignSystem from '@pluralsh/design-system'
 import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
@@ -37,7 +38,7 @@ import {
   WORKBENCHES_CREATE_ABS_PATH,
   getWorkbenchAbsPath,
 } from 'routes/workbenchesRoutesConsts'
-import { ComponentType, useMemo, useState } from 'react'
+import { ComponentType, useEffect, useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
@@ -81,6 +82,12 @@ export function WorkbenchesList() {
       { queryHook: useWorkbenchesQuery, keyPath: ['workbenches'] },
       { q: debouncedSearchString, projectId, ...sortVariables }
     )
+
+  // The table reports its visible slice for polling but doesn't clear it on
+  // unmount, so card view would keep refreshing the table's old rows.
+  useEffect(() => {
+    if (display.view !== 'list') setVirtualSlice(undefined)
+  }, [display.view, setVirtualSlice])
 
   const workbenches = useMemo(
     () => mapExistingNodes(data?.workbenches),
@@ -189,7 +196,19 @@ export function WorkbenchesList() {
       <WorkbenchTabHeader
         title="Workbenches"
         icon={WorkbenchIcon ? <WorkbenchIcon /> : undefined}
-        description="Build-your-own agents for common DevOps tasks. Each workbench bundles tools and skills, and orchestrates subagents tailored to observability, infra analysis, and coding tasks."
+        description={
+          <>
+            Agents to manage production. Bundles tools and skills, and
+            orchestrates subagents to automate your busywork.{' '}
+            <InlineLink
+              href="https://docs.plural.sh/plural-features/workbenches"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Learn more
+            </InlineLink>
+          </>
+        }
       />
       <WorkbenchesSummary projectId={projectId} />
       {error && <GqlError error={error} />}
@@ -228,15 +247,19 @@ function WorkbenchesSummary({ projectId }: { projectId?: string }) {
       }}
     >
       <WorkbenchStatCard
-        label="PRs merged"
-        value={(aggregates?.pullRequests ?? 0).toLocaleString()}
-        helper="Over lifetime"
+        label="PR efficiency"
+        value={formatPrEfficiency(
+          aggregates?.pullRequests ?? 0,
+          aggregates?.pullRequestMergeRate
+        )}
+        helper="PRs merged (merge rate), over lifetime"
         loading={isLoading}
       />
       <WorkbenchStatCard
         label="Hours saved"
         value={formatHours(aggregates?.hoursSaved ?? 0)}
         helper="Estimated from the size of merged PRs"
+        info={<HoursSavedInfo />}
         loading={isLoading}
       />
       <WorkbenchStatCard
@@ -247,6 +270,34 @@ function WorkbenchesSummary({ projectId }: { projectId?: string }) {
       />
     </div>
   )
+}
+
+// Static MathML: React's JSX types don't include MathML elements.
+// Mirrors PullRequest.aggregates/1 in lib/console/schema/pull_request.ex.
+const HOURS_SAVED_FORMULA =
+  '<math display="block"><mi>h</mi><mo>=</mo>' +
+  '<munder><mo mathsize="1.6em">&#x2211;</mo><mtext>merged PRs</mtext></munder>' +
+  '<mi>max</mi><mrow><mo mathsize="1.8em">(</mo><mfrac><mn>1</mn><mn>4</mn></mfrac><mo>,</mo>' +
+  '<mfrac><mrow><mi>min</mi><mo>(</mo><mi>L</mi><mo>,</mo><mn>2000</mn><mo>)</mo></mrow>' +
+  '<mi>r</mi></mfrac><mo mathsize="1.8em">)</mo></mrow></math>'
+
+function HoursSavedInfo() {
+  return (
+    <div css={{ maxWidth: 280 }}>
+      <div
+        css={{ fontSize: 16, margin: '4px 0 8px' }}
+        dangerouslySetInnerHTML={{ __html: HOURS_SAVED_FORMULA }}
+      />
+      L is lines changed; r is lines per hour: 150 for GitOps, 100 for config,
+      50 for app code.
+    </div>
+  )
+}
+
+function formatPrEfficiency(merged: number, rate: Nullable<number>) {
+  const count = merged.toLocaleString()
+
+  return isNonNullable(rate) ? `${count} (${Math.round(rate * 100)}%)` : count
 }
 
 function formatHours(hours: number) {

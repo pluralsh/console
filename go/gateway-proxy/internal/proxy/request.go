@@ -102,9 +102,13 @@ func PrepareRequest(body []byte, header http.Header, opts RequestOptions) (*Prep
 	}
 
 	if opts.StripCacheControl {
-		for _, key := range []string{"system", "messages", "tools"} {
+		for key, strip := range map[string]func(any){
+			"system":   stripBlocks,
+			"messages": stripMessages,
+			"tools":    stripTools,
+		} {
 			if raw, ok := fields[key]; ok {
-				fields[key] = stripCacheControl(raw)
+				fields[key] = stripCacheControl(raw, strip)
 			}
 		}
 	}
@@ -143,37 +147,54 @@ func mergeBetas(bodyBetas json.RawMessage, headerValues []string, allowlist []st
 	return out, nil
 }
 
-// stripCacheControl removes every cache_control key from a JSON value. Values that are not
-// objects or arrays are returned untouched.
-func stripCacheControl(raw json.RawMessage) json.RawMessage {
+// stripCacheControl removes cache hints from a system, messages or tools value. Only the
+// positions where the Messages API accepts cache_control are touched: tool input schemas and
+// tool_use inputs are user data and may legitimately contain a cache_control key.
+func stripCacheControl(raw json.RawMessage, strip func(any)) json.RawMessage {
 	var v any
 	dec := json.NewDecoder(bytes.NewReader(raw))
 	dec.UseNumber()
 	if err := dec.Decode(&v); err != nil {
 		return raw
 	}
-	out, err := json.Marshal(removeKey(v, "cache_control"))
+	strip(v)
+	out, err := json.Marshal(v)
 	if err != nil {
 		return raw
 	}
 	return out
 }
 
-func removeKey(v any, key string) any {
-	switch t := v.(type) {
-	case map[string]any:
-		delete(t, key)
-		for k, child := range t {
-			t[k] = removeKey(child, key)
+// stripBlocks handles a list of content blocks (system, or a message's content).
+func stripBlocks(v any) {
+	blocks, _ := v.([]any)
+	for _, b := range blocks {
+		block, ok := b.(map[string]any)
+		if !ok {
+			continue
 		}
-		return t
-	case []any:
-		for i, child := range t {
-			t[i] = removeKey(child, key)
+		delete(block, "cache_control")
+		if block["type"] == "tool_result" {
+			stripBlocks(block["content"])
 		}
-		return t
-	default:
-		return v
+	}
+}
+
+func stripMessages(v any) {
+	messages, _ := v.([]any)
+	for _, m := range messages {
+		if msg, ok := m.(map[string]any); ok {
+			stripBlocks(msg["content"])
+		}
+	}
+}
+
+func stripTools(v any) {
+	tools, _ := v.([]any)
+	for _, t := range tools {
+		if tool, ok := t.(map[string]any); ok {
+			delete(tool, "cache_control")
+		}
 	}
 }
 

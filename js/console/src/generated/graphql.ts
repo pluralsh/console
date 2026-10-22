@@ -23889,7 +23889,7 @@ export type WorkbenchesSummaryQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchesSummaryQuery = { __typename?: 'RootQueryType', workbenchAggregates: { __typename?: 'WorkbenchAggregates', pullRequests?: number | null, hoursSaved?: number | null, totalTokens?: number | null } };
+export type WorkbenchesSummaryQuery = { __typename?: 'RootQueryType', workbenchAggregates: { __typename?: 'WorkbenchAggregates', pullRequests?: number | null, pullRequestMergeRate?: number | null, hoursSaved?: number | null, totalTokens?: number | null } };
 
 export type WorkbenchesEvalsMergeRateGraphQueryVariables = Exact<{
   period?: InputMaybe<EvalResultsPeriod>;
@@ -48828,6 +48828,7 @@ export const WorkbenchesSummaryDocument = gql`
     query WorkbenchesSummary($projectId: ID) {
   workbenchAggregates(projectId: $projectId) {
     pullRequests
+    pullRequestMergeRate
     hoursSaved
     totalTokens
   }

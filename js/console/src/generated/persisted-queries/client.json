@@ -1982,10 +1982,10 @@
          "name": "WorkbenchDashboard",
          "body": "query WorkbenchDashboard {\n  workbenchAggregates {\n    pullRequests\n    pullRequestMergeRate\n    evalResults\n    __typename\n  }\n}"
       },
-      "sha256:a59ec2d51b8beedb5b19674c78fbb407c99243e67d80a58fbf410f416b387fc6": {
+      "sha256:d236fdc2b3f9a3b2e2791a6b328d4b9eba412465731cb095a01a8caffcc29f6f": {
          "type": "query",
          "name": "WorkbenchesSummary",
-         "body": "query WorkbenchesSummary($projectId: ID) {\n  workbenchAggregates(projectId: $projectId) {\n    pullRequests\n    hoursSaved\n    totalTokens\n    __typename\n  }\n}"
+         "body": "query WorkbenchesSummary($projectId: ID) {\n  workbenchAggregates(projectId: $projectId) {\n    pullRequests\n    pullRequestMergeRate\n    hoursSaved\n    totalTokens\n    __typename\n  }\n}"
       },
       "sha256:c4f4c207c42b50e3b6de8acac5a4c77a56202e0cb5188b356e2dd15499d6b70d": {
          "type": "query",

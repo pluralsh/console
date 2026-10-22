@@ -907,6 +907,7 @@ query WorkbenchDashboard {
 query WorkbenchesSummary($projectId: ID) {
   workbenchAggregates(projectId: $projectId) {
     pullRequests
+    pullRequestMergeRate
     hoursSaved
     totalTokens
   }

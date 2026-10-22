@@ -56,8 +56,9 @@ func (in *FederatedCredential) Attributes(userID string) console.FederatedCreden
 	}
 
 	return console.FederatedCredentialAttributes{
-		Issuer:     in.Spec.Issuer,
-		Aud:        lo.EmptyableToPtr(in.Spec.Aud),
+		Issuer: in.Spec.Issuer,
+		// Always sent so removing spec.aud clears it in Console; "" is stored as unset.
+		Aud:        lo.ToPtr(in.Spec.Aud),
 		Scopes:     lo.ToSlicePtr(in.Spec.Scopes),
 		ClaimsLike: claimsLike,
 		UserID:     userID,
