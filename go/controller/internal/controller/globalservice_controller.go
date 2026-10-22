@@ -186,7 +186,11 @@ func (r *GlobalServiceReconciler) attributes(ctx context.Context, globalService 
 		}
 	}
 
-	attr.IgnoreClusters = r.ignoreClusters(ctx, globalService)
+	ignoreClusters, err := r.ignoreClusters(ctx, globalService)
+	if err != nil {
+		return attr, nil, err
+	}
+	attr.IgnoreClusters = ignoreClusters
 	return attr, nil, nil
 }
 
@@ -223,9 +227,9 @@ func (r *GlobalServiceReconciler) addServiceControllerRef(ctx context.Context, s
 	return utils.TryAddControllerRef(ctx, r.Client, service, globalService.DeepCopy(), r.Scheme)
 }
 
-func (r *GlobalServiceReconciler) ignoreClusters(ctx context.Context, globalService *v1alpha1.GlobalService) *[]*string {
+func (r *GlobalServiceReconciler) ignoreClusters(ctx context.Context, globalService *v1alpha1.GlobalService) (*[]*string, error) {
 	if globalService.Spec.IgnoreClusters == nil {
-		return nil
+		return nil, nil
 	}
 	logger := log.FromContext(ctx)
 
@@ -240,9 +244,11 @@ func (r *GlobalServiceReconciler) ignoreClusters(ctx context.Context, globalServ
 		clusters = append(clusters, lo.ToPtr(clusterID))
 	}
 	if len(errorsList) > 0 {
-		logger.Info("failed to get cluster ids for global service", "errors", utilerrors.NewAggregate(errorsList), "globalService", globalService.Name, "namespace", globalService.Namespace)
+		err := utilerrors.NewAggregate(errorsList)
+		logger.Info("failed to get cluster ids for global service", "errors", err, "globalService", globalService.Name, "namespace", globalService.Namespace)
+		return nil, err
 	}
-	return &clusters
+	return &clusters, nil
 }
 
 func (r *GlobalServiceReconciler) getService(ctx context.Context, globalService *v1alpha1.GlobalService) (*v1alpha1.ServiceDeployment, *ctrl.Result, error) {
