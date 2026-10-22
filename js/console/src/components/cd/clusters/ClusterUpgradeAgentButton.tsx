@@ -226,9 +226,14 @@ const getCurUpgradeStatus = (
 }
 
 const AgentRunFormPopupSC = styled(SimplePopupMenu)(({ theme }) => ({
-  width: 578,
-  padding: theme.spacing.medium,
-  gap: theme.spacing.large,
+  // SimplePopupMenu sets its own width/padding under '&&', so this needs to match its specificity
+  '&&': {
+    width: 578,
+    maxWidth: 'calc(100vw - 32px)',
+    padding: theme.spacing.medium,
+    gap: theme.spacing.large,
+    whiteSpace: 'normal',
+  },
   transform: 'translateY(20px)',
   marginBottom: theme.spacing.xxlarge,
   boxShadow: theme.boxShadows.moderate,
