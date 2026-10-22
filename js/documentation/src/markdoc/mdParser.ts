@@ -49,6 +49,23 @@ export const readMdFileCached = async (
       ? yaml.load(ast.attributes.frontmatter)
       : {}
 
+    // transform silently drops unknown tags, so fail loudly instead
+    const undefinedTags = Markdoc.validate(ast, schemaConfig).filter(
+      ({ error }) => error.id === 'tag-undefined'
+    )
+
+    if (undefinedTags.length > 0) {
+      throw new MarkdocValidationError(
+        undefinedTags
+          .map(({ lines, error }) => {
+            const line = lines[0] !== undefined ? `:${lines[0] + 1}` : ''
+
+            return `${filePath}${line}: ${error.message}`
+          })
+          .join('\n')
+      )
+    }
+
     const content = Markdoc.transform(ast, schemaConfig)
 
     const ret: MarkdocPage = JSON.parse(
@@ -62,11 +79,15 @@ export const readMdFileCached = async (
     )
 
     return cacheAndReturn(ret)
-  } catch {
-    // console.error(e)
+  } catch (e) {
+    if (e instanceof MarkdocValidationError) throw e
 
     return cacheAndReturn(null)
   }
+}
+
+class MarkdocValidationError extends Error {
+  name = 'MarkdocValidationError'
 }
 
 // see https://github.com/markdoc/markdoc/issues/10
