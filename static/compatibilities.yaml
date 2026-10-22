@@ -247,6 +247,17 @@ addons:
   release_url: https://github.com/kubernetes-sigs/aws-ebs-csi-driver/releases/tag/v{vsn}
   helm_repository_url: https://kubernetes-sigs.github.io/aws-ebs-csi-driver
   versions:
+  - version: 1.67.1
+    kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29',
+      '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 2.67.1
+    images: ['public.ecr.aws/csi-components/csi-attacher:v4.13.0-eksbuild.2', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.18.0-eksbuild.2',
+      'public.ecr.aws/csi-components/csi-provisioner:v6.4.0-eksbuild.2', 'public.ecr.aws/csi-components/csi-resizer:v2.3.0-eksbuild.2',
+      'public.ecr.aws/csi-components/livenessprobe:v2.20.0-eksbuild.2', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.67.1',
+      'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20260817-81577dc432-master']
   - version: 1.67.0
     kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29',
       '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
@@ -1065,7 +1076,13 @@ addons:
       '1.18', '1.17']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Release notes provided do not include any itemized changes; both
+          versions point to an external CHANGELOG.]
+      breaking_changes: [No breaking changes are listed in the provided notes; need
+          the project/Helm chart CHANGELOG between v3.5.0 and v3.5.2 to confirm.]
     chart_version: 4.5.2
     images: ['public.ecr.aws/csi-components/csi-node-driver-registrar:v2.18.0-eksbuild.1',
       'public.ecr.aws/csi-components/csi-provisioner:v6.4.0-eksbuild.1', 'public.ecr.aws/csi-components/livenessprobe:v2.20.0-eksbuild.1',
@@ -1219,7 +1236,14 @@ addons:
       '1.18', '1.17']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No feature details provided in the supplied release notes; both versions
+          point to an external CHANGELOG without listing changes.]
+      breaking_changes: [No breaking-change information provided in the supplied release
+          notes; must consult the upstream CHANGELOG between v2.1.12 and v2.1.15 to
+          confirm.]
     chart_version: 3.2.6
     images: ['public.ecr.aws/csi-components/csi-node-driver-registrar:v2.14.0-eksbuild.5',
       'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.4', 'public.ecr.aws/csi-components/livenessprobe:v2.16.0-eksbuild.5',
@@ -1328,6 +1352,33 @@ addons:
   helm_values: clusterName=example
   chart_name: aws-load-balancer-controller
   versions:
+  - version: 3.6.1
+    kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29',
+      '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: '- **No Helm values changes called out for v3.6.1.** This is a
+        patch release; upgrade the controller image/chart only.
+
+        - **If upgrading from < v3.6.0:** apply the **v3.6.0 CRD update steps first**
+        (see below) before moving to 3.6.1.'
+      chart_updates: [Patch release focused on dependency/security updates (Go toolchain
+          + `golang.org/x/net`) with no API/CRD/behavior changes., Adds/extends controller
+          metrics (new per-resource reconcile condition gauge) and documentation updates.,
+        'Minor networking reconcile robustness: treat `InvalidGroup.NotFound` as success
+          when releasing auto-generated backend security groups.', 'Internal refactor:
+          shared mTLS parsing helpers for Gateway + Ingress (no behavior change).',
+        'Backend model enhancement: `PodEndpoint` now includes `NodeReadyTime`.']
+      features: [Adds `awslbc_controller_reconcile_condition` metric to show last
+          reconcile success(1)/failure(0) per resource (Ingress/Service/Gateway/TGB/GA).,
+        Exposes node Ready transition time on pod endpoints via `PodEndpoint.NodeReadyTime`
+          (useful for debugging/health/latency analyses).]
+      breaking_changes: ['None in v3.6.1 (explicitly no CRD, API, or behavioral changes).',
+        'Note: v3.6.0 required/strongly recommended CRD re-apply steps; skipping those
+          when coming from <3.6.0 can break Gateway/TGB behavior.']
+    chart_version: 3.6.1
+    images: ['public.ecr.aws/eks/aws-load-balancer-controller:v3.6.1']
   - version: 3.6.0
     kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29',
       '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
@@ -1944,7 +1995,7 @@ addons:
   - version: 3.35.1
     kube: ['1.36']
     requirements:
-    - name: Alloy
+    - name: updated
       version: 4.3.2-bb.2
     - name: Anchore Enterprise
       version: 4.1.2-bb.2
@@ -1954,61 +2005,55 @@ addons:
       version: 1.1.8-bb.3
     - name: Cert Manager
       version: v1.20.3-bb.2
-    - name: Eck Operator
+    - name: updated
       version: 3.5.0-bb.2
-    - name: Elasticsearch Kibana
+    - name: updated
       version: 1.44.0-bb.1
-    - name: External Secrets Operator
+    - name: updated
       version: 2.12.0-bb.0
-    - name: Fluentbit
+    - name: updated
       version: 0.58.3-bb.0
     - name: Fortify
       version: 26.2.0-bb.6
-    - name: Gatekeeper
+    - name: updated
       version: 3.23.1-bb.1
     - name: Gateway Api
       version: 1.6.2-bb.0
-    - name: Gitlab
+    - name: updated
       version: 10.4.2-bb.0
-    - name: Gitlab Runner
+    - name: updated
       version: 0.91.2-bb.3
     - name: Grafana
       version: 13.2.4-bb.0
-    - name: Harbor
+    - name: updated
       version: 1.19.2-bb.3
-    - name: Headlamp
+    - name: updated
       version: 0.45.0-bb.1
-    - name: Istio Cni
+    - name: updated
       version: 1.31.1-bb.0
-    - name: Istio Crds
-      version: 1.31.1-bb.0
-    - name: Istio Egress Gateway
+    - name: updated
       version: 0.1.5-bb.0
-    - name: Istio Gateway
-      version: 1.31.1-bb.0
-    - name: Istiod
-      version: 1.31.1-bb.0
-    - name: Keycloak
+    - name: updated
       version: 7.3.2-bb.1
     - name: Kiali
       version: 2.32.0-bb.0
-    - name: Kyverno
+    - name: updated
       version: 3.9.1-bb.1
     - name: Kyverno Policies
       version: 3.3.4-bb.87
     - name: Kyverno Reporter
       version: 3.10.0-bb.2
-    - name: Loki
+    - name: updated
       version: 6.55.0-bb.9
     - name: Mattermost
       version: 11.11.0-bb.0
     - name: Mattermost Operator
       version: 1.25.9-bb.1
-    - name: Metrics Server
+    - name: updated
       version: 3.14.0-bb.1
-    - name: Mimir
+    - name: updated
       version: 6.2.1-bb.1
-    - name: Minio
+    - name: updated
       version: 7.1.1-bb.25
     - name: Minio Operator
       version: 7.1.1-bb.11
@@ -2026,16 +2071,14 @@ addons:
       version: 2.1.0-bb.3
     - name: Thanos
       version: 17.6.0-bb.3
-    - name: Twistlock
+    - name: updated
       version: 0.31.0-bb.0
     - name: Vault
       version: 0.34.1-bb.2
-    - name: Velero
+    - name: updated
       version: 12.2.1-bb.0
     - name: Wrapper
       version: 0.4.15
-    - name: Ztunnel
-      version: 1.31.1-bb.0
     incompatibilities: []
     summary: null
     chart_version: 3.35.1
@@ -2043,7 +2086,7 @@ addons:
   - version: 3.35.0
     kube: ['1.36']
     requirements:
-    - name: Alloy
+    - name: updated
       version: 4.3.2-bb.2
     - name: Anchore Enterprise
       version: 4.1.2-bb.2
@@ -2053,61 +2096,55 @@ addons:
       version: 1.1.8-bb.3
     - name: Cert Manager
       version: v1.20.3-bb.2
-    - name: Eck Operator
+    - name: updated
       version: 3.5.0-bb.2
-    - name: Elasticsearch Kibana
+    - name: updated
       version: 1.44.0-bb.1
-    - name: External Secrets Operator
+    - name: updated
       version: 2.12.0-bb.0
-    - name: Fluentbit
+    - name: updated
       version: 0.58.3-bb.0
     - name: Fortify
       version: 26.2.0-bb.6
-    - name: Gatekeeper
+    - name: updated
       version: 3.23.1-bb.1
     - name: Gateway Api
       version: 1.6.2-bb.0
-    - name: Gitlab
+    - name: updated
       version: 10.4.2-bb.0
-    - name: Gitlab Runner
+    - name: updated
       version: 0.91.2-bb.3
     - name: Grafana
       version: 13.2.4-bb.0
-    - name: Harbor
+    - name: updated
       version: 1.19.2-bb.3
-    - name: Headlamp
+    - name: updated
       version: 0.45.0-bb.1
-    - name: Istio Cni
+    - name: updated
       version: 1.31.1-bb.0
-    - name: Istio Crds
-      version: 1.31.1-bb.0
-    - name: Istio Egress Gateway
+    - name: updated
       version: 0.1.5-bb.0
-    - name: Istio Gateway
-      version: 1.31.1-bb.0
-    - name: Istiod
-      version: 1.31.1-bb.0
-    - name: Keycloak
+    - name: updated
       version: 7.3.2-bb.1
     - name: Kiali
       version: 2.32.0-bb.0
-    - name: Kyverno
+    - name: updated
       version: 3.9.1-bb.1
     - name: Kyverno Policies
       version: 3.3.4-bb.87
     - name: Kyverno Reporter
       version: 3.10.0-bb.2
-    - name: Loki
+    - name: updated
       version: 6.55.0-bb.9
     - name: Mattermost
       version: 11.11.0-bb.0
     - name: Mattermost Operator
       version: 1.25.9-bb.1
-    - name: Metrics Server
+    - name: updated
       version: 3.14.0-bb.1
-    - name: Mimir
+    - name: updated
       version: 6.2.1-bb.1
-    - name: Minio
+    - name: updated
       version: 7.1.1-bb.25
     - name: Minio Operator
       version: 7.1.1-bb.11
@@ -2125,16 +2162,14 @@ addons:
       version: 2.1.0-bb.3
     - name: Thanos
       version: 17.6.0-bb.3
-    - name: Twistlock
+    - name: updated
       version: 0.31.0-bb.0
     - name: Vault
       version: 0.34.1-bb.2
-    - name: Velero
+    - name: updated
       version: 12.2.1-bb.0
     - name: Wrapper
       version: 0.4.15
-    - name: Ztunnel
-      version: 1.31.1-bb.0
     incompatibilities: []
     summary:
       helm_changes: ''
@@ -2165,7 +2200,7 @@ addons:
     requirements:
     - name: Alloy
       version: 4.3.2-bb.0
-    - name: Anchore Enterprise
+    - name: updated
       version: 4.1.2-bb.2
     - name: Argocd
       version: 10.2.1-bb.2
@@ -2173,43 +2208,37 @@ addons:
       version: 1.1.8-bb.3
     - name: Cert Manager
       version: v1.20.3-bb.2
-    - name: Eck Operator
+    - name: updated
       version: 3.5.0-bb.1
-    - name: Elasticsearch Kibana
+    - name: updated
       version: 1.44.0-bb.0
-    - name: External Secrets Operator
+    - name: updated
       version: 2.11.0-bb.0
     - name: Fluentbit
       version: 0.58.2-bb.0
-    - name: Fortify
+    - name: updated
       version: 26.2.0-bb.6
     - name: Gatekeeper
       version: 3.23.1-bb.0
-    - name: Gateway Api
+    - name: updated
       version: 1.6.2-bb.0
-    - name: Gitlab
+    - name: updated
       version: 10.4.1-bb.0
     - name: Gitlab Runner
       version: 0.91.2-bb.2
-    - name: Grafana
+    - name: updated
       version: 13.2.4-bb.0
-    - name: Harbor
+    - name: updated
       version: 1.19.2-bb.2
     - name: Headlamp
       version: 0.45.0-bb.0
-    - name: Istio Cni
+    - name: updated
       version: 1.30.4-bb.1
-    - name: Istio Crds
-      version: 1.30.4-bb.1
-    - name: Istio Egress Gateway
+    - name: updated
       version: 0.1.3
-    - name: Istio Gateway
-      version: 1.30.4-bb.1
-    - name: Istiod
-      version: 1.30.4-bb.1
-    - name: Keycloak
+    - name: updated
       version: 7.3.0-bb.2
-    - name: Kiali
+    - name: updated
       version: 2.32.0-bb.0
     - name: Kyverno
       version: 3.9.1-bb.0
@@ -2217,44 +2246,42 @@ addons:
       version: 3.3.4-bb.87
     - name: Kyverno Reporter
       version: 3.10.0-bb.2
-    - name: Loki
+    - name: updated
       version: 6.55.0-bb.8
-    - name: Mattermost
+    - name: updated
       version: 11.11.0-bb.0
-    - name: Mattermost Operator
+    - name: updated
       version: 1.25.9-bb.1
     - name: Metrics Server
       version: 3.14.0-bb.0
-    - name: Mimir
+    - name: updated
       version: 6.1.0-bb.2
     - name: Minio
       version: 7.1.1-bb.24
-    - name: Minio Operator
+    - name: updated
       version: 7.1.1-bb.11
-    - name: Monitoring
+    - name: updated
       version: 91.4.1-bb.1
-    - name: Neuvector
+    - name: updated
       version: 2.11.2-bb.0
     - name: Prometheus Operator Crds
       version: 31.0.1-bb.0
-    - name: Renovate
+    - name: updated
       version: 46.316.0-bb.0
-    - name: Sonarqube
+    - name: updated
       version: 2026.4.1-bb.4
-    - name: Tempo
+    - name: updated
       version: 2.1.0-bb.3
-    - name: Thanos
+    - name: updated
       version: 17.6.0-bb.3
-    - name: Twistlock
+    - name: updated
       version: 0.30.0-bb.3
-    - name: Vault
+    - name: updated
       version: 0.34.1-bb.2
-    - name: Velero
+    - name: updated
       version: 12.1.0-bb.5
     - name: Wrapper
       version: 0.4.15
-    - name: Ztunnel
-      version: 1.30.4-bb.1
     incompatibilities: []
     summary:
       helm_changes: ''
@@ -2283,94 +2310,86 @@ addons:
     requirements:
     - name: Alloy
       version: 4.3.2-bb.0
-    - name: Anchore Enterprise
+    - name: updated
       version: 4.1.2-bb.0
-    - name: Argocd
+    - name: updated
       version: 10.2.1-bb.2
-    - name: Authservice
+    - name: updated
       version: 1.1.8-bb.3
     - name: Cert Manager
       version: v1.20.3-bb.2
-    - name: Eck Operator
+    - name: updated
       version: 3.5.0-bb.0
-    - name: Elasticsearch Kibana
+    - name: updated
       version: 1.43.0-bb.0
-    - name: External Secrets Operator
+    - name: updated
       version: 2.10.0-bb.2
-    - name: Fluentbit
+    - name: updated
       version: 0.58.2-bb.0
-    - name: Fortify
+    - name: updated
       version: 26.2.0-bb.4
-    - name: Gatekeeper
+    - name: updated
       version: 3.23.1-bb.0
     - name: Gateway Api
       version: 1.6.1-bb.0
-    - name: Gitlab
+    - name: updated
       version: 10.3.2-bb.1
-    - name: Gitlab Runner
+    - name: updated
       version: 0.91.2-bb.2
-    - name: Grafana
+    - name: updated
       version: 12.10.0-bb.0
-    - name: Harbor
+    - name: updated
       version: 1.19.2-bb.1
-    - name: Headlamp
+    - name: updated
       version: 0.45.0-bb.0
-    - name: Istio Cni
-      version: 1.30.4-bb.0
-    - name: Istio Crds
-      version: 1.30.4-bb.0
-    - name: Istio Gateway
-      version: 1.30.4-bb.0
-    - name: Istiod
+    - name: updated
       version: 1.30.4-bb.0
     - name: Keycloak
       version: 7.3.0-bb.0
-    - name: Kiali
+    - name: updated
       version: 2.31.0-bb.0
-    - name: Kyverno
+    - name: updated
       version: 3.9.1-bb.0
     - name: Kyverno Policies
       version: 3.3.4-bb.87
-    - name: Kyverno Reporter
+    - name: updated
       version: 3.10.0-bb.2
-    - name: Loki
+    - name: updated
       version: 6.55.0-bb.7
-    - name: Mattermost
+    - name: updated
       version: 11.10.1-bb.0
-    - name: Mattermost Operator
+    - name: updated
       version: 1.25.9-bb.0
-    - name: Metrics Server
+    - name: updated
       version: 3.14.0-bb.0
     - name: Mimir
       version: 6.1.0-bb.1
-    - name: Minio
+    - name: updated
       version: 7.1.1-bb.24
-    - name: Minio Operator
+    - name: updated
       version: 7.1.1-bb.10
-    - name: Monitoring
+    - name: updated
       version: 88.6.2-bb.0
-    - name: Neuvector
+    - name: updated
       version: 2.11.1-bb.0
     - name: Prometheus Operator Crds
       version: 31.0.1-bb.0
-    - name: Renovate
+    - name: updated
       version: 46.289.4-bb.0
-    - name: Sonarqube
+    - name: updated
       version: 2026.4.1-bb.1
     - name: Tempo
       version: 2.1.0-bb.2
-    - name: Thanos
+    - name: updated
       version: 17.6.0-bb.1
-    - name: Twistlock
+    - name: updated
       version: 0.30.0-bb.2
-    - name: Vault
+    - name: updated
       version: 0.34.1-bb.1
-    - name: Velero
+    - name: updated
       version: 12.1.0-bb.4
     - name: Wrapper
       version: 0.4.15
-    - name: Ztunnel
-      version: 1.30.4-bb.0
     incompatibilities: []
     summary:
       helm_changes: ''
@@ -2391,21 +2410,21 @@ addons:
     requirements:
     - name: Alloy
       version: 4.3.2-bb.0
-    - name: Anchore Enterprise
+    - name: updated
       version: 3.25.1-bb.3
     - name: Argocd
       version: 10.2.1-bb.0
-    - name: Authservice
+    - name: updated
       version: 1.1.8-bb.1
-    - name: Cert Manager
+    - name: updated
       version: v1.20.3-bb.2
     - name: Eck Operator
       version: 3.4.1-bb.1
     - name: Elasticsearch Kibana
       version: 1.41.0-bb.0
-    - name: External Secrets Operator
+    - name: updated
       version: 2.9.0-bb.0
-    - name: Fluentbit
+    - name: updated
       version: 0.57.9-bb.1
     - name: Fortify
       version: 26.2.0-bb.2
@@ -2415,7 +2434,7 @@ addons:
       version: 1.6.1-bb.0
     - name: Gitlab
       version: 10.2.4-bb.0
-    - name: Gitlab Runner
+    - name: updated
       version: 0.91.2-bb.1
     - name: Grafana
       version: 10.5.15-bb.6
@@ -2433,15 +2452,15 @@ addons:
       version: 1.30.3-bb.0
     - name: Keycloak
       version: 7.3.0-bb.0
-    - name: Kiali
+    - name: updated
       version: 2.30.0-bb.1
-    - name: Kyverno
+    - name: updated
       version: 3.9.0-bb.0
     - name: Kyverno Policies
       version: 3.3.4-bb.87
-    - name: Kyverno Reporter
+    - name: updated
       version: 3.10.0-bb.0
-    - name: Loki
+    - name: updated
       version: 6.55.0-bb.5
     - name: Mattermost
       version: 11.10.0-bb.0
@@ -2455,7 +2474,7 @@ addons:
       version: 7.1.1-bb.23
     - name: Minio Operator
       version: 7.1.1-bb.9
-    - name: Monitoring
+    - name: updated
       version: 88.3.0-bb.1
     - name: Neuvector
       version: 2.11.0-bb.2
@@ -2463,15 +2482,15 @@ addons:
       version: 31.0.1-bb.0
     - name: Renovate
       version: 46.251.0-bb.0
-    - name: Sonarqube
+    - name: updated
       version: 2026.4.1-bb.0
     - name: Tempo
       version: 2.1.0-bb.2
-    - name: Thanos
+    - name: updated
       version: 17.6.0-bb.0
-    - name: Twistlock
+    - name: updated
       version: 0.30.0-bb.0
-    - name: Vault
+    - name: updated
       version: 0.34.1-bb.0
     - name: Velero
       version: 12.1.0-bb.3
@@ -2501,39 +2520,39 @@ addons:
   - version: 3.31.0
     kube: ['1.35']
     requirements:
-    - name: Alloy
+    - name: updated
       version: 4.3.2-bb.0
     - name: Anchore Enterprise
       version: 3.25.1-bb.1
-    - name: Argocd
+    - name: updated
       version: 10.2.1-bb.0
-    - name: Authservice
+    - name: updated
       version: 1.1.5-bb.7
     - name: Bbctl
       version: 3.0.1-bb.3
     - name: Eck Operator
       version: 3.4.1-bb.1
-    - name: Elasticsearch Kibana
+    - name: updated
       version: 1.41.0-bb.0
-    - name: External Secrets Operator
+    - name: updated
       version: 2.8.0-bb.0
     - name: Fluentbit
       version: 0.57.9-bb.0
-    - name: Fortify
+    - name: updated
       version: 26.2.0-bb.2
-    - name: Gatekeeper
+    - name: updated
       version: 3.23.0-bb.0
-    - name: Gateway Api
+    - name: updated
       version: 1.6.1-bb.0
-    - name: Gitlab
+    - name: updated
       version: 10.2.4-bb.0
     - name: Gitlab Runner
       version: 0.88.3-bb.2
     - name: Grafana
       version: 10.5.15-bb.6
-    - name: Harbor
+    - name: updated
       version: 1.19.2-bb.0
-    - name: Headlamp
+    - name: updated
       version: 0.44.0-bb.0
     - name: Istio Cni
       version: 1.30.3-bb.0
@@ -2545,47 +2564,47 @@ addons:
       version: 1.30.3-bb.0
     - name: Keycloak
       version: 7.2.2-bb.1
-    - name: Kiali
+    - name: updated
       version: 2.30.0-bb.0
-    - name: Kyverno
+    - name: updated
       version: 3.8.2-bb.2
     - name: Kyverno Policies
       version: 3.3.4-bb.87
-    - name: Kyverno Reporter
+    - name: updated
       version: 3.9.0-bb.1
     - name: Loki
       version: 6.55.0-bb.2
-    - name: Mattermost
+    - name: updated
       version: 11.10.0-bb.0
-    - name: Mattermost Operator
+    - name: updated
       version: 1.25.7-bb.3
     - name: Metrics Server
       version: 3.13.1-bb.1
     - name: Mimir
       version: 6.1.0-bb.1
-    - name: Minio
+    - name: updated
       version: 7.1.1-bb.23
-    - name: Minio Operator
+    - name: updated
       version: 7.1.1-bb.9
-    - name: Monitoring
+    - name: updated
       version: 88.3.0-bb.0
     - name: Neuvector
       version: 2.11.0-bb.2
-    - name: Prometheus Operator Crds
+    - name: updated
       version: 31.0.1-bb.0
-    - name: Renovate
+    - name: updated
       version: 46.251.0-bb.0
-    - name: Sonarqube
+    - name: updated
       version: 2026.4.0-bb.0
     - name: Tempo
       version: 2.1.0-bb.2
     - name: Thanos
       version: 17.4.0-bb.3
-    - name: Twistlock
+    - name: updated
       version: 0.28.0-bb.3
-    - name: Vault
+    - name: updated
       version: 0.34.0-bb.0
-    - name: Velero
+    - name: updated
       version: 12.1.0-bb.3
     - name: Wrapper
       version: 0.4.15
@@ -2614,25 +2633,25 @@ addons:
   - version: 3.30.0
     kube: ['1.35']
     requirements:
-    - name: Alloy
+    - name: updated
       version: 4.3.1-bb.1
-    - name: Anchore Enterprise
+    - name: updated
       version: 3.25.1-bb.1
-    - name: Argocd
+    - name: updated
       version: 10.1.4-bb.1
     - name: Authservice
       version: 1.1.5-bb.5
     - name: Bbctl
       version: 3.0.1-bb.3
-    - name: Eck Operator
+    - name: updated
       version: 3.4.1-bb.1
-    - name: Elasticsearch Kibana
+    - name: updated
       version: 1.40.0-bb.2
     - name: External Secrets Operator
       version: 2.7.0-bb.2
-    - name: Fluentbit
+    - name: updated
       version: 0.57.9-bb.0
-    - name: Fortify
+    - name: updated
       version: 26.2.0-bb.1
     - name: Gatekeeper
       version: 3.22.2-bb.2
@@ -2640,49 +2659,43 @@ addons:
       version: 1.5.1-bb.1
     - name: Gitlab
       version: 9.11.8-bb.0
-    - name: Gitlab Runner
+    - name: updated
       version: 0.88.3-bb.2
-    - name: Grafana
+    - name: updated
       version: 10.5.15-bb.6
-    - name: Harbor
+    - name: updated
       version: 1.19.1-bb.2
     - name: Headlamp
       version: 0.40.0-bb.2
-    - name: Istio Cni
+    - name: updated
       version: 1.30.3-bb.0
-    - name: Istio Crds
-      version: 1.30.3-bb.0
-    - name: Istio Gateway
-      version: 1.30.3-bb.0
-    - name: Istiod
-      version: 1.30.3-bb.0
-    - name: Keycloak
+    - name: updated
       version: 7.2.2-bb.1
     - name: Kiali
       version: 2.28.0-bb.1
-    - name: Kyverno
+    - name: updated
       version: 3.8.2-bb.0
     - name: Kyverno Policies
       version: 3.3.4-bb.87
-    - name: Kyverno Reporter
+    - name: updated
       version: 3.9.0-bb.0
     - name: Loki
       version: 6.55.0-bb.2
-    - name: Mattermost
+    - name: updated
       version: 11.9.0-bb.5
-    - name: Mattermost Operator
+    - name: updated
       version: 1.25.7-bb.2
-    - name: Metrics Server
+    - name: updated
       version: 3.13.1-bb.1
-    - name: Mimir
+    - name: updated
       version: 6.1.0-bb.1
-    - name: Minio
+    - name: updated
       version: 7.1.1-bb.21
-    - name: Minio Operator
+    - name: updated
       version: 7.1.1-bb.8
-    - name: Monitoring
+    - name: updated
       version: 87.10.1-bb.3
-    - name: Neuvector
+    - name: updated
       version: 2.11.0-bb.2
     - name: Prometheus Operator Crds
       version: 30.0.1-bb.0
@@ -2692,18 +2705,16 @@ addons:
       version: 2026.3.1-bb.2
     - name: Tempo
       version: 2.1.0-bb.2
-    - name: Thanos
+    - name: updated
       version: 17.4.0-bb.3
-    - name: Twistlock
+    - name: updated
       version: 0.28.0-bb.2
-    - name: Vault
+    - name: updated
       version: 0.33.0-bb.4
-    - name: Velero
+    - name: updated
       version: 12.1.0-bb.2
     - name: Wrapper
       version: 0.4.15
-    - name: Ztunnel
-      version: 1.30.3-bb.0
     incompatibilities: []
     summary:
       helm_changes: ''
@@ -2721,11 +2732,11 @@ addons:
   - version: 3.29.0
     kube: ['1.35']
     requirements:
-    - name: Alloy
+    - name: updated
       version: 4.2.2-bb.0
-    - name: Anchore Enterprise
+    - name: updated
       version: 3.25.0-bb.1
-    - name: Argocd
+    - name: updated
       version: 10.1.3-bb.0
     - name: Authservice
       version: 1.1.5-bb.5
@@ -2735,73 +2746,73 @@ addons:
       version: 3.4.1-bb.0
     - name: Elasticsearch Kibana
       version: 1.39.0-bb.0
-    - name: External Secrets Operator
+    - name: updated
       version: 2.7.0-bb.2
     - name: Fluentbit
       version: 0.57.3-bb.0
     - name: Fortify
       version: 26.2.0-bb.0
-    - name: Gatekeeper
+    - name: updated
       version: 3.22.2-bb.2
     - name: Gateway Api
       version: 1.5.1-bb.1
-    - name: Gitlab
+    - name: updated
       version: 9.11.8-bb.0
     - name: Gitlab Runner
       version: 0.88.3-bb.1
-    - name: Grafana
+    - name: updated
       version: 10.5.15-bb.4
-    - name: Harbor
+    - name: updated
       version: 1.19.1-bb.1
-    - name: Headlamp
+    - name: updated
       version: 0.40.0-bb.2
     - name: Istio Cni
       version: 1.30.2-bb.0
     - name: Istio Crds
       version: 1.30.2-bb.0
-    - name: Istio Gateway
+    - name: updated
       version: 1.30.2-bb.2
     - name: Istiod
       version: 1.30.2-bb.0
-    - name: Keycloak
+    - name: updated
       version: 7.2.2-bb.0
-    - name: Kiali
+    - name: updated
       version: 2.28.0-bb.1
-    - name: Kyverno
+    - name: updated
       version: 3.8.1-bb.5
-    - name: Kyverno Policies
+    - name: updated
       version: 3.3.4-bb.87
     - name: Kyverno Reporter
       version: 3.7.4-bb.3
     - name: Loki
       version: 6.55.0-bb.2
-    - name: Mattermost
+    - name: updated
       version: 11.9.0-bb.0
-    - name: Mattermost Operator
+    - name: updated
       version: 1.25.7-bb.1
-    - name: Metrics Server
+    - name: updated
       version: 3.13.1-bb.0
-    - name: Mimir
+    - name: updated
       version: 6.0.6-bb.4
-    - name: Minio
+    - name: updated
       version: 7.1.1-bb.20
-    - name: Minio Operator
+    - name: updated
       version: 7.1.1-bb.7
-    - name: Monitoring
+    - name: updated
       version: 87.10.1-bb.1
-    - name: Neuvector
+    - name: updated
       version: 2.10.3-bb.1
-    - name: Prometheus Operator Crds
+    - name: updated
       version: 30.0.1-bb.0
     - name: Renovate
       version: 46.31.6-bb.5
-    - name: Sonarqube
+    - name: updated
       version: 2026.3.1-bb.2
-    - name: Tempo
+    - name: updated
       version: 2.1.0-bb.2
     - name: Thanos
       version: 17.4.0-bb.2
-    - name: Twistlock
+    - name: updated
       version: 0.28.0-bb.0
     - name: Vault
       version: 0.33.0-bb.2
@@ -2829,96 +2840,88 @@ addons:
   - version: 3.28.0
     kube: ['1.35']
     requirements:
-    - name: Alloy
+    - name: updated
       version: 4.1.7-bb.0
     - name: Anchore Enterprise
       version: 3.25.0-bb.0
-    - name: Argocd
+    - name: updated
       version: 9.7.0-bb.0
     - name: Authservice
       version: 1.1.5-bb.5
     - name: Bbctl
       version: 3.0.1-bb.3
-    - name: Eck Operator
+    - name: updated
       version: 3.4.1-bb.0
-    - name: Elasticsearch Kibana
+    - name: updated
       version: 1.39.0-bb.0
-    - name: External Secrets Operator
+    - name: updated
       version: 1.3.1-bb.2
     - name: Fluentbit
       version: 0.57.3-bb.0
-    - name: Fortify
+    - name: updated
       version: 26.2.0-bb.0
     - name: Gatekeeper
       version: 3.22.2-bb.1
     - name: Gateway Api
       version: 1.5.1-bb.1
-    - name: Gitlab
+    - name: updated
       version: 9.11.7-bb.0
-    - name: Gitlab Runner
+    - name: updated
       version: 0.88.3-bb.1
     - name: Grafana
       version: 10.5.15-bb.3
-    - name: Harbor
+    - name: updated
       version: 1.19.1-bb.0
     - name: Headlamp
       version: 0.40.0-bb.1
-    - name: Istio Cni
-      version: 1.30.2-bb.0
-    - name: Istio Crds
-      version: 1.30.2-bb.0
-    - name: Istio Gateway
-      version: 1.30.2-bb.0
-    - name: Istiod
+    - name: updated
       version: 1.30.2-bb.0
     - name: Keycloak
       version: 7.2.0-bb.2
-    - name: Kiali
+    - name: updated
       version: 2.28.0-bb.0
-    - name: Kyverno
+    - name: updated
       version: 3.8.1-bb.4
     - name: Kyverno Policies
       version: 3.3.4-bb.65
-    - name: Kyverno Reporter
+    - name: updated
       version: 3.7.4-bb.3
     - name: Loki
       version: 6.55.0-bb.2
-    - name: Mattermost
+    - name: updated
       version: 11.8.2-bb.0
     - name: Mattermost Operator
       version: 1.25.7-bb.0
     - name: Metrics Server
       version: 3.13.0-bb.6
-    - name: Mimir
+    - name: updated
       version: 6.0.6-bb.3
-    - name: Minio
+    - name: updated
       version: 7.1.1-bb.19
     - name: Minio Operator
       version: 7.1.1-bb.6
-    - name: Monitoring
+    - name: updated
       version: 85.3.3-bb.2
-    - name: Neuvector
+    - name: updated
       version: 2.10.3-bb.0
     - name: Prometheus Operator Crds
       version: 28.0.1-bb.0
     - name: Renovate
       version: 46.31.6-bb.5
-    - name: Sonarqube
+    - name: updated
       version: 2026.3.1-bb.1
     - name: Tempo
       version: 2.1.0-bb.1
     - name: Thanos
       version: 17.4.0-bb.2
-    - name: Twistlock
+    - name: updated
       version: 0.27.0-bb.2
-    - name: Vault
+    - name: updated
       version: 0.33.0-bb.2
-    - name: Velero
+    - name: updated
       version: 12.1.0-bb.1
     - name: Wrapper
       version: 0.4.15
-    - name: Ztunnel
-      version: 1.30.2-bb.0
     incompatibilities: []
     summary:
       helm_changes: ''
@@ -2950,11 +2953,11 @@ addons:
       version: 4.0.1-bb.0
     - name: Anchore Enterprise
       version: 3.25.0-bb.0
-    - name: Argocd
+    - name: updated
       version: 9.5.21-bb.0
-    - name: Authservice
+    - name: updated
       version: 1.1.5-bb.5
-    - name: Backstage
+    - name: updated
       version: 2.8.1-bb.0
     - name: Bbctl
       version: 3.0.1-bb.3
@@ -2982,15 +2985,9 @@ addons:
       version: 1.19.0-bb.0
     - name: Headlamp
       version: 0.40.0-bb.1
-    - name: Istio Cni
+    - name: updated
       version: 1.30.1-bb.0
-    - name: Istio Crds
-      version: 1.30.1-bb.0
-    - name: Istio Gateway
-      version: 1.30.1-bb.0
-    - name: Istiod
-      version: 1.30.1-bb.0
-    - name: Keycloak
+    - name: updated
       version: 7.2.0-bb.2
     - name: Kiali
       version: 2.27.0-bb.0
@@ -2998,17 +2995,17 @@ addons:
       version: 3.8.1-bb.2
     - name: Kyverno Policies
       version: 3.3.4-bb.65
-    - name: Kyverno Reporter
+    - name: updated
       version: 3.7.4-bb.2
     - name: Loki
       version: 6.55.0-bb.2
-    - name: Mattermost
+    - name: updated
       version: 11.7.3-bb.0
-    - name: Mattermost Operator
+    - name: updated
       version: 1.25.7-bb.0
     - name: Metrics Server
       version: 3.13.0-bb.6
-    - name: Mimir
+    - name: updated
       version: 6.0.6-bb.2
     - name: Minio
       version: 7.1.1-bb.18
@@ -3022,7 +3019,7 @@ addons:
       version: 28.0.1-bb.0
     - name: Renovate
       version: 46.31.6-bb.5
-    - name: Sonarqube
+    - name: updated
       version: 2026.3.1-bb.0
     - name: Tempo
       version: 2.1.0-bb.1
@@ -3032,12 +3029,10 @@ addons:
       version: 0.26.0-bb.0
     - name: Vault
       version: 0.32.0-bb.1
-    - name: Velero
+    - name: updated
       version: 12.0.2-bb.1
     - name: Wrapper
       version: 0.4.15
-    - name: Ztunnel
-      version: 1.30.1-bb.0
     incompatibilities: []
     summary:
       helm_changes: ''
@@ -3064,9 +3059,9 @@ addons:
     requirements:
     - name: Alloy
       version: 4.0.1-bb.0
-    - name: Anchore Enterprise
+    - name: updated
       version: 3.25.0-bb.0
-    - name: Argocd
+    - name: updated
       version: 9.5.15-bb.0
     - name: Authservice
       version: 1.1.5-bb.3
@@ -3076,7 +3071,7 @@ addons:
       version: 3.0.1-bb.3
     - name: Eck Operator
       version: 3.4.0-bb.1
-    - name: Elasticsearch Kibana
+    - name: updated
       version: 1.37.0-bb.0
     - name: External Secrets Operator
       version: 1.3.1-bb.1
@@ -3088,13 +3083,13 @@ addons:
       version: 3.22.2-bb.1
     - name: Gateway Api
       version: 1.5.1-bb.1
-    - name: Gitlab
+    - name: updated
       version: 9.11.1-bb.2
     - name: Gitlab Runner
       version: 0.88.1-bb.0
     - name: Grafana
       version: 10.5.15-bb.3
-    - name: Harbor
+    - name: updated
       version: 1.19.0-bb.0
     - name: Headlamp
       version: 0.40.0-bb.1
@@ -3106,19 +3101,19 @@ addons:
       version: 1.29.2-bb.0
     - name: Istiod
       version: 1.29.2-bb.0
-    - name: Keycloak
+    - name: updated
       version: 7.2.0-bb.1
-    - name: Kiali
+    - name: updated
       version: 2.27.0-bb.0
-    - name: Kyverno
+    - name: updated
       version: 3.8.1-bb.2
     - name: Kyverno Policies
       version: 3.3.4-bb.65
-    - name: Kyverno Reporter
+    - name: updated
       version: 3.7.4-bb.1
-    - name: Loki
+    - name: updated
       version: 6.55.0-bb.2
-    - name: Mattermost
+    - name: updated
       version: 11.7.2-bb.0
     - name: Mattermost Operator
       version: 1.25.6-bb.0
@@ -3130,9 +3125,9 @@ addons:
       version: 7.1.1-bb.18
     - name: Minio Operator
       version: 7.1.1-bb.6
-    - name: Monitoring
+    - name: updated
       version: 85.3.3-bb.0
-    - name: Neuvector
+    - name: updated
       version: 2.10.2-bb.0
     - name: Prometheus Operator Crds
       version: 28.0.1-bb.0
@@ -3142,13 +3137,13 @@ addons:
       version: 2026.2.1-bb.0
     - name: Tempo
       version: 2.1.0-bb.1
-    - name: Thanos
+    - name: updated
       version: 17.4.0-bb.2
-    - name: Twistlock
+    - name: updated
       version: 0.26.0-bb.0
     - name: Vault
       version: 0.32.0-bb.1
-    - name: Velero
+    - name: updated
       version: 12.0.1-bb.0
     - name: Wrapper
       version: 0.4.15
@@ -3168,19 +3163,19 @@ addons:
   - version: 3.25.0
     kube: ['1.35']
     requirements:
-    - name: Alloy
+    - name: updated
       version: 4.0.1-bb.0
-    - name: Anchore Enterprise
+    - name: updated
       version: 3.23.0-bb.2
-    - name: Argocd
+    - name: updated
       version: 9.5.11-bb.1
-    - name: Authservice
+    - name: updated
       version: 1.1.5-bb.3
     - name: Backstage
       version: 2.6.3-bb.3
     - name: Bbctl
       version: 3.0.1-bb.3
-    - name: Eck Operator
+    - name: updated
       version: 3.4.0-bb.1
     - name: Elasticsearch Kibana
       version: 1.36.0-bb.1
@@ -3190,11 +3185,11 @@ addons:
       version: 0.57.3-bb.0
     - name: Fortify
       version: 25.4.1-bb.0
-    - name: Gatekeeper
+    - name: updated
       version: 3.22.2-bb.1
     - name: Gateway Api
       version: 1.5.1-bb.1
-    - name: Gitlab
+    - name: updated
       version: 9.11.1-bb.1
     - name: Gitlab Runner
       version: 0.88.1-bb.0
@@ -3214,7 +3209,7 @@ addons:
       version: 1.29.2-bb.0
     - name: Keycloak
       version: 7.1.9-bb.3
-    - name: Kiali
+    - name: updated
       version: 2.26.0-bb.1
     - name: Kyverno
       version: 3.7.2-bb.1
@@ -3224,9 +3219,9 @@ addons:
       version: 3.7.4-bb.0
     - name: Loki
       version: 6.55.0-bb.1
-    - name: Mattermost
+    - name: updated
       version: 11.6.2-bb.0
-    - name: Mattermost Operator
+    - name: updated
       version: 1.25.6-bb.0
     - name: Metrics Server
       version: 3.13.0-bb.6
@@ -3246,7 +3241,7 @@ addons:
       version: 46.31.6-bb.5
     - name: Sonarqube
       version: 2026.2.1-bb.0
-    - name: Tempo
+    - name: updated
       version: 2.1.0-bb.1
     - name: Thanos
       version: 17.3.3-bb.4
@@ -3277,7 +3272,7 @@ addons:
       version: 3.8.4-bb.1
     - name: Anchore Enterprise
       version: 3.23.0-bb.0
-    - name: Argocd
+    - name: updated
       version: 9.5.11-bb.0
     - name: Authservice
       version: 1.1.5-bb.2
@@ -3285,29 +3280,29 @@ addons:
       version: 2.6.3-bb.3
     - name: Bbctl
       version: 3.0.1-bb.3
-    - name: Eck Operator
+    - name: updated
       version: 3.3.2-bb.0
-    - name: Elasticsearch Kibana
+    - name: updated
       version: 1.36.0-bb.1
     - name: External Secrets Operator
       version: 1.3.1-bb.1
-    - name: Fluentbit
+    - name: updated
       version: 0.57.3-bb.0
     - name: Fortify
       version: 25.4.1-bb.0
-    - name: Gatekeeper
+    - name: updated
       version: 3.22.2-bb.0
     - name: Gateway Api
       version: 1.5.1-bb.1
     - name: Gitlab
       version: 9.11.1-bb.0
-    - name: Gitlab Runner
+    - name: updated
       version: 0.88.1-bb.0
     - name: Grafana
       version: 10.5.15-bb.3
     - name: Harbor
       version: 1.18.3-bb.0
-    - name: Headlamp
+    - name: updated
       version: 0.40.0-bb.1
     - name: Istio Cni
       version: 1.29.2-bb.0
@@ -3321,13 +3316,13 @@ addons:
       version: 7.1.9-bb.3
     - name: Kiali
       version: 2.25.0-bb.0
-    - name: Kyverno
+    - name: updated
       version: 3.7.2-bb.1
-    - name: Kyverno Policies
+    - name: updated
       version: 3.3.4-bb.65
-    - name: Kyverno Reporter
+    - name: updated
       version: 3.7.4-bb.0
-    - name: Loki
+    - name: updated
       version: 6.55.0-bb.1
     - name: Mattermost
       version: 11.6.1-bb.0
@@ -3335,27 +3330,27 @@ addons:
       version: 1.25.5-bb.1
     - name: Metrics Server
       version: 3.13.0-bb.6
-    - name: Mimir
+    - name: updated
       version: 6.0.6-bb.0
     - name: Minio
       version: 7.1.1-bb.18
     - name: Minio Operator
       version: 7.1.1-bb.6
-    - name: Monitoring
+    - name: updated
       version: 83.4.0-bb.2
-    - name: Neuvector
+    - name: updated
       version: 2.8.13-bb.1
-    - name: Prometheus Operator Crds
+    - name: updated
       version: 28.0.1-bb.0
-    - name: Renovate
+    - name: updated
       version: 46.31.6-bb.5
     - name: Sonarqube
       version: 2026.2.1-bb.0
-    - name: Tempo
+    - name: updated
       version: 2.1.0-bb.0
     - name: Thanos
       version: 17.3.3-bb.4
-    - name: Twistlock
+    - name: updated
       version: 0.25.0-bb.2
     - name: Vault
       version: 0.32.0-bb.1
@@ -15525,36 +15520,41 @@ addons:
   helm_repository_url: https://charts.chaos-mesh.org
   chart_name: chaos-mesh
   versions:
-  - version: 2.8.5
+  - version: 2.8.6
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30']
     requirements: []
     incompatibilities: []
     summary:
-      helm_changes: "- If you were using the controller\u2019s gRPC/ctrl server, note\
-        \ that **`enableCtrlServer` is `false` by default** starting in v2.8.0. Verify\
-        \ whether you need it enabled and set the value explicitly if required.\n\
-        - v2.8.0 adds **support for deploying extra Kubernetes objects via the Helm\
-        \ chart**. Consider using this instead of separate manifests if you currently\
-        \ deploy addon resources alongside Chaos Mesh.\n- Fix in v2.8.0: **Prometheus\
-        \ template referenced wrong Helm values**. If you customized metrics/ServiceMonitor/PrometheusRule\
-        \ values, re-check rendered manifests after upgrade.\n- v2.8.5: Dashboard\
-        \ auth: **Secret references and inline credentials behavior changed/fixed**,\
-        \ plus **additional environment sources supported**. Review your Dashboard\
-        \ auth configuration/Secrets and confirm the chart no longer overwrites Secret\
-        \ refs.\n"
-      chart_updates: [Helm chart can now deploy extra Kubernetes objects (v2.8.0).,
-        Default for `enableCtrlServer` changed to false in the Helm chart (v2.8.0).,
-        Prometheus template Helm values reference bug fixed (v2.8.0)., 'Dashboard
-          auth Secret reference overwrite fixed and extra env sources supported (v2.8.5,
-          impacts charted Dashboard configuration).']
-      features: ['Helm chart can deploy extra Kubernetes objects, reducing the need
-          for separate post-install manifests.', 'Workflow task templates can now
-          receive labels via `workflow.spec.templates.task`, improving selection/organization.']
-      breaking_changes: ['`enableCtrlServer` now defaults to `false` in Helm; environments
-          relying on the ctrl server must explicitly enable it after upgrade.']
-    chart_version: 2.8.5
-    images: ['ghcr.io/chaos-mesh/chaos-coredns:v0.2.8', 'ghcr.io/chaos-mesh/chaos-daemon:v2.8.5',
-      'ghcr.io/chaos-mesh/chaos-dashboard:v2.8.5', 'ghcr.io/chaos-mesh/chaos-mesh:v2.8.5']
+      helm_changes: "- **New:** Helm chart now supports deploying *extra Kubernetes\
+        \ objects* (see PR **#4649**). This typically corresponds to a new values\
+        \ block (often named something like `extraObjects` / `extraManifests` / `extraDeploy`)\
+        \ to let you add ConfigMaps, Secrets, NetworkPolicies, etc. alongside the\
+        \ chart.\n- **Default change:** `enableCtrlServer` is now **`false` by default**\
+        \ in the Helm chart (PR **#4702**). If you relied on the controller server\
+        \ being enabled previously, you must explicitly set it to `true` in values.\n\
+        - **Template fix:** Prometheus template had wrong helm values references and\
+        \ was fixed (PR **#4543**). Re-check any overridden Prometheus/ServiceMonitor-related\
+        \ values after upgrade.\n- **Label rendering:** Chart now uses label templates\
+        \ when rendering the `chaos-dashboard` Service (PR **#4708**). If you depend\
+        \ on exact Service label keys/values (selectors, network policies), verify\
+        \ them post-upgrade.\n- **Docs/schema:** Usage docs around `helm-values-schema-json`\
+        \ were updated (PR **#4719**); if you validate values via schema tooling in\
+        \ CI, ensure you\u2019re using the updated schema/docs."
+      chart_updates: [Helm chart can now deploy extra Kubernetes objects (#4649).,
+        '`enableCtrlServer` default changed to `false` (#4702).', Prometheus templating
+          fixed to reference the correct values (#4543)., Chaos Dashboard Service
+          label rendering updated to use label templates (#4708)., Helm values schema/docs
+          guidance updated (#4719).]
+      features: [Helm chart can deploy extra Kubernetes objects alongside Chaos Mesh
+          resources., Workflow task templates can now include labels (`workflow.spec.templates.task`).]
+      breaking_changes: ['`enableCtrlServer` default is now `false`; clusters that
+          relied on the controller server being enabled must set it explicitly to
+          avoid losing that endpoint/behavior.', 'The `chaosctl` tool was removed;
+          any automation using it must migrate to alternatives (e.g., `kubectl`, API
+          usage, or dashboard/workflow tooling).']
+    chart_version: 2.8.6
+    images: ['ghcr.io/chaos-mesh/chaos-coredns:v0.2.8', 'ghcr.io/chaos-mesh/chaos-daemon:v2.8.6',
+      'ghcr.io/chaos-mesh/chaos-dashboard:v2.8.6', 'ghcr.io/chaos-mesh/chaos-mesh:v2.8.6']
   - version: 2.8.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30']
     requirements: []
@@ -25883,23 +25883,19 @@ addons:
   helm_repository_url: https://traefik.github.io/charts
   eolApiSlug: traefik
   versions:
-  - version: 3.7.15
+  - version: 3.7.16
     kube: ['1.37', '1.36', '1.35', '1.34']
     requirements: []
     incompatibilities: []
     summary:
       helm_changes: ''
       chart_updates: []
-      features: []
-      breaking_changes: [v3.7.15 notes explicitly say to read the migration guide;
-          treat this as potential breaking behavior changes even though none are listed
-          in the excerpt., 'Stricter server handling of CONNECT requests: Traefik
-          now rejects CONNECT regardless of HTTP version and rejects the CONNECT method
-          before reaching the muxer. If you relied on CONNECT tunneling behavior (e.g.,
-          proxying arbitrary TCP over HTTP CONNECT), validate this still works or
-          adjust configuration/architecture.']
-    chart_version: 42.1.0
-    images: ['docker.io/traefik:v3.7.15']
+      features: ['Security fix: includes remediation for advisory GHSA-hrpp-p4fc-wwf8
+          (upgrade recommended).', ForwardAuth now supports NTLM and Kerberos authentication
+          (also supported via ingress-nginx auth-url integration).]
+      breaking_changes: []
+    chart_version: 42.1.2
+    images: ['docker.io/traefik:v3.7.16']
   - version: 3.7.4
     kube: ['1.37', '1.36', '1.35', '1.34']
     requirements: []
@@ -26174,28 +26170,31 @@ addons:
     summary:
       helm_changes: ''
       chart_updates: []
-      features: ['Modernized fs-backup to a micro-service architecture, enabling concurrency
-          control, cancel/resume across restarts, and more stable node-agent resource
-          usage.', fs-backup now supports Windows workloads by running data mover
-          pods on Windows nodes (complementing prior CSI snapshot data movement for
-          Windows)., 'Added beta support for Kubernetes VolumeGroupSnapshots for point-in-time,
-          write-order-consistent snapshots across multiple volumes.', 'PriorityClass
-          can now be configured for server, node-agent, data mover pods, and backup
-          repository maintenance jobs independently.', 'Improved scalability/resiliency
-          of data movers: queueing via node-agent PrepareQueueLength, better restart/orphan
-          handling, and enhanced node-selection (including per-storage-class) for
-          CSI snapshot data movement restores.', Resource policies now support reusable
-          include/exclude filters via includeExcludePolicy in addition to volumePolicy.]
-      breaking_changes: ['Restic uploader path removed: --uploader-type=restic is
-          no longer valid for installation/backup creation (restores from existing
-          restic backups supported only until v1.19).', Repository maintenance job
-          settings were removed from velero server flags and must be configured via
-          the repository maintenance job ConfigMap instead., 'PVC restore behavior
-          change: selected-node annotation is now always removed when no node mapping
-          exists (previously preserved if the node existed).', 'The request is for
-          an upgrade from 1.17.0 to 1.17.0 (no version change); if you truly are staying
-          on the same version, there is nothing to upgrade aside from redeploying
-          with the same image/chart.']
+      features: ['Modernized fs-backup to a micro-service architecture, adding concurrency
+          control, cancel/resume on restart, improved robustness, and steadier node-agent
+          resource usage.', 'fs-backup now supports Windows clusters by running data
+          mover pods on Windows nodes; combined with prior CSI snapshot data movement
+          support, Windows workloads are now covered end-to-end.', 'Beta support for
+          Kubernetes VolumeGroupSnapshot, enabling crash-consistent point-in-time
+          snapshots across multiple volumes for both CSI snapshot backup and CSI snapshot
+          data movement.', 'PriorityClass can now be configured separately for Velero
+          server, node-agent, data mover pods, and backup repository maintenance jobs.',
+        'Data mover scalability/resiliency improvements: configurable node-agent PrepareQueueLength
+          to throttle pending pod creation; data movements can survive node-agent
+          restarts and can be canceled if orphaned; restore now supports node-selection
+          including per storage class.', 'Resource policy configmaps now support includeExcludePolicy
+          in addition to volumePolicy, enabling reusable include/exclude filters across
+          backups.', 'Operational improvements and fixes including BSL availability
+          metric, BSL status checks during backup/restore, safer cloud credential
+          permissions, and assorted CSI snapshot/data movement behaviors.']
+      breaking_changes: ['Restic fs-backup path is removed in v1.17: --uploader-type=restic
+          is no longer a valid install configuration; restores from existing restic
+          backups remain supported until v1.19.', Repository maintenance job configuration
+          flags were removed from the Velero server (--keep-latest-maintenance-jobs
+          and CPU/memory request/limit flags); configuration moved to a maintenance
+          job ConfigMap., 'PVC restore behavior change: selected-node annotation is
+          now always removed when no node mapping exists (previously it could be preserved
+          if the node existed).']
     chart_version: 11.4.0
     images: ['docker.io/bitnamilegacy/kubectl:1.37', 'docker.io/velero/velero:v1.17.1']
   - version: 1.17.0
@@ -26253,25 +26252,28 @@ addons:
     summary:
       helm_changes: ''
       chart_updates: []
-      features: ['Windows cluster support (hybrid Linux/Windows deployments), including
-          node-agent/data mover/maintenance jobs and full data mover backup+restore
-          lifecycle for Windows workloads.', 'Parallel ItemBlock backups: backup engine
-          can process grouped resource blocks concurrently; configurable via `--item-block-worker-count`
-          (default 1).', 'Data mover restore scalability improvement for `WaitForFirstConsumer`
-          volumes: new node-agent flag `ignoreDelayBinding` allows restores to spread
-          across nodes instead of being pinned to the attach node.', 'Improved observability
-          for data mover backup/restore and cleanup: more intermediate-object status/error
-          logging in node-agent logs (enabled by default).', 'CSI snapshot usability:
-          unnecessary retained `VolumeSnapshotContent` objects are no longer included
-          in backups/restores, reducing clutter and cross-cluster sync noise.', 'BackupRepository
-          maintenance improvements: `RecentMaintenance` history in BackupRepository
-          CR, maintenance job recapture after server restarts, skip init/maintenance
-          for readOnly BSLs, and configurable kopia full-maintenance intervals (`normalGC`/`fastGC`/`eagerGC`)
-          via `fullMaintenanceInterval`.', Volume Policy can now filter volumes by
-          PVC labels., Per-object control of resource status restore via `velero.io/restore-status`
-          annotation., 'Velero images consolidated: `velero`, `velero-helper`, and
-          `velero-restore-helper` binaries are all included in the main Velero image.']
-      breaking_changes: []
+      features: ['Windows cluster support: Velero components (node-agent, data mover
+          pods, maintenance jobs) can run on Linux and Windows nodes, and data mover
+          can back up/restore Windows workloads end-to-end.', 'Parallel ItemBlock
+          backup: backups can process grouped resource item blocks concurrently to
+          improve throughput; configurable via new `--item-block-worker-count` server
+          flag (default 1).', 'Data mover restore scalability for WaitForFirstConsumer
+          volumes: restores can be spread across nodes by setting new node-agent config
+          flag `ignoreDelayBinding`.', 'Improved observability for data mover operations:
+          node-agent logs include intermediate object statuses and cleanup deletion
+          errors automatically.', 'CSI snapshot usability: retained VolumeSnapshotContent
+          is no longer included in backups/restores, reducing cross-cluster sync noise.',
+        'BackupRepository maintenance resiliency/observability: adds `RecentMaintenance`
+          history, recaptures running maintenance after server restart, and avoids
+          maintenance/init when BackupStorageLocation is readOnly; supports configurable
+          maintenance intervals via `fullMaintenanceInterval` (normal/fast/eager GC).',
+        'Volume Policy enhancement: can filter volumes by PVC labels.', 'Object-level
+          resource status restore control: per-object annotation `velero.io/restore-status`
+          to decide whether to restore status.', 'Single Velero image now contains
+          velero, velero-helper, and velero-restore-helper binaries.']
+      breaking_changes: ['No explicit breaking changes called out in the provided
+          1.16.0 release notes; validate any custom automation around helper images,
+          Windows scheduling/tolerations, and new defaults/flags during upgrade.']
     chart_version: 10.1.3
     images: ['docker.io/bitnamilegacy/kubectl:1.37', 'velero/velero:v1.16.2']
   - version: 1.15.0
@@ -26283,32 +26285,32 @@ addons:
     summary:
       helm_changes: ''
       chart_updates: []
-      features: ['Data mover micro service: CSI Snapshot Data Movement transfer work
-          moves from node-agent to dedicated per-backup/restore pods, improving security
-          (no hostPath), isolation, and resource control.', Item Block + ItemBlockAction
-          plugin type introduced to group correlated resources (built-in for Pods/PVCs)
-          to enable future concurrent backup processing; v1.15 lays groundwork but
-          still single-threaded., 'Repository maintenance jobs can be scheduled onto
-          selected nodes via a new configMap, letting you steer heavy maintenance
-          away from critical nodes.', 'BackupPVC configuration (via new configMap)
-          can mount backupPVCs read-only to speed expose operations on some storage
-          backends (e.g., Ceph), with SELinux caveats.', 'BackupPVC storage class
-          is now configurable (same configMap), allowing different replication/performance
-          characteristics for backupPVCs than workload PVCs.', Backup repository cache
-          size limit per repository is configurable via a new configMap to avoid pod
-          eviction due to ephemeral storage pressure., 'Performance improvements:
-          fixes plugin-call memory leak, passes client QPS/burst settings to plugins,
-          and includes Kopia upstream improvements for high-file-count repository
-          maintenance memory usage.']
-      breaking_changes: [Restic uploader path for filesystem backups is now deprecated
-          (warnings emitted when using --uploader-type=restic or Restic-based fs backups/restores);
-          plan migration to Kopia., node-agent configMap name is no longer fixed;
-          if you customize it you must set the node-agent server arg node-agent-configmap
-          accordingly., Repository maintenance job settings are moving from Velero
-          server flags into the new repository-maintenance configMap; configMap values
-          take precedence when both are set (legacy flags still accepted)., The 'Changing
-          PVC selected-node' feature is deprecated and should no longer be relied
-          upon; it will be removed in a future release.]
+      features: ['Data mover micro service: CSI Snapshot Data Movement transfers move
+          from node-agent pods to dedicated backup/restore pods for better security
+          (no hostPath), per-operation resource control, and improved isolation/resilience.',
+        'Item Block concepts and new ItemBlockAction (IBA) plugin type introduced
+          to group correlated resources (e.g., pods/PVCs) for future concurrent backup
+          processing; in 1.15 the model exists but backups are still single-threaded.',
+        Node selection for repository maintenance jobs via a new repository maintenance
+          configMap to steer maintenance workloads to preferred nodes., 'BackupPVC
+          configuration via a new configMap: support read-only mounting of backupPVCs
+          (faster expose on some storage like Ceph) and choosing a different storageClass
+          for backupPVCs.', Backup repository cache size (ephemeral storage) limit
+          configurable per repository via a new backup repository configMap to prevent
+          eviction/out-of-space issues., 'Performance fixes: server memory leak after
+          plugin calls fixed; client QPS/burst settings propagated to plugins; Kopia
+          upstream improvements merged to reduce memory usage during maintenance on
+          large repos.']
+      breaking_changes: ['Restic uploader path is deprecated starting in 1.15: backups/restores
+          still succeed but emit warnings when using --uploader-type=restic or restic-based
+          fs-backup workflows; plan migration to kopia.', Node-agent configuration
+          configMap name is no longer fixed; if you use a non-default name you must
+          set the server parameter node-agent-configmap to point to it., Repository
+          maintenance job settings are now primarily configured via the new repository
+          maintenance configMap; legacy server flags remain for backward compatibility
+          but configMap values take precedence if both are set., The 'change PVC selected-node'
+          feature is deprecated in 1.15 and should not be relied on; it will be removed
+          in a future release.]
     chart_version: 8.7.2
     images: ['docker.io/bitnami/kubectl:1.37', 'velero/velero:v1.15.2']
   - version: 1.14.0
@@ -26319,35 +26321,32 @@ addons:
     incompatibilities: []
     summary:
       helm_changes: ''
-      chart_updates: [Velero CSI plugin is now built-in (internal plugin) and installed
-          by default; do not install the separate CSI plugin via `--plugins`/chart
-          extra plugins anymore., Repository maintenance for kopia/restic backup repositories
-          is moved out of the Velero server pod into separate Kubernetes Jobs; resources
-          for those jobs can be configured., Default resource requests/limits for
-          the node-agent are removed so node-agent pods run as BestEffort QoS unless
-          you set your own requests/limits.]
-      features: [Kopia/restic repository maintenance now runs as Kubernetes Jobs to
-          avoid Velero server pod OOMs; you can set job resource requests/limits.,
-        'VolumePolicies now support actions beyond skip: you can force per-volume
-          `fs-backup` vs `snapshot` to get fine-grained control without modifying
-          workloads.', Data mover pods can be scheduled onto a subset of nodes via
-          a ConfigMap-based node selection mechanism., 'Restore VolumeInfo metadata
-          is now persisted and shown in `velero restore describe`, improving visibility
-          into how volumes were restored.', Restores add a new `Finalizing` phase
-          so PV patching/label restore and post-restore hooks happen after data movement
-          completes., 'Azure authentication adds support for service principal certificate-based
-          auth (phishing-resistant), alongside secret-based auth.']
-      breaking_changes: [CSI plugin is merged into the core Velero repo in v1.14 and
-          is installed by default; remove any explicit CSI plugin installation to
-          avoid duplicates/conflicts., Node-agent default CPU/memory requests/limits
-          are removed; clusters that relied on guaranteed/burstable QoS must set explicit
-          resources to prevent eviction/throttling issues., 'Backup namespace filtering
-          behavior changed: if `includedNamespaces`/`excludedNamespaces` are unset
-          but a label selector is used, only namespaces containing matched resources
-          are backed up (previously all namespaces were included).', 'Restore workflow
-          change: PV patching in the new `Finalizing` state can cause restores to
-          end `PartiallyFailed` when PVs are stuck Pending; previously they might
-          have reported `Complete`.']
+      chart_updates: []
+      features: [Repository maintenance for kopia/restic backup repositories now runs
+          as separate Kubernetes Jobs to avoid Velero server OOMs; resource requests
+          can be set for these jobs during install., 'VolumePolicies now support additional
+          actions to control volume handling, including choosing filesystem backup
+          (fs-backup) vs snapshot per volume for fine-grained opt-in/out behavior.',
+        'Data mover pods can be constrained to eligible nodes via a ConfigMap-based
+          node selection mechanism, helping manage resource-intensive, long-running
+          data movement workloads.', 'Restore operations now persist VolumeInfo metadata
+          for restored volumes, and `velero restore describe` surfaces more detail
+          about how volumes were handled.', 'Restores add a new "Finalizing" phase
+          to ensure PV labels and post-restore hooks run after volume data restoration/data
+          movement completes, improving correctness.', 'Azure plugin gains certificate-based
+          service principal authentication as an alternative to secret-based auth,
+          enabling phishing-resistant/conditional access scenarios.']
+      breaking_changes: [CSI plugin is merged into the main Velero repo and installed
+          by default as an internal plugin; do not install the external CSI plugin
+          via `--plugins` during installation/upgrade., 'Default CPU/memory requests
+          and limits for node-agent pods are removed, changing their QoS class to
+          BestEffort; clusters relying on guaranteed/burstable resources must explicitly
+          set resources.', 'Namespace filtering behavior changes when `includedNamespaces`/`excludedNamespaces`
+          are unset but label selectors are set: only namespaces containing matching
+          resources are included (previously all namespaces were included).', 'Restores
+          may now end in PartiallyFailed if PV patching in the new Finalizing state
+          is blocked (e.g., PV stuck Pending); previously similar scenarios could
+          still report Complete.']
     chart_version: 7.2.2
     images: ['docker.io/bitnami/kubectl:1.37', 'velero/velero:v1.14.1']
   - version: 1.13.0
@@ -33884,20 +33883,19 @@ addons:
   helm_values: wizApiToken.secret.create=false,imagePullSecret.username=dummy,imagePullSecret.password=dummy
   chart_name: wiz-sensor
   versions:
-  - version: 1.0.12757
+  - version: 1.0.12768
     kube: ['1.37', '1.36', '1.35', '1.34']
     requirements: []
     incompatibilities: []
     summary:
       helm_changes: ''
       chart_updates: []
-      features: [Release notes provided only include the chart package metadata (tag/repo/publish
-          time) and do not list functional changes; assume no feature details are
-          available from the provided notes.]
-      breaking_changes: [No breaking changes are mentioned in the provided release
-          notes; treat as unknown until you review the chart/app changelog between
-          1.0.3999 and 1.0.12757.]
-    chart_version: 1.0.12757
+      features: [Release notes provided only include publication metadata and the
+          packaged chart asset; no feature-level changes are described.]
+      breaking_changes: ['Unknown: the provided notes do not include any breaking-change
+          information; treat as potentially breaking until a full changelog/diff is
+          reviewed.']
+    chart_version: 1.0.12768
     images: ['wizio.azurecr.io/sensor:v1']
   - version: 1.0.3999
     kube: ['1.37', '1.36', '1.35', '1.34']

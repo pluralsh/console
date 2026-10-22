@@ -4,22 +4,19 @@ release_url: https://github.com/traefik/traefik/releases/tag/v{vsn}
 helm_repository_url: https://traefik.github.io/charts
 eolApiSlug: traefik
 versions:
-- version: 3.7.15
+- version: 3.7.16
   kube: ['1.37', '1.36', '1.35', '1.34']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
     chart_updates: []
-    features: []
-    breaking_changes: [v3.7.15 notes explicitly say to read the migration guide; treat
-        this as potential breaking behavior changes even though none are listed in
-        the excerpt., 'Stricter server handling of CONNECT requests: Traefik now rejects
-        CONNECT regardless of HTTP version and rejects the CONNECT method before reaching
-        the muxer. If you relied on CONNECT tunneling behavior (e.g., proxying arbitrary
-        TCP over HTTP CONNECT), validate this still works or adjust configuration/architecture.']
-  chart_version: 42.1.0
-  images: ['docker.io/traefik:v3.7.15']
+    features: ['Security fix: includes remediation for advisory GHSA-hrpp-p4fc-wwf8
+        (upgrade recommended).', ForwardAuth now supports NTLM and Kerberos authentication
+        (also supported via ingress-nginx auth-url integration).]
+    breaking_changes: []
+  chart_version: 42.1.2
+  images: ['docker.io/traefik:v3.7.16']
 - version: 3.7.4
   kube: ['1.37', '1.36', '1.35', '1.34']
   requirements: []
