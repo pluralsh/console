@@ -110,7 +110,7 @@ const SearchBar = styled.button(({ theme }) => ({
     maxWidth: '26vw',
   },
   height: 36,
-  padding: `0 ${theme.spacing.xsmall}px 0 ${theme.spacing.small}px`,
+  padding: `0 ${theme.spacing.xsmall} 0 ${theme.spacing.small}`,
   border: `1px solid ${brand['line-strong']}`,
   borderRadius: 4,
   background: brand.surface,

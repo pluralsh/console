@@ -96,7 +96,7 @@ const GlobalStyles = createGlobalStyle(({ theme }) => ({
   },
   '*': {
     scrollPaddingTop: 'var(--top-nav-height)',
-    scrollMarginTop: `${theme.spacing.large}px`,
+    scrollMarginTop: `${theme.spacing.large}`,
   },
 }))
 

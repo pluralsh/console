@@ -57,7 +57,7 @@ const Hero = styled.div(({ theme }) => ({
     alignItems: 'center',
   },
   '.content': {
-    padding: `${theme.spacing.xlarge}px ${theme.spacing.large}px `,
+    padding: `${theme.spacing.xlarge} ${theme.spacing.large} `,
     p: {
       ...theme.partials.marketingText.body1,
       color: brandTokens.dark.body,
