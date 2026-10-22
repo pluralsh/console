@@ -350,7 +350,7 @@ const ConsoleVersionSC = styled.span<{ $isExpanded: boolean }>(
     ...TRUNCATE,
     color: theme.colors['text-xlight'],
     fontSize: '0.625rem',
-    letterSpacing: '-0.021875rem',
+    letterSpacing: '-0.025em',
     margin: theme.spacing.xsmall,
     textAlign: 'center',
     ...($isExpanded && {

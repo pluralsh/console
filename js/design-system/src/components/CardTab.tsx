@@ -26,7 +26,7 @@ const CardTabsSC = styled.div(({ theme }) => ({
   alignItems: 'flex-end',
   gap: theme.spacing.xsmall,
   flexShrink: 0,
-  marginBottom: '-0.0625rem',
+  marginBottom: '-1px',
   position: 'relative',
   zIndex: 1,
 }))

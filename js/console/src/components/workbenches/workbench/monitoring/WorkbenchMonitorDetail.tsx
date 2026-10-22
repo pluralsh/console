@@ -115,7 +115,7 @@ function useThresholdLayer(value: number) {
         y={yScale(value)}
         dy="-0.5em"
         textAnchor="end"
-        css={{ fill: colors['border-danger'], fontSize: '0.6875rem' }}
+        css={{ fill: colors['border-danger'], fontSize: '0.75rem' }}
       >
         Threshold {value}
       </text>
@@ -306,7 +306,7 @@ function MonitorDetailView({
               {monitor.description && (
                 <Body1P
                   $color="text-long-form"
-                  css={{ letterSpacing: '0.015625rem' }}
+                  css={{ letterSpacing: '0.025em' }}
                 >
                   {monitor.description}
                 </Body1P>
@@ -1420,7 +1420,7 @@ const GradeSC = styled.button<{ $color: string }>(({ theme, $color }) => ({
   display: 'flex',
   flexShrink: 0,
   fontFamily: theme.fontFamilies.sans,
-  fontSize: '0.5rem',
+  fontSize: '0.625rem',
   fontWeight: 700,
   height: 24,
   justifyContent: 'center',

@@ -57,7 +57,7 @@ export function WorkbenchMonitoringSharePopover({
         <CaptionP
           $color="text-xlight"
           css={{
-            letterSpacing: '0.03125rem',
+            letterSpacing: '0.025em',
             textTransform: 'uppercase',
             margin: 0,
           }}

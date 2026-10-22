@@ -312,7 +312,7 @@ const ChipBodySC = styled.span(({ theme }) => ({
   borderRadius: theme.borderRadiuses.medium,
   background: theme.colors['fill-two'],
   transition: 'background 0.1s ease-in-out',
-  margin: '0.0625rem',
+  margin: '1px',
 }))
 
 export const ChipLinkSC = styled(Link)(({ theme }) => ({

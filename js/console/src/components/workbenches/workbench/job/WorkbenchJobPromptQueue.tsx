@@ -176,7 +176,7 @@ function QueueItem({
       <QueueItemContentSC>
         <Body2P
           $color="text-light"
-          css={{ ...TRUNCATE, width: '100%', letterSpacing: '0.03125rem' }}
+          css={{ ...TRUNCATE, width: '100%', letterSpacing: '0.025em' }}
         >
           {prettifyPrompt(prompt.prompt ?? '')}
         </Body2P>
@@ -231,7 +231,7 @@ const QueueCardSC = styled(Card)(({ theme }) => ({
   borderBottomRightRadius: 0,
   borderBottom: 'none',
   // Pull down 1px so this border meets the chat input border without a double line.
-  marginBottom: '-0.0625rem',
+  marginBottom: '-1px',
   padding: `${theme.spacing.xsmall} 0 ${theme.spacing.small}`,
 }))
 
@@ -264,7 +264,7 @@ const QueueSectionSC = styled.div(({ theme }) => ({
 }))
 
 const QueueSectionLabelSC = styled(Body2P)(({ theme }) => ({
-  letterSpacing: '0.03125rem',
+  letterSpacing: '0.025em',
   padding: `0 ${theme.spacing.xsmall}`,
 }))
 

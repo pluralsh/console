@@ -9,7 +9,7 @@ pre code.hljs {
 }
 
 code.hljs {
-  padding: 0.1875rem 0.3125rem;
+  padding: 0.25rem 0.25rem;
 }
 
 .hljs ::selection,

@@ -8,7 +8,7 @@ export const EmbedAspectRatio = styled.div<{ $aspectRatio: string | number }>(
           '&::before': {
             content: '""',
             width: '1px',
-            marginLeft: '-0.0625rem',
+            marginLeft: '-1px',
             float: 'left',
             height: 0,
             paddingTop: `calc(100% / (${$aspectRatio}))`,

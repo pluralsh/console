@@ -430,7 +430,7 @@ function ViewChip({
           justifyContent: 'center',
           height: 32,
           minWidth: 80,
-          padding: '0.3125rem 0.75rem',
+          padding: '0.25rem 0.75rem',
           borderRadius: theme.borderRadiuses.medium,
           boxShadow: 'none',
         },

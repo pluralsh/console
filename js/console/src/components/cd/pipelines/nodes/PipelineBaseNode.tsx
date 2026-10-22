@@ -87,7 +87,7 @@ export const BaseNodeSC = styled(NodeBaseCardSC)(({ theme }) => ({
   },
   '.heading': {
     ...theme.partials.text.overline,
-    lineHeight: '0.0625rem',
+    lineHeight: '1px',
     color: theme.colors['text-xlight'],
   },
   '.subhead': {

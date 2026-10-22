@@ -206,7 +206,7 @@ const TabsRowSC = styled.div(({ theme }) => ({
 const ToolbarTabSC = styled(UnstyledLink)<{ $active: boolean }>(
   ({ theme, $active }) => ({
     ...theme.partials.text.body2,
-    fontSize: '0.8125rem',
+    fontSize: '0.875rem',
     fontWeight: $active ? 600 : 400,
     display: 'flex',
     alignItems: 'center',

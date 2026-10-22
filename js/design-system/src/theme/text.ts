@@ -2,7 +2,7 @@ import { type CSSObject } from '../types'
 
 import { fontFamilies } from './fonts'
 import { semanticColorCssVars } from './colors'
-import { pxToRem } from './rem'
+import { pxToRem, TRACKING } from './rem'
 
 export const INLINE_CODE_EMS = 0.8
 export const INLINE_CODE_MIN_PX = 12
@@ -10,7 +10,7 @@ export const INLINE_CODE_MIN_PX = 12
 const bodyBaseStyle = {
   fontFamily: fontFamilies.sans,
   fontWeight: 400,
-  letterSpacing: '0.03125rem',
+  letterSpacing: TRACKING.wide,
   '& b, & strong': {
     fontWeight: 600,
   },
@@ -38,7 +38,7 @@ const bodyBold = {
 
 const body2LooseLineHeight = {
   ...body2,
-  lineHeight: '1.375rem',
+  lineHeight: '1.5rem',
 } as const satisfies CSSObject
 
 // The mono font ships with ligatures; code must render as typed.
@@ -54,56 +54,56 @@ const textPartials = {
     fontSize: '4.5rem',
     lineHeight: '110%',
     fontWeight: 400,
-    letterSpacing: '-0.0625rem',
+    letterSpacing: TRACKING.tight,
   },
   h2: {
     fontFamily: fontFamilies.semi,
     fontSize: '3.75rem',
     lineHeight: '115%',
     fontWeight: 500,
-    letterSpacing: '-0.0625rem',
+    letterSpacing: TRACKING.tight,
   },
   h3: {
     fontFamily: fontFamilies.semi,
     fontSize: '3rem',
     lineHeight: '120%',
     fontWeight: 400,
-    letterSpacing: '-0.03125rem',
+    letterSpacing: TRACKING.normal,
   },
   h4: {
     fontFamily: fontFamilies.semi,
     fontSize: '2.25rem',
-    lineHeight: '2.8125rem',
+    lineHeight: '2.75rem',
     fontWeight: 400,
-    letterSpacing: '-0.015625rem',
+    letterSpacing: TRACKING.normal,
   },
   title1: {
     fontFamily: fontFamilies.semi,
     fontSize: '1.875rem',
     lineHeight: '2.5rem',
     fontWeight: 500,
-    letterSpacing: '-0.015625rem',
+    letterSpacing: TRACKING.normal,
   },
   title2: {
     fontFamily: fontFamilies.semi,
     fontSize: '1.5rem',
     lineHeight: '2rem',
     fontWeight: 500,
-    letterSpacing: '-0.015625rem',
+    letterSpacing: TRACKING.normal,
   },
   subtitle1: {
     fontFamily: fontFamilies.semi,
     fontSize: '1.25rem',
     lineHeight: '1.5rem',
     fontWeight: 500,
-    letterSpacing: 0,
+    letterSpacing: TRACKING.normal,
   },
   subtitle2: {
     fontFamily: fontFamilies.semi,
     fontSize: '1.125rem',
     lineHeight: '1.5rem',
     fontWeight: 500,
-    letterSpacing: 0,
+    letterSpacing: TRACKING.normal,
   },
   body1,
   body2,
@@ -120,42 +120,42 @@ const textPartials = {
     fontSize: '0.75rem',
     lineHeight: '1rem',
     fontWeight: 400,
-    letterSpacing: '0.03125rem',
+    letterSpacing: TRACKING.wider,
   },
   badgeLabel: {
     fontFamily: fontFamilies.sans,
     fontSize: '0.75rem',
     lineHeight: '100%',
     fontWeight: 700,
-    letterSpacing: '0.03125rem',
+    letterSpacing: TRACKING.wider,
   },
   buttonMedium: {
     fontFamily: fontFamilies.sans,
     fontSize: '0.875rem',
     lineHeight: '1.5rem',
     fontWeight: 600,
-    letterSpacing: '0.03125rem',
+    letterSpacing: TRACKING.wide,
   },
   buttonLarge: {
     fontFamily: fontFamilies.sans,
     fontSize: '1rem',
     lineHeight: '1.5rem',
     fontWeight: 600,
-    letterSpacing: '0.03125rem',
+    letterSpacing: TRACKING.wide,
   },
   buttonSmall: {
     fontFamily: fontFamilies.sans,
     fontSize: '0.75rem',
     lineHeight: '1.5rem',
     fontWeight: 600,
-    letterSpacing: '0.03125rem',
+    letterSpacing: TRACKING.wider,
   },
   overline: {
     fontFamily: fontFamilies.semi,
     fontSize: '0.75rem',
     lineHeight: '1rem',
     fontWeight: 400,
-    letterSpacing: '0.078125rem',
+    letterSpacing: TRACKING.widest,
     textTransform: 'uppercase',
   },
   truncate: {
@@ -187,13 +187,13 @@ const textPartials = {
   code: {
     ...mono,
     fontSize: '0.875rem',
-    lineHeight: '1.375rem',
-    letterSpacing: '0.015625rem',
+    lineHeight: '1.5rem',
+    letterSpacing: TRACKING.wide,
   },
   inlineCode: {
     ...mono,
     fontSize: `calc(max(${pxToRem(INLINE_CODE_MIN_PX)}, ${INLINE_CODE_EMS}em))`,
-    letterSpacing: '0.015625rem',
+    letterSpacing: TRACKING.wide,
   },
 } as const satisfies Record<string, CSSObject>
 

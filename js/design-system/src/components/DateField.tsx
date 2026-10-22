@@ -24,7 +24,7 @@ const DateSegmentSC = styled.div(({ theme }) => {
     padding: `${vPad}px ${xPad}px`,
     margin: `${-vPad * 2}px 0`,
     '&.segment-literal': {
-      padding: '0 0.0625rem',
+      padding: '0 1px',
       margin: '0',
     },
     '&.first': {

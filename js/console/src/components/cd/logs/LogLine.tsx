@@ -77,7 +77,7 @@ const LogLineWrapper = styled.div<{
   ...theme.partials.text.mono,
   fontSize: '0.75rem',
   lineHeight: '1.25rem',
-  letterSpacing: '0.015625rem',
+  letterSpacing: '0.025em',
   backgroundColor: $highlighted ? theme.colors['fill-two'] : 'transparent',
   '&:hover': {
     backgroundColor: theme.colors['fill-two'],

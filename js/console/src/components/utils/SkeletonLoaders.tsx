@@ -206,7 +206,7 @@ export function SidecarSkeleton({ num = 6 }: { num?: number }) {
     <Sidecar>
       {Array.from({ length: num }).map((_, index) => (
         <SidecarItem
-          css={{ '& > *': { lineHeight: '1.875rem' } }}
+          css={{ '& > *': { lineHeight: '2rem' } }}
           key={index}
           heading={
             <RectangleSkeleton

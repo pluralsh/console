@@ -213,7 +213,7 @@ const ContentEditableDivSC = styled.div<{ $disabled?: boolean }>(
       lineHeight: '1.6em',
       userSelect: 'none',
       cursor: 'default',
-      margin: '0.0625rem',
+      margin: '1px',
     },
     [`[${CHIP_DATA_ATTR}][data-selected] > span`]: { background: 'Highlight' },
   })

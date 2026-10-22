@@ -29,7 +29,7 @@ export function UpgradesConsolidatedTableExpander({
   return (
     <div>
       {callout && (
-        <SectionWrapperSC css={{ gap: spacing.xsmall, paddingTop: '1.375rem' }}>
+        <SectionWrapperSC css={{ gap: spacing.xsmall, paddingTop: '1.5rem' }}>
           <CaptionP
             $color="text-xlight"
             css={{ userSelect: 'none' }}

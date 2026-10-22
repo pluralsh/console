@@ -465,7 +465,7 @@ function FileTreeItemTextIcon({
         color: theme.colors['text-success'],
         fontFamily: 'Inter',
         fontWeight: 600,
-        fontSize: '0.5625rem',
+        fontSize: '0.625rem',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',

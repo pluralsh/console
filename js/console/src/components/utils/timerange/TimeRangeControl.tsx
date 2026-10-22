@@ -241,7 +241,7 @@ const DurationChipSC = styled.span(({ theme }) => ({
   color: theme.colors['text-light'],
   flexShrink: 0,
   minWidth: 36,
-  padding: '0.0625rem 0.375rem',
+  padding: '1px 0.375rem',
   textAlign: 'center',
 }))
 

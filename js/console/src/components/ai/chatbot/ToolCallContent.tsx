@@ -37,8 +37,8 @@ export const toolSurfaceCss = (theme: DefaultTheme) => ({
 
 export const toolOutputTextCss = (theme: DefaultTheme) => ({
   ...theme.partials.text.mono,
-  fontSize: '0.8125rem',
-  lineHeight: '1.125rem',
+  fontSize: '0.875rem',
+  lineHeight: '1.25rem',
   fontWeight: 200,
 })
 

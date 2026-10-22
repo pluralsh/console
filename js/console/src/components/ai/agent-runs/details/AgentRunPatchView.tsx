@@ -133,7 +133,7 @@ const PatchRawSC = styled.pre(({ theme }) => ({
   padding: theme.spacing.medium,
   ...theme.partials.text.mono,
   fontSize: '0.875rem',
-  lineHeight: '1.375rem',
+  lineHeight: '1.5rem',
   color: theme.colors['text-light'],
   whiteSpace: 'pre-wrap',
   wordBreak: 'break-word',
@@ -170,8 +170,8 @@ const PatchViewSC = styled.div<{
 
     '.diff-line': {
       fontSize: '0.875rem',
-      letterSpacing: '0.015625rem',
-      lineHeight: '1.375rem',
+      letterSpacing: '0.025em',
+      lineHeight: '1.5rem',
     },
 
     '.diff-gutter-normal': {
@@ -187,7 +187,7 @@ const PatchViewSC = styled.div<{
       borderRadius: 2,
       boxDecorationBreak: 'clone',
       WebkitBoxDecorationBreak: 'clone',
-      padding: '0 0.0625rem',
+      padding: '0 1px',
     },
 
     '.diff-gutter': {

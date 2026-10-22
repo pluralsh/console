@@ -156,7 +156,7 @@ export function ContainerLogsTable({
       css={{
         minHeight: 0,
         height: '100%',
-        ' td': { padding: '0.0625rem 0', minHeight: '30px' },
+        ' td': { padding: '1px 0', minHeight: '30px' },
         ' .thSortIndicatorWrap > div': { width: '100%' },
       }}
     >

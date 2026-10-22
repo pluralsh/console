@@ -25,7 +25,7 @@ import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 import { Link } from 'react-router-dom'
 
 const menuLabelProps = {
-  style: { fontSize: '0.8125rem', lineHeight: '1.25rem' },
+  style: { fontSize: '0.875rem', lineHeight: '1.25rem' },
 }
 
 enum MenuItemKey {

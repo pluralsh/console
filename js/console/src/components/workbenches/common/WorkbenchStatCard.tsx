@@ -40,7 +40,7 @@ export function WorkbenchStatCard({
           css={{
             fontSize: '2.25rem',
             fontWeight: 600,
-            letterSpacing: '-0.015625rem',
+            letterSpacing: '-0.025em',
             lineHeight: '2rem',
             color: valueColor,
           }}
