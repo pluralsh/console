@@ -1,0 +1,124 @@
+# Default values for gateway-proxy.
+
+replicaCount: 2
+
+image:
+  repository: ghcr.io/pluralsh/gateway-proxy
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ~
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+# Non-secret proxy settings, rendered as environment variables. Empty values fall back to the
+# binary's defaults.
+config:
+  # FM gateway base URL; requests go to {gatewayUrl}/model/{modelId}/invoke. Required.
+  gatewayUrl: ""
+  # Gateway model ID used when a client's model has no entry in modelMap. When empty, unmapped
+  # client model names are passed through unchanged.
+  modelId: ""
+  # Maps Anthropic model names sent by clients to gateway model IDs.
+  modelMap: {}
+  #  claude-opus-4-7: claude-4.7-opus
+  # synthesize: replay non-streaming invoke responses as SSE (works with the documented API).
+  # upstream: use /invoke-with-response-stream if the gateway exposes it.
+  streamingMode: synthesize
+  # Upper bound on a single gateway call, also sent as Request-Timeout-Ms.
+  timeout: 10m
+  # How long a synthesized stream waits before committing a 200 and sending pings.
+  keepaliveInterval: 10s
+  # Strip cache_control from system, messages and tools before forwarding.
+  stripCacheControl: false
+  # Only forward these anthropic-beta values; empty forwards all.
+  betaAllowlist: []
+  # debug, info, warn or error.
+  logLevel: info
+
+oauth:
+  # OAuth2 token endpoint for the client-credentials grant. Required.
+  tokenUrl: ""
+  # OAuth2 client ID. Required.
+  clientId: ""
+  scopes: []
+  resource: ""
+  audience: ""
+
+secrets:
+  # Name of an existing Secret providing PROXY_API_KEY and OAUTH_CLIENT_SECRET. When set, the
+  # values below are ignored and no Secret is created by the chart.
+  existingSecret: ""
+  # API key clients must send as x-api-key (or Authorization: Bearer).
+  apiKey: ""
+  # OAuth2 client secret.
+  clientSecret: ""
+
+serviceAccount:
+  create: true
+  # Defaults to the release fullname.
+  name: ""
+  annotations: {}
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 65532
+  runAsGroup: 65532
+  seccompProfile:
+    type: RuntimeDefault
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: false
+  className: ""
+  # Streams can stay open for minutes; raise proxy timeouts on your ingress controller, e.g.
+  #  nginx.ingress.kubernetes.io/proxy-read-timeout: "900"
+  #  nginx.ingress.kubernetes.io/proxy-send-timeout: "900"
+  #  nginx.ingress.kubernetes.io/proxy-buffering: "off"
+  annotations: {}
+  hosts:
+    - host: gateway-proxy.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    memory: 256Mi
+
+livenessProbe:
+  httpGet:
+    path: /healthz
+    port: http
+readinessProbe:
+  httpGet:
+    path: /healthz
+    port: http
+
+# The proxy drains in-flight requests for up to 30s on SIGTERM.
+terminationGracePeriodSeconds: 45
+
+env: []
+envFrom: []
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

@@ -1,0 +1,10 @@
+config:
+  gatewayUrl: https://fm-gateway.example.com
+  modelMap:
+    claude-opus-4-7: claude-4.7-opus
+oauth:
+  tokenUrl: https://idp.example.com/oauth2/token
+  clientId: gateway-proxy
+secrets:
+  apiKey: sk-test
+  clientSecret: test-secret

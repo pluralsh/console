@@ -1,0 +1,6 @@
+apiVersion: v2
+name: gateway-proxy
+description: Anthropic Messages API proxy for Bedrock-invoke FM gateways using OAuth client credentials
+type: application
+version: 0.1.0
+appVersion: "0.12.52"
