@@ -13,6 +13,7 @@ import {
 } from '../../icons'
 import { styledThemeDark, styledThemeLight } from '../../theme'
 import { ShotBlock, shotTokens, SkeletonBlock } from './blocks'
+import { CONTOUR_GROUP, CONTOUR_PATHS } from './contours'
 import {
   type ProductShotFidelity,
   type ProductShotNav,
@@ -146,19 +147,19 @@ function Contours({ color }: { color: string }) {
       viewBox={`0 0 ${PRODUCT_SHOT_WIDTH} ${PRODUCT_SHOT_HEIGHT}`}
       width={PRODUCT_SHOT_WIDTH}
     >
-      {Array.from({ length: 16 }, (_, index) => {
-        const offset = index * 34
-
-        return (
+      <g
+        fill="none"
+        stroke={color}
+        strokeWidth={CONTOUR_GROUP.strokeWidth}
+        transform={`scale(${PRODUCT_SHOT_WIDTH / CONTOUR_GROUP.frameWidth}) translate(${CONTOUR_GROUP.x} ${CONTOUR_GROUP.y})`}
+      >
+        {CONTOUR_PATHS.map((d) => (
           <path
-            d={`M -20 ${640 - offset} C 30 ${520 - offset}, 10 ${380 - offset * 0.9}, 70 ${300 - offset * 0.85} S 190 ${150 - offset * 0.7}, 320 ${70 - offset * 0.5} S 640 ${-10 - offset * 0.25}, 860 ${-60 - offset * 0.2}`}
-            fill="none"
-            key={index}
-            stroke={color}
-            strokeWidth="1"
+            d={d}
+            key={d}
           />
-        )
-      })}
+        ))}
+      </g>
     </svg>
   )
 }

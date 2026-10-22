@@ -70,7 +70,7 @@ export const shotTokens = (theme: DefaultTheme) =>
   theme.mode === 'dark'
     ? {
         stage: '#111216',
-        contour: 'rgb(255 255 255 / 0.1)',
+        contour: '#2A2E37',
         window: '#1B1C21',
         windowBorder: 'rgb(255 255 255 / 0.07)',
         dots: 'rgb(255 255 255 / 0.13)',
@@ -93,7 +93,7 @@ export const shotTokens = (theme: DefaultTheme) =>
       }
     : {
         stage: '#F1F2F6',
-        contour: 'rgb(28 36 72 / 0.09)',
+        contour: '#DCDFE6',
         window: '#FFFFFF',
         windowBorder: 'rgb(28 36 72 / 0.1)',
         dots: 'rgb(28 36 72 / 0.14)',
