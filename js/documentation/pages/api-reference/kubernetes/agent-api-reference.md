@@ -14,6 +14,7 @@ Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 AP
 - [AgentRuntime](#agentruntime)
 - [ClusterDrain](#clusterdrain)
 - [CustomHealth](#customhealth)
+- [CustomInsightPriority](#custominsightpriority)
 - [ImageWarmer](#imagewarmer)
 - [IngressReplica](#ingressreplica)
 - [KubecostExtractor](#kubecostextractor)
@@ -604,6 +605,45 @@ _Appears in:_
 
 
 
+#### CustomInsightPriority
+
+
+
+CustomInsightPriority sets the priority of failing objects in the cluster insights and the cluster health score.
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `CustomInsightPriority` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[CustomInsightPrioritySpec](#custominsightpriorityspec)_ |  |  |  |
+
+
+#### CustomInsightPrioritySpec
+
+
+
+CustomInsightPrioritySpec defines how the insight priority of failing objects is decided.
+
+
+
+_Appears in:_
+- [CustomInsightPriority](#custominsightpriority)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `target` _[InsightTarget](#insighttarget)_ | Target selects the failing objects this script sets the priority of. |  | Optional: \{\} <br /> |
+| `precedence` _integer_ | Precedence decides which script owns an object that several targets match: the highest wins and ties are<br />broken by name. A script never sees objects it does not own, and scripts are not chained. |  | Optional: \{\} <br /> |
+| `engine` _[InsightEngine](#insightengine)_ | Engine the script is written for. | python | Enum: [python] <br />Optional: \{\} <br /> |
+| `script` _string_ | Script defines `evaluate(input)`, called with the objects this script owns in `input["rows"]`, and returns a<br />dictionary from the `uid` of a row to `\{"priority": "LOW\|MEDIUM\|HIGH\|CRITICAL\|IGNORE", "reason": "..."\}`.<br />Rows that are left out keep their built-in priority, IGNORE removes a row from the insights and the cluster health score.<br />Objects annotated with deployments.plural.sh/insight-priority are decided by the annotation and never reach the script.<br />See https://docs.plural.sh/plural-features/continuous-deployment/deployment-operator/insight-priority for the full guide. |  |  |
+
+
+
+
 #### ExaConnection
 
 
@@ -861,6 +901,80 @@ _Appears in:_
 | `ingressClassName` _string_ |  |  | Optional: \{\} <br /> |
 | `tls` _[IngressTLS](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#ingresstls-v1-networking) array_ |  |  | Optional: \{\} <br /> |
 | `hostMappings` _object (keys:string, values:string)_ |  |  | Required: \{\} <br /> |
+
+
+#### InsightEngine
+
+_Underlying type:_ _string_
+
+InsightEngine is the language an insight priority script is written in.
+
+_Validation:_
+- Enum: [python]
+
+_Appears in:_
+- [CustomInsightPrioritySpec](#custominsightpriorityspec)
+
+| Field | Description |
+| --- | --- |
+| `python` | InsightEnginePython evaluates the script as sandboxed Python.<br /> |
+
+
+#### InsightEvaluation
+
+
+
+InsightEvaluation is the outcome of the last time the script ran.
+
+
+
+_Appears in:_
+- [CustomInsightPriorityStatus](#custominsightprioritystatus)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `time` _[Time](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#time-v1-meta)_ | Time the script last ran with a different outcome than the one before. |  |  |
+| `matched` _integer_ | Matched is the number of failing objects the script owned. |  |  |
+| `overridden` _integer_ | Overridden is the number of objects the script gave a priority. |  |  |
+| `ignored` _integer_ | Ignored is the number of objects the script ignored. |  |  |
+| `durationMs` _integer_ | DurationMs is how long the script took. |  |  |
+
+
+#### InsightTarget
+
+
+
+InsightTarget selects the failing objects a script is responsible for. An object has to match every
+non-empty field, so an empty target matches everything.
+
+
+
+_Appears in:_
+- [CustomInsightPrioritySpec](#custominsightpriorityspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `kinds` _[InsightTargetKind](#insighttargetkind) array_ | Kinds the script is responsible for. |  | Optional: \{\} <br /> |
+| `namespaces` _string array_ | Namespaces the script is responsible for. Cluster scoped objects only match when this is empty. |  | Optional: \{\} <br /> |
+| `labelSelector` _[LabelSelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#labelselector-v1-meta)_ | LabelSelector selects objects by their labels. |  | Optional: \{\} <br /> |
+
+
+#### InsightTargetKind
+
+
+
+InsightTargetKind selects objects by kind.
+
+
+
+_Appears in:_
+- [InsightTarget](#insighttarget)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `group` _string_ | Group of the kind, empty for the core group. |  | Optional: \{\} <br /> |
+| `version` _string_ | Version of the kind, any version matches when empty. |  | Optional: \{\} <br /> |
+| `kind` _string_ | Kind of the objects, for example StatefulSet. |  | MinLength: 1 <br /> |
 
 
 #### KubecostExtractor

@@ -64,7 +64,6 @@ require (
 	github.com/pluralsh/controller-reconcile-helper v0.1.0
 	github.com/prometheus/client_golang v1.23.2
 	github.com/robfig/cron/v3 v3.0.1
-	github.com/sahilm/fuzzy v0.1.1
 	github.com/samber/lo v1.53.0
 	github.com/sirupsen/logrus v1.9.4
 	github.com/spf13/pflag v1.0.10

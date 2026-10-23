@@ -3,6 +3,7 @@ package streamline
 import (
 	"context"
 	"fmt"
+	"math/rand/v2"
 	"sync"
 	"time"
 
@@ -33,6 +34,21 @@ type EventSubscriber func(event watch.Event)
 func WithRestartDelay(d time.Duration) Option {
 	return func(s *Supervisor) {
 		s.restartDelay = d
+	}
+}
+
+// WithMaxRestartBackoff caps the delay between restarts of a synchronizer that fails to start. A resource that
+// keeps failing until its next restart waits for the cap no longer holds back WaitUntilSynced, it is still retried.
+func WithMaxRestartBackoff(d time.Duration) Option {
+	return func(s *Supervisor) {
+		s.maxRestartBackoff = d
+	}
+}
+
+// WithRestartJitter sets how far a restart is spread out at most, so resources that fail together do not retry together.
+func WithRestartJitter(d time.Duration) Option {
+	return func(s *Supervisor) {
+		s.restartJitter = d
 	}
 }
 
@@ -80,6 +96,8 @@ type Supervisor struct {
 	dequeueJitter                 time.Duration
 	updateJitter                  time.Duration
 	restartDelay                  time.Duration
+	maxRestartBackoff             time.Duration
+	restartJitter                 time.Duration
 	cacheSyncTimeout              time.Duration
 	synchronizerResyncInterval    time.Duration
 	maxNotFoundRetries            int
@@ -95,13 +113,14 @@ func NewSupervisor(client dynamic.Interface, store store.Store, statusSynchroniz
 		discoveryCache:                discoveryCache,
 		svcCache:                      svcCache,
 		store:                         store,
-		registerQueue:                 workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[schema.GroupVersionResource]()),
 		componentQueue:                workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[string]()),
 		synchronizers:                 cmap.NewStringer[schema.GroupVersionResource, Synchronizer](),
 		restartAttemptsLeftMap:        cmap.NewStringer[schema.GroupVersionResource, int](),
 		eventSubscribers:              cmap.NewStringer[schema.GroupVersionResource, []EventSubscriber](),
 		maxNotFoundRetries:            3,
 		restartDelay:                  1 * time.Second,
+		maxRestartBackoff:             1 * time.Minute,
+		restartJitter:                 10 * time.Second,
 		cacheSyncTimeout:              5 * time.Second,
 		synchronizerResyncInterval:    30 * time.Minute,
 		dequeueJitter:                 200 * time.Millisecond,
@@ -114,7 +133,29 @@ func NewSupervisor(client dynamic.Interface, store store.Store, statusSynchroniz
 		option(s)
 	}
 
+	// The queue backs off per resource, so it is built once the delays are known.
+	s.registerQueue = workqueue.NewTypedRateLimitingQueue(jitteredRateLimiter{
+		TypedRateLimiter: workqueue.NewTypedItemExponentialFailureRateLimiter[schema.GroupVersionResource](s.restartDelay, s.maxRestartBackoff),
+		jitter:           s.restartJitter,
+	})
+
 	return s
+}
+
+// jitteredRateLimiter spreads out the delays of the wrapped limiter by up to jitter. The spread never exceeds the
+// delay itself, so the first restarts stay quick.
+type jitteredRateLimiter struct {
+	workqueue.TypedRateLimiter[schema.GroupVersionResource]
+	jitter time.Duration
+}
+
+func (in jitteredRateLimiter) When(gvr schema.GroupVersionResource) time.Duration {
+	delay := in.TypedRateLimiter.When(gvr)
+	if spread := min(in.jitter, delay); spread > 0 {
+		delay += rand.N(spread)
+	}
+
+	return delay
 }
 
 func (in *Supervisor) WaitForCacheSync(ctx context.Context) error {
@@ -140,6 +181,47 @@ func (in *Supervisor) WaitForCacheSync(ctx context.Context) error {
 			}
 		}
 	}
+}
+
+// WaitUntilSynced blocks until every synchronizer has loaded its resources into the store, or has been failing for so
+// long that it is no longer waited for, and returns early only when the context is done. Unlike WaitForCacheSync it has no timeout, as a consumer that
+// reports on the whole cluster has nothing correct to report from a partially loaded store.
+func (in *Supervisor) WaitUntilSynced(ctx context.Context) error {
+	ticker := time.NewTicker(time.Second)
+	defer ticker.Stop()
+
+	for {
+		if in.synced() {
+			return nil
+		}
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-ticker.C:
+		}
+	}
+}
+
+func (in *Supervisor) synced() bool {
+	for gvr, s := range in.synchronizers.Items() {
+		if !s.Started() && !in.broken(gvr) {
+			return false
+		}
+	}
+
+	return true
+}
+
+// broken tells whether a resource failed to start often enough for its next restart to wait for the cap. It is still
+// retried at that pace, but the store is not held back for it any longer.
+func (in *Supervisor) broken(gvr schema.GroupVersionResource) bool {
+	failures := 0
+	for delay := in.restartDelay; delay > 0 && delay < in.maxRestartBackoff; delay *= 2 {
+		failures++
+	}
+
+	return in.registerQueue.NumRequeues(gvr) >= max(failures, 1)
 }
 
 func (in *Supervisor) MaybeRegister(gvr schema.GroupVersionResource) {
@@ -190,6 +272,7 @@ func (in *Supervisor) Unregister(gvr schema.GroupVersionResource) {
 		in.synchronizers.Remove(gvr)
 	}
 
+	in.registerQueue.Forget(gvr)
 	in.clearAttempts(gvr)
 }
 
@@ -235,10 +318,8 @@ func (in *Supervisor) processNextWorkItem(ctx context.Context) bool {
 		return false
 	}
 
-	defer func() {
-		in.registerQueue.Forget(gvr)
-		in.registerQueue.Done(gvr)
-	}()
+	// The failures of a resource are kept until it starts, that is what makes its restarts back off.
+	defer in.registerQueue.Done(gvr)
 	go in.startSynchronizer(ctx, gvr)
 	return true
 }
@@ -273,9 +354,13 @@ func (in *Supervisor) startSynchronizer(ctx context.Context, gvr schema.GroupVer
 	err := syn.Start(ctx) // start is a blocking operation
 	metrics.Record().ResourceCacheWatchEnd(gvr.String())
 
-	in.synchronizers.Remove(gvr)
+	if syn.Started() {
+		in.registerQueue.Forget(gvr)
+	}
 
+	// The synchronizer stays registered across a restart, so the store is not reported as loaded in between.
 	if err == nil {
+		in.synchronizers.Remove(gvr)
 		klog.V(log.LogLevelVerbose).InfoS("synchronizer stopped", "gvr", gvr.String())
 		metrics.Record().ResourceCacheWatchRemove(gvr.String())
 		return
@@ -283,14 +368,18 @@ func (in *Supervisor) startSynchronizer(ctx context.Context, gvr schema.GroupVer
 
 	if apierrors.IsMethodNotSupported(err) {
 		klog.V(log.LogLevelVerbose).ErrorS(err, "skipping resource as it is not supported", "gvr", gvr.String())
+		in.synchronizers.Remove(gvr)
 		metrics.Record().ResourceCacheWatchRemove(gvr.String())
+		in.registerQueue.Forget(gvr)
 		return
 	}
 
 	gvk, discErr := in.discoveryCache.KindFor(gvr)
 	if discErr != nil {
 		klog.V(log.LogLevelVerbose).ErrorS(discErr, "failed to register resource, could not get gvk for resource", "gvr", gvr.String())
+		in.synchronizers.Remove(gvr)
 		metrics.Record().ResourceCacheWatchRemove(gvr.String())
+		in.registerQueue.Forget(gvr)
 		return
 	}
 
@@ -299,7 +388,9 @@ func (in *Supervisor) startSynchronizer(ctx context.Context, gvr schema.GroupVer
 		if left == 0 {
 			klog.V(log.LogLevelVerbose).ErrorS(err, "resource not found after retries, skipping", "gvr", gvr.String(), "attempts", used)
 			in.clearAttempts(gvr)
+			in.synchronizers.Remove(gvr)
 			metrics.Record().ResourceCacheWatchRemove(gvr.String())
+			in.registerQueue.Forget(gvr)
 			return
 		}
 

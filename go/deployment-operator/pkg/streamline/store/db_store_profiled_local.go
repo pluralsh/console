@@ -7,6 +7,7 @@ import (
 	"github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 	smcommon "github.com/pluralsh/console/go/deployment-operator/pkg/streamline/common"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline/insights"
 	"github.com/pluralsh/console/go/polly/containers"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -109,6 +110,20 @@ func (p *ProfiledStoreLocal) GetAppliedComponentByUID(uid types.UID) (*client.Co
 	return res, err
 }
 
+// GetPriorityAnnotation wraps Store.GetPriorityAnnotation with tracing.
+func (p *ProfiledStoreLocal) GetPriorityAnnotation(uid types.UID) (string, bool, error) {
+	var (
+		annotation string
+		found      bool
+		err        error
+	)
+	_ = traceLocal(context.Background(), "GetPriorityAnnotation", func() error {
+		annotation, found, err = p.inner.GetPriorityAnnotation(uid)
+		return err
+	})
+	return annotation, found, err
+}
+
 // GetAppliedComponentsByGVK wraps Store.GetAppliedComponentsByGVK with tracing.
 func (p *ProfiledStoreLocal) GetAppliedComponentsByGVK(gvk schema.GroupVersionKind) ([]smcommon.Component, error) {
 	var (
@@ -151,6 +166,19 @@ func (p *ProfiledStoreLocal) GetServiceComponents(serviceID string, onlyApplied 
 	)
 	_ = traceLocal(context.Background(), "GetServiceComponents", func() error {
 		res, err = p.inner.GetServiceComponents(serviceID, onlyApplied)
+		return err
+	})
+	return res, err
+}
+
+// GetFailingRoots wraps Store.GetFailingRoots with tracing.
+func (p *ProfiledStoreLocal) GetFailingRoots() ([]insights.Root, error) {
+	var (
+		res []insights.Root
+		err error
+	)
+	_ = traceLocal(context.Background(), "GetFailingRoots", func() error {
+		res, err = p.inner.GetFailingRoots()
 		return err
 	})
 	return res, err
@@ -329,7 +357,7 @@ func (p *ProfiledStoreLocal) SetComponentUnsynced(obj unstructured.Unstructured)
 func (p *ProfiledStoreLocal) SaveComponentAttributes(obj client.ComponentChildAttributes, args ...any) error {
 	var err error
 	_ = traceLocal(context.Background(), "SaveComponentAttributes", func() error {
-		err = p.inner.SaveComponentAttributes(obj, args)
+		err = p.inner.SaveComponentAttributes(obj, args...)
 		return err
 	})
 	return err
