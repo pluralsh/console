@@ -61,7 +61,7 @@ const SubTabBase = styled.button<{
     },
     padding: `${
       size === 'small' ? theme.spacing.xxsmall : theme.spacing.xsmall
-    }px ${theme.spacing.medium}px`,
+    } ${theme.spacing.medium}`,
     align: 'center',
     '&:hover': {
       backgroundColor:

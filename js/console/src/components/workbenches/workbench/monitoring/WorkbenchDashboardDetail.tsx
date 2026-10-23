@@ -408,12 +408,12 @@ export function MonitoringDetailSkeleton() {
           <RectangleSkeleton
             $height="small"
             $width="70%"
-            style={{ marginTop: 8 }}
+            style={{ marginTop: '0.5rem' }}
           />
           <RectangleSkeleton
             $height={40}
             $width="100%"
-            style={{ marginTop: 24 }}
+            style={{ marginTop: '1.5rem' }}
           />
           <Flex
             gap="medium"
@@ -460,7 +460,7 @@ const StripSC = styled.div(({ theme }) => ({
   gap: theme.spacing.small,
   height: 40,
   justifyContent: 'space-between',
-  padding: `0 ${theme.spacing.medium}px`,
+  padding: `0 ${theme.spacing.medium}`,
   // Above the tab strip (z-index 1) without trapping fullscreen stacking.
   position: 'relative',
   zIndex: 2,
@@ -487,7 +487,7 @@ const ScrollSC = styled.div({
 const BodySC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
+  padding: `${theme.spacing.medium} ${theme.spacing.large}`,
   paddingBottom: theme.spacing.large,
 }))
 

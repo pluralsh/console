@@ -10,7 +10,7 @@ import { ComponentProps, useState } from 'react'
 import styled from 'styled-components'
 
 const IconFrameStyled = styled(IconFrame)(({ theme }) => ({
-  marginRight: -theme.spacing.medium + 3,
+  marginRight: `calc(3px - ${theme.spacing.medium})`,
   color: theme.colors['icon-light'],
 }))
 

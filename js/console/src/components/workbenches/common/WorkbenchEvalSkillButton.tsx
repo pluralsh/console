@@ -203,7 +203,7 @@ function WorkbenchEvalSkillPanel({
 const AnimatedWrapperSC = styled(animated.div)(({ theme }) => ({
   position: 'absolute',
   right: 0,
-  top: 32 + theme.spacing.medium,
+  top: `calc(32px + ${theme.spacing.medium})`,
   display: 'flex',
   flexDirection: 'column',
   maxHeight: 'calc(100vh - 160px)',

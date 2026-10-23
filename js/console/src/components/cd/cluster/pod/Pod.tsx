@@ -176,7 +176,7 @@ export default function Pod() {
           {tab === 'logs' && (
             <div
               css={{
-                padding: `${theme.spacing.small}px 0 ${theme.spacing.xlarge}px`,
+                padding: `${theme.spacing.small} 0 ${theme.spacing.xlarge}`,
               }}
             >
               <LogsLegend />
@@ -202,5 +202,5 @@ export default function Pod() {
 }
 
 const BodySC = styled(PageRowSC)(({ theme }) => ({
-  padding: `${theme.spacing.large}px ${theme.spacing.large}px 0`,
+  padding: `${theme.spacing.large} ${theme.spacing.large} 0`,
 }))

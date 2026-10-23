@@ -86,7 +86,7 @@ const WrapperSC = styled.div<{ $layout: GraphLegendLayout }>(({ $layout }) => ({
   alignContent: 'flex-start',
   display: 'flex',
   flexShrink: 0,
-  gap: '4px 10px',
+  gap: '0.25rem 0.625rem',
   ...($layout === 'wrap' && { flexWrap: 'wrap' }),
   ...($layout === 'column' && { flexDirection: 'column' }),
   ...($layout === 'row' && {
@@ -116,14 +116,14 @@ const ItemSC = styled.button<{
   color: theme.colors['text-xlight'],
   cursor: $interactive ? 'pointer' : 'default',
   display: 'flex',
-  fontSize: 12,
-  gap: 6,
-  lineHeight: '16px',
+  fontSize: '0.75rem',
+  gap: '0.375rem',
+  lineHeight: '1rem',
   maxWidth: $layout === 'row' ? ROW_ITEM_MAX_WIDTH : '100%',
   minWidth: 0,
   ...($layout === 'row' && { flexShrink: 0 }),
   opacity: $dimmed ? 0.45 : 1,
-  padding: '2px 4px',
+  padding: '0.125rem 0.25rem',
   textAlign: 'left',
   ...($interactive && {
     '&:hover': {

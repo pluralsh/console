@@ -61,7 +61,7 @@ const SectionHeaderSC = styled.button(({ theme }) => ({
   display: 'flex',
   gap: theme.spacing.small,
   minHeight: 44,
-  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  padding: `${theme.spacing.small} ${theme.spacing.medium}`,
   textAlign: 'left',
   width: '100%',
   '&:hover': {

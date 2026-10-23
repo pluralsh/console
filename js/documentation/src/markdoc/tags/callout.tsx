@@ -145,11 +145,11 @@ const CalloutSC = styled.aside<{ $color: string; $size: CalloutSize }>(
     display: 'flex',
     flexDirection: 'column',
     gap: theme.spacing.xsmall,
-    margin: `${theme.spacing.large}px 0`,
+    margin: `${theme.spacing.large} 0`,
     padding:
       $size === 'compact'
-        ? `${theme.spacing.xsmall}px ${theme.spacing.medium}px`
-        : `${theme.spacing.medium}px`,
+        ? `${theme.spacing.xsmall} ${theme.spacing.medium}`
+        : `${theme.spacing.medium}`,
     borderRadius: theme.borderRadiuses.medium,
     backgroundColor: `color-mix(in srgb, ${$color} var(--callout-tint), ${brand.surface})`,
     border: `1px solid color-mix(in srgb, ${$color} var(--callout-border), transparent)`,

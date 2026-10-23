@@ -2,6 +2,8 @@ fragment WorkbenchTiny on Workbench {
   id
   name
   description
+  insertedAt
+  updatedAt
   agentRuntime {
     id
     name
@@ -865,8 +867,24 @@ fragment WorkbenchEvalResultRow on WorkbenchEvalResult {
   }
 }
 
-query Workbenches($first: Int = 100, $after: String, $q: String) {
-  workbenches(first: $first, after: $after, q: $q) {
+query Workbenches(
+  $first: Int = 100
+  $after: String
+  $q: String
+  $projectId: ID
+  $sort: WorkbenchSort
+  $direction: SortDirection
+  $favoriteIds: [ID]
+) {
+  workbenches(
+    first: $first
+    after: $after
+    q: $q
+    projectId: $projectId
+    sort: $sort
+    direction: $direction
+    favoriteIds: $favoriteIds
+  ) {
     pageInfo {
       ...PageInfo
     }
@@ -883,6 +901,15 @@ query WorkbenchDashboard {
     pullRequests
     pullRequestMergeRate
     evalResults
+  }
+}
+
+query WorkbenchesSummary($projectId: ID) {
+  workbenchAggregates(projectId: $projectId) {
+    pullRequests
+    pullRequestMergeRate
+    hoursSaved
+    totalTokens
   }
 }
 

@@ -28,10 +28,10 @@ const DateSegmentSC = styled.div(({ theme }) => {
       margin: '0',
     },
     '&.first': {
-      marginLeft: -2,
+      marginLeft: '-0.125rem',
     },
     '&.last': {
-      marginRight: -2,
+      marginRight: '-0.125rem',
     },
 
     textTransform: 'uppercase',

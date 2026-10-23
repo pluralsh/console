@@ -187,5 +187,5 @@ export default function PipelineJob() {
 }
 
 const BodySC = styled(PageRowSC)(({ theme }) => ({
-  padding: `${theme.spacing.large}px ${theme.spacing.large}px 0`,
+  padding: `${theme.spacing.large} ${theme.spacing.large} 0`,
 }))

@@ -102,7 +102,7 @@ export function WorkbenchMonitorSettings() {
   if (monitor.type !== MonitorType.Log)
     return (
       <PageSC>
-        <Title2H1 css={{ marginBottom: 16 }}>{monitor.name}</Title2H1>
+        <Title2H1 css={{ marginBottom: '1rem' }}>{monitor.name}</Title2H1>
         <WorkbenchEmptyState
           inset={false}
           message="Settings unavailable"
@@ -126,7 +126,7 @@ export function WorkbenchMonitorSettings() {
   if (!monitor.service?.id)
     return (
       <PageSC>
-        <Title2H1 css={{ marginBottom: 16 }}>{monitor.name}</Title2H1>
+        <Title2H1 css={{ marginBottom: '1rem' }}>{monitor.name}</Title2H1>
         <WorkbenchEmptyState
           inset={false}
           message="Settings unavailable"

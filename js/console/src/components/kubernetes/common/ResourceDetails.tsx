@@ -9,7 +9,6 @@ import { PageToolbar } from '../../layout/PageToolbar'
 import { PageHeaderContext } from '../../cd/ContinuousDeployment'
 import { getKubernetesAbsPath } from '../../../routes/kubernetesRoutesConsts.tsx'
 import { AxiosInstance } from '../../../helpers/axios.ts'
-import { useExplainWithAI } from '../../ai/AIContext.tsx'
 import { GqlError } from '../../utils/Alert'
 import {
   getNamespacedResourceOptions,
@@ -74,15 +73,7 @@ export default function ResourceDetails({
     refetchInterval: 30_000,
   })
 
-  const { data, error } = namespace ? namespacedQuery : clusterQuery
-
-  const prompt = useMemo(() => {
-    return data
-      ? `Describe the following Kubernetes ${kind} resource: ${JSON.stringify(data)}`
-      : undefined
-  }, [data, kind])
-
-  useExplainWithAI(prompt)
+  const { error } = namespace ? namespacedQuery : clusterQuery
 
   if (error) {
     return <GqlError error={error} />

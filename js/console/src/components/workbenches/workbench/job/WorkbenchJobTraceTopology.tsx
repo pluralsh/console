@@ -238,7 +238,7 @@ const TraceSingleGraphSC = styled(TraceTopologySC)(({ theme }) => ({
   backgroundColor:
     theme.mode === 'dark' ? theme.colors.grey[950] : theme.colors['fill-zero'],
   backgroundImage: `radial-gradient(circle, ${theme.colors['border-fill-three']} 1px, transparent 1px)`,
-  backgroundSize: `${theme.spacing.large}px ${theme.spacing.large}px`,
+  backgroundSize: `${theme.spacing.large} ${theme.spacing.large}`,
   display: 'flex',
   justifyContent: 'center',
 }))
@@ -253,8 +253,8 @@ const TraceNodeSC = styled.div(({ theme }) => ({
   overflow: 'hidden',
   position: 'relative',
   width: 260,
-  paddingRight: 12,
-  gap: 16,
+  paddingRight: '0.75rem',
+  gap: '1rem',
 }))
 
 const TraceNodeAccentSC = styled.span<{ $color: string }>(({ $color }) => ({
@@ -270,7 +270,7 @@ const TraceNodeBodySC = styled.div(({ theme }) => ({
   flexDirection: 'column',
   gap: theme.spacing.xxxsmall,
   minWidth: 0,
-  padding: `${theme.spacing.small}px 0`,
+  padding: `${theme.spacing.small} 0`,
 }))
 
 const TraceNodeTitleSC = styled.div(({ theme }) => ({

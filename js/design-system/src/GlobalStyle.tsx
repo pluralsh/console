@@ -10,6 +10,7 @@ import { getBoxShadows } from './theme/boxShadows'
 import { baseColors } from './theme/colors-base'
 import { semanticColorsDark } from './theme/colors-semantic-dark'
 import { semanticColorsLight } from './theme/colors-semantic-light'
+import { pxToRem, ROOT_FONT_SIZE_STEPS } from './theme/rem'
 
 const {
   borderRadiuses,
@@ -63,9 +64,12 @@ const getShadowCSSVars = ({ mode }: { mode: ColorMode }) =>
     ])
   )
 const spacingCSSVars = Object.fromEntries(
-  Object.entries(spacing).map(([name, value]) => [
-    `--space-${name}`,
-    `${value}px`,
+  Object.entries(spacing).map(([name, value]) => [`--space-${name}`, value])
+)
+const rootFontSizeCSS = Object.fromEntries(
+  ROOT_FONT_SIZE_STEPS.map(({ minWidth, fontSize }) => [
+    `@media (min-width: ${minWidth}px)`,
+    { html: { fontSize } },
   ])
 )
 const radiiCSSVars = Object.fromEntries(
@@ -141,10 +145,13 @@ const GlobalStyleSheet = createGlobalStyle`
       boxSizing: 'border-box',
     },
     html: {
-      fontSize: 14,
       lineHeight: 1.15,
       WebkitTextSizeAdjust: '100%',
       colorScheme: theme.mode,
+    },
+    ...rootFontSizeCSS,
+    body: {
+      fontSize: pxToRem(14),
     },
     // Keep html/body on the app-shell token (index.html reads --color-page-background).
     // This is intentionally NOT fill-zero.

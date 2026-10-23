@@ -45,6 +45,32 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
              |> ids_equal([workbench])
     end
 
+    test "it can rank favorites first" do
+      a = insert(:workbench, name: "a")
+      b = insert(:workbench, name: "b")
+      c = insert(:workbench, name: "c")
+
+      {:ok, %{data: %{"workbenches" => found}}} = run_query("""
+        query Workbenches($ids: [ID]) {
+          workbenches(first: 5, sort: FAVORITED, favoriteIds: $ids) {
+            edges { node { id } }
+          }
+        }
+      """, %{"ids" => [c.id]}, %{current_user: admin_user()})
+
+      assert Enum.map(from_connection(found), & &1["id"]) == [c.id, a.id, b.id]
+
+      {:ok, %{data: %{"workbenches" => found}}} = run_query("""
+        query {
+          workbenches(first: 5, sort: NAME, direction: DESC) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: admin_user()})
+
+      assert Enum.map(from_connection(found), & &1["id"]) == [c.id, b.id, a.id]
+    end
+
     test "it can respect rbac" do
       user = insert(:user)
       project = insert(:project, read_bindings: [%{user_id: user.id}])
@@ -3018,6 +3044,55 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert agg["pullRequests"] == 1
       assert agg["pullRequestMergeRate"] == 0.5
       assert agg["evalResults"] == 8.0
+    end
+
+    test "workbenchAggregates estimates hours saved and tokens, scoped by project" do
+      project = insert(:project)
+      wb = insert(:workbench, project: project)
+      job = insert(:workbench_job,
+        workbench: wb,
+        usage: %{input_tokens: 10, output_tokens: 5, total_tokens: 15, cached_tokens: 50}
+      )
+      insert(:workbench_job, workbench: wb, usage: %{total_tokens: 100})
+
+      difficulty = &%Console.Schema.PullRequest.Difficulty{type: &1, lines: &2}
+      insert(:pull_request, workbench_job: job, status: :merged, difficulty: difficulty.(:gitops, 300))
+      insert(:pull_request, workbench_job: job, status: :merged, difficulty: difficulty.(:application, 100))
+      insert(:pull_request, workbench_job: job, status: :merged, difficulty: difficulty.(:configuration, 4))
+      insert(:pull_request, workbench_job: job, status: :merged)
+      insert(:pull_request, workbench_job: job, status: :closed, difficulty: difficulty.(:application, 1000))
+
+      other = insert(:workbench_job, usage: %{total_tokens: 1000})
+      insert(:pull_request, workbench_job: other, status: :merged, difficulty: difficulty.(:application, 1000))
+
+      {:ok, %{data: %{"workbenchAggregates" => agg}}} = run_query("""
+        query Aggregates($projectId: ID) {
+          workbenchAggregates(projectId: $projectId) {
+            pullRequests
+            hoursSaved
+            totalTokens
+          }
+        }
+      """, %{"projectId" => project.id}, %{current_user: admin_user()})
+
+      assert agg["pullRequests"] == 4
+      assert agg["hoursSaved"] == 4.25
+      assert agg["totalTokens"] == 165
+    end
+
+    test "workbenchAggregates only includes workbenches the user can read" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      readable = insert(:workbench_job, workbench: insert(:workbench, project: project))
+      insert(:pull_request, workbench_job: readable, status: :merged)
+      insert(:pull_request, workbench_job: insert(:workbench_job), status: :merged)
+
+      {:ok, %{data: %{"workbenchAggregates" => agg}}} = run_query("""
+        query { workbenchAggregates { pullRequests totalTokens } }
+      """, %{}, %{current_user: user})
+
+      assert agg["pullRequests"] == 1
+      assert agg["totalTokens"] == 0
     end
 
     test "workbenchPrMergeRates returns global merge rate buckets" do

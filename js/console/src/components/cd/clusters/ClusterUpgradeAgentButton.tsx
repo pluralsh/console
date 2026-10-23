@@ -241,7 +241,7 @@ const AgentRunFormPopupSC = styled(SimplePopupMenu)(({ theme }) => ({
 }))
 
 const PromptInputBoxSC = styled(Card)(({ theme }) => ({
-  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  padding: `${theme.spacing.small} ${theme.spacing.medium}`,
   '&:focus-within': {
     border: theme.borders['outline-focused'],
   },

@@ -18,7 +18,7 @@ import {
 
 const Heading = styled.h1(({ theme }) => ({
   margin: 0,
-  marginBottom: 16,
+  marginBottom: '1rem',
   ...theme.partials.text.title1,
 }))
 
@@ -44,7 +44,7 @@ const CustomTabListAs = styled.div<{
   flexShrink: 0,
   marginRight: theme.spacing.large,
   width: 200,
-  padding: 10,
+  padding: '0.625rem',
   border: `1px solid ${theme.colors[$borderColor]}`,
 }))
 
@@ -58,7 +58,7 @@ const CustomTabRoot = styled.div(({ theme }) => ({
   justifyContent: 'center',
   alignItems: 'center',
   width: '100%',
-  padding: 20,
+  padding: '1.25rem',
   textAlign: 'center',
   border: theme.borders['fill-two'],
 }))

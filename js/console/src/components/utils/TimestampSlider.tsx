@@ -84,10 +84,10 @@ const SliderCardSC = styled(Card)<{ $isOpen: boolean }>(
   ({ theme, $isOpen }) => ({
     position: 'absolute',
     zIndex: theme.zIndexes.modal,
-    top: `calc(100% + ${theme.spacing.xsmall}px)`,
+    top: `calc(100% + ${theme.spacing.xsmall})`,
     right: 0,
     width: 496,
-    padding: `${theme.spacing.small}px ${theme.spacing.medium}px ${theme.spacing.small + 16}px`,
+    padding: `${theme.spacing.small} ${theme.spacing.medium} calc(${theme.spacing.small} + 16px)`,
     background: theme.colors['fill-two'],
     ...(!$isOpen && { display: 'none' }),
   })

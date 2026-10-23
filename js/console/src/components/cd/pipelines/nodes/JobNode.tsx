@@ -31,7 +31,7 @@ export const gateStateToJobText = {
 } as const satisfies Record<GateState, string>
 
 const ContainerCardSC = styled(Card)(({ theme }) => ({
-  '&&': { padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px ` },
+  '&&': { padding: `${theme.spacing.xsmall} ${theme.spacing.small} ` },
   '.contentArea': {
     display: 'flex',
     alignItems: 'center',
@@ -45,7 +45,7 @@ const ContainerCardSC = styled(Card)(({ theme }) => ({
   '.secondary': {
     ...theme.partials.text.caption,
     color: theme.colors['text-xlight'],
-    marginTop: -theme.spacing.xxxsmall,
+    marginTop: theme.spacing['minus-xxxsmall'],
   },
 }))
 

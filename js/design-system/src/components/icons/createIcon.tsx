@@ -2,6 +2,7 @@ import { type ReactNode } from 'react'
 import { type DefaultTheme, useTheme } from 'styled-components'
 
 import { type SemanticColorKey } from '../../theme/colors'
+import { pxToRem } from '../../theme/rem'
 import Icon, { type IconProps as IconLayoutProps } from '../Icon'
 
 type IconBaseProps = {
@@ -41,7 +42,7 @@ function createIcon(render: (props: IconBaseProps) => ReactNode) {
         {...props}
       >
         {render({
-          size,
+          size: typeof size === 'number' ? pxToRem(size) : size,
           color: resolveThemeColor(color, theme.colors),
           secondaryColor: resolveThemeColor(secondaryColor, theme.colors),
           fullColor,

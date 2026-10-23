@@ -64,7 +64,7 @@ function HierarchyNode({
 }
 
 const Panel = styled.div(({ theme }) => ({
-  margin: `${theme.spacing.medium}px 0 ${theme.spacing.large}px`,
+  margin: `${theme.spacing.medium} 0 ${theme.spacing.large}`,
   padding: 20,
   border: `1px solid ${brand['line-strong']}`,
   borderRadius: 4,

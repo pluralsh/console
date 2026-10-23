@@ -76,8 +76,8 @@ const hueToBorderColor = {
 
 const sizeToFont = (size: AppIconSize, theme: DefaultTheme) =>
   ({
-    xxxsmall: { ...theme.partials.text.caption, fontSize: 10 },
-    xxsmall: { ...theme.partials.text.body2Bold, fontSize: 12 },
+    xxxsmall: { ...theme.partials.text.caption, fontSize: '0.625rem' },
+    xxsmall: { ...theme.partials.text.body2Bold, fontSize: '0.75rem' },
     xsmall: theme.partials.text.body2Bold,
     small: theme.partials.text.subtitle2,
     medium: theme.partials.text.subtitle1,

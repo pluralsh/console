@@ -75,7 +75,7 @@ const CardSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.medium,
-  padding: `${theme.spacing.small}px ${theme.spacing.large}px`,
+  padding: `${theme.spacing.small} ${theme.spacing.large}`,
   borderRadius: theme.borderRadiuses.large,
   backgroundColor: theme.colors['fill-zero'],
   boxShadow: theme.boxShadows.slight,
@@ -107,7 +107,7 @@ const HeaderTitleSC = styled.span(({ theme }) => ({
 const BodySC = styled.div({
   display: 'flex',
   flexDirection: 'column',
-  gap: 6,
+  gap: '0.375rem',
 })
 
 const LinkTextSC = styled.div({
@@ -132,9 +132,9 @@ const LinkTitleSC = styled.span(({ theme }) => ({
 const PropsRowSC = styled.div({
   display: 'flex',
   flexWrap: 'wrap',
-  gap: 6,
-  paddingBottom: 10,
-  '& > *': { padding: '0 10px', whiteSpace: 'nowrap' },
+  gap: '0.375rem',
+  paddingBottom: '0.625rem',
+  '& > *': { padding: '0 0.625rem', whiteSpace: 'nowrap' },
 })
 
 const ProviderSC = styled.span(({ theme }) => ({

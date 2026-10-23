@@ -62,7 +62,7 @@ const ArticleChip = styled.a(({ theme }) => ({
   display: 'inline-flex',
   alignItems: 'center',
   gap: theme.spacing.xsmall,
-  padding: `6px ${theme.spacing.small}px`,
+  padding: `6px ${theme.spacing.small}`,
   border: `1px solid ${brand['line-strong']}`,
   borderRadius: 4,
   background: brand.surface,

@@ -26,7 +26,7 @@ const CardTabsSC = styled.div(({ theme }) => ({
   alignItems: 'flex-end',
   gap: theme.spacing.xsmall,
   flexShrink: 0,
-  marginBottom: -1,
+  marginBottom: '-1px',
   position: 'relative',
   zIndex: 1,
 }))
@@ -43,7 +43,7 @@ const CardTabSC = styled.button<{
   width: 'fit-content',
   maxWidth: '100%',
   height: 40,
-  padding: `0 ${theme.spacing.medium}px`,
+  padding: `0 ${theme.spacing.medium}`,
   border: `1px solid ${
     active ? theme.colors[fillToNeutralBorderC[fillLevel]] : 'transparent'
   }`,

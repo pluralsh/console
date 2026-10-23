@@ -135,7 +135,7 @@ const ChatP = styled.p(({ theme }) => ({
 }))
 
 /** List layout shared by the chat markdown renderers. */
-export const chatListCss = (theme: DefaultTheme, itemGap: number) =>
+export const chatListCss = (theme: DefaultTheme, itemGap: string) =>
   ({
     paddingLeft: theme.spacing.large,
     // Margin, not flex: Chrome crashes (error code 5) when a list is a flex
@@ -176,7 +176,7 @@ const ChatHr = styled.hr(({ theme }) => ({
   height: 1,
   border: 0,
   backgroundColor: theme.colors.border,
-  margin: `${theme.spacing.medium}px 0 ${theme.spacing.xxsmall}px`,
+  margin: `${theme.spacing.medium} 0 ${theme.spacing.xxsmall}`,
   '&:first-child': { marginTop: 0 },
 }))
 
@@ -239,7 +239,7 @@ const QuietInlineCodeSC = styled.code(({ theme }) => ({
     theme.mode === 'light'
       ? theme.colors['fill-two']
       : theme.colors['fill-one'],
-  padding: `0 ${theme.spacing.xxsmall}px`,
+  padding: `0 ${theme.spacing.xxsmall}`,
   borderRadius: theme.borderRadiuses.medium,
   border: 'none',
   wordBreak: 'break-word',
@@ -291,7 +291,7 @@ const ChatTd = styled.td(({ theme }) => ({
     theme.mode === 'light'
       ? theme.colors['fill-one']
       : theme.colors['fill-zero-selected'],
-  padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
+  padding: `${theme.spacing.xsmall} ${theme.spacing.small}`,
   color: theme.colors['text-light'],
   textAlign: 'left',
   border: theme.borders['fill-two'],

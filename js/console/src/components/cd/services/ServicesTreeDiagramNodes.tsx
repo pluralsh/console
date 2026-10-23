@@ -99,7 +99,7 @@ export function ServicesTreeDiagramServiceNode({
       //         flexWrap: 'wrap',
       //         gap: theme.spacing.xxsmall,
       //         marginTop: theme.spacing.xxsmall,
-      //         padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+      //         padding: `${theme.spacing.small} ${theme.spacing.medium}`,
       //         width: 336,
       //       }}
       //     >
@@ -158,7 +158,7 @@ export function ServicesTreeDiagramServiceNode({
           gap: theme.spacing.medium,
           borderTopLeftRadius: theme.borderRadiuses.large,
           borderTopRightRadius: theme.borderRadiuses.large,
-          padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+          padding: `${theme.spacing.small} ${theme.spacing.medium}`,
         }}
       >
         <div
@@ -189,7 +189,7 @@ export function ServicesTreeDiagramServiceNode({
       </div>
       <div
         css={{
-          padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+          padding: `${theme.spacing.small} ${theme.spacing.medium}`,
         }}
       >
         <div css={{ flex: 1 }}>
@@ -519,7 +519,7 @@ export function ServicesTreeDiagramGlobalServiceNode({
           borderTopRightRadius: theme.borderRadiuses.large,
           color: theme.colors['text-xlight'],
           gap: theme.spacing.medium,
-          padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+          padding: `${theme.spacing.small} ${theme.spacing.medium}`,
         }}
       >
         <div
@@ -549,7 +549,7 @@ export function ServicesTreeDiagramGlobalServiceNode({
         css={{
           display: 'flex',
           backgroundColor: theme.colors['fill-one'],
-          padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+          padding: `${theme.spacing.small} ${theme.spacing.medium}`,
         }}
       >
         <div css={{ flex: 1, minWidth: 50 }}>

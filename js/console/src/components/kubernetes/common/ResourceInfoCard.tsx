@@ -124,8 +124,8 @@ function CodeHeaderUnstyled({
 }
 
 const CodeHeader = styled(CodeHeaderUnstyled)(({ fillLevel, theme }) => ({
-  minHeight: theme.spacing.xlarge + theme.spacing.xsmall * 2,
-  padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
+  minHeight: `calc(${theme.spacing.xlarge} + 2 * ${theme.spacing.xsmall})`,
+  padding: `${theme.spacing.xsmall} ${theme.spacing.medium}`,
   borderBottom:
     fillLevel >= 1 ? theme.borders['fill-three'] : theme.borders['fill-two'],
   backgroundColor:

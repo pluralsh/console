@@ -56,7 +56,9 @@ func (in *FederatedCredential) Attributes(userID string) console.FederatedCreden
 	}
 
 	return console.FederatedCredentialAttributes{
-		Issuer:     in.Spec.Issuer,
+		Issuer: in.Spec.Issuer,
+		// Always sent so removing spec.aud clears it in Console; "" is stored as unset.
+		Aud:        lo.ToPtr(in.Spec.Aud),
 		Scopes:     lo.ToSlicePtr(in.Spec.Scopes),
 		ClaimsLike: claimsLike,
 		UserID:     userID,
@@ -72,6 +74,10 @@ type FederatedCredentialSpec struct {
 	// Issuer is the URL of the identity provider that issues the tokens.
 	// +kubebuilder:validation:Required
 	Issuer string `json:"issuer"`
+
+	// Audience is the expected aud of tokens exchanged with this credential. When unset, any audience is accepted. When set, the token aud must equal this value, or include it when aud is a list.
+	// +kubebuilder:validation:Optional
+	Aud string `json:"aud,omitempty"`
 
 	// Scopes are the scopes that the credential will request from the identity provider.
 	// +kubebuilder:validation:Optional

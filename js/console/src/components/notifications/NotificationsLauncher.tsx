@@ -55,7 +55,7 @@ export default function NotificationsLauncher() {
 const AnimatedWrapperSC = styled(animated.div)(({ theme }) => ({
   position: 'absolute',
   right: 0,
-  top: 32 + theme.spacing.xsmall,
+  top: `calc(32px + ${theme.spacing.xsmall})`,
   display: 'flex',
   flexDirection: 'column',
   height: '70vh',

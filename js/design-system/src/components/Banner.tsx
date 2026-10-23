@@ -83,8 +83,8 @@ const BannerInner = styled.div(({ theme }) => ({
 
 const IconWrap = styled.div((_) => ({
   display: 'flex',
-  paddingTop: 2,
-  paddingBottom: 2,
+  paddingTop: '0.125rem',
+  paddingBottom: '0.125rem',
 }))
 
 const Heading = styled.div<{ $bold: boolean }>(({ $bold, theme }) => ({

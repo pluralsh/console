@@ -22,7 +22,7 @@ export function useFloatingCornerScale({
   triggerRef: RefCallback<any>
 } {
   const theme = useTheme()
-  const sizePadding = theme.spacing.xxsmall
+  const sizePadding = theme.spacingPx.xxsmall
 
   // flip() padding must be smaller than size() padding to prevent flickering
   // back and forth. This makes padding off by one at some window sizes, but
@@ -33,7 +33,7 @@ export function useFloatingCornerScale({
     placement,
     strategy: 'fixed',
     middleware: [
-      offset(theme.spacing.xxsmall),
+      offset(theme.spacingPx.xxsmall),
       size({
         padding: sizePadding,
       }),

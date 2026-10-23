@@ -1802,6 +1802,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `issuer` _string_ | Issuer is the URL of the identity provider that issues the tokens. |  | Required: \{\} <br /> |
+| `aud` _string_ | Audience is the expected aud of tokens exchanged with this credential. When unset, any audience is accepted. When set, the token aud must equal this value, or include it when aud is a list. |  | Optional: \{\} <br /> |
 | `scopes` _string array_ | Scopes are the scopes that the credential will request from the identity provider. |  | Optional: \{\} <br /> |
 | `claimsLike` _[RawExtension](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#rawextension-runtime-pkg)_ | ClaimsLike is a JSON expression that matches the claims in the token.<br />All the value strings should be a valid regular expression, which must match the entire claim value.<br />Example:<br />	...<br />	claimsLike:<br />		sub: "repo:myaccount/myrepo:ref:refs/heads/.*" |  | Optional: \{\} <br /> |
 | `user` _string_ | User is the user email address that will be authenticated by this credential. |  | Required: \{\} <br /> |

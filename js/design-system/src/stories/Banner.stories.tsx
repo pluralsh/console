@@ -10,7 +10,7 @@ const Link = styled.a(({ theme }) => ({
 
 const Heading = styled.h1(({ theme }) => ({
   margin: 0,
-  marginTop: 16,
+  marginTop: '1rem',
   ...theme.partials.text.subtitle2,
 }))
 

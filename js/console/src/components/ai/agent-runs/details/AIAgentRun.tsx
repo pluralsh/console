@@ -468,7 +468,7 @@ const QueueCardSC = styled(Card)(({ theme }) => ({
   borderBottomLeftRadius: 0,
   borderBottomRightRadius: 0,
   borderBottom: 'none',
-  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  padding: `${theme.spacing.small} ${theme.spacing.medium}`,
 }))
 
 const WrapperSC = styled.div(({ theme }) => ({

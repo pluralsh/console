@@ -21,7 +21,7 @@ export function ResponsivePageFullWidth({
         flexDirection: 'column',
         // with the scroll area's own top padding, leaves a large gap under the
         // page toolbar
-        paddingTop: theme.spacing.large - theme.spacing.medium,
+        paddingTop: `calc(${theme.spacing.large} - ${theme.spacing.medium})`,
         ...(scrollable
           ? {
               paddingRight: 0,

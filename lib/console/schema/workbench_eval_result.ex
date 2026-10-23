@@ -22,6 +22,13 @@ defmodule Console.Schema.WorkbenchEvalResult do
     timestamps()
   end
 
+  def for_workbenches(query \\ __MODULE__, workbench_query) do
+    from(r in query,
+      join: e in assoc(r, :workbench_eval),
+      where: e.workbench_id in subquery(Workbench.ids(workbench_query))
+    )
+  end
+
   def for_workbench(query \\ __MODULE__, workbench_id) do
     from(r in query,
       join: e in assoc(r, :workbench_eval),

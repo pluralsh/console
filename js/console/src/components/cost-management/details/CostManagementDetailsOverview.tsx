@@ -139,7 +139,7 @@ function CostCard({
           </Flex>
         ),
       }}
-      css={{ padding: `${theme.spacing.large}px ${theme.spacing.xlarge}px` }}
+      css={{ padding: `${theme.spacing.large} ${theme.spacing.xlarge}` }}
     >
       <Flex direction="column">
         <Title1H1 as="span">

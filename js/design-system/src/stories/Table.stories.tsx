@@ -113,7 +113,7 @@ const columns = [
     header: () => (
       <div style={{ display: 'flex', flexDirection: 'column' }}>
         <div>Function</div>
-        <div style={{ fontSize: 12, fontWeight: 400 }}>Caption</div>
+        <div style={{ fontSize: '0.75rem', fontWeight: 400 }}>Caption</div>
       </div>
     ),
   }),
@@ -582,7 +582,7 @@ export const LinkableRows: StoryObj<Parameters<typeof Template>[0]> = {
               alert(`Action clicked for: ${row.original.function}`)
             }}
             style={{
-              padding: '4px 12px',
+              padding: '0.25rem 0.75rem',
               cursor: 'pointer',
               background: '#1a1d24',
               border: '1px solid #3d4149',

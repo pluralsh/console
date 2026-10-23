@@ -205,7 +205,7 @@ const SubTabSC = styled(SubTab)<{
     gap: theme.spacing.small,
     padding: !$label
       ? size === 'small'
-        ? theme.spacing.xsmall - 2
+        ? `calc(${theme.spacing.xsmall} - 2px)`
         : theme.spacing.small
       : undefined,
     color: $active ? theme.colors['text'] : theme.colors['text-primary'],

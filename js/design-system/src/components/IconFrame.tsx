@@ -7,6 +7,7 @@ import {
 import styled, { DefaultTheme } from 'styled-components'
 
 import { type SemanticColorKey } from '../theme/colors'
+import { pxToRem } from '../theme/rem'
 import { lightElevatedSurface } from '../theme/lightElevatedSurface'
 
 import { type PolymorphicComponentProps } from '../types'
@@ -81,7 +82,7 @@ const ICON_FRAME_ICON_SIZE = {
 } as const satisfies Record<Size, number>
 
 const sizeToFrameSize: Record<Size, number> = {
-  xsmall: 18,
+  xsmall: 20,
   small: 24,
   medium: 32,
   large: 40,
@@ -120,8 +121,8 @@ const IconFrameSC = styled.div<{
   alignItems: 'center',
   alignContent: 'center',
   justifyContent: 'center',
-  width: sizeToFrameSize[$size],
-  height: sizeToFrameSize[$size],
+  width: pxToRem(sizeToFrameSize[$size]),
+  height: pxToRem(sizeToFrameSize[$size]),
   backgroundColor: $background
     ? theme.colors[$background]
     : $selected

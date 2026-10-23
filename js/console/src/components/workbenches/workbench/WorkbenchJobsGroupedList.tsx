@@ -23,6 +23,7 @@ import {
   WorkbenchGroupedList,
 } from 'components/workbenches/common/WorkbenchGroupedList'
 import {
+  Delta,
   SortDirection,
   useWorkbenchJobsForStatusQuery,
   useWorkbenchJobStatusCountsQuery,
@@ -31,11 +32,12 @@ import {
   WorkbenchJobTinyFragment,
 } from 'generated/graphql'
 import { includes, startCase } from 'lodash'
-import { memo, ReactElement, useMemo } from 'react'
+import { memo, ReactElement, useEffect, useMemo, useRef, useState } from 'react'
 import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
 import { formatDateTime } from 'utils/datetime'
 import { mapExistingNodes } from 'utils/graphql'
+import { useWorkbenchJobDeltaListener } from './useWorkbenchJobsDelta'
 import { WorkbenchJobActionsRow } from './WorkbenchJobsTable'
 import { WORKBENCH_JOBS_PAGE_SIZE } from './workbenchJobsDisplay'
 import { WorkbenchStoredPromptMarkdown } from './WorkbenchStoredPromptMarkdown'
@@ -120,7 +122,12 @@ export function WorkbenchJobsGroupedList({
   fill?: boolean
   defaultCollapsed?: Partial<Record<WorkbenchJobStatus, boolean>>
 }) {
-  const { data, previousData, loading } = useWorkbenchJobStatusCountsQuery({
+  const {
+    data,
+    previousData,
+    loading,
+    refetch: refetchCounts,
+  } = useWorkbenchJobStatusCountsQuery({
     variables: {
       id: workbenchId,
       q: filters.q,
@@ -131,6 +138,10 @@ export function WorkbenchJobsGroupedList({
     pollInterval: POLL_INTERVAL,
   })
   const countsData = data ?? previousData
+  const { listedStatuses, refresh } = useJobDeltaRefresh(
+    workbenchId,
+    refetchCounts
+  )
   const groups = useMemo(() => {
     if (!countsData) return undefined
     const counts = toCounts(
@@ -168,10 +179,58 @@ export function WorkbenchJobsGroupedList({
           pageSize={pageSize}
           capped={capped}
           scrollEl={scrollEl}
+          listedStatuses={listedStatuses}
+          refresh={refresh}
         />
       )}
     />
   )
+}
+
+// gathers a burst of deltas (e.g. a job starting and its first activity) into
+// one refetch
+const DELTA_REFETCH_DELAY_MS = 300
+
+type GroupRefresh = {
+  version: number
+  statuses: ReadonlySet<WorkbenchJobStatus>
+}
+
+// polling alone leaves new jobs and status moves up to a poll interval late,
+// so job deltas refetch the counts and the groups a job left or joined.
+// Updates that keep a job's status need nothing: its row reads the cache entry
+// the subscription already wrote.
+function useJobDeltaRefresh(workbenchId: string, refetchCounts: () => void) {
+  // job id -> the status group currently listing it
+  const [listedStatuses] = useState(() => new Map<string, WorkbenchJobStatus>())
+  const [refresh, setRefresh] = useState<GroupRefresh>({
+    version: 0,
+    statuses: new Set(),
+  })
+  const pending = useRef(new Set<WorkbenchJobStatus>())
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined)
+
+  useEffect(() => () => clearTimeout(timer.current), [])
+
+  useWorkbenchJobDeltaListener(workbenchId, (delta, job) => {
+    const listed = listedStatuses.get(job.id)
+    const next = delta === Delta.Delete ? undefined : job.status
+    if (listed === next) return
+
+    if (listed) pending.current.add(listed)
+    if (next) pending.current.add(next)
+    if (timer.current) return
+
+    timer.current = setTimeout(() => {
+      timer.current = undefined
+      const statuses = pending.current
+      pending.current = new Set()
+      refetchCounts()
+      setRefresh(({ version }) => ({ version: version + 1, statuses }))
+    }, DELTA_REFETCH_DELAY_MS)
+  })
+
+  return { listedStatuses, refresh }
 }
 
 function JobStatusGroup({
@@ -182,6 +241,8 @@ function JobStatusGroup({
   pageSize,
   capped,
   scrollEl,
+  listedStatuses,
+  refresh,
 }: {
   workbenchId: string
   status: WorkbenchJobStatus
@@ -190,8 +251,10 @@ function JobStatusGroup({
   pageSize: number
   capped: boolean
   scrollEl: HTMLDivElement | null
+  listedStatuses: Map<string, WorkbenchJobStatus>
+  refresh: GroupRefresh
 }) {
-  const { data, loading, pageInfo, fetchNextPage, fetchingMore } =
+  const { data, loading, pageInfo, fetchNextPage, fetchingMore, refetch } =
     useFetchPaginatedData(
       {
         queryHook: useWorkbenchJobsForStatusQuery,
@@ -202,6 +265,24 @@ function JobStatusGroup({
       { id: workbenchId, status, ...filters }
     )
   const jobs = useMemo(() => mapExistingNodes(data?.workbench?.runs), [data])
+
+  // keyed by this group's status rather than each job's: the subscription
+  // rewrites a moved job's status in the cache before its delta is handled
+  useEffect(() => {
+    jobs.forEach((job) => listedStatuses.set(job.id, status))
+
+    return () =>
+      jobs.forEach((job) => {
+        if (listedStatuses.get(job.id) === status) listedStatuses.delete(job.id)
+      })
+  }, [jobs, listedStatuses, status])
+
+  const seenVersion = useRef(refresh.version)
+  useEffect(() => {
+    if (refresh.version === seenVersion.current) return
+    seenVersion.current = refresh.version
+    if (refresh.statuses.has(status)) refetch()
+  }, [refetch, refresh, status])
 
   return (
     <GroupedListBody

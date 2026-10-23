@@ -28,9 +28,9 @@ export const MainColumn = styled.div(({ theme }) => ({
   alignItems: 'flex-start',
   minWidth: 0,
   width: '100%',
-  padding: `0 ${theme.spacing.large}px`,
+  padding: `0 ${theme.spacing.large}`,
   [mqs.twoColumn]: {
-    padding: `0 ${theme.spacing.xlarge}px`,
+    padding: `0 ${theme.spacing.xlarge}`,
   },
   [mqs.maxWidth]: {
     padding: '0 64px',
@@ -58,7 +58,7 @@ export const ContentContainer = styled.main<{ $wide?: boolean }>(
     flex: '1 1 auto',
     minWidth: 0,
     width: '100%',
-    padding: `36px 0 ${theme.spacing.xxxlarge}px`,
+    padding: `36px 0 ${theme.spacing.xxxlarge}`,
     ...(!$wide
       ? {
           maxWidth: 820,

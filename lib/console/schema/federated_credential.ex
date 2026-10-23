@@ -4,6 +4,7 @@ defmodule Console.Schema.FederatedCredential do
 
   schema "federated_credentials" do
     field :issuer, :string
+    field :aud, :string
     field :claims_like, :map
     field :scopes, {:array, :string}
 
@@ -19,6 +20,21 @@ defmodule Console.Schema.FederatedCredential do
   def for_user(query \\ __MODULE__, user_id) do
     from(f in query, where: f.user_id == ^user_id)
   end
+
+  @doc """
+  Whether `token_aud` satisfies this credential's expected audience.
+
+  `aud` is optional. When it is unset, any audience is accepted so existing
+  credentials keep working. When it is set, the token audience must be that
+  value, or a list containing it. oidcc's own audience check is not sufficient:
+  the exchange path has to pass a client id, and deriving it from the token's
+  own `aud` makes that check pass for every audience.
+  """
+  def audience_allowed?(%__MODULE__{aud: expected}, token_aud)
+      when is_binary(expected) and expected != "" do
+    aud_includes?(token_aud, expected)
+  end
+  def audience_allowed?(%__MODULE__{}, _), do: true
 
   def allow?(%__MODULE__{claims_like: %{} = conditions}, %{} = claims) do
     Enum.all?(conditions, fn {k, v} ->
@@ -47,13 +63,18 @@ defmodule Console.Schema.FederatedCredential do
     do: Regex.match?(re, to_string(val))
   defp claim_matches?(_, _), do: false
 
-  @valid ~w(issuer claims_like scopes user_id)a
+  defp aud_includes?(aud, expected) when is_binary(aud), do: aud == expected
+  defp aud_includes?(auds, expected) when is_list(auds), do: Enum.member?(auds, expected)
+  defp aud_includes?(_, _), do: false
+
+  @valid ~w(issuer aud claims_like scopes user_id)a
+  @required ~w(issuer claims_like scopes user_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
     |> foreign_key_constraint(:user_id)
-    |> validate_required(@valid)
+    |> validate_required(@required)
     |> validate_claims()
   end
 

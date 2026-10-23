@@ -121,7 +121,7 @@ const HeaderSC = styled.div<{
           : fillToNeutralBgC[fillLevel]
       ],
     height: size === 'large' ? 48 : 40,
-    padding: `0 ${theme.spacing.medium}px`,
+    padding: `0 ${theme.spacing.medium}`,
     // overflow:hidden + matching radius shears the 1px border at corners
     // and can make the white fill look clipped against the border curve.
     overflow: theme.mode === 'light' ? 'visible' : 'hidden',

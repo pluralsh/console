@@ -94,9 +94,9 @@ const HeaderSC = styled.div(({ theme }) => ({
 
 const HeaderTitleSC = styled.h2(({ theme }) => ({
   ...theme.partials.text.mono,
-  fontSize: 20,
+  fontSize: '1.25rem',
   fontWeight: 500,
-  lineHeight: '24px',
+  lineHeight: '1.5rem',
   letterSpacing: 0,
   ...TRUNCATE,
   margin: 0,
@@ -108,7 +108,7 @@ const BodySC = styled.div(({ theme }) => ({
   flexDirection: 'column',
   gap: theme.spacing.large,
   minHeight: '100%',
-  padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
+  padding: `${theme.spacing.medium} ${theme.spacing.large}`,
   backgroundColor:
     theme.mode === 'light'
       ? theme.colors['fill-zero']

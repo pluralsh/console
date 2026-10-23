@@ -34,7 +34,7 @@ export function sidebarItemLayout(theme: DefaultTheme, isExpanded: boolean) {
       ? {
           alignSelf: 'stretch',
           width: 'auto',
-          margin: `0 -${theme.spacing.xsmall}px`,
+          margin: `0 -${theme.spacing.xsmall}`,
         }
       : { alignSelf: 'center', width: 40 }),
   } as const

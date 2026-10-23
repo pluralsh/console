@@ -201,7 +201,7 @@ function SubTabTemplate(args: any) {
   )
 }
 const contentCardStyle = {
-  padding: 32,
+  padding: '2rem',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',

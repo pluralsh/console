@@ -179,7 +179,7 @@ const ResultRowSC = styled.li<{ $highlighted: boolean }>(
     display: 'flex',
     alignItems: 'center',
     gap: theme.spacing.small,
-    padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
+    padding: `${theme.spacing.xsmall} ${theme.spacing.small}`,
     borderRadius: theme.borderRadiuses.medium,
     cursor: 'pointer',
     background: $highlighted ? theme.colors['fill-two'] : 'transparent',
@@ -219,6 +219,6 @@ const RowKindSC = styled.span(({ theme }) => ({
 const EmptyStateSC = styled.div(({ theme }) => ({
   ...theme.partials.text.caption,
   color: theme.colors['text-xlight'],
-  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  padding: `${theme.spacing.small} ${theme.spacing.medium}`,
   textAlign: 'center',
 }))

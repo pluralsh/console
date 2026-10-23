@@ -701,7 +701,7 @@ export function WorkbenchCodingAgentStep({
             {repoError && (
               <span
                 css={{
-                  fontSize: 12,
+                  fontSize: '0.75rem',
                   color: 'var(--text-danger, #c53030)',
                 }}
               >

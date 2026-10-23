@@ -8,7 +8,7 @@ const GlobalStyles = createGlobalStyle(({ theme }) => ({
     '--docsearch-text-color': 'rgb(28, 30, 33)',
     '--docsearch-secondary-text-color': 'rgb(68, 73, 80)',
     '--docsearch-background-color': theme.colors['fill-zero'],
-    '--docsearch-spacing': `${theme.spacing.medium}px`,
+    '--docsearch-spacing': `${theme.spacing.medium}`,
     '--docsearch-icon-stroke-width': '1.4',
     '--docsearch-focus-color': theme.colors['action-primary'],
     '--docsearch-highlight-color': theme.colors['action-primary'],
@@ -34,7 +34,7 @@ const GlobalStyles = createGlobalStyle(({ theme }) => ({
     '--docsearch-actions-height': '40px',
 
     /* hit */
-    '--docsearch-hit-height': `${theme.spacing.xxxlarge}px`,
+    '--docsearch-hit-height': `${theme.spacing.xxxlarge}`,
     '--docsearch-hit-color': 'rgb(68, 73, 80)',
     '--docsearch-hit-highlight-color': theme.colors['fill-zero-hover'],
     '--docsearch-hit-active-color': '#fff',

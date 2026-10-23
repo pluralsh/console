@@ -90,7 +90,7 @@ function GlobalSettingsPermissionsCard({
         css={{
           ...theme.partials.text.overline,
           color: theme.colors['icon-xlight'],
-          marginBottom: `${theme.spacing.medium}px`,
+          marginBottom: `${theme.spacing.medium}`,
         }}
       >
         {upperFirst(type)} Permissions

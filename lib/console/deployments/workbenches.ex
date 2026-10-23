@@ -1035,10 +1035,11 @@ defmodule Console.Deployments.Workbenches do
     end
   end
 
-  defp mark_running(%WorkbenchJob{} = job) do
+  defp mark_running(%WorkbenchJob{status: prev} = job) do
     job
     |> Ecto.Changeset.change(%{status: :running, updated_at: Timex.now()})
     |> Repo.update(allow_stale: true)
+    |> notify_status_change(prev)
   end
 
   @doc """
@@ -1084,8 +1085,13 @@ defmodule Console.Deployments.Workbenches do
         workbench_job_activity_id: activity.id
       })
     end)
-    |> execute(extract: :activity)
-    |> notify(:create, user)
+    |> execute()
+    |> case do
+      {:ok, %{activity: activity, job: updated}} ->
+        notify_status_change({:ok, updated}, job.status)
+        notify({:ok, activity}, :create, user)
+      err -> err
+    end
   end
 
   def create_message(attrs, id, %User{} = user) when is_binary(id) do
@@ -1243,8 +1249,13 @@ defmodule Console.Deployments.Workbenches do
       Ecto.Changeset.change(job, %{status: :running, updated_at: DateTime.utc_now()})
       |> Repo.update()
     end)
-    |> execute(extract: :activity)
-    |> notify(:create)
+    |> execute()
+    |> case do
+      {:ok, %{activity: activity, job: updated}} ->
+        notify_status_change({:ok, updated}, job.status)
+        notify({:ok, activity}, :create)
+      err -> err
+    end
   end
 
   @doc """
@@ -1717,4 +1728,7 @@ defmodule Console.Deployments.Workbenches do
   def notify({:ok, %WorkbenchJobActivity{} = activity}, :update),
     do: handle_notify(PubSub.WorkbenchJobActivityUpdated, activity)
   def notify(pass, _), do: pass
+
+  defp notify_status_change({:ok, %WorkbenchJob{status: status}} = pass, status), do: pass
+  defp notify_status_change(pass, _), do: notify(pass, :update)
 end

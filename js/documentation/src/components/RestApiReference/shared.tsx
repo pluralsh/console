@@ -32,7 +32,7 @@ export const StatusTab = styled.button<{ $active: boolean }>(
     display: 'flex',
     alignItems: 'center',
     gap: theme.spacing.xsmall,
-    padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+    padding: `${theme.spacing.small} ${theme.spacing.medium}`,
     background: 'transparent',
     border: 'none',
     borderBottom: $active
@@ -88,7 +88,7 @@ export function Table(props: ComponentPropsWithoutRef<'table'>) {
 
 export const Th = styled.th(({ theme }) => ({
   textAlign: 'left',
-  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  padding: `${theme.spacing.small} ${theme.spacing.medium}`,
   border: 'none',
   borderRight: tableLine,
   borderBottom: tableLine,
@@ -99,7 +99,7 @@ export const Th = styled.th(({ theme }) => ({
 }))
 
 export const Td = styled.td(({ theme }) => ({
-  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  padding: `${theme.spacing.small} ${theme.spacing.medium}`,
   border: 'none',
   borderRight: tableLine,
   borderBottom: tableLine,

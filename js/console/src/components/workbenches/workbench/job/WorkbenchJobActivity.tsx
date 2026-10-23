@@ -207,7 +207,7 @@ export function WorkbenchJobActivity({
       padding="none"
       triggerWrapperStyles={{
         justifyContent: 'flex-start',
-        gap: 10,
+        gap: '0.625rem',
         padding: 0,
         width: 'fit-content',
         maxWidth: '100%',
@@ -522,7 +522,7 @@ function WorkbenchJobActivityResult({
             <AgentRunInfoSimple
               key={agentRun.id}
               agentRun={agentRun}
-              css={{ padding: `0 ${spacing.small}px` }}
+              css={{ padding: `0 ${spacing.small}` }}
             />
           ))}
         </>
@@ -1217,7 +1217,7 @@ const ActivityHeaderSC = styled.span<{ $hasStatusIcon: boolean }>(
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap',
       ...($hasStatusIcon && {
-        paddingLeft: ACTIVITY_STATUS_ICON_SIZE + theme.spacing.xsmall,
+        paddingLeft: `calc(${ACTIVITY_STATUS_ICON_SIZE}px + ${theme.spacing.xsmall})`,
       }),
     },
   })
