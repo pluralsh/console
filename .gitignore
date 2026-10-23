@@ -88,3 +88,6 @@ data/
 
 # Agents
 .codex/
+
+# Generated marketing product-shot assets
+/js/design-system/product-shot-exports/
