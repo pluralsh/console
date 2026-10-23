@@ -60,3 +60,12 @@ kas:
     auth:
       password: {{ configuration.kasRedis }}
 
+{% if imports.mgmt.console_s3_bucket %}
+console:
+  config:
+    objectStore:
+      provider: s3
+      s3:
+        bucket: {{ imports.mgmt.console_s3_bucket }}
+        region: {{ imports.mgmt.console_s3_region }}
+{% endif %}

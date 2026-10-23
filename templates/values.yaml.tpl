@@ -61,3 +61,12 @@ kas:
     auth:
       password: {{ .Values.kasRedis }}
 
+{{ if .Values.objectStoreBucket }}
+console:
+  config:
+    objectStore:
+      provider: s3
+      s3:
+        bucket: {{ .Values.objectStoreBucket }}
+        region: {{ .Values.objectStoreRegion }}
+{{ end }}
