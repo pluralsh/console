@@ -6,6 +6,7 @@ import (
 
 	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
 	agentrunv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/attachments"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/prebake"
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
@@ -23,12 +24,13 @@ const ConfigFileName = "opencode.json"
 
 // configureNative writes only the provider-native OpenCode configuration. The
 // shared prompt and skill files are prepared separately by Agent.Prepare.
-func (agent *Agent) configureNative(config toolv1.Config, consoleURL, consoleToken string, provider Provider, model string, openaiCompatible bool, token string) error {
+func (agent *Agent) configureNative(config toolv1.Config, provider Provider, model string, openaiCompatible bool, token string) error {
 	input := &ConfigTemplateInput{
-		ConsoleURL:            consoleURL,
-		ConsoleToken:          consoleToken,
+		// The sidecar forwards these to the Console AI proxy and replaces the key with the deploy token.
+		ConsoleURL:            common.AgentConsoleProxyURL,
+		ConsoleToken:          common.AgentAIProxyAPIKey,
 		AgentRunID:            config.Run.ID,
-		ReadOnlyDirectories:   prebake.ExtraReadDirs(),
+		ReadOnlyDirectories:   append(prebake.ExtraReadDirs(), attachments.ReadDirs()...),
 		Provider:              provider,
 		OpenAICompatible:      openaiCompatible,
 		Endpoint:              config.Run.Runtime.Config.OpenCode.Endpoint,

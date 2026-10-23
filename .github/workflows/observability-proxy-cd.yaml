@@ -41,7 +41,7 @@ jobs:
       # module cache is ~2.5GB and was evicting every other Actions cache in the repo
       - uses: actions/setup-go@v7
         with:
-          go-version-file: go/observability-proxy/go.mod
+          go-version-file: go/go.work
           cache: false
       - run: go mod download
       - run: GOCACHE=/tmp/go-build go test ./...

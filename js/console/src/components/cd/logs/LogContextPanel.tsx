@@ -211,7 +211,7 @@ const FacetRowSC = styled.div(({ theme }) => ({
   display: 'flex',
   gap: theme.spacing.medium,
   borderTop: theme.borders.default,
-  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  padding: `${theme.spacing.small} ${theme.spacing.medium}`,
   '&:hover': {
     cursor: 'pointer',
     backgroundColor: theme.colors['fill-one-hover'],

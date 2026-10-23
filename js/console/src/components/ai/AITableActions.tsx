@@ -1,4 +1,5 @@
 import {
+  ICON_FRAME_ICON_SIZE,
   ArrowRightIcon,
   Button,
   ChatOutlineIcon,
@@ -64,25 +65,40 @@ export function AITableActions({
       >
         <ListBoxItem
           key={MenuItemKey.OpenChat}
-          leftContent={<ChatOutlineIcon />}
-          rightContent={<ArrowRightIcon color="icon-default" />}
+          leftContent={<ChatOutlineIcon size={ICON_FRAME_ICON_SIZE.small} />}
+          rightContent={
+            <ArrowRightIcon
+              size={ICON_FRAME_ICON_SIZE.small}
+              color="icon-default"
+            />
+          }
           label="Open Chat"
         />
         <ListBoxItem
           key={MenuItemKey.Rename}
-          leftContent={<PencilIcon />}
+          leftContent={<PencilIcon size={ICON_FRAME_ICON_SIZE.small} />}
           label="Rename thread"
         />
         <ListBoxItem
           key={MenuItemKey.Fork}
-          leftContent={<GitForkIcon />}
-          rightContent={<ArrowRightIcon color="icon-default" />}
+          leftContent={<GitForkIcon size={ICON_FRAME_ICON_SIZE.small} />}
+          rightContent={
+            <ArrowRightIcon
+              size={ICON_FRAME_ICON_SIZE.small}
+              color="icon-default"
+            />
+          }
           label="Fork thread"
         />
         <ListBoxItem
           key={MenuItemKey.Delete}
           destructive
-          leftContent={<TrashCanIcon color="icon-danger" />}
+          leftContent={
+            <TrashCanIcon
+              size={ICON_FRAME_ICON_SIZE.small}
+              color="icon-danger"
+            />
+          }
           label="Delete thread"
         />
       </MoreMenu>

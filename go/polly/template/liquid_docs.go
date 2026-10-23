@@ -22,31 +22,31 @@ var functionDocs = map[string]FilterFunctionDocumentation{
 		Example:     "`add1 3` returns `4`.",
 	},
 	"add1f": {
-		Description: "Increments float number by 1.",
+		Description: "Increments a float number by 1.",
 		Parameters:  []string{"Float number to increment"},
-		Example:     "`add1 3.0` returns `4.0`.",
+		Example:     "`add1f 3.0` returns `4.0`.",
 	},
 	"addf": {
 		Description: "Sums float numbers. Accepts two or more inputs.",
 		Parameters:  []string{"Float number", "Float number", "..."},
-		Example:     "`add 1.1 2.2 3.3` returns `6.6`.",
+		Example:     "`addf 1.1 2.2 3.3` returns `6.6`.",
 	},
 	"adler32sum": {
-		Description: "Computes Adler-32 checksum of a string.",
+		Description: "Computes the Adler-32 checksum of a string.",
 		Parameters:  []string{"String"},
 		Example:     "`adler32sum \"Hello world!\"`.",
 	},
 	"ago": {
-		Description: "Returns duration from current time (`time.Now`) in seconds resolution.",
+		Description: "Returns duration from current time (`time.Now`) with seconds resolution.",
 		Parameters:  []string{"Date"},
 		Example:     "`ago .CreatedAt` will return something like `2h34m7s`.",
 	},
 	"all": {
-		Description: "Takes a list of values ad returns true if all values are non-empty.",
+		Description: "Takes a list of values and returns true if all values are non-empty.",
 		Parameters:  []string{"List"},
 	},
 	"any": {
-		Description: "Takes a list of values ad returns true if any values are non-empty.",
+		Description: "Takes a list of values and returns true if any values are non-empty.",
 		Parameters:  []string{"List"},
 	},
 	"append": {
@@ -59,19 +59,19 @@ var functionDocs = map[string]FilterFunctionDocumentation{
 		Parameters:  []string{"String to convert"},
 	},
 	"b32dec": {
-		Description: "Decodes string from Base32 format.",
+		Description: "Decodes a string from Base32 format.",
 		Parameters:  []string{"String to decode"},
 	},
 	"b32enc": {
-		Description: "Encodes string with Base32 format.",
+		Description: "Encodes a string in Base32 format.",
 		Parameters:  []string{"String to encode"},
 	},
 	"b64dec": {
-		Description: "Decodes string from Base64 format.",
+		Description: "Decodes a string from Base64 format.",
 		Parameters:  []string{"String to decode"},
 	},
 	"b64enc": {
-		Description: "Encodes string with Base64 format.",
+		Description: "Encodes a string in Base64 format.",
 		Parameters:  []string{"String to encode"},
 	},
 	"base": {
@@ -80,23 +80,23 @@ var functionDocs = map[string]FilterFunctionDocumentation{
 		Example:     "`base \"foo/bar/baz\"` returns `baz`.",
 	},
 	"bcrypt": {
-		Description: "Generates bcrypt hash of a string.",
+		Description: "Generates a bcrypt hash of a string.",
 		Parameters:  []string{"String"},
 	},
 	"biggest": {},
 	"buildCustomCert": {
-		Description: "Allows customizing the certificate. It returns object with PEM-encoded certificate and key. Note that the returned object can be passed to the `genSignedCert` function to sign a certificate using this CA.",
+		Description: "Allows customizing the certificate. It returns an object with PEM-encoded certificate and key. Note that the returned object can be passed to the `genSignedCert` function to sign a certificate using this CA.",
 		Parameters:  []string{"Base64 encoded PEM format certificate", "Base64 encoded PEM format private key"},
 		Example:     "`$ca := buildCustomCert \"base64-encoded-ca-crt\" \"base64-encoded-ca-key\"`",
 	},
 	"camelcase": {
-		Description: "Converts a string from snake_case to camelCase.",
+		Description: "Converts a string from snake_case to PascalCase.",
 		Parameters:  []string{"String to convert"},
 		Example:     "`camelcase \"http_server\"` returns `HttpServer`.",
 	},
 	"cat": {},
 	"ceil": {
-		Description: "Returns greatest float value greater than or equal to input value.",
+		Description: "Returns the smallest float value greater than or equal to the input value.",
 		Parameters:  []string{"Input value"},
 		Example:     "`ceil 123.001` will return `124.0`.",
 	},
@@ -108,16 +108,16 @@ var functionDocs = map[string]FilterFunctionDocumentation{
 		Parameters:  []string{"List"},
 	},
 	"concat": {
-		Description: "Concatenates arbitrary number of lists into one.",
+		Description: "Concatenates an arbitrary number of lists into one.",
 		Parameters:  []string{"List", "..."},
 	},
 	"contains": {
-		Description: "Tests if one string is contained inside of another.",
+		Description: "Tests if one string is contained inside another.",
 		Parameters:  []string{"Substring", "String"},
 		Example:     "`contains \"cat\" \"catch\"` returns `true`.",
 	},
 	"date": {
-		Description: "Formats date. See https://pauladamsmith.com/blog/2011/05/go_time.html.",
+		Description: "Formats a date. See https://pauladamsmith.com/blog/2011/05/go_time.html.",
 		Parameters:  []string{"Date layout"},
 	},
 	"dateInZone": {
@@ -135,7 +135,7 @@ var functionDocs = map[string]FilterFunctionDocumentation{
 		Parameters:  []string{"Base64 string encoded by the AES-256 CBC algorithm"},
 	},
 	"deepCopy": {
-		Description: "Makes deep copy of the value. This includes maps and other structures. It will panic if there is a problem.",
+		Description: "Makes a deep copy of the value. This includes maps and other structures. It will panic if there is a problem.",
 		Parameters:  []string{"Value to copy"},
 		Example:     "`dict \"a\" 1 \"b\" 2 | deepCopy`.",
 	},
@@ -152,13 +152,13 @@ var functionDocs = map[string]FilterFunctionDocumentation{
 		Description: "Performs float number division.",
 	},
 	"duration": {
-		Description: "Formats a given amount of seconds as a `time.Duration`.",
-		Parameters:  []string{"Amount of seconds"},
+		Description: "Formats a given number of seconds as a `time.Duration`.",
+		Parameters:  []string{"Number of seconds"},
 		Example:     "`duration \"95\"` returns `1m35s`.",
 	},
 	"durationRound": {},
 	"empty": {
-		Description: "Returns true if given value has the zero value for its type.",
+		Description: "Returns true if the given value has the zero value for its type.",
 		Parameters:  []string{"Value"},
 		Example:     "`empty .Foo`.",
 	},
@@ -168,17 +168,17 @@ var functionDocs = map[string]FilterFunctionDocumentation{
 		Example:     "`encryptAES \"secretkey\" \"plaintext\"`.",
 	},
 	"env": {
-		Description: "Reads environment variable.",
+		Description: "Reads an environment variable.",
 		Parameters:  []string{"Environment variable name"},
 		Example:     "`env \"HOME\"`",
 	},
 	"expandenv": {
-		Description: "Substitutes environment variable in a string.",
+		Description: "Substitutes environment variables in a string.",
 		Parameters:  []string{"String to expand"},
 		Example:     "`expandenv \"Your path is set to $PATH\"`",
 	},
 	"ext": {
-		Description: "Returns file extension.",
+		Description: "Returns the file extension.",
 		Parameters:  []string{"File path"},
 		Example:     "`ext \"foo.bar\"` will return `\"bar\"`",
 	},
@@ -188,30 +188,30 @@ var functionDocs = map[string]FilterFunctionDocumentation{
 		Example:     "`fail \"Please accept the end user license agreement\"`",
 	},
 	"first": {
-		Description: "Returns head item on a list.",
+		Description: "Returns the head item of a list.",
 		Parameters:  []string{"List"},
 	},
 	"float64": {
-		Description: "Converts to a `float64`",
-		Parameters:  []string{"Value to convert, it can be for example an integer or a string"},
+		Description: "Converts to a `float64`.",
+		Parameters:  []string{"Value to convert; for example, an integer or a string"},
 	},
 	"floor": {
-		Description: "Returns the greatest float value greater than or equal to input value.",
+		Description: "Returns the greatest float value less than or equal to the input value.",
 		Parameters:  []string{"Input value"},
 		Example:     "`floor 123.9999` will return `123.0`",
 	},
 	"fromJson": {
-		Description: "Decodes a JSON document into a structure. If the input cannot be decoded as JSON the function will return an empty string.",
+		Description: "Decodes a JSON document into a structure. If the input cannot be decoded as JSON, the function will return an empty string.",
 		Parameters:  []string{"JSON document"},
 		Example:     "`fromJson \"{\\\"foo\\\": 55}\"`.",
 	},
 	"genCA": {
-		Description: "Generates a new, self-signed x509 SSL Certificate Authority using 2048-bit RSA private key. It returns object with PEM-encoded certificate and key. Note that the returned object can be passed to the `genSignedCert` function to sign a certificate using this CA.",
+		Description: "Generates a new, self-signed x509 SSL Certificate Authority using a 2048-bit RSA private key. It returns an object with PEM-encoded certificate and key. Note that the returned object can be passed to the `genSignedCert` function to sign a certificate using this CA.",
 		Parameters:  []string{"Subject common name (CN)", "Cert validity duration in days"},
 	},
 	"genCAWithKey": {
-		Description: "Generates a new, self-signed x509 SSL Certificate Authority using given private key. It returns object with PEM-encoded certificate and key. Note that the returned object can be passed to the `genSignedCert` function to sign a certificate using this CA.",
-		Parameters:  []string{"Subject common name (CN)", "Cert validity duration in days", "private key (PEM-encoded; DSA keys are not supported)"},
+		Description: "Generates a new, self-signed x509 SSL Certificate Authority using the given private key. It returns an object with PEM-encoded certificate and key. Note that the returned object can be passed to the `genSignedCert` function to sign a certificate using this CA.",
+		Parameters:  []string{"Subject common name (CN)", "Cert validity duration in days", "Private key (PEM-encoded; DSA keys are not supported)"},
 	},
 	"genPrivateKey": {
 		Description: "Generates a new private key encoded into a PEM block.",
@@ -233,19 +233,19 @@ var functionDocs = map[string]FilterFunctionDocumentation{
 		Example:     "`has 4 $myList`",
 	},
 	"hasKey": {
-		Description: "Checks if given dictionary contains given key.",
+		Description: "Checks if the given dictionary contains the given key.",
 		Parameters:  []string{"Map", "Key to find"},
 	},
 	"hasPrefix": {
-		Description: "Check if string has given prefix.",
+		Description: "Checks if a string has the given prefix.",
 		Parameters:  []string{"Prefix", "String"},
 	},
 	"hasSuffix": {
-		Description: "Check if string has given suffix.",
-		Parameters:  []string{"Prefix", "Suffix"},
+		Description: "Checks if a string has the given suffix.",
+		Parameters:  []string{"Suffix", "String"},
 	},
 	"htmlDate": {
-		Description: "Formats a date for inserting into HTML date picker input field.",
+		Description: "Formats a date for inserting into an HTML date picker input field.",
 		Parameters:  []string{"Date"},
 		Example:     "`now | htmlDate`.",
 	},
@@ -257,16 +257,16 @@ var functionDocs = map[string]FilterFunctionDocumentation{
 	"htpasswd": {},
 	"indent":   {},
 	"initial": {
-		Description: "Compliments `last` by retuning all but the last element. It will panic if there is a problem.",
+		Description: "Complements `last` by returning all but the last element. It will panic if there is a problem.",
 		Parameters:  []string{"List"},
 	},
 	"initials": {},
 	"int": {
-		Description: "Converts to a `int`.",
+		Description: "Converts to an `int`.",
 		Parameters:  []string{"Value to convert"},
 	},
 	"int64": {
-		Description: "Converts to a `int64`.",
+		Description: "Converts to an `int64`.",
 		Parameters:  []string{"Value to convert"},
 	},
 	"isAbs": {
@@ -280,7 +280,7 @@ var functionDocs = map[string]FilterFunctionDocumentation{
 		Example:     "`kebabcase \"FirstName\"` returns `first-name`.",
 	},
 	"keys": {
-		Description: "Returns list of all keys from a map.",
+		Description: "Returns a list of all keys from a map.",
 		Parameters:  []string{"Map"},
 	},
 	"kindIs": {},
@@ -290,7 +290,7 @@ var functionDocs = map[string]FilterFunctionDocumentation{
 	"lower": {
 		Description: "Converts the entire string to lowercase.",
 		Parameters:  []string{"String to transform"},
-		Example:     "`upper \\\"HELLO\\\"` will return `hello`.",
+		Example:     "`lower \"HELLO\"` will return `hello`.",
 	},
 	"max": {
 		Description: "Returns the largest of a series of integers.",
@@ -300,7 +300,7 @@ var functionDocs = map[string]FilterFunctionDocumentation{
 	"maxf": {
 		Description: "Returns the largest of a series of floats.",
 		Parameters:  []string{"Float number", "Float number", "..."},
-		Example:     "`max 1 2 3.65` will return `3.65`.",
+		Example:     "`maxf 1 2 3.65` will return `3.65`.",
 	},
 	"merge":          {},
 	"mergeOverwrite": {},
@@ -312,7 +312,7 @@ var functionDocs = map[string]FilterFunctionDocumentation{
 	"minf": {
 		Description: "Returns the smallest of a series of floats.",
 		Parameters:  []string{"Float number", "Float number", "..."},
-		Example:     "`min 1.3 2 3` will return `1.3`.",
+		Example:     "`minf 1.3 2 3` will return `1.3`.",
 	},
 	"mod": {},
 	"mul": {
@@ -326,7 +326,7 @@ var functionDocs = map[string]FilterFunctionDocumentation{
 		Example:     "`mulf 1.5 2 2` returns `6`.",
 	},
 	"mustAppend": {
-		Description: "Appends a new item to existing list, creating a new list. It will return an error to the template engine if there is a problem.",
+		Description: "Appends a new item to an existing list, creating a new list. It will return an error to the template engine if there is a problem.",
 		Parameters:  []string{"List", "Item to append"},
 		Example:     "`mustAppend ( list 1 2 3 ) 5` returns `[1, 2, 3, 5]`.",
 	},
@@ -338,7 +338,7 @@ var functionDocs = map[string]FilterFunctionDocumentation{
 	"mustDateModify": {},
 	"mustDeepCopy":   {},
 	"mustFirst": {
-		Description: "Returns head item on a list. It will return an error to the template engine if there is a problem.",
+		Description: "Returns the head item of a list. It will return an error to the template engine if there is a problem.",
 		Parameters:  []string{"List"},
 		Example:     "`mustFirst $myList`",
 	},
@@ -349,7 +349,7 @@ var functionDocs = map[string]FilterFunctionDocumentation{
 		Example:     "`mustHas 4 $myList`",
 	},
 	"mustInitial": {
-		Description: "Compliments `last` by retuning all but the last element. It will return an error to the template engine ifd there is a problem.",
+		Description: "Complements `last` by returning all but the last element. It will return an error to the template engine if there is a problem.",
 		Parameters:  []string{"List"},
 		Example:     "`mustInitial $myList`",
 	},
@@ -365,7 +365,7 @@ var functionDocs = map[string]FilterFunctionDocumentation{
 	"mustRegexReplaceAllLiteral": {},
 	"mustRegexSplit":             {},
 	"mustRest": {
-		Description: "Gets tail of the list (everything but the first item). It will return an error to the template engine if there is a problem.",
+		Description: "Gets the tail of the list (everything but the first item). It will return an error to the template engine if there is a problem.",
 		Parameters:  []string{"List"},
 		Example:     "`mustRest $myList`",
 	},
@@ -376,7 +376,7 @@ var functionDocs = map[string]FilterFunctionDocumentation{
 	},
 	"mustSlice": {},
 	"mustToDate": {
-		Description: "Converts a string to a date. If the string can’t be converted it returns the zero value. It will return an error to the template engine if there is a problem.",
+		Description: "Converts a string to a date. If the string can’t be converted, it returns the zero value. It will return an error to the template engine if there is a problem.",
 		Parameters:  []string{"Date layout", "Date string"},
 	},
 	"mustToJson":       {},
@@ -388,7 +388,7 @@ var functionDocs = map[string]FilterFunctionDocumentation{
 	},
 	"mustWithout": {
 		Description: "Filters items out of a list. It will return an error to the template engine if there is a problem.",
-		Parameters:  []string{"CList", "Item to filter out"},
+		Parameters:  []string{"List", "Item to filter out"},
 		Example:     "`mustWithout ( list 1 2 3 4 5) 1 3 5` returns `[2, 4]`.",
 	},
 	"nindent": {},
@@ -401,7 +401,7 @@ var functionDocs = map[string]FilterFunctionDocumentation{
 	"osBase": {
 		Description: "Returns the last element of a file path.",
 		Parameters:  []string{"File path"},
-		Example:     "`osClean \"/foo/bar/../baz\"` and `osClean \"C:\\\\foo\\\\bar\\\\..\\\\baz\"` will resolve the `..` and return `foo/baz` on Linux and `C:\\foo\\baz` on Windows.",
+		Example:     "`osBase \"/foo/bar/baz\"` returns `baz` on Linux, and `osBase \"C:\\\\foo\\\\bar\\\\baz\"` returns `baz` on Windows.",
 	},
 	"osClean": {
 		Description: "Cleans up a path.",
@@ -414,7 +414,7 @@ var functionDocs = map[string]FilterFunctionDocumentation{
 		Example:     "`osDir \"/foo/bar/baz\"` returns `/foo/bar` on Linux, and `osDir \"C:\\\\foo\\\\bar\\\\baz\"` returns `C:\\\\foo\\\\bar` on Windows.",
 	},
 	"osExt": {
-		Description: "Return the file extension.",
+		Description: "Returns the file extension.",
 		Parameters:  []string{"File path"},
 		Example:     "`osExt \"/foo.bar\"` and `osExt \"C:\\\\foo.bar\"` will return `.bar` on Linux and Windows, respectively.",
 	},
@@ -432,13 +432,13 @@ var functionDocs = map[string]FilterFunctionDocumentation{
 	"randAlphaNum": {},
 	"randAscii":    {},
 	"randBytes": {
-		Description: "Accepts a count and generates cryptographically secure random sequence of bytes. The sequence is returned as a Base64 encoded string.",
+		Description: "Accepts a count and generates a cryptographically secure random sequence of bytes. The sequence is returned as a Base64 encoded string.",
 		Parameters:  []string{"Number of bytes to generate"},
 	},
 	"randInt": {
 		Description: "Returns a random integer value from min (inclusive) to max (exclusive).",
 		Parameters:  []string{"Min value (inclusive)", "Max value (exclusive)"},
-		Example:     " `randInt 12 30` will produce a random number in the range from 12 to 30.",
+		Example:     "`randInt 12 30` will produce a random number from 12 to 29.",
 	},
 	"randNumeric":            {},
 	"regexFind":              {},
@@ -451,7 +451,7 @@ var functionDocs = map[string]FilterFunctionDocumentation{
 	"repeat":                 {},
 	"replace":                {},
 	"rest": {
-		Description: "Gets tail of the list (everything but the first item).",
+		Description: "Gets the tail of the list (everything but the first item).",
 		Parameters:  []string{"List"},
 	},
 	"reverse": {
@@ -459,23 +459,23 @@ var functionDocs = map[string]FilterFunctionDocumentation{
 		Parameters:  []string{"List"},
 	},
 	"round": {
-		Description: "Returns a float value with the remainder rounded to the given number to digits after the decimal point.",
+		Description: "Returns a float value with the remainder rounded to the given number of digits after the decimal point.",
 		Parameters:  []string{"Float number", "Number of digits to round to"},
 		Example:     "`round 123.55555 3` will return `123.556`.",
 	},
 	"semver":        {},
 	"semverCompare": {},
 	"seq": {
-		Description: "Works like Bash `seq` command. Specify 1 parameter (`end`) to generate all counting integers between 1 and `end` inclusive. Specify 2 parameters (`start` and `end`) to generate all counting integers between `start` and `end` inclusive incrementing or decrementing by 1. Specify 3 parameters (`start`, `step` and `end`) to generate all counting integers between `start` and `end` inclusive incrementing or decrementing by `step`.",
+		Description: "Works like the Bash `seq` command. Specify 1 parameter (`end`) to generate all counting integers between 1 and `end` inclusive. Specify 2 parameters (`start` and `end`) to generate all counting integers between `start` and `end` inclusive incrementing or decrementing by 1. Specify 3 parameters (`start`, `step` and `end`) to generate all counting integers between `start` and `end` inclusive incrementing or decrementing by `step`.",
 	},
 	"set":     {},
 	"sha1sum": {},
 	"sha256sum": {
-		Description: "Generates SHA256 hash of an input.",
+		Description: "Generates a SHA256 hash of an input.",
 		Parameters:  []string{"Input value"},
 	},
 	"sha512sum": {
-		Description: "Generates SHA512 hash of an input.",
+		Description: "Generates a SHA512 hash of an input.",
 		Parameters:  []string{"Input value"},
 		Example:     "`sha512sum \"Hello world!\"`.",
 	},
@@ -488,7 +488,7 @@ var functionDocs = map[string]FilterFunctionDocumentation{
 	"snakecase": {
 		Description: "Converts a string from camelCase to snake_case.",
 		Parameters:  []string{"String to convert"},
-		Example:     "`camelcase \"FirstName\"` returns `first_name`.",
+		Example:     "`snakecase \"FirstName\"` returns `first_name`.",
 	},
 	"sortAlpha": {},
 	"split":     {},
@@ -499,7 +499,7 @@ var functionDocs = map[string]FilterFunctionDocumentation{
 	"subf":      {},
 	"substr":    {},
 	"swapcase": {
-		Description: "Swaps the case of a string using a word based algorithm.",
+		Description: "Swaps the case of a string using a word-based algorithm.",
 		Parameters:  []string{"String to convert"},
 		Example:     "`swapcase \"This Is A.Test\"` returns `tHIS iS a.tEST`.",
 	},
@@ -514,26 +514,26 @@ var functionDocs = map[string]FilterFunctionDocumentation{
 		Example:     "`title \"hello world\"` returns `\"Hello World\"`.",
 	},
 	"toDate": {
-		Description: "Converts a string to a date. If the string can’t be converted it returns the zero value.",
+		Description: "Converts a string to a date. If the string can’t be converted, it returns the zero value.",
 		Parameters:  []string{"Date layout", "Date string"},
 	},
 	"toDecimal": {
-		Description: "Converts a Unix octal to a `int64`.",
+		Description: "Converts a Unix octal to an `int64`.",
 		Parameters:  []string{"Unix octal"},
 		Example:     "`\"0777\" | toDecimal` will convert `0777` to `511` and return the value as `int64`.",
 	},
 	"toJson": {
-		Description: "Encodes an item into JSON string. If the item cannot be converted to JSON the function will return an empty string.",
+		Description: "Encodes an item into a JSON string. If the item cannot be converted to JSON, the function will return an empty string.",
 		Parameters:  []string{"An item to encode"},
 		Example:     "`toJson .Item` returns JSON string representation of `.Item`.",
 	},
 	"toPrettyJson": {
-		Description: "Encodes an item into pretty (intended) JSON string.",
+		Description: "Encodes an item into a pretty (indented) JSON string.",
 		Parameters:  []string{"An item to encode"},
-		Example:     "`toPrettyJson .Item` returns intended JSON string representation of `.Item`.",
+		Example:     "`toPrettyJson .Item` returns an indented JSON string representation of `.Item`.",
 	},
 	"toRawJson": {
-		Description: "Encodes an item into JSON string with HTML characters unescaped.",
+		Description: "Encodes an item into a JSON string with HTML characters unescaped.",
 		Parameters:  []string{"An item to encode"},
 		Example:     "`toRawJson .Item` returns unescaped JSON string representation of `.Item`.",
 	},
@@ -544,10 +544,10 @@ var functionDocs = map[string]FilterFunctionDocumentation{
 	"toStrings": {
 		Description: "Converts a list, slice or array to a list of strings.",
 		Parameters:  []string{"List"},
-		Example:     "`list 1 2 3 | toString` converts `1`, `2` and `3` to strings and then returns them as a list.",
+		Example:     "`list 1 2 3 | toStrings` converts `1`, `2` and `3` to strings and then returns them as a list.",
 	},
 	"trim": {
-		Description: "Removes space from either side of a string.",
+		Description: "Removes whitespace from both sides of a string.",
 		Parameters:  []string{"String to trim"},
 		Example:     "`trim \"  hello  \"` will return `hello`.",
 	},
@@ -582,7 +582,7 @@ var functionDocs = map[string]FilterFunctionDocumentation{
 		Example:     "`now | unixEpoch`",
 	},
 	"unset": {
-		Description: "Given a map and a key it deletes the key from the map. It returns dictionary. Note that if the key is not found this operation will simply return. No error will be generated.",
+		Description: "Given a map and a key, deletes the key from the map and returns the dictionary. If the key is not found, this operation returns without generating an error.",
 		Parameters:  []string{"Map", "Key of an item to delete"},
 	},
 	"until": {
@@ -591,9 +591,9 @@ var functionDocs = map[string]FilterFunctionDocumentation{
 		Example:     "`until 5` will return a list `[0, 1, 2, 3, 4]`.",
 	},
 	"untilStep": {
-		Description: "Like `until` generates a list of counting integers but it allows to define a start, stop and step.",
+		Description: "Like `until`, generates a list of counting integers, but lets you define a start, stop, and step.",
 		Parameters:  []string{"Start value (inclusive)", "Max value (exclusive)", "Step"},
-		Example:     "`untilStep 3 6 2` will return `[3, 5]` by starting with 3 and adding 2 until it is equal or greater than 6.",
+		Example:     "`untilStep 3 6 2` will return `[3, 5]` by starting with 3 and adding 2 until it is equal to or greater than 6.",
 	},
 	"untitle": {
 		Description: "Removes title casing.",
@@ -606,16 +606,16 @@ var functionDocs = map[string]FilterFunctionDocumentation{
 		Example:     "`upper \"hello\"` returns `HELLO`",
 	},
 	"urlJoin": {
-		Description: "Joins map produced by `urlParse` to produce URL string.",
+		Description: "Joins a map produced by `urlParse` into a URL string.",
 		Parameters:  []string{"Map produced by `urlParse`"},
-		Example:     "`urlJoin (dict \"fragment\" \"fragment\" \"host\" \"host:80\" \"path\" \"/path\" \"query\" \"query\" \"scheme\" \"http\")` returns `proto://host:80/path?query#fragment`.",
+		Example:     "`urlJoin (dict \"fragment\" \"fragment\" \"host\" \"host:80\" \"path\" \"/path\" \"query\" \"query\" \"scheme\" \"http\")` returns `http://host:80/path?query#fragment`.",
 	},
 	"urlParse": {
-		Description: "Parses string for URL and produces dict with URL parts. For more info check https://golang.org/pkg/net/url/#URL.",
+		Description: "Parses a URL string and produces a dict with the URL parts. For more info, see https://golang.org/pkg/net/url/#URL.",
 		Parameters:  []string{"String with URL"},
 	},
 	"values": {
-		Description: "Returns list of all values from a map.",
+		Description: "Returns a list of all values from a map.",
 		Parameters:  []string{"Map"},
 	},
 	"without": {
@@ -629,8 +629,8 @@ var functionDocs = map[string]FilterFunctionDocumentation{
 		Example:     "`wrap 80 $text` will wrap the string in `$text` at 80 columns.",
 	},
 	"wrapWith": {
-		Description: "Works as `wrap` but lets you specify the string to wrap with (`wrap` uses `\\n`).",
+		Description: "Works like `wrap`, but lets you specify the string to wrap with (`wrap` uses `\\n`).",
 		Parameters:  []string{"Column count", "String to wrap with", "Text"},
-		Example:     "`wrapWith 5 \"\\t\" \"Hello world\"` returns `hello world` (where the whitespace is an ASCII tab character).",
+		Example:     "`wrapWith 5 \"\\t\" \"Hello world\"` returns `Hello world` (where the whitespace is an ASCII tab character).",
 	},
 }

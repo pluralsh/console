@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "paths": {
+      "@pluralsh/design-system": ["../design-system/src/index.ts"],
       "*": ["./src/*"]
     },
     "target": "ESNext",

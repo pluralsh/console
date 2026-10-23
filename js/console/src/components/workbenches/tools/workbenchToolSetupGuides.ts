@@ -19,6 +19,7 @@ const TOOL_SETUP_GUIDE_MARKDOWN_PATHS: Partial<
   [WorkbenchToolType.Atlassian]: '/setup-guides/tools/atlassian.md',
   [WorkbenchToolType.Jira]: '/setup-guides/tools/jira.md',
   [WorkbenchToolType.JiraDatacenter]: '/setup-guides/tools/jira_datacenter.md',
+  [WorkbenchToolType.ServiceNow]: '/setup-guides/tools/service_now.md',
   [WorkbenchToolType.Exa]: '/setup-guides/tools/exa.md',
   [WorkbenchToolType.Github]: '/setup-guides/tools/github.md',
   [WorkbenchToolType.Gitlab]: '/setup-guides/tools/gitlab.md',
@@ -65,6 +66,8 @@ const TOOL_SETUP_GUIDE_DOC_URLS: Partial<Record<WorkbenchToolType, string>> = {
     'https://developer.atlassian.com/cloud/jira/platform/basic-auth-for-rest-apis/',
   [WorkbenchToolType.JiraDatacenter]:
     'https://confluence.atlassian.com/enterprise/using-personal-access-tokens-1026032365.html',
+  [WorkbenchToolType.ServiceNow]:
+    'https://www.servicenow.com/docs/bundle/latest-api-reference/page/integrate/inbound-rest/concept/c_TableAPI.html',
   [WorkbenchToolType.Exa]: 'https://dashboard.exa.ai/api-keys',
   [WorkbenchToolType.Github]:
     'https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens',

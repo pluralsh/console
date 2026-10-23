@@ -117,7 +117,7 @@ func (t *recordingTool) ConfigureBabysitRun() error {
 	return nil
 }
 
-func (t *recordingTool) Configure(_, _ string) error { return nil }
+func (t *recordingTool) Configure() error { return nil }
 
 func (t *recordingTool) OnMessage(toolv1.MessageCallback) {}
 
@@ -130,6 +130,10 @@ func (t *recordingTool) FollowUpRun(context.Context, string) error {
 
 func (t *recordingTool) UploadArtifacts(context.Context) (*artifacts.UploadArtifacts, error) {
 	return nil, nil
+}
+
+func (t *recordingTool) RestoreSession(context.Context, string) (string, error) {
+	return "", nil
 }
 
 type fakeBabysitGRPCClient struct {

@@ -173,7 +173,7 @@ const CalendarSC = styled.div(({ theme }) => ({
       ...theme.partials.text.subtitle2,
       textAlign: 'center',
       flexGrow: 1,
-      padding: `0 ${theme.spacing.small}px`,
+      padding: `0 ${theme.spacing.small}`,
     },
     '.button': {
       width: `${100 / 7}%`,
@@ -250,14 +250,12 @@ export function Calendar({
       <div className="header">
         <h3 className="title">{title}</h3>
         <div className="button prevButton">
-          {/* @ts-ignore */}
           <NextPrevButton
             icon={<ArrowLeftIcon />}
             {...prevButtonProps}
           />
         </div>
         <div className="button nextButton">
-          {/* @ts-ignore */}
           <NextPrevButton
             icon={<ArrowRightIcon />}
             {...nextButtonProps}

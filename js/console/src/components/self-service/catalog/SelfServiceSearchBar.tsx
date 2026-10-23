@@ -1,7 +1,6 @@
 import {
   CatalogIcon,
   Chip,
-  Flex,
   Input,
   MagnifyingGlassIcon,
   PrQueueIcon,
@@ -10,7 +9,7 @@ import { CreatePrAutomation } from 'components/self-service/pr/automations/Creat
 import { Body2P } from 'components/utils/typography/Text'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { isEmpty } from 'lodash'
-import { ReactNode, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getCatalogAbsPath } from 'routes/selfServiceRoutesConsts'
 import { useTheme } from 'styled-components'
@@ -22,13 +21,16 @@ import type {
 
 export type { SearchDropdownItem }
 
+const SEARCH_WIDTH = 240
+const SEARCH_EXPANDED_WIDTH = 520
+
+// sized for a page toolbar: small until focused, then wide enough for the
+// semantic search prompt and its results
 export function SelfServiceSearchBar({
-  aside,
   search,
   showCatalogGroup = true,
   showPrGroup = true,
 }: {
-  aside?: ReactNode
   search: SelfServiceSearchState
   showCatalogGroup?: boolean
   showPrGroup?: boolean
@@ -53,109 +55,109 @@ export function SelfServiceSearchBar({
   const showSearchDropdown = searchFocused && hasActiveSearch && showDropdown
 
   return (
-    <>
-      <Flex
-        gap="medium"
-        width="100%"
-        justify="space-between"
-      >
+    <div
+      css={{
+        flexShrink: 1,
+        minWidth: 140,
+        position: 'relative',
+        transition: 'width 200ms ease',
+        width: searchFocused ? SEARCH_EXPANDED_WIDTH : SEARCH_WIDTH,
+      }}
+    >
+      <Input
+        size="small"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.currentTarget.value)}
+        onFocus={() => setSearchFocused(true)}
+        onBlur={() => setSearchFocused(false)}
+        showClearButton
+        placeholder={
+          !semanticSearchEnabled
+            ? 'Search'
+            : searchFocused
+              ? 'Ask anything across service catalog and PR automations. Try "I want to create clusters."'
+              : 'Search or ask anything'
+        }
+        startIcon={
+          <MagnifyingGlassIcon
+            size={12}
+            color="icon-light"
+          />
+        }
+        css={{ width: '100%' }}
+      />
+      {showSearchDropdown && (
         <div
+          onMouseDown={(e) => e.preventDefault()}
           css={{
-            flexGrow: 1,
-            position: 'relative',
+            background: theme.colors['fill-one'],
+            border: theme.borders['fill-two'],
+            borderRadius: theme.borderRadiuses.medium,
+            boxShadow: theme.boxShadows.moderate,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: theme.spacing.small,
+            left: 0,
+            maxHeight: 500,
+            overflowY: 'auto',
+            padding: theme.spacing.small,
+            position: 'absolute',
+            right: 0,
+            top: `calc(100% + ${theme.spacing.xxsmall})`,
+            zIndex: theme.zIndexes.selectPopover,
           }}
         >
-          <Input
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.currentTarget.value)}
-            onFocus={() => setSearchFocused(true)}
-            onBlur={() => setSearchFocused(false)}
-            showClearButton
-            placeholder={
-              semanticSearchEnabled
-                ? 'Ask anything across service catalog and PR automations. Try "I want to create clusters."'
-                : 'Search'
-            }
-            startIcon={<MagnifyingGlassIcon color="icon-light" />}
-            css={{ width: '100%' }}
-          />
-          {showSearchDropdown && (
-            <div
-              onMouseDown={(e) => e.preventDefault()}
+          {isSearchPending ? (
+            <RectangleSkeleton
+              $height={56}
+              $width="100%"
+            />
+          ) : !panelHasResults ? (
+            <Body2P
+              $color="text-xlight"
               css={{
-                background: theme.colors['fill-one'],
-                border: theme.borders['fill-two'],
-                borderRadius: theme.borderRadiuses.medium,
-                boxShadow: theme.boxShadows.moderate,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: theme.spacing.small,
-                left: 0,
-                maxHeight: 500,
-                overflowY: 'auto',
-                padding: theme.spacing.small,
-                position: 'absolute',
-                right: 0,
-                top: `calc(100% + ${theme.spacing.xxsmall}px)`,
-                zIndex: theme.zIndexes.selectPopover,
+                padding: `${theme.spacing.xsmall} ${theme.spacing.small}`,
+                textAlign: 'center',
               }}
             >
-              {isSearchPending ? (
-                <RectangleSkeleton
-                  $height={56}
-                  $width="100%"
-                />
-              ) : !panelHasResults ? (
-                <Body2P
-                  $color="text-xlight"
-                  css={{
-                    padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
-                    textAlign: 'center',
+              No results found.
+            </Body2P>
+          ) : (
+            <>
+              {showCatalogGroup && (
+                <SelfServiceSearchDropdownGroup
+                  label="Service catalog"
+                  items={panelCatalogItems}
+                  icon={<CatalogIcon />}
+                  clickable
+                  onClick={(item) => {
+                    setSearchFocused(false)
+                    navigate(getCatalogAbsPath(item.id))
                   }}
-                >
-                  No results found.
-                </Body2P>
-              ) : (
-                <>
-                  {showCatalogGroup && (
-                    <SelfServiceSearchDropdownGroup
-                      label="Service catalog"
-                      items={panelCatalogItems}
-                      icon={<CatalogIcon />}
-                      clickable
-                      onClick={(item) => {
-                        setSearchFocused(false)
-                        navigate(getCatalogAbsPath(item.id))
-                      }}
-                      renderRightContent={(item) => {
-                        return (
-                          item.category && (
-                            <Chip size="small">{item.category}</Chip>
-                          )
-                        )
-                      }}
-                    />
-                  )}
-                  {showPrGroup && (
-                    <SelfServiceSearchDropdownGroup
-                      label="PR automations"
-                      items={panelPrAutomationItems}
-                      icon={<PrQueueIcon />}
-                      renderRightContent={(item) => (
-                        <CreatePrAutomation
-                          id={item.id}
-                          buttonProps={{ small: true }}
-                        />
-                      )}
-                    />
-                  )}
-                </>
+                  renderRightContent={(item) => {
+                    return (
+                      item.category && <Chip size="small">{item.category}</Chip>
+                    )
+                  }}
+                />
               )}
-            </div>
+              {showPrGroup && (
+                <SelfServiceSearchDropdownGroup
+                  label="PR automations"
+                  items={panelPrAutomationItems}
+                  icon={<PrQueueIcon />}
+                  renderRightContent={(item) => (
+                    <CreatePrAutomation
+                      id={item.id}
+                      buttonProps={{ small: true }}
+                    />
+                  )}
+                />
+              )}
+            </>
           )}
         </div>
-        {aside}
-      </Flex>
-    </>
+      )}
+    </div>
   )
 }

@@ -65,7 +65,7 @@ spec:
 
 ## Browser endpoints
 
-- **Browserless (chrome/chromium/firefox/puppeteer):** websocket endpoint on `ws://localhost:3000` (Playwright uses `ws://localhost:3000/chrome/playwright` by default).
+- **Browserless (chrome/chromium/firefox/puppeteer):** WebSocket endpoint on `ws://localhost:3000` (Playwright uses `ws://localhost:3000/chrome/playwright` by default).
 - **Selenium:** HTTP endpoint on `http://localhost:3000`.
 
 ## Repository setup for remote browser tests

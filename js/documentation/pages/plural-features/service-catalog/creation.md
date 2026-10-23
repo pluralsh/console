@@ -6,10 +6,10 @@ description: Defining your own service catalogs with Plural
 ## Overview
 
 {% callout severity="info" %}
-TLDR: skip to {% doclink to="plural_features_service_catalog_creation" %}Examples{% /doclink %} to see a link to our Github repository with our full default catalog for working examples
+TLDR: skip to [Examples](#examples) to see a link to our GitHub repository with our full default catalog for working examples
 {% /callout %}
 
-Plural Service Catalogs are ultimately driven off of two kubernetes custom resources: `Catalog` and `PrAutomation`.  Here are examples of both:
+Plural Service Catalogs are ultimately driven by two Kubernetes custom resources: `Catalog` and `PrAutomation`.  Here are examples of both:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -103,10 +103,10 @@ spec:
     documentation: The cloud provider region you're going to use to deploy cloud resources.
 ```
 
-A catalog is a container for many PRAutomations which themselves control the code-generation to accomplish the provisioning task being implemented.  In this case, we're provisioning [Airbyte](https://airbyte.com/).  The real work is being done in the referenced templates.
+A catalog is a container for many PRAutomations, which themselves control the code generation that accomplishes the provisioning task being implemented.  In this case, we're provisioning [Airbyte](https://airbyte.com/).  The real work is being done in the referenced templates.
 
 ## Examples
 
-The best way to get some inspiration on how to write your own templates is to look through some examples, and that's why we've made our default service catalog open source.  You can browse it here:
+The best way to get inspiration for writing your own templates is to look through some examples, which is why we've made our default service catalog open source.  You can browse it here:
 
 https://github.com/pluralsh/scaffolds/tree/main/setup/catalogs

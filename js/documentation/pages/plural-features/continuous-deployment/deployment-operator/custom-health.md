@@ -37,7 +37,7 @@ The script receives a global `Obj`: the unstructured target Kubernetes resource.
 
 ## Script outputs
 
-Every script sets global `healthStatus` to an object with `status` and, when applicable, `message` fields. The allowed status values are:
+Every script sets the global `healthStatus` to an object with `status` and, when applicable, `message` fields. The allowed status values are:
 
 - `Healthy`
 - `Progressing`

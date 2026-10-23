@@ -64,7 +64,7 @@ export function OidcProviders({
   )
 }
 const AddNewProviderCardSC = styled(Card)(({ theme }) => ({
-  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  padding: `${theme.spacing.small} ${theme.spacing.medium}`,
   background: 'transparent',
   display: 'flex',
   alignItems: 'center',
@@ -105,6 +105,7 @@ const cols = [
         <Flex gap="xxsmall">
           <IconFrame
             clickable
+            size="small"
             tooltip="Delete provider"
             onClick={(e) => {
               e.stopPropagation()
@@ -114,6 +115,7 @@ const cols = [
           />
           <IconFrame
             clickable
+            size="small"
             tooltip="Go to provider settings"
             icon={<CaretRightIcon />}
           />

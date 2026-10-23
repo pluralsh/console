@@ -18,7 +18,16 @@ defmodule CloudQuery.ClientTest do
     assert Client.adapter() == GRPC.Client.Adapters.Gun
     assert [{Retry, opts}] = Client.interceptors()
     assert opts[:max] == 3
-    assert Client.cloud_query_rpc_opts() == [timeout: :timer.minutes(5)]
+    assert Client.adapter_opts()[:http2_opts] == %{keepalive: :timer.seconds(15), keepalive_tolerance: 2}
+  end
+
+  test "advertises gzip on every unary rpc without compressing requests" do
+    for opts <- [Client.metrics_rpc_opts(), Client.cloud_query_rpc_opts(), Client.logs_rpc_opts(), Client.lambda_rpc_opts()] do
+      assert opts[:accepted_compressors] == [GRPC.Compressor.Gzip]
+      refute opts[:compressor]
+    end
+
+    assert Client.cloud_query_rpc_opts()[:timeout] == :timer.minutes(5)
   end
 end
 

@@ -76,7 +76,7 @@ When a job completes with Write mode and the agent has opened pull requests, the
 The most powerful workbench configurations pair operational capabilities with a coding agent:
 
 * **Kubernetes + Pod logs + Write mode** — investigate a crashing service, identify the offending configuration, and open a PR against the GitOps repo to fix it
-* **Stacks + Write mode** — detect a drift in Terraform state and open a PR to reconcile the IaC definition
+* **Stacks + Write mode** — detect drift in Terraform state and open a PR to reconcile the IaC definition
 * **Vulnerabilities + Write mode** — scan for CVEs in Plural-managed services and open PRs to bump affected dependency versions in the relevant repos
 
-In these patterns the agent moves through a full remediation loop: observe, diagnose, fix, and create a reviewable artifact — all within a single workbench job.
+In these patterns, the agent moves through a full remediation loop: observe, diagnose, fix, and create a reviewable artifact — all within a single workbench job.

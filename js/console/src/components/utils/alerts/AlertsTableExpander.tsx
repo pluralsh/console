@@ -11,15 +11,12 @@ import { truncate } from 'lodash'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { Body2BoldP } from '../typography/Text'
+import { getAlertAnnotations, getAlertTags } from './alertDetails'
 
 export function AlertsTableExpander({ row }: { row: Row<AlertFragment> }) {
   const alert = row.original
-  const tags = alert.tags?.filter(
-    (tag): tag is { id: string; name: string; value: string } => !!tag
-  )
-  const annotations = Object.entries(alert.annotations ?? {}).filter(
-    (arr): arr is [string, string] => typeof arr[1] === 'string'
-  )
+  const tags = getAlertTags(alert)
+  const annotations = getAlertAnnotations(alert)
 
   return (
     <WrapperSC>

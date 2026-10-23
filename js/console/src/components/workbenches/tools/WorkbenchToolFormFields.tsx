@@ -117,6 +117,24 @@ export function WorkbenchToolFormFields({
         />
       )
     }
+    case WorkbenchToolType.ServiceNow: {
+      const key = CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY[type]
+      const config =
+        state.configuration?.[key] ?? INITIAL_TOOL_CONFIG_BY_TYPE[type]({})[key]
+      return (
+        <ServiceNowFormFields
+          config={config}
+          setConfig={(next) =>
+            update({
+              configuration: { ...state.configuration, [key]: next },
+            })
+          }
+          oauth={state.oauth}
+          setOauth={(oauth) => update({ oauth })}
+          persistedOauthType={persistedOauthType}
+        />
+      )
+    }
     case WorkbenchToolType.Linear:
       return render(type, LinearFormFields)
     case WorkbenchToolType.Slack:
@@ -285,7 +303,7 @@ function OpensearchFormFields({
       <p
         css={{
           margin: 0,
-          fontSize: 14,
+          fontSize: '0.875rem',
           color: colors['text-xlight'],
         }}
       >
@@ -657,7 +675,7 @@ function PrometheusFormFields({
           <p
             css={{
               margin: 0,
-              fontSize: 14,
+              fontSize: '0.875rem',
               color: colors['text-xlight'],
             }}
           >
@@ -791,6 +809,55 @@ function JiraDatacenterFormFields({
           value={c.apiToken ?? ''}
           onChange={(e) => set({ ...c, apiToken: e.target.value })}
         />
+      )}
+      <OauthTokenExchangeFormFields
+        oauth={oauth}
+        setOauth={setOauth}
+        persistedType={persistedOauthType}
+      />
+    </>
+  )
+}
+
+function ServiceNowFormFields({
+  config: c,
+  setConfig: set,
+  oauth,
+  setOauth,
+  persistedOauthType,
+}: ToolFormFieldProps<WorkbenchToolType.ServiceNow> & {
+  oauth?: Nullable<OauthTokenExchangeAttributes>
+  setOauth: (oauth: OauthTokenExchangeAttributes | undefined) => void
+  persistedOauthType?: Nullable<OauthTokenExchangeType>
+}) {
+  return (
+    <>
+      <InputField
+        label="ServiceNow instance URL"
+        hint="Your instance URL, for example https://example.service-now.com"
+        placeholder="https://example.service-now.com"
+        required
+        value={c.url}
+        onChange={(e) => set({ ...c, url: e.target.value })}
+      />
+      {!oauth?.enabled && (
+        <>
+          <InputField
+            label="Username"
+            hint="ServiceNow user the agent acts as. It needs read and write access to the ticket tables."
+            required
+            value={c.username ?? ''}
+            onChange={(e) => set({ ...c, username: e.target.value })}
+          />
+          <InputField
+            label="Password"
+            hint="Leave blank when editing to keep the stored password."
+            required
+            revealer
+            value={c.password ?? ''}
+            onChange={(e) => set({ ...c, password: e.target.value })}
+          />
+        </>
       )}
       <OauthTokenExchangeFormFields
         oauth={oauth}
@@ -1076,7 +1143,7 @@ function GithubFormFields({
             <p
               css={{
                 margin: 0,
-                fontSize: 14,
+                fontSize: '0.875rem',
                 color: colors['text-xlight'],
               }}
             >

@@ -65,7 +65,7 @@ export function LabelsAnnotations({
       <Flex
         direction="column"
         gap="xlarge"
-        maxWidth={(CARD_CONTENT_MAX_WIDTH - theme.spacing.xlarge * 3) / 2}
+        maxWidth={`calc((${CARD_CONTENT_MAX_WIDTH}px - 3 * ${theme.spacing.xlarge}) / 2)`}
       >
         {hasLabels && (
           <LabelsAnnotationsRow name="Labels">

@@ -114,8 +114,9 @@ export default function CronJob(): ReactElement<any> {
         tabs={directory}
         additionalHeaderContent={
           <Button
-            floating
-            startIcon={<PlayIcon />}
+            secondary
+            small
+            startIcon={<PlayIcon size={12} />}
             onClick={() =>
               mutation.mutate({
                 client: AxiosInstance(clusterId),

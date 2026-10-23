@@ -9,6 +9,7 @@ import {
   DiscoverIcon,
   Flex,
   KubernetesIcon,
+  PaperclipIcon,
   ListIcon,
   PrOpenIcon,
   SmallNodeIcon,
@@ -72,12 +73,15 @@ export function WorkbenchPromptOptionsSelector({
   onChange,
   disabled = false,
   workbenchModes,
+  onAttachFiles,
 }: {
   workbenchId?: Nullable<string>
   value: WorkbenchJobModesAttributes | null
   onChange: (value: WorkbenchJobModesAttributes | null) => void
   disabled?: boolean
   workbenchModes?: WorkbenchJobModes | null
+  /** Shows an attach files entry when set */
+  onAttachFiles?: () => void
 }) {
   const theme = useTheme()
   const { panelBackground, panelBorder } = workbenchPromptPanelSurfaces(theme)
@@ -154,7 +158,6 @@ export function WorkbenchPromptOptionsSelector({
           width: PANEL_WIDTH,
           minWidth: PANEL_WIDTH,
           maxWidth: PANEL_WIDTH,
-          clipPath: 'none',
         }}
       >
         <Card
@@ -195,7 +198,7 @@ export function WorkbenchPromptOptionsSelector({
                 maxHeight: PANEL_MAX_HEIGHT,
                 minHeight: 0,
                 overflowY: 'auto',
-                padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+                padding: `${theme.spacing.small} ${theme.spacing.medium}`,
                 pointerEvents: sidePanel ? 'none' : undefined,
               }}
               aria-hidden={!!sidePanel}
@@ -281,6 +284,22 @@ export function WorkbenchPromptOptionsSelector({
                   <WorkbenchBudgetSpendCapWarning
                     workbenchId={workbenchId}
                     budget={value?.budget}
+                  />
+                </>
+              )}
+              {onAttachFiles && (
+                <>
+                  <Divider />
+                  <PromptOptionRow
+                    label="Attach files"
+                    hint="Or drag and drop files onto the prompt"
+                    icon={<PaperclipIcon size={12} />}
+                    showCaret={false}
+                    onOpen={() => {
+                      setIsOpen(false)
+                      setSidePanel(null)
+                      onAttachFiles()
+                    }}
                   />
                 </>
               )}
@@ -444,11 +463,13 @@ function PromptOptionRow({
   hint,
   icon,
   onOpen,
+  showCaret = true,
 }: {
   label: string
   hint: string
   icon: ReactNode
   onOpen: () => void
+  showCaret?: boolean
 }) {
   const theme = useTheme()
   const { modeItemBackground } = workbenchPromptPanelSurfaces(theme)
@@ -486,11 +507,13 @@ function PromptOptionRow({
         </Flex>
         <CaptionP $color="text-xlight">{hint}</CaptionP>
       </Flex>
-      <CaretRightIcon
-        size={12}
-        color="icon-light"
-        css={{ alignSelf: 'center', flexShrink: 0 }}
-      />
+      {showCaret && (
+        <CaretRightIcon
+          size={12}
+          color="icon-light"
+          css={{ alignSelf: 'center', flexShrink: 0 }}
+        />
+      )}
     </button>
   )
 }
@@ -641,7 +664,7 @@ function SidePanelContainer({
         maxHeight: PANEL_MAX_HEIGHT,
         minHeight: 0,
         overflowY: 'auto',
-        padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+        padding: `${theme.spacing.small} ${theme.spacing.medium}`,
         pointerEvents: hidden ? 'none' : undefined,
       }}
       aria-hidden={hidden}
@@ -650,7 +673,7 @@ function SidePanelContainer({
       {children}
       <div
         css={{
-          margin: `auto -${theme.spacing.medium}px -${theme.spacing.small}px`,
+          margin: `auto -${theme.spacing.medium} -${theme.spacing.small}`,
           borderTop: panelBorder,
         }}
       >
@@ -663,7 +686,7 @@ function SidePanelContainer({
             alignItems: 'center',
             gap: theme.spacing.xsmall,
             width: '100%',
-            padding: `${theme.spacing.xsmall + theme.spacing.small / 2}px ${theme.spacing.medium}px`,
+            padding: `calc(${theme.spacing.xsmall} + ${theme.spacing.small} / 2) ${theme.spacing.medium}`,
             color: theme.colors.text,
             cursor: 'pointer',
             '&:hover': { background: modeItemBackground },
@@ -724,7 +747,7 @@ function SelectedOptionPill({
       css={{
         height: 32,
         flexShrink: 0,
-        gap: 8,
+        gap: '0.5rem',
       }}
     >
       {icon}

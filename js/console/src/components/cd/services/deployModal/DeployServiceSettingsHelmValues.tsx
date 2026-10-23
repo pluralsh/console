@@ -28,7 +28,7 @@ export const HelmValuesFilesTableSC = styled.table(({ theme }) => ({
   },
   'thead th': {
     ...theme.partials.text.body2Bold,
-    // marginBottom: -theme.spacing.xxxsmall,
+    // marginBottom: theme.spacing['minus-xxxsmall'],
   },
   th: {
     display: 'block',
@@ -270,7 +270,7 @@ const HelmValuesFilesInput = memo(
                   <th>
                     <DeleteIconButton
                       disabled={i === 0 && !valuesFile}
-                      css={{ marginTop: 4 }}
+                      css={{ marginTop: '0.25rem' }}
                       onClick={() => {
                         setHelmValuesFiles((helmValues) =>
                           produce(helmValues, (draft) => {

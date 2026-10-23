@@ -20,6 +20,7 @@ defmodule Console.AI.Workbench.MCP.Toolset.Classify do
     Jira,
     Pagerduty,
     Sentry,
+    ServiceNow,
     Slack,
     Teams
   }
@@ -32,6 +33,7 @@ defmodule Console.AI.Workbench.MCP.Toolset.Classify do
     Observability.Logs,
     Observability.LogAggregate,
     Observability.Traces,
+    Observability.TraceFacets,
     Observability.ExternalDashboard,
     Observability.ExternalDashboards,
     Observability.ExternalMonitor,
@@ -63,7 +65,7 @@ defmodule Console.AI.Workbench.MCP.Toolset.Classify do
     Infrastructure.PodLogs
   ]
 
-  @traces [Observability.Traces]
+  @traces [Observability.Traces, Observability.TraceFacets]
 
   @infrastructure [
     Infrastructure.ApiDiscovery,
@@ -129,6 +131,10 @@ defmodule Console.AI.Workbench.MCP.Toolset.Classify do
     Sentry.IssueRead,
     Sentry.ListIssueEvents,
     Sentry.ListIssues,
+    ServiceNow.GetRecord,
+    ServiceNow.ListComments,
+    ServiceNow.ListRecords,
+    ServiceNow.ListStates,
     Slack.FindChannelByName,
     Slack.ListChannels,
     Slack.ListMessages,

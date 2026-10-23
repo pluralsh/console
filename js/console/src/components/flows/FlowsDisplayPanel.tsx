@@ -1,21 +1,14 @@
 import { Radio } from '@pluralsh/design-system'
 import { serviceStatusToLabel } from 'components/cd/services/ServiceStatusChip'
 import {
-  DisplayFilterRow,
-  DisplayFilterRows,
+  DisplayFilterSection,
   DisplayPanel,
   DisplayRadioGroup,
   DisplaySection,
-  DisplaySectionHeader,
   DisplaySortHeader,
   DisplayViewToggle,
-  toggleListValue,
 } from 'components/utils/display/DisplayPanel'
-import {
-  FlowSort,
-  SortDirection,
-  ServiceDeploymentStatus,
-} from 'generated/graphql'
+import { FlowSort, ServiceDeploymentStatus } from 'generated/graphql'
 import { FLOW_HEALTH_OPTIONS, FlowsDisplayState } from './flowsDisplay'
 
 export function FlowsDisplayPanel({
@@ -33,37 +26,18 @@ export function FlowsDisplayPanel({
         view={state.view}
         onChange={(view) => onChange({ ...state, view })}
       />
-      <DisplaySection>
-        <DisplaySectionHeader>Service health</DisplaySectionHeader>
-        <DisplayFilterRows>
-          {FLOW_HEALTH_OPTIONS.map((status) => (
-            <DisplayFilterRow
-              key={status}
-              label={serviceStatusToLabel(status)}
-              count={statusCounts[status] ?? 0}
-              checked={state.statuses.includes(status)}
-              onChange={() =>
-                onChange({
-                  ...state,
-                  statuses: toggleListValue(state.statuses, status),
-                })
-              }
-            />
-          ))}
-        </DisplayFilterRows>
-      </DisplaySection>
+      <DisplayFilterSection
+        title="Service health"
+        options={FLOW_HEALTH_OPTIONS}
+        selected={state.statuses}
+        counts={statusCounts}
+        getLabel={serviceStatusToLabel}
+        onChange={(statuses) => onChange({ ...state, statuses })}
+      />
       <DisplaySection>
         <DisplaySortHeader
-          descending={state.direction === SortDirection.Desc}
-          onToggle={() =>
-            onChange({
-              ...state,
-              direction:
-                state.direction === SortDirection.Desc
-                  ? SortDirection.Asc
-                  : SortDirection.Desc,
-            })
-          }
+          direction={state.direction}
+          onChange={(direction) => onChange({ ...state, direction })}
         />
         <DisplayRadioGroup
           value={state.sort}

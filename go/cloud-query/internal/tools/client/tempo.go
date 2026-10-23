@@ -56,6 +56,65 @@ func (in *TempoClient) Trace(ctx context.Context, traceID string) (*datasource.T
 	return &resp, nil
 }
 
+type TempoTagsResponse struct {
+	Scopes []struct {
+		Name string   `json:"name"`
+		Tags []string `json:"tags"`
+	} `json:"scopes"`
+}
+
+type TempoTagValuesResponse struct {
+	TagValues []struct {
+		Value string `json:"value"`
+	} `json:"tagValues"`
+}
+
+// Tags lists attribute names, scoped to traces matching a TraceQL query.
+func (in *TempoClient) Tags(ctx context.Context, query, start, end string) (*TempoTagsResponse, error) {
+	var resp TempoTagsResponse
+	if err := in.getTagsAPI(ctx, "/api/v2/search/tags", query, start, end, &resp); err != nil {
+		return nil, err
+	}
+
+	return &resp, nil
+}
+
+// TagValues lists values of a TraceQL attribute, e.g. `resource.service.name`.
+func (in *TempoClient) TagValues(ctx context.Context, tag, query, start, end string) (*TempoTagValuesResponse, error) {
+	var resp TempoTagValuesResponse
+	path := "/api/v2/search/tag/" + url.PathEscape(tag) + "/values"
+	if err := in.getTagsAPI(ctx, path, query, start, end, &resp); err != nil {
+		return nil, err
+	}
+
+	return &resp, nil
+}
+
+func (in *TempoClient) getTagsAPI(ctx context.Context, path, query, start, end string, result any) error {
+	params := url.Values{}
+	if query != "" {
+		params.Set("q", query)
+	}
+	if start != "" && end != "" {
+		params.Set("start", start)
+		params.Set("end", end)
+	}
+
+	response, err := in.R().
+		SetContext(ctx).
+		SetQueryString(params.Encode()).
+		SetResult(result).
+		Get(strings.TrimSuffix(in.baseUrl, "/") + path)
+	if err != nil {
+		return err
+	}
+	if response.IsError() {
+		return fmt.Errorf("tempo tag search failed: status=%d body=%s", response.StatusCode(), response.String())
+	}
+
+	return nil
+}
+
 func (in *TempoClient) searchEndpoint() string {
 	return strings.TrimSuffix(in.baseUrl, "/") + "/api/search"
 }

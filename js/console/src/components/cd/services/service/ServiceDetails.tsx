@@ -1,7 +1,7 @@
 import { Chip, Flex, Select, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { memo, ReactNode, Suspense, useMemo, useState } from 'react'
-import { Outlet, useLocation, useMatch, useParams } from 'react-router-dom'
-import { useTheme } from 'styled-components'
+import { Outlet, useMatch, useParams } from 'react-router-dom'
+import styled from 'styled-components'
 
 import {
   ServiceDeploymentDetailsFragment,
@@ -10,16 +10,11 @@ import {
   useServiceDeploymentTinyQuery,
 } from 'generated/graphql'
 
-import {
-  DocPageContextProvider,
-  useDocPageContext,
-} from 'components/contexts/DocPageContext'
+import { DocPageContextProvider } from 'components/contexts/DocPageContext'
 import { useCurrentFlow } from 'components/flows/hooks/useCurrentFlow'
 import { GqlError } from 'components/utils/Alert'
 import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
-import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
 import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
-import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
 import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
 import {
   CD_SERVICE_PATH_MATCHER_ABS,
@@ -33,7 +28,19 @@ import {
 
 import { getClusterBreadcrumbs } from 'components/cd/cluster/Cluster'
 import { POLL_INTERVAL } from 'components/cluster/constants'
-import { Directory, SideNavEntries } from 'components/layout/SideNavEntries'
+import {
+  PageRowSC,
+  PageSidebarBodySC,
+  PageSidebarHeaderSC,
+  PageSidebarSC,
+  PageWithSidebar,
+} from 'components/layout/PageLayout'
+import {
+  PageToolbar,
+  PageToolbarSlotContext,
+} from 'components/layout/PageToolbar'
+import { PageSidebarNav } from 'components/layout/PageSidebarNav'
+import { Directory } from 'components/layout/SideNavEntries'
 
 import {
   useLogsEnabled,
@@ -49,7 +56,10 @@ import {
   SidecarSkeleton,
 } from 'components/utils/SkeletonLoaders'
 import { serviceStatusToSeverity } from '../ServiceStatusChip'
-import { type ServiceDetailsContextType } from './ServiceDetailsContext'
+import {
+  type ServiceDetailsContextType,
+  ServiceToolbarStartSlotContext,
+} from './ServiceDetailsContext'
 import { ServiceDetailsSidecar } from './ServiceDetailsSidecar'
 import { useServicePersonaType } from './settings/ServiceSettings'
 
@@ -229,8 +239,6 @@ export const getDirectory = ({
 }
 
 function ServiceDetailsBase() {
-  const theme = useTheme()
-  const { pathname } = useLocation()
   const { serviceId } = useParams()
   const { flowIdOrName, flowData } = useCurrentFlow()
   const { tab } =
@@ -246,6 +254,8 @@ function ServiceDetailsBase() {
   const [isRefetching, setIsRefetching] = useState(false)
 
   const [sidenavContent, setSidenavContent] = useState<ReactNode | null>(null)
+  const [toolbarStart, setToolbarStart] = useState<HTMLDivElement | null>(null)
+  const [toolbarEnd, setToolbarEnd] = useState<HTMLDivElement | null>(null)
 
   const { data, loading, error, refetch } = useServiceDeploymentQuery({
     variables: { id: serviceId ?? '' },
@@ -262,7 +272,6 @@ function ServiceDetailsBase() {
     clusterId,
     serviceId,
   })
-  const docPageContext = useDocPageContext()
   const logsEnabled = useLogsEnabled()
   const metricsEnabled = useMetricsEnabled()
 
@@ -292,90 +301,102 @@ function ServiceDetailsBase() {
   )
 
   return (
-    <ResponsiveLayoutPage css={{ paddingBottom: theme.spacing.large }}>
-      <ResponsiveLayoutSidenavContainer>
-        <div
-          css={{
-            display: 'flex',
-            flexDirection: 'column',
-            rowGap: theme.spacing.medium,
-            overflow: 'hidden',
-            maxHeight: '100%',
-          }}
-        >
-          <Suspense
-            fallback={
-              <Select
-                label={
-                  <RectangleSkeleton
-                    $width="100%"
-                    $height={20}
-                  />
-                }
-              >
-                <div />
-              </Select>
-            }
-          >
-            <ServiceSelector />
-          </Suspense>
-          <div
-            css={{
-              overflowY: 'auto',
-              paddingBottom: theme.spacing.medium,
-            }}
-          >
-            {sidenavContent || (
-              <SideNavEntries
-                directory={directory}
-                pathname={pathname}
-                pathPrefix={pathPrefix}
-                docPageContext={docPageContext}
-                loading={isLoading}
-              />
+    <PageWithSidebar
+      sidebar={
+        <PageSidebarSC>
+          <PageSidebarHeaderSC>
+            <Suspense
+              fallback={
+                <Select
+                  size="small"
+                  label={
+                    <RectangleSkeleton
+                      $width="100%"
+                      $height={16}
+                    />
+                  }
+                >
+                  <div />
+                </Select>
+              }
+            >
+              <ServiceSelector />
+            </Suspense>
+          </PageSidebarHeaderSC>
+          {sidenavContent ? (
+            <PageSidebarBodySC>{sidenavContent}</PageSidebarBodySC>
+          ) : (
+            <PageSidebarNav
+              directory={directory}
+              pathPrefix={pathPrefix}
+              loading={isLoading}
+            />
+          )}
+        </PageSidebarSC>
+      }
+      toolbar={
+        <PageToolbar
+          start={
+            <div
+              ref={setToolbarStart}
+              css={{ display: 'contents' }}
+            />
+          }
+          slotRef={setToolbarEnd}
+        />
+      }
+    >
+      <ServiceToolbarStartSlotContext value={toolbarStart}>
+        <PageToolbarSlotContext value={toolbarEnd}>
+          <BodySC>
+            {!fullWidth && <ResponsiveLayoutSpacer />}
+            <ResponsiveLayoutContentContainer
+              role="main"
+              css={fullWidth ? { width: 'auto', maxWidth: 'none' } : undefined}
+            >
+              {!serviceDeployment && error ? (
+                <GqlError error={error} />
+              ) : (
+                <Outlet
+                  context={
+                    {
+                      service: serviceDeployment,
+                      refetch: () => {
+                        setIsRefetching(true)
+                        return refetch().finally(() => setIsRefetching(false))
+                      },
+                      isRefetching,
+                      isLoading,
+                      setSidenavContent,
+                    } satisfies ServiceDetailsContextType
+                  }
+                />
+              )}
+            </ResponsiveLayoutContentContainer>
+            {!fullWidth && (
+              <>
+                <ResponsiveLayoutSidecarContainer>
+                  {isLoading ? (
+                    <SidecarSkeleton />
+                  ) : (
+                    <ServiceDetailsSidecar
+                      serviceDeployment={serviceDeployment}
+                    />
+                  )}
+                </ResponsiveLayoutSidecarContainer>
+                <ResponsiveLayoutSpacer />
+              </>
             )}
-          </div>
-        </div>
-      </ResponsiveLayoutSidenavContainer>
-      {!fullWidth && <ResponsiveLayoutSpacer />}
-      <ResponsiveLayoutContentContainer
-        role="main"
-        css={fullWidth ? { width: 'auto', maxWidth: 'none' } : undefined}
-      >
-        {!serviceDeployment && error ? (
-          <GqlError error={error} />
-        ) : (
-          <Outlet
-            context={
-              {
-                service: serviceDeployment,
-                refetch: () => {
-                  setIsRefetching(true)
-                  return refetch().finally(() => setIsRefetching(false))
-                },
-                isRefetching,
-                isLoading,
-                setSidenavContent,
-              } satisfies ServiceDetailsContextType
-            }
-          />
-        )}
-      </ResponsiveLayoutContentContainer>
-      {!fullWidth && (
-        <>
-          <ResponsiveLayoutSidecarContainer>
-            {isLoading ? (
-              <SidecarSkeleton />
-            ) : (
-              <ServiceDetailsSidecar serviceDeployment={serviceDeployment} />
-            )}
-          </ResponsiveLayoutSidecarContainer>
-          <ResponsiveLayoutSpacer />
-        </>
-      )}
-    </ResponsiveLayoutPage>
+          </BodySC>
+        </PageToolbarSlotContext>
+      </ServiceToolbarStartSlotContext>
+    </PageWithSidebar>
   )
 }
+
+const BodySC = styled(PageRowSC)(({ theme }) => ({
+  padding: theme.spacing.large,
+}))
 
 export default function ServiceDetails({ ...props }) {
   return (

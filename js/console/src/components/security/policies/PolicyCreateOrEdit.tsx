@@ -46,7 +46,7 @@ const TYPE_OPTIONS: {
   {
     value: PolicyType.Stack,
     label: 'Stacks',
-    description: 'Admit or deny tool calls in stacks.',
+    description: 'Approve plans or block runs on infrastructure stacks.',
     icon: <StackIcon size={16} />,
   },
   {

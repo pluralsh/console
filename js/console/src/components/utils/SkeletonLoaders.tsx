@@ -65,16 +65,16 @@ export function TableSkeleton({
       }}
     >
       <svg
-        width={width + theme.spacing.large * numColumns}
+        width={width + theme.spacingPx.large * numColumns}
         height={height}
-        viewBox={`0 0 ${width + theme.spacing.large * (numColumns - 1)} ${height}`}
+        viewBox={`0 0 ${width + theme.spacingPx.large * (numColumns - 1)} ${height}`}
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
         {Array.from({ length: numRows * numColumns }, (_, i) => (
           <rect
             key={i}
-            x={(i % numColumns) * (width / numColumns + theme.spacing.large)}
+            x={(i % numColumns) * (width / numColumns + theme.spacingPx.large)}
             y={Math.floor(i / numColumns) * 60}
             width={width / numColumns}
             height="12"
@@ -206,7 +206,7 @@ export function SidecarSkeleton({ num = 6 }: { num?: number }) {
     <Sidecar>
       {Array.from({ length: num }).map((_, index) => (
         <SidecarItem
-          css={{ '& > *': { lineHeight: '30px' } }}
+          css={{ '& > *': { lineHeight: '2rem' } }}
           key={index}
           heading={
             <RectangleSkeleton

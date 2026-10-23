@@ -241,6 +241,7 @@ const cols = [
       return (
         <CopyButton
           type="tertiary"
+          size="small"
           tooltip="Copy table as markdown"
           text={overviewDataToMarkdown(
             ctx.table.options.data,

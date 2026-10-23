@@ -9,6 +9,7 @@ defmodule Console.AI.Workbench.Subagents.Canvas do
   alias Console.AI.Tools.Workbench.Canvas.{
     Canvas,
     MarkdownBlock,
+    SectionBlock,
     MetricsBlock,
     LogsBlock,
     TracesBlock,
@@ -46,6 +47,7 @@ defmodule Console.AI.Workbench.Subagents.Canvas do
       Result,
       Canvas,
       MarkdownBlock,
+      SectionBlock,
       %MetricsBlock{env: env},
       %LogsBlock{env: env},
       %TracesBlock{env: env},

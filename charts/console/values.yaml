@@ -11,6 +11,10 @@ cloud:
   enabled: false
   o11y:
     enabled: false
+    # whether to use the plural observability stack for observability
+    plural: false
+    # base url of the plural telemetry ingress, products are served beneath /metrics, /logs and /traces
+    telemetryUrl: ~
     # ilm is the Elasticsearch index lifecycle policy bodies applied to cloud log indices.
     # Override phases per policy; both default to warm after 1d and delete after 7d.
     ilm:
@@ -175,6 +179,9 @@ console:
     groupsWhitelist: []
 
     objectStore:
+      # provider selects the object store backend: s3, gcs, or azure.
+      # empty keeps the historical inference, which prefers an s3 bucket, then an azure storage account, then a gcs bucket.
+      provider: ~
       # path is used to configure the path within object storage for storing large files, useful for multi-tenant bucket usage.
       path: ~
       # s3 is used to configure the s3 bucket for storing large files, which include screen recordings of agent runs, workbench memory, etc.
@@ -197,6 +204,12 @@ console:
         container: ~
         # accessKey is used to configure the azure access key for storing large files
         accessKey: ~
+
+      gcs:
+        # bucket is used to configure the gcs bucket name for storing large files
+        bucket: ~
+        # credentials is an optional service account JSON key. unset uses GKE workload identity
+        credentials: ~
 
       details:
         # assumeRoleArn is used to configure the assume role arn for cloud query
@@ -235,6 +248,9 @@ secrets:
   cluster_name: test
   # jwt is used to set JWT_SECRET if not null
   jwt: REPLACEME
+  # secret_key_base is used to set SECRET_KEY_BASE if not null, which signs file download links and session cookies.
+  # Must be at least 64 characters (eg `openssl rand -base64 64`).  If unset, the console derives one from the jwt secret
+  secret_key_base:
   # erlang is used to set ERLANG_COOKIE if not null
   erlang: REPLACEME
   # admin_name is used to set ADMIN_NAME
@@ -431,6 +447,142 @@ ai:
       periodSeconds: 10
       timeoutSeconds: 5
       failureThreshold: 3
+
+# pseudofs deploys the workbench filesystem, a gRPC server storing per-workbench files in the object store configured
+# in console.config.objectStore.  It's only installed when an s3 bucket, gcs bucket, or azure storage account is configured there, and
+# keeps its data beneath `<console.config.objectStore.path>/<pseudofs.objectStore.subpath>`.  It runs as the console
+# service account, so workload identity annotations on that account grant it bucket access as well.
+pseudofs:
+  # enabled can be set to false to skip the filesystem even when an object store is configured
+  enabled: true
+  image:
+    # registry defaults to global.registry when empty
+    registry: ""
+    repository: fs
+    # tag defaults to image.tag, then the chart appVersion, since fs is vendored under the console's tags
+    tag: ~
+    pullPolicy: IfNotPresent
+  imagePullSecrets: []
+  service:
+    port: 9093
+    annotations: {}
+  objectStore:
+    # subpath is the prefix beneath console.config.objectStore.path that the filesystem is stored under
+    subpath: fs
+    s3:
+      # allowHttp permits plaintext connections to a custom endpoint, it is implied by an http:// endpoint
+      allowHttp: false
+      # virtualHostedStyle uses virtual-hosted-style requests instead of path-style requests
+      virtualHostedStyle: false
+    azure:
+      # endpoint overrides the azure blob storage endpoint
+      endpoint: ~
+      # allowHttp permits plaintext connections to a custom endpoint
+      allowHttp: false
+  config:
+    # filesystem maps to the pseudofs filesystem configuration.  storage.type, storage.path and storage.object_store
+    # are generated from console.config.objectStore, and metastore_wal_path defaults to <persistence.mountPath>/wal.
+    filesystem:
+      storage:
+        block_cache:
+          type: FoyerHybrid
+          memory_capacity: 536870912
+          disk_capacity: 10737418240
+          disk_path: /var/cache/pseudofs
+          write_policy: WriteOnEviction
+        meta_cache:
+          type: FoyerMemory
+          capacity: 134217728
+      blobs:
+        # must be on the persistent volume, blobs are acknowledged before they reach the object store
+        local_path: /var/lib/pseudofs/blobs
+        cache_capacity_bytes: 4294967296
+        upload_concurrency: 4
+        gc_grace_seconds: 300
+      inline_threshold_bytes: 16384
+      chunk_size_bytes: 1048576
+      max_file_size_bytes: 1073741824
+      max_append_generations: 64
+    maxUnaryFileSizeBytes: 8388608
+    maxDecodingMessageBytes: 16777216
+    maxEncodingMessageBytes: 16777216
+    # search configures glob and grep defaults and caps, omitted fields use server defaults
+    search: {}
+  # persistence holds the metastore WAL and blobs awaiting upload, so it must stay enabled for durable writes
+  persistence:
+    enabled: true
+    existingClaim: ""
+    storageClass: ""
+    accessModes:
+      - ReadWriteOnce
+    size: 10Gi
+    annotations: {}
+    mountPath: /var/lib/pseudofs
+  cache:
+    mountPath: /var/cache/pseudofs
+    persistence:
+      enabled: false
+      existingClaim: ""
+      storageClass: ""
+      accessModes:
+        - ReadWriteOnce
+      size: 20Gi
+      annotations: {}
+    emptyDir:
+      medium: ""
+      sizeLimit: ""
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      memory: 2Gi
+  podAnnotations: {}
+  podLabels: {}
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 10001
+    runAsGroup: 10001
+    fsGroup: 10001
+    fsGroupChangePolicy: OnRootMismatch
+    seccompProfile:
+      type: RuntimeDefault
+  securityContext:
+    allowPrivilegeEscalation: false
+    privileged: false
+    capabilities:
+      drop:
+        - ALL
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 10001
+    runAsGroup: 10001
+    seccompProfile:
+      type: RuntimeDefault
+  probes:
+    liveness:
+      enabled: true
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      timeoutSeconds: 2
+      failureThreshold: 3
+    readiness:
+      enabled: true
+      initialDelaySeconds: 2
+      periodSeconds: 5
+      timeoutSeconds: 2
+      failureThreshold: 6
+  priorityClassName: ""
+  terminationGracePeriodSeconds: 30
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+  topologySpreadConstraints: []
+  # extraEnv and extraEnvFrom can supply object store credentials beyond the static keys in console.config.objectStore
+  extraEnv: []
+  extraEnvFrom: []
+  extraVolumes: []
+  extraVolumeMounts: []
 
 # initContainers is used to create a list of init containers for your console deployment
 initContainers: []

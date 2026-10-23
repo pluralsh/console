@@ -5,7 +5,7 @@ description: Creating a flow and registering your services with it
 
 # GitOps Configuration
 
-Creating a flow is easy to do with our Kubernetes Operator, an example yaml spec is:
+Creating a flow is easy with our Kubernetes Operator. An example YAML spec is:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -22,7 +22,7 @@ spec:
     - groupName: console-writers 
 ```
 
-From there, you can use the `flowRef` attribute on `ServiceDeployment` or `Pipeline` to register services or pipelines, eg:
+From there, you can use the `flowRef` attribute on `ServiceDeployment` or `Pipeline` to register services or pipelines, e.g.:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -55,7 +55,7 @@ spec:
     namespace: infra
 ```
 
-and for a Pipeline, it'll end up looking like the following:
+For a Pipeline, it looks like the following:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -91,6 +91,6 @@ spec:
       type: APPROVAL
 ```
 
-Once this is applied (easily done by adding to a Git repository managed by Plural CD), you'll end up with a view in the Plural Console something like this:
+Once this is applied (easily done by adding it to a Git repository managed by Plural CD), you'll see a view in the Plural Console like this:
 
 ![](/assets/flows/flow-ui.png)

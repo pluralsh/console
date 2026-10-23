@@ -33,6 +33,7 @@ defmodule Console.Application do
       {Registry, [keys: :unique, name: Console.Deployments.Stacks.Worker.registry()]},
       {Registry, [keys: :unique, name: Console.Deployments.Helm.Agent.registry()]},
       {Registry, [keys: :unique, name: Console.AI.MCP.Agent.registry()]},
+      {Registry, [keys: :unique, name: Console.AI.Workbench.MCP.Clients.registry()]},
       {Registry, [keys: :unique, name: Console.AI.Agents]},
       {Finch, name: Anubis.Finch},
       :hackney_pool.child_spec(:ai_pool, [max_connections: 100, max_per_host: 100]),
@@ -52,7 +53,7 @@ defmodule Console.Application do
       Console.Deployments.Pipelines.Supervisor,
       Console.Deployments.Helm.Supervisor,
       Console.Deployments.Local.Server,
-    ] ++ cloud_query_client(@env) ++ [
+    ] ++ cloud_query_client(@env) ++ pseudofs_client(@env) ++ [
       {GRPC.Server.Supervisor,
         endpoint: Console.GRPC.Endpoint,
         port: 50051,
@@ -66,6 +67,7 @@ defmodule Console.Application do
       Console.Prom.Meter,
       Console.AI.Agents.Supervisor,
       Console.AI.MCP.Supervisor,
+      Console.AI.Workbench.MCP.Clients,
       Console.Deployments.Deprecations.Table,
       Console.Deployments.Compatibilities.Table,
       Console.Deployments.KubeVersions.Table,
@@ -102,10 +104,26 @@ defmodule Console.Application do
         name: CloudQuery.Client,
         target: Console.conf(:cloudquery_host),
         adapter: CloudQuery.Client.adapter(),
+        adapter_opts: CloudQuery.Client.adapter_opts(),
         interceptors: CloudQuery.Client.interceptors()
       }
     ]
   end
+
+  @doc false
+  def pseudofs_client(env, target \\ Console.conf(:pseudofs))
+  def pseudofs_client(:test, _), do: []
+  def pseudofs_client(_, target) when is_binary(target) do
+    [
+      {GRPC.Client.Connection,
+        name: Console.PseudoFS.Client,
+        target: target,
+        adapter: Console.PseudoFS.Client.adapter(),
+        adapter_opts: Console.PseudoFS.Client.adapter_opts()
+      }
+    ]
+  end
+  def pseudofs_client(_, _), do: []
 
   defp consumers(), do: Console.conf(:consumers) || []
 

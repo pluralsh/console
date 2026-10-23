@@ -50,3 +50,20 @@ func TestAgentRun_IsStreamingProxyEnabled(t *testing.T) {
 		}
 	})
 }
+
+func TestAgentRun_UsesConsoleAIProxyOnlyForPluralRoutedRuns(t *testing.T) {
+	var nilRun *AgentRun
+	if nilRun.UsesConsoleAIProxy() {
+		t.Fatal("expected nil run not to use the Console AI proxy")
+	}
+
+	claude := &AgentRun{Runtime: &AgentRuntime{Config: &AgentRuntimeConfig{Claude: &ClaudeConfig{}}}}
+	if claude.UsesConsoleAIProxy() {
+		t.Fatal("expected a Claude run with aiProxy off to use its own key")
+	}
+
+	claude.Runtime.AiProxy = true
+	if !claude.UsesConsoleAIProxy() {
+		t.Fatal("expected a run with aiProxy on to use the Console AI proxy")
+	}
+}

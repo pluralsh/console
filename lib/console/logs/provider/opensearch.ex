@@ -59,8 +59,11 @@ defmodule Console.Logs.Provider.Opensearch do
   defp search_response({:ok, %Req.Response{status: 200, body: body}}) do
     {:ok, Snap.SearchResponse.new(body)}
   end
-  defp search_response({:ok, %Req.Response{body: body}}), do: {:error, "opensearch failure: #{body}"}
+  defp search_response({:ok, %Req.Response{body: body}}), do: {:error, "opensearch failure: #{error_body(body)}"}
   defp search_response(_), do: {:error, "network failure"}
+
+  def error_body(body) when is_binary(body), do: body
+  def error_body(body), do: Jason.encode!(body)
 
   defp format_hits(%Snap.SearchResponse{hits: %Snap.Hits{hits: hits}}) do
     Enum.map(hits, fn %Snap.Hit{source: source} ->
@@ -105,6 +108,7 @@ defmodule Console.Logs.Provider.Opensearch do
              |> add_terms(q)
              |> add_range(q)
              |> add_pod(q)
+             |> add_node(q)
              |> add_namespaces(q)
              |> add_facets(q),
       sort: sort(q),
@@ -144,6 +148,19 @@ defmodule Console.Logs.Provider.Opensearch do
   defp add_pod(query, %Query{pod: pod}) when is_binary(pod) and byte_size(pod) > 0,
     do: add_filter(query, %{term: %{"kubernetes.pod.name.keyword" => pod}})
   defp add_pod(query, _), do: query
+
+  # fluent-bit/fluentd: kubernetes.host, filebeat: kubernetes.node.name
+  @node_fields ~w(kubernetes.host.keyword kubernetes.node.name.keyword)
+
+  defp add_node(query, %Query{node: node}) when is_binary(node) and byte_size(node) > 0 do
+    add_filter(query, %{
+      nested: %{
+        path: "kubernetes",
+        query: %{bool: %{should: Enum.map(@node_fields, &%{term: %{&1 => node}}), minimum_should_match: 1}}
+      }
+    })
+  end
+  defp add_node(query, _), do: query
 
   defp add_namespaces(query, %Query{namespaces: [_ | _] = ns}) do
     add_filter(query, %{

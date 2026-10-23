@@ -49,13 +49,13 @@ function capacity(
       )
     case CapacityType.Pods:
       return sumBy(nodes, (n) =>
-        parseInt((n?.status?.capacity as Capacity)?.pods ?? '0')
+        parseInt((n?.status?.capacity as Capacity)?.pods ?? '0', 10)
       )
   }
 }
 
 function pods(pods: Array<MetricResult>): number {
-  return parseInt(pods?.at(pods.length - 1)?.value ?? '0')
+  return parseInt(pods?.at(pods.length - 1)?.value ?? '0', 10)
 }
 
 function toValues(

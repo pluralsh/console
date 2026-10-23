@@ -422,6 +422,10 @@ defmodule Console.GraphQl.Deployments.Settings do
   @desc "A federated credential is a way to authenticate users from an external identity provider"
   input_object :federated_credential_attributes do
     field :issuer, non_null(:string)
+
+    field :aud, :string,
+      description: "expected audience of tokens exchanged with this credential. When unset, any audience is accepted"
+
     field :claims_like, :json
     field :scopes, list_of(:string)
     field :user_id, non_null(:id)
@@ -865,6 +869,10 @@ defmodule Console.GraphQl.Deployments.Settings do
   object :federated_credential do
     field :id, non_null(:id)
     field :issuer, non_null(:string)
+
+    field :aud, :string,
+      description: "expected audience of tokens exchanged with this credential. When unset, any audience is accepted"
+
     field :claims_like, :map
     field :scopes, list_of(:string)
     field :user, :user, resolve: dataloader(User)

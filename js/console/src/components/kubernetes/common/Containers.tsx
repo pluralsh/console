@@ -20,7 +20,7 @@ export default function Containers({ containers }: ContainersProps) {
       css={{
         display: 'flex',
         flexDirection: 'column',
-        gap: '24px',
+        gap: '1.5rem',
       }}
     >
       {containers &&
@@ -46,7 +46,7 @@ function Container({ container }: ContainerProps) {
           css={{
             display: 'flex',
             alignItems: 'center',
-            gap: '8px',
+            gap: '0.5rem',
           }}
         >
           <ContainerStatus
@@ -71,7 +71,6 @@ function Container({ container }: ContainerProps) {
         </ResourceInfoCardEntry>
         <ResourceInfoCardEntry heading="Commands">
           {container.commands ? (
-            // @ts-ignore
             <Code
               css={{
                 pre: {

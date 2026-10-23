@@ -1,6 +1,6 @@
 # GitLab workbench tool setup
 
-This integration calls the **GitLab HTTP API v4** with a `PRIVATE-TOKEN` header. Registered tools cover **merge requests**, **issues**, **notes (comments)**, and **award emoji** on notes.
+This integration calls the **GitLab HTTP API v4** with a `PRIVATE-TOKEN` header. Registered tools cover reading **merge requests** and **issues**, creating and editing **notes (comments)**, **award emoji** on notes, and **closing merge requests**.
 
 ## Form fields
 
@@ -21,11 +21,11 @@ Fine-grained personal access tokens use a different permission model; see [Fine-
 | Tools | Classic PAT scopes |
 | --- | --- |
 | Merge request read, issue read (including listing notes) | `read_api` |
-| Create note on merge request or issue; award emoji on a note | `api` (read/write API). `read_api` alone is **not** enough for POST actions. |
+| Create or edit a note on a merge request or issue; award emoji on a note; close a merge request | `api` (read/write API). `read_api` alone is **not** enough for any write action. |
 
 **Practical guidance**
 
-- Prefer **`read_api`** only if agents should **never** post comments or reactions.
-- For the full tool surface (read + comment + emoji), use **`api`**, or configure a **project/group access token** with the minimum **read_api** / **api** (or fine-grained equivalents) on the projects the workbench should touch.
+- Prefer **`read_api`** only if agents should **never** post or edit comments, react, or close merge requests.
+- For the full tool surface (read + comment + emoji + close), use **`api`**, or configure a **project/group access token** with the minimum **read_api** / **api** (or fine-grained equivalents) on the projects the workbench should touch.
 
 Tokens must be able to see the **projects** you reference in tool calls (project path or numeric ID). Use project-scoped tokens when you want to limit blast radius.

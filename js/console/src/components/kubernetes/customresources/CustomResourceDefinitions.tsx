@@ -1,13 +1,13 @@
-import { ChipList, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { ChipList, Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
-import { useTheme } from 'styled-components'
 import { KubernetesClusterFragment, Maybe } from '../../../generated/graphql'
 
 import { getCustomResourceDefinitionsInfiniteOptions } from '../../../generated/kubernetes/@tanstack/react-query.gen'
 import { getCustomResourcesAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment'
 import { useCluster, usePinnedResources } from '../Cluster'
+import DeleteResourceButton from '../common/DeleteResource'
 import { ResourceList } from '../common/ResourceList'
 import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
 import PinCustomResourceDefinition from './PinCustomResourceDefinition'
@@ -33,24 +33,15 @@ const colName = columnHelper.accessor((r) => r?.objectMeta.name, {
   id: 'name',
   header: 'Name',
   enableSorting: true,
-  cell: ({ getValue }) => (
-    <span
-      css={{
-        maxWidth: 350,
-        whiteSpace: 'nowrap',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-      }}
-    >
-      {getValue()}
-    </span>
-  ),
+  meta: { gridTemplate: 'minmax(160px, 2fr)', truncate: true },
+  cell: ({ getValue }) => <span>{getValue()}</span>,
 })
 
 const colGroup = columnHelper.accessor((crd) => crd?.group, {
   id: 'group',
   header: 'Group',
-  cell: ({ getValue }) => getValue(),
+  meta: { gridTemplate: 'minmax(80px, 1fr)', truncate: true },
+  cell: ({ getValue }) => <span>{getValue()}</span>,
 })
 
 const colVersion = columnHelper.accessor((crd) => crd?.version, {
@@ -62,7 +53,8 @@ const colVersion = columnHelper.accessor((crd) => crd?.version, {
 const colKind = columnHelper.accessor((crd) => crd?.names?.kind, {
   id: 'kind',
   header: 'Kind',
-  cell: ({ getValue }) => getValue(),
+  meta: { gridTemplate: 'minmax(80px, 1fr)', truncate: true },
+  cell: ({ getValue }) => <span>{getValue()}</span>,
 })
 
 const colScope = columnHelper.accessor((crd) => crd?.scope, {
@@ -80,6 +72,7 @@ const colEstablished = columnHelper.accessor((crd) => crd?.established, {
 const colCategories = columnHelper.accessor((crd) => crd?.names.categories, {
   id: 'categories',
   header: 'Categories',
+  meta: { gridTemplate: 'fit-content(120px)' },
   cell: ({ getValue }) => (
     <ChipList
       size="small"
@@ -90,21 +83,28 @@ const colCategories = columnHelper.accessor((crd) => crd?.names.categories, {
   ),
 })
 
-const colPin = columnHelper.accessor((crd) => crd, {
-  id: 'pin',
+const colActions = columnHelper.accessor((crd) => crd, {
+  id: 'actions',
   header: '',
-  cell: ({ getValue }) => <PinCustomResourceDefinition crd={getValue()} />,
+  cell: ({ getValue, table }) => (
+    <Flex gap="xsmall">
+      <PinCustomResourceDefinition crd={getValue()} />
+      <DeleteResourceButton
+        resource={getValue()}
+        refetch={table?.options?.meta?.refetch}
+        customResource={table?.options?.meta?.customResource}
+      />
+    </Flex>
+  ),
 })
 
 export default function CustomResourceDefinitions() {
-  const theme = useTheme()
   const cluster = useCluster()
   const pinnedResources = usePinnedResources()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
-  const { colAction, colLabels, colCreationTimestamp } =
-    useDefaultColumns(columnHelper)
+  const { colLabels, colCreationTimestamp } = useDefaultColumns(columnHelper)
   const columns = useMemo(
     () => [
       colName,
@@ -114,12 +114,14 @@ export default function CustomResourceDefinitions() {
       colScope,
       colEstablished,
       colCategories,
-      colLabels,
+      {
+        ...colLabels,
+        meta: { ...colLabels.meta, gridTemplate: 'fit-content(160px)' },
+      },
       colCreationTimestamp,
-      colPin,
-      colAction,
+      colActions,
     ],
-    [colAction, colLabels, colCreationTimestamp]
+    [colLabels, colCreationTimestamp]
   )
 
   const headerContent = useMemo(
@@ -135,31 +137,13 @@ export default function CustomResourceDefinitions() {
   useSetPageHeaderContent(headerContent)
 
   return (
-    <div
-      css={{
-        position: 'relative',
-        width: '100%',
-        height: '100%',
-      }}
+    <ResourceList<
+      TypesCustomResourceDefinitionList,
+      TypesCustomResourceDefinition
     >
-      <div
-        css={{
-          position: 'absolute',
-          width: '100%',
-          height: '100%',
-          paddingTop: theme.spacing.medium,
-          paddingBottom: theme.spacing.large,
-        }}
-      >
-        <ResourceList<
-          TypesCustomResourceDefinitionList,
-          TypesCustomResourceDefinition
-        >
-          columns={columns}
-          queryOptions={getCustomResourceDefinitionsInfiniteOptions}
-          itemsKey="items"
-        />
-      </div>
-    </div>
+      columns={columns}
+      queryOptions={getCustomResourceDefinitionsInfiniteOptions}
+      itemsKey="items"
+    />
   )
 }

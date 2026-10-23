@@ -3,13 +3,13 @@ title: Management controller
 description: GitOps CRDs reconciled on your management cluster
 ---
 
-The **management controller** runs on your management cluster and reconciles the Plural Management API — the CRDs that register clusters, services, git repositories, stacks, PR automations, and other control-plane resources with the Console.
+The **management controller** runs on your management cluster and reconciles the Plural Management API — the CRDs that register clusters, services, Git repositories, stacks, PR automations, and other control-plane resources with the Console.
 
 It acts as a GitOps frontend to the Console API: you declare desired state in Kubernetes, and the controller creates, updates, and synchronizes the corresponding Console resources. This is the same pattern described in [Management Controllers Reconciliation Logic](/plural-features/continuous-deployment/management-controllers-reconciliation-logic).
 
 ## Global configuration
 
-Console-wide settings that are not tied to a single service or cluster — agent fleet helm defaults, observability backends, AI providers, RBAC bindings, repository references, and more — are configured through the `DeploymentSettings` CRD. See [DeploymentSettings](deployment-settings) for the singleton name, namespace, and full spec reference.
+Console-wide settings that are not tied to a single service or cluster — agent fleet Helm defaults, observability backends, AI providers, RBAC bindings, repository references, and more — are configured through the `DeploymentSettings` CRD. See [DeploymentSettings](deployment-settings) for the singleton name, namespace, and full spec reference.
 
 ## API reference
 

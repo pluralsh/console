@@ -1,5 +1,16 @@
 defmodule Console.Configuration do
-  defstruct [:git_commit, :is_demo_project, :is_sandbox, :plural_login, :vpn_enabled, :features, :sentry_enabled, :healthmap_cluster_count, :details]
+  defstruct [
+    :git_commit,
+    :is_demo_project,
+    :is_sandbox,
+    :plural_login,
+    :vpn_enabled,
+    :features,
+    :sentry_enabled,
+    :healthmap_cluster_count,
+    :details,
+    :object_store_enabled
+  ]
 
   defmodule Details do
     defstruct [:assume_role_arn, :egress_ips]
@@ -23,6 +34,7 @@ defmodule Console.Configuration do
       sentry_enabled: !!Application.get_env(:sentry, :dsn),
       healthmap_cluster_count: Application.get_env(:console, :healthmap_cluster_count) || 1000,
       details: Details.new(Application.get_env(:console, :details) || %{}),
+      object_store_enabled: Console.conf(:object_store) == true,
     }
   end
 end

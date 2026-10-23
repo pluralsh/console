@@ -2,6 +2,8 @@ fragment WorkbenchTiny on Workbench {
   id
   name
   description
+  insertedAt
+  updatedAt
   agentRuntime {
     id
     name
@@ -81,6 +83,7 @@ fragment WorkbenchWebhookTiny on WorkbenchWebhook {
 fragment Workbench on Workbench {
   ...WorkbenchTiny
   systemPrompt
+  filesystemEnabled
   agentRuntime {
     id
     name
@@ -90,8 +93,8 @@ fragment Workbench on Workbench {
     id
   }
   configuration {
-    selfService
     infrastructure {
+      selfService
       services
       stacks
       kubernetes
@@ -278,6 +281,10 @@ fragment WorkbenchToolConfigurationFields on WorkbenchToolConfiguration {
   jiraDatacenter {
     url
   }
+  serviceNow {
+    url
+    username
+  }
   linear {
     url
   }
@@ -373,8 +380,8 @@ fragment WorkbenchJobThought on WorkbenchJobThought {
     logs {
       ...WorkbenchJobActivityLog
     }
-    metrics {
-      ...WorkbenchJobActivityMetric
+    series {
+      ...MetricSeries
     }
     traces {
       ...WorkbenchJobActivityTrace
@@ -437,6 +444,10 @@ fragment WorkbenchCanvasToolGraph on WorkbenchCanvasToolGraph {
 fragment WorkbenchCanvasBlock on WorkbenchCanvasBlock {
   identifier
   type
+  title
+  description
+  sectionId
+  collapsed
   layout {
     x
     y
@@ -551,6 +562,9 @@ fragment WorkbenchJobActivity on WorkbenchJobActivity {
   status
   prompt
   insertedAt
+  attachments {
+    ...Attachment
+  }
   user {
     ...UserTiny
   }
@@ -692,6 +706,9 @@ fragment WorkbenchIssue on Issue {
   workbenchJob {
     id
     status
+    pullRequests {
+      ...PullRequestBasic
+    }
   }
 }
 
@@ -795,12 +812,14 @@ fragment WorkbenchJobTiny on WorkbenchJob {
 
 fragment WorkbenchJob on WorkbenchJob {
   ...WorkbenchJobTiny
+  updatedAt
   usage {
     ...WorkbenchJobUsage
   }
   workbench {
     id
     name
+    filesystemEnabled
     tools {
       ...WorkbenchToolTiny
     }
@@ -848,8 +867,24 @@ fragment WorkbenchEvalResultRow on WorkbenchEvalResult {
   }
 }
 
-query Workbenches($first: Int = 100, $after: String, $q: String) {
-  workbenches(first: $first, after: $after, q: $q) {
+query Workbenches(
+  $first: Int = 100
+  $after: String
+  $q: String
+  $projectId: ID
+  $sort: WorkbenchSort
+  $direction: SortDirection
+  $favoriteIds: [ID]
+) {
+  workbenches(
+    first: $first
+    after: $after
+    q: $q
+    projectId: $projectId
+    sort: $sort
+    direction: $direction
+    favoriteIds: $favoriteIds
+  ) {
     pageInfo {
       ...PageInfo
     }
@@ -866,6 +901,15 @@ query WorkbenchDashboard {
     pullRequests
     pullRequestMergeRate
     evalResults
+  }
+}
+
+query WorkbenchesSummary($projectId: ID) {
+  workbenchAggregates(projectId: $projectId) {
+    pullRequests
+    pullRequestMergeRate
+    hoursSaved
+    totalTokens
   }
 }
 
@@ -964,10 +1008,25 @@ query WorkbenchEvalSettings($id: ID!) {
   }
 }
 
-query WorkbenchJobs($id: ID!, $first: Int = 100, $after: String) {
+query WorkbenchJobs(
+  $id: ID!
+  $first: Int = 100
+  $after: String
+  $statuses: [WorkbenchJobStatus]
+  $prStates: [WorkbenchJobPrState]
+  $direction: SortDirection
+  $withTotal: Boolean = false
+) {
   workbench(id: $id) {
     id
-    runs(first: $first, after: $after) {
+    runs(
+      first: $first
+      after: $after
+      statuses: $statuses
+      prStates: $prStates
+      direction: $direction
+    ) {
+      totalCount @include(if: $withTotal)
       pageInfo {
         ...PageInfo
       }
@@ -980,22 +1039,87 @@ query WorkbenchJobs($id: ID!, $first: Int = 100, $after: String) {
   }
 }
 
-fragment WorkbenchJobSearchRow on WorkbenchJob {
-  id
-  prompt
-  status
-  result {
+query WorkbenchJobCounts($id: ID!) {
+  workbench(id: $id) {
     id
-    conclusion
-  }
-  pullRequests {
-    ...PullRequestBasic
+    runCounts {
+      statuses {
+        status
+        count
+      }
+      pullRequests {
+        state
+        count
+      }
+    }
   }
 }
 
-query WorkbenchJobSearch($workbenchId: ID!, $q: String!, $limit: Int) {
-  workbenchJobSearch(workbenchId: $workbenchId, q: $q, limit: $limit) {
-    ...WorkbenchJobSearchRow
+query WorkbenchJobStatusCounts(
+  $id: ID!
+  $q: String
+  $prStates: [WorkbenchJobPrState]
+  $insertedAfter: DateTime
+) {
+  workbench(id: $id) {
+    id
+    runCounts(q: $q, prStates: $prStates, insertedAfter: $insertedAfter) {
+      statuses {
+        status
+        count
+      }
+    }
+  }
+}
+
+query WorkbenchJobsForStatus(
+  $id: ID!
+  $status: WorkbenchJobStatus!
+  $q: String
+  $prStates: [WorkbenchJobPrState]
+  $direction: SortDirection
+  $insertedAfter: DateTime
+  $first: Int = 50
+  $after: String
+) {
+  workbench(id: $id) {
+    id
+    runs(
+      first: $first
+      after: $after
+      q: $q
+      statuses: [$status]
+      prStates: $prStates
+      direction: $direction
+      insertedAfter: $insertedAfter
+    ) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...WorkbenchJobTiny
+        }
+      }
+    }
+  }
+}
+
+query WorkbenchJobSearch(
+  $workbenchId: ID!
+  $q: String!
+  $limit: Int
+  $statuses: [WorkbenchJobStatus]
+  $prStates: [WorkbenchJobPrState]
+) {
+  workbenchJobSearch(
+    workbenchId: $workbenchId
+    q: $q
+    limit: $limit
+    statuses: $statuses
+    prStates: $prStates
+  ) {
+    ...WorkbenchJobTiny
   }
 }
 
@@ -1021,16 +1145,75 @@ query RecentWorkbenchJobs($count: Int) {
   }
 }
 
-query WorkbenchAlerts($id: ID!, $first: Int = 100, $after: String) {
+query WorkbenchAlertCounts($id: ID!) {
   workbench(id: $id) {
     id
-    alerts(first: $first, after: $after) {
+    alertCounts {
+      types {
+        type
+        count
+      }
+      severities {
+        severity
+        count
+      }
+    }
+  }
+}
+
+# the fields only the workbench alert views show, kept out of the shared Alert
+# fragment so other alert lists don't fetch them
+fragment WorkbenchAlert on Alert {
+  ...Alert
+  workbenchJob {
+    error
+    pullRequests {
+      ...PullRequestBasic
+    }
+  }
+  cluster {
+    id
+    name
+  }
+  serviceDeployment {
+    id
+    name
+    cluster {
+      id
+    }
+  }
+  value
+  silenceUrl
+}
+
+query WorkbenchAlerts(
+  $id: ID!
+  $first: Int = 100
+  $after: String
+  $q: String
+  $types: [ObservabilityWebhookType]
+  $severities: [AlertSeverity]
+  $sort: AlertSort
+  $direction: SortDirection
+) {
+  workbench(id: $id) {
+    id
+    alerts(
+      first: $first
+      after: $after
+      q: $q
+      types: $types
+      severities: $severities
+      sort: $sort
+      direction: $direction
+    ) {
+      totalCount
       pageInfo {
         ...PageInfo
       }
       edges {
         node {
-          ...Alert
+          ...WorkbenchAlert
         }
       }
     }
@@ -1076,6 +1259,55 @@ query WorkbenchIssues(
       q: $q
       providers: $providers
       statuses: $statuses
+      sort: $sort
+      direction: $direction
+      first: $first
+      after: $after
+    ) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...WorkbenchIssue
+        }
+      }
+    }
+  }
+}
+
+query WorkbenchIssueStatusCounts(
+  $id: ID!
+  $q: String
+  $providers: [IssueWebhookProvider]
+) {
+  workbench(id: $id) {
+    id
+    issueCounts(q: $q, providers: $providers) {
+      statuses {
+        status
+        count
+      }
+    }
+  }
+}
+
+query WorkbenchIssuesForStatus(
+  $id: ID!
+  $status: IssueStatus!
+  $q: String
+  $providers: [IssueWebhookProvider]
+  $sort: IssueSort
+  $direction: SortDirection
+  $first: Int = 50
+  $after: String
+) {
+  workbench(id: $id) {
+    id
+    issues(
+      q: $q
+      providers: $providers
+      statuses: [$status]
       sort: $sort
       direction: $direction
       first: $first
@@ -1292,11 +1524,11 @@ query WorkbenchJob($id: ID!) {
   }
 }
 
-query WorkbenchJobMetricsTool($id: ID!, $name: String, $arguments: Json) {
+query WorkbenchJobMetricsSeriesTool($id: ID!, $name: String, $arguments: Json) {
   workbenchJob(id: $id) {
     id
-    metricsTool(name: $name, arguments: $arguments) {
-      ...WorkbenchJobActivityMetric
+    metricsSeriesTool(name: $name, arguments: $arguments) {
+      ...MetricSeries
     }
   }
 }
@@ -1325,6 +1557,9 @@ query WorkbenchJobActivities($id: ID!) {
     status
     prompt
     insertedAt
+    attachments {
+      ...Attachment
+    }
     modes {
       ...WorkbenchJobModesFields
     }
@@ -1908,5 +2143,55 @@ subscription WorkbenchExecStream($activityId: ID!) {
     activityId
     text
     seq
+  }
+}
+
+fragment Attachment on Attachment {
+  id
+  filename
+  filetype
+  path
+  size
+  downloadUrl
+}
+
+fragment WorkbenchFile on WorkbenchFile {
+  path
+  name
+  kind
+  size
+  modifiedAt
+  sandboxPath
+}
+
+query WorkbenchFiles($id: ID!, $path: String) {
+  workbench(id: $id) {
+    id
+    files(path: $path) {
+      ...WorkbenchFile
+    }
+  }
+}
+
+query WorkbenchFile($id: ID!, $path: String!) {
+  workbench(id: $id) {
+    id
+    file(path: $path) {
+      ...WorkbenchFile
+      downloadUrl
+    }
+  }
+}
+
+query WorkbenchFileContents($id: ID!, $path: String!) {
+  workbench(id: $id) {
+    id
+    fileContents(path: $path)
+  }
+}
+
+mutation DeleteWorkbenchFile($workbenchId: ID!, $path: String!) {
+  deleteWorkbenchFile(workbenchId: $workbenchId, path: $path) {
+    ...WorkbenchFile
   }
 }

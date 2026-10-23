@@ -38,6 +38,7 @@ function CreateRouterButton() {
     <>
       <Button
         primary
+        small
         onClick={() => setOpen(true)}
       >
         New router

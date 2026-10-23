@@ -5,8 +5,8 @@ import {
   CHIP_TAG_ATTR,
 } from 'components/utils/contentEditableChips'
 import {
-  forwardRef,
   ReactNode,
+  Ref,
   RefObject,
   useEffect,
   useLayoutEffect,
@@ -73,44 +73,48 @@ function chipHintFromTarget(
   }
 }
 
-const ChipAnchorStub = forwardRef<HTMLSpanElement, { chip: HTMLElement }>(
-  function ChipAnchorStub({ chip }, ref) {
-    const [rect, setRect] = useState(() => chip.getBoundingClientRect())
+const ChipAnchorStub = function ChipAnchorStub({
+  chip,
+  ref,
+}: {
+  chip: HTMLElement
+  ref?: Ref<HTMLSpanElement>
+}) {
+  const [rect, setRect] = useState(() => chip.getBoundingClientRect())
 
-    useLayoutEffect(() => {
-      let frame = 0
-      const sync = () => {
-        cancelAnimationFrame(frame)
-        frame = requestAnimationFrame(() => {
-          if (chip.isConnected) setRect(chip.getBoundingClientRect())
-        })
-      }
-      sync()
-      window.addEventListener('scroll', sync, true)
-      window.addEventListener('resize', sync)
-      return () => {
-        cancelAnimationFrame(frame)
-        window.removeEventListener('scroll', sync, true)
-        window.removeEventListener('resize', sync)
-      }
-    }, [chip])
+  useLayoutEffect(() => {
+    let frame = 0
+    const sync = () => {
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(() => {
+        if (chip.isConnected) setRect(chip.getBoundingClientRect())
+      })
+    }
+    sync()
+    window.addEventListener('scroll', sync, true)
+    window.addEventListener('resize', sync)
+    return () => {
+      cancelAnimationFrame(frame)
+      window.removeEventListener('scroll', sync, true)
+      window.removeEventListener('resize', sync)
+    }
+  }, [chip])
 
-    return (
-      <span
-        ref={ref}
-        aria-hidden
-        style={{
-          position: 'fixed',
-          left: rect.left,
-          top: rect.top,
-          width: Math.max(rect.width, 1),
-          height: Math.max(rect.height, 1),
-          pointerEvents: 'none',
-        }}
-      />
-    )
-  }
-)
+  return (
+    <span
+      ref={ref}
+      aria-hidden
+      style={{
+        position: 'fixed',
+        left: rect.left,
+        top: rect.top,
+        width: Math.max(rect.width, 1),
+        height: Math.max(rect.height, 1),
+        pointerEvents: 'none',
+      }}
+    />
+  )
+}
 
 export function EditableSkillChipTooltip({
   containerRef,

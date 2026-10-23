@@ -1,4 +1,5 @@
 import {
+  ICON_FRAME_ICON_SIZE,
   ArrowTopRightIcon,
   CopyIcon,
   ListBoxItem,
@@ -80,7 +81,10 @@ export const ColUrl = columnHelper.accessor(({ node }) => node?.url, {
         }}
       >
         <TruncateUrl css={{ flexGrow: 1 }}>{url}</TruncateUrl>
-        <CopyButton text={url} />
+        <CopyButton
+          text={url}
+          size="small"
+        />
       </div>
     )
   },
@@ -181,7 +185,12 @@ export const ColActions = columnHelper.display({
         <MoreMenu onSelectionChange={(newKey) => setMenuKey(newKey)}>
           <ListBoxItem
             key={MenuItemKey.Manage}
-            leftContent={<ArrowTopRightIcon color="icon-default" />}
+            leftContent={
+              <ArrowTopRightIcon
+                size={ICON_FRAME_ICON_SIZE.small}
+                color="icon-default"
+              />
+            }
             label={
               <a css={{ textDecoration: 'none', color: 'inherit' }}>
                 {`Manage${scmName ? ` on ${scmName}` : ''}`}
@@ -191,14 +200,22 @@ export const ColActions = columnHelper.display({
           />
           <ListBoxItem
             key={MenuItemKey.Copy}
-            leftContent={<CopyIcon color={theme.colors['icon-default']} />}
+            leftContent={
+              <CopyIcon
+                size={ICON_FRAME_ICON_SIZE.small}
+                color={theme.colors['icon-default']}
+              />
+            }
             label="Copy webhook URL"
             textValue="Copy webhook URL"
           />
           <ListBoxItem
             key={MenuItemKey.Delete}
             leftContent={
-              <TrashCanIcon color={theme.colors['icon-danger-critical']} />
+              <TrashCanIcon
+                size={ICON_FRAME_ICON_SIZE.small}
+                color={theme.colors['icon-danger-critical']}
+              />
             }
             label="Delete webhook"
             textValue="Delete webhook"

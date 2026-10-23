@@ -21,7 +21,7 @@ function Prompt({ children, ...props }: ChipProps) {
       size="large"
       clickable
       css={{
-        borderRadius: 16,
+        borderRadius: theme.borderRadiuses.medium,
         padding: theme.spacing.large,
         width: 'fit-content',
       }}
@@ -52,7 +52,7 @@ function PromptsControl({
   return (
     <Chip
       css={{
-        borderRadius: 16,
+        borderRadius: theme.borderRadiuses.medium,
         cursor: 'pointer',
         height: 32,
         backgroundColor: chroma(theme.colors['fill-one']).alpha(0.5).hex(),

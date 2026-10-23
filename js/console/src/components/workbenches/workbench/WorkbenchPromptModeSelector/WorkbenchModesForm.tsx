@@ -561,7 +561,7 @@ function ModeActionRow({
             alignItems: 'center',
             gap: theme.spacing.small,
             width: '100%',
-            padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+            padding: `${theme.spacing.small} ${theme.spacing.medium}`,
             color: theme.colors['text-xlight'],
             background: theme.colors['fill-one'],
             border: theme.borders.input,
@@ -658,7 +658,7 @@ function ModeCard({
         css={{
           width: 16,
           height: 16,
-          marginTop: 2,
+          marginTop: '0.125rem',
           borderRadius: '50%',
           border: `1px solid ${active ? theme.colors['border-selected'] : theme.colors['border-input']}`,
           boxShadow: active ? `inset 0 0 0 3px ${panelBackground}` : undefined,

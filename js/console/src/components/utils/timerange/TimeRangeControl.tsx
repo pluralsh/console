@@ -17,13 +17,14 @@ type EditState = { draft: string; initial: string; highlighted: number }
 
 /**
  * Editable time range field (type `4h` or an explicit `start – end`) with a
- * preset menu and a live/paused toggle.
+ * preset menu and a live/paused toggle (hidden with `showLiveToggle={false}`).
  */
 export function TimeRangeControl({
   value,
   now,
   onChange,
   presets = TIME_RANGE_PRESETS,
+  showLiveToggle = true,
   width = 340,
   className,
 }: {
@@ -31,6 +32,7 @@ export function TimeRangeControl({
   now: Date
   onChange: (range: TimeRange) => void
   presets?: TimeRangePreset[]
+  showLiveToggle?: boolean
   width?: number | string
   className?: string
 }) {
@@ -175,16 +177,18 @@ export function TimeRangeControl({
           </MenuSC>
         )}
       </FieldSC>
-      <LiveButtonSC
-        type="button"
-        $live={value.live}
-        aria-pressed={value.live}
-        title={value.live ? 'Pause live updates' : 'Resume live updates'}
-        onClick={toggleLive}
-      >
-        {value.live ? <PauseIcon size={12} /> : <PlayIcon size={12} />}
-        {value.live ? 'Live' : 'Paused'}
-      </LiveButtonSC>
+      {showLiveToggle && (
+        <LiveButtonSC
+          type="button"
+          $live={value.live}
+          aria-pressed={value.live}
+          title={value.live ? 'Pause live updates' : 'Resume live updates'}
+          onClick={toggleLive}
+        >
+          {value.live ? <PauseIcon size={12} /> : <PlayIcon size={12} />}
+          {value.live ? 'Live' : 'Paused'}
+        </LiveButtonSC>
+      )}
     </ControlSC>
   )
 }
@@ -214,7 +218,7 @@ const FieldSC = styled.div<{ $editing: boolean; $error: boolean }>(
     gap: theme.spacing.xsmall,
     height: 32,
     minWidth: 0,
-    padding: `0 ${theme.spacing.small}px 0 ${theme.spacing.xsmall}px`,
+    padding: `0 ${theme.spacing.small} 0 ${theme.spacing.xsmall}`,
     position: 'relative',
   })
 )
@@ -237,20 +241,24 @@ const DurationChipSC = styled.span(({ theme }) => ({
   color: theme.colors['text-light'],
   flexShrink: 0,
   minWidth: 36,
-  padding: '1px 6px',
+  padding: '1px 0.375rem',
   textAlign: 'center',
 }))
 
 const MenuSC = styled.div(({ theme }) => ({
-  backgroundColor: theme.colors['fill-two'],
-  border: theme.borders['fill-two'],
+  backgroundColor:
+    theme.mode === 'dark' ? theme.colors['fill-one'] : theme.colors['fill-two'],
+  border:
+    theme.mode === 'dark'
+      ? theme.borders['fill-one']
+      : theme.borders['fill-two'],
   borderRadius: theme.borderRadiuses.large,
   boxShadow: theme.boxShadows.moderate,
   display: 'flex',
   flexDirection: 'column',
   left: -1,
   minWidth: 280,
-  padding: `${theme.spacing.xsmall}px 0`,
+  padding: `${theme.spacing.xsmall} 0`,
   position: 'absolute',
   right: -1,
   top: 'calc(100% + 4px)',
@@ -260,7 +268,7 @@ const MenuSC = styled.div(({ theme }) => ({
 const MenuHintSC = styled.div(({ theme }) => ({
   ...theme.partials.text.caption,
   color: theme.colors['text-xlight'],
-  padding: `${theme.spacing.xxsmall}px ${theme.spacing.medium}px ${theme.spacing.xsmall}px`,
+  padding: `${theme.spacing.xxsmall} ${theme.spacing.medium} ${theme.spacing.xsmall}`,
 }))
 
 const MenuItemSC = styled.div<{ $highlighted: boolean }>(
@@ -268,13 +276,15 @@ const MenuItemSC = styled.div<{ $highlighted: boolean }>(
     ...theme.partials.text.body2,
     alignItems: 'center',
     backgroundColor: $highlighted
-      ? theme.colors['fill-two-hover']
+      ? theme.colors[
+          theme.mode === 'dark' ? 'fill-one-hover' : 'fill-two-hover'
+        ]
       : 'transparent',
     color: theme.colors.text,
     cursor: 'pointer',
     display: 'flex',
     gap: theme.spacing.small,
-    padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
+    padding: `${theme.spacing.xsmall} ${theme.spacing.medium}`,
     '&[aria-selected="true"]': {
       color: theme.colors['text-primary-accent'],
     },
@@ -294,7 +304,7 @@ const LiveButtonSC = styled.button<{ $live: boolean }>(({ theme, $live }) => ({
   flexShrink: 0,
   gap: theme.spacing.xsmall,
   height: 32,
-  padding: `0 ${theme.spacing.small}px`,
+  padding: `0 ${theme.spacing.small}`,
   '&:hover': {
     backgroundColor: theme.colors['fill-one-hover'],
   },

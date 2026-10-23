@@ -46,11 +46,11 @@ function NodeGroupsScrollContainer({
       if (barWidth > 0) {
         innerRef.current.style.setProperty(
           'padding-right',
-          `${theme.spacing.xsmall}px`
+          `${theme.spacing.xsmall}`
         )
         ref.current.style.setProperty(
           'margin-right',
-          `${-barWidth - theme.spacing.xsmall}px`
+          `calc(${-barWidth}px - ${theme.spacing.xsmall})`
         )
       } else {
         innerRef.current.style.setProperty('padding-right', '0')
@@ -91,14 +91,14 @@ function NodeGroupContainer({ provider }): ReactElement<any> {
       css={{
         display: 'flex',
         flexDirection: 'column',
-        gap: '24px',
+        gap: '1.5rem',
       }}
     >
       <div
         css={{
           display: 'flex',
           flexDirection: 'column',
-          gap: '24px',
+          gap: '1.5rem',
         }}
       >
         <div

@@ -82,6 +82,7 @@ function NodeGroup({
         {removable && (
           <IconFrame
             clickable
+            size="small"
             icon={<TrashCanIcon />}
             onClick={() => onRemove?.()}
           />
@@ -105,7 +106,7 @@ function NodeGroup({
             onChange={({ target: { value } }) =>
               setNodeGroup((ng) => ({
                 ...ng,
-                minNodes: Number.parseInt(value),
+                minNodes: Number.parseInt(value, 10),
               }))
             }
             inputProps={{ type: 'number' }}
@@ -125,7 +126,7 @@ function NodeGroup({
             onChange={({ target: { value } }) =>
               setNodeGroup((ng) => ({
                 ...ng,
-                maxNodes: Number.parseInt(value),
+                maxNodes: Number.parseInt(value, 10),
               }))
             }
             inputProps={{ type: 'number' }}

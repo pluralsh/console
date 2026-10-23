@@ -1,12 +1,12 @@
 import {
   type ComponentProps,
+  createContext,
   type Dispatch,
   type Key,
   type MutableRefObject,
   type ReactElement,
+  type Ref,
   type SetStateAction,
-  createContext,
-  forwardRef,
   useCallback,
   useContext,
   useEffect,
@@ -17,7 +17,8 @@ import {
 
 import {
   ArrowRightIcon,
-  CaretRightIcon,
+  MinusIcon,
+  PlusIcon,
   usePrevious,
 } from '@pluralsh/design-system'
 import NextLink from 'next/link'
@@ -28,10 +29,10 @@ import classNames from 'classnames'
 import useMeasure from 'react-use-measure'
 import styled, { useTheme } from 'styled-components'
 
+import { brand, docsText } from '@src/theme/docsTheme'
+import type { MenuId, NavItem, NavMenu } from '../NavData'
 import scrollIntoContainerView from '../utils/scrollIntoContainerView'
 import { getBarePathFromPath, removeTrailingSlashes } from '../utils/text'
-
-import type { MenuId, NavItem, NavMenu } from '../NavData'
 
 export type SideNavProps = {
   navData: NavMenu
@@ -67,17 +68,20 @@ const StyledLink = styled(NextLink as any)(({ theme }) => ({
   flexGrow: 1,
   flexShrink: 1,
   margin: 0,
-  padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
-  ...theme.partials.text.body2,
+  padding: '6px 10px',
+  fontFamily: theme.fontFamilies.sans,
+  fontSize: 14,
+  lineHeight: 1.45,
+  letterSpacing: '0.01em',
   textDecoration: 'none',
-  color: theme.colors['text-xlight'],
+  color: theme.colors['text-light'],
   '.iconRight': {
     display: 'flex',
     justifyContent: 'right',
     flexGrow: 1,
   },
   '&:hover': {
-    color: theme.colors.text,
+    color: brand.ink,
   },
   '&:focus, &:focus-visible': {
     outline: 'none',
@@ -94,26 +98,32 @@ type LinkBaseProps = Partial<ComponentProps<typeof StyledLink>> & {
   iconRight?: ReactElement
 }
 
-const LinkBase = forwardRef<HTMLAnchorElement, LinkBaseProps>(
-  ({ className, children, iconLeft, iconRight, href, ...props }, ref) => {
-    const { keyboardNavigable } = useContext(KeyboardNavContext)
-    const content = (
-      <StyledLink
-        href={href}
-        className={className}
-        tabIndex={keyboardNavigable ? 0 : -1}
-        ref={ref}
-        {...props}
-      >
-        {iconLeft && iconLeft}
-        {children}
-        <div className="iconRight">{iconRight && iconRight}</div>
-      </StyledLink>
-    )
+const LinkBase = ({
+  className,
+  children,
+  iconLeft,
+  iconRight,
+  href,
+  ref,
+  ...props
+}: LinkBaseProps & { ref?: Ref<HTMLAnchorElement> }) => {
+  const { keyboardNavigable } = useContext(KeyboardNavContext)
+  const content = (
+    <StyledLink
+      href={href}
+      className={className}
+      tabIndex={keyboardNavigable ? 0 : -1}
+      ref={ref}
+      {...props}
+    >
+      {iconLeft && iconLeft}
+      {children}
+      <div className="iconRight">{iconRight && iconRight}</div>
+    </StyledLink>
+  )
 
-    return content
-  }
-)
+  return content
+}
 
 const CaretButton = styled(
   ({ isOpen = false, mode: _mode, className, ...props }) => {
@@ -146,8 +156,16 @@ const CaretButton = styled(
       >
         {_mode === 'menu' ? (
           <ArrowRightIcon className="icon" />
+        ) : isOpen ? (
+          <MinusIcon
+            className="icon"
+            size={12}
+          />
         ) : (
-          <CaretRightIcon className="icon" />
+          <PlusIcon
+            className="icon"
+            size={12}
+          />
         )}
       </button>
     )
@@ -157,10 +175,10 @@ const CaretButton = styled(
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  paddingRight: theme.spacing.large,
-  paddingLeft: theme.spacing.medium,
+  paddingRight: 10,
+  paddingLeft: theme.spacing.xsmall,
   cursor: 'pointer',
-  color: theme.colors['text-light'],
+  color: brand.subtle,
   transition: 'color 0.1s ease',
   position: 'relative',
   '&:focus-visible::before': {
@@ -168,18 +186,13 @@ const CaretButton = styled(
     borderRadius: theme.borderRadiuses.medium,
     top: theme.spacing.xsmall,
     left: theme.spacing.xsmall,
-    right: theme.spacing.xsmall + theme.spacing.xsmall,
+    right: `calc(${theme.spacing.xsmall} * 2)`,
     bottom: theme.spacing.xsmall,
   },
   ...(mode === 'subsection'
     ? {
-        '.icon': {
-          transform: `rotate(${isOpen ? 90 : 0}deg)`,
-          transition: 'all 0.175s cubic-bezier(.31,1.49,.64,1)',
-        },
-        '&.showHoverState:hover .icon': {
-          transform: isOpen ? 'rotate(-45deg)' : 'rotate(45deg)',
-          transitionDuration: '0.2s',
+        '&.showHoverState:hover': {
+          color: brand.ink,
         },
       }
     : {}),
@@ -239,11 +252,11 @@ function NavLinkUnstyled({
       scrollIntoContainerView(liRef.current, scrollRef.current, {
         behavior: 'smooth',
         block: 'start',
-        blockOffset: theme.spacing.xlarge,
+        blockOffset: theme.spacingPx.xlarge,
         preventIfVisible: true,
       })
     }
-  }, [isSelected, wasSelected, scrollRef, liRef, theme.spacing.xlarge])
+  }, [isSelected, wasSelected, scrollRef, liRef, theme.spacingPx.xlarge])
 
   const toMenuOnClick = () => toMenu && setMenuId(toMenu)
 
@@ -289,27 +302,26 @@ const NavLink = styled(NavLinkUnstyled)(({ theme }) => ({
   listStyle: 'none',
 
   borderRadius: theme.borderRadiuses.medium,
+  transition: 'background-color 0.15s ease-out',
 
   '&:hover': {
-    backgroundColor: theme.colors['fill-one-hover'],
+    backgroundColor: brand['surface-hover'],
   },
-  '&.selectedSecondary': {
-    backgroundColor: theme.colors['fill-one-selected'],
-    '&:hover': { backgroundColor: theme.colors['fill-one-selected'] },
+  '&.selectedSecondary > a': {
+    color: brand.ink,
   },
   '&.selected': {
-    backgroundColor: theme.colors['action-primary'],
-    '&:hover': { backgroundColor: theme.colors['action-primary-hover'] },
-    a: { color: theme.colors.text },
+    backgroundColor: brand['accent-tint'],
+    '&:hover': { backgroundColor: brand['accent-tint'] },
+    a: { color: brand['accent-ink'], fontWeight: 500 },
+    button: { color: brand['accent-ink'] },
   },
 }))
 
-export const TopHeading = styled.h6(({ theme }) => ({
+export const TopHeading = styled.h6((_) => ({
   margin: 0,
-  paddingLeft: theme.spacing.medium,
-  paddingTop: theme.spacing.xsmall,
-  paddingBottom: theme.spacing.xsmall,
-  ...theme.partials.marketingText.label,
+  padding: '6px 10px',
+  ...docsText.label,
 }))
 
 const TopSection = styled(({ title, children, ...props }) => (
@@ -317,13 +329,13 @@ const TopSection = styled(({ title, children, ...props }) => (
     <TopHeading>{title}</TopHeading>
     {children}
   </div>
-))(({ theme }) => ({
+))((_) => ({
   display: 'block',
   margin: 0,
   padding: 0,
   listStyle: 'none',
   '&:not(:first-child)': {
-    marginTop: theme.spacing.large,
+    marginTop: 20,
   },
 }))
 
@@ -345,41 +357,50 @@ function isPathnameInSections(
   return false
 }
 
-const SubSectionsList = styled(
-  forwardRef<
-    HTMLUListElement,
-    { sections: NavItem[]; indentLevel?: number; className?: string }
-  >(({ className, sections, indentLevel = 0 }, ref) => {
-    const pathname = useContext(NavContext).optimisticPathname
+const SubSectionsList = styled((({
+  className,
+  sections,
+  indentLevel = 0,
+  ref,
+}: {
+  sections: NavItem[]
+  indentLevel?: number
+  className?: string
+  ref?: Ref<HTMLUListElement>
+}) => {
+  const pathname = useContext(NavContext).optimisticPathname
 
-    return (
-      <ul
-        ref={ref}
-        className={className}
-      >
-        {sections.map((subSection) => {
-          const defaultOpen = isPathnameInSections(pathname, [subSection])
+  return (
+    <ul
+      ref={ref}
+      className={className}
+    >
+      {sections.map((subSection) => {
+        const defaultOpen = isPathnameInSections(pathname, [subSection])
 
-          return (
-            <SubSection
-              key={`${subSection.href || ''}-${subSection.title || ''}`}
-              defaultOpen={defaultOpen}
-              {...subSection}
-              indentLevel={indentLevel + 1}
-            />
-          )
-        })}
-      </ul>
-    )
-  }) as any
-)(({ theme, indentLevel }) => ({
+        return (
+          <SubSection
+            key={`${subSection.href || ''}-${subSection.title || ''}`}
+            defaultOpen={defaultOpen}
+            {...subSection}
+            indentLevel={indentLevel + 1}
+          />
+        )
+      })}
+    </ul>
+  )
+}) as any)(({ theme, indentLevel }) => ({
   margin: 0,
   padding: 0,
   listStyle: 'none',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 1,
   ...(indentLevel
     ? {
-        paddingLeft:
-          indentLevel >= 2 ? theme.spacing.xsmall : theme.spacing.medium,
+        margin: '2px 0 4px 12px',
+        paddingLeft: theme.spacing.xsmall,
+        borderLeft: `1px solid ${brand.line}`,
       }
     : {}),
 }))
@@ -491,11 +512,11 @@ const NavScrollContainer = styled.div<{
   right: 0,
   bottom: 0,
   overflowY: 'auto',
-  backgroundColor: theme.colors['fill-one'],
-  borderRight: desktop ? theme.borders['fill-one'] : 'none',
-  paddingBottom: `calc(${theme.spacing.xlarge}px + var(--menu-extra-bpad))`,
-  paddingTop: padTop ? theme.spacing.large : 0,
-  paddingRight: theme.spacing.medium,
+  backgroundColor: brand['surface-sidebar'],
+  borderRight: desktop ? `1px solid ${brand.line}` : 'none',
+  paddingBottom: `calc(${theme.spacing.xxlarge} + var(--menu-extra-bpad))`,
+  paddingTop: padTop ? 20 : 0,
+  paddingRight: theme.spacing.small,
   paddingLeft: theme.spacing.medium,
   display: hide ? 'none' : 'block',
 }))

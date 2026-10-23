@@ -1,4 +1,5 @@
 import {
+  ICON_FRAME_ICON_SIZE,
   ListIcon,
   NetworkInterfaceIcon,
   useSetBreadcrumbs,
@@ -12,7 +13,7 @@ import {
   CD_REL_PATH,
   SERVICES_REL_PATH,
 } from 'routes/cdRoutesConsts'
-import { useTheme } from 'styled-components'
+import { ToolbarSearchInput } from 'components/layout/PageToolbar'
 
 import {
   Maybe,
@@ -37,7 +38,7 @@ import {
   ColServiceDeployment,
   ColStatus,
 } from './ServicesColumns'
-import { StatusTabKey } from './ServicesFilters'
+import { StatusTabKey, useServicesSearch } from './ServicesFilters'
 
 export const columns = [
   ColServiceDeployment,
@@ -83,7 +84,6 @@ const directory = [
 ]
 
 export default function Services() {
-  const theme = useTheme()
   const pathMatch = useMatch(`${CD_ABS_PATH}/${SERVICES_REL_PATH}/:tab`)
   const tab = pathMatch?.params?.tab || ''
   const [refetch, setRefetch] = useState(() => () => {})
@@ -99,28 +99,6 @@ export default function Services() {
         },
       ],
       []
-    )
-  )
-
-  useSetPageHeaderContent(
-    useMemo(
-      () => (
-        <div
-          css={{
-            display: 'flex',
-            justifyContent: 'end',
-            gap: theme.spacing.small,
-          }}
-        >
-          <ButtonGroup
-            directory={directory}
-            toPath={(path) => `/${CD_REL_PATH}/${SERVICES_REL_PATH}/${path}`}
-            tab={tab}
-          />
-          <DeployService refetch={refetch} />
-        </div>
-      ),
-      [refetch, tab, theme.spacing.small]
     )
   )
 
@@ -149,6 +127,36 @@ export default function Services() {
         ),
     }
   }, [setRefetch, params, setParams])
+
+  const [searchString, setSearchString] = useServicesSearch(
+    context.q,
+    context.setQ
+  )
+
+  useSetPageHeaderContent(
+    useMemo(
+      () => (
+        <>
+          {!tab && (
+            <ToolbarSearchInput
+              placeholder="Search services"
+              value={searchString}
+              onChange={setSearchString}
+            />
+          )}
+          <ButtonGroup
+            size="small"
+            iconSize={ICON_FRAME_ICON_SIZE.small}
+            directory={directory}
+            toPath={(path) => `/${CD_REL_PATH}/${SERVICES_REL_PATH}/${path}`}
+            tab={tab}
+          />
+          <DeployService refetch={refetch} />
+        </>
+      ),
+      [refetch, tab, searchString, setSearchString]
+    )
+  )
 
   return <Outlet context={context} />
 }

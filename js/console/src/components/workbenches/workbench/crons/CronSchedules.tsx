@@ -1,7 +1,5 @@
 import {
   Button,
-  Card,
-  EmptyState,
   Flex,
   IconFrame,
   PencilIcon,
@@ -9,6 +7,7 @@ import {
   TrashCanIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import { createColumnHelper } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
@@ -116,22 +115,20 @@ export function CronSchedules() {
           gap="xxsmall"
         />
         {!!data && isEmpty(crons) ? (
-          <Card>
-            <EmptyState
-              message="No schedules yet"
-              description="Create a schedule for the workbench with prompt."
-              css={{ margin: '0 auto', width: 500 }}
+          <WorkbenchEmptyState
+            inset={false}
+            message="No schedules yet"
+            description="Schedules run this workbench with a prompt on a recurring basis."
+          >
+            <Button
+              small
+              onClick={() => {
+                navigate(getWorkbenchCronScheduleCreateAbsPath(workbenchId))
+              }}
             >
-              <Button
-                small
-                onClick={() => {
-                  navigate(getWorkbenchCronScheduleCreateAbsPath(workbenchId))
-                }}
-              >
-                Create new schedule
-              </Button>
-            </EmptyState>
-          </Card>
+              Create new schedule
+            </Button>
+          </WorkbenchEmptyState>
         ) : (
           <StretchedFlex
             direction="column"
@@ -228,12 +225,14 @@ function getColumns({
         >
           <IconFrame
             clickable
+            size="small"
             tooltip="Edit schedule"
             icon={<PencilIcon />}
             onClick={() => onEdit(row.original)}
           />
           <IconFrame
             clickable
+            size="small"
             tooltip="Delete schedule"
             icon={<TrashCanIcon color="icon-danger" />}
             onClick={() => onDelete(row.original)}

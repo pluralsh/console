@@ -122,6 +122,23 @@ defmodule ConsoleWeb.GitControllerTest do
       assert error.warning
     end
 
+    test "if the fetch is rate limited it persists a warning", %{conn: conn} do
+      git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
+      %{id: id} = svc = insert(:service, repository: git, git: %{ref: "master", folder: "bin"})
+
+      expect(Discovery, :digest, fn _, _ -> {:error, :rate_limited} end)
+
+      conn
+      |> add_auth_headers(svc.cluster)
+      |> get("/v1/git/tarballs", %{id: id})
+      |> response(429)
+
+      %{errors: [error]} = refetch(svc) |> Console.Repo.preload([:errors])
+      assert error.source == "git"
+      assert error.message == "Rate limited"
+      assert error.warning
+    end
+
     test "if fetching and dependencies are not satisfied, it will 402 and persist an error", %{conn: conn} do
       git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
       svc = insert(:service, repository: git, git: %{ref: "master", folder: "bin"})
@@ -210,6 +227,23 @@ defmodule ConsoleWeb.GitControllerTest do
       assert svc.status == :stale
       assert error.source == "git"
       assert error.message == "Git or Helm agent is bootstrapping"
+      assert error.warning
+    end
+
+    test "if the fetch is rate limited it persists a warning", %{conn: conn} do
+      git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
+      %{id: id} = svc = insert(:service, repository: git, git: %{ref: "master", folder: "bin"})
+
+      expect(Discovery, :digest, fn _, _ -> {:error, :rate_limited} end)
+
+      conn
+      |> add_auth_headers(svc.cluster)
+      |> get("/ext/v1/digests", %{id: id})
+      |> response(429)
+
+      %{errors: [error]} = refetch(svc) |> Console.Repo.preload([:errors])
+      assert error.source == "git"
+      assert error.message == "Rate limited"
       assert error.warning
     end
 

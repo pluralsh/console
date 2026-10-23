@@ -39,7 +39,8 @@ defmodule Console.Schema.WorkbenchTool do
     docker: 29,
     victoria_logs: 30,
     jira: 31,
-    jira_datacenter: 32
+    jira_datacenter: 32,
+    service_now: 33
 
   defenum Category,
     metrics: 0,
@@ -142,6 +143,12 @@ defmodule Console.Schema.WorkbenchTool do
       embeds_one :jira_datacenter, JiraDatacenterConnection, on_replace: :update do
         field :url,       :string
         field :api_token, EncryptedString
+      end
+
+      embeds_one :service_now, ServiceNowConnection, on_replace: :update do
+        field :url,      :string
+        field :username, :string
+        field :password, EncryptedString
       end
 
       embeds_one :prometheus, PrometheusConnection, on_replace: :update do
@@ -347,6 +354,7 @@ defmodule Console.Schema.WorkbenchTool do
     |> cast_embed(:oauth_token, with: &oauth_token_changeset/2)
     |> cast_embed(:configuration, with: &configuration_changeset/2)
     |> validate_jira_datacenter_auth()
+    |> validate_service_now_auth()
     |> foreign_key_constraint(:project_id)
     |> foreign_key_constraint(:cloud_connection_id)
     |> foreign_key_constraint(:mcp_server_id)
@@ -421,6 +429,7 @@ defmodule Console.Schema.WorkbenchTool do
   defp categories(:atlassian), do: [:ticketing]
   defp categories(:jira), do: [:ticketing]
   defp categories(:jira_datacenter), do: [:ticketing]
+  defp categories(:service_now), do: [:ticketing]
   defp categories(:cloud), do: [:infrastructure]
   defp categories(:exa), do: [:search]
   defp categories(:gitlab), do: [:scm]
@@ -455,6 +464,7 @@ defmodule Console.Schema.WorkbenchTool do
     |> cast_embed(:atlassian, with: &atlassian_configuration_changeset/2)
     |> cast_embed(:jira, with: &jira_configuration_changeset/2)
     |> cast_embed(:jira_datacenter, with: &jira_datacenter_configuration_changeset/2)
+    |> cast_embed(:service_now, with: &service_now_configuration_changeset/2)
     |> cast_embed(:exa, with: &exa_configuration_changeset/2)
     |> cast_embed(:gitlab, with: &gitlab_configuration_changeset/2)
     |> cast_embed(:bitbucket, with: &bitbucket_configuration_changeset/2)
@@ -661,6 +671,23 @@ defmodule Console.Schema.WorkbenchTool do
          false <- present?(jira && jira.api_token),
          false <- oauth_configured?(get_field(changeset, :oauth)) do
       add_error(changeset, :configuration, "jira data center requires an API token or OAuth token exchange")
+    else
+      _ -> changeset
+    end
+  end
+
+  defp service_now_configuration_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(url username password)a)
+    |> validate_required([:url])
+  end
+
+  defp validate_service_now_auth(changeset) do
+    with :service_now <- get_field(changeset, :tool),
+         %{service_now: sn} <- get_field(changeset, :configuration),
+         false <- present?(sn && sn.username) and present?(sn && sn.password),
+         false <- oauth_configured?(get_field(changeset, :oauth)) do
+      add_error(changeset, :configuration, "servicenow requires a username and password or OAuth token exchange")
     else
       _ -> changeset
     end

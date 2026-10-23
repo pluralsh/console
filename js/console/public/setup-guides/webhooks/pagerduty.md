@@ -27,11 +27,11 @@ In your PagerDuty account (`https://<your-subdomain>.pagerduty.com/`):
 
 In Plural:
 
-1. Set **Type** to `Observability`.
-2. Set **Provider** to `PAGERDUTY`.
+1. Set **Type of webhook** to `Observability`.
+2. Set **Provider type** to `PagerDuty`.
 3. Enter webhook **Name**.
-4. Paste the PagerDuty signing secret as Plural **Signing secret**.
-5. Click **Create new webhook**.
+4. Paste the PagerDuty signing secret as Plural **Secret**.
+5. Click **Create**.
 
 Copy the Plural-generated webhook URL.
 
@@ -51,4 +51,6 @@ Trigger a test incident (or send a PagerDuty test event) and confirm in Plural:
 
 - request accepted
 - `x-pagerduty-signature` verification succeeds
-- incident state transitions are visible (`triggered`, `acknowledged`, `resolved`)
+- the alert is firing after `triggered` and `acknowledged`, and resolved after `resolved`
+
+Plural only keeps an incident that is associated with a Plural project, cluster, or service, or that matches a workbench trigger. Otherwise the request returns `{"ignored": true}`. Associate an incident with `plrl_project`, `plrl_cluster`, and `plrl_service` keys in its custom details, or with a `Plural Cluster: <handle>` style marker in its title.

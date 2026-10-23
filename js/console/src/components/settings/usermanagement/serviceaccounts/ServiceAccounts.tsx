@@ -1,5 +1,8 @@
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
-import { SettingsPageHeader } from 'components/settings/Settings'
+import {
+  PageToolbarPortal,
+  ToolbarSearchInput,
+} from 'components/layout/PageToolbar'
 
 import { useState } from 'react'
 
@@ -16,13 +19,18 @@ export default function ServiceAccounts() {
 
   return (
     <>
-      <SettingsPageHeader heading="Service Accounts">
-        <ServiceAccountCreate q={q} />
-      </SettingsPageHeader>
-      <ServiceAccountsList
-        q={q}
-        setQ={setQ}
-      />
+      <PageToolbarPortal>
+        <ToolbarSearchInput
+          placeholder="Search an account"
+          value={q}
+          onChange={setQ}
+        />
+        <ServiceAccountCreate
+          q={q}
+          small
+        />
+      </PageToolbarPortal>
+      <ServiceAccountsList q={q} />
     </>
   )
 }

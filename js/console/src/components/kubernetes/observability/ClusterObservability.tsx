@@ -62,14 +62,10 @@ const FillSC = styled.div({
   width: '100%',
 })
 
-const ContentSC = styled.div<{ $scrollable?: boolean }>(
-  ({ theme, $scrollable }) => ({
-    display: 'flex',
-    flexDirection: 'column',
-    inset: 0,
-    overflowY: $scrollable ? 'auto' : 'hidden',
-    paddingTop: theme.spacing.medium,
-    paddingBottom: theme.spacing.large,
-    position: 'absolute',
-  })
-)
+const ContentSC = styled.div<{ $scrollable?: boolean }>(({ $scrollable }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  inset: 0,
+  overflowY: $scrollable ? 'auto' : 'hidden',
+  position: 'absolute',
+}))

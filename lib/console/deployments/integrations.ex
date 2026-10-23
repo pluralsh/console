@@ -93,8 +93,24 @@ defmodule Console.Deployments.Integrations do
     |> IssueWebhook.changeset(attrs)
     |> allow(user, :write)
     |> when_ok(:update)
+    |> evict_issue_webhook()
     |> notify(:update)
   end
+
+  @doc """
+  Records the secret a provider sends during its webhook handshake (Asana's `X-Hook-Secret`).
+  Only the first handshake is accepted; rotating the webhook's secret clears it so a new one can be recorded.
+  """
+  @spec record_handshake_secret(IssueWebhook.t, binary) :: issue_webhook_resp
+  def record_handshake_secret(%IssueWebhook{id: id} = hook, secret) when is_binary(secret) and byte_size(secret) > 0 do
+    IssueWebhook.awaiting_handshake(id)
+    |> Repo.update_all(set: [handshake_secret: secret, updated_at: DateTime.utc_now()])
+    |> case do
+      {1, _} -> evict_issue_webhook({:ok, %{hook | handshake_secret: secret}})
+      _ -> {:error, "a handshake secret is already recorded for this webhook"}
+    end
+  end
+  def record_handshake_secret(_, _), do: {:error, "invalid handshake secret"}
 
   @doc """
   Deletes an issue webhook by id. Fails if the user is not an admin.
@@ -104,8 +120,15 @@ defmodule Console.Deployments.Integrations do
     get_issue_webhook!(id)
     |> allow(user, :write)
     |> when_ok(:delete)
+    |> evict_issue_webhook()
     |> notify(:delete)
   end
+
+  defp evict_issue_webhook({:ok, %IssueWebhook{external_id: ext_id}} = res) do
+    @cache.delete({:issue_webhook, ext_id})
+    res
+  end
+  defp evict_issue_webhook(pass), do: pass
 
   defp check_chat_connection_limit do
     case Repo.aggregate(ChatConnection, :count) do

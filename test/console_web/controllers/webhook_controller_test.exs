@@ -717,6 +717,56 @@ defmodule ConsoleWeb.WebhookControllerTest do
   end
 
   describe "#issue/2 (Jira)" do
+    test "it accepts admin webhooks signed with x-hub-signature", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :jira)
+      insert(:workbench_webhook, issue_webhook: hook, matches: %{substring: "Checkout"})
+      payload = Jason.encode!(%{
+        "webhookEvent" => "jira:issue_created",
+        "issue" => %{
+          "key" => "OPS-42",
+          "self" => "https://mycompany.atlassian.net/rest/api/2/issue/10001",
+          "fields" => %{"summary" => "Checkout is down", "description" => "500s", "status" => %{"name" => "To Do"}}
+        }
+      })
+      signature = :crypto.mac(:hmac, :sha256, hook.secret, payload) |> Base.encode16(case: :lower)
+
+      result =
+        conn
+        |> put_req_header("x-hub-signature", "sha256=#{signature}")
+        |> put_req_header("content-type", "application/json")
+        |> post("/ext/v1/webhooks/issues/jira/#{hook.external_id}", payload)
+        |> json_response(200)
+
+      assert result["message"] == "persisted issue"
+      [issue] = Console.Repo.all(Console.Schema.Issue)
+      assert issue.external_id == "OPS-42"
+      assert issue.url == "https://mycompany.atlassian.net/browse/OPS-42"
+    end
+
+    test "it rejects an invalid x-hub-signature even with a valid secret header", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :jira)
+      payload = Jason.encode!(%{"issue" => %{"key" => "PROJ-1"}})
+
+      conn
+      |> put_req_header("x-hub-signature", "sha256=deadbeef")
+      |> put_req_header("x-atlassian-webhook-secret", hook.secret)
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/issues/jira/#{hook.external_id}", payload)
+      |> response(403)
+    end
+
+    test "it rejects x-hub-signature with an unsupported method", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :jira)
+      payload = Jason.encode!(%{"issue" => %{"key" => "PROJ-1"}})
+      signature = :crypto.mac(:hmac, :md5, hook.secret, payload) |> Base.encode16(case: :lower)
+
+      conn
+      |> put_req_header("x-hub-signature", "md5=#{signature}")
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/issues/jira/#{hook.external_id}", payload)
+      |> response(403)
+    end
+
     test "it returns 403 when x-atlassian-webhook-secret is missing", %{conn: conn} do
       hook = insert(:issue_webhook, provider: :jira)
       payload = Jason.encode!(%{"issue" => %{"key" => "PROJ-123", "fields" => %{"summary" => "Bug", "description" => "Desc", "status" => %{"name" => "Open"}}, "self" => "https://mycompany.atlassian.net/rest/api/2/issue/123"}})
@@ -895,6 +945,87 @@ defmodule ConsoleWeb.WebhookControllerTest do
   end
 
   describe "#issue/2 (Asana)" do
+    test "it answers the handshake by echoing x-hook-secret and records it", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :asana)
+
+      conn =
+        conn
+        |> put_req_header("x-hook-secret", "asana-handshake-secret")
+        |> put_req_header("content-type", "application/json")
+        |> post("/ext/v1/webhooks/issues/asana/#{hook.external_id}", "{}")
+
+      assert response(conn, 200)
+      assert get_resp_header(conn, "x-hook-secret") == ["asana-handshake-secret"]
+      assert Console.Deployments.Integrations.get_issue_webhook!(hook.id).handshake_secret == "asana-handshake-secret"
+    end
+
+    test "it rejects a second handshake without overwriting the recorded secret", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :asana, handshake_secret: "original")
+
+      conn
+      |> put_req_header("x-hook-secret", "attacker")
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/issues/asana/#{hook.external_id}", "{}")
+      |> response(403)
+
+      assert Console.Deployments.Integrations.get_issue_webhook!(hook.id).handshake_secret == "original"
+    end
+
+    test "it does not treat x-hook-secret as a handshake for other providers", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :linear)
+
+      conn =
+        conn
+        |> put_req_header("x-hook-secret", "whatever")
+        |> put_req_header("content-type", "application/json")
+        |> post("/ext/v1/webhooks/issues/linear/#{hook.external_id}", "{}")
+
+      assert response(conn, 403)
+      assert get_resp_header(conn, "x-hook-secret") == []
+      refute Console.Deployments.Integrations.get_issue_webhook!(hook.id).handshake_secret
+    end
+
+    test "it accepts events signed with the recorded handshake secret", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :asana, handshake_secret: "asana-handshake-secret")
+      insert(:workbench_webhook, issue_webhook: hook, matches: %{substring: "checkout"})
+      payload = Jason.encode!(%{
+        "task" => %{
+          "gid" => "asana-handshake-task",
+          "name" => "checkout is down",
+          "notes" => "500s",
+          "permalink_url" => "https://app.asana.com/0/project/handshake",
+          "completed" => false
+        }
+      })
+      signature = :crypto.mac(:hmac, :sha256, "asana-handshake-secret", payload)
+                  |> Base.encode16(case: :lower)
+
+      result =
+        conn
+        |> put_req_header("x-hook-signature", signature)
+        |> put_req_header("content-type", "application/json")
+        |> post("/ext/v1/webhooks/issues/asana/#{hook.external_id}", payload)
+        |> json_response(200)
+
+      assert result["message"] == "persisted issue"
+    end
+
+    test "it acknowledges a heartbeat signed with the handshake secret", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :asana, handshake_secret: "asana-handshake-secret")
+      payload = Jason.encode!(%{"events" => []})
+      signature = :crypto.mac(:hmac, :sha256, "asana-handshake-secret", payload)
+                  |> Base.encode16(case: :lower)
+
+      result =
+        conn
+        |> put_req_header("x-hook-signature", signature)
+        |> put_req_header("content-type", "application/json")
+        |> post("/ext/v1/webhooks/issues/asana/#{hook.external_id}", payload)
+        |> json_response(200)
+
+      assert result["ignored"]
+    end
+
     test "it returns 403 when x-hook-signature is missing", %{conn: conn} do
       hook = insert(:issue_webhook, provider: :asana)
       payload = Jason.encode!(%{"events" => [%{"action" => "changed", "resource" => %{"gid" => "123", "resource_type" => "task"}}]})
@@ -2201,6 +2332,99 @@ defmodule ConsoleWeb.WebhookControllerTest do
     end
   end
 
+  describe "#issue/2 (ServiceNow)" do
+    test "it returns 403 without a secret or signature", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :service_now)
+
+      conn
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/issues/service_now/#{hook.external_id}", Jason.encode!(service_now_payload()))
+      |> response(403)
+    end
+
+    test "it returns 403 when the shared secret is invalid", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :service_now)
+
+      conn
+      |> put_req_header("x-plural-webhook-secret", "invalid-secret")
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/issues/service_now/#{hook.external_id}", Jason.encode!(service_now_payload()))
+      |> response(403)
+    end
+
+    test "an invalid signature is rejected even with a valid shared secret", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :service_now)
+
+      conn
+      |> put_req_header("x-plural-signature", "invalid")
+      |> put_req_header("x-plural-webhook-secret", hook.secret)
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/issues/service_now/#{hook.external_id}", Jason.encode!(service_now_payload()))
+      |> response(403)
+    end
+
+    test "it persists an incident authenticated with the shared secret", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :service_now)
+      insert(:workbench_webhook, issue_webhook: hook, matches: %{substring: "Checkout"})
+
+      result =
+        conn
+        |> put_req_header("x-plural-webhook-secret", hook.secret)
+        |> put_req_header("content-type", "application/json")
+        |> post("/ext/v1/webhooks/issues/service_now/#{hook.external_id}", Jason.encode!(service_now_payload()))
+        |> json_response(200)
+
+      assert result["message"] == "persisted issue"
+
+      [issue] = Console.Repo.all(Console.Schema.Issue)
+      assert issue.provider == :service_now
+      assert issue.external_id == "#{hook.id}:incident:0123456789abcdef0123456789abcdef"
+      assert issue.title == "Checkout is down"
+      assert issue.body == "500s from the payments service"
+      assert issue.status == :in_progress
+      assert issue.url ==
+               "https://example.service-now.com/nav_to.do?uri=incident.do%3Fsys_id%3D0123456789abcdef0123456789abcdef"
+    end
+
+    for encoding <- [:hex, :base64] do
+      test "it accepts a #{encoding} HMAC-SHA256 signature", %{conn: conn} do
+        hook = insert(:issue_webhook, provider: :service_now)
+        insert(:workbench_webhook, issue_webhook: hook, matches: %{substring: "Checkout"})
+        payload = Jason.encode!(service_now_payload(%{"state" => %{"value" => "6", "display_value" => "Resolved"}}))
+        mac = :crypto.mac(:hmac, :sha256, hook.secret, payload)
+        signature = if unquote(encoding) == :hex, do: Base.encode16(mac, case: :lower), else: Base.encode64(mac)
+
+        result =
+          conn
+          |> put_req_header("x-plural-signature", signature)
+          |> put_req_header("content-type", "application/json")
+          |> post("/ext/v1/webhooks/issues/service_now/#{hook.external_id}", payload)
+          |> json_response(200)
+
+        refute result["ignored"]
+        [issue] = Console.Repo.all(Console.Schema.Issue)
+        assert issue.status == :completed
+      end
+    end
+
+    test "it ignores tables outside the ticket tables", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :service_now)
+
+      result =
+        conn
+        |> put_req_header("x-plural-webhook-secret", hook.secret)
+        |> put_req_header("content-type", "application/json")
+        |> post(
+          "/ext/v1/webhooks/issues/service_now/#{hook.external_id}",
+          Jason.encode!(service_now_payload(%{"table" => "sys_user"}))
+        )
+        |> json_response(200)
+
+      assert result["ignored"]
+      [] = Console.Repo.all(Console.Schema.Issue)
+    end
+  end
+
   describe "#issue/2 (Azure DevOps)" do
     test "it returns 403 without basic auth", %{conn: conn} do
       hook = insert(:issue_webhook, provider: :azure_devops)
@@ -2430,5 +2654,20 @@ defmodule ConsoleWeb.WebhookControllerTest do
         }
       }
     }
+  end
+
+  defp service_now_payload(attrs \\ %{}) do
+    Map.merge(
+      %{
+        "table" => "incident",
+        "instance_url" => "https://example.service-now.com/",
+        "sys_id" => "0123456789abcdef0123456789abcdef",
+        "number" => "INC0010001",
+        "short_description" => "Checkout is down",
+        "description" => "500s from the payments service",
+        "state" => "2"
+      },
+      attrs
+    )
   end
 end

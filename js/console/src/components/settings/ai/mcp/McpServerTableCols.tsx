@@ -21,7 +21,10 @@ import {
 } from 'components/cd/utils/PermissionsModal'
 
 export type McpTableAction =
-  'audit' | 'permissions' | 'edit' | 'removeConnection'
+  | 'audit'
+  | 'permissions'
+  | 'edit'
+  | 'removeConnection'
 
 const columnHelper = createColumnHelper<McpServerFragment>()
 
@@ -96,6 +99,7 @@ function EditAction({ server }: { server: McpServerFragment }) {
   return (
     <IconFrame
       clickable
+      size="small"
       as={Link}
       to={getAiSettingsMcpServerEditAbsPath({ mcpServerId: server.id })}
       tooltip="Edit MCP server"
@@ -110,6 +114,7 @@ function AuditAction({ id, name }: { id: string; name: string }) {
     <>
       <IconFrame
         clickable
+        size="small"
         tooltip="Audit trail"
         onClick={() => setShowModal(true)}
         icon={<ListIcon />}
@@ -136,6 +141,7 @@ function PermissionsAction({
     <>
       <IconFrame
         clickable
+        size="small"
         tooltip="Permissions"
         onClick={() => setShowPermissions(true)}
         icon={<PeopleIcon />}
@@ -167,6 +173,7 @@ function RemoveConnectionAction({
   return (
     <IconFrame
       clickable
+      size="small"
       disabled={loading}
       icon={loading ? <Spinner /> : <TrashCanIcon />}
       tooltip="Remove connection"

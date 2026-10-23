@@ -2,6 +2,7 @@ fragment WorkbenchDashboardSummary on WorkbenchDashboard {
   id
   name
   description
+  publicId
   insertedAt
   updatedAt
 }
@@ -190,8 +191,8 @@ query WorkbenchDashboardGraph(
   workbenchDashboard(id: $id) {
     id
     graph(identifier: $identifier, input: $input, timeRange: $timeRange) {
-      metrics {
-        ...WorkbenchJobActivityMetric
+      series {
+        ...MetricSeries
       }
       logs {
         ...WorkbenchJobActivityLog
@@ -258,6 +259,12 @@ query WorkbenchMonitorJobs(
 mutation DeleteWorkbenchDashboard($id: ID!) {
   deleteDashboard(id: $id) {
     id
+  }
+}
+
+mutation ShareWorkbenchDashboard($id: ID!, $shared: Boolean!) {
+  shareWorkbenchDashboard(id: $id, shared: $shared) {
+    ...WorkbenchDashboardDetails
   }
 }
 

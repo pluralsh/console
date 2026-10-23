@@ -227,7 +227,7 @@ const PromptSectionSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.large,
-  paddingRight: 160,
+  paddingRight: '10rem',
   [`@container (max-width: ${theme.breakpoints.desktop}px)`]: {
     paddingRight: theme.spacing.small,
   },
@@ -243,6 +243,7 @@ const publishedToLabel = (published: Nullable<boolean>) => {
     case true:
       return 'Published research'
     case false:
+    case null:
     case undefined:
       return 'My research'
   }

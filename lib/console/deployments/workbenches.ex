@@ -5,6 +5,7 @@ defmodule Console.Deployments.Workbenches do
   import Console.AI.Workbench.Mentions
   import Console.Schema.WorkbenchJobActivity, only: [is_action: 1]
   alias Console.AI.Workbench.Toolchain
+  alias Console.Deployments.Attachments
   alias Console.Schema.{
     User,
     Workbench,
@@ -36,7 +37,7 @@ defmodule Console.Deployments.Workbenches do
     Service,
     QueuedPrompt
   }
-  alias Console.AI.{Provider, VectorStore}
+  alias Console.AI.Provider
   alias Console.AI.Tools.Workbench.{FunctionCall, KubeDrain, KubeRequest, SavedPrompt, KubeShell}
   alias Console.Services.Users
   alias Console.Deployments.Settings
@@ -129,36 +130,21 @@ defmodule Console.Deployments.Workbenches do
   end
 
   @doc """
-  Executes a semantic search for workbench jobs indexed in the vector store.
+  Searches a workbench's jobs for a case-insensitive substring of their prompt, newest first.
+  A `:filter` further narrows the matching jobs.
   """
-  @spec workbench_job_search(binary, User.t(), keyword) :: {:ok, [WorkbenchJob.t()]} | error
-  def workbench_job_search(q, %User{} = user, opts \\ []) do
-    count = Keyword.get(opts, :limit, 5)
-    workbench_id = Keyword.get(opts, :workbench_id)
-    user = Console.Services.Rbac.preload(user)
+  @spec workbench_job_search(binary, binary, keyword) :: {:ok, [WorkbenchJob.t()]}
+  def workbench_job_search(q, workbench_id, opts \\ []) do
+    filter = Keyword.get(opts, :filter) || & &1
 
-    with {:ok, results} <- VectorStore.fetch(q, [
-           count: count,
-           filters: search_filters(workbench_id),
-           user: user
-         ]) do
-      results
-      |> Enum.map(fn
-        %VectorStore.Response{workbench_job: %{id: id}} when is_binary(id) -> id
-        _ -> nil
-      end)
-      |> Enum.reject(&is_nil/1)
-      |> Enum.uniq()
-      |> WorkbenchJob.for_ids()
-      |> Repo.all()
-      |> ok()
-    end
+    WorkbenchJob.for_workbench(workbench_id)
+    |> WorkbenchJob.search(q)
+    |> filter.()
+    |> WorkbenchJob.ordered([desc: :inserted_at, desc: :id])
+    |> WorkbenchJob.with_limit(Keyword.get(opts, :limit, 5))
+    |> Repo.all()
+    |> ok()
   end
-
-  defp search_filters(workbench_id) when is_binary(workbench_id) do
-    [datatype: {:raw, :workbench_job}, workbench_id: workbench_id]
-  end
-  defp search_filters(_), do: [datatype: {:raw, :workbench_job}]
 
   @doc """
   Creates or updates a workbench. If attrs contain an id, that record is updated.
@@ -857,6 +843,9 @@ defmodule Console.Deployments.Workbenches do
       |> allow(user, :read)
       |> when_ok(:insert)
     end)
+    |> add_operation(:attachments, fn %{job: job} ->
+      Attachments.create(attrs[:attachments], job.workbench_id, %{workbench_job_id: job.id})
+    end)
     |> execute(extract: :job)
     |> notify(:create, user)
   end
@@ -1046,10 +1035,11 @@ defmodule Console.Deployments.Workbenches do
     end
   end
 
-  defp mark_running(%WorkbenchJob{} = job) do
+  defp mark_running(%WorkbenchJob{status: prev} = job) do
     job
     |> Ecto.Changeset.change(%{status: :running, updated_at: Timex.now()})
     |> Repo.update(allow_stale: true)
+    |> notify_status_change(prev)
   end
 
   @doc """
@@ -1089,8 +1079,19 @@ defmodule Console.Deployments.Workbenches do
       |> WorkbenchJobActivity.changeset(attrs)
       |> Repo.insert()
     end)
-    |> execute(extract: :activity)
-    |> notify(:create, user)
+    |> add_operation(:attachments, fn %{job: job, activity: activity} ->
+      Attachments.create(attrs[:attachments], job.workbench_id, %{
+        workbench_job_id: job.id,
+        workbench_job_activity_id: activity.id
+      })
+    end)
+    |> execute()
+    |> case do
+      {:ok, %{activity: activity, job: updated}} ->
+        notify_status_change({:ok, updated}, job.status)
+        notify({:ok, activity}, :create, user)
+      err -> err
+    end
   end
 
   def create_message(attrs, id, %User{} = user) when is_binary(id) do
@@ -1103,11 +1104,18 @@ defmodule Console.Deployments.Workbenches do
   Requires read/prompt access to the target job.
   """
   @spec create_queued_prompt(map, binary | WorkbenchJob.t(), User.t()) :: queued_prompt_resp
-  def create_queued_prompt(attrs, %WorkbenchJob{id: job_id}, %User{id: user_id} = user) do
-    %QueuedPrompt{workbench_job_id: job_id, user_id: user_id}
-    |> QueuedPrompt.changeset(attrs)
-    |> allow(user, :read)
-    |> when_ok(:insert)
+  def create_queued_prompt(attrs, %WorkbenchJob{id: job_id, workbench_id: wid}, %User{id: user_id} = user) do
+    start_transaction()
+    |> add_operation(:prompt, fn _ ->
+      %QueuedPrompt{workbench_job_id: job_id, user_id: user_id}
+      |> QueuedPrompt.changeset(attrs)
+      |> allow(user, :read)
+      |> when_ok(:insert)
+    end)
+    |> add_operation(:attachments, fn %{prompt: prompt} ->
+      Attachments.create(attrs[:attachments], wid, %{queued_prompt_id: prompt.id})
+    end)
+    |> execute(extract: :prompt)
     |> notify(:create, user)
   end
 
@@ -1142,6 +1150,9 @@ defmodule Console.Deployments.Workbenches do
         prompt: prompt.prompt,
         modes: prompt.modes
       }, job, user)
+    end)
+    |> add_operation(:attachments, fn %{job: activity} ->
+      Attachments.move_queued(prompt.id, activity)
     end)
     |> execute(extract: :job)
   end
@@ -1238,8 +1249,13 @@ defmodule Console.Deployments.Workbenches do
       Ecto.Changeset.change(job, %{status: :running, updated_at: DateTime.utc_now()})
       |> Repo.update()
     end)
-    |> execute(extract: :activity)
-    |> notify(:create)
+    |> execute()
+    |> case do
+      {:ok, %{activity: activity, job: updated}} ->
+        notify_status_change({:ok, updated}, job.status)
+        notify({:ok, activity}, :create)
+      err -> err
+    end
   end
 
   @doc """
@@ -1712,4 +1728,7 @@ defmodule Console.Deployments.Workbenches do
   def notify({:ok, %WorkbenchJobActivity{} = activity}, :update),
     do: handle_notify(PubSub.WorkbenchJobActivityUpdated, activity)
   def notify(pass, _), do: pass
+
+  defp notify_status_change({:ok, %WorkbenchJob{status: status}} = pass, status), do: pass
+  defp notify_status_change(pass, _), do: notify(pass, :update)
 end

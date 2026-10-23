@@ -6,9 +6,10 @@
 
 import { useMemo, useState } from 'react'
 
-import { Breadcrumbs, CheckIcon, CopyIcon, Tab } from '@pluralsh/design-system'
+import { CheckIcon, CopyIcon } from '@pluralsh/design-system'
 import { useRouter } from 'next/router'
 
+import { BreadcrumbTrail } from '@src/components/Breadcrumbs'
 import { PageDivider } from '@src/components/MainContent'
 import {
   ContentContainer,
@@ -18,7 +19,11 @@ import {
 } from '@src/components/PageGrid'
 import { useSetRestNav } from '@src/contexts/RestNavContext'
 import { useCopyText } from '@src/hooks/useCopyText'
-
+import type {
+  ApiSection,
+  EndpointDetail,
+  Parameter,
+} from '@src/lib/openapi-rest'
 import { AuthPageContent } from './AuthPageContent'
 import { MethodBadge } from './MethodBadge'
 import { ParameterTable } from './ParameterTable'
@@ -38,12 +43,7 @@ import {
   TabBar,
 } from './RestApiReference.styles'
 import { AUTH_PAGE_ID, SidebarNav } from './SidebarNav'
-
-import type {
-  ApiSection,
-  EndpointDetail,
-  Parameter,
-} from '@src/lib/openapi-rest'
+import { StatusTab } from './shared'
 
 type TabId = 'query' | 'responses'
 
@@ -108,7 +108,7 @@ export function RestApiReference({
         <ContentContainer $wide>
           <RestContentWrapper>
             <BreadcrumbsWrapper>
-              <Breadcrumbs breadcrumbs={breadcrumbs} />
+              <BreadcrumbTrail crumbs={breadcrumbs} />
             </BreadcrumbsWrapper>
 
             {isAuthPage && <AuthPageContent />}
@@ -141,18 +141,20 @@ export function RestApiReference({
                   )}
 
                   <TabBar>
-                    <Tab
-                      active={activeTab === 'query'}
+                    <StatusTab
+                      type="button"
+                      $active={activeTab === 'query'}
                       onClick={() => setActiveTab('query')}
                     >
                       {getParameterTabLabel(detail.parameters ?? [])}
-                    </Tab>
-                    <Tab
-                      active={activeTab === 'responses'}
+                    </StatusTab>
+                    <StatusTab
+                      type="button"
+                      $active={activeTab === 'responses'}
                       onClick={() => setActiveTab('responses')}
                     >
                       Responses
-                    </Tab>
+                    </StatusTab>
                   </TabBar>
 
                   {activeTab === 'query' && (

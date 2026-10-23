@@ -45,7 +45,7 @@ func (in *PrometheusProvider) newClient() (v1.API, error) {
 	return v1.NewAPI(apiClient), nil
 }
 
-func (in *PrometheusProvider) Metrics(ctx context.Context, input *toolquery.MetricsQueryInput) (*toolquery.MetricsQueryOutput, error) {
+func (in *PrometheusProvider) MetricsSeries(ctx context.Context, input *toolquery.MetricsQueryInput) (*toolquery.MetricsSeriesOutput, error) {
 	if in.conn == nil {
 		return nil, fmt.Errorf("%w: prometheus connection is required", ErrInvalidArgument)
 	}
@@ -62,17 +62,22 @@ func (in *PrometheusProvider) Metrics(ctx context.Context, input *toolquery.Metr
 	if err != nil {
 		return nil, err
 	}
+	start, end := normalizeRange(
+		input.GetRange().GetStart().AsTime(),
+		input.GetRange().GetEnd().AsTime(),
+		step,
+	)
 
 	value, _, err := client.QueryRange(ctx, input.Query, v1.Range{
-		Start: input.GetRange().GetStart().AsTime(),
-		End:   input.GetRange().GetEnd().AsTime(),
+		Start: start,
+		End:   end,
 		Step:  step,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	return in.toMetricsQueryOutput(value)
+	return in.toMetricsSeriesOutput(value)
 }
 
 func (in *PrometheusProvider) MetricsSearch(ctx context.Context, input *toolquery.MetricsSearchInput) (*toolquery.MetricsSearchOutput, error) {
@@ -123,8 +128,7 @@ func (in *PrometheusProvider) MetricsLabelSearch(ctx context.Context, input *too
 		return nil, err
 	}
 
-	end := time.Now()
-	start := end.Add(-24 * time.Hour)
+	start, end := metricsLabelSearchRange(input)
 	limit := metricsLabelSearchLimit(input.GetLimit())
 	matches := []string{fmt.Sprintf(`{__name__=%q}`, strings.TrimSpace(input.GetMetric()))}
 
@@ -160,23 +164,54 @@ func (in *PrometheusProvider) toStep(input *toolquery.MetricsQueryInput) (time.D
 		return step, nil
 	}
 
-	parsed, err := time.ParseDuration(input.GetStep())
+	parsed, err := model.ParseDuration(input.GetStep())
 	if err != nil {
 		return time.Duration(0), fmt.Errorf("%w: invalid step duration: %s", ErrInvalidArgument, input.GetStep())
 	}
 
-	return parsed, nil
+	return time.Duration(parsed), nil
 }
 
-func (in *PrometheusProvider) toMetricsQueryOutput(value model.Value) (*toolquery.MetricsQueryOutput, error) {
+func normalizeRange(start, end time.Time, step time.Duration) (time.Time, time.Time) {
+	if step <= 0 {
+		return start, end
+	}
+	return floorTime(start, step), ceilTime(end, step)
+}
+
+func floorTime(timestamp time.Time, step time.Duration) time.Time {
+	nanos := timestamp.UnixNano()
+	remainder := nanos % step.Nanoseconds()
+	if remainder < 0 {
+		remainder += step.Nanoseconds()
+	}
+	return time.Unix(0, nanos-remainder).UTC()
+}
+
+func ceilTime(timestamp time.Time, step time.Duration) time.Time {
+	nanos := timestamp.UnixNano()
+	remainder := nanos % step.Nanoseconds()
+	if remainder < 0 {
+		remainder += step.Nanoseconds()
+	}
+	if remainder == 0 {
+		return timestamp.UTC()
+	}
+	return time.Unix(0, nanos+step.Nanoseconds()-remainder).UTC()
+}
+
+func (in *PrometheusProvider) toMetricsSeriesOutput(value model.Value) (*toolquery.MetricsSeriesOutput, error) {
 	matrix, ok := value.(model.Matrix)
 	if !ok {
 		return nil, fmt.Errorf("unexpected prometheus result type %T", value)
 	}
 
-	metrics := make([]*toolquery.MetricPoint, 0)
+	output := make([]*toolquery.MetricSeries, 0, len(matrix))
 	for _, stream := range matrix {
-		name := string(stream.Metric[model.MetricNameLabel])
+		if len(stream.Values) == 0 {
+			continue
+		}
+
 		labels := make(map[string]string, len(stream.Metric))
 		for k, v := range stream.Metric {
 			if k == model.MetricNameLabel {
@@ -185,16 +220,21 @@ func (in *PrometheusProvider) toMetricsQueryOutput(value model.Value) (*toolquer
 			labels[string(k)] = string(v)
 		}
 
+		samples := make([]*toolquery.MetricSample, 0, len(stream.Values))
 		for _, sample := range stream.Values {
 			ts := time.Unix(0, int64(sample.Timestamp)*int64(time.Millisecond))
-			metrics = append(metrics, &toolquery.MetricPoint{
+			samples = append(samples, &toolquery.MetricSample{
 				Timestamp: timestamppb.New(ts),
-				Name:      name,
 				Value:     float64(sample.Value),
-				Labels:    labels,
 			})
 		}
+
+		output = append(output, &toolquery.MetricSeries{
+			Name:    string(stream.Metric[model.MetricNameLabel]),
+			Labels:  labels,
+			Samples: samples,
+		})
 	}
 
-	return &toolquery.MetricsQueryOutput{Metrics: metrics}, nil
+	return &toolquery.MetricsSeriesOutput{Series: output}, nil
 }

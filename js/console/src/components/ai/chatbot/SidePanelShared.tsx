@@ -1,8 +1,10 @@
+import { HEADER_HEIGHT } from 'components/layout/layoutConsts'
 import { ReactNode } from 'react'
 import styled from 'styled-components'
 
 const HANDLE_THICKNESS = 20
-export const SIDE_PANEL_HEADER_HEIGHT = 55
+// level with the bottom border of the main header, which sits below its height
+export const SIDE_PANEL_HEADER_HEIGHT = HEADER_HEIGHT + 1
 
 export function SidePanelContent({
   children,
@@ -37,8 +39,8 @@ export const PanelHeaderSC = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  minHeight: SIDE_PANEL_HEADER_HEIGHT,
-  padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
+  height: SIDE_PANEL_HEADER_HEIGHT,
+  padding: `0 ${theme.spacing.medium}`,
   borderBottom: theme.borders.hairline,
   flexShrink: 0,
 }))
@@ -71,6 +73,7 @@ export const DragHandleSC = styled.div<{ $isDragging?: boolean }>(
     width: HANDLE_THICKNESS,
     height: '100%',
     cursor: 'ew-resize',
+    touchAction: 'none',
     background: 'transparent',
     display: 'flex',
     justifyContent: 'center',

@@ -1,7 +1,6 @@
 import {
   AddIcon,
   Button,
-  EmptyState,
   Flex,
   FormField,
   ListBoxFooter,
@@ -10,6 +9,7 @@ import {
   Select,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import { useLogin } from 'components/contexts'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
@@ -240,14 +240,18 @@ export function ChatbotForm({ mode }: { mode: 'create' | 'edit' }) {
 
   if (mode === 'edit' && !chatbotLoading && !chatbot)
     return (
-      <EmptyState message="Chatbot not found">
+      <WorkbenchEmptyState
+        message="Chatbot not found"
+        description="It may have been removed from this workbench."
+      >
         <Button
+          small
           startIcon={<ReturnIcon />}
           onClick={() => navigate(getWorkbenchChatbotsAbsPath(workbenchId))}
         >
           Back to all chatbots
         </Button>
-      </EmptyState>
+      </WorkbenchEmptyState>
     )
 
   const isLoading =
@@ -329,7 +333,7 @@ export function ChatbotForm({ mode }: { mode: 'create' | 'edit' }) {
                         >
                           <div
                             css={{
-                              fontSize: '14px',
+                              fontSize: '0.875rem',
                               fontWeight: 600,
                             }}
                           >
@@ -344,7 +348,7 @@ export function ChatbotForm({ mode }: { mode: 'create' | 'edit' }) {
                             css={{
                               display: 'flex',
                               alignItems: 'center',
-                              gap: '4px',
+                              gap: '0.25rem',
                             }}
                           >
                             Create chatbot in settings

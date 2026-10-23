@@ -75,7 +75,7 @@ import {
   MemoActivityIcon,
   ExpandableUserPrompt,
 } from './WorkbenchJobActivityResults'
-import { getMetricSeries } from './workbenchJobMetrics'
+import { getMetricSeriesFromResponses } from './workbenchJobMetrics'
 import { WorkbenchJobCanvas } from './WorkbenchJobCanvas'
 import { WorkbenchJobInlineActionCard } from './WorkbenchJobInlineActionCard'
 
@@ -128,6 +128,7 @@ export function WorkbenchJobActivity({
       <ExpandableUserPrompt
         prompt={activity.prompt}
         timestamp={activity.insertedAt}
+        attachments={activity.attachments}
       />
     )
 
@@ -206,7 +207,7 @@ export function WorkbenchJobActivity({
       padding="none"
       triggerWrapperStyles={{
         justifyContent: 'flex-start',
-        gap: 10,
+        gap: '0.625rem',
         padding: 0,
         width: 'fit-content',
         maxWidth: '100%',
@@ -521,7 +522,7 @@ function WorkbenchJobActivityResult({
             <AgentRunInfoSimple
               key={agentRun.id}
               agentRun={agentRun}
-              css={{ padding: `0 ${spacing.small}px` }}
+              css={{ padding: `0 ${spacing.small}` }}
             />
           ))}
         </>
@@ -535,13 +536,7 @@ function WorkbenchJobActivityResult({
   )
 }
 
-// Trims each line's empty space above the capitals and below the baseline, so
-// row gaps measure from the letters themselves. Browsers without `text-box`
-// keep the normal line spacing.
-const trimTextBoxCss = { textBox: 'trim-both cap alphabetic' } as const
-
-// Horizontal-only clipping keeps ellipsis while letting ascenders, descenders,
-// and the title row's icons extend past the trimmed text.
+// Keep ellipsis horizontal so glyphs and icons are not clipped vertically.
 const clipInlineCss = { overflowX: 'clip', overflowY: 'visible' } as const
 
 // children that render null leave an empty box that still takes a gap slot in the parent
@@ -563,17 +558,12 @@ const MemoLabelSC = styled(Body2P)(({ theme }) => ({
   ...clipInlineCss,
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
-  ...trimTextBoxCss,
 }))
 
-// Cap height, so the hover caret overflows instead of growing the row. The
-// label wrapper clips sideways only, or it would cut off ascenders and
-// descenders that extend past the trimmed text.
 const memoTriggerStyles = {
   justifyContent: 'flex-start',
   width: 'fit-content',
   maxWidth: '100%',
-  height: '1cap',
   '& > span': clipInlineCss,
 } as const
 
@@ -595,7 +585,6 @@ function WorkbenchJobActivityThoughts({
   })
   const isLoading = !data && loading
   const activity = data?.workbenchJobActivity
-  const shimmer = isJobRunning(activity?.status)
 
   const { thoughts, lastThought, header } = useMemo(() => {
     const thoughts = activity?.thoughts?.filter(isNonNullable) ?? []
@@ -617,7 +606,7 @@ function WorkbenchJobActivityThoughts({
           tool: thought.tool,
         })
       } else if (!isEmpty(thought.attributes?.logs)) numWithLogs += 1
-      else if (!isEmpty(thought.attributes?.metrics)) numWithMetrics += 1
+      else if (!isEmpty(thought.attributes?.series)) numWithMetrics += 1
       else {
         otherThoughts.push({
           name: thought.toolName,
@@ -641,20 +630,18 @@ function WorkbenchJobActivityThoughts({
           <WorkbenchToolCallSummary
             toolCounts={toolCounts}
             textParts={textParts}
-            shimmer={shimmer}
           />
         ) : (
           <Body2P
             as="span"
             $color="text-xlight"
-            $shimmer={shimmer}
           >
             {textParts.join(', ') ||
               `${thoughts.length} tool ${pluralize('call', thoughts.length)}`}
           </Body2P>
         ),
     }
-  }, [activity?.thoughts, shimmer])
+  }, [activity?.thoughts])
 
   if (isEmpty(thoughts) && !isLoading) return null
   if (error)
@@ -688,17 +675,13 @@ function WorkbenchJobActivityThoughts({
             <WorkbenchJobActivityThought
               key={i}
               thought={thought}
-              shimmer={shimmer}
             />
           ))}
         </Flex>
       </SimpleAccordion>
       {!isExpanded && lastThought && isJobRunning(activity?.status) && (
         <EaseIn currentKey={lastThought.id}>
-          <WorkbenchJobActivityThought
-            thought={lastThought}
-            shimmer={shimmer}
-          />
+          <WorkbenchJobActivityThought thought={lastThought} />
         </EaseIn>
       )}
     </Flex>
@@ -707,13 +690,14 @@ function WorkbenchJobActivityThoughts({
 
 function WorkbenchJobActivityThought({
   thought,
-  shimmer = false,
 }: {
   thought: WorkbenchJobThoughtFragment
-  shimmer?: boolean
 }) {
   const { id, content, toolName, toolArgs, attributes, tool } = thought
-  const metrics = attributes?.metrics?.filter(isNonNullable) ?? []
+  const series = useMemo(
+    () => getMetricSeriesFromResponses(attributes?.series),
+    [attributes?.series]
+  )
   const logs = attributes?.logs?.filter(isNonNullable) ?? []
   const query = getSearchQuery(toolArgs)
   const toolIcon = thoughtToolIcon({ tool, toolName, toolArgs })
@@ -721,10 +705,8 @@ function WorkbenchJobActivityThought({
     toolName || tool ? workbenchToolCallTitle(toolName, tool) : undefined
   const blankResult = isBlankToolPayload(content)
   const isMetricsFetch =
-    !isEmpty(metrics) || isObservabilityFetch(toolName, 'metrics')
-  const metricSeriesCount = isMetricsFetch
-    ? getMetricSeries(metrics).length
-    : undefined
+    !isEmpty(series) || isObservabilityFetch(toolName, 'metrics')
+  const metricSeriesCount = isMetricsFetch ? series.length : undefined
   const noLogs =
     isObservabilityFetch(toolName, 'logs') && isEmpty(logs) && blankResult
   return (
@@ -733,18 +715,16 @@ function WorkbenchJobActivityThought({
       attributes={{ tool: { name: toolName, arguments: toolArgs } }}
       customTitle={title}
       leadingIcon={toolIcon}
-      shimmer={shimmer}
       {...(metricSeriesCount != null && {
         customLabel: (
           <WorkbenchObservabilityToolLabel
             icon={toolIcon}
             title={`fetch metrics (${metricSeriesCount})`}
             query={query}
-            shimmer={shimmer}
           />
         ),
         ...(metricSeriesCount > 0 && {
-          customResultBody: <ExpandableJobActivityMetrics metrics={metrics} />,
+          customResultBody: <ExpandableJobActivityMetrics series={series} />,
         }),
       })}
       {...(noLogs
@@ -754,7 +734,6 @@ function WorkbenchJobActivityThought({
                 icon={toolIcon}
                 title="no logs"
                 query={query}
-                shimmer={shimmer}
               />
             ),
             customResultBody: <EmptyToolResult message="No logs" />,
@@ -765,14 +744,12 @@ function WorkbenchJobActivityThought({
                 icon={toolIcon}
                 title={title ?? 'fetch logs'}
                 query={query}
-                shimmer={shimmer}
               />
             ),
             customResultBody: (
               <PreviewablePanel
                 contentKey={`logs:${id}:${logs.length}`}
                 subtle
-                shimmer={shimmer}
               >
                 <JobActivityLogs logs={logs} />
               </PreviewablePanel>
@@ -836,12 +813,10 @@ function WorkbenchObservabilityToolLabel({
   icon,
   title,
   query,
-  shimmer = false,
 }: {
   icon?: ReactNode
   title: string
   query: string
-  shimmer?: boolean
 }) {
   return (
     <Flex
@@ -854,7 +829,6 @@ function WorkbenchObservabilityToolLabel({
       <Body2P
         as="span"
         $color="text-xlight"
-        $shimmer={shimmer}
         css={{ flexShrink: 0, whiteSpace: 'nowrap' }}
       >
         {title}
@@ -863,7 +837,6 @@ function WorkbenchObservabilityToolLabel({
         <Body2P
           as="span"
           $color="text-disabled"
-          $shimmer={shimmer}
           css={{
             minWidth: 0,
             overflow: 'hidden',
@@ -881,11 +854,9 @@ function WorkbenchObservabilityToolLabel({
 function WorkbenchToolCallSummary({
   toolCounts,
   textParts,
-  shimmer = false,
 }: {
   toolCounts: Array<{ count: number; tool: WorkbenchToolTinyFragment }>
   textParts: string[]
-  shimmer?: boolean
 }) {
   const { spacing } = useTheme()
 
@@ -902,7 +873,6 @@ function WorkbenchToolCallSummary({
           key={part}
           as="span"
           $color="text-xlight"
-          $shimmer={shimmer}
           css={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -938,7 +908,6 @@ function WorkbenchToolCallSummary({
           <Body2P
             as="span"
             $color="text-xlight"
-            $shimmer={shimmer}
             css={{ marginRight: spacing.xxsmall }}
           >
             {count}
@@ -946,7 +915,6 @@ function WorkbenchToolCallSummary({
           <Body2P
             as="span"
             $color="text-xlight"
-            $shimmer={shimmer}
           >
             {getWorkbenchToolLabel(tool.tool, tool.cloudConnection?.provider)}
           </Body2P>
@@ -978,7 +946,6 @@ function ActivityLatestTool({
       <Body2P
         as="span"
         $color="text-disabled"
-        $shimmer
         css={{
           minWidth: 0,
           overflow: 'hidden',
@@ -1241,7 +1208,6 @@ const ActivityHeaderSC = styled.span<{ $hasStatusIcon: boolean }>(
     },
     '.type': {
       flexShrink: 0,
-      ...trimTextBoxCss,
     },
     '.summary': {
       display: 'block',
@@ -1250,20 +1216,17 @@ const ActivityHeaderSC = styled.span<{ $hasStatusIcon: boolean }>(
       ...clipInlineCss,
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap',
-      ...trimTextBoxCss,
       ...($hasStatusIcon && {
-        paddingLeft: ACTIVITY_STATUS_ICON_SIZE + theme.spacing.xsmall,
+        paddingLeft: `calc(${ACTIVITY_STATUS_ICON_SIZE}px + ${theme.spacing.xsmall})`,
       }),
     },
   })
 )
 
-// Cap height, so taller trailing icons overflow instead of growing the row.
 const ActivityTitleRowSC = styled.span(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   gap: theme.spacing.xsmall,
-  height: '1cap',
   minWidth: 0,
   maxWidth: '100%',
   ...clipInlineCss,

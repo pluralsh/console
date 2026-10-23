@@ -34,9 +34,7 @@ const columns = [
       return (
         <ChipList
           maxVisible={Infinity}
-          chips={apis.map((api) => (
-            <Chip>{api}</Chip>
-          ))}
+          chips={apis.map((api) => <Chip>{api}</Chip>)}
         />
       )
     },
@@ -56,9 +54,7 @@ const columns = [
       return (
         <ChipList
           maxVisible={Infinity}
-          chips={ids.map((id) => (
-            <Chip>{id}</Chip>
-          ))}
+          chips={ids.map((id) => <Chip>{id}</Chip>)}
         />
       )
     },
@@ -74,7 +70,7 @@ export function AccessTokensScopes({ token }: { token: AccessTokenFragment }) {
         textValue="Scopes"
         tooltip
         clickable
-        size="medium"
+        size="small"
         icon={<ArchitectureIcon />}
         onClick={() => setOpen(true)}
       />

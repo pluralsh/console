@@ -1,8 +1,7 @@
 import {
+  ICON_FRAME_ICON_SIZE,
   ArrowTopRightIcon,
   Button,
-  CloseIcon,
-  Divider,
   EmptyState,
   FiltersIcon,
   Flex,
@@ -13,8 +12,6 @@ import {
   PeopleIcon,
   ReturnIcon,
   SearchIcon,
-  SubTab,
-  TabList,
   TrashCanIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
@@ -25,13 +22,21 @@ import { TagsFilter } from 'components/cd/services/ClusterTagsFilter'
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
 
 import usePersistedState from 'components/hooks/usePersistedState'
+import {
+  PageSidebarBodySC,
+  PageSidebarHeaderSC,
+  PageSidebarSC,
+  PageWithSidebar,
+} from 'components/layout/PageLayout'
+import {
+  PageToolbar,
+  PageToolbarSlotContext,
+} from 'components/layout/PageToolbar'
 import { InsightsTabLabel } from 'components/utils/AiInsights'
 
-import { StretchedFlex } from 'components/utils/StretchedFlex.tsx'
-import { StackedText } from 'components/utils/table/StackedText.tsx'
 import { VirtualList } from 'components/utils/VirtualList.tsx'
 import { isEmpty } from 'lodash'
-import { Key, useEffect, useMemo, useRef, useState } from 'react'
+import { Key, useEffect, useMemo, useState } from 'react'
 import {
   Link,
   Outlet,
@@ -39,7 +44,7 @@ import {
   useNavigate,
   useParams,
 } from 'react-router-dom'
-import { useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
 import { keySetToTagArray } from 'utils/clusterTags'
 
@@ -71,11 +76,8 @@ import { isTerraformFamilyStackType } from './common/stackTypeUtils'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders.tsx'
 import { useProjectId } from '../contexts/ProjectsContext'
 import { GqlError } from '../utils/Alert'
-import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage'
 import { MoreMenu } from '../utils/MoreMenu'
 import { useFetchPaginatedData } from '../utils/table/useFetchPaginatedData'
-import { LinkTabWrap } from '../utils/Tabs'
-import { StackStatusChip } from './common/StackStatusChip.tsx'
 import StackActions from './StackActions'
 import { StackDeletedEmptyState } from './StackDeletedEmptyState'
 import StackDeleteModal from './StackDeleteModal'
@@ -141,10 +143,10 @@ export function Stacks() {
   const { ai } = useDeploymentSettings()
   const { stackId = '' } = useParams()
   const projectId = useProjectId()
-  const tabStateRef = useRef<any>(null)
   const pathMatch = useMatch(`${getStacksAbsPath(stackId)}/:tab`)
   const tab = pathMatch?.params?.tab || ''
   const [menuKey, setMenuKey] = useState<MenuItemKey>(MenuItemKey.None)
+  const [toolbarSlot, setToolbarSlot] = useState<HTMLDivElement | null>(null)
 
   const [searchString, setSearchString] = useState('')
   const debouncedSearchString = useDebounce(searchString, 100)
@@ -191,11 +193,7 @@ export function Stacks() {
     [stackId, stacks]
   )
 
-  const {
-    data: stackData,
-    loading: stackLoading,
-    error: stackError,
-  } = useStackQuery({
+  const { data: stackData, error: stackError } = useStackQuery({
     variables: { id: stackId },
     skip: !stackId,
     fetchPolicy: 'cache-and-network',
@@ -208,7 +206,16 @@ export function Stacks() {
     () => getDirectory(fullStack, !!ai?.enabled),
     [ai?.enabled, fullStack]
   )
-  const currentTab = directory.find(({ path }) => path === tab)
+  const tabs = useMemo(
+    () =>
+      directory
+        .filter(({ enabled }) => enabled)
+        .map(({ label, path }) => ({
+          label,
+          path: `${getStacksAbsPath(stackId)}/${path}`,
+        })),
+    [directory, stackId]
+  )
   const deleteLabel = fullStack?.deletedAt
     ? 'Retry stack delete'
     : 'Delete  stack'
@@ -256,78 +263,60 @@ export function Stacks() {
     )
   }
 
-  return (
-    <ResponsiveLayoutPage
-      css={{
-        paddingBottom: theme.spacing.large,
-        gap: theme.spacing.xlarge,
-      }}
-    >
-      <Flex
-        direction="column"
-        gap="small"
-        minWidth={340}
-        width={340}
-      >
-        <Flex gap="small">
+  const sidebar = (
+    <PageSidebarSC $width={340}>
+      <PageSidebarHeaderSC>
+        <Flex
+          gap="xsmall"
+          align="center"
+        >
           <Input
+            size="small"
+            showClearButton
             placeholder="Search stacks"
-            startIcon={<SearchIcon />}
+            startIcon={<SearchIcon size={12} />}
             value={searchString}
-            onChange={(e) => {
-              setSearchString?.(e.currentTarget.value)
-            }}
-            css={{ flexGrow: 1 }}
+            onChange={(e) => setSearchString(e.currentTarget.value)}
+            css={{ flex: 1, minWidth: 0 }}
           />
-          {!filterExpanded && (
-            <Button
-              floating
-              onClick={() => setFilterExpanded(true)}
-              height={40}
-              width={40}
-            >
-              <FiltersIcon />
-            </Button>
-          )}
+          <IconFrame
+            clickable
+            size="medium"
+            type={filterExpanded ? 'secondary' : 'tertiary'}
+            icon={<FiltersIcon />}
+            tooltip={filterExpanded ? 'Hide tag filter' : 'Filter by tags'}
+            aria-label="Filter by tags"
+            onClick={() => setFilterExpanded(!filterExpanded)}
+          />
         </Flex>
-        {filterExpanded && (
+      </PageSidebarHeaderSC>
+      {filterExpanded && (
+        <TagFilterSC>
           <TagsFilter
+            small
             type={TagType.Stack}
             innerChips={false}
             selectedTagKeys={selectedTagKeys}
             setSelectedTagKeys={setSelectedTagKeys}
             searchOp={tagOp}
             setSearchOp={setTagOp}
-            comboBoxProps={{
-              endIcon: (
-                <CloseIcon
-                  css={{
-                    color: theme.colors['text-light'],
-                    '&:hover': {
-                      cursor: 'pointer',
-                      color: theme.colors.text,
-                    },
-                  }}
-                  onClick={() => setFilterExpanded(false)}
-                />
-              ),
-            }}
           />
-        )}
+        </TagFilterSC>
+      )}
+      <StackListSC>
         {(!isEmpty(stacks) || (!data && loading)) && (
           <VirtualList
             data={stacks}
             loading={!data && loading}
-            skeletonProps={{ gap: 'xsmall', height: 80 }}
+            skeletonProps={{ gap: 'xxxsmall', height: 72 }}
             onVirtualSliceChange={setVirtualSlice}
             hasNextPage={pageInfo?.hasNextPage}
             isLoadingNextPage={loading}
             loadNextPage={() => pageInfo?.hasNextPage && fetchNextPage()}
-            renderer={({ rowData, index }) => (
+            renderer={({ rowData }) => (
               <StackEntry
                 stack={rowData}
                 active={rowData.id === stackId}
-                first={index === 0}
               />
             )}
           />
@@ -337,146 +326,121 @@ export function Stacks() {
             <EmptyState message="No stacks match your query.">
               <Button
                 secondary
+                small
                 onClick={() => setSearchString('')}
               >
                 Reset search
               </Button>
             </EmptyState>
           )}
-      </Flex>
-      {stackError && !fullStack ? (
+      </StackListSC>
+    </PageSidebarSC>
+  )
+
+  if (stackError && !fullStack)
+    return (
+      <PageWithSidebar sidebar={sidebar}>
         <StackDeletedEmptyState />
-      ) : (
-        <Flex
-          direction="column"
-          gap="medium"
-          minWidth={600}
-          flex={1}
+      </PageWithSidebar>
+    )
+
+  return (
+    <PageWithSidebar
+      sidebar={sidebar}
+      toolbar={
+        <PageToolbar
+          tabs={tabs}
+          activeFn={(path) => path === `${getStacksAbsPath(stackId)}/${tab}`}
+          slotRef={setToolbarSlot}
         >
-          <StretchedFlex align="start">
-            <StackedText
-              loading={!tinyStack && stackLoading}
-              first={
-                <Flex
-                  gap="small"
-                  align="center"
-                >
-                  {tinyStack?.name}
-                  {deleting && (
-                    <StackStatusChip
-                      status={tinyStack?.status}
-                      deleting={deleting}
-                      size="small"
-                    />
-                  )}
-                </Flex>
-              }
-              firstPartialType="subtitle1"
-              firstColor="text"
-              second={tinyStack?.repository?.url}
-              secondPartialType="body1"
-            />
-            <Flex gap="medium">
-              <StackActions
-                deleting={deleting}
-                stack={tinyStack}
-              />
-              <MoreMenu
-                disabled={!fullStack}
-                onSelectionChange={(newKey) => setMenuKey(newKey)}
-                width={240}
-                triggerButton={
-                  <IconFrame
-                    textValue="Menu"
-                    clickable
-                    size="large"
-                    icon={
-                      <MoreIcon
-                        width={16}
-                        color={
-                          !fullStack ? theme.colors['icon-disabled'] : undefined
-                        }
-                      />
+          <StackActions
+            deleting={deleting}
+            stack={tinyStack}
+          />
+          <MoreMenu
+            disabled={!fullStack}
+            onSelectionChange={(newKey) => setMenuKey(newKey)}
+            width={240}
+            triggerButton={
+              <IconFrame
+                textValue="Menu"
+                clickable
+                size="medium"
+                iconSize={ICON_FRAME_ICON_SIZE.small}
+                icon={
+                  <MoreIcon
+                    color={
+                      !fullStack ? theme.colors['icon-disabled'] : undefined
                     }
-                    type="secondary"
                   />
                 }
-              >
-                <ListBoxItem
-                  key={MenuItemKey.ManagePermissions}
-                  label="Manage permissions"
-                  textValue="Manage permissions"
-                  leftContent={<PeopleIcon />}
-                />
-                <ListBoxItem
-                  destructive
-                  key={MenuItemKey.Detach}
-                  label="Detach stack"
-                  textValue="Detach stack"
-                  leftContent={
-                    <ReturnIcon color={theme.colors['icon-danger']} />
-                  }
-                />
-                <ListBoxItem
-                  destructive
-                  key={MenuItemKey.Delete}
-                  label={deleteLabel}
-                  textValue={deleteLabel}
-                  leftContent={
-                    <TrashCanIcon color={theme.colors['icon-danger']} />
-                  }
-                />
-              </MoreMenu>
-              {fullStack && (
-                <>
-                  <StackPermissionsModal
-                    stack={fullStack}
-                    open={menuKey === MenuItemKey.ManagePermissions}
-                    onClose={() => setMenuKey(MenuItemKey.None)}
-                  />
-                  <StackDetachModal
-                    stack={fullStack}
-                    refetch={refetch}
-                    open={menuKey === MenuItemKey.Detach}
-                    onClose={() => setMenuKey(MenuItemKey.None)}
-                  />
-                  <StackDeleteModal
-                    stack={fullStack}
-                    open={menuKey === MenuItemKey.Delete}
-                    onClose={() => setMenuKey(MenuItemKey.None)}
-                  />
-                </>
-              )}
-            </Flex>
-          </StretchedFlex>
-          <Divider backgroundColor={theme.colors.border} />
-          <TabList
-            scrollable
-            stateRef={tabStateRef}
-            stateProps={{
-              orientation: 'horizontal',
-              selectedKey: currentTab?.path,
-            }}
+                type="secondary"
+              />
+            }
           >
-            {directory
-              .filter(({ enabled }) => enabled)
-              .map(({ label, path }) => (
-                <LinkTabWrap
-                  subTab
-                  key={path}
-                  to={`${getStacksAbsPath(stackId)}/${path}`}
-                >
-                  <SubTab key={path}>{label}</SubTab>
-                </LinkTabWrap>
-              ))}
-          </TabList>
-          {/* TODO: make stack nullable on the context type and add skeletons at the drill-down levels */}
-          {!fullStack ? (
-            <RectangleSkeleton
-              $height="100%"
-              $width="100%"
+            <ListBoxItem
+              key={MenuItemKey.ManagePermissions}
+              label="Manage permissions"
+              textValue="Manage permissions"
+              leftContent={<PeopleIcon size={ICON_FRAME_ICON_SIZE.small} />}
             />
-          ) : (
+            <ListBoxItem
+              destructive
+              key={MenuItemKey.Detach}
+              label="Detach stack"
+              textValue="Detach stack"
+              leftContent={
+                <ReturnIcon
+                  size={ICON_FRAME_ICON_SIZE.small}
+                  color={theme.colors['icon-danger']}
+                />
+              }
+            />
+            <ListBoxItem
+              destructive
+              key={MenuItemKey.Delete}
+              label={deleteLabel}
+              textValue={deleteLabel}
+              leftContent={
+                <TrashCanIcon
+                  size={ICON_FRAME_ICON_SIZE.small}
+                  color={theme.colors['icon-danger']}
+                />
+              }
+            />
+          </MoreMenu>
+          {fullStack && (
+            <>
+              <StackPermissionsModal
+                stack={fullStack}
+                open={menuKey === MenuItemKey.ManagePermissions}
+                onClose={() => setMenuKey(MenuItemKey.None)}
+              />
+              <StackDetachModal
+                stack={fullStack}
+                refetch={refetch}
+                open={menuKey === MenuItemKey.Detach}
+                onClose={() => setMenuKey(MenuItemKey.None)}
+              />
+              <StackDeleteModal
+                stack={fullStack}
+                open={menuKey === MenuItemKey.Delete}
+                onClose={() => setMenuKey(MenuItemKey.None)}
+              />
+            </>
+          )}
+        </PageToolbar>
+      }
+    >
+      <ContentSC>
+        {/* TODO: make stack nullable on the context type and add skeletons at the drill-down levels */}
+        {!fullStack ? (
+          <RectangleSkeleton
+            $height="100%"
+            $width="100%"
+          />
+        ) : (
+          <PageToolbarSlotContext value={toolbarSlot}>
             <Outlet
               context={
                 {
@@ -486,9 +450,31 @@ export function Stacks() {
                 } satisfies StackOutletContextT
               }
             />
-          )}
-        </Flex>
-      )}
-    </ResponsiveLayoutPage>
+          </PageToolbarSlotContext>
+        )}
+      </ContentSC>
+    </PageWithSidebar>
   )
 }
+
+const TagFilterSC = styled.div(({ theme }) => ({
+  flexShrink: 0,
+  padding: theme.spacing.small,
+  borderBottom: theme.borders.hairline,
+}))
+
+const StackListSC = styled(PageSidebarBodySC)({
+  padding: 0,
+  overflow: 'hidden',
+})
+
+const ContentSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.medium,
+  flex: 1,
+  minHeight: 0,
+  minWidth: 0,
+  overflow: 'hidden',
+  padding: theme.spacing.large,
+}))

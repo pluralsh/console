@@ -11,9 +11,9 @@ import NextLink from 'next/link'
 import isEmpty from 'lodash/isEmpty'
 import styled from 'styled-components'
 
-import { MethodBadge } from './MethodBadge'
-
 import type { ApiSection, Endpoint } from '@src/lib/openapi-rest'
+import { brand } from '@src/theme/docsTheme'
+import { MethodBadge } from './MethodBadge'
 
 const Sidebar = styled.aside<{ $overlay?: boolean }>(({ $overlay }) => ({
   display: 'flex',
@@ -37,8 +37,8 @@ const Sidebar = styled.aside<{ $overlay?: boolean }>(({ $overlay }) => ({
 const SidebarInner = styled.div<{ $overlay?: boolean }>(
   ({ theme, $overlay }) => ({
     overflowY: 'auto',
-    backgroundColor: theme.colors['fill-one'],
-    borderRight: $overlay ? 'none' : theme.borders['fill-one'],
+    backgroundColor: brand['surface-sidebar'],
+    borderRight: $overlay ? 'none' : `1px solid ${brand.line}`,
     paddingBottom: theme.spacing.xlarge,
     paddingLeft: theme.spacing.medium,
     paddingRight: theme.spacing.medium,
@@ -59,10 +59,10 @@ const SidebarInner = styled.div<{ $overlay?: boolean }>(
 )
 
 const SearchWrapper = styled.div(({ theme }) => ({
-  padding: `${theme.spacing.medium}px 0`,
+  padding: `${theme.spacing.medium} 0`,
   position: 'sticky',
   top: 0,
-  backgroundColor: theme.colors['fill-one'],
+  backgroundColor: brand['surface-sidebar'],
   zIndex: 1,
 }))
 
@@ -102,7 +102,7 @@ const EndpointRowLink = styled(NextLink)<{ $active: boolean }>(
     alignItems: 'center',
     gap: theme.spacing.small,
     width: '100%',
-    padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
+    padding: `${theme.spacing.xsmall} ${theme.spacing.medium}`,
     background: 'transparent',
     border: 'none',
     cursor: 'pointer',
@@ -110,13 +110,14 @@ const EndpointRowLink = styled(NextLink)<{ $active: boolean }>(
     textDecoration: 'none',
     color: 'inherit',
     borderRadius: theme.borderRadiuses.medium,
-    backgroundColor: $active ? theme.colors['action-primary'] : 'transparent',
+    backgroundColor: $active ? brand['accent-tint'] : 'transparent',
+    ...($active && {
+      [`& ${EndpointLabel}`]: { color: brand['accent-ink'], fontWeight: 500 },
+    }),
     '&:hover': {
-      backgroundColor: $active
-        ? theme.colors['action-primary-hover']
-        : theme.colors['fill-one-hover'],
+      backgroundColor: $active ? brand['accent-tint'] : brand['surface-hover'],
       [`& ${EndpointLabel}`]: {
-        color: theme.colors.text,
+        color: $active ? brand['accent-ink'] : brand.ink,
       },
     },
   })
@@ -126,25 +127,25 @@ export const AUTH_PAGE_ID = '__authentication__'
 
 const TopNavItemLink = styled(NextLink)<{ $active: boolean }>(
   ({ theme, $active }) => ({
-    ...theme.partials.text.body1Bold,
+    fontFamily: theme.fontFamilies.sans,
+    fontSize: 14,
+    fontWeight: 500,
+    lineHeight: 1.45,
     display: 'flex',
     alignItems: 'center',
     gap: theme.spacing.small,
     width: '100%',
-    padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+    padding: `${theme.spacing.small} ${theme.spacing.medium}`,
     background: 'transparent',
     border: 'none',
     cursor: 'pointer',
     textAlign: 'left',
     textDecoration: 'none',
     borderRadius: theme.borderRadiuses.medium,
-    backgroundColor: $active ? theme.colors['action-primary'] : 'transparent',
-    color: $active ? theme.colors.text : theme.colors['text-xlight'],
+    backgroundColor: $active ? brand['accent-tint'] : 'transparent',
+    color: $active ? brand['accent-ink'] : brand.ink,
     '&:hover': {
-      backgroundColor: $active
-        ? theme.colors['action-primary-hover']
-        : theme.colors['fill-one-hover'],
-      color: theme.colors.text,
+      backgroundColor: $active ? brand['accent-tint'] : brand['surface-hover'],
     },
   })
 )
@@ -152,7 +153,7 @@ const TopNavItemLink = styled(NextLink)<{ $active: boolean }>(
 const TopNavDivider = styled.hr(({ theme }) => ({
   border: 'none',
   borderTop: theme.borders.default,
-  margin: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  margin: `${theme.spacing.small} ${theme.spacing.medium}`,
 }))
 
 export function SidebarNav({

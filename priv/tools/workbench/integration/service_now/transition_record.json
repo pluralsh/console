@@ -1,0 +1,34 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "table": {
+      "type": "string",
+      "enum": [
+        "incident",
+        "change_request",
+        "problem",
+        "sc_task"
+      ],
+      "description": "ServiceNow ticket table: incident, change_request, problem or sc_task (catalog task)."
+    },
+    "record_id": {
+      "type": "string",
+      "description": "Record sys_id (32 hex characters) or record number, for example INC0010001 or CHG0030002."
+    },
+    "state": {
+      "type": "string",
+      "description": "Target state as a raw value (for example \"2\") or a label (for example \"In Progress\"). Call list_states first to see the valid values."
+    },
+    "fields": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Extra fields the transition needs, for example {\"close_code\": \"<a valid code>\", \"close_notes\": \"...\"} to resolve an incident, or {\"close_code\": \"successful\", \"close_notes\": \"...\"} to close a change. The valid close_code values of an incident differ per instance, list them with list_states and field close_code first, because ServiceNow ignores a value that is not one of them and then reports the code as missing."
+    }
+  },
+  "required": [
+    "table",
+    "record_id",
+    "state"
+  ]
+}

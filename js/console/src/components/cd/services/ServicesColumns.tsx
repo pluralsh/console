@@ -1,4 +1,5 @@
 import {
+  ICON_FRAME_ICON_SIZE,
   DryRunIcon,
   Flex,
   GearTrainIcon,
@@ -29,6 +30,7 @@ import {
   getClusterIconUrl,
   getProviderIconUrl,
 } from 'components/utils/Provider'
+import { UnstyledLink } from 'components/utils/Link'
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 import { StackedText } from 'components/utils/table/StackedText'
@@ -111,23 +113,34 @@ export const ColCluster = columnHelper.accessor(
   {
     id: 'clusterName',
     header: 'Cluster',
-    meta: { gridTemplate: '180px', truncate: true },
+    meta: { gridTemplate: 'minmax(180px, 220px)', truncate: true },
     cell: ({ row: { original } }) => {
       const cluster = original?.node?.cluster
       if (!cluster) return null
-      return <ClusterNameAndIcon cluster={cluster} />
+      return (
+        <ClusterNameAndIcon
+          cluster={cluster}
+          // the tooltip trigger captures clicks meant for the row link, so it has to link too
+          to={getServiceDetailsPath({
+            clusterId: cluster.id,
+            serviceId: original?.node?.id,
+          })}
+        />
+      )
     },
   }
 )
 
 export function ClusterNameAndIcon({
   cluster,
+  to,
 }: {
   cluster: Nullable<ClusterMinimalFragment>
+  to?: string
 }) {
   const theme = useTheme()
   if (!cluster) return null
-  return (
+  const content = (
     <ColWithIcon
       css={{ width: 'max-content' }}
       icon={getClusterIconUrl({
@@ -137,6 +150,23 @@ export function ClusterNameAndIcon({
     >
       {cluster.name}
     </ColWithIcon>
+  )
+  return (
+    <Tooltip
+      placement="top-start"
+      label={cluster.name}
+    >
+      {to ? (
+        <UnstyledLink
+          to={to}
+          $extendStyle={{ color: 'inherit', display: 'block' }}
+        >
+          {content}
+        </UnstyledLink>
+      ) : (
+        <div>{content}</div>
+      )}
+    </Tooltip>
   )
 }
 
@@ -355,35 +385,40 @@ export const ColActions = columnHelper.accessor(({ node }) => node?.id, {
             {!node?.globalService?.id && (
               <ListBoxItem
                 key={MenuItemKey.MakeGlobal}
-                leftContent={<GlobeIcon />}
+                leftContent={<GlobeIcon size={ICON_FRAME_ICON_SIZE.small} />}
                 label="Make global"
                 textValue="Make global"
               />
             )}
             <ListBoxItem
               key={MenuItemKey.Permissions}
-              leftContent={<PeopleIcon />}
+              leftContent={<PeopleIcon size={ICON_FRAME_ICON_SIZE.small} />}
               label="Permissions"
               textValue="Permissions"
             />
             {!isEmpty(serviceDeployment.helm?.repository) && (
               <ListBoxItem
                 key={MenuItemKey.HelmValues}
-                leftContent={<ListIcon />}
+                leftContent={<ListIcon size={ICON_FRAME_ICON_SIZE.small} />}
                 label="Helm values"
                 textValue="Helm values"
               />
             )}
             <ListBoxItem
               key={MenuItemKey.Settings}
-              leftContent={<GearTrainIcon />}
+              leftContent={<GearTrainIcon size={ICON_FRAME_ICON_SIZE.small} />}
               label="Settings"
               textValue="Settings"
             />
             {node?.globalService?.id && (
               <ListBoxItem
                 key={MenuItemKey.DeleteGlobal}
-                leftContent={<GlobeIcon color={theme.colors['icon-danger']} />}
+                leftContent={
+                  <GlobeIcon
+                    size={ICON_FRAME_ICON_SIZE.small}
+                    color={theme.colors['icon-danger']}
+                  />
+                }
                 label="Delete global service"
                 textValue="Delete global service"
               />
@@ -392,7 +427,10 @@ export const ColActions = columnHelper.accessor(({ node }) => node?.id, {
               <ListBoxItem
                 key={MenuItemKey.Detach}
                 leftContent={
-                  <ReturnIcon color={theme.colors['icon-danger-critical']} />
+                  <ReturnIcon
+                    size={ICON_FRAME_ICON_SIZE.small}
+                    color={theme.colors['icon-danger-critical']}
+                  />
                 }
                 label="Detach service"
                 textValue="Detach service"
@@ -402,7 +440,10 @@ export const ColActions = columnHelper.accessor(({ node }) => node?.id, {
               <ListBoxItem
                 key={MenuItemKey.Delete}
                 leftContent={
-                  <TrashCanIcon color={theme.colors['icon-danger-critical']} />
+                  <TrashCanIcon
+                    size={ICON_FRAME_ICON_SIZE.small}
+                    color={theme.colors['icon-danger-critical']}
+                  />
                 }
                 label="Delete service"
                 textValue="Delete service"

@@ -16,6 +16,7 @@ type ConsoleClient interface {
 	DeleteAgentRuntime(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteAgentRuntime, error)
 	ListAgentRuntimes(ctx context.Context, after *string, first *int64, before *string, last *int64, q *string, typeArg *AgentRuntimeType, interceptors ...clientv2.RequestInterceptor) (*ListAgentRuntimes, error)
 	GetAgentRun(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRun, error)
+	GetAgentRunCredentials(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRunCredentials, error)
 	GetAgentRunMinimal(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRunMinimal, error)
 	ListAgentRuns(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListAgentRuns, error)
 	ListAgentRunsMinimal(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListAgentRunsMinimal, error)
@@ -512,9 +513,10 @@ func (t *AgentTodoFragment) GetTitle() string {
 }
 
 type AgentPromptFragment struct {
-	ID     string "json:\"id\" graphql:\"id\""
-	Prompt string "json:\"prompt\" graphql:\"prompt\""
-	Seq    int64  "json:\"seq\" graphql:\"seq\""
+	ID          string                     "json:\"id\" graphql:\"id\""
+	Prompt      string                     "json:\"prompt\" graphql:\"prompt\""
+	Seq         int64                      "json:\"seq\" graphql:\"seq\""
+	Attachments []*AgentAttachmentFragment "json:\"attachments,omitempty\" graphql:\"attachments\""
 }
 
 func (t *AgentPromptFragment) GetID() string {
@@ -534,6 +536,51 @@ func (t *AgentPromptFragment) GetSeq() int64 {
 		t = &AgentPromptFragment{}
 	}
 	return t.Seq
+}
+func (t *AgentPromptFragment) GetAttachments() []*AgentAttachmentFragment {
+	if t == nil {
+		t = &AgentPromptFragment{}
+	}
+	return t.Attachments
+}
+
+type AgentAttachmentFragment struct {
+	ID          string  "json:\"id\" graphql:\"id\""
+	Filename    string  "json:\"filename\" graphql:\"filename\""
+	Filetype    *string "json:\"filetype,omitempty\" graphql:\"filetype\""
+	Size        *int64  "json:\"size,omitempty\" graphql:\"size\""
+	DownloadURL *string "json:\"downloadUrl,omitempty\" graphql:\"downloadUrl\""
+}
+
+func (t *AgentAttachmentFragment) GetID() string {
+	if t == nil {
+		t = &AgentAttachmentFragment{}
+	}
+	return t.ID
+}
+func (t *AgentAttachmentFragment) GetFilename() string {
+	if t == nil {
+		t = &AgentAttachmentFragment{}
+	}
+	return t.Filename
+}
+func (t *AgentAttachmentFragment) GetFiletype() *string {
+	if t == nil {
+		t = &AgentAttachmentFragment{}
+	}
+	return t.Filetype
+}
+func (t *AgentAttachmentFragment) GetSize() *int64 {
+	if t == nil {
+		t = &AgentAttachmentFragment{}
+	}
+	return t.Size
+}
+func (t *AgentAttachmentFragment) GetDownloadURL() *string {
+	if t == nil {
+		t = &AgentAttachmentFragment{}
+	}
+	return t.DownloadURL
 }
 
 type ScmCredentialFragment struct {
@@ -683,14 +730,13 @@ type AgentRunFragment struct {
 	LanguageVersion *string                    "json:\"languageVersion,omitempty\" graphql:\"languageVersion\""
 	Todos           []*AgentTodoFragment       "json:\"todos,omitempty\" graphql:\"todos\""
 	Prompts         []*AgentPromptFragment     "json:\"prompts,omitempty\" graphql:\"prompts\""
+	Attachments     []*AgentAttachmentFragment "json:\"attachments,omitempty\" graphql:\"attachments\""
 	Skills          []*AgentRunFragment_Skills "json:\"skills,omitempty\" graphql:\"skills\""
 	Status          AgentRunStatus             "json:\"status\" graphql:\"status\""
 	PodReference    *AgentPodReferenceFragment "json:\"podReference,omitempty\" graphql:\"podReference\""
 	Error           *string                    "json:\"error,omitempty\" graphql:\"error\""
 	Analysis        *AgentAnalysisFragment     "json:\"analysis,omitempty\" graphql:\"analysis\""
 	Usage           *AgentRunFragment_Usage    "json:\"usage,omitempty\" graphql:\"usage\""
-	ScmCreds        *ScmCredentialFragment     "json:\"scmCreds,omitempty\" graphql:\"scmCreds\""
-	PluralCreds     *PluralCredsFragment       "json:\"pluralCreds,omitempty\" graphql:\"pluralCreds\""
 	WorkbenchMcpURL *string                    "json:\"workbenchMcpUrl,omitempty\" graphql:\"workbenchMcpUrl\""
 	Runtime         *AgentRuntimeFragment      "json:\"runtime,omitempty\" graphql:\"runtime\""
 	User            *AgentRunFragment_User     "json:\"user,omitempty\" graphql:\"user\""
@@ -771,6 +817,12 @@ func (t *AgentRunFragment) GetPrompts() []*AgentPromptFragment {
 	}
 	return t.Prompts
 }
+func (t *AgentRunFragment) GetAttachments() []*AgentAttachmentFragment {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.Attachments
+}
 func (t *AgentRunFragment) GetSkills() []*AgentRunFragment_Skills {
 	if t == nil {
 		t = &AgentRunFragment{}
@@ -806,18 +858,6 @@ func (t *AgentRunFragment) GetUsage() *AgentRunFragment_Usage {
 		t = &AgentRunFragment{}
 	}
 	return t.Usage
-}
-func (t *AgentRunFragment) GetScmCreds() *ScmCredentialFragment {
-	if t == nil {
-		t = &AgentRunFragment{}
-	}
-	return t.ScmCreds
-}
-func (t *AgentRunFragment) GetPluralCreds() *PluralCredsFragment {
-	if t == nil {
-		t = &AgentRunFragment{}
-	}
-	return t.PluralCreds
 }
 func (t *AgentRunFragment) GetWorkbenchMcpURL() *string {
 	if t == nil {
@@ -890,6 +930,24 @@ func (t *AgentRunFragment) GetFollowupPrURL() *string {
 		t = &AgentRunFragment{}
 	}
 	return t.FollowupPrURL
+}
+
+type AgentRunCredentialsFragment struct {
+	ScmCreds    *ScmCredentialFragment "json:\"scmCreds,omitempty\" graphql:\"scmCreds\""
+	PluralCreds *PluralCredsFragment   "json:\"pluralCreds,omitempty\" graphql:\"pluralCreds\""
+}
+
+func (t *AgentRunCredentialsFragment) GetScmCreds() *ScmCredentialFragment {
+	if t == nil {
+		t = &AgentRunCredentialsFragment{}
+	}
+	return t.ScmCreds
+}
+func (t *AgentRunCredentialsFragment) GetPluralCreds() *PluralCredsFragment {
+	if t == nil {
+		t = &AgentRunCredentialsFragment{}
+	}
+	return t.PluralCreds
 }
 
 type AgentRunMinimalFragment struct {
@@ -1989,6 +2047,7 @@ type FederatedCredentialFragment struct {
 	ID         string                            "json:\"id\" graphql:\"id\""
 	ClaimsLike map[string]any                    "json:\"claimsLike,omitempty\" graphql:\"claimsLike\""
 	Issuer     string                            "json:\"issuer\" graphql:\"issuer\""
+	Aud        *string                           "json:\"aud,omitempty\" graphql:\"aud\""
 	Scopes     []*string                         "json:\"scopes,omitempty\" graphql:\"scopes\""
 	InsertedAt *string                           "json:\"insertedAt,omitempty\" graphql:\"insertedAt\""
 	UpdatedAt  *string                           "json:\"updatedAt,omitempty\" graphql:\"updatedAt\""
@@ -2012,6 +2071,12 @@ func (t *FederatedCredentialFragment) GetIssuer() string {
 		t = &FederatedCredentialFragment{}
 	}
 	return t.Issuer
+}
+func (t *FederatedCredentialFragment) GetAud() *string {
+	if t == nil {
+		t = &FederatedCredentialFragment{}
+	}
+	return t.Aud
 }
 func (t *FederatedCredentialFragment) GetScopes() []*string {
 	if t == nil {
@@ -7962,31 +8027,6 @@ func (t *AgentRunFragment_Usage) GetTotalTokens() *int64 {
 	return t.TotalTokens
 }
 
-type AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy struct {
-	Enabled bool    "json:\"enabled\" graphql:\"enabled\""
-	Noproxy *string "json:\"noproxy,omitempty\" graphql:\"noproxy\""
-	URL     string  "json:\"url\" graphql:\"url\""
-}
-
-func (t *AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetEnabled() bool {
-	if t == nil {
-		t = &AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
-	}
-	return t.Enabled
-}
-func (t *AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetNoproxy() *string {
-	if t == nil {
-		t = &AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
-	}
-	return t.Noproxy
-}
-func (t *AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetURL() string {
-	if t == nil {
-		t = &AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
-	}
-	return t.URL
-}
-
 type AgentRunFragment_User struct {
 	Email string "json:\"email\" graphql:\"email\""
 	ID    string "json:\"id\" graphql:\"id\""
@@ -8028,6 +8068,31 @@ func (t *AgentRunFragment_Flow) GetName() string {
 		t = &AgentRunFragment_Flow{}
 	}
 	return t.Name
+}
+
+type AgentRunCredentialsFragment_ScmCreds_ScmCredentialFragment_Proxy struct {
+	Enabled bool    "json:\"enabled\" graphql:\"enabled\""
+	Noproxy *string "json:\"noproxy,omitempty\" graphql:\"noproxy\""
+	URL     string  "json:\"url\" graphql:\"url\""
+}
+
+func (t *AgentRunCredentialsFragment_ScmCreds_ScmCredentialFragment_Proxy) GetEnabled() bool {
+	if t == nil {
+		t = &AgentRunCredentialsFragment_ScmCreds_ScmCredentialFragment_Proxy{}
+	}
+	return t.Enabled
+}
+func (t *AgentRunCredentialsFragment_ScmCreds_ScmCredentialFragment_Proxy) GetNoproxy() *string {
+	if t == nil {
+		t = &AgentRunCredentialsFragment_ScmCreds_ScmCredentialFragment_Proxy{}
+	}
+	return t.Noproxy
+}
+func (t *AgentRunCredentialsFragment_ScmCreds_ScmCredentialFragment_Proxy) GetURL() string {
+	if t == nil {
+		t = &AgentRunCredentialsFragment_ScmCreds_ScmCredentialFragment_Proxy{}
+	}
+	return t.URL
 }
 
 type AgentRunMinimalFragment_Runtime struct {
@@ -11658,10 +11723,28 @@ func (t *BindingPolicyFragment_Matches_Workbench) GetRegexes() []*string {
 	return t.Regexes
 }
 
+type BindingPolicyFragment_Matches_Stack struct {
+	Type *StackPolicyType "json:\"type,omitempty\" graphql:\"type\""
+}
+
+func (t *BindingPolicyFragment_Matches_Stack) GetType() *StackPolicyType {
+	if t == nil {
+		t = &BindingPolicyFragment_Matches_Stack{}
+	}
+	return t.Type
+}
+
 type BindingPolicyFragment_Matches struct {
+	Stack     *BindingPolicyFragment_Matches_Stack     "json:\"stack,omitempty\" graphql:\"stack\""
 	Workbench *BindingPolicyFragment_Matches_Workbench "json:\"workbench,omitempty\" graphql:\"workbench\""
 }
 
+func (t *BindingPolicyFragment_Matches) GetStack() *BindingPolicyFragment_Matches_Stack {
+	if t == nil {
+		t = &BindingPolicyFragment_Matches{}
+	}
+	return t.Stack
+}
 func (t *BindingPolicyFragment_Matches) GetWorkbench() *BindingPolicyFragment_Matches_Workbench {
 	if t == nil {
 		t = &BindingPolicyFragment_Matches{}
@@ -15739,9 +15822,10 @@ func (t *WorkbenchFragment_Configuration_Coding) GetRepositories() []*string {
 }
 
 type WorkbenchFragment_Configuration_Infrastructure struct {
-	Kubernetes *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
-	Services   *bool "json:\"services,omitempty\" graphql:\"services\""
-	Stacks     *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
+	Kubernetes  *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
+	SelfService *bool "json:\"selfService,omitempty\" graphql:\"selfService\""
+	Services    *bool "json:\"services,omitempty\" graphql:\"services\""
+	Stacks      *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
 }
 
 func (t *WorkbenchFragment_Configuration_Infrastructure) GetKubernetes() *bool {
@@ -15749,6 +15833,12 @@ func (t *WorkbenchFragment_Configuration_Infrastructure) GetKubernetes() *bool {
 		t = &WorkbenchFragment_Configuration_Infrastructure{}
 	}
 	return t.Kubernetes
+}
+func (t *WorkbenchFragment_Configuration_Infrastructure) GetSelfService() *bool {
+	if t == nil {
+		t = &WorkbenchFragment_Configuration_Infrastructure{}
+	}
+	return t.SelfService
 }
 func (t *WorkbenchFragment_Configuration_Infrastructure) GetServices() *bool {
 	if t == nil {
@@ -18076,31 +18166,6 @@ func (t *GetAgentRun_AgentRun_AgentRunFragment_Usage) GetTotalTokens() *int64 {
 	return t.TotalTokens
 }
 
-type GetAgentRun_AgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy struct {
-	Enabled bool    "json:\"enabled\" graphql:\"enabled\""
-	Noproxy *string "json:\"noproxy,omitempty\" graphql:\"noproxy\""
-	URL     string  "json:\"url\" graphql:\"url\""
-}
-
-func (t *GetAgentRun_AgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetEnabled() bool {
-	if t == nil {
-		t = &GetAgentRun_AgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
-	}
-	return t.Enabled
-}
-func (t *GetAgentRun_AgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetNoproxy() *string {
-	if t == nil {
-		t = &GetAgentRun_AgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
-	}
-	return t.Noproxy
-}
-func (t *GetAgentRun_AgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetURL() string {
-	if t == nil {
-		t = &GetAgentRun_AgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
-	}
-	return t.URL
-}
-
 type GetAgentRun_AgentRun_AgentRunFragment_User struct {
 	Email string "json:\"email\" graphql:\"email\""
 	ID    string "json:\"id\" graphql:\"id\""
@@ -18142,6 +18207,31 @@ func (t *GetAgentRun_AgentRun_AgentRunFragment_Flow) GetName() string {
 		t = &GetAgentRun_AgentRun_AgentRunFragment_Flow{}
 	}
 	return t.Name
+}
+
+type GetAgentRunCredentials_AgentRun_AgentRunCredentialsFragment_ScmCreds_ScmCredentialFragment_Proxy struct {
+	Enabled bool    "json:\"enabled\" graphql:\"enabled\""
+	Noproxy *string "json:\"noproxy,omitempty\" graphql:\"noproxy\""
+	URL     string  "json:\"url\" graphql:\"url\""
+}
+
+func (t *GetAgentRunCredentials_AgentRun_AgentRunCredentialsFragment_ScmCreds_ScmCredentialFragment_Proxy) GetEnabled() bool {
+	if t == nil {
+		t = &GetAgentRunCredentials_AgentRun_AgentRunCredentialsFragment_ScmCreds_ScmCredentialFragment_Proxy{}
+	}
+	return t.Enabled
+}
+func (t *GetAgentRunCredentials_AgentRun_AgentRunCredentialsFragment_ScmCreds_ScmCredentialFragment_Proxy) GetNoproxy() *string {
+	if t == nil {
+		t = &GetAgentRunCredentials_AgentRun_AgentRunCredentialsFragment_ScmCreds_ScmCredentialFragment_Proxy{}
+	}
+	return t.Noproxy
+}
+func (t *GetAgentRunCredentials_AgentRun_AgentRunCredentialsFragment_ScmCreds_ScmCredentialFragment_Proxy) GetURL() string {
+	if t == nil {
+		t = &GetAgentRunCredentials_AgentRun_AgentRunCredentialsFragment_ScmCreds_ScmCredentialFragment_Proxy{}
+	}
+	return t.URL
 }
 
 type GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_Runtime struct {
@@ -18302,31 +18392,6 @@ func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage) GetTotalToke
 		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage{}
 	}
 	return t.TotalTokens
-}
-
-type ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy struct {
-	Enabled bool    "json:\"enabled\" graphql:\"enabled\""
-	Noproxy *string "json:\"noproxy,omitempty\" graphql:\"noproxy\""
-	URL     string  "json:\"url\" graphql:\"url\""
-}
-
-func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetEnabled() bool {
-	if t == nil {
-		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
-	}
-	return t.Enabled
-}
-func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetNoproxy() *string {
-	if t == nil {
-		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
-	}
-	return t.Noproxy
-}
-func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetURL() string {
-	if t == nil {
-		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
-	}
-	return t.URL
 }
 
 type ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_User struct {
@@ -18590,31 +18655,6 @@ func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRu
 	return t.TotalTokens
 }
 
-type ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy struct {
-	Enabled bool    "json:\"enabled\" graphql:\"enabled\""
-	Noproxy *string "json:\"noproxy,omitempty\" graphql:\"noproxy\""
-	URL     string  "json:\"url\" graphql:\"url\""
-}
-
-func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetEnabled() bool {
-	if t == nil {
-		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
-	}
-	return t.Enabled
-}
-func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetNoproxy() *string {
-	if t == nil {
-		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
-	}
-	return t.Noproxy
-}
-func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetURL() string {
-	if t == nil {
-		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
-	}
-	return t.URL
-}
-
 type ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User struct {
 	Email string "json:\"email\" graphql:\"email\""
 	ID    string "json:\"id\" graphql:\"id\""
@@ -18805,31 +18845,6 @@ func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage) GetTotalTokens() 
 	return t.TotalTokens
 }
 
-type CreateAgentRun_CreateAgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy struct {
-	Enabled bool    "json:\"enabled\" graphql:\"enabled\""
-	Noproxy *string "json:\"noproxy,omitempty\" graphql:\"noproxy\""
-	URL     string  "json:\"url\" graphql:\"url\""
-}
-
-func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetEnabled() bool {
-	if t == nil {
-		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
-	}
-	return t.Enabled
-}
-func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetNoproxy() *string {
-	if t == nil {
-		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
-	}
-	return t.Noproxy
-}
-func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetURL() string {
-	if t == nil {
-		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
-	}
-	return t.URL
-}
-
 type CreateAgentRun_CreateAgentRun_AgentRunFragment_User struct {
 	Email string "json:\"email\" graphql:\"email\""
 	ID    string "json:\"id\" graphql:\"id\""
@@ -18956,31 +18971,6 @@ func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetTotalTokens() 
 		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
 	}
 	return t.TotalTokens
-}
-
-type UpdateAgentRun_UpdateAgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy struct {
-	Enabled bool    "json:\"enabled\" graphql:\"enabled\""
-	Noproxy *string "json:\"noproxy,omitempty\" graphql:\"noproxy\""
-	URL     string  "json:\"url\" graphql:\"url\""
-}
-
-func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetEnabled() bool {
-	if t == nil {
-		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
-	}
-	return t.Enabled
-}
-func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetNoproxy() *string {
-	if t == nil {
-		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
-	}
-	return t.Noproxy
-}
-func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy) GetURL() string {
-	if t == nil {
-		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_ScmCreds_ScmCredentialFragment_Proxy{}
-	}
-	return t.URL
 }
 
 type UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User struct {
@@ -29590,10 +29580,28 @@ func (t *GetBindingPolicy_BindingPolicy_BindingPolicyFragment_Matches_Workbench)
 	return t.Regexes
 }
 
+type GetBindingPolicy_BindingPolicy_BindingPolicyFragment_Matches_Stack struct {
+	Type *StackPolicyType "json:\"type,omitempty\" graphql:\"type\""
+}
+
+func (t *GetBindingPolicy_BindingPolicy_BindingPolicyFragment_Matches_Stack) GetType() *StackPolicyType {
+	if t == nil {
+		t = &GetBindingPolicy_BindingPolicy_BindingPolicyFragment_Matches_Stack{}
+	}
+	return t.Type
+}
+
 type GetBindingPolicy_BindingPolicy_BindingPolicyFragment_Matches struct {
+	Stack     *GetBindingPolicy_BindingPolicy_BindingPolicyFragment_Matches_Stack     "json:\"stack,omitempty\" graphql:\"stack\""
 	Workbench *GetBindingPolicy_BindingPolicy_BindingPolicyFragment_Matches_Workbench "json:\"workbench,omitempty\" graphql:\"workbench\""
 }
 
+func (t *GetBindingPolicy_BindingPolicy_BindingPolicyFragment_Matches) GetStack() *GetBindingPolicy_BindingPolicy_BindingPolicyFragment_Matches_Stack {
+	if t == nil {
+		t = &GetBindingPolicy_BindingPolicy_BindingPolicyFragment_Matches{}
+	}
+	return t.Stack
+}
 func (t *GetBindingPolicy_BindingPolicy_BindingPolicyFragment_Matches) GetWorkbench() *GetBindingPolicy_BindingPolicy_BindingPolicyFragment_Matches_Workbench {
 	if t == nil {
 		t = &GetBindingPolicy_BindingPolicy_BindingPolicyFragment_Matches{}
@@ -29623,10 +29631,28 @@ func (t *ListBindingPolicies_BindingPolicies_Edges_Node_BindingPolicyFragment_Ma
 	return t.Regexes
 }
 
+type ListBindingPolicies_BindingPolicies_Edges_Node_BindingPolicyFragment_Matches_Stack struct {
+	Type *StackPolicyType "json:\"type,omitempty\" graphql:\"type\""
+}
+
+func (t *ListBindingPolicies_BindingPolicies_Edges_Node_BindingPolicyFragment_Matches_Stack) GetType() *StackPolicyType {
+	if t == nil {
+		t = &ListBindingPolicies_BindingPolicies_Edges_Node_BindingPolicyFragment_Matches_Stack{}
+	}
+	return t.Type
+}
+
 type ListBindingPolicies_BindingPolicies_Edges_Node_BindingPolicyFragment_Matches struct {
+	Stack     *ListBindingPolicies_BindingPolicies_Edges_Node_BindingPolicyFragment_Matches_Stack     "json:\"stack,omitempty\" graphql:\"stack\""
 	Workbench *ListBindingPolicies_BindingPolicies_Edges_Node_BindingPolicyFragment_Matches_Workbench "json:\"workbench,omitempty\" graphql:\"workbench\""
 }
 
+func (t *ListBindingPolicies_BindingPolicies_Edges_Node_BindingPolicyFragment_Matches) GetStack() *ListBindingPolicies_BindingPolicies_Edges_Node_BindingPolicyFragment_Matches_Stack {
+	if t == nil {
+		t = &ListBindingPolicies_BindingPolicies_Edges_Node_BindingPolicyFragment_Matches{}
+	}
+	return t.Stack
+}
 func (t *ListBindingPolicies_BindingPolicies_Edges_Node_BindingPolicyFragment_Matches) GetWorkbench() *ListBindingPolicies_BindingPolicies_Edges_Node_BindingPolicyFragment_Matches_Workbench {
 	if t == nil {
 		t = &ListBindingPolicies_BindingPolicies_Edges_Node_BindingPolicyFragment_Matches{}
@@ -29674,10 +29700,28 @@ func (t *CreateBindingPolicy_CreateBindingPolicy_BindingPolicyFragment_Matches_W
 	return t.Regexes
 }
 
+type CreateBindingPolicy_CreateBindingPolicy_BindingPolicyFragment_Matches_Stack struct {
+	Type *StackPolicyType "json:\"type,omitempty\" graphql:\"type\""
+}
+
+func (t *CreateBindingPolicy_CreateBindingPolicy_BindingPolicyFragment_Matches_Stack) GetType() *StackPolicyType {
+	if t == nil {
+		t = &CreateBindingPolicy_CreateBindingPolicy_BindingPolicyFragment_Matches_Stack{}
+	}
+	return t.Type
+}
+
 type CreateBindingPolicy_CreateBindingPolicy_BindingPolicyFragment_Matches struct {
+	Stack     *CreateBindingPolicy_CreateBindingPolicy_BindingPolicyFragment_Matches_Stack     "json:\"stack,omitempty\" graphql:\"stack\""
 	Workbench *CreateBindingPolicy_CreateBindingPolicy_BindingPolicyFragment_Matches_Workbench "json:\"workbench,omitempty\" graphql:\"workbench\""
 }
 
+func (t *CreateBindingPolicy_CreateBindingPolicy_BindingPolicyFragment_Matches) GetStack() *CreateBindingPolicy_CreateBindingPolicy_BindingPolicyFragment_Matches_Stack {
+	if t == nil {
+		t = &CreateBindingPolicy_CreateBindingPolicy_BindingPolicyFragment_Matches{}
+	}
+	return t.Stack
+}
 func (t *CreateBindingPolicy_CreateBindingPolicy_BindingPolicyFragment_Matches) GetWorkbench() *CreateBindingPolicy_CreateBindingPolicy_BindingPolicyFragment_Matches_Workbench {
 	if t == nil {
 		t = &CreateBindingPolicy_CreateBindingPolicy_BindingPolicyFragment_Matches{}
@@ -29696,10 +29740,28 @@ func (t *UpdateBindingPolicy_UpdateBindingPolicy_BindingPolicyFragment_Matches_W
 	return t.Regexes
 }
 
+type UpdateBindingPolicy_UpdateBindingPolicy_BindingPolicyFragment_Matches_Stack struct {
+	Type *StackPolicyType "json:\"type,omitempty\" graphql:\"type\""
+}
+
+func (t *UpdateBindingPolicy_UpdateBindingPolicy_BindingPolicyFragment_Matches_Stack) GetType() *StackPolicyType {
+	if t == nil {
+		t = &UpdateBindingPolicy_UpdateBindingPolicy_BindingPolicyFragment_Matches_Stack{}
+	}
+	return t.Type
+}
+
 type UpdateBindingPolicy_UpdateBindingPolicy_BindingPolicyFragment_Matches struct {
+	Stack     *UpdateBindingPolicy_UpdateBindingPolicy_BindingPolicyFragment_Matches_Stack     "json:\"stack,omitempty\" graphql:\"stack\""
 	Workbench *UpdateBindingPolicy_UpdateBindingPolicy_BindingPolicyFragment_Matches_Workbench "json:\"workbench,omitempty\" graphql:\"workbench\""
 }
 
+func (t *UpdateBindingPolicy_UpdateBindingPolicy_BindingPolicyFragment_Matches) GetStack() *UpdateBindingPolicy_UpdateBindingPolicy_BindingPolicyFragment_Matches_Stack {
+	if t == nil {
+		t = &UpdateBindingPolicy_UpdateBindingPolicy_BindingPolicyFragment_Matches{}
+	}
+	return t.Stack
+}
 func (t *UpdateBindingPolicy_UpdateBindingPolicy_BindingPolicyFragment_Matches) GetWorkbench() *UpdateBindingPolicy_UpdateBindingPolicy_BindingPolicyFragment_Matches_Workbench {
 	if t == nil {
 		t = &UpdateBindingPolicy_UpdateBindingPolicy_BindingPolicyFragment_Matches{}
@@ -29718,10 +29780,28 @@ func (t *DeleteBindingPolicy_DeleteBindingPolicy_BindingPolicyFragment_Matches_W
 	return t.Regexes
 }
 
+type DeleteBindingPolicy_DeleteBindingPolicy_BindingPolicyFragment_Matches_Stack struct {
+	Type *StackPolicyType "json:\"type,omitempty\" graphql:\"type\""
+}
+
+func (t *DeleteBindingPolicy_DeleteBindingPolicy_BindingPolicyFragment_Matches_Stack) GetType() *StackPolicyType {
+	if t == nil {
+		t = &DeleteBindingPolicy_DeleteBindingPolicy_BindingPolicyFragment_Matches_Stack{}
+	}
+	return t.Type
+}
+
 type DeleteBindingPolicy_DeleteBindingPolicy_BindingPolicyFragment_Matches struct {
+	Stack     *DeleteBindingPolicy_DeleteBindingPolicy_BindingPolicyFragment_Matches_Stack     "json:\"stack,omitempty\" graphql:\"stack\""
 	Workbench *DeleteBindingPolicy_DeleteBindingPolicy_BindingPolicyFragment_Matches_Workbench "json:\"workbench,omitempty\" graphql:\"workbench\""
 }
 
+func (t *DeleteBindingPolicy_DeleteBindingPolicy_BindingPolicyFragment_Matches) GetStack() *DeleteBindingPolicy_DeleteBindingPolicy_BindingPolicyFragment_Matches_Stack {
+	if t == nil {
+		t = &DeleteBindingPolicy_DeleteBindingPolicy_BindingPolicyFragment_Matches{}
+	}
+	return t.Stack
+}
 func (t *DeleteBindingPolicy_DeleteBindingPolicy_BindingPolicyFragment_Matches) GetWorkbench() *DeleteBindingPolicy_DeleteBindingPolicy_BindingPolicyFragment_Matches_Workbench {
 	if t == nil {
 		t = &DeleteBindingPolicy_DeleteBindingPolicy_BindingPolicyFragment_Matches{}
@@ -36846,9 +36926,10 @@ func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Configuration_Coding)
 }
 
 type CreateWorkbench_CreateWorkbench_WorkbenchFragment_Configuration_Infrastructure struct {
-	Kubernetes *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
-	Services   *bool "json:\"services,omitempty\" graphql:\"services\""
-	Stacks     *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
+	Kubernetes  *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
+	SelfService *bool "json:\"selfService,omitempty\" graphql:\"selfService\""
+	Services    *bool "json:\"services,omitempty\" graphql:\"services\""
+	Stacks      *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
 }
 
 func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Configuration_Infrastructure) GetKubernetes() *bool {
@@ -36856,6 +36937,12 @@ func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Configuration_Infrast
 		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Configuration_Infrastructure{}
 	}
 	return t.Kubernetes
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Configuration_Infrastructure) GetSelfService() *bool {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_Configuration_Infrastructure{}
+	}
+	return t.SelfService
 }
 func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Configuration_Infrastructure) GetServices() *bool {
 	if t == nil {
@@ -37938,9 +38025,10 @@ func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Configuration_Coding)
 }
 
 type UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Configuration_Infrastructure struct {
-	Kubernetes *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
-	Services   *bool "json:\"services,omitempty\" graphql:\"services\""
-	Stacks     *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
+	Kubernetes  *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
+	SelfService *bool "json:\"selfService,omitempty\" graphql:\"selfService\""
+	Services    *bool "json:\"services,omitempty\" graphql:\"services\""
+	Stacks      *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
 }
 
 func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Configuration_Infrastructure) GetKubernetes() *bool {
@@ -37948,6 +38036,12 @@ func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Configuration_Infrast
 		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Configuration_Infrastructure{}
 	}
 	return t.Kubernetes
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Configuration_Infrastructure) GetSelfService() *bool {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Configuration_Infrastructure{}
+	}
+	return t.SelfService
 }
 func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Configuration_Infrastructure) GetServices() *bool {
 	if t == nil {
@@ -39030,9 +39124,10 @@ func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Configuration_Coding)
 }
 
 type DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Configuration_Infrastructure struct {
-	Kubernetes *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
-	Services   *bool "json:\"services,omitempty\" graphql:\"services\""
-	Stacks     *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
+	Kubernetes  *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
+	SelfService *bool "json:\"selfService,omitempty\" graphql:\"selfService\""
+	Services    *bool "json:\"services,omitempty\" graphql:\"services\""
+	Stacks      *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
 }
 
 func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Configuration_Infrastructure) GetKubernetes() *bool {
@@ -39040,6 +39135,12 @@ func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Configuration_Infrast
 		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Configuration_Infrastructure{}
 	}
 	return t.Kubernetes
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Configuration_Infrastructure) GetSelfService() *bool {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Configuration_Infrastructure{}
+	}
+	return t.SelfService
 }
 func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Configuration_Infrastructure) GetServices() *bool {
 	if t == nil {
@@ -42968,9 +43069,10 @@ func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Configuration_
 }
 
 type ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Configuration_Infrastructure struct {
-	Kubernetes *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
-	Services   *bool "json:\"services,omitempty\" graphql:\"services\""
-	Stacks     *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
+	Kubernetes  *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
+	SelfService *bool "json:\"selfService,omitempty\" graphql:\"selfService\""
+	Services    *bool "json:\"services,omitempty\" graphql:\"services\""
+	Stacks      *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
 }
 
 func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Configuration_Infrastructure) GetKubernetes() *bool {
@@ -42978,6 +43080,12 @@ func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Configuration_
 		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Configuration_Infrastructure{}
 	}
 	return t.Kubernetes
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Configuration_Infrastructure) GetSelfService() *bool {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Configuration_Infrastructure{}
+	}
+	return t.SelfService
 }
 func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Configuration_Infrastructure) GetServices() *bool {
 	if t == nil {
@@ -44089,9 +44197,10 @@ func (t *GetWorkbench_Workbench_WorkbenchFragment_Configuration_Coding) GetRepos
 }
 
 type GetWorkbench_Workbench_WorkbenchFragment_Configuration_Infrastructure struct {
-	Kubernetes *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
-	Services   *bool "json:\"services,omitempty\" graphql:\"services\""
-	Stacks     *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
+	Kubernetes  *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
+	SelfService *bool "json:\"selfService,omitempty\" graphql:\"selfService\""
+	Services    *bool "json:\"services,omitempty\" graphql:\"services\""
+	Stacks      *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
 }
 
 func (t *GetWorkbench_Workbench_WorkbenchFragment_Configuration_Infrastructure) GetKubernetes() *bool {
@@ -44099,6 +44208,12 @@ func (t *GetWorkbench_Workbench_WorkbenchFragment_Configuration_Infrastructure) 
 		t = &GetWorkbench_Workbench_WorkbenchFragment_Configuration_Infrastructure{}
 	}
 	return t.Kubernetes
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_Configuration_Infrastructure) GetSelfService() *bool {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_Configuration_Infrastructure{}
+	}
+	return t.SelfService
 }
 func (t *GetWorkbench_Workbench_WorkbenchFragment_Configuration_Infrastructure) GetServices() *bool {
 	if t == nil {
@@ -47651,6 +47766,17 @@ type GetAgentRun struct {
 func (t *GetAgentRun) GetAgentRun() *AgentRunFragment {
 	if t == nil {
 		t = &GetAgentRun{}
+	}
+	return t.AgentRun
+}
+
+type GetAgentRunCredentials struct {
+	AgentRun *AgentRunCredentialsFragment "json:\"agentRun,omitempty\" graphql:\"agentRun\""
+}
+
+func (t *GetAgentRunCredentials) GetAgentRun() *AgentRunCredentialsFragment {
+	if t == nil {
+		t = &GetAgentRunCredentials{}
 	}
 	return t.AgentRun
 }
@@ -51730,6 +51856,9 @@ fragment AgentRunFragment on AgentRun {
 	prompts {
 		... AgentPromptFragment
 	}
+	attachments {
+		... AgentAttachmentFragment
+	}
 	skills {
 		name
 		description
@@ -51752,12 +51881,6 @@ fragment AgentRunFragment on AgentRun {
 		inputCost
 		outputCost
 		totalCost
-	}
-	scmCreds {
-		... ScmCredentialFragment
-	}
-	pluralCreds {
-		... PluralCredsFragment
 	}
 	workbenchMcpUrl
 	runtime {
@@ -51794,6 +51917,16 @@ fragment AgentPromptFragment on AgentPrompt {
 	id
 	prompt
 	seq
+	attachments {
+		... AgentAttachmentFragment
+	}
+}
+fragment AgentAttachmentFragment on Attachment {
+	id
+	filename
+	filetype
+	size
+	downloadUrl
 }
 fragment AgentPodReferenceFragment on AgentPodReference {
 	name
@@ -51803,20 +51936,6 @@ fragment AgentAnalysisFragment on AgentAnalysis {
 	summary
 	analysis
 	bullets
-}
-fragment ScmCredentialFragment on ScmCreds {
-	token
-	username
-	exaKey
-	proxy {
-		enabled
-		url
-		noproxy
-	}
-}
-fragment PluralCredsFragment on PluralCreds {
-	token
-	url
 }
 fragment AgentRuntimeFragment on AgentRuntime {
 	id
@@ -51888,6 +52007,52 @@ func (c *Client) GetAgentRun(ctx context.Context, id string, interceptors ...cli
 
 	var res GetAgentRun
 	if err := c.Client.Post(ctx, "GetAgentRun", GetAgentRunDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetAgentRunCredentialsDocument = `query GetAgentRunCredentials ($id: ID!) {
+	agentRun(id: $id) {
+		... AgentRunCredentialsFragment
+	}
+}
+fragment AgentRunCredentialsFragment on AgentRun {
+	scmCreds {
+		... ScmCredentialFragment
+	}
+	pluralCreds {
+		... PluralCredsFragment
+	}
+}
+fragment ScmCredentialFragment on ScmCreds {
+	token
+	username
+	exaKey
+	proxy {
+		enabled
+		url
+		noproxy
+	}
+}
+fragment PluralCredsFragment on PluralCreds {
+	token
+	url
+}
+`
+
+func (c *Client) GetAgentRunCredentials(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRunCredentials, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetAgentRunCredentials
+	if err := c.Client.Post(ctx, "GetAgentRunCredentials", GetAgentRunCredentialsDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -51972,6 +52137,9 @@ fragment AgentRunFragment on AgentRun {
 	prompts {
 		... AgentPromptFragment
 	}
+	attachments {
+		... AgentAttachmentFragment
+	}
 	skills {
 		name
 		description
@@ -51994,12 +52162,6 @@ fragment AgentRunFragment on AgentRun {
 		inputCost
 		outputCost
 		totalCost
-	}
-	scmCreds {
-		... ScmCredentialFragment
-	}
-	pluralCreds {
-		... PluralCredsFragment
 	}
 	workbenchMcpUrl
 	runtime {
@@ -52036,6 +52198,16 @@ fragment AgentPromptFragment on AgentPrompt {
 	id
 	prompt
 	seq
+	attachments {
+		... AgentAttachmentFragment
+	}
+}
+fragment AgentAttachmentFragment on Attachment {
+	id
+	filename
+	filetype
+	size
+	downloadUrl
 }
 fragment AgentPodReferenceFragment on AgentPodReference {
 	name
@@ -52045,20 +52217,6 @@ fragment AgentAnalysisFragment on AgentAnalysis {
 	summary
 	analysis
 	bullets
-}
-fragment ScmCredentialFragment on ScmCreds {
-	token
-	username
-	exaKey
-	proxy {
-		enabled
-		url
-		noproxy
-	}
-}
-fragment PluralCredsFragment on PluralCreds {
-	token
-	url
 }
 fragment AgentRuntimeFragment on AgentRuntime {
 	id
@@ -52237,6 +52395,9 @@ fragment AgentRunFragment on AgentRun {
 	prompts {
 		... AgentPromptFragment
 	}
+	attachments {
+		... AgentAttachmentFragment
+	}
 	skills {
 		name
 		description
@@ -52259,12 +52420,6 @@ fragment AgentRunFragment on AgentRun {
 		inputCost
 		outputCost
 		totalCost
-	}
-	scmCreds {
-		... ScmCredentialFragment
-	}
-	pluralCreds {
-		... PluralCredsFragment
 	}
 	workbenchMcpUrl
 	runtime {
@@ -52301,6 +52456,16 @@ fragment AgentPromptFragment on AgentPrompt {
 	id
 	prompt
 	seq
+	attachments {
+		... AgentAttachmentFragment
+	}
+}
+fragment AgentAttachmentFragment on Attachment {
+	id
+	filename
+	filetype
+	size
+	downloadUrl
 }
 fragment AgentPodReferenceFragment on AgentPodReference {
 	name
@@ -52310,20 +52475,6 @@ fragment AgentAnalysisFragment on AgentAnalysis {
 	summary
 	analysis
 	bullets
-}
-fragment ScmCredentialFragment on ScmCreds {
-	token
-	username
-	exaKey
-	proxy {
-		enabled
-		url
-		noproxy
-	}
-}
-fragment PluralCredsFragment on PluralCreds {
-	token
-	url
 }
 fragment AgentRuntimeFragment on AgentRuntime {
 	id
@@ -52489,6 +52640,9 @@ fragment AgentRunFragment on AgentRun {
 	prompts {
 		... AgentPromptFragment
 	}
+	attachments {
+		... AgentAttachmentFragment
+	}
 	skills {
 		name
 		description
@@ -52511,12 +52665,6 @@ fragment AgentRunFragment on AgentRun {
 		inputCost
 		outputCost
 		totalCost
-	}
-	scmCreds {
-		... ScmCredentialFragment
-	}
-	pluralCreds {
-		... PluralCredsFragment
 	}
 	workbenchMcpUrl
 	runtime {
@@ -52553,6 +52701,16 @@ fragment AgentPromptFragment on AgentPrompt {
 	id
 	prompt
 	seq
+	attachments {
+		... AgentAttachmentFragment
+	}
+}
+fragment AgentAttachmentFragment on Attachment {
+	id
+	filename
+	filetype
+	size
+	downloadUrl
 }
 fragment AgentPodReferenceFragment on AgentPodReference {
 	name
@@ -52562,20 +52720,6 @@ fragment AgentAnalysisFragment on AgentAnalysis {
 	summary
 	analysis
 	bullets
-}
-fragment ScmCredentialFragment on ScmCreds {
-	token
-	username
-	exaKey
-	proxy {
-		enabled
-		url
-		noproxy
-	}
-}
-fragment PluralCredsFragment on PluralCreds {
-	token
-	url
 }
 fragment AgentRuntimeFragment on AgentRuntime {
 	id
@@ -52679,6 +52823,9 @@ fragment AgentRunFragment on AgentRun {
 	prompts {
 		... AgentPromptFragment
 	}
+	attachments {
+		... AgentAttachmentFragment
+	}
 	skills {
 		name
 		description
@@ -52701,12 +52848,6 @@ fragment AgentRunFragment on AgentRun {
 		inputCost
 		outputCost
 		totalCost
-	}
-	scmCreds {
-		... ScmCredentialFragment
-	}
-	pluralCreds {
-		... PluralCredsFragment
 	}
 	workbenchMcpUrl
 	runtime {
@@ -52743,6 +52884,16 @@ fragment AgentPromptFragment on AgentPrompt {
 	id
 	prompt
 	seq
+	attachments {
+		... AgentAttachmentFragment
+	}
+}
+fragment AgentAttachmentFragment on Attachment {
+	id
+	filename
+	filetype
+	size
+	downloadUrl
 }
 fragment AgentPodReferenceFragment on AgentPodReference {
 	name
@@ -52752,20 +52903,6 @@ fragment AgentAnalysisFragment on AgentAnalysis {
 	summary
 	analysis
 	bullets
-}
-fragment ScmCredentialFragment on ScmCreds {
-	token
-	username
-	exaKey
-	proxy {
-		enabled
-		url
-		noproxy
-	}
-}
-fragment PluralCredsFragment on PluralCreds {
-	token
-	url
 }
 fragment AgentRuntimeFragment on AgentRuntime {
 	id
@@ -61933,6 +62070,7 @@ fragment FederatedCredentialFragment on FederatedCredential {
 	id
 	claimsLike
 	issuer
+	aud
 	scopes
 	insertedAt
 	updatedAt
@@ -61994,6 +62132,7 @@ fragment FederatedCredentialFragment on FederatedCredential {
 	id
 	claimsLike
 	issuer
+	aud
 	scopes
 	insertedAt
 	updatedAt
@@ -62055,6 +62194,7 @@ fragment FederatedCredentialFragment on FederatedCredential {
 	id
 	claimsLike
 	issuer
+	aud
 	scopes
 	insertedAt
 	updatedAt
@@ -67706,6 +67846,9 @@ fragment BindingPolicyFragment on BindingPolicy {
 		workbench {
 			regexes
 		}
+		stack {
+			type
+		}
 	}
 	policy {
 		... TinyPolicyFragment
@@ -67784,6 +67927,9 @@ fragment BindingPolicyFragment on BindingPolicy {
 		workbench {
 			regexes
 		}
+		stack {
+			type
+		}
 	}
 	policy {
 		... TinyPolicyFragment
@@ -67838,6 +67984,9 @@ fragment BindingPolicyFragment on BindingPolicy {
 		workbench {
 			regexes
 		}
+		stack {
+			type
+		}
 	}
 	policy {
 		... TinyPolicyFragment
@@ -67884,6 +68033,9 @@ fragment BindingPolicyFragment on BindingPolicy {
 	matches {
 		workbench {
 			regexes
+		}
+		stack {
+			type
 		}
 	}
 	policy {
@@ -67932,6 +68084,9 @@ fragment BindingPolicyFragment on BindingPolicy {
 	matches {
 		workbench {
 			regexes
+		}
+		stack {
+			type
 		}
 	}
 	policy {
@@ -74726,6 +74881,7 @@ fragment WorkbenchFragment on Workbench {
 			repositories
 		}
 		infrastructure {
+			selfService
 			services
 			stacks
 			kubernetes
@@ -75027,6 +75183,7 @@ fragment WorkbenchFragment on Workbench {
 			repositories
 		}
 		infrastructure {
+			selfService
 			services
 			stacks
 			kubernetes
@@ -75329,6 +75486,7 @@ fragment WorkbenchFragment on Workbench {
 			repositories
 		}
 		infrastructure {
+			selfService
 			services
 			stacks
 			kubernetes
@@ -76365,6 +76523,7 @@ fragment WorkbenchFragment on Workbench {
 			repositories
 		}
 		infrastructure {
+			selfService
 			services
 			stacks
 			kubernetes
@@ -76674,6 +76833,7 @@ fragment WorkbenchFragment on Workbench {
 			repositories
 		}
 		infrastructure {
+			selfService
 			services
 			stacks
 			kubernetes
@@ -77996,6 +78156,7 @@ var DocumentOperationNames = map[string]string{
 	DeleteAgentRuntimeDocument:                        "DeleteAgentRuntime",
 	ListAgentRuntimesDocument:                         "ListAgentRuntimes",
 	GetAgentRunDocument:                               "GetAgentRun",
+	GetAgentRunCredentialsDocument:                    "GetAgentRunCredentials",
 	GetAgentRunMinimalDocument:                        "GetAgentRunMinimal",
 	ListAgentRunsDocument:                             "ListAgentRuns",
 	ListAgentRunsMinimalDocument:                      "ListAgentRunsMinimal",

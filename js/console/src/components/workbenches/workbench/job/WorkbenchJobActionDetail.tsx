@@ -2,7 +2,6 @@ import {
   Button,
   Code,
   Flex,
-  IconFrame,
   KubernetesIcon,
   ReturnIcon,
 } from '@pluralsh/design-system'
@@ -105,17 +104,9 @@ export function WorkbenchJobActionDetail({
             gap="small"
             css={{ minWidth: 0, flex: 1 }}
           >
-            <IconFrame
-              circle
-              size="medium"
-              type="secondary"
-              icon={icon ?? <KubernetesIcon size={16} />}
-              css={{
-                flexShrink: 0,
-                border: theme.borders['fill-two'],
-                backgroundColor: 'transparent',
-              }}
-            />
+            <Flex css={{ flexShrink: 0 }}>
+              {icon ?? <KubernetesIcon size={16} />}
+            </Flex>
             <StackedText
               first={getActionTitle(activity)}
               firstPartialType="body2Bold"

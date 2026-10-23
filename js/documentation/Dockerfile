@@ -1,22 +1,21 @@
-FROM node:24-alpine AS base
+FROM node:24.11.1-alpine AS base
 
 WORKDIR /app
 
-RUN apk add --no-cache git
-
-COPY js/package.json js/yarn.lock js/.yarnrc.yml js/.prettierrc.yaml ./
+COPY js/package.json js/yarn.lock js/.yarnrc.yml ./
 COPY js/.yarn/ ./.yarn/
 COPY js/console/package.json ./console/package.json
 COPY js/design-system/package.json ./design-system/package.json
 COPY js/documentation/package.json ./documentation/package.json
-COPY js/eslint-config/package.json ./eslint-config/package.json
-COPY js/stylelint-config/package.json ./stylelint-config/package.json
+
+# Focus skips the console app. The design system is focused too because Next
+# transpiles and type-checks its source, which needs its dev-only type deps.
 RUN corepack enable \
-  && yarn install --immutable
+  && YARN_ENABLE_IMMUTABLE_INSTALLS=true \
+    yarn workspaces focus @pluralsh/documentation @pluralsh/design-system
 
 COPY js/design-system/ ./design-system/
 COPY js/documentation/ ./documentation/
-COPY js/eslint-config/ ./eslint-config/
 
 ARG NEXT_PUBLIC_ROOT_URL
 ARG NEXT_PUBLIC_GA_ID
@@ -24,18 +23,27 @@ ARG NEXT_PUBLIC_GA_ID
 ENV NEXT_PUBLIC_ROOT_URL=$NEXT_PUBLIC_ROOT_URL
 ENV NEXT_PUBLIC_GA_ID=$NEXT_PUBLIC_GA_ID
 
-RUN yarn workspace @pluralsh/documentation build:next
+# Biome is the js-ci Lint job, so the image runs next build directly.
+RUN yarn workspace @pluralsh/documentation next build
 
-FROM node:24-alpine AS production
+FROM node:24.11.1-alpine AS production
+
+ENV NODE_ENV=production \
+    PORT=3000 \
+    HOSTNAME=0.0.0.0
+
 WORKDIR /app
 
-COPY --from=base /app/node_modules/ ./node_modules/
-COPY --from=base /app/documentation/ ./documentation/
+COPY --from=base --chown=node:node /app/documentation/.next/standalone/ ./
+COPY --from=base --chown=node:node /app/documentation/.next/static/ ./documentation/.next/static/
+COPY --from=base --chown=node:node /app/documentation/public/ ./documentation/public/
+# Pages not prerendered at build time (fallback: 'blocking') read their
+# markdown from here at request time.
+COPY --from=base --chown=node:node /app/documentation/pages/ ./documentation/pages/
 
+USER node
+WORKDIR /app/documentation
 EXPOSE 3000
 
-WORKDIR /app/documentation
-CMD ["node", "/app/node_modules/next/dist/bin/next", "start", "-p", "3000"]
-RUN chown -R node:node /app
-USER node
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 CMD ["node", "-e", "fetch('http://127.0.0.1:3000/').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+CMD ["node", "server.js"]

@@ -143,7 +143,7 @@ const SubHeaderSC = styled.div(({ theme }) => ({
   alignItems: 'center',
   gap: theme.spacing.large,
   justifyContent: 'space-between',
-  padding: `0 ${theme.spacing.medium}px`,
+  padding: `0 ${theme.spacing.medium}`,
   borderBottom: theme.borders.hairline,
 }))
 
@@ -151,7 +151,8 @@ const MainHeaderSC = styled.div(({ theme }) => ({
   display: 'flex',
   gap: theme.spacing.small,
   alignItems: 'center',
-  padding: theme.spacing.medium,
+  padding: `0 ${theme.spacing.medium}`,
   borderBottom: theme.borders.hairline,
-  maxHeight: SIDE_PANEL_HEADER_HEIGHT,
+  height: SIDE_PANEL_HEADER_HEIGHT,
+  flexShrink: 0,
 }))

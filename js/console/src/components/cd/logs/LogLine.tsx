@@ -70,14 +70,14 @@ const LogLineWrapper = styled.div<{
   $highlighted?: boolean
 }>(({ theme, $borderColor, $highlighted }) => ({
   width: '100%',
-  padding: `${theme.spacing.xxsmall}px ${theme.spacing.small}px`,
+  padding: `${theme.spacing.xxsmall} ${theme.spacing.small}`,
   borderLeft: `4px solid ${$borderColor}`,
   color: $highlighted ? theme.colors.text : theme.colors['text-light'],
   wordBreak: 'break-word',
   ...theme.partials.text.mono,
-  fontSize: '12px',
-  lineHeight: '20px',
-  letterSpacing: '0.25px',
+  fontSize: '0.75rem',
+  lineHeight: '1.25rem',
+  letterSpacing: '0.025em',
   backgroundColor: $highlighted ? theme.colors['fill-two'] : 'transparent',
   '&:hover': {
     backgroundColor: theme.colors['fill-two'],

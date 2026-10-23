@@ -25,7 +25,7 @@ function Template({ heading, ...props }: SidecarProps) {
     <div>
       <div
         style={{
-          marginBottom: 48,
+          marginBottom: '3rem',
           maxWidth: 200,
         }}
       >

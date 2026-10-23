@@ -6,6 +6,8 @@ import {
   formatSpanCount,
   httpStatusFromAttribute,
   orderTraceSpans,
+  spanDescription,
+  spanLabel,
   traceSeverity,
   traceStatusMessage,
   traceTreeMeta,
@@ -162,5 +164,108 @@ describe('timeline scale', () => {
 
     expect(traceBarPosition(row, bounds)).toEqual({ left: 0, width: 0.75 })
     expect(traceTicks(bounds).every(({ offset }) => offset === 0)).toBe(true)
+  })
+})
+
+describe('spanLabel', () => {
+  const ectoTags = {
+    'db.system': 'postgresql',
+    'db.name': 'console',
+    'db.instance': 'console',
+    source: 'role_bindings',
+    original_span_name: 'console.repo.query:role_bindings',
+  }
+
+  it('keeps informative span names', () => {
+    expect(
+      spanLabel(trace({ name: 'POST /gql', tags: { 'http.method': 'POST' } }))
+    ).toBe('POST /gql')
+  })
+
+  it('names queries renamed after their database from their attributes', () => {
+    expect(spanLabel(trace({ name: 'console', tags: ectoTags }))).toBe(
+      'role_bindings'
+    )
+    expect(
+      spanLabel(
+        trace({
+          name: 'console',
+          tags: {
+            ...ectoTags,
+            'db.operation.name': 'SELECT',
+            'db.collection.name': 'users',
+          },
+        })
+      )
+    ).toBe('SELECT users')
+  })
+
+  it('falls back to the name a collector replaced', () => {
+    const { source: _, ...tags } = ectoTags
+
+    expect(spanLabel(trace({ name: 'console', tags }))).toBe(
+      'console.repo.query:role_bindings'
+    )
+  })
+
+  it('replaces names that only repeat the service', () => {
+    expect(
+      spanLabel(
+        trace({
+          name: 'checkout',
+          service: 'checkout',
+          tags: { 'rpc.service': 'Cart', 'rpc.method': 'Add' },
+        })
+      )
+    ).toBe('Cart/Add')
+    expect(spanLabel(trace({ name: 'checkout', service: 'checkout' }))).toBe(
+      'checkout'
+    )
+    expect(spanLabel(trace({ name: null }))).toBe('Unnamed span')
+  })
+})
+
+describe('spanDescription', () => {
+  it('describes queries by statement, or database without one', () => {
+    expect(
+      spanDescription(
+        trace({ tags: { 'db.system': 'postgresql', 'db.name': 'console' } })
+      )
+    ).toBe('postgresql · console')
+    expect(
+      spanDescription(
+        trace({
+          tags: {
+            'db.system.name': 'postgresql',
+            'db.query.text': 'SELECT 1',
+          },
+        })
+      )
+    ).toBe('SELECT 1')
+  })
+
+  it('describes requests and model calls', () => {
+    expect(
+      spanDescription(
+        trace({
+          tags: {
+            'http.response.status_code': 503,
+            'server.address': 'api.example.com',
+          },
+        })
+      )
+    ).toBe('503 · api.example.com')
+    expect(
+      spanDescription(
+        trace({
+          tags: {
+            'gen_ai.request.model': 'gpt-5',
+            'gen_ai.usage.input_tokens': 120,
+            'gen_ai.usage.output_tokens': 40,
+          },
+        })
+      )
+    ).toBe('gpt-5 · 120 in / 40 out tokens')
+    expect(spanDescription(trace({ tags: {} }))).toBeUndefined()
   })
 })

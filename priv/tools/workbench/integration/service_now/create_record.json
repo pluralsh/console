@@ -1,0 +1,33 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "table": {
+      "type": "string",
+      "enum": [
+        "incident",
+        "change_request",
+        "problem",
+        "sc_task"
+      ],
+      "description": "ServiceNow ticket table: incident, change_request, problem or sc_task (catalog task)."
+    },
+    "short_description": {
+      "type": "string",
+      "description": "One-line summary of the ticket."
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed description of the ticket."
+    },
+    "fields": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Additional fields keyed by column name using raw values, for example {\"urgency\": \"2\", \"impact\": \"2\", \"assignment_group\": \"<group sys_id or name>\", \"category\": \"software\"}."
+    }
+  },
+  "required": [
+    "table",
+    "short_description"
+  ]
+}

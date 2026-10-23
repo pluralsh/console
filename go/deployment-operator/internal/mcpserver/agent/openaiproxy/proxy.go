@@ -28,7 +28,9 @@ func forwardRequest(client HTTPDoer, upstreamURL string, r *http.Request, body [
 	return client.Do(req)
 }
 
+// copyResponse drops upstream cookies, since the request went out with the deploy token, not the caller's credentials.
 func copyResponse(w http.ResponseWriter, resp *http.Response, body []byte) {
+	resp.Header.Del("Set-Cookie")
 	for key, values := range resp.Header {
 		for _, value := range values {
 			w.Header().Add(key, value)

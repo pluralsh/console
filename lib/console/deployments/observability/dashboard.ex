@@ -5,19 +5,67 @@ defmodule Console.Deployments.Observability.Dashboard do
   alias Console.Schema.Dashboard.{Datasource, Graph, Input}
 
   @variable ~r/\$\{([A-Za-z_][A-Za-z0-9_]*)\}/
+  @max_public_range_seconds 30 * 86_400
   @metrics_tool_prefix "workbench_observability_metrics_"
 
-  @spec graph(Dashboard.t(), binary, map, map, User.t()) :: {:ok, map} | Console.error()
-  def graph(%Dashboard{} = dashboard, identifier, input, time_range, %User{} = user) do
+  @spec graph(Dashboard.t(), binary, map, map, User.t() | nil) :: {:ok, map} | Console.error()
+  def graph(%Dashboard{} = dashboard, identifier, input, time_range, user) when is_nil(user) or is_struct(user, User) do
     with %Graph{datasource: %Datasource{} = datasource} <- find(dashboard.graphs, identifier),
          {:ok, data} <- execute_graph(dashboard, datasource, input, time_range, user) do
-      {:ok, %{datasource.type => data}}
+      {:ok, graph_result(datasource.type, data)}
     else
       nil -> {:error, "graph #{identifier} not found"}
       %Graph{} -> {:error, "graph #{identifier} does not have a datasource"}
       error -> error
     end
   end
+
+  @doc """
+  Runs a graph for an unauthenticated public viewer. Variables are never caller-supplied: they come
+  from input defaults plus a server-derived time_range, and the window is capped at 30 days.
+  """
+  @spec public_graph(Dashboard.t(), binary, map) :: {:ok, map} | Console.error()
+  def public_graph(%Dashboard{} = dashboard, identifier, time_range) do
+    with {:ok, range} <- validate_public_range(time_range),
+      do: graph(dashboard, identifier, public_variables(dashboard, range), range, nil)
+  end
+
+  @doc "Input defaults, with every time_range input overridden by the request window."
+  @spec public_variables(Dashboard.t(), map) :: %{binary => binary}
+  def public_variables(%Dashboard{inputs: inputs}, time_range) do
+    {start_at, end_at} = time_range_bounds(time_range)
+    duration = "#{max(round(DateTime.diff(end_at, start_at, :second) / 60), 1)}m"
+
+    Enum.reduce(inputs || [], %{}, fn
+      %Input{name: name, type: :time_range}, acc -> Map.put(acc, name, duration)
+      %Input{default: nil}, acc -> acc
+      %Input{name: name, default: default}, acc -> Map.put(acc, name, default)
+    end)
+  end
+
+  @spec validate_public_range(map) :: {:ok, map} | {:error, binary}
+  def validate_public_range(time_range) do
+    with {start_at, end_at} <- time_range_bounds(time_range),
+         {:ok, start_at} <- to_datetime(start_at),
+         {:ok, end_at} <- to_datetime(end_at),
+         seconds when seconds > 0 <- DateTime.diff(end_at, start_at, :second) do
+      if seconds <= @max_public_range_seconds,
+        do: {:ok, %{start: start_at, end: end_at}},
+        else: {:error, "time range cannot exceed 30 days"}
+    else
+      seconds when is_integer(seconds) -> {:error, "time range end must be after start"}
+      _ -> {:error, "invalid time range"}
+    end
+  end
+
+  defp to_datetime(%DateTime{} = dt), do: {:ok, dt}
+  defp to_datetime(value) when is_binary(value) do
+    case DateTime.from_iso8601(value) do
+      {:ok, dt, _} -> {:ok, dt}
+      _ -> :error
+    end
+  end
+  defp to_datetime(_), do: :error
 
   @spec input(Dashboard.t(), binary, map, map, User.t()) :: {:ok, [binary]} | Console.error()
   def input(%Dashboard{} = dashboard, identifier, input, time_range, %User{} = user) do
@@ -60,6 +108,9 @@ defmodule Console.Deployments.Observability.Dashboard do
   defp execute_graph(_, _, _, _, _),
     do: {:error, "graph datasource must return metrics, logs, or traces"}
 
+  defp graph_result(:metrics, series), do: %{series: series}
+  defp graph_result(type, data), do: %{type => data}
+
   @metric_target_points 240
   @metric_step_candidates [
     15,
@@ -88,7 +139,7 @@ defmodule Console.Deployments.Observability.Dashboard do
       |> maybe_put_metric_step(datasource, dashboard.workbench, time_range)
 
     case datasource.type do
-      :metrics -> Toolchain.metrics(dashboard.workbench, datasource.tool, args, user)
+      :metrics -> Toolchain.metrics_series(dashboard.workbench, datasource.tool, args, user)
       :logs -> Toolchain.logs(dashboard.workbench, datasource.tool, args, user)
       :traces -> Toolchain.traces(dashboard.workbench, datasource.tool, args, user)
       :labels -> Toolchain.labels(dashboard.workbench, datasource.tool, args, user)

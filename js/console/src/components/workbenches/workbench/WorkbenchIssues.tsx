@@ -1,30 +1,26 @@
-import { Flex, SearchIcon } from '@pluralsh/design-system'
-import { useDebounce, useKeyDown } from '@react-hooks-library/core'
-import usePersistedState from 'components/hooks/usePersistedState'
-import { ExpandedInput, IconExpander } from 'components/utils/IconExpander'
+import { useDebounce } from '@react-hooks-library/core'
 import { WorkbenchIssuesBoard } from 'components/workbenches/common/WorkbenchIssuesBoard'
-import { WorkbenchIssuesTable } from 'components/workbenches/common/WorkbenchIssuesTable'
-import { GqlError } from 'components/utils/Alert'
+import { WorkbenchIssuesGroupedList } from 'components/workbenches/common/WorkbenchIssuesGroupedList'
+import { WorkbenchMonitoringContent } from 'components/workbenches/common/WorkbenchMonitoringContent'
+import { WorkbenchHeaderSearch } from 'components/workbenches/common/WorkbenchSearchInput'
 import {
   DisplayButton,
-  DisplayContentSC,
-  DisplayFilterEmpty,
-  DisplayMainSC,
+  DisplayPanel,
+  toCounts,
+  useDisplaySidecar,
+  useDisplayState,
 } from 'components/utils/display/DisplayPanel'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import {
-  IssueStatus,
-  IssueWebhookProvider,
-  useWorkbenchIssuesQuery,
-} from 'generated/graphql'
-import { compact, fromPairs, isEmpty, isNil } from 'lodash'
+import { useWorkbenchIssuesQuery } from 'generated/graphql'
+import { isEmpty } from 'lodash'
 import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { WORKBENCH_PARAM_ID } from 'routes/workbenchesRoutesConsts'
-import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { WorkbenchPageLayout } from './Workbench'
-import { WorkbenchIssuesDisplayPanel } from './WorkbenchIssuesDisplayPanel'
+import { DETAILS_LIST_WIDTH } from '../common/WorkbenchDetailsView'
+import { useWorkbenchIssuesDetails } from './WorkbenchIssuesDetails'
+import { WorkbenchIssuesDisplayOptions } from './WorkbenchIssuesDisplayOptions'
 import {
   DEFAULT_WORKBENCH_ISSUES_DISPLAY,
   getIssueFilterEmptyKind,
@@ -32,41 +28,33 @@ import {
   resetIssueFilters,
   toIssueFilterVariables,
   visibleIssueProviders,
-  WorkbenchIssuesDisplayState,
-  WorkbenchIssuesView,
 } from './workbenchIssuesDisplay'
 
-const WORKBENCH_ISSUES_VIEW_STORAGE_KEY = 'workbench-issues-view'
-const SEARCH_INPUT_WIDTH = 520
+// renamed when the grouped list replaced the table, so saved views reset to it
+const WORKBENCH_ISSUES_VIEW_STORAGE_KEY = 'workbench-issues-view-v2'
+const PAGE_SIZE = 50
+
+// stable, so the paginated data callbacks don't change every render
+const ISSUES_KEY_PATH = ['workbench', 'issues']
 
 export function WorkbenchIssues() {
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
-  const [persistedView, setPersistedView] = usePersistedState(
+  const { display, updateDisplay } = useDisplayState(
     WORKBENCH_ISSUES_VIEW_STORAGE_KEY,
-    DEFAULT_WORKBENCH_ISSUES_DISPLAY.view,
-    0,
-    (value: unknown): WorkbenchIssuesView =>
-      value === 'board' ? 'board' : 'list'
+    DEFAULT_WORKBENCH_ISSUES_DISPLAY
   )
   const [searchString, setSearchString] = useState('')
-  const [displayOpen, setDisplayOpen] = useState(false)
-  const [display, setDisplay] = useState(() => ({
-    ...DEFAULT_WORKBENCH_ISSUES_DISPLAY,
-    view: persistedView,
-  }))
   const debouncedSearchString = useDebounce(searchString.trim(), 200)
   const filterVars = useMemo(() => toIssueFilterVariables(display), [display])
-  const updateDisplay = (next: WorkbenchIssuesDisplayState) => {
-    setDisplay(next)
-    setPersistedView(next.view)
-  }
-  const clearSearch = () => setSearchString('')
 
-  useKeyDown(['Escape'], clearSearch)
-
-  const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
+  const { data, loading, error, pageInfo, fetchNextPage, fetchingMore } =
     useFetchPaginatedData(
-      { queryHook: useWorkbenchIssuesQuery, keyPath: ['workbench', 'issues'] },
+      {
+        queryHook: useWorkbenchIssuesQuery,
+        keyPath: ISSUES_KEY_PATH,
+        pageSize: PAGE_SIZE,
+        keepLoadedPages: true,
+      },
       {
         id: workbenchId,
         q: isEmpty(debouncedSearchString) ? undefined : debouncedSearchString,
@@ -78,23 +66,11 @@ export function WorkbenchIssues() {
     [data]
   )
   const providerCounts = useMemo(
-    () =>
-      fromPairs(
-        compact(data?.workbench?.issueCounts?.providers).map((entry) => [
-          entry.provider,
-          entry.count,
-        ])
-      ) as Partial<Record<IssueWebhookProvider, number>>,
+    () => toCounts(data?.workbench?.issueCounts?.providers, (e) => e.provider),
     [data]
   )
   const statusCounts = useMemo(
-    () =>
-      fromPairs(
-        compact(data?.workbench?.issueCounts?.statuses).map((entry) => [
-          entry.status,
-          entry.count,
-        ])
-      ) as Partial<Record<IssueStatus, number>>,
+    () => toCounts(data?.workbench?.issueCounts?.statuses, (e) => e.status),
     [data]
   )
   const filterEmptyKind = useMemo(
@@ -103,83 +79,103 @@ export function WorkbenchIssues() {
     [display, providerCounts]
   )
 
+  const filtered = hasUncheckedIssueFilters(display)
+  const displaySidecar = useDisplaySidecar(display.view === 'list')
+  const onResetFilters = () => updateDisplay(resetIssueFilters(display))
+  const emptyState = {
+    searching: !!debouncedSearchString,
+    filtered,
+    onResetFilters,
+  }
+  // the list groups by status itself, one query per group
+  const groupFilters = useMemo(
+    () => ({
+      q: isEmpty(debouncedSearchString) ? undefined : debouncedSearchString,
+      providers: filterVars.providers,
+      sort: filterVars.sort,
+      direction: filterVars.direction,
+    }),
+    [debouncedSearchString, filterVars]
+  )
+  const listProps = {
+    issues,
+    loading: !data && loading,
+    fetchingMore,
+    hasNextPage: !!pageInfo?.hasNextPage,
+    fetchNextPage,
+    fallbackWorkbenchId: workbenchId,
+  }
+  const details = useWorkbenchIssuesDetails({
+    ...listProps,
+    active: display.view === 'details',
+    emptyState,
+    searchString,
+    onSearchChange: setSearchString,
+  })
+  const showDetails = display.view === 'details' && !error && !filterEmptyKind
+
   return (
     <WorkbenchPageLayout
+      sidecar={
+        displaySidecar.isOpen && (
+          <DisplayPanel>
+            <WorkbenchIssuesDisplayOptions
+              state={display}
+              onChange={updateDisplay}
+              providerCounts={providerCounts}
+              statusCounts={statusCounts}
+            />
+          </DisplayPanel>
+        )
+      }
       showEditWorkbenchButton={false}
+      {...(showDetails && {
+        sidebar: {
+          kind: 'custom',
+          content: details.sidebar,
+          width: DETAILS_LIST_WIDTH,
+        },
+      })}
       headerActions={
         <>
-          <IconExpander
-            tooltip="Search issues"
-            icon={<SearchIcon />}
-            active={!!searchString}
-            onClear={clearSearch}
-          >
-            <ExpandedInput
-              width={SEARCH_INPUT_WIDTH}
-              inputValue={searchString}
+          {!showDetails && (
+            <WorkbenchHeaderSearch
+              value={searchString}
               onChange={setSearchString}
               placeholder="Search issues"
             />
-          </IconExpander>
+          )}
           <DisplayButton
-            showDot={hasUncheckedIssueFilters(display)}
-            onClick={() => setDisplayOpen(!displayOpen)}
+            showDot={filtered}
+            expanded={displaySidecar.isOpen}
+            onClick={displaySidecar.toggle}
           />
         </>
       }
     >
-      {error ? (
-        <GqlError error={error} />
+      {showDetails ? (
+        details.content
       ) : (
-        <WrapperSC>
-          <DisplayContentSC>
-            <DisplayMainSC>
-              {filterEmptyKind ? (
-                <DisplayFilterEmpty
-                  title={`No ${filterEmptyKind} selected`}
-                  description={`It looks like there are no ${filterEmptyKind} selected.`}
-                  onReset={() => updateDisplay(resetIssueFilters(display))}
-                />
-              ) : display.view === 'board' ? (
-                <WorkbenchIssuesBoard
-                  issues={issues}
-                  statuses={display.statuses}
-                  loading={loading}
-                  hasNextPage={!!pageInfo?.hasNextPage}
-                  fetchNextPage={fetchNextPage}
-                  fallbackWorkbenchId={workbenchId}
-                />
-              ) : (
-                <WorkbenchIssuesTable
-                  issues={issues}
-                  loading={isNil(data) && loading}
-                  hasNextPage={pageInfo?.hasNextPage}
-                  fetchNextPage={fetchNextPage}
-                  setVirtualSlice={setVirtualSlice}
-                  fallbackWorkbenchId={workbenchId}
-                />
-              )}
-            </DisplayMainSC>
-            {displayOpen && (
-              <WorkbenchIssuesDisplayPanel
-                state={display}
-                onChange={updateDisplay}
-                providerCounts={providerCounts}
-                statusCounts={statusCounts}
-              />
-            )}
-          </DisplayContentSC>
-        </WrapperSC>
+        <WorkbenchMonitoringContent
+          error={error}
+          filterEmptyKind={filterEmptyKind}
+          onResetFilters={onResetFilters}
+        >
+          {display.view === 'board' ? (
+            <WorkbenchIssuesBoard
+              {...listProps}
+              statuses={display.statuses}
+            />
+          ) : (
+            <WorkbenchIssuesGroupedList
+              workbenchId={workbenchId}
+              statuses={display.statuses}
+              filters={groupFilters}
+              emptyState={emptyState}
+            />
+          )}
+        </WorkbenchMonitoringContent>
       )}
     </WorkbenchPageLayout>
   )
 }
-
-const WrapperSC = styled(Flex)(({ theme }) => ({
-  flexDirection: 'column',
-  flex: 1,
-  gap: theme.spacing.medium,
-  minHeight: 160,
-  overflow: 'hidden',
-  padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
-}))

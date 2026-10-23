@@ -214,7 +214,7 @@ const EditModalContentWrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   height: '100%',
-  marginTop: -theme.spacing.small,
+  marginTop: theme.spacing['minus-small'],
   gap: theme.spacing.xlarge,
   width: 768,
 }))

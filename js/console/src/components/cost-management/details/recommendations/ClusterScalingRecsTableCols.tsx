@@ -1,5 +1,6 @@
 import { isNullish } from '@apollo/client/cache/inmemory/helpers'
 import {
+  ICON_FRAME_ICON_SIZE,
   ArrowTopRightIcon,
   Button,
   PrOpenIcon,
@@ -108,7 +109,7 @@ export const ColService = columnHelper.accessor((rec) => rec.service, {
           provider={service.cluster?.provider?.cloud}
         />
         {service.name}
-        <ArrowTopRightIcon />
+        <ArrowTopRightIcon size={ICON_FRAME_ICON_SIZE.small} />
       </a>
     )
   },

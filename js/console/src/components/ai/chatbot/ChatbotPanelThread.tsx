@@ -360,7 +360,7 @@ export const ChatbotMessagesWrapperSC = styled.div(({ theme }) => ({
   flex: 1,
   scrollbarWidth: 'none',
   overflowY: 'auto',
-  padding: `${theme.spacing.medium}px ${theme.spacing.medium}px 0 ${theme.spacing.medium}px`,
+  padding: `${theme.spacing.medium} ${theme.spacing.medium} 0 ${theme.spacing.medium}`,
   position: 'relative',
   height: '100%',
 

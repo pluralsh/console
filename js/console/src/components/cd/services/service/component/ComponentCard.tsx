@@ -18,7 +18,7 @@ const ComponentCardSC = styled(Card)(({ theme }) => ({
     alignItems: 'center',
     // Soft shadows must paint outside the card; keep text truncate on .content
     overflow: theme.mode === 'light' ? 'visible' : 'hidden',
-    padding: `${theme.spacing.xxsmall}px ${theme.spacing.xsmall}px`,
+    padding: `${theme.spacing.xxsmall} ${theme.spacing.xsmall}`,
     gap: theme.spacing.xsmall,
     textDecoration: 'none',
     '&:any-link': {

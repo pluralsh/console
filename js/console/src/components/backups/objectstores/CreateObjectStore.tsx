@@ -20,6 +20,7 @@ export default function CreateObjectStore({
     <>
       <Button
         primary
+        small
         {...buttonProps}
         {...(!backupsEnabled ? { disabled: true } : {})}
       >

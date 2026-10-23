@@ -1,6 +1,5 @@
 import {
   Button,
-  EmptyState,
   Flex,
   HamburgerMenuCollapsedIcon,
   HamburgerMenuCollapseIcon,
@@ -9,7 +8,8 @@ import {
   Tab,
   TabList,
 } from '@pluralsh/design-system'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Link,
   useNavigate,
@@ -31,7 +31,10 @@ import {
   WorkbenchEvalResultRowFragment,
   useWorkbenchEvalsQuery,
 } from 'generated/graphql'
-import { WorkbenchEvalsSidePanel } from './WorkbenchEvalsSidePanel'
+import {
+  WORKBENCH_EVALS_SIDE_PANEL_WIDTH,
+  WorkbenchEvalsSidePanel,
+} from './WorkbenchEvalsSidePanel'
 import { WorkbenchStoredPromptMarkdown } from '../WorkbenchStoredPromptMarkdown'
 import { Subtitle1H1 } from 'components/utils/typography/Text'
 import { mapExistingNodes } from 'utils/graphql'
@@ -103,6 +106,12 @@ export function WorkbenchEvals() {
     setPromptExpanded(false)
   }, [selectedEvalRow?.id])
 
+  const onSelectEvalResultId = useCallback(
+    (evalResultId: string) =>
+      navigate(getWorkbenchEvalResultAbsPath({ workbenchId, evalResultId })),
+    [navigate, workbenchId]
+  )
+
   return (
     <WorkbenchPageLayout
       showEditWorkbenchButton={false}
@@ -113,21 +122,16 @@ export function WorkbenchEvals() {
             evalRows={evalRows}
             loading={loading && !data}
             selectedEvalResultId={selectedEvalRow?.id}
-            onSelectEvalResultId={(evalResultId) =>
-              navigate(
-                getWorkbenchEvalResultAbsPath({
-                  workbenchId,
-                  evalResultId,
-                })
-              )
-            }
+            onSelectEvalResultId={onSelectEvalResultId}
           />
         ),
+        width: WORKBENCH_EVALS_SIDE_PANEL_WIDTH,
       }}
       headerActions={
-        <Flex gap="small">
+        <>
           <Button
             secondary
+            small
             onClick={() =>
               navigate(getWorkbenchEvalSettingsAbsPath(workbenchId))
             }
@@ -135,11 +139,12 @@ export function WorkbenchEvals() {
             Eval settings
           </Button>
           <WorkbenchEvalSkillButton
+            small
             disabled={loading && !data}
             evalResultId={selectedEvalResultIdForSkill}
             workbenchId={workbenchId}
           />
-        </Flex>
+        </>
       }
     >
       {error ? (
@@ -147,14 +152,10 @@ export function WorkbenchEvals() {
       ) : (
         <EvalsContentSC>
           {!selectedEvalRow ? (
-            <Flex
-              align="center"
-              flex={1}
-              justify="center"
-              minHeight={0}
-            >
-              <EmptyState message="No evals available yet." />
-            </Flex>
+            <WorkbenchEmptyState
+              message="No evals yet"
+              description="Evals grade finished jobs. Results will show up here once a job has been evaluated."
+            />
           ) : (
             <ColumnsSC $qualityCollapsed={qualityBreakdownCollapsed}>
               <PanelSC $trimRightBorder={qualityBreakdownCollapsed}>
@@ -373,7 +374,7 @@ const PanelHeaderSC = styled.header(({ theme }) => ({
   flexShrink: 0,
   lineHeight: 1,
   minHeight: 40,
-  padding: `${theme.spacing.xxsmall}px ${theme.spacing.medium}px`,
+  padding: `${theme.spacing.xxsmall} ${theme.spacing.medium}`,
   borderBottom: theme.borders['fill-one'],
   width: '100%',
 }))

@@ -30,6 +30,7 @@ export default function RestoreStackButton({
         />
       )}
       <Button
+        small
         loading={loading}
         onClick={() => restore()}
       >

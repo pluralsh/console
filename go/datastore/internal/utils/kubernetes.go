@@ -293,6 +293,10 @@ func TryRemoveControllerRef(ctx context.Context, client ctrlruntimeclient.Client
 			return nil
 		}
 
+		if !metav1.IsControlledBy(controlled, owner) {
+			return nil
+		}
+
 		original := controlled.DeepCopyObject().(ctrlruntimeclient.Object)
 
 		err := controllerutil.RemoveControllerReference(owner, controlled, scheme)

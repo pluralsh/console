@@ -24,10 +24,23 @@ but it must not duplicate or substitute for it.
 
 You can also query the current state of the canvas at any time using the `show_canvas` tool.
 
+Every block accepts an optional `description`: one short sentence on what the block shows and why it matters, shown behind an info icon next to its title.  Prefer it over a separate markdown block explaining a chart.
+
+### Sections
+
+When a dashboard covers several distinct concerns (e.g. the failing signal, saturation, dependencies), group related blocks into collapsible sections:
+
+1. Call `add_section_block` with an `identifier`, `title`, optional `description`, and a `position` ordering it among sections.  Set `collapsed: true` for supporting detail most readers can skip.
+2. Add blocks to it by setting their `section_id` to the section's identifier.  The section must exist before its blocks are added.
+
+Unsectioned blocks render first, at the top of the canvas, followed by the sections in `position` order.  Keep the headline summary and the most important visualization unsectioned.  Small canvases with a handful of blocks don't need sections.
+
 As blocks are added, we will validate canvas shape in two ways:
 
 1. Ensuring no overlapping blocks are added.
 2. Ensuring no gaps in the canvas as they are added.  A block is either an empty row to start, or empty columns to start a row, or column gap within blocks in a row.
+
+The unsectioned blocks and the blocks of each section are separate grids: each starts at row 0 and is validated on its own.
 
 Once the canvas looks good, call the subagent_result tool and we'll ensure the canvas is saved.  The results will be streamed to the frontend, so
 you should focus on modifying from top-left to bottom-right, as the canvas is scrollable vertically.

@@ -1,4 +1,5 @@
-import { EmptyState, Flex } from '@pluralsh/design-system'
+import { Flex } from '@pluralsh/design-system'
+import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { GqlError } from 'components/utils/Alert'
 import { TableSkeleton } from 'components/utils/SkeletonLoaders'
@@ -70,7 +71,13 @@ export function WorkbenchJobActions({ jobId }: { jobId: string }) {
   }
 
   if (isEmpty(sections)) {
-    return <EmptyState message="No actions for this job yet." />
+    return (
+      <WorkbenchEmptyState
+        inset={false}
+        message="No actions yet"
+        description="Actions the agent takes during this job will show up here."
+      />
+    )
   }
 
   return (
@@ -86,7 +93,7 @@ export function WorkbenchJobActions({ jobId }: { jobId: string }) {
               $color="text-xlight"
               css={{
                 textTransform: 'uppercase',
-                letterSpacing: '0.5px',
+                letterSpacing: '0.025em',
               }}
             >
               {section.label} {section.count}

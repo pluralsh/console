@@ -39,10 +39,8 @@ export const PopoverWrapper = styled.div<{
   pointerEvents: 'none',
   zIndex: theme.zIndexes.selectPopover,
   clipPath: placement.startsWith('top')
-    ? `polygon(-100px calc(100% + ${theme.spacing.xxsmall}px), calc(100% + 100px) calc(100% + ${theme.spacing.xxsmall}px), calc(100% + 100px) -100px, -100px -100px)`
-    : `polygon(-100px ${-theme.spacing
-        .xxsmall}px, -100px calc(100% + 100px), calc(100% + 100px) calc(100% + 100px), calc(100% + 100px) ${-theme
-        .spacing.xxsmall}px)`,
+    ? `polygon(-100px calc(100% + ${theme.spacing.xxsmall}), calc(100% + 100px) calc(100% + ${theme.spacing.xxsmall}), calc(100% + 100px) -100px, -100px -100px)`
+    : `polygon(-100px ${theme.spacing['minus-xxsmall']}, -100px calc(100% + 100px), calc(100% + 100px) calc(100% + 100px), calc(100% + 100px) ${theme.spacing['minus-xxsmall']})`,
   '&.enter-done': {
     clipPath: 'none',
   },

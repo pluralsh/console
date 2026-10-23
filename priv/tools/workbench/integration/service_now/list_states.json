@@ -1,0 +1,27 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "table": {
+      "type": "string",
+      "enum": [
+        "incident",
+        "change_request",
+        "problem",
+        "sc_task"
+      ],
+      "description": "ServiceNow ticket table: incident, change_request, problem or sc_task (catalog task)."
+    },
+    "record_id": {
+      "type": "string",
+      "description": "Optional. For change_request, the change sys_id or number (for example CHG0030002) to list the states that change can move to next. Other tables always return all state choices."
+    },
+    "field": {
+      "type": "string",
+      "description": "Optional. A choice field of the table to list the valid values of instead of the states, for example close_code (the resolution code needed to resolve an incident). Values differ per instance, so read them here instead of guessing."
+    }
+  },
+  "required": [
+    "table"
+  ]
+}

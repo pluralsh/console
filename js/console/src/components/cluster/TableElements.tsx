@@ -123,15 +123,19 @@ export const UsageText = styled.div(({ theme }) => ({
 
 function TableCaretLinkUnstyled({
   textValue,
+  size = 'medium',
   ...props
-}: ComponentProps<typeof UnstyledLink> & { textValue: string }) {
+}: ComponentProps<typeof UnstyledLink> & {
+  textValue: string
+  size?: ComponentProps<typeof IconFrame>['size']
+}) {
   return (
     <UnstyledLink {...props}>
       <IconFrame
         clickable
         textValue={textValue}
         tooltip={textValue}
-        size="medium"
+        size={size}
         icon={<CaretRightIcon />}
       />
     </UnstyledLink>

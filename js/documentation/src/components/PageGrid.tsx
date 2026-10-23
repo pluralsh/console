@@ -1,5 +1,6 @@
 import styled from 'styled-components'
 
+import { brand } from '@src/theme/docsTheme'
 import { mqs } from './Breakpoints'
 
 export const PageGrid = styled.div({
@@ -12,12 +13,12 @@ export const PageGrid = styled.div({
   },
 })
 
-export const SideNavContainer = styled.div(({ theme }) => ({
+export const SideNavContainer = styled.div((_) => ({
   display: 'none',
   [mqs.twoColumn]: {
     display: 'block',
     minWidth: 0,
-    backgroundColor: theme.colors['fill-one'],
+    backgroundColor: brand['surface-sidebar'],
   },
 }))
 
@@ -27,9 +28,9 @@ export const MainColumn = styled.div(({ theme }) => ({
   alignItems: 'flex-start',
   minWidth: 0,
   width: '100%',
-  padding: `0 ${theme.spacing.large}px`,
+  padding: `0 ${theme.spacing.large}`,
   [mqs.twoColumn]: {
-    padding: `0 ${theme.spacing.xlarge}px`,
+    padding: `0 ${theme.spacing.xlarge}`,
   },
   [mqs.maxWidth]: {
     padding: '0 64px',
@@ -57,15 +58,12 @@ export const ContentContainer = styled.main<{ $wide?: boolean }>(
     flex: '1 1 auto',
     minWidth: 0,
     width: '100%',
-    padding: `${theme.spacing.medium}px 0 ${theme.spacing.xxxlarge}px`,
+    padding: `36px 0 ${theme.spacing.xxxlarge}`,
     ...(!$wide
       ? {
-          maxWidth: 896,
-          [mqs.threeColumn]: {
-            maxWidth: 960,
-          },
+          maxWidth: 820,
           [mqs.maxWidth]: {
-            maxWidth: 1120,
+            maxWidth: 880,
           },
         }
       : {

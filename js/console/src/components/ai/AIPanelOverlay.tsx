@@ -39,7 +39,7 @@ export function AIPanelOverlay({
         boxShadow: theme.boxShadows.moderate,
         position: 'absolute',
         right: 0,
-        top: 32 + theme.spacing.small,
+        top: `calc(32px + ${theme.spacing.small})`,
         transformOrigin: 'top right',
       }}
       style={styles}

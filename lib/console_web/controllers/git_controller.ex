@@ -79,7 +79,7 @@ defmodule ConsoleWeb.GitController do
         ])
         agent_bootstrapping(conn)
       {{:error, :rate_limited}, svc} ->
-        Services.add_errors(svc, [%{source: "git", message: "Rate limited"}])
+        Services.add_errors(svc, [%{source: "git", message: "Rate limited", warning: true}])
         rate_limited(conn)
       {{:error, err}, svc} ->
         Services.add_errors(svc, [%{source: "git", message: stringify(err)}])
@@ -103,7 +103,7 @@ defmodule ConsoleWeb.GitController do
         ])
         agent_bootstrapping(conn)
       {{:error, :rate_limited}, svc} ->
-        Services.add_errors(svc, [%{source: "git", message: "Rate limited"}])
+        Services.add_errors(svc, [%{source: "git", message: "Rate limited", warning: true}])
         rate_limited(conn)
       {{:error, {:dependencies, err}}, svc} ->
         Services.add_errors(svc, [%{source: "git", message: stringify(err), warning: true}])
@@ -126,7 +126,7 @@ defmodule ConsoleWeb.GitController do
   defp fetch_digest(%Service{} = svc), do: Services.digest(svc)
 
   defp stringify(err) when is_binary(err), do: err
-  defp stringify(err), do: inspect(err)
+  defp stringify(err), do: Console.rpc_error_message(err) || inspect(err)
 
   defp get_digest(%{"digest" => digest}, _), do: {:ok, digest}
   defp get_digest(_, %Service{} = svc), do: fetch_digest(svc)
@@ -146,9 +146,9 @@ defmodule ConsoleWeb.GitController do
   defp agent_chart_digest(), do: Console.sha_file(Settings.agent_service_chart())
 
   defp agent_bootstrapping(conn),
-    do: send_resp(conn, 425, "Git or Helm agent is not ready")
+    do: send_resp(conn, 425, Console.rpc_error_message(:agent_bootstrapping))
 
-  defp rate_limited(conn), do: send_resp(conn, 429, "Rate limited")
+  defp rate_limited(conn), do: send_resp(conn, 429, Console.rpc_error_message(:rate_limited))
 
   defp chunk_send_tar(conn, f) do
     smart = SmartFile.new(f)

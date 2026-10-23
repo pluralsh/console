@@ -7,21 +7,21 @@ defmodule Console.AI.Workbench.Engine do
      message history to the memory engine to inform the next iteration of the loop.
   3. A complete tool is used to mark the conclusion of the job.
   """
-  import Console.AI.Workbench.Subagents.Base, only: [drop_empty: 1, log_error: 2, skill_knowledge_tools: 2]
+  import Console.AI.Workbench.Subagents.Base, only: [drop_empty: 1, log_error: 2, skill_knowledge_tools: 2, knowledge_tools: 1]
   import Console.AI.Agents.Base, only: [publish_absinthe: 2]
   import Console.AI.Workbench.Environment, only: [engine_opts: 1]
   import Console.Schema.WorkbenchJobActivity, only: [is_action: 1]
   alias Console.Repo
   alias Console.AI.Chat.MemoryEngine
   alias Console.AI.Provider.Base, as: ProviderBase
-  alias Console.Deployments.Workbenches
+  alias Console.Deployments.{Workbenches, Attachments}
   alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity, WorkbenchTool, ChatConnection, ChatbotMessage, User}
   alias Console.AI.Workbench.Skills, as: SkillsUtil
   alias Console.AI.Workbench.Subagents, as: SA
   alias Console.AI.Workbench.{
     Environment,
     Message,
-    Supervisor,
+    MCP,
     Heartbeat,
     Canvas,
     Activity,
@@ -64,16 +64,17 @@ defmodule Console.AI.Workbench.Engine do
 
     # MCP clients must be up before Environment.new/3 indexes tools via tools/list.
     with {:ok, _} <- Heartbeat.start_link(job),
-         {:ok, _} <- Supervisor.start_link(tools, job),
+         {:ok, _} <- MCP.start_clients(tools),
          {:ok, skills} <- load_skills(workbench) do
       env = Environment.new(job, tools, skills)
       Console.AI.Tool.context(user: user, runtime: workbench.agent_runtime)
       {:ok, %__MODULE__{job: job, user: user, environment: env}}
     else
       {:error, {:already_started, _}} = err -> err
-      {:error, {:shutdown, {:failed_to_start_child, _, {:already_started, _}}}} = err -> err
       {:error, _} = err ->
-        Workbenches.fail_job("Error loading workbench environment: #{inspect(err)}", job)
+        Logger.warning("Error loading workbench environment: #{inspect(err)}")
+        message = Console.rpc_error_message(err) || inspect(err)
+        Workbenches.fail_job("Error loading workbench environment: #{message}", job)
         err
     end
   end
@@ -466,14 +467,19 @@ defmodule Console.AI.Workbench.Engine do
        }) do
     activities
     |> Enum.reverse()
-    |> Enum.map(&Message.to_message/1)
-    |> then(&ProviderBase.reqllm_messages([{:user, job.prompt} | &1]))
+    |> Enum.map(&context_message/1)
+    |> then(&ProviderBase.reqllm_messages([{:user, Attachments.prompt_content(job.prompt, job.attachments)} | &1]))
   end
+
+  defp context_message(%WorkbenchJobActivity{type: :user, prompt: prompt, attachments: [_ | _] = attachments}),
+    do: {:user, Attachments.prompt_content(prompt, attachments)}
+  defp context_message(activity), do: Message.to_message(activity)
 
   defp list_activities(%WorkbenchJob{id: id}) do
     WorkbenchJobActivity.ordered()
     |> WorkbenchJobActivity.for_workbench_job(id)
     |> Repo.all()
+    |> Repo.preload(:attachments)
     |> Enum.reverse()
   end
 
@@ -490,9 +496,7 @@ defmodule Console.AI.Workbench.Engine do
     skills = Environment.with_builtins(skills) |> Environment.subagent_skills(:orchestrator)
     tool_names = SA.tool_names(subagents, env)
 
-    skill_knowledge_tools(job, skills) ++ [
-      %KnowledgeUpsert{job: job},
-      %KnowledgeDelete{job: job},
+    skill_knowledge_tools(job, skills) ++ knowledge_tools([%KnowledgeUpsert{job: job}, %KnowledgeDelete{job: job}]) ++ [
       %Subagents{
         bench: job.workbench,
         job: job,
@@ -502,7 +506,7 @@ defmodule Console.AI.Workbench.Engine do
       },
       %Subagent{subagents: subagents},
       %FetchNotes{job: job},
-      %Codemode{tools: []},
+      %Codemode{tools: [], workbench_id: job.workbench_id},
       Notes,
       %Complete{job: job, user: env.user},
     ] ++ type_tools(job)
@@ -541,7 +545,8 @@ defmodule Console.AI.Workbench.Engine do
       engine: engine,
       actions: Environment.actions(environment),
       review: WorkbenchJob.coding_review?(job),
-      self_service: :self_service in Environment.subagents(environment)
+      self_service: :self_service in Environment.subagents(environment),
+      filesystem: Console.PseudoFS.enabled?()
     ))
   end
 
@@ -557,7 +562,7 @@ defmodule Console.AI.Workbench.Engine do
   end
   defp backfill_chat(tools, _), do: tools
 
-  @preloads [:result, :flow, :pull_requests, chatbot_message: [:chat_connection], user: [:groups], workbench: [:workbench_skills, :repository, :agent_runtime, [tools: [:mcp_server, :cloud_connection, :scm_connection]]]]
+  @preloads [:result, :flow, :pull_requests, :attachments, chatbot_message: [:chat_connection], user: [:groups], workbench: [:workbench_skills, :repository, :agent_runtime, [tools: [:mcp_server, :cloud_connection, :scm_connection]]]]
 
   defp verifiable(
          %__MODULE__{

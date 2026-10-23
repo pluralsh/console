@@ -1,10 +1,4 @@
-import {
-  Chip,
-  Input,
-  SearchIcon,
-  SubTab,
-  TabList,
-} from '@pluralsh/design-system'
+import { Chip, SubTab, TabList } from '@pluralsh/design-system'
 
 import { useDebounce } from '@react-hooks-library/core'
 
@@ -54,6 +48,7 @@ export const statusTabs = Object.entries({
 const ServiceFiltersSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexGrow: 1,
+  alignItems: 'center',
   columnGap: theme.spacing.medium,
   '.statusTab': {
     display: 'flex',
@@ -62,29 +57,34 @@ const ServiceFiltersSC = styled.div(({ theme }) => ({
   },
 }))
 
+export function useServicesSearch(
+  q: Nullable<string>,
+  setQ: Nullable<(q: string) => void>
+) {
+  const [searchString, setSearchString] = useState(q || '')
+  const debouncedSearchString = useDebounce(searchString, 250)
+
+  useEffect(() => {
+    setQ?.(debouncedSearchString)
+  }, [debouncedSearchString, setQ])
+
+  return [searchString, setSearchString] as const
+}
+
 export function ServicesFilters({
   setQueryStatusFilter,
-  hideSearch = false,
   tabStateRef,
   statusCounts,
   loadingStatuses,
 }: {
   setQueryStatusFilter: Dispatch<SetStateAction<StatusTabKey>>
-  hideSearch?: boolean
   tabStateRef: RefObject<any>
   statusCounts: Record<StatusTabKey, number | undefined>
   loadingStatuses: boolean
 }) {
-  const { q, setQ, clusterId, setClusterId } =
-    useOutletContext<ServicesContextT>()
-  const [searchString, setSearchString] = useState(q || '')
-  const debouncedSearchString = useDebounce(searchString, 250)
+  const { clusterId, setClusterId } = useOutletContext<ServicesContextT>()
   const [statusFilter, setStatusFilter] = useState<StatusTabKey>('ALL')
   const deferredStatusFilter = useDeferredValue(statusFilter)
-
-  useEffect(() => {
-    setQ?.(debouncedSearchString)
-  }, [searchString, debouncedSearchString, setQ])
 
   useEffect(() => {
     setQueryStatusFilter(deferredStatusFilter)
@@ -100,25 +100,15 @@ export function ServicesFilters({
   return (
     <ServiceFiltersSC>
       {setClusterId && (
-        <div css={{ minWidth: 260, width: 360 }}>
+        <div css={{ minWidth: 220, width: 300 }}>
           <ClusterSelector
             clusterId={clusterId}
             allowDeselect
             onClusterChange={onClusterChange}
+            inputProps={{ small: true }}
           />
         </div>
       )}
-      <div css={{ minWidth: 120, flex: 1 }}>
-        {!hideSearch && (
-          <Input
-            placeholder="Search"
-            startIcon={<SearchIcon />}
-            value={searchString}
-            onChange={(e) => setSearchString(e.currentTarget.value)}
-            css={{ flexGrow: 1 }}
-          />
-        )}
-      </div>
       <TabList
         scrollable
         stateRef={tabStateRef}
@@ -133,6 +123,7 @@ export function ServicesFilters({
         {statusTabs?.map(([key, { label }]) => (
           <SubTab
             key={key}
+            size="small"
             textValue={label}
             className="statusTab"
           >

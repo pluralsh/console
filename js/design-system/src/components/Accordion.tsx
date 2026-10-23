@@ -23,14 +23,19 @@ export type AccordionProps = ComponentProps<typeof RadixAccordion.Root> &
   ComponentProps<typeof Card>
 
 export type AccordionCaret =
-  'none' | 'left' | 'right' | 'right-quarter' | 'right-quarter-mirror'
+  | 'none'
+  | 'left'
+  | 'right'
+  | 'right-quarter'
+  | 'right-quarter-mirror'
 
 function Accordion({
   children,
   ...props
 }: {
   children?:
-    ReactElement<typeof AccordionItem> | ReactElement<typeof AccordionItem>[]
+    | ReactElement<typeof AccordionItem>
+    | ReactElement<typeof AccordionItem>[]
   collapsible?: boolean
 } & AccordionProps) {
   return (
@@ -138,7 +143,7 @@ const ItemSC = styled(RadixAccordion.Item)({
 
 const TriggerSC = styled(RadixAccordion.Trigger)<{
   $caret: AccordionCaret
-  $padding?: number
+  $padding?: number | string
 }>(({ theme, $caret, $padding }) => ({
   ...theme.partials.reset.button,
   ...($padding ? { padding: $padding } : {}),

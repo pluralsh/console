@@ -2,6 +2,7 @@ import {
   ApolloClient,
   DocumentNode,
   InMemoryCache,
+  InMemoryCacheConfig,
   split,
 } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context'
@@ -32,9 +33,16 @@ export const { client, socket } = buildClient(
   fetchToken
 )
 
+export const authlessCacheConfig: InMemoryCacheConfig = {
+  typePolicies: {
+    // un-normalized and fetched piecemeal by the public page and each panel graph
+    PublicWorkbenchDashboard: { merge: true },
+  },
+}
+
 export const authlessClient = new ApolloClient({
   link: createLink({ uri: GQL_URL }),
-  cache: new InMemoryCache(),
+  cache: new InMemoryCache(authlessCacheConfig),
 })
 
 function maybeReconnect(socket) {
@@ -131,8 +139,6 @@ export function buildClient(
     cache: new InMemoryCache({
       possibleTypes: fragments.possibleTypes,
       typePolicies: {
-        // un-normalized and fetched piecemeal by each cluster metrics graph
-        ClusterUsageMetrics: { merge: true },
         Command: {
           fields: {
             exitCode: {

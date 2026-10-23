@@ -31,8 +31,11 @@ import (
 )
 
 const (
-	AgentRuntimeFinalizer       = "deployments.plural.sh/agent-runtime-protection"
-	requeueAfterAgentRuntime    = 2 * time.Minute
+	AgentRuntimeFinalizer = "deployments.plural.sh/agent-runtime-protection"
+	// Poll pending runs often enough that terminal reprompts do not sit idle
+	// for minutes if the websocket kick is missed. Websocket AgentRunUpdated
+	// remains the fast path.
+	requeueAfterAgentRuntime    = 30 * time.Second
 	pendingAgentRunFetchRetries = 3
 )
 
@@ -420,7 +423,11 @@ func (r *AgentRuntimeReconciler) createAgentRun(ctx context.Context, agentRuntim
 	logger := log.FromContext(ctx)
 	key := client.ObjectKey{Name: run.ID, Namespace: agentRuntime.Spec.TargetNamespace}
 
-	if err := r.Get(ctx, key, &v1alpha1.AgentRun{}); err == nil {
+	existing := &v1alpha1.AgentRun{}
+	if err := r.Get(ctx, key, existing); err == nil {
+		if existing.DeletionTimestamp != nil {
+			return fmt.Errorf("agent run %s is being deleted", run.ID)
+		}
 		logger.Info("agent run already exists", "id", run.ID)
 		return nil
 	} else if !errors.IsNotFound(err) {

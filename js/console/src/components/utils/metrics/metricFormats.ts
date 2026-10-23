@@ -3,7 +3,13 @@ import type { MetricResponseFragment } from 'generated/graphql'
 import { Prometheus } from 'utils/prometheus'
 
 export type MetricFormat =
-  'cpu' | 'memory' | 'bytesRate' | 'percent' | 'rate' | 'count'
+  | 'cpu'
+  | 'memory'
+  | 'bytesRate'
+  | 'percent'
+  | 'rate'
+  | 'count'
+  | 'number'
 
 const BYTE_SUFFIXES = ['B', 'KiB', 'MiB', 'GiB', 'TiB']
 
@@ -31,6 +37,7 @@ export const METRIC_FORMATTERS: Record<
   percent: (v) => `${trim(v * 100)}%`,
   rate: (v) => `${trim(v)}/s`,
   count: (v) => String(Math.round(v)),
+  number: trim,
 }
 
 export const METRIC_TICK_BASES: Record<MetricFormat, TickBase> = {
@@ -40,6 +47,7 @@ export const METRIC_TICK_BASES: Record<MetricFormat, TickBase> = {
   percent: 'decimal',
   rate: 'decimal',
   count: 'integer',
+  number: 'decimal',
 }
 
 export function toPoints(values: MetricResponseFragment['values']) {

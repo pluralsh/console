@@ -5,11 +5,11 @@ description: Safely migrate workloads in blue/green cluster upgrades
 
 ## Overview
 
-A common painpoint in managing Kubernetes upgrades is handling the movement of applications themselves onto newly upgraded nodes.  Whenever a Kubernetes upgrade happens, especially in the cloud, the knock-on effect is every node and every pod is rebooted.  The default cadence of this is node-by-node, a `kubectl drain` command is effectively run for each node restarting any pod in the process.  Since this isn't knowledgeable of the deployments controlling those pods, it is easy to cause unavailability during the upgrade process, especially if applications are not coded to tolerate restarts gracefully.  The `ClusterDrain` custom resource is meant to solve this.
+A common pain point in managing Kubernetes upgrades is handling the movement of applications themselves onto newly upgraded nodes.  Whenever a Kubernetes upgrade happens, especially in the cloud, the knock-on effect is that every node and every pod is rebooted.  The default cadence of this is node-by-node: a `kubectl drain` command is effectively run for each node, restarting any pod in the process.  Since this process isn't aware of the deployments controlling those pods, it is easy to cause unavailability during the upgrade process, especially if applications are not coded to tolerate restarts gracefully.  The `ClusterDrain` custom resource is meant to solve this.
 
 ## Definition
 
-Fundamentally the CRD is quite, simple, it can look something like this:
+Fundamentally, the CRD is quite simple. It can look something like this:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -26,14 +26,14 @@ spec:
       deployments.plural.sh/drainable: "true"
 ```
 
-What this is doing is whenever a cluster version is changed, it will create a new `ClusterDrain` then apply two constraints:
+Whenever a cluster version is changed, this will create a new `ClusterDrain`, then apply two constraints:
 
 1. `labelSelector` - this will only apply to deployments, statefulsets, and daemonsets matching that label selector.
-2. `flowControl` - a maximum concurrency level the drain process will utilize.  This can prevent too many pod restarts occurring concurrently.
+2. `flowControl` - a maximum concurrency level the drain process will use.  This can prevent too many pod restarts from occurring concurrently.
 
-As long as a deployment, statefulset, daemonset matches that selector, it will basically perform a graceful restart on the deployment - accomplished by adding a temporary annotation to its podTemplate subfield.  This will inherit the existing rollout policies of that controller, which developers will have tuned their applications to tolerate (otherwise they could never release their code to k8s).
+As long as a deployment, statefulset, or daemonset matches that selector, it will perform a graceful restart on it, accomplished by adding a temporary annotation to its podTemplate subfield.  This will inherit the existing rollout policies of that controller, which developers will have tuned their applications to tolerate (otherwise they could never release their code to Kubernetes).
 
-An example resource opted-in to the drain would be:
+An example resource opted in to the drain would be:
 
 ```yaml
 apiVersion: apps/v1
@@ -117,16 +117,16 @@ strategy:
     type: RollingUpdate
 ```
 
-Already configures a 25% rollout policy, so bumping this controller will gracefully ensure the pods are restarted and placed on the newly available nodes running your latest k8s version.
+This already configures a 25% rollout policy, so bumping this controller will gracefully ensure the pods are restarted and placed on the newly available nodes running your latest Kubernetes version.
 
 ## Drain Waves
 
-If you notice, there's also a `deployments.plural.sh/drain-wave` annotation.  This is meant to control dependency ordering around application restarts.  Say you have 3 microservices, a, b, and c.
+You may notice there's also a `deployments.plural.sh/drain-wave` annotation.  This is meant to control dependency ordering around application restarts.  Say you have 3 microservices: a, b, and c.
 
 1. A calls into b and c
 2. B calls into c
-3. C just exposes its api but is otherwise standalone
+3. C only exposes its API but is otherwise standalone
 
-In that world, you should have a be drain-wave 0, b drain-wave 1, and c drain-wave 2 to minimize the concurrent failures that could happen if the entire call tree were restarted at once.
+In that case, you should make a drain-wave 0, b drain-wave 1, and c drain-wave 2 to minimize the concurrent failures that could happen if the entire call tree were restarted at once.
 
-Oftentimes this sort of manual configuration is not necessary because the restart policies give enough headroom but the resource does provide the optionality for dependency ordering in usecases where it remains necessary.
+Often this sort of manual configuration is not necessary because the restart policies give enough headroom, but the resource does provide the option of dependency ordering in use cases where it remains necessary.

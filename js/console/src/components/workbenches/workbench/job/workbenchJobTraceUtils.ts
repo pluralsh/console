@@ -146,6 +146,140 @@ export function serviceName(span: Pick<TraceSpan, 'service'>) {
   return span.service ?? 'unknown service'
 }
 
+// where collectors keep a name they rewrote, e.g. the transform processor's
+// set_semconv_span_name and Grafana's span name normalization
+const ORIGINAL_SPAN_NAME_TAGS = [
+  'original_span_name',
+  'grafana.original_span_name',
+]
+
+type LabeledSpan = Pick<TraceSpan, 'name' | 'service' | 'tags'>
+
+// The span's name, unless it only repeats its service or database. Collectors
+// that rename spans from semantic conventions read the legacy `db.name` (the
+// database) as the collection, so every query gets named after the database;
+// those are named from their semantic convention attributes instead.
+export function spanLabel({ name, service, tags }: LabeledSpan) {
+  const trimmed = name?.trim()
+  const generic = [
+    service,
+    ...stringTags(tags, ['db.name', 'db.namespace', 'db.instance']),
+    ...stringTags(tags, ['db.system', 'db.system.name']),
+  ]
+  if (trimmed && !generic.includes(trimmed)) return trimmed
+
+  return (
+    semconvSpanName(tags) ??
+    stringTag(tags, ORIGINAL_SPAN_NAME_TAGS) ??
+    trimmed ??
+    'Unnamed span'
+  )
+}
+
+// What the span did beyond its name, e.g. a query's database or statement, a
+// request's status, or a model call's tokens
+export function spanDescription({ tags }: Pick<TraceSpan, 'tags'>) {
+  const dbSystem = stringTag(tags, ['db.system.name', 'db.system'])
+  if (dbSystem)
+    return (
+      stringTag(tags, ['db.query.text', 'db.statement']) ??
+      joinParts([dbSystem, stringTag(tags, ['db.namespace', 'db.name'])])
+    )
+
+  const model = stringTag(tags, [
+    'gen_ai.response.model',
+    'gen_ai.request.model',
+  ])
+  if (model) {
+    const input = tagValue(tags, ['gen_ai.usage.input_tokens'])
+    const output = tagValue(tags, ['gen_ai.usage.output_tokens'])
+    return joinParts([
+      model,
+      input != null && output != null
+        ? `${input} in / ${output} out tokens`
+        : undefined,
+    ])
+  }
+
+  const httpStatus = tagValue(tags, [
+    'http.response.status_code',
+    'http.status_code',
+  ])
+  if (httpStatus != null)
+    return joinParts([
+      String(httpStatus),
+      stringTag(tags, ['server.address', 'net.peer.name']),
+    ])
+
+  return stringTag(tags, ['rpc.system', 'messaging.system'])
+}
+
+// span names per the semantic conventions for databases, RPC, messaging,
+// HTTP and generative AI, falling back to their pre-1.26 attribute names
+function semconvSpanName(tags: Nullable<Record<string, unknown>>) {
+  if (stringTag(tags, ['db.system.name', 'db.system']))
+    return (
+      stringTag(tags, ['db.query.summary']) ??
+      joinParts(
+        [
+          stringTag(tags, ['db.operation.name', 'db.operation']),
+          // `source` is opentelemetry_ecto's name for the queried table
+          stringTag(tags, ['db.collection.name', 'db.sql.table', 'source']),
+        ],
+        ' '
+      )
+    )
+
+  const rpcMethod = stringTag(tags, ['rpc.method'])
+  if (rpcMethod)
+    return joinParts([stringTag(tags, ['rpc.service']), rpcMethod], '/')
+
+  const messagingOperation = stringTag(tags, [
+    'messaging.operation.name',
+    'messaging.operation',
+  ])
+  if (messagingOperation)
+    return joinParts(
+      [messagingOperation, stringTag(tags, ['messaging.destination.name'])],
+      ' '
+    )
+
+  const httpMethod = stringTag(tags, ['http.request.method', 'http.method'])
+  if (httpMethod)
+    return joinParts(
+      [httpMethod, stringTag(tags, ['http.route', 'url.template'])],
+      ' '
+    )
+
+  const aiOperation = stringTag(tags, ['gen_ai.operation.name'])
+  if (aiOperation)
+    return joinParts(
+      [aiOperation, stringTag(tags, ['gen_ai.request.model'])],
+      ' '
+    )
+
+  return undefined
+}
+
+function stringTag(tags: Nullable<Record<string, unknown>>, names: string[]) {
+  return stringTags(tags, names)[0]
+}
+
+function stringTags(tags: Nullable<Record<string, unknown>>, names: string[]) {
+  return names
+    .map((name) => tags?.[name])
+    .filter(
+      (value): value is string =>
+        typeof value === 'string' && value.trim() !== ''
+    )
+    .map((value) => value.trim())
+}
+
+function joinParts(parts: Nullable<string>[], separator = ' · ') {
+  const present = parts.filter(isNonNullable)
+  return present.length ? present.join(separator) : undefined
+}
+
 export function formatSpanCount(count: number) {
   return `${count} ${count === 1 ? 'span' : 'spans'}`
 }

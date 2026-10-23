@@ -1,5 +1,6 @@
 import { ResponsiveLine, type LineCustomSvgLayerProps } from '@nivo/line'
 import { Card, Flex, ProgressBar } from '@pluralsh/design-system'
+import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 import { ChartTooltip } from 'components/utils/ChartTooltip'
 import { ButtonGroup } from 'components/utils/ButtonGroup'
 import { useChartTheme } from 'components/utils/charts'
@@ -59,6 +60,18 @@ export function WorkbenchesUsage() {
   )
   const totals = useMemo(() => deriveTotals(entries), [entries])
 
+  useSetPageHeaderContent(
+    useMemo(
+      () => (
+        <RangeButtonGroup
+          range={range}
+          setRange={setRange}
+        />
+      ),
+      [range]
+    )
+  )
+
   if (error) return <GqlError error={error} />
 
   return (
@@ -98,12 +111,6 @@ export function WorkbenchesUsage() {
       <WorkbenchGraphCard
         title="Token & cost usage"
         hint="Aggregated across all workbenches. Cost is estimated from token counts."
-        rightContent={
-          <RangeButtonGroup
-            range={range}
-            setRange={setRange}
-          />
-        }
         loading={loading}
         minContentHeight={layout.graphMinHeight}
       >
@@ -146,8 +153,6 @@ export function WorkbenchesUsage() {
       </WorkbenchGraphCard>
       <UsageByWorkbenchCard
         entries={entries}
-        range={range}
-        setRange={setRange}
         loading={loading}
       />
     </Flex>
@@ -265,10 +270,10 @@ function UsageLineChart({
             theme={lineChartTheme}
             colors={[color]}
             margin={{
-              top: theme.spacing.xsmall,
-              right: theme.spacing.xsmall,
-              bottom: theme.spacing.large,
-              left: theme.spacing.xsmall,
+              top: theme.spacingPx.xsmall,
+              right: theme.spacingPx.xsmall,
+              bottom: theme.spacingPx.large,
+              left: theme.spacingPx.xsmall,
             }}
             xScale={{ type: 'point' }}
             yScale={{
@@ -282,7 +287,7 @@ function UsageLineChart({
             axisLeft={null}
             axisBottom={{
               tickSize: 0,
-              tickPadding: theme.spacing.xsmall,
+              tickPadding: theme.spacingPx.xsmall,
               tickRotation: 0,
               tickValues: xTickValues,
               renderTick: ({ tickIndex, value, x, y }) => {
@@ -302,7 +307,7 @@ function UsageLineChart({
                       style={theme.partials.text.caption}
                       textAnchor={textAnchor}
                       x={-4}
-                      y={theme.spacing.medium}
+                      y={theme.spacingPx.medium}
                     >
                       {String(value)}
                     </text>
@@ -342,8 +347,8 @@ function UsageLineChart({
             }
             enablePoints={false}
             lineWidth={1}
-            pointSize={theme.spacing.small}
-            pointBorderWidth={theme.spacing.xxxsmall}
+            pointSize={theme.spacingPx.small}
+            pointBorderWidth={theme.spacingPx.xxxsmall}
             pointBorderColor={theme.colors['fill-accent']}
             useMesh
             curve="linear"
@@ -365,13 +370,9 @@ function UsageLineChart({
 
 function UsageByWorkbenchCard({
   entries,
-  range,
-  setRange,
   loading,
 }: {
   entries: UsageEntry[]
-  range: UsageRangeOption
-  setRange: (range: UsageRangeOption) => void
   loading: boolean
 }) {
   const theme = useTheme()
@@ -395,12 +396,6 @@ function UsageByWorkbenchCard({
         </CaptionP>
       }
       minContentHeight={layout.summaryCardMinHeight}
-      rightContent={
-        <RangeButtonGroup
-          range={range}
-          setRange={setRange}
-        />
-      }
       loading={loading}
     >
       {hasData ? (
@@ -571,13 +566,14 @@ const rangeToPeriod: Record<UsageRangeOption, EvalResultsPeriod> = {
 
 function getUsageLayout(theme: DefaultTheme) {
   return {
-    emptyStateMinHeight: theme.spacing.xxxxxlarge - theme.spacing.xsmall,
-    graphMinHeight: theme.spacing.xxxxxlarge * 2 + theme.spacing.xxsmall,
-    lineChartCardMinHeight: theme.spacing.xxxxxlarge * 2,
-    lineChartMinHeight: theme.spacing.xxxxxlarge + theme.spacing.xxlarge,
-    progressBarHeight: theme.spacing.xxsmall + theme.spacing.xxxsmall,
-    statCardMinWidth: theme.spacing.xxxxxlarge * 2 + theme.spacing.large,
-    summaryCardMinHeight: theme.spacing.xxxxxxlarge - theme.spacing.xsmall,
-    workbenchLabelMinWidth: theme.spacing.xxxxxlarge - theme.spacing.xxlarge,
+    emptyStateMinHeight: theme.spacingPx.xxxxxlarge - theme.spacingPx.xsmall,
+    graphMinHeight: theme.spacingPx.xxxxxlarge * 2 + theme.spacingPx.xxsmall,
+    lineChartCardMinHeight: theme.spacingPx.xxxxxlarge * 2,
+    lineChartMinHeight: theme.spacingPx.xxxxxlarge + theme.spacingPx.xxlarge,
+    progressBarHeight: theme.spacingPx.xxsmall + theme.spacingPx.xxxsmall,
+    statCardMinWidth: theme.spacingPx.xxxxxlarge * 2 + theme.spacingPx.large,
+    summaryCardMinHeight: theme.spacingPx.xxxxxxlarge - theme.spacingPx.xsmall,
+    workbenchLabelMinWidth:
+      theme.spacingPx.xxxxxlarge - theme.spacingPx.xxlarge,
   }
 }

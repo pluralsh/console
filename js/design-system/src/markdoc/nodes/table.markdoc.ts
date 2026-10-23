@@ -41,10 +41,8 @@ export const table: BaseSchema = {
           .map((td) => td.children)
       )
 
-    return new Tag(
-      this.render as any,
-      { thead, tbody, children },
-      node.transformChildren(config)
-    )
+    // Cells live only in thead/tbody; repeating them as children would ship
+    // every table's contents several times in the serialized page props.
+    return new Tag(this.render as any, { thead, tbody }, [])
   },
 }

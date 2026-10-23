@@ -28,6 +28,7 @@ export function ViewLogsButton({ metadata, kind }: any) {
   return (
     <Button
       secondary
+      small
       startIcon={<LogsIcon />}
       as={Link}
       to={url}

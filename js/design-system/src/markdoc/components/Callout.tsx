@@ -14,7 +14,7 @@ function MarkdocCallout({
   ctas,
   ...props
 }: Omit<CalloutProps, 'buttonProps'> & { ctas: any[] }) {
-  let buttonProps
+  let buttonProps: CalloutProps['buttonProps']
   const { useNavigate } = useNavigationContext()
   const navigate = useNavigate()
 

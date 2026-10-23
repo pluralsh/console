@@ -34,7 +34,7 @@ const Checklist = styled(ChecklistUnstyled)(({ theme }) => ({
   '.header': {
     ...theme.partials.text.subtitle1,
     borderBottom: theme.borders['fill-two'],
-    padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
+    padding: `${theme.spacing.medium} ${theme.spacing.large}`,
     cursor: 'pointer',
 
     display: 'flex',
@@ -44,15 +44,15 @@ const Checklist = styled(ChecklistUnstyled)(({ theme }) => ({
   },
 
   '.content': {
-    padding: `${theme.spacing.xsmall}px 0`,
+    padding: `${theme.spacing.xsmall} 0`,
     borderBottom: theme.borders['fill-two'],
     display: 'flex',
     flexDirection: 'column',
   },
 
   '.finishContainer': {
-    paddingTop: `${theme.spacing.large}px`,
-    paddingBottom: `${theme.spacing.medium}px`,
+    paddingTop: `${theme.spacing.large}`,
+    paddingBottom: `${theme.spacing.medium}`,
   },
 
   '.shrink': {
@@ -78,7 +78,8 @@ type ChecklistProps = ComponentPropsWithRef<'div'> & {
   label: string
   stateProps: ChecklistStateProps
   footerChildren:
-    ReactElement<ChecklistFooterProps> | ReactElement<ChecklistFooterProps>[]
+    | ReactElement<ChecklistFooterProps>
+    | ReactElement<ChecklistFooterProps>[]
   completeChildren: ReactElement<any>
   children: ReactElement<ChecklistItemProps>[]
 }

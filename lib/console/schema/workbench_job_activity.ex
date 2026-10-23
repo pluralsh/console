@@ -108,6 +108,7 @@ defmodule Console.Schema.WorkbenchJobActivity do
       on_replace: :delete,
       foreign_key: :workbench_job_activity_id
     has_many :agent_runs, through: [:agent_run_associations, :agent_run]
+    has_many :attachments, Console.Schema.Attachment
 
     has_many :thoughts, WorkbenchJobThought,
       on_replace: :delete,

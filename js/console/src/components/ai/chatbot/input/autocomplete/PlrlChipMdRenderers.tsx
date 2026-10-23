@@ -14,12 +14,7 @@ import {
 } from '@pluralsh/design-system'
 import { ClusterProviderIcon } from 'components/utils/Provider'
 import { ClusterDistro, ScmType } from 'generated/graphql'
-import {
-  ComponentPropsWithoutRef,
-  ComponentType,
-  forwardRef,
-  ReactNode,
-} from 'react'
+import { ComponentPropsWithoutRef, ComponentType, Ref, ReactNode } from 'react'
 import type { ExtraProps } from 'react-markdown'
 import { Link } from 'react-router-dom'
 import {
@@ -45,20 +40,24 @@ type ChipBodyProps = {
   children: ReactNode
 } & ComponentPropsWithoutRef<typeof ChipBodySC>
 
-const ChipBody = forwardRef<HTMLSpanElement, ChipBodyProps>(function ChipBody(
-  { icon, children, ...rest },
-  ref
-) {
+export const ChipBody = function ChipBody({
+  icon,
+  children,
+  ref,
+  ...rest
+}: ChipBodyProps & { ref?: Ref<HTMLSpanElement> }) {
   return (
     <ChipBodySC
       ref={ref}
       {...rest}
     >
       {icon}
-      <span>{children}</span>
+      <ChipLabelSC title={typeof children === 'string' ? children : undefined}>
+        {children}
+      </ChipLabelSC>
     </ChipBodySC>
   )
-})
+}
 
 // react-markdown picks the component by tag name and spreads only the XML
 // attributes — so `kind` isn't on the rendered props (it's the tag itself)
@@ -301,24 +300,36 @@ export const plrlChipComponents = {
   [K in MentionKind]: ComponentType<RenderedChipProps<K>>
 }
 
+const CHIP_MAX_WIDTH = '16rem'
+
 const ChipBodySC = styled.span(({ theme }) => ({
   ...theme.partials.text.body2,
   display: 'inline-flex',
   alignItems: 'center',
   gap: theme.spacing.xxsmall,
   verticalAlign: 'middle',
-  padding: `${theme.spacing.xxxsmall}px ${theme.spacing.xsmall}px`,
-  fontSize: 12,
-  lineHeight: '16px',
+  padding: `${theme.spacing.xxxsmall} ${theme.spacing.xsmall}`,
+  fontSize: '0.75rem',
+  lineHeight: '1rem',
   color: theme.colors.text,
   border: theme.borders['fill-three'],
   borderRadius: theme.borderRadiuses.medium,
   background: theme.colors['fill-two'],
   transition: 'background 0.1s ease-in-out',
-  margin: 1,
+  margin: '1px',
+  // long names truncate rather than wrap, so a chip never takes over a card
+  maxWidth: `min(calc(100% - 2px), ${CHIP_MAX_WIDTH})`,
+  '& > svg, & > img': { flexShrink: 0 },
 }))
 
-const ChipLinkSC = styled(Link)(({ theme }) => ({
+const ChipLabelSC = styled.span({
+  minWidth: 0,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+})
+
+export const ChipLinkSC = styled(Link)(({ theme }) => ({
   textDecoration: 'none',
   '&:hover > *': { background: theme.colors['fill-two-hover'] },
 }))

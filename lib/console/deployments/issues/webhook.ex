@@ -1,6 +1,6 @@
 defmodule Console.Deployments.Issues.Webhook do
   import Console.Services.Base, only: [ok: 1]
-  alias Console.Deployments.Issues.Webhook.{Linear, Jira, Asana, Github, Gitlab, AzureDevops, Bitbucket, BitbucketDatacenter}
+  alias Console.Deployments.Issues.Webhook.{Linear, Jira, Asana, Github, Gitlab, AzureDevops, Bitbucket, BitbucketDatacenter, ServiceNow}
   alias Console.Deployments.Workbenches
   alias Console.Deployments.Observability.Webhook.Raw
   alias Console.Schema.{WorkbenchWebhook, IssueWebhook}
@@ -202,6 +202,17 @@ defmodule Console.Deployments.Issues.Webhook do
     |> with_payload(payload)
     |> workbench_association(webhook)
     |> ok()
+  end
+
+  def payload(%IssueWebhook{provider: :service_now} = webhook, %{} = payload) do
+    with {:ok, record} <- ServiceNow.record(payload) do
+      build_attributes(ServiceNow, record)
+      |> Map.put(:external_id, ServiceNow.external_id(webhook.id, record))
+      |> Map.put(:provider, :service_now)
+      |> with_payload(payload)
+      |> workbench_association(webhook)
+      |> ok()
+    end
   end
 
   def payload(_, _), do: {:error, "invalid payload"}

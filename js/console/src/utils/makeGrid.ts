@@ -6,21 +6,21 @@ export function makeGrid({
   minColWidth,
   maxColWidth,
 }: {
-  gap: number
+  gap: number | string
   maxCols: number
   minColWidth: number
   maxColWidth?: number
 }): CSSProperties {
-  const gapCount = maxCols - 1
-  const totalGapWidth = gapCount * gap
+  const gapLength = typeof gap === 'number' ? `${gap}px` : gap
+  const totalGapWidth = `(${maxCols - 1} * ${gapLength})`
 
   return {
     display: 'grid',
-    gridTemplateColumns: `repeat(auto-fill, minmax(max(${minColWidth}px, calc((100% - ${totalGapWidth}px) / ${maxCols})), 1fr))`,
+    gridTemplateColumns: `repeat(auto-fill, minmax(max(${minColWidth}px, calc((100% - ${totalGapWidth}) / ${maxCols})), 1fr))`,
     gap,
     ...(maxColWidth
       ? {
-          maxWidth: maxCols * maxColWidth + totalGapWidth,
+          maxWidth: `calc(${maxCols * maxColWidth}px + ${totalGapWidth})`,
         }
       : {}),
   }

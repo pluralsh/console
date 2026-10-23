@@ -40,7 +40,7 @@ func NewAzureProvider(conn *toolquery.AzureConnection) (*AzureProvider, error) {
 	}).validate()
 }
 
-func (in *AzureProvider) Metrics(ctx context.Context, input *toolquery.MetricsQueryInput) (*toolquery.MetricsQueryOutput, error) {
+func (in *AzureProvider) MetricsSeries(ctx context.Context, input *toolquery.MetricsQueryInput) (*toolquery.MetricsSeriesOutput, error) {
 	if input == nil || input.GetQuery() == "" {
 		return nil, fmt.Errorf("%w: query is required", ErrInvalidArgument)
 	}
@@ -71,10 +71,10 @@ func (in *AzureProvider) Metrics(ctx context.Context, input *toolquery.MetricsQu
 		return nil, err
 	}
 
-	return datasource.NewAzureMetricsResponse(resp).ToMetricsQueryOutput(), nil
+	return datasource.NewAzureMetricsResponse(resp).ToMetricsSeriesOutput(), nil
 }
 
-func (in *AzureProvider) metricsManagedPrometheus(ctx context.Context, input *toolquery.MetricsQueryInput, url string) (*toolquery.MetricsQueryOutput, error) {
+func (in *AzureProvider) metricsManagedPrometheus(ctx context.Context, input *toolquery.MetricsQueryInput, url string) (*toolquery.MetricsSeriesOutput, error) {
 	token, err := in.client.PrometheusAccessToken(ctx)
 	if err != nil {
 		return nil, err
@@ -85,7 +85,7 @@ func (in *AzureProvider) metricsManagedPrometheus(ctx context.Context, input *to
 		Token: new(token),
 	})
 
-	return prom.Metrics(ctx, input)
+	return prom.MetricsSeries(ctx, input)
 }
 
 func (in *AzureProvider) MetricsSearch(ctx context.Context, input *toolquery.MetricsSearchInput) (*toolquery.MetricsSearchOutput, error) {
@@ -201,8 +201,7 @@ func (in *AzureProvider) metricsLabelSearchValues(ctx context.Context, input *to
 		return nil, fmt.Errorf("%w: azure metrics label value search requires metrics_namespace", ErrInvalidArgument)
 	}
 
-	end := time.Now().UTC()
-	start := end.Add(-24 * time.Hour)
+	start, end := metricsLabelSearchRange(input)
 	resp, err := in.client.Metrics(
 		ctx,
 		strings.TrimSpace(opts.GetMetricsEndpoint()),
@@ -221,8 +220,8 @@ func (in *AzureProvider) metricsLabelSearchValues(ctx context.Context, input *to
 
 	label := strings.TrimSpace(input.GetLabel())
 	values := make([]string, 0)
-	for _, point := range datasource.NewAzureMetricsResponse(resp).ToMetricsQueryOutput().GetMetrics() {
-		values = append(values, point.GetLabels()[label])
+	for _, s := range datasource.NewAzureMetricsResponse(resp).ToMetricsSeriesOutput().GetSeries() {
+		values = append(values, s.GetLabels()[label])
 	}
 
 	return newMetricsLabelSearchOutput(values, input.GetQuery(), metricsLabelSearchLimit(input.GetLimit())), nil

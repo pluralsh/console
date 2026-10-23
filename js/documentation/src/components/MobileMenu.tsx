@@ -7,7 +7,7 @@ import { useIsomorphicLayoutEffect } from 'usehooks-ts'
 
 import { DISCORD_LINK } from '@src/consts'
 import { useRestNav } from '@src/contexts/RestNavContext'
-
+import { brand } from '@src/theme/docsTheme'
 import { FullNav, NavButtons, type NavContextValue } from './FullNav'
 import GithubStars from './GithubStars'
 import useScrollLock from './hooks/useScrollLock'
@@ -61,7 +61,7 @@ export const PluralMenu = styled(PluralMenuContent)(
     paddingLeft: theme.spacing.xlarge,
     paddingRight: theme.spacing.xlarge,
     overflow: 'auto',
-    paddingBottom: `calc(${theme.spacing.xlarge}px + var(--menu-extra-bpad))`,
+    paddingBottom: `calc(${theme.spacing.xlarge} + var(--menu-extra-bpad))`,
 
     [TopHeading]: {
       paddingLeft: 0,
@@ -91,7 +91,7 @@ const DocsNavWrap = styled.div({
   minHeight: 0,
 })
 
-const Content = styled.div(({ theme }) => ({
+const Content = styled.div((_) => ({
   pointerEvents: 'all',
   position: 'absolute',
   left: 0,
@@ -99,7 +99,7 @@ const Content = styled.div(({ theme }) => ({
   top: 'var(--top-nav-height)',
   bottom: 0,
   paddingRight: 0,
-  background: theme.colors['fill-one'],
+  background: brand['surface-sidebar'],
   display: 'flex',
   flexDirection: 'column',
   minHeight: 0,

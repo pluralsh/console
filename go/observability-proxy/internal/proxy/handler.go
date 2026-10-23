@@ -3,6 +3,7 @@ package proxy
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httputil"
@@ -13,6 +14,11 @@ import (
 	"github.com/pluralsh/console/go/observability-proxy/internal/console"
 	"github.com/pluralsh/console/go/observability-proxy/internal/logging"
 	"k8s.io/klog/v2"
+)
+
+const (
+	elasticInfoResponse    = `{"name":"plural-logs","cluster_name":"plural-logs","version":{"number":"8.11.0","build_flavor":"default","minimum_wire_compatibility_version":"7.17.0","minimum_index_compatibility_version":"7.0.0"},"tagline":"You Know, for Search"}`
+	elasticLicenseResponse = `{"license":{"status":"active","type":"basic"}}`
 )
 
 // Handler serves observability ingest and query proxy endpoints.
@@ -41,6 +47,7 @@ func (h *Handler) Register(mux *http.ServeMux) {
 	mux.HandleFunc("/ext/v1/ingest/prometheus", h.prometheusIngest)
 	mux.HandleFunc("/ext/v1/ingest/elastic", h.elasticIngest)
 	mux.HandleFunc("/ext/v1/ingest/elastic/", h.elasticIngest)
+	mux.HandleFunc("/ext/v1/ingest/loki/api/v1/push", h.lokiIngest)
 	mux.HandleFunc("/ext/v1/query/prometheus", h.prometheusQuery)
 	mux.HandleFunc("/ext/v1/query/prometheus/", h.prometheusQuery)
 }
@@ -93,10 +100,65 @@ func (h *Handler) elasticIngest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	target, err := BuildElasticTarget(cfg.ElasticHost, mappedSuffix)
+	// loki takes precedence: once logs are served by plural telemetry, elastic is only
+	// emulated, even if console still advertises an elastic host
+	if cfg.LokiHost != "" && r.Method == http.MethodGet {
+		h.elasticCompatibility(w, mappedSuffix)
+		return
+	}
+
+	var target *url.URL
+	switch {
+	case cfg.LokiHost != "":
+		target, err = BuildLokiElasticTarget(cfg.LokiHost, mappedSuffix)
+	case cfg.ElasticHost != "":
+		target, err = BuildElasticTarget(cfg.ElasticHost, mappedSuffix)
+	default:
+		err = fmt.Errorf("no elastic or loki host configured")
+	}
 	if err != nil {
 		klog.Errorf("invalid elastic target: %v", err)
 		http.Error(w, "elastic target unavailable", http.StatusServiceUnavailable)
+		return
+	}
+
+	h.forward(w, r, target)
+}
+
+func (h *Handler) elasticCompatibility(w http.ResponseWriter, suffix string) {
+	body := elasticInfoResponse
+	if suffix == "/_license" {
+		body = elasticLicenseResponse
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Elastic-Product", "Elasticsearch")
+	w.WriteHeader(http.StatusOK)
+	_, _ = io.WriteString(w, body)
+}
+
+func (h *Handler) lokiIngest(w http.ResponseWriter, r *http.Request) {
+	klog.V(logging.LevelVerbose).Infof("handling loki ingest request method=%s path=%s", r.Method, r.URL.Path)
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	cfg, err := h.configProvider.GetConfig(r.Context())
+	if err != nil {
+		http.Error(w, "observability config unavailable", http.StatusServiceUnavailable)
+		return
+	}
+
+	if cfg.LokiHost == "" {
+		http.Error(w, "loki ingest target unavailable", http.StatusServiceUnavailable)
+		return
+	}
+
+	target, err := BuildLokiPushTarget(cfg.LokiHost)
+	if err != nil {
+		klog.Errorf("invalid loki ingest target: %v", err)
+		http.Error(w, "loki ingest target unavailable", http.StatusServiceUnavailable)
 		return
 	}
 

@@ -18,7 +18,7 @@ import gradients from './theme/gradients'
 import { marketingTextPartials } from './theme/marketingText'
 import { resetPartials } from './theme/resets'
 import { scrollBar } from './theme/scrollBar'
-import { spacing } from './theme/spacing'
+import { spacing, spacingPx } from './theme/spacing'
 import { textPartials } from './theme/text'
 import { visuallyHidden } from './theme/visuallyHidden'
 import { zIndexes } from './theme/zIndexes'
@@ -64,6 +64,7 @@ const getStyledTheme = ({ mode }: { mode: ColorMode }) =>
     ...getBaseTheme({ mode }),
     ...{
       spacing,
+      spacingPx,
       boxShadows: getBoxShadows({ mode }),
       borderRadiuses,
       fontFamilies,

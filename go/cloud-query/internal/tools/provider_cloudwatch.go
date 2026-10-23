@@ -20,6 +20,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/pluralsh/console/go/cloud-query/internal/proto/toolquery"
+	"github.com/pluralsh/console/go/cloud-query/internal/tools/series"
 )
 
 type CloudwatchProvider struct {
@@ -30,7 +31,7 @@ func NewCloudwatchProvider(conn *toolquery.CloudwatchConnection) *CloudwatchProv
 	return &CloudwatchProvider{conn: conn}
 }
 
-func (in *CloudwatchProvider) Metrics(ctx context.Context, input *toolquery.MetricsQueryInput) (*toolquery.MetricsQueryOutput, error) {
+func (in *CloudwatchProvider) MetricsSeries(ctx context.Context, input *toolquery.MetricsQueryInput) (*toolquery.MetricsSeriesOutput, error) {
 	if in.conn == nil {
 		return nil, fmt.Errorf("%w: cloudwatch connection is required", ErrInvalidArgument)
 	}
@@ -66,7 +67,8 @@ func (in *CloudwatchProvider) Metrics(ctx context.Context, input *toolquery.Metr
 		}
 	}
 
-	points := make([]*toolquery.MetricPoint, 0)
+	// a result can span several pages, so samples are merged by name and labels
+	builder := series.NewBuilder()
 	paginator := cloudwatch.NewGetMetricDataPaginator(client, request)
 	for paginator.HasMorePages() {
 		page, err := paginator.NextPage(ctx)
@@ -80,27 +82,22 @@ func (in *CloudwatchProvider) Metrics(ctx context.Context, input *toolquery.Metr
 				name = aws.ToString(result.Id)
 			}
 
+			labels := map[string]string{}
+			if id := aws.ToString(result.Id); id != "" {
+				labels["id"] = id
+			}
+			if status := string(result.StatusCode); status != "" {
+				labels["status"] = status
+			}
+
 			length := min(len(result.Values), len(result.Timestamps))
 			for i := range length {
-				labels := map[string]string{}
-				if id := aws.ToString(result.Id); id != "" {
-					labels["id"] = id
-				}
-				if status := string(result.StatusCode); status != "" {
-					labels["status"] = status
-				}
-
-				points = append(points, &toolquery.MetricPoint{
-					Timestamp: timestamppb.New(result.Timestamps[i].UTC()),
-					Name:      name,
-					Value:     result.Values[i],
-					Labels:    labels,
-				})
+				builder.Add(name, labels, result.Timestamps[i].UTC(), result.Values[i])
 			}
 		}
 	}
 
-	return &toolquery.MetricsQueryOutput{Metrics: points}, nil
+	return builder.Output(), nil
 }
 
 func (in *CloudwatchProvider) MetricsSearch(ctx context.Context, searchInput *toolquery.MetricsSearchInput) (*toolquery.MetricsSearchOutput, error) {

@@ -1,0 +1,57 @@
+{{ if and .Values.cloud.enabled .Values.cloud.o11y.enabled .Values.cloud.o11y.plural }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: plrl-{{ .Values.cloud.instanceName }}-auth
+  namespace: telemetry-system
+stringData:
+  password: {{ .Values.cloud.esPassword }}
+---
+apiVersion: telemetry.plural.sh/v1alpha1
+kind: NamespaceAuthentication
+metadata:
+  name: metrics-authz
+  namespace: telemetry-system
+spec:
+  dataStoreRef:
+    kind: Metrics
+    name: metrics
+  namespace: {{ .Values.cloud.instanceName }}
+  username: plrl
+  permission: write
+  secretKeyRef:
+    name: plrl-{{ .Values.cloud.instanceName }}-auth
+    key: password
+---
+apiVersion: telemetry.plural.sh/v1alpha1
+kind: NamespaceAuthentication
+metadata:
+  name: logs-authz
+  namespace: telemetry-system
+spec:
+  dataStoreRef:
+    kind: Logs
+    name: logs
+  namespace: {{ .Values.cloud.instanceName }}
+  username: plrl
+  permission: write
+  secretKeyRef:
+    name: plrl-{{ .Values.cloud.instanceName }}-auth
+    key: password
+---
+apiVersion: telemetry.plural.sh/v1alpha1
+kind: NamespaceAuthentication
+metadata:
+  name: traces-authz
+  namespace: telemetry-system
+spec:
+  dataStoreRef:
+    kind: Traces
+    name: traces
+  namespace: {{ .Values.cloud.instanceName }}
+  username: plrl
+  permission: write
+  secretKeyRef:
+    name: plrl-{{ .Values.cloud.instanceName }}-auth
+    key: password
+{{ end }}

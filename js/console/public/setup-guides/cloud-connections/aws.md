@@ -109,3 +109,24 @@ resource "aws_iam_role_policy" "plural_cloud_query_assume_target" {
 
 For a single-account integration, the base identity may receive `ReadOnlyAccess`
 directly and `Assume role ARN` can be left empty.
+
+## 5) Lambda workbench tools
+
+`ReadOnlyAccess` does not allow invoking functions. If a Lambda workbench tool uses this
+connection, also grant `lambda:InvokeFunction` on each function it calls, on the role it
+assumes (or on the base identity when `Assume role ARN` is empty):
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "lambda:InvokeFunction",
+      "Resource": "arn:aws:lambda:<region>:<account-id>:function:<function-name>*"
+    }
+  ]
+}
+```
+
+Set `Region` to the function's region; Lambda tools fail when the connection has no region.

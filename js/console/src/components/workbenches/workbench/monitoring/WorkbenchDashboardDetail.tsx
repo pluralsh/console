@@ -1,10 +1,10 @@
 import {
-  EmptyState,
   ExpandIcon,
   Flex,
   HamburgerMenuCollapsedIcon,
   IconFrame,
 } from '@pluralsh/design-system'
+import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { CaptionP } from 'components/utils/typography/Text'
@@ -17,7 +17,6 @@ import {
   WorkbenchDashboardInput,
   WorkbenchMonitoringDashboardQueryResult,
 } from 'generated/graphql'
-import { omit } from 'lodash'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useLocation } from 'react-router-dom'
@@ -47,6 +46,8 @@ import {
   WorkbenchDashboardFilters,
 } from './WorkbenchDashboardFilters'
 import { WorkbenchDashboardPanels } from './WorkbenchDashboardPanels'
+import { DashboardPublicShare } from './DashboardPublicShare'
+import { AuthenticatedGraphSource, toPanelGraph } from './DashboardGraphSource'
 
 export function DashboardDetail({
   dashboardId,
@@ -72,7 +73,10 @@ export function DashboardDetail({
   if (!dashboard)
     return (
       <MainSC>
-        <EmptyState message="Dashboard not found." />
+        <WorkbenchEmptyState
+          message="Dashboard not found"
+          description="It may have been deleted from this workbench."
+        />
       </MainSC>
     )
 
@@ -93,7 +97,7 @@ function DashboardDetailView({
 }) {
   const { pathname, search } = useLocation()
   const graphs = useMemo(
-    () => dashboard.graphs?.filter(isNonNullable) ?? [],
+    () => dashboard.graphs?.filter(isNonNullable).map(toPanelGraph) ?? [],
     [dashboard.graphs]
   )
   const allInputs = useMemo(
@@ -149,14 +153,6 @@ function DashboardDetailView({
     for (const input of rangeInputs) out[input.name] = rangeDuration
     return out
   }, [filters, rangeInputs, rangeDuration])
-  const shareVariables = useMemo(
-    () =>
-      omit(
-        variables,
-        rangeInputs.map((input) => input.name)
-      ),
-    [variables, rangeInputs]
-  )
   const onInputReadyChange = useCallback((name: string, ready: boolean) => {
     setReadyInputs((current) =>
       current[name] === ready ? current : { ...current, [name]: ready }
@@ -228,9 +224,13 @@ function DashboardDetailView({
             <WorkbenchMonitoringSharePopover
               kind="dashboard"
               pathname={pathname}
-              range={range}
-              variables={shareVariables}
-            />
+              active={!!dashboard.publicId}
+            >
+              <DashboardPublicShare
+                dashboardId={dashboard.id}
+                publicId={dashboard.publicId}
+              />
+            </WorkbenchMonitoringSharePopover>
             <IconFrame
               ref={fullscreenTriggerRef}
               clickable
@@ -301,16 +301,17 @@ function DashboardDetailView({
             />
           </ToolbarSC>
           <PanelsSC>
-            <WorkbenchDashboardPanels
-              dashboardId={dashboard.id}
-              graphs={graphs}
-              variables={variables}
-              timeRange={timeRange}
-              rangeRevision={rangeRevision}
-              queriesEnabled={dashboardReady}
-              onRangeSelect={onRangeSelect}
-              onUpdate={onUpdate}
-            />
+            <AuthenticatedGraphSource dashboardId={dashboard.id}>
+              <WorkbenchDashboardPanels
+                graphs={graphs}
+                variables={variables}
+                timeRange={timeRange}
+                rangeRevision={rangeRevision}
+                queriesEnabled={dashboardReady}
+                onRangeSelect={onRangeSelect}
+                onUpdate={onUpdate}
+              />
+            </AuthenticatedGraphSource>
           </PanelsSC>
         </BodySC>
       </ScrollSC>
@@ -407,12 +408,12 @@ export function MonitoringDetailSkeleton() {
           <RectangleSkeleton
             $height="small"
             $width="70%"
-            style={{ marginTop: 8 }}
+            style={{ marginTop: '0.5rem' }}
           />
           <RectangleSkeleton
             $height={40}
             $width="100%"
-            style={{ marginTop: 24 }}
+            style={{ marginTop: '1.5rem' }}
           />
           <Flex
             gap="medium"
@@ -441,7 +442,9 @@ const MainSC = styled.div<{ $fullscreen?: boolean }>(
       inset: 0,
       position: 'fixed',
       width: '100%',
-      zIndex: theme.zIndexes.modal,
+      // Keep page fullscreen below actual dialogs so graph fullscreen and
+      // query modals opened from within it remain visible.
+      zIndex: theme.zIndexes.modal - 1,
     }),
   })
 )
@@ -449,8 +452,7 @@ const MainSC = styled.div<{ $fullscreen?: boolean }>(
 const StripSC = styled.div(({ theme }) => ({
   alignItems: 'center',
   boxSizing: 'border-box',
-  // fill-one-selected matches Figma fill/one #21242C (pre-rename tokens).
-  backgroundColor: theme.colors['fill-one-selected'],
+  backgroundColor: theme.colors['fill-one'],
   borderBottom: theme.borders.default,
   borderTop: theme.borders.default,
   display: 'flex',
@@ -458,7 +460,7 @@ const StripSC = styled.div(({ theme }) => ({
   gap: theme.spacing.small,
   height: 40,
   justifyContent: 'space-between',
-  padding: `0 ${theme.spacing.medium}px`,
+  padding: `0 ${theme.spacing.medium}`,
   // Above the tab strip (z-index 1) without trapping fullscreen stacking.
   position: 'relative',
   zIndex: 2,
@@ -485,7 +487,7 @@ const ScrollSC = styled.div({
 const BodySC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
+  padding: `${theme.spacing.medium} ${theme.spacing.large}`,
   paddingBottom: theme.spacing.large,
 }))
 

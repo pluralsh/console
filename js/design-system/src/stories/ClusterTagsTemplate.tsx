@@ -1,5 +1,5 @@
 import { type ComponentProps, type Key, useMemo, useState } from 'react'
-import Fuse from 'fuse.js'
+import Fuse, { type FuseResult } from 'fuse.js'
 
 import { isEqual, uniqWith } from 'lodash-es'
 
@@ -77,7 +77,7 @@ export function ClusterTagsTemplate({
   )
 
   const searchResults = useMemo(() => {
-    let ret: Fuse.FuseResult<Tag>[]
+    let ret: FuseResult<Tag>[]
 
     if (inputValue) {
       ret = fuse.search(inputValue)

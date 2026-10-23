@@ -13,21 +13,14 @@ func StreamEventsFromResponse(response responses.Response) ([]json.RawMessage, e
 	var events []json.RawMessage
 	seq := int64(0)
 
-	shell, err := responseShell(response)
+	completed, err := rawObject(response.RawJSON(), response)
 	if err != nil {
 		return nil, err
 	}
+	shell := withFields(completed, map[string]any{"output": nil, "status": string(responses.ResponseStatusInProgress)})
 
-	events = append(events, mustEventJSON(responses.ResponseCreatedEvent{
-		Response:       shell,
-		SequenceNumber: nextSeq(&seq),
-		Type:           constant.ResponseCreated("response.created"),
-	}))
-	events = append(events, mustEventJSON(responses.ResponseInProgressEvent{
-		Response:       shell,
-		SequenceNumber: nextSeq(&seq),
-		Type:           constant.ResponseInProgress("response.in_progress"),
-	}))
+	events = append(events, responseEvent("response.created", shell, &seq))
+	events = append(events, responseEvent("response.in_progress", shell, &seq))
 
 	for outputIndex, item := range response.Output {
 		itemEvents, err := streamEventsForOutputItem(item, int64(outputIndex), &seq)
@@ -37,11 +30,7 @@ func StreamEventsFromResponse(response responses.Response) ([]json.RawMessage, e
 		events = append(events, itemEvents...)
 	}
 
-	events = append(events, mustEventJSON(responses.ResponseCompletedEvent{
-		Response:       response,
-		SequenceNumber: nextSeq(&seq),
-		Type:           constant.ResponseCompleted("response.completed"),
-	}))
+	events = append(events, responseEvent("response.completed", completed, &seq))
 
 	return events, nil
 }
@@ -60,17 +49,13 @@ func streamEventsForOutputItem(item responses.ResponseOutputItemUnion, outputInd
 func streamEventsForMessage(message responses.ResponseOutputMessage, outputIndex int64, seq *int64) ([]json.RawMessage, error) {
 	var events []json.RawMessage
 
-	inProgress, err := messageWithStatus(message, responses.ResponseOutputMessageStatusInProgress, true)
+	completedItem, err := rawObject(message.RawJSON(), message)
 	if err != nil {
 		return nil, err
 	}
 
-	events = append(events, mustEventJSON(responses.ResponseOutputItemAddedEvent{
-		Item:           inProgress,
-		OutputIndex:    outputIndex,
-		SequenceNumber: nextSeq(seq),
-		Type:           constant.ResponseOutputItemAdded("response.output_item.added"),
-	}))
+	inProgress := withFields(completedItem, map[string]any{"status": string(responses.ResponseOutputMessageStatusInProgress), "content": []any{}})
+	events = append(events, itemEvent("response.output_item.added", inProgress, outputIndex, seq))
 
 	for contentIndex, content := range message.Content {
 		switch content.Type {
@@ -139,35 +124,20 @@ func streamEventsForMessage(message responses.ResponseOutputMessage, outputIndex
 		}
 	}
 
-	completedItem, err := messageAsOutputItem(message)
-	if err != nil {
-		return nil, err
-	}
-
-	events = append(events, mustEventJSON(responses.ResponseOutputItemDoneEvent{
-		Item:           completedItem,
-		OutputIndex:    outputIndex,
-		SequenceNumber: nextSeq(seq),
-		Type:           constant.ResponseOutputItemDone("response.output_item.done"),
-	}))
+	events = append(events, itemEvent("response.output_item.done", completedItem, outputIndex, seq))
 
 	return events, nil
 }
 
 func streamEventsForFunctionCall(call responses.ResponseFunctionToolCall, outputIndex int64, seq *int64) ([]json.RawMessage, error) {
-	var events []json.RawMessage
+	events := make([]json.RawMessage, 0, 4)
 
-	inProgress, err := functionCallWithStatus(call, "in_progress")
+	item, err := rawObject(call.RawJSON(), call)
 	if err != nil {
 		return nil, err
 	}
 
-	events = append(events, mustEventJSON(responses.ResponseOutputItemAddedEvent{
-		Item:           inProgress,
-		OutputIndex:    outputIndex,
-		SequenceNumber: nextSeq(seq),
-		Type:           constant.ResponseOutputItemAdded("response.output_item.added"),
-	}))
+	events = append(events, itemEvent("response.output_item.added", withFields(item, map[string]any{"status": "in_progress"}), outputIndex, seq))
 	events = append(events, mustEventJSON(responses.ResponseFunctionCallArgumentsDeltaEvent{
 		Delta:          call.Arguments,
 		ItemID:         call.ID,
@@ -183,138 +153,68 @@ func streamEventsForFunctionCall(call responses.ResponseFunctionToolCall, output
 		Type:           constant.ResponseFunctionCallArgumentsDone("response.function_call_arguments.done"),
 	}))
 
-	completed, err := functionCallWithStatus(call, "completed")
-	if err != nil {
-		return nil, err
-	}
-
-	events = append(events, mustEventJSON(responses.ResponseOutputItemDoneEvent{
-		Item:           completed,
-		OutputIndex:    outputIndex,
-		SequenceNumber: nextSeq(seq),
-		Type:           constant.ResponseOutputItemDone("response.output_item.done"),
-	}))
+	events = append(events, itemEvent("response.output_item.done", withFields(item, map[string]any{"status": "completed"}), outputIndex, seq))
 
 	return events, nil
 }
 
 func streamEventsForGenericItem(item responses.ResponseOutputItemUnion, outputIndex int64, seq *int64) ([]json.RawMessage, error) {
-	inProgress, err := outputItemWithStatus(item, "in_progress")
-	if err != nil {
-		return nil, err
-	}
-	completed, err := outputItemWithStatus(item, "completed")
+	raw, err := rawObject(item.RawJSON(), item)
 	if err != nil {
 		return nil, err
 	}
 
 	return []json.RawMessage{
-		mustEventJSON(responses.ResponseOutputItemAddedEvent{
-			Item:           inProgress,
-			OutputIndex:    outputIndex,
-			SequenceNumber: nextSeq(seq),
-			Type:           constant.ResponseOutputItemAdded("response.output_item.added"),
-		}),
-		mustEventJSON(responses.ResponseOutputItemDoneEvent{
-			Item:           completed,
-			OutputIndex:    outputIndex,
-			SequenceNumber: nextSeq(seq),
-			Type:           constant.ResponseOutputItemDone("response.output_item.done"),
-		}),
+		itemEvent("response.output_item.added", withFields(raw, map[string]any{"status": "in_progress"}), outputIndex, seq),
+		itemEvent("response.output_item.done", withFields(raw, map[string]any{"status": "completed"}), outputIndex, seq),
 	}, nil
 }
 
-func responseShell(response responses.Response) (responses.Response, error) {
-	raw, err := json.Marshal(response)
-	if err != nil {
-		return responses.Response{}, fmt.Errorf("marshal response shell: %w", err)
-	}
-
-	var shell responses.Response
-	if err := json.Unmarshal(raw, &shell); err != nil {
-		return responses.Response{}, fmt.Errorf("unmarshal response shell: %w", err)
-	}
-
-	shell.Output = nil
-	shell.Status = responses.ResponseStatusInProgress
-	return shell, nil
-}
-
-func messageWithStatus(message responses.ResponseOutputMessage, status responses.ResponseOutputMessageStatus, clearContent bool) (responses.ResponseOutputItemUnion, error) {
-	raw, err := json.Marshal(message)
-	if err != nil {
-		return responses.ResponseOutputItemUnion{}, fmt.Errorf("marshal message: %w", err)
-	}
-
-	var payload map[string]any
-	if err := json.Unmarshal(raw, &payload); err != nil {
-		return responses.ResponseOutputItemUnion{}, fmt.Errorf("unmarshal message: %w", err)
-	}
-
-	payload["status"] = string(status)
-	if clearContent {
-		payload["content"] = []any{}
-	}
-
-	return outputItemFromMap(payload)
-}
-
-func functionCallWithStatus(call responses.ResponseFunctionToolCall, status string) (responses.ResponseOutputItemUnion, error) {
-	raw, err := json.Marshal(call)
-	if err != nil {
-		return responses.ResponseOutputItemUnion{}, fmt.Errorf("marshal function call: %w", err)
-	}
-
-	var payload map[string]any
-	if err := json.Unmarshal(raw, &payload); err != nil {
-		return responses.ResponseOutputItemUnion{}, fmt.Errorf("unmarshal function call: %w", err)
-	}
-
-	payload["status"] = status
-	return outputItemFromMap(payload)
-}
-
-func outputItemWithStatus(item responses.ResponseOutputItemUnion, status string) (responses.ResponseOutputItemUnion, error) {
-	raw := item.RawJSON()
+// rawObject decodes the JSON Console sent rather than re-encoding the SDK type, which drops fields the SDK
+// doesn't model (such as a function call's namespace) that clients must send back unchanged.
+func rawObject(raw string, typed any) (map[string]any, error) {
+	data := []byte(raw)
 	if raw == "" {
-		return responses.ResponseOutputItemUnion{}, fmt.Errorf("output item has no raw JSON")
+		var err error
+		if data, err = json.Marshal(typed); err != nil {
+			return nil, fmt.Errorf("marshal %T: %w", typed, err)
+		}
 	}
 
-	var payload map[string]any
-	if err := json.Unmarshal([]byte(raw), &payload); err != nil {
-		return responses.ResponseOutputItemUnion{}, fmt.Errorf("unmarshal output item: %w", err)
+	var object map[string]any
+	if err := json.Unmarshal(data, &object); err != nil {
+		return nil, fmt.Errorf("unmarshal %T: %w", typed, err)
 	}
-
-	payload["status"] = status
-	return outputItemFromMap(payload)
+	return object, nil
 }
 
-func outputItemFromMap(payload map[string]any) (responses.ResponseOutputItemUnion, error) {
-	raw, err := json.Marshal(payload)
-	if err != nil {
-		return responses.ResponseOutputItemUnion{}, fmt.Errorf("marshal output item: %w", err)
+// withFields returns a copy of object with fields set.
+func withFields(object, fields map[string]any) map[string]any {
+	result := make(map[string]any, len(object)+len(fields))
+	for key, value := range object {
+		result[key] = value
 	}
-
-	var item responses.ResponseOutputItemUnion
-	if err := json.Unmarshal(raw, &item); err != nil {
-		return responses.ResponseOutputItemUnion{}, fmt.Errorf("unmarshal output item union: %w", err)
+	for key, value := range fields {
+		result[key] = value
 	}
-
-	return item, nil
+	return result
 }
 
-func messageAsOutputItem(message responses.ResponseOutputMessage) (responses.ResponseOutputItemUnion, error) {
-	raw, err := json.Marshal(message)
-	if err != nil {
-		return responses.ResponseOutputItemUnion{}, fmt.Errorf("marshal message: %w", err)
-	}
+func itemEvent(eventType string, item map[string]any, outputIndex int64, seq *int64) json.RawMessage {
+	return mustEventJSON(map[string]any{
+		"type":            eventType,
+		"item":            item,
+		"output_index":    outputIndex,
+		"sequence_number": nextSeq(seq),
+	})
+}
 
-	var item responses.ResponseOutputItemUnion
-	if err := json.Unmarshal(raw, &item); err != nil {
-		return responses.ResponseOutputItemUnion{}, fmt.Errorf("unmarshal message union: %w", err)
-	}
-
-	return item, nil
+func responseEvent(eventType string, response map[string]any, seq *int64) json.RawMessage {
+	return mustEventJSON(map[string]any{
+		"type":            eventType,
+		"response":        response,
+		"sequence_number": nextSeq(seq),
+	})
 }
 
 func mustEventJSON(event any) json.RawMessage {

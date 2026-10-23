@@ -3,7 +3,15 @@ defmodule Console.AI.Tools.Workbench.Observability.Metrics do
   alias Console.AI.Tools.Workbench.Observability.TimeRange
   alias CloudQuery.Client
   alias Toolquery.ToolQuery.{Stub}
-  alias Toolquery.{MetricsQueryInput, MetricsQueryOutput, MetricsOptions, AzureMetricsOptions, MetricPoint}
+  alias Toolquery.{
+    MetricsQueryInput,
+    MetricsQueryOutput,
+    MetricsSeriesOutput,
+    MetricSeries,
+    MetricsOptions,
+    AzureMetricsOptions,
+    MetricPoint
+  }
   alias Console.AI.Workbench.Conversion
   alias Console.AI.Tools.Workbench.Output
 
@@ -59,24 +67,119 @@ defmodule Console.AI.Tools.Workbench.Observability.Metrics do
     cast(model, attrs, ~w(resource_id metrics_namespace aggregation filter order_by roll_up_by metrics_endpoint)a)
   end
 
-  @metric_limit 500
+  # bounds on what a thought stores for charting, independent of the model-facing output
+  @stored_series_limit 50
+  @stored_sample_limit 1_000
+  @non_finite_values [:nan, :infinity, :negative_infinity]
+  @sample_format "[unix_seconds, value]"
 
   def implement(%__MODULE__{} = tool) do
     tool = TimeRange.ensure(tool)
     with :ok <- TimeRange.safe(tool.time_range),
          {:ok, conn} <- Client.connect(),
          {:ok, input} <- input(tool),
-         {:ok, %MetricsQueryOutput{} = output} <- Stub.metrics(conn, input, Client.metrics_rpc_opts()),
-         {:ok, content} <- Protobuf.JSON.encode(output) do
-      {:ok, %{content: Output.truncate(content), metrics: Enum.map(Enum.take(output.metrics, @metric_limit), &mapify/1)}}
+         {:ok, %MetricsSeriesOutput{} = output} <- Stub.metrics_series(conn, input, Client.metrics_rpc_opts()) do
+      series = Enum.flat_map(output.series, &mapify_series/1)
+
+      with {:ok, content} <- Output.json(model_output(series)) do
+        {:ok, %{content: content, series: stored_series(series)}}
+      end
     end
+  end
+
+  @doc """
+  The model-facing encoding: labels once per series and samples as `[unix_seconds, value]`
+  pairs, since repeating labels and ISO timestamps on every point dominates token usage.
+  """
+  def model_output(series) do
+    %{
+      sample_format: @sample_format,
+      series: Enum.map(series, fn %{name: name, labels: labels, samples: samples} ->
+        %{samples: Enum.map(samples, &[DateTime.to_unix(&1.timestamp), &1.value])}
+        |> maybe_put(:name, name)
+        |> maybe_put(:labels, labels)
+      end)
+    }
+  end
+
+  defp maybe_put(map, _, v) when v in [nil, ""] or v == %{}, do: map
+  defp maybe_put(map, k, v), do: Map.put(map, k, v)
+
+  @doc """
+  Caps series stored on a thought, thinning each one evenly so a chart still spans the
+  full queried range.
+  """
+  def stored_series(series) do
+    series = Enum.take(series, @stored_series_limit)
+    per_series = max(div(@stored_sample_limit, max(length(series), 1)), 2)
+    Enum.map(series, &Map.update!(&1, :samples, fn samples -> thin(samples, per_series) end))
+  end
+
+  defp thin(samples, max) when length(samples) <= max, do: samples
+  defp thin(samples, max) do
+    last = length(samples) - 1
+    indexed = List.to_tuple(samples)
+    Enum.map(0..(max - 1), &elem(indexed, round(&1 * last / (max - 1))))
   end
 
   def structured(%__MODULE__{} = tool) do
     with {:ok, conn} <- Client.connect(),
          {:ok, input} <- input(TimeRange.ensure(tool)),
          {:ok, %MetricsQueryOutput{} = output} <- Stub.metrics(conn, input, Client.metrics_rpc_opts()) do
-      {:ok, Enum.map(output.metrics, &mapify/1)}
+      {:ok, output.metrics |> finite_metrics() |> Enum.map(&mapify/1)}
+    end
+  end
+
+  @doc """
+  Like `structured/1`, but grouped by series: `%{name, labels, samples: [%{timestamp, value}]}`.
+  """
+  def structured_series(%__MODULE__{} = tool) do
+    with {:ok, conn} <- Client.connect(),
+         {:ok, input} <- input(TimeRange.ensure(tool)),
+         {:ok, %MetricsSeriesOutput{} = output} <- Stub.metrics_series(conn, input, Client.metrics_rpc_opts()) do
+      {:ok, Enum.flat_map(output.series, &mapify_series/1)}
+    end
+  end
+
+  @doc "Expands series from `structured_series/1` into the per-point shape of `structured/1`."
+  def flatten_series(series) when is_list(series) do
+    Enum.flat_map(series, fn %{name: name, labels: labels, samples: samples} ->
+      Enum.map(samples, &%{timestamp: &1.timestamp, name: name, value: &1.value, labels: labels})
+    end)
+  end
+
+  @doc "Groups per-point metrics (the `structured/1` shape) into series, in first-seen order."
+  def group_points(points) when is_list(points) do
+    {order, groups} =
+      Enum.reduce(points, {[], %{}}, fn point, {order, groups} ->
+        key = {point.name, point.labels || %{}}
+        sample = %{timestamp: point.timestamp, value: point.value}
+
+        case groups do
+          %{^key => samples} -> {order, Map.put(groups, key, [sample | samples])}
+          _ -> {[key | order], Map.put(groups, key, [sample])}
+        end
+      end)
+
+    order
+    |> Enum.reverse()
+    |> Enum.map(fn {name, labels} = key ->
+      %{name: name, labels: labels, samples: Enum.reverse(groups[key])}
+    end)
+  end
+
+  defp finite_metrics(metrics),
+    do: Enum.reject(metrics, &(&1.value in @non_finite_values))
+
+  defp mapify_series(%MetricSeries{samples: samples} = series) do
+    case finite_metrics(samples) do
+      [] -> []
+      samples ->
+        [%{
+          name: series.name,
+          labels: series.labels,
+          samples: Enum.map(samples, &%{timestamp: TimeRange.to_datetime(&1.timestamp), value: &1.value})
+        }]
     end
   end
 

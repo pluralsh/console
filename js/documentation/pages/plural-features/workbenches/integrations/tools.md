@@ -16,7 +16,7 @@ Navigate to **Workbenches → Integrations** to browse the available tool types,
 
 ### Plural native integrations
 
-These capabilities are built directly into the workbench runtime and require no external credentials or tool setup. They are enabled per-workbench via the capability toggles in [Step 1 of the creation wizard](/plural-features/workbenches/configuration#step-1-workbench-setup).
+These capabilities are built directly into the workbench runtime and require no external credentials or tool setup. They are enabled per workbench via the capability toggles in [Step 1 of the creation wizard](/plural-features/workbenches/configuration#step-1-workbench-setup).
 
 | Capability | What the agent can access |
 |---|---|
@@ -34,35 +34,52 @@ All native integrations respect your existing RBAC — enabling a capability her
 
 | Tool | What the agent can do |
 |---|---|
-| **[Prometheus](/plural-features/workbenches/integrations/tools/prometheus)** | Query metrics from a Prometheus-compatible endpoint |
+| **[Prometheus](/plural-features/workbenches/integrations/tools/prometheus)** | Run PromQL range queries and discover metric names, label names, and label values on a Prometheus-compatible endpoint |
 | **[Datadog](/plural-features/workbenches/integrations/tools/datadog)** | Query metrics, logs, and traces from the Datadog API |
-| **[Loki](/plural-features/workbenches/integrations/tools/loki)** | Query log streams from a Loki-compatible endpoint |
-| **[Elastic](/plural-features/workbenches/integrations/tools/elastic)** | Query and search indices in an Elasticsearch cluster |
-| **[Tempo](/plural-features/workbenches/integrations/tools/tempo)** | Query distributed traces from a Grafana Tempo endpoint |
-| **[Jaeger](/plural-features/workbenches/integrations/tools/jaeger)** | Query distributed traces from a Jaeger backend |
+| **[Loki](/plural-features/workbenches/integrations/tools/loki)** | Query log streams and aggregate log counts from a Loki-compatible endpoint using LogQL |
+| **[Elastic](/plural-features/workbenches/integrations/tools/elastic)** | Search logs and aggregate log counts from an Elasticsearch index with text queries and exact-match facets |
+| **[Splunk](/plural-features/workbenches/integrations/tools/splunk)** | Search logs stored in Splunk Enterprise or Splunk Cloud using SPL queries via the management REST API |
+| **[VictoriaLogs](/plural-features/workbenches/integrations/tools/victoria-logs)** | Query logs and aggregate log counts from a VictoriaLogs endpoint using LogsQL |
+| **[OpenSearch](/plural-features/workbenches/integrations/tools/opensearch)** | Search logs and aggregate log counts in an Amazon OpenSearch Service index with SigV4-signed requests |
+| **[CloudWatch](/plural-features/workbenches/integrations/tools/cloudwatch)** | Query metrics with metric math, run Logs Insights queries, and read dashboards and alarms in one AWS region |
+| **[Dynatrace](/plural-features/workbenches/integrations/tools/dynatrace)** | Query Grail metrics, logs, and spans with DQL, and read dashboards and anomaly-detection settings |
+| **[Azure Monitor](/plural-features/workbenches/integrations/tools/azure)** | Query Azure Monitor metrics (or Managed Prometheus with PromQL) and Log Analytics logs with KQL, and read dashboards and alert rules |
+| **[Tempo](/plural-features/workbenches/integrations/tools/tempo)** | Query distributed trace spans from a Grafana Tempo endpoint |
+| **[Jaeger](/plural-features/workbenches/integrations/tools/jaeger)** | Query distributed trace spans from a Jaeger backend with filters for service, operation, duration, and attributes |
+
+### Incident & error management
+
+| Tool | What the agent can do |
+|---|---|
+| **[PagerDuty](/plural-features/workbenches/integrations/tools/pagerduty)** | Read incident details, notes, and log entries from the PagerDuty REST API |
+| **[Sentry](/plural-features/workbenches/integrations/tools/sentry)** | Read issues, events, and stack traces from the Sentry API |
 
 ### Source control
 
 | Tool | What the agent can do |
 |---|---|
-| **[GitHub](/plural-features/workbenches/integrations/tools/github)** | Read repositories, list PRs, and (in Write mode) open pull requests |
-| **[GitLab](/plural-features/workbenches/integrations/tools/gitlab)** | Same as GitHub for GitLab projects |
-| **[Bitbucket Cloud](/plural-features/workbenches/integrations/tools/bitbucket)** | Same as GitHub for Bitbucket Cloud |
-| **[Bitbucket Data Center](/plural-features/workbenches/integrations/tools/bitbucket-datacenter)** | Same as GitHub for self-hosted Bitbucket Data Center |
+| **[GitHub](/plural-features/workbenches/integrations/tools/github)** | Read, list, and search issues, pull requests, and repositories (including diffs, checks, and reviews); read code scanning, Dependabot, and secret scanning alerts; comment on, review, and close pull requests |
+| **[GitLab](/plural-features/workbenches/integrations/tools/gitlab)** | Read merge requests and issues with their notes, post and edit notes, award emoji, and close merge requests without merging |
+| **[Bitbucket Cloud](/plural-features/workbenches/integrations/tools/bitbucket)** | Read pull requests and issues with their comments, post and edit comments, and decline pull requests without merging |
+| **[Bitbucket Data Center](/plural-features/workbenches/integrations/tools/bitbucket-datacenter)** | Read pull requests and their comments, post, reply to, and edit comments, and add emoji reactions on self-hosted Bitbucket Data Center |
+| **[Azure DevOps](/plural-features/workbenches/integrations/tools/azure-devops)** | Read pull requests with comment threads and work items with comments, post and edit comments, add reactions, and abandon pull requests |
 
 ### Messaging
 
 | Tool | What the agent can do |
 |---|---|
-| **[Slack](/plural-features/workbenches/integrations/tools/slack)** | Post messages and read channel history |
+| **[Slack](/plural-features/workbenches/integrations/tools/slack)** | Find channels, read channel history, post and edit messages (including thread replies), add reactions, create channels, and invite users or user groups |
 | **Microsoft Teams** | Post messages to Teams channels |
 
 ### Issue tracking
 
 | Tool | What the agent can do |
 |---|---|
-| **[Atlassian (Jira)](/plural-features/workbenches/integrations/tools/atlassian)** | Create, read, and update Jira issues |
-| **[Linear](/plural-features/workbenches/integrations/tools/linear)** | Create and update Linear issues |
+| **[Atlassian](/plural-features/workbenches/integrations/tools/atlassian)** | Call Jira and Confluence Cloud via Atlassian's MCP server — search, create, and update issues; read and edit pages |
+| **[Jira Cloud](/plural-features/workbenches/integrations/tools/jira)** | Search, create, update, comment on, and transition Jira Cloud issues with JQL queries |
+| **[Jira Data Center](/plural-features/workbenches/integrations/tools/jira-datacenter)** | Search, create, update, comment on, and transition Jira Data Center issues on self-hosted instances |
+| **[Linear](/plural-features/workbenches/integrations/tools/linear)** | Find, create, and update Linear issues, projects, and comments through Linear's hosted MCP server |
+| **[ServiceNow](/plural-features/workbenches/integrations/tools/service-now)** | Create, read, update, and comment on incidents, change requests, problems, and catalog tasks |
 
 ### Cloud
 
@@ -73,7 +90,7 @@ Rather than asking the LLM to reason about cloud state from natural language des
 | Agent tool | What it does |
 |---|---|
 | `cloud_tables` | Lists available SQL tables for the cloud connection — the agent calls this first to discover what data it can query |
-| `cloud_schema` | Returns the column schema for a specific table |
+| `cloud_schemas` | Returns the column names and types for an exact list of tables |
 | `cloud_query` | Executes a PostgreSQL-compatible SQL query against the cloud account's data |
 
 The agent is also always equipped with a **calculator tool** that evaluates arithmetic expressions deterministically. This means any aggregation, percentage change, or cost total is computed — never estimated by the LLM — eliminating hallucination on numerical results.
@@ -84,12 +101,32 @@ The agent is also always equipped with a **calculator tool** that evaluates arit
 | **GCP** | Compute Engine, GKE, Cloud SQL, Billing, and more |
 | **Azure** | VMs, AKS, storage, Azure Monitor, and more |
 
+A cloud connection can also back a serverless function tool, which the agent calls with a JSON input:
+
+| Tool | What the agent can do |
+|---|---|
+| **[Lambda](/plural-features/workbenches/integrations/tools/lambda)** | Invoke an AWS Lambda function you describe with a JSON input schema, optionally behind human approval |
+| **[Cloud Run](/plural-features/workbenches/integrations/tools/cloud-run)** | Call a Google Cloud Run service with a JSON body, optionally behind human approval |
+| **[Azure Function](/plural-features/workbenches/integrations/tools/azure-function)** | Call an HTTP-triggered Azure Function with a JSON body, optionally behind human approval |
+
+### Web search
+
+| Tool | What the agent can do |
+|---|---|
+| **[Exa](/plural-features/workbenches/integrations/tools/exa)** | Search the web and read pages by URL through Exa's hosted MCP server |
+
+### Container registries
+
+| Tool | What the agent can do |
+|---|---|
+| **[Docker registry](/plural-features/workbenches/integrations/tools/docker)** | Search repository tags, find the latest semver versions, and fetch image manifests from Docker Hub, GHCR, or a private OCI registry (read-only) |
+
 ### Custom
 
 | Tool | Description |
 |---|---|
 | **[HTTP](/plural-features/workbenches/integrations/tools/http)** | A custom REST endpoint. You define the request shape (URL, method, headers, body, JSON schema) and the agent can call it as a named tool |
-| **[MCP](/plural-features/workbenches/integrations/tools/mcp)** | Any [Model Context Protocol](https://modelcontextprotocol.io) server. Plural handles authentication and audit-logs every call |
+| **[MCP](/plural-features/workbenches/integrations/tools/mcp)** | Any [Model Context Protocol](https://modelcontextprotocol.io) server that supports streamable HTTP. The agent can call every tool the server exposes, and Plural authenticates with static headers or OAuth client credentials |
 
 
 ## Creating a tool

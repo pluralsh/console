@@ -40,8 +40,8 @@ defmodule Console.Logs.Provider.Loki do
 
   @spec aggregate(t(), Query.t) :: {:ok, [AggregationBucket.t]} | Console.error
   def aggregate(%__MODULE__{connection: %Connection{host: host} = conn}, %Query{} = q) when is_binary(host) do
-    {start, stop} = range(q)
     step = Time.to_seconds(q.bucket_size, 60)
+    {start, stop} = range(q, step)
 
     get(conn, "/loki/api/v1/query_range", %{
       "query" => "sum(count_over_time(#{build_query(conn, q)} [#{step}s]))",
@@ -95,8 +95,16 @@ defmodule Console.Logs.Provider.Loki do
       |> Enum.reverse()
       |> ensure_matcher(labels)
 
-    "{#{Enum.join(matchers, ", ")}}#{line_filter(q)}"
+    "{#{Enum.join(matchers, ", ")}}#{line_filter(q)}#{node_filter(q)}"
   end
+
+  # shippers name the node label differently (promtail: node_name, alloy/otlp: k8s_node_name, ...),
+  # and some ship it as structured metadata, which only a label filter (not a stream selector) can match
+  @node_labels ~w(k8s_node_name node_name node nodename kubernetes_host)
+
+  defp node_filter(%Query{node: node}) when is_binary(node) and byte_size(node) > 0,
+    do: " | " <> Enum.map_join(@node_labels, " or ", &matcher(&1, node))
+  defp node_filter(_), do: ""
 
   defp add_resource(ms, %Query{resource: %Cluster{handle: h}}, {cl, _}), do: [matcher(cl, h) | ms]
   defp add_resource(ms, %Query{resource: %Service{} = svc}, {cl, nl}) do
@@ -157,6 +165,12 @@ defmodule Console.Logs.Provider.Loki do
 
   defp range(%Query{time: time}) do
     {start, stop} = Time.range(time)
+    {Time.to_unix_nano(start), Time.to_unix_nano(stop)}
+  end
+
+  defp range(%Query{time: time}, step) do
+    {start, stop} = Time.range(time)
+    {start, stop} = Console.TimeRange.align_range(start, stop, step)
     {Time.to_unix_nano(start), Time.to_unix_nano(stop)}
   end
 

@@ -3,7 +3,7 @@ title: Dynamic Helm Configuration with Lua Scripts
 description: Enhance Helm deployments with dynamic configuration by using Lua scripts
 ---
 
-When luaScript is present and non-empty A Go library for processing Lua scripts generating structured output in the format:
+When luaScript is present and non-empty, it is executed by a Go library that processes Lua scripts and generates structured output in the format:
 
 ```json
 {
@@ -17,7 +17,7 @@ The full Helm release is rendered using this merged configuration.
 
 ## Security Architecture
 
-The Lua execution environment follows the principle of the least privilege by:
+The Lua execution environment follows the principle of least privilege by:
 
 1. **Selective Library Loading**: Only essential, safe standard libraries are loaded
 2. **Custom Module Control**: All additional functionality is provided through controlled custom modules
@@ -32,7 +32,7 @@ The encoding module provides functions for JSON and YAML serialization.
 #### Functions
 
 ##### `encoding.jsonEncode(value) -> string`
-Converts a Lua value to JSON string.
+Converts a Lua value to a JSON string.
 
 ```lua
 local data = {name = "John", age = 30}
@@ -50,7 +50,7 @@ local data = encoding.jsonDecode(jsonStr)
 ```
 
 ##### `encoding.yamlEncode(value) -> string`
-Converts a Lua value to YAML string.
+Converts a Lua value to a YAML string.
 
 ```lua
 local data = {
@@ -76,7 +76,7 @@ local data = encoding.yamlDecode(yamlStr)
 ```
 
 ##### `encoding.jsonSchema(value, pathStr) -> bool, error`
-Accepts a lua value and a string representing a path to a jsonschema definition file, and determines whether the value matches that schema.  `pathStr` must be a relative path within the underlying tarball of your plural service, and `error` will be nil if there's no error fetching or parsing the jsonschema file.
+Accepts a Lua value and a string representing a path to a JSON Schema definition file, and determines whether the value matches that schema. `pathStr` must be a relative path within the underlying tarball of your Plural service, and `error` will be nil if there's no error fetching or parsing the JSON Schema file.
 
 ```lua
 local value = {
@@ -121,7 +121,7 @@ end
 - `filePath` (string): Relative path to the file within the base directory
 
 **Returns:**
-- `string`: File contents, or `nil` and error message on failure
+- `string`: File contents, or `nil` and an error message on failure
 
 ##### `fs.walk(directory) -> [string]`
 Returns a list of all files within the specified directory and its subdirectories.
@@ -155,7 +155,7 @@ end
 
 
 **Returns:**
-- `[string]`: Array of relative file paths, or `nil` and error message on failure
+- `[string]`: Array of relative file paths, or `nil` and an error message on failure
 
 ### Utils Module
 
@@ -327,13 +327,13 @@ end
 ## Error Handling
 
 All functions return errors in a consistent format:
-- File operations return `nil` and error message on failure
-- Encoding operations return `nil` and error message on failure
+- File operations return `nil` and an error message on failure
+- Encoding operations return `nil` and an error message on failure
 - Path security violations return descriptive error messages
-- Merge operations return `nil` and error message on failure
+- Merge operations return `nil` and an error message on failure
 
 When running Lua code from Go using GopherLua, safe error handling is important to prevent your application from
-panicking due to unhandled Lua runtime errors. What is `pcall` in Lua? The `pcall` stands for `protected call`.
+panicking due to unhandled Lua runtime errors. What is `pcall` in Lua? `pcall` stands for `protected call`.
 
 ```lua
 ok, result = pcall(function() 

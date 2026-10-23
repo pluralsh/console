@@ -15,15 +15,18 @@ export function NamespaceMultiSelect({
 }) {
   const allSelected =
     Array.from(selectedNamespaces).length >= allNamespaces.length
-  const sortedSelectedNamespaces = Array.from(selectedNamespaces).sort()
+  const sortedSelectedNamespaces = Array.from(selectedNamespaces).sort((a, b) =>
+    a.localeCompare(b)
+  )
 
   return (
     <Select
       label="All namespaces"
       triggerButton={
         <FilterTrigger
-          $width={280}
+          $width={220}
           $border
+          size="small"
         >
           {sortedSelectedNamespaces.length === 0
             ? 'Select namespaces'

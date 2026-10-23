@@ -21,14 +21,14 @@ Once configured, your Plural Console login page will include **Log in with OIDC*
 - A Plural-managed Kubernetes cluster  
 - Basic knowledge of [RBAC](https://kubernetes.io/docs/reference/access-authn-authz/rbac/)  
 
-## Step 1: Register an OIDC Application in Okta[text](../../../public/assets/oidc-integration)
+## Step 1: Register an OIDC Application in Okta
 
-1. Log into **Okta Admin Console** → **Applications → Create App Integration**.  
+1. Log in to the **Okta Admin Console** → **Applications → Create App Integration**.  
 2. Select **OIDC** and **Web Application**.
 
 ![](/assets/oidc-integration/okta-new-app.png)
 
-3. Configure redirect URIs for your Plural console domain.  
+3. Configure redirect URIs for your Plural Console domain.  
 4. Save and copy:
    - **Client ID**  
    - **Client Secret**  
@@ -49,7 +49,7 @@ Plural now delegates login to Okta. You should see a **Log in with OIDC** button
 
 ## Step 3: Map Okta Groups to Kubernetes RBAC
 
-1. In Okta Admin Console, create groups (e.g., `sre`, `developer`).  
+1. In the Okta Admin Console, create groups (e.g., `sre`, `developer`).  
 2. Assign users to groups.  
 3. Bind groups to RBAC roles in Kubernetes via GitOps:
 
@@ -89,7 +89,7 @@ Plural's GitOps pipeline syncs these bindings to all managed clusters automatica
 
 ## Verifying Access
 
-After configuring Okta integration, you should confirm that group-to-RBAC mappings are working correctly. The simplest way to validate RBAC is with `kubectl auth can-i`. This command lets you impersonate a group and test whether specific actions are allowed.
+After configuring the Okta integration, confirm that group-to-RBAC mappings are working correctly. The simplest way to validate RBAC is with `kubectl auth can-i`, which lets you impersonate a group and test whether specific actions are allowed.
 
 ```bash
 # SRE group should have full admin rights
@@ -101,4 +101,4 @@ kubectl auth can-i delete pods --as-group=developer
 
 Expected results:
 - The first command should return yes (SREs are bound to cluster-admin).
-- The second should return no (Developers only have view role).
+- The second should return no (developers only have the view role).

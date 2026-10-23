@@ -36,6 +36,18 @@ jobs:
     needs: [vouch]
     name: Test
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     defaults:
       run:
         shell: bash
@@ -44,10 +56,12 @@ jobs:
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v7
         with:
-          go-version-file: go/datastore/go.mod
+          go-version-file: go/go.work
           cache-dependency-path: go/datastore/go.sum
           cache: true
       - name: Download dependencies
         run: go mod download
       - name: Test
         run: PATH=$PATH:$GOPATH/bin make test
+        env:
+          POSTGRES_TEST_URL: postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable

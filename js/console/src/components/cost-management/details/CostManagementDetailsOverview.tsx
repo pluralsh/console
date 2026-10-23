@@ -8,6 +8,7 @@ import {
   DeltaUpIcon,
   Flex,
   RamIcon,
+  SemanticColorKey,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
@@ -17,10 +18,7 @@ import dayjs from 'dayjs'
 import { ClusterUsageHistoryFragment } from 'generated/graphql'
 import { ReactNode, useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
-import {
-  COST_MANAGEMENT_ABS_PATH,
-  COST_MANAGEMENT_REL_PATH,
-} from 'routes/costManagementRoutesConsts'
+import { COST_MANAGEMENT_ABS_PATH } from 'routes/costManagementRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { CMContextType } from './CostManagementDetails'
 import {
@@ -29,7 +27,7 @@ import {
 } from './CostTimeSeriesGraph'
 
 const getBreadcrumbs = (clusterName: string) => [
-  { label: COST_MANAGEMENT_REL_PATH, url: COST_MANAGEMENT_ABS_PATH },
+  { label: 'cost management', url: COST_MANAGEMENT_ABS_PATH },
   { label: clusterName },
   { label: 'overview' },
 ]
@@ -121,8 +119,8 @@ function CostCard({
   deltaTimeframe: string
 }) {
   const theme = useTheme()
-  let deltaIcon
-  let deltaColor
+  let deltaIcon: ReactNode
+  let deltaColor: SemanticColorKey
   if (delta) {
     deltaIcon = delta > 0 ? <DeltaUpIcon /> : <DeltaDownIcon />
     deltaColor = delta > 0 ? 'text-danger-light' : 'text-success-light'
@@ -141,7 +139,7 @@ function CostCard({
           </Flex>
         ),
       }}
-      css={{ padding: `${theme.spacing.large}px ${theme.spacing.xlarge}px` }}
+      css={{ padding: `${theme.spacing.large} ${theme.spacing.xlarge}` }}
     >
       <Flex direction="column">
         <Title1H1 as="span">

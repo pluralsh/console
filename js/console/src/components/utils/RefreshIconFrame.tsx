@@ -42,8 +42,8 @@ export default function IconFrameRefreshButton({
               '&::before': {
                 width: 16,
                 height: 16,
-                marginTop: -8,
-                marginLeft: -8,
+                marginTop: '-0.5rem',
+                marginLeft: '-0.5rem',
               },
             }}
           />

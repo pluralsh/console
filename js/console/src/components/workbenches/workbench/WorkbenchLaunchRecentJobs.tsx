@@ -1,137 +1,105 @@
-import { Card, CaretRightIcon } from '@pluralsh/design-system'
-import { RunStatusIcon } from 'components/ai/agent-runs/AgentRunInfoDisplays'
+import { Button } from '@pluralsh/design-system'
+import dayjs from 'dayjs'
+import { useMemo } from 'react'
+import { Link } from 'react-router-dom'
+import {
+  getWorkbenchAbsPath,
+  WORKBENCH_JOBS_REL_PATH,
+} from 'routes/workbenchesRoutesConsts'
+import styled from 'styled-components'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
-import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { CaptionP, Subtitle2H1 } from 'components/utils/typography/Text'
-import { WorkbenchStoredPromptMarkdown } from 'components/workbenches/workbench/WorkbenchStoredPromptMarkdown'
-import { WorkbenchUsageChips } from 'components/workbenches/common/WorkbenchUsageChips'
-import {
-  useWorkbenchJobsQuery,
-  WorkbenchJobTinyFragment,
-} from 'generated/graphql'
-import { isEmpty } from 'lodash'
-import { useMemo } from 'react'
-import { Link } from 'react-router-dom'
-import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
-import styled from 'styled-components'
-import { fromNow } from 'utils/datetime'
-import { mapExistingNodes } from 'utils/graphql'
-import { WorkbenchJobActionsRow } from './WorkbenchJobsTable'
+import { EmptyListState } from 'components/workbenches/common/WorkbenchBoard'
+import { useWorkbenchJobStatusCountsQuery } from 'generated/graphql'
+import { JOB_STATUS_OPTIONS } from './workbenchJobsDisplay'
+import { WorkbenchJobsGroupedList } from './WorkbenchJobsGroupedList'
 
-const RECENT_JOBS_COUNT = 3
+const LAUNCH_JOBS_PER_STATUS = 5
+const LAUNCH_JOBS_WINDOW_DAYS = 7
+const LAUNCH_DEFAULT_COLLAPSED = {}
+
+const EMPTY_STATE: EmptyListState = {
+  searching: false,
+  filtered: false,
+  onResetFilters: () => {},
+}
 
 export function WorkbenchLaunchRecentJobs({
   workbenchId,
 }: {
   workbenchId: string
 }) {
-  const { data, loading, error } = useWorkbenchJobsQuery({
-    variables: { id: workbenchId, first: RECENT_JOBS_COUNT },
-    skip: !workbenchId,
-    fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
-  })
-
-  const jobs = useMemo(() => mapExistingNodes(data?.workbench?.runs), [data])
+  // stable for the visit, so polling doesn't move the window every render
+  const insertedAfter = useMemo(
+    () => dayjs().subtract(LAUNCH_JOBS_WINDOW_DAYS, 'day').toISOString(),
+    []
+  )
+  const filters = useMemo(() => ({ insertedAfter }), [insertedAfter])
+  const { data, previousData, loading, error } =
+    useWorkbenchJobStatusCountsQuery({
+      // same variables as the list below, so both share one polled query
+      variables: {
+        id: workbenchId,
+        q: undefined,
+        prStates: undefined,
+        insertedAfter,
+      },
+      skip: !workbenchId,
+      fetchPolicy: 'cache-and-network',
+      pollInterval: POLL_INTERVAL,
+    })
+  const countsData = data ?? previousData
+  const hasJobs = (countsData?.workbench?.runCounts?.statuses ?? []).some(
+    (entry) => (entry?.count ?? 0) > 0
+  )
 
   if (error) return <GqlError error={error} />
-  if (isEmpty(jobs) && !loading) return null
+  if (!hasJobs && !countsData && loading) {
+    return (
+      <SectionSC>
+        <Subtitle2H1>Recent jobs</Subtitle2H1>
+        <RectangleSkeleton
+          $height={132}
+          $width="100%"
+        />
+      </SectionSC>
+    )
+  }
+  if (!hasJobs) return null
 
   return (
     <SectionSC>
-      <Subtitle2H1>Recent jobs</Subtitle2H1>
-      <CardGridSC>
-        {isEmpty(jobs)
-          ? Array.from({ length: RECENT_JOBS_COUNT }).map((_, i) => (
-              <RectangleSkeleton
-                key={i}
-                $height={140}
-                $width="100%"
-              />
-            ))
-          : jobs.map((job) => (
-              <WorkbenchLaunchRecentJobCard
-                key={job.id}
-                job={job}
-              />
-            ))}
-      </CardGridSC>
+      <HeaderSC>
+        <TitleSC>
+          <Subtitle2H1>Recent jobs</Subtitle2H1>
+          <CaptionP $color="text-xlight">
+            Last {LAUNCH_JOBS_WINDOW_DAYS} days
+          </CaptionP>
+        </TitleSC>
+        <Button
+          small
+          secondary
+          as={Link}
+          to={`${getWorkbenchAbsPath(workbenchId)}/${WORKBENCH_JOBS_REL_PATH}`}
+        >
+          All jobs
+        </Button>
+      </HeaderSC>
+      <WorkbenchJobsGroupedList
+        workbenchId={workbenchId}
+        statuses={JOB_STATUS_OPTIONS}
+        filters={filters}
+        emptyState={EMPTY_STATE}
+        pageSize={LAUNCH_JOBS_PER_STATUS}
+        capped
+        fill={false}
+        defaultCollapsed={LAUNCH_DEFAULT_COLLAPSED}
+      />
     </SectionSC>
   )
 }
-
-function WorkbenchLaunchRecentJobCard({
-  job,
-}: {
-  job: WorkbenchJobTinyFragment
-}) {
-  const { id, prompt, status, insertedAt, user, workbench } = job
-  if (!workbench) return null
-
-  return (
-    <RecentJobCardSC
-      clickable
-      forwardedAs={Link}
-      to={getWorkbenchJobAbsPath({ workbenchId: workbench.id, jobId: id })}
-    >
-      <StretchedFlex>
-        {user ? (
-          <CaptionP
-            $color="text-xlight"
-            css={{ ...TRUNCATE_STYLE }}
-          >
-            {user.name}
-          </CaptionP>
-        ) : (
-          <span />
-        )}
-        <StretchedFlex
-          gap="small"
-          css={{ width: 'auto' }}
-        >
-          <CaptionP $color="text-xlight">{fromNow(insertedAt)}</CaptionP>
-          <RunStatusIcon
-            fullColor
-            status={status}
-          />
-        </StretchedFlex>
-      </StretchedFlex>
-      <WorkbenchStoredPromptMarkdown
-        text={prompt ?? ''}
-        density="jobCard"
-        clampLines={2}
-      />
-      <UsageRowSC>
-        <WorkbenchUsageChips
-          usage={job.usage}
-          budget={job.modes?.budget}
-          error={job.error}
-        />
-      </UsageRowSC>
-      <BottomSectionSC>
-        <DividerSC />
-        <CardActionsRowSC>
-          <WorkbenchJobActionsRow
-            job={job}
-            chipFillLevel={2}
-          />
-          <CaretRightIcon
-            color="icon-xlight"
-            css={{ marginLeft: 'auto', flexShrink: 0 }}
-          />
-        </CardActionsRowSC>
-      </BottomSectionSC>
-    </RecentJobCardSC>
-  )
-}
-
-const TRUNCATE_STYLE = {
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-} as const
 
 const SectionSC = styled.div(({ theme }) => ({
   display: 'flex',
@@ -139,51 +107,15 @@ const SectionSC = styled.div(({ theme }) => ({
   gap: theme.spacing.medium,
 }))
 
-const CardGridSC = styled.div(({ theme }) => ({
-  display: 'grid',
-  gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-  gap: theme.spacing.medium,
-  [`@media (max-width: ${theme.breakpoints.desktop}px)`]: {
-    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-  },
-}))
-
-const RecentJobCardSC = styled(Card)(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.medium,
-  padding: theme.spacing.medium,
-  textDecoration: 'none',
-  minHeight: 140,
-  '&&:has(button:hover, [data-clickable="true"]:hover):hover': {
-    backgroundColor: theme.colors['fill-one'],
-  },
-}))
-
-const UsageRowSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  gap: theme.spacing.xxsmall,
-  flexWrap: 'wrap',
-  minHeight: 24,
-}))
-
-const BottomSectionSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.medium,
-  marginTop: 'auto',
-}))
-
-// Fixed height matches the tallest possible child (IconFrame medium = 32px)
-// so all action rows occupy the same layout height without clipping content.
-const CardActionsRowSC = styled.div({
-  height: 32,
+const HeaderSC = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
-})
+  justifyContent: 'space-between',
+  gap: theme.spacing.medium,
+}))
 
-const DividerSC = styled.div(({ theme }) => ({
-  borderTop: `1px solid ${theme.colors['border-fill-one']}`,
-  marginLeft: -theme.spacing.medium,
-  marginRight: -theme.spacing.medium,
+const TitleSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'baseline',
+  gap: theme.spacing.small,
 }))

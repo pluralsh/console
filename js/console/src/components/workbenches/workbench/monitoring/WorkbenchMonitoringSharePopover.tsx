@@ -1,6 +1,5 @@
 import {
   Button,
-  Checkbox,
   Code,
   IconFrame,
   ShareIcon,
@@ -9,37 +8,30 @@ import {
 import { useOutsideClick } from 'components/hooks/useOutsideClick'
 import { SimplePopupMenu } from 'components/layout/HeaderPopupMenu'
 import { CaptionP } from 'components/utils/typography/Text'
-import { useMemo, useRef, useState } from 'react'
+import { ReactNode, useMemo, useRef, useState } from 'react'
 import styled from 'styled-components'
-import type { TimeRange } from 'components/utils/timerange/timeRange'
 import { buildMonitoringShareUrl } from './monitoringShare'
 
 export function WorkbenchMonitoringSharePopover({
   kind,
   pathname,
-  range,
-  variables,
+  active = false,
+  children,
 }: {
   kind: 'dashboard' | 'monitor'
   pathname: string
-  range?: TimeRange
-  variables?: Record<string, string | string[]>
+  // marks the icon, e.g. when a dashboard is shared publicly
+  active?: boolean
+  // replaces the default copy-link body
+  children?: ReactNode
 }) {
   const [open, setOpen] = useState(false)
-  const [includeFiltersAndRange, setIncludeFiltersAndRange] = useState(true)
   const btnRef = useRef<HTMLDivElement>(null)
   useOutsideClick(btnRef, () => setOpen(false))
 
-  const canIncludeState = kind === 'dashboard'
   const shareUrl = useMemo(
-    () =>
-      buildMonitoringShareUrl({
-        pathname,
-        range,
-        variables,
-        includeFiltersAndRange: canIncludeState && includeFiltersAndRange,
-      }),
-    [pathname, range, variables, canIncludeState, includeFiltersAndRange]
+    () => buildMonitoringShareUrl({ pathname, includeFiltersAndRange: false }),
+    [pathname]
   )
   const { copied, handleCopy } = useCopyText(shareUrl)
 
@@ -51,9 +43,10 @@ export function WorkbenchMonitoringSharePopover({
         size="small"
         type="tertiary"
         icon={<ShareIcon />}
-        textValue={`Share ${kind}`}
+        textValue={active ? `Share ${kind} (shared publicly)` : `Share ${kind}`}
         onClick={() => setOpen((prev) => !prev)}
       />
+      {active && <ActiveDotSC />}
       <ShareMenuSC
         type="header"
         linkStyles={false}
@@ -64,40 +57,33 @@ export function WorkbenchMonitoringSharePopover({
         <CaptionP
           $color="text-xlight"
           css={{
-            letterSpacing: '0.5px',
+            letterSpacing: '0.025em',
             textTransform: 'uppercase',
             margin: 0,
           }}
         >
-          Share {kind}
+          Share
         </CaptionP>
-        <Code
-          showHeader={false}
-          showLineNumbers={false}
-          css={{ maxHeight: 120, overflow: 'auto' }}
-        >
-          {shareUrl}
-        </Code>
-        {canIncludeState && (
-          <Checkbox
-            checked={includeFiltersAndRange}
-            onChange={({ target: { checked } }) =>
-              setIncludeFiltersAndRange(checked)
-            }
-            small
-          >
-            Include filters and range
-          </Checkbox>
+        {children ?? (
+          <>
+            <Code
+              showHeader={false}
+              showLineNumbers={false}
+              css={{ maxHeight: 120, overflow: 'auto' }}
+            >
+              {shareUrl}
+            </Code>
+            <Button
+              small
+              primary
+              disabled={copied}
+              onClick={handleCopy}
+              css={{ width: '100%' }}
+            >
+              {copied ? 'Copied!' : 'Copy link'}
+            </Button>
+          </>
         )}
-        <Button
-          small
-          primary
-          disabled={copied}
-          onClick={handleCopy}
-          css={{ width: '100%' }}
-        >
-          {copied ? 'Copied!' : 'Copy link'}
-        </Button>
       </ShareMenuSC>
     </WrapSC>
   )
@@ -108,14 +94,26 @@ const WrapSC = styled.div({
   whiteSpace: 'nowrap',
 })
 
+const ActiveDotSC = styled.span(({ theme }) => ({
+  position: 'absolute',
+  top: -2,
+  right: -2,
+  width: 6,
+  height: 6,
+  borderRadius: '50%',
+  backgroundColor: theme.colors['icon-danger'],
+  pointerEvents: 'none',
+}))
+
 const ShareMenuSC = styled(SimplePopupMenu)(({ theme }) => ({
   '&&': {
     width: 411,
     maxWidth: 'min(411px, calc(100vw - 32px))',
-    padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px ${theme.spacing.medium}px`,
+    padding: `${theme.spacing.xsmall} ${theme.spacing.medium} ${theme.spacing.medium}`,
     gap: theme.spacing.medium,
     boxShadow: theme.boxShadows.moderate,
     display: 'flex',
     flexDirection: 'column',
+    whiteSpace: 'normal',
   },
 }))

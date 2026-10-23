@@ -35,14 +35,14 @@ const Wizard = styled(WizardUnstyled)(({ theme }) => ({
     alignItems: 'center',
     justifyContent: 'space-between',
     height: '40px',
-    marginBottom: '24px',
+    marginBottom: '1.5rem',
   },
 
   '.footer': {
-    marginTop: '24px',
+    marginTop: '1.5rem',
 
     '&.divider': {
-      paddingTop: '24px',
+      paddingTop: '1.5rem',
       borderTop: '1px solid',
       borderColor: theme.colors.border,
     },
@@ -54,7 +54,7 @@ const Wizard = styled(WizardUnstyled)(({ theme }) => ({
     bottom: 0,
     right: 0,
     left: 0,
-    margin: '-24px',
+    margin: '-1.5rem',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',

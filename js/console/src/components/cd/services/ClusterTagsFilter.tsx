@@ -1,6 +1,7 @@
 import {
   ListBoxFooterPlus,
   ReloadIcon,
+  SelectButton,
   TagMultiSelect,
   TagMultiSelectProps,
 } from '@pluralsh/design-system'
@@ -20,9 +21,11 @@ export function TagsFilter({
   setSearchOp,
   comboBoxProps,
   selectProps,
+  small,
 }: {
   type?: TagType
   innerChips?: boolean
+  small?: boolean
   selectedTagKeys: Set<Key>
   setSelectedTagKeys: (keys: Set<Key>) => void
   searchOp: Conjunction
@@ -62,6 +65,7 @@ export function TagsFilter({
     <TagMultiSelect
       innerChips={innerChips}
       comboBoxProps={{
+        ...(small && { inputProps: { small: true } }),
         dropdownFooterFixed: (
           <ListBoxFooterPlus
             leftContent={<ReloadIcon />}
@@ -80,7 +84,23 @@ export function TagsFilter({
         },
         ...comboBoxProps,
       }}
-      selectProps={selectProps}
+      selectProps={{
+        ...(small && {
+          triggerButton: (
+            <SelectButton
+              size="small"
+              css={{
+                borderTopRightRadius: 0,
+                borderBottomRightRadius: 0,
+                borderRight: 'none',
+              }}
+            >
+              {searchOp === Conjunction.And ? 'All' : 'Any'}
+            </SelectButton>
+          ),
+        }),
+        ...selectProps,
+      }}
       selectedTagKeys={selectedTagKeys}
       setSelectedTagKeys={setSelectedTagKeys}
       inputValue={inputValue}

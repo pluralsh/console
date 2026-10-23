@@ -86,6 +86,7 @@ export function ServiceSelector() {
   return (
     <Select
       aria-label="app"
+      size="small"
       selectedKey={serviceId}
       onSelectionChange={switchService}
       label={

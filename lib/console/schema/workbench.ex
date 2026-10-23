@@ -108,9 +108,8 @@ defmodule Console.Schema.Workbench do
     field :memory,         Type
 
     embeds_one :configuration, Configuration, on_replace: :update do
-      field :self_service, :boolean, default: false
-
       embeds_one :infrastructure, Infrastructure, on_replace: :update do
+        field :self_service,    :boolean, default: false
         field :services,        :boolean
         field :stacks,          :boolean
         field :kubernetes,      :boolean
@@ -202,6 +201,24 @@ defmodule Console.Schema.Workbench do
     from(w in query, order_by: ^order)
   end
 
+  def ordered_by_favorites(query, [], dir), do: ordered(query, [{dir, :name}])
+  def ordered_by_favorites(query, ids, dir) do
+    from(w in query,
+      order_by: [
+        {:asc, fragment("CASE WHEN ? THEN 0 ELSE 1 END", w.id in ^ids)},
+        {^dir, w.name}
+      ]
+    )
+  end
+
+  def ids(query \\ __MODULE__) do
+    from(w in query, select: w.id)
+  end
+
+  def by_ids(query) do
+    from(w in __MODULE__, where: w.id in subquery(ids(query)))
+  end
+
   def for_user(query \\ __MODULE__, %User{} = user) do
     Rbac.globally_readable(query, user, fn query, id, groups ->
       from(w in query,
@@ -255,7 +272,7 @@ defmodule Console.Schema.Workbench do
 
   def configuration_changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, [:self_service])
+    |> cast(attrs, [])
     |> cast_embed(:infrastructure, with: &infrastructure_changeset/2)
     |> cast_embed(:coding, with: &coding_changeset/2)
     |> cast_embed(:observability, with: &observability_changeset/2)
@@ -263,7 +280,7 @@ defmodule Console.Schema.Workbench do
 
   def infrastructure_changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, ~w(services stacks kubernetes pod_logs vulnerabilities sentinels)a)
+    |> cast(attrs, ~w(self_service services stacks kubernetes pod_logs vulnerabilities sentinels)a)
   end
 
   def coding_changeset(model, attrs \\ %{}) do

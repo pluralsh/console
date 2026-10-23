@@ -10,11 +10,11 @@ Use this guide to fill `Subscription ID`, `Tenant ID`, `Client ID`, `Client secr
 
 ## 2) Assign read-only roles
 
-Grant RBAC roles at the smallest possible scope:
-- `Monitoring Reader` for metrics and monitoring resources
-- `Log Analytics Reader` (or `Log Analytics Data Reader`) for logs/workspace queries
+Grant RBAC roles at the smallest scope that works:
+- `Monitoring Reader` on the **subscription** for metrics, dashboards, and alert rules. Metrics are queried through the Azure Monitor metrics batch API, which requires `Monitoring Reader` on the subscription itself; a role on individual resources or resource groups is not enough.
+- `Log Analytics Reader` (or `Log Analytics Data Reader`) on the Log Analytics workspaces for logs/workspace queries
 
-If you use **Azure Managed Prometheus** (see below), also grant access that allows the service principal to query that workspace’s Prometheus API (follow Microsoft’s guidance for your deployment model).
+If you use **Azure Managed Prometheus** (see below), also assign `Monitoring Data Reader` to the service principal on the Azure Monitor workspace so it can query that workspace’s Prometheus API.
 
 Avoid contributor/owner roles for this integration.
 

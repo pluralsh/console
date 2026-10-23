@@ -150,6 +150,9 @@ func (r *AgentRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 		controllerutil.AddFinalizer(run, AgentRunFinalizer)
 	}
 	if !run.GetDeletionTimestamp().IsZero() {
+		if err := r.deleteRunSecrets(ctx, run); err != nil {
+			return ctrl.Result{}, err
+		}
 		controllerutil.RemoveFinalizer(run, AgentRunFinalizer)
 		return ctrl.Result{}, nil
 	}
@@ -213,6 +216,19 @@ func (r *AgentRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 	if err != nil {
 		utils.MarkCondition(run.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
+	}
+
+	// A terminal run can be requeued to pending (follow-up reprompt). Replace any
+	// finished pod so a fresh harness boots instead of treating the old pod as
+	// the run result. Requeue quickly so the next turn starts without waiting
+	// for the long agent-run poll interval.
+	if apiAgentRun.Status == console.AgentRunStatusPending && isAgentRunPodTerminal(pod) {
+		logger.V(2).Info("recreating agent run pod for pending follow-up", "pod", pod.Name)
+		if err := r.Delete(ctx, pod); err != nil && !errors.IsNotFound(err) {
+			return ctrl.Result{}, err
+		}
+		run.Status.PodRef = nil
+		return jitterRequeue(requeueWaitForResources, jitter), nil
 	}
 
 	if completion, ok, delay := getAgentRunPodCompletion(pod, agentRunMaxLifetimeForRuntime(agentRuntime)); ok {
@@ -336,6 +352,13 @@ func agentRunMaxLifetimeForRuntime(runtime *v1alpha1.AgentRuntime) time.Duration
 	return agentRunMaxLifetime
 }
 
+func isAgentRunPodTerminal(pod *corev1.Pod) bool {
+	if pod == nil {
+		return false
+	}
+	return pod.Status.Phase == corev1.PodSucceeded || pod.Status.Phase == corev1.PodFailed
+}
+
 func isAgentRunPodTimedOut(pod *corev1.Pod, ttl time.Duration) bool {
 	if pod == nil {
 		return false
@@ -344,7 +367,7 @@ func isAgentRunPodTimedOut(pod *corev1.Pod, ttl time.Duration) bool {
 		ttl = agentRunMaxLifetime
 	}
 	// Don't time out pods that have already reached a terminal phase.
-	if pod.Status.Phase == corev1.PodSucceeded || pod.Status.Phase == corev1.PodFailed {
+	if isAgentRunPodTerminal(pod) {
 		return false
 	}
 	if !pod.Status.StartTime.IsZero() {
@@ -360,18 +383,20 @@ func isAgentRunPodFailed(pod *corev1.Pod) (bool, string) {
 	if pod == nil {
 		return false, ""
 	}
+	if reason, evicted := podEvictionReason(pod); evicted {
+		return true, reason
+	}
 	for _, status := range pod.Status.InitContainerStatuses {
-		if status.State.Terminated != nil && status.State.Terminated.ExitCode != 0 {
-			reason := fmt.Sprintf("init container %q failed with exit code %d", status.Name, status.State.Terminated.ExitCode)
-			if status.State.Terminated.Message != "" {
-				reason = fmt.Sprintf("%s: %s", reason, status.State.Terminated.Message)
-			} else if status.State.Terminated.Reason != "" {
-				reason = fmt.Sprintf("%s: %s", reason, status.State.Terminated.Reason)
-			}
+		if reason, failed := containerFailureReason("init container", status); failed {
 			return true, reason
 		}
 	}
 	if pod.Status.Phase == corev1.PodFailed {
+		for _, status := range pod.Status.ContainerStatuses {
+			if reason, failed := containerFailureReason("container", status); failed {
+				return true, reason
+			}
+		}
 		if pod.Status.Message != "" {
 			return true, pod.Status.Message
 		}
@@ -381,6 +406,29 @@ func isAgentRunPodFailed(pod *corev1.Pod) (bool, string) {
 		return true, "agent run pod failed"
 	}
 	return false, ""
+}
+
+func podEvictionReason(pod *corev1.Pod) (string, bool) {
+	if pod.Status.Phase != corev1.PodFailed || pod.Status.Reason != "Evicted" {
+		return "", false
+	}
+	if pod.Status.Message != "" {
+		return pod.Status.Message, true
+	}
+	return pod.Status.Reason, true
+}
+
+func containerFailureReason(kind string, status corev1.ContainerStatus) (string, bool) {
+	if status.State.Terminated == nil || status.State.Terminated.ExitCode == 0 {
+		return "", false
+	}
+	reason := fmt.Sprintf("%s %q failed with exit code %d", kind, status.Name, status.State.Terminated.ExitCode)
+	if status.State.Terminated.Message != "" {
+		reason = fmt.Sprintf("%s: %s", reason, status.State.Terminated.Message)
+	} else if status.State.Terminated.Reason != "" {
+		reason = fmt.Sprintf("%s: %s", reason, status.State.Terminated.Reason)
+	}
+	return reason, true
 }
 
 func getAgentRunPodInitContainerFailureFinishedAt(pod *corev1.Pod) *metav1.Time {
@@ -400,6 +448,11 @@ func (r *AgentRunReconciler) reconcilePod(ctx context.Context, run *v1alpha1.Age
 	secret, err := r.reconcilePodSecret(ctx, run, runtime)
 	if err != nil {
 		return nil, fmt.Errorf("failed to reconcile run secret: %w", err)
+	}
+
+	pluralSecret, err := r.reconcilePluralSecret(ctx, run)
+	if err != nil {
+		return nil, fmt.Errorf("failed to reconcile plural secret: %w", err)
 	}
 
 	bootstrapCM, err := r.reconcileBootstrapConfigMap(ctx, run, runtime)
@@ -434,6 +487,10 @@ func (r *AgentRunReconciler) reconcilePod(ctx context.Context, run *v1alpha1.Age
 	// add owner ref to pod secret if it doesn't exist
 	if err := utils.TryAddOwnerRef(ctx, r.Client, pod, secret, r.Scheme); err != nil {
 		return pod, fmt.Errorf("failed to add owner ref: %w", err)
+	}
+
+	if err := utils.TryAddOwnerRef(ctx, r.Client, pod, pluralSecret, r.Scheme); err != nil {
+		return pod, fmt.Errorf("failed to add owner ref to plural secret: %w", err)
 	}
 
 	if bootstrapCM != nil {
@@ -543,13 +600,13 @@ func (r *AgentRunReconciler) reconcilePodSecret(ctx context.Context, run *v1alph
 	}
 
 	secret := &corev1.Secret{}
-	if err := r.Get(ctx, types.NamespacedName{Name: run.Name, Namespace: run.Namespace}, secret); err != nil {
+	if err := r.Get(ctx, types.NamespacedName{Name: runSecretName(run.Name), Namespace: run.Namespace}, secret); err != nil {
 		if !errors.IsNotFound(err) {
 			return nil, fmt.Errorf("failed to get secret: %w", err)
 		}
 
 		secret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{Name: run.Name, Namespace: run.Namespace},
+			ObjectMeta: runSecretMeta(runSecretName(run.Name), run),
 			StringData: r.getSecretData(run, config, runtime.Spec.Type, signingKey, exaConnection, mcpServers),
 		}
 
@@ -559,6 +616,10 @@ func (r *AgentRunReconciler) reconcilePodSecret(ctx context.Context, run *v1alph
 		}
 
 		return secret, nil
+	}
+
+	if err := checkRunSecretOwner(secret, run); err != nil {
+		return nil, err
 	}
 
 	if !r.hasSecretData(secret.Data, run) {
@@ -602,9 +663,7 @@ func (r *AgentRunReconciler) resolveSigningKey(ctx context.Context, runtime *v1a
 
 func (r *AgentRunReconciler) getSecretData(run *v1alpha1.AgentRun, config *v1alpha1.AgentRuntimeConfigRaw, runtimeType console.AgentRuntimeType, signingKey []byte, exaConnection *v1alpha1.ExaConnectionRaw, mcpServers []mcp.Server) map[string]string {
 	result := map[string]string{
-		EnvConsoleURL:  r.ConsoleURL,
-		EnvDeployToken: r.DeployToken,
-		EnvAgentRunID:  run.Status.GetID(),
+		EnvAgentRunID: run.Status.GetID(),
 	}
 
 	if payload := mcpServersPayload(mcpServers); payload != "" {
@@ -730,10 +789,82 @@ func (r *AgentRunReconciler) getSecretData(run *v1alpha1.AgentRun, config *v1alp
 	return result
 }
 
+// reconcilePluralSecret keeps the deploy token and Console URL in a separate secret that is never mounted
+// into the default container. Only the sidecar and bootstrap talk to Console directly.
+func (r *AgentRunReconciler) reconcilePluralSecret(ctx context.Context, run *v1alpha1.AgentRun) (*corev1.Secret, error) {
+	data := map[string]string{EnvDeployToken: r.DeployToken, EnvConsoleURL: r.ConsoleURL}
+
+	secret := &corev1.Secret{}
+	if err := r.Get(ctx, types.NamespacedName{Name: pluralSecretName(run.Name), Namespace: run.Namespace}, secret); err != nil {
+		if !errors.IsNotFound(err) {
+			return nil, fmt.Errorf("failed to get plural secret: %w", err)
+		}
+
+		secret = &corev1.Secret{
+			ObjectMeta: runSecretMeta(pluralSecretName(run.Name), run),
+			StringData: data,
+		}
+		if err = r.Create(ctx, secret); err != nil {
+			return nil, fmt.Errorf("failed to create plural secret: %w", err)
+		}
+		return secret, nil
+	}
+
+	if err := checkRunSecretOwner(secret, run); err != nil {
+		return nil, err
+	}
+
+	if string(secret.Data[EnvDeployToken]) != r.DeployToken || string(secret.Data[EnvConsoleURL]) != r.ConsoleURL {
+		secret.StringData = data
+		if err := r.Update(ctx, secret); err != nil {
+			return nil, fmt.Errorf("failed to update plural secret: %w", err)
+		}
+	}
+
+	return secret, nil
+}
+
+// agentRunUIDAnnotation records which run a run secret was created for.
+const agentRunUIDAnnotation = "deployments.plural.sh/agent-run-uid"
+
+func runSecretMeta(name string, run *v1alpha1.AgentRun) metav1.ObjectMeta {
+	return metav1.ObjectMeta{
+		Name:        name,
+		Namespace:   run.Namespace,
+		Annotations: map[string]string{agentRunUIDAnnotation: string(run.UID)},
+	}
+}
+
+// checkRunSecretOwner refuses a secret this run didn't create, so its data never reaches another run's pod.
+func checkRunSecretOwner(secret *corev1.Secret, run *v1alpha1.AgentRun) error {
+	if uid, ok := secret.Annotations[agentRunUIDAnnotation]; !ok || uid != string(run.UID) {
+		return fmt.Errorf("secret %s/%s was not created for agent run %s", secret.Namespace, secret.Name, run.Name)
+	}
+	return nil
+}
+
 func (r *AgentRunReconciler) hasSecretData(data map[string][]byte, run *v1alpha1.AgentRun) bool {
-	token, hasToken := data[EnvDeployToken]
-	url, hasUrl := data[EnvConsoleURL]
 	id, hasID := data[EnvAgentRunID]
-	return hasToken && hasUrl && hasID &&
-		string(token) == r.DeployToken && string(url) == r.ConsoleURL && string(id) == run.Status.GetID()
+	return hasID && string(id) == run.Status.GetID()
+}
+
+// deleteRunSecrets removes this run's secrets. They are owned by the pod, so this only matters when the
+// pod was never created, which would otherwise leave the deploy token behind.
+func (r *AgentRunReconciler) deleteRunSecrets(ctx context.Context, run *v1alpha1.AgentRun) error {
+	for _, name := range []string{runSecretName(run.Name), pluralSecretName(run.Name)} {
+		secret := &corev1.Secret{}
+		if err := r.Get(ctx, types.NamespacedName{Name: name, Namespace: run.Namespace}, secret); err != nil {
+			if errors.IsNotFound(err) {
+				continue
+			}
+			return fmt.Errorf("failed to get secret %s: %w", name, err)
+		}
+		if checkRunSecretOwner(secret, run) != nil {
+			continue
+		}
+		if err := r.Delete(ctx, secret); err != nil && !errors.IsNotFound(err) {
+			return fmt.Errorf("failed to delete secret %s: %w", name, err)
+		}
+	}
+	return nil
 }

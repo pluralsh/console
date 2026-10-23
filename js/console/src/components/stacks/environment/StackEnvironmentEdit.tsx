@@ -19,6 +19,7 @@ export default function StackEnvironmentEdit({
         <IconFrame
           tooltip="Edit"
           clickable
+          size="small"
           icon={<GearTrainIcon />}
           onClick={() => setOpen(true)}
         />

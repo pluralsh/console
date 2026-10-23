@@ -3,6 +3,9 @@ import { useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Script from 'next/script'
 
+import { COLOR_MODE_KEY, DEFAULT_COLOR_MODE } from '@src/theme/colorMode'
+import { brandTokens, PLURAL_BLUE } from '@src/theme/palette'
+
 function HubSpot() {
   const router = useRouter()
 
@@ -74,6 +77,15 @@ function HubSpot() {
 //   }
 // }
 
+// Kapa reads its config once when the script loads, so it follows the color
+// mode active at page load (colorModeScript has already set it by then).
+const initialColorMode = () =>
+  (typeof document !== 'undefined' &&
+    document.documentElement.getAttribute(`data-${COLOR_MODE_KEY}`)) ||
+  DEFAULT_COLOR_MODE
+
+const kapaDark = brandTokens.dark
+
 function KapaWidget() {
   // useEffect(() => {
   //   const onCookiePrefChange = () => {
@@ -108,21 +120,19 @@ function KapaWidget() {
       data-modal-open-on-command-k="true"
       data-modal-command-k-search-mode-default="true"
       data-search-mode-enabled="true"
-      data-modal-override-open-selector-search=".docs-search-trigger"
-      data-modal-override-open-selector=".docs-ai-trigger"
       data-mcp-enabled="true"
       data-mcp-server-url="https://plural.mcp.kapa.ai"
-      data-project-color="#5D63F4"
+      data-project-color={PLURAL_BLUE}
       data-project-logo="https://docs.plural.sh/favicon-192.png"
       data-kapa-branding-hidden="true"
-      data-color-scheme="dark"
-      data-surface-color-dark="#12151B"
-      data-surface-elevated-color-dark="#1B1F27"
-      data-surface-hover-color-dark="#252932"
-      data-text-color-dark="#EEF0F1"
-      data-text-muted-color-dark="#A1A5B0"
-      data-border-color-dark="#303540"
-      data-anchor-color-dark="#5D63F4"
+      data-color-scheme={initialColorMode()}
+      data-surface-color-dark={kapaDark.canvas}
+      data-surface-elevated-color-dark={kapaDark.surface}
+      data-surface-hover-color-dark={kapaDark['surface-hover']}
+      data-text-color-dark={kapaDark.ink}
+      data-text-muted-color-dark={kapaDark.muted}
+      data-border-color-dark="#2a2c42"
+      data-anchor-color-dark={kapaDark['accent-ink']}
     />
   )
 }

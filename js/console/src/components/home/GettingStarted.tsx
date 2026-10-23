@@ -123,7 +123,7 @@ export function GettingStartedContentHomeVariant() {
       direction="column"
       align="center"
       gap="medium"
-      margin={`${theme.spacing.xxlarge}px auto`}
+      margin={`${theme.spacing.xxlarge} auto`}
       width={576}
     >
       <Body1BoldP>Congrats on deploying your Plural Console!</Body1BoldP>

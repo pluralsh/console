@@ -28,7 +28,7 @@ import { WorkbenchJobPromptInput } from './WorkbenchJobPromptInput'
 import { isActivityTerminal } from './workbenchJobActivityCollapse'
 
 /** The only space between top-level rows. Rows add no vertical padding of their own. */
-export const ACTIVITY_GAP = 'xlarge' as const
+export const ACTIVITY_GAP = 'small' as const
 
 export function WorkbenchJobActivities({
   jobId,
@@ -134,7 +134,7 @@ export function WorkbenchJobActivities({
             data={activityGroups}
             itemGap={ACTIVITY_GAP}
             style={{
-              padding: `${spacing.large}px ${spacing.large}px 0`,
+              padding: `${spacing.large} ${spacing.large} 0`,
               // Keep the clicked row from being pinned when it grows at the bottom.
               overflowAnchor: 'none',
             }}
@@ -150,6 +150,7 @@ export function WorkbenchJobActivities({
                 <ExpandableUserPrompt
                   prompt={job?.prompt}
                   timestamp={job?.insertedAt}
+                  attachments={job?.attachments}
                   fullWidth
                   css={{ marginTop: 0 }}
                 />

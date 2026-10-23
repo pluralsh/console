@@ -268,16 +268,16 @@ function SectionHeader({ label }: { label: string }) {
       disabled
       textValue=""
       css={{
-        paddingTop: 8,
-        paddingBottom: 8,
+        paddingTop: '0.5rem',
+        paddingBottom: '0.5rem',
         cursor: 'default',
         pointerEvents: 'none',
         '&:hover': { backgroundColor: 'transparent' },
         '.label': {
           textTransform: 'uppercase',
           letterSpacing: '0.04em',
-          fontSize: 10,
-          lineHeight: '16px',
+          fontSize: '0.625rem',
+          lineHeight: '1rem',
         },
       }}
     />
@@ -321,7 +321,7 @@ function modelOptionKey({ provider, model }: WorkbenchJobModelAttributes) {
 }
 
 const DropdownSearchHeaderSC = styled.div(({ theme }) => ({
-  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  padding: `${theme.spacing.small} ${theme.spacing.medium}`,
 }))
 
 const DropdownFooterSC = styled.div(({ theme }) => ({

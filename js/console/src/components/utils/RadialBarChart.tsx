@@ -77,7 +77,7 @@ export const createCenteredMetric = (
           dominantBaseline="alphabetic"
           style={{
             fontFamily: 'Monument Semi-Mono',
-            fontSize: 26,
+            fontSize: '1.5rem',
             fontStyle: 'normal',
             fontWeight: 500,
           }}
@@ -93,7 +93,7 @@ export const createCenteredMetric = (
           dominantBaseline="hanging"
           style={{
             ...theme.partials.text.body2,
-            fontSize: 12,
+            fontSize: '0.75rem',
           }}
         >
           {label}

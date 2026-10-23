@@ -1,4 +1,4 @@
-import { Input, SearchIcon, Table } from '@pluralsh/design-system'
+import { Table } from '@pluralsh/design-system'
 import { isEmpty } from 'lodash'
 import { ComponentProps, useMemo } from 'react'
 
@@ -20,13 +20,7 @@ import { serviceAccountsCols } from './ServiceAccountCols'
 
 export const SERVICE_ACCOUNTS_QUERY_PAGE_SIZE = 100
 
-export function ServiceAccountsList({
-  q,
-  setQ,
-}: {
-  q: string
-  setQ: (q: string) => void
-}) {
+export function ServiceAccountsList({ q }: { q: string }) {
   const debouncedQ = useDebounce(q, 100)
   const { me } = useLogin()
   const isAdmin = !!me?.roles?.admin
@@ -54,12 +48,6 @@ export function ServiceAccountsList({
 
   return (
     <ListWrapperSC>
-      <Input
-        value={q}
-        placeholder="Search an account"
-        startIcon={<SearchIcon color="text-light" />}
-        onChange={({ target: { value } }) => setQ(value)}
-      />
       <GridTableWrapper>
         <Table
           hideHeader

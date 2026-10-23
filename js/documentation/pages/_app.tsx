@@ -1,8 +1,9 @@
 import {
   type ComponentProps,
   type ComponentType,
+  type ReactNode,
+  type Ref,
   Suspense,
-  forwardRef,
   useEffect,
   useMemo,
   useState,
@@ -14,7 +15,6 @@ import {
   NavigationContextProvider,
   type NavigationContextValue,
   GlobalStyle as PluralGlobalStyle,
-  styledTheme,
 } from '@pluralsh/design-system'
 import type { AppProps } from 'next/app'
 import NextLink from 'next/link'
@@ -24,6 +24,8 @@ import { until } from '@open-draft/until'
 import { SSRProvider } from '@react-aria/ssr'
 import '@src/highlight'
 import '@src/styles/globals.css'
+
+import type { MarkdocNextJsPageProps } from '@markdoc/next.js'
 import styled, { ThemeProvider as StyledThemeProvider } from 'styled-components'
 import { SWRConfig } from 'swr'
 
@@ -59,8 +61,13 @@ import { NavDataProvider } from '@src/contexts/NavDataContext'
 import { RestNavProvider } from '@src/contexts/RestNavContext'
 import { collectHeadings } from '@src/markdoc/utils/parseHeadings'
 import { getNavData } from '@src/NavData'
-
-import type { MarkdocNextJsPageProps } from '@markdoc/next.js'
+import {
+  ColorModeProvider,
+  DocsColorVars,
+  useColorMode,
+} from '@src/theme/colorMode'
+import { docsThemeDark, docsThemeLight } from '@src/theme/docsTheme'
+import routes from '../generated/routes.json'
 
 /** Page component type; some pages opt into a full-width custom layout (e.g. REST API reference). */
 type PageComponentWithLayout = ComponentType<MyPageProps> & {
@@ -86,7 +93,17 @@ export type MarkdocHeading = {
   title?: string
 }
 
-const docsStyledTheme = { ...styledTheme, ...{ docs: { topNavHeight: 72 } } }
+function DocsThemeProvider({ children }: { children: ReactNode }) {
+  const { mode } = useColorMode()
+
+  return (
+    <StyledThemeProvider
+      theme={mode === 'dark' ? docsThemeDark : docsThemeLight}
+    >
+      {children}
+    </StyledThemeProvider>
+  )
+}
 
 const Page = styled.div(() => ({}))
 
@@ -104,15 +121,30 @@ const usePathname = () => {
   return router.basePath + (router.asPath.split(/[?#]/)[0] || router.pathname)
 }
 
-const Link = forwardRef<HTMLAnchorElement, ComponentProps<'a'>>(
-  ({ href, ...props }, ref) => (
-    <NextLink
-      ref={ref}
-      href={href ?? ''}
-      {...props}
-    />
-  )
+const Link = ({
+  href,
+  ref,
+  ...props
+}: ComponentProps<'a'> & { ref?: Ref<HTMLAnchorElement> }) => (
+  <NextLink
+    ref={ref}
+    href={href ?? ''}
+    {...props}
+  />
 )
+
+const routeIndex: Record<string, { relPath: string | null }> = routes
+
+function relativeLinkBase(pathname: string) {
+  const route = pathname.replace(/\/$/, '') || '/'
+  const relPath = routeIndex[route]?.relPath
+
+  if (relPath?.endsWith('/index.md')) return route
+
+  const parent = route.replace(/\/[^/]+$/, '')
+
+  return parent || '/'
+}
 
 function App({ Component, pageProps = {}, swrConfig }: MyAppProps) {
   const router = useRouter()
@@ -152,6 +184,7 @@ function App({ Component, pageProps = {}, swrConfig }: MyAppProps) {
   const app = (
     <>
       <PluralGlobalStyle />
+      <DocsColorVars />
       <GlobalStyles />
       <PagePropsContext.Provider value={pageProps}>
         <HtmlHead {...headProps} />
@@ -208,7 +241,7 @@ function App({ Component, pageProps = {}, swrConfig }: MyAppProps) {
   )
 
   const navContextVal = useMemo<NavigationContextValue>(
-    () => ({ useNavigate, usePathname, Link }),
+    () => ({ useNavigate, usePathname, Link, relativeLinkBase }),
     []
   )
 
@@ -220,9 +253,11 @@ function App({ Component, pageProps = {}, swrConfig }: MyAppProps) {
             <NavDataProvider value={navData}>
               <RestNavProvider>
                 <BreakpointProvider>
-                  <StyledThemeProvider theme={docsStyledTheme}>
-                    <FillLevelProvider value={0}>{app}</FillLevelProvider>
-                  </StyledThemeProvider>
+                  <ColorModeProvider>
+                    <DocsThemeProvider>
+                      <FillLevelProvider value={0}>{app}</FillLevelProvider>
+                    </DocsThemeProvider>
+                  </ColorModeProvider>
                 </BreakpointProvider>
               </RestNavProvider>
             </NavDataProvider>

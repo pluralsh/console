@@ -5,9 +5,12 @@ defmodule Console.AI.Tools.Workbench.MonitoringTest do
   alias Console.AI.Tools.Workbench.Monitoring
   alias Console.AI.Tools.Workbench.Monitoring.{
     DashboardDelete,
+    DashboardGet,
     DashboardGraphDelete,
     DashboardList,
     DashboardUpsert,
+    MonitorDelete,
+    MonitorGet,
     MonitorList,
     MonitorUpsert
   }
@@ -116,6 +119,101 @@ defmodule Console.AI.Tools.Workbench.MonitoringTest do
              )
 
     assert {"must have unique identifiers within the batch", _} = changeset.errors[:graphs]
+  end
+
+  test "rejects invalid monitor UUIDs before persistence" do
+    user = insert(:user, roles: %{admin: true})
+    job = insert(:workbench_job, user: user)
+
+    attrs = %{
+      "monitor_id" => "console",
+      "attributes" => %{
+        "name" => "API errors",
+        "severity" => "high",
+        "type" => "metrics",
+        "evaluation_cron" => "*/5 * * * *",
+        "service_id" => "console",
+        "query" => %{"metrics" => %{"query" => "up"}},
+        "threshold" => %{"aggregate" => "max", "value" => 1}
+      }
+    }
+
+    assert {:error, %Ecto.Changeset{} = changeset} =
+             Tool.validate(%MonitorUpsert{job: job, user: user}, attrs)
+
+    refute changeset.valid?
+    assert {"is not a valid UUID, got console", _} = changeset.errors[:monitor_id]
+
+    assert %{service_id: ["is not a valid UUID, got console"]} =
+             errors_on(changeset).attributes
+  end
+
+  test "rejects invalid UUIDs in monitoring lookup and delete tools" do
+    user = insert(:user, roles: %{admin: true})
+    job = insert(:workbench_job, user: user)
+
+    for tool <- [
+          %MonitorGet{job: job},
+          %MonitorDelete{job: job, user: user}
+        ] do
+      assert {:error, %Ecto.Changeset{} = changeset} =
+               Tool.validate(tool, %{"monitor_id" => "console"})
+
+      refute changeset.valid?
+      assert {"is not a valid UUID, got console", _} = changeset.errors[:monitor_id]
+    end
+
+    assert {:error, %Ecto.Changeset{} = changeset} =
+             Tool.validate(%DashboardGet{job: job}, %{"dashboard_id" => "console"})
+
+    refute changeset.valid?
+    assert {"is not a valid UUID, got console", _} = changeset.errors[:dashboard_id]
+  end
+
+  test "reports a missing monitor type without crashing tool validation" do
+    user = insert(:user, roles: %{admin: true})
+    job = insert(:workbench_job, user: user)
+
+    assert {:error, %Ecto.Changeset{} = changeset} =
+             Tool.validate(
+               %MonitorUpsert{job: job, user: user},
+               %{
+                 "attributes" => %{
+                   "name" => "API errors",
+                   "severity" => "high",
+                   "evaluation_cron" => "*/5 * * * *",
+                   "service_id" => Ecto.UUID.generate(),
+                   "query" => %{"metrics" => %{"query" => "up"}},
+                   "threshold" => %{"aggregate" => "max", "value" => 1}
+                 }
+               }
+             )
+
+    assert %{type: ["can't be blank"]} = errors_on(changeset).attributes
+  end
+
+  test "validates dashboard upsert string limits before persistence" do
+    user = insert(:user, roles: %{admin: true})
+    job = insert(:workbench_job, user: user)
+
+    assert {:error, %Ecto.Changeset{} = changeset} =
+             Tool.validate(
+               %DashboardUpsert{job: job, user: user},
+               %{
+                 "dashboard_name" => String.duplicate("n", 256),
+                 "graphs" => [
+                   %{
+                     "identifier" => "requests",
+                     "type" => "timeseries",
+                     "layout" => %{"x" => 0, "y" => 0, "w" => 6, "h" => 4}
+                   }
+                 ],
+                 "settings" => %{"description" => String.duplicate("d", 10_001)}
+               }
+             )
+
+    assert "should be at most 255 character(s)" in errors_on(changeset).dashboard_name
+    assert %{description: ["should be at most 10000 character(s)"]} = errors_on(changeset).settings
   end
 
   test "creates a dashboard in the current workbench and associates it to the job" do

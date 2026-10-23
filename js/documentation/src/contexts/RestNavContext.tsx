@@ -1,10 +1,10 @@
 import {
   createContext,
+  type ReactNode,
   useContext,
   useEffect,
   useMemo,
   useState,
-  type ReactNode,
 } from 'react'
 
 import type { ApiSection } from '@src/lib/openapi-rest'

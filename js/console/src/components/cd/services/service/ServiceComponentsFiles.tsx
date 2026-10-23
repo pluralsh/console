@@ -1,19 +1,20 @@
-import {
-  createTheme,
-  ThemeProvider as MuiThemeProvider,
-} from '@mui/material/styles'
-import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView'
-import { TreeItem, treeItemClasses } from '@mui/x-tree-view/TreeItem'
+import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
+import { TreeItem } from '@mui/x-tree-view/TreeItem'
 import { Code, EmptyState, FolderIcon, Tooltip } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
+import {
+  FileTypeIcon,
+  fileTreeMuiTheme,
+  StyledTreeView,
+  TreeItemIcon,
+  TreeItemText,
+} from 'components/utils/fileTree'
 import { StackedText } from 'components/utils/table/StackedText'
-import { TRUNCATE_LEFT } from 'components/utils/truncate'
 import { ServiceFile, useServiceTarballQuery } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import styled, { useTheme } from 'styled-components'
-import { getFileTypeIconKey, getLanguageFromFileName } from 'utils/file'
+import { getLanguageFromFileName } from 'utils/file'
 import {
   useSetServiceComponentsChatButtonVisible,
   useSetServiceComponentsFiltersHidden,
@@ -24,96 +25,6 @@ import {
   useSetSidenavContent,
 } from './ServiceDetailsContext'
 
-const StyledTreeView = styled(SimpleTreeView)(({ theme }) => ({
-  height: '100%',
-  width: '100%',
-
-  [`& .${treeItemClasses.root}`]: {
-    marginBottom: theme.spacing.xxxsmall,
-    width: '100%',
-    paddingLeft: 2,
-  },
-
-  [`& .${treeItemClasses.content}`]: {
-    borderRadius: theme.borderRadiuses.medium,
-    padding: `${theme.spacing.xxsmall}px ${theme.spacing.xsmall}px`,
-    ...theme.partials.text.body2,
-    color: theme.colors['text-light'],
-    width: '100%',
-    minWidth: 0,
-    display: 'flex',
-    overflow: 'hidden',
-
-    '&:hover': {
-      backgroundColor: theme.colors['fill-zero-hover'],
-    },
-
-    '&.Mui-focused, &.Mui-selected, &.Mui-selected.Mui-focused': {
-      backgroundColor: theme.colors['fill-zero-selected'],
-      color: theme.colors.text,
-    },
-  },
-
-  [`& .${treeItemClasses.label}`]: {
-    display: 'flex',
-    alignItems: 'center',
-    padding: 0,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-    minWidth: 0,
-  },
-
-  [`& .${treeItemClasses.groupTransition}`]: {
-    paddingLeft:
-      'calc(var(--TreeView-itemChildrenIndentation)) - max(0px, (var(--TreeView-itemDepth) - 2) * 12px))',
-    borderLeft: `1px solid ${theme.colors['border']}`,
-    margin: `2px 0 2px 14px`,
-  },
-
-  [`& .${treeItemClasses.root}.parent-of-selected > .${treeItemClasses.groupTransition}:has(.${treeItemClasses.root}.file-selected)`]:
-    {
-      borderLeftColor: theme.colors.grey[600],
-    },
-}))
-
-const TreeItemIcon = styled.div(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  marginRight: theme.spacing.xsmall,
-  color: theme.colors['icon-default'],
-  flexShrink: 0,
-}))
-
-const TreeItemText = styled.span({
-  ...TRUNCATE_LEFT,
-  minWidth: 0,
-})
-
-// mui components need a proper mui theme where theme.spacing is a function
-// otherwise a styled-components theme leaks in and crashes things
-const muiTheme = createTheme()
-
-const FILE_TYPE_ICON_PATH = '/file-type-icons' as const
-const FILE_ICON_SIZE = 18
-
-const FILE_TYPE_ICONS: Readonly<Record<string, string>> = {
-  dockerfile: `${FILE_TYPE_ICON_PATH}/file_type_docker.svg`,
-  helmignore: `${FILE_TYPE_ICON_PATH}/file_type_helm.svg`,
-  json: `${FILE_TYPE_ICON_PATH}/file_type_json.svg`,
-  yaml: `${FILE_TYPE_ICON_PATH}/file_type_light_yaml.svg`,
-  yml: `${FILE_TYPE_ICON_PATH}/file_type_light_yaml.svg`,
-  md: `${FILE_TYPE_ICON_PATH}/file_type_markdown.svg`,
-  markdown: `${FILE_TYPE_ICON_PATH}/file_type_markdown.svg`,
-  license: `${FILE_TYPE_ICON_PATH}/file_type_license.svg`,
-  liquid: `${FILE_TYPE_ICON_PATH}/file_type_liquid.svg`,
-  lua: `${FILE_TYPE_ICON_PATH}/file_type_lua.svg`,
-  toml: `${FILE_TYPE_ICON_PATH}/file_type_light_toml.svg`,
-  tpl: `${FILE_TYPE_ICON_PATH}/file_type_templ.svg`,
-  tpl_: `${FILE_TYPE_ICON_PATH}/file_type_templ.svg`,
-  txt: `${FILE_TYPE_ICON_PATH}/file_type_text.svg`,
-} as const
-
 function decodeBase64(content: string): string {
   try {
     const binary = atob(content)
@@ -122,50 +33,6 @@ function decodeBase64(content: string): string {
   } catch {
     return content
   }
-}
-
-function FileTreeItemIcon({ fileName }: { fileName: string }): React.ReactNode {
-  const iconKey = getFileTypeIconKey(fileName)
-  const iconPath = iconKey ? FILE_TYPE_ICONS[iconKey.toLowerCase()] : undefined
-
-  if (iconPath) {
-    return (
-      <img
-        src={iconPath}
-        alt={iconKey}
-        width={FILE_ICON_SIZE}
-        height={FILE_ICON_SIZE}
-      />
-    )
-  }
-
-  return <FileTreeItemTextIcon extension={iconKey ?? ''} />
-}
-
-function FileTreeItemTextIcon({
-  extension,
-}: {
-  extension: string
-}): React.ReactNode {
-  const theme = useTheme()
-
-  return (
-    <div
-      css={{
-        width: FILE_ICON_SIZE,
-        height: FILE_ICON_SIZE,
-        color: theme.colors['text-success'],
-        fontFamily: 'Inter',
-        fontWeight: 600,
-        fontSize: 9,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      {extension.toLowerCase().slice(0, 3)}
-    </div>
-  )
 }
 
 type TreeNode = {
@@ -367,7 +234,7 @@ export function ComponentsFilesView() {
             label={
               <Tooltip
                 label={node.name}
-                css={{ marginLeft: 6 }}
+                css={{ marginLeft: '0.375rem' }}
               >
                 <div
                   css={{
@@ -379,7 +246,7 @@ export function ComponentsFilesView() {
                 >
                   <TreeItemIcon>
                     {node.isFile ? (
-                      <FileTreeItemIcon fileName={node.name} />
+                      <FileTypeIcon fileName={node.name} />
                     ) : (
                       <FolderIcon size={14} />
                     )}
@@ -397,7 +264,7 @@ export function ComponentsFilesView() {
       })
 
     return data?.serviceTarball && treeNodes.length > 0 ? (
-      <MuiThemeProvider theme={muiTheme}>
+      <MuiThemeProvider theme={fileTreeMuiTheme}>
         <StyledTreeView
           itemChildrenIndentation={12}
           selectedItems={selectedFile?.path ? [selectedFile.path] : []}

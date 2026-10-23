@@ -13,6 +13,7 @@ export function FlowWorkbenchJobLauncher({
 }) {
   return (
     <Button
+      small
       as={Link}
       to={`${getFlowDetailsPath({ flowIdOrName: flow.name })}/${FLOW_WORKBENCHES_REL_PATH}`}
     >

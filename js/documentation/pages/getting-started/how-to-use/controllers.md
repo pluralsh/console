@@ -9,29 +9,29 @@ description: Setting up your edge networking on a cluster, and learn a bit about
 If you're using Plural Cloud, this will be configured for you by default!
 {% /callout %}
 
-A very common problem a user will need to solve when setting up a new cluster is getting edge networking set up.  This includes solving a few main concerns:
+A very common problem you'll need to solve when setting up a new cluster is configuring edge networking.  This includes solving a few main concerns:
 
 * Ingress - this sets up an ingress controller for load balancing incoming HTTP requests into the microservices on your cluster
-* DNS registration - you can use externaldns to automate listening for new hostname registrations in ingress resources and registering them with standard DNS services like route53
-* SSL Cert Management - the standard K8s approach to this is using Cert Manager.
+* DNS registration - you can use externaldns to automate listening for new hostname registrations in ingress resources and registering them with standard DNS services like Route53
+* SSL Cert Management - the standard Kubernetes approach to this is using cert-manager.
 
-`plural up` gets you 90% of the way there out of the box, you'll just need to configure a few basic things.  We provide a consolidated [runtime chart](https://github.com/pluralsh/bootstrap/tree/main/charts/runtime) that makes installing these in one swoop much easier, but you can also mix-and-match from the CNCF ecosystem as well based on your organizations requirements and preferences.
+`plural up` gets you 90% of the way there out of the box; you'll only need to configure a few basic things.  We provide a consolidated [runtime chart](https://github.com/pluralsh/bootstrap/tree/main/charts/runtime) that makes installing these in one go much easier, but you can also mix and match from the CNCF ecosystem based on your organization's requirements and preferences.
 
-The tooling you'll use here should also generalize to any other common runtime add-ons you might need to apply, which are all optimally managed via global services and if the templating is done well, will require a very small set of files to maintain.  Some of these concerns can be:
+The tooling you'll use here should also generalize to any other common runtime add-ons you might need to apply, which are all best managed via global services and, if the templating is done well, will require a very small set of files to maintain.  Some of these concerns can be:
 
 * setting up datadog-agent in all your clusters
-* setting up istio/linkerd service meshes in your clusters
-* setting up security tooling like trivy or kubescape in your cluster
-* setting up cost management tooling like kubecost 
+* setting up Istio/Linkerd service meshes in your clusters
+* setting up security tooling like Trivy or Kubescape in your cluster
+* setting up cost management tooling like Kubecost 
 
 ## Setting Up A Network Stack
 
-We're going to use externaldns and ingress nginx for now, but the technique can generalize to any other helm chart as well, so if you want to mix and match, feel free to simply use this as inspiration.  
+We're going to use externaldns and ingress-nginx for now, but the technique generalizes to any other Helm chart, so if you want to mix and match, feel free to use this as inspiration.  
 
-First, let's create a global service for the external-dns chart.  This will ensure it's installed on all clusters with a common tagset.  Writing this to `bootstrap/components/externaldns.yaml`
+First, let's create a global service for the external-dns chart.  This will ensure it's installed on all clusters with a common tagset.  Write this to `bootstrap/components/externaldns.yaml`:
 
 {% callout severity="info" %}
-The global services will all be written to a subfolder of `bootstrap`.  This is because `plural up` initializes a bootstrap service-of-services under that folder, so we can guarantee any file written there will be synced.  Sets of configuration that should be deployed independently and not to the mgmt cluster ought to live in their own folder structure, which we typically put under `services/**`. 
+The global services will all be written to a subfolder of `bootstrap`.  This is because `plural up` initializes a bootstrap service-of-services under that folder, so we can guarantee any file written there will be synced.  Sets of configuration that should be deployed independently and not to the mgmt cluster should live in their own folder structure, which we typically put under `services/**`. 
 
 *Changes will not be applied until they are pushed or merged to your main branch that the root `apps` service is listening to.*
 {% /callout %}
@@ -81,7 +81,7 @@ serviceAccount:
     eks.amazonaws.com/role-arn: {{ cluster.metadata.iam.external_dns }} # check terraform/modules/clusters/aws/plural.tf for where this is set
 ```
 
-Second let's install ingress-nginx, first by defining another global service at `bootstrap/components/ingress-nginx.yaml`
+Second, let's install ingress-nginx by defining another global service at `bootstrap/components/ingress-nginx.yaml`:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -108,7 +108,7 @@ spec:
       - ingress-nginx.yaml.liquid
 ```
 
-This will also pair with a yaml values file at `helm/ingress-nginx.yaml.liquid` like so:
+This will also pair with a YAML values file at `helm/ingress-nginx.yaml.liquid` like so:
 
 ```yaml
 controller:
@@ -177,12 +177,12 @@ controller:
       enabled: false
 ```
 
-This is a tad verbose but is mostly just adding some nice defaults to productionize your setup and ensure a NLB is used in AWS.
+This is a tad verbose, but it mostly adds some nice defaults to productionize your setup and ensure an NLB is used in AWS.
 
-You'll also want to modify `terraform/modules/clusters/aws/plural.tf` to add the `dns_zone` to the metadata, it will look something like this once complete:
+You'll also want to modify `terraform/modules/clusters/aws/plural.tf` to add the `dns_zone` to the metadata. It will look something like this once complete:
 
 {% callout severity="info" %}
-Usually DNS is managed by systems that predate adoption of Plural, so we don't provision it by default.  We often recommend users create subdomains and register them w/ their root domain using an NS record to give their k8s cluster a sandboxed scope to register their dns entries in.
+Usually DNS is managed by systems that predate adoption of Plural, so we don't provision it by default.  We often recommend users create subdomains and register them w/ their root domain using an NS record to give their Kubernetes cluster a sandboxed scope to register their DNS entries in.
 {% /callout %}
 
 ```tf
@@ -220,7 +220,7 @@ resource "plural_cluster" "this" {
 }
 ```
 
-Notice also, we've already prebuilt the iam policies for external-dns for you in `terraform/modules/clusters/aws/addons.tf`.  If you want another add-on, you can easily imitate that pattern, or you're free to tune our defaults as well.  The terraform that does it looks like this:
+Notice also that we've already prebuilt the IAM policies for external-dns for you in `terraform/modules/clusters/aws/addons.tf`.  If you want another add-on, you can easily imitate that pattern, or you're free to tune our defaults.  The Terraform that does it looks like this:
 
 ```tf
 module "externaldns_irsa_role" {
@@ -244,11 +244,11 @@ module "externaldns_irsa_role" {
 }
 ```
 
-And uses some off-the-shelf tf modules they have created.  It's output is then plumbed to the `plural_cluster.this` resource which allows the dynamic templating in the `runtime.yaml.liquid` file.  In general, any file can add a `.liquid` extension, and our agent will dynamically template it.  You can read more about that {% doclink to="plural_features_service_templating" %}here{% /doclink %}.
+This uses some off-the-shelf Terraform modules.  Its output is then plumbed to the `plural_cluster.this` resource which allows the dynamic templating in the `runtime.yaml.liquid` file.  In general, any file can add a `.liquid` extension, and our agent will dynamically template it.  You can read more about that {% doclink to="plural_features_service_templating" %}here{% /doclink %}.
 
 ## Setting Up AWS Load Balancer Controller (AWS only)
 
-EKS is very bare bones and doesn't ship with a fully featured load balancer controller by default. To get full support for provisioning NLBs and ALBs, you should deploy the load balancer controller to your cluster, which would be done with a global service at `bootstrap/components/aws-load-balancer.yaml`:
+EKS is very bare-bones and doesn't ship with a fully featured load balancer controller by default. To get full support for provisioning NLBs and ALBs, you should deploy the load balancer controller to your cluster, which would be done with a global service at `bootstrap/components/aws-load-balancer.yaml`:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -296,7 +296,7 @@ serviceAccount:
 
 ## Setting Up Cert-Manager
 
-Cert-Manager is an almost ubiquitous component in kubernetes and usually should be managed separately.  We'll set it up, and also provision a Route53 dns01 issuer alongside it (write to `bootstrap/components/cert-manager.yaml`):
+Cert-Manager is an almost ubiquitous component in Kubernetes and usually should be managed separately.  We'll set it up, and also provision a Route53 dns01 issuer alongside it (write to `bootstrap/components/cert-manager.yaml`):
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -327,7 +327,7 @@ spec:
       - certmanager.yaml.liquid
 ```
 
-The values file needed here is and should be placed in `helm/certmanager.yaml.liquid`:
+The values file needed here should be placed in `helm/certmanager.yaml.liquid`:
 
 ```yaml
 installCRDs: true
@@ -342,10 +342,10 @@ securityContext:
 ```
 
 {% callout severity="info" %}
-The `runtime` chart does provision a `letsencrypt-prod` issuer using the http01 ACME protocol, which usually requires no additional configuration. It might be suitable for your usecase, in which case the following is unnecessary.  We have noticed it's more prone to flaking vs dns01. Also it can only work on publicly accessible endpoints since it requires an HTTP call to a service hosted by your ingress.
+The `runtime` chart does provision a `letsencrypt-prod` issuer using the http01 ACME protocol, which usually requires no additional configuration. It might be suitable for your use case, in which case the following is unnecessary.  We have noticed it's more prone to flaking than dns01. It also only works on publicly accessible endpoints since it requires an HTTP call to a service hosted by your ingress.
 {% /callout %}
 
-This sets up IRSA auth to cert-manager to allow dns01 ACME cert validations to succeed using Route53.  You'll then want to create another service to spawn the cluster issuer resources cert-manager uses, you can do this by adding a file at `services/cluster-issuer/clusterissuer.yaml`:
+This sets up IRSA auth to cert-manager to allow dns01 ACME cert validations to succeed using Route53.  You'll then want to create another service to spawn the cluster issuer resources cert-manager uses. You can do this by adding a file at `services/cluster-issuer/clusterissuer.yaml`:
 
 ```yaml
 apiVersion: cert-manager.io/v1
@@ -394,7 +394,7 @@ spec:
 
 ## Push to Deploy
 
-We registered all these manifests under the root `bootstrap` folder a `plural up`-derived management cluster listens to by default, so all you should need to do is either:
+We registered all these manifests under the root `bootstrap` folder, which a `plural up`-derived management cluster listens to by default, so all you should need to do is either:
 
 ```sh
 git commit -m "setup our cluster runtime"

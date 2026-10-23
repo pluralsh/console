@@ -4,8 +4,6 @@ import {
   Flex,
   FormField,
   Input,
-  ListBoxItem,
-  Select,
   SidePanelOpenIcon,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
@@ -123,9 +121,6 @@ export function McpServerCreateForm({
 
   const [name, setName] = useState(existingServer?.name ?? '')
   const [url, setUrl] = useState(existingServer?.url ?? '')
-  const [protocol, setProtocol] = useState<McpServerProtocol>(
-    existingServer?.protocol ?? McpServerProtocol.StreamableHttp
-  )
   const [headers, setHeaders] = useState<HeaderField[]>(() =>
     headersFromServer(existingServer)
   )
@@ -165,14 +160,14 @@ export function McpServerCreateForm({
     return {
       name: trimmedName,
       url: trimmedUrl,
-      protocol,
+      protocol: McpServerProtocol.StreamableHttp,
       authentication:
         configuredHeaders.length > 0 || configuredOauth
           ? { headers: configuredHeaders, oauth: configuredOauth }
           : undefined,
       readBindings: readBindings.map(bindingToBindingAttributes),
     }
-  }, [name, url, protocol, headers, oauth, readBindings, existingServer])
+  }, [name, url, headers, oauth, readBindings, existingServer])
 
   const complete = (server: Nullable<{ id: string; name: string }>) => {
     if (!server) return
@@ -255,30 +250,6 @@ export function McpServerCreateForm({
             />
           </FormField>
           <FormField
-            label="Protocol"
-            hint="Streamable HTTP is recommended. SSE is deprecated and should only be used when necessary."
-          >
-            <Select
-              selectedKey={protocol}
-              onSelectionChange={(key) =>
-                setProtocol(
-                  (key as McpServerProtocol) ?? McpServerProtocol.StreamableHttp
-                )
-              }
-              selectionMode="single"
-              label="Protocol"
-            >
-              <ListBoxItem
-                key={McpServerProtocol.StreamableHttp}
-                label="Streamable HTTP"
-              />
-              <ListBoxItem
-                key={McpServerProtocol.Sse}
-                label="SSE (deprecated)"
-              />
-            </Select>
-          </FormField>
-          <FormField
             label="Headers"
             hint={
               isEditing
@@ -327,7 +298,7 @@ export function McpServerCreateForm({
                     />
                     {canRemove && (
                       <DeleteIconButton
-                        size="large"
+                        size="small"
                         onClick={() =>
                           setHeaders((prev) =>
                             prev.filter((row) => row.id !== header.id)

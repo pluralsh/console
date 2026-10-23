@@ -6,6 +6,14 @@
             "type": "string",
             "description": "Unique key for this canvas block (e.g. `errors_by_type`)."
         },
+        "section_id": {
+            "type": "string",
+            "description": "Optional identifier of the section (from add_section_block) this block belongs to. Layout coordinates are then relative to that section's grid."
+        },
+        "description": {
+            "type": "string",
+            "description": "Optional one-sentence explanation of what this block shows and why it matters, shown behind an info icon next to its title."
+        },
         "layout": {
             "type": "object",
             "description": "Required grid placement (CanvasBlock.Layout). All of x, y, w, and h must be set.",

@@ -3,6 +3,7 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { useTheme } from 'styled-components'
 import { useState } from 'react'
 import {
+  ICON_FRAME_ICON_SIZE,
   GearTrainIcon,
   ListBoxItem,
   TrashCanIcon,
@@ -94,14 +95,17 @@ export const ColActions = columnHelper.accessor(({ node }) => node?.id, {
         <MoreMenu onSelectionChange={(newKey) => setMenuKey(newKey)}>
           <ListBoxItem
             key={MenuItemKey.Settings}
-            leftContent={<GearTrainIcon />}
+            leftContent={<GearTrainIcon size={ICON_FRAME_ICON_SIZE.small} />}
             label="Settings"
             textValue="Settings"
           />
           <ListBoxItem
             key={MenuItemKey.Delete}
             leftContent={
-              <TrashCanIcon color={theme.colors['icon-danger-critical']} />
+              <TrashCanIcon
+                size={ICON_FRAME_ICON_SIZE.small}
+                color={theme.colors['icon-danger-critical']}
+              />
             }
             label="Delete backup"
             textValue="Delete backup"

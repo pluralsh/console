@@ -65,7 +65,7 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
   end
 
   def tools(%WorkbenchJob{workbench: bench, user: user}, %Environment{skills: skills, job: job, activities: activities} = environment, %FileCache{} = cache) do
-    skills = Environment.subagent_skills(skills, :infrastructure)
+    skills = Environment.with_builtins(skills) |> Environment.subagent_skills(:infrastructure)
 
     core_tools(job, environment)
     |> Enum.concat(vuln_tools(bench, user))
@@ -84,7 +84,7 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     |> Enum.concat(pod_logs_tools(bench, user))
     |> Enum.concat(Tools.cloud_tools(environment.tools))
     |> Enum.concat(Tools.docker_tools(environment.tools))
-    |> build_codemode(policies)
+    |> build_codemode(job, policies)
   end
 
   defp has_cloud_tools?(%Environment{tools: tools}), do: Tools.cloud_tools(tools) != []
@@ -136,10 +136,12 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
   end
   defp manifests_tools(_, _, _, _), do: []
 
-  defp build_codemode(tools, policies) do
-    case Enum.split_with(tools, &codemode?/1) do
-      {[_ | _] = codemode, regular} ->
-        [%Codemode{tools: codemode, policies: policies} | regular]
+  defp build_codemode(tools, job, policies) do
+    case {Enum.split_with(tools, &codemode?/1), Console.PseudoFS.enabled?()} do
+      {{[_ | _] = codemode, regular}, _} ->
+        [%Codemode{tools: codemode, policies: policies, workbench_id: job.workbench_id} | regular]
+      # the sandbox is also how the subagent reaches the workbench filesystem its prompt points it to
+      {_, true} -> [%Codemode{tools: [], policies: policies, workbench_id: job.workbench_id} | tools]
       _ -> tools
     end
   end

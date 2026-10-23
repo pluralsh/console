@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import { Button, DiscordIcon, usePrevious } from '@pluralsh/design-system'
+import { DiscordIcon, usePrevious } from '@pluralsh/design-system'
 import NextLink from 'next/link'
 import { useRouter } from 'next/router'
 
@@ -8,17 +8,19 @@ import { useKey } from 'rooks'
 import styled from 'styled-components'
 
 import { DISCORD_LINK } from '@src/consts'
+import { brand, docsText } from '@src/theme/docsTheme'
 import { getBarePathFromPath } from '@src/utils/text'
-
 import { BreakpointIsGreaterOrEqual, mqs, useBreakpoint } from './Breakpoints'
 import { DocsSearch } from './DocsSearch'
 import GithubStars from './GithubStars'
+import { Logo } from './Logo'
 import MobileMenu from './MobileMenu'
-import { HamburgerButton, SocialLink } from './PageHeaderButtons'
-
-const Filler = styled.div((_) => ({
-  flexGrow: 1,
-}))
+import {
+  HamburgerButton,
+  HeaderButton,
+  SocialLink,
+  ThemeToggle,
+} from './PageHeaderButtons'
 
 function PageHeaderUnstyled({ ...props }) {
   const [menuIsOpen, setMenuIsOpen] = useState(false)
@@ -46,50 +48,54 @@ function PageHeaderUnstyled({ ...props }) {
 
   return (
     <header {...props}>
-      <nav className="leftSection">
+      <div className="leftSection">
         <NextLink
           href="/"
-          className="flex"
-          passHref
+          className="brand"
+          aria-label="Plural docs home"
         >
-          <img
-            className="logo"
-            alt="Plural docs"
-            src="/images/plural-docs-logo.svg"
-          />
+          <Logo aria-hidden />
+          <span className="docsLabel">docs</span>
         </NextLink>
-        <PageHeaderLinks />
-      </nav>
-      <Filler />
-      <section className="rightSection">
         <DocsSearch />
+      </div>
+      <nav
+        className="rightSection"
+        aria-label="Site"
+      >
+        <div className="links">
+          <MainLink href="https://www.plural.sh/community">Community</MainLink>
+          <MainLink
+            href={DISCORD_LINK}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Discord
+          </MainLink>
+        </div>
         <div className="socialIcons">
           <SocialLink
             className="discordIcon"
             href={DISCORD_LINK}
             target="_blank"
             rel="noopener noreferrer"
-            tabIndex={0}
+            aria-label="Plural on Discord"
           >
             <DiscordIcon size={16} />
           </SocialLink>
           <GithubStars />
         </div>
+        <ThemeToggle />
         <div className="buttons">
-          <Button
-            as="a"
+          <HeaderButton href="https://app.plural.sh/login">
+            Sign in
+          </HeaderButton>
+          <HeaderButton
+            $variant="primary"
             href="https://www.plural.sh/contact-sales"
-            primary
           >
             Get started
-          </Button>
-          <Button
-            as="a"
-            href="https://app.plural.sh/login"
-            secondary
-          >
-            Sign in
-          </Button>
+          </HeaderButton>
         </div>
         <HamburgerButton
           isOpen={menuIsOpen}
@@ -97,7 +103,7 @@ function PageHeaderUnstyled({ ...props }) {
             setMenuIsOpen(!menuIsOpen)
           }}
         />
-      </section>
+      </nav>
       <MobileMenu
         isOpen={menuIsOpen}
         setIsOpen={setMenuIsOpen}
@@ -110,84 +116,85 @@ const PageHeader = styled(PageHeaderUnstyled)(({ theme }) => ({
   top: 0,
   position: 'sticky',
   height: 'var(--top-nav-height)',
-  background: theme.colors['fill-zero'],
   width: '100%',
   zIndex: '100',
   display: 'flex',
   alignItems: 'center',
-  justifyContent: 'left',
-  paddingLeft: 40,
-  paddingRight: theme.spacing.large,
-  borderBottom: theme.borders['fill-one'],
-  [mqs.fullHeader]: {
-    paddingLeft: 0,
-    paddingRight: 40,
+  justifyContent: 'space-between',
+  gap: theme.spacing.medium,
+  padding: '0 clamp(16px, 3vw, 28px)',
+  borderBottom: `1px solid ${brand.line}`,
+  background: `color-mix(in srgb, ${brand.canvas} 88%, transparent)`,
+  backdropFilter: 'blur(12px)',
+  WebkitBackdropFilter: 'blur(12px)',
+  '.brand': {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 10,
+    flexShrink: 0,
+    textDecoration: 'none',
+    color: brand.ink,
+  },
+  '.docsLabel': {
+    ...docsText.eyebrow,
+    position: 'relative',
+    top: 1,
+  },
+  '.leftSection': {
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing.large,
+    minWidth: 0,
+  },
+  '.rightSection': {
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing.xsmall,
+  },
+  '.links': {
+    display: 'none',
+    [mqs.threeColumn]: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: theme.spacing.xxsmall,
+      marginRight: theme.spacing.xsmall,
+    },
   },
   '.socialIcons': {
     display: 'none',
     [mqs.maxWidth]: {
       display: 'flex',
-      flexDirection: 'row',
-      gap: theme.spacing.medium,
+      alignItems: 'center',
+      gap: theme.spacing.xsmall,
     },
   },
   '.buttons': {
     display: 'none',
-    gap: theme.spacing.medium,
+    gap: theme.spacing.xsmall,
+    marginLeft: theme.spacing.xxsmall,
     [mqs.fullHeader]: {
       display: 'flex',
       alignItems: 'center',
     },
-  },
-  '.logo': {
-    width: 162,
-    maxWidth: '100%',
-    minWidth: 0,
-    display: 'block',
-  },
-  '.leftSection': {
-    display: 'flex',
-    alignItems: 'center',
-    gap: theme.spacing.medium,
-    [mqs.fullHeader]: {
-      paddingLeft: 40,
-      paddingRight: theme.spacing.large,
-    },
-  },
-  '.rightSection': {
-    display: 'flex',
-    alignItems: 'center',
-    gap: theme.spacing.medium,
   },
 }))
 
 export const MainLink = styled.a(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
-  '&:any-link': {
-    color: theme.colors['text-light'],
+  fontFamily: theme.fontFamilies.sans,
+  fontSize: 14,
+  lineHeight: 1.4,
+  letterSpacing: '0.01em',
+  borderRadius: 2,
+  padding: '8px 10px',
+  transition: 'color 0.2s ease-out, background-color 0.2s ease-out',
+  '&, &:any-link': {
+    color: brand.ink,
     textDecoration: 'none',
   },
   '&:hover': {
-    textDecoration: 'underline',
-    color: theme.colors.text,
-  },
-  padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
-  [mqs.fullHeader]: {
-    padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
-  },
-}))
-
-const PageHeaderLinks = styled(({ ...props }) => (
-  <div {...props}>
-    {/* <MainLink href="https://plural.sh/marketplace">Marketplace</MainLink> */}
-    <MainLink href="https://plural.sh/community">Community</MainLink>
-  </div>
-))(({ theme }) => ({
-  display: 'none',
-  [mqs.threeColumn]: {
-    display: 'flex',
-    gap: theme.spacing.xsmall,
+    background: brand['surface-hover'],
   },
 }))
 

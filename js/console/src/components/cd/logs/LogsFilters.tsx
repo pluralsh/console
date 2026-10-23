@@ -65,6 +65,7 @@ export function LogsLabelsPicker({
   logs,
   clusterId,
   serviceId,
+  node,
   query,
   time,
   addLabel,
@@ -75,6 +76,7 @@ export function LogsLabelsPicker({
   logs: LogLineFragment[]
   clusterId?: string
   serviceId?: string
+  node?: string
   query?: string
   time?: LogTimeRange
   addLabel: (key: string, value: string) => void
@@ -95,7 +97,7 @@ export function LogsLabelsPicker({
   }, [logs, selectedLabels])
 
   const { data, loading } = useLogLabelsQuery({
-    variables: { field, clusterId, serviceId, query, time },
+    variables: { field, clusterId, serviceId, node, query, time },
     skip: !field,
     fetchPolicy: 'cache-and-network',
   })

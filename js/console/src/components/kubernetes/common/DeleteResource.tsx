@@ -37,6 +37,7 @@ export default function DeleteResourceButton({
     <div onClick={(e) => e.stopPropagation()}>
       <IconFrame
         clickable
+        size="medium"
         icon={<TrashCanIcon color="icon-danger" />}
         onClick={() => setOpen(true)}
         textValue="Delete"
@@ -72,10 +73,8 @@ interface ServerError {
   message?: string
 }
 
-interface DeleteResourceModalProps extends Pick<
-  ConfirmProps,
-  'confirmationEnabled' | 'confirmationText'
-> {
+interface DeleteResourceModalProps
+  extends Pick<ConfirmProps, 'confirmationEnabled' | 'confirmationText'> {
   open: boolean
   setOpen: (open: boolean) => void
   resource: Resource

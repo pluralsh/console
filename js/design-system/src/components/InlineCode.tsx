@@ -11,11 +11,11 @@ import { ComponentPropsWithRef } from 'react'
 // support exists
 //
 const Spacer = styled.span((_) => ({
-  fontSize: 1.5,
+  fontSize: '1.5px',
   display: 'inline',
   lineHeight: 0,
   '&:after': {
-    fontSize: 1.5,
+    fontSize: '1.5px',
     lineHeight: 0,
     content: '"\u2001"', // em-space
     display: 'inline',

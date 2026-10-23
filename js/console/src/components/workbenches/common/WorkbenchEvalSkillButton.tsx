@@ -80,14 +80,18 @@ export function WorkbenchEvalSkillButton({
   return (
     <div
       ref={ref}
-      css={{ position: 'relative', zIndex: theme.zIndexes.modal }}
+      css={{
+        position: 'relative',
+        flexShrink: 0,
+        zIndex: theme.zIndexes.modal,
+      }}
     >
       <Button
         disabled={disabled || !evalResultId}
         onClick={toggle}
         {...props}
       >
-        Create skills from eval
+        Apply eval
       </Button>
       {transitions((styles) => (
         <AnimatedWrapperSC style={styles}>
@@ -158,7 +162,7 @@ function WorkbenchEvalSkillPanel({
           $color="text-light"
           css={{ flexGrow: 1 }}
         >
-          Update workbench skills
+          Update workbench skills with eval
         </Body1P>
         <IconFrame
           clickable
@@ -199,7 +203,7 @@ function WorkbenchEvalSkillPanel({
 const AnimatedWrapperSC = styled(animated.div)(({ theme }) => ({
   position: 'absolute',
   right: 0,
-  top: 32 + theme.spacing.medium,
+  top: `calc(32px + ${theme.spacing.medium})`,
   display: 'flex',
   flexDirection: 'column',
   maxHeight: 'calc(100vh - 160px)',

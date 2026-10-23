@@ -1,5 +1,6 @@
 import {
   FillLevel,
+  ICON_FRAME_ICON_SIZE,
   SemanticBorderKey,
   SubTab,
   toFillLevel,
@@ -7,7 +8,14 @@ import {
   useFillLevel,
   WrapWithIf,
 } from '@pluralsh/design-system'
-import { ComponentPropsWithRef, Dispatch, ReactNode } from 'react'
+import {
+  cloneElement,
+  ComponentPropsWithRef,
+  Dispatch,
+  isValidElement,
+  ReactElement,
+  ReactNode,
+} from 'react'
 import styled from 'styled-components'
 import { fillLevelToBackground } from './FillLevelDiv.tsx'
 
@@ -27,6 +35,7 @@ type ButtonGroupProps = {
   onClick?: Dispatch<string>
   toPath?: (path: string) => string
   fillLevel?: FillLevel
+  iconSize?: number
 } & ComponentPropsWithRef<typeof SubTab>
 
 export function ButtonGroup({
@@ -35,6 +44,7 @@ export function ButtonGroup({
   onClick,
   toPath,
   fillLevel: fillLevelProp,
+  iconSize,
   ...props
 }: ButtonGroupProps) {
   const inferredFillLevel = useFillLevel()
@@ -48,6 +58,7 @@ export function ButtonGroup({
           tab={tab}
           toPath={toPath}
           fillLevel={fillLevel}
+          iconSize={iconSize}
           {...props}
         />
       ) : (
@@ -56,6 +67,7 @@ export function ButtonGroup({
           tab={tab}
           onClick={onClick}
           fillLevel={fillLevel}
+          iconSize={iconSize}
           {...props}
         />
       )}
@@ -63,7 +75,14 @@ export function ButtonGroup({
   )
 }
 
-function ButtonLinkGroup({ directory, tab, toPath, fillLevel, ...props }) {
+function ButtonLinkGroup({
+  directory,
+  tab,
+  toPath,
+  fillLevel,
+  iconSize,
+  ...props
+}) {
   return directory.map(({ path, icon, label, tooltip }, idx) => (
     <WrapWithIf
       key={path}
@@ -91,14 +110,25 @@ function ButtonLinkGroup({ directory, tab, toPath, fillLevel, ...props }) {
           $fillLevel={fillLevel}
           {...props}
         >
-          {icon} {label}
+          <ButtonGroupIcon
+            icon={icon}
+            size={iconSize}
+          />{' '}
+          {label}
         </SubTabSC>
       </LinkTabWrap>
     </WrapWithIf>
   ))
 }
 
-function ButtonSwitchGroup({ directory, tab, onClick, fillLevel, ...props }) {
+function ButtonSwitchGroup({
+  directory,
+  tab,
+  onClick,
+  fillLevel,
+  iconSize,
+  ...props
+}) {
   return directory.map(({ path, icon, label, tooltip }, idx) => (
     <WrapWithIf
       key={path}
@@ -119,10 +149,32 @@ function ButtonSwitchGroup({ directory, tab, onClick, fillLevel, ...props }) {
         $fillLevel={fillLevel}
         {...props}
       >
-        {icon} {label}
+        <ButtonGroupIcon
+          icon={icon}
+          size={iconSize}
+        />{' '}
+        {label}
       </SubTabSC>
     </WrapWithIf>
   ))
+}
+
+function ButtonGroupIcon({ icon, size }: { icon?: ReactNode; size?: number }) {
+  if (!icon || !size || !isValidElement(icon)) return icon
+
+  return (
+    <span
+      css={{
+        display: 'flex',
+        width: ICON_FRAME_ICON_SIZE.medium,
+        height: ICON_FRAME_ICON_SIZE.medium,
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      {cloneElement(icon as ReactElement<{ size?: number }>, { size })}
+    </span>
+  )
 }
 
 const GroupWrapperSC = styled.div<{
@@ -144,13 +196,18 @@ const SubTabSC = styled(SubTab)<{
   $label: string
   $directory: ButtonGroupDirectory
   $fillLevel: number
-}>(({ theme, $active, $idx, $directory, $label, $fillLevel }) => {
+}>(({ theme, $active, $idx, $directory, $label, $fillLevel, size }) => {
   return {
     flex: 1,
     display: 'flex',
     justifyContent: 'center',
+    alignItems: 'center',
     gap: theme.spacing.small,
-    padding: !$label ? theme.spacing.small : undefined,
+    padding: !$label
+      ? size === 'small'
+        ? `calc(${theme.spacing.xsmall} - 2px)`
+        : theme.spacing.small
+      : undefined,
     color: $active ? theme.colors['text'] : theme.colors['text-primary'],
     borderRight:
       $idx === $directory.length - 1 || $active

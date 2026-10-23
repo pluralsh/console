@@ -123,6 +123,34 @@ defmodule Console.Deployments.IntegrationsTest do
         name: "updated-name"
       }, webhook.id, user)
     end
+
+    test "rotating the secret clears a recorded handshake secret" do
+      admin = admin_user()
+      webhook = insert(:issue_webhook, provider: :asana, handshake_secret: "asana-secret")
+
+      {:ok, renamed} = Integrations.update_issue_webhook(%{name: "renamed"}, webhook.id, admin)
+      assert renamed.handshake_secret == "asana-secret"
+
+      {:ok, rotated} = Integrations.update_issue_webhook(%{secret: "new-secret"}, webhook.id, admin)
+      refute rotated.handshake_secret
+    end
+  end
+
+  describe "#record_handshake_secret/2" do
+    test "it records the first handshake secret only" do
+      webhook = insert(:issue_webhook, provider: :asana)
+
+      {:ok, recorded} = Integrations.record_handshake_secret(webhook, "first")
+      assert recorded.handshake_secret == "first"
+
+      {:error, _} = Integrations.record_handshake_secret(webhook, "second")
+      assert Integrations.get_issue_webhook!(webhook.id).handshake_secret == "first"
+    end
+
+    test "it rejects an empty secret" do
+      webhook = insert(:issue_webhook, provider: :asana)
+      {:error, _} = Integrations.record_handshake_secret(webhook, "")
+    end
   end
 
   describe "#delete_issue_webhook/2" do

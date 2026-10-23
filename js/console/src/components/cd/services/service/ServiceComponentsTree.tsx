@@ -231,7 +231,7 @@ function ServiceComponentTreeNodeBase({
           gap: theme.spacing.medium,
           borderTopLeftRadius: theme.borderRadiuses.large,
           borderTopRightRadius: theme.borderRadiuses.large,
-          padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+          padding: `${theme.spacing.small} ${theme.spacing.medium}`,
         }}
       >
         {header}
@@ -240,7 +240,7 @@ function ServiceComponentTreeNodeBase({
         css={{
           display: 'flex',
           gap: theme.spacing.small,
-          padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+          padding: `${theme.spacing.small} ${theme.spacing.medium}`,
         }}
       >
         <div css={{ ...TRUNCATE, flex: 1 }}>{content}</div>

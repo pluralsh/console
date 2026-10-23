@@ -173,6 +173,7 @@ config :console, ConsoleWeb.Endpoint,
   Keyword.merge(
     [
       url: endpoint_url,
+      secret_key_base: Console.secret_key_base(get_env("SECRET_KEY_BASE"), get_env("JWT_SECRET")),
       check_origin: [
         "//#{get_env("HOST")}",
         "//#{get_env("EXT_HOST") || get_env("HOST")}",
@@ -276,6 +277,8 @@ config :console,
   vmetrics_tenant: get_env("CONSOLE_VMETRICS_TENANT"),
   vmetrics_url: get_env("CONSOLE_VMETRICS_URL"),
   es_url: get_env("CONSOLE_CLOUD_ES_URL"),
+  plural_o11y: get_env("CONSOLE_CLOUD_OBSERVABILITY_PLURAL") == "true",
+  telemetry_url: get_env("CONSOLE_CLOUD_TELEMETRY_URL"),
   byok: get_env("CONSOLE_BYOK") == "true",
   cloudquery: get_env("CONSOLE_CLOUDQUERY") == "true",
   airgap: get_env("CONSOLE_AIRGAP") == "true",
@@ -414,54 +417,74 @@ config :console,
   :kas_insecure_skip_tls_verify,
   get_env("KAS_INSECURE_SKIP_TLS_VERIFY") == "true"
 
-if is_set("CONSOLE_S3_BUCKET") do
-  s3_region = get_env("CONSOLE_S3_REGION") || "us-east-1"
-  s3_endpoint = get_env("CONSOLE_S3_ENDPOINT")
+object_store_provider = get_env("CONSOLE_OBJECT_STORE_PROVIDER") || ""
 
-  s3_config =
-    if s3_endpoint do
-      uri =
-        case URI.parse(s3_endpoint) do
-          %URI{host: nil} -> URI.parse("https://#{s3_endpoint}")
-          uri -> uri
-        end
+# One backend only. An empty provider follows the chart: s3, then azure, then gcs.
+cond do
+  object_store_provider in ["", "s3"] and is_set("CONSOLE_S3_BUCKET") ->
+    s3_region = get_env("CONSOLE_S3_REGION") || "us-east-1"
+    s3_endpoint = get_env("CONSOLE_S3_ENDPOINT")
 
-      [
-        scheme: "#{uri.scheme || "https"}://",
-        host: uri.host,
-        port: uri.port || if(uri.scheme == "http", do: 80, else: 443),
-        region: s3_region
-      ]
-    else
-      [region: s3_region]
-    end
+    s3_config =
+      if s3_endpoint do
+        uri =
+          case URI.parse(s3_endpoint) do
+            %URI{host: nil} -> URI.parse("https://#{s3_endpoint}")
+            uri -> uri
+          end
 
-  config :console,
-    object_store: true,
-    object_store_path: get_env("CONSOLE_OBJECT_STORE_PATH") || "plrl"
+        [
+          scheme: "#{uri.scheme || "https"}://",
+          host: uri.host,
+          port: uri.port || if(uri.scheme == "http", do: 80, else: 443),
+          region: s3_region
+        ]
+      else
+        [region: s3_region]
+      end
 
-  config :ex_aws,
-    region: s3_region,
-    s3: s3_config
+    config :console,
+      object_store: true,
+      object_store_path: get_env("CONSOLE_OBJECT_STORE_PATH") || "plrl"
 
-  config :waffle,
-    storage: Waffle.Storage.S3,
-    bucket: get_env("CONSOLE_S3_BUCKET"),
-    asset_host: get_env("CONSOLE_S3_ENDPOINT"),
-    region: s3_region,
-    virtual_host: is_nil(s3_endpoint)
+    config :ex_aws,
+      region: s3_region,
+      s3: s3_config
+
+    config :waffle,
+      storage: Waffle.Storage.S3,
+      bucket: get_env("CONSOLE_S3_BUCKET"),
+      asset_host: get_env("CONSOLE_S3_ENDPOINT"),
+      region: s3_region,
+      virtual_host: is_nil(s3_endpoint)
+
+  object_store_provider in ["", "azure"] and is_set("CONSOLE_AZURE_STORAGE_ACCOUNT") ->
+    config :console,
+      object_store: true,
+      object_store_path: get_env("CONSOLE_OBJECT_STORE_PATH") || "plrl"
+
+    # without an access key, auth comes from workload identity
+    config :waffle,
+      storage: (if is_set("CONSOLE_AZURE_STORAGE_ACCESS_KEY"), do: Waffle.Storage.Azure, else: Console.Storage.Azure),
+      storage_account: get_env("CONSOLE_AZURE_STORAGE_ACCOUNT"),
+      container: get_env("CONSOLE_AZURE_STORAGE_CONTAINER"),
+      access_key: get_env("CONSOLE_AZURE_STORAGE_ACCESS_KEY")
+
+  object_store_provider in ["", "gcs"] and is_set("CONSOLE_GCS_BUCKET") ->
+    config :console,
+      object_store: true,
+      object_store_path: get_env("CONSOLE_OBJECT_STORE_PATH") || "plrl"
+
+    config :waffle,
+      storage: Console.Storage.GCS,
+      bucket: get_env("CONSOLE_GCS_BUCKET")
+
+  true ->
+    :ok
 end
 
-if is_set("CONSOLE_AZURE_STORAGE_ACCOUNT") do
-  config :console,
-    object_store: true,
-    object_store_path: get_env("CONSOLE_OBJECT_STORE_PATH") || "plrl"
-
-  config :waffle,
-    storage: Waffle.Storage.Azure,
-    storage_account: get_env("CONSOLE_AZURE_STORAGE_ACCOUNT"),
-    container: get_env("CONSOLE_AZURE_STORAGE_CONTAINER"),
-    access_key: get_env("CONSOLE_AZURE_STORAGE_ACCESS_KEY")
+if is_set("CONSOLE_PSEUDOFS_ADDR") do
+  config :console, pseudofs: get_env("CONSOLE_PSEUDOFS_ADDR")
 end
 
 if is_set("CONSOLE_INSTANCE_DETAILS") do

@@ -8,10 +8,10 @@ export const MdBlockquote = styled.blockquote.withConfig(commonCfg)(
     ...theme.partials.text.body1,
     color: theme.colors['text-light'],
     margin: 0,
-    marginLeft: theme.spacing.xlarge - 1,
+    marginLeft: `calc(${theme.spacing.xlarge} - 1px)`,
     borderLeft: `2px solid ${theme.colors.border}`,
     padding: '0',
-    paddingLeft: theme.spacing.xlarge - 1,
+    paddingLeft: `calc(${theme.spacing.xlarge} - 1px)`,
     boxShadow: 'none',
     '& p': {
       ...theme.partials.text.body1,
@@ -74,5 +74,5 @@ export const MdHr = styled.hr.withConfig(commonCfg)(({ theme }) => ({
   backgroundColor: theme.colors.border,
   border: 0,
   padding: 0,
-  margin: `${theme.spacing.xlarge}px ${theme.spacing.large}px`,
+  margin: `${theme.spacing.xlarge} ${theme.spacing.large}`,
 }))

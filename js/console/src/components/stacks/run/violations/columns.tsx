@@ -33,7 +33,7 @@ const sortSeverity: SortingFnOption<StackPolicyViolation> = (
   const second =
     severityToPriority[rowB.getValue<StackPolicyViolation>(colId)?.severity] ??
     0
-  return first == second ? 0 : first < second ? -1 : 1
+  return first === second ? 0 : first < second ? -1 : 1
 }
 
 function ViolationSeverity({

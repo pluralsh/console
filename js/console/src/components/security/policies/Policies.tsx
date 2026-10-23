@@ -1,20 +1,19 @@
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
-import { SubTabs } from 'components/utils/SubTabs'
+import { SubtabDirectory } from 'components/utils/SubTabs'
 import { useMemo } from 'react'
 import { Outlet, useMatch } from 'react-router-dom'
 import {
   POLICIES_ABS_PATH,
-  POLICIES_ATTACHMENT_RULES_REL_PATH,
+  POLICIES_ATTACHMENT_RULES_ABS_PATH,
 } from 'routes/securityRoutesConsts'
-import styled from 'styled-components'
 import { getPoliciesBreadcrumbs } from './policiesBreadcrumbs'
 
 export const POLICIES_DESCRIPTION =
-  'OPA/Rego documents that govern tool execution. Attach them to workbenches and stacks. If any matching policy denies, the tool call is rejected.'
+  'OPA/Rego documents that govern workbench tools and stack runs. Attach them to workbenches and stacks. If any matching policy denies, the action is rejected.'
 
-const directory = [
-  { label: 'Policies', path: '' },
-  { label: 'Attachment rules', path: POLICIES_ATTACHMENT_RULES_REL_PATH },
+export const POLICIES_TABS: SubtabDirectory = [
+  { label: 'Policies', path: POLICIES_ABS_PATH },
+  { label: 'Attachment rules', path: POLICIES_ATTACHMENT_RULES_ABS_PATH },
 ]
 
 export function Policies() {
@@ -22,24 +21,5 @@ export function Policies() {
 
   useSetBreadcrumbs(useMemo(() => getPoliciesBreadcrumbs(tab), [tab]))
 
-  return (
-    <WrapperSC>
-      <SubTabs
-        directory={directory}
-        activeFn={(path) => path === tab}
-      />
-      <Outlet />
-    </WrapperSC>
-  )
+  return <Outlet />
 }
-
-const WrapperSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  flex: 1,
-  gap: theme.spacing.large,
-  minHeight: 0,
-  minWidth: 0,
-  height: '100%',
-  overflow: 'hidden',
-}))

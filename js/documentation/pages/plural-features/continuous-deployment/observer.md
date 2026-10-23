@@ -16,15 +16,15 @@ This event-driven model integrates tightly with GitOps practices, ensuring deplo
 
 ## Available Observer Target Types
 
-There are a variety of observer scrape targets that an action can act upon are:
+There are a variety of observer scrape targets that an action can act upon:
 
-* `HELM` - scrape a helm chart and act on new versions
-* `GIT` - scrape a git repo in plural and act on new tags
-* `ADDON` - scrape a Plural addon-compatibility table and act on new versions compatible with a list of kubernetes versions
-* `EKS_ADDON` - scape a Plural eks addon compatibility table and act on new versions compatible with a list of kubernetes versions
+* `HELM` - scrape a Helm chart and act on new versions
+* `GIT` - scrape a Git repo in Plural and act on new tags
+* `ADDON` - scrape a Plural addon-compatibility table and act on new versions compatible with a list of Kubernetes versions
+* `EKS_ADDON` - scrape a Plural EKS addon compatibility table and act on new versions compatible with a list of Kubernetes versions
 
 {% callout severity="info" %}
-The last two are often the most useful, and can automate almost all the addon version maintenance related to kubernetes upgrades.
+The last two are often the most useful, and can automate almost all the addon version maintenance related to Kubernetes upgrades.
 {% /callout %}
 
 ## Available Observer Actions
@@ -32,7 +32,7 @@ The last two are often the most useful, and can automate almost all the addon ve
 Observers currently can execute two actions:
 
 * `PIPELINE` - add a new PipelineContext to a Plural Pipeline, this is useful for triggering a promotion pipeline for new addons
-* `PR` - trigger a Plural PR Automation: this is really useful for gluing the Observer automation into legacy IaC and GitOps code.
+* `PR` - trigger a Plural PR Automation: this is useful for gluing the Observer automation into legacy IaC and GitOps code.
 
 {% callout severity="info" %}
 PR Automations can modify any codebase with the right templating, and you can leverage that to automate version maintenance irrespective of how embedded Plural is in your infra.
@@ -109,7 +109,7 @@ stringData:
 | type      | outputs                                  | Explanation                                                                               |
 |-----------|------------------------------------------|-------------------------------------------------------------------------------------------|
 | OCI       | $value                                | OCI version found                                                                         |
-| HELM      | $value                                | HELM chart version found                                                                  |
-| GIT       | $value                                | GIT tag/commit found                                                                      |
+| HELM      | $value                                | Helm chart version found                                                                  |
+| GIT       | $value                                | Git tag/commit found                                                                      |
 | ADDON     | $value, $images, $chartVersion, $version | $value/$chartVersion: chart version<br/>$images: all detected images in the chart (JSON)<br/>$version: app version |
 | EKS_ADDON | $value, $version                     | $value/$version: EKS addon version                                                      |

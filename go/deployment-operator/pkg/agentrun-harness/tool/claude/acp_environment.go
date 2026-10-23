@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 )
 
 const (
@@ -27,9 +28,10 @@ func (agent *Agent) env(config toolv1.Config) []string {
 	}
 
 	if config.Run.IsProxyEnabled() {
+		// The sidecar replaces the placeholder key with the deploy token.
 		return append(env,
-			fmt.Sprintf("%s=%s", anthropicAuthEnv, agent.consoleToken),
-			fmt.Sprintf("%s=%s/ext/ai/anthropic", anthropicBaseURLEnv, agent.consoleURL),
+			fmt.Sprintf("%s=%s", anthropicAuthEnv, common.AgentAIProxyAPIKey),
+			fmt.Sprintf("%s=%s/ext/ai/anthropic", anthropicBaseURLEnv, common.AgentConsoleProxyURL),
 		)
 	}
 

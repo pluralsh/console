@@ -1,16 +1,10 @@
-import {
-  Button,
-  Flex,
-  KubernetesAltIcon,
-  SubTab,
-  TabList,
-  TabPanel,
-} from '@pluralsh/design-system'
+import { Button, KubernetesAltIcon } from '@pluralsh/design-system'
 import { ViewLogsButton } from 'components/component/ViewLogsButton'
 import { useLogin } from 'components/contexts'
+import { PageColumnSC } from 'components/layout/PageLayout'
+import { PageToolbar } from 'components/layout/PageToolbar'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
-import { LinkTabWrap } from 'components/utils/Tabs'
-import { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
+import { ReactNode, useEffect, useMemo, useState } from 'react'
 import {
   Link,
   Outlet,
@@ -28,7 +22,6 @@ import {
 import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 import { useTheme } from 'styled-components'
 
-import { useExplainWithAI } from 'components/ai/AIContext.tsx'
 import { Kind } from 'components/kubernetes/common/types.ts'
 import {
   getKubernetesCustomResourceDetailsPath,
@@ -42,7 +35,6 @@ import {
   isUnstructured,
   useFetchComponentDetails,
 } from './useFetchComponentDetails.tsx'
-import { RectangleSkeleton } from 'components/utils/SkeletonLoaders.tsx'
 
 export type ComponentDetailsContext = {
   component: Nullable<ServiceDeploymentComponentFragment>
@@ -71,10 +63,8 @@ export function ComponentDetails({
   const theme = useTheme()
   const navigate = useNavigate()
   const { flowIdOrName } = useParams()
-  const tabStateRef = useRef<any>(null)
   const { me } = useLogin()
   const componentKind = component?.kind?.toLowerCase() || ''
-  const componentName = component?.name?.toLowerCase() || ''
 
   const {
     data,
@@ -92,12 +82,6 @@ export function ComponentDetails({
     [data]
   )
   const visibleError = data ? undefined : error
-
-  useExplainWithAI(
-    value
-      ? `Describe the following kubernetes resource: ${value?.raw}`
-      : undefined
-  )
 
   const subpath = useMatch(`${pathMatchString}/:subpath`)?.params?.subpath || ''
   const outletContext: ComponentDetailsContext = useMemo(
@@ -131,6 +115,7 @@ export function ComponentDetails({
   )
 
   const currentTab = filteredDirectory.find(({ path }) => path === subpath)
+  const tabs = filteredDirectory.map(({ path, label }) => ({ path, label }))
 
   const [headerContent, setHeaderContent] = useState<ReactNode>()
   const pageHeaderContext = useMemo(() => ({ setHeaderContent }), [])
@@ -142,79 +127,53 @@ export function ComponentDetails({
 
   return (
     <PageHeaderContext value={pageHeaderContext}>
-      <ResponsivePageFullWidth
-        scrollable={
-          currentTab?.path === '' ||
-          currentTab?.path === 'info' ||
-          currentTab?.path === 'metadata'
-        }
-        heading={
-          componentName || (
-            <RectangleSkeleton
-              $width={200}
-              $height="xlarge"
-            />
-          )
-        }
-        headingContent={
-          <Flex gap="medium">
-            <TabList
-              stateRef={tabStateRef}
-              stateProps={{
-                orientation: 'horizontal',
-                selectedKey: currentTab?.path,
-              }}
-            >
-              {filteredDirectory.map(({ label, path }) => (
-                <LinkTabWrap
-                  key={path}
-                  to={path}
-                  subTab
-                >
-                  <SubTab>{label}</SubTab>
-                </LinkTabWrap>
-              ))}
-            </TabList>
-            {service?.cluster?.id && component && (
-              <ViewInDashboardButton
-                clusterId={service.cluster.id}
-                component={component}
-              />
-            )}
-            {pluralServiceDeploymentRef?.cluster?.id && (
-              <Button
-                as={Link}
-                to={getServiceDetailsPath({
-                  flowIdOrName,
-                  serviceId: pluralServiceDeploymentRef.id,
-                  clusterId: pluralServiceDeploymentRef.cluster.id,
-                })}
-              >
-                View Service
-              </Button>
-            )}
-            {!service?.id && (
-              <ViewLogsButton
-                metadata={value?.metadata}
-                kind={componentKind}
-              />
-            )}
-            {headerContent}
-          </Flex>
-        }
-      >
-        {visibleError && currentTab?.path !== 'dryrun' && (
-          <div css={{ marginBottom: theme.spacing.medium }}>
-            <GqlError error={visibleError} />
-          </div>
-        )}
-        <TabPanel
-          css={{ display: 'contents' }}
-          stateRef={tabStateRef}
+      <PageColumnSC>
+        <PageToolbar
+          tabs={tabs}
+          activeFn={(path) => path === subpath}
         >
+          {service?.cluster?.id && component && (
+            <ViewInDashboardButton
+              clusterId={service.cluster.id}
+              component={component}
+            />
+          )}
+          {pluralServiceDeploymentRef?.cluster?.id && (
+            <Button
+              small
+              as={Link}
+              to={getServiceDetailsPath({
+                flowIdOrName,
+                serviceId: pluralServiceDeploymentRef.id,
+                clusterId: pluralServiceDeploymentRef.cluster.id,
+              })}
+            >
+              View Service
+            </Button>
+          )}
+          {!service?.id && (
+            <ViewLogsButton
+              metadata={value?.metadata}
+              kind={componentKind}
+            />
+          )}
+          {headerContent}
+        </PageToolbar>
+        <ResponsivePageFullWidth
+          scrollable={
+            currentTab?.path === '' ||
+            currentTab?.path === 'info' ||
+            currentTab?.path === 'metadata'
+          }
+        >
+          {visibleError && currentTab?.path !== 'dryrun' && (
+            <div css={{ marginBottom: theme.spacing.medium }}>
+              <GqlError error={visibleError} />
+            </div>
+          )}
           <Outlet context={outletContext} />
-        </TabPanel>
-      </ResponsivePageFullWidth>
+        </ResponsivePageFullWidth>
+      </PageColumnSC>
     </PageHeaderContext>
   )
 }

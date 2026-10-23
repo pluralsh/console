@@ -24,7 +24,12 @@ export function useFloatingDropdown({
   sizeToContent = false,
   flipFallbackStrategy = 'initialPlacement',
   flipBeforeSize = false,
+  open,
+  onOpenChange,
 }: Pick<SelectProps, 'placement' | 'width' | 'maxHeight'> & {
+  /** Open state, for floating-ui interactions (`useDismiss`, `FloatingFocusManager`). */
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
   minHeight?: string | number
   minWidth?: string | number
   /** Grow with content up to maxHeight instead of filling available height. */
@@ -39,7 +44,7 @@ export function useFloatingDropdown({
   triggerRef: RefCallback<any>
 } {
   const theme = useTheme()
-  const sizePadding = theme.spacing.xxsmall
+  const sizePadding = theme.spacingPx.xxsmall
 
   // flip() padding must be smaller than size() padding to prevent flickering
   // back and forth. This makes padding off by one at some window sizes, but
@@ -94,10 +99,12 @@ export function useFloatingDropdown({
   })
 
   const floating = useFloating({
+    open,
+    onOpenChange,
     placement: `bottom-${placement === 'left' ? 'start' : 'end'}`,
     strategy: 'fixed',
     middleware: [
-      offset(theme.spacing.xxsmall),
+      offset(theme.spacingPx.xxsmall),
       ...(flipBeforeSize
         ? [flipMiddleware, sizeMiddleware]
         : [sizeMiddleware, flipMiddleware]),

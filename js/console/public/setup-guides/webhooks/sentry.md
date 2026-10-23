@@ -1,43 +1,44 @@
 # Sentry Webhook Setup for Plural
 
 References:
+- [Sentry - Integration Platform](https://docs.sentry.io/organization/integrations/integration-platform/)
 - [Sentry - Issue Alerts for webhook integrations](https://docs.sentry.io/organization/integrations/integration-platform/webhooks/issue-alerts/)
-- [Sentry Help - Issue webhooks vs alert rules](https://sentry.zendesk.com/hc/en-us/articles/41592230359835-Why-do-issues-get-pushed-to-my-webhook-integration-even-when-alert-rules-do-not-trigger)
 
-## 1. Create the webhook in Plural first
+Sentry generates the signing secret: it is the **Client Secret** of a Sentry internal integration. Plural verifies the `Sentry-Hook-Signature` header (hex HMAC-SHA256 of the request body) with that secret and only accepts issue alert deliveries (`Sentry-Hook-Resource: event_alert`). Basic auth is not used.
+
+## 1. Create an internal integration in Sentry and copy its Client Secret
+
+In Sentry, open **Settings** -> **Developer Settings** and create a new internal integration:
+
+1. Enter a name.
+2. Set **Webhook URL** to a temporary placeholder (for example `https://example.com/plural-webhook-placeholder`).
+3. Turn on **Alert Action**.
+4. Save, then copy the integration's **Client Secret**.
+
+## 2. Create the webhook in Plural
 
 In Plural:
 
-1. Set **Type** to `Observability`.
-2. Set **Provider** to `SENTRY`.
-3. Enter a webhook **Name**.
-4. Enter a **Signing secret**.
-5. Click **Create new webhook**.
+1. Set **Type of webhook** to `Observability`.
+2. Set **Provider type** to `Sentry`.
+3. Enter webhook **Name**.
+4. Paste the Sentry Client Secret as the Plural **Secret** (don't generate a new one).
+5. Click **Create**.
 
-Copy the generated webhook URL.
+Copy the Plural-generated webhook URL.
 
-## 2. Configure webhook integration in your Sentry org
+## 3. Point Sentry at Plural
 
-Open your Sentry host (for example `https://<your-sentry-host>/`) and configure the webhook integration/action to POST to the Plural URL.
+1. Edit the internal integration and replace the placeholder **Webhook URL** with the Plural webhook URL.
+2. In the issue alert rule you want to forward, add the action **Send a notification via** your integration, and save the rule.
 
-If your Sentry setup allows custom auth headers, send HTTP Basic Auth with:
-
-- username: any non-empty value
-- password: the Plural signing secret
-
-## 3. Configure notifications
-
-Enable only the event streams you need:
-
-- issue alert events (rule-triggered)
-- issue lifecycle events (created/resolved/regressed) only if required
-
-This avoids duplicate/noisy deliveries.
+Metric alerts, issue webhooks, and other resources are rejected with 403. Only issue alert rule actions are accepted.
 
 ## 4. Validate
 
-Trigger a test error and an alert-rule event, then confirm in Plural:
+Trigger an error that matches the alert rule and confirm in Plural:
 
-- request accepted
-- auth/verification succeeds
-- lifecycle and alert events are mapped correctly
+- request accepted (403 means the secret is not the Client Secret, or the delivery is not an issue alert)
+- the alert appears
+
+Plural only keeps a Sentry alert that matches a workbench trigger, or whose event has a `plrl.flow` tag naming an existing Plural flow. Events without an exception stack trace are ignored. Sentry alerts always stay firing, so a repeat alert for the same Sentry issue does not start another workbench job.

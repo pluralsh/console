@@ -29,6 +29,7 @@ query LogAggregation(
   $time: LogTimeRange
   $operator: LogQueryOperator
   $facets: [LogFacetInput]
+  $node: String
 ) {
   logAggregation(
     clusterId: $clusterId
@@ -38,6 +39,7 @@ query LogAggregation(
     time: $time
     facets: $facets
     operator: $operator
+    node: $node
   ) {
     ...LogLine
   }
@@ -49,6 +51,7 @@ query LogLabels(
   $serviceId: ID
   $query: String
   $time: LogTimeRange
+  $node: String
 ) {
   logLabels(
     field: $field
@@ -56,6 +59,7 @@ query LogLabels(
     serviceId: $serviceId
     query: $query
     time: $time
+    node: $node
   ) {
     ...LogFacetDetail
   }
@@ -69,6 +73,7 @@ query LogAggregationBuckets(
   $operator: LogQueryOperator
   $aggregation: LogAggregationInput
   $facets: [LogFacetInput]
+  $node: String
 ) {
   logAggregationBuckets(
     serviceId: $serviceId
@@ -78,6 +83,7 @@ query LogAggregationBuckets(
     aggregation: $aggregation
     operator: $operator
     facets: $facets
+    node: $node
   ) {
     ...LogAggregationBucket
   }

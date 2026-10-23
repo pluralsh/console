@@ -8,7 +8,9 @@ import { useEffect, useState } from 'react'
 import isEmpty from 'lodash/isEmpty'
 import styled from 'styled-components'
 
+import type { ResponseSchemaInfo, SchemaProperty } from '@src/lib/openapi-rest'
 import {
+  getStatusColor,
   StatusDot,
   StatusTab,
   StatusTabs,
@@ -17,10 +19,7 @@ import {
   TdLight,
   Th,
   TypeTag,
-  getStatusColor,
 } from './shared'
-
-import type { ResponseSchemaInfo, SchemaProperty } from '@src/lib/openapi-rest'
 
 /* ─── Styled Components ──────────────────────────────────────────────────── */
 

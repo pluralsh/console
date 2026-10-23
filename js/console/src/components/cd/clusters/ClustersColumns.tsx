@@ -1,4 +1,5 @@
 import {
+  ICON_FRAME_ICON_SIZE,
   Chip,
   Flex,
   GearTrainIcon,
@@ -19,7 +20,6 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { SortingFn } from '@tanstack/table-core'
 import {
   TableCaretLink,
-  TableText,
   TabularNumbers,
 } from 'components/cluster/TableElements'
 import { roundTo } from 'components/cluster/utils.tsx'
@@ -291,12 +291,10 @@ export const ColMemory = columnHelper.accessor(({ node }) => node, {
     return percentage > 0 ? (
       <>
         <SizeTextSc>{display}</SizeTextSc>
-        <TableText>
-          <UsageBar
-            usage={percentage}
-            width={100}
-          />
-        </TableText>
+        <UsageBar
+          usage={percentage}
+          width={100}
+        />
       </>
     ) : (
       display
@@ -511,13 +509,13 @@ export const ColCdTableActions = columnHelper.accessor(({ node }) => node, {
         <MoreMenu onSelectionChange={(newKey) => setMenuKey(newKey)}>
           <ListBoxItem
             key={MenuItemKey.Permissions}
-            leftContent={<PeopleIcon />}
+            leftContent={<PeopleIcon size={ICON_FRAME_ICON_SIZE.small} />}
             label="Permissions"
             textValue="Permissions"
           />
           <ListBoxItem
             key={MenuItemKey.Settings}
-            leftContent={<GearTrainIcon />}
+            leftContent={<GearTrainIcon size={ICON_FRAME_ICON_SIZE.small} />}
             label="Settings"
             textValue="Settings"
           />
@@ -525,7 +523,10 @@ export const ColCdTableActions = columnHelper.accessor(({ node }) => node, {
             <ListBoxItem
               key={MenuItemKey.Detach}
               leftContent={
-                <ReturnIcon color={theme.colors['icon-danger-critical']} />
+                <ReturnIcon
+                  size={ICON_FRAME_ICON_SIZE.small}
+                  color={theme.colors['icon-danger-critical']}
+                />
               }
               label="Detach cluster"
               textValue="Detach cluster"
@@ -535,7 +536,10 @@ export const ColCdTableActions = columnHelper.accessor(({ node }) => node, {
             <ListBoxItem
               key={MenuItemKey.Delete}
               leftContent={
-                <TrashCanIcon color={theme.colors['icon-danger-critical']} />
+                <TrashCanIcon
+                  size={ICON_FRAME_ICON_SIZE.small}
+                  color={theme.colors['icon-danger-critical']}
+                />
               }
               label="Delete cluster"
               textValue="Delete cluster"
@@ -586,6 +590,7 @@ export const ColHomeTableActions = columnHelper.accessor(({ node }) => node, {
           insight={getValue()?.insight}
         />
         <TableCaretLink
+          size="small"
           to={getClusterDetailsPath({
             clusterId: cluster?.id,
           })}

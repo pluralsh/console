@@ -14,7 +14,7 @@ import {
   Children,
   MouseEvent,
   ReactNode,
-  forwardRef,
+  Ref,
   useCallback,
   useEffect,
   useRef,
@@ -109,7 +109,7 @@ export const ColMembershipExpander = {
     row.getCanExpand() && (
       <IconFrame
         clickable
-        size="medium"
+        size="small"
         type="tertiary"
         tooltip={row.getIsExpanded() ? 'Collapse' : 'Expand'}
         icon={
@@ -249,14 +249,17 @@ export function MembershipExpandPanel({
   )
 }
 
-export const MembershipUserRow = forwardRef<
-  HTMLDivElement,
-  {
-    name?: string | null
-    email?: string | null
-    avatar?: string | null
-  }
->(function MembershipUserRow({ name, email, avatar }, ref) {
+export const MembershipUserRow = function MembershipUserRow({
+  name,
+  email,
+  avatar,
+  ref,
+}: {
+  name?: string | null
+  email?: string | null
+  avatar?: string | null
+  ref?: Ref<HTMLDivElement>
+}) {
   return (
     <MembershipListRowSC ref={ref}>
       <Flex
@@ -289,7 +292,7 @@ export const MembershipUserRow = forwardRef<
       )}
     </MembershipListRowSC>
   )
-})
+}
 
 export function HoverActions({ children }: { children: ReactNode }) {
   return (
@@ -308,7 +311,7 @@ export const MembershipListRowSC = styled.div(({ theme }) => ({
   height: MEMBERSHIP_ROW_HEIGHT,
   flexShrink: 0,
   overflow: 'hidden',
-  padding: `${theme.spacing.medium}px ${theme.spacing.medium}px ${theme.spacing.medium}px ${theme.spacing.small}px`,
+  padding: `${theme.spacing.medium} ${theme.spacing.medium} ${theme.spacing.medium} ${theme.spacing.small}`,
   backgroundColor: theme.colors['fill-zero'],
   borderBottom: theme.borders.default,
   '&:nth-child(even)': {

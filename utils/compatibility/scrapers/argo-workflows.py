@@ -9,6 +9,7 @@ from utils import (
     get_github_releases_timestamps,
     find_last_n_releases,
     clean_kube_version,
+    github_headers,
     print_error,
     print_success,
     print_warning,
@@ -44,7 +45,7 @@ def fetch_github_tags():
     tags = []
     for page in range(1, 5):
         url = f"https://api.github.com/repos/{github_repo_owner}/{github_repo_name}/tags"
-        response = requests.get(url, params={"page": page, "per_page": 100})
+        response = requests.get(url, params={"page": page, "per_page": 100}, headers=github_headers())
         if response.status_code != 200:
             print_error(f"Failed to fetch GitHub tags. Status code: {response.status_code}")
             break

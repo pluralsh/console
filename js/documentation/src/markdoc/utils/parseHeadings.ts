@@ -1,6 +1,6 @@
-import { type MarkdocHeading } from '@pluralsh/design-system'
+import type { MarkdocHeading } from '@pluralsh/design-system'
 
-import { type RenderableTreeNodes, type Tag } from '@markdoc/markdoc'
+import type { RenderableTreeNodes, Tag } from '@markdoc/markdoc'
 
 export const collectHeadings = (node: RenderableTreeNodes): MarkdocHeading[] =>
   isTag(node)

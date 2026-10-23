@@ -3,7 +3,7 @@ defmodule Console.AI.Workbench.MCPTest do
   use Mimic
 
   alias Console.AI.Workbench.MCP
-  alias Console.Schema.{McpServer, WorkbenchJob, WorkbenchTool}
+  alias Console.Schema.{McpServer, WorkbenchTool}
   alias Console.Schema.DeploymentSettings.OauthToken
 
   test "initializes a workbench MCP transport with an exchanged OAuth token" do
@@ -31,7 +31,7 @@ defmodule Console.AI.Workbench.MCPTest do
 
     tool = %WorkbenchTool{tool: :mcp, mcp_server: server}
 
-    assert {:streamable_http, options} = MCP.transport(tool, %WorkbenchJob{})
+    assert {:streamable_http, options} = MCP.transport(tool)
     assert options[:base_url] == "https://mcp.example.com"
     assert options[:headers] == %{"Authorization" => "Bearer mcp-access-token"}
   end

@@ -35,7 +35,7 @@ export const ListItem = styled.li.withConfig(commonCfg)(({ theme }) => {
       display: 'block',
       position: 'absolute',
       textAlign: 'center',
-      left: -offset,
+      left: theme.spacing['minus-large'],
       width: offset,
     },
     'ol > &::before': {

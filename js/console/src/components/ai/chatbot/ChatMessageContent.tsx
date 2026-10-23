@@ -265,7 +265,7 @@ export function ChatbotCreatePrButton({
     <Flex
       gap="small"
       justifySelf="flex-end"
-      margin={`${theme.spacing.xxsmall}px ${theme.spacing.medium}px`}
+      margin={`${theme.spacing.xxsmall} ${theme.spacing.medium}`}
     >
       <span
         css={{
@@ -619,7 +619,7 @@ const DefaultWrapperSC = styled.div<{ $role: AiRole }>(({ theme, $role }) => ({
     backgroundColor: theme.colors['fill-zero'],
     border: theme.borders.default,
     borderRadius: theme.borderRadiuses.large,
-    padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+    padding: `${theme.spacing.small} ${theme.spacing.medium}`,
     ...userMessageNestedCodeStyles(theme),
   }),
 }))

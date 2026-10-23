@@ -11,11 +11,11 @@ Plural accepts Bitbucket Data Center pull request and pull request comment webho
 
 In Plural:
 
-1. Set **Type** to `Ticketing`.
-2. Set **Provider** to `BITBUCKET_DATACENTER`.
+1. Set **Type of webhook** to `Ticketing`.
+2. Set **Provider type** to `Bitbucket Data Center`.
 3. Enter a webhook **Name**.
 4. Enter a **Secret**. Plural validates incoming requests using **HTTP Basic authentication** where this secret must be the Basic auth password (username is ignored).
-5. Click **Create new webhook**.
+5. Click **Create**.
 
 Plural generates the webhook **URL** after creation. Copy that URL.
 
@@ -25,7 +25,7 @@ In your project or repository webhook settings:
 
 1. Go to **Settings** -> **Webhooks** -> **Create webhook**.
 2. Set the target **URL** to the Plural webhook URL from step 1.
-3. Enable **Basic authentication** for the webhook.
+3. Choose **Basic authentication** as the authentication method. Do not use the secret token method: Plural does not check `X-Hub-Signature` for Bitbucket Data Center and rejects those requests with `403`.
 4. Use any username and set the password to the same secret you entered in Plural.
 5. Save the webhook.
 

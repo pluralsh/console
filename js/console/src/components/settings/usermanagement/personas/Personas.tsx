@@ -1,10 +1,9 @@
 import BillingFeatureBlockBanner from 'components/billing/BillingFeatureBlockBanner'
 import SubscriptionContext from 'components/contexts/SubscriptionContext'
+import { PageToolbarPortal } from 'components/layout/PageToolbar'
 import { useContext } from 'react'
 
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
-
-import { SettingsPageHeader } from 'components/settings/Settings'
 
 import { getUserManagementBreadcrumbs } from '../UserManagement'
 
@@ -23,10 +22,9 @@ export function Personas() {
 
   return (
     <>
-      <SettingsPageHeader heading="Personas">
-        <PersonaCreate />
-      </SettingsPageHeader>
-
+      <PageToolbarPortal>
+        <PersonaCreate small />
+      </PageToolbarPortal>
       <ListWrapperSC>
         {isAvailable ? (
           <PersonasList />

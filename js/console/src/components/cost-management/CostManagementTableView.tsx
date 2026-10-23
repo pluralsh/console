@@ -1,6 +1,5 @@
 import { Flex, Table } from '@pluralsh/design-system'
 import { Row } from '@tanstack/react-table'
-import { TagsFilter } from 'components/cd/services/ClusterTagsFilter'
 import { useProjectId } from 'components/contexts/ProjectsContext'
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
@@ -57,16 +56,9 @@ export function CostManagementTableView() {
   return (
     <Flex
       direction="column"
-      gap="medium"
       height="100%"
       overflow="hidden"
     >
-      <TagsFilter
-        selectedTagKeys={tagKeysState[0]}
-        setSelectedTagKeys={tagKeysState[1]}
-        searchOp={tagOpState[0]}
-        setSearchOp={tagOpState[1]}
-      />
       <Table
         fullHeightWrap
         // fillLevel={1}

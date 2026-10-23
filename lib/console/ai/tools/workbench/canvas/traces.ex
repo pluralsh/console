@@ -7,6 +7,8 @@ defmodule Console.AI.Tools.Workbench.Canvas.TracesBlock do
   embedded_schema do
     field :env, :map, virtual: true
     field :identifier, :string
+    field :section_id, :string
+    field :description, :string
 
     embeds_one :layout, CanvasBlock.Layout, on_replace: :update
     embeds_one :props, ToolGraph, on_replace: :update
@@ -22,7 +24,7 @@ defmodule Console.AI.Tools.Workbench.Canvas.TracesBlock do
 
   def changeset(model, attrs) do
     model
-    |> cast(attrs, [:identifier])
+    |> cast(attrs, [:identifier, :section_id, :description])
     |> cast_embed(:layout, required: true)
     |> cast_embed(:props, required: true)
     |> validate_required([:identifier])
@@ -31,6 +33,8 @@ defmodule Console.AI.Tools.Workbench.Canvas.TracesBlock do
   def implement(%__MODULE__{env: env, layout: layout, props: props} = model) do
     block = %CanvasBlock{
       identifier: model.identifier,
+      section_id: model.section_id,
+      description: model.description,
       type: :traces,
       layout: layout,
       content: %CanvasBlock.Content{traces: props}

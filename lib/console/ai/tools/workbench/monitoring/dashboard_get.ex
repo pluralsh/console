@@ -1,10 +1,11 @@
 defmodule Console.AI.Tools.Workbench.Monitoring.DashboardGet do
   use Console.AI.Tools.Workbench.Base
+  import Console.AI.Tools.Agent.Base, only: [check_uuid: 2]
   alias Console.AI.Tools.Workbench.Monitoring
 
   embedded_schema do
     field :job, :map, virtual: true
-    field :dashboard_id, :string
+    field :dashboard_id, :binary_id
   end
 
   @json_schema Console.priv_file!("tools/workbench/monitoring/dashboard_id.json") |> Jason.decode!()
@@ -18,6 +19,7 @@ defmodule Console.AI.Tools.Workbench.Monitoring.DashboardGet do
   def changeset(model, attrs) do
     model
     |> cast(attrs, [:dashboard_id])
+    |> check_uuid(:dashboard_id)
     |> validate_required([:dashboard_id])
   end
 

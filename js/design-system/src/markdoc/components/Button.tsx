@@ -66,7 +66,7 @@ function Button({
 }
 
 export const ButtonGroup = styled.div(({ theme }) => ({
-  margin: `${theme.spacing.large}px 0`,
+  margin: `${theme.spacing.large} 0`,
   display: 'flex',
   flexWrap: 'wrap',
   gap: theme.spacing.small,
@@ -75,7 +75,7 @@ export const ButtonGroup = styled.div(({ theme }) => ({
 export default styled(Button)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'row',
-  margin: `${theme.spacing.large}px 0`,
+  margin: `${theme.spacing.large} 0`,
   [`${ButtonGroup} &`]: {
     margin: 0,
   },

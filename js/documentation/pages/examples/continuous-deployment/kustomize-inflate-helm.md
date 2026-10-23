@@ -13,7 +13,7 @@ deployments more secure and maintainable.
 Before you begin, make sure to cover [prerequisites and setup](../#prerequisites).
 
 ## Step-by-Step Guide: Deploying WordPress with Kustomize and Helm
-Let's walk through deploying WordPress using Kustomize to inflate Helm charts. Feel free to adjust provided file
+Let's walk through deploying WordPress using Kustomize to inflate Helm charts. Feel free to adjust the provided file
 examples according to your needs and commit them to your configured Git repository.
 
 ### Step 1: Create a GeneratedSecret resource
@@ -93,8 +93,8 @@ stringData:
 
 ##### [services/examples/kustomize-inflate-helm/wordpress](#TODO)
 You'll also need to include the WordPress Helm chart in your repository. You can download it from the official Helm repository and include it in your Git repository
-or download a linked `wordpress.tar` and unpack it in the above path. It will create a `wordpress` directory with the chart inside. It's been vendored from the official 
-bitnami wordpress.
+or download the linked `wordpress.tar` and unpack it in the above path. It will create a `wordpress` directory with the chart inside. It's been vendored from the official 
+Bitnami WordPress chart.
 
 ### Step 3: Create a ServiceDeployment resource
 Finally, we'll create a ServiceDeployment resource that uses Kustomize to inflate the Helm chart.
@@ -125,7 +125,7 @@ After a couple of minutes, the service should be deployed and running. You can c
 
 ![](/assets/examples/plrl-04-console.png 'CD tab -> mgmt cluster -> plrl-04-wordpress service')
 
-You can access your `wordpress` instance using i.e. `kubectl`.
+You can access your `wordpress` instance using, for example, `kubectl`.
 ```shell
 kubectl -n examples port-forward svc/wordpress 8080:80
 ```

@@ -30,9 +30,9 @@ import { AxiosInstance } from '../../../../../helpers/axios'
 const FormContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  margin-bottom: 24px;
-  margin-right: 8px;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  margin-right: 0.5rem;
 `
 
 interface CreateSecretModalProps {

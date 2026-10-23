@@ -106,7 +106,7 @@ export function ClusterUpgradeAgentFlyover({
               fillLevel={2}
               severity={statusToChipSeverity[clusterUpgrade.status]}
               loading={
-                clusterUpgrade.status == ClusterUpgradeStatus.InProgress ||
+                clusterUpgrade.status === ClusterUpgradeStatus.InProgress ||
                 clusterUpgrade.status === ClusterUpgradeStatus.Pending
               }
             >
@@ -283,11 +283,14 @@ function AgentRunLinkButton({
           tooltip="View agent run details"
         />
       )
+    case AgentRunStatus.Babysitting:
+    case AgentRunStatus.PendingApproval:
+      return null
   }
 }
 
 const TopCardSC = styled(Card)(({ theme }) => ({
-  padding: `${theme.spacing.large}px ${theme.spacing.xxlarge}px`,
+  padding: `${theme.spacing.large} ${theme.spacing.xxlarge}`,
   background: 'transparent',
   display: 'flex',
   alignItems: 'flex-end',

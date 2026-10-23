@@ -36,7 +36,8 @@ import { sentinelRunJobsCols } from './jobs/SentinelRunJobsCols'
 import { SentinelCheckWithResult } from './SentinelRun'
 
 export type JobStatusFilterKey =
-  'All' | Exclude<SentinelRunJobStatus, SentinelRunJobStatus.Pending>
+  | 'All'
+  | Exclude<SentinelRunJobStatus, SentinelRunJobStatus.Pending>
 
 enum ExpanderTab {
   Reason = 'reason',
@@ -158,7 +159,7 @@ function IntegrationTestExpander({
             <SubTab
               key={label}
               className="statusTab"
-              css={{ display: 'flex', gap: 12 }}
+              css={{ display: 'flex', gap: '0.75rem' }}
             >
               {label === SentinelRunJobStatus.Pending
                 ? 'Pending'
@@ -205,7 +206,7 @@ const WrapperSC = styled.div<{ $bgColor?: SemanticColorKey }>(
     maxHeight: 500,
     overflow: 'auto',
     gap: theme.spacing.medium,
-    padding: `${theme.spacing.medium}px ${theme.spacing.medium}px ${theme.spacing.large}px`,
+    padding: `${theme.spacing.medium} ${theme.spacing.medium} ${theme.spacing.large}`,
     background: theme.colors[$bgColor],
     borderTop: theme.borders['fill-one'],
   })
@@ -227,7 +228,7 @@ function SegmentedControlBtn({
   return (
     <Button
       small
-      css={{ padding: `0 ${spacing.xsmall}px`, minHeight: 24 }}
+      css={{ padding: `0 ${spacing.xsmall}`, minHeight: 24 }}
       style={{ ...(active && { pointerEvents: 'none', cursor: 'default' }) }}
       floating={active}
       tertiary={!active}
