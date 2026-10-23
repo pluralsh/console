@@ -23,22 +23,22 @@ const Picker = styled(PickerUnstyled)(({ theme }) => ({
   minHeight: 0,
 
   '.grid': {
-    marginTop: '16px',
+    marginTop: '1rem',
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fill, minmax(225px, 1fr))',
     gridAutoRows: 'minmax(auto, 40px)',
-    gap: '16px',
+    gap: '1rem',
     height: 'calc(100% - 56px)',
     minHeight: '200px',
     overflow: 'auto',
   },
 
   '.scrollable': {
-    paddingRight: '8px',
+    paddingRight: '0.5rem',
   },
 
   '.empty': {
-    marginTop: '16px',
+    marginTop: '1rem',
     display: 'flex',
     alignItems: 'center',
     justifyItems: 'center',

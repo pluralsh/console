@@ -994,7 +994,7 @@ const TableSC = styled.table(({ theme }) => ({
   width: '100%',
   'th, td': {
     borderBottom: theme.borders.default,
-    padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
+    padding: `${theme.spacing.xsmall} ${theme.spacing.small}`,
     textAlign: 'left',
   },
   th: {

@@ -198,7 +198,7 @@ export function WorkbenchPromptOptionsSelector({
                 maxHeight: PANEL_MAX_HEIGHT,
                 minHeight: 0,
                 overflowY: 'auto',
-                padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+                padding: `${theme.spacing.small} ${theme.spacing.medium}`,
                 pointerEvents: sidePanel ? 'none' : undefined,
               }}
               aria-hidden={!!sidePanel}
@@ -664,7 +664,7 @@ function SidePanelContainer({
         maxHeight: PANEL_MAX_HEIGHT,
         minHeight: 0,
         overflowY: 'auto',
-        padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+        padding: `${theme.spacing.small} ${theme.spacing.medium}`,
         pointerEvents: hidden ? 'none' : undefined,
       }}
       aria-hidden={hidden}
@@ -673,7 +673,7 @@ function SidePanelContainer({
       {children}
       <div
         css={{
-          margin: `auto -${theme.spacing.medium}px -${theme.spacing.small}px`,
+          margin: `auto -${theme.spacing.medium} -${theme.spacing.small}`,
           borderTop: panelBorder,
         }}
       >
@@ -686,7 +686,7 @@ function SidePanelContainer({
             alignItems: 'center',
             gap: theme.spacing.xsmall,
             width: '100%',
-            padding: `${theme.spacing.xsmall + theme.spacing.small / 2}px ${theme.spacing.medium}px`,
+            padding: `calc(${theme.spacing.xsmall} + ${theme.spacing.small} / 2) ${theme.spacing.medium}`,
             color: theme.colors.text,
             cursor: 'pointer',
             '&:hover': { background: modeItemBackground },
@@ -747,7 +747,7 @@ function SelectedOptionPill({
       css={{
         height: 32,
         flexShrink: 0,
-        gap: 8,
+        gap: '0.5rem',
       }}
     >
       {icon}

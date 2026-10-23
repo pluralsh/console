@@ -5,7 +5,7 @@ import styled from 'styled-components'
 
 const Heading = styled.h4(({ theme }) => ({
   margin: 0,
-  marginBottom: 12,
+  marginBottom: '0.75rem',
   ...theme.partials.text.subtitle1,
 }))
 
@@ -24,17 +24,17 @@ function Template(args: any) {
       direction="column"
       maxWidth={697}
     >
-      <div style={{ marginBottom: 24 }}>
+      <div style={{ marginBottom: '1.5rem' }}>
         <Heading>Default</Heading> <RepositoryCard {...args} />
       </div>
-      <div style={{ marginBottom: 24 }}>
+      <div style={{ marginBottom: '1.5rem' }}>
         <Heading>Marketing</Heading>
         <RepositoryCard
           variant="marketing"
           {...args}
         />
       </div>
-      <div style={{ marginBottom: 24 }}>
+      <div style={{ marginBottom: '1.5rem' }}>
         <Heading>Medium</Heading>
         <RepositoryCard
           size="medium"
@@ -42,7 +42,7 @@ function Template(args: any) {
           {...args}
         />
       </div>
-      <div style={{ marginBottom: 24 }}>
+      <div style={{ marginBottom: '1.5rem' }}>
         <Heading>Large</Heading>
         <RepositoryCard
           size="large"

@@ -8,7 +8,7 @@ import styled from 'styled-components'
 
 const Heading = styled.h1(({ theme }) => ({
   margin: 0,
-  marginBottom: 16,
+  marginBottom: '1rem',
   ...theme.partials.text.title1,
 }))
 

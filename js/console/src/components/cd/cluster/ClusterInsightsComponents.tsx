@@ -224,7 +224,7 @@ const ComponentInsightCardSC = styled(Card)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  padding: `${theme.spacing.small} ${theme.spacing.medium}`,
   gap: theme.spacing.xsmall,
   textDecoration: 'none',
   '&:any-link': { textDecoration: 'none' },

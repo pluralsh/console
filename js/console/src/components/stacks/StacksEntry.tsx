@@ -64,7 +64,7 @@ const WrapperSC = styled.div<{ $active: boolean }>(({ theme, $active }) => ({
   justifyContent: 'space-between',
   gap: theme.spacing.medium,
   alignItems: 'center',
-  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  padding: `${theme.spacing.small} ${theme.spacing.medium}`,
   borderBottom: theme.borders.default,
   ...($active
     ? {

@@ -62,8 +62,8 @@ to load on CPU nodes.
 Workbenches get a persistent filesystem backed by
 [PseudoFS](https://github.com/pluralsh/telemetry), a single-replica gRPC server
 that stores files in the same object store configured in
-`console.config.objectStore`. It is installed automatically when an S3 bucket
-or Azure storage account is configured there, and can be disabled with
+`console.config.objectStore`. It is installed automatically when an S3 bucket,
+GCS bucket, or Azure storage account is configured there, and can be disabled with
 `pseudofs.enabled: false`. Each workbench is a separate tenant, and the Console
 connects to the in-namespace `console-pseudofs` service.
 
@@ -81,19 +81,33 @@ s3://<bucket>/<path>/fs/metastore/  SlateDB metastore
 s3://<bucket>/<path>/fs/blobs/      file content blobs
 ```
 
+Set `console.config.objectStore.provider` to `s3`, `gcs`, or `azure` to choose
+the backend explicitly. Leave it empty to keep the historical inference, which
+prefers an S3 bucket, then an Azure storage account, then a GCS bucket. When
+the provider is set, only that backend's settings are passed to the Console.
+
 The StatefulSet runs as the `console` service account, so workload identity
 annotations under `serviceAccount.annotations` (IRSA, EKS Pod Identity, Azure
-workload identity) also grant it bucket access. When static keys are set in
-`console.config.objectStore.s3` or `console.config.objectStore.azure`, they are
-copied into a `console-pseudofs-env` secret. Other credentials can be supplied
-with `pseudofs.extraEnv` or `pseudofs.extraEnvFrom`. The pod inherits the
-Console's `podLabels` (eg `azure.workload.identity/use: "true"`), and
-`pseudofs.podLabels` adds more.
+workload identity, or a GKE service account annotation) also grant it bucket
+access. When static keys are set in `console.config.objectStore.s3` or
+`console.config.objectStore.azure`, they are copied into a
+`console-pseudofs-env` secret. A GCS service account JSON key in
+`console.config.objectStore.gcs.credentials` is mounted at
+`/var/run/gcs/credentials.json` and exposed as `GOOGLE_APPLICATION_CREDENTIALS`.
+Other credentials can be supplied with `pseudofs.extraEnv` or
+`pseudofs.extraEnvFrom`. The pod inherits the Console's `podLabels` (eg
+`azure.workload.identity/use: "true"`), and `pseudofs.podLabels` adds more.
 
 On Azure, leaving `console.config.objectStore.azure.accessKey` unset makes both
 the Console and PseudoFS authenticate with workload identity. The identity needs
 `Storage Blob Data Contributor` on the container (or account), which also lets
 the Console issue the user delegation SAS urls it hands out for downloads.
+
+On GCS, leaving `console.config.objectStore.gcs.credentials` unset does the
+same with GKE workload identity. The identity needs object create and delete on
+the bucket (`roles/storage.objectAdmin` covers both) and
+`roles/iam.serviceAccountTokenCreator` on itself so the Console can sign
+download urls.
 
 S3-compatible endpoints reuse `console.config.objectStore.s3.endpoint`; an
 `http://` endpoint enables plaintext connections, and

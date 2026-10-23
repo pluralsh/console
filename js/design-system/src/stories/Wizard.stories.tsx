@@ -51,7 +51,7 @@ function Application({ ...props }: any): ReactElement<any> {
       <p
         css={{
           margin: 0,
-          paddingBottom: 16,
+          paddingBottom: '1rem',
           ...theme.partials.text.overline,
           color: theme.colors['text-xlight'],
         }}

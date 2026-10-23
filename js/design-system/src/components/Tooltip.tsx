@@ -228,7 +228,7 @@ function Tooltip({
                   position="absolute"
                   top={0}
                   left={0}
-                  size={ARROW_WIDTH}
+                  size={`${ARROW_WIDTH}px`}
                   color="fill-two"
                 />
               </div>
@@ -243,7 +243,7 @@ function Tooltip({
 const TipSC = styled.div(({ theme }) => ({
   ...theme.partials.text.caption,
   borderRadius: theme.borderRadiuses.medium,
-  padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
+  padding: `${theme.spacing.xsmall} ${theme.spacing.small}`,
   backgroundColor: theme.colors['fill-two'],
   boxShadow: theme.boxShadows.moderate,
   userSelect: 'none',

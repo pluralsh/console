@@ -5498,6 +5498,8 @@ export const WorkbenchTinyFragmentDoc = /*#__PURE__*/ gql`
   id
   name
   description
+  insertedAt
+  updatedAt
   agentRuntime {
     id
     name
@@ -10789,8 +10791,16 @@ export const ClusterVulnerabilityAggregateDocument = /*#__PURE__*/ gql`
 }
     ${ClusterVulnAggregateFragmentDoc}` as unknown as DocumentNode<Types.ClusterVulnerabilityAggregateQuery, Types.ClusterVulnerabilityAggregateQueryVariables>;
 export const WorkbenchesDocument = /*#__PURE__*/ gql`
-    query Workbenches($first: Int = 100, $after: String, $q: String) {
-  workbenches(first: $first, after: $after, q: $q) {
+    query Workbenches($first: Int = 100, $after: String, $q: String, $projectId: ID, $sort: WorkbenchSort, $direction: SortDirection, $favoriteIds: [ID]) {
+  workbenches(
+    first: $first
+    after: $after
+    q: $q
+    projectId: $projectId
+    sort: $sort
+    direction: $direction
+    favoriteIds: $favoriteIds
+  ) {
     pageInfo {
       ...PageInfo
     }
@@ -10812,6 +10822,16 @@ export const WorkbenchDashboardDocument = /*#__PURE__*/ gql`
   }
 }
     ` as unknown as DocumentNode<Types.WorkbenchDashboardQuery, Types.WorkbenchDashboardQueryVariables>;
+export const WorkbenchesSummaryDocument = /*#__PURE__*/ gql`
+    query WorkbenchesSummary($projectId: ID) {
+  workbenchAggregates(projectId: $projectId) {
+    pullRequests
+    pullRequestMergeRate
+    hoursSaved
+    totalTokens
+  }
+}
+    ` as unknown as DocumentNode<Types.WorkbenchesSummaryQuery, Types.WorkbenchesSummaryQueryVariables>;
 export const WorkbenchesEvalsMergeRateGraphDocument = /*#__PURE__*/ gql`
     query WorkbenchesEvalsMergeRateGraph($period: EvalResultsPeriod = WEEK) {
   workbenchPrMergeRates(period: $period) {

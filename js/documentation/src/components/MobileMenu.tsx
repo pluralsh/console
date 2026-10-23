@@ -61,7 +61,7 @@ export const PluralMenu = styled(PluralMenuContent)(
     paddingLeft: theme.spacing.xlarge,
     paddingRight: theme.spacing.xlarge,
     overflow: 'auto',
-    paddingBottom: `calc(${theme.spacing.xlarge}px + var(--menu-extra-bpad))`,
+    paddingBottom: `calc(${theme.spacing.xlarge} + var(--menu-extra-bpad))`,
 
     [TopHeading]: {
       paddingLeft: 0,

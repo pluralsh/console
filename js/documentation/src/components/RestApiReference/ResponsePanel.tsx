@@ -30,8 +30,8 @@ const ResponseHeader = styled.div(({ theme }) => ({
   alignItems: 'center',
   justifyContent: 'space-between',
   gap: theme.spacing.medium,
-  minHeight: theme.spacing.xlarge + theme.spacing.xsmall * 2,
-  padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
+  minHeight: `calc(${theme.spacing.xlarge} + ${theme.spacing.xsmall} * 2)`,
+  padding: `${theme.spacing.xsmall} ${theme.spacing.medium}`,
   borderBottom: `1px solid ${brand.line}`,
   ...docsText.label,
 }))
@@ -56,7 +56,7 @@ const CopyBtnWrap = styled.div(({ theme }) => ({
 
 const CodeContent = styled.div(({ theme }) => ({
   overflow: 'auto',
-  padding: `${theme.spacing.medium}px`,
+  padding: `${theme.spacing.medium}`,
   color: brand.ink,
   '.hljs-attr': { color: brand['syntax-key'] },
   '.hljs-string': { color: brand['syntax-string'] },

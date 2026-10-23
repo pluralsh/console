@@ -134,7 +134,7 @@ export function WorkbenchJobActivities({
             data={activityGroups}
             itemGap={ACTIVITY_GAP}
             style={{
-              padding: `${spacing.large}px ${spacing.large}px 0`,
+              padding: `${spacing.large} ${spacing.large} 0`,
               // Keep the clicked row from being pinned when it grows at the bottom.
               overflowAnchor: 'none',
             }}

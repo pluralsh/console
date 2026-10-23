@@ -208,7 +208,7 @@ const ContentEditableDivSC = styled.div<{ $disabled?: boolean }>(
       display: 'inline-flex',
       alignItems: 'center',
       gap: theme.spacing.xxsmall,
-      padding: `0 ${theme.spacing.xsmall}px`,
+      padding: `0 ${theme.spacing.xsmall}`,
       borderRadius: theme.borderRadiuses.medium,
       background: theme.colors['fill-two'],
       border: theme.borders['fill-two'],
@@ -216,7 +216,7 @@ const ContentEditableDivSC = styled.div<{ $disabled?: boolean }>(
       lineHeight: '1.6em',
       userSelect: 'none',
       cursor: 'default',
-      margin: 1,
+      margin: '1px',
     },
     [`[${CHIP_DATA_ATTR}][data-selected] > span`]: { background: 'Highlight' },
   })

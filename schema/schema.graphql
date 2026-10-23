@@ -649,6 +649,15 @@ type RootQueryType {
 
     "filter workbenches by project"
     projectId: ID
+
+    "field to sort workbenches by"
+    sort: WorkbenchSort
+
+    "sort direction"
+    direction: SortDirection
+
+    "workbench ids to rank first when sorting by favorited"
+    favoriteIds: [ID]
   ): WorkbenchConnection
 
   workbenchTools(
@@ -719,7 +728,10 @@ type RootQueryType {
 
   workbenchPullRequests: Int!
 
-  workbenchAggregates: WorkbenchAggregates!
+  workbenchAggregates(
+    "only aggregate workbenches in this project"
+    projectId: ID
+  ): WorkbenchAggregates!
 
   workbenchUsage(
     period: EvalResultsPeriod
@@ -3191,6 +3203,13 @@ enum WorkbenchJobPrState {
   NONE
 }
 
+enum WorkbenchSort {
+  NAME
+  INSERTED_AT
+  UPDATED_AT
+  FAVORITED
+}
+
 enum EvalResultsPeriod {
   DAY
   WEEK
@@ -5476,6 +5495,12 @@ type WorkbenchAggregates {
 
   "average eval grade across workbench eval results"
   evalResults: Float
+
+  "estimated engineering hours saved by merged pull requests, derived from their classified difficulty"
+  hoursSaved: Float
+
+  "total tokens consumed by workbench jobs"
+  totalTokens: Int
 }
 
 type WorkbenchUsageTimeseries {
@@ -7779,8 +7804,14 @@ input VsphereCloudConnectionAttributes {
 "A federated credential is a way to authenticate users from an external identity provider"
 input FederatedCredentialAttributes {
   issuer: String!
+
+  "expected audience of tokens exchanged with this credential. When unset, any audience is accepted"
+  aud: String
+
   claimsLike: Json
+
   scopes: [String]
+
   userId: ID!
 }
 
@@ -8315,11 +8346,20 @@ type VsphereConnectionAttributes {
 "A federated credential is a way to authenticate users from an external identity provider"
 type FederatedCredential {
   id: ID!
+
   issuer: String!
+
+  "expected audience of tokens exchanged with this credential. When unset, any audience is accepted"
+  aud: String
+
   claimsLike: Map
+
   scopes: [String]
+
   user: User
+
   insertedAt: DateTime
+
   updatedAt: DateTime
 }
 

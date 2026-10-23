@@ -127,7 +127,7 @@ function TokenBreakdown({
         display: 'flex',
         flexDirection: 'column',
         gap: theme.spacing.xxsmall,
-        padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
+        padding: `${theme.spacing.medium} ${theme.spacing.large}`,
         backgroundColor: usageCardBackground(theme),
       }}
     >
@@ -234,7 +234,7 @@ function CostBreakdown({
         display: 'flex',
         flexDirection: 'column',
         gap: theme.spacing.xsmall,
-        padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
+        padding: `${theme.spacing.medium} ${theme.spacing.large}`,
         backgroundColor: usageCardBackground(theme),
       }}
     >

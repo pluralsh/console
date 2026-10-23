@@ -12,7 +12,7 @@ import styled, { useTheme } from 'styled-components'
 
 const Heading = styled.h1(({ theme }) => ({
   margin: 0,
-  marginBottom: 12,
+  marginBottom: '0.75rem',
   ...theme.partials.text.subtitle2,
 }))
 
@@ -69,7 +69,7 @@ function Template({ onFillLevel, asLink, ...args }: any) {
       {sizes.map((size) => (
         <div>
           <Heading>{`${size[0].toUpperCase()}${size.slice(1)}`}</Heading>
-          <div style={{ marginBottom: 32 }}>
+          <div style={{ marginBottom: '2rem' }}>
             <WrapWithIf
               condition={onFillLevel > 0}
               wrapper={

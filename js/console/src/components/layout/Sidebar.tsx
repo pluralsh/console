@@ -349,14 +349,14 @@ const ConsoleVersionSC = styled.span<{ $isExpanded: boolean }>(
   ({ theme, $isExpanded }) => ({
     ...TRUNCATE,
     color: theme.colors['text-xlight'],
-    fontSize: 10,
-    letterSpacing: '-0.35px',
+    fontSize: '0.625rem',
+    letterSpacing: '-0.025em',
     margin: theme.spacing.xsmall,
     textAlign: 'center',
     ...($isExpanded && {
       alignSelf: 'stretch',
-      margin: `${theme.spacing.xsmall}px 0`,
-      paddingLeft: theme.spacing.small - theme.spacing.xsmall,
+      margin: `${theme.spacing.xsmall} 0`,
+      paddingLeft: `calc(${theme.spacing.small} - ${theme.spacing.xsmall})`,
       textAlign: 'left',
     }),
   })
@@ -366,8 +366,8 @@ const SidebarLogoSC = styled.img({
   width: 24,
   height: 24,
   objectFit: 'contain',
-  marginLeft: '-4px',
-  marginRight: '-4px',
+  marginLeft: '-0.25rem',
+  marginRight: '-0.25rem',
 })
 
 const ToggleSidebarButtonSC = styled.button<{
@@ -380,7 +380,7 @@ const ToggleSidebarButtonSC = styled.button<{
   alignItems: 'center',
   justifyContent: $isExpanded ? 'flex-start' : 'center',
   gap: theme.spacing.xsmall,
-  padding: $isExpanded ? `0 ${theme.spacing.medium}px` : theme.spacing.small,
+  padding: $isExpanded ? `0 ${theme.spacing.medium}` : theme.spacing.small,
   whiteSpace: 'nowrap',
   color: theme.colors['text-xlight'],
   cursor: 'pointer',

@@ -3,6 +3,26 @@ defmodule Console.Schema.FederatedCredentialTest do
 
   alias Console.Schema.FederatedCredential
 
+  describe "audience_allowed?/2" do
+    test "an unset audience accepts any token audience" do
+      cred = %FederatedCredential{}
+
+      assert FederatedCredential.audience_allowed?(cred, "vault")
+      assert FederatedCredential.audience_allowed?(cred, ["vault"])
+      assert FederatedCredential.audience_allowed?(cred, nil)
+    end
+
+    test "a pinned audience matches that value, including list audiences" do
+      cred = %FederatedCredential{aud: "https://console.plural.sh"}
+
+      assert FederatedCredential.audience_allowed?(cred, "https://console.plural.sh")
+      assert FederatedCredential.audience_allowed?(cred, ["vault", "https://console.plural.sh"])
+      refute FederatedCredential.audience_allowed?(cred, "vault")
+      refute FederatedCredential.audience_allowed?(cred, ["vault"])
+      refute FederatedCredential.audience_allowed?(cred, nil)
+    end
+  end
+
   describe "allow?/2" do
     test "it matches string claims against their regex" do
       cred = %FederatedCredential{claims_like: %{"sub" => "^repo:pluralsh/console:ref:refs/heads/master$"}}
@@ -78,6 +98,25 @@ defmodule Console.Schema.FederatedCredentialTest do
         refute cs.valid?
         assert cs.errors[:claims_like]
       end
+    end
+
+    test "audience is optional and a blank value is left unset" do
+      attrs = %{
+        issuer: "https://token.actions.githubusercontent.com",
+        claims_like: %{"sub" => "repo:pluralsh/console:.*"},
+        scopes: ["catalog.write"],
+        user_id: Ecto.UUID.generate()
+      }
+
+      assert FederatedCredential.changeset(%FederatedCredential{}, attrs).valid?
+
+      cs = FederatedCredential.changeset(%FederatedCredential{}, Map.put(attrs, :aud, ""))
+      assert cs.valid?
+      refute Map.has_key?(cs.changes, :aud)
+
+      cs = FederatedCredential.changeset(%FederatedCredential{}, Map.put(attrs, :aud, "https://console.plural.sh"))
+      assert cs.valid?
+      assert cs.changes.aud == "https://console.plural.sh"
     end
   end
 end

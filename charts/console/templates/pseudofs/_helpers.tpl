@@ -1,9 +1,43 @@
 {{/*
 The workbench filesystem is only installed alongside an object store.
 */}}
-{{- define "pseudofs.enabled" -}}
+{{/*
+Explicit provider wins. Empty prefers s3, then azure, then gcs, matching the historical pseudofs choice.
+*/}}
+{{- define "objectStore.provider" -}}
 {{- $store := .Values.console.config.objectStore -}}
-{{- if and .Values.pseudofs.enabled (or $store.s3.bucket $store.azure.storageAccount) -}}
+{{- if $store.provider -}}
+{{- if not (or (eq $store.provider "s3") (or (eq $store.provider "gcs") (eq $store.provider "azure"))) -}}
+{{- fail (printf "console.config.objectStore.provider must be s3, gcs, or azure, got %q" $store.provider) -}}
+{{- end -}}
+{{- $store.provider -}}
+{{- else if $store.s3.bucket -}}
+s3
+{{- else if $store.azure.storageAccount -}}
+azure
+{{- else if $store.gcs.bucket -}}
+gcs
+{{- end -}}
+{{- end -}}
+
+{{- define "pseudofs.enabled" -}}
+{{- $provider := include "objectStore.provider" . | trim -}}
+{{- $store := .Values.console.config.objectStore -}}
+{{- if and .Values.pseudofs.enabled (eq $provider "s3") $store.s3.bucket -}}
+true
+{{- else if and .Values.pseudofs.enabled (eq $provider "azure") $store.azure.storageAccount -}}
+true
+{{- else if and .Values.pseudofs.enabled (eq $provider "gcs") $store.gcs.bucket -}}
+true
+{{- end -}}
+{{- end -}}
+
+{{/*
+A JSON key is mounted for PseudoFS only when GCS is the selected backend and credentials are set.
+*/}}
+{{- define "pseudofs.gcsKey" -}}
+{{- $store := .Values.console.config.objectStore -}}
+{{- if and (eq (include "objectStore.provider" . | trim) "gcs") $store.gcs.credentials -}}
 true
 {{- end -}}
 {{- end -}}
@@ -53,17 +87,21 @@ Translates console.config.objectStore into a pseudofs object_store block.
 */}}
 {{- define "pseudofs.objectStore" -}}
 {{- $store := .Values.console.config.objectStore -}}
-{{- if $store.s3.bucket -}}
+{{- $provider := include "objectStore.provider" . | trim -}}
+{{- if eq $provider "s3" -}}
 {{- $s3 := .Values.pseudofs.objectStore.s3 -}}
 type: Aws
-bucket: {{ $store.s3.bucket | quote }}
+bucket: {{ required "console.config.objectStore.s3.bucket is required for the workbench filesystem" $store.s3.bucket | quote }}
 region: {{ $store.s3.region | default "us-east-1" | quote }}
 {{- with $store.s3.endpoint }}
 endpoint: {{ ternary . (printf "https://%s" .) (contains "://" .) | quote }}
 {{- end }}
 allow_http: {{ or $s3.allowHttp (hasPrefix "http://" ($store.s3.endpoint | default "")) }}
 virtual_hosted_style: {{ $s3.virtualHostedStyle }}
-{{- else -}}
+{{- else if eq $provider "gcs" -}}
+type: Gcp
+bucket: {{ required "console.config.objectStore.gcs.bucket is required for the workbench filesystem" $store.gcs.bucket | quote }}
+{{- else if eq $provider "azure" -}}
 {{- $azure := .Values.pseudofs.objectStore.azure -}}
 type: Azure
 account: {{ $store.azure.storageAccount | quote }}
@@ -72,5 +110,7 @@ container: {{ required "console.config.objectStore.azure.container is required f
 endpoint: {{ . | quote }}
 {{- end }}
 allow_http: {{ $azure.allowHttp }}
+{{- else -}}
+{{- fail "the workbench filesystem requires console.config.objectStore.provider to be s3, gcs, or azure" -}}
 {{- end -}}
 {{- end -}}

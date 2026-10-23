@@ -116,7 +116,7 @@ const IconWrapSC = styled(Flex)(({ theme }) => ({
   alignItems: 'center',
   justifyContent: 'center',
   backgroundColor: theme.colors['fill-three'],
-  padding: 2,
+  padding: '0.125rem',
   border: theme.borders.input,
   borderRadius: theme.borderRadiuses.medium,
   width: 24,
@@ -135,7 +135,7 @@ const LabelSC = styled.p(({ theme }) => ({
 const IconImgSC = styled.img(({ theme }) => ({
   objectPosition: 'center',
   backgroundColor: theme.colors['fill-three'],
-  padding: 2,
+  padding: '0.125rem',
   border: theme.borders.input,
   borderRadius: theme.borderRadiuses.medium,
   width: 24,

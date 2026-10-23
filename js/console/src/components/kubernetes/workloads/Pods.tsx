@@ -43,12 +43,14 @@ const columnHelper = createColumnHelper<PodPod>()
 const colImages = columnHelper.accessor((pod) => pod?.containerImages, {
   id: 'images',
   header: 'Images',
+  meta: { gridTemplate: 'minmax(120px, 1fr)' },
   cell: ({ getValue }) => <WorkloadImages images={getValue()} />,
 })
 
 const colNode = columnHelper.accessor((pod) => pod?.nodeName, {
   id: 'node',
   header: 'Node',
+  meta: { truncate: true },
   cell: ({ getValue }) => (
     <ResourceLink
       objectRef={{

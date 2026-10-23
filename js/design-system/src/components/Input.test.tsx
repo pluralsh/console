@@ -34,8 +34,8 @@ describe('migrated form primitives', () => {
       )
 
       const styles = sheet.getStyleTags()
-      expect(styles).toContain('padding-bottom:24px')
-      expect(styles).toContain('margin-bottom:16px')
+      expect(styles).toContain('padding-bottom:1.5rem')
+      expect(styles).toContain('margin-bottom:1rem')
       expect(styles).toContain('width:100%')
     } finally {
       sheet.seal()

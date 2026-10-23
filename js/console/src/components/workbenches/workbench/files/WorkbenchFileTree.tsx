@@ -249,7 +249,7 @@ function EntryLabel({
     <EntryLabelSC>
       <Tooltip
         label={name}
-        css={{ marginLeft: 6 }}
+        css={{ marginLeft: '0.375rem' }}
       >
         <div
           css={{
@@ -289,7 +289,7 @@ function StatusItem({ path, label }: { path: string; label: ReactNode }) {
       label={
         <CaptionP
           $color="text-xlight"
-          css={{ display: 'flex', alignItems: 'center', gap: 6 }}
+          css={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}
         >
           {label}
         </CaptionP>
@@ -328,7 +328,7 @@ const HeaderSC = styled.div(({ theme }) => ({
   boxSizing: 'border-box',
   height: WORKBENCH_FILES_HEADER_HEIGHT,
   flexShrink: 0,
-  padding: `0 ${theme.spacing.medium}px`,
+  padding: `0 ${theme.spacing.medium}`,
   borderBottom: theme.borders.hairline,
 }))
 

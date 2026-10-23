@@ -230,7 +230,7 @@ const ChartAndFilterWrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.xsmall,
-  padding: `${theme.spacing.medium}px ${theme.spacing.large}px ${theme.spacing.large}px`,
+  padding: `${theme.spacing.medium} ${theme.spacing.large} ${theme.spacing.large}`,
   flex: 1,
   whiteSpace: 'nowrap',
   height: '100%',

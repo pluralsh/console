@@ -465,7 +465,7 @@ function WorkbenchSavedPrompts({
                 referenceRole={false}
                 placement="right"
                 arrow={true}
-                offset={theme.spacing.xxsmall}
+                offset={theme.spacingPx.xxsmall}
                 style={{
                   width: SAVED_PROMPTS_PANEL_WIDTH,
                   boxSizing: 'border-box',

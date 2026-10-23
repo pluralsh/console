@@ -1,0 +1,8 @@
+gateway-proxy serves the Anthropic Messages API at:
+
+  http://{{ include "gateway-proxy.fullname" . }}.{{ .Release.Namespace }}.svc:{{ .Values.service.port }}
+
+Point Anthropic clients at it with the configured API key, e.g. for Claude Code:
+
+  export ANTHROPIC_BASE_URL=http://{{ include "gateway-proxy.fullname" . }}.{{ .Release.Namespace }}.svc:{{ .Values.service.port }}
+  export ANTHROPIC_API_KEY=<secrets.apiKey>

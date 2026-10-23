@@ -290,7 +290,11 @@ export function LogsMetricsChart({
           </BarsRowSC>
         </BarsAreaSC>
       </ChartCanvasSC>
-      <XAxisSC style={{ paddingLeft: Y_AXIS_WIDTH + theme.spacing.medium }}>
+      <XAxisSC
+        style={{
+          paddingLeft: `calc(${Y_AXIS_WIDTH}px + ${theme.spacing.medium})`,
+        }}
+      >
         {tickIndices(buckets.length).map((i, tickIdx, indices) => (
           <XTickSC
             key={i}
@@ -337,7 +341,7 @@ const ChartCanvasSC = styled.div({
   display: 'flex',
   alignItems: 'flex-end',
   height: CHART_CANVAS_HEIGHT,
-  paddingTop: 8,
+  paddingTop: '0.5rem',
 })
 
 const YAxisSC = styled.div(({ theme }) => ({
@@ -347,11 +351,11 @@ const YAxisSC = styled.div(({ theme }) => ({
   alignItems: 'flex-end',
   width: Y_AXIS_WIDTH,
   height: '100%',
-  paddingRight: 4,
-  paddingTop: 8,
+  paddingRight: '0.25rem',
+  paddingTop: '0.5rem',
   color: theme.colors['text-xlight'],
-  fontSize: 10,
-  lineHeight: '14px',
+  fontSize: '0.625rem',
+  lineHeight: '0.875rem',
   flexShrink: 0,
 }))
 
@@ -413,7 +417,7 @@ const BarSC = styled.div<{ $height: number }>(({ theme, $height }) => ({
 const XAxisSC = styled.div(({ theme }) => ({
   position: 'relative',
   height: X_AXIS_HEIGHT,
-  marginTop: 4,
+  marginTop: '0.25rem',
   paddingRight: theme.spacing.medium,
 }))
 
@@ -427,8 +431,8 @@ const XTickSC = styled.span<{ $align: 'start' | 'center' | 'end' }>(
           ? 'translateX(-100%)'
           : 'translateX(-50%)',
     color: theme.colors['text-xlight'],
-    fontSize: 10,
-    lineHeight: '14px',
+    fontSize: '0.625rem',
+    lineHeight: '0.875rem',
     whiteSpace: 'nowrap',
   })
 )

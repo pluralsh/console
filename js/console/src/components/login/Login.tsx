@@ -224,7 +224,7 @@ export default function Login() {
           css={{
             display: 'flex',
             flexDirection: 'column',
-            marginBottom: 10,
+            marginBottom: '0.625rem',
             gap: theme.spacing.xsmall,
           }}
         >

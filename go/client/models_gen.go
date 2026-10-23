@@ -3872,6 +3872,7 @@ type ExtendedSupportInfo struct {
 type FederatedCredential struct {
 	ID         string         `json:"id"`
 	Issuer     string         `json:"issuer"`
+	Aud        *string        `json:"aud,omitempty"`
 	ClaimsLike map[string]any `json:"claimsLike,omitempty"`
 	Scopes     []*string      `json:"scopes,omitempty"`
 	User       *User          `json:"user,omitempty"`
@@ -3882,6 +3883,7 @@ type FederatedCredential struct {
 // A federated credential is a way to authenticate users from an external identity provider
 type FederatedCredentialAttributes struct {
 	Issuer     string    `json:"issuer"`
+	Aud        *string   `json:"aud,omitempty"`
 	ClaimsLike *string   `json:"claimsLike,omitempty"`
 	Scopes     []*string `json:"scopes,omitempty"`
 	UserID     string    `json:"userId"`

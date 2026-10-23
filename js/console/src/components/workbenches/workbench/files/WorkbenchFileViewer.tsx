@@ -260,7 +260,7 @@ const ViewerHeaderSC = styled.div(({ theme }) => ({
   gap: theme.spacing.small,
   boxSizing: 'border-box',
   minHeight: WORKBENCH_FILES_HEADER_HEIGHT,
-  padding: `${theme.spacing.small}px ${theme.spacing.large}px`,
+  padding: `${theme.spacing.small} ${theme.spacing.large}`,
   borderBottom: theme.borders.hairline,
   flexShrink: 0,
 }))

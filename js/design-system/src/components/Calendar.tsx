@@ -173,7 +173,7 @@ const CalendarSC = styled.div(({ theme }) => ({
       ...theme.partials.text.subtitle2,
       textAlign: 'center',
       flexGrow: 1,
-      padding: `0 ${theme.spacing.small}px`,
+      padding: `0 ${theme.spacing.small}`,
     },
     '.button': {
       width: `${100 / 7}%`,

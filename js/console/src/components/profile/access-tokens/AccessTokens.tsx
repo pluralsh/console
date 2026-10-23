@@ -260,7 +260,7 @@ export function AccessTokens() {
       css={{
         display: 'flex',
         flexDirection: 'column',
-        gap: 16,
+        gap: '1rem',
         height: '100%',
       }}
     >

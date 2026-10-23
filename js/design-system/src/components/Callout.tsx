@@ -214,8 +214,8 @@ function Callout({
               (expandable && expanded) || !expandable
                 ? 'auto'
                 : size === 'compact'
-                  ? theme.spacing.xsmall
-                  : theme.spacing.medium
+                  ? theme.spacingPx.xsmall
+                  : theme.spacingPx.medium
             }
           >
             <div className="children">{children}</div>
@@ -269,8 +269,8 @@ const CalloutSC = styled.div<{
   gap: theme.spacing.small,
   padding:
     $size === 'compact'
-      ? `${theme.spacing.xsmall}px ${theme.spacing.medium}px`
-      : `${theme.spacing.medium}px`,
+      ? `${theme.spacing.xsmall} ${theme.spacing.medium}`
+      : `${theme.spacing.medium}`,
   margin: 0,
   borderRadius: theme.borderRadiuses.medium,
   ...theme.partials.text.body2LooseLineHeight,

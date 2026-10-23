@@ -436,7 +436,7 @@ function ViewChip({
           justifyContent: 'center',
           height: 32,
           minWidth: 80,
-          padding: '5px 12px',
+          padding: '0.25rem 0.75rem',
           borderRadius: theme.borderRadiuses.medium,
           boxShadow: 'none',
         },
@@ -485,7 +485,7 @@ const PanelSC = styled.div(({ theme }) => ({
   boxSizing: 'border-box',
   display: 'flex',
   flexDirection: 'column',
-  padding: `0 ${theme.spacing.medium}px`,
+  padding: `0 ${theme.spacing.medium}`,
   '& > :last-child': { borderBottom: 'none' },
 }))
 
@@ -494,7 +494,7 @@ const PopoverPanelSC = styled(Card)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   overflowY: 'auto',
-  padding: `0 ${theme.spacing.medium}px`,
+  padding: `0 ${theme.spacing.medium}`,
   boxShadow: theme.boxShadows.moderate,
   zIndex: theme.zIndexes.selectPopover,
   '& > :last-child': { borderBottom: 'none' },
@@ -504,7 +504,7 @@ const ViewToggleSC = styled.div<{ $count: number }>(({ theme, $count }) => ({
   display: 'grid',
   gridTemplateColumns: `repeat(${$count}, 1fr)`,
   gap: theme.spacing.xxsmall,
-  padding: `${theme.spacing.medium}px 0 ${theme.spacing.xsmall}px`,
+  padding: `${theme.spacing.medium} 0 ${theme.spacing.xsmall}`,
   // the switch alone in the panel gets even top/bottom padding; otherwise
   // the next section header adds its own top padding
   '&:last-child': { paddingBottom: theme.spacing.medium },
@@ -591,7 +591,7 @@ const EmptyWrapperSC = styled(Card)(({ theme }) => ({
   maxHeight: '100%',
   width: '100%',
   minHeight: 160,
-  padding: `${theme.spacing.xlarge}px ${theme.spacing.medium}px`,
+  padding: `${theme.spacing.xlarge} ${theme.spacing.medium}`,
 }))
 
 const EmptyCopySC = styled.div(({ theme }) => ({

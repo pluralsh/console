@@ -9,8 +9,8 @@ export const FooterLink = styled.a(({ theme }) => ({
   '&, &:any-link': {
     ...theme.partials.text.caption,
     display: 'block',
-    fontSize: 10,
-    lineHeight: '14px',
+    fontSize: '0.625rem',
+    lineHeight: '0.875rem',
     color: theme.colors['text-xlight'],
     textDecoration: 'none',
   },

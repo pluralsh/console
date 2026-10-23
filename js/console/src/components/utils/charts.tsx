@@ -11,7 +11,7 @@ export const useChartTheme = () => {
         text: {
           fill: theme.colors['text-light'],
           ...theme.partials.text.body2,
-          fontSize: 10,
+          fontSize: '0.625rem',
         },
       },
     },

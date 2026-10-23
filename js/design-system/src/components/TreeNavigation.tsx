@@ -181,7 +181,7 @@ function NavLink({
             flexGrow: 1,
             paddingTop: theme.spacing.xsmall,
             paddingBottom: theme.spacing.xsmall,
-            paddingLeft: (depth + 1) * theme.spacing.medium,
+            paddingLeft: `calc(${depth + 1} * ${theme.spacing.medium})`,
             paddingRight: isSubSection ? 0 : theme.spacing.medium,
           }}
         >

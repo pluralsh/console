@@ -137,8 +137,8 @@ const PatchRawSC = styled.pre(({ theme }) => ({
   margin: 0,
   padding: theme.spacing.medium,
   ...theme.partials.text.mono,
-  fontSize: 14,
-  lineHeight: '22px',
+  fontSize: '0.875rem',
+  lineHeight: '1.5rem',
   color: theme.colors['text-light'],
   whiteSpace: 'pre-wrap',
   wordBreak: 'break-word',
@@ -174,9 +174,9 @@ const PatchViewSC = styled.div<{
     minWidth: 0,
 
     '.diff-line': {
-      fontSize: 14,
-      letterSpacing: '0.25px',
-      lineHeight: '22px',
+      fontSize: '0.875rem',
+      letterSpacing: '0.025em',
+      lineHeight: '1.5rem',
     },
 
     '.diff-gutter-normal': {
@@ -211,7 +211,7 @@ const PatchViewSC = styled.div<{
 
     '.agent-run-diff-collapsed-content': {
       backgroundColor: theme.colors['fill-accent'],
-      padding: `${theme.spacing.xxsmall}px ${theme.spacing.medium}px`,
+      padding: `${theme.spacing.xxsmall} ${theme.spacing.medium}`,
       textAlign: 'center',
     },
   }
@@ -221,7 +221,7 @@ const CollapsedLinesLabelSC = styled.span(({ theme }) => ({
   ...theme.partials.text.caption,
   color: theme.colors['text-xlight'],
   display: 'inline-block',
-  lineHeight: '96px',
+  lineHeight: '6rem',
   userSelect: 'none',
   whiteSpace: 'nowrap',
 }))

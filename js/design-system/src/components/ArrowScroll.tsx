@@ -102,7 +102,7 @@ const ArrowWrapperSC = styled.div<{
   width: 36,
   display: 'flex',
   justifyContent: $direction === 'left' ? 'flex-start' : 'flex-end',
-  padding: `0 ${theme.spacing.xxsmall}px`,
+  padding: `0 ${theme.spacing.xxsmall}`,
   alignItems: 'center',
   transition: 'opacity .2s ease',
   background: `linear-gradient(to ${$direction}, transparent 0%, ${theme.colors[$color]} 70%, ${theme.colors[$color]} 100%)`,

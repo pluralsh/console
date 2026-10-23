@@ -98,7 +98,7 @@ const MIN_GRAPH_WIDTH = 420
 export const MetricsGraphGrid = styled.div(({ theme }) => ({
   display: 'grid',
   gap: theme.spacing.medium,
-  gridTemplateColumns: `repeat(auto-fill, minmax(max(${MIN_GRAPH_WIDTH}px, calc((100% - ${theme.spacing.medium}px) / 2)), 1fr))`,
+  gridTemplateColumns: `repeat(auto-fill, minmax(max(${MIN_GRAPH_WIDTH}px, calc((100% - ${theme.spacing.medium}) / 2)), 1fr))`,
 }))
 
 /** Scroll container for a metrics dashboard below its fixed time range control. */

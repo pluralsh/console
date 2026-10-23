@@ -120,8 +120,6 @@ function KapaWidget() {
       data-modal-open-on-command-k="true"
       data-modal-command-k-search-mode-default="true"
       data-search-mode-enabled="true"
-      data-modal-override-open-selector-search=".docs-search-trigger"
-      data-modal-override-open-selector=".docs-ai-trigger"
       data-mcp-enabled="true"
       data-mcp-server-url="https://plural.mcp.kapa.ai"
       data-project-color={PLURAL_BLUE}

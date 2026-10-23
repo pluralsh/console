@@ -92,7 +92,7 @@ export function ServiceDetailsSidecar({
         <Sidecar>
           <SidecarItem heading="Parent service">{parent.name}</SidecarItem>
           <Button
-            marginTop={theme.spacing.large}
+            marginTop="large"
             secondary
             as={Link}
             to={getServiceDetailsPath({

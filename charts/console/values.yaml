@@ -179,6 +179,9 @@ console:
     groupsWhitelist: []
 
     objectStore:
+      # provider selects the object store backend: s3, gcs, or azure.
+      # empty keeps the historical inference, which prefers an s3 bucket, then an azure storage account, then a gcs bucket.
+      provider: ~
       # path is used to configure the path within object storage for storing large files, useful for multi-tenant bucket usage.
       path: ~
       # s3 is used to configure the s3 bucket for storing large files, which include screen recordings of agent runs, workbench memory, etc.
@@ -201,6 +204,12 @@ console:
         container: ~
         # accessKey is used to configure the azure access key for storing large files
         accessKey: ~
+
+      gcs:
+        # bucket is used to configure the gcs bucket name for storing large files
+        bucket: ~
+        # credentials is an optional service account JSON key. unset uses GKE workload identity
+        credentials: ~
 
       details:
         # assumeRoleArn is used to configure the assume role arn for cloud query
@@ -440,7 +449,7 @@ ai:
       failureThreshold: 3
 
 # pseudofs deploys the workbench filesystem, a gRPC server storing per-workbench files in the object store configured
-# in console.config.objectStore.  It's only installed when an s3 bucket or azure storage account is configured there, and
+# in console.config.objectStore.  It's only installed when an s3 bucket, gcs bucket, or azure storage account is configured there, and
 # keeps its data beneath `<console.config.objectStore.path>/<pseudofs.objectStore.subpath>`.  It runs as the console
 # service account, so workload identity annotations on that account grant it bucket access as well.
 pseudofs:

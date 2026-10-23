@@ -186,7 +186,7 @@ const CaretButton = styled(
     borderRadius: theme.borderRadiuses.medium,
     top: theme.spacing.xsmall,
     left: theme.spacing.xsmall,
-    right: theme.spacing.xsmall + theme.spacing.xsmall,
+    right: `calc(${theme.spacing.xsmall} * 2)`,
     bottom: theme.spacing.xsmall,
   },
   ...(mode === 'subsection'
@@ -252,11 +252,11 @@ function NavLinkUnstyled({
       scrollIntoContainerView(liRef.current, scrollRef.current, {
         behavior: 'smooth',
         block: 'start',
-        blockOffset: theme.spacing.xlarge,
+        blockOffset: theme.spacingPx.xlarge,
         preventIfVisible: true,
       })
     }
-  }, [isSelected, wasSelected, scrollRef, liRef, theme.spacing.xlarge])
+  }, [isSelected, wasSelected, scrollRef, liRef, theme.spacingPx.xlarge])
 
   const toMenuOnClick = () => toMenu && setMenuId(toMenu)
 
@@ -506,7 +506,7 @@ const NavScrollContainer = styled.div<{
   overflowY: 'auto',
   backgroundColor: brand['surface-sidebar'],
   borderRight: desktop ? `1px solid ${brand.line}` : 'none',
-  paddingBottom: `calc(${theme.spacing.xxlarge}px + var(--menu-extra-bpad))`,
+  paddingBottom: `calc(${theme.spacing.xxlarge} + var(--menu-extra-bpad))`,
   paddingTop: padTop ? 20 : 0,
   paddingRight: theme.spacing.small,
   paddingLeft: theme.spacing.medium,

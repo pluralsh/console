@@ -175,7 +175,7 @@ const TriggerWrapperSC = styled.div(({ theme }) => ({
   color: theme.colors['text-light'],
   alignItems: 'center',
   gap: theme.spacing.large,
-  padding: `${theme.spacing.medium}px`,
+  padding: `${theme.spacing.medium}`,
   cursor: 'pointer',
   background: theme.colors['fill-one'],
   '&:hover': {

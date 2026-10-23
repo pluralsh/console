@@ -191,7 +191,7 @@ const ActivePendingNodeSC = styled.div(({ theme }) => ({
 const ConnectorSC = styled.div(({ theme }) => ({
   position: 'absolute',
   top: 24,
-  bottom: -theme.spacing.xsmall,
+  bottom: theme.spacing['minus-xsmall'],
   left: '50%',
   width: 1,
   transform: 'translateX(-50%)',

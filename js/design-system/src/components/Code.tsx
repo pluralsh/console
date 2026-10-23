@@ -84,7 +84,7 @@ function CodeHeaderUnstyled({
 const CodeHeader = styled(CodeHeaderUnstyled)<{ $visuallyHidden?: boolean }>(
   ({ $visuallyHidden = false, fillLevel, theme }) => ({
     minHeight: theme.spacing.large,
-    padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
+    padding: `${theme.spacing.xsmall} ${theme.spacing.small}`,
     borderBottom:
       fillLevel >= 1 ? theme.borders['fill-three'] : theme.borders['fill-two'],
     backgroundColor:
@@ -389,9 +389,9 @@ const CodeContentSC = styled.div<{
   height: '100%',
   overflow: 'auto',
   alignItems: 'center',
-  padding: `${$multiLine ? theme.spacing.small : theme.spacing.xsmall}px ${
+  padding: `${$multiLine ? theme.spacing.small : theme.spacing.xsmall} ${
     theme.spacing.small
-  }px`,
+  }`,
   borderBottomLeftRadius: theme.borderRadiuses.large,
   borderBottomRightRadius: theme.borderRadiuses.large,
   ...($validMermaid

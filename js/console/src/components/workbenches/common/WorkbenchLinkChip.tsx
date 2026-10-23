@@ -171,5 +171,5 @@ const HoverCardFloatingSC = styled.div(({ theme }) => ({
   pointerEvents: 'auto',
   zIndex: theme.zIndexes.tooltip,
   paddingTop: theme.spacing.xxsmall,
-  marginTop: -theme.spacing.xxsmall,
+  marginTop: theme.spacing['minus-xxsmall'],
 }))

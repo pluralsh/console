@@ -100,13 +100,13 @@ export function ChatInputClusterSelect({
               flexDirection: 'column',
               gap: theme.spacing.xsmall,
               color: theme.colors['text-xlight'],
-              padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+              padding: `${theme.spacing.small} ${theme.spacing.medium}`,
             }}
           >
             Cluster
             <Input
               small
-              inputProps={{ css: { lineHeight: '12px' } }}
+              inputProps={{ css: { lineHeight: '0.75rem' } }}
               showClearButton
               placeholder="Search..."
               value={inputValue}

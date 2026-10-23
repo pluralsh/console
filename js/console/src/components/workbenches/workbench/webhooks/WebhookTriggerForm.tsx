@@ -442,7 +442,7 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
                       >
                         <div
                           css={{
-                            fontSize: '14px',
+                            fontSize: '0.875rem',
                             fontWeight: 600,
                           }}
                         >
@@ -457,7 +457,7 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
                           css={{
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '4px',
+                            gap: '0.25rem',
                           }}
                         >
                           Manage webhooks

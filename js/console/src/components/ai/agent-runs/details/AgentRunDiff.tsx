@@ -466,7 +466,7 @@ function FileTreeItemTextIcon({
         color: theme.colors['text-success'],
         fontFamily: 'Inter',
         fontWeight: 600,
-        fontSize: 9,
+        fontSize: '0.625rem',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -500,7 +500,7 @@ function renderTree(
         label={
           <Tooltip
             label={node.name}
-            css={{ marginLeft: 6 }}
+            css={{ marginLeft: '0.375rem' }}
           >
             <TreeLabelSC>
               <TreeIconSC>
@@ -560,13 +560,13 @@ const DiffTreeHeaderSC = styled.div(({ theme }) => ({
   ...theme.partials.text.overline,
   color: theme.colors['text-light'],
   lineHeight: 1,
-  padding: `${theme.spacing.small}px ${theme.spacing.small}px ${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
+  padding: `${theme.spacing.small} ${theme.spacing.small} ${theme.spacing.xsmall} ${theme.spacing.medium}`,
   textTransform: 'uppercase',
 }))
 
 const DiffFileHeaderSC = styled.div(({ theme }) => ({
   ...diffPanelHeaderStyles({ theme }),
-  padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
+  padding: `${theme.spacing.xsmall} ${theme.spacing.medium}`,
 }))
 
 const DiffFileHeaderInfoSC = styled.div(({ theme }) => ({
@@ -594,8 +594,8 @@ const DiffFileIconSC = styled.div({
 
 const DiffFileNameSC = styled.div(({ theme }) => ({
   ...theme.partials.text.mono,
-  fontSize: 14,
-  lineHeight: '16px',
+  fontSize: '0.875rem',
+  lineHeight: '1rem',
   color: theme.colors['text-light'],
   ...TRUNCATE,
   flex: 1,
@@ -618,7 +618,7 @@ const DiffHeaderActionsSC = styled.div(({ theme }) => ({
 const DiffMinimizeControlSC = styled.div({
   display: 'flex',
   alignItems: 'center',
-  gap: 2,
+  gap: '0.125rem',
 })
 
 const DiffEscHintSC = styled.span(({ theme }) => ({
@@ -634,7 +634,7 @@ const DiffLineStatsSC = styled.span(({ theme }) => ({
   gap: theme.spacing.xsmall,
   flexShrink: 0,
   letterSpacing: 0,
-  lineHeight: '16px',
+  lineHeight: '1rem',
   textAlign: 'right',
   textTransform: 'none',
 }))
@@ -651,7 +651,7 @@ const DiffTreeContentSC = styled.div(({ theme }) => ({
   minHeight: 0,
   flex: 1,
   overflow: 'auto',
-  padding: `${theme.spacing.small}px ${theme.spacing.small}px ${theme.spacing.small}px ${theme.spacing.medium}px`,
+  padding: `${theme.spacing.small} ${theme.spacing.small} ${theme.spacing.small} ${theme.spacing.medium}`,
 }))
 
 const DiffContentSC = styled.div({
@@ -685,12 +685,12 @@ const StyledTreeView = styled(SimpleTreeView)(({ theme }) => ({
   [`& .${treeItemClasses.root}`]: {
     marginBottom: theme.spacing.xxxsmall,
     width: '100%',
-    paddingLeft: 2,
+    paddingLeft: '0.125rem',
   },
 
   [`& .${treeItemClasses.content}`]: {
     borderRadius: theme.borderRadiuses.medium,
-    padding: `${theme.spacing.xxsmall}px ${theme.spacing.xsmall}px`,
+    padding: `${theme.spacing.xxsmall} ${theme.spacing.xsmall}`,
     ...theme.partials.text.body2,
     color: theme.colors['text-light'],
     width: '100%',
@@ -720,8 +720,8 @@ const StyledTreeView = styled(SimpleTreeView)(({ theme }) => ({
 
   [`& .${treeItemClasses.groupTransition}`]: {
     paddingLeft:
-      'calc(var(--TreeView-itemChildrenIndentation)) - max(0px, (var(--TreeView-itemDepth) - 2) * 12px))',
-    margin: `2px 0 2px 14px`,
+      'calc(var(--TreeView-itemChildrenIndentation)) - max(0, (var(--TreeView-itemDepth) - 2) * 0.75rem))',
+    margin: `0.125rem 0 0.125rem 0.875rem`,
   },
 }))
 

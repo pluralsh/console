@@ -928,6 +928,16 @@ defmodule Console.Deployments.WorkbenchesTest do
 
       job = refetch(job)
       assert job.status == :running
+      assert_receive {:event, %PubSub.WorkbenchJobUpdated{item: %{id: id, status: :running}}}
+      assert id == job.id
+    end
+
+    test "does not notify when the job is already running" do
+      job = insert(:workbench_job, status: :running)
+
+      {:ok, _} = Workbenches.heartbeat(job)
+
+      refute_receive {:event, %PubSub.WorkbenchJobUpdated{}}
     end
   end
 
@@ -1042,6 +1052,17 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert_receive {:event, %PubSub.WorkbenchJobActivityCreated{item: ^activity}}
 
       assert refetch(job).status == :pending
+    end
+
+    test "notifies when a finished job is re-queued by a message" do
+      user = insert(:user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      job = insert(:workbench_job, user: user, workbench: workbench, status: :successful)
+
+      {:ok, _} = Workbenches.create_message(%{prompt: "follow-up"}, job.id, user)
+
+      assert_receive {:event, %PubSub.WorkbenchJobUpdated{item: %{id: id, status: :pending}}}
+      assert id == job.id
     end
 
     test "job owner can create a message when passing the job struct" do
@@ -1472,6 +1493,8 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert activity.type == :coding
       assert activity.prompt == "analyze the repo"
       assert_receive {:event, %PubSub.WorkbenchJobActivityCreated{item: ^activity}}
+      assert_receive {:event, %PubSub.WorkbenchJobUpdated{item: %{id: id, status: :running}}}
+      assert id == job.id
 
       job = refetch(job)
       assert job.status == :running

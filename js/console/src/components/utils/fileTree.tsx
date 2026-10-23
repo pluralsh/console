@@ -12,12 +12,12 @@ export const StyledTreeView = styled(SimpleTreeView)(({ theme }) => ({
   [`& .${treeItemClasses.root}`]: {
     marginBottom: theme.spacing.xxxsmall,
     width: '100%',
-    paddingLeft: 2,
+    paddingLeft: '0.125rem',
   },
 
   [`& .${treeItemClasses.content}`]: {
     borderRadius: theme.borderRadiuses.medium,
-    padding: `${theme.spacing.xxsmall}px ${theme.spacing.xsmall}px`,
+    padding: `${theme.spacing.xxsmall} ${theme.spacing.xsmall}`,
     ...theme.partials.text.body2,
     color: theme.colors['text-light'],
     width: '100%',
@@ -47,9 +47,9 @@ export const StyledTreeView = styled(SimpleTreeView)(({ theme }) => ({
 
   [`& .${treeItemClasses.groupTransition}`]: {
     paddingLeft:
-      'calc(var(--TreeView-itemChildrenIndentation)) - max(0px, (var(--TreeView-itemDepth) - 2) * 12px))',
+      'calc(var(--TreeView-itemChildrenIndentation)) - max(0, (var(--TreeView-itemDepth) - 2) * 0.75rem))',
     borderLeft: `1px solid ${theme.colors['border']}`,
-    margin: `2px 0 2px 14px`,
+    margin: `0.125rem 0 0.125rem 0.875rem`,
   },
 
   [`& .${treeItemClasses.root}.parent-of-selected > .${treeItemClasses.groupTransition}:has(.${treeItemClasses.root}.file-selected)`]:

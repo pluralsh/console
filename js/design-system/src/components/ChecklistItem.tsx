@@ -22,9 +22,9 @@ const ChecklistItemInner = styled(ChecklistItemInnerUnstyled)(
     flexDirection: 'column',
 
     '.itemHeader': {
-      padding: `${theme.spacing.xsmall}px ${theme.spacing.large}px`,
+      padding: `${theme.spacing.xsmall} ${theme.spacing.large}`,
       display: 'flex',
-      gap: 12,
+      gap: '0.75rem',
       alignItems: 'center',
       color: selected ? theme.colors.text : theme.colors['text-light'],
       cursor: 'pointer',
@@ -106,7 +106,7 @@ const ChecklistItemInner = styled(ChecklistItemInnerUnstyled)(
     },
 
     '.itemContainer': {
-      padding: `0 ${theme.spacing.large}px`,
+      padding: `0 ${theme.spacing.large}`,
       display: 'flex',
       gap: theme.spacing.small,
       color: theme.colors['text-light'],
@@ -118,7 +118,7 @@ const ChecklistItemInner = styled(ChecklistItemInnerUnstyled)(
         borderLeft: theme.borders.selected,
       },
       '.itemContent': {
-        padding: `${theme.spacing.xsmall}px 0`,
+        padding: `${theme.spacing.xsmall} 0`,
       },
     },
 

@@ -93,7 +93,7 @@ export function WorkbenchJobActions({ jobId }: { jobId: string }) {
               $color="text-xlight"
               css={{
                 textTransform: 'uppercase',
-                letterSpacing: '0.5px',
+                letterSpacing: '0.025em',
               }}
             >
               {section.label} {section.count}

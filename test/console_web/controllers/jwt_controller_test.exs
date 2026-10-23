@@ -25,5 +25,21 @@ defmodule ConsoleWeb.JWTControllerTest do
 
       assert is_binary(token)
     end
+
+    test "an unknown email is forbidden, not missing", %{conn: conn} do
+      signer = Joken.Signer.create("HS256", "secret")
+
+      {:ok, token, _} =
+        Console.TestToken.generate_and_sign(%{"iss" => "https://evil.example", "aud" => "plural"}, signer)
+
+      reject(&Console.OIDC.ProviderConfiguration.fetch/2)
+
+      %{"error" => error} =
+        conn
+        |> post("/v1/token/exchange", %{email: "missing@example.com", jwt: token})
+        |> json_response(403)
+
+      assert error =~ "no federated credential"
+    end
   end
 end

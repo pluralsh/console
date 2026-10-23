@@ -108,7 +108,7 @@ export function ChatbotActionsPanel({
         {!hasData ? (
           loading ? (
             <TableSkeleton
-              width={ACTIONS_PANEL_WIDTH - 2 * theme.spacing.xlarge}
+              width={ACTIONS_PANEL_WIDTH - 2 * theme.spacingPx.xlarge}
               numColumns={1}
               styles={{ padding: theme.spacing.xlarge }}
             />
@@ -292,7 +292,7 @@ const HeaderSC = styled.div(({ theme }) => ({
   alignItems: 'center',
   justifyContent: 'space-between',
   borderBottom: theme.borders.hairline,
-  padding: `0 ${theme.spacing.medium}px`,
+  padding: `0 ${theme.spacing.medium}`,
   height: SIDE_PANEL_HEADER_HEIGHT,
   flexShrink: 0,
 }))

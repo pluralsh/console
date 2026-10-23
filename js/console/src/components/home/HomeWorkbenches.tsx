@@ -21,6 +21,7 @@ import {
   Title2H1,
 } from 'components/utils/typography/Text'
 import { WorkbenchCard } from 'components/workbenches/WorkbenchesList'
+import { useWorkbenchFavorites } from 'components/workbenches/workbenchesDisplay'
 import { WorkbenchJobCreateInput } from 'components/workbenches/workbench/WorkbenchJobCreateInput'
 import { WorkbenchStoredPromptMarkdown } from 'components/workbenches/workbench/WorkbenchStoredPromptMarkdown'
 import {
@@ -137,6 +138,7 @@ function RecentJobCard({ job }: { job: WorkbenchJobTinyFragment }) {
       <WorkbenchStoredPromptMarkdown
         text={prompt ?? ''}
         density="jobCard"
+        clampLines={2}
       />
       <CaptionP
         $color="text-xlight"
@@ -185,6 +187,7 @@ function YourWorkbenchesSection() {
   const { data, loading, error } = useWorkbenchesQuery({
     fetchPolicy: 'cache-and-network',
   })
+  const { favoriteIds, toggleFavorite } = useWorkbenchFavorites()
   const workbenches = useMemo(
     () => mapExistingNodes(data?.workbenches).slice(0, 3),
     [data]
@@ -209,6 +212,8 @@ function YourWorkbenchesSection() {
               <WorkbenchCard
                 key={workbench.id}
                 workbench={workbench}
+                favorited={favoriteIds.includes(workbench.id)}
+                onToggleFavorite={() => toggleFavorite(workbench.id)}
               />
             ))}
       </CardGridSC>
@@ -222,7 +227,7 @@ const ContentWrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.xlarge,
-  padding: `${theme.spacing.xxlarge}px ${theme.spacing.large}px 0`,
+  padding: `${theme.spacing.xxlarge} ${theme.spacing.large} 0`,
 }))
 
 const BottomSpacerSC = styled.div(({ theme }) => ({
@@ -235,8 +240,8 @@ const BannerSC = styled(Card)(({ theme }) => ({
   alignItems: 'center',
   justifyContent: 'space-between',
   gap: theme.spacing.medium,
-  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
-  margin: `-${theme.spacing.medium}px 0 -${theme.spacing.xlarge}px`,
+  padding: `${theme.spacing.small} ${theme.spacing.medium}`,
+  margin: `-${theme.spacing.medium} 0 -${theme.spacing.xlarge}`,
   [`@media (max-width: 1500px)`]: { marginBottom: 0 },
 }))
 
@@ -251,7 +256,7 @@ const HeadingSC = styled.div(({ theme }) => ({
   alignItems: 'center',
   justifyContent: 'center',
   gap: theme.spacing.small,
-  paddingTop: theme.spacing.xxxlarge,
+  paddingTop: theme.spacing.xlarge,
   [`@media (max-width: 1500px)`]: { paddingTop: theme.spacing.small },
 }))
 
@@ -276,7 +281,7 @@ const RecentJobCardSC = styled(Card)(({ theme }) => ({
   flexDirection: 'column',
   gap: theme.spacing.small,
   padding: theme.spacing.medium,
-  paddingRight: `calc(${theme.spacing.medium} + 16px)`,
+  paddingRight: `calc(${theme.spacing.medium} + 1rem)`,
   textDecoration: 'none',
   minHeight: 120,
 }))

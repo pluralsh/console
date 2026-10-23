@@ -17,3 +17,4 @@ vendor/
 .tmp/
 .dist/
 coverage.out
+/api

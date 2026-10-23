@@ -281,15 +281,22 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     |> paginate(args)
   end
 
-  def aggregates(_, _) do
-    prs = PullRequest.for_workbench_jobs()
+  def aggregates(args, %{context: %{current_user: user}}) do
+    workbenches = Workbench.for_user(user)
+                  |> workbench_filters(args)
+
+    prs = PullRequest.for_workbenches(workbenches)
           |> PullRequest.aggregates()
+    evals = WorkbenchEvalResult.for_workbenches(workbenches)
+            |> WorkbenchEvalResult.aggregates()
 
     with [pr] <- Console.Repo.all(prs),
-         [eval] <- Console.Repo.all(WorkbenchEvalResult.aggregates()) do
+         [eval] <- Console.Repo.all(evals) do
       {:ok, %{
         pull_requests: pr.merged,
         pull_request_merge_rate: pr.merge_rate,
+        hours_saved: pr.hours_saved,
+        total_tokens: Console.Repo.one(WorkbenchJob.total_tokens(workbenches)),
         eval_results: eval.average_grade,
       }}
     else
@@ -371,12 +378,22 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     do: Toolchain.traces(job, name, args, user)
 
   def workbenches(args, %{context: %{current_user: user}}) do
-    Workbench.ordered()
-    |> Workbench.for_user(user)
+    Workbench.for_user(user)
     |> workbench_filters(args)
     |> maybe_search(Workbench, args)
+    |> Workbench.by_ids()
+    |> apply_workbench_sort(args[:sort], args[:direction] || :asc, args)
     |> paginate(args)
   end
+
+  defp apply_workbench_sort(query, :inserted_at, dir, _),
+    do: Workbench.ordered(query, [{dir, :inserted_at}, {:asc, :name}])
+  defp apply_workbench_sort(query, :updated_at, dir, _),
+    do: Workbench.ordered(query, [{dir, :updated_at}, {:asc, :name}])
+  defp apply_workbench_sort(query, :favorited, dir, args),
+    do: Workbench.ordered_by_favorites(query, args[:favorite_ids] || [], dir)
+  defp apply_workbench_sort(query, _, dir, _),
+    do: Workbench.ordered(query, [{dir, :name}])
 
   def workbench_tools(args, %{context: %{current_user: user}}) do
     WorkbenchTool.ordered()

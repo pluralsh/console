@@ -83,7 +83,7 @@ export function GlobalSettingsGeneral() {
         </StretchedFlex>
         <Divider
           backgroundColor="border-fill-two"
-          css={{ margin: `${spacing.large}px 0` }}
+          css={{ margin: `${spacing.large} 0` }}
         />
         <StretchedFlex>
           <StackedText

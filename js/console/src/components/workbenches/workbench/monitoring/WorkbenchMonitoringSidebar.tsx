@@ -568,7 +568,7 @@ const GroupSC = styled.div<{ $first?: boolean }>(({ theme, $first }) => ({
 }))
 
 const PaddedSC = styled.div(({ theme }) => ({
-  padding: `0 ${theme.spacing.medium}px`,
+  padding: `0 ${theme.spacing.medium}`,
 }))
 
 // Same treatment as the workbench side panel empty add button.
@@ -593,7 +593,7 @@ const GroupHeaderSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexShrink: 0,
   justifyContent: 'space-between',
-  padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
+  padding: `${theme.spacing.xsmall} ${theme.spacing.medium}`,
 }))
 
 const GroupListSC = styled.div(() => ({
@@ -609,7 +609,7 @@ const RowSC = styled.div<{ $selected?: boolean }>(({ theme, $selected }) => {
   const selectedColor = theme.colors['fill-two-selected']
   const hoverColor = theme.colors['fill-one-hover']
   const actionFade = (color: string) =>
-    `linear-gradient(to right, transparent, ${color} ${theme.spacing.large}px)`
+    `linear-gradient(to right, transparent, ${color} ${theme.spacing.large})`
 
   return {
     alignItems: 'center',
@@ -618,7 +618,7 @@ const RowSC = styled.div<{ $selected?: boolean }>(({ theme, $selected }) => {
     backgroundColor: $selected ? selectedColor : undefined,
     display: 'flex',
     gap: theme.spacing.xsmall,
-    padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+    padding: `${theme.spacing.small} ${theme.spacing.medium}`,
     position: 'relative',
     // Delete sits over the title so the name can use the full row.
     '& > .delete-action, & > .inline-confirm': {

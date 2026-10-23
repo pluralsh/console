@@ -119,7 +119,7 @@ const PreBakedOptionSC = styled.div(({ theme }) => ({
   justifyContent: 'space-between',
   height: '100%',
   width: '100%',
-  padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
+  padding: `${theme.spacing.xsmall} ${theme.spacing.small}`,
   gap: theme.spacing.xxlarge,
   color: theme.colors.text,
   background: theme.colors['fill-two'],
@@ -135,7 +135,7 @@ const ManualOptionSC = styled.div(({ theme }) => ({
   border: theme.borders['fill-two'],
   background: theme.colors['fill-one'],
   borderRadius: theme.borderRadiuses.large,
-  padding: `${theme.spacing.medium}px`,
+  padding: `${theme.spacing.medium}`,
   '&:hover': {
     background: theme.colors['fill-one-hover'],
   },

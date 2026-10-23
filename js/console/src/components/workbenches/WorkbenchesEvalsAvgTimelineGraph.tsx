@@ -89,7 +89,7 @@ export function WorkbenchesEvalsAvgTimelineGraph() {
                     <div
                       css={{
                         borderTop: theme.borders.default,
-                        padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+                        padding: `${theme.spacing.small} ${theme.spacing.medium}`,
                         width: '100%',
                       }}
                     >
@@ -152,7 +152,7 @@ export function WorkbenchesEvalsAvgTimelineGraph() {
                         cursor: 'pointer',
                         border: theme.borders.default,
                         borderRadius: theme.borderRadiuses.medium,
-                        padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
+                        padding: `${theme.spacing.xsmall} ${theme.spacing.small}`,
                         display: 'flex',
                         alignItems: 'center',
                         gap: theme.spacing.xsmall,

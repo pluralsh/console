@@ -70,7 +70,7 @@ function Template({ format, separator, segments }: StoryProps) {
             separator={separator}
             segments={segments || DATE_SEGMENTS}
           />
-          <div css={{ marginTop: '8px' }}>Value: {dateValue}</div>
+          <div css={{ marginTop: '0.5rem' }}>Value: {dateValue}</div>
         </WrapperSC>
       )
     case 'custom':
@@ -84,7 +84,7 @@ function Template({ format, separator, segments }: StoryProps) {
             separator={separator}
             segments={segments || CUSTOM_SEGMENTS}
           />
-          <div css={{ marginTop: '8px' }}>Value: {customValue}</div>
+          <div css={{ marginTop: '0.5rem' }}>Value: {customValue}</div>
         </WrapperSC>
       )
     default:

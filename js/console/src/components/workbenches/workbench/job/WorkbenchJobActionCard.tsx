@@ -73,7 +73,7 @@ const CardSC = styled.div(({ theme }) => ({
   flexDirection: 'column',
   gap: theme.spacing.xsmall,
   minWidth: 0,
-  padding: `${theme.spacing.medium}px ${theme.spacing.small}px`,
+  padding: `${theme.spacing.medium} ${theme.spacing.small}`,
   background: theme.colors['fill-one'],
   borderTop: theme.borders.default,
   borderRight: theme.borders.default,

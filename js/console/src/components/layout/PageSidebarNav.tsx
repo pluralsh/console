@@ -69,14 +69,14 @@ const NavSC = styled.nav(({ theme }) => ({
   flex: 1,
   minHeight: 0,
   overflowY: 'auto',
-  padding: `${theme.spacing.xsmall}px 0`,
+  padding: `${theme.spacing.xsmall} 0`,
 }))
 
 const SkeletonRowSC = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   height: 36,
-  padding: `0 ${theme.spacing.medium}px`,
+  padding: `0 ${theme.spacing.medium}`,
 }))
 
 const NavItemSC = styled(Link)<{ $active: boolean }>(({ theme, $active }) => ({
@@ -85,7 +85,7 @@ const NavItemSC = styled(Link)<{ $active: boolean }>(({ theme, $active }) => ({
   alignItems: 'center',
   flexShrink: 0,
   height: 36,
-  padding: `0 ${theme.spacing.medium}px`,
+  padding: `0 ${theme.spacing.medium}`,
   textDecoration: 'none',
   color: $active ? theme.colors.text : theme.colors['text-light'],
   backgroundColor: $active ? theme.colors['fill-zero-selected'] : undefined,

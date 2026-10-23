@@ -56,7 +56,7 @@ export function ComponentTreeNode({ id, data }: NodeProps<ComponentNode>) {
       css={{
         alignItems: 'center',
         overflow: 'hidden',
-        padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
+        padding: `${theme.spacing.xsmall} ${theme.spacing.medium}`,
         gap: theme.spacing.medium,
         width: 240,
         '&:hover': {

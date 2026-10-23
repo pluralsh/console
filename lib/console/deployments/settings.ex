@@ -378,37 +378,49 @@ defmodule Console.Deployments.Settings do
   end
 
   @doc """
-  Validates a given jwt and verifies if a federated credential exists for the specified user to exchange for a console-validated jwt
+  Validates a given jwt and verifies if a federated credential exists for the specified user to exchange for a console-validated jwt.
+
+  Trust is checked before any issuer metadata is fetched: an unknown email or an
+  issuer with no credential for that user returns an error and does not make an
+  outbound request. Unknown emails return the same error as a credential miss so
+  the exchange endpoint cannot be used to enumerate registered users.
   """
   @spec exchange_token(binary, binary) :: {:ok, binary} | Console.error()
   def exchange_token(token, email) do
-    user = Users.cached_user_by_email!(email)
-
     with {:token, {:ok, %{"iss" => issuer, "aud" => aud}}} <- {:token, Joken.peek_claims(token)},
          {:token, {:ok, client_id}} <- {:token, client_id(aud)},
+         {:user, {:ok, user}} <- {:user, fetch_exchange_user(email)},
+         {:credential, [_ | _] = credentials} <- {:credential, credentials_for(user, issuer, aud)},
          {:config, {:ok, {conf, jwks}}} <- {:config, issuer_configuration(issuer)},
          opts = %{client_jwks: JOSE.JWK.generate_key(16)},
          ctx = Oidcc.ClientContext.from_manual(conf, jwks, client_id, "dummy_secret", opts),
          opts = %{signing_algs: ctx.provider_configuration.id_token_signing_alg_values_supported},
          {:validate, {:ok, claims}} <- {:validate, Oidcc.Token.validate_jwt(token, ctx, opts)} do
-      FederatedCredential.for_issuer(issuer)
-      |> FederatedCredential.for_user(user.id)
-      |> Console.Repo.all()
-      |> Enum.filter(&FederatedCredential.allow?(&1, claims))
+      credentials
+      |> Enum.filter(fn cred ->
+        FederatedCredential.audience_allowed?(cred, claims["aud"]) and
+          FederatedCredential.allow?(cred, claims)
+      end)
       |> case do
-        [_ | _] = credentials ->
+        [_ | _] = matched ->
           scopes =
-            Enum.flat_map(credentials, &(&1.scopes || []))
+            Enum.flat_map(matched, &(&1.scopes || []))
             |> Enum.uniq()
 
           sign_token(user, scopes)
 
         _ ->
-          {:error, "no federated credentials for #{email} match jwt claims"}
+          no_credential(email)
       end
     else
       {:token, _} ->
         {:error, "invalid jwt format, must include iss and aud claims"}
+
+      {:user, _} ->
+        no_credential(email)
+
+      {:credential, _} ->
+        no_credential(email)
 
       {:config, _} = res ->
         Logger.error("failed to fetch issuer configuration: #{inspect(res)}")
@@ -421,10 +433,31 @@ defmodule Console.Deployments.Settings do
   end
 
   # `aud` may be a single string or a list (kubernetes service account tokens always use a list).
-  # oidcc only checks that the token's audience contains the client id, so any one of them will do.
+  # oidcc only checks that the token's audience contains the client id we hand it, so deriving
+  # that id from the token itself accepts every audience. A credential's `aud`, when set, is
+  # what actually pins the audience. See `FederatedCredential.audience_allowed?/2`.
   defp client_id(aud) when is_binary(aud), do: {:ok, aud}
   defp client_id([aud | _]) when is_binary(aud), do: {:ok, aud}
   defp client_id(_), do: :error
+
+  defp fetch_exchange_user(email) do
+    {:ok, Users.cached_user_by_email!(email)}
+  rescue
+    Ecto.NoResultsError -> :error
+  end
+
+  # Issuer trust is resolved before `issuer_configuration/1`, so an untrusted issuer never
+  # triggers a fetch of its discovery document or jwks. Credentials that pin `aud` and do
+  # not match the token audience are dropped here for the same reason.
+  defp credentials_for(%User{id: user_id}, issuer, aud) do
+    FederatedCredential.for_issuer(issuer)
+    |> FederatedCredential.for_user(user_id)
+    |> Repo.all()
+    |> Enum.filter(&FederatedCredential.audience_allowed?(&1, aud))
+  end
+
+  defp no_credential(email),
+    do: {:error, "no federated credentials for #{email} match jwt claims"}
 
   defp sign_token(user, scopes) do
     case Console.Guardian.encode_and_sign(user, %{"scopes" => scopes}, ttl: {1, :hour}) do

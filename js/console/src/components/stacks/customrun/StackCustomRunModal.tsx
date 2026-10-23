@@ -97,5 +97,5 @@ const ModalHeaderSC = styled.header(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.medium,
-  marginBottom: -theme.spacing.xsmall,
+  marginBottom: theme.spacing['minus-xsmall'],
 }))

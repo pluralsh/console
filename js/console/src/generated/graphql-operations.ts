@@ -394,6 +394,7 @@ export { VulnerabilityStatisticsDocument as VulnerabilityStatistics } from './gr
 export { ClusterVulnerabilityAggregateDocument as ClusterVulnerabilityAggregate } from './graphql-documents'
 export { WorkbenchesDocument as Workbenches } from './graphql-documents'
 export { WorkbenchDashboardDocument as WorkbenchDashboard } from './graphql-documents'
+export { WorkbenchesSummaryDocument as WorkbenchesSummary } from './graphql-documents'
 export { WorkbenchesEvalsMergeRateGraphDocument as WorkbenchesEvalsMergeRateGraph } from './graphql-documents'
 export { WorkbenchesEvalsAvgGraphDocument as WorkbenchesEvalsAvgGraph } from './graphql-documents'
 export { WorkbenchesEvalsAvgTimelineGraphDocument as WorkbenchesEvalsAvgTimelineGraph } from './graphql-documents'

@@ -6,7 +6,7 @@ export const TriggerCardSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.small,
-  padding: `${theme.spacing.small}px ${theme.spacing.large}px`,
+  padding: `${theme.spacing.small} ${theme.spacing.large}`,
   borderRadius: theme.borderRadiuses.large,
   border: theme.borders.input,
   backgroundColor: theme.colors['fill-zero'],

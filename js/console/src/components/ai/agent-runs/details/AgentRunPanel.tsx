@@ -504,7 +504,7 @@ const TabSkeletonSC = styled(RectangleSkeleton).attrs({ $height: 16 })(
   ({ theme }) => ({
     borderRadius: theme.borderRadiuses.medium,
     flexShrink: 0,
-    padding: `${theme.spacing.xxsmall}px ${theme.spacing.small}px`,
+    padding: `${theme.spacing.xxsmall} ${theme.spacing.small}`,
     display: 'inline-flex',
     alignItems: 'center',
     boxSizing: 'border-box',
@@ -520,7 +520,7 @@ const panelTabStyles = ({ theme }: { theme: any; active?: boolean }) => ({
   boxShadow: 'none',
   borderRadius: theme.borderRadiuses.medium,
   backgroundColor: 'transparent',
-  padding: `${theme.spacing.xxsmall}px ${theme.spacing.small}px`,
+  padding: `${theme.spacing.xxsmall} ${theme.spacing.small}`,
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
