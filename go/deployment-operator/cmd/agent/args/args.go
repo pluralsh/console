@@ -23,6 +23,10 @@ import (
 
 const (
 	EnvDeployToken        = "DEPLOY_TOKEN"
+	EnvFerroTunnelToken   = "FERROTUNNEL_TOKEN"
+	EnvFerroTunnelCA      = "FERROTUNNEL_CA"
+	EnvFerroTunnelCert    = "FERROTUNNEL_CERT"
+	EnvFerroTunnelKey     = "FERROTUNNEL_KEY"
 	EnvDatadogEnabled     = "DATADOG_ENABLED"
 	EnvDatadogHost        = "DATADOG_HOST"
 	EnvDatadogEnvironment = "DATADOG_ENV"
@@ -138,6 +142,8 @@ var (
 	argDatadog                         = flag.Bool("datadog", helpers.GetPluralEnvBool(EnvDatadogEnabled, false), "Enable datadog integration for detailed application profiling. By default it will push to http://datadog.monitoring.svc.cluster.local:8125")
 	argLocalDatabaseProfiler           = flag.Bool("local-db-profiler", false, "Enable local database profiler for profiling local database operations.")
 	argEnableKubecostProxy             = flag.Bool("enable-kubecost-proxy", false, "If set, will proxy a Kubecost API request through the K8s API server.")
+	argFerroTunnelServer               = flag.String("ferrotunnel-server", "", "FerroTunnel control address, host:port. Used by TunnelController.")
+	argFerroTunnelServiceAccount       = flag.String("ferrotunnel-service-account", "", "Service account the FerroTunnel client uses to watch TunnelClient objects.")
 	argDeferPollOnInstall              = flag.Bool("defer-poll-on-install", true, "Defer the initial poll when this deployment operator has been running for more than one hour.")
 
 	argMaxConcurrentReconciles = flag.Int("max-concurrent-reconciles", 100, "Maximum number of concurrent reconciles which can be run.")
@@ -227,6 +233,30 @@ func DisableHelmTemplateDryRunServer() bool {
 
 func EnableKubecostProxy() bool {
 	return *argEnableKubecostProxy
+}
+
+func FerroTunnelServer() string {
+	return *argFerroTunnelServer
+}
+
+func FerroTunnelServiceAccount() string {
+	return *argFerroTunnelServiceAccount
+}
+
+func FerroTunnelToken() string {
+	return helpers.GetEnv(EnvFerroTunnelToken, "")
+}
+
+func FerroTunnelCA() string {
+	return helpers.GetEnv(EnvFerroTunnelCA, "")
+}
+
+func FerroTunnelCert() string {
+	return helpers.GetEnv(EnvFerroTunnelCert, "")
+}
+
+func FerroTunnelKey() string {
+	return helpers.GetEnv(EnvFerroTunnelKey, "")
 }
 
 func DeferPollOnInstall() bool {
