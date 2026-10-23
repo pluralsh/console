@@ -5,7 +5,8 @@ import {
   ValidatedInput,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
-import { ProjectsDocument, useCreateProjectMutation } from 'generated/graphql'
+import { useCreateProjectMutation } from 'generated/graphql'
+import { ProjectsDocument } from 'generated/graphql-documents'
 import { isEmpty } from 'lodash'
 import { ComponentProps, useState } from 'react'
 import { useTheme } from 'styled-components'

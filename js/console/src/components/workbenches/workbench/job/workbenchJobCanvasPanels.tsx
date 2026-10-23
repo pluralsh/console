@@ -10,7 +10,10 @@ import styled from 'styled-components'
 import { COLORS } from 'utils/color'
 import { isNonNullable } from 'utils/isNonNullable'
 import { DashboardPanelGraph } from '../monitoring/DashboardGraphSource'
-import type { JobCanvasQuery, JobCanvasQueryType } from './JobCanvasGraphSource'
+import type {
+  JobCanvasQuery,
+  JobCanvasQueryType,
+} from './useJobCanvasGraphData'
 import { hasWorkbenchMetricsToolQuery } from './WorkbenchJobActivityResults'
 import { getToolGraphSummaries } from './workbenchJobCanvasSummaries'
 

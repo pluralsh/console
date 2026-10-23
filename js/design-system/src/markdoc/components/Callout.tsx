@@ -15,8 +15,7 @@ function MarkdocCallout({
   ...props
 }: Omit<CalloutProps, 'buttonProps'> & { ctas: any[] }) {
   let buttonProps: CalloutProps['buttonProps']
-  const { useNavigate } = useNavigationContext()
-  const navigate = useNavigate()
+  const { navigate } = useNavigationContext()
 
   const href = useNormalizeHref(ctas?.[0]?.href)
 

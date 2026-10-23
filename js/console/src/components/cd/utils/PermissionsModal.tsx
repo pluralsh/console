@@ -1,13 +1,6 @@
 import { Button, Modal } from '@pluralsh/design-system'
 import styled, { useTheme } from 'styled-components'
-import {
-  FormEvent,
-  ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
+import { FormEvent, ReactNode, useCallback, useMemo, useState } from 'react'
 import isEqual from 'lodash/isEqual'
 import uniqWith from 'lodash/uniqWith'
 import upperFirst from 'lodash/upperFirst'
@@ -96,15 +89,18 @@ export function PermissionsModal({
 }) {
   const theme = useTheme()
 
-  const [readBindings, setReadBindings] = useState(bindings.readBindings)
-  const [writeBindings, setWriteBindings] = useState(bindings.writeBindings)
-
-  useEffect(() => {
-    setReadBindings(bindings.readBindings)
-  }, [bindings.readBindings])
-  useEffect(() => {
-    setWriteBindings(bindings.writeBindings)
-  }, [bindings.writeBindings])
+  // only the user's edits are stored; untouched lists show the current bindings
+  const [editedReadBindings, setReadBindings] =
+    useState<typeof bindings.readBindings>()
+  const [editedWriteBindings, setWriteBindings] =
+    useState<typeof bindings.writeBindings>()
+  const readBindings = editedReadBindings ?? bindings.readBindings
+  const writeBindings = editedWriteBindings ?? bindings.writeBindings
+  const close = () => {
+    setReadBindings(undefined)
+    setWriteBindings(undefined)
+    onClose()
+  }
 
   const uniqueReadBindings = useMemo(
     () => uniqWith(readBindings, isEqual),
@@ -118,7 +114,7 @@ export function PermissionsModal({
     useUpdateRbacMutation({
       onCompleted: () => {
         refetch?.()
-        onClose()
+        close()
       },
     })
   const allowSubmit = readBindings && writeBindings
@@ -152,7 +148,7 @@ export function PermissionsModal({
     <Modal
       header={header}
       open={open}
-      onClose={onClose}
+      onClose={close}
       asForm
       formProps={{ onSubmit }}
       size="custom"
@@ -181,7 +177,7 @@ export function PermissionsModal({
             type="button"
             onClick={(e) => {
               e.preventDefault()
-              onClose?.()
+              close()
             }}
           >
             Cancel

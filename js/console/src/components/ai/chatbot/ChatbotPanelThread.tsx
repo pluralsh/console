@@ -1,4 +1,4 @@
-import { Flex, usePrevious } from '@pluralsh/design-system'
+import { Flex } from '@pluralsh/design-system'
 import { GqlError, GqlErrorType } from 'components/utils/Alert.tsx'
 import {
   AiDeltaFragment,
@@ -144,25 +144,32 @@ export function ChatbotPanelThread({
 
   // runs when new messages are added
   const lastMessageId = messages[messages.length - 1]?.id
-  const prevLastMessageId = usePrevious(lastMessageId)
-  useEffect(() => {
-    if (!lastMessageId || lastMessageId === prevLastMessageId) return
-
-    setStreaming(false)
-    setStreamedMessages([])
-    setPendingMessage(null)
-  }, [lastMessageId, prevLastMessageId])
+  const [prevLastMessageId, setPrevLastMessageId] = useState(lastMessageId)
+  if (lastMessageId !== prevLastMessageId) {
+    setPrevLastMessageId(lastMessageId)
+    if (lastMessageId) {
+      setStreaming(false)
+      setStreamedMessages([])
+      setPendingMessage(null)
+    }
+  }
 
   // reset the mutation when the thread id changes so errors are cleared (like if a new thread is created)
-  useEffect(() => {
+  const [prevThreadId, setPrevThreadId] = useState(threadId)
+  if (threadId !== prevThreadId) {
+    setPrevThreadId(threadId)
     setStreaming(false)
     setStreamedMessages([])
+  }
+  useEffect(() => {
     reset()
   }, [threadId, reset])
 
   // handles send and then clears the message queue if this is the right thread
   useEffect(() => {
     if (queuedChatMessage && queuedChatMessage.threadId === threadId) {
+      // sending is a side effect (mutation) that also updates local streaming state
+      // oxlint-disable-next-line react/set-state-in-effect
       sendMessage(queuedChatMessage.message)
       setQueuedChatMessage(null)
     }

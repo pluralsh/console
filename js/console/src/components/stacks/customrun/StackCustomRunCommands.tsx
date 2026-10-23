@@ -6,11 +6,8 @@ import { parseScript } from 'utils/cmdLineParse'
 
 import { useTheme } from 'styled-components'
 
-import {
-  StackRunsDocument,
-  StackRunsQuery,
-  useCreateOnDemandRunMutation,
-} from 'generated/graphql'
+import { StackRunsQuery, useCreateOnDemandRunMutation } from 'generated/graphql'
+import { StackRunsDocument } from 'generated/graphql-documents'
 import { appendConnection, updateCache } from 'utils/graphql'
 
 import { GqlError } from 'components/utils/Alert'

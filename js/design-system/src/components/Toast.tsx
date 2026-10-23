@@ -56,9 +56,12 @@ function Toast({
         ? closeTimeoutProp
         : defaults.closeTimeout
 
-  useEffect(() => {
+  const [prevShow, setPrevShow] = useState(show)
+
+  if (show !== prevShow) {
+    setPrevShow(show)
     setOpen(show)
-  }, [show])
+  }
 
   useEffect(() => {
     if (closeTimeout === 'none') {

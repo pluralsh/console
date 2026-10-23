@@ -34,7 +34,7 @@ import {
   VsphereCloudConnectionAttributes,
   WorkbenchToolType,
 } from 'generated/graphql'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useEffectEvent, useMemo, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import {
   CLOUD_CONNECTION_SELECTED_QUERY_PARAM,
@@ -86,6 +86,11 @@ export function CloudConnectionCreateForm({
   const resolvedBackPath = backPath ?? WORKBENCHES_TOOLS_CREATE_ABS_PATH
   const { isOpen, openSetupGuidePanel, closeSetupGuidePanel } =
     useWebhookSetupGuidePanel()
+
+  const onUnmount = useEffectEvent(() => {
+    if (isOpen) closeSetupGuidePanel()
+  })
+  useEffect(() => () => onUnmount(), [])
   const setupGuideMarkdownPath = provider
     ? getCloudConnectionSetupGuideMarkdownPath(provider)
     : null

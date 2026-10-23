@@ -1,3 +1,7 @@
+// TabList and TabPanel share state imperatively through a stateRef that is read
+// and written during render, so their components opt out of React Compiler
+// ('use no memo') until that API is reworked.
+/* oxlint-disable react/refs, react/immutability */
 import { mergeRefs } from '@react-aria/utils'
 import {
   type ComponentProps,
@@ -17,6 +21,21 @@ import styled from 'styled-components'
 import { type Key } from '@react-types/shared'
 
 import { type MakeOptional, type Renderer, type TabStateRef } from './TabList'
+
+// TabList calls a single stateRef.current.updateTabPanel, but in multipanel mode
+// every panel must re-render on selection change (memoized parents won't do it).
+const panelUpdaters = new WeakMap<TabStateRef, Set<() => void>>()
+
+function getPanelUpdaters(stateRef: TabStateRef) {
+  let updaters = panelUpdaters.get(stateRef)
+
+  if (!updaters) {
+    updaters = new Set()
+    panelUpdaters.set(stateRef, updaters)
+  }
+
+  return updaters
+}
 
 /*
 mode='multipanel'
@@ -79,6 +98,7 @@ function WrappedTabPanel({
   mode,
   ...props
 }: WrappedTabPanelProps) {
+  'use no memo'
   const ref = useRef(null)
   let { tabPanelProps } = useTabPanel(stateProps, state, ref)
   const { visuallyHiddenProps } = useVisuallyHidden()
@@ -125,10 +145,21 @@ function TabPanel({
   mode,
   ...props
 }: TabPanelProps) {
+  'use no memo'
   // https://reactjs.org/docs/hooks-faq.html#is-there-something-like-forceupdate
   const [numRechecks, recheckStateRef] = useReducer((x) => x + 1, 0)
   const [, forceUpdate] = useReducer((x) => x + 1, 0)
   const updateTabPanel = useCallback(() => forceUpdate(), [forceUpdate])
+
+  useEffect(() => {
+    const updaters = getPanelUpdaters(stateRef)
+
+    updaters.add(updateTabPanel)
+
+    return () => {
+      updaters.delete(updateTabPanel)
+    }
+  }, [stateRef, updateTabPanel])
 
   if (mode === 'multipanel' && !tabKey) {
     throw new Error("TabPanel: tabKey prop must be set when mode='multipanel'")
@@ -151,14 +182,17 @@ function TabPanel({
       }
       recheckStateRef()
     }
-  })
+  }, [numRechecks, stateRef])
 
   if (!renderer && !as) {
     as = <div {...props} />
   }
 
   if (stateRef.current) {
-    stateRef.current.updateTabPanel = updateTabPanel
+    const updaters = getPanelUpdaters(stateRef)
+
+    stateRef.current.updateTabPanel = () =>
+      updaters.forEach((update) => update())
 
     return (
       <WrappedTabPanel

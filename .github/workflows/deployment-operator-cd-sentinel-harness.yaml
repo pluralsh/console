@@ -211,6 +211,6 @@ jobs:
         cache-from: type=gha,scope=sentinel-harness-terratest
         cache-to: type=gha,mode=max,scope=sentinel-harness-terratest
         build-args: |
-          GO_VERSION=1.27.1
+          GO_VERSION=1.27.2
           SENTINEL_HARNESS_BASE_IMAGE_REPO=ghcr.io/pluralsh/sentinel-harness-base
           SENTINEL_HARNESS_BASE_IMAGE_TAG=${{ needs.publish-base-image.outputs.version }}

@@ -22,8 +22,8 @@ import {
 import {
   MonitorTinyFragment,
   useDeleteMonitorMutation,
-  useServiceMonitorsQuery,
 } from 'generated/graphql'
+import { ServiceMonitorsDocument } from 'generated/graphql-documents'
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { SERVICE_PARAM_ID } from 'routes/cdRoutesConsts'
@@ -37,7 +37,7 @@ export function ServiceMonitors() {
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
       {
-        queryHook: useServiceMonitorsQuery,
+        query: ServiceMonitorsDocument,
         keyPath: ['serviceDeployment', 'monitors'],
         skip: !serviceId,
       },

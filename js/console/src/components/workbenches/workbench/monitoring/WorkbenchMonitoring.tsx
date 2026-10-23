@@ -74,9 +74,13 @@ export function WorkbenchMonitoring() {
   const updateJobId = updateKey ? updateJobs[updateKey] : undefined
   const setUpdateJobId = (jobId: Nullable<string>) => {
     if (!updateKey) return
-    setUpdateJobs(({ [updateKey]: _, ...rest }) =>
-      jobId ? { ...rest, [updateKey]: jobId } : rest
-    )
+    // React Compiler can't handle computed-key destructuring, so copy and delete
+    setUpdateJobs((jobs) => {
+      const next = { ...jobs }
+      if (jobId) next[updateKey] = jobId
+      else delete next[updateKey]
+      return next
+    })
   }
 
   return (

@@ -6,9 +6,9 @@ import {
   type VirtualSlice,
 } from 'components/utils/table/useFetchPaginatedData'
 import {
-  usePolicyStackAttachmentsQuery,
-  usePolicyWorkbenchAttachmentsQuery,
-} from 'generated/graphql'
+  PolicyStackAttachmentsDocument,
+  PolicyWorkbenchAttachmentsDocument,
+} from 'generated/graphql-documents'
 import { compact, startCase } from 'lodash'
 import { useMemo } from 'react'
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
@@ -34,7 +34,7 @@ export function PolicyAttachments() {
   const id = policy?.id ?? params[POLICIES_PARAM_ID] ?? ''
   const workbenchQuery = useFetchPaginatedData(
     {
-      queryHook: usePolicyWorkbenchAttachmentsQuery,
+      query: PolicyWorkbenchAttachmentsDocument,
       keyPath: ['policy', 'workbenchPolicies'],
       skip: !id,
     },
@@ -42,7 +42,7 @@ export function PolicyAttachments() {
   )
   const stackQuery = useFetchPaginatedData(
     {
-      queryHook: usePolicyStackAttachmentsQuery,
+      query: PolicyStackAttachmentsDocument,
       keyPath: ['policy', 'stackPolicies'],
       skip: !id,
     },

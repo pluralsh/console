@@ -22,9 +22,9 @@ import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
 import {
   AgentRuntimeType,
   useUpsertFlowMutation,
-  useWorkbenchesQuery,
   WorkbenchTinyFragment,
 } from 'generated/graphql'
+import { WorkbenchesDocument } from 'generated/graphql-documents'
 import { isEmpty } from 'lodash'
 import {
   ComponentPropsWithoutRef,
@@ -33,7 +33,6 @@ import {
   ReactElement,
   ReactNode,
   UIEvent,
-  useEffect,
   useMemo,
   useState,
 } from 'react'
@@ -54,15 +53,29 @@ export function AttachWorkbenchesModal({
 } & ComponentPropsWithoutRef<typeof Modal>) {
   const theme = useTheme()
   const [query, setQuery] = useState('')
-  const [selectedWorkbenches, setSelectedWorkbenches] = useState<
-    Map<string, WorkbenchTinyFragment>
-  >(new Map())
+  // the user's selection, or null to show the attached workbenches
+  const [editedSelection, setEditedSelection] = useState<Map<
+    string,
+    WorkbenchTinyFragment
+  > | null>(null)
+  const selectedWorkbenches = useMemo(
+    () =>
+      editedSelection ??
+      new Map(
+        attachedWorkbenches.map((workbench) => [workbench.id, workbench])
+      ),
+    [editedSelection, attachedWorkbenches]
+  )
+  const close = () => {
+    setEditedSelection(null)
+    onClose?.()
+  }
   const debouncedQuery = useDebounce(query, 200)
 
   const { data, loading, error, pageInfo, fetchNextPage } =
     useFetchPaginatedData(
       {
-        queryHook: useWorkbenchesQuery,
+        query: WorkbenchesDocument,
         keyPath: ['workbenches'],
       },
       { q: debouncedQuery }
@@ -74,17 +87,9 @@ export function AttachWorkbenchesModal({
       refetchQueries: ['FlowWorkbenches'],
       onCompleted: () => {
         onUpdated()
-        onClose?.()
+        close()
       },
     })
-
-  useEffect(() => {
-    if (!open) return
-
-    setSelectedWorkbenches(
-      new Map(attachedWorkbenches.map((workbench) => [workbench.id, workbench]))
-    )
-  }, [attachedWorkbenches, open])
 
   const allWorkbenches = useMemo(
     () => mapExistingNodes(data?.workbenches),
@@ -102,13 +107,13 @@ export function AttachWorkbenchesModal({
   )
 
   const addWorkbench = (workbench: WorkbenchTinyFragment) =>
-    setSelectedWorkbenches((workbenches) =>
-      new Map(workbenches).set(workbench.id, workbench)
+    setEditedSelection(
+      new Map(selectedWorkbenches).set(workbench.id, workbench)
     )
 
   const removeWorkbench = (workbenchId: string) =>
-    setSelectedWorkbenches((workbenches) => {
-      const next = new Map(workbenches)
+    setEditedSelection(() => {
+      const next = new Map(selectedWorkbenches)
       next.delete(workbenchId)
       return next
     })
@@ -128,7 +133,7 @@ export function AttachWorkbenchesModal({
   return (
     <Modal
       open={open}
-      onClose={onClose}
+      onClose={close}
       header="Attach workbench to flow"
       size="custom"
       css={{
@@ -147,7 +152,7 @@ export function AttachWorkbenchesModal({
         >
           <Button
             destructive
-            onClick={onClose}
+            onClick={close}
           >
             Cancel
           </Button>

@@ -1,0 +1,71 @@
+name: CD / Design system
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - ".github/workflows/design-system-publish.yaml"
+      - "js/.tool-versions"
+      - "js/.yarnrc.yml"
+      - "js/design-system/**"
+      - "js/package.json"
+      - "js/yarn.lock"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  id-token: write
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  vouch:
+    name: Vouch
+    uses: ./.github/workflows/vouch-gate.yml
+    permissions:
+      contents: read
+
+  publish:
+    needs: [vouch]
+    name: Publish npm package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: js/.tool-versions
+          cache: yarn
+          cache-dependency-path: js/yarn.lock
+      - run: npm install -g corepack@0.36.0 && corepack enable
+      - working-directory: js
+        run: >-
+          YARN_ENABLE_IMMUTABLE_INSTALLS=true
+          yarn workspaces focus @pluralsh/design-system
+      # Build before semantic-release so a broken build fails before any tag is pushed.
+      - working-directory: js
+        run: yarn workspace @pluralsh/design-system build
+      - name: Bootstrap migrated release history
+        run: |
+          # Tag the parent so the commit that adds this pipeline counts toward the first release.
+          if [[ -z "$(git tag --list 'design-system-v*')" ]]; then
+            git tag design-system-v5.31.2 HEAD^
+            git push origin design-system-v5.31.2
+          fi
+      - name: Semantic release
+        uses: cycjimmy/semantic-release-action@v6
+        with:
+          working_directory: js/design-system
+          tag_format: design-system-v${version}
+          extra_plugins: |
+            conventional-changelog-conventionalcommits@10.2.1
+            semantic-release-monorepo@8.0.2
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          NPM_CONFIG_PROVENANCE: true

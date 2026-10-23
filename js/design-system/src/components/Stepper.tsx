@@ -81,20 +81,14 @@ function Stepper({
 }: StepperProps) {
   const eltRef = useRef<HTMLDivElement>(null)
   const mergedRef = mergeRefs(ref, eltRef)
-  const [collapseTitles, setCollapseTitles] = useState(true)
+  const [tooNarrow, setTooNarrow] = useState(true)
+  const collapseTitles = forceCollapse || tooNarrow
 
   const attemptCollapse = useCallback(() => {
-    if (vertical && forceCollapse) {
-      setCollapseTitles(true)
+    setTooNarrow((eltRef.current?.clientWidth ?? 0) < collapseAtWidth)
+  }, [eltRef, collapseAtWidth])
 
-      return
-    }
-    setCollapseTitles(
-      !!forceCollapse || (eltRef.current?.clientWidth ?? 0) < collapseAtWidth
-    )
-  }, [forceCollapse, eltRef, collapseAtWidth, vertical])
-
-  useEffect(attemptCollapse, [vertical, forceCollapse, attemptCollapse])
+  useEffect(attemptCollapse, [attemptCollapse])
   useResizeObserver(eltRef, attemptCollapse)
 
   return (

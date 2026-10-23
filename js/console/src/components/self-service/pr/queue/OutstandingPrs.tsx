@@ -1,7 +1,7 @@
 import { Flex, Table } from '@pluralsh/design-system'
 import { ComponentProps, useState } from 'react'
 
-import { usePullRequestsQuery } from 'generated/graphql'
+import { PullRequestsDocument } from 'generated/graphql-documents'
 
 import { useThrottle } from 'components/hooks/useThrottle'
 
@@ -33,7 +33,7 @@ export function OutstandingPrs() {
     fetchNextPage,
     setVirtualSlice,
   } = useFetchPaginatedData(
-    { queryHook: usePullRequestsQuery, keyPath: ['pullRequests'] },
+    { query: PullRequestsDocument, keyPath: ['pullRequests'] },
     { q: debouncedSearchString }
   )
 

@@ -6,7 +6,7 @@ import {
   type DocSection,
   docsStructure,
   redirects,
-} from '../src/routing/docs-structure'
+} from '../src/routing/docs-structure.ts'
 
 type FileInfo = {
   relPath: string | null

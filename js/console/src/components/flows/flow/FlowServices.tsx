@@ -9,10 +9,8 @@ import {
 } from 'components/flows/flowHealth'
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import {
-  ServiceDeploymentsRowFragment,
-  useFlowServicesQuery,
-} from 'generated/graphql'
+import { ServiceDeploymentsRowFragment } from 'generated/graphql'
+import { FlowServicesDocument } from 'generated/graphql-documents'
 import { useMemo } from 'react'
 import {
   useNavigate,
@@ -36,7 +34,7 @@ export function FlowServices() {
     fetchNextPage,
     setVirtualSlice,
   } = useFetchPaginatedData(
-    { queryHook: useFlowServicesQuery, keyPath: ['flow', 'services'] },
+    { query: FlowServicesDocument, keyPath: ['flow', 'services'] },
     { id: flow?.id ?? '' }
   )
   const reactTableOptions = useMemo(() => ({ meta: { refetch } }), [refetch])

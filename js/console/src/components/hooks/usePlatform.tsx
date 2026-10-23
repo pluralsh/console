@@ -1,5 +1,3 @@
-import { useEffect, useState } from 'react'
-
 const getPlatform = () => {
   if (
     window?.navigator?.platform.indexOf('Mac') === 0 ||
@@ -23,12 +21,6 @@ const getPlatform = () => {
   }
 }
 
-export const usePlatform = () => {
-  const [platform, setPlatform] = useState(getPlatform())
+const PLATFORM = getPlatform()
 
-  useEffect(() => {
-    setPlatform(getPlatform())
-  }, [])
-
-  return platform
-}
+export const usePlatform = () => PLATFORM

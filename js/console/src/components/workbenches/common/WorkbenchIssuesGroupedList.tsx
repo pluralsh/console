@@ -9,10 +9,10 @@ import {
   IssueStatus,
   IssueWebhookProvider,
   SortDirection,
-  useWorkbenchIssuesForStatusQuery,
   useWorkbenchIssueStatusCountsQuery,
   WorkbenchIssueFragment,
 } from 'generated/graphql'
+import { WorkbenchIssuesForStatusDocument } from 'generated/graphql-documents'
 import { includes } from 'lodash'
 import { memo, useMemo } from 'react'
 import { formatDateTime } from 'utils/datetime'
@@ -131,7 +131,7 @@ function IssueStatusGroup({
   const { data, loading, pageInfo, fetchNextPage, fetchingMore } =
     useFetchPaginatedData(
       {
-        queryHook: useWorkbenchIssuesForStatusQuery,
+        query: WorkbenchIssuesForStatusDocument,
         keyPath: ISSUES_KEY_PATH,
         pageSize: PAGE_SIZE,
         keepLoadedPages: true,

@@ -8,18 +8,20 @@ import {
   PeopleIcon,
   PersonIcon,
 } from '@pluralsh/design-system'
-import { useEffect, useState } from 'react'
+import { cloneElement, useEffect, useEffectEvent, useState } from 'react'
 import { ApolloClient, useApolloClient } from '@apollo/client'
 import styled, { useTheme } from 'styled-components'
 
 import {
-  SearchGroupsDocument,
   SearchGroupsQuery,
   SearchGroupsQueryVariables,
-  SearchUsersDocument,
   SearchUsersQuery,
   SearchUsersQueryVariables,
 } from 'generated/graphql'
+import {
+  SearchGroupsDocument,
+  SearchUsersDocument,
+} from 'generated/graphql-documents'
 
 const ICONS = {
   user: <PersonIcon size={14} />,
@@ -45,7 +47,7 @@ export function fetchUsers(client: ApolloClient<any>, query, setSuggestions) {
     .then(({ data }) =>
       data?.users?.edges?.map((edge) => ({
         value: edge?.node,
-        label: UserSuggestion(edge?.node),
+        label: userSuggestion(edge?.node),
       }))
     )
     .then(setSuggestions)
@@ -60,13 +62,14 @@ export function fetchGroups(client: ApolloClient<any>, query, setSuggestions) {
     .then(({ data }) =>
       data?.groups?.edges?.map((edge) => ({
         value: edge?.node,
-        label: GroupSuggestion(edge?.node),
+        label: groupSuggestion(edge?.node),
       }))
     )
     .then(setSuggestions)
 }
 
-export function UserSuggestion({ name, email, avatar, id }: any) {
+// plain function, not a component: called outside render from fetch callbacks
+function userSuggestion({ name, email, avatar, id }: any) {
   return (
     <ListBoxItem
       key={id}
@@ -85,7 +88,7 @@ export function UserSuggestion({ name, email, avatar, id }: any) {
   )
 }
 
-export function GroupSuggestion({ name, description, id }: any) {
+function groupSuggestion({ name, description, id }: any) {
   return (
     <ListBoxItem
       key={id}
@@ -110,15 +113,21 @@ export function BindingInput({
   add,
   hint,
   layout,
-  placeholder = TEXT[type]?.placeholder,
-  label = TEXT[type]?.label,
+  placeholder: placeholderProp,
+  label: labelProp,
   inputProps,
   icon,
 }: any) {
+  const placeholder =
+    placeholderProp === undefined ? TEXT[type]?.placeholder : placeholderProp
+  const label = labelProp === undefined ? TEXT[type]?.label : labelProp
   const { colors } = useTheme()
   const client = useApolloClient()
   const [suggestions, setSuggestions] = useState([])
   const fetch = fetcher || FETCHER[type]
+  // bindings hold user emails / group names, matching what the chips display
+  const isBound = (value) =>
+    !!value && !!bindings?.includes(type === 'group' ? value.name : value.email)
 
   return (
     <TagInput
@@ -131,6 +140,7 @@ export function BindingInput({
       width="100%"
       suggestions={suggestions}
       items={bindings}
+      isSelected={isBound}
       onRemove={remove}
       onAdd={({ value }) => add(value)}
       onChange={({ target: { value } }) => fetch(client, value, setSuggestions)}
@@ -151,6 +161,7 @@ function TagInput({
   layout,
   suggestions,
   items,
+  isSelected,
   icon,
   onRemove,
   onAdd,
@@ -161,8 +172,10 @@ function TagInput({
   const [inputValue, setInputValue] = useState('')
 
   // Run only on first render. Make sure there will be data in Combo Box to start with.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => onChange({ target: { value: inputValue } }), [])
+  const loadInitialSuggestions = useEffectEvent(() =>
+    onChange({ target: { value: inputValue } })
+  )
+  useEffect(() => loadInitialSuggestions(), [])
 
   return (
     <TagPicker>
@@ -178,7 +191,7 @@ function TagInput({
           onSelectionChange={(key) => {
             const selection = suggestions.find((s) => s?.value?.id === key)
 
-            if (selection) onAdd(selection)
+            if (selection && !isSelected(selection.value)) onAdd(selection)
           }}
           onInputChange={(value) => {
             setInputValue(value)
@@ -187,7 +200,9 @@ function TagInput({
           startIcon={icon}
           inputProps={{ placeholder, ...inputProps }}
         >
-          {suggestions.map(({ label }) => label)}
+          {suggestions.map(({ value, label }) =>
+            isSelected(value) ? cloneElement(label, { selected: true }) : label
+          )}
         </ComboBox>
         {items?.length > 0 && (
           <ChipList

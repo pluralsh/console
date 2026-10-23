@@ -31,6 +31,20 @@ interface CloudObjectsCardProps {
   content?: string
 }
 
+function parseObjects(content: Nullable<string>) {
+  if (!content) return { objects: [], isValid: false }
+
+  try {
+    const parsed = JSON.parse(content)
+    return {
+      objects: parsed,
+      isValid: Array.isArray(parsed) && parsed.length > 0,
+    }
+  } catch (_) {
+    return { objects: [], isValid: false }
+  }
+}
+
 export default function CloudObjectsCard({
   query,
   content,
@@ -58,19 +72,7 @@ export default function CloudObjectsCard({
     }
   }, [provider, query])
 
-  const { objects, isValid } = useMemo(() => {
-    if (!content) return { objects: [], isValid: false }
-
-    try {
-      const parsed = JSON.parse(content)
-      return {
-        objects: parsed,
-        isValid: Array.isArray(parsed) && parsed.length > 0,
-      }
-    } catch (_) {
-      return { objects: [], isValid: false }
-    }
-  }, [content])
+  const { objects, isValid } = useMemo(() => parseObjects(content), [content])
 
   if (!provider || !objectType || !isValid) {
     return null

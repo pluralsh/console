@@ -31,11 +31,18 @@ export function normalizeUpdateError(error: unknown): GqlErrorType {
   return error instanceof Error ? error : String(error)
 }
 
+function parseYaml(value: string): Record<string, unknown> | Error {
+  try {
+    return load(value) as Record<string, unknown>
+  } catch (e) {
+    return e instanceof Error ? e : new Error(String(e))
+  }
+}
+
 export default function Raw(): ReactElement<any> {
   const theme = useTheme()
   const { clusterId, name = '', namespace, crd } = useParams()
   const pathMatch = useMatch(`${getKubernetesAbsPath(clusterId)}/:kind/*`)
-  const [current, setCurrent] = useState<string>()
   const [sha, setSHA] = useState<string>()
   const [updateError, setUpdateError] = useState<GqlErrorType>()
   const [updating, setUpdating] = useState(false)
@@ -69,6 +76,7 @@ export default function Raw(): ReactElement<any> {
   const { data, refetch, isLoading, error } = namespace
     ? namespacedQuery
     : clusterQuery
+  const current = useMemo(() => (data ? dump(data) : undefined), [data])
   const handleUpdateError = (error: unknown) => {
     setUpdating(false)
     setUpdateError(normalizeUpdateError(error))
@@ -95,17 +103,10 @@ export default function Raw(): ReactElement<any> {
   }, [updateError])
 
   useEffect(() => {
-    if (!data) return
+    if (current === undefined) return
 
-    const current = dump(data)
-
-    setCurrent(current)
-    calculateSHA(current)
-
-    async function calculateSHA(current: string) {
-      setSHA(await hash(current ?? ''))
-    }
-  }, [data])
+    hash(current).then(setSHA)
+  }, [current])
 
   if (error) return <GqlError error={error} />
 
@@ -138,20 +139,18 @@ export default function Raw(): ReactElement<any> {
         saving={updating}
         saveLabel="Update"
         onSave={(v) => {
-          try {
-            const input = load(v) as Record<string, unknown>
-
-            setUpdating(true)
-            mutation.mutate({
-              client,
-              path: namespace
-                ? { kind, name: name ?? '', namespace: namespace ?? '' }
-                : { kind, name: name ?? '', namespace: '' },
-              body: input,
-            })
-          } catch (e) {
-            setUpdateError(normalizeUpdateError(e))
+          const input = parseYaml(v)
+          if (input instanceof Error) {
+            setUpdateError(normalizeUpdateError(input))
+            return
           }
+
+          setUpdating(true)
+          mutation.mutate({
+            client,
+            path: { kind, name: name ?? '', namespace: namespace ?? '' },
+            body: input,
+          })
         }}
       />
     </>

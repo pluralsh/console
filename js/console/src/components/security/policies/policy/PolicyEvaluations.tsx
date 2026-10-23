@@ -13,11 +13,8 @@ import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { StackedText } from 'components/utils/table/StackedText'
 import { OverlineH1, Subtitle1H1 } from 'components/utils/typography/Text'
-import {
-  PolicyEvaluationFragment,
-  PolicyType,
-  usePolicyEvaluationsQuery,
-} from 'generated/graphql'
+import { PolicyEvaluationFragment, PolicyType } from 'generated/graphql'
+import { PolicyEvaluationsDocument } from 'generated/graphql-documents'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
 import {
@@ -54,13 +51,17 @@ export function PolicyEvaluations() {
   const params = useParams()
   const policyId = policy?.id ?? params[POLICIES_PARAM_ID] ?? ''
   const evalIdFromPath = params[POLICIES_EVAL_PARAM_ID]
-  const [detailTab, setDetailTab] = useState<DetailTab>('input')
+  // the chosen tab and the eval it was chosen for; other evals start on 'input'
+  const [tabChoice, setTabChoice] = useState<{
+    evalId?: string
+    tab: DetailTab
+  }>({ tab: 'input' })
   const detailTabsStateRef = useRef<any>(undefined)
 
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
       {
-        queryHook: usePolicyEvaluationsQuery,
+        query: PolicyEvaluationsDocument,
         keyPath: ['policy', 'policyEvaluations'],
         skip: !policyId,
       },
@@ -87,15 +88,17 @@ export function PolicyEvaluations() {
     navigate(getPolicyEvalAbsPath(policyId, selectedEval.id), { replace: true })
   }, [evalIdFromPath, navigate, policyId, selectedEval?.id])
 
-  useEffect(() => {
-    setDetailTab('input')
-  }, [selectedEval?.id])
+  const detailTab =
+    tabChoice.evalId === selectedEval?.id ? tabChoice.tab : 'input'
+  const setDetailTab = (tab: DetailTab) =>
+    setTabChoice({ evalId: selectedEval?.id, tab })
 
   if (error) return <GqlError error={error} />
 
   return (
     <WrapperSC>
       <PolicyEvaluationsSidePanel
+        key={policy?.type}
         evals={evals}
         policyType={policy?.type}
         loading={loading && !data}

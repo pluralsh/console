@@ -25,12 +25,12 @@ import {
 import {
   Delta,
   SortDirection,
-  useWorkbenchJobsForStatusQuery,
   useWorkbenchJobStatusCountsQuery,
   WorkbenchJobPrState,
   WorkbenchJobStatus,
   WorkbenchJobTinyFragment,
 } from 'generated/graphql'
+import { WorkbenchJobsForStatusDocument } from 'generated/graphql-documents'
 import { includes, startCase } from 'lodash'
 import { memo, ReactElement, useEffect, useMemo, useRef, useState } from 'react'
 import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
@@ -257,7 +257,7 @@ function JobStatusGroup({
   const { data, loading, pageInfo, fetchNextPage, fetchingMore, refetch } =
     useFetchPaginatedData(
       {
-        queryHook: useWorkbenchJobsForStatusQuery,
+        query: WorkbenchJobsForStatusDocument,
         keyPath: RUNS_KEY_PATH,
         pageSize,
         keepLoadedPages: true,

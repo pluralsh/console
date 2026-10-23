@@ -142,22 +142,21 @@ function useCopyList(getText: () => Promise<string>) {
     return () => clearTimeout(timeout)
   }, [copied])
 
-  const handleCopy = useCallback(async () => {
+  const handleCopy = useCallback(() => {
     setCopying(true)
-    try {
-      await window.navigator.clipboard.writeText(await getText())
-      setCopied(true)
-    } catch (error) {
-      popToast({
-        content:
-          error instanceof Error && error.message
-            ? error.message
-            : 'Could not copy list',
-        severity: 'danger',
-      })
-    } finally {
-      setCopying(false)
-    }
+    return getText()
+      .then((text) => window.navigator.clipboard.writeText(text))
+      .then(() => setCopied(true))
+      .catch((error) =>
+        popToast({
+          content:
+            error instanceof Error && error.message
+              ? error.message
+              : 'Could not copy list',
+          severity: 'danger',
+        })
+      )
+      .finally(() => setCopying(false))
   }, [getText, popToast])
 
   return { copied, copying, handleCopy }

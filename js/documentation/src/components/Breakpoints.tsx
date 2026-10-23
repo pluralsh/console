@@ -2,10 +2,15 @@ import {
   createContext,
   type PropsWithChildren,
   useContext,
-  useEffect,
   useMemo,
-  useState,
+  useSyncExternalStore,
 } from 'react'
+
+const subscribeToResize = (onChange: () => void) => {
+  window.addEventListener('resize', onChange)
+
+  return () => window.removeEventListener('resize', onChange)
+}
 
 type Breakpoint =
   | ''
@@ -34,7 +39,11 @@ export const mqs = Object.fromEntries(
 export const BreakpointContext = createContext<Breakpoint>('')
 
 export function BreakpointProvider({ children }: PropsWithChildren) {
-  const [windowWidth, setWindowWidth] = useState(0)
+  const windowWidth = useSyncExternalStore(
+    subscribeToResize,
+    () => window.innerWidth,
+    () => 0
+  )
   const val = useMemo(() => {
     let curBreakpoint: Breakpoint = ''
 
@@ -46,16 +55,6 @@ export function BreakpointProvider({ children }: PropsWithChildren) {
 
     return curBreakpoint
   }, [windowWidth])
-
-  useEffect(() => {
-    setWindowWidth(window.innerWidth)
-  }, [])
-
-  useEffect(() => {
-    window.addEventListener('resize', () => {
-      setWindowWidth(window.innerWidth)
-    })
-  })
 
   return (
     <BreakpointContext.Provider value={val}>

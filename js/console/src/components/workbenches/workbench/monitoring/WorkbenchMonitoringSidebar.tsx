@@ -22,12 +22,14 @@ import {
   useDeleteMonitorMutation,
   useDeleteWorkbenchDashboardMutation,
   useWorkbenchDashboardDeltaSubscription,
-  useWorkbenchDashboardsQuery,
   useWorkbenchMonitorDeltaSubscription,
-  useWorkbenchMonitorsQuery,
   WorkbenchDashboardSummaryFragment,
   WorkbenchMonitorSummaryFragment,
 } from 'generated/graphql'
+import {
+  WorkbenchDashboardsDocument,
+  WorkbenchMonitorsDocument,
+} from 'generated/graphql-documents'
 import { times } from 'lodash'
 import { useState } from 'react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
@@ -63,7 +65,7 @@ export function WorkbenchMonitoringSidebar({
 
   const dashboards = useFetchPaginatedData(
     {
-      queryHook: useWorkbenchDashboardsQuery,
+      query: WorkbenchDashboardsDocument,
       keyPath: ['workbench', 'workbenchDashboards'],
       keepLoadedPages: true,
     },
@@ -71,7 +73,7 @@ export function WorkbenchMonitoringSidebar({
   )
   const monitors = useFetchPaginatedData(
     {
-      queryHook: useWorkbenchMonitorsQuery,
+      query: WorkbenchMonitorsDocument,
       keyPath: ['workbench', 'monitors'],
       keepLoadedPages: true,
     },

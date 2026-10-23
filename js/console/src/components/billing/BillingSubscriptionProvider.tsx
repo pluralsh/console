@@ -1,7 +1,7 @@
 import SubscriptionContext, {
   SubscriptionContextType,
 } from 'components/contexts/SubscriptionContext'
-import { ReactNode, useMemo } from 'react'
+import { ReactNode, useMemo, useState } from 'react'
 import { dayjsExtended as dayjs, isBefore, toDateOrUndef } from 'utils/datetime'
 
 import { useSubscriptionSuspenseQuery } from '../../generated/graphql.ts'
@@ -17,6 +17,9 @@ export function BillingSubscriptionProvider({
     fetchPolicy: 'network-only',
   })
 
+  // evaluated once per mount, like the network-only query above
+  const [now] = useState(() => new Date())
+
   const subscriptionContextValue = useMemo<SubscriptionContextType>(() => {
     const account = data?.account
     const availableFeatures = account?.availableFeatures
@@ -27,18 +30,17 @@ export function BillingSubscriptionProvider({
     const isPaidPlan = isProPlan || isEnterprisePlan
     const grandfatheredUntil = account?.grandfatheredUntil
     const isLegacyUser = !!grandfatheredUntil
-    const isGrandfathered =
-      isLegacyUser && isBefore(new Date(), grandfatheredUntil)
+    const isGrandfathered = isLegacyUser && isBefore(now, grandfatheredUntil)
     const licenseExpiry = toDateOrUndef(data?.configuration?.licenseExpiry)
     const isLicenseExpiring =
       !!licenseExpiry &&
-      dayjs(licenseExpiry).isBetween(dayjs(), dayjs().add(1, 'week'))
+      dayjs(licenseExpiry).isBetween(dayjs(now), dayjs(now).add(1, 'week'))
 
     // Marking grandfathering as expired only for a month after expiry date.
     // Afterwards expiry banners will not be visible and UI will be the same as for open-source users.
     const isGrandfatheringExpired =
       isLegacyUser &&
-      dayjs().isBetween(
+      dayjs(now).isBetween(
         dayjs(grandfatheredUntil),
         dayjs(grandfatheredUntil).add(1, 'month'),
         null,
@@ -59,7 +61,7 @@ export function BillingSubscriptionProvider({
       licenseExpiry,
       refetch,
     }
-  }, [data, refetch])
+  }, [data, now, refetch])
 
   return (
     <SubscriptionContext value={subscriptionContextValue}>

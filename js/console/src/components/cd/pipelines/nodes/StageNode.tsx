@@ -17,7 +17,6 @@ import {
   ComponentProps,
   FormEvent,
   useCallback,
-  useEffect,
   useMemo,
   useState,
 } from 'react'
@@ -25,7 +24,6 @@ import { useNavigate, useParams } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 
 import {
-  PipelineContextsDocument,
   PipelineContextsQuery,
   PipelineStageFragment,
   PrStatus,
@@ -33,6 +31,7 @@ import {
   ServiceDeploymentStatus,
   useCreatePipelineContextMutation,
 } from 'generated/graphql'
+import { PipelineContextsDocument } from 'generated/graphql-documents'
 
 import { useNodeEdges } from 'components/hooks/reactFlowHooks'
 import { GqlError } from 'components/utils/Alert'
@@ -429,10 +428,6 @@ function AddContextModal({
     [json, mutation, pipelineId]
   )
 
-  useEffect(() => {
-    setJsonError('')
-  }, [json])
-
   const actions = (
     <Button
       type="submit"
@@ -465,7 +460,10 @@ function AddContextModal({
           <CodeEditor
             value={json}
             language="json"
-            onChange={setJson}
+            onChange={(value) => {
+              setJson(value)
+              setJsonError('')
+            }}
             height="160px"
             options={{ lineNumbers: 'off', minimap: { enabled: false } }}
           />

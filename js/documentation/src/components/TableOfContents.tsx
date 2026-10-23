@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useId, useMemo, useState } from 'react'
 
-import { usePrevious } from '@pluralsh/design-system'
 import NextLink from 'next/link'
 import { useRouter } from 'next/router'
 
@@ -149,7 +148,7 @@ export function TableOfContents({
   const { hash } =
     (typeof window !== 'undefined' && window?.location) ||
     new URL(`http://plural.sh${router.asPath}`)
-  const previousHash = usePrevious(hash)
+  const [previousHash, setPreviousHash] = useState(hash)
 
   const [highlightedHash, _setHighlightedHash] = useState(
     hashIsInToC(hash) ? hash : ''
@@ -163,9 +162,10 @@ export function TableOfContents({
     [hashIsInToC, _setHighlightedHash]
   )
 
-  useEffect(() => {
-    if (hash !== previousHash && hashIsInToC(hash)) setHighlightedHash(hash)
-  }, [hash, hashIsInToC, previousHash, setHighlightedHash])
+  if (hash !== previousHash) {
+    setPreviousHash(hash)
+    if (hashIsInToC(hash)) _setHighlightedHash(hash)
+  }
 
   const scrollListener = useCallback(() => {
     let scrollToHash = ''

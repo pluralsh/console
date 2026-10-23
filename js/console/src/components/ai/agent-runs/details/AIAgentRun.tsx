@@ -342,7 +342,7 @@ function AgentRunRepromptInput({ run }: { run: AgentRunFragment }) {
 
   useEffect(() => {
     sendTopQueuePrompt()
-  }, [chatQueue.length, isPromptConsuming, loading, sendTopQueuePrompt])
+  }, [chatQueue, isPromptConsuming, loading, isRunning])
 
   const submitPrompt = () => {
     const content = prompt.trim()

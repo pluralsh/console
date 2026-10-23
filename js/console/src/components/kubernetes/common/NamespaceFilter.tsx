@@ -4,7 +4,6 @@ import {
   KeyboardEvent,
   SetStateAction,
   useCallback,
-  useEffect,
   useMemo,
   useState,
 } from 'react'
@@ -29,11 +28,13 @@ export function NamespaceFilter({
   namespace?: string
   onChange: Dispatch<SetStateAction<string | undefined>>
 } & Partial<Omit<ComponentProps<typeof ComboBox>, 'onChange'>>) {
-  const [value, setValue] = useState<string | undefined>(namespace)
-
-  useEffect(() => {
-    setValue(namespace)
-  }, [namespace])
+  // typed text and the namespace it was typed against; a new namespace replaces it
+  const [draft, setDraft] = useState<{
+    namespace?: string
+    value?: string
+  }>({ namespace, value: namespace })
+  const value = draft.namespace === namespace ? draft.value : namespace
+  const setValue = (value: string | undefined) => setDraft({ namespace, value })
 
   const trimmedValue = value?.trim() ?? ''
 
@@ -50,7 +51,7 @@ export function NamespaceFilter({
   const applyNamespace = useCallback(
     (ns: string) => {
       onChange(ns)
-      setValue(ns)
+      setDraft({ namespace: ns, value: ns })
     },
     [onChange]
   )

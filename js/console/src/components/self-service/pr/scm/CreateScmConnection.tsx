@@ -4,10 +4,10 @@ import { useTheme } from 'styled-components'
 
 import {
   ScmConnectionAttributes,
-  ScmConnectionsDocument,
   ScmType,
   useCreateScmConnectionMutation,
 } from 'generated/graphql'
+import { ScmConnectionsDocument } from 'generated/graphql-documents'
 import { appendConnection, deepOmitFalsy, updateCache } from 'utils/graphql'
 
 import { useUpdateState } from 'components/hooks/useUpdateState'

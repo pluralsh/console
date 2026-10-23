@@ -22,11 +22,11 @@ import { useUpdateState } from 'components/hooks/useUpdateState'
 import {
   NotificationRouterAttributes,
   NotificationRouterFragment,
-  NotificationRoutersDocument,
   NotificationSinkFragment,
   useNotificationSinksQuery,
   useUpsertNotificationRouterMutation,
 } from 'generated/graphql'
+import { NotificationRoutersDocument } from 'generated/graphql-documents'
 
 import { appendConnection, updateCache } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'

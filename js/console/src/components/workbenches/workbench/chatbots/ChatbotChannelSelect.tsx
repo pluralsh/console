@@ -13,7 +13,7 @@ import { GqlError } from 'components/utils/Alert'
 import { InlineA } from 'components/utils/typography/Text'
 import { useSearchConversationsQuery } from 'generated/graphql'
 import { isEmpty } from 'lodash'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { isNonNullable } from 'utils/isNonNullable'
 
 const CHANNEL_HINT =
@@ -34,11 +34,6 @@ export function ChatbotChannelSelect({
   const [inputValue, setInputValue] = useState('')
   const [isOpen, setIsOpen] = useState(false)
   const debouncedQuery = useDebounce(inputValue, 200)
-
-  useEffect(() => {
-    setManualEntry(false)
-    setInputValue('')
-  }, [chatConnectionId])
 
   const { data, loading, error } = useSearchConversationsQuery({
     variables: {

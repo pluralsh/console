@@ -1,11 +1,13 @@
 import { InMemoryCache } from '@apollo/client'
 import {
   DashboardGraphType,
-  PublicWorkbenchDashboardDocument,
-  PublicWorkbenchDashboardGraphDocument,
   PublicWorkbenchDashboardGraphQuery,
   PublicWorkbenchDashboardQuery,
 } from 'generated/graphql'
+import {
+  PublicWorkbenchDashboardDocument,
+  PublicWorkbenchDashboardGraphDocument,
+} from 'generated/graphql-documents'
 import { describe, expect, it, vi } from 'vitest'
 
 import { authlessCacheConfig } from './client'

@@ -1,10 +1,8 @@
 import { AppIcon, Flex, Modal, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
-import {
-  McpServerAuditFragment,
-  useMcpServerAuditsQuery,
-} from 'generated/graphql'
+import { McpServerAuditFragment } from 'generated/graphql'
+import { McpServerAuditsDocument } from 'generated/graphql-documents'
 import { useMemo } from 'react'
 import { mapExistingNodes } from 'utils/graphql'
 
@@ -17,7 +15,7 @@ const columnHelper = createColumnHelper<McpServerAuditFragment>()
 export function McpAuditTable({ id }: { id: string }) {
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
-      { queryHook: useMcpServerAuditsQuery, keyPath: ['mcpServer', 'audits'] },
+      { query: McpServerAuditsDocument, keyPath: ['mcpServer', 'audits'] },
       { id }
     )
 

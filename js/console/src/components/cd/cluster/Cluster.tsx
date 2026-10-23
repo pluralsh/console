@@ -20,9 +20,7 @@ import {
   createContext,
   ReactNode,
   Suspense,
-  useCallback,
   useContext,
-  useEffect,
   useMemo,
   useState,
 } from 'react'
@@ -222,22 +220,18 @@ export function Cluster() {
     () => (cluster ? getSharedMenuItems(cluster) : []),
     [cluster]
   )
-  const [moreMenuItems, setMoreMenuItems] =
-    useState<Array<MoreMenuItem>>(sharedMenuItems)
-  const setMoreMenuItemsWrapper = useCallback(
-    (items: Array<MoreMenuItem>) =>
-      setMoreMenuItems([...sharedMenuItems, ...items]),
-    [sharedMenuItems]
-  )
+  // items added by the current tab's page, shown after the shared ones
+  const [tabMenuItems, setTabMenuItems] = useState<Array<MoreMenuItem>>([])
+  const moreMenuItems = [...sharedMenuItems, ...tabMenuItems]
 
   const pageHeaderContext = useMemo(
     () => ({
       setHeaderContent,
-      setMoreMenuItems: setMoreMenuItemsWrapper,
+      setMoreMenuItems: setTabMenuItems,
       menuKey,
       setMenuKey,
     }),
-    [menuKey, setMoreMenuItemsWrapper]
+    [menuKey]
   )
 
   const crumbs: Breadcrumb[] = useMemo(
@@ -251,7 +245,11 @@ export function Cluster() {
   )
 
   useSetBreadcrumbs(crumbs)
-  useEffect(() => setMoreMenuItems(sharedMenuItems), [sharedMenuItems, tab])
+  const [prevTab, setPrevTab] = useState(tab)
+  if (tab !== prevTab) {
+    setPrevTab(tab)
+    setTabMenuItems([])
+  }
 
   if (!(cluster || clusterLoading))
     return <EmptyState message="Cluster not found." />

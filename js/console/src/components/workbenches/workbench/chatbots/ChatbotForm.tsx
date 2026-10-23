@@ -408,6 +408,8 @@ export function ChatbotForm({ mode }: { mode: 'create' | 'edit' }) {
                         </FormField>
                       </Flex>
                       <ChatbotChannelSelect
+                        // reset the search and manual entry when the connection changes
+                        key={formState.chatConnectionId}
                         chatConnectionId={formState.chatConnectionId}
                         channel={formState.channel}
                         onChannelChange={(nextChannel) =>

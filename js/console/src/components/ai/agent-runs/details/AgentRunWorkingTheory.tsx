@@ -130,12 +130,7 @@ function AgentRunStatusCallout({
               <IconFrame
                 size="large"
                 type="secondary"
-                icon={
-                  <PrIcon
-                    size="small"
-                    color="icon-light"
-                  />
-                }
+                icon={<PrIcon color="icon-light" />}
                 css={{ flexShrink: 0 }}
               />
             }

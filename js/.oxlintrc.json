@@ -29,15 +29,15 @@
     "react/void-use-memo": "error",
     "react/globals": "error",
     "react/error-boundaries": "error",
-    "react/incompatible-library": "warn",
-    "react/unsupported-syntax": "warn",
-    // React Compiler rules are warnings until both applications are compliant.
-    "react/preserve-manual-memoization": "warn",
-    "react/immutability": "warn",
-    "react/refs": "warn",
-    "react/set-state-in-effect": "warn",
-    "react/set-state-in-render": "warn",
-    "react/purity": "warn",
+    // React Compiler rules: code must follow the Rules of React to be compiled.
+    "react/incompatible-library": "error",
+    "react/unsupported-syntax": "error",
+    "react/preserve-manual-memoization": "error",
+    "react/immutability": "error",
+    "react/refs": "error",
+    "react/set-state-in-effect": "error",
+    "react/set-state-in-render": "error",
+    "react/purity": "error",
 
     // Type-aware rules (enabled by options.typeAware above).
     "typescript/await-thenable": "error",

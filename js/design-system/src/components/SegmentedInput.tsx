@@ -64,12 +64,13 @@ export default function SegmentedInput({
   // maps the segment number to its indices in the string (not including separators)
   const segNumToSelectionRange: { start: number; end: number }[] =
     useMemo(() => {
+      const ranges: { start: number; end: number }[] = []
       let start = 0
-      return segments.map((segment) => {
-        const range = { start, end: start + segment.length }
+      for (const segment of segments) {
+        ranges.push({ start, end: start + segment.length })
         start += segment.length + separator.length
-        return range
-      })
+      }
+      return ranges
     }, [segments, separator.length])
 
   // maps indices in the string (including separators) to their segment number

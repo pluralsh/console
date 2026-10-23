@@ -2,10 +2,8 @@ import { useTheme } from 'styled-components'
 import { FormEvent, useCallback, useState } from 'react'
 import { Button, Codeline, Modal } from '@pluralsh/design-system'
 
-import {
-  AccessTokensDocument,
-  useCreateAccessTokenMutation,
-} from 'generated/graphql'
+import { useCreateAccessTokenMutation } from 'generated/graphql'
+import { AccessTokensDocument } from 'generated/graphql-documents'
 import { GqlError } from 'components/utils/Alert'
 import { appendConnection, updateCache } from 'utils/graphql'
 

@@ -26,7 +26,12 @@ export const readMdFileCached = async (
     return cachedVal
   }
 
-  const fullPath = path.join(process.cwd(), filePath)
+  // Scoped to pages/ so output tracing doesn't pull the whole project into the server bundle
+  const fullPath = path.join(
+    process.cwd(),
+    'pages',
+    path.relative('pages', filePath)
+  )
 
   try {
     const file = await fs.readFile(fullPath, 'utf8')
@@ -44,6 +49,23 @@ export const readMdFileCached = async (
       ? yaml.load(ast.attributes.frontmatter)
       : {}
 
+    // transform silently drops unknown tags, so fail loudly instead
+    const undefinedTags = Markdoc.validate(ast, schemaConfig).filter(
+      ({ error }) => error.id === 'tag-undefined'
+    )
+
+    if (undefinedTags.length > 0) {
+      throw new MarkdocValidationError(
+        undefinedTags
+          .map(({ lines, error }) => {
+            const line = lines[0] !== undefined ? `:${lines[0] + 1}` : ''
+
+            return `${filePath}${line}: ${error.message}`
+          })
+          .join('\n')
+      )
+    }
+
     const content = Markdoc.transform(ast, schemaConfig)
 
     const ret: MarkdocPage = JSON.parse(
@@ -57,11 +79,15 @@ export const readMdFileCached = async (
     )
 
     return cacheAndReturn(ret)
-  } catch {
-    // console.error(e)
+  } catch (e) {
+    if (e instanceof MarkdocValidationError) throw e
 
     return cacheAndReturn(null)
   }
+}
+
+class MarkdocValidationError extends Error {
+  name = 'MarkdocValidationError'
 }
 
 // Placeholders like `<cluster-handle>` in prose parse as unclosed elements that

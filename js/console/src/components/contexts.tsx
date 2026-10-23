@@ -92,22 +92,20 @@ export function LoginContextProvider({
   const jwt = fetchToken()
   const impersonating = isImpersonatingServiceAccount()
 
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(() => {
     refreshLoading.current = true
 
-    try {
-      const jwt = await getRefreshedToken()
-
-      if (jwt) {
-        setToken(jwt)
-      } else {
+    return getRefreshedToken()
+      .then((jwt) => {
+        if (jwt) setToken(jwt)
+        else logout()
+      })
+      .catch(() => {
         logout()
-      }
-    } catch {
-      logout()
-    } finally {
-      refreshLoading.current = false
-    }
+      })
+      .finally(() => {
+        refreshLoading.current = false
+      })
   }, [logout])
 
   useEffect(() => {

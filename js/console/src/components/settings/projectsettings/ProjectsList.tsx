@@ -1,6 +1,6 @@
 import { EmptyState, Table } from '@pluralsh/design-system'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
-import { useProjectsQuery } from 'generated/graphql'
+import { ProjectsDocument } from 'generated/graphql-documents'
 import isEmpty from 'lodash/isEmpty'
 import { useMemo } from 'react'
 
@@ -18,7 +18,7 @@ export const PROJECTS_QUERY_PAGE_SIZE = 100
 export function ProjectsList() {
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData({
-      queryHook: useProjectsQuery,
+      query: ProjectsDocument,
       keyPath: ['projects'],
       pageSize: PROJECTS_QUERY_PAGE_SIZE,
     })

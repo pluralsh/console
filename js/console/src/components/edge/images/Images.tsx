@@ -1,10 +1,8 @@
 import { LoopingLogo, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { ReactNode } from 'react'
-import {
-  ClusterIsoImageEdge,
-  useClusterIsoImagesQuery,
-} from '../../../generated/graphql.ts'
+import { ClusterIsoImageEdge } from '../../../generated/graphql.ts'
+import { ClusterIsoImagesDocument } from '../../../generated/graphql-documents'
 import { ObscuredToken } from '../../profile/ObscuredToken.tsx'
 import { GqlError } from '../../utils/Alert.tsx'
 import CopyButton from '../../utils/CopyButton.tsx'
@@ -74,7 +72,7 @@ export default function Images(): ReactNode {
   const { data, error, loading, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData({
       pollInterval: 30_000,
-      queryHook: useClusterIsoImagesQuery,
+      query: ClusterIsoImagesDocument,
       keyPath: ['clusterIsoImages'],
     })
 

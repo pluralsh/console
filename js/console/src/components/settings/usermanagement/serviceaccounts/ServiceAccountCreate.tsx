@@ -1,9 +1,7 @@
 import { Button, Modal, ValidatedInput } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
-import {
-  ServiceAccountsDocument,
-  useCreateServiceAccountMutation,
-} from 'generated/graphql'
+import { useCreateServiceAccountMutation } from 'generated/graphql'
+import { ServiceAccountsDocument } from 'generated/graphql-documents'
 import { useState } from 'react'
 import { appendConnection, updateCache } from 'utils/graphql'
 

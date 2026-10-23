@@ -3,7 +3,7 @@
  * green/amber/red status dot, Copy button without icon.
  */
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import {
   Button,
@@ -66,14 +66,11 @@ const CodeContent = styled.div(({ theme }) => ({
 
 export function ResponsePanel({ detail }: { detail: EndpointDetail }) {
   const theme = useTheme()
-  const [selectedIndex, setSelectedIndex] = useState(0)
+  const [requestedIndex, setSelectedIndex] = useState(0)
   const { responses } = detail
-
-  useEffect(() => {
-    setSelectedIndex((prev) =>
-      isEmpty(responses) ? 0 : Math.min(prev, responses.length - 1)
-    )
-  }, [responses])
+  const selectedIndex = isEmpty(responses)
+    ? 0
+    : Math.min(requestedIndex, responses.length - 1)
 
   if (isEmpty(responses)) return null
 

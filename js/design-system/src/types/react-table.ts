@@ -1,4 +1,4 @@
-import '@tanstack/react-table'
+import type { RowData } from '@tanstack/react-table'
 import { type ReactNode } from 'react'
 import { TooltipProps } from '../components/Tooltip'
 

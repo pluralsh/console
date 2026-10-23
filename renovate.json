@@ -44,6 +44,41 @@
       "bumpVersion": "patch"
     },
     {
+      "description": "TODO: @hey-api/openapi-ts is pinned to a next prerelease because 0.99.0 doesn't support TypeScript 7 (https://github.com/hey-api/hey-api/issues/4235). Move to the first stable release with TypeScript 7 support as soon as it's out, then delete this rule.",
+      "matchPackageNames": ["@hey-api/openapi-ts"],
+      "allowedVersions": ">0.99.0"
+    },
+    {
+      "description": "Node in js/.tool-versions, engines, .nvmrc and Docker images moves together",
+      "matchDepNames": ["node"],
+      "groupName": "Node.js"
+    },
+    {
+      "description": "Adobe releases these in lockstep; separate PRs leave duplicate @internationalized types",
+      "matchPackageNames": ["react-aria", "react-aria-components", "react-stately", "@adobe/react-spectrum", "@react-aria/**", "@react-stately/**", "@react-types/**", "@react-spectrum/**", "@internationalized/**"],
+      "groupName": "react-aria"
+    },
+    {
+      "matchPackageNames": ["react", "react-dom", "@types/react", "@types/react-dom"],
+      "groupName": "react"
+    },
+    {
+      "matchPackageNames": ["storybook", "@storybook/**"],
+      "groupName": "storybook"
+    },
+    {
+      "matchPackageNames": ["vite", "vitest", "@vitest/**", "@vitejs/**"],
+      "groupName": "vite"
+    },
+    {
+      "matchPackageNames": ["oxlint", "oxlint-tsgolint"],
+      "groupName": "oxlint"
+    },
+    {
+      "matchPackageNames": ["@graphql-codegen/**"],
+      "groupName": "graphql-codegen"
+    },
+    {
       "matchManagers": ["npm"],
       "additionalBranchPrefix": "frontend/",
       "semanticCommitScope": "frontend",
@@ -69,6 +104,7 @@
       "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
     }
   ],
+  "postUpdateOptions": ["yarnDedupeHighest"],
   "labels": ["dependencies"],
   "separateMinorPatch": true
 }

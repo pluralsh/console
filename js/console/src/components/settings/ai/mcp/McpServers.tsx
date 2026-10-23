@@ -12,10 +12,8 @@ import { PageToolbarPortal } from 'components/layout/PageToolbar'
 import { SettingsDescription } from 'components/settings/Settings'
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import {
-  useGenerateMcpTokenLazyQuery,
-  useMcpServersQuery,
-} from 'generated/graphql'
+import { useGenerateMcpTokenLazyQuery } from 'generated/graphql'
+import { McpServersDocument } from 'generated/graphql-documents'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
@@ -42,7 +40,7 @@ export function McpServers() {
     setVirtualSlice,
     refetch,
   } = useFetchPaginatedData({
-    queryHook: useMcpServersQuery,
+    query: McpServersDocument,
     keyPath: ['mcpServers'],
   })
 
