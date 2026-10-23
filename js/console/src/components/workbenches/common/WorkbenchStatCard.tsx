@@ -36,8 +36,7 @@ export function WorkbenchStat({
   info,
   loading,
   valueColor,
-  centered,
-}: WorkbenchStatProps & { centered?: boolean }) {
+}: WorkbenchStatProps) {
   const theme = useTheme()
 
   return (
@@ -46,7 +45,6 @@ export function WorkbenchStat({
         display: 'flex',
         flexDirection: 'column',
         gap: theme.spacing.small,
-        ...(centered && { alignItems: 'center', textAlign: 'center' }),
       }}
     >
       <div
