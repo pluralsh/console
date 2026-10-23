@@ -189,3 +189,17 @@ func TestOtherInputsStillOmitEmptyFields(t *testing.T) {
 		t.Fatalf("expected empty fields to be omitted, got %v", attrs)
 	}
 }
+
+func TestGlobalServiceAttributesPreserveExplicitEmptyIgnoreClusters(t *testing.T) {
+	emptyIgnoreClusters := []*string{}
+	attrs := encodeVariables(t, GlobalServiceAttributes{
+		Name:           "global-service",
+		IgnoreClusters: &emptyIgnoreClusters,
+	})
+	expectField(t, attrs, "ignoreClusters", []any{})
+
+	attrs = encodeVariables(t, GlobalServiceAttributes{Name: "global-service"})
+	if _, ok := attrs["ignoreClusters"]; ok {
+		t.Fatalf("expected unset ignoreClusters to be omitted, got %v", attrs)
+	}
+}
