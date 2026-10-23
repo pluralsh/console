@@ -39,6 +39,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import {
   CLOUD_CONNECTION_SELECTED_QUERY_PARAM,
   WORKBENCHES_TOOLS_CREATE_ABS_PATH,
+  withReturnWorkbenchParam,
 } from 'routes/workbenchesRoutesConsts'
 import {
   WORKBENCHES_TOOLS_PROVIDER_PARAM,
@@ -83,7 +84,6 @@ export function CloudConnectionCreateForm({
     existingConnection?.provider ??
     (isProvider(providerParam) ? providerParam : selectedProvider)
   const isEditing = !!existingConnection
-  const resolvedBackPath = backPath ?? WORKBENCHES_TOOLS_CREATE_ABS_PATH
   const { isOpen, openSetupGuidePanel, closeSetupGuidePanel } =
     useWebhookSetupGuidePanel()
   const setupGuideMarkdownPath = provider
@@ -94,12 +94,17 @@ export function CloudConnectionCreateForm({
     : undefined
 
   const returnParams = useMemo(() => {
-    const params = new URLSearchParams({
-      [WORKBENCHES_TOOLS_TYPE_PARAM]: WorkbenchToolType.Cloud,
-    })
+    const params = withReturnWorkbenchParam(
+      new URLSearchParams({
+        [WORKBENCHES_TOOLS_TYPE_PARAM]: WorkbenchToolType.Cloud,
+      }),
+      searchParams
+    )
     if (provider) params.set(WORKBENCHES_TOOLS_PROVIDER_PARAM, provider)
     return params
-  }, [provider])
+  }, [provider, searchParams])
+  const resolvedBackPath =
+    backPath ?? `${WORKBENCHES_TOOLS_CREATE_ABS_PATH}?${returnParams}`
 
   const [name, setName] = useState(existingConnection?.name ?? '')
   const [aws, setAws] = useState<AwsCloudConnectionAttributes>({

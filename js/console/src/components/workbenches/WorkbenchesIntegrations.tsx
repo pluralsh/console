@@ -21,8 +21,11 @@ import { WorkbenchTabHeader } from 'components/workbenches/common/WorkbenchTabHe
 import { WorkbenchTabWrapper } from 'components/workbenches/common/WorkbenchTabWrapper'
 import Fuse, { type IFuseOptions } from 'fuse.js'
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { WORKBENCHES_TOOLS_CREATE_ABS_PATH } from 'routes/workbenchesRoutesConsts'
+import { Link, useSearchParams } from 'react-router-dom'
+import {
+  WORKBENCHES_TOOLS_CREATE_ABS_PATH,
+  withReturnWorkbenchParam,
+} from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
 import {
   WORKBENCHES_TOOLS_PROVIDER_PARAM,
@@ -41,6 +44,7 @@ const SEARCH_OPTIONS: IFuseOptions<WorkbenchToolCard> = {
   threshold: 0.25,
 }
 export function WorkbenchesIntegrations() {
+  const [searchParams] = useSearchParams()
   const [query, setQuery] = useState('')
   const [filtersVisible, setFiltersVisible] = useState(true)
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
@@ -150,9 +154,12 @@ export function WorkbenchesIntegrations() {
             <CardGrid styles={workbenchToolCardGridStyles(280)}>
               {filteredCards.map(
                 ({ type, provider, label, description, categoryLabels }) => {
-                  const params = new URLSearchParams({
-                    [WORKBENCHES_TOOLS_TYPE_PARAM]: type,
-                  })
+                  const params = withReturnWorkbenchParam(
+                    new URLSearchParams({
+                      [WORKBENCHES_TOOLS_TYPE_PARAM]: type,
+                    }),
+                    searchParams
+                  )
                   if (provider)
                     params.set(WORKBENCHES_TOOLS_PROVIDER_PARAM, provider)
                   return (

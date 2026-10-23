@@ -44,6 +44,31 @@ export const CLOUD_CONNECTION_SELECTED_QUERY_PARAM = 'selectedCloudConnection'
 export const WORKBENCHES_TOOLS_CREATE_MCP_SERVER_REL_PATH = 'create-mcp-server'
 export const WORKBENCHES_TOOLS_CREATE_MCP_SERVER_ABS_PATH = `${WORKBENCHES_TOOLS_CREATE_ABS_PATH}/${WORKBENCHES_TOOLS_CREATE_MCP_SERVER_REL_PATH}`
 export const MCP_SERVER_SELECTED_QUERY_PARAM = 'selectedMcpServer'
+export const WORKBENCHES_TOOLS_RETURN_WORKBENCH_QUERY_PARAM =
+  'returnToWorkbench'
+export const WORKBENCH_ADDED_TOOL_QUERY_PARAM = 'addedTool'
+
+export const getWorkbenchToolsAddAbsPath = (
+  returnWorkbenchId?: Nullable<string>
+) =>
+  returnWorkbenchId
+    ? `${WORKBENCHES_TOOLS_ADD_ABS_PATH}?${new URLSearchParams({ [WORKBENCHES_TOOLS_RETURN_WORKBENCH_QUERY_PARAM]: returnWorkbenchId })}`
+    : WORKBENCHES_TOOLS_ADD_ABS_PATH
+
+export const withReturnWorkbenchParam = (
+  params: URLSearchParams,
+  source: URLSearchParams
+) => {
+  const returnWorkbenchId = source.get(
+    WORKBENCHES_TOOLS_RETURN_WORKBENCH_QUERY_PARAM
+  )
+  if (returnWorkbenchId)
+    params.set(
+      WORKBENCHES_TOOLS_RETURN_WORKBENCH_QUERY_PARAM,
+      returnWorkbenchId
+    )
+  return params
+}
 export const WORKBENCHES_TOOLS_EDIT_ABS_PATH = `${WORKBENCHES_TOOLS_YOUR_ABS_PATH}/:${WORKBENCHES_TOOLS_PARAM_ID}/${WORKBENCHES_EDIT_REL_PATH}`
 export const getWorkbenchToolEditAbsPath = (toolId: Nullable<string>) =>
   `${WORKBENCHES_TOOLS_YOUR_ABS_PATH}/${toolId ?? ''}/${WORKBENCHES_EDIT_REL_PATH}`

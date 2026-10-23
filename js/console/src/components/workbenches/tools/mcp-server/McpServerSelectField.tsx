@@ -14,6 +14,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import {
   MCP_SERVER_SELECTED_QUERY_PARAM,
   WORKBENCHES_TOOLS_CREATE_MCP_SERVER_ABS_PATH,
+  withReturnWorkbenchParam,
 } from 'routes/workbenchesRoutesConsts'
 import { mapExistingNodes } from 'utils/graphql'
 
@@ -56,7 +57,10 @@ export function McpServerSelectField({
       caption={
         <InlineLink
           as={Link}
-          to={WORKBENCHES_TOOLS_CREATE_MCP_SERVER_ABS_PATH}
+          to={{
+            pathname: WORKBENCHES_TOOLS_CREATE_MCP_SERVER_ABS_PATH,
+            search: `?${withReturnWorkbenchParam(new URLSearchParams(), searchParams)}`,
+          }}
         >
           Create new MCP server
         </InlineLink>
