@@ -3,7 +3,7 @@
 # Usage: docker run <image> [api|kas|agentk] [args...]
 
 # Builder stage for all binaries
-FROM golang:1.27.2-alpine AS builder
+FROM golang:1.27.3-alpine AS builder
 
 ARG TARGETARCH
 ARG TARGETOS
@@ -67,7 +67,7 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build \
     -o /binaries/agentk ./cmd/agentk
 
 # Final stage - minimal image with all three binaries
-FROM gcr.io/distroless/static-debian12:nonroot AS final
+FROM gcr.io/distroless/static-debian12@sha256:afa5c872c891853ca7fcf1f12c3edb23f7eeef36189728842dd51042ff57f7ab AS final
 
 ARG BUILD_TIME=1970-01-01T00:00:00Z
 ARG GIT_COMMIT=unknown
@@ -91,8 +91,8 @@ LABEL source="https://github.com/pluralsh/console/go/kubernetes-agent" \
       org.opencontainers.image.licenses="MIT" \
       org.opencontainers.image.title="KAS Server" \
       org.opencontainers.image.description="KAS server image for Plural CD" \
-      org.opencontainers.image.base.name="gcr.io/distroless/static-debian12:nonroot" \
-      org.opencontainers.image.rebuild-trigger="2026-06-26-kas"
+      org.opencontainers.image.base.name="gcr.io/distroless/static-debian12@sha256:afa5c872c891853ca7fcf1f12c3edb23f7eeef36189728842dd51042ff57f7ab" \
+      org.opencontainers.image.rebuild-trigger="2026-10-23-kas-security-remediation"
 
 # Copy all binaries from builder
 COPY --from=builder /binaries/api /api
