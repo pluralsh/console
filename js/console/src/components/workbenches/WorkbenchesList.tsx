@@ -8,12 +8,11 @@ import {
 import { InlineLink } from 'components/utils/typography/InlineLink'
 import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import * as DesignSystem from '@pluralsh/design-system'
-import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 import { useProjectId } from 'components/contexts/ProjectsContext'
 import { FlowFavoriteButton } from 'components/flows/FlowFavoriteButton'
 import { PageSidecarPortal } from 'components/layout/PageLayout'
 import { ToolbarSearchInput } from 'components/layout/PageToolbar'
-import { WorkbenchStatCard } from 'components/workbenches/common/WorkbenchStatCard'
+import { WorkbenchStat } from 'components/workbenches/common/WorkbenchStatCard'
 import { WorkbenchTabHeader } from 'components/workbenches/common/WorkbenchTabHeader'
 import { formatTokenCount } from 'components/workbenches/common/workbenchUsage'
 import {
@@ -27,7 +26,11 @@ import {
   useDisplayState,
 } from 'components/utils/display/DisplayPanel'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
+import {
+  Body1BoldP,
+  Body2BoldP,
+  Body2P,
+} from 'components/utils/typography/Text'
 import {
   WorkbenchTinyFragment,
   useWorkbenchesQuery,
@@ -35,7 +38,9 @@ import {
 } from 'generated/graphql'
 import { Link } from 'react-router-dom'
 import {
+  WORKBENCHES_ABS_PATH,
   WORKBENCHES_CREATE_ABS_PATH,
+  WORKBENCHES_EVALS_REL_PATH,
   getWorkbenchAbsPath,
 } from 'routes/workbenchesRoutesConsts'
 import { ComponentType, useEffect, useMemo, useState } from 'react'
@@ -63,6 +68,7 @@ const WorkbenchIcon = (DesignSystem as { WorkbenchIcon?: ComponentType })
   .WorkbenchIcon
 
 export function WorkbenchesList() {
+  const theme = useTheme()
   const projectId = useProjectId()
   const [searchString, setSearchString] = useState('')
   const debouncedSearchString = useThrottle(searchString, 200)
@@ -96,36 +102,10 @@ export function WorkbenchesList() {
   const hasActiveSearch = !!debouncedSearchString
   const showSearchEmptyState = hasActiveSearch && workbenches.length === 0
 
-  useSetPageHeaderContent(
-    useMemo(
-      () => (
-        <Flex
-          align="center"
-          gap="medium"
-        >
-          <ToolbarSearchInput
-            placeholder="Search workbenches"
-            value={searchString}
-            onChange={setSearchString}
-          />
-          <DisplayButton
-            showDot={false}
-            expanded={displayOpen}
-            onClick={() => setDisplayOpen((open) => !open)}
-          />
-          <Button
-            small
-            as={Link}
-            to={WORKBENCHES_CREATE_ABS_PATH}
-            startIcon={<AddIcon />}
-          >
-            Create workbench
-          </Button>
-        </Flex>
-      ),
-      [searchString, displayOpen]
-    )
-  )
+  const workbenchCount =
+    !data && loading
+      ? null
+      : `${workbenches.length}${pageInfo?.hasNextPage ? '+' : ''}`
 
   const content = () => {
     if (!data && loading)
@@ -211,8 +191,43 @@ export function WorkbenchesList() {
         }
       />
       <WorkbenchesSummary projectId={projectId} />
-      {error && <GqlError error={error} />}
-      {content()}
+      <ListSectionSC>
+        <ListHeaderSC>
+          <Body1BoldP>
+            All workbenches{' '}
+            {workbenchCount && (
+              <span css={{ color: theme.colors['text-xlight'] }}>
+                {workbenchCount}
+              </span>
+            )}
+          </Body1BoldP>
+          <Flex
+            align="center"
+            gap="medium"
+          >
+            <ToolbarSearchInput
+              placeholder="Search workbenches"
+              value={searchString}
+              onChange={setSearchString}
+            />
+            <DisplayButton
+              showDot={false}
+              expanded={displayOpen}
+              onClick={() => setDisplayOpen((open) => !open)}
+            />
+            <Button
+              small
+              as={Link}
+              to={WORKBENCHES_CREATE_ABS_PATH}
+              startIcon={<AddIcon />}
+            >
+              Create workbench
+            </Button>
+          </Flex>
+        </ListHeaderSC>
+        {error && <GqlError error={error} />}
+        {content()}
+      </ListSectionSC>
       {displayOpen && (
         <PageSidecarPortal>
           <WorkbenchesDisplayPanel
@@ -226,7 +241,6 @@ export function WorkbenchesList() {
 }
 
 function WorkbenchesSummary({ projectId }: { projectId?: string }) {
-  const theme = useTheme()
   const { data, loading, error } = useWorkbenchesSummaryQuery({
     variables: { projectId },
     fetchPolicy: 'cache-and-network',
@@ -237,38 +251,45 @@ function WorkbenchesSummary({ projectId }: { projectId?: string }) {
   if (error) return <GqlError error={error} />
 
   return (
-    <div
-      css={{
-        display: 'grid',
-        // matches CardGrid, so the stat columns line up with the cards below
-        gap: theme.spacing.medium,
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        flexShrink: 0,
-      }}
-    >
-      <WorkbenchStatCard
-        label="PR efficiency"
-        value={formatPrEfficiency(
-          aggregates?.pullRequests ?? 0,
-          aggregates?.pullRequestMergeRate
-        )}
-        helper="PRs merged (merge rate), over lifetime"
-        loading={isLoading}
-      />
-      <WorkbenchStatCard
-        label="Hours saved"
-        value={formatHours(aggregates?.hoursSaved ?? 0)}
-        helper="Estimated from the size of merged PRs"
-        info={<HoursSavedInfo />}
-        loading={isLoading}
-      />
-      <WorkbenchStatCard
-        label="Tokens consumed"
-        value={formatTokenCount(aggregates?.totalTokens ?? 0) ?? '0'}
-        helper="Over lifetime"
-        loading={isLoading}
-      />
-    </div>
+    <SummaryCardSC>
+      <SummaryCellSC>
+        <WorkbenchStat
+          label="PR efficiency"
+          value={formatPrEfficiency(
+            aggregates?.pullRequests ?? 0,
+            aggregates?.pullRequestMergeRate
+          )}
+          helper="PRs merged (merge rate), over lifetime"
+          loading={isLoading}
+        />
+      </SummaryCellSC>
+      <SummaryCellSC>
+        <WorkbenchStat
+          label="Hours saved"
+          value={formatHours(aggregates?.hoursSaved ?? 0)}
+          helper="Estimated from the size of merged PRs"
+          info={<HoursSavedInfo />}
+          loading={isLoading}
+        />
+      </SummaryCellSC>
+      <SummaryCellSC>
+        <WorkbenchStat
+          label="Tokens consumed"
+          value={formatTokenCount(aggregates?.totalTokens ?? 0) ?? '0'}
+          helper="Over lifetime"
+          loading={isLoading}
+        />
+      </SummaryCellSC>
+      <SummaryLinkCellSC>
+        <InlineLink
+          as={Link}
+          to={`${WORKBENCHES_ABS_PATH}/${WORKBENCHES_EVALS_REL_PATH}`}
+        >
+          View evals
+        </InlineLink>
+        <CaretRightIcon size={12} />
+      </SummaryLinkCellSC>
+    </SummaryCardSC>
   )
 }
 
@@ -455,10 +476,51 @@ const MetadataValueSC = styled.div({
   minWidth: 0,
 })
 
+const SummaryCardSC = styled(Card)(({ theme }) => ({
+  display: 'flex',
+  flexWrap: 'wrap',
+  flexShrink: 0,
+  border: theme.borders.default,
+}))
+
+const SummaryCellSC = styled.div(({ theme }) => ({
+  flex: 1,
+  minWidth: 200,
+  padding: theme.spacing.large,
+  '& + &': {
+    borderLeft: theme.borders.default,
+  },
+}))
+
+const SummaryLinkCellSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing.xxsmall,
+  padding: theme.spacing.large,
+  whiteSpace: 'nowrap',
+}))
+
+const ListSectionSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.medium,
+  flex: 1,
+  minHeight: 0,
+}))
+
+const ListHeaderSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  flexWrap: 'wrap',
+  gap: theme.spacing.medium,
+  flexShrink: 0,
+}))
+
 const WrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing.large,
+  gap: theme.spacing.xlarge,
   overflow: 'hidden',
   height: '100%',
 }))
