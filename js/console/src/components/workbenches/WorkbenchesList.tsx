@@ -477,9 +477,6 @@ const SummaryCellSC = styled.div(({ theme }) => ({
   flex: 1,
   minWidth: 200,
   padding: theme.spacing.large,
-  '&:first-child': {
-    paddingLeft: 0,
-  },
   '& + &': {
     borderLeft: theme.borders.default,
   },
