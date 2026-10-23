@@ -3870,8 +3870,9 @@ type ExtendedSupportInfo struct {
 
 // A federated credential is a way to authenticate users from an external identity provider
 type FederatedCredential struct {
-	ID         string         `json:"id"`
-	Issuer     string         `json:"issuer"`
+	ID     string `json:"id"`
+	Issuer string `json:"issuer"`
+	// expected audience of tokens exchanged with this credential. When unset, any audience is accepted
 	Aud        *string        `json:"aud,omitempty"`
 	ClaimsLike map[string]any `json:"claimsLike,omitempty"`
 	Scopes     []*string      `json:"scopes,omitempty"`
@@ -3882,7 +3883,8 @@ type FederatedCredential struct {
 
 // A federated credential is a way to authenticate users from an external identity provider
 type FederatedCredentialAttributes struct {
-	Issuer     string    `json:"issuer"`
+	Issuer string `json:"issuer"`
+	// expected audience of tokens exchanged with this credential. When unset, any audience is accepted
 	Aud        *string   `json:"aud,omitempty"`
 	ClaimsLike *string   `json:"claimsLike,omitempty"`
 	Scopes     []*string `json:"scopes,omitempty"`
@@ -5385,6 +5387,8 @@ type MetricPointResponse struct {
 }
 
 type MetricResponse struct {
+	// the metric name, for backends that report it separately from the labels in `metric`
+	Name   *string         `json:"name,omitempty"`
 	Metric map[string]any  `json:"metric,omitempty"`
 	Values []*MetricResult `json:"values,omitempty"`
 }
@@ -10984,6 +10988,10 @@ type WorkbenchAggregates struct {
 	PullRequestMergeRate *float64 `json:"pullRequestMergeRate,omitempty"`
 	// average eval grade across workbench eval results
 	EvalResults *float64 `json:"evalResults,omitempty"`
+	// estimated engineering hours saved by merged pull requests, derived from their classified difficulty
+	HoursSaved *float64 `json:"hoursSaved,omitempty"`
+	// total tokens consumed by workbench jobs
+	TotalTokens *int64 `json:"totalTokens,omitempty"`
 }
 
 type WorkbenchAlertCounts struct {
@@ -11055,10 +11063,18 @@ type WorkbenchBudgetAttributes struct {
 }
 
 type WorkbenchCanvasBlock struct {
-	Identifier *string                      `json:"identifier,omitempty"`
-	Type       *WorkbenchCanvasBlockType    `json:"type,omitempty"`
-	Layout     *WorkbenchCanvasBlockLayout  `json:"layout,omitempty"`
-	Content    *WorkbenchCanvasBlockContent `json:"content,omitempty"`
+	Identifier *string                   `json:"identifier,omitempty"`
+	Type       *WorkbenchCanvasBlockType `json:"type,omitempty"`
+	// the header of a section block
+	Title *string `json:"title,omitempty"`
+	// an explanation of what this block shows
+	Description *string `json:"description,omitempty"`
+	// the identifier of the section block this block belongs to
+	SectionID *string `json:"sectionId,omitempty"`
+	// whether a section block starts collapsed
+	Collapsed *bool                        `json:"collapsed,omitempty"`
+	Layout    *WorkbenchCanvasBlockLayout  `json:"layout,omitempty"`
+	Content   *WorkbenchCanvasBlockContent `json:"content,omitempty"`
 }
 
 type WorkbenchCanvasBlockContent struct {
@@ -11310,7 +11326,9 @@ type WorkbenchDashboardGraphLayout struct {
 }
 
 type WorkbenchDashboardGraphResult struct {
-	// Metric points returned by a metrics datasource
+	// Metric series returned by a metrics datasource, with labels sent once per series
+	Series []*MetricResponse `json:"series,omitempty"`
+	// Metric points returned by a metrics datasource, one entry per point (prefer series)
 	Metrics []*WorkbenchJobActivityMetric `json:"metrics,omitempty"`
 	// Log entries returned by a logs datasource
 	Logs []*WorkbenchJobActivityLog `json:"logs,omitempty"`
@@ -11562,6 +11580,7 @@ type WorkbenchJob struct {
 	// ready/pending breakdown for unconsumed queued prompts
 	QueuedPromptSummary QueuedPromptSummary           `json:"queuedPromptSummary"`
 	MetricsTool         []*WorkbenchJobActivityMetric `json:"metricsTool,omitempty"`
+	MetricsSeriesTool   []*MetricResponse             `json:"metricsSeriesTool,omitempty"`
 	LogsTool            []*WorkbenchJobActivityLog    `json:"logsTool,omitempty"`
 	TracesTool          []*WorkbenchJobActivityTrace  `json:"tracesTool,omitempty"`
 	// whimsically describes current progress for you
@@ -11979,7 +11998,9 @@ type WorkbenchJobThought struct {
 }
 
 type WorkbenchJobThoughtAttributes struct {
-	// metrics for the thought
+	// metric series for the thought, with labels sent once per series
+	Series []*MetricResponse `json:"series,omitempty"`
+	// metrics for the thought, one entry per point (prefer series)
 	Metrics []*WorkbenchJobActivityMetric `json:"metrics,omitempty"`
 	// logs for the thought
 	Logs []*WorkbenchJobActivityLog `json:"logs,omitempty"`
@@ -20338,6 +20359,7 @@ const (
 	WorkbenchCanvasBlockTypeTraces   WorkbenchCanvasBlockType = "TRACES"
 	WorkbenchCanvasBlockTypePie      WorkbenchCanvasBlockType = "PIE"
 	WorkbenchCanvasBlockTypeBar      WorkbenchCanvasBlockType = "BAR"
+	WorkbenchCanvasBlockTypeSection  WorkbenchCanvasBlockType = "SECTION"
 )
 
 var AllWorkbenchCanvasBlockType = []WorkbenchCanvasBlockType{
@@ -20347,11 +20369,12 @@ var AllWorkbenchCanvasBlockType = []WorkbenchCanvasBlockType{
 	WorkbenchCanvasBlockTypeTraces,
 	WorkbenchCanvasBlockTypePie,
 	WorkbenchCanvasBlockTypeBar,
+	WorkbenchCanvasBlockTypeSection,
 }
 
 func (e WorkbenchCanvasBlockType) IsValid() bool {
 	switch e {
-	case WorkbenchCanvasBlockTypeMarkdown, WorkbenchCanvasBlockTypeMetrics, WorkbenchCanvasBlockTypeLogs, WorkbenchCanvasBlockTypeTraces, WorkbenchCanvasBlockTypePie, WorkbenchCanvasBlockTypeBar:
+	case WorkbenchCanvasBlockTypeMarkdown, WorkbenchCanvasBlockTypeMetrics, WorkbenchCanvasBlockTypeLogs, WorkbenchCanvasBlockTypeTraces, WorkbenchCanvasBlockTypePie, WorkbenchCanvasBlockTypeBar, WorkbenchCanvasBlockTypeSection:
 		return true
 	}
 	return false
@@ -20849,6 +20872,65 @@ func (e *WorkbenchSkillSubagent) UnmarshalJSON(b []byte) error {
 }
 
 func (e WorkbenchSkillSubagent) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type WorkbenchSort string
+
+const (
+	WorkbenchSortName       WorkbenchSort = "NAME"
+	WorkbenchSortInsertedAt WorkbenchSort = "INSERTED_AT"
+	WorkbenchSortUpdatedAt  WorkbenchSort = "UPDATED_AT"
+	WorkbenchSortFavorited  WorkbenchSort = "FAVORITED"
+)
+
+var AllWorkbenchSort = []WorkbenchSort{
+	WorkbenchSortName,
+	WorkbenchSortInsertedAt,
+	WorkbenchSortUpdatedAt,
+	WorkbenchSortFavorited,
+}
+
+func (e WorkbenchSort) IsValid() bool {
+	switch e {
+	case WorkbenchSortName, WorkbenchSortInsertedAt, WorkbenchSortUpdatedAt, WorkbenchSortFavorited:
+		return true
+	}
+	return false
+}
+
+func (e WorkbenchSort) String() string {
+	return string(e)
+}
+
+func (e *WorkbenchSort) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = WorkbenchSort(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid WorkbenchSort", str)
+	}
+	return nil
+}
+
+func (e WorkbenchSort) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *WorkbenchSort) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e WorkbenchSort) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil
