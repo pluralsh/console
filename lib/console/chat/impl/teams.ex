@@ -75,7 +75,7 @@ defmodule Console.Chat.Impl.Teams do
   defp mentioned?(_), do: false
 
   defp spawn_job(%ChatConnection{} = conn, activity) do
-    msg = %Reference{id: activity["id"], text: clean_text(activity)}
+    msg = %Reference{id: activity["id"], text: clean_text(activity), parent_id: parent_id(activity)}
     channel = %Reference{id: channel_id(activity), text: channel_id(activity)}
 
     extra = %{
@@ -101,6 +101,27 @@ defmodule Console.Chat.Impl.Teams do
 
   defp conversation_id(%{"conversation" => %{"id" => id}}) when is_binary(id), do: id
   defp conversation_id(_), do: nil
+
+  # Thread root of a channel reply. Slack uses `thread_ts` the same way: a reply continues the job
+  # whose message id is that root, and a root mention has no parent.
+  # `replyToId` is the root activity id. Teams also puts it on `conversation.id` as `messageid=`.
+  defp parent_id(%{"replyToId" => reply_to, "id" => id})
+       when is_binary(reply_to) and reply_to != "" and reply_to != id, do: reply_to
+  defp parent_id(%{"id" => id} = activity) when is_binary(id) do
+    case thread_root(activity) do
+      root when is_binary(root) and root != "" and root != id -> root
+      _ -> nil
+    end
+  end
+  defp parent_id(_), do: nil
+
+  defp thread_root(%{"conversation" => %{"id" => conv}}) when is_binary(conv) do
+    case Regex.run(~r/(?:^|;)messageid=([^;]+)/, conv) do
+      [_, root] -> root
+      _ -> nil
+    end
+  end
+  defp thread_root(_), do: nil
 
   defp clean_text(%{"text" => text}) when is_binary(text) do
     text
