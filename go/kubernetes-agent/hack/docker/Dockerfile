@@ -3,7 +3,7 @@
 # Usage: docker run <image> [api|kas|agentk] [args...]
 
 # Builder stage for all binaries
-FROM golang:1.27.2-alpine AS builder
+FROM golang:1.27.3-alpine AS builder
 
 ARG TARGETARCH
 ARG TARGETOS
@@ -67,11 +67,16 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build \
     -o /binaries/agentk ./cmd/agentk
 
 # Final stage - minimal image with all three binaries
-FROM gcr.io/distroless/static-debian12:nonroot AS final
+FROM debian:12-slim@sha256:7ff6ba31527b9e336162fa061746c366c4b2032f4d2cff2078bea43f78efe3f8 AS final
 
 ARG BUILD_TIME=1970-01-01T00:00:00Z
 ARG GIT_COMMIT=unknown
 ARG VERSION=dev
+
+# Pin the supported Debian security package that supplies current zoneinfo data.
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends tzdata=2026c-0+deb12u1 && \
+    rm -rf /var/lib/apt/lists/*
 
 LABEL source="https://github.com/pluralsh/console/go/kubernetes-agent" \
       name="Kubernetes Agent Multi-Binary" \
@@ -91,17 +96,15 @@ LABEL source="https://github.com/pluralsh/console/go/kubernetes-agent" \
       org.opencontainers.image.licenses="MIT" \
       org.opencontainers.image.title="KAS Server" \
       org.opencontainers.image.description="KAS server image for Plural CD" \
-      org.opencontainers.image.base.name="gcr.io/distroless/static-debian12:nonroot" \
-      org.opencontainers.image.rebuild-trigger="2026-06-26-kas"
+      org.opencontainers.image.base.name="debian:12-slim@sha256:7ff6ba31527b9e336162fa061746c366c4b2032f4d2cff2078bea43f78efe3f8" \
+      org.opencontainers.image.rebuild-trigger="2026-10-23-kas"
 
 # Copy all binaries from builder
 COPY --from=builder /binaries/api /api
 COPY --from=builder /binaries/kas /kas
 COPY --from=builder /binaries/agentk /agentk
 
-# Create a simple entrypoint script (shell script won't work in distroless)
-# Instead, we'll use kas as the default entrypoint
-# Users can override with: docker run image /api or /agentk
+# Users can override the default entrypoint with /api or /agentk.
 
 # Default to kas for backward compatibility
 ENTRYPOINT ["/kas"]
@@ -117,5 +120,5 @@ ENTRYPOINT ["/kas"]
 # 8154 - Kubernetes API
 # 8155 - Internal API
 EXPOSE 8000 8001 8150 8151 8153 8154 8155
-USER nonroot:nonroot
+USER 65532:65532
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD ["/kas", "--help"]
