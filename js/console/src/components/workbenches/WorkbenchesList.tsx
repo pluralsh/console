@@ -251,7 +251,7 @@ function WorkbenchesSummary({ projectId }: { projectId?: string }) {
   if (error) return <GqlError error={error} />
 
   return (
-    <SummaryCardSC>
+    <SummaryStripSC>
       <SummaryCellSC>
         <WorkbenchStat
           label="PR efficiency"
@@ -289,7 +289,7 @@ function WorkbenchesSummary({ projectId }: { projectId?: string }) {
         </InlineLink>
         <CaretRightIcon size={12} />
       </SummaryLinkCellSC>
-    </SummaryCardSC>
+    </SummaryStripSC>
   )
 }
 
@@ -476,17 +476,21 @@ const MetadataValueSC = styled.div({
   minWidth: 0,
 })
 
-const SummaryCardSC = styled(Card)(({ theme }) => ({
+const SummaryStripSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexWrap: 'wrap',
   flexShrink: 0,
-  border: theme.borders.default,
+  borderTop: theme.borders.default,
+  borderBottom: theme.borders.default,
 }))
 
 const SummaryCellSC = styled.div(({ theme }) => ({
   flex: 1,
   minWidth: 200,
   padding: theme.spacing.large,
+  '&:first-child': {
+    paddingLeft: 0,
+  },
   '& + &': {
     borderLeft: theme.borders.default,
   },
@@ -497,6 +501,7 @@ const SummaryLinkCellSC = styled.div(({ theme }) => ({
   alignItems: 'center',
   gap: theme.spacing.xxsmall,
   padding: theme.spacing.large,
+  paddingRight: 0,
   whiteSpace: 'nowrap',
 }))
 
