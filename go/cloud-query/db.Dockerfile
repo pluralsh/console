@@ -1,38 +1,18 @@
 ARG POSTGRES_MAJOR_VERSION=15
-ARG POSTGRES_VERSION=${POSTGRES_MAJOR_VERSION}.18
+ARG POSTGRES_VERSION=${POSTGRES_MAJOR_VERSION}.19
 
 FROM golang:1.27.1 AS libraries
 
 # Configure versions for Steampipe extensions
 # Do not use latest versions here, as they may not be compatible
-ARG AWS_VERSION=1.30.8
-ARG AZURE_VERSION=1.12.4
-ARG GCP_VERSION=1.13.5
-ARG VSPHERE_VERSION=0.1.1
+ARG AWS_VERSION=1.30.9
+ARG AZURE_VERSION=1.12.5
+ARG GCP_VERSION=1.13.6
+ARG VSPHERE_VERSION=0.1.4
 
 WORKDIR /workspace
 
 COPY hack/ hack/
-
-ARG TARGETOS
-ARG TARGETARCH
-
-# Install dependencies required by the installer script
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        bash \
-        curl \
-        ca-certificates
-
-# Set gcloud CLI download URL based on architecture
-RUN case ${TARGETARCH} in \
-            amd64) GCLOUD_ARCH=x86_64 ;; \
-            arm64) GCLOUD_ARCH=arm ;; \
-            *) GCLOUD_ARCH=${TARGETARCH} ;; \
-        esac && \
-    curl https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-${TARGETOS}-${GCLOUD_ARCH}.tar.gz | tar -xz && \
-    mv google-cloud-sdk /opt/google-cloud-sdk && \
-    /opt/google-cloud-sdk/install.sh --quiet
 
 # Run installer script and install
 # provider extensions for AWS, Azure, and GCP
@@ -54,9 +34,6 @@ COPY --from=libraries /workspace/lib/steampipe_postgres_*.so /opt/postgresql/${P
 # Copy extension SQL and control files
 COPY --from=libraries /workspace/lib/steampipe_postgres_*.sql /opt/postgresql/${POSTGRES_MAJOR_VERSION}/share/extension/
 COPY --from=libraries /workspace/lib/steampipe_postgres_*.control /opt/postgresql/${POSTGRES_MAJOR_VERSION}/share/extension/
-
-# Copy gcloud CLI
-COPY --from=libraries /opt/google-cloud-sdk/bin/gcloud /usr/local/bin/gcloud
 
 # Switch to the postgres user
 USER postgres
