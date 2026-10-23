@@ -22,18 +22,18 @@ RUN mkdir -p /workspace/lib && \
     /workspace/hack/postgres.sh -p gcp -v ${GCP_VERSION} -d /workspace/lib/ && \
     /workspace/hack/postgres.sh -p vsphere -v ${VSPHERE_VERSION} -d /workspace/lib/
 
-FROM reg.mini.dev/postgres:${POSTGRES_VERSION}
+FROM dhi.io/postgres:${POSTGRES_VERSION}
 
 ARG POSTGRES_MAJOR_VERSION
 
 COPY --chmod=755 hack/init.sh /usr/local/bin/startup.sh
 
 # Copy extension libraries
-COPY --from=libraries /workspace/lib/steampipe_postgres_*.so /usr/lib/postgresql${POSTGRES_MAJOR_VERSION}/
+COPY --from=libraries /workspace/lib/steampipe_postgres_*.so /opt/postgresql/${POSTGRES_MAJOR_VERSION}/lib/
 
 # Copy extension SQL and control files
-COPY --from=libraries /workspace/lib/steampipe_postgres_*.sql /usr/share/postgresql${POSTGRES_MAJOR_VERSION}/extension/
-COPY --from=libraries /workspace/lib/steampipe_postgres_*.control /usr/share/postgresql${POSTGRES_MAJOR_VERSION}/extension/
+COPY --from=libraries /workspace/lib/steampipe_postgres_*.sql /opt/postgresql/${POSTGRES_MAJOR_VERSION}/share/extension/
+COPY --from=libraries /workspace/lib/steampipe_postgres_*.control /opt/postgresql/${POSTGRES_MAJOR_VERSION}/share/extension/
 
 # Switch to the postgres user
 USER postgres
