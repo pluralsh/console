@@ -93,6 +93,13 @@ defmodule Console.Deployments.Sentinel.RunnerTest do
       insert_list(2, :cluster, tags: [%{name: "tier", value: "dev"}])
       run = insert(:sentinel_run, sentinel: sentinel, checks: Console.mapify(sentinel.checks))
 
+      test_pid = self()
+      handler = "runner-test-#{inspect(make_ref())}"
+      :telemetry.attach_many(handler, [~w(console sentinel run)a, ~w(console sentinel run job)a], fn event, measurements, meta, _ ->
+        send(test_pid, {:telemetry, event, measurements, meta})
+      end, nil)
+      on_exit(fn -> :telemetry.detach(handler) end)
+
       {:ok, pid} = Runner.start(refetch(run))
 
       %Runner.State{checks: checks} = :sys.get_state(pid)
@@ -121,6 +128,11 @@ defmodule Console.Deployments.Sentinel.RunnerTest do
       assert status.job_count        == 2
       assert status.successful_count == 2
       assert status.failed_count     == 0
+
+      for status <- ~w(pending success)a, _ <- 1..2,
+        do: assert_receive {:telemetry, ~w(console sentinel run job)a, %{count: 1}, %{status: ^status, cluster: _}}
+      assert_receive {:telemetry, ~w(console sentinel run)a, %{count: 1}, %{status: :success}}
+      refute_receive {:telemetry, ~w(console sentinel run)a, _, _}
     end
   end
 end
