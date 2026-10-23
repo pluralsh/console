@@ -241,6 +241,8 @@ func asString(value interface{}) string {
 }
 
 func checkConditions(conditions []hpaCondition, progressingStatus *HealthStatus) (*HealthStatus, error) {
+	// Degraded wins over healthy no matter the order. The HPA controller lists AbleToScale
+	// first and it stays True while ScalingActive is False with FailedGetResourceMetric.
 	for _, condition := range conditions {
 		if isDegraded(&condition) {
 			return &HealthStatus{
@@ -248,7 +250,9 @@ func checkConditions(conditions []hpaCondition, progressingStatus *HealthStatus)
 				Message: condition.Message,
 			}, nil
 		}
+	}
 
+	for _, condition := range conditions {
 		if isHealthy(&condition) {
 			return &HealthStatus{
 				Status:  HealthStatusHealthy,

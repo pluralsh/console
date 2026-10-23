@@ -15,6 +15,7 @@ import (
 
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 	smcommon "github.com/pluralsh/console/go/deployment-operator/pkg/streamline/common"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline/insights"
 )
 
 // ProfiledStore is a wrapper around a Store that adds Datadog tracing
@@ -112,6 +113,20 @@ func (p *ProfiledStore) GetAppliedComponentByUID(uid types.UID) (*client.Compone
 		return err
 	})
 	return res, err
+}
+
+// GetPriorityAnnotation wraps Store.GetPriorityAnnotation with tracing.
+func (p *ProfiledStore) GetPriorityAnnotation(uid types.UID) (string, bool, error) {
+	var (
+		annotation string
+		found      bool
+		err        error
+	)
+	_ = trace(context.Background(), "GetPriorityAnnotation", func() error {
+		annotation, found, err = p.inner.GetPriorityAnnotation(uid)
+		return err
+	})
+	return annotation, found, err
 }
 
 // GetAppliedComponentsByGVK wraps Store.GetAppliedComponentsByGVK with tracing.
@@ -290,6 +305,19 @@ func (p *ProfiledStore) GetHookComponents(serviceID string) ([]smcommon.HookComp
 	return res, err
 }
 
+// GetFailingRoots wraps Store.GetFailingRoots with tracing.
+func (p *ProfiledStore) GetFailingRoots() ([]insights.Root, error) {
+	var (
+		res []insights.Root
+		err error
+	)
+	_ = trace(context.Background(), "GetFailingRoots", func() error {
+		res, err = p.inner.GetFailingRoots()
+		return err
+	})
+	return res, err
+}
+
 // GetComponentInsights wraps Store.GetComponentInsights with tracing.
 func (p *ProfiledStore) GetComponentInsights() ([]client.ClusterInsightComponentAttributes, error) {
 	var (
@@ -307,7 +335,7 @@ func (p *ProfiledStore) GetComponentInsights() ([]client.ClusterInsightComponent
 func (p *ProfiledStore) SaveComponentAttributes(obj client.ComponentChildAttributes, args ...any) error {
 	var err error
 	_ = trace(context.Background(), "SaveComponentAttributes", func() error {
-		err = p.inner.SaveComponentAttributes(obj, args)
+		err = p.inner.SaveComponentAttributes(obj, args...)
 		return err
 	})
 	return err

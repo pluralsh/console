@@ -859,6 +859,13 @@ export const ClusterInsightComponentFragmentDoc = /*#__PURE__*/ gql`
   group
   version
   priority
+  service {
+    id
+    name
+    cluster {
+      id
+    }
+  }
   insight {
     ...AiInsight
   }
@@ -7109,6 +7116,21 @@ export const FixResearchDiagramDocument = /*#__PURE__*/ gql`
   }
 }
     ${InfraResearchFragmentDoc}` as unknown as DocumentNode<Types.FixResearchDiagramMutation, Types.FixResearchDiagramMutationVariables>;
+export const ServiceComponentIdentitiesDocument = /*#__PURE__*/ gql`
+    query ServiceComponentIdentities($id: ID!) {
+  serviceDeployment(id: $id) {
+    id
+    components {
+      id
+      group
+      version
+      kind
+      namespace
+      name
+    }
+  }
+}
+    ` as unknown as DocumentNode<Types.ServiceComponentIdentitiesQuery, Types.ServiceComponentIdentitiesQueryVariables>;
 export const AiInsightDocument = /*#__PURE__*/ gql`
     query AiInsight($id: ID!) {
   aiInsight(id: $id) {

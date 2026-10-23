@@ -1778,6 +1778,93 @@ func TestComponentCache_SetServiceChildren(t *testing.T) {
 		require.Equal(t, componentBefore.ServiceID, "abc")
 		require.Equal(t, componentBefore.ParentUID, "123")
 	})
+
+	t.Run("should keep service ownership when a watch event updates the component", func(t *testing.T) {
+		storeInstance, err := store.NewDatabaseStore(context.Background(), store.WithStorage(api.StorageFile))
+		require.NoError(t, err)
+		defer func(storeInstance store.Store) {
+			require.NoError(t, storeInstance.Shutdown(), "failed to shutdown store")
+		}(storeInstance)
+
+		// Objects rendered by a Flux HelmRelease carry neither the owning inventory annotation
+		// nor an owner reference to the HelmRelease. Ownership comes only from SetServiceChildren.
+		obj := createUnstructuredResource("apps", "v1", "Deployment", "default", "helm-release-child")
+		require.NoError(t, storeInstance.SaveComponents([]unstructured.Unstructured{obj}))
+
+		updated, err := storeInstance.SetServiceChildren("abc", "123", []common.StoreKey{
+			{
+				GVK:       obj.GroupVersionKind(),
+				Namespace: obj.GetNamespace(),
+				Name:      obj.GetName(),
+			},
+		})
+		require.NoError(t, err)
+		require.Equal(t, 1, updated)
+
+		// A status change, i.e. a pod restart, triggers a watch event for the same object
+		obj.Object["status"] = map[string]any{"observedGeneration": int64(2)}
+		require.NoError(t, storeInstance.SaveComponent(obj))
+
+		component, err := storeInstance.GetAppliedComponent(obj)
+		require.NoError(t, err)
+		require.NotNil(t, component)
+		assert.Equal(t, "abc", component.ServiceID, "Watch event should not drop the service ownership set by SetServiceChildren")
+		assert.Equal(t, "123", component.ParentUID, "Watch event should not drop the parent set by SetServiceChildren")
+	})
+
+	t.Run("should keep the ownership of an object that was reset to unsynced", func(t *testing.T) {
+		storeInstance, err := store.NewDatabaseStore(context.Background(), store.WithStorage(api.StorageFile))
+		require.NoError(t, err)
+		defer func(storeInstance store.Store) {
+			require.NoError(t, storeInstance.Shutdown(), "failed to shutdown store")
+		}(storeInstance)
+
+		obj := createUnstructuredResource("apps", "v1", "Deployment", "default", "helm-release-child")
+		require.NoError(t, storeInstance.SaveComponents([]unstructured.Unstructured{obj}))
+		_, err = storeInstance.SetServiceChildren("abc", "123", []common.StoreKey{
+			{GVK: obj.GroupVersionKind(), Namespace: obj.GetNamespace(), Name: obj.GetName()},
+		})
+		require.NoError(t, err)
+		require.NoError(t, storeInstance.SetComponentUnsynced(obj))
+
+		// it is applied again, possibly with a new uid, the placeholder has none to compare with
+		again := obj.DeepCopy()
+		again.SetUID("another-uid")
+		require.NoError(t, storeInstance.SaveComponent(*again))
+
+		component, err := storeInstance.GetAppliedComponent(*again)
+		require.NoError(t, err)
+		require.NotNil(t, component)
+		assert.Equal(t, "abc", component.ServiceID)
+		assert.Equal(t, "123", component.ParentUID)
+	})
+
+	t.Run("should not hand the ownership to a replacement with another uid", func(t *testing.T) {
+		storeInstance, err := store.NewDatabaseStore(context.Background(), store.WithStorage(api.StorageFile))
+		require.NoError(t, err)
+		defer func(storeInstance store.Store) {
+			require.NoError(t, storeInstance.Shutdown(), "failed to shutdown store")
+		}(storeInstance)
+
+		obj := createUnstructuredResource("apps", "v1", "Deployment", "default", "helm-release-child")
+		require.NoError(t, storeInstance.SaveComponents([]unstructured.Unstructured{obj}))
+		_, err = storeInstance.SetServiceChildren("abc", "123", []common.StoreKey{
+			{GVK: obj.GroupVersionKind(), Namespace: obj.GetNamespace(), Name: obj.GetName()},
+		})
+		require.NoError(t, err)
+
+		// the delete event was missed, and the object was created again under the same name
+		replacement := obj.DeepCopy()
+		replacement.SetUID("another-uid")
+		require.NoError(t, storeInstance.SaveComponent(*replacement))
+
+		component, err := storeInstance.GetAppliedComponent(*replacement)
+		require.NoError(t, err)
+		require.NotNil(t, component)
+		assert.Equal(t, "another-uid", component.UID)
+		assert.Empty(t, component.ServiceID)
+		assert.Empty(t, component.ParentUID)
+	})
 }
 
 func TestComponentCache_GetComponentAttributes(t *testing.T) {

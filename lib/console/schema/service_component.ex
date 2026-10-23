@@ -43,6 +43,33 @@ defmodule Console.Schema.ServiceComponent do
     from(sc in query, where: sc.service_id == ^service_id)
   end
 
+  def for_cluster(query \\ __MODULE__, cluster_id) do
+    from(sc in query,
+      join: s in assoc(sc, :service),
+      where: s.cluster_id == ^cluster_id
+    )
+  end
+
+  # the core group and cluster scoped objects are stored as either nil or an empty string depending on who reported them
+  def for_object(query \\ __MODULE__, {g, v, k, ns, n}) do
+    from(sc in query,
+      where: coalesce(sc.group, "") == ^(g || "")
+         and sc.version == ^v
+         and sc.kind == ^k
+         and coalesce(sc.namespace, "") == ^(ns || "")
+         and sc.name == ^n
+    )
+  end
+
+  def with_insight(query \\ __MODULE__) do
+    from(sc in query,
+      where: not is_nil(sc.insight_id),
+      order_by: [desc: coalesce(sc.updated_at, sc.inserted_at)],
+      preload: [insight: :evidence],
+      limit: 1
+    )
+  end
+
   def count_by_flow_state(ids) do
     from(sc in __MODULE__,
       join: s in assoc(sc, :service),

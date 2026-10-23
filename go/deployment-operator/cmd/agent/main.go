@@ -47,6 +47,7 @@ import (
 	consolectrl "github.com/pluralsh/console/go/deployment-operator/pkg/controller"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/controller/namespaces"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/controller/service"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/insightpriority"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/ping"
 	pythonruntime "github.com/pluralsh/console/go/deployment-operator/pkg/python"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/scraper"
@@ -180,7 +181,8 @@ func main() {
 	userGroupCache := cache.NewUserGroupCache(extConsoleClient)
 
 	registerConsoleReconcilersOrDie(consoleManager, mapper, clientSet, kubeManager.GetClient(), dynamicClient, dbStore, kubeManager.GetScheme(), extConsoleClient, supervisor, discoveryCache, namespaceCache, svcCache, cacheStore.Dir())
-	registerKubeReconcilersOrDie(ctx, clientSet, kubeManager, consoleManager, config, extConsoleClient, discoveryCache, args.EnableKubecostProxy(), args.ConsoleUrl(), args.DeployToken(), userGroupCache)
+	insightRegistry := insightpriority.NewRegistry()
+	registerKubeReconcilersOrDie(ctx, clientSet, kubeManager, consoleManager, config, extConsoleClient, discoveryCache, args.EnableKubecostProxy(), args.ConsoleUrl(), args.DeployToken(), userGroupCache, insightRegistry)
 
 	svcReconciler := consoleManager.GetReconcilerOrDie(service.Identifier).(*service.ServiceReconciler)
 	nsReconciler := consoleManager.GetReconcilerOrDie(namespaces.Identifier).(*namespaces.NamespaceReconciler)
@@ -218,10 +220,11 @@ func main() {
 	// Start the console manager in background.
 	runConsoleManagerInBackgroundOrDie(ctx, consoleManager)
 
-	pinger := ping.NewOrDie(extConsoleClient, config, kubeManager.GetClient(), discoveryCache, dbStore)
+	pinger := ping.NewOrDie(extConsoleClient, config, kubeManager.GetClient(), discoveryCache, dbStore, ping.WithInsightGracePeriod(args.InsightGracePeriod()), ping.WithInsightPriorities(insightpriority.NewEvaluator(insightRegistry)))
 
-	// Start cluster pinger
-	ping.RunClusterPingerInBackgroundOrDie(ctx, pinger, args.ClusterPingInterval())
+	// Start cluster pinger. Unlike the rest of the agent, it waits for all synchronizers to load the store
+	// instead of giving up at the supervisor cache sync timeout, as it reports on the whole cluster.
+	ping.RunClusterPingerInBackgroundOrDie(ctx, pinger, args.ClusterPingInterval(), supervisor.WaitUntilSynced)
 
 	// Start runtime services pinger
 	ping.RunRuntimeServicePingerInBackgroundOrDie(ctx, pinger, args.RuntimeServicesPingInterval())

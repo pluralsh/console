@@ -2,7 +2,7 @@ defmodule Console.Deployments.ClustersTest do
   use Console.DataCase, async: true
   use Mimic
   alias Console.PubSub
-  alias Console.Deployments.{Clusters, Services, Settings, Compatibilities}
+  alias Console.Deployments.{Clusters, Services, Settings, Compatibilities, Cron}
   alias Kazan.Apis.Core.V1, as: CoreV1
   import KubernetesScaffolds
 
@@ -1369,6 +1369,67 @@ defmodule Console.Deployments.ClustersTest do
       assert insight.name == "test"
 
       assert_receive {:event, %PubSub.ClusterPinged{item: ^pinged}}
+    end
+
+    test "it keeps insight components that are still reported when pruning" do
+      cluster = insert(:cluster)
+      stale = Timex.now() |> Timex.shift(hours: -5)
+      component = insert(:cluster_insight_component,
+        cluster: cluster,
+        group: "apps",
+        version: "v1",
+        kind: "Deployment",
+        namespace: "default",
+        name: "test",
+        insight: build(:ai_insight),
+        inserted_at: stale,
+        updated_at: stale
+      )
+
+      # the agent keeps reporting the same failing component on every ping
+      {:ok, _} = Clusters.ping(%{
+        insight_components: [
+          %{group: "apps", version: "v1", kind: "Deployment", namespace: "default", name: "test"}
+        ]
+      }, cluster)
+
+      Cron.prune_insight_components()
+
+      assert refetched = refetch(component)
+      assert refetched.insight_id == component.insight_id
+    end
+
+    test "it prunes the insight components of clusters that stopped pinging" do
+      quiet = insert(:cluster, pinged_at: Timex.now() |> Timex.shift(hours: -5))
+      active = insert(:cluster, pinged_at: Timex.now())
+      stale = Timex.now() |> Timex.shift(hours: -5)
+      gone = insert(:cluster_insight_component, cluster: quiet, inserted_at: stale, updated_at: stale)
+      kept = insert(:cluster_insight_component, cluster: active, inserted_at: stale, updated_at: stale)
+
+      Cron.prune_insight_components()
+
+      refute refetch(gone)
+      assert refetch(kept)
+    end
+
+    test "it stores the service managing an insight component, and drops malformed ids" do
+      cluster = insert(:cluster)
+      svc = insert(:service, cluster: cluster)
+      gone = Ecto.UUID.generate()
+
+      {:ok, _} = Clusters.ping(%{
+        insight_components: [
+          %{group: "apps", version: "v1", kind: "Deployment", namespace: "default", name: "managed", service_id: svc.id},
+          %{group: "apps", version: "v1", kind: "Deployment", namespace: "default", name: "deleted", service_id: gone},
+          %{group: "apps", version: "v1", kind: "Deployment", namespace: "default", name: "malformed", service_id: "not-a-uuid"},
+          %{group: "apps", version: "v1", kind: "Deployment", namespace: "default", name: "unmanaged"}
+        ]
+      }, cluster)
+
+      by_name = Console.Repo.all(Console.Schema.ClusterInsightComponent.for_cluster(cluster.id))
+                |> Map.new(& {&1.name, &1.service_id})
+
+      assert by_name == %{"managed" => svc.id, "deleted" => gone, "malformed" => nil, "unmanaged" => nil}
     end
   end
 

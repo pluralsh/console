@@ -1,14 +1,19 @@
-import { Code, Divider, Flex, Switch } from '@pluralsh/design-system'
+import { Button, Code, Divider, Flex, Switch } from '@pluralsh/design-system'
 import { InsightDisplay } from 'components/ai/insights/InsightDisplay.tsx'
 import { SendInsightToWorkbenchButton } from 'components/ai/insights/SendInsightToWorkbench'
 import { GqlError } from 'components/utils/Alert.tsx'
 import IconFrameRefreshButton from 'components/utils/RefreshIconFrame.tsx'
-import { useClusterInsightComponentQuery } from 'generated/graphql.ts'
+import {
+  useClusterInsightComponentQuery,
+  useServiceComponentIdentitiesQuery,
+} from 'generated/graphql.ts'
 import { useMemo, useState } from 'react'
-import { useMatch } from 'react-router-dom'
+import { Link, useMatch } from 'react-router-dom'
 import {
   CLUSTER_ABS_PATH,
   CLUSTER_INSIGHTS_PATH,
+  getServiceComponentPath,
+  getServiceDetailsPath,
 } from 'routes/cdRoutesConsts.tsx'
 import { useTheme } from 'styled-components'
 import { stringify } from 'yaml'
@@ -17,7 +22,10 @@ import {
   useSetActionContent,
   useSetNavigationContent,
 } from './ClusterInsights.tsx'
-import { ClusterInsightComponentLabel } from './ClusterInsightsComponents.tsx'
+import {
+  ClusterInsightComponentLabel,
+  isSameObject,
+} from './ClusterInsightComponentParts.tsx'
 
 export function ClusterInsightComponent() {
   const theme = useTheme()
@@ -31,6 +39,38 @@ export function ClusterInsightComponent() {
 
   const component = data?.clusterInsightComponent
   const [showRaw, setShowRaw] = useState(false)
+
+  // Goes to the component of the managing service that is this object, which has the insight with the context of the
+  // service, and to the service itself when it does not have that component in its manifests.
+  const service = component?.service
+  const { data: serviceData } = useServiceComponentIdentitiesQuery({
+    skip: !service,
+    variables: { id: service?.id ?? '' },
+  })
+  const serviceComponentId = component
+    ? serviceData?.serviceDeployment?.components?.find(
+        (c) => c && isSameObject(c, component)
+      )?.id
+    : undefined
+  const serviceLink = useMemo(() => {
+    if (!service) return null
+
+    const clusterId = service.cluster?.id
+
+    return serviceComponentId
+      ? {
+          label: 'View Service Component',
+          to: `${getServiceComponentPath({
+            clusterId,
+            serviceId: service.id,
+            componentId: serviceComponentId,
+          })}/insights`,
+        }
+      : {
+          label: 'View Service',
+          to: getServiceDetailsPath({ clusterId, serviceId: service.id }),
+        }
+  }, [service, serviceComponentId])
 
   useSetNavigationContent(
     useMemo(
@@ -47,7 +87,10 @@ export function ClusterInsightComponent() {
   useSetActionContent(
     useMemo(
       () => (
-        <Flex gap="small">
+        <Flex
+          gap="small"
+          align="center"
+        >
           <Switch
             checked={showRaw}
             onChange={(checked) => setShowRaw(checked)}
@@ -58,10 +101,19 @@ export function ClusterInsightComponent() {
             loading={clusterLoading}
             refetch={refetch}
           />
+          {serviceLink && (
+            <Button
+              secondary
+              as={Link}
+              to={serviceLink.to}
+            >
+              {serviceLink.label}
+            </Button>
+          )}
           <SendInsightToWorkbenchButton insight={component?.insight} />
         </Flex>
       ),
-      [showRaw, clusterLoading, refetch, component?.insight]
+      [showRaw, clusterLoading, refetch, component?.insight, serviceLink]
     )
   )
 

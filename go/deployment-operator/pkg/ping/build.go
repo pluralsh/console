@@ -1,30 +1,44 @@
 package ping
 
 import (
+	"context"
+	"fmt"
 	"strings"
+	"time"
 
 	console "github.com/pluralsh/console/go/client"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/version"
 	"k8s.io/klog/v2"
 
+	"github.com/pluralsh/console/go/deployment-operator/pkg/insightpriority"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/scraper"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline/insights"
 )
 
-func (p *Pinger) pingAttributes(info *version.Info, pods []string, minKubeletVersion, openShiftVersion *string, podCount *int64) console.ClusterPing {
-	hs, err := p.store.GetHealthScore()
+func (p *Pinger) pingAttributes(info *version.Info, pods []string, minKubeletVersion, openShiftVersion *string, podCount *int64) (console.ClusterPing, error) {
+	nodCount, namespaceCount, err := p.store.GetComponentCounts()
 	if err != nil {
-		klog.ErrorS(err, "failed to get health score")
+		klog.ErrorS(err, "failed to get cluster component counts")
 	}
+
+	// The health score and the insights are computed from the same failing roots, so they always agree.
+	now := time.Now()
+	roots, err := p.store.GetFailingRoots()
+	if err != nil {
+		// An empty list would report a healthy cluster and make Console delete all its insights, so skip this ping.
+		return console.ClusterPing{}, fmt.Errorf("failed to get failing components: %w", err)
+	}
+	var overrides map[string]insights.Override
+	if p.priorities != nil {
+		overrides = p.priorities.Overrides(context.Background(), roots, insightpriority.Cluster{Nodes: nodCount, Namespaces: namespaceCount}, now)
+	}
+	summary := insights.Summarize(roots, overrides, now)
+	hs := summary.HealthScore
 
 	ns, err := p.store.GetNodeStatistics()
 	if err != nil {
 		klog.ErrorS(err, "failed to get node statistics")
-	}
-
-	nodCount, namespaceCount, err := p.store.GetComponentCounts()
-	if err != nil {
-		klog.ErrorS(err, "failed to get cluster component counts")
 	}
 
 	vs := strings.Split(info.GitVersion, "-")
@@ -47,12 +61,7 @@ func (p *Pinger) pingAttributes(info *version.Info, pods []string, minKubeletVer
 		OpenshiftVersion: openShiftVersion,
 	}
 
-	cInsights, err := p.store.GetComponentInsights()
-	if err != nil {
-		klog.ErrorS(err, "failed to get component insights")
-	}
-
-	cp.InsightComponents = lo.ToSlicePtr(cInsights)
+	cp.InsightComponents = lo.ToSlicePtr(insights.Attributes(p.grace.apply(summary, p.store, now)))
 	if metrics.CPUAvailableMillicores > 0 {
 		cp.CPUTotal = lo.ToPtr(float64(metrics.CPUAvailableMillicores))
 	}
@@ -66,5 +75,5 @@ func (p *Pinger) pingAttributes(info *version.Info, pods []string, minKubeletVer
 		cp.MemoryUtil = lo.ToPtr(float64(metrics.MemoryUsedPercentage))
 	}
 
-	return cp
+	return cp, nil
 }

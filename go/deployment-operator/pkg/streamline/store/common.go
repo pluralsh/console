@@ -2,54 +2,11 @@ package store
 
 import (
 	"github.com/pluralsh/console/go/client"
-	"github.com/sahilm/fuzzy"
 	"github.com/samber/lo"
 	"k8s.io/klog/v2"
 	"zombiezen.com/go/sqlite"
 	"zombiezen.com/go/sqlite/sqlitex"
 )
-
-var (
-	kindsInsightPriorities = map[string]client.InsightComponentPriority{
-		"Ingress":     client.InsightComponentPriorityCritical,
-		"Certificate": client.InsightComponentPriorityCritical, // cert-manager Certificate
-		"StatefulSet": client.InsightComponentPriorityHigh,
-		"DaemonSet":   client.InsightComponentPriorityMedium,
-		"Deployment":  client.InsightComponentPriorityLow,
-	}
-
-	resourcesInsightPriorities = map[string]client.InsightComponentPriority{
-		"certmanager":   client.InsightComponentPriorityCritical,
-		"coredns":       client.InsightComponentPriorityCritical,
-		"kubeproxy":     client.InsightComponentPriorityCritical,
-		"istio":         client.InsightComponentPriorityCritical,
-		"linkerd":       client.InsightComponentPriorityCritical,
-		"csinode":       client.InsightComponentPriorityCritical,
-		"csicontroller": client.InsightComponentPriorityCritical,
-		"nodeexporter":  client.InsightComponentPriorityHigh,
-	}
-)
-
-// InsightComponentPriority returns insight priority for a given component.
-func InsightComponentPriority(name, namespace, kind string) *client.InsightComponentPriority {
-	for resource, priority := range resourcesInsightPriorities {
-		// Fuzzy match to find similar resources
-		matches := fuzzy.Find(resource, []string{name, namespace})
-
-		// Only consider first score threshold as it is the best match
-		if len(matches) > 0 && matches[0].Score >= 200 {
-			return lo.ToPtr(priority)
-		}
-	}
-
-	// Check if the kind is directly mapped to a priority
-	if priority, exists := kindsInsightPriorities[kind]; exists {
-		return lo.ToPtr(priority)
-	}
-
-	// Default to low priority if no matches found
-	return lo.ToPtr(client.InsightComponentPriorityLow)
-}
 
 // NodeStatisticHealth returns health status based on the number of pending pods.
 func NodeStatisticHealth(pendingPods int64) *client.NodeStatisticHealth {
@@ -90,4 +47,18 @@ func WithTransaction(conn *sqlite.Conn, fn func() error) (err error) {
 
 	err = fn()
 	return err
+}
+
+// withReadTransaction runs fn in a deferred transaction, so all its reads see one snapshot and no write lock is taken.
+func withReadTransaction(conn *sqlite.Conn, fn func() error) (err error) {
+	if err = sqlitex.Execute(conn, "BEGIN", nil); err != nil {
+		return err
+	}
+	defer func() {
+		if e := sqlitex.Execute(conn, "ROLLBACK", nil); e != nil && err == nil {
+			err = e
+		}
+	}()
+
+	return fn()
 }
