@@ -14248,6 +14248,18 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/datastore-chart-v0.0.1/datastore-0.0.1.tgz
     version: 0.0.1
+  gateway-proxy:
+  - apiVersion: v2
+    appVersion: 0.12.52
+    created: "2026-10-23T01:00:53.524983534Z"
+    description: Anthropic Messages API proxy for Bedrock-invoke FM gateways using
+      OAuth client credentials
+    digest: 448d6af337ed8fbd86c14ce25b1687e42d678b1c07f609ecbe8bb526998a6f16
+    name: gateway-proxy
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/gateway-proxy-chart-v0.1.0/gateway-proxy-0.1.0.tgz
+    version: 0.1.0
   kas:
   - apiVersion: v2
     appVersion: 0.2.2
@@ -14556,4 +14568,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/webhook-proxy-chart-v0.1.0/webhook-proxy-0.1.0.tgz
     version: 0.1.0
-generated: "2026-10-18T23:41:39.713002914Z"
+generated: "2026-10-23T01:00:53.525573663Z"
