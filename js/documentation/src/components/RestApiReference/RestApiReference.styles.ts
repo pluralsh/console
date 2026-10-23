@@ -127,11 +127,11 @@ export const AuthBody = styled.div(({ theme }) => ({
   color: theme.colors['text-light'],
   lineHeight: 1.7,
   p: {
-    margin: `${theme.spacing.medium}px 0`,
+    margin: `${theme.spacing.medium} 0`,
   },
   ol: {
     paddingLeft: theme.spacing.xlarge,
-    margin: `${theme.spacing.medium}px 0`,
+    margin: `${theme.spacing.medium} 0`,
   },
   li: {
     marginBottom: theme.spacing.xsmall,
@@ -139,7 +139,7 @@ export const AuthBody = styled.div(({ theme }) => ({
   code: {
     ...theme.partials.text.inlineCode,
     backgroundColor: theme.colors['fill-two'],
-    padding: `2px ${theme.spacing.xxsmall}px`,
+    padding: `2px ${theme.spacing.xxsmall}`,
     borderRadius: theme.borderRadiuses.medium,
   },
   a: {

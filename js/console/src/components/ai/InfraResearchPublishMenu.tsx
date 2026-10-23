@@ -32,7 +32,7 @@ export function InfraResearchPublishMenu({
         dropdownHeaderFixed={
           <Overline
             css={{
-              padding: `${spacing.small}px ${spacing.medium}px ${spacing.xsmall}px`,
+              padding: `${spacing.small} ${spacing.medium} ${spacing.xsmall}`,
             }}
           >
             {label}

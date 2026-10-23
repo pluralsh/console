@@ -15,6 +15,7 @@ import CloseIcon from './icons/CloseIcon'
 import { Spinner } from './Spinner'
 import Tooltip from './Tooltip'
 import { type SemanticColorKey } from '../theme/colors'
+import { pxToRem } from '../theme/rem'
 
 export const CHIP_CLOSE_ATTR_KEY = 'data-close-button' as const
 export type ChipSize = 'small' | 'medium' | 'large'
@@ -105,17 +106,17 @@ const ChipCardSC = styled(Card)<{
       '&&': {
         backgroundColor:
           $inactive && $inactive !== 'keep-fill' ? 'transparent' : undefined,
-        padding: `${$size === 'large' ? 6 : theme.spacing.xxxsmall}px ${
+        padding: `${$size === 'large' ? pxToRem(6) : theme.spacing.xxxsmall} ${
           $size === 'large' && $condensed
-            ? 6
+            ? pxToRem(6)
             : $size === 'small'
               ? $condensed
-                ? 6
+                ? pxToRem(6)
                 : theme.spacing.xsmall
               : $condensed
                 ? theme.spacing.xsmall
                 : theme.spacing.small
-        }px`,
+        }`,
         alignItems: 'center',
         display: 'inline-flex',
         textDecoration: 'none',
@@ -162,8 +163,8 @@ const CloseButtonSC = styled.button<{
   alignItems: 'center',
   justifyContent: 'center',
   borderRadius: theme.borderRadiuses.medium,
-  padding: theme.spacing.xsmall - theme.spacing.xxsmall,
-  margin: -(theme.spacing.xsmall - theme.spacing.xxsmall),
+  padding: `calc(${theme.spacing.xsmall} - ${theme.spacing.xxsmall})`,
+  margin: `calc(${theme.spacing.xxsmall} - ${theme.spacing.xsmall})`,
   '.closeIcon': {
     color: theme.colors['text-light'],
   },

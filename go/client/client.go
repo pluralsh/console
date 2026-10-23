@@ -2047,6 +2047,7 @@ type FederatedCredentialFragment struct {
 	ID         string                            "json:\"id\" graphql:\"id\""
 	ClaimsLike map[string]any                    "json:\"claimsLike,omitempty\" graphql:\"claimsLike\""
 	Issuer     string                            "json:\"issuer\" graphql:\"issuer\""
+	Aud        *string                           "json:\"aud,omitempty\" graphql:\"aud\""
 	Scopes     []*string                         "json:\"scopes,omitempty\" graphql:\"scopes\""
 	InsertedAt *string                           "json:\"insertedAt,omitempty\" graphql:\"insertedAt\""
 	UpdatedAt  *string                           "json:\"updatedAt,omitempty\" graphql:\"updatedAt\""
@@ -2070,6 +2071,12 @@ func (t *FederatedCredentialFragment) GetIssuer() string {
 		t = &FederatedCredentialFragment{}
 	}
 	return t.Issuer
+}
+func (t *FederatedCredentialFragment) GetAud() *string {
+	if t == nil {
+		t = &FederatedCredentialFragment{}
+	}
+	return t.Aud
 }
 func (t *FederatedCredentialFragment) GetScopes() []*string {
 	if t == nil {
@@ -62063,6 +62070,7 @@ fragment FederatedCredentialFragment on FederatedCredential {
 	id
 	claimsLike
 	issuer
+	aud
 	scopes
 	insertedAt
 	updatedAt
@@ -62124,6 +62132,7 @@ fragment FederatedCredentialFragment on FederatedCredential {
 	id
 	claimsLike
 	issuer
+	aud
 	scopes
 	insertedAt
 	updatedAt
@@ -62185,6 +62194,7 @@ fragment FederatedCredentialFragment on FederatedCredential {
 	id
 	claimsLike
 	issuer
+	aud
 	scopes
 	insertedAt
 	updatedAt

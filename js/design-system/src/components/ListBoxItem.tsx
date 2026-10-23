@@ -39,7 +39,7 @@ const ListBoxItemInner = styled.div<Partial<ListBoxItemProps>>(
     alignItems: 'center',
     position: 'relative',
     width: 'auto',
-    padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
+    padding: `${theme.spacing.xsmall} ${theme.spacing.medium}`,
     backgroundColor: 'none',
     cursor: 'pointer',
     '&:hover': {
@@ -141,7 +141,7 @@ const ListBoxFooterInner = styled.button<{ $focused?: boolean }>(
     display: 'flex',
     position: 'relative',
     width: '100%',
-    padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+    padding: `${theme.spacing.small} ${theme.spacing.medium}`,
     '&:hover': {
       backgroundColor: theme.colors['fill-one-hover'],
     },

@@ -201,6 +201,24 @@ defmodule Console.Schema.Workbench do
     from(w in query, order_by: ^order)
   end
 
+  def ordered_by_favorites(query, [], dir), do: ordered(query, [{dir, :name}])
+  def ordered_by_favorites(query, ids, dir) do
+    from(w in query,
+      order_by: [
+        {:asc, fragment("CASE WHEN ? THEN 0 ELSE 1 END", w.id in ^ids)},
+        {^dir, w.name}
+      ]
+    )
+  end
+
+  def ids(query \\ __MODULE__) do
+    from(w in query, select: w.id)
+  end
+
+  def by_ids(query) do
+    from(w in __MODULE__, where: w.id in subquery(ids(query)))
+  end
+
   def for_user(query \\ __MODULE__, %User{} = user) do
     Rbac.globally_readable(query, user, fn query, id, groups ->
       from(w in query,

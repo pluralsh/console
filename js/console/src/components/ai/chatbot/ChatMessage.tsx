@@ -266,7 +266,7 @@ export function PrLinkoutCard({ url, title }: { url: string; title: string }) {
         window.open(url, '_blank')
       }}
       css={{
-        padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
+        padding: `${theme.spacing.xsmall} ${theme.spacing.small}`,
         width: '100%',
       }}
     >
@@ -304,7 +304,7 @@ const ActionsWrapperSC = styled.div<{
   opacity: $show ? 1 : 0,
   transition: '0.3s opacity ease',
   justifyContent: $side === 'left' ? 'flex-start' : 'flex-end',
-  padding: `${theme.spacing.xxxsmall}px 0`,
+  padding: `${theme.spacing.xxxsmall} 0`,
   pointerEvents: 'none',
   '& > *': { pointerEvents: $show ? 'auto' : 'none' },
 }))

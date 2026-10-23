@@ -2387,8 +2387,10 @@ type ClusterInsightComponent struct {
 	Namespace *string                   `json:"namespace,omitempty"`
 	Name      string                    `json:"name"`
 	Priority  *InsightComponentPriority `json:"priority,omitempty"`
-	Cluster   *Cluster                  `json:"cluster,omitempty"`
-	Insight   *AiInsight                `json:"insight,omitempty"`
+	// the plural service managing this component, if any
+	Service *ServiceDeployment `json:"service,omitempty"`
+	Cluster *Cluster           `json:"cluster,omitempty"`
+	Insight *AiInsight         `json:"insight,omitempty"`
 	// the raw kubernetes resource itself, this is an expensive fetch and should be used sparingly
 	Resource *KubernetesUnstructured `json:"resource,omitempty"`
 }
@@ -2400,6 +2402,8 @@ type ClusterInsightComponentAttributes struct {
 	Namespace *string                   `json:"namespace,omitempty"`
 	Name      string                    `json:"name"`
 	Priority  *InsightComponentPriority `json:"priority,omitempty"`
+	// the plural service that manages this component, if any
+	ServiceID *string `json:"serviceId,omitempty"`
 }
 
 // A reference to a built ISO image to be used for flashing new edge clusters
@@ -3872,6 +3876,7 @@ type ExtendedSupportInfo struct {
 type FederatedCredential struct {
 	ID         string         `json:"id"`
 	Issuer     string         `json:"issuer"`
+	Aud        *string        `json:"aud,omitempty"`
 	ClaimsLike map[string]any `json:"claimsLike,omitempty"`
 	Scopes     []*string      `json:"scopes,omitempty"`
 	User       *User          `json:"user,omitempty"`
@@ -3882,6 +3887,7 @@ type FederatedCredential struct {
 // A federated credential is a way to authenticate users from an external identity provider
 type FederatedCredentialAttributes struct {
 	Issuer     string    `json:"issuer"`
+	Aud        *string   `json:"aud,omitempty"`
 	ClaimsLike *string   `json:"claimsLike,omitempty"`
 	Scopes     []*string `json:"scopes,omitempty"`
 	UserID     string    `json:"userId"`

@@ -49,7 +49,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v7
         with:
-          go-version-file: go/cloud-query/go.mod
+          go-version-file: go/go.work
           cache-dependency-path: go/cloud-query/go.sum
           cache: true
       - name: Download dependencies

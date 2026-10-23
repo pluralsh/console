@@ -1,3 +1,4 @@
+import { REM_BASE_PX, useRemPx } from '@pluralsh/design-system'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import {
   BoardCardGridSC,
@@ -116,12 +117,14 @@ function VirtualJobsGrid({
   const rows = useMemo(() => chunk(jobs, columns), [jobs, columns])
   const listRef = useRef<HTMLDivElement>(null)
   const scrollMargin = useScrollMargin(listRef, scrollEl)
+  const remPx = useRemPx()
 
   const virtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => scrollEl,
     estimateSize: () => ESTIMATED_ROW_HEIGHT,
-    gap: theme.spacing.medium,
+    // must equal VirtualRowsSC's rem gap at the current root font size
+    gap: (theme.spacingPx.medium * remPx) / REM_BASE_PX,
     overscan: 3,
     scrollMargin,
   })

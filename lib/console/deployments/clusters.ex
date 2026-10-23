@@ -852,9 +852,22 @@ defmodule Console.Deployments.Clusters do
   defp stabilize_insight_components(%{insight_components: [_ | _] = new} = attrs, %Cluster{insight_components: existing}) do
     key = fn %{group: g, version: v, kind: k, name: n} = attrs -> {g, v, k, Map.get(attrs, :namespace), n} end
     by_key = Map.new(existing, & {key.(&1), &1.id})
-    Map.put(attrs, :insight_components, Enum.map(new, &Map.put(&1, :id, by_key[key.(&1)])))
+    Map.put(attrs, :insight_components, Enum.map(new, fn comp ->
+      comp
+      |> Map.put(:id, by_key[key.(comp)])
+      |> Map.put(:service_id, component_service_id(comp[:service_id]))
+    end))
   end
   defp stabilize_insight_components(attrs, _), do: Map.put(attrs, :insight_components, [])
+
+  # there is no fk on the service, so an id of a deleted service behaves like nil and needs no lookup, only malformed ids are dropped
+  defp component_service_id(id) when is_binary(id) do
+    case Ecto.UUID.cast(id) do
+      {:ok, uuid} -> uuid
+      _ -> nil
+    end
+  end
+  defp component_service_id(_), do: nil
 
   defp stabilize_operational_layout(attrs, cluster) do
     Console.put_path(attrs, [:operational_layout, :id], case cluster do

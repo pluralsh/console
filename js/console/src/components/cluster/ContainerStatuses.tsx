@@ -90,7 +90,7 @@ export function ContainerStatus({ status }: { status: ContainerStatusT }) {
       <div
         css={{
           borderRadius: 3,
-          padding: 2,
+          padding: '0.125rem',
           '&:hover': { backgroundColor: colors['fill-two-hover'] },
         }}
       >

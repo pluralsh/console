@@ -234,7 +234,7 @@ export function ComponentsFilesView() {
             label={
               <Tooltip
                 label={node.name}
-                css={{ marginLeft: 6 }}
+                css={{ marginLeft: '0.375rem' }}
               >
                 <div
                   css={{

@@ -375,5 +375,5 @@ function getDetailsTabs({
 const PrListSC = styled.div({
   display: 'flex',
   flexDirection: 'column',
-  gap: 6,
+  gap: '0.375rem',
 })

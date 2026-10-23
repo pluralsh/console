@@ -9,7 +9,7 @@ import {
   TabList,
 } from '@pluralsh/design-system'
 import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Link,
   useNavigate,
@@ -106,6 +106,12 @@ export function WorkbenchEvals() {
     setPromptExpanded(false)
   }, [selectedEvalRow?.id])
 
+  const onSelectEvalResultId = useCallback(
+    (evalResultId: string) =>
+      navigate(getWorkbenchEvalResultAbsPath({ workbenchId, evalResultId })),
+    [navigate, workbenchId]
+  )
+
   return (
     <WorkbenchPageLayout
       showEditWorkbenchButton={false}
@@ -116,14 +122,7 @@ export function WorkbenchEvals() {
             evalRows={evalRows}
             loading={loading && !data}
             selectedEvalResultId={selectedEvalRow?.id}
-            onSelectEvalResultId={(evalResultId) =>
-              navigate(
-                getWorkbenchEvalResultAbsPath({
-                  workbenchId,
-                  evalResultId,
-                })
-              )
-            }
+            onSelectEvalResultId={onSelectEvalResultId}
           />
         ),
         width: WORKBENCH_EVALS_SIDE_PANEL_WIDTH,
@@ -375,7 +374,7 @@ const PanelHeaderSC = styled.header(({ theme }) => ({
   flexShrink: 0,
   lineHeight: 1,
   minHeight: 40,
-  padding: `${theme.spacing.xxsmall}px ${theme.spacing.medium}px`,
+  padding: `${theme.spacing.xxsmall} ${theme.spacing.medium}`,
   borderBottom: theme.borders['fill-one'],
   width: '100%',
 }))

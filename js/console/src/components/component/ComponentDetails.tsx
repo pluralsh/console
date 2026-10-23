@@ -22,7 +22,6 @@ import {
 import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 import { useTheme } from 'styled-components'
 
-import { useExplainWithAI } from 'components/ai/AIContext.tsx'
 import { Kind } from 'components/kubernetes/common/types.ts'
 import {
   getKubernetesCustomResourceDetailsPath,
@@ -83,12 +82,6 @@ export function ComponentDetails({
     [data]
   )
   const visibleError = data ? undefined : error
-
-  useExplainWithAI(
-    value
-      ? `Describe the following kubernetes resource: ${value?.raw}`
-      : undefined
-  )
 
   const subpath = useMatch(`${pathMatchString}/:subpath`)?.params?.subpath || ''
   const outletContext: ComponentDetailsContext = useMemo(

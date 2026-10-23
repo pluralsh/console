@@ -143,7 +143,7 @@ const ItemSC = styled(RadixAccordion.Item)({
 
 const TriggerSC = styled(RadixAccordion.Trigger)<{
   $caret: AccordionCaret
-  $padding?: number
+  $padding?: number | string
 }>(({ theme, $caret, $padding }) => ({
   ...theme.partials.reset.button,
   ...($padding ? { padding: $padding } : {}),

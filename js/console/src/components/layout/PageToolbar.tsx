@@ -158,7 +158,7 @@ export const PageToolbarSC = styled.div(({ theme }) => ({
   flexShrink: 0,
   height: PAGE_TOOLBAR_HEIGHT,
   minWidth: 0,
-  padding: `0 ${theme.spacing.large}px`,
+  padding: `0 ${theme.spacing.large}`,
   backgroundColor: theme.colors['fill-accent'],
   borderBottom: theme.borders.hairline,
   position: 'relative',
@@ -194,7 +194,7 @@ const TabsSC = styled.div(({ theme }) => ({
   minWidth: 0,
   flexShrink: 1,
   // keeps the first label in line with the page content
-  marginLeft: -theme.spacing.small,
+  marginLeft: theme.spacing['minus-small'],
 }))
 
 const TabsRowSC = styled.div(({ theme }) => ({
@@ -206,12 +206,12 @@ const TabsRowSC = styled.div(({ theme }) => ({
 const ToolbarTabSC = styled(UnstyledLink)<{ $active: boolean }>(
   ({ theme, $active }) => ({
     ...theme.partials.text.body2,
-    fontSize: 13,
+    fontSize: '0.875rem',
     fontWeight: $active ? 600 : 400,
     display: 'flex',
     alignItems: 'center',
     gap: theme.spacing.xxsmall,
-    padding: `6px ${theme.spacing.small}px`,
+    padding: `0.375rem ${theme.spacing.small}`,
     borderRadius: theme.borderRadiuses.medium,
     whiteSpace: 'nowrap',
     color: $active

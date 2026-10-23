@@ -17,9 +17,46 @@ jobs:
         if: github.event_name == 'schedule'
         run: echo "Scheduled workflow runs are not actor-gated"
 
-      - uses: mitchellh/vouch/action/check-user@d66fa29a64600490892131ad87597c30c91fcac4 # v1.5.0
+      # Inlines mitchellh/vouch/action/check-user: its hustcer/setup-nu step
+      # intermittently fails to resolve Nushell release assets, so nu is
+      # downloaded straight from the release instead.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         if: github.event_name != 'schedule'
         with:
-          user: ${{ github.event.pull_request.user.login || github.actor }}
+          repository: mitchellh/vouch
+          ref: d66fa29a64600490892131ad87597c30c91fcac4 # v1.5.0
+          path: .vouch
+          persist-credentials: false
+
+      - name: Install Nushell
+        if: github.event_name != 'schedule'
+        env:
+          NU_VERSION: "0.116.1"
+        run: |
+          release="nu-${NU_VERSION}-x86_64-unknown-linux-gnu"
+          mkdir -p "$RUNNER_TEMP/nu"
+          curl -fsSL --retry 5 --retry-all-errors \
+            "https://github.com/nushell/nushell/releases/download/${NU_VERSION}/${release}.tar.gz" \
+            | tar xz -C "$RUNNER_TEMP/nu" --strip-components=1 "${release}/nu"
+          echo "$RUNNER_TEMP/nu" >> "$GITHUB_PATH"
+
+      - name: Check user
+        if: github.event_name != 'schedule'
+        shell: nu {0}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VOUCH_USER: ${{ github.event.pull_request.user.login || github.actor }}
+        run: |
+          use ${{ github.workspace }}/.vouch/vouch *
+
+          let user = $env.VOUCH_USER
+          let status = (gh-check-user $user
+            -R "${{ github.repository }}"
+            --vouched-repo ""
+            --vouched-file ".github/VOUCHED.td"
+          ).status
+          print $"User ($user): ($status)"
+
+          if $status in ["denounced", "unknown"] {
+            error make { msg: $"User ($user) is not vouched \(($status))" }
+          }

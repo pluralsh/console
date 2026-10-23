@@ -213,7 +213,7 @@ export function FlowPipelineChip({
       inactive={
         !pending && !stopped && pipelineCount === 0 ? 'keep-fill' : false
       }
-      css={{ '& .children': { gap: 4 } }}
+      css={{ '& .children': { gap: '0.25rem' } }}
     >
       {`${pipelineCount} ${pluralize('pipeline', pipelineCount)}`}
       {pending && (

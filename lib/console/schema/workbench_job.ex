@@ -19,6 +19,34 @@ defmodule Console.Schema.WorkbenchJob do
   }
   alias Console.Deployments.Policies.Rbac
 
+  # Mirrors billedTokenCount in the console UI: providers that report cached
+  # tokens outside input_tokens still bill for them.
+  defmacrop billed_tokens(usage) do
+    quote do
+      fragment(
+        """
+        greatest(
+          coalesce((?->>'total_tokens')::bigint, 0),
+          coalesce((?->>'input_tokens')::bigint, 0) +
+          coalesce((?->>'output_tokens')::bigint, 0) +
+          case
+            when coalesce((?->>'cached_tokens')::bigint, 0) >
+                 coalesce((?->>'input_tokens')::bigint, 0)
+            then coalesce((?->>'cached_tokens')::bigint, 0)
+            else 0
+          end
+        )
+        """,
+        unquote(usage),
+        unquote(usage),
+        unquote(usage),
+        unquote(usage),
+        unquote(usage),
+        unquote(usage)
+      )
+    end
+  end
+
   defmodule Modes do
     use Console.Schema.Base
     alias Console.Schema.DeploymentSettings.AIProvider
@@ -251,31 +279,18 @@ defmodule Console.Schema.WorkbenchJob do
         timestamp: fragment("date_trunc(?, ?) at time zone 'UTC'", ^period, j.inserted_at),
         input_tokens: fragment("sum(coalesce((?->>'input_tokens')::integer, 0))", j.usage),
         output_tokens: fragment("sum(coalesce((?->>'output_tokens')::integer, 0))", j.usage),
-        total_tokens:
-          fragment(
-            """
-            sum(greatest(
-              coalesce((?->>'total_tokens')::integer, 0),
-              coalesce((?->>'input_tokens')::integer, 0) +
-              coalesce((?->>'output_tokens')::integer, 0) +
-              case
-                when coalesce((?->>'cached_tokens')::integer, 0) >
-                     coalesce((?->>'input_tokens')::integer, 0)
-                then coalesce((?->>'cached_tokens')::integer, 0)
-                else 0
-              end
-            ))
-            """,
-            j.usage,
-            j.usage,
-            j.usage,
-            j.usage,
-            j.usage,
-            j.usage
-          ),
+        total_tokens: fragment("?::bigint", sum(billed_tokens(j.usage))),
         total_cost: fragment("sum(coalesce((?->>'total_cost')::double precision, 0.0))", j.usage)
       },
       order_by: [asc: 2]
+    )
+  end
+
+  def total_tokens(query \\ Workbench) do
+    from(j in __MODULE__,
+      join: w in subquery(query),
+        on: w.id == j.workbench_id,
+      select: fragment("coalesce(?, 0)::bigint", sum(billed_tokens(j.usage)))
     )
   end
 

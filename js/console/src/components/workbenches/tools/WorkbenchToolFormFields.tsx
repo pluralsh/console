@@ -303,7 +303,7 @@ function OpensearchFormFields({
       <p
         css={{
           margin: 0,
-          fontSize: 14,
+          fontSize: '0.875rem',
           color: colors['text-xlight'],
         }}
       >
@@ -675,7 +675,7 @@ function PrometheusFormFields({
           <p
             css={{
               margin: 0,
-              fontSize: 14,
+              fontSize: '0.875rem',
               color: colors['text-xlight'],
             }}
           >
@@ -1143,7 +1143,7 @@ function GithubFormFields({
             <p
               css={{
                 margin: 0,
-                fontSize: 14,
+                fontSize: '0.875rem',
                 color: colors['text-xlight'],
               }}
             >

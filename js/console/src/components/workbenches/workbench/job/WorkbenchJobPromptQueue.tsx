@@ -176,7 +176,7 @@ function QueueItem({
       <QueueItemContentSC>
         <Body2P
           $color="text-light"
-          css={{ ...TRUNCATE, width: '100%', letterSpacing: '0.5px' }}
+          css={{ ...TRUNCATE, width: '100%', letterSpacing: '0.025em' }}
         >
           {prettifyPrompt(prompt.prompt ?? '')}
         </Body2P>
@@ -231,12 +231,12 @@ const QueueCardSC = styled(Card)(({ theme }) => ({
   borderBottomRightRadius: 0,
   borderBottom: 'none',
   // Pull down 1px so this border meets the chat input border without a double line.
-  marginBottom: -1,
-  padding: `${theme.spacing.xsmall}px 0 ${theme.spacing.small}px`,
+  marginBottom: '-1px',
+  padding: `${theme.spacing.xsmall} 0 ${theme.spacing.small}`,
 }))
 
 const QueueErrorSC = styled.div(({ theme }) => ({
-  padding: `0 ${theme.spacing.medium}px`,
+  padding: `0 ${theme.spacing.medium}`,
 }))
 
 const QueueHeaderSC = styled.div(({ theme }) => ({
@@ -246,7 +246,7 @@ const QueueHeaderSC = styled.div(({ theme }) => ({
   gap: theme.spacing.medium,
   width: '100%',
   minWidth: 0,
-  padding: `0 ${theme.spacing.medium}px`,
+  padding: `0 ${theme.spacing.medium}`,
 }))
 
 const QueueBodySC = styled.div(({ theme }) => ({
@@ -260,12 +260,12 @@ const QueueSectionSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.xxsmall,
-  padding: `0 ${theme.spacing.xsmall}px`,
+  padding: `0 ${theme.spacing.xsmall}`,
 }))
 
 const QueueSectionLabelSC = styled(Body2P)(({ theme }) => ({
-  letterSpacing: '0.5px',
-  padding: `0 ${theme.spacing.xsmall}px`,
+  letterSpacing: '0.025em',
+  padding: `0 ${theme.spacing.xsmall}`,
 }))
 
 const DeleteButtonSC = styled(IconFrame)({
@@ -279,7 +279,7 @@ const QueueItemSC = styled.div(({ theme }) => ({
   alignItems: 'center',
   gap: theme.spacing.medium,
   borderRadius: theme.borderRadiuses.medium,
-  padding: `${theme.spacing.xxsmall}px ${theme.spacing.xsmall}px`,
+  padding: `${theme.spacing.xxsmall} ${theme.spacing.xsmall}`,
   '&:hover': {
     backgroundColor: theme.colors['fill-two-hover'],
   },

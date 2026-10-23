@@ -187,7 +187,7 @@ export function ReactFlowGraph({
           >
             <Background
               variant={BackgroundVariant.Dots}
-              gap={theme.spacing.large}
+              gap={theme.spacingPx.large}
               size={1}
               color={theme.colors['border-fill-three']}
             />

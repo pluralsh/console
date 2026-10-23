@@ -131,7 +131,7 @@ const PromptSectionSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.large,
-  paddingRight: 160,
+  paddingRight: '10rem',
   [`@container (max-width: ${theme.breakpoints.desktop}px)`]: {
     paddingRight: 0,
   },

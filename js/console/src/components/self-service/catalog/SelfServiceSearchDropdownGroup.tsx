@@ -35,7 +35,7 @@ export function SelfServiceSearchDropdownGroup({
         justify="space-between"
         css={{
           color: theme.colors['text-xlight'],
-          padding: `${theme.spacing.xxsmall}px ${theme.spacing.xsmall}px`,
+          padding: `${theme.spacing.xxsmall} ${theme.spacing.xsmall}`,
           textTransform: 'uppercase',
           ...theme.partials.text.caption,
         }}

@@ -52,7 +52,9 @@ export const ChipBody = function ChipBody({
       {...rest}
     >
       {icon}
-      <span>{children}</span>
+      <ChipLabelSC title={typeof children === 'string' ? children : undefined}>
+        {children}
+      </ChipLabelSC>
     </ChipBodySC>
   )
 }
@@ -298,22 +300,34 @@ export const plrlChipComponents = {
   [K in MentionKind]: ComponentType<RenderedChipProps<K>>
 }
 
+const CHIP_MAX_WIDTH = '16rem'
+
 const ChipBodySC = styled.span(({ theme }) => ({
   ...theme.partials.text.body2,
   display: 'inline-flex',
   alignItems: 'center',
   gap: theme.spacing.xxsmall,
   verticalAlign: 'middle',
-  padding: `${theme.spacing.xxxsmall}px ${theme.spacing.xsmall}px`,
-  fontSize: 12,
-  lineHeight: '16px',
+  padding: `${theme.spacing.xxxsmall} ${theme.spacing.xsmall}`,
+  fontSize: '0.75rem',
+  lineHeight: '1rem',
   color: theme.colors.text,
   border: theme.borders['fill-three'],
   borderRadius: theme.borderRadiuses.medium,
   background: theme.colors['fill-two'],
   transition: 'background 0.1s ease-in-out',
-  margin: 1,
+  margin: '1px',
+  // long names truncate rather than wrap, so a chip never takes over a card
+  maxWidth: `min(calc(100% - 2px), ${CHIP_MAX_WIDTH})`,
+  '& > svg, & > img': { flexShrink: 0 },
 }))
+
+const ChipLabelSC = styled.span({
+  minWidth: 0,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+})
 
 export const ChipLinkSC = styled(Link)(({ theme }) => ({
   textDecoration: 'none',

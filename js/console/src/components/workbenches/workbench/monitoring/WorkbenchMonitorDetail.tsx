@@ -115,7 +115,7 @@ function useThresholdLayer(value: number) {
         y={yScale(value)}
         dy="-0.5em"
         textAnchor="end"
-        css={{ fill: colors['border-danger'], fontSize: 11 }}
+        css={{ fill: colors['border-danger'], fontSize: '0.75rem' }}
       >
         Threshold {value}
       </text>
@@ -306,7 +306,7 @@ function MonitorDetailView({
               {monitor.description && (
                 <Body1P
                   $color="text-long-form"
-                  css={{ letterSpacing: '0.25px' }}
+                  css={{ letterSpacing: '0.025em' }}
                 >
                   {monitor.description}
                 </Body1P>
@@ -1080,7 +1080,7 @@ const StripSC = styled.div(({ theme }) => ({
   gap: theme.spacing.small,
   height: 40,
   justifyContent: 'space-between',
-  padding: `0 ${theme.spacing.medium}px`,
+  padding: `0 ${theme.spacing.medium}`,
   // Above the tab strip (z-index 1) without trapping fullscreen stacking.
   position: 'relative',
   zIndex: 2,
@@ -1115,7 +1115,7 @@ const BodySC = styled.div(({ theme }) => ({
   flexDirection: 'column',
   // Padding lives on the scroll child — flex scroll containers drop
   // padding-bottom from the scrollable overflow area.
-  padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
+  padding: `${theme.spacing.medium} ${theme.spacing.large}`,
   paddingBottom: theme.spacing.xlarge,
 }))
 
@@ -1182,9 +1182,9 @@ const TitleRowSC = styled.div(({ theme }) => ({
 const TitleSC = styled.h2(({ theme }) => ({
   color: theme.colors.text,
   ...theme.partials.text.mono,
-  fontSize: 18,
+  fontSize: '1.125rem',
   fontWeight: 400,
-  lineHeight: '24px',
+  lineHeight: '1.5rem',
   margin: 0,
 }))
 
@@ -1205,7 +1205,7 @@ const DefinitionCardSC = styled(Card)(({ theme }) => ({
   flexDirection: 'column',
   gap: theme.spacing.medium,
   minWidth: 0,
-  padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
+  padding: `${theme.spacing.medium} ${theme.spacing.large}`,
 }))
 
 const DefinitionHeaderSC = styled.div({
@@ -1293,9 +1293,9 @@ const RecentSectionSC = styled.div(({ theme }) => ({
 const SectionTitleSC = styled.h3(({ theme }) => ({
   color: theme.colors.text,
   ...theme.partials.text.mono,
-  fontSize: 18,
+  fontSize: '1.125rem',
   fontWeight: 400,
-  lineHeight: '24px',
+  lineHeight: '1.5rem',
   margin: 0,
 }))
 
@@ -1395,7 +1395,7 @@ const JobMetaChipSC = styled.span(({ theme }) => ({
   display: 'inline-flex',
   flexShrink: 0,
   gap: theme.spacing.xsmall,
-  padding: '2px 8px',
+  padding: '0.125rem 0.5rem',
   textDecoration: 'none',
   whiteSpace: 'nowrap',
   '&:hover, &:visited': {
@@ -1420,11 +1420,11 @@ const GradeSC = styled.button<{ $color: string }>(({ theme, $color }) => ({
   display: 'flex',
   flexShrink: 0,
   fontFamily: theme.fontFamilies.sans,
-  fontSize: 8,
+  fontSize: '0.625rem',
   fontWeight: 700,
   height: 24,
   justifyContent: 'center',
-  lineHeight: '8px',
+  lineHeight: '0.5rem',
   padding: 0,
   width: 24,
 }))

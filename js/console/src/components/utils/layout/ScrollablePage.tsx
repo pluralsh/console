@@ -30,7 +30,7 @@ const ScrollablePageContent = styled.div<{
     ...(scrollable ? { scrollbarGutter: 'stable' } : {}),
     ...(scrollable && fullWidth
       ? {
-          paddingRight: theme.spacing.large - 6,
+          paddingRight: `calc(${theme.spacing.large} - 6px)`,
         }
       : {}),
     ...(minWidth ? { minWidth: minWidth } : {}),

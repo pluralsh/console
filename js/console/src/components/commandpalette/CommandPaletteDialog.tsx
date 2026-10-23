@@ -46,7 +46,7 @@ export const WrapperModal = styled(ModalWrapper)(({ theme }) => ({
       cursor: 'pointer',
       display: 'flex',
       gap: theme.spacing.xsmall,
-      padding: `${theme.spacing.small}px 16px`,
+      padding: `${theme.spacing.small} 1rem`,
 
       '&:hover': {
         backgroundColor: theme.colors['fill-one-hover'],
@@ -55,7 +55,7 @@ export const WrapperModal = styled(ModalWrapper)(({ theme }) => ({
 
     '[cmdk-list]': {
       backgroundColor: theme.colors['fill-zero'],
-      height: `calc(var(--cmdk-list-height) + ${theme.spacing.small * 2}px)`,
+      height: `calc(var(--cmdk-list-height) + 2 * ${theme.spacing.small})`,
       overflow: 'auto',
       padding: theme.spacing.small,
       transition: 'height 100ms ease',
@@ -67,7 +67,7 @@ export const WrapperModal = styled(ModalWrapper)(({ theme }) => ({
         cursor: 'pointer',
         display: 'flex',
         gap: theme.spacing.xxsmall,
-        padding: `${theme.spacing.small}px 16px`,
+        padding: `${theme.spacing.small} 1rem`,
 
         '.fade': {
           color: theme.colors['text-xlight'],
@@ -108,14 +108,14 @@ export const WrapperModal = styled(ModalWrapper)(({ theme }) => ({
       '[cmdk-separator]': {
         backgroundColor: theme.colors['border-input'],
         height: 1,
-        margin: `${theme.spacing.small}px -${theme.spacing.small}px`,
+        margin: `${theme.spacing.small} -${theme.spacing.small}`,
       },
     },
 
     '#cmdk-footer': {
       display: 'flex',
       gap: theme.spacing.xsmall,
-      padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+      padding: `${theme.spacing.small} ${theme.spacing.medium}`,
       backgroundColor: theme.colors['fill-zero-selected'],
       borderTop: theme.borders['input'],
       borderBottomLeftRadius: theme.borderRadiuses.large,

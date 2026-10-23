@@ -156,7 +156,7 @@ function FileTooltipContent({
     <Flex
       direction="column"
       gap="xsmall"
-      css={{ padding: 2 }}
+      css={{ padding: '0.125rem' }}
     >
       <Body2BoldP css={{ overflowWrap: 'anywhere' }}>
         {file?.name ?? basename(path)}

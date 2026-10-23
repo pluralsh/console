@@ -10,6 +10,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 
 	smcommon "github.com/pluralsh/console/go/deployment-operator/pkg/streamline/common"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline/insights"
 )
 
 type Store interface {
@@ -38,6 +39,10 @@ type Store interface {
 
 	GetAppliedComponentByUID(uid types.UID) (*client.ComponentChildAttributes, error)
 
+	// GetPriorityAnnotation returns the normalized insight priority annotation of an applied component, and whether
+	// the component is stored at all.
+	GetPriorityAnnotation(uid types.UID) (annotation string, found bool, err error)
+
 	// GetAppliedComponentsByGVK returns all applied components matching provided GVK.
 	GetAppliedComponentsByGVK(gvk schema.GroupVersionKind) ([]smcommon.Component, error)
 
@@ -60,6 +65,11 @@ type Store interface {
 	// It uses a single query to fetch both components and their recursive children (up to 4 levels deep).
 	GetServiceComponentsWithChildren(serviceID string, onlyApplied bool) ([]client.ComponentAttributes, error)
 
+	// GetFailingRoots returns the objects that represent the failures of the cluster. The health score and the
+	// insights are computed from them with insights.Summarize, so both always describe the same failures.
+	GetFailingRoots() ([]insights.Root, error)
+
+	// GetComponentInsights returns the failing roots with their built-in priorities.
 	GetComponentInsights() ([]client.ClusterInsightComponentAttributes, error)
 
 	GetComponentCounts() (nodeCount, namespaceCount int64, err error)
@@ -70,7 +80,7 @@ type Store interface {
 	// Returns an error if the database operation fails or if the connection cannot be established.
 	GetNodeStatistics() ([]*client.NodeStatisticAttributes, error)
 
-	// GetHealthScore calculates cluster health as a percentage using a base score minus deductions system.
+	// GetHealthScore calculates the cluster health, 100 minus a penalty for every failing root.
 	// Returns the health score as an integer value (0-100) and any error encountered.
 	GetHealthScore() (int64, error)
 

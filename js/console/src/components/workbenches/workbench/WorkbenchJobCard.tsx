@@ -119,6 +119,6 @@ const CardActionsRowSC = styled.div({
 
 const DividerSC = styled.div(({ theme }) => ({
   borderTop: `1px solid ${theme.colors['border-fill-one']}`,
-  marginLeft: -theme.spacing.medium,
-  marginRight: -theme.spacing.medium,
+  marginLeft: theme.spacing['minus-medium'],
+  marginRight: theme.spacing['minus-medium'],
 }))

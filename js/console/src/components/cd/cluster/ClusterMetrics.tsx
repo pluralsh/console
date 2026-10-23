@@ -165,7 +165,7 @@ const InlineToggleSC = styled.div(({ theme }) => ({
   '& a > *': {
     alignItems: 'center',
     boxSizing: 'border-box',
-    padding: `0 ${theme.spacing.small}px`,
+    padding: `0 ${theme.spacing.small}`,
   },
 }))
 

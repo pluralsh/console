@@ -59,7 +59,7 @@ const SidebarInner = styled.div<{ $overlay?: boolean }>(
 )
 
 const SearchWrapper = styled.div(({ theme }) => ({
-  padding: `${theme.spacing.medium}px 0`,
+  padding: `${theme.spacing.medium} 0`,
   position: 'sticky',
   top: 0,
   backgroundColor: brand['surface-sidebar'],
@@ -102,7 +102,7 @@ const EndpointRowLink = styled(NextLink)<{ $active: boolean }>(
     alignItems: 'center',
     gap: theme.spacing.small,
     width: '100%',
-    padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
+    padding: `${theme.spacing.xsmall} ${theme.spacing.medium}`,
     background: 'transparent',
     border: 'none',
     cursor: 'pointer',
@@ -135,7 +135,7 @@ const TopNavItemLink = styled(NextLink)<{ $active: boolean }>(
     alignItems: 'center',
     gap: theme.spacing.small,
     width: '100%',
-    padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+    padding: `${theme.spacing.small} ${theme.spacing.medium}`,
     background: 'transparent',
     border: 'none',
     cursor: 'pointer',
@@ -153,7 +153,7 @@ const TopNavItemLink = styled(NextLink)<{ $active: boolean }>(
 const TopNavDivider = styled.hr(({ theme }) => ({
   border: 'none',
   borderTop: theme.borders.default,
-  margin: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  margin: `${theme.spacing.small} ${theme.spacing.medium}`,
 }))
 
 export function SidebarNav({

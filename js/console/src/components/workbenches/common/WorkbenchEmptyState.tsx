@@ -69,7 +69,7 @@ const MessageSC = styled.p(({ theme }) => ({
 const DescriptionSC = styled.p(({ theme }) => ({
   ...theme.partials.text.body2,
   color: theme.colors['text-light'],
-  margin: `${theme.spacing.xxsmall}px 0 0`,
+  margin: `${theme.spacing.xxsmall} 0 0`,
   maxWidth: 480,
   overflowWrap: 'anywhere',
   textWrap: 'pretty',
@@ -86,7 +86,7 @@ const ActionsSC = styled.div(({ theme }) => ({
 const EmptyTextSC = styled.p(({ theme }) => ({
   ...theme.partials.text.body2,
   color: theme.colors['text-xlight'],
-  margin: `${theme.spacing.large}px auto`,
-  padding: `0 ${theme.spacing.medium}px`,
+  margin: `${theme.spacing.large} auto`,
+  padding: `0 ${theme.spacing.medium}`,
   textAlign: 'center',
 }))

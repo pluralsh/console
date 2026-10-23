@@ -18,7 +18,7 @@ function CornerBox({ ref, ...props }: FlexProps) {
     <Flex
       ref={ref}
       width="100%"
-      css={{ padding: 20 }}
+      css={{ padding: '1.25rem' }}
       {...props}
     />
   )
@@ -93,7 +93,7 @@ function Template(args: any) {
   const [showModal, setShowModal] = useState(false)
 
   return (
-    <div style={{ margin: -32 }}>
+    <div style={{ margin: '-2rem' }}>
       <Flex
         width="100%"
         height="33vh"

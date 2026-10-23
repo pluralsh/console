@@ -24,7 +24,9 @@ import RestoreStackButton from './RestoreStackButton'
 import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 import { Link } from 'react-router-dom'
 
-const menuLabelProps = { style: { fontSize: 13, lineHeight: '20px' } }
+const menuLabelProps = {
+  style: { fontSize: '0.875rem', lineHeight: '1.25rem' },
+}
 
 enum MenuItemKey {
   None = '',

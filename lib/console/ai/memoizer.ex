@@ -5,13 +5,87 @@ defmodule Console.AI.Memoizer do
 
   @spec generate(struct) :: {:ok, AiInsight.t} | {:error, binary}
   def generate(model) do
-    model   = Evidence.preload(model)
+    model   = model |> Evidence.preload() |> adopt()
     insight = Evidence.insight(model)
     case AiInsight.memoized?(insight, nil) do
       true ->
         bump_poll(model)
         {:ok, insight}
       false -> try_generate(model, insight)
+    end
+  end
+
+  @doc """
+  The same kubernetes object can be a component of a service and a component of its cluster, and each of them has an
+  insight of its own. They are made to share one row, so the object is paid for once and what they show cannot drift apart.
+
+  The service component has the richer context, so it owns the row: a cluster component always points at the fresh
+  insight of its service component, even when it has a fresh one of its own, and is detached from a stale one instead of
+  regenerating it. A service component only adopts the insight of a cluster component when it has no fresh one itself.
+  """
+  @spec adopt(struct) :: struct
+  def adopt(%ClusterInsightComponent{insight: own} = model) do
+    case find_peer(model) do
+      %{insight: %AiInsight{} = shared} ->
+        own_id = with %AiInsight{id: id} <- own, do: id
+        fresh? = AiInsight.memoized?(shared, nil)
+
+        cond do
+          fresh? and own_id != shared.id -> link(model, shared)
+          fresh? -> %{model | insight: shared}
+          # a forced row is most likely owned by a service refresh, so it is detached instead of overwritten
+          match?(%AiInsight{force: true}, own) -> link(model, nil)
+          own_id == shared.id -> link(model, nil)
+          true -> model
+        end
+      _ -> model
+    end
+  end
+  def adopt(model) do
+    case Evidence.insight(model) do
+      # a forced refresh must regenerate, not fall back to a peer's existing diagnosis
+      %AiInsight{force: true} -> model
+      insight ->
+        case AiInsight.memoized?(insight, nil) do
+          true -> model
+          false -> find_peer(model) |> adopt(model)
+        end
+    end
+  end
+
+  defp find_peer(%ClusterInsightComponent{cluster_id: cid, group: g, version: v, kind: k, namespace: ns, name: n}) do
+    ServiceComponent.for_cluster(cid)
+    |> ServiceComponent.for_object({g, v, k, ns, n})
+    |> ServiceComponent.with_insight()
+    |> Repo.one()
+  end
+  defp find_peer(%ServiceComponent{group: g, version: v, kind: k, namespace: ns, name: n, service: %{cluster_id: cid}}) do
+    ClusterInsightComponent.for_cluster(cid)
+    |> ClusterInsightComponent.for_object({g, v, k, ns, n})
+    |> ClusterInsightComponent.with_insight()
+    |> Repo.one()
+  end
+  defp find_peer(_), do: nil
+
+  defp adopt(%{insight: %AiInsight{} = shared}, model) do
+    cond do
+      AiInsight.memoized?(shared, nil) -> link(model, shared)
+      detach?(model, shared) -> link(model, nil)
+      true -> model
+    end
+  end
+  defp adopt(_, model), do: model
+
+  defp detach?(%ClusterInsightComponent{insight: %AiInsight{id: id}}, %AiInsight{id: id}), do: true
+  defp detach?(_, _), do: false
+
+  defp link(%{} = model, insight) do
+    model
+    |> Ecto.Changeset.change(insight_id: insight && insight.id)
+    |> Repo.update(allow_stale: true)
+    |> case do
+      {:ok, updated} -> %{updated | insight: insight}
+      _ -> model
     end
   end
 

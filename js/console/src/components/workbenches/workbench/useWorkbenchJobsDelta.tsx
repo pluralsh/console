@@ -6,6 +6,7 @@ import {
   WorkbenchJobsDocument,
   WorkbenchJobsQuery,
 } from 'generated/graphql'
+import { useEffect, useLayoutEffect, useRef } from 'react'
 import { appendConnection } from 'utils/graphql'
 import { WORKBENCH_JOBS_PAGE_SIZE } from './workbenchJobsDisplay'
 import { RECENT_JOBS_FOR_WARNING } from './WorkbenchPromptModeSelector/WorkbenchBudgetSpendCapWarning'
@@ -17,6 +18,15 @@ const WORKBENCH_JOBS_FIRST_VALUES = [
   WORKBENCH_JOBS_PAGE_SIZE,
 ] as const
 
+export type WorkbenchJobDeltaListener = (
+  delta: Delta,
+  job: WorkbenchJobTinyFragment
+) => void
+
+// fed by the workbench page's single subscription, so views under it can react
+// to job deltas without each opening their own
+const deltaListeners = new Map<string, Set<WorkbenchJobDeltaListener>>()
+
 export function useWorkbenchJobsDelta(workbenchId: Nullable<string>) {
   useWorkbenchJobDeltaSubscription({
     variables: { workbenchId: workbenchId ?? undefined },
@@ -25,11 +35,45 @@ export function useWorkbenchJobsDelta(workbenchId: Nullable<string>) {
     onData: ({ client, data: { data } }) => {
       const event = data?.workbenchJobDelta
       const payload = event?.payload
-      if (!workbenchId || event?.delta !== Delta.Create || !payload?.id) return
+      if (!workbenchId || !event?.delta || !payload?.id) return
 
-      prependJobToCachedWorkbenchJobsQueries(client.cache, workbenchId, payload)
+      if (event.delta === Delta.Create)
+        prependJobToCachedWorkbenchJobsQueries(
+          client.cache,
+          workbenchId,
+          payload
+        )
+
+      deltaListeners
+        .get(workbenchId)
+        ?.forEach((listener) => listener(event.delta!, payload))
     },
   })
+}
+
+export function useWorkbenchJobDeltaListener(
+  workbenchId: string,
+  listener: WorkbenchJobDeltaListener
+) {
+  const listenerRef = useRef(listener)
+
+  useLayoutEffect(() => {
+    listenerRef.current = listener
+  })
+
+  useEffect(() => {
+    const wrapped: WorkbenchJobDeltaListener = (delta, job) =>
+      listenerRef.current(delta, job)
+    const listeners = deltaListeners.get(workbenchId) ?? new Set()
+
+    listeners.add(wrapped)
+    deltaListeners.set(workbenchId, listeners)
+
+    return () => {
+      listeners.delete(wrapped)
+      if (listeners.size === 0) deltaListeners.delete(workbenchId)
+    }
+  }, [workbenchId])
 }
 
 function prependJobToCachedWorkbenchJobsQueries(

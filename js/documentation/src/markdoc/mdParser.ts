@@ -64,13 +64,32 @@ export const readMdFileCached = async (
   }
 }
 
+// Placeholders like `<cluster-handle>` in prose parse as unclosed elements that
+// swallow the rest of the page and break hydration, so anything that isn't a
+// standard HTML element is kept as literal text.
+const HTML_ELEMENTS = new Set(
+  (
+    'a abbr address article aside b bdi bdo blockquote br caption cite code col ' +
+    'colgroup dd del details dfn div dl dt em figcaption figure footer h1 h2 h3 ' +
+    'h4 h5 h6 header hr i iframe img ins kbd li mark ol p picture pre q s samp ' +
+    'section small source span strong sub summary sup table tbody td tfoot th ' +
+    'thead time tr u ul var video wbr'
+  ).split(' ')
+)
+
 // see https://github.com/markdoc/markdoc/issues/10
 // https://gist.github.com/rpaul-stripe/941eb22c4779ea87b1adf7715d76ca08
 function processHtmlTokens(tokens) {
   const output: any[] = []
+  let source = ''
+  const rawTag = () => source.slice(parser.startIndex, parser.endIndex + 1)
 
   const parser = new Parser({
     onopentag(name, attrs) {
+      if (!HTML_ELEMENTS.has(name)) {
+        output.push({ type: 'text', content: rawTag() })
+        return
+      }
       output.push({
         type: 'tag_open',
         nesting: 1,
@@ -89,7 +108,11 @@ function processHtmlTokens(tokens) {
         output.push({ type: 'text', content })
     },
 
-    onclosetag() {
+    onclosetag(name, isImplied) {
+      if (!HTML_ELEMENTS.has(name)) {
+        if (!isImplied) output.push({ type: 'text', content: rawTag() })
+        return
+      }
       output.push({
         type: 'tag_close',
         nesting: -1,
@@ -100,6 +123,7 @@ function processHtmlTokens(tokens) {
 
   for (const token of tokens) {
     if (token.type.startsWith('html')) {
+      source += token.content
       parser.write(token.content)
       continue
     }

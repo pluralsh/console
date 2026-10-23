@@ -293,7 +293,7 @@ const HeaderSC = styled.div({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  gap: 16,
+  gap: '1rem',
   minWidth: 0,
   width: '100%',
 })
@@ -309,7 +309,7 @@ const HeaderBlockSC = styled.div(({ theme }) => ({
 const HeaderActionsSC = styled.div({
   display: 'flex',
   alignItems: 'center',
-  gap: 16,
+  gap: '1rem',
   flexShrink: 0,
 })
 

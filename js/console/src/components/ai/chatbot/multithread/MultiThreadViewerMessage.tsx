@@ -227,7 +227,7 @@ export function SimpleToolCall({
                   width: '100%',
                   maxWidth: '100%',
                   boxSizing: 'border-box',
-                  padding: `${spacing.xsmall}px ${spacing.small}px`,
+                  padding: `${spacing.xsmall} ${spacing.small}`,
                 }
               : undefined
           }
@@ -503,7 +503,7 @@ export const hoverCaretTriggerStyles = {
   justifyContent: 'flex-start',
   width: 'fit-content',
   maxWidth: '100%',
-  gap: 6,
+  gap: '0.375rem',
 } as const
 
 /** Keeps styled tool labels on one line; size to content so caret sits after the text. */
@@ -648,7 +648,7 @@ const InlineCodeSC = styled.code(({ theme }) => ({
   ...theme.partials.text.mono,
   fontSize: '0.9em',
   backgroundColor: theme.colors['fill-two'],
-  padding: `0 ${theme.spacing.xxsmall}px`,
+  padding: `0 ${theme.spacing.xxsmall}`,
   borderRadius: theme.borderRadiuses.medium,
   wordBreak: 'break-word',
 }))
@@ -662,7 +662,7 @@ const HrSC = styled.hr(({ theme }) => ({
   height: 1,
   backgroundColor: theme.colors.border,
   border: 0,
-  margin: `${theme.spacing.xsmall}px 0`,
+  margin: `${theme.spacing.xsmall} 0`,
   width: '100%',
 }))
 
@@ -708,7 +708,7 @@ const TdSC = styled.td(({ theme }) => ({
     theme.mode === 'light'
       ? theme.colors['fill-one']
       : theme.colors['fill-zero-selected'],
-  padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
+  padding: `${theme.spacing.xsmall} ${theme.spacing.small}`,
   color: theme.colors['text-light'],
   textAlign: 'left',
   verticalAlign: 'top',

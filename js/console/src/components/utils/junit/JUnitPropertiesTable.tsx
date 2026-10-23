@@ -74,7 +74,7 @@ const PaddedCellSC = styled.div(({ theme }) => ({
   width: '100%',
   display: 'flex',
   alignItems: 'center',
-  padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
+  padding: `${theme.spacing.xsmall} ${theme.spacing.small}`,
   '*[data-cell-bg="dark"] &': { background: theme.colors['fill-zero'] },
   '*[data-cell-bg="bright"] &': { background: theme.colors['fill-three'] },
 }))

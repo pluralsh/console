@@ -232,7 +232,7 @@ function ModalIllustration({ modalStep }: { modalStep: 'configure' | 'copy' }) {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'start',
-        padding: `0 ${theme.spacing.xlarge}px`,
+        padding: `0 ${theme.spacing.xlarge}`,
       }}
     >
       <div
@@ -286,7 +286,7 @@ function ModalIllustration({ modalStep }: { modalStep: 'configure' | 'copy' }) {
           height: 1,
           flexGrow: 1,
           backgroundColor: theme.colors.border,
-          margin: `${theme.spacing.large}px ${theme.spacing.xlarge}px 0`,
+          margin: `${theme.spacing.large} ${theme.spacing.xlarge} 0`,
         }}
       />
       <div

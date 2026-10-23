@@ -462,7 +462,7 @@ export const StickyActionsFooterSC = styled.div(({ theme }) => ({
   zIndex: theme.zIndexes.tooltip,
   background: theme.colors['fill-one'],
   border: `1px solid ${theme.colors['fill-one']}`, // should match bg color
-  padding: `${theme.spacing.small}px 0 ${theme.spacing.xlarge}px`,
+  padding: `${theme.spacing.small} 0 ${theme.spacing.xlarge}`,
   '&::before': { flex: 1 },
 }))
 

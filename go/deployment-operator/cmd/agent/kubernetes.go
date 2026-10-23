@@ -31,6 +31,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
+	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 	"github.com/pluralsh/console/go/deployment-operator/cmd/agent/args"
 	"github.com/pluralsh/console/go/deployment-operator/internal/controller"
 	"github.com/pluralsh/console/go/deployment-operator/internal/utils"
@@ -39,6 +40,7 @@ import (
 	consoleclient "github.com/pluralsh/console/go/deployment-operator/pkg/client"
 	consolectrl "github.com/pluralsh/console/go/deployment-operator/pkg/controller"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/controller/service"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/insightpriority"
 )
 
 func emptyDiskHealthCheck(_ *http.Request) error {
@@ -138,6 +140,7 @@ func registerKubeReconcilersOrDie(
 	enableKubecostProxy bool,
 	consoleURL, deployToken string,
 	userGroupCache cache.UserGroupCache,
+	insightRegistry *insightpriority.Registry,
 ) {
 	rolloutsClient, dynamicClient, kubeClient := initKubeClientsOrDie(config)
 
@@ -240,6 +243,8 @@ func registerKubeReconcilersOrDie(
 	}).SetupWithManager(manager); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "HealthConvert")
 	}
+	registerCustomInsightPriority(manager, insightRegistry)
+
 	if err := (&controller.StackRunJobReconciler{
 		Client:        manager.GetClient(),
 		Scheme:        manager.GetScheme(),
@@ -366,5 +371,29 @@ func registerKubeReconcilersOrDie(
 		DeployToken:   deployToken,
 	}).SetupWithManager(manager); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "SentinelRunJob")
+	}
+}
+
+// registerCustomInsightPriority registers the controller of CustomInsightPriority scripts when their CRD is installed.
+// Helm does not upgrade the CRDs of a chart, so an agent that is upgraded without them has to start without the feature,
+// a controller watching a missing CRD would fail the whole manager.
+func registerCustomInsightPriority(manager ctrl.Manager, registry *insightpriority.Registry) {
+	gk := schema.GroupKind{Group: v1alpha1.GroupVersion.Group, Kind: "CustomInsightPriority"}
+	if _, err := manager.GetRESTMapper().RESTMapping(gk, v1alpha1.GroupVersion.Version); err != nil {
+		if meta.IsNoMatchError(err) {
+			setupLog.Info("CustomInsightPriority CRD is not installed, insight priorities can not be customized", "controller", "CustomInsightPriority")
+		} else {
+			setupLog.Error(err, "unable to check for the CustomInsightPriority CRD", "controller", "CustomInsightPriority")
+		}
+		return
+	}
+
+	if err := (&controller.CustomInsightPriorityReconciler{
+		Client:   manager.GetClient(),
+		Scheme:   manager.GetScheme(),
+		Registry: registry,
+		Recorder: manager.GetEventRecorder("custominsightpriority-controller"),
+	}).SetupWithManager(manager); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "CustomInsightPriority")
 	}
 }

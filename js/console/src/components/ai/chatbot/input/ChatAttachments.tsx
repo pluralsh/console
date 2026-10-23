@@ -231,7 +231,7 @@ const ShelfSC = styled.div<{ $compact: boolean }>(({ theme, $compact }) => ({
     '.file-chip': {
       height: 24,
       maxWidth: 180,
-      padding: `0 ${theme.spacing.xsmall}px`,
+      padding: `0 ${theme.spacing.xsmall}`,
       gap: theme.spacing.xxsmall,
     },
   }),
@@ -260,7 +260,7 @@ const FileChipSC = styled.div(({ theme }) => ({
   gap: theme.spacing.xsmall,
   height: 32,
   maxWidth: 240,
-  padding: `0 ${theme.spacing.small}px 0 ${theme.spacing.xsmall}px`,
+  padding: `0 ${theme.spacing.small} 0 ${theme.spacing.xsmall}`,
   borderRadius: theme.borderRadiuses.medium,
   border: theme.borders['fill-two'],
   background: theme.colors['fill-two'],

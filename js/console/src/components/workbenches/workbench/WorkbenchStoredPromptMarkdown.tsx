@@ -74,7 +74,7 @@ const clampedMarkdownInnerStyles = ({
 
   /* Tighter than default block markdown so margins don't steal the line budget. */
   & > *:not(:last-child) {
-    margin-bottom: ${theme.spacing.xxxsmall}px;
+    margin-bottom: ${theme.spacing.xxxsmall};
   }
 `
 

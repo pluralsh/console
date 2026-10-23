@@ -37,10 +37,10 @@ const ChatInputSelectButtonSC = styled.button<{ $isOpen?: boolean }>(
     alignItems: 'center',
     borderRadius: theme.borderRadiuses.medium,
     display: 'flex',
-    fontSize: 12,
+    fontSize: '0.75rem',
     gap: theme.spacing.xxsmall,
     height: 18,
-    padding: `${theme.spacing.xxxsmall}px ${theme.spacing.xsmall}px`,
+    padding: `${theme.spacing.xxxsmall} ${theme.spacing.xsmall}`,
     '&:hover': { backgroundColor: theme.colors['fill-three-hover'] },
     '&:focus': { backgroundColor: theme.colors['fill-three-selected'] },
     '.dropdownIcon': {

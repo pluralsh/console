@@ -2,6 +2,7 @@ import { type CSSObject } from '../types'
 
 import { fontFamilies } from './fonts'
 import { semanticColorCssVars } from './colors'
+import { pxToRem, TRACKING } from './rem'
 
 export const INLINE_CODE_EMS = 0.8
 export const INLINE_CODE_MIN_PX = 12
@@ -9,7 +10,7 @@ export const INLINE_CODE_MIN_PX = 12
 const bodyBaseStyle = {
   fontFamily: fontFamilies.sans,
   fontWeight: 400,
-  letterSpacing: '0.5px',
+  letterSpacing: TRACKING.wide,
   '& b, & strong': {
     fontWeight: 600,
   },
@@ -18,16 +19,16 @@ const bodyBaseStyle = {
 const body1 = {
   ...bodyBaseStyle,
   ...{
-    fontSize: 16,
-    lineHeight: '24px',
+    fontSize: '1rem',
+    lineHeight: '1.5rem',
   },
 } as const satisfies CSSObject
 
 const body2 = {
   ...bodyBaseStyle,
   ...{
-    fontSize: 14,
-    lineHeight: '20px',
+    fontSize: '0.875rem',
+    lineHeight: '1.25rem',
   },
 } as const satisfies CSSObject
 
@@ -37,7 +38,7 @@ const bodyBold = {
 
 const body2LooseLineHeight = {
   ...body2,
-  lineHeight: '22px',
+  lineHeight: '1.5rem',
 } as const satisfies CSSObject
 
 // The mono font ships with ligatures; code must render as typed.
@@ -50,59 +51,59 @@ const mono = {
 const textPartials = {
   h1: {
     fontFamily: fontFamilies.semi,
-    fontSize: 72,
+    fontSize: '4.5rem',
     lineHeight: '110%',
     fontWeight: 400,
-    letterSpacing: '-1px',
+    letterSpacing: TRACKING.tight,
   },
   h2: {
     fontFamily: fontFamilies.semi,
-    fontSize: 60,
+    fontSize: '3.75rem',
     lineHeight: '115%',
     fontWeight: 500,
-    letterSpacing: '-1px',
+    letterSpacing: TRACKING.tight,
   },
   h3: {
     fontFamily: fontFamilies.semi,
-    fontSize: 48,
+    fontSize: '3rem',
     lineHeight: '120%',
     fontWeight: 400,
-    letterSpacing: '-0.5px',
+    letterSpacing: TRACKING.normal,
   },
   h4: {
     fontFamily: fontFamilies.semi,
-    fontSize: 36,
-    lineHeight: '45px',
+    fontSize: '2.25rem',
+    lineHeight: '2.75rem',
     fontWeight: 400,
-    letterSpacing: '-0.25px',
+    letterSpacing: TRACKING.normal,
   },
   title1: {
     fontFamily: fontFamilies.semi,
-    fontSize: 30,
-    lineHeight: '40px',
+    fontSize: '1.875rem',
+    lineHeight: '2.5rem',
     fontWeight: 500,
-    letterSpacing: '-0.25px',
+    letterSpacing: TRACKING.normal,
   },
   title2: {
     fontFamily: fontFamilies.semi,
-    fontSize: 24,
-    lineHeight: '32px',
+    fontSize: '1.5rem',
+    lineHeight: '2rem',
     fontWeight: 500,
-    letterSpacing: '-0.25px',
+    letterSpacing: TRACKING.normal,
   },
   subtitle1: {
     fontFamily: fontFamilies.semi,
-    fontSize: 20,
-    lineHeight: '24px',
+    fontSize: '1.25rem',
+    lineHeight: '1.5rem',
     fontWeight: 500,
-    letterSpacing: 0,
+    letterSpacing: TRACKING.normal,
   },
   subtitle2: {
     fontFamily: fontFamilies.semi,
-    fontSize: 18,
-    lineHeight: '24px',
+    fontSize: '1.125rem',
+    lineHeight: '1.5rem',
     fontWeight: 500,
-    letterSpacing: 0,
+    letterSpacing: TRACKING.normal,
   },
   body1,
   body2,
@@ -116,45 +117,45 @@ const textPartials = {
   },
   caption: {
     fontFamily: fontFamilies.sans,
-    fontSize: 12,
-    lineHeight: '16px',
+    fontSize: '0.75rem',
+    lineHeight: '1rem',
     fontWeight: 400,
-    letterSpacing: '0.5px',
+    letterSpacing: TRACKING.wider,
   },
   badgeLabel: {
     fontFamily: fontFamilies.sans,
-    fontSize: 12,
+    fontSize: '0.75rem',
     lineHeight: '100%',
     fontWeight: 700,
-    letterSpacing: '0.5px',
+    letterSpacing: TRACKING.wider,
   },
   buttonMedium: {
     fontFamily: fontFamilies.sans,
-    fontSize: 14,
-    lineHeight: '24px',
+    fontSize: '0.875rem',
+    lineHeight: '1.5rem',
     fontWeight: 600,
-    letterSpacing: '0.5px',
+    letterSpacing: TRACKING.wide,
   },
   buttonLarge: {
     fontFamily: fontFamilies.sans,
-    fontSize: 16,
-    lineHeight: '24px',
+    fontSize: '1rem',
+    lineHeight: '1.5rem',
     fontWeight: 600,
-    letterSpacing: '0.5px',
+    letterSpacing: TRACKING.wide,
   },
   buttonSmall: {
     fontFamily: fontFamilies.sans,
-    fontSize: 12,
-    lineHeight: '24px',
+    fontSize: '0.75rem',
+    lineHeight: '1.5rem',
     fontWeight: 600,
-    letterSpacing: '0.5px',
+    letterSpacing: TRACKING.wider,
   },
   overline: {
     fontFamily: fontFamilies.semi,
-    fontSize: 12,
-    lineHeight: '16px',
+    fontSize: '0.75rem',
+    lineHeight: '1rem',
     fontWeight: 400,
-    letterSpacing: '1.25px',
+    letterSpacing: TRACKING.widest,
     textTransform: 'uppercase',
   },
   truncate: {
@@ -185,14 +186,14 @@ const textPartials = {
   mono,
   code: {
     ...mono,
-    fontSize: 14,
-    lineHeight: '22px',
-    letterSpacing: '.25px',
+    fontSize: '0.875rem',
+    lineHeight: '1.5rem',
+    letterSpacing: TRACKING.wide,
   },
   inlineCode: {
     ...mono,
-    fontSize: `calc(max(${INLINE_CODE_MIN_PX}px, ${INLINE_CODE_EMS}em))`,
-    letterSpacing: '.25px',
+    fontSize: `calc(max(${pxToRem(INLINE_CODE_MIN_PX)}, ${INLINE_CODE_EMS}em))`,
+    letterSpacing: TRACKING.wide,
   },
 } as const satisfies Record<string, CSSObject>
 

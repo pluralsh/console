@@ -361,8 +361,8 @@ export function CronScheduleForm({ mode }: { mode: 'create' | 'edit' }) {
                             },
                             '& input': {
                               minHeight: 54,
-                              paddingLeft: 16,
-                              paddingRight: 16,
+                              paddingLeft: '1rem',
+                              paddingRight: '1rem',
                               ...theme.partials.text.mono,
                             },
                           }}
@@ -377,7 +377,7 @@ export function CronScheduleForm({ mode }: { mode: 'create' | 'edit' }) {
                           css={{
                             padding: theme.spacing.medium,
                             border: 'none',
-                            '& p': { lineHeight: '20px' },
+                            '& p': { lineHeight: '1.25rem' },
                           }}
                         >
                           <Body2P>{preview.description}</Body2P>

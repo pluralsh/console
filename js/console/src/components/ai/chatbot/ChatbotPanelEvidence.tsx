@@ -108,5 +108,5 @@ const WrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.large,
-  padding: `${theme.spacing.large}px ${theme.spacing.xxxlarge}px ${theme.spacing.medium}px`,
+  padding: `${theme.spacing.large} ${theme.spacing.xxxlarge} ${theme.spacing.medium}`,
 }))

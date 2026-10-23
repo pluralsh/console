@@ -258,9 +258,9 @@ export const BoardSC = styled.div({
 
 export const BoardTitleSC = styled.h2(({ theme }) => ({
   ...theme.partials.text.mono,
-  fontSize: 18,
+  fontSize: '1.125rem',
   fontWeight: 400,
-  lineHeight: '24px',
+  lineHeight: '1.5rem',
   letterSpacing: 0,
   margin: 0,
   color: theme.colors.text,
@@ -341,5 +341,5 @@ const LoadingMoreSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexShrink: 0,
   justifyContent: 'center',
-  padding: `${theme.spacing.small}px 0 ${theme.spacing.large}px`,
+  padding: `${theme.spacing.small} 0 ${theme.spacing.large}`,
 }))

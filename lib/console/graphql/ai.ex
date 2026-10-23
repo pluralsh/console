@@ -306,6 +306,7 @@ defmodule Console.GraphQl.AI do
     field :name,      non_null(:string)
     field :priority,  :insight_component_priority
 
+    field :service, :service_deployment, resolve: dataloader(Deployments), description: "the plural service managing this component, if any"
     field :cluster, :cluster,    resolve: dataloader(Deployments)
     field :insight, :ai_insight, resolve: dataloader(AI)
 
