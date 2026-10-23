@@ -68,4 +68,25 @@ console:
       s3:
         bucket: {{ imports.mgmt.console_s3_bucket }}
         region: {{ imports.mgmt.console_s3_region }}
+{% elsif imports.mgmt.console_azure_storage_account %}
+console:
+  config:
+    objectStore:
+      provider: azure
+      azure:
+        storageAccount: {{ imports.mgmt.console_azure_storage_account }}
+        container: {{ imports.mgmt.console_azure_container }}
+        {% if imports.mgmt.console_azure_access_key %}
+        accessKey: {{ imports.mgmt.console_azure_access_key }}
+        {% endif %}
+{% elsif imports.mgmt.console_gcs_bucket %}
+console:
+  config:
+    objectStore:
+      provider: gcs
+      gcs:
+        bucket: {{ imports.mgmt.console_gcs_bucket }}
+        {% if imports.mgmt.console_gcs_credentials %}
+        credentials: {{ imports.mgmt.console_gcs_credentials | json }}
+        {% endif %}
 {% endif %}

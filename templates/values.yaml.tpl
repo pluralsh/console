@@ -69,4 +69,25 @@ console:
       s3:
         bucket: {{ .Values.objectStoreBucket }}
         region: {{ .Values.objectStoreRegion }}
+{{ else if .Values.objectStoreAzureStorageAccount }}
+console:
+  config:
+    objectStore:
+      provider: azure
+      azure:
+        storageAccount: {{ .Values.objectStoreAzureStorageAccount }}
+        container: {{ .Values.objectStoreAzureContainer }}
+        {{ if .Values.objectStoreAzureAccessKey }}
+        accessKey: {{ .Values.objectStoreAzureAccessKey }}
+        {{ end }}
+{{ else if .Values.objectStoreGcsBucket }}
+console:
+  config:
+    objectStore:
+      provider: gcs
+      gcs:
+        bucket: {{ .Values.objectStoreGcsBucket }}
+        {{ if .Values.objectStoreGcsCredentials }}
+        credentials: {{ .Values.objectStoreGcsCredentials | quote }}
+        {{ end }}
 {{ end }}
