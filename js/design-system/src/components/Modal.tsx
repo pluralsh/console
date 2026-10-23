@@ -120,7 +120,7 @@ const ModalActionsGradientSC = styled.div(({ theme }) => ({
 const ModalActionsContentSC = styled.div(({ theme }) => ({
   display: 'flex',
   padding: theme.spacing.large,
-  paddingTop: theme.spacing.large - gradientHeight,
+  paddingTop: `calc(${theme.spacing.large} - ${gradientHeight}px)`,
   alignItems: 'center',
   justifyContent: 'flex-end',
   backgroundColor: theme.colors['fill-one'],
@@ -165,7 +165,7 @@ function Modal({
 
   const maxWidth =
     size === 'auto'
-      ? `min(1000px, 100vw - ${theme.spacing.xlarge * 2}px)`
+      ? `min(1000px, 100vw - 2 * ${theme.spacing.xlarge})`
       : sizeToWidth[size]
 
   return (

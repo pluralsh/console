@@ -18,6 +18,7 @@ import { useTheme } from 'styled-components'
 import { GqlError } from 'components/utils/Alert'
 
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
+import { PageToolbarPortal } from 'components/layout/PageToolbar'
 
 import { ContainerLogsTable } from 'components/cd/cluster/pod/logs/ContainerLogs'
 
@@ -83,49 +84,43 @@ export default function PipelineJobLogs() {
 
   return (
     <ScrollablePage
-      heading="Logs"
       scrollable={false}
-      headingContent={
-        jobGateState === GateState.Running ||
-        jobGateState === GateState.Pending ? (
-          <div
-            css={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: theme.spacing.medium,
-            }}
-          >
-            <Button
-              disabled={loadingForceGate}
-              onClick={() =>
-                forceGate({
-                  variables: {
-                    id,
-                    state: GateState.Open,
-                  },
-                })
-              }
-            >
-              Mark Successful
-            </Button>
-            <Button
-              disabled={loadingForceGate}
-              secondary
-              onClick={() =>
-                forceGate({
-                  variables: {
-                    id,
-                    state: GateState.Closed,
-                  },
-                })
-              }
-            >
-              Cancel
-            </Button>
-          </div>
-        ) : null
-      }
+      contentStyles={{ paddingTop: 0 }}
     >
+      {(jobGateState === GateState.Running ||
+        jobGateState === GateState.Pending) && (
+        <PageToolbarPortal>
+          <Button
+            small
+            disabled={loadingForceGate}
+            onClick={() =>
+              forceGate({
+                variables: {
+                  id,
+                  state: GateState.Open,
+                },
+              })
+            }
+          >
+            Mark Successful
+          </Button>
+          <Button
+            small
+            disabled={loadingForceGate}
+            secondary
+            onClick={() =>
+              forceGate({
+                variables: {
+                  id,
+                  state: GateState.Closed,
+                },
+              })
+            }
+          >
+            Cancel
+          </Button>
+        </PageToolbarPortal>
+      )}
       <div
         css={{
           display: 'flex',

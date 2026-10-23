@@ -68,7 +68,10 @@ export { default as Flyover } from './components/Flyover'
 export { default as FormField } from './components/FormField'
 export { default as Highlight } from './components/Highlight'
 export { default as hljs } from './hljs'
-export { default as IconFrame } from './components/IconFrame'
+export {
+  default as IconFrame,
+  ICON_FRAME_ICON_SIZE,
+} from './components/IconFrame'
 export type { IconFrameProps } from './components/IconFrame'
 export { default as AWSIcon, AWSIconName } from './components/icons/AWSIcon'
 export { default as InlineCode } from './components/InlineCode'
@@ -159,6 +162,7 @@ export { useFloatingDropdown } from './hooks/useFloatingDropdown'
 export { useInert } from './hooks/useInert'
 export { useIsFocused } from './hooks/useIsFocused'
 export { default as usePrevious } from './hooks/usePrevious'
+export { useRemPx } from './hooks/useRemPx'
 export { default as useResizeObserver } from './hooks/useResizeObserver'
 export { default as useUnmount } from './hooks/useUnmount'
 export { useCopyText } from './components/Code'
@@ -197,6 +201,7 @@ export { green, orange } from './theme/colors-base'
 export { semanticColorCssVars, semanticColorKeys } from './theme/colors'
 export type { SemanticColorCssVar, SemanticColorKey } from './theme/colors'
 export type { SemanticSpacingKey } from './theme/spacing'
+export { getRemPx, pxToRem, REM_BASE_PX } from './theme/rem'
 
 // Utils
 export { default as scrollIntoContainerView } from './utils/scrollIntoContainerView'

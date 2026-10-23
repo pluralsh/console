@@ -14,6 +14,8 @@ import (
 var configTemplateText string
 
 type ConfigTemplateInput struct {
+	// ConsoleURL and ConsoleToken configure the Plural provider. They hold the sidecar's URL and a
+	// placeholder key; the sidecar swaps in the deploy token, so no real Console credential is written.
 	ConsoleURL   string
 	ConsoleToken string
 	AgentRunID   string

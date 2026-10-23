@@ -25,6 +25,7 @@ const ISSUE_WEBHOOK_PROVIDER_LABELS: Record<IssueWebhookProvider, string> = {
   [IssueWebhookProvider.Gitlab]: 'GitLab',
   [IssueWebhookProvider.Jira]: 'Jira',
   [IssueWebhookProvider.Linear]: 'Linear',
+  [IssueWebhookProvider.ServiceNow]: 'ServiceNow',
 }
 
 export function humanizeObservabilityWebhookType(

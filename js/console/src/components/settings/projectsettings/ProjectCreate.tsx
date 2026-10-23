@@ -15,13 +15,14 @@ import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
 import { PROJECTS_QUERY_PAGE_SIZE } from './ProjectsList'
 
-export default function ProjectCreate() {
+export default function ProjectCreate({ small }: { small?: boolean }) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
     <>
       <Button
-        floating
+        small={small}
+        floating={!small}
         startIcon={<FolderIcon />}
         onClick={() => setIsOpen(true)}
       >

@@ -16,7 +16,7 @@ import { useCreateInviteMutation } from '../../../../generated/graphql.ts'
 export const inviteLink = (invite) =>
   `https://${apiHost()}/invite/${invite.secureId}`
 
-export default function UserInvite() {
+export default function UserInvite({ small }: { small?: boolean }) {
   const [open, setOpen] = useState(false)
   const [email, setEmail] = useState('')
   const [invite, setInvite] = useState<any>(null)
@@ -36,6 +36,7 @@ export default function UserInvite() {
       <div>
         <Button
           secondary
+          small={small}
           onClick={() => setOpen(true)}
         >
           Invite user

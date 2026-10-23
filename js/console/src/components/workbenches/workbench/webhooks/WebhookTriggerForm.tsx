@@ -3,7 +3,6 @@ import {
   Button,
   Checkbox,
   Chip,
-  EmptyState,
   Flex,
   FormField,
   Input,
@@ -17,6 +16,7 @@ import {
   VisualInspectionIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
@@ -333,8 +333,12 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
 
   if (mode === 'edit' && !fetchWorkbenchWebhookState.loading && !webhook)
     return (
-      <EmptyState message="Webhook trigger not found">
+      <WorkbenchEmptyState
+        message="Webhook trigger not found"
+        description="It may have been removed from this workbench."
+      >
         <Button
+          small
           startIcon={<ReturnIcon />}
           onClick={() =>
             navigate(getWorkbenchWebhookTriggersAbsPath(workbenchId))
@@ -342,7 +346,7 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
         >
           Back to all webhooks
         </Button>
-      </EmptyState>
+      </WorkbenchEmptyState>
     )
 
   const isLoading =
@@ -438,7 +442,7 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
                       >
                         <div
                           css={{
-                            fontSize: '14px',
+                            fontSize: '0.875rem',
                             fontWeight: 600,
                           }}
                         >
@@ -453,7 +457,7 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
                           css={{
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '4px',
+                            gap: '0.25rem',
                           }}
                         >
                           Manage webhooks
@@ -490,7 +494,6 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
                                     inactive
                                     icon={<VisualInspectionIcon />}
                                     iconColor="icon-xlight"
-                                    css={{ borderRadius: 11 }}
                                   >
                                     Observability
                                   </Chip>
@@ -510,7 +513,6 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
                                     inactive
                                     icon={<TicketIcon />}
                                     iconColor="icon-xlight"
-                                    css={{ borderRadius: 11 }}
                                   >
                                     Ticketing
                                   </Chip>

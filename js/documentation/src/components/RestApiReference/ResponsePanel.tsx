@@ -18,6 +18,7 @@ import styled, { useTheme } from 'styled-components'
 
 import { useCopyText } from '@src/hooks/useCopyText'
 import type { EndpointDetail, ResponseSample } from '@src/lib/openapi-rest'
+import { brand, docsText } from '@src/theme/docsTheme'
 import { getStatusColor, StatusDot, StatusTab, StatusTabs } from './shared'
 
 const Panel = styled.div(({ theme }) => ({
@@ -29,20 +30,17 @@ const ResponseHeader = styled.div(({ theme }) => ({
   alignItems: 'center',
   justifyContent: 'space-between',
   gap: theme.spacing.medium,
-  minHeight: theme.spacing.xlarge + theme.spacing.xsmall * 2,
-  padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
-  borderBottom: theme.borders['fill-two'],
-  backgroundColor: theme.colors['fill-two'],
-  borderTopLeftRadius: theme.borderRadiuses.medium + 2,
-  borderTopRightRadius: theme.borderRadiuses.medium + 2,
-  ...theme.partials.text.overline,
-  color: theme.colors['text-light'],
+  minHeight: `calc(${theme.spacing.xlarge} + ${theme.spacing.xsmall} * 2)`,
+  padding: `${theme.spacing.xsmall} ${theme.spacing.medium}`,
+  borderBottom: `1px solid ${brand.line}`,
+  ...docsText.label,
 }))
 
 const StatusBadge = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   gap: theme.spacing.xsmall,
+  color: brand.ink,
 }))
 
 const CodeWrapper = styled.div(() => ({
@@ -58,7 +56,12 @@ const CopyBtnWrap = styled.div(({ theme }) => ({
 
 const CodeContent = styled.div(({ theme }) => ({
   overflow: 'auto',
-  padding: `${theme.spacing.medium}px`,
+  padding: `${theme.spacing.medium}`,
+  color: brand.ink,
+  '.hljs-attr': { color: brand['syntax-key'] },
+  '.hljs-string': { color: brand['syntax-string'] },
+  '.hljs-literal, .hljs-number': { color: brand['syntax-literal'] },
+  '.hljs-punctuation': { color: brand.ink },
 }))
 
 export function ResponsePanel({ detail }: { detail: EndpointDetail }) {

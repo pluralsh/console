@@ -1,15 +1,18 @@
 import {
+  ICON_FRAME_ICON_SIZE,
   Flex,
-  Input,
   ListBoxFooterPlus,
   ListBoxItem,
-  SearchIcon,
   Select,
   SelectButton,
   Table,
   TrashCanIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import {
+  PageToolbarPortal,
+  ToolbarSearchInput,
+} from 'components/layout/PageToolbar'
 import { GqlError } from 'components/utils/Alert'
 import { ScalingRecommendationType } from 'generated/graphql'
 import { useMemo } from 'react'
@@ -24,14 +27,11 @@ import {
   getColScalingPr,
 } from './ClusterScalingRecsTableCols'
 
-import {
-  COST_MANAGEMENT_ABS_PATH,
-  COST_MANAGEMENT_REL_PATH,
-} from 'routes/costManagementRoutesConsts'
+import { COST_MANAGEMENT_ABS_PATH } from 'routes/costManagementRoutesConsts'
 import { mapExistingNodes } from 'utils/graphql'
 
 const getBreadcrumbs = (clusterName: string) => [
-  { label: COST_MANAGEMENT_REL_PATH, url: COST_MANAGEMENT_ABS_PATH },
+  { label: 'cost management', url: COST_MANAGEMENT_ABS_PATH },
   { label: clusterName },
   { label: 'recommendations' },
 ]
@@ -79,17 +79,18 @@ export function CostManagementDetailsRecommendations() {
       gap="medium"
       overflow="hidden"
     >
-      <Flex gap="medium">
-        <Input
-          startIcon={<SearchIcon />}
+      <PageToolbarPortal>
+        <ToolbarSearchInput
           placeholder="Search by resource name"
           value={recommendationsQ}
-          onChange={(e) => setRecommendationsQ(e.target.value)}
-          css={{ flex: 1 }}
+          onChange={setRecommendationsQ}
         />
         <Select
           triggerButton={
-            <SelectButton css={{ minWidth: 300 }}>
+            <SelectButton
+              size="small"
+              css={{ minWidth: 200 }}
+            >
               {recType ?? 'Select type'}
             </SelectButton>
           }
@@ -98,7 +99,9 @@ export function CostManagementDetailsRecommendations() {
             setRecType(type as ScalingRecommendationType)
           }
           dropdownFooter={
-            <ListBoxFooterPlus leftContent={<TrashCanIcon />}>
+            <ListBoxFooterPlus
+              leftContent={<TrashCanIcon size={ICON_FRAME_ICON_SIZE.small} />}
+            >
               Clear Selection
             </ListBoxFooterPlus>
           }
@@ -111,7 +114,7 @@ export function CostManagementDetailsRecommendations() {
             />
           ))}
         </Select>
-      </Flex>
+      </PageToolbarPortal>
       {error ? (
         <GqlError error={error} />
       ) : (

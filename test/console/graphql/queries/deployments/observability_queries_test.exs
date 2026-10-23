@@ -7,10 +7,11 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
   alias Toolquery.{
     LogEntry,
     LogsQueryOutput,
-    MetricPoint,
+    MetricSample,
+    MetricSeries,
     MetricsLabelSearchOutput,
     MetricsLabelSearchResult,
-    MetricsQueryOutput,
+    MetricsSeriesOutput,
     TraceSpan,
     TracesQueryOutput
   }
@@ -392,7 +393,7 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
 
       expect(Client, :connect, 2, fn -> {:ok, :mock_conn} end)
 
-      expect(Stub, :metrics, fn :mock_conn, input, opts ->
+      expect(Stub, :metrics_series, fn :mock_conn, input, opts ->
         assert opts[:timeout] == :timer.seconds(30)
         assert input.query == "sum(rate(http_requests_total{namespace=\"production\"}[5m]))"
         assert input.step == "30s"
@@ -400,13 +401,21 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
         assert DateTime.compare(Google.Protobuf.to_datetime(input.range.end), end_at) == :eq
 
         {:ok,
-         %MetricsQueryOutput{
-           metrics: [
-             %MetricPoint{
-               timestamp: Google.Protobuf.from_datetime(end_at),
+         %MetricsSeriesOutput{
+           series: [
+             %MetricSeries{
                name: "http_requests_total",
-               value: 42.0,
-               labels: %{"namespace" => "production"}
+               labels: %{"namespace" => "production"},
+               samples: [
+                 %MetricSample{timestamp: Google.Protobuf.from_datetime(DateTime.add(end_at, -30)), value: 41.5},
+                 %MetricSample{timestamp: Google.Protobuf.from_datetime(end_at), value: 42.0},
+                 %MetricSample{timestamp: Google.Protobuf.from_datetime(end_at), value: :nan}
+               ]
+             },
+             %MetricSeries{
+               name: "http_requests_total",
+               labels: %{"namespace" => "staging"},
+               samples: [%MetricSample{timestamp: Google.Protobuf.from_datetime(end_at), value: :infinity}]
              }
            ]
          }}
@@ -434,6 +443,7 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
           query Dashboard($id: ID!, $input: Json!, $timeRange: DashboardTimeRangeAttributes!) {
             workbenchDashboard(id: $id) {
               graphData: graph(identifier: "requests", input: $input, timeRange: $timeRange) {
+                series { name metric values { timestamp value } }
                 metrics { timestamp name value labels }
                 logs { timestamp message labels }
                 traces { traceId spanId name }
@@ -453,7 +463,15 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
           %{current_user: admin_user()}
         )
 
-      assert [metric] = found["graphData"]["metrics"]
+      assert [series] = found["graphData"]["series"]
+      assert series["name"] == "http_requests_total"
+      assert series["metric"] == %{"namespace" => "production"}
+      assert series["values"] == [
+               %{"timestamp" => "#{DateTime.to_unix(end_at) - 30}", "value" => "41.5"},
+               %{"timestamp" => "#{DateTime.to_unix(end_at)}", "value" => "42.0"}
+             ]
+
+      assert [_, metric] = found["graphData"]["metrics"]
       assert metric["name"] == "http_requests_total"
       assert metric["value"] == 42.0
       assert metric["labels"] == %{"namespace" => "production"}
@@ -527,7 +545,7 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
 
       expect(Client, :connect, 2, fn -> {:ok, :mock_conn} end)
 
-      expect(Stub, :metrics, 2, fn :mock_conn, input, _opts ->
+      expect(Stub, :metrics_series, 2, fn :mock_conn, input, _opts ->
         case input.query do
           "azure_cpu" ->
             assert input.step == "PT15S"
@@ -537,7 +555,7 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
             assert is_nil(input.range)
         end
 
-        {:ok, %MetricsQueryOutput{metrics: []}}
+        {:ok, %MetricsSeriesOutput{series: []}}
       end)
 
       {:ok, %{data: %{"workbenchDashboard" => found}}} =

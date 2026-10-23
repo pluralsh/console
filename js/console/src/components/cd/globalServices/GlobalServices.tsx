@@ -3,7 +3,7 @@ import { Button, useSetBreadcrumbs } from '@pluralsh/design-system'
 
 import { CD_REL_PATH, GLOBAL_SERVICES_REL_PATH } from 'routes/cdRoutesConsts'
 
-import { useTheme } from 'styled-components'
+import { ToolbarSearchInput } from 'components/layout/PageToolbar'
 
 import {
   CD_BASE_CRUMBS,
@@ -42,7 +42,7 @@ export const crumbs = [
 ]
 
 export function GlobalServices() {
-  const theme = useTheme()
+  const [searchString, setSearchString] = useState('')
   const [refetch, setRefetch] = useState(() => () => {})
   const [isModalOpen, setIsModalOpen] = useState(false)
 
@@ -51,14 +51,16 @@ export function GlobalServices() {
   useSetPageHeaderContent(
     useMemo(
       () => (
-        <div
-          css={{
-            display: 'flex',
-            justifyContent: 'end',
-            gap: theme.spacing.small,
-          }}
-        >
-          <Button onClick={() => setIsModalOpen(true)}>
+        <>
+          <ToolbarSearchInput
+            placeholder="Search global services"
+            value={searchString}
+            onChange={setSearchString}
+          />
+          <Button
+            small
+            onClick={() => setIsModalOpen(true)}
+          >
             New Global Service
           </Button>
           <YamlGeneratorModal
@@ -68,11 +70,16 @@ export function GlobalServices() {
             header="Create global service"
             kind="GlobalService"
           />
-        </div>
+        </>
       ),
-      [theme.spacing.small, isModalOpen, refetch]
+      [searchString, isModalOpen, refetch]
     )
   )
 
-  return <GlobalServicesTable setRefetch={setRefetch} />
+  return (
+    <GlobalServicesTable
+      searchString={searchString}
+      setRefetch={setRefetch}
+    />
+  )
 }

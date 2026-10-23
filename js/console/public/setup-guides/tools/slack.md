@@ -16,7 +16,9 @@ Use this guide to create a Slack app, install it to your workspace, and grant **
 3. Install the app to your workspace (**Install to Workspace**).
 4. Copy **Bot User OAuth Token** (starts with `xoxb-`). That is the value for the Workbench field **Bot user OAuth token**.
 
-Invite the bot to any **private** channel it should list, post in, or invite others to—the bot only sees private channels it has joined.
+Invite the bot (for example with `/invite @your-app` in the channel) to every channel it should read, post in, or invite others to. With a bot token, Slack requires channel membership for `conversations.history`, `chat.postMessage`, and `conversations.invite`, in **public** channels as well as private ones. Private channels the bot has not joined are also omitted from channel listings.
+
+If agents only need to post to public channels, you can add the `chat:write.public` bot scope instead of joining each one; reading history and inviting still require membership.
 
 ## 3) Scopes used by built-in Slack tools
 

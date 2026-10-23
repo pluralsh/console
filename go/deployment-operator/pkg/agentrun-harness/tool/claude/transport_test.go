@@ -15,6 +15,7 @@ import (
 	console "github.com/pluralsh/console/go/client"
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/usage"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
 	stackv1 "github.com/pluralsh/console/go/deployment-operator/pkg/harness/stackrun/v1"
 )
@@ -127,12 +128,11 @@ func TestTransportProjectsClaudeACP(t *testing.T) {
 	}
 }
 
-func TestACPEnvironmentUsesProxyCredential(t *testing.T) {
+func TestACPEnvironmentUsesSidecarProxy(t *testing.T) {
 	config := toolv1.Config{WorkDir: t.TempDir(), RepositoryDir: t.TempDir(), Run: claudeTestRun(console.AgentRunModeWrite, "claude-sonnet", true)}
 	agent := NewAgent(config)
-	agent.consoleURL, agent.consoleToken = "https://console.example", "console-token"
 	values := testEnvValues(agent.env(config))
-	if values[anthropicAuthEnv] != "console-token" || values[anthropicBaseURLEnv] != "https://console.example/ext/ai/anthropic" {
+	if values[anthropicAuthEnv] != common.AgentAIProxyAPIKey || values[anthropicBaseURLEnv] != common.AgentConsoleProxyURL+"/ext/ai/anthropic" {
 		t.Fatalf("proxy environment = %#v", values)
 	}
 	if _, exists := values[anthropicAPIKeyEnv]; exists {

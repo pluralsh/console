@@ -81,6 +81,7 @@ defmodule Console.Schema.AgentRun do
     has_many :pull_requests, PullRequest
     has_many :messages,      AgentMessage, on_replace: :delete
     has_many :prompts,       AgentPrompt, on_replace: :delete
+    has_many :attachments,   Console.Schema.Attachment, where: [agent_prompt_id: nil]
     has_one  :upload,        AgentRunUpload
 
     timestamps()
@@ -96,6 +97,10 @@ defmodule Console.Schema.AgentRun do
 
   def for_session(query \\ __MODULE__, session_id) do
     from(ar in query, where: ar.session_id == ^session_id)
+  end
+
+  def with_lock(query \\ __MODULE__) do
+    from(ar in query, lock: "FOR UPDATE")
   end
 
   def for_status(query \\ __MODULE__, status) do

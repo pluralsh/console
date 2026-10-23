@@ -52,7 +52,11 @@ defmodule Console.AI.Workbench.Environment do
     do: Keyword.merge(engine_opts(job), [policies: policies])
 
   def engine_opts(%WorkbenchJob{} = job) do
-    model_opts(job, ModelSelection.tool_model(job, Settings.cached()))
+    settings = Settings.cached()
+    base = ModelSelection.base_model(settings)
+
+    model_opts(job, ModelSelection.tool_model(job, settings)) ++
+      [compaction_opts: [usage_callback: &usage_callback(job, base, &1)]]
   end
 
   @doc """

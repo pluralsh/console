@@ -60,7 +60,7 @@ import {
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 
-import { EmptyStateCompact } from 'components/ai/AIThreads'
+import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import { FillLevelDiv } from 'components/utils/FillLevelDiv'
 import { Link } from 'react-router-dom'
 import {
@@ -310,6 +310,8 @@ export function WorkbenchSkillsConfigStep({
   const [subTab, setSubTab] = useState<
     'git-skills' | 'plural-skills' | 'knowledge'
   >('plural-skills')
+  // the workbench filesystem supersedes the knowledge base
+  const showKnowledge = !formState.filesystemEnabled
 
   useEffect(() => {
     setTabs(
@@ -326,16 +328,18 @@ export function WorkbenchSkillsConfigStep({
         >
           Git skills
         </CardTab>
-        <CardTab
-          active={subTab === 'knowledge'}
-          onClick={() => setSubTab('knowledge')}
-        >
-          Knowledge
-        </CardTab>
+        {showKnowledge && (
+          <CardTab
+            active={subTab === 'knowledge'}
+            onClick={() => setSubTab('knowledge')}
+          >
+            Knowledge
+          </CardTab>
+        )}
       </CardTabs>
     )
     return () => setTabs(null)
-  }, [setTabs, subTab])
+  }, [setTabs, subTab, showKnowledge])
 
   if (subTab === 'git-skills') {
     return (
@@ -346,7 +350,7 @@ export function WorkbenchSkillsConfigStep({
     )
   }
 
-  if (subTab === 'knowledge') {
+  if (subTab === 'knowledge' && showKnowledge) {
     return (
       <KnowledgeSubStep
         formState={formState}
@@ -697,7 +701,7 @@ export function WorkbenchCodingAgentStep({
             {repoError && (
               <span
                 css={{
-                  fontSize: 12,
+                  fontSize: '0.75rem',
                   color: 'var(--text-danger, #c53030)',
                 }}
               >
@@ -853,12 +857,13 @@ export function WorkbenchAttachToolsStep({
   }
 
   return tools.length === 0 ? (
-    <EmptyStateCompact
-      message="You have not set up any tools yet"
-      description="You can set up tools by clicking the button below. Tools can also be added later."
-      cssProps={{ '& *': { textWrap: 'pretty' } }}
+    <WorkbenchEmptyState
+      inset={false}
+      message="No tools set up yet"
+      description="Tools give this workbench's agents access to your systems. You can also add them later."
     >
       <Button
+        small
         secondary
         endIcon={<ArrowTopRightIcon size={16} />}
         as={Link}
@@ -866,7 +871,7 @@ export function WorkbenchAttachToolsStep({
       >
         Set up tools
       </Button>
-    </EmptyStateCompact>
+    </WorkbenchEmptyState>
   ) : (
     <Flex
       direction="column"
@@ -989,7 +994,6 @@ export function WorkbenchAttachToolsStep({
                       />
                     </Flex>
                     <IconFrame
-                      circle
                       clickable
                       icon={<CloseIcon />}
                       tooltip="Remove from selection"

@@ -5,7 +5,7 @@ description: End-to-end guide to creating, configuring, and running your first w
 
 ## Prerequisites
 
-Before creating a workbench you need:
+Before creating a workbench, you need:
 
 * Any external tools (Datadog, Prometheus, GitHub, Slack, etc.) configured in **Workbenches → Integrations**. Tools can be added later, but it is easiest to have them ready before creating the workbench. See [Workbench tools](/plural-features/workbenches/integrations/tools).
 * If you plan to enable the coding agent, an `AgentRuntime` resource deployed to your management cluster. See [Configure an AgentRuntime](/plural-features/plural-ai/ai-agent/configure-agent).
@@ -121,4 +121,4 @@ Open the **•••** overflow menu on any workbench and select **Edit** to reo
 
 ## Deleting a workbench
 
-From the overflow menu, select **Delete**. This permanently removes the workbench and all associated job history, schedules, webhooks and saved prompts.
+From the overflow menu, select **Delete**. This permanently removes the workbench and all associated job history, schedules, webhooks, and saved prompts.

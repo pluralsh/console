@@ -10,7 +10,7 @@ const Dots = styled.div`
   display: flex;
   align-items: center;
   height: 24px;
-  gap: 4px;
+  gap: 0.25rem;
 `
 
 const Dot = styled.span<{ delay: number }>`

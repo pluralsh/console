@@ -41,7 +41,7 @@ export function WorkbenchJobTriggerAlert({
           trigger={
             <Flex
               align="center"
-              gap="medium"
+              gap="small"
             >
               <TriggerCardIconWrapperSC>
                 <MegaphoneIcon />

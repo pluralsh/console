@@ -110,6 +110,108 @@ export const docsStructure: DocSection[] = [
     title: 'Plural Features',
     sections: [
       {
+        path: 'workbenches',
+        title: 'Workbenches',
+        sections: [
+          { path: 'configuration', title: 'Setting up a workbench' },
+          { path: 'coding-agent', title: 'Coding agent' },
+          {
+            path: 'integrations',
+            title: 'Integrations',
+            sections: [
+              {
+                path: 'tools',
+                title: 'Tools',
+                sections: [
+                  { path: 'datadog', title: 'Datadog' },
+                  { path: 'prometheus', title: 'Prometheus' },
+                  { path: 'loki', title: 'Loki' },
+                  { path: 'elastic', title: 'Elasticsearch' },
+                  { path: 'tempo', title: 'Tempo' },
+                  { path: 'jaeger', title: 'Jaeger' },
+                  { path: 'cloudwatch', title: 'CloudWatch' },
+                  { path: 'dynatrace', title: 'Dynatrace' },
+                  { path: 'sentry', title: 'Sentry' },
+                  { path: 'splunk', title: 'Splunk' },
+                  { path: 'victoria-logs', title: 'VictoriaLogs' },
+                  { path: 'opensearch', title: 'OpenSearch' },
+                  { path: 'azure', title: 'Azure Monitor' },
+                  { path: 'pagerduty', title: 'PagerDuty' },
+                  { path: 'github', title: 'GitHub' },
+                  { path: 'gitlab', title: 'GitLab' },
+                  { path: 'bitbucket', title: 'Bitbucket Cloud' },
+                  {
+                    path: 'bitbucket-datacenter',
+                    title: 'Bitbucket Data Center',
+                  },
+                  { path: 'slack', title: 'Slack' },
+                  { path: 'atlassian', title: 'Atlassian' },
+                  { path: 'jira', title: 'Jira Cloud' },
+                  {
+                    path: 'jira-datacenter',
+                    title: 'Jira Data Center',
+                  },
+                  { path: 'linear', title: 'Linear' },
+                  { path: 'service-now', title: 'ServiceNow' },
+                  { path: 'azure-devops', title: 'Azure DevOps' },
+                  { path: 'http', title: 'HTTP' },
+                  { path: 'mcp', title: 'MCP' },
+                  { path: 'docker', title: 'Docker registry' },
+                  { path: 'exa', title: 'Exa' },
+                  { path: 'cloud', title: 'Cloud' },
+                  { path: 'lambda', title: 'Lambda' },
+                  { path: 'cloud-run', title: 'Cloud Run' },
+                  {
+                    path: 'azure-function',
+                    title: 'Azure Function',
+                  },
+                ],
+              },
+              {
+                path: 'webhooks',
+                title: 'Webhooks',
+                sections: [
+                  { path: 'alertops', title: 'AlertOps' },
+                  { path: 'datadog', title: 'Datadog' },
+                  { path: 'grafana', title: 'Grafana' },
+                  { path: 'new-relic', title: 'New Relic' },
+                  { path: 'pagerduty', title: 'PagerDuty' },
+                  { path: 'plural', title: 'Plural' },
+                  { path: 'sentry', title: 'Sentry' },
+                  { path: 'asana', title: 'Asana' },
+                  { path: 'azure-devops', title: 'Azure DevOps' },
+                  { path: 'bitbucket', title: 'Bitbucket Cloud' },
+                  {
+                    path: 'bitbucket-datacenter',
+                    title: 'Bitbucket Data Center',
+                  },
+                  { path: 'github', title: 'GitHub' },
+                  { path: 'gitlab', title: 'GitLab' },
+                  { path: 'jira', title: 'Jira' },
+                  { path: 'linear', title: 'Linear' },
+                  { path: 'service-now', title: 'ServiceNow' },
+                ],
+              },
+              {
+                path: 'chatbots',
+                title: 'Chatbots',
+                sections: [
+                  { path: 'slack', title: 'Slack' },
+                  { path: 'teams', title: 'Microsoft Teams' },
+                ],
+              },
+            ],
+          },
+          { path: 'running-jobs', title: 'Running workbench jobs' },
+          { path: 'automation', title: 'Automating workbench jobs' },
+          {
+            path: 'follow-up-automation',
+            title: 'Automating workbench follow-up',
+          },
+          { path: 'use-cases', title: 'Common use cases' },
+        ],
+      },
+      {
         path: 'continuous-deployment',
         title: 'Continuous deployment',
         sections: [
@@ -218,106 +320,6 @@ export const docsStructure: DocSection[] = [
         sections: [
           { path: 'creation', title: 'Creating your own catalog' },
           { path: 'contribution-program', title: 'Contribution program' },
-        ],
-      },
-      {
-        path: 'workbenches',
-        title: 'Workbenches',
-        sections: [
-          { path: 'configuration', title: 'Setting up a workbench' },
-          { path: 'coding-agent', title: 'Coding agent' },
-          {
-            path: 'integrations',
-            title: 'Integrations',
-            sections: [
-              {
-                path: 'tools',
-                title: 'Tools',
-                sections: [
-                  { path: 'datadog', title: 'Datadog' },
-                  { path: 'prometheus', title: 'Prometheus' },
-                  { path: 'loki', title: 'Loki' },
-                  { path: 'elastic', title: 'Elasticsearch' },
-                  { path: 'tempo', title: 'Tempo' },
-                  { path: 'jaeger', title: 'Jaeger' },
-                  { path: 'cloudwatch', title: 'CloudWatch' },
-                  { path: 'dynatrace', title: 'Dynatrace' },
-                  { path: 'sentry', title: 'Sentry' },
-                  { path: 'splunk', title: 'Splunk' },
-                  { path: 'victoria-logs', title: 'VictoriaLogs' },
-                  { path: 'opensearch', title: 'OpenSearch' },
-                  { path: 'azure', title: 'Azure Monitor' },
-                  { path: 'pagerduty', title: 'PagerDuty' },
-                  { path: 'github', title: 'GitHub' },
-                  { path: 'gitlab', title: 'GitLab' },
-                  { path: 'bitbucket', title: 'Bitbucket Cloud' },
-                  {
-                    path: 'bitbucket-datacenter',
-                    title: 'Bitbucket Data Center',
-                  },
-                  { path: 'slack', title: 'Slack' },
-                  { path: 'atlassian', title: 'Atlassian' },
-                  { path: 'jira', title: 'Jira Cloud' },
-                  {
-                    path: 'jira-datacenter',
-                    title: 'Jira Data Center',
-                  },
-                  { path: 'linear', title: 'Linear' },
-                  { path: 'azure-devops', title: 'Azure DevOps' },
-                  { path: 'http', title: 'HTTP' },
-                  { path: 'mcp', title: 'MCP' },
-                  { path: 'docker', title: 'Docker registry' },
-                  { path: 'exa', title: 'Exa' },
-                  { path: 'cloud', title: 'Cloud' },
-                  { path: 'lambda', title: 'Lambda' },
-                  { path: 'cloud-run', title: 'Cloud Run' },
-                  {
-                    path: 'azure-function',
-                    title: 'Azure Function',
-                  },
-                ],
-              },
-              {
-                path: 'webhooks',
-                title: 'Webhooks',
-                sections: [
-                  { path: 'alertops', title: 'AlertOps' },
-                  { path: 'datadog', title: 'Datadog' },
-                  { path: 'grafana', title: 'Grafana' },
-                  { path: 'new-relic', title: 'New Relic' },
-                  { path: 'pagerduty', title: 'PagerDuty' },
-                  { path: 'plural', title: 'Plural' },
-                  { path: 'sentry', title: 'Sentry' },
-                  { path: 'asana', title: 'Asana' },
-                  { path: 'azure-devops', title: 'Azure DevOps' },
-                  { path: 'bitbucket', title: 'Bitbucket Cloud' },
-                  {
-                    path: 'bitbucket-datacenter',
-                    title: 'Bitbucket Data Center',
-                  },
-                  { path: 'github', title: 'GitHub' },
-                  { path: 'gitlab', title: 'GitLab' },
-                  { path: 'jira', title: 'Jira' },
-                  { path: 'linear', title: 'Linear' },
-                ],
-              },
-              {
-                path: 'chatbots',
-                title: 'Chatbots',
-                sections: [
-                  { path: 'slack', title: 'Slack' },
-                  { path: 'teams', title: 'Microsoft Teams' },
-                ],
-              },
-            ],
-          },
-          { path: 'running-jobs', title: 'Running workbench jobs' },
-          { path: 'automation', title: 'Automating workbench jobs' },
-          {
-            path: 'follow-up-automation',
-            title: 'Automating workbench follow-up',
-          },
-          { path: 'use-cases', title: 'Common use cases' },
         ],
       },
       {
@@ -437,13 +439,6 @@ export const docsStructure: DocSection[] = [
       { path: 'product-updates', title: 'Product Updates' },
       { path: 'security', title: 'Plural Security Certifications' },
       // { path: 'paid-tiers', title: 'Plural Pricing Model' },
-      {
-        path: 'architecture',
-        title: 'Advanced Architecture',
-        sections: [
-          { path: 'gitops-architecture', title: 'GitOps Architecture' },
-        ],
-      },
     ],
   },
 ]
@@ -455,7 +450,7 @@ export const docsStructure: DocSection[] = [
 export const redirects = [
   {
     source: '/getting-started/agent-api-reference',
-    destination: '/overview/agent-api-reference',
+    destination: '/api-reference/kubernetes/agent-api-reference',
     permanent: true,
   },
   {
@@ -479,8 +474,18 @@ export const redirects = [
     permanent: true,
   },
   {
+    source: '/resources/architecture',
+    destination: '/overview/architecture',
+    permanent: true,
+  },
+  {
+    source: '/resources/architecture/gitops-architecture',
+    destination: '/overview/architecture',
+    permanent: true,
+  },
+  {
     source: '/deployments/operator/api',
-    destination: '/overview/api-reference',
+    destination: '/api-reference/kubernetes/management-api-reference',
     permanent: true,
   },
   {
@@ -495,7 +500,7 @@ export const redirects = [
   },
   {
     source: '/getting-started/deployments',
-    destination: '/getting-started/first-steps/index',
+    destination: '/getting-started/first-steps',
     permanent: true,
   },
   {
@@ -540,7 +545,7 @@ export const redirects = [
   },
   {
     source: '/how-to/index',
-    destination: '/getting-started/how-to-use/index',
+    destination: '/getting-started/how-to-use',
     permanent: true,
   },
   {
@@ -587,12 +592,12 @@ export const redirects = [
   },
   {
     source: '/deployments/using-operator',
-    destination: '/plural-features/continuous-deployment/index',
+    destination: '/plural-features/continuous-deployment',
     permanent: true,
   },
   {
     source: '/deployments/deprecations',
-    destination: '/plural-features/k8s-upgrade-assistant/index',
+    destination: '/plural-features/k8s-upgrade-assistant',
     permanent: true,
   },
   {
@@ -632,7 +637,7 @@ export const redirects = [
   },
   {
     source: '/deployments/stacks',
-    destination: '/plural-features/stacks-iac-management/index',
+    destination: '/plural-features/stacks-iac-management',
     permanent: true,
   },
   {
@@ -647,12 +652,12 @@ export const redirects = [
   },
   {
     source: '/service-catalog/overview',
-    destination: '/plural-features/service-catalog/index',
+    destination: '/plural-features/service-catalog',
     permanent: true,
   },
   {
     source: '/deployments/dashboard',
-    destination: '/plural-features/kubernetes-dashboard/index',
+    destination: '/plural-features/kubernetes-dashboard',
     permanent: true,
   },
   {
@@ -692,7 +697,7 @@ export const redirects = [
   },
   {
     source: '/ai/overview',
-    destination: '/plural-features/plural-ai/index',
+    destination: '/plural-features/plural-ai',
     permanent: true,
   },
   {
@@ -712,22 +717,22 @@ export const redirects = [
   },
   {
     source: '/deployments/pr-automation',
-    destination: '/plural-features/pr-automation/index',
+    destination: '/plural-features/pr-automation',
     permanent: true,
   },
   {
     source: '/deployments/templating',
-    destination: '/plural-features/service-templating/index',
+    destination: '/plural-features/continuous-deployment/service-templating',
     permanent: true,
   },
   {
     source: '/deployments/multi-tenancy',
-    destination: '/plural-features/projects-and-multi-tenancy/index',
+    destination: '/plural-features/projects-and-multi-tenancy',
     permanent: true,
   },
   {
     source: '/deployments/notifications',
-    destination: '/plural-features/notifications/index',
+    destination: '/plural-features/notifications',
     permanent: true,
   },
   {

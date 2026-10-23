@@ -158,7 +158,7 @@ const SubtitleSC = styled.div(({ theme }) => ({
 const SuggestionsSC = styled.div({
   display: 'flex',
   flexWrap: 'wrap',
-  gap: 10,
+  gap: '0.625rem',
 })
 
 const SuggestionCardSC = styled.button(({ theme }) => ({

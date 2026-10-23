@@ -5,28 +5,28 @@ description: Easily create a first class PR preview environment experience withi
 
 ## Overview
 
-Preview environments are a powerful software testing pattern whereby you create a near clone of a dev environment with the code of a feature branch during the duration of a pull request.  This has a few great benefits:
+Preview environments are a powerful software testing pattern in which you create a near clone of a dev environment running a feature branch's code for the duration of a pull request.  This has a few great benefits:
 
-1. Reduces churn in your dev environment, improving overall stability - which is a common failure in large organizations with many in-flight changes
-2. Makes it easier to test code in isolation - the code only has the changes happening in your branch
-3. Reduces dev data corruption issues - true if you implement database forking as part of the preview, making it easy to test things like schema migrations
+1. Reduces churn in your dev environment, improving overall stability - a common failure point in large organizations with many in-flight changes
+2. Makes it easier to test code in isolation - the code only has the changes in your branch
+3. Reduces dev data corruption issues - if you implement database forking as part of the preview, making it easy to test things like schema migrations
 
-This is extremely easy to implement with Plural because of a few things:
+This is extremely easy to implement with Plural for a few reasons:
 
-* GitOps patterns make it really easy to redeploy and reconfigure services
-* Plural already has the webhook and event system to track PR updates natively implemented within its server
-* Plural also already has a secure way of managing SCM credentials, so it can natively implement the Github/Gitlab comment feedback to make an ideal DevEx around preview environments
+* GitOps patterns make it easy to redeploy and reconfigure services
+* Plural already natively implements the webhook and event system to track PR updates within its server
+* Plural already has a secure way of managing SCM credentials, so it can natively implement GitHub/GitLab comment feedback for an ideal DevEx around preview environments
 
 ## Demo Video
 
-If you just want to see it in action, here's a quick YouTube video demo:
+If you want to see it in action, here's a quick YouTube video demo:
 
 {% embed url="https://youtu.be/9hoiQnkgnzQ" aspectRatio="16 / 9" /%}
 
 
 ## How to Implement
 
-Implementing preview environments is quite simple.  You functionally just need to register one custom resource, a `PreviewEnvironmentTemplate` like below:
+Implementing preview environments is quite simple.  You only need to register one custom resource, a `PreviewEnvironmentTemplate` like the one below:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -75,12 +75,12 @@ Plural Flow: flow-test
 Plural Preview: test # notice this is the same as the name of the PreviewEnvironmentTemplate
 ```
 
-the `template` field customizes how you'll override the setting of the source service, in this case it will:
+The `template` field customizes how you override the settings of the source service. In this case, it will:
 
-1. deploy it in the `flow-test-pr-{{ pr.number }}` namespace
-2. Override the image with `sha-{{ commitSha | slice: 0, 7 }}` (basically the sha image tag we've configured GH actions to build with)
+1. Deploy it in the `flow-test-pr-{{ pr.number }}` namespace
+2. Override the image with `sha-{{ commitSha | slice: 0, 7 }}` (the SHA image tag we've configured GitHub Actions to build with)
 
-To see how the image was built, you can consult one of our example repos [here](https://github.com/pluralsh/plrl-cd-demo/blob/main/.github/workflows/push.yaml#L48), but the image tagging is easy to accomplish with github actions using:
+To see how the image was built, consult one of our example repos [here](https://github.com/pluralsh/plrl-cd-demo/blob/main/.github/workflows/push.yaml#L48). The image tagging is easy to accomplish with GitHub Actions using:
 
 
 ```yaml
@@ -120,7 +120,7 @@ jobs:
 
 ## Templating variables
 
-The fields of `PreviewEnvironment.spec.template` can include liquid templating with the following preconfigured context variable schema:
+The fields of `PreviewEnvironment.spec.template` can include Liquid templating with the following preconfigured context variable schema:
 
 ```yaml
 commitSha: string
@@ -131,7 +131,7 @@ pr:
   attributes: {string: string} # a string kv map gathered from using Plural Attribute: {key}={value} in your pr body for additional configuration
 ```
 
-Like in the case above, you can use that to templatize useful fields like namespace/service names and helm values subfields.
+As in the example above, you can use these to templatize useful fields like namespace/service names and Helm values subfields.
 
 ## Constraints
 
@@ -139,5 +139,5 @@ Plural enforces a few constraints on how preview environments can be created:
 
 1. They will only deploy to the same cluster as their source service
 2. They will only deploy to a namespace with a name that's prefixed by the original service's namespace
-    - this is to prevent preview environments from jumping tenants, but also still make it easy to prevent them from trampling the original service.
+    - this prevents preview environments from jumping tenants, while still making it easy to keep them from trampling the original service.
 

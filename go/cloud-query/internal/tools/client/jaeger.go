@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"strconv"
 	"strings"
 
@@ -85,8 +86,76 @@ func (in *JaegerClient) Traces(ctx context.Context, query datasource.JaegerTrace
 	if err != nil {
 		return nil, err
 	}
+
+	return in.tracesResult(response, traces, "jaeger traces search")
+}
+
+// Trace fetches every span of one trace.
+func (in *JaegerClient) Trace(ctx context.Context, traceID string) (*datasource.JaegerTraceResponse, error) {
+	traces := new(datasource.JaegerTracesResponse)
+	response, err := in.R().
+		SetContext(ctx).
+		SetHeader("Accept", "application/json").
+		SetResult(traces).
+		Get(in.baseURL + jaegerTracesEndpoint + "/" + url.PathEscape(traceID))
+	if err != nil {
+		return nil, err
+	}
+
+	return in.tracesResult(response, traces, "jaeger trace fetch")
+}
+
+// Services lists the services that reported spans.
+func (in *JaegerClient) Services(ctx context.Context) ([]string, error) {
+	var resp struct {
+		Services []string `json:"services"`
+	}
+	if err := in.getJSON(ctx, "/api/v3/services", nil, &resp); err != nil {
+		return nil, err
+	}
+
+	return resp.Services, nil
+}
+
+// Operations lists a service's span names.
+func (in *JaegerClient) Operations(ctx context.Context, service string) ([]string, error) {
+	var resp struct {
+		Operations []struct {
+			Name string `json:"name"`
+		} `json:"operations"`
+	}
+	if err := in.getJSON(ctx, "/api/v3/operations", map[string]string{"service": service}, &resp); err != nil {
+		return nil, err
+	}
+
+	names := make([]string, 0, len(resp.Operations))
+	for _, op := range resp.Operations {
+		names = append(names, op.Name)
+	}
+
+	return names, nil
+}
+
+// getJSON decodes the body itself, as Jaeger can answer with text/plain.
+func (in *JaegerClient) getJSON(ctx context.Context, path string, params map[string]string, result any) error {
+	response, err := in.R().
+		SetContext(ctx).
+		SetHeader("Accept", "application/json").
+		SetQueryParams(params).
+		Get(in.baseURL + path)
+	if err != nil {
+		return err
+	}
 	if response.IsError() {
-		return nil, fmt.Errorf("jaeger traces search failed: status=%d body=%s", response.StatusCode(), response.String())
+		return fmt.Errorf("jaeger request to %s failed: status=%d body=%s", path, response.StatusCode(), response.String())
+	}
+
+	return json.Unmarshal(response.Bytes(), result)
+}
+
+func (in *JaegerClient) tracesResult(response *resty.Response, traces *datasource.JaegerTracesResponse, operation string) (*datasource.JaegerTraceResponse, error) {
+	if response.IsError() {
+		return nil, fmt.Errorf("%s failed: status=%d body=%s", operation, response.StatusCode(), response.String())
 	}
 
 	// Fallback: manually unmarshal if automatic unmarshalling failed due to incorrect Content-Type

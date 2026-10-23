@@ -1,19 +1,14 @@
-import { ReactElement, ReactNode, useMemo, useRef, useState } from 'react'
-import { SubTab, TabList } from '@pluralsh/design-system'
-import { useTheme } from 'styled-components'
+import { ReactElement, ReactNode, useCallback, useMemo, useState } from 'react'
+import styled from 'styled-components'
 import { useMatch, useParams, useResolvedPath } from 'react-router-dom'
 import pluralize from 'pluralize'
 import { useQuery } from '@tanstack/react-query'
 
-import { ResponsiveLayoutPage } from '../../utils/layout/ResponsiveLayoutPage'
-import { LinkTabWrap } from '../../utils/Tabs'
-import { ResponsivePageFullWidth } from '../../utils/layout/ResponsivePageFullWidth'
-import { ResponsiveLayoutSpacer } from '../../utils/layout/ResponsiveLayoutSpacer'
-import { ResponsiveLayoutSidecarContainer } from '../../utils/layout/ResponsiveLayoutSidecarContainer'
+import { PageColumnSC, PageContentSC, PageRowSC } from '../../layout/PageLayout'
+import { PageToolbar } from '../../layout/PageToolbar'
 import { PageHeaderContext } from '../../cd/ContinuousDeployment'
 import { getKubernetesAbsPath } from '../../../routes/kubernetesRoutesConsts.tsx'
 import { AxiosInstance } from '../../../helpers/axios.ts'
-import { useExplainWithAI } from '../../ai/AIContext.tsx'
 import { GqlError } from '../../utils/Alert'
 import {
   getNamespacedResourceOptions,
@@ -38,12 +33,17 @@ export default function ResourceDetails({
   sidecar,
   children,
 }: ResourceDetailsProps): ReactElement<any> {
-  const theme = useTheme()
-  const basePath = useResolvedPath('.')
-  const pathMatch = useMatch(`${basePath.pathname}/:tab`)
+  const { pathname: basePath } = useResolvedPath('.')
+  const pathMatch = useMatch(`${basePath}/:tab`)
   const tab = pathMatch?.params?.tab || ''
-  const tabStateRef = useRef<any>(null)
-  const currentTab = tabs.find(({ path }) => path === (tab ?? ''))
+  const getTabPath = useCallback(
+    (path: string) => (path ? `${basePath}/${path}` : basePath),
+    [basePath]
+  )
+  const toolbarTabs = useMemo(
+    () => tabs.map(({ label, path }) => ({ label, path: getTabPath(path) })),
+    [tabs, getTabPath]
+  )
   const [headerContent, setHeaderContent] = useState<ReactNode>()
   const pageHeaderContext = useMemo(() => ({ setHeaderContent }), [])
   const { clusterId, name = '', namespace, crd } = useParams()
@@ -73,102 +73,38 @@ export default function ResourceDetails({
     refetchInterval: 30_000,
   })
 
-  const { data, error } = namespace ? namespacedQuery : clusterQuery
-
-  const prompt = useMemo(() => {
-    return data
-      ? `Describe the following Kubernetes ${kind} resource: ${JSON.stringify(data)}`
-      : undefined
-  }, [data, kind])
-
-  useExplainWithAI(prompt)
+  const { error } = namespace ? namespacedQuery : clusterQuery
 
   if (error) {
     return <GqlError error={error} />
   }
 
   return (
-    <ResponsiveLayoutPage
-      css={{ maxWidth: theme.breakpoints.desktopLarge, margin: 'auto' }}
-    >
-      <ResponsiveLayoutPage
-        css={{
-          display: 'flex',
-          flexDirection: 'column',
-          padding: 0,
-          paddingBottom: theme.spacing.large,
-
-          '> div': {
-            paddingLeft: 0,
-            paddingTop: 0,
-          },
-        }}
+    <PageColumnSC>
+      <PageToolbar
+        tabs={toolbarTabs}
+        activeFn={(path) => path === getTabPath(tab)}
       >
-        <header
-          css={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            gap: theme.spacing.small,
-            marginBottom: theme.spacing.medium,
-            paddingRight: theme.spacing.xlarge,
-          }}
-        >
-          <div css={{ flex: 1, overflow: 'hidden' }}>
-            <TabList
-              scrollable
-              stateRef={tabStateRef}
-              stateProps={{
-                orientation: 'horizontal',
-                selectedKey: currentTab?.path,
-              }}
-            >
-              {tabs.map(({ label, path }) => (
-                <LinkTabWrap
-                  subTab
-                  key={path}
-                  textValue={label}
-                  to={path}
-                >
-                  <SubTab
-                    key={path}
-                    textValue={label}
-                  >
-                    {label}
-                  </SubTab>
-                </LinkTabWrap>
-              ))}
-            </TabList>
-          </div>
-          {headerContent}
-          {additionalHeaderContent}
-        </header>
-        <ResponsivePageFullWidth noPadding>
+        {headerContent}
+        {additionalHeaderContent}
+      </PageToolbar>
+      <PageRowSC>
+        <PageContentSC>
           <PageHeaderContext.Provider value={pageHeaderContext}>
-            <div
-              css={{
-                display: 'flex',
-                flexDirection: 'column',
-                height: '100%',
-                gap: theme.spacing.large,
-              }}
-            >
-              {children}
-            </div>
+            {children}
           </PageHeaderContext.Provider>
-        </ResponsivePageFullWidth>
-      </ResponsiveLayoutPage>
-      <ResponsiveLayoutSpacer />
-      <ResponsiveLayoutSidecarContainer
-        css={{
-          width: 360,
-          height: '100%',
-          overflow: 'hidden',
-          paddingBottom: theme.spacing.large,
-          marginLeft: 0,
-        }}
-      >
-        <div css={{ height: '100%', overflowY: 'auto' }}>{sidecar}</div>
-      </ResponsiveLayoutSidecarContainer>
-    </ResponsiveLayoutPage>
+        </PageContentSC>
+        <SidecarSC>{sidecar}</SidecarSC>
+      </PageRowSC>
+    </PageColumnSC>
   )
 }
+
+const SidecarSC = styled.div(({ theme }) => ({
+  flexShrink: 0,
+  width: 360,
+  minHeight: 0,
+  overflowY: 'auto',
+  padding: theme.spacing.large,
+  paddingLeft: 0,
+}))

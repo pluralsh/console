@@ -81,9 +81,9 @@ const TriggerSC = styled.button(({ theme }) => ({
   cursor: 'pointer',
   display: 'flex',
   gap: theme.spacing.xsmall,
-  margin: `0 -${theme.spacing.xsmall}px`,
+  margin: `0 -${theme.spacing.xsmall}`,
   maxWidth: '100%',
-  padding: `2px ${theme.spacing.xsmall}px`,
+  padding: `0.125rem ${theme.spacing.xsmall}`,
   '&:hover': { backgroundColor: theme.colors['fill-one-hover'] },
   '&:focus-visible': {
     outline: `1px solid ${theme.colors['border-outline-focused']}`,
@@ -93,9 +93,9 @@ const TriggerSC = styled.button(({ theme }) => ({
 const TitleSC = styled.h2(({ theme }) => ({
   ...theme.partials.text.mono,
   color: theme.colors.text,
-  fontSize: 18,
+  fontSize: '1.125rem',
   fontWeight: 400,
-  lineHeight: '24px',
+  lineHeight: '1.5rem',
   margin: 0,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
@@ -109,14 +109,18 @@ const CaretSC = styled(CaretDownIcon)<{ $open: boolean }>(({ $open }) => ({
 }))
 
 const PanelSC = styled.div(({ theme }) => ({
-  backgroundColor: theme.colors['fill-two'],
-  border: theme.borders['fill-two'],
+  backgroundColor:
+    theme.mode === 'dark' ? theme.colors['fill-one'] : theme.colors['fill-two'],
+  border:
+    theme.mode === 'dark'
+      ? theme.borders['fill-one']
+      : theme.borders['fill-two'],
   borderRadius: theme.borderRadiuses.large,
   boxShadow: theme.boxShadows.moderate,
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.small,
-  left: -theme.spacing.xsmall,
+  left: theme.spacing['minus-xsmall'],
   maxWidth: 'min(520px, calc(100vw - 64px))',
   padding: theme.spacing.medium,
   position: 'absolute',

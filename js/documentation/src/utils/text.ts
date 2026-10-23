@@ -1,5 +1,3 @@
-import type { Provider } from '../generated/graphql'
-
 export * from '@pluralsh/design-system'
 
 export function removeTrailingSlashes(str) {
@@ -32,18 +30,6 @@ export function getBarePathFromPath(url: string) {
 
 export function isSubrouteOf(route: string, compareRoute: string) {
   return route.startsWith(compareRoute)
-}
-
-export const providerToProviderName: Record<Provider, string> = {
-  GCP: 'GCP',
-  AWS: 'AWS',
-  AZURE: 'Azure',
-  EQUINIX: 'Equinix',
-  KIND: 'kind',
-  CUSTOM: 'Custom',
-  LINODE: 'Linode',
-  KUBERNETES: 'Kubernetes',
-  GENERIC: 'Generic',
 }
 
 export function toHtmlId(str) {

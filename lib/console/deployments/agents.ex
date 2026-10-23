@@ -7,7 +7,7 @@ defmodule Console.Deployments.Agents do
   import Console.Schema.AgentRun, only: [is_terminal: 1]
   alias Console.Deployments.Pr.Review
   alias Console.Services.Users
-  alias Console.Deployments.{Clusters, Pr.Dispatcher, Git, Workbenches}
+  alias Console.Deployments.{Clusters, Pr.Dispatcher, Git, Workbenches, Attachments}
   alias Console.AI.Tool
   alias Console.PubSub
   alias Kazan.Apis.Core.V1, as: CoreV1
@@ -23,6 +23,7 @@ defmodule Console.Deployments.Agents do
     PullRequest,
     AgentMessage,
     AgentRunRepository,
+    WorkbenchJob,
     WorkbenchJobActivity,
     AgentRunUpload
   }
@@ -156,7 +157,8 @@ defmodule Console.Deployments.Agents do
   end
 
   @doc """
-  Creates an agent run, initiated by an ordinary user with create bindings against the runtime
+  Creates an agent run, initiated by an ordinary user with create bindings against the runtime.  Runs spawned
+  by a workbench can pass `attachments`, sandbox paths of existing workbench files the harness will download.
   """
   @spec create_agent_run(map, binary, User.t) :: agent_run_resp
   def create_agent_run(attrs, runtime_id, %User{id: user_id} = user) do
@@ -184,6 +186,9 @@ defmodule Console.Deployments.Agents do
         true -> {:ok, run}
         false -> {:error, "repository is not allowed for this runtime, allowed repositories: #{inspect(runtime.allowed_repositories || [])}"}
       end
+    end)
+    |> add_operation(:attachments, fn %{run: run} ->
+      run_attachments(run, %{agent_run_id: run.id}, &Attachments.link(attrs[:attachments], &1, &2), attrs[:attachments])
     end)
     |> execute(extract: :run)
     |> notify(:create)
@@ -371,15 +376,25 @@ defmodule Console.Deployments.Agents do
   end
 
   @doc """
-  Creates a new prompt for this agent run
+  Creates a new prompt for this agent run.
+
+  For terminal runs, requeues the run to pending with followup enabled so the
+  harness can restore the uploaded session and continue from prior history.
   """
-  @spec create_prompt(binary, binary, User.t) :: prompt_resp
-  def create_prompt(prompt, run_id, %User{} = user) do
+  @spec create_prompt(binary, binary, User.t, [Plug.Upload.t], [binary]) :: prompt_resp
+  def create_prompt(prompt, run_id, %User{} = user, attachments \\ [], files \\ []) do
     start_transaction()
     |> add_operation(:run, fn _ ->
-      get_agent_run!(run_id)
-      |> allow(user, :update)
+      run =
+        AgentRun.with_lock()
+        |> Repo.get!(run_id)
+        |> Repo.preload([:upload])
+
+      with {:ok, run} <- allow(run, user, :update) do
+        validate_terminal_reprompt(run)
+      end
     end)
+    |> add_operation(:requeue, fn %{run: run} -> requeue_terminal_run(run) end)
     |> add_operation(:prompt, fn _ ->
       %AgentPromptHistory{}
       |> AgentPromptHistory.changeset(%{prompt: prompt, agent_run_id: run_id})
@@ -395,7 +410,74 @@ defmodule Console.Deployments.Agents do
       |> AgentMessage.changeset(%{role: :user, message: prompt, agent_run_id: run_id})
       |> Repo.insert()
     end)
-    |> execute(extract: :prompt)
+    |> add_operation(:attachments, fn %{run: run, agent_prompt: agent_prompt} ->
+      assocs = %{agent_prompt_id: agent_prompt.id, agent_run_id: run.id}
+      run_attachments(run, assocs, &Attachments.create(attachments, &1, &2), attachments)
+    end)
+    |> add_operation(:files, fn %{run: run, agent_prompt: agent_prompt} ->
+      assocs = %{agent_prompt_id: agent_prompt.id, agent_run_id: run.id}
+      run_attachments(run, assocs, &Attachments.link(files, &1, &2), files)
+    end)
+    |> execute()
+    |> case do
+      {:ok, %{prompt: history, requeue: {:requeued, run}}} ->
+        notify({:ok, run}, :update)
+        {:ok, history}
+      {:ok, %{prompt: history}} ->
+        {:ok, history}
+      err -> err
+    end
+  end
+
+  defp validate_terminal_reprompt(%AgentRun{status: status, mode: :review}) when is_terminal(status),
+    do: {:error, "review mode agent runs cannot be reprompted"}
+  defp validate_terminal_reprompt(%AgentRun{status: status} = run) when is_terminal(status) do
+    cond do
+      Console.conf(:object_store) != true ->
+        {:error, "object store is not enabled for this instance, agent run reprompting requires session uploads"}
+      !has_session_upload?(run) ->
+        {:error, "agent run has no uploaded session to restore"}
+      true ->
+        {:ok, run}
+    end
+  end
+  defp validate_terminal_reprompt(%AgentRun{} = run), do: {:ok, run}
+
+  defp has_session_upload?(%AgentRun{upload: %AgentRunUpload{session: session}})
+       when is_binary(session) and byte_size(session) > 0,
+    do: true
+  defp has_session_upload?(%AgentRun{upload: %AgentRunUpload{session: %{file_name: name}}})
+       when is_binary(name) and byte_size(name) > 0,
+    do: true
+  defp has_session_upload?(_), do: false
+
+  defp requeue_terminal_run(%AgentRun{status: status, id: run_id} = run) when is_terminal(status) do
+    AgentPrompt.for_run(run_id)
+    |> Repo.delete_all()
+
+    run
+    |> AgentRun.changeset(%{
+      status: :pending,
+      followup: true,
+      error: nil,
+      pod_reference: nil,
+      approved_at: nil
+    })
+    |> Repo.update()
+    |> case do
+      {:ok, updated} -> {:ok, {:requeued, updated}}
+      err -> err
+    end
+  end
+  defp requeue_terminal_run(%AgentRun{} = run), do: {:ok, {:noop, run}}
+
+  # attachments live in a workbench's filesystem, so only runs spawned by a workbench can have them
+  defp run_attachments(_, _, _, empty) when empty in [nil, []], do: {:ok, []}
+  defp run_attachments(run, assocs, fun, _) do
+    case Repo.preload(run, :workbench_job, force: true) do
+      %AgentRun{workbench_job: %WorkbenchJob{workbench_id: wid}} -> fun.(wid, assocs)
+      _ -> {:error, "file attachments are only supported for agent runs spawned by a workbench"}
+    end
   end
 
   @doc """

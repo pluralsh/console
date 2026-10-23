@@ -1,15 +1,10 @@
-import {
-  Chip,
-  Flex,
-  Input,
-  SearchIcon,
-  SubTab,
-  Table,
-  TabList,
-} from '@pluralsh/design-system'
+import { Chip, Flex, SubTab, Table, TabList } from '@pluralsh/design-system'
 import { useDebounce } from '@react-hooks-library/core'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment.tsx'
-import { StretchedFlex } from 'components/utils/StretchedFlex.tsx'
+import {
+  PageToolbarPortal,
+  ToolbarSearchInput,
+} from 'components/layout/PageToolbar'
 import { StackedText } from 'components/utils/table/StackedText.tsx'
 import { capitalize } from 'lodash'
 import { useMemo, useRef, useState } from 'react'
@@ -66,6 +61,13 @@ export function Sentinels() {
       gap="medium"
       overflow="hidden"
     >
+      <PageToolbarPortal>
+        <ToolbarSearchInput
+          placeholder="Search by sentinel name"
+          value={filterString}
+          onChange={setFilterString}
+        />
+      </PageToolbarPortal>
       <StackedText
         first="Registered sentinels"
         firstPartialType="body2Bold"
@@ -74,14 +76,7 @@ export function Sentinels() {
         secondPartialType="body2"
         secondColor="text-light"
       />
-      <StretchedFlex gap="medium">
-        <Input
-          css={{ width: '40%' }}
-          startIcon={<SearchIcon />}
-          placeholder="Search by sentinel name"
-          value={filterString}
-          onChange={(e) => setFilterString(e.currentTarget.value)}
-        />
+      <div>
         <TabList
           scrollable
           stateRef={tabStateRef}
@@ -96,7 +91,7 @@ export function Sentinels() {
             <SubTab
               key={label}
               className="statusTab"
-              css={{ display: 'flex', gap: 12 }}
+              css={{ display: 'flex', gap: '0.75rem' }}
             >
               {label === SentinelRunStatus.Pending
                 ? 'Running'
@@ -110,7 +105,7 @@ export function Sentinels() {
             </SubTab>
           ))}
         </TabList>
-      </StretchedFlex>
+      </div>
       <Table
         fullHeightWrap
         virtualizeRows

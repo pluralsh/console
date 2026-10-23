@@ -77,6 +77,13 @@ func (agent *runtimeTestAgent) Export(_ context.Context, request ExportRequest) 
 	}}, nil
 }
 
+func (agent *runtimeTestAgent) Import(_ context.Context, request ImportRequest) (string, error) {
+	if request.Manifest == nil {
+		return "", nil
+	}
+	return request.Manifest.Session.ID, nil
+}
+
 type runtimeTestTurn struct {
 	kind      TurnKind
 	prompt    string
@@ -229,7 +236,7 @@ func TestRuntimeLifecycleAndErrorRouting(t *testing.T) {
 	runtime.Run(context.Background(), exec.WithArgs([]string{"--test"}))
 	<-transport.completed
 
-	if err := runtime.Configure("https://console.example", "secret"); err != nil {
+	if err := runtime.Configure(); err != nil {
 		t.Fatalf("Configure() error = %v", err)
 	}
 	if err := runtime.ConfigureBabysitRun(); err != nil {
@@ -271,9 +278,6 @@ func TestRuntimeLifecycleAndErrorRouting(t *testing.T) {
 	}
 	if len(agent.configure) != 2 || agent.configure[0].Phase != ConfigurePhaseInitial || agent.configure[1].Phase != ConfigurePhaseBabysit {
 		t.Fatalf("configure phases = %#v", agent.configure)
-	}
-	if agent.configure[0].ConsoleToken != "secret" || agent.configure[1].ConsoleToken != "" {
-		t.Fatalf("configure credentials were not phase scoped: %#v", agent.configure)
 	}
 }
 

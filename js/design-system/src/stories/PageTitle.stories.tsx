@@ -39,7 +39,7 @@ function UnsavedHint() {
       <p
         css={{
           margin: 0,
-          marginRight: 16,
+          marginRight: '1rem',
           textAlign: 'right',
           alignSelf: 'center',
           ...theme.partials.text.body2,

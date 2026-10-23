@@ -6,9 +6,10 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 )
 
-func TestBuildACPEnvironmentUsesConsoleCredential(t *testing.T) {
+func TestBuildACPEnvironmentUsesSidecarPlaceholder(t *testing.T) {
 	for _, test := range []struct {
 		name      string
 		streaming bool
@@ -27,8 +28,13 @@ func TestBuildACPEnvironmentUsesConsoleCredential(t *testing.T) {
 				t.Fatalf("buildACPEnvironment() failed: %v", err)
 			}
 			values := testEnvValues(env)
-			if values[consoleTokenEnv] != token || values[codexAPIKeyEnv] != token {
-				t.Fatal("proxy environment did not use the Console credential")
+			if values[codexAPIKeyEnv] != common.AgentAIProxyAPIKey {
+				t.Fatal("proxy environment did not use the sidecar placeholder")
+			}
+			for key, value := range values {
+				if strings.Contains(value, token) {
+					t.Fatalf("proxy environment leaked the Plural token in %s", key)
+				}
 			}
 			if _, ok := values[openAIAPIKeyEnv]; ok {
 				t.Fatal("proxy environment included the direct API key variable")

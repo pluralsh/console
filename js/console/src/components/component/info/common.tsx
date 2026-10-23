@@ -33,7 +33,7 @@ export const PropGroup = styled.div(({ theme }) => ({
   flexDirection: 'column',
   flexGrow: 1,
   justifyContent: 'space-between',
-  padding: `${theme.spacing.medium}px 0`,
+  padding: `${theme.spacing.medium} 0`,
 }))
 
 export function InfoSection({
@@ -61,7 +61,7 @@ export function InfoSection({
         flex: 1,
         gap: theme.spacing.small,
         '& > :first-child': {
-          marginBottom: -theme.spacing.xxxsmall,
+          marginBottom: theme.spacing['minus-xxxsmall'],
         },
       }}
       {...props}

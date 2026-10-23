@@ -3,12 +3,12 @@ package agent
 import (
 	"context"
 	"fmt"
+	"net"
 	"net/http"
 
 	"github.com/mark3labs/mcp-go/server"
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/console/go/deployment-operator/internal/mcpserver/agent/openaiproxy"
 	"github.com/pluralsh/console/go/deployment-operator/internal/mcpserver/agent/tool"
 	console "github.com/pluralsh/console/go/deployment-operator/pkg/client"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
@@ -42,14 +42,20 @@ type Server struct {
 	tools []tool.Tool
 
 	// openaiProxy optionally exposes a local OpenAI chat completion endpoint
-	openaiProxy *openaiproxy.Handler
+	openaiProxy http.Handler
 
 	// openaiResponsesProxy optionally exposes a local OpenAI responses endpoint
-	openaiResponsesProxy *openaiproxy.ResponsesHandler
+	openaiResponsesProxy http.Handler
 
 	// workbenchMCPProxy exposes the originating workbench without sharing its
 	// user credential with the coding-agent container.
 	workbenchMCPProxy http.Handler
+
+	// consoleExtProxy forwards the harness's allowlisted Console ext calls, adding the deploy token.
+	consoleExtProxy http.Handler
+
+	// consoleAIProxy forwards the agent's model calls to the Console AI proxy, adding the deploy token.
+	consoleAIProxy http.Handler
 }
 
 // Start starts the MCP server with streamable HTTP transport
@@ -92,6 +98,14 @@ func (in *Server) init() *Server {
 		mux.Handle(common.AgentWorkbenchMCPPath, in.workbenchMCPProxy)
 		klog.V(log.LogLevelDefault).InfoS("registered workbench mcp proxy", "path", common.AgentWorkbenchMCPPath)
 	}
+	if in.consoleExtProxy != nil {
+		mux.Handle(common.AgentConsoleExtGQLPath, in.consoleExtProxy)
+		klog.V(log.LogLevelDefault).InfoS("registered console ext proxy", "path", common.AgentConsoleExtGQLPath)
+	}
+	if in.consoleAIProxy != nil {
+		mux.Handle(common.AgentConsoleAIPath, in.consoleAIProxy)
+		klog.V(log.LogLevelDefault).InfoS("registered console ai proxy", "path", common.AgentConsoleAIPath)
+	}
 	if in.openaiProxy != nil {
 		mux.Handle(common.AgentOpenAIChatCompletionsPath, in.openaiProxy)
 		klog.V(log.LogLevelDefault).InfoS("registered openai chat completion proxy", "path", common.AgentOpenAIChatCompletionsPath)
@@ -101,7 +115,7 @@ func (in *Server) init() *Server {
 		klog.V(log.LogLevelDefault).InfoS("registered openai responses proxy", "path", common.AgentOpenAIResponsesPath)
 	}
 
-	in.httpServer = &http.Server{Handler: mux}
+	in.httpServer = &http.Server{Handler: loopbackOnly(mux)}
 	return in
 }
 
@@ -118,4 +132,18 @@ func NewServer(client console.Client, options ...Option) *Server {
 	}
 
 	return mcpServer.init()
+}
+
+// loopbackOnly rejects callers that are not in the pod itself. The listener stays on all interfaces
+// because the kubelet's startup probe dials the pod IP, but the proxies behind it inject the deploy
+// token and must not be usable by other pods.
+func loopbackOnly(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		host, _, err := net.SplitHostPort(r.RemoteAddr)
+		if ip := net.ParseIP(host); err != nil || ip == nil || !ip.IsLoopback() {
+			http.Error(w, "only local callers are allowed", http.StatusForbidden)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
 }

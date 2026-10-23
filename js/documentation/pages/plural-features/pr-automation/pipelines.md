@@ -3,18 +3,18 @@ title: PR automation pipelines
 description: Use PR automations to generate revisions throughout a pipeline
 ---
 
-Plural Pipelines do not ordinarily require human intervention to deploy the services within them, instead relying on common conventions like passing along git shas plus configured secrets to ferry along code changes. That said, there are still cases where you would like a PR to perform each update:
+Plural Pipelines do not ordinarily require human intervention to deploy their services, instead relying on common conventions like passing along Git SHAs plus configured secrets to ferry code changes along. That said, there are still cases where you'd want a PR to perform each update:
 
 - Robust GitOps flows where you need an auditable approval for each change
-- Cases where other automations (eg GitOps app-of-apps or terraform) could interfere with the changes from a pipeline
+- Cases where other automations (e.g. GitOps app-of-apps or Terraform) could interfere with the changes from a pipeline
 
-Plural PR Automation pipelines provide a simple but highly configurable means of providing extensible, auditable, yet automated workflows that can meet those sorts of constraints.
+Plural PR Automation pipelines provide a simple but highly configurable way to build extensible, auditable, yet automated workflows that meet those sorts of constraints.
 
 ## Setup
 
-Here's a quick and dirty dev to prod pipeline with pr automations to execute the changes in each stage:
+Here's a quick and dirty dev-to-prod pipeline with PR automations to execute the changes in each stage.
 
-in `dev.yaml`:
+In `dev.yaml`:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -36,7 +36,7 @@ spec:
     namespace: infra
 ```
 
-in `prod.yaml`:
+In `prod.yaml`:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -58,7 +58,7 @@ spec:
     namespace: infra
 ```
 
-in `pipeline.yaml`:
+In `pipeline.yaml`:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -91,7 +91,7 @@ spec:
           type: APPROVAL
 ```
 
-in `prautomation.yaml`:
+In `prautomation.yaml`:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -119,15 +119,15 @@ spec:
 
 ## How it works
 
-The `{dev,prod}.yaml` files configure the two podinfo services. Notice the `# VERSION` comment in each, that's simply designed to simplify the regex logic that's ultimately used by the pr automation in `prautomation.yaml` and is a generally useful trick in configuring these workflows.
+The `{dev,prod}.yaml` files configure the two podinfo services. Notice the `# VERSION` comment in each. It's there to simplify the regex logic used by the PR automation in `prautomation.yaml`, and is a generally useful trick when configuring these workflows.
 
-The PR Automation itself is templated, and utilizes the default `pipeline` object to infer the stage in which its applied to reduce the configuration burden for you. When triggered by the dev stage, it'll work off the `apps/pipeline/dev.yaml` file, and similarly the `apps/pipeline/prod.yaml` file for the prod stage.
+The PR Automation itself is templated, and uses the default `pipeline` object to infer the stage it's applied to, reducing the configuration burden for you. When triggered by the dev stage, it'll work off the `apps/pipeline/dev.yaml` file, and similarly the `apps/pipeline/prod.yaml` file for the prod stage.
 
-The Pipeline yaml file configures the pipeline end-to-end, and you can see each stage service has promotion criteria pointing to the configured pr automation. That tells the pipeline to trigger the pr creation process when that stage is active. To move from dev -> prod, a manual approval is required, as specified in the edge configuration.
+The Pipeline YAML file configures the pipeline end-to-end, and you can see each stage service has promotion criteria pointing to the configured PR automation. That tells the pipeline to trigger the PR creation process when that stage is active. To move from dev -> prod, a manual approval is required, as specified in the edge configuration.
 
 ## Kicking a run off
 
-To initiate the pipeline, you need to create a pipeline context, which you can do easily via CRD, eg:
+To initiate the pipeline, you need to create a pipeline context, which you can easily do via CRD, e.g.:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -144,7 +144,7 @@ spec:
 
 ## Add an integration test
 
-Many orgs will want more advanced promotion criteria than manual approval. In particular, running an integration test on a test cluster is a best practice to confirm a service is ready to be promoted to the next stage. Plural pipelines have the capability to spawn those as part of the gates along the pipeline edge. An example of that is as follows modifying our existing `pipeline.yaml`:
+Many orgs will want more advanced promotion criteria than manual approval. In particular, running an integration test on a test cluster is a best practice to confirm a service is ready to be promoted to the next stage. Plural pipelines can spawn those as part of the gates along a pipeline edge. Here's an example, modifying our existing `pipeline.yaml`:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1

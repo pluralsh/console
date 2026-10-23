@@ -1,0 +1,28 @@
+{
+  "type": "object",
+  "description": "Find the highest semver tags in a Docker/OCI repository. This is heavyweight: it lists every tag in the repository (potentially many registry requests) before sorting, so only use it when you need the latest or highest versions. To look up or browse specific tags, use the search_tags tool instead.",
+  "properties": {
+    "repository_slug": {
+      "type": "string",
+      "description": "Repository slug within the configured registry, for example library/nginx, pluralsh/console, or my-team/my-image."
+    },
+    "query": {
+      "type": "string",
+      "description": "Optional case-insensitive substring a tag must contain to be considered, for example \"alpine\" to only rank alpine variants."
+    },
+    "include_prerelease": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether to rank tags with a suffix, like 1.2.0-rc.1. Image variants such as 1.27.0-alpine are also suffixed, so set this to true when using query to rank a variant."
+    },
+    "limit": {
+      "type": "integer",
+      "default": 10,
+      "minimum": 1,
+      "maximum": 100,
+      "description": "How many of the highest versions to return, sorted from highest to lowest."
+    }
+  },
+  "required": ["repository_slug"],
+  "additionalProperties": false
+}

@@ -27,7 +27,7 @@ func TestConfigTemplateProxyResponses(t *testing.T) {
 		Providers: []configTemplateProvider{{
 			Name:    pluralProvider,
 			BaseURL: "https://console.plural.sh/ext/ai/v1",
-			EnvKey:  consoleTokenEnv,
+			EnvKey:  codexAPIKeyEnv,
 			WireAPI: responsesWireAPI,
 		}},
 	})
@@ -51,7 +51,7 @@ func TestConfigTemplateProxyResponses(t *testing.T) {
 		t.Fatalf("code mode namespaces = %#v", codeMode["direct_only_tool_namespaces"])
 	}
 	provider := tableValue(t, tableValue(t, doc, "model_providers"), pluralProvider)
-	if provider["base_url"] != "https://console.plural.sh/ext/ai/v1" || provider["env_key"] != consoleTokenEnv || provider["wire_api"] != responsesWireAPI {
+	if provider["base_url"] != "https://console.plural.sh/ext/ai/v1" || provider["env_key"] != codexAPIKeyEnv || provider["wire_api"] != responsesWireAPI {
 		t.Fatalf("provider = %#v", provider)
 	}
 }

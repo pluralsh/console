@@ -1,11 +1,12 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   use Console.GraphQl.Resolvers.Deployments.Base
-  import Absinthe.Resolution.Helpers, only: [batch: 3]
+  import Absinthe.Resolution.Helpers, only: [batch: 3, on_load: 2]
   alias Console.Repo
   alias Kube.Utils, as: KUtils
-  alias Console.Deployments.{Clusters, Workbenches}
+  alias Console.Deployments.{Clusters, Workbenches, WorkbenchFiles}
   alias Console.AI.Workbench.{Toolchain, Skills}
   alias Console.AI.Tools.Workbench.Infrastructure.KubeGet
+  alias Console.AI.Tools.Workbench.Observability.Metrics
   alias Console.Schema.{
     Alert,
     Cluster,
@@ -68,13 +69,17 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     dir = Map.get(args, :direction) || :desc
 
     WorkbenchJob.for_workbench(workbench.id)
+    |> maybe_job_search(args)
     |> workbench_job_filters(args)
     |> WorkbenchJob.ordered([{dir, :inserted_at}, {dir, :id}])
     |> paginate_with_total(args)
   end
 
-  def run_counts(%Workbench{id: id}, _, _) do
-    jobs = WorkbenchJob.for_workbench(id)
+  def run_counts(%Workbench{id: id}, args, _) do
+    jobs =
+      WorkbenchJob.for_workbench(id)
+      |> maybe_job_search(args)
+      |> workbench_job_filters(Map.take(args, [:pr_states, :inserted_after]))
     none = Repo.aggregate(WorkbenchJob.without_pull_requests(jobs), :count)
 
     {:ok, %{
@@ -104,9 +109,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
 
   def workbench_job_search(%{q: q, workbench_id: workbench_id} = args, ctx) do
     with {:ok, _} <- Workbenches.get_workbench!(workbench_id) |> allow(actor(ctx), :read) do
-      Workbenches.workbench_job_search(q, actor(ctx),
+      Workbenches.workbench_job_search(q, workbench_id,
         limit: Map.get(args, :limit, 5),
-        workbench_id: workbench_id,
         filter: job_search_filter(args)
       )
     end
@@ -277,15 +281,22 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     |> paginate(args)
   end
 
-  def aggregates(_, _) do
-    prs = PullRequest.for_workbench_jobs()
+  def aggregates(args, %{context: %{current_user: user}}) do
+    workbenches = Workbench.for_user(user)
+                  |> workbench_filters(args)
+
+    prs = PullRequest.for_workbenches(workbenches)
           |> PullRequest.aggregates()
+    evals = WorkbenchEvalResult.for_workbenches(workbenches)
+            |> WorkbenchEvalResult.aggregates()
 
     with [pr] <- Console.Repo.all(prs),
-         [eval] <- Console.Repo.all(WorkbenchEvalResult.aggregates()) do
+         [eval] <- Console.Repo.all(evals) do
       {:ok, %{
         pull_requests: pr.merged,
         pull_request_merge_rate: pr.merge_rate,
+        hours_saved: pr.hours_saved,
+        total_tokens: Console.Repo.one(WorkbenchJob.total_tokens(workbenches)),
         eval_results: eval.average_grade,
       }}
     else
@@ -349,6 +360,17 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   def metrics_tool(%WorkbenchJob{} = job, %{name: name, arguments: args}, %{context: %{current_user: user}}),
     do: Toolchain.metrics(job, name, args, user)
 
+  def metrics_series_tool(%WorkbenchJob{} = job, %{name: name, arguments: args}, %{context: %{current_user: user}}),
+    do: Toolchain.metrics_series(job, name, args, user)
+
+  def thought_metric_series(%{series: [_ | _] = series}, _, _), do: {:ok, series}
+  def thought_metric_series(%{metrics: [_ | _] = metrics}, _, _), do: {:ok, Metrics.group_points(metrics)}
+  def thought_metric_series(_, _, _), do: {:ok, []}
+
+  def thought_metrics(%{metrics: [_ | _] = metrics}, _, _), do: {:ok, metrics}
+  def thought_metrics(%{series: [_ | _] = series}, _, _), do: {:ok, Metrics.flatten_series(series)}
+  def thought_metrics(_, _, _), do: {:ok, []}
+
   def logs_tool(%WorkbenchJob{} = job, %{name: name, arguments: args}, %{context: %{current_user: user}}),
     do: Toolchain.logs(job, name, args, user)
 
@@ -356,12 +378,22 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     do: Toolchain.traces(job, name, args, user)
 
   def workbenches(args, %{context: %{current_user: user}}) do
-    Workbench.ordered()
-    |> Workbench.for_user(user)
+    Workbench.for_user(user)
     |> workbench_filters(args)
     |> maybe_search(Workbench, args)
+    |> Workbench.by_ids()
+    |> apply_workbench_sort(args[:sort], args[:direction] || :asc, args)
     |> paginate(args)
   end
+
+  defp apply_workbench_sort(query, :inserted_at, dir, _),
+    do: Workbench.ordered(query, [{dir, :inserted_at}, {:asc, :name}])
+  defp apply_workbench_sort(query, :updated_at, dir, _),
+    do: Workbench.ordered(query, [{dir, :updated_at}, {:asc, :name}])
+  defp apply_workbench_sort(query, :favorited, dir, args),
+    do: Workbench.ordered_by_favorites(query, args[:favorite_ids] || [], dir)
+  defp apply_workbench_sort(query, _, dir, _),
+    do: Workbench.ordered(query, [{dir, :name}])
 
   def workbench_tools(args, %{context: %{current_user: user}}) do
     WorkbenchTool.ordered()
@@ -378,6 +410,57 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
 
   def whimsey_text(%WorkbenchJob{} = job, _, _), do: Workbenches.whimsey_text(job)
   def whimsey_text(%WorkbenchJobActivity{} = activity, _, _), do: Workbenches.whimsey_text(activity)
+
+  def list_workbench_files(workbench, args, _), do: WorkbenchFiles.list(workbench, Map.get(args, :path, "/"))
+
+  def workbench_file(workbench, %{path: path}, _), do: WorkbenchFiles.stat(workbench, path)
+
+  def workbench_file_contents(workbench, %{path: path}, _), do: WorkbenchFiles.read_text(workbench, path)
+
+  def glob_workbench_files(workbench, %{pattern: pattern} = args, _),
+    do: WorkbenchFiles.glob(workbench, pattern, args[:max_results])
+
+  def grep_workbench_files(workbench, %{pattern: pattern} = args, _),
+    do: WorkbenchFiles.grep(workbench, pattern, args)
+
+  def workbench_file_download_url(%{kind: :file, workbench_id: id, path: path}, _, %{context: %{current_user: user}}),
+    do: {:ok, WorkbenchFiles.download_url(id, path, user)}
+  def workbench_file_download_url(_, _, _), do: {:ok, nil}
+
+  def attachment_download_url(%{workbench_id: id, path: path}, _, %{context: %{current_user: %Console.Schema.User{} = user}}),
+    do: {:ok, WorkbenchFiles.download_url(id, path, user)}
+  # agent run harnesses authenticate as their cluster, so downloads are signed for the user who started the run,
+  # once the run's runtime is confirmed to belong to that cluster.  runs and runtimes are batch loaded across attachments
+  def attachment_download_url(%{agent_run_id: run_id} = att, _, %{context: %{cluster: %Cluster{id: cluster_id}, loader: loader}})
+      when is_binary(run_id) do
+    loader
+    |> Dataloader.load(Console.GraphQl.Resolvers.Deployments, :agent_run, att)
+    |> on_load(fn loader ->
+      run = Dataloader.get(loader, Console.GraphQl.Resolvers.Deployments, :agent_run, att)
+      loader
+      |> Dataloader.load(Console.GraphQl.Resolvers.Deployments, :runtime, run)
+      |> on_load(fn loader ->
+        case Dataloader.get(loader, Console.GraphQl.Resolvers.Deployments, :runtime, run) do
+          %Console.Schema.AgentRuntime{cluster_id: ^cluster_id} ->
+            {:ok, WorkbenchFiles.download_url(att.workbench_id, att.path, run.user_id)}
+          _ -> {:ok, nil}
+        end
+      end)
+    end)
+  end
+  def attachment_download_url(_, _, _), do: {:ok, nil}
+
+  def write_workbench_file(%{workbench_id: id} = args, %{context: %{current_user: user}}),
+    do: WorkbenchFiles.write_file(args, id, user)
+
+  def create_workbench_directory(%{workbench_id: id, path: path}, %{context: %{current_user: user}}),
+    do: WorkbenchFiles.create_directory(path, id, user)
+
+  def move_workbench_file(%{workbench_id: id, source: source, target: target}, %{context: %{current_user: user}}),
+    do: WorkbenchFiles.move_file(source, target, id, user)
+
+  def delete_workbench_file(%{workbench_id: id, path: path}, %{context: %{current_user: user}}),
+    do: WorkbenchFiles.delete_file(path, id, user)
 
   def create_workbench(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Workbenches.create_workbench(attrs, user)
@@ -524,6 +607,10 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     end)
   end
 
+  defp maybe_job_search(query, %{q: q}) when is_binary(q) and byte_size(q) > 0,
+    do: WorkbenchJob.search(query, q)
+  defp maybe_job_search(query, _), do: query
+
   defp workbench_job_filters(query, args) do
     Enum.reduce(args, query, fn
       {:alert, true}, q -> WorkbenchJob.with_alert(q)
@@ -531,6 +618,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
       {:monitor_id, id}, q when is_binary(id) -> WorkbenchJob.for_monitor(q, id)
       {:statuses, s}, q when is_list(s) -> WorkbenchJob.for_statuses(q, s)
       {:pr_states, s}, q when is_list(s) -> WorkbenchJob.for_pr_states(q, s)
+      {:inserted_after, ts}, q when not is_nil(ts) -> WorkbenchJob.inserted_after(q, ts)
       _, q -> q
     end)
   end

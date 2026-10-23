@@ -117,6 +117,7 @@ export function DisplayButton({
   return (
     <Button
       secondary
+      small
       startIcon={<FiltersIcon />}
       aria-haspopup="dialog"
       aria-expanded={expanded}
@@ -130,8 +131,25 @@ export function DisplayButton({
   )
 }
 
+// Open state for display options docked in a sidecar: `defaultOpen` until the
+// user toggles it.
+export function useDisplaySidecar(defaultOpen = false) {
+  const [open, setOpen] = useState<boolean | null>(null)
+  const isOpen = open ?? defaultOpen
+
+  return { isOpen, toggle: () => setOpen(!isOpen) }
+}
+
+// display options docked in the page sidecar (see PageWithSidecar)
 export function DisplayPanel({ children }: { children: ReactNode }) {
-  return <PanelSC fillLevel={1}>{children}</PanelSC>
+  return (
+    <PanelSC
+      role="region"
+      aria-label="Display options"
+    >
+      {children}
+    </PanelSC>
+  )
 }
 
 // Display button with its panel floating over the content below it.
@@ -394,10 +412,11 @@ function ViewChip({
   onClick: () => void
   children: string
 }) {
+  const theme = useTheme()
+
   return (
     <Chip
       clickable
-      rounded
       icon={icon}
       fillLevel={selected ? 3 : 1}
       aria-pressed={selected}
@@ -411,7 +430,8 @@ function ViewChip({
           justifyContent: 'center',
           height: 32,
           minWidth: 80,
-          padding: '5px 12px',
+          padding: '0.25rem 0.75rem',
+          borderRadius: theme.borderRadiuses.medium,
           boxShadow: 'none',
         },
         '& .icon svg': { width: 12, height: 12 },
@@ -455,18 +475,12 @@ const DisplayFilterDotSC = styled.span(({ theme }) => ({
   flexShrink: 0,
 }))
 
-const PanelSC = styled(Card)(({ theme }) => ({
+const PanelSC = styled.div(({ theme }) => ({
   boxSizing: 'border-box',
   display: 'flex',
   flexDirection: 'column',
-  flexShrink: 0,
-  alignSelf: 'stretch',
-  height: '100%',
-  maxHeight: '100%',
-  minHeight: 0,
-  overflowY: 'auto',
-  padding: `0 ${theme.spacing.medium}px`,
-  width: 230,
+  padding: `0 ${theme.spacing.medium}`,
+  '& > :last-child': { borderBottom: 'none' },
 }))
 
 const PopoverPanelSC = styled(Card)(({ theme }) => ({
@@ -474,7 +488,7 @@ const PopoverPanelSC = styled(Card)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   overflowY: 'auto',
-  padding: `0 ${theme.spacing.medium}px`,
+  padding: `0 ${theme.spacing.medium}`,
   boxShadow: theme.boxShadows.moderate,
   zIndex: theme.zIndexes.selectPopover,
   '& > :last-child': { borderBottom: 'none' },
@@ -484,7 +498,7 @@ const ViewToggleSC = styled.div<{ $count: number }>(({ theme, $count }) => ({
   display: 'grid',
   gridTemplateColumns: `repeat(${$count}, 1fr)`,
   gap: theme.spacing.xxsmall,
-  padding: `${theme.spacing.medium}px 0 ${theme.spacing.xsmall}px`,
+  padding: `${theme.spacing.medium} 0 ${theme.spacing.xsmall}`,
   // the switch alone in the panel gets even top/bottom padding; otherwise
   // the next section header adds its own top padding
   '&:last-child': { paddingBottom: theme.spacing.medium },
@@ -571,7 +585,7 @@ const EmptyWrapperSC = styled(Card)(({ theme }) => ({
   maxHeight: '100%',
   width: '100%',
   minHeight: 160,
-  padding: `${theme.spacing.xlarge}px ${theme.spacing.medium}px`,
+  padding: `${theme.spacing.xlarge} ${theme.spacing.medium}`,
 }))
 
 const EmptyCopySC = styled.div(({ theme }) => ({

@@ -1,18 +1,19 @@
 import styled from 'styled-components'
 
+import { docsText } from '@src/theme/docsTheme'
+
 // ─── Content layout (uses shared PageGrid from PageGrid.tsx) ───────────────────
 
 export const RestContentWrapper = styled.div((_) => ({
   minWidth: 0,
 }))
 
-export const BreadcrumbsWrapper = styled.div(({ theme }) => ({
+export const BreadcrumbsWrapper = styled.div((_) => ({
   display: 'flex',
   alignItems: 'center',
   width: '100%',
   minWidth: 0,
-  minHeight: 40,
-  marginBottom: theme.spacing.large,
+  marginBottom: 20,
   '& > *': {
     minWidth: 0,
     width: '100%',
@@ -38,10 +39,10 @@ export const EndpointTitleRow = styled.div(({ theme }) => ({
   marginBottom: theme.spacing.large,
 }))
 
-export const EndpointName = styled.h2(({ theme }) => ({
-  ...theme.partials.text.title2,
+export const EndpointName = styled.h2((_) => ({
+  ...docsText.pageTitle,
+  fontSize: 'clamp(30px, 3.4vw, 40px)',
   margin: 0,
-  color: theme.colors.text,
 }))
 
 export const PathGroup = styled.div(({ theme }) => ({
@@ -105,6 +106,7 @@ export const CopyIconWrapper = styled.span<{ $visible: boolean }>(
 export const TabBar = styled.div(({ theme }) => ({
   display: 'flex',
   gap: 0,
+  borderBottom: theme.borders.default,
   marginBottom: theme.spacing.xlarge,
 }))
 
@@ -115,10 +117,9 @@ export const AuthContent = styled.div({
 })
 
 export const AuthTitle = styled.h1(({ theme }) => ({
-  ...theme.partials.text.title1,
+  ...docsText.pageTitle,
   margin: 0,
   marginBottom: theme.spacing.medium,
-  color: theme.colors.text,
 }))
 
 export const AuthBody = styled.div(({ theme }) => ({
@@ -126,11 +127,11 @@ export const AuthBody = styled.div(({ theme }) => ({
   color: theme.colors['text-light'],
   lineHeight: 1.7,
   p: {
-    margin: `${theme.spacing.medium}px 0`,
+    margin: `${theme.spacing.medium} 0`,
   },
   ol: {
     paddingLeft: theme.spacing.xlarge,
-    margin: `${theme.spacing.medium}px 0`,
+    margin: `${theme.spacing.medium} 0`,
   },
   li: {
     marginBottom: theme.spacing.xsmall,
@@ -138,7 +139,7 @@ export const AuthBody = styled.div(({ theme }) => ({
   code: {
     ...theme.partials.text.inlineCode,
     backgroundColor: theme.colors['fill-two'],
-    padding: `2px ${theme.spacing.xxsmall}px`,
+    padding: `2px ${theme.spacing.xxsmall}`,
     borderRadius: theme.borderRadiuses.medium,
   },
   a: {

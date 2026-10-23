@@ -224,11 +224,6 @@ defmodule Console.Deployments.Clusters do
     end
   end
 
-  def warm(:nodes, %Cluster{id: id} = cluster) do
-    with {:ok, nodes} <- fetch_nodes(cluster),
-      do: @cache_adapter.put({:nodes, id}, {:ok, nodes}, ttl: @node_ttl)
-  end
-
   def warm(:node_metrics, %Cluster{id: id} = cluster) do
     with {:ok, metrics} <- fetch_node_metrics(cluster),
       do: @cache_adapter.put({:node_metrics, id}, {:ok, metrics}, ttl: @node_ttl)
@@ -242,22 +237,15 @@ defmodule Console.Deployments.Clusters do
   def warm(:api_discovery, %Cluster{} = cluster), do: api_discovery(cluster)
 
   @doc """
-  Same as `nodes/1` except only reads from cache
-  """
-  @spec cached_nodes(Cluster.t) :: {:ok, term} | Console.error
-  def cached_nodes(%Cluster{id: id}) do
-    case @cache_adapter.get({:nodes, id}) do
-      {:ok, nodes} when is_list(nodes) -> {:ok, nodes}
-      _ -> {:ok, []}
-    end
-  end
-
-  @doc """
-  Fetches the nodes for a cluster, this query is heavily cached for performance
+  Fetches the nodes for a cluster, this query is heavily cached for performance, except for the
+  management cluster, which always reads directly from the k8s api
   """
   @spec nodes(Cluster.t) :: {:ok, term} | Console.error
+  def nodes(%Cluster{self: true} = cluster), do: fetch_nodes(cluster)
+  def nodes(%Cluster{} = cluster), do: cached_fetch_nodes(cluster)
+
   @decorate cacheable(cache: @cache_adapter, key: {:nodes, cluster.id}, opts: [ttl: @node_ttl])
-  def nodes(%Cluster{} = cluster), do: fetch_nodes(cluster)
+  defp cached_fetch_nodes(%Cluster{} = cluster), do: fetch_nodes(cluster)
 
   defp fetch_nodes(%Cluster{pinged_at: nil, self: false}), do: {:ok, []}
   defp fetch_nodes(%Cluster{} = cluster) do
@@ -753,6 +741,7 @@ defmodule Console.Deployments.Clusters do
   defp add_callout(result, _), do: result
 
   defp template_values(values, %Cluster{} = cluster) when is_binary(values) do
+    cluster = Repo.preload(cluster, [:tags])
     with {:ok, tpl} <- Solid.parse(values),
          {:ok, res, _} <- Solid.render(tpl, %{"cluster" => cluster}, [strict_variables: false, strict_filters: true]) do
       IO.iodata_to_binary(res)
@@ -1226,7 +1215,7 @@ defmodule Console.Deployments.Clusters do
     # can't make this a transaction because there's no true time boundary on it
     Service.agent()
     |> Service.stream()
-    |> Service.preloaded([:cluster])
+    |> Service.preloaded([cluster: :tags])
     |> Repo.stream(method: :keyset)
     |> Console.throttle(count: 100, pause: :timer.seconds(10))
     |> Task.async_stream(fn svc ->

@@ -23,9 +23,7 @@ const (
 // Agent owns Claude's native configuration, prompt and skills preparation,
 // and staging of Claude's provider-owned session state.
 type Agent struct {
-	config       toolv1.Config
-	consoleURL   string
-	consoleToken string
+	config toolv1.Config
 }
 
 var _ toolv1.Agent = (*Agent)(nil)
@@ -97,11 +95,6 @@ func (agent *Agent) Configure(ctx context.Context, request toolv1.ConfigureReque
 		return err
 	}
 
-	agent.consoleURL = request.ConsoleURL
-	if request.ConsoleToken != "" {
-		agent.consoleToken = request.ConsoleToken
-	}
-
 	return agent.writeNativeConfig(config, request.Settings.Model.Name)
 }
 
@@ -133,6 +126,28 @@ func (agent *Agent) Export(ctx context.Context, request toolv1.ExportRequest) (t
 	return toolv1.ExportResult{SessionSource: artifacts.SessionSource{
 		Path: request.OutputDir, ArchivePath: claudeProjectsDir,
 	}}, nil
+}
+
+func (agent *Agent) Import(ctx context.Context, request toolv1.ImportRequest) (string, error) {
+	if err := agent.contextError(ctx); err != nil {
+		return "", err
+	}
+	if request.Manifest == nil {
+		return "", errors.New("claude session manifest is not set")
+	}
+	config, err := agent.configWithClaude()
+	if err != nil {
+		return "", err
+	}
+	archivePath := request.Manifest.Session.ArchivePath
+	if archivePath == "" {
+		archivePath = claudeProjectsDir
+	}
+	destination := filepath.Join(agent.configPath(config), claudeProjectsDir)
+	if err := artifacts.RestoreArchiveTree(ctx, request.ExtractDir, archivePath, destination); err != nil {
+		return "", fmt.Errorf("import claude session: %w", err)
+	}
+	return request.Manifest.Session.ID, nil
 }
 
 func (agent *Agent) configWithClaude() (toolv1.Config, error) {

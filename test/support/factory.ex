@@ -551,7 +551,8 @@ defmodule Console.Factory do
   def stack_policy_factory do
     %Schema.StackPolicy{
       policy: build(:policy),
-      stack: build(:stack)
+      stack: build(:stack),
+      type: :approval
     }
   end
 
@@ -1210,6 +1211,13 @@ defmodule Console.Factory do
     }
   end
 
+  def agent_prompt_factory do
+    %Schema.AgentPrompt{
+      agent_run: build(:agent_run),
+      prompt: "a queued prompt"
+    }
+  end
+
   def agent_message_factory do
     %Schema.AgentMessage{
       agent_run: build(:agent_run),
@@ -1333,6 +1341,16 @@ defmodule Console.Factory do
   def workbench_prompt_factory do
     %Schema.WorkbenchPrompt{
       prompt: "saved prompt text",
+      workbench: build(:workbench)
+    }
+  end
+
+  def attachment_factory do
+    %Schema.Attachment{
+      filename: "file.txt",
+      filetype: "text/plain",
+      path: sequence(:attachment_path, &"/_plrl_/uploads/#{&1}/file.txt"),
+      size: 10,
       workbench: build(:workbench)
     }
   end

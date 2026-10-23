@@ -1,9 +1,4 @@
-import {
-  Button,
-  Flex,
-  IconFrame,
-  KubernetesIcon,
-} from '@pluralsh/design-system'
+import { Button, Flex, KubernetesIcon } from '@pluralsh/design-system'
 import { StatusAccentFrameSC } from 'components/utils/StatusAccentFrame'
 import { StackedText } from 'components/utils/table/StackedText'
 import { WorkbenchJobActionFragment } from 'generated/graphql'
@@ -39,17 +34,9 @@ export function WorkbenchJobActionCard({
             gap="small"
             css={{ minWidth: 0, flex: 1 }}
           >
-            <IconFrame
-              circle
-              size="medium"
-              type="secondary"
-              icon={icon ?? <KubernetesIcon size={16} />}
-              css={{
-                flexShrink: 0,
-                border: theme.borders['fill-two'],
-                backgroundColor: 'transparent',
-              }}
-            />
+            <Flex css={{ flexShrink: 0 }}>
+              {icon ?? <KubernetesIcon size={16} />}
+            </Flex>
             <StackedText
               first={getActionTitle(activity)}
               firstPartialType="body2Bold"
@@ -86,7 +73,7 @@ const CardSC = styled.div(({ theme }) => ({
   flexDirection: 'column',
   gap: theme.spacing.xsmall,
   minWidth: 0,
-  padding: `${theme.spacing.medium}px ${theme.spacing.small}px`,
+  padding: `${theme.spacing.medium} ${theme.spacing.small}`,
   background: theme.colors['fill-one'],
   borderTop: theme.borders.default,
   borderRight: theme.borders.default,

@@ -37,7 +37,7 @@ export function AgentRunMetadata({ run }: { run: AgentRunFragment }) {
       align="center"
       gap="small"
       wrap="wrap"
-      css={{ rowGap: 4, minWidth: 0 }}
+      css={{ rowGap: '0.25rem', minWidth: 0 }}
     >
       <CaptionP $color="text-xlight">
         {prettifyRepoUrl(run?.repository ?? '')}

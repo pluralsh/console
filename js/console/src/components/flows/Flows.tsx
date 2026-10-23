@@ -4,12 +4,12 @@ import {
   Button,
   Flex,
   FlowIcon,
-  Input,
-  SearchIcon,
   useSetBreadcrumbs,
   Card,
   EmptyState,
 } from '@pluralsh/design-system'
+import { PageColumnSC, PageWithSidecar } from 'components/layout/PageLayout'
+import { PageToolbar, ToolbarSearchInput } from 'components/layout/PageToolbar'
 import { EmptyStateCompact } from 'components/ai/AIThreads'
 import { FlowCard } from 'components/flows/FlowCard'
 import { FlowsDisplayPanel } from 'components/flows/FlowsDisplayPanel'
@@ -30,10 +30,7 @@ import { CardGrid } from 'components/self-service/catalog/CatalogsGrid'
 import { GqlError } from 'components/utils/Alert'
 import {
   DisplayButton,
-  DisplayContentSC,
   DisplayFilterEmpty,
-  DisplayMainSC,
-  DisplayToolbarSC,
   toCounts,
   toggleListValue,
 } from 'components/utils/display/DisplayPanel'
@@ -49,6 +46,7 @@ import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 
 const breadcrumbs: Breadcrumb[] = [{ label: 'flows', url: FLOWS_ABS_PATH }]
+const FLOWS_TABS = [{ path: FLOWS_ABS_PATH, label: 'Flows' }]
 export const FLOW_DOCS_URL = 'https://docs.plural.sh/plural-features/flows'
 const FLOWS_VIEW_STORAGE_KEY = 'flows-view'
 const FLOWS_FAVORITES_STORAGE_KEY = 'flows-favorites'
@@ -179,46 +177,42 @@ export function Flows() {
   }
 
   return (
-    <WrapperSC>
-      <HeaderSC>
-        <Flex direction="column">
-          <Subtitle1H1>Flows</Subtitle1H1>
-          <Body2P $color="text-light">
-            Organize services, pipelines, workbenches, and more into holistic
-            units. <InlineA href={FLOW_DOCS_URL}>Learn more</InlineA>
-          </Body2P>
-        </Flex>
-      </HeaderSC>
-      <DisplayToolbarSC>
-        <Input
-          showClearButton
-          css={{ flex: 1 }}
+    <PageColumnSC>
+      <PageToolbar tabs={FLOWS_TABS}>
+        <ToolbarSearchInput
           placeholder="Search flows"
-          startIcon={<SearchIcon />}
           value={searchString}
-          onChange={(e) =>
-            setSearchParams(
-              { ...(e.currentTarget.value && { q: e.currentTarget.value }) },
-              { replace: true }
-            )
-          }
+          onChange={(q) => setSearchParams(q ? { q } : {}, { replace: true })}
         />
         <DisplayButton
           showDot={hasUncheckedFlowFilters(display)}
+          expanded={displayOpen}
           onClick={() => setDisplayOpen(!displayOpen)}
         />
-      </DisplayToolbarSC>
-      <DisplayContentSC>
-        <DisplayMainSC>{listContent()}</DisplayMainSC>
-        {displayOpen && (
-          <FlowsDisplayPanel
-            state={display}
-            onChange={updateDisplay}
-            statusCounts={statusCounts}
-          />
-        )}
-      </DisplayContentSC>
-    </WrapperSC>
+      </PageToolbar>
+      <PageWithSidecar
+        sidecar={
+          displayOpen && (
+            <FlowsDisplayPanel
+              state={display}
+              onChange={updateDisplay}
+              statusCounts={statusCounts}
+            />
+          )
+        }
+      >
+        <ContentSC>
+          <Flex direction="column">
+            <Subtitle1H1>Flows</Subtitle1H1>
+            <Body2P $color="text-light">
+              Organize services, pipelines, workbenches, and more into holistic
+              units. <InlineA href={FLOW_DOCS_URL}>Learn more</InlineA>
+            </Body2P>
+          </Flex>
+          {listContent()}
+        </ContentSC>
+      </PageWithSidecar>
+    </PageColumnSC>
   )
 }
 
@@ -248,21 +242,14 @@ function FlowEmptyState() {
   )
 }
 
-const WrapperSC = styled.div(({ theme }) => ({
+const ContentSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.large,
-  height: '100%',
+  flex: 1,
+  minHeight: 0,
   width: '100%',
   maxWidth: theme.breakpoints.desktop,
   alignSelf: 'center',
-  overflow: 'hidden',
   padding: theme.spacing.large,
-}))
-
-const HeaderSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  gap: theme.spacing.medium,
 }))

@@ -8,14 +8,14 @@ description: Deploying a basic microservice to a cluster managed by Plural
 Now that you have a few clusters up, you'll likely want to start deploying real workloads into them.  This will show you a relatively basic use case with an example repo we've created [here](https://github.com/pluralsh/plrl-cd-demo.git).
 
 You will:
-* add a new git repository to your Plural Console
-* deploy a service to a workload cluster with a git hosted helm chart.
+* add a new Git repository to your Plural Console
+* deploy a service to a workload cluster with a Git-hosted Helm chart.
 
-It's worth noting you can put the helm repository in any repo, it doesn't have to be the application repo.  You can also create your own helm repository using OCI or Github Pages, and source charts from there.
+It's worth noting that you can put the Helm chart in any repo; it doesn't have to be the application repo.  You can also create your own Helm repository using OCI or GitHub Pages, and source charts from there.
 
 ## Add the Application's Git Repository
 
-To deploy anything, you need to have a repository to source yaml manifests from.  We'll just use a basic Git repository, done by adding to `bootstrap/repositories/cd-demo.yaml`:
+To deploy anything, you need to have a repository to source YAML manifests from.  We'll use a basic Git repository, which you can add by writing to `bootstrap/repositories/cd-demo.yaml`:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -26,7 +26,7 @@ spec:
   url: https://github.com/pluralsh/plrl-cd-demo.git
 ```
 
-The example repo is public, if yours requires authentication, you can backfill the auth information in the UI, or a simple way to check it all into Git is reference an `SCMConnection` that can provide repository read permissions, like so:
+The example repo is public. If yours requires authentication, you can backfill the auth information in the UI, or a simple way to check it all into Git is to reference an `SCMConnection` that can provide repository read permissions, like so:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -41,13 +41,13 @@ spec:
 ```
 
 {% callout severity="info" %}
-`scmConnectionRef` requires that you use an `https` git url
+`scmConnectionRef` requires that you use an `https` Git URL.
 {% /callout %}
 
 
 ## Add a ServiceDeployment to point to that Git Repository
 
-You'll also want to register a new service deployment for this `cd-demo` repository, that can be done by writing to `bootstrap/cd-demo/dev.yaml`:
+You'll also want to register a new service deployment for this `cd-demo` repository, which can be done by writing to `bootstrap/cd-demo/dev.yaml`:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -76,12 +76,12 @@ spec:
 ```
 
 {% callout severity="warning" %}
-The `clusterRef` field on a service deployment is immutable.  If you happen to chose the wrong one, it's not a big deal, but you'll need to delete that ServiceDeployment CRD manually then let the underlying service recreate it from scratch.  This can be done in the Plural Kubernetes dashboard UI easily.
+The `clusterRef` field on a service deployment is immutable.  If you happen to choose the wrong one, it's not a big deal, but you'll need to delete that ServiceDeployment CRD manually, then let the underlying service recreate it from scratch.  This can be done in the Plural Kubernetes dashboard UI easily.
 {% /callout %}
 
 ## Push to Deploy
 
-We registered all these manifests under the root `bootstrap` folder a `plural up`-derived management cluster listens to by default, so all you should need to do is either:
+We registered all these manifests under the root `bootstrap` folder, which a `plural up`-derived management cluster listens to by default, so all you should need to do is either:
 
 ```sh
 git commit -m "setup example microservice"

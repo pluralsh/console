@@ -1,4 +1,5 @@
 import {
+  ICON_FRAME_ICON_SIZE,
   Button,
   Chip,
   Code,
@@ -446,20 +447,25 @@ function DefinitionActions({
         <ListBoxItem
           key="edit"
           label="Edit policy"
-          leftContent={<PencilIcon />}
+          leftContent={<PencilIcon size={ICON_FRAME_ICON_SIZE.small} />}
         />
         <ListBoxItem
           destructive
           key="delete"
           label="Delete policy"
-          leftContent={<TrashCanIcon color={theme.colors['icon-danger']} />}
+          leftContent={
+            <TrashCanIcon
+              size={ICON_FRAME_ICON_SIZE.small}
+              color={theme.colors['icon-danger']}
+            />
+          }
         />
       </MoreMenu>
     </>
   )
 }
 
-const WrapperSC = styled.div(({ theme }) => ({
+const WrapperSC = styled.div({
   display: 'grid',
   flex: 1,
   gridTemplateColumns: 'minmax(0, 624px) minmax(0, 1fr)',
@@ -468,8 +474,7 @@ const WrapperSC = styled.div(({ theme }) => ({
   minHeight: 0,
   minWidth: 0,
   overflow: 'hidden',
-  borderTop: theme.borders.default,
-}))
+})
 
 const EditorColumnSC = styled.section(({ theme }) => ({
   borderRight: theme.borders.default,
@@ -495,7 +500,7 @@ const EditorBodySC = styled.div(({ theme }) => ({
   gap: theme.spacing.small,
   minHeight: 0,
   overflow: 'hidden',
-  padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
+  padding: theme.spacing.large,
 }))
 
 const SimulatorBodySC = styled.div(({ theme }) => ({

@@ -26,6 +26,11 @@
             "type": "string",
             "description": "The prompt to give to the coding agent.  This should be a detailed prompt that describes the changes you want to make to the repository.  Commonmark Markdown formatting is encouraged to convey structure and semantic importance."
         },
+        "attachments": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "Sandbox paths of existing files in the workbench filesystem (eg `/workbench/_plrl_/uploads/<id>/screenshot.png` or `/workbench/datasets/clusters.csv`) to give the coding agent. They're downloaded into its environment and listed in its prompt, so pass anything that would help with the task, such as files the user attached (screenshots, logs, specs, csvs) or reports and datasets you've written, rather than paraphrasing them in the prompt."
+        },
         "babysit": {
             "type": "boolean",
             "description": "When true, requests babysitting behavior for this run. Enables the agent to track CI failures and user comments.  Useful for application code prs or complex changes"

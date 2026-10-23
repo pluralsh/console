@@ -109,7 +109,7 @@ export const ColMembershipExpander = {
     row.getCanExpand() && (
       <IconFrame
         clickable
-        size="medium"
+        size="small"
         type="tertiary"
         tooltip={row.getIsExpanded() ? 'Collapse' : 'Expand'}
         icon={
@@ -311,7 +311,7 @@ export const MembershipListRowSC = styled.div(({ theme }) => ({
   height: MEMBERSHIP_ROW_HEIGHT,
   flexShrink: 0,
   overflow: 'hidden',
-  padding: `${theme.spacing.medium}px ${theme.spacing.medium}px ${theme.spacing.medium}px ${theme.spacing.small}px`,
+  padding: `${theme.spacing.medium} ${theme.spacing.medium} ${theme.spacing.medium} ${theme.spacing.small}`,
   backgroundColor: theme.colors['fill-zero'],
   borderBottom: theme.borders.default,
   '&:nth-child(even)': {

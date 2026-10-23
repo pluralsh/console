@@ -1,12 +1,12 @@
 import {
   Button,
-  EmptyState,
   Flex,
   FormField,
   Input,
   ReturnIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import { GqlError } from 'components/utils/Alert'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
@@ -153,14 +153,18 @@ export function SavedPromptForm({ mode }: { mode: 'create' | 'edit' }) {
 
   if (mode === 'edit' && !promptsLoading && !savedPrompt)
     return (
-      <EmptyState message="Saved prompt not found">
+      <WorkbenchEmptyState
+        message="Saved prompt not found"
+        description="It may have been removed from this workbench."
+      >
         <Button
+          small
           startIcon={<ReturnIcon />}
           onClick={() => navigate(getWorkbenchSavedPromptsAbsPath(workbenchId))}
         >
           Back to all saved prompts
         </Button>
-      </EmptyState>
+      </WorkbenchEmptyState>
     )
 
   const isLoading =

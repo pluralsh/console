@@ -15,7 +15,7 @@ versions:
         provided notes; changes are primarily reliability, caching, and security/UX
         bug fixes plus dependency bumps.']
     breaking_changes: []
-  chart_version: 10.10.3
+  chart_version: 10.10.5
   images: ['ecr-public.aws.com/docker/library/redis:8.6.4-alpine', 'ghcr.io/dexidp/dex:v2.46.0',
     'quay.io/argoproj/argocd:v3.5.5']
 - version: 3.5.1

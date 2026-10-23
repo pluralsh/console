@@ -196,7 +196,7 @@ export const useCreateClusterContext = () => {
 //         display: 'flex',
 //         flexGrow: 1,
 //         justifyContent: 'end',
-//         marginTop: -theme.spacing.xsmall,
+//         marginTop: theme.spacing['minus-xsmall'],
 //       }}
 //     >
 //       <TabList
@@ -394,6 +394,7 @@ export default function CreateCluster() {
     <>
       <Button
         primary
+        small
         {...buttonProps}
       >
         Import Cluster

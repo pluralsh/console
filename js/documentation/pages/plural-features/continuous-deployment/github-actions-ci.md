@@ -1,20 +1,20 @@
 ---
-title: Integration With Github Actions
-description: How to integrate Plural with Github Actions and other CI providers
+title: Integration With GitHub Actions
+description: How to integrate Plural with GitHub Actions and other CI providers
 ---
 
-Plural is generally meant to implement a GitOps based workflow that is somewhat tangential to general CI strategies.  The main point of friction is that CI will usually run against commits against application code, usually resulting in a complete docker image build, but GitOps workflows require a follow-on commit in a secondary infrastructure config repo (or subsection of a monorepo).
+Plural is generally meant to implement a GitOps-based workflow that is somewhat tangential to general CI strategies. The main point of friction is that CI usually runs against commits to application code, typically resulting in a complete Docker image build, but GitOps workflows require a follow-on commit in a secondary infrastructure config repo (or subsection of a monorepo).
 
-Automating that is typically not done, with teams manually managing config files and executing tedious processes.  You also don't want to compromise the security of your GitOps controller by exposing its credentials to a public CI solution like Github Actions.  Plural takes the following approach:
+That follow-on step is rarely automated, so teams end up manually managing config files and executing tedious processes. You also don't want to compromise the security of your GitOps controller by exposing its credentials to a public CI solution like GitHub Actions. Plural takes the following approach:
 
-1. You can delegate federated credentials to issue temporary JWTs against your Plural instance to authenticate, with scopes usually limited to minimal changes (eg create a PR)
-2. We provide decent prebuilt actions to make integration as simple as possible.
+1. You can delegate federated credentials to issue temporary JWTs against your Plural instance to authenticate, with scopes usually limited to minimal changes (e.g. create a PR)
+2. We provide prebuilt actions to make integration as simple as possible.
 
-Lets show how its done.
+Let's show how it's done.
 
 ## Create a federated credential
 
-The first step is creating a federated credential to allow a token exchange between Github's OIDC provider and Plural:
+The first step is creating a federated credential to allow a token exchange between GitHub's OIDC provider and Plural:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -23,20 +23,29 @@ metadata:
   name: gh-actions
 spec:
   issuer: https://token.actions.githubusercontent.com # the oidc issuer url for gh actions, can be swapped for any other platform with oidc federation support
-  user: someone@example.com # should point to the user email you want the federated credential to auth as
+  user: ci-bot@example.com # should point to the user email you want the federated credential to auth as
+  # aud: https://console.example.com # optional. When set, only tokens with this audience are exchanged
   scopes:
     - catalog.write
   claimsLike:
-    sub: "repo:pluralsh/console:ref:refs/heads/master" # any regex is supported
+    sub: "repo:pluralsh/console:ref:refs/heads/master" # any regex is supported, and must match the whole claim
 ```
 
+Each `claimsLike` value is a regex matched against the corresponding claim in the incoming JWT, and every listed claim must match. Regexes are always anchored, so they must match the entire claim value: the pattern above won't accept tokens from a branch like `master-evil`. Use `.*` explicitly where you want a wildcard, e.g. `repo:pluralsh/console:ref:refs/heads/.*`. Claims whose value is a list, like `aud`, match if any element matches.
+
+`aud` is optional. Set it to the audience this credential should accept, and tokens minted for a different audience are rejected before they are exchanged. Leave it unset to keep accepting any audience. A token from a trusted issuer that was minted for another service can otherwise be replayed here.
+
+{% callout severity="warning" %}
+Bind federated credentials to a dedicated, least-privilege user (like `ci-bot@example.com` here) that is only granted the RBAC this workflow needs. Avoid the built-in `console@plural.sh` user: it is a privileged admin used by Plural internally, and actions it takes are excluded from audit logs, so anything exchanged for its credentials would be both overpowered and untraceable.
+{% /callout %}
+
 {% callout severity="info" %}
-You can actually use Plural AI to generate these with its built in Kubernetes API discovery integration! Just be sure to select your management cluster in the chat context.
+You can actually use Plural AI to generate these with its built-in Kubernetes API discovery integration! Be sure to select your management cluster in the chat context.
 {% /callout %}
 
 ## Define the PR Automation
 
-In this case we're going to have Github Actions trigger a PR automation, it can also perform other api actions like kicking a Plural Pipeline as well.  Just to show how it would work, here's an example PR automation spec:
+In this case, we're going to have GitHub Actions trigger a PR automation, though it can also perform other API actions, like kicking off a Plural Pipeline. To show how it works, here's an example PR automation spec:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -66,11 +75,11 @@ spec:
     documentation: The new image tag to use
 ```
 
-Notice this is really just overlaying some templated yaml on the existing `bootstrap/console.yaml` file which is deploying our console service. Nothing too crazy, usually image updates are simple.
+Notice this is just overlaying some templated YAML on the existing `bootstrap/console.yaml` file, which deploys our console service. Nothing too crazy; image updates are usually simple.
 
-## Define the Github Action to trigger a PR
+## Define the GitHub Action to trigger a PR
 
-Then your github actions file can look something like this, in this case it is executing on all pushes to master
+Your GitHub Actions workflow file can then look something like this; in this case, it runs on all pushes to master:
 
 ```yaml
 name: CI / Trigger PR
@@ -136,7 +145,7 @@ jobs:
         id: plural
         uses: pluralsh/setup-plural@v2
         with:
-          email: console@plural.sh
+          email: ci-bot@example.com # must match the user on the federated credential
           consoleUrl: https://my.console.cloud.plural.sh
       - name: Set outputs
         id: sha

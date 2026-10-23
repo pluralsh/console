@@ -4,17 +4,17 @@ description: Handling enterprise-grade complexity with Plural projects
 ---
 ## Overview
 
-One of the key challenges for implementing fleet management throughout an enterprise is balancing the competing concerns of gaining single-pane-of-glass management over your Kubernetes estate across multiple organizations or lines of business, and adhering to principals of least privilege and other security best practices that can easily be thrown by the wayside in implementing that degree of automation. In particular, these main concerns need to be satisfied to confidently implement fleet management:
+One of the key challenges in implementing fleet management throughout an enterprise is balancing two competing concerns: gaining single-pane-of-glass management over your Kubernetes estate across multiple organizations or lines of business, and adhering to the principle of least privilege and other security best practices that are easily tossed by the wayside when implementing that degree of automation. In particular, these main concerns need to be satisfied to confidently implement fleet management:
 
-1. Owners of a subset of resources cannot edit resources outside their domain
-2. There is no single-store of credentials for the entire fleet (if one cluster is compromised that doesn't imply the entire enterprise is then compromised)
+1. Owners of a subset of resources cannot edit resources outside their domain.
+2. There is no single store of credentials for the entire fleet (if one cluster is compromised, that doesn't imply the entire enterprise is compromised).
 3. It is still seamless to create, destroy, and update any cluster within the fleet and maintain line-of-sight into what's running within them.
 
-Plural allows you to maintain all three of these core concerns using a number of clever constructs, namely `Projects` (for segmenting resources w/in Plural under specific sets of bound policies), `NamespaceCredentials` for overriding the resources reconciled by our operator to specific configured credentials (making sure GitOps doesn't become implicit God-mode), and `ServiceAccount` which allows you to quickly provision assumable bot-accounts like Kubernetes service accounts which can then be fed into Terraform Stacks or `NamespaceCredentials` to seamlessly bound permissions throughout the system.
+Plural allows you to address all three of these core concerns using several clever constructs, namely `Projects` (for segmenting resources within Plural under specific sets of bound policies), `NamespaceCredentials` (for overriding the credentials our operator uses to reconcile resources with specific configured ones, making sure GitOps doesn't become implicit God-mode), and `ServiceAccount` (which allows you to quickly provision assumable bot accounts, like Kubernetes service accounts, which can then be fed into Terraform Stacks or `NamespaceCredentials` to seamlessly bound permissions throughout the system).
 
 ## TLDR
 
-If you would rather just see a live demo, feel free to browse the video below, it will go over this in the context of a working example in full detail:
+If you'd rather see a live demo, watch the video below, which goes over this in full detail in the context of a working example:
 
 {% embed url="https://youtu.be/svGZ1-8fqKo" aspectRatio="16 / 9" /%}
 
@@ -61,9 +61,9 @@ spec:
     namespace: gke-fleet
 ```
 
-This creates a `ServiceAccount` for the dummy `gke-fleet-fleet@plural.sh` email and plumbs that service account as the writer for the `gke-fleet` Project.  Finally it binds that service account's access token as the credentials for the `gke-fleet` namespace.
+This creates a `ServiceAccount` for the dummy `gke-fleet-fleet@plural.sh` email and plumbs that service account in as the writer for the `gke-fleet` Project.  Finally, it binds that service account's access token as the credentials for the `gke-fleet` namespace.
 
-From there, we can create a single service to sync in resources w/in that namespace like so:
+From there, we can create a single service to sync in resources within that namespace like so:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -85,7 +85,7 @@ spec:
     namespace: infra
 ```
 
-And add a few clusters also like so w/in that namespace:
+And add a few clusters within that namespace like so:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -134,9 +134,9 @@ spec:
     fleet: gke-fleet
 ```
 
-Since the `InfrastructureStack` resource was created in that namespace, it's going to use the above `ServiceAccount`'s credentials to reconcile that CRD.  It also has bound the service account as the actor for the stack, so any usage of the Plural terraform provider will auth as that service account.  Note there are guarantees within Plural's authorization logic to ensure these are only w/in resources that user can write to and that they can't wire in other actor's besides themselves if they don't have sufficient permissions.
+Since the `InfrastructureStack` resource was created in that namespace, it's going to use the above `ServiceAccount`'s credentials to reconcile that CRD.  It also binds the service account as the actor for the stack, so any usage of the Plural Terraform provider will authenticate as that service account.  Note that Plural's authorization logic guarantees these are only within resources that user can write to, and that they can't wire in actors other than themselves if they don't have sufficient permissions.
 
-Notice we're also using a dedicated cluster, `gke-fleet-tf` to execute that terraform stack.  This allows you to separate the cloud creds used for provisioning your cloud infrastructure and reduce the risk of a single management cluster with God-like access to your cloud estate.  And you can bind those clusters to Projects as well to ensure they're only accessible to the right individuals within your enterprise within Plural itself.
+Notice we're also using a dedicated cluster, `gke-fleet-tf`, to execute that Terraform stack.  This allows you to separate the cloud creds used for provisioning your cloud infrastructure and reduce the risk of a single management cluster with God-like access to your cloud estate.  You can also bind those clusters to Projects to ensure they're only accessible to the right individuals in your enterprise within Plural itself.
 
 Now that the clusters are set, you can also add a few services, like:
 
@@ -175,13 +175,13 @@ spec:
     tier: dev
 ```
 
-Again, these services are only creatable w/in clusters of the `gke-fleet` project, since they're in a namespace bound to that `ServiceAccount`'s credentials.
+Again, these services can only be created within clusters of the `gke-fleet` project, since they're in a namespace bound to that `ServiceAccount`'s credentials.
 
 ## What Does This Do for Me?
 
-So what's the upshot here:
+So what's the upshot here?
 
 * We've been able to scalably manage permissions throughout your clusters using the `Project` abstraction.
-* We've been able to isolate the GitOps reconciliation process to limited and scoped permissions using the `NamespaceCredentials` object, and bind them to users w/ only write access to a single `Project`
-* We've leveraged the cluster targeting feature of Stacks to scope down the cloud creds used by terraform to the single project it's relevant for.
+* We've been able to isolate the GitOps reconciliation process to limited, scoped permissions using the `NamespaceCredentials` object, and bind them to users with write access to only a single `Project`.
+* We've used the cluster targeting feature of Stacks to scope down the cloud creds used by Terraform to the single project they're relevant for.
 * We've still maintained Plural as a single point to manage the entirety of your Kubernetes estate in a scalable, but compliant, way.

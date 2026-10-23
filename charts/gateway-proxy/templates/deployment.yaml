@@ -1,0 +1,126 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "gateway-proxy.fullname" . }}
+  labels:
+    {{- include "gateway-proxy.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "gateway-proxy.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        {{- if not .Values.secrets.existingSecret }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        {{- end }}
+      {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "gateway-proxy.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "gateway-proxy.serviceAccountName" . }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          env:
+            - name: PROXY_LISTEN_ADDR
+              value: {{ printf ":%v" .Values.service.port | quote }}
+            - name: GATEWAY_URL
+              value: {{ required "config.gatewayUrl is required" .Values.config.gatewayUrl | quote }}
+            - name: OAUTH_TOKEN_URL
+              value: {{ required "oauth.tokenUrl is required" .Values.oauth.tokenUrl | quote }}
+            - name: OAUTH_CLIENT_ID
+              value: {{ required "oauth.clientId is required" .Values.oauth.clientId | quote }}
+            - name: GATEWAY_STREAMING_MODE
+              value: {{ .Values.config.streamingMode | quote }}
+            - name: GATEWAY_TIMEOUT
+              value: {{ .Values.config.timeout | quote }}
+            - name: GATEWAY_KEEPALIVE_INTERVAL
+              value: {{ .Values.config.keepaliveInterval | quote }}
+            - name: GATEWAY_STRIP_CACHE_CONTROL
+              value: {{ .Values.config.stripCacheControl | quote }}
+            - name: LOG_LEVEL
+              value: {{ .Values.config.logLevel | quote }}
+            {{- with .Values.config.modelId }}
+            - name: GATEWAY_MODEL_ID
+              value: {{ . | quote }}
+            {{- end }}
+            {{- with include "gateway-proxy.modelMap" . }}
+            - name: GATEWAY_MODEL_MAP
+              value: {{ . | quote }}
+            {{- end }}
+            {{- with .Values.config.betaAllowlist }}
+            - name: GATEWAY_BETA_ALLOWLIST
+              value: {{ join "," . | quote }}
+            {{- end }}
+            {{- with .Values.oauth.scopes }}
+            - name: OAUTH_SCOPES
+              value: {{ join " " . | quote }}
+            {{- end }}
+            {{- with .Values.oauth.resource }}
+            - name: OAUTH_RESOURCE
+              value: {{ . | quote }}
+            {{- end }}
+            {{- with .Values.oauth.audience }}
+            - name: OAUTH_AUDIENCE
+              value: {{ . | quote }}
+            {{- end }}
+            - name: PROXY_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "gateway-proxy.secretName" . }}
+                  key: PROXY_API_KEY
+            - name: OAUTH_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "gateway-proxy.secretName" . }}
+                  key: OAUTH_CLIENT_SECRET
+            {{- with .Values.env }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- with .Values.envFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -2,6 +2,7 @@ import {
   CheckIcon,
   CopyIcon,
   IconFrame,
+  IconFrameProps,
   SemanticColorKey,
   Tooltip,
 } from '@pluralsh/design-system'
@@ -12,6 +13,7 @@ type CopyButtonProps = {
   type?: 'secondary' | 'tertiary' | 'floating'
   tooltip?: string
   iconColor?: SemanticColorKey
+  size?: IconFrameProps['size']
 }
 
 function CopyButton({
@@ -19,6 +21,7 @@ function CopyButton({
   type = 'floating',
   tooltip,
   iconColor,
+  size,
 }: CopyButtonProps) {
   const [copied, setCopied] = useState(false)
 
@@ -45,6 +48,7 @@ function CopyButton({
     >
       <IconFrame
         clickable
+        size={size}
         icon={
           copied ? (
             <CheckIcon color={iconColor} />

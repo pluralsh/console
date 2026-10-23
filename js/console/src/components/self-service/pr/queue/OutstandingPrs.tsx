@@ -1,10 +1,14 @@
-import { Flex, Input, SearchIcon, Table } from '@pluralsh/design-system'
+import { Flex, Table } from '@pluralsh/design-system'
 import { ComponentProps, useState } from 'react'
 
 import { usePullRequestsQuery } from 'generated/graphql'
 
 import { useThrottle } from 'components/hooks/useThrottle'
 
+import {
+  PageToolbarPortal,
+  ToolbarSearchInput,
+} from 'components/layout/PageToolbar'
 import { GqlError } from 'components/utils/Alert'
 
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
@@ -37,35 +41,37 @@ export function OutstandingPrs() {
     meta: { refetch },
   }
 
-  if (error) return <GqlError error={error} />
-
   return (
-    <Flex
-      direction="column"
-      gap="small"
-      height="100%"
-      overflow="hidden"
-    >
-      <Input
-        placeholder="Search PRs"
-        startIcon={<SearchIcon />}
-        showClearButton
-        value={searchString}
-        onChange={(e) => setSearchString(e.currentTarget.value)}
-        css={{ flexGrow: 1 }}
-      />
-      <Table
-        virtualizeRows
-        fullHeightWrap
-        columns={prColumns}
-        loading={!data && loading}
-        data={data?.pullRequests?.edges || []}
-        reactTableOptions={reactTableOptions}
-        hasNextPage={pageInfo?.hasNextPage}
-        fetchNextPage={fetchNextPage}
-        isFetchingNextPage={loading}
-        onVirtualSliceChange={setVirtualSlice}
-      />
-    </Flex>
+    <>
+      <PageToolbarPortal>
+        <ToolbarSearchInput
+          placeholder="Search PRs"
+          value={searchString}
+          onChange={setSearchString}
+        />
+      </PageToolbarPortal>
+      {error ? (
+        <GqlError error={error} />
+      ) : (
+        <Flex
+          direction="column"
+          height="100%"
+          overflow="hidden"
+        >
+          <Table
+            virtualizeRows
+            fullHeightWrap
+            columns={prColumns}
+            loading={!data && loading}
+            data={data?.pullRequests?.edges || []}
+            reactTableOptions={reactTableOptions}
+            hasNextPage={pageInfo?.hasNextPage}
+            fetchNextPage={fetchNextPage}
+            isFetchingNextPage={loading}
+            onVirtualSliceChange={setVirtualSlice}
+          />
+        </Flex>
+      )}
+    </>
   )
 }

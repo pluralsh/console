@@ -80,7 +80,7 @@ export function AISettingsAIInsights() {
   }
 
   return (
-    <ScrollablePage>
+    <ScrollablePage contentStyles={{ paddingTop: 0 }}>
       <Flex
         direction="column"
         gap="medium"
@@ -188,7 +188,7 @@ const InsightRowSC = styled.div(({ theme }) => ({
   alignItems: 'center',
   justifyContent: 'space-between',
   gap: theme.spacing.xlarge,
-  padding: `${theme.spacing.medium}px 0`,
+  padding: `${theme.spacing.medium} 0`,
   '&:first-child': { paddingTop: 0 },
   '&:last-child': { paddingBottom: 0 },
 }))

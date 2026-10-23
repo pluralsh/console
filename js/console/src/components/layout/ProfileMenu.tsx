@@ -87,7 +87,7 @@ export function ProfileMenu() {
                 : {
                     backgroundColor: theme.colors['fill-three'],
                     border: theme.borders.input,
-                    fontSize: 12,
+                    fontSize: '0.75rem',
                     ...(theme.mode === 'light' && {
                       // Initials default to white (for action-primary fill);
                       // on light grey chrome use default dark text.

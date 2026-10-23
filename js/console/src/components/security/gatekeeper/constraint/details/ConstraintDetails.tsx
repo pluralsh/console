@@ -60,9 +60,9 @@ function ConstraintDetails() {
     >
       <div css={{ flexGrow: 1, height: '100%' }}>
         <ScrollablePage
-          heading={name}
           scrollable
           fullWidth
+          noPadding
         >
           <Title2H1 css={{ marginBottom: '0.67em' }}>Description</Title2H1>
           <Body1P css={{ color: theme.colors['text-long-form'] }}>
@@ -80,7 +80,6 @@ function ConstraintDetails() {
         css={{
           width: 200,
           minWidth: 200,
-          marginTop: 57,
         }}
       >
         <SidecarItem heading="Policy name"> {name}</SidecarItem>

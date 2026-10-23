@@ -6,7 +6,7 @@ from collections import OrderedDict
 import requests
 import yaml
 
-from utils import get_chart_versions, print_success, update_compatibility_info
+from utils import get_chart_versions, github_headers, print_success, update_compatibility_info
 
 app_name = "argo-rollouts"
 github_api_tags_url = "https://api.github.com/repos/argoproj/argo-rollouts/tags"
@@ -22,7 +22,10 @@ def fetch_github_tags():
     page = 1
     while True:
         response = requests.get(
-            github_api_tags_url, params={"per_page": 100, "page": page}, timeout=30
+            github_api_tags_url,
+            params={"per_page": 100, "page": page},
+            headers=github_headers(),
+            timeout=30,
         )
         response.raise_for_status()
         entries = response.json()

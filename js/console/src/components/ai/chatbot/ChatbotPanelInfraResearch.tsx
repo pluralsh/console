@@ -123,11 +123,11 @@ const GradientWrapperSC = styled.div(({ theme }) => ({
   flexDirection: 'column',
   height: '100%',
   overflow: 'auto',
-  padding: `${theme.spacing.medium}px ${theme.spacing.xxxlarge}px ${theme.spacing.xlarge}px`,
+  padding: `${theme.spacing.medium} ${theme.spacing.xxxlarge} ${theme.spacing.xlarge}`,
   background: INFRA_RESEARCH_PANEL_BG,
 }))
 
 const PromptCardSC = styled(Card)(({ theme }) => ({
   ...theme.partials.text.body2LooseLineHeight,
-  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  padding: `${theme.spacing.small} ${theme.spacing.medium}`,
 }))

@@ -2,24 +2,23 @@ import {
   Card,
   CpuIcon,
   Flex,
-  Input,
   NamespaceIcon,
   RamIcon,
-  SearchIcon,
   Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 
+import {
+  PageToolbarPortal,
+  ToolbarSearchInput,
+} from 'components/layout/PageToolbar'
 import { GqlError } from 'components/utils/Alert'
 import { OverlineH1 } from 'components/utils/typography/Text'
 import { ClusterNamespaceUsageFragment } from 'generated/graphql'
 import { useMemo } from 'react'
 
 import { useOutletContext } from 'react-router-dom'
-import {
-  COST_MANAGEMENT_ABS_PATH,
-  COST_MANAGEMENT_REL_PATH,
-} from 'routes/costManagementRoutesConsts'
+import { COST_MANAGEMENT_ABS_PATH } from 'routes/costManagementRoutesConsts'
 import { useTheme } from 'styled-components'
 import {
   ColCpuCost,
@@ -38,7 +37,7 @@ import {
 import { CMContextType } from './CostManagementDetails'
 
 const getBreadcrumbs = (clusterName: string) => [
-  { label: COST_MANAGEMENT_REL_PATH, url: COST_MANAGEMENT_ABS_PATH },
+  { label: 'cost management', url: COST_MANAGEMENT_ABS_PATH },
   { label: clusterName },
   { label: 'namespaces' },
 ]
@@ -70,6 +69,13 @@ export function CostManagementDetailsNamespaces() {
       gap="medium"
       paddingBottom={theme.spacing.large}
     >
+      <PageToolbarPortal>
+        <ToolbarSearchInput
+          placeholder="Search by namespace"
+          value={namespaceQ}
+          onChange={setNamespaceQ}
+        />
+      </PageToolbarPortal>
       <Flex gap="large">
         <Card
           css={{
@@ -118,51 +124,36 @@ export function CostManagementDetailsNamespaces() {
           />
         </Card>
       </Flex>
-      <Flex
-        direction="column"
-        gap="small"
-        overflow="hidden"
+      <Card
+        css={{ overflow: 'hidden', maxHeight: 500 }}
+        header={{
+          content: (
+            <Flex gap="small">
+              <NamespaceIcon />
+              <OverlineH1 as="h3">all namespaces</OverlineH1>
+            </Flex>
+          ),
+        }}
       >
-        <Input
-          startIcon={<SearchIcon />}
-          placeholder="Search by namespace"
-          value={namespaceQ}
-          onChange={(e) => setNamespaceQ(e.target.value)}
-          css={{ flexShrink: 0 }}
-        />
-        <Card
-          css={{ overflow: 'hidden', maxHeight: 500 }}
-          header={{
-            content: (
-              <Flex gap="small">
-                <NamespaceIcon />
-                <OverlineH1 as="h3">all namespaces</OverlineH1>
-              </Flex>
-            ),
-          }}
-        >
-          {error ? (
-            <GqlError error={error} />
-          ) : (
-            <Table
-              fullHeightWrap
-              fillLevel={1}
-              virtualizeRows
-              flush
-              rowBg="base"
-              loading={!data && loading}
-              columns={cols}
-              data={usages}
-              hasNextPage={
-                data?.clusterUsage?.namespaces?.pageInfo?.hasNextPage
-              }
-              isFetchingNextPage={loading}
-              fetchNextPage={fetchNextPage}
-              onVirtualSliceChange={setVirtualSlice}
-            />
-          )}
-        </Card>
-      </Flex>
+        {error ? (
+          <GqlError error={error} />
+        ) : (
+          <Table
+            fullHeightWrap
+            fillLevel={1}
+            virtualizeRows
+            flush
+            rowBg="base"
+            loading={!data && loading}
+            columns={cols}
+            data={usages}
+            hasNextPage={data?.clusterUsage?.namespaces?.pageInfo?.hasNextPage}
+            isFetchingNextPage={loading}
+            fetchNextPage={fetchNextPage}
+            onVirtualSliceChange={setVirtualSlice}
+          />
+        )}
+      </Card>
     </Flex>
   )
 }

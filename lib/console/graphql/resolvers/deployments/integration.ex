@@ -11,8 +11,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Integration do
     |> paginate(args)
   end
 
-  def issue_counts(%Workbench{id: id}, _, _) do
-    issues = Issue.for_workbench(id)
+  def issue_counts(%Workbench{id: id}, args, _) do
+    issues =
+      Issue.for_workbench(id)
+      |> maybe_search(Issue, args)
+      |> issue_filters(Map.take(args, [:providers]))
 
     {:ok, %{
       providers: Console.Repo.all(Issue.count_by_provider(issues)),

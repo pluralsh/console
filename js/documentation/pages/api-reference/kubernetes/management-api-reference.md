@@ -485,6 +485,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `workbench` _[WorkbenchBindingPolicyMatches](#workbenchbindingpolicymatches)_ | Workbench defines match criteria for workbench-type binding policies. |  | Optional: \{\} <br /> |
+| `stack` _[StackBindingPolicyMatches](#stackbindingpolicymatches)_ | Stack defines match criteria for stack-type binding policies, including the evaluation stage. |  | Optional: \{\} <br /> |
 
 
 #### BindingPolicySpec
@@ -1801,8 +1802,9 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `issuer` _string_ | Issuer is the URL of the identity provider that issues the tokens. |  | Required: \{\} <br /> |
+| `aud` _string_ | Audience is the expected aud of tokens exchanged with this credential. When unset, any audience is accepted. When set, the token aud must equal this value, or include it when aud is a list. |  | Optional: \{\} <br /> |
 | `scopes` _string array_ | Scopes are the scopes that the credential will request from the identity provider. |  | Optional: \{\} <br /> |
-| `claimsLike` _[RawExtension](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#rawextension-runtime-pkg)_ | ClaimsLike is a JSON expression that matches the claims in the token.<br />All the value strings should be a valid regular expression.<br />Example:<br />	...<br />	claimsLike:<br />		sub: "repo:myaccount/myrepo:ref:refs/heads/.*" |  | Optional: \{\} <br /> |
+| `claimsLike` _[RawExtension](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#rawextension-runtime-pkg)_ | ClaimsLike is a JSON expression that matches the claims in the token.<br />All the value strings should be a valid regular expression, which must match the entire claim value.<br />Example:<br />	...<br />	claimsLike:<br />		sub: "repo:myaccount/myrepo:ref:refs/heads/.*" |  | Optional: \{\} <br /> |
 | `user` _string_ | User is the user email address that will be authenticated by this credential. |  | Required: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
@@ -2616,7 +2618,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `name` _string_ | Name specifies the name for this MCP server.<br />If not provided, the name from the resource metadata will be used.<br />This name is used for identification and referencing in AI workflows. |  | Optional: \{\} <br /> |
-| `protocol` _[McpServerProtocol](#mcpserverprotocol)_ | Protocol specifies the MCP transport protocol (SSE or STREAMABLE_HTTP).<br />STREAMABLE_HTTP is the modern protocol and is the default when omitted. | STREAMABLE_HTTP | Enum: [SSE STREAMABLE_HTTP] <br />Optional: \{\} <br /> |
+| `protocol` _[McpServerProtocol](#mcpserverprotocol)_ | Protocol specifies the MCP transport protocol. Only STREAMABLE_HTTP is supported and it is the default<br />when omitted. SSE is no longer supported and will fail to synchronize. | STREAMABLE_HTTP | Enum: [SSE STREAMABLE_HTTP] <br />Optional: \{\} <br /> |
 | `url` _string_ | URL is the HTTP endpoint where the MCP server is hosted.<br />This must be a valid HTTP or HTTPS URL that the AI system can reach<br />to execute tool calls and interact with the server's capabilities. |  | Required: \{\} <br /> |
 | `bindings` _[Bindings](#bindings)_ | Bindings define the read and write access policies for this MCP server.<br />These control which users and groups can view, modify, or execute tools<br />provided by this server, enabling fine-grained access control. |  | Optional: \{\} <br /> |
 | `authentication` _[MCPServerAuthentication](#mcpserverauthentication)_ | Authentication specifies the authentication configuration for accessing this MCP server.<br />Different authentication methods are supported including built-in Plural JWT<br />and custom HTTP headers for integration with various authentication systems. |  | Optional: \{\} <br /> |
@@ -5687,6 +5689,22 @@ _Appears in:_
 | `nodePools` _string_ | NodePools contains specs of node pools managed by this cluster. |  | Optional: \{\} <br /> |
 
 
+#### StackBindingPolicyMatches
+
+
+
+StackBindingPolicyMatches defines the stack policy evaluation stage attached by a BindingPolicy.
+
+
+
+_Appears in:_
+- [BindingPolicyMatches](#bindingpolicymatches)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `type` _[StackPolicyType](#stackpolicytype)_ | Type is the stack policy evaluation stage. Valid values: APPROVAL, RUN.<br />APPROVAL evaluates after the plan. RUN evaluates before a run is created. |  | Optional: \{\} <br /> |
+
+
 #### StackConfiguration
 
 
@@ -6648,6 +6666,7 @@ _Appears in:_
 | `teams` _[WorkbenchToolTeamsConfig](#workbenchtoolteamsconfig)_ | Microsoft Teams / Graph connection (integration). |  | Optional: \{\} <br /> |
 | `atlassian` _[WorkbenchToolAtlassianConfig](#workbenchtoolatlassianconfig)_ | Atlassian/jira connection (ticketing). |  | Optional: \{\} <br /> |
 | `jiraDatacenter` _[WorkbenchToolJiraDatacenterConfig](#workbenchtooljiradatacenterconfig)_ | Jira Data Center connection (ticketing). |  | Optional: \{\} <br /> |
+| `serviceNow` _[WorkbenchToolServiceNowConfig](#workbenchtoolservicenowconfig)_ | ServiceNow connection (ticketing). |  | Optional: \{\} <br /> |
 | `exa` _[WorkbenchToolExaConfig](#workbenchtoolexaconfig)_ | Exa connection (search). |  | Optional: \{\} <br /> |
 | `github` _[WorkbenchToolGithubConfig](#workbenchtoolgithubconfig)_ | GitHub connection (integration). |  | Optional: \{\} <br /> |
 | `gitlab` _[WorkbenchToolGitlabConfig](#workbenchtoolgitlabconfig)_ | GitLab connection (scm). |  | Optional: \{\} <br /> |
@@ -6994,6 +7013,24 @@ _Appears in:_
 | `accessTokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the Sentry user auth token or internal integration token. |  | Optional: \{\} <br /> |
 
 
+#### WorkbenchToolServiceNowConfig
+
+
+
+WorkbenchToolServiceNowConfig defines a ServiceNow connection.
+
+
+
+_Appears in:_
+- [WorkbenchToolConfiguration](#workbenchtoolconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `url` _string_ | ServiceNow instance URL, for example https://example.service-now.com. |  | Required: \{\} <br /> |
+| `username` _string_ | Username for basic auth when OAuth is not used. |  | Optional: \{\} <br /> |
+| `passwordSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | PasswordSecretRef references the basic auth password when OAuth is not used. |  | Optional: \{\} <br /> |
+
+
 #### WorkbenchToolSlackConfig
 
 
@@ -7024,7 +7061,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `name` _string_ | The name of the tool (a-z, 0-9, underscores). If not set, metadata.name is used. |  | Optional: \{\} <br />Pattern: `^[a-z0-9_]+$` <br />Type: string <br /> |
-| `tool` _[WorkbenchToolType](#workbenchtooltype)_ | The type of tool. |  | Enum: [HTTP ELASTIC DATADOG PROMETHEUS LOKI TEMPO SENTRY MCP LINEAR ATLASSIAN SPLUNK DYNATRACE CLOUDWATCH AZURE CLOUD JAEGER EXA GITHUB SLACK TEAMS GITLAB BITBUCKET BITBUCKET_DATACENTER AZURE_DEVOPS PAGERDUTY OPENSEARCH LAMBDA CLOUD_RUN AZURE_FUNCTION DOCKER VICTORIA_LOGS JIRA JIRA_DATACENTER] <br />Required: \{\} <br /> |
+| `tool` _[WorkbenchToolType](#workbenchtooltype)_ | The type of tool. |  | Enum: [HTTP ELASTIC DATADOG PROMETHEUS LOKI TEMPO SENTRY MCP LINEAR ATLASSIAN SPLUNK DYNATRACE CLOUDWATCH AZURE CLOUD JAEGER EXA GITHUB SLACK TEAMS GITLAB BITBUCKET BITBUCKET_DATACENTER AZURE_DEVOPS PAGERDUTY OPENSEARCH LAMBDA CLOUD_RUN AZURE_FUNCTION DOCKER VICTORIA_LOGS JIRA JIRA_DATACENTER SERVICE_NOW] <br />Required: \{\} <br /> |
 | `categories` _WorkbenchToolCategory array_ | Categories for the tool. |  | Optional: \{\} <br /> |
 | `approval` _boolean_ | Whether this tool requires approval before execution. |  | Optional: \{\} <br /> |
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | The project for this tool. |  | Optional: \{\} <br /> |

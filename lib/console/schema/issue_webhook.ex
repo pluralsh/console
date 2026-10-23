@@ -3,13 +3,15 @@ defmodule Console.Schema.IssueWebhook do
   alias Console.Deployments.Policies.Rbac
   alias Console.Schema.{PolicyBinding, User}
 
-  defenum Provider, linear: 0, jira: 1, asana: 2, github: 3, gitlab: 4, azure_devops: 5, bitbucket: 6, bitbucket_datacenter: 7
+  defenum Provider, linear: 0, jira: 1, asana: 2, github: 3, gitlab: 4, azure_devops: 5, bitbucket: 6, bitbucket_datacenter: 7, service_now: 8
 
   schema "issue_webhooks" do
     field :provider,    Provider
     field :external_id, :string
     field :name,        :string
     field :secret,      Piazza.Ecto.EncryptedString
+    # set by the provider during a webhook handshake (Asana's X-Hook-Secret), never by users
+    field :handshake_secret, Piazza.Ecto.EncryptedString
 
     field :read_policy_id, :binary_id
     field :write_policy_id, :binary_id
@@ -28,6 +30,10 @@ defmodule Console.Schema.IssueWebhook do
 
   def url(%__MODULE__{external_id: ext_id, provider: p}),
     do: Console.Deployments.Notifications.webhook_url("/v1/webhooks/issues/#{p}/#{ext_id}")
+
+  def awaiting_handshake(query \\ __MODULE__, id) do
+    from(w in query, where: w.id == ^id and is_nil(w.handshake_secret))
+  end
 
   def ordered(query \\ __MODULE__, order \\ [asc: :inserted_at]) do
     from(w in query, order_by: ^order)
@@ -55,9 +61,17 @@ defmodule Console.Schema.IssueWebhook do
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:external_id, &gen_external_id/0)
     |> validate_required([:provider, :name, :secret])
+    |> reset_handshake_secret()
     |> unique_constraint(:url)
     |> unique_constraint(:name)
     |> unique_constraint(:external_id)
+  end
+
+  defp reset_handshake_secret(cs) do
+    case get_change(cs, :secret) do
+      nil -> cs
+      _ -> put_change(cs, :handshake_secret, nil)
+    end
   end
 
   defp gen_external_id() do

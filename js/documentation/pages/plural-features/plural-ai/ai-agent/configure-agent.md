@@ -17,7 +17,7 @@ For field-level details, see the [AgentRuntime API reference](/api-reference/kub
 apiVersion: deployments.plural.sh/v1alpha1
 kind: AgentRuntime
 metadata:
-  name: claude-default
+  name: codex-default
   namespace: plrl-agents
 spec:
   targetNamespace: plrl-agents
@@ -30,10 +30,10 @@ spec:
       # apiKeySecretRef:
       #   name: ai-config
       #   key: openai 
-      model: claude-3-5-sonnet-latest
+      model: gpt-5.6-terra
 ```
 
-Supported runtime types are `CLAUDE`, `OPENCODE`, and `GEMINI`.
+Supported runtime types are `CLAUDE`, `OPENCODE`, `GEMINI`, `CODEX`, `PI`, and `CUSTOM`.
 
 ## Optional: Enable codebase memory persistence
 
@@ -131,10 +131,10 @@ Navigate to `Plural AI` -> `Agent runs`.
 
 ### Step 2: Create a new run
 
-In the main view fill in:
+In the main view, fill in:
 
 - **Prompt** describing the task.
-- **Repository** selected from the list of recent repositories or provide a custom URL.
+- **Repository** selected from the list of recent repositories, or a custom URL.
 - **Mode** set to `WRITE` or `ANALYZE`.
 - **Provider** matching the runtime type you configured.
 
@@ -147,7 +147,7 @@ The agent works in the background and streams updates to the run timeline.
 ### Step 4: Review results
 
 - In `WRITE` mode, the agent applies changes and opens a pull request.
-- In `ANALYSIS` mode, the agent produces a markdown summary visible in the Console.
+- In `ANALYZE` mode, the agent produces a markdown summary visible in the Console.
 
 ![](/assets/ai/agent_run_details_done.png)
 

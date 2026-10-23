@@ -1,5 +1,6 @@
 import { Card, Flex, Spinner } from '@pluralsh/design-system'
 import { IssueLink } from 'components/workbenches/common/IssueLink'
+import { WorkbenchJobPrChip } from 'components/workbenches/common/WorkbenchJobPrIcon'
 import { WorkbenchViewJobChip } from 'components/workbenches/common/WorkbenchViewJobChip'
 import { CaptionP } from 'components/utils/typography/Text'
 import { IssueStatus, WorkbenchIssueFragment } from 'generated/graphql'
@@ -120,12 +121,21 @@ function IssueCard({
       </Flex>
       <TitleSC>{issue.title}</TitleSC>
       {workbenchId && workbenchJobId && (
-        <WorkbenchViewJobChip
-          workbenchId={workbenchId}
-          jobId={workbenchJobId}
-          status={issue.workbenchJob?.status}
-          css={{ alignSelf: 'flex-end' }}
-        />
+        <Flex
+          gap="xsmall"
+          align="center"
+          justify="flex-end"
+        >
+          <WorkbenchJobPrChip
+            pullRequests={issue.workbenchJob?.pullRequests}
+            fillLevel={2}
+          />
+          <WorkbenchViewJobChip
+            workbenchId={workbenchId}
+            jobId={workbenchJobId}
+            status={issue.workbenchJob?.status}
+          />
+        </Flex>
       )}
     </CardSC>
   )
@@ -134,9 +144,7 @@ function IssueCard({
 function EmptyColumnCard() {
   return (
     <EmptyCardSC>
-      <EmptyCardTextSC>
-        No tickets available in this status yet.
-      </EmptyCardTextSC>
+      <EmptyCardTextSC>No issues in this status yet.</EmptyCardTextSC>
     </EmptyCardSC>
   )
 }
@@ -182,7 +190,7 @@ const ColumnSC = styled.div({
 const CardsSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  gap: 10,
+  gap: '0.625rem',
   alignItems: 'stretch',
   paddingBottom: theme.spacing.small,
 }))

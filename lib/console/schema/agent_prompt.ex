@@ -8,6 +8,8 @@ defmodule Console.Schema.AgentPrompt do
 
     belongs_to :agent_run, AgentRun
 
+    has_many :attachments, Console.Schema.Attachment
+
     timestamps()
   end
 

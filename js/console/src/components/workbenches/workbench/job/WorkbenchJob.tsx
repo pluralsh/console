@@ -1,10 +1,10 @@
 import {
   Button,
-  EmptyState,
   Flex,
   SidePanelOpenIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import { RunStatusIcon } from 'components/ai/agent-runs/AgentRunInfoDisplays'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { useSidePanelWidth } from 'components/layout/TopLevelSidePanel'
@@ -27,9 +27,11 @@ import { SaveWorkbenchPromptButton } from '../SaveWorkbenchPromptButton'
 import { WorkbenchJobActivities } from './WorkbenchJobActivities'
 import { WorkbenchJobMeta } from './WorkbenchJobMeta'
 import { isJobRunning } from './WorkbenchJobActivity'
-import { useWorkbenchJobPanel } from './WorkbenchJobPanel'
-import { hasWorkbenchJobPanelContent } from './workbenchJobResultUtils'
-import { useWorkbenchJobActionSummary } from './useWorkbenchJobActionSummary'
+import {
+  hasWorkbenchJobPanelTabs,
+  useWorkbenchJobPanel,
+  useWorkbenchJobTabsData,
+} from './WorkbenchJobPanel'
 
 export function WorkbenchJob() {
   const theme = useTheme()
@@ -47,10 +49,14 @@ export function WorkbenchJob() {
 
   const job = data?.workbenchJob
   const isLoading = loading && !job
-  const { hasActions } = useWorkbenchJobActionSummary(jobId)
-  const hasPanelContent = hasWorkbenchJobPanelContent(job, hasActions)
+  const panelData = useWorkbenchJobTabsData(jobId)
+  const hasPanelContent = !!job?.id && hasWorkbenchJobPanelTabs(panelData)
 
-  const { isOpen, setOpen } = useWorkbenchJobPanel(!!job?.id && hasPanelContent)
+  const { isOpen, setOpen } = useWorkbenchJobPanel({
+    hasContent: hasPanelContent,
+    loading: isLoading || panelData.isLoading || panelData.areActionsLoading,
+    key: jobId,
+  })
   useSidePanelWidth({
     maxWidthVw: 60,
     initialWidthVw:
@@ -81,7 +87,10 @@ export function WorkbenchJob() {
   if (!(job || loading))
     return !jobId ||
       queryError?.message?.includes('could not find resource') ? (
-      <EmptyState message="Workbench job not found." />
+      <WorkbenchEmptyState
+        message="Job not found"
+        description="This job may have been deleted, or the link is out of date."
+      />
     ) : (
       <GqlError
         header="Failed to load workbench job"
@@ -110,7 +119,7 @@ export function WorkbenchJob() {
             gap="xlarge"
             css={{
               borderBottom: theme.borders.default,
-              paddingBottom: theme.spacing.large,
+              paddingBottom: theme.spacing.medium,
             }}
           >
             <StackedText
@@ -123,6 +132,9 @@ export function WorkbenchJob() {
               second={job && <WorkbenchJobMeta job={job} />}
               secondColor="text-xlight"
               secondPartialType="body2"
+              css={{
+                '& > :first-child': { textBox: 'trim-start cap alphabetic' },
+              }}
             />
             <Flex
               align="center"
@@ -145,7 +157,7 @@ export function WorkbenchJob() {
           />
         </WrapperSC>
       </MainColumnSC>
-      {!!job?.id && hasPanelContent && !isOpen && (
+      {hasPanelContent && !isOpen && (
         <PanelOpenBtnSC
           tertiary
           onClick={() => setOpen(true)}

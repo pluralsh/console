@@ -10,6 +10,7 @@ import (
 	console "github.com/pluralsh/console/go/client"
 	agentrunv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 )
 
 func TestAgentPrepareAndConfigurePhases(t *testing.T) {
@@ -41,10 +42,8 @@ func TestAgentPrepareAndConfigurePhases(t *testing.T) {
 		t.Fatalf("ResolveSettings() error = %v", err)
 	}
 	if err := agent.Configure(context.Background(), toolv1.ConfigureRequest{
-		Phase:        toolv1.ConfigurePhaseInitial,
-		ConsoleURL:   "https://console.example",
-		ConsoleToken: "console-token",
-		Settings:     settings,
+		Phase:    toolv1.ConfigurePhaseInitial,
+		Settings: settings,
 	}); err != nil {
 		t.Fatalf("Configure(initial) error = %v", err)
 	}
@@ -53,7 +52,7 @@ func TestAgentPrepareAndConfigurePhases(t *testing.T) {
 	if err != nil {
 		t.Fatalf("read native config: %v", err)
 	}
-	if !strings.Contains(string(native), "https://console.example/ext/ai/v1") ||
+	if !strings.Contains(string(native), common.AgentConsoleProxyURL+"/ext/ai/v1") ||
 		!strings.Contains(string(native), `model = "openai/gpt-5.1-codex"`) ||
 		!strings.Contains(string(native), "[mcp_servers.\"plural\"]") ||
 		!strings.Contains(string(native), "required = true") ||
@@ -85,9 +84,8 @@ func TestResolveProviderSettingsPreservesProxyEndpointAndWirePolicy(t *testing.T
 	run.Runtime.Config.Codex.Method = string(method)
 	config := toolv1.Config{WorkDir: t.TempDir(), RepositoryDir: t.TempDir(), Run: run}
 	agent := NewAgent(config)
-	agent.consoleURL = "https://console.example"
 	provider, baseURL, _, wireAPI := agent.resolveProviderSettings(config)
-	if provider != pluralProvider || baseURL != "https://console.example/ext/ai/v1" || wireAPI != responsesWireAPI {
+	if provider != pluralProvider || baseURL != common.AgentConsoleProxyURL+"/ext/ai/v1" || wireAPI != responsesWireAPI {
 		t.Fatalf("proxy provider settings = %q, %q, %q", provider, baseURL, wireAPI)
 	}
 	run.Runtime.AiProxy = false

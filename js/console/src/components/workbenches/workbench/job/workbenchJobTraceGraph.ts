@@ -1,7 +1,7 @@
 import { type Edge } from '@xyflow/react'
 import { WorkbenchJobActivityTraceFragment } from 'generated/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
-import { formatDuration } from './workbenchJobTraceUtils'
+import { formatDuration, spanLabel } from './workbenchJobTraceUtils'
 import { traceBarColor } from './workbenchJobTraceColors'
 
 const smoothEdgeType = 'plural-smooth-edge'
@@ -32,7 +32,7 @@ export function getSpanNodesAndEdges(spans: TraceGraphSpan[]) {
       data: {
         color: serviceColor(serviceName(span)),
         duration,
-        label: span.name ?? 'Unnamed span',
+        label: spanLabel(span),
         service: serviceName(span),
         severity: nodeSeverity(span.tags),
         tool: isToolSpan(span.tags),

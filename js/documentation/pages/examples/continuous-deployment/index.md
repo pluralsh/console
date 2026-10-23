@@ -5,7 +5,7 @@ description: 'Learn how to deploy applications using Helm charts, Kustomize, and
 
 ## Overview
 
-This section provides practical examples of using Plural's Continuous Deployment feature to easily install and manage
+This section provides practical examples of using Plural's Continuous Deployment feature to install and manage
 applications in your Kubernetes clusters. Plural is a comprehensive platform that simplifies infrastructure management for
 DevOps teams and developers.
 
@@ -16,7 +16,7 @@ These examples demonstrate how Plural can help you:
 - **Enhance Kubernetes Deployments**: Apply Liquid templating to customize Helm values and raw Kubernetes manifests
 - **Build Connected Services**: Create services with proper dependencies and orchestration between components
 - **Implement GitOps Workflows**: Manage multi-environment deployments (like dev → staging → production) with clear separation and controlled promotion between environments
-- **Automate Updates**: Leverage pipeline observers to automatically generate pull requests when new versions of your applications are available
+- **Automate Updates**: Use pipeline observers to automatically generate pull requests when new versions of your applications are available
 
 Plural brings these capabilities together in a unified platform that combines the best practices of GitOps with powerful deployment tools that work across any infrastructure. The examples in this section will guide you through practical implementations that you can adapt to your own projects.
 
@@ -35,7 +35,7 @@ If you're missing any of these, please refer to the [First Steps guide](../../ge
 For simplicity, all examples in this guide use the `mgmt` cluster as the deployment target and a main infrastructure repository (initially created during Plural bootstrapping with `plural up`) to store the configuration. Before proceeding, create the required `Cluster` and `GitRepository` resources that will be shared across all examples.
 
 ### Create a read-only cluster resource
-First, we'll create and adopt a cluster that will serve as the target for our examples. While the `mgmt` cluster typically exists in the `infra` namespace, we can adopt additional read-only clusters through our custom resources as needed
+First, we'll create and adopt a cluster that will serve as the target for our examples. While the `mgmt` cluster typically exists in the `infra` namespace, we can adopt additional read-only clusters through our custom resources as needed.
 
 ##### [apps/examples/cluster.yaml](#TODO)
 ```yaml

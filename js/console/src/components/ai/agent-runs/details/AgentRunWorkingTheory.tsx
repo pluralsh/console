@@ -128,7 +128,6 @@ function AgentRunStatusCallout({
             secondColor="text-xlight"
             icon={
               <IconFrame
-                circle
                 size="large"
                 type="secondary"
                 icon={

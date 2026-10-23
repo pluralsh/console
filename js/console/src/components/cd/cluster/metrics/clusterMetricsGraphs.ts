@@ -15,22 +15,31 @@ export type UsageField = Exclude<
   '__typename'
 >
 
-export type ClusterMetricGraph = {
+export type MetricGraph<M, F extends string> = {
   key: string
   title: string
   tooltip: string
   format: MetricFormat
   /** the only usage metrics (and so prometheus queries) this graph fetches */
-  fields: UsageField[]
-  series: (metrics: ClusterUsageMetricsFragment) => GraphSeries[]
+  fields: F[]
+  series: (metrics: M) => GraphSeries[]
 }
 
-export type ClusterMetricSection = {
+export type MetricSection<M, F extends string> = {
   key: string
   title: string
   description?: string
-  graphs: ClusterMetricGraph[]
+  graphs: MetricGraph<M, F>[]
 }
+
+export type ClusterMetricGraph = MetricGraph<
+  ClusterUsageMetricsFragment,
+  UsageField
+>
+export type ClusterMetricSection = MetricSection<
+  ClusterUsageMetricsFragment,
+  UsageField
+>
 
 export type Metrics = Nullable<Nullable<MetricResponseFragment>[]>
 type Point = GraphSeries['data'][number]
@@ -45,9 +54,9 @@ const GROUP_LABELS: Record<ClusterMetricsGrouping, string> = {
 }
 
 /** Query variables enabling just the `@include`d usage fields a graph needs. */
-export function usageFieldVariables(fields: UsageField[]) {
+export function usageFieldVariables<F extends string>(fields: F[]) {
   return Object.fromEntries(fields.map((field) => [field, true])) as Partial<
-    Record<UsageField, boolean>
+    Record<F, boolean>
   >
 }
 

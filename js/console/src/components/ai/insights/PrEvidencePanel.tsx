@@ -68,7 +68,7 @@ const PrEvidenceLineSC = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   gap: theme.spacing.small,
-  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  padding: `${theme.spacing.small} ${theme.spacing.medium}`,
   paddingRight: theme.spacing.small,
   borderBottom: theme.borders.input,
 }))

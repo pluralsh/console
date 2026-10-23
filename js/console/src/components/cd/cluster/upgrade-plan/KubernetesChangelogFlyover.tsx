@@ -154,7 +154,7 @@ const FlyoverSC = styled(Flyover)(({ theme }) => ({
 }))
 
 const MdWrapperCardSC = styled(Card)(({ theme }) => ({
-  padding: `${theme.spacing.large}px ${theme.spacing.medium}px`,
+  padding: `${theme.spacing.large} ${theme.spacing.medium}`,
   background: theme.colors['fill-accent'],
   border: theme.borders.default,
   overflow: 'auto',
@@ -164,5 +164,5 @@ const ChangelogHrSC = styled.hr(({ theme }) => ({
   height: '1px',
   backgroundColor: theme.colors.border,
   border: 0,
-  margin: `${theme.spacing.medium}px 0 0`,
+  margin: `${theme.spacing.medium} 0 0`,
 }))

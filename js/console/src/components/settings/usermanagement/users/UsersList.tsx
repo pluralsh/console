@@ -1,6 +1,10 @@
-import { Input, SearchIcon, Table } from '@pluralsh/design-system'
+import { Table } from '@pluralsh/design-system'
 import { useLogin } from 'components/contexts'
 import { useThrottle } from 'components/hooks/useThrottle'
+import {
+  PageToolbarPortal,
+  ToolbarSearchInput,
+} from 'components/layout/PageToolbar'
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { useUsersQuery } from 'generated/graphql'
@@ -34,36 +38,38 @@ export function UsersList() {
     setVirtualSlice,
   })
 
-  if (error) return <GqlError error={error} />
-
   return (
     <ListWrapperSC>
-      <Input
-        value={q}
-        placeholder="Search users"
-        startIcon={<SearchIcon color="text-light" />}
-        onChange={({ target: { value } }) => setQ(value)}
-        css={{ flexShrink: 0 }}
-      />
-      <Table
-        fullHeightWrap
-        virtualizeRows
-        {...membershipExpandTableProps}
-        data={users}
-        columns={usersCols}
-        loading={!data && loading}
-        onVirtualSliceChange={onVirtualSliceChange}
-        renderExpanded={({ row }) => <UserGroupsExpand row={row} />}
-        emptyStateProps={{
-          message: !throttledQ
-            ? "Looks like you don't have any users yet."
-            : `No users found for ${throttledQ}`,
-          // invites are only available when not using login with Plural.
-          children: configuration && !configuration?.pluralLogin && (
-            <UserInvite />
-          ),
-        }}
-      />
+      <PageToolbarPortal>
+        <ToolbarSearchInput
+          placeholder="Search users"
+          value={q}
+          onChange={setQ}
+        />
+      </PageToolbarPortal>
+      {error ? (
+        <GqlError error={error} />
+      ) : (
+        <Table
+          fullHeightWrap
+          virtualizeRows
+          {...membershipExpandTableProps}
+          data={users}
+          columns={usersCols}
+          loading={!data && loading}
+          onVirtualSliceChange={onVirtualSliceChange}
+          renderExpanded={({ row }) => <UserGroupsExpand row={row} />}
+          emptyStateProps={{
+            message: !throttledQ
+              ? "Looks like you don't have any users yet."
+              : `No users found for ${throttledQ}`,
+            // invites are only available when not using login with Plural.
+            children: configuration && !configuration?.pluralLogin && (
+              <UserInvite />
+            ),
+          }}
+        />
+      )}
     </ListWrapperSC>
   )
 }

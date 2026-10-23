@@ -290,7 +290,7 @@ function AgentRunLinkButton({
 }
 
 const TopCardSC = styled(Card)(({ theme }) => ({
-  padding: `${theme.spacing.large}px ${theme.spacing.xxlarge}px`,
+  padding: `${theme.spacing.large} ${theme.spacing.xxlarge}`,
   background: 'transparent',
   display: 'flex',
   alignItems: 'flex-end',

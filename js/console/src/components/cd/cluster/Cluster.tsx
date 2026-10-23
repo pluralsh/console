@@ -1,14 +1,10 @@
 import {
+  ICON_FRAME_ICON_SIZE,
   Breadcrumb,
   EmptyState,
   GearTrainIcon,
-  IconFrame,
   ListBoxItem,
-  MoreIcon,
   PersonIcon,
-  SubTab,
-  TabList,
-  TabPanel,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 
@@ -16,18 +12,21 @@ import {
   useLogsEnabled,
   useMetricsEnabled,
 } from 'components/contexts/DeploymentSettingsContext'
+import { PageColumnSC, PageRowSC } from 'components/layout/PageLayout'
+import { PageToolbar } from 'components/layout/PageToolbar'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
-import { LinkTabWrap } from 'components/utils/Tabs'
 import { isFunction } from 'lodash'
 import {
+  createContext,
   ReactNode,
   Suspense,
   useCallback,
+  useContext,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from 'react'
+import { createPortal } from 'react-dom'
 import {
   Outlet,
   useMatch,
@@ -51,7 +50,7 @@ import {
   CLUSTER_VCLUSTERS_REL_PATH,
   CLUSTERS_REL_PATH,
 } from 'routes/cdRoutesConsts'
-import { useTheme } from 'styled-components'
+import styled from 'styled-components'
 
 import {
   ClusterFragment,
@@ -123,13 +122,13 @@ const getSharedMenuItems = (cluster: ClusterFragment): Array<MoreMenuItem> => [
   {
     key: 'permissions',
     label: 'Permissions',
-    icon: <PersonIcon />,
+    icon: <PersonIcon size={ICON_FRAME_ICON_SIZE.small} />,
     enabled: true,
   },
   {
     key: 'settings',
     label: 'Settings',
-    icon: <GearTrainIcon />,
+    icon: <GearTrainIcon size={ICON_FRAME_ICON_SIZE.small} />,
     enabled: !cluster.self,
   },
 ]
@@ -173,9 +172,7 @@ export const getClusterBreadcrumbs = ({
 }
 
 export function Cluster() {
-  const theme = useTheme()
   const navigate = useNavigate()
-  const tabStateRef = useRef<any>(null)
   const { clusterId, tab, detailsTab } =
     useMatch(`${CLUSTER_ABS_PATH}/:tab?/:detailsTab?/*`)?.params ?? {}
   const [refetchServices, setRefetchServices] = useState(() => () => {})
@@ -205,9 +202,21 @@ export function Cluster() {
       }).filter((t) => t.enabled !== false),
     [cluster, logsEnabled, metricsEnabled, meshEnabled]
   )
-  const currentTab = directory.find(({ path }) => path === tab)
+  const tabs = useMemo(
+    () =>
+      directory.map(({ label, path }) => ({
+        key: path,
+        label,
+        path: `${CLUSTER_ABS_PATH}/${path}`.replace(
+          `:${CLUSTER_PARAM_ID}`,
+          clusterId ?? ''
+        ),
+      })),
+    [directory, clusterId]
+  )
 
   const [headerContent, setHeaderContent] = useState<ReactNode>()
+  const [sidebarSlot, setSidebarSlot] = useState<HTMLDivElement | null>(null)
   const [menuKey, setMenuKey] = useState<string>('')
   const sharedMenuItems = useMemo(
     () => (cluster ? getSharedMenuItems(cluster) : []),
@@ -248,22 +257,19 @@ export function Cluster() {
     return <EmptyState message="Cluster not found." />
 
   return (
-    <ResponsivePageFullWidth
-      scrollable={
-        tab !== 'services' &&
-        tab !== 'pods' &&
-        tab !== CLUSTER_PRS_REL_PATH &&
-        tab !== CLUSTER_VCLUSTERS_REL_PATH &&
-        tab !== 'addons' &&
-        tab !== 'logs'
-      }
-      headingContent={
-        <>
-          <div css={{ width: 320, height: '100%', flexShrink: 0 }}>
+    <PageRowSC>
+      <SidebarSlotSC ref={setSidebarSlot} />
+      <PageColumnSC>
+        <PageToolbar
+          tabs={tabs}
+          activeFn={(path) => path === tabs.find((t) => t.key === tab)?.path}
+        >
+          <div css={{ width: 240, flexShrink: 1, minWidth: 160 }}>
             <ClusterSelector
               clusterId={clusterId}
               allowDeselect={false}
               showUpgrades={tab === 'addons'}
+              inputProps={{ small: true }}
               onClusterChange={(c) => {
                 if (c?.id && c.id !== clusterId) {
                   navigate(
@@ -273,113 +279,87 @@ export function Cluster() {
               }}
             />
           </div>
-          <TabList
-            scrollable
-            stateRef={tabStateRef}
-            stateProps={{
-              orientation: 'horizontal',
-              selectedKey: currentTab?.path,
+          {headerContent}
+          <MoreMenu
+            onSelectionChange={(newKey: string) => setMenuKey(newKey)}
+            triggerProps={{
+              iconFrameType: 'secondary',
+              size: 'medium',
+              iconSize: ICON_FRAME_ICON_SIZE.small,
             }}
           >
-            {directory.map(({ label, path }) => (
-              <LinkTabWrap
-                css={{ minWidth: 'fit-content' }}
-                subTab
-                key={path}
-                to={`${CLUSTER_ABS_PATH}/${path}`.replace(
-                  `:${CLUSTER_PARAM_ID}`,
-                  clusterId ?? ''
-                )}
-              >
-                <SubTab key={path}>{label}</SubTab>
-              </LinkTabWrap>
-            ))}
-          </TabList>
-          <div
-            css={{
-              justifyContent: 'end',
-              display: 'flex',
-              flexGrow: 1,
-              flexShrink: 0,
-              gap: theme.spacing.small,
-              marginLeft: theme.spacing.large,
-            }}
-          >
-            {headerContent}
-            <MoreMenu
-              onSelectionChange={(newKey: string) => setMenuKey(newKey)}
-              triggerButton={
-                <IconFrame
-                  textValue="Menu"
-                  clickable
-                  size="large"
-                  type="secondary"
-                  icon={
-                    <MoreIcon
-                      width={16}
-                      color={theme.colors['icon-light']}
-                    />
-                  }
-                  css={{
-                    backgroundColor: theme.colors['fill-two'],
-                    '&:hover:not(:disabled)': {
-                      backgroundColor: theme.colors['fill-two-hover'],
-                    },
-                  }}
-                />
-              }
-            >
-              {moreMenuItems.map((item) => {
-                const enabled = isFunction(item.enabled)
-                  ? item.enabled()
-                  : item.enabled
+            {moreMenuItems.map((item) => {
+              const enabled = isFunction(item.enabled)
+                ? item.enabled()
+                : item.enabled
 
-                return enabled ? (
-                  <ListBoxItem
-                    key={item.key}
-                    leftContent={item.icon}
-                    label={item.label}
-                    textValue={item.label}
-                  />
-                ) : undefined
-              })}
-            </MoreMenu>
-            <ClusterPermissionsModal
-              cluster={cluster}
-              open={menuKey === 'permissions'}
-              onClose={() => setMenuKey('')}
-            />
-            <ClusterSettingsModal
-              cluster={cluster}
-              open={menuKey === 'settings'}
-              onClose={() => setMenuKey('')}
-            />
-          </div>
-        </>
-      }
-    >
-      <TabPanel
-        css={{ height: '100%' }}
-        stateRef={tabStateRef}
-      >
-        <PageHeaderContext value={pageHeaderContext}>
-          <Suspense fallback={<LoadingIndicator />}>
-            <Outlet
-              context={
-                {
-                  cluster,
-                  clusterLoading,
-                  refetch: refetchCluster,
-                  refetchServices,
-                  setRefetchServices,
-                } satisfies ClusterContextType
-              }
-            />
-          </Suspense>
-        </PageHeaderContext>
-      </TabPanel>
-    </ResponsivePageFullWidth>
+              return enabled ? (
+                <ListBoxItem
+                  key={item.key}
+                  leftContent={item.icon}
+                  label={item.label}
+                  textValue={item.label}
+                />
+              ) : undefined
+            })}
+          </MoreMenu>
+        </PageToolbar>
+        <ClusterPermissionsModal
+          cluster={cluster}
+          open={menuKey === 'permissions'}
+          onClose={() => setMenuKey('')}
+        />
+        <ClusterSettingsModal
+          cluster={cluster}
+          open={menuKey === 'settings'}
+          onClose={() => setMenuKey('')}
+        />
+        <ResponsivePageFullWidth
+          scrollable={
+            tab !== 'services' &&
+            tab !== 'pods' &&
+            tab !== CLUSTER_PRS_REL_PATH &&
+            tab !== CLUSTER_VCLUSTERS_REL_PATH &&
+            tab !== 'addons' &&
+            tab !== 'logs'
+          }
+        >
+          <PageHeaderContext value={pageHeaderContext}>
+            <ClusterSidebarSlotContext value={sidebarSlot}>
+              <Suspense fallback={<LoadingIndicator />}>
+                <Outlet
+                  context={
+                    {
+                      cluster,
+                      clusterLoading,
+                      refetch: refetchCluster,
+                      refetchServices,
+                      setRefetchServices,
+                    } satisfies ClusterContextType
+                  }
+                />
+              </Suspense>
+            </ClusterSidebarSlotContext>
+          </PageHeaderContext>
+        </ResponsivePageFullWidth>
+      </PageColumnSC>
+    </PageRowSC>
   )
+}
+
+const SidebarSlotSC = styled.div({
+  display: 'flex',
+  flexShrink: 0,
+  '&:empty': { display: 'none' },
+})
+
+const ClusterSidebarSlotContext = createContext<Nullable<HTMLElement>>(null)
+
+// renders a tab's sidebar beside the cluster toolbar, from the header down
+export function ClusterSidebarPortal({ children }: { children: ReactNode }) {
+  const slot = useContext(ClusterSidebarSlotContext)
+
+  return slot ? createPortal(children, slot) : null
 }
 
 export type ClusterContextType = {

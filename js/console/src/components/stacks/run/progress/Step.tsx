@@ -141,7 +141,7 @@ const TriggerSC = styled.div<{ $hasLogs: boolean }>(({ theme, $hasLogs }) => ({
   justifyContent: 'space-between',
   gap: theme.spacing.small,
   ...theme.partials.text.mono,
-  padding: `${theme.spacing.xsmall}px ${theme.spacing.large}px`,
+  padding: `${theme.spacing.xsmall} ${theme.spacing.large}`,
   backgroundColor: theme.colors['fill-two'],
   '&:hover': {
     backgroundColor: $hasLogs ? theme.colors['fill-two-hover'] : 'none',

@@ -602,6 +602,191 @@ defmodule Console.Deployments.SettingsTest do
 
       {:error, "no federated credential" <> _} = Settings.exchange_token(token, user.email)
     end
+
+    test "it does not fetch an issuer with no credential for the user" do
+      user = insert(:user)
+
+      insert(:federated_credential,
+        issuer: "https://oidc.plural.sh",
+        user: user,
+        claims_like: %{"sub" => user.email}
+      )
+
+      signer = Joken.Signer.create("HS256", "secret")
+
+      {:ok, token, _} =
+        Console.TestToken.generate_and_sign(%{"iss" => "https://evil.example", "aud" => "plural"}, signer)
+
+      reject(&Console.OIDC.ProviderConfiguration.fetch/2)
+
+      {:error, "no federated credential" <> _} = Settings.exchange_token(token, user.email)
+    end
+
+    test "an unknown email looks like a credential miss and does not fetch the issuer" do
+      signer = Joken.Signer.create("HS256", "secret")
+
+      {:ok, token, _} =
+        Console.TestToken.generate_and_sign(
+          %{"iss" => "https://evil.example", "aud" => "plural"},
+          signer
+        )
+
+      reject(&Console.OIDC.ProviderConfiguration.fetch/2)
+
+      {:error, "no federated credential" <> _} =
+        Settings.exchange_token(token, "missing@example.com")
+    end
+
+    test "it rejects a token minted for a different audience without fetching the issuer" do
+      user = insert(:user)
+
+      insert(:federated_credential,
+        issuer: "https://oidc.plural.sh",
+        user: user,
+        aud: "https://console.plural.sh",
+        claims_like: %{"sub" => user.email}
+      )
+
+      signer = Joken.Signer.create("HS256", "secret")
+
+      {:ok, token, _} =
+        Console.TestToken.generate_and_sign(
+          %{"iss" => "https://oidc.plural.sh", "sub" => user.email, "aud" => ["vault"]},
+          signer
+        )
+
+      reject(&Console.OIDC.ProviderConfiguration.fetch/2)
+      reject(&Oidcc.Token.validate_jwt/3)
+
+      {:error, "no federated credential" <> _} = Settings.exchange_token(token, user.email)
+    end
+
+    test "it exchanges a token when the credential audience matches" do
+      user = insert(:user)
+      issuer = "https://oidc.eks.us-east-1.amazonaws.com/id/EXAMPLE"
+      audience = "https://console.plural.sh"
+
+      insert(:federated_credential,
+        issuer: issuer,
+        user: user,
+        aud: audience,
+        claims_like: %{"sub" => user.email}
+      )
+
+      signer = Joken.Signer.create("HS256", "secret")
+
+      {:ok, token, _} =
+        Console.TestToken.generate_and_sign(
+          %{"iss" => issuer, "sub" => user.email, "aud" => [audience]},
+          signer
+        )
+
+      {:ok, conf} =
+        Oidcc.ProviderConfiguration.decode_configuration(k8s_discovery(issuer), Settings.issuer_quirks())
+
+      expect(Console.OIDC.ProviderConfiguration, :fetch, fn ^issuer, _ ->
+        {:ok, {conf, JOSE.JWK.generate_key({:oct, 16})}}
+      end)
+
+      expect(Oidcc.Token, :validate_jwt, fn _, %{client_id: ^audience}, _ ->
+        {:ok, %{"iss" => issuer, "sub" => user.email, "aud" => [audience]}}
+      end)
+
+      {:ok, token} = Settings.exchange_token(token, user.email)
+
+      assert is_binary(token)
+    end
+
+    test "it still exchanges a token when the credential has no audience" do
+      user = insert(:user)
+
+      insert(:federated_credential,
+        issuer: "https://oidc.plural.sh",
+        user: user,
+        claims_like: %{"sub" => user.email}
+      )
+
+      signer = Joken.Signer.create("HS256", "secret")
+
+      {:ok, token, _} =
+        Console.TestToken.generate_and_sign(
+          %{"iss" => "https://oidc.plural.sh", "sub" => user.email, "aud" => "vault"},
+          signer
+        )
+
+      issuer = "https://oidc.plural.sh"
+
+      {:ok, conf} =
+        Oidcc.ProviderConfiguration.decode_configuration(k8s_discovery(issuer), Settings.issuer_quirks())
+
+      expect(Console.OIDC.ProviderConfiguration, :fetch, fn ^issuer, _ ->
+        {:ok, {conf, JOSE.JWK.generate_key({:oct, 16})}}
+      end)
+
+      expect(Oidcc.Token, :validate_jwt, fn _, %{client_id: "vault"}, _ ->
+        {:ok, %{"sub" => user.email, "aud" => "vault"}}
+      end)
+
+      {:ok, token} = Settings.exchange_token(token, user.email)
+
+      assert is_binary(token)
+    end
+
+    test "it will exchange a kubernetes service account token" do
+      user = insert(:user)
+      issuer = "https://oidc.eks.us-east-1.amazonaws.com/id/EXAMPLE"
+      sub = "system:serviceaccount:crossplane-system:provider-plural"
+
+      insert(:federated_credential,
+        issuer: issuer,
+        user: user,
+        claims_like: %{"sub" => "^#{sub}$", "aud" => "^plural$"}
+      )
+
+      signer = Joken.Signer.create("HS256", "secret")
+
+      {:ok, token, _} =
+        Console.TestToken.generate_and_sign(%{"iss" => issuer, "sub" => sub, "aud" => ["plural"]}, signer)
+
+      {:ok, conf} =
+        Oidcc.ProviderConfiguration.decode_configuration(k8s_discovery(issuer), Settings.issuer_quirks())
+
+      expect(Console.OIDC.ProviderConfiguration, :fetch, fn ^issuer, _ ->
+        {:ok, {conf, JOSE.JWK.generate_key({:oct, 16})}}
+      end)
+
+      expect(Oidcc.Token, :validate_jwt, fn _, %{client_id: "plural"}, _ ->
+        {:ok, %{"iss" => issuer, "sub" => sub, "aud" => ["plural"]}}
+      end)
+
+      {:ok, token} = Settings.exchange_token(token, user.email)
+
+      assert is_binary(token)
+    end
+  end
+
+  describe "#issuer_quirks/0" do
+    test "it lets kubernetes discovery documents, which omit scopes_supported, decode" do
+      issuer = "https://kubernetes.default.svc.cluster.local"
+
+      {:error, _} = Oidcc.ProviderConfiguration.decode_configuration(k8s_discovery(issuer), %{})
+
+      {:ok, conf} =
+        Oidcc.ProviderConfiguration.decode_configuration(k8s_discovery(issuer), Settings.issuer_quirks())
+
+      assert conf.jwks_uri == "#{issuer}/openid/v1/jwks"
+    end
+  end
+
+  # what the kubernetes apiserver serves at /.well-known/openid-configuration
+  defp k8s_discovery(issuer) do
+    %{
+      "issuer" => issuer,
+      "jwks_uri" => "#{issuer}/openid/v1/jwks",
+      "response_types_supported" => ["id_token"],
+      "subject_types_supported" => ["public"],
+      "id_token_signing_alg_values_supported" => ["RS256"]
+    }
   end
 
   defp model_fields(),

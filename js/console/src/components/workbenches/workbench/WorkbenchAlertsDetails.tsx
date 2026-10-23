@@ -1,4 +1,5 @@
-import { Chip, EmptyState } from '@pluralsh/design-system'
+import { Chip } from '@pluralsh/design-system'
+import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import {
   getAlertAnnotations,
   getAlertSummary,
@@ -154,7 +155,6 @@ export function useWorkbenchAlertsDetails({
                     toggleAlertSeverityChip(severities, severity)
                   )
                 }
-                rounded
               >
                 {ALERT_SEVERITY_LABELS[severity]} ({severityCounts[severity]})
               </Chip>
@@ -168,6 +168,7 @@ export function useWorkbenchAlertsDetails({
             noun="alerts"
             loading={loading}
             emptyState={emptyState}
+            sidebar
           />
         )}
         {alerts.map((alert) => (
@@ -208,7 +209,15 @@ export function useWorkbenchAlertsDetails({
     </DetailsListSC>
   )
 
-  const content = (
+  const content = !selected ? (
+    !loading && (
+      <BoardEmptyList
+        noun="alerts"
+        loading={false}
+        emptyState={emptyState}
+      />
+    )
+  ) : (
     <DetailsLayoutSC $panelCount={detailsOpen ? 2 : 1}>
       {selected && (
         <AlertConclusionPanel
@@ -432,13 +441,15 @@ function AlertDetailsPanel({
         {tab === 'Annotations' && (
           <KeyValueChips
             entries={getAlertAnnotations(alert)}
-            emptyMessage="No annotations."
+            emptyMessage="No annotations"
+            emptyDescription="This alert was sent without any annotations."
           />
         )}
         {tab === 'Tags' && (
           <KeyValueChips
             entries={getAlertTagEntries(alert)}
-            emptyMessage="No tags."
+            emptyMessage="No tags"
+            emptyDescription="This alert was sent without any tags."
           />
         )}
         {tab === 'All information' && (
@@ -514,11 +525,20 @@ function KeyValueCard({
 function KeyValueChips({
   entries,
   emptyMessage,
+  emptyDescription,
 }: {
   entries: [string, string][]
   emptyMessage: string
+  emptyDescription: string
 }) {
-  if (isEmpty(entries)) return <EmptyState message={emptyMessage} />
+  if (isEmpty(entries))
+    return (
+      <WorkbenchEmptyState
+        inset={false}
+        message={emptyMessage}
+        description={emptyDescription}
+      />
+    )
 
   return (
     <ChipsSC>
@@ -565,7 +585,7 @@ const SeverityChipsSC = styled.div(({ theme }) => ({
 const SummaryCardSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexWrap: 'wrap',
-  gap: `${theme.spacing.medium}px ${theme.spacing.large}px`,
+  gap: `${theme.spacing.medium} ${theme.spacing.large}`,
   padding: theme.spacing.large,
   borderRadius: theme.borderRadiuses.large,
   border: theme.borders.default,
@@ -585,14 +605,14 @@ const SectionSC = styled.div({
 const SectionTitleSC = styled.h3(({ theme }) => ({
   ...theme.partials.text.body1,
   margin: 0,
-  padding: `${theme.spacing.medium}px 0 ${theme.spacing.small}px`,
+  padding: `${theme.spacing.medium} 0 ${theme.spacing.small}`,
   color: theme.colors['text-xlight'],
 }))
 
 const KeyValueCardSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  padding: `${theme.spacing.xsmall}px ${theme.spacing.large}px`,
+  padding: `${theme.spacing.xsmall} ${theme.spacing.large}`,
   borderRadius: theme.borderRadiuses.large,
   border: theme.borders.default,
   backgroundColor: theme.colors['fill-zero'],
@@ -602,7 +622,7 @@ const KeyValueRowSC = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   gap: theme.spacing.small,
-  padding: `${theme.spacing.small}px 0`,
+  padding: `${theme.spacing.small} 0`,
   borderBottom: theme.borders.default,
   '&:last-child': { borderBottom: 'none' },
 }))
@@ -633,5 +653,5 @@ const JobResultSC = styled.div(({ theme }) => ({
 const ChipsSC = styled.div({
   display: 'flex',
   flexWrap: 'wrap',
-  gap: 10,
+  gap: '0.625rem',
 })

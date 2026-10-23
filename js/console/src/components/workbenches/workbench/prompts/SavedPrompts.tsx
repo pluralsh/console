@@ -1,8 +1,6 @@
 import {
   ArrowUpIcon,
   Button,
-  Card,
-  EmptyState,
   Flex,
   IconFrame,
   PencilIcon,
@@ -10,6 +8,7 @@ import {
   TrashCanIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import { createColumnHelper } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert'
 import { prettifyPrompt } from 'components/utils/contentEditableChips'
@@ -144,22 +143,20 @@ export function SavedPrompts() {
         css={{ maxWidth: 750 }}
       >
         {!!data && isEmpty(prompts) ? (
-          <Card>
-            <EmptyState
-              message="No saved prompts yet"
-              description="Create reusable prompts for this workbench."
-              css={{ margin: '0 auto', width: 500 }}
+          <WorkbenchEmptyState
+            inset={false}
+            message="No saved prompts yet"
+            description="Save prompts you run often so you can reuse them on this workbench."
+          >
+            <Button
+              small
+              onClick={() => {
+                navigate(getWorkbenchSavedPromptCreateAbsPath(workbenchId))
+              }}
             >
-              <Button
-                small
-                onClick={() => {
-                  navigate(getWorkbenchSavedPromptCreateAbsPath(workbenchId))
-                }}
-              >
-                Add saved prompt
-              </Button>
-            </EmptyState>
-          </Card>
+              Add saved prompt
+            </Button>
+          </WorkbenchEmptyState>
         ) : (
           <StretchedFlex
             direction="column"
@@ -252,18 +249,21 @@ function getColumns({
         >
           <IconFrame
             clickable={!!row.original.prompt?.trim() && !runLoading}
+            size="small"
             tooltip="Run saved prompt"
             icon={<ArrowUpIcon />}
             onClick={() => onRun(row.original)}
           />
           <IconFrame
             clickable
+            size="small"
             tooltip="Edit saved prompt"
             icon={<PencilIcon />}
             onClick={() => onEdit(row.original)}
           />
           <IconFrame
             clickable
+            size="small"
             tooltip="Delete saved prompt"
             icon={<TrashCanIcon color="icon-danger" />}
             onClick={() => onDelete(row.original)}

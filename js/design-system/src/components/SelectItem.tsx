@@ -30,7 +30,7 @@ const SelectItemWrap = styled.label<SelectItemWrapProps>(
     display: 'flex',
     height: 32,
     width,
-    padding: `${theme.spacing.xxsmall}px ${theme.spacing.small}px`,
+    padding: `${theme.spacing.xxsmall} ${theme.spacing.small}`,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: selected

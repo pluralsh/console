@@ -26,7 +26,7 @@ The setup guide lists the full manifest and scope requirements for public channe
 
 ## Setup
 
-Create the chatbot connection in Console and follow the inline setup guide for app credentials and channel binding. That guide is maintained at `js/console/public/setup-guides/chatbots/slack.md`.
+Create the chatbot connection in the Console and follow the inline setup guide for app credentials and channel binding. That guide is maintained at `js/console/public/setup-guides/chatbots/slack.md`.
 
 ## Related
 

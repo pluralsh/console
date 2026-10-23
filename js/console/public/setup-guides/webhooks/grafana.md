@@ -6,11 +6,11 @@ Reference: [Grafana - Configure the webhook notifier](https://grafana.com/docs/g
 
 In Plural:
 
-1. Set **Type** to `Observability`.
-2. Set **Provider** to `GRAFANA`.
+1. Set **Type of webhook** to `Observability`.
+2. Set **Provider type** to `Grafana`.
 3. Enter a webhook **Name**.
-4. Enter a **Signing secret**.
-5. Click **Create new webhook**.
+4. Enter or generate a **Secret**.
+5. Click **Create**.
 
 Plural shows the webhook URL only after creation. Copy it.
 

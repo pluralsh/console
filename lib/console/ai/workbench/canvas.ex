@@ -39,16 +39,54 @@ defmodule Console.AI.Workbench.Canvas do
 
   def render(%__MODULE__{blocks: blocks}), do: Map.values(blocks)
 
+  @doc """
+  Sections are headers rather than grid cells: the unsectioned blocks and the blocks of each
+  section form independent grids, each validated for overlaps and gaps on its own.
+  """
   def validate(%__MODULE__{} = canvas) do
     canvas_blocks = Map.values(canvas.blocks)
-    with nil <- find_intersection(canvas_blocks),
-         :ok <- validate_no_gaps(canvas_blocks) do
+    with :ok <- validate_sections(canvas_blocks),
+         :ok <- validate_grids(canvas_blocks) do
       {:ok, canvas}
-    else
-      {:error, _} = err -> err
+    end
+  end
+
+  defp validate_sections(blocks) do
+    sections = for %CanvasBlock{type: :section, identifier: id} <- blocks, into: MapSet.new(), do: id
+
+    Enum.find_value(blocks, :ok, fn
+      %CanvasBlock{type: :section, section_id: s, identifier: id} when is_binary(s) and s != "" ->
+        {:error, "section #{id} cannot belong to another section"}
+      %CanvasBlock{section_id: s, identifier: id} when is_binary(s) and s != "" ->
+        if MapSet.member?(sections, s),
+          do: nil,
+          else: {:error, "canvas block #{id} references unknown section #{s}, add it with add_section_block first"}
+      _ -> nil
+    end)
+  end
+
+  defp validate_grids(blocks) do
+    blocks
+    |> Enum.reject(& &1.type == :section)
+    |> Enum.group_by(&section_key/1)
+    |> Enum.find_value(:ok, fn {section, grid} ->
+      case validate_grid(grid) do
+        :ok -> nil
+        {:error, msg} when is_binary(section) -> {:error, "in section #{section}: #{msg}"}
+        error -> error
+      end
+    end)
+  end
+
+  defp validate_grid(blocks) do
+    case find_intersection(blocks) do
+      nil -> validate_no_gaps(blocks)
       {left_id, right_id} -> {:error, "canvas blocks #{left_id} and #{right_id} have intersecting layout rectangles"}
     end
   end
+
+  defp section_key(%CanvasBlock{section_id: s}) when is_binary(s) and s != "", do: s
+  defp section_key(_), do: nil
 
   @spec validate_no_gaps([CanvasBlock.t()]) :: :ok | {:error, binary()}
   def validate_no_gaps([]), do: :ok

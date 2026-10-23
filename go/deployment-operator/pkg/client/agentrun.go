@@ -43,6 +43,25 @@ func (c *client) GetAgentRun(ctx context.Context, id string) (*console.AgentRunF
 	return response.AgentRun, err
 }
 
+func (c *client) GetAgentRunCredentials(ctx context.Context, id string) (*console.AgentRunCredentialsFragment, error) {
+	if id == "" {
+		return nil, fmt.Errorf("no id specified")
+	}
+
+	response, err := c.consoleClient.GetAgentRunCredentials(ctx, id)
+	if internalerror.IsNotFound(err) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, id)
+	}
+	if err == nil && (response == nil || response.AgentRun == nil) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, id)
+	}
+	if response == nil {
+		return nil, err
+	}
+
+	return response.AgentRun, err
+}
+
 func (c *client) CancelAgentRun(ctx context.Context, id string) error {
 	_, err := c.consoleClient.CancelAgentRun(ctx, id)
 	return err

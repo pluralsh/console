@@ -79,6 +79,7 @@ config :console,
   default_project_name: "default",
   prom_plugins: [Console.Prom.Plugin],
   cloudquery: false,
+  pseudofs: nil,
   jwt_pub_key: or_nil.(File.read("config/pubkey.pem")),
   oidc_sync: :upsert,
   refresh_token_expiry: "7d",
@@ -124,6 +125,10 @@ config :console, :ai_defaults,
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
+
+# anubis' per-category `:logging` levels are overridden by hardcoded warning/error levels and by
+# remote servers' own log notifications, so this is the only effective way to quiet it
+config :anubis_mcp, log: false
 
 config :phoenix, :json_library, JSON
 

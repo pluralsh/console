@@ -55,8 +55,8 @@ export function InfraResearchSidecar({
   return (
     <Sidecar
       css={{
-        padding: `0 0 ${spacing.medium}px`,
-        '& > p': { padding: `0 0 ${spacing.xsmall}px ${spacing.medium}px` },
+        padding: `0 0 ${spacing.medium}`,
+        '& > p': { padding: `0 0 ${spacing.xsmall} ${spacing.medium}` },
       }}
     >
       <ActionItemSC

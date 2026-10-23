@@ -37,7 +37,7 @@ export function ClustersCharts({
       setIsOpen={setShow}
       loading={false}
       accordionStyles={{
-        marginTop: show ? 0 : -spacing.small,
+        marginTop: show ? 0 : spacing['minus-small'],
         position: 'relative',
       }}
     >

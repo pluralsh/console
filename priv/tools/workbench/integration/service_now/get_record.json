@@ -1,0 +1,41 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "table": {
+      "type": "string",
+      "enum": [
+        "incident",
+        "change_request",
+        "problem",
+        "sc_task"
+      ],
+      "description": "ServiceNow ticket table: incident, change_request, problem or sc_task (catalog task)."
+    },
+    "record_id": {
+      "type": "string",
+      "description": "Record sys_id (32 hex characters) or record number, for example INC0010001 or CHG0030002."
+    },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Fields to return, for example number, short_description, state, priority, assigned_to. Omit for all fields."
+    },
+    "display_value": {
+      "type": "string",
+      "enum": [
+        "true",
+        "false",
+        "all"
+      ],
+      "default": "true",
+      "description": "true returns display values (labels such as \"In Progress\"), false returns raw stored values (such as state 2), all returns both as {display_value, value} pairs. Use false or all when you need raw values for an update."
+    }
+  },
+  "required": [
+    "table",
+    "record_id"
+  ]
+}

@@ -72,7 +72,12 @@ defmodule Console.GRPC.Server do
     end
   end
 
-  defp add_elastic_configs(%Plrl.ObservabilityConfig{} = pb, inst) when is_binary(inst) do
+  defp add_elastic_configs(%Plrl.ObservabilityConfig{} = pb, inst) when is_binary(inst),
+    do: add_elastic_configs(pb, inst, Console.plural_o11y?())
+  defp add_elastic_configs(%Plrl.ObservabilityConfig{} = pb, _), do: pb
+
+  defp add_elastic_configs(%Plrl.ObservabilityConfig{} = pb, _inst, true), do: pb
+  defp add_elastic_configs(%Plrl.ObservabilityConfig{} = pb, inst, _) do
     case Console.es_creds() do
       {:ok, url, pass} ->
         %Plrl.ObservabilityConfig{pb | elasticUsername: "plrl-#{inst}", elasticPassword: pass, elasticIndex: "plrl-#{inst}-logs-*", elasticHost: url}
@@ -80,7 +85,6 @@ defmodule Console.GRPC.Server do
         pb
     end
   end
-  defp add_elastic_configs(%Plrl.ObservabilityConfig{} = pb, _), do: pb
 
   defp add_loki_configs(%Plrl.ObservabilityConfig{} = pb) do
     case Console.telemetry_url(:logs, :write) do

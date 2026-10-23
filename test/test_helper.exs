@@ -49,9 +49,11 @@ Mimic.copy(Console.Mesh.Prometheus)
 Mimic.copy(GRPC.Stub)
 Mimic.copy(GRPC.Client.Connection)
 Mimic.copy(Cloudquery.CloudQuery.Stub)
+Mimic.copy(Console.PseudoFS)
 Mimic.copy(Console.AI.Graph.Indexer.Sink)
 Mimic.copy(Req)
 Mimic.copy(Oidcc.Token)
+Mimic.copy(Console.OIDC.ProviderConfiguration)
 Mimic.copy(Kazan.Client.Imp)
 Mimic.copy(Console.AI.Workbench.Subagents.Infrastructure)
 Mimic.copy(Console.AI.Workbench.Subagents.Integration)
@@ -77,7 +79,9 @@ Mimic.copy(Console.Uploads)
 
 # :external tests depend on live third-party services or continuously updated remote data and
 # flake on rate limits/timeouts; run them explicitly with `mix test --include external`
-ExUnit.start(exclude: [:external])
+ExUnit.start(exclude: [:external]
+  ++ if(System.get_env("PSEUDOFS_TEST_ADDR"), do: [], else: [:pseudofs])
+  ++ if(System.get_env("GCS_TEST_URL"), do: [], else: [:gcs]))
 Ecto.Adapters.SQL.Sandbox.mode(Console.Repo, :manual)
 
 {:ok, _} = Application.ensure_all_started(:ex_machina)

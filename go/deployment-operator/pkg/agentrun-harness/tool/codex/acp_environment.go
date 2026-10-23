@@ -5,12 +5,12 @@ import (
 	"fmt"
 
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 )
 
 // These names are the environment variables exchanged between the agent-run
 // process and Codex's ACP adapter.
 const (
-	consoleTokenEnv       = "PLRL_CONSOLE_TOKEN"
 	openAIAPIKeyEnv       = "OPENAI_API_KEY"
 	codexAPIKeyEnv        = "CODEX_API_KEY"
 	codexConfigEnv        = "CODEX_CONFIG"
@@ -31,7 +31,8 @@ func (agent *Agent) env(config toolv1.Config, model, provider string) ([]string,
 	codex := config.Run.Runtime.Config.Codex
 	credential := codex.ApiKey
 	if config.Run.IsProxyEnabled() {
-		credential = agent.consoleToken
+		// The sidecar replaces the placeholder key with the deploy token.
+		credential = common.AgentAIProxyAPIKey
 	}
 
 	configJSON, err := json.Marshal(map[string]string{"model": model})
@@ -40,7 +41,6 @@ func (agent *Agent) env(config toolv1.Config, model, provider string) ([]string,
 	}
 
 	env := []string{
-		fmt.Sprintf("%s=%s", consoleTokenEnv, agent.consoleToken),
 		fmt.Sprintf("%s=%s", codexHomeEnv, agent.codexHome(config)),
 		fmt.Sprintf("%s=%s", codexAPIKeyEnv, credential),
 		fmt.Sprintf("%s=%s", defaultAuthRequestEnv, defaultAuthRequest),

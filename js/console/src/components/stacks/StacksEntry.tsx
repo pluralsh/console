@@ -16,18 +16,15 @@ import { StackTypeIcon } from './common/StackTypeIcon'
 export function StackEntry({
   stack,
   active,
-  first,
 }: {
   stack: StackTinyFragment
   active: boolean
-  first: boolean
 }) {
   const navigate = useNavigate()
 
   return (
     <WrapperSC
       $active={active}
-      $first={first}
       onClick={() => !active && navigate(getStacksAbsPath(stack.id))}
     >
       <Flex
@@ -62,43 +59,31 @@ export function StackEntry({
   )
 }
 
-const WrapperSC = styled.div<{ $active: boolean; $first: boolean }>(
-  ({ theme, $active, $first }) => ({
-    display: 'flex',
-    justifyContent: 'space-between',
-    gap: theme.spacing.large,
-    alignItems: 'center',
-    padding: theme.spacing.medium,
-    borderLeft: theme.borders.default,
-    borderRight: $active
-      ? `2px solid ${theme.colors['border-primary']}`
-      : theme.borders.default,
-    borderBottom: theme.borders.default,
-    ...(theme.mode === 'light' && {
-      // White on page-background — never transparent (same as page grey)
-      backgroundColor: theme.colors['fill-zero'],
-    }),
-
-    ...($active
-      ? {
-          backgroundColor: theme.colors['fill-zero-selected'],
-          cursor: 'default',
-        }
-      : {
-          cursor: 'pointer',
-
-          '&:hover': {
-            backgroundColor: theme.colors['fill-zero-hover'],
-          },
-        }),
-
-    ...($first ? { borderTop: theme.borders.default } : {}),
-  })
-)
+const WrapperSC = styled.div<{ $active: boolean }>(({ theme, $active }) => ({
+  display: 'flex',
+  justifyContent: 'space-between',
+  gap: theme.spacing.medium,
+  alignItems: 'center',
+  padding: `${theme.spacing.small} ${theme.spacing.medium}`,
+  borderBottom: theme.borders.default,
+  ...($active
+    ? {
+        // matches PageSidebarNav's active item
+        backgroundColor: theme.colors['fill-zero-selected'],
+        boxShadow: `inset -2px 0 0 ${theme.colors['border-primary']}`,
+        cursor: 'default',
+      }
+    : {
+        cursor: 'pointer',
+        '&:hover': {
+          backgroundColor: theme.colors['fill-zero-hover'],
+        },
+      }),
+}))
 
 const NameSC = styled.span<{ $active: boolean }>(({ theme, $active }) => ({
   ...TRUNCATE,
-  ...($active ? theme.partials.text.body1Bold : theme.partials.text.body1),
+  ...($active ? theme.partials.text.body2Bold : theme.partials.text.body2),
   color: $active ? theme.colors.text : theme.colors['text-light'],
   flexGrow: 1,
 }))

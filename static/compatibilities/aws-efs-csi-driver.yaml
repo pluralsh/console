@@ -3,25 +3,27 @@ git_url: https://github.com/kubernetes-sigs/aws-efs-csi-driver
 release_url: https://github.com/kubernetes-sigs/aws-efs-csi-driver/releases/tag/v{vsn}
 helm_repository_url: https://kubernetes-sigs.github.io/aws-efs-csi-driver
 versions:
-- version: 3.5.1
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17']
+- version: 3.5.2
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18',
+    '1.17']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
     chart_updates: []
-    features: [No specific feature details provided in the release notes; v3.5.1 references
-        the project CHANGELOG for the full list of changes.]
-    breaking_changes: [No breaking changes are mentioned in the provided release notes;
-        verify the upstream CHANGELOG for any behavioral or configuration changes
-        between v3.5.0 and v3.5.1.]
-  chart_version: 4.5.1
-  images: ['public.ecr.aws/csi-components/csi-node-driver-registrar:v2.17.0-eksbuild.7',
-    'public.ecr.aws/csi-components/csi-provisioner:v6.3.0-eksbuild.7', 'public.ecr.aws/csi-components/livenessprobe:v2.19.0-eksbuild.7',
-    'public.ecr.aws/efs-csi-driver/amazon/aws-efs-csi-driver:v3.5.1']
+    features: [Release notes provided do not include any itemized changes; both versions
+        point to an external CHANGELOG.]
+    breaking_changes: [No breaking changes are listed in the provided notes; need
+        the project/Helm chart CHANGELOG between v3.5.0 and v3.5.2 to confirm.]
+  chart_version: 4.5.2
+  images: ['public.ecr.aws/csi-components/csi-node-driver-registrar:v2.18.0-eksbuild.1',
+    'public.ecr.aws/csi-components/csi-provisioner:v6.4.0-eksbuild.1', 'public.ecr.aws/csi-components/livenessprobe:v2.20.0-eksbuild.1',
+    'public.ecr.aws/efs-csi-driver/amazon/aws-efs-csi-driver:v3.5.2']
 - version: 3.5.0
-  kube: []
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18',
+    '1.17']
   requirements: []
   incompatibilities: []
   summary:
@@ -37,7 +39,9 @@ versions:
     'public.ecr.aws/csi-components/csi-provisioner:v6.3.0-eksbuild.7', 'public.ecr.aws/csi-components/livenessprobe:v2.19.0-eksbuild.7',
     'public.ecr.aws/efs-csi-driver/amazon/aws-efs-csi-driver:v3.5.0']
 - version: 3.4.0
-  kube: []
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18',
+    '1.17']
   requirements: []
   incompatibilities: []
   summary:
@@ -52,7 +56,9 @@ versions:
     'public.ecr.aws/csi-components/csi-provisioner:v6.3.0-eksbuild.1', 'public.ecr.aws/csi-components/livenessprobe:v2.19.0-eksbuild.2',
     'public.ecr.aws/efs-csi-driver/amazon/aws-efs-csi-driver:v3.4.0']
 - version: 3.3.0
-  kube: []
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18',
+    '1.17']
   requirements: []
   incompatibilities: []
   summary:
@@ -67,7 +73,9 @@ versions:
     'public.ecr.aws/csi-components/csi-provisioner:v6.2.0-eksbuild.7', 'public.ecr.aws/csi-components/livenessprobe:v2.19.0-eksbuild.2',
     'public.ecr.aws/efs-csi-driver/amazon/aws-efs-csi-driver:v3.3.0']
 - version: 3.2.0
-  kube: []
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18',
+    '1.17']
   requirements: []
   incompatibilities: []
   summary:
@@ -83,7 +91,9 @@ versions:
     'public.ecr.aws/csi-components/csi-provisioner:v6.2.0-eksbuild.3', 'public.ecr.aws/csi-components/livenessprobe:v2.18.0-eksbuild.4',
     'public.ecr.aws/efs-csi-driver/amazon/aws-efs-csi-driver:v3.2.0']
 - version: 3.1.0
-  kube: []
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18',
+    '1.17']
   requirements: []
   incompatibilities: []
   summary:
@@ -98,7 +108,9 @@ versions:
     'public.ecr.aws/csi-components/csi-provisioner:v6.2.0-eksbuild.3', 'public.ecr.aws/csi-components/livenessprobe:v2.18.0-eksbuild.4',
     'public.ecr.aws/efs-csi-driver/amazon/aws-efs-csi-driver:v3.1.0']
 - version: 3.0.0
-  kube: []
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18',
+    '1.17']
   requirements: []
   incompatibilities: []
   summary:
@@ -115,7 +127,9 @@ versions:
     'public.ecr.aws/csi-components/csi-provisioner:v6.1.0-eksbuild.2', 'public.ecr.aws/csi-components/livenessprobe:v2.17.0-eksbuild.3',
     'public.ecr.aws/efs-csi-driver/amazon/aws-efs-csi-driver:v3.0.0']
 - version: 2.3.0
-  kube: []
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18',
+    '1.17']
   requirements: []
   incompatibilities: []
   summary:
@@ -131,8 +145,9 @@ versions:
     'public.ecr.aws/csi-components/csi-provisioner:v6.1.0-eksbuild.2', 'public.ecr.aws/csi-components/livenessprobe:v2.17.0-eksbuild.3',
     'public.ecr.aws/efs-csi-driver/amazon/aws-efs-csi-driver:v2.3.0']
 - version: 2.2.0
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-    '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18',
+    '1.17']
   requirements: []
   incompatibilities: []
   summary:
@@ -148,6 +163,24 @@ versions:
   images: ['public.ecr.aws/csi-components/csi-node-driver-registrar:v2.15.0-eksbuild.2',
     'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.5', 'public.ecr.aws/csi-components/livenessprobe:v2.17.0-eksbuild.2',
     'public.ecr.aws/efs-csi-driver/amazon/aws-efs-csi-driver:v2.2.0']
+- version: 2.1.15
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18',
+    '1.17']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [No feature details provided in the supplied release notes; both versions
+        point to an external CHANGELOG without listing changes.]
+    breaking_changes: [No breaking-change information provided in the supplied release
+        notes; must consult the upstream CHANGELOG between v2.1.12 and v2.1.15 to
+        confirm.]
+  chart_version: 3.2.6
+  images: ['public.ecr.aws/csi-components/csi-node-driver-registrar:v2.14.0-eksbuild.5',
+    'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.4', 'public.ecr.aws/csi-components/livenessprobe:v2.16.0-eksbuild.5',
+    'public.ecr.aws/efs-csi-driver/amazon/aws-efs-csi-driver:v2.1.15']
 - version: 2.1.12
   kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
     '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17']

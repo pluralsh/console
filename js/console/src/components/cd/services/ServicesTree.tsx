@@ -88,7 +88,6 @@ export function ServicesTree() {
       }}
     >
       <ServicesFilters
-        hideSearch
         setQueryStatusFilter={setQueryStatusFilter}
         tabStateRef={tabStateRef}
         statusCounts={statusCounts}

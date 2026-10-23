@@ -1,8 +1,10 @@
 import { useDebounce } from '@react-hooks-library/core'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import {
-  DisplayPopover,
+  DisplayButton,
+  DisplayPanel,
   toCounts,
+  useDisplaySidecar,
   useDisplayState,
 } from 'components/utils/display/DisplayPanel'
 import {
@@ -15,7 +17,6 @@ import {
   getColAlertViewJob,
 } from '../../utils/alerts/AlertsTable'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import { DETAILS_TAB_STRIP_HEIGHT } from 'components/workbenches/common/WorkbenchDetailsView'
 import { WorkbenchMonitoringContent } from 'components/workbenches/common/WorkbenchMonitoringContent'
 import {
   useWorkbenchAlertCountsQuery,
@@ -28,6 +29,7 @@ import { WORKBENCH_PARAM_ID } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { WorkbenchPageLayout } from './Workbench'
+import { DETAILS_LIST_WIDTH } from '../common/WorkbenchDetailsView'
 import { WorkbenchAlertsBoard } from './WorkbenchAlertsBoard'
 import { useWorkbenchAlertsDetails } from './WorkbenchAlertsDetails'
 import { WorkbenchAlertsDisplayOptions } from './WorkbenchAlertsDisplayOptions'
@@ -133,6 +135,7 @@ export function WorkbenchAlerts() {
   }, [tableSliceActive, setVirtualSlice])
 
   const filtered = hasUncheckedAlertFilters(display)
+  const displaySidecar = useDisplaySidecar()
   const emptyState = {
     searching: !!debouncedSearchString,
     filtered,
@@ -161,28 +164,42 @@ export function WorkbenchAlerts() {
 
   return (
     <WorkbenchPageLayout
+      sidecar={
+        displaySidecar.isOpen && (
+          <DisplayPanel>
+            <WorkbenchAlertsDisplayOptions
+              state={display}
+              onChange={updateDisplay}
+              typeCounts={typeCounts}
+              severityCounts={severityCounts}
+            />
+          </DisplayPanel>
+        )
+      }
       {...(showDetails && {
-        sidebar: { kind: 'custom', content: details.sidebar },
-        tabStripHeight: DETAILS_TAB_STRIP_HEIGHT,
+        sidebar: {
+          kind: 'custom',
+          content: details.sidebar,
+          width: DETAILS_LIST_WIDTH,
+        },
       })}
       headerActions={
-        <DisplayPopover showDot={filtered}>
-          <WorkbenchAlertsDisplayOptions
-            state={display}
-            onChange={updateDisplay}
-            typeCounts={typeCounts}
-            severityCounts={severityCounts}
-          />
-        </DisplayPopover>
+        <DisplayButton
+          showDot={filtered}
+          expanded={displaySidecar.isOpen}
+          onClick={displaySidecar.toggle}
+        />
       }
     >
       {showDetails ? (
         details.content
       ) : (
         <WorkbenchMonitoringContent
-          searchString={searchString}
-          onSearchChange={setSearchString}
-          searchPlaceholder="Search alerts"
+          search={{
+            searchString,
+            onSearchChange: setSearchString,
+            searchPlaceholder: 'Search alerts',
+          }}
           error={error}
           filterEmptyKind={filterEmptyKind}
           onResetFilters={emptyState.onResetFilters}

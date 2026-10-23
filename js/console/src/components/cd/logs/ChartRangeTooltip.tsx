@@ -90,7 +90,7 @@ const TooltipSC = styled.div<{ $x: number; $y: number }>(
 
 const TimeSC = styled.div(({ theme }) => ({
   ...theme.partials.text.code,
-  fontSize: 12,
+  fontSize: '0.75rem',
   color: theme.colors['text-xlight'],
   padding: theme.spacing.xsmall,
 }))

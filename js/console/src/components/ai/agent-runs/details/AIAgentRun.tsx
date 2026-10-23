@@ -21,6 +21,7 @@ import { StackedText } from 'components/utils/table/StackedText'
 import { Body2P } from 'components/utils/typography/Text.tsx'
 import {
   AgentRunFragment,
+  AgentRunMode,
   AgentRunStatus,
   useAgentRunQuery,
   useApproveAgentRunMutation,
@@ -37,6 +38,7 @@ import {
   getAgentRunAbsPath,
 } from 'routes/aiRoutesConsts'
 import styled, { useTheme } from 'styled-components'
+import { useLogin } from 'components/contexts'
 import { getAIBreadcrumbs } from '../../AI.tsx'
 import {
   ChatInputSimple,
@@ -48,6 +50,12 @@ import { AIAgentRunShareButton } from './AIAgentRunShareButton.tsx'
 import { AgentRunMetadata } from './AIAgentRunSidecar.tsx'
 import { useAgentRunPanel } from './AgentRunPanel.tsx'
 import { hasAgentRunPanelContent } from './agentRunPanelUtils.ts'
+
+const TERMINAL_AGENT_RUN_STATUSES = new Set<AgentRunStatus>([
+  AgentRunStatus.Successful,
+  AgentRunStatus.Failed,
+  AgentRunStatus.Cancelled,
+])
 
 const AGENT_RUN_POLL_INTERVAL = 5_000
 
@@ -69,6 +77,7 @@ export const getAgentRunBreadcrumbs = (
 export function AIAgentRun() {
   const id = useParams()[AI_AGENT_RUNS_PARAM_RUN_ID] ?? ''
   const theme = useTheme()
+  const { configuration } = useLogin()
 
   const [cancelAgentRun, { loading: cancelling, error: cancellingError }] =
     useCancelAgentRunMutation({
@@ -90,7 +99,11 @@ export function AIAgentRun() {
   const runLoading = !data && loading
   const run = data?.agentRun
   const showSidePanel = hasAgentRunPanelContent(run)
-  const { isOpen, setOpen, setApproval } = useAgentRunPanel(showSidePanel, id)
+  const { isOpen, setOpen, setApproval } = useAgentRunPanel({
+    hasContent: showSidePanel,
+    loading: runLoading,
+    key: id,
+  })
 
   useEffect(() => {
     if (!id) return
@@ -113,9 +126,16 @@ export function AIAgentRun() {
   const isPromptConsuming =
     (run?.status === AgentRunStatus.PendingApproval && !run.approvedAt) ||
     run?.status === AgentRunStatus.Babysitting
+  const canTerminalReprompt =
+    !!run?.status &&
+    TERMINAL_AGENT_RUN_STATUSES.has(run.status) &&
+    run.mode !== AgentRunMode.Review &&
+    !!configuration?.objectStoreEnabled &&
+    !!run.upload?.session
   const canReprompt =
     isPromptConsuming ||
-    (run?.status === AgentRunStatus.Running && (run.approval || run.babysit))
+    (run?.status === AgentRunStatus.Running && (run.approval || run.babysit)) ||
+    canTerminalReprompt
 
   useSetBreadcrumbs(
     useMemo(
@@ -407,6 +427,10 @@ function agentRunRepromptPlaceholder(status: AgentRunStatus) {
       return 'Ask the agent to follow up on the draft PR.'
     case AgentRunStatus.PendingApproval:
       return 'Have revisions to PR draft? Ask the agent here before you approve.'
+    case AgentRunStatus.Successful:
+    case AgentRunStatus.Failed:
+    case AgentRunStatus.Cancelled:
+      return 'Continue this agent run with a follow-up prompt.'
     default:
       return 'Send an additional message to this agent run.'
   }
@@ -444,7 +468,7 @@ const QueueCardSC = styled(Card)(({ theme }) => ({
   borderBottomLeftRadius: 0,
   borderBottomRightRadius: 0,
   borderBottom: 'none',
-  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  padding: `${theme.spacing.small} ${theme.spacing.medium}`,
 }))
 
 const WrapperSC = styled.div(({ theme }) => ({

@@ -1,13 +1,13 @@
 ---
 title: Add RBAC to the K8s dashboard
-description: Use a simple global service to configure organization wide Kubernetes RBAC for end users
+description: Use a simple global service to configure organization-wide Kubernetes RBAC for end users
 ---
 
 # Overview
 
 By default, the Plural Console embedded Kubernetes dashboard ships with closed permissions.  You'll need to gradually add [RBAC](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) rules to users or groups as you want to carefully expand access throughout the system.
 
-In addition, Plural's built-in Continuous Deployment engine allows you to ship these rules seamlessly to all clusters in your fleet, or to any subset of clusters.  We'll show you how to set up a basic cluster-admin role for SRE personnel on your team, but the basics can be reworked for any other set of RBAC rules
+In addition, Plural's built-in Continuous Deployment engine allows you to ship these rules seamlessly to all clusters in your fleet, or to any subset of clusters.  We'll show you how to set up a basic cluster-admin role for SRE personnel on your team, but the basics can be reworked for any other set of RBAC rules.
 
 ## Define an RBAC service
 
@@ -31,10 +31,10 @@ subjects:
 This role references the `sre` group in the Plural Console, which you can also configure to sync with your upstream identity provider or SSO.  For the purposes of the walkthrough, you can also manually create that group by navigating to Settings > User Management > Groups or going to https://{you-console-instance}/settings/user-management/groups
 
 {% callout severity="info" %}
-Plural uses a Kubernetes concept called [Impersonation](https://kubernetes.io/docs/reference/access-authn-authz/authentication/#user-impersonation) to authenticate into an end cluster's API server with an identity that looks exactly like the current users' Plural Console identity.  The primary benefit of this is it allows you to mirror your SSO straight into kubernetes itself, rather than deal with cloud-specific authorization complexity.
+Plural uses a Kubernetes concept called [Impersonation](https://kubernetes.io/docs/reference/access-authn-authz/authentication/#user-impersonation) to authenticate into an end cluster's API server with an identity that looks exactly like the current user's Plural Console identity.  The primary benefit of this is that it allows you to mirror your SSO straight into Kubernetes itself, rather than deal with cloud-specific authorization complexity.
 {% /callout %}
 
-If you want to add other rules, say for a specific user, feel free to add them in that folder as well, eg you could add a rule `services/rbac/michael.yaml`:
+If you want to add other rules, say for a specific user, feel free to add them in that folder as well. For example, you could add a rule at `services/rbac/michael.yaml`:
 
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -51,11 +51,11 @@ subjects:
     name: michael@example.com
 ```
 
-To add the specific user `michael@example.com` identified by that email to the RBAC rules.
+This adds the specific user identified by the email `michael@example.com` to the RBAC rules.
 
 ## Define a GlobalService to sync the rbac fleet-wide
 
-We'll define our first, extremely basic global service to sync these rbac rules like so, under `bootstrap/components/rbac.yaml`:
+We'll define our first, extremely basic global service to sync these RBAC rules like so, under `bootstrap/components/rbac.yaml`:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -78,7 +78,7 @@ spec:
 
 ## Push to Deploy
 
-We registered all these manifests under the root `bootstrap` folder a `plural up`-derived management cluster listens to by default, so all you should need to do is either:
+We registered all these manifests under the root `bootstrap` folder, which a `plural up`-derived management cluster listens to by default, so all you should need to do is either:
 
 ```sh
 git commit -m "setup example microservice"
@@ -93,4 +93,4 @@ You might need to wait a minute or two for the system to poll git and realize th
 
 ## Check the Kubernetes Dashboard
 
-It should only take a quick poll cycle to see the resources populate in your dashboard at https://{your-console}/kubernetes.  If you don't see anything there, it's likely you simply haven't created the `sre` group or haven't added your own user to it.  Doing that manually giving it a second to repopulate should do the trick.
+It should only take a quick poll cycle to see the resources populate in your dashboard at https://{your-console}/kubernetes.  If you don't see anything there, it's likely you haven't created the `sre` group or haven't added your own user to it.  Doing that manually and giving it a second to repopulate should do the trick.

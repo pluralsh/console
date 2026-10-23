@@ -41,8 +41,10 @@ function DocLink({
 const oldDocIDtoRouteMap: Record<string, string> = {
   overview_introduction: '/overview/introduction',
   overview_architecture: '/overview/architecture',
-  overview_management_api_reference: '/overview/management-api-reference',
-  overview_agent_api_reference: '/overview/agent-api-reference',
+  overview_management_api_reference:
+    '/api-reference/kubernetes/management-api-reference',
+  overview_api_reference: '/api-reference/kubernetes/management-api-reference',
+  overview_agent_api_reference: '/api-reference/kubernetes/agent-api-reference',
   getting_started_first_steps: '/getting-started/first-steps',
   getting_started_first_steps_cli_quickstart:
     '/getting-started/first-steps/cli-quickstart',
@@ -109,6 +111,8 @@ const oldDocIDtoRouteMap: Record<string, string> = {
   plural_features_stacks_iac_management_service_contexts:
     '/plural-features/stacks-iac-management/service-contexts',
   plural_features_service_catalog: '/plural-features/service-catalog',
+  plural_features_service_catalog_overview: '/plural-features/service-catalog',
+  service_catalog_overview: '/plural-features/service-catalog#demo-video',
   plural_features_service_catalog_creation:
     '/plural-features/service-catalog/creation',
   plural_features_service_catalog_contribution_program:
@@ -125,12 +129,15 @@ const oldDocIDtoRouteMap: Record<string, string> = {
     '/plural-features/pr-automation/testing',
   plural_features_pr_automation_pipelines:
     '/plural-features/pr-automation/pipelines',
-  plural_features_service_templating: '/plural-features/service-templating',
+  plural_features_service_templating:
+    '/plural-features/continuous-deployment/service-templating',
   plural_features_service_templating_templating_filters:
-    '/plural-features/service-templating/supporting-liquid-filters',
+    '/plural-features/continuous-deployment/service-templating/supporting-liquid-filters',
+  'terraform-interop':
+    '/plural-features/stacks-iac-management/service-contexts',
   plural_features_projects_and_multi_tenancy:
     '/plural-features/projects-and-multi-tenancy',
-  plural_features_notifications: '/plural-features/10-notifications',
+  plural_features_notifications: '/plural-features/notifications',
   faq_security: '/faq/security',
   faq_plural_oidc: '/faq/plural-oidc',
   faq_certifications: '/faq/certifications',

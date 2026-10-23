@@ -1,8 +1,27 @@
-import { Code, Markdown, getLastStringChild } from '@pluralsh/design-system'
+import {
+  Code,
+  Markdown,
+  getLastStringChild,
+  markdownSanitizeSchema,
+} from '@pluralsh/design-system'
 import { ComponentProps, HTMLAttributes, ReactElement, ReactNode } from 'react'
 import styled, { type DefaultTheme } from 'styled-components'
+import {
+  PLRL_FILE_ATTRIBUTES,
+  PLRL_FILE_TAG,
+  plrlFileChipComponents,
+} from './PlrlFileChip'
 
 type ChatMarkdownProps = ComponentProps<typeof Markdown>
+
+const chatSanitizeSchema = {
+  ...markdownSanitizeSchema,
+  tagNames: [...(markdownSanitizeSchema.tagNames ?? []), PLRL_FILE_TAG],
+  attributes: {
+    ...markdownSanitizeSchema.attributes,
+    [PLRL_FILE_TAG]: PLRL_FILE_ATTRIBUTES,
+  },
+}
 
 /**
  * Conversational markdown for chat / workbench.
@@ -20,9 +39,11 @@ export function ChatMarkdown({
   return (
     <ChatMarkdownSC>
       <Markdown
+        sanitizeSchema={chatSanitizeSchema}
         {...props}
         text={text}
         components={{
+          ...plrlFileChipComponents,
           h1: ChatH1,
           h2: ChatH2,
           h3: ChatH3,
@@ -114,7 +135,7 @@ const ChatP = styled.p(({ theme }) => ({
 }))
 
 /** List layout shared by the chat markdown renderers. */
-export const chatListCss = (theme: DefaultTheme, itemGap: number) =>
+export const chatListCss = (theme: DefaultTheme, itemGap: string) =>
   ({
     paddingLeft: theme.spacing.large,
     // Margin, not flex: Chrome crashes (error code 5) when a list is a flex
@@ -155,7 +176,7 @@ const ChatHr = styled.hr(({ theme }) => ({
   height: 1,
   border: 0,
   backgroundColor: theme.colors.border,
-  margin: `${theme.spacing.medium}px 0 ${theme.spacing.xxsmall}px`,
+  margin: `${theme.spacing.medium} 0 ${theme.spacing.xxsmall}`,
   '&:first-child': { marginTop: 0 },
 }))
 
@@ -218,7 +239,7 @@ const QuietInlineCodeSC = styled.code(({ theme }) => ({
     theme.mode === 'light'
       ? theme.colors['fill-two']
       : theme.colors['fill-one'],
-  padding: `0 ${theme.spacing.xxsmall}px`,
+  padding: `0 ${theme.spacing.xxsmall}`,
   borderRadius: theme.borderRadiuses.medium,
   border: 'none',
   wordBreak: 'break-word',
@@ -270,7 +291,7 @@ const ChatTd = styled.td(({ theme }) => ({
     theme.mode === 'light'
       ? theme.colors['fill-one']
       : theme.colors['fill-zero-selected'],
-  padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
+  padding: `${theme.spacing.xsmall} ${theme.spacing.small}`,
   color: theme.colors['text-light'],
   textAlign: 'left',
   border: theme.borders['fill-two'],

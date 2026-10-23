@@ -1,8 +1,8 @@
 import { Chip, Flex } from '@pluralsh/design-system'
-import { type ComponentProps, useMemo, useState } from 'react'
+import { WorkbenchEmptyText } from 'components/workbenches/common/WorkbenchEmptyState'
+import { type ComponentProps, memo, useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { WorkbenchStoredPromptMarkdown } from '../WorkbenchStoredPromptMarkdown'
-import { Body2P } from 'components/utils/typography/Text'
 import {
   evalGradeToCategory,
   EvalGradeCategory,
@@ -18,10 +18,12 @@ type EvalRow = WorkbenchEvalResultRowFragment & {
   workbenchJob: NonNullable<WorkbenchEvalResultRowFragment['workbenchJob']>
 }
 
+export const WORKBENCH_EVALS_SIDE_PANEL_WIDTH = 350
+
 type EvalFilter = 'all' | EvalGradeCategory
 type ChipSeverity = NonNullable<ComponentProps<typeof Chip>['severity']>
 
-export function WorkbenchEvalsSidePanel({
+export const WorkbenchEvalsSidePanel = memo(function WorkbenchEvalsSidePanel({
   evalRows,
   loading,
   selectedEvalResultId,
@@ -85,18 +87,18 @@ export function WorkbenchEvalsSidePanel({
       css={{
         backgroundColor: theme.colors['fill-accent'],
         borderRight: theme.borders.default,
-        minWidth: 350,
-        maxWidth: 350,
+        minWidth: WORKBENCH_EVALS_SIDE_PANEL_WIDTH,
+        maxWidth: WORKBENCH_EVALS_SIDE_PANEL_WIDTH,
       }}
     >
       <Flex
         alignItems="center"
         gap="xsmall"
-        // the tab strip's height plus this row's bottom border, so the border
-        // lines up with the one under the tab strip
-        height={DETAILS_TAB_STRIP_HEIGHT + 1}
-        padding="medium"
-        wrap="wrap"
+        height={DETAILS_TAB_STRIP_HEIGHT}
+        flexShrink={0}
+        paddingLeft="medium"
+        paddingRight="medium"
+        overflowX="auto"
         css={{ borderBottom: theme.borders.default }}
       >
         {filterOptions.map(({ key, count, severity }) => (
@@ -153,19 +155,16 @@ export function WorkbenchEvalsSidePanel({
             )}
           />
         ) : (
-          <Body2P
-            $color="text-xlight"
-            css={{ margin: `${theme.spacing.large}px auto` }}
-          >
+          <WorkbenchEmptyText>
             {activeFilter === 'all'
-              ? 'No evals available yet.'
-              : 'No evals available for this filter.'}
-          </Body2P>
+              ? 'No evals yet. Graded jobs will show up here.'
+              : 'No evals match this filter.'}
+          </WorkbenchEmptyText>
         )}
       </Flex>
     </Flex>
   )
-}
+})
 
 function EvalFilterChip({
   filterKey,
@@ -192,7 +191,7 @@ function EvalFilterChip({
       inactive={!hasItems}
       onClick={hasItems ? onClick : undefined}
       css={{
-        borderRadius: 12,
+        borderRadius: theme.borderRadiuses.medium,
         backgroundColor: active ? theme.colors['fill-two-selected'] : undefined,
         height: 'fit-content',
       }}
@@ -211,7 +210,7 @@ const EvalLinkSC = styled.button<{ $active?: boolean }>(
     alignItems: 'center',
     gap: theme.spacing.small,
     width: '100%',
-    padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+    padding: `${theme.spacing.small} ${theme.spacing.medium}`,
     textAlign: 'left',
     // on the panel's lighter background, as the Monitoring sidebar's rows
     backgroundColor: $active ? theme.colors['fill-two-selected'] : undefined,

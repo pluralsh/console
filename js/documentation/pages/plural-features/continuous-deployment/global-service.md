@@ -3,7 +3,7 @@ title: Global services
 description: Replicate services to all or part of your fleet
 ---
 
-Plural natively supports a concept of global services, e.g. a service that's replicated across a subset of your fleet. This is particular for low level kubernetes system add-ons like ingress controllers, service meshes, cert manager, etc. To define a global service, you first need to define a service that will serve as a source, then use the `GlobalService` CRD:
+Plural natively supports a concept of global services, i.e. a service that's replicated across a subset of your fleet. This is particularly useful for low-level Kubernetes system add-ons like ingress controllers, service meshes, cert-manager, etc. To define a global service, you first need to define a service that will serve as a source, then use the `GlobalService` CRD:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -24,15 +24,15 @@ spec:
         name: console
 ```
 
-In this specific case, we set up the k3s system upgrade controller on a single cluster, then replicate it using the `GlobalService` CR to all clusters with the `edge: fabric` tags. You can also target on kubernetes distribution (eg EKS, AKS, GKE, K3s, etc) or cluster api provider, and we're welcome to other targeting/organization mechanisms as well if those are not sufficient.
+In this specific case, we set up the k3s system upgrade controller on a single cluster, then replicate it using the `GlobalService` CR to all clusters with the `edge: fabric` tags. You can also target by Kubernetes distribution (e.g. EKS, AKS, GKE, K3s, etc.) or Cluster API provider, and we're open to other targeting/organization mechanisms as well if those are not sufficient.
 
 ## Templating within Global Services
 
-A very common problem you'll face when redeploying apps across your fleet is there's cluster-specific data you'll need for each instance of it. Plural supports that through its templating capabilities in the deployment agent on a cluster.
+A very common problem you'll face when redeploying apps across your fleet is that there's cluster-specific data you'll need for each instance of it. Plural supports that through the templating capabilities of the deployment agent on each cluster.
 
-Take an example of setting up external-dns fleet wide. You'll likely need to configure a different domain and iam arn for each cluster. You can leverage the cluster resources built-in metadata field alongside templating to accomplish that easily, like so:
+Take the example of setting up external-dns fleet-wide. You'll likely need to configure a different domain and IAM ARN for each cluster. You can leverage the Cluster resource's built-in metadata field alongside templating to accomplish that easily, like so:
 
-The ideal way to provide metadata is via terraform, since very often that is the source of truth for the initial values.  This would be done via code like this:
+The ideal way to provide metadata is via Terraform, since very often that is the source of truth for the initial values.  This would be done via code like this:
 
 ```terraform
 resource "plural_cluster" "this" {
@@ -46,7 +46,7 @@ resource "plural_cluster" "this" {
 }
 ```
 
-That said, you can also do it in yaml using a `Cluster` custom resource, like what's presented below:
+That said, you can also do it in YAML using a `Cluster` custom resource, as shown below:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -63,7 +63,7 @@ spec:
     domain: my.domain.com # can add any nested map structure as metadata
 ```
 
-From there, you can define your global service and the helm values needed for it:
+From there, you can define your global service and the Helm values needed for it:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -98,9 +98,9 @@ domainFilters:
 serviceAccount:
   enabled: true
   annotations:
-    eks.amazonaws.com/role-arn: {{ cluster.metadata.externaldnsRoleArm }}
+    eks.amazonaws.com/role-arn: {{ cluster.metadata.externaldnsRoleArn }}
 ```
 
 If you added secrets, you can access them with something like `{{ configuration.YOUR_SECRET_NAME }}` and if you want to use service contexts, we recommend checking the docs {% doclink to="terraform-interop" %}here{% /doclink %}.
 
-Very commonly there's actually a lot of overlap between configuration on the same cluster, so the metadata blob will be smaller than you might expect.
+Often there's a lot of overlap between configuration on the same cluster, so the metadata blob will be smaller than you might expect.

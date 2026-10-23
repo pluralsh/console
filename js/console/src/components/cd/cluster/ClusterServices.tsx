@@ -1,11 +1,12 @@
 import {
+  ICON_FRAME_ICON_SIZE,
   DeploymentIcon,
   ListIcon,
   NetworkInterfaceIcon,
 } from '@pluralsh/design-system'
 import { useEffect, useMemo } from 'react'
 import { Outlet, useMatch, useParams, useSearchParams } from 'react-router-dom'
-import { useTheme } from 'styled-components'
+import { ToolbarSearchInput } from 'components/layout/PageToolbar'
 
 import {
   CLUSTER_SERVICES_PATH,
@@ -19,6 +20,7 @@ import {
 } from '../ContinuousDeployment'
 import { DeployServiceModal } from '../services/deployModal/DeployService'
 import { ServicesContextT } from '../services/Services'
+import { useServicesSearch } from '../services/ServicesFilters'
 
 import { useClusterContext } from './Cluster'
 
@@ -28,7 +30,6 @@ const directory = [
 ]
 
 export default function ClusterServices() {
-  const theme = useTheme()
   const { clusterId } = useParams()
   const pathMatch = useMatch(
     `${getClusterDetailsPath({ clusterId })}/${CLUSTER_SERVICES_PATH}/:tab`
@@ -45,35 +46,12 @@ export default function ClusterServices() {
 
   const { setMoreMenuItems, menuKey, setMenuKey } = usePageHeaderContext()
 
-  useSetPageHeaderContent(
-    useMemo(
-      () => (
-        <div
-          css={{
-            display: 'flex',
-            justifyContent: 'end',
-            gap: theme.spacing.small,
-          }}
-        >
-          <ButtonGroup
-            directory={directory}
-            toPath={(path) =>
-              `${getClusterDetailsPath({ clusterId })}/${CLUSTER_SERVICES_PATH}/${path}`
-            }
-            tab={tab}
-          />
-        </div>
-      ),
-      [clusterId, tab, theme.spacing.small]
-    )
-  )
-
   useEffect(() => {
     setMoreMenuItems?.([
       {
         key: 'deploy',
         label: 'Deploy Service',
-        icon: <DeploymentIcon />,
+        icon: <DeploymentIcon size={ICON_FRAME_ICON_SIZE.small} />,
         enabled: true,
       },
     ])
@@ -89,6 +67,37 @@ export default function ClusterServices() {
         setSearchParams({ ...(newQ && { q: newQ }) }, { replace: true }),
     }),
     [setRefetch, clusterId, q, setSearchParams]
+  )
+
+  const [searchString, setSearchString] = useServicesSearch(
+    context.q,
+    context.setQ
+  )
+
+  useSetPageHeaderContent(
+    useMemo(
+      () => (
+        <>
+          {!tab && (
+            <ToolbarSearchInput
+              placeholder="Search services"
+              value={searchString}
+              onChange={setSearchString}
+            />
+          )}
+          <ButtonGroup
+            size="small"
+            iconSize={ICON_FRAME_ICON_SIZE.small}
+            directory={directory}
+            toPath={(path) =>
+              `${getClusterDetailsPath({ clusterId })}/${CLUSTER_SERVICES_PATH}/${path}`
+            }
+            tab={tab}
+          />
+        </>
+      ),
+      [clusterId, tab, searchString, setSearchString]
+    )
   )
 
   return (

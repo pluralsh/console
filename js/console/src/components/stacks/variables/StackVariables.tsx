@@ -1,9 +1,8 @@
+import { Table, useSetBreadcrumbs } from '@pluralsh/design-system'
 import {
-  Input,
-  SearchIcon,
-  Table,
-  useSetBreadcrumbs,
-} from '@pluralsh/design-system'
+  PageToolbarPortal,
+  ToolbarSearchInput,
+} from 'components/layout/PageToolbar'
 import { useMemo, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
@@ -48,7 +47,6 @@ const columns = [
 ]
 
 export default function StackVariables() {
-  const theme = useTheme()
   const { stack } = useOutletContext() as StackOutletContextT
   const [filterString, setFilterString] = useState('')
   const debouncedFilterString = useDebounce(filterString, 100)
@@ -72,33 +70,23 @@ export default function StackVariables() {
   )
 
   return (
-    <div css={{ overflow: 'hidden' }}>
-      <div
-        css={{
-          display: 'flex',
-          flexDirection: 'column',
-          rowGap: theme.spacing.medium,
-          height: '100%',
-        }}
-      >
-        <div>
-          <Input
-            placeholder="Search"
-            startIcon={<SearchIcon />}
-            value={filterString}
-            onChange={(e) => setFilterString(e.currentTarget.value)}
-          />
-        </div>
-        <Table
-          fullHeightWrap
-          data={variables}
-          columns={columns}
-          reactTableOptions={{
-            state: { globalFilter: debouncedFilterString },
-          }}
-          emptyStateProps={{ message: 'No variables set.' }}
+    <div css={{ overflow: 'hidden', height: '100%' }}>
+      <PageToolbarPortal>
+        <ToolbarSearchInput
+          placeholder="Search variables"
+          value={filterString}
+          onChange={setFilterString}
         />
-      </div>
+      </PageToolbarPortal>
+      <Table
+        fullHeightWrap
+        data={variables}
+        columns={columns}
+        reactTableOptions={{
+          state: { globalFilter: debouncedFilterString },
+        }}
+        emptyStateProps={{ message: 'No variables set.' }}
+      />
     </div>
   )
 }

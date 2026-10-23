@@ -18,7 +18,7 @@ export const SecretsTableSC = styled.table(({ theme }) => ({
   },
   'thead th': {
     ...theme.partials.text.body2Bold,
-    marginBottom: -theme.spacing.xsmall,
+    marginBottom: theme.spacing['minus-xsmall'],
   },
   th: {
     display: 'block',
@@ -135,7 +135,7 @@ export function DeployServiceSettingsSecrets({
               </th>
               <th>
                 <DeleteIconButton
-                  css={{ marginTop: 4 }}
+                  css={{ marginTop: '0.25rem' }}
                   onClick={() => {
                     setSecrets((secrets) =>
                       produce(secrets, (draft) => {

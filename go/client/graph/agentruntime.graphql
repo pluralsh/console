@@ -41,6 +41,14 @@ query GetAgentRun($id: ID!) {
     }
 }
 
+# Credentials are fetched separately so routine agent run reads don't carry them
+# (or mint a Plural token). Only agent-bootstrap and the mcpserver sidecar need them.
+query GetAgentRunCredentials($id: ID!) {
+    agentRun(id: $id) {
+        ...AgentRunCredentialsFragment
+    }
+}
+
 query GetAgentRunMinimal($id: ID!) {
     agentRun(id: $id) {
         ...AgentRunMinimalFragment
@@ -213,6 +221,17 @@ fragment AgentPromptFragment on AgentPrompt {
     id
     prompt
     seq
+    attachments {
+        ...AgentAttachmentFragment
+    }
+}
+
+fragment AgentAttachmentFragment on Attachment {
+    id
+    filename
+    filetype
+    size
+    downloadUrl
 }
 
 fragment ScmCredentialFragment on ScmCreds {
@@ -266,6 +285,9 @@ fragment AgentRunFragment on AgentRun {
     prompts {
         ...AgentPromptFragment
     }
+    attachments {
+        ...AgentAttachmentFragment
+    }
     skills {
         name
         description
@@ -288,12 +310,6 @@ fragment AgentRunFragment on AgentRun {
         inputCost
         outputCost
         totalCost
-    }
-    scmCreds {
-        ...ScmCredentialFragment
-    }
-    pluralCreds {
-        ...PluralCredsFragment
     }
     workbenchMcpUrl
     runtime {
@@ -322,6 +338,15 @@ fragment AgentRunFragment on AgentRun {
     followupPrUrl
 }
 
+
+fragment AgentRunCredentialsFragment on AgentRun {
+    scmCreds {
+        ...ScmCredentialFragment
+    }
+    pluralCreds {
+        ...PluralCredsFragment
+    }
+}
 
 fragment AgentRunMinimalFragment on AgentRun {
     id

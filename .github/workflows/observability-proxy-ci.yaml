@@ -36,7 +36,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v7
         with:
-          go-version-file: go/observability-proxy/go.mod
+          go-version-file: go/go.work
           cache: false
 
       - name: Run tests

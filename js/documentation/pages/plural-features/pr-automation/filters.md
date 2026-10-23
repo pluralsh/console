@@ -5,11 +5,11 @@ description: Supported Liquid filters for use in PR Automation templates
 
 # Liquid Filters in PR Automation
 
-PR Automation in Plural uses [Liquid](https://shopify.github.io/liquid/) templating engine for generating templates. In addition to the standard Liquid filters, Plural provides a set of custom filters that can be used in your templates.
+PR Automation in Plural uses the [Liquid](https://shopify.github.io/liquid/) templating engine to generate templates. In addition to the standard Liquid filters, Plural provides a set of custom filters that can be used in your templates.
 
 ## Supported Filters
 
-Plural supports a wide range of Liquid filters that can be used in your PR Automation templates. These filters include:
+Plural supports a wide range of Liquid filters in PR Automation templates, including:
 
 - String manipulation (e.g., `abbrev`, `trim`, `upper`, `lower`)
 - Mathematical operations (e.g., `add`, `sub`, `mul`, `div`)
@@ -18,7 +18,7 @@ Plural supports a wide range of Liquid filters that can be used in your PR Autom
 - Encoding/decoding (e.g., `b64enc`, `b64dec`, `urlquery`)
 - And many more
 
-For a complete list of supported filters and detailed documentation for each, please refer to our [Liquid Filters documentation](https://github.com/pluralsh/polly/blob/main/docs/liquid-filters.md).
+For a complete list of supported filters and detailed documentation for each, see our [Liquid Filters documentation](https://github.com/pluralsh/polly/blob/main/docs/liquid-filters.md).
 
 ## Using Filters in Templates
 
@@ -66,4 +66,4 @@ This would output the current date in the format "YYYY-MM-DD".
 
 This would add 1 to the value of `context.replicas`.
 
-For more examples and detailed documentation, please refer to our [Liquid Filters documentation](https://github.com/pluralsh/polly/blob/main/docs/liquid-filters.md).
+For more examples and detailed documentation, see our [Liquid Filters documentation](https://github.com/pluralsh/polly/blob/main/docs/liquid-filters.md).

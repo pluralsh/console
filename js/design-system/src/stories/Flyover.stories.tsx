@@ -22,7 +22,7 @@ const Text = styled.p(({ theme }) => ({
 
 const Heading = styled.h3(({ theme }) => ({
   margin: 0,
-  marginBottom: 8,
+  marginBottom: '0.5rem',
   ...theme.partials.text.subtitle1,
 }))
 
@@ -38,14 +38,14 @@ type Story = StoryObj<any>
 function ExtraContent() {
   return (
     <div style={{ maxWidth: 500 }}>
-      <Text style={{ marginBottom: 16 }}>
+      <Text style={{ marginBottom: '1rem' }}>
         Some extra content to check that body scroll is disabled when Flyover is
         open.
       </Text>
       {Array.from({ length: 5 }).map((_, i) => (
         <Text
           key={i}
-          style={{ marginBottom: 16 }}
+          style={{ marginBottom: '1rem' }}
         >
           Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus
           tempor, mi pulvinar vestibulum viverra, magnan ipsum suscipit turpis,
@@ -85,7 +85,7 @@ function Template(args: any) {
       >
         {!args.asForm && (
           <>
-            <Text style={{ marginBottom: 16 }}>
+            <Text style={{ marginBottom: '1rem' }}>
               Uninstalling this application will disable all future upgrades.
             </Text>
             <Text>

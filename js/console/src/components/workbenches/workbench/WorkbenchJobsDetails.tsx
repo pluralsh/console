@@ -1,10 +1,10 @@
 import {
   ArrowTopRightIcon,
   Chip,
-  EmptyState,
   Flex,
   prettifyRepoUrl,
 } from '@pluralsh/design-system'
+import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import { prettifyPrompt } from 'components/utils/contentEditableChips'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { StackedText } from 'components/utils/table/StackedText'
@@ -114,6 +114,7 @@ export function useWorkbenchJobsDetails({
             noun="jobs"
             loading={loading}
             emptyState={emptyState}
+            sidebar
           />
         ) : (
           jobs.map((job) => (
@@ -148,7 +149,15 @@ export function useWorkbenchJobsDetails({
     </DetailsListSC>
   )
 
-  const content = (
+  const content = !selected ? (
+    !loading && (
+      <BoardEmptyList
+        noun="jobs"
+        loading={false}
+        emptyState={emptyState}
+      />
+    )
+  ) : (
     <DetailsLayoutSC $panelCount={detailsOpen ? 2 : 1}>
       {selected && (
         <WorkbenchJobConclusionPanel
@@ -215,7 +224,11 @@ function WorkbenchJobDetailsPanel({
         </DetailsTabBodySC>
       ) : isEmpty(tabs) ? (
         <DetailsTabBodySC>
-          <EmptyState message="No job details available yet." />
+          <WorkbenchEmptyState
+            inset={false}
+            message="No job details yet"
+            description="Activity, actions, and results will show up here as the job runs."
+          />
         </DetailsTabBodySC>
       ) : (
         <>
@@ -362,5 +375,5 @@ function getDetailsTabs({
 const PrListSC = styled.div({
   display: 'flex',
   flexDirection: 'column',
-  gap: 6,
+  gap: '0.375rem',
 })

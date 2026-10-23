@@ -1,20 +1,20 @@
 ---
 title: Prompt-based PR Automation
-description: Use a light weight coding agent to automate routine GitOps changes
+description: Use a lightweight coding agent to automate routine GitOps changes
 ---
 
-Deterministic PR automations have a win in speed and reliability, but the machinery does require setup and configuration.  You can simplify this greatly with our basic AI integration, where Plural will use a fast, sandboxed coding agent to make the needed code changes for your desired PR.  The process is basically:
+Deterministic PR automations win on speed and reliability, but the machinery does require setup and configuration.  You can simplify this greatly with our basic AI integration, where Plural uses a fast, sandboxed coding agent to make the code changes for your desired PR.  The process is:
 
-1. Provide a templated prompt that will define the change needed in the repo.
-2. On PR Automation invocation, the agent will take over and make the needed modification.
+1. Provide a templated prompt that defines the change needed in the repo.
+2. When the PR Automation is invoked, the agent takes over and makes the modification.
 
 {% callout severity="info" %}
-These are especially useful for unstructured code changes.  For instance, preserving documentation in YAML files, or modifying terraform code without complex regex logic.
+These are especially useful for unstructured code changes, for instance, preserving documentation in YAML files or modifying Terraform code without complex regex logic.
 {% /callout %}
 
 ## Basic Example
 
-A simple example of one would be:
+A simple example:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -45,4 +45,4 @@ spec:
       - prod
 ```
 
-The automation will allow you to call it with a `{"name": string, "tier": string}` context block at any time, and the code change will be delegated to the AI according to the guidance given.  The prompt is also templatable, in case it's useful to provide customization based on user input.
+You can call the automation with a `{"name": string, "tier": string}` context block at any time, and the code change is delegated to the AI according to the guidance given.  The prompt is also templatable, so you can customize it based on user input.

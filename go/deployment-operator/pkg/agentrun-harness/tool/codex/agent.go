@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/samber/lo"
-
 	console "github.com/pluralsh/console/go/client"
 	agentrunv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/artifacts"
@@ -24,20 +22,14 @@ const (
 // Agent owns Codex settings, shared prompt and skills preparation, native
 // configuration, and staging of Codex's native session data.
 type Agent struct {
-	config       toolv1.Config
-	consoleURL   string
-	consoleToken string
+	config toolv1.Config
 }
 
 var _ toolv1.Agent = (*Agent)(nil)
 
 // NewAgent creates a Codex Agent for one agent run.
 func NewAgent(config toolv1.Config) *Agent {
-	agent := &Agent{config: config}
-	if config.Run != nil && config.Run.PluralCreds != nil {
-		agent.consoleToken = lo.FromPtr(config.Run.PluralCreds.Token)
-	}
-	return agent
+	return &Agent{config: config}
 }
 
 // Type identifies the Console runtime implemented by Agent.
@@ -102,11 +94,6 @@ func (agent *Agent) Configure(ctx context.Context, request toolv1.ConfigureReque
 		return err
 	}
 
-	agent.consoleURL = request.ConsoleURL
-	if request.ConsoleToken != "" {
-		agent.consoleToken = request.ConsoleToken
-	}
-
 	model := agent.resolveModelForSettings(config, request.Settings)
 	return agent.writeNativeConfig(config, model)
 }
@@ -141,6 +128,28 @@ func (agent *Agent) Export(ctx context.Context, request toolv1.ExportRequest) (t
 		Path:        request.OutputDir,
 		ArchivePath: codexSessionsDir,
 	}}, nil
+}
+
+func (agent *Agent) Import(ctx context.Context, request toolv1.ImportRequest) (string, error) {
+	if err := agent.contextError(ctx); err != nil {
+		return "", err
+	}
+	if request.Manifest == nil {
+		return "", fmt.Errorf("codex session manifest is not set")
+	}
+	config, err := agent.configWithCodex()
+	if err != nil {
+		return "", err
+	}
+	archivePath := request.Manifest.Session.ArchivePath
+	if archivePath == "" {
+		archivePath = codexSessionsDir
+	}
+	destination := filepath.Join(agent.codexHome(config), codexSessionsDir)
+	if err := artifacts.RestoreArchiveTree(ctx, request.ExtractDir, archivePath, destination); err != nil {
+		return "", fmt.Errorf("import codex session: %w", err)
+	}
+	return request.Manifest.Session.ID, nil
 }
 
 func (agent *Agent) configWithCodex() (toolv1.Config, error) {

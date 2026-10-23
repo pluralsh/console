@@ -3,7 +3,15 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
   use Mimic
   alias CloudQuery.Client
   alias Toolquery.ToolQuery.Stub
-  alias Toolquery.{MetricPoint, MetricsQueryOutput, TraceSpan, TracesQueryOutput}
+  alias Toolquery.{
+    MetricPoint,
+    MetricsQueryOutput,
+    MetricSample,
+    MetricSeries,
+    MetricsSeriesOutput,
+    TraceSpan,
+    TracesQueryOutput
+  }
 
   describe "workbenches" do
     test "it can fetch workbenches" do
@@ -35,6 +43,32 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
 
       assert from_connection(found)
              |> ids_equal([workbench])
+    end
+
+    test "it can rank favorites first" do
+      a = insert(:workbench, name: "a")
+      b = insert(:workbench, name: "b")
+      c = insert(:workbench, name: "c")
+
+      {:ok, %{data: %{"workbenches" => found}}} = run_query("""
+        query Workbenches($ids: [ID]) {
+          workbenches(first: 5, sort: FAVORITED, favoriteIds: $ids) {
+            edges { node { id } }
+          }
+        }
+      """, %{"ids" => [c.id]}, %{current_user: admin_user()})
+
+      assert Enum.map(from_connection(found), & &1["id"]) == [c.id, a.id, b.id]
+
+      {:ok, %{data: %{"workbenches" => found}}} = run_query("""
+        query {
+          workbenches(first: 5, sort: NAME, direction: DESC) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: admin_user()})
+
+      assert Enum.map(from_connection(found), & &1["id"]) == [c.id, b.id, a.id]
     end
 
     test "it can respect rbac" do
@@ -677,6 +711,73 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       ]
     end
 
+    test "it can filter workbench run counts by search and pr state" do
+      workbench = insert(:workbench)
+      with_pr = insert(:workbench_job, workbench: workbench, status: :failed, prompt: "fix the Scraper")
+      insert(:pull_request, workbench_job: with_pr, status: :open)
+      insert(:workbench_job, workbench: workbench, status: :successful, prompt: "scraper is slow")
+      other = insert(:workbench_job, workbench: workbench, status: :failed, prompt: "something else")
+      insert(:pull_request, workbench_job: other, status: :open)
+
+      {:ok, %{data: %{"workbench" => found}}} = run_query("""
+        query Workbench($id: ID!, $q: String, $prStates: [WorkbenchJobPrState]) {
+          workbench(id: $id) {
+            runCounts(q: $q, prStates: $prStates) {
+              statuses { status count }
+            }
+          }
+        }
+      """, %{"id" => workbench.id, "q" => "scraper", "prStates" => ["OPEN"]}, %{current_user: admin_user()})
+
+      assert found["runCounts"]["statuses"] == [%{"status" => "FAILED", "count" => 1}]
+    end
+
+    test "it can filter workbench runs and counts to a creation window" do
+      workbench = insert(:workbench)
+      recent = insert(:workbench_job, workbench: workbench, status: :running)
+      insert(:workbench_job,
+        workbench: workbench,
+        status: :failed,
+        inserted_at: Timex.now() |> Timex.shift(days: -8)
+      )
+      since = Timex.now() |> Timex.shift(days: -7) |> DateTime.to_iso8601()
+
+      {:ok, %{data: %{"workbench" => found}}} = run_query("""
+        query Workbench($id: ID!, $insertedAfter: DateTime) {
+          workbench(id: $id) {
+            runs(first: 10, insertedAfter: $insertedAfter) {
+              edges { node { id } }
+            }
+            runCounts(insertedAfter: $insertedAfter) {
+              statuses { status count }
+            }
+          }
+        }
+      """, %{"id" => workbench.id, "insertedAfter" => since}, %{current_user: admin_user()})
+
+      assert from_connection(found["runs"]) |> ids_equal([recent])
+      assert found["runCounts"]["statuses"] == [%{"status" => "RUNNING", "count" => 1}]
+    end
+
+    test "it can search workbench runs by prompt" do
+      workbench = insert(:workbench)
+      match = insert(:workbench_job, workbench: workbench, status: :running, prompt: "fix the Scraper")
+      insert(:workbench_job, workbench: workbench, status: :successful, prompt: "scraper is slow")
+      insert(:workbench_job, workbench: workbench, status: :running, prompt: "something else")
+
+      {:ok, %{data: %{"workbench" => found}}} = run_query("""
+        query Workbench($id: ID!, $q: String, $statuses: [WorkbenchJobStatus]) {
+          workbench(id: $id) {
+            runs(first: 10, q: $q, statuses: $statuses) {
+              edges { node { id } }
+            }
+          }
+        }
+      """, %{"id" => workbench.id, "q" => "scraper", "statuses" => ["RUNNING"]}, %{current_user: admin_user()})
+
+      assert from_connection(found["runs"]) |> Enum.map(& &1["id"]) == [match.id]
+    end
+
     test "it can fetch workbench alerts" do
       workbench = insert(:workbench)
       alerts = insert_list(3, :alert, workbench: workbench, project: workbench.project)
@@ -1052,6 +1153,31 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
 
       assert providers == %{"GITHUB" => 2, "LINEAR" => 1}
       assert statuses == %{"OPEN" => 2, "COMPLETED" => 1}
+    end
+
+    test "it can filter workbench issue counts by search and provider" do
+      workbench = insert(:workbench)
+      insert(:issue, workbench: workbench, status: :open, provider: :github, title: "fix the scraper")
+      insert(:issue, workbench: workbench, status: :completed, provider: :github, title: "scraper is slow")
+      insert(:issue, workbench: workbench, status: :open, provider: :linear, title: "scraper on linear")
+      insert(:issue, workbench: workbench, status: :open, provider: :github, title: "something else")
+
+      {:ok, %{data: %{"workbench" => found}}} = run_query("""
+        query Workbench($id: ID!, $q: String, $providers: [IssueWebhookProvider]) {
+          workbench(id: $id) {
+            issueCounts(q: $q, providers: $providers) {
+              providers { provider count }
+              statuses { status count }
+            }
+          }
+        }
+      """, %{"id" => workbench.id, "q" => "scraper", "providers" => ["GITHUB"]}, %{current_user: admin_user()})
+
+      providers = Map.new(found["issueCounts"]["providers"], & {&1["provider"], &1["count"]})
+      statuses  = Map.new(found["issueCounts"]["statuses"], & {&1["status"], &1["count"]})
+
+      assert providers == %{"GITHUB" => 2}
+      assert statuses == %{"OPEN" => 1, "COMPLETED" => 1}
     end
 
     test "users field returns users from user and group policy bindings on the workbench" do
@@ -1636,6 +1762,73 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       }, %{current_user: admin_user()})
     end
 
+    test "it resolves metricsSeriesTool as grouped series without non-finite samples" do
+      workbench = insert(:workbench)
+      tool = insert(:workbench_tool,
+        project: workbench.project,
+        name: "prom",
+        tool: :prometheus,
+        categories: [:metrics],
+        configuration: %{
+          prometheus: %{url: "https://prom.example.com", token: "token", tenant_id: nil}
+        }
+      )
+
+      insert(:workbench_tool_association, workbench: workbench, tool: tool)
+      job = insert(:workbench_job, workbench: workbench)
+      now = DateTime.utc_now() |> DateTime.truncate(:second)
+
+      expect(Client, :connect, fn -> {:ok, :mock_conn} end)
+      expect(Stub, :metrics_series, fn :mock_conn, input, opts ->
+        assert opts[:timeout] == :timer.seconds(30)
+        assert input.query == "sum(rate(http_requests_total[5m])) by (method)"
+        assert input.step == "30s"
+
+        {:ok,
+         %MetricsSeriesOutput{
+           series: [
+             %MetricSeries{
+               name: "http_requests_total",
+               labels: %{"method" => "GET"},
+               samples: [
+                 %MetricSample{timestamp: Google.Protobuf.from_datetime(now), value: :nan},
+                 %MetricSample{timestamp: Google.Protobuf.from_datetime(now), value: 42.5}
+               ]
+             },
+             %MetricSeries{
+               name: "http_requests_total",
+               labels: %{"method" => "POST"},
+               samples: [%MetricSample{timestamp: Google.Protobuf.from_datetime(now), value: :negative_infinity}]
+             }
+           ]
+         }}
+      end)
+
+      {:ok, %{data: %{"workbenchJob" => found}}} = run_query("""
+        query WorkbenchJob($id: ID!, $name: String!, $arguments: Json) {
+          workbenchJob(id: $id) {
+            metricsSeriesTool(name: $name, arguments: $arguments) {
+              name
+              metric
+              values { timestamp value }
+            }
+          }
+        }
+      """, %{
+        "id" => job.id,
+        "name" => "workbench_observability_metrics_prom",
+        "arguments" => Jason.encode!(%{"query" => "sum(rate(http_requests_total[5m])) by (method)", "step" => "30s"})
+      }, %{current_user: admin_user()})
+
+      assert found["metricsSeriesTool"] == [
+               %{
+                 "name" => "http_requests_total",
+                 "metric" => %{"method" => "GET"},
+                 "values" => [%{"timestamp" => "#{DateTime.to_unix(now)}", "value" => "42.5"}]
+               }
+             ]
+    end
+
     test "it returns gRPC metrics errors as GraphQL errors" do
       workbench = insert(:workbench)
 
@@ -1829,6 +2022,59 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert found["type"] == "CODING"
       assert found["prompt"] == "fix the bug"
       assert found["user"]["id"] == user.id
+    end
+
+    test "thought metrics resolve as series and flat points for both stored shapes" do
+      activity = insert(:workbench_job_activity, workbench_job: insert(:workbench_job), type: :coding)
+      t1 = ~U[2026-10-19 00:00:00Z]
+      t2 = ~U[2026-10-19 00:01:00Z]
+
+      {:ok, _} =
+        %Console.Schema.WorkbenchJobThought{}
+        |> Console.Schema.WorkbenchJobThought.changeset(%{
+          activity_id: activity.id,
+          content: "series",
+          attributes: %{series: [%{name: "up", labels: %{"pod" => "a"}, samples: [%{timestamp: t1, value: 1.0}, %{timestamp: t2, value: 2.0}]}]}
+        })
+        |> Console.Repo.insert()
+
+      {:ok, _} =
+        %Console.Schema.WorkbenchJobThought{}
+        |> Console.Schema.WorkbenchJobThought.changeset(%{
+          activity_id: activity.id,
+          content: "legacy",
+          attributes: %{metrics: [
+            %{name: "up", labels: %{"pod" => "b"}, timestamp: t1, value: 3.0},
+            %{name: "up", labels: %{"pod" => "b"}, timestamp: t2, value: 4.0}
+          ]}
+        })
+        |> Console.Repo.insert()
+
+      {:ok, %{data: %{"workbenchJobActivity" => found}}} = run_query("""
+        query WorkbenchJobActivity($id: ID!) {
+          workbenchJobActivity(id: $id) {
+            thoughts {
+              content
+              attributes {
+                series { name metric values { timestamp value } }
+                metrics { name value labels }
+              }
+            }
+          }
+        }
+      """, %{"id" => activity.id}, %{current_user: admin_user()})
+
+      by_content = Map.new(found["thoughts"], &{&1["content"], &1["attributes"]})
+      values = fn a, b -> [%{"timestamp" => "#{DateTime.to_unix(t1)}", "value" => a}, %{"timestamp" => "#{DateTime.to_unix(t2)}", "value" => b}] end
+
+      assert by_content["series"]["series"] == [%{"name" => "up", "metric" => %{"pod" => "a"}, "values" => values.("1.0", "2.0")}]
+      assert by_content["series"]["metrics"] == [
+               %{"name" => "up", "value" => 1.0, "labels" => %{"pod" => "a"}},
+               %{"name" => "up", "value" => 2.0, "labels" => %{"pod" => "a"}}
+             ]
+
+      assert by_content["legacy"]["series"] == [%{"name" => "up", "metric" => %{"pod" => "b"}, "values" => values.("3.0", "4.0")}]
+      assert length(by_content["legacy"]["metrics"]) == 2
     end
 
     test "users with read access to the workbench can fetch workbench job activities" do
@@ -2305,16 +2551,14 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
   end
 
   describe "workbenchJobSearch" do
-    test "it can search vector-indexed workbench jobs" do
-      enable_vector_store()
-
+    test "it can search workbench jobs by prompt substring" do
       workbench = insert(:workbench)
 
       job =
         insert(:workbench_job,
           workbench: workbench,
           status: :successful,
-          prompt: "investigate database outage",
+          prompt: "investigate the Database Outage in prod",
           result: build(:workbench_job_result, conclusion: "root cause was connection pool exhaustion")
         )
 
@@ -2324,20 +2568,10 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
         url: "https://github.com/org/repo/pull/1"
       )
 
-      expect(Console.AI.VectorStore, :fetch, fn "database outage", opts ->
-        assert opts[:count] == 2
-        assert opts[:filters] == [datatype: {:raw, :workbench_job}, workbench_id: workbench.id]
-        assert %{__struct__: Console.Schema.User} = opts[:user]
+      insert(:workbench_job, workbench: workbench, prompt: "upgrade the cluster")
+      insert(:workbench_job, prompt: "another database outage")
 
-        {:ok, [
-          %Console.AI.VectorStore.Response{
-            type: :workbench,
-            workbench_job: %Console.Schema.WorkbenchJob.Mini{id: job.id}
-          }
-        ]}
-      end)
-
-      {:ok, %{data: %{"workbenchJobSearch" => [found | _]}}} = run_query("""
+      {:ok, %{data: %{"workbenchJobSearch" => [found]}}} = run_query("""
         query WorkbenchJobSearch($workbenchId: ID!) {
           workbenchJobSearch(q: "database outage", workbenchId: $workbenchId, limit: 2) {
             id
@@ -2351,30 +2585,31 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
 
       assert found["id"] == job.id
       assert found["status"] == "SUCCESSFUL"
-      assert found["prompt"] == "investigate database outage"
+      assert found["prompt"] == "investigate the Database Outage in prod"
       assert found["result"]["conclusion"] == "root cause was connection pool exhaustion"
       assert found["pullRequests"] == [
         %{"title" => pr.title, "url" => pr.url}
       ]
     end
 
-    test "it filters search results by status and pull request state in relevance order" do
-      enable_vector_store()
-
+    test "it filters search results by status and pull request state, newest first" do
       workbench = insert(:workbench)
-      [first_failed, second_failed, third_failed] = insert_list(3, :workbench_job, workbench: workbench, status: :failed)
-      [first_ok, second_ok] = insert_list(2, :workbench_job, workbench: workbench, status: :successful)
-      insert(:pull_request, workbench_job: second_ok, status: :merged)
-      ranked = [first_ok, second_failed, second_ok, first_failed, third_failed]
+      job = fn status, minutes_ago ->
+        insert(:workbench_job,
+          workbench: workbench,
+          status: status,
+          prompt: "fix the outage",
+          inserted_at: Timex.now() |> Timex.shift(minutes: -minutes_ago)
+        )
+      end
 
-      expect(Console.AI.VectorStore, :fetch, 3, fn "outage", opts ->
-        {:ok, ranked
-              |> Enum.take(opts[:count])
-              |> Enum.map(&%Console.AI.VectorStore.Response{
-                type: :workbench,
-                workbench_job: %Console.Schema.WorkbenchJob.Mini{id: &1.id}
-              })}
-      end)
+      first_ok = job.(:successful, 1)
+      second_failed = job.(:failed, 2)
+      second_ok = job.(:successful, 3)
+      first_failed = job.(:failed, 4)
+      job.(:failed, 5)
+      insert(:workbench_job, workbench: workbench, status: :failed, prompt: "unrelated")
+      insert(:pull_request, workbench_job: second_ok, status: :merged)
 
       query = """
         query WorkbenchJobSearch($workbenchId: ID!, $statuses: [WorkbenchJobStatus], $prStates: [WorkbenchJobPrState]) {
@@ -2384,7 +2619,6 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
         }
       """
 
-      # 4 candidates for a limit of 2: the matching ones among them, most relevant first
       {:ok, %{data: %{"workbenchJobSearch" => found}}} =
         run_query(query, %{"workbenchId" => workbench.id, "statuses" => ["FAILED"]}, %{current_user: admin_user()})
 
@@ -2395,36 +2629,33 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
 
       assert Enum.map(found, & &1["id"]) == [second_ok.id]
 
-      # unfiltered searches fetch just the limit, in relevance order
       {:ok, %{data: %{"workbenchJobSearch" => found}}} =
         run_query(query, %{"workbenchId" => workbench.id}, %{current_user: admin_user()})
 
       assert Enum.map(found, & &1["id"]) == [first_ok.id, second_failed.id]
     end
 
-    test "it errors when the vector store is not enabled" do
-      deployment_settings(
-        ai: %{
-          enabled: true,
-          provider: :openai,
-          openai: %{access_token: "key"},
-          vector_store: %{enabled: false}
-        }
-      )
-
+    test "it matches like wildcards literally, without the vector store" do
       reject(&Console.AI.VectorStore.fetch/2)
 
       workbench = insert(:workbench)
+      job = insert(:workbench_job, workbench: workbench, prompt: "raise cpu to 100% on node_pool")
+      insert(:workbench_job, workbench: workbench, prompt: "raise cpu to 1000 on nodeXpool")
 
-      assert {:ok, %{errors: [%{message: message} | _]}} = run_query("""
-        query WorkbenchJobSearch($workbenchId: ID!) {
-          workbenchJobSearch(q: "database outage", workbenchId: $workbenchId, limit: 2) {
+      query = """
+        query WorkbenchJobSearch($workbenchId: ID!, $q: String!) {
+          workbenchJobSearch(q: $q, workbenchId: $workbenchId, limit: 5) {
             id
           }
         }
-      """, %{"workbenchId" => workbench.id}, %{current_user: admin_user()})
+      """
 
-      assert message == "Vector store is not enabled, cannot query"
+      for q <- ["100%", "node_pool"] do
+        {:ok, %{data: %{"workbenchJobSearch" => found}}} =
+          run_query(query, %{"workbenchId" => workbench.id, "q" => q}, %{current_user: admin_user()})
+
+        assert Enum.map(found, & &1["id"]) == [job.id]
+      end
     end
   end
 
@@ -2815,6 +3046,55 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert agg["evalResults"] == 8.0
     end
 
+    test "workbenchAggregates estimates hours saved and tokens, scoped by project" do
+      project = insert(:project)
+      wb = insert(:workbench, project: project)
+      job = insert(:workbench_job,
+        workbench: wb,
+        usage: %{input_tokens: 10, output_tokens: 5, total_tokens: 15, cached_tokens: 50}
+      )
+      insert(:workbench_job, workbench: wb, usage: %{total_tokens: 100})
+
+      difficulty = &%Console.Schema.PullRequest.Difficulty{type: &1, lines: &2}
+      insert(:pull_request, workbench_job: job, status: :merged, difficulty: difficulty.(:gitops, 300))
+      insert(:pull_request, workbench_job: job, status: :merged, difficulty: difficulty.(:application, 100))
+      insert(:pull_request, workbench_job: job, status: :merged, difficulty: difficulty.(:configuration, 4))
+      insert(:pull_request, workbench_job: job, status: :merged)
+      insert(:pull_request, workbench_job: job, status: :closed, difficulty: difficulty.(:application, 1000))
+
+      other = insert(:workbench_job, usage: %{total_tokens: 1000})
+      insert(:pull_request, workbench_job: other, status: :merged, difficulty: difficulty.(:application, 1000))
+
+      {:ok, %{data: %{"workbenchAggregates" => agg}}} = run_query("""
+        query Aggregates($projectId: ID) {
+          workbenchAggregates(projectId: $projectId) {
+            pullRequests
+            hoursSaved
+            totalTokens
+          }
+        }
+      """, %{"projectId" => project.id}, %{current_user: admin_user()})
+
+      assert agg["pullRequests"] == 4
+      assert agg["hoursSaved"] == 4.25
+      assert agg["totalTokens"] == 165
+    end
+
+    test "workbenchAggregates only includes workbenches the user can read" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      readable = insert(:workbench_job, workbench: insert(:workbench, project: project))
+      insert(:pull_request, workbench_job: readable, status: :merged)
+      insert(:pull_request, workbench_job: insert(:workbench_job), status: :merged)
+
+      {:ok, %{data: %{"workbenchAggregates" => agg}}} = run_query("""
+        query { workbenchAggregates { pullRequests totalTokens } }
+      """, %{}, %{current_user: user})
+
+      assert agg["pullRequests"] == 1
+      assert agg["totalTokens"] == 0
+    end
+
     test "workbenchPrMergeRates returns global merge rate buckets" do
       wb1 = insert(:workbench)
       wb2 = insert(:workbench)
@@ -2869,22 +3149,5 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert row["merge_rate"] == 1.0
       assert row["timestamp"]
     end
-  end
-
-  defp enable_vector_store() do
-    import ElasticsearchUtils
-
-    deployment_settings(
-      ai: %{
-        enabled: true,
-        provider: :openai,
-        openai: %{access_token: "key"},
-        vector_store: %{
-          enabled: true,
-          store: :elastic,
-          elastic: es_vector_settings()
-        }
-      }
-    )
   end
 end

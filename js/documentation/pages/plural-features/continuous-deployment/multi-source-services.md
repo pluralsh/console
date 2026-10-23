@@ -9,7 +9,7 @@ The most common use case is deploying an **operator and its custom resources tog
 
 ## Example: datastore operator + custom resources
 
-Here's a basic example using our datastore-operator (which manages things like elasticsearch indexes and postgres databases via GitOps):
+Here's a basic example using our datastore-operator (which manages things like Elasticsearch indexes and Postgres databases via GitOps):
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -88,7 +88,7 @@ Each entry in `spec.sources` fetches content from a Git repository and places it
 | --- | --- |
 | `repositoryRef` | Reference to a `GitRepository` CR (or inline `git.url`) |
 | `git.folder` | Subdirectory within that repo to fetch |
-| `git.ref` | Branch, tag, or commit to checkout |
+| `git.ref` | Branch, tag, or commit to check out |
 | `path` | Subdirectory name inside the final tarball |
 
 The **primary source** (`spec.helm`, `spec.git`, or `spec.kustomize`) is unpacked at the tarball root. Each additional `sources` entry is merged under its own `path`. For the example above, the tarball layout looks like:

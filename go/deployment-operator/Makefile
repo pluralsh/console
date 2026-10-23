@@ -181,61 +181,23 @@ harness-run-pulumi: docker-build-harness-pulumi ## run harness
 		--stack-run-id=${PLURAL_STACK_RUN_ID}; \
 	rm -f $$KUBECONFIG_TMP
 
+# The harness reaches Console only through the mcpserver sidecar, so it can't run on its own;
+# these run the docker compose pod simulation (bootstrap + mcpserver + harness).
 .PHONY: agent-harness-opencode-run
-agent-harness-opencode-run: docker-build-agent-harness-opencode ## run agent harness w/ opencode
-	docker run \
-		-e PLRL_AGENT_RUN_ID=$(PLRL_AGENT_RUN_ID) \
-		-e PLRL_DEPLOY_TOKEN=$(PLRL_DEPLOY_TOKEN) \
-		-e PLRL_CONSOLE_URL=$(PLRL_CONSOLE_URL) \
-		-e PLRL_OPENCODE_PROVIDER=$(PLRL_OPENCODE_PROVIDER) \
-		-e PLRL_OPENCODE_ENDPOINT=$(PLRL_OPENCODE_ENDPOINT) \
-		-e PLRL_OPENCODE_MODEL=$(PLRL_OPENCODE_MODEL) \
-		-e PLRL_OPENCODE_TOKEN=$(PLRL_OPENCODE_TOKEN) \
-		--rm -it \
-		ghcr.io/pluralsh/agent-harness-opencode --v=4
+agent-harness-opencode-run: agent-up-opencode ## run agent harness w/ opencode
 
 .PHONY: agent-harness-codex-run
-agent-harness-codex-run: docker-build-agent-harness-codex ## run agent harness w/ codex
-	@KEY_TMP=$$(mktemp) && \
-	cp $${HOME}/.ssh/id_rsa $$KEY_TMP && \
-	chmod 644 $$KEY_TMP && \
-	docker run \
-		-v $$KEY_TMP:/plural/git/git-signing.key:ro \
-		-e PLRL_AGENT_RUN_ID=$(PLRL_AGENT_RUN_ID) \
-		-e PLRL_DEPLOY_TOKEN=$(PLRL_DEPLOY_TOKEN) \
-		-e PLRL_CONSOLE_URL=$(PLRL_CONSOLE_URL) \
-		-e PLRL_CODEX_MODEL=$(PLRL_CODEX_MODEL) \
-		-e PLRL_CODEX_API_KEY=$(PLRL_CODEX_API_KEY) \
-		-e GIT_ACCESS_TOKEN=$(GIT_ACCESS_TOKEN) \
-		--rm -it \
-		ghcr.io/pluralsh/agent-harness-codex --v=3; \
-	rm -f $$KEY_TMP
+agent-harness-codex-run: agent-up-codex ## run agent harness w/ codex
 
 .PHONY: agent-harness-claude-run
-agent-harness-claude-run: docker-build-agent-harness-claude ## run agent harness w/ claude
-	docker run \
-		-e PLRL_AGENT_RUN_ID=$(PLRL_AGENT_RUN_ID) \
-		-e PLRL_DEPLOY_TOKEN=$(PLRL_DEPLOY_TOKEN) \
-		-e PLRL_CONSOLE_URL=$(PLRL_CONSOLE_URL) \
-		-e PLRL_CLAUDE_MODEL=$(PLRL_CLAUDE_MODEL) \
-		-e PLRL_CLAUDE_TOKEN=$(PLRL_CLAUDE_TOKEN) \
-		--rm -it \
-		ghcr.io/pluralsh/agent-harness-claude --v=3
+agent-harness-claude-run: agent-up-claude ## run agent harness w/ claude
 
 .PHONY: agent-harness-gemini-run
-agent-harness-gemini-run: docker-build-agent-harness-gemini ## run agent harness w/ gemini
-	docker run \
-		-e PLRL_AGENT_RUN_ID=$(PLRL_AGENT_RUN_ID) \
-		-e PLRL_DEPLOY_TOKEN=$(PLRL_DEPLOY_TOKEN) \
-		-e PLRL_CONSOLE_URL=$(PLRL_CONSOLE_URL) \
-		-e PLRL_GEMINI_MODEL=$(PLRL_GEMINI_MODEL) \
-		-e PLRL_GEMINI_API_KEY=$(PLRL_GEMINI_API_KEY) \
-		--rm -it \
-		ghcr.io/pluralsh/agent-harness-gemini --v=5
+agent-harness-gemini-run: agent-up-gemini ## run agent harness w/ gemini
 
 .PHONY: agent-mcpserver-run
 agent-mcpserver-run: agent-mcpserver ## run mcp server locally
-	PLRL_CONSOLE_TOKEN=${PLRL_CONSOLE_TOKEN} \
+	PLRL_DEPLOY_TOKEN=${PLRL_DEPLOY_TOKEN} \
 	PLRL_CONSOLE_URL=${PLRL_CONSOLE_URL} \
 	PLRL_AGENT_RUN_ID=${PLRL_AGENT_RUN_ID} \
 	./bin/agent-mcpserver

@@ -168,7 +168,7 @@ const HeaderSC = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   gap: theme.spacing.xsmall,
-  padding: 10,
+  padding: '0.625rem',
   borderBottom: theme.borders['fill-two'],
 }))
 

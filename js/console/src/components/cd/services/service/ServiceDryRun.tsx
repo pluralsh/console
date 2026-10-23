@@ -13,6 +13,7 @@ import {
   IconFrame,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
+import { PageToolbarPortal } from 'components/layout/PageToolbar'
 
 import { isEmpty } from 'lodash'
 
@@ -59,9 +60,11 @@ export default function ServiceDryRun() {
 
   return (
     <ScrollablePage
-      heading="Dry run"
-      headingContent={
-        !(isEmpty(live) && isEmpty(desired)) && (
+      scrollable={false}
+      noPadding
+    >
+      {!(isEmpty(live) && isEmpty(desired)) && (
+        <PageToolbarPortal>
           <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
             <IconFrame
               clickable
@@ -80,10 +83,8 @@ export default function ServiceDryRun() {
               tooltip="Use unified view"
             />
           </div>
-        )
-      }
-      scrollable={false}
-    >
+        </PageToolbarPortal>
+      )}
       {isEmpty(live) && isEmpty(desired) ? (
         <div>There is no data available yet.</div>
       ) : (

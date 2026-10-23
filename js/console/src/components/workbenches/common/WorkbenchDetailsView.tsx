@@ -7,6 +7,7 @@ import {
   Tab,
   TabList,
 } from '@pluralsh/design-system'
+import { PAGE_TOOLBAR_HEIGHT } from 'components/layout/PageToolbar'
 import { TRUNCATE } from 'components/utils/truncate'
 import { isJobRunning } from 'components/workbenches/workbench/job/WorkbenchJobActivity'
 import { WorkbenchJobStatus } from 'generated/graphql'
@@ -17,12 +18,11 @@ import { BoardTitleSC } from './WorkbenchBoard'
 // Shared building blocks for the workbench Details views (jobs, issues,
 // alerts): a selectable list on the left and detail panels on the right.
 
-const DETAILS_LIST_WIDTH = 350
+export const DETAILS_LIST_WIDTH = 350
 const STATUS_GUTTER_SIZE = 10
 const DETAILS_PANEL_HEADER_HEIGHT = 44
-// tab strip height when the list is the sidebar: its search row (2x16 padding
-// + 32 input) sits above the same border as the details panels
-export const DETAILS_TAB_STRIP_HEIGHT = 64
+// the list's search row, level with the page toolbar beside it
+export const DETAILS_TAB_STRIP_HEIGHT = PAGE_TOOLBAR_HEIGHT
 
 type DetailsGutterStatus = 'running' | 'failed' | null
 
@@ -206,7 +206,7 @@ export function DetailsTabs<T extends string>({
       </TabList>
       <Flex
         flex={1}
-        css={{ borderBottom: theme.borders.default }}
+        css={{ borderBottom: theme.borders.hairline }}
       />
     </Flex>
   )
@@ -236,7 +236,7 @@ export const DetailsLinkRowSC = styled.a(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   gap: theme.spacing.small,
-  padding: 10,
+  padding: '0.625rem',
   borderRadius: theme.borderRadiuses.medium,
   textDecoration: 'none',
   '&:hover': { backgroundColor: theme.colors['fill-zero-hover'] },
@@ -280,13 +280,18 @@ export const DetailsListSC = styled.div(({ theme }) => ({
   height: '100%',
   minHeight: 0,
   backgroundColor: theme.colors['fill-accent'],
-  borderRight: theme.borders.default,
+  borderRight: theme.borders.hairline,
 }))
 
 export const DetailsListSearchSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing.small,
   flexShrink: 0,
-  padding: theme.spacing.medium,
-  borderBottom: theme.borders.default,
+  height: DETAILS_TAB_STRIP_HEIGHT,
+  padding: `0 ${theme.spacing.medium}`,
+  borderBottom: theme.borders.hairline,
+  '& > *': { flex: 1, minWidth: 0 },
 }))
 
 export const DetailsListItemsSC = styled.div({
@@ -360,7 +365,7 @@ const ListItemSC = styled.button<{ $selected: boolean }>(
     alignItems: 'center',
     gap: theme.spacing.small,
     width: '100%',
-    padding: `${theme.spacing.small}px ${theme.spacing.large}px ${theme.spacing.small}px ${theme.spacing.small}px`,
+    padding: `${theme.spacing.small} ${theme.spacing.large} ${theme.spacing.small} ${theme.spacing.small}`,
     cursor: 'pointer',
     // on the list's lighter background, as the Monitoring sidebar's rows
     backgroundColor: $selected ? theme.colors['fill-two-selected'] : undefined,
@@ -423,7 +428,7 @@ const PanelHeaderSC = styled.div(({ theme }) => ({
   gap: theme.spacing.small,
   flexShrink: 0,
   minHeight: DETAILS_PANEL_HEADER_HEIGHT,
-  padding: `0 ${theme.spacing.medium}px`,
+  padding: `0 ${theme.spacing.medium}`,
   borderBottom: theme.borders.default,
   backgroundColor: theme.colors['fill-one'],
 }))

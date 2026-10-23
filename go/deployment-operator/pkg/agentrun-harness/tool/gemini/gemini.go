@@ -13,6 +13,7 @@ import (
 	console "github.com/pluralsh/console/go/client"
 
 	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/attachments"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/prebake"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/gemini/events"
 	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
@@ -167,11 +168,12 @@ func (in *Gemini) start(ctx context.Context, options ...exec.Option) {
 		env = append(env, fmt.Sprintf("GEMINI_API_BASE_URL=%s", *in.Config.Run.Runtime.Config.Gemini.Endpoint))
 	}
 
+	resume := in.Config.ResumeFollowup && in.sessionID != ""
 	in.executable = exec.NewExecutable(
 		"gemini",
 		append(
 			options,
-			exec.WithArgs(in.args("", false)),
+			exec.WithArgs(in.args("", resume)),
 			exec.WithDir(in.Config.WorkDir),
 			exec.WithEnv(env),
 			exec.WithTimeout(in.Config.Run.Runtime.Config.Gemini.Timeout),
@@ -180,8 +182,8 @@ func (in *Gemini) start(ctx context.Context, options ...exec.Option) {
 
 	klog.V(log.LogLevelInfo).InfoS("Gemini executable configured", "timeout", in.Config.Run.Runtime.Config.Gemini.Timeout)
 
-	// Send the initial prompt as a message too
-	if in.onMessage != nil {
+	// Cold-start follow-ups already persist the user prompt via createAgentRunPrompt.
+	if !in.Config.ResumeFollowup && in.onMessage != nil {
 		in.onMessage(&console.AgentMessageAttributes{Message: in.Config.Run.Prompt, Role: console.AiRoleUser}, "")
 	}
 
@@ -237,7 +239,7 @@ func (in *Gemini) args(prompt string, resume bool) []string {
 }
 
 func (in *Gemini) includeDirectories() []string {
-	candidates := append([]string{in.Config.RepositoryDir}, prebake.ExtraReadDirs()...)
+	candidates := append(append([]string{in.Config.RepositoryDir}, prebake.ExtraReadDirs()...), attachments.ReadDirs()...)
 	dirs := make([]string, 0, len(candidates))
 	seen := make(map[string]struct{}, len(candidates))
 	for _, dir := range candidates {
@@ -253,7 +255,7 @@ func (in *Gemini) includeDirectories() []string {
 	return dirs
 }
 
-func (in *Gemini) Configure(_, _ string) error {
+func (in *Gemini) Configure() error {
 	if err := in.ConfigureSystemPrompt(console.AgentRuntimeTypeGemini); err != nil {
 		return err
 	}
@@ -263,7 +265,7 @@ func (in *Gemini) Configure(_, _ string) error {
 
 	input := &ConfigTemplateInput{
 		RepositoryDir:     in.Config.RepositoryDir,
-		ExtraDirectories:  prebake.ExtraReadDirs(),
+		ExtraDirectories:  append(prebake.ExtraReadDirs(), attachments.ReadDirs()...),
 		AgentRunID:        in.Config.Run.ID,
 		AgentRunMode:      in.Config.Run.Mode,
 		InactivityTimeout: int64(in.Config.Run.Runtime.Config.Gemini.InactivityTimeout.Seconds()),

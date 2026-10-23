@@ -379,6 +379,75 @@ defmodule Toolquery.TracesQueryInput do
   field :range, 3, type: Toolquery.TimeRange
   field :limit, 4, proto3_optional: true, type: :int32
   field :options, 5, proto3_optional: true, type: Toolquery.TracesOptions
+  field :filters, 6, proto3_optional: true, type: Toolquery.TraceFilters
+end
+
+defmodule Toolquery.TraceFilters do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "toolquery.TraceFilters",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :service, 1, proto3_optional: true, type: :string
+  field :operation, 2, proto3_optional: true, type: :string
+  field :attributes, 3, repeated: true, type: Toolquery.TraceAttributeFilter
+  field :duration_min, 4, proto3_optional: true, type: :string, json_name: "durationMin"
+  field :duration_max, 5, proto3_optional: true, type: :string, json_name: "durationMax"
+  field :errors_only, 6, proto3_optional: true, type: :bool, json_name: "errorsOnly"
+  field :trace_id, 7, proto3_optional: true, type: :string, json_name: "traceId"
+end
+
+defmodule Toolquery.TraceAttributeFilter do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "toolquery.TraceAttributeFilter",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :name, 1, type: :string
+  field :value, 2, type: :string
+end
+
+defmodule Toolquery.TraceFacetsInput do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "toolquery.TraceFacetsInput",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :connection, 1, type: Toolquery.ToolConnection
+  field :range, 2, proto3_optional: true, type: Toolquery.TimeRange
+  field :attribute, 3, proto3_optional: true, type: :string
+  field :filters, 4, proto3_optional: true, type: Toolquery.TraceFilters
+  field :query, 5, proto3_optional: true, type: :string
+  field :limit, 6, proto3_optional: true, type: :int64
+end
+
+defmodule Toolquery.TraceFacetValue do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "toolquery.TraceFacetValue",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :name, 1, type: :string
+  field :count, 2, proto3_optional: true, type: :int64
+end
+
+defmodule Toolquery.TraceFacetsOutput do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "toolquery.TraceFacetsOutput",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :values, 1, repeated: true, type: Toolquery.TraceFacetValue
 end
 
 defmodule Toolquery.TracesOptions do
@@ -454,6 +523,55 @@ defmodule Toolquery.MetricsQueryOutput do
     syntax: :proto3
 
   field :metrics, 1, repeated: true, type: Toolquery.MetricPoint
+end
+
+defmodule Toolquery.MetricSample do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "toolquery.MetricSample",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :timestamp, 1, type: Google.Protobuf.Timestamp
+  field :value, 2, type: :double
+end
+
+defmodule Toolquery.MetricSeries.LabelsEntry do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "toolquery.MetricSeries.LabelsEntry",
+    map: true,
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :key, 1, type: :string
+  field :value, 2, type: :string
+end
+
+defmodule Toolquery.MetricSeries do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "toolquery.MetricSeries",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :name, 1, type: :string
+  field :labels, 2, repeated: true, type: Toolquery.MetricSeries.LabelsEntry, map: true
+  field :samples, 3, repeated: true, type: Toolquery.MetricSample
+end
+
+defmodule Toolquery.MetricsSeriesOutput do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "toolquery.MetricsSeriesOutput",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :series, 1, repeated: true, type: Toolquery.MetricSeries
 end
 
 defmodule Toolquery.MetricsSearchInput do
@@ -735,6 +853,8 @@ defmodule Toolquery.ToolQuery.Service do
 
   rpc :Metrics, Toolquery.MetricsQueryInput, Toolquery.MetricsQueryOutput
 
+  rpc :MetricsSeries, Toolquery.MetricsQueryInput, Toolquery.MetricsSeriesOutput
+
   rpc :MetricsSearch, Toolquery.MetricsSearchInput, Toolquery.MetricsSearchOutput
 
   rpc :MetricsLabelSearch, Toolquery.MetricsLabelSearchInput, Toolquery.MetricsLabelSearchOutput
@@ -744,6 +864,8 @@ defmodule Toolquery.ToolQuery.Service do
   rpc :LogAggregate, Toolquery.LogAggregateInput, Toolquery.LogAggregateOutput
 
   rpc :Traces, Toolquery.TracesQueryInput, Toolquery.TracesQueryOutput
+
+  rpc :TraceFacets, Toolquery.TraceFacetsInput, Toolquery.TraceFacetsOutput
 
   rpc :InvokeLambda, Toolquery.InvokeLambdaInput, Toolquery.InvokeLambdaOutput
 

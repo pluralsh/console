@@ -5,21 +5,21 @@ description: Bootstrap Plural on an existing cluster
 
 ## Overview
 
-For users that just want to use our CD capabilities and full control of their kubernetes setup, you can install a simplified version of Plural onto an existing kubernetes cluster. We've made this a turnkey process, but there are some prerequisites, namely:
+If you want to use only our CD capabilities and keep full control of your Kubernetes setup, you can install a simplified version of Plural onto an existing Kubernetes cluster. We've made this a turnkey process, but there are some prerequisites, namely:
 
-- You'll need to create a postgres db for state storage, and have a jdbc connection string for it ready of the form: `postgres://<user>:<password>@<host>:5432/<db>`
-- You'll need to have your network setup in place so that all clusters you want to deploy to can make outbound network connections to the ingress you configure for plural CD, in general this means setting up:
+- You'll need to create a Postgres database for state storage, and have a JDBC connection string for it ready of the form: `postgres://<user>:<password>@<host>:5432/<db>`
+- You'll need to have your network setup in place so that all clusters you want to deploy to can make outbound network connections to the ingress you configure for Plural CD. In general, this means setting up:
 
 * ingress-nginx - the ingress controller we've configured by default in the chart
-* cert-manager - the chart assumes cert-manager handles cert generation by default but this can be disabled as well if you use a load balancer bound cloud cert manager
-* externaldns - to bind dns entries to the hosts defined in the console's ingress
+* cert-manager - the chart assumes cert-manager handles cert generation by default, but this can be disabled if you use a load-balancer-bound cloud cert manager
+* externaldns - to bind DNS entries to the hosts defined in the console's ingress
 
-You are free to customize these at your own risk, usually it's not that challenging. The most likely potential gotcha is ensuring the connection stickiness configuration handles a migration to a different ingress controller from ingress-nginx.
+You are free to customize these at your own risk; usually it's not that challenging. The most likely potential gotcha is ensuring the connection stickiness configuration handles a migration to a different ingress controller from ingress-nginx.
 
 {% callout severity="info" %}
-If you're unfamiliar with how to set up these components for your cloud, we have a number of useful example terraform setups at https://github.com/pluralsh/bootstrap/tree/main/existing.
+If you're unfamiliar with how to set up these components for your cloud, we have several useful example Terraform setups at https://github.com/pluralsh/bootstrap/tree/main/existing.
 
-It will walk you through effectively everything needed below
+They will walk you through effectively everything needed below
 {% /callout %}
 
 
@@ -32,23 +32,23 @@ plural login
 plural cd control-plane
 ```
 
-If you haven't already installed the Plural CLI, we have a homebrew installation available here:
+If you haven't already installed the Plural CLI, we have a Homebrew installation available here:
 
 ```sh
 brew install pluralsh/plural/plural
 ```
 
-If you don't have homebrew, there are more advanced installation instructions {% doclink to="getting_started_quickstart" %}here{% /doclink %}.
+If you don't have Homebrew, there are more advanced installation instructions [here](/getting-started/first-steps/cli-quickstart).
 
 This will do a few things:
 
-- ask you for basic configuration like fqdns for your CD install and also the postgres jdbc url
-- set up a oidc provider for your cluster to provide secure user login
-- print a full helm values file that will be used to install your instance.
+- ask you for basic configuration like FQDNs for your CD install and the Postgres JDBC URL
+- set up an OIDC provider for your cluster to provide secure user login
+- print a full Helm values file that will be used to install your instance.
 
-You'll then want to run the helm command we provide to you, you have the option to inspect the values we've generated first, and also you can add some last mile configuration here. This can be things like flipping out the ingress class or cert manager issuer (we use `nginx` by default and an issuer of `letsencrypt-prod`).
+You'll then want to run the Helm command we provide. You can inspect the values we've generated first and add some last-mile configuration here, such as swapping out the ingress class or cert-manager issuer (we use `nginx` by default and an issuer of `letsencrypt-prod`).
 
-Then run the helm commands generated, which ought to be something along the lines of:
+Then run the generated Helm commands, which should look something like:
 
 ```sh
 helm repo add plrl-console https://pluralsh.github.io/console
@@ -59,7 +59,7 @@ We also strongly recommend you find a secure place to store the generated `value
 
 ## Manage Console Via CRD
 
-You can also define a CRD to manage your console's upgrade lifecycle at your own pace. This is a two step process:
+You can also define a CRD to manage your console's upgrade lifecycle at your own pace. This is a two-step process:
 
 1. Create a secret with your current values file, something like:
 
@@ -73,15 +73,15 @@ stringData:
   values.yaml: <your values file>
 ```
 
-This should be done out of band of git as the values contain sensitive information. A single command to create this is also:
+This should be done out of band of git as the values contain sensitive information. You can also create it with a single command:
 
 ```sh
 kubectl create secret generic console-values --from-file=values.yaml=values.secret.yaml -n infra
 ```
 
-(you'll want to run this in the same directory as your `values.secret.yaml` file, otherwise specify it's relative path in the `--from-file` flag)
+(you'll want to run this in the same directory as your `values.secret.yaml` file, otherwise specify its relative path in the `--from-file` flag)
 
-2. Create a helm service referencing it in a folder currently being synced via GitOps:
+2. Create a Helm service referencing it in a folder currently being synced via GitOps:
 
 ```yaml
 ---
@@ -114,7 +114,7 @@ spec:
     namespace: infra
 ```
 
-You can then add additional values configuration using the `values` field of a helm service, or convert it to a multi-source service and source values files directly from git.
+You can then add additional values configuration using the `values` field of a Helm service, or convert it to a multi-source service and source values files directly from git.
 
 ## Generate Console Update PRs instead of floating versions
 

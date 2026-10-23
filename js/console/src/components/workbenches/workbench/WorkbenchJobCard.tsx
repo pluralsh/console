@@ -13,12 +13,19 @@ import { WorkbenchUsageChips } from 'components/workbenches/common/WorkbenchUsag
 import { WorkbenchStoredPromptMarkdown } from 'components/workbenches/workbench/WorkbenchStoredPromptMarkdown'
 import { WorkbenchJobTinyFragment } from 'generated/graphql'
 import { truncate } from 'lodash'
+import { memo } from 'react'
 import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
 import { fromNow } from 'utils/datetime'
 import { WorkbenchJobActionsRow } from './WorkbenchJobsTable'
 
-export function WorkbenchJobCard({ job }: { job: WorkbenchJobTinyFragment }) {
+// memoized: Apollo keeps unchanged jobs' objects across polls, so only the
+// changed cards re-render
+export const WorkbenchJobCard = memo(function WorkbenchJobCard({
+  job,
+}: {
+  job: WorkbenchJobTinyFragment
+}) {
   const { id, prompt, status, insertedAt, user, workbench } = job
   if (!workbench) return null
 
@@ -77,7 +84,7 @@ export function WorkbenchJobCard({ job }: { job: WorkbenchJobTinyFragment }) {
       </BottomSectionSC>
     </JobCardSC>
   )
-}
+})
 
 const JobCardSC = styled(Card)(({ theme }) => ({
   display: 'flex',
@@ -112,6 +119,6 @@ const CardActionsRowSC = styled.div({
 
 const DividerSC = styled.div(({ theme }) => ({
   borderTop: `1px solid ${theme.colors['border-fill-one']}`,
-  marginLeft: -theme.spacing.medium,
-  marginRight: -theme.spacing.medium,
+  marginLeft: theme.spacing['minus-medium'],
+  marginRight: theme.spacing['minus-medium'],
 }))

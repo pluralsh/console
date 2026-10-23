@@ -52,13 +52,56 @@ type RootQueryType {
   metric(query: String!, offset: Int, step: String, clusterId: ID): [MetricResponse]
 
   logAggregation(
-    serviceId: ID, clusterId: ID, query: String, time: LogTimeRange, limit: Int, operator: LogQueryOperator, facets: [LogFacetInput]
+    serviceId: ID
+
+    clusterId: ID
+
+    query: String
+
+    time: LogTimeRange
+
+    limit: Int
+
+    operator: LogQueryOperator
+
+    facets: [LogFacetInput]
+
+    "only logs from pods on this node"
+    node: String
   ): [LogLine]
 
-  logLabels(serviceId: ID, clusterId: ID, query: String, time: LogTimeRange, field: String!): [LogFacetDetail]
+  logLabels(
+    serviceId: ID
+
+    clusterId: ID
+
+    query: String
+
+    time: LogTimeRange
+
+    field: String!
+
+    "only logs from pods on this node"
+    node: String
+  ): [LogFacetDetail]
 
   logAggregationBuckets(
-    serviceId: ID, clusterId: ID, query: String, time: LogTimeRange, aggregation: LogAggregationInput, operator: LogQueryOperator, facets: [LogFacetInput]
+    serviceId: ID
+
+    clusterId: ID
+
+    query: String
+
+    time: LogTimeRange
+
+    aggregation: LogAggregationInput
+
+    operator: LogQueryOperator
+
+    facets: [LogFacetInput]
+
+    "only logs from pods on this node"
+    node: String
   ): [LogAggregationBucket]
 
   logs(query: String!, start: Long, end: Long, limit: Int!, clusterId: ID): [LogStream]
@@ -606,6 +649,15 @@ type RootQueryType {
 
     "filter workbenches by project"
     projectId: ID
+
+    "field to sort workbenches by"
+    sort: WorkbenchSort
+
+    "sort direction"
+    direction: SortDirection
+
+    "workbench ids to rank first when sorting by favorited"
+    favoriteIds: [ID]
   ): WorkbenchConnection
 
   workbenchTools(
@@ -631,7 +683,7 @@ type RootQueryType {
     count: Int
   ): [WorkbenchJob]
 
-  "Semantic search over vector-indexed workbench jobs"
+  "Case-insensitive substring search over a workbench's job prompts, newest first"
   workbenchJobSearch(
     q: String!
 
@@ -676,7 +728,10 @@ type RootQueryType {
 
   workbenchPullRequests: Int!
 
-  workbenchAggregates: WorkbenchAggregates!
+  workbenchAggregates(
+    "only aggregate workbenches in this project"
+    projectId: ID
+  ): WorkbenchAggregates!
 
   workbenchUsage(
     period: EvalResultsPeriod
@@ -1436,6 +1491,30 @@ type RootMutationType {
 
   runSentinel(id: ID, name: String, overrides: SentinelRunOverrides): SentinelRun
 
+  writeWorkbenchFile(
+    workbenchId: ID!
+
+    "the absolute path of the file, missing parent directories are created"
+    path: String!
+
+    "text contents of the file"
+    content: String
+
+    "an uploaded file, used instead of content"
+    file: Upload
+  ): WorkbenchFile
+
+  createWorkbenchDirectory(workbenchId: ID!, path: String!): WorkbenchFile
+
+  moveWorkbenchFile(workbenchId: ID!, source: String!, target: String!): WorkbenchFile
+
+  deleteWorkbenchFile(
+    workbenchId: ID!
+
+    "a file, or a directory which will be deleted recursively"
+    path: String!
+  ): WorkbenchFile
+
   createWorkbench(attributes: WorkbenchAttributes): Workbench
 
   updateWorkbench(id: ID!, attributes: WorkbenchAttributes): Workbench
@@ -1502,10 +1581,10 @@ type RootMutationType {
   deleteWorkbenchSkill(id: ID!): WorkbenchSkill
 
   "Updates saved workbench knowledge. Requires write access to the workbench."
-  updateWorkbenchKnowledge(id: ID!, attributes: WorkbenchKnowledgeAttributes!): WorkbenchKnowledge
+  updateWorkbenchKnowledge(id: ID!, attributes: WorkbenchKnowledgeAttributes!): WorkbenchKnowledge @deprecated(reason: "superseded by writeWorkbenchFile under \/knowledge when the workbench filesystem is enabled")
 
   "Deletes saved workbench knowledge. Requires write access to the workbench."
-  deleteWorkbenchKnowledge(id: ID!): WorkbenchKnowledge
+  deleteWorkbenchKnowledge(id: ID!): WorkbenchKnowledge @deprecated(reason: "superseded by deleteWorkbenchFile under \/knowledge when the workbench filesystem is enabled")
 
   "Creates the eval configuration for a workbench (at most one per workbench). Requires write access to the workbench."
   createWorkbenchEval(
@@ -1634,7 +1713,17 @@ type RootMutationType {
 
   createAgentRun(runtimeId: ID!, attributes: AgentRunAttributes!): AgentRun
 
-  createAgentRunPrompt(id: ID!, prompt: String!): AgentPromptHistory
+  createAgentRunPrompt(
+    id: ID!
+
+    prompt: String!
+
+    "files to attach to this prompt, only supported for agent runs spawned by a workbench"
+    attachments: [Upload]
+
+    "sandbox paths (eg \/workbench\/reports\/summary.md) of existing workbench files to attach to this prompt, only supported for agent runs spawned by a workbench"
+    files: [String]
+  ): AgentPromptHistory
 
   shareAgentRun(id: ID!, shared: Boolean!): AgentRun
 
@@ -1894,6 +1983,7 @@ enum IssueWebhookProvider {
   AZURE_DEVOPS
   BITBUCKET
   BITBUCKET_DATACENTER
+  SERVICE_NOW
 }
 
 enum IssueStatus {
@@ -2642,6 +2732,9 @@ type AgentRun {
   "the prompts this agent run has received"
   prompts: [AgentPrompt]
 
+  "files attached to this agent run's initial prompt, downloadable by its harness"
+  attachments: [Attachment]
+
   "the messages this agent run has generated during its run"
   messages: [AgentMessage]
 
@@ -2807,6 +2900,9 @@ type AgentPrompt {
 
   "the sequence number of the prompt"
   seq: Int!
+
+  "files attached to this prompt"
+  attachments: [Attachment]
 
   insertedAt: DateTime
 
@@ -2987,6 +3083,7 @@ enum WorkbenchToolType {
   VICTORIA_LOGS
   JIRA
   JIRA_DATACENTER
+  SERVICE_NOW
 }
 
 enum WorkbenchToolCategory {
@@ -3068,6 +3165,7 @@ enum WorkbenchCanvasBlockType {
   TRACES
   PIE
   BAR
+  SECTION
 }
 
 enum WorkbenchSkillSubagent {
@@ -3105,10 +3203,22 @@ enum WorkbenchJobPrState {
   NONE
 }
 
+enum WorkbenchSort {
+  NAME
+  INSERTED_AT
+  UPDATED_AT
+  FAVORITED
+}
+
 enum EvalResultsPeriod {
   DAY
   WEEK
   MONTH
+}
+
+enum WorkbenchFileKind {
+  FILE
+  DIRECTORY
 }
 
 input WorkbenchJobAttributes {
@@ -3120,6 +3230,9 @@ input WorkbenchJobAttributes {
 
   "mode-specific options for this job"
   modes: WorkbenchJobModesAttributes
+
+  "files to attach to the prompt, which are uploaded to the workbench filesystem"
+  attachments: [Upload]
 }
 
 input WorkbenchJobModesAttributes {
@@ -3599,6 +3712,9 @@ input WorkbenchToolConfigurationAttributes {
   "jira data center connection (ticketing)"
   jiraDatacenter: WorkbenchToolJiraDatacenterConnectionAttributes
 
+  "servicenow connection (ticketing)"
+  serviceNow: WorkbenchToolServiceNowConnectionAttributes
+
   "exa connection (search)"
   exa: WorkbenchToolExaConnectionAttributes
 
@@ -3904,6 +4020,17 @@ input WorkbenchToolJiraDatacenterConnectionAttributes {
   apiToken: String
 }
 
+input WorkbenchToolServiceNowConnectionAttributes {
+  "servicenow instance URL (for example, https:\/\/example.service-now.com)"
+  url: String!
+
+  "servicenow user for basic auth (required if not using OAuth token exchange)"
+  username: String
+
+  "servicenow password for basic auth (required if not using OAuth token exchange)"
+  password: String
+}
+
 input WorkbenchToolExaConnectionAttributes {
   "exa API key"
   apiKey: String
@@ -4033,6 +4160,9 @@ input WorkbenchToolHttpHeaderAttributes {
 input WorkbenchMessageAttributes {
   "the prompt for the message"
   prompt: String!
+
+  "files to attach to the prompt, which are uploaded to the workbench filesystem"
+  attachments: [Upload]
 }
 
 input QueuedPromptAttributes {
@@ -4044,6 +4174,9 @@ input QueuedPromptAttributes {
 
   "mode-specific overrides to apply when this prompt is dequeued"
   modes: WorkbenchJobModesAttributes
+
+  "files to attach to the prompt, which are uploaded to the workbench filesystem immediately"
+  attachments: [Upload]
 }
 
 type WorkbenchJobCounts {
@@ -4072,6 +4205,71 @@ type QueuedPromptSummary {
 
   "earliest future dequeable_at among pending prompts"
   nextAt: DateTime
+}
+
+type WorkbenchFile {
+  "absolute path of this file within the workbench filesystem"
+  path: String!
+
+  "the base name of this file"
+  name: String!
+
+  kind: WorkbenchFileKind!
+
+  "size in bytes (only populated when the file is fetched directly)"
+  size: Int
+
+  "last modification time (only populated when the file is fetched directly)"
+  modifiedAt: DateTime
+
+  "where this file is located within the agent's python sandbox"
+  sandboxPath: String!
+
+  "a short-lived, pre-signed url to download this file, supporting range requests"
+  downloadUrl: String
+}
+
+type Attachment {
+  id: ID!
+
+  "the name of the uploaded file"
+  filename: String!
+
+  "the media type of the uploaded file"
+  filetype: String
+
+  "where this file is stored in the workbench filesystem"
+  path: String!
+
+  "size in bytes"
+  size: Int
+
+  "a short-lived, pre-signed url to download this file"
+  downloadUrl: String
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type WorkbenchGrepLine {
+  lineNumber: Int!
+  text: String!
+}
+
+type WorkbenchGrepMatch {
+  "the file containing this match"
+  path: String!
+
+  lineNumber: Int!
+
+  line: String!
+
+  "context lines preceding the match"
+  before: [WorkbenchGrepLine]
+
+  "context lines following the match"
+  after: [WorkbenchGrepLine]
 }
 
 type Workbench {
@@ -4122,6 +4320,43 @@ type Workbench {
 
   workbenchPolicies(after: String, first: Int, before: String, last: Int): WorkbenchPolicyConnection
 
+  "whether this workbench has a filesystem, which requires an object store to be configured"
+  filesystemEnabled: Boolean
+
+  "the files and directories directly beneath a directory in this workbench's filesystem"
+  files(
+    "the directory to list, defaults to the root"
+    path: String
+  ): [WorkbenchFile]
+
+  "a single file or directory in this workbench's filesystem"
+  file(path: String!): WorkbenchFile
+
+  "the text contents of a file, for previewing (use the download url for binary or large files)"
+  fileContents(path: String!): String
+
+  "files matching a glob pattern, supporting `*`, `?`, `**` and `{a,b}`"
+  globFiles(pattern: String!, maxResults: Int): [WorkbenchFile]
+
+  "lines matching a regex within a file, directory or glob pattern"
+  grepFiles(
+    pattern: String!
+
+    "a file, directory or glob to search, defaults to the root"
+    path: String
+
+    "treat the pattern as a literal string"
+    fixedString: Boolean
+
+    caseInsensitive: Boolean
+
+    beforeContext: Int
+
+    afterContext: Int
+
+    maxMatches: Int
+  ): [WorkbenchGrepMatch]
+
   runs(
     after: String
 
@@ -4148,9 +4383,24 @@ type Workbench {
 
     "creation date sort direction"
     direction: SortDirection
+
+    "case-insensitive substring search over job prompts"
+    q: String
+
+    "only runs created at or after this time"
+    insertedAfter: DateTime
   ): WorkbenchJobConnection
 
-  runCounts: WorkbenchJobCounts
+  runCounts(
+    "only count runs whose prompt contains this (case-insensitive)"
+    q: String
+
+    "only count runs with pull requests in these states"
+    prStates: [WorkbenchJobPrState]
+
+    "only count runs created at or after this time"
+    insertedAfter: DateTime
+  ): WorkbenchJobCounts
 
   crons(after: String, first: Int, before: String, last: Int): WorkbenchCronConnection
 
@@ -4158,7 +4408,7 @@ type Workbench {
 
   workbenchSkills(after: String, first: Int, before: String, last: Int): WorkbenchSkillConnection
 
-  workbenchKnowledge(after: String, first: Int, before: String, last: Int): WorkbenchKnowledgeConnection
+  workbenchKnowledge(after: String, first: Int, before: String, last: Int): WorkbenchKnowledgeConnection @deprecated(reason: "superseded by \/knowledge in the workbench filesystem when filesystemEnabled")
 
   workbenchDashboards(
     after: String
@@ -4247,7 +4497,13 @@ type Workbench {
     direction: SortDirection
   ): IssueConnection
 
-  issueCounts: WorkbenchIssueCounts
+  issueCounts(
+    "only count issues matching this title or external id search"
+    q: String
+
+    "only count issues from these providers"
+    providers: [IssueWebhookProvider]
+  ): WorkbenchIssueCounts
 
   "users that have read or write access to this workbench"
   users: [User]
@@ -4335,6 +4591,9 @@ type WorkbenchJob {
   "dashboards and monitors associated with this workbench job"
   associations: [WorkbenchJobAssociation]
 
+  "files attached to the initial prompt of this job"
+  attachments: [Attachment]
+
   "the alert this run was spawned from"
   alert: Alert
 
@@ -4375,6 +4634,14 @@ type WorkbenchJob {
     "the arguments for the metrics tool"
     arguments: Json
   ): [WorkbenchJobActivityMetric]
+
+  metricsSeriesTool(
+    "the name of the metrics tool"
+    name: String
+
+    "the arguments for the metrics tool"
+    arguments: Json
+  ): [MetricResponse]
 
   logsTool(
     "the name of the logs tool"
@@ -4539,6 +4806,9 @@ type WorkbenchJobActivity {
   "all agent runs associated with this activity (sideloadable)"
   agentRuns: [AgentRun]
 
+  "files attached to this activity's prompt"
+  attachments: [Attachment]
+
   "the user who created, approved, or denied this activity"
   user: User
 
@@ -4575,7 +4845,10 @@ type WorkbenchJobThought {
 }
 
 type WorkbenchJobThoughtAttributes {
-  "metrics for the thought"
+  "metric series for the thought, with labels sent once per series"
+  series: [MetricResponse]
+
+  "metrics for the thought, one entry per point (prefer series)"
   metrics: [WorkbenchJobActivityMetric]
 
   "logs for the thought"
@@ -4844,8 +5117,23 @@ type WorkbenchCanvasBlockContent {
 
 type WorkbenchCanvasBlock {
   identifier: String
+
   type: WorkbenchCanvasBlockType
+
+  "the header of a section block"
+  title: String
+
+  "an explanation of what this block shows"
+  description: String
+
+  "the identifier of the section block this block belongs to"
+  sectionId: String
+
+  "whether a section block starts collapsed"
+  collapsed: Boolean
+
   layout: WorkbenchCanvasBlockLayout
+
   content: WorkbenchCanvasBlockContent
 }
 
@@ -4987,6 +5275,9 @@ type QueuedPrompt {
 
   "the job this prompt will be sent to"
   workbenchJob: WorkbenchJob
+
+  "files attached to this prompt"
+  attachments: [Attachment]
 
   "the user who queued this prompt"
   user: User
@@ -5204,6 +5495,12 @@ type WorkbenchAggregates {
 
   "average eval grade across workbench eval results"
   evalResults: Float
+
+  "estimated engineering hours saved by merged pull requests, derived from their classified difficulty"
+  hoursSaved: Float
+
+  "total tokens consumed by workbench jobs"
+  totalTokens: Int
 }
 
 type WorkbenchUsageTimeseries {
@@ -5431,6 +5728,9 @@ type WorkbenchToolConfiguration {
   "jira data center connection (no secrets)"
   jiraDatacenter: WorkbenchToolJiraDatacenterConnection
 
+  "servicenow connection (no secrets)"
+  serviceNow: WorkbenchToolServiceNowConnection
+
   "exa connection (no secrets)"
   exa: WorkbenchToolExaConnection
 
@@ -5653,6 +5953,14 @@ type WorkbenchToolJiraConnection {
 type WorkbenchToolJiraDatacenterConnection {
   "jira data center base URL (PAT never exposed)"
   url: String!
+}
+
+type WorkbenchToolServiceNowConnection {
+  "servicenow instance URL"
+  url: String!
+
+  "servicenow basic auth user (password never exposed)"
+  username: String
 }
 
 type WorkbenchToolExaConnection {
@@ -7496,8 +7804,14 @@ input VsphereCloudConnectionAttributes {
 "A federated credential is a way to authenticate users from an external identity provider"
 input FederatedCredentialAttributes {
   issuer: String!
+
+  "expected audience of tokens exchanged with this credential. When unset, any audience is accepted"
+  aud: String
+
   claimsLike: Json
+
   scopes: [String]
+
   userId: ID!
 }
 
@@ -8032,11 +8346,20 @@ type VsphereConnectionAttributes {
 "A federated credential is a way to authenticate users from an external identity provider"
 type FederatedCredential {
   id: ID!
+
   issuer: String!
+
+  "expected audience of tokens exchanged with this credential. When unset, any audience is accepted"
+  aud: String
+
   claimsLike: Map
+
   scopes: [String]
+
   user: User
+
   insertedAt: DateTime
+
   updatedAt: DateTime
 }
 
@@ -8669,7 +8992,10 @@ type PublicWorkbenchDashboardGraph {
 }
 
 type WorkbenchDashboardGraphResult {
-  "Metric points returned by a metrics datasource"
+  "Metric series returned by a metrics datasource, with labels sent once per series"
+  series: [MetricResponse]
+
+  "Metric points returned by a metrics datasource, one entry per point (prefer series)"
   metrics: [WorkbenchJobActivityMetric]
 
   "Log entries returned by a logs datasource"
@@ -9112,6 +9438,11 @@ enum ApprovalResult {
   INDETERMINATE
 }
 
+enum StackPolicyType {
+  APPROVAL
+  RUN
+}
+
 input StackAttributes {
   "the name of the stack"
   name: String!
@@ -9474,6 +9805,9 @@ input StackDefinitionAttributes {
 input StackPolicyAttributes {
   "the policy to associate with this stack"
   policyId: ID!
+
+  "when this policy is evaluated: approval (after plan) or run (before a run is created). Defaults to APPROVAL"
+  type: StackPolicyType
 }
 
 input CustomStepAttributes {
@@ -10064,9 +10398,16 @@ type StackDefinition {
 
 type StackPolicy {
   id: ID!
+
+  "when this policy is evaluated: approval (after plan) or run (before a run is created)"
+  type: StackPolicyType!
+
   policy: Policy
+
   stack: InfrastructureStack
+
   insertedAt: DateTime
+
   updatedAt: DateTime
 }
 
@@ -10618,6 +10959,12 @@ input BindingPolicyUpdateAttributes {
 
 input BindingPolicyMatchesAttributes {
   workbench: WorkbenchPolicyMatchesAttributes
+  stack: StackPolicyMatchesAttributes
+}
+
+input StackPolicyMatchesAttributes {
+  "stack policy evaluation stage to attach: approval (after plan) or run (before a run is created). Defaults to APPROVAL"
+  type: StackPolicyType
 }
 
 input ConstraintRefAttributes {
@@ -10799,6 +11146,12 @@ type BindingPolicy {
 
 type BindingPolicyMatches {
   workbench: WorkbenchPolicyMatches
+  stack: StackPolicyMatches
+}
+
+type StackPolicyMatches {
+  "stack policy evaluation stage attached by this binding"
+  type: StackPolicyType
 }
 
 "A sampled policy decision for a tool invocation."
@@ -13005,6 +13358,16 @@ enum ClusterMetricsGrouping {
   NODE
 }
 
+enum NodeMetricsGrouping {
+  "a single node-wide series"
+  NODE
+
+  NAMESPACE
+
+  "one series per pod, labeled by `namespace` and `pod`"
+  POD
+}
+
 enum VersionCompliance {
   LATEST
   COMPLIANT
@@ -13719,6 +14082,106 @@ type ClusterUsageMetrics {
   restarts: [MetricResponse]
 }
 
+"""
+Prometheus timeseries for a single node. Host fields come from node-exporter (matched to the node by an
+`instance`, `nodename` or `node` label, or node_uname_info), the rest from cAdvisor and kube-state-metrics. Fields marked grouped are broken
+out by the `groupBy` argument and labeled by `namespace` (and `pod`) accordingly; the rest are node-wide.
+"""
+type NodeUsageMetrics {
+  "fraction (0-1) of host cpu time spent busy"
+  cpuUtilization: [MetricResponse]
+
+  "fraction (0-1) of host cpu time per non-idle mode, labeled by `mode`"
+  cpuModes: [MetricResponse]
+
+  "host cpu count"
+  cpuCores: [MetricResponse]
+
+  "1m host load average"
+  load1: [MetricResponse]
+
+  "5m host load average"
+  load5: [MetricResponse]
+
+  "15m host load average"
+  load15: [MetricResponse]
+
+  "host memory in bytes"
+  memoryTotal: [MetricResponse]
+
+  "host memory in use (total less available) in bytes"
+  memoryUsed: [MetricResponse]
+
+  "host page cache and buffers in bytes"
+  memoryCached: [MetricResponse]
+
+  "major page faults per second"
+  majorPageFaults: [MetricResponse]
+
+  "fraction (0-1) of each host filesystem used, labeled by `mountpoint`"
+  filesystemFullness: [MetricResponse]
+
+  "host disk read throughput in bytes\/s"
+  diskRead: [MetricResponse]
+
+  "host disk write throughput in bytes\/s"
+  diskWrite: [MetricResponse]
+
+  "fraction (0-1) of time the busiest disk spent doing I\/O"
+  diskBusy: [MetricResponse]
+
+  "physical interface receive throughput in bytes\/s"
+  networkReceive: [MetricResponse]
+
+  "physical interface transmit throughput in bytes\/s"
+  networkTransmit: [MetricResponse]
+
+  "physical interface receive and transmit errors per second"
+  networkErrors: [MetricResponse]
+
+  "physical interface receive and transmit drops per second"
+  networkDropped: [MetricResponse]
+
+  "allocatable node cpu in cores"
+  cpuAllocatable: [MetricResponse]
+
+  "allocatable node memory in bytes"
+  memoryAllocatable: [MetricResponse]
+
+  "pod capacity of the node"
+  podsAllocatable: [MetricResponse]
+
+  "1 while each node condition holds, labeled by `condition`"
+  conditions: [MetricResponse]
+
+  "container cpu usage in cores (grouped)"
+  cpu: [MetricResponse]
+
+  "cpu requests of pods on the node in cores (grouped)"
+  cpuRequests: [MetricResponse]
+
+  "cpu limits of pods on the node in cores (grouped)"
+  cpuLimits: [MetricResponse]
+
+  "container working set memory in bytes (grouped)"
+  memory: [MetricResponse]
+
+  "memory requests of pods on the node in bytes (grouped)"
+  memoryRequests: [MetricResponse]
+
+  "memory limits of pods on the node in bytes (grouped)"
+  memoryLimits: [MetricResponse]
+
+  "container OOM kills within each rate window (grouped)"
+  oomKills: [MetricResponse]
+
+  "running pods on the node (grouped)"
+  podsRunning: [MetricResponse]
+
+  "container restarts on the node within each rate window (grouped)"
+  restarts: [MetricResponse]
+}
+
 type ClusterNodeMetrics {
   cpu: [MetricResponse]
   memory: [MetricResponse]
@@ -13975,6 +14438,9 @@ type Cluster {
   clusterUsageMetrics(groupBy: ClusterMetricsGrouping, start: DateTime, stop: DateTime, step: String): ClusterUsageMetrics
 
   clusterNodeMetrics(node: String!, start: DateTime, stop: DateTime, step: String): ClusterNodeMetrics
+
+  "host, resource, workload and health prometheus timeseries for a single node"
+  nodeUsageMetrics(node: String!, start: DateTime, stop: DateTime, step: String, groupBy: NodeMetricsGrouping): NodeUsageMetrics
 
   networkGraph(namespace: String, time: DateTime): [NetworkMeshEdge]
 
@@ -17303,7 +17769,11 @@ type DashboardMetric {
 }
 
 type MetricResponse {
+  "the metric name, for backends that report it separately from the labels in `metric`"
+  name: String
+
   metric: Map
+
   values: [MetricResult]
 }
 
@@ -18649,6 +19119,9 @@ type ConsoleConfiguration {
   vpnEnabled: Boolean
 
   sentryEnabled: Boolean
+
+  "whether object store is configured for session uploads and agent run reprompting"
+  objectStoreEnabled: Boolean
 
   "whether at least one cluster has been installed, false if a user hasn't fully onboarded"
   installed: Boolean

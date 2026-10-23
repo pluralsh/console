@@ -13,6 +13,8 @@ import {
   useSyncGlobalServiceMutation,
 } from 'generated/graphql'
 import { useMemo } from 'react'
+import { PageColumnSC } from 'components/layout/PageLayout'
+import { PageToolbar } from 'components/layout/PageToolbar'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { GLOBAL_SERVICE_PARAM_ID } from 'routes/cdRoutesConsts'
 import styled from 'styled-components'
@@ -55,39 +57,38 @@ export function GlobalService() {
     )
 
   return (
-    <WrapperSC>
-      <Flex
-        direction="column"
-        gap="large"
-        flexGrow={1}
-        flexShrink={1}
-        width={RESPONSIVE_LAYOUT_CONTENT_WIDTH}
-      >
+    <PageColumnSC>
+      <PageToolbar>
         <GlobalServiceSelect selectedGlobalService={globalService} />
-        <GlobalServiceServices
-          globalServiceID={globalServiceId}
-          seedService={globalService?.service}
-        />
-      </Flex>
-      <Flex
-        direction="column"
-        gap="large"
-      >
         <KickButton
           secondary
-          width="100%"
+          small
           startIcon={<ReloadIcon />}
           kickMutationHook={useSyncGlobalServiceMutation}
           message="Resync"
           tooltipMessage="Sync this service now instead of at the next poll interval"
           variables={{ id: globalServiceId }}
         />
+      </PageToolbar>
+      <WrapperSC>
+        <Flex
+          direction="column"
+          gap="large"
+          flexGrow={1}
+          flexShrink={1}
+          width={RESPONSIVE_LAYOUT_CONTENT_WIDTH}
+        >
+          <GlobalServiceServices
+            globalServiceID={globalServiceId}
+            seedService={globalService?.service}
+          />
+        </Flex>
         <GlobalServiceSidecar
           loading={isLoading}
           globalService={globalService}
         />
-      </Flex>
-    </WrapperSC>
+      </WrapperSC>
+    </PageColumnSC>
   )
 }
 
@@ -119,8 +120,9 @@ function GlobalServiceSelect({
     )
 
   return (
-    <div css={{ width: 320 }}>
+    <div css={{ width: 280 }}>
       <Select
+        size="small"
         titleContent={
           selectedGlobalService?.distro ? (
             <DistroProviderIcon
@@ -174,7 +176,8 @@ function GlobalServiceSelect({
 
 const WrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
-  height: '100%',
+  flex: 1,
+  minHeight: 0,
   gap: theme.spacing.large,
   maxWidth: theme.breakpoints.desktopLarge + 800,
   padding: theme.spacing.large,

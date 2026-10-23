@@ -1,21 +1,24 @@
 import { useDebounce } from '@react-hooks-library/core'
 import { WorkbenchIssuesBoard } from 'components/workbenches/common/WorkbenchIssuesBoard'
-import { WorkbenchIssuesTable } from 'components/workbenches/common/WorkbenchIssuesTable'
-import { DETAILS_TAB_STRIP_HEIGHT } from 'components/workbenches/common/WorkbenchDetailsView'
+import { WorkbenchIssuesGroupedList } from 'components/workbenches/common/WorkbenchIssuesGroupedList'
 import { WorkbenchMonitoringContent } from 'components/workbenches/common/WorkbenchMonitoringContent'
+import { WorkbenchHeaderSearch } from 'components/workbenches/common/WorkbenchSearchInput'
 import {
-  DisplayPopover,
+  DisplayButton,
+  DisplayPanel,
   toCounts,
+  useDisplaySidecar,
   useDisplayState,
 } from 'components/utils/display/DisplayPanel'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { useWorkbenchIssuesQuery } from 'generated/graphql'
 import { isEmpty } from 'lodash'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { WORKBENCH_PARAM_ID } from 'routes/workbenchesRoutesConsts'
 import { mapExistingNodes } from 'utils/graphql'
 import { WorkbenchPageLayout } from './Workbench'
+import { DETAILS_LIST_WIDTH } from '../common/WorkbenchDetailsView'
 import { useWorkbenchIssuesDetails } from './WorkbenchIssuesDetails'
 import { WorkbenchIssuesDisplayOptions } from './WorkbenchIssuesDisplayOptions'
 import {
@@ -27,7 +30,8 @@ import {
   visibleIssueProviders,
 } from './workbenchIssuesDisplay'
 
-const WORKBENCH_ISSUES_VIEW_STORAGE_KEY = 'workbench-issues-view'
+// renamed when the grouped list replaced the table, so saved views reset to it
+const WORKBENCH_ISSUES_VIEW_STORAGE_KEY = 'workbench-issues-view-v2'
 const PAGE_SIZE = 50
 
 // stable, so the paginated data callbacks don't change every render
@@ -43,27 +47,20 @@ export function WorkbenchIssues() {
   const debouncedSearchString = useDebounce(searchString.trim(), 200)
   const filterVars = useMemo(() => toIssueFilterVariables(display), [display])
 
-  const {
-    data,
-    loading,
-    error,
-    pageInfo,
-    fetchNextPage,
-    setVirtualSlice,
-    fetchingMore,
-  } = useFetchPaginatedData(
-    {
-      queryHook: useWorkbenchIssuesQuery,
-      keyPath: ISSUES_KEY_PATH,
-      pageSize: PAGE_SIZE,
-      keepLoadedPages: true,
-    },
-    {
-      id: workbenchId,
-      q: isEmpty(debouncedSearchString) ? undefined : debouncedSearchString,
-      ...filterVars,
-    }
-  )
+  const { data, loading, error, pageInfo, fetchNextPage, fetchingMore } =
+    useFetchPaginatedData(
+      {
+        queryHook: useWorkbenchIssuesQuery,
+        keyPath: ISSUES_KEY_PATH,
+        pageSize: PAGE_SIZE,
+        keepLoadedPages: true,
+      },
+      {
+        id: workbenchId,
+        q: isEmpty(debouncedSearchString) ? undefined : debouncedSearchString,
+        ...filterVars,
+      }
+    )
   const issues = useMemo(
     () => mapExistingNodes(data?.workbench?.issues),
     [data]
@@ -82,15 +79,24 @@ export function WorkbenchIssues() {
     [display, providerCounts]
   )
 
-  // only the table reports its visible slice; drop it in other views so
-  // polling keeps every page loaded in Board/Details
-  const tableSliceActive = display.view === 'list'
-  useEffect(() => {
-    if (!tableSliceActive) setVirtualSlice(undefined)
-  }, [tableSliceActive, setVirtualSlice])
-
   const filtered = hasUncheckedIssueFilters(display)
+  const displaySidecar = useDisplaySidecar(display.view === 'list')
   const onResetFilters = () => updateDisplay(resetIssueFilters(display))
+  const emptyState = {
+    searching: !!debouncedSearchString,
+    filtered,
+    onResetFilters,
+  }
+  // the list groups by status itself, one query per group
+  const groupFilters = useMemo(
+    () => ({
+      q: isEmpty(debouncedSearchString) ? undefined : debouncedSearchString,
+      providers: filterVars.providers,
+      sort: filterVars.sort,
+      direction: filterVars.direction,
+    }),
+    [debouncedSearchString, filterVars]
+  )
   const listProps = {
     issues,
     loading: !data && loading,
@@ -102,11 +108,7 @@ export function WorkbenchIssues() {
   const details = useWorkbenchIssuesDetails({
     ...listProps,
     active: display.view === 'details',
-    emptyState: {
-      searching: !!debouncedSearchString,
-      filtered,
-      onResetFilters,
-    },
+    emptyState,
     searchString,
     onSearchChange: setSearchString,
   })
@@ -114,29 +116,47 @@ export function WorkbenchIssues() {
 
   return (
     <WorkbenchPageLayout
+      sidecar={
+        displaySidecar.isOpen && (
+          <DisplayPanel>
+            <WorkbenchIssuesDisplayOptions
+              state={display}
+              onChange={updateDisplay}
+              providerCounts={providerCounts}
+              statusCounts={statusCounts}
+            />
+          </DisplayPanel>
+        )
+      }
       showEditWorkbenchButton={false}
       {...(showDetails && {
-        sidebar: { kind: 'custom', content: details.sidebar },
-        tabStripHeight: DETAILS_TAB_STRIP_HEIGHT,
+        sidebar: {
+          kind: 'custom',
+          content: details.sidebar,
+          width: DETAILS_LIST_WIDTH,
+        },
       })}
       headerActions={
-        <DisplayPopover showDot={filtered}>
-          <WorkbenchIssuesDisplayOptions
-            state={display}
-            onChange={updateDisplay}
-            providerCounts={providerCounts}
-            statusCounts={statusCounts}
+        <>
+          {!showDetails && (
+            <WorkbenchHeaderSearch
+              value={searchString}
+              onChange={setSearchString}
+              placeholder="Search issues"
+            />
+          )}
+          <DisplayButton
+            showDot={filtered}
+            expanded={displaySidecar.isOpen}
+            onClick={displaySidecar.toggle}
           />
-        </DisplayPopover>
+        </>
       }
     >
       {showDetails ? (
         details.content
       ) : (
         <WorkbenchMonitoringContent
-          searchString={searchString}
-          onSearchChange={setSearchString}
-          searchPlaceholder="Search issues"
           error={error}
           filterEmptyKind={filterEmptyKind}
           onResetFilters={onResetFilters}
@@ -147,13 +167,11 @@ export function WorkbenchIssues() {
               statuses={display.statuses}
             />
           ) : (
-            <WorkbenchIssuesTable
-              issues={issues}
-              loading={listProps.loading}
-              hasNextPage={pageInfo?.hasNextPage}
-              fetchNextPage={fetchNextPage}
-              setVirtualSlice={setVirtualSlice}
-              fallbackWorkbenchId={workbenchId}
+            <WorkbenchIssuesGroupedList
+              workbenchId={workbenchId}
+              statuses={display.statuses}
+              filters={groupFilters}
+              emptyState={emptyState}
             />
           )}
         </WorkbenchMonitoringContent>

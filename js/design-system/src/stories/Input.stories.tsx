@@ -110,14 +110,14 @@ function CustomInputTemplate(args: any) {
           {...props}
         />
       </div>
-      <div style={{ marginTop: 16 }}>
+      <div style={{ marginTop: '1rem' }}>
         <Input
           width="100%"
           value={inputVal}
           {...props}
         />
       </div>
-      <div style={{ marginTop: 16 }}>
+      <div style={{ marginTop: '1rem' }}>
         <Input
           small
           width="100%"
@@ -145,21 +145,21 @@ function CustomInputV2Template(args: any) {
       direction="column"
       maxWidth="500px"
     >
-      <div style={{ marginTop: 16 }}>
+      <div style={{ marginTop: '1rem' }}>
         <Input
           size="large"
           width="100%"
           {...props}
         />
       </div>
-      <div style={{ marginTop: 16 }}>
+      <div style={{ marginTop: '1rem' }}>
         <Input
           width="100%"
           value={inputVal}
           {...props}
         />
       </div>
-      <div style={{ marginTop: 16 }}>
+      <div style={{ marginTop: '1rem' }}>
         <Input
           size="small"
           width="100%"

@@ -1,11 +1,11 @@
 import {
   Button,
   Card,
-  EmptyState,
   Flex,
   ReturnIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import {
   getMonitorFormStepIcon,
   isMonitorFormValid,
@@ -91,16 +91,25 @@ export function WorkbenchMonitorSettings() {
   if (!monitor)
     return (
       <PageSC>
-        <EmptyState message="Monitor not found." />
+        <WorkbenchEmptyState
+          inset={false}
+          message="Monitor not found"
+          description="It may have been deleted from this workbench."
+        />
       </PageSC>
     )
 
   if (monitor.type !== MonitorType.Log)
     return (
       <PageSC>
-        <Title2H1 css={{ marginBottom: 16 }}>{monitor.name}</Title2H1>
-        <EmptyState message="Manual settings are only available for log monitors.">
+        <Title2H1 css={{ marginBottom: '1rem' }}>{monitor.name}</Title2H1>
+        <WorkbenchEmptyState
+          inset={false}
+          message="Settings unavailable"
+          description="Manual settings are only available for log monitors."
+        >
           <Button
+            small
             as={Link}
             to={getWorkbenchMonitoringMonitorAbsPath({
               workbenchId,
@@ -110,16 +119,21 @@ export function WorkbenchMonitorSettings() {
           >
             Back to monitor
           </Button>
-        </EmptyState>
+        </WorkbenchEmptyState>
       </PageSC>
     )
 
   if (!monitor.service?.id)
     return (
       <PageSC>
-        <Title2H1 css={{ marginBottom: 16 }}>{monitor.name}</Title2H1>
-        <EmptyState message="This monitor is missing a service binding, so log settings cannot be edited here.">
+        <Title2H1 css={{ marginBottom: '1rem' }}>{monitor.name}</Title2H1>
+        <WorkbenchEmptyState
+          inset={false}
+          message="Settings unavailable"
+          description="This monitor isn't linked to a service, so its log settings can't be edited here."
+        >
           <Button
+            small
             as={Link}
             to={getWorkbenchMonitoringMonitorAbsPath({
               workbenchId,
@@ -129,7 +143,7 @@ export function WorkbenchMonitorSettings() {
           >
             Back to monitor
           </Button>
-        </EmptyState>
+        </WorkbenchEmptyState>
       </PageSC>
     )
 

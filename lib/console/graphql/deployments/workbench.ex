@@ -22,16 +22,29 @@ defmodule Console.GraphQl.Deployments.Workbench do
     value :none, description: "jobs without any pull requests"
   end
 
+  enum :workbench_sort do
+    value :name
+    value :inserted_at
+    value :updated_at
+    value :favorited
+  end
+
   enum :eval_results_period do
     value :day
     value :week
     value :month
   end
 
+  enum :workbench_file_kind do
+    value :file
+    value :directory
+  end
+
   input_object :workbench_job_attributes do
     field :prompt,  :string, description: "the prompt for this job"
     field :flow_id, :id, description: "the flow this job is associated with"
     field :modes,   :workbench_job_modes_attributes, description: "mode-specific options for this job"
+    field :attachments, list_of(:upload), description: "files to attach to the prompt, which are uploaded to the workbench filesystem"
   end
 
   input_object :workbench_job_modes_attributes do
@@ -261,6 +274,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :atlassian,            :workbench_tool_atlassian_connection_attributes, description: "atlassian/jira connection (ticketing)"
     field :jira,                 :workbench_tool_jira_connection_attributes, description: "jira cloud connection (ticketing)"
     field :jira_datacenter,      :workbench_tool_jira_datacenter_connection_attributes, description: "jira data center connection (ticketing)"
+    field :service_now,          :workbench_tool_service_now_connection_attributes, description: "servicenow connection (ticketing)"
     field :exa,                  :workbench_tool_exa_connection_attributes, description: "exa connection (search)"
     field :github,               :workbench_tool_github_connection_attributes, description: "github connection (integration)"
     field :gitlab,               :workbench_tool_gitlab_connection_attributes, description: "gitlab connection (scm)"
@@ -414,6 +428,12 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :api_token, :string, description: "jira data center personal access token"
   end
 
+  input_object :workbench_tool_service_now_connection_attributes do
+    field :url,      non_null(:string), description: "servicenow instance URL (for example, https://example.service-now.com)"
+    field :username, :string, description: "servicenow user for basic auth (required if not using OAuth token exchange)"
+    field :password, :string, description: "servicenow password for basic auth (required if not using OAuth token exchange)"
+  end
+
   input_object :workbench_tool_exa_connection_attributes do
     field :api_key, :string, description: "exa API key"
   end
@@ -501,13 +521,15 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   input_object :workbench_message_attributes do
-    field :prompt, non_null(:string), description: "the prompt for the message"
+    field :prompt,      non_null(:string), description: "the prompt for the message"
+    field :attachments, list_of(:upload), description: "files to attach to the prompt, which are uploaded to the workbench filesystem"
   end
 
   input_object :queued_prompt_attributes do
     field :prompt,       non_null(:string), description: "the prompt to send when dequeued"
     field :dequeable_at, non_null(:datetime), description: "when this prompt becomes eligible to dequeue"
     field :modes,        :workbench_job_modes_attributes, description: "mode-specific overrides to apply when this prompt is dequeued"
+    field :attachments,  list_of(:upload), description: "files to attach to the prompt, which are uploaded to the workbench filesystem immediately"
   end
 
   object :workbench_job_counts do
@@ -529,6 +551,49 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :ready_count,   non_null(:integer), description: "unconsumed prompts that are eligible to dequeue"
     field :pending_count, non_null(:integer), description: "unconsumed prompts waiting for dequeable_at"
     field :next_at,       :datetime, description: "earliest future dequeable_at among pending prompts"
+  end
+
+  object :workbench_file do
+    field :path,        non_null(:string), description: "absolute path of this file within the workbench filesystem"
+    field :name,        non_null(:string), description: "the base name of this file"
+    field :kind,        non_null(:workbench_file_kind)
+    field :size,        :integer, description: "size in bytes (only populated when the file is fetched directly)"
+    field :modified_at, :datetime, description: "last modification time (only populated when the file is fetched directly)"
+
+    field :sandbox_path, non_null(:string),
+      description: "where this file is located within the agent's python sandbox",
+      resolve: fn %{path: path}, _, _ -> {:ok, Console.Deployments.WorkbenchFiles.sandbox_path(path)} end
+
+    field :download_url, :string,
+      description: "a short-lived, pre-signed url to download this file, supporting range requests",
+      resolve: &Deployments.workbench_file_download_url/3
+  end
+
+  object :attachment do
+    field :id,       non_null(:id)
+    field :filename, non_null(:string), description: "the name of the uploaded file"
+    field :filetype, :string, description: "the media type of the uploaded file"
+    field :path,     non_null(:string), description: "where this file is stored in the workbench filesystem"
+    field :size,     :integer, description: "size in bytes"
+
+    field :download_url, :string,
+      description: "a short-lived, pre-signed url to download this file",
+      resolve: &Deployments.attachment_download_url/3
+
+    timestamps()
+  end
+
+  object :workbench_grep_line do
+    field :line_number, non_null(:integer)
+    field :text,        non_null(:string)
+  end
+
+  object :workbench_grep_match do
+    field :path,        non_null(:string), description: "the file containing this match"
+    field :line_number, non_null(:integer)
+    field :line,        non_null(:string)
+    field :before,      list_of(:workbench_grep_line), description: "context lines preceding the match"
+    field :after,       list_of(:workbench_grep_line), description: "context lines following the match"
   end
 
   object :workbench do
@@ -558,6 +623,52 @@ defmodule Console.GraphQl.Deployments.Workbench do
       resolve &Deployments.list_workbench_policies/3
     end
 
+    field :filesystem_enabled, :boolean,
+      description: "whether this workbench has a filesystem, which requires an object store to be configured",
+      resolve: fn _, _, _ -> {:ok, Console.Deployments.WorkbenchFiles.enabled?()} end
+
+    field :files, list_of(:workbench_file), description: "the files and directories directly beneath a directory in this workbench's filesystem" do
+      middleware Nested, check: true, msg: "workbench files cannot be fetched through a policy"
+      arg :path, :string, description: "the directory to list, defaults to the root"
+
+      resolve &Deployments.list_workbench_files/3
+    end
+
+    field :file, :workbench_file, description: "a single file or directory in this workbench's filesystem" do
+      middleware Nested, check: true, msg: "workbench files cannot be fetched through a policy"
+      arg :path, non_null(:string)
+
+      resolve &Deployments.workbench_file/3
+    end
+
+    field :file_contents, :string, description: "the text contents of a file, for previewing (use the download url for binary or large files)" do
+      middleware Nested, check: true, msg: "workbench files cannot be fetched through a policy"
+      arg :path, non_null(:string)
+
+      resolve &Deployments.workbench_file_contents/3
+    end
+
+    field :glob_files, list_of(:workbench_file), description: "files matching a glob pattern, supporting `*`, `?`, `**` and `{a,b}`" do
+      middleware Nested, check: true, msg: "workbench files cannot be fetched through a policy"
+      arg :pattern,     non_null(:string)
+      arg :max_results, :integer
+
+      resolve &Deployments.glob_workbench_files/3
+    end
+
+    field :grep_files, list_of(:workbench_grep_match), description: "lines matching a regex within a file, directory or glob pattern" do
+      middleware Nested, check: true, msg: "workbench files cannot be fetched through a policy"
+      arg :pattern,          non_null(:string)
+      arg :path,             :string, description: "a file, directory or glob to search, defaults to the root"
+      arg :fixed_string,     :boolean, description: "treat the pattern as a literal string"
+      arg :case_insensitive, :boolean
+      arg :before_context,   :integer
+      arg :after_context,    :integer
+      arg :max_matches,      :integer
+
+      resolve &Deployments.grep_workbench_files/3
+    end
+
     connection field :runs, node_type: :workbench_job do
       middleware Nested, check: true, msg: "workbench runs cannot be fetched through a policy"
       arg :alert, :boolean, description: "show runs spawned from alerts"
@@ -566,12 +677,18 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :statuses, list_of(:workbench_job_status), description: "filter runs by status"
       arg :pr_states, list_of(:workbench_job_pr_state), description: "filter runs by the state of their pull requests"
       arg :direction, :sort_direction, description: "creation date sort direction"
+      arg :q, :string, description: "case-insensitive substring search over job prompts"
+      arg :inserted_after, :datetime, description: "only runs created at or after this time"
 
       resolve &Deployments.list_workbench_runs/3
     end
 
     field :run_counts, :workbench_job_counts do
       middleware Nested, check: true, msg: "workbench run counts cannot be fetched through a policy"
+      arg :q, :string, description: "only count runs whose prompt contains this (case-insensitive)"
+      arg :pr_states, list_of(:workbench_job_pr_state), description: "only count runs with pull requests in these states"
+      arg :inserted_after, :datetime, description: "only count runs created at or after this time"
+
       resolve &Deployments.run_counts/3
     end
 
@@ -590,7 +707,8 @@ defmodule Console.GraphQl.Deployments.Workbench do
       resolve &Deployments.list_workbench_skills/3
     end
 
-    connection field :workbench_knowledge, node_type: :workbench_knowledge do
+    connection field :workbench_knowledge, node_type: :workbench_knowledge,
+      deprecate: "superseded by /knowledge in the workbench filesystem when filesystemEnabled" do
       middleware Nested, check: true, msg: "workbench knowledge cannot be fetched through a policy"
       resolve &Deployments.list_workbench_knowledge/3
     end
@@ -656,6 +774,9 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
     field :issue_counts, :workbench_issue_counts do
       middleware Nested, check: true, msg: "workbench issue counts cannot be fetched through a policy"
+      arg :q, :string, description: "only count issues matching this title or external id search"
+      arg :providers, list_of(:issue_webhook_provider), description: "only count issues from these providers"
+
       resolve &Deployments.issue_counts/3
     end
 
@@ -715,6 +836,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :eval_result,   :workbench_eval_result, resolve: dataloader(Deployments), description: "the eval result for this job (sideloadable)"
     field :pull_requests, list_of(:pull_request), resolve: dataloader(Deployments), description: "pull requests associated with this workbench job"
     field :associations,  list_of(:workbench_job_association), resolve: dataloader(Deployments), description: "dashboards and monitors associated with this workbench job"
+    field :attachments,   list_of(:attachment), resolve: dataloader(Deployments), description: "files attached to the initial prompt of this job"
 
     field :alert,           :alert,         resolve: dataloader(Deployments), description: "the alert this run was spawned from"
     field :issue,           :issue,         resolve: dataloader(Deployments), description: "the issue this run was spawned from"
@@ -744,6 +866,13 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :arguments, :json,   description: "the arguments for the metrics tool"
 
       resolve &Deployments.metrics_tool/3
+    end
+
+    field :metrics_series_tool, list_of(:metric_response) do
+      arg :name,      :string, description: "the name of the metrics tool"
+      arg :arguments, :json,   description: "the arguments for the metrics tool"
+
+      resolve &Deployments.metrics_series_tool/3
     end
 
     field :logs_tool, list_of(:workbench_job_activity_log) do
@@ -831,6 +960,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :workbench_job, :workbench_job, resolve: dataloader(Deployments), description: "the job this activity belongs to"
     field :agent_run,    :agent_run, resolve: dataloader(Deployments), description: "the agent run that executed this activity"
     field :agent_runs,   list_of(:agent_run), resolve: dataloader(Deployments), description: "all agent runs associated with this activity (sideloadable)"
+    field :attachments,  list_of(:attachment), resolve: dataloader(Deployments), description: "files attached to this activity's prompt"
     field :user,         :user, resolve: dataloader(User), description: "the user who created, approved, or denied this activity"
 
     timestamps()
@@ -850,7 +980,12 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_job_thought_attributes do
-    field :metrics, list_of(:workbench_job_activity_metric), description: "metrics for the thought"
+    field :series, list_of(:metric_response),
+      description: "metric series for the thought, with labels sent once per series",
+      resolve: &Deployments.thought_metric_series/3
+    field :metrics, list_of(:workbench_job_activity_metric),
+      description: "metrics for the thought, one entry per point (prefer series)",
+      resolve: &Deployments.thought_metrics/3
     field :logs,    list_of(:workbench_job_activity_log), description: "logs for the thought"
     field :traces,  list_of(:workbench_job_activity_trace), description: "traces for the thought"
   end
@@ -1010,10 +1145,14 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_canvas_block do
-    field :identifier, :string
-    field :type,       :workbench_canvas_block_type
-    field :layout,     :workbench_canvas_block_layout
-    field :content,    :workbench_canvas_block_content
+    field :identifier,  :string
+    field :type,        :workbench_canvas_block_type
+    field :title,       :string, description: "the header of a section block"
+    field :description, :string, description: "an explanation of what this block shows"
+    field :section_id,  :string, description: "the identifier of the section block this block belongs to"
+    field :collapsed,   :boolean, description: "whether a section block starts collapsed"
+    field :layout,      :workbench_canvas_block_layout
+    field :content,     :workbench_canvas_block_content
   end
 
   object :workbench_job_result_todo do
@@ -1086,6 +1225,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :user_id,      :id, description: "user this prompt will run as"
 
     field :workbench_job, :workbench_job, resolve: dataloader(Deployments), description: "the job this prompt will be sent to"
+    field :attachments,   list_of(:attachment), resolve: dataloader(Deployments), description: "files attached to this prompt"
     field :user,          :user, resolve: dataloader(User), description: "the user who queued this prompt"
 
     timestamps()
@@ -1218,6 +1358,12 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
     field :eval_results, :float,
       description: "average eval grade across workbench eval results"
+
+    field :hours_saved, :float,
+      description: "estimated engineering hours saved by merged pull requests, derived from their classified difficulty"
+
+    field :total_tokens, :integer,
+      description: "total tokens consumed by workbench jobs"
   end
 
   object :workbench_usage_timeseries do
@@ -1322,6 +1468,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :jira,      :workbench_tool_jira_connection, description: "jira cloud connection (no secrets)"
     field :jira_datacenter, :workbench_tool_jira_datacenter_connection,
       description: "jira data center connection (no secrets)"
+    field :service_now, :workbench_tool_service_now_connection, description: "servicenow connection (no secrets)"
     field :exa,       :workbench_tool_exa_connection, description: "exa connection (no secrets)"
     field :github,    :workbench_tool_github_connection, description: "github connection (no secrets)"
     field :gitlab,    :workbench_tool_gitlab_connection, description: "gitlab connection (no secrets)"
@@ -1454,6 +1601,11 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
   object :workbench_tool_jira_datacenter_connection do
     field :url, non_null(:string), description: "jira data center base URL (PAT never exposed)"
+  end
+
+  object :workbench_tool_service_now_connection do
+    field :url,      non_null(:string), description: "servicenow instance URL"
+    field :username, :string, description: "servicenow basic auth user (password never exposed)"
   end
 
   object :workbench_tool_exa_connection do
@@ -1640,6 +1792,10 @@ defmodule Console.GraphQl.Deployments.Workbench do
         action: :read
       arg :q, :string
       arg :project_id, :id, description: "filter workbenches by project"
+      arg :sort, :workbench_sort, description: "field to sort workbenches by"
+      arg :direction, :sort_direction, description: "sort direction"
+      arg :favorite_ids, list_of(:id),
+        description: "workbench ids to rank first when sorting by favorited"
 
       resolve &Deployments.workbenches/2
     end
@@ -1676,13 +1832,12 @@ defmodule Console.GraphQl.Deployments.Workbench do
       resolve &Deployments.recent_workbench_jobs/2
     end
 
-    @desc "Semantic search over vector-indexed workbench jobs"
+    @desc "Case-insensitive substring search over a workbench's job prompts, newest first"
     field :workbench_job_search, list_of(:workbench_job) do
       middleware Authenticated
       middleware Scope,
         resource: :workbench,
         action: :read
-      middleware VectorStoreEnabled
       arg :q,             non_null(:string)
       arg :workbench_id,  non_null(:id), description: "scope search to this workbench"
       arg :limit,         :integer, description: "max results to return (defaults to 5)"
@@ -1765,6 +1920,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
       middleware Scope,
         resource: :workbench,
         action: :read
+      arg :project_id, :id, description: "only aggregate workbenches in this project"
 
       resolve &Deployments.aggregates/2
     end
@@ -1804,6 +1960,53 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_mutations do
+    field :write_workbench_file, :workbench_file do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :workbench_id, non_null(:id)
+      arg :path,         non_null(:string), description: "the absolute path of the file, missing parent directories are created"
+      arg :content,      :string, description: "text contents of the file"
+      arg :file,         :upload, description: "an uploaded file, used instead of content"
+
+      resolve &Deployments.write_workbench_file/2
+    end
+
+    field :create_workbench_directory, :workbench_file do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :workbench_id, non_null(:id)
+      arg :path,         non_null(:string)
+
+      resolve &Deployments.create_workbench_directory/2
+    end
+
+    field :move_workbench_file, :workbench_file do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :workbench_id, non_null(:id)
+      arg :source,       non_null(:string)
+      arg :target,       non_null(:string)
+
+      resolve &Deployments.move_workbench_file/2
+    end
+
+    field :delete_workbench_file, :workbench_file do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :workbench_id, non_null(:id)
+      arg :path,         non_null(:string), description: "a file, or a directory which will be deleted recursively"
+
+      resolve &Deployments.delete_workbench_file/2
+    end
+
     field :create_workbench, :workbench do
       middleware Authenticated
       middleware Scope,
@@ -2012,7 +2215,8 @@ defmodule Console.GraphQl.Deployments.Workbench do
     end
 
     @desc "Updates saved workbench knowledge. Requires write access to the workbench."
-    field :update_workbench_knowledge, :workbench_knowledge do
+    field :update_workbench_knowledge, :workbench_knowledge,
+      deprecate: "superseded by writeWorkbenchFile under /knowledge when the workbench filesystem is enabled" do
       middleware Authenticated
       middleware Scope,
         resource: :workbench,
@@ -2024,7 +2228,8 @@ defmodule Console.GraphQl.Deployments.Workbench do
     end
 
     @desc "Deletes saved workbench knowledge. Requires write access to the workbench."
-    field :delete_workbench_knowledge, :workbench_knowledge do
+    field :delete_workbench_knowledge, :workbench_knowledge,
+      deprecate: "superseded by deleteWorkbenchFile under /knowledge when the workbench filesystem is enabled" do
       middleware Authenticated
       middleware Scope,
         resource: :workbench,

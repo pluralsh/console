@@ -16,7 +16,7 @@ function Tab({ ...props }: ComponentProps<typeof TabBase>) {
         '& div': {
           justifyContent: 'center',
           paddingTop: theme.spacing.xsmall,
-          paddingBottom: theme.spacing.xsmall - 3,
+          paddingBottom: `calc(${theme.spacing.xsmall} - 3px)`,
           fontFamily: theme.fontFamilies.sansHero,
         },
       }}

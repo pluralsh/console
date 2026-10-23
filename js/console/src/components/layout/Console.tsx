@@ -7,7 +7,9 @@ import BreadcrumbsProvider from 'components/contexts/BreadcrumbsProvider'
 import ConsoleNavContextProvider from 'components/contexts/NavigationContext'
 import { Outlet } from 'react-router-dom'
 
-import LoadingIndicator from 'components/utils/LoadingIndicator'
+import LoadingIndicator, {
+  FullPageLoadingIndicator,
+} from 'components/utils/LoadingIndicator'
 
 import { DeploymentSettingsProvider } from 'components/contexts/DeploymentSettingsContext'
 import { AwaitingReviewProvider } from 'components/contexts/AwaitingReviewContext'
@@ -33,7 +35,6 @@ import { QoveScriptLoader } from '../QoveScriptLoader'
 import { SentryInitializer } from '../SentryInitializer'
 import Header from './Header'
 import { Sidebar, SidebarProvider } from './Sidebar'
-import Subheader from './Subheader'
 import {
   TopLevelSidePanel,
   TopLevelSidePanelProviders,
@@ -47,33 +48,36 @@ export default function Console() {
           <EnsureLogin>
             <SentryInitializer>
               <QoveScriptLoader>
-                <SelectedProjectProvider>
-                  <BillingSubscriptionProvider>
-                    <BreadcrumbsProvider>
-                      <TerminalThemeProvider>
-                        <ShareSecretProvider>
-                          <AccessTokenProvider>
-                            <DeploymentSettingsProvider>
-                              <AwaitingReviewProvider>
-                                <SidebarProvider>
-                                  <TopLevelSidePanelProviders>
-                                    <FeatureFlagProvider>
-                                      <CommandPaletteProvider>
-                                        <SimpleToastProvider>
-                                          <ConsoleContent />
-                                        </SimpleToastProvider>
-                                      </CommandPaletteProvider>
-                                    </FeatureFlagProvider>
-                                  </TopLevelSidePanelProviders>
-                                </SidebarProvider>
-                              </AwaitingReviewProvider>
-                            </DeploymentSettingsProvider>
-                          </AccessTokenProvider>
-                        </ShareSecretProvider>
-                      </TerminalThemeProvider>
-                    </BreadcrumbsProvider>
-                  </BillingSubscriptionProvider>
-                </SelectedProjectProvider>
+                {/* committed outside the subscription query's suspense so both fetch at once */}
+                <DeploymentSettingsProvider>
+                  <SelectedProjectProvider>
+                    <Suspense fallback={<FullPageLoadingIndicator />}>
+                      <BillingSubscriptionProvider>
+                        <BreadcrumbsProvider>
+                          <TerminalThemeProvider>
+                            <ShareSecretProvider>
+                              <AccessTokenProvider>
+                                <AwaitingReviewProvider>
+                                  <SidebarProvider>
+                                    <TopLevelSidePanelProviders>
+                                      <FeatureFlagProvider>
+                                        <CommandPaletteProvider>
+                                          <SimpleToastProvider>
+                                            <ConsoleContent />
+                                          </SimpleToastProvider>
+                                        </CommandPaletteProvider>
+                                      </FeatureFlagProvider>
+                                    </TopLevelSidePanelProviders>
+                                  </SidebarProvider>
+                                </AwaitingReviewProvider>
+                              </AccessTokenProvider>
+                            </ShareSecretProvider>
+                          </TerminalThemeProvider>
+                        </BreadcrumbsProvider>
+                      </BillingSubscriptionProvider>
+                    </Suspense>
+                  </SelectedProjectProvider>
+                </DeploymentSettingsProvider>
               </QoveScriptLoader>
             </SentryInitializer>
           </EnsureLogin>
@@ -127,7 +131,6 @@ function ConsoleContent() {
             position="relative"
             css={{ container: 'console / inline-size' }}
           >
-            <Subheader />
             <Suspense fallback={<LoadingIndicator />}>
               <Outlet />
             </Suspense>

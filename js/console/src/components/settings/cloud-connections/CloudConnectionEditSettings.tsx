@@ -2,15 +2,13 @@ import {
   Breadcrumb,
   Button,
   EmptyState,
-  Flex,
   SidePanelOpenIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
+import { PageToolbarPortal } from 'components/layout/PageToolbar'
 import { CloudConnectionCreateForm } from 'components/workbenches/tools/cloud-connection/CloudConnectionCreateForm'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
-import { StackedTextSC } from 'components/utils/table/StackedText'
 import { useWebhookSetupGuidePanel } from 'components/workbenches/workbench/webhooks/WebhookSetupGuidePanel'
 import { Provider, useCloudConnectionQuery } from 'generated/graphql'
 import { useEffect, useEffectEvent, useMemo, useRef } from 'react'
@@ -20,16 +18,14 @@ import {
   CLOUD_CONNECTIONS_SETTINGS_CLOUD_CONNECTION_ID_PARAM_ID,
   getCloudConnectionsSettingsEditAbsPath,
 } from 'routes/settingsRoutesConst'
-import { useTheme } from 'styled-components'
 import {
   getCloudConnectionSetupGuideDocumentationUrl,
   getCloudConnectionSetupGuideMarkdownPath,
 } from '../../workbenches/tools/cloud-connection/cloudConnectionSetupGuides'
-import { SETTINGS_BREADCRUMBS } from '../Settings'
+import { SETTINGS_BREADCRUMBS, SettingsDescription } from '../Settings'
 
 export function CloudConnectionEditSettings() {
   const navigate = useNavigate()
-  const theme = useTheme()
   const params = useParams()
   const cloudConnectionId =
     params[CLOUD_CONNECTIONS_SETTINGS_CLOUD_CONNECTION_ID_PARAM_ID]
@@ -63,40 +59,6 @@ export function CloudConnectionEditSettings() {
       [editPath]
     )
   )
-  useSetPageHeaderContent(
-    useMemo(
-      () => (
-        <Flex justifyContent="space-between">
-          <StackedTextSC>
-            <span
-              css={{
-                ...theme.partials.text.body2,
-                color: theme.colors['text-light'],
-              }}
-            >
-              Edit cloud connection credentials and access policy.
-            </span>
-          </StackedTextSC>
-          {!isOpen && (
-            <Button
-              secondary
-              startIcon={<SidePanelOpenIcon />}
-              onClick={() =>
-                openSetupGuidePanel({
-                  documentationUrl,
-                  markdownPath,
-                })
-              }
-              css={{ whiteSpace: 'nowrap' }}
-            >
-              Setup guide
-            </Button>
-          )}
-        </Flex>
-      ),
-      [documentationUrl, isOpen, markdownPath, openSetupGuidePanel, theme]
-    )
-  )
 
   const openGuide = useEffectEvent(() =>
     openSetupGuidePanel({
@@ -115,22 +77,47 @@ export function CloudConnectionEditSettings() {
   })
   useEffect(() => () => onUnmount(), [])
 
-  if (error) return <GqlError error={error} />
-  if (loading && !connection) return <LoadingIndicator />
-
-  return connection ? (
-    <CloudConnectionCreateForm
-      key={connection.id}
-      existingConnection={connection}
-      backPath={CLOUD_CONNECTIONS_SETTINGS_ABS_PATH}
-      onSaved={() => navigate(CLOUD_CONNECTIONS_SETTINGS_ABS_PATH)}
-      showSetupGuideButton={false}
-    />
-  ) : (
-    <EmptyState message="Cloud connection not found.">
-      <Button onClick={() => navigate(CLOUD_CONNECTIONS_SETTINGS_ABS_PATH)}>
-        Back to all cloud connections
-      </Button>
-    </EmptyState>
+  return (
+    <>
+      <SettingsDescription>
+        Edit cloud connection credentials and access policy.
+      </SettingsDescription>
+      {!isOpen && (
+        <PageToolbarPortal>
+          <Button
+            secondary
+            small
+            startIcon={<SidePanelOpenIcon />}
+            onClick={() =>
+              openSetupGuidePanel({
+                documentationUrl,
+                markdownPath,
+              })
+            }
+          >
+            Setup guide
+          </Button>
+        </PageToolbarPortal>
+      )}
+      {error ? (
+        <GqlError error={error} />
+      ) : loading && !connection ? (
+        <LoadingIndicator />
+      ) : connection ? (
+        <CloudConnectionCreateForm
+          key={connection.id}
+          existingConnection={connection}
+          backPath={CLOUD_CONNECTIONS_SETTINGS_ABS_PATH}
+          onSaved={() => navigate(CLOUD_CONNECTIONS_SETTINGS_ABS_PATH)}
+          showSetupGuideButton={false}
+        />
+      ) : (
+        <EmptyState message="Cloud connection not found.">
+          <Button onClick={() => navigate(CLOUD_CONNECTIONS_SETTINGS_ABS_PATH)}>
+            Back to all cloud connections
+          </Button>
+        </EmptyState>
+      )}
+    </>
   )
 }

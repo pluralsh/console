@@ -1,4 +1,5 @@
 import {
+  ICON_FRAME_ICON_SIZE,
   ArrowRightIcon,
   DiffColumnIcon,
   EditIcon,
@@ -90,25 +91,46 @@ export function ChatbotThreadMoreMenu() {
       >
         <ListBoxItem
           key={MenuItemKey.Rename}
-          leftContent={<EditIcon />}
+          leftContent={<EditIcon size={ICON_FRAME_ICON_SIZE.small} />}
           label="Rename thread"
         />
         <ListBoxItem
           key={MenuItemKey.Fork}
-          leftContent={forkLoading ? <Spinner /> : <GitForkIcon />}
-          rightContent={<ArrowRightIcon color="icon-default" />}
+          leftContent={
+            forkLoading ? (
+              <Spinner />
+            ) : (
+              <GitForkIcon size={ICON_FRAME_ICON_SIZE.small} />
+            )
+          }
+          rightContent={
+            <ArrowRightIcon
+              size={ICON_FRAME_ICON_SIZE.small}
+              color="icon-default"
+            />
+          }
           label="Fork thread"
         />
         <ListBoxItem
           key={MenuItemKey.History}
-          leftContent={<DiffColumnIcon />}
-          rightContent={<ArrowRightIcon color="icon-default" />}
+          leftContent={<DiffColumnIcon size={ICON_FRAME_ICON_SIZE.small} />}
+          rightContent={
+            <ArrowRightIcon
+              size={ICON_FRAME_ICON_SIZE.small}
+              color="icon-default"
+            />
+          }
           label="View history"
         />
         <ListBoxItem
           destructive
           key={MenuItemKey.Delete}
-          leftContent={<TrashCanIcon color="icon-danger" />}
+          leftContent={
+            <TrashCanIcon
+              size={ICON_FRAME_ICON_SIZE.small}
+              color="icon-danger"
+            />
+          }
           label="Delete thread"
         />
       </MoreMenu>

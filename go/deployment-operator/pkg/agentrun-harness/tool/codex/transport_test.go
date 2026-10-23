@@ -64,7 +64,6 @@ func TestTransportLaunchPreservesHooksAndACPEnvironment(t *testing.T) {
 	}
 	content := string(env)
 	for _, want := range []string{
-		consoleTokenEnv + "=",
 		codexAPIKeyEnv + "=api-key",
 		openAIAPIKeyEnv + "=api-key",
 		defaultAuthRequestEnv + `={"methodId":"api-key"}`,
@@ -132,7 +131,7 @@ func writeCodexACPBinary(t *testing.T, binDir string) {
 	t.Helper()
 	path := filepath.Join(binDir, codexACPBinary)
 	script := "#!/bin/sh\n" +
-		"printf 'PLRL_CONSOLE_TOKEN=%s\\nCODEX_HOME=%s\\nCODEX_API_KEY=%s\\nOPENAI_API_KEY=%s\\nDEFAULT_AUTH_REQUEST=%s\\nNO_BROWSER=%s\\nMODEL_PROVIDER=%s\\nCODEX_CONFIG=%s\\n' \"$PLRL_CONSOLE_TOKEN\" \"$CODEX_HOME\" \"$CODEX_API_KEY\" \"$OPENAI_API_KEY\" \"$DEFAULT_AUTH_REQUEST\" \"$NO_BROWSER\" \"$MODEL_PROVIDER\" \"$CODEX_CONFIG\" > \"$CODEX_ENV_FILE\"\n"
+		"printf 'CODEX_HOME=%s\\nCODEX_API_KEY=%s\\nOPENAI_API_KEY=%s\\nDEFAULT_AUTH_REQUEST=%s\\nNO_BROWSER=%s\\nMODEL_PROVIDER=%s\\nCODEX_CONFIG=%s\\n' \"$CODEX_HOME\" \"$CODEX_API_KEY\" \"$OPENAI_API_KEY\" \"$DEFAULT_AUTH_REQUEST\" \"$NO_BROWSER\" \"$MODEL_PROVIDER\" \"$CODEX_CONFIG\" > \"$CODEX_ENV_FILE\"\n"
 	if err := os.WriteFile(path, []byte(script), 0755); err != nil {
 		t.Fatal(err)
 	}

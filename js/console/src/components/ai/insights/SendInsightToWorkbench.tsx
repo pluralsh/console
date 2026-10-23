@@ -250,7 +250,7 @@ const PromptPreviewBoxSC = styled(Card)(({ theme }) => ({
   minHeight: 132,
   maxHeight: 241,
   overflowY: 'auto',
-  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  padding: `${theme.spacing.small} ${theme.spacing.medium}`,
   backgroundColor: theme.colors['fill-two'],
   border: theme.borders.input,
   color: theme.colors['text-light'],

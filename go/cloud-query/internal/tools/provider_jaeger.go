@@ -19,23 +19,40 @@ func NewJaegerProvider(conn *toolquery.JaegerConnection) *JaegerProvider {
 	return &JaegerProvider{conn: conn}
 }
 
-func (in *JaegerProvider) Traces(ctx context.Context, input *toolquery.TracesQueryInput) (*toolquery.TracesQueryOutput, error) {
-	if in.conn == nil {
-		return nil, ErrInvalidArgument
-	}
-	if input == nil || strings.TrimSpace(input.GetQuery()) == "" {
-		return nil, fmt.Errorf("%w: query must be set to service_name", ErrInvalidArgument)
-	}
-
-	jaegerClient := client.NewJaegerClient(
+func (in *JaegerProvider) newClient() *client.JaegerClient {
+	return client.NewJaegerClient(
 		in.conn.GetUrl(),
 		in.conn.GetToken(),
 		in.conn.GetUsername(),
 		in.conn.GetPassword(),
 	)
+}
+
+func (in *JaegerProvider) Traces(ctx context.Context, input *toolquery.TracesQueryInput) (*toolquery.TracesQueryOutput, error) {
+	if in.conn == nil || input == nil {
+		return nil, ErrInvalidArgument
+	}
+
+	jaegerClient := in.newClient()
 	defer jaegerClient.Close()
 
-	resp, err := jaegerClient.Traces(ctx, in.toJaegerQuery(input))
+	if traceID := strings.TrimSpace(input.GetFilters().GetTraceId()); traceID != "" {
+		resp, err := jaegerClient.Trace(ctx, traceID)
+		if err != nil {
+			return nil, err
+		}
+		return resp.ToTracesQueryOutput(), nil
+	}
+
+	q, err := in.toJaegerQuery(input)
+	if err != nil {
+		return nil, err
+	}
+	if q.ServiceName == "" {
+		return nil, fmt.Errorf("%w: set the query or filters.service to a service name, which trace facets on `service.name` lists", ErrInvalidArgument)
+	}
+
+	resp, err := jaegerClient.Traces(ctx, q)
 	if err != nil {
 		return nil, err
 	}
@@ -43,10 +60,61 @@ func (in *JaegerProvider) Traces(ctx context.Context, input *toolquery.TracesQue
 	return resp.ToTracesQueryOutput(), nil
 }
 
-func (in *JaegerProvider) toJaegerQuery(input *toolquery.TracesQueryInput) datasource.JaegerTraceQuery {
+// TraceFacets lists services and span names, the only facets Jaeger indexes.
+func (in *JaegerProvider) TraceFacets(ctx context.Context, input *toolquery.TraceFacetsInput) (*toolquery.TraceFacetsOutput, error) {
+	if in.conn == nil || input == nil {
+		return nil, ErrInvalidArgument
+	}
+
+	jaegerClient := in.newClient()
+	defer jaegerClient.Close()
+
+	switch strings.TrimSpace(input.GetAttribute()) {
+	case "":
+		return facetValues(input, facetNames([]string{TraceFacetService, TraceFacetSpanName})), nil
+	case TraceFacetService:
+		services, err := jaegerClient.Services(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return facetValues(input, facetNames(services)), nil
+	case TraceFacetSpanName:
+		service := strings.TrimSpace(input.GetFilters().GetService())
+		if service == "" {
+			return nil, fmt.Errorf("%w: jaeger lists span names per service, set filters.service", ErrInvalidArgument)
+		}
+		operations, err := jaegerClient.Operations(ctx, service)
+		if err != nil {
+			return nil, err
+		}
+		return facetValues(input, facetNames(operations)), nil
+	default:
+		return nil, fmt.Errorf("%w: jaeger only lists `%s` and `%s` values", ErrInvalidArgument, TraceFacetService, TraceFacetSpanName)
+	}
+}
+
+func (in *JaegerProvider) toJaegerQuery(input *toolquery.TracesQueryInput) (datasource.JaegerTraceQuery, error) {
+	filters := input.GetFilters()
 	q := datasource.JaegerTraceQuery{
-		ServiceName: strings.TrimSpace(input.GetQuery()),
-		Attributes:  map[string]string{},
+		ServiceName:   strings.TrimSpace(input.GetQuery()),
+		OperationName: strings.TrimSpace(filters.GetOperation()),
+		DurationMin:   strings.TrimSpace(filters.GetDurationMin()),
+		DurationMax:   strings.TrimSpace(filters.GetDurationMax()),
+		Attributes:    map[string]string{},
+	}
+	if v := strings.TrimSpace(filters.GetService()); v != "" {
+		q.ServiceName = v
+	}
+	for _, attr := range traceFilterAttributes(filters) {
+		q.Attributes[attr[0]] = attr[1]
+	}
+	if filters.GetErrorsOnly() {
+		q.Attributes["error"] = "true"
+	}
+	for _, d := range []string{q.DurationMin, q.DurationMax} {
+		if _, _, err := parseTraceDuration(d); err != nil {
+			return q, err
+		}
 	}
 
 	if input.GetRange() != nil {
@@ -88,5 +156,5 @@ func (in *JaegerProvider) toJaegerQuery(input *toolquery.TracesQueryInput) datas
 		q.Attributes = nil
 	}
 
-	return q
+	return q, nil
 }

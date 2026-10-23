@@ -1,14 +1,11 @@
 import {
   ArrowTopRightIcon,
   Breadcrumb,
-  Flex,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
-import { StackedTextSC } from 'components/utils/table/StackedText'
+import { PageToolbarPortal } from 'components/layout/PageToolbar'
 import { CLOUD_CONNECTIONS_SETTINGS_ABS_PATH } from 'routes/settingsRoutesConst'
-import { useTheme } from 'styled-components'
-import { SETTINGS_BREADCRUMBS } from '../Settings'
+import { SETTINGS_BREADCRUMBS, SettingsDescription } from '../Settings'
 import {
   AddCloudConnectionButton,
   CloudConnectionsList,
@@ -20,29 +17,23 @@ const CLOUD_CONNECTIONS_SETTINGS_BREADCRUMBS: Breadcrumb[] = [
 ]
 
 export default function CloudConnectionsSettings() {
-  const theme = useTheme()
-
   useSetBreadcrumbs(CLOUD_CONNECTIONS_SETTINGS_BREADCRUMBS)
-  useSetPageHeaderContent(
-    <Flex justifyContent="space-between">
-      <StackedTextSC>
-        <span
-          css={{
-            ...theme.partials.text.body2,
-            color: theme.colors['text-light'],
-          }}
-        >
-          Manage all your configured cloud integrations in one place.
-        </span>
-      </StackedTextSC>
-      <AddCloudConnectionButton
-        buttonProps={{
-          secondary: true,
-          endIcon: <ArrowTopRightIcon />,
-        }}
-      />
-    </Flex>
-  )
 
-  return <CloudConnectionsList />
+  return (
+    <>
+      <SettingsDescription>
+        Manage all your configured cloud integrations in one place.
+      </SettingsDescription>
+      <PageToolbarPortal>
+        <AddCloudConnectionButton
+          buttonProps={{
+            secondary: true,
+            small: true,
+            endIcon: <ArrowTopRightIcon />,
+          }}
+        />
+      </PageToolbarPortal>
+      <CloudConnectionsList />
+    </>
+  )
 }

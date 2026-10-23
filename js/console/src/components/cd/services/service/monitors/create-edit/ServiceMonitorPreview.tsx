@@ -70,7 +70,7 @@ export function ServiceMonitorPreview({
           stroke: colors['border-danger'],
           strokeDasharray: '6 4',
         },
-        textStyle: { fill: colors['border-danger'], fontSize: 11 },
+        textStyle: { fill: colors['border-danger'], fontSize: '0.75rem' },
       },
     ],
     [colors, threshold.aggregate, threshold.value]

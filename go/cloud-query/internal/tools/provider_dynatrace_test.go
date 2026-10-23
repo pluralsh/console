@@ -68,27 +68,31 @@ func TestDynatraceProvider_MetricsFromDqlRecords(t *testing.T) {
 		PlatformToken: "test-token",
 	})
 
-	resp, err := provider.Metrics(context.Background(), &toolquery.MetricsQueryInput{
+	resp, err := provider.MetricsSeries(context.Background(), &toolquery.MetricsQueryInput{
 		Query: "timeseries avg(dt.host.cpu.usage), by:{dt.entity.host}",
 	})
 	if err != nil {
 		t.Fatalf("provider metrics failed: %v", err)
 	}
 
-	if got := len(resp.Metrics); got != 2 {
-		t.Fatalf("expected 2 metric points, got %d", got)
+	if got := len(resp.GetSeries()); got != 1 {
+		t.Fatalf("expected 1 metric series, got %d", got)
 	}
-	if resp.Metrics[0].GetName() != "dt.host.cpu.usage" {
-		t.Fatalf("unexpected first metric name: %s", resp.Metrics[0].GetName())
+	s := resp.GetSeries()[0]
+	if s.GetName() != "dt.host.cpu.usage" {
+		t.Fatalf("unexpected metric name: %s", s.GetName())
 	}
-	if resp.Metrics[0].GetLabels()["host.name"] != "node-1" {
-		t.Fatalf("unexpected first metric label: %v", resp.Metrics[0].GetLabels())
+	if s.GetLabels()["host.name"] != "node-1" {
+		t.Fatalf("unexpected metric labels: %v", s.GetLabels())
 	}
-	if resp.Metrics[1].GetName() != "dt.host.cpu.usage" {
-		t.Fatalf("unexpected second metric name: %s", resp.Metrics[1].GetName())
+	if got := len(s.GetSamples()); got != 2 {
+		t.Fatalf("expected 2 samples, got %d", got)
 	}
-	if resp.Metrics[1].GetValue() != 14.37 {
-		t.Fatalf("unexpected second metric value: %v", resp.Metrics[1].GetValue())
+	if s.GetSamples()[1].GetValue() != 14.37 {
+		t.Fatalf("unexpected second sample value: %v", s.GetSamples()[1].GetValue())
+	}
+	if !s.GetSamples()[1].GetTimestamp().AsTime().Equal(time.Date(2021, 4, 1, 15, 17, 0, 0, time.UTC)) {
+		t.Fatalf("unexpected second sample timestamp: %v", s.GetSamples()[1].GetTimestamp().AsTime())
 	}
 }
 

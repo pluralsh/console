@@ -1,4 +1,5 @@
-import { ReactNode, useLayoutEffect } from 'react'
+import { createContext, ReactNode, useContext, useLayoutEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { ApolloQueryResult } from '@apollo/client'
 import {
   ServiceDeploymentDetailsFragment,
@@ -12,6 +13,20 @@ export type ServiceDetailsContextType = {
   isRefetching: boolean
   isLoading: boolean
   setSidenavContent: (content: ReactNode | null) => void
+}
+
+export const ServiceToolbarStartSlotContext =
+  createContext<Nullable<HTMLElement>>(null)
+
+// renders at the start of the service toolbar, e.g. a tab's subtabs
+export function ServiceToolbarStartPortal({
+  children,
+}: {
+  children: ReactNode
+}) {
+  const slot = useContext(ServiceToolbarStartSlotContext)
+
+  return slot ? createPortal(children, slot) : null
 }
 
 export const useServiceContext = () =>

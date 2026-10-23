@@ -7,26 +7,26 @@ Plural Pipelines provide a way to automate the GitOps changes necessary to promo
 
 1. Create a PR for dev, wait for review and merge
 2. Create a PR for staging, same as above
-3. finally create a PR for prod and you're done.
+3. Finally, create a PR for prod and you're done.
 
-This is tedious and completely unnecessary.  In addition, you'll also want to automate a variety of confirmation tests along the promotion process, which can be missed in a manual pattern.
+This is tedious and completely unnecessary. You'll also want to automate a variety of confirmation tests along the promotion process, which can be missed in a manual pattern.
 
 Plural solves this by:
 
 1. Allowing users to define their promotion flow via CRD
-2. Across all stages, a PR is auto-generated using Plural's pr automation capabilities.
-3. Between stages, gates can be used to control promotion, with a variety of different checks that can be performed.
+2. Auto-generating a PR at each stage using Plural's PR automation capabilities.
+3. Using gates between stages to control promotion, with a variety of checks that can be performed.
 
 ## Pipeline Flavors
 
 There are two ways to accomplish a pipeline with Plural:
 
-* Deterministic [PR Automation](/plural-features/pr-automation/crds) based pipelining
-* AI based PR based pipelining
+* Deterministic [PR Automation](/plural-features/pr-automation/crds)-based pipelining
+* AI-based PR pipelining
 
-The main difference is the second uses prompting plus lightweight coding agents to accomplish the needed yaml changes to promote your software.  Since they are usually small config changes, this is usually very reliable, and often much easier to setup for developers of all skill levels, but for teams that desire the security of determinism, that is available as well.
+The main difference is that the second uses prompting plus lightweight coding agents to make the YAML changes needed to promote your software. Since these are usually small config changes, this approach is very reliable and often much easier to set up for developers of all skill levels, but for teams that want the security of determinism, that option is available as well.
 
-Before we go into exact pipeline examples, assume we have two plural services defined in a file `bootstrap/guestbook.yaml` like so:
+Before we go into exact pipeline examples, assume we have two Plural services defined in a file `bootstrap/guestbook.yaml` like so:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -58,7 +58,7 @@ spec:
     url: git@github.com:pluralsh/guestbook.git 
 ```
 
-We have either a deterministic or AI based method to define these pipelines. For a **deterministic** Pipeline:
+You can define these pipelines with either a deterministic or an AI-based method. For a **deterministic** Pipeline:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -98,7 +98,7 @@ spec:
 ```
 
 {% callout severity="info" %}
-Notice in each case, there's a pr automation specified as the promotion criteria.  You would need to define this as a separate `PrAutomation` crd.
+Notice that in each case, a PR automation is specified as the promotion criteria. You would need to define this as a separate `PrAutomation` CRD.
 {% /callout %}
 
 An AI pipeline is simpler and more self-contained:
@@ -146,17 +146,17 @@ spec:
           type: APPROVAL
 ```
 
-Obviously a lot simpler and easier to manage if you wish to do so.  Another thing you might have noticed is the Gates on the edge definition. We can explain those as well.
+This is a lot simpler and easier to manage. You might also have noticed the gates on the edge definition, which are explained below.
 
 ## Pipeline Gates Variants
 
-Gates serve as checkpoints between pipeline stages ensuring a change is safe to promote.  They have four main variants:
+Gates serve as checkpoints between pipeline stages, ensuring a change is safe to promote. They have four main variants:
 
-1. APPROVAL - manual signoff in the Plural UI.
-2. WINDOW - time based constraint for promotion
+1. APPROVAL - manual sign-off in the Plural UI.
+2. WINDOW - time-based constraint for promotion
 3. JOB - allows you to run a dedicated integration test job on a cluster
-4. SENTINEL - run a full [Plural Sentinel](/plural-features/plural-ai/sentinels) to blast integration tests throughout your infrastructure.  Useful for wide testing, eg when you're doing cluster upgrades throughout your dev fleet.
+4. SENTINEL - run a full [Plural Sentinel](/plural-features/plural-ai/sentinels) to blast integration tests throughout your infrastructure. Useful for wide testing, e.g. when you're doing cluster upgrades throughout your dev fleet.
 
 {% callout severity="info" %}
-We often use Pipelines to manage fleet-wide promotions, for instance mass cluster upgrades, or mass kubernetes operator upgrades.  A GitOps approach is ideal for those one-to-many deployment scenarios, and the Sentinel promotion gate naturally pairs with that in giving you a mass test lifecycle to confirm those changes alongside just executing them.
+We often use Pipelines to manage fleet-wide promotions, for instance mass cluster upgrades, or mass Kubernetes operator upgrades. A GitOps approach is ideal for those one-to-many deployment scenarios, and the Sentinel promotion gate pairs naturally with it, giving you a mass test lifecycle to confirm those changes rather than just executing them.
 {% /callout %}

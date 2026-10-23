@@ -6,7 +6,7 @@ import { FillLevelProvider } from '../../components/contexts/FillLevelContext'
 
 const StyledBlockquote = styled.blockquote(({ theme }) => ({
   position: 'relative',
-  padding: `${theme.spacing.medium}px ${theme.spacing.xlarge}px`,
+  padding: `${theme.spacing.medium} ${theme.spacing.xlarge}`,
   background: theme.colors['fill-one'],
   margin: 0,
   marginTop: theme.spacing.xlarge,

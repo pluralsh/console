@@ -35,6 +35,12 @@ defmodule Console.GraphQl.Deployments.Cluster do
     value :node
   end
 
+  enum :node_metrics_grouping do
+    value :node, description: "a single node-wide series"
+    value :namespace
+    value :pod, description: "one series per pod, labeled by `namespace` and `pod`"
+  end
+
   enum :version_compliance do
     value :latest
     value :compliant
@@ -497,6 +503,47 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :restarts,                 list_of(:metric_response), description: "container restarts within each rate window"
   end
 
+  @desc """
+  Prometheus timeseries for a single node. Host fields come from node-exporter (matched to the node by an
+  `instance`, `nodename` or `node` label, or node_uname_info), the rest from cAdvisor and kube-state-metrics. Fields marked grouped are broken
+  out by the `groupBy` argument and labeled by `namespace` (and `pod`) accordingly; the rest are node-wide.
+  """
+  object :node_usage_metrics do
+    field :cpu_utilization,     list_of(:metric_response), description: "fraction (0-1) of host cpu time spent busy"
+    field :cpu_modes,           list_of(:metric_response), description: "fraction (0-1) of host cpu time per non-idle mode, labeled by `mode`"
+    field :cpu_cores,           list_of(:metric_response), description: "host cpu count"
+    field :load1,               list_of(:metric_response), description: "1m host load average"
+    field :load5,               list_of(:metric_response), description: "5m host load average"
+    field :load15,              list_of(:metric_response), description: "15m host load average"
+    field :memory_total,        list_of(:metric_response), description: "host memory in bytes"
+    field :memory_used,         list_of(:metric_response), description: "host memory in use (total less available) in bytes"
+    field :memory_cached,       list_of(:metric_response), description: "host page cache and buffers in bytes"
+    field :major_page_faults,   list_of(:metric_response), description: "major page faults per second"
+    field :filesystem_fullness, list_of(:metric_response), description: "fraction (0-1) of each host filesystem used, labeled by `mountpoint`"
+    field :disk_read,           list_of(:metric_response), description: "host disk read throughput in bytes/s"
+    field :disk_write,          list_of(:metric_response), description: "host disk write throughput in bytes/s"
+    field :disk_busy,           list_of(:metric_response), description: "fraction (0-1) of time the busiest disk spent doing I/O"
+    field :network_receive,     list_of(:metric_response), description: "physical interface receive throughput in bytes/s"
+    field :network_transmit,    list_of(:metric_response), description: "physical interface transmit throughput in bytes/s"
+    field :network_errors,      list_of(:metric_response), description: "physical interface receive and transmit errors per second"
+    field :network_dropped,     list_of(:metric_response), description: "physical interface receive and transmit drops per second"
+
+    field :cpu_allocatable,     list_of(:metric_response), description: "allocatable node cpu in cores"
+    field :memory_allocatable,  list_of(:metric_response), description: "allocatable node memory in bytes"
+    field :pods_allocatable,    list_of(:metric_response), description: "pod capacity of the node"
+    field :conditions,          list_of(:metric_response), description: "1 while each node condition holds, labeled by `condition`"
+
+    field :cpu,                 list_of(:metric_response), description: "container cpu usage in cores (grouped)"
+    field :cpu_requests,        list_of(:metric_response), description: "cpu requests of pods on the node in cores (grouped)"
+    field :cpu_limits,          list_of(:metric_response), description: "cpu limits of pods on the node in cores (grouped)"
+    field :memory,              list_of(:metric_response), description: "container working set memory in bytes (grouped)"
+    field :memory_requests,     list_of(:metric_response), description: "memory requests of pods on the node in bytes (grouped)"
+    field :memory_limits,       list_of(:metric_response), description: "memory limits of pods on the node in bytes (grouped)"
+    field :oom_kills,           list_of(:metric_response), description: "container OOM kills within each rate window (grouped)"
+    field :pods_running,        list_of(:metric_response), description: "running pods on the node (grouped)"
+    field :restarts,            list_of(:metric_response), description: "container restarts on the node within each rate window (grouped)"
+  end
+
   object :cluster_node_metrics do
     field :cpu, list_of(:metric_response)
     field :memory, list_of(:metric_response)
@@ -686,6 +733,17 @@ defmodule Console.GraphQl.Deployments.Cluster do
       arg :step,         :string
 
       resolve &Deployments.metrics/3
+    end
+
+    @desc "host, resource, workload and health prometheus timeseries for a single node"
+    field :node_usage_metrics, :node_usage_metrics do
+      arg :node,     non_null(:string)
+      arg :start,    :datetime
+      arg :stop,     :datetime
+      arg :step,     :string
+      arg :group_by, :node_metrics_grouping, default_value: :node
+
+      resolve &Deployments.node_usage_metrics/3
     end
 
     field :network_graph, list_of(:network_mesh_edge) do

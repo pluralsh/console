@@ -109,11 +109,12 @@ const Button = memo(
             ? 'floating'
             : 'primary'
 
+    // Reading offsetHeight forces layout, so only measure when the spinner shows.
     useEffect(() => {
-      if (!buttonRef.current) return
+      if (!loading || !buttonRef.current) return
 
       setMeasuredHeight(buttonRef.current.offsetHeight)
-    }, [])
+    }, [loading])
 
     const { rest, css } = resolveSpacersAndSanitizeCss(props, theme)
 
@@ -224,7 +225,7 @@ export const ButtonBaseSC = styled.button<{
     color: colors['text-always-white'],
     background: colors['action-primary'],
     border: '1px solid transparent',
-    padding: `${spacing.xsmall - 1}px ${spacing.medium - 1}px`,
+    padding: `calc(${spacing.xsmall} - 1px) calc(${spacing.medium} - 1px)`,
     '&:focus': { outline: 'none' },
     '&:focus-visible': {
       outline: 'none',
@@ -361,11 +362,11 @@ export const ButtonBaseSC = styled.button<{
     // sizes besides medium (default)
     ...($size === 'large' && {
       ...partials.text.buttonLarge,
-      padding: `${spacing.small - 1}px ${spacing.large - 1}px`,
+      padding: `calc(${spacing.small} - 1px) calc(${spacing.large} - 1px)`,
     }),
     ...($size === 'small' && {
       ...partials.text.buttonSmall,
-      padding: `${spacing.xxsmall - 1}px ${spacing.medium - 1}px`,
+      padding: `calc(${spacing.xxsmall} - 1px) calc(${spacing.medium} - 1px)`,
       minHeight: 32,
     }),
   })
@@ -384,7 +385,7 @@ const IconSC = styled.span<{
     justifyContent: 'center',
     visibility: $loading ? 'hidden' : 'inherit',
     margin:
-      $position === 'start' ? `0 ${marginSize}px 0 0` : `0 0 0 ${marginSize}px`,
+      $position === 'start' ? `0 ${marginSize} 0 0` : `0 0 0 ${marginSize}`,
   }
 })
 

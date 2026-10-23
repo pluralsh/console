@@ -3,6 +3,7 @@ import { isEmpty, isUndefined, omit, pick } from 'lodash-es'
 import {
   type ComponentProps,
   type ComponentPropsWithoutRef,
+  type FocusEvent,
   type HTMLAttributes,
   type KeyboardEvent,
   type KeyboardEventHandler,
@@ -77,6 +78,7 @@ type ComboBoxProps = Exclude<ComboBoxInputProps, 'children'> & {
 
 type ComboBoxInputProps = {
   showArrow?: boolean
+  arrowSize?: 'small' | 'medium'
   isOpen?: boolean
   outerInputProps?: InputPropsFull
   onInputClick?: MouseEventHandler
@@ -109,10 +111,12 @@ const OpenButtonSC = styled.div(({ theme }) => ({
 function OpenButton({
   buttonRef,
   buttonProps = {},
+  arrowSize = 'medium',
   ...props
 }: HTMLAttributes<HTMLDivElement> & {
   buttonRef?: RefObject<HTMLDivElement | null>
   buttonProps?: AriaButtonProps
+  arrowSize?: ComboBoxInputProps['arrowSize']
 }) {
   const fallbackRef = useRef<HTMLDivElement | null>(null)
   const resolvedButtonRef = buttonRef ?? fallbackRef
@@ -127,7 +131,7 @@ function OpenButton({
       {...props}
       {...useButtonProps}
     >
-      <CaretDownIcon />
+      <CaretDownIcon size={arrowSize === 'small' ? 12 : 16} />
     </OpenButtonSC>
   )
 }
@@ -158,6 +162,7 @@ function ComboBoxInput({
   buttonRef,
   buttonProps,
   showArrow = true,
+  arrowSize,
   hasChips = false,
   onInputClick,
   loading,
@@ -189,6 +194,7 @@ function ComboBoxInput({
           <OpenButton
             buttonRef={buttonRef}
             buttonProps={buttonProps}
+            arrowSize={arrowSize}
           />
         ) : undefined
       }
@@ -225,6 +231,7 @@ function ComboBox({
   onHeaderClick,
   onFooterClick,
   showArrow,
+  arrowSize,
   startIcon,
   endIcon,
   placement,
@@ -246,6 +253,10 @@ function ComboBox({
   const stateRef = useRef<ComboBoxState<object> | null>(null)
   const [isOpenUncontrolled, setIsOpenUncontrolled] = useState(false)
   const previousInputValue = useRef(inputValue)
+  // react-aria dispatches synthetic focus events on the input to manage
+  // virtual focus (e.g. after selecting an option), which must not reopen
+  // the dropdown
+  const focusIsSyntheticRef = useRef(false)
 
   if (typeof isOpen !== 'boolean') {
     isOpen = isOpenUncontrolled
@@ -282,7 +293,7 @@ function ComboBox({
   const wrappedOnFocusChange: NonNullable<typeof onFocusChange> = useCallback(
     (isFocused) => {
       // Enforce open on focus
-      if (isFocused && !isOpen) {
+      if (isFocused && !isOpen && !focusIsSyntheticRef.current) {
         setIsOpen(true)
       }
       if (onFocusChange) {
@@ -516,6 +527,10 @@ function ComboBox({
         inputRef={inputInnerRef}
         inputProps={{
           ...inputProps,
+          onFocus: (e: FocusEvent<HTMLInputElement>) => {
+            focusIsSyntheticRef.current = !e.nativeEvent.isTrusted
+            inputProps?.onFocus?.(e)
+          },
           onKeyDown: (e: KeyboardEvent<HTMLInputElement>) => {
             handleKeyDown(e)
             inputProps?.onKeyDown?.(e)
@@ -524,6 +539,7 @@ function ComboBox({
         buttonRef={buttonRef}
         buttonProps={buttonProps}
         showArrow={showArrow}
+        arrowSize={arrowSize}
         isOpen={state.isOpen}
         suffix={suffix}
         prefix={prefix}

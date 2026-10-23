@@ -55,7 +55,7 @@ export const Td = styled.td<{
     },
     color: theme.colors['text-light'],
 
-    padding: padCells ? (loose ? '16px 12px' : '8px 12px') : 0,
+    padding: padCells ? (loose ? '1rem 0.75rem' : '0.5rem 0.75rem') : 0,
     '&:first-child': stickyColumn
       ? {
           boxShadow: theme.boxShadows.slight,
@@ -93,7 +93,7 @@ export const TdExpand = styled.td(({ theme }) => ({
   color: theme.colors['text-light'],
   height: 'auto',
   minHeight: 52,
-  padding: '16px 12px',
+  padding: '1rem 0.75rem',
 }))
 
 export const TdLoading = styled(Td)(({ theme }) => ({
@@ -105,7 +105,7 @@ export const TdLoading = styled(Td)(({ theme }) => ({
   textAlign: 'center',
   gap: theme.spacing.xsmall,
   color: theme.colors['text-xlight'],
-  minHeight: theme.spacing.large * 2 + theme.spacing.xlarge,
+  minHeight: `calc(2 * ${theme.spacing.large} + ${theme.spacing.xlarge})`,
 }))
 
 export const TdBasic = styled.td({

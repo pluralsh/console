@@ -8,7 +8,7 @@ import { useMemo } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 
-const RECENT_JOBS_FOR_WARNING = 3
+export const RECENT_JOBS_FOR_WARNING = 3
 
 export function WorkbenchBudgetSpendCapWarning({
   workbenchId,
@@ -76,7 +76,7 @@ const WarningSC = styled.div(({ theme }) => ({
   backgroundColor: theme.colors.yellow[900],
   border: `1px solid ${theme.colors.yellow[800]}`,
   flexShrink: 0,
-  '& > svg': { flexShrink: 0, marginTop: 1 },
+  '& > svg': { flexShrink: 0, marginTop: '1px' },
 }))
 
 const WarningPlaceholderSC = styled.div({

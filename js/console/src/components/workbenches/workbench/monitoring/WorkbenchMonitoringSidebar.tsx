@@ -3,13 +3,13 @@ import {
   Button,
   CheckIcon,
   CloseIcon,
-  EmptyState,
   Flex,
   IconFrame,
   Input,
   SearchIcon,
   TrashCanIcon,
 } from '@pluralsh/design-system'
+import { WorkbenchEmptyText } from 'components/workbenches/common/WorkbenchEmptyState'
 import { useThrottle } from 'components/hooks/useThrottle'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
@@ -40,9 +40,11 @@ import {
   WORKBENCH_MONITORING_DASHBOARD_PARAM_ID,
   WORKBENCH_MONITORING_MONITOR_PARAM_ID,
 } from 'routes/workbenchesRoutesConsts'
+import { PageSidebarHeaderSC } from 'components/layout/PageLayout'
 import styled from 'styled-components'
 import { fromNow } from 'utils/datetime'
 import { mapExistingNodes } from 'utils/graphql'
+import { WORKBENCH_SIDEBAR_WIDTH } from '../WorkbenchSidePanel'
 
 function isNearBottom(el: HTMLElement) {
   return el.scrollHeight - el.scrollTop - el.clientHeight < 200
@@ -144,7 +146,9 @@ export function WorkbenchMonitoringSidebar({
       <GroupsSC>
         {showNoMatches ? (
           <NoMatchesSC>
-            <EmptyState message={`No results for "${trimmedFilter}".`} />
+            <WorkbenchEmptyText>
+              No dashboards or monitors match “{trimmedFilter}”.
+            </WorkbenchEmptyText>
           </NoMatchesSC>
         ) : (
           <>
@@ -523,7 +527,7 @@ function MonitorRow({
 const WrapperSC = styled.div(({ theme }) => ({
   alignSelf: 'stretch',
   backgroundColor: theme.colors['fill-accent'],
-  borderRight: theme.borders.default,
+  borderRight: theme.borders.hairline,
   boxSizing: 'border-box',
   display: 'flex',
   flexDirection: 'column',
@@ -531,15 +535,12 @@ const WrapperSC = styled.div(({ theme }) => ({
   height: '100%',
   minHeight: 0,
   overflow: 'hidden',
-  width: 300,
-  maxWidth: 300,
-  minWidth: 300,
+  width: WORKBENCH_SIDEBAR_WIDTH,
+  maxWidth: WORKBENCH_SIDEBAR_WIDTH,
+  minWidth: WORKBENCH_SIDEBAR_WIDTH,
 }))
 
-const FilterSC = styled.div(({ theme }) => ({
-  borderBottom: theme.borders.default,
-  padding: theme.spacing.medium,
-}))
+const FilterSC = styled(PageSidebarHeaderSC)({})
 
 const GroupsSC = styled.div({
   display: 'flex',
@@ -565,7 +566,7 @@ const GroupSC = styled.div<{ $first?: boolean }>(({ theme, $first }) => ({
 }))
 
 const PaddedSC = styled.div(({ theme }) => ({
-  padding: `0 ${theme.spacing.medium}px`,
+  padding: `0 ${theme.spacing.medium}`,
 }))
 
 // Same treatment as the workbench side panel empty add button.
@@ -590,7 +591,7 @@ const GroupHeaderSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexShrink: 0,
   justifyContent: 'space-between',
-  padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
+  padding: `${theme.spacing.xsmall} ${theme.spacing.medium}`,
 }))
 
 const GroupListSC = styled.div(() => ({
@@ -606,7 +607,7 @@ const RowSC = styled.div<{ $selected?: boolean }>(({ theme, $selected }) => {
   const selectedColor = theme.colors['fill-two-selected']
   const hoverColor = theme.colors['fill-one-hover']
   const actionFade = (color: string) =>
-    `linear-gradient(to right, transparent, ${color} ${theme.spacing.large}px)`
+    `linear-gradient(to right, transparent, ${color} ${theme.spacing.large})`
 
   return {
     alignItems: 'center',
@@ -615,7 +616,7 @@ const RowSC = styled.div<{ $selected?: boolean }>(({ theme, $selected }) => {
     backgroundColor: $selected ? selectedColor : undefined,
     display: 'flex',
     gap: theme.spacing.xsmall,
-    padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+    padding: `${theme.spacing.small} ${theme.spacing.medium}`,
     position: 'relative',
     // Delete sits over the title so the name can use the full row.
     '& > .delete-action, & > .inline-confirm': {

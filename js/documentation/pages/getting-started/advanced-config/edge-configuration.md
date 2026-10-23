@@ -12,7 +12,7 @@ Plural uses a pull-based architecture designed for clusters with restricted or i
 The architecture is built for scale:
 
 * Agent communication is egress-only, so edge devices do not need public endpoints, inbound firewall rules, or a shared private network with the management plane.
-* Plural's [Git-aware caching and distribution layer](/resources/architecture/gitops-architecture) fetches source repositories centrally, creates content-addressed deployment artifacts, and serves them through multiple cache levels. Agents normally fetch a small digest and download an artifact only when its content changes. This avoids multiplying source-control and management-plane traffic by the number of clusters.
+* Plural's [Git-aware caching and distribution layer](/overview/architecture#control-plane) fetches source repositories centrally, creates content-addressed deployment artifacts, and serves them through multiple cache levels. Agents normally fetch a small digest and download an artifact only when its content changes. This avoids multiplying source-control and management-plane traffic by the number of clusters.
 * Plural has been deployed in production environments with more than 5,000 edge clusters.
 
 For very large fleets, tune the agent to reduce background traffic and persist its caches locally.
@@ -38,7 +38,7 @@ spec:
   disableWebsocket: true
 ```
 
-Setting an interval to `"0s"` disables that task. This profile minimizes requests from each device, but it also disables Stack runs, Sentinel runs, pipeline gate evaluation, vulnerability report uploads, and managed namespace polling on those clusters.  We also downtune other polls from their existing defaults, usually 2-3m to support higher scale, this can be toggled up and down based on total fleet, we've found there's usually little need to tune until you get around 1k clusters.
+Setting an interval to `"0s"` disables that task. This profile minimizes requests from each device, but it also disables Stack runs, Sentinel runs, pipeline gate evaluation, vulnerability report uploads, and managed namespace polling on those clusters.  We also tune down other polls from their existing defaults (usually 2-3 minutes) to support higher scale. These can be adjusted up or down based on total fleet size; we've found there's usually little need to tune them until you reach around 1k clusters.
 
 If an edge cluster needs any of those features, enable its corresponding interval rather than copying this profile unchanged. See [AgentConfiguration](/plural-features/continuous-deployment/deployment-operator/agent-configuration) for the complete field reference and verification steps.
 

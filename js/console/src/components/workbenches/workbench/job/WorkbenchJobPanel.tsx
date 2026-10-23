@@ -13,14 +13,17 @@ import {
   usePrevious,
 } from '@pluralsh/design-system'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
+import { WorkbenchFileContext } from 'components/ai/chatbot/PlrlFileChip'
 import {
   PanelHeaderSC,
   SidePanelContent,
 } from 'components/ai/chatbot/SidePanelShared'
 import {
   SidePanel,
+  SidePanelAutoOpen,
+  useSidePanelAutoOpen,
   useTopLevelSidePanel,
-} from 'components/layout/TopLevelSidePanel'
+} from 'components/layout/TopLevelSidePanelState'
 import { TabLabelWithIndicatorDot } from 'components/workbenches/common/TabLabelWithIndicatorDot'
 import {
   AgentRunStatus,
@@ -29,12 +32,11 @@ import {
   useWorkbenchJobQuery,
   WorkbenchJobFragment,
 } from 'generated/graphql'
-import { isEmpty, isNil, uniqBy } from 'lodash'
+import { isEmpty, uniqBy } from 'lodash'
 import {
   ReactElement,
   useCallback,
   useEffect,
-  useEffectEvent,
   useMemo,
   useRef,
   useState,
@@ -137,31 +139,35 @@ export function WorkbenchJobPanelContent() {
         />
       </PanelHeaderSC>
       <ContentWrapperSC>
-        <ContentInnerSC>
-          {selectedTab === 'Result' &&
-            (isLoading || hasWorkbenchJobResultContent(job)) && (
-              <WorkbenchJobResult
-                job={job}
-                loading={isLoading}
+        <WorkbenchFileContext.Provider
+          value={job?.workbench?.filesystemEnabled ? job.workbench.id : null}
+        >
+          <ContentInnerSC>
+            {selectedTab === 'Result' &&
+              (isLoading || hasWorkbenchJobResultContent(job)) && (
+                <WorkbenchJobResult
+                  job={job}
+                  loading={isLoading}
+                />
+              )}
+            {selectedTab === 'Pull requests' && job?.id && (
+              <WorkbenchJobPrs
+                generatedPrs={data.generatedPrs}
+                draftPrs={data.draftPrs}
+                workbenchId={job.workbench?.id ?? ''}
+                workbenchName={job.workbench?.name ?? ''}
+                jobId={job.id}
               />
             )}
-          {selectedTab === 'Pull requests' && job?.id && (
-            <WorkbenchJobPrs
-              generatedPrs={data.generatedPrs}
-              draftPrs={data.draftPrs}
-              workbenchId={job.workbench?.id ?? ''}
-              workbenchName={job.workbench?.name ?? ''}
-              jobId={job.id}
+            {selectedTab === 'Usage' && job?.usage && (
+              <WorkbenchJobUsage usage={job.usage} />
+            )}
+            <WorkbenchJobCommonTabContent
+              tab={selectedTab}
+              job={job}
             />
-          )}
-          {selectedTab === 'Usage' && job?.usage && (
-            <WorkbenchJobUsage usage={job.usage} />
-          )}
-          <WorkbenchJobCommonTabContent
-            tab={selectedTab}
-            job={job}
-          />
-        </ContentInnerSC>
+          </ContentInnerSC>
+        </WorkbenchFileContext.Provider>
       </ContentWrapperSC>
     </SidePanelContent>
   )
@@ -350,24 +356,22 @@ export function WorkbenchJobCommonTabContent({
   }
 }
 
-export function useWorkbenchJobPanel(autoOpen?: Nullable<boolean>) {
-  const { sidePanel, setSidePanel } = useTopLevelSidePanel()
+export function useWorkbenchJobPanel(autoOpen?: Nullable<SidePanelAutoOpen>) {
+  const { sidePanel, setSidePanel, closeSidePanel } = useTopLevelSidePanel()
   const isOpen = sidePanel === SIDE_PANEL_TYPE
   const setOpen = useCallback(
-    (open: boolean) => setSidePanel(open ? SIDE_PANEL_TYPE : null),
-    [setSidePanel]
+    (open: boolean) =>
+      open ? setSidePanel(SIDE_PANEL_TYPE) : closeSidePanel(SIDE_PANEL_TYPE),
+    [setSidePanel, closeSidePanel]
   )
-
-  const onAutoOpen = useEffectEvent(() => setOpen(true))
-  const onUnmount = useEffectEvent(() => setOpen(false))
-  useEffect(() => {
-    if (!!autoOpen) onAutoOpen()
-    return () => {
-      if (!isNil(autoOpen)) onUnmount()
-    }
-  }, [autoOpen])
+  useSidePanelAutoOpen(SIDE_PANEL_TYPE, autoOpen)
 
   return { isOpen, setOpen }
+}
+
+// Whether the panel has a tab to show once loaded, matching `getPanelTabs`.
+export function hasWorkbenchJobPanelTabs(data: WorkbenchJobTabsData) {
+  return !isEmpty(getPanelTabs({ ...data, isLoading: false }))
 }
 
 const ContentWrapperSC = styled.div(() => ({
@@ -397,9 +401,9 @@ const PanelSubTabSC = styled(SubTab)(({ theme }) => ({
   minWidth: 'max-content',
   outline: 'none',
   boxShadow: 'none',
-  borderRadius: 20,
+  borderRadius: theme.borderRadiuses.medium,
   backgroundColor: 'transparent',
-  padding: `${theme.spacing.xxsmall}px ${theme.spacing.small}px`,
+  padding: `${theme.spacing.xxsmall} ${theme.spacing.small}`,
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',

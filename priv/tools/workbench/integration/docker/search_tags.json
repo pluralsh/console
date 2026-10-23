@@ -1,6 +1,6 @@
 {
   "type": "object",
-  "description": "List one page of tags for a Docker/OCI repository slug. Registries return tags in their own order (not necessarily sorted by recency), so if the tag you need isn't on this page, call again with the returned next_cursor until next_cursor is null.",
+  "description": "List one page of tags for a Docker/OCI repository slug. Registries return tags in their own order (not necessarily sorted by recency), so if the tag you need isn't on this page, call again with the returned next_cursor until next_cursor is null. Registries usually order tags lexically (1.10.0 before 1.9.0), so to find the latest semver use the latest_tags tool instead of paging and sorting yourself.",
   "properties": {
     "repository_slug": {
       "type": "string",

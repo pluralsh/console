@@ -40,7 +40,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v7
         with:
-          go-version-file: go/oci-auth/go.mod
+          go-version-file: go/go.work
           cache-dependency-path: go/oci-auth/go.sum
           cache: true
       - run: go mod download

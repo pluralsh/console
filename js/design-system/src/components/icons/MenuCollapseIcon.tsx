@@ -8,10 +8,12 @@ export default createIcon(({ size, color }) => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <circle
-      cx="8"
-      cy="8"
-      r="7.5"
+    <rect
+      x={0.5}
+      y={0.5}
+      width={15}
+      height={15}
+      rx={3}
       stroke={color}
     />
     <path

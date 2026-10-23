@@ -332,6 +332,8 @@ template:
 	assert.Contains(t, defaultC.VolumeMounts, expectedMount)
 	assert.Contains(t, mcpServer.VolumeMounts, expectedMount)
 	assert.Contains(t, bootstrap.VolumeMounts, expectedMount)
+	assert.Equal(t, corev1.TerminationMessageFallbackToLogsOnError, defaultC.TerminationMessagePolicy)
+	assert.Equal(t, corev1.TerminationMessageFallbackToLogsOnError, bootstrap.TerminationMessagePolicy)
 
 	volume := requireVolume(t, pod.Spec.Volumes, "ca-certificate-only")
 	if assert.NotNil(t, volume.ConfigMap) {
@@ -389,8 +391,7 @@ func TestBuildAgentRunPod_IncludesMCPServerSidecar(t *testing.T) {
 	assert.Contains(t, mcp.Args, common.AgentMCPServerAddress)
 	assert.Contains(t, mcp.Args, "--grpc-address")
 	assert.Contains(t, mcp.Args, common.AgentMCPGRPCServerAddress)
-	assert.Len(t, mcp.EnvFrom, 1)
-	assert.Equal(t, run.Name, mcp.EnvFrom[0].SecretRef.LocalObjectReference.Name)
+	assert.Equal(t, getPrivilegedContainerEnvFrom(run.Name), mcp.EnvFrom)
 
 	var excludeTools string
 	for _, e := range mcp.Env {
@@ -413,10 +414,12 @@ func TestBuildAgentRunPod_IncludesMCPServerSidecar(t *testing.T) {
 	assert.Equal(t, []string{"/agent-bootstrap"}, bootstrap.Command)
 	assert.Contains(t, bootstrap.Args, "--working-dir")
 	assert.Contains(t, bootstrap.Args, common.AgentRunSharedWorkDir)
+	assert.Equal(t, corev1.TerminationMessageFallbackToLogsOnError, bootstrap.TerminationMessagePolicy)
 	assertAgentBootstrapRestrictedSecurityContext(t, *bootstrap)
 	assert.Contains(t, bootstrap.Env, corev1.EnvVar{Name: "HOME", Value: defaultTmpVolumePath})
 
 	defaultC := requireContainer(t, pod.Spec.Containers, defaultContainer)
+	assert.Equal(t, corev1.TerminationMessageFallbackToLogsOnError, defaultC.TerminationMessagePolicy)
 	if assert.NotNil(t, defaultC.SecurityContext) && assert.NotNil(t, defaultC.SecurityContext.ReadOnlyRootFilesystem) {
 		assert.False(t, *defaultC.SecurityContext.ReadOnlyRootFilesystem)
 	}
@@ -822,6 +825,68 @@ func TestGetAgentRunPodCompletion(t *testing.T) {
 			wantDelay:  true,
 		},
 		{
+			name: "completes failed harness container",
+			pod: &corev1.Pod{
+				Status: corev1.PodStatus{
+					Phase:   corev1.PodFailed,
+					Message: "agent run pod failed",
+					ContainerStatuses: []corev1.ContainerStatus{
+						{
+							Name: defaultContainer,
+							State: corev1.ContainerState{
+								Terminated: &corev1.ContainerStateTerminated{
+									ExitCode: 255,
+									Message:  "agent run failed: could not start",
+								},
+							},
+						},
+					},
+				},
+			},
+			wantStatus: console.AgentRunStatusFailed,
+			wantPhase:  v1alpha1.AgentRunPhaseFailed,
+			wantReason: "container \"default\" failed with exit code 255: agent run failed: could not start",
+			wantOK:     true,
+		},
+		{
+			name: "prefers eviction message over container exit",
+			pod: &corev1.Pod{
+				Status: corev1.PodStatus{
+					Phase:   corev1.PodFailed,
+					Reason:  "Evicted",
+					Message: "The node was low on resource: memory.",
+					ContainerStatuses: []corev1.ContainerStatus{
+						{
+							Name: defaultContainer,
+							State: corev1.ContainerState{
+								Terminated: &corev1.ContainerStateTerminated{
+									ExitCode: 137,
+									Message:  "agent run failed: signal: killed",
+								},
+							},
+						},
+					},
+				},
+			},
+			wantStatus: console.AgentRunStatusFailed,
+			wantPhase:  v1alpha1.AgentRunPhaseFailed,
+			wantReason: "The node was low on resource: memory.",
+			wantOK:     true,
+		},
+		{
+			name: "falls back to pod message when no container failed",
+			pod: &corev1.Pod{
+				Status: corev1.PodStatus{
+					Phase:   corev1.PodFailed,
+					Message: "evicted",
+				},
+			},
+			wantStatus: console.AgentRunStatusFailed,
+			wantPhase:  v1alpha1.AgentRunPhaseFailed,
+			wantReason: "evicted",
+			wantOK:     true,
+		},
+		{
 			name: "completes timed out pod",
 			pod: &corev1.Pod{
 				ObjectMeta: metav1.ObjectMeta{
@@ -933,4 +998,40 @@ func assertContainerNamesUnique(t *testing.T, pod *corev1.Pod) {
 		}
 		names[container.Name] = struct{}{}
 	}
+}
+
+func TestBuildAgentRunPod_DeployTokenIsolation(t *testing.T) {
+	run := &v1alpha1.AgentRun{ObjectMeta: metav1.ObjectMeta{Name: "run", Namespace: "ns"}}
+	runtime := &v1alpha1.AgentRuntime{Spec: v1alpha1.AgentRuntimeSpec{
+		Template: &corev1.PodTemplateSpec{Spec: corev1.PodSpec{
+			ShareProcessNamespace: lo.ToPtr(true),
+			Containers: []corev1.Container{{
+				Name:    defaultContainer,
+				EnvFrom: getDefaultContainerEnvFrom(pluralSecretName("run")),
+			}},
+		}},
+	}}
+
+	pod := buildAgentRunPod(run, runtime)
+
+	assert.False(t, lo.FromPtr(pod.Spec.ShareProcessNamespace))
+	hasPlural := func(c corev1.Container) bool {
+		return lo.ContainsBy(c.EnvFrom, func(e corev1.EnvFromSource) bool {
+			return e.SecretRef != nil && e.SecretRef.Name == pluralSecretName("run")
+		})
+	}
+	for _, c := range pod.Spec.Containers {
+		if c.Name == defaultContainer {
+			assert.False(t, hasPlural(c))
+			assert.Equal(t, getDefaultContainerEnvFrom(runSecretName("run")), c.EnvFrom)
+		}
+	}
+	found := 0
+	for _, c := range pod.Spec.InitContainers {
+		if c.Name == agentBootstrapContainerName || c.Name == mcpServerContainerName {
+			found++
+			assert.True(t, hasPlural(c), c.Name)
+		}
+	}
+	assert.Equal(t, 2, found)
 }

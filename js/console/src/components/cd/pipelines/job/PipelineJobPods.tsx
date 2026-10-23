@@ -60,7 +60,7 @@ export default function PipelineJobLogs() {
   return (
     <ScrollablePage
       scrollable={false}
-      heading="Pods"
+      contentStyles={{ paddingTop: 0 }}
     >
       <PodsList
         fullHeightWrap

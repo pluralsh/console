@@ -5,8 +5,8 @@
     "node": ">=24.11.1"
   },
   "scripts": {
-    "dev": "run-s generate:route-index && concurrently \"next dev -p 3004\" \"yarn graphql:codegen:watch\"",
-    "dev:watch": "concurrently \"next dev -p 3004\" \"yarn graphql:codegen:watch\"",
+    "dev": "run-s generate:route-index dev:next",
+    "dev:next": "next dev -p 3004",
     "build": "run-s generate:route-index build:next",
     "build:next": "biome check --vcs-enabled=false ./src ./pages && next build",
     "start": "next start -p 3000",
@@ -16,8 +16,6 @@
     "fix": "run-s fix:js fix:biome",
     "fix:biome": "biome check --write ./src ./pages",
     "fix:js": "oxlint -c ../.oxlintrc.json --fix src pages",
-    "graphql:codegen": "graphql-codegen --config codegen.yml",
-    "graphql:codegen:watch": "graphql-codegen --watch --config codegen.yml",
     "generate:route-index": "ts-node scripts/index-routes.ts"
   },
   "dependencies": {
@@ -25,11 +23,6 @@
     "@apollo/client": "3.14.1",
     "@emotion/react": "11.14.0",
     "@emotion/styled": "11.14.1",
-    "@graphql-codegen/cli": "4.0.1",
-    "@graphql-codegen/introspection": "4.0.0",
-    "@graphql-codegen/typescript": "4.0.0",
-    "@graphql-codegen/typescript-operations": "4.0.0",
-    "@graphql-codegen/typescript-react-apollo": "3.3.7",
     "@loomhq/loom-embed": "1.5.0",
     "@markdoc/markdoc": "0.4.0",
     "@markdoc/next.js": "0.2.2",
@@ -71,14 +64,11 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",
-    "@graphql-codegen/cli": "4.0.1",
-    "@graphql-codegen/client-preset": "4.0.0",
     "@types/glob": "8.1.0",
     "@types/node": "24.10.1",
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
     "chokidar": "4.0.3",
-    "concurrently": "8.2.0",
     "npm-run-all2": "9.0.3",
     "openapi-types": "12.1.3",
     "oxlint": "1.87.0",

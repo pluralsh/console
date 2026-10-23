@@ -51,7 +51,7 @@ export const StepperAccordionItemSC = styled(AccordionItem)<{
     width: 1,
     left: LINE_LEFT,
     top: TRIGGER_HEIGHT / 2 + DOT_SIZE / 2 + DOT_GAP,
-    bottom: DOT_GAP - theme.spacing[$gap] - TRIGGER_HEIGHT / 2 + DOT_SIZE / 2,
+    bottom: `calc(${DOT_GAP - TRIGGER_HEIGHT / 2 + DOT_SIZE / 2}px - ${theme.spacing[$gap]})`,
     backgroundColor: theme.colors['border-fill-three'],
     ...($isLast !== undefined && { display: $isLast ? 'none' : 'block' }),
   },

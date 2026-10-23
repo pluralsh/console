@@ -5,8 +5,16 @@ helm_repository_url: https://blob.istio.io/istio-release/charts
 chart_name: istiod
 eolApiSlug: istio
 versions:
+- version: 1.31.2
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.31.2
+  images: ['docker.io/istio/pilot:1.31.2']
+  eolAt: '2027-02-28'
 - version: 1.31.1
-  kube: ['1.36', '1.35', '1.34', '1.33', '1.32']
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32']
   requirements: []
   incompatibilities: []
   summary: null
@@ -64,7 +72,7 @@ versions:
         affect your cluster.']
   chart_version: 1.29.0
   images: ['docker.io/istio/pilot:1.29.0']
-  eolAt: '2026-10-31'
+  eolAt: '2026-10-15'
 - version: 1.28.0
   kube: ['1.34', '1.33', '1.32', '1.31', '1.30']
   requirements: []

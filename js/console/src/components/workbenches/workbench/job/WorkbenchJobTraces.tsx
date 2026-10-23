@@ -16,8 +16,18 @@ import {
   StatusOkIcon,
   TreeViewIcon,
   WarningIcon,
+  useResizeObserver,
 } from '@pluralsh/design-system'
-import { type ReactNode, useMemo, useRef, useState } from 'react'
+import { DragHandleSC } from 'components/ai/chatbot/SidePanelShared'
+import { useResizablePane } from 'components/ai/chatbot/useResizeableChatPane'
+import {
+  type ReactNode,
+  type RefObject,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import styled from 'styled-components'
 import { TraceTopology } from './WorkbenchJobTraceTopology'
 import { traceBarColor } from './workbenchJobTraceColors'
@@ -32,6 +42,8 @@ import {
   orderTraceSpans,
   serviceName,
   shortTraceId,
+  spanDescription,
+  spanLabel,
   traceBarPosition,
   traceBounds,
   type TraceSeverity,
@@ -45,17 +57,47 @@ import {
   traceTreeMeta,
 } from './workbenchJobTraceUtils'
 
+// for containers with their own full screen button, which opens the trace's
+// full screen layout rather than enlarging the container
+export type TraceFullscreenControl = {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  title?: string
+  returnFocusRef?: RefObject<HTMLElement | null>
+}
+
+const TREE_STEP = 20
+const TRACE_LABEL_MIN = 200
+const TRACE_LABEL_DEFAULT = 256
+const TRACE_LABEL_MAX = 560
+// leave the bars enough room that widening the names cannot cover the timeline
+const TRACE_TIMELINE_MIN = 220
+const TRACE_LABEL_STORAGE_KEY = 'workbench-trace-label-width'
+
+function traceLabelMax(containerWidth: number) {
+  if (containerWidth <= 0) return TRACE_LABEL_MAX
+
+  return Math.max(
+    TRACE_LABEL_MIN,
+    Math.min(TRACE_LABEL_MAX, containerWidth - TRACE_TIMELINE_MIN)
+  )
+}
+
 export function TraceWaterfall({
   traces,
   summary,
+  fullscreenControl,
 }: {
   traces: TraceSpan[]
   summary?: Nullable<string>
+  fullscreenControl?: TraceFullscreenControl
 }) {
   const traceGroups = useMemo(() => groupTraces(traces), [traces])
   const [selectedTraceId, setSelectedTraceId] = useState<string>()
   const [view, setView] = useState<TraceView>('timeline')
-  const [fullscreen, setFullscreen] = useState(false)
+  const [ownFullscreen, setOwnFullscreen] = useState(false)
+  const fullscreen = fullscreenControl?.open ?? ownFullscreen
+  const setFullscreen = fullscreenControl?.onOpenChange ?? setOwnFullscreen
   const fullscreenTriggerRef = useRef<HTMLDivElement>(null)
   const [detailsOpen, setDetailsOpen] = useState(false)
   const activeTrace =
@@ -76,6 +118,28 @@ export function TraceWaterfall({
   const selectedParent = rows.find(
     ({ span }) => span.spanId === selectedRow?.span.parentId
   )
+  const timelineRef = useRef<HTMLDivElement>(null)
+  const [labelContainerWidth, setLabelContainerWidth] = useState(0)
+  const onLabelContainerWidth = useCallback((next: number) => {
+    setLabelContainerWidth((current) => (current === next ? current : next))
+  }, [])
+  useResizeObserver(timelineRef, ({ width }) =>
+    onLabelContainerWidth(Math.floor(width))
+  )
+  const preferredLabelWidth =
+    TRACE_LABEL_DEFAULT +
+    rows.reduce((max, row) => Math.max(max, row.depth), 0) * TREE_STEP
+  const labelMaxWidth = traceLabelMax(labelContainerWidth)
+  const {
+    calculatedPanelWidth: labelWidth,
+    isDragging,
+    dragHandleProps,
+  } = useResizablePane(TRACE_LABEL_MIN, 100, undefined, {
+    defaultWidthPx: Math.min(preferredLabelWidth, TRACE_LABEL_MAX),
+    storageKey: TRACE_LABEL_STORAGE_KEY,
+    maxWidthPx: labelMaxWidth,
+    handleEdge: 'right',
+  })
 
   if (!activeTrace || !rows.length || !bounds) return null
 
@@ -137,23 +201,42 @@ export function TraceWaterfall({
               Exit full screen
             </Button>
           ) : (
-            <IconFrame
-              clickable
-              type="tertiary"
-              size="large"
-              icon={<ExpandIcon size={16} />}
-              tooltip="Full screen"
-              aria-label="Full screen"
-              ref={fullscreenTriggerRef}
-              onClick={() => setFullscreen(true)}
-              css={{ marginLeft: 'auto' }}
-            />
+            !fullscreenControl && (
+              <IconFrame
+                clickable
+                type="tertiary"
+                size="large"
+                icon={<ExpandIcon size={16} />}
+                tooltip="Full screen"
+                aria-label="Full screen"
+                ref={fullscreenTriggerRef}
+                onClick={() => setFullscreen(true)}
+                css={{ marginLeft: 'auto' }}
+              />
+            )
           )}
         </TraceToolbarActionsSC>
       </TraceHeaderSC>
       {view === 'timeline' ? (
         <TraceTimelineContentSC $sideDetails={fullscreen && !!selectedRow}>
-          <TimelineSC $fullscreen={fullscreen}>
+          <DragHandleSC
+            role="separator"
+            aria-label="Span list width"
+            aria-orientation="vertical"
+            aria-valuemin={TRACE_LABEL_MIN}
+            aria-valuemax={labelMaxWidth}
+            aria-valuenow={labelWidth}
+            tabIndex={0}
+            title="Drag to resize the span list"
+            $isDragging={isDragging}
+            css={{ left: labelWidth - 10 }}
+            {...dragHandleProps}
+          />
+          <TimelineSC
+            ref={timelineRef}
+            $fullscreen={fullscreen}
+            style={{ '--trace-label-width': `${labelWidth}px` }}
+          >
             <TimelineHeaderSC>
               <CaptionP $color="text-xlight">SPAN</CaptionP>
               <TraceAxisSC>
@@ -176,6 +259,8 @@ export function TraceWaterfall({
               const { left, width } = traceBarPosition(row, bounds)
               const severity = traceSeverity(row.span.tags)
               const color = traceBarColor(service)
+              const label = spanLabel(row.span)
+              const description = spanDescription(row.span)
 
               return (
                 <TraceRowSC
@@ -197,9 +282,14 @@ export function TraceWaterfall({
                       {tree[index]?.hasChildren && <TraceDotDownSC />}
                       <ServiceDotSC $color={color.accent} />
                     </TraceDotWrapSC>
-                    <TraceNameSC title={row.span.name ?? 'Unnamed span'}>
-                      {row.span.name ?? 'Unnamed span'}
-                    </TraceNameSC>
+                    <TraceNameStackSC
+                      title={description ? `${label}\n${description}` : label}
+                    >
+                      <TraceNameSC>{label}</TraceNameSC>
+                      {description && (
+                        <TraceDescriptionSC>{description}</TraceDescriptionSC>
+                      )}
+                    </TraceNameStackSC>
                     <TraceBarStatusIcon severity={severity} />
                     <TraceDurationSC>
                       {formatDuration(duration)}
@@ -211,10 +301,10 @@ export function TraceWaterfall({
                       $fill={color.fill}
                       $left={left}
                       $width={width}
-                      title={`${service} · ${formatDuration(duration)}`}
+                      title={`${label} · ${service} · ${formatDuration(duration)}`}
                     >
                       <TraceBarTextSC $color={color.text}>
-                        {row.span.name ?? 'Unnamed span'}
+                        {label}
                       </TraceBarTextSC>
                       <TraceBarServiceSC $color={color.text}>
                         {service}
@@ -231,7 +321,7 @@ export function TraceWaterfall({
               <TraceDetailHeaderSC>
                 <TraceDetailTitleSC>
                   <Body2P $color="text-light">
-                    {selectedRow.span.name ?? 'Unnamed span'}
+                    {spanLabel(selectedRow.span)}
                   </Body2P>
                   <IconFrame
                     clickable
@@ -284,7 +374,7 @@ export function TraceWaterfall({
                           )
                         }
                       >
-                        {selectedParent.span.name}
+                        {spanLabel(selectedParent.span)}
                       </TraceParentButtonSC>
                     </>
                   )}
@@ -319,11 +409,13 @@ export function TraceWaterfall({
       <ModalWrapper
         open={fullscreen}
         onOpenChange={setFullscreen}
-        title="Trace visualization"
+        title={fullscreenControl?.title ?? 'Trace visualization'}
         aria-describedby={undefined}
         onCloseAutoFocus={(event) => {
           event.preventDefault()
-          requestAnimationFrame(() => fullscreenTriggerRef.current?.focus())
+          const returnFocusRef =
+            fullscreenControl?.returnFocusRef ?? fullscreenTriggerRef
+          requestAnimationFrame(() => returnFocusRef.current?.focus())
         }}
         css={{
           width: 'min(1500px, 100%)',
@@ -563,8 +655,6 @@ function TraceBarStatusIcon({ severity }: { severity: TraceSeverity }) {
   return null
 }
 
-const TREE_STEP = 20
-
 const TraceWaterfallSC = styled.div<{ $fullscreen: boolean }>(
   ({ theme, $fullscreen }) => ({
     containerType: 'inline-size',
@@ -612,7 +702,7 @@ const TraceSummarySC = styled.div<{ $fullscreen: boolean }>(
     flex: 1,
     gap: theme.spacing.large,
     minWidth: 0,
-    padding: `${theme.spacing.xsmall}px 0`,
+    padding: `${theme.spacing.xsmall} 0`,
     '@container trace-view (max-width: 560px)': {
       gap: theme.spacing.xsmall,
       flexWrap: 'wrap',
@@ -625,7 +715,7 @@ const TraceIdChipSC = styled.span(({ theme }) => ({
   flex: 1,
   minWidth: 100,
   overflow: 'hidden',
-  padding: `6px ${theme.spacing.small}px`,
+  padding: `0.375rem ${theme.spacing.small}`,
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
   '> span:last-child': { color: theme.colors['text-xlight'] },
@@ -637,7 +727,7 @@ const TraceMetricSC = styled.div(({ theme }) => ({
   flexShrink: 0,
   flexDirection: 'column',
   gap: theme.spacing.xxsmall,
-  padding: '0 10px',
+  padding: '0 0.625rem',
 }))
 
 const TraceStatusMetricSC = styled(TraceMetricSC)({
@@ -666,7 +756,7 @@ const TraceViewControlSC = styled(RadioGroup)(({ theme }) => ({
   display: 'flex',
   flexShrink: 0,
   height: 40,
-  padding: '2px 4px',
+  padding: '0.125rem 0.25rem',
 }))
 
 const TraceViewOptionSC = styled(SelectItem)(({ theme }) => ({
@@ -691,6 +781,7 @@ const TraceTimelineContentSC = styled.div<{ $sideDetails: boolean }>(
       overflowY: 'auto',
     },
     minHeight: 0,
+    position: 'relative',
   })
 )
 
@@ -706,7 +797,7 @@ const TimelineHeaderSC = styled.div(({ theme }) => ({
   background: theme.colors['fill-zero'],
   borderBottom: `1px solid ${theme.colors.border}`,
   display: 'grid',
-  gridTemplateColumns: '256px minmax(0, 1fr)',
+  gridTemplateColumns: 'var(--trace-label-width, 256px) minmax(0, 1fr)',
   minHeight: 50,
   position: 'sticky',
   top: 0,
@@ -715,17 +806,17 @@ const TimelineHeaderSC = styled.div(({ theme }) => ({
     alignItems: 'center',
     display: 'flex',
     borderRight: theme.borders.default,
-    padding: `0 ${theme.spacing.medium}px`,
+    padding: `0 ${theme.spacing.medium}`,
   },
   '@container trace-view (max-width: 560px)': {
-    gridTemplateColumns: '200px minmax(300px, 1fr)',
-    minWidth: 500,
+    gridTemplateColumns: 'var(--trace-label-width, 256px) minmax(300px, 1fr)',
+    minWidth: 'calc(var(--trace-label-width, 256px) + 300px)',
   },
 }))
 
 const TraceAxisSC = styled.div(({ theme }) => ({
   position: 'relative',
-  margin: `0 ${theme.spacing.medium}px`,
+  margin: `0 ${theme.spacing.medium}`,
 }))
 
 const TraceTickSC = styled.div<{ $position: number }>(
@@ -746,7 +837,7 @@ const TraceTickSC = styled.div<{ $position: number }>(
             ? undefined
             : 'translateX(-50%)',
       background: theme.colors['fill-zero'],
-      paddingBottom: 2,
+      paddingBottom: '0.125rem',
     },
   })
 )
@@ -760,7 +851,7 @@ const TraceRowSC = styled.button<{ $selected: boolean }>(
     color: 'inherit',
     cursor: 'pointer',
     display: 'grid',
-    gridTemplateColumns: '256px minmax(0, 1fr)',
+    gridTemplateColumns: 'var(--trace-label-width, 256px) minmax(0, 1fr)',
     height: 40,
     minHeight: 40,
     padding: 0,
@@ -774,8 +865,8 @@ const TraceRowSC = styled.button<{ $selected: boolean }>(
     },
     '&:last-child > :last-child::after': { display: 'none' },
     '@container trace-view (max-width: 560px)': {
-      gridTemplateColumns: '200px minmax(300px, 1fr)',
-      minWidth: 500,
+      gridTemplateColumns: 'var(--trace-label-width, 256px) minmax(300px, 1fr)',
+      minWidth: 'calc(var(--trace-label-width, 256px) + 300px)',
     },
   })
 )
@@ -786,7 +877,7 @@ const TraceLabelSC = styled.div(({ theme }) => ({
   display: 'flex',
   gap: 0,
   minWidth: 0,
-  padding: `0 ${theme.spacing.medium}px`,
+  padding: `0 ${theme.spacing.medium}`,
 }))
 
 const TraceTreeGutterSC = styled.div<{ $depth: number }>(({ $depth }) => ({
@@ -824,7 +915,7 @@ const TraceTreeLineSC = styled.span<{
 })
 
 const TraceDotWrapSC = styled.span({
-  marginRight: 12,
+  marginRight: '0.75rem',
   alignItems: 'center',
   alignSelf: 'stretch',
   display: 'flex',
@@ -849,19 +940,33 @@ const ServiceDotSC = styled.span<{ $color: string }>(({ $color }) => ({
   width: 8,
 }))
 
+const TraceNameStackSC = styled.span({
+  display: 'flex',
+  flexDirection: 'column',
+  minWidth: 0,
+  marginRight: '0.5rem',
+})
+
 const TraceNameSC = styled.span(({ theme }) => ({
   ...theme.partials.text.body2,
   color: theme.colors['text-light'],
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
-  marginRight: 8,
+}))
+
+const TraceDescriptionSC = styled.span(({ theme }) => ({
+  ...theme.partials.text.caption,
+  color: theme.colors['text-xlight'],
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
 }))
 
 const TraceDurationSC = styled.span(({ theme }) => ({
   color: theme.colors['text-xlight'],
   ...theme.partials.text.mono,
-  fontSize: 12,
+  fontSize: '0.75rem',
   marginLeft: 'auto',
   paddingLeft: theme.spacing.xsmall,
   whiteSpace: 'nowrap',
@@ -872,14 +977,14 @@ const TraceBarAreaSC = styled.div(({ theme }) => ({
   boxSizing: 'border-box',
   display: 'flex',
   minWidth: 0,
-  margin: `0 ${theme.spacing.medium}px`,
+  margin: `0 ${theme.spacing.medium}`,
   height: '100%',
   position: 'relative',
   '&::after': {
     content: '""',
     position: 'absolute',
-    left: -theme.spacing.medium,
-    right: -theme.spacing.medium,
+    left: theme.spacing['minus-medium'],
+    right: theme.spacing['minus-medium'],
     bottom: 0,
     borderBottom: theme.borders.default,
   },
@@ -902,7 +1007,7 @@ const TraceBarSC = styled.span<{
   height: 20,
   marginLeft: `${$left}%`,
   overflow: 'hidden',
-  padding: `0 8px 0 10px`,
+  padding: `0 0.5rem 0 0.625rem`,
   position: 'absolute',
   minWidth: 3,
   width: `${$width}%`,
@@ -911,10 +1016,10 @@ const TraceBarSC = styled.span<{
 const TraceBarTextSC = styled.span<{ $color: string }>(({ $color }) => ({
   color: $color,
   flexShrink: 1,
-  fontSize: 12,
+  fontSize: '0.75rem',
   fontWeight: 600,
-  letterSpacing: '0.25px',
-  lineHeight: '16px',
+  letterSpacing: '0.025em',
+  lineHeight: '1rem',
   minWidth: 0,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
@@ -924,9 +1029,9 @@ const TraceBarTextSC = styled.span<{ $color: string }>(({ $color }) => ({
 const TraceBarServiceSC = styled.span<{ $color: string }>(({ $color }) => ({
   color: $color,
   flex: 1,
-  fontSize: 12,
-  letterSpacing: '0.5px',
-  lineHeight: '16px',
+  fontSize: '0.75rem',
+  letterSpacing: '0.025em',
+  lineHeight: '1rem',
   minWidth: 0,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
@@ -979,7 +1084,7 @@ const TraceDetailFieldsSC = styled.div(({ theme }) => ({
   '> *': { minWidth: 0, justifySelf: 'start' },
   alignItems: 'start',
   display: 'grid',
-  gap: `${theme.spacing.xsmall}px ${theme.spacing.xsmall}px`,
+  gap: `${theme.spacing.xsmall} ${theme.spacing.xsmall}`,
   gridTemplateColumns: '77px minmax(0, 1fr)',
 }))
 

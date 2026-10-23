@@ -60,10 +60,12 @@ def test_fetch_tags_paginates_and_uses_timeouts(monkeypatch):
     first = [{"name": f"v1.8.{patch}"} for patch in range(100)]
     get = Mock(side_effect=[response(body=first), response(body=[{"name": "v1.7.0"}])])
     monkeypatch.setattr(scraper.requests, "get", get)
+    monkeypatch.setenv("GITHUB_TOKEN", "token")
     assert len(scraper.fetch_github_tags()) == 101
+    headers = {"Authorization": "Bearer token"}
     assert [call.kwargs for call in get.call_args_list] == [
-        {"params": {"per_page": 100, "page": 1}, "timeout": 30},
-        {"params": {"per_page": 100, "page": 2}, "timeout": 30},
+        {"params": {"per_page": 100, "page": 1}, "headers": headers, "timeout": 30},
+        {"params": {"per_page": 100, "page": 2}, "headers": headers, "timeout": 30},
     ]
 
 

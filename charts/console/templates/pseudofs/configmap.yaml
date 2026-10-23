@@ -1,0 +1,31 @@
+{{- if include "pseudofs.enabled" . }}
+{{- $filesystem := deepCopy .Values.pseudofs.config.filesystem }}
+{{- $storage := get $filesystem "storage" | default (dict) }}
+{{- $_ := set $storage "type" "SlateDb" }}
+{{- $_ := set $storage "path" (include "pseudofs.storagePath" .) }}
+{{- $_ := set $storage "object_store" (include "pseudofs.objectStore" . | fromYaml) }}
+{{- $_ := set $filesystem "storage" $storage }}
+{{- if not (hasKey $filesystem "metastore_wal_path") }}
+{{- $_ := set $filesystem "metastore_wal_path" (printf "%s/wal" .Values.pseudofs.persistence.mountPath) }}
+{{- else if eq (toString $filesystem.metastore_wal_path) "" }}
+{{- $_ := unset $filesystem "metastore_wal_path" }}
+{{- end }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "pseudofs.fullname" . }}
+  labels:
+    {{- include "pseudofs.labels" . | nindent 4 }}
+data:
+  pseudofs.yaml: |
+    listener: 0.0.0.0:{{ .Values.pseudofs.service.port }}
+    filesystem:
+      {{- toYaml $filesystem | nindent 6 }}
+    max_unary_file_size_bytes: {{ printf "%.0f" (float64 .Values.pseudofs.config.maxUnaryFileSizeBytes) }}
+    max_decoding_message_bytes: {{ printf "%.0f" (float64 .Values.pseudofs.config.maxDecodingMessageBytes) }}
+    max_encoding_message_bytes: {{ printf "%.0f" (float64 .Values.pseudofs.config.maxEncodingMessageBytes) }}
+    {{- with .Values.pseudofs.config.search }}
+    search:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+{{- end }}

@@ -6,6 +6,8 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 )
 
 func TestWorkbenchMCPProxyInjectsCredentialAndPreservesProtocol(t *testing.T) {
@@ -23,12 +25,14 @@ func TestWorkbenchMCPProxyInjectsCredentialAndPreservesProtocol(t *testing.T) {
 	defer upstream.Close()
 
 	token := "user-token"
-	handler, err := newWorkbenchMCPProxy(
+	handler, err := newTokenProxy(
 		upstream.URL+"/mcp/workbench/id?categories=metrics%2Clogs",
+		"Bearer",
 		func() string { return token },
+		nil,
 	)
 	if err != nil {
-		t.Fatalf("newWorkbenchMCPProxy() error = %v", err)
+		t.Fatalf("newTokenProxy() error = %v", err)
 	}
 
 	request := httptest.NewRequest(http.MethodPost, "http://127.0.0.1/workbench/mcp", strings.NewReader(`{"jsonrpc":"2.0"}`))
@@ -73,10 +77,34 @@ func TestWorkbenchMCPProxyInjectsCredentialAndPreservesProtocol(t *testing.T) {
 }
 
 func TestWorkbenchMCPProxyRejectsInvalidConfiguration(t *testing.T) {
-	if _, err := newWorkbenchMCPProxy("not-a-url", func() string { return "token" }); err == nil {
+	if _, err := newTokenProxy("not-a-url", "Bearer", func() string { return "token" }, nil); err == nil {
 		t.Fatal("expected invalid URL error")
 	}
-	if _, err := newWorkbenchMCPProxy("https://console.example/mcp", func() string { return "" }); err == nil {
+	if _, err := newTokenProxy("https://console.example/mcp", "Bearer", func() string { return "" }, nil); err == nil {
 		t.Fatal("expected missing token error")
+	}
+}
+
+func TestWorkbenchMCPProxyKeepsOperatorToolFilter(t *testing.T) {
+	var query string
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		query = r.URL.RawQuery
+	}))
+	defer upstream.Close()
+
+	srv := NewServer(nil, WithWorkbenchMCPProxy(
+		upstream.URL+"/mcp/workbench/id?categories=metrics%2Clogs",
+		func() string { return "user-token" },
+	))
+
+	for _, target := range []string{"", "?tools=raw_kube_get", "?categories=infrastructure"} {
+		srv.httpServer.Handler.ServeHTTP(httptest.NewRecorder(), localRequest(
+			http.MethodPost,
+			common.AgentWorkbenchMCPPath+target,
+			strings.NewReader(`{"jsonrpc":"2.0"}`),
+		))
+		if query != "categories=metrics%2Clogs" {
+			t.Fatalf("%q: upstream query = %q", target, query)
+		}
 	}
 }
