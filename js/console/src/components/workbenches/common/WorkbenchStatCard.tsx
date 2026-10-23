@@ -5,31 +5,46 @@ import { CaptionP } from 'components/utils/typography/Text'
 import type { ReactNode } from 'react'
 import { useTheme } from 'styled-components'
 
-export function WorkbenchStatCard({
-  label,
-  value,
-  helper,
-  info,
-  loading,
-  valueColor,
-}: {
+type WorkbenchStatProps = {
   label: string
   value: string
   helper: string
   info?: ReactNode
   loading?: boolean
   valueColor?: string
-}) {
+}
+
+export function WorkbenchStatCard(props: WorkbenchStatProps) {
   const theme = useTheme()
 
   return (
     <Card
       css={{
         border: theme.borders.default,
+        padding: theme.spacing.large,
+      }}
+    >
+      <WorkbenchStat {...props} />
+    </Card>
+  )
+}
+
+export function WorkbenchStat({
+  label,
+  value,
+  helper,
+  info,
+  loading,
+  valueColor,
+}: WorkbenchStatProps) {
+  const theme = useTheme()
+
+  return (
+    <div
+      css={{
         display: 'flex',
         flexDirection: 'column',
         gap: theme.spacing.small,
-        padding: theme.spacing.large,
       }}
     >
       <div
@@ -72,6 +87,6 @@ export function WorkbenchStatCard({
         </div>
       )}
       <CaptionP $color="text-xlight">{helper}</CaptionP>
-    </Card>
+    </div>
   )
 }
