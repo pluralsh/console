@@ -41,9 +41,16 @@ import {
   WORKBENCHES_ABS_PATH,
   WORKBENCHES_CREATE_ABS_PATH,
   WORKBENCHES_EVALS_REL_PATH,
+  WORKBENCHES_USAGE_REL_PATH,
   getWorkbenchAbsPath,
 } from 'routes/workbenchesRoutesConsts'
-import { ComponentType, useEffect, useMemo, useState } from 'react'
+import {
+  ComponentType,
+  ReactNode,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
@@ -261,7 +268,13 @@ function WorkbenchesSummary({ projectId }: { projectId?: string }) {
           )}
           helper="PRs merged (merge rate), over lifetime"
           loading={isLoading}
+          centered
         />
+        <SummaryLink
+          to={`${WORKBENCHES_ABS_PATH}/${WORKBENCHES_EVALS_REL_PATH}`}
+        >
+          View evals
+        </SummaryLink>
       </SummaryCellSC>
       <SummaryCellSC>
         <WorkbenchStat
@@ -270,6 +283,7 @@ function WorkbenchesSummary({ projectId }: { projectId?: string }) {
           helper="Estimated from the size of merged PRs"
           info={<HoursSavedInfo />}
           loading={isLoading}
+          centered
         />
       </SummaryCellSC>
       <SummaryCellSC>
@@ -278,18 +292,35 @@ function WorkbenchesSummary({ projectId }: { projectId?: string }) {
           value={formatTokenCount(aggregates?.totalTokens ?? 0) ?? '0'}
           helper="Over lifetime"
           loading={isLoading}
+          centered
         />
-      </SummaryCellSC>
-      <SummaryLinkCellSC>
-        <InlineLink
-          as={Link}
-          to={`${WORKBENCHES_ABS_PATH}/${WORKBENCHES_EVALS_REL_PATH}`}
+        <SummaryLink
+          to={`${WORKBENCHES_ABS_PATH}/${WORKBENCHES_USAGE_REL_PATH}`}
         >
-          View evals
-        </InlineLink>
-        <CaretRightIcon size={12} />
-      </SummaryLinkCellSC>
+          View usage
+        </SummaryLink>
+      </SummaryCellSC>
     </SummaryStripSC>
+  )
+}
+
+function SummaryLink({ to, children }: { to: string; children: ReactNode }) {
+  const theme = useTheme()
+
+  return (
+    <Flex
+      align="center"
+      gap="xxsmall"
+      css={{ marginTop: theme.spacing.small }}
+    >
+      <InlineLink
+        as={Link}
+        to={to}
+      >
+        {children}
+      </InlineLink>
+      <CaretRightIcon size={12} />
+    </Flex>
   )
 }
 
@@ -485,24 +516,15 @@ const SummaryStripSC = styled.div(({ theme }) => ({
 }))
 
 const SummaryCellSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
   flex: 1,
   minWidth: 200,
   padding: theme.spacing.large,
-  '&:first-child': {
-    paddingLeft: 0,
-  },
   '& + &': {
     borderLeft: theme.borders.default,
   },
-}))
-
-const SummaryLinkCellSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  gap: theme.spacing.xxsmall,
-  padding: theme.spacing.large,
-  paddingRight: 0,
-  whiteSpace: 'nowrap',
 }))
 
 const ListSectionSC = styled.div(({ theme }) => ({
