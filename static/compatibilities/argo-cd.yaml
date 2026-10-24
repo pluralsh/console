@@ -4,20 +4,18 @@ release_url: https://github.com/argoproj/argo-cd/releases/tag/v{vsn}
 helm_repository_url: https://argoproj.github.io/argo-helm
 eolApiSlug: argocd
 versions:
-- version: 3.5.5
+- version: 3.5.6
   kube: ['1.37', '1.36', '1.35']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
     chart_updates: []
-    features: ['No user-facing features called out between v3.5.1 and v3.5.5 in the
-        provided notes; changes are primarily reliability, caching, and security/UX
-        bug fixes plus dependency bumps.']
+    features: []
     breaking_changes: []
-  chart_version: 10.10.5
+  chart_version: 10.11.1
   images: ['ecr-public.aws.com/docker/library/redis:8.6.4-alpine', 'ghcr.io/dexidp/dex:v2.46.0',
-    'quay.io/argoproj/argocd:v3.5.5']
+    'quay.io/argoproj/argocd:v3.5.6']
 - version: 3.5.1
   kube: ['1.37', '1.36', '1.35']
   requirements: []

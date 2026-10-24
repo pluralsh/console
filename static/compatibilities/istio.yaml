@@ -5,13 +5,17 @@ helm_repository_url: https://blob.istio.io/istio-release/charts
 chart_name: istiod
 eolApiSlug: istio
 versions:
-- version: 1.31.2
+- version: 1.31.3
   kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32']
   requirements: []
   incompatibilities: []
-  summary: null
-  chart_version: 1.31.2
-  images: ['docker.io/istio/pilot:1.31.2']
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: []
+    breaking_changes: []
+  chart_version: 1.31.3
+  images: ['docker.io/istio/pilot:1.31.3']
   eolAt: '2027-02-28'
 - version: 1.31.1
   kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32']
