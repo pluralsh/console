@@ -4,36 +4,23 @@ helm_repository_url: https://helm.cilium.io/
 helm_values: debug.verbose=flow
 eolApiSlug: cilium
 versions:
-- version: 1.20.3
+- version: 1.20.4
   kube: ['1.37', '1.36', '1.35']
   requirements: []
   incompatibilities: []
   summary:
-    helm_changes: "- No Helm chart changelog was provided for 1.20.2 \u2192 1.20.3,\
-      \ so **no explicit values changes can be confirmed** from the data above.\n\
-      - One Helm-related fix is called out in the *application* notes: **`hubble.tls.auto.privateKey`\
-      \ is no longer ignored when using cert-manager-generated Hubble certificates**.\
-      \ If you set this value, re-check that the rendered cert-manager resources now\
-      \ pick it up as intended.\n- A policy validation change: **CiliumLocalRedirectPolicy\
-      \ `redirectBackend.toPorts: []` is now rejected** (agent will error instead\
-      \ of panicking). If you generate this via Helm templating, fix templates/values\
-      \ to avoid empty arrays.\n"
+    helm_changes: ''
     chart_updates: []
-    features: ['Alibaba Cloud: added support for IMDSv2 (token-based) instance metadata
-        access.', 'Gateway API: BackendTLSPolicy can now use system CA certificates
-        (helps when relying on node/system trust bundle).', 'Gateway API: HTTPRoute
-        ordering is now deterministic, reducing config churn and hard-to-reproduce
-        behavior.']
-    breaking_changes: [CiliumLocalRedirectPolicy with `redirectBackend.toPorts` set
-        to an empty array is now rejected (previously could trigger an agent panic).
-        Update/validate any such CRs before upgrade., 'Operator behavior change: CNPs
-        with a `nodeSelector` will no longer silently enforce nothing; mis-scoped
-        policies may begin enforcing as expected (or surface as errors), so validate
-        nodeSelector-based policies in staging.']
-  chart_version: 1.20.3
-  images: ['quay.io/cilium/cilium-envoy:v1.38.6-1791537840-00e749f11f69334c625e53fc1ce2fc6c7f34a51f@sha256:d6c8c0c91954d1885026d82a31b341f37dcd34a4b127fdaf1587e43ddd224cef',
-    'quay.io/cilium/cilium:v1.20.3@sha256:95cfa5c2427cc6b452c00908778d0566311f572589284af949d06a013db1a849',
-    'quay.io/cilium/operator-generic:v1.20.3@sha256:efdd8d89d6d8f63d21a065fa2f9e17614a2b3ac9371b221af9355f63829e2dbc']
+    features: ['Security patch release: upgrades Go to 1.26.10 to address CVE-2026-111943
+        (compromised eMudhra intermediate CA trust) and updates dependencies to latest
+        patch versions.', 'AlibabaCloud IPAM: adds support for RRSA (RAM Roles for
+        Service Accounts) credentials, in addition to static AccessKeys and ECS RAM
+        roles.']
+    breaking_changes: []
+  chart_version: 1.20.4
+  images: ['quay.io/cilium/cilium-envoy:v1.39.5-1792733054-8c73b2816bc8239e27f1fd53b271884688137459@sha256:547ab45f6092f681d9f54f3be9fa8fb1e705c9c5dc2df388efe3a52aa6965629',
+    'quay.io/cilium/cilium:v1.20.4@sha256:20fe92e4c86641233a450098c158d2d29085f3419931ab6bf681d2485dedf16e',
+    'quay.io/cilium/operator-generic:v1.20.4@sha256:7a7a3489dc66ad67e420d285c8a8d2e169b0957ad15e120f593d27081bf38d82']
 - version: 1.20.2
   kube: ['1.37', '1.36', '1.35']
   requirements: []
