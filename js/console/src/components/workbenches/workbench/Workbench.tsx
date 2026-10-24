@@ -46,6 +46,8 @@ import {
   ReactNode,
   useCallback,
   useContext,
+  useEffect,
+  useEffectEvent,
   useLayoutEffect,
   useMemo,
   useState,
@@ -58,6 +60,7 @@ import {
   useNavigate,
   useOutletContext,
   useParams,
+  useSearchParams,
 } from 'react-router-dom'
 import {
   getWorkbenchAbsPath,
@@ -66,6 +69,7 @@ import {
   getWorkbenchEvalSettingsAbsPath,
   getWorkbenchSavedPromptsAbsPath,
   getWorkbenchWebhookTriggersAbsPath,
+  WORKBENCH_ADDED_TOOL_QUERY_PARAM,
   WORKBENCH_JOBS_REL_PATH,
   WORKBENCH_PARAM_ID,
   WORKBENCHES_ABS_PATH,
@@ -573,6 +577,21 @@ export function Workbench() {
   const { popToast } = useSimpleToast()
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [toolsEditOpen, setToolsEditOpen] = useState(false)
+  const [addedToolId, setAddedToolId] = useState<string | null>(null)
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  const consumeAddedToolParam = useEffectEvent((toolId: string) => {
+    setAddedToolId(toolId)
+    setToolsEditOpen(true)
+    const next = new URLSearchParams(searchParams)
+    next.delete(WORKBENCH_ADDED_TOOL_QUERY_PARAM)
+    setSearchParams(next, { replace: true })
+  })
+
+  useEffect(() => {
+    const toolId = searchParams.get(WORKBENCH_ADDED_TOOL_QUERY_PARAM)
+    if (toolId) consumeAddedToolParam(toolId)
+  }, [searchParams])
 
   const { data, loading, error } = useWorkbenchQuery({
     variables: { id },
@@ -673,7 +692,11 @@ export function Workbench() {
       <WorkbenchToolsEditModal
         workbench={workbench}
         open={toolsEditOpen}
-        onClose={() => setToolsEditOpen(false)}
+        onClose={() => {
+          setToolsEditOpen(false)
+          setAddedToolId(null)
+        }}
+        addedToolId={addedToolId}
       />
     </>
   )

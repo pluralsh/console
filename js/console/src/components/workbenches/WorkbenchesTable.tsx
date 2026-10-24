@@ -1,6 +1,6 @@
-import { CaretRightIcon, IconFrame, Table } from '@pluralsh/design-system'
+import { CaretRightIcon, Flex, IconFrame, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
-import { FlowFavoriteStar } from 'components/flows/FlowFavoriteButton'
+import { FlowFavoriteButton } from 'components/flows/FlowFavoriteButton'
 import { VirtualSlice } from 'components/utils/table/useFetchPaginatedData'
 import { CaptionP } from 'components/utils/typography/Text'
 import { TRUNCATE } from 'components/utils/truncate'
@@ -33,13 +33,23 @@ function getColumns({
       meta: { gridTemplate: 'min-content' },
       cell: function Cell({ getValue }) {
         const { id } = getValue()
+        const favorited = favoriteIds.includes(id)
 
         return (
-          <WorkbenchActionsMenu
-            workbenchId={id}
-            favorited={favoriteIds.includes(id)}
-            onToggleFavorite={() => onToggleFavorite(id)}
-          />
+          <Flex
+            gap="xsmall"
+            align="center"
+          >
+            <WorkbenchActionsMenu
+              workbenchId={id}
+              favorited={favorited}
+              onToggleFavorite={() => onToggleFavorite(id)}
+            />
+            <FlowFavoriteButton
+              favorited={favorited}
+              onToggle={() => onToggleFavorite(id)}
+            />
+          </Flex>
         )
       },
     }),
@@ -48,18 +58,11 @@ function getColumns({
       header: 'Name',
       meta: { gridTemplate: 'minmax(240px, 2fr)' },
       cell: function Cell({ getValue }) {
-        const { id, name, description } = getValue()
+        const { name, description } = getValue()
 
         return (
           <NameBlockSC>
-            <NameRowSC>
-              <NameP>{name}</NameP>
-              {favoriteIds.includes(id) && (
-                <FavoriteMarkSC>
-                  <FlowFavoriteStar size={14} />
-                </FavoriteMarkSC>
-              )}
-            </NameRowSC>
+            <NameP>{name}</NameP>
             {description && (
               <CaptionP
                 $color="text-xlight"
@@ -163,21 +166,6 @@ const NameBlockSC = styled.div({
   flexDirection: 'column',
   minWidth: 0,
   maxWidth: '100%',
-})
-
-const NameRowSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  gap: theme.spacing.xxsmall,
-  minWidth: 0,
-  maxWidth: '100%',
-  width: 'max-content',
-}))
-
-const FavoriteMarkSC = styled.span({
-  display: 'inline-flex',
-  flexShrink: 0,
-  lineHeight: 0,
 })
 
 const NameP = styled.p(({ theme }) => ({

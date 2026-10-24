@@ -1,6 +1,7 @@
 defmodule Console.Deployments.Sentinels do
   use Console.Services.Base
   import Console.Deployments.Policies
+  import Console.Prom.Plugin, only: [metric_scope: 1]
   alias Console.Schema.{
     User,
     Sentinel,
@@ -120,6 +121,7 @@ defmodule Console.Deployments.Sentinels do
       |> Repo.insert()
     end)
     |> execute(extract: :run)
+    |> record_status(nil)
     |> notify(:create)
   end
 
@@ -168,6 +170,13 @@ defmodule Console.Deployments.Sentinels do
 
         {count, jobs} = Repo.insert_all(SentinelRunJob, attrs, returning: true)
         Enum.each(jobs, &handle_notify(PubSub.SentinelRunJobCreated, &1))
+        Enum.each(chunk, fn cluster ->
+          :telemetry.execute(
+            metric_scope(:sentinel_run_job),
+            %{count: 1},
+            %{status: :pending, sentinel_run_id: id, cluster: cluster.handle}
+          )
+        end)
 
         count
       end)
@@ -180,10 +189,13 @@ defmodule Console.Deployments.Sentinels do
 
   @spec update_sentinel_job(map, binary, Cluster.t) :: sentinel_run_job_resp
   def update_sentinel_job(attrs, id, %Cluster{} = cluster) when is_binary(id) do
-    Repo.get!(SentinelRunJob, id)
+    job = Repo.get!(SentinelRunJob, id)
+
+    job
     |> SentinelRunJob.changeset(attrs)
     |> allow(cluster, :write)
     |> when_ok(:update)
+    |> record_status(job, %{cluster: cluster.handle})
     |> notify(:update)
   end
 
@@ -209,9 +221,37 @@ defmodule Console.Deployments.Sentinels do
       run
       |> SentinelRun.changeset(%{status: :failed})
       |> Repo.update()
+      |> record_status(run)
       |> notify(:update)
     end)
   end
+
+  @doc """
+  Increments the sentinel run or run job status counter if `result` moved the record out of the status of `previous`,
+  merging `metadata` into the telemetry event (eg the cluster handle for run jobs)
+  """
+  @spec record_status({:ok, SentinelRun.t | SentinelRunJob.t} | error, SentinelRun.t | SentinelRunJob.t | nil, map) ::
+    {:ok, SentinelRun.t | SentinelRunJob.t} | error
+  def record_status(result, previous, metadata \\ %{})
+  def record_status({:ok, %{status: status} = record} = result, previous, metadata) do
+    case previous do
+      %{status: ^status} -> :ok
+      _ ->
+        :telemetry.execute(
+          status_scope(record),
+          %{count: 1},
+          Map.merge(metadata, %{status: status, sentinel_run_id: run_id(record)})
+        )
+    end
+    result
+  end
+  def record_status(pass, _, _), do: pass
+
+  defp status_scope(%SentinelRun{}), do: metric_scope(:sentinel_run)
+  defp status_scope(%SentinelRunJob{}), do: metric_scope(:sentinel_run_job)
+
+  defp run_id(%SentinelRun{id: id}), do: id
+  defp run_id(%SentinelRunJob{sentinel_run_id: id}), do: id
 
   defp notify({:ok, %SentinelRun{} = sentinel}, :create),
     do: handle_notify(PubSub.SentinelRunCreated, sentinel)
