@@ -3,6 +3,7 @@ package tools
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -93,14 +94,23 @@ func (in *PrometheusProvider) MetricsSearch(ctx context.Context, input *toolquer
 	// Use the Prometheus v1 client to fetch metric names over a recent time window.
 	end := time.Now()
 	start := end.Add(-24 * time.Hour)
-	labelValues, _, err := client.LabelValues(ctx, "__name__", nil, start, end, v1.WithLimit(5000))
+	query := strings.TrimSpace(input.GetQuery())
+
+	// Filter server-side: backends apply the limit before returning values (VictoriaMetrics
+	// returns an arbitrary subset), so filtering only the returned page misses matches.
+	var matches []string
+	if query != "" {
+		matches = []string{metricNameSearchSelector(query)}
+	}
+
+	labelValues, _, err := client.LabelValues(ctx, model.MetricNameLabel, matches, start, end, v1.WithLimit(5000))
 	if err != nil {
 		return nil, err
 	}
 
-	if input.GetQuery() != "" {
+	if query != "" {
 		labelValues = lo.Filter(labelValues, func(lv model.LabelValue, _ int) bool {
-			return strings.Contains(strings.ToLower(string(lv)), strings.ToLower(input.GetQuery()))
+			return strings.Contains(strings.ToLower(string(lv)), strings.ToLower(query))
 		})
 	}
 
@@ -113,6 +123,10 @@ func (in *PrometheusProvider) MetricsSearch(ctx context.Context, input *toolquer
 	})
 
 	return &toolquery.MetricsSearchOutput{Metrics: results}, nil
+}
+
+func metricNameSearchSelector(query string) string {
+	return fmt.Sprintf(`{__name__=~%q}`, "(?i).*"+regexp.QuoteMeta(query)+".*")
 }
 
 func (in *PrometheusProvider) MetricsLabelSearch(ctx context.Context, input *toolquery.MetricsLabelSearchInput) (*toolquery.MetricsLabelSearchOutput, error) {
