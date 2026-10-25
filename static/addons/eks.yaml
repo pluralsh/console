@@ -6246,6 +6246,11 @@
     - '1.35'
     - '1.34'
     - '1.33'
+  - version: v0.0.10009020261023-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
   - version: v0.0.10009020261020-eksbuild.1
     compatibilities:
     - '1.35'
@@ -6429,6 +6434,11 @@
   publisher: cloudsoft
 - name: coredns
   versions:
+  - version: v1.14.7-eksbuild.19
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
   - version: v1.14.7-eksbuild.11
     compatibilities:
     - '1.37'
@@ -6484,6 +6494,13 @@
     - '1.37'
     - '1.36'
     - '1.35'
+  - version: v1.13.2-eksbuild.59
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
   - version: v1.13.2-eksbuild.51
     compatibilities:
     - '1.37'
@@ -6582,6 +6599,11 @@
     - '1.35'
     - '1.34'
     - '1.33'
+  - version: v1.12.4-eksbuild.66
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
   - version: v1.12.4-eksbuild.58
     compatibilities:
     - '1.35'
@@ -6672,6 +6694,14 @@
     - '1.35'
     - '1.34'
     - '1.33'
+  - version: v1.11.4-eksbuild.88
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
   - version: v1.11.4-eksbuild.80
     compatibilities:
     - '1.34'
@@ -7959,6 +7989,15 @@
   publisher: eG Innovations
 - name: eks-node-monitoring-agent
   versions:
+  - version: v1.7.4-eksbuild.1
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
   - version: v1.7.3-eksbuild.1
     compatibilities:
     - '1.37'
@@ -8206,6 +8245,17 @@
   publisher: eks
 - name: eks-pod-identity-agent
   versions:
+  - version: v1.4.1-eksbuild.2
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
   - version: v1.4.0-eksbuild.4
     compatibilities:
     - '1.37'
@@ -9568,6 +9618,9 @@
   publisher: kong
 - name: kube-proxy
   versions:
+  - version: v1.37.0-eksbuild.29
+    compatibilities:
+    - '1.37'
   - version: v1.37.0-eksbuild.22
     compatibilities:
     - '1.37'
@@ -9580,6 +9633,10 @@
   - version: v1.37.0-eksbuild.4
     compatibilities:
     - '1.37'
+  - version: v1.36.0-eksbuild.55
+    compatibilities:
+    - '1.37'
+    - '1.36'
   - version: v1.36.0-eksbuild.48
     compatibilities:
     - '1.37'
@@ -9632,6 +9689,11 @@
     compatibilities:
     - '1.37'
     - '1.36'
+  - version: v1.35.3-eksbuild.59
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
   - version: v1.35.3-eksbuild.52
     compatibilities:
     - '1.37'
@@ -9712,6 +9774,12 @@
     - '1.37'
     - '1.36'
     - '1.35'
+  - version: v1.34.6-eksbuild.59
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
+    - '1.34'
   - version: v1.34.6-eksbuild.52
     compatibilities:
     - '1.37'
@@ -9832,6 +9900,12 @@
     - '1.36'
     - '1.35'
     - '1.34'
+  - version: v1.33.10-eksbuild.59
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
   - version: v1.33.10-eksbuild.52
     compatibilities:
     - '1.36'
@@ -9964,6 +10038,12 @@
     - '1.35'
     - '1.34'
     - '1.33'
+  - version: v1.32.13-eksbuild.62
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
   - version: v1.32.13-eksbuild.55
     compatibilities:
     - '1.35'
@@ -10120,6 +10200,12 @@
     - '1.34'
     - '1.33'
     - '1.32'
+  - version: v1.31.14-eksbuild.66
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
   - version: v1.31.14-eksbuild.59
     compatibilities:
     - '1.34'
@@ -14202,6 +14288,15 @@
   publisher: Upwind Security
 - name: vpc-cni
   versions:
+  - version: v1.23.2-eksbuild.6
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
   - version: v1.23.2-eksbuild.4
     compatibilities:
     - '1.37'
@@ -14247,6 +14342,16 @@
     - '1.33'
     - '1.32'
     - '1.31'
+  - version: v1.22.4-eksbuild.8
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v1.22.4-eksbuild.6
     compatibilities:
     - '1.37'
