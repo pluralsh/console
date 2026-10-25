@@ -78,7 +78,6 @@ func cloudO11yValues(o11y map[string]interface{}) map[string]interface{} {
 			"esPassword":       "es-pass",
 			"vmPassword":       "vm-pass",
 			"vmTenant":         "12",
-			"elasticNamespace": "elastic",
 			"o11y":             o11y,
 		},
 	}
@@ -104,10 +103,14 @@ var _ = Describe("Cloud observability", func() {
 				Expect(err).NotTo(HaveOccurred())
 			})
 
-			It("provisions elastic and vmetrics auth", func() {
-				Expect(manifests).To(HaveKey(elasticUserSecret.String()))
-				Expect(manifests).To(HaveKey(elasticUser.String()))
+			It("does not provision any elasticsearch resources", func() {
+				for key := range manifests {
+					Expect(key).NotTo(ContainSubstring("dbs.plural.sh"))
+				}
+				Expect(manifests).NotTo(HaveKey(elasticUserSecret.String()))
+			})
 
+			It("provisions vmetrics auth", func() {
 				raw, exists := manifests[vmUser.String()]
 				Expect(exists).To(BeTrue())
 				password, _, err := unstructured.NestedString(raw.Object, "spec", "password")

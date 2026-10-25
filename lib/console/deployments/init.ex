@@ -176,6 +176,24 @@ defmodule Console.Deployments.Init do
   end
 
   @doc """
+  Turns off the elastic-backed vector and graph stores on cloud instances, since cloud no longer
+  provisions elasticsearch users or indices for them.
+  """
+  @spec disable_vector_store() :: {:ok, DeploymentSettings.t | map} | Console.error()
+  def disable_vector_store() do
+    case Console.cloud?() do
+      true ->
+        Settings.fetch_consistent()
+        |> DeploymentSettings.changeset(%{ai: %{
+          vector_store: %{enabled: false},
+          graph: %{enabled: false}
+        }})
+        |> Repo.update()
+      _ -> {:ok, %{}}
+    end
+  end
+
+  @doc """
   Migrates an existing cloud instance onto the plural telemetry stack.  Repoints the global
   prometheus/logging settings, the shared observability service context, and the plural
   workbench tools at telemetry, creating the loki and tempo tools if they don't exist yet.
@@ -307,25 +325,7 @@ defmodule Console.Deployments.Init do
          inst when is_binary(inst) <- Console.cloud_instance(),
          {:ok, url, pass} <- Console.es_creds(),
          {:ok, o11y} <- observability_settings(inst, url, pass) do
-        es_creds = %{
-          host: url,
-          user: "plrl-#{inst}",
-          password: pass,
-          index: "plrl-#{inst}-logs-*"
-        }
-
-        attrs
-        |> Map.merge(o11y)
-        |> put_in([:ai, :vector_store], %{
-          enabled: true,
-          vector_store: :elastic,
-          elastic: Map.put(es_creds, :index, "plrl-#{inst}-vectors")
-        })
-        |> put_in([:ai, :graph], %{
-          enabled: true,
-          store: :elastic,
-          elastic: Map.put(es_creds, :index, "plrl-#{inst}-graph")
-        })
+      Map.merge(attrs, o11y)
     else
       _ -> attrs
     end
