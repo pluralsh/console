@@ -194,7 +194,7 @@ export function buildClient(
     cache: new InMemoryCache(authenticatedCacheConfig),
   })
 
-  // in unit tests this would open a socket after jsdom tears down localStorage
+  // Reconnecting under Vitest outlives the jsdom environment and reads a torn-down localStorage.
   if (import.meta.env.MODE !== 'test')
     setInterval(() => maybeReconnect(socket), 5000)
 

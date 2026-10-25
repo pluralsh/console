@@ -201,7 +201,7 @@ import PodDisruptionBudget from '../components/kubernetes/cluster/PodDisruptionB
 export const kubernetesRoutes = (
   <Route
     path={KUBERNETES_ABS_PATH}
-    element={<Root />}
+    element={<Root errorLayout={(error) => <Navigation error={error} />} />}
   >
     <Route
       path=""

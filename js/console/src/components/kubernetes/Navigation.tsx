@@ -1,3 +1,4 @@
+import { ApolloError } from '@apollo/client'
 import { ReactNode, useMemo, useState } from 'react'
 import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
 
@@ -31,13 +32,15 @@ import { PageToolbar } from '../layout/PageToolbar'
 import { PageSidebarNav } from '../layout/PageSidebarNav'
 import { Directory } from '../layout/SideNavEntries'
 
+import { GqlError } from '../utils/Alert'
+
 import { DataSelectInputs } from './common/DataSelect'
 
 export const NAMESPACE_PARAM = 'namespace'
 export const FILTER_PARAM = 'filter'
 export { LAST_SELECTED_CLUSTER_KEY } from './clusterSelection'
 
-export default function Navigation() {
+export default function Navigation({ error }: { error?: ApolloError }) {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const { clusterId = '' } = useParams()
@@ -50,7 +53,7 @@ export default function Navigation() {
     pathname.startsWith(`${pathPrefix}/${path}`)
   )
   const showDataSelect =
-    !isObservabilityPath && !pathname.includes(AUDIT_REL_PATH)
+    !error && !isObservabilityPath && !pathname.includes(AUDIT_REL_PATH)
 
   const directory: Directory = useMemo(
     () => [
@@ -109,7 +112,14 @@ export default function Navigation() {
     >
       <PageContentSC>
         <PageHeaderContext.Provider value={pageHeaderContext}>
-          <Outlet />
+          {error ? (
+            <GqlError
+              header="Cannot load cluster"
+              error={error}
+            />
+          ) : (
+            <Outlet />
+          )}
         </PageHeaderContext.Provider>
       </PageContentSC>
     </PageWithSidebar>
