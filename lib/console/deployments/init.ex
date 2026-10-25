@@ -191,7 +191,11 @@ defmodule Console.Deployments.Init do
          {:ok, tools} <- telemetry_tools(pass) do
       bot = console_bot()
       start_transaction()
-      |> add_operation(:settings, fn _ -> Settings.update(settings) end)
+      |> add_operation(:settings, fn _ ->
+        Settings.fetch_consistent()
+        |> DeploymentSettings.changeset(settings)
+        |> Repo.update()
+      end)
       |> add_operation(:context, fn _ ->
         Services.save_context(%{configuration: context}, @context_name, bot)
       end)
