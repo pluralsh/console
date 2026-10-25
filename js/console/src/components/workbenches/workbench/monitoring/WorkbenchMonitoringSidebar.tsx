@@ -615,9 +615,6 @@ const RowSC = styled.div<{ $selected?: boolean }>(({ theme, $selected }) => {
   return {
     alignItems: 'center',
     backgroundColor: $selected ? selectedColor : undefined,
-    boxShadow: $selected
-      ? `inset -2px 0 0 ${theme.colors['border-primary']}`
-      : undefined,
     display: 'flex',
     gap: theme.spacing.xsmall,
     padding: `${theme.spacing.small} ${theme.spacing.medium}`,

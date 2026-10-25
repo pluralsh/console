@@ -73,12 +73,12 @@ func allO11yAuthKeys() []common.ManifestKey {
 func cloudO11yValues(o11y map[string]interface{}) map[string]interface{} {
 	return map[string]interface{}{
 		"cloud": map[string]interface{}{
-			"enabled":          true,
-			"instanceName":     "test",
-			"esPassword":       "es-pass",
-			"vmPassword":       "vm-pass",
-			"vmTenant":         "12",
-			"o11y":             o11y,
+			"enabled":      true,
+			"instanceName": "test",
+			"esPassword":   "es-pass",
+			"vmPassword":   "vm-pass",
+			"vmTenant":     "12",
+			"o11y":         o11y,
 		},
 	}
 }
@@ -94,7 +94,7 @@ func secretFromManifests(manifests common.ManifestMap, key common.ManifestKey) c
 
 var _ = Describe("Cloud observability", func() {
 	for _, chartEntry := range console.Charts() {
-		Context(chartEntry.Name+" with the legacy elastic and vmetrics stack", Ordered, func() {
+		Context(chartEntry.Name+" without plural telemetry", Ordered, func() {
 			var manifests common.ManifestMap
 
 			BeforeAll(func() {
@@ -103,19 +103,13 @@ var _ = Describe("Cloud observability", func() {
 				Expect(err).NotTo(HaveOccurred())
 			})
 
-			It("does not provision any elasticsearch resources", func() {
+			It("does not provision elastic or vmetrics auth", func() {
 				for key := range manifests {
 					Expect(key).NotTo(ContainSubstring("dbs.plural.sh"))
+					Expect(key).NotTo(ContainSubstring("operator.victoriametrics.com"))
 				}
 				Expect(manifests).NotTo(HaveKey(elasticUserSecret.String()))
-			})
-
-			It("provisions vmetrics auth", func() {
-				raw, exists := manifests[vmUser.String()]
-				Expect(exists).To(BeTrue())
-				password, _, err := unstructured.NestedString(raw.Object, "spec", "password")
-				Expect(err).NotTo(HaveOccurred())
-				Expect(password).To(Equal("vm-pass"))
+				Expect(manifests).NotTo(HaveKey(vmUser.String()))
 			})
 
 			It("does not provision telemetry auth", func() {

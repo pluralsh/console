@@ -369,9 +369,6 @@ const ListItemSC = styled.button<{ $selected: boolean }>(
     cursor: 'pointer',
     // matches PageSidebarNav's active item, as in the stacks sidebar
     backgroundColor: $selected ? theme.colors['fill-zero-selected'] : undefined,
-    boxShadow: $selected
-      ? `inset -2px 0 0 ${theme.colors['border-primary']}`
-      : undefined,
     '&:hover': {
       backgroundColor: $selected
         ? theme.colors['fill-zero-selected']

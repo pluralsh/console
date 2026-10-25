@@ -214,9 +214,6 @@ const EvalLinkSC = styled.button<{ $active?: boolean }>(
     textAlign: 'left',
     // matches PageSidebarNav's active item, as in the stacks sidebar
     backgroundColor: $active ? theme.colors['fill-zero-selected'] : undefined,
-    boxShadow: $active
-      ? `inset -2px 0 0 ${theme.colors['border-primary']}`
-      : undefined,
 
     '&:hover': {
       backgroundColor: $active
