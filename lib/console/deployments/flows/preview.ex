@@ -69,6 +69,7 @@ defmodule Console.Deployments.Flows.Preview do
   end
   def sync_service(_), do: :ok
 
+  defp post_comment(%PreviewEnvironmentInstance{pull_request_id: nil}), do: :ok
   defp post_comment(%PreviewEnvironmentInstance{} = inst) do
     %PreviewEnvironmentInstance{
       pull_request: %PullRequest{url: url, commit_sha: sha} = pr,
