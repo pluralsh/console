@@ -171,6 +171,18 @@ defmodule Console.Logs.Provider.LokiTest do
       {:ok, labels} = Loki.labels(Loki.new(@conn), Query.new(field: "container"))
       assert labels == [%{label: "b", count: 9}, %{label: "a", count: 2}]
     end
+
+    test "it counts over whole minutes" do
+      bef = ~U[2026-10-01 01:00:30.250Z]
+      expect(Req, :get, fn url, _ ->
+        {_, params} = params(url)
+        assert params["time"] == "#{DateTime.to_unix(~U[2026-10-01 01:01:00Z], :nanosecond)}"
+        assert params["query"] =~ "[1860s]"
+        {:ok, %Req.Response{status: 200, body: Jason.encode!(%{data: %{resultType: "vector", result: []}})}}
+      end)
+
+      {:ok, []} = Loki.labels(Loki.new(@conn), Query.new(field: "container", time: %Time{before: bef, duration: "30m"}))
+    end
   end
 
   describe "Provider.client/1" do

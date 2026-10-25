@@ -61,7 +61,8 @@ defmodule Console.Logs.Provider.Loki do
   @spec labels(t(), Query.t) :: {:ok, [%{label: binary, count: integer}]} | Console.error
   def labels(%__MODULE__{connection: %Connection{host: host} = conn}, %Query{field: field} = q)
       when is_binary(host) and is_binary(field) do
-    {start, stop} = range(q)
+    # whole minutes let loki-compatible backends count from per-minute summaries rather than every row
+    {start, stop} = range(q, 60)
     label = label_name(field)
     window = max(div(stop - start, @nano), 1)
 

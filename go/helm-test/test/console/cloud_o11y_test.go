@@ -56,7 +56,7 @@ type telemetryAuth struct {
 
 func (in telemetryAuth) Key() common.ManifestKey {
 	return common.ManifestKey{
-		Name:      in.Store + "-authz",
+		Name:      "plrl-test-" + in.Store + "-authz",
 		Namespace: telemetryNamespace,
 		GroupKind: schema.GroupKind{Group: telemetryGroup, Kind: "NamespaceAuthentication"},
 	}
