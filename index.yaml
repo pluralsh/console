@@ -137,6 +137,33 @@ entries:
   console:
   - apiVersion: v2
     appVersion: 0.12.52
+    created: "2026-10-25T00:51:51.255281461Z"
+    dependencies:
+    - condition: controller.enabled
+      name: controller
+      repository: file://../controller
+      version: 0.0.219
+    - condition: flux2.enabled
+      name: flux2
+      repository: https://fluxcd-community.github.io/helm-charts
+      version: 2.14.0
+    - condition: dex.enabled
+      name: dex
+      repository: https://charts.dexidp.io
+      version: 0.24.0
+    - name: common
+      repository: https://charts.bitnami.com/bitnami
+      version: 2.34.0
+    description: deploys the plural console and additional dependencies, for use in
+      bring-your-own-kube setups
+    digest: 704df40a9ed84a91c5f5049f59611e8f707937e578f9941e6f78f575b440e9ef
+    name: console
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/console-chart-v0.4.51/console-0.4.51.tgz
+    version: 0.4.51
+  - apiVersion: v2
+    appVersion: 0.12.52
     created: "2026-10-24T16:43:39.163020163Z"
     dependencies:
     - condition: controller.enabled
@@ -6224,6 +6251,32 @@ entries:
     - https://github.com/pluralsh/console/releases/download/console-chart-v0.1.1/console-0.1.1.tgz
     version: 0.1.1
   console-rapid:
+  - apiVersion: v2
+    appVersion: 0.12.52
+    created: "2026-10-25T00:51:51.497277247Z"
+    dependencies:
+    - condition: controller.enabled
+      name: controller
+      repository: file://../controller
+      version: 0.0.219
+    - condition: flux2.enabled
+      name: flux2
+      repository: https://fluxcd-community.github.io/helm-charts
+      version: 2.14.1
+    - condition: dex.enabled
+      name: dex
+      repository: https://charts.dexidp.io
+      version: 0.24.0
+    - name: common
+      repository: https://charts.bitnami.com/bitnami
+      version: 2.34.0
+    description: rapid channel chart for the plural console (used for testing)
+    digest: f4d721bdba344f49361627e8c632742f207e527747768c3d9db8670edf28d5d9
+    name: console-rapid
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/console-rapid-chart-v0.4.56/console-rapid-0.4.56.tgz
+    version: 0.4.56
   - apiVersion: v2
     appVersion: 0.12.52
     created: "2026-10-24T16:10:00.056930744Z"
@@ -14641,4 +14694,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/webhook-proxy-chart-v0.1.0/webhook-proxy-0.1.0.tgz
     version: 0.1.0
-generated: "2026-10-24T16:43:39.605737207Z"
+generated: "2026-10-25T00:51:51.498536041Z"
