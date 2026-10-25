@@ -4,7 +4,7 @@ defmodule Console.Logs.Provider.Loki do
   """
   @behaviour Console.Logs.Provider
   import Console.Logs.Provider.Utils
-  alias Console.Logs.{Query, Time, Line, AggregationBucket}
+  alias Console.Logs.{Query, Time, Line, AggregationBucket, Level}
   alias Console.Schema.{Cluster, Service}
   alias Console.Schema.DeploymentSettings.Loki, as: Connection
 
@@ -44,14 +44,14 @@ defmodule Console.Logs.Provider.Loki do
     {start, stop} = range(q, step)
 
     get(conn, "/loki/api/v1/query_range", %{
-      "query" => "sum(count_over_time(#{build_query(conn, q)} [#{step}s]))",
+      "query" => "#{sum(q)}(count_over_time(#{build_query(conn, q)} [#{step}s]))",
       "start" => start,
       "end" => stop,
       "step" => step
     })
     |> case do
       {:ok, %{"data" => %{"resultType" => "matrix", "result" => results}}} ->
-        {:ok, format_buckets(results)}
+        {:ok, format_buckets(results, q)}
       {:ok, _} -> {:ok, []}
       {:error, err} -> {:error, "failed to query loki aggregations: #{err}"}
     end
@@ -96,7 +96,29 @@ defmodule Console.Logs.Provider.Loki do
       |> Enum.reverse()
       |> ensure_matcher(labels)
 
-    "{#{Enum.join(matchers, ", ")}}#{line_filter(q)}#{node_filter(q)}"
+    # the level filter comes first: loki-compatible backends count a query filtering only labels from summaries
+    "{#{Enum.join(matchers, ", ")}}#{level_filter(q)}#{line_filter(q)}#{node_filter(q)}"
+  end
+
+  # detected_level is structured metadata, which only a label filter (not a stream selector) can match
+  @level_label "detected_level"
+
+  defp sum(%Query{group_by_level: true}), do: "sum by (#{@level_label}) "
+  defp sum(_), do: "sum"
+
+  defp level_filter(%Query{} = q) do
+    case levels(q) do
+      [] -> ""
+      [level] -> " | #{matcher(@level_label, level)}"
+      levels -> " | #{@level_label}=~#{quote_str(Enum.join(levels, "|"))}"
+    end
+  end
+
+  defp levels(%Query{levels: levels, facets: facets}) do
+    from_facets = for %{key: @level_label, value: v} <- facets || [], do: v
+    Enum.map(levels || [], &Atom.to_string(Level.normalize(&1)))
+    |> Enum.concat(from_facets)
+    |> Enum.uniq()
   end
 
   # shippers name the node label differently (promtail: node_name, alloy/otlp: k8s_node_name, ...),
@@ -124,7 +146,8 @@ defmodule Console.Logs.Provider.Loki do
   defp add_pod(ms, _), do: ms
 
   defp add_facets(ms, %Query{facets: [_ | _] = facets}) do
-    Enum.reduce(facets, ms, fn %{key: k, value: v}, acc -> [matcher(label_name(k), v) | acc] end)
+    Enum.reject(facets, &(&1.key == @level_label))
+    |> Enum.reduce(ms, fn %{key: k, value: v}, acc -> [matcher(label_name(k), v) | acc] end)
   end
   defp add_facets(ms, _), do: ms
 
@@ -187,12 +210,24 @@ defmodule Console.Logs.Provider.Loki do
     |> Enum.map(&elem(&1, 1))
   end
 
-  defp format_buckets([%{"values" => values} | _]) do
+  # series without the label, or with a value outside the known levels, all count as unknown
+  defp format_buckets(results, %Query{group_by_level: true}) do
+    Enum.flat_map(results, fn %{"metric" => metric, "values" => values} ->
+      level = Level.normalize(metric[@level_label])
+      Enum.map(values, fn [ts, count] -> {{trunc(ts), level}, to_int(count)} end)
+    end)
+    |> Enum.reduce(%{}, fn {key, count}, acc -> Map.update(acc, key, count, &(&1 + count)) end)
+    |> Enum.sort()
+    |> Enum.map(fn {{ts, level}, count} ->
+      %AggregationBucket{timestamp: DateTime.from_unix!(ts), count: count, level: level}
+    end)
+  end
+  defp format_buckets([%{"values" => values} | _], _) do
     Enum.map(values, fn [ts, count] ->
       %AggregationBucket{timestamp: DateTime.from_unix!(trunc(ts)), count: to_int(count)}
     end)
   end
-  defp format_buckets(_), do: []
+  defp format_buckets(_, _), do: []
 
   defp format_labels(results, label) do
     Enum.map(results, fn %{"metric" => metric, "value" => [_, count]} ->

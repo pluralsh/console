@@ -2536,6 +2536,8 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `enabled` _boolean_ | Enabled defines whether to enable the logging integration or not. |  | Optional: \{\} <br /> |
 | `driver` _[LogDriver](#logdriver)_ | Driver is the type of log aggregation solution you wish to use. | VICTORIA | Enum: [VICTORIA ELASTIC OPENSEARCH LOKI] <br />Optional: \{\} <br /> |
+| `levels` _boolean_ | Levels declares the log store can filter and group by log level, eg loki's detected_level.<br />Leave off for stores without level support, where a level filter would match nothing. |  | Optional: \{\} <br /> |
+| `levelField` _string_ | LevelField is the field holding a log's level, for elasticsearch, opensearch and victoria. |  | Optional: \{\} <br /> |
 | `victoria` _[HTTPConnection](#httpconnection)_ | Victoria configures a connection to VictoriaMetrics |  | Optional: \{\} <br /> |
 | `elastic` _[ElasticsearchConnection](#elasticsearchconnection)_ | Elastic configures a connection to elasticsearch |  | Optional: \{\} <br /> |
 | `opensearch` _[OpensearchConnection](#opensearchconnection)_ | Opensearch configures a connection to opensearch |  | Optional: \{\} <br /> |

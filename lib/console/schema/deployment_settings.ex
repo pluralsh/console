@@ -282,8 +282,10 @@ defmodule Console.Schema.DeploymentSettings do
     end
 
     embeds_one :logging, Logging, on_replace: :update do
-      field :enabled,  :boolean
-      field :driver,   LogDriver
+      field :enabled,     :boolean
+      field :driver,      LogDriver
+      field :levels,      :boolean, default: false
+      field :level_field, :string
 
       embeds_one :victoria, Connection, on_replace: :update
       embeds_one :elastic,  Elastic, on_replace: :update
@@ -647,7 +649,7 @@ defmodule Console.Schema.DeploymentSettings do
 
   defp logging_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(enabled driver)a)
+    |> cast(attrs, ~w(enabled driver levels level_field)a)
     |> cast_embed(:victoria)
     |> cast_embed(:elastic)
     |> cast_embed(:opensearch)

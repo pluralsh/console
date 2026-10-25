@@ -1627,6 +1627,15 @@ spec:
                     description: Enabled defines whether to enable the logging integration
                       or not.
                     type: boolean
+                  levelField:
+                    description: LevelField is the field holding a log's level, for
+                      elasticsearch, opensearch and victoria.
+                    type: string
+                  levels:
+                    description: |-
+                      Levels declares the log store can filter and group by log level, eg loki's detected_level.
+                      Leave off for stores without level support, where a level filter would match nothing.
+                    type: boolean
                   loki:
                     description: Loki configures a connection to grafana loki
                     properties:

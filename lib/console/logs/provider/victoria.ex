@@ -4,7 +4,7 @@ defmodule Console.Logs.Provider.Victoria do
   """
   @behaviour Console.Logs.Provider
   import Console.Logs.Provider.Utils
-  alias Console.Logs.{Query, Time, Line, Stream.Exec}
+  alias Console.Logs.{Query, Time, Line, Level, Stream.Exec}
   alias Console.Schema.{Cluster, Service, DeploymentSettings.Connection}
 
   @options [receive_timeout: :timer.seconds(30), connect_options: [timeout: :timer.seconds(30)], retry: false]
@@ -40,6 +40,7 @@ defmodule Console.Logs.Provider.Victoria do
   defp build_query(%Query{query: query} = q) do
     add_resource([query], q)
     |> add_node(q)
+    |> add_levels(q)
     |> add_time(q)
     |> maybe_reverse(q)
     |> Enum.join(" ")
@@ -78,6 +79,12 @@ defmodule Console.Logs.Provider.Victoria do
   defp add_node(io, %Query{node: node}) when is_binary(node) and byte_size(node) > 0,
     do: ["(" <> Enum.map_join(@node_fields, " or ", &~s("#{&1}":=#{Jason.encode!(node)})) <> ")" | io]
   defp add_node(io, _), do: io
+
+  defp add_levels(io, %Query{levels: [_ | _] = levels} = q) do
+    spellings = Enum.flat_map(levels, &Level.spellings(Level.normalize(&1)))
+    ["#{q.level_field || "level"}:in(" <> Enum.map_join(spellings, ",", &Jason.encode!/1) <> ")" | io]
+  end
+  defp add_levels(io, _), do: io
 
   defp add_time(io, %Query{time: %Time{after: a, before: b}}) when is_binary(a) and is_binary(b),
     do: [~s(_time:[#{a}, #{b}]) | io]

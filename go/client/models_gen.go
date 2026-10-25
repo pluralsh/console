@@ -5065,10 +5065,14 @@ type LoadBalancerStatus struct {
 type LogAggregationBucket struct {
 	Timestamp *string `json:"timestamp,omitempty"`
 	Count     *int64  `json:"count,omitempty"`
+	// the level counted, when grouping by level
+	Level *LogLevel `json:"level,omitempty"`
 }
 
 type LogAggregationInput struct {
 	BucketSize *string `json:"bucketSize,omitempty"`
+	// count each bucket per log level, setting level on every bucket
+	GroupByLevel *bool `json:"groupByLevel,omitempty"`
 }
 
 type LogFacet struct {
@@ -5109,6 +5113,10 @@ type LoggingSettings struct {
 	Enabled *bool `json:"enabled,omitempty"`
 	// the type of log aggregation solution you wish to use
 	Driver *LogDriver `json:"driver,omitempty"`
+	// whether the log store supports filtering and grouping by log level, eg loki's detected_level
+	Levels *bool `json:"levels,omitempty"`
+	// the field holding a log's level, for elasticsearch, opensearch and victoria
+	LevelField *string `json:"levelField,omitempty"`
 	// configures a connection to victoria metrics
 	Victoria *HTTPConnection `json:"victoria,omitempty"`
 	// configures a connection to elasticsearch for logging
@@ -5120,8 +5128,12 @@ type LoggingSettings struct {
 }
 
 type LoggingSettingsAttributes struct {
-	Enabled    *bool                              `json:"enabled,omitempty"`
-	Driver     *LogDriver                         `json:"driver,omitempty"`
+	Enabled *bool      `json:"enabled,omitempty"`
+	Driver  *LogDriver `json:"driver,omitempty"`
+	// whether the log store supports filtering and grouping by log level
+	Levels *bool `json:"levels,omitempty"`
+	// the field holding a log's level, for elasticsearch, opensearch and victoria
+	LevelField *string                            `json:"levelField,omitempty"`
 	Victoria   *HTTPConnectionAttributes          `json:"victoria,omitempty"`
 	Elastic    *ElasticsearchConnectionAttributes `json:"elastic,omitempty"`
 	Opensearch *OpensearchConnectionAttributes    `json:"opensearch,omitempty"`
@@ -16541,6 +16553,74 @@ func (e *LogDriver) UnmarshalJSON(b []byte) error {
 }
 
 func (e LogDriver) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+// A log level, as loki's detected_level normalizes it
+type LogLevel string
+
+const (
+	LogLevelTrace    LogLevel = "TRACE"
+	LogLevelDebug    LogLevel = "DEBUG"
+	LogLevelInfo     LogLevel = "INFO"
+	LogLevelWarn     LogLevel = "WARN"
+	LogLevelError    LogLevel = "ERROR"
+	LogLevelCritical LogLevel = "CRITICAL"
+	LogLevelFatal    LogLevel = "FATAL"
+	LogLevelUnknown  LogLevel = "UNKNOWN"
+)
+
+var AllLogLevel = []LogLevel{
+	LogLevelTrace,
+	LogLevelDebug,
+	LogLevelInfo,
+	LogLevelWarn,
+	LogLevelError,
+	LogLevelCritical,
+	LogLevelFatal,
+	LogLevelUnknown,
+}
+
+func (e LogLevel) IsValid() bool {
+	switch e {
+	case LogLevelTrace, LogLevelDebug, LogLevelInfo, LogLevelWarn, LogLevelError, LogLevelCritical, LogLevelFatal, LogLevelUnknown:
+		return true
+	}
+	return false
+}
+
+func (e LogLevel) String() string {
+	return string(e)
+}
+
+func (e *LogLevel) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = LogLevel(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid LogLevel", str)
+	}
+	return nil
+}
+
+func (e LogLevel) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *LogLevel) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e LogLevel) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

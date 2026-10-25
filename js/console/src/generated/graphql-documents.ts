@@ -2506,6 +2506,7 @@ export const DeploymentSettingsFragmentDoc = /*#__PURE__*/ gql`
   logging {
     enabled
     driver
+    levels
   }
   latestK8sVsn
   lokiConnection {
@@ -4585,6 +4586,7 @@ export const LogAggregationBucketFragmentDoc = /*#__PURE__*/ gql`
     fragment LogAggregationBucket on LogAggregationBucket {
   timestamp
   count
+  level
 }
     ` as unknown as DocumentNode<Types.LogAggregationBucketFragment, unknown>;
 export const MetricPointResponseFragmentDoc = /*#__PURE__*/ gql`
@@ -9577,7 +9579,7 @@ export const LoginLinkDocument = /*#__PURE__*/ gql`
     ${UserFragmentDoc}
 ${RefreshTokenFragmentDoc}` as unknown as DocumentNode<Types.LoginLinkMutation, Types.LoginLinkMutationVariables>;
 export const LogAggregationDocument = /*#__PURE__*/ gql`
-    query LogAggregation($clusterId: ID, $limit: Int, $query: String, $serviceId: ID, $time: LogTimeRange, $operator: LogQueryOperator, $facets: [LogFacetInput], $node: String) {
+    query LogAggregation($clusterId: ID, $limit: Int, $query: String, $serviceId: ID, $time: LogTimeRange, $operator: LogQueryOperator, $facets: [LogFacetInput], $node: String, $levels: [LogLevel]) {
   logAggregation(
     clusterId: $clusterId
     limit: $limit
@@ -9587,13 +9589,14 @@ export const LogAggregationDocument = /*#__PURE__*/ gql`
     facets: $facets
     operator: $operator
     node: $node
+    levels: $levels
   ) {
     ...LogLine
   }
 }
     ${LogLineFragmentDoc}` as unknown as DocumentNode<Types.LogAggregationQuery, Types.LogAggregationQueryVariables>;
 export const LogLabelsDocument = /*#__PURE__*/ gql`
-    query LogLabels($field: String!, $clusterId: ID, $serviceId: ID, $query: String, $time: LogTimeRange, $node: String) {
+    query LogLabels($field: String!, $clusterId: ID, $serviceId: ID, $query: String, $time: LogTimeRange, $node: String, $levels: [LogLevel]) {
   logLabels(
     field: $field
     clusterId: $clusterId
@@ -9601,13 +9604,14 @@ export const LogLabelsDocument = /*#__PURE__*/ gql`
     query: $query
     time: $time
     node: $node
+    levels: $levels
   ) {
     ...LogFacetDetail
   }
 }
     ${LogFacetDetailFragmentDoc}` as unknown as DocumentNode<Types.LogLabelsQuery, Types.LogLabelsQueryVariables>;
 export const LogAggregationBucketsDocument = /*#__PURE__*/ gql`
-    query LogAggregationBuckets($serviceId: ID, $clusterId: ID, $query: String, $time: LogTimeRange, $operator: LogQueryOperator, $aggregation: LogAggregationInput, $facets: [LogFacetInput], $node: String) {
+    query LogAggregationBuckets($serviceId: ID, $clusterId: ID, $query: String, $time: LogTimeRange, $operator: LogQueryOperator, $aggregation: LogAggregationInput, $facets: [LogFacetInput], $node: String, $levels: [LogLevel]) {
   logAggregationBuckets(
     serviceId: $serviceId
     clusterId: $clusterId
@@ -9617,6 +9621,7 @@ export const LogAggregationBucketsDocument = /*#__PURE__*/ gql`
     operator: $operator
     facets: $facets
     node: $node
+    levels: $levels
   ) {
     ...LogAggregationBucket
   }

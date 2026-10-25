@@ -198,6 +198,27 @@ defmodule Console.GraphQl.ObservabilityQueriesTest do
       assert line["log"] == "a log"
     end
 
+    test "it can count buckets per level" do
+      user = insert(:user)
+      svc = insert(:service, read_bindings: [%{user_id: user.id}])
+      expect(Console.Logs.Provider, :aggregate, fn %{levels: [:error, :warn], group_by_level: true, bucket_size: "1m"} ->
+        {:ok, [%Console.Logs.AggregationBucket{timestamp: ~U[2026-10-01 00:00:00Z], count: 3, level: :error}]}
+      end)
+
+      {:ok, %{data: %{"logAggregationBuckets" => [bucket]}}} = run_query("""
+        query Buckets($serviceId: ID!) {
+          logAggregationBuckets(
+            serviceId: $serviceId,
+            levels: [ERROR, WARN],
+            aggregation: {bucketSize: "1m", groupByLevel: true}
+          ) { timestamp count level }
+        }
+      """, %{"serviceId" => svc.id}, %{current_user: user})
+
+      assert bucket["count"] == 3
+      assert bucket["level"] == "ERROR"
+    end
+
     test "it can fetch logs from an elasticsearch index" do
       user = insert(:user)
       svc = insert(:service, read_bindings: [%{user_id: user.id}])

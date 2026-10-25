@@ -68,6 +68,9 @@ type RootQueryType {
 
     "only logs from pods on this node"
     node: String
+
+    "only logs at one of these levels"
+    levels: [LogLevel]
   ): [LogLine]
 
   logLabels(
@@ -83,6 +86,9 @@ type RootQueryType {
 
     "only logs from pods on this node"
     node: String
+
+    "only logs at one of these levels"
+    levels: [LogLevel]
   ): [LogFacetDetail]
 
   logAggregationBuckets(
@@ -102,6 +108,9 @@ type RootQueryType {
 
     "only logs from pods on this node"
     node: String
+
+    "only logs at one of these levels"
+    levels: [LogLevel]
   ): [LogAggregationBucket]
 
   logs(query: String!, start: Long, end: Long, limit: Int!, clusterId: ID): [LogStream]
@@ -7421,10 +7430,21 @@ input CostSettingsAttributes {
 
 input LoggingSettingsAttributes {
   enabled: Boolean
+
   driver: LogDriver
+
+  "whether the log store supports filtering and grouping by log level"
+  levels: Boolean
+
+  "the field holding a log's level, for elasticsearch, opensearch and victoria"
+  levelField: String
+
   victoria: HttpConnectionAttributes
+
   elastic: ElasticsearchConnectionAttributes
+
   opensearch: OpensearchConnectionAttributes
+
   loki: LokiLoggingConnectionAttributes
 }
 
@@ -8221,6 +8241,12 @@ type LoggingSettings {
 
   "the type of log aggregation solution you wish to use"
   driver: LogDriver
+
+  "whether the log store supports filtering and grouping by log level, eg loki's detected_level"
+  levels: Boolean
+
+  "the field holding a log's level, for elasticsearch, opensearch and victoria"
+  levelField: String
 
   "configures a connection to victoria metrics"
   victoria: HttpConnection
@@ -17740,6 +17766,21 @@ input LogFacetInput {
 
 input LogAggregationInput {
   bucketSize: String
+
+  "count each bucket per log level, setting level on every bucket"
+  groupByLevel: Boolean
+}
+
+"A log level, as loki's detected_level normalizes it"
+enum LogLevel {
+  TRACE
+  DEBUG
+  INFO
+  WARN
+  ERROR
+  CRITICAL
+  FATAL
+  UNKNOWN
 }
 
 enum LogQueryOperator {
@@ -17809,7 +17850,11 @@ type LogFacetDetail {
 
 type LogAggregationBucket {
   timestamp: DateTime
+
   count: Int
+
+  "the level counted, when grouping by level"
+  level: LogLevel
 }
 
 type Metadata {

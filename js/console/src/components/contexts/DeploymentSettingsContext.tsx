@@ -132,6 +132,13 @@ export function useLogsEnabled() {
   return !!ctx?.logging?.enabled
 }
 
+/** Whether the log store can filter and group by level, eg loki's detected_level. */
+export function useLogLevelsEnabled() {
+  const ctx = useDeploymentSettings()
+
+  return !!(ctx?.logging?.enabled && ctx.logging.levels)
+}
+
 export function useMetricsEnabled() {
   const ctx = useDeploymentSettings()
 

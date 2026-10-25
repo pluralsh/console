@@ -4589,6 +4589,16 @@ func (in *LoggingSettings) DeepCopyInto(out *LoggingSettings) {
 		*out = new(client.LogDriver)
 		**out = **in
 	}
+	if in.Levels != nil {
+		in, out := &in.Levels, &out.Levels
+		*out = new(bool)
+		**out = **in
+	}
+	if in.LevelField != nil {
+		in, out := &in.LevelField, &out.LevelField
+		*out = new(string)
+		**out = **in
+	}
 	if in.Victoria != nil {
 		in, out := &in.Victoria, &out.Victoria
 		*out = new(HTTPConnection)

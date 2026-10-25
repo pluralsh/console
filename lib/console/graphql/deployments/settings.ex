@@ -104,6 +104,8 @@ defmodule Console.GraphQl.Deployments.Settings do
   input_object :logging_settings_attributes do
     field :enabled, :boolean
     field :driver, :log_driver
+    field :levels, :boolean, description: "whether the log store supports filtering and grouping by log level"
+    field :level_field, :string, description: "the field holding a log's level, for elasticsearch, opensearch and victoria"
     field :victoria, :http_connection_attributes
     field :elastic, :elasticsearch_connection_attributes
     field :opensearch, :opensearch_connection_attributes
@@ -774,6 +776,12 @@ defmodule Console.GraphQl.Deployments.Settings do
 
     field :driver, :log_driver,
       description: "the type of log aggregation solution you wish to use"
+
+    field :levels, :boolean,
+      description: "whether the log store supports filtering and grouping by log level, eg loki's detected_level"
+
+    field :level_field, :string,
+      description: "the field holding a log's level, for elasticsearch, opensearch and victoria"
 
     field :victoria, :http_connection, description: "configures a connection to victoria metrics"
 
