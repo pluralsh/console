@@ -606,16 +606,18 @@ const GroupListSC = styled.div(() => ({
 }))
 
 const RowSC = styled.div<{ $selected?: boolean }>(({ theme, $selected }) => {
-  const selectedColor = theme.colors['fill-two-selected']
-  const hoverColor = theme.colors['fill-one-hover']
+  // matches PageSidebarNav's active item, as in the stacks sidebar
+  const selectedColor = theme.colors['fill-zero-selected']
+  const hoverColor = theme.colors['fill-zero-hover']
   const actionFade = (color: string) =>
     `linear-gradient(to right, transparent, ${color} ${theme.spacing.large})`
 
   return {
     alignItems: 'center',
-    // Note: Figma fill tokens predate the DS rename; these current tokens
-    // match the Figma rendered hexes (selected #2A2E37, hover #252932).
     backgroundColor: $selected ? selectedColor : undefined,
+    boxShadow: $selected
+      ? `inset -2px 0 0 ${theme.colors['border-primary']}`
+      : undefined,
     display: 'flex',
     gap: theme.spacing.xsmall,
     padding: `${theme.spacing.small} ${theme.spacing.medium}`,
