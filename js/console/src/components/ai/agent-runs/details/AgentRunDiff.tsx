@@ -228,6 +228,7 @@ export function agentRunPatchCacheKey(patchUrl?: string | null): string {
 export function AgentRunDiff({
   runId,
   patchUrl,
+  refreshKey,
   isFullscreen = false,
   onFullscreenChange,
   isApprovable = false,
@@ -237,6 +238,8 @@ export function AgentRunDiff({
   runId: string
   /** Waffle patch URL (includes ?v= stamp). Key the fetch so follow-up uploads refresh. */
   patchUrl?: string | null
+  /** Run updatedAt (or similar) so Diff reloads when the run finishes a follow-up. */
+  refreshKey?: string | null
   isFullscreen?: boolean
   onFullscreenChange?: (fullscreen: boolean) => void
   isApprovable?: boolean
@@ -244,13 +247,14 @@ export function AgentRunDiff({
   approving?: boolean
 }) {
   const patchKey = agentRunPatchCacheKey(patchUrl)
+  const cacheKey = [patchKey, refreshKey ?? ''].filter(Boolean).join(':')
   const {
     data: content,
     error,
     isLoading,
   } = useQuery({
-    queryKey: ['agent-run-patch', runId, patchKey],
-    queryFn: () => fetchAgentRunUpload(runId, 'patch'),
+    queryKey: ['agent-run-patch', runId, cacheKey],
+    queryFn: () => fetchAgentRunUpload(runId, 'patch', cacheKey),
     enabled: !!runId,
     staleTime: Infinity,
     placeholderData: (previous) => previous,
