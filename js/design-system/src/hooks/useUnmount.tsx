@@ -1,16 +1,9 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useEffectEvent } from 'react'
 
 function useUnmount(effect: () => void) {
-  const effectRef = useRef(effect)
+  const onUnmount = useEffectEvent(effect)
 
-  effectRef.current = effect
-
-  useEffect(
-    () => () => {
-      effectRef.current()
-    },
-    []
-  )
+  useEffect(() => () => onUnmount(), [])
 }
 
 export default useUnmount

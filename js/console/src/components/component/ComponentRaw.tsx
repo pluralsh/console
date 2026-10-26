@@ -72,24 +72,22 @@ export function RawYaml({
   )
 }
 
+function formatRawJson(raw: object | string | null | undefined) {
+  let json: string
+
+  try {
+    json = raw
+      ? JSON.stringify(typeof raw === 'string' ? JSON.parse(raw) : raw, null, 2)
+      : ''
+  } catch {
+    json = typeof raw === 'string' ? raw : ''
+  }
+
+  return json
+}
+
 export function RawJson({ raw }: { raw?: object | string | null | undefined }) {
-  const rawStr = useMemo(() => {
-    let json: string
-
-    try {
-      json = raw
-        ? JSON.stringify(
-            typeof raw === 'string' ? JSON.parse(raw) : raw,
-            null,
-            2
-          )
-        : ''
-    } catch {
-      json = typeof raw === 'string' ? raw : ''
-    }
-
-    return json
-  }, [raw])
+  const rawStr = useMemo(() => formatRawJson(raw), [raw])
 
   if (isEmpty(raw)) {
     return <EmptyState message="No data available." />

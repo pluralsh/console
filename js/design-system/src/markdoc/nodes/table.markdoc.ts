@@ -6,7 +6,7 @@ import { type BaseSchema, isTag } from '../types'
 export const table: BaseSchema = {
   render: Table,
   description: 'Display horizontal tabs in a box',
-  children: ['tab'],
+  children: ['thead', 'tbody'],
   attributes: {},
   transform(node, config) {
     const children = node.transformChildren(config)

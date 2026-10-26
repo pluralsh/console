@@ -59,7 +59,8 @@ export function WorkbenchEvals() {
   const [qualityTab, setQualityTab] = useState<QualityTab>('prompt')
   const [qualityBreakdownCollapsed, setQualityBreakdownCollapsed] =
     useState(false)
-  const [promptExpanded, setPromptExpanded] = useState(false)
+  // the row whose prompt is expanded, so switching rows collapses it
+  const [expandedRowId, setExpandedRowId] = useState<string | null>(null)
   const qualityTabsStateRef = useRef<any>(undefined)
 
   const { data, loading, error } = useWorkbenchEvalsQuery({
@@ -77,6 +78,8 @@ export function WorkbenchEvals() {
   const selectedEvalRowFromPath =
     evalRows.find((r) => r.id === evalResultIdFromPath) ?? null
   const selectedEvalRow = selectedEvalRowFromPath ?? evalRows[0] ?? null
+  const promptExpanded =
+    !!selectedEvalRow && expandedRowId === selectedEvalRow.id
 
   const feedback = selectedEvalRow?.feedback
   const grade = selectedEvalRow?.grade ?? 0
@@ -101,10 +104,6 @@ export function WorkbenchEvals() {
       { replace: true }
     )
   }, [evalResultIdFromPath, navigate, selectedEvalRow?.id, workbenchId])
-
-  useEffect(() => {
-    setPromptExpanded(false)
-  }, [selectedEvalRow?.id])
 
   const onSelectEvalResultId = useCallback(
     (evalResultId: string) =>
@@ -220,7 +219,6 @@ export function WorkbenchEvals() {
                   >
                     <Flex
                       direction="column"
-                      align="flex-start"
                       gap="xxsmall"
                       minWidth={0}
                       width="100%"
@@ -244,10 +242,17 @@ export function WorkbenchEvals() {
                       )}
                       {canExpandPrompt && (
                         <span
-                          onClick={() => setPromptExpanded((v) => !v)}
+                          onClick={() =>
+                            setExpandedRowId(
+                              promptExpanded
+                                ? null
+                                : (selectedEvalRow?.id ?? null)
+                            )
+                          }
                           css={{
                             ...theme.partials.text.caption,
                             color: theme.colors['text-input-disabled'],
+                            alignSelf: 'flex-start',
                             cursor: 'pointer',
                             userSelect: 'none',
                           }}

@@ -64,27 +64,32 @@ function CollapsedLinesDecoration({ count }: { count: number }) {
   )
 }
 
+function parsePatch(patch: string) {
+  try {
+    const parsedFile = parseDiff(patch)[0]
+
+    if (!parsedFile?.hunks?.length) {
+      return { file: parsedFile, tokens: null, parseFailed: false }
+    }
+
+    return {
+      file: parsedFile,
+      tokens: tokenize(parsedFile.hunks, {
+        enhancers: [markEdits(parsedFile.hunks, { type: 'line' })],
+      }),
+      parseFailed: false,
+    }
+  } catch {
+    return { file: undefined, tokens: null, parseFailed: true }
+  }
+}
+
 export function AgentRunPatchView({ patch }: { patch: string }) {
   const theme = useTheme()
-  const { file, tokens, parseFailed } = useMemo(() => {
-    try {
-      const parsedFile = parseDiff(patch)[0]
-
-      if (!parsedFile?.hunks?.length) {
-        return { file: parsedFile, tokens: null, parseFailed: false }
-      }
-
-      return {
-        file: parsedFile,
-        tokens: tokenize(parsedFile.hunks, {
-          enhancers: [markEdits(parsedFile.hunks, { type: 'line' })],
-        }),
-        parseFailed: false,
-      }
-    } catch {
-      return { file: undefined, tokens: null, parseFailed: true }
-    }
-  }, [patch])
+  const { file, tokens, parseFailed } = useMemo(
+    () => parsePatch(patch),
+    [patch]
+  )
 
   if (parseFailed) {
     return <PatchRawSC>{patch}</PatchRawSC>

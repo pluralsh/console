@@ -7,6 +7,7 @@ import {
   type ReactNode,
   type RefObject,
   cloneElement,
+  useLayoutEffect,
   useMemo,
   useRef,
 } from 'react'
@@ -208,16 +209,18 @@ function ListBox({
 
   const state = useListState<object>(listStateProps as any)
 
-  stateRef.current = state
+  useLayoutEffect(() => {
+    stateRef.current = state
 
-  if (nextFocusedKeyRef.current) {
-    const focusedKey =
-      state.collection.getKeyAfter(nextFocusedKeyRef.current) ||
-      nextFocusedKeyRef.current
+    if (nextFocusedKeyRef.current) {
+      const focusedKey =
+        state.collection.getKeyAfter(nextFocusedKeyRef.current) ||
+        nextFocusedKeyRef.current
 
-    state.selectionManager.setFocusedKey(focusedKey)
-    nextFocusedKeyRef.current = null
-  }
+      state.selectionManager.setFocusedKey(focusedKey)
+      nextFocusedKeyRef.current = null
+    }
+  })
 
   return (
     <ListBoxUnmanaged
@@ -283,17 +286,25 @@ function Option({ item, state }: { item: any; state: ListState<object> }) {
     isFocused,
   } = useOption({ key: item.key }, state, ref)
 
+  const { ref: itemRef, selected, disabled } = item?.rendered?.props ?? {}
   const mergedProps = mergeProps(optionProps, {
-    selected: isSelected || item?.rendered?.props?.selected,
-    disabled: isDisabled || item?.rendered?.props?.disabled,
+    selected: isSelected || selected,
+    disabled: isDisabled || disabled,
     focused: isFocused,
     labelProps,
     descriptionProps,
     selectionMode: state.selectionManager.selectionMode,
-    ref: mergeRefs([ref, item?.rendered?.props?.ref]),
   })
 
-  return cloneElement(item.rendered, mergedProps)
+  const Rendered = item.rendered.type
+
+  return (
+    <Rendered
+      {...item.rendered.props}
+      {...mergedProps}
+      ref={(node: unknown) => mergeRefs([ref, itemRef])(node)}
+    />
+  )
 }
 
 export { ListBox, ListBoxUnmanaged, useItemWrappedChildren }

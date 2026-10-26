@@ -7,8 +7,8 @@ import {
 
 export type NavigationContextValue = {
   Link: ComponentType<ComponentProps<'a'>>
-  usePathname: () => string
-  useNavigate: () => (location?: string) => void
+  pathname: string
+  navigate: (location?: string) => void
   /**
    * Directory a relative Markdown link should resolve against.
    * Leaf pages should pass their parent route; index pages should pass themselves.

@@ -42,7 +42,6 @@ export function DeployServiceSettingsSecrets({
 
   const { items, errorCount } = useMemo(() => {
     const names = new Set<string>()
-    let errorCount = 0
 
     const items = secrets.map((secret) => {
       const duplicate = names.has(secret.name) && !!secret.name
@@ -50,10 +49,6 @@ export function DeployServiceSettingsSecrets({
       names.add(secret.name)
 
       const noName = !!secret.value && !secret.name
-
-      if (duplicate || noName) {
-        errorCount++
-      }
 
       return {
         secret,
@@ -63,6 +58,10 @@ export function DeployServiceSettingsSecrets({
         },
       }
     })
+
+    const errorCount = items.filter(
+      ({ errors }) => errors.duplicate || errors.noName
+    ).length
 
     return { items, errorCount }
   }, [secrets])

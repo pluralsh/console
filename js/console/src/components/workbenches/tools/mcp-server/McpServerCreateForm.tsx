@@ -31,7 +31,7 @@ import {
   useUpsertMcpServerMutation,
   WorkbenchToolType,
 } from 'generated/graphql'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useEffectEvent, useMemo, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import styled from 'styled-components'
 import { deepOmitBlank } from 'utils/graphql'
@@ -109,6 +109,11 @@ export function McpServerCreateForm({
   const { popToast } = useSimpleToast()
   const { isOpen, openSetupGuidePanel, closeSetupGuidePanel } =
     useWebhookSetupGuidePanel()
+
+  const onUnmount = useEffectEvent(() => {
+    if (isOpen) closeSetupGuidePanel()
+  })
+  useEffect(() => () => onUnmount(), [])
   const isEditing = !!existingServer
 
   const returnParams = useMemo(

@@ -18,12 +18,9 @@ import { GqlError } from 'components/utils/Alert'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { StackedText } from 'components/utils/table/StackedText'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import {
-  useUpdateWorkbenchMutation,
-  useWorkbenchToolsQuery,
-  WorkbenchQuery,
-} from 'generated/graphql'
-import { useEffect, useMemo, useState } from 'react'
+import { useUpdateWorkbenchMutation, WorkbenchQuery } from 'generated/graphql'
+import { WorkbenchToolsDocument } from 'generated/graphql-documents'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getWorkbenchToolsAddAbsPath } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
@@ -67,7 +64,8 @@ export function WorkbenchToolsEditModal({
   onClose: () => void
   addedToolId?: Nullable<string>
 }) {
-  const [selectedToolIds, setSelectedToolIds] = useState<string[]>([])
+  // the user's selection, or null to show the workbench's current tools
+  const [editedToolIds, setSelectedToolIds] = useState<string[] | null>(null)
   const { popToast } = useSimpleToast()
   const navigate = useNavigate()
 
@@ -76,7 +74,7 @@ export function WorkbenchToolsEditModal({
     error: toolsError,
     loading: toolsLoading,
   } = useFetchPaginatedData({
-    queryHook: useWorkbenchToolsQuery,
+    query: WorkbenchToolsDocument,
     keyPath: ['workbenchTools'],
     skip: !open,
   })
@@ -90,6 +88,16 @@ export function WorkbenchToolsEditModal({
     () => (workbench?.tools ?? []).filter(isNonNullable).map((tool) => tool.id),
     [workbench?.tools]
   )
+  // a tool just created from this workbench starts out selected
+  const defaultToolIds =
+    addedToolId && !associatedToolIds.includes(addedToolId)
+      ? [...associatedToolIds, addedToolId]
+      : associatedToolIds
+  const selectedToolIds = editedToolIds ?? defaultToolIds
+  const close = () => {
+    setSelectedToolIds(null)
+    onClose()
+  }
   const configuredToolsById = useMemo(
     () => new Map(configuredTools.map((tool) => [tool.id, tool])),
     [configuredTools]
@@ -109,15 +117,6 @@ export function WorkbenchToolsEditModal({
     return !associatedToolIds.every((id) => selectedToolIdsSet.has(id))
   }, [associatedToolIds, selectedToolIds])
 
-  useEffect(() => {
-    if (!open) return
-    setSelectedToolIds(
-      addedToolId && !associatedToolIds.includes(addedToolId)
-        ? [...associatedToolIds, addedToolId]
-        : associatedToolIds
-    )
-  }, [addedToolId, associatedToolIds, open])
-
   const [updateWorkbench, { loading: saveLoading, error: saveError }] =
     useUpdateWorkbenchMutation({
       refetchQueries: ['WorkbenchTriggersSummary', 'Workbench'],
@@ -127,7 +126,7 @@ export function WorkbenchToolsEditModal({
           content: `${workbench?.name ?? 'workbench tools'} updated`,
           severity: 'success',
         })
-        onClose()
+        close()
       },
     })
 
@@ -146,14 +145,14 @@ export function WorkbenchToolsEditModal({
   }
 
   const handleDeselectTool = (toolId: string) => {
-    setSelectedToolIds((ids) => ids.filter((id) => id !== toolId))
+    setSelectedToolIds(selectedToolIds.filter((id) => id !== toolId))
   }
 
   return (
     <Modal
       open={open}
       size="large"
-      onClose={onClose}
+      onClose={close}
       header={
         <Flex
           align="center"
@@ -166,7 +165,7 @@ export function WorkbenchToolsEditModal({
             size="small"
             icon={<CloseIcon size={12} />}
             tooltip="Close"
-            onClick={onClose}
+            onClick={close}
           />
         </Flex>
       }
@@ -175,7 +174,7 @@ export function WorkbenchToolsEditModal({
           <Button
             destructive
             type="button"
-            onClick={onClose}
+            onClick={close}
             disabled={saveLoading}
           >
             Cancel
@@ -233,7 +232,7 @@ export function WorkbenchToolsEditModal({
                     />
                   }
                   onClick={() => {
-                    onClose()
+                    close()
                     navigate(getWorkbenchToolsAddAbsPath(workbench?.id))
                   }}
                 >

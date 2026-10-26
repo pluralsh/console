@@ -34,7 +34,7 @@ export const button: BaseSchema = {
 export const buttonGroup: BaseSchema = {
   render: ButtonGroup,
   description: 'Display a horizontal list of buttons',
-  children: ['Button'],
+  children: ['tag'],
   attributes: {},
   transform(node, config) {
     const children = unwrapParagraphs(node.transformChildren(config)).filter(

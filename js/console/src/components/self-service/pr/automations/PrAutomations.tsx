@@ -1,7 +1,7 @@
 import { ArrowTopRightIcon, Button, Flex, Table } from '@pluralsh/design-system'
 import { useMemo, useState } from 'react'
 
-import { usePrAutomationsQuery } from 'generated/graphql'
+import { PrAutomationsDocument } from 'generated/graphql-documents'
 
 import { GqlError } from 'components/utils/Alert'
 
@@ -33,7 +33,7 @@ export function PrAutomations() {
     setVirtualSlice,
   } = useFetchPaginatedData(
     {
-      queryHook: usePrAutomationsQuery,
+      query: PrAutomationsDocument,
       keyPath: ['prAutomations'],
     },
     { q: debouncedSearchString }

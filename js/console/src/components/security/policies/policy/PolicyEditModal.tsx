@@ -2,7 +2,7 @@ import { Button, Flex, Modal } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { PolicyFragment, useUpdatePolicyMutation } from 'generated/graphql'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import {
   PolicyDescriptionField,
   PolicyNameField,
@@ -18,20 +18,24 @@ export function PolicyEditModal({
   policy: PolicyFragment | null | undefined
 }) {
   const { popToast } = useSimpleToast()
-  const [name, setName] = useState('')
-  const [description, setDescription] = useState('')
-
-  useEffect(() => {
-    if (!open) return
-
-    setName(policy?.name ?? '')
-    setDescription(policy?.description ?? '')
-  }, [open, policy?.description, policy?.name])
+  // only the user's edits are stored; untouched fields show the current policy
+  const [edits, setEdits] = useState<{ name?: string; description?: string }>(
+    {}
+  )
+  const name = edits.name ?? policy?.name ?? ''
+  const description = edits.description ?? policy?.description ?? ''
+  const setName = (name: string) => setEdits((e) => ({ ...e, name }))
+  const setDescription = (description: string) =>
+    setEdits((e) => ({ ...e, description }))
+  const close = () => {
+    setEdits({})
+    onClose()
+  }
 
   const [updatePolicy, { loading, error }] = useUpdatePolicyMutation({
     onCompleted: () => {
       popToast({ content: 'Policy updated', severity: 'success' })
-      onClose()
+      close()
     },
   })
 
@@ -59,7 +63,7 @@ export function PolicyEditModal({
   return (
     <Modal
       open={open}
-      onClose={onClose}
+      onClose={close}
       header="Edit policy"
       asForm
       formProps={{
@@ -77,7 +81,7 @@ export function PolicyEditModal({
           <Button
             secondary
             type="button"
-            onClick={onClose}
+            onClick={close}
           >
             Cancel
           </Button>

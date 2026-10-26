@@ -4,14 +4,14 @@ import { WorkbenchTabHeader } from 'components/workbenches/common/WorkbenchTabHe
 import { WorkbenchTabWrapper } from 'components/workbenches/common/WorkbenchTabWrapper'
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import { useWorkbenchesIssuesQuery } from 'generated/graphql'
+import { WorkbenchesIssuesDocument } from 'generated/graphql-documents'
 import { useMemo } from 'react'
 import { mapExistingNodes } from 'utils/graphql'
 
 export function WorkbenchesIssues() {
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData({
-      queryHook: useWorkbenchesIssuesQuery,
+      query: WorkbenchesIssuesDocument,
       keyPath: ['workbenchIssues'],
     })
 

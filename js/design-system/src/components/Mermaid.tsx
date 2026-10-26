@@ -3,7 +3,7 @@ import mermaid, { MermaidConfig } from 'mermaid'
 import {
   ComponentPropsWithoutRef,
   Ref,
-  useCallback,
+  useEffect,
   useImperativeHandle,
   useLayoutEffect,
   useState,
@@ -58,20 +58,19 @@ export function Mermaid({
 }) {
   const { mode } = useTheme()
 
-  const [svgStr, setSvgStr] = useState<Nullable<string>>()
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setErrorState] = useState<Nullable<Error>>(null)
+  const id = getMermaidId(`${mode}:${diagram}`)
+  const [rendered, setRendered] = useState<{
+    id: string
+    result: string | Error
+  }>()
+  const result =
+    cachedRenders[id] ?? (rendered?.id === id ? rendered.result : undefined)
+  const isLoading = result === undefined
+  const svgStr = typeof result === 'string' ? result : null
+  const error = result instanceof Error ? result : null
   const [panZoomKey, setPanZoomKey] = useState(0) // increment to force panzoom wrapper to reset
   const [isFullscreen, setIsFullscreen] = useState(false)
   const { copied, handleCopy } = useCopyText(diagram)
-
-  const setError = useCallback(
-    (error: Nullable<Error>) => {
-      setErrorState(error)
-      setErrorProp?.(error)
-    },
-    [setErrorProp]
-  )
 
   useImperativeHandle(ref, () => ({ svgStr }))
 
@@ -85,44 +84,34 @@ export function Mermaid({
     }
   }, [mode])
 
+  useEffect(() => {
+    setErrorProp?.(error)
+  }, [error, setErrorProp])
+
   useLayoutEffect(() => {
-    const id = getMermaidId(`${mode}:${diagram}`)
-    const cached = cachedRenders[id]
-    if (cached) {
-      setIsLoading(false)
-      setSvgStr(typeof cached === 'string' ? cached : null)
-      setError(cached instanceof Error ? cached : null)
-      return
-    }
+    if (cachedRenders[id]) return
 
     // need to keep track of this since we're dealing with async ops, helps avoid race condition
     let isMounted = true
     const renderDiagram = async () => {
+      let result: string | Error
       try {
-        setIsLoading(true)
-        setError(null)
-        const { svg } = await mermaid.render(id, diagram)
-        if (!isMounted) return
-
-        cachedRenders[id] = svg
-        setSvgStr(svg)
-        setIsLoading(false)
+        result = (await mermaid.render(id, diagram)).svg
       } catch (caughtErr) {
-        if (!isMounted) return
-        const err =
+        result =
           caughtErr instanceof Error ? caughtErr : new Error(String(caughtErr))
-        console.warn('Error parsing Mermaid (rendering plaintext):', err)
-        setError(err)
-        setIsLoading(false)
-        cachedRenders[id] = err
+        if (isMounted)
+          console.warn('Error parsing Mermaid (rendering plaintext):', result)
       }
+      cachedRenders[id] = result
+      if (isMounted) setRendered({ id, result })
     }
     renderDiagram()
 
     return () => {
       isMounted = false
     }
-  }, [diagram, setError, mode])
+  }, [id, diagram])
 
   if (error)
     return (

@@ -12,8 +12,8 @@ import { createColumnHelper } from '@tanstack/react-table'
 import {
   PullRequestFragment,
   useKickStackPullRequestMutation,
-  useStackPrsQuery,
 } from 'generated/graphql'
+import { StackPrsDocument } from 'generated/graphql-documents'
 import { Link, useOutletContext } from 'react-router-dom'
 
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
@@ -42,7 +42,7 @@ export function StackPrs() {
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
       {
-        queryHook: useStackPrsQuery,
+        query: StackPrsDocument,
         keyPath: ['infrastructureStack', 'pullRequests'],
         fetchPolicy: 'cache-and-network',
       },

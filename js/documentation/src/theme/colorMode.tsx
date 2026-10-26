@@ -3,9 +3,8 @@ import {
   type PropsWithChildren,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
-  useState,
+  useSyncExternalStore,
 } from 'react'
 
 import { createGlobalStyle } from 'styled-components'
@@ -54,16 +53,28 @@ const ColorModeContext = createContext<ColorModeContextValue>({
   toggle: () => {},
 })
 
+// <html>'s attribute is the source of truth (colorModeScript sets it before paint)
+const subscribe = (onChange: () => void) => {
+  const observer = new MutationObserver(onChange)
+
+  observer.observe(document.documentElement, { attributeFilter: [ATTR] })
+
+  return () => observer.disconnect()
+}
+
+const getMode = (): ColorMode => {
+  const attr = document.documentElement.getAttribute(ATTR)
+
+  return isColorMode(attr) ? attr : DEFAULT_COLOR_MODE
+}
+
 export function ColorModeProvider({ children }: PropsWithChildren) {
-  // Server and first client render agree on the default; the real mode (already
-  // applied to <html> by colorModeScript) is picked up after hydration.
-  const [mode, setModeState] = useState<ColorMode>(DEFAULT_COLOR_MODE)
-
-  useEffect(() => {
-    const attr = document.documentElement.getAttribute(ATTR)
-
-    if (isColorMode(attr)) setModeState(attr)
-  }, [])
+  // Server and hydration render use the default, then React switches to the real mode.
+  const mode = useSyncExternalStore(
+    subscribe,
+    getMode,
+    () => DEFAULT_COLOR_MODE
+  )
 
   const setMode = useCallback((next: ColorMode) => {
     document.documentElement.setAttribute(ATTR, next)
@@ -72,7 +83,6 @@ export function ColorModeProvider({ children }: PropsWithChildren) {
     } catch {
       // Storage can be unavailable (private mode); the choice just won't stick.
     }
-    setModeState(next)
   }, [])
 
   const value = useMemo(

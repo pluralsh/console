@@ -130,7 +130,8 @@ function BaseIcon({ ref, className, css, children, ...otherProps }: IconProps) {
       ref={ref}
       className={className}
       {...domProps}
-      css={
+      // transient prop instead of `css`: Next's SWC css-prop transform breaks on React Compiler output
+      $css={
         { ...resolveIconCss(cssProps, theme.spacing), ...css } as StyledObject
       }
     >
@@ -139,7 +140,7 @@ function BaseIcon({ ref, className, css, children, ...otherProps }: IconProps) {
   )
 }
 
-const IconSC = styled.span({
+const IconSC = styled.span<{ $css: StyledObject }>(({ $css }) => ({
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -147,7 +148,8 @@ const IconSC = styled.span({
   '& *': {
     transition: 'stroke 150ms linear, fill 150ms linear',
   },
-})
+  ...$css,
+}))
 
 const Icon = memo(BaseIcon)
 

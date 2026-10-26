@@ -33,9 +33,9 @@ import {
 } from 'components/utils/typography/Text'
 import {
   WorkbenchTinyFragment,
-  useWorkbenchesQuery,
   useWorkbenchesSummaryQuery,
 } from 'generated/graphql'
+import { WorkbenchesDocument } from 'generated/graphql-documents'
 import { Link } from 'react-router-dom'
 import {
   WORKBENCHES_CREATE_ABS_PATH,
@@ -83,7 +83,7 @@ export function WorkbenchesList() {
 
   const { data, error, loading, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
-      { queryHook: useWorkbenchesQuery, keyPath: ['workbenches'] },
+      { query: WorkbenchesDocument, keyPath: ['workbenches'] },
       { q: debouncedSearchString, projectId, ...sortVariables }
     )
 

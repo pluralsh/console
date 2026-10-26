@@ -14,10 +14,8 @@ import {
 import { createColumnHelper } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert.tsx'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData.tsx'
-import {
-  ComplianceReportGeneratorFragment,
-  useComplianceReportGeneratorsQuery,
-} from 'generated/graphql.ts'
+import { ComplianceReportGeneratorFragment } from 'generated/graphql.ts'
+import { ComplianceReportGeneratorsDocument } from 'generated/graphql-documents'
 import { fetchToken } from 'helpers/auth.ts'
 import streamSaver from 'streamsaver'
 import { parseContentDispositionFilename } from 'utils/contentDisposition.ts'
@@ -87,7 +85,7 @@ export function ComplianceReports() {
 
   const { data, loading, error, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData({
-      queryHook: useComplianceReportGeneratorsQuery,
+      query: ComplianceReportGeneratorsDocument,
       keyPath: ['complianceReportGenerators'],
     })
 

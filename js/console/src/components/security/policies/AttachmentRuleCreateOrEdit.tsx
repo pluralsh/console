@@ -36,9 +36,9 @@ import {
   useBindingPolicyQuery,
   useCreateBindingPolicyMutation,
   useDeleteBindingPolicyMutation,
-  usePoliciesQuery,
   useUpdateBindingPolicyMutation,
 } from 'generated/graphql'
+import { PoliciesDocument } from 'generated/graphql-documents'
 import { isEqual, startCase, truncate } from 'lodash'
 import pluralize from 'pluralize'
 import { KeyboardEvent, ReactNode, useMemo, useState } from 'react'
@@ -494,7 +494,7 @@ function PolicySelect({
   onSelectionChange: (policy: PolicyTinyFragment) => void
 }) {
   const { data, loading, pageInfo, fetchNextPage } = useFetchPaginatedData({
-    queryHook: usePoliciesQuery,
+    query: PoliciesDocument,
     keyPath: ['policies'],
   })
   const policies = useMemo(() => {

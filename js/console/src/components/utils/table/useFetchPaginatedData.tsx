@@ -2,9 +2,9 @@ import {
   ErrorPolicy,
   NetworkStatus,
   OperationVariables,
-  QueryHookOptions,
-  QueryResult,
+  TypedDocumentNode,
   WatchQueryFetchPolicy,
+  useQuery,
 } from '@apollo/client'
 import { TableProps } from '@pluralsh/design-system'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
@@ -18,21 +18,12 @@ import { Dispatch, useCallback, useMemo, useState } from 'react'
 
 export const DEFAULT_PAGE_SIZE = 100
 
-export type GenericQueryHook<
-  TQueryType,
-  TVariables extends OperationVariables,
-> = (
-  baseOptions: QueryHookOptions<TQueryType, TVariables> &
-    ({ variables: TVariables; skip?: boolean } | { skip: boolean })
-) => QueryResult<TQueryType, TVariables> & {
-  fetchMore: (options: any) => Promise<any>
-}
-
 export type FetchPaginatedDataOptions<
   TQueryType,
   TVariables extends OperationVariables,
 > = {
-  queryHook: GenericQueryHook<TQueryType, TVariables>
+  // a generated typed `...Document`, not the `use...Query` hook, so the compiler can optimize callers
+  query: TypedDocumentNode<TQueryType, TVariables>
   pageSize?: number
   keyPath: string[]
   pollInterval?: number
@@ -81,11 +72,11 @@ export function useFetchPaginatedData<
     [options.keyPath]
   )
 
-  const queryResult = options.queryHook({
+  const queryResult = useQuery<TQueryType, TVariables>(options.query, {
     variables: {
       first: options.pageSize ?? DEFAULT_PAGE_SIZE,
       ...variables,
-    },
+    } as TVariables,
     skip: options.skip,
     errorPolicy: options.errorPolicy,
     fetchPolicy: options.fetchPolicy ?? 'cache-and-network',

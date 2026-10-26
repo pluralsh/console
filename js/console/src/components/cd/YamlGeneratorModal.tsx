@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import {
   BrowserIcon,
@@ -63,21 +63,21 @@ export function YamlGeneratorModal({
   >('all')
   const [modalStep, setModalStep] = useState<'configure' | 'copy'>('configure')
 
-  useEffect(() => {
-    if (!open) {
-      setModalStep('configure')
-      setName('')
-      setTags({})
-      setDistributionValue('all')
-    }
-  }, [open])
+  // the form is cleared whenever the modal closes, so it opens fresh
+  const close = () => {
+    setModalStep('configure')
+    setName('')
+    setTags({})
+    setDistributionValue('all')
+    onClose?.()
+  }
 
   return (
     <ModalAlt
       header={header}
       open={open}
       onClose={() => {
-        onClose?.()
+        close()
         refetch?.()
       }}
       asForm
@@ -91,7 +91,7 @@ export function YamlGeneratorModal({
               e.preventDefault()
               if (modalStep === 'configure') setModalStep('copy')
               else {
-                onClose?.()
+                close()
               }
             }}
           >
@@ -102,7 +102,7 @@ export function YamlGeneratorModal({
             type="button"
             onClick={(e) => {
               e.preventDefault()
-              onClose?.()
+              close()
             }}
           >
             Cancel

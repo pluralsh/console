@@ -13,7 +13,7 @@ import {
   PolicyType,
   useCreatePolicyMutation,
 } from 'generated/graphql'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { PolicyDescriptionField, PolicyNameField } from './PolicyIdentityFields'
 
 export function CreateBindingModal({
@@ -31,12 +31,16 @@ export function CreateBindingModal({
   const [description, setDescription] = useState('')
   const [policy, setPolicy] = useState('')
 
-  useEffect(() => {
-    if (open) return
+  // the form is cleared whenever the modal closes, so it opens empty
+  const resetForm = () => {
     setName('')
     setDescription('')
     setPolicy('')
-  }, [open])
+  }
+  const close = () => {
+    resetForm()
+    onClose()
+  }
 
   const [createPolicy, { loading, error }] = useCreatePolicyMutation({
     onCompleted: (data) => {
@@ -44,6 +48,7 @@ export function CreateBindingModal({
 
       if (!created) return
       popToast({ content: 'Binding policy created', severity: 'success' })
+      resetForm()
       onCreated(created)
     },
     refetchQueries: ['Policies'],
@@ -70,7 +75,7 @@ export function CreateBindingModal({
   return (
     <Modal
       open={open}
-      onClose={onClose}
+      onClose={close}
       header="New Binding"
       size="large"
       asForm
@@ -89,7 +94,7 @@ export function CreateBindingModal({
           <Button
             floating
             type="button"
-            onClick={onClose}
+            onClick={close}
           >
             Cancel
           </Button>

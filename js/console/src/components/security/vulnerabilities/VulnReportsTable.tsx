@@ -1,10 +1,8 @@
 import { Table } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import {
-  useVulnerabilityReportsQuery,
-  VulnReportGrade,
-} from 'generated/graphql'
+import { VulnReportGrade } from 'generated/graphql'
+import { VulnerabilityReportsDocument } from 'generated/graphql-documents'
 import { memo, useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { getVulnerabilityReportDetailsPath } from 'routes/securityRoutesConsts'
@@ -34,7 +32,7 @@ export const VulneratbilityReportsTable = memo(
     const { data, loading, error, fetchNextPage, setVirtualSlice } =
       useFetchPaginatedData(
         {
-          queryHook: useVulnerabilityReportsQuery,
+          query: VulnerabilityReportsDocument,
           keyPath: ['vulnerabilityReports'],
         },
         {

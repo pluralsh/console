@@ -6,6 +6,7 @@ import {
   type ReactNode,
   type RefObject,
   cloneElement,
+  useLayoutEffect,
   useRef,
   useState,
 } from 'react'
@@ -364,7 +365,9 @@ function Select({
 
   const state = useBimodalSelectState(selectStateProps)
 
-  setNextFocusedKey({ nextFocusedKeyRef, state, stateRef })
+  useLayoutEffect(() => {
+    setNextFocusedKey({ nextFocusedKeyRef, state, stateRef })
+  })
 
   // Get props for the listbox element
   const ref = useRef<HTMLElement | null>(null)

@@ -9,7 +9,8 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { ClusterNameAndIcon } from 'components/cd/services/ServicesColumns.tsx'
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import { AgentRuntimeFragment, useAgentRuntimesQuery } from 'generated/graphql'
+import { AgentRuntimeFragment } from 'generated/graphql'
+import { AgentRuntimesDocument } from 'generated/graphql-documents'
 import { truncate } from 'lodash'
 import { useMemo, useState } from 'react'
 import { mapExistingNodes } from 'utils/graphql'
@@ -20,7 +21,7 @@ import { AIAgentRuntimePermissionsModal } from './AIAgentRuntimePermissionsModal
 export function AIAgentRuntimes() {
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData({
-      queryHook: useAgentRuntimesQuery,
+      query: AgentRuntimesDocument,
       keyPath: ['agentRuntimes'],
     })
 

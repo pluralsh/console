@@ -19,8 +19,8 @@ import {
   ClusterRestore,
   RestoreStatus,
   useClusterBasicQuery,
-  useClusterRestoresQuery,
 } from '../../../../generated/graphql'
+import { ClusterRestoresDocument } from '../../../../generated/graphql-documents'
 import { GqlError } from '../../../utils/Alert'
 import { Edge } from '../../../../utils/graphql'
 import { BACKUPS_CLUSTERS_BASE_CRUMBS } from '../../clusters/Clusters'
@@ -143,7 +143,7 @@ export default function Restores() {
     fetchNextPage,
     setVirtualSlice,
   } = useFetchPaginatedData(
-    { queryHook: useClusterRestoresQuery, keyPath: ['clusterRestores'] },
+    { query: ClusterRestoresDocument, keyPath: ['clusterRestores'] },
     { clusterId }
   )
 

@@ -3,9 +3,10 @@ import { create } from 'storybook/theming'
 export default create({
   base: 'dark',
 
-  brandTitle: 'Plural',
+  // HTML title instead of brandImage, which stretches to the sidebar width
+  brandTitle:
+    '<img src="/logos/plural-full-logo-white.svg" alt="Plural" width="80" />',
   brandUrl: 'https://plural.sh',
-  brandImage: '/plural-logo-white-48.png',
   brandTarget: '_self',
 
   colorPrimary: '#293EFF',

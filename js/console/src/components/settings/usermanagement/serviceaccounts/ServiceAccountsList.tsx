@@ -2,7 +2,7 @@ import { Table } from '@pluralsh/design-system'
 import { isEmpty } from 'lodash'
 import { ComponentProps, useMemo } from 'react'
 
-import { useServiceAccountsQuery } from 'generated/graphql'
+import { ServiceAccountsDocument } from 'generated/graphql-documents'
 
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 
@@ -28,7 +28,7 @@ export function ServiceAccountsList({ q }: { q: string }) {
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
       {
-        queryHook: useServiceAccountsQuery,
+        query: ServiceAccountsDocument,
         keyPath: ['serviceAccounts'],
         pageSize: SERVICE_ACCOUNTS_QUERY_PAGE_SIZE,
       },

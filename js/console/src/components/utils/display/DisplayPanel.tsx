@@ -175,6 +175,12 @@ export function DisplayPopover({
     open,
     onOpenChange: setOpen,
   })
+  const {
+    refs: { setFloating },
+    strategy,
+    x,
+    y,
+  } = floating
   // dismisses on outside press and on Escape wherever focus is (e.g. after
   // clicking plain text in the panel); focus then returns to the button
   const { getReferenceProps, getFloatingProps } = useInteractions([
@@ -198,14 +204,14 @@ export function DisplayPopover({
             modal={false}
           >
             <PopoverPanelSC
-              ref={floating.refs.setFloating}
+              ref={setFloating}
               role="dialog"
               aria-label="Display options"
               fillLevel={1}
               style={{
-                position: floating.strategy,
-                left: floating.x ?? 0,
-                top: floating.y ?? 0,
+                position: strategy,
+                left: x ?? 0,
+                top: y ?? 0,
               }}
               {...getFloatingProps()}
             >

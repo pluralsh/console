@@ -10,8 +10,8 @@ import {
   useWorkbenchCanvasStreamSubscription,
   WorkbenchCanvasBlockFragment,
   WorkbenchJobActivityFragment,
-  WorkbenchJobActivityFragmentDoc,
 } from 'generated/graphql'
+import { WorkbenchJobActivityFragmentDoc } from 'generated/graphql-documents'
 import { isEmpty } from 'lodash'
 import { useMemo } from 'react'
 import styled from 'styled-components'

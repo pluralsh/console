@@ -11,9 +11,9 @@ import styled, { useTheme } from 'styled-components'
 import {
   ScmType,
   ScmWebhookFragment,
-  ScmWebhooksDocument,
   useDeleteScmWebhookMutation,
 } from 'generated/graphql'
+import { ScmWebhooksDocument } from 'generated/graphql-documents'
 import { Edge, removeConnection, updateCache } from 'utils/graphql'
 
 import CopyButton from 'components/utils/CopyButton'

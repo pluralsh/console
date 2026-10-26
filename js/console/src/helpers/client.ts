@@ -192,7 +192,9 @@ export function buildClient(
     }),
   })
 
-  setInterval(() => maybeReconnect(socket), 5000)
+  // in unit tests this would open a socket after jsdom tears down localStorage
+  if (import.meta.env.MODE !== 'test')
+    setInterval(() => maybeReconnect(socket), 5000)
 
   return { client, socket }
 }

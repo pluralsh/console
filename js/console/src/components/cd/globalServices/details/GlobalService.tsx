@@ -9,9 +9,11 @@ import {
 import {
   GlobalServiceFragment,
   useGetGlobalServiceQuery,
-  useGlobalServicesQuery,
-  useSyncGlobalServiceMutation,
 } from 'generated/graphql'
+import {
+  GlobalServicesDocument,
+  SyncGlobalServiceDocument,
+} from 'generated/graphql-documents'
 import { useMemo } from 'react'
 import { PageColumnSC } from 'components/layout/PageLayout'
 import { PageToolbar } from 'components/layout/PageToolbar'
@@ -64,7 +66,7 @@ export function GlobalService() {
           secondary
           small
           startIcon={<ReloadIcon />}
-          kickMutationHook={useSyncGlobalServiceMutation}
+          kickMutation={SyncGlobalServiceDocument}
           message="Resync"
           tooltipMessage="Sync this service now instead of at the next poll interval"
           variables={{ id: globalServiceId }}
@@ -102,7 +104,7 @@ function GlobalServiceSelect({
   const { pathname } = useLocation()
   const projectId = useProjectId()
   const { data, loading, error } = useFetchPaginatedData(
-    { queryHook: useGlobalServicesQuery, keyPath: ['globalServices'] },
+    { query: GlobalServicesDocument, keyPath: ['globalServices'] },
     { projectId }
   )
 

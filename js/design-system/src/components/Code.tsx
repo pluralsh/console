@@ -446,7 +446,14 @@ function CodeUnstyled({
         if (typeof onSelectedTabChange === 'function') onSelectedTabChange(key)
       },
     }),
-    [onSelectedTabChange, selectedTabKey, tabInterface, setTabInterface, tabs]
+    [
+      onSelectedTabChange,
+      selectedTabKey,
+      setSelectedTabKey,
+      tabInterface,
+      setTabInterface,
+      tabs,
+    ]
   )
 
   const selectedTabLanguage = tabs?.find(

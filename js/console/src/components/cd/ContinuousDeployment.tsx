@@ -1,4 +1,4 @@
-import { Breadcrumb } from '@pluralsh/design-system'
+import { Breadcrumb, SetInert } from '@pluralsh/design-system'
 
 import { useLogin } from 'components/contexts'
 
@@ -6,7 +6,6 @@ import { PageColumnSC } from 'components/layout/PageLayout'
 import { PageToolbar } from 'components/layout/PageToolbar'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
-import { MakeInert } from 'components/utils/MakeInert'
 import {
   createContext,
   Dispatch,
@@ -236,14 +235,14 @@ export default function ContinuousDeployment() {
 
   return (
     <PageColumnSC>
-      <MakeInert inert={!cdEnabled}>
+      <SetInert inert={!cdEnabled}>
         <PageToolbar
           tabs={tabs}
           activeFn={(path) => path === `${CD_ABS_PATH}/${tab}`}
         >
           {headerContent}
         </PageToolbar>
-      </MakeInert>
+      </SetInert>
       <ResponsivePageFullWidth scrollable={scrollable}>
         <PluralErrorBoundary>
           <PageHeaderContext.Provider value={pageHeaderContext}>

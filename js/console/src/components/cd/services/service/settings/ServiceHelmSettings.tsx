@@ -8,7 +8,7 @@ import {
   useUpdateServiceDeploymentMutation,
 } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useEffectEvent, useMemo, useState } from 'react'
 import styled from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import { ChartForm } from '../../deployModal/DeployServiceSettingsHelm'
@@ -41,13 +41,16 @@ export function ServiceHelmSettings() {
     helmValuesFiles: !isEmpty(filteredValuesFiles) ? filteredValuesFiles : [''],
   })
 
-  useEffect(() => {
-    if (service?.id !== prevServiceId) reset()
-  }, [prevServiceId, reset, service?.id])
+  // reset only when the service or its settings change, not when initial values do
+  const resetForm = useEffectEvent(reset)
 
   useEffect(() => {
-    if (helmSettingsData) reset()
-  }, [helmSettingsData, reset])
+    if (service?.id !== prevServiceId) resetForm()
+  }, [prevServiceId, service?.id])
+
+  useEffect(() => {
+    if (helmSettingsData) resetForm()
+  }, [helmSettingsData])
 
   // git-sourced services (eg the deploy-operator) carry helm values without a chart
   const isChart = !!service?.helm?.chart

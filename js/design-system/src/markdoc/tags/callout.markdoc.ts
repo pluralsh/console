@@ -6,7 +6,7 @@ import { type BaseSchema, isTag } from '../types'
 export const callout: BaseSchema = {
   render: Callout,
   description: 'Display the enclosed content in a callout box',
-  children: ['paragraph', 'tag', 'list', 'cta'],
+  children: ['paragraph', 'tag', 'list'],
   attributes: {
     severity: {
       type: String,

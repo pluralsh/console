@@ -9,6 +9,7 @@ import {
   useEffect,
   useImperativeHandle,
   useMemo,
+  useEffectEvent,
 } from 'react'
 import styled from 'styled-components'
 
@@ -122,7 +123,8 @@ function WizardUnstyled({
     [steps, completed, onComplete]
   )
   useEffect(() => onSelect && onSelect(selected), [onSelect, selected])
-  useEffect(() => {
+  // re-sync steps only when the number of dependency steps changes
+  const syncDependencySteps = useEffectEvent(() =>
     setSteps((steps) => {
       if (isEmpty(dependencySteps)) {
         if (steps.some((s) => s.isDependency)) onReset()
@@ -136,8 +138,12 @@ function WizardUnstyled({
 
       return arr
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dependencySteps?.length, onReset, setSteps])
+  )
+  const dependencyStepsLength = dependencySteps?.length
+
+  useEffect(() => {
+    syncDependencySteps()
+  }, [dependencyStepsLength, onReset, setSteps])
 
   return (
     <div

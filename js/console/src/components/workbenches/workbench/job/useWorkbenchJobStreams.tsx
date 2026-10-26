@@ -8,15 +8,17 @@ import {
   useWorkbenchJobThoughtDeltaSubscription,
   useWorkbenchTextStreamSubscription,
   WorkbenchCanvasBlockFragment,
-  WorkbenchJobActivitiesDocument,
   WorkbenchJobActivitiesQuery,
   WorkbenchJobActivityFragment,
-  WorkbenchJobActivityWithThoughtsFragmentDoc,
   WorkbenchJobFragment,
-  WorkbenchJobFragmentDoc,
   WorkbenchJobProgressFragment,
   WorkbenchJobThoughtFragment,
 } from 'generated/graphql'
+import {
+  WorkbenchJobActivitiesDocument,
+  WorkbenchJobActivityWithThoughtsFragmentDoc,
+  WorkbenchJobFragmentDoc,
+} from 'generated/graphql-documents'
 import { useRef, useState } from 'react'
 import {
   appendConnectionToEnd,

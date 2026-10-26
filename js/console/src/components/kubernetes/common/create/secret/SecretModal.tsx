@@ -9,7 +9,7 @@ import {
 import { useNamespaces } from 'components/kubernetes/Cluster'
 import { GqlError } from 'components/utils/Alert'
 
-import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
+import { Dispatch, ReactNode, SetStateAction, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 import { SecretType, ToSecretYaml } from './common'
@@ -53,7 +53,6 @@ export function CreateSecretModal({
   const { clusterId } = useParams()
   const namespaces = useNamespaces()
 
-  const [yaml, setYaml] = useState('')
   const [valid, setValid] = useState(false)
   const [creating, setCreating] = useState(false)
   const [name, setName] = useState('')
@@ -105,18 +104,9 @@ export function CreateSecretModal({
     },
   })
 
-  useEffect(() => {
-    setYaml(
-      ToSecretYaml({
-        name,
-        namespace,
-        type,
-        serviceAccount,
-        data,
-      })
-    )
-    setValid((valid) => valid && !!name && !!namespace)
-  }, [name, namespace, type, data, serviceAccount])
+  const yaml = ToSecretYaml({ name, namespace, type, serviceAccount, data })
+
+  if (valid && !(name && namespace)) setValid(false)
 
   return (
     <Modal

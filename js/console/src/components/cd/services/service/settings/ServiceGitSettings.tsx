@@ -12,7 +12,7 @@ import {
   useGitRepositoriesQuery,
   useUpdateServiceDeploymentMutation,
 } from 'generated/graphql'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useEffectEvent, useMemo } from 'react'
 import { useUpdateState } from 'components/hooks/useUpdateState'
 import styled from 'styled-components'
 import {
@@ -57,9 +57,12 @@ export function ServiceGitSettings() {
     repositoryId: service?.repository?.id ?? '',
   })
 
+  // reset only when the service or its settings change, not when initial values do
+  const resetForm = useEffectEvent(reset)
+
   useEffect(() => {
-    if (service?.id !== prevServiceId) reset()
-  }, [prevServiceId, reset, service?.id])
+    if (service?.id !== prevServiceId) resetForm()
+  }, [prevServiceId, service?.id])
 
   const attributes = useMemo(() => {
     const git =

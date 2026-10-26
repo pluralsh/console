@@ -19,7 +19,7 @@ import {
   WorkbenchPromptFragment,
 } from 'generated/graphql'
 import { isEqual } from 'lodash'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import {
   getWorkbenchSavedPromptsAbsPath,
@@ -50,9 +50,6 @@ export function SavedPromptForm({ mode }: { mode: 'create' | 'edit' }) {
     location.state as Nullable<SavedPromptCreateRouteState>
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
   const savedPromptId = useParams()[WORKBENCHES_SAVED_PROMPT_PARAM_ID]
-  const [formState, setFormState] = useState<SavedPromptFormState>(() =>
-    getInitialFormState(undefined, createRouteState?.prompt)
-  )
   const { popToast } = useSimpleToast()
 
   const {
@@ -88,10 +85,21 @@ export function SavedPromptForm({ mode }: { mode: 'create' | 'edit' }) {
     [prompts, savedPromptId]
   )
 
-  useEffect(() => {
-    if (!savedPrompt) return
-    setFormState(getInitialFormState(savedPrompt))
-  }, [savedPrompt])
+  // the user's edits, tied to the prompt they were made on: the route reuses this
+  // component across prompts, and stale edits must never be saved to another one
+  const formKey = `${workbenchId}:${mode}:${savedPromptId ?? ''}`
+  const [edited, setEdited] = useState<{
+    key: string
+    form: SavedPromptFormState
+  } | null>(null)
+  // otherwise show the saved prompt (which may load after mount)
+  const formState =
+    edited?.key === formKey
+      ? edited.form
+      : getInitialFormState(savedPrompt, createRouteState?.prompt)
+  const setFormState = (
+    update: (prev: SavedPromptFormState) => SavedPromptFormState
+  ) => setEdited({ key: formKey, form: update(formState) })
 
   const attributes = toAttributes(formState)
 

@@ -159,15 +159,10 @@ export function TopLevelSidePanelProvider({
     ? requested
     : null
 
-  // Child effects run before this one in the same commit, so a page that just
-  // mounted may already have requested its panel. Check the latest state rather
-  // than the rendered one, or we'd clobber that request with the previous
-  // route's panel.
-  useEffect(() => {
-    setRequested((current) =>
-      isAllowed(current, pathname, legacyChatEnabled) ? current : null
-    )
-  }, [requested, pathname, legacyChatEnabled])
+  // Drop the request once it's no longer allowed here. This runs during render,
+  // before a newly mounted page's effects can request its own panel, so that
+  // request is never clobbered by the previous route's panel.
+  if (requested && !sidePanel) setRequested(null)
 
   const closeSidePanel = useCallback(
     (panel: SidePanel) =>

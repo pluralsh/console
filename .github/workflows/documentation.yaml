@@ -7,6 +7,7 @@ on:
     paths:
       - ".github/workflows/documentation.yaml"
       - "js/.yarnrc.yml"
+      - "js/.tool-versions"
       - "js/design-system/**"
       - "js/documentation/**"
       - "js/biome.json"
@@ -21,6 +22,7 @@ on:
     paths:
       - ".github/workflows/documentation.yaml"
       - "js/.yarnrc.yml"
+      - "js/.tool-versions"
       - "js/design-system/**"
       - "js/documentation/**"
       - "js/biome.json"
@@ -77,10 +79,10 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-node@v7
         with:
-          node-version: 24.11.1
+          node-version-file: js/.tool-versions
           cache: yarn
           cache-dependency-path: js/yarn.lock
-      - run: corepack enable
+      - run: npm install -g corepack@0.36.0 && corepack enable
         working-directory: js
       - run: yarn --immutable
         working-directory: js

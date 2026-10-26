@@ -17,15 +17,14 @@ type ChipListProps = ComponentProps<'div'> & {
 
 function ChipListUnstyled({
   ref,
-  chips,
+  chips: chipsProp,
   maxVisible = 3,
   showExtra = true,
   ...props
 }: ChipListProps) {
-  if (!Array.isArray(chips)) {
-    chips = []
-  }
-  chips = chips.filter((chip) => !!chip)
+  const chips = (Array.isArray(chipsProp) ? chipsProp : []).filter(
+    (chip) => !!chip
+  )
   const firstChips = useMemo(
     () =>
       chips

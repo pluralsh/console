@@ -23,15 +23,7 @@ import { useUpdateState } from 'components/hooks/useUpdateState'
 import { PersonaConfiguration } from './PersonaConfiguration'
 
 import { mergeWith } from 'lodash'
-import {
-  ComponentProps,
-  ReactNode,
-  SubmitEventHandler,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
+import { ComponentProps, SubmitEventHandler, useCallback, useMemo } from 'react'
 import { useTheme } from 'styled-components'
 import { deepOmitKey } from 'utils/deepOmitKey'
 
@@ -182,7 +174,6 @@ export function EditPersonaAttributesModal({
   onClose: () => void
 }) {
   const theme = useTheme()
-  const [errorMsg, setErrorMsg] = useState<ReactNode>()
   const initialConfig = useMemo(
     () => getFullConfig(persona?.configuration),
     [persona?.configuration]
@@ -214,16 +205,12 @@ export function EditPersonaAttributesModal({
     onCompleted: onClose,
   })
 
-  useEffect(() => {
-    setErrorMsg(
-      error && (
-        <GqlError
-          header="Problem editing persona attributes"
-          error={error}
-        />
-      )
-    )
-  }, [error])
+  const errorMsg = error && (
+    <GqlError
+      header="Problem editing persona attributes"
+      error={error}
+    />
+  )
 
   const allowSubmit = hasUpdates && !!name
 

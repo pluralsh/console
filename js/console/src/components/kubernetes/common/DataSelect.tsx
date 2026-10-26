@@ -78,6 +78,12 @@ export function DataSelectInputs() {
   // the custom setParams is needed to avoid a race condition when simultaneously calling setFilter and setNamespace
   const routeHasChanged = (usePrevious(pathname) ?? pathname) !== pathname
   const clusterHasChanged = (usePrevious(clusterId) ?? clusterId) !== clusterId
+  const [prevRoute, setPrevRoute] = useState({ pathname, clusterId })
+  if (prevRoute.pathname !== pathname || prevRoute.clusterId !== clusterId) {
+    setPrevRoute({ pathname, clusterId })
+    if (prevRoute.pathname !== pathname) setFilterState('')
+    if (prevRoute.clusterId !== clusterId) setNsState('')
+  }
   useLayoutEffect(() => {
     // setting params navigates, which would cancel a pending index-route
     // redirect, so skip it unless the query would actually change
@@ -91,14 +97,9 @@ export function DataSelectInputs() {
       : routeHasChanged
         ? !hasFilter
         : nsMatches && filterMatches
-    if (unchanged) {
-      if (routeHasChanged) setFilterState('')
-      if (clusterHasChanged) setNsState('')
-      return
-    }
+    if (unchanged) return
     setParams((params) => {
       if (routeHasChanged) {
-        setFilterState('')
         params.delete(FILTER_PARAM)
       } else {
         if (nsState) params.set(NAMESPACE_PARAM, nsState)
@@ -107,7 +108,6 @@ export function DataSelectInputs() {
         else params.delete(FILTER_PARAM)
       }
       if (clusterHasChanged) {
-        setNsState('')
         params.delete(NAMESPACE_PARAM)
       }
       return params

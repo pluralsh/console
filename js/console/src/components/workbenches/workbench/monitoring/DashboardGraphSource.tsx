@@ -8,7 +8,11 @@ import {
   WorkbenchDashboardGraphQuery,
 } from 'generated/graphql'
 import { authlessClient } from 'helpers/client'
-import { createContext, ReactNode, use, useMemo } from 'react'
+import { createContext, ReactNode, use } from 'react'
+import {
+  type JobCanvasGraphQueries,
+  useJobCanvasGraphData,
+} from '../job/useJobCanvasGraphData'
 
 type WorkbenchDashboardGraph = NonNullable<
   NonNullable<WorkbenchDashboardDetailsFragment['graphs']>[number]
@@ -57,39 +61,71 @@ export type GraphDataArgs = {
 // on the shared dashboard entity makes each response re-diff the others
 const GRAPH_FETCH_POLICY = 'no-cache'
 
-type DashboardGraphSource = {
-  useGraphData: (args: GraphDataArgs) => GraphDataResult
-  readOnly: boolean
-}
+type DashboardGraphSource =
+  | { dashboardId: string; publicId?: never; job?: never; readOnly: false }
+  | { publicId: string; dashboardId?: never; job?: never; readOnly: true }
+  | {
+      job: JobCanvasGraphQueries
+      dashboardId?: never
+      publicId?: never
+      readOnly: true
+    }
 
-const DashboardGraphSourceContext = createContext<DashboardGraphSource | null>(
-  null
-)
-
-export function DashboardGraphSourceProvider({
-  useGraphData,
-  readOnly,
-  children,
-}: DashboardGraphSource & { children: ReactNode }) {
-  const value = useMemo(
-    () => ({ useGraphData, readOnly }),
-    [useGraphData, readOnly]
-  )
-
-  return (
-    <DashboardGraphSourceContext value={value}>
-      {children}
-    </DashboardGraphSourceContext>
-  )
-}
+export const DashboardGraphSourceContext =
+  createContext<DashboardGraphSource | null>(null)
 
 export function useDashboardGraphSource() {
   const source = use(DashboardGraphSourceContext)
   if (!source)
     throw new Error(
-      'useDashboardGraphSource must be used within a DashboardGraphSourceProvider'
+      'useDashboardGraphSource must be used within a graph source (AuthenticatedGraphSource, PublicGraphSource or JobCanvasGraphSource)'
     )
   return source
+}
+
+// Runs the authenticated, public or job canvas query, depending on the source.
+// Every query hook is called on each render; the ones for other sources are skipped.
+export function useGraphData(args: GraphDataArgs): GraphDataResult {
+  const { identifier, variables, timeRange, skip } = args
+  const { dashboardId, publicId, job } = useDashboardGraphSource()
+  const authenticated = useWorkbenchDashboardGraphQuery({
+    variables: {
+      id: dashboardId ?? '',
+      identifier,
+      input: JSON.stringify(variables),
+      timeRange,
+    },
+    skip: skip || !dashboardId,
+    fetchPolicy: GRAPH_FETCH_POLICY,
+  })
+  // public graphs ignore variables; the backend applies input defaults
+  const publicGraph = usePublicWorkbenchDashboardGraphQuery({
+    client: authlessClient,
+    variables: { publicId: publicId ?? '', identifier, timeRange },
+    skip: skip || !publicId,
+    fetchPolicy: GRAPH_FETCH_POLICY,
+  })
+  const jobGraph = useJobCanvasGraphData(job, args)
+
+  if (job) return jobGraph
+
+  if (publicId) {
+    const { data, previousData, loading, error } = publicGraph
+    return {
+      data: data?.publicWorkbenchDashboard?.graph ?? undefined,
+      previousData: previousData?.publicWorkbenchDashboard?.graph ?? undefined,
+      loading,
+      error,
+    }
+  }
+
+  const { data, previousData, loading, error } = authenticated
+  return {
+    data: data?.workbenchDashboard?.graph ?? undefined,
+    previousData: previousData?.workbenchDashboard?.graph ?? undefined,
+    loading,
+    error,
+  }
 }
 
 export function AuthenticatedGraphSource({
@@ -99,42 +135,10 @@ export function AuthenticatedGraphSource({
   dashboardId: string
   children: ReactNode
 }) {
-  const useGraphData = useMemo(
-    () =>
-      function useAuthenticatedGraphData({
-        identifier,
-        variables,
-        timeRange,
-        skip,
-      }: GraphDataArgs): GraphDataResult {
-        const { data, previousData, loading, error } =
-          useWorkbenchDashboardGraphQuery({
-            variables: {
-              id: dashboardId,
-              identifier,
-              input: JSON.stringify(variables),
-              timeRange,
-            },
-            skip,
-            fetchPolicy: GRAPH_FETCH_POLICY,
-          })
-        return {
-          data: data?.workbenchDashboard?.graph ?? undefined,
-          previousData: previousData?.workbenchDashboard?.graph ?? undefined,
-          loading,
-          error,
-        }
-      },
-    [dashboardId]
-  )
-
   return (
-    <DashboardGraphSourceProvider
-      useGraphData={useGraphData}
-      readOnly={false}
-    >
+    <DashboardGraphSourceContext value={{ dashboardId, readOnly: false }}>
       {children}
-    </DashboardGraphSourceProvider>
+    </DashboardGraphSourceContext>
   )
 }
 
@@ -145,39 +149,10 @@ export function PublicGraphSource({
   publicId: string
   children: ReactNode
 }) {
-  // public graphs ignore variables; the backend applies input defaults
-  const useGraphData = useMemo(
-    () =>
-      function usePublicGraphData({
-        identifier,
-        timeRange,
-        skip,
-      }: GraphDataArgs): GraphDataResult {
-        const { data, previousData, loading, error } =
-          usePublicWorkbenchDashboardGraphQuery({
-            client: authlessClient,
-            variables: { publicId, identifier, timeRange },
-            skip,
-            fetchPolicy: GRAPH_FETCH_POLICY,
-          })
-        return {
-          data: data?.publicWorkbenchDashboard?.graph ?? undefined,
-          previousData:
-            previousData?.publicWorkbenchDashboard?.graph ?? undefined,
-          loading,
-          error,
-        }
-      },
-    [publicId]
-  )
-
   return (
-    <DashboardGraphSourceProvider
-      useGraphData={useGraphData}
-      readOnly
-    >
+    <DashboardGraphSourceContext value={{ publicId, readOnly: true }}>
       {children}
-    </DashboardGraphSourceProvider>
+    </DashboardGraphSourceContext>
   )
 }
 

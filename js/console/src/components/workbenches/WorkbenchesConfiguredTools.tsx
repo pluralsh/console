@@ -15,7 +15,7 @@ import { GqlError } from 'components/utils/Alert'
 import { StackedText } from 'components/utils/table/StackedText'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { WorkbenchTabWrapper } from 'components/workbenches/common/WorkbenchTabWrapper'
-import { useWorkbenchToolsQuery } from 'generated/graphql'
+import { WorkbenchToolsDocument } from 'generated/graphql-documents'
 import { isEmpty } from 'lodash'
 import { getWorkbenchToolEditAbsPath } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
@@ -37,7 +37,7 @@ export function WorkbenchesConfiguredTools() {
 
   const { data, error, loading, pageInfo, fetchNextPage } =
     useFetchPaginatedData({
-      queryHook: useWorkbenchToolsQuery,
+      query: WorkbenchToolsDocument,
       keyPath: ['workbenchTools'],
     })
 

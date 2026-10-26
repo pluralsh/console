@@ -3,8 +3,8 @@ import { useNavigationContext } from '../../components/contexts/NavigationContex
 import { normalizeMarkdownHref, removeTrailingSlashes } from './text'
 
 export function useNormalizeHref(href?: string) {
-  const { usePathname, relativeLinkBase } = useNavigationContext()
-  const pathname = removeTrailingSlashes(usePathname()) || '/'
+  const { pathname: currentPathname, relativeLinkBase } = useNavigationContext()
+  const pathname = removeTrailingSlashes(currentPathname) || '/'
   const basePath = relativeLinkBase?.(pathname) ?? pathname
 
   return normalizeMarkdownHref(href, basePath)

@@ -14,7 +14,7 @@ import {
 } from 'components/self-service/pr/queue/PrQueueColumns'
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import { usePullRequestsQuery } from 'generated/graphql'
+import { PullRequestsDocument } from 'generated/graphql-documents'
 
 import { useClusterContext } from './Cluster'
 
@@ -44,7 +44,7 @@ export function ClusterPRs() {
     setVirtualSlice,
   } = useFetchPaginatedData(
     {
-      queryHook: usePullRequestsQuery,
+      query: PullRequestsDocument,
       keyPath: ['pullRequests'],
       skip: !cluster,
     },
