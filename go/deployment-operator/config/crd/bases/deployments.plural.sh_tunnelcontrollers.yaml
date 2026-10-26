@@ -1,0 +1,68 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: tunnelcontrollers.deployments.plural.sh
+spec:
+  group: deployments.plural.sh
+  names:
+    kind: TunnelController
+    listKind: TunnelControllerList
+    plural: tunnelcontrollers
+    singular: tunnelcontroller
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.template.spec.containers[0].image
+      name: Image
+      type: string
+    - jsonPath: '.status.conditions[?(@.type=="Ready")].status'
+      name: Ready
+      type: string
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: TunnelController runs one FerroTunnel client Deployment for this cluster.
+        properties:
+          spec:
+            description: Optional pod template. The controller creates the Secret and Deployment.
+            properties:
+              template:
+                description: Optional override for the secure default client pod template. Set the ferrotunnel-client image on the tunnel-controller container.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+            type: object
+          status:
+            description: Observed state of TunnelController.
+            properties:
+              conditions:
+                items:
+                  description: Condition contains details for one aspect of the current state of this API Resource.
+                  properties:
+                    lastTransitionTime:
+                      format: date-time
+                      type: string
+                    message:
+                      type: string
+                    observedGeneration:
+                      format: int64
+                      type: integer
+                    reason:
+                      type: string
+                    status:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - message
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

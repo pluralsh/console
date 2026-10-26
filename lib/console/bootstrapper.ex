@@ -17,6 +17,7 @@ defmodule Console.Bootstrapper do
       send self(), :migrate
       send self(), :kick
       send self(), :force_flip
+      send self(), :ferrotunnel
     end
 
     write_token_file!()
@@ -45,6 +46,15 @@ defmodule Console.Bootstrapper do
     case Console.Deployments.Init.force_flip() do
       {:ok, %{}} -> {:noreply, state}
       _ -> {:noreply, state}
+    end
+  end
+
+  def handle_info(:ferrotunnel, state) do
+    case Console.Deployments.FerroTunnel.ensure() do
+      {:ok, _} -> {:noreply, state}
+      err ->
+        Logger.info("didn't prepare ferrotunnel due to: #{inspect(err)}")
+        {:noreply, state}
     end
   end
 
