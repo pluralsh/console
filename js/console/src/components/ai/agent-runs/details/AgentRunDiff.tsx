@@ -215,7 +215,9 @@ export function agentRunPatchCacheKey(patchUrl?: string | null): string {
   try {
     const url = new URL(
       patchUrl,
-      typeof window !== 'undefined' ? window.location.origin : 'http://localhost'
+      typeof window !== 'undefined'
+        ? window.location.origin
+        : 'http://localhost'
     )
     return url.searchParams.get('v') ?? url.pathname
   } catch {
