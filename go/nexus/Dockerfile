@@ -27,7 +27,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
     ./cmd/main.go
 
 # Runtime stage
-FROM gcr.io/distroless/static-debian12:nonroot
+FROM gcr.io/distroless/static-debian12@sha256:52dcfbabb7457ea47c82f6e13af8c8a4a1d9f7b0145142b3ecab20f2b888411d
 
 ARG BUILD_TIME=1970-01-01T00:00:00Z
 ARG GIT_COMMIT=unknown
@@ -45,7 +45,7 @@ LABEL org.opencontainers.image.created="${BUILD_TIME}" \
       org.opencontainers.image.licenses="MIT" \
       org.opencontainers.image.title="Nexus" \
       org.opencontainers.image.description="AI proxy service for Plural Console" \
-      org.opencontainers.image.base.name="gcr.io/distroless/static-debian12:nonroot" \
+      org.opencontainers.image.base.name="gcr.io/distroless/static-debian12@sha256:52dcfbabb7457ea47c82f6e13af8c8a4a1d9f7b0145142b3ecab20f2b888411d" \
       org.opencontainers.image.rebuild-trigger="2026-06-26-nexus"
 
 WORKDIR /app
