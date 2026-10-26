@@ -31,6 +31,9 @@ const TOOL_SETUP_GUIDE_MARKDOWN_PATHS: Partial<
   [WorkbenchToolType.Dynatrace]: '/setup-guides/tools/dynatrace.md',
   [WorkbenchToolType.Cloudwatch]: '/setup-guides/tools/cloudwatch.md',
   [WorkbenchToolType.Azure]: '/setup-guides/tools/azure.md',
+  [WorkbenchToolType.Lambda]: '/setup-guides/tools/lambda.md',
+  [WorkbenchToolType.CloudRun]: '/setup-guides/tools/cloud_run.md',
+  [WorkbenchToolType.AzureFunction]: '/setup-guides/tools/azure_function.md',
   [WorkbenchToolType.Sentry]: '/setup-guides/tools/sentry.md',
   [WorkbenchToolType.Mcp]: '/setup-guides/tools/mcp.md',
   [WorkbenchToolType.Docker]: '/setup-guides/tools/docker.md',
@@ -87,6 +90,12 @@ const TOOL_SETUP_GUIDE_DOC_URLS: Partial<Record<WorkbenchToolType, string>> = {
     'https://docs.aws.amazon.com/aws-managed-policy/latest/reference/CloudWatchReadOnlyAccess.html',
   [WorkbenchToolType.Azure]:
     'https://learn.microsoft.com/en-us/azure/azure-monitor/fundamentals/roles-permissions-security',
+  [WorkbenchToolType.Lambda]:
+    'https://docs.aws.amazon.com/lambda/latest/dg/lambda-api-permissions-ref.html',
+  [WorkbenchToolType.CloudRun]:
+    'https://cloud.google.com/run/docs/reference/iam/permissions',
+  [WorkbenchToolType.AzureFunction]:
+    'https://learn.microsoft.com/en-us/azure/role-based-access-control/permissions/web-and-mobile',
   [WorkbenchToolType.Sentry]: 'https://docs.sentry.io/api/permissions/',
   [WorkbenchToolType.Mcp]: 'https://modelcontextprotocol.io/introduction',
   [WorkbenchToolType.Docker]:
