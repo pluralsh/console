@@ -69,6 +69,13 @@ console:
         bucket: {{ imports.mgmt.console_s3_bucket }}
         region: {{ imports.mgmt.console_s3_region }}
 {% elsif imports.mgmt.console_azure_storage_account %}
+{% if imports.mgmt.console_azure_client_id %}
+serviceAccount:
+  annotations:
+    azure.workload.identity/client-id: {{ imports.mgmt.console_azure_client_id }}
+podLabels:
+  azure.workload.identity/use: "true"
+{% endif %}
 console:
   config:
     objectStore:

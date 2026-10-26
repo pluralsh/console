@@ -70,6 +70,13 @@ console:
         bucket: {{ .Values.objectStoreBucket }}
         region: {{ .Values.objectStoreRegion }}
 {{ else if .Values.objectStoreAzureStorageAccount }}
+{{ if .Values.objectStoreAzureClientId }}
+serviceAccount:
+  annotations:
+    azure.workload.identity/client-id: {{ .Values.objectStoreAzureClientId }}
+podLabels:
+  azure.workload.identity/use: "true"
+{{ end }}
 console:
   config:
     objectStore:
