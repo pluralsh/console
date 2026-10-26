@@ -78,12 +78,12 @@ export const LOG_LEVELS = [
 export const logLevelColor: Record<LogLevel, SemanticColorKey> = {
   [LogLevel.Fatal]: 'icon-danger-critical',
   [LogLevel.Critical]: 'icon-danger-critical',
-  [LogLevel.Error]: 'border-danger-light',
-  [LogLevel.Warn]: 'border-warning',
-  [LogLevel.Info]: 'border-selected',
-  [LogLevel.Debug]: 'border-fill-three',
-  [LogLevel.Trace]: 'border-fill-three',
-  [LogLevel.Unknown]: 'graph-blue',
+  [LogLevel.Error]: 'border-danger',
+  [LogLevel.Warn]: 'text-warning',
+  [LogLevel.Info]: 'border-info',
+  [LogLevel.Debug]: 'icon-xlight',
+  [LogLevel.Trace]: 'icon-xlight',
+  [LogLevel.Unknown]: 'border-fill-three',
 }
 
 export const logLevelLabel = (level: LogLevel) =>

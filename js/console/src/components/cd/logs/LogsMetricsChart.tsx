@@ -29,6 +29,7 @@ const X_AXIS_HEIGHT = 28
 const CHART_PADDING_BOTTOM = 8
 const CHART_CANVAS_HEIGHT = 130
 const CHART_BAR_GAP = 2
+const CHART_BAR_WIDTH = 6
 const SELECTION_SHADOW = 'rgba(2, 3, 24, 0.55)'
 const SELECTION_EDGE = '#747af6'
 const TOOLTIP_TOP = CHART_CANVAS_HEIGHT + X_AXIS_HEIGHT
@@ -290,18 +291,18 @@ export function LogsMetricsChart({
               </>
             )}
             {buckets.map((bucket) => (
-              <BarSC
-                key={bucket.timestamp.getTime()}
-                $height={(bucket.count / yMax) * CHART_CANVAS_HEIGHT}
-              >
-                {bucket.levels.map(({ level, count }) => (
-                  <BarSegmentSC
-                    key={level}
-                    $color={logLevelColor[level]}
-                    style={{ flexGrow: count }}
-                  />
-                ))}
-              </BarSC>
+              <BarSlotSC key={bucket.timestamp.getTime()}>
+                <BarSC $height={(bucket.count / yMax) * CHART_CANVAS_HEIGHT}>
+                  {groupByLevel &&
+                    bucket.levels.map(({ level, count }) => (
+                      <BarSegmentSC
+                        key={level}
+                        $color={logLevelColor[level]}
+                        style={{ flexGrow: count }}
+                      />
+                    ))}
+                </BarSC>
+              </BarSlotSC>
             ))}
           </BarsRowSC>
         </BarsAreaSC>
@@ -419,11 +420,20 @@ const SelectionEdgeSC = styled.div<{ $side: 'start' | 'end' }>(({ $side }) => ({
   ...($side === 'start' ? { left: 0 } : { right: 0 }),
 }))
 
+const BarSlotSC = styled.div({
+  flex: 1,
+  minWidth: 0,
+  height: '100%',
+  display: 'flex',
+  alignItems: 'flex-end',
+  justifyContent: 'center',
+})
+
 const BarSC = styled.div<{ $height: number }>(({ theme, $height }) => ({
   position: 'relative',
   zIndex: 1,
-  flex: 1,
-  minWidth: 0,
+  width: CHART_BAR_WIDTH,
+  maxWidth: '100%',
   height: $height,
   display: 'flex',
   flexDirection: 'column',
