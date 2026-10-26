@@ -47,6 +47,32 @@ describe('workbenchJobsDisplay', () => {
       getJobFilterEmptyKind({ ...DEFAULT_WORKBENCH_JOBS_DISPLAY, prStates: [] })
     ).toBe('pull request states')
   })
+
+  it('sends selected people without treating an empty person list as an empty filter', () => {
+    expect(toJobFilterVariables(DEFAULT_WORKBENCH_JOBS_DISPLAY)).toEqual({
+      statuses: undefined,
+      prStates: undefined,
+    })
+    expect(hasUncheckedJobFilters(DEFAULT_WORKBENCH_JOBS_DISPLAY)).toBe(false)
+    expect(getJobFilterEmptyKind(DEFAULT_WORKBENCH_JOBS_DISPLAY)).toBeNull()
+
+    const state = {
+      ...DEFAULT_WORKBENCH_JOBS_DISPLAY,
+      userIds: ['user-1', 'user-2'],
+    }
+
+    expect(toJobFilterVariables(state)).toEqual({
+      statuses: undefined,
+      prStates: undefined,
+      userIds: ['user-1', 'user-2'],
+    })
+    expect(hasUncheckedJobFilters(state)).toBe(true)
+    expect(getJobFilterEmptyKind(state)).toBeNull()
+    expect(
+      getJobFilterEmptyKind({ ...state, userIds: [] })
+    ).toBeNull()
+    expect(resetJobFilters(state)).toEqual(DEFAULT_WORKBENCH_JOBS_DISPLAY)
+  })
 })
 
 describe('job filter options', () => {
