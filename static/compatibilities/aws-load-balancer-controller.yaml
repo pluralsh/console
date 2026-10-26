@@ -5,33 +5,35 @@ helm_repository_url: https://aws.github.io/eks-charts
 helm_values: clusterName=example
 chart_name: aws-load-balancer-controller
 versions:
-- version: 3.6.1
+- version: 3.6.2
   kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
     '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
   summary:
-    helm_changes: '- **No Helm values changes called out for v3.6.1.** This is a patch
-      release; upgrade the controller image/chart only.
-
-      - **If upgrading from < v3.6.0:** apply the **v3.6.0 CRD update steps first**
-      (see below) before moving to 3.6.1.'
-    chart_updates: [Patch release focused on dependency/security updates (Go toolchain
-        + `golang.org/x/net`) with no API/CRD/behavior changes., Adds/extends controller
-        metrics (new per-resource reconcile condition gauge) and documentation updates.,
-      'Minor networking reconcile robustness: treat `InvalidGroup.NotFound` as success
-        when releasing auto-generated backend security groups.', 'Internal refactor:
-        shared mTLS parsing helpers for Gateway + Ingress (no behavior change).',
-      'Backend model enhancement: `PodEndpoint` now includes `NodeReadyTime`.']
-    features: [Adds `awslbc_controller_reconcile_condition` metric to show last reconcile
-        success(1)/failure(0) per resource (Ingress/Service/Gateway/TGB/GA)., Exposes
-        node Ready transition time on pod endpoints via `PodEndpoint.NodeReadyTime`
-        (useful for debugging/health/latency analyses).]
-    breaking_changes: ['None in v3.6.1 (explicitly no CRD, API, or behavioral changes).',
-      'Note: v3.6.0 required/strongly recommended CRD re-apply steps; skipping those
-        when coming from <3.6.0 can break Gateway/TGB behavior.']
-  chart_version: 3.6.1
-  images: ['public.ecr.aws/eks/aws-load-balancer-controller:v3.6.1']
+    helm_changes: ''
+    chart_updates: [v3.6.2 is a patch release with no CRD changes; upgrading the controller
+        image/version is sufficient if you are already on >= v3.6.0., 'If upgrading
+        from < v3.6.0, first apply the v3.6.0 CRD update steps (AWS-vended CRDs and
+        gateway-crds.yaml) before upgrading the controller.']
+    features: ["Cross-account TargetGroupBinding can (optionally) register IP targets\
+        \ using the pod\u2019s actual Availability Zone to improve zonal routing for\
+        \ cross-account setups.", 'New Ingress annotation `frontend-nlb-status-only`
+        controls whether Ingress status publishes only the frontend NLB hostname,
+        improving ExternalDNS behavior when an NLB fronts an ALB Ingress.', Gateway
+        API importers can customize Gateway names/finalizers/controller wiring; ReferenceGrant
+        now uses `v1` apiVersion., Gateway controller startup performance improvement
+        in v3.6.2 by skipping redundant child-resource fan-out during initial cache
+        sync (faster startup on large Gateway deployments).]
+    breaking_changes: ['v3.6.0 includes ''Action Required'' CRD refresh guidance:
+        apply the latest AWS-vended CRDs (and gateway CRDs) before upgrading to avoid
+        drift; while Gateway API version is unchanged (still built against v1.6.0),
+        CRD application is effectively required operationally.', 'v3.6.2 changes the
+        controller image base CA bundle (removes several eMudhra/emSign roots), which
+        can break outbound TLS connections to endpoints relying on those CAs (behavior/config
+        unchanged, but trust store differs).']
+  chart_version: 3.6.2
+  images: ['public.ecr.aws/eks/aws-load-balancer-controller:v3.6.2']
 - version: 3.6.0
   kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
     '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
