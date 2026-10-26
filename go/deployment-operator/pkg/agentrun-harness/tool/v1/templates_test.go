@@ -120,6 +120,24 @@ func TestSystemPromptInputIncludesPRURL(t *testing.T) {
 	}
 }
 
+func TestSystemPromptInputOmitsOriginalPromptOnResumeFollowup(t *testing.T) {
+	input := (&DefaultTool{Config: Config{
+		ResumeFollowup: true,
+		Run: &agentrunv1.AgentRun{
+			Mode:     console.AgentRunModeWrite,
+			Prompt:   "continue from here",
+			Followup: true,
+		},
+	}}).systemPromptInput()
+
+	if input.Prompt != "" {
+		t.Fatalf("expected empty original prompt on resume follow-up, got %q", input.Prompt)
+	}
+	if !input.Followup {
+		t.Fatal("expected follow-up flag to remain set")
+	}
+}
+
 func TestSystemPromptTemplate_OmitsOriginalTaskWhenPromptEmpty(t *testing.T) {
 	templateDir := filepath.Join("..", "..", "..", "..", "dockerfiles", "agent-harness", "system")
 	content, err := systemPromptTemplate(filepath.Join(templateDir, "write.md.tmpl"), &SystemPromptTemplateInput{
