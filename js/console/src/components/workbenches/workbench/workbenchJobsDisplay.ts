@@ -14,6 +14,7 @@ export type WorkbenchJobsDisplayState = {
   view: DisplayView
   statuses: WorkbenchJobStatus[]
   prStates: WorkbenchJobPrState[]
+  userIds: string[]
   direction: SortDirection
 }
 
@@ -50,16 +51,22 @@ export const DEFAULT_WORKBENCH_JOBS_DISPLAY: WorkbenchJobsDisplayState = {
   view: 'list',
   statuses: JOB_STATUS_OPTIONS,
   prStates: JOB_PR_STATE_OPTIONS,
+  userIds: [],
   direction: SortDirection.Desc,
 }
 
 export function hasUncheckedJobFilters({
   statuses,
   prStates,
-}: Pick<WorkbenchJobsDisplayState, 'statuses' | 'prStates'>): boolean {
+  userIds,
+}: Pick<
+  WorkbenchJobsDisplayState,
+  'statuses' | 'prStates' | 'userIds'
+>): boolean {
   return (
     !allSelected(statuses, JOB_STATUS_OPTIONS) ||
-    !allSelected(prStates, JOB_PR_STATE_OPTIONS)
+    !allSelected(prStates, JOB_PR_STATE_OPTIONS) ||
+    !isEmpty(userIds)
   )
 }
 
@@ -84,6 +91,7 @@ export function resetJobFilters(
     ...state,
     statuses: DEFAULT_WORKBENCH_JOBS_DISPLAY.statuses,
     prStates: DEFAULT_WORKBENCH_JOBS_DISPLAY.prStates,
+    userIds: DEFAULT_WORKBENCH_JOBS_DISPLAY.userIds,
   }
 }
 
@@ -91,12 +99,17 @@ export function resetJobFilters(
 export function toJobFilterVariables({
   statuses,
   prStates,
-}: Pick<WorkbenchJobsDisplayState, 'statuses' | 'prStates'>): {
+  userIds,
+}: Pick<WorkbenchJobsDisplayState, 'statuses' | 'prStates' | 'userIds'>): {
   statuses?: WorkbenchJobStatus[]
   prStates?: WorkbenchJobPrState[]
+  userIds?: string[]
 } {
   return {
     statuses: filterVariable(statuses, JOB_STATUS_OPTIONS),
     prStates: filterVariable(prStates, JOB_PR_STATE_OPTIONS),
+    // empty means everyone, including people who run a job later; a
+    // non-empty list is sent as-is rather than compared to the current options
+    ...(!isEmpty(userIds) ? { userIds } : {}),
   }
 }

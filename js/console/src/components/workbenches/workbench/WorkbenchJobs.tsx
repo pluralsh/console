@@ -68,6 +68,7 @@ export function WorkbenchJobs() {
     () => ({
       q: query || undefined,
       prStates: filterVars.prStates,
+      userIds: filterVars.userIds,
       direction,
     }),
     [query, filterVars, direction]
@@ -106,6 +107,10 @@ export function WorkbenchJobs() {
   const prStateCounts = useMemo(
     () =>
       toCounts(countsData?.workbench?.runCounts?.pullRequests, (e) => e.state),
+    [countsData]
+  )
+  const users = useMemo(
+    () => (countsData?.workbench?.runCounts?.users ?? []).filter(isNonNullable),
     [countsData]
   )
 
@@ -191,6 +196,7 @@ export function WorkbenchJobs() {
               onChange={updateDisplay}
               statusCounts={statusCounts}
               prStateCounts={prStateCounts}
+              users={users}
               searching={searching}
             />
           </DisplayPanel>

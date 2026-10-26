@@ -10952,7 +10952,7 @@ export const WorkbenchEvalSettingsDocument = /*#__PURE__*/ gql`
 }
     ` as unknown as DocumentNode<Types.WorkbenchEvalSettingsQuery, Types.WorkbenchEvalSettingsQueryVariables>;
 export const WorkbenchJobsDocument = /*#__PURE__*/ gql`
-    query WorkbenchJobs($id: ID!, $first: Int = 100, $after: String, $statuses: [WorkbenchJobStatus], $prStates: [WorkbenchJobPrState], $direction: SortDirection, $withTotal: Boolean = false) {
+    query WorkbenchJobs($id: ID!, $first: Int = 100, $after: String, $statuses: [WorkbenchJobStatus], $prStates: [WorkbenchJobPrState], $userIds: [ID], $direction: SortDirection, $withTotal: Boolean = false) {
   workbench(id: $id) {
     id
     runs(
@@ -10960,6 +10960,7 @@ export const WorkbenchJobsDocument = /*#__PURE__*/ gql`
       after: $after
       statuses: $statuses
       prStates: $prStates
+      userIds: $userIds
       direction: $direction
     ) {
       totalCount @include(if: $withTotal)
@@ -10989,15 +10990,25 @@ export const WorkbenchJobCountsDocument = /*#__PURE__*/ gql`
         state
         count
       }
+      users {
+        id
+        name
+        count
+      }
     }
   }
 }
     ` as unknown as DocumentNode<Types.WorkbenchJobCountsQuery, Types.WorkbenchJobCountsQueryVariables>;
 export const WorkbenchJobStatusCountsDocument = /*#__PURE__*/ gql`
-    query WorkbenchJobStatusCounts($id: ID!, $q: String, $prStates: [WorkbenchJobPrState], $insertedAfter: DateTime) {
+    query WorkbenchJobStatusCounts($id: ID!, $q: String, $prStates: [WorkbenchJobPrState], $userIds: [ID], $insertedAfter: DateTime) {
   workbench(id: $id) {
     id
-    runCounts(q: $q, prStates: $prStates, insertedAfter: $insertedAfter) {
+    runCounts(
+      q: $q
+      prStates: $prStates
+      userIds: $userIds
+      insertedAfter: $insertedAfter
+    ) {
       statuses {
         status
         count
@@ -11007,7 +11018,7 @@ export const WorkbenchJobStatusCountsDocument = /*#__PURE__*/ gql`
 }
     ` as unknown as DocumentNode<Types.WorkbenchJobStatusCountsQuery, Types.WorkbenchJobStatusCountsQueryVariables>;
 export const WorkbenchJobsForStatusDocument = /*#__PURE__*/ gql`
-    query WorkbenchJobsForStatus($id: ID!, $status: WorkbenchJobStatus!, $q: String, $prStates: [WorkbenchJobPrState], $direction: SortDirection, $insertedAfter: DateTime, $first: Int = 50, $after: String) {
+    query WorkbenchJobsForStatus($id: ID!, $status: WorkbenchJobStatus!, $q: String, $prStates: [WorkbenchJobPrState], $userIds: [ID], $direction: SortDirection, $insertedAfter: DateTime, $first: Int = 50, $after: String) {
   workbench(id: $id) {
     id
     runs(
@@ -11016,6 +11027,7 @@ export const WorkbenchJobsForStatusDocument = /*#__PURE__*/ gql`
       q: $q
       statuses: [$status]
       prStates: $prStates
+      userIds: $userIds
       direction: $direction
       insertedAfter: $insertedAfter
     ) {
@@ -11033,13 +11045,14 @@ export const WorkbenchJobsForStatusDocument = /*#__PURE__*/ gql`
     ${PageInfoFragmentDoc}
 ${WorkbenchJobTinyFragmentDoc}` as unknown as DocumentNode<Types.WorkbenchJobsForStatusQuery, Types.WorkbenchJobsForStatusQueryVariables>;
 export const WorkbenchJobSearchDocument = /*#__PURE__*/ gql`
-    query WorkbenchJobSearch($workbenchId: ID!, $q: String!, $limit: Int, $statuses: [WorkbenchJobStatus], $prStates: [WorkbenchJobPrState]) {
+    query WorkbenchJobSearch($workbenchId: ID!, $q: String!, $limit: Int, $statuses: [WorkbenchJobStatus], $prStates: [WorkbenchJobPrState], $userIds: [ID]) {
   workbenchJobSearch(
     workbenchId: $workbenchId
     q: $q
     limit: $limit
     statuses: $statuses
     prStates: $prStates
+    userIds: $userIds
   ) {
     ...WorkbenchJobTiny
   }

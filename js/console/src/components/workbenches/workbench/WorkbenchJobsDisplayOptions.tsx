@@ -15,11 +15,18 @@ import {
   WorkbenchJobsDisplayState,
 } from './workbenchJobsDisplay'
 
+export type WorkbenchJobPerson = {
+  id: string
+  name?: string | null
+  count: number
+}
+
 export function WorkbenchJobsDisplayOptions({
   state,
   onChange,
   statusCounts,
   prStateCounts,
+  users,
   searching = false,
 }: {
   state: WorkbenchJobsDisplayState
@@ -28,6 +35,7 @@ export function WorkbenchJobsDisplayOptions({
   searching?: boolean
   statusCounts: Partial<Record<WorkbenchJobStatus, number>>
   prStateCounts: Partial<Record<WorkbenchJobPrState, number>>
+  users: readonly WorkbenchJobPerson[]
 }) {
   return (
     <>
@@ -53,6 +61,15 @@ export function WorkbenchJobsDisplayOptions({
         getLabel={(prState) => JOB_PR_STATE_LABELS[prState]}
         compact
         onChange={(prStates) => onChange({ ...state, prStates })}
+      />
+      <DisplayFilterSection
+        title="Person"
+        options={users.map((user) => user.id)}
+        selected={state.userIds}
+        counts={Object.fromEntries(users.map((user) => [user.id, user.count]))}
+        getLabel={(id) => users.find((user) => user.id === id)?.name || '—'}
+        compact
+        onChange={(userIds) => onChange({ ...state, userIds })}
       />
       <DisplaySection>
         <DisplaySortHeader

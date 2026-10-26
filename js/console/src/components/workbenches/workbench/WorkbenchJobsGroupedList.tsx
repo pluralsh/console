@@ -98,6 +98,7 @@ const RUNS_KEY_PATH = ['workbench', 'runs']
 type JobQueryFilters = {
   q?: string
   prStates?: WorkbenchJobPrState[]
+  userIds?: string[]
   direction?: SortDirection
   insertedAfter?: string
 }
@@ -132,6 +133,7 @@ export function WorkbenchJobsGroupedList({
       id: workbenchId,
       q: filters.q,
       prStates: filters.prStates,
+      userIds: filters.userIds,
       insertedAfter: filters.insertedAfter,
     },
     fetchPolicy: 'cache-and-network',
