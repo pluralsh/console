@@ -24,6 +24,7 @@ defmodule Console.Deployments.Settings do
   @cache_adapter Console.conf(:cache_adapter)
   @local_adapter Console.conf(:local_cache)
   @ttl :timer.minutes(45)
+  @memo_key {__MODULE__, :memoized}
 
   @type settings_resp :: {:ok, DeploymentSettings.t()} | Console.error()
   @type project_resp :: {:ok, Project.t()} | Console.error()
@@ -77,8 +78,34 @@ defmodule Console.Deployments.Settings do
   Fetches and caches the global deployment settings object, preloads also fetched along the way
   """
   @spec fetch() :: DeploymentSettings.t() | nil
+  def fetch() do
+    case Process.get(@memo_key) do
+      {:ok, settings} -> settings
+      _ -> fetch_shared()
+    end
+  end
+
   @decorate cacheable(cache: @cache_adapter, key: :deployment_settings, opts: [ttl: @ttl])
-  def fetch(), do: fetch_consistent()
+  defp fetch_shared(), do: fetch_consistent()
+
+  @doc """
+  Runs `fun` with `fetch/0` pinned to a single lookup of the shared cache, which can be a cross-node call.
+  Meant for hot loops evaluating many policies at once, like fanning a subscription event out to every
+  subscriber.  The pin only lasts for `fun`, so never wrap writes to the settings in it.
+  """
+  @spec memoize((-> result)) :: result when result: term
+  def memoize(fun) when is_function(fun, 0) do
+    case Process.get(@memo_key) do
+      {:ok, _} -> fun.()
+      _ ->
+        Process.put(@memo_key, {:ok, fetch_shared()})
+        try do
+          fun.()
+        after
+          Process.delete(@memo_key)
+        end
+    end
+  end
 
   def available_models(), do: fetch() |> AvailableModels.list()
 

@@ -32,6 +32,7 @@ import { useTheme } from 'styled-components'
 import { fromNow } from 'utils/datetime'
 import StackRunIcon from '../common/StackRunIcon'
 import { StackStatusChip } from '../common/StackStatusChip'
+import { useRefetchOnStackDelta } from '../common/useStackDeltas'
 import { StackOutletContextT } from '../Stacks'
 
 export function StackRunsTable({
@@ -46,15 +47,24 @@ export function StackRunsTable({
   >
 } & Omit<TableProps, 'data' | 'columns'>) {
   const { stackId } = useParams()
-  const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData(
-      {
-        query: StackRunsDocument,
-        keyPath: ['infrastructureStack', 'runs'],
-        ...options,
-      },
-      variables
-    )
+  const {
+    data,
+    loading,
+    error,
+    refetch,
+    pageInfo,
+    fetchNextPage,
+    setVirtualSlice,
+  } = useFetchPaginatedData(
+    {
+      query: StackRunsDocument,
+      keyPath: ['infrastructureStack', 'runs'],
+      ...options,
+    },
+    variables
+  )
+
+  useRefetchOnStackDelta(variables.id, refetch)
 
   const runs = useMemo(
     () => mapExistingNodes(data?.infrastructureStack?.runs),

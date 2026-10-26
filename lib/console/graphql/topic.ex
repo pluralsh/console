@@ -28,6 +28,10 @@ defimpl Console.GraphQl.Topic, for: Kazan.Apis.Core.V1.Pod do
   def infer(%@for{metadata: %{namespace: ns, name: name}}, _), do: [pod_delta: "pods:#{ns}:#{name}", pod_delta: "pods"]
 end
 
+defimpl Console.GraphQl.Topic, for: Console.Schema.Stack do
+  def infer(_, _), do: [infrastructure_stack_delta: "stacks"]
+end
+
 defimpl Console.GraphQl.Topic, for: Console.Schema.RunLog do
   def infer(%@for{step_id: id}, _), do: [run_logs_delta: "steps:#{id}"]
 end

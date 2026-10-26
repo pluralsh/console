@@ -1,6 +1,7 @@
 import {
   Button,
   Callout,
+  CheckIcon,
   GitCommitIcon,
   GraphQLToast,
   ReloadIcon,
@@ -11,10 +12,11 @@ import {
   ServiceErrorsModal,
 } from 'components/cd/services/ServicesTableErrors'
 import { InsightsTabLabel } from 'components/utils/AiInsights'
+import { useSimpleToast } from 'components/utils/SimpleToastContext'
 
 import { isEmpty } from 'lodash'
 import { ReactNode, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import {
   StackRunDetailsFragment,
@@ -175,29 +177,39 @@ export function StackRunHeaderButtons({
 }: StackRunHeaderProps) {
   const theme = useTheme()
   const navigate = useNavigate()
+  const { stackId } = useParams()
   const [serviceErrorsOpen, setServiceErrorsOpen] = useState(false)
+
+  const { popToast } = useSimpleToast()
 
   const [mutation, { loading, error }] = useApproveStackRunMutation({
     variables: { id: stackRun.id },
-    onCompleted: () => refetch?.(),
+    onCompleted: () => {
+      popToast({
+        content: 'Stack run approved, it will start shortly',
+        severity: 'success',
+      })
+      refetch?.()
+    },
   })
 
   const [restart, { loading: restartLoading, error: restartError }] =
     useRestartStackRunMutation({
       variables: { id: stackRun.id },
       onCompleted: ({ restartStackRun }) =>
-        navigate(getStackRunsAbsPath(stackRun.id, restartStackRun?.id)),
+        navigate(getStackRunsAbsPath(stackId, restartStackRun?.id)),
     })
 
-  const [cancel, { loading: cancelLoading }] = useCompleteStackRunMutation({
-    variables: {
-      id: stackRun.id,
-      attributes: {
-        status: StackStatus.Cancelled,
+  const [cancel, { loading: cancelLoading, error: cancelError }] =
+    useCompleteStackRunMutation({
+      variables: {
+        id: stackRun.id,
+        attributes: {
+          status: StackStatus.Cancelled,
+        },
       },
-    },
-    onCompleted: () => refetch?.(),
-  })
+      onCompleted: () => refetch?.(),
+    })
 
   const terminal = TERMINAL_STATES.includes(stackRun.status)
 
@@ -215,6 +227,15 @@ export function StackRunHeaderButtons({
       {restartError && (
         <GraphQLToast
           error={{ graphQLErrors: [...(restartError?.graphQLErrors ?? [])] }}
+          header="Error (500)"
+          margin="xlarge"
+          marginTop="xxxlarge"
+          marginBottom="xxxlarge"
+        />
+      )}
+      {cancelError && (
+        <GraphQLToast
+          error={{ graphQLErrors: [...(cancelError?.graphQLErrors ?? [])] }}
           header="Error (500)"
           margin="xlarge"
           marginTop="xxxlarge"
@@ -265,7 +286,15 @@ export function StackRunHeaderButtons({
           </Button>
         )}
         {stackRun.status === StackStatus.PendingApproval &&
-          !stackRun.approvedAt && (
+          (stackRun.approvedAt ? (
+            <Button
+              small
+              disabled
+              startIcon={<CheckIcon size={12} />}
+            >
+              Approved
+            </Button>
+          ) : (
             <Button
               small
               onClick={() => mutation()}
@@ -273,7 +302,7 @@ export function StackRunHeaderButtons({
             >
               Approve
             </Button>
-          )}
+          ))}
       </div>
     </>
   )

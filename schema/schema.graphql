@@ -1871,6 +1871,9 @@ type RootSubscriptionType {
 
   notificationDelta: NotificationDelta
 
+  "Changes to any stack the current user can read, including status changes from its runs"
+  infrastructureStackDelta: InfrastructureStackDelta
+
   runLogsDelta(stepId: ID!): RunLogsDelta
 
   "streams chunks of ai text for a given parent scope"
@@ -10543,6 +10546,11 @@ type StackPolicyConnection {
 type RunLogsDelta {
   delta: Delta
   payload: RunLogs
+}
+
+type InfrastructureStackDelta {
+  delta: Delta
+  payload: InfrastructureStack
 }
 
 "A reference for a globalized service, which targets clusters based on the configured criteria"

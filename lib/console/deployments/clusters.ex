@@ -423,12 +423,13 @@ defmodule Console.Deployments.Clusters do
     |> Repo.all()
   end
 
-  @decorate cacheable(cache: @multilevel_adapter, key: {:deploy_token, token}, opts: [ttl: :timer.hours(3)])
   @spec get_by_deploy_token(binary) :: Cluster.t | nil
   def get_by_deploy_token(token) do
-    with nil <- Repo.get_by(Cluster, deploy_token: token),
-         %DeployToken{cluster: cluster} <- Repo.get_by(DeployToken, token: token) |> Repo.preload([:cluster]),
-      do: cluster
+    Console.Cache.fetch_or_store(@multilevel_adapter, {:deploy_token, token}, fn ->
+      with nil <- Repo.get_by(Cluster, deploy_token: token),
+           %DeployToken{cluster: cluster} <- Repo.get_by(DeployToken, token: token) |> Repo.preload([:cluster]),
+        do: cluster
+    end, ttl: :timer.hours(3), negative_ttl: :timer.minutes(1))
   end
 
   def local_cluster(), do: Console.Repo.get_by!(Cluster, self: true)

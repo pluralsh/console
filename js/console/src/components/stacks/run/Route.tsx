@@ -23,6 +23,10 @@ import {
 } from '../../../routes/stacksRoutesConsts'
 import { ResponsiveLayoutContentContainer } from '../../utils/layout/ResponsiveLayoutContentContainer'
 import LoadingIndicator from '../../utils/LoadingIndicator'
+import {
+  useRefetchOnStackDelta,
+  useStackDeltas,
+} from '../common/useStackDeltas'
 import { getBreadcrumbs } from '../Stacks'
 
 import StackRunHeader, {
@@ -30,6 +34,10 @@ import StackRunHeader, {
   StackRunHeaderButtons,
 } from './Header'
 import StackRunSidecar from './Sidecar'
+
+// run updates arrive as stack deltas, but step progress emits no events, so
+// this still polls faster than the other stack views
+const RUN_POLL_INTERVAL = 15_000
 
 export type StackRunOutletContextT = {
   stackRun: StackRunDetailsFragment
@@ -59,14 +67,21 @@ export default function StackRunDetail(): ReactNode {
   const { pathname } = useLocation()
   const [toolbarSlot, setToolbarSlot] = useState<HTMLDivElement | null>(null)
 
-  const { data, loading, refetch, error } = useStackRunQuery({
+  const { data, previousData, loading, refetch, error } = useStackRunQuery({
     variables: { id: runId! },
     skip: !runId,
-    pollInterval: 5_000,
+    pollInterval: RUN_POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })
 
-  const stackRun = data?.stackRun
+  useStackDeltas()
+  useRefetchOnStackDelta(stackId, refetch)
+
+  // a mutation can briefly leave the cached run incomplete while it refetches,
+  // so keep rendering the last known copy instead of flashing the page loader
+  const stackRun =
+    data?.stackRun ??
+    (previousData?.stackRun?.id === runId ? previousData?.stackRun : undefined)
 
   const { tabs, activePath } = useMemo(() => {
     if (!stackRun) return { tabs: [], activePath: '' }

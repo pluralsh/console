@@ -4,6 +4,38 @@ defmodule Console.Cache do
     adapter: Nebulex.Adapters.Partitioned,
     primary_storage_adapter: Nebulex.Adapters.Local
 
+  @not_found {__MODULE__, :not_found}
+
+  @doc """
+  Fetches a value from an existing cache, storing both successful lookups and misses.
+
+  Misses use a non-nil sentinel because Nebulex treats `nil` as a cache miss. Their
+  shorter TTL limits how long a newly-created value could be hidden by a prior miss.
+  """
+  def fetch_or_store(cache, key, fun, opts \\ []) do
+    negative_ttl = Keyword.get(opts, :negative_ttl, :timer.minutes(5))
+    cache_opts = Keyword.delete(opts, :negative_ttl)
+
+    case cache.get(key) do
+      @not_found ->
+        nil
+
+      nil ->
+        case fun.() do
+          nil ->
+            cache.put(key, @not_found, Keyword.put(cache_opts, :ttl, negative_ttl))
+            nil
+
+          value ->
+            cache.put(key, value, cache_opts)
+            value
+        end
+
+      value ->
+        value
+    end
+  end
+
   def cached(adapter, key, fun, opts \\ []) do
     case adapter.get(key) do
       nil ->

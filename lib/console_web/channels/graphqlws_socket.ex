@@ -10,6 +10,8 @@ defmodule ConsoleWeb.GraphqlWSSocket do
     with {:ok, token} <- fetch_token(params),
          {:ok, current_user, _claims} = Console.Guardian.resource_from_token(token) do
       :timer.send_interval(@gql_ping_interval, :gql_ws_keepalive)
+      # subscriptions authorize every delivery against this user, so its groups must be loaded up front
+      current_user = Console.Services.Rbac.preload(current_user)
       {:ok, %{name: current_user.email}, assign_context(socket, current_user: current_user)}
     else
       _ -> {:error, %{}, socket}

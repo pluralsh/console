@@ -3,6 +3,9 @@ defmodule ConsoleWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :console
   use Absinthe.Phoenix.Endpoint
 
+  def run_docset(pubsub, docs_and_topics, mutation_result),
+    do: ConsoleWeb.Subscriptions.run_docset(pubsub, docs_and_topics, mutation_result)
+
   socket "/socket/gql-ws", ConsoleWeb.GraphqlWSSocket,
     websocket: [path: "", subprotocols: ["graphql-transport-ws"], check_origin: false]
 

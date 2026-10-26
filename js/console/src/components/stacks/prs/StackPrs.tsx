@@ -28,6 +28,7 @@ import { PrStatusChip } from 'components/self-service/pr/queue/PrQueueColumns'
 import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { StackRunsTable } from '../runs/StackRunsTable'
+import { STACK_DELTA_FALLBACK_POLL_INTERVAL } from '../common/useStackDeltas'
 
 export function StackPrs() {
   const { stack } = useOutletContext<StackOutletContextT>()
@@ -126,7 +127,10 @@ function StackPrsExpandedRow({
       virtualizeRows={false}
       fillLevel={2}
       variables={{ id: stackId, pullRequestId: pr.id }}
-      options={{ pollInterval: 5_000, fetchPolicy: 'cache-and-network' }}
+      options={{
+        pollInterval: STACK_DELTA_FALLBACK_POLL_INTERVAL,
+        fetchPolicy: 'cache-and-network',
+      }}
       height={400}
       borderRadius={0}
       paddingLeft={24}

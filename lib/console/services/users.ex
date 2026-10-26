@@ -48,24 +48,26 @@ defmodule Console.Services.Users do
   @decorate cacheable(cache: @cache_adapter, key: :console_bot, opts: [ttl: @ttl])
   def console(), do: Repo.get_by(User, email: "console@plural.sh")
 
-  @decorate cacheable(cache: @cache_adapter, key: {:access, token}, opts: [ttl: @ttl])
   def get_by_token(token) do
-    Repo.get_by(AccessToken, token: token)
-    |> Repo.preload([:user])
-    |> case do
-      %AccessToken{user: %User{} = user, scopes: scopes} = token -> %{user | token: token, scopes: scopes}
-      _ -> nil
-    end
+    Console.Cache.fetch_or_store(Console.Cache, {:access, token}, fn ->
+      Repo.get_by(AccessToken, token: token)
+      |> Repo.preload([:user])
+      |> case do
+        %AccessToken{user: %User{} = user, scopes: scopes} = token -> %{user | token: token, scopes: scopes}
+        _ -> nil
+      end
+    end, ttl: @ttl, negative_ttl: :timer.minutes(1))
   end
 
-  @decorate cacheable(cache: Console.Cache, key: {:bootstrap, token}, opts: [ttl: @ttl])
   def get_by_bootstrap_token(token) do
-    Repo.get_by(BootstrapToken, token: token)
-    |> Repo.preload([:user])
-    |> case do
-      %BootstrapToken{user: %User{} = user} = token -> %{user | bootstrap: token}
-      _ -> nil
-    end
+    Console.Cache.fetch_or_store(Console.Cache, {:bootstrap, token}, fn ->
+      Repo.get_by(BootstrapToken, token: token)
+      |> Repo.preload([:user])
+      |> case do
+        %BootstrapToken{user: %User{} = user} = token -> %{user | bootstrap: token}
+        _ -> nil
+      end
+    end, ttl: @ttl, negative_ttl: :timer.minutes(1))
   end
 
   def get_user_by_email(email), do: Repo.get_by(User, email: email)

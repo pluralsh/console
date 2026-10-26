@@ -80,6 +80,39 @@ defimpl Console.PubSub.Rtc, for: [
   def deliver(%{item: item}), do: {item, :delete}
 end
 
+# stack deltas are authorized per subscriber on delivery, so preload the full policy graph once here
+defimpl Console.PubSub.Rtc, for: Console.PubSub.StackCreated do
+  alias Console.Deployments.Policies.Rbac
+  def deliver(%{item: stack}), do: {Rbac.preload(stack), :create}
+end
+
+defimpl Console.PubSub.Rtc, for: [Console.PubSub.StackUpdated, Console.PubSub.StackDeleted] do
+  alias Console.Deployments.Policies.Rbac
+  def deliver(%{item: stack}), do: {Rbac.preload(stack), :update}
+end
+
+defimpl Console.PubSub.Rtc, for: Console.PubSub.StackDetached do
+  alias Console.Deployments.Policies.Rbac
+  def deliver(%{item: stack}), do: {Rbac.preload(stack), :delete}
+end
+
+defimpl Console.PubSub.Rtc, for: [
+  Console.PubSub.StackRunCreated,
+  Console.PubSub.StackRunUpdated,
+  Console.PubSub.StackRunCompleted
+] do
+  alias Console.Deployments.{Stacks, Policies.Rbac}
+  alias Console.Schema.Stack
+
+  def deliver(%{item: %{stack_id: id}}) when is_binary(id) do
+    case Stacks.get_stack(id) do
+      %Stack{} = stack -> {Rbac.preload(stack), :update}
+      _ -> :ok
+    end
+  end
+  def deliver(_), do: :ok
+end
+
 defimpl Console.PubSub.Rtc, for: Console.PubSub.AgentMessageStdoutCreated do
   def deliver(%{item: stdout}), do: {stdout, :create}
 end

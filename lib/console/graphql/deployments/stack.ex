@@ -706,6 +706,7 @@ defmodule Console.GraphQl.Deployments.Stack do
   connection node_type: :stack_policy
 
   delta :run_logs
+  delta :infrastructure_stack
 
   object :public_stack_queries do
     field :custom_stack_run, :custom_stack_run do
@@ -1024,6 +1025,19 @@ defmodule Console.GraphQl.Deployments.Stack do
   end
 
   object :stack_subscriptions do
+    @desc "Changes to any stack the current user can read, including status changes from its runs"
+    field :infrastructure_stack_delta, :infrastructure_stack_delta do
+      middleware Scope,
+        resource: :stack,
+        action: :read
+      middleware Console.Middleware.SubscriptionPolicy, policy: Console.Deployments.Policies
+
+      config fn
+        _, %{context: %{current_user: %Console.Schema.User{}}} -> {:ok, topic: "stacks"}
+        _, _ -> {:error, "unauthenticated"}
+      end
+    end
+
     field :run_logs_delta, :run_logs_delta do
       arg :step_id, non_null(:id)
 

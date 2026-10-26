@@ -10624,17 +10624,17 @@ export const UpdateStackRunDocument = /*#__PURE__*/ gql`
 export const CompleteStackRunDocument = /*#__PURE__*/ gql`
     mutation CompleteStackRun($id: ID!, $attributes: StackRunAttributes!) {
   completeStackRun(id: $id, attributes: $attributes) {
-    ...StackRun
+    ...StackRunDetails
   }
 }
-    ${StackRunFragmentDoc}` as unknown as DocumentNode<Types.CompleteStackRunMutation, Types.CompleteStackRunMutationVariables>;
+    ${StackRunDetailsFragmentDoc}` as unknown as DocumentNode<Types.CompleteStackRunMutation, Types.CompleteStackRunMutationVariables>;
 export const ApproveStackRunDocument = /*#__PURE__*/ gql`
     mutation ApproveStackRun($id: ID!) {
   approveStackRun(id: $id) {
-    ...StackRun
+    ...StackRunDetails
   }
 }
-    ${StackRunFragmentDoc}` as unknown as DocumentNode<Types.ApproveStackRunMutation, Types.ApproveStackRunMutationVariables>;
+    ${StackRunDetailsFragmentDoc}` as unknown as DocumentNode<Types.ApproveStackRunMutation, Types.ApproveStackRunMutationVariables>;
 export const RestartStackRunDocument = /*#__PURE__*/ gql`
     mutation RestartStackRun($id: ID!) {
   restartStackRun(id: $id) {
@@ -10656,6 +10656,21 @@ export const TriggerStackRunDocument = /*#__PURE__*/ gql`
   }
 }
     ${StackRunFragmentDoc}` as unknown as DocumentNode<Types.TriggerStackRunMutation, Types.TriggerStackRunMutationVariables>;
+export const InfrastructureStackDeltaDocument = /*#__PURE__*/ gql`
+    subscription InfrastructureStackDelta {
+  infrastructureStackDelta {
+    delta
+    payload {
+      id
+      name
+      status
+      paused
+      deletedAt
+      updatedAt
+    }
+  }
+}
+    ` as unknown as DocumentNode<Types.InfrastructureStackDeltaSubscription, Types.InfrastructureStackDeltaSubscriptionVariables>;
 export const LogsDeltaDocument = /*#__PURE__*/ gql`
     subscription LogsDelta($id: ID!) {
   runLogsDelta(stepId: $id) {
