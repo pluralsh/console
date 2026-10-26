@@ -210,6 +210,7 @@ function buildNodeLookup(
 
 export function AgentRunDiff({
   runId,
+  patchUrl,
   isFullscreen = false,
   onFullscreenChange,
   isApprovable = false,
@@ -217,6 +218,8 @@ export function AgentRunDiff({
   approving = false,
 }: {
   runId: string
+  /** Waffle patch URL (includes ?v= stamp). Key the fetch so follow-up uploads refresh. */
+  patchUrl?: string | null
   isFullscreen?: boolean
   onFullscreenChange?: (fullscreen: boolean) => void
   isApprovable?: boolean
@@ -228,7 +231,7 @@ export function AgentRunDiff({
     error,
     isLoading,
   } = useQuery({
-    queryKey: ['agent-run-patch', runId],
+    queryKey: ['agent-run-patch', runId, patchUrl ?? ''],
     queryFn: () => fetchAgentRunUpload(runId, 'patch'),
     enabled: !!runId,
     staleTime: Infinity,
