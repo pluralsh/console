@@ -242,12 +242,18 @@ defmodule Console.Schema.WorkbenchJob do
     )
   end
 
+  # Bounds the Person filter payload. Further people, ordered by name, are omitted.
+  @max_count_by_user 100
+
   def count_by_user(query \\ __MODULE__) do
+    max_users = @max_count_by_user
+
     from(j in query,
       join: u in assoc(j, :user),
       group_by: [u.id, u.name],
       select: %{id: u.id, name: u.name, count: count(j.id)},
-      order_by: [asc: u.name]
+      order_by: [asc: u.name],
+      limit: ^max_users
     )
   end
 
