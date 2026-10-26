@@ -366,8 +366,6 @@ export function AgentRunPanelContent() {
             <ContentInnerFlushSC>
               <AgentRunDiff
                 runId={run.id}
-                patchUrl={run.upload.patch}
-                refreshKey={run.updatedAt}
                 isFullscreen={diffFullscreen}
                 onFullscreenChange={setDiffFullscreen}
                 isApprovable={
