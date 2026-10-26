@@ -698,6 +698,9 @@ type RootQueryType {
 
     "filter results by the state of their pull requests"
     prStates: [WorkbenchJobPrState]
+
+    "filter results by the users who ran them"
+    userIds: [ID]
   ): [WorkbenchJob]
 
   workbenchJobActivity(id: ID!): WorkbenchJobActivity
@@ -4184,6 +4187,9 @@ type WorkbenchJobCounts {
 
   "jobs with at least one pull request in each state (a job can count towards several)"
   pullRequests: [WorkbenchJobCountByPrState]
+
+  "jobs run by each user on this workbench"
+  users: [WorkbenchJobCountByUser]
 }
 
 type WorkbenchJobCountByStatus {
@@ -4193,6 +4199,12 @@ type WorkbenchJobCountByStatus {
 
 type WorkbenchJobCountByPrState {
   state: WorkbenchJobPrState!
+  count: Int!
+}
+
+type WorkbenchJobCountByUser {
+  id: ID!
+  name: String
   count: Int!
 }
 
@@ -4381,6 +4393,9 @@ type Workbench {
     "filter runs by the state of their pull requests"
     prStates: [WorkbenchJobPrState]
 
+    "filter runs by the users who ran them"
+    userIds: [ID]
+
     "creation date sort direction"
     direction: SortDirection
 
@@ -4397,6 +4412,9 @@ type Workbench {
 
     "only count runs with pull requests in these states"
     prStates: [WorkbenchJobPrState]
+
+    "only count runs by these users"
+    userIds: [ID]
 
     "only count runs created at or after this time"
     insertedAfter: DateTime

@@ -203,6 +203,10 @@ defmodule Console.Schema.WorkbenchJob do
     from(j in query, where: j.status in ^statuses)
   end
 
+  def for_user_ids(query \\ __MODULE__, ids) do
+    from(j in query, where: j.user_id in ^ids)
+  end
+
   def inserted_after(query \\ __MODULE__, ts)
   def inserted_after(query, nil), do: query
   def inserted_after(query, ts), do: from(j in query, where: j.inserted_at >= ^ts)
@@ -235,6 +239,15 @@ defmodule Console.Schema.WorkbenchJob do
       join: pr in assoc(j, :pull_requests),
       group_by: pr.status,
       select: %{state: pr.status, count: count(j.id, :distinct)}
+    )
+  end
+
+  def count_by_user(query \\ __MODULE__) do
+    from(j in query,
+      join: u in assoc(j, :user),
+      group_by: [u.id, u.name],
+      select: %{id: u.id, name: u.name, count: count(j.id)},
+      order_by: [asc: u.name]
     )
   end
 

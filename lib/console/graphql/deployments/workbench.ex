@@ -535,6 +535,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   object :workbench_job_counts do
     field :statuses,      list_of(:workbench_job_count_by_status)
     field :pull_requests, list_of(:workbench_job_count_by_pr_state), description: "jobs with at least one pull request in each state (a job can count towards several)"
+    field :users,         list_of(:workbench_job_count_by_user), description: "jobs run by each user on this workbench"
   end
 
   object :workbench_job_count_by_status do
@@ -544,6 +545,12 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
   object :workbench_job_count_by_pr_state do
     field :state, non_null(:workbench_job_pr_state)
+    field :count, non_null(:integer)
+  end
+
+  object :workbench_job_count_by_user do
+    field :id,    non_null(:id)
+    field :name,  :string
     field :count, non_null(:integer)
   end
 
@@ -676,6 +683,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :monitor_id, :id, description: "show runs spawned from a specific monitor"
       arg :statuses, list_of(:workbench_job_status), description: "filter runs by status"
       arg :pr_states, list_of(:workbench_job_pr_state), description: "filter runs by the state of their pull requests"
+      arg :user_ids, list_of(:id), description: "filter runs by the users who ran them"
       arg :direction, :sort_direction, description: "creation date sort direction"
       arg :q, :string, description: "case-insensitive substring search over job prompts"
       arg :inserted_after, :datetime, description: "only runs created at or after this time"
@@ -687,6 +695,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
       middleware Nested, check: true, msg: "workbench run counts cannot be fetched through a policy"
       arg :q, :string, description: "only count runs whose prompt contains this (case-insensitive)"
       arg :pr_states, list_of(:workbench_job_pr_state), description: "only count runs with pull requests in these states"
+      arg :user_ids, list_of(:id), description: "only count runs by these users"
       arg :inserted_after, :datetime, description: "only count runs created at or after this time"
 
       resolve &Deployments.run_counts/3
@@ -1843,6 +1852,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :limit,         :integer, description: "max results to return (defaults to 5)"
       arg :statuses,      list_of(:workbench_job_status), description: "filter results by status"
       arg :pr_states,     list_of(:workbench_job_pr_state), description: "filter results by the state of their pull requests"
+      arg :user_ids,      list_of(:id), description: "filter results by the users who ran them"
 
       resolve &Deployments.workbench_job_search/2
     end
