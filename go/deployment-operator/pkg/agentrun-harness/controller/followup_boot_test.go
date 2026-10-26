@@ -54,24 +54,47 @@ func TestApplyFollowupBootPromptSkipsRegularRuns(t *testing.T) {
 	}
 }
 
-func TestApplyFollowupBootPromptUsesRunPromptWhenSessionPresent(t *testing.T) {
+func TestApplyFollowupBootPromptSkipsWhenNoQueuedPrompt(t *testing.T) {
 	in := &agentRunController{
-		agentRunID: "run-1",
 		agentRun: &agentrunv1.AgentRun{
 			Followup:   true,
-			Prompt:     "continue from here",
+			Prompt:     "original",
 			SessionURL: "https://example.com/session.tar.gz",
 		},
 	}
 
-	if !in.applyFollowupBootPrompt() {
-		t.Fatal("expected terminal reprompt without queued prompts to resume follow-up")
+	if in.applyFollowupBootPrompt() {
+		t.Fatal("expected missing AgentPrompt to skip boot rewrite")
 	}
-	if in.agentRun.Prompt != "continue from here" {
-		t.Fatalf("prompt = %q", in.agentRun.Prompt)
+	if in.agentRun.Prompt != "original" {
+		t.Fatalf("prompt = %q, want original left unchanged", in.agentRun.Prompt)
 	}
-	if in.lastPromptSeq != 0 {
-		t.Fatalf("lastPromptSeq = %d, want 0", in.lastPromptSeq)
+}
+
+func TestRequireFollowupBootPromptErrorsWithoutQueuedPrompt(t *testing.T) {
+	in := &agentRunController{
+		agentRunID: "run-1",
+		agentRun: &agentrunv1.AgentRun{
+			Followup:   true,
+			SessionURL: "https://example.com/session.tar.gz",
+		},
+	}
+
+	if err := in.requireFollowupBootPrompt(false); err == nil {
+		t.Fatal("expected error when session follow-up has no queued AgentPrompt")
+	}
+}
+
+func TestRequireFollowupBootPromptAllowsWorkbenchFollowup(t *testing.T) {
+	in := &agentRunController{
+		agentRun: &agentrunv1.AgentRun{
+			Followup: true,
+			Prompt:   "pr follow-up work",
+		},
+	}
+
+	if err := in.requireFollowupBootPrompt(false); err != nil {
+		t.Fatalf("expected workbench follow-up without session to cold-start: %v", err)
 	}
 }
 

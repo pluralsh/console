@@ -829,7 +829,7 @@ defmodule Console.Deployments.AgentsTest do
       requeued = refetch(run)
       assert requeued.status == :pending
       assert requeued.followup
-      assert requeued.prompt == "continue from here"
+      assert requeued.prompt == run.prompt
       assert is_nil(requeued.error)
       assert is_nil(requeued.approved_at)
       assert is_nil(requeued.pod_reference)

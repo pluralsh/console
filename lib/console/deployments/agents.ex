@@ -410,7 +410,7 @@ defmodule Console.Deployments.Agents do
         validate_terminal_reprompt(run)
       end
     end)
-    |> add_operation(:requeue, fn %{run: run} -> requeue_terminal_run(run, prompt) end)
+    |> add_operation(:requeue, fn %{run: run} -> requeue_terminal_run(run) end)
     |> add_operation(:prompt, fn _ ->
       %AgentPromptHistory{}
       |> AgentPromptHistory.changeset(%{prompt: prompt, agent_run_id: run_id})
@@ -467,9 +467,9 @@ defmodule Console.Deployments.Agents do
     do: true
   defp has_session_upload?(_), do: false
 
-  # Persist the new user prompt on the run so the harness (and UI) do not fall
-  # back to the original AgentRun.prompt when Prompts are missing at boot.
-  defp requeue_terminal_run(%AgentRun{status: status, id: run_id} = run, prompt) when is_terminal(status) do
+  # Keep AgentRun.prompt as the original task. The follow-up text is stored on
+  # AgentPrompt and claimed by the harness at boot via applyFollowupBootPrompt.
+  defp requeue_terminal_run(%AgentRun{status: status, id: run_id} = run) when is_terminal(status) do
     AgentPrompt.for_run(run_id)
     |> Repo.delete_all()
 
@@ -477,7 +477,6 @@ defmodule Console.Deployments.Agents do
     |> AgentRun.changeset(%{
       status: :pending,
       followup: true,
-      prompt: prompt,
       error: nil,
       pod_reference: nil,
       approved_at: nil
@@ -488,7 +487,7 @@ defmodule Console.Deployments.Agents do
       err -> err
     end
   end
-  defp requeue_terminal_run(%AgentRun{} = run, _prompt), do: {:ok, {:noop, run}}
+  defp requeue_terminal_run(%AgentRun{} = run), do: {:ok, {:noop, run}}
 
   # attachments live in a workbench's filesystem, so only runs spawned by a workbench can have them
   defp run_attachments(_, _, _, empty) when empty in [nil, []], do: {:ok, []}
