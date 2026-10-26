@@ -145,6 +145,7 @@ export const docsStructure: DocSection[] = [
                     title: 'Bitbucket Data Center',
                   },
                   { path: 'slack', title: 'Slack' },
+                  { path: 'teams', title: 'Microsoft Teams' },
                   { path: 'atlassian', title: 'Atlassian' },
                   { path: 'jira', title: 'Jira Cloud' },
                   {
@@ -763,6 +764,11 @@ export const redirects = [
   {
     source: '/plural-features/workbenches/tools/datadog',
     destination: '/plural-features/workbenches/integrations/tools/datadog',
+    permanent: true,
+  },
+  {
+    source: '/plural-features/workbenches/integrations/tools/teams.md',
+    destination: '/plural-features/workbenches/integrations/tools/teams',
     permanent: true,
   },
 ]

@@ -160,6 +160,7 @@ Keep these behaviors in mind:
 * **Reactions are not supported with application tokens.** `teams_react_to_channel_message` requires a delegated token. Calling it with this tool returns a permission error.
 * **Reply only works on chatbot-triggered jobs.** `teams_reply` uses the Bot Framework connector and reads the conversation context from jobs started by a Microsoft Teams chatbot @mention. It fails on other jobs with "no teams chat context is available for this job."
 * **Search is case-insensitive substring match.** Search operations use `contains(tolower(...))` filters in Microsoft Graph OData queries. Results match any display name, email, or user principal name containing the query substring.
+* **Graph may reject search queries.** The tool does not send the `ConsistencyLevel: eventual` header required by these `contains(tolower(...))` queries. This is a current tool limitation; changing permissions or search terms will not fix that rejection.
 * **Application permission scope** — the app registration needs admin consent for each application permission. Omit permissions for capabilities the workbench does not need.
 
 ## Troubleshooting
@@ -197,6 +198,7 @@ Keep these behaviors in mind:
 ### Search returns unexpected results
 
 * Search operations use `contains` filters with `tolower` for case-insensitive substring matching. Results include any team, group, or user whose relevant field contains the query string.
+* Graph may reject these search queries because the tool does not send the `ConsistencyLevel: eventual` header. This is a current tool limitation; changing permissions or search terms will not fix that rejection.
 * `teams_search_teams` filters to team-enabled groups only (`resourceProvisioningOptions/Any(c:c eq 'Team')`). Use `teams_search_groups` to search all Microsoft 365 groups, including non-team groups.
 * Verify the search query string. OData single quotes are escaped automatically (`'` becomes `''`), but other OData special characters are not. Use simple alphanumeric queries for best results.
 
