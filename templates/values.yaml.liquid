@@ -80,6 +80,11 @@ console:
         accessKey: {{ imports.mgmt.console_azure_access_key }}
         {% endif %}
 {% elsif imports.mgmt.console_gcs_bucket %}
+{% if imports.mgmt.console_gcs_service_account %}
+serviceAccount:
+  annotations:
+    iam.gke.io/gcp-service-account: {{ imports.mgmt.console_gcs_service_account }}
+{% endif %}
 console:
   config:
     objectStore:

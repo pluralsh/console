@@ -81,6 +81,11 @@ console:
         accessKey: {{ .Values.objectStoreAzureAccessKey }}
         {{ end }}
 {{ else if .Values.objectStoreGcsBucket }}
+{{ if .Values.objectStoreGcsServiceAccount }}
+serviceAccount:
+  annotations:
+    iam.gke.io/gcp-service-account: {{ .Values.objectStoreGcsServiceAccount }}
+{{ end }}
 console:
   config:
     objectStore:
