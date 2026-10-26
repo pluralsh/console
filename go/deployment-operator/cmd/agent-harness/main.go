@@ -1,3 +1,4 @@
+// Command agent-harness runs a single agent run inside its pod and reports progress back to the console.
 package main
 
 import (

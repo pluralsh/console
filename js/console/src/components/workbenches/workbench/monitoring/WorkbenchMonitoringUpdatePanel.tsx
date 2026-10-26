@@ -136,7 +136,6 @@ export function WorkbenchMonitoringUpdatePanel({
               workbenchId,
             })}
             placeholder="Describe the change. Use @ to mention dashboards, monitors, clusters, and more."
-            bgColor="fill-one-selected"
             onCreated={(job) => onJobChange(job.id)}
           />
         </Flex>

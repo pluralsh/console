@@ -412,7 +412,7 @@ function AgentRunRepromptInput({ run }: { run: AgentRunFragment }) {
           onSubmit={submitPrompt}
           loading={loading}
           allowSubmit={!!prompt.trim()}
-          wrapperStyles={{ minHeight: 112 }}
+          wrapperStyles={{ minHeight: 'unset' }}
         />
       </div>
     </RepromptInputWrapperSC>

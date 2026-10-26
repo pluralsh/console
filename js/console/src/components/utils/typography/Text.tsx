@@ -126,7 +126,7 @@ export function shimmerWithinCss(theme: DefaultTheme) {
 
   return {
     '@keyframes shimmer-text': shimmerKeyframes,
-    '& :is(p, span, li, pre, code, h1, h2, h3, h4, td, th)': {
+    '& :is(p, span, li, pre, code, h1, h2, h3, h4, td, th):not(button *)': {
       ...text,
       color: 'transparent !important',
     },
