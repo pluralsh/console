@@ -13462,11 +13462,19 @@ input ClusterPing {
 
 input ClusterInsightComponentAttributes {
   group: String
+
   version: String!
+
   kind: String!
+
   namespace: String
+
   name: String!
+
   priority: InsightComponentPriority
+
+  "the plural service that manages this component, if any"
+  serviceId: ID
 }
 
 input NodeStatisticAttributes {
@@ -17494,6 +17502,9 @@ type ClusterInsightComponent {
   name: String!
 
   priority: InsightComponentPriority
+
+  "the plural service managing this component, if any"
+  service: ServiceDeployment
 
   cluster: Cluster
 

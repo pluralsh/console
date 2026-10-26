@@ -6,33 +6,45 @@ import (
 	"sort"
 	"time"
 
+	"github.com/Masterminds/semver/v3"
+	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/klog/v2"
 
+	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/client"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
-
-	"github.com/Masterminds/semver/v3"
-	"github.com/pluralsh/console/go/polly/containers"
-	"github.com/samber/lo"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	internallog "github.com/pluralsh/console/go/deployment-operator/pkg/log"
+	"github.com/pluralsh/console/go/polly/containers"
 )
 
-func RunClusterPingerInBackgroundOrDie(ctx context.Context, pinger *Pinger, duration time.Duration) {
+// RunClusterPingerInBackgroundOrDie pings the cluster every interval. The first ping waits for ready, which should return
+// once the store holds the state of the cluster: a ping built from a partially loaded store would report healthy
+// workloads as missing and drop their insights in Console. Nothing else is held back by it.
+func RunClusterPingerInBackgroundOrDie(ctx context.Context, pinger *Pinger, duration time.Duration, ready func(context.Context) error) {
 	interval := func() time.Duration {
 		return clusterPingInterval(duration)
 	}
 
-	_ = helpers.DynamicBackgroundPollUntilContextCancel(ctx, interval, false, func(_ context.Context) (done bool, err error) {
-		if err := pinger.PingCluster(); err != nil {
-			klog.ErrorS(err, "failed ping cluster")
+	go func() {
+		start := time.Now()
+		if err := ready(ctx); err != nil {
+			klog.V(internallog.LogLevelDefault).InfoS("cluster pinger stopped before the store was ready", "reason", err)
+			return
 		}
-		return false, nil
-	})
+		klog.V(internallog.LogLevelDefault).InfoS("store is ready, starting cluster pinger", "waited", time.Since(start))
 
-	klog.V(internallog.LogLevelDefault).InfoS("started cluster pinger", "interval", duration)
+		_ = helpers.DynamicBackgroundPollUntilContextCancel(ctx, interval, false, func(_ context.Context) (done bool, err error) {
+			if err := pinger.PingCluster(); err != nil {
+				klog.ErrorS(err, "failed ping cluster")
+			}
+			return false, nil
+		})
+
+		klog.V(internallog.LogLevelDefault).InfoS("started cluster pinger", "interval", duration)
+	}()
 }
 
 func clusterPingInterval(defaultDuration time.Duration) time.Duration {
@@ -71,14 +83,12 @@ func (p *Pinger) PingCluster() error {
 		}
 	}
 
-	attrs := p.pingAttributes(info, podNames, minKubeletVersion, openShiftVersion, podCount)
-	attrs.AvailabilityZones = stabilize(azs)
-	if err := p.consoleClient.PingCluster(attrs); err != nil {
-		attrs.Distro = nil
-		return p.consoleClient.PingCluster(attrs) // fallback to no distro to support old console servers
+	attrs, err := p.pingAttributes(info, podNames, minKubeletVersion, openShiftVersion, podCount)
+	if err != nil {
+		return err
 	}
-
-	return nil
+	attrs.AvailabilityZones = stabilize(azs)
+	return pingWithFallback(p.consoleClient, attrs)
 }
 
 // kubeNodeData tries to scrape a minimum kubelet version across all nodes in the cluster.
@@ -125,4 +135,18 @@ func stabilize(azs containers.Set[string]) []*string {
 	azsList := azs.List()
 	sort.Strings(azsList)
 	return lo.ToSlicePtr(azsList)
+}
+
+// pingWithFallback pings the cluster and, if that fails, once more without the fields that old Console servers do not
+// know. They reject the whole ping for an unknown field, which would also lose the health score.
+func pingWithFallback(c client.Client, attrs console.ClusterPing) error {
+	if err := c.PingCluster(attrs); err != nil {
+		attrs.Distro = nil
+		for _, component := range attrs.InsightComponents {
+			component.ServiceID = nil
+		}
+		return c.PingCluster(attrs)
+	}
+
+	return nil
 }

@@ -1,6 +1,6 @@
 import { Chip, Flex, SubTab, Table } from '@pluralsh/design-system'
 import { createColumnHelper, Row } from '@tanstack/react-table'
-import { ClusterInsightComponentLabel } from 'components/cd/cluster/ClusterInsightsComponents'
+import { ClusterInsightComponentLabel } from 'components/cd/cluster/ClusterInsightComponentParts'
 import { AiInsightSummaryIcon } from 'components/utils/AiInsights'
 import {
   ClusterInsightComponentFragment,

@@ -14,6 +14,8 @@ defmodule Console.Prom.Plugin do
   def metric_scope(:erlang_nodes), do: ~w(console erlang nodes count)a
   def metric_scope(:persisted_query_hit), do: ~w(console persisted query hit)a
   def metric_scope(:persisted_query_miss), do: ~w(console persisted query miss)a
+  def metric_scope(:sentinel_run), do: ~w(console sentinel run)a
+  def metric_scope(:sentinel_run_job), do: ~w(console sentinel run job)a
 
   def plural_metric(name), do: [:plrl | name]
 
@@ -40,6 +42,20 @@ defmodule Console.Prom.Plugin do
           event_name: metric_scope(:persisted_query_miss),
           measurement: :count,
           description: "The number of persisted query misses."
+        ),
+        sum(
+          plural_metric(~w(sentinel run status count)a),
+          event_name: metric_scope(:sentinel_run),
+          measurement: :count,
+          description: "The number of sentinel runs that have transitioned into each status.",
+          tags: [:status]
+        ),
+        sum(
+          plural_metric(~w(sentinel run job status count)a),
+          event_name: metric_scope(:sentinel_run_job),
+          measurement: :count,
+          description: "The number of sentinel run jobs that have transitioned into each status, per cluster.",
+          tags: [:status, :cluster]
         )
       ]
     )

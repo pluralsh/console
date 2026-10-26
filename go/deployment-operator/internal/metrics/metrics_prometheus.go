@@ -31,6 +31,8 @@ type prometheusRecorder struct {
 
 	controllerRestartCounter *prometheus.CounterVec
 
+	insightPriorityFailureCounter *prometheus.CounterVec
+
 	synchronizationEventCounter *prometheus.CounterVec
 }
 
@@ -111,6 +113,10 @@ func (in *prometheusRecorder) ControllerRestart(name string) {
 	in.controllerRestartCounter.WithLabelValues(name).Inc()
 }
 
+func (in *prometheusRecorder) InsightPriorityFailure(name string) {
+	in.insightPriorityFailureCounter.WithLabelValues(name).Inc()
+}
+
 func (in *prometheusRecorder) init() Recorder {
 	in.discoveryAPICacheRefreshCounter = promauto.NewCounter(prometheus.CounterOpts{
 		Name: DiscoveryAPICacheRefreshMetricName,
@@ -156,6 +162,11 @@ func (in *prometheusRecorder) init() Recorder {
 		Name: ControllerRestartsMetricName,
 		Help: ControllerRestartsMetricDescription,
 	}, []string{MetricLabelControllerName})
+
+	in.insightPriorityFailureCounter = promauto.NewCounterVec(prometheus.CounterOpts{
+		Name: InsightPriorityFailureMetricName,
+		Help: InsightPriorityFailureMetricDescription,
+	}, []string{MetricLabelInsightPriorityName})
 
 	in.synchronizationEventCounter = promauto.NewCounterVec(prometheus.CounterOpts{
 		Name: SynchronizerEventMetricName,

@@ -26,6 +26,11 @@ models:
     fields:
       containers:
         type: "*[]*github.com/pluralsh/console/go/client.ContainerAttributes"
+  # Preserve omitted versus explicitly empty ignore cluster lists so controllers can clear this field.
+  GlobalServiceAttributes:
+    fields:
+      ignoreClusters:
+        type: "*[]*string"
 schema:
   - "../../schema/*.graphql"
 query:

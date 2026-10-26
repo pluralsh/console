@@ -22,12 +22,16 @@ import { capitalize, isEmpty } from 'lodash'
 import { useLayoutEffect, useMemo } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import {
+  getWorkbenchAbsPath,
   getWorkbenchToolEditAbsPath,
-  WORKBENCHES_TOOLS_ADD_ABS_PATH,
+  getWorkbenchToolsAddAbsPath,
+  WORKBENCH_ADDED_TOOL_QUERY_PARAM,
   WORKBENCHES_TOOLS_ADD_REL_PATH,
   WORKBENCHES_TOOLS_PARAM_ID,
+  WORKBENCHES_TOOLS_RETURN_WORKBENCH_QUERY_PARAM,
   WORKBENCHES_TOOLS_YOUR_REL_PATH,
   WORKBENCHES_TOOLS_YOUR_ABS_PATH,
+  withReturnWorkbenchParam,
 } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
 import { deepOmitBlank } from 'utils/graphql'
@@ -87,6 +91,9 @@ export function WorkbenchToolCreateOrEdit({
   const id = useParams()[WORKBENCHES_TOOLS_PARAM_ID]
   const [searchParams, setSearchParams] = useSearchParams()
   const providerParam = searchParams.get(WORKBENCHES_TOOLS_PROVIDER_PARAM)
+  const returnWorkbenchId = searchParams.get(
+    WORKBENCHES_TOOLS_RETURN_WORKBENCH_QUERY_PARAM
+  )
 
   const { data, loading, error } = useWorkbenchToolQuery({
     variables: { id },
@@ -127,11 +134,12 @@ export function WorkbenchToolCreateOrEdit({
       (isProvider(providerParam) ? providerParam : Provider.Aws)
 
     if (nextType !== type || nextProvider !== providerParam) {
-      const next: Record<string, string> = {
-        [WORKBENCHES_TOOLS_TYPE_PARAM]: nextType,
-      }
+      const next = withReturnWorkbenchParam(
+        new URLSearchParams({ [WORKBENCHES_TOOLS_TYPE_PARAM]: nextType }),
+        searchParams
+      )
       if (nextProvider && nextType === WorkbenchToolType.Cloud)
-        next[WORKBENCHES_TOOLS_PROVIDER_PARAM] = nextProvider
+        next.set(WORKBENCHES_TOOLS_PROVIDER_PARAM, nextProvider)
       setSearchParams(next, { replace: true })
     }
   }, [id, searchParams, setSearchParams, tool, isLoading, providerParam, type])
@@ -162,7 +170,13 @@ export function WorkbenchToolCreateOrEdit({
       onCompleted: ({ createWorkbenchTool }) => {
         const name = createWorkbenchTool?.name ?? 'Tool'
         popToast({ content: `${name} created`, severity: 'success' })
-        navigate(WORKBENCHES_TOOLS_YOUR_ABS_PATH)
+        if (returnWorkbenchId && createWorkbenchTool?.id)
+          navigate(
+            `${getWorkbenchAbsPath(returnWorkbenchId)}?${new URLSearchParams({
+              [WORKBENCH_ADDED_TOOL_QUERY_PARAM]: createWorkbenchTool.id,
+            })}`
+          )
+        else navigate(WORKBENCHES_TOOLS_YOUR_ABS_PATH)
       },
     })
   const [update, { loading: updateLoading, error: updateError }] =
@@ -230,7 +244,7 @@ export function WorkbenchToolCreateOrEdit({
             mutationLoading={mutationLoading}
             backPath={
               mode === 'create'
-                ? WORKBENCHES_TOOLS_ADD_ABS_PATH
+                ? getWorkbenchToolsAddAbsPath(returnWorkbenchId)
                 : WORKBENCHES_TOOLS_YOUR_ABS_PATH
             }
             onSave={onSave}

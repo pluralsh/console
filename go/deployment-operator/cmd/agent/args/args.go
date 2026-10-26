@@ -94,6 +94,9 @@ const (
 	defaultClusterPingInterval         = "2m"
 	defaultClusterPingIntervalDuration = 2 * time.Minute
 
+	defaultInsightGracePeriod         = "10m"
+	defaultInsightGracePeriodDuration = 10 * time.Minute
+
 	defaultRuntimeServicePingInterval         = "3m"
 	defaultRuntimeServicePingIntervalDuration = 3 * time.Minute
 
@@ -174,6 +177,7 @@ var (
 	argWorkqueueQPS                         = flag.Int("workqueue-qps", 10, "The maximum number of items to process per second.")
 	argWorkqueueBurst                       = flag.Int("workqueue-burst", 50, "The maximum number of items to process at a time.")
 	argClusterPingInterval                  = flag.String("cluster-ping-interval", defaultClusterPingInterval, "Time interval to ping cluster.")
+	argInsightGracePeriod                   = flag.String("insight-grace-period", defaultInsightGracePeriod, "How long a component that stopped failing is still reported as a cluster insight, to keep flapping components from regenerating their insight. Set to 0 to disable.")
 	argRuntimeServicePingInterval           = flag.String("runtime-service-ping-interval", defaultRuntimeServicePingInterval, "Time interval to register runtime services.")
 	argStackPollInterval                    = flag.String("stack-poll-interval", defaultStackPollInterval, "Time interval to poll stack resources from the Console API. Use '0s' to disable.")
 	argSentinelPollInterval                 = flag.String("sentinel-poll-interval", defaultSentinelPollInterval, "Time interval to poll sentinel run jobs from the Console API. Use '0s' to disable.")
@@ -506,6 +510,16 @@ func ClusterPingInterval() time.Duration {
 	if err != nil {
 		klog.ErrorS(err, "Could not parse cluster-ping-interval", "value", *argClusterPingInterval, "default", defaultClusterPingInterval)
 		return defaultClusterPingIntervalDuration
+	}
+
+	return duration
+}
+
+func InsightGracePeriod() time.Duration {
+	duration, err := time.ParseDuration(*argInsightGracePeriod)
+	if err != nil || duration < 0 {
+		klog.ErrorS(err, "Could not parse insight-grace-period", "value", *argInsightGracePeriod, "default", defaultInsightGracePeriod)
+		return defaultInsightGracePeriodDuration
 	}
 
 	return duration

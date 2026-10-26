@@ -2,6 +2,7 @@ package ping
 
 import (
 	"fmt"
+	"time"
 
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
@@ -12,9 +13,13 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/internal/utils"
 	discoverycache "github.com/pluralsh/console/go/deployment-operator/pkg/cache/discovery"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/client"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/insightpriority"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline/store"
 	"github.com/pluralsh/console/go/polly/containers"
 )
+
+// defaultInsightGracePeriod is how long a recovered component is still reported unless configured otherwise.
+const defaultInsightGracePeriod = 10 * time.Minute
 
 type Pinger struct {
 	consoleClient   client.Client
@@ -25,6 +30,25 @@ type Pinger struct {
 	apiExtClient    *apiextensionsclient.Clientset
 	store           store.Store
 	supportedAddons containers.Set[string]
+	grace           *graceWindow
+	priorities      *insightpriority.Evaluator
+}
+
+// Option configures a Pinger.
+type Option func(*Pinger)
+
+// WithInsightPriorities lets CustomInsightPriority scripts decide the priority of failing components.
+func WithInsightPriorities(evaluator *insightpriority.Evaluator) Option {
+	return func(p *Pinger) {
+		p.priorities = evaluator
+	}
+}
+
+// WithInsightGracePeriod sets how long a recovered component is still reported as an insight, zero disables it.
+func WithInsightGracePeriod(period time.Duration) Option {
+	return func(p *Pinger) {
+		p.grace = newGraceWindow(period)
+	}
 }
 
 var supported = []string{
@@ -61,15 +85,15 @@ var supported = []string{
 	"vector",
 }
 
-func NewOrDie(console client.Client, config *rest.Config, k8sClient ctrclient.Client, discoveryCache discoverycache.Cache, store store.Store) *Pinger {
-	pinger, err := New(console, config, k8sClient, discoveryCache, store)
+func NewOrDie(console client.Client, config *rest.Config, k8sClient ctrclient.Client, discoveryCache discoverycache.Cache, store store.Store, options ...Option) *Pinger {
+	pinger, err := New(console, config, k8sClient, discoveryCache, store, options...)
 	if err != nil {
 		panic(fmt.Errorf("failed to create Pinger: %w", err))
 	}
 	return pinger
 }
 
-func New(console client.Client, config *rest.Config, k8sClient ctrclient.Client, discoveryCache discoverycache.Cache, store store.Store) (*Pinger, error) {
+func New(console client.Client, config *rest.Config, k8sClient ctrclient.Client, discoveryCache discoverycache.Cache, store store.Store, options ...Option) (*Pinger, error) {
 	f := utils.NewFactory(config)
 	cs, err := f.KubernetesClientSet()
 	if err != nil {
@@ -93,7 +117,7 @@ func New(console client.Client, config *rest.Config, k8sClient ctrclient.Client,
 		}
 	}
 
-	return &Pinger{
+	pinger := &Pinger{
 		consoleClient:   console,
 		factory:         f,
 		k8sClient:       k8sClient,
@@ -102,5 +126,11 @@ func New(console client.Client, config *rest.Config, k8sClient ctrclient.Client,
 		discoveryCache:  discoveryCache,
 		store:           store,
 		supportedAddons: supportedAddons,
-	}, nil
+		grace:           newGraceWindow(defaultInsightGracePeriod),
+	}
+	for _, option := range options {
+		option(pinger)
+	}
+
+	return pinger, nil
 }

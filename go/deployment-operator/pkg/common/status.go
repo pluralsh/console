@@ -50,27 +50,30 @@ type Progress struct {
 }
 
 func ToStatus(obj *unstructured.Unstructured) *console.ComponentState {
+	state, _ := ToStatusWithMessage(obj)
+	return state
+}
+
+// ToStatusWithMessage returns the component state together with the message of the health check that produced it.
+func ToStatusWithMessage(obj *unstructured.Unstructured) (*console.ComponentState, string) {
 	h, err := GetResourceHealth(obj)
 	if err != nil {
 		klog.ErrorS(err, "failed to get resource health status", "name", obj.GetName(), "namespace", obj.GetNamespace())
 	}
 	if h == nil {
-		return nil
+		return nil, ""
 	}
 
-	if h.Status == HealthStatusDegraded {
-		return lo.ToPtr(console.ComponentStateFailed)
+	switch h.Status {
+	case HealthStatusDegraded:
+		return lo.ToPtr(console.ComponentStateFailed), h.Message
+	case HealthStatusHealthy:
+		return lo.ToPtr(console.ComponentStateRunning), h.Message
+	case HealthStatusPaused:
+		return lo.ToPtr(console.ComponentStatePaused), h.Message
+	default:
+		return lo.ToPtr(console.ComponentStatePending), h.Message
 	}
-
-	if h.Status == HealthStatusHealthy {
-		return lo.ToPtr(console.ComponentStateRunning)
-	}
-
-	if h.Status == HealthStatusPaused {
-		return lo.ToPtr(console.ComponentStatePaused)
-	}
-
-	return lo.ToPtr(console.ComponentStatePending)
 }
 
 func ToComponentAttributes(obj *unstructured.Unstructured) *console.ComponentAttributes {
