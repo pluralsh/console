@@ -1,4 +1,4 @@
-import { OperationVariables } from '@apollo/client/core'
+import { OperationVariables, TypedDocumentNode } from '@apollo/client/core'
 import {
   ClusterIcon,
   ComboBox,
@@ -15,20 +15,17 @@ import {
 import isEmpty from 'lodash/isEmpty'
 import { ReactNode, useCallback, useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
+import { InputMaybe } from '../../../generated/graphql.ts'
 import {
-  InputMaybe,
-  useClusterSelectorQuery,
-  useFlowsQuery,
-  useGroupsQuery,
-  useUsersQuery,
-} from '../../../generated/graphql.ts'
+  ClusterSelectorDocument,
+  FlowsDocument,
+  GroupsDocument,
+  UsersDocument,
+} from '../../../generated/graphql-documents'
 import { useThrottle } from '../../hooks/useThrottle.tsx'
 import { FillLevelDiv } from '../../utils/FillLevelDiv.tsx'
 import { ClusterProviderIcon } from '../../utils/Provider.tsx'
-import {
-  GenericQueryHook,
-  useFetchPaginatedData,
-} from '../../utils/table/useFetchPaginatedData.tsx'
+import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData.tsx'
 
 // This file contains various selectors for clusters, groups, users, and flows.
 // It uses a generic SelectorBase component to handle the common logic for fetching and displaying items.
@@ -42,7 +39,7 @@ function SelectorBase<
 >({
   input,
   setInput,
-  queryHook,
+  query,
   queryKey,
   queryInputProp,
   placeholder,
@@ -52,7 +49,7 @@ function SelectorBase<
 }: {
   input: string
   setInput: (value: string) => void
-  queryHook: GenericQueryHook<TQueryType, TVariables>
+  query: TypedDocumentNode<TQueryType, TVariables>
   queryKey: string
   queryInputProp: string
   placeholder?: string
@@ -71,7 +68,7 @@ function SelectorBase<
     TVariables
   >(
     {
-      queryHook: queryHook,
+      query,
       keyPath: [queryKey],
       errorPolicy: 'ignore',
     },
@@ -155,7 +152,7 @@ function ClusterHandleSelector({
     <SelectorBase
       input={clusterHandle}
       setInput={setClusterHandle}
-      queryHook={useClusterSelectorQuery}
+      query={ClusterSelectorDocument}
       queryKey="clusters"
       queryInputProp="handle"
       placeholder="Search clusters"
@@ -203,7 +200,7 @@ function GroupSelector({
     <SelectorBase
       input={group}
       setInput={setGroup}
-      queryHook={useGroupsQuery}
+      query={GroupsDocument}
       queryKey="groups"
       queryInputProp="name"
       placeholder="Search groups"
@@ -232,7 +229,7 @@ function UserSelector({
     <SelectorBase
       input={user}
       setInput={setUser}
-      queryHook={useUsersQuery}
+      query={UsersDocument}
       queryKey="users"
       queryInputProp="email"
       placeholder="Search users"
@@ -261,7 +258,7 @@ function FlowSelector({
     <SelectorBase
       input={flow}
       setInput={setFlow}
-      queryHook={useFlowsQuery}
+      query={FlowsDocument}
       queryKey="flows"
       queryInputProp="name"
       placeholder="Search flows"

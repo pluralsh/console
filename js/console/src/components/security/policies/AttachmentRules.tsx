@@ -1,6 +1,6 @@
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import { useBindingPoliciesQuery } from 'generated/graphql'
+import { BindingPoliciesDocument } from 'generated/graphql-documents'
 import { useNavigate } from 'react-router-dom'
 import { POLICIES_ATTACHMENT_RULES_CREATE_ABS_PATH } from 'routes/securityRoutesConsts'
 import { AttachmentRulesTable } from './AttachmentRulesTable'
@@ -13,7 +13,7 @@ export function AttachmentRules() {
   const navigate = useNavigate()
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData({
-      queryHook: useBindingPoliciesQuery,
+      query: BindingPoliciesDocument,
       keyPath: ['bindingPolicies'],
     })
 

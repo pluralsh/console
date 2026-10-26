@@ -69,7 +69,7 @@ All native integrations respect your existing RBAC — enabling a capability her
 | Tool | What the agent can do |
 |---|---|
 | **[Slack](/plural-features/workbenches/integrations/tools/slack)** | Find channels, read channel history, post and edit messages (including thread replies), add reactions, create channels, and invite users or user groups |
-| **Microsoft Teams** | Post messages to Teams channels |
+| **[Microsoft Teams](/plural-features/workbenches/integrations/tools/teams)** | List and search teams, channels, and messages; search users and groups; post and edit channel messages; add reactions; reply to chatbot mentions |
 
 ### Issue tracking
 

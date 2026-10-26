@@ -9,7 +9,7 @@ import {
   UpsertCatalogMutationVariables,
 } from 'generated/graphql'
 import { uniqWith, isEqual } from 'lodash'
-import { useState, useEffect, useMemo, useCallback, FormEvent } from 'react'
+import { useState, useMemo, useCallback, FormEvent } from 'react'
 import { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import { Permissions } from 'components/cd/utils/PermissionsModal.tsx'
@@ -51,19 +51,22 @@ export function CatalogPermissionsModal({
 }) {
   const theme = useTheme()
 
-  const [createBindings, setCreateBindings] = useState(catalog.createBindings)
-  const [readBindings, setReadBindings] = useState(catalog.readBindings)
-  const [writeBindings, setWriteBindings] = useState(catalog.writeBindings)
-
-  useEffect(
-    () => setCreateBindings(catalog.createBindings),
-    [catalog.createBindings]
-  )
-  useEffect(() => setReadBindings(catalog.readBindings), [catalog.readBindings])
-  useEffect(
-    () => setWriteBindings(catalog.writeBindings),
-    [catalog.writeBindings]
-  )
+  // only the user's edits are stored; untouched lists show the current bindings
+  const [editedCreateBindings, setCreateBindings] =
+    useState<typeof catalog.createBindings>()
+  const [editedReadBindings, setReadBindings] =
+    useState<typeof catalog.readBindings>()
+  const [editedWriteBindings, setWriteBindings] =
+    useState<typeof catalog.writeBindings>()
+  const createBindings = editedCreateBindings ?? catalog.createBindings
+  const readBindings = editedReadBindings ?? catalog.readBindings
+  const writeBindings = editedWriteBindings ?? catalog.writeBindings
+  const close = () => {
+    setCreateBindings(undefined)
+    setReadBindings(undefined)
+    setWriteBindings(undefined)
+    onClose()
+  }
 
   const uniqueCreateBindings = useMemo(
     () => uniqWith(createBindings, isEqual),
@@ -81,7 +84,7 @@ export function CatalogPermissionsModal({
   const [mutation, { loading, error }] = useUpsertCatalogMutation({
     onCompleted: () => {
       refetch?.()
-      onClose()
+      close()
     },
   })
   const allowSubmit = readBindings && writeBindings
@@ -125,7 +128,7 @@ export function CatalogPermissionsModal({
     <Modal
       header={`Catalog permissions - ${catalog.name}`}
       open={open}
-      onClose={onClose}
+      onClose={close}
       asForm
       formProps={{ onSubmit }}
       size="custom"
@@ -154,7 +157,7 @@ export function CatalogPermissionsModal({
             type="button"
             onClick={(e) => {
               e.preventDefault()
-              onClose?.()
+              close()
             }}
           >
             Cancel

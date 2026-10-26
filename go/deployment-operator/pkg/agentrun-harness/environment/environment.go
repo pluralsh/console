@@ -380,15 +380,49 @@ func (in *environment) configureRepository(repoDirPath, userName, userEmail stri
 	if err != nil {
 		return err
 	}
+	baseCommit := strings.TrimSpace(string(output))
+
+	// Terminal / PR follow-ups check out the head branch tip. Diffing against
+	// that tip only captures new uncommitted work and would replace a useful
+	// full-PR patch with an empty or partial one. Prefer merge-base with the
+	// stored base branch so regenerated patches still cover the PR.
+	if mb := in.followupMergeBaseCommit(repoDirPath); mb != "" {
+		baseCommit = mb
+	}
 
 	config := &Config{
 		Dir:        repoDirPath,
 		BaseBranch: baseBranch,
-		BaseCommit: strings.TrimSpace(string(output)),
+		BaseCommit: baseCommit,
 	}
 
 	klog.V(log.LogLevelInfo).InfoS("repository ready", "url", in.agentRun.Repository, "dir", repoDirPath)
 	return config.Save()
+}
+
+func (in *environment) followupMergeBaseCommit(repoDirPath string) string {
+	if in.agentRun == nil || !in.agentRun.Followup {
+		return ""
+	}
+	baseRef := strings.TrimSpace(lo.FromPtr(in.agentRun.Branch))
+	if baseRef == "" {
+		return ""
+	}
+
+	for _, ref := range []string{"origin/" + baseRef, baseRef} {
+		cmd := exec.NewExecutable("git",
+			exec.WithArgs([]string{"merge-base", "HEAD", ref}),
+			exec.WithDir(repoDirPath),
+		)
+		output, err := cmd.RunWithOutput(context.Background())
+		if err != nil {
+			continue
+		}
+		if mb := strings.TrimSpace(string(output)); mb != "" {
+			return mb
+		}
+	}
+	return ""
 }
 
 // ConfigureGitSafeDirectory marks the repository as trusted for git when the

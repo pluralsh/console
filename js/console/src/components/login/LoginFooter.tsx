@@ -3,6 +3,8 @@ import styled from 'styled-components'
 import { LOGIN_BREAKPOINT } from './constants'
 import { ComponentPropsWithRef } from 'react'
 
+const CURRENT_YEAR = new Date().getFullYear()
+
 export const FooterLink = styled.a(({ theme }) => ({
   '&, &:any-link': {
     ...theme.partials.text.caption,
@@ -28,9 +30,7 @@ export function Footer(props: ComponentPropsWithRef<'div'>) {
       {...props}
     >
       <FooterList>
-        <FooterLink as="div">
-          © Plural {new Date().toLocaleString('en-us', { year: 'numeric' })}
-        </FooterLink>
+        <FooterLink as="div">© Plural {CURRENT_YEAR}</FooterLink>
         <FooterLink
           href="https://www.plural.sh/legal/privacy-policy"
           target="_blank"

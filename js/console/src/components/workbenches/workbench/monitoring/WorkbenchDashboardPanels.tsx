@@ -44,6 +44,7 @@ import {
 import {
   DashboardPanelGraph,
   useDashboardGraphSource,
+  useGraphData,
 } from './DashboardGraphSource'
 import { DashboardTimeseriesChart } from './DashboardTimeseriesChart'
 import { DashboardToolIcon } from './dashboardToolIcon'
@@ -309,7 +310,7 @@ function DataDashboardPanel({
   onRangeSelect,
   onUpdate,
 }: DashboardPanelProps) {
-  const { useGraphData, readOnly } = useDashboardGraphSource()
+  const { readOnly } = useDashboardGraphSource()
   const needsFetch = dashboardGraphNeedsFetch(
     graph.type,
     graph.hasDatasource,

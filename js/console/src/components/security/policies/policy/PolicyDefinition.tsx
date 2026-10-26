@@ -24,9 +24,9 @@ import { CaptionP, OverlineH1 } from 'components/utils/typography/Text'
 import {
   useDeletePolicyMutation,
   useEvaluatePolicyLazyQuery,
-  usePolicyEvaluationsQuery,
   useUpdatePolicyMutation,
 } from 'generated/graphql'
+import { PolicyEvaluationsDocument } from 'generated/graphql-documents'
 import {
   useCallback,
   useEffect,
@@ -85,7 +85,7 @@ export function PolicyDefinition() {
 
   const { data, loading, pageInfo, fetchNextPage } = useFetchPaginatedData(
     {
-      queryHook: usePolicyEvaluationsQuery,
+      query: PolicyEvaluationsDocument,
       keyPath: ['policy', 'policyEvaluations'],
       skip: !policy?.id,
     },
@@ -174,11 +174,9 @@ export function PolicyDefinition() {
   const onEdit = useCallback(() => setEditOpen(true), [])
   const onDelete = useCallback(() => setConfirmDelete(true), [])
 
-  useEffect(() => {
-    if (!evalIdFromSearch || selectedEvalId === evalIdFromSearch) return
-
+  if (evalIdFromSearch && selectedEvalId !== evalIdFromSearch) {
     setSelectedEvalId(evalIdFromSearch)
-  }, [evalIdFromSearch, selectedEvalId])
+  }
 
   useEffect(() => {
     if (!selectedEval || appliedEvalId.current === selectedEval.id) return

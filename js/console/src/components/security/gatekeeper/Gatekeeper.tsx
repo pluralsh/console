@@ -5,9 +5,9 @@ import { DisplayButton } from 'components/utils/display/DisplayPanel'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import {
   ConstraintViolationField,
-  usePolicyConstraintsQuery,
   useViolationStatisticsQuery,
 } from 'generated/graphql'
+import { PolicyConstraintsDocument } from 'generated/graphql-documents'
 import { useState } from 'react'
 import {
   GATEKEEPER_ABS_PATH,
@@ -77,7 +77,7 @@ export function Gatekeeper() {
 
   const { data, loading, error, refetch, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
-      { queryHook: usePolicyConstraintsQuery, keyPath: ['policyConstraints'] },
+      { query: PolicyConstraintsDocument, keyPath: ['policyConstraints'] },
       policyQFilters
     )
 

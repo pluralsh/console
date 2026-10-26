@@ -1,3 +1,8 @@
+// Global types and module augmentations the public API relies on
+import './types/global'
+import './types/styled'
+import './types/react-table'
+
 export type { IconProps } from './components/icons/createIcon'
 export * from './icons'
 

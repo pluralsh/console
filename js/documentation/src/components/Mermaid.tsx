@@ -8,7 +8,6 @@ import {
   type ReactNode,
   type Ref,
   type SetStateAction,
-  useCallback,
   useEffect,
   useImperativeHandle,
   useLayoutEffect,
@@ -38,6 +37,30 @@ export type MermaidRefHandle = {
   svgStr: Nullable<string>
 }
 
+async function renderMermaid(id: string, diagram: string) {
+  try {
+    const mermaid = (await import('mermaid')).default
+    const elkLayouts = (await import('@mermaid-js/layout-elk')).default
+
+    mermaid.initialize({
+      startOnLoad: false,
+      flowchart: { defaultRenderer: 'elk' },
+    })
+
+    try {
+      mermaid.registerLayoutLoaders(elkLayouts)
+    } catch (err) {
+      console.error('Failed to register ELK layout with mermaid:', err)
+    }
+    return (await mermaid.render(id, diagram)).svg
+  } catch (caughtErr) {
+    const err =
+      caughtErr instanceof Error ? caughtErr : new Error(String(caughtErr))
+    console.error('Error parsing Mermaid (rendering plaintext):', err)
+    return err
+  }
+}
+
 export function Mermaid({
   ref,
   diagram,
@@ -49,79 +72,39 @@ export function Mermaid({
   setError?: (error: Nullable<Error>) => void
 }) {
   const theme = useTheme()
-  const [svgStr, setSvgStr] = useState<Nullable<string>>()
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setErrorState] = useState<Nullable<Error>>(null)
+  const id = getMermaidId(diagram)
+  const [rendered, setRendered] = useState<{
+    id: string
+    result: string | Error
+  }>()
+  const result =
+    cachedRenders[id] ?? (rendered?.id === id ? rendered.result : undefined)
+  const isLoading = result === undefined
+  const svgStr = typeof result === 'string' ? result : null
+  const error = result instanceof Error ? result : null
   const [panZoomKey, setPanZoomKey] = useState(0) // increment to force panzoom wrapper to reset
   const { copied, handleCopy } = useCopyText(diagram)
 
-  const setError = useCallback(
-    (error: Nullable<Error>) => {
-      setErrorState(error)
-      setErrorProp?.(error)
-    },
-    [setErrorProp]
-  )
-
   useImperativeHandle(ref, () => ({ svgStr }))
 
+  useEffect(() => {
+    setErrorProp?.(error)
+  }, [error, setErrorProp])
+
   useLayoutEffect(() => {
-    const id = getMermaidId(diagram)
-    const cached = cachedRenders[id]
-
-    if (cached) {
-      setIsLoading(false)
-      setSvgStr(typeof cached === 'string' ? cached : null)
-      setError(cached instanceof Error ? cached : null)
-
-      return
-    }
+    if (cachedRenders[id]) return
 
     // need to keep track of this since we're dealing with async ops, helps avoid race condition
     let isMounted = true
-    const renderDiagram = async () => {
-      try {
-        setIsLoading(true)
-        setError(null)
-
-        const mermaid = (await import('mermaid')).default
-        const elkLayouts = (await import('@mermaid-js/layout-elk')).default
-
-        mermaid.initialize({
-          startOnLoad: false,
-          flowchart: { defaultRenderer: 'elk' },
-        })
-
-        try {
-          mermaid.registerLayoutLoaders(elkLayouts)
-        } catch (err) {
-          console.error('Failed to register ELK layout with mermaid:', err)
-        }
-        const { svg } = await mermaid.render(id, diagram)
-
-        if (!isMounted) return
-
-        cachedRenders[id] = svg
-        setSvgStr(svg)
-        setIsLoading(false)
-      } catch (caughtErr) {
-        if (!isMounted) return
-        const err =
-          caughtErr instanceof Error ? caughtErr : new Error(String(caughtErr))
-
-        console.error('Error parsing Mermaid (rendering plaintext):', err)
-        setError(err)
-        setIsLoading(false)
-        cachedRenders[id] = err
-      }
-    }
-
-    renderDiagram()
+    renderMermaid(id, diagram).then((result) => {
+      cachedRenders[id] = result
+      if (isMounted) setRendered({ id, result })
+    })
 
     return () => {
       isMounted = false
     }
-  }, [diagram, setError])
+  }, [id, diagram])
 
   if (error) return <div>Error: {error.message}</div>
 

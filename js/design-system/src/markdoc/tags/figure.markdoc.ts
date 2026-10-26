@@ -20,7 +20,7 @@ const makeBareImage = (node: RenderableTreeNode): RenderableTreeNode => {
 
 export const figure: BaseSchema = {
   render: Figure,
-  children: ['tab'],
+  children: ['paragraph', 'image'],
   attributes: {},
   transform(node, config) {
     const children = node

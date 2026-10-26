@@ -1,6 +1,6 @@
 module github.com/pluralsh/console/go/tools
 
-go 1.27.1
+go 1.27.2
 
 require (
 	github.com/99designs/gqlgen v0.17.91
@@ -12,7 +12,7 @@ require (
 	github.com/gqlgo/gqlgenc v0.38.2
 	github.com/onsi/ginkgo/v2 v2.32.0
 	github.com/pseudomuto/protoc-gen-doc v1.5.1
-	github.com/vektra/mockery/v2 v2.53.7
+	github.com/vektra/mockery/v2 v2.53.8
 	go.uber.org/mock v0.6.0
 	golang.org/x/tools v0.52.0
 	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.6.0

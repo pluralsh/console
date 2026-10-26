@@ -3,10 +3,10 @@ import {
   Delta,
   useWorkbenchJobDeltaSubscription,
   WorkbenchJobTinyFragment,
-  WorkbenchJobsDocument,
   WorkbenchJobsQuery,
 } from 'generated/graphql'
 import { useEffect, useLayoutEffect, useRef } from 'react'
+import { WorkbenchJobsDocument } from 'generated/graphql-documents'
 import { appendConnection } from 'utils/graphql'
 import { WORKBENCH_JOBS_PAGE_SIZE } from './workbenchJobsDisplay'
 import { RECENT_JOBS_FOR_WARNING } from './WorkbenchPromptModeSelector/WorkbenchBudgetSpendCapWarning'

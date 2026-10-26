@@ -6,9 +6,9 @@ import { useNavigate } from 'react-router-dom'
 import {
   ScmConnectionFragment,
   ScmType,
-  ScmWebhooksDocument,
   useCreateScmWebhookMutation,
 } from 'generated/graphql'
+import { ScmWebhooksDocument } from 'generated/graphql-documents'
 import { appendConnectionToEnd, updateCache } from 'utils/graphql'
 
 import { PR_SCM_WEBHOOKS_ABS_PATH } from 'routes/selfServiceRoutesConsts'
@@ -48,7 +48,8 @@ export function CreateScmConectionWebhookModalBase({
     },
   })
   const { owner } = formState
-  const allowSubmit = owner && connection?.id
+  const connectionId = connection?.id
+  const allowSubmit = owner && connectionId
   const onSubmit = useCallback(
     (e) => {
       e.preventDefault()
@@ -59,11 +60,11 @@ export function CreateScmConectionWebhookModalBase({
       }
       if (allowSubmit) {
         mutation({
-          variables: { connectionId: connection?.id, owner: owner.trim() },
+          variables: { connectionId, owner: owner.trim() },
         })
       }
     },
-    [allowSubmit, connection?.id, mutation, navigate, owner, success]
+    [allowSubmit, connectionId, mutation, navigate, owner, success]
   )
 
   return (

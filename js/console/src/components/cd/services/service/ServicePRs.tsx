@@ -4,7 +4,7 @@ import {
   ToolbarSearchInput,
 } from 'components/layout/PageToolbar'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
-import { usePullRequestsQuery } from 'generated/graphql'
+import { PullRequestsDocument } from 'generated/graphql-documents'
 import { ComponentProps, useState } from 'react'
 import { useParams } from 'react-router-dom'
 
@@ -44,7 +44,7 @@ export function ServicePRs() {
     fetchNextPage,
     setVirtualSlice,
   } = useFetchPaginatedData(
-    { queryHook: usePullRequestsQuery, keyPath: ['pullRequests'] },
+    { query: PullRequestsDocument, keyPath: ['pullRequests'] },
     { q: debouncedSearchString, serviceId }
   )
 

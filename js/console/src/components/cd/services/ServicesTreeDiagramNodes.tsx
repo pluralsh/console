@@ -29,9 +29,11 @@ import {
   ServiceDeploymentComponentFragment,
   ServiceDeploymentStatus,
   ServiceTreeNodeFragment,
-  useKickServiceMutation,
-  useSyncGlobalServiceMutation,
 } from '../../../generated/graphql'
+import {
+  SyncGlobalServiceDocument,
+  KickServiceDocument,
+} from '../../../generated/graphql-documents'
 import {
   getClusterDetailsPath,
   getGlobalServiceDetailsPath,
@@ -212,7 +214,7 @@ export function ServicesTreeDiagramServiceNode({
               <KickButton
                 icon
                 pulledAt={data.repository?.pulledAt}
-                kickMutationHook={useKickServiceMutation}
+                kickMutation={KickServiceDocument}
                 tooltipMessage="Use this to sync this service now instead of at the next poll interval"
                 variables={{ id: data.id }}
               />
@@ -579,7 +581,7 @@ export function ServicesTreeDiagramGlobalServiceNode({
         <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
           <KickButton
             icon
-            kickMutationHook={useSyncGlobalServiceMutation}
+            kickMutation={SyncGlobalServiceDocument}
             message="Resync"
             tooltipMessage="Sync this service now instead of at the next poll interval"
             variables={{ id: data.id }}

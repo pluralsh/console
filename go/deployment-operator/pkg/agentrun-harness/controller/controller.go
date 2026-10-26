@@ -106,6 +106,9 @@ func (in *agentRunController) prepare(ctx context.Context) error {
 	}
 
 	resumeFollowup := in.applyFollowupBootPrompt()
+	if err := in.requireFollowupBootPrompt(resumeFollowup); err != nil {
+		return err
+	}
 	if !resumeFollowup {
 		// Mark prompts present at boot as already consumed so only newly
 		// queued prompts are dispatched mid-run. Follow-up boot claims the

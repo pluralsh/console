@@ -7,10 +7,12 @@ import {
 import {
   IssueWebhookFragment,
   ObservabilityWebhookFragment,
-  useIssueWebhooksQuery,
-  useObservabilityWebhooksQuery,
   WorkbenchJobActivityType,
 } from 'generated/graphql'
+import {
+  IssueWebhooksDocument,
+  ObservabilityWebhooksDocument,
+} from 'generated/graphql-documents'
 import { useCallback, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { WEBHOOKS_SETTINGS_CREATE_ABS_PATH } from 'routes/settingsRoutesConst'
@@ -41,7 +43,7 @@ export function WebhooksList() {
     setVirtualSlice: setObservabilityVirtualSlice,
     refetch: refetchObservability,
   } = useFetchPaginatedData({
-    queryHook: useObservabilityWebhooksQuery,
+    query: ObservabilityWebhooksDocument,
     keyPath: ['observabilityWebhooks'],
     pageSize: WEBHOOKS_PAGE_SIZE,
     fetchPolicy: 'cache-and-network',
@@ -56,7 +58,7 @@ export function WebhooksList() {
     setVirtualSlice: setIssueVirtualSlice,
     refetch: refetchIssue,
   } = useFetchPaginatedData({
-    queryHook: useIssueWebhooksQuery,
+    query: IssueWebhooksDocument,
     keyPath: ['issueWebhooks'],
     pageSize: WEBHOOKS_PAGE_SIZE,
     fetchPolicy: 'cache-and-network',

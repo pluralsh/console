@@ -46,8 +46,6 @@ import {
   ReactNode,
   useCallback,
   useContext,
-  useEffect,
-  useEffectEvent,
   useLayoutEffect,
   useMemo,
   useState,
@@ -577,21 +575,9 @@ export function Workbench() {
   const { popToast } = useSimpleToast()
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [toolsEditOpen, setToolsEditOpen] = useState(false)
-  const [addedToolId, setAddedToolId] = useState<string | null>(null)
   const [searchParams, setSearchParams] = useSearchParams()
-
-  const consumeAddedToolParam = useEffectEvent((toolId: string) => {
-    setAddedToolId(toolId)
-    setToolsEditOpen(true)
-    const next = new URLSearchParams(searchParams)
-    next.delete(WORKBENCH_ADDED_TOOL_QUERY_PARAM)
-    setSearchParams(next, { replace: true })
-  })
-
-  useEffect(() => {
-    const toolId = searchParams.get(WORKBENCH_ADDED_TOOL_QUERY_PARAM)
-    if (toolId) consumeAddedToolParam(toolId)
-  }, [searchParams])
+  // set by the tool create page when returning here with a newly created tool
+  const addedToolId = searchParams.get(WORKBENCH_ADDED_TOOL_QUERY_PARAM)
 
   const { data, loading, error } = useWorkbenchQuery({
     variables: { id },
@@ -691,10 +677,13 @@ export function Workbench() {
       />
       <WorkbenchToolsEditModal
         workbench={workbench}
-        open={toolsEditOpen}
+        open={toolsEditOpen || !!addedToolId}
         onClose={() => {
           setToolsEditOpen(false)
-          setAddedToolId(null)
+          if (!addedToolId) return
+          const next = new URLSearchParams(searchParams)
+          next.delete(WORKBENCH_ADDED_TOOL_QUERY_PARAM)
+          setSearchParams(next, { replace: true })
         }}
         addedToolId={addedToolId}
       />

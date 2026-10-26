@@ -1,10 +1,7 @@
 import { removeConnection, updateCache } from 'utils/graphql'
 
-import {
-  ProjectFragment,
-  ProjectsDocument,
-  useDeleteProjectMutation,
-} from 'generated/graphql'
+import { ProjectFragment, useDeleteProjectMutation } from 'generated/graphql'
+import { ProjectsDocument } from 'generated/graphql-documents'
 import { Confirm } from '../../utils/Confirm'
 
 import { PROJECTS_QUERY_PAGE_SIZE } from './ProjectsList'

@@ -19,7 +19,7 @@ import {
   WorkbenchToolType,
 } from 'generated/graphql'
 import { capitalize, isEmpty } from 'lodash'
-import { useLayoutEffect, useMemo } from 'react'
+import { useEffect, useEffectEvent, useLayoutEffect, useMemo } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import {
   getWorkbenchAbsPath,
@@ -118,6 +118,11 @@ export function WorkbenchToolCreateOrEdit({
     getWorkbenchToolSetupGuideDocumentationUrl(type)
   const { isOpen, openSetupGuidePanel, closeSetupGuidePanel } =
     useWebhookSetupGuidePanel()
+
+  const onUnmount = useEffectEvent(() => {
+    if (isOpen) closeSetupGuidePanel()
+  })
+  useEffect(() => () => onUnmount(), [])
 
   useLayoutEffect(() => {
     if (isLoading) return

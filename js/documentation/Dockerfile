@@ -1,4 +1,4 @@
-FROM node:24.11.1-alpine AS base
+FROM node:26.12.0-alpine AS base
 
 WORKDIR /app
 
@@ -10,7 +10,9 @@ COPY js/documentation/package.json ./documentation/package.json
 
 # Focus skips the console app. The design system is focused too because Next
 # transpiles and type-checks its source, which needs its dev-only type deps.
-RUN corepack enable \
+# Node 25+ no longer bundles corepack
+RUN npm install -g corepack@0.36.0 \
+  && corepack enable \
   && YARN_ENABLE_IMMUTABLE_INSTALLS=true \
     yarn workspaces focus @pluralsh/documentation @pluralsh/design-system
 
@@ -26,7 +28,7 @@ ENV NEXT_PUBLIC_GA_ID=$NEXT_PUBLIC_GA_ID
 # Biome is the js-ci Lint job, so the image runs next build directly.
 RUN yarn workspace @pluralsh/documentation next build
 
-FROM node:24.11.1-alpine AS production
+FROM node:26.12.0-alpine AS production
 
 ENV NODE_ENV=production \
     PORT=3000 \

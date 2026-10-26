@@ -12,8 +12,10 @@ export function ServiceDeprecationsModal({
 }: {
   components: ServiceDeploymentComponentFragment[]
 } & ComponentProps<typeof Modal>) {
-  const deprecations =
-    useMemo(() => collectDeprecations(components), [components]) || []
+  const deprecations = useMemo(
+    () => collectDeprecations(components) || [],
+    [components]
+  )
 
   return (
     <Modal

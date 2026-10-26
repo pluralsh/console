@@ -5,7 +5,7 @@ import {
   Modal,
   PeopleIcon,
 } from '@pluralsh/design-system'
-import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import { FormEvent, useCallback, useMemo, useState } from 'react'
 
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import {
@@ -31,16 +31,21 @@ export function PermissionsModal({
   open: boolean
   onClose: Nullable<() => void>
 }) {
-  const [bindings, setBindings] = useState(generator.readBindings)
-
-  useEffect(() => setBindings(generator.readBindings), [generator.readBindings])
+  // only the user's edits are stored; untouched lists show the current bindings
+  const [editedBindings, setBindings] =
+    useState<typeof generator.readBindings>()
+  const bindings = editedBindings ?? generator.readBindings
+  const close = () => {
+    setBindings(undefined)
+    onClose?.()
+  }
 
   const uniqueBindings = useMemo(() => uniqWith(bindings, isEqual), [bindings])
 
   const [mutation, { loading, error }] =
     useUpsertComplianceReportGeneratorMutation({
       onCompleted: () => {
-        onClose?.()
+        close()
       },
     })
 
@@ -67,7 +72,7 @@ export function PermissionsModal({
   return (
     <Modal
       open={open}
-      onClose={onClose}
+      onClose={close}
       size={'large'}
       asForm
       formProps={{ onSubmit }}
@@ -82,7 +87,7 @@ export function PermissionsModal({
               type={'button'}
               secondary
               small
-              onClick={() => onClose?.()}
+              onClick={() => close()}
             >
               Cancel
             </Button>

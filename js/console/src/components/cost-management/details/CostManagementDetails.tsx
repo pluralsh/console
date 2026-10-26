@@ -13,10 +13,12 @@ import {
   ClusterUsageNamespacesQuery,
   ClusterUsageScalingRecommendationsQuery,
   ScalingRecommendationType,
-  useClusterUsageHistoryQuery,
-  useClusterUsageNamespacesQuery,
-  useClusterUsageScalingRecommendationsQuery,
 } from 'generated/graphql'
+import {
+  ClusterUsageHistoryDocument,
+  ClusterUsageNamespacesDocument,
+  ClusterUsageScalingRecommendationsDocument,
+} from 'generated/graphql-documents'
 import { useMemo, useState } from 'react'
 import { Outlet, useParams } from 'react-router-dom'
 import {
@@ -43,7 +45,9 @@ export type CMContextType = {
 }
 
 export function CostManagementDetails() {
-  const { id = '', ['*']: route } = useParams()
+  const params = useParams()
+  const { id = '' } = params
+  const route = params['*']
   const [toolbarSlot, setToolbarSlot] = useState<HTMLDivElement | null>(null)
   const [namespaceQ, setNamespaceQ] = useState<string>('')
   const throttledNamespaceQ = useThrottle(namespaceQ, 300)
@@ -55,7 +59,7 @@ export function CostManagementDetails() {
 
   const historyQuery = useFetchPaginatedData(
     {
-      queryHook: useClusterUsageHistoryQuery,
+      query: ClusterUsageHistoryDocument,
       pageSize: BIG_PAGE_SIZE,
       keyPath: ['clusterUsage', 'history'],
     },
@@ -64,7 +68,7 @@ export function CostManagementDetails() {
 
   const namespacesQuery = useFetchPaginatedData(
     {
-      queryHook: useClusterUsageNamespacesQuery,
+      query: ClusterUsageNamespacesDocument,
       pageSize: BIG_PAGE_SIZE,
       keyPath: ['clusterUsage', 'namespaces'],
     },
@@ -73,7 +77,7 @@ export function CostManagementDetails() {
 
   const recommendationsQuery = useFetchPaginatedData(
     {
-      queryHook: useClusterUsageScalingRecommendationsQuery,
+      query: ClusterUsageScalingRecommendationsDocument,
       pageSize: BIG_PAGE_SIZE,
       keyPath: ['clusterUsage', 'recommendations'],
     },

@@ -1,10 +1,8 @@
 import { Flex, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { CellContext, createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
-import {
-  ClusterAuditLog,
-  useKubernetesClusterAuditLogsQuery,
-} from '../../../generated/graphql.ts'
+import { ClusterAuditLog } from '../../../generated/graphql.ts'
+import { KubernetesClusterAuditLogsDocument } from '../../../generated/graphql-documents'
 import { GqlError } from '../../utils/Alert.tsx'
 import { DateTimeCol } from '../../utils/table/DateTimeCol.tsx'
 import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData.tsx'
@@ -53,7 +51,7 @@ export default function Audit() {
     useFetchPaginatedData(
       {
         skip: !cluster?.id,
-        queryHook: useKubernetesClusterAuditLogsQuery,
+        query: KubernetesClusterAuditLogsDocument,
         keyPath: ['auditLogs'],
         pollInterval: 30_000,
       },

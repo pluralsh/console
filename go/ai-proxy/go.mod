@@ -1,6 +1,6 @@
 module github.com/pluralsh/console/go/ai-proxy
 
-go 1.27.1
+go 1.27.2
 
 replace github.com/pluralsh/console/go/polly => ../polly
 

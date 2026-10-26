@@ -115,9 +115,7 @@ function NavEntryDoc({
   path,
   ...props
 }: { path: string } & Omit<ComponentProps<typeof TreeNavEntry>, 'active'>) {
-  const { usePathname, useNavigate } = useNavigationContext()
-  const navigate = useNavigate()
-  const currentPath = usePathname()
+  const { pathname: currentPath, navigate } = useNavigationContext()
 
   const [loadingSubPaths, setLoadingSubPaths] = useState(false)
   const [subPaths, setSubPaths] = useState<
@@ -182,9 +180,7 @@ function NavEntryDoc({
 }
 
 function TemplateInner() {
-  const { usePathname, useNavigate } = useNavigationContext()
-  const navigate = useNavigate()
-  const currentPath = usePathname()
+  const { pathname: currentPath, navigate } = useNavigationContext()
 
   return (
     <div style={{ maxWidth: 200 }}>

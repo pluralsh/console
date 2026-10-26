@@ -3,7 +3,7 @@
  * Nested properties are indented; no collapsible sections.
  */
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import isEmpty from 'lodash/isEmpty'
 import styled from 'styled-components'
@@ -139,13 +139,10 @@ export function ResponseSchemaView({
 }: {
   schemas: ResponseSchemaInfo[]
 }) {
-  const [selectedIndex, setSelectedIndex] = useState(0)
-
-  useEffect(() => {
-    setSelectedIndex((prev) =>
-      isEmpty(schemas) ? 0 : Math.min(prev, schemas.length - 1)
-    )
-  }, [schemas])
+  const [requestedIndex, setSelectedIndex] = useState(0)
+  const selectedIndex = isEmpty(schemas)
+    ? 0
+    : Math.min(requestedIndex, schemas.length - 1)
 
   if (isEmpty(schemas)) {
     return (

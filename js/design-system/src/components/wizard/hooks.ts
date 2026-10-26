@@ -1,4 +1,10 @@
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import {
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from 'react'
 import { isEmpty, isEqual } from 'lodash-es'
 
 import { type ContextProps, type StepConfig, WizardContext } from './context'
@@ -232,7 +238,12 @@ const useWizard = (
   const [active, setActive] = useState<number>(0)
   const [completed, setCompleted] = useState<boolean>(false)
 
-  useEffect(() => setSteps(initialSteps), [initialSteps])
+  const [prevInitialSteps, setPrevInitialSteps] = useState(initialSteps)
+
+  if (initialSteps !== prevInitialSteps) {
+    setPrevInitialSteps(initialSteps)
+    setSteps(initialSteps)
+  }
 
   return {
     steps,
@@ -245,32 +256,25 @@ const useWizard = (
   }
 }
 
-const useWindowSize = () => {
-  const [windowSize, setWindowSize] = useState({
-    width: 0,
-    height: 0,
-  })
+const subscribeToResize = (onChange: () => void) => {
+  window.addEventListener('resize', onChange)
 
-  const handleResize = useCallback(
-    () =>
-      setWindowSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      }),
-    []
+  return () => window.removeEventListener('resize', onChange)
+}
+
+const useWindowSize = () => {
+  const width = useSyncExternalStore(
+    subscribeToResize,
+    () => window.innerWidth,
+    () => 0
+  )
+  const height = useSyncExternalStore(
+    subscribeToResize,
+    () => window.innerHeight,
+    () => 0
   )
 
-  useEffect(() => {
-    window.addEventListener('resize', handleResize)
-
-    // Call handler right away so state gets updated with initial window size
-    handleResize()
-
-    // Remove event listener on cleanup
-    return () => window.removeEventListener('resize', handleResize)
-  }, [handleResize]) // Empty array ensures that effect is only run on mount
-
-  return windowSize
+  return { width, height }
 }
 
 export {

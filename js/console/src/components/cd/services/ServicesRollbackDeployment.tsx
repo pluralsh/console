@@ -88,11 +88,14 @@ export function ModalForm({
   refetch: Nullable<() => void>
 }) {
   const theme = useTheme()
-  const [revisionId, setRevisionId] = useState('')
+  const [selectedRevisionId, setRevisionId] = useState('')
 
   const { data, error } = useServiceDeploymentRevisionsQuery({
     variables: { id: serviceDeployment.id },
   })
+  // default to the current revision until the user picks one
+  const revisionId =
+    selectedRevisionId || data?.serviceDeployment?.revision?.id || ''
   const [mutation, { loading: mutationLoading, error: mutationError }] =
     useRollbackServiceMutation({
       variables: {
@@ -104,12 +107,6 @@ export function ModalForm({
         onClose?.()
       },
     })
-
-  useEffect(() => {
-    if (!revisionId && data?.serviceDeployment?.revision?.id) {
-      setRevisionId(data.serviceDeployment.revision?.id)
-    }
-  }, [data?.serviceDeployment?.revision?.id, revisionId])
 
   const disabled = !data || !serviceDeployment.id || !revisionId
   const onSubmit = useCallback(

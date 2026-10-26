@@ -1,4 +1,3 @@
-import { usePrevious } from '@pluralsh/design-system'
 import {
   AiDeltaFragment,
   AiRole,
@@ -7,7 +6,7 @@ import {
   useAiChatStreamSubscription,
 } from 'generated/graphql'
 import { produce } from 'immer'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
 // TODO, migrate chatbot to use this too
 export function useChatStreaming({
@@ -43,12 +42,14 @@ export function useChatStreaming({
   })
 
   // reset streaming when new messages are added
-  const prevLastMessageId = usePrevious(lastMessageId)
-  useEffect(() => {
-    if (!lastMessageId || lastMessageId === prevLastMessageId) return
-    setStreaming(false)
-    setStreamedMessages([])
-  }, [lastMessageId, prevLastMessageId])
+  const [prevLastMessageId, setPrevLastMessageId] = useState(lastMessageId)
+  if (lastMessageId !== prevLastMessageId) {
+    setPrevLastMessageId(lastMessageId)
+    if (lastMessageId) {
+      setStreaming(false)
+      setStreamedMessages([])
+    }
+  }
 
   const streamedContent = useMemo(
     () =>

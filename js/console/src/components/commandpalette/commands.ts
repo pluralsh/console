@@ -40,9 +40,9 @@ import { FLOWS_ABS_PATH } from 'routes/flowRoutesConsts.tsx'
 import {
   ChatThreadTinyFragment,
   PageInfoFragment,
-  useChatThreadsQuery,
   useClustersTinyQuery,
 } from '../../generated/graphql'
+import { ChatThreadsDocument } from '../../generated/graphql-documents'
 import { AI_ABS_PATH } from '../../routes/aiRoutesConsts'
 import {
   CD_ABS_PATH,
@@ -231,7 +231,7 @@ export function useCommands({
             id: 'stacks',
             label: 'Stacks',
             icon: StackIcon,
-            callback: () => navigate(STACKS_ROOT_PATH),
+            callback: () => navigate(`/${STACKS_ROOT_PATH}`),
             deps: [navigate],
             hotkeys: ['shift S'],
           },
@@ -247,7 +247,7 @@ export function useCommands({
             id: 'kubernetes-dashboard',
             label: 'Kubernetes Dashboard',
             icon: KubernetesAltIcon,
-            callback: () => navigate(KUBERNETES_ROOT_PATH),
+            callback: () => navigate(`/${KUBERNETES_ROOT_PATH}`),
             deps: [navigate],
             hotkeys: ['shift K'],
           },
@@ -471,7 +471,7 @@ export function useHistory({
   const { loading, data, fetchNextPage, pageInfo } = useFetchPaginatedData(
     {
       pollInterval: 60_000,
-      queryHook: useChatThreadsQuery,
+      query: ChatThreadsDocument,
       keyPath: ['chatThreads'],
       pageSize: 50,
       skip,

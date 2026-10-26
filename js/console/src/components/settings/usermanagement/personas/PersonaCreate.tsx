@@ -15,9 +15,9 @@ import {
 import {
   BindingAttributes,
   PersonaConfigurationAttributes,
-  PersonasDocument,
   useCreatePersonaMutation,
 } from 'generated/graphql'
+import { PersonasDocument } from 'generated/graphql-documents'
 import { RequiredDeep } from 'type-fest'
 import SubscriptionContext from 'components/contexts/SubscriptionContext'
 import BillingFeatureBlockModal from 'components/billing/BillingFeatureBlockModal'

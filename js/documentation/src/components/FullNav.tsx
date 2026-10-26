@@ -103,13 +103,14 @@ export function FullNav({
   const thisPath = getBarePathFromPath(router.asPath)
   const previousPath = usePrevious(thisPath)
 
+  const [menuPath, setMenuPath] = useState(thisPath)
+  if (thisPath !== menuPath) {
+    setMenuPath(thisPath)
+    setMenuId('docs')
+  }
+
   useEffect(() => {
-    if (previousPath && thisPath !== previousPath) {
-      if (setIsOpen) {
-        setIsOpen(false)
-      }
-      setMenuId('docs')
-    }
+    if (previousPath && thisPath !== previousPath) setIsOpen?.(false)
   }, [thisPath, previousPath, setIsOpen])
 
   const showNavButton = !desktop

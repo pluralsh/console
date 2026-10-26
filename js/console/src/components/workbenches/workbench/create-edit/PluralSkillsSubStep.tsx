@@ -183,24 +183,27 @@ export function PluralSkillsSubStep({
       return null
     }
 
-    try {
+    // returns an error message, or null on success
+    const persist = async (): Promise<string | null> => {
       const existingId = editingSkill?.id
       if (existingId) {
         await updateSkill({
           variables: { id: existingId, attributes: normalizedDraft },
         })
         saveToForm({ ...normalizedDraft, id: existingId })
-      } else {
-        const result = await createSkill({
-          variables: { workbenchId, attributes: normalizedDraft },
-        })
-        const id = result.data?.createWorkbenchSkill?.id
-        if (!id) return 'The skill was not created.'
-        saveToForm({ ...normalizedDraft, id })
+        return null
       }
-    } catch (error) {
-      return toErrorMessage(error)
+      const result = await createSkill({
+        variables: { workbenchId, attributes: normalizedDraft },
+      })
+      const id = result.data?.createWorkbenchSkill?.id
+      if (!id) return 'The skill was not created.'
+      saveToForm({ ...normalizedDraft, id })
+      return null
     }
+
+    const persistError = await persist().catch(toErrorMessage)
+    if (persistError) return persistError
     setEditingName(null)
     return null
   }
@@ -398,9 +401,16 @@ function PluralSkillForm({
     [draft.subagents]
   )
 
-  useEffect(() => {
+  const [prevDraft, setPrevDraft] = useState(draft)
+  if (
+    draft.contents !== prevDraft.contents ||
+    draft.description !== prevDraft.description ||
+    draft.name !== prevDraft.name ||
+    draft.subagents !== prevDraft.subagents
+  ) {
+    setPrevDraft(draft)
     setSaveError(null)
-  }, [draft.contents, draft.description, draft.name, draft.subagents])
+  }
 
   useEffect(() => {
     setFooterActions(

@@ -4,9 +4,6 @@ import {
   type ReactNode,
   type Ref,
   Suspense,
-  useEffect,
-  useMemo,
-  useState,
 } from 'react'
 
 import {
@@ -22,6 +19,8 @@ import { useRouter } from 'next/router'
 
 import { until } from '@open-draft/until'
 import { SSRProvider } from '@react-aria/ssr'
+
+import { useIsClient } from '@src/hooks/useIsClient'
 import '@src/highlight'
 import '@src/styles/globals.css'
 
@@ -133,6 +132,8 @@ const Link = ({
   />
 )
 
+const NAV_DATA = getNavData()
+
 const routeIndex: Record<string, { relPath: string | null }> = routes
 
 function relativeLinkBase(pathname: string) {
@@ -149,13 +150,7 @@ function relativeLinkBase(pathname: string) {
 function App({ Component, pageProps = {}, swrConfig }: MyAppProps) {
   const router = useRouter()
   const markdoc = pageProps?.markdoc
-  const [isClient, setIsClient] = useState(false)
-  const [navData, setNavData] = useState(() => getNavData())
-
-  useEffect(() => {
-    setIsClient(true)
-    setNavData(getNavData())
-  }, [])
+  const isClient = useIsClient()
 
   const { metaTitle, metaDescription } = pageProps
 
@@ -240,17 +235,21 @@ function App({ Component, pageProps = {}, swrConfig }: MyAppProps) {
     </>
   )
 
-  const navContextVal = useMemo<NavigationContextValue>(
-    () => ({ useNavigate, usePathname, Link, relativeLinkBase }),
-    []
-  )
+  const navigate = useNavigate()
+  const pathname = usePathname()
+  const navContextVal: NavigationContextValue = {
+    navigate,
+    pathname,
+    Link,
+    relativeLinkBase,
+  }
 
   return (
     <SSRProvider>
       <MarkdocContextProvider value={{ variant: 'docs' }}>
         <NavigationContextProvider value={navContextVal}>
           <SWRConfig value={swrConfig}>
-            <NavDataProvider value={navData}>
+            <NavDataProvider value={NAV_DATA}>
               <RestNavProvider>
                 <BreakpointProvider>
                   <ColorModeProvider>

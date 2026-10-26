@@ -21,28 +21,21 @@ function Link({
   )
 }
 
-function usePathname() {
-  const loc = useLocation()
-
-  return loc.pathname
-}
-
 export default function ConsoleNavContextProvider({
   children,
 }: {
   children: ReactNode
 }) {
+  const { pathname } = useLocation()
+  const navigate = useNavigate()
+
   return (
     <NavigationContextProvider
       value={{
         Link: Link as any,
-        usePathname,
-        useNavigate: () => {
-          const navigate = useNavigate()
-
-          return (loc) => {
-            navigate(loc ?? '')
-          }
+        pathname,
+        navigate: (loc) => {
+          navigate(loc ?? '')
         },
       }}
     >

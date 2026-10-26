@@ -15,9 +15,10 @@ import { useThrottle } from 'components/hooks/useThrottle'
 
 import { FillLevelDiv } from 'components/utils/FillLevelDiv'
 import { ClusterProviderIcon } from 'components/utils/Provider'
-import { ClusterTinyFragment, useClusterSelectorQuery } from 'generated/graphql'
+import { ClusterTinyFragment } from 'generated/graphql'
+import { ClusterSelectorDocument } from 'generated/graphql-documents'
 import isEmpty from 'lodash/isEmpty'
-import { ComponentPropsWithRef, useCallback, useMemo, useState } from 'react'
+import { ComponentPropsWithRef, useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
 
 import { useProjectId } from '../../contexts/ProjectsContext'
@@ -55,7 +56,7 @@ export default function ClusterSelector({
 
   const { data, loading, pageInfo, fetchNextPage } = useFetchPaginatedData(
     {
-      queryHook: useClusterSelectorQuery,
+      query: ClusterSelectorDocument,
       keyPath: ['clusters'],
       errorPolicy: 'ignore',
     },
@@ -75,24 +76,14 @@ export default function ClusterSelector({
     [data?.cluster, data?.clusters?.edges]
   )
 
-  const findCluster = useCallback(
-    (clusterId: Nullable<string>) => {
-      if (!clusterId) {
-        return null
-      }
-      if (data?.cluster && data?.cluster.id === clusterId) {
-        return data.cluster
-      }
+  const findCluster = (clusterId: Nullable<string>) => {
+    if (!clusterId) return null
+    if (data?.cluster?.id === clusterId) return data.cluster
 
-      return clusters?.find((cluster) => cluster?.id === clusterId)
-    },
-    [clusters, data?.cluster]
-  )
+    return clusters?.find((cluster) => cluster?.id === clusterId)
+  }
 
-  const selectedCluster = useMemo(
-    () => findCluster(clusterId),
-    [clusterId, findCluster]
-  )
+  const selectedCluster = findCluster(clusterId)
 
   return (
     <FillLevelDiv fillLevel={fillLevel}>

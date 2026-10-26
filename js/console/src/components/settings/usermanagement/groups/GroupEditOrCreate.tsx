@@ -86,7 +86,8 @@ export function GroupEditOrCreate({
 
   const addMember = (user: UserFragment) =>
     isCreating
-      ? setNewGroupUsers([...newGroupUsers, user])
+      ? !newGroupUsers.some((u) => u.id === user.id) &&
+        setNewGroupUsers([...newGroupUsers, user])
       : addUserToExistingGroup({
           variables: { groupId: group.id, userId: user.id },
         })

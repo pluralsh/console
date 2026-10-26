@@ -21,7 +21,6 @@ export default function OutputValue({
   secret,
 }: OutputValueProps): ReactNode {
   const [hidden, setHidden] = useState(secret)
-  const [object, setObject] = useState()
   const displayValue = useMemo(
     () =>
       hidden
@@ -29,13 +28,11 @@ export default function OutputValue({
         : value,
     [hidden, value]
   )
-  const isObject = useMemo(() => {
+  const { isObject, object } = useMemo(() => {
     try {
-      setObject(JSON.parse(value))
-
-      return true
+      return { isObject: true, object: JSON.parse(value) }
     } catch {
-      return false
+      return { isObject: false, object: undefined }
     }
   }, [value])
 

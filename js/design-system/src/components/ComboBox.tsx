@@ -13,6 +13,7 @@ import {
   type RefObject,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -223,7 +224,7 @@ function ComboBox({
   onFocusChange,
   onOpenChange,
   onInputChange,
-  isOpen,
+  isOpen: isOpenProp,
   dropdownHeader,
   dropdownFooter,
   dropdownHeaderFixed,
@@ -237,7 +238,7 @@ function ComboBox({
   placement,
   width,
   maxHeight,
-  inputProps: outerInputProps = {},
+  inputProps: inputPropsProp = {},
   loading,
   suffix,
   prefix,
@@ -258,9 +259,8 @@ function ComboBox({
   // the dropdown
   const focusIsSyntheticRef = useRef(false)
 
-  if (typeof isOpen !== 'boolean') {
-    isOpen = isOpenUncontrolled
-  }
+  const isOpen =
+    typeof isOpenProp === 'boolean' ? isOpenProp : isOpenUncontrolled
 
   const wrappedOnOpenChange: NonNullable<typeof onOpenChange> = useCallback(
     (nextIsOpen, menuTrigger) => {
@@ -343,7 +343,9 @@ function ComboBox({
     ...comboStateProps,
   })
 
-  setNextFocusedKey({ nextFocusedKeyRef, state, stateRef })
+  useLayoutEffect(() => {
+    setNextFocusedKey({ nextFocusedKeyRef, state, stateRef })
+  })
 
   useEffect(() => {
     if (isOpen !== state.isOpen) {
@@ -460,7 +462,7 @@ function ComboBox({
     }
   }, [])
 
-  outerInputProps = useMemo(
+  const outerInputProps = useMemo(
     () => ({
       inputContent: (
         <>
@@ -505,9 +507,9 @@ function ComboBox({
             },
           }
         : {}),
-      ...outerInputProps,
-      ...(outerInputProps.ref
-        ? { ref: mergeRefs([outerInputProps.ref, triggerRef]) }
+      ...inputPropsProp,
+      ...(inputPropsProp.ref
+        ? { ref: mergeRefs([inputPropsProp.ref, triggerRef]) }
         : { ref: triggerRef }),
     }),
     [
@@ -516,7 +518,7 @@ function ComboBox({
       inputContent,
       onDeleteChip,
       onDeleteChipProp,
-      outerInputProps,
+      inputPropsProp,
       triggerRef,
     ]
   )
