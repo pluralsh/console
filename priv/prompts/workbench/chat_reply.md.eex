@@ -1,3 +1,8 @@
 <%= @msg.text %>
 
-(This was a message in <%= @chat.type %>.  Be sure to react to this in <%= @chat.type %> to indicate you've seen it.  Message details are id=<%= @msg.id %>, channel=<%= @channel.text %>,channel_id=id=<%= @channel.id %>)
+(This was a message in <%= @chat.type %>.  <%= cond do %>
+<% @chat.type == :teams -> %>
+Respond in the conversation using the `teams_reply` tool.  You do not need channel or message ids.  Microsoft Teams does not support bot-set emoji reactions, so do not attempt to react to messages.
+<% true -> %>
+Be sure to react to this in <%= @chat.type %> to indicate you've seen it.
+<% end %>  Message details are id=<%= @msg.id %>, channel=<%= @channel.text %>,channel_id=id=<%= @channel.id %>)
