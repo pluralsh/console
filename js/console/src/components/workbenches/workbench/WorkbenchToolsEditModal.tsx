@@ -1,4 +1,5 @@
 import {
+  AddIcon,
   Button,
   Card,
   Chip,
@@ -6,6 +7,7 @@ import {
   Flex,
   FormField,
   IconFrame,
+  ListBoxFooterPlus,
   ListBoxItem,
   Modal,
   Select,
@@ -19,6 +21,8 @@ import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedD
 import { useUpdateWorkbenchMutation, WorkbenchQuery } from 'generated/graphql'
 import { WorkbenchToolsDocument } from 'generated/graphql-documents'
 import { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { getWorkbenchToolsAddAbsPath } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
@@ -53,14 +57,17 @@ export function WorkbenchToolsEditModal({
   workbench,
   open,
   onClose,
+  addedToolId,
 }: {
   workbench: Nullable<WorkbenchQuery['workbench']>
   open: boolean
   onClose: () => void
+  addedToolId?: Nullable<string>
 }) {
   // the user's selection, or null to show the workbench's current tools
   const [editedToolIds, setSelectedToolIds] = useState<string[] | null>(null)
   const { popToast } = useSimpleToast()
+  const navigate = useNavigate()
 
   const {
     data: toolsData,
@@ -81,7 +88,12 @@ export function WorkbenchToolsEditModal({
     () => (workbench?.tools ?? []).filter(isNonNullable).map((tool) => tool.id),
     [workbench?.tools]
   )
-  const selectedToolIds = editedToolIds ?? associatedToolIds
+  // a tool just created from this workbench starts out selected
+  const defaultToolIds =
+    addedToolId && !associatedToolIds.includes(addedToolId)
+      ? [...associatedToolIds, addedToolId]
+      : associatedToolIds
+  const selectedToolIds = editedToolIds ?? defaultToolIds
   const close = () => {
     setSelectedToolIds(null)
     onClose()
@@ -211,6 +223,22 @@ export function WorkbenchToolsEditModal({
                 setSelectedToolIds(Array.from(keys).map(String))
               }
               isDisabled={toolsLoading}
+              dropdownFooterFixed={
+                <ListBoxFooterPlus
+                  leftContent={
+                    <AddIcon
+                      size={16}
+                      color="text-primary-accent"
+                    />
+                  }
+                  onClick={() => {
+                    close()
+                    navigate(getWorkbenchToolsAddAbsPath(workbench?.id))
+                  }}
+                >
+                  Create tool
+                </ListBoxFooterPlus>
+              }
             >
               {configuredTools.map((tool) => (
                 <ListBoxItem

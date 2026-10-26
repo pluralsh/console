@@ -10,7 +10,7 @@ stringData:
 apiVersion: telemetry.plural.sh/v1alpha1
 kind: NamespaceAuthentication
 metadata:
-  name: metrics-authz
+  name: plrl-{{ .Values.cloud.instanceName }}-metrics-authz
   namespace: telemetry-system
 spec:
   dataStoreRef:
@@ -26,7 +26,7 @@ spec:
 apiVersion: telemetry.plural.sh/v1alpha1
 kind: NamespaceAuthentication
 metadata:
-  name: logs-authz
+  name: plrl-{{ .Values.cloud.instanceName }}-logs-authz
   namespace: telemetry-system
 spec:
   dataStoreRef:
@@ -42,7 +42,7 @@ spec:
 apiVersion: telemetry.plural.sh/v1alpha1
 kind: NamespaceAuthentication
 metadata:
-  name: traces-authz
+  name: plrl-{{ .Values.cloud.instanceName }}-traces-authz
   namespace: telemetry-system
 spec:
   dataStoreRef:

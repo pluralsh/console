@@ -17,6 +17,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import {
   CLOUD_CONNECTION_SELECTED_QUERY_PARAM,
   WORKBENCHES_TOOLS_CREATE_CLOUD_CONNECTION_ABS_PATH,
+  withReturnWorkbenchParam,
 } from 'routes/workbenchesRoutesConsts'
 import { mapExistingNodes } from 'utils/graphql'
 import { getWorkbenchToolLabel, PROVIDER_TO_ICON } from '../workbenchToolsUtils'
@@ -71,7 +72,7 @@ export function CloudConnectionSelectField({
           as={Link}
           to={{
             pathname: WORKBENCHES_TOOLS_CREATE_CLOUD_CONNECTION_ABS_PATH,
-            search: `?provider=${provider}`,
+            search: `?${withReturnWorkbenchParam(new URLSearchParams({ provider }), searchParams)}`,
           }}
         >
           Create new {getWorkbenchToolLabel(WorkbenchToolType.Cloud, provider)}{' '}

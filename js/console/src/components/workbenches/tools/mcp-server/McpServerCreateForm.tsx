@@ -32,12 +32,13 @@ import {
   WorkbenchToolType,
 } from 'generated/graphql'
 import { useEffect, useEffectEvent, useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import styled from 'styled-components'
 import { deepOmitBlank } from 'utils/graphql'
 import {
   MCP_SERVER_SELECTED_QUERY_PARAM,
   WORKBENCHES_TOOLS_CREATE_ABS_PATH,
+  withReturnWorkbenchParam,
 } from 'routes/workbenchesRoutesConsts'
 import { WORKBENCHES_TOOLS_TYPE_PARAM } from '../WorkbenchToolCreateOrEdit'
 import { useWebhookSetupGuidePanel } from '../../workbench/webhooks/WebhookSetupGuidePanel'
@@ -104,6 +105,7 @@ export function McpServerCreateForm({
   showSetupGuideButton?: boolean
 }) {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { popToast } = useSimpleToast()
   const { isOpen, openSetupGuidePanel, closeSetupGuidePanel } =
     useWebhookSetupGuidePanel()
@@ -116,10 +118,13 @@ export function McpServerCreateForm({
 
   const returnParams = useMemo(
     () =>
-      new URLSearchParams({
-        [WORKBENCHES_TOOLS_TYPE_PARAM]: WorkbenchToolType.Mcp,
-      }),
-    []
+      withReturnWorkbenchParam(
+        new URLSearchParams({
+          [WORKBENCHES_TOOLS_TYPE_PARAM]: WorkbenchToolType.Mcp,
+        }),
+        searchParams
+      ),
+    [searchParams]
   )
   const resolvedBackPath =
     backPath ?? `${WORKBENCHES_TOOLS_CREATE_ABS_PATH}?${returnParams}`

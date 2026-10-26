@@ -4231,7 +4231,7 @@ type GlobalServiceAttributes struct {
 	// additional context used to template service metadata during global service reconciliation
 	Context *TemplateContextAttributes `json:"context,omitempty"`
 	// the id of the clusters to ignore
-	IgnoreClusters []*string `json:"ignoreClusters,omitempty"`
+	IgnoreClusters *[]*string `json:"ignoreClusters,omitempty"`
 }
 
 type GlobalServiceConnection struct {

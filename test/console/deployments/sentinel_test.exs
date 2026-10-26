@@ -4,6 +4,18 @@ defmodule Console.Deployments.SentinelTest do
   alias Console.Deployments.Sentinels
   alias Console.Schema.SentinelRunJob
 
+  @run_event ~w(console sentinel run)a
+  @job_event ~w(console sentinel run job)a
+
+  setup do
+    pid = self()
+    handler = "sentinel-test-#{inspect(make_ref())}"
+    :telemetry.attach_many(handler, [@run_event, @job_event], fn event, measurements, meta, _ ->
+      send(pid, {:telemetry, event, measurements, meta})
+    end, nil)
+    on_exit(fn -> :telemetry.detach(handler) end)
+  end
+
   describe "create_sentinel/2" do
     test "project writers can create a sentinel" do
       user = insert(:user)
@@ -100,6 +112,9 @@ defmodule Console.Deployments.SentinelTest do
 
       assert refetch(sentinel).last_run_at
       assert_receive {:event, %PubSub.SentinelRunCreated{item: ^run}}
+
+      run_id = run.id
+      assert_receive {:telemetry, @run_event, %{count: 1}, %{status: :pending, sentinel_run_id: ^run_id}}
     end
 
     test "project readers can run a sentinel" do
@@ -210,6 +225,15 @@ defmodule Console.Deployments.SentinelTest do
 
       assert MapSet.new(received_ids)
              |> MapSet.equal?(job_ids)
+
+      run_id = run.id
+      handles = for _ <- 1..3 do
+        assert_receive {:telemetry, @job_event, %{count: 1}, %{status: :pending, sentinel_run_id: ^run_id, cluster: handle}}
+        handle
+      end
+
+      assert MapSet.new(handles)
+             |> MapSet.equal?(MapSet.new(clusters, & &1.handle))
     end
   end
 
@@ -225,7 +249,20 @@ defmodule Console.Deployments.SentinelTest do
 
       assert_receive {:event, %PubSub.SentinelRunJobUpdated{item: ^updated}}
 
+      {run_id, handle} = {job.sentinel_run_id, cluster.handle}
+      assert_receive {:telemetry, @job_event, %{count: 1}, %{status: :success, sentinel_run_id: ^run_id, cluster: ^handle}}
+
       {:error, _} = Sentinels.update_sentinel_job(%{status: :success}, job.id, insert(:cluster))
+    end
+
+    test "it only counts run jobs whose status changed" do
+      cluster = insert(:cluster)
+      job = insert(:sentinel_run_job, cluster: cluster, status: :running)
+
+      {:ok, _} = Sentinels.update_sentinel_job(%{output: "some logs"}, job.id, cluster)
+
+      run_id = job.sentinel_run_id
+      refute_receive {:telemetry, @job_event, _, %{sentinel_run_id: ^run_id}}
     end
   end
 
@@ -241,6 +278,10 @@ defmodule Console.Deployments.SentinelTest do
 
       assert_receive {:event, %PubSub.SentinelRunUpdated{item: updated}}
       assert updated.id == run.id
+
+      {run_id, fine_id} = {run.id, fine.id}
+      assert_receive {:telemetry, @run_event, %{count: 1}, %{status: :failed, sentinel_run_id: ^run_id}}
+      refute_receive {:telemetry, @run_event, _, %{sentinel_run_id: ^fine_id}}
     end
   end
 end

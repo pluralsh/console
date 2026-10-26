@@ -17,7 +17,7 @@ defmodule Console.Deployments.Sentinel.Runner do
   use Console.Services.Base
   alias Console.Repo
   alias Console.Schema.{Sentinel, SentinelRun, GitRepository}
-  alias Console.Deployments.{Git.Discovery, Tar}
+  alias Console.Deployments.{Git.Discovery, Tar, Sentinels}
   alias Console.Deployments.Sentinel.Impl
   require Logger
 
@@ -122,6 +122,7 @@ defmodule Console.Deployments.Sentinel.Runner do
       |> Repo.update()
     end)
     |> execute(extract: :run)
+    |> Sentinels.record_status(run)
     |> notify(:update, source_pid)
   end
 
