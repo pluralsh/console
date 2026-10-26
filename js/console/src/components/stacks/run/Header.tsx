@@ -12,8 +12,6 @@ import {
   ServiceErrorsModal,
 } from 'components/cd/services/ServicesTableErrors'
 import { InsightsTabLabel } from 'components/utils/AiInsights'
-import { useSimpleToast } from 'components/utils/SimpleToastContext'
-
 import { isEmpty } from 'lodash'
 import { ReactNode, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -180,17 +178,9 @@ export function StackRunHeaderButtons({
   const { stackId } = useParams()
   const [serviceErrorsOpen, setServiceErrorsOpen] = useState(false)
 
-  const { popToast } = useSimpleToast()
-
   const [mutation, { loading, error }] = useApproveStackRunMutation({
     variables: { id: stackRun.id },
-    onCompleted: () => {
-      popToast({
-        content: 'Stack run approved, it will start shortly',
-        severity: 'success',
-      })
-      refetch?.()
-    },
+    onCompleted: () => refetch?.(),
   })
 
   const [restart, { loading: restartLoading, error: restartError }] =

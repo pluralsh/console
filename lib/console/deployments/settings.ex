@@ -81,6 +81,10 @@ defmodule Console.Deployments.Settings do
   def fetch() do
     case Process.get(@memo_key) do
       {:ok, settings} -> settings
+      :pending ->
+        settings = fetch_shared()
+        Process.put(@memo_key, {:ok, settings})
+        settings
       _ -> fetch_shared()
     end
   end
@@ -89,21 +93,22 @@ defmodule Console.Deployments.Settings do
   defp fetch_shared(), do: fetch_consistent()
 
   @doc """
-  Runs `fun` with `fetch/0` pinned to a single lookup of the shared cache, which can be a cross-node call.
+  Runs `fun` with `fetch/0` pinned to at most one lookup of the shared cache, which can be a cross-node
+  call.  The lookup is lazy, so `fun` pays nothing unless something in it actually reads the settings.
   Meant for hot loops evaluating many policies at once, like fanning a subscription event out to every
   subscriber.  The pin only lasts for `fun`, so never wrap writes to the settings in it.
   """
   @spec memoize((-> result)) :: result when result: term
   def memoize(fun) when is_function(fun, 0) do
     case Process.get(@memo_key) do
-      {:ok, _} -> fun.()
-      _ ->
-        Process.put(@memo_key, {:ok, fetch_shared()})
+      nil ->
+        Process.put(@memo_key, :pending)
         try do
           fun.()
         after
           Process.delete(@memo_key)
         end
+      _ -> fun.()
     end
   end
 

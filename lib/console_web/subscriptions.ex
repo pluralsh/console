@@ -10,7 +10,8 @@ defmodule ConsoleWeb.Subscriptions do
   alias Console.Deployments.Settings
 
   def run_docset(pubsub, docs_and_topics, mutation_result) do
-    # every subscriber's policy check can fall back to the global settings, so look them up once per event
+    # policy-checked subscriptions can fall back to the global settings for every subscriber, so they're
+    # looked up at most once per event, and only if a policy check needs them
     Settings.memoize(fn ->
       for {topic, _key_strategy, doc} <- docs_and_topics do
         try do

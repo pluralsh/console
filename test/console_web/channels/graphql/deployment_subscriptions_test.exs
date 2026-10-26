@@ -249,6 +249,38 @@ defmodule ConsoleWeb.GraphQl.DeploymentsSubscriptionTest do
     end
   end
 
+  describe "subscriptions without delivery policies" do
+    test "they are delivered without looking up deployment settings" do
+      user  = insert(:user)
+      stack = insert(:stack, read_bindings: [%{user_id: user.id}])
+      step  = insert(:run_step, run: insert(:stack_run, stack: stack))
+      logs  = insert(:run_log, step: step)
+      deployment_settings()
+
+      {:ok, socket} = establish_socket(user)
+      ref = push_doc(socket, """
+        subscription Logs($stepId: ID!) {
+          runLogsDelta(stepId: $stepId) { delta payload { id } }
+        }
+      """, variables: %{"stepId" => step.id})
+      assert_reply(ref, :ok, %{subscriptionId: sub})
+
+      handler = "unpolicied-delta-queries-#{inspect(self())}"
+      :telemetry.attach(handler, [:console, :repo, :query], &__MODULE__.forward_query/4, self())
+      on_exit(fn -> :telemetry.detach(handler) end)
+
+      Absinthe.Subscription.publish(
+        ConsoleWeb.Endpoint,
+        %{payload: logs, delta: :create},
+        run_logs_delta: "steps:#{step.id}"
+      )
+      :telemetry.detach(handler)
+
+      refute_received {:repo_query, _}
+      assert_push("subscription:data", %{subscriptionId: ^sub})
+    end
+  end
+
   def forward_query(_event, _measurements, %{query: query}, pid) do
     if self() == pid, do: send(pid, {:repo_query, query})
   end

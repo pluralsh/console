@@ -141,6 +141,7 @@ function StackPrsExpandedRow({
 function ResyncStackPr({ id }: { id: string }) {
   const [mutation, { loading, error }] = useKickStackPullRequestMutation({
     variables: { id },
+    refetchQueries: ['StackRuns'],
   })
 
   return (
