@@ -829,6 +829,7 @@ defmodule Console.Deployments.AgentsTest do
       requeued = refetch(run)
       assert requeued.status == :pending
       assert requeued.followup
+      assert requeued.prompt == "continue from here"
       assert is_nil(requeued.error)
       assert is_nil(requeued.approved_at)
       assert is_nil(requeued.pod_reference)
@@ -984,6 +985,25 @@ defmodule Console.Deployments.AgentsTest do
       assert is_nil(upload.session)
       assert is_nil(upload.screen_recording)
       assert is_nil(upload.patch)
+    end
+
+    test "nil attachment fields do not clear existing uploads" do
+      cluster = insert(:cluster)
+      runtime = insert(:agent_runtime, cluster: cluster)
+      run = insert(:agent_run, runtime: runtime)
+      existing = insert(:agent_run_upload, agent_run: run)
+
+      stub(Console, :conf, fn :object_store -> true end)
+
+      {:ok, upload} = Agents.agent_run_uploads(%{
+        session: nil,
+        screen_recording: nil,
+        patch: nil
+      }, run.id, cluster)
+
+      assert upload.id == existing.id
+      assert upload.patch.file_name == existing.patch.file_name
+      assert upload.session.file_name == existing.session.file_name
     end
 
     test "clusters cannot create uploads for other's agent runs" do

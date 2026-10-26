@@ -89,6 +89,14 @@ func (in *DefaultTool) systemPromptInput() *SystemPromptTemplateInput {
 		branch = *in.Config.Run.Branch
 	}
 
+	// On session-restored follow-ups the archive already carries prior history;
+	// omit "Original task" so the system prompt does not restate (and possibly
+	// re-prioritize) the previous objective over the new user turn.
+	prompt := in.Config.Run.Prompt
+	if in.Config.ResumeFollowup {
+		prompt = ""
+	}
+
 	return &SystemPromptTemplateInput{
 		Mode:                 in.Config.Run.Mode,
 		ReviewDepth:          in.Config.Run.ReviewDepth,
@@ -97,7 +105,7 @@ func (in *DefaultTool) systemPromptInput() *SystemPromptTemplateInput {
 		MemoryEnabled:        in.Config.Run.MemoryEnabled,
 		WorkDir:              in.Config.WorkDir,
 		RepositoryDir:        in.Config.RepositoryDir,
-		Prompt:               in.Config.Run.Prompt,
+		Prompt:               prompt,
 		Branch:               branch,
 		PRURL:                in.Config.Run.PRURL,
 		Followup:             in.Config.Run.Followup,

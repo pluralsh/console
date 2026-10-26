@@ -494,6 +494,18 @@ func TestCloneRepositoryChecksOutFollowupHeadBranch(t *testing.T) {
 	if got := strings.TrimSpace(string(current)); got != headBranch {
 		t.Fatalf("branch = %q, want %s", got, headBranch)
 	}
+
+	wantMergeBase, err := exec.Command("git", "-C", dest, "merge-base", "HEAD", "origin/main").Output()
+	if err != nil {
+		t.Fatal(err)
+	}
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() config: %v", err)
+	}
+	if cfg.BaseCommit != strings.TrimSpace(string(wantMergeBase)) {
+		t.Fatalf("BaseCommit = %q, want merge-base with origin/main %q", cfg.BaseCommit, strings.TrimSpace(string(wantMergeBase)))
+	}
 }
 
 func TestCheckoutFollowupBranchSkipsWhenNoBranch(t *testing.T) {

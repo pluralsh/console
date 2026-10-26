@@ -260,7 +260,11 @@ defmodule Console.Deployments.Agents do
       end
     end)
     |> add_operation(:create, fn %{upload_record: upload} ->
-      changeset = AgentRunUpload.changeset(upload, attrs)
+      # GraphQL always sends session/screenRecording/patch variables; nil means
+      # "not provided this call". Drop those keys so Waffle does not clear prior
+      # artifacts (e.g. a follow-up session-only upload wiping the PR patch).
+      upload_attrs = drop_nil_upload_attrs(attrs)
+      changeset = AgentRunUpload.changeset(upload, upload_attrs)
 
       case Repo.update(changeset) do
         {:ok, upload} -> {:ok, upload}
@@ -268,7 +272,7 @@ defmodule Console.Deployments.Agents do
           Logger.error("failed to create agent run upload",
             agent_run_id: run_id,
             upload_id: upload.id,
-            attrs: inspect_upload_attrs(attrs),
+            attrs: inspect_upload_attrs(upload_attrs),
             errors: inspect(changeset.errors)
           )
 
@@ -278,6 +282,18 @@ defmodule Console.Deployments.Agents do
     |> execute(extract: :create)
     |> notify(:create)
   end
+
+  @upload_fields ~w(session screen_recording patch)a
+  @upload_field_strings ~w(session screen_recording patch)
+
+  defp drop_nil_upload_attrs(attrs) when is_map(attrs) do
+    Map.reject(attrs, fn
+      {key, nil} when key in @upload_fields -> true
+      {key, nil} when key in @upload_field_strings -> true
+      _ -> false
+    end)
+  end
+  defp drop_nil_upload_attrs(attrs), do: attrs
 
   defp inspect_upload_attrs(attrs) do
     attrs
@@ -394,7 +410,7 @@ defmodule Console.Deployments.Agents do
         validate_terminal_reprompt(run)
       end
     end)
-    |> add_operation(:requeue, fn %{run: run} -> requeue_terminal_run(run) end)
+    |> add_operation(:requeue, fn %{run: run} -> requeue_terminal_run(run, prompt) end)
     |> add_operation(:prompt, fn _ ->
       %AgentPromptHistory{}
       |> AgentPromptHistory.changeset(%{prompt: prompt, agent_run_id: run_id})
@@ -451,7 +467,9 @@ defmodule Console.Deployments.Agents do
     do: true
   defp has_session_upload?(_), do: false
 
-  defp requeue_terminal_run(%AgentRun{status: status, id: run_id} = run) when is_terminal(status) do
+  # Persist the new user prompt on the run so the harness (and UI) do not fall
+  # back to the original AgentRun.prompt when Prompts are missing at boot.
+  defp requeue_terminal_run(%AgentRun{status: status, id: run_id} = run, prompt) when is_terminal(status) do
     AgentPrompt.for_run(run_id)
     |> Repo.delete_all()
 
@@ -459,6 +477,7 @@ defmodule Console.Deployments.Agents do
     |> AgentRun.changeset(%{
       status: :pending,
       followup: true,
+      prompt: prompt,
       error: nil,
       pod_reference: nil,
       approved_at: nil
@@ -469,7 +488,7 @@ defmodule Console.Deployments.Agents do
       err -> err
     end
   end
-  defp requeue_terminal_run(%AgentRun{} = run), do: {:ok, {:noop, run}}
+  defp requeue_terminal_run(%AgentRun{} = run, _prompt), do: {:ok, {:noop, run}}
 
   # attachments live in a workbench's filesystem, so only runs spawned by a workbench can have them
   defp run_attachments(_, _, _, empty) when empty in [nil, []], do: {:ok, []}
