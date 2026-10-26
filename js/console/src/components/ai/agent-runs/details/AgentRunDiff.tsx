@@ -208,6 +208,21 @@ function buildNodeLookup(
   return { nodeMap, parentMap }
 }
 
+/** Stable cache identity for a patch upload. GraphQL returns a freshly signed
+ * URL on every poll; only Waffle's `v` stamp changes when the file updates. */
+export function agentRunPatchCacheKey(patchUrl?: string | null): string {
+  if (!patchUrl) return ''
+  try {
+    const url = new URL(
+      patchUrl,
+      typeof window !== 'undefined' ? window.location.origin : 'http://localhost'
+    )
+    return url.searchParams.get('v') ?? url.pathname
+  } catch {
+    return patchUrl
+  }
+}
+
 export function AgentRunDiff({
   runId,
   patchUrl,
@@ -226,15 +241,17 @@ export function AgentRunDiff({
   onApprove?: () => void
   approving?: boolean
 }) {
+  const patchKey = agentRunPatchCacheKey(patchUrl)
   const {
     data: content,
     error,
     isLoading,
   } = useQuery({
-    queryKey: ['agent-run-patch', runId, patchUrl ?? ''],
+    queryKey: ['agent-run-patch', runId, patchKey],
     queryFn: () => fetchAgentRunUpload(runId, 'patch'),
     enabled: !!runId,
     staleTime: Infinity,
+    placeholderData: (previous) => previous,
   })
   const files = useMemo(
     () => (content ? splitPatchFiles(content) : []),
@@ -266,11 +283,19 @@ export function AgentRunDiff({
   useKeyDown('Escape', () => isFullscreen && onFullscreenChange?.(false))
 
   useEffect(() => {
+    if (files.length === 0) {
+      setSelectedPath(undefined)
+      setParentOfSelectedId(undefined)
+      return
+    }
+    if (selectedPath && files.some((file) => file.path === selectedPath)) {
+      return
+    }
     setSelectedPath(files[0]?.path)
     setParentOfSelectedId(
       files[0]?.path ? parentMap.get(files[0].path) : undefined
     )
-  }, [files, parentMap])
+  }, [files, parentMap, selectedPath])
 
   useEffect(() => {
     if (selectedPath && parentOfSelectedId) {
