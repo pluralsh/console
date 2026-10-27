@@ -27,7 +27,6 @@ import {
 } from 'routes/cdRoutesConsts'
 
 import { getClusterBreadcrumbs } from 'components/cd/cluster/Cluster'
-import { POLL_INTERVAL } from 'components/cluster/constants'
 import {
   PageRowSC,
   PageSidebarBodySC,
@@ -48,6 +47,10 @@ import {
 } from 'components/contexts/DeploymentSettingsContext'
 
 import { ServiceSelector } from '../ServiceSelector'
+import {
+  SERVICE_DELTA_FALLBACK_POLL_INTERVAL,
+  useServiceDeltas,
+} from '../useServiceDeltas'
 
 import { getFlowBreadcrumbs } from 'components/flows/flow/Flow'
 import { InsightsTabLabel } from 'components/utils/AiInsights'
@@ -259,10 +262,12 @@ function ServiceDetailsBase() {
 
   const { data, loading, error, refetch } = useServiceDeploymentQuery({
     variables: { id: serviceId ?? '' },
-    pollInterval: POLL_INTERVAL,
+    pollInterval: SERVICE_DELTA_FALLBACK_POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
     errorPolicy: 'all',
   })
+  // component syncs and errors aren't carried by the delta itself
+  useServiceDeltas({ id: serviceId, refetch, skip: !serviceId })
   const { serviceDeployment } = data ?? {}
   const isLoading = !data && loading
   const clusterId = serviceDeployment?.cluster?.id

@@ -2937,6 +2937,12 @@ export type ClusterConnection = {
   pageInfo: PageInfo;
 };
 
+export type ClusterDelta = {
+  __typename?: 'ClusterDelta';
+  delta?: Maybe<Delta>;
+  payload?: Maybe<Cluster>;
+};
+
 export enum ClusterDistro {
   Aks = 'AKS',
   Eks = 'EKS',
@@ -14063,12 +14069,16 @@ export type RootSubscriptionType = {
   agentRunDelta?: Maybe<AgentRunDelta>;
   /** streams chunks of ai text for a given parent scope */
   aiStream?: Maybe<AiDelta>;
+  /** Changes to a single cluster, or any cluster the current user can read if no id is given */
+  clusterDelta?: Maybe<ClusterDelta>;
   clusterUpgradeProgress?: Maybe<ClusterUpgradeProgress>;
   /** Changes to any stack the current user can read, including status changes from its runs */
   infrastructureStackDelta?: Maybe<InfrastructureStackDelta>;
   notificationDelta?: Maybe<NotificationDelta>;
   podDelta?: Maybe<PodDelta>;
   runLogsDelta?: Maybe<RunLogsDelta>;
+  /** Changes to a single service, the services of a cluster, or any service the current user can read if neither is given */
+  serviceDeploymentDelta?: Maybe<ServiceDeploymentDelta>;
   toolThoughts?: Maybe<ToolThought>;
   workbenchCanvasStream?: Maybe<WorkbenchCanvasBlock>;
   workbenchDashboardDelta?: Maybe<WorkbenchDashboardDelta>;
@@ -14105,6 +14115,11 @@ export type RootSubscriptionTypeAiStreamArgs = {
 };
 
 
+export type RootSubscriptionTypeClusterDeltaArgs = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
 export type RootSubscriptionTypeClusterUpgradeProgressArgs = {
   upgradeId: Scalars['ID']['input'];
 };
@@ -14112,6 +14127,12 @@ export type RootSubscriptionTypeClusterUpgradeProgressArgs = {
 
 export type RootSubscriptionTypeRunLogsDeltaArgs = {
   stepId: Scalars['ID']['input'];
+};
+
+
+export type RootSubscriptionTypeServiceDeploymentDeltaArgs = {
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  id?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -15353,6 +15374,12 @@ export type ServiceDeploymentConnection = {
   __typename?: 'ServiceDeploymentConnection';
   edges?: Maybe<Array<Maybe<ServiceDeploymentEdge>>>;
   pageInfo: PageInfo;
+};
+
+export type ServiceDeploymentDelta = {
+  __typename?: 'ServiceDeploymentDelta';
+  delta?: Maybe<Delta>;
+  payload?: Maybe<ServiceDeployment>;
 };
 
 export type ServiceDeploymentEdge = {
@@ -21309,6 +21336,13 @@ export type NodeUsageMetricsQueryVariables = Exact<{
 
 export type NodeUsageMetricsQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', id: string, nodeUsageMetrics?: { __typename?: 'NodeUsageMetrics', cpuUtilization?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuModes?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuCores?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, load1?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, load5?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, load15?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memoryTotal?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memoryUsed?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memoryCached?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, majorPageFaults?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, filesystemFullness?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, diskRead?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, diskWrite?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, diskBusy?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, networkReceive?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, networkTransmit?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, networkErrors?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, networkDropped?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuAllocatable?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memory?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memoryRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memoryLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memoryAllocatable?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, oomKills?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podsRunning?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podsAllocatable?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, restarts?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, conditions?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null } | null } | null };
 
+export type ClusterDeltaSubscriptionVariables = Exact<{
+  id?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type ClusterDeltaSubscription = { __typename?: 'RootSubscriptionType', clusterDelta?: { __typename?: 'ClusterDelta', delta?: Delta | null, payload?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, self?: boolean | null, virtual?: boolean | null, protect?: boolean | null, distro?: ClusterDistro | null, version?: string | null, currentVersion?: string | null, kubeletVersion?: string | null, installed?: boolean | null, healthy?: boolean | null, healthScore?: number | null, pingedAt?: string | null, deletedAt?: string | null, nodeCount?: number | null, podCount?: number | null, namespaceCount?: number | null, cpuTotal?: number | null, memoryTotal?: number | null, cpuUtil?: number | null, memoryUtil?: number | null, availabilityZones?: Array<string | null> | null } | null } | null };
+
 export type ComponentMetricsFragmentFragment = { __typename?: 'ServiceDeployment', componentMetrics?: { __typename?: 'ServiceComponentMetrics', cpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, mem?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podCpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podMem?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, cpuLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, memLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podCpuRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podMemRequests?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podCpuLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podMemLimits?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null } | null };
 
 export type ServiceDeploymentComponentMetricsQueryVariables = Exact<{
@@ -21876,6 +21910,14 @@ export type ServiceDeploymentQueryVariables = Exact<{
 
 
 export type ServiceDeploymentQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', namespace: string, message?: string | null, version: string, id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, operationalLayout?: { __typename?: 'OperationalLayout', serviceMesh?: ServiceMesh | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, components?: Array<{ __typename?: 'ServiceComponent', id: string, uid?: string | null, name: string, group?: string | null, kind: string, namespace?: string | null, state?: ComponentState | null, synced: boolean, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, content?: { __typename?: 'ComponentContent', desired?: string | null, live?: string | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null> | null, contexts?: Array<{ __typename?: 'ServiceContext', id: string, configuration?: Record<string, unknown> | null, name: string, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string } | null, secrets?: Array<{ __typename?: 'ServiceConfiguration', name: string, value: string } | null> | null } | null> | null, dependencies?: Array<{ __typename?: 'ServiceDependency', id: string, name: string, status?: ServiceDeploymentStatus | null, updatedAt?: string | null } | null> | null, repository?: { __typename?: 'GitRepository', pulledAt?: string | null, id: string, url: string, httpsPath?: string | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, imports?: Array<{ __typename?: 'ServiceImport', stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType, status: StackStatus, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null } | null } | null> | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null, scalingRecommendations?: Array<{ __typename?: 'ClusterScalingRecommendation', id: string, namespace?: string | null, name?: string | null, type?: ScalingRecommendationType | null, container?: string | null, cpuCost?: number | null, cpuRequest?: number | null, cpuRecommendation?: number | null, memoryCost?: number | null, memoryRequest?: number | null, memoryRecommendation?: number | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', distro?: ClusterDistro | null, id: string, name: string, handle?: string | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null } | null } | null> | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string, warning?: boolean | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null } | null };
+
+export type ServiceDeploymentDeltaSubscriptionVariables = Exact<{
+  id?: InputMaybe<Scalars['ID']['input']>;
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type ServiceDeploymentDeltaSubscription = { __typename?: 'RootSubscriptionType', serviceDeploymentDelta?: { __typename?: 'ServiceDeploymentDelta', delta?: Delta | null, payload?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, message?: string | null, version: string, promotion?: ServicePromotion | null, protect?: boolean | null, dryRun?: boolean | null, deletedAt?: string | null, updatedAt?: string | null } | null } | null };
 
 export type ServiceDeploymentTinyQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -29409,6 +29451,29 @@ export type NodeUsageMetricsSuspenseQueryHookResult = ReturnType<typeof useNodeU
 export type NodeUsageMetricsQueryResult = Apollo.QueryResult<NodeUsageMetricsQuery, NodeUsageMetricsQueryVariables>;
 
 /**
+ * __useClusterDeltaSubscription__
+ *
+ * To run a query within a React component, call `useClusterDeltaSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useClusterDeltaSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClusterDeltaSubscription({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useClusterDeltaSubscription(baseOptions?: Apollo.SubscriptionHookOptions<ClusterDeltaSubscription, ClusterDeltaSubscriptionVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<ClusterDeltaSubscription, ClusterDeltaSubscriptionVariables>(Operations.ClusterDelta, options);
+      }
+export type ClusterDeltaSubscriptionHookResult = ReturnType<typeof useClusterDeltaSubscription>;
+export type ClusterDeltaSubscriptionResult = Apollo.SubscriptionResult<ClusterDeltaSubscription>;
+
+/**
  * __useServiceDeploymentComponentMetricsQuery__
  *
  * To run a query within a React component, call `useServiceDeploymentComponentMetricsQuery` and pass it any options that fit your needs.
@@ -31299,6 +31364,30 @@ export type ServiceDeploymentQueryHookResult = ReturnType<typeof useServiceDeplo
 export type ServiceDeploymentLazyQueryHookResult = ReturnType<typeof useServiceDeploymentLazyQuery>;
 export type ServiceDeploymentSuspenseQueryHookResult = ReturnType<typeof useServiceDeploymentSuspenseQuery>;
 export type ServiceDeploymentQueryResult = Apollo.QueryResult<ServiceDeploymentQuery, ServiceDeploymentQueryVariables>;
+
+/**
+ * __useServiceDeploymentDeltaSubscription__
+ *
+ * To run a query within a React component, call `useServiceDeploymentDeltaSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useServiceDeploymentDeltaSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useServiceDeploymentDeltaSubscription({
+ *   variables: {
+ *      id: // value for 'id'
+ *      clusterId: // value for 'clusterId'
+ *   },
+ * });
+ */
+export function useServiceDeploymentDeltaSubscription(baseOptions?: Apollo.SubscriptionHookOptions<ServiceDeploymentDeltaSubscription, ServiceDeploymentDeltaSubscriptionVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<ServiceDeploymentDeltaSubscription, ServiceDeploymentDeltaSubscriptionVariables>(Operations.ServiceDeploymentDelta, options);
+      }
+export type ServiceDeploymentDeltaSubscriptionHookResult = ReturnType<typeof useServiceDeploymentDeltaSubscription>;
+export type ServiceDeploymentDeltaSubscriptionResult = Apollo.SubscriptionResult<ServiceDeploymentDeltaSubscription>;
 
 /**
  * __useServiceDeploymentTinyQuery__
@@ -42291,6 +42380,8 @@ export const namedOperations = {
     AgentMessageOutputDelta: 'AgentMessageOutputDelta',
     AgentRunDelta: 'AgentRunDelta',
     AIChatStream: 'AIChatStream',
+    ClusterDelta: 'ClusterDelta',
+    ServiceDeploymentDelta: 'ServiceDeploymentDelta',
     InfrastructureStackDelta: 'InfrastructureStackDelta',
     LogsDelta: 'LogsDelta',
     WorkbenchJobDelta: 'WorkbenchJobDelta',

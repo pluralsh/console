@@ -61,6 +61,7 @@ export function PolicyEvaluations() {
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
       {
+        pollInterval: 60_000,
         query: PolicyEvaluationsDocument,
         keyPath: ['policy', 'policyEvaluations'],
         skip: !policyId,

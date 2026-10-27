@@ -77,7 +77,11 @@ export function Gatekeeper() {
 
   const { data, loading, error, refetch, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
-      { query: PolicyConstraintsDocument, keyPath: ['policyConstraints'] },
+      {
+        pollInterval: 60_000,
+        query: PolicyConstraintsDocument,
+        keyPath: ['policyConstraints'],
+      },
       policyQFilters
     )
 

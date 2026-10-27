@@ -1,3 +1,4 @@
+import { AGGREGATE_POLL_INTERVAL } from 'components/cluster/constants'
 import {
   Chip,
   FillLevelProvider,
@@ -57,7 +58,7 @@ export function VulnerabilityReports() {
       q: throttledReportsQ,
     },
     fetchPolicy: 'cache-and-network',
-    pollInterval: 10000,
+    pollInterval: AGGREGATE_POLL_INTERVAL,
   })
 
   const gradeToCountMap = statsData?.vulnerabilityStatistics?.reduce(

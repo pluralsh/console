@@ -1117,3 +1117,34 @@ query NodeUsageMetrics(
     }
   }
 }
+
+subscription ClusterDelta($id: ID) {
+  clusterDelta(id: $id) {
+    delta
+    payload {
+      id
+      name
+      handle
+      self
+      virtual
+      protect
+      distro
+      version
+      currentVersion
+      kubeletVersion
+      installed
+      healthy
+      healthScore
+      pingedAt
+      deletedAt
+      nodeCount
+      podCount
+      namespaceCount
+      cpuTotal
+      memoryTotal
+      cpuUtil
+      memoryUtil
+      availabilityZones
+    }
+  }
+}

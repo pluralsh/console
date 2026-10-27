@@ -1876,6 +1876,9 @@ type RootSubscriptionType {
 
   runLogsDelta(stepId: ID!): RunLogsDelta
 
+  "Changes to a single service, the services of a cluster, or any service the current user can read if neither is given"
+  serviceDeploymentDelta(id: ID, clusterId: ID): ServiceDeploymentDelta
+
   "streams chunks of ai text for a given parent scope"
   aiStream(
     "the insight id to use when streaming a fix suggestion"
@@ -1922,6 +1925,9 @@ type RootSubscriptionType {
   workbenchDashboardDelta(id: ID, workbenchId: ID): WorkbenchDashboardDelta
 
   workbenchMonitorDelta(id: ID, workbenchId: ID): MonitorDelta
+
+  "Changes to a single cluster, or any cluster the current user can read if no id is given"
+  clusterDelta(id: ID): ClusterDelta
 
   clusterUpgradeProgress(upgradeId: ID!): ClusterUpgradeProgress
 }
@@ -13319,6 +13325,11 @@ type RevisionConnection {
   edges: [RevisionEdge]
 }
 
+type ServiceDeploymentDelta {
+  delta: Delta
+  payload: ServiceDeployment
+}
+
 enum ClusterDistro {
   GENERIC
   EKS
@@ -15486,6 +15497,11 @@ type ProjectUsageHistoryConnection {
 type DeprecatedCustomResourceConnection {
   pageInfo: PageInfo!
   edges: [DeprecatedCustomResourceEdge]
+}
+
+type ClusterDelta {
+  delta: Delta
+  payload: Cluster
 }
 
 enum AuthMethod {

@@ -18,6 +18,7 @@ import { useProjectId } from '../../contexts/ProjectsContext'
 import { POLL_INTERVAL } from '../ContinuousDeployment'
 import { ServicesContextT, columns, getServiceStatuses } from './Services'
 import { ServicesFilters, StatusTabKey } from './ServicesFilters'
+import { useServiceDeltas } from './useServiceDeltas'
 
 export default function ServicesTable() {
   const projectId = useProjectId()
@@ -35,7 +36,11 @@ export default function ServicesTable() {
     fetchNextPage,
     setVirtualSlice,
   } = useFetchPaginatedData(
-    { query: ServiceDeploymentsDocument, keyPath: ['serviceDeployments'] },
+    {
+      pollInterval: POLL_INTERVAL,
+      query: ServiceDeploymentsDocument,
+      keyPath: ['serviceDeployments'],
+    },
     {
       q: q || undefined,
       projectId,
@@ -52,6 +57,8 @@ export default function ServicesTable() {
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   })
+  useServiceDeltas({ clusterId })
+
   const statusCounts = useMemo(
     () => getServiceStatuses((aggData || aggPrev)?.serviceStatuses),
     [aggData, aggPrev]

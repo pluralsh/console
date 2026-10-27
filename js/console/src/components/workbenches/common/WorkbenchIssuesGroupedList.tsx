@@ -131,6 +131,7 @@ function IssueStatusGroup({
   const { data, loading, pageInfo, fetchNextPage, fetchingMore } =
     useFetchPaginatedData(
       {
+        pollInterval: POLL_INTERVAL,
         query: WorkbenchIssuesForStatusDocument,
         keyPath: ISSUES_KEY_PATH,
         pageSize: PAGE_SIZE,

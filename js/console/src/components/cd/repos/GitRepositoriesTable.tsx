@@ -3,7 +3,10 @@ import { useGitPullabilityStatisticsQuery } from 'generated/graphql'
 import { GitRepositoriesDocument } from 'generated/graphql-documents'
 import { useEffect } from 'react'
 
-import { POLL_INTERVAL } from 'components/cluster/constants'
+import {
+  AGGREGATE_POLL_INTERVAL,
+  POLL_INTERVAL,
+} from 'components/cluster/constants'
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import {
@@ -32,11 +35,15 @@ export function GitRepositoriesTable({
 }) {
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
-      { query: GitRepositoriesDocument, keyPath: ['gitRepositories'] },
+      {
+        pollInterval: POLL_INTERVAL,
+        query: GitRepositoriesDocument,
+        keyPath: ['gitRepositories'],
+      },
       { q: searchStr, health: statusFilterKeyToGitHealth(status) }
     )
   const { data: statsData } = useGitPullabilityStatisticsQuery({
-    pollInterval: POLL_INTERVAL,
+    pollInterval: AGGREGATE_POLL_INTERVAL,
   })
 
   const hasFilters = !!status || !!searchStr

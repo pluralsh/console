@@ -15,6 +15,7 @@ import { createLink } from 'apollo-absinthe-upload-link'
 import { createClient } from 'graphql-ws'
 import { Socket as PhoenixSocket } from 'phoenix'
 import { mergeConnectionsByNodeId } from 'utils/graphql'
+import { isDocumentHidden } from 'utils/visibility'
 
 import fragments from '../generated/fragments.json'
 import { fetchToken } from './auth'

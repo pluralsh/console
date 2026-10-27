@@ -915,12 +915,24 @@ defmodule Console.GraphQl.Deployments.Service do
   end
 
   object :service_subscriptions do
+    @desc "Changes to a single service, the services of a cluster, or any service the current user can read if neither is given"
     field :service_deployment_delta, :service_deployment_delta do
-      arg :id, non_null(:id)
+      arg :id,         :id
+      arg :cluster_id, :id
 
-      config fn args, ctx ->
-        with {:ok, svc} <- Deployments.resolve_service(args, ctx),
-          do: {:ok, topic: "services:#{svc.id}"}
+      middleware Scope,
+        resource: :service,
+        action: :read
+      middleware Console.Middleware.SubscriptionPolicy, policy: Console.Deployments.Policies
+
+      config fn
+        %{id: id} = args, ctx when is_binary(id) ->
+          with {:ok, svc} <- Deployments.resolve_service(args, ctx),
+            do: {:ok, topic: "services:#{svc.id}"}
+        %{cluster_id: id}, %{context: %{current_user: %Console.Schema.User{}}} when is_binary(id) ->
+          {:ok, topic: "services:clusters:#{id}"}
+        _, %{context: %{current_user: %Console.Schema.User{}}} -> {:ok, topic: "services"}
+        _, _ -> {:error, "unauthenticated"}
       end
     end
   end

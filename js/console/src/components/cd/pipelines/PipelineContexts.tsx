@@ -1,3 +1,4 @@
+import { POLL_INTERVAL } from 'components/cluster/constants'
 import { Button, PrOpenIcon, Table, Tooltip } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert'
@@ -117,6 +118,7 @@ export function PipelineContexts({
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
       {
+        pollInterval: POLL_INTERVAL,
         query: PipelineContextsDocument,
         keyPath: ['pipeline', 'contexts'],
       },

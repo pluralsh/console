@@ -1999,6 +1999,24 @@ defmodule Console.GraphQl.Deployments.Cluster do
   end
 
   object :cluster_subscriptions do
+    @desc "Changes to a single cluster, or any cluster the current user can read if no id is given"
+    field :cluster_delta, :cluster_delta do
+      arg :id, :id
+
+      middleware Scope,
+        resource: :cluster,
+        action: :read
+      middleware Console.Middleware.SubscriptionPolicy, policy: Console.Deployments.Policies
+
+      config fn
+        %{id: id} = args, ctx when is_binary(id) ->
+          with {:ok, cluster} <- Deployments.resolve_cluster(args, ctx),
+            do: {:ok, topic: "clusters:#{cluster.id}"}
+        _, %{context: %{current_user: %Console.Schema.User{}}} -> {:ok, topic: "clusters"}
+        _, _ -> {:error, "unauthenticated"}
+      end
+    end
+
     field :cluster_upgrade_progress, :cluster_upgrade_progress do
       arg :upgrade_id, non_null(:id)
 

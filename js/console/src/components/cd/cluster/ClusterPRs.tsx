@@ -1,3 +1,4 @@
+import { POLL_INTERVAL } from 'components/cluster/constants'
 import { Input, SearchIcon, Table } from '@pluralsh/design-system'
 import { ComponentProps, useState } from 'react'
 import { useTheme } from 'styled-components'
@@ -44,6 +45,7 @@ export function ClusterPRs() {
     setVirtualSlice,
   } = useFetchPaginatedData(
     {
+      pollInterval: POLL_INTERVAL,
       query: PullRequestsDocument,
       keyPath: ['pullRequests'],
       skip: !cluster,

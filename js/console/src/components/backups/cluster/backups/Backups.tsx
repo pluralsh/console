@@ -1,3 +1,4 @@
+import { POLL_INTERVAL } from 'components/cluster/constants'
 import {
   EmptyState,
   LoopingLogo,
@@ -54,7 +55,11 @@ export default function Backups() {
     fetchNextPage,
     setVirtualSlice,
   } = useFetchPaginatedData(
-    { query: ClusterBackupsDocument, keyPath: ['clusterBackups'] },
+    {
+      pollInterval: POLL_INTERVAL,
+      query: ClusterBackupsDocument,
+      keyPath: ['clusterBackups'],
+    },
     { clusterId }
   )
 

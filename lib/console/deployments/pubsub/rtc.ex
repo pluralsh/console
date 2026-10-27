@@ -20,11 +20,48 @@ defimpl Console.PubSub.Rtc, for: [Console.PubSub.PipelineGateUpdated, Console.Pu
   end
 end
 
+# service deltas are authorized per subscriber on delivery and component updates fire on every agent
+# sync, so the policy graph is attached once here, mostly from cache
+defimpl Console.PubSub.Rtc, for: Console.PubSub.ServiceCreated do
+  alias Console.Deployments.Policies.Rbac
+  def deliver(%{item: svc}), do: {Rbac.cached_preload(svc), :create}
+end
+
 defimpl Console.PubSub.Rtc, for: [
   Console.PubSub.ServiceUpdated,
   Console.PubSub.ServiceComponentsUpdated,
 ] do
-  def deliver(%{item: item}), do: {item, :update}
+  alias Console.Deployments.Policies.Rbac
+  def deliver(%{item: svc}), do: {Rbac.cached_preload(svc), :update}
+end
+
+# soft deletes only schedule a drain, while detaching removes the row immediately
+defimpl Console.PubSub.Rtc, for: Console.PubSub.ServiceDeleted do
+  alias Console.Deployments.Policies.Rbac
+  def deliver(%{item: %{__meta__: %{state: :deleted}} = svc}), do: {Rbac.cached_preload(svc), :delete}
+  def deliver(%{item: svc}), do: {Rbac.cached_preload(svc), :update}
+end
+
+defimpl Console.PubSub.Rtc, for: Console.PubSub.ServiceHardDeleted do
+  alias Console.Deployments.Policies.Rbac
+  def deliver(%{item: svc}), do: {Rbac.cached_preload(svc), :delete}
+end
+
+defimpl Console.PubSub.Rtc, for: Console.PubSub.ClusterCreated do
+  alias Console.Deployments.Policies.Rbac
+  def deliver(%{item: cluster}), do: {Rbac.cached_preload(cluster), :create}
+end
+
+defimpl Console.PubSub.Rtc, for: [Console.PubSub.ClusterUpdated, Console.PubSub.ClusterPinged] do
+  alias Console.Deployments.Policies.Rbac
+  def deliver(%{item: cluster}), do: {Rbac.cached_preload(cluster), :update}
+end
+
+# soft deletes only schedule a drain, while detaching or deleting a virtual cluster removes the row immediately
+defimpl Console.PubSub.Rtc, for: Console.PubSub.ClusterDeleted do
+  alias Console.Deployments.Policies.Rbac
+  def deliver(%{item: %{__meta__: %{state: :deleted}} = cluster}), do: {Rbac.cached_preload(cluster), :delete}
+  def deliver(%{item: cluster}), do: {Rbac.cached_preload(cluster), :update}
 end
 
 defimpl Console.PubSub.Rtc, for: Console.PubSub.AgentMessageUpdated do

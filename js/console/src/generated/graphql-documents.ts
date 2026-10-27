@@ -8031,6 +8031,38 @@ export const NodeUsageMetricsDocument = /*#__PURE__*/ gql`
   }
 }
     ${NodeUsageMetricsFragmentDoc}` as unknown as DocumentNode<Types.NodeUsageMetricsQuery, Types.NodeUsageMetricsQueryVariables>;
+export const ClusterDeltaDocument = /*#__PURE__*/ gql`
+    subscription ClusterDelta($id: ID) {
+  clusterDelta(id: $id) {
+    delta
+    payload {
+      id
+      name
+      handle
+      self
+      virtual
+      protect
+      distro
+      version
+      currentVersion
+      kubeletVersion
+      installed
+      healthy
+      healthScore
+      pingedAt
+      deletedAt
+      nodeCount
+      podCount
+      namespaceCount
+      cpuTotal
+      memoryTotal
+      cpuUtil
+      memoryUtil
+      availabilityZones
+    }
+  }
+}
+    ` as unknown as DocumentNode<Types.ClusterDeltaSubscription, Types.ClusterDeltaSubscriptionVariables>;
 export const ServiceDeploymentComponentMetricsDocument = /*#__PURE__*/ gql`
     query ServiceDeploymentComponentMetrics($id: ID, $name: String, $cluster: String, $componentId: ID!, $start: DateTime, $stop: DateTime, $step: String) {
   serviceDeployment(id: $id, name: $name, cluster: $cluster) {
@@ -8612,6 +8644,27 @@ export const ServiceDeploymentDocument = /*#__PURE__*/ gql`
   }
 }
     ${ServiceDeploymentDetailsFragmentDoc}` as unknown as DocumentNode<Types.ServiceDeploymentQuery, Types.ServiceDeploymentQueryVariables>;
+export const ServiceDeploymentDeltaDocument = /*#__PURE__*/ gql`
+    subscription ServiceDeploymentDelta($id: ID, $clusterId: ID) {
+  serviceDeploymentDelta(id: $id, clusterId: $clusterId) {
+    delta
+    payload {
+      id
+      name
+      namespace
+      status
+      componentStatus
+      message
+      version
+      promotion
+      protect
+      dryRun
+      deletedAt
+      updatedAt
+    }
+  }
+}
+    ` as unknown as DocumentNode<Types.ServiceDeploymentDeltaSubscription, Types.ServiceDeploymentDeltaSubscriptionVariables>;
 export const ServiceDeploymentTinyDocument = /*#__PURE__*/ gql`
     query ServiceDeploymentTiny($id: ID!) {
   serviceDeployment(id: $id) {

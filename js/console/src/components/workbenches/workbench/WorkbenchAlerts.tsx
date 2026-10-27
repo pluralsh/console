@@ -66,6 +66,7 @@ export function WorkbenchAlerts() {
     fetchingMore,
   } = useFetchPaginatedData(
     {
+      pollInterval: POLL_INTERVAL,
       query: WorkbenchAlertsDocument,
       keyPath: ALERTS_KEY_PATH,
       pageSize: PAGE_SIZE,

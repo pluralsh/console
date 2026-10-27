@@ -68,6 +68,7 @@ import { useOnboarded } from '../../contexts/DeploymentSettingsContext.tsx'
 import { GettingStartedBlock } from '../../home/GettingStarted.tsx'
 import { ClustersCharts } from './ClustersCharts.tsx'
 import { cdClustersColumns } from './ClustersColumns'
+import { useClusterDeltas } from './useClusterDeltas'
 import { DemoTable } from './ClustersDemoTable'
 import CreateCluster from './create/CreateCluster'
 import {
@@ -157,7 +158,11 @@ export default function Clusters() {
     fetchNextPage,
     setVirtualSlice,
   } = useFetchPaginatedData(
-    { query: ClustersDocument, keyPath: ['clusters'] },
+    {
+      pollInterval: POLL_INTERVAL,
+      query: ClustersDocument,
+      keyPath: ['clusters'],
+    },
     {
       q: debouncedSearchString,
       projectId,
@@ -173,6 +178,7 @@ export default function Clusters() {
           : upgradeableFilter === 'UPGRADEABLE',
     }
   )
+  useClusterDeltas()
   const {
     data: aggData,
     previousData: aggPrev,

@@ -72,6 +72,10 @@ import { DirLabelWithChip } from '../services/service/ServiceDetails.tsx'
 import { CLUSTER_DETAILS_TABS } from './ClusterDetails.tsx'
 import { ClusterPermissionsModal } from './ClusterPermissions'
 import { ClusterSettingsModal } from './ClusterSettings.tsx'
+import {
+  CLUSTER_DELTA_FALLBACK_POLL_INTERVAL,
+  useClusterDeltas,
+} from '../clusters/useClusterDeltas'
 
 const getDirectory = ({
   cluster,
@@ -131,8 +135,6 @@ const getSharedMenuItems = (cluster: ClusterFragment): Array<MoreMenuItem> => [
   },
 ]
 
-const POLL_INTERVAL = 10 * 1000
-
 export const getClusterBreadcrumbs = ({
   cluster,
   tab: tabParam,
@@ -184,8 +186,9 @@ export function Cluster() {
   } = useClusterQuery({
     variables: { id: clusterId || '' },
     fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
+    pollInterval: CLUSTER_DELTA_FALLBACK_POLL_INTERVAL,
   })
+  useClusterDeltas({ id: clusterId, refetch: refetchCluster, skip: !clusterId })
 
   const cluster = data?.cluster
   const meshEnabled = !!cluster?.operationalLayout?.serviceMesh

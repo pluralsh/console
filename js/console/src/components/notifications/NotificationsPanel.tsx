@@ -1,3 +1,4 @@
+import { POLL_INTERVAL } from 'components/cluster/constants'
 import { useTheme } from 'styled-components'
 import { ComponentProps, useMemo } from 'react'
 import {
@@ -49,6 +50,7 @@ export function NotificationsPanel({
 
   const { data, pageInfo, fetchNextPage, setVirtualSlice, loading } =
     useFetchPaginatedData({
+      pollInterval: POLL_INTERVAL,
       query: AppNotificationsDocument,
       keyPath: ['appNotifications'],
     })

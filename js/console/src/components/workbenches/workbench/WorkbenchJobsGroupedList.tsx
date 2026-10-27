@@ -294,6 +294,7 @@ function JobStatusGroup({
   const { data, loading, pageInfo, fetchNextPage, fetchingMore, refetch } =
     useFetchPaginatedData(
       {
+        pollInterval: POLL_INTERVAL,
         query: WorkbenchJobsForStatusDocument,
         keyPath: RUNS_KEY_PATH,
         pageSize,

@@ -1,3 +1,4 @@
+import { POLL_INTERVAL } from 'components/cluster/constants'
 import { Flex } from '@pluralsh/design-system'
 import { AlertInsight } from 'components/utils/alerts/AlertInsight'
 import {
@@ -21,7 +22,11 @@ export function FlowAlerts() {
   const { flow } = useOutletContext<FlowOutletContext>()
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
-      { query: FlowAlertsDocument, keyPath: ['flow', 'alerts'] },
+      {
+        pollInterval: POLL_INTERVAL,
+        query: FlowAlertsDocument,
+        keyPath: ['flow', 'alerts'],
+      },
       { id: flow?.id ?? '' }
     )
 

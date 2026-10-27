@@ -1,3 +1,4 @@
+import { POLL_INTERVAL } from 'components/cluster/constants'
 import { useDebounce } from '@react-hooks-library/core'
 import { WorkbenchIssuesBoard } from 'components/workbenches/common/WorkbenchIssuesBoard'
 import { WorkbenchIssuesGroupedList } from 'components/workbenches/common/WorkbenchIssuesGroupedList'
@@ -50,6 +51,7 @@ export function WorkbenchIssues() {
   const { data, loading, error, pageInfo, fetchNextPage, fetchingMore } =
     useFetchPaginatedData(
       {
+        pollInterval: POLL_INTERVAL,
         query: WorkbenchIssuesDocument,
         keyPath: ISSUES_KEY_PATH,
         pageSize: PAGE_SIZE,

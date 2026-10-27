@@ -3,6 +3,24 @@ defmodule ConsoleWeb.GraphQl.DeploymentsSubscriptionTest do
   alias Console.{PubSub.Consumers.Rtc, PubSub}
   alias Console.Schema.AgentMessage.Stdout
 
+  @service_delta """
+    subscription Services($id: ID, $clusterId: ID) {
+      serviceDeploymentDelta(id: $id, clusterId: $clusterId) {
+        delta
+        payload { id name status deletedAt }
+      }
+    }
+  """
+
+  @cluster_delta """
+    subscription Clusters($id: ID) {
+      clusterDelta(id: $id) {
+        delta
+        payload { id handle deletedAt }
+      }
+    }
+  """
+
   describe "runLogsDelta" do
     test "new logs will broadcast deltas" do
       user = insert(:user)
@@ -281,6 +299,296 @@ defmodule ConsoleWeb.GraphQl.DeploymentsSubscriptionTest do
     end
   end
 
+  describe "serviceDeploymentDelta" do
+    alias Console.Deployments.Policies.Rbac
+
+    test "service updates are only delivered to subscribers who can read the service" do
+      reader   = insert(:user)
+      group    = insert(:group)
+      insert(:group_member, group: group, user: reader)
+      outsider = insert(:user)
+      service  = insert(:service, read_bindings: [%{group_id: group.id}])
+
+      reader_sub   = subscribe_services(reader)
+      outsider_sub = subscribe_services(outsider)
+
+      Rtc.handle_event(%PubSub.ServiceUpdated{item: service})
+
+      assert_service_delta(reader_sub, service)
+      refute_push("subscription:data", %{subscriptionId: ^outsider_sub})
+    end
+
+    test "access is inherited from the service's cluster, its project and its flow" do
+      cluster_reader = insert(:user)
+      project_reader = insert(:user)
+      flow_reader    = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: project_reader.id}])
+      cluster = insert(:cluster, project: project, read_bindings: [%{user_id: cluster_reader.id}])
+      flow    = insert(:flow, read_bindings: [%{user_id: flow_reader.id}])
+      service = insert(:service, cluster: cluster, flow: flow)
+
+      subs = Enum.map([cluster_reader, project_reader, flow_reader], &subscribe_services/1)
+
+      Rtc.handle_event(%PubSub.ServiceComponentsUpdated{item: service})
+
+      for sub <- subs, do: assert_service_delta(sub, service)
+    end
+
+    test "cluster-scoped subscriptions only receive that cluster's services" do
+      admin   = admin_user()
+      cluster = insert(:cluster)
+      service = insert(:service, cluster: cluster)
+      other   = insert(:service)
+
+      sub = subscribe_services(admin, %{"clusterId" => cluster.id})
+
+      Rtc.handle_event(%PubSub.ServiceUpdated{item: other})
+      refute_push("subscription:data", %{subscriptionId: ^sub})
+
+      Rtc.handle_event(%PubSub.ServiceUpdated{item: service})
+      assert_service_delta(sub, service)
+    end
+
+    test "cluster-scoped subscriptions are still filtered on delivery" do
+      cluster = insert(:cluster)
+      service = insert(:service, cluster: cluster)
+
+      sub = subscribe_services(insert(:user), %{"clusterId" => cluster.id})
+
+      Rtc.handle_event(%PubSub.ServiceUpdated{item: service})
+      refute_push("subscription:data", %{subscriptionId: ^sub})
+    end
+
+    test "single service subscriptions require read access and still deliver updates" do
+      reader  = insert(:user)
+      service = insert(:service, read_bindings: [%{user_id: reader.id}])
+      other   = insert(:service)
+
+      sub = subscribe_services(reader, %{"id" => service.id})
+
+      {:ok, socket} = establish_socket(reader)
+      ref = push_doc(socket, @service_delta, variables: %{"id" => other.id})
+      assert_reply(ref, :error, _)
+
+      Rtc.handle_event(%PubSub.ServiceUpdated{item: other})
+      Rtc.handle_event(%PubSub.ServiceUpdated{item: service})
+      assert_service_delta(sub, service)
+      refute_push("subscription:data", %{subscriptionId: ^sub})
+    end
+
+    test "creates, soft deletes, detaches and hard deletes broadcast the matching delta" do
+      admin   = admin_user()
+      service = insert(:service)
+
+      sub = subscribe_services(admin)
+
+      Rtc.handle_event(%PubSub.ServiceCreated{item: service})
+      assert_service_delta(sub, service, "CREATE")
+
+      {:ok, draining} = Ecto.Changeset.change(service, %{deleted_at: Timex.now()}) |> Console.Repo.update()
+      Rtc.handle_event(%PubSub.ServiceDeleted{item: draining})
+      assert_push("subscription:data", %{
+        subscriptionId: ^sub,
+        result: %{data: %{"serviceDeploymentDelta" => %{"delta" => "UPDATE", "payload" => payload}}}
+      })
+      assert payload["id"] == service.id
+      assert payload["deletedAt"]
+
+      {:ok, detached} = Console.Repo.delete(draining)
+      Rtc.handle_event(%PubSub.ServiceDeleted{item: detached})
+      assert_service_delta(sub, service, "DELETE")
+
+      Rtc.handle_event(%PubSub.ServiceHardDeleted{item: detached})
+      assert_service_delta(sub, service, "DELETE")
+    end
+
+    test "access tokens without service scopes are filtered even for admins" do
+      admin   = admin_user()
+      service = insert(:service)
+
+      scoped   = subscribe_services(admin, %{}, ~w(service.read))
+      unscoped = subscribe_services(admin, %{}, ~w(stack.read))
+
+      Rtc.handle_event(%PubSub.ServiceUpdated{item: service})
+
+      assert_service_delta(scoped, service)
+      refute_push("subscription:data", %{subscriptionId: ^unscoped})
+    end
+
+    test "the cached preload carries the full policy graph" do
+      user    = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      flow    = insert(:flow)
+      service = insert(:service, cluster: insert(:cluster, project: project), flow: flow)
+
+      loaded = Rbac.cached_preload(Console.Repo.get!(Console.Schema.Service, service.id))
+
+      assert loaded.read_bindings == []
+      assert [%{user_id: user_id}] = loaded.cluster.project.read_bindings
+      assert user_id == user.id
+      assert loaded.flow.id == flow.id
+      assert Ecto.assoc_loaded?(loaded.flow.project.read_bindings)
+    end
+
+    # the test cache never hits, so the one settings read stands in for the single shared-cache
+    # lookup made in prod, which must not grow with the number of subscribers
+    test "authorizing deliveries makes no per-subscriber queries" do
+      readers   = for _ <- 1..3, do: insert(:user)
+      outsiders = for _ <- 1..5, do: insert(:user)
+      cluster   = insert(:cluster, read_bindings: Enum.map(readers, &%{user_id: &1.id}))
+      service   = insert(:service, cluster: cluster)
+      deployment_settings()
+
+      reader_subs   = Enum.map(readers, &subscribe_services/1)
+      outsider_subs = Enum.map(outsiders, &subscribe_services/1)
+
+      service = Rbac.cached_preload(service)
+
+      handler = "service-delta-queries-#{inspect(self())}"
+      :telemetry.attach(handler, [:console, :repo, :query], &__MODULE__.forward_query/4, self())
+      on_exit(fn -> :telemetry.detach(handler) end)
+
+      Absinthe.Subscription.publish(
+        ConsoleWeb.Endpoint,
+        %{payload: service, delta: :update},
+        Console.GraphQl.Topic.infer(service, :update)
+      )
+      :telemetry.detach(handler)
+
+      assert_received {:repo_query, "SELECT" <> _ = query}
+      assert query =~ ~s(FROM "deployment_settings")
+      refute_received {:repo_query, _}
+      for sub <- reader_subs, do: assert_service_delta(sub, service)
+      for sub <- outsider_subs, do: refute_push("subscription:data", %{subscriptionId: ^sub})
+    end
+  end
+
+  describe "clusterDelta" do
+    alias Console.Deployments.Policies.Rbac
+
+    test "cluster updates are only delivered to subscribers who can read the cluster or its project" do
+      reader         = insert(:user)
+      project_reader = insert(:user)
+      outsider       = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: project_reader.id}])
+      cluster = insert(:cluster, project: project, read_bindings: [%{user_id: reader.id}])
+
+      subs         = Enum.map([reader, project_reader], &subscribe_clusters/1)
+      outsider_sub = subscribe_clusters(outsider)
+
+      Rtc.handle_event(%PubSub.ClusterUpdated{item: cluster})
+
+      for sub <- subs, do: assert_cluster_delta(sub, cluster)
+      refute_push("subscription:data", %{subscriptionId: ^outsider_sub})
+    end
+
+    test "pings broadcast updates" do
+      admin   = admin_user()
+      cluster = insert(:cluster)
+
+      sub = subscribe_clusters(admin)
+
+      Rtc.handle_event(%PubSub.ClusterPinged{item: cluster})
+      assert_cluster_delta(sub, cluster)
+    end
+
+    test "single cluster subscriptions require read access and only receive that cluster" do
+      reader  = insert(:user)
+      cluster = insert(:cluster, read_bindings: [%{user_id: reader.id}])
+      other   = insert(:cluster)
+
+      sub = subscribe_clusters(reader, %{"id" => cluster.id})
+
+      {:ok, socket} = establish_socket(reader)
+      ref = push_doc(socket, @cluster_delta, variables: %{"id" => other.id})
+      assert_reply(ref, :error, _)
+
+      Rtc.handle_event(%PubSub.ClusterUpdated{item: other})
+      Rtc.handle_event(%PubSub.ClusterUpdated{item: cluster})
+      assert_cluster_delta(sub, cluster)
+      refute_push("subscription:data", %{subscriptionId: ^sub})
+    end
+
+    test "creates, soft deletes and detaches broadcast the matching delta" do
+      admin   = admin_user()
+      cluster = insert(:cluster)
+
+      sub = subscribe_clusters(admin)
+
+      Rtc.handle_event(%PubSub.ClusterCreated{item: cluster})
+      assert_cluster_delta(sub, cluster, "CREATE")
+
+      {:ok, draining} = Ecto.Changeset.change(cluster, %{deleted_at: Timex.now()}) |> Console.Repo.update()
+      Rtc.handle_event(%PubSub.ClusterDeleted{item: draining})
+      assert_push("subscription:data", %{
+        subscriptionId: ^sub,
+        result: %{data: %{"clusterDelta" => %{"delta" => "UPDATE", "payload" => payload}}}
+      })
+      assert payload["id"] == cluster.id
+      assert payload["deletedAt"]
+
+      {:ok, detached} = Console.Repo.delete(draining)
+      Rtc.handle_event(%PubSub.ClusterDeleted{item: detached})
+      assert_cluster_delta(sub, cluster, "DELETE")
+    end
+
+    test "access tokens without cluster scopes are filtered even for admins" do
+      admin   = admin_user()
+      cluster = insert(:cluster)
+
+      scoped   = subscribe_clusters(admin, %{}, ~w(cluster.read))
+      unscoped = subscribe_clusters(admin, %{}, ~w(stack.read))
+
+      Rtc.handle_event(%PubSub.ClusterUpdated{item: cluster})
+
+      assert_cluster_delta(scoped, cluster)
+      refute_push("subscription:data", %{subscriptionId: ^unscoped})
+    end
+
+    test "the cached preload keeps the event's cluster and attaches its policy graph" do
+      user    = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      cluster = insert(:cluster, project: project, read_bindings: [%{user_id: user.id}])
+
+      fresh  = %{Console.Repo.get!(Console.Schema.Cluster, cluster.id) | handle: "renamed"}
+      loaded = Rbac.cached_preload(fresh)
+
+      assert loaded.handle == "renamed"
+      assert [%{user_id: user_id}] = loaded.read_bindings
+      assert user_id == user.id
+      assert [%{user_id: ^user_id}] = loaded.project.read_bindings
+    end
+
+    test "authorizing deliveries makes no per-subscriber queries" do
+      readers   = for _ <- 1..3, do: insert(:user)
+      outsiders = for _ <- 1..5, do: insert(:user)
+      cluster   = insert(:cluster, read_bindings: Enum.map(readers, &%{user_id: &1.id}))
+      deployment_settings()
+
+      reader_subs   = Enum.map(readers, &subscribe_clusters/1)
+      outsider_subs = Enum.map(outsiders, &subscribe_clusters/1)
+
+      cluster = Rbac.cached_preload(cluster)
+
+      handler = "cluster-delta-queries-#{inspect(self())}"
+      :telemetry.attach(handler, [:console, :repo, :query], &__MODULE__.forward_query/4, self())
+      on_exit(fn -> :telemetry.detach(handler) end)
+
+      Absinthe.Subscription.publish(
+        ConsoleWeb.Endpoint,
+        %{payload: cluster, delta: :update},
+        Console.GraphQl.Topic.infer(cluster, :update)
+      )
+      :telemetry.detach(handler)
+
+      assert_received {:repo_query, "SELECT" <> _ = query}
+      assert query =~ ~s(FROM "deployment_settings")
+      refute_received {:repo_query, _}
+      for sub <- reader_subs, do: assert_cluster_delta(sub, cluster)
+      for sub <- outsider_subs, do: refute_push("subscription:data", %{subscriptionId: ^sub})
+    end
+  end
+
   def forward_query(_event, _measurements, %{query: query}, pid) do
     if self() == pid, do: send(pid, {:repo_query, query})
   end
@@ -297,6 +605,36 @@ defmodule ConsoleWeb.GraphQl.DeploymentsSubscriptionTest do
     {:ok, token, _} = Console.Guardian.encode_and_sign(user, %{"scopes" => scopes})
     {:ok, socket} = connect(ConsoleWeb.UserSocket, %{"token" => "Bearer #{token}"}, connect_info: %{})
     Absinthe.Phoenix.SubscriptionTest.join_absinthe(socket)
+  end
+
+  defp subscribe_services(user, variables \\ %{}, scopes \\ nil) do
+    {:ok, socket} = stack_socket(user, scopes)
+    ref = push_doc(socket, @service_delta, variables: variables)
+    assert_reply(ref, :ok, %{subscriptionId: sub})
+    sub
+  end
+
+  defp subscribe_clusters(user, variables \\ %{}, scopes \\ nil) do
+    {:ok, socket} = stack_socket(user, scopes)
+    ref = push_doc(socket, @cluster_delta, variables: variables)
+    assert_reply(ref, :ok, %{subscriptionId: sub})
+    sub
+  end
+
+  defp assert_cluster_delta(sub, cluster, delta \\ "UPDATE") do
+    assert_push("subscription:data", %{
+      subscriptionId: ^sub,
+      result: %{data: %{"clusterDelta" => %{"delta" => ^delta, "payload" => payload}}}
+    })
+    assert payload["id"] == cluster.id
+  end
+
+  defp assert_service_delta(sub, service, delta \\ "UPDATE") do
+    assert_push("subscription:data", %{
+      subscriptionId: ^sub,
+      result: %{data: %{"serviceDeploymentDelta" => %{"delta" => ^delta, "payload" => payload}}}
+    })
+    assert payload["id"] == service.id
   end
 
   defp assert_stack_delta(sub, stack, delta \\ "UPDATE") do

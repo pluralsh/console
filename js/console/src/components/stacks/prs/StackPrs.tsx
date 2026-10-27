@@ -1,3 +1,4 @@
+import { POLL_INTERVAL } from 'components/cluster/constants'
 import {
   ICON_FRAME_ICON_SIZE,
   ArrowTopRightIcon,
@@ -43,6 +44,7 @@ export function StackPrs() {
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
       {
+        pollInterval: POLL_INTERVAL,
         query: StackPrsDocument,
         keyPath: ['infrastructureStack', 'pullRequests'],
         fetchPolicy: 'cache-and-network',

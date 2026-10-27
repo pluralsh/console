@@ -1,3 +1,4 @@
+import { POLL_INTERVAL } from 'components/cluster/constants'
 import { Flex } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
@@ -47,6 +48,7 @@ export function FlowWorkbenches() {
     fetchingMore: fetchingMoreJobs,
   } = useFetchPaginatedData(
     {
+      pollInterval: POLL_INTERVAL,
       query: FlowWorkbenchJobsDocument,
       keyPath: ['flow', 'workbenchJobs'],
       skip: !flow?.id,

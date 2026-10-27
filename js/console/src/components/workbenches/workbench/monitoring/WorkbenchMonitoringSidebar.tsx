@@ -65,6 +65,7 @@ export function WorkbenchMonitoringSidebar({
 
   const dashboards = useFetchPaginatedData(
     {
+      pollInterval: 60_000,
       query: WorkbenchDashboardsDocument,
       keyPath: ['workbench', 'workbenchDashboards'],
       keepLoadedPages: true,
@@ -73,6 +74,7 @@ export function WorkbenchMonitoringSidebar({
   )
   const monitors = useFetchPaginatedData(
     {
+      pollInterval: 60_000,
       query: WorkbenchMonitorsDocument,
       keyPath: ['workbench', 'monitors'],
       keepLoadedPages: true,

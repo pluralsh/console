@@ -41,7 +41,16 @@ defimpl Console.GraphQl.Topic, for: Console.Schema.Pipeline do
 end
 
 defimpl Console.GraphQl.Topic, for: Console.Schema.Service do
-  def infer(%@for{id: id}, _), do: [service_deployment_delta: "services:#{id}"]
+  def infer(%@for{id: id, cluster_id: cluster_id}, _),
+    do: [
+      service_deployment_delta: "services:#{id}",
+      service_deployment_delta: "services:clusters:#{cluster_id}",
+      service_deployment_delta: "services"
+    ]
+end
+
+defimpl Console.GraphQl.Topic, for: Console.Schema.Cluster do
+  def infer(%@for{id: id}, _), do: [cluster_delta: "clusters:#{id}", cluster_delta: "clusters"]
 end
 
 defimpl Console.GraphQl.Topic, for: Console.Schema.AgentMessage do

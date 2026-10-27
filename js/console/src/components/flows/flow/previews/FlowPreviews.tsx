@@ -1,3 +1,4 @@
+import { POLL_INTERVAL } from 'components/cluster/constants'
 import {
   BrowseAppsIcon,
   Button,
@@ -62,6 +63,7 @@ export function FlowPreviews() {
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
       {
+        pollInterval: POLL_INTERVAL,
         query: FlowPreviewEnvironmentInstancesDocument,
         keyPath: ['flow', 'previewEnvironmentInstances'],
       },

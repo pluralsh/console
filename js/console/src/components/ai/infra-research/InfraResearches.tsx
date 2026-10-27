@@ -1,3 +1,4 @@
+import { POLL_INTERVAL } from 'components/cluster/constants'
 import {
   CaretRightIcon,
   Chip,
@@ -37,7 +38,11 @@ export function InfraResearches() {
   const [published, setPublished] = useState<Nullable<boolean>>(true)
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
-      { query: InfraResearchesDocument, keyPath: ['infraResearches'] },
+      {
+        pollInterval: POLL_INTERVAL,
+        query: InfraResearchesDocument,
+        keyPath: ['infraResearches'],
+      },
       { published }
     )
   const infraResearches = useMemo(
