@@ -2,6 +2,9 @@
 ingress:
   console_dns: {{ configuration.consoleDns }}
   kas_dns: {{ configuration.kasDns }}
+  {% if configuration.ingressClass %}
+  ingressClass: {{ configuration.ingressClass }}
+  {% endif %}
   {% if configuration.clusterIssuer %}
   annotations:
     cert-manager.io/cluster-issuer: {{ configuration.clusterIssuer }}
@@ -51,6 +54,9 @@ kas:
 
   ingress:
     kas_dns: {{ configuration.kasDns }}
+    {% if configuration.ingressClass %}
+    ingressClass: {{ configuration.ingressClass }}
+    {% endif %}
     {% if configuration.clusterIssuer %}
     annotations:
       cert-manager.io/cluster-issuer: {{ configuration.clusterIssuer }}
