@@ -12,6 +12,8 @@ import (
 	"testing"
 	"time"
 
+	"google.golang.org/protobuf/types/known/timestamppb"
+
 	"github.com/pluralsh/console/go/cloud-query/internal/proto/toolquery"
 )
 
@@ -86,6 +88,29 @@ func TestPrometheusStepSupportsDays(t *testing.T) {
 	}
 	if step != 48*time.Hour {
 		t.Fatalf("step = %s, want 48h", step)
+	}
+}
+
+func TestPrometheusStepIsRaisedForLongRanges(t *testing.T) {
+	provider := &PrometheusProvider{}
+	start := time.Date(2026, 10, 9, 12, 0, 0, 0, time.UTC)
+	stepText := "15s"
+	input := &toolquery.MetricsQueryInput{
+		Step:  &stepText,
+		Range: &toolquery.TimeRange{Start: timestamppb.New(start), End: timestamppb.New(start.Add(7 * 24 * time.Hour))},
+	}
+
+	step, err := provider.toStep(input)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if step != 605*time.Second {
+		t.Fatalf("step = %s, want 10m5s", step)
+	}
+
+	input.Range.End = timestamppb.New(start.Add(time.Hour))
+	if step, _ := provider.toStep(input); step != 15*time.Second {
+		t.Fatalf("step = %s, want the requested 15s", step)
 	}
 }
 

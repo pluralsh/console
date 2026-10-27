@@ -15,6 +15,7 @@ import (
 
 	"github.com/pluralsh/console/go/cloud-query/internal/proto/toolquery"
 	"github.com/pluralsh/console/go/cloud-query/internal/tools/client"
+	"github.com/pluralsh/console/go/cloud-query/internal/tools/series"
 )
 
 type PrometheusProvider struct {
@@ -172,18 +173,18 @@ func (in *PrometheusProvider) MetricsLabelSearch(ctx context.Context, input *too
 	return newMetricsLabelSearchOutput(resultValues, input.GetQuery(), limit), nil
 }
 
+// toStep raises the requested step (30s by default) to the range's series.MinStep, since every step is a sample.
 func (in *PrometheusProvider) toStep(input *toolquery.MetricsQueryInput) (time.Duration, error) {
 	step := 30 * time.Second
-	if len(input.GetStep()) == 0 {
-		return step, nil
+	if len(input.GetStep()) > 0 {
+		parsed, err := model.ParseDuration(input.GetStep())
+		if err != nil {
+			return time.Duration(0), fmt.Errorf("%w: invalid step duration: %s", ErrInvalidArgument, input.GetStep())
+		}
+		step = time.Duration(parsed)
 	}
 
-	parsed, err := model.ParseDuration(input.GetStep())
-	if err != nil {
-		return time.Duration(0), fmt.Errorf("%w: invalid step duration: %s", ErrInvalidArgument, input.GetStep())
-	}
-
-	return time.Duration(parsed), nil
+	return max(step, series.MinStep(input.GetRange().GetStart().AsTime(), input.GetRange().GetEnd().AsTime())), nil
 }
 
 func normalizeRange(start, end time.Time, step time.Duration) (time.Time, time.Time) {

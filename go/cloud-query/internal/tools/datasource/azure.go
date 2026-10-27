@@ -3,6 +3,7 @@ package datasource
 import (
 	"fmt"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
 	"time"
@@ -56,6 +57,7 @@ func (in *AzureMetricsRequest) init(input *toolquery.MetricsQueryInput) (*AzureM
 	if err != nil {
 		return nil, err
 	}
+	interval = azureInterval(interval, series.MinStep(input.GetRange().GetStart().AsTime(), input.GetRange().GetEnd().AsTime()))
 
 	in.MetricNames = metricNames
 	in.MetricsEndpoint = strings.TrimSpace(azure.GetMetricsEndpoint())
@@ -109,6 +111,40 @@ func (in *AzureMetricsRequest) toInterval(step string) (string, error) {
 	}
 
 	return step, nil
+}
+
+type azureTimeGrain struct {
+	grain    string
+	duration time.Duration
+}
+
+// the time grains Azure Monitor metrics support, finest first
+var azureIntervals = []azureTimeGrain{
+	{"PT1M", time.Minute},
+	{"PT5M", 5 * time.Minute},
+	{"PT15M", 15 * time.Minute},
+	{"PT30M", 30 * time.Minute},
+	{"PT1H", time.Hour},
+	{"PT6H", 6 * time.Hour},
+	{"PT12H", 12 * time.Hour},
+	{"P1D", 24 * time.Hour},
+}
+
+// azureInterval raises a supported time grain finer than minStep to the finest grain that isn't, or the coarsest
+// one. Other durations are passed through for Azure to judge.
+func azureInterval(interval string, minStep time.Duration) string {
+	i := slices.IndexFunc(azureIntervals, func(g azureTimeGrain) bool { return g.grain == interval })
+	if i < 0 || azureIntervals[i].duration >= minStep {
+		return interval
+	}
+
+	for _, g := range azureIntervals[i:] {
+		if g.duration >= minStep {
+			return g.grain
+		}
+	}
+
+	return azureIntervals[len(azureIntervals)-1].grain
 }
 
 func NewAzureMetricsRequest(input *toolquery.MetricsQueryInput) (*AzureMetricsRequest, error) {

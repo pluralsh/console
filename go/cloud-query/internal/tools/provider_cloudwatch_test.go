@@ -9,6 +9,25 @@ import (
 	"github.com/pluralsh/console/go/cloud-query/internal/proto/toolquery"
 )
 
+func TestCloudwatchPeriodIsRaisedToAValidPeriod(t *testing.T) {
+	cases := []struct {
+		step, minStep time.Duration
+		want          int32
+	}{
+		{time.Minute, 4 * time.Second, 60},
+		{45 * time.Second, 0, 45},
+		{time.Second, 4 * time.Second, 5},
+		{10 * time.Second, 25 * time.Second, 30},
+		{time.Minute, 605 * time.Second, 660},
+	}
+
+	for _, c := range cases {
+		if got := cloudwatchPeriod(c.step, c.minStep); got != c.want {
+			t.Fatalf("cloudwatchPeriod(%s, %s) = %d, want %d", c.step, c.minStep, got, c.want)
+		}
+	}
+}
+
 func TestCloudwatchLogAggregateRequestAndBuckets(t *testing.T) {
 	start := time.Date(2026, time.September, 8, 12, 0, 0, 0, time.UTC)
 	end := start.Add(time.Hour)

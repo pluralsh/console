@@ -63,7 +63,8 @@ func (in *CloudwatchProvider) MetricsSeries(ctx context.Context, input *toolquer
 			return nil, fmt.Errorf("%w: invalid step duration: %s", ErrInvalidArgument, step)
 		}
 		if duration > 0 {
-			request.MetricDataQueries[0].Period = aws.Int32(int32(duration.Seconds()))
+			minStep := series.MinStep(input.GetRange().GetStart().AsTime(), input.GetRange().GetEnd().AsTime())
+			request.MetricDataQueries[0].Period = aws.Int32(cloudwatchPeriod(duration, minStep))
 		}
 	}
 
@@ -98,6 +99,23 @@ func (in *CloudwatchProvider) MetricsSeries(ctx context.Context, input *toolquer
 	}
 
 	return builder.Output(), nil
+}
+
+// cloudwatchPeriod is the requested period in seconds, raised when it's finer than minStep to the next period
+// CloudWatch accepts: 1, 5, 10 or 30 seconds for high resolution metrics, otherwise a multiple of 60.
+func cloudwatchPeriod(step, minStep time.Duration) int32 {
+	if step >= minStep {
+		return int32(step.Seconds())
+	}
+
+	seconds := int64(minStep / time.Second)
+	for _, period := range []int64{1, 5, 10, 30} {
+		if seconds <= period {
+			return int32(period)
+		}
+	}
+
+	return int32((seconds + 59) / 60 * 60)
 }
 
 func (in *CloudwatchProvider) MetricsSearch(ctx context.Context, searchInput *toolquery.MetricsSearchInput) (*toolquery.MetricsSearchOutput, error) {

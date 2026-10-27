@@ -102,6 +102,7 @@ defmodule Console.MixProject do
         override: true},
       {:snap, "~> 0.11"},
       {:finch, "~> 0.19"},
+      {:nimble_pool, "~> 1.1"},
       {:anubis_mcp, "~> 2.1"},
       {:piazza_core, "~> 0.3.9", git: "https://github.com/michaeljguarino/piazza_core", commit: "2a91145d0d567f1aab40d52843d77dfb491c424a", override: true},
       {:flow, "~> 1.2"},

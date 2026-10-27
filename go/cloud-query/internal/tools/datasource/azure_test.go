@@ -8,6 +8,26 @@ import (
 	"github.com/samber/lo"
 )
 
+func TestAzureIntervalIsRaisedToASupportedGrain(t *testing.T) {
+	cases := []struct {
+		interval string
+		minStep  time.Duration
+		want     string
+	}{
+		{"PT1M", 30 * time.Second, "PT1M"},
+		{"PT1M", 605 * time.Second, "PT15M"},
+		{"PT1H", 605 * time.Second, "PT1H"},
+		{"PT1M", 48 * time.Hour, "P1D"},
+		{"PT2M", time.Hour, "PT2M"},
+	}
+
+	for _, c := range cases {
+		if got := azureInterval(c.interval, c.minStep); got != c.want {
+			t.Fatalf("azureInterval(%s, %s) = %s, want %s", c.interval, c.minStep, got, c.want)
+		}
+	}
+}
+
 func TestAzureMetricsSeriesGroupsByAggregation(t *testing.T) {
 	start := time.Date(2026, 10, 19, 12, 0, 0, 0, time.UTC)
 	response := NewAzureMetricsResponse(azmetrics.QueryResourcesResponse{

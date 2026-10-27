@@ -132,7 +132,12 @@ func (p *toolProvider) MetricsSeries(ctx context.Context, input *toolquery.Metri
 		return nil, ErrUnsupportedOperation
 	}
 
-	return p.metrics.MetricsSeries(ctx, input)
+	output, err := p.metrics.MetricsSeries(ctx, input)
+	if err != nil {
+		return nil, err
+	}
+
+	return series.Bound(output), nil
 }
 
 func (p *toolProvider) MetricsSearch(ctx context.Context, input *toolquery.MetricsSearchInput) (*toolquery.MetricsSearchOutput, error) {
