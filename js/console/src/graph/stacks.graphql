@@ -651,6 +651,29 @@ subscription InfrastructureStackDelta {
   }
 }
 
+# the full row fragment, so created runs can be added to cached run lists
+subscription StackRunDelta($stackId: ID!) {
+  stackRunDelta(stackId: $stackId) {
+    delta
+    payload {
+      ...StackRun
+      pullRequest {
+        id
+      }
+    }
+  }
+}
+
+# a created stack, to add to cached stack lists
+query StackListEntry($id: ID!) {
+  infrastructureStack(id: $id) {
+    ...StackTiny
+    project {
+      id
+    }
+  }
+}
+
 subscription LogsDelta($id: ID!) {
   runLogsDelta(stepId: $id) {
     delta

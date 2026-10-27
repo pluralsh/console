@@ -511,6 +511,8 @@ defmodule Console.Deployments.StacksTest do
       %{environment: [_], files: [_]} = Console.Repo.preload(stack, [:environment, :files])
 
       [_] = StackRun.for_stack(stack.id) |> Console.Repo.all()
+      assert_receive {:event, %PubSub.StackStatusChanged{item: %{id: stack_id, sha: "new-sha"}}}
+      assert stack_id == stack.id
       assert_receive {:event, %PubSub.StackRunCreated{item: ^run}}, :timer.seconds(10)
     end
 
@@ -1271,6 +1273,20 @@ defmodule Console.Deployments.StacksTest do
       assert refetch(stack).status == :successful
 
       assert_receive {:event, %PubSub.StackRunUpdated{item: ^updated}}
+      assert_receive {:event, %PubSub.StackStatusChanged{item: %{id: stack_id, status: :successful}}}
+      assert stack_id == stack.id
+      refute_receive {:event, %PubSub.StackUpdated{}}
+    end
+
+    test "dry runs don't change their stack's status" do
+      user  = insert(:user)
+      stack = insert(:stack, write_bindings: [%{user_id: user.id}])
+      run   = insert(:stack_run, stack: stack, dry_run: true)
+
+      {:ok, updated} = Stacks.update_stack_run(%{status: :successful}, run.id, user)
+
+      assert_receive {:event, %PubSub.StackRunUpdated{item: ^updated}}
+      refute_receive {:event, %PubSub.StackStatusChanged{}}
     end
 
     test "writers can attach infracost resources on update" do
@@ -1388,6 +1404,9 @@ defmodule Console.Deployments.StacksTest do
       assert output.value == "val"
 
       assert_receive {:event, %PubSub.StackRunCompleted{item: ^completed}}
+      assert_receive {:event, %PubSub.StackStatusChanged{item: %{id: stack_id, last_successful: ref}}}
+      assert stack_id == stack.id
+      assert ref == completed.git.ref
 
       # can still complete when completed
       {:ok, _} = Stacks.complete_stack_run(%{

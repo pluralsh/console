@@ -707,6 +707,7 @@ defmodule Console.GraphQl.Deployments.Stack do
 
   delta :run_logs
   delta :infrastructure_stack
+  delta :stack_run
 
   object :public_stack_queries do
     field :custom_stack_run, :custom_stack_run do
@@ -1035,6 +1036,17 @@ defmodule Console.GraphQl.Deployments.Stack do
       config fn
         _, %{context: %{current_user: %Console.Schema.User{}}} -> {:ok, topic: "stacks"}
         _, _ -> {:error, "unauthenticated"}
+      end
+    end
+
+    @desc "Changes to the runs of a stack, authorized once against the stack when subscribing"
+    field :stack_run_delta, :stack_run_delta do
+      arg :stack_id, non_null(:id)
+
+      config fn %{stack_id: id}, %{context: ctx} ->
+        ctx = Console.Middleware.Scope.scope_context(ctx, resource: :stack, action: :read)
+        with {:ok, stack} <- Deployments.resolve_stack(%{id: id}, %{context: ctx}),
+          do: {:ok, topic: "stacks:#{stack.id}:runs"}
       end
     end
 

@@ -10724,6 +10724,29 @@ export const InfrastructureStackDeltaDocument = /*#__PURE__*/ gql`
   }
 }
     ` as unknown as DocumentNode<Types.InfrastructureStackDeltaSubscription, Types.InfrastructureStackDeltaSubscriptionVariables>;
+export const StackRunDeltaDocument = /*#__PURE__*/ gql`
+    subscription StackRunDelta($stackId: ID!) {
+  stackRunDelta(stackId: $stackId) {
+    delta
+    payload {
+      ...StackRun
+      pullRequest {
+        id
+      }
+    }
+  }
+}
+    ${StackRunFragmentDoc}` as unknown as DocumentNode<Types.StackRunDeltaSubscription, Types.StackRunDeltaSubscriptionVariables>;
+export const StackListEntryDocument = /*#__PURE__*/ gql`
+    query StackListEntry($id: ID!) {
+  infrastructureStack(id: $id) {
+    ...StackTiny
+    project {
+      id
+    }
+  }
+}
+    ${StackTinyFragmentDoc}` as unknown as DocumentNode<Types.StackListEntryQuery, Types.StackListEntryQueryVariables>;
 export const LogsDeltaDocument = /*#__PURE__*/ gql`
     subscription LogsDelta($id: ID!) {
   runLogsDelta(stepId: $id) {

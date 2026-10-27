@@ -23,10 +23,7 @@ import {
 } from '../../../routes/stacksRoutesConsts'
 import { ResponsiveLayoutContentContainer } from '../../utils/layout/ResponsiveLayoutContentContainer'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import {
-  useRefetchOnStackDelta,
-  useStackDeltas,
-} from '../common/useStackDeltas'
+import { useStackRunDeltas } from '../common/useStackDeltas'
 import { getBreadcrumbs } from '../Stacks'
 
 import StackRunHeader, {
@@ -35,7 +32,7 @@ import StackRunHeader, {
 } from './Header'
 import StackRunSidecar from './Sidecar'
 
-// run updates arrive as stack deltas, but step progress emits no events, so
+// run updates arrive as run deltas, but step progress emits no events, so
 // this still polls faster than the other stack views
 const RUN_POLL_INTERVAL = 15_000
 
@@ -74,8 +71,7 @@ export default function StackRunDetail(): ReactNode {
     fetchPolicy: 'cache-and-network',
   })
 
-  useStackDeltas()
-  useRefetchOnStackDelta(stackId, refetch)
+  useStackRunDeltas(stackId)
 
   // a mutation can briefly leave the cached run incomplete while it refetches,
   // so keep rendering the last known copy instead of flashing the page loader

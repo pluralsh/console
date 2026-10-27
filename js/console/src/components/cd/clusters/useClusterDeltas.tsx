@@ -5,13 +5,10 @@ import {
   Delta,
   useClusterDeltaSubscription,
 } from 'generated/graphql'
-import { useEffect, useLayoutEffect, useRef } from 'react'
+import { useDebouncedRefetch } from 'components/hooks/useDebouncedRefetch'
 
 // polling is only a fallback for missed socket events once a view subscribes
 export const CLUSTER_DELTA_FALLBACK_POLL_INTERVAL = 30_000
-
-// a delete and the update before it can arrive back to back, so refetches are coalesced
-const REFETCH_DEBOUNCE = 500
 
 // root fields holding cluster connections, which deleted clusters are pruned from
 const CLUSTER_LIST_FIELDS = ['clusters']
@@ -29,28 +26,20 @@ type ClusterConnection = { edges?: Nullable<{ node?: Reference }[]> }
  * deliberately not written to the cache directly, since an unscoped
  * subscription would otherwise pull in every cluster it hears about.
  *
- * `refetch` is called (debounced) on any delta, for views showing fields the
- * delta doesn't carry. Every agent ping is a delta, so only pass it when
- * subscribing to a single cluster.
+ * `refetchOnCreate` is called (debounced) for creates only, for filtered or
+ * paginated lists that can't place a new cluster themselves.
  */
 export function useClusterDeltas({
   id,
-  refetch,
+  refetchOnCreate,
   skip,
 }: {
   id?: Nullable<string>
-  refetch?: Nullable<() => unknown>
+  refetchOnCreate?: Nullable<() => unknown>
   skip?: boolean
 } = {}) {
   const { cache } = useApolloClient()
-  const refetchRef = useRef(refetch)
-  const timeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined)
-
-  useLayoutEffect(() => {
-    refetchRef.current = refetch
-  })
-
-  useEffect(() => () => clearTimeout(timeoutRef.current), [])
+  const onCreate = useDebouncedRefetch(refetchOnCreate)
 
   useClusterDeltaSubscription({
     variables: { id: id ?? undefined },
@@ -65,12 +54,7 @@ export function useClusterDeltas({
       if (event.delta === Delta.Delete) removeCluster(cache, cluster.id)
       else mergeCluster(cache, cluster)
 
-      if (!refetchRef.current) return
-      clearTimeout(timeoutRef.current)
-      timeoutRef.current = setTimeout(
-        () => refetchRef.current?.(),
-        REFETCH_DEBOUNCE
-      )
+      if (event.delta === Delta.Create) onCreate()
     },
   })
 }

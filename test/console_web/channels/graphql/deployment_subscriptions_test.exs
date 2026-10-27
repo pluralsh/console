@@ -93,12 +93,11 @@ defmodule ConsoleWeb.GraphQl.DeploymentsSubscriptionTest do
       refute_push("subscription:data", %{subscriptionId: ^outsider_sub})
     end
 
-    test "stack run updates broadcast the stack's latest state" do
+    test "status changes from runs broadcast the stack's latest state" do
       reader   = insert(:user)
       outsider = insert(:user)
       stack    = insert(:stack, read_bindings: [%{user_id: reader.id}])
-      run      = insert(:stack_run, stack: stack)
-      Ecto.Changeset.change(stack, %{status: :running}) |> Console.Repo.update!()
+      stack    = Ecto.Changeset.change(stack, %{status: :running}) |> Console.Repo.update!()
 
       {:ok, reader_socket} = establish_socket(reader)
       {:ok, outsider_socket} = establish_socket(outsider)
@@ -108,7 +107,7 @@ defmodule ConsoleWeb.GraphQl.DeploymentsSubscriptionTest do
       outsider_ref = push_doc(outsider_socket, @stack_delta)
       assert_reply(outsider_ref, :ok, %{subscriptionId: outsider_sub})
 
-      Rtc.handle_event(%PubSub.StackRunUpdated{item: run})
+      Rtc.handle_event(%PubSub.StackStatusChanged{item: stack})
 
       assert_push("subscription:data", %{
         subscriptionId: ^reader_sub,
@@ -264,6 +263,89 @@ defmodule ConsoleWeb.GraphQl.DeploymentsSubscriptionTest do
       refute_received {:repo_query, _}
       for sub <- reader_subs, do: assert_stack_delta(sub, stack)
       for sub <- outsider_subs, do: refute_push("subscription:data", %{subscriptionId: ^sub})
+    end
+  end
+
+  describe "stackRunDelta" do
+    @run_delta """
+      subscription Runs($stackId: ID!) {
+        stackRunDelta(stackId: $stackId) {
+          delta
+          payload { id status }
+        }
+      }
+    """
+
+    test "subscribing requires read access to the stack" do
+      reader = insert(:user)
+      stack  = insert(:stack, read_bindings: [%{user_id: reader.id}])
+
+      {:ok, socket} = establish_socket(insert(:user))
+      ref = push_doc(socket, @run_delta, variables: %{"stackId" => stack.id})
+      assert_reply(ref, :error, _)
+
+      {:ok, socket} = establish_socket(reader)
+      ref = push_doc(socket, @run_delta, variables: %{"stackId" => stack.id})
+      assert_reply(ref, :ok, %{subscriptionId: _})
+    end
+
+    test "access tokens need stack scopes to subscribe" do
+      admin = admin_user()
+      stack = insert(:stack)
+
+      {:ok, socket} = stack_socket(admin, ~w(service.read))
+      ref = push_doc(socket, @run_delta, variables: %{"stackId" => stack.id})
+      assert_reply(ref, :error, _)
+
+      {:ok, socket} = stack_socket(admin, ~w(stack.read))
+      ref = push_doc(socket, @run_delta, variables: %{"stackId" => stack.id})
+      assert_reply(ref, :ok, %{subscriptionId: _})
+    end
+
+    test "run events only reach the subscribers of the run's stack" do
+      reader = insert(:user)
+      stack  = insert(:stack, read_bindings: [%{user_id: reader.id}])
+      run    = insert(:stack_run, stack: stack)
+      other  = insert(:stack_run, stack: insert(:stack, read_bindings: [%{user_id: reader.id}]))
+
+      runs_sub   = subscribe_runs(reader, stack)
+      stacks_sub = subscribe_stacks(reader)
+
+      Rtc.handle_event(%PubSub.StackRunCreated{item: run})
+      assert_run_delta(runs_sub, run, "CREATE")
+
+      Rtc.handle_event(%PubSub.StackRunUpdated{item: run})
+      assert_run_delta(runs_sub, run)
+
+      Rtc.handle_event(%PubSub.StackRunCompleted{item: run})
+      assert_run_delta(runs_sub, run)
+
+      Rtc.handle_event(%PubSub.StackRunUpdated{item: other})
+      refute_push("subscription:data", %{subscriptionId: ^runs_sub})
+      refute_push("subscription:data", %{subscriptionId: ^stacks_sub})
+    end
+
+    test "deliveries make no queries, however many subscribers" do
+      readers = for _ <- 1..3, do: insert(:user)
+      stack   = insert(:stack, read_bindings: Enum.map(readers, &%{user_id: &1.id}))
+      run     = insert(:stack_run, stack: stack)
+      deployment_settings()
+
+      subs = Enum.map(readers, &subscribe_runs(&1, stack))
+
+      handler = "run-delta-queries-#{inspect(self())}"
+      :telemetry.attach(handler, [:console, :repo, :query], &__MODULE__.forward_query/4, self())
+      on_exit(fn -> :telemetry.detach(handler) end)
+
+      Absinthe.Subscription.publish(
+        ConsoleWeb.Endpoint,
+        %{payload: run, delta: :update},
+        Console.GraphQl.Topic.infer(run, :update)
+      )
+      :telemetry.detach(handler)
+
+      refute_received {:repo_query, _}
+      for sub <- subs, do: assert_run_delta(sub, run)
     end
   end
 
@@ -612,6 +694,21 @@ defmodule ConsoleWeb.GraphQl.DeploymentsSubscriptionTest do
     ref = push_doc(socket, @service_delta, variables: variables)
     assert_reply(ref, :ok, %{subscriptionId: sub})
     sub
+  end
+
+  defp subscribe_runs(user, stack) do
+    {:ok, socket} = establish_socket(user)
+    ref = push_doc(socket, @run_delta, variables: %{"stackId" => stack.id})
+    assert_reply(ref, :ok, %{subscriptionId: sub})
+    sub
+  end
+
+  defp assert_run_delta(sub, run, delta \\ "UPDATE") do
+    assert_push("subscription:data", %{
+      subscriptionId: ^sub,
+      result: %{data: %{"stackRunDelta" => %{"delta" => ^delta, "payload" => payload}}}
+    })
+    assert payload["id"] == run.id
   end
 
   defp subscribe_clusters(user, variables \\ %{}, scopes \\ nil) do

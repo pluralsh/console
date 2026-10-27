@@ -188,7 +188,7 @@ export function Cluster() {
     fetchPolicy: 'cache-and-network',
     pollInterval: CLUSTER_DELTA_FALLBACK_POLL_INTERVAL,
   })
-  useClusterDeltas({ id: clusterId, refetch: refetchCluster, skip: !clusterId })
+  useClusterDeltas({ id: clusterId, skip: !clusterId })
 
   const cluster = data?.cluster
   const meshEnabled = !!cluster?.operationalLayout?.serviceMesh

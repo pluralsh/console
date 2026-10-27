@@ -61,6 +61,8 @@ defmodule Console.PubSub.StackCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.StackUpdated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.StackDeleted, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.StackDetached, do: use Piazza.PubSub.Event
+# a run wrote its stack (status, sha, state), unlike StackUpdated which is for edits to the stack itself
+defmodule Console.PubSub.StackStatusChanged, do: use Piazza.PubSub.Event
 
 defmodule Console.PubSub.StackRunCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.StackRunUpdated, do: use Piazza.PubSub.Event

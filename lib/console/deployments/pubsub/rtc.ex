@@ -133,21 +133,19 @@ defimpl Console.PubSub.Rtc, for: Console.PubSub.StackDetached do
   def deliver(%{item: stack}), do: {Rbac.preload(stack), :delete}
 end
 
-defimpl Console.PubSub.Rtc, for: [
-  Console.PubSub.StackRunCreated,
-  Console.PubSub.StackRunUpdated,
-  Console.PubSub.StackRunCompleted
-] do
-  alias Console.Deployments.{Stacks, Policies.Rbac}
-  alias Console.Schema.Stack
+# runs write their stack on every status change, so its delta is authorized from the cached policy graph
+defimpl Console.PubSub.Rtc, for: Console.PubSub.StackStatusChanged do
+  alias Console.Deployments.Policies.Rbac
+  def deliver(%{item: stack}), do: {Rbac.cached_preload(stack), :update}
+end
 
-  def deliver(%{item: %{stack_id: id}}) when is_binary(id) do
-    case Stacks.get_stack(id) do
-      %Stack{} = stack -> {Rbac.preload(stack), :update}
-      _ -> :ok
-    end
-  end
-  def deliver(_), do: :ok
+# run subscribers were authorized against the run's stack when subscribing, so runs need no preloads
+defimpl Console.PubSub.Rtc, for: Console.PubSub.StackRunCreated do
+  def deliver(%{item: run}), do: {run, :create}
+end
+
+defimpl Console.PubSub.Rtc, for: [Console.PubSub.StackRunUpdated, Console.PubSub.StackRunCompleted] do
+  def deliver(%{item: run}), do: {run, :update}
 end
 
 defimpl Console.PubSub.Rtc, for: Console.PubSub.AgentMessageStdoutCreated do

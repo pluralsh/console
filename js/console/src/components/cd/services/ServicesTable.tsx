@@ -15,10 +15,13 @@ import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
 
 import { useProjectId } from '../../contexts/ProjectsContext'
 
-import { POLL_INTERVAL } from '../ContinuousDeployment'
+import { STATUS_COUNTS_POLL_INTERVAL } from '../ContinuousDeployment'
 import { ServicesContextT, columns, getServiceStatuses } from './Services'
 import { ServicesFilters, StatusTabKey } from './ServicesFilters'
-import { useServiceDeltas } from './useServiceDeltas'
+import {
+  SERVICE_DELTA_FALLBACK_POLL_INTERVAL,
+  useServiceDeltas,
+} from './useServiceDeltas'
 
 export default function ServicesTable() {
   const projectId = useProjectId()
@@ -37,7 +40,7 @@ export default function ServicesTable() {
     setVirtualSlice,
   } = useFetchPaginatedData(
     {
-      pollInterval: POLL_INTERVAL,
+      pollInterval: SERVICE_DELTA_FALLBACK_POLL_INTERVAL,
       query: ServiceDeploymentsDocument,
       keyPath: ['serviceDeployments'],
     },
@@ -55,9 +58,9 @@ export default function ServicesTable() {
   } = useServiceStatusesQuery({
     variables: { ...(clusterId ? { clusterId } : {}) },
     fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
+    pollInterval: STATUS_COUNTS_POLL_INTERVAL,
   })
-  useServiceDeltas({ clusterId })
+  useServiceDeltas({ clusterId, refetchOnCreate: refetch })
 
   const statusCounts = useMemo(
     () => getServiceStatuses((aggData || aggPrev)?.serviceStatuses),

@@ -50,7 +50,6 @@ import { keySetToTagArray } from 'utils/clusterTags'
 
 import {
   Conjunction,
-  Delta,
   StackFragment,
   StackTinyFragment,
   StackType,
@@ -75,9 +74,8 @@ import { mapExistingNodes } from '../../utils/graphql'
 import { isTerraformFamilyStackType } from './common/stackTypeUtils'
 import {
   STACK_DELTA_FALLBACK_POLL_INTERVAL,
-  useRefetchOnStackDelta,
-  useStackDeltaListener,
   useStackDeltas,
+  useStackRunDeltas,
 } from './common/useStackDeltas'
 
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders.tsx'
@@ -201,11 +199,7 @@ export function Stacks() {
     [stackId, stacks]
   )
 
-  const {
-    data: stackData,
-    error: stackError,
-    refetch: refetchStack,
-  } = useStackQuery({
+  const { data: stackData, error: stackError } = useStackQuery({
     variables: { id: stackId },
     skip: !stackId,
     fetchPolicy: 'cache-and-network',
@@ -214,10 +208,7 @@ export function Stacks() {
   })
 
   useStackDeltas()
-  useRefetchOnStackDelta(stackId, refetchStack)
-  useStackDeltaListener((delta) => {
-    if (delta === Delta.Create || delta === Delta.Delete) refetch()
-  })
+  useStackRunDeltas(stackId)
 
   const fullStack = useMemo(() => stackData?.infrastructureStack, [stackData])
   const directory = useMemo(

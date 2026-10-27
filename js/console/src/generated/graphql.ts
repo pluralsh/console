@@ -14079,6 +14079,8 @@ export type RootSubscriptionType = {
   runLogsDelta?: Maybe<RunLogsDelta>;
   /** Changes to a single service, the services of a cluster, or any service the current user can read if neither is given */
   serviceDeploymentDelta?: Maybe<ServiceDeploymentDelta>;
+  /** Changes to the runs of a stack, authorized once against the stack when subscribing */
+  stackRunDelta?: Maybe<StackRunDelta>;
   toolThoughts?: Maybe<ToolThought>;
   workbenchCanvasStream?: Maybe<WorkbenchCanvasBlock>;
   workbenchDashboardDelta?: Maybe<WorkbenchDashboardDelta>;
@@ -14133,6 +14135,11 @@ export type RootSubscriptionTypeRunLogsDeltaArgs = {
 export type RootSubscriptionTypeServiceDeploymentDeltaArgs = {
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   id?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootSubscriptionTypeStackRunDeltaArgs = {
+  stackId: Scalars['ID']['input'];
 };
 
 
@@ -16151,6 +16158,12 @@ export type StackRunConnection = {
   __typename?: 'StackRunConnection';
   edges?: Maybe<Array<Maybe<StackRunEdge>>>;
   pageInfo: PageInfo;
+};
+
+export type StackRunDelta = {
+  __typename?: 'StackRunDelta';
+  delta?: Maybe<Delta>;
+  payload?: Maybe<StackRun>;
 };
 
 export type StackRunEdge = {
@@ -23733,6 +23746,20 @@ export type InfrastructureStackDeltaSubscriptionVariables = Exact<{ [key: string
 
 
 export type InfrastructureStackDeltaSubscription = { __typename?: 'RootSubscriptionType', infrastructureStackDelta?: { __typename?: 'InfrastructureStackDelta', delta?: Delta | null, payload?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, status: StackStatus, paused?: boolean | null, deletedAt?: string | null, updatedAt?: string | null } | null } | null };
+
+export type StackRunDeltaSubscriptionVariables = Exact<{
+  stackId: Scalars['ID']['input'];
+}>;
+
+
+export type StackRunDeltaSubscription = { __typename?: 'RootSubscriptionType', stackRunDelta?: { __typename?: 'StackRunDelta', delta?: Delta | null, payload?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, committer?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, pullRequest?: { __typename?: 'PullRequest', id: string } | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, infracostResources?: Array<{ __typename?: 'StackInfracostResource', id: string, resourceScope: string, projectName?: string | null, name: string, resourceType?: string | null, hourlyCost?: number | null, monthlyCost?: number | null, monthlyUsageCost?: number | null, rawResource?: Record<string, unknown> | null } | null> | null } | null } | null };
+
+export type StackListEntryQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type StackListEntryQuery = { __typename?: 'RootQueryType', infrastructureStack?: { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, status: StackStatus, project?: { __typename?: 'Project', id: string } | null, repository?: { __typename?: 'GitRepository', url: string, pulledAt?: string | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, parent?: { __typename?: 'ServiceDeployment', id: string } | null } | null };
 
 export type LogsDeltaSubscriptionVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -37637,6 +37664,65 @@ export type InfrastructureStackDeltaSubscriptionHookResult = ReturnType<typeof u
 export type InfrastructureStackDeltaSubscriptionResult = Apollo.SubscriptionResult<InfrastructureStackDeltaSubscription>;
 
 /**
+ * __useStackRunDeltaSubscription__
+ *
+ * To run a query within a React component, call `useStackRunDeltaSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useStackRunDeltaSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useStackRunDeltaSubscription({
+ *   variables: {
+ *      stackId: // value for 'stackId'
+ *   },
+ * });
+ */
+export function useStackRunDeltaSubscription(baseOptions: Apollo.SubscriptionHookOptions<StackRunDeltaSubscription, StackRunDeltaSubscriptionVariables> & ({ variables: StackRunDeltaSubscriptionVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<StackRunDeltaSubscription, StackRunDeltaSubscriptionVariables>(Operations.StackRunDelta, options);
+      }
+export type StackRunDeltaSubscriptionHookResult = ReturnType<typeof useStackRunDeltaSubscription>;
+export type StackRunDeltaSubscriptionResult = Apollo.SubscriptionResult<StackRunDeltaSubscription>;
+
+/**
+ * __useStackListEntryQuery__
+ *
+ * To run a query within a React component, call `useStackListEntryQuery` and pass it any options that fit your needs.
+ * When your component renders, `useStackListEntryQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useStackListEntryQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useStackListEntryQuery(baseOptions: Apollo.QueryHookOptions<StackListEntryQuery, StackListEntryQueryVariables> & ({ variables: StackListEntryQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<StackListEntryQuery, StackListEntryQueryVariables>(Operations.StackListEntry, options);
+      }
+export function useStackListEntryLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<StackListEntryQuery, StackListEntryQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<StackListEntryQuery, StackListEntryQueryVariables>(Operations.StackListEntry, options);
+        }
+// @ts-ignore
+export function useStackListEntrySuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<StackListEntryQuery, StackListEntryQueryVariables>): Apollo.UseSuspenseQueryResult<StackListEntryQuery, StackListEntryQueryVariables>;
+export function useStackListEntrySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<StackListEntryQuery, StackListEntryQueryVariables>): Apollo.UseSuspenseQueryResult<StackListEntryQuery | undefined, StackListEntryQueryVariables>;
+export function useStackListEntrySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<StackListEntryQuery, StackListEntryQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<StackListEntryQuery, StackListEntryQueryVariables>(Operations.StackListEntry, options);
+        }
+export type StackListEntryQueryHookResult = ReturnType<typeof useStackListEntryQuery>;
+export type StackListEntryLazyQueryHookResult = ReturnType<typeof useStackListEntryLazyQuery>;
+export type StackListEntrySuspenseQueryHookResult = ReturnType<typeof useStackListEntrySuspenseQuery>;
+export type StackListEntryQueryResult = Apollo.QueryResult<StackListEntryQuery, StackListEntryQueryVariables>;
+
+/**
  * __useLogsDeltaSubscription__
  *
  * To run a query within a React component, call `useLogsDeltaSubscription` and pass it any options that fit your needs.
@@ -42096,6 +42182,7 @@ export const namedOperations = {
     StackRunJob: 'StackRunJob',
     StackRunJobLogs: 'StackRunJobLogs',
     CustomStackRuns: 'CustomStackRuns',
+    StackListEntry: 'StackListEntry',
     AccessTokens: 'AccessTokens',
     TokenAudits: 'TokenAudits',
     Users: 'Users',
@@ -42383,6 +42470,7 @@ export const namedOperations = {
     ClusterDelta: 'ClusterDelta',
     ServiceDeploymentDelta: 'ServiceDeploymentDelta',
     InfrastructureStackDelta: 'InfrastructureStackDelta',
+    StackRunDelta: 'StackRunDelta',
     LogsDelta: 'LogsDelta',
     WorkbenchJobDelta: 'WorkbenchJobDelta',
     WorkbenchJobActivityDelta: 'WorkbenchJobActivityDelta',

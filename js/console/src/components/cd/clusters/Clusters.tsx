@@ -40,7 +40,7 @@ import { isEmpty } from 'lodash'
 import { ToolbarSearchInput } from 'components/layout/PageToolbar'
 
 import {
-  POLL_INTERVAL,
+  STATUS_COUNTS_POLL_INTERVAL,
   useSetPageHeaderContent,
   useSetPageScrollable,
 } from '../ContinuousDeployment'
@@ -68,7 +68,10 @@ import { useOnboarded } from '../../contexts/DeploymentSettingsContext.tsx'
 import { GettingStartedBlock } from '../../home/GettingStarted.tsx'
 import { ClustersCharts } from './ClustersCharts.tsx'
 import { cdClustersColumns } from './ClustersColumns'
-import { useClusterDeltas } from './useClusterDeltas'
+import {
+  CLUSTER_DELTA_FALLBACK_POLL_INTERVAL,
+  useClusterDeltas,
+} from './useClusterDeltas'
 import { DemoTable } from './ClustersDemoTable'
 import CreateCluster from './create/CreateCluster'
 import {
@@ -159,7 +162,7 @@ export default function Clusters() {
     setVirtualSlice,
   } = useFetchPaginatedData(
     {
-      pollInterval: POLL_INTERVAL,
+      pollInterval: CLUSTER_DELTA_FALLBACK_POLL_INTERVAL,
       query: ClustersDocument,
       keyPath: ['clusters'],
     },
@@ -178,7 +181,7 @@ export default function Clusters() {
           : upgradeableFilter === 'UPGRADEABLE',
     }
   )
-  useClusterDeltas()
+  useClusterDeltas({ refetchOnCreate: refetch })
   const {
     data: aggData,
     previousData: aggPrev,
@@ -186,7 +189,7 @@ export default function Clusters() {
   } = useClusterStatusesQuery({
     variables: { q: debouncedSearchString, projectId },
     fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
+    pollInterval: STATUS_COUNTS_POLL_INTERVAL,
   })
   const { clusterStatuses, upgradeStatistics } = (aggData || aggPrev) ?? {}
 

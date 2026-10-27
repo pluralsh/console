@@ -379,7 +379,8 @@ defmodule Console.Deployments.Stacks do
       |> when_ok(:update)
     end)
     |> add_operation(:stack, &sync_stack_status(&1[:run]))
-    |> execute(extract: :run)
+    |> execute()
+    |> notify_stack_status()
     |> notify(:update)
   end
 
@@ -550,7 +551,8 @@ defmodule Console.Deployments.Stacks do
       |> when_ok(:update)
     end)
     |> add_operation(:stack, &sync_stack_status(&1[:run]))
-    |> execute(extract: :run)
+    |> execute()
+    |> notify_stack_status()
     |> notify(:complete)
   end
 
@@ -993,7 +995,8 @@ defmodule Console.Deployments.Stacks do
       |> Stack.delete_changeset(delete_run(stack, run))
       |> Repo.update()
     end)
-    |> execute(extract: :run)
+    |> execute()
+    |> notify_stack_status()
     |> notify(:create)
   end
 
@@ -1268,6 +1271,13 @@ defmodule Console.Deployments.Stacks do
     |> allow(user, :write)
     |> when_ok(:delete)
   end
+
+  defp notify_stack_status({:ok, %{run: run} = result}) do
+    with %{stack: %Stack{} = stack} <- result,
+      do: handle_notify(PubSub.StackStatusChanged, stack)
+    {:ok, run}
+  end
+  defp notify_stack_status(err), do: err
 
   defp notify({:ok, %Stack{} = stack}, :create, actor),
     do: handle_notify(PubSub.StackCreated, stack, actor: actor)

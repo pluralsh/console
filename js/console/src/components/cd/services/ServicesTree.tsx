@@ -18,7 +18,7 @@ import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { ServicesContextT, getServiceStatuses } from './Services'
 import { ServicesFilters, StatusTabKey } from './ServicesFilters'
 import { ServicesTreeDiagram } from './ServicesTreeDiagram'
-import { POLL_INTERVAL } from '../ContinuousDeployment'
+import { STATUS_COUNTS_POLL_INTERVAL } from '../ContinuousDeployment'
 
 const servicesLimit = 1000
 
@@ -64,7 +64,7 @@ export function ServicesTree() {
   } = useServiceStatusesQuery({
     variables: { ...(clusterId ? { clusterId } : {}) },
     fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
+    pollInterval: STATUS_COUNTS_POLL_INTERVAL,
   })
   const statusCounts = useMemo(
     () => getServiceStatuses((aggData || aggPrev)?.serviceStatuses),

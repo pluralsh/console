@@ -1874,6 +1874,9 @@ type RootSubscriptionType {
   "Changes to any stack the current user can read, including status changes from its runs"
   infrastructureStackDelta: InfrastructureStackDelta
 
+  "Changes to the runs of a stack, authorized once against the stack when subscribing"
+  stackRunDelta(stackId: ID!): StackRunDelta
+
   runLogsDelta(stepId: ID!): RunLogsDelta
 
   "Changes to a single service, the services of a cluster, or any service the current user can read if neither is given"
@@ -10557,6 +10560,11 @@ type RunLogsDelta {
 type InfrastructureStackDelta {
   delta: Delta
   payload: InfrastructureStack
+}
+
+type StackRunDelta {
+  delta: Delta
+  payload: StackRun
 }
 
 "A reference for a globalized service, which targets clusters based on the configured criteria"

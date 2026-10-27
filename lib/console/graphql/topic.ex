@@ -32,6 +32,10 @@ defimpl Console.GraphQl.Topic, for: Console.Schema.Stack do
   def infer(_, _), do: [infrastructure_stack_delta: "stacks"]
 end
 
+defimpl Console.GraphQl.Topic, for: Console.Schema.StackRun do
+  def infer(%@for{stack_id: id}, _), do: [stack_run_delta: "stacks:#{id}:runs"]
+end
+
 defimpl Console.GraphQl.Topic, for: Console.Schema.RunLog do
   def infer(%@for{step_id: id}, _), do: [run_logs_delta: "steps:#{id}"]
 end

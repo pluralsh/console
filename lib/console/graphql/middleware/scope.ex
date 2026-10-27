@@ -12,6 +12,12 @@ defmodule Console.Middleware.Scope do
   end
   def call(res, _), do: res
 
+  @doc """
+  Applies the same scopes to a resolution context, for checks made outside field resolution like a
+  subscription's `config`
+  """
+  def scope_context(ctx, opts), do: call(%{context: ctx}, opts).context
+
   defp generate_scopes(resource, :write), do: ~w(#{resource}.write)
   defp generate_scopes(resource, :read), do: ~w(#{resource}.read #{resource}.write)
   defp generate_scopes(resource, scope) when not is_nil(scope), do: ~w(#{resource}.#{scope})

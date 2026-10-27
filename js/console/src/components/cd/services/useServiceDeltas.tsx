@@ -5,13 +5,10 @@ import {
   ServiceDeploymentDeltaSubscription,
   useServiceDeploymentDeltaSubscription,
 } from 'generated/graphql'
-import { useEffect, useLayoutEffect, useRef } from 'react'
+import { useDebouncedRefetch } from 'components/hooks/useDebouncedRefetch'
 
 // polling is only a fallback for missed socket events once a view subscribes
 export const SERVICE_DELTA_FALLBACK_POLL_INTERVAL = 30_000
-
-// a sync can arrive as a burst of deltas, so refetches are coalesced
-const REFETCH_DEBOUNCE = 500
 
 // root fields holding service connections, which deleted services are pruned from
 const SERVICE_LIST_FIELDS = ['serviceDeployments', 'serviceTree']
@@ -32,28 +29,26 @@ type ServiceConnection = { edges?: Nullable<{ node?: Reference }[]> }
  * unscoped subscription would otherwise pull in every service it hears about.
  *
  * `refetch` is called (debounced) on any delta, for views showing fields the
- * delta doesn't carry, like components or errors.
+ * delta doesn't carry, like components or errors. `refetchOnCreate` is only
+ * called for creates, for filtered or paginated lists that can't place a new
+ * service themselves.
  */
 export function useServiceDeltas({
   id,
   clusterId,
   refetch,
+  refetchOnCreate,
   skip,
 }: {
   id?: Nullable<string>
   clusterId?: Nullable<string>
   refetch?: Nullable<() => unknown>
+  refetchOnCreate?: Nullable<() => unknown>
   skip?: boolean
 } = {}) {
   const { cache } = useApolloClient()
-  const refetchRef = useRef(refetch)
-  const timeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined)
-
-  useLayoutEffect(() => {
-    refetchRef.current = refetch
-  })
-
-  useEffect(() => () => clearTimeout(timeoutRef.current), [])
+  const onDelta = useDebouncedRefetch(refetch)
+  const onCreate = useDebouncedRefetch(refetchOnCreate)
 
   useServiceDeploymentDeltaSubscription({
     variables: { id: id ?? undefined, clusterId: clusterId ?? undefined },
@@ -68,12 +63,8 @@ export function useServiceDeltas({
       if (event.delta === Delta.Delete) removeService(cache, service.id)
       else mergeService(cache, service)
 
-      if (!refetchRef.current) return
-      clearTimeout(timeoutRef.current)
-      timeoutRef.current = setTimeout(
-        () => refetchRef.current?.(),
-        REFETCH_DEBOUNCE
-      )
+      onDelta()
+      if (event.delta === Delta.Create) onCreate()
     },
   })
 }
