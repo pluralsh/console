@@ -70,6 +70,13 @@ console:
         bucket: {{ .Values.objectStoreBucket }}
         region: {{ .Values.objectStoreRegion }}
 {{ else if .Values.objectStoreAzureStorageAccount }}
+{{ if .Values.objectStoreAzureClientId }}
+serviceAccount:
+  annotations:
+    azure.workload.identity/client-id: {{ .Values.objectStoreAzureClientId }}
+podLabels:
+  azure.workload.identity/use: "true"
+{{ end }}
 console:
   config:
     objectStore:
@@ -81,6 +88,11 @@ console:
         accessKey: {{ .Values.objectStoreAzureAccessKey }}
         {{ end }}
 {{ else if .Values.objectStoreGcsBucket }}
+{{ if .Values.objectStoreGcsServiceAccount }}
+serviceAccount:
+  annotations:
+    iam.gke.io/gcp-service-account: {{ .Values.objectStoreGcsServiceAccount }}
+{{ end }}
 console:
   config:
     objectStore:
