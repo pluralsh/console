@@ -770,7 +770,7 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert found["runCounts"]["statuses"] == [%{"status" => "FAILED", "count" => 1}]
     end
 
-    test "it counts runs by user and filters status counts by user" do
+    test "it filters status counts by user" do
       workbench = insert(:workbench)
       alice = insert(:user, name: "Alice")
       bob = insert(:user, name: "Bob")
@@ -789,19 +789,10 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
             runCounts(userIds: $userIds) {
               statuses { status count }
               pullRequests { state count }
-              users { id name count }
             }
           }
         }
       """
-
-      {:ok, %{data: %{"workbench" => found}}} =
-        run_query(query, %{"id" => workbench.id}, %{current_user: admin_user()})
-
-      assert found["runCounts"]["users"] == [
-        %{"id" => alice.id, "name" => "Alice", "count" => 2},
-        %{"id" => bob.id, "name" => "Bob", "count" => 1}
-      ]
 
       {:ok, %{data: %{"workbench" => filtered}}} =
         run_query(query, %{"id" => workbench.id, "userIds" => [alice.id]}, %{current_user: admin_user()})
@@ -810,8 +801,6 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
         %{"status" => "FAILED", "count" => 1},
         %{"status" => "SUCCESSFUL", "count" => 1}
       ]
-
-      assert filtered["runCounts"]["users"] == found["runCounts"]["users"]
 
       assert Enum.sort_by(filtered["runCounts"]["pullRequests"], & &1["state"]) == [
         %{"state" => "MERGED", "count" => 1},
@@ -823,7 +812,6 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
         run_query(query, %{"id" => workbench.id, "userIds" => []}, %{current_user: admin_user()})
 
       assert empty["runCounts"]["statuses"] == []
-      assert empty["runCounts"]["users"] == found["runCounts"]["users"]
     end
 
     test "it can filter workbench runs and counts to a creation window" do

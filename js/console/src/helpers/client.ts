@@ -87,9 +87,6 @@ export const authenticatedCacheConfig: InMemoryCacheConfig = {
         },
       },
     },
-    // Per-workbench job counts. Caching by user id would let one workbench's
-    // poll overwrite the same person's count on another workbench.
-    WorkbenchJobCountByUser: { keyFields: false },
   },
 }
 

@@ -18344,20 +18344,11 @@ export type WorkbenchJobCountByStatus = {
   status: WorkbenchJobStatus;
 };
 
-export type WorkbenchJobCountByUser = {
-  __typename?: 'WorkbenchJobCountByUser';
-  count: Scalars['Int']['output'];
-  id: Scalars['ID']['output'];
-  name?: Maybe<Scalars['String']['output']>;
-};
-
 export type WorkbenchJobCounts = {
   __typename?: 'WorkbenchJobCounts';
   /** jobs with at least one pull request in each state (a job can count towards several) */
   pullRequests?: Maybe<Array<Maybe<WorkbenchJobCountByPrState>>>;
   statuses?: Maybe<Array<Maybe<WorkbenchJobCountByStatus>>>;
-  /** jobs run by each user on this workbench */
-  users?: Maybe<Array<Maybe<WorkbenchJobCountByUser>>>;
 };
 
 export type WorkbenchJobDelta = {

@@ -535,7 +535,6 @@ defmodule Console.GraphQl.Deployments.Workbench do
   object :workbench_job_counts do
     field :statuses,      list_of(:workbench_job_count_by_status)
     field :pull_requests, list_of(:workbench_job_count_by_pr_state), description: "jobs with at least one pull request in each state (a job can count towards several)"
-    field :users,         list_of(:workbench_job_count_by_user), description: "jobs run by each user on this workbench, ordered by name"
   end
 
   object :workbench_job_count_by_status do
@@ -545,12 +544,6 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
   object :workbench_job_count_by_pr_state do
     field :state, non_null(:workbench_job_pr_state)
-    field :count, non_null(:integer)
-  end
-
-  object :workbench_job_count_by_user do
-    field :id,    non_null(:id)
-    field :name,  :string
     field :count, non_null(:integer)
   end
 

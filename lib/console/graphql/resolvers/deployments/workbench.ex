@@ -75,7 +75,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     |> paginate_with_total(args)
   end
 
-  def run_counts(%Workbench{id: id}, args, info) do
+  def run_counts(%Workbench{id: id}, args, _) do
     jobs =
       WorkbenchJob.for_workbench(id)
       |> maybe_job_search(args)
@@ -85,17 +85,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
 
     {:ok, %{
       statuses: Repo.all(WorkbenchJob.count_by_status(status_jobs)),
-      pull_requests: Repo.all(WorkbenchJob.count_by_pr_state(jobs)) ++ [%{state: :none, count: none}],
-      # Counted before user_ids, and only when selected. Status polls don't ask
-      # for people, and the jobs page builds its Person menu from loaded jobs.
-      users: users_count(jobs, info)
+      pull_requests: Repo.all(WorkbenchJob.count_by_pr_state(jobs)) ++ [%{state: :none, count: none}]
     }}
-  end
-
-  defp users_count(jobs, info) do
-    if Enum.any?(Absinthe.Resolution.project(info), &(&1.schema_node.identifier == :users)),
-      do: Repo.all(WorkbenchJob.count_by_user(jobs)),
-      else: []
   end
 
   def accessible_users(workbench, _args, _) do

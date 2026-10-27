@@ -4187,9 +4187,6 @@ type WorkbenchJobCounts {
 
   "jobs with at least one pull request in each state (a job can count towards several)"
   pullRequests: [WorkbenchJobCountByPrState]
-
-  "jobs run by each user on this workbench, ordered by name"
-  users: [WorkbenchJobCountByUser]
 }
 
 type WorkbenchJobCountByStatus {
@@ -4199,12 +4196,6 @@ type WorkbenchJobCountByStatus {
 
 type WorkbenchJobCountByPrState {
   state: WorkbenchJobPrState!
-  count: Int!
-}
-
-type WorkbenchJobCountByUser {
-  id: ID!
-  name: String
   count: Int!
 }
 

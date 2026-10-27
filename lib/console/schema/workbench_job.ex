@@ -242,15 +242,6 @@ defmodule Console.Schema.WorkbenchJob do
     )
   end
 
-  def count_by_user(query \\ __MODULE__) do
-    from(j in query,
-      join: u in assoc(j, :user),
-      group_by: [u.id, u.name],
-      select: %{id: u.id, name: u.name, count: count(j.id)},
-      order_by: [asc: u.name]
-    )
-  end
-
   def for_monitor(query \\ __MODULE__, monitor_id) do
     from(j in query,
       join: a in assoc(j, :alert),
