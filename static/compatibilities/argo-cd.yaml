@@ -13,8 +13,8 @@ versions:
     chart_updates: []
     features: []
     breaking_changes: []
-  chart_version: 10.11.1
-  images: ['ecr-public.aws.com/docker/library/redis:8.6.4-alpine', 'ghcr.io/dexidp/dex:v2.46.0',
+  chart_version: 10.11.6
+  images: ['ecr-public.aws.com/docker/library/redis:8.6.4-alpine', 'ghcr.io/dexidp/dex:v2.46.1',
     'quay.io/argoproj/argocd:v3.5.6']
 - version: 3.5.1
   kube: ['1.37', '1.36', '1.35']
