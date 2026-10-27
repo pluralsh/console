@@ -49,7 +49,7 @@ describe('workbenchJobsDisplay', () => {
     ).toBe('pull request states')
   })
 
-  it('sends selected people without treating an empty person list as an empty filter', () => {
+  it('sends a copied set of people and does not treat an empty person list as an empty filter', () => {
     expect(toJobFilterVariables(DEFAULT_WORKBENCH_JOBS_DISPLAY)).toEqual({
       statuses: undefined,
       prStates: undefined,
@@ -69,9 +69,7 @@ describe('workbenchJobsDisplay', () => {
     })
     expect(hasUncheckedJobFilters(state)).toBe(true)
     expect(getJobFilterEmptyKind(state)).toBeNull()
-    expect(
-      getJobFilterEmptyKind({ ...state, userIds: [] })
-    ).toBeNull()
+    expect(getJobFilterEmptyKind({ ...state, userIds: [] })).toBeNull()
     expect(resetJobFilters(state)).toEqual(DEFAULT_WORKBENCH_JOBS_DISPLAY)
   })
 })
