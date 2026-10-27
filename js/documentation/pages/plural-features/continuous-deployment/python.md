@@ -38,16 +38,16 @@ spec:
 
 ## The Python Runtime
 
-Scripts are executed by [Monty](https://github.com/pydantic/monty), a sandboxed Python interpreter written in Rust, embedded in the deployment agent through [gomonty](https://github.com/ewhauser/gomonty). It is not CPython: it implements a subset of Python 3.14 syntax and a small subset of the standard library, and it has no access to the host system.
+Scripts are executed by [Monty](https://github.com/pydantic/monty), a sandboxed Python interpreter written in Rust, embedded in the deployment agent through [gomonty](https://github.com/ewhauser/gomonty). It is not CPython: it implements a subset of Python 3.14 syntax and a small subset of the standard library, and its only access to the host system is through the agent-provided globals described below.
 
 The agent currently bundles gomonty `v0.0.14`, which pins Monty `v0.0.9`. Monty's [upstream documentation](https://pydantic.dev/docs/monty/limitations/) tracks the latest Monty release, which supports more than the pinned version does (for example classes and `str.format`). Treat this page as the reference for what works in the agent.
 
 ### Security Model
 
-- **No filesystem access**: `open` does not exist, and filesystem calls in `os` and `pathlib` raise `NotImplementedError`. Unlike Lua, Python scripts cannot read files from the service tarball. Use `valuesFiles` to have the agent load files on your behalf.
+- **Read-only filesystem access scoped to the service**: like Lua, scripts can read files from the service tarball with [`fs.read` and `fs.walk`](#reading-files). Paths are resolved relative to the service root, and any path that resolves outside it, whether through `..`, an absolute path, or a symlink, is rejected. There is no way to write files. `open` does not exist, and filesystem calls in `os` and `pathlib` raise `NotImplementedError`.
 - **No environment or network access**: `os.getenv` and `os.environ` raise `NotImplementedError`, and there is no socket, HTTP, or subprocess module.
 - **No third-party packages**: there is no `sys.path` or site-packages, so `import yaml`, `import requests`, and similar fail with `ModuleNotFoundError`. YAML support is provided by the [`yaml_encode` and `yaml_decode`](#yaml) globals instead.
-- **Limited host callbacks**: the only way to reach the agent is [`k8s_object_meta`](#kubernetes-object-metadata), a read-only lookup against the agent's object cache. The [YAML](#yaml) and [`merge`](#merging-dictionaries) helpers also run on the agent, but they only transform the data you pass them. [`warn`](#service-warnings) is defined in the sandbox itself.
+- **Limited host callbacks**: the only ways to reach the agent are [`fs.read` and `fs.walk`](#reading-files), which read from the service directory, and [`k8s_object_meta`](#kubernetes-object-metadata), a read-only lookup against the agent's object cache. The [YAML](#yaml) and [`merge`](#merging-dictionaries) helpers also run on the agent, but they only transform the data you pass them. [`warn`](#service-warnings) is defined in the sandbox itself.
 - **Fresh state on every render**: each render gets a new interpreter. Nothing defined in one render, including functions and globals, is visible to the next.
 
 ### Resource Limits
@@ -139,10 +139,12 @@ if "endpoint" in db:
 | [`yaml_encode(value)`](#yaml) | Serialize a value to a YAML string |
 | [`yaml_decode(text)`](#yaml) | Parse a YAML string into Python values |
 | [`merge(destination, source, strategy="override")`](#merging-dictionaries) | Deep-merge two dictionaries |
+| [`fs.read(path)`](#reading-files) | Read a file from the service directory |
+| [`fs.walk(dir, ignore_dotfiles=False)`](#reading-files) | List the files under a directory of the service |
 | [`k8s_object_meta(group, version, kind, namespace, name)`](#kubernetes-object-metadata) | Look up cached Kubernetes object metadata |
 | [`warn(message)`](#service-warnings) | Report a non-fatal warning to the service |
 
-These are plain globals, not modules, so call them directly without an `import`.
+These are plain globals, not modules, so call them directly without an `import`. `fs` is a global object, so use `fs.read(...)` and `fs.walk(...)` as written, the same as in Lua.
 
 ## Value Merge Order
 
@@ -215,7 +217,7 @@ Some differences from CPython:
 | `math` | Common functions such as `floor`, `ceil`, `sqrt`, `log`, `pow`, `isclose`, `gcd`, trigonometric functions, and `pi` |
 | `datetime` | `date`, `datetime`, `timedelta`, and `timezone` for constructing, parsing (`fromisoformat`), and doing arithmetic on dates. `datetime.now()` and `date.today()` are not available, since the sandbox has no clock |
 | `typing` | Names for type hints, such as `Any` and `Optional` |
-| `pathlib` | Pure path manipulation only, such as `str(Path("a") / "b")`. Filesystem methods raise `NotImplementedError` |
+| `pathlib` | Pure path manipulation only, such as `str(Path("a") / "b")`. Filesystem methods raise `NotImplementedError`, so use [`fs.read` and `fs.walk`](#reading-files) instead. They accept `Path` objects as well as strings |
 | `sys` | Interpreter metadata, such as `sys.version_info` |
 | `os` | Importable, but every function raises `NotImplementedError` |
 | `asyncio` | Importable, but there is nothing to await in this context |
@@ -300,6 +302,56 @@ appended = merge(base, override, strategy="append")
 ```
 
 `merge` only combines the dictionaries you pass it. It has no effect on how the script's `values` are layered over the other value sources, which is described in [Value Merge Order](#value-merge-order).
+
+## Reading Files
+
+Python scripts can read files from the service tarball through the `fs` global, matching Lua's `fs.read` and `fs.walk`. Access is read-only and confined to the service root:
+
+- Paths are relative to the service root. `..` and `.` components are allowed as long as the result stays inside the root.
+- Paths that resolve outside the service root, including absolute paths and symlinks that point outside it, raise `OSError`.
+- There are no write, delete, or other filesystem operations.
+
+Unlike Lua, which returns `nil` and an error message, failures raise exceptions that you can catch with `try` / `except`:
+
+| Exception | Raised when |
+|-----------|-------------|
+| `FileNotFoundError` | The path does not exist |
+| `IsADirectoryError` | `fs.read` is given a directory |
+| `NotADirectoryError` | A path component that should be a directory is a file |
+| `OSError` | The path is outside the service root, or any other filesystem error. All of the exceptions above are subclasses of `OSError` |
+| `TypeError` | The arguments have the wrong type or count |
+
+### `fs.read(path) -> str`
+
+Returns the contents of the file at `path`. Files must be UTF-8 text. Binary files raise `UnicodeDecodeError`.
+
+**Parameters:**
+- `path` (str or `pathlib.Path`): File path, relative to the service root
+
+```python
+config = yaml_decode(fs.read("config/app.yaml"))
+values["app"] = config
+
+try:
+    values["banner"] = fs.read("banner.txt")
+except FileNotFoundError:
+    warn("banner.txt not found, skipping banner")
+```
+
+### `fs.walk(dir, ignore_dotfiles=False) -> list[str]`
+
+Returns every file under `dir`, recursively and in lexical order. Directories themselves are not included. Each entry is a path relative to the **service root**, not to `dir`, so it can be passed straight to `fs.read` or appended to `valuesFiles`. If `dir` is a file, the result is a list containing just that file.
+
+**Parameters:**
+- `dir` (str or `pathlib.Path`): Directory to walk, relative to the service root. Use `"."` for the whole service
+- `ignore_dotfiles` (bool, optional): Skip files and directories whose names start with `.`, along with everything under those directories. Can be passed by position or as a keyword
+
+```python
+for path in fs.walk("config", ignore_dotfiles=True):
+    if path.endswith(".yaml"):
+        values = merge(values, yaml_decode(fs.read(path)))
+# config/.secrets/... and config/.draft.yaml are skipped
+```
 
 ## Kubernetes Object Metadata
 
@@ -482,7 +534,8 @@ if start:
 | `encoding.jsonEncode` / `jsonDecode` | `json.dumps` / `json.loads` |
 | `encoding.yamlEncode` / `yamlDecode` | `yaml_encode` / `yaml_decode` |
 | `encoding.jsonSchema` | Not available |
-| `fs.read` / `fs.walk` | Not available. Use `valuesFiles` |
+| `fs.read(path)`, returns the contents or `nil, err` | `fs.read(path)`, returns a `str` or raises `OSError` |
+| `fs.walk(dir, ignoreDotfiles)`, returns a table or `nil, err` | `fs.walk(dir, ignore_dotfiles)`, returns a `list[str]` or raises `OSError` |
 | `utils.merge(dst, src, strategy)` | `merge(dst, src, strategy)` |
 | `utils.splitString(s, d)` | `s.split(d)` |
 | `utils.pathJoin(parts)` | `"/".join(parts)` |

@@ -88,6 +88,46 @@ func TestPythonValuesInlineScriptWinsOverFile(t *testing.T) {
 	}
 }
 
+func TestPythonValuesFSIsScopedToServiceDirectory(t *testing.T) {
+	parent := t.TempDir()
+	dir := filepath.Join(parent, "service")
+	writePythonFile(t, dir, "config/app.yaml", "replicas: 3\n")
+	writePythonFile(t, dir, "config/.hidden.yaml", "replicas: 9\n")
+	writePythonFile(t, parent, "outside.yaml", "escaped: true\n")
+
+	p, err := python.NewPoolWithConfig(python.Config{WorkerCount: 1, QueueSize: 1})
+	if err != nil {
+		t.Fatalf("NewPoolWithConfig: %v", err)
+	}
+	t.Cleanup(func() { _ = p.Close() })
+
+	svc := &console.ServiceDeploymentForAgent{
+		Helm: &console.ServiceDeploymentForAgent_Helm{
+			PythonScript: lo.ToPtr(`
+values["files"] = fs.walk("config", True)
+values["app"] = yaml_decode(fs.read(values["files"][0]))
+try:
+    fs.read("../outside.yaml")
+except OSError:
+    values["escaped"] = False
+`),
+		},
+	}
+	result, _, err := (&helm{dir: dir, pythonPool: p}).pythonValues(context.Background(), svc)
+	if err != nil {
+		t.Fatalf("pythonValues: %v", err)
+	}
+	if files, ok := result["files"].([]any); !ok || len(files) != 1 || files[0] != "config/app.yaml" {
+		t.Fatalf("unexpected walk result: %#v", result["files"])
+	}
+	if app, ok := result["app"].(map[string]any); !ok || app["replicas"] != float64(3) {
+		t.Fatalf("unexpected read result: %#v", result["app"])
+	}
+	if result["escaped"] != false {
+		t.Fatalf("expected reads outside the service directory to fail: %#v", result)
+	}
+}
+
 func TestPythonValuesCannotReadPythonFileOutsideDirectory(t *testing.T) {
 	dir := t.TempDir()
 	outsideDir := t.TempDir()

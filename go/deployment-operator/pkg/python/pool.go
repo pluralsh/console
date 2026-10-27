@@ -2,9 +2,10 @@
 // templating.
 //
 // Scripts run in a fresh Gomonty REPL for every job. The sandbox does not
-// expose OS, filesystem, network, or environment access. Host callbacks are
-// limited to the read-only k8s_object_meta lookup against the agent cache and
-// the pure yaml_encode, yaml_decode, and merge helpers.
+// expose OS, network, or environment access. Host callbacks are limited to
+// the read-only fs.read and fs.walk methods scoped to the job's directory, the
+// read-only k8s_object_meta lookup against the agent cache, and the pure
+// yaml_encode, yaml_decode, and merge helpers.
 package python
 
 import (
@@ -71,6 +72,7 @@ var syntaxByteRange = regexp.MustCompile(`byte range ([0-9]+)\.\.([0-9]+)$`)
 
 type job struct {
 	ctx      context.Context
+	dir      string
 	script   string
 	bindings map[string]any
 	result   chan jobResult
@@ -160,9 +162,16 @@ func (config Config) workerCount() int {
 	return parallelism
 }
 
-// Run submits one script to the bounded pool. The timeout starts before queue
-// admission, so a queued job cannot extend the caller's end-to-end deadline.
+// Run submits one script to the bounded pool without filesystem access, so
+// fs.read and fs.walk raise OSError.
 func (p *Pool) Run(ctx context.Context, script string, bindings map[string]any) (Result, error) {
+	return p.RunInDir(ctx, "", script, bindings)
+}
+
+// RunInDir submits one script to the bounded pool, scoping fs.read and fs.walk
+// to dir. The timeout starts before queue admission, so a queued job cannot
+// extend the caller's end-to-end deadline.
+func (p *Pool) RunInDir(ctx context.Context, dir, script string, bindings map[string]any) (Result, error) {
 	if ctx == nil {
 		ctx = context.Background()
 	}
@@ -178,6 +187,7 @@ func (p *Pool) Run(ctx context.Context, script string, bindings map[string]any) 
 
 	request := job{
 		ctx:      ctx,
+		dir:      dir,
 		script:   script,
 		bindings: bindings,
 		result:   make(chan jobResult, 1),
@@ -231,7 +241,7 @@ func (p *Pool) worker() {
 			default:
 			}
 
-			result, err := p.execute(request.ctx, request.script, request.bindings)
+			result, err := p.execute(request.ctx, request.dir, request.script, request.bindings)
 			request.result <- jobResult{result: result, err: err}
 		}
 	}
@@ -259,7 +269,7 @@ func (p *Pool) healthCheck() error {
 	return nil
 }
 
-func (p *Pool) execute(parentCtx context.Context, script string, bindings map[string]any) (Result, error) {
+func (p *Pool) execute(parentCtx context.Context, dir, script string, bindings map[string]any) (Result, error) {
 	ctx, cancel := context.WithTimeout(parentCtx, p.timeout)
 	defer cancel()
 	stopPoolCancel := context.AfterFunc(p.poolCtx, cancel)
@@ -300,14 +310,16 @@ func (p *Pool) execute(parentCtx context.Context, script string, bindings map[st
 		"    if not isinstance(message, str):\n" +
 		"        raise TypeError('warn() argument must be a string')\n" +
 		"    __helm_warnings.append(message)\n"
-	if _, err := repl.FeedRun(ctx, initialization, p.feedOptions()); err != nil {
+	fs := newFSModule(dir)
+	defer fs.Close()
+	if _, err := feed(ctx, repl, initialization, map[string]monty.Value{fsName: fsValue()}, fs); err != nil {
 		return Result{}, p.mapExecutionError(ctx, err)
 	}
-	if _, err := repl.FeedRun(ctx, script, p.feedOptions()); err != nil {
+	if _, err := feed(ctx, repl, script, nil, fs); err != nil {
 		return Result{}, p.mapExecutionError(ctx, err)
 	}
 
-	encoded, err := repl.FeedRun(ctx, "__helm_json.dumps({'values': values, 'valuesFiles': valuesFiles, 'warnings': __helm_warnings})", p.feedOptions())
+	encoded, err := feed(ctx, repl, "__helm_json.dumps({'values': values, 'valuesFiles': valuesFiles, 'warnings': __helm_warnings})", nil, fs)
 	if err != nil {
 		return Result{}, p.mapExecutionError(ctx, err)
 	}

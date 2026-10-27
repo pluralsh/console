@@ -14,15 +14,72 @@ const (
 	mergeStrategyAppend   = "append"
 )
 
-func (p *Pool) feedOptions() monty.FeedOptions {
-	return monty.FeedOptions{
-		Functions: map[string]monty.ExternalFunction{
-			"k8s_object_meta": k8sObjectMeta,
-			"yaml_encode":     yamlEncode,
-			"yaml_decode":     yamlDecode,
-			"merge":           merge,
-		},
+var externalFunctions = map[string]monty.ExternalFunction{
+	"k8s_object_meta": k8sObjectMeta,
+	"yaml_encode":     yamlEncode,
+	"yaml_decode":     yamlDecode,
+	"merge":           merge,
+}
+
+// feed runs one snippet in the REPL. It replaces Repl.FeedRun because gomonty
+// drops host method handlers when a dataclass crosses into the sandbox, so
+// method calls on the fs global have to be dispatched here.
+func feed(ctx context.Context, repl *monty.Repl, code string, inputs map[string]monty.Value, fs *fsModule) (monty.Value, error) {
+	progress, err := repl.FeedStart(ctx, code, monty.FeedStartOptions{Inputs: inputs})
+	for err == nil {
+		if ctxErr := ctx.Err(); ctxErr != nil {
+			return monty.Value{}, ctxErr
+		}
+		switch current := progress.(type) {
+		case *monty.Complete:
+			return current.Output, nil
+		case *monty.NameLookupSnapshot:
+			if _, ok := externalFunctions[current.VariableName]; ok {
+				progress, err = current.ResumeValue(ctx, monty.FunctionValue(monty.Function{Name: current.VariableName}))
+			} else {
+				progress, err = current.ResumeUndefined(ctx)
+			}
+		case *monty.Snapshot:
+			var result monty.Result
+			if result, err = dispatch(ctx, current, fs); err != nil {
+				return monty.Value{}, err
+			}
+			if exception, raised := result.Raised(); raised {
+				progress, err = current.ResumeException(ctx, *exception)
+			} else {
+				progress, err = current.ResumeReturn(ctx, result.Value())
+			}
+		default:
+			return monty.Value{}, fmt.Errorf("unsupported Python progress %T", current)
+		}
 	}
+	return monty.Value{}, err
+}
+
+func dispatch(ctx context.Context, snapshot *monty.Snapshot, fs *fsModule) (monty.Result, error) {
+	call := monty.Call{
+		FunctionName: snapshot.FunctionName,
+		Args:         snapshot.Args,
+		Kwargs:       snapshot.Kwargs,
+		CallID:       snapshot.CallID,
+		IsMethodCall: snapshot.IsMethodCall,
+	}
+	switch {
+	case snapshot.IsOSFunction:
+		return raise("NotImplementedError", fmt.Sprintf("%s is not available", snapshot.FunctionName))
+	case snapshot.IsMethodCall:
+		if len(call.Args) > 0 && isFSValue(call.Args[0]) {
+			if method, ok := fs.method(call.FunctionName); ok {
+				return method(ctx, call)
+			}
+		}
+		return raise("AttributeError", fmt.Sprintf("object has no attribute %q", call.FunctionName))
+	}
+	fn, ok := externalFunctions[call.FunctionName]
+	if !ok {
+		return raise("LookupError", fmt.Sprintf("unable to find %q in external functions", call.FunctionName))
+	}
+	return fn(ctx, call)
 }
 
 // yamlEncode implements yaml_encode(value) -> str.

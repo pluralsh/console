@@ -383,7 +383,7 @@ func (h *helm) pythonValues(ctx context.Context, svc *console.ServiceDeploymentF
 		return nil, valuesFiles, fmt.Errorf("no Python script, file, or folder provided")
 	}
 
-	result, err := pool.Run(ctx, pythonString, bindings(svc))
+	result, err := pool.RunInDir(ctx, h.dir, pythonString, bindings(svc))
 	if err != nil {
 		return nil, valuesFiles, err
 	}
