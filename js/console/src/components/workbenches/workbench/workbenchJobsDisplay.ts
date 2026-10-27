@@ -110,7 +110,7 @@ export function getJobFilterEmptyKind({
   prStates,
 }: Pick<
   WorkbenchJobsDisplayState,
-  'statuses' | 'prStates'
+  'statuses' | 'prStates' | 'userIds'
 >): JobFilterEmptyKind | null {
   if (isEmpty(statuses)) return 'statuses'
   if (isEmpty(prStates)) return 'pull request states'

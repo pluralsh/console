@@ -113,7 +113,10 @@ export function WorkbenchJobs() {
   // the list view loads jobs inside each status group, so those groups report
   // the rows they have; the other views use the page query (and recent jobs)
   const [groupedJobs, setGroupedJobs] = useState<
-    readonly { id: string; user?: { id: string; name?: string | null } | null }[]
+    readonly {
+      id: string
+      user?: { id: string; name?: string | null } | null
+    }[]
   >([])
   const onGroupedJobs = useCallback(
     (

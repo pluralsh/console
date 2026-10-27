@@ -158,8 +158,6 @@ export function WorkbenchJobsGroupedList({
   const jobsByStatus = useRef(
     new Map<WorkbenchJobStatus, readonly WorkbenchJobTinyFragment[]>()
   )
-  const onLoadedJobsRef = useRef(onLoadedJobs)
-  onLoadedJobsRef.current = onLoadedJobs
   const reportGroupJobs = useCallback(
     (
       status: WorkbenchJobStatus,
@@ -167,13 +165,13 @@ export function WorkbenchJobsGroupedList({
     ) => {
       if (groupJobs) jobsByStatus.current.set(status, groupJobs)
       else jobsByStatus.current.delete(status)
-      if (!onLoadedJobsRef.current) return
+      if (!onLoadedJobs) return
 
       const loaded: WorkbenchJobTinyFragment[] = []
       for (const rows of jobsByStatus.current.values()) loaded.push(...rows)
-      onLoadedJobsRef.current(loaded)
+      onLoadedJobs(loaded)
     },
-    []
+    [onLoadedJobs]
   )
   const groups = useMemo(() => {
     if (!countsData) return undefined
