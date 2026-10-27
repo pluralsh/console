@@ -28,17 +28,75 @@ const GQL_URL = '/gql'
 const WS_URI = '/socket'
 const GQL_WS_URI = '/socket/gql-ws'
 
-export const { client, socket } = buildClient(
-  { gql: GQL_URL, ws: WS_URI, gqlws: GQL_WS_URI },
-  fetchToken
-)
-
 export const authlessCacheConfig: InMemoryCacheConfig = {
   typePolicies: {
     // un-normalized and fetched piecemeal by the public page and each panel graph
     PublicWorkbenchDashboard: { merge: true },
   },
 }
+
+export const authenticatedCacheConfig: InMemoryCacheConfig = {
+  possibleTypes: fragments.possibleTypes,
+  typePolicies: {
+    Command: {
+      fields: {
+        exitCode: {
+          merge(code, incoming) {
+            if (code || code === 0) return code
+
+            return incoming
+          },
+        },
+      },
+    },
+    // TODO: re-evaluate if this logic is actually being used correctly
+    // Only configure specific merge behavior for the problematic connection
+    ChatThread: {
+      fields: {
+        chats: {
+          merge(existing, incoming, { args }) {
+            // For paginated chats, merge properly based on cursor
+            if (!existing) return incoming
+            if (!incoming) return existing
+
+            // If it's a fresh fetch (no cursor args), replace entirely
+            if (!args?.after && !args?.before) {
+              return incoming
+            }
+
+            // Otherwise merge the connections
+            return {
+              ...incoming,
+              edges: [...(existing.edges || []), ...(incoming.edges || [])],
+            }
+          },
+        },
+      },
+    },
+    WorkbenchJob: {
+      fields: {
+        // Poll responses can have been resolved before a subscription event
+        // arrives. Preserve activity edges added by the subscription when
+        // that older response is written to the cache.
+        activities: {
+          merge(existing, incoming, options) {
+            if (options.args?.status || options.args?.type) return incoming
+
+            return mergeConnectionsByNodeId(existing, incoming, options)
+          },
+        },
+      },
+    },
+    // Per-workbench job counts. Caching by user id would let one workbench's
+    // poll overwrite the same person's count on another workbench.
+    WorkbenchJobCountByUser: { keyFields: false },
+  },
+}
+
+export const { client, socket } = buildClient(
+  { gql: GQL_URL, ws: WS_URI, gqlws: GQL_WS_URI },
+  fetchToken
+)
 
 export const authlessClient = new ApolloClient({
   link: createLink({ uri: GQL_URL }),
@@ -136,60 +194,7 @@ export function buildClient(
 
   const client = new ApolloClient({
     link: splitLink,
-    cache: new InMemoryCache({
-      possibleTypes: fragments.possibleTypes,
-      typePolicies: {
-        Command: {
-          fields: {
-            exitCode: {
-              merge(code, incoming) {
-                if (code || code === 0) return code
-
-                return incoming
-              },
-            },
-          },
-        },
-        // TODO: re-evaluate if this logic is actually being used correctly
-        // Only configure specific merge behavior for the problematic connection
-        ChatThread: {
-          fields: {
-            chats: {
-              merge(existing, incoming, { args }) {
-                // For paginated chats, merge properly based on cursor
-                if (!existing) return incoming
-                if (!incoming) return existing
-
-                // If it's a fresh fetch (no cursor args), replace entirely
-                if (!args?.after && !args?.before) {
-                  return incoming
-                }
-
-                // Otherwise merge the connections
-                return {
-                  ...incoming,
-                  edges: [...(existing.edges || []), ...(incoming.edges || [])],
-                }
-              },
-            },
-          },
-        },
-        WorkbenchJob: {
-          fields: {
-            // Poll responses can have been resolved before a subscription event
-            // arrives. Preserve activity edges added by the subscription when
-            // that older response is written to the cache.
-            activities: {
-              merge(existing, incoming, options) {
-                if (options.args?.status || options.args?.type) return incoming
-
-                return mergeConnectionsByNodeId(existing, incoming, options)
-              },
-            },
-          },
-        },
-      },
-    }),
+    cache: new InMemoryCache(authenticatedCacheConfig),
   })
 
   // in unit tests this would open a socket after jsdom tears down localStorage

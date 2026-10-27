@@ -23993,7 +23993,7 @@ export type WorkbenchJobCountsQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchJobCountsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, runCounts?: { __typename?: 'WorkbenchJobCounts', statuses?: Array<{ __typename?: 'WorkbenchJobCountByStatus', status: WorkbenchJobStatus, count: number } | null> | null, pullRequests?: Array<{ __typename?: 'WorkbenchJobCountByPrState', state: WorkbenchJobPrState, count: number } | null> | null, users?: Array<{ __typename?: 'WorkbenchJobCountByUser', id: string, name?: string | null, count: number } | null> | null } | null } | null };
+export type WorkbenchJobCountsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, runCounts?: { __typename?: 'WorkbenchJobCounts', statuses?: Array<{ __typename?: 'WorkbenchJobCountByStatus', status: WorkbenchJobStatus, count: number } | null> | null, pullRequests?: Array<{ __typename?: 'WorkbenchJobCountByPrState', state: WorkbenchJobPrState, count: number } | null> | null } | null } | null };
 
 export type WorkbenchJobStatusCountsQueryVariables = Exact<{
   id: Scalars['ID']['input'];

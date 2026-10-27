@@ -1,4 +1,4 @@
-import { InMemoryCache } from '@apollo/client'
+import { gql, InMemoryCache } from '@apollo/client'
 import {
   DashboardGraphType,
   PublicWorkbenchDashboardGraphQuery,
@@ -10,7 +10,7 @@ import {
 } from 'generated/graphql-documents'
 import { describe, expect, it, vi } from 'vitest'
 
-import { authlessCacheConfig } from './client'
+import { authenticatedCacheConfig, authlessCacheConfig } from './client'
 
 vi.mock('./auth', () => ({ fetchToken: () => null }))
 
@@ -124,5 +124,80 @@ describe('authlessCacheConfig', () => {
     writeAll(cache)
 
     expect(readPage(cache)).toBeNull()
+  })
+})
+
+const userId = 'user-1'
+
+// The jobs page no longer asks the polled counts query for people. This
+// document still selects them so the cache policy stays covered.
+const WorkbenchJobUserCountsDocument = gql`
+  query WorkbenchJobUserCounts($id: ID!) {
+    workbench(id: $id) {
+      id
+      runCounts {
+        users {
+          id
+          name
+          count
+        }
+      }
+    }
+  }
+`
+
+function jobCounts(workbenchId: string, count: number) {
+  return {
+    workbench: {
+      __typename: 'Workbench' as const,
+      id: workbenchId,
+      runCounts: {
+        __typename: 'WorkbenchJobCounts' as const,
+        users: [
+          {
+            __typename: 'WorkbenchJobCountByUser' as const,
+            id: userId,
+            name: 'Ada',
+            count,
+          },
+        ],
+      },
+    },
+  }
+}
+
+function writeJobCounts(cache: InMemoryCache, workbenchId: string, count: number) {
+  cache.writeQuery({
+    query: WorkbenchJobUserCountsDocument,
+    variables: { id: workbenchId },
+    data: jobCounts(workbenchId, count),
+  })
+}
+
+const readJobCounts = (cache: InMemoryCache, workbenchId: string) =>
+  cache.readQuery({
+    query: WorkbenchJobUserCountsDocument,
+    variables: { id: workbenchId },
+  })
+
+describe('authenticatedCacheConfig', () => {
+  it('keeps one person’s job count separate on each workbench', () => {
+    const cache = new InMemoryCache(authenticatedCacheConfig)
+
+    writeJobCounts(cache, 'wb-a', 1)
+    writeJobCounts(cache, 'wb-b', 5)
+
+    expect(readJobCounts(cache, 'wb-a')).toEqual(jobCounts('wb-a', 1))
+    expect(readJobCounts(cache, 'wb-b')).toEqual(jobCounts('wb-b', 5))
+    expect(cache.extract()[`WorkbenchJobCountByUser:${userId}`]).toBeUndefined()
+  })
+
+  it('shares one record per user without the type policy', () => {
+    const cache = new InMemoryCache()
+
+    writeJobCounts(cache, 'wb-a', 1)
+    writeJobCounts(cache, 'wb-b', 5)
+
+    expect(readJobCounts(cache, 'wb-a')?.workbench?.runCounts?.users?.[0]?.count).toBe(5)
   })
 })

@@ -1053,11 +1053,6 @@ query WorkbenchJobCounts($id: ID!) {
         state
         count
       }
-      users {
-        id
-        name
-        count
-      }
     }
   }
 }

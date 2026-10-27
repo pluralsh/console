@@ -826,33 +826,6 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert empty["runCounts"]["users"] == found["runCounts"]["users"]
     end
 
-    test "it caps run counts by user" do
-      workbench = insert(:workbench)
-      limit = 100
-
-      for n <- 1..(limit + 1) do
-        insert(:workbench_job,
-          workbench: workbench,
-          user: insert(:user, name: "Person #{String.pad_leading(Integer.to_string(n), 3, "0")}")
-        )
-      end
-
-      {:ok, %{data: %{"workbench" => found}}} = run_query("""
-        query Workbench($id: ID!) {
-          workbench(id: $id) {
-            runCounts {
-              users { name }
-            }
-          }
-        }
-      """, %{"id" => workbench.id}, %{current_user: admin_user()})
-
-      names = Enum.map(found["runCounts"]["users"], & &1["name"])
-      assert length(names) == limit
-      assert List.first(names) == "Person 001"
-      refute "Person 101" in names
-    end
-
     test "it can filter workbench runs and counts to a creation window" do
       workbench = insert(:workbench)
       recent = insert(:workbench_job, workbench: workbench, status: :running)

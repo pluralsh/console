@@ -12,14 +12,9 @@ import {
   JOB_PR_STATE_LABELS,
   JOB_PR_STATE_OPTIONS,
   JOB_STATUS_OPTIONS,
+  WorkbenchJobPerson,
   WorkbenchJobsDisplayState,
 } from './workbenchJobsDisplay'
-
-export type WorkbenchJobPerson = {
-  id: string
-  name?: string | null
-  count: number
-}
 
 export function WorkbenchJobsDisplayOptions({
   state,

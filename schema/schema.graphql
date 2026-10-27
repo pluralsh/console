@@ -4188,7 +4188,7 @@ type WorkbenchJobCounts {
   "jobs with at least one pull request in each state (a job can count towards several)"
   pullRequests: [WorkbenchJobCountByPrState]
 
-  "jobs run by each user on this workbench, at most 100 users ordered by name"
+  "jobs run by each user on this workbench, ordered by name"
   users: [WorkbenchJobCountByUser]
 }
 

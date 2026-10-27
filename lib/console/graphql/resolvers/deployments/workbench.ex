@@ -75,21 +75,27 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     |> paginate_with_total(args)
   end
 
-  def run_counts(%Workbench{id: id}, args, _) do
+  def run_counts(%Workbench{id: id}, args, info) do
     jobs =
       WorkbenchJob.for_workbench(id)
       |> maybe_job_search(args)
       |> workbench_job_filters(Map.take(args, [:pr_states, :inserted_after]))
     none = Repo.aggregate(WorkbenchJob.without_pull_requests(jobs), :count)
-    # Count people before user_ids so the Person section still lists everyone on this workbench.
-    users = Repo.all(WorkbenchJob.count_by_user(jobs))
     status_jobs = workbench_job_filters(jobs, Map.take(args, [:user_ids]))
 
     {:ok, %{
       statuses: Repo.all(WorkbenchJob.count_by_status(status_jobs)),
       pull_requests: Repo.all(WorkbenchJob.count_by_pr_state(jobs)) ++ [%{state: :none, count: none}],
-      users: users
+      # Counted before user_ids, and only when selected. Status polls don't ask
+      # for people, and the jobs page builds its Person menu from loaded jobs.
+      users: users_count(jobs, info)
     }}
+  end
+
+  defp users_count(jobs, info) do
+    if Enum.any?(Absinthe.Resolution.project(info), &(&1.schema_node.identifier == :users)),
+      do: Repo.all(WorkbenchJob.count_by_user(jobs)),
+      else: []
   end
 
   def accessible_users(workbench, _args, _) do

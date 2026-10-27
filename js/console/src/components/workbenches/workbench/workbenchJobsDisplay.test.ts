@@ -6,6 +6,7 @@ import {
   hasUncheckedJobFilters,
   JOB_PR_STATE_OPTIONS,
   JOB_STATUS_OPTIONS,
+  peopleFromLoadedJobs,
   resetJobFilters,
   toJobFilterVariables,
 } from './workbenchJobsDisplay'
@@ -72,6 +73,28 @@ describe('workbenchJobsDisplay', () => {
       getJobFilterEmptyKind({ ...state, userIds: [] })
     ).toBeNull()
     expect(resetJobFilters(state)).toEqual(DEFAULT_WORKBENCH_JOBS_DISPLAY)
+  })
+})
+
+describe('peopleFromLoadedJobs', () => {
+  it('counts distinct people on the loaded jobs, ordered by name', () => {
+    expect(
+      peopleFromLoadedJobs([
+        { id: 'job-1', user: { id: 'bob', name: 'Bob' } },
+        { id: 'job-2', user: { id: 'ada', name: 'Ada' } },
+        { id: 'job-3', user: { id: 'ada', name: 'Ada' } },
+        { id: 'job-4', user: null },
+        { id: 'job-2', user: { id: 'ada', name: 'Ada' } },
+      ])
+    ).toEqual([
+      { id: 'ada', name: 'Ada', count: 2 },
+      { id: 'bob', name: 'Bob', count: 1 },
+    ])
+  })
+
+  it('is empty when no loaded job has a person', () => {
+    expect(peopleFromLoadedJobs([])).toEqual([])
+    expect(peopleFromLoadedJobs([{ id: 'job-1', user: null }])).toEqual([])
   })
 })
 

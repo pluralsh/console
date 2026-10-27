@@ -10990,11 +10990,6 @@ export const WorkbenchJobCountsDocument = /*#__PURE__*/ gql`
         state
         count
       }
-      users {
-        id
-        name
-        count
-      }
     }
   }
 }
