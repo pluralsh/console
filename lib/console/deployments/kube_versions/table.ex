@@ -139,7 +139,7 @@ defmodule Console.Deployments.KubeVersions.Table do
 
   def handle_info(:poll, %State{table: table, static: false, url: url} = state) do
     with {:ok, %Req.Response{status: 200, body: body}} <- Req.get(url, decode_body: false, retry: false),
-         {:ok, %{"kube_changelog" => changelog}} <- YamlElixir.read_from_string(body) do
+         {:ok, %{"kube_changelog" => changelog}} <- Console.Utils.Yaml.decode(body) do
       table = Enum.reduce(changelog, table, fn change, table ->
         changelog = Changelog.new(change)
         KeyValueSet.put!(table, {:changelog, changelog.version}, changelog)
@@ -163,14 +163,14 @@ defmodule Console.Deployments.KubeVersions.Table do
   def static() do
     Enum.map(@distros, fn distro ->
       {:ok, yaml} = File.read("static/extended/#{distro}.yaml")
-      {:ok, versions} = YamlElixir.read_from_string(yaml)
+      {:ok, versions} = Console.Utils.Yaml.decode(yaml)
       to_entry(distro, versions)
     end)
   end
 
   def static_changelog() do
     {:ok, yaml} = File.read("static/kube_changelog.yaml")
-    {:ok, %{"kube_changelog" => changelog}} = YamlElixir.read_from_string(yaml)
+    {:ok, %{"kube_changelog" => changelog}} = Console.Utils.Yaml.decode(yaml)
     Enum.map(changelog, &Changelog.new/1)
   end
 end

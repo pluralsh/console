@@ -30,7 +30,7 @@ defmodule Console.Deployments.Helm.Repository do
     artifact: %HelmRepository.Status.Artifact{url: url}
   }}) when is_binary(url) do
     with {:ok, %Req.Response{status: 200, body: body}} <- Req.get(url, decode_body: false, retry: false),
-         {:ok, yaml} <- YamlElixir.read_from_string(body) do
+         {:ok, yaml} <- Console.Utils.Yaml.decode(body) do
       helm = %Schema{entries: yaml["entries"]}
       helm = Schema.transform(helm)
       {:ok, helm.entries}

@@ -58,7 +58,7 @@ defmodule Console.Deployments.Deprecations.Table do
 
   defp fetch_and_parse(url) do
     with {:ok, %Req.Response{status: 200, body: body}} <- Req.get(url, [decode_body: false, retry: false] ++ Console.Utils.HTTP.req_options(proxy_config())),
-         {:ok, %{"deprecated-versions" => deprecated}} <- YamlElixir.read_from_string(body) do
+         {:ok, %{"deprecated-versions" => deprecated}} <- Console.Utils.Yaml.decode(body) do
       Enum.map(deprecated, &to_entry/1)
     end
   end
@@ -86,7 +86,7 @@ defmodule Console.Deployments.Deprecations.Table do
 
   def static() do
     {:ok, yaml} = File.read("static/versions.yml")
-    {:ok, %{"deprecated-versions" => [_ | _] = deprecated}} = YamlElixir.read_from_string(yaml)
+    {:ok, %{"deprecated-versions" => [_ | _] = deprecated}} = Console.Utils.Yaml.decode(yaml)
     Enum.map(deprecated, &to_entry/1)
   end
 end

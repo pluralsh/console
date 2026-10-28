@@ -559,7 +559,7 @@ defmodule Console.Deployments.Services do
   @spec self_manage(binary, User.t) :: service_resp
   def self_manage(values, %User{} = user) do
     start_transaction()
-    |> add_operation(:values, fn _ -> YamlElixir.read_from_string(values) end)
+    |> add_operation(:values, fn _ -> Console.Utils.Yaml.decode(values) end)
     |> add_operation(:git, fn _ -> ensure_console_repo(user) end)
     |> add_operation(:settings, fn _ -> Settings.update(%{self_managed: true}, user) end)
     |> add_operation(:service, fn %{git: git} ->

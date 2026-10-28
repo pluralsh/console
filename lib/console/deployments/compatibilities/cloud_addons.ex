@@ -66,7 +66,7 @@ defmodule Console.Deployments.Compatibilities.CloudAddOns do
 
   defp fetch_manifest(url) do
     with {:ok, %Req.Response{status: 200, body: body}} <- Req.get(url <> "manifest.yaml", decode_body: false, retry: false),
-         {:ok, %{"platforms" => platforms}} <- YamlElixir.read_from_string(body),
+         {:ok, %{"platforms" => platforms}} <- Console.Utils.Yaml.decode(body),
       do: platforms
   end
 
@@ -80,7 +80,7 @@ defmodule Console.Deployments.Compatibilities.CloudAddOns do
   end
 
   defp decode_cloud_addon(platform, yaml) do
-    with {:ok, res} <- YamlElixir.read_from_string(yaml),
+    with {:ok, res} <- Console.Utils.Yaml.decode(yaml),
          {:ok, encoded} <- Jason.encode(res),
          {:ok, addons} <- Poison.decode(encoded, as: [CloudAddOn.spec()]),
       do: {:ok, {platform, Enum.map(addons, &Map.put(&1, :distro, String.to_existing_atom(platform)))}}
@@ -89,7 +89,7 @@ defmodule Console.Deployments.Compatibilities.CloudAddOns do
   def static() do
     base_path = "static/addons"
     {:ok, yaml} = File.read("#{base_path}/manifest.yaml")
-    {:ok, %{"platforms" => [_ | _] = platforms}} = YamlElixir.read_from_string(yaml)
+    {:ok, %{"platforms" => [_ | _] = platforms}} = Console.Utils.Yaml.decode(yaml)
     Enum.map(platforms, fn name ->
       {:ok, yaml} = File.read("#{base_path}/#{name}.yaml")
       {:ok, addon} = decode_cloud_addon(name, yaml)

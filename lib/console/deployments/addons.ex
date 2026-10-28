@@ -55,7 +55,7 @@ defmodule Console.Deployments.AddOns do
 
   defp parse_addons(contents) do
     Enum.map(contents, fn {_, value} ->
-      with {:ok, yaml} <- YamlElixir.read_from_string(value),
+      with {:ok, yaml} <- Console.Utils.Yaml.decode(value),
            {:ok, addon} <- Poison.decode(Jason.encode!(yaml), as: AddOn.spec()) do
         addon
       else

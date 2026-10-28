@@ -42,7 +42,7 @@ defimpl Console.Helm.Interface, for: Console.Helm.Interface.HTTP do
 
   defp handle_body(%Req.Response{status: 200, body: %{} = body}), do: {:ok, body}
   defp handle_body(%Req.Response{status: 200, body: body}) when is_binary(body),
-    do: YamlElixir.read_from_string(body)
+    do: Console.Utils.Yaml.decode(body)
 
   def chart(%@for{repo: %HelmRepository{url: "http" <> _}} = client, %Index{indexed: %{} = indexed}, chart, vsn) do
     with {:chart, %{^chart => charts}} <- {:chart, indexed},

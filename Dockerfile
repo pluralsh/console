@@ -58,7 +58,7 @@ WORKDIR /opt/app
 
 # hexpm/elixir-alpine has Mix and ca-certificates only. git is required for
 # mix git deps; build-base is required for argon2_elixir's C NIF. Rust NIFs
-# (mdex, mermaid_validator) ship precompiled and do not need rustc.
+# (mdex, mermaid_validator, yaml_rustler) ship precompiled and do not need rustc.
 RUN if [ "$OS_VARIANT" = "alpine" ]; then \
       apk add --no-cache git build-base; \
     else \

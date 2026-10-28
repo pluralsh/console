@@ -19,7 +19,7 @@ defmodule Console.Deployments.Helm.AgentTest do
       files = stream_and_untar(f)
       assert files["Chart.yaml"]
 
-      {:ok, chart} = YamlElixir.read_from_string(files["Chart.yaml"])
+      {:ok, chart} = Console.Utils.Yaml.decode(files["Chart.yaml"])
       assert Version.compare(chart["appVersion"], "0.5.20") == :gt
 
       git = Console.Deployments.Git.get_helm_repository(repo)
@@ -81,7 +81,7 @@ defmodule Console.Deployments.Helm.AgentTest do
 
       files = stream_and_untar(f)
       assert files["Chart.yaml"]
-      {:ok, _} = YamlElixir.read_from_string(files["Chart.yaml"])
+      {:ok, _} = Console.Utils.Yaml.decode(files["Chart.yaml"])
 
       assert Console.Deployments.Git.get_helm_repository(repo).health == :pullable
 
@@ -106,7 +106,7 @@ defmodule Console.Deployments.Helm.AgentTest do
 
       files = stream_and_untar(f)
       assert files["Chart.yaml"]
-      {:ok, _} = YamlElixir.read_from_string(files["Chart.yaml"])
+      {:ok, _} = Console.Utils.Yaml.decode(files["Chart.yaml"])
 
       Process.exit(pid, :kill)
     end

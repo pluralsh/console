@@ -8,7 +8,7 @@ defmodule Kube.Parser do
     module = Keyword.get(opts, :module) |> Macro.to_string() |> String.split(".") |> Module.concat()
     list_module = Module.concat(module, "List")
 
-    {:ok, crd} = YamlElixir.read_from_file(path)
+    {:ok, crd} = Console.Utils.Yaml.decode_file(path)
     {group, version, name, kind, spec} = metadata(crd)
 
     model = model(spec, module, overrides)

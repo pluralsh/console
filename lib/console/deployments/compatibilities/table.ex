@@ -91,7 +91,7 @@ defmodule Console.Deployments.Compatibilities.Table do
 
   defp fetch_addons(url) do
     with {:ok, %Req.Response{status: 200, body: body}} <- Req.get(url, [decode_body: false, retry: false] ++ Console.Utils.HTTP.req_options(proxy_config())),
-         {:ok, %{"addons" => addons}} <- YamlElixir.read_from_string(body),
+         {:ok, %{"addons" => addons}} <- Console.Utils.Yaml.decode(body),
       do: addons
   end
 
@@ -101,7 +101,7 @@ defmodule Console.Deployments.Compatibilities.Table do
   end
 
   defp decode_addon(name, yaml) do
-    with {:ok, addon} <- YamlElixir.read_from_string(yaml),
+    with {:ok, addon} <- Console.Utils.Yaml.decode(yaml),
          {:ok, encoded} <- Jason.encode(addon),
          {:ok, addon} <- Poison.decode(encoded, as: AddOn.spec()),
       do: {:ok, %{addon | name: name}}
@@ -110,7 +110,7 @@ defmodule Console.Deployments.Compatibilities.Table do
   def static() do
     base_path = "static/compatibilities"
     {:ok, yaml} = File.read("#{base_path}/manifest.yaml")
-    {:ok, %{"names" => [_ | _] = addons}} = YamlElixir.read_from_string(yaml)
+    {:ok, %{"names" => [_ | _] = addons}} = Console.Utils.Yaml.decode(yaml)
     Enum.map(addons, fn name ->
       {:ok, yaml} = File.read("#{base_path}/#{name}.yaml")
       {:ok, addon} = decode_addon(name, yaml)

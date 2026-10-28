@@ -19,7 +19,7 @@ defmodule Console.Plural.Manifest do
 
   def get() do
     location()
-    |> YamlElixir.read_from_file()
+    |> Console.Utils.Yaml.decode_file()
     |> case do
       {:ok, %{"spec" => spec}} ->
         {:ok, %__MODULE__{

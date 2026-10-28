@@ -204,7 +204,7 @@ defmodule Console.Deployments.Flows.Preview do
   end
   defp template_helm_vals(_, %ServiceTemplate{} = tpl, _), do: {:ok, tpl}
 
-  defp safe_yaml(val) when is_binary(val), do: YamlElixir.read_from_string(val)
+  defp safe_yaml(val) when is_binary(val), do: Console.Utils.Yaml.decode(val)
   defp safe_yaml(nil), do: {:ok, %{}}
 
   defp render_liquid(template, ctx) when is_binary(template) do

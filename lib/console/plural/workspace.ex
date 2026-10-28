@@ -7,7 +7,7 @@ defmodule Console.Plural.Workspace do
 
   def get() do
     location()
-    |> YamlElixir.read_from_file()
+    |> Console.Utils.Yaml.decode_file()
     |> case do
       {:ok, %{"spec" => workspace}} ->
         wkspace = %__MODULE__{

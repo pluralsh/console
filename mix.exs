@@ -132,7 +132,7 @@ defmodule Console.MixProject do
       {:timex, "~> 3.7.13"},
       {:zstream, "~> 0.6"},
       {:csv, "~> 3.2"},
-      {:yaml_elixir, "~> 2.9"},
+      {:yaml_rustler, "~> 0.3.0", git: "https://github.com/pluralsh/yaml_rustler.git", branch: "main"},
       {:google_api_ai_platform, "~> 0.27"},
       {:goth, "~> 1.4", git: "https://github.com/pluralsh/goth.git", branch: "plrl-cleanup", commit: "4958159d1e9acec2154590ecacc732ecd58f8312", override: true},
       {:poison, "~> 6.0", override: true},
