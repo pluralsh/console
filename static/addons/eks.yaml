@@ -4048,6 +4048,24 @@
   publisher: eks
 - name: aws-mountpoint-s3-csi-driver
   versions:
+  - version: v2.9.1-eksbuild.1
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+  - version: v2.9.0-eksbuild.1
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
   - version: v2.8.0-eksbuild.1
     compatibilities:
     - '1.37'
@@ -5608,6 +5626,14 @@
   publisher: Chainguard
 - name: chainguard_aws-efs-csi-driver-fips
   versions:
+  - version: v4.5.10002020261025-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v4.5.10002020261024-eksbuild.1
     compatibilities:
     - '1.35'
@@ -6132,6 +6158,11 @@
   publisher: Chainguard
 - name: chainguard_coredns-fips
   versions:
+  - version: v1.49.10000020261025-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
   - version: v1.48.10000020260930-eksbuild.1
     compatibilities:
     - '1.35'
@@ -6276,6 +6307,11 @@
     - '1.34'
     - '1.33'
   - version: v0.0.20009020260425-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+  - version: v0.0.10009020261025-eksbuild.1
     compatibilities:
     - '1.35'
     - '1.34'
