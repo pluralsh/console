@@ -49,6 +49,14 @@ query GetAgentRunCredentials($id: ID!) {
     }
 }
 
+# Polled by the agent harness for cancellation, approval and queued prompts. Prompts are
+# listed by seq only; the full run is fetched when a new one shows up.
+query GetAgentRunStatus($id: ID!) {
+    agentRun(id: $id) {
+        ...AgentRunStatusFragment
+    }
+}
+
 query GetAgentRunMinimal($id: ID!) {
     agentRun(id: $id) {
         ...AgentRunMinimalFragment
@@ -345,6 +353,17 @@ fragment AgentRunCredentialsFragment on AgentRun {
     }
     pluralCreds {
         ...PluralCredsFragment
+    }
+}
+
+fragment AgentRunStatusFragment on AgentRun {
+    id
+    status
+    approvedAt
+    headBranch
+    prompts {
+        id
+        seq
     }
 }
 

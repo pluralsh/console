@@ -12,23 +12,49 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/environment"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/errors"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/websocket"
 )
+
+// stackRunNotification is the deployAgentNotification resource console publishes on stack run updates.
+const stackRunNotification = "stack_run"
 
 type consoleSignal struct {
 	client console.Client
 	id     string
+	socket websocket.Socket
+	pushed chan struct{}
+	dev    bool
+}
+
+// Publish implements websocket.Publisher. Notifications only carry the run id, so a
+// matching one triggers an immediate status check rather than cancelling outright.
+func (in *consoleSignal) Publish(id string, _ bool) {
+	if id != in.id {
+		return
+	}
+
+	select {
+	case in.pushed <- struct{}{}:
+	default:
+	}
 }
 
 func (in *consoleSignal) Listen(cancelFunc context.CancelCauseFunc) {
-	klog.V(log.LogLevelDebug).InfoS("starting console signal listener")
+	klog.V(log.LogLevelDebug).InfoS("starting console signal listener", "websocket", in.socket != nil)
 
 	ctx, cancel := context.WithCancel(context.Background())
 
 	const (
-		baseInterval = 5 * time.Second
-		maxInterval  = 30 * time.Second
-		factor       = 2.0
+		maxInterval = 30 * time.Second
+		factor      = 2.0
 	)
+
+	// Pushed notifications cover cancellation promptly, so polling is only a fallback
+	// for missed events when the socket is up.
+	baseInterval := 5 * time.Second
+	if in.socket != nil {
+		baseInterval = maxInterval
+	}
 
 	go func() {
 		interval := baseInterval
@@ -41,6 +67,9 @@ func (in *consoleSignal) Listen(cancelFunc context.CancelCauseFunc) {
 				default:
 				}
 			}
+			if in.socket != nil {
+				_ = in.socket.Close()
+			}
 		}()
 
 		for {
@@ -48,9 +77,22 @@ func (in *consoleSignal) Listen(cancelFunc context.CancelCauseFunc) {
 			case <-ctx.Done():
 				return
 			case <-timer.C:
+				if in.socket != nil {
+					// No-op while connected; recreates the client after a dropped connection.
+					if err := in.socket.Join(); err != nil {
+						klog.V(log.LogLevelDebug).InfoS("could not rejoin console websocket", "error", err)
+					}
+				}
+			case <-in.pushed:
+				if !timer.Stop() {
+					select {
+					case <-timer.C:
+					default:
+					}
+				}
 			}
 
-			stackRun, err := in.client.GetStackRunBase(in.id)
+			stackRun, err := in.client.GetStackRunStatus(in.id)
 			if err != nil {
 				// Back off on error, reset to base on next success.
 				interval = min(time.Duration(float64(interval)*factor), maxInterval)
@@ -73,7 +115,7 @@ func (in *consoleSignal) Listen(cancelFunc context.CancelCauseFunc) {
 			interval = baseInterval
 
 			// Allow rerunning cancelled runs when in dev mode.
-			if stackRun != nil && stackRun.Status == gqlclient.StackStatusCancelled && !environment.IsDev() {
+			if stackRun != nil && stackRun.Status == gqlclient.StackStatusCancelled && !in.dev {
 				cancelFunc(errors.ErrRemoteCancel)
 				cancel()
 				return
@@ -85,11 +127,22 @@ func (in *consoleSignal) Listen(cancelFunc context.CancelCauseFunc) {
 	}()
 }
 
-func NewConsoleSignal(client console.Client, id string) Signal {
-	return &consoleSignal{
-		client,
-		id,
+// NewConsoleSignal watches the console for cancellation of the given stack run. When socket is
+// non-nil the signal subscribes to stack run notifications on it and polls far less often.
+func NewConsoleSignal(client console.Client, id string, socket websocket.Socket) Signal {
+	signal := &consoleSignal{
+		client: client,
+		id:     id,
+		socket: socket,
+		pushed: make(chan struct{}, 1),
+		dev:    environment.IsDev(),
 	}
+
+	if socket != nil {
+		socket.AddPublisher(stackRunNotification, signal)
+	}
+
+	return signal
 }
 
 type timeoutSignal struct {

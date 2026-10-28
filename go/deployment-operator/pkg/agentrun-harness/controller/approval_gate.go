@@ -84,26 +84,14 @@ func (in *agentRunController) runPostRunPollLoop(ctx context.Context) {
 
 	klog.V(log.LogLevelInfo).InfoS("waiting for agent run approval or follow-up prompts", "id", in.agentRunID)
 
-	timer := time.NewTimer(promptPollInterval)
-	defer timer.Stop()
-
 	for {
-		select {
-		case <-ctx.Done():
+		if in.waitForPoll(ctx) {
 			return
-		case <-in.done:
-			return
-		case <-timer.C:
 		}
 
-		run, err := in.consoleClient.GetAgentRun(ctx, in.agentRunID)
+		run, err := in.consoleClient.GetAgentRunStatus(ctx, in.agentRunID)
 		if err != nil {
 			klog.ErrorS(err, "could not poll agent run state", "id", in.agentRunID)
-			timer.Reset(promptPollInterval)
-			continue
-		}
-		if run == nil {
-			timer.Reset(promptPollInterval)
 			continue
 		}
 		if run.Status == gqlclient.AgentRunStatusCancelled && !environment.IsDev() {
@@ -112,18 +100,35 @@ func (in *agentRunController) runPostRunPollLoop(ctx context.Context) {
 		}
 
 		// User prompts take priority — agent keeps working while approval is pending.
-		if in.tryDispatchQueuedUserPrompt(ctx, run, true) {
-			timer.Reset(promptPollInterval)
+		if in.dispatchQueuedUserPrompt(ctx, run, true) {
 			continue
 		}
 
 		if run.ApprovedAt != nil {
-			if !in.dispatchApprovalGrantedPrompt(ctx, run) {
-				return
-			}
+			in.dispatchApprovalGrantedPrompt(ctx, run)
 			return
 		}
-
-		timer.Reset(promptPollInterval)
 	}
+}
+
+// waitForPoll waits for the next prompt poll tick or a Console kick. Returns true when the
+// controller is shutting down.
+func (in *agentRunController) waitForPoll(ctx context.Context) bool {
+	return in.waitForPollUpTo(ctx, in.promptPollInterval())
+}
+
+// waitForPollUpTo is waitForPoll, but ticks after at most limit.
+func (in *agentRunController) waitForPollUpTo(ctx context.Context, limit time.Duration) bool {
+	timer := time.NewTimer(min(limit, in.promptPollInterval()))
+	defer timer.Stop()
+
+	select {
+	case <-ctx.Done():
+		return true
+	case <-in.done:
+		return true
+	case <-timer.C:
+	case <-in.kicks:
+	}
+	return false
 }

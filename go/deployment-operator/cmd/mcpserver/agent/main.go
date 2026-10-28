@@ -197,6 +197,7 @@ func createServerOptions(
 		opts = append(opts, agent.WithConsoleAIProxy(args.ConsoleURL()+"/ext/ai", args.DeployToken))
 	}
 	opts = append(opts, agent.WithConsoleExtProxy(args.ConsoleExtApiURL(), args.DeployToken, args.AgentRunID()))
+	opts = append(opts, agent.WithRunEvents(args.ConsoleURL(), args.DeployToken, args.AgentRunID()))
 	if upstream := helpers.GetPluralEnv(controller.EnvWorkbenchMCPURL, ""); upstream != "" {
 		opts = append(opts, agent.WithWorkbenchMCPProxy(upstream, credentials.PluralToken))
 	}

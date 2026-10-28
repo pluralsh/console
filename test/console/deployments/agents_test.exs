@@ -790,6 +790,9 @@ defmodule Console.Deployments.AgentsTest do
       agent_message = Repo.get_by(AgentMessage, agent_run_id: run.id)
       assert agent_message.message == "a prompt"
       assert agent_message.role == :user
+
+      prompt_id = agent_prompt.id
+      assert_receive {:event, %PubSub.AgentPromptCreated{item: %AgentPrompt{id: ^prompt_id}}}
     end
 
     test "it uses monotonic ids for prompt ordering" do

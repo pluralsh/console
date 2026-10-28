@@ -9,6 +9,7 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/internal/mcpserver/agent/openaiproxy"
 	"github.com/pluralsh/console/go/deployment-operator/internal/mcpserver/agent/tool"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/websocket"
 )
 
 // Option is a function that configures an MCP server instance
@@ -96,6 +97,19 @@ const (
 	consoleExtClient         = "agent-harness"
 	consoleExtAgentRunHeader = "Plural-Agent-Run"
 )
+
+// WithRunEvents subscribes to the cluster's deploy agent notifications with the deploy token and
+// serves this agent run's ones to the harness as a local long-poll.
+func WithRunEvents(consoleURL string, token func() string, agentRunID string) Option {
+	return func(s *Server) {
+		socket, err := websocket.NewClosed(agentRunID, consoleURL, token())
+		if err != nil {
+			klog.ErrorS(err, "could not configure console websocket, the harness will only poll for agent run changes")
+			return
+		}
+		s.runEvents = newRunEvents(agentRunID, socket)
+	}
+}
 
 // WithConsoleExtProxy registers a local reverse proxy to the Console ext API
 // that authenticates with the deploy token, so the harness container never holds it.

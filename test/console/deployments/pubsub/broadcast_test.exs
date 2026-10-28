@@ -133,4 +133,15 @@ defmodule Console.Deployments.PubSub.BroadcastTest do
       Broadcast.handle_event(event)
     end
   end
+
+  describe "AgentPromptCreated" do
+    test "it will push an agent.prompt.event for the prompt's run" do
+      %{runtime: %{cluster_id: cluster_id}, id: id} = run = insert(:agent_run)
+      prompt = insert(:agent_prompt, agent_run: run)
+      expect(Phoenix.Channel.Server, :broadcast, fn Console.PubSub, "cluster:" <> ^cluster_id, "agent.prompt.event", %{"id" => ^id} -> :ok end)
+
+      event = %PubSub.AgentPromptCreated{item: prompt}
+      Broadcast.handle_event(event)
+    end
+  end
 end

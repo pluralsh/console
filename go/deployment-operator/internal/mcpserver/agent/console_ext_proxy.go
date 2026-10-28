@@ -31,6 +31,7 @@ type consoleExtOperation struct {
 // consoleExtOperations are the only Console ext documents the harness sends, keyed by persisted query hash.
 var consoleExtOperations = map[string]consoleExtOperation{
 	client.HashQuery(client.GetAgentRunDocument):              {runIDVariable: "id"},
+	client.HashQuery(client.GetAgentRunStatusDocument):        {runIDVariable: "id"},
 	client.HashQuery(client.UpdateAgentRunDocument):           {runIDVariable: "id"},
 	client.HashQuery(client.CreateAgentMessageDocument):       {runIDVariable: "runId"},
 	client.HashQuery(client.UpdateAgentMessageDocument):       {},

@@ -97,8 +97,8 @@ var _ = Describe("Volumes", func() {
 						name:         "kas",
 						key:          resources.Kas.Deployment,
 						container:    "kas",
-						volumes:      kasVolumes,
-						volumeMounts: kasVolumeMounts,
+						volumes:      append(kasVolumes, globalVolumes...),
+						volumeMounts: append(kasVolumeMounts, globalVolumeMounts...),
 					},
 				}
 			)

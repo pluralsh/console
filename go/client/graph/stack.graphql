@@ -135,19 +135,14 @@ fragment StackRunBaseFragment on StackRun {
         url
         token
     }
-    actor { ...UserFragment }
-    stack { ...InfrastructureStackFragment }
-    state { ...StackStateFragment}
+    stack {
+        id
+        deletedAt
+    }
     steps { ...RunStepFragment}
     files { ...StackFileFragment}
-    git { ...GitRefFragment }
-    repository { ...GitRepositoryFragment}
-    jobSpec { ...JobSpecFragment}
     configuration { ...StackConfigurationFragment}
     environment { ...StackEnvironmentFragment}
-    output { ...StackOutputFragment}
-    errors { ...ServiceErrorFragment}
-    violations { ...StackPolicyViolationFragment }
     policyEngine { ...PolicyEngineFragment }
 }
 
@@ -335,6 +330,13 @@ query ListInfrastructureStacks($after: String, $first: Int, $before: String, $la
 query GetStackRunMinimal($id: ID!) {
     stackRun(id: $id) {
         ...StackRunMinimalFragment
+    }
+}
+
+query GetStackRunStatus($id: ID!) {
+    stackRun(id: $id) {
+        id
+        status
     }
 }
 

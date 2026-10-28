@@ -167,19 +167,6 @@ defmodule Console.Deployments.Cron do
     |> Stream.run()
   end
 
-  def backfill_managed_namespaces() do
-    Logger.info "backfilling managed namespaces across clusters"
-
-    ManagedNamespace.stream()
-    |> Repo.stream(method: :keyset)
-    |> Console.throttle(count: 100, pause: 20)
-    |> Task.async_stream(fn mns ->
-      Logger.info "syncing managed namespace #{mns.id}"
-      Global.reconcile_namespace(mns)
-    end, max_concurrency: 20)
-    |> Stream.run()
-  end
-
   def drain_managed_namespaces() do
     Logger.info "draining managed namespaces across clusters"
 

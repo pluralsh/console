@@ -70,6 +70,15 @@ defimpl Console.Deployments.PubSub.Broadcastable, for: [
   end
 end
 
+defimpl Console.Deployments.PubSub.Broadcastable, for: Console.PubSub.AgentPromptCreated do
+  alias Console.Schema.AgentPrompt
+
+  def message(%{item: %AgentPrompt{} = prompt}) do
+    %{agent_run: %{id: id, runtime: %{cluster_id: cid}}} = Console.Repo.preload(prompt, [agent_run: :runtime])
+    {"cluster:#{cid}", "agent.prompt.event", %{"id" => id}}
+  end
+end
+
 defimpl Console.Deployments.PubSub.Broadcastable, for: Console.PubSub.SentinelRunJobCreated do
   alias Console.Schema.SentinelRunJob
   def message(%@for{item: %SentinelRunJob{cluster_id: cid} = job}) do
