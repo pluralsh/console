@@ -384,7 +384,7 @@ func getVersionPairs(versions []controllerv1.NormalizedVersion) []VersionPair {
 		}
 	}
 
-	versionPairs := make([]VersionPair, 0, len(versions)-1) // Preallocate slice capacity
+	versionPairs := make([]VersionPair, 0, max(len(versions)-1, 0)) // Preallocate slice capacity
 	for i := 0; i < len(versions)-1; i++ {
 		versionPair := createVersionPair(versions[i], versions[i+1])
 		versionPairs = append(versionPairs, versionPair)
