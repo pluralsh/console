@@ -1,5 +1,5 @@
 defmodule Console.Schema.ClusterRestoreHistory do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{Cluster, ClusterRestore}
 
   schema "cluster_restore_history" do

@@ -1,5 +1,5 @@
 defmodule Console.Schema.ObservableMetric do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{Stack, PipelineGate, ObservabilityProvider}
 
   defenum Action, block: 0, warn: 1

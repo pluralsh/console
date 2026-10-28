@@ -1,5 +1,5 @@
 defmodule Console.Schema.ObjectStore do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Piazza.Ecto.EncryptedString
 
   schema "object_stores" do

@@ -1,5 +1,5 @@
 defmodule Console.Schema.FederatedCredential do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.User
 
   schema "federated_credentials" do

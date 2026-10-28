@@ -2,12 +2,14 @@ defmodule Console.AI.Research.Graph do
   defmodule Vertex do
     @derive JSON.Encoder
     @derive Jason.Encoder
+    @derive Torque.Encoder
     defstruct [:identifier, :type, :description, annotations: %{}]
   end
 
   defmodule Edge do
     @derive JSON.Encoder
     @derive Jason.Encoder
+    @derive Torque.Encoder
     defstruct [:from, :to, :type, :description]
   end
 
@@ -15,6 +17,7 @@ defmodule Console.AI.Research.Graph do
 
   @derive JSON.Encoder
   @derive Jason.Encoder
+  @derive Torque.Encoder
   defstruct [vertices: %{}, edges: %{}, notes: [], service_ids: [], stack_ids: []]
 
   def spec() do

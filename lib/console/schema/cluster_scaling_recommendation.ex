@@ -1,5 +1,5 @@
 defmodule Console.Schema.ClusterScalingRecommendation do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{Cluster, Service}
 
   defenum Type, deployment: 0, statefulset: 1, daemonset: 2, rollout: 3

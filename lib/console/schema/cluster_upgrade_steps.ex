@@ -1,5 +1,5 @@
 defmodule Console.Schema.ClusterUpgradeStep do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{ClusterUpgrade, AgentRun}
 
   defenum Type, addon: 0, cloud_addon: 1, infrastructure: 2

@@ -1,5 +1,5 @@
 defmodule Console.Schema.JWK do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
 
   schema "jwks" do
     field :jwk, :map

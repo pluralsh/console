@@ -40,7 +40,7 @@ defmodule Prometheus.Client do
     Path.join(host(client), "/api/v1/query")
     |> Req.post([form: [{"query", query}], headers: @headers ++ auth(client)] ++ @timeouts)
     |> case do
-      {:ok, %{body: body, status: 200}} -> Poison.decode(body, as: Response.spec())
+      {:ok, %{body: body, status: 200}} -> Response.decode(body)
       _ -> {:error, "prometheus error"}
     end
   end
@@ -60,7 +60,7 @@ defmodule Prometheus.Client do
       headers: @headers ++ auth(client)] ++ @range_timeouts
     )
     |> case do
-      {:ok, %{body: body, status: 200}} -> Poison.decode(body, as: Response.spec())
+      {:ok, %{body: body, status: 200}} -> Response.decode(body)
       _ -> {:error, "prometheus error"}
     end
   end

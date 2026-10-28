@@ -1,5 +1,5 @@
 defmodule Console.Schema.ClusterRestore do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{ClusterBackup}
 
   defenum Status, created: 0, pending: 1, successful: 2, failed: 3

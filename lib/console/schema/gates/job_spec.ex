@@ -1,5 +1,5 @@
 defmodule Console.Schema.Gates.ResourceRequests do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
 
   embedded_schema do
     field :cpu,    :string
@@ -13,7 +13,7 @@ defmodule Console.Schema.Gates.ResourceRequests do
 end
 
 defmodule Console.Schema.Gates.Resources do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
 
   alias Console.Schema.Gates.ResourceRequests
 
@@ -31,7 +31,7 @@ defmodule Console.Schema.Gates.Resources do
 end
 
 defmodule Console.Schema.Gates.JobSpec do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
 
   alias Console.Schema.Gates.Resources
 

@@ -1,5 +1,5 @@
 defmodule Console.Schema.TerraformState do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.Stack
 
   schema "terraform_states" do

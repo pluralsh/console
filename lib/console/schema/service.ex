@@ -32,7 +32,7 @@ defmodule Console.Schema.Service do
   defenum RendererType, auto: 0, raw: 1, helm: 2, kustomize: 3
 
   defmodule Git do
-    use Piazza.Ecto.Schema
+    use Console.Schema.Base
 
     embedded_schema do
       field :ref,    :string
@@ -48,7 +48,7 @@ defmodule Console.Schema.Service do
   end
 
   defmodule Helm do
-    use Piazza.Ecto.Schema
+    use Console.Schema.Base
     import Console.Schema.Base, only: [helm_url: 2]
     alias Console.Schema.{NamespacedName, Service.Git}
 
@@ -119,7 +119,7 @@ defmodule Console.Schema.Service do
   end
 
   defmodule Source do
-    use Piazza.Ecto.Schema
+    use Console.Schema.Base
 
     embedded_schema do
       field :path, :string
@@ -136,7 +136,7 @@ defmodule Console.Schema.Service do
   end
 
   defmodule Renderer do
-    use Piazza.Ecto.Schema
+    use Console.Schema.Base
     alias Console.Schema.Service.RendererType
 
     embedded_schema do

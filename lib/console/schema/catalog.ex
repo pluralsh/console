@@ -90,6 +90,7 @@ defmodule Console.Schema.Catalog.Mini do
 
   @derive Jason.Encoder
   @derive JSON.Encoder
+  @derive Torque.Encoder
   defstruct [:id, :name, :description, :documentation, :category, :icon, :dark_icon]
 
   def new(%Catalog{} = catalog) do

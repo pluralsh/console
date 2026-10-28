@@ -130,7 +130,7 @@ config :logger, :console,
 # remote servers' own log notifications, so this is the only effective way to quiet it
 config :anubis_mcp, log: false
 
-config :phoenix, :json_library, JSON
+config :phoenix, :json_library, Console.JSON
 
 config :console, Console.Guardian,
   ttl: {30, :minutes},

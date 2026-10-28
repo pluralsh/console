@@ -1,5 +1,5 @@
 defmodule Console.Schema.ClusterISOImage do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{Project, User, PolicyBinding}
   alias Console.Deployments.Policies.Rbac
 

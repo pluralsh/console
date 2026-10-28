@@ -1,5 +1,5 @@
 defmodule Console.Schema.NamespaceVuln do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{VulnerabilityReport}
 
   schema "namespace_vulns" do

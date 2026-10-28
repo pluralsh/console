@@ -47,18 +47,22 @@ ARG APP_NAME=console
 ARG MIX_ENV=prod
 ARG SKIP_PHOENIX=false
 ARG OS_VARIANT=alpine
+# torque picks its x86_64 build from the builder's CPU flags, but the image runs elsewhere, so pin it.
+# v2 needs SSE4.2 (any x86 server since 2009); v3 adds the AVX2 paths but crashes on CPUs without AVX2.
+ARG TORQUE_CPU_VARIANT=v2
 
 ENV SKIP_PHOENIX=${SKIP_PHOENIX} \
     APP_NAME=${APP_NAME} \
     MIX_ENV=${MIX_ENV} \
     OS_VARIANT=${OS_VARIANT} \
+    TORQUE_CPU_VARIANT=${TORQUE_CPU_VARIANT} \
     MIX_OS_DEPS_COMPILE_PARTITION_COUNT=4
 
 WORKDIR /opt/app
 
 # hexpm/elixir-alpine has Mix and ca-certificates only. git is required for
 # mix git deps; build-base is required for argon2_elixir's C NIF. Rust NIFs
-# (mdex, mermaid_validator, yaml_rustler) ship precompiled and do not need rustc.
+# (mdex, mermaid_validator, yaml_rustler, torque) ship precompiled and do not need rustc.
 RUN if [ "$OS_VARIANT" = "alpine" ]; then \
       apk add --no-cache git build-base; \
     else \

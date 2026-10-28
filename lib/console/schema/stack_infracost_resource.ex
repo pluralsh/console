@@ -1,5 +1,5 @@
 defmodule Console.Schema.StackInfracostResource do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{Stack, StackRun}
 
   @scopes ~w(breakdown past_breakdown diff free)

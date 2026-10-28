@@ -1,5 +1,5 @@
 defmodule Console.Schema.PromotionService do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{PipelinePromotion, Service, Revision}
 
   schema "promotion_services" do

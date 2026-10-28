@@ -1,5 +1,5 @@
 defmodule Console.Schema.ServiceContextBinding do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{Service, ServiceContext}
 
   schema "service_context_bindings" do

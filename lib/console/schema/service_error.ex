@@ -1,5 +1,5 @@
 defmodule Console.Schema.ServiceError do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{Service, Cluster, StackRun, PipelineStage, Observer, SentinelRun}
 
   schema "service_errors" do

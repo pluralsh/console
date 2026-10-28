@@ -1,5 +1,5 @@
 defmodule Console.Schema.Manifest do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
 
   defenum Provider, aws: 0, gcp: 1, azure: 2, equinix: 3
 

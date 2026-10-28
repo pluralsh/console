@@ -1,5 +1,5 @@
 defmodule Console.Schema.PostgresInstance do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
 
   schema "postgres_instances" do
     field :namespace, :string

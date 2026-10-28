@@ -91,6 +91,7 @@ defmodule ConsoleWeb.Router do
 
         forward "/gql", Console.ExternalGraphQl.Plug,
           schema: Console.ExternalGraphQl,
+          json_codec: Console.JSON,
           document_providers: [Console.GraphQl.PersistedQuery, Absinthe.Plug.DocumentProvider.Default],
           analyze_complexity: true,
           max_complexity: 650,
@@ -264,6 +265,7 @@ defmodule ConsoleWeb.Router do
 
       forward "/gql", Absinthe.Plug,
         schema: Console.GraphQl,
+        json_codec: Console.JSON,
         document_providers: [Console.GraphQl.PersistedQuery, Absinthe.Plug.DocumentProvider.Default],
         analyze_complexity: true,
         max_complexity: 650,

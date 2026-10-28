@@ -1,5 +1,5 @@
 defmodule Console.Schema.AgentMigration do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.Service
 
   schema "agent_migrations" do

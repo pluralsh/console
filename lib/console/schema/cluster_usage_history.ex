@@ -1,5 +1,5 @@
 defmodule Console.Schema.ClusterUsageHistory do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{Cluster, User}
 
   schema "cluster_usage_history" do

@@ -49,12 +49,12 @@ defmodule Console.Logs.Provider.Elastic do
 
   def search(%Elastic{index: index} = conn, query) do
     Elastic.url(conn, "#{index}/_search")
-    |> Req.post([headers: Elastic.headers(conn, @headers), body: Jason.encode!(query)] ++ @opts)
+    |> Req.post([headers: Elastic.headers(conn, @headers), body: Console.JSON.encode!(query)] ++ @opts)
     |> search_response()
   end
 
   defp search_response({:ok, %Req.Response{status: 200, body: body}}) do
-    with {:ok, resp} <- Jason.decode(body),
+    with {:ok, resp} <- Console.JSON.decode(body),
       do: {:ok, Snap.SearchResponse.new(resp)}
   end
   defp search_response({:ok, %Req.Response{body: body}}), do: {:error, "es failure: #{body}"}

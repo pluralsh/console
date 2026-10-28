@@ -124,7 +124,7 @@ defmodule Console.OCI.Client do
 
   # some registries (eg public.ecr.aws) serve json with a text/plain content type, so req won't decode it
   defp json_body(%Req.Response{body: body}) when is_binary(body) do
-    case Jason.decode(body) do
+    case Console.JSON.decode(body) do
       {:ok, %{} = decoded} -> decoded
       _ -> %{}
     end
@@ -171,7 +171,13 @@ defmodule Console.OCI.Client do
 
   defp dkr_client(h, repo, proxy) do
     base_url = "https://#{h}"
-    Req.new(base_url: base_url, retry: &retry_rate_limited/2, max_retries: 3, redirect: true)
+    Req.new(
+      base_url: base_url,
+      retry: &retry_rate_limited/2,
+      max_retries: 3,
+      redirect: true,
+      decoders: [json: Console.JSON, json_api: Console.JSON]
+    )
     |> put_proxy(proxy, base_url)
     |> Req.Request.register_options([:dkr_repo])
     |> Req.Request.merge_options(dkr_repo: repo)

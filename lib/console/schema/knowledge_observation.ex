@@ -1,5 +1,5 @@
 defmodule Console.Schema.KnowledgeObservation do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.KnowledgeEntity
 
   schema "knowledge_observations" do

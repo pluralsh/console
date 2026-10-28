@@ -1,5 +1,5 @@
 defmodule Console.Schema.PolicyBinding do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{User, Group}
 
   schema "policy_bindings" do

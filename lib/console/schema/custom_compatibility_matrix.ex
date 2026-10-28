@@ -35,12 +35,12 @@ defmodule Console.Schema.CustomCompatibilityMatrix do
   end
 
   def convert(%__MODULE__.Version{} = version) do
-    %Version{
+    Version.prepare(%Version{
       version: version.version,
       chart_version: version.chart_version,
       kube: version.kube,
       summary: convert(version.summary)
-    }
+    })
   end
 
   def convert(%__MODULE__.Version.Summary{} = summary) do

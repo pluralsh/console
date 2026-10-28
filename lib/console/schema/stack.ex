@@ -40,7 +40,7 @@ defmodule Console.Schema.Stack do
   def running_states(), do: ~w(pending running pending_approval)a
 
   defmodule Configuration do
-    use Piazza.Ecto.Schema
+    use Console.Schema.Base
 
     embedded_schema do
       field :image,   :string
@@ -140,7 +140,7 @@ defmodule Console.Schema.Stack do
   end
 
   defmodule PolicyEngine do
-    use Piazza.Ecto.Schema
+    use Console.Schema.Base
     alias Console.Schema.Service.Git
 
     defenum Type, trivy: 0

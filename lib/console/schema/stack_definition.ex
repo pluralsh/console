@@ -1,9 +1,9 @@
 defmodule Console.Schema.StackDefinition do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{Stack, RunStep}
 
   defmodule Step do
-    use Piazza.Ecto.Schema
+    use Console.Schema.Base
 
     embedded_schema do
       field :stage,            RunStep.Stage

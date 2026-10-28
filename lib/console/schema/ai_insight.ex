@@ -1,5 +1,5 @@
 defmodule Console.Schema.AiInsight do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{
     Alert,
     Service,

@@ -1,5 +1,5 @@
 defmodule Console.Schema.AgentSession do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{
     CloudConnection,
     ChatThread,

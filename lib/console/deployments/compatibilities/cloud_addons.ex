@@ -1,7 +1,8 @@
 defmodule Console.Deployments.Compatibilities.CloudAddOns do
   use GenServer
-  # import Console.Deployments.Ecto.Validations, only: [clean_version: 1]
-  alias Console.Deployments.{Compatibilities.CloudAddOn, Static}
+  import Console.Deployments.Compatibilities.Utils, only: [proxy_config: 0]
+  alias Console.Deployments.{Compatibilities.CloudAddOn, Compatibilities.Utils, Static}
+  alias Console.Utils.HTTP
   alias Console.Schema.CloudAddon, as: AddOn
   alias ETS.KeyValueSet
   require Logger
@@ -11,7 +12,7 @@ defmodule Console.Deployments.Compatibilities.CloudAddOns do
   @url "/matrices/compatability/static/addons/"
 
   defmodule State do
-    defstruct [:table, :url, :static, ready: false]
+    defstruct [:table, :url, :static, :platforms, ready: false, validators: %{}]
   end
 
   def start_link(opt \\ :ok) do
@@ -46,44 +47,55 @@ defmodule Console.Deployments.Compatibilities.CloudAddOns do
     {:noreply, %{state | table: table, ready: true}}
   end
 
-  def handle_info(:poll, %State{table: table, url: url} = state) do
-    with [_ | _] = platforms <- Console.safely(fn -> fetch_manifest(url) end, fn err -> {:error, err} end) do
-      table = Enum.reduce(platforms, table, fn name, table ->
-        case fetch_platform(url, name) do
-          {:ok, addon} -> persist(table, addon)
-          _ ->
-            Logger.warning "failed to fetch platform #{name}, will retry on next poll"
-            table
-        end
-      end)
-      {:noreply, %{state | table: table, ready: true}}
-    else
+  def handle_info(:poll, %State{} = state) do
+    case Console.safely(fn -> poll(state) end, fn err -> {:error, err} end) do
+      {:ok, %State{} = state} -> {:noreply, %{state | ready: true}}
       err ->
         Logger.error "failed to fetch cloud addon manifest: #{inspect(err)}"
         {:noreply, state}
     end
   end
 
-  defp fetch_manifest(url) do
-    with {:ok, %Req.Response{status: 200, body: body}} <- Req.get(url <> "manifest.yaml", decode_body: false, retry: false),
-         {:ok, %{"platforms" => platforms}} <- Console.Utils.Yaml.decode(body),
-      do: platforms
+  defp poll(state) do
+    with {:ok, platforms, state} <- fetch_manifest(state),
+      do: {:ok, Enum.reduce(platforms, state, &fetch_platform/2)}
   end
 
-  defp fetch_platform(url, platform) do
-    case Req.get(url <> "#{platform}.yaml", decode_body: false, retry: false) do
-      {:ok, %Req.Response{status: 200, body: body}} ->
-        decode_cloud_addon(platform, body)
-      _ ->
-        {:error, "failed to fetch platform #{platform}"}
+  # validators are only kept once a body decodes, so a bad file is refetched
+  # on the next poll rather than skipped as unchanged
+  defp fetch_manifest(%State{url: url, validators: vs, platforms: platforms} = state) do
+    manifest = url <> "manifest.yaml"
+    case HTTP.fetch_if_changed(manifest, vs[manifest], opts()) do
+      {:ok, :unchanged, v} when is_list(platforms) -> {:ok, platforms, validated(state, manifest, v)}
+      {:ok, body, v} when is_binary(body) ->
+        with {:ok, %{"platforms" => [_ | _] = platforms}} <- Console.Utils.Yaml.decode(body),
+          do: {:ok, platforms, %{validated(state, manifest, v) | platforms: platforms}}
+      err -> err
     end
   end
 
+  defp fetch_platform(name, %State{url: url, validators: vs, table: table} = state) do
+    file = url <> "#{name}.yaml"
+    with {:ok, body, v} when is_binary(body) <- HTTP.fetch_if_changed(file, vs[file], opts()),
+         {:ok, addon} <- decode_cloud_addon(name, body) do
+      %{validated(state, file, v) | table: persist(table, addon)}
+    else
+      {:ok, :unchanged, v} -> validated(state, file, v)
+      _ ->
+        Logger.warning "failed to fetch platform #{name}, will retry on next poll"
+        state
+    end
+  end
+
+  defp validated(%State{validators: vs} = state, url, v), do: %{state | validators: Map.put(vs, url, v)}
+
+  defp opts(), do: HTTP.req_options(proxy_config())
+
   defp decode_cloud_addon(platform, yaml) do
-    with {:ok, res} <- Console.Utils.Yaml.decode(yaml),
-         {:ok, encoded} <- Jason.encode(res),
-         {:ok, addons} <- Poison.decode(encoded, as: [CloudAddOn.spec()]),
-      do: {:ok, {platform, Enum.map(addons, &Map.put(&1, :distro, String.to_existing_atom(platform)))}}
+    with {:ok, addons} when is_list(addons) <- Console.Utils.Yaml.decode(yaml) do
+      distro = String.to_existing_atom(platform)
+      {:ok, {platform, Utils.map_list(addons, &CloudAddOn.new(&1, distro))}}
+    end
   end
 
   def static() do

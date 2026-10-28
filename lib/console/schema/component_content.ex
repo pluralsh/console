@@ -1,5 +1,5 @@
 defmodule Console.Schema.ComponentContent do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{ServiceComponent}
 
   schema "component_contents" do

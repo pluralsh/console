@@ -1,5 +1,5 @@
 defmodule Console.Schema.OIDCProvider do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{PolicyBinding, User}
   alias Console.Deployments.Policies.Rbac
 

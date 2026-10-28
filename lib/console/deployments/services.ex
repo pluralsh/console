@@ -908,8 +908,9 @@ defmodule Console.Deployments.Services do
   @spec add_deprecations(Service.t) :: {:ok, map} | Console.error
   def add_deprecations(%Service{} = service) do
     %{components: components, cluster: cluster} = Repo.preload(service, [:components, :cluster])
+    minor = Checker.cluster_minor(cluster)
     found_deprecations = Enum.map(components, fn component ->
-      case Checker.check(component, cluster) do
+      case Checker.check(component, minor) do
         {entry, blocking} ->
           Map.from_struct(entry)
           |> Map.put(:blocking, blocking)

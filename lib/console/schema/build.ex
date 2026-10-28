@@ -1,5 +1,5 @@
 defmodule Console.Schema.Build do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{Command, Changelog, User}
 
   @expiry 30

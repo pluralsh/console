@@ -1,5 +1,5 @@
 defmodule Console.Schema.McpServer do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{PolicyBinding, Project, User}
   alias Console.Schema.DeploymentSettings.OauthToken, as: TokenExchange
   alias Console.Deployments.Policies.Rbac

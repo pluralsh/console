@@ -1,5 +1,5 @@
 defmodule Console.Schema.RunbookExecution do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.User
 
   schema "runbook_executions" do

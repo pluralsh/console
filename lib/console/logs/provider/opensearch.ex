@@ -49,7 +49,8 @@ defmodule Console.Logs.Provider.Opensearch do
       url: Opensearch.url(conn, "#{index}/_search"),
       method: :post,
       headers: Opensearch.headers(conn, @headers),
-      body: Jason.encode!(query),
+      body: Console.JSON.encode!(query),
+      decoders: [json: Console.JSON],
       aws_sigv4: Opensearch.aws_sigv4_headers(conn)
     ])
     |> Req.post()
@@ -63,7 +64,7 @@ defmodule Console.Logs.Provider.Opensearch do
   defp search_response(_), do: {:error, "network failure"}
 
   def error_body(body) when is_binary(body), do: body
-  def error_body(body), do: Jason.encode!(body)
+  def error_body(body), do: Console.JSON.encode!(body)
 
   defp format_hits(%Snap.SearchResponse{hits: %Snap.Hits{hits: hits}}) do
     Enum.map(hits, fn %Snap.Hit{source: source} ->

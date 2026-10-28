@@ -1,5 +1,5 @@
 defmodule Console.Schema.RunLog do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.RunStep
 
   @expiry 30

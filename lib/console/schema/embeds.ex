@@ -1,5 +1,5 @@
 defmodule Console.Schema.OCIAuth do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.ScmConnection
   alias Piazza.Ecto.EncryptedString
 
@@ -56,7 +56,7 @@ defmodule Console.Schema.OCIAuth do
 end
 
 defmodule Console.Schema.DiffNormalizer do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
 
   embedded_schema do
     field :group,         :string
@@ -76,7 +76,7 @@ defmodule Console.Schema.DiffNormalizer do
 end
 
 defmodule Console.Schema.Metadata do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
 
   embedded_schema do
     field :labels,      :map
@@ -92,7 +92,7 @@ defmodule Console.Schema.Metadata do
 end
 
 defmodule Console.Schema.Configuration do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
 
   defenum Type,
     string: 0,
@@ -114,7 +114,7 @@ defmodule Console.Schema.Configuration do
   defenum UniqScope, project: 0, cluster: 1
 
   defmodule Condition do
-    use Piazza.Ecto.Schema
+    use Console.Schema.Base
 
     defenum Operation, not: 0, gt: 1, lt: 2, eq: 3, gte: 4, lte: 5, prefix: 6, suffix: 7
 

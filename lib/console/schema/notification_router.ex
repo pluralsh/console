@@ -1,5 +1,5 @@
 defmodule Console.Schema.NotificationRouter do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{RouterFilter, RouterSink}
 
   schema "notification_routers" do

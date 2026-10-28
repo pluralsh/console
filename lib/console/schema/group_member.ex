@@ -1,5 +1,5 @@
 defmodule Console.Schema.GroupMember do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{User, Group}
 
   schema "group_members" do

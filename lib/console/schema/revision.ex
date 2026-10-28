@@ -1,5 +1,5 @@
 defmodule Console.Schema.Revision do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{Service, ServiceConfiguration, ServiceTemplate}
 
   schema "revisions" do

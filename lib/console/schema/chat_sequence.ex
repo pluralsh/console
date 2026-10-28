@@ -1,5 +1,5 @@
 defmodule Console.Schema.ChatSequence do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{User, ChatThread}
 
   schema "chat_sequences" do

@@ -1,9 +1,9 @@
 defmodule Console.Schema.ClusterBackup do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.Cluster
 
   defmodule ResourceSelector do
-    use Piazza.Ecto.Schema
+    use Console.Schema.Base
 
     embedded_schema do
       field :included, {:array, :string}

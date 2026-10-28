@@ -1,5 +1,5 @@
 defmodule Console.Schema.UpgradeInsight do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{Cluster, UpgradeInsightDetail}
 
   defenum Status, passing: 0, failed: 1, unknown: 2, warning: 3

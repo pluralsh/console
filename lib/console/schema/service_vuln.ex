@@ -1,5 +1,5 @@
 defmodule Console.Schema.ServiceVuln do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{Service, VulnerabilityReport}
 
   schema "service_vulns" do

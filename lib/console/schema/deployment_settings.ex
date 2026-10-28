@@ -10,7 +10,7 @@ defmodule Console.Schema.DeploymentSettings do
   defenum BedrockEndpoint, runtime: 0, mantle: 1
 
   defmodule Connection do
-    use Piazza.Ecto.Schema
+    use Console.Schema.Base
 
     embedded_schema do
       field :host,     :string
@@ -72,7 +72,7 @@ defmodule Console.Schema.DeploymentSettings do
   end
 
   defmodule Elastic do
-    use Piazza.Ecto.Schema
+    use Console.Schema.Base
 
     embedded_schema do
       field :host,     :string
@@ -99,7 +99,7 @@ defmodule Console.Schema.DeploymentSettings do
   end
 
   defmodule Loki do
-    use Piazza.Ecto.Schema
+    use Console.Schema.Base
 
     embedded_schema do
       field :host,            :string

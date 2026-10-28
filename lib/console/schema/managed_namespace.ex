@@ -1,5 +1,5 @@
 defmodule Console.Schema.ManagedNamespace do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{
     NamespaceCluster,
     NamespaceInstance,
@@ -11,7 +11,7 @@ defmodule Console.Schema.ManagedNamespace do
   }
 
   defmodule Target do
-    use Piazza.Ecto.Schema
+    use Console.Schema.Base
 
     embedded_schema do
       field :distro, Console.Schema.Cluster.Distro

@@ -12,7 +12,7 @@ defmodule Console.Deployments.Compatibilities.Table do
   @url "/matrices/compatability/static/compatibilities.yaml"
 
   defmodule State do
-    defstruct [:table, :url, :static, :ready]
+    defstruct [:table, :url, :static, :ready, :validators]
   end
 
   def start_link(opt \\ :ok) do
@@ -64,18 +64,18 @@ defmodule Console.Deployments.Compatibilities.Table do
     {:noreply, %{state | table: table, ready: true}}
   end
 
-  def handle_info(:poll, %State{table: table, url: url} = state) do
-    with [_ | _] = addons <- Console.safely(fn -> fetch_addons(url) end, fn err -> {:error, err} end) do
-      Enum.reduce(addons, table, fn addon, table ->
-        case decode_addon(addon) do
-          {:ok, addon} -> KeyValueSet.put!(table, addon.name, addon)
-          _ ->
-            Logger.warning "failed to fetch addon #{addon.name}, will retry on next poll"
+  def handle_info(:poll, %State{table: table, url: url, validators: prev} = state) do
+    case Console.safely(fn -> fetch_addons(url, prev) end, fn err -> {:error, err} end) do
+      {:ok, :unchanged, validators} ->
+        {:noreply, %{state | ready: true, validators: validators}}
+      {:ok, [_ | _] = addons, validators} ->
+        table = Enum.reduce(addons, table, fn
+          %{"name" => name} = addon, table when is_binary(name) -> KeyValueSet.put!(table, name, AddOn.new(addon))
+          addon, table ->
+            Logger.warning "skipping malformed addon entry #{inspect(addon, limit: 5)}"
             table
-        end
-      end)
-      {:noreply, %{state | table: table, ready: true}}
-    else
+        end)
+        {:noreply, %{state | table: table, ready: true, validators: validators}}
       err ->
         Logger.error "failed to fetch kubernetes addon manifest: #{inspect(err)}"
         {:noreply, state}
@@ -89,22 +89,14 @@ defmodule Console.Deployments.Compatibilities.Table do
     |> then(& {:noreply, %{state | table: &1}})
   end
 
-  defp fetch_addons(url) do
-    with {:ok, %Req.Response{status: 200, body: body}} <- Req.get(url, [decode_body: false, retry: false] ++ Console.Utils.HTTP.req_options(proxy_config())),
-         {:ok, %{"addons" => addons}} <- Console.Utils.Yaml.decode(body),
-      do: addons
-  end
-
-  defp decode_addon(raw) do
-    with {:ok, encoded} <- Jason.encode(raw),
-       do: Poison.decode(encoded, as: AddOn.spec())
-  end
-
-  defp decode_addon(name, yaml) do
-    with {:ok, addon} <- Console.Utils.Yaml.decode(yaml),
-         {:ok, encoded} <- Jason.encode(addon),
-         {:ok, addon} <- Poison.decode(encoded, as: AddOn.spec()),
-      do: {:ok, %{addon | name: name}}
+  # validators are only kept once the body decodes, so a bad manifest is
+  # refetched on the next poll rather than skipped as unchanged
+  defp fetch_addons(url, prev) do
+    opts = Console.Utils.HTTP.req_options(proxy_config())
+    with {:ok, body, validators} when is_binary(body) <- Console.Utils.HTTP.fetch_if_changed(url, prev, opts),
+         {:ok, %{"addons" => addons}} <- Console.Utils.Yaml.decode(body) do
+      {:ok, addons, validators}
+    end
   end
 
   def static() do
@@ -113,8 +105,8 @@ defmodule Console.Deployments.Compatibilities.Table do
     {:ok, %{"names" => [_ | _] = addons}} = Console.Utils.Yaml.decode(yaml)
     Enum.map(addons, fn name ->
       {:ok, yaml} = File.read("#{base_path}/#{name}.yaml")
-      {:ok, addon} = decode_addon(name, yaml)
-      %{addon | name: name}
+      {:ok, %{} = addon} = Console.Utils.Yaml.decode(yaml)
+      %{AddOn.new(addon) | name: name}
     end)
   end
 end

@@ -1,5 +1,5 @@
 defmodule Console.Schema.Lock do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
 
   schema "locks" do
     field :name,       :string

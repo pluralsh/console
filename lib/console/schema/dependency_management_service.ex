@@ -1,5 +1,5 @@
 defmodule Console.Schema.DependencyManagementService do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{Service, ScmConnection}
 
   schema "dependency_management_services" do

@@ -1,5 +1,5 @@
 defmodule Console.Schema.CloudAddon do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.Cluster
 
   schema "cloud_addons" do

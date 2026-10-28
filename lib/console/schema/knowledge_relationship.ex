@@ -1,5 +1,5 @@
 defmodule Console.Schema.KnowledgeRelationship do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{KnowledgeEntity, Flow}
 
   schema "knowledge_relationships" do

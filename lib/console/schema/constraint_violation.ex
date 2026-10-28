@@ -1,5 +1,5 @@
 defmodule Console.Schema.ConstraintViolation do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.PolicyConstraint
 
   schema "constraint_violations" do

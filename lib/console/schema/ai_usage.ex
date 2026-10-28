@@ -1,5 +1,5 @@
 defmodule Console.Schema.AIUsage do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
 
   embedded_schema do
     field :input_tokens,     :integer

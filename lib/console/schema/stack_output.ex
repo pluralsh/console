@@ -1,5 +1,5 @@
 defmodule Console.Schema.StackOutput do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{Stack, StackRun}
 
   schema "stack_outputs" do

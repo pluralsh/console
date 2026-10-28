@@ -1,5 +1,5 @@
 defmodule Console.Schema.Invite do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
 
   schema "watchman_invites" do
     field :secure_id, :string

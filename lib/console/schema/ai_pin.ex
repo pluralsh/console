@@ -1,5 +1,5 @@
 defmodule Console.Schema.AiPin do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{User, AiInsight, ChatThread}
 
   schema "ai_pins" do

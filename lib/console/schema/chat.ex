@@ -1,5 +1,5 @@
 defmodule Console.Schema.Chat do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{
     User,
     ChatThread,

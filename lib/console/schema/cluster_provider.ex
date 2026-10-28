@@ -1,12 +1,12 @@
 defmodule Console.Schema.ClusterProvider do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   import Console.Deployments.Ecto.Validations
   alias Console.Deployments.Providers.{Versions, Regions}
   alias Console.Deployments.Policies.Rbac
   alias Console.Schema.{Service, GitRepository, PolicyBinding, User, ProviderCredential}
 
   defmodule CloudSettings do
-    use Piazza.Ecto.Schema
+    use Console.Schema.Base
     alias Piazza.Ecto.EncryptedString
 
     embedded_schema do

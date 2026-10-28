@@ -1,5 +1,5 @@
 defmodule Console.Schema.PipelineGate do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{PipelineEdge, User, Cluster, Gates.JobSpec, Sentinel, SentinelRun, PipelineContext}
 
   defenum Type, approval: 0, window: 1, job: 2, sentinel: 3

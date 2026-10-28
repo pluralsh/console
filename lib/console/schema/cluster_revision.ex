@@ -1,5 +1,5 @@
 defmodule Console.Schema.ClusterRevision do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{Cluster, ClusterNodePool}
 
   schema "cluster_revisions" do

@@ -14,6 +14,10 @@ defmodule Console.Schema.Base do
       def with_limit(query \\ __MODULE__, limit) do
         from(q in query, limit: ^limit)
       end
+
+      defimpl Torque.Encoder, for: __MODULE__ do
+        def encode(struct), do: Piazza.Ecto.Schema.mapify(struct)
+      end
     end
   end
 

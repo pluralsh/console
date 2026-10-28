@@ -1,5 +1,5 @@
 defmodule Console.Schema.ClusterUpgrade do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{Cluster, User, ClusterUpgradeStep, AgentRuntime}
 
   defenum Status, pending: 0, in_progress: 1, completed: 2, failed: 3

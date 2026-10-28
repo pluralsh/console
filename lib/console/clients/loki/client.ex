@@ -1,5 +1,5 @@
 defmodule Loki.Client do
-  alias Loki.{Response, Data, Result, Value}
+  alias Loki.{Response, Data, Value}
   alias Console.Schema.DeploymentSettings.Connection
 
   def host(%Connection{host: h}) when is_binary(h), do: h
@@ -26,7 +26,7 @@ defmodule Loki.Client do
     |> case do
       {:ok, %{body: body, status: 200}} ->
         {:ok, body
-              |> Poison.decode(as: %Response{data: %Data{result: [%Result{}]}})
+              |> Response.decode()
               |> convert()}
       _ -> {:error, "loki error"}
     end

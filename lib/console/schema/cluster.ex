@@ -30,7 +30,7 @@ defmodule Console.Schema.Cluster do
   defenum Distro, generic: 0, eks: 1, aks: 2, gke: 3, rke: 4, k3s: 5, openshift: 6
 
   defmodule Kubeconfig do
-    use Piazza.Ecto.Schema
+    use Console.Schema.Base
     alias Console.Schema.NamespacedName
 
     embedded_schema do
@@ -46,7 +46,7 @@ defmodule Console.Schema.Cluster do
   end
 
   defmodule CloudSettings do
-    use Piazza.Ecto.Schema
+    use Console.Schema.Base
 
     embedded_schema do
       # just temporary until we know what of these will actually matter
@@ -626,6 +626,7 @@ defmodule Console.Schema.Cluster.Mini do
 
   @derive Jason.Encoder
   @derive JSON.Encoder
+  @derive Torque.Encoder
 
   @type runtime_service_data :: %{
     name: binary,

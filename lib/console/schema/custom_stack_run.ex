@@ -1,5 +1,5 @@
 defmodule Console.Schema.CustomStackRun do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   import Console.Schema.Base, only: [truncate_fields: 3]
   alias Console.Schema.{Stack, Configuration}
 
