@@ -41,13 +41,13 @@ defmodule ConsoleWeb.AIController do
   def maybe_add_params(conn, _), do: conn
 
   def do_proxy(conn, upstream) do
-    {body, conn} = ReverseProxyPlug.read_body(conn)
+    {body, conn} = ConsoleWeb.Plugs.Parsers.read_body(conn)
     conn = add_nginx_headers(conn)
 
     url = find_uri(upstream, conn.query_string)
 
     case Req.post(url, [
-      body: Enum.reverse(body) |> IO.iodata_to_binary(),
+      body: body,
       headers: convert_headers(conn, upstream),
       into: :self,
       decode_body: false,

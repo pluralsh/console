@@ -46,7 +46,11 @@ defmodule ConsoleWeb.Endpoint do
 
   plug ConsoleWeb.ProxyRouter
 
-  plug ConsoleWeb.Plugs.Parsers
+  plug ConsoleWeb.Plugs.Parsers, skip: [
+    ~w(ext v1 webhooks),
+    ~w(ext v1 states terraform),
+    ~w(ext v1 ai openai)
+  ]
 
   plug Sentry.PlugContext, body_scrubber: {ConsoleWeb.Sentry, :scrub_params}
 

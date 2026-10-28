@@ -6,6 +6,8 @@ defmodule ConsoleWeb.WebhookController do
   alias Console.Chat.Impl.Teams, as: TeamsBot
   alias Console.Chat.Teams.Auth, as: TeamsAuth
 
+  plug ConsoleWeb.Plugs.CachedParsers when action in [:scm, :observability, :teams, :issue]
+
   def cluster(conn, _) do
     with {:ok, _, token} <- ConsoleWeb.Plugs.Token.get_bearer_token(conn),
          ["plrl", id, auth] <- String.split(token, ":"),
@@ -90,7 +92,7 @@ defmodule ConsoleWeb.WebhookController do
 
   defp verify(conn, %ScmWebhook{type: :github, hmac: hmac}) do
     with [signature] <- get_req_header(conn, "x-hub-signature-256"),
-         computed = :crypto.mac(:hmac, :sha256, hmac, Enum.reverse(conn.assigns.raw_body)),
+         computed = :crypto.mac(:hmac, :sha256, hmac, conn.assigns.raw_body),
          true <- Plug.Crypto.secure_compare(signature, "sha256=#{Base.encode16(computed, case: :lower)}") do
       :ok
     else
@@ -116,7 +118,7 @@ defmodule ConsoleWeb.WebhookController do
 
   defp verify(conn, %ScmWebhook{type: :bitbucket, hmac: hmac}) do
     with [signature] <- get_req_header(conn, "x-hub-signature"),
-         computed = :crypto.mac(:hmac, :sha256, hmac, Enum.reverse(conn.assigns.raw_body)),
+         computed = :crypto.mac(:hmac, :sha256, hmac, conn.assigns.raw_body),
          true <- Plug.Crypto.secure_compare(signature, "sha256=#{Base.encode16(computed, case: :lower)}") do
       :ok
     else
@@ -143,7 +145,7 @@ defmodule ConsoleWeb.WebhookController do
   defp verify(conn, %ObservabilityWebhook{type: :sentry, secret: secret}) do
     with [signature] <- get_req_header(conn, "sentry-hook-signature"),
          ["event_alert"] <- get_req_header(conn, "sentry-hook-resource"),
-         computed = :crypto.mac(:hmac, :sha256, secret, Enum.reverse(conn.assigns.raw_body)),
+         computed = :crypto.mac(:hmac, :sha256, secret, conn.assigns.raw_body),
          true <- Plug.Crypto.secure_compare(signature, Base.encode16(computed, case: :lower)) do
       :ok
     else
@@ -153,7 +155,7 @@ defmodule ConsoleWeb.WebhookController do
 
   defp verify(conn, %ObservabilityWebhook{type: :pagerduty, secret: secret}) do
     with [signature] <- get_req_header(conn, "x-pagerduty-signature"),
-         mac = :crypto.mac(:hmac, :sha256, secret, Enum.reverse(conn.assigns.raw_body)),
+         mac = :crypto.mac(:hmac, :sha256, secret, conn.assigns.raw_body),
          computed_signature = Base.encode16(mac, case: :lower) do
 
       String.split(signature, ",")
@@ -199,7 +201,7 @@ defmodule ConsoleWeb.WebhookController do
 
   defp verify(conn, %IssueWebhook{provider: :linear, secret: secret}) do
     with [signature] <- get_req_header(conn, "linear-signature"),
-          mac = :crypto.mac(:hmac, :sha256, secret, Enum.reverse(conn.assigns.raw_body)),
+          mac = :crypto.mac(:hmac, :sha256, secret, conn.assigns.raw_body),
           computed_signature = Base.encode16(mac, case: :lower),
           true <- Plug.Crypto.secure_compare(signature, computed_signature) do
       :ok
@@ -221,7 +223,7 @@ defmodule ConsoleWeb.WebhookController do
   # Asana signs with the secret from its handshake; relays sign with the webhook's own secret
   defp verify(conn, %IssueWebhook{provider: :asana, secret: secret, handshake_secret: handshake}) do
     with [signature] <- get_req_header(conn, "x-hook-signature"),
-         body = Enum.reverse(conn.assigns.raw_body),
+         body = conn.assigns.raw_body,
          true <- Enum.any?([secret, handshake], &valid_asana_signature?(&1, body, signature)) do
       :ok
     else
@@ -256,7 +258,7 @@ defmodule ConsoleWeb.WebhookController do
   defp verify(_, _), do: :reject
 
   defp verify_service_now_signature(conn, signature, secret) do
-    mac = :crypto.mac(:hmac, :sha256, secret, Enum.reverse(conn.assigns.raw_body))
+    mac = :crypto.mac(:hmac, :sha256, secret, conn.assigns.raw_body)
     signature = signature |> String.trim() |> String.replace_prefix("sha256=", "")
 
     case Plug.Crypto.secure_compare(String.downcase(signature), Base.encode16(mac, case: :lower)) or
@@ -271,7 +273,7 @@ defmodule ConsoleWeb.WebhookController do
   defp verify_websub_signature(conn, signature, secret) do
     with [method, sig] <- String.split(String.trim(signature), "=", parts: 2),
          {:ok, alg} <- Map.fetch(@websub_methods, String.downcase(method)),
-         mac = :crypto.mac(:hmac, alg, secret, Enum.reverse(conn.assigns.raw_body)),
+         mac = :crypto.mac(:hmac, alg, secret, conn.assigns.raw_body),
          true <- Plug.Crypto.secure_compare(String.downcase(sig), Base.encode16(mac, case: :lower)) do
       :ok
     else

@@ -16,6 +16,12 @@ defmodule Console.Deployments.Stacks.State do
 
   def get_tf(stack_id), do: Repo.get_by(TerraformState, stack_id: stack_id)
 
+  # lock checks and writes never read the stored state, which can be many MB
+  defp get_tf_meta(stack_id) do
+    TerraformState.without_state()
+    |> Repo.get_by(stack_id: stack_id)
+  end
+
   def get_terraform_state(stack_id, actor) do
     case get_tf(stack_id) do
       %TerraformState{} = state -> allow(state, actor, :state)
@@ -30,7 +36,7 @@ defmodule Console.Deployments.Stacks.State do
     do: upsert_terraform_state(%{state: state, lock_id: lock_id}, stack_id, actor)
 
   def lock_terraform_state(%{"id" => id} = lock_info, stack_id, actor) do
-    case get_tf(stack_id) do
+    case get_tf_meta(stack_id) do
       nil -> upsert_terraform_state(%{lock: lock_info}, stack_id, actor)
       %TerraformState{lock: %{id: ^id}} = state -> set_lock(lock_info, state, actor)
       %TerraformState{lock: %{id: _} = lock} -> {:error, {:locked, lock}}
@@ -39,14 +45,14 @@ defmodule Console.Deployments.Stacks.State do
   end
 
   def unlock_terraform_state(stack_id, actor) do
-    get_tf(stack_id)
+    get_tf_meta(stack_id)
     |> TerraformState.changeset(%{lock: nil})
     |> allow(actor, :state)
     |> when_ok(:update)
   end
 
   defp upsert_terraform_state(attrs, stack_id, actor) do
-    case get_tf(stack_id) do
+    case get_tf_meta(stack_id) do
       %TerraformState{} = state -> state
       _ -> %TerraformState{stack_id: stack_id}
     end

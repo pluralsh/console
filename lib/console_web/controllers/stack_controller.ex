@@ -2,7 +2,10 @@ defmodule ConsoleWeb.StackController do
   use ConsoleWeb, :controller
   alias Console.Deployments.Stacks.State
 
+  alias ConsoleWeb.Plugs.Parsers
+
   plug :get_actor when action in [:get_tf_state, :update_tf_state, :lock_tf_state, :unlock_tf_state]
+  plug :parse when action in [:lock_tf_state, :unlock_tf_state]
 
   def get_tf_state(conn, %{"stack_id" => id}) do
     case State.get_terraform_state(id, conn.assigns.actor) do
@@ -13,11 +16,11 @@ defmodule ConsoleWeb.StackController do
     end
   end
 
-  def update_tf_state(conn, %{"stack_id" => id} = attrs) do
-    %{raw_body: state, actor: actor} = conn.assigns
+  # terraform state is stored verbatim, and can be many MB, so it's never parsed
+  def update_tf_state(conn, %{"stack_id" => id}) do
+    {state, conn} = Parsers.read_body(conn)
 
-    IO.iodata_to_binary(state)
-    |> State.update_terraform_state(attrs["ID"], id, actor)
+    State.update_terraform_state(state, conn.params["ID"], id, conn.assigns.actor)
     |> handle_resp(conn)
   end
 
@@ -43,6 +46,8 @@ defmodule ConsoleWeb.StackController do
   defp handle_resp({:error, err}, conn), do: send_resp(conn, 400, inspect(err))
 
   defp handle_resp({:ok, _}, conn), do: send_resp(conn, 200, "")
+
+  defp parse(conn, _), do: Parsers.parse(conn)
 
   defp get_actor(conn, _) do
     with {_, token} <- Plug.BasicAuth.parse_basic_auth(conn),
