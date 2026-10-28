@@ -2,7 +2,8 @@
 ingress:
   console_dns: {{ .Values.consoleDns }}
   kas_dns: {{ .Values.kasDns }}
-  {{ if .Values.ingressClass }}
+  {{/* older plural-cli versions send "<nil>" when no ingress class is configured */}}
+  {{ if and .Values.ingressClass (ne .Values.ingressClass "<nil>") }}
   ingressClass: {{ .Values.ingressClass }}
   {{ end }}
   {{ if .Values.clusterIssuer }}
@@ -55,7 +56,7 @@ kas:
 
   ingress:
     kas_dns: {{ .Values.kasDns }}
-    {{ if .Values.ingressClass }}
+    {{ if and .Values.ingressClass (ne .Values.ingressClass "<nil>") }}
     ingressClass: {{ .Values.ingressClass }}
     {{ end }}
     {{ if .Values.clusterIssuer }}
