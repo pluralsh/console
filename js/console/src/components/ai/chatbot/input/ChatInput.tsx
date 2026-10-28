@@ -1,5 +1,6 @@
 import {
   AiSparkleFilledIcon,
+  ArrowCornerUpIcon,
   ArrowUpIcon,
   Button,
   CaretDownIcon,
@@ -16,6 +17,7 @@ import { SemanticPartialType } from 'components/utils/table/StackedText.tsx'
 import { ChatThreadDetailsFragment } from 'generated/graphql.ts'
 import { isEmpty, truncate } from 'lodash'
 import {
+  ComponentProps,
   ComponentPropsWithoutRef,
   ComponentPropsWithRef,
   Dispatch,
@@ -296,16 +298,10 @@ export function ChatInputSimple({
       </div>
       {submitButton ??
         (showSubmitButton && (
-          <ChatSubmitButton
+          <PromptSubmitButton
             loading={loading}
-            loadingIndicator={<SpinnerAlt color="icon-xlight" />}
             disabled={!allowSubmit || loading || disabled}
             onClick={handleSubmit}
-            css={{
-              position: 'absolute',
-              bottom: spacing.small,
-              right: spacing.small,
-            }}
           />
         ))}
       <MentionMenu
@@ -320,6 +316,32 @@ export function ChatInputSimple({
 
 const EMPTY_FILES: File[] = []
 const noop = () => {}
+
+const PROMPT_SUBMIT_BUTTON_SIZE = 32
+
+export function PromptSubmitButton({
+  loading = false,
+  ...props
+}: Omit<ComponentProps<typeof ChatSubmitButton>, 'icon' | 'loadingIndicator'>) {
+  const { spacing, borderRadiuses } = useTheme()
+
+  return (
+    <ChatSubmitButton
+      icon={<ArrowCornerUpIcon />}
+      loading={loading}
+      loadingIndicator={<SpinnerAlt color="icon-xlight" />}
+      css={{
+        position: 'absolute',
+        bottom: spacing.small,
+        right: spacing.small,
+        width: PROMPT_SUBMIT_BUTTON_SIZE,
+        height: PROMPT_SUBMIT_BUTTON_SIZE,
+        borderRadius: borderRadiuses.medium,
+      }}
+      {...props}
+    />
+  )
+}
 
 export function ChatSubmitButton({
   bgColor = 'fill-primary',

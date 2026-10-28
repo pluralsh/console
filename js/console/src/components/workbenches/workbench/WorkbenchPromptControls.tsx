@@ -1,7 +1,6 @@
-import { ArrowCornerUpIcon, SpinnerAlt } from '@pluralsh/design-system'
-import { ChatSubmitButton } from 'components/ai/chatbot/input/ChatInput'
+import { PromptSubmitButton } from 'components/ai/chatbot/input/ChatInput'
 import type { ComponentProps } from 'react'
-import styled, { useTheme } from 'styled-components'
+import styled from 'styled-components'
 
 const CONTROL_SIZE = 32
 
@@ -16,29 +15,7 @@ export const WorkbenchPromptOptionsGroup = styled.div(({ theme }) => ({
   '&&& .chatOptionPill': { borderRadius: theme.borderRadiuses.medium },
 }))
 
-export function WorkbenchPromptSubmitButton({
-  loading = false,
-  ...props
-}: Omit<ComponentProps<typeof ChatSubmitButton>, 'icon' | 'loadingIndicator'>) {
-  const { spacing, borderRadiuses } = useTheme()
-
-  return (
-    <ChatSubmitButton
-      icon={<ArrowCornerUpIcon />}
-      loading={loading}
-      loadingIndicator={<SpinnerAlt color="icon-xlight" />}
-      css={{
-        position: 'absolute',
-        bottom: spacing.small,
-        right: spacing.small,
-        width: CONTROL_SIZE,
-        height: CONTROL_SIZE,
-        borderRadius: borderRadiuses.medium,
-      }}
-      {...props}
-    />
-  )
-}
+export { PromptSubmitButton as WorkbenchPromptSubmitButton }
 
 export function WorkbenchPromptCancelButton(
   props: ComponentProps<typeof CancelButtonSC>

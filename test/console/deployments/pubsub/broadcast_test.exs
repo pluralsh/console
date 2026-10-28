@@ -104,6 +104,16 @@ defmodule Console.Deployments.PubSub.BroadcastTest do
     end
   end
 
+  describe "StackRunCompleted" do
+    test "it will push a stack.run.event event" do
+      %{id: id, cluster_id: cluster_id} = run = insert(:stack_run, status: :cancelled)
+      expect(Phoenix.Channel.Server, :broadcast, fn Console.PubSub, "cluster:" <> ^cluster_id, "stack.run.event", %{"id" => ^id} -> :ok end)
+
+      event = %PubSub.StackRunCompleted{item: run}
+      Broadcast.handle_event(event)
+    end
+  end
+
   describe "StackRunDeleted" do
     test "it will push a stack.run.event event" do
       %{id: id, cluster_id: cluster_id} = run = insert(:stack)

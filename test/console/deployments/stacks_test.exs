@@ -1340,6 +1340,26 @@ defmodule Console.Deployments.StacksTest do
       assert_receive {:event, %PubSub.StackRunUpdated{item: ^updated}}
     end
 
+    test "clusters cannot move a cancelled run out of cancelled" do
+      stack = insert(:stack)
+      run = insert(:stack_run, stack: stack, status: :cancelled)
+
+      {:ok, updated} = Stacks.update_stack_run(%{status: :running, state: %{plan: "some plan"}}, run.id, run.cluster)
+
+      assert updated.status == :cancelled
+      assert updated.state.plan == "some plan"
+    end
+
+    test "users can still change the status of a cancelled run" do
+      user = insert(:user)
+      stack = insert(:stack, write_bindings: [%{user_id: user.id}])
+      run = insert(:stack_run, stack: stack, status: :cancelled)
+
+      {:ok, updated} = Stacks.update_stack_run(%{status: :running}, run.id, user)
+
+      assert updated.status == :running
+    end
+
     test "random users cannot update runs" do
       stack = insert(:stack)
       run = insert(:stack_run, stack: stack)
@@ -1380,6 +1400,16 @@ defmodule Console.Deployments.StacksTest do
   end
 
   describe "#complete_stack_run/3" do
+    test "clusters cannot complete a cancelled run with another status" do
+      stack = insert(:stack)
+      run = insert(:stack_run, stack: stack, status: :cancelled)
+
+      {:ok, completed} = Stacks.complete_stack_run(%{status: :successful}, run.id, run.cluster)
+
+      assert completed.status == :cancelled
+      assert refetch(stack).status == :cancelled
+    end
+
     test "writers can compelete runs" do
       user = insert(:user)
       stack = insert(:stack, write_bindings: [%{user_id: user.id}])

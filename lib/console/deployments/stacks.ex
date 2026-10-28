@@ -366,15 +366,18 @@ defmodule Console.Deployments.Stacks do
   end
 
   @doc """
-  Updates basic attributes of a run, clusters and users are authorized to perform
+  Updates basic attributes of a run, clusters and users are authorized to perform.
+  Clusters cannot move a cancelled run out of the cancelled status.
   """
   @spec update_stack_run(map, binary, User.t | Cluster.t) :: run_resp
   def update_stack_run(attrs, id, actor) do
     start_transaction()
     |> add_operation(:run, fn _ ->
-      get_run!(id)
+      run = get_run!(id)
+
+      run
       |> Repo.preload([:state, :infracost_resources, violations: :causes])
-      |> StackRun.update_changeset(attrs)
+      |> StackRun.update_changeset(preserve_cancellation(attrs, run, actor))
       |> allow(actor, :write)
       |> when_ok(:update)
     end)
@@ -538,15 +541,18 @@ defmodule Console.Deployments.Stacks do
   end
 
   @doc """
-  It terminates a run in a completed state, and if successful, persists output/state information to the stack
+  It terminates a run in a completed state, and if successful, persists output/state information to the stack.
+  Clusters cannot move a cancelled run out of the cancelled status.
   """
   @spec complete_stack_run(map, binary, User.t | Cluster.t) :: run_resp
   def complete_stack_run(attrs, id, actor) do
     start_transaction()
     |> add_operation(:run, fn _ ->
-      get_run!(id)
+      run = get_run!(id)
+
+      run
       |> Repo.preload([:state, :output, :errors, :stack, :infracost_resources, violations: :causes])
-      |> StackRun.complete_changeset(attrs)
+      |> StackRun.complete_changeset(preserve_cancellation(attrs, run, actor))
       |> allow(actor, :write)
       |> when_ok(:update)
     end)
@@ -555,6 +561,11 @@ defmodule Console.Deployments.Stacks do
     |> notify_stack_status()
     |> notify(:complete)
   end
+
+  # the harness only polls for cancellation, so its in-flight status writes can race a user's cancel
+  defp preserve_cancellation(attrs, %StackRun{status: :cancelled}, %Cluster{}),
+    do: Map.delete(attrs, :status)
+  defp preserve_cancellation(attrs, _, _), do: attrs
 
   defp sync_stack_status(%StackRun{dry_run: false, status: :successful} = run) do
     %{state: state, output: output, stack: stack} = Repo.preload(run, [:state, :output, :stack])
