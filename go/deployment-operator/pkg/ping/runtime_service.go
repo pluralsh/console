@@ -376,6 +376,10 @@ type VersionPair struct {
 }
 
 func getVersionPairs(versions []controllerv1.NormalizedVersion) []VersionPair {
+	if len(versions) < 2 {
+		return nil
+	}
+
 	// Helper function for creating VersionPair
 	createVersionPair := func(latest, previous controllerv1.NormalizedVersion) VersionPair {
 		return VersionPair{
