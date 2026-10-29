@@ -55,7 +55,8 @@ EXPOSE 9418
 RUN apk update --no-cache && apk add --no-cache "libssl3>=3.5.7-r0" "libcrypto3>=3.5.7-r0"
 # Upgrade libexpat to fix authorization bypass vulnerability allowing arbitrary SQL execution
 RUN apk upgrade --no-cache libexpat musl musl-utils zlib
-RUN apk add --no-cache git
+# Pin brotli-libs to fix CVE-2026-111497 (out-of-bounds write in the brotli decoder, pulled in via git/libcurl)
+RUN apk add --no-cache git "brotli-libs>=1.2.1-r0"
 
 COPY --from=builder /usr/bin/soft /usr/bin/
 COPY --from=builder /go/data /data
