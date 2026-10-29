@@ -26,6 +26,10 @@ jobs:
       id-token: write
       packages: write
     steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v6
@@ -54,14 +58,39 @@ jobs:
           echo "$GHCR_TOKEN" | skopeo login ghcr.io -u "${{ github.repository_owner }}" --password-stdin
           echo "$GCR_TOKEN" | skopeo login gcr.io -u oauth2accesstoken --password-stdin
           echo "$DOCKER_TOKEN" | skopeo login docker.io -u mjgpluralsh --password-stdin
+      - name: Login to registries for Cosign
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to Docker Hub for Cosign
+        uses: docker/login-action@v4
+        with:
+          username: mjgpluralsh
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+      - name: Login to GCR for Cosign
+        run: |
+          echo "${{ steps.gcp.outputs.access_token }}" | docker login gcr.io -u oauth2accesstoken --password-stdin
       - name: Copy image
+        id: copy
         env:
           TAGS: ${{ steps.meta.outputs.tags }}
         run: |
           set -euo pipefail
+          digest=$(skopeo inspect --format '{{.Digest}}' "docker://${SOURCE_IMAGE}:${PSEUDOFS_VERSION}")
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
           while read -r dest; do
             [ -n "$dest" ] || continue
             skopeo copy --all --preserve-digests --retry-times 3 \
               "docker://${SOURCE_IMAGE}:${PSEUDOFS_VERSION}" \
               "docker://${dest}"
           done <<< "$TAGS"
+      - name: Cosign sign
+        uses: ./.github/actions/cosign-sign
+        with:
+          digest: ${{ steps.copy.outputs.digest }}
+          images: |
+            ghcr.io/pluralsh/fs
+            gcr.io/pluralsh/fs
+            docker.io/pluralsh/fs

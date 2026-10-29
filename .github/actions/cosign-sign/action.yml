@@ -1,0 +1,70 @@
+# Keyless Cosign signing for released Console images.
+#
+# Verify a signed image with:
+#   cosign verify \
+#     --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+#     --certificate-identity-regexp '^https://github.com/pluralsh/console/\.github/workflows/.+@refs/(tags|heads)/.+$' \
+#     ghcr.io/pluralsh/console:<version>
+#
+# Tag pushes get a refs/tags/... certificate identity.
+# Manual workflow_dispatch releases get a refs/heads/<branch> identity.
+name: Cosign sign
+description: Keyless Cosign sign of image digests on release tag or release workflow_dispatch runs
+
+inputs:
+  images:
+    description: Newline-separated image repositories to sign (no tag), e.g. ghcr.io/pluralsh/console
+    required: true
+  digest:
+    description: Manifest digest to sign, including the sha256: prefix
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Decide whether to sign
+      id: gate
+      shell: bash
+      env:
+        EVENT_NAME: ${{ github.event_name }}
+        REF: ${{ github.ref }}
+        DISPATCH_TAG: ${{ github.event.inputs.tag }}
+        DISPATCH_VERSION: ${{ github.event.inputs.version }}
+      run: |
+        set -euo pipefail
+        sign=false
+        if [[ "$EVENT_NAME" == "push" && "$REF" == refs/tags/* ]]; then
+          sign=true
+        elif [[ "$EVENT_NAME" == "workflow_dispatch" && -n "${DISPATCH_TAG:-}" ]]; then
+          sign=true
+        elif [[ "$EVENT_NAME" == "workflow_dispatch" && -n "${DISPATCH_VERSION:-}" && "$DISPATCH_VERSION" != "latest" ]]; then
+          sign=true
+        fi
+        echo "sign=$sign" >> "$GITHUB_OUTPUT"
+        if [[ "$sign" != "true" ]]; then
+          echo "Skipping Cosign (not a release tag or release workflow_dispatch)."
+        fi
+
+    - name: Install Cosign
+      if: steps.gate.outputs.sign == 'true'
+      uses: sigstore/cosign-installer@v3.8.2
+
+    - name: Sign images
+      if: steps.gate.outputs.sign == 'true'
+      shell: bash
+      env:
+        IMAGES: ${{ inputs.images }}
+        DIGEST: ${{ inputs.digest }}
+      run: |
+        set -euo pipefail
+        digest="$DIGEST"
+        if [[ "$digest" != sha256:* ]]; then
+          echo "digest must start with sha256:, got: $digest" >&2
+          exit 1
+        fi
+        while IFS= read -r image; do
+          image="${image//[$'\t\r\n ']/}"
+          [[ -z "$image" ]] && continue
+          echo "Signing ${image}@${digest}"
+          cosign sign --yes "${image}@${digest}"
+        done <<< "$IMAGES"
