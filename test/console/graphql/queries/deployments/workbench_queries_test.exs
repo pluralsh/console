@@ -654,6 +654,44 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       end
     end
 
+    test "it can filter workbench runs by who ran them" do
+      workbench = insert(:workbench)
+      alice = insert(:user, name: "Alice")
+      bob = insert(:user, name: "Bob")
+
+      alice_failed = insert(:workbench_job, workbench: workbench, user: alice, status: :failed)
+      insert(:pull_request, workbench_job: alice_failed, status: :open)
+      alice_merged = insert(:workbench_job, workbench: workbench, user: alice, status: :successful)
+      insert(:pull_request, workbench_job: alice_merged, status: :merged)
+      bob_running = insert(:workbench_job, workbench: workbench, user: bob, status: :running)
+      insert(:workbench_job, user: alice, status: :failed)
+
+      query = """
+        query Workbench($id: ID!, $userIds: [ID], $statuses: [WorkbenchJobStatus], $prStates: [WorkbenchJobPrState]) {
+          workbench(id: $id) {
+            runs(first: 10, userIds: $userIds, statuses: $statuses, prStates: $prStates) {
+              edges { node { id } }
+            }
+          }
+        }
+      """
+
+      for {vars, expected} <- [
+        {%{"userIds" => [alice.id]}, [alice_failed, alice_merged]},
+        {%{"userIds" => [bob.id], "statuses" => ["RUNNING"]}, [bob_running]},
+        {%{"userIds" => [alice.id], "prStates" => ["MERGED"]}, [alice_merged]},
+        {%{"userIds" => [alice.id], "statuses" => ["FAILED"], "prStates" => ["OPEN"]}, [alice_failed]},
+        {%{"userIds" => [bob.id], "prStates" => ["MERGED"]}, []},
+        {%{"userIds" => []}, []}
+      ] do
+        {:ok, %{data: %{"workbench" => found}}} =
+          run_query(query, Map.put(vars, "id", workbench.id), %{current_user: admin_user()})
+
+        assert from_connection(found["runs"])
+               |> ids_equal(expected)
+      end
+    end
+
     test "it can sort workbench runs by creation date" do
       workbench = insert(:workbench)
       older = insert(:workbench_job, workbench: workbench, inserted_at: Timex.now() |> Timex.shift(days: -1))
@@ -730,6 +768,50 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       """, %{"id" => workbench.id, "q" => "scraper", "prStates" => ["OPEN"]}, %{current_user: admin_user()})
 
       assert found["runCounts"]["statuses"] == [%{"status" => "FAILED", "count" => 1}]
+    end
+
+    test "it filters status counts by user" do
+      workbench = insert(:workbench)
+      alice = insert(:user, name: "Alice")
+      bob = insert(:user, name: "Bob")
+      outsider = insert(:user, name: "Cara")
+
+      alice_failed = insert(:workbench_job, workbench: workbench, user: alice, status: :failed)
+      insert(:pull_request, workbench_job: alice_failed, status: :open)
+      insert(:workbench_job, workbench: workbench, user: alice, status: :successful)
+      bob_job = insert(:workbench_job, workbench: workbench, user: bob, status: :running)
+      insert(:pull_request, workbench_job: bob_job, status: :merged)
+      insert(:workbench_job, user: outsider, status: :failed)
+
+      query = """
+        query Workbench($id: ID!, $userIds: [ID]) {
+          workbench(id: $id) {
+            runCounts(userIds: $userIds) {
+              statuses { status count }
+              pullRequests { state count }
+            }
+          }
+        }
+      """
+
+      {:ok, %{data: %{"workbench" => filtered}}} =
+        run_query(query, %{"id" => workbench.id, "userIds" => [alice.id]}, %{current_user: admin_user()})
+
+      assert Enum.sort_by(filtered["runCounts"]["statuses"], & &1["status"]) == [
+        %{"status" => "FAILED", "count" => 1},
+        %{"status" => "SUCCESSFUL", "count" => 1}
+      ]
+
+      assert Enum.sort_by(filtered["runCounts"]["pullRequests"], & &1["state"]) == [
+        %{"state" => "MERGED", "count" => 1},
+        %{"state" => "NONE", "count" => 1},
+        %{"state" => "OPEN", "count" => 1}
+      ]
+
+      {:ok, %{data: %{"workbench" => empty}}} =
+        run_query(query, %{"id" => workbench.id, "userIds" => []}, %{current_user: admin_user()})
+
+      assert empty["runCounts"]["statuses"] == []
     end
 
     test "it can filter workbench runs and counts to a creation window" do
@@ -2633,6 +2715,41 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
         run_query(query, %{"workbenchId" => workbench.id}, %{current_user: admin_user()})
 
       assert Enum.map(found, & &1["id"]) == [first_ok.id, second_failed.id]
+    end
+
+    test "it filters search results by who ran them" do
+      workbench = insert(:workbench)
+      alice = insert(:user, name: "Alice")
+      bob = insert(:user, name: "Bob")
+
+      alice_failed = insert(:workbench_job, workbench: workbench, user: alice, status: :failed, prompt: "fix the outage")
+      insert(:pull_request, workbench_job: alice_failed, status: :open)
+      alice_merged = insert(:workbench_job, workbench: workbench, user: alice, status: :successful, prompt: "fix the outage")
+      insert(:pull_request, workbench_job: alice_merged, status: :merged)
+      bob_failed = insert(:workbench_job, workbench: workbench, user: bob, status: :failed, prompt: "fix the outage")
+      insert(:workbench_job, workbench: workbench, user: alice, prompt: "unrelated")
+      insert(:workbench_job, user: alice, prompt: "fix the outage")
+
+      query = """
+        query WorkbenchJobSearch($workbenchId: ID!, $userIds: [ID], $statuses: [WorkbenchJobStatus], $prStates: [WorkbenchJobPrState]) {
+          workbenchJobSearch(q: "outage", workbenchId: $workbenchId, limit: 5, userIds: $userIds, statuses: $statuses, prStates: $prStates) {
+            id
+          }
+        }
+      """
+
+      for {vars, expected} <- [
+        {%{"userIds" => [alice.id]}, [alice_failed, alice_merged]},
+        {%{"userIds" => [alice.id], "statuses" => ["FAILED"]}, [alice_failed]},
+        {%{"userIds" => [alice.id], "prStates" => ["MERGED"]}, [alice_merged]},
+        {%{"userIds" => [bob.id]}, [bob_failed]},
+        {%{"userIds" => []}, []}
+      ] do
+        {:ok, %{data: %{"workbenchJobSearch" => found}}} =
+          run_query(query, Map.put(vars, "workbenchId", workbench.id), %{current_user: admin_user()})
+
+        assert ids_equal(found, expected)
+      end
     end
 
     test "it matches like wildcards literally, without the vector store" do

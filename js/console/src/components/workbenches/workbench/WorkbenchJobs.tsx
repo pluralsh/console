@@ -17,7 +17,7 @@ import {
   useWorkbenchJobsQuery,
 } from 'generated/graphql'
 import { WorkbenchJobsDocument } from 'generated/graphql-documents'
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
@@ -34,6 +34,7 @@ import {
   DEFAULT_WORKBENCH_JOBS_DISPLAY,
   getJobFilterEmptyKind,
   hasUncheckedJobFilters,
+  peopleFromLoadedJobs,
   resetJobFilters,
   toJobFilterVariables,
   WORKBENCH_JOBS_PAGE_SIZE,
@@ -68,6 +69,7 @@ export function WorkbenchJobs() {
     () => ({
       q: query || undefined,
       prStates: filterVars.prStates,
+      userIds: filterVars.userIds,
       direction,
     }),
     [query, filterVars, direction]
@@ -108,6 +110,25 @@ export function WorkbenchJobs() {
       toCounts(countsData?.workbench?.runCounts?.pullRequests, (e) => e.state),
     [countsData]
   )
+  // the list view loads jobs inside each status group, so those groups report
+  // the rows they have; the other views use the page query (and recent jobs)
+  const [groupedJobs, setGroupedJobs] = useState<
+    readonly {
+      id: string
+      user?: { id: string; name?: string | null } | null
+    }[]
+  >([])
+  const onGroupedJobs = useCallback(
+    (
+      next: readonly {
+        id: string
+        user?: { id: string; name?: string | null } | null
+      }[]
+    ) => {
+      setGroupedJobs((current) => (sameJobIds(current, next) ? current : next))
+    },
+    []
+  )
 
   // searching shows the (unpaginated) search results in every view
   const jobs = useMemo(
@@ -142,6 +163,17 @@ export function WorkbenchJobs() {
           ? mapExistingNodes(recentData?.workbench?.runs)
           : jobs.slice(0, BOARD_RECENT_JOBS_COUNT),
     [fetchRecent, jobs, recentData, searching]
+  )
+  const users = useMemo(
+    () =>
+      peopleFromLoadedJobs(
+        grouped
+          ? groupedJobs
+          : fetchRecent
+            ? [...jobs, ...(recentJobs ?? [])]
+            : jobs
+      ),
+    [fetchRecent, grouped, groupedJobs, jobs, recentJobs]
   )
   const list = searching
     ? {
@@ -191,6 +223,7 @@ export function WorkbenchJobs() {
               onChange={updateDisplay}
               statusCounts={statusCounts}
               prStateCounts={prStateCounts}
+              users={users}
               searching={searching}
             />
           </DisplayPanel>
@@ -236,6 +269,7 @@ export function WorkbenchJobs() {
               statuses={display.statuses}
               filters={groupFilters}
               emptyState={emptyState}
+              onLoadedJobs={onGroupedJobs}
             />
           ) : (
             <WorkbenchJobsBoard
@@ -249,5 +283,15 @@ export function WorkbenchJobs() {
         </WorkbenchMonitoringContent>
       )}
     </WorkbenchPageLayout>
+  )
+}
+
+function sameJobIds(
+  current: readonly { id: string }[],
+  next: readonly { id: string }[]
+) {
+  return (
+    current.length === next.length &&
+    current.every((job, index) => job.id === next[index]?.id)
   )
 }

@@ -698,6 +698,9 @@ type RootQueryType {
 
     "filter results by the state of their pull requests"
     prStates: [WorkbenchJobPrState]
+
+    "filter results by the users who ran them"
+    userIds: [ID]
   ): [WorkbenchJob]
 
   workbenchJobActivity(id: ID!): WorkbenchJobActivity
@@ -4381,6 +4384,9 @@ type Workbench {
     "filter runs by the state of their pull requests"
     prStates: [WorkbenchJobPrState]
 
+    "filter runs by the users who ran them"
+    userIds: [ID]
+
     "creation date sort direction"
     direction: SortDirection
 
@@ -4397,6 +4403,9 @@ type Workbench {
 
     "only count runs with pull requests in these states"
     prStates: [WorkbenchJobPrState]
+
+    "only count runs by these users"
+    userIds: [ID]
 
     "only count runs created at or after this time"
     insertedAfter: DateTime

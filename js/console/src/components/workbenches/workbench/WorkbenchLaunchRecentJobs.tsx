@@ -44,6 +44,7 @@ export function WorkbenchLaunchRecentJobs({
         id: workbenchId,
         q: undefined,
         prStates: undefined,
+        userIds: undefined,
         insertedAfter,
       },
       skip: !workbenchId,

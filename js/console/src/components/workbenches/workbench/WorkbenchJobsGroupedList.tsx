@@ -32,7 +32,15 @@ import {
 } from 'generated/graphql'
 import { WorkbenchJobsForStatusDocument } from 'generated/graphql-documents'
 import { includes, startCase } from 'lodash'
-import { memo, ReactElement, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  memo,
+  ReactElement,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
 import { formatDateTime } from 'utils/datetime'
@@ -98,6 +106,7 @@ const RUNS_KEY_PATH = ['workbench', 'runs']
 type JobQueryFilters = {
   q?: string
   prStates?: WorkbenchJobPrState[]
+  userIds?: string[]
   direction?: SortDirection
   insertedAfter?: string
 }
@@ -111,6 +120,7 @@ export function WorkbenchJobsGroupedList({
   capped = false,
   fill = true,
   defaultCollapsed = DEFAULT_COLLAPSED,
+  onLoadedJobs,
 }: {
   workbenchId: string
   statuses: WorkbenchJobStatus[]
@@ -121,6 +131,8 @@ export function WorkbenchJobsGroupedList({
   capped?: boolean
   fill?: boolean
   defaultCollapsed?: Partial<Record<WorkbenchJobStatus, boolean>>
+  // people for the Person menu come from jobs these groups have loaded
+  onLoadedJobs?: (jobs: readonly WorkbenchJobTinyFragment[]) => void
 }) {
   const {
     data,
@@ -132,6 +144,7 @@ export function WorkbenchJobsGroupedList({
       id: workbenchId,
       q: filters.q,
       prStates: filters.prStates,
+      userIds: filters.userIds,
       insertedAfter: filters.insertedAfter,
     },
     fetchPolicy: 'cache-and-network',
@@ -141,6 +154,24 @@ export function WorkbenchJobsGroupedList({
   const { listedStatuses, refresh } = useJobDeltaRefresh(
     workbenchId,
     refetchCounts
+  )
+  const jobsByStatus = useRef(
+    new Map<WorkbenchJobStatus, readonly WorkbenchJobTinyFragment[]>()
+  )
+  const reportGroupJobs = useCallback(
+    (
+      status: WorkbenchJobStatus,
+      groupJobs: readonly WorkbenchJobTinyFragment[] | null
+    ) => {
+      if (groupJobs) jobsByStatus.current.set(status, groupJobs)
+      else jobsByStatus.current.delete(status)
+      if (!onLoadedJobs) return
+
+      const loaded: WorkbenchJobTinyFragment[] = []
+      for (const rows of jobsByStatus.current.values()) loaded.push(...rows)
+      onLoadedJobs(loaded)
+    },
+    [onLoadedJobs]
   )
   const groups = useMemo(() => {
     if (!countsData) return undefined
@@ -181,6 +212,7 @@ export function WorkbenchJobsGroupedList({
           scrollEl={scrollEl}
           listedStatuses={listedStatuses}
           refresh={refresh}
+          onGroupJobs={onLoadedJobs ? reportGroupJobs : undefined}
         />
       )}
     />
@@ -243,6 +275,7 @@ function JobStatusGroup({
   scrollEl,
   listedStatuses,
   refresh,
+  onGroupJobs,
 }: {
   workbenchId: string
   status: WorkbenchJobStatus
@@ -253,6 +286,10 @@ function JobStatusGroup({
   scrollEl: HTMLDivElement | null
   listedStatuses: Map<string, WorkbenchJobStatus>
   refresh: GroupRefresh
+  onGroupJobs?: (
+    status: WorkbenchJobStatus,
+    jobs: readonly WorkbenchJobTinyFragment[] | null
+  ) => void
 }) {
   const { data, loading, pageInfo, fetchNextPage, fetchingMore, refetch } =
     useFetchPaginatedData(
@@ -265,6 +302,17 @@ function JobStatusGroup({
       { id: workbenchId, status, ...filters }
     )
   const jobs = useMemo(() => mapExistingNodes(data?.workbench?.runs), [data])
+
+  useEffect(() => {
+    onGroupJobs?.(status, jobs)
+  }, [jobs, onGroupJobs, status])
+
+  useEffect(
+    () => () => {
+      onGroupJobs?.(status, null)
+    },
+    [onGroupJobs, status]
+  )
 
   // keyed by this group's status rather than each job's: the subscription
   // rewrites a moved job's status in the cache before its delta is handled

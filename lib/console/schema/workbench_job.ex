@@ -203,6 +203,10 @@ defmodule Console.Schema.WorkbenchJob do
     from(j in query, where: j.status in ^statuses)
   end
 
+  def for_user_ids(query \\ __MODULE__, ids) do
+    from(j in query, where: j.user_id in ^ids)
+  end
+
   def inserted_after(query \\ __MODULE__, ts)
   def inserted_after(query, nil), do: query
   def inserted_after(query, ts), do: from(j in query, where: j.inserted_at >= ^ts)

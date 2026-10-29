@@ -81,9 +81,10 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
       |> maybe_job_search(args)
       |> workbench_job_filters(Map.take(args, [:pr_states, :inserted_after]))
     none = Repo.aggregate(WorkbenchJob.without_pull_requests(jobs), :count)
+    status_jobs = workbench_job_filters(jobs, Map.take(args, [:user_ids]))
 
     {:ok, %{
-      statuses: Repo.all(WorkbenchJob.count_by_status(jobs)),
+      statuses: Repo.all(WorkbenchJob.count_by_status(status_jobs)),
       pull_requests: Repo.all(WorkbenchJob.count_by_pr_state(jobs)) ++ [%{state: :none, count: none}]
     }}
   end
@@ -117,7 +118,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   end
 
   defp job_search_filter(args) do
-    if Enum.any?([:statuses, :pr_states], &is_list(Map.get(args, &1))),
+    if Enum.any?([:statuses, :pr_states, :user_ids], &is_list(Map.get(args, &1))),
       do: &workbench_job_filters(&1, args)
   end
 
@@ -618,6 +619,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
       {:monitor_id, id}, q when is_binary(id) -> WorkbenchJob.for_monitor(q, id)
       {:statuses, s}, q when is_list(s) -> WorkbenchJob.for_statuses(q, s)
       {:pr_states, s}, q when is_list(s) -> WorkbenchJob.for_pr_states(q, s)
+      {:user_ids, ids}, q when is_list(ids) -> WorkbenchJob.for_user_ids(q, ids)
       {:inserted_after, ts}, q when not is_nil(ts) -> WorkbenchJob.inserted_after(q, ts)
       _, q -> q
     end)

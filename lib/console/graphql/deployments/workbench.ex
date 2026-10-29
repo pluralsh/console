@@ -676,6 +676,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :monitor_id, :id, description: "show runs spawned from a specific monitor"
       arg :statuses, list_of(:workbench_job_status), description: "filter runs by status"
       arg :pr_states, list_of(:workbench_job_pr_state), description: "filter runs by the state of their pull requests"
+      arg :user_ids, list_of(:id), description: "filter runs by the users who ran them"
       arg :direction, :sort_direction, description: "creation date sort direction"
       arg :q, :string, description: "case-insensitive substring search over job prompts"
       arg :inserted_after, :datetime, description: "only runs created at or after this time"
@@ -687,6 +688,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
       middleware Nested, check: true, msg: "workbench run counts cannot be fetched through a policy"
       arg :q, :string, description: "only count runs whose prompt contains this (case-insensitive)"
       arg :pr_states, list_of(:workbench_job_pr_state), description: "only count runs with pull requests in these states"
+      arg :user_ids, list_of(:id), description: "only count runs by these users"
       arg :inserted_after, :datetime, description: "only count runs created at or after this time"
 
       resolve &Deployments.run_counts/3
@@ -1843,6 +1845,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :limit,         :integer, description: "max results to return (defaults to 5)"
       arg :statuses,      list_of(:workbench_job_status), description: "filter results by status"
       arg :pr_states,     list_of(:workbench_job_pr_state), description: "filter results by the state of their pull requests"
+      arg :user_ids,      list_of(:id), description: "filter results by the users who ran them"
 
       resolve &Deployments.workbench_job_search/2
     end

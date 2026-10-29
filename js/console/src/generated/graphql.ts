@@ -13968,6 +13968,7 @@ export type RootQueryTypeWorkbenchJobSearchArgs = {
   prStates?: InputMaybe<Array<InputMaybe<WorkbenchJobPrState>>>;
   q: Scalars['String']['input'];
   statuses?: InputMaybe<Array<InputMaybe<WorkbenchJobStatus>>>;
+  userIds?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
   workbenchId: Scalars['ID']['input'];
 };
 
@@ -17257,6 +17258,7 @@ export type WorkbenchRunCountsArgs = {
   insertedAfter?: InputMaybe<Scalars['DateTime']['input']>;
   prStates?: InputMaybe<Array<InputMaybe<WorkbenchJobPrState>>>;
   q?: InputMaybe<Scalars['String']['input']>;
+  userIds?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
 };
 
 
@@ -17273,6 +17275,7 @@ export type WorkbenchRunsArgs = {
   prStates?: InputMaybe<Array<InputMaybe<WorkbenchJobPrState>>>;
   q?: InputMaybe<Scalars['String']['input']>;
   statuses?: InputMaybe<Array<InputMaybe<WorkbenchJobStatus>>>;
+  userIds?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
 };
 
 
@@ -23968,6 +23971,7 @@ export type WorkbenchJobsQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
   statuses?: InputMaybe<Array<InputMaybe<WorkbenchJobStatus>> | InputMaybe<WorkbenchJobStatus>>;
   prStates?: InputMaybe<Array<InputMaybe<WorkbenchJobPrState>> | InputMaybe<WorkbenchJobPrState>>;
+  userIds?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>> | InputMaybe<Scalars['ID']['input']>>;
   direction?: InputMaybe<SortDirection>;
   withTotal?: InputMaybe<Scalars['Boolean']['input']>;
 }>;
@@ -23986,6 +23990,7 @@ export type WorkbenchJobStatusCountsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
   q?: InputMaybe<Scalars['String']['input']>;
   prStates?: InputMaybe<Array<InputMaybe<WorkbenchJobPrState>> | InputMaybe<WorkbenchJobPrState>>;
+  userIds?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>> | InputMaybe<Scalars['ID']['input']>>;
   insertedAfter?: InputMaybe<Scalars['DateTime']['input']>;
 }>;
 
@@ -23997,6 +24002,7 @@ export type WorkbenchJobsForStatusQueryVariables = Exact<{
   status: WorkbenchJobStatus;
   q?: InputMaybe<Scalars['String']['input']>;
   prStates?: InputMaybe<Array<InputMaybe<WorkbenchJobPrState>> | InputMaybe<WorkbenchJobPrState>>;
+  userIds?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>> | InputMaybe<Scalars['ID']['input']>>;
   direction?: InputMaybe<SortDirection>;
   insertedAfter?: InputMaybe<Scalars['DateTime']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -24012,6 +24018,7 @@ export type WorkbenchJobSearchQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['Int']['input']>;
   statuses?: InputMaybe<Array<InputMaybe<WorkbenchJobStatus>> | InputMaybe<WorkbenchJobStatus>>;
   prStates?: InputMaybe<Array<InputMaybe<WorkbenchJobPrState>> | InputMaybe<WorkbenchJobPrState>>;
+  userIds?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>> | InputMaybe<Scalars['ID']['input']>>;
 }>;
 
 
@@ -38395,6 +38402,7 @@ export type WorkbenchEvalSettingsQueryResult = Apollo.QueryResult<WorkbenchEvalS
  *      after: // value for 'after'
  *      statuses: // value for 'statuses'
  *      prStates: // value for 'prStates'
+ *      userIds: // value for 'userIds'
  *      direction: // value for 'direction'
  *      withTotal: // value for 'withTotal'
  *   },
@@ -38471,6 +38479,7 @@ export type WorkbenchJobCountsQueryResult = Apollo.QueryResult<WorkbenchJobCount
  *      id: // value for 'id'
  *      q: // value for 'q'
  *      prStates: // value for 'prStates'
+ *      userIds: // value for 'userIds'
  *      insertedAfter: // value for 'insertedAfter'
  *   },
  * });
@@ -38511,6 +38520,7 @@ export type WorkbenchJobStatusCountsQueryResult = Apollo.QueryResult<WorkbenchJo
  *      status: // value for 'status'
  *      q: // value for 'q'
  *      prStates: // value for 'prStates'
+ *      userIds: // value for 'userIds'
  *      direction: // value for 'direction'
  *      insertedAfter: // value for 'insertedAfter'
  *      first: // value for 'first'
@@ -38555,6 +38565,7 @@ export type WorkbenchJobsForStatusQueryResult = Apollo.QueryResult<WorkbenchJobs
  *      limit: // value for 'limit'
  *      statuses: // value for 'statuses'
  *      prStates: // value for 'prStates'
+ *      userIds: // value for 'userIds'
  *   },
  * });
  */
