@@ -111,6 +111,8 @@ defmodule ConsoleWeb.Router do
         post "/webhooks/:type/:id", WebhookController, :scm
         post "/vulnerabilities", PolicyController, :vulnerabilities
         post "/constraints",     PolicyController, :constraints
+        post "/costs",           CostController, :ingest
+        post "/services/:id/components", ComponentController, :update
 
         get "/gate/:cluster/:name", GitController, :proceed
         get "/gate/:id", GitController, :proceed

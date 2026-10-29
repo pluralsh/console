@@ -114,6 +114,185 @@ type violation struct {
 	Message   *string `json:"message,omitempty"`
 }
 
+// Top-level keys are always sent, null if unset, as the console applies every key that's present.
+type serviceComponentsUpdate struct {
+	Components []component      `json:"components"`
+	RevisionID string           `json:"revision_id"`
+	Sha        *string          `json:"sha"`
+	Errors     []serviceError   `json:"errors"`
+	Metadata   *serviceMetadata `json:"metadata"`
+}
+
+type component struct {
+	State     *string           `json:"state,omitempty"`
+	Synced    bool              `json:"synced"`
+	Group     string            `json:"group"`
+	Version   string            `json:"version"`
+	Kind      string            `json:"kind"`
+	Namespace string            `json:"namespace"`
+	Name      string            `json:"name"`
+	UID       *string           `json:"uid,omitempty"`
+	Content   *componentContent `json:"content,omitempty"`
+	Children  []componentChild  `json:"children,omitempty"`
+}
+
+type componentContent struct {
+	Desired *string `json:"desired,omitempty"`
+	Live    *string `json:"live,omitempty"`
+}
+
+type componentChild struct {
+	UID       string  `json:"uid"`
+	State     *string `json:"state,omitempty"`
+	ParentUID *string `json:"parent_uid,omitempty"`
+	Name      string  `json:"name"`
+	Namespace *string `json:"namespace,omitempty"`
+	Group     *string `json:"group,omitempty"`
+	Version   string  `json:"version"`
+	Kind      string  `json:"kind"`
+}
+
+type serviceError struct {
+	Source  string `json:"source"`
+	Message string `json:"message"`
+	Warning *bool  `json:"warning,omitempty"`
+}
+
+type serviceMetadata struct {
+	Images []string `json:"images,omitempty"`
+	Fqdns  []string `json:"fqdns,omitempty"`
+}
+
+type costIngest struct {
+	Cluster         *cost                   `json:"cluster,omitempty"`
+	Namespaces      []cost                  `json:"namespaces,omitempty"`
+	Recommendations []scalingRecommendation `json:"recommendations,omitempty"`
+}
+
+type cost struct {
+	Namespace        *string  `json:"namespace,omitempty"`
+	Memory           *float64 `json:"memory,omitempty"`
+	CPU              *float64 `json:"cpu,omitempty"`
+	Gpu              *float64 `json:"gpu,omitempty"`
+	Storage          *float64 `json:"storage,omitempty"`
+	MemoryUtil       *float64 `json:"memory_util,omitempty"`
+	CPUUtil          *float64 `json:"cpu_util,omitempty"`
+	GpuUtil          *float64 `json:"gpu_util,omitempty"`
+	CPUCost          *float64 `json:"cpu_cost,omitempty"`
+	MemoryCost       *float64 `json:"memory_cost,omitempty"`
+	GpuCost          *float64 `json:"gpu_cost,omitempty"`
+	IngressCost      *float64 `json:"ingress_cost,omitempty"`
+	LoadBalancerCost *float64 `json:"load_balancer_cost,omitempty"`
+	EgressCost       *float64 `json:"egress_cost,omitempty"`
+	NodeCost         *float64 `json:"node_cost,omitempty"`
+	ControlPlaneCost *float64 `json:"control_plane_cost,omitempty"`
+	StorageCost      *float64 `json:"storage_cost,omitempty"`
+}
+
+type scalingRecommendation struct {
+	Type          *string  `json:"type,omitempty"`
+	Namespace     *string  `json:"namespace,omitempty"`
+	Name          *string  `json:"name,omitempty"`
+	Container     *string  `json:"container,omitempty"`
+	CPUUtil       *float64 `json:"cpu_util,omitempty"`
+	GpuUtil       *float64 `json:"gpu_util,omitempty"`
+	MemoryUtil    *float64 `json:"memory_util,omitempty"`
+	MemoryRequest *float64 `json:"memory_request,omitempty"`
+	CPURequest    *float64 `json:"cpu_request,omitempty"`
+	CPUCost       *float64 `json:"cpu_cost,omitempty"`
+	MemoryCost    *float64 `json:"memory_cost,omitempty"`
+	GpuCost       *float64 `json:"gpu_cost,omitempty"`
+	ServiceID     *string  `json:"service_id,omitempty"`
+}
+
+func toServiceComponentsUpdate(components []*console.ComponentAttributes, revisionID string, sha *string, errs []*console.ServiceErrorAttributes, metadata *console.ServiceMetadataAttributes) serviceComponentsUpdate {
+	return serviceComponentsUpdate{
+		Components: convertSlice(components, toComponent),
+		RevisionID: revisionID,
+		Sha:        sha,
+		Errors: convertSlice(errs, func(e *console.ServiceErrorAttributes) serviceError {
+			return serviceError{Source: e.Source, Message: e.Message, Warning: e.Warning}
+		}),
+		Metadata: convertPtr(metadata, func(m *console.ServiceMetadataAttributes) serviceMetadata {
+			return serviceMetadata{Images: lo.FromSlicePtr(lo.Compact(m.Images)), Fqdns: lo.FromSlicePtr(lo.Compact(m.Fqdns))}
+		}),
+	}
+}
+
+func toComponent(in *console.ComponentAttributes) component {
+	return component{
+		State:     lowerEnum(in.State),
+		Synced:    in.Synced,
+		Group:     in.Group,
+		Version:   in.Version,
+		Kind:      in.Kind,
+		Namespace: in.Namespace,
+		Name:      in.Name,
+		UID:       in.UID,
+		Content: convertPtr(in.Content, func(c *console.ComponentContentAttributes) componentContent {
+			return componentContent{Desired: c.Desired, Live: c.Live}
+		}),
+		Children: convertSlice(in.Children, func(c *console.ComponentChildAttributes) componentChild {
+			return componentChild{
+				UID:       c.UID,
+				State:     lowerEnum(c.State),
+				ParentUID: c.ParentUID,
+				Name:      c.Name,
+				Namespace: c.Namespace,
+				Group:     c.Group,
+				Version:   c.Version,
+				Kind:      c.Kind,
+			}
+		}),
+	}
+}
+
+func toCostIngest(in console.CostIngestAttributes) costIngest {
+	return costIngest{
+		Cluster:    convertPtr(in.Cluster, toCost),
+		Namespaces: convertSlice(in.Namespaces, toCost),
+		Recommendations: convertSlice(in.Recommendations, func(r *console.ClusterRecommendationAttributes) scalingRecommendation {
+			return scalingRecommendation{
+				Type:          lowerEnum(r.Type),
+				Namespace:     r.Namespace,
+				Name:          r.Name,
+				Container:     r.Container,
+				CPUUtil:       r.CPUUtil,
+				GpuUtil:       r.GpuUtil,
+				MemoryUtil:    r.MemoryUtil,
+				MemoryRequest: r.MemoryRequest,
+				CPURequest:    r.CPURequest,
+				CPUCost:       r.CPUCost,
+				MemoryCost:    r.MemoryCost,
+				GpuCost:       r.GpuCost,
+				ServiceID:     r.ServiceID,
+			}
+		}),
+	}
+}
+
+func toCost(in *console.CostAttributes) cost {
+	return cost{
+		Namespace:        in.Namespace,
+		Memory:           in.Memory,
+		CPU:              in.CPU,
+		Gpu:              in.Gpu,
+		Storage:          in.Storage,
+		MemoryUtil:       in.MemoryUtil,
+		CPUUtil:          in.CPUUtil,
+		GpuUtil:          in.GpuUtil,
+		CPUCost:          in.CPUCost,
+		MemoryCost:       in.MemoryCost,
+		GpuCost:          in.GpuCost,
+		IngressCost:      in.IngressCost,
+		LoadBalancerCost: in.LoadBalancerCost,
+		EgressCost:       in.EgressCost,
+		NodeCost:         in.NodeCost,
+		ControlPlaneCost: in.ControlPlaneCost,
+		StorageCost:      in.StorageCost,
+	}
+}
+
 func toVulnerabilityReports(in []*console.VulnerabilityReportAttributes) []vulnerabilityReport {
 	return lo.FilterMap(in, func(r *console.VulnerabilityReportAttributes, _ int) (vulnerabilityReport, bool) {
 		if r == nil {
@@ -228,7 +407,12 @@ func convertPtr[T, R any](in *T, f func(*T) R) *R {
 	return lo.ToPtr(f(in))
 }
 
+// convertSlice keeps nil slices nil, as some endpoints treat null and empty lists differently.
 func convertSlice[T, R any](in []*T, f func(*T) R) []R {
+	if in == nil {
+		return nil
+	}
+
 	return lo.FilterMap(in, func(v *T, _ int) (R, bool) {
 		if v == nil {
 			var zero R

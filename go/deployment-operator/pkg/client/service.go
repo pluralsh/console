@@ -2,6 +2,8 @@ package client
 
 import (
 	"errors"
+	"fmt"
+	"net/url"
 
 	console "github.com/pluralsh/console/go/client"
 )
@@ -66,8 +68,12 @@ func (c *client) GetServiceDeploymentComponents(id string) (*console.GetServiceD
 }
 
 func (c *client) UpdateComponents(id, revisionID string, sha *string, components []*console.ComponentAttributes, errs []*console.ServiceErrorAttributes, metadata *console.ServiceMetadataAttributes) error {
-	_, err := c.consoleClient.UpdateServiceComponents(c.ctx, id, components, revisionID, sha, errs, metadata)
-	return err
+	return c.upload(fmt.Sprintf("/ext/v1/services/%s/components", url.PathEscape(id)), func() any {
+		return toServiceComponentsUpdate(components, revisionID, sha, errs, metadata)
+	}, nil, func() error {
+		_, err := c.consoleClient.UpdateServiceComponents(c.ctx, id, components, revisionID, sha, errs, metadata)
+		return err
+	})
 }
 
 func (c *client) UpdateServiceErrors(id string, errs []*console.ServiceErrorAttributes) error {

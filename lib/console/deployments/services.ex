@@ -863,7 +863,7 @@ defmodule Console.Deployments.Services do
   end
   def stabilize_contexts(attrs, _), do: attrs
 
-  def stabilize(%{components: new_components} = attrs, %Service{components: components} = svc) do
+  def stabilize(%{components: new_components} = attrs, %Service{components: components} = svc) when is_list(new_components) do
     components = Map.new(components, fn  comp -> {component_key(comp), comp} end)
     new_components = Enum.map(new_components, &stabilize_component(&1, components))
     Map.put(attrs, :components, new_components)
@@ -878,8 +878,9 @@ defmodule Console.Deployments.Services do
 
   defp _stabilize_errors([], _, acc), do: acc
   defp _stabilize_errors(res, [], acc), do: acc ++ res
-  defp _stabilize_errors([l | lres], [r | rres], acc),
+  defp _stabilize_errors([%{} = l | lres], [r | rres], acc),
     do: _stabilize_errors(lres, rres, [Map.put(l, :id, r.id) | acc])
+  defp _stabilize_errors([l | lres], rres, acc), do: _stabilize_errors(lres, rres, [l | acc])
 
   defp stabilize_component(new_component, components) do
     case components[component_key(new_component)] do
@@ -892,7 +893,10 @@ defmodule Console.Deployments.Services do
 
   defp maybe_stabilize_children(%{children: [_ | _] = children} = component, old_children) when is_list(old_children) do
     old_children = Map.new(old_children, fn %ServiceComponentChild{id: id, uid: uid} -> {uid, id} end)
-    Map.put(component, :children, Enum.map(children, &Map.put(&1, :id, old_children[&1.uid])))
+    Map.put(component, :children, Enum.map(children, fn
+      %{} = child -> Map.put(child, :id, old_children[child[:uid]])
+      child -> child
+    end))
   end
   defp maybe_stabilize_children(component, _), do: Map.put(component, :children, [])
 
