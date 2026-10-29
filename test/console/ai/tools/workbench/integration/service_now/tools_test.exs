@@ -236,17 +236,23 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.ToolsTest do
   describe "get_variables" do
     @variables ~s({"result":[
       {"sc_item_option.item_option_new.name":"workspace","sc_item_option.item_option_new.question_text":"Workspace name",
-       "sc_item_option.item_option_new.type":"6","sc_item_option.value":"plural-test"},
+       "sc_item_option.item_option_new.type":"6","sc_item_option.item_option_new.read_roles":"",
+       "sc_item_option.value":"plural-test"},
       {"sc_item_option.item_option_new.name":"optional_label","sc_item_option.item_option_new.question_text":"Optional Software",
-       "sc_item_option.item_option_new.type":"11","sc_item_option.value":""},
+       "sc_item_option.item_option_new.type":"11","sc_item_option.item_option_new.read_roles":"",
+       "sc_item_option.value":""},
       {"sc_item_option.item_option_new.name":"acrobat","sc_item_option.item_option_new.question_text":"Adobe Acrobat",
-       "sc_item_option.item_option_new.type":"7","sc_item_option.value":"true"},
+       "sc_item_option.item_option_new.type":"7","sc_item_option.item_option_new.read_roles":"",
+       "sc_item_option.value":"true"},
       {"sc_item_option.item_option_new.name":"api_key","sc_item_option.item_option_new.question_text":"API key",
-       "sc_item_option.item_option_new.type":"25","sc_item_option.value":"encrypted"},
+       "sc_item_option.item_option_new.type":"25","sc_item_option.item_option_new.read_roles":"",
+       "sc_item_option.value":"encrypted"},
       {"sc_item_option.item_option_new.name":"cost_center","sc_item_option.item_option_new.question_text":"Cost center",
        "sc_item_option.item_option_new.type":"6","sc_item_option.item_option_new.read_roles":"finance",
        "sc_item_option.value":"CC-42"},
-      {"sc_item_option.value":"unknown type"}
+      {"sc_item_option.item_option_new.name":"no_roles_field","sc_item_option.item_option_new.question_text":"Unknown roles",
+       "sc_item_option.item_option_new.type":"6","sc_item_option.value":"secret?"},
+      {"sc_item_option.item_option_new.read_roles":"","sc_item_option.value":"unknown type"}
     ]})
 
     test "reads the variables of a requested item, without layout variables or hidden values" do
@@ -279,6 +285,7 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.ToolsTest do
                  %{"name" => "acrobat", "question" => "Adobe Acrobat", "value" => "true"},
                  %{"name" => "api_key", "question" => "API key", "value" => "(masked)"},
                  %{"name" => "cost_center", "question" => "Cost center", "value" => "(restricted)"},
+                 %{"name" => "no_roles_field", "question" => "Unknown roles", "value" => "(hidden)"},
                  %{"name" => nil, "question" => nil, "value" => "(hidden)"}
                ],
                "truncated" => false
@@ -292,7 +299,11 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.ToolsTest do
 
       rows =
         for i <- 1..200,
-            do: %{"sc_item_option.item_option_new.name" => "v#{i}", "sc_item_option.item_option_new.type" => "6"}
+            do: %{
+              "sc_item_option.item_option_new.name" => "v#{i}",
+              "sc_item_option.item_option_new.type" => "6",
+              "sc_item_option.item_option_new.read_roles" => ""
+            }
 
       expect(Req, :request, fn _ ->
         {:ok, %Req.Response{status: 200, body: Jason.encode!(%{"result" => rows})}}

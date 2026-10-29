@@ -113,13 +113,17 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.GetVariables do
     %{"name" => row[@name], "question" => row[@question], "value" => value(row)}
   end
 
-  # Fails closed: a value is only returned when its type could be read and is not masked, so an
-  # integration user without read access to item_option_new never gets a masked secret back.
-  # Variables limited to some roles in the catalog stay hidden, the Table API does not check those.
+  # Fails closed: a value is only returned when its read roles and type could be read, the variable
+  # has no read roles and is not masked. Unrestricted variables come back with read_roles "", a
+  # missing key means it could not be read. Variables limited to some roles in the catalog stay
+  # hidden, the Table API does not check those.
+  defp value(%{@read_roles => ""} = row), do: unrestricted(row)
   defp value(%{@read_roles => roles}) when nonempty_string(roles), do: "(restricted)"
-  defp value(%{@type_field => @masked}), do: "(masked)"
-  defp value(%{@type_field => type} = row) when nonempty_string(type), do: row[@value]
   defp value(_), do: "(hidden)"
+
+  defp unrestricted(%{@type_field => @masked}), do: "(masked)"
+  defp unrestricted(%{@type_field => type} = row) when nonempty_string(type), do: row[@value]
+  defp unrestricted(_), do: "(hidden)"
 
   defp reference(%{"value" => id}), do: id
   defp reference(id), do: id

@@ -89,8 +89,8 @@ ServiceNow can issue tokens with the client credentials grant:
 - Catalog variables are returned as stored: reference variables hold the
   `sys_id` of the referenced record, select boxes and multiple choice hold the
   choice value rather than its label, and multi-row variable sets are not read.
-  Masked variables, variables with read roles, and variables whose type the
-  user cannot read are hidden. At most 200 variables are read per item. An empty list for an item with variables means
+  Masked variables, variables with read roles, and variables whose type or
+  read roles the user cannot read are hidden. At most 200 variables are read per item. An empty list for an item with variables means
   the user cannot read `sc_item_option_mtom` or `sc_item_option`; variables
   without a name and with hidden values mean it cannot read `item_option_new`.
   The `itil` role can read all three on base instances.
