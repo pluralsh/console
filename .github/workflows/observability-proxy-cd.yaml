@@ -214,12 +214,32 @@ jobs:
           docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
             $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
 
+      # Resolve digest via a tag unique to this run (dispatch/semver/sha), never a
+      # mutable branch tag like master — meta.outputs.version prefers the branch.
       - name: Inspect image
         id: inspect
+        env:
+          IMAGE: ${{ matrix.images }}
+          DISPATCH_TAG: ${{ github.event.inputs.tag }}
+          RELEASE_VERSION: ${{ steps.tag_version.outputs.version }}
         run: |
-          digest=$(docker buildx imagetools inspect ${{ matrix.images }}:${{ steps.meta.outputs.version }} --format '{{.Manifest.Digest}}')
+          set -euo pipefail
+          if [[ -n "${DISPATCH_TAG:-}" ]]; then
+            ref="${IMAGE}:${DISPATCH_TAG}"
+          elif [[ -n "${RELEASE_VERSION:-}" ]]; then
+            ref="${IMAGE}:${RELEASE_VERSION}"
+          else
+            ref=$(jq -cr --arg img "$IMAGE" '
+              [.tags[] | select(startswith($img + ":sha-"))][0] // empty
+            ' <<< "$DOCKER_METADATA_OUTPUT_JSON")
+          fi
+          if [[ -z "${ref:-}" ]]; then
+            echo "Unable to resolve a non-mutable tag for digest lookup" >&2
+            exit 1
+          fi
+          digest=$(docker buildx imagetools inspect "$ref" --format '{{.Manifest.Digest}}')
           echo "digest=$digest" >> "$GITHUB_OUTPUT"
-          docker buildx imagetools inspect ${{ matrix.images }}:${{ steps.meta.outputs.version }}
+          docker buildx imagetools inspect "$ref"
       - name: Cosign sign
         uses: ./.github/actions/cosign-sign
         with:
