@@ -150,6 +150,10 @@ jobs:
           - docker.io/pluralsh/datastore-controller
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
       - name: Download digests
         uses: actions/download-artifact@v8
         with:
@@ -195,5 +199,13 @@ jobs:
           docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
             $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
       - name: Inspect image
+        id: inspect
         run: |
+          digest=$(docker buildx imagetools inspect ${{ matrix.images }}:${{ steps.meta.outputs.version }} --format '{{.Manifest.Digest}}')
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
           docker buildx imagetools inspect ${{ matrix.images }}:${{ steps.meta.outputs.version }}
+      - name: Cosign sign
+        uses: ./.github/actions/cosign-sign
+        with:
+          digest: ${{ steps.inspect.outputs.digest }}
+          images: ${{ matrix.images }}
