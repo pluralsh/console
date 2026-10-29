@@ -171,8 +171,22 @@ versions:
         for any late-breaking notes.]
   chart_version: 0.40.5
   images: ['quay.io/argoproj/argocli:v3.5.3', 'quay.io/argoproj/workflow-controller:v3.5.3']
-- version: 3.5.0
+- version: 3.5.1
   kube: ['1.28', '1.27', '1.26']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Release notes provided are for v3.5.0 only and mainly include installation/asset
+        information; no functional changes are described in the excerpt.]
+    breaking_changes: ["No breaking changes are listed in the provided notes; to assess\
+        \ 3.5.0\u21923.5.1 impact we still need v3.5.1 application and Helm chart\
+        \ changelog entries."]
+  chart_version: 0.39.4
+  images: ['quay.io/argoproj/argocli:v3.5.1', 'quay.io/argoproj/workflow-controller:v3.5.1']
+- version: 3.5.0
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:

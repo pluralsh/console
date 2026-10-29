@@ -1296,22 +1296,28 @@ versions:
   images: ['quay.io/cilium/cilium:v1.13.11@sha256:3b117c7a6be212e2723813b44b909c757b76943cb0e9fdd0ec2aa4475bfcadb5',
     'quay.io/cilium/operator-generic:v1.13.11@sha256:730e2209b8777f1525186c602f77d5f22259ec4f1f6a2e923f4c03809ab7b0b1']
   eolAt: '2024-07-24'
-- version: 1.13.8
+- version: 1.13.9
   kube: ['1.28', '1.27', '1.26']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
     chart_updates: []
-    features: [1.13.8 is a security-focused bugfix release that addresses the HTTP/2
-        Rapid Reset / Stream Cancellation attack (CVE-2023-44487) via updated Envoy
-        and Go/x/net dependencies., Security and dependency updates include bumping
-        gRPC to 1.56.3 and updating Azure SDK components used by the vendor/azure
-        integration.]
+    features: ['Network policy performance improvements across the 1.13 patch line,
+        including a fix where L4 port rules without an explicit protocol are now treated
+        as protocol ANY (1.13.9).', 'DNS proxy now uses the original pod IP as the
+        source address when forwarding to upstream DNS servers (1.13.9), which can
+        affect DNS server ACLs and logging.', 'IPsec observability and troubleshooting
+        improved: `cilium encrypt status` shows interfaces used for decryption, new
+        Prometheus metrics for XFRM configs, and more informative IPsec error logs
+        (1.13.9).', 'Metrics cardinality improvements: stale node entries are removed
+        from node connectivity metrics to prevent unbounded growth (1.13.9).', 'Bug
+        fixes for datapath/service handling, including NodePort redirect validation
+        and Envoy load-balancing endpoint calculation fixes (1.13.9).']
     breaking_changes: []
-  chart_version: 1.13.8
-  images: ['quay.io/cilium/cilium:v1.13.8@sha256:774f0f11e171a96b59158884e0151eb522a2cf3fe23a7af7a140ae31ac30271b',
-    'quay.io/cilium/operator-generic:v1.13.8@sha256:324d17fa59f9a5fa5f957f088567cb66f15d8771880f6ced755e79e8e4b085fd']
+  chart_version: 1.13.9
+  images: ['quay.io/cilium/cilium:v1.13.9@sha256:859d4390df6f683479e83c8b8d69b0e52eb893d6a9ba36e8bbb4d6ec9be03c42',
+    'quay.io/cilium/operator-generic:v1.13.9@sha256:b4cce66722ec4962c19518a6b1117d1e93a283835b208adb082b60e9cb3cf398']
   eolAt: '2024-07-24'
 - version: 1.13.0
   kube: ['1.27', '1.26', '1.25']
@@ -1390,22 +1396,23 @@ versions:
   chart_version: 1.12.18
   images: ['quay.io/cilium/cilium:v1.12.18@sha256:71218d52b2b9a63525e31e9be716810605696cbc02008e658953212f638d6b6b',
     'quay.io/cilium/operator-generic:v1.12.18@sha256:ac9b8a95d6faddacc1bca4145562c5143543dfbbc41b244383b52b8be83238ab']
-- version: 1.12.15
+- version: 1.12.16
   kube: ['1.28', '1.27', '1.26']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
     chart_updates: []
-    features: ['Security hardening update: includes fixes for the HTTP/2 Stream Cancellation
-        Attack (CVE-2023-44487) via updated Envoy and Go/x-net/grpc dependencies.',
-      'Improved observability/troubleshooting: adds additional datapath drop notifications
-        and fixes trace notification identity reporting for certain hairpinned reply
-        traffic.']
+    features: ['DNS proxy now uses the original pod IP as the source address when
+        talking to upstream DNS servers, improving correctness/observability in some
+        environments.', 'New/expanded IPsec observability: `cilium encrypt status`
+        shows decryption interfaces and Prometheus metrics expose XFRM configuration
+        details.', 'Network policy handling is corrected so port rules that omit `protocol`
+        are treated as `ANY`, avoiding unintended drops.']
     breaking_changes: []
-  chart_version: 1.12.15
-  images: ['quay.io/cilium/cilium:v1.12.15@sha256:24c4c9d756b2467ec20475309b68d640cdf91aa0008e136a826197590f028cca',
-    'quay.io/cilium/operator-generic:v1.12.15@sha256:ef8acf5b11f033032b55e2ece07179d925bfcb6f0cb501a898fdc031bad900ea']
+  chart_version: 1.12.16
+  images: ['quay.io/cilium/cilium:v1.12.16@sha256:74d0c8d91821bf5fb7a7a7ad4acdebd6f74dd52ba1d1e3d40fa543a506a7ee14',
+    'quay.io/cilium/operator-generic:v1.12.16@sha256:3132b821c1d3f617a1763ce32be8e42b33adfa8dbd267c7ec45f368794c5dcae']
 - version: 1.12.5
   kube: ['1.27', '1.26', '1.25']
   requirements: []
