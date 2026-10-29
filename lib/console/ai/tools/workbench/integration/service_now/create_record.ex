@@ -20,7 +20,7 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.CreateRecord do
 
   def description(%__MODULE__{tool: %WorkbenchTool{name: name}}),
     do:
-      "Create a ServiceNow ticket (incident, change request, problem or catalog task) using the #{name} connection."
+      "Create a ServiceNow ticket (incident, change request, problem or catalog task) using the #{name} connection. Requests (REQ) and requested items (RITM) come from ordering a catalog item and cannot be created here."
 
   def json_schema(%__MODULE__{}), do: @json_schema
 
@@ -28,7 +28,9 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.CreateRecord do
     model
     |> cast(attrs, [:table, :short_description, :description, :fields])
     |> validate_required([:table, :short_description])
-    |> validate_inclusion(:table, Client.tables())
+    |> validate_inclusion(:table, Client.creatable_tables(),
+      message: "must be one of #{Enum.join(Client.creatable_tables(), ", ")}, requests and requested items are created by ordering a catalog item"
+    )
   end
 
   def implement(%__MODULE__{} = model) do

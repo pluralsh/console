@@ -8,13 +8,15 @@
         "incident",
         "change_request",
         "problem",
-        "sc_task"
+        "sc_task",
+        "sc_request",
+        "sc_req_item"
       ],
-      "description": "ServiceNow ticket table: incident, change_request, problem or sc_task (catalog task)."
+      "description": "ServiceNow table, picked by the record number prefix: INC incident, CHG change_request, PRB problem, REQ sc_request (request), RITM sc_req_item (requested item), SCTASK sc_task (catalog task)."
     },
     "query": {
       "type": "string",
-      "description": "ServiceNow encoded query, for example active=true^priority=1^ORDERBYDESCsys_created_on. Conditions are joined with ^, OR conditions use ^OR."
+      "description": "ServiceNow encoded query, for example active=true^priority=1^ORDERBYDESCsys_created_on. Conditions are joined with ^, OR conditions use ^OR. Reference fields can be dot-walked, for example request.number=REQ0010001 on sc_req_item or request_item.number=RITM0010001 on sc_task."
     },
     "fields": {
       "type": "array",

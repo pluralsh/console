@@ -19,7 +19,7 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.ListStates do
 
   def description(%__MODULE__{tool: %WorkbenchTool{name: name}}),
     do:
-      "List the states a ServiceNow ticket can be in using the #{name} connection. For a change request with record_id it returns the states the change can move to next, with their conditions. Pass field to list the choices of another choice field instead, for example close_code to find the valid resolution codes before resolving an incident. Use it before transition_record."
+      "List the states a ServiceNow ticket can be in using the #{name} connection. For a change request with record_id it returns the states the change can move to next, with their conditions. Pass field to list the choices of another choice field instead, for example close_code to find the valid resolution codes before resolving an incident. Use it before transition_record. Requests track their progress in request_state and requested items in stage, while their state often stays open until they close, so pass field request_state or stage to list those values."
 
   def json_schema(%__MODULE__{}), do: @json_schema
 

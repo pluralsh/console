@@ -3,7 +3,7 @@ title: ServiceNow
 description: Create, read, update, and comment on ServiceNow tickets from a workbench
 ---
 
-The ServiceNow tool lets a workbench agent work with tickets in your ServiceNow instance through the [Table API](https://www.servicenow.com/docs/bundle/latest-api-reference/page/integrate/inbound-rest/concept/c_TableAPI.html). It covers four ticket tables: incidents (`incident`), change requests (`change_request`), problems (`problem`), and catalog tasks (`sc_task`). Requests for any other table are rejected before they reach ServiceNow. The tool does not limit which columns a query can read, so only the integration user's ACLs restrict data, including fields reached through references such as `caller_id.email`.
+The ServiceNow tool lets a workbench agent work with tickets in your ServiceNow instance through the [Table API](https://www.servicenow.com/docs/bundle/latest-api-reference/page/integrate/inbound-rest/concept/c_TableAPI.html). It covers six ticket tables: incidents (`incident`), change requests (`change_request`), problems (`problem`), catalog tasks (`sc_task`), requests (`sc_request`), and requested items (`sc_req_item`). It also reads the catalog variables of a requested item. Requests for any other table are rejected before they reach ServiceNow. The tool does not limit which columns a query can read, so only the integration user's ACLs restrict data, including fields reached through references such as `caller_id.email`.
 
 For the complete list of integrations and general tool behavior, see [Workbench tools](/plural-features/workbenches/integrations/tools).
 
@@ -20,7 +20,7 @@ Use a dedicated service account with the narrowest role that works. The agent ca
 1. In ServiceNow, open **User Administration → Users** and create a dedicated user, for example `plural.agent`.
 2. Check **Web service access only** so the account cannot sign in to the UI.
 3. Set a password.
-4. Grant the `itil` role, or a custom role with read and write access to the four ticket tables.
+4. Grant the `itil` role, or a custom role with read access to the six ticket tables and to `sc_item_option_mtom`, `sc_item_option`, and `item_option_new` for catalog variables. Write access is only needed on the tables the agent should update, comment on, or move.
 
 Comments and work notes are stored in the `sys_journal_field` table. Base instances usually restrict that table, so the agent can write notes but reads back an empty list. See [Allow reading comments](#allow-reading-comments). The same goes for the state choices in `sys_choice`, which `list_states` and `transition_record` read to resolve state labels such as `In Progress`. See [Allow reading state choices](#allow-reading-state-choices).
 
@@ -83,7 +83,7 @@ Instead of a password, the tool can fetch a bearer token with the OAuth client c
 
 ### Tickets
 
-These work on all four tables.
+These work on all six tables, except that `create_record` cannot create requests or requested items. Those come from ordering a catalog item, and a record inserted through the Table API would skip the catalog flow.
 
 | Operation | What it does |
 |---|---|
@@ -96,7 +96,17 @@ These work on all four tables.
 | `list_states` | Lists the states a table can have. For a change request it lists the states that change can move to next. With `field` it lists the choices of another field instead, such as the `close_code` resolution codes of an incident. |
 | `transition_record` | Moves a ticket to another state. The target is checked against the states from `list_states` when ServiceNow reports them, and a rejection from ServiceNow, such as a missing `close_code` or `close_notes`, is returned to the agent. Resolution codes differ per instance, so the agent reads them with `list_states` first. ServiceNow ignores a code that is not one of them and then reports the code as missing. |
 
-The read-only operations are `list_records`, `get_record`, `list_comments`, and `list_states`. The others change data in ServiceNow and are left out of read-only surfaces such as the workbench MCP server. The tool cannot delete tickets. Agents close or cancel them with `transition_record` instead.
+### Service catalog
+
+A request (`REQ…`) holds one or more requested items (`RITM…`), and each item can have catalog tasks (`SCTASK…`). The agent follows that hierarchy with dot-walked queries in `list_records`, for example `request.number=REQ0010001` on `sc_req_item`. Requests track their progress in `request_state` and requested items in `stage`. Their `state` usually changes only when they close, so `list_states` with `field` set to `request_state` or `stage` lists the values that matter.
+
+| Operation | What it does |
+|---|---|
+| `get_variables` | Reads the catalog variables of a requested item, the values entered on the form when it was ordered, as name, question, and value. Takes a requested item, or a catalog task to read the variables of its item. Reads `sc_item_option_mtom` with fields dot-walked to `sc_item_option` and `item_option_new`. |
+
+Variables are returned as stored. Reference variables hold the `sys_id` of the referenced record, select boxes and multiple choice hold the choice value rather than its label, layout-only variables such as labels are skipped, and multi-row variable sets are not read. Masked variables, variables limited to some roles with **Read roles**, and variables whose type the integration user cannot read are returned without their value, because the Table API does not check variable read roles itself. At most 200 variables are read per item, and the response flags when there may be more.
+
+The read-only operations are `list_records`, `get_record`, `get_variables`, `list_comments`, and `list_states`. The others change data in ServiceNow and are left out of read-only surfaces such as the workbench MCP server. The tool cannot delete tickets. Agents close or cancel them with `transition_record` instead.
 
 Reads return display values (labels such as `In Progress`) by default. The agent can ask for raw values, or both, when it needs the stored value of a field before updating it. State values differ per table and can be customized per instance. `transition_record` accepts either a value or a label.
 
@@ -111,13 +121,14 @@ Moving a change request uses the [Change Management API](https://www.servicenow.
 
 ## Limitations
 
-* **Four tables only.** `incident`, `change_request`, `problem`, and `sc_task`. Other tables, including custom ones, are rejected.
+* **Six tables only.** `incident`, `change_request`, `problem`, `sc_task`, `sc_request`, and `sc_req_item`. Other tables, including custom ones, are rejected. Requests and requested items cannot be created.
+* **Catalog variables need read access.** `get_variables` reads `sc_item_option_mtom`, `sc_item_option`, and `item_option_new`. The `itil` role can on a base instance. Without access to the first two the call returns an empty list, and without access to `item_option_new` the variables come back without names and with hidden values.
 * **Paging uses offsets.** `list_records` and `list_comments` return a `nextCursor` whenever a page is full, so reading an exact multiple of the page size ends with one empty page. Page size is capped at 100.
 * **Comment history needs an ACL.** `list_comments` reads `sys_journal_field`, which base instances restrict. Without read access the call returns an empty list, so a ticket with comments looks like one without.
 * **Transition checks are best effort.** A change is checked against the states it can move to next, as reported by the Change Management API. For incidents, problems, and catalog tasks ServiceNow has no transition API, so `transition_record` checks the target against the table's state choices, and ServiceNow business rules decide whether the move is allowed. When the integration user cannot read the state choices (`sys_choice`) or the next states cannot be read, the state is sent as given and ServiceNow decides. The error message is passed back to the agent.
 * **`list_states` returns choices, not transitions, except for changes.** It returns the state choices of the table, or the choices of the field given in `field`. The next states are only available for a change request when a `record_id` is given and no other field is asked for.
 * **Custom states.** State values and labels can differ per instance, and change models can add their own states. `list_states` shows what the instance has.
-* **No deletes, attachments, or approvals.** The tool has no operation to delete tickets, read or write attachments, or approve and reject approvals. Because `update_record` and `transition_record` write any field the integration user can write, keep approval fields read-only for that user with ACLs. A normal change that needs approval is meant to be approved in ServiceNow before it can move past authorization.
+* **No deletes, attachments, or approvals.** The tool has no operation to delete tickets, read or write attachments, or approve and reject approvals. Because `update_record` and `transition_record` write any field the integration user can write, keep approval fields read-only for that user with ACLs, including `approval` on requests and requested items. A normal change that needs approval is meant to be approved in ServiceNow before it can move past authorization, and a request before it is fulfilled.
 * **Basic auth or client credentials only.** Authorization code and JWT grants are not supported.
 
 ## Using it from a workbench
@@ -129,12 +140,14 @@ Example prompts:
 * "Assign INC0010001 to plural.agent, move it to In Progress, and add a work note with what you found."
 * "Resolve INC0010001 with close notes describing the fix."
 * "Which states can CHG0030001 move to next?"
+* "Read the variables of RITM0010001 and summarize what was ordered."
 
 ## Troubleshooting
 
 * **401 Unauthorized**: the username, password, or OAuth client details are wrong, or the user is locked out.
 * **403 Forbidden or empty results**: the user's roles or ACLs do not cover the table. For `list_comments`, check read access to `sys_journal_field`, and for `list_states` check `sys_choice`.
-* **Table is not supported**: the tool only works with `incident`, `change_request`, `problem`, and `sc_task`.
+* **Table is not supported**: the tool only works with `incident`, `change_request`, `problem`, `sc_task`, `sc_request`, and `sc_req_item`.
+* **No variables on a requested item**: check read access to `sc_item_option_mtom` and `sc_item_option`, and that the item was ordered with a form. Variables without names and with hidden values mean the user cannot read `item_option_new`.
 
 ## Related
 

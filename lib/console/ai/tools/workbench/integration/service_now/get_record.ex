@@ -19,7 +19,8 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.GetRecord do
   def name(%__MODULE__{tool: %WorkbenchTool{name: name}}), do: "service_now_#{name}_get_record"
 
   def description(%__MODULE__{tool: %WorkbenchTool{name: name}}),
-    do: "Get a ServiceNow ticket by sys_id or number (for example INC0010001) using the #{name} connection."
+    do:
+      "Get a ServiceNow ticket by sys_id or number (for example INC0010001 or RITM0010001) using the #{name} connection. Catalog variables (the form values entered when an item was ordered) are not fields of a requested item, read them with get_variables. A request (REQ) has no variables of its own, its requested items (RITM) do."
 
   def json_schema(%__MODULE__{}), do: @json_schema
 

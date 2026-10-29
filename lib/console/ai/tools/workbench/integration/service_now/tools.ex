@@ -6,6 +6,7 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.Tools do
   @modules [
     Console.AI.Tools.Workbench.Integration.ServiceNow.ListRecords,
     Console.AI.Tools.Workbench.Integration.ServiceNow.GetRecord,
+    Console.AI.Tools.Workbench.Integration.ServiceNow.GetVariables,
     Console.AI.Tools.Workbench.Integration.ServiceNow.CreateRecord,
     Console.AI.Tools.Workbench.Integration.ServiceNow.UpdateRecord,
     Console.AI.Tools.Workbench.Integration.ServiceNow.ListComments,

@@ -74,7 +74,10 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.ClientTest do
     test "only allows ticket tables" do
       assert {:ok, "/table/incident"} = Client.table_path("incident")
       assert {:ok, "/table/sc_task/#{@sys_id}"} = Client.table_path("sc_task", @sys_id)
+      assert {:ok, "/table/sc_request"} = Client.table_path("sc_request")
+      assert {:ok, "/table/sc_req_item/#{@sys_id}"} = Client.table_path("sc_req_item", @sys_id)
       assert {:error, _} = Client.table_path("sys_user")
+      assert {:error, _} = Client.table_path("sc_item_option_mtom")
     end
   end
 

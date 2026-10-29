@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "table": {
+      "type": "string",
+      "enum": [
+        "sc_req_item",
+        "sc_task"
+      ],
+      "default": "sc_req_item",
+      "description": "sc_req_item for a requested item (RITM number), sc_task for a catalog task (SCTASK number), whose requested item's variables are returned."
+    },
+    "record_id": {
+      "type": "string",
+      "description": "Record sys_id (32 hex characters) or record number, for example RITM0010001 or SCTASK0010001."
+    }
+  },
+  "required": [
+    "record_id"
+  ]
+}

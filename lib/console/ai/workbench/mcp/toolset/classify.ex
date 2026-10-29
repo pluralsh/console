@@ -132,6 +132,7 @@ defmodule Console.AI.Workbench.MCP.Toolset.Classify do
     Sentry.ListIssueEvents,
     Sentry.ListIssues,
     ServiceNow.GetRecord,
+    ServiceNow.GetVariables,
     ServiceNow.ListComments,
     ServiceNow.ListRecords,
     ServiceNow.ListStates,

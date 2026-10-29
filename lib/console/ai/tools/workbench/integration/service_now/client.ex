@@ -13,7 +13,10 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.Client do
   alias Console.Schema.WorkbenchTool
   alias Console.Schema.WorkbenchTool.Configuration.ServiceNowConnection
 
-  @tables ~w(incident change_request problem sc_task)
+  @tables ~w(incident change_request problem sc_task sc_request sc_req_item)
+  # requests and requested items come from ordering a catalog item, a Table API insert would
+  # skip the catalog flow and leave them without a parent request or variables
+  @creatable ~w(incident change_request problem sc_task)
   @sys_id ~r/\A[0-9a-f]{32}\z/i
   # record numbers are interpolated into an encoded query, so `^` and `=` must never get through
   @number ~r/\A[A-Za-z0-9_-]+\z/
@@ -30,6 +33,10 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.Client do
   @doc "The ServiceNow tables the workbench tool is allowed to touch."
   @spec tables() :: [String.t()]
   def tables, do: @tables
+
+  @doc "The subset of `tables/0` the workbench tool may create records in."
+  @spec creatable_tables() :: [String.t()]
+  def creatable_tables, do: @creatable
 
   @spec build(WorkbenchTool.t()) :: {:ok, t} | {:error, String.t()}
   def build(%WorkbenchTool{
