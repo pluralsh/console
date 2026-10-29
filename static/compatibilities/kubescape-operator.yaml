@@ -4,48 +4,30 @@ release_url: https://github.com/kubescape/helm-charts/releases/tag/kubescape-ope
 helm_repository_url: https://kubescape.github.io/helm-charts
 helm_values: clusterName=example,account=example
 versions:
-- version: 1.40.5
+- version: 1.41.0
   kube: ['1.37', '1.36', '1.35']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
-    chart_updates: [No release-note details were provided for kubescape-operator chart
-        version 1.40.4 or 1.40.5; 1.40.5 is marked pre-release with no 'What's Changed'
-        section in the supplied notes., 'From 1.40.3 notes (the only detailed set
-        provided): chart now scopes OTEL config to node-agent via `otelUrl` and drops
-        the bundled OpenTelemetry collector.', Kubernetes minimum version is enforced
-        as >= 1.28 via a Helm `kubeVersion` guard., Operator enables CEL admission
-        rules; SecurityException CRDs gain CEL validation; one orphan/uninstallable
-        SecurityException CRD is removed upstream (from kubescape app notes)., Prometheus
-        exporter ServiceMonitor is decoupled from kubescape ServiceMonitor., 'Synchronizer
-        now syncs additional resources (ServiceAccounts, ContainerProfiles, AISandboxHeartbeats
-        endpoint registration).', 'Node-agent autoscaling/affinity changes: targets
-        label-less nodes via DoesNotExist affinity; autoscaler mount guard aligned;
-        GKE Autopilot allowlist default bumped to 1.40-v2 and allowlist synchronizer
-        installed when enabled.', 'Storage: storage pod restarts when storage config
-        changes.']
-    features: [Configurable `proxyRegistryMap` for kubevuln cluster config to support
-        proxy/registry mapping., 'New kubevuln knobs: `cveMatchingMode` and `trustedVendors`
-        for improved CVE matching behavior.', 'Opt-in remediation capability (`capabilities.remediation`)
-        with gated mutating RBAC; operator action/remediate workflows expanded upstream
-        (annotate, dry-run, quarantine).', 'Node-agent: alert deduplication bypass
-        exposed and a master switch added; expanded OpenTelemetry traces/logs/metrics
-        support upstream.', 'Synchronizer: can sync ContainerProfiles and additional
-        resource types to backend; adds Kafka backend upstream (synchronizer component).',
-      'Storage: IPv6-only cluster support via configurable bind address upstream;
-        ContainerProfile consolidation/compaction improvements upstream.']
-    breaking_changes: [Kubernetes >= 1.28 is now required (Helm will block install/upgrade
-        on older clusters)., "Bundled OpenTelemetry collector is dropped; OTEL is\
-        \ now scoped to node-agent via `otelUrl`\u2014clusters relying on the chart-provided\
-        \ collector must deploy their own collector and update values accordingly.",
-      CEL validation/admission features may require Kubernetes/CRD compatibility (and
-        can cause previously-accepted custom resources to be rejected if they fail
-        new CEL rules).]
-  chart_version: 1.40.5
-  images: ['quay.io/kubescape/http-request:v0.2.23', 'quay.io/kubescape/kubescape:v4.0.14',
-    'quay.io/kubescape/kubevuln:v0.3.430', 'quay.io/kubescape/node-agent:v0.3.219',
-    'quay.io/kubescape/operator:v0.2.172', 'quay.io/kubescape/storage:v0.0.348']
+    chart_updates: ["Release notes provided are for **kubescape-operator 1.40.3**,\
+        \ not for the target version **1.41.0**. Cannot accurately summarize the 1.40.3\
+        \ \u2192 1.41.0 upgrade without 1.41.0 chart/app changelog."]
+    features: ['From the provided 1.40.3 notes (not 1.41.0): scoped OpenTelemetry
+        to node-agent via `otelUrl` and removed bundled otel-collector.', Introduced
+        Kubernetes version guard requiring Kubernetes >= 1.28., Enabled CEL admission
+        rules and added CEL validation to SecurityException CRDs., 'Added new synced
+        resource types in synchronizer (e.g., ServiceAccounts, ContainerProfiles,
+        AISandboxHeartbeats endpoint).', Added opt-in remediation capability with
+        gated mutating RBAC and expanded kubevuln configuration options.]
+    breaking_changes: ['From the provided 1.40.3 notes (not 1.41.0): chart now requires
+        Kubernetes >= 1.28 (enforced by `kubeVersion` guard).', Bundled otel-collector
+        dropped; deployments relying on it must provide their own collector and configure
+        `otelUrl` accordingly.]
+  chart_version: 1.41.0
+  images: ['quay.io/kubescape/kubectl:1.36.1', 'quay.io/kubescape/kubescape:v4.0.17',
+    'quay.io/kubescape/kubevuln:v0.3.571', 'quay.io/kubescape/node-agent:v0.3.299',
+    'quay.io/kubescape/operator:v0.2.204', 'quay.io/kubescape/storage:v0.0.378']
 - version: 1.40.3
   kube: ['1.37', '1.36', '1.35']
   requirements: []
@@ -609,22 +591,6 @@ versions:
     features: []
     breaking_changes: []
   chart_version: 1.16.0
-  images: []
-- version: 1.15.3
-  kube: ['1.28', '1.27', '1.26']
-  requirements: []
-  incompatibilities: []
-  summary:
-    helm_changes: ''
-    chart_updates: ['No detailed changelog content was provided beyond release metadata
-        (tags, dates, assets). There are no documented chart template changes, dependency
-        bumps, or value schema changes in the provided notes.']
-    features: [No feature notes were included in the provided release metadata; assume
-        no user-visible feature changes are documented between 1.15.0 and 1.15.3 in
-        the notes you shared.]
-    breaking_changes: [No breaking changes were mentioned in the provided notes; still
-        validate by diffing chart values/schema and rendering manifests before upgrading.]
-  chart_version: 1.15.3
   images: []
 - version: 1.15.0
   kube: ['1.27', '1.26', '1.25']

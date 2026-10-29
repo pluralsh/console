@@ -9,7 +9,12 @@ versions:
   kube: ['1.37', '1.36', '1.35', '1.34']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: ['Release note mainly contains publish/install/pull/signature verification
+        instructions for chart version `1.0.12791` in `wiz-sec/charts` (OCI: `oci://public-registry.wiz.io/charts`).']
+    features: []
+    breaking_changes: []
   chart_version: 1.0.12791
   images: ['wizio.azurecr.io/sensor:v1']
 - version: 1.0.3999

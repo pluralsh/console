@@ -4,6 +4,54 @@ helm_repository_url: https://victoriametrics.github.io/helm-charts
 readme_url: https://github.com/VictoriaMetrics/operator/blob/master/README.md
 icon: https://dashboard.snapcraft.io/site_media/appmedia/2020/11/output-onlinepngtools.png
 versions:
+- version: 0.75.2
+  kube: ['1.37', '1.36', '1.35']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "## Helm/values changes to plan for\n\nNo Helm chart\u2013specific\
+      \ changelog was provided, so there are **no explicit `values.yaml` key changes**\
+      \ to apply from this input.\n\nThat said, this operator release **requires cluster-level\
+      \ manifests to be updated** (CRDs + RBAC), which in Helm terms usually means:\n\
+      \n- Ensure your Helm release is configured to **install/upgrade CRDs** (or apply\
+      \ CRDs separately before `helm upgrade`).\n- Ensure the chart version you deploy\
+      \ includes the **updated ClusterRole rules** (or provide overrides if your chart\
+      \ supports it).\n\nKey required manifest changes called out by the release notes:\n\
+      \n- **Install/upgrade the `VTAgent` CRD** even if you don\u2019t plan to use\
+      \ VTAgent yet.\n- **Update the operator `ClusterRole`** to include full verbs\
+      \ on `operator.victoriametrics.com/vtagents` plus `vtagents/status` and `vtagents/finalizers`.\n\
+      - Update CRDs for: **VMAgent**, **VMAnomaly**, **VMRule** (schema/default fixes),\
+      \ and also CRDs with the `dnsConfig.items` schema cleanup."
+    chart_updates: ['CRDs must be updated (notably: VTAgent CRD added; VMAgent/VMAnomaly
+        shardCount default; VMRule defaults fix; dnsConfig schema cleanup; plus other
+        CRD schema corrections).', Operator RBAC/ClusterRole must be upgraded; older
+        roles can cause operator to fail cache sync due to VTAgent controller being
+        enabled by default., Expect one-time rolling updates of various workloads
+        due to config-reloader sidecar args change., Service behavior/validation changes
+        for VMCluster vmstorage serviceSpec and vmselect/VMAlertmanager serviceSpec
+        may cause reconciliation failures or Service recreation.]
+    features: [Adds `VTAgent` CRD to receive OTLP trace spans over HTTP/gRPC and forward
+        to VictoriaTraces; VTAgent controller is enabled by default., 'Adds `grpcSpec`
+        for VT components to accept OTLP over gRPC, with optional TLS.', Adds `removePvcAfterDelete`
+        for VLSingle/VTSingle; default now preserves PVC after CR deletion., 'Operator
+        metrics improvements: adds `k8s_version` label to `vm_app_version` and adds
+        `operator_controller_errors_total{reason=...}` while deprecating older per-type
+        error counters.', VMAnomaly gains bounded reader/writer controls and new typed
+        spec fields for those limits., VMAlertmanagerConfig supports custom HTTP headers
+        in receiver http_config.]
+    breaking_changes: [Operator now requires updated RBAC for `vtagents` because the
+        VTAgent controller is enabled by default; without it the operator can log
+        `cannot list resource "vtagents"` and exit after cacheSyncTimeout., 'VMCluster
+        now rejects `vmstorage.serviceSpec` with `useAsDefault: true` if it would
+        make the default vmstorage Service non-headless; reconciliation will fail
+        until fixed.', 'For VMCluster `vmselect.serviceSpec` and VMAlertmanager `serviceSpec`
+        with `useAsDefault: true` + explicit `type` but no `clusterIP`, the Service
+        becomes non-headless and is recreated with a new `clusterIP` (possible connection
+        disruption unless you pin behavior).', '`status.updateStatus` semantics for
+        config-only objects changed: it no longer reflects whether selected applications
+        accepted the config; consumers should rely on `status.conditions` instead.']
+  chart_version: 0.68.2
+  images: ['victoriametrics/operator:v0.75.2']
 - version: 0.75.0
   kube: ['1.37', '1.36', '1.35']
   requirements: []
@@ -1321,7 +1369,7 @@ versions:
   chart_version: 0.27.3
   images: ['victoriametrics/operator:v0.39.0']
 - version: 0.38.0
-  kube: ['1.28', '1.27', '1.26']
+  kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:

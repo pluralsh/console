@@ -632,32 +632,21 @@ versions:
   chart_version: 3.14.0
   images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.14.0', 'openpolicyagent/gatekeeper:v3.14.0']
   eolAt: '2024-05-09'
-- version: 3.13.2
+- version: 3.13.4
   kube: ['1.28', '1.27', '1.26']
   requirements: []
   incompatibilities: []
   summary:
-    helm_changes: "- **v3.13.2 is the first 3.13.x tag that ships a Helm chart**;\
-      \ v3.13.1 did not include one.\n- **No Helm values changes were called out**\
-      \ in the v3.13.2 application release notes; expect the same behavior as v3.13.1.\n\
-      - For the 3.13.0 jump, note the new/updated Helm-facing knobs implied by the\
-      \ release notes:\n  - `webhookURL` Helm option added.\n  - Ability to choose\
-      \ **deployment strategy** for `controller-manager`.\n  - Support adding **PriorityClass**\
-      \ to Jobs.\n  - Pre-upgrade hook job: retries configured (helps reliability\
-      \ during upgrades).\n"
-    chart_updates: ['v3.13.2 release is functionally identical to v3.13.1, but **adds/publishes
-        the Helm chart artifact** for the release tag.', 'In 3.13.0 line, chart-related
-        fixes/robustness improvements mentioned include webhook retry logic for Helm
-        probes and retry configuration on the pre-upgrade hook job.']
-    features: ['Audit: added PubSub support for audit eventing/integration.', ExpansionTemplates
-        graduated to **beta** (more stable API/behavior expectations)., Added an experimental
-        **ValidatingAdmissionPolicy (VAP) driver** prototype., Added support for **External
-        Data Provider audit response cache** (performance/availability improvement).,
-      'Added **observability statistics/metrics** for admission, audit, and gator
-        CLI.']
+    helm_changes: ''
+    chart_updates: []
+    features: [Pub/Sub support for audit was introduced in 3.13.0., ExpansionTemplates
+        that validate workload resources graduated to beta in 3.13.0., An experimental
+        ValidatingAdmissionPolicy (VAP) driver was added in 3.13.0., Support for an
+        External Data Provider audit response cache was added in 3.13.0., 'New observability
+        statistics for admission, audit, and the gator CLI were added in 3.13.0.']
     breaking_changes: []
-  chart_version: 3.13.2
-  images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.13.2', 'openpolicyagent/gatekeeper:v3.13.2']
+  chart_version: 3.13.4
+  images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.13.4', 'openpolicyagent/gatekeeper:v3.13.4']
   eolAt: '2024-02-05'
 - version: 3.13.0
   kube: ['1.27', '1.26', '1.25']

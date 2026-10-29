@@ -9,7 +9,13 @@ versions:
     '1.17']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [No feature details provided in the supplied release notes; both versions
+        only reference an external CHANGELOG.]
+    breaking_changes: [No breaking-change details provided in the supplied release
+        notes; both versions only reference an external CHANGELOG.]
   chart_version: 4.5.3
   images: ['public.ecr.aws/csi-components/csi-node-driver-registrar:v2.18.0-eksbuild.3',
     'public.ecr.aws/csi-components/csi-provisioner:v6.4.0-eksbuild.3', 'public.ecr.aws/csi-components/livenessprobe:v2.20.0-eksbuild.3',
