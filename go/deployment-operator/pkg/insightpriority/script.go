@@ -14,7 +14,7 @@ import (
 	"time"
 	"unicode/utf8"
 
-	monty "github.com/ewhauser/gomonty"
+	monty "github.com/pluralsh/gomonty"
 )
 
 const (
@@ -54,6 +54,7 @@ func Compile(ctx context.Context, script string) (err error) {
 	if err != nil {
 		return fmt.Errorf("create Python REPL: %w", err)
 	}
+	defer repl.Close()
 
 	if _, err := repl.FeedRun(ctx, script, monty.FeedOptions{}); err != nil {
 		return fmt.Errorf("%w: %s", ErrInvalidScript, describe(ctx, err))
@@ -95,6 +96,7 @@ func Run(ctx context.Context, script string, input any) (_ json.RawMessage, err 
 	if err != nil {
 		return nil, fmt.Errorf("create Python REPL: %w", err)
 	}
+	defer repl.Close()
 
 	preamble := "import json as __json\n__input = __json.loads(''.join([\n" + chunks.String() + "]))\n"
 	for _, source := range []string{preamble, script} {

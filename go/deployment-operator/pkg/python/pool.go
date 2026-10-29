@@ -2,9 +2,13 @@
 // templating.
 //
 // Scripts run in a fresh Gomonty REPL for every job. The sandbox does not
-// expose OS, filesystem, network, or environment access. Host callbacks are
-// limited to the read-only k8s_object_meta lookup against the agent cache and
-// the pure yaml_encode, yaml_decode, and merge helpers.
+// expose OS, network, or environment access. Jobs started with RunInDir see
+// that directory read-only at /repo, which is also their working directory,
+// through pathlib, open, os.walk, and the fs.read and fs.walk helpers that
+// mirror the Lua fs module. Writes and paths outside /repo raise
+// PermissionError. Host callbacks are limited to the read-only
+// k8s_object_meta lookup against the agent cache and the pure yaml_encode,
+// yaml_decode, and merge helpers.
 package python
 
 import (
@@ -12,21 +16,60 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"regexp"
 	"runtime"
 	"strings"
 	"sync"
 	"time"
 
-	monty "github.com/ewhauser/gomonty"
+	monty "github.com/pluralsh/gomonty"
 )
 
 const (
 	// ExecutionTimeout bounds queue admission and execution for one job.
 	ExecutionTimeout = 10 * time.Second
-	maxMemoryBytes   = 100 << 20
-	maxRecursion     = 100
+	// maxMemoryBytes is the budget of one worker. Monty accounts memory across
+	// the whole process, so the pool limit is this budget times the workers.
+	maxMemoryBytes = 100 << 20
+	maxRecursion   = 100
+
+	scriptName = "helm-values.py"
+	// repoMount is where RunInDir exposes its directory to scripts.
+	repoMount = "/repo"
 )
+
+// fsPrelude defines fs, the Python counterpart of the Lua fs module. Paths are
+// relative to /repo, a leading slash included, and errors are raised as the
+// usual Python exceptions. fs.walk lists files depth first in lexical order,
+// like filepath.Walk, and does not follow symlinks to directories.
+const fsPrelude = `import os as __helm_os
+from pathlib import Path as __HelmPath
+
+def __helm_fs_path(path):
+    if not isinstance(path, str):
+        raise TypeError('fs path must be a string')
+    return __helm_os.path.normpath(__helm_os.path.join('` + repoMount + `', path.lstrip('/')))
+
+class __HelmFs:
+    def read(self, path):
+        return __HelmPath(__helm_fs_path(path)).read_text()
+
+    def walk(self, path, ignore_dotfiles=False):
+        root = __HelmPath(__helm_fs_path(path))
+        root.stat()
+        files = []
+        pending = [root]
+        while pending:
+            current = pending.pop()
+            if current.is_dir() and not current.is_symlink():
+                if ignore_dotfiles and current.name.startswith('.'):
+                    continue
+                pending.extend(sorted(current.iterdir(), key=lambda child: child.name, reverse=True))
+            elif not (ignore_dotfiles and current.name.startswith('.')):
+                files.append(__helm_os.path.relpath(str(current), '` + repoMount + `'))
+        return files
+
+fs = __HelmFs()
+`
 
 // Config controls a Pool. WorkerCount and QueueSize are intended primarily
 // for focused tests. Production callers should set MaxConcurrentReconciles so
@@ -60,6 +103,7 @@ type Pool struct {
 	wg     sync.WaitGroup
 
 	timeout time.Duration
+	workers int
 }
 
 var defaultPool struct {
@@ -67,10 +111,9 @@ var defaultPool struct {
 	pool *Pool
 }
 
-var syntaxByteRange = regexp.MustCompile(`byte range ([0-9]+)\.\.([0-9]+)$`)
-
 type job struct {
 	ctx      context.Context
+	dir      string
 	script   string
 	bindings map[string]any
 	result   chan jobResult
@@ -116,6 +159,7 @@ func NewPoolWithConfig(config Config) (*Pool, error) {
 		poolCtx:    poolCtx,
 		poolCancel: poolCancel,
 		timeout:    timeout,
+		workers:    workers,
 	}
 
 	if err := p.healthCheck(); err != nil {
@@ -162,7 +206,14 @@ func (config Config) workerCount() int {
 
 // Run submits one script to the bounded pool. The timeout starts before queue
 // admission, so a queued job cannot extend the caller's end-to-end deadline.
+// The script has no filesystem access, use RunInDir to give it a directory.
 func (p *Pool) Run(ctx context.Context, script string, bindings map[string]any) (Result, error) {
+	return p.RunInDir(ctx, "", script, bindings)
+}
+
+// RunInDir is Run with dir mounted read-only at /repo, the script's working
+// directory. An empty dir mounts nothing.
+func (p *Pool) RunInDir(ctx context.Context, dir string, script string, bindings map[string]any) (Result, error) {
 	if ctx == nil {
 		ctx = context.Background()
 	}
@@ -178,6 +229,7 @@ func (p *Pool) Run(ctx context.Context, script string, bindings map[string]any) 
 
 	request := job{
 		ctx:      ctx,
+		dir:      dir,
 		script:   script,
 		bindings: bindings,
 		result:   make(chan jobResult, 1),
@@ -231,7 +283,7 @@ func (p *Pool) worker() {
 			default:
 			}
 
-			result, err := p.execute(request.ctx, request.script, request.bindings)
+			result, err := p.execute(request.ctx, request.dir, request.script, request.bindings)
 			request.result <- jobResult{result: result, err: err}
 		}
 	}
@@ -247,19 +299,20 @@ func (p *Pool) healthCheck() error {
 	limits := p.limits()
 	limits.MaxDuration = timeout
 	repl, err := monty.NewRepl(monty.ReplOptions{
-		ScriptName: "helm-values.py",
+		ScriptName: scriptName,
 		Limits:     limits,
 	})
 	if err != nil {
 		return fmt.Errorf("initialize Python runtime: %w", err)
 	}
+	defer repl.Close()
 	if _, err := repl.FeedRun(ctx, "1", monty.FeedOptions{}); err != nil {
 		return fmt.Errorf("health-check Python runtime: %w", err)
 	}
 	return nil
 }
 
-func (p *Pool) execute(parentCtx context.Context, script string, bindings map[string]any) (Result, error) {
+func (p *Pool) execute(parentCtx context.Context, dir string, script string, bindings map[string]any) (Result, error) {
 	ctx, cancel := context.WithTimeout(parentCtx, p.timeout)
 	defer cancel()
 	stopPoolCancel := context.AfterFunc(p.poolCtx, cancel)
@@ -273,13 +326,28 @@ func (p *Pool) execute(parentCtx context.Context, script string, bindings map[st
 		return Result{}, fmt.Errorf("serialize Python bindings: %w", err)
 	}
 
+	var mounts []*monty.MountDir
+	cwd := ""
+	if dir != "" {
+		mount, err := monty.NewMountDir(repoMount, dir, monty.MountDirOptions{Mode: monty.MountReadOnly})
+		if err != nil {
+			return Result{}, fmt.Errorf("mount Python directory: %w", err)
+		}
+		defer mount.Close()
+		mounts = []*monty.MountDir{mount}
+		cwd = repoMount
+	}
+
 	repl, err := monty.NewRepl(monty.ReplOptions{
-		ScriptName: "helm-values.py",
+		ScriptName: scriptName,
 		Limits:     p.limits(),
+		Cwd:        cwd,
 	})
 	if err != nil {
 		return Result{}, fmt.Errorf("create Python REPL: %w", err)
 	}
+	defer repl.Close()
+	options := p.feedOptions(mounts)
 
 	quotedBindings, err := json.Marshal(string(bindingsJSON))
 	if err != nil {
@@ -299,15 +367,16 @@ func (p *Pool) execute(parentCtx context.Context, script string, bindings map[st
 		"def warn(message):\n" +
 		"    if not isinstance(message, str):\n" +
 		"        raise TypeError('warn() argument must be a string')\n" +
-		"    __helm_warnings.append(message)\n"
-	if _, err := repl.FeedRun(ctx, initialization, p.feedOptions()); err != nil {
+		"    __helm_warnings.append(message)\n" +
+		fsPrelude
+	if _, err := repl.FeedRun(ctx, initialization, options); err != nil {
 		return Result{}, p.mapExecutionError(ctx, err)
 	}
-	if _, err := repl.FeedRun(ctx, script, p.feedOptions()); err != nil {
+	if _, err := repl.FeedRun(ctx, script, options); err != nil {
 		return Result{}, p.mapExecutionError(ctx, err)
 	}
 
-	encoded, err := repl.FeedRun(ctx, "__helm_json.dumps({'values': values, 'valuesFiles': valuesFiles, 'warnings': __helm_warnings})", p.feedOptions())
+	encoded, err := repl.FeedRun(ctx, "__helm_json.dumps({'values': values, 'valuesFiles': valuesFiles, 'warnings': __helm_warnings})", options)
 	if err != nil {
 		return Result{}, p.mapExecutionError(ctx, err)
 	}
@@ -341,7 +410,7 @@ func (p *Pool) execute(parentCtx context.Context, script string, bindings map[st
 func (p *Pool) limits() *monty.ResourceLimits {
 	return &monty.ResourceLimits{
 		MaxDuration:       p.timeout,
-		MaxMemory:         maxMemoryBytes,
+		MaxMemory:         max(p.workers, 1) * maxMemoryBytes,
 		MaxRecursionDepth: maxRecursion,
 	}
 }
@@ -359,10 +428,11 @@ func (p *Pool) mapExecutionError(ctx context.Context, err error) error {
 
 	var syntax *monty.SyntaxError
 	if errors.As(err, &syntax) {
-		if match := syntaxByteRange.FindStringSubmatch(syntax.Error()); len(match) == 3 {
-			return fmt.Errorf("python SyntaxError at helm-values.py bytes %s..%s", match[1], match[2])
+		if len(syntax.Frames) == 0 {
+			return errors.New("python SyntaxError")
 		}
-		return errors.New("python SyntaxError")
+		frame := syntax.Frames[len(syntax.Frames)-1]
+		return fmt.Errorf("python SyntaxError at %s:%d:%d", scriptName, frame.Line, frame.Column)
 	}
 	var runtimeErr *monty.RuntimeError
 	if errors.As(err, &runtimeErr) {
@@ -386,9 +456,9 @@ func (p *Pool) mapExecutionError(ctx context.Context, err error) error {
 		}
 		frame := runtimeErr.Frames[0]
 		if deadline {
-			return fmt.Errorf("python %s at helm-values.py:%d:%d: %w", kind, frame.Line, frame.Column, context.DeadlineExceeded)
+			return fmt.Errorf("python %s at %s:%d:%d: %w", kind, scriptName, frame.Line, frame.Column, context.DeadlineExceeded)
 		}
-		return fmt.Errorf("python %s at helm-values.py:%d:%d", kind, frame.Line, frame.Column)
+		return fmt.Errorf("python %s at %s:%d:%d", kind, scriptName, frame.Line, frame.Column)
 	}
 	return errors.New("python execution failed")
 }

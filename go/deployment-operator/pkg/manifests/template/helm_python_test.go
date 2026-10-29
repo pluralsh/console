@@ -366,6 +366,53 @@ func writePythonFile(t *testing.T, dir, name, contents string) {
 	}
 }
 
+func TestPythonFsMatchesLuaFs(t *testing.T) {
+	dir := t.TempDir()
+	writePythonFile(t, dir, "values.yaml", "replicas: 2\n")
+	writePythonFile(t, dir, "config/b.yaml", "b: 1\n")
+	writePythonFile(t, dir, "config/.secret", "hidden")
+	writePythonFile(t, dir, "config/nested/a.yaml", "a: 1\n")
+	writePythonFile(t, dir, "config.yaml", "root: true\n")
+	writePythonFile(t, dir, ".github/workflow.yaml", "on: push\n")
+
+	p, err := python.NewPoolWithConfig(python.Config{WorkerCount: 1, QueueSize: 1})
+	if err != nil {
+		t.Fatalf("NewPoolWithConfig: %v", err)
+	}
+	t.Cleanup(func() { _ = p.Close() })
+
+	h := &helm{dir: dir, pythonPool: p}
+	luaResult, _, err := h.luaValues(&console.ServiceDeploymentForAgent{Helm: &console.ServiceDeploymentForAgent_Helm{LuaScript: lo.ToPtr(`
+values["read"] = fs.read("values.yaml")
+values["absolute"] = fs.read("/config/b.yaml")
+values["all"] = fs.walk(".")
+values["visible"] = fs.walk(".", true)
+values["config"] = fs.walk("config", true)
+`)}})
+	if err != nil {
+		t.Fatalf("luaValues: %v", err)
+	}
+	pythonResult, _, err := h.pythonValues(context.Background(), &console.ServiceDeploymentForAgent{Helm: &console.ServiceDeploymentForAgent_Helm{PythonScript: lo.ToPtr(`
+values["read"] = fs.read("values.yaml")
+values["absolute"] = fs.read("/config/b.yaml")
+values["all"] = fs.walk(".")
+values["visible"] = fs.walk(".", True)
+values["config"] = fs.walk("config", ignore_dotfiles=True)
+`)}})
+	if err != nil {
+		t.Fatalf("pythonValues: %v", err)
+	}
+
+	for _, key := range []string{"read", "absolute", "all", "visible", "config"} {
+		if luaResult[key] == nil {
+			t.Fatalf("lua values[%q] is empty", key)
+		}
+		if fmt.Sprint(pythonResult[key]) != fmt.Sprint(luaResult[key]) {
+			t.Errorf("values[%q]: python %v, lua %v", key, pythonResult[key], luaResult[key])
+		}
+	}
+}
+
 func TestPythonValuesWarnings(t *testing.T) {
 	p, err := python.NewPoolWithConfig(python.Config{WorkerCount: 1, QueueSize: 1})
 	if err != nil {

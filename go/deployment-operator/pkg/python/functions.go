@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"dario.cat/mergo"
-	monty "github.com/ewhauser/gomonty"
+	monty "github.com/pluralsh/gomonty"
 	"gopkg.in/yaml.v3"
 )
 
@@ -14,8 +14,9 @@ const (
 	mergeStrategyAppend   = "append"
 )
 
-func (p *Pool) feedOptions() monty.FeedOptions {
+func (p *Pool) feedOptions(mounts []*monty.MountDir) monty.FeedOptions {
 	return monty.FeedOptions{
+		Mounts: mounts,
 		Functions: map[string]monty.ExternalFunction{
 			"k8s_object_meta": k8sObjectMeta,
 			"yaml_encode":     yamlEncode,
