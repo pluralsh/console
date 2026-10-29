@@ -152,6 +152,11 @@ export default function Clusters() {
     Conjunction.Or
   )
 
+  const tagQuery = useMemo(
+    () => (isEmpty(searchTags) ? undefined : { op: tagOp, tags: searchTags }),
+    [searchTags, tagOp]
+  )
+
   const {
     data,
     loading,
@@ -172,9 +177,7 @@ export default function Clusters() {
       ...(statusFilter !== 'ALL'
         ? { healthy: statusFilter === 'HEALTHY' }
         : {}),
-      ...(!isEmpty(searchTags)
-        ? { tagQuery: { op: tagOp, tags: searchTags } }
-        : {}),
+      tagQuery,
       upgradeable:
         upgradeableFilter === 'ALL'
           ? undefined
@@ -187,7 +190,7 @@ export default function Clusters() {
     previousData: aggPrev,
     loading: aggLoading,
   } = useClusterStatusesQuery({
-    variables: { q: debouncedSearchString, projectId },
+    variables: { q: debouncedSearchString, projectId, tagQuery },
     fetchPolicy: 'cache-and-network',
     pollInterval: STATUS_COUNTS_POLL_INTERVAL,
   })
@@ -215,7 +218,7 @@ export default function Clusters() {
     () => data?.clusters?.edges?.filter(isNonNullable) ?? [],
     [data?.clusters?.edges]
   )
-  const hasStatFilters = !!debouncedSearchString || !!projectId
+  const hasStatFilters = !!debouncedSearchString || !!projectId || !!tagQuery
   const isDemo = (statusCounts.ALL === 0 && !hasStatFilters) || !cdIsEnabled
   const tableData: Edge<ClustersRowFragment>[] = isDemo
     ? DEMO_CLUSTERS

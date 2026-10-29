@@ -243,10 +243,10 @@ type RootQueryType {
   ): ClusterConnection
 
   "gets summary information for all healthy\/unhealthy clusters in your fleet"
-  clusterStatuses(q: String, tag: TagInput, projectId: ID): [ClusterStatusInfo]
+  clusterStatuses(q: String, tag: TagInput, tagQuery: TagQuery, projectId: ID): [ClusterStatusInfo]
 
   "gets summary information for upgradeability in your fleet"
-  upgradeStatistics(q: String, tag: TagInput, projectId: ID): UpgradeStatistics
+  upgradeStatistics(q: String, tag: TagInput, tagQuery: TagQuery, projectId: ID): UpgradeStatistics
 
   "lists tags applied to any clusters in the fleet"
   tags(tag: String): [String]

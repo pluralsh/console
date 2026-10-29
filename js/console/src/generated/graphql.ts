@@ -12867,6 +12867,7 @@ export type RootQueryTypeClusterStatusesArgs = {
   projectId?: InputMaybe<Scalars['ID']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
   tag?: InputMaybe<TagInput>;
+  tagQuery?: InputMaybe<TagQuery>;
 };
 
 
@@ -13899,6 +13900,7 @@ export type RootQueryTypeUpgradeStatisticsArgs = {
   projectId?: InputMaybe<Scalars['ID']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
   tag?: InputMaybe<TagInput>;
+  tagQuery?: InputMaybe<TagQuery>;
 };
 
 
@@ -21180,6 +21182,7 @@ export type ClusterStatusInfoFragment = { __typename?: 'ClusterStatusInfo', coun
 export type ClusterStatusesQueryVariables = Exact<{
   q?: InputMaybe<Scalars['String']['input']>;
   projectId?: InputMaybe<Scalars['ID']['input']>;
+  tagQuery?: InputMaybe<TagQuery>;
 }>;
 
 
@@ -29077,6 +29080,7 @@ export type DetachClusterMutationOptions = Apollo.BaseMutationOptions<DetachClus
  *   variables: {
  *      q: // value for 'q'
  *      projectId: // value for 'projectId'
+ *      tagQuery: // value for 'tagQuery'
  *   },
  * });
  */

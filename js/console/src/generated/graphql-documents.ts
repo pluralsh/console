@@ -7941,11 +7941,11 @@ export const DetachClusterDocument = /*#__PURE__*/ gql`
 }
     ${ClusterFragmentDoc}` as unknown as DocumentNode<Types.DetachClusterMutation, Types.DetachClusterMutationVariables>;
 export const ClusterStatusesDocument = /*#__PURE__*/ gql`
-    query ClusterStatuses($q: String, $projectId: ID) {
-  clusterStatuses(q: $q, projectId: $projectId) {
+    query ClusterStatuses($q: String, $projectId: ID, $tagQuery: TagQuery) {
+  clusterStatuses(q: $q, projectId: $projectId, tagQuery: $tagQuery) {
     ...ClusterStatusInfo
   }
-  upgradeStatistics(q: $q, projectId: $projectId) {
+  upgradeStatistics(q: $q, projectId: $projectId, tagQuery: $tagQuery) {
     upgradeable
     count
   }

@@ -659,11 +659,11 @@ fragment ClusterStatusInfo on ClusterStatusInfo {
   healthy
 }
 
-query ClusterStatuses($q: String, $projectId: ID) {
-  clusterStatuses(q: $q, projectId: $projectId) {
+query ClusterStatuses($q: String, $projectId: ID, $tagQuery: TagQuery) {
+  clusterStatuses(q: $q, projectId: $projectId, tagQuery: $tagQuery) {
     ...ClusterStatusInfo
   }
-  upgradeStatistics(q: $q, projectId: $projectId) {
+  upgradeStatistics(q: $q, projectId: $projectId, tagQuery: $tagQuery) {
     upgradeable
     count
   }

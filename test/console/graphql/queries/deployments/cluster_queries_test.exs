@@ -1016,11 +1016,45 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
         }
       """, %{}, %{current_user: admin})
 
-      assert length(res) == 3
+      assert length(res) == 2
       as_map = Map.new(res, & {&1["healthy"], &1})
       assert as_map[true]["count"] == 2
-      assert as_map[false]["count"] == 3
-      assert as_map[nil]["count"] == 1
+      assert as_map[false]["count"] == 4
+    end
+
+    test "it agrees with the healthy filter and each cluster's health, and supports tag queries" do
+      admin = admin_user()
+      # pinged 30m ago with the default 2m interval, so unhealthy despite being within 120 minutes
+      stale = insert(:cluster, ping_interval: 120, pinged_at: Timex.now() |> Timex.shift(minutes: -30))
+      fresh = insert(:cluster, ping_interval: 120, pinged_at: Timex.now() |> Timex.shift(minutes: -1))
+      never = insert(:cluster)
+      other = insert(:cluster, ping_interval: 120, pinged_at: Timex.now() |> Timex.shift(minutes: -30))
+      for c <- [stale, fresh, never], do: insert(:tag, cluster: c, name: "env", value: "prod")
+      insert(:tag, cluster: stale, name: "tier", value: "dev")
+      insert(:tag, cluster: other, name: "env", value: "dev")
+
+      for {cluster, healthy} <- [{stale, false}, {fresh, true}, {never, false}],
+        do: assert Console.Schema.Cluster.healthy?(refetch(cluster)) == healthy
+
+      tq = %{"op" => "OR", "tags" => [%{"name" => "env", "value" => "prod"}, %{"name" => "tier", "value" => "dev"}]}
+
+      {:ok, %{data: %{"clusterStatuses" => res, "upgradeStatistics" => stats}}} = run_query("""
+        query Statuses($tagQuery: TagQuery) {
+          clusterStatuses(tagQuery: $tagQuery) { healthy count }
+          upgradeStatistics(tagQuery: $tagQuery) { count }
+        }
+      """, %{"tagQuery" => tq}, %{current_user: admin})
+
+      assert Map.new(res, & {&1["healthy"], &1["count"]}) == %{true => 1, false => 2}
+      assert stats["count"] == 3
+
+      {:ok, %{data: %{"clusters" => found}}} = run_query("""
+        query Clusters($tagQuery: TagQuery) {
+          clusters(first: 5, healthy: false, tagQuery: $tagQuery) { edges { node { id } } }
+        }
+      """, %{"tagQuery" => tq}, %{current_user: admin})
+
+      assert ids_equal(from_connection(found), [stale, never])
     end
   end
 

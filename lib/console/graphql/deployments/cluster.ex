@@ -1567,6 +1567,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
       middleware Authenticated
       arg :q,          :string
       arg :tag,        :tag_input
+      arg :tag_query,  :tag_query
       arg :project_id, :id
 
       resolve &Deployments.cluster_statuses/2
@@ -1577,6 +1578,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
       middleware Authenticated
       arg :q,          :string
       arg :tag,        :tag_input
+      arg :tag_query,  :tag_query
       arg :project_id, :id
 
       resolve &Deployments.upgrade_statistics/2
