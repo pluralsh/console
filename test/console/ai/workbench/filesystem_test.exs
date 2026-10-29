@@ -62,6 +62,16 @@ defmodule Console.AI.Workbench.FilesystemTest do
       {:ok, {:named_tuple, "StatResult", fields}} = os(:stat, [{:path, "/workbench/d"}])
       assert Bitwise.band(Map.new(fields)["st_mode"], 0o040_000) != 0
     end
+
+    test "it returns type errors instead of raising on non-string values like sql rows" do
+      row = ["plrl-dev", "gp2", 10, 100, nil]
+
+      assert os(:write_text, [{:path, "/workbench/out.txt"}, row]) ==
+        {:error, :type_error, "data must be str, not list"}
+      assert os(:append_text, [{:path, "/workbench/out.txt"}, row]) ==
+        {:error, :type_error, "data must be str, not list"}
+      assert os(:read_text, [row]) == {:error, :type_error, "expected a str or Path, not list"}
+    end
   end
 
   describe "functions/1" do

@@ -6,7 +6,8 @@ end
 defimpl Inspect, for: Console.AI.Tools.Workbench.Infrastructure.CloudSchemas.Cell do
   import Inspect.Algebra
 
-  def inspect(%{value: value}, _opts), do: concat([value])
+  def inspect(%{value: value}, _opts) when is_binary(value), do: concat([value])
+  def inspect(%{value: value}, opts), do: to_doc(value, opts)
 end
 
 defmodule Console.AI.Tools.Workbench.Infrastructure.CloudSchemas do

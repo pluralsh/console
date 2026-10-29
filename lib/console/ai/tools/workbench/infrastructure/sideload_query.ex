@@ -35,7 +35,9 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.SideloadQuery do
   def filter(_, _, _), do: []
 
   defp matches?(value, regex) when is_binary(value), do: Regex.match?(regex, value)
-  defp matches?(value, regex), do: matches?(to_string(value),regex)
+  defp matches?(nil, _), do: false
+  defp matches?(value, regex) when is_atom(value) or is_number(value), do: matches?(to_string(value), regex)
+  defp matches?(value, regex), do: matches?(inspect(value), regex)
 
   defp validate_regex(changeset) do
     validate_change(changeset, :search, fn
