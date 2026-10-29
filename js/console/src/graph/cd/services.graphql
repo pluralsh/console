@@ -338,7 +338,8 @@ query ServiceDeployment($id: ID!) {
   }
 }
 
-# only plain service columns, since the server resolves this once per subscriber per event
+# only plain service columns and the errors preloaded with the event, since the server resolves this once
+# per subscriber per event
 subscription ServiceDeploymentDelta($id: ID, $clusterId: ID) {
   serviceDeploymentDelta(id: $id, clusterId: $clusterId) {
     delta
@@ -355,6 +356,11 @@ subscription ServiceDeploymentDelta($id: ID, $clusterId: ID) {
       dryRun
       deletedAt
       updatedAt
+      errors {
+        source
+        message
+        warning
+      }
     }
   }
 }

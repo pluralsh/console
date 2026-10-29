@@ -29,7 +29,7 @@ type ServiceConnection = { edges?: Nullable<{ node?: Reference }[]> }
  * unscoped subscription would otherwise pull in every service it hears about.
  *
  * `refetch` is called (debounced) on any delta, for views showing fields the
- * delta doesn't carry, like components or errors. `refetchOnCreate` is only
+ * delta doesn't carry, like components. `refetchOnCreate` is only
  * called for creates, for filtered or paginated lists that can't place a new
  * service themselves.
  */

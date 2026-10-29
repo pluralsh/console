@@ -68,6 +68,44 @@ describe('mergeService', () => {
     ).toBe(ServiceDeploymentStatus.Healthy)
   })
 
+  it('replaces cached errors, clearing them on an empty list', () => {
+    const cache = new InMemoryCache()
+    const fragment = gql`
+      fragment E on ServiceDeployment {
+        status
+        errors {
+          source
+          message
+          warning
+        }
+      }
+    `
+    const error = {
+      __typename: 'ServiceError' as const,
+      source: 'sync',
+      message: 'broke',
+      warning: null,
+    }
+    cache.writeFragment({
+      id: 'ServiceDeployment:a',
+      fragment,
+      data: {
+        __typename: 'ServiceDeployment',
+        status: ServiceDeploymentStatus.Failed,
+        errors: [error],
+      },
+    })
+
+    mergeService(cache, {
+      ...delta('a', ServiceDeploymentStatus.Healthy),
+      errors: [],
+    })
+
+    expect(
+      cache.readFragment<any>({ id: 'ServiceDeployment:a', fragment })
+    ).toMatchObject({ status: ServiceDeploymentStatus.Healthy, errors: [] })
+  })
+
   it('never adds services that are not cached', () => {
     const cache = cacheWith({}, ['a'])
 

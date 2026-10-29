@@ -54,6 +54,31 @@ defmodule ConsoleWeb.ComponentControllerTest do
       assert svc.component_status == "1 / 1"
     end
 
+    test "an empty error list clears errors while null keeps them", %{conn: conn} do
+      cluster = insert(:cluster)
+      service = insert(:service, cluster: cluster)
+      path = "/ext/v1/services/#{service.id}/components"
+      post = fn body ->
+        conn
+        |> add_auth_headers(cluster)
+        |> post_json(path, Map.merge(%{"components" => [@component], "revision_id" => service.revision_id}, body))
+        |> json_response(200)
+
+        Console.Repo.preload(refetch(service), [:errors], force: true)
+      end
+
+      svc = post.(%{"errors" => [%{"source" => "sync", "message" => "broke"}]})
+      assert [%{source: "sync", message: "broke"}] = svc.errors
+      assert svc.status == :failed
+
+      svc = post.(%{"errors" => nil})
+      assert [%{source: "sync", message: "broke"}] = svc.errors
+
+      svc = post.(%{"errors" => []})
+      assert svc.errors == []
+      assert svc.status == :healthy
+    end
+
     test "it rejects invalid component states", %{conn: conn} do
       cluster = insert(:cluster)
       service = insert(:service, cluster: cluster)

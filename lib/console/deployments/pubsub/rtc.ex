@@ -25,10 +25,11 @@ defimpl Console.PubSub.Rtc, for: [Console.PubSub.PipelineGateUpdated, Console.Pu
 end
 
 # service deltas are authorized per subscriber on delivery and component updates fire on every agent
-# sync, so the policy graph is attached once here, mostly from cache
+# sync, so the policy graph is attached once here, mostly from cache.  Errors are carried by the delta
+# and preloaded once too, rather than by every subscriber's resolution, and are gone with deleted rows.
 defimpl Console.PubSub.Rtc, for: Console.PubSub.ServiceCreated do
   alias Console.Deployments.Policies.Rbac
-  def deliver(%{item: svc}), do: {Rbac.cached_preload(svc), :create}
+  def deliver(%{item: svc}), do: {Rbac.cached_preload(svc) |> Console.Repo.preload(:errors), :create}
 end
 
 defimpl Console.PubSub.Rtc, for: [
@@ -36,19 +37,19 @@ defimpl Console.PubSub.Rtc, for: [
   Console.PubSub.ServiceComponentsUpdated,
 ] do
   alias Console.Deployments.Policies.Rbac
-  def deliver(%{item: svc}), do: {Rbac.cached_preload(svc), :update}
+  def deliver(%{item: svc}), do: {Rbac.cached_preload(svc) |> Console.Repo.preload(:errors), :update}
 end
 
 # soft deletes only schedule a drain, while detaching removes the row immediately
 defimpl Console.PubSub.Rtc, for: Console.PubSub.ServiceDeleted do
   alias Console.Deployments.Policies.Rbac
-  def deliver(%{item: %{__meta__: %{state: :deleted}} = svc}), do: {Rbac.cached_preload(svc), :delete}
-  def deliver(%{item: svc}), do: {Rbac.cached_preload(svc), :update}
+  def deliver(%{item: %{__meta__: %{state: :deleted}} = svc}), do: {%{Rbac.cached_preload(svc) | errors: []}, :delete}
+  def deliver(%{item: svc}), do: {Rbac.cached_preload(svc) |> Console.Repo.preload(:errors), :update}
 end
 
 defimpl Console.PubSub.Rtc, for: Console.PubSub.ServiceHardDeleted do
   alias Console.Deployments.Policies.Rbac
-  def deliver(%{item: svc}), do: {Rbac.cached_preload(svc), :delete}
+  def deliver(%{item: svc}), do: {%{Rbac.cached_preload(svc) | errors: []}, :delete}
 end
 
 defimpl Console.PubSub.Rtc, for: Console.PubSub.ClusterCreated do

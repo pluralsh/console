@@ -21943,7 +21943,7 @@ export type ServiceDeploymentDeltaSubscriptionVariables = Exact<{
 }>;
 
 
-export type ServiceDeploymentDeltaSubscription = { __typename?: 'RootSubscriptionType', serviceDeploymentDelta?: { __typename?: 'ServiceDeploymentDelta', delta?: Delta | null, payload?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, message?: string | null, version: string, promotion?: ServicePromotion | null, protect?: boolean | null, dryRun?: boolean | null, deletedAt?: string | null, updatedAt?: string | null } | null } | null };
+export type ServiceDeploymentDeltaSubscription = { __typename?: 'RootSubscriptionType', serviceDeploymentDelta?: { __typename?: 'ServiceDeploymentDelta', delta?: Delta | null, payload?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, message?: string | null, version: string, promotion?: ServicePromotion | null, protect?: boolean | null, dryRun?: boolean | null, deletedAt?: string | null, updatedAt?: string | null, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string, warning?: boolean | null } | null> | null } | null } | null };
 
 export type ServiceDeploymentTinyQueryVariables = Exact<{
   id: Scalars['ID']['input'];

@@ -374,7 +374,6 @@ const JobRow = memo(function JobRow({
         })}
         aria-label="View job"
       />
-      {job.status && <JobStatusIcon status={job.status} />}
       <PromptSC>
         <WorkbenchStoredPromptMarkdown
           text={truncateKeepingChips(job.prompt ?? '', PROMPT_MAX_CHARS)}

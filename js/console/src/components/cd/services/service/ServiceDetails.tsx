@@ -266,7 +266,7 @@ function ServiceDetailsBase() {
     fetchPolicy: 'cache-and-network',
     errorPolicy: 'all',
   })
-  // component syncs and errors aren't carried by the delta itself
+  // component syncs aren't carried by the delta itself
   useServiceDeltas({ id: serviceId, refetch, skip: !serviceId })
   const { serviceDeployment } = data ?? {}
   const isLoading = !data && loading

@@ -8661,6 +8661,11 @@ export const ServiceDeploymentDeltaDocument = /*#__PURE__*/ gql`
       dryRun
       deletedAt
       updatedAt
+      errors {
+        source
+        message
+        warning
+      }
     }
   }
 }

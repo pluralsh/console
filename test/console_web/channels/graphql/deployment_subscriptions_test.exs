@@ -455,6 +455,35 @@ defmodule ConsoleWeb.GraphQl.DeploymentsSubscriptionTest do
       for sub <- subs, do: assert_service_delta(sub, service)
     end
 
+    test "deltas carry the service's errors, including when they've been cleared" do
+      admin   = admin_user()
+      service = insert(:service)
+      {:ok, socket} = stack_socket(admin, nil)
+      ref = push_doc(socket, """
+        subscription Services($id: ID) {
+          serviceDeploymentDelta(id: $id) {
+            delta
+            payload { id errors { source message warning } }
+          }
+        }
+      """, variables: %{"id" => service.id})
+      assert_reply(ref, :ok, %{subscriptionId: sub})
+
+      {:ok, failed} = Console.Deployments.Services.add_errors(service, [%{source: "sync", message: "broke"}])
+      Rtc.handle_event(%PubSub.ServiceComponentsUpdated{item: failed})
+      assert_push("subscription:data", %{subscriptionId: ^sub, result: %{data: %{"serviceDeploymentDelta" => %{"payload" => payload}}}})
+      assert payload["errors"] == [%{"source" => "sync", "message" => "broke", "warning" => false}]
+
+      {:ok, cleared} = Console.Deployments.Services.add_errors(failed, [])
+      Rtc.handle_event(%PubSub.ServiceComponentsUpdated{item: cleared})
+      assert_push("subscription:data", %{subscriptionId: ^sub, result: %{data: %{"serviceDeploymentDelta" => %{"payload" => payload}}}})
+      assert payload["errors"] == []
+
+      Rtc.handle_event(%PubSub.ServiceComponentsUpdated{item: refetch(cleared)})
+      assert_push("subscription:data", %{subscriptionId: ^sub, result: %{data: %{"serviceDeploymentDelta" => %{"payload" => payload}}}})
+      assert payload["errors"] == []
+    end
+
     test "cluster-scoped subscriptions only receive that cluster's services" do
       admin   = admin_user()
       cluster = insert(:cluster)

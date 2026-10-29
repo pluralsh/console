@@ -192,6 +192,10 @@ export function buildClient(
 
   const client = new ApolloClient({
     link: splitLink,
+    // nobody sees a background tab's data, so its polls wait until it's shown again
+    defaultOptions: {
+      watchQuery: { skipPollAttempt: isDocumentHidden },
+    },
     cache: new InMemoryCache(authenticatedCacheConfig),
   })
 
