@@ -165,6 +165,40 @@ func TestPythonFolderCannotReadOutsideDirectory(t *testing.T) {
 	}
 }
 
+func TestPythonScriptCannotReadThroughEscapingSymlinks(t *testing.T) {
+	dir := t.TempDir()
+	outsideDir := t.TempDir()
+	writePythonFile(t, outsideDir, "secret.yaml", "escaped: true\n")
+	if err := os.Symlink(filepath.Join(outsideDir, "secret.yaml"), filepath.Join(dir, "linked.yaml")); err != nil {
+		t.Fatalf("Symlink: %v", err)
+	}
+	if err := os.Symlink(outsideDir, filepath.Join(dir, "linked-dir")); err != nil {
+		t.Fatalf("Symlink: %v", err)
+	}
+
+	p, err := python.NewPoolWithConfig(python.Config{WorkerCount: 1, QueueSize: 1})
+	if err != nil {
+		t.Fatalf("NewPoolWithConfig: %v", err)
+	}
+	t.Cleanup(func() { _ = p.Close() })
+
+	for _, script := range []string{
+		`values["v"] = fs.read("linked.yaml")`,
+		`values["v"] = fs.read("linked-dir/secret.yaml")`,
+		`values["v"] = open("linked.yaml").read()`,
+	} {
+		t.Run(script, func(t *testing.T) {
+			svc := &console.ServiceDeploymentForAgent{
+				Helm: &console.ServiceDeploymentForAgent_Helm{PythonScript: lo.ToPtr(script)},
+			}
+			result, _, err := (&helm{dir: dir, pythonPool: p}).pythonValues(context.Background(), svc)
+			if err == nil || !strings.Contains(err.Error(), "python PermissionError") {
+				t.Fatalf("expected PermissionError, got %v (values %#v)", err, result)
+			}
+		})
+	}
+}
+
 func TestTemplateValuesCannotReadValuesFileOutsideDirectory(t *testing.T) {
 	dir := t.TempDir()
 	outsideDir := t.TempDir()
