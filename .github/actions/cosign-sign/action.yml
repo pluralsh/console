@@ -13,10 +13,10 @@ description: Keyless Cosign sign of image digests on release tag or release work
 
 inputs:
   images:
-    description: Newline-separated image repositories to sign (no tag), e.g. ghcr.io/pluralsh/console
+    description: "Newline-separated image repositories to sign (no tag), e.g. ghcr.io/pluralsh/console"
     required: true
   digest:
-    description: Manifest digest to sign, including the sha256: prefix
+    description: "Manifest digest to sign, including the sha256: prefix"
     required: true
 
 runs:
