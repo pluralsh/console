@@ -4,7 +4,7 @@ go 1.27.2
 
 require (
 	github.com/bytedance/sonic v1.15.3-0.20260730064818-2a36d6da63e2
-	github.com/go-chi/chi/v5 v5.2.5
+	github.com/go-chi/chi/v5 v5.4.0
 	github.com/maximhq/bifrost/core v1.9.0
 	github.com/samber/lo v1.53.0
 	github.com/spf13/viper v1.21.0
