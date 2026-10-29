@@ -55,6 +55,45 @@ defmodule ConsoleWeb.GraphQl.DeploymentsSubscriptionTest do
     end
   end
 
+  describe "runStepDelta" do
+    @step_delta """
+      subscription Steps($runId: ID!) {
+        runStepDelta(runId: $runId) {
+          delta
+          payload { id status }
+        }
+      }
+    """
+
+    test "step updates broadcast deltas to readers of the run's stack" do
+      user  = insert(:user)
+      stack = insert(:stack, read_bindings: [%{user_id: user.id}])
+      run   = insert(:stack_run, stack: stack)
+      step  = insert(:run_step, run: run, status: :running)
+
+      {:ok, socket} = establish_socket(user)
+
+      ref = push_doc(socket, @step_delta, variables: %{"runId" => run.id})
+      assert_reply(ref, :ok, %{subscriptionId: _})
+
+      Rtc.handle_event(%PubSub.RunStepUpdated{item: step})
+
+      assert_push("subscription:data", %{result: %{data: %{"runStepDelta" => delta}}})
+      assert delta["delta"] == "UPDATE"
+      assert delta["payload"]["id"] == step.id
+      assert delta["payload"]["status"] == "RUNNING"
+    end
+
+    test "users who cannot read the stack cannot subscribe" do
+      run = insert(:stack_run)
+
+      {:ok, socket} = establish_socket(insert(:user))
+
+      ref = push_doc(socket, @step_delta, variables: %{"runId" => run.id})
+      assert_reply(ref, :error, _)
+    end
+  end
+
   describe "infrastructureStackDelta" do
     @stack_delta """
       subscription {

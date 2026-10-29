@@ -1877,6 +1877,9 @@ type RootSubscriptionType {
   "Changes to the runs of a stack, authorized once against the stack when subscribing"
   stackRunDelta(stackId: ID!): StackRunDelta
 
+  "Status changes to the steps of a run, its logs stream separately through runLogsDelta"
+  runStepDelta(runId: ID!): RunStepDelta
+
   runLogsDelta(stepId: ID!): RunLogsDelta
 
   "Changes to a single service, the services of a cluster, or any service the current user can read if neither is given"
@@ -10555,6 +10558,11 @@ type StackPolicyConnection {
 type RunLogsDelta {
   delta: Delta
   payload: RunLogs
+}
+
+type RunStepDelta {
+  delta: Delta
+  payload: RunStep
 }
 
 type InfrastructureStackDelta {

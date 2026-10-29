@@ -109,6 +109,8 @@ defmodule ConsoleWeb.Router do
 
       scope "/v1", ConsoleWeb do
         post "/webhooks/:type/:id", WebhookController, :scm
+        post "/vulnerabilities", PolicyController, :vulnerabilities
+        post "/constraints",     PolicyController, :constraints
 
         get "/gate/:cluster/:name", GitController, :proceed
         get "/gate/:id", GitController, :proceed

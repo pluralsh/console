@@ -706,6 +706,7 @@ defmodule Console.GraphQl.Deployments.Stack do
   connection node_type: :stack_policy
 
   delta :run_logs
+  delta :run_step
   delta :infrastructure_stack
   delta :stack_run
 
@@ -1047,6 +1048,16 @@ defmodule Console.GraphQl.Deployments.Stack do
         ctx = Console.Middleware.Scope.scope_context(ctx, resource: :stack, action: :read)
         with {:ok, stack} <- Deployments.resolve_stack(%{id: id}, %{context: ctx}),
           do: {:ok, topic: "stacks:#{stack.id}:runs"}
+      end
+    end
+
+    @desc "Status changes to the steps of a run, its logs stream separately through runLogsDelta"
+    field :run_step_delta, :run_step_delta do
+      arg :run_id, non_null(:id)
+
+      config fn %{run_id: run_id}, ctx ->
+        with {:ok, run} <- Deployments.resolve_stack_run(%{id: run_id}, ctx),
+          do: {:ok, topic: "stack_runs:#{run.id}:steps"}
       end
     end
 

@@ -1304,6 +1304,8 @@ defmodule Console.Deployments.Stacks do
     do: notify_after(:timer.seconds(5), PubSub.StackRunCreated, stack)
   defp notify({:ok, %RunLog{} = log}, :create),
     do: handle_notify(PubSub.RunLogsCreated, log)
+  defp notify({:ok, %RunStep{} = step}, :update),
+    do: handle_notify(PubSub.RunStepUpdated, step)
   defp notify({:ok, %StackRun{} = stack}, :update),
     do: handle_notify(PubSub.StackRunUpdated, stack)
   defp notify({:ok, %StackRun{} = stack}, :complete),

@@ -10747,6 +10747,18 @@ export const StackListEntryDocument = /*#__PURE__*/ gql`
   }
 }
     ${StackTinyFragmentDoc}` as unknown as DocumentNode<Types.StackListEntryQuery, Types.StackListEntryQueryVariables>;
+export const RunStepDeltaDocument = /*#__PURE__*/ gql`
+    subscription RunStepDelta($runId: ID!) {
+  runStepDelta(runId: $runId) {
+    delta
+    payload {
+      id
+      status
+      updatedAt
+    }
+  }
+}
+    ` as unknown as DocumentNode<Types.RunStepDeltaSubscription, Types.RunStepDeltaSubscriptionVariables>;
 export const LogsDeltaDocument = /*#__PURE__*/ gql`
     subscription LogsDelta($id: ID!) {
   runLogsDelta(stepId: $id) {

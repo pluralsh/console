@@ -4,6 +4,7 @@ import (
 	"context"
 	"math/rand"
 	"net/http"
+	"sync/atomic"
 	"time"
 
 	console "github.com/pluralsh/console/go/client"
@@ -32,6 +33,8 @@ type client struct {
 	url            string
 	token          string
 	myClusterCache pollycache.Store[console.MyCluster]
+	// set once the console is found not to have the REST ingest endpoints
+	legacyIngest atomic.Bool
 }
 
 func (c *client) GetCredentials() (url, token string) {

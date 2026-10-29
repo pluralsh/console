@@ -70,6 +70,7 @@ defmodule Console.PubSub.StackRunDeleted, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.StackRunCompleted, do: use Piazza.PubSub.Event
 
 defmodule Console.PubSub.RunLogsCreated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.RunStepUpdated, do: use Piazza.PubSub.Event
 
 defmodule Console.PubSub.SharedSecretCreated, do: use Piazza.PubSub.Event
 

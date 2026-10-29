@@ -674,6 +674,18 @@ query StackListEntry($id: ID!) {
   }
 }
 
+# step status changes, normalized into the steps of the cached run
+subscription RunStepDelta($runId: ID!) {
+  runStepDelta(runId: $runId) {
+    delta
+    payload {
+      id
+      status
+      updatedAt
+    }
+  }
+}
+
 subscription LogsDelta($id: ID!) {
   runLogsDelta(stepId: $id) {
     delta

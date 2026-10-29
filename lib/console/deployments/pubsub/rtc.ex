@@ -4,6 +4,10 @@ defimpl Console.PubSub.Rtc, for: [Console.PubSub.RunLogsCreated] do
   def deliver(%{item: item}), do: {item, :create}
 end
 
+defimpl Console.PubSub.Rtc, for: Console.PubSub.RunStepUpdated do
+  def deliver(%{item: step}), do: {step, :update}
+end
+
 defimpl Console.PubSub.Rtc, for: Console.PubSub.PipelineStageUpdated do
   def deliver(%{item: stage}) do
     %{pipeline: pipeline} = Console.Repo.preload(stage, [:pipeline])

@@ -1534,6 +1534,8 @@ defmodule Console.Deployments.StacksTest do
 
       assert updated.id == step.id
       assert updated.status == :running
+
+      assert_receive {:event, %PubSub.RunStepUpdated{item: ^updated}}
     end
 
     test "random clusters cannot update steps" do

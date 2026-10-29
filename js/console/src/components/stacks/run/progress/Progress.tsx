@@ -7,7 +7,7 @@ import sortBy from 'lodash/sortBy'
 import { RunStep, StepStatus } from '../../../../generated/graphql'
 
 import Step from './Step'
-import { StackRunOutletContextT } from '../Route.tsx'
+import { isRunFinished, StackRunOutletContextT } from '../Route.tsx'
 
 function currentStep(steps: Array<RunStep>): string {
   for (let i = steps.length - 1; i > 0; i--) {
@@ -32,6 +32,7 @@ export default function StackRunProgress(): ReactNode {
     [stackRun.steps]
   )
   const openId = currentStep(sorted as Array<RunStep>)
+  const live = !isRunFinished(stackRun.status)
 
   return (
     <ScrollablePage
@@ -49,6 +50,7 @@ export default function StackRunProgress(): ReactNode {
             key={s!.id}
             step={s!}
             open={s!.id === openId}
+            live={live}
           />
         ))}
       </Card>
