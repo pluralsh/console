@@ -317,27 +317,15 @@ export function ChatInputSimple({
 const EMPTY_FILES: File[] = []
 const noop = () => {}
 
-const PROMPT_SUBMIT_BUTTON_SIZE = 32
-
 export function PromptSubmitButton({
   loading = false,
   ...props
 }: Omit<ComponentProps<typeof ChatSubmitButton>, 'icon' | 'loadingIndicator'>) {
-  const { spacing, borderRadiuses } = useTheme()
-
   return (
-    <ChatSubmitButton
+    <PromptSubmitButtonSC
       icon={<ArrowCornerUpIcon />}
       loading={loading}
       loadingIndicator={<SpinnerAlt color="icon-xlight" />}
-      css={{
-        position: 'absolute',
-        bottom: spacing.small,
-        right: spacing.small,
-        width: PROMPT_SUBMIT_BUTTON_SIZE,
-        height: PROMPT_SUBMIT_BUTTON_SIZE,
-        borderRadius: borderRadiuses.medium,
-      }}
       {...props}
     />
   )
@@ -445,6 +433,18 @@ const ChatSubmitButtonSC = styled(Button)<{ $bgColor: SemanticColorKey }>(
     background: theme.colors[$bgColor],
   })
 )
+
+// doubled so the square shape wins over the round base regardless of stylesheet order
+const PromptSubmitButtonSC = styled(ChatSubmitButton)(({ theme }) => ({
+  '&&': {
+    position: 'absolute',
+    bottom: theme.spacing.small,
+    right: theme.spacing.small,
+    width: 32,
+    height: 32,
+    borderRadius: theme.borderRadiuses.medium,
+  },
+}))
 
 const ChipListSC = styled.div(({ theme }) => ({
   display: 'flex',
