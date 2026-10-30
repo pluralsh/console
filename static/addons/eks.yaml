@@ -352,6 +352,17 @@
   publisher: akuity
 - name: amazon-cloudwatch-observability
   versions:
+  - version: v7.0.0-eksbuild.1
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
   - version: v6.7.0-eksbuild.1
     compatibilities:
     - '1.37'
@@ -4390,6 +4401,18 @@
   publisher: s3
 - name: aws-network-flow-monitoring-agent
   versions:
+  - version: v1.1.8-eksbuild.2
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v1.1.8-eksbuild.1
     compatibilities:
     - '1.37'
@@ -9137,6 +9160,16 @@
   publisher: factorhouse
 - name: fluent-bit
   versions:
+  - version: v5.1.5-eksbuild.2
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v5.1.5-eksbuild.1
     compatibilities:
     - '1.37'
@@ -11630,6 +11663,16 @@
   publisher: eks
 - name: kube-state-metrics
   versions:
+  - version: v2.20.0-eksbuild.10
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v2.20.0-eksbuild.9
     compatibilities:
     - '1.37'
@@ -12813,6 +12856,16 @@
   publisher: Nirmata
 - name: prometheus-node-exporter
   versions:
+  - version: v1.12.1-eksbuild.11
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v1.12.1-eksbuild.10
     compatibilities:
     - '1.37'
