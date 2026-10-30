@@ -3,12 +3,13 @@ defmodule Console.AI.Tools.Workbench.Codemode do
   alias Console.AI.Tools.Workbench.OutputType
   alias Console.AI.Tools.Workbench.Output
   alias Console.AI.Tool
-  alias Console.AI.Workbench.Filesystem
+  alias Console.AI.Workbench.{Filesystem, SandboxPool}
 
   require EEx
 
   @max_output_bytes 100_000
   @max_runtime_ms :timer.minutes(1)
+  @max_wait_ms :timer.minutes(2)
 
   embedded_schema do
     field(:tools, {:array, :map}, virtual: true)
@@ -38,22 +39,24 @@ defmodule Console.AI.Tools.Workbench.Codemode do
   end
 
   def implement(%__MODULE__{tools: tools, policies: policies, python: python, workbench_id: wid}) do
-    ExMonty.Sandbox.run(
-      python,
-      [
-        functions: Map.merge(build_funcs(tools, policies), fs_funcs(wid)),
-        mounts: mounts(),
-        callback_timeout: @max_runtime_ms,
-        limits: %{
-          # execution-time budget (always enforced)
-          max_duration_secs: 60.0,
-          # ~100MB memory limit (see note below)
-          max_memory: 100_000_000,
-          # call stack depth limit
-          max_recursion_depth: 100
-        }
-      ] ++ fs_os(wid)
-    )
+    SandboxPool.run(fn ->
+      ExMonty.Sandbox.run(
+        python,
+        [
+          functions: Map.merge(build_funcs(tools, policies), fs_funcs(wid)),
+          mounts: mounts(),
+          callback_timeout: @max_runtime_ms,
+          limits: %{
+            # execution-time budget (always enforced)
+            max_duration_secs: 60.0,
+            # ~100MB memory limit (see note below)
+            max_memory: 100_000_000,
+            # call stack depth limit
+            max_recursion_depth: 100
+          }
+        ] ++ fs_os(wid)
+      )
+    end, @max_wait_ms)
     |> case do
       {:ok, result, stdo} ->
         Output.json(
@@ -61,6 +64,9 @@ defmodule Console.AI.Tools.Workbench.Codemode do
           "return fewer fields or summarize the result",
           @max_output_bytes
         )
+
+      {:error, :busy} ->
+        {:error, "The python sandbox is at capacity, try again shortly or proceed without it"}
 
       {:error, err} ->
         {:error, "Failed to execute Python code: #{inspect(err)}"}

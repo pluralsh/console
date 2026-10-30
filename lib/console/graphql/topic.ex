@@ -28,6 +28,18 @@ defimpl Console.GraphQl.Topic, for: Kazan.Apis.Core.V1.Pod do
   def infer(%@for{metadata: %{namespace: ns, name: name}}, _), do: [pod_delta: "pods:#{ns}:#{name}", pod_delta: "pods"]
 end
 
+defimpl Console.GraphQl.Topic, for: Console.Schema.Stack do
+  def infer(_, _), do: [infrastructure_stack_delta: "stacks"]
+end
+
+defimpl Console.GraphQl.Topic, for: Console.Schema.StackRun do
+  def infer(%@for{stack_id: id}, _), do: [stack_run_delta: "stacks:#{id}:runs"]
+end
+
+defimpl Console.GraphQl.Topic, for: Console.Schema.RunStep do
+  def infer(%@for{run_id: id}, _), do: [run_step_delta: "stack_runs:#{id}:steps"]
+end
+
 defimpl Console.GraphQl.Topic, for: Console.Schema.RunLog do
   def infer(%@for{step_id: id}, _), do: [run_logs_delta: "steps:#{id}"]
 end
@@ -37,7 +49,16 @@ defimpl Console.GraphQl.Topic, for: Console.Schema.Pipeline do
 end
 
 defimpl Console.GraphQl.Topic, for: Console.Schema.Service do
-  def infer(%@for{id: id}, _), do: [service_deployment_delta: "services:#{id}"]
+  def infer(%@for{id: id, cluster_id: cluster_id}, _),
+    do: [
+      service_deployment_delta: "services:#{id}",
+      service_deployment_delta: "services:clusters:#{cluster_id}",
+      service_deployment_delta: "services"
+    ]
+end
+
+defimpl Console.GraphQl.Topic, for: Console.Schema.Cluster do
+  def infer(%@for{id: id}, _), do: [cluster_delta: "clusters:#{id}", cluster_delta: "clusters"]
 end
 
 defimpl Console.GraphQl.Topic, for: Console.Schema.AgentMessage do

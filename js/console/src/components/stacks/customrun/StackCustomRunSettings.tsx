@@ -56,6 +56,7 @@ export function StackCustomRunSettings({
       runName: `Running ${customRun.name} with args ${JSON.stringify(configVals)}`,
     },
     onCompleted: () => onClose(),
+    refetchQueries: ['StackRuns'],
     update: (cache, { data }) => {
       updateCache(cache, {
         variables: {

@@ -201,7 +201,7 @@ func (in *agentRunController) init() (Controller, error) {
 //
 //  1. Analysis persistence (if configured)
 //  2. Post-run poll (approval mode): queued user prompts or approval → PR prompt
-//  3. Babysit loop (if enabled): user prompts every promptPollInterval (5s),
+//  3. Babysit loop (if enabled): user prompts every promptPollInterval (5s, 30s when kicked),
 //     PR/SCM checks every babysitInterval (default 60s)
 //
 // When both approval and babysit are enabled, approval follow-up creates the PR
@@ -234,16 +234,10 @@ func (in *agentRunController) babysitLoop(ctx context.Context, callback func(ctx
 	}
 
 	for {
-		agentRun, err := in.consoleClient.GetAgentRun(ctx, in.agentRunID)
+		agentRun, err := in.consoleClient.GetAgentRunStatus(ctx, in.agentRunID)
 		if err != nil {
 			klog.ErrorS(err, "could not poll agent run during babysit", "id", in.agentRunID)
-			if in.waitBabysit(ctx, promptPollInterval) {
-				return
-			}
-			continue
-		}
-		if agentRun == nil {
-			if in.waitBabysit(ctx, promptPollInterval) {
+			if in.waitForPoll(ctx) {
 				return
 			}
 			continue
@@ -253,15 +247,15 @@ func (in *agentRunController) babysitLoop(ctx context.Context, callback func(ctx
 			return
 		}
 
-		if in.tryDispatchQueuedUserPrompt(ctx, agentRun, false) {
-			if in.waitBabysit(ctx, promptPollInterval) {
+		if in.dispatchQueuedUserPrompt(ctx, agentRun, false) {
+			if in.waitForPoll(ctx) {
 				return
 			}
 			continue
 		}
 
-		if !in.lastBabysitPRPollAt.IsZero() && time.Since(in.lastBabysitPRPollAt) < prInterval {
-			if in.waitBabysit(ctx, promptPollInterval) {
+		if untilPR := prInterval - time.Since(in.lastBabysitPRPollAt); !in.lastBabysitPRPollAt.IsZero() && untilPR > 0 {
+			if in.waitForPollUpTo(ctx, untilPR) {
 				return
 			}
 			continue
@@ -272,20 +266,9 @@ func (in *agentRunController) babysitLoop(ctx context.Context, callback func(ctx
 			return
 		}
 
-		if in.waitBabysit(ctx, promptPollInterval) {
+		if in.waitForPoll(ctx) {
 			return
 		}
-	}
-}
-
-func (in *agentRunController) waitBabysit(ctx context.Context, d time.Duration) bool {
-	select {
-	case <-ctx.Done():
-		return true
-	case <-in.done:
-		return true
-	case <-time.After(d):
-		return false
 	}
 }
 

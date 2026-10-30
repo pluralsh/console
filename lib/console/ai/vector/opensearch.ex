@@ -64,7 +64,7 @@ defmodule Console.AI.Vector.Opensearch do
       url: Opensearch.url(os, index),
       method: :put,
       headers: Opensearch.headers(os, @headers),
-      body: Jason.encode!(@index_mappings),
+      body: Console.JSON.encode!(@index_mappings),
       aws_sigv4: Opensearch.aws_sigv4_headers(os)
     ])
     |> Req.put()
@@ -93,7 +93,7 @@ defmodule Console.AI.Vector.Opensearch do
         url: Opensearch.url(os, Elastic.doc_url(os.index, id)),
         method: :post,
         headers: Opensearch.headers(os, @headers),
-        body: Jason.encode!(doc_filters(%{
+        body: Console.JSON.encode!(doc_filters(%{
           passages: Enum.map(embeddings, fn {passage, vector} -> %{vector: vector, text: passage} end),
           datatype: datatype,
           "@timestamp": DateTime.utc_now(),

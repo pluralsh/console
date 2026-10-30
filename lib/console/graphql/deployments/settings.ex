@@ -104,6 +104,8 @@ defmodule Console.GraphQl.Deployments.Settings do
   input_object :logging_settings_attributes do
     field :enabled, :boolean
     field :driver, :log_driver
+    field :levels, :boolean, description: "whether the log store supports filtering and grouping by log level"
+    field :level_field, :string, description: "the field holding a log's level, for elasticsearch, opensearch and victoria"
     field :victoria, :http_connection_attributes
     field :elastic, :elasticsearch_connection_attributes
     field :opensearch, :opensearch_connection_attributes
@@ -238,6 +240,9 @@ defmodule Console.GraphQl.Deployments.Settings do
   end
 
   input_object :anthropic_settings_attributes do
+    field :base_url, :string,
+      description: "a custom base url for an Anthropic compatible API, leave blank for Anthropic"
+
     field :access_token, :string
     field :model, :string
     field :proxy, :http_proxy_attributes, description: "an HTTP proxy to use for this provider's API calls"
@@ -671,6 +676,9 @@ defmodule Console.GraphQl.Deployments.Settings do
 
   @desc "Anthropic connection information"
   object :anthropic_settings do
+    field :base_url, :string,
+      description: "the base url to use when querying an Anthropic compatible API, leave blank for Anthropic"
+
     field :model, :string, description: "the anthropic model version to use"
     field :proxy, :http_proxy_configuration, description: "the HTTP proxy used for this provider's API calls"
 
@@ -774,6 +782,12 @@ defmodule Console.GraphQl.Deployments.Settings do
 
     field :driver, :log_driver,
       description: "the type of log aggregation solution you wish to use"
+
+    field :levels, :boolean,
+      description: "whether the log store supports filtering and grouping by log level, eg loki's detected_level"
+
+    field :level_field, :string,
+      description: "the field holding a log's level, for elasticsearch, opensearch and victoria"
 
     field :victoria, :http_connection, description: "configures a connection to victoria metrics"
 

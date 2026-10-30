@@ -101,6 +101,13 @@ func (in *executable) prepare(ctx context.Context, streaming bool) (*exec.Cmd, e
 
 	ctx = signals.NewCancelableContext(ctx, signals.NewTimeoutSignal(in.timeout))
 	cmd := exec.CommandContext(ctx, in.command, in.args...)
+	// Interrupt instead of the default SIGKILL so tools like terraform can stop gracefully and
+	// release state locks. WaitDelay then kills the process and closes its output pipes, so
+	// leftover child processes (eg. providers) holding them cannot block Wait.
+	cmd.Cancel = func() error {
+		return cmd.Process.Signal(os.Interrupt)
+	}
+	cmd.WaitDelay = in.cancelGracePeriod
 	if !streaming {
 		w := in.writer()
 		// Configure additional writers so that we can simultaneously write output
@@ -187,6 +194,8 @@ func NewExecutable(command string, options ...Option) Executable {
 		env:           make([]string, 0),
 		hookFunctions: make(map[v1.Lifecycle]v1.HookFunction),
 		timeout:       60 * time.Minute,
+		// Under the default 30s pod termination grace period
+		cancelGracePeriod: 20 * time.Second,
 	}
 
 	for _, o := range options {

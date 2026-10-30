@@ -31,7 +31,7 @@ defmodule ConsoleWeb.Plugs.Token do
       broadcast(user, token)
       conn
       |> Guardian.Plug.put_current_token(token.token, key: key)
-      |> Guardian.Plug.put_current_resource(Console.Services.Rbac.preload(user))
+      |> Guardian.Plug.put_current_resource(Console.Services.Rbac.cached_preload(user))
       |> Guardian.Plug.put_current_claims(%{"sub" => "user:#{user.id}"}, key: key)
     end
   end
@@ -65,6 +65,14 @@ defmodule ConsoleWeb.Plugs.Token do
 
   def get_cluster(%Plug.Conn{private: %{} = private}), do: Map.get(private, @token_key)
   def get_cluster(_), do: nil
+
+  @spec fetch_cluster(Plug.Conn.t) :: {:ok, Cluster.t} | {:error, :forbidden}
+  def fetch_cluster(conn) do
+    case get_cluster(conn) do
+      %Cluster{} = cluster -> {:ok, cluster}
+      _ -> {:error, :forbidden}
+    end
+  end
 
   def get_token(conn) do
     case get_req_header(conn, "authorization") do

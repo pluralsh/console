@@ -1,3 +1,4 @@
+import { POLL_INTERVAL } from 'components/cluster/constants'
 import {
   Chip,
   EmptyState,
@@ -143,7 +144,11 @@ export default function Restores() {
     fetchNextPage,
     setVirtualSlice,
   } = useFetchPaginatedData(
-    { query: ClusterRestoresDocument, keyPath: ['clusterRestores'] },
+    {
+      pollInterval: POLL_INTERVAL,
+      query: ClusterRestoresDocument,
+      keyPath: ['clusterRestores'],
+    },
     { clusterId }
   )
 

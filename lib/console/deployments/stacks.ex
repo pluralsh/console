@@ -366,20 +366,24 @@ defmodule Console.Deployments.Stacks do
   end
 
   @doc """
-  Updates basic attributes of a run, clusters and users are authorized to perform
+  Updates basic attributes of a run, clusters and users are authorized to perform.
+  Clusters cannot move a cancelled run out of the cancelled status.
   """
   @spec update_stack_run(map, binary, User.t | Cluster.t) :: run_resp
   def update_stack_run(attrs, id, actor) do
     start_transaction()
     |> add_operation(:run, fn _ ->
-      get_run!(id)
+      run = get_run!(id)
+
+      run
       |> Repo.preload([:state, :infracost_resources, violations: :causes])
-      |> StackRun.update_changeset(attrs)
+      |> StackRun.update_changeset(preserve_cancellation(attrs, run, actor))
       |> allow(actor, :write)
       |> when_ok(:update)
     end)
     |> add_operation(:stack, &sync_stack_status(&1[:run]))
-    |> execute(extract: :run)
+    |> execute()
+    |> notify_stack_status()
     |> notify(:update)
   end
 
@@ -537,22 +541,31 @@ defmodule Console.Deployments.Stacks do
   end
 
   @doc """
-  It terminates a run in a completed state, and if successful, persists output/state information to the stack
+  It terminates a run in a completed state, and if successful, persists output/state information to the stack.
+  Clusters cannot move a cancelled run out of the cancelled status.
   """
   @spec complete_stack_run(map, binary, User.t | Cluster.t) :: run_resp
   def complete_stack_run(attrs, id, actor) do
     start_transaction()
     |> add_operation(:run, fn _ ->
-      get_run!(id)
+      run = get_run!(id)
+
+      run
       |> Repo.preload([:state, :output, :errors, :stack, :infracost_resources, violations: :causes])
-      |> StackRun.complete_changeset(attrs)
+      |> StackRun.complete_changeset(preserve_cancellation(attrs, run, actor))
       |> allow(actor, :write)
       |> when_ok(:update)
     end)
     |> add_operation(:stack, &sync_stack_status(&1[:run]))
-    |> execute(extract: :run)
+    |> execute()
+    |> notify_stack_status()
     |> notify(:complete)
   end
+
+  # the harness only polls for cancellation, so its in-flight status writes can race a user's cancel
+  defp preserve_cancellation(attrs, %StackRun{status: :cancelled}, %Cluster{}),
+    do: Map.delete(attrs, :status)
+  defp preserve_cancellation(attrs, _, _), do: attrs
 
   defp sync_stack_status(%StackRun{dry_run: false, status: :successful} = run) do
     %{state: state, output: output, stack: stack} = Repo.preload(run, [:state, :output, :stack])
@@ -993,7 +1006,8 @@ defmodule Console.Deployments.Stacks do
       |> Stack.delete_changeset(delete_run(stack, run))
       |> Repo.update()
     end)
-    |> execute(extract: :run)
+    |> execute()
+    |> notify_stack_status()
     |> notify(:create)
   end
 
@@ -1269,6 +1283,13 @@ defmodule Console.Deployments.Stacks do
     |> when_ok(:delete)
   end
 
+  defp notify_stack_status({:ok, %{run: run} = result}) do
+    with %{stack: %Stack{} = stack} <- result,
+      do: handle_notify(PubSub.StackStatusChanged, stack)
+    {:ok, run}
+  end
+  defp notify_stack_status(err), do: err
+
   defp notify({:ok, %Stack{} = stack}, :create, actor),
     do: handle_notify(PubSub.StackCreated, stack, actor: actor)
   defp notify({:ok, %Stack{} = stack}, :update, actor),
@@ -1283,6 +1304,8 @@ defmodule Console.Deployments.Stacks do
     do: notify_after(:timer.seconds(5), PubSub.StackRunCreated, stack)
   defp notify({:ok, %RunLog{} = log}, :create),
     do: handle_notify(PubSub.RunLogsCreated, log)
+  defp notify({:ok, %RunStep{} = step}, :update),
+    do: handle_notify(PubSub.RunStepUpdated, step)
   defp notify({:ok, %StackRun{} = stack}, :update),
     do: handle_notify(PubSub.StackRunUpdated, stack)
   defp notify({:ok, %StackRun{} = stack}, :complete),

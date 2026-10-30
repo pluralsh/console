@@ -1,5 +1,5 @@
 defmodule Console.Schema.AgentPrompt do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.AgentRun
 
   schema "agent_prompts" do

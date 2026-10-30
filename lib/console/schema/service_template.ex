@@ -1,5 +1,5 @@
 defmodule Console.Schema.ServiceTemplate do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{GitRepository, Service, Revision, ServiceDependency}
 
   schema "service_templates" do

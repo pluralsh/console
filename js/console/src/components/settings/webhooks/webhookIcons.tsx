@@ -12,7 +12,7 @@ import {
   NewrelicLogoIcon,
   PagerdutyLogoIcon,
   SentryLogoIcon,
-  TicketIcon,
+  ServiceNowLogoIcon,
   WebhooksIcon,
 } from '@pluralsh/design-system'
 import {
@@ -58,7 +58,7 @@ export function getIssueWebhookProviderIcon(provider: Nullable<string>) {
     case IssueWebhookProvider.Asana:
       return <AsanaLogoIcon fullColor />
     case IssueWebhookProvider.ServiceNow:
-      return <TicketIcon />
+      return <ServiceNowLogoIcon fullColor />
     default:
       return <WebhooksIcon />
   }

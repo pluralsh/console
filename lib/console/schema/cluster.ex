@@ -30,7 +30,7 @@ defmodule Console.Schema.Cluster do
   defenum Distro, generic: 0, eks: 1, aks: 2, gke: 3, rke: 4, k3s: 5, openshift: 6
 
   defmodule Kubeconfig do
-    use Piazza.Ecto.Schema
+    use Console.Schema.Base
     alias Console.Schema.NamespacedName
 
     embedded_schema do
@@ -46,7 +46,7 @@ defmodule Console.Schema.Cluster do
   end
 
   defmodule CloudSettings do
-    use Piazza.Ecto.Schema
+    use Console.Schema.Base
 
     embedded_schema do
       # just temporary until we know what of these will actually matter
@@ -318,9 +318,19 @@ defmodule Console.Schema.Cluster do
     from(c in query, where: c.parent_cluster_id == ^parent_id)
   end
 
+  # the SQL equivalent of healthy?/1, so filters and counts agree with the health shown for each cluster
+  defmacrop healthy_ping(pinged_at, ping_interval) do
+    quote do
+      fragment(
+        "coalesce(? > CURRENT_TIMESTAMP - coalesce(? * INTERVAL '3 seconds', INTERVAL '20 minutes'), false)",
+        unquote(pinged_at),
+        unquote(ping_interval)
+      )
+    end
+  end
+
   def statistics(query \\ __MODULE__) do
-    expired = health_threshold()
-    nested = from(c in __MODULE__, select: %{healthy: c.pinged_at > ^expired, id: c.id})
+    nested = from(c in __MODULE__, select: %{healthy: healthy_ping(c.pinged_at, c.ping_interval), id: c.id})
     from(c in query,
       join: n in subquery(nested),
         on: n.id == c.id,
@@ -409,16 +419,14 @@ defmodule Console.Schema.Cluster do
 
   def health(query \\ __MODULE__, health)
   def health(query, true) do
-    from(c in query, where: c.pinged_at > fragment("CURRENT_TIMESTAMP - coalesce(?, 10) * INTERVAL '1 minute'", c.ping_interval))
+    from(c in query, where: healthy_ping(c.pinged_at, c.ping_interval))
   end
 
   def health(query, _) do
-    from(c in query, where: c.pinged_at <= fragment("CURRENT_TIMESTAMP - coalesce(?, 10) * INTERVAL '1 minute'", c.ping_interval))
+    from(c in query, where: not healthy_ping(c.pinged_at, c.ping_interval))
   end
 
   def healthy(query \\ __MODULE__), do: health(query, true)
-
-  defp health_threshold(), do: Timex.now() |> Timex.shift(minutes: -5)
 
   def with_tag(query \\ __MODULE__, name, value) do
     from(c in query,
@@ -427,13 +435,10 @@ defmodule Console.Schema.Cluster do
     )
   end
 
+  # a semi-join, since joining matched tags would repeat clusters in aggregates like statistics/1
   def with_tag_query(query \\ __MODULE__, tq) do
-    tags = Tag.for_query(tq)
-    from(c in query,
-      join: t in subquery(tags),
-        on: t.cluster_id == c.id,
-      distinct: true
-    )
+    ids = Tag.for_query(tq) |> exclude(:select) |> select([t], t.cluster_id)
+    from(c in query, where: c.id in subquery(ids))
   end
 
   def for_tags(query \\ __MODULE__, tags) do
@@ -626,6 +631,7 @@ defmodule Console.Schema.Cluster.Mini do
 
   @derive Jason.Encoder
   @derive JSON.Encoder
+  @derive Torque.Encoder
 
   @type runtime_service_data :: %{
     name: binary,

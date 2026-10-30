@@ -1,9 +1,9 @@
 defmodule Console.Schema.ClusterNodePool do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{Cluster}
 
   defmodule CloudSettings do
-    use Piazza.Ecto.Schema
+    use Console.Schema.Base
 
     embedded_schema do
       embeds_one :aws, Aws, on_replace: :update do

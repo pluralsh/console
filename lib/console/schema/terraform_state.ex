@@ -1,5 +1,5 @@
 defmodule Console.Schema.TerraformState do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.Stack
 
   schema "terraform_states" do
@@ -20,6 +20,10 @@ defmodule Console.Schema.TerraformState do
     belongs_to :stack, Stack
 
     timestamps()
+  end
+
+  def without_state(query \\ __MODULE__) do
+    from(ts in query, select: struct(ts, ^(__schema__(:fields) -- [:state])))
   end
 
   def changeset(model, attrs \\ %{}) do

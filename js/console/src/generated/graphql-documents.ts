@@ -2380,6 +2380,7 @@ export const SmtpSettingsFragmentDoc = /*#__PURE__*/ gql`
 export const AiSettingsFragmentDoc = /*#__PURE__*/ gql`
     fragment AiSettings on AiSettings {
   anthropic {
+    baseUrl
     model
     toolModel
     proxy {
@@ -2506,6 +2507,7 @@ export const DeploymentSettingsFragmentDoc = /*#__PURE__*/ gql`
   logging {
     enabled
     driver
+    levels
   }
   latestK8sVsn
   lokiConnection {
@@ -4585,6 +4587,7 @@ export const LogAggregationBucketFragmentDoc = /*#__PURE__*/ gql`
     fragment LogAggregationBucket on LogAggregationBucket {
   timestamp
   count
+  level
 }
     ` as unknown as DocumentNode<Types.LogAggregationBucketFragment, unknown>;
 export const MetricPointResponseFragmentDoc = /*#__PURE__*/ gql`
@@ -7939,11 +7942,11 @@ export const DetachClusterDocument = /*#__PURE__*/ gql`
 }
     ${ClusterFragmentDoc}` as unknown as DocumentNode<Types.DetachClusterMutation, Types.DetachClusterMutationVariables>;
 export const ClusterStatusesDocument = /*#__PURE__*/ gql`
-    query ClusterStatuses($q: String, $projectId: ID) {
-  clusterStatuses(q: $q, projectId: $projectId) {
+    query ClusterStatuses($q: String, $projectId: ID, $tagQuery: TagQuery) {
+  clusterStatuses(q: $q, projectId: $projectId, tagQuery: $tagQuery) {
     ...ClusterStatusInfo
   }
-  upgradeStatistics(q: $q, projectId: $projectId) {
+  upgradeStatistics(q: $q, projectId: $projectId, tagQuery: $tagQuery) {
     upgradeable
     count
   }
@@ -8029,6 +8032,38 @@ export const NodeUsageMetricsDocument = /*#__PURE__*/ gql`
   }
 }
     ${NodeUsageMetricsFragmentDoc}` as unknown as DocumentNode<Types.NodeUsageMetricsQuery, Types.NodeUsageMetricsQueryVariables>;
+export const ClusterDeltaDocument = /*#__PURE__*/ gql`
+    subscription ClusterDelta($id: ID) {
+  clusterDelta(id: $id) {
+    delta
+    payload {
+      id
+      name
+      handle
+      self
+      virtual
+      protect
+      distro
+      version
+      currentVersion
+      kubeletVersion
+      installed
+      healthy
+      healthScore
+      pingedAt
+      deletedAt
+      nodeCount
+      podCount
+      namespaceCount
+      cpuTotal
+      memoryTotal
+      cpuUtil
+      memoryUtil
+      availabilityZones
+    }
+  }
+}
+    ` as unknown as DocumentNode<Types.ClusterDeltaSubscription, Types.ClusterDeltaSubscriptionVariables>;
 export const ServiceDeploymentComponentMetricsDocument = /*#__PURE__*/ gql`
     query ServiceDeploymentComponentMetrics($id: ID, $name: String, $cluster: String, $componentId: ID!, $start: DateTime, $stop: DateTime, $step: String) {
   serviceDeployment(id: $id, name: $name, cluster: $cluster) {
@@ -8610,6 +8645,32 @@ export const ServiceDeploymentDocument = /*#__PURE__*/ gql`
   }
 }
     ${ServiceDeploymentDetailsFragmentDoc}` as unknown as DocumentNode<Types.ServiceDeploymentQuery, Types.ServiceDeploymentQueryVariables>;
+export const ServiceDeploymentDeltaDocument = /*#__PURE__*/ gql`
+    subscription ServiceDeploymentDelta($id: ID, $clusterId: ID) {
+  serviceDeploymentDelta(id: $id, clusterId: $clusterId) {
+    delta
+    payload {
+      id
+      name
+      namespace
+      status
+      componentStatus
+      message
+      version
+      promotion
+      protect
+      dryRun
+      deletedAt
+      updatedAt
+      errors {
+        source
+        message
+        warning
+      }
+    }
+  }
+}
+    ` as unknown as DocumentNode<Types.ServiceDeploymentDeltaSubscription, Types.ServiceDeploymentDeltaSubscriptionVariables>;
 export const ServiceDeploymentTinyDocument = /*#__PURE__*/ gql`
     query ServiceDeploymentTiny($id: ID!) {
   serviceDeployment(id: $id) {
@@ -9577,7 +9638,7 @@ export const LoginLinkDocument = /*#__PURE__*/ gql`
     ${UserFragmentDoc}
 ${RefreshTokenFragmentDoc}` as unknown as DocumentNode<Types.LoginLinkMutation, Types.LoginLinkMutationVariables>;
 export const LogAggregationDocument = /*#__PURE__*/ gql`
-    query LogAggregation($clusterId: ID, $limit: Int, $query: String, $serviceId: ID, $time: LogTimeRange, $operator: LogQueryOperator, $facets: [LogFacetInput], $node: String) {
+    query LogAggregation($clusterId: ID, $limit: Int, $query: String, $serviceId: ID, $time: LogTimeRange, $operator: LogQueryOperator, $facets: [LogFacetInput], $node: String, $levels: [LogLevel]) {
   logAggregation(
     clusterId: $clusterId
     limit: $limit
@@ -9587,13 +9648,14 @@ export const LogAggregationDocument = /*#__PURE__*/ gql`
     facets: $facets
     operator: $operator
     node: $node
+    levels: $levels
   ) {
     ...LogLine
   }
 }
     ${LogLineFragmentDoc}` as unknown as DocumentNode<Types.LogAggregationQuery, Types.LogAggregationQueryVariables>;
 export const LogLabelsDocument = /*#__PURE__*/ gql`
-    query LogLabels($field: String!, $clusterId: ID, $serviceId: ID, $query: String, $time: LogTimeRange, $node: String) {
+    query LogLabels($field: String!, $clusterId: ID, $serviceId: ID, $query: String, $time: LogTimeRange, $node: String, $levels: [LogLevel]) {
   logLabels(
     field: $field
     clusterId: $clusterId
@@ -9601,13 +9663,14 @@ export const LogLabelsDocument = /*#__PURE__*/ gql`
     query: $query
     time: $time
     node: $node
+    levels: $levels
   ) {
     ...LogFacetDetail
   }
 }
     ${LogFacetDetailFragmentDoc}` as unknown as DocumentNode<Types.LogLabelsQuery, Types.LogLabelsQueryVariables>;
 export const LogAggregationBucketsDocument = /*#__PURE__*/ gql`
-    query LogAggregationBuckets($serviceId: ID, $clusterId: ID, $query: String, $time: LogTimeRange, $operator: LogQueryOperator, $aggregation: LogAggregationInput, $facets: [LogFacetInput], $node: String) {
+    query LogAggregationBuckets($serviceId: ID, $clusterId: ID, $query: String, $time: LogTimeRange, $operator: LogQueryOperator, $aggregation: LogAggregationInput, $facets: [LogFacetInput], $node: String, $levels: [LogLevel]) {
   logAggregationBuckets(
     serviceId: $serviceId
     clusterId: $clusterId
@@ -9617,6 +9680,7 @@ export const LogAggregationBucketsDocument = /*#__PURE__*/ gql`
     operator: $operator
     facets: $facets
     node: $node
+    levels: $levels
   ) {
     ...LogAggregationBucket
   }
@@ -10619,17 +10683,17 @@ export const UpdateStackRunDocument = /*#__PURE__*/ gql`
 export const CompleteStackRunDocument = /*#__PURE__*/ gql`
     mutation CompleteStackRun($id: ID!, $attributes: StackRunAttributes!) {
   completeStackRun(id: $id, attributes: $attributes) {
-    ...StackRun
+    ...StackRunDetails
   }
 }
-    ${StackRunFragmentDoc}` as unknown as DocumentNode<Types.CompleteStackRunMutation, Types.CompleteStackRunMutationVariables>;
+    ${StackRunDetailsFragmentDoc}` as unknown as DocumentNode<Types.CompleteStackRunMutation, Types.CompleteStackRunMutationVariables>;
 export const ApproveStackRunDocument = /*#__PURE__*/ gql`
     mutation ApproveStackRun($id: ID!) {
   approveStackRun(id: $id) {
-    ...StackRun
+    ...StackRunDetails
   }
 }
-    ${StackRunFragmentDoc}` as unknown as DocumentNode<Types.ApproveStackRunMutation, Types.ApproveStackRunMutationVariables>;
+    ${StackRunDetailsFragmentDoc}` as unknown as DocumentNode<Types.ApproveStackRunMutation, Types.ApproveStackRunMutationVariables>;
 export const RestartStackRunDocument = /*#__PURE__*/ gql`
     mutation RestartStackRun($id: ID!) {
   restartStackRun(id: $id) {
@@ -10651,6 +10715,56 @@ export const TriggerStackRunDocument = /*#__PURE__*/ gql`
   }
 }
     ${StackRunFragmentDoc}` as unknown as DocumentNode<Types.TriggerStackRunMutation, Types.TriggerStackRunMutationVariables>;
+export const InfrastructureStackDeltaDocument = /*#__PURE__*/ gql`
+    subscription InfrastructureStackDelta {
+  infrastructureStackDelta {
+    delta
+    payload {
+      id
+      name
+      status
+      paused
+      deletedAt
+      updatedAt
+    }
+  }
+}
+    ` as unknown as DocumentNode<Types.InfrastructureStackDeltaSubscription, Types.InfrastructureStackDeltaSubscriptionVariables>;
+export const StackRunDeltaDocument = /*#__PURE__*/ gql`
+    subscription StackRunDelta($stackId: ID!) {
+  stackRunDelta(stackId: $stackId) {
+    delta
+    payload {
+      ...StackRun
+      pullRequest {
+        id
+      }
+    }
+  }
+}
+    ${StackRunFragmentDoc}` as unknown as DocumentNode<Types.StackRunDeltaSubscription, Types.StackRunDeltaSubscriptionVariables>;
+export const StackListEntryDocument = /*#__PURE__*/ gql`
+    query StackListEntry($id: ID!) {
+  infrastructureStack(id: $id) {
+    ...StackTiny
+    project {
+      id
+    }
+  }
+}
+    ${StackTinyFragmentDoc}` as unknown as DocumentNode<Types.StackListEntryQuery, Types.StackListEntryQueryVariables>;
+export const RunStepDeltaDocument = /*#__PURE__*/ gql`
+    subscription RunStepDelta($runId: ID!) {
+  runStepDelta(runId: $runId) {
+    delta
+    payload {
+      id
+      status
+      updatedAt
+    }
+  }
+}
+    ` as unknown as DocumentNode<Types.RunStepDeltaSubscription, Types.RunStepDeltaSubscriptionVariables>;
 export const LogsDeltaDocument = /*#__PURE__*/ gql`
     subscription LogsDelta($id: ID!) {
   runLogsDelta(stepId: $id) {

@@ -16,6 +16,13 @@ func WithConsoleClient(client console.Client) Option {
 	}
 }
 
+// WithKicks wakes the approval and babysit loops early when Console notifies about this run.
+func WithKicks(kicks <-chan struct{}) Option {
+	return func(s *agentRunController) {
+		s.kicks = kicks
+	}
+}
+
 func WithWorkingDir(dir string) Option {
 	return func(s *agentRunController) {
 		s.dir = dir

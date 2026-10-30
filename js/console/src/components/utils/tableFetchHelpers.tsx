@@ -2,6 +2,7 @@ import { QueryResult } from '@apollo/client'
 import { usePrevious } from '@pluralsh/design-system'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { InputMaybe } from 'generated/graphql'
+import { isDocumentHidden } from 'utils/visibility'
 import { isEqual, isUndefined, omit, omitBy } from 'lodash'
 
 import {
@@ -60,7 +61,7 @@ export function useSlicePolling<
   const paused = pollsLoaded && loadedCount > MAX_POLLED_ITEMS
 
   const poll = useEffectEvent(() => {
-    refetch()
+    if (!isDocumentHidden()) refetch()
   })
 
   useEffect(() => {

@@ -7,3 +7,10 @@ defimpl Jason.Encoder, for: [
     |> Jason.Encode.map(opts)
   end
 end
+
+defimpl Torque.Encoder, for: [
+  Console.Schema.ClusterNodePool.Taint,
+  Console.Schema.ClusterNodePool.CloudSettings.Aws,
+] do
+  def encode(struct), do: Piazza.Ecto.Schema.mapify(struct)
+end

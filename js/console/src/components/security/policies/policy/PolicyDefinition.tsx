@@ -85,6 +85,7 @@ export function PolicyDefinition() {
 
   const { data, loading, pageInfo, fetchNextPage } = useFetchPaginatedData(
     {
+      pollInterval: 60_000,
       query: PolicyEvaluationsDocument,
       keyPath: ['policy', 'policyEvaluations'],
       skip: !policy?.id,

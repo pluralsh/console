@@ -1,11 +1,11 @@
 defmodule Console.Schema.Persona do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{PolicyBinding, User}
 
   defenum Role, platform: 0, developer: 1, security: 2, finops: 3, management: 4
 
   defmodule Configuration do
-    use Piazza.Ecto.Schema
+    use Console.Schema.Base
 
     embedded_schema do
       field :all, :boolean

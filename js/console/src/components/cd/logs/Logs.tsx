@@ -8,6 +8,7 @@ import {
 import { useCallback, useMemo, useState } from 'react'
 
 import { POLL_INTERVAL } from 'components/cluster/constants'
+import { useLogLevelsEnabled } from 'components/contexts/DeploymentSettingsContext'
 import { useThrottle } from 'components/hooks/useThrottle'
 import { GqlError } from 'components/utils/Alert'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
@@ -20,13 +21,18 @@ import {
 import { useTimeRange } from 'components/utils/timerange/useTimeRange'
 import {
   LogFacetInput,
+  LogLevel,
   LogQueryOperator,
   LogTimeRange,
   useLogAggregationQuery,
 } from 'generated/graphql'
 import styled from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
-import { LogsLabelsPicker, LogsQueryOperatorSelect } from './LogsFilters'
+import {
+  LogsLabelsPicker,
+  LogsLevelSelect,
+  LogsQueryOperatorSelect,
+} from './LogsFilters'
 import { LogsLabels } from './LogsLabels'
 import { LogsMetricsChart } from './LogsMetricsChart'
 import { LogsTable } from './LogsTable'
@@ -57,6 +63,9 @@ export function Logs({
   const { popToast } = useSimpleToast()
 
   const [labels, setLabels] = useState<LogFacetInput[]>([])
+  const levelsEnabled = useLogLevelsEnabled()
+  const [selectedLevels, setLevels] = useState<LogLevel[]>([])
+  const levels = levelsEnabled ? selectedLevels : undefined
   const [q, setQ] = useState('')
   const throttledQ = useThrottle(q, 1000)
   const [queryOperator, setQueryOperator] = useState(LogQueryOperator.Or)
@@ -106,6 +115,7 @@ export function Logs({
       facets: labels,
       operator: queryOperator,
       node,
+      levels,
     },
     fetchPolicy: 'cache-and-network',
     notifyOnNetworkStatusChange: true,
@@ -153,6 +163,14 @@ export function Logs({
           onChange={({ target: { value } }) => setQ(value)}
           css={{ flex: '1 1 200px', minWidth: 120, maxWidth: 420 }}
         />
+        {levelsEnabled && (
+          <LogsLevelSelect
+            size="small"
+            levels={selectedLevels}
+            setLevels={setLevels}
+            shrink={0}
+          />
+        )}
         <LogsLabelsPicker
           size="small"
           logs={logs}
@@ -161,6 +179,7 @@ export function Logs({
           node={node}
           query={throttledQ}
           time={time}
+          levels={levels}
           addLabel={addLabel}
           selectedLabels={labels}
           shrink={1}
@@ -212,6 +231,8 @@ export function Logs({
                 time={time}
                 operator={queryOperator}
                 facets={labels}
+                levels={levels}
+                groupByLevel={levelsEnabled}
                 windowSeconds={durationSeconds}
                 onRangeSelect={onRangeSelect}
                 pollInterval={polling ? POLL_INTERVAL : 0}

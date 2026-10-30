@@ -43,6 +43,36 @@ func (in *agentRunController) runFollowUpPrompt(ctx context.Context, prompt stri
 	return true
 }
 
+// dispatchQueuedUserPrompt consumes the next queued user prompt, if the polled status lists one.
+// The full run, with prompt text and attachments, is only fetched then. Returns true when a
+// prompt was dispatched.
+func (in *agentRunController) dispatchQueuedUserPrompt(ctx context.Context, status *gqlclient.AgentRunStatusFragment, restorePendingApproval bool) bool {
+	if !hasPromptAfter(status.Prompts, in.lastPromptSeq) {
+		return false
+	}
+
+	run, err := in.consoleClient.GetAgentRun(ctx, in.agentRunID)
+	if err != nil {
+		klog.ErrorS(err, "could not fetch queued user prompts", "id", in.agentRunID)
+		return false
+	}
+	if nextPrompt(run.Prompts, in.lastPromptSeq) == nil {
+		// Only blank prompts are queued, which are never dispatched, so don't refetch for them.
+		in.lastPromptSeq = max(in.lastPromptSeq, maxPromptSeq(run.Prompts))
+		return false
+	}
+	return in.tryDispatchQueuedUserPrompt(ctx, run, restorePendingApproval)
+}
+
+func hasPromptAfter(prompts []*gqlclient.AgentRunStatusFragment_Prompts, after int64) bool {
+	for _, prompt := range prompts {
+		if prompt != nil && prompt.Seq > after {
+			return true
+		}
+	}
+	return false
+}
+
 // tryDispatchQueuedUserPrompt consumes the next queued user prompt, if any.
 // Returns true when a prompt was dispatched.
 func (in *agentRunController) tryDispatchQueuedUserPrompt(ctx context.Context, run *gqlclient.AgentRunFragment, restorePendingApproval bool) bool {
@@ -63,7 +93,7 @@ func (in *agentRunController) tryDispatchQueuedUserPrompt(ctx context.Context, r
 }
 
 // dispatchApprovalGrantedPrompt unlocks PR creation after the user approves.
-func (in *agentRunController) dispatchApprovalGrantedPrompt(ctx context.Context, run *gqlclient.AgentRunFragment) bool {
+func (in *agentRunController) dispatchApprovalGrantedPrompt(ctx context.Context, run *gqlclient.AgentRunStatusFragment) bool {
 	in.agentRun.ApprovedAt = run.ApprovedAt
 	in.agentRun.HeadBranch = run.HeadBranch
 	in.approvalPromptSent = true

@@ -1,5 +1,5 @@
 defmodule Console.Schema.SharedSecret do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.PolicyBinding
 
   schema "shared_secrets" do

@@ -19,6 +19,7 @@ fragment LogFacetDetail on LogFacetDetail {
 fragment LogAggregationBucket on LogAggregationBucket {
   timestamp
   count
+  level
 }
 
 query LogAggregation(
@@ -30,6 +31,7 @@ query LogAggregation(
   $operator: LogQueryOperator
   $facets: [LogFacetInput]
   $node: String
+  $levels: [LogLevel]
 ) {
   logAggregation(
     clusterId: $clusterId
@@ -40,6 +42,7 @@ query LogAggregation(
     facets: $facets
     operator: $operator
     node: $node
+    levels: $levels
   ) {
     ...LogLine
   }
@@ -52,6 +55,7 @@ query LogLabels(
   $query: String
   $time: LogTimeRange
   $node: String
+  $levels: [LogLevel]
 ) {
   logLabels(
     field: $field
@@ -60,6 +64,7 @@ query LogLabels(
     query: $query
     time: $time
     node: $node
+    levels: $levels
   ) {
     ...LogFacetDetail
   }
@@ -74,6 +79,7 @@ query LogAggregationBuckets(
   $aggregation: LogAggregationInput
   $facets: [LogFacetInput]
   $node: String
+  $levels: [LogLevel]
 ) {
   logAggregationBuckets(
     serviceId: $serviceId
@@ -84,6 +90,7 @@ query LogAggregationBuckets(
     operator: $operator
     facets: $facets
     node: $node
+    levels: $levels
   ) {
     ...LogAggregationBucket
   }

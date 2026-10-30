@@ -1,5 +1,5 @@
 defmodule Console.Schema.UpgradeInsightDetail do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.UpgradeInsight
 
   schema "upgrade_insight_details" do

@@ -26,6 +26,11 @@ func TestIsTransientFetchError(t *testing.T) {
 			transient: true,
 		},
 		{
+			name:      "backing off from a rate limit",
+			err:       &manifests.BackoffError{},
+			transient: true,
+		},
+		{
 			name:      "other client error",
 			err:       &manifests.HTTPError{StatusCode: http.StatusBadRequest},
 			transient: false,

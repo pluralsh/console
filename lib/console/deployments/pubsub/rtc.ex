@@ -4,6 +4,10 @@ defimpl Console.PubSub.Rtc, for: [Console.PubSub.RunLogsCreated] do
   def deliver(%{item: item}), do: {item, :create}
 end
 
+defimpl Console.PubSub.Rtc, for: Console.PubSub.RunStepUpdated do
+  def deliver(%{item: step}), do: {step, :update}
+end
+
 defimpl Console.PubSub.Rtc, for: Console.PubSub.PipelineStageUpdated do
   def deliver(%{item: stage}) do
     %{pipeline: pipeline} = Console.Repo.preload(stage, [:pipeline])
@@ -20,11 +24,49 @@ defimpl Console.PubSub.Rtc, for: [Console.PubSub.PipelineGateUpdated, Console.Pu
   end
 end
 
+# service deltas are authorized per subscriber on delivery and component updates fire on every agent
+# sync, so the policy graph is attached once here, mostly from cache.  Errors are carried by the delta
+# and preloaded once too, rather than by every subscriber's resolution, and are gone with deleted rows.
+defimpl Console.PubSub.Rtc, for: Console.PubSub.ServiceCreated do
+  alias Console.Deployments.Policies.Rbac
+  def deliver(%{item: svc}), do: {Rbac.cached_preload(svc) |> Console.Repo.preload(:errors), :create}
+end
+
 defimpl Console.PubSub.Rtc, for: [
   Console.PubSub.ServiceUpdated,
   Console.PubSub.ServiceComponentsUpdated,
 ] do
-  def deliver(%{item: item}), do: {item, :update}
+  alias Console.Deployments.Policies.Rbac
+  def deliver(%{item: svc}), do: {Rbac.cached_preload(svc) |> Console.Repo.preload(:errors), :update}
+end
+
+# soft deletes only schedule a drain, while detaching removes the row immediately
+defimpl Console.PubSub.Rtc, for: Console.PubSub.ServiceDeleted do
+  alias Console.Deployments.Policies.Rbac
+  def deliver(%{item: %{__meta__: %{state: :deleted}} = svc}), do: {%{Rbac.cached_preload(svc) | errors: []}, :delete}
+  def deliver(%{item: svc}), do: {Rbac.cached_preload(svc) |> Console.Repo.preload(:errors), :update}
+end
+
+defimpl Console.PubSub.Rtc, for: Console.PubSub.ServiceHardDeleted do
+  alias Console.Deployments.Policies.Rbac
+  def deliver(%{item: svc}), do: {%{Rbac.cached_preload(svc) | errors: []}, :delete}
+end
+
+defimpl Console.PubSub.Rtc, for: Console.PubSub.ClusterCreated do
+  alias Console.Deployments.Policies.Rbac
+  def deliver(%{item: cluster}), do: {Rbac.cached_preload(cluster), :create}
+end
+
+defimpl Console.PubSub.Rtc, for: [Console.PubSub.ClusterUpdated, Console.PubSub.ClusterPinged] do
+  alias Console.Deployments.Policies.Rbac
+  def deliver(%{item: cluster}), do: {Rbac.cached_preload(cluster), :update}
+end
+
+# soft deletes only schedule a drain, while detaching or deleting a virtual cluster removes the row immediately
+defimpl Console.PubSub.Rtc, for: Console.PubSub.ClusterDeleted do
+  alias Console.Deployments.Policies.Rbac
+  def deliver(%{item: %{__meta__: %{state: :deleted}} = cluster}), do: {Rbac.cached_preload(cluster), :delete}
+  def deliver(%{item: cluster}), do: {Rbac.cached_preload(cluster), :update}
 end
 
 defimpl Console.PubSub.Rtc, for: Console.PubSub.AgentMessageUpdated do
@@ -78,6 +120,37 @@ defimpl Console.PubSub.Rtc, for: [
   Console.PubSub.MonitorDeleted,
 ] do
   def deliver(%{item: item}), do: {item, :delete}
+end
+
+# stack deltas are authorized per subscriber on delivery, so preload the full policy graph once here
+defimpl Console.PubSub.Rtc, for: Console.PubSub.StackCreated do
+  alias Console.Deployments.Policies.Rbac
+  def deliver(%{item: stack}), do: {Rbac.preload(stack), :create}
+end
+
+defimpl Console.PubSub.Rtc, for: [Console.PubSub.StackUpdated, Console.PubSub.StackDeleted] do
+  alias Console.Deployments.Policies.Rbac
+  def deliver(%{item: stack}), do: {Rbac.preload(stack), :update}
+end
+
+defimpl Console.PubSub.Rtc, for: Console.PubSub.StackDetached do
+  alias Console.Deployments.Policies.Rbac
+  def deliver(%{item: stack}), do: {Rbac.preload(stack), :delete}
+end
+
+# runs write their stack on every status change, so its delta is authorized from the cached policy graph
+defimpl Console.PubSub.Rtc, for: Console.PubSub.StackStatusChanged do
+  alias Console.Deployments.Policies.Rbac
+  def deliver(%{item: stack}), do: {Rbac.cached_preload(stack), :update}
+end
+
+# run subscribers were authorized against the run's stack when subscribing, so runs need no preloads
+defimpl Console.PubSub.Rtc, for: Console.PubSub.StackRunCreated do
+  def deliver(%{item: run}), do: {run, :create}
+end
+
+defimpl Console.PubSub.Rtc, for: [Console.PubSub.StackRunUpdated, Console.PubSub.StackRunCompleted] do
+  def deliver(%{item: run}), do: {run, :update}
 end
 
 defimpl Console.PubSub.Rtc, for: Console.PubSub.AgentMessageStdoutCreated do

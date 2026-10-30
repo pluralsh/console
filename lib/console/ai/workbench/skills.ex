@@ -119,7 +119,7 @@ defmodule Console.AI.Workbench.Skills do
 
   def parse_skill(file, skill) when is_binary(skill) do
     with {:regex, [_, meta, contents]} <- {:regex, Regex.run(@metadata_regex, skill)},
-         {:yaml, {:ok, %{"name" => name, "description" => description} = meta}} <- {:yaml, YamlElixir.read_from_string(meta)} do
+         {:yaml, {:ok, %{"name" => name, "description" => description} = meta}} <- {:yaml, Console.Utils.Yaml.decode(meta)} do
       {:ok, %Skill{
         name: String.trim(name),
         description: String.trim(description),

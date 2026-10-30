@@ -47,6 +47,53 @@ defmodule ConsoleWeb.StackControllerTest do
       assert refetch(state).state == new_state
     end
 
+    test "it stores the body verbatim without decoding it", %{conn: conn} do
+      state = insert(:terraform_state, state: "some state")
+
+      new_state = ~s({"not": "valid json")
+      conn
+      |> basic_auth(state.stack.cluster)
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/states/terraform/#{state.stack.id}", new_state)
+      |> response(200)
+
+      assert refetch(state).state == new_state
+    end
+
+    test "it can create a tf state if none exists", %{conn: conn} do
+      stack = insert(:stack)
+
+      new_state = Jason.encode!(%{new: "state"})
+      conn
+      |> basic_auth(stack.cluster)
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/states/terraform/#{stack.id}", new_state)
+      |> response(200)
+
+      assert Console.Deployments.Stacks.State.get_tf(stack.id).state == new_state
+    end
+
+    test "it honors the lock id passed as a query param", %{conn: conn} do
+      state = insert(:terraform_state, state: "some state", lock: %{id: "lock-id", owner: "someone@example.com"})
+
+      new_state = Jason.encode!(%{new: "state"})
+      conn
+      |> basic_auth(state.stack.cluster)
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/states/terraform/#{state.stack.id}?ID=other-id", new_state)
+      |> response(423)
+
+      assert refetch(state).state == "some state"
+
+      conn
+      |> basic_auth(state.stack.cluster)
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/states/terraform/#{state.stack.id}?ID=lock-id", new_state)
+      |> response(200)
+
+      assert refetch(state).state == new_state
+    end
+
     test "it will 403 if you don't have access", %{conn: conn} do
       state = insert(:terraform_state, state: "some state")
 
@@ -72,6 +119,10 @@ defmodule ConsoleWeb.StackControllerTest do
         Owner: "someone@example.com"
       }))
       |> response(200)
+
+      locked = refetch(state)
+      assert locked.lock.id == "lock-id"
+      assert locked.state == "some state"
     end
 
     test "it can upsert and lock a tf state if no state exists", %{conn: conn} do
@@ -123,7 +174,9 @@ defmodule ConsoleWeb.StackControllerTest do
       |> post("/ext/v1/states/terraform/#{state.stack.id}/unlock")
       |> response(200)
 
-      assert refetch(state).lock == nil
+      unlocked = refetch(state)
+      assert unlocked.lock == nil
+      assert unlocked.state == "some state"
     end
 
     test "it will 403 if you don't have access", %{conn: conn} do

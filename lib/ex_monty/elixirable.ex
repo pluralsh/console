@@ -17,6 +17,10 @@ defmodule ExMonty.Elixirable do
     end
   end
 
+  defimpl Torque.Encoder, for: MapSet do
+    def encode(value), do: MapSet.to_list(value)
+  end
+
   @spec to_elixir(term()) :: term()
   def to_elixir({:bytes, value}) when is_binary(value), do: value
   def to_elixir({:path, value}) when is_binary(value), do: value

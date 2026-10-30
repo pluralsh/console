@@ -1,6 +1,6 @@
+import { AGGREGATE_POLL_INTERVAL } from 'components/cluster/constants'
 import { Button, CaretUpIcon } from '@pluralsh/design-system'
 import { SimpleAccordion } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
-import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { useLogin } from 'components/contexts'
 import { useProjectId } from 'components/contexts/ProjectsContext'
 import {
@@ -69,7 +69,7 @@ function ClusterChartsContent() {
   const { data: healthScoresData } = useClusterHealthScoresQuery({
     variables: { projectId, first: healthmapClusterCount },
     fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
+    pollInterval: AGGREGATE_POLL_INTERVAL,
   })
   const {
     data: upgradeData,
@@ -78,7 +78,7 @@ function ClusterChartsContent() {
   } = useUpgradeStatisticsQuery({
     variables: { projectId },
     fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
+    pollInterval: AGGREGATE_POLL_INTERVAL,
   })
 
   const clusters = useMemo(

@@ -1,5 +1,5 @@
 defmodule Console.Schema.PolicyConstraint do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{Cluster, ConstraintViolation}
 
   defenum Enforcement, warn: 0, deny: 1, dry_run: 2

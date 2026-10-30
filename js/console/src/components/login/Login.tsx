@@ -35,6 +35,7 @@ import { LoginPortal } from './LoginPortal'
 
 // 30 seconds
 const POLL_INTERVAL = 30 * 1000
+const ME_POLL_INTERVAL = 5 * 60 * 1000
 
 const setInputFocus = (ref: RefObject<any>) => {
   requestAnimationFrame(() => {
@@ -71,7 +72,7 @@ function LoginError({
 
 export function EnsureLogin({ children }) {
   const { data, error, loading } = useMeQuery({
-    pollInterval: POLL_INTERVAL,
+    pollInterval: ME_POLL_INTERVAL,
     errorPolicy: 'ignore',
   })
 

@@ -439,7 +439,8 @@ defmodule Console.Deployments.Agents do
       {:ok, %{prompt: history, requeue: {:requeued, run}}} ->
         notify({:ok, run}, :update)
         {:ok, history}
-      {:ok, %{prompt: history}} ->
+      {:ok, %{prompt: history, agent_prompt: prompt}} ->
+        handle_notify(PubSub.AgentPromptCreated, prompt)
         {:ok, history}
       err -> err
     end

@@ -1,3 +1,4 @@
+import { POLL_INTERVAL } from 'components/cluster/constants'
 import {
   DiscoverIcon,
   IconFrame,
@@ -310,7 +311,11 @@ export function Observers() {
 
   const { data, loading, error, pageInfo, fetchNextPage } =
     useFetchPaginatedData(
-      { query: ObserversDocument, keyPath: ['observers'] },
+      {
+        pollInterval: POLL_INTERVAL,
+        query: ObserversDocument,
+        keyPath: ['observers'],
+      },
       { projectId }
     )
 

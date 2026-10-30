@@ -32,6 +32,7 @@ export const VulneratbilityReportsTable = memo(
     const { data, loading, error, fetchNextPage, setVirtualSlice } =
       useFetchPaginatedData(
         {
+          pollInterval: 60_000,
           query: VulnerabilityReportsDocument,
           keyPath: ['vulnerabilityReports'],
         },

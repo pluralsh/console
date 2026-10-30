@@ -7,7 +7,6 @@ import {
   useQuery,
 } from '@apollo/client'
 import { TableProps } from '@pluralsh/design-system'
-import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import {
   appendPage,
   reduceNestedData,
@@ -26,6 +25,7 @@ export type FetchPaginatedDataOptions<
   query: TypedDocumentNode<TQueryType, TVariables>
   pageSize?: number
   keyPath: string[]
+  // lists don't poll unless they set this, most only change through the viewer's own mutations
   pollInterval?: number
   errorPolicy?: ErrorPolicy
   fetchPolicy?: WatchQueryFetchPolicy
@@ -108,7 +108,7 @@ export function useFetchPaginatedData<
   const { refetch } = useSlicePolling(reducedQueryResult, {
     virtualSlice,
     pageSize: options.pageSize ?? DEFAULT_PAGE_SIZE,
-    interval: options.pollInterval ?? POLL_INTERVAL,
+    interval: options.pollInterval ?? 0,
     keyPath: options.keyPath,
     skip: options.skip,
     keepLoadedPages: options.keepLoadedPages,

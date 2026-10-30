@@ -1,3 +1,4 @@
+import { POLL_INTERVAL } from 'components/cluster/constants'
 import { Table, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -36,7 +37,11 @@ export function Pipelines() {
 
   const { data, loading, error, pageInfo, fetchNextPage } =
     useFetchPaginatedData(
-      { query: PipelinesDocument, keyPath: ['pipelines'] },
+      {
+        pollInterval: POLL_INTERVAL,
+        query: PipelinesDocument,
+        keyPath: ['pipelines'],
+      },
       { q: debouncedSearchString, projectId }
     )
 

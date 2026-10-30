@@ -1,7 +1,9 @@
+import { ApolloError } from '@apollo/client'
 import { EmptyState } from '@pluralsh/design-system'
 import { isEmpty } from 'lodash'
 import {
   createContext,
+  ReactNode,
   useContext,
   useEffect,
   useLayoutEffect,
@@ -111,8 +113,10 @@ export const useNamespaces = () => {
 
 export default function Cluster({
   getDefaultClusterPath = getKubernetesAbsPath,
+  errorLayout,
 }: {
   getDefaultClusterPath?: (clusterId: string) => string
+  errorLayout?: (error: ApolloError) => ReactNode
 }) {
   const theme = useTheme()
   const { popToast } = useSimpleToast()
@@ -243,6 +247,13 @@ export default function Cluster({
   useEffect(() => {
     refetchNamespaces()
   }, [refetchNamespaces, clusterId])
+
+  if (error && errorLayout)
+    return (
+      <ClusterContext value={context}>
+        <DataSelectProvider>{errorLayout(error)}</DataSelectProvider>
+      </ClusterContext>
+    )
 
   if (error)
     return (

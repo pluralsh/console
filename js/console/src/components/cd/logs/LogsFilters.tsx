@@ -7,10 +7,12 @@ import {
   ListBoxItem,
   Select,
   SelectButton,
+  SemanticColorKey,
 } from '@pluralsh/design-system'
 import { FillLevelDiv } from 'components/utils/FillLevelDiv'
 import {
   LogFacetInput,
+  LogLevel,
   LogLineFragment,
   LogQueryOperator,
   LogTimeRange,
@@ -61,6 +63,86 @@ export function LogsQueryOperatorSelect({
   )
 }
 
+/** Most to least severe, the order levels stack in the histogram. */
+export const LOG_LEVELS = [
+  LogLevel.Fatal,
+  LogLevel.Critical,
+  LogLevel.Error,
+  LogLevel.Warn,
+  LogLevel.Info,
+  LogLevel.Debug,
+  LogLevel.Trace,
+  LogLevel.Unknown,
+]
+
+export const logLevelColor: Record<LogLevel, SemanticColorKey> = {
+  [LogLevel.Fatal]: 'icon-danger-critical',
+  [LogLevel.Critical]: 'icon-danger-critical',
+  [LogLevel.Error]: 'border-danger',
+  [LogLevel.Warn]: 'text-warning',
+  [LogLevel.Info]: 'border-info',
+  [LogLevel.Debug]: 'icon-xlight',
+  [LogLevel.Trace]: 'icon-xlight',
+  [LogLevel.Unknown]: 'border-fill-three',
+}
+
+export const logLevelLabel = (level: LogLevel) =>
+  level.charAt(0) + level.slice(1).toLowerCase()
+
+export function LogsLevelSelect({
+  levels,
+  setLevels,
+  size = 'medium',
+  ...props
+}: {
+  levels: LogLevel[]
+  setLevels: (levels: LogLevel[]) => void
+  size?: FilterSize
+} & FlexProps) {
+  return (
+    <Flex {...props}>
+      <FillLevelDiv fillLevel={1}>
+        <Select
+          size={size}
+          width={180}
+          label="All levels"
+          selectionMode="multiple"
+          selectedKeys={levels}
+          onSelectionChange={(keys) =>
+            setLevels(
+              LOG_LEVELS.filter((level) => (keys as Set<string>).has(level))
+            )
+          }
+          triggerButton={
+            <SelectButton size={size}>
+              {levels.length === 0
+                ? 'All levels'
+                : levels.map(logLevelLabel).join(', ')}
+            </SelectButton>
+          }
+        >
+          {LOG_LEVELS.map((level) => (
+            <ListBoxItem
+              key={level}
+              label={logLevelLabel(level)}
+              leftContent={<LevelSwatchSC $color={logLevelColor[level]} />}
+            />
+          ))}
+        </Select>
+      </FillLevelDiv>
+    </Flex>
+  )
+}
+
+const LevelSwatchSC = styled.div<{ $color: SemanticColorKey }>(
+  ({ theme, $color }) => ({
+    backgroundColor: theme.colors[$color],
+    borderRadius: theme.borderRadiuses.medium,
+    height: 10,
+    width: 10,
+  })
+)
+
 export function LogsLabelsPicker({
   logs,
   clusterId,
@@ -68,6 +150,7 @@ export function LogsLabelsPicker({
   node,
   query,
   time,
+  levels,
   addLabel,
   selectedLabels,
   size = 'medium',
@@ -79,6 +162,7 @@ export function LogsLabelsPicker({
   node?: string
   query?: string
   time?: LogTimeRange
+  levels?: LogLevel[]
   addLabel: (key: string, value: string) => void
   selectedLabels: LogFacetInput[]
   size?: FilterSize
@@ -97,7 +181,7 @@ export function LogsLabelsPicker({
   }, [logs, selectedLabels])
 
   const { data, loading } = useLogLabelsQuery({
-    variables: { field, clusterId, serviceId, node, query, time },
+    variables: { field, clusterId, serviceId, node, query, time, levels },
     skip: !field,
     fetchPolicy: 'cache-and-network',
   })

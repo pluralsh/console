@@ -90,7 +90,6 @@ export function WorkbenchMonitoringBuild({
         workbenchId={workbenchId}
         workbenchLoading={workbenchLoading}
         placeholder="Describe what you want to build or questions you have on your clusters."
-        bgColor="fill-one-selected"
       />
       <SuggestionsSC>
         {SUGGESTIONS[kind].map((suggestion) => (

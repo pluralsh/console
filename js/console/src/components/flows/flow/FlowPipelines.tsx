@@ -1,3 +1,4 @@
+import { POLL_INTERVAL } from 'components/cluster/constants'
 import { Table } from '@pluralsh/design-system'
 import { Row } from '@tanstack/react-table'
 import { columns } from 'components/cd/pipelines/PipelinesColumns'
@@ -24,7 +25,11 @@ export function FlowPipelines() {
     fetchNextPage,
     setVirtualSlice,
   } = useFetchPaginatedData(
-    { query: FlowPipelinesDocument, keyPath: ['flow', 'pipelines'] },
+    {
+      pollInterval: POLL_INTERVAL,
+      query: FlowPipelinesDocument,
+      keyPath: ['flow', 'pipelines'],
+    },
     { id: flow?.id ?? '' }
   )
   const reactTableOptions = useMemo(() => ({ meta: { refetch } }), [refetch])

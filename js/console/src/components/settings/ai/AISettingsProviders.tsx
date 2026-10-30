@@ -107,6 +107,7 @@ export function initialSettingsAttributes(
               anthropic: {
                 model: ai.anthropic.model,
                 toolModel: ai.anthropic.toolModel,
+                baseUrl: ai.anthropic.baseUrl,
                 accessToken: '',
               },
             }
@@ -379,6 +380,17 @@ export function AnthropicSettings({
           disabled={!enabled}
           value={settings?.toolModel ?? modelDefaults?.toolModel ?? ''}
           onChange={(e) => updateSettings({ toolModel: e.currentTarget.value })}
+        />
+      </FormField>
+      <FormField
+        label="Base URL"
+        infoTooltip="Optional custom API base URL for Anthropic-compatible gateways, e.g. https://gateway.example.com. Leave blank to use Anthropic."
+        style={{ flex: 1 }}
+      >
+        <Input
+          disabled={!enabled}
+          value={settings?.baseUrl ?? ''}
+          onChange={(e) => updateSettings({ baseUrl: e.currentTarget.value })}
         />
       </FormField>
       <FormField

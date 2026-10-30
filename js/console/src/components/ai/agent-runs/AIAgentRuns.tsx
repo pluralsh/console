@@ -1,3 +1,4 @@
+import { POLL_INTERVAL } from 'components/cluster/constants'
 import { Flex, Table } from '@pluralsh/design-system'
 import { PageToolbarPortal } from 'components/layout/PageToolbar'
 import { GqlError } from 'components/utils/Alert'
@@ -22,7 +23,11 @@ export function AIAgentRuns() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
-      { query: AgentRunsDocument, keyPath: ['agentRuns'] },
+      {
+        pollInterval: POLL_INTERVAL,
+        query: AgentRunsDocument,
+        keyPath: ['agentRuns'],
+      },
       { runtimeId: selectedRuntimeId }
     )
 

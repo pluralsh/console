@@ -56,6 +56,9 @@ type Server struct {
 
 	// consoleAIProxy forwards the agent's model calls to the Console AI proxy, adding the deploy token.
 	consoleAIProxy http.Handler
+
+	// runEvents relays Console notifications about this agent run to the harness.
+	runEvents *runEvents
 }
 
 // Start starts the MCP server with streamable HTTP transport
@@ -65,6 +68,9 @@ func (in *Server) Start(addr string) error {
 	}
 
 	in.httpServer.Addr = addr
+	if in.runEvents != nil {
+		in.runEvents.start()
+	}
 	klog.V(log.LogLevelDefault).InfoS("started plural console mcp server", "version", in.version, "address", addr)
 	return in.httpServer.ListenAndServe()
 }
@@ -75,6 +81,9 @@ func (in *Server) Shutdown(ctx context.Context) error {
 		return nil
 	}
 
+	if in.runEvents != nil {
+		_ = in.runEvents.close()
+	}
 	return in.httpServer.Shutdown(ctx)
 }
 
@@ -101,6 +110,10 @@ func (in *Server) init() *Server {
 	if in.consoleExtProxy != nil {
 		mux.Handle(common.AgentConsoleExtGQLPath, in.consoleExtProxy)
 		klog.V(log.LogLevelDefault).InfoS("registered console ext proxy", "path", common.AgentConsoleExtGQLPath)
+	}
+	if in.runEvents != nil {
+		mux.Handle(common.AgentRunEventsPath, in.runEvents)
+		klog.V(log.LogLevelDefault).InfoS("registered agent run events", "path", common.AgentRunEventsPath)
 	}
 	if in.consoleAIProxy != nil {
 		mux.Handle(common.AgentConsoleAIPath, in.consoleAIProxy)

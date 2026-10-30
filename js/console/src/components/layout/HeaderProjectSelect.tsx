@@ -1,15 +1,24 @@
-import { ListBoxItem, Toast } from '@pluralsh/design-system'
+import {
+  CloseIcon,
+  Input,
+  ListBoxFooterPlus,
+  ListBoxItem,
+  SearchIcon,
+  Toast,
+} from '@pluralsh/design-system'
 
 import { useProjectsTinyQuery } from 'generated/graphql'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
+import styled from 'styled-components'
 import { mapExistingNodes } from '../../utils/graphql'
 import { useSelectedProjectContext } from '../contexts/ProjectsContext'
 import { CrumbSelect } from './CrumbSelect'
 
-const ALL_PROJECTS_KEY = '__all__'
+const EMPTY_SEARCH_RESULT_KEY = '__empty__'
 
 export function HeaderProjectSelect() {
   const { projectId, setProjectId } = useSelectedProjectContext()
+  const [query, setQuery] = useState('')
 
   const { data, error } = useProjectsTinyQuery({
     pollInterval: 60_000,
@@ -21,32 +30,69 @@ export function HeaderProjectSelect() {
     [data?.projects]
   )
   const selected = projects.find(({ id }) => id === projectId)
+  const normalizedQuery = query.trim().toLocaleLowerCase()
+  const filteredProjects = normalizedQuery
+    ? projects.filter(({ name, description }) =>
+        `${name} ${description ?? ''}`
+          .toLocaleLowerCase()
+          .includes(normalizedQuery)
+      )
+    : projects
 
   return (
     <>
       <CrumbSelect
         ariaLabel="Project"
         label={selected?.name ?? 'all projects'}
-        selectedKey={projectId || ALL_PROJECTS_KEY}
-        onSelectionChange={(key) =>
-          setProjectId(key === ALL_PROJECTS_KEY ? '' : key)
+        selectedKey={projectId}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) setQuery('')
+        }}
+        onSelectionChange={setProjectId}
+        dropdownHeaderFixed={
+          <ProjectSearchHeaderSC>
+            <Input
+              small
+              showClearButton
+              startIcon={<SearchIcon size={12} />}
+              placeholder="Search projects"
+              value={query}
+              onChange={(event) => setQuery(event.currentTarget.value)}
+              inputProps={{ ref: (node) => node?.focus() }}
+            />
+          </ProjectSearchHeaderSC>
+        }
+        dropdownFooterFixed={
+          projectId ? (
+            <ListBoxFooterPlus
+              onClick={() => {
+                setProjectId('')
+                setQuery('')
+              }}
+              leftContent={<CloseIcon color="icon-info" />}
+            >
+              Clear selection
+            </ListBoxFooterPlus>
+          ) : undefined
         }
       >
-        {[
-          <ListBoxItem
-            key={ALL_PROJECTS_KEY}
-            label="all projects"
-            textValue="all projects"
-          />,
-          ...projects.map((p) => (
+        {filteredProjects.length > 0 ? (
+          filteredProjects.map((project) => (
             <ListBoxItem
-              key={p.id}
-              label={p.name}
-              textValue={p.name}
-              description={p.description}
+              key={project.id}
+              label={project.name}
+              textValue={project.name}
+              description={project.description}
             />
-          )),
-        ]}
+          ))
+        ) : (
+          <ListBoxItem
+            key={EMPTY_SEARCH_RESULT_KEY}
+            label="No projects found"
+            textValue=""
+            disabled
+          />
+        )}
       </CrumbSelect>
       {error && (
         <Toast
@@ -62,3 +108,7 @@ export function HeaderProjectSelect() {
     </>
   )
 }
+
+const ProjectSearchHeaderSC = styled.div(({ theme }) => ({
+  padding: `${theme.spacing.small} ${theme.spacing.medium}`,
+}))

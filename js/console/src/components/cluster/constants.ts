@@ -1,1 +1,2 @@
 export const POLL_INTERVAL = 10 * 1000
+export const AGGREGATE_POLL_INTERVAL = 60 * 1000

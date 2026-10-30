@@ -1,5 +1,5 @@
 defmodule Console.Schema.OperationalLayout do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.Cluster
 
   defenum ServiceMesh, linkerd: 0, istio: 1, cilium: 2, ebpf: 3

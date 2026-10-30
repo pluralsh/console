@@ -1,5 +1,5 @@
 defmodule Console.Schema.ServiceDependency do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{Service, ServiceTemplate}
 
   schema "service_dependencies" do

@@ -1,5 +1,5 @@
 defmodule Console.Schema.AlertResolution do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{Alert}
 
   schema "alert_resolutions" do

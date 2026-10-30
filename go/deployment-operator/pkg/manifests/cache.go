@@ -32,6 +32,7 @@ type ManifestCache struct {
 	consoleURL string
 	expiry     time.Duration
 	cacheDir   string
+	gate       *rateLimitGate
 }
 
 func NewCache(expiry time.Duration, token, consoleURL, cacheDir string) *ManifestCache {
@@ -41,11 +42,17 @@ func NewCache(expiry time.Duration, token, consoleURL, cacheDir string) *Manifes
 		expiry:     expiry,
 		consoleURL: consoleURL,
 		cacheDir:   cacheDir,
+		gate:       newRateLimitGate(),
 	}
 }
 
 func (c *ManifestCache) Fetch(svc *console.ServiceDeploymentForAgent) (string, error) {
+	if err := c.gate.check(); err != nil {
+		return "", err
+	}
+
 	sha, err := fetchSha(c.consoleURL, c.token, svc.ID)
+	c.gate.observe(err)
 	if err != nil {
 		return "", err
 	}
@@ -77,7 +84,9 @@ func (c *ManifestCache) Fetch(svc *console.ServiceDeploymentForAgent) (string, e
 	}
 
 	log.V(2).Info("fetching fresh tarball", "url", tarballURL.String(), "sha", sha)
-	if err := fetch(tarballURL.String(), c.token, sha, dir); err != nil {
+	err = fetch(tarballURL.String(), c.token, sha, dir)
+	c.gate.observe(err)
+	if err != nil {
 		os.RemoveAll(dir)
 		return "", err
 	}

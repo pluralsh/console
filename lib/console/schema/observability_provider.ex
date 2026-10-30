@@ -1,10 +1,10 @@
 defmodule Console.Schema.ObservabilityProvider do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
 
   defenum Type, datadog: 0, newrelic: 1
 
   defmodule Credentials do
-    use Piazza.Ecto.Schema
+    use Console.Schema.Base
     alias Piazza.Ecto.EncryptedString
 
     embedded_schema do

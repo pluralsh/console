@@ -706,6 +706,9 @@ defmodule Console.GraphQl.Deployments.Stack do
   connection node_type: :stack_policy
 
   delta :run_logs
+  delta :run_step
+  delta :infrastructure_stack
+  delta :stack_run
 
   object :public_stack_queries do
     field :custom_stack_run, :custom_stack_run do
@@ -1024,6 +1027,40 @@ defmodule Console.GraphQl.Deployments.Stack do
   end
 
   object :stack_subscriptions do
+    @desc "Changes to any stack the current user can read, including status changes from its runs"
+    field :infrastructure_stack_delta, :infrastructure_stack_delta do
+      middleware Scope,
+        resource: :stack,
+        action: :read
+      middleware Console.Middleware.SubscriptionPolicy, policy: Console.Deployments.Policies
+
+      config fn
+        _, %{context: %{current_user: %Console.Schema.User{}}} -> {:ok, topic: "stacks"}
+        _, _ -> {:error, "unauthenticated"}
+      end
+    end
+
+    @desc "Changes to the runs of a stack, authorized once against the stack when subscribing"
+    field :stack_run_delta, :stack_run_delta do
+      arg :stack_id, non_null(:id)
+
+      config fn %{stack_id: id}, %{context: ctx} ->
+        ctx = Console.Middleware.Scope.scope_context(ctx, resource: :stack, action: :read)
+        with {:ok, stack} <- Deployments.resolve_stack(%{id: id}, %{context: ctx}),
+          do: {:ok, topic: "stacks:#{stack.id}:runs"}
+      end
+    end
+
+    @desc "Status changes to the steps of a run, its logs stream separately through runLogsDelta"
+    field :run_step_delta, :run_step_delta do
+      arg :run_id, non_null(:id)
+
+      config fn %{run_id: run_id}, ctx ->
+        with {:ok, run} <- Deployments.resolve_stack_run(%{id: run_id}, ctx),
+          do: {:ok, topic: "stack_runs:#{run.id}:steps"}
+      end
+    end
+
     field :run_logs_delta, :run_logs_delta do
       arg :step_id, non_null(:id)
 

@@ -1,5 +1,5 @@
 defmodule Console.Schema.PinnedCustomResource do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{Cluster}
 
   schema "pinned_custom_resources" do

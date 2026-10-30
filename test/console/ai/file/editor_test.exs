@@ -16,7 +16,7 @@ defmodule Console.AI.File.EditorTest do
 
       {:ok, res} = File.read(f)
       IO.puts(res)
-      {:ok, _} = YamlElixir.read_from_string(res)
+      {:ok, _} = Console.Utils.Yaml.decode(res)
     end
   end
 end

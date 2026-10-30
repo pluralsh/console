@@ -28,9 +28,11 @@ import CommandLog from '../../../utils/CommandLog.tsx'
 interface StepProps {
   step: RunStep
   open?: boolean
+  // whether the run is still in progress
+  live?: boolean
 }
 
-export default function Step({ step, open }: StepProps): ReactNode {
+export default function Step({ step, open, live }: StepProps): ReactNode {
   const ref = useRef<HTMLDivElement>(null)
 
   const [folded, setFolded] = useState<boolean | undefined>(undefined)
@@ -50,8 +52,10 @@ export default function Step({ step, open }: StepProps): ReactNode {
     []
   )
 
+  // the harness can flush a step's last logs after marking it complete, so keep
+  // listening until the whole run finishes
   useLogsDeltaSubscription({
-    skip: step.status !== StepStatus.Running,
+    skip: !live && step.status !== StepStatus.Running,
     variables: { id: step.id },
     onData: ({ data: { data } }) =>
       setLogs(

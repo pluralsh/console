@@ -83,6 +83,49 @@ defmodule Console.Utils.HTTP do
   end
   def proxy_options(_, _), do: []
 
+  @type validators :: %{etag: binary | nil, last_modified: binary | nil, sha: binary}
+
+  @doc """
+  GETs `url`, revalidating against the `validators` returned by the previous
+  call: the etag and last-modified are sent as conditional headers, and a 200
+  whose body hashes the same as last time also counts as unchanged, for servers
+  that ignore them. Returns `{:ok, :unchanged, validators}` or
+  `{:ok, body, validators}`; keep the validators for the next call.
+  """
+  @spec fetch_if_changed(binary, validators | nil, keyword) ::
+          {:ok, :unchanged | binary, validators} | {:error, term}
+  def fetch_if_changed(url, prev, opts \\ []) do
+    opts = Keyword.merge([decode_body: false, retry: false, headers: conditional_headers(prev)], opts)
+    case Req.get(url, opts) do
+      {:ok, %Req.Response{status: 304}} when is_map(prev) -> {:ok, :unchanged, prev}
+      {:ok, %Req.Response{status: 200, body: body} = resp} when is_binary(body) ->
+        validators = %{
+          etag: header(resp, "etag"),
+          last_modified: header(resp, "last-modified"),
+          sha: :crypto.hash(:sha256, body)
+        }
+        case prev do
+          %{sha: sha} when sha == validators.sha -> {:ok, :unchanged, validators}
+          _ -> {:ok, body, validators}
+        end
+      {:ok, %Req.Response{status: status}} -> {:error, "unexpected status #{status} fetching #{url}"}
+      {:error, _} = err -> err
+    end
+  end
+
+  defp conditional_headers(%{} = prev) do
+    [{"if-none-match", prev[:etag]}, {"if-modified-since", prev[:last_modified]}]
+    |> Enum.filter(fn {_, v} -> is_binary(v) end)
+  end
+  defp conditional_headers(_), do: []
+
+  defp header(resp, name) do
+    case Req.Response.get_header(resp, name) do
+      [value | _] -> value
+      _ -> nil
+    end
+  end
+
   defp no_proxy?(%{noproxy: noproxy}, url) when is_binary(noproxy) and is_binary(url) do
     host = URI.parse(url).host
     noproxy

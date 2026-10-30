@@ -1,5 +1,5 @@
 defmodule Console.Schema.PromotionCriteria do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{StageService, Service, PrAutomation, ScmConnection}
 
   schema "promotion_criteria" do

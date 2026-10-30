@@ -415,6 +415,7 @@ defmodule Console.Schema.WorkbenchJob.Mini do
   }
 
   @derive Jason.Encoder
+  @derive Torque.Encoder
 
   defstruct [:id, :status, :prompt, :objective, :conclusion, :criticism, :topology, :activities, :pull_requests]
 

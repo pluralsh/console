@@ -5,7 +5,7 @@ defmodule Console.Helm.Client do
   def client(%HelmRepository{url: "oci://" <> _} = repo), do: OCI.client(repo)
   def client(%HelmRepository{} = repo), do: HTTP.client(repo)
 
-  defdelegate index(client), to: Interface
+  def index(client, prev \\ nil), do: Interface.index(client, prev)
 
   defdelegate chart(client, idx, chart, vsn), to: Interface
 

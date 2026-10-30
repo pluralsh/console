@@ -27,10 +27,10 @@ export function determineLevel(line: string): LogLevel {
 
 export const logLevelToColor: Record<LogLevel, SemanticColorKey> = {
   [LogLevel.SUCCESS]: 'border-success',
-  [LogLevel.WARN]: 'border-warning',
-  [LogLevel.ERROR]: 'border-danger-light',
+  [LogLevel.WARN]: 'text-warning',
+  [LogLevel.ERROR]: 'border-danger',
   [LogLevel.FATAL]: 'icon-danger-critical',
-  [LogLevel.INFO]: 'border-selected',
+  [LogLevel.INFO]: 'border-info',
   [LogLevel.UNKNOWN]: 'border-fill-three',
 }
 

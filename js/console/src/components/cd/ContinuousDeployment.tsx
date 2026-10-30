@@ -34,6 +34,7 @@ import { PluralErrorBoundary } from './PluralErrorBoundary'
 import { useCDEnabled } from './utils/useCDEnabled'
 
 export const POLL_INTERVAL = 10_000
+export const STATUS_COUNTS_POLL_INTERVAL = 30_000
 
 export const PageScrollableContext = createContext<
   | {

@@ -1,5 +1,5 @@
 defmodule Console.Schema.RefreshToken do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.User
 
   schema "refresh_tokens" do

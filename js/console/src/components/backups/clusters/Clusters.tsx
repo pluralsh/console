@@ -1,3 +1,4 @@
+import { POLL_INTERVAL } from 'components/cluster/constants'
 import {
   Breadcrumb,
   EmptyState,
@@ -47,7 +48,11 @@ export default function Clusters() {
     fetchNextPage,
     setVirtualSlice,
   } = useFetchPaginatedData(
-    { query: ClustersObjectStoresDocument, keyPath: ['clusters'] },
+    {
+      pollInterval: POLL_INTERVAL,
+      query: ClustersObjectStoresDocument,
+      keyPath: ['clusters'],
+    },
     { backups: true }
   )
 

@@ -219,6 +219,17 @@ type LoggingSettings struct {
 	// +kubebuilder:validation:Optional
 	Driver *console.LogDriver `json:"driver,omitempty"`
 
+	// Levels declares the log store can filter and group by log level, eg loki's detected_level.
+	// Leave off for stores without level support, where a level filter would match nothing.
+	//
+	// +kubebuilder:validation:Optional
+	Levels *bool `json:"levels,omitempty"`
+
+	// LevelField is the field holding a log's level, for elasticsearch, opensearch and victoria.
+	//
+	// +kubebuilder:validation:Optional
+	LevelField *string `json:"levelField,omitempty"`
+
 	// Victoria configures a connection to VictoriaMetrics
 	//
 	// +kubebuilder:validation:Optional
@@ -624,8 +635,10 @@ type CreatePr struct {
 
 func (in *LoggingSettings) Attributes(ctx context.Context, c client.Client, namespace string) (*console.LoggingSettingsAttributes, error) {
 	attr := &console.LoggingSettingsAttributes{
-		Enabled: in.Enabled,
-		Driver:  in.Driver,
+		Enabled:    in.Enabled,
+		Driver:     in.Driver,
+		Levels:     in.Levels,
+		LevelField: in.LevelField,
 	}
 
 	if in.Victoria != nil {
@@ -745,6 +758,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 		}
 
 		attr.Anthropic = &console.AnthropicSettingsAttributes{
+			BaseURL:        in.Anthropic.BaseUrl,
 			AccessToken:    lo.ToPtr(token),
 			Model:          in.Anthropic.Model,
 			ToolModel:      in.Anthropic.ToolModel,

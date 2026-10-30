@@ -294,6 +294,7 @@ function JobStatusGroup({
   const { data, loading, pageInfo, fetchNextPage, fetchingMore, refetch } =
     useFetchPaginatedData(
       {
+        pollInterval: POLL_INTERVAL,
         query: WorkbenchJobsForStatusDocument,
         keyPath: RUNS_KEY_PATH,
         pageSize,
@@ -373,7 +374,6 @@ const JobRow = memo(function JobRow({
         })}
         aria-label="View job"
       />
-      {job.status && <JobStatusIcon status={job.status} />}
       <PromptSC>
         <WorkbenchStoredPromptMarkdown
           text={truncateKeepingChips(job.prompt ?? '', PROMPT_MAX_CHARS)}

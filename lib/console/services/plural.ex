@@ -57,7 +57,7 @@ defmodule Console.Services.Plural do
   @spec merge_config(binary, [%{path: binary, value: binary, type: atom}]) :: bin_resp
   def merge_config(repository, paths) do
     with {:ok, vals} <- File.read(filename(repository, :helm)),
-         {:ok, map} <- YamlElixir.read_from_string(vals),
+         {:ok, map} <- Utils.Yaml.decode(vals),
          {:ok, map} <- make_updates(map, paths),
          {:ok, doc} <- Utils.Yaml.format(map),
       do: update_configuration(repository, doc, :helm)
@@ -83,7 +83,7 @@ defmodule Console.Services.Plural do
       do: {:ok, update}
   end
 
-  defp validate(str, :helm), do: YamlElixir.read_from_string(str)
+  defp validate(str, :helm), do: Utils.Yaml.decode(str)
   defp validate(_, _), do: {:ok, nil}
 
   defp vals_filename(repository) do

@@ -34,7 +34,7 @@ defmodule Console.Services.PluralTest do
         %{path: ".a.b[0]", value: "0", type: :int},
         %{path: ".d", value: "hey", type: :string},
       ])
-      {:ok, %{"a" => %{"b" => [0, %{"c" => 3}]}, "d" => "hey"}} = YamlElixir.read_from_string(res)
+      {:ok, %{"a" => %{"b" => [0, %{"c" => 3}]}, "d" => "hey"}} = Console.Utils.Yaml.decode(res)
     end
   end
 end

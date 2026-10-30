@@ -8,12 +8,14 @@ import {
   PageToolbar,
   PageToolbarSlotContext,
 } from 'components/layout/PageToolbar'
-import { ReactNode, useMemo, useState } from 'react'
+import { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { Outlet, useLocation, useParams } from 'react-router-dom'
 import styled from 'styled-components'
 
 import {
   StackRunDetailsFragment,
+  StackStatus,
+  useRunStepDeltaSubscription,
   useStackRunQuery,
 } from '../../../generated/graphql'
 import {
@@ -23,6 +25,7 @@ import {
 } from '../../../routes/stacksRoutesConsts'
 import { ResponsiveLayoutContentContainer } from '../../utils/layout/ResponsiveLayoutContentContainer'
 import LoadingIndicator from '../../utils/LoadingIndicator'
+import { useStackRunDeltas } from '../common/useStackDeltas'
 import { getBreadcrumbs } from '../Stacks'
 
 import StackRunHeader, {
@@ -30,6 +33,20 @@ import StackRunHeader, {
   StackRunHeaderButtons,
 } from './Header'
 import StackRunSidecar from './Sidecar'
+
+// run and step changes arrive over the socket and logs stream per step, so
+// polling only catches missed events, and stops once the run has finished.
+// Each refetch reloads every step's logs and the plan, so keep it rare
+const RUN_FALLBACK_POLL_INTERVAL = 60_000
+
+const FINISHED_STATUSES = new Set<Nullable<StackStatus>>([
+  StackStatus.Successful,
+  StackStatus.Failed,
+  StackStatus.Cancelled,
+])
+
+export const isRunFinished = (status: Nullable<StackStatus>) =>
+  FINISHED_STATUSES.has(status)
 
 export type StackRunOutletContextT = {
   stackRun: StackRunDetailsFragment
@@ -59,14 +76,38 @@ export default function StackRunDetail(): ReactNode {
   const { pathname } = useLocation()
   const [toolbarSlot, setToolbarSlot] = useState<HTMLDivElement | null>(null)
 
-  const { data, loading, refetch, error } = useStackRunQuery({
+  const [finished, setFinished] = useState(false)
+  const { data, previousData, loading, refetch, error } = useStackRunQuery({
     variables: { id: runId! },
     skip: !runId,
-    pollInterval: 5_000,
+    pollInterval: finished ? 0 : RUN_FALLBACK_POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })
 
-  const stackRun = data?.stackRun
+  useStackRunDeltas(stackId)
+  useRunStepDeltaSubscription({
+    variables: { runId: runId ?? '' },
+    skip: !runId,
+    ignoreResults: true,
+  })
+
+  // a mutation can briefly leave the cached run incomplete while it refetches,
+  // so keep rendering the last known copy instead of flashing the page loader
+  const stackRun =
+    data?.stackRun ??
+    (previousData?.stackRun?.id === runId ? previousData?.stackRun : undefined)
+
+  // run deltas only carry the summary fields, so a status change refetches the
+  // details that change with it, like state, outputs, errors and violations
+  const status = stackRun?.id === runId ? stackRun?.status : undefined
+  const isFinished = isRunFinished(status)
+  if (isFinished !== finished) setFinished(isFinished)
+
+  const lastStatus = useRef(status)
+  useEffect(() => {
+    if (lastStatus.current && status && lastStatus.current !== status) refetch()
+    lastStatus.current = status
+  }, [status, refetch])
 
   const { tabs, activePath } = useMemo(() => {
     if (!stackRun) return { tabs: [], activePath: '' }

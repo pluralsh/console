@@ -1,5 +1,5 @@
 defmodule Console.Schema.PipelineStage do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{
     Pipeline,
     StageService,

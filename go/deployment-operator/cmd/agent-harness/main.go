@@ -1,3 +1,4 @@
+// Command agent-harness runs a single agent run inside its pod and reports progress back to the console.
 package main
 
 import (
@@ -10,6 +11,7 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/controller"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/environment"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/events"
 	agentsignals "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/signals"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/client"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
@@ -22,14 +24,17 @@ func main() {
 	klog.V(log.LogLevelDefault).InfoS("starting agent harness", "version", environment.Version)
 
 	consoleClient := client.New(common.AgentConsoleExtGQLURL, "")
+	watcher := events.NewWatcher(common.AgentRunEventsURL)
 	ctx := signals.NewCancelableContext(
 		signals.SetupSignalHandler(signals.ExitCodeTerminated),
-		agentsignals.NewConsoleSignal(consoleClient, args.AgentRunID()),
+		agentsignals.NewConsoleSignal(consoleClient, args.AgentRunID(), watcher.Subscribe()),
 	)
+	go watcher.Run(ctx)
 
 	opts := []controller.Option{
 		controller.WithAgentRun(args.AgentRunID()),
 		controller.WithConsoleClient(consoleClient),
+		controller.WithKicks(watcher.Subscribe()),
 		controller.WithWorkingDir(args.WorkingDir()),
 	}
 

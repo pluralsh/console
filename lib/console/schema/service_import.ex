@@ -1,5 +1,5 @@
 defmodule Console.Schema.ServiceImport do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{Service, Stack}
 
   schema "service_imports" do

@@ -3,7 +3,10 @@ import { GitHealth, useHelmPullabilityStatisticsQuery } from 'generated/graphql'
 import { HelmRepositoriesDocument } from 'generated/graphql-documents'
 import { useEffect } from 'react'
 
-import { POLL_INTERVAL } from 'components/cluster/constants'
+import {
+  AGGREGATE_POLL_INTERVAL,
+  POLL_INTERVAL,
+} from 'components/cluster/constants'
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import {
@@ -30,11 +33,15 @@ export function HelmRepositoriesTable({
 }) {
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
-      { query: HelmRepositoriesDocument, keyPath: ['helmRepositories'] },
+      {
+        pollInterval: POLL_INTERVAL,
+        query: HelmRepositoriesDocument,
+        keyPath: ['helmRepositories'],
+      },
       { q: searchStr, health: statusFilterKeyToGitHealth(status) }
     )
   const { data: statsData } = useHelmPullabilityStatisticsQuery({
-    pollInterval: POLL_INTERVAL,
+    pollInterval: AGGREGATE_POLL_INTERVAL,
   })
 
   const hasFilters = !!status || !!searchStr

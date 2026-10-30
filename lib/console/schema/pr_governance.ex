@@ -1,5 +1,5 @@
 defmodule Console.Schema.PrGovernance do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{ScmConnection}
   alias Piazza.Ecto.EncryptedString
 

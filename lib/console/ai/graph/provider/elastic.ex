@@ -42,7 +42,7 @@ defmodule Console.AI.Graph.Provider.Elastic do
 
   def init(%__MODULE__{conn: %Elastic{index: index} = es}) do
     Elastic.url(es, curr_index(index))
-    |> Req.put(headers: Elastic.headers(es, @headers), body: Jason.encode!(@index_mappings), decode_body: false, retry: false)
+    |> Req.put(headers: Elastic.headers(es, @headers), body: Console.JSON.encode!(@index_mappings), decode_body: false, retry: false)
     |> handle_response("could not initialize elasticsearch:")
   end
 
@@ -52,7 +52,7 @@ defmodule Console.AI.Graph.Provider.Elastic do
     bulk =
       curr_index(es.index)
       |> process_bulk(items, cloud)
-      |> Enum.map(&Jason.encode!/1)
+      |> Enum.map(&Console.JSON.encode!/1)
       |> Enum.join("\n")
 
     Elastic.url(es, "/_bulk")

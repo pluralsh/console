@@ -1,5 +1,5 @@
 defmodule Console.Schema.ComplianceReport do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.ComplianceReportGenerator
 
   schema "compliance_reports" do

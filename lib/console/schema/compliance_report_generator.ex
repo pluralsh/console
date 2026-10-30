@@ -1,5 +1,5 @@
 defmodule Console.Schema.ComplianceReportGenerator do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Deployments.Policies.Rbac
   alias Console.Schema.{PolicyBinding, User}
 

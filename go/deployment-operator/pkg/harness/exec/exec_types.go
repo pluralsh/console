@@ -43,6 +43,10 @@ type executable struct {
 	// timeout
 	timeout time.Duration
 
+	// cancelGracePeriod is how long a cancelled command has to exit after being interrupted
+	// before it is killed and its output pipes are closed.
+	cancelGracePeriod time.Duration
+
 	// logSink is a custom writer that can be used to forward
 	// executable output. It does not stop output from being forwarded
 	// to the [os.Stdout].

@@ -338,6 +338,33 @@ query ServiceDeployment($id: ID!) {
   }
 }
 
+# only plain service columns and the errors preloaded with the event, since the server resolves this once
+# per subscriber per event
+subscription ServiceDeploymentDelta($id: ID, $clusterId: ID) {
+  serviceDeploymentDelta(id: $id, clusterId: $clusterId) {
+    delta
+    payload {
+      id
+      name
+      namespace
+      status
+      componentStatus
+      message
+      version
+      promotion
+      protect
+      dryRun
+      deletedAt
+      updatedAt
+      errors {
+        source
+        message
+        warning
+      }
+    }
+  }
+}
+
 query ServiceDeploymentTiny($id: ID!) {
   serviceDeployment(id: $id) {
     ...ServiceDeploymentTiny

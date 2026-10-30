@@ -32,7 +32,11 @@ export function SentinelRunsTables({ id }: { id: string }) {
   })
   const { data, error, loading, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
-      { query: SentinelRunsDocument, keyPath: ['sentinel', 'runs'] },
+      {
+        pollInterval: POLL_INTERVAL,
+        query: SentinelRunsDocument,
+        keyPath: ['sentinel', 'runs'],
+      },
       { id }
     )
 

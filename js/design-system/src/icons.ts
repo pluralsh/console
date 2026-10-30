@@ -273,6 +273,7 @@ export { default as SendMessageIcon } from './components/icons/SendMessageIcon'
 export { default as SentinelIcon } from './components/icons/SentinelIcon'
 export { default as SentryLogoIcon } from './components/icons/SentryLogoIcon'
 export { default as ServersIcon } from './components/icons/ServersIcon'
+export { default as ServiceNowLogoIcon } from './components/icons/ServiceNowLogoIcon'
 export {
   default as SeverityIcon,
   type SeverityIconSeverity,

@@ -1,5 +1,7 @@
 import {
+  LogAggregationBucketFragment,
   LogFacetInput,
+  LogLevel,
   LogQueryOperator,
   LogTimeRange,
   useLogAggregationBucketsQuery,
@@ -13,11 +15,13 @@ import {
   useState,
 } from 'react'
 import styled, { useTheme } from 'styled-components'
+import type { SemanticColorKey } from '@pluralsh/design-system'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { toDateOrUndef, formatDateTime } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
 import parseDuration from 'parse-duration-ms'
 import { ChartRangeTooltip } from './ChartRangeTooltip'
+import { LOG_LEVELS, logLevelColor } from './LogsFilters'
 import type { LogsTimeRange } from './Logs'
 
 const Y_AXIS_WIDTH = 36
@@ -25,6 +29,7 @@ const X_AXIS_HEIGHT = 28
 const CHART_PADDING_BOTTOM = 8
 const CHART_CANVAS_HEIGHT = 130
 const CHART_BAR_GAP = 2
+const CHART_BAR_WIDTH = 6
 const SELECTION_SHADOW = 'rgba(2, 3, 24, 0.55)'
 const SELECTION_EDGE = '#747af6'
 const TOOLTIP_TOP = CHART_CANVAS_HEIGHT + X_AXIS_HEIGHT
@@ -35,7 +40,11 @@ const compactCount = (count: number) =>
     maximumFractionDigits: 1,
   }).format(count)
 
-type ChartBucket = { timestamp: Date; count: number }
+type ChartBucket = {
+  timestamp: Date
+  count: number
+  levels: { level: LogLevel; count: number }[]
+}
 
 export function LogsMetricsChart({
   clusterId,
@@ -45,6 +54,8 @@ export function LogsMetricsChart({
   time,
   operator,
   facets,
+  levels,
+  groupByLevel = false,
   windowSeconds,
   onRangeSelect,
   pollInterval = 0,
@@ -56,6 +67,8 @@ export function LogsMetricsChart({
   time: LogTimeRange
   operator: LogQueryOperator
   facets: LogFacetInput[]
+  levels?: LogLevel[]
+  groupByLevel?: boolean
   windowSeconds: number
   onRangeSelect: (start: Date, end: Date) => void
   pollInterval?: number
@@ -79,10 +92,11 @@ export function LogsMetricsChart({
       serviceId,
       query,
       time,
-      aggregation: { bucketSize },
+      aggregation: { bucketSize, groupByLevel },
       operator,
       facets,
       node,
+      levels,
     },
     fetchPolicy: 'cache-and-network',
     pollInterval,
@@ -91,12 +105,7 @@ export function LogsMetricsChart({
 
   const buckets = useMemo(
     () =>
-      (data?.logAggregationBuckets?.filter(isNonNullable) ?? [])
-        .map((b) => ({
-          timestamp: toDateOrUndef(b.timestamp)!,
-          count: b.count ?? 0,
-        }))
-        .filter((b) => b.timestamp),
+      stackBuckets(data?.logAggregationBuckets?.filter(isNonNullable) ?? []),
     [data]
   )
   const initialLoading = loading && !data
@@ -282,10 +291,18 @@ export function LogsMetricsChart({
               </>
             )}
             {buckets.map((bucket) => (
-              <BarSC
-                key={bucket.timestamp.getTime()}
-                $height={(bucket.count / yMax) * CHART_CANVAS_HEIGHT}
-              />
+              <BarSlotSC key={bucket.timestamp.getTime()}>
+                <BarSC $height={(bucket.count / yMax) * CHART_CANVAS_HEIGHT}>
+                  {groupByLevel &&
+                    bucket.levels.map(({ level, count }) => (
+                      <BarSegmentSC
+                        key={level}
+                        $color={logLevelColor[level]}
+                        style={{ flexGrow: count }}
+                      />
+                    ))}
+                </BarSC>
+              </BarSlotSC>
             ))}
           </BarsRowSC>
         </BarsAreaSC>
@@ -403,16 +420,36 @@ const SelectionEdgeSC = styled.div<{ $side: 'start' | 'end' }>(({ $side }) => ({
   ...($side === 'start' ? { left: 0 } : { right: 0 }),
 }))
 
+const BarSlotSC = styled.div({
+  flex: 1,
+  minWidth: 0,
+  height: '100%',
+  display: 'flex',
+  alignItems: 'flex-end',
+  justifyContent: 'center',
+})
+
 const BarSC = styled.div<{ $height: number }>(({ theme, $height }) => ({
   position: 'relative',
   zIndex: 1,
-  flex: 1,
-  minWidth: 0,
+  width: CHART_BAR_WIDTH,
+  maxWidth: '100%',
   height: $height,
+  display: 'flex',
+  flexDirection: 'column',
+  overflow: 'hidden',
   backgroundColor: theme.colors['graph-blue'],
   borderTopLeftRadius: 1,
   borderTopRightRadius: 1,
 }))
+
+const BarSegmentSC = styled.div<{ $color: SemanticColorKey }>(
+  ({ theme, $color }) => ({
+    flexBasis: 0,
+    minHeight: 0,
+    backgroundColor: theme.colors[$color],
+  })
+)
 
 const XAxisSC = styled.div(({ theme }) => ({
   position: 'relative',
@@ -458,6 +495,29 @@ const BUCKET_SIZES: { seconds: number; value: string }[] = [
   { seconds: 6 * 3600, value: '6h' },
 ]
 const MAX_BUCKETS = 90
+
+/** Merges per-level buckets into one bar per timestamp, most severe level on top. */
+export function stackBuckets(
+  raw: Pick<LogAggregationBucketFragment, 'timestamp' | 'count' | 'level'>[]
+): ChartBucket[] {
+  const byTime = new Map<number, Map<LogLevel, number>>()
+  for (const { timestamp, count, level } of raw) {
+    const ts = toDateOrUndef(timestamp)?.getTime()
+    if (ts === undefined || Number.isNaN(ts)) continue
+    const levels = byTime.get(ts) ?? new Map<LogLevel, number>()
+    const key = level ?? LogLevel.Unknown
+    levels.set(key, (levels.get(key) ?? 0) + (count ?? 0))
+    byTime.set(ts, levels)
+  }
+  return Array.from(byTime, ([ts, levels]) => ({
+    timestamp: new Date(ts),
+    count: Array.from(levels.values()).reduce((sum, c) => sum + c, 0),
+    levels: LOG_LEVELS.filter((level) => levels.get(level)).map((level) => ({
+      level,
+      count: levels.get(level)!,
+    })),
+  })).sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime())
+}
 
 /** Smallest bucket size that keeps the window within `MAX_BUCKETS` bars. */
 export function bucketSizeForWindow(seconds: number): string {

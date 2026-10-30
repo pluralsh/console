@@ -1,5 +1,5 @@
 defmodule Console.Schema.Tag do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{Cluster, Service, Stack, Catalog, Alert}
 
   schema "tags" do

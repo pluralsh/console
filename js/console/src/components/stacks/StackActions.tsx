@@ -48,7 +48,7 @@ export default function StackActions({
   const [menuKey, setMenuKey] = useState<MenuItemKey>(MenuItemKey.Resync)
   const [showRestoreToast, setShowRestoreToast] = useState(false)
   const [mutation, { loading, error }] = useTriggerStackRunMutation({
-    refetchQueries: ['Stacks'],
+    refetchQueries: ['Stacks', 'StackRuns'],
     awaitRefetchQueries: true,
   })
   const theme = useTheme()
@@ -106,7 +106,7 @@ export default function StackActions({
             pulledAt={stack?.repository?.pulledAt}
             kickMutation={KickStackDocument}
             mutationOptions={{
-              refetchQueries: ['Stacks'],
+              refetchQueries: ['Stacks', 'StackRuns'],
               awaitRefetchQueries: true,
             }}
             message="Resync"

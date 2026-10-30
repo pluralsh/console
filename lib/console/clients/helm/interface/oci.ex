@@ -28,7 +28,7 @@ defimpl Console.Helm.Interface, for: Console.Helm.Interface.OCI do
   import Console.Helm.Utils, only: [match_version: 2, has_wildcard?: 1]
   alias Console.Helm.{Index, Chart, Interface.OCI}
 
-  def index(_), do: {:ok, %Index{}}
+  def index(_, _), do: {:ok, %Index{}}
 
   def chart(%OCI{} = oci, %Index{}, chart, vsn) do
     with {:auth, {:ok, %{client: client} = oci}} <- {:auth, OCI.authenticate(oci)},

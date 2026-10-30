@@ -86,7 +86,8 @@ defmodule Console.AI.Provider.Base do
       {:tool, content, %{call_id: id, name: name, arguments: args}} ->
         id = tid(id)
         [Context.assistant("", tool_calls: [ToolCall.new(id, name, Jason.encode!(args))]), Context.tool_result(id, Poison.encode!(content))]
-      {:tool, content} -> [Context.tool_result("unknown", content)]
+      {:tool, content} when is_binary(content) -> [Context.tool_result("unknown", content)]
+      {:tool, content} -> [Context.tool_result("unknown", Poison.encode!(content))]
     end)
     |> Context.new()
   end

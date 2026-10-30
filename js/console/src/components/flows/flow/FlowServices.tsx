@@ -1,3 +1,4 @@
+import { POLL_INTERVAL } from 'components/cluster/constants'
 import { Chip, Flex, Table } from '@pluralsh/design-system'
 import { Row } from '@tanstack/react-table'
 import { columns } from 'components/cd/services/Services'
@@ -34,7 +35,11 @@ export function FlowServices() {
     fetchNextPage,
     setVirtualSlice,
   } = useFetchPaginatedData(
-    { query: FlowServicesDocument, keyPath: ['flow', 'services'] },
+    {
+      pollInterval: POLL_INTERVAL,
+      query: FlowServicesDocument,
+      keyPath: ['flow', 'services'],
+    },
     { id: flow?.id ?? '' }
   )
   const reactTableOptions = useMemo(() => ({ meta: { refetch } }), [refetch])

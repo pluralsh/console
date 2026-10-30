@@ -1,3 +1,4 @@
+import { POLL_INTERVAL } from 'components/cluster/constants'
 import {
   Button,
   Flex,
@@ -52,6 +53,7 @@ export function ReportHistoryModal({
   const { data, loading, error, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
       {
+        pollInterval: POLL_INTERVAL,
         query: ComplianceReportsDocument,
         keyPath: ['complianceReportGenerator', 'complianceReports'],
       },

@@ -13,6 +13,7 @@ fragment SmtpSettings on SmtpSettings {
 
 fragment AiSettings on AiSettings {
   anthropic {
+    baseUrl
     model
     toolModel
     proxy {
@@ -138,6 +139,7 @@ fragment DeploymentSettings on DeploymentSettings {
   logging {
     enabled
     driver
+    levels
   }
   latestK8sVsn
   lokiConnection {

@@ -27,7 +27,20 @@ defmodule Console.GraphQl.Observability do
 
   # bucket_size is the size of the bucket to aggregate by (ex: 1m, 5m, 1h, 1d as time intervals)
   input_object :log_aggregation_input do
-    field :bucket_size, :string
+    field :bucket_size,    :string
+    field :group_by_level, :boolean, description: "count each bucket per log level, setting level on every bucket"
+  end
+
+  @desc "A log level, as loki's detected_level normalizes it"
+  enum :log_level do
+    value :trace
+    value :debug
+    value :info
+    value :warn
+    value :error
+    value :critical
+    value :fatal
+    value :unknown
   end
 
   enum :log_query_operator do
@@ -150,6 +163,7 @@ defmodule Console.GraphQl.Observability do
       arg :operator,   :log_query_operator
       arg :facets,     list_of(:log_facet_input)
       arg :node,       :string, description: "only logs from pods on this node"
+      arg :levels,     list_of(:log_level), description: "only logs at one of these levels"
 
       resolve &Observability.list_logs/2
     end
@@ -162,6 +176,7 @@ defmodule Console.GraphQl.Observability do
       arg :time,       :log_time_range
       arg :field,      non_null(:string)
       arg :node,       :string, description: "only logs from pods on this node"
+      arg :levels,     list_of(:log_level), description: "only logs at one of these levels"
 
       resolve &Observability.list_log_labels/2
     end
@@ -176,6 +191,7 @@ defmodule Console.GraphQl.Observability do
       arg :operator,    :log_query_operator
       arg :facets,      list_of(:log_facet_input)
       arg :node,        :string, description: "only logs from pods on this node"
+      arg :levels,      list_of(:log_level), description: "only logs at one of these levels"
 
       resolve &Observability.list_log_aggregations/2
     end
@@ -206,5 +222,6 @@ defmodule Console.GraphQl.Observability do
   object :log_aggregation_bucket do
     field :timestamp, :datetime
     field :count, :integer
+    field :level, :log_level, description: "the level counted, when grouping by level"
   end
 end

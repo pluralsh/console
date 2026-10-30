@@ -12,7 +12,7 @@ defmodule Console.Mesh.Prometheus do
     |> Req.post(form: form([{"query", query}], Map.new(opts)), headers: headers(conn), decode_body: false, retry: false)
     |> case do
       {:ok, %Req.Response{body: body, status: 200}} ->
-        Poison.decode(body, as: Response.spec())
+        Response.decode(body)
       _ -> {:error, "prometheus error"}
     end
   end

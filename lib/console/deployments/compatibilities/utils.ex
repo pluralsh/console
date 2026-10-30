@@ -8,21 +8,64 @@ defmodule Console.Deployments.Compatibilities.Utils do
     end
   end
 
-  def versions_greater([_ | _] = versions, from) when is_binary(from) do
-    clean_version(from)
-    |> Version.parse()
-    |> case do
-      {:ok, %Version{} = vsn} ->
-        Enum.filter(versions, fn next ->
-          case Version.parse(clean_version(next.version)) do
-            {:ok, %Version{} = next} -> :lt == Version.compare(vsn, next)
-            _ -> false
-          end
-        end)
-      _ -> versions
+  @doc "parses a (possibly v-prefixed or major.minor) version, nil when it isn't semver"
+  @spec semver(term) :: Version.t | nil
+  def semver(vsn) when is_binary(vsn) do
+    case Version.parse(clean_version(vsn)) do
+      {:ok, parsed} -> parsed
+      _ -> nil
     end
   end
-  def versions_greater(versions, _), do: versions
+  def semver(_), do: nil
+
+  @doc "the parsed version of a matrix entry, using the one cached at load when present"
+  def semver_of(%{semver: %Version{} = parsed}), do: parsed
+  def semver_of(%{version: vsn}), do: semver(vsn)
+  def semver_of(_), do: nil
+
+  @doc """
+  The lowest entry newer than `from` whose kube list includes the minor after
+  `current`'s. Entries that aren't semver are never candidates.
+  """
+  def upgrade_candidate(versions, kube, current, from) do
+    with %Version{major: maj, minor: min} <- semver(current) do
+      floor = semver(from)
+      Enum.reduce(versions, nil, fn vsn, best ->
+        with %Version{} = parsed <- semver_of(vsn),
+             true <- is_nil(floor) or Version.compare(parsed, floor) == :gt,
+             true <- supports_kube?(kube.(vsn), maj, min + 1),
+             true <- is_nil(best) or Version.compare(parsed, elem(best, 0)) == :lt do
+          {parsed, vsn}
+        else
+          _ -> best
+        end
+      end)
+      |> case do
+        {_, vsn} -> vsn
+        nil -> nil
+      end
+    else
+      _ -> nil
+    end
+  end
+
+  @doc "whether a kube list names `major.minor`, however the entries are spelled (1.30, v1.30, 1.30.0)"
+  def supports_kube?(kube, maj, min) when is_list(kube) do
+    exact = "#{maj}.#{min}"
+    Enum.any?(kube, fn
+      ^exact -> true
+      vsn -> match?(%Version{major: ^maj, minor: ^min}, semver(vsn))
+    end)
+  end
+  def supports_kube?(_, _, _), do: false
+
+  def stringify(v) when is_binary(v) or is_nil(v), do: v
+  def stringify(v) when is_number(v), do: to_string(v)
+  def stringify(v), do: v
+
+  @doc "maps the map entries of a decoded list, dropping anything malformed"
+  def map_list(l, fun) when is_list(l), do: for(%{} = attrs <- l, do: fun.(attrs))
+  def map_list(_, _), do: nil
 
   def later?(vsn1, vsn2) do
     with {:ok, vsn1} <- Version.parse(clean_version(vsn1)),

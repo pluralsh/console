@@ -1,5 +1,5 @@
 defmodule Console.Schema.ScmConnection do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Piazza.Ecto.EncryptedString
   import Console.Deployments.Git.Utils
 

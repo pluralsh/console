@@ -32,7 +32,11 @@ export function Sentinels() {
 
   const { data, error, loading, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
-      { query: SentinelsDocument, keyPath: ['sentinels'] },
+      {
+        pollInterval: POLL_INTERVAL,
+        query: SentinelsDocument,
+        keyPath: ['sentinels'],
+      },
       {
         q: debouncedFilterString || undefined,
         status: statusFilterKey === 'All' ? undefined : statusFilterKey,

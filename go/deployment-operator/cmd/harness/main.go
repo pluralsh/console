@@ -16,6 +16,7 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/signals"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/sink"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/websocket"
 )
 
 func main() {
@@ -28,7 +29,7 @@ func main() {
 	)
 	ctx := signals.NewCancelableContext(
 		signals.SetupSignalHandler(signals.ExitCodeTerminated),
-		signals.NewConsoleSignal(consoleClient, args.StackRunID()),
+		signals.NewConsoleSignal(consoleClient, args.StackRunID(), cancellationSocket()),
 	)
 
 	opts := []controller.Option{
@@ -55,6 +56,22 @@ func main() {
 	if err = ctrl.Start(ctx); err != nil {
 		handleFatalError(err)
 	}
+}
+
+// cancellationSocket subscribes to the cluster's agent notifications so cancellation is pushed
+// rather than polled. A nil socket falls back to polling only.
+func cancellationSocket() websocket.Socket {
+	socket, err := websocket.NewClosed(args.StackRunID(), args.ConsoleUrl(), args.ConsoleToken())
+	if err != nil {
+		klog.ErrorS(err, "could not create console websocket, falling back to polling for cancellation")
+		return nil
+	}
+
+	if err := socket.Join(); err != nil {
+		klog.ErrorS(err, "could not join console websocket, will retry while polling for cancellation")
+	}
+
+	return socket
 }
 
 func handleFatalError(err error) {

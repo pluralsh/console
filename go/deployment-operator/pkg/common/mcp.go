@@ -23,6 +23,11 @@ const (
 	AgentConsoleExtGQLPath = "/plural/ext/gql"
 	AgentConsoleExtGQLURL  = AgentConsoleProxyURL + "/ext/gql"
 
+	// AgentRunEventsPath long-polls for Console notifications about this agent run, which the sidecar
+	// receives over the deploy agent websocket.
+	AgentRunEventsPath = "/plural/agent-run/events"
+	AgentRunEventsURL  = AgentConsoleProxyURL + "/agent-run/events"
+
 	// AgentConsoleAIPath proxies the agent's model calls to the Console AI proxy.
 	AgentConsoleAIPath = "/plural/ext/ai/"
 	// AgentAIProxyAPIKey is the placeholder API key agents send to the sidecar, which replaces it.

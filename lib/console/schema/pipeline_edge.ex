@@ -1,5 +1,5 @@
 defmodule Console.Schema.PipelineEdge do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{Pipeline, PipelineStage, PipelineGate}
 
   schema "pipeline_edges" do

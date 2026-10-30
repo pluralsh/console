@@ -1,3 +1,4 @@
+import { AGGREGATE_POLL_INTERVAL } from 'components/cluster/constants'
 import { Breadcrumb, Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
 import {
   useCloudSetupUnfinished,
@@ -106,7 +107,7 @@ function HomeClusters() {
       healthRange: healthScoreLabelToRange[healthScoreOption],
     },
     fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
+    pollInterval: AGGREGATE_POLL_INTERVAL,
   })
 
   const {
@@ -118,7 +119,11 @@ function HomeClusters() {
     fetchNextPage,
     setVirtualSlice,
   } = useFetchPaginatedData(
-    { query: ClustersDocument, keyPath: ['clusters'] },
+    {
+      pollInterval: POLL_INTERVAL,
+      query: ClustersDocument,
+      keyPath: ['clusters'],
+    },
     {
       projectId,
       healthRange: healthScoreLabelToRange[healthScoreOption],
@@ -131,7 +136,7 @@ function HomeClusters() {
     error: upgradeError,
   } = useUpgradeStatisticsQuery({
     variables: { projectId },
-    pollInterval: POLL_INTERVAL,
+    pollInterval: AGGREGATE_POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })
 

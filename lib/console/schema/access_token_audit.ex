@@ -1,5 +1,5 @@
 defmodule Console.Schema.AccessTokenAudit do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.AccessToken
 
   schema "access_token_audits" do

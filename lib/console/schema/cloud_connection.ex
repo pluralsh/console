@@ -1,5 +1,5 @@
 defmodule Console.Schema.CloudConnection do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Piazza.Ecto.EncryptedString
   alias Console.Deployments.Policies.Rbac
   alias Console.Schema.{User, PolicyBinding}

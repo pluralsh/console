@@ -12,7 +12,8 @@ defmodule Console.Logs.Query do
   defstruct [
     :project_id, :cluster_id, :service_id, :query, :limit,
     :resource, :time, :facets, :namespaces,
-    :bucket_size, :group_by_fields, :pod, :node, :field, :operator
+    :bucket_size, :group_by_fields, :pod, :node, :field, :operator,
+    :levels, :group_by_level, :level_field
   ]
 
   def new(args) do
@@ -30,7 +31,9 @@ defmodule Console.Logs.Query do
       field: args[:field],
       operator: args[:operator] || :or,
       pod: args[:pod],
-      node: args[:node]
+      node: args[:node],
+      levels: args[:levels],
+      group_by_level: args[:group_by_level] || false
     }
   end
 

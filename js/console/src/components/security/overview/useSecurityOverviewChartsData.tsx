@@ -1,3 +1,4 @@
+import { AGGREGATE_POLL_INTERVAL } from 'components/cluster/constants'
 import {
   PolicyAggregate,
   usePolicyStatisticsQuery,
@@ -8,7 +9,6 @@ import {
 import { useMemo } from 'react'
 
 import { CHART_COLOR_MAP } from 'components/utils/RadialBarChart'
-import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 
 export type SecurityChartDatum = {
   x: string
@@ -33,7 +33,7 @@ export function useSecurityOverviewChartsData(filters?: {
         ...filters,
       },
       fetchPolicy: 'cache-and-network',
-      pollInterval: POLL_INTERVAL,
+      pollInterval: AGGREGATE_POLL_INTERVAL,
     })
   const clusterPolicyStats = clusterRes.data || clusterRes.previousData
 
@@ -44,14 +44,14 @@ export function useSecurityOverviewChartsData(filters?: {
         ...filters,
       },
       fetchPolicy: 'cache-and-network',
-      pollInterval: POLL_INTERVAL,
+      pollInterval: AGGREGATE_POLL_INTERVAL,
     })
   const enforcementStats = enforcementRes.data || enforcementRes.previousData
 
   const { error: vulnStatsError, ...vulnRes } = useVulnerabilityStatisticsQuery(
     {
       fetchPolicy: 'cache-and-network',
-      pollInterval: POLL_INTERVAL,
+      pollInterval: AGGREGATE_POLL_INTERVAL,
     }
   )
   const vulnStats = (

@@ -1,5 +1,5 @@
 defmodule Console.Schema.ClusterRegistration do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   import Console.Deployments.Ecto.Validations
   alias Console.Schema.{Project, User}
 

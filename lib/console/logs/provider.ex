@@ -11,34 +11,41 @@ defmodule Console.Logs.Provider do
 
   @spec query(Query.t) :: {:ok, [Line.t]} | error
   def query(%Query{} = q) do
-    with {:ok, %{__struct__: provider} = prov} <- client(),
-      do: provider.query(prov, q)
+    with {:ok, %{__struct__: provider} = prov, settings} <- client(),
+      do: provider.query(prov, levels(q, settings))
   end
 
   @spec aggregate(Query.t) :: {:ok, [map()]} | error
   def aggregate(%Query{} = q) do
-    with {:ok, %{__struct__: provider} = prov} <- client(),
-      do: provider.aggregate(prov, q)
+    with {:ok, %{__struct__: provider} = prov, settings} <- client(),
+      do: provider.aggregate(prov, levels(q, settings))
   end
 
   def labels(%Query{} = q) do
-    with {:ok, %{__struct__: provider} = prov} <- client(),
-      do: provider.labels(prov, q)
+    with {:ok, %{__struct__: provider} = prov, settings} <- client(),
+      do: provider.labels(prov, levels(q, settings))
   end
+
+  # stores without levels would match nothing on a level filter, so drop level args unless the store has them
+  @spec levels(Query.t, DeploymentSettings.t) :: Query.t
+  def levels(%Query{} = q, %DeploymentSettings{logging: %{levels: true} = logging}),
+    do: %{q | level_field: logging.level_field}
+  def levels(%Query{} = q, _), do: %{q | levels: nil, group_by_level: false}
 
   @spec accessible(Query.t, User.t) :: {:ok, Query.t} | error
   def accessible(%Query{} = query, %User{} = user), do: Query.accessible(query, user)
 
   def enabled?() do
     case client() do
-      {:ok, _} -> true
+      {:ok, _, _} -> true
       _ -> false
     end
   end
 
   defp client() do
-    Console.Deployments.Settings.cached()
-    |> client()
+    settings = Console.Deployments.Settings.cached()
+    with {:ok, prov} <- client(settings),
+      do: {:ok, prov, settings}
   end
 
   def client(%DeploymentSettings{logging: %{enabled: true, driver: :victoria, victoria: %{} = victoria}}),

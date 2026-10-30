@@ -310,7 +310,7 @@ const GroupHeaderSC = styled.button<{ $color: IconColor }>(
 
 function statusTint(fill: string, color: string) {
   try {
-    return chroma.mix(fill, color, 0.04, 'rgb').hex()
+    return chroma.mix(fill, color, 0.07, 'rgb').hex()
   } catch {
     return fill
   }

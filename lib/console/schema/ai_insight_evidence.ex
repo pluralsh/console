@@ -1,5 +1,5 @@
 defmodule Console.Schema.AiInsightEvidence do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.AiInsight
 
   defenum Type, log: 0, pr: 1, alert: 2, knowledge: 3

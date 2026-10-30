@@ -12,6 +12,7 @@ var (
 	ErrTerminated      = errors.New("process has been terminated")
 	ErrNoChanges       = errors.New("plan has no changes, skipping run")
 	ErrUnauthenticated = errors.New("console token expired or is invalid")
+	ErrInvalidStatus   = errors.New("stack run cannot be started from its current status")
 )
 
 func WrapUnauthenticated(action string, err error) error {

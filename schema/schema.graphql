@@ -68,6 +68,9 @@ type RootQueryType {
 
     "only logs from pods on this node"
     node: String
+
+    "only logs at one of these levels"
+    levels: [LogLevel]
   ): [LogLine]
 
   logLabels(
@@ -83,6 +86,9 @@ type RootQueryType {
 
     "only logs from pods on this node"
     node: String
+
+    "only logs at one of these levels"
+    levels: [LogLevel]
   ): [LogFacetDetail]
 
   logAggregationBuckets(
@@ -102,6 +108,9 @@ type RootQueryType {
 
     "only logs from pods on this node"
     node: String
+
+    "only logs at one of these levels"
+    levels: [LogLevel]
   ): [LogAggregationBucket]
 
   logs(query: String!, start: Long, end: Long, limit: Int!, clusterId: ID): [LogStream]
@@ -234,10 +243,10 @@ type RootQueryType {
   ): ClusterConnection
 
   "gets summary information for all healthy\/unhealthy clusters in your fleet"
-  clusterStatuses(q: String, tag: TagInput, projectId: ID): [ClusterStatusInfo]
+  clusterStatuses(q: String, tag: TagInput, tagQuery: TagQuery, projectId: ID): [ClusterStatusInfo]
 
   "gets summary information for upgradeability in your fleet"
-  upgradeStatistics(q: String, tag: TagInput, projectId: ID): UpgradeStatistics
+  upgradeStatistics(q: String, tag: TagInput, tagQuery: TagQuery, projectId: ID): UpgradeStatistics
 
   "lists tags applied to any clusters in the fleet"
   tags(tag: String): [String]
@@ -1862,7 +1871,19 @@ type RootSubscriptionType {
 
   notificationDelta: NotificationDelta
 
+  "Changes to any stack the current user can read, including status changes from its runs"
+  infrastructureStackDelta: InfrastructureStackDelta
+
+  "Changes to the runs of a stack, authorized once against the stack when subscribing"
+  stackRunDelta(stackId: ID!): StackRunDelta
+
+  "Status changes to the steps of a run, its logs stream separately through runLogsDelta"
+  runStepDelta(runId: ID!): RunStepDelta
+
   runLogsDelta(stepId: ID!): RunLogsDelta
+
+  "Changes to a single service, the services of a cluster, or any service the current user can read if neither is given"
+  serviceDeploymentDelta(id: ID, clusterId: ID): ServiceDeploymentDelta
 
   "streams chunks of ai text for a given parent scope"
   aiStream(
@@ -1910,6 +1931,9 @@ type RootSubscriptionType {
   workbenchDashboardDelta(id: ID, workbenchId: ID): WorkbenchDashboardDelta
 
   workbenchMonitorDelta(id: ID, workbenchId: ID): MonitorDelta
+
+  "Changes to a single cluster, or any cluster the current user can read if no id is given"
+  clusterDelta(id: ID): ClusterDelta
 
   clusterUpgradeProgress(upgradeId: ID!): ClusterUpgradeProgress
 }
@@ -7421,10 +7445,21 @@ input CostSettingsAttributes {
 
 input LoggingSettingsAttributes {
   enabled: Boolean
+
   driver: LogDriver
+
+  "whether the log store supports filtering and grouping by log level"
+  levels: Boolean
+
+  "the field holding a log's level, for elasticsearch, opensearch and victoria"
+  levelField: String
+
   victoria: HttpConnectionAttributes
+
   elastic: ElasticsearchConnectionAttributes
+
   opensearch: OpensearchConnectionAttributes
+
   loki: LokiLoggingConnectionAttributes
 }
 
@@ -7593,6 +7628,9 @@ input OpenaiTokenExchangeAttributes {
 }
 
 input AnthropicSettingsAttributes {
+  "a custom base url for an Anthropic compatible API, leave blank for Anthropic"
+  baseUrl: String
+
   accessToken: String
 
   model: String
@@ -8097,6 +8135,9 @@ type OpenaiTokenExchange {
 
 "Anthropic connection information"
 type AnthropicSettings {
+  "the base url to use when querying an Anthropic compatible API, leave blank for Anthropic"
+  baseUrl: String
+
   "the anthropic model version to use"
   model: String
 
@@ -8221,6 +8262,12 @@ type LoggingSettings {
 
   "the type of log aggregation solution you wish to use"
   driver: LogDriver
+
+  "whether the log store supports filtering and grouping by log level, eg loki's detected_level"
+  levels: Boolean
+
+  "the field holding a log's level, for elasticsearch, opensearch and victoria"
+  levelField: String
 
   "configures a connection to victoria metrics"
   victoria: HttpConnection
@@ -10517,6 +10564,21 @@ type StackPolicyConnection {
 type RunLogsDelta {
   delta: Delta
   payload: RunLogs
+}
+
+type RunStepDelta {
+  delta: Delta
+  payload: RunStep
+}
+
+type InfrastructureStackDelta {
+  delta: Delta
+  payload: InfrastructureStack
+}
+
+type StackRunDelta {
+  delta: Delta
+  payload: StackRun
 }
 
 "A reference for a globalized service, which targets clusters based on the configured criteria"
@@ -13285,6 +13347,11 @@ type RevisionConnection {
   edges: [RevisionEdge]
 }
 
+type ServiceDeploymentDelta {
+  delta: Delta
+  payload: ServiceDeployment
+}
+
 enum ClusterDistro {
   GENERIC
   EKS
@@ -15452,6 +15519,11 @@ type ProjectUsageHistoryConnection {
 type DeprecatedCustomResourceConnection {
   pageInfo: PageInfo!
   edges: [DeprecatedCustomResourceEdge]
+}
+
+type ClusterDelta {
+  delta: Delta
+  payload: Cluster
 }
 
 enum AuthMethod {
@@ -17740,6 +17812,21 @@ input LogFacetInput {
 
 input LogAggregationInput {
   bucketSize: String
+
+  "count each bucket per log level, setting level on every bucket"
+  groupByLevel: Boolean
+}
+
+"A log level, as loki's detected_level normalizes it"
+enum LogLevel {
+  TRACE
+  DEBUG
+  INFO
+  WARN
+  ERROR
+  CRITICAL
+  FATAL
+  UNKNOWN
 }
 
 enum LogQueryOperator {
@@ -17809,7 +17896,11 @@ type LogFacetDetail {
 
 type LogAggregationBucket {
   timestamp: DateTime
+
   count: Int
+
+  "the level counted, when grouping by level"
+  level: LogLevel
 }
 
 type Metadata {

@@ -1,5 +1,5 @@
 defmodule Console.Schema.Webhook do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
 
   defenum Type, piazza: 0, slack: 1
   defenum Status, healthy: 0, unhealthy: 1

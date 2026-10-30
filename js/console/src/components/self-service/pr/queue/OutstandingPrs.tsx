@@ -1,3 +1,4 @@
+import { POLL_INTERVAL } from 'components/cluster/constants'
 import { Flex, Table } from '@pluralsh/design-system'
 import { ComponentProps, useState } from 'react'
 
@@ -33,7 +34,11 @@ export function OutstandingPrs() {
     fetchNextPage,
     setVirtualSlice,
   } = useFetchPaginatedData(
-    { query: PullRequestsDocument, keyPath: ['pullRequests'] },
+    {
+      pollInterval: POLL_INTERVAL,
+      query: PullRequestsDocument,
+      keyPath: ['pullRequests'],
+    },
     { q: debouncedSearchString }
   )
 

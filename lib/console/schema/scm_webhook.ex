@@ -1,5 +1,5 @@
 defmodule Console.Schema.ScmWebhook do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
 
   schema "scm_webhooks" do
     field :type,        Console.Schema.ScmConnection.Type

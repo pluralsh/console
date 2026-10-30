@@ -1,5 +1,5 @@
 defmodule Console.Schema.Notification do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
 
   defenum Severity, none: 0, low: 1, medium: 2, high: 3, critical: 4
   defenum Status, firing: 0, resolved: 1

@@ -659,11 +659,11 @@ fragment ClusterStatusInfo on ClusterStatusInfo {
   healthy
 }
 
-query ClusterStatuses($q: String, $projectId: ID) {
-  clusterStatuses(q: $q, projectId: $projectId) {
+query ClusterStatuses($q: String, $projectId: ID, $tagQuery: TagQuery) {
+  clusterStatuses(q: $q, projectId: $projectId, tagQuery: $tagQuery) {
     ...ClusterStatusInfo
   }
-  upgradeStatistics(q: $q, projectId: $projectId) {
+  upgradeStatistics(q: $q, projectId: $projectId, tagQuery: $tagQuery) {
     upgradeable
     count
   }
@@ -1114,6 +1114,37 @@ query NodeUsageMetrics(
       groupBy: $groupBy
     ) {
       ...NodeUsageMetrics
+    }
+  }
+}
+
+subscription ClusterDelta($id: ID) {
+  clusterDelta(id: $id) {
+    delta
+    payload {
+      id
+      name
+      handle
+      self
+      virtual
+      protect
+      distro
+      version
+      currentVersion
+      kubeletVersion
+      installed
+      healthy
+      healthScore
+      pingedAt
+      deletedAt
+      nodeCount
+      podCount
+      namespaceCount
+      cpuTotal
+      memoryTotal
+      cpuUtil
+      memoryUtil
+      availabilityZones
     }
   }
 }

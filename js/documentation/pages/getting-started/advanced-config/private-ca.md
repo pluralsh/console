@@ -129,12 +129,13 @@ additionalVolumeMounts:
 
 ## Configuring Operator-Driven Pod Creation
 
-Plural's deployment-operator can spawn pod-like workloads through two means:
+Plural's deployment-operator can spawn pod-like workloads through three means:
 
 1. InfrastructureStacks - for running IaC like Terraform
 2. AgentRuntimes - for running coding agents
+3. Sentinels - for running integration tests across your clusters
 
-Both of these support providing a full pod template to customize their generated pods. Here's an example of how it would work:
+All of these support providing a full pod template to customize their generated pods. Here's an example of how it would work:
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -206,4 +207,46 @@ spec:
               items:
                 - key: ca-certificates.crt
                   path: ca-certificates.crt
+```
+
+And for sentinel integration tests. The simplified `containers` form of a sentinel `jobSpec` doesn't support volume mounts, so use `raw` instead. In raw mode, the namespace and service account are read from the pod template, and a container named `default` with no image runs the standard sentinel test harness:
+
+```yaml
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Sentinel
+metadata:
+  name: example
+spec:
+  ...
+  checks:
+    - name: integration-tests
+      type: INTEGRATION_TEST
+      configuration:
+        integrationTest:
+          format: JUNIT
+          tags:
+            tier: dev
+          jobSpec:
+            namespace: plrl-deploy-operator
+            raw:
+              template:
+                metadata:
+                  namespace: plrl-deploy-operator # the namespace the test job runs in
+                spec:
+                  serviceAccountName: deployment-operator
+                  containers:
+                  - name: default # the main sentinel test container, set `image` to use your own test harness
+                    volumeMounts:
+                    - mountPath: /etc/ssl/certs/
+                      name: ca-certificate-only
+                      readOnly: true
+                  volumes:
+                  - name: ca-certificate-only
+                    configMap:
+                      name: plrl-bundle
+                      defaultMode: 0644
+                      optional: false
+                      items:
+                        - key: ca-certificates.crt
+                          path: ca-certificates.crt
 ```

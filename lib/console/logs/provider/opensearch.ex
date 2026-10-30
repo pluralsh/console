@@ -4,7 +4,7 @@ defmodule Console.Logs.Provider.Opensearch do
   """
   @behaviour Console.Logs.Provider
   alias Console.Schema.{Cluster, Service, DeploymentSettings.Opensearch}
-  alias Console.Logs.{Query, Line, Time, AggregationBucket}
+  alias Console.Logs.{Query, Line, Time, AggregationBucket, Level}
 
   @type t :: %__MODULE__{}
   @headers [{"Content-Type", "application/json"}]
@@ -49,7 +49,8 @@ defmodule Console.Logs.Provider.Opensearch do
       url: Opensearch.url(conn, "#{index}/_search"),
       method: :post,
       headers: Opensearch.headers(conn, @headers),
-      body: Jason.encode!(query),
+      body: Console.JSON.encode!(query),
+      decoders: [json: Console.JSON],
       aws_sigv4: Opensearch.aws_sigv4_headers(conn)
     ])
     |> Req.post()
@@ -63,7 +64,7 @@ defmodule Console.Logs.Provider.Opensearch do
   defp search_response(_), do: {:error, "network failure"}
 
   def error_body(body) when is_binary(body), do: body
-  def error_body(body), do: Jason.encode!(body)
+  def error_body(body), do: Console.JSON.encode!(body)
 
   defp format_hits(%Snap.SearchResponse{hits: %Snap.Hits{hits: hits}}) do
     Enum.map(hits, fn %Snap.Hit{source: source} ->
@@ -78,11 +79,17 @@ defmodule Console.Logs.Provider.Opensearch do
   defp format_hits(_), do: []
 
   defp format_aggregation_response(%Snap.SearchResponse{aggregations: %{"logs_over_time" => %Snap.Aggregation{buckets: buckets}}}) do
-    Enum.map(buckets, fn bucket ->
-      %AggregationBucket{
-        timestamp: parse_bucket_timestamp(bucket["key_as_string"] || bucket["key"]),
-        count: bucket["doc_count"]
-      }
+    Enum.flat_map(buckets, fn bucket ->
+      timestamp = parse_bucket_timestamp(bucket["key_as_string"] || bucket["key"])
+      case bucket do
+        %{"by_level" => %{"buckets" => levels}} ->
+          Enum.reduce(levels, %{}, fn %{"key" => key, "doc_count" => count}, acc ->
+            Map.update(acc, Level.normalize(key), count, &(&1 + count))
+          end)
+          |> Enum.sort()
+          |> Enum.map(fn {level, count} -> %AggregationBucket{timestamp: timestamp, count: count, level: level} end)
+        _ -> [%AggregationBucket{timestamp: timestamp, count: bucket["doc_count"]}]
+      end
     end)
   end
   defp format_aggregation_response(_), do: []
@@ -110,7 +117,8 @@ defmodule Console.Logs.Provider.Opensearch do
              |> add_pod(q)
              |> add_node(q)
              |> add_namespaces(q)
-             |> add_facets(q),
+             |> add_facets(q)
+             |> add_levels(q),
       sort: sort(q),
       size: Query.limit(q),
     }
@@ -205,6 +213,16 @@ defmodule Console.Logs.Provider.Opensearch do
   end
   defp add_facets(q, _), do: q
 
+  # the level field as shippers commonly write it, matched exactly in each common spelling
+  @level_field "level.keyword"
+
+  defp add_levels(q, %Query{levels: [_ | _] = levels} = query),
+    do: add_filter(q, %{terms: %{level_field(query) => Enum.flat_map(levels, &Level.spellings(Level.normalize(&1)))}})
+  defp add_levels(q, _), do: q
+
+  defp level_field(%Query{level_field: f}) when is_binary(f) and byte_size(f) > 0, do: f
+  defp level_field(_), do: @level_field
+
   defp facets(resp) do
     # this populates kubernetes.node field with an empty map if doesn't already exist
     resp = case resp do
@@ -257,13 +275,14 @@ defmodule Console.Logs.Provider.Opensearch do
              |> add_terms(q)
              |> add_range(q)
              |> add_namespaces(q)
-             |> add_facets(q),
+             |> add_facets(q)
+             |> add_levels(q),
       aggs: build_aggregations(q),
       size: 0
     }
   end
 
-  defp build_aggregations(%Query{bucket_size: bucket_size}) do
+  defp build_aggregations(%Query{bucket_size: bucket_size} = q) do
     %{
       logs_over_time: %{
         date_histogram: %{
@@ -271,6 +290,11 @@ defmodule Console.Logs.Provider.Opensearch do
           fixed_interval: bucket_size || "1m"
         }
       }
+      |> maybe_by_level(q)
     }
   end
+
+  defp maybe_by_level(agg, %Query{group_by_level: true} = q),
+    do: Map.put(agg, :aggs, %{by_level: %{terms: %{field: level_field(q), size: 50, missing: "unknown"}}})
+  defp maybe_by_level(agg, _), do: agg
 end

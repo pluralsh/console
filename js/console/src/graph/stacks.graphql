@@ -608,13 +608,13 @@ mutation UpdateStackRun($id: ID!, $attributes: StackRunAttributes!) {
 
 mutation CompleteStackRun($id: ID!, $attributes: StackRunAttributes!) {
   completeStackRun(id: $id, attributes: $attributes) {
-    ...StackRun
+    ...StackRunDetails
   }
 }
 
 mutation ApproveStackRun($id: ID!) {
   approveStackRun(id: $id) {
-    ...StackRun
+    ...StackRunDetails
   }
 }
 
@@ -633,6 +633,56 @@ mutation RestoreStack($id: ID!) {
 mutation TriggerStackRun($id: ID!) {
   triggerRun(id: $id) {
     ...StackRun
+  }
+}
+
+# only plain stack columns, since the server resolves this once per subscriber per event
+subscription InfrastructureStackDelta {
+  infrastructureStackDelta {
+    delta
+    payload {
+      id
+      name
+      status
+      paused
+      deletedAt
+      updatedAt
+    }
+  }
+}
+
+# the full row fragment, so created runs can be added to cached run lists
+subscription StackRunDelta($stackId: ID!) {
+  stackRunDelta(stackId: $stackId) {
+    delta
+    payload {
+      ...StackRun
+      pullRequest {
+        id
+      }
+    }
+  }
+}
+
+# a created stack, to add to cached stack lists
+query StackListEntry($id: ID!) {
+  infrastructureStack(id: $id) {
+    ...StackTiny
+    project {
+      id
+    }
+  }
+}
+
+# step status changes, normalized into the steps of the cached run
+subscription RunStepDelta($runId: ID!) {
+  runStepDelta(runId: $runId) {
+    delta
+    payload {
+      id
+      status
+      updatedAt
+    }
   }
 }
 

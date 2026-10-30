@@ -1,5 +1,5 @@
 defmodule Console.Schema.BootstrapToken do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{User, Project}
 
   schema "bootstrap_tokens" do

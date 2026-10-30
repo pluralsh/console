@@ -1,5 +1,5 @@
 defmodule Console.Schema.Changelog do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{Build}
 
   schema "changelog" do

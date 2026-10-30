@@ -109,10 +109,9 @@ defmodule Console.AI.Workbench.Filesystem.Formats do
   @doc "parses yaml text into a list of its documents"
   @spec parse_yaml(binary) :: {:ok, list} | {:error, atom, binary}
   def parse_yaml(text) do
-    case YamlElixir.read_all_from_string(text) do
+    case Console.Utils.Yaml.decode_all(text) do
       {:ok, docs} -> {:ok, Enum.map(docs, &pythonize/1)}
-      {:error, %{message: msg}} -> {:error, :value_error, "invalid yaml: #{msg}"}
-      {:error, err} -> {:error, :value_error, "invalid yaml: #{inspect(err)}"}
+      {:error, msg} -> {:error, :value_error, "invalid yaml: #{msg}"}
     end
   end
 

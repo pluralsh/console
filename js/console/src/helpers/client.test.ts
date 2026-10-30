@@ -10,7 +10,7 @@ import {
 } from 'generated/graphql-documents'
 import { describe, expect, it, vi } from 'vitest'
 
-import { authlessCacheConfig } from './client'
+import { authlessCacheConfig, buildClient } from './client'
 
 vi.mock('./auth', () => ({ fetchToken: () => null }))
 
@@ -124,5 +124,26 @@ describe('authlessCacheConfig', () => {
     writeAll(cache)
 
     expect(readPage(cache)).toBeNull()
+  })
+})
+
+describe('buildClient', () => {
+  it('skips poll attempts while the tab is hidden', () => {
+    const { client } = buildClient(
+      { gql: '/gql', ws: '/socket', gqlws: '/socket/gql-ws' },
+      () => null
+    )
+    const { options } = client.watchQuery({
+      query: PublicWorkbenchDashboardDocument,
+      variables: { publicId },
+      pollInterval: 1000,
+    })
+    const visibility = vi.spyOn(document, 'visibilityState', 'get')
+
+    visibility.mockReturnValue('hidden')
+    expect(options.skipPollAttempt?.()).toBe(true)
+
+    visibility.mockReturnValue('visible')
+    expect(options.skipPollAttempt?.()).toBe(false)
   })
 })

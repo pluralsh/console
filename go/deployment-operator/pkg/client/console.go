@@ -4,6 +4,7 @@ import (
 	"context"
 	"math/rand"
 	"net/http"
+	"sync/atomic"
 	"time"
 
 	console "github.com/pluralsh/console/go/client"
@@ -32,6 +33,8 @@ type client struct {
 	url            string
 	token          string
 	myClusterCache pollycache.Store[console.MyCluster]
+	// set once the console is found not to have the REST ingest endpoints
+	legacyIngest atomic.Bool
 }
 
 func (c *client) GetCredentials() (url, token string) {
@@ -90,6 +93,7 @@ type Client interface {
 	GetStackRunBase(id string) (*v1.StackRun, error)
 	GetStackRun(id string) (*console.StackRunMinimalFragment, error)
 	GetStackRunApprovedAt(id string) (*console.GetStackRunApprovedAt_StackRun, error)
+	GetStackRunStatus(id string) (*console.GetStackRunStatus_StackRun, error)
 	AddStackRunLogs(id, logs string) error
 	CompleteStackRun(id string, attributes console.StackRunAttributes) error
 	UpdateStackRun(id string, attributes console.StackRunAttributes) error
@@ -109,6 +113,7 @@ type Client interface {
 	ListAgentRuntimePendingRuns(ctx context.Context, id string, after *string, first *int64) (*console.ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns, error)
 	IsAgentRunExists(ctx context.Context, id string) (bool, error)
 	GetAgentRun(ctx context.Context, id string) (*console.AgentRunFragment, error)
+	GetAgentRunStatus(ctx context.Context, id string) (*console.AgentRunStatusFragment, error)
 	GetAgentRunCredentials(ctx context.Context, id string) (*console.AgentRunCredentialsFragment, error)
 	GetAgentRunTodos(ctx context.Context, id string) ([]*console.AgentTodoFragment, error)
 	CancelAgentRun(ctx context.Context, id string) error

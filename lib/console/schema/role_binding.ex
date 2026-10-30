@@ -1,5 +1,5 @@
 defmodule Console.Schema.RoleBinding do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{User, Group, Role}
 
   schema "role_bindings" do

@@ -1,5 +1,5 @@
 defmodule Console.Schema.GitRepository do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.ScmConnection
   alias Console.Deployments.Git.{Pathing, Utils}
 

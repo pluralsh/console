@@ -53,7 +53,7 @@ defmodule Console.AI.Vector.Elastic do
 
   def init(%__MODULE__{conn: %Elastic{index: index} = es}) do
     Elastic.url(es, index)
-    |> Req.put(headers: Elastic.headers(es, @headers), body: Jason.encode!(@index_mappings), decode_body: false, retry: false)
+    |> Req.put(headers: Elastic.headers(es, @headers), body: Console.JSON.encode!(@index_mappings), decode_body: false, retry: false)
     |> handle_response("could not initialize elasticsearch:")
     |> case do
       :ok -> initialized()
@@ -76,7 +76,7 @@ defmodule Console.AI.Vector.Elastic do
     with {id, datatype, text} <- Content.content(data),
          {:ok, embeddings} <- Provider.embeddings(text) do
       Elastic.url(es, doc_url(es.index, id))
-      |> Req.post(headers: Elastic.headers(es, @headers), body: Jason.encode!(doc_filters(%{
+      |> Req.post(headers: Elastic.headers(es, @headers), body: Console.JSON.encode!(doc_filters(%{
         passages: Enum.map(embeddings, fn {passage, vector} -> %{vector: vector, text: passage} end),
         datatype: datatype,
         "@timestamp": DateTime.utc_now(),
@@ -130,7 +130,7 @@ defmodule Console.AI.Vector.Elastic do
     not_filters = Keyword.get(opts, :not, [])
     query = %{query: %{bool: add_not(%{must: filters(filters)}, not_filters)}}
     Elastic.url(es, "#{es.index}/_delete_by_query")
-    |> Req.post(headers: Elastic.headers(es, @headers), body: Jason.encode!(query), decode_body: false, retry: false)
+    |> Req.post(headers: Elastic.headers(es, @headers), body: Console.JSON.encode!(query), decode_body: false, retry: false)
     |> handle_response("could not delete vectors from elasticsearch:")
     |> handle_missing_index(conn)
   end
@@ -147,7 +147,7 @@ defmodule Console.AI.Vector.Elastic do
     }
 
     Elastic.url(es, "#{es.index}/_delete_by_query")
-    |> Req.post(headers: Elastic.headers(es, @headers), body: Jason.encode!(query), decode_body: false, retry: false)
+    |> Req.post(headers: Elastic.headers(es, @headers), body: Console.JSON.encode!(query), decode_body: false, retry: false)
     |> handle_response("could not delete vectors from elasticsearch:")
     |> handle_missing_index(conn)
   end

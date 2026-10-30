@@ -3,6 +3,7 @@ package tools
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -14,6 +15,7 @@ import (
 
 	"github.com/pluralsh/console/go/cloud-query/internal/proto/toolquery"
 	"github.com/pluralsh/console/go/cloud-query/internal/tools/client"
+	"github.com/pluralsh/console/go/cloud-query/internal/tools/series"
 )
 
 type PrometheusProvider struct {
@@ -93,14 +95,23 @@ func (in *PrometheusProvider) MetricsSearch(ctx context.Context, input *toolquer
 	// Use the Prometheus v1 client to fetch metric names over a recent time window.
 	end := time.Now()
 	start := end.Add(-24 * time.Hour)
-	labelValues, _, err := client.LabelValues(ctx, "__name__", nil, start, end, v1.WithLimit(5000))
+	query := strings.TrimSpace(input.GetQuery())
+
+	// Filter server-side: backends apply the limit before returning values (VictoriaMetrics
+	// returns an arbitrary subset), so filtering only the returned page misses matches.
+	var matches []string
+	if query != "" {
+		matches = []string{metricNameSearchSelector(query)}
+	}
+
+	labelValues, _, err := client.LabelValues(ctx, model.MetricNameLabel, matches, start, end, v1.WithLimit(5000))
 	if err != nil {
 		return nil, err
 	}
 
-	if input.GetQuery() != "" {
+	if query != "" {
 		labelValues = lo.Filter(labelValues, func(lv model.LabelValue, _ int) bool {
-			return strings.Contains(strings.ToLower(string(lv)), strings.ToLower(input.GetQuery()))
+			return strings.Contains(strings.ToLower(string(lv)), strings.ToLower(query))
 		})
 	}
 
@@ -113,6 +124,10 @@ func (in *PrometheusProvider) MetricsSearch(ctx context.Context, input *toolquer
 	})
 
 	return &toolquery.MetricsSearchOutput{Metrics: results}, nil
+}
+
+func metricNameSearchSelector(query string) string {
+	return fmt.Sprintf(`{__name__=~%q}`, "(?i).*"+regexp.QuoteMeta(query)+".*")
 }
 
 func (in *PrometheusProvider) MetricsLabelSearch(ctx context.Context, input *toolquery.MetricsLabelSearchInput) (*toolquery.MetricsLabelSearchOutput, error) {
@@ -158,18 +173,18 @@ func (in *PrometheusProvider) MetricsLabelSearch(ctx context.Context, input *too
 	return newMetricsLabelSearchOutput(resultValues, input.GetQuery(), limit), nil
 }
 
+// toStep raises the requested step (30s by default) to the range's series.MinStep, since every step is a sample.
 func (in *PrometheusProvider) toStep(input *toolquery.MetricsQueryInput) (time.Duration, error) {
 	step := 30 * time.Second
-	if len(input.GetStep()) == 0 {
-		return step, nil
+	if len(input.GetStep()) > 0 {
+		parsed, err := model.ParseDuration(input.GetStep())
+		if err != nil {
+			return time.Duration(0), fmt.Errorf("%w: invalid step duration: %s", ErrInvalidArgument, input.GetStep())
+		}
+		step = time.Duration(parsed)
 	}
 
-	parsed, err := model.ParseDuration(input.GetStep())
-	if err != nil {
-		return time.Duration(0), fmt.Errorf("%w: invalid step duration: %s", ErrInvalidArgument, input.GetStep())
-	}
-
-	return time.Duration(parsed), nil
+	return max(step, series.MinStep(input.GetRange().GetStart().AsTime(), input.GetRange().GetEnd().AsTime())), nil
 }
 
 func normalizeRange(start, end time.Time, step time.Duration) (time.Time, time.Time) {

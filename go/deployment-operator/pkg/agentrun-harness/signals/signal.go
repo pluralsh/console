@@ -5,7 +5,6 @@ import (
 	"time"
 
 	gqlclient "github.com/pluralsh/console/go/client"
-	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/environment"
@@ -15,41 +14,72 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
 
+const (
+	resyncPeriod = 5 * time.Second
+	// kickedResyncPeriod only covers missed kicks, so it can be much longer.
+	kickedResyncPeriod = 30 * time.Second
+)
+
 type consoleSignal struct {
 	client console.Client
 	id     string
+	kicks  <-chan struct{}
+	dev    bool
 }
 
 func (in *consoleSignal) Listen(cancelFunc context.CancelCauseFunc) {
 	klog.V(log.LogLevelDebug).InfoS("starting console signal listener")
 
-	ctx, cancel := context.WithCancel(context.Background())
-	resyncPeriod := 5 * time.Second
+	period := resyncPeriod
+	if in.kicks != nil {
+		period = kickedResyncPeriod
+	}
 
-	go wait.Until(func() {
-		agentRun, err := in.client.GetAgentRun(ctx, in.id)
-		if err != nil {
-			klog.ErrorS(err, "could not resync agent run", "id", in.id)
-			return
-		}
+	go func() {
+		ctx := context.Background()
+		timer := time.NewTimer(period)
+		defer timer.Stop()
 
-		if agentRun == nil {
-			klog.V(log.LogLevelDebug).InfoS("agent run not found", "id", in.id)
-			return
-		}
+		for {
+			select {
+			case <-timer.C:
+			case <-in.kicks:
+				if !timer.Stop() {
+					select {
+					case <-timer.C:
+					default:
+					}
+				}
+			}
 
-		klog.V(log.LogLevelDebug).InfoS("resyncing agent run", "status", agentRun.Status, "dev", environment.IsDev())
-		// Allow rerunning cancelled runs when in dev mode.
-		if agentRun.Status == gqlclient.AgentRunStatusCancelled && !environment.IsDev() {
-			cancelFunc(errors.ErrRemoteCancel)
-			cancel()
+			if in.cancelled(ctx) {
+				cancelFunc(errors.ErrRemoteCancel)
+				return
+			}
+			timer.Reset(period)
 		}
-	}, resyncPeriod, ctx.Done())
+	}()
 }
 
-func NewConsoleSignal(client console.Client, id string) types.Signal {
+func (in *consoleSignal) cancelled(ctx context.Context) bool {
+	agentRun, err := in.client.GetAgentRunStatus(ctx, in.id)
+	if err != nil {
+		klog.ErrorS(err, "could not resync agent run", "id", in.id)
+		return false
+	}
+
+	klog.V(log.LogLevelDebug).InfoS("resyncing agent run", "status", agentRun.Status, "dev", in.dev)
+	// Allow rerunning cancelled runs when in dev mode.
+	return agentRun.Status == gqlclient.AgentRunStatusCancelled && !in.dev
+}
+
+// NewConsoleSignal polls the run's status for remote cancellation. kicks, when set, triggers an
+// immediate check and lets the poll back off, see events.Watcher.
+func NewConsoleSignal(client console.Client, id string, kicks <-chan struct{}) types.Signal {
 	return &consoleSignal{
-		client,
-		id,
+		client: client,
+		id:     id,
+		kicks:  kicks,
+		dev:    environment.IsDev(),
 	}
 }

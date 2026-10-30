@@ -1,5 +1,5 @@
 defmodule Console.Schema.Role do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.RoleBinding
 
   def permissions(), do: __MODULE__.Permissions.__schema__(:fields) -- [:id]

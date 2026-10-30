@@ -1,5 +1,5 @@
 defmodule Console.Schema.ClusterNamespaceUsage do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.Cluster
 
   schema "cluster_namespace_usage" do

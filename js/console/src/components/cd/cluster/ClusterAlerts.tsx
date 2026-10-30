@@ -1,3 +1,4 @@
+import { POLL_INTERVAL } from 'components/cluster/constants'
 import { AlertsTable } from 'components/utils/alerts/AlertsTable'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { ClusterAlertsDocument } from 'generated/graphql-documents'
@@ -9,7 +10,11 @@ export function ClusterAlerts() {
   const { cluster } = useClusterContext()
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
-      { query: ClusterAlertsDocument, keyPath: ['cluster', 'alerts'] },
+      {
+        pollInterval: POLL_INTERVAL,
+        query: ClusterAlertsDocument,
+        keyPath: ['cluster', 'alerts'],
+      },
       { clusterId: cluster?.id ?? '' }
     )
   const alerts = useMemo(

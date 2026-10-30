@@ -53,7 +53,7 @@ defmodule Console.Plural.Config do
 
   def config_file_inner() do
     filename = Path.join([System.user_home!(), ".plural", "config.yml"])
-    case YamlElixir.read_from_file(filename) do
+    case Console.Utils.Yaml.decode_file(filename) do
       {:ok, %{"kind" => "Config", "spec" => conf}} -> conf
       {:ok, conf} -> conf
       _ -> nil

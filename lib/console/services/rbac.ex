@@ -1,9 +1,27 @@
 defmodule Console.Services.Rbac do
   alias Console.Schema.{Role, User, BootstrapToken}
 
+  @local_cache Console.conf(:local_cache)
+  @bindings [:role_bindings, :group_role_bindings, :groups]
+
   def preload(user) do
     Console.Repo.preload(user, [role_bindings: :role, group_role_bindings: :role])
   end
+
+  @doc """
+  Like `preload/1`, but reuses a user's bindings for up to a minute on this node, so
+  authenticating each request doesn't requery them. Role and group membership changes
+  can take that long to reach a user's requests.
+  """
+  @spec cached_preload(User.t | nil) :: User.t | nil
+  def cached_preload(%User{id: id} = user) do
+    Console.Cache.fetch_or_store(@local_cache, {:rbac_bindings, id}, fn ->
+      preload(user)
+      |> Map.take(@bindings)
+    end, ttl: :timer.minutes(1))
+    |> then(&Map.merge(user, &1))
+  end
+  def cached_preload(nil), do: nil
 
   def allow(%User{bootstrap: %BootstrapToken{}}, _, _), do: {:error, :forbidden}
   def allow(%User{roles: %{admin: true}}, _, _), do: :ok

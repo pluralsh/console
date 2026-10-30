@@ -6,6 +6,7 @@ defmodule Console.AI.File.Grepper do
 
   defmodule Result do
     @derive Jason.Encoder
+    @derive Torque.Encoder
     defstruct [:content, :start_line, :end_line]
   end
 

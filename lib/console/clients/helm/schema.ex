@@ -16,15 +16,19 @@ defmodule Console.Helm.Chart do
 end
 
 defmodule Console.Helm.Index do
-  alias Console.Helm.Chart
+  alias Console.Helm.{Chart, Utils}
 
-  defstruct [:oci, :entries, :indexed, :apiVersion]
+  @type t :: %__MODULE__{}
+
+  # etag, last_modified and sha describe the index.yaml this was parsed from, so an unchanged
+  # index can be detected without parsing it again
+  defstruct [:oci, :entries, :indexed, :sorted, :apiVersion, :etag, :last_modified, :sha]
 
   def transform(%__MODULE__{entries: %{} = entries} = repo) do
     entries = Enum.map(entries, fn {name, charts} ->
       %{name: name, versions: Enum.map(charts, &Chart.build/1)}
     end)
-    %{repo | entries: entries, indexed: indexed(entries)}
+    %{repo | entries: entries, indexed: indexed(entries), sorted: sorted(entries)}
   end
   def transform(pass), do: pass
 
@@ -33,4 +37,6 @@ defmodule Console.Helm.Index do
       {entry.name, Map.new(entry.versions, & {&1.version, &1})}
     end)
   end
+
+  defp sorted(entries), do: Map.new(entries, &{&1.name, Utils.sort_versions(&1.versions)})
 end

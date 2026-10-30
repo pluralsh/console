@@ -1,3 +1,4 @@
+import { POLL_INTERVAL } from 'components/cluster/constants'
 import {
   Flex,
   Input,
@@ -46,6 +47,7 @@ export function VClusters() {
     setVirtualSlice,
   } = useFetchPaginatedData(
     {
+      pollInterval: POLL_INTERVAL,
       query: VClustersDocument,
       keyPath: ['clusters'],
     },

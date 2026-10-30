@@ -1,3 +1,4 @@
+import { POLL_INTERVAL } from 'components/cluster/constants'
 import {
   AddIcon,
   Button,
@@ -83,7 +84,11 @@ export function WorkbenchesList() {
 
   const { data, error, loading, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
-      { query: WorkbenchesDocument, keyPath: ['workbenches'] },
+      {
+        pollInterval: POLL_INTERVAL,
+        query: WorkbenchesDocument,
+        keyPath: ['workbenches'],
+      },
       { q: debouncedSearchString, projectId, ...sortVariables }
     )
 

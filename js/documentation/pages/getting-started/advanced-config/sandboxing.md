@@ -57,27 +57,36 @@ extraSecretEnv:
 #     tls:
 #       enabled: false
 
+# prefixes console, oci-auth, fs, git-server and the optional AI images, eg your.enterprise.registry/pluralsh/console
 global:
-  registry: your.enterprise.registry
+  registry: your.enterprise.registry/pluralsh
 
-# configure kas image for the kubernetes proxy server setup
-kas:
-  agent:
-    proxy:
+# these images are configured with full repository paths, so need to be overridden individually
+controller:
+  controllerManager:
+    manager:
       image:
-        repository: your.enterprise.registry/some/nginx
+        repository: your.enterprise.registry/pluralsh/deployment-controller
 
+kas:
   image:
-    repository: your.enterprise.registry/pluralsh/kas
+    repository: your.enterprise.registry/pluralsh/kubernetes-agent
 
   redis:
-    registry: your.enterprise.registry
-    repository: redis
+    image:
+      registry: your.enterprise.registry
+      repository: pluralsh/registry/bitnami/redis
+
+cloudQuery:
+  image:
+    repository: your.enterprise.registry/pluralsh/cloud-query
+  database:
+    image:
+      repository: your.enterprise.registry/pluralsh/cloud-query-db
 
 # if you need to enable the internal git server
 gitServer:
   enabled: true # if you want to enable the built-in git server for our default repos, especially for sourcing the deployment operator
-  repository: your.enterprise.registry/git-server
 ```
 
 The exact images you'll want to vendor are listed below as well.
@@ -129,9 +138,16 @@ Plural maintained images:
 ```
 Management Cluster:
 - ghcr.io/pluralsh/console
-- ghcr.io/pluralsh/kas
+- ghcr.io/pluralsh/oci-auth (sidecar in the console pod)
+- ghcr.io/pluralsh/kubernetes-agent (the kas server for the kubernetes proxy)
 - ghcr.io/pluralsh/deployment-controller
+- ghcr.io/pluralsh/cloud-query
+- ghcr.io/pluralsh/cloud-query-db
+- ghcr.io/pluralsh/fs (workbench filesystem, deployed whenever `console.config.objectStore` has a bucket or storage account configured)
 - ghcr.io/pluralsh/git-server (optional if you want to use our vendored git server)
+- ghcr.io/pluralsh/nexus (optional, only if `aiProxy.enabled`)
+- ghcr.io/pluralsh/observability-proxy (optional, only if `observabilityProxy.enabled`)
+- ghcr.io/pluralsh/embedding-server (optional, only if `ai.localEmbeddings.enabled`)
 ```
 
 ```
@@ -143,8 +159,6 @@ Agent:
 ```
 Third party images used by our chart (these are often already vendored in an enterprise environment):
 - ghcr.io/pluralsh/registry/bitnami/redis:7.4.2-debian-12-r5
-- ghcr.io/pluralsh/registry/nginx:stable-alpine3.20-slim (can be any nginx image, ours is not customized)
-- docker.io/kubernetesui/dashboard-api - this is also available via `ghcr.io/pluralsh/registry/kubernetesui/dashboard-api`
 ```
 
 If you want to deterministically extract the images from our charts, you can also use yq, like so:
@@ -156,7 +170,7 @@ helm template charts/console | yq '..|.image? | select(.)' | sort -u
 
 git clone https://github.com/pluralsh/deployment-operator.git
 cd deployment-operator
-helm template charts/console | yq '..|.image? | select(.)' | sort -u
+helm template charts/deployment-operator | yq '..|.image? | select(.)' | sort -u
 ```
 
 If you plan to use Stacks, Sentinels or our async coding agent harness, there are a few other images that are used by our deployment-operator:
@@ -191,33 +205,38 @@ All of these images follow semver, and are also published to `gcr.io` and `docke
 For the main Plural Helm chart (https://pluralsh.github.io/console), configuring your *management cluster*, you'll want to use the following YAML overlay:
 
 ```yaml
-# configure main console image
+# configures the console, oci-auth, fs, git-server, nexus, observability-proxy and embedding-server images,
+# which resolve to {global.registry}/{repository}, eg your.enterprise.registry/pluralsh/fs
 global:
-  registry: your.enterprise.registry
+  registry: your.enterprise.registry/pluralsh
+
+# configure the deployment controller image
+controller:
+  controllerManager:
+    manager:
+      image:
+        repository: your.enterprise.registry/pluralsh/deployment-controller
 
 # configure kas image
 kas:
-  agent:
-    proxy:
-      image:
-        repository: your.enterprise.registry/some/nginx
-
   image:
-    repository: your.enterprise.registry/pluralsh/kas
+    repository: your.enterprise.registry/pluralsh/kubernetes-agent
 
   redis:
-    registry: your.enterprise.registry
-    repository: redis
-
-# if you need to enable the internal git server
-gitServer:
-  repository: your.enterprise.registry/git-server
-
-dashboard:
-  api:
     image:
-      repository: your.enterprise.registry/kubernetesui/dashboard
+      registry: your.enterprise.registry
+      repository: pluralsh/registry/bitnami/redis
+
+# configure cloud query images
+cloudQuery:
+  image:
+    repository: your.enterprise.registry/pluralsh/cloud-query
+  database:
+    image:
+      repository: your.enterprise.registry/pluralsh/cloud-query-db
 ```
+
+Images with a `registry` field (`pseudofs.image`, `gitServer.image`, `observabilityProxy.image`, `ai.localEmbeddings.image`) can also be pointed at a registry other than `global.registry` individually.
 
 Agent Helm configuration is covered in a few sections below.
 

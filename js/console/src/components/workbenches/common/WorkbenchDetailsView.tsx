@@ -367,12 +367,12 @@ const ListItemSC = styled.button<{ $selected: boolean }>(
     width: '100%',
     padding: `${theme.spacing.small} ${theme.spacing.large} ${theme.spacing.small} ${theme.spacing.small}`,
     cursor: 'pointer',
-    // on the list's lighter background, as the Monitoring sidebar's rows
-    backgroundColor: $selected ? theme.colors['fill-two-selected'] : undefined,
+    // matches PageSidebarNav's active item, as in the stacks sidebar
+    backgroundColor: $selected ? theme.colors['fill-zero-selected'] : undefined,
     '&:hover': {
       backgroundColor: $selected
-        ? theme.colors['fill-two-selected']
-        : theme.colors['fill-one-hover'],
+        ? theme.colors['fill-zero-selected']
+        : theme.colors['fill-zero-hover'],
     },
     '&:focus-visible': {
       outline: theme.borders['outline-focused'],

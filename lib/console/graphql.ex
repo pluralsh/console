@@ -91,6 +91,7 @@ defmodule Console.GraphQl do
     import_fields :kubernetes_subscriptions
     import_fields :user_subscriptions
     import_fields :stack_subscriptions
+    import_fields :service_subscriptions
     import_fields :ai_subscriptions
     import_fields :agent_subscriptions
     import_fields :workbench_subscriptions

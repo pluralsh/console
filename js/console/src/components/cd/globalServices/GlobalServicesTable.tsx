@@ -1,3 +1,4 @@
+import { POLL_INTERVAL } from 'components/cluster/constants'
 import { Table } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { GlobalServiceFragment } from 'generated/graphql'
@@ -34,7 +35,11 @@ function GlobalServicesTableComponent({
     fetchNextPage,
     setVirtualSlice,
   } = useFetchPaginatedData(
-    { query: GlobalServicesDocument, keyPath: ['globalServices'] },
+    {
+      pollInterval: POLL_INTERVAL,
+      query: GlobalServicesDocument,
+      keyPath: ['globalServices'],
+    },
     { projectId, q: debouncedSearchString }
   )
 

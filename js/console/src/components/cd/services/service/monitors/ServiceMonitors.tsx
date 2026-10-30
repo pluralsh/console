@@ -1,3 +1,4 @@
+import { POLL_INTERVAL } from 'components/cluster/constants'
 import {
   Button,
   Flex,
@@ -37,6 +38,7 @@ export function ServiceMonitors() {
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
       {
+        pollInterval: POLL_INTERVAL,
         query: ServiceMonitorsDocument,
         keyPath: ['serviceDeployment', 'monitors'],
         skip: !serviceId,

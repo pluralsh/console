@@ -1,5 +1,5 @@
 defmodule Console.Schema.StackState do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{Stack, StackRun, AiInsight}
 
   schema "stack_states" do

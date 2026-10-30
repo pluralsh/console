@@ -318,6 +318,7 @@ defmodule Console.Schema.PrAutomation.Mini do
 
   @derive Jason.Encoder
   @derive JSON.Encoder
+  @derive Torque.Encoder
   defstruct [
     :id,
     :name,

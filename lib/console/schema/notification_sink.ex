@@ -1,5 +1,5 @@
 defmodule Console.Schema.NotificationSink do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{AppNotification, PolicyBinding}
 
   defenum Type, slack: 0, teams: 1, plural: 2

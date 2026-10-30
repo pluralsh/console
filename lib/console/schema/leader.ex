@@ -1,5 +1,5 @@
 defmodule Console.Schema.Leader do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
 
   schema "leaders" do
     field :name,      :string
@@ -7,10 +7,6 @@ defmodule Console.Schema.Leader do
     field :heartbeat, :utc_datetime_usec
 
     timestamps()
-  end
-
-  def with_lock(query \\ __MODULE__) do
-    from(l in query, lock: "FOR UPDATE")
   end
 
   @valid ~w(name ref heartbeat)a

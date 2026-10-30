@@ -67,8 +67,11 @@ func (r *StackRunJobReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 
 	run := &v1alpha1.StackRunJob{}
 	if err := r.Get(ctx, req.NamespacedName, run); err != nil {
+		if apierrs.IsNotFound(err) {
+			return ctrl.Result{}, nil
+		}
 		logger.Error(err, "unable to fetch StackRunJob")
-		return ctrl.Result{}, k8sClient.IgnoreNotFound(err)
+		return ctrl.Result{}, err
 	}
 
 	scope, err := NewDefaultScope(ctx, r.Client, run)

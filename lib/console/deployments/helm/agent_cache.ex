@@ -1,5 +1,5 @@
 defmodule Console.Deployments.Helm.AgentCache do
-  alias Console.Helm.Client
+  alias Console.Helm.{Client, Index}
   alias Console.Deployments.Helm.Utils
   alias Console.Otel.Tracing
   require Logger
@@ -50,14 +50,18 @@ defmodule Console.Deployments.Helm.AgentCache do
     %{cache | client: Client.client(repo)}
   end
 
-  def refresh(%__MODULE__{client: client, repo: repo} = cache) do
+  def refresh(%__MODULE__{client: client, repo: repo, index: prev} = cache) do
     Tracing.span("helm.index", %{"helm.repository.url" => Tracing.sanitize_url(repo.url)}, fn ->
-      case Client.index(client) do
-        {:ok, idx} -> {:ok, sweep(%{cache | index: idx})}
+      case Client.index(client, prev) do
+        {:ok, idx} -> {:ok, sweep(%{cache | index: idx}, changed?(prev, idx))}
         _ -> {:error, "could not fetch index"}
       end
     end)
   end
+
+  # oci repos have no index, so their tags have to be rechecked every time
+  defp changed?(%Index{sha: sha}, %Index{sha: sha}) when is_binary(sha), do: false
+  defp changed?(_, _), do: true
 
   def get(%__MODULE__{table: t}, chart, vsn),  do: get(t, chart, vsn)
 
@@ -143,7 +147,8 @@ defmodule Console.Deployments.Helm.AgentCache do
     end
   end
 
-  defp sweep(%__MODULE__{table: t, repo: repo} = cache) do
+  # cached charts are only rechecked against a changed index, an unchanged one can't have moved a version
+  defp sweep(%__MODULE__{table: t, repo: repo} = cache, changed?) do
     {kept, expired} = :ets.foldl(fn {_, l}, {keep, expired} ->
       case Line.expired?(l) do
         true ->
@@ -151,12 +156,12 @@ defmodule Console.Deployments.Helm.AgentCache do
           :ets.delete(t, {:chart, l.chart, l.vsn})
           {keep, expired + 1}
         false ->
-          send self(), {:refresh, l.chart, l.vsn}
+          if changed?, do: send(self(), {:refresh, l.chart, l.vsn})
           {keep + 1, expired}
       end
     end, {0, 0}, t)
 
-    Logger.info "expired #{expired} stale helm cache entries for #{repo.url}, kept #{kept}"
+    Logger.info "expired #{expired} stale helm cache entries for #{repo.url}, kept #{kept}, index changed: #{changed?}"
     cache
   end
 end

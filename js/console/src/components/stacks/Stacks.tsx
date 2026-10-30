@@ -72,6 +72,11 @@ import {
 } from '../../routes/stacksRoutesConsts'
 import { mapExistingNodes } from '../../utils/graphql'
 import { isTerraformFamilyStackType } from './common/stackTypeUtils'
+import {
+  STACK_DELTA_FALLBACK_POLL_INTERVAL,
+  useStackDeltas,
+  useStackRunDeltas,
+} from './common/useStackDeltas'
 
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders.tsx'
 import { useProjectId } from '../contexts/ProjectsContext'
@@ -173,6 +178,7 @@ export function Stacks() {
     {
       query: StacksDocument,
       keyPath: ['infrastructureStacks'],
+      pollInterval: STACK_DELTA_FALLBACK_POLL_INTERVAL,
     },
     {
       q: debouncedSearchString || undefined,
@@ -198,8 +204,11 @@ export function Stacks() {
     skip: !stackId,
     fetchPolicy: 'cache-and-network',
     errorPolicy: 'all',
-    pollInterval: 5_000,
+    pollInterval: STACK_DELTA_FALLBACK_POLL_INTERVAL,
   })
+
+  useStackDeltas()
+  useStackRunDeltas(stackId)
 
   const fullStack = useMemo(() => stackData?.infrastructureStack, [stackData])
   const directory = useMemo(

@@ -130,7 +130,7 @@ config :logger, :console,
 # remote servers' own log notifications, so this is the only effective way to quiet it
 config :anubis_mcp, log: false
 
-config :phoenix, :json_library, JSON
+config :phoenix, :json_library, Console.JSON
 
 config :console, Console.Guardian,
   ttl: {30, :minutes},
@@ -217,6 +217,9 @@ config :console, Console.PromEx,
   drop_metrics_groups: [],
   grafana: :disabled,
   metrics_server: :disabled,
+  # each scrape already flushes the buffered metrics and defers this flush, which renders and
+  # discards the whole export, so it should only run if scrapes stop
+  ets_flush_interval: :timer.minutes(2),
   version: "0.11.0"
 
 config :console, :ttls,

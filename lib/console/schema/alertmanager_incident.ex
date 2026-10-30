@@ -1,5 +1,5 @@
 defmodule Console.Schema.AlertmanagerIncident do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
 
   schema "alertmanager_incidents" do
     field :fingerprint, :string

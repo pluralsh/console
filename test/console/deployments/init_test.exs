@@ -57,6 +57,44 @@ defmodule Console.Deployments.InitTest do
     end
   end
 
+  describe "#disable_vector_store/0" do
+    @elastic %{host: "http://test.es.com", user: "plrl-test", password: "secret"}
+    @elastic_ai %{
+      enabled: true,
+      vector_store: %{enabled: true, initialized: true, store: :elastic, elastic: Map.put(@elastic, :index, "plrl-test-vectors")},
+      graph: %{enabled: true, store: :elastic, elastic: Map.put(@elastic, :index, "plrl-test-graph")}
+    }
+
+    test "disables the vector and graph stores on cloud" do
+      insert(:deployment_settings, ai: @elastic_ai)
+      stub(Console, :conf, fn
+        :cloud -> true
+        key -> Application.get_env(:console, key, nil)
+      end)
+
+      {:ok, %DeploymentSettings{}} = Init.disable_vector_store()
+
+      updated = Settings.fetch_consistent()
+      refute updated.ai.vector_store.enabled
+      refute updated.ai.graph.enabled
+      assert updated.ai.enabled
+    end
+
+    test "ignores non-cloud instances" do
+      insert(:deployment_settings, ai: @elastic_ai)
+      stub(Console, :conf, fn
+        :cloud -> false
+        key -> Application.get_env(:console, key, nil)
+      end)
+
+      {:ok, %{}} = Init.disable_vector_store()
+
+      unchanged = Settings.fetch_consistent()
+      assert unchanged.ai.vector_store.enabled
+      assert unchanged.ai.graph.enabled
+    end
+  end
+
   describe "#migrate_openai/0" do
     @legacy_bedrock_ai %{
       enabled: true,
@@ -403,7 +441,8 @@ defmodule Console.Deployments.InitTest do
       assert res.settings.logging.loki.user == "plrl"
       assert res.settings.logging.loki.password == "secret"
 
-      assert res.settings.ai.vector_store.elastic.host == "http://test.es.com"
+      refute res.settings.ai.vector_store
+      refute res.settings.ai.graph
 
       context = Services.get_context_by_name!("plrl/cloud/observability")
       assert context.configuration["elastic"]["user"] == "plrl"

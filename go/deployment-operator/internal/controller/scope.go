@@ -5,6 +5,8 @@ import (
 	"fmt"
 
 	"github.com/pluralsh/controller-reconcile-helper/pkg/patch"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	kerrors "k8s.io/apimachinery/pkg/util/errors"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -19,8 +21,10 @@ type DefaultScope[T client.Object] struct {
 	patchHelper *patch.Helper
 }
 
+// PatchObject ignores not found errors, since removing the last finalizer deletes the object
+// before the remaining (eg. status) patches are issued.
 func (in *DefaultScope[T]) PatchObject() error {
-	return in.patchHelper.Patch(in.ctx, in.object)
+	return kerrors.FilterOut(in.patchHelper.Patch(in.ctx, in.object), apierrors.IsNotFound)
 }
 
 func NewDefaultScope[T client.Object](ctx context.Context, client client.Client, object T) (Scope[T], error) {

@@ -1,5 +1,5 @@
 defmodule Console.Schema.StackPolicyViolation do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{StackRun, StackViolationCause, Vulnerability}
 
 

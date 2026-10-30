@@ -25,8 +25,8 @@ var (
 
 // preStart function is executed before stack run steps.
 func (in *stackRunController) preStart() error {
-	if in.stackRun.Status != gqlclient.StackStatusPending && !environment.IsDev() {
-		klog.Fatalf("could not start stack run: invalid status: %s", in.stackRun.Status)
+	if err := validateStartStatus(in.stackRun.Status); err != nil && !environment.IsDev() {
+		return err
 	}
 
 	if err := stackrun.MarkStackRunWithRetryTimeout(in.consoleClient, in.stackRunID, gqlclient.StackStatusRunning, 5*time.Second, 30*time.Second); err != nil {
@@ -51,6 +51,20 @@ func (in *stackRunController) preStart() error {
 	return nil
 }
 
+// validateStartStatus allows running as well as pending runs, since the operator marks a run
+// running as soon as its job starts, which usually happens before the harness fetches it.
+// Pending approval is allowed so a restarted harness pod can resume waiting for approval.
+func validateStartStatus(status gqlclient.StackStatus) error {
+	switch status {
+	case gqlclient.StackStatusPending, gqlclient.StackStatusRunning, gqlclient.StackStatusPendingApproval:
+		return nil
+	case gqlclient.StackStatusCancelled:
+		return harnesserrors.ErrRemoteCancel
+	default:
+		return fmt.Errorf("%w: %s", harnesserrors.ErrInvalidStatus, status)
+	}
+}
+
 // postStart function is executed after all stack run steps.
 func (in *stackRunController) postStart(err error) {
 	var status gqlclient.StackStatus
@@ -62,6 +76,10 @@ func (in *stackRunController) postStart(err error) {
 		// Console token is expired or invalid; any further API call will also
 		// fail with 401/403, so skip console updates and exit cleanly.
 		klog.ErrorS(err, "unauthenticated – skipping console status update")
+		return
+	case errors.Is(err, harnesserrors.ErrInvalidStatus):
+		// The run already reached a terminal status elsewhere, do not overwrite it.
+		klog.ErrorS(err, "skipping console status update")
 		return
 	case errors.Is(err, harnesserrors.ErrRemoteCancel):
 		status = gqlclient.StackStatusCancelled
@@ -131,8 +149,16 @@ func (in *stackRunController) postExecHook(step *gqlclient.RunStepFragment) v1.H
 // postExecHook is a callback function started by the exec.Executable before it runs the executable.
 func (in *stackRunController) preExecHook(ctx context.Context, step *gqlclient.RunStepFragment) v1.HookFunction {
 	return func() error {
+		if err := in.checkCancelled(ctx); err != nil {
+			return err
+		}
+
 		if (step.Stage == gqlclient.StepStageApply || step.Stage == gqlclient.StepStageDestroy) && in.requiresApproval() {
 			if err := in.waitForApproval(ctx); err != nil {
+				return err
+			}
+
+			if err := in.checkCancelled(ctx); err != nil {
 				return err
 			}
 		}
@@ -147,6 +173,34 @@ func (in *stackRunController) preExecHook(ctx context.Context, step *gqlclient.R
 
 		return nil
 	}
+}
+
+// checkCancelled synchronously checks for remote cancellation so that a step never starts
+// after a cancel the console signal has not picked up yet.
+func (in *stackRunController) checkCancelled(ctx context.Context) error {
+	if cause := context.Cause(ctx); cause != nil {
+		return cause
+	}
+
+	if environment.IsDev() {
+		return nil
+	}
+
+	stackRun, err := in.consoleClient.GetStackRunStatus(in.stackRunID)
+	if err != nil {
+		if clienterrors.IsUnauthenticated(err) {
+			return harnesserrors.WrapUnauthenticated("could not check stack run status", err)
+		}
+
+		klog.ErrorS(err, "could not check stack run status before starting step")
+		return nil
+	}
+
+	if stackRun != nil && stackRun.Status == gqlclient.StackStatusCancelled {
+		return harnesserrors.ErrRemoteCancel
+	}
+
+	return nil
 }
 
 func (in *stackRunController) requiresApproval() bool {

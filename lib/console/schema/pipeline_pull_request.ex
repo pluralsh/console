@@ -1,5 +1,5 @@
 defmodule Console.Schema.PipelinePullRequest do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{PipelineContext, PipelineStage, PullRequest, Service}
 
   schema "pipeline_pull_requests" do

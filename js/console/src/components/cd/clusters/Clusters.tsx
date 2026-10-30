@@ -40,7 +40,7 @@ import { isEmpty } from 'lodash'
 import { ToolbarSearchInput } from 'components/layout/PageToolbar'
 
 import {
-  POLL_INTERVAL,
+  STATUS_COUNTS_POLL_INTERVAL,
   useSetPageHeaderContent,
   useSetPageScrollable,
 } from '../ContinuousDeployment'
@@ -68,6 +68,10 @@ import { useOnboarded } from '../../contexts/DeploymentSettingsContext.tsx'
 import { GettingStartedBlock } from '../../home/GettingStarted.tsx'
 import { ClustersCharts } from './ClustersCharts.tsx'
 import { cdClustersColumns } from './ClustersColumns'
+import {
+  CLUSTER_DELTA_FALLBACK_POLL_INTERVAL,
+  useClusterDeltas,
+} from './useClusterDeltas'
 import { DemoTable } from './ClustersDemoTable'
 import CreateCluster from './create/CreateCluster'
 import {
@@ -148,6 +152,11 @@ export default function Clusters() {
     Conjunction.Or
   )
 
+  const tagQuery = useMemo(
+    () => (isEmpty(searchTags) ? undefined : { op: tagOp, tags: searchTags }),
+    [searchTags, tagOp]
+  )
+
   const {
     data,
     loading,
@@ -157,30 +166,33 @@ export default function Clusters() {
     fetchNextPage,
     setVirtualSlice,
   } = useFetchPaginatedData(
-    { query: ClustersDocument, keyPath: ['clusters'] },
+    {
+      pollInterval: CLUSTER_DELTA_FALLBACK_POLL_INTERVAL,
+      query: ClustersDocument,
+      keyPath: ['clusters'],
+    },
     {
       q: debouncedSearchString,
       projectId,
       ...(statusFilter !== 'ALL'
         ? { healthy: statusFilter === 'HEALTHY' }
         : {}),
-      ...(!isEmpty(searchTags)
-        ? { tagQuery: { op: tagOp, tags: searchTags } }
-        : {}),
+      tagQuery,
       upgradeable:
         upgradeableFilter === 'ALL'
           ? undefined
           : upgradeableFilter === 'UPGRADEABLE',
     }
   )
+  useClusterDeltas({ refetchOnCreate: refetch })
   const {
     data: aggData,
     previousData: aggPrev,
     loading: aggLoading,
   } = useClusterStatusesQuery({
-    variables: { q: debouncedSearchString, projectId },
+    variables: { q: debouncedSearchString, projectId, tagQuery },
     fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
+    pollInterval: STATUS_COUNTS_POLL_INTERVAL,
   })
   const { clusterStatuses, upgradeStatistics } = (aggData || aggPrev) ?? {}
 
@@ -206,7 +218,7 @@ export default function Clusters() {
     () => data?.clusters?.edges?.filter(isNonNullable) ?? [],
     [data?.clusters?.edges]
   )
-  const hasStatFilters = !!debouncedSearchString || !!projectId
+  const hasStatFilters = !!debouncedSearchString || !!projectId || !!tagQuery
   const isDemo = (statusCounts.ALL === 0 && !hasStatFilters) || !cdIsEnabled
   const tableData: Edge<ClustersRowFragment>[] = isDemo
     ? DEMO_CLUSTERS

@@ -11,6 +11,58 @@ import (
 	"github.com/pluralsh/console/go/cloud-query/internal/proto/toolquery"
 )
 
+const (
+	// MaxSamples caps the samples returned per series. Finer resolution only costs callers, which encode every
+	// point for a model that sees a truncated slice of them.
+	MaxSamples = 1_000
+
+	// MaxSeries caps the series returned per query.
+	MaxSeries = 100
+)
+
+// MinStep is the smallest step keeping a series from start to end within MaxSamples, rounded up to a whole second.
+func MinStep(start, end time.Time) time.Duration {
+	span := end.Sub(start)
+	if span <= 0 {
+		return 0
+	}
+
+	step := (span + MaxSamples - 1) / MaxSamples
+	return (step + time.Second - 1).Truncate(time.Second)
+}
+
+// Bound drops series past MaxSeries and evenly thins the rest to MaxSamples, keeping each series' first and last
+// sample. It backstops providers whose resolution can't be set from the request.
+func Bound(output *toolquery.MetricsSeriesOutput) *toolquery.MetricsSeriesOutput {
+	if output == nil {
+		return nil
+	}
+
+	if len(output.Series) > MaxSeries {
+		output.Series = output.Series[:MaxSeries]
+	}
+
+	for _, s := range output.Series {
+		s.Samples = thin(s.Samples, MaxSamples)
+	}
+
+	return output
+}
+
+func thin(samples []*toolquery.MetricSample, limit int) []*toolquery.MetricSample {
+	if len(samples) <= limit {
+		return samples
+	}
+
+	last := len(samples) - 1
+	thinned := make([]*toolquery.MetricSample, limit)
+	for i := range limit {
+		thinned[i] = samples[i*last/(limit-1)]
+	}
+
+	return thinned
+}
+
 // Flatten expands series into one point per sample, each carrying its series' name and labels.
 func Flatten(output *toolquery.MetricsSeriesOutput) *toolquery.MetricsQueryOutput {
 	size := 0

@@ -1,5 +1,5 @@
 defmodule Console.Schema.NamespaceCluster do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{ManagedNamespace, Cluster}
 
   schema "namespace_clusters" do

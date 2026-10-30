@@ -29,6 +29,9 @@ type agentRunController struct {
 	// consoleClient is the client for Console API
 	consoleClient console.Client
 
+	// kicks fires when Console notifies about this run, so polls don't wait for the next tick.
+	kicks <-chan struct{}
+
 	// tool is the agent run tool that is being executed
 	tool v1.Tool
 

@@ -1,5 +1,5 @@
 defmodule Console.Schema.ApiDeprecation do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.ServiceComponent
 
   schema "api_deprecations" do

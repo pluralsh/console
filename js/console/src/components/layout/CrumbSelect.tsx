@@ -9,6 +9,9 @@ export function CrumbSelect({
   ariaLabel,
   selectedKey,
   onSelectionChange,
+  onOpenChange,
+  dropdownHeaderFixed,
+  dropdownFooterFixed,
   width = 280,
   children,
 }: {
@@ -16,6 +19,9 @@ export function CrumbSelect({
   ariaLabel: string
   selectedKey: string
   onSelectionChange: (key: string) => void
+  onOpenChange?: ComponentProps<typeof Select>['onOpenChange']
+  dropdownHeaderFixed?: ComponentProps<typeof Select>['dropdownHeaderFixed']
+  dropdownFooterFixed?: ComponentProps<typeof Select>['dropdownFooterFixed']
   width?: number
   children: ComponentProps<typeof Select>['children']
 }) {
@@ -25,7 +31,10 @@ export function CrumbSelect({
     <Select
       label={ariaLabel}
       isOpen={isOpen}
-      onOpenChange={setIsOpen}
+      onOpenChange={(nextIsOpen) => {
+        setIsOpen(nextIsOpen)
+        onOpenChange?.(nextIsOpen)
+      }}
       selectedKey={selectedKey}
       onSelectionChange={(key) => {
         if (key !== null && key !== undefined) onSelectionChange(`${key}`)
@@ -34,6 +43,8 @@ export function CrumbSelect({
       width={width}
       maxHeight={360}
       triggerButton={<CrumbSelectTrigger label={label} />}
+      dropdownHeaderFixed={dropdownHeaderFixed}
+      dropdownFooterFixed={dropdownFooterFixed}
     >
       {children}
     </Select>

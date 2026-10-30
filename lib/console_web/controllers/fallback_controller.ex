@@ -9,6 +9,12 @@ defmodule ConsoleWeb.FallbackController do
     |> json(%{error: "forbidden"})
   end
 
+  def call(conn, {:error, {:bad_request, msg}}) do
+    conn
+    |> put_status(400)
+    |> json(%{error: msg})
+  end
+
   def call(conn, {:error, %Ecto.Changeset{} = cs}) do
     conn
     |> put_status(422)

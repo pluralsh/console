@@ -7,6 +7,7 @@ defmodule Console.Guardian do
   use Nebulex.Caching
 
   @ttl :timer.minutes(15)
+  @local_cache Console.conf(:local_cache)
 
   def subject_for_token(%User{id: id}, _claims),
     do: {:ok, "user:#{id}"}
@@ -44,10 +45,15 @@ defmodule Console.Guardian do
   def possibly_cached(id, %{"cached" => true}), do: cached_fetch_user(id)
   def possibly_cached(id, _), do: fetch_user(id)
 
-  # @decorate cacheable(cache: Console.Cache, key: {:login, id}, opts: [ttl: @ttl], match: &allow/1)
+  @doc """
+  Fetches a user and their bindings, reusing them for up to a minute on this node, so changes to a
+  user (including deactivation) can take that long to reach their requests.
+  """
   def fetch_user(id) do
-    Console.Repo.get(User, id)
-    |> Console.Services.Rbac.preload()
+    Console.Cache.fetch_or_store(@local_cache, {:login_user, id}, fn ->
+      Console.Repo.get(User, id)
+      |> Console.Services.Rbac.preload()
+    end, ttl: :timer.minutes(1), negative_ttl: :timer.minutes(1))
   end
 
   def add_scopes(%User{} = user, %{"scopes" => [_ | _] = scopes}) do

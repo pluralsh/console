@@ -1,3 +1,4 @@
+import { AGGREGATE_POLL_INTERVAL } from 'components/cluster/constants'
 import styled, { useTheme } from 'styled-components'
 
 import {
@@ -13,7 +14,6 @@ import { GqlError } from 'components/utils/Alert'
 import { ChartSkeleton } from 'components/utils/SkeletonLoaders'
 
 import { RadialBar } from '@nivo/radial-bar'
-import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { CustomLegend } from 'components/utils/CustomLegend'
 import { ChartTooltip } from 'components/utils/ChartTooltip'
 import {
@@ -170,7 +170,7 @@ export function SecurityOverviewHeatmapCard() {
   const { data, loading, error } = useClusterVulnerabilityAggregateQuery({
     variables: { grade },
     fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
+    pollInterval: AGGREGATE_POLL_INTERVAL,
   })
 
   const vulns =

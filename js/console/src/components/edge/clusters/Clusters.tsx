@@ -1,3 +1,4 @@
+import { POLL_INTERVAL } from 'components/cluster/constants'
 import {
   AppIcon,
   Button,
@@ -140,6 +141,7 @@ export default function Clusters(): ReactNode {
     fetchNextPage,
     setVirtualSlice,
   } = useFetchPaginatedData({
+    pollInterval: POLL_INTERVAL,
     query: ClusterRegistrationsDocument,
     keyPath: ['clusterRegistrations'],
   })

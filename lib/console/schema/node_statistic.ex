@@ -1,5 +1,5 @@
 defmodule Console.Schema.NodeStatistic do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.Cluster
 
   defenum Health, healthy: 0, warning: 1, failed: 2

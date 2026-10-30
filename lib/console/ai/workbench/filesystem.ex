@@ -99,15 +99,17 @@ defmodule Console.AI.Workbench.Filesystem do
       do: {:ok, {:bytes, data}}
   end
 
-  defp dispatch(t, :write_text, v, p, [content | _], _),
-    do: PseudoFS.write_text(t, p, to_string(content)) |> result(v)
+  defp dispatch(t, :write_text, v, p, [content | _], _) do
+    with {:ok, content} <- text(content),
+      do: PseudoFS.write_text(t, p, content) |> result(v)
+  end
 
   defp dispatch(t, :write_bytes, v, p, [content | _], _),
     do: PseudoFS.write_bytes(t, p, bytes(content)) |> result(v)
 
   defp dispatch(t, :append_text, v, p, [content | _], _) do
-    content = to_string(content)
-    with {:ok, _} <- PseudoFS.append_text(t, p, content) |> result(v),
+    with {:ok, content} <- text(content),
+         {:ok, _} <- PseudoFS.append_text(t, p, content) |> result(v),
       do: {:ok, String.length(content)}
   end
 
@@ -327,18 +329,36 @@ defmodule Console.AI.Workbench.Filesystem do
   defp type_bits(_), do: @s_ifreg
 
   defp resolve(path) do
-    vpath = normalize(extract(path))
-    case vpath do
-      @root -> {:ok, vpath, "/"}
-      @root <> "/" <> rest -> {:ok, vpath, "/" <> rest}
-      _ -> {:error, :permission_error, "#{vpath} is outside the sandbox filesystems, use paths under #{@root} or /scratch"}
+    with p when is_binary(p) <- extract(path),
+         vpath = normalize(p),
+         {:ok, fspath} <- tenant_location(vpath) do
+      {:ok, vpath, fspath}
+    else
+      nil -> {:error, :type_error, "expected a str or Path, not #{python_type(path)}"}
+      err -> err
     end
   end
+
+  defp tenant_location(@root), do: {:ok, "/"}
+  defp tenant_location(@root <> "/" <> rest), do: {:ok, "/" <> rest}
+  defp tenant_location(vpath),
+    do: {:error, :permission_error, "#{vpath} is outside the sandbox filesystems, use paths under #{@root} or /scratch"}
 
   defp extract({:path, p}), do: extract(p)
   defp extract("/" <> _ = p), do: p
   defp extract(p) when is_binary(p), do: Path.join(@root, p)
-  defp extract(p), do: to_string(p)
+  defp extract(_), do: nil
+
+  defp text(content) when is_binary(content), do: {:ok, content}
+  defp text(content), do: {:error, :type_error, "data must be str, not #{python_type(content)}"}
+
+  defp python_type(v) when is_list(v), do: "list"
+  defp python_type(v) when is_map(v), do: "dict"
+  defp python_type(nil), do: "NoneType"
+  defp python_type(v) when is_boolean(v), do: "bool"
+  defp python_type(v) when is_integer(v), do: "int"
+  defp python_type(v) when is_float(v), do: "float"
+  defp python_type(_), do: "object"
 
   defp normalize(path) do
     path

@@ -15,6 +15,7 @@ defmodule Console.AI.Graph.IndexableItem do
 
   @derive JSON.Encoder
   @derive Jason.Encoder
+  @derive Torque.Encoder
   defstruct [:id, :type, :links, :document, :attributes, :provider]
 
   def from_search(hit) do

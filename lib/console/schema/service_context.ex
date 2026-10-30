@@ -1,5 +1,5 @@
 defmodule Console.Schema.ServiceContext do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.Project
 
   schema "service_contexts" do

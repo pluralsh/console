@@ -40,7 +40,7 @@ defmodule Console.Plural.Context do
 
   def get() do
     with {:ok, content} <- File.read(location()),
-         {:ok, %{"spec" => spec}} <- YamlElixir.read_from_string(content) do
+         {:ok, %{"spec" => spec}} <- Console.Utils.Yaml.decode(content) do
       {:ok, new(spec)}
     else
       _ -> {:error, :not_found}

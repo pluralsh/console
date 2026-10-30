@@ -13,7 +13,7 @@ defmodule Console.Deployments.KubeVersions.Table do
   @poll :timer.hours(6)
 
   defmodule State do
-    defstruct [:table, :url, :static]
+    defstruct [:table, :url, :static, :validators]
   end
 
   defmodule Entry do
@@ -24,6 +24,7 @@ defmodule Console.Deployments.KubeVersions.Table do
     @type t :: %__MODULE__{version: binary, extended: boolean}
 
     @derive Jason.Encoder
+    @derive Torque.Encoder
     defstruct [:version, :extended, :extended_from]
 
     def new(attrs) do
@@ -137,15 +138,16 @@ defmodule Console.Deployments.KubeVersions.Table do
     {:ok, %State{table: table, static: Console.conf(:airgap), url: Console.plrl_assets_url(@changelog_url)}}
   end
 
-  def handle_info(:poll, %State{table: table, static: false, url: url} = state) do
-    with {:ok, %Req.Response{status: 200, body: body}} <- Req.get(url, decode_body: false, retry: false),
-         {:ok, %{"kube_changelog" => changelog}} <- YamlElixir.read_from_string(body) do
+  def handle_info(:poll, %State{table: table, static: false, url: url, validators: prev} = state) do
+    with {:ok, body, validators} when is_binary(body) <- Console.Utils.HTTP.fetch_if_changed(url, prev),
+         {:ok, %{"kube_changelog" => changelog}} <- Console.Utils.Yaml.decode(body) do
       table = Enum.reduce(changelog, table, fn change, table ->
         changelog = Changelog.new(change)
         KeyValueSet.put!(table, {:changelog, changelog.version}, changelog)
       end)
-      {:noreply, %{state | table: table}}
+      {:noreply, %{state | table: table, validators: validators}}
     else
+      {:ok, :unchanged, validators} -> {:noreply, %{state | validators: validators}}
       err ->
         Logger.error "failed to fetch kubernetes changelog: #{inspect(err)}"
         {:noreply, state}
@@ -163,14 +165,14 @@ defmodule Console.Deployments.KubeVersions.Table do
   def static() do
     Enum.map(@distros, fn distro ->
       {:ok, yaml} = File.read("static/extended/#{distro}.yaml")
-      {:ok, versions} = YamlElixir.read_from_string(yaml)
+      {:ok, versions} = Console.Utils.Yaml.decode(yaml)
       to_entry(distro, versions)
     end)
   end
 
   def static_changelog() do
     {:ok, yaml} = File.read("static/kube_changelog.yaml")
-    {:ok, %{"kube_changelog" => changelog}} = YamlElixir.read_from_string(yaml)
+    {:ok, %{"kube_changelog" => changelog}} = Console.Utils.Yaml.decode(yaml)
     Enum.map(changelog, &Changelog.new/1)
   end
 end

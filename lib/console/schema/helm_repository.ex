@@ -1,5 +1,5 @@
 defmodule Console.Schema.HelmRepository do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.GitRepository
 
   defenum Provider, basic: 0, bearer: 1, gcp: 2, azure: 3, aws: 4

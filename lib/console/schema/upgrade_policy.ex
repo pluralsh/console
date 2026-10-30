@@ -1,5 +1,5 @@
 defmodule Console.Schema.UpgradePolicy do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
 
   defenum Type, deploy: 0, approval: 1, ignore: 2
 

@@ -33,6 +33,7 @@ export function StackCustomRunCommands({
       commands: parseScript(script),
     },
     onCompleted: () => onClose(),
+    refetchQueries: ['StackRuns'],
     update: (cache, { data }) => {
       updateCache(cache, {
         variables: {

@@ -1,3 +1,4 @@
+import { POLL_INTERVAL } from 'components/cluster/constants'
 import { Table } from '@pluralsh/design-system'
 
 import { GqlError } from 'components/utils/Alert'
@@ -21,6 +22,7 @@ export function GlobalServiceServices({
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
       {
+        pollInterval: POLL_INTERVAL,
         query: GetGlobalServiceServicesDocument,
         keyPath: ['globalService', 'services'],
       },

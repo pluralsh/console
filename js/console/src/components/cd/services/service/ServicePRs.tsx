@@ -1,3 +1,4 @@
+import { POLL_INTERVAL } from 'components/cluster/constants'
 import { Table } from '@pluralsh/design-system'
 import {
   PageToolbarPortal,
@@ -44,7 +45,11 @@ export function ServicePRs() {
     fetchNextPage,
     setVirtualSlice,
   } = useFetchPaginatedData(
-    { query: PullRequestsDocument, keyPath: ['pullRequests'] },
+    {
+      pollInterval: POLL_INTERVAL,
+      query: PullRequestsDocument,
+      keyPath: ['pullRequests'],
+    },
     { q: debouncedSearchString, serviceId }
   )
 

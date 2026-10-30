@@ -1,5 +1,6 @@
 import {
   AiSparkleFilledIcon,
+  ArrowCornerUpIcon,
   ArrowUpIcon,
   Button,
   CaretDownIcon,
@@ -16,6 +17,7 @@ import { SemanticPartialType } from 'components/utils/table/StackedText.tsx'
 import { ChatThreadDetailsFragment } from 'generated/graphql.ts'
 import { isEmpty, truncate } from 'lodash'
 import {
+  ComponentProps,
   ComponentPropsWithoutRef,
   ComponentPropsWithRef,
   Dispatch,
@@ -296,16 +298,10 @@ export function ChatInputSimple({
       </div>
       {submitButton ??
         (showSubmitButton && (
-          <ChatSubmitButton
+          <PromptSubmitButton
             loading={loading}
-            loadingIndicator={<SpinnerAlt color="icon-xlight" />}
             disabled={!allowSubmit || loading || disabled}
             onClick={handleSubmit}
-            css={{
-              position: 'absolute',
-              bottom: spacing.small,
-              right: spacing.small,
-            }}
           />
         ))}
       <MentionMenu
@@ -320,6 +316,20 @@ export function ChatInputSimple({
 
 const EMPTY_FILES: File[] = []
 const noop = () => {}
+
+export function PromptSubmitButton({
+  loading = false,
+  ...props
+}: Omit<ComponentProps<typeof ChatSubmitButton>, 'icon' | 'loadingIndicator'>) {
+  return (
+    <PromptSubmitButtonSC
+      icon={<ArrowCornerUpIcon />}
+      loading={loading}
+      loadingIndicator={<SpinnerAlt color="icon-xlight" />}
+      {...props}
+    />
+  )
+}
 
 export function ChatSubmitButton({
   bgColor = 'fill-primary',
@@ -423,6 +433,18 @@ const ChatSubmitButtonSC = styled(Button)<{ $bgColor: SemanticColorKey }>(
     background: theme.colors[$bgColor],
   })
 )
+
+// doubled so the square shape wins over the round base regardless of stylesheet order
+const PromptSubmitButtonSC = styled(ChatSubmitButton)(({ theme }) => ({
+  '&&': {
+    position: 'absolute',
+    bottom: theme.spacing.small,
+    right: theme.spacing.small,
+    width: 32,
+    height: 32,
+    borderRadius: theme.borderRadiuses.medium,
+  },
+}))
 
 const ChipListSC = styled.div(({ theme }) => ({
   display: 'flex',

@@ -3,6 +3,7 @@ defmodule Console.Logs.Provider.LokiTest do
   use Mimic
   alias Console.Logs.{Provider, Query, Time, Line, AggregationBucket}
   alias Console.Logs.Provider.Loki
+  alias Console.Schema.DeploymentSettings
   alias Console.Schema.DeploymentSettings.Loki, as: Connection
 
   setup :set_mimic_global
@@ -69,6 +70,14 @@ defmodule Console.Logs.Provider.LokiTest do
     test "it doesn't double up an explicit case-insensitive flag and ignores blank queries" do
       assert Loki.build_query(@conn, Query.new(query: "(?i)Boom")) == ~s<{cluster=~".+"} |~ "(?i)Boom">
       assert Loki.build_query(@conn, Query.new(query: "   ")) == ~s({cluster=~".+"})
+    end
+
+    test "it filters levels on detected_level in the pipeline, ahead of the line filter" do
+      assert Loki.build_query(@conn, Query.new(query: "boom", levels: [:error])) ==
+        ~s<{cluster=~".+"} | detected_level="error" |~ "(?i)boom">
+
+      q = Query.new(levels: [:error, "FATAL"], facets: [%{key: "detected_level", value: "warn"}, %{key: "app", value: "a"}])
+      assert Loki.build_query(@conn, q) == ~s<{app="a"} | detected_level=~"error|fatal|warn">
     end
 
     test "it escapes quotes and backslashes in the regex and falls back to a non-empty selector" do
@@ -153,6 +162,30 @@ defmodule Console.Logs.Provider.LokiTest do
     end
   end
 
+  describe "aggregate/2 grouped by level" do
+    test "it sums by detected_level and merges spellings of the same level" do
+      expect(Req, :get, fn url, _ ->
+        {_, params} = params(url)
+        assert params["query"] ==
+          ~s<sum by (detected_level) (count_over_time({cluster=~".+"} | detected_level=~"error|warn" [60s]))>
+
+        {:ok, %Req.Response{status: 200, body: Jason.encode!(%{
+          data: %{resultType: "matrix", result: [
+            %{metric: %{detected_level: "error"}, values: [[1759276800, "4"], [1759276860, "1"]]},
+            %{metric: %{detected_level: "warning"}, values: [[1759276800, "2"]]},
+            %{metric: %{detected_level: "warn"}, values: [[1759276800, "3"]]}
+          ]}
+        })}}
+      end)
+
+      q = Query.new(levels: [:error, :warn], group_by_level: true, bucket_size: "1m")
+      {:ok, buckets} = Loki.aggregate(Loki.new(@conn), q)
+
+      assert Enum.map(buckets, &{DateTime.to_unix(&1.timestamp), &1.level, &1.count}) ==
+        [{1759276800, :error, 4}, {1759276800, :warn, 5}, {1759276860, :error, 1}]
+    end
+  end
+
   describe "labels/2" do
     test "it counts values of a label" do
       expect(Req, :get, fn url, _ ->
@@ -182,6 +215,18 @@ defmodule Console.Logs.Provider.LokiTest do
       end)
 
       {:ok, []} = Loki.labels(Loki.new(@conn), Query.new(field: "container", time: %Time{before: bef, duration: "30m"}))
+    end
+  end
+
+  describe "Provider.levels/2" do
+    test "it drops level args unless the store supports levels" do
+      q = Query.new(levels: [:error], group_by_level: true)
+
+      off = %DeploymentSettings{logging: %DeploymentSettings.Logging{enabled: true, driver: :loki}}
+      assert %Query{levels: nil, group_by_level: false} = Provider.levels(q, off)
+
+      on = %DeploymentSettings{logging: %DeploymentSettings.Logging{enabled: true, levels: true, level_field: "severity.keyword"}}
+      assert %Query{levels: [:error], group_by_level: true, level_field: "severity.keyword"} = Provider.levels(q, on)
     end
   end
 

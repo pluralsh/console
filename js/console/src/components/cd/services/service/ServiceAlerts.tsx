@@ -1,3 +1,4 @@
+import { POLL_INTERVAL } from 'components/cluster/constants'
 import { ServiceAlertsDocument } from 'generated/graphql-documents'
 
 import { AlertsTable } from 'components/utils/alerts/AlertsTable'
@@ -12,6 +13,7 @@ export function ServiceAlerts() {
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
       {
+        pollInterval: POLL_INTERVAL,
         query: ServiceAlertsDocument,
         keyPath: ['serviceDeployment', 'alerts'],
         skip: !service?.id,

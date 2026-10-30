@@ -3,6 +3,9 @@ defmodule ConsoleWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :console
   use Absinthe.Phoenix.Endpoint
 
+  def run_docset(pubsub, docs_and_topics, mutation_result),
+    do: ConsoleWeb.Subscriptions.run_docset(pubsub, docs_and_topics, mutation_result)
+
   socket "/socket/gql-ws", ConsoleWeb.GraphqlWSSocket,
     websocket: [path: "", subprotocols: ["graphql-transport-ws"], check_origin: false]
 
@@ -40,10 +43,15 @@ defmodule ConsoleWeb.Endpoint do
   plug ConsoleWeb.Plugs.RemoteIp
   plug ConsoleWeb.Plugs.AuditContext
   plug ConsoleWeb.Plugs.SecureHeaders
+  plug ConsoleWeb.Plugs.RetryAfter
 
   plug ConsoleWeb.ProxyRouter
 
-  plug ConsoleWeb.Plugs.Parsers
+  plug ConsoleWeb.Plugs.Parsers, skip: [
+    ~w(ext v1 webhooks),
+    ~w(ext v1 states terraform),
+    ~w(ext v1 ai openai)
+  ]
 
   plug Sentry.PlugContext, body_scrubber: {ConsoleWeb.Sentry, :scrub_params}
 

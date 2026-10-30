@@ -30,7 +30,7 @@ defmodule Console.AI.Anthropic do
       model: opts.model || model_defaults[:model],
       tool_model: opts.tool_model || model_defaults[:tool_model],
       full_url: Map.get(opts, :full_url),
-      base_url: Map.get(opts, :base_url),
+      base_url: normalize_base_url(Map.get(opts, :base_url)),
       proxy: Map.get(opts, :proxy),
       body: Map.get(opts, :body, %{}),
       stream: Stream.stream()
@@ -69,4 +69,13 @@ defmodule Console.AI.Anthropic do
   def provider_options(%__MODULE__{} = anthropic) do
     Enum.filter([base_url: anthropic.base_url, api_key: anthropic.access_key] ++ http_options(anthropic), fn {_, v} -> not is_nil(v) end)
   end
+
+  # ReqLLM appends /v1/messages itself, so accept urls with or without the /v1 suffix
+  defp normalize_base_url(url) when is_binary(url) do
+    case String.trim(url) |> String.trim_trailing("/") |> String.replace_suffix("/v1", "") do
+      "" -> nil
+      url -> url
+    end
+  end
+  defp normalize_base_url(_), do: nil
 end

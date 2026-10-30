@@ -511,6 +511,8 @@ defmodule Console.Deployments.StacksTest do
       %{environment: [_], files: [_]} = Console.Repo.preload(stack, [:environment, :files])
 
       [_] = StackRun.for_stack(stack.id) |> Console.Repo.all()
+      assert_receive {:event, %PubSub.StackStatusChanged{item: %{id: stack_id, sha: "new-sha"}}}
+      assert stack_id == stack.id
       assert_receive {:event, %PubSub.StackRunCreated{item: ^run}}, :timer.seconds(10)
     end
 
@@ -1271,6 +1273,20 @@ defmodule Console.Deployments.StacksTest do
       assert refetch(stack).status == :successful
 
       assert_receive {:event, %PubSub.StackRunUpdated{item: ^updated}}
+      assert_receive {:event, %PubSub.StackStatusChanged{item: %{id: stack_id, status: :successful}}}
+      assert stack_id == stack.id
+      refute_receive {:event, %PubSub.StackUpdated{}}
+    end
+
+    test "dry runs don't change their stack's status" do
+      user  = insert(:user)
+      stack = insert(:stack, write_bindings: [%{user_id: user.id}])
+      run   = insert(:stack_run, stack: stack, dry_run: true)
+
+      {:ok, updated} = Stacks.update_stack_run(%{status: :successful}, run.id, user)
+
+      assert_receive {:event, %PubSub.StackRunUpdated{item: ^updated}}
+      refute_receive {:event, %PubSub.StackStatusChanged{}}
     end
 
     test "writers can attach infracost resources on update" do
@@ -1324,6 +1340,26 @@ defmodule Console.Deployments.StacksTest do
       assert_receive {:event, %PubSub.StackRunUpdated{item: ^updated}}
     end
 
+    test "clusters cannot move a cancelled run out of cancelled" do
+      stack = insert(:stack)
+      run = insert(:stack_run, stack: stack, status: :cancelled)
+
+      {:ok, updated} = Stacks.update_stack_run(%{status: :running, state: %{plan: "some plan"}}, run.id, run.cluster)
+
+      assert updated.status == :cancelled
+      assert updated.state.plan == "some plan"
+    end
+
+    test "users can still change the status of a cancelled run" do
+      user = insert(:user)
+      stack = insert(:stack, write_bindings: [%{user_id: user.id}])
+      run = insert(:stack_run, stack: stack, status: :cancelled)
+
+      {:ok, updated} = Stacks.update_stack_run(%{status: :running}, run.id, user)
+
+      assert updated.status == :running
+    end
+
     test "random users cannot update runs" do
       stack = insert(:stack)
       run = insert(:stack_run, stack: stack)
@@ -1364,6 +1400,16 @@ defmodule Console.Deployments.StacksTest do
   end
 
   describe "#complete_stack_run/3" do
+    test "clusters cannot complete a cancelled run with another status" do
+      stack = insert(:stack)
+      run = insert(:stack_run, stack: stack, status: :cancelled)
+
+      {:ok, completed} = Stacks.complete_stack_run(%{status: :successful}, run.id, run.cluster)
+
+      assert completed.status == :cancelled
+      assert refetch(stack).status == :cancelled
+    end
+
     test "writers can compelete runs" do
       user = insert(:user)
       stack = insert(:stack, write_bindings: [%{user_id: user.id}])
@@ -1388,6 +1434,9 @@ defmodule Console.Deployments.StacksTest do
       assert output.value == "val"
 
       assert_receive {:event, %PubSub.StackRunCompleted{item: ^completed}}
+      assert_receive {:event, %PubSub.StackStatusChanged{item: %{id: stack_id, last_successful: ref}}}
+      assert stack_id == stack.id
+      assert ref == completed.git.ref
 
       # can still complete when completed
       {:ok, _} = Stacks.complete_stack_run(%{
@@ -1485,6 +1534,8 @@ defmodule Console.Deployments.StacksTest do
 
       assert updated.id == step.id
       assert updated.status == :running
+
+      assert_receive {:event, %PubSub.RunStepUpdated{item: ^updated}}
     end
 
     test "random clusters cannot update steps" do

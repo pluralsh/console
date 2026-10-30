@@ -51,6 +51,12 @@ func WithTimeout(timeout time.Duration) Option {
 	}
 }
 
+func WithCancelGracePeriod(gracePeriod time.Duration) Option {
+	return func(e *executable) {
+		e.cancelGracePeriod = gracePeriod
+	}
+}
+
 func WithOutputAnalyzer(heuristics []OutputAnalyzerHeuristic, opts ...AnalyzerOption) Option {
 	return func(e *executable) {
 		e.outputAnalyzer = NewOutputAnalyzer(heuristics, opts...)

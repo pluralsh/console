@@ -1,5 +1,5 @@
 defmodule Console.Schema.StackViolationCause do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{StackPolicyViolation}
 
   schema "stack_violation_causes" do

@@ -212,13 +212,13 @@ const EvalLinkSC = styled.button<{ $active?: boolean }>(
     width: '100%',
     padding: `${theme.spacing.small} ${theme.spacing.medium}`,
     textAlign: 'left',
-    // on the panel's lighter background, as the Monitoring sidebar's rows
-    backgroundColor: $active ? theme.colors['fill-two-selected'] : undefined,
+    // matches PageSidebarNav's active item, as in the stacks sidebar
+    backgroundColor: $active ? theme.colors['fill-zero-selected'] : undefined,
 
     '&:hover': {
       backgroundColor: $active
-        ? theme.colors['fill-two-selected']
-        : theme.colors['fill-one-hover'],
+        ? theme.colors['fill-zero-selected']
+        : theme.colors['fill-zero-hover'],
     },
   })
 )

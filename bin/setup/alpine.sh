@@ -2,7 +2,8 @@ apk update
 # Upgrade busybox and ssl_client to fix CVE in BusyBox tar (terminal escape sequence vulnerability)
 # Upgrade gnutls to fix CVE (double-free in Subject Alternative Name export)
 apk upgrade --no-cache busybox busybox-binsh ssl_client gnutls
-apk add openssh-client libgcc libstdc++ ncurses-libs openssl-dev ca-certificates git gnupg bash pcre2=10.49-r0
+# Pin brotli-libs to fix CVE-2026-111497 (out-of-bounds write in the brotli decoder, pulled in via git/libcurl)
+apk add openssh-client libgcc libstdc++ ncurses-libs openssl-dev ca-certificates git gnupg bash pcre2=10.49-r0 "brotli-libs>=1.2.1-r0"
 apk add --no-cache --update --virtual=build gcc musl-dev libffi-dev openssl-dev make
 apk del build
 addgroup --gid 10001 app

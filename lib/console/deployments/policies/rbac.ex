@@ -242,6 +242,71 @@ defmodule Console.Deployments.Policies.Rbac do
   @top_preloads [:read_bindings, :write_bindings, project: @bindings]
   @stack_preloads [:read_bindings, :write_bindings, project: @bindings, cluster: @bindings]
 
+  @policy_cache Console.conf(:multilevel_cache)
+  @policy_ttl :timer.minutes(1)
+
+  @doc """
+  `preload/1` for services on hot read-only paths, like authorizing service deltas, which fire on every
+  agent sync.  The service's own bindings and its cluster's and flow's policy graphs are each cached by
+  id, locally and in the partitioned cache shared across nodes, so a burst of events across one cluster's
+  services costs one db lookup per cluster for the whole fleet rather than per event.  Binding changes
+  can take up to a minute to apply here, so never use this to authorize writes.
+
+  Clusters work the same way for cluster deltas, which fire on every agent ping.  The event's cluster is
+  kept and only its bindings and project come from the cached graph, which service deltas share.
+
+  Stacks get the read graph only (their bindings and project), for the stack deltas each run event sends.
+  """
+  @spec cached_preload(Service.t) :: Service.t
+  @spec cached_preload(Cluster.t) :: Cluster.t
+  @spec cached_preload(Stack.t) :: Stack.t
+  def cached_preload(%Service{} = svc) do
+    {read, write} = cached_bindings(svc)
+    %{svc |
+      read_bindings: read,
+      write_bindings: write,
+      cluster: cached_policy_graph(Cluster, svc.cluster_id),
+      flow: cached_policy_graph(Flow, svc.flow_id)
+    }
+  end
+  def cached_preload(%Cluster{id: id, project_id: project_id} = cluster) do
+    case cached_policy_graph(Cluster, id) do
+      %Cluster{project_id: ^project_id} = cached ->
+        %{cluster | read_bindings: cached.read_bindings, write_bindings: cached.write_bindings, project: cached.project}
+      _ -> preload(cluster)
+    end
+  end
+  def cached_preload(%Stack{} = stack) do
+    {read, write} = cached_bindings(stack)
+    %{stack |
+      read_bindings: read,
+      write_bindings: write,
+      project: cached_policy_graph(Project, stack.project_id)
+    }
+  end
+
+  defp cached_bindings(%schema{id: id, read_bindings: read, write_bindings: write})
+       when is_list(read) and is_list(write) do
+    @policy_cache.put({:rbac_bindings, schema, id}, {read, write}, ttl: @policy_ttl)
+    {read, write}
+  end
+  defp cached_bindings(%schema{id: id} = resource) do
+    Console.Cache.fetch_or_store(@policy_cache, {:rbac_bindings, schema, id}, fn ->
+      %{read_bindings: read, write_bindings: write} = Repo.preload(resource, @bindings)
+      {read, write}
+    end, ttl: @policy_ttl)
+  end
+
+  defp cached_policy_graph(_, nil), do: nil
+  defp cached_policy_graph(schema, id) do
+    Console.Cache.fetch_or_store(@policy_cache, {:rbac_preload, schema, id}, fn ->
+      case Repo.get(schema, id) do
+        nil -> nil
+        found -> preload(found)
+      end
+    end, ttl: @policy_ttl, negative_ttl: @policy_ttl)
+  end
+
   def preload(%PipelineContext{} = ctx), do: Repo.preload(ctx, [pipeline: @top_preloads])
   def preload(%PipelineGate{} = gate), do: Repo.preload(gate, [edge: [pipeline: @top_preloads]])
   def preload(%Pipeline{} = pipe), do: Repo.preload(pipe, @top_preloads ++ [flow: @top_preloads])
