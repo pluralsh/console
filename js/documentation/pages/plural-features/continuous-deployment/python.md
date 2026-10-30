@@ -38,16 +38,16 @@ spec:
 
 ## The Python Runtime
 
-Scripts are executed by [Monty](https://github.com/pydantic/monty), a sandboxed Python interpreter written in Rust, embedded in the deployment agent through [gomonty](https://github.com/ewhauser/gomonty). It is not CPython: it implements a subset of Python 3.14 syntax and a small subset of the standard library, and it has no access to the host system.
+Scripts are executed by [Monty](https://github.com/pydantic/monty), a sandboxed Python interpreter written in Rust, embedded in the deployment agent through [gomonty](https://github.com/pluralsh/gomonty). It is not CPython: it implements a subset of Python 3.14 syntax and a subset of the standard library. Apart from a read-only view of the service's files, it has no access to the host system.
 
-The agent currently bundles gomonty `v0.0.14`, which pins Monty `v0.0.9`. Monty's [upstream documentation](https://pydantic.dev/docs/monty/limitations/) tracks the latest Monty release, which supports more than the pinned version does (for example classes and `str.format`). Treat this page as the reference for what works in the agent.
+The agent currently bundles gomonty `v0.1.0`, which pins Monty `v1.4.0`. Monty's [upstream documentation](https://pydantic.dev/docs/monty/limitations/) tracks the latest Monty release, which may support more than the pinned version does. Treat this page as the reference for what works in the agent.
 
 ### Security Model
 
-- **No filesystem access**: `open` does not exist, and filesystem calls in `os` and `pathlib` raise `NotImplementedError`. Unlike Lua, Python scripts cannot read files from the service tarball. Use `valuesFiles` to have the agent load files on your behalf.
-- **No environment or network access**: `os.getenv` and `os.environ` raise `NotImplementedError`, and there is no socket, HTTP, or subprocess module.
+- **Read-only access to the service files**: the service root, the directory the agent unpacked the service tarball into, is mounted read-only at `/repo`, which is also the working directory. Scripts can read it with the [`fs` helpers](#reading-files), `open`, `pathlib`, and `os`. Writes raise `PermissionError`, as do paths that resolve outside `/repo`, including `..` and symlinks that point outside the service root. Nothing else on the agent's filesystem is visible.
+- **No environment or network access**: `os.getenv` and `os.environ` raise `RuntimeError`, and there is no socket, HTTP, or subprocess module.
 - **No third-party packages**: there is no `sys.path` or site-packages, so `import yaml`, `import requests`, and similar fail with `ModuleNotFoundError`. YAML support is provided by the [`yaml_encode` and `yaml_decode`](#yaml) globals instead.
-- **Limited host callbacks**: the only way to reach the agent is [`k8s_object_meta`](#kubernetes-object-metadata), a read-only lookup against the agent's object cache. The [YAML](#yaml) and [`merge`](#merging-dictionaries) helpers also run on the agent, but they only transform the data you pass them. [`warn`](#service-warnings) is defined in the sandbox itself.
+- **Limited host callbacks**: the only way to reach the agent is [`k8s_object_meta`](#kubernetes-object-metadata), a read-only lookup against the agent's object cache. The [YAML](#yaml) and [`merge`](#merging-dictionaries) helpers also run on the agent, but they only transform the data you pass them. [`warn`](#service-warnings) and the [`fs` helpers](#reading-files) are defined in the sandbox itself.
 - **Fresh state on every render**: each render gets a new interpreter. Nothing defined in one render, including functions and globals, is visible to the next.
 
 ### Resource Limits
@@ -55,8 +55,10 @@ The agent currently bundles gomonty `v0.0.14`, which pins Monty `v0.0.9`. Monty'
 | Limit | Value |
 |-------|-------|
 | Execution time | 10 seconds, including time spent waiting for a free interpreter |
-| Memory | 100 MB |
+| Memory | 100 MB for each interpreter in the agent's pool, shared by all scripts running at the same time |
 | Recursion depth | 100 frames |
+
+The memory limit covers everything the interpreters on the agent hold at once, so a script can use more than 100 MB while the agent is otherwise idle, and less when many services render together. Keep scripts well under 100 MB, and avoid reading large files whole.
 
 Exceeding a limit fails the render with a `TimeoutError`, `MemoryError`, or `RecursionError`.
 
@@ -141,6 +143,8 @@ if "endpoint" in db:
 | [`merge(destination, source, strategy="override")`](#merging-dictionaries) | Deep-merge two dictionaries |
 | [`k8s_object_meta(group, version, kind, namespace, name)`](#kubernetes-object-metadata) | Look up cached Kubernetes object metadata |
 | [`warn(message)`](#service-warnings) | Report a non-fatal warning to the service |
+| [`fs.read(path)`](#reading-files) | Read a file from the service root as text |
+| [`fs.walk(dir, ignore_dotfiles=False)`](#reading-files) | List the files under a directory of the service root |
 
 These are plain globals, not modules, so call them directly without an `import`.
 
@@ -177,20 +181,19 @@ Supported:
 - f-strings, including format specs such as `f"{ratio:.2f}"`
 - Tuple and starred unpacking (`first, *rest = items`), `**` dict unpacking, and the walrus operator
 - Type hints, which are parsed and ignored at runtime
+- `class` definitions with methods, and `@dataclass` from `dataclasses`
+- `match` statements
+- `str.format()`, `%` formatting, and `dict1 | dict2`
 - `import x` and `from x import y` for the modules listed below
 
 Not supported in the pinned version:
 
 | Feature | Alternative |
 |---------|-------------|
-| `class` definitions and `@dataclass` | Use dictionaries |
 | Generators (`yield`) | Build and return a list |
-| `match` statements | Use `if` / `elif` |
 | `del x` and `del d[key]` | Use `d.pop(key)`, or build a new dict with a comprehension |
-| `str.format()` and `%` formatting | Use f-strings |
-| `dict1 \| dict2` | Use `{**dict1, **dict2}` |
 | `from module import *` | Import names explicitly |
-| Custom exception classes | Raise a built-in type such as `ValueError` |
+| Custom exception classes, including subclasses of `Exception` | Raise a built-in type such as `ValueError` |
 
 Unsupported constructs fail the render with `NotImplementedError`, `AttributeError`, or `TypeError`.
 
@@ -202,7 +205,7 @@ Built-in functions: `abs`, `all`, `any`, `bin`, `chr`, `divmod`, `enumerate`, `f
 
 Some differences from CPython:
 
-- `hasattr` and `callable` are not available.
+- `callable` is not available, and `hasattr` returns `False` for the methods of built-in types (`hasattr("a", "upper")` is `False`). Check types with `isinstance` instead.
 - `enumerate`, `zip`, `map`, `filter`, and `reversed` return lists rather than lazy iterators.
 - `print` is accepted, but its output is discarded. Use `warn` to surface information.
 
@@ -213,14 +216,81 @@ Some differences from CPython:
 | `json` | `loads`, `dumps` (including `indent` and `sort_keys`), and `JSONDecodeError` |
 | `re` | `compile`, `search`, `match`, `fullmatch`, `findall`, `finditer`, `sub`, `split`, `escape`, and the `IGNORECASE`, `MULTILINE`, `DOTALL`, and `ASCII` flags. Backed by Rust's `fancy-regex`, so a few edge cases differ from CPython |
 | `math` | Common functions such as `floor`, `ceil`, `sqrt`, `log`, `pow`, `isclose`, `gcd`, trigonometric functions, and `pi` |
-| `datetime` | `date`, `datetime`, `timedelta`, and `timezone` for constructing, parsing (`fromisoformat`), and doing arithmetic on dates. `datetime.now()` and `date.today()` are not available, since the sandbox has no clock |
+| `datetime` | `date`, `datetime`, `timedelta`, and `timezone` for constructing, parsing (`fromisoformat`), and doing arithmetic on dates. `datetime.now()` and `date.today()` read the agent's clock, see [Date Arithmetic](#date-arithmetic) |
+| `time` | `time.time()` reads the agent's clock |
 | `typing` | Names for type hints, such as `Any` and `Optional` |
-| `pathlib` | Pure path manipulation only, such as `str(Path("a") / "b")`. Filesystem methods raise `NotImplementedError` |
+| `dataclasses` | `@dataclass` |
+| `collections` | `Counter` and `defaultdict`. `OrderedDict` is not available, but plain dictionaries keep insertion order |
+| `itertools`, `functools` | For example `itertools.chain`, `itertools.product`, and `functools.reduce` |
+| `copy` | `copy` and `deepcopy` |
+| `base64`, `hashlib` | For example `base64.b64encode` and `hashlib.sha256(...).hexdigest()` |
+| `random` | Random numbers. Values change on every render, see [Date Arithmetic](#date-arithmetic) for why that matters |
+| `pathlib` | Path manipulation, and reading under `/repo` with methods such as `read_text`, `exists`, `is_dir`, `iterdir`, and `glob`. Writes raise `PermissionError` |
+| `os` | `os.getcwd`, `os.listdir`, `os.walk`, and `os.path` functions such as `join`, `exists`, `isdir`, `relpath`, and `normpath`, all limited to `/repo`. `os.getenv` and `os.environ` raise `RuntimeError` |
 | `sys` | Interpreter metadata, such as `sys.version_info` |
-| `os` | Importable, but every function raises `NotImplementedError` |
 | `asyncio` | Importable, but there is nothing to await in this context |
 
-Every other module, including `yaml`, `base64`, `hashlib`, `collections`, `itertools`, `functools`, `copy`, `random`, `time`, `uuid`, and `string`, is missing and fails with `ModuleNotFoundError`. For YAML, use the [`yaml_encode` and `yaml_decode`](#yaml) globals.
+Every other module, including `yaml`, `glob`, `uuid`, `string`, `enum`, `textwrap`, `operator`, `subprocess`, and `socket`, is missing and fails with `ModuleNotFoundError`. For YAML, use the [`yaml_encode` and `yaml_decode`](#yaml) globals.
+
+## Reading Files
+
+Scripts can read files from the service root, the same files `valuesFiles` and `pythonFolder` refer to. The service root is mounted read-only at `/repo`, and relative paths resolve against it.
+
+### `fs.read(path) -> str`
+
+Returns the contents of a file as text. `path` is relative to the service root, and a leading `/` means the same thing, so `fs.read("config/app.yaml")` and `fs.read("/config/app.yaml")` read the same file.
+
+```python
+config = yaml_decode(fs.read("config/app.yaml"))
+values["app"] = {"logLevel": config.get("logLevel", "info")}
+```
+
+### `fs.walk(dir, ignore_dotfiles=False) -> list[str]`
+
+Returns the paths of every file under `dir`, recursively, relative to the service root rather than to `dir`. Files are listed depth first in name order, and directories themselves are not listed. With `ignore_dotfiles=True`, files and directories whose names start with `.` are skipped, along with everything inside those directories. Pass `"."` to walk the whole service root. If `dir` is a file, the result is just that file.
+
+```python
+dashboards = {}
+for path in fs.walk("dashboards", ignore_dotfiles=True):
+    if path.endswith(".json"):
+        dashboards[path.split("/")[-1]] = fs.read(path)
+values["grafana"] = {"dashboards": dashboards}
+```
+
+Symlinks to directories are listed as files rather than followed. Symlinks that point outside the service root are left out entirely.
+
+### Python's own file APIs
+
+`open`, `pathlib`, and `os` work on the same read-only view, so standard code like this works too:
+
+```python
+from pathlib import Path
+import os
+
+replicas = Path("replicas.txt").read_text().strip()
+charts = sorted(name for name in os.listdir("charts") if os.path.isdir(os.path.join("charts", name)))
+```
+
+### Errors
+
+File operations raise the usual Python exceptions, which fail the render unless you catch them:
+
+| Exception | Cause |
+|-----------|-------|
+| `FileNotFoundError` | The path does not exist |
+| `IsADirectoryError` | `fs.read` or `open` was given a directory |
+| `PermissionError` | A write, or a path that resolves outside the service root, through `..` or a symlink |
+| `TypeError` | `fs.read` or `fs.walk` was given something other than a string |
+
+```python
+try:
+    overrides = yaml_decode(fs.read(f"overrides/{cluster['handle']}.yaml"))
+except FileNotFoundError:
+    overrides = {}
+values.update(overrides)
+```
+
+Unlike Lua's `fs.read` and `fs.walk`, which return `nil` and an error message, the Python helpers raise.
 
 ## YAML
 
@@ -361,7 +431,7 @@ To avoid leaking secrets from `configuration` or `imports`, the reported error c
 python templating error: python ValueError at helm-values.py:12:5
 ```
 
-Syntax errors report a byte range instead of a line, for example `python SyntaxError at helm-values.py bytes 120..128`.
+Syntax errors are reported the same way, for example `python SyntaxError at helm-values.py:4:9`.
 
 Warnings from a failed render are discarded, so calling `warn` right before raising doesn't help. Use `warn` for problems the script can recover from, and keep fatal checks small enough that the exception type and line identify the cause:
 
@@ -458,7 +528,7 @@ values["ingress"] = {
 
 ### Date Arithmetic
 
-The sandbox has no clock, so dates must come from configuration.
+`datetime.now()`, `date.today()`, `time.time()`, and `random` give a different result on every render, so values built from them change each time the agent reconciles the service. Take dates from configuration instead, so the rendered values only change when you change them.
 
 ```python
 import datetime
@@ -482,7 +552,8 @@ if start:
 | `encoding.jsonEncode` / `jsonDecode` | `json.dumps` / `json.loads` |
 | `encoding.yamlEncode` / `yamlDecode` | `yaml_encode` / `yaml_decode` |
 | `encoding.jsonSchema` | Not available |
-| `fs.read` / `fs.walk` | Not available. Use `valuesFiles` |
+| `fs.read(path)`, returns the contents or `nil` and an error | `fs.read(path)`, returns the contents or raises |
+| `fs.walk(dir, ignoreDotfiles)` | `fs.walk(dir, ignore_dotfiles=False)` |
 | `utils.merge(dst, src, strategy)` | `merge(dst, src, strategy)` |
 | `utils.splitString(s, d)` | `s.split(d)` |
 | `utils.pathJoin(parts)` | `"/".join(parts)` |

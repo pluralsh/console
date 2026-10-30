@@ -166,7 +166,7 @@ func TestRunSyntaxErrorReportsSafeLocation(t *testing.T) {
 	if err == nil {
 		t.Fatal("Run succeeded")
 	}
-	if !strings.Contains(err.Error(), "python SyntaxError at helm-values.py bytes ") {
+	if !strings.Contains(err.Error(), "python SyntaxError at helm-values.py:1:") {
 		t.Fatalf("error omitted safe syntax location: %v", err)
 	}
 	if strings.Contains(err.Error(), source) || strings.Contains(err.Error(), "syntax-location-secret") {

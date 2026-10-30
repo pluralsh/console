@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sync"
 
-	monty "github.com/ewhauser/gomonty"
+	monty "github.com/pluralsh/gomonty"
 )
 
 // ObjectMetaLookup returns cached Kubernetes object metadata for Helm Python

@@ -33,7 +33,6 @@ require (
 	github.com/coder/acp-go-sdk v0.13.5
 	github.com/cyphar/filepath-securejoin v0.6.1
 	github.com/evanphx/json-patch/v5 v5.9.11
-	github.com/ewhauser/gomonty v0.0.14
 	github.com/fluxcd/flagger v1.41.0
 	github.com/fluxcd/helm-controller/api v1.4.3
 	github.com/gin-gonic/gin v1.12.0
@@ -62,6 +61,7 @@ require (
 	github.com/pluralsh/console/go/client v1.74.1
 	github.com/pluralsh/console/go/polly v1.0.0
 	github.com/pluralsh/controller-reconcile-helper v0.1.0
+	github.com/pluralsh/gomonty v0.1.0
 	github.com/prometheus/client_golang v1.23.2
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/samber/lo v1.53.0

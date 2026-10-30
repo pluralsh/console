@@ -7,8 +7,8 @@ import (
 	"slices"
 	"time"
 
-	monty "github.com/ewhauser/gomonty"
 	"github.com/pluralsh/console/go/polly/luautils"
+	monty "github.com/pluralsh/gomonty"
 )
 
 // valueToGo converts a sandbox value into plain Go data (maps, slices, and

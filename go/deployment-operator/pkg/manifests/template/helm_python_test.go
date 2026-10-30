@@ -165,6 +165,40 @@ func TestPythonFolderCannotReadOutsideDirectory(t *testing.T) {
 	}
 }
 
+func TestPythonScriptCannotReadThroughEscapingSymlinks(t *testing.T) {
+	dir := t.TempDir()
+	outsideDir := t.TempDir()
+	writePythonFile(t, outsideDir, "secret.yaml", "escaped: true\n")
+	if err := os.Symlink(filepath.Join(outsideDir, "secret.yaml"), filepath.Join(dir, "linked.yaml")); err != nil {
+		t.Fatalf("Symlink: %v", err)
+	}
+	if err := os.Symlink(outsideDir, filepath.Join(dir, "linked-dir")); err != nil {
+		t.Fatalf("Symlink: %v", err)
+	}
+
+	p, err := python.NewPoolWithConfig(python.Config{WorkerCount: 1, QueueSize: 1})
+	if err != nil {
+		t.Fatalf("NewPoolWithConfig: %v", err)
+	}
+	t.Cleanup(func() { _ = p.Close() })
+
+	for _, script := range []string{
+		`values["v"] = fs.read("linked.yaml")`,
+		`values["v"] = fs.read("linked-dir/secret.yaml")`,
+		`values["v"] = open("linked.yaml").read()`,
+	} {
+		t.Run(script, func(t *testing.T) {
+			svc := &console.ServiceDeploymentForAgent{
+				Helm: &console.ServiceDeploymentForAgent_Helm{PythonScript: lo.ToPtr(script)},
+			}
+			result, _, err := (&helm{dir: dir, pythonPool: p}).pythonValues(context.Background(), svc)
+			if err == nil || !strings.Contains(err.Error(), "python PermissionError") {
+				t.Fatalf("expected PermissionError, got %v (values %#v)", err, result)
+			}
+		})
+	}
+}
+
 func TestTemplateValuesCannotReadValuesFileOutsideDirectory(t *testing.T) {
 	dir := t.TempDir()
 	outsideDir := t.TempDir()
@@ -363,6 +397,53 @@ func writePythonFile(t *testing.T, dir, name, contents string) {
 	}
 	if err := os.WriteFile(path, []byte(contents), 0o644); err != nil {
 		t.Fatalf("WriteFile: %v", err)
+	}
+}
+
+func TestPythonFsMatchesLuaFs(t *testing.T) {
+	dir := t.TempDir()
+	writePythonFile(t, dir, "values.yaml", "replicas: 2\n")
+	writePythonFile(t, dir, "config/b.yaml", "b: 1\n")
+	writePythonFile(t, dir, "config/.secret", "hidden")
+	writePythonFile(t, dir, "config/nested/a.yaml", "a: 1\n")
+	writePythonFile(t, dir, "config.yaml", "root: true\n")
+	writePythonFile(t, dir, ".github/workflow.yaml", "on: push\n")
+
+	p, err := python.NewPoolWithConfig(python.Config{WorkerCount: 1, QueueSize: 1})
+	if err != nil {
+		t.Fatalf("NewPoolWithConfig: %v", err)
+	}
+	t.Cleanup(func() { _ = p.Close() })
+
+	h := &helm{dir: dir, pythonPool: p}
+	luaResult, _, err := h.luaValues(&console.ServiceDeploymentForAgent{Helm: &console.ServiceDeploymentForAgent_Helm{LuaScript: lo.ToPtr(`
+values["read"] = fs.read("values.yaml")
+values["absolute"] = fs.read("/config/b.yaml")
+values["all"] = fs.walk(".")
+values["visible"] = fs.walk(".", true)
+values["config"] = fs.walk("config", true)
+`)}})
+	if err != nil {
+		t.Fatalf("luaValues: %v", err)
+	}
+	pythonResult, _, err := h.pythonValues(context.Background(), &console.ServiceDeploymentForAgent{Helm: &console.ServiceDeploymentForAgent_Helm{PythonScript: lo.ToPtr(`
+values["read"] = fs.read("values.yaml")
+values["absolute"] = fs.read("/config/b.yaml")
+values["all"] = fs.walk(".")
+values["visible"] = fs.walk(".", True)
+values["config"] = fs.walk("config", ignore_dotfiles=True)
+`)}})
+	if err != nil {
+		t.Fatalf("pythonValues: %v", err)
+	}
+
+	for _, key := range []string{"read", "absolute", "all", "visible", "config"} {
+		if luaResult[key] == nil {
+			t.Fatalf("lua values[%q] is empty", key)
+		}
+		if fmt.Sprint(pythonResult[key]) != fmt.Sprint(luaResult[key]) {
+			t.Errorf("values[%q]: python %v, lua %v", key, pythonResult[key], luaResult[key])
+		}
 	}
 }
 
