@@ -842,6 +842,9 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
     field :alert,           :alert,         resolve: dataloader(Deployments), description: "the alert this run was spawned from"
     field :issue,           :issue,         resolve: dataloader(Deployments), description: "the issue this run was spawned from"
+    field :cluster,         :cluster,       resolve: dataloader(Deployments), description: "the cluster this job was spawned to remediate"
+    field :component_key,   :string,        description: "identity of the cluster insight component this job remediates"
+    field :insight_sha,     :string,        description: "sha of the component insight this job was started from"
     field :referenced_job,  :workbench_job, resolve: dataloader(Deployments), description: "the original job this job was spawned from (e.g. eval skill jobs) (sideloadable)"
 
     connection field :activities, node_type: :workbench_job_activity do

@@ -375,6 +375,14 @@ defimpl Console.PubSub.Recurse, for: [Console.PubSub.IssueCreated, Console.PubSu
     EEx.function_from_file(:defp, :prompt, "priv/prompts/workbench/issue.md.eex", [:assigns])
 end
 
+defimpl Console.PubSub.Recurse, for: Console.PubSub.ClusterInsight do
+  alias Console.Schema.Cluster
+  alias Console.AI.Remediation
+
+  def process(%{item: {%Cluster{} = cluster, _}}), do: Remediation.remediate(cluster)
+  def process(_), do: :ok
+end
+
 defimpl Console.PubSub.Recurse, for: Console.PubSub.WorkbenchJobActivityCreated do
   def process(%{item: %{type: :user} = activity}), do: Console.Pipelines.AI.Workbench.Producer.kick(activity)
   def process(_), do: :ok
