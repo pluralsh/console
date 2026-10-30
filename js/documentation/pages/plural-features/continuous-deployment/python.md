@@ -234,7 +234,7 @@ Every other module, including `yaml`, `glob`, `uuid`, `string`, `enum`, `textwra
 
 ## Reading Files
 
-Scripts can read files from the service root, the same files `valuesFiles` and `pythonFolder` refer to. The service root is mounted read-only at `/repo`, and relative paths resolve against it.
+Python scripts have the same filesystem access as [Lua scripts](lua.md): they can read files from the service root, the same files `valuesFiles` and `pythonFolder` refer to. The service root is mounted read-only at `/repo`, and relative paths resolve against it. The `fs.read` and `fs.walk` builtins mirror Lua's `fs` module, and `open`, `pathlib`, and `os` work on the same view.
 
 ### `fs.read(path) -> str`
 
