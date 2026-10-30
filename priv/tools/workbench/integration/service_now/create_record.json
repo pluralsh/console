@@ -10,7 +10,7 @@
         "problem",
         "sc_task"
       ],
-      "description": "ServiceNow ticket table: incident, change_request, problem or sc_task (catalog task)."
+      "description": "ServiceNow ticket table: incident, change_request, problem or sc_task (catalog task). Requests (sc_request) and requested items (sc_req_item) are created by ordering a catalog item, not here."
     },
     "short_description": {
       "type": "string",

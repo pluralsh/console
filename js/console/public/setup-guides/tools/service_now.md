@@ -1,10 +1,16 @@
 # ServiceNow tool setup
 
 The tool reads and writes tickets through the ServiceNow Table API. It only
-touches four tables: `incident`, `change_request`, `problem` and `sc_task`.
-Agents can search, read, create, update, comment on and move tickets between
-states. For change requests, the Change Management API is only used to read the
-states a change can move to next and to move it. Agents cannot delete tickets.
+touches six ticket tables: `incident`, `change_request`, `problem`, `sc_task`,
+`sc_request` (requests) and `sc_req_item` (requested items). Agents can search,
+read, create, update, comment on and move tickets between states. Requests and
+requested items cannot be created, they come from ordering a catalog item. For
+change requests, the Change Management API is only used to read the states a
+change can move to next and to move it. Agents cannot delete tickets.
+
+Agents can also read the catalog variables of a requested item, the values
+entered on the form when it was ordered. They are read from
+`sc_item_option_mtom`, `sc_item_option` and `item_option_new`.
 
 ## 1) Create an integration user
 
@@ -12,8 +18,9 @@ states a change can move to next and to move it. Agents cannot delete tickets.
    the workbench, for example `plural.agent`.
 2. Check **Web service access only** so the account cannot sign in to the UI.
 3. Set a password.
-4. Grant the `itil` role, or a custom role with read and write access to the
-   four ticket tables.
+4. Grant the `itil` role, or a custom role with read access to the six ticket
+   tables and the three catalog variable tables. Write access is only needed
+   on the tables the agent should update, comment on or move.
 
 ### Comments and work notes (`sys_journal_field`)
 
@@ -77,7 +84,18 @@ ServiceNow can issue tokens with the client credentials grant:
 
 ## Limitations
 
-- Only `incident`, `change_request`, `problem` and `sc_task` are supported.
+- Only `incident`, `change_request`, `problem`, `sc_task`, `sc_request` and
+  `sc_req_item` are supported, and only the first four can be created.
+- Catalog variables are returned as stored: reference variables hold the
+  `sys_id` of the referenced record, select boxes and multiple choice hold the
+  choice value rather than its label, and multi-row variable sets are not read.
+  Masked variables, variables with read roles, and variables whose type or
+  read roles the user cannot read are hidden. At most 200 variables are read per item. An empty list for an item with variables means
+  the user cannot read `sc_item_option_mtom` or `sc_item_option`; variables
+  without a name and with hidden values mean it cannot read `item_option_new`.
+  The `itil` role can read all three on base instances.
+- Requests track their progress in `request_state` and requested items in
+  `stage`. Their `state` usually changes only when they close.
 - The agent can set any field the integration user can write, so give it the
   narrowest role that works.
 - Paging is offset based and a full page always returns a next cursor, so the
@@ -86,8 +104,9 @@ ServiceNow can issue tokens with the client credentials grant:
   states it can move to next, other tables against the state choices
   (`sys_choice`), and ServiceNow business rules decide the rest. If the user
   cannot read those, the state is sent as given.
-- The agent cannot read or decide approvals. Normal changes that need approval
-  have to be approved in ServiceNow, and approval fields should be read-only
+- The agent cannot read or decide approvals. Normal changes and requests that
+  need approval have to be approved in ServiceNow, and approval fields
+  (`approval` on changes, requests and requested items) should be read-only
   for the integration user.
 - Moving a change needs the `itil` or `change_manager` role to write, and
   `itil`, `change_manager` or `sn_change_read` to read.

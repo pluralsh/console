@@ -22,7 +22,7 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.ListRecords do
 
   def description(%__MODULE__{tool: %WorkbenchTool{name: name}}),
     do:
-      "Search ServiceNow tickets (incidents, change requests, problems, catalog tasks) with an encoded query using the #{name} connection."
+      "Search ServiceNow tickets (incidents, change requests, problems, requests, requested items, catalog tasks) with an encoded query using the #{name} connection. Follow the catalog hierarchy with dot-walked queries: the requested items of a request are table sc_req_item with query request.number=REQ0010001, the catalog tasks of a requested item are table sc_task with query request_item.number=RITM0010001."
 
   def json_schema(%__MODULE__{}), do: @json_schema
 

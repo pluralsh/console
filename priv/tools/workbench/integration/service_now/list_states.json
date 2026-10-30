@@ -8,9 +8,11 @@
         "incident",
         "change_request",
         "problem",
-        "sc_task"
+        "sc_task",
+        "sc_request",
+        "sc_req_item"
       ],
-      "description": "ServiceNow ticket table: incident, change_request, problem or sc_task (catalog task)."
+      "description": "ServiceNow table, picked by the record number prefix: INC incident, CHG change_request, PRB problem, REQ sc_request (request), RITM sc_req_item (requested item), SCTASK sc_task (catalog task)."
     },
     "record_id": {
       "type": "string",
@@ -18,7 +20,7 @@
     },
     "field": {
       "type": "string",
-      "description": "Optional. A choice field of the table to list the valid values of instead of the states, for example close_code (the resolution code needed to resolve an incident). Values differ per instance, so read them here instead of guessing."
+      "description": "Optional. A choice field of the table to list the valid values of instead of the states, for example close_code (the resolution code needed to resolve an incident), request_state for a request or stage for a requested item. Values differ per instance, so read them here instead of guessing."
     }
   },
   "required": [

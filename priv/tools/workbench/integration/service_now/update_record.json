@@ -8,13 +8,15 @@
         "incident",
         "change_request",
         "problem",
-        "sc_task"
+        "sc_task",
+        "sc_request",
+        "sc_req_item"
       ],
-      "description": "ServiceNow ticket table: incident, change_request, problem or sc_task (catalog task)."
+      "description": "ServiceNow table, picked by the record number prefix: INC incident, CHG change_request, PRB problem, REQ sc_request (request), RITM sc_req_item (requested item), SCTASK sc_task (catalog task)."
     },
     "record_id": {
       "type": "string",
-      "description": "Record sys_id (32 hex characters) or record number, for example INC0010001 or CHG0030002."
+      "description": "Record sys_id (32 hex characters) or record number, for example INC0010001, CHG0030002 or RITM0010001."
     },
     "fields": {
       "type": "object",

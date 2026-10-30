@@ -324,7 +324,7 @@ const CONFIGURABLE_TOOL_TYPE_CARD_DESCRIPTIONS: Record<
   [WorkbenchToolType.JiraDatacenter]:
     'Manage Jira Data Center issues and comments through the Jira REST API.',
   [WorkbenchToolType.ServiceNow]:
-    'Manage ServiceNow incidents, change requests, problems, and catalog tasks through the Table API.',
+    'Manage ServiceNow incidents, change requests, problems, requests, requested items, and catalog tasks through the Table API.',
   [WorkbenchToolType.Linear]:
     'Connect to Linear for issue tracking and project management.',
   [WorkbenchToolType.Slack]:

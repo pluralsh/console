@@ -99,6 +99,18 @@ defmodule Console.AI.Tools.Workbench.Integration.ServiceNow.StateToolsTest do
       assert %{"choices" => [%{"value" => "1"}]} = Jason.decode!(encoded)
     end
 
+    test "lists the request_state choices of a request" do
+      expect(Req, :request, fn opts ->
+        assert URI.decode_query(URI.parse(opts[:url]).query)["sysparm_query"] =~
+                 "name=sc_request^element=request_state^"
+
+        {:ok, %Req.Response{status: 200, body: ~s({"result":[{"value":"in_process","label":"Approved"}]})}}
+      end)
+
+      assert {:ok, encoded} = run(ListStates, %{"table" => "sc_request", "field" => "request_state"})
+      assert %{"table" => "sc_request", "choices" => [%{"value" => "in_process"}]} = Jason.decode!(encoded)
+    end
+
     test "field state answers like a call without a field" do
       expect(Req, :request, fn _ -> {:ok, %Req.Response{status: 200, body: @choices}} end)
 
