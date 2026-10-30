@@ -5,7 +5,7 @@ helm_repository_url: https://charts.chaos-mesh.org
 chart_name: chaos-mesh
 versions:
 - version: 2.8.7
-  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30']
+  kube: ['1.37', '1.36', '1.35']
   requirements: []
   incompatibilities: []
   summary:
@@ -31,7 +31,7 @@ versions:
   images: ['ghcr.io/chaos-mesh/chaos-coredns:v0.2.8', 'ghcr.io/chaos-mesh/chaos-daemon:v2.8.7',
     'ghcr.io/chaos-mesh/chaos-dashboard:v2.8.7', 'ghcr.io/chaos-mesh/chaos-mesh:v2.8.7']
 - version: 2.8.0
-  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30']
+  kube: ['1.37', '1.36', '1.35']
   requirements: []
   incompatibilities: []
   summary:

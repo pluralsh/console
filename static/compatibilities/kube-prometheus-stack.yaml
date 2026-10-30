@@ -5,30 +5,24 @@ readme_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/m
 helm_repository_url: https://prometheus-community.github.io/helm-charts
 chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
 versions:
-- version: 92.14.1
+- version: 92.16.0
   kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
     '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
-    helm_changes: '### Helm values / configuration changes
-
-      - **prometheus-pushgateway**: new optional value to set `service.appProtocol`
-      on the Pushgateway Service. If you need Kubernetes `appProtocol` (e.g., `http`)
-      on the service port, set it; otherwise no change is required.'
-    chart_updates: [Added optional `service.appProtocol` support for the prometheus-pushgateway
-        Service., 'Bumped container image versions: prometheus-pushgateway to **v3.10.0**,
-        smartctl-exporter to **v0.15.0**, and Thanos to **v0.42.5**.', 'Maintenance/CI:
-        updated helm/chart-releaser-action to **v1.8.0** (no runtime impact).']
-    features: [Optional `appProtocol` field can be set on the Pushgateway Service
-        ports to better integrate with service meshes/ingress/controllers that use
-        `appProtocol`., 'Component images refreshed (Pushgateway, smartctl-exporter,
-        Thanos) to pick up fixes and improvements from upstream releases.']
+    helm_changes: ''
+    chart_updates: [Dependency non-major updates (92.14.0)., 'Bumps component image
+        tags: Alertmanager to v2.1.3; kube-state-metrics to v8.8.0.', Updates bundled
+        prometheus-kafka-exporter to v1.11.0., Fixes kube-state-metrics probes when
+        kube-rbac-proxy is enabled.]
+    features: [prometheus-kafka-exporter updated to v1.11.0 (may include minor improvements
+        and fixes from that project).]
     breaking_changes: []
-  chart_version: 92.14.1
-  images: ['docker.io/bats/bats:1.14.0', 'docker.io/grafana/grafana:13.2.4-distroless',
+  chart_version: 92.16.0
+  images: ['docker.io/bats/bats:1.14.0', 'docker.io/grafana/grafana:13.3.0-distroless',
     'ghcr.io/jkroepke/kube-webhook-certgen:1.11.0', 'quay.io/kiwigrid/k8s-sidecar:2.14.1',
-    'quay.io/prometheus-operator/prometheus-operator:v0.94.2', 'quay.io/prometheus/alertmanager:v0.34.1',
+    'quay.io/prometheus-operator/prometheus-operator:v0.94.2', 'quay.io/prometheus/alertmanager:v0.34.2',
     'quay.io/prometheus/node-exporter:v1.12.1-distroless', 'quay.io/prometheus/prometheus:v3.15.1-distroless',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
 - version: 92.14.0
