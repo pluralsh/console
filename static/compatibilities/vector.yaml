@@ -3,6 +3,13 @@ git_url: https://github.com/vectordotdev/vector/
 release_url: https://github.com/vectordotdev/vector/releases/tag/v{vsn}
 helm_repository_url: https://helm.vector.dev/
 versions:
+- version: 0.61.0
+  kube: ['1.37', '1.36', '1.35']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.61.0
+  images: ['docker.io/timberio/vector:0.61.0-distroless-libc']
 - version: 0.60.0
   kube: ['1.37', '1.36', '1.35']
   requirements: []
