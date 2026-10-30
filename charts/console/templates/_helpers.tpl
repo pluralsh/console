@@ -158,3 +158,43 @@ custom pod labels so the Deployment and Service selectors cannot be changed.
 {{- $selectorLabels := include "embedding-server.selectorLabels" . | fromYaml -}}
 {{- toYaml (mergeOverwrite $labels $selectorLabels) -}}
 {{- end -}}
+
+{{/*
+Custom CA volumeMounts for console / KAS containers.
+*/}}
+{{- define "console.certs.volumeMounts" -}}
+{{- range $cert := .Values.certs }}
+- name: {{ $cert.name }}
+  mountPath: /etc/ssl/certs/{{ $cert.file }}
+  subPath: {{ $cert.file }}
+  readOnly: true
+{{- end }}
+{{- end -}}
+
+{{/*
+Custom CA volumes backed by chart-rendered ConfigMaps.
+*/}}
+{{- define "console.certs.volumes" -}}
+{{- range $cert := .Values.certs }}
+- name: {{ $cert.name }}
+  configMap:
+    name: {{ include "console.fullname" $ }}-{{ $cert.name }}
+    defaultMode: 0644
+{{- end }}
+{{- end -}}
+
+{{/*
+Agent helm values seeded from certs when console.config.agentHelmValues is unset.
+Enables spawned-workload CA injection on the deployment-operator chart.
+*/}}
+{{- define "console.agentHelmValues" -}}
+{{- if .Values.console.config.agentHelmValues -}}
+{{- .Values.console.config.agentHelmValues | toYaml -}}
+{{- else if .Values.certs -}}
+certs:
+{{- .Values.certs | toYaml | nindent 2 }}
+spawnedWorkloads:
+  caBundle:
+    enabled: true
+{{- end -}}
+{{- end -}}

@@ -9,6 +9,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"github.com/pluralsh/console/go/helm-test/internal/common"
 	"github.com/pluralsh/console/go/helm-test/test/console"
@@ -122,6 +123,99 @@ var _ = Describe("Volumes", func() {
 
 					Expect(exists).To(BeTrue())
 					Expect(container.VolumeMounts).To(ContainElements(deploymentEntry.volumeMounts))
+				})
+			}
+		})
+
+		Context(chartEntry.Name+" with custom certs values", Ordered, func() {
+			var (
+				err       error
+				manifests common.ManifestMap
+				resources = chartEntry.Resources()
+
+				certVolume = corev1.Volume{
+					Name: "ca-bundle",
+					VolumeSource: corev1.VolumeSource{
+						ConfigMap: &corev1.ConfigMapVolumeSource{
+							LocalObjectReference: corev1.LocalObjectReference{
+								Name: chartEntry.ReleaseName + "-ca-bundle",
+							},
+							DefaultMode: lo.ToPtr[int32](0644),
+						},
+					},
+				}
+				certVolumeMount = corev1.VolumeMount{
+					Name:      "ca-bundle",
+					MountPath: "/etc/ssl/certs/ca-certificates.crt",
+					SubPath:   "ca-certificates.crt",
+					ReadOnly:  true,
+				}
+				values = map[string]interface{}{
+					"certs": []map[string]interface{}{
+						{
+							"name": "ca-bundle",
+							"file": "ca-certificates.crt",
+							"data": "-----BEGIN CERTIFICATE-----\nTEST\n-----END CERTIFICATE-----\n",
+						},
+					},
+					"kas": map[string]interface{}{
+						"enabled": true,
+					},
+				}
+				deployments = []struct {
+					name      string
+					key       common.ManifestKey
+					container string
+				}{
+					{
+						name:      "console",
+						key:       resources.Console.Deployment,
+						container: "console",
+					},
+					{
+						name:      "kas",
+						key:       resources.Kas.Deployment,
+						container: "kas",
+					},
+					{
+						name:      "kas-api",
+						key:       resources.Kas.Deployment,
+						container: "api",
+					},
+				}
+			)
+
+			BeforeAll(func() {
+				manifests, err = chartEntry.Load(values)
+				Expect(err).NotTo(HaveOccurred())
+			})
+
+			It("should render a certs ConfigMap", func() {
+				key := common.ManifestKey{
+					Name: chartEntry.ReleaseName + "-ca-bundle",
+					GroupKind: schema.GroupKind{
+						Group: common.GroupCore,
+						Kind:  "ConfigMap",
+					},
+				}
+				_, exists := manifests[key.String()]
+				Expect(exists).To(BeTrue())
+			})
+
+			for _, deploymentEntry := range deployments {
+				deploymentEntry := deploymentEntry
+
+				It(fmt.Sprintf("should mount certs to %s", deploymentEntry.name), func() {
+					deployment := deploymentFromManifests(manifests, deploymentEntry.key)
+
+					Expect(deployment.Spec.Template.Spec.Volumes).To(ContainElement(certVolume))
+
+					container, exists := lo.Find(deployment.Spec.Template.Spec.Containers, func(container corev1.Container) bool {
+						return container.Name == deploymentEntry.container
+					})
+
+					Expect(exists).To(BeTrue())
+					Expect(container.VolumeMounts).To(ContainElement(certVolumeMount))
 				})
 			}
 		})

@@ -1,3 +1,10 @@
+{% if configuration.privateCaPem %}
+certs:
+  - name: ca-bundle
+    file: ca-certificates.crt
+    data: |
+{{ configuration.privateCaPem }}
+{% endif %}
 
 ingress:
   console_dns: {{ configuration.consoleDns }}
