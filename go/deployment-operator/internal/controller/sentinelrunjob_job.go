@@ -75,6 +75,9 @@ func (r *SentinelRunJobReconciler) reconcileRunJob(ctx context.Context, srj *v1a
 		if err != nil {
 			return nil, err
 		}
+		if err := common.EnsureSpawnedCAConfigMap(ctx, r.Client, srj.Namespace); err != nil {
+			return nil, fmt.Errorf("failed to ensure spawned CA configmap: %w", err)
+		}
 		if err := r.Create(ctx, job); err != nil {
 			return nil, err
 		}
@@ -120,6 +123,8 @@ func (r *SentinelRunJobReconciler) GenerateRunJob(run *console.SentinelRunJobFra
 	jobSpec.Template.Spec.Volumes = r.ensureDefaultVolumes(jobSpec.Template.Spec.Volumes)
 
 	jobSpec.Template.Spec.SecurityContext = r.ensureDefaultPodSecurityContext(jobSpec.Template.Spec.SecurityContext)
+
+	common.ApplySpawnedCAToPodSpec(&jobSpec.Template.Spec)
 
 	return &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{

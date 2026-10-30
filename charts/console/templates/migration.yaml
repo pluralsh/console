@@ -62,6 +62,7 @@ spec:
         {{ toYaml .Values.global.additionalVolumeMounts | nindent 8 }}
         {{ end }}
         {{ end }}
+        {{- include "console.certs.volumeMounts" . | nindent 8 }}
       restartPolicy: Never
       {{ with .Values.migrator.nodeSelector}}
       nodeSelector:
@@ -84,4 +85,5 @@ spec:
       {{ if .Values.global.additionalVolumes }}
       {{ toYaml .Values.global.additionalVolumes | nindent 6 }}
       {{ end }}
+      {{- include "console.certs.volumes" . | nindent 6 }}
   backoffLimit: 5

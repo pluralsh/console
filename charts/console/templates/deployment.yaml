@@ -141,6 +141,7 @@ spec:
         {{ toYaml .Values.global.additionalVolumeMounts | nindent 8 }}
         {{ end }}
         {{ end }}
+        {{- include "console.certs.volumeMounts" . | nindent 8 }}
         ports:
         - name: {{ ternary "https" "http" .Values.console.tls.enabled }}
           containerPort: {{ .Values.service.port }}
@@ -221,3 +222,4 @@ spec:
       {{ if .Values.global.additionalVolumes }}
       {{ toYaml .Values.global.additionalVolumes | nindent 6 }}
       {{ end }}
+      {{- include "console.certs.volumes" . | nindent 6 }}

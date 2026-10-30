@@ -98,6 +98,7 @@ spec:
           {{ toYaml .Values.global.additionalVolumeMounts | nindent 10 }}
           {{ end }}
           {{ end }}
+          {{- include "console.certs.volumeMounts" . | nindent 10 }}
           - name: etc-kas
             mountPath: /etc/kas
             readOnly: true
@@ -134,6 +135,8 @@ spec:
                   key: CONSOLE_HOST
           ports:
             - containerPort: 8000
+          volumeMounts:
+          {{- include "console.certs.volumeMounts" . | nindent 10 }}
           readinessProbe:
             httpGet:
               path: /health
@@ -156,6 +159,7 @@ spec:
       {{ toYaml .Values.global.additionalVolumes | nindent 6 }}
       {{ end }}
       {{ end }}
+      {{- include "console.certs.volumes" . | nindent 6 }}
       - name: etc-kas
         projected:
           defaultMode: 0440
