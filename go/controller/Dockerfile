@@ -51,7 +51,7 @@ LABEL org.opencontainers.image.created="${BUILD_TIME}" \
       org.opencontainers.image.title="Deployment Controller" \
       org.opencontainers.image.description="Deployment controller for Plural Console" \
       org.opencontainers.image.base.name="gcr.io/distroless/static:nonroot" \
-      org.opencontainers.image.rebuild-trigger="2026-06-26-deployment-controller"
+      org.opencontainers.image.rebuild-trigger="2026-10-30-security-remediation"
 
 WORKDIR /
 COPY --from=builder /workspace/controller/manager .

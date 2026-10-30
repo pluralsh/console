@@ -1,3 +1,13 @@
+# The distroless Debian 12 base still carries tzdata 2026b, so install the
+# explicitly pinned fixed package and copy its timezone database into runtime.
+FROM debian:12-slim AS tzdata
+
+ARG TZDATA_VERSION=2026f-0+deb12u1
+
+RUN apt-get update \
+    && apt-get install --no-install-recommends --yes tzdata=${TZDATA_VERSION} \
+    && rm -rf /var/lib/apt/lists/*
+
 # Build stage
 FROM golang:1.27.2-alpine AS builder
 
@@ -46,7 +56,7 @@ LABEL org.opencontainers.image.created="${BUILD_TIME}" \
       org.opencontainers.image.title="Nexus" \
       org.opencontainers.image.description="AI proxy service for Plural Console" \
       org.opencontainers.image.base.name="gcr.io/distroless/static-debian12:nonroot" \
-      org.opencontainers.image.rebuild-trigger="2026-06-26-nexus"
+      org.opencontainers.image.rebuild-trigger="2026-10-30-security-remediation"
 
 WORKDIR /app
 
@@ -55,6 +65,7 @@ COPY --from=builder /build/nexus /app/nexus
 
 # Copy default config (optional)
 COPY --from=builder /build/config/config.yaml /app/config/config.yaml
+COPY --from=tzdata /usr/share/zoneinfo /usr/share/zoneinfo
 
 # Expose HTTP port
 EXPOSE 8080

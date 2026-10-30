@@ -25,6 +25,7 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} go build -ldflags
 FROM gcr.io/distroless/static:nonroot
 WORKDIR /
 COPY --from=builder /workspace/oci-auth/oci-auth .
+LABEL org.opencontainers.image.rebuild-trigger="2026-10-30-security-remediation"
 USER 65532:65532
 
 ENTRYPOINT ["/oci-auth"]

@@ -2,6 +2,16 @@
 # Builds: api, kas, and agentk binaries in a single image
 # Usage: docker run <image> [api|kas|agentk] [args...]
 
+# Install the fixed Debian 12 timezone database separately because the
+# distroless Debian 12 base still carries tzdata 2026b.
+FROM debian:12-slim AS tzdata
+
+ARG TZDATA_VERSION=2026f-0+deb12u1
+
+RUN apt-get update \
+    && apt-get install --no-install-recommends --yes tzdata=${TZDATA_VERSION} \
+    && rm -rf /var/lib/apt/lists/*
+
 # Builder stage for all binaries
 FROM golang:1.27.2-alpine AS builder
 
@@ -92,12 +102,13 @@ LABEL source="https://github.com/pluralsh/console/go/kubernetes-agent" \
       org.opencontainers.image.title="KAS Server" \
       org.opencontainers.image.description="KAS server image for Plural CD" \
       org.opencontainers.image.base.name="gcr.io/distroless/static-debian12:nonroot" \
-      org.opencontainers.image.rebuild-trigger="2026-06-26-kas"
+      org.opencontainers.image.rebuild-trigger="2026-10-30-security-remediation"
 
 # Copy all binaries from builder
 COPY --from=builder /binaries/api /api
 COPY --from=builder /binaries/kas /kas
 COPY --from=builder /binaries/agentk /agentk
+COPY --from=tzdata /usr/share/zoneinfo /usr/share/zoneinfo
 
 # Create a simple entrypoint script (shell script won't work in distroless)
 # Instead, we'll use kas as the default entrypoint
