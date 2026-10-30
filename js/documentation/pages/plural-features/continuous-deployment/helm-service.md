@@ -65,9 +65,34 @@ For more information, see [Dynamic Helm Configuration with Lua Scripts](lua.md).
 
 ## Dynamic Helm Configuration via pythonScript
 
-The same `values` / `valuesFiles` overlay is available from a sandboxed Python script. The sandbox does not expose OS, filesystem, or network access. Scripts can call `k8s_object_meta`, which reads cached Kubernetes object metadata (uid, name, namespace, and labels) from the agent. Cluster-scoped objects use an empty namespace, and a cache miss returns `None`. The `yaml_encode`, `yaml_decode`, and `merge` helpers mirror Lua's `encoding` and `utils.merge`.
+The same `values` / `valuesFiles` overlay is available from a sandboxed Python script. The sandbox has no environment or network access.
 
-Scripts can also call `warn(message)` to report non-fatal problems back to the service. See [Reporting Warnings](#reporting-warnings).
+Python has the same filesystem access as Lua. The service root is mounted read-only at `/repo`, which is also the working directory, and the `fs.read` and `fs.walk` helpers mirror Lua's `fs` module. Standard Python file APIs (`open`, `pathlib`, and `os`) work on the same view. Writes, and paths that resolve outside the service root, raise `PermissionError`. Unlike Lua, which returns `nil` and an error message, the Python helpers raise exceptions such as `FileNotFoundError`.
+
+The agent defines these builtins before your script runs. They are plain globals, so call them without an `import`:
+
+| Name | Description |
+|------|-------------|
+| `values` | Output `dict`, starts empty. Keys you set are merged into the Helm values |
+| `valuesFiles` | Output `list[str]`, starts empty. Extra values files to load, relative to the service root |
+| `configuration`, `cluster`, `contexts`, `imports`, `service` | Read-only service context, the same bindings available to Lua and Liquid |
+| `fs.read(path)` | Read a file from the service root as text. Mirrors Lua's `fs.read` |
+| `fs.walk(dir, ignore_dotfiles=False)` | List the files under a directory, relative to the service root. Mirrors Lua's `fs.walk` |
+| `yaml_encode(value)` / `yaml_decode(text)` | Serialize and parse YAML. Mirror Lua's `encoding.yamlEncode` and `encoding.yamlDecode` |
+| `merge(destination, source, strategy="override")` | Deep-merge two dictionaries. Mirrors Lua's `utils.merge` |
+| `k8s_object_meta(group, version, kind, namespace, name)` | Read cached Kubernetes object metadata (uid, name, namespace, and labels) from the agent. Cluster-scoped objects use an empty namespace, and a cache miss returns `None` |
+| `warn(message)` | Report a non-fatal problem back to the service. See [Reporting Warnings](#reporting-warnings) |
+
+```python
+config = yaml_decode(fs.read("config/app.yaml"))
+values["app"] = {"logLevel": config.get("logLevel", "info")}
+
+dashboards = {}
+for path in fs.walk("dashboards", ignore_dotfiles=True):
+    if path.endswith(".json"):
+        dashboards[path.split("/")[-1]] = fs.read(path)
+values["grafana"] = {"dashboards": dashboards}
+```
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -92,7 +117,7 @@ spec:
           warn("kube-system namespace not found in the agent cache, observeClusterId will not be set")
 ```
 
-Python can also be loaded from a file with `pythonFile`, or from a folder of helper modules with `pythonFolder`. Lua and Python are mutually exclusive: when any Python field is set, Python runs and Lua is skipped. For the supported language subset, available modules, script concatenation order, and value merge order, see [Dynamic Helm Configuration with Python Scripts](python.md).
+Python can also be loaded from a file with `pythonFile`, or from a folder of helper modules with `pythonFolder`. Lua and Python are mutually exclusive: when any Python field is set, Python runs and Lua is skipped. For the full builtin and filesystem reference, the supported language subset, available modules, script concatenation order, and value merge order, see [Dynamic Helm Configuration with Python Scripts](python.md).
 
 The Lua equivalent of `k8s_object_meta` is documented in [Dynamic Helm Configuration with Lua Scripts](lua.md#kubernetes-object-metadata).
 
