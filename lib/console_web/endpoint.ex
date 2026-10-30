@@ -43,6 +43,7 @@ defmodule ConsoleWeb.Endpoint do
   plug ConsoleWeb.Plugs.RemoteIp
   plug ConsoleWeb.Plugs.AuditContext
   plug ConsoleWeb.Plugs.SecureHeaders
+  plug ConsoleWeb.Plugs.RetryAfter
 
   plug ConsoleWeb.ProxyRouter
 

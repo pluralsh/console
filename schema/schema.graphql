@@ -7628,6 +7628,9 @@ input OpenaiTokenExchangeAttributes {
 }
 
 input AnthropicSettingsAttributes {
+  "a custom base url for an Anthropic compatible API, leave blank for Anthropic"
+  baseUrl: String
+
   accessToken: String
 
   model: String
@@ -8132,6 +8135,9 @@ type OpenaiTokenExchange {
 
 "Anthropic connection information"
 type AnthropicSettings {
+  "the base url to use when querying an Anthropic compatible API, leave blank for Anthropic"
+  baseUrl: String
+
   "the anthropic model version to use"
   model: String
 

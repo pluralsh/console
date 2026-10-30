@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 )
 
 func createTestTarGz(t *testing.T) []byte {
@@ -62,10 +63,18 @@ func TestGetBody_Success(t *testing.T) {
 	}
 }
 
+func withRateLimitBaseDelay(t *testing.T, d time.Duration) {
+	prev := rateLimitBaseDelay
+	rateLimitBaseDelay = d
+	t.Cleanup(func() { rateLimitBaseDelay = prev })
+}
+
 func TestGetReader_RateLimitRetryExhaustionPreservesHTTPError(t *testing.T) {
+	withRateLimitBaseDelay(t, time.Millisecond)
 	var requests int
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		requests++
+		w.Header().Set("Retry-After", "0")
 		http.Error(w, "slow down", http.StatusTooManyRequests)
 	}))
 	defer server.Close()
@@ -87,6 +96,81 @@ func TestGetReader_RateLimitRetryExhaustionPreservesHTTPError(t *testing.T) {
 	}
 	if httpErr.StatusCode != http.StatusTooManyRequests {
 		t.Fatalf("expected status %d, got %d", http.StatusTooManyRequests, httpErr.StatusCode)
+	}
+}
+
+func TestGetReader_HonorsRetryAfter(t *testing.T) {
+	withRateLimitBaseDelay(t, time.Millisecond)
+	var requests int
+	var first time.Time
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requests++
+		if requests == 1 {
+			first = time.Now()
+			w.Header().Set("Retry-After", "1")
+			http.Error(w, "Too Many Requests", http.StatusTooManyRequests)
+			return
+		}
+		fmt.Fprint(w, "ok")
+	}))
+	defer server.Close()
+
+	resp, _, err := GetReader(server.URL, "dummy-token")
+	if err != nil {
+		t.Fatalf("expected no error, got: %v", err)
+	}
+	resp.Close()
+	if requests != 2 {
+		t.Fatalf("expected 2 requests, got %d", requests)
+	}
+	if waited := time.Since(first); waited < time.Second {
+		t.Fatalf("expected to wait at least the Retry-After of 1s, waited %s", waited)
+	}
+}
+
+func TestFetchSha_DoesNotRetryRateLimits(t *testing.T) {
+	var requests int
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requests++
+		w.Header().Set("Retry-After", "7")
+		http.Error(w, "Too Many Requests", http.StatusTooManyRequests)
+	}))
+	defer server.Close()
+
+	_, err := fetchSha(server.URL, "dummy-token", "service-id")
+
+	var httpErr *HTTPError
+	if !errors.As(err, &httpErr) {
+		t.Fatalf("expected wrapped HTTPError, got: %v", err)
+	}
+	if httpErr.RetryAfter != 7*time.Second {
+		t.Fatalf("expected retry after of 7s, got %s", httpErr.RetryAfter)
+	}
+	if requests != 1 {
+		t.Fatalf("expected 1 request, got %d", requests)
+	}
+}
+
+func TestParseRetryAfter(t *testing.T) {
+	now := time.Date(2026, 10, 29, 12, 0, 0, 0, time.UTC)
+	tests := []struct {
+		value string
+		want  time.Duration
+	}{
+		{"", 0},
+		{"3", 3 * time.Second},
+		{" 3 ", 3 * time.Second},
+		{"-5", 0},
+		{"garbage", 0},
+		{"86400", maxRetryAfter},
+		{now.Add(30 * time.Second).Format(http.TimeFormat), 30 * time.Second},
+		{now.Add(-30 * time.Second).Format(http.TimeFormat), 0},
+	}
+
+	for _, tt := range tests {
+		if got := parseRetryAfter(tt.value, now); got != tt.want {
+			t.Errorf("parseRetryAfter(%q) = %s, want %s", tt.value, got, tt.want)
+		}
 	}
 }
 

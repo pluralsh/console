@@ -1142,6 +1142,8 @@ type AnsibleConfigurationAttributes struct {
 
 // Anthropic connection information
 type AnthropicSettings struct {
+	// the base url to use when querying an Anthropic compatible API, leave blank for Anthropic
+	BaseURL *string `json:"baseUrl,omitempty"`
 	// the anthropic model version to use
 	Model *string `json:"model,omitempty"`
 	// the HTTP proxy used for this provider's API calls
@@ -1153,6 +1155,8 @@ type AnthropicSettings struct {
 }
 
 type AnthropicSettingsAttributes struct {
+	// a custom base url for an Anthropic compatible API, leave blank for Anthropic
+	BaseURL     *string `json:"baseUrl,omitempty"`
 	AccessToken *string `json:"accessToken,omitempty"`
 	Model       *string `json:"model,omitempty"`
 	// an HTTP proxy to use for this provider's API calls
@@ -2364,6 +2368,11 @@ type ClusterCondition struct {
 type ClusterConnection struct {
 	PageInfo PageInfo       `json:"pageInfo"`
 	Edges    []*ClusterEdge `json:"edges,omitempty"`
+}
+
+type ClusterDelta struct {
+	Delta   *Delta   `json:"delta,omitempty"`
+	Payload *Cluster `json:"payload,omitempty"`
 }
 
 type ClusterEdge struct {
@@ -4730,6 +4739,11 @@ type InfrastructureStack struct {
 type InfrastructureStackConnection struct {
 	PageInfo PageInfo                   `json:"pageInfo"`
 	Edges    []*InfrastructureStackEdge `json:"edges,omitempty"`
+}
+
+type InfrastructureStackDelta struct {
+	Delta   *Delta               `json:"delta,omitempty"`
+	Payload *InfrastructureStack `json:"payload,omitempty"`
 }
 
 type InfrastructureStackEdge struct {
@@ -8489,6 +8503,11 @@ type RunStepAttributes struct {
 	Status StepStatus `json:"status"`
 }
 
+type RunStepDelta struct {
+	Delta   *Delta   `json:"delta,omitempty"`
+	Payload *RunStep `json:"payload,omitempty"`
+}
+
 type RunningState struct {
 	StartedAt *string `json:"startedAt,omitempty"`
 }
@@ -9421,6 +9440,11 @@ type ServiceDeploymentConnection struct {
 	Edges    []*ServiceDeploymentEdge `json:"edges,omitempty"`
 }
 
+type ServiceDeploymentDelta struct {
+	Delta   *Delta             `json:"delta,omitempty"`
+	Payload *ServiceDeployment `json:"payload,omitempty"`
+}
+
 type ServiceDeploymentEdge struct {
 	Node   *ServiceDeployment `json:"node,omitempty"`
 	Cursor *string            `json:"cursor,omitempty"`
@@ -10092,6 +10116,11 @@ type StackRunAttributes struct {
 type StackRunConnection struct {
 	PageInfo PageInfo        `json:"pageInfo"`
 	Edges    []*StackRunEdge `json:"edges,omitempty"`
+}
+
+type StackRunDelta struct {
+	Delta   *Delta    `json:"delta,omitempty"`
+	Payload *StackRun `json:"payload,omitempty"`
 }
 
 type StackRunEdge struct {

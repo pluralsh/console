@@ -13,6 +13,7 @@ fragment SmtpSettings on SmtpSettings {
 
 fragment AiSettings on AiSettings {
   anthropic {
+    baseUrl
     model
     toolModel
     proxy {

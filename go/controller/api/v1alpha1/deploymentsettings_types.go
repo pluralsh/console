@@ -758,6 +758,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 		}
 
 		attr.Anthropic = &console.AnthropicSettingsAttributes{
+			BaseURL:        in.Anthropic.BaseUrl,
 			AccessToken:    lo.ToPtr(token),
 			Model:          in.Anthropic.Model,
 			ToolModel:      in.Anthropic.ToolModel,

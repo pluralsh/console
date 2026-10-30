@@ -128,6 +128,38 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
       assert updated["logging"]["opensearch"]["usePodIdentity"] == false
     end
 
+    test "admins can configure an anthropic base url" do
+      admin = admin_user()
+      deployment_settings()
+
+      {:ok, %{data: %{"updateDeploymentSettings" => updated}}} = run_query("""
+        mutation Update($attrs: DeploymentSettingsAttributes!) {
+          updateDeploymentSettings(attributes: $attrs) {
+            ai {
+              provider
+              anthropic { baseUrl model }
+            }
+          }
+        }
+      """, %{
+        "attrs" => %{
+          "ai" => %{
+            "enabled" => true,
+            "provider" => "ANTHROPIC",
+            "anthropic" => %{
+              "accessToken" => "token",
+              "baseUrl" => "https://anthropic-gateway.example.com",
+              "model" => "claude-sonnet-4-5"
+            }
+          }
+        }
+      }, %{current_user: admin})
+
+      assert updated["ai"]["provider"] == "ANTHROPIC"
+      assert updated["ai"]["anthropic"]["baseUrl"] == "https://anthropic-gateway.example.com"
+      assert updated["ai"]["anthropic"]["model"] == "claude-sonnet-4-5"
+    end
+
     test "admins can configure azure deployments map" do
       admin = admin_user()
       deployment_settings()

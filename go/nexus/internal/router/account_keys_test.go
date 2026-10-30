@@ -443,3 +443,23 @@ func TestAccountXAIProvider(t *testing.T) {
 	require.Equal(t, "https://api.x.ai", providerConfig.NetworkConfig.BaseURL)
 	require.Nil(t, providerConfig.CustomProviderConfig)
 }
+
+func TestAccountAnthropicBaseURL(t *testing.T) {
+	cfg := &pb.AiConfig{
+		Enabled: true,
+		Anthropic: &pb.AnthropicConfig{
+			Model:   lo.ToPtr("claude-sonnet-4-5"),
+			BaseUrl: lo.ToPtr("https://anthropic-gateway.example/v1/"),
+			ApiKey:  lo.ToPtr("anthropic-key"),
+		},
+	}
+	acct := &Account{
+		consoleClient: &mockConsoleClient{cfg: cfg},
+		tokenCache:    tokenexchange.NewCache(),
+		logger:        zap.NewNop(),
+	}
+
+	providerConfig, err := acct.GetConfigForProvider(schemas.Anthropic)
+	require.NoError(t, err)
+	require.Equal(t, "https://anthropic-gateway.example", providerConfig.NetworkConfig.BaseURL)
+}

@@ -2380,6 +2380,7 @@ export const SmtpSettingsFragmentDoc = /*#__PURE__*/ gql`
 export const AiSettingsFragmentDoc = /*#__PURE__*/ gql`
     fragment AiSettings on AiSettings {
   anthropic {
+    baseUrl
     model
     toolModel
     proxy {

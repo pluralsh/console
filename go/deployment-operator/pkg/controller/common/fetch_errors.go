@@ -10,7 +10,8 @@ import (
 
 func IsRateLimitError(err error) bool {
 	var httpErr *manifests.HTTPError
-	return errors.As(err, &httpErr) && httpErr.StatusCode == http.StatusTooManyRequests
+	var backoffErr *manifests.BackoffError
+	return (errors.As(err, &httpErr) && httpErr.StatusCode == http.StatusTooManyRequests) || errors.As(err, &backoffErr)
 }
 
 func IsTimeoutError(err error) bool {

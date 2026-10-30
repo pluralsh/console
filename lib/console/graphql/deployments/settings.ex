@@ -240,6 +240,9 @@ defmodule Console.GraphQl.Deployments.Settings do
   end
 
   input_object :anthropic_settings_attributes do
+    field :base_url, :string,
+      description: "a custom base url for an Anthropic compatible API, leave blank for Anthropic"
+
     field :access_token, :string
     field :model, :string
     field :proxy, :http_proxy_attributes, description: "an HTTP proxy to use for this provider's API calls"
@@ -673,6 +676,9 @@ defmodule Console.GraphQl.Deployments.Settings do
 
   @desc "Anthropic connection information"
   object :anthropic_settings do
+    field :base_url, :string,
+      description: "the base url to use when querying an Anthropic compatible API, leave blank for Anthropic"
+
     field :model, :string, description: "the anthropic model version to use"
     field :proxy, :http_proxy_configuration, description: "the HTTP proxy used for this provider's API calls"
 

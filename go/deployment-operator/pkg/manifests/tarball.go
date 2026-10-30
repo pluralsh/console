@@ -1,16 +1,24 @@
 package manifests
 
 import (
+	stderrors "errors"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
+	"strings"
 	"time"
 
+	"github.com/pluralsh/console/go/deployment-operator/internal/utils"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/errors"
 )
 
-const pluralDigestHeader = "x-plrl-digest"
+const (
+	pluralDigestHeader = "x-plrl-digest"
+	maxRetryAfter      = 10 * time.Minute
+	getReaderAttempts  = 3
+)
 
 var (
 	timeout = 10 * time.Second
@@ -20,10 +28,11 @@ var (
 			ResponseHeaderTimeout: timeout,
 		},
 	}
+	rateLimitBaseDelay = 500 * time.Millisecond
 )
 
 func getBody(url, token string) (string, error) {
-	resp, _, err := GetReader(url, token)
+	resp, _, err := getReader(url, token, 1)
 	if err != nil {
 		return "", err
 	}
@@ -38,7 +47,12 @@ func getBody(url, token string) (string, error) {
 	return string(body), nil
 }
 
+// GetReader fetches url, retrying rate limited requests with exponential backoff that honors Retry-After.
 func GetReader(url, token string) (io.ReadCloser, http.Header, error) {
+	return getReader(url, token, getReaderAttempts)
+}
+
+func getReader(url, token string, attempts int) (io.ReadCloser, http.Header, error) {
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, nil, err
@@ -46,21 +60,45 @@ func GetReader(url, token string) (io.ReadCloser, http.Header, error) {
 	req.Header.Add("Authorization", "Token "+token)
 
 	var lastErr error
-	for i := range 3 {
-		resp, header, retriable, err := doRequest(req)
-		if err != nil {
-			if !retriable {
-				return nil, nil, err
-			}
-
-			lastErr = err
-			time.Sleep(time.Duration(50*(i+1)) * time.Millisecond)
-			continue
+	for i := range attempts {
+		if i > 0 {
+			time.Sleep(retryDelay(i-1, lastErr))
 		}
 
-		return resp, header, nil
+		resp, header, retriable, err := doRequest(req)
+		if err == nil {
+			return resp, header, nil
+		}
+		if !retriable {
+			return nil, nil, err
+		}
+		lastErr = err
 	}
 	return nil, nil, fmt.Errorf("could not fetch manifest, retries exhausted: %w", lastErr)
+}
+
+func retryDelay(attempt int, err error) time.Duration {
+	delay := rateLimitBaseDelay << attempt
+	var httpErr *HTTPError
+	if stderrors.As(err, &httpErr) {
+		delay = max(delay, httpErr.RetryAfter)
+	}
+	return delay + utils.Jitter(delay/2)
+}
+
+func parseRetryAfter(value string, now time.Time) time.Duration {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return 0
+	}
+
+	var delay time.Duration
+	if secs, err := strconv.Atoi(value); err == nil {
+		delay = time.Duration(secs) * time.Second
+	} else if t, err := http.ParseTime(value); err == nil {
+		delay = t.Sub(now)
+	}
+	return min(max(delay, 0), maxRetryAfter)
 }
 
 func doRequest(req *http.Request) (io.ReadCloser, http.Header, bool, error) {
@@ -79,6 +117,7 @@ func doRequest(req *http.Request) (io.ReadCloser, http.Header, bool, error) {
 		httpErr := &HTTPError{StatusCode: resp.StatusCode, URL: req.URL.String(), Msg: string(errMsg)}
 
 		if resp.StatusCode == http.StatusTooManyRequests {
+			httpErr.RetryAfter = parseRetryAfter(resp.Header.Get("Retry-After"), time.Now())
 			return nil, nil, true, httpErr
 		}
 
@@ -98,7 +137,7 @@ func fetchSha(consoleURL, token, serviceID string) (string, error) {
 }
 
 func fetch(url, token, sha, dir string) error {
-	resp, header, err := GetReader(url, token)
+	resp, header, err := getReader(url, token, 1)
 	if err != nil {
 		return err
 	}

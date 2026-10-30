@@ -236,15 +236,35 @@ defmodule ConsoleWeb.GitControllerTest do
 
       expect(Discovery, :digest, fn _, _ -> {:error, :rate_limited} end)
 
-      conn
-      |> add_auth_headers(svc.cluster)
-      |> get("/ext/v1/digests", %{id: id})
-      |> response(429)
+      conn =
+        conn
+        |> add_auth_headers(svc.cluster)
+        |> get("/ext/v1/digests", %{id: id})
+
+      assert response(conn, 429)
+      assert get_resp_header(conn, "retry-after") == ["1"]
 
       %{errors: [error]} = refetch(svc) |> Console.Repo.preload([:errors])
       assert error.source == "git"
       assert error.message == "Rate limited"
       assert error.warning
+    end
+
+    test "db pool queue timeouts are 429'ed with a retry-after", %{conn: conn} do
+      git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
+      svc = insert(:service, repository: git, git: %{ref: "master", folder: "bin"})
+
+      expect(Discovery, :digest, fn _, _ ->
+        raise DBConnection.ConnectionError.exception("connection not available", :queue_timeout)
+      end)
+
+      {429, headers, _} = assert_error_sent 429, fn ->
+        conn
+        |> add_auth_headers(svc.cluster)
+        |> get("/ext/v1/digests", %{id: svc.id})
+      end
+
+      assert {"retry-after", "1"} in headers
     end
 
     @tag :skip
@@ -314,11 +334,14 @@ defmodule ConsoleWeb.GitControllerTest do
 
       assert {:allow, 1} = Hammer.check_rate(bucket, :timer.seconds(1), 1)
 
-      build_conn()
-      |> Map.put(:remote_ip, {127, 0, 0, 42})
-      |> add_auth_headers(other_cluster)
-      |> get("/v1/git/tarballs", %{id: svc.id})
-      |> response(429)
+      conn =
+        build_conn()
+        |> Map.put(:remote_ip, {127, 0, 0, 42})
+        |> add_auth_headers(other_cluster)
+        |> get("/v1/git/tarballs", %{id: svc.id})
+
+      assert response(conn, 429) == "Too Many Requests"
+      assert get_resp_header(conn, "retry-after") == ["1"]
     end
   end
 
