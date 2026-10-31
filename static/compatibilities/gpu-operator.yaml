@@ -267,7 +267,7 @@ versions:
   kube: ['1.27', '1.26', '1.25']
   requirements: []
   chart_version: 1.7.0
-  images: ['nvcr.io/nvidia/gpu-operator:v1.7.0', 'quay.io/kubernetes_incubator/node-feature-discovery:v0.6.0']
+  images: []
   incompatibilities: []
 - version: 1.6.2
   kube: ['1.27', '1.26', '1.25']
