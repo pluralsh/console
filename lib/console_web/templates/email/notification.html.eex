@@ -1,11 +1,5 @@
-<div class="fit-content margin-horizontal-auto text-lead">
-  You have a new notification in Plural
-</div>
-
-<div class="fit-content margin-horizontal-auto text-content text-align-center margin-top-large">
-  <%= raw(markdown(@notification.text)) %>
-</div>
-
-<a class="button margin-top-large" href="<%= url("/") %>">
-  Login to the Plural Console to see more
-</a>
+<%= card do %>
+  <%= h1 do %>You have a new notification in Plural<% end %>
+  <%= email_markdown(@notification.text) %>
+<% end %>
+<%= cta(href: url("/")) do %>Login to the Plural Console to see more<% end %>
