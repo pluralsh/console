@@ -7,7 +7,14 @@ versions:
   kube: ['1.37', '1.36', '1.35']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Vector 0.61.0 includes 3 new features compared to 0.60.0, but the
+        specific feature details were not provided in the notes you pasted.']
+    breaking_changes: ['Vector 0.61.0 includes 1 breaking change compared to 0.60.0,
+        but the specific breaking-change detail was not included in the notes you
+        pasted.']
   chart_version: 0.61.0
   images: ['docker.io/timberio/vector:0.61.0-distroless-libc']
 - version: 0.60.0
