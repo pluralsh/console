@@ -4100,6 +4100,27 @@ _Appears in:_
 | `urgent` _boolean_ | Urgent controls whether notifications should be immediately delivered via email.<br />When true, notifications sent to this sink will trigger immediate SMTP delivery<br />in addition to appearing in the Console UI, useful for critical alerts. |  | Optional: \{\} <br /> |
 
 
+#### PluralVectorConnectionSettings
+
+
+
+
+
+
+
+_Appears in:_
+- [VectorStore](#vectorstore)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `host` _string_ | Host is the base url of the plural vector cluster api, including any configured path prefix. |  | Required: \{\} <br /> |
+| `namespace` _string_ | Namespace is the vector db namespace to store embeddings in, defaults to console. |  | Optional: \{\} <br /> |
+| `user` _string_ | User is the user to authenticate with basic auth. |  | Optional: \{\} <br /> |
+| `passwordSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | PasswordSecretRef is a reference to the local secret holding the basic auth password. |  | Optional: \{\} <br /> |
+| `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to the local secret holding a bearer token, which takes precedence over basic auth. |  | Optional: \{\} <br /> |
+| `deferEmbeddings` _boolean_ | DeferEmbeddings lets the vector db embed text with its own configured embedding model,<br />rather than computing embeddings in the console. |  | Optional: \{\} <br /> |
+
+
 #### Policy
 
 
@@ -6083,9 +6104,10 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `enabled` _boolean_ | Enabled controls whether the vector store is enabled or not.. | false | Optional: \{\} <br /> |
-| `vectorStore` _[VectorStore](#vectorstore)_ | VectorStore is the type of the vector store to use. |  | Enum: [ELASTIC OPENSEARCH POSTGRES] <br />Optional: \{\} <br /> |
+| `vectorStore` _[VectorStore](#vectorstore)_ | VectorStore is the type of the vector store to use. |  | Enum: [ELASTIC OPENSEARCH POSTGRES PLURAL] <br />Optional: \{\} <br /> |
 | `elastic` _[ElasticsearchConnectionSettings](#elasticsearchconnectionsettings)_ | Elastic configuration for the vector store. |  | Optional: \{\} <br /> |
 | `opensearch` _[OpensearchConnectionSettings](#opensearchconnectionsettings)_ | Opensearch configuration for the vector store. |  | Optional: \{\} <br /> |
+| `plural` _[PluralVectorConnectionSettings](#pluralvectorconnectionsettings)_ | Plural vector db configuration for the vector store. |  | Optional: \{\} <br /> |
 
 
 #### VertexSettings

@@ -360,6 +360,20 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :store, :vector_store
     field :elastic, :elasticsearch_connection_attributes
     field :opensearch, :opensearch_connection_attributes
+    field :plural, :plural_vector_connection_attributes
+  end
+
+  input_object :plural_vector_connection_attributes do
+    field :host, non_null(:string),
+      description: "base url of the plural vector cluster api, including any configured path prefix"
+
+    field :namespace, :string, description: "the namespace to store vectors in, defaults to console"
+    field :user, :string, description: "user to connect w/ for basic auth"
+    field :password, :string, description: "password to connect w/ for basic auth"
+    field :token, :string, description: "a bearer token (jwt) to authenticate with, takes precedence over basic auth"
+
+    field :defer_embeddings, :boolean,
+      description: "whether to let the vector db embed text with its own configured embedding model, rather than computing embeddings in the console"
   end
 
   input_object :graph_store_attributes do

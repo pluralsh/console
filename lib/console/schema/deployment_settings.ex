@@ -5,7 +5,7 @@ defmodule Console.Schema.DeploymentSettings do
 
   defenum AIProvider, openai: 0, anthropic: 1, ollama: 2, azure: 3, bedrock: 4, vertex: 5, openai_compatible: 6, xai: 7
   defenum LogDriver, victoria: 0, elastic: 1, opensearch: 2, loki: 3
-  defenum VectorStore, elastic: 0, opensearch: 1, postgres: 2
+  defenum VectorStore, elastic: 0, opensearch: 1, postgres: 2, plural: 3
   defenum OpenAIMethod, chat: 0, responses: 1, auto: 2
   defenum BedrockEndpoint, runtime: 0, mantle: 1
 
@@ -197,6 +197,39 @@ defmodule Console.Schema.DeploymentSettings do
     end
   end
 
+  defmodule Plural do
+    use Console.Schema.Base
+
+    @namespace_format ~r/^[A-Za-z0-9\-_.]{1,128}$/
+
+    embedded_schema do
+      field :host,             :string
+      field :namespace,        :string, default: "console"
+      field :user,             :string
+      field :password,         EncryptedString
+      field :token,            EncryptedString
+      field :defer_embeddings, :boolean, default: false
+    end
+
+    def changeset(model, attrs \\ %{}) do
+      model
+      |> cast(attrs, ~w(host namespace user password token defer_embeddings)a)
+      |> trim_changes(~w(password token)a)
+      |> validate_required([:host, :namespace])
+      |> validate_format(:namespace, @namespace_format, message: "must be 1-128 characters of A-Z a-z 0-9 - _ .")
+    end
+
+    def headers(%__MODULE__{token: t}, headers) when is_binary(t) and byte_size(t) > 0,
+      do: [{"Authorization", "Bearer #{t}"} | headers]
+    def headers(%__MODULE__{user: u, password: p}, headers) when is_binary(u) and is_binary(p),
+      do: [{"Authorization", Plug.BasicAuth.encode_basic_auth(u, p)} | headers]
+    def headers(_, headers), do: headers
+
+    def url(%__MODULE__{host: host}, path) when is_binary(host) do
+      Path.join(host, path)
+    end
+  end
+
   defmodule OpenAI do
     use Console.Schema.Base
     alias Console.Schema.ScmConnection
@@ -326,6 +359,7 @@ defmodule Console.Schema.DeploymentSettings do
 
         embeds_one :elastic, Elastic, on_replace: :update
         embeds_one :opensearch, Opensearch, on_replace: :update
+        embeds_one :plural, Plural, on_replace: :update
       end
 
       embeds_one :graph, Graph, on_replace: :update do
@@ -638,6 +672,7 @@ defmodule Console.Schema.DeploymentSettings do
     |> cast(attrs, ~w(enabled store version)a)
     |> cast_embed(:elastic)
     |> cast_embed(:opensearch)
+    |> cast_embed(:plural)
     |> set_initialized()
   end
 

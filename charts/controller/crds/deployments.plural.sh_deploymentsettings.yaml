@@ -1157,6 +1157,81 @@ spec:
                         - host
                         - index
                         type: object
+                      plural:
+                        description: Plural vector db configuration for the vector
+                          store.
+                        properties:
+                          deferEmbeddings:
+                            description: |-
+                              DeferEmbeddings lets the vector db embed text with its own configured embedding model,
+                              rather than computing embeddings in the console.
+                            type: boolean
+                          host:
+                            description: Host is the base url of the plural vector
+                              cluster api, including any configured path prefix.
+                            type: string
+                          namespace:
+                            description: Namespace is the vector db namespace to store
+                              embeddings in, defaults to console.
+                            type: string
+                          passwordSecretRef:
+                            description: PasswordSecretRef is a reference to the local
+                              secret holding the basic auth password.
+                            properties:
+                              key:
+                                description: The key of the secret to select from.  Must
+                                  be a valid secret key.
+                                type: string
+                              name:
+                                default: ""
+                                description: |-
+                                  Name of the referent.
+                                  This field is effectively required, but due to backwards compatibility is
+                                  allowed to be empty. Instances of this type with an empty value here are
+                                  almost certainly wrong.
+                                  More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                type: string
+                              optional:
+                                description: Specify whether the Secret or its key
+                                  must be defined
+                                type: boolean
+                            required:
+                            - key
+                            type: object
+                            x-kubernetes-map-type: atomic
+                          tokenSecretRef:
+                            description: TokenSecretRef is a reference to the local
+                              secret holding a bearer token, which takes precedence
+                              over basic auth.
+                            properties:
+                              key:
+                                description: The key of the secret to select from.  Must
+                                  be a valid secret key.
+                                type: string
+                              name:
+                                default: ""
+                                description: |-
+                                  Name of the referent.
+                                  This field is effectively required, but due to backwards compatibility is
+                                  allowed to be empty. Instances of this type with an empty value here are
+                                  almost certainly wrong.
+                                  More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                type: string
+                              optional:
+                                description: Specify whether the Secret or its key
+                                  must be defined
+                                type: boolean
+                            required:
+                            - key
+                            type: object
+                            x-kubernetes-map-type: atomic
+                          user:
+                            description: User is the user to authenticate with basic
+                              auth.
+                            type: string
+                        required:
+                        - host
+                        type: object
                       vectorStore:
                         description: VectorStore is the type of the vector store to
                           use.
@@ -1164,6 +1239,7 @@ spec:
                         - ELASTIC
                         - OPENSEARCH
                         - POSTGRES
+                        - PLURAL
                         type: string
                     type: object
                   vertex:
