@@ -3,7 +3,8 @@ defmodule Console.AI.Vector.Plural do
   Vector store backed by a Plural vector cluster (`plural-vector cluster`).  Every indexed object is
   stored as one document in the configured namespace, with a row per passage.  The namespace and its
   schema are managed out of band; with `defer_embeddings` the namespace is expected to embed the `text`
-  attribute with the server's own model, otherwise vectors are computed with the console's embedding provider.
+  attribute with the server's own model, which also splits each document's text into passages sized for it,
+  otherwise vectors are computed with the console's embedding provider.
   """
   @behaviour Console.AI.VectorStore
   @behaviour Console.AI.Vector.Bulk
@@ -11,7 +12,6 @@ defmodule Console.AI.Vector.Plural do
   import Console.AI.Vector.Utils
   require Logger
 
-  alias Console.AI.Utils
   alias Console.AI.Provider
   alias Console.AI.Vector.Content
   alias Console.AI.Vector.Plural.{Delete, Document, Passage, Write}
@@ -20,7 +20,8 @@ defmodule Console.AI.Vector.Plural do
   # the cluster api caps request bodies at axum's default 2 MiB
   @max_bytes 1_536 * 1024
   @max_count 500
-  @chunk_size 8000
+  # the db cuts query texts to its model's input limit, this only bounds the request
+  @max_query_chars 100_000
   @auth ~w(user_ids group_ids)a
   @all %{op: "Exists", attribute: "datatype"}
 
@@ -49,17 +50,27 @@ defmodule Console.AI.Vector.Plural do
   def prepare(%__MODULE__{conn: conn}, data, opts) do
     case Content.content(data) do
       {id, datatype, text} when is_binary(text) ->
-        case passages(conn, text) do
-          {:ok, [_ | _] = passages} ->
-            fit(%Document{
-              id: id || Ecto.UUID.generate(),
-              attributes: attributes(data, datatype, Keyword.get(opts, :filters, [])),
-              passages: passages
-            })
-          {:ok, []} -> :ignore
-          err -> err
-        end
+        index(conn, %Document{
+          id: id || Ecto.UUID.generate(),
+          attributes: attributes(data, datatype, Keyword.get(opts, :filters, []))
+        }, text)
       _ -> :ignore
+    end
+  end
+
+  # a document without passages has its text split into passages by the db
+  defp index(%Conn{defer_embeddings: true}, doc, text) do
+    case String.trim(text) do
+      "" -> :ignore
+      _ -> fit_text(doc, text)
+    end
+  end
+  defp index(_, doc, text) do
+    case Provider.embeddings(text) do
+      {:ok, [_ | _] = embeddings} ->
+        fit(%{doc | passages: Enum.map(embeddings, fn {_, vector} -> %Passage{vector: vector} end)})
+      {:ok, []} -> :ignore
+      err -> err
     end
   end
 
@@ -115,6 +126,31 @@ defmodule Console.AI.Vector.Plural do
     end
   end
 
+  # likewise a document's text can't be split across requests: cut it to what fits the request limit
+  defp fit_text(%Document{id: id} = doc, text) do
+    case size(with_text(doc, "")) do
+      base when base > @max_bytes ->
+        {:error, "document #{id} is too large to index in plural vector (#{base} bytes without its text)"}
+      _ ->
+        case cut_text(doc, text, String.length(text)) do
+          ^text -> {:ok, with_text(doc, text)}
+          cut ->
+            Logger.warning("indexing #{String.length(cut)} of #{String.length(text)} characters of document #{id} to fit plural vector's request limit")
+            {:ok, with_text(doc, cut)}
+        end
+    end
+  end
+
+  defp cut_text(doc, text, len) do
+    cut = String.slice(text, 0, len)
+    case size(with_text(doc, cut)) <= @max_bytes do
+      true -> cut
+      false -> cut_text(doc, text, trunc(len * 0.9))
+    end
+  end
+
+  defp with_text(%Document{attributes: attrs} = doc, text), do: %{doc | attributes: Map.put(attrs, "text", text)}
+
   defp direct({:retry, msg}), do: {:error, msg}
   defp direct(result), do: result
 
@@ -158,14 +194,7 @@ defmodule Console.AI.Vector.Plural do
 
   defp write(conn, %Write{} = write), do: request(conn, :post, namespace_path(conn, "write"), write)
 
-  defp passages(%Conn{defer_embeddings: true}, text),
-    do: {:ok, Enum.map(Utils.chunk(text, @chunk_size), &%Passage{text: &1})}
-  defp passages(_, text) do
-    with {:ok, embeddings} <- Provider.embeddings(text),
-      do: {:ok, Enum.map(embeddings, fn {_, vector} -> %Passage{vector: vector} end)}
-  end
-
-  defp rank_by(%Conn{defer_embeddings: true}, text), do: {:ok, %{op: "ANN", text: String.slice(text, 0, @chunk_size)}}
+  defp rank_by(%Conn{defer_embeddings: true}, text), do: {:ok, %{op: "ANN", text: String.slice(text, 0, @max_query_chars)}}
   defp rank_by(_, text) do
     with {:ok, [{_, embedding} | _]} <- Provider.embeddings(text),
       do: {:ok, %{op: "ANN", vector: embedding}}

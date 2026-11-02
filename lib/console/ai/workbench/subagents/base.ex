@@ -2,7 +2,7 @@ defmodule Console.AI.Workbench.Subagents.Base do
   import Console.AI.Agents.Base, only: [publish_absinthe: 2]
   alias Console.Repo
   alias Console.AI.{Stream, VectorStore}
-  alias Console.AI.Workbench.{Activity, Environment, Tools}
+  alias Console.AI.Workbench.{Activity, Environment, MCP, Tools}
   alias Console.Deployments.Workbenches
   alias Console.Schema.{AgentRun, WorkbenchJobThought, WorkbenchJob, WorkbenchJobActivity, WorkbenchTool}
   alias Console.AI.Tools.Workbench.{Context, Skills, Skill, ListKnowledge, Knowledge, KnowledgeUsed}
@@ -124,6 +124,19 @@ defmodule Console.AI.Workbench.Subagents.Base do
       | knowledge_tools([%ListKnowledge{job: job}, %Knowledge{job: job}, %KnowledgeUsed{job: job}])
     ]
   end
+
+  @doc """
+  MCP tools from workbench tools in the `:search` category (eg web search), wired into the orchestrator and
+  every subagent. Tools `agent` already receives through its own category routing are skipped to avoid
+  duplicate tool names.
+  """
+  def search_tools(%Environment{tools: tools, job: %WorkbenchJob{} = job}, agent)
+      when is_map(tools) or is_list(tools) do
+    Environment.subagent_tools(tools, :search)
+    |> Enum.reject(&Environment.subagent_tool?(&1, agent))
+    |> MCP.expand_tools(job)
+  end
+  def search_tools(_, _), do: []
 
   def skill_knowledge_pre_enable do
     [%Context{}, %Skills{}, %Skill{} | knowledge_tools([%ListKnowledge{}, %Knowledge{}, %KnowledgeUsed{}])]

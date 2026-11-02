@@ -70,6 +70,7 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     core_tools(job, environment)
     |> Enum.concat(vuln_tools(bench, user))
     |> Enum.concat(manifests_tools(bench, job, user, cache))
+    |> Enum.concat(search_tools(environment, :infrastructure))
     |> Enum.concat(skill_knowledge_tools(job, skills) ++ [
       Scratchpad,
       %History{job: job, activities: activities},

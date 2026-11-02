@@ -54,6 +54,7 @@ defmodule Console.AI.Workbench.Subagents.Verify do
     Observability.core_tools(job, environment)
     |> Enum.concat(Infrastructure.core_tools(job, environment))
     |> Enum.concat(sentinel_tools(job))
+    |> Enum.concat(search_tools(environment, :verify))
     |> Enum.concat(skill_knowledge_tools(job, skills) ++ [
       Scratchpad,
       Result

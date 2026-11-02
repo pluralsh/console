@@ -48,6 +48,7 @@ defmodule Console.AI.Workbench.Subagents.Observability do
 
     core_tools(job, environment, user)
     |> Enum.concat(MCP.expand_tools(Environment.subagent_tools(tools, :observability), job))
+    |> Enum.concat(search_tools(environment, :observability))
     |> Enum.concat(pod_logs_tools(job, user))
     |> Enum.concat(Monitoring.read_tools(job))
     |> Enum.concat(skill_knowledge_tools(job, skills) ++ [

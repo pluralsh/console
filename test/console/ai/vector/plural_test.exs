@@ -30,9 +30,8 @@ defmodule Console.AI.Vector.PluralTest do
         assert doc["attributes"]["catalog_id"] == catalog.id
         assert doc["attributes"]["user_ids"] == ["u"]
         assert Jason.decode!(doc["attributes"]["data"])["name"] == catalog.name
-        [passage] = doc["passages"]
-        assert passage["text"] =~ catalog.name
-        refute Map.has_key?(passage, "vector")
+        assert doc["attributes"]["text"] =~ catalog.name
+        assert doc["passages"] == []
         refute Map.has_key?(json(opts), "delete_by_filter")
         {:ok, %Req.Response{status: 200, body: %{"rows_upserted" => 1}}}
       end)
@@ -70,6 +69,24 @@ defmodule Console.AI.Vector.PluralTest do
       expect(Req, :request, fn opts ->
         %Write{upsert_documents: [%Document{passages: passages}]} = opts[:json]
         assert length(passages) in 1..399
+        assert IO.iodata_length(Jason.encode_to_iodata!(opts[:json])) <= 1_536 * 1024 + 64
+        {:ok, %Req.Response{status: 200, body: %{}}}
+      end)
+
+      :ok = Buffer.flush()
+    end
+
+    test "it cuts deferred text that would exceed the request limit" do
+      plural_settings(defer_embeddings: true)
+      mini = %{Catalog.Mini.new(insert(:catalog)) | description: String.duplicate("x", 1_000_000)}
+      {_, _, text} = Console.AI.Vector.Content.content(mini)
+
+      :ok = VectorStore.insert(mini)
+
+      expect(Req, :request, fn opts ->
+        [doc] = json(opts)["upsert_documents"]
+        assert String.starts_with?(text, doc["attributes"]["text"])
+        assert String.length(doc["attributes"]["text"]) < String.length(text)
         assert IO.iodata_length(Jason.encode_to_iodata!(opts[:json])) <= 1_536 * 1024 + 64
         {:ok, %Req.Response{status: 200, body: %{}}}
       end)
