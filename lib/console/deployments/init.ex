@@ -224,6 +224,37 @@ defmodule Console.Deployments.Init do
     end
   end
 
+  @doc """
+  Moves a cloud instance's vector store onto the plural telemetry vector datastore, replacing the
+  elastic store `disable_vector_store/0` turned off.  The instance's namespace and its schema are
+  provisioned by the console chart, and the namespace embeds documents server-side.  The store
+  starts out empty and is refilled by the regular vectorization crons and events.
+  """
+  @spec migrate_plural_vector() :: {:ok, DeploymentSettings.t} | Console.error()
+  def migrate_plural_vector() do
+    with true <- Console.plural_o11y?(),
+         true <- Console.cloud?(),
+         inst when is_binary(inst) <- Console.cloud_instance(),
+         {:ok, _, pass} <- Console.es_creds(),
+         {:ok, url} <- Console.telemetry_vector_url() do
+      Settings.fetch_consistent()
+      |> DeploymentSettings.changeset(%{ai: %{vector_store: %{
+        enabled: true,
+        store: :plural,
+        plural: %{
+          host: url,
+          namespace: inst,
+          user: Console.telemetry_user(),
+          password: pass,
+          defer_embeddings: true
+        }
+      }}})
+      |> Repo.update()
+    else
+      _ -> {:error, "plural telemetry vector storage is not fully configured"}
+    end
+  end
+
   @spec setup_workbench() :: {:ok, %{bench: Workbench.t()}} | Console.error()
   def setup_workbench() do
     with true <- Console.cloud?(),

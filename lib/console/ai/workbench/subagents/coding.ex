@@ -99,7 +99,7 @@ defmodule Console.AI.Workbench.Subagents.Coding do
 
   def tools(%Environment{} = environment), do: tools(nil, environment)
 
-  def tools(activity, %Environment{skills: skills, tools: workbench_tools, job: job, activities: activities}) do
+  def tools(activity, %Environment{skills: skills, tools: workbench_tools, job: job, activities: activities} = environment) do
     skills = Environment.subagent_skills(skills, :coding)
     [
       %CodingAgent{activity: activity, workbench: job.workbench, job: job, skills: skills},
@@ -110,6 +110,7 @@ defmodule Console.AI.Workbench.Subagents.Coding do
       Result
     ]
     |> Enum.concat(Integration.scm_tools(workbench_tools))
+    |> Enum.concat(search_tools(environment, :coding))
   end
 
   EEx.function_from_file(:defp, :analysis_prompt, Console.priv_filename(["prompts", "workbench", "coding_output.md.eex"]), [:assigns])

@@ -1650,7 +1650,7 @@ type VectorStore struct {
 
 	// VectorStore is the type of the vector store to use.
 	//
-	// +kubebuilder:validation:Enum=ELASTIC;OPENSEARCH;POSTGRES
+	// +kubebuilder:validation:Enum=ELASTIC;OPENSEARCH;POSTGRES;PLURAL
 	// +kubebuilder:validation:Optional
 	VectorStore *console.VectorStore `json:"vectorStore,omitempty"`
 
@@ -1663,6 +1663,11 @@ type VectorStore struct {
 	//
 	// +kubebuilder:validation:Optional
 	Opensearch *OpensearchConnectionSettings `json:"opensearch,omitempty"`
+
+	// Plural vector db configuration for the vector store.
+	//
+	// +kubebuilder:validation:Optional
+	Plural *PluralVectorConnectionSettings `json:"plural,omitempty"`
 }
 
 func (in *VectorStore) Attributes(ctx context.Context, c client.Client, namespace string) (*console.VectorStoreAttributes, error) {
@@ -1717,8 +1722,78 @@ func (in *VectorStore) Attributes(ctx context.Context, c client.Client, namespac
 			AWSSecretAccessKey: awsSecretAccessKey,
 			AWSRegion:          in.Opensearch.AwsRegion,
 		}
+	case console.VectorStorePlural:
+		if in.Plural == nil {
+			return nil, fmt.Errorf("must provide plural configuration to set the provider to PLURAL")
+		}
+
+		plural, err := in.Plural.Attributes(ctx, c, namespace)
+		if err != nil {
+			return nil, err
+		}
+		attr.Plural = plural
 	case console.VectorStorePostgres:
 	}
+	return attr, nil
+}
+
+type PluralVectorConnectionSettings struct {
+	// Host is the base url of the plural vector cluster api, including any configured path prefix.
+	//
+	// +kubebuilder:validation:Required
+	Host string `json:"host"`
+
+	// Namespace is the vector db namespace to store embeddings in, defaults to console.
+	//
+	// +kubebuilder:validation:Optional
+	Namespace *string `json:"namespace,omitempty"`
+
+	// User is the user to authenticate with basic auth.
+	//
+	// +kubebuilder:validation:Optional
+	User *string `json:"user,omitempty"`
+
+	// PasswordSecretRef is a reference to the local secret holding the basic auth password.
+	//
+	// +kubebuilder:validation:Optional
+	PasswordSecretRef *corev1.SecretKeySelector `json:"passwordSecretRef,omitempty"`
+
+	// TokenSecretRef is a reference to the local secret holding a bearer token, which takes precedence over basic auth.
+	//
+	// +kubebuilder:validation:Optional
+	TokenSecretRef *corev1.SecretKeySelector `json:"tokenSecretRef,omitempty"`
+
+	// DeferEmbeddings lets the vector db embed text with its own configured embedding model,
+	// rather than computing embeddings in the console.
+	//
+	// +kubebuilder:validation:Optional
+	DeferEmbeddings *bool `json:"deferEmbeddings,omitempty"`
+}
+
+func (in *PluralVectorConnectionSettings) Attributes(ctx context.Context, c client.Client, namespace string) (*console.PluralVectorConnectionAttributes, error) {
+	attr := &console.PluralVectorConnectionAttributes{
+		Host:            in.Host,
+		Namespace:       in.Namespace,
+		User:            in.User,
+		DeferEmbeddings: in.DeferEmbeddings,
+	}
+
+	if in.PasswordSecretRef != nil {
+		password, err := utils.GetSecretKey(ctx, c, in.PasswordSecretRef, namespace)
+		if err != nil {
+			return nil, err
+		}
+		attr.Password = lo.ToPtr(password)
+	}
+
+	if in.TokenSecretRef != nil {
+		token, err := utils.GetSecretKey(ctx, c, in.TokenSecretRef, namespace)
+		if err != nil {
+			return nil, err
+		}
+		attr.Token = lo.ToPtr(token)
+	}
+
 	return attr, nil
 }
 

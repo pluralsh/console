@@ -54,4 +54,39 @@ spec:
   secretKeyRef:
     name: plrl-{{ .Values.cloud.instanceName }}-auth
     key: password
+---
+apiVersion: telemetry.plural.sh/v1alpha1
+kind: NamespaceAuthentication
+metadata:
+  name: plrl-{{ .Values.cloud.instanceName }}-vector-authz
+  namespace: telemetry-system
+spec:
+  dataStoreRef:
+    kind: Vector
+    name: vector
+  namespace: {{ .Values.cloud.instanceName }}
+  username: plrl
+  permission: write
+  secretKeyRef:
+    name: plrl-{{ .Values.cloud.instanceName }}-auth
+    key: password
+---
+apiVersion: telemetry.plural.sh/v1alpha1
+kind: NamespaceSchema
+metadata:
+  name: plrl-{{ .Values.cloud.instanceName }}-vector
+  namespace: telemetry-system
+spec:
+  dataStoreRef:
+    kind: Vector
+    name: vector
+  namespace: {{ .Values.cloud.instanceName }}
+  # the attributes Console.AI.Vector.Plural writes, the console defers embedding `text` to the server
+  schema:
+    text: { type: string, embed: true }
+    datatype: { type: string }
+    data: { type: string }
+    timestamp: { type: int }
+    user_ids: { type: "[]string" }
+    group_ids: { type: "[]string" }
 {{ end }}

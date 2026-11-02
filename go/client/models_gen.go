@@ -7166,6 +7166,21 @@ type PluralSubscription struct {
 	Plan *Plan   `json:"plan,omitempty"`
 }
 
+type PluralVectorConnectionAttributes struct {
+	// base url of the plural vector cluster api, including any configured path prefix
+	Host string `json:"host"`
+	// the namespace to store vectors in, defaults to console
+	Namespace *string `json:"namespace,omitempty"`
+	// user to connect w/ for basic auth
+	User *string `json:"user,omitempty"`
+	// password to connect w/ for basic auth
+	Password *string `json:"password,omitempty"`
+	// a bearer token (jwt) to authenticate with, takes precedence over basic auth
+	Token *string `json:"token,omitempty"`
+	// whether to let the vector db embed text with its own configured embedding model, rather than computing embeddings in the console
+	DeferEmbeddings *bool `json:"deferEmbeddings,omitempty"`
+}
+
 type Pod struct {
 	Status   PodStatus `json:"status"`
 	Spec     PodSpec   `json:"spec"`
@@ -10676,6 +10691,7 @@ type VectorStoreAttributes struct {
 	Store      *VectorStore                       `json:"store,omitempty"`
 	Elastic    *ElasticsearchConnectionAttributes `json:"elastic,omitempty"`
 	Opensearch *OpensearchConnectionAttributes    `json:"opensearch,omitempty"`
+	Plural     *PluralVectorConnectionAttributes  `json:"plural,omitempty"`
 }
 
 type VectorStoreSettings struct {
@@ -20062,17 +20078,19 @@ const (
 	VectorStoreElastic    VectorStore = "ELASTIC"
 	VectorStoreOpensearch VectorStore = "OPENSEARCH"
 	VectorStorePostgres   VectorStore = "POSTGRES"
+	VectorStorePlural     VectorStore = "PLURAL"
 )
 
 var AllVectorStore = []VectorStore{
 	VectorStoreElastic,
 	VectorStoreOpensearch,
 	VectorStorePostgres,
+	VectorStorePlural,
 }
 
 func (e VectorStore) IsValid() bool {
 	switch e {
-	case VectorStoreElastic, VectorStoreOpensearch, VectorStorePostgres:
+	case VectorStoreElastic, VectorStoreOpensearch, VectorStorePostgres, VectorStorePlural:
 		return true
 	}
 	return false

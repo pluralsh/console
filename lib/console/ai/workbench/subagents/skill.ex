@@ -74,8 +74,8 @@ defmodule Console.AI.Workbench.Subagents.Skill do
   def tools(%Environment{job: job, activities: activities} = environment),
     do: tools(target_job(%{job | activities: activities}), environment)
 
-  def tools(target_job, %Environment{skills: skills}) do
-    skill_knowledge_tools(target_job, skills) ++ [
+  def tools(target_job, %Environment{skills: skills} = environment) do
+    skill_knowledge_tools(target_job, skills) ++ search_tools(environment, :skill) ++ [
       Scratchpad,
       %SkillUpdate{skills: skills, job: target_job},
       %SkillCreate{

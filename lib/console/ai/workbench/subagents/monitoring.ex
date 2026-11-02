@@ -50,6 +50,7 @@ defmodule Console.AI.Workbench.Subagents.Monitoring do
         job
       )
     )
+    |> Enum.concat(search_tools(environment, :observability))
     |> Enum.concat(Monitoring.read_tools(job))
     |> Enum.concat(Monitoring.write_tools(job, user))
     |> Enum.concat(

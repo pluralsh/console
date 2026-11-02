@@ -96,6 +96,20 @@ defmodule Console do
     end
   end
 
+  @doc """
+  Base url of the plural telemetry vector api, `{telemetry_url}/vector`.  The vector api takes its
+  namespace in each request's path, so unlike `telemetry_url/2` it isn't namespace-scoped.
+  """
+  @spec telemetry_vector_url() :: {:ok, binary} | :error
+  def telemetry_vector_url() do
+    with true <- plural_o11y?(),
+         url when is_binary(url) <- Console.conf(:telemetry_url) do
+      {:ok, Path.join(url, "vector")}
+    else
+      _ -> :error
+    end
+  end
+
   def truncate(str, len, suffix \\ "...")
   def truncate(str, len, suffix) when byte_size(str) > len,
     do: "#{String.slice(str, 0, len - byte_size(suffix))}#{suffix}"

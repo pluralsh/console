@@ -7332,6 +7332,7 @@ enum VectorStore {
   ELASTIC
   OPENSEARCH
   POSTGRES
+  PLURAL
 }
 
 enum OpenAiMethod {
@@ -7778,6 +7779,27 @@ input VectorStoreAttributes {
   store: VectorStore
   elastic: ElasticsearchConnectionAttributes
   opensearch: OpensearchConnectionAttributes
+  plural: PluralVectorConnectionAttributes
+}
+
+input PluralVectorConnectionAttributes {
+  "base url of the plural vector cluster api, including any configured path prefix"
+  host: String!
+
+  "the namespace to store vectors in, defaults to console"
+  namespace: String
+
+  "user to connect w\/ for basic auth"
+  user: String
+
+  "password to connect w\/ for basic auth"
+  password: String
+
+  "a bearer token (jwt) to authenticate with, takes precedence over basic auth"
+  token: String
+
+  "whether to let the vector db embed text with its own configured embedding model, rather than computing embeddings in the console"
+  deferEmbeddings: Boolean
 }
 
 input GraphStoreAttributes {
