@@ -1,4 +1,10 @@
 export {
+  CLUSTER_AGENT_HEIGHT,
+  CLUSTER_AGENT_WIDTH,
+  ClusterAgentShot,
+  type ClusterAgentShotProps,
+} from './ClusterAgentShot'
+export {
   OVERVIEW_SCREEN_HEIGHT,
   OVERVIEW_SCREEN_WIDTH,
   OVERVIEW_STAGE_HEIGHT,

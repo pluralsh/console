@@ -17,6 +17,7 @@ const overviewScreens = ['flow', 'workbench']
 const themes = ['light', 'dark']
 const story = 'product-shots-gallery--environment-hygiene'
 const overviewStory = 'product-shots-overview--flow'
+const clusterStory = 'product-shots-cluster-agent--dark'
 
 await rm(output, { force: true, recursive: true })
 await mkdir(resolve(output, 'images'), { recursive: true })
@@ -92,11 +93,31 @@ try {
     }
   }
 
+  const clusterManifest = []
+  await page.setViewportSize({ width: 1360, height: 2500 })
+
+  for (const theme of themes) {
+    const args = `theme:${theme};width:1202`
+    await page.goto(`http://127.0.0.1:6106/iframe.html?id=${clusterStory}&args=${args}`, {
+      waitUntil: 'networkidle',
+    })
+    const shot = page.locator('[data-cluster-agent-shot]')
+    await shot.waitFor()
+    await page.evaluate(() => document.fonts.ready)
+    const file = `images/cluster-agent-${theme}.webp`
+    await shot.screenshot({ path: resolve(output, file), type: 'webp', omitBackground: true })
+    clusterManifest.push({ id: 'cluster-agent', theme, file })
+  }
+
   await browser.close()
   await writeFile(resolve(output, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`)
   await writeFile(
     resolve(output, 'overview-manifest.json'),
     `${JSON.stringify(overviewManifest, null, 2)}\n`
+  )
+  await writeFile(
+    resolve(output, 'cluster-agent-manifest.json'),
+    `${JSON.stringify(clusterManifest, null, 2)}\n`
   )
   await writeFile(
     resolve(output, 'embed.js'),
