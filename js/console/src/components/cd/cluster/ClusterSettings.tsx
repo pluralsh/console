@@ -13,8 +13,8 @@ import { useUpdateState } from 'components/hooks/useUpdateState'
 
 import { GqlError } from 'components/utils/Alert'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
-import { WorkbenchSelector } from 'components/workbenches/WorkbenchSelector'
-import { useWorkbenchOptions } from 'components/workbenches/useWorkbenchOptions'
+import { SearchableWorkbenchSelector } from 'components/workbenches/WorkbenchSelector'
+import { useSearchableWorkbenchOptions } from 'components/workbenches/useWorkbenchOptions'
 
 import {
   ClustersRowFragment,
@@ -55,11 +55,6 @@ function ClusterSettingsModalInner({
     [cluster?.tags]
   )
 
-  const {
-    workbenches,
-    hasWorkbenches,
-    loading: workbenchesLoading,
-  } = useWorkbenchOptions()
   const {
     state: {
       name,
@@ -196,23 +191,12 @@ function ClusterSettingsModalInner({
         </Switch>
         {autoRemediate && (
           <>
-            <FormField
-              label="Remediation workbench"
-              hint={
-                !workbenchesLoading && !hasWorkbenches
-                  ? 'Create a workbench before enabling auto-remediation.'
-                  : 'Jobs are sent here when an insight component meets the severity below.'
+            <RemediationWorkbenchField
+              workbenchId={remediationWorkbenchId}
+              setWorkbenchId={(id) =>
+                updateState({ remediationWorkbenchId: id })
               }
-            >
-              <WorkbenchSelector
-                workbenchId={remediationWorkbenchId}
-                setWorkbenchId={(id) =>
-                  updateState({ remediationWorkbenchId: id })
-                }
-                workbenches={workbenches}
-                loading={workbenchesLoading}
-              />
-            </FormField>
+            />
             <FormField label="Minimum severity">
               <Select
                 label="Minimum severity"
@@ -268,6 +252,51 @@ function ClusterSettingsModalInner({
         {error && <GqlError error={error} />}
       </Flex>
     </Modal>
+  )
+}
+
+function RemediationWorkbenchField({
+  workbenchId,
+  setWorkbenchId,
+}: {
+  workbenchId: Nullable<string>
+  setWorkbenchId: (id: Nullable<string>) => void
+}) {
+  const {
+    workbenches,
+    selectedWorkbench,
+    hasWorkbenches,
+    loading,
+    fetchingMore,
+    query,
+    setQuery,
+    hasNextPage,
+    fetchNextPage,
+  } = useSearchableWorkbenchOptions(workbenchId)
+
+  return (
+    <FormField
+      label="Remediation workbench"
+      hint={
+        !loading && !hasWorkbenches
+          ? 'Create a workbench before enabling auto-remediation.'
+          : 'Jobs are sent here when an insight component meets the severity below.'
+      }
+    >
+      <SearchableWorkbenchSelector
+        workbenchId={workbenchId}
+        setWorkbenchId={setWorkbenchId}
+        workbenches={workbenches}
+        selectedWorkbench={selectedWorkbench}
+        loading={loading}
+        fetchingMore={fetchingMore}
+        query={query}
+        onQueryChange={setQuery}
+        hasNextPage={hasNextPage}
+        onLoadMore={fetchNextPage}
+        disabled={!loading && !hasWorkbenches}
+      />
+    </FormField>
   )
 }
 

@@ -11068,11 +11068,6 @@ type WorkbenchAlertCounts struct {
 	Severities []*AlertCountBySeverity `json:"severities,omitempty"`
 }
 
-type WorkbenchAlertCounts struct {
-	Types      []*AlertCountByType     `json:"types,omitempty"`
-	Severities []*AlertCountBySeverity `json:"severities,omitempty"`
-}
-
 type WorkbenchAttributes struct {
 	// the name of the workbench (must be unique)
 	Name string `json:"name"`

@@ -295,7 +295,8 @@ defmodule Console.Schema.Cluster do
     )
   end
 
-  def for_user(query \\ __MODULE__, %User{} = user) do
+  def for_user(query \\ __MODULE__, user)
+  def for_user(query, %User{} = user) do
     Rbac.globally_readable(query, user, fn query, id, groups ->
       sub = Service.for_user(user)
       from(c in query,
@@ -310,6 +311,7 @@ defmodule Console.Schema.Cluster do
       )
     end)
   end
+  def for_user(query, _), do: from(c in query, where: false)
 
   def for_provider(query \\ __MODULE__, provider_id) do
     from(c in query, where: c.provider_id == ^provider_id)

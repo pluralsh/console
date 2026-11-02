@@ -656,7 +656,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :object_store,     :object_store, resolve: dataloader(Deployments), description: "the object store connection bound to this cluster for backup/restore"
     field :parent_cluster,   :cluster, resolve: dataloader(Deployments), description: "the parent of this virtual cluster"
     field :insight,          :ai_insight, resolve: dataloader(Deployments), description: "an ai insight generated about issues discovered which might impact the health of this cluster"
-    field :remediation_workbench, :workbench, resolve: dataloader(Deployments), description: "workbench that receives auto-remediation jobs when cluster insights clear this cluster's policy"
+    field :remediation_workbench, :workbench, resolve: dataloader(Deployments, args: %{readable: true}), description: "workbench that receives auto-remediation jobs when cluster insights clear this cluster's policy"
     field :current_upgrade,  :cluster_upgrade, resolve: dataloader(Deployments), description: "the current upgrade attempt for this cluster"
 
     field :operational_layout, :operational_layout, resolve: dataloader(Deployments), description: "a high level description of the setup of common resources in a cluster"

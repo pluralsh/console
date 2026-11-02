@@ -1598,6 +1598,42 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert found["id"] == job.id
     end
 
+    test "it hides a cluster the job reader cannot access" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      cluster = insert(:cluster)
+      job = insert(:workbench_job, workbench: workbench, cluster: cluster, user: user)
+
+      {:ok, %{data: %{"workbenchJob" => found}}} = run_query("""
+        query WorkbenchJob($id: ID!) {
+          workbenchJob(id: $id) {
+            cluster { id handle name }
+          }
+        }
+      """, %{"id" => job.id}, %{current_user: user})
+
+      assert found["cluster"] == nil
+    end
+
+    test "it returns a cluster the job reader can access" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      cluster = insert(:cluster, read_bindings: [%{user_id: user.id}])
+      job = insert(:workbench_job, workbench: workbench, cluster: cluster, user: user)
+
+      {:ok, %{data: %{"workbenchJob" => found}}} = run_query("""
+        query WorkbenchJob($id: ID!) {
+          workbenchJob(id: $id) {
+            cluster { id handle }
+          }
+        }
+      """, %{"id" => job.id}, %{current_user: user})
+
+      assert found["cluster"]["id"] == cluster.id
+      assert found["cluster"]["handle"] == cluster.handle
+    end
 
     test "users without read access cannot fetch workbench jobs" do
       user = insert(:user)

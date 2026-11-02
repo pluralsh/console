@@ -459,6 +459,9 @@ defmodule Console.Deployments.Clusters do
 
   def create_cluster_raw(attrs, %User{} = user) do
     start_transaction()
+    |> add_operation(:remediation_workbench, fn _ ->
+      authorize_remediation_workbench(attrs, user)
+    end)
     |> add_operation(:cloud, fn _ -> {:ok, Console.cloud?()} end)
     |> add_operation(:limit, fn _ ->
       case !attrs[:ignore_limit] && cluster_limit?() do
@@ -530,6 +533,9 @@ defmodule Console.Deployments.Clusters do
   @spec upsert_virtual_cluster(map, binary, User.t) :: cluster_resp
   def upsert_virtual_cluster(attrs, parent_id, %User{} = user) do
     start_transaction()
+    |> add_operation(:remediation_workbench, fn _ ->
+      authorize_remediation_workbench(attrs, user)
+    end)
     |> add_operation(:parent, fn _ ->
       get_cluster!(parent_id)
       |> Repo.preload([:read_bindings, :write_bindings])

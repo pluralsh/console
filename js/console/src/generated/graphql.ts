@@ -24062,6 +24062,17 @@ export type WorkbenchesQueryVariables = Exact<{
 
 export type WorkbenchesQuery = { __typename?: 'RootQueryType', workbenches?: { __typename?: 'WorkbenchConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchEdge', node?: { __typename?: 'Workbench', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, agentRuntime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, tools?: Array<{ __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, approval?: boolean | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, mcpServer?: { __typename?: 'McpServer', id: string, name: string, url: string } | null } | null> | null, webhooks?: { __typename?: 'WorkbenchWebhookConnection', edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, priority?: number | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, type: ObservabilityWebhookType } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, provider: IssueWebhookProvider } | null } | null } | null> | null } | null } | null } | null> | null } | null };
 
+export type WorkbenchSelectorOptionsQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
+  currentWorkbenchId?: InputMaybe<Scalars['ID']['input']>;
+  hasCurrentWorkbench?: Scalars['Boolean']['input'];
+}>;
+
+
+export type WorkbenchSelectorOptionsQuery = { __typename?: 'RootQueryType', workbenches?: { __typename?: 'WorkbenchConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchEdge', node?: { __typename?: 'Workbench', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, agentRuntime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, tools?: Array<{ __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, approval?: boolean | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, mcpServer?: { __typename?: 'McpServer', id: string, name: string, url: string } | null } | null> | null, webhooks?: { __typename?: 'WorkbenchWebhookConnection', edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, priority?: number | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, type: ObservabilityWebhookType } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, provider: IssueWebhookProvider } | null } | null } | null> | null } | null } | null } | null> | null } | null, workbench?: { __typename?: 'Workbench', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, agentRuntime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, tools?: Array<{ __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, approval?: boolean | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, mcpServer?: { __typename?: 'McpServer', id: string, name: string, url: string } | null } | null> | null, webhooks?: { __typename?: 'WorkbenchWebhookConnection', edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, priority?: number | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, type: ObservabilityWebhookType } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, provider: IssueWebhookProvider } | null } | null } | null> | null } | null } | null };
+
 export type WorkbenchDashboardQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -38349,6 +38360,46 @@ export type WorkbenchesSuspenseQueryHookResult = ReturnType<typeof useWorkbenche
 export type WorkbenchesQueryResult = Apollo.QueryResult<WorkbenchesQuery, WorkbenchesQueryVariables>;
 
 /**
+ * __useWorkbenchSelectorOptionsQuery__
+ *
+ * To run a query within a React component, call `useWorkbenchSelectorOptionsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchSelectorOptionsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWorkbenchSelectorOptionsQuery({
+ *   variables: {
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *      q: // value for 'q'
+ *      currentWorkbenchId: // value for 'currentWorkbenchId'
+ *      hasCurrentWorkbench: // value for 'hasCurrentWorkbench'
+ *   },
+ * });
+ */
+export function useWorkbenchSelectorOptionsQuery(baseOptions?: Apollo.QueryHookOptions<WorkbenchSelectorOptionsQuery, WorkbenchSelectorOptionsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<WorkbenchSelectorOptionsQuery, WorkbenchSelectorOptionsQueryVariables>(Operations.WorkbenchSelectorOptions, options);
+      }
+export function useWorkbenchSelectorOptionsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<WorkbenchSelectorOptionsQuery, WorkbenchSelectorOptionsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<WorkbenchSelectorOptionsQuery, WorkbenchSelectorOptionsQueryVariables>(Operations.WorkbenchSelectorOptions, options);
+        }
+// @ts-ignore
+export function useWorkbenchSelectorOptionsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<WorkbenchSelectorOptionsQuery, WorkbenchSelectorOptionsQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchSelectorOptionsQuery, WorkbenchSelectorOptionsQueryVariables>;
+export function useWorkbenchSelectorOptionsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchSelectorOptionsQuery, WorkbenchSelectorOptionsQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchSelectorOptionsQuery | undefined, WorkbenchSelectorOptionsQueryVariables>;
+export function useWorkbenchSelectorOptionsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchSelectorOptionsQuery, WorkbenchSelectorOptionsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<WorkbenchSelectorOptionsQuery, WorkbenchSelectorOptionsQueryVariables>(Operations.WorkbenchSelectorOptions, options);
+        }
+export type WorkbenchSelectorOptionsQueryHookResult = ReturnType<typeof useWorkbenchSelectorOptionsQuery>;
+export type WorkbenchSelectorOptionsLazyQueryHookResult = ReturnType<typeof useWorkbenchSelectorOptionsLazyQuery>;
+export type WorkbenchSelectorOptionsSuspenseQueryHookResult = ReturnType<typeof useWorkbenchSelectorOptionsSuspenseQuery>;
+export type WorkbenchSelectorOptionsQueryResult = Apollo.QueryResult<WorkbenchSelectorOptionsQuery, WorkbenchSelectorOptionsQueryVariables>;
+
+/**
  * __useWorkbenchDashboardQuery__
  *
  * To run a query within a React component, call `useWorkbenchDashboardQuery` and pass it any options that fit your needs.
@@ -42273,6 +42324,7 @@ export const namedOperations = {
     VulnerabilityStatistics: 'VulnerabilityStatistics',
     ClusterVulnerabilityAggregate: 'ClusterVulnerabilityAggregate',
     Workbenches: 'Workbenches',
+    WorkbenchSelectorOptions: 'WorkbenchSelectorOptions',
     WorkbenchDashboard: 'WorkbenchDashboard',
     WorkbenchesSummary: 'WorkbenchesSummary',
     WorkbenchesEvalsMergeRateGraph: 'WorkbenchesEvalsMergeRateGraph',
