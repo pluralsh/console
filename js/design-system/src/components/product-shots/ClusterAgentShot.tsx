@@ -1,18 +1,11 @@
 import type { ReactNode } from 'react'
 import styled, { type DefaultTheme, ThemeProvider } from 'styled-components'
 
-import AiSparkleOutlineIcon from '../icons/AiSparkleOutlineIcon'
-import AwsLogoIcon from '../icons/AwsLogoIcon'
+import AppsIcon from '../icons/AppsIcon'
 import CaretDownIcon from '../icons/CaretDownIcon'
-import CloseIcon from '../icons/CloseIcon'
 import ElasticsearchLogoIcon from '../icons/ElasticsearchLogoIcon'
-import EyeIcon from '../icons/EyeIcon'
 import GitPullIcon from '../icons/GitPullIcon'
 import GrafanaLogoIcon from '../icons/GrafanaLogoIcon'
-import PlayIcon from '../icons/PlayIcon'
-import PluralLogoIcon from '../icons/PluralLogoIcon'
-import PlusIcon from '../icons/PlusIcon'
-import StackIcon from '../icons/StackIcon'
 import type { ProductShotTheme } from './scenarios'
 
 export const CLUSTER_AGENT_WIDTH = 1202
@@ -188,7 +181,7 @@ function AgentCard() {
           justifyContent: 'center',
         }}
       >
-        <AiSparkleOutlineIcon size={16} />
+        <BurstIcon />
         <Label $size={18}>Starting background agent</Label>
       </Row>
     </Card>
@@ -220,22 +213,19 @@ function ChatCard() {
         <Placeholder>How can I help?</Placeholder>
         <Row style={{ alignItems: 'center', marginTop: 18 }}>
           <IconButton>
-            <PlusIcon size={16} />
+            <PlusMark />
           </IconButton>
           <IconButton>
-            <AiSparkleOutlineIcon size={16} />
+            <SparkleIcon dot />
           </IconButton>
           <Spacer />
           <ModelButton>
-            <AwsLogoIcon
-              fullColor
-              size={18}
-            />
+            <AwsBadge />
             <CaretDownIcon size={10} />
           </ModelButton>
           <CopilotButton>
             Copilot Agent
-            <PlayIcon size={12} />
+            <PlayMark />
           </CopilotButton>
         </Row>
       </Composer>
@@ -256,7 +246,7 @@ function ClusterCard() {
       }}
     >
       <Row style={{ alignItems: 'center', gap: 8 }}>
-        <CloseIcon size={12} />
+        <AppsIcon size={14} />
         <Label $size={15}>Cluster overview</Label>
       </Row>
       <Row style={{ alignItems: 'center', gap: 8, marginTop: 8 }}>
@@ -296,7 +286,7 @@ function PullRequestCard() {
         <Row style={{ alignItems: 'center', gap: 8 }}>
           <OpenedChip>Opened</OpenedChip>
           <ViewButton>
-            <EyeIcon size={13} />
+            <EyeMark />
             View
           </ViewButton>
         </Row>
@@ -304,7 +294,7 @@ function PullRequestCard() {
       <Stacks>
         <Insights>AI Insights</Insights>
         <Row style={{ alignItems: 'center', gap: 8, marginBottom: 10 }}>
-          <StackIcon size={13} />
+          <LayersIcon />
           <Label $size={13}>Stacks</Label>
         </Row>
         {stacks.map((stack) => (
@@ -317,7 +307,7 @@ function PullRequestCard() {
               </div>
             </Row>
             <Status $kind={stack.status}>
-              {stack.status === 'Failed' && <AiSparkleOutlineIcon size={11} />}
+              {stack.status === 'Failed' && <SparkleIcon color="#9EC4FF" />}
               {stack.status}
             </Status>
           </StackRow>
@@ -393,32 +383,37 @@ function AirbyteMark() {
   return (
     <svg
       aria-hidden="true"
-      height="18"
+      height="20"
       viewBox="0 0 24 24"
-      width="18"
+      width="20"
     >
-      <rect
-        fill="#615EFF"
-        height="24"
-        rx="6"
-        width="24"
+      <path
+        d="M4 18.5C4 8.5 20 8.5 20 18.5"
+        fill="none"
+        stroke="#8B8CFF"
+        strokeLinecap="round"
+        strokeWidth="1.8"
       />
       <path
-        d={
-          'M5 13.2c1.8-2.4 3.2-2.6 4.8-.4 1.5 2 2.8 2.2 4.4 0 ' +
-          '1.4-1.9 2.6-2.1 4.2-.2'
-        }
+        d="M7.2 18.5c0-6.2 9.6-6.2 9.6 0"
         fill="none"
-        stroke="#fff"
+        stroke="#8B8CFF"
         strokeLinecap="round"
-        strokeWidth="1.7"
+        strokeWidth="1.8"
       />
       <path
-        d="M6.2 9.4c1.5-1.5 2.8-1.5 4.2.2"
+        d="M10.2 18.5c0-3.2 3.6-3.2 3.6 0"
         fill="none"
-        stroke="#fff"
+        stroke="#8B8CFF"
         strokeLinecap="round"
-        strokeWidth="1.5"
+        strokeWidth="1.8"
+      />
+      <path
+        d="M12 14.6v4.2"
+        fill="none"
+        stroke="#8B8CFF"
+        strokeLinecap="round"
+        strokeWidth="1.8"
       />
     </svg>
   )
@@ -428,39 +423,28 @@ function DagsterMark() {
   return (
     <svg
       aria-hidden="true"
-      height="18"
+      height="20"
       viewBox="0 0 24 24"
-      width="18"
+      width="20"
     >
-      <rect
-        fill="#3A2C86"
-        height="24"
-        rx="6"
-        width="24"
-      />
-      <circle
-        cx="8"
-        cy="8.5"
-        fill="#9B8CFF"
-        r="2.1"
-      />
-      <circle
-        cx="16.2"
-        cy="9"
-        fill="#D7CCFF"
-        r="2.1"
-      />
       <circle
         cx="12"
-        cy="16.2"
-        fill="#6D5CFF"
-        r="2.3"
+        cy="12"
+        fill="#514CFF"
+        r="7.2"
+      />
+      <circle
+        cx="9.3"
+        cy="9"
+        fill="#F7F8FF"
+        r="2"
       />
       <path
-        d="M8 8.5 16.2 9 12 16.2Z"
+        d="M6.6 13.6c2.2 2.4 6.4 2.8 9.2.5"
         fill="none"
-        stroke="#E6E0FF"
-        strokeWidth="1.1"
+        stroke="#C9CCFF"
+        strokeLinecap="round"
+        strokeWidth="1.7"
       />
     </svg>
   )
@@ -468,12 +452,240 @@ function DagsterMark() {
 
 function AgentMark() {
   return (
-    <Mark>
-      <PluralLogoIcon
-        color="#FFFFFF"
-        size={16}
+    <svg
+      aria-hidden="true"
+      height="58"
+      viewBox="0 0 58 58"
+      width="58"
+    >
+      <circle
+        cx="29"
+        cy="29"
+        fill="none"
+        r="26"
+        stroke="#6E4AD8"
+        strokeWidth="1.4"
       />
-    </Mark>
+      <circle
+        cx="29"
+        cy="29"
+        fill="none"
+        r="20.5"
+        stroke="#8B62F0"
+        strokeWidth="1.6"
+      />
+      <circle
+        cx="29"
+        cy="29"
+        fill={button}
+        r="15"
+      />
+      <rect
+        fill="none"
+        height="12"
+        rx="1.6"
+        stroke="#FFFFFF"
+        strokeWidth="1.7"
+        width="12"
+        x="22.2"
+        y="22.4"
+      />
+      <rect
+        fill="#FFFFFF"
+        height="4.6"
+        rx="0.6"
+        width="4.6"
+        x="26.6"
+        y="26.8"
+      />
+    </svg>
+  )
+}
+
+function BurstIcon() {
+  const rays = [0, 45, 90, 135, 180, 225, 270, 315]
+
+  return (
+    <svg
+      aria-hidden="true"
+      height="16"
+      viewBox="0 0 16 16"
+      width="16"
+    >
+      {rays.map((angle) => (
+        <line
+          key={angle}
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeWidth="1.4"
+          transform={`rotate(${angle} 8 8)`}
+          x1="8"
+          x2="8"
+          y1="1.4"
+          y2="4.3"
+        />
+      ))}
+    </svg>
+  )
+}
+
+function SparkleIcon({ dot = false, color = 'currentColor' }) {
+  return (
+    <svg
+      aria-hidden="true"
+      height="16"
+      viewBox="0 0 16 16"
+      width="16"
+    >
+      <path
+        d="M8 1.4 10.1 5.9 14.6 8 10.1 10.1 8 14.6 5.9 10.1 1.4 8 5.9 5.9Z"
+        fill={color}
+      />
+      {dot && (
+        <rect
+          fill={color}
+          height="2.2"
+          rx="0.3"
+          width="2.2"
+          x="12.4"
+          y="12.2"
+        />
+      )}
+    </svg>
+  )
+}
+
+function PlusMark() {
+  return (
+    <svg
+      aria-hidden="true"
+      height="16"
+      viewBox="0 0 16 16"
+      width="16"
+    >
+      <path
+        d="M8 2.5v11M2.5 8h11"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeWidth="1.4"
+      />
+    </svg>
+  )
+}
+
+function PlayMark() {
+  return (
+    <svg
+      aria-hidden="true"
+      height="12"
+      viewBox="0 0 12 12"
+      width="12"
+    >
+      <path
+        d="M3.2 1.8 10 6 3.2 10.2Z"
+        fill="none"
+        stroke="currentColor"
+        strokeLinejoin="round"
+        strokeWidth="1.3"
+      />
+    </svg>
+  )
+}
+
+function EyeMark() {
+  return (
+    <svg
+      aria-hidden="true"
+      height="14"
+      viewBox="0 0 16 16"
+      width="14"
+    >
+      <path
+        d="M1.5 8s2.6-4 6.5-4 6.5 4 6.5 4-2.6 4-6.5 4S1.5 8 1.5 8Z"
+        fill="none"
+        stroke="#FFFFFF"
+        strokeLinejoin="round"
+        strokeWidth="1.4"
+      />
+      <circle
+        cx="8"
+        cy="8"
+        fill="#FFFFFF"
+        r="1.7"
+      />
+    </svg>
+  )
+}
+
+function LayersIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      height="14"
+      viewBox="0 0 16 16"
+      width="14"
+    >
+      <path
+        d="M8 1.6 14.2 4.8 8 8 1.8 4.8Z"
+        fill="none"
+        stroke="currentColor"
+        strokeLinejoin="round"
+        strokeWidth="1.2"
+      />
+      <path
+        d="M1.8 8 8 11.2 14.2 8"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.2"
+      />
+      <path
+        d="M1.8 11.1 8 14.3 14.2 11.1"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.2"
+      />
+    </svg>
+  )
+}
+
+function AwsBadge() {
+  return (
+    <AwsTile>
+      <svg
+        aria-hidden="true"
+        height="22"
+        viewBox="0 0 28 22"
+        width="28"
+      >
+        <text
+          fill="currentColor"
+          fontFamily="Inter, Helvetica, Arial, sans-serif"
+          fontSize="9"
+          fontWeight="700"
+          textAnchor="middle"
+          x="14"
+          y="10"
+        >
+          aws
+        </text>
+        <path
+          d="M5 14.2c3.2 2.4 14.6 2.4 17.6 0"
+          fill="none"
+          stroke="#FF9900"
+          strokeLinecap="round"
+          strokeWidth="1.4"
+        />
+        <path
+          d="m20.2 13.2 3.2 1.6-2.6 1.5"
+          fill="#FF9900"
+        />
+      </svg>
+    </AwsTile>
   )
 }
 
@@ -540,16 +752,15 @@ const PrepareButton = styled.div({
   padding: '0 18px',
 })
 
-const Mark = styled.div(({ theme }) => ({
+const AwsTile = styled.span(({ theme }) => ({
   alignItems: 'center',
-  background: button,
-  borderRadius: 12,
-  boxShadow: `0 0 0 4px ${tk(theme).ring}, 0 0 0 9px ${tk(theme).ringSoft}`,
-  color: '#FFFFFF',
+  border: `1px solid ${tk(theme).border}`,
+  borderRadius: 8,
+  color: tk(theme).text,
   display: 'inline-flex',
-  height: 40,
+  height: 32,
   justifyContent: 'center',
-  width: 40,
+  width: 34,
 }))
 
 const Composer = styled.div(({ theme }) => ({
@@ -735,12 +946,15 @@ const Repo = styled.div(({ theme }) => ({
 const Status = styled.span<{ $kind: 'Failed' | 'Successful' }>(
   ({ theme, $kind }) => ({
     alignItems: 'center',
+    border: $kind === 'Failed' ? `1px solid ${tk(theme).border}` : 0,
+    borderRadius: 8,
     color: $kind === 'Failed' ? tk(theme).failed : tk(theme).success,
     display: 'inline-flex',
     flexShrink: 0,
     fontSize: 13,
     fontWeight: 500,
-    gap: 4,
+    gap: 5,
     marginLeft: 8,
+    padding: $kind === 'Failed' ? '4px 8px' : 0,
   })
 )
