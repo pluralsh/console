@@ -69,3 +69,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           NPM_CONFIG_PROVENANCE: true
+          # npm sees js/ as an npm workspace root; updating it after `npm version`
+          # loads sibling manifests whose Yarn `workspace:*` deps npm can't parse.
+          NPM_CONFIG_WORKSPACES_UPDATE: false
