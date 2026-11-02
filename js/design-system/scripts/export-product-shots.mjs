@@ -18,18 +18,26 @@ const themes = ['light', 'dark']
 const story = 'product-shots-gallery--environment-hygiene'
 const overviewStory = 'product-shots-overview--flow'
 const clusterStory = 'product-shots-cluster-agent--dark'
+const consoleStory = 'product-shots-cluster-console--dark'
 
 await rm(output, { force: true, recursive: true })
 await mkdir(resolve(output, 'images'), { recursive: true })
 await mkdir(resolve(output, 'svg'), { recursive: true })
 
-const build = spawnSync('yarn', ['build:storybook'], { cwd: root, stdio: 'inherit' })
+const build = spawnSync('yarn', ['build:storybook'], {
+  cwd: root,
+  stdio: 'inherit',
+})
 if (build.status) process.exit(build.status)
 
-const server = spawn('yarn', ['http-server', 'storybook-static', '-p', '6106', '-c-1'], {
-  cwd: root,
-  stdio: 'ignore',
-})
+const server = spawn(
+  'yarn',
+  ['http-server', 'storybook-static', '-p', '6106', '-c-1'],
+  {
+    cwd: root,
+    stdio: 'ignore',
+  }
+)
 
 try {
   for (let attempt = 0; attempt < 40; attempt += 1) {
@@ -41,22 +49,32 @@ try {
   }
 
   const browser = await chromium.launch({ headless: true })
-  const page = await browser.newPage({ viewport: { width: 1000, height: 760 }, deviceScaleFactor: 2 })
+  const page = await browser.newPage({
+    viewport: { width: 1000, height: 760 },
+    deviceScaleFactor: 2,
+  })
   const manifest = []
 
   for (const scenario of scenarios) {
     for (let step = 0; step < 4; step += 1) {
       for (const theme of themes) {
         const args = `scenario:${scenario};step:${step};theme:${theme};animate:false`
-        await page.goto(`http://127.0.0.1:6106/iframe.html?id=${story}&args=${args}`, {
-          waitUntil: 'networkidle',
-        })
+        await page.goto(
+          `http://127.0.0.1:6106/iframe.html?id=${story}&args=${args}`,
+          {
+            waitUntil: 'networkidle',
+          }
+        )
         const shot = page.locator('[data-product-shot]')
         await shot.waitFor()
         await page.evaluate(() => document.fonts.ready)
         const fidelity = await shot.getAttribute('data-fidelity')
         const file = `images/${scenario}-${step + 1}-${theme}.webp`
-        await shot.screenshot({ path: resolve(output, file), type: 'webp', omitBackground: true })
+        await shot.screenshot({
+          path: resolve(output, file),
+          type: 'webp',
+          omitBackground: true,
+        })
         manifest.push({ id: scenario, step, fidelity, theme, file })
       }
     }
@@ -69,16 +87,23 @@ try {
     for (const theme of themes) {
       for (const background of [true, false]) {
         const args = `screen:${screen};theme:${theme};background:${background ? '!true' : '!false'}`
-        await page.goto(`http://127.0.0.1:6106/iframe.html?id=${overviewStory}&args=${args}`, {
-          waitUntil: 'networkidle',
-        })
+        await page.goto(
+          `http://127.0.0.1:6106/iframe.html?id=${overviewStory}&args=${args}`,
+          {
+            waitUntil: 'networkidle',
+          }
+        )
         const shot = page.locator('[data-overview-shot]')
         await shot.waitFor()
         await page.evaluate(() => document.fonts.ready)
 
         if (background) {
           const file = `images/overview-${screen}-${theme}.webp`
-          await shot.screenshot({ path: resolve(output, file), type: 'webp', omitBackground: true })
+          await shot.screenshot({
+            path: resolve(output, file),
+            type: 'webp',
+            omitBackground: true,
+          })
           overviewManifest.push({ id: screen, theme, background, file })
         } else {
           const file = `svg/overview-${screen}-${theme}.svg`
@@ -98,19 +123,52 @@ try {
 
   for (const theme of themes) {
     const args = `theme:${theme};width:1202`
-    await page.goto(`http://127.0.0.1:6106/iframe.html?id=${clusterStory}&args=${args}`, {
-      waitUntil: 'networkidle',
-    })
+    await page.goto(
+      `http://127.0.0.1:6106/iframe.html?id=${clusterStory}&args=${args}`,
+      {
+        waitUntil: 'networkidle',
+      }
+    )
     const shot = page.locator('[data-cluster-agent-shot]')
     await shot.waitFor()
     await page.evaluate(() => document.fonts.ready)
     const file = `images/cluster-agent-${theme}.webp`
-    await shot.screenshot({ path: resolve(output, file), type: 'webp', omitBackground: true })
+    await shot.screenshot({
+      path: resolve(output, file),
+      type: 'webp',
+      omitBackground: true,
+    })
     clusterManifest.push({ id: 'cluster-agent', theme, file })
   }
 
+  const consoleManifest = []
+  await page.setViewportSize({ width: 1280, height: 760 })
+
+  for (const theme of themes) {
+    const args = `theme:${theme};width:1167`
+    await page.goto(
+      `http://127.0.0.1:6106/iframe.html?id=${consoleStory}&args=${args}`,
+      {
+        waitUntil: 'networkidle',
+      }
+    )
+    const shot = page.locator('[data-cluster-console-shot]')
+    await shot.waitFor()
+    await page.evaluate(() => document.fonts.ready)
+    const file = `images/cluster-console-${theme}.webp`
+    await shot.screenshot({
+      path: resolve(output, file),
+      type: 'webp',
+      omitBackground: true,
+    })
+    consoleManifest.push({ id: 'cluster-console', theme, file })
+  }
+
   await browser.close()
-  await writeFile(resolve(output, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`)
+  await writeFile(
+    resolve(output, 'manifest.json'),
+    `${JSON.stringify(manifest, null, 2)}\n`
+  )
   await writeFile(
     resolve(output, 'overview-manifest.json'),
     `${JSON.stringify(overviewManifest, null, 2)}\n`
@@ -118,6 +176,10 @@ try {
   await writeFile(
     resolve(output, 'cluster-agent-manifest.json'),
     `${JSON.stringify(clusterManifest, null, 2)}\n`
+  )
+  await writeFile(
+    resolve(output, 'cluster-console-manifest.json'),
+    `${JSON.stringify(consoleManifest, null, 2)}\n`
   )
   await writeFile(
     resolve(output, 'embed.js'),

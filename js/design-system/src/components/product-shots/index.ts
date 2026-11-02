@@ -1,4 +1,10 @@
 export {
+  CLUSTER_CONSOLE_HEIGHT,
+  CLUSTER_CONSOLE_WIDTH,
+  ClusterConsoleShot,
+  type ClusterConsoleShotProps,
+} from './ClusterConsoleShot'
+export {
   CLUSTER_AGENT_HEIGHT,
   CLUSTER_AGENT_WIDTH,
   ClusterAgentShot,
