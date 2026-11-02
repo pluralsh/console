@@ -700,12 +700,14 @@ defmodule Console.Schema.DeploymentSettings do
   end
 
   defp set_initialized(changeset) do
-    case {get_change(changeset, :store), get_change(changeset, :elastic), get_change(changeset, :opensearch)} do
-      {:elastic, e, _} when not is_nil(e) ->
+    case {get_change(changeset, :store), get_change(changeset, :elastic), get_change(changeset, :opensearch), get_change(changeset, :plural)} do
+      {:elastic, e, _, _} when not is_nil(e) ->
         put_change(changeset, :initialized, false)
-      {:opensearch, _, o} when not is_nil(o) ->
+      {:opensearch, _, o, _} when not is_nil(o) ->
         put_change(changeset, :initialized, false)
-      {:postgres, _, _} ->
+      {:postgres, _, _, _} ->
+        put_change(changeset, :initialized, false)
+      {:plural, _, _, p} when not is_nil(p) ->
         put_change(changeset, :initialized, false)
       _ -> changeset
     end
