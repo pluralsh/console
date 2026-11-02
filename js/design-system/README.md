@@ -9,15 +9,15 @@ Storybook lives in this package (`yarn start`) and is published to Chromatic on 
 ## Usage
 
 ```jsx
-Import { Alert } from '@pluralsh/design-system'
+import { Alert } from '@pluralsh/design-system'
 
 // ...
 return (
   <Alert
-    severy="success"
+    severity="success"
     title="Wouhou!"
   >
-    You installed @pluralsh/design-system correcly
+    You installed @pluralsh/design-system correctly
   </Alert>
 )
 ```
