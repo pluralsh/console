@@ -119,6 +119,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - uses: docker/setup-buildx-action@v4
       - name: Build and push softserve
+        id: build
         uses: docker/build-push-action@v7
         with:
           context: "./dockerfiles"
@@ -129,3 +130,11 @@ jobs:
           platforms: linux/amd64
           cache-from: type=gha,scope=softserve
           cache-to: type=gha,mode=max,scope=softserve
+      - name: Cosign sign
+        uses: ./.github/actions/cosign-sign
+        with:
+          digest: ${{ steps.build.outputs.digest }}
+          images: |
+            ghcr.io/pluralsh/git-server
+            gcr.io/pluralsh/git-server
+            docker.io/pluralsh/git-server
