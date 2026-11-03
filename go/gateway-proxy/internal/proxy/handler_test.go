@@ -1,11 +1,13 @@
 package proxy
 
 import (
+	"bytes"
 	"io"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -137,6 +139,50 @@ func TestNonStreamingMessage(t *testing.T) {
 	assert.Equal(t, "5000", reqs[0].Header.Get("Request-Timeout-Ms"))
 	assert.Equal(t, "Bearer token-1", reqs[0].Header.Get("Authorization"))
 	assert.Equal(t, []any{"interleaved-thinking-2025-05-14"}, reqs[0].Body["anthropic_beta"])
+}
+
+type syncBuffer struct {
+	mu  sync.Mutex
+	buf bytes.Buffer
+}
+
+func (b *syncBuffer) Write(p []byte) (int, error) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	return b.buf.Write(p)
+}
+
+func (b *syncBuffer) String() string {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	return b.buf.String()
+}
+
+func TestAnthropicOnlyBetasAreDroppedAndLogged(t *testing.T) {
+	gw := newGateway(t)
+	gw.Responder = func(fakegateway.Request) fakegateway.Reply {
+		return fakegateway.Reply{Status: 400, Message: "ValidationException: invalid beta flag"}
+	}
+	logs := &syncBuffer{}
+	srv := newTestProxy(t, gw, func(o *Options, _ *oauth.Credentials) {
+		o.Logger = slog.New(slog.NewJSONHandler(logs, &slog.HandlerOptions{Level: slog.LevelDebug}))
+	})
+
+	resp := post(t, srv, "/v1/messages", simpleRequest, "anthropic-beta", "tools-2024-05-16,interleaved-thinking-2025-05-14")
+	errObj := assertAnthropicError(t, resp, 400, "invalid_request_error")
+	assert.Contains(t, errObj["message"], "invalid beta flag")
+
+	reqs := gw.Requests()
+	require.Len(t, reqs, 1)
+	assert.Equal(t, []any{"interleaved-thinking-2025-05-14"}, reqs[0].Body["anthropic_beta"])
+
+	out := logs.String()
+	assert.NotContains(t, out, testAPIKey, "credentials are never logged")
+	assert.Contains(t, out, `"X-Api-Key":"[redacted]"`)
+	assert.Contains(t, out, `"dropped_betas":["tools-2024-05-16"]`)
+	assert.Contains(t, out, `"msg":"gateway error response"`)
+	assert.Contains(t, out, `"msg":"gateway error response body"`)
+	assert.Contains(t, out, `invalid beta flag`)
 }
 
 func TestGeneratesRequestID(t *testing.T) {

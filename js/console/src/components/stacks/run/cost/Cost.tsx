@@ -6,7 +6,7 @@ import { StackedText } from 'components/utils/table/StackedText'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { StackInfracostResourceFragment } from 'generated/graphql'
 import { StackRunInfracostResourcesDocument } from 'generated/graphql-documents'
-import { ReactNode, useMemo, useState } from 'react'
+import { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { mapExistingNodes } from 'utils/graphql'
 
@@ -26,15 +26,30 @@ export default function StackRunCost(): ReactNode {
   const { stackRun } = useOutletContext<StackRunOutletContextT>()
   const [scope, setScope] = useState(SCOPES[0].key)
 
-  const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData(
-      {
-        query: StackRunInfracostResourcesDocument,
-        keyPath: ['stackRun', 'infracostResources'],
-        pageSize: PAGE_SIZE,
-      },
-      { id: stackRun.id, resourceScope: scope }
-    )
+  const {
+    data,
+    loading,
+    error,
+    refetch,
+    pageInfo,
+    fetchNextPage,
+    setVirtualSlice,
+  } = useFetchPaginatedData(
+    {
+      query: StackRunInfracostResourcesDocument,
+      keyPath: ['stackRun', 'infracostResources'],
+      pageSize: PAGE_SIZE,
+    },
+    { id: stackRun.id, resourceScope: scope }
+  )
+
+  // costs are saved with the run's completion, so a status change can bring new rows
+  const status = stackRun.status
+  const lastStatus = useRef(status)
+  useEffect(() => {
+    if (lastStatus.current !== status) refetch()
+    lastStatus.current = status
+  }, [status, refetch])
 
   const resources = useMemo(
     () => mapExistingNodes(data?.stackRun?.infracostResources),
