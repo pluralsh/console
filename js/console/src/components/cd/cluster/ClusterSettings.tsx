@@ -79,7 +79,8 @@ function ClusterSettingsModalInner({
       remediationWorkbenchId: cluster?.remediationWorkbench?.id ?? null,
       remediationMinPriority:
         cluster?.remediationMinPriority ?? InsightComponentPriority.High,
-      remediationWindow: cluster?.remediationWindow ?? DEFAULT_REMEDIATION_WINDOW,
+      remediationWindow:
+        cluster?.remediationWindow ?? DEFAULT_REMEDIATION_WINDOW,
       remediationMaxJobs:
         cluster?.remediationMaxJobs ?? DEFAULT_REMEDIATION_MAX_JOBS,
     },
@@ -91,8 +92,7 @@ function ClusterSettingsModalInner({
 
   if (!cluster) return null
 
-  const allowSubmit =
-    hasUpdates && (!autoRemediate || !!remediationWorkbenchId)
+  const allowSubmit = hasUpdates && (!autoRemediate || !!remediationWorkbenchId)
 
   return (
     <Modal

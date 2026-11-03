@@ -96,8 +96,7 @@ export function useSearchableWorkbenchOptions(workbenchId: Nullable<string>) {
     listed.find((workbench) => workbench.id === workbenchId) ??
     null
   const workbenches = useMemo(
-    () =>
-      search ? listed : withCurrentWorkbench(listed, selectedWorkbench),
+    () => (search ? listed : withCurrentWorkbench(listed, selectedWorkbench)),
     [listed, search, selectedWorkbench]
   )
 
