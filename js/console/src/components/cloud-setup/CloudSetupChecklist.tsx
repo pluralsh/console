@@ -70,14 +70,18 @@ export function CloudSetupChecklist() {
               Dismiss
             </Button>
           )}
-          <Button
-            small
-            tertiary
-            endIcon={isCollapsed ? <CaretDownIcon /> : <CaretUpIcon />}
-            onClick={() => setCollapsed(!isCollapsed)}
-          >
-            {isCollapsed ? 'Finish setup' : 'Hide'}
-          </Button>
+          {/* the card stays open while finishing a GitHub app install, so
+              there's nothing to toggle until that's done */}
+          {!returningFromGitHub && (
+            <Button
+              small
+              tertiary
+              endIcon={isCollapsed ? <CaretDownIcon /> : <CaretUpIcon />}
+              onClick={() => setCollapsed(!isCollapsed)}
+            >
+              {isCollapsed ? 'Finish setup' : 'Hide'}
+            </Button>
+          )}
         </Flex>
       </HeaderSC>
       {!isCollapsed && (

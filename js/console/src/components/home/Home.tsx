@@ -81,6 +81,8 @@ function HomeClusters() {
   const { borders } = useTheme()
   const { configuration } = useLogin()
   const { isCloud, cloudConnected } = useCloudSetupState()
+  const [params] = useSearchParams()
+  const returningFromGitHub = !!params.get(INSTALLATION_ID_PARAM)
   const projectId = useProjectId()
   useSetBreadcrumbs(breadcrumbs)
   const onboarded = useOnboarded()
@@ -239,8 +241,11 @@ function HomeClusters() {
           )}
         </WidthLimiterSC>
       </TableSectionSC>
-      {/* don't stack the welcome popup on top of unfinished cloud setup */}
-      {!onboarded && !(isCloud && !cloudConnected) && <GettingStartedPopup />}
+      {/* don't stack the welcome popup on top of unfinished cloud setup,
+          including while finishing a GitHub app install */}
+      {!onboarded && !(isCloud && (!cloudConnected || returningFromGitHub)) && (
+        <GettingStartedPopup />
+      )}
     </Flex>
   )
 }
