@@ -13,7 +13,6 @@ import DemoBanner from './DemoBanner'
 import { HeaderProjectSelect } from './HeaderProjectSelect'
 import { HeaderWorkbenchSelect } from './HeaderWorkbenchSelect'
 import { HEADER_HEIGHT } from './layoutConsts'
-import { ProfileMenu } from './ProfileMenu'
 import { useSubheaderBackButton } from './useSubheaderBackButton'
 
 const HeaderSC = styled.div(({ theme }) => ({
@@ -70,7 +69,6 @@ export default function Header() {
           <NotificationsLauncher />
           <HeaderWorkbenchSelect />
           <ChatbotLauncher />
-          <ProfileMenu />
         </Flex>
       </HeaderContentSC>
     </HeaderSC>

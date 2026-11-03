@@ -56,6 +56,8 @@ import { WORKBENCHES_ABS_PATH } from '../../routes/workbenchesRoutesConsts.tsx'
 import CommandPaletteShortcuts from '../commandpalette/CommandPaletteShortcuts.tsx'
 import { HelpLauncher } from 'components/help/HelpLauncher.tsx'
 import { ApplicationUpdateNavButton } from './ApplicationUpdateNavButton.tsx'
+import { useApplicationUpdateAvailable } from './applicationUpdate.ts'
+import { ProfileMenu } from './ProfileMenu.tsx'
 import { AINavIcon } from 'components/ai/AINavIcon'
 import { StacksNavIcon } from 'components/awaiting-review/StacksNavIcon'
 
@@ -239,6 +241,7 @@ export function Sidebar() {
   )
   const isCDEnabled = useCDEnabled({ redirect: false })
   const defaultCDPath = useDefaultCDPath()
+  const updateAvailable = useApplicationUpdateAvailable()
 
   const menuItems = useMemo(
     () =>
@@ -270,29 +273,33 @@ export function Sidebar() {
   return (
     <SidebarSC $isExpanded={isExpanded}>
       <SidebarSection flex={1}>
-        {menuItems.map((item, i) => (
-          <SidebarItem
-            key={i}
-            asLink
-            to={item.path}
-            active={isActive(item)}
-            expandedLabel={item.expandedLabel}
-            tooltip={
-              <Flex
-                gap="small"
-                align="center"
-              >
-                {item.expandedLabel}
-                <CommandPaletteShortcuts shortcuts={item.hotkeys} />
-              </Flex>
-            }
-          >
-            {item.icon}
-          </SidebarItem>
-        ))}
+        {menuItems.map((item, i) =>
+          item.path === '/' && updateAvailable ? (
+            <ApplicationUpdateNavButton key={i} />
+          ) : (
+            <SidebarItem
+              key={i}
+              asLink
+              to={item.path}
+              active={isActive(item)}
+              expandedLabel={item.expandedLabel}
+              tooltip={
+                <Flex
+                  gap="small"
+                  align="center"
+                >
+                  {item.expandedLabel}
+                  <CommandPaletteShortcuts shortcuts={item.hotkeys} />
+                </Flex>
+              }
+            >
+              {item.icon}
+            </SidebarItem>
+          )
+        )}
         <Flex flex={1} />
         <HelpLauncher />
-        <ApplicationUpdateNavButton />
+        <ProfileMenu />
         {configuration?.consoleVersion && (
           <ConsoleVersion version={configuration.consoleVersion} />
         )}

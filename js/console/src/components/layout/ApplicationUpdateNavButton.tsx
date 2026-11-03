@@ -9,7 +9,8 @@ import {
 } from './applicationUpdate'
 import { SidebarContext } from './Sidebar'
 
-// laid out like the other sidebar items, so its icon lines up with theirs
+// laid out like the other sidebar items, so its icon lines up with theirs; it
+// takes the home item's slot, so the margins keep that slot's 40px height
 const UpdateButtonSC = styled.button<{ $isExpanded: boolean }>(
   ({ theme, $isExpanded }) => ({
     ...theme.partials.reset.button,
@@ -22,6 +23,8 @@ const UpdateButtonSC = styled.button<{ $isExpanded: boolean }>(
     whiteSpace: 'nowrap',
     ...sidebarItemLayout(theme, $isExpanded),
     height: 32,
+    marginTop: 4,
+    marginBottom: 4,
     ...(!$isExpanded && { width: 32, padding: 0 }),
     paddingTop: 0,
     paddingBottom: 0,

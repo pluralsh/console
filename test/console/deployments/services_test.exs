@@ -900,6 +900,29 @@ defmodule Console.Deployments.ServicesTest do
       assert component.id == updated_component.id
     end
 
+    test "a service with no components is healthy" do
+      service = insert(:service, status: :stale)
+
+      {:ok, service} = Services.update_components(%{errors: [], components: []}, service)
+
+      svc = refetch(service)
+      assert svc.status == :healthy
+      assert svc.component_status == "0 / 0"
+    end
+
+    test "a service with no components still fails on errors" do
+      service = insert(:service, status: :stale)
+
+      {:ok, service} = Services.update_components(%{
+        errors: [%{source: "sync", message: "folder is empty"}],
+        components: []
+      }, service)
+
+      svc = refetch(service)
+      assert svc.status == :failed
+      assert svc.component_status == "0 / 0"
+    end
+
     test "if a component is in error it will flag" do
       service = insert(:service)
 

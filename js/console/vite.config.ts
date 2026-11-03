@@ -128,7 +128,9 @@ export default defineConfig({
     // }),
   ],
   server: {
+    // OIDC redirect URIs are registered for this exact port
     port: 3000,
+    strictPort: true,
     proxy: {
       '/v1': API_URL,
       '/gql': API_URL,
