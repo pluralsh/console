@@ -511,7 +511,14 @@ versions:
   kube: ['1.28', '1.27', '1.26']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Release notes provided do not include any actual change list; only
+        the release tag, commit count, and build artifacts are shown, so no specific
+        features can be extracted.']
+    breaking_changes: [No breaking changes can be determined from the provided notes
+        because there is no changelog content (no list of fixes/features/config changes).]
   chart_version: 0.27.0
   images: ['timberio/vector:0.33.1-distroless-libc']
 - version: 0.33.0
