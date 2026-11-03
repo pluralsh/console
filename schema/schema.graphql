@@ -2356,8 +2356,8 @@ input AgentRunStatusAttributes {
   "the status of this agent run"
   status: AgentRunStatus!
 
-  "the messages this agent run has generated during its run"
-  messages: [AgentMessageAttributes]
+  "ignored, messages are created with createAgentMessage"
+  messages: [AgentMessageAttributes] @deprecated(reason: "use createAgentMessage instead")
 
   "the error reason of the agent run"
   error: String
@@ -10027,8 +10027,19 @@ type InfrastructureStack {
   "key\/value tags to filter stacks"
   tags: [Tag]
 
-  "Infracost resource rows attached to this stack (newest first)"
-  infracostResources(limit: Int): [StackInfracostResource]
+  "Infracost resource rows attached to this stack (newest first), only fetchable for a single stack"
+  infracostResources(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    "only rows of this scope (breakdown | past_breakdown | diff | free)"
+    resourceScope: String
+  ): StackInfracostResourceConnection
 
   readBindings: [PolicyBinding]
 
@@ -10332,8 +10343,19 @@ type StackRun {
   "policy violations for this stack"
   violations: [StackPolicyViolation]
 
-  "Infracost resource rows attached to this run (newest first)"
-  infracostResources(limit: Int): [StackInfracostResource]
+  "Infracost resource rows attached to this run (most expensive first), only fetchable for a single run"
+  infracostResources(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    "only rows of this scope (breakdown | past_breakdown | diff | free)"
+    resourceScope: String
+  ): StackInfracostResourceConnection
 
   insertedAt: DateTime
 
@@ -10581,6 +10603,11 @@ type StackDefinitionConnection {
 type StackPolicyConnection {
   pageInfo: PageInfo!
   edges: [StackPolicyEdge]
+}
+
+type StackInfracostResourceConnection {
+  pageInfo: PageInfo!
+  edges: [StackInfracostResourceEdge]
 }
 
 type RunLogsDelta {
@@ -19615,6 +19642,11 @@ type ManagedNamespaceEdge {
 
 type GlobalServiceEdge {
   node: GlobalService
+  cursor: String
+}
+
+type StackInfracostResourceEdge {
+  node: StackInfracostResource
   cursor: String
 }
 

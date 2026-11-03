@@ -18,7 +18,7 @@ func TestFailAgentRun(t *testing.T) {
 		return attrs.Status == gqlclient.AgentRunStatusFailed &&
 			attrs.Error != nil &&
 			*attrs.Error == "agent run failed: boom"
-	})).Return(&gqlclient.AgentRunFragment{ID: "run-1"}, nil).Once()
+	})).Return(&gqlclient.AgentRunUpdateFragment{ID: "run-1"}, nil).Once()
 
 	require.NoError(t, FailAgentRun(m, "run-1", "agent run failed: boom", nil))
 }
@@ -28,7 +28,7 @@ func TestFailAgentRunPropagatesUpdateError(t *testing.T) {
 
 	m := mocks.NewClientMock(t)
 	m.On("UpdateAgentRun", mock.Anything, "run-1", mock.Anything).
-		Return((*gqlclient.AgentRunFragment)(nil), errors.New("console unavailable")).
+		Return((*gqlclient.AgentRunUpdateFragment)(nil), errors.New("console unavailable")).
 		Once()
 
 	err := FailAgentRun(m, "run-1", "agent run failed: boom", nil)

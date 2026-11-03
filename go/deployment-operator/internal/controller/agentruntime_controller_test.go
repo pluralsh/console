@@ -72,13 +72,13 @@ func TestCreateAgentRunPropagatesWorkbenchMCPURL(t *testing.T) {
 		},
 	}
 	workbenchMCPURL := "https://console.example/mcp/workbench/workbench-id"
-	run := &console.AgentRunFragment{
+	run := &console.AgentRunPendingFragment{
 		ID:              "run-id",
 		Prompt:          "investigate",
 		Repository:      "https://github.com/pluralsh/console",
 		Mode:            console.AgentRunModeAnalyze,
 		WorkbenchMcpURL: &workbenchMCPURL,
-		Runtime:         &console.AgentRuntimeFragment{Name: "runtime"},
+		Runtime:         &console.AgentRunPendingFragment_Runtime{Name: "runtime"},
 	}
 
 	g.Expect(reconciler.createAgentRun(context.Background(), agentRuntime, run)).To(Succeed())
@@ -101,7 +101,7 @@ var _ = Describe("AgentRuntime Controller", func() {
 			gqlErr := errors.New("graphql: pending run is unavailable")
 			consoleClient := mocks.NewClientMock(GinkgoT())
 			consoleClient.EXPECT().
-				GetAgentRun(mock.Anything, runID).
+				GetAgentRunPending(mock.Anything, runID).
 				Return(nil, gqlErr).
 				Times(pendingAgentRunFetchRetries + 1)
 			consoleClient.EXPECT().
@@ -110,7 +110,7 @@ var _ = Describe("AgentRuntime Controller", func() {
 						attrs.Error != nil &&
 						*attrs.Error == gqlErr.Error()
 				})).
-				Return(&console.AgentRunFragment{ID: runID}, nil).
+				Return(&console.AgentRunUpdateFragment{ID: runID}, nil).
 				Once()
 
 			reconciler := &AgentRuntimeReconciler{

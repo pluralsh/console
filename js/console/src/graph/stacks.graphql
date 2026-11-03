@@ -151,9 +151,6 @@ fragment StackRun on StackRun {
   insight {
     ...AiInsight
   }
-  infracostResources(limit: 5) {
-    ...StackInfracostResource
-  }
 }
 
 fragment ObservableMetric on ObservableMetric {
@@ -239,9 +236,6 @@ fragment StackRunDetails on StackRun {
     type
     maxSeverity
   }
-  infracostResources(limit: 10) {
-    ...StackInfracostResource
-  }
 }
 
 fragment StackInfracostResource on StackInfracostResource {
@@ -253,7 +247,6 @@ fragment StackInfracostResource on StackInfracostResource {
   hourlyCost
   monthlyCost
   monthlyUsageCost
-  rawResource
 }
 
 fragment CustomStackRun on CustomStackRun {
@@ -497,6 +490,31 @@ query StackRuns(
 query StackRun($id: ID!) {
   stackRun(id: $id) {
     ...StackRunDetails
+  }
+}
+
+query StackRunInfracostResources(
+  $id: ID!
+  $after: String
+  $first: Int = 25
+  $resourceScope: String
+) {
+  stackRun(id: $id) {
+    id
+    infracostResources(
+      after: $after
+      first: $first
+      resourceScope: $resourceScope
+    ) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...StackInfracostResource
+        }
+      }
+    }
   }
 }
 

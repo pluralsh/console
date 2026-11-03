@@ -4891,19 +4891,6 @@ export const PublicWorkbenchDashboardGraphFragmentDoc = /*#__PURE__*/ gql`
   hasDatasource
 }
     ` as unknown as DocumentNode<Types.PublicWorkbenchDashboardGraphFragment, unknown>;
-export const StackInfracostResourceFragmentDoc = /*#__PURE__*/ gql`
-    fragment StackInfracostResource on StackInfracostResource {
-  id
-  resourceScope
-  projectName
-  name
-  resourceType
-  hourlyCost
-  monthlyCost
-  monthlyUsageCost
-  rawResource
-}
-    ` as unknown as DocumentNode<Types.StackInfracostResourceFragment, unknown>;
 export const StackRunFragmentDoc = /*#__PURE__*/ gql`
     fragment StackRun on StackRun {
   id
@@ -4923,12 +4910,8 @@ export const StackRunFragmentDoc = /*#__PURE__*/ gql`
   insight {
     ...AiInsight
   }
-  infracostResources(limit: 5) {
-    ...StackInfracostResource
-  }
 }
-    ${AiInsightFragmentDoc}
-${StackInfracostResourceFragmentDoc}` as unknown as DocumentNode<Types.StackRunFragment, unknown>;
+    ${AiInsightFragmentDoc}` as unknown as DocumentNode<Types.StackRunFragment, unknown>;
 export const StackFragmentDoc = /*#__PURE__*/ gql`
     fragment Stack on InfrastructureStack {
   id
@@ -5217,9 +5200,6 @@ export const StackRunDetailsFragmentDoc = /*#__PURE__*/ gql`
     type
     maxSeverity
   }
-  infracostResources(limit: 10) {
-    ...StackInfracostResource
-  }
 }
     ${UserFragmentDoc}
 ${ObservableMetricFragmentDoc}
@@ -5235,8 +5215,19 @@ ${StackFileFragmentDoc}
 ${JobGateSpecFragmentDoc}
 ${RunStepFragmentDoc}
 ${AiInsightFragmentDoc}
-${StackPolicyViolationFragmentDoc}
-${StackInfracostResourceFragmentDoc}` as unknown as DocumentNode<Types.StackRunDetailsFragment, unknown>;
+${StackPolicyViolationFragmentDoc}` as unknown as DocumentNode<Types.StackRunDetailsFragment, unknown>;
+export const StackInfracostResourceFragmentDoc = /*#__PURE__*/ gql`
+    fragment StackInfracostResource on StackInfracostResource {
+  id
+  resourceScope
+  projectName
+  name
+  resourceType
+  hourlyCost
+  monthlyCost
+  monthlyUsageCost
+}
+    ` as unknown as DocumentNode<Types.StackInfracostResourceFragment, unknown>;
 export const CustomStackRunFragmentDoc = /*#__PURE__*/ gql`
     fragment CustomStackRun on CustomStackRun {
   id
@@ -10578,6 +10569,24 @@ export const StackRunDocument = /*#__PURE__*/ gql`
   }
 }
     ${StackRunDetailsFragmentDoc}` as unknown as DocumentNode<Types.StackRunQuery, Types.StackRunQueryVariables>;
+export const StackRunInfracostResourcesDocument = /*#__PURE__*/ gql`
+    query StackRunInfracostResources($id: ID!, $after: String, $first: Int = 25, $resourceScope: String) {
+  stackRun(id: $id) {
+    id
+    infracostResources(after: $after, first: $first, resourceScope: $resourceScope) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...StackInfracostResource
+        }
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${StackInfracostResourceFragmentDoc}` as unknown as DocumentNode<Types.StackRunInfracostResourcesQuery, Types.StackRunInfracostResourcesQueryVariables>;
 export const StackRunJobDocument = /*#__PURE__*/ gql`
     query StackRunJob($id: ID!) {
   stackRun(id: $id) {

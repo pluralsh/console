@@ -211,7 +211,7 @@ defmodule Console.Deployments.Agents do
   @spec update_agent_run(map, binary, Cluster.t) :: agent_run_resp
   def update_agent_run(attrs, run_id, %Cluster{} = cluster) do
     start_transaction()
-    |> add_operation(:run, fn _ -> validate_run(run_id, cluster, [:runtime, :messages]) end)
+    |> add_operation(:run, fn _ -> validate_run(run_id, cluster) end)
     |> add_operation(:update, fn %{run: run} ->
       AgentRun.changeset(run, attrs)
       |> Repo.update()

@@ -139,7 +139,6 @@ defmodule Console.Schema.AgentRun do
     |> cast_embed(:todos, with: &todo_changeset/2)
     |> cast_embed(:analysis, with: &analysis_changeset/2)
     |> cast_embed(:skills, with: &skill_changeset/2)
-    |> cast_assoc(:messages)
     |> validate_required(~w(status prompt repository runtime_id user_id mode)a)
   end
 

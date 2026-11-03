@@ -375,12 +375,12 @@ func (r *AgentRuntimeReconciler) createRunFromID(runID string) error {
 	return r.createAgentRun(r.Ctx, agentRuntime, run)
 }
 
-func (r *AgentRuntimeReconciler) getPendingAgentRunWithRetry(ctx context.Context, runID string) (*console.AgentRunFragment, error) {
+func (r *AgentRuntimeReconciler) getPendingAgentRunWithRetry(ctx context.Context, runID string) (*console.AgentRunPendingFragment, error) {
 	logger := log.FromContext(ctx)
 	var lastErr error
 
 	for attempt := 0; attempt <= pendingAgentRunFetchRetries; attempt++ {
-		run, err := r.ConsoleClient.GetAgentRun(ctx, runID)
+		run, err := r.ConsoleClient.GetAgentRunPending(ctx, runID)
 		if err == nil {
 			return run, nil
 		}
@@ -419,7 +419,7 @@ func (r *AgentRuntimeReconciler) failPendingAgentRunFetch(ctx context.Context, r
 	return updateErr
 }
 
-func (r *AgentRuntimeReconciler) createAgentRun(ctx context.Context, agentRuntime *v1alpha1.AgentRuntime, run *console.AgentRunFragment) error {
+func (r *AgentRuntimeReconciler) createAgentRun(ctx context.Context, agentRuntime *v1alpha1.AgentRuntime, run *console.AgentRunPendingFragment) error {
 	logger := log.FromContext(ctx)
 	key := client.ObjectKey{Name: run.ID, Namespace: agentRuntime.Spec.TargetNamespace}
 

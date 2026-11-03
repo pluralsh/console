@@ -565,7 +565,7 @@ type AgentRunRepositoryEdge struct {
 type AgentRunStatusAttributes struct {
 	// the status of this agent run
 	Status AgentRunStatus `json:"status"`
-	// the messages this agent run has generated during its run
+	// ignored, messages are created with createAgentMessage
 	Messages []*AgentMessageAttributes `json:"messages,omitempty"`
 	// the error reason of the agent run
 	Error *string `json:"error,omitempty"`

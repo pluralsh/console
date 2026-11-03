@@ -74,7 +74,7 @@ func TestUpdateAgentRunPersistsBufferedUsageWithoutMutatingFetchedRun(t *testing
 			attrs.Usage != nil &&
 			attrs.Usage.InputTokens != nil &&
 			*attrs.Usage.InputTokens == 10
-	})).Return(&gqlclient.AgentRunFragment{ID: "r1"}, nil).Once()
+	})).Return(&gqlclient.AgentRunUpdateFragment{ID: "r1"}, nil).Once()
 
 	in := &agentRunController{
 		agentRun:      &agentrunv1.AgentRun{Status: gqlclient.AgentRunStatusPending},

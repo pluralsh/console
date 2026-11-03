@@ -63,7 +63,9 @@ defmodule Console.GraphQl.Deployments.Agent do
 
   input_object :agent_run_status_attributes do
     field :status,           non_null(:agent_run_status), description: "the status of this agent run"
-    field :messages,         list_of(:agent_message_attributes), description: "the messages this agent run has generated during its run"
+    field :messages,         list_of(:agent_message_attributes),
+      description: "ignored, messages are created with createAgentMessage",
+      deprecate: "use createAgentMessage instead"
     field :error,            :string, description: "the error reason of the agent run"
     field :pod_reference,    :namespaced_name, description: "the kubernetes pod this agent is running on"
     field :head_branch,      :string, description: "the head branch this agent run has created for its pull request"

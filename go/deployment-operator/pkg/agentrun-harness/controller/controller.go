@@ -155,7 +155,7 @@ func (in *agentRunController) completeAgentRun(status gqlclient.AgentRunStatus, 
 	return err
 }
 
-func (in *agentRunController) updateAgentRun(ctx context.Context, attrs gqlclient.AgentRunStatusAttributes) (*gqlclient.AgentRunFragment, error) {
+func (in *agentRunController) updateAgentRun(ctx context.Context, attrs gqlclient.AgentRunStatusAttributes) (*gqlclient.AgentRunUpdateFragment, error) {
 	if in.usage != nil {
 		attrs.Usage = in.usage.Attributes()
 	}
@@ -337,7 +337,7 @@ func (in *agentRunController) babysitSCMClient() (scm.GRPCClient, error) {
 // resolveBabysitPRURLs returns the PR URLs the babysit loop should poll via SCM.
 // Created PR URLs take precedence; followupPrUrl is used when the run has no
 // associated PRs (the follow-up path).
-func (in *agentRunController) resolveBabysitPRURLs(agentRun *gqlclient.AgentRunFragment) []string {
+func (in *agentRunController) resolveBabysitPRURLs(agentRun *gqlclient.AgentRunUpdateFragment) []string {
 	if urls := createdPRURLs(agentRun); len(urls) > 0 {
 		in.babysitPRURLs = urls
 		return urls
@@ -349,7 +349,7 @@ func (in *agentRunController) resolveBabysitPRURLs(agentRun *gqlclient.AgentRunF
 	return in.babysitPRURLs
 }
 
-func createdPRURLs(agentRun *gqlclient.AgentRunFragment) []string {
+func createdPRURLs(agentRun *gqlclient.AgentRunUpdateFragment) []string {
 	if agentRun == nil {
 		return nil
 	}
@@ -372,7 +372,7 @@ func createdPRURLs(agentRun *gqlclient.AgentRunFragment) []string {
 	return urls
 }
 
-func followupPRURL(agentRun *gqlclient.AgentRunFragment, harnessRun *agentrunv1.AgentRun) string {
+func followupPRURL(agentRun *gqlclient.AgentRunUpdateFragment, harnessRun *agentrunv1.AgentRun) string {
 	if agentRun != nil && agentRun.FollowupPrURL != nil {
 		if u := strings.TrimSpace(*agentRun.FollowupPrURL); u != "" {
 			return u

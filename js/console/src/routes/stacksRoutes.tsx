@@ -4,6 +4,7 @@ import { StackRunJob } from 'components/stacks/run/StackRunJob.tsx'
 
 import { StackPrs } from 'components/stacks/prs/StackPrs'
 import Violations from '../components/stacks/run/violations/Violations.tsx'
+import StackRunCost from '../components/stacks/run/cost/Cost'
 
 import { Stacks } from '../components/stacks/Stacks'
 import StackRunDetail from '../components/stacks/run/Route'
@@ -47,6 +48,7 @@ import {
   STACK_RUNS_REPOSITORY_REL_PATH,
   STACK_RUNS_STATE_REL_PATH,
   STACK_RUNS_VIOLATIONS_REL_PATH,
+  STACK_RUNS_COST_REL_PATH,
   STACK_STATE_REL_PATH,
   STACK_VARS_REL_PATH,
 } from './stacksRoutesConsts'
@@ -145,6 +147,11 @@ export const stacksRoutes = [
       key="violations"
       path={STACK_RUNS_VIOLATIONS_REL_PATH}
       element={<Violations />}
+    />
+    <Route
+      key="cost"
+      path={STACK_RUNS_COST_REL_PATH}
+      element={<StackRunCost />}
     />
   </Route>,
 ]

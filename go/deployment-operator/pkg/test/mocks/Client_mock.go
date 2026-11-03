@@ -832,6 +832,65 @@ func (_c *ClientMock_GetAgentRunCredentials_Call) RunAndReturn(run func(context.
 	return _c
 }
 
+// GetAgentRunPending provides a mock function with given fields: ctx, id
+func (_m *ClientMock) GetAgentRunPending(ctx context.Context, id string) (*goclient.AgentRunPendingFragment, error) {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetAgentRunPending")
+	}
+
+	var r0 *goclient.AgentRunPendingFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*goclient.AgentRunPendingFragment, error)); ok {
+		return rf(ctx, id)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *goclient.AgentRunPendingFragment); ok {
+		r0 = rf(ctx, id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*goclient.AgentRunPendingFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ClientMock_GetAgentRunPending_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetAgentRunPending'
+type ClientMock_GetAgentRunPending_Call struct {
+	*mock.Call
+}
+
+// GetAgentRunPending is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ClientMock_Expecter) GetAgentRunPending(ctx interface{}, id interface{}) *ClientMock_GetAgentRunPending_Call {
+	return &ClientMock_GetAgentRunPending_Call{Call: _e.mock.On("GetAgentRunPending", ctx, id)}
+}
+
+func (_c *ClientMock_GetAgentRunPending_Call) Run(run func(ctx context.Context, id string)) *ClientMock_GetAgentRunPending_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ClientMock_GetAgentRunPending_Call) Return(_a0 *goclient.AgentRunPendingFragment, _a1 error) *ClientMock_GetAgentRunPending_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ClientMock_GetAgentRunPending_Call) RunAndReturn(run func(context.Context, string) (*goclient.AgentRunPendingFragment, error)) *ClientMock_GetAgentRunPending_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetAgentRunStatus provides a mock function with given fields: ctx, id
 func (_m *ClientMock) GetAgentRunStatus(ctx context.Context, id string) (*goclient.AgentRunStatusFragment, error) {
 	ret := _m.Called(ctx, id)
@@ -3421,23 +3480,23 @@ func (_c *ClientMock_UpdateAgentMessage_Call) RunAndReturn(run func(context.Cont
 }
 
 // UpdateAgentRun provides a mock function with given fields: ctx, id, attrs
-func (_m *ClientMock) UpdateAgentRun(ctx context.Context, id string, attrs goclient.AgentRunStatusAttributes) (*goclient.AgentRunFragment, error) {
+func (_m *ClientMock) UpdateAgentRun(ctx context.Context, id string, attrs goclient.AgentRunStatusAttributes) (*goclient.AgentRunUpdateFragment, error) {
 	ret := _m.Called(ctx, id, attrs)
 
 	if len(ret) == 0 {
 		panic("no return value specified for UpdateAgentRun")
 	}
 
-	var r0 *goclient.AgentRunFragment
+	var r0 *goclient.AgentRunUpdateFragment
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, goclient.AgentRunStatusAttributes) (*goclient.AgentRunFragment, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string, goclient.AgentRunStatusAttributes) (*goclient.AgentRunUpdateFragment, error)); ok {
 		return rf(ctx, id, attrs)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, goclient.AgentRunStatusAttributes) *goclient.AgentRunFragment); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string, goclient.AgentRunStatusAttributes) *goclient.AgentRunUpdateFragment); ok {
 		r0 = rf(ctx, id, attrs)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*goclient.AgentRunFragment)
+			r0 = ret.Get(0).(*goclient.AgentRunUpdateFragment)
 		}
 	}
 
@@ -3470,12 +3529,12 @@ func (_c *ClientMock_UpdateAgentRun_Call) Run(run func(ctx context.Context, id s
 	return _c
 }
 
-func (_c *ClientMock_UpdateAgentRun_Call) Return(_a0 *goclient.AgentRunFragment, _a1 error) *ClientMock_UpdateAgentRun_Call {
+func (_c *ClientMock_UpdateAgentRun_Call) Return(_a0 *goclient.AgentRunUpdateFragment, _a1 error) *ClientMock_UpdateAgentRun_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *ClientMock_UpdateAgentRun_Call) RunAndReturn(run func(context.Context, string, goclient.AgentRunStatusAttributes) (*goclient.AgentRunFragment, error)) *ClientMock_UpdateAgentRun_Call {
+func (_c *ClientMock_UpdateAgentRun_Call) RunAndReturn(run func(context.Context, string, goclient.AgentRunStatusAttributes) (*goclient.AgentRunUpdateFragment, error)) *ClientMock_UpdateAgentRun_Call {
 	_c.Call.Return(run)
 	return _c
 }
