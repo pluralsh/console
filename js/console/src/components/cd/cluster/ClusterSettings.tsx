@@ -17,6 +17,7 @@ import { SearchableWorkbenchSelector } from 'components/workbenches/WorkbenchSel
 import { useSearchableWorkbenchOptions } from 'components/workbenches/useWorkbenchOptions'
 
 import {
+  ClusterUpdateAttributes,
   ClustersRowFragment,
   InsightComponentPriority,
   useUpdateClusterMutation,
@@ -36,6 +37,52 @@ const REMEDIATION_PRIORITIES = [
 
 const DEFAULT_REMEDIATION_WINDOW = 21_600
 const DEFAULT_REMEDIATION_MAX_JOBS = 3
+
+type RemediationForm = {
+  autoRemediate: boolean
+  remediationWorkbenchId: Nullable<string>
+  remediationMinPriority: InsightComponentPriority
+  remediationWindow: number
+  remediationMaxJobs: number
+}
+
+type ChangedRemediationAttributes = Pick<
+  ClusterUpdateAttributes,
+  | 'remediationWorkbenchId'
+  | 'remediationMinPriority'
+  | 'remediationWindow'
+  | 'remediationMaxJobs'
+>
+
+function changedRemediationAttributes(
+  current: RemediationForm,
+  initial: RemediationForm
+): ChangedRemediationAttributes {
+  const attributes: ChangedRemediationAttributes = {}
+  const workbenchId = current.autoRemediate
+    ? current.remediationWorkbenchId
+    : null
+  const initialWorkbenchId = initial.autoRemediate
+    ? initial.remediationWorkbenchId
+    : null
+
+  if (workbenchId !== initialWorkbenchId)
+    attributes.remediationWorkbenchId = workbenchId
+  if (current.remediationMinPriority !== initial.remediationMinPriority)
+    attributes.remediationMinPriority = current.remediationMinPriority
+  if (current.remediationWindow !== initial.remediationWindow) {
+    attributes.remediationWindow = Number.isFinite(current.remediationWindow)
+      ? current.remediationWindow
+      : DEFAULT_REMEDIATION_WINDOW
+  }
+  if (current.remediationMaxJobs !== initial.remediationMaxJobs) {
+    attributes.remediationMaxJobs = Number.isFinite(current.remediationMaxJobs)
+      ? current.remediationMaxJobs
+      : DEFAULT_REMEDIATION_MAX_JOBS
+  }
+
+  return attributes
+}
 
 function ClusterSettingsModalInner({
   cluster,
@@ -69,6 +116,7 @@ function ClusterSettingsModalInner({
     },
     update: updateState,
     hasUpdates,
+    initialState,
   } = useUpdateState(
     {
       name: cluster?.name,
@@ -113,16 +161,16 @@ function ClusterSettingsModalInner({
                   protect,
                   tags: tagsToNameValue(tags),
                   disableAi,
-                  remediationWorkbenchId: autoRemediate
-                    ? remediationWorkbenchId
-                    : null,
-                  remediationMinPriority,
-                  remediationWindow: Number.isFinite(remediationWindow)
-                    ? remediationWindow
-                    : DEFAULT_REMEDIATION_WINDOW,
-                  remediationMaxJobs: Number.isFinite(remediationMaxJobs)
-                    ? remediationMaxJobs
-                    : DEFAULT_REMEDIATION_MAX_JOBS,
+                  ...changedRemediationAttributes(
+                    {
+                      autoRemediate,
+                      remediationWorkbenchId,
+                      remediationMinPriority,
+                      remediationWindow,
+                      remediationMaxJobs,
+                    },
+                    initialState
+                  ),
                 },
               },
             })

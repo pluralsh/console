@@ -21,11 +21,26 @@ defmodule Console.AI.Remediation do
   @spec remediate(Cluster.t | binary) :: {:ok, [WorkbenchJob.t]} | :ok | Console.error
   def remediate(%Cluster{id: id}), do: remediate(id)
   def remediate(id) when is_binary(id) do
-    Cluster
-    |> Repo.get(id)
-    |> Repo.preload(insight_components: :insight)
-    |> do_remediate()
+    Repo.transaction(fn ->
+      id
+      |> lock_cluster()
+      |> do_remediate()
+      |> commit_or_rollback()
+    end)
+    |> unwrap()
   end
+
+  defp lock_cluster(id) do
+    %Cluster{id: id}
+    |> Repo.locked()
+    |> Repo.preload(insight_components: :insight)
+  end
+
+  defp commit_or_rollback({:error, reason}), do: Repo.rollback(reason)
+  defp commit_or_rollback(result), do: result
+
+  defp unwrap({:ok, result}), do: result
+  defp unwrap({:error, reason}), do: {:error, reason}
 
   defp do_remediate(%Cluster{remediation_workbench_id: id} = cluster) when is_binary(id) do
     Workbench

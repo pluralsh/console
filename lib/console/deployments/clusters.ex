@@ -620,7 +620,7 @@ defmodule Console.Deployments.Clusters do
 
   defp authorize_remediation_workbench(%{remediation_workbench_id: id}, %User{} = user) when is_binary(id) and id != "" do
     case Repo.get(Workbench, id) do
-      %Workbench{} = bench -> allow(bench, user, :read)
+      %Workbench{} = bench -> allow(bench, user, :write)
       _ -> {:error, "workbench not found"}
     end
   end
