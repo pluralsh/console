@@ -1738,6 +1738,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   delta :workbench_job
   delta :workbench_job_activity
   delta :workbench_job_thought
+  delta :queued_prompt
 
   object :workbench_queries do
     field :workbench, :workbench do
@@ -2499,6 +2500,16 @@ defmodule Console.GraphQl.Deployments.Workbench do
       config fn %{job_id: job_id}, ctx ->
         with {:ok, _job} <- Deployments.workbench_job(%{id: job_id}, ctx),
           do: {:ok, topic: "workbench_jobs:#{job_id}:activities"}
+      end
+    end
+
+    @desc "Queued prompts for a job as they're queued, consumed or deleted. Consumed and deleted prompts no longer belong in the job's queued prompts."
+    field :queued_prompt_delta, :queued_prompt_delta do
+      arg :job_id, non_null(:id)
+
+      config fn %{job_id: job_id}, ctx ->
+        with {:ok, _} <- Deployments.workbench_job(%{id: job_id}, ctx),
+          do: {:ok, topic: "workbench_jobs:#{job_id}:queued_prompts"}
       end
     end
 

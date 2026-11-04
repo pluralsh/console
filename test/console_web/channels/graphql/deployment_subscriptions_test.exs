@@ -55,6 +55,49 @@ defmodule ConsoleWeb.GraphQl.DeploymentsSubscriptionTest do
     end
   end
 
+  describe "queuedPromptDelta" do
+    @queued_prompt_delta """
+      subscription QueuedPrompts($jobId: ID!) {
+        queuedPromptDelta(jobId: $jobId) {
+          delta
+          payload { id prompt consumedAt }
+        }
+      }
+    """
+
+    test "queued prompt changes broadcast deltas to the job's subscribers" do
+      user = insert(:user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      job = insert(:workbench_job, workbench: workbench)
+      prompt = insert(:queued_prompt, workbench_job: job, user: user)
+
+      {:ok, socket} = establish_socket(user)
+      ref = push_doc(socket, @queued_prompt_delta, variables: %{"jobId" => job.id})
+      assert_reply(ref, :ok, %{subscriptionId: _})
+
+      for {event, delta} <- [
+            {PubSub.WorkbenchQueuedPromptCreated, "CREATE"},
+            {PubSub.WorkbenchQueuedPromptUpdated, "UPDATE"},
+            {PubSub.WorkbenchQueuedPromptDeleted, "DELETE"}
+          ] do
+        Rtc.handle_event(struct(event, item: prompt))
+
+        assert_push("subscription:data", %{result: %{data: %{"queuedPromptDelta" => pushed}}})
+        assert pushed["delta"] == delta
+        assert pushed["payload"]["id"] == prompt.id
+      end
+    end
+
+    test "users who can't read the job can't subscribe" do
+      user = insert(:user)
+      job = insert(:workbench_job)
+
+      {:ok, socket} = establish_socket(user)
+      ref = push_doc(socket, @queued_prompt_delta, variables: %{"jobId" => job.id})
+      assert_reply(ref, :error, _)
+    end
+  end
+
   describe "runStepDelta" do
     @step_delta """
       subscription Steps($runId: ID!) {

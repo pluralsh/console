@@ -1,6 +1,8 @@
 import { ApolloCache, useApolloClient } from '@apollo/client'
 import {
   Delta,
+  QueuedPromptTinyFragment,
+  useQueuedPromptDeltaSubscription,
   useWorkbenchCanvasStreamSubscription,
   useWorkbenchJobActivityDeltaSubscription,
   useWorkbenchJobDeltaSubscription,
@@ -18,6 +20,7 @@ import {
   WorkbenchJobActivityWithThoughtsFragmentDoc,
   WorkbenchJobFragmentDoc,
 } from 'generated/graphql-documents'
+import { sortBy } from 'lodash'
 import { useRef, useState } from 'react'
 import {
   appendConnectionToEnd,
@@ -26,6 +29,9 @@ import {
 } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import { isJobRunning } from './WorkbenchJobActivity'
+import { isWorkbenchJobAction } from './workbenchJobActionsUtils'
+
+const ACTION_QUERIES = ['WorkbenchJobActionSummary', 'WorkbenchJobActions']
 
 // keyed by activity id
 type WorkbenchJobLatestThoughtMap = Record<string, WorkbenchJobThoughtFragment>
@@ -88,13 +94,30 @@ export function useWorkbenchJobStreams(
     ignoreResults: true,
     onData: ({ data: { data } }) => {
       const activityDelta = data?.workbenchJobActivityDelta
+      const activity = activityDelta?.payload
 
       if (activityDelta?.delta === Delta.Create) setJobLevelThinking([])
 
-      appendActivityToCache(
+      appendActivityToCache(client.cache, jobId ?? '', activity)
+
+      // action lists and summaries are separate connections the delta can't
+      // update in place
+      if (activity && isWorkbenchJobAction(activity))
+        client.refetchQueries({ include: ACTION_QUERIES })
+    },
+  })
+  useQueuedPromptDeltaSubscription({
+    variables: { jobId: jobId ?? '' },
+    skip: !jobId || !activityQueryLoaded,
+    ignoreResults: true,
+    onData: ({ data: { data } }) => {
+      const event = data?.queuedPromptDelta
+      if (!jobId || !event?.delta || !event.payload) return
+      updateQueuedPromptsInCache(
         client.cache,
-        jobId ?? '',
-        data?.workbenchJobActivityDelta?.payload
+        jobId,
+        event.delta,
+        event.payload
       )
     },
   })
@@ -128,6 +151,50 @@ export const appendActivityToCache = (
         'activities'
       ),
     }),
+  })
+
+// the job's queue only holds unconsumed prompts, ordered like the server's
+// list: by dequeableAt, then insertedAt
+const updateQueuedPromptsInCache = (
+  cache: ApolloCache<object>,
+  jobId: string,
+  delta: Delta,
+  {
+    consumedAt,
+    ...prompt
+  }: QueuedPromptTinyFragment & { consumedAt?: Nullable<string> }
+) =>
+  updateCache<WorkbenchJobActivitiesQuery>(cache, {
+    query: WorkbenchJobActivitiesDocument,
+    variables: { id: jobId },
+    update: (prev) => {
+      if (!prev.workbenchJob?.queuedPrompts) return prev
+      const queued = prev.workbenchJob.queuedPrompts
+      const others = (queued.edges ?? []).filter(
+        (edge) => edge?.node?.id !== prompt.id
+      )
+      const edges =
+        delta === Delta.Delete || consumedAt
+          ? others
+          : sortBy(
+              [
+                ...others,
+                { __typename: 'QueuedPromptEdge' as const, node: prompt },
+              ],
+              [
+                (edge) => edge?.node?.dequeableAt ?? '',
+                (edge) => edge?.node?.insertedAt ?? '',
+              ]
+            )
+
+      return {
+        ...prev,
+        workbenchJob: {
+          ...prev.workbenchJob,
+          queuedPrompts: { ...queued, edges },
+        },
+      }
+    },
   })
 
 const appendThoughtToActivityCache = (

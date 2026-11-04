@@ -9959,6 +9959,12 @@ export type QueuedPromptConnection = {
   pageInfo: PageInfo;
 };
 
+export type QueuedPromptDelta = {
+  __typename?: 'QueuedPromptDelta';
+  delta?: Maybe<Delta>;
+  payload?: Maybe<QueuedPrompt>;
+};
+
 export type QueuedPromptEdge = {
   __typename?: 'QueuedPromptEdge';
   cursor?: Maybe<Scalars['String']['output']>;
@@ -14104,6 +14110,8 @@ export type RootSubscriptionType = {
   infrastructureStackDelta?: Maybe<InfrastructureStackDelta>;
   notificationDelta?: Maybe<NotificationDelta>;
   podDelta?: Maybe<PodDelta>;
+  /** Queued prompts for a job as they're queued, consumed or deleted. Consumed and deleted prompts no longer belong in the job's queued prompts. */
+  queuedPromptDelta?: Maybe<QueuedPromptDelta>;
   runLogsDelta?: Maybe<RunLogsDelta>;
   /** Status changes to the steps of a run, its logs stream separately through runLogsDelta */
   runStepDelta?: Maybe<RunStepDelta>;
@@ -14153,6 +14161,11 @@ export type RootSubscriptionTypeClusterDeltaArgs = {
 
 export type RootSubscriptionTypeClusterUpgradeProgressArgs = {
   upgradeId: Scalars['ID']['input'];
+};
+
+
+export type RootSubscriptionTypeQueuedPromptDeltaArgs = {
+  jobId: Scalars['ID']['input'];
 };
 
 
@@ -24814,6 +24827,13 @@ export type WorkbenchJobThoughtDeltaSubscriptionVariables = Exact<{
 
 
 export type WorkbenchJobThoughtDeltaSubscription = { __typename?: 'RootSubscriptionType', workbenchJobThoughtDelta?: { __typename?: 'WorkbenchJobThoughtDelta', delta?: Delta | null, payload?: { __typename?: 'WorkbenchJobThought', id: string, content?: string | null, toolName?: string | null, toolArgs?: Record<string, unknown> | null, tool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, approval?: boolean | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, mcpServer?: { __typename?: 'McpServer', id: string, name: string, url: string } | null } | null, activity?: { __typename?: 'WorkbenchJobActivity', id: string } | null, attributes?: { __typename?: 'WorkbenchJobThoughtAttributes', logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, series?: Array<{ __typename?: 'MetricResponse', name?: string | null, metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, traces?: Array<{ __typename?: 'WorkbenchJobActivityTrace', traceId?: string | null, spanId?: string | null, parentId?: string | null, name?: string | null, service?: string | null, start?: string | null, end?: string | null, tags?: Record<string, unknown> | null } | null> | null } | null } | null } | null };
+
+export type QueuedPromptDeltaSubscriptionVariables = Exact<{
+  jobId: Scalars['ID']['input'];
+}>;
+
+
+export type QueuedPromptDeltaSubscription = { __typename?: 'RootSubscriptionType', queuedPromptDelta?: { __typename?: 'QueuedPromptDelta', delta?: Delta | null, payload?: { __typename?: 'QueuedPrompt', consumedAt?: string | null, id: string, prompt?: string | null, dequeableAt?: string | null, insertedAt?: string | null, user?: { __typename?: 'User', id: string, name: string } | null } | null } | null };
 
 export type WorkbenchJobProgressSubscriptionVariables = Exact<{
   jobId: Scalars['ID']['input'];
@@ -41346,6 +41366,29 @@ export type WorkbenchJobThoughtDeltaSubscriptionHookResult = ReturnType<typeof u
 export type WorkbenchJobThoughtDeltaSubscriptionResult = Apollo.SubscriptionResult<WorkbenchJobThoughtDeltaSubscription>;
 
 /**
+ * __useQueuedPromptDeltaSubscription__
+ *
+ * To run a query within a React component, call `useQueuedPromptDeltaSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useQueuedPromptDeltaSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useQueuedPromptDeltaSubscription({
+ *   variables: {
+ *      jobId: // value for 'jobId'
+ *   },
+ * });
+ */
+export function useQueuedPromptDeltaSubscription(baseOptions: Apollo.SubscriptionHookOptions<QueuedPromptDeltaSubscription, QueuedPromptDeltaSubscriptionVariables> & ({ variables: QueuedPromptDeltaSubscriptionVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<QueuedPromptDeltaSubscription, QueuedPromptDeltaSubscriptionVariables>(Operations.QueuedPromptDelta, options);
+      }
+export type QueuedPromptDeltaSubscriptionHookResult = ReturnType<typeof useQueuedPromptDeltaSubscription>;
+export type QueuedPromptDeltaSubscriptionResult = Apollo.SubscriptionResult<QueuedPromptDeltaSubscription>;
+
+/**
  * __useWorkbenchJobProgressSubscription__
  *
  * To run a query within a React component, call `useWorkbenchJobProgressSubscription` and pass it any options that fit your needs.
@@ -42573,6 +42616,7 @@ export const namedOperations = {
     WorkbenchJobDelta: 'WorkbenchJobDelta',
     WorkbenchJobActivityDelta: 'WorkbenchJobActivityDelta',
     WorkbenchJobThoughtDelta: 'WorkbenchJobThoughtDelta',
+    QueuedPromptDelta: 'QueuedPromptDelta',
     WorkbenchJobProgress: 'WorkbenchJobProgress',
     WorkbenchCanvasStream: 'WorkbenchCanvasStream',
     WorkbenchExecStream: 'WorkbenchExecStream',

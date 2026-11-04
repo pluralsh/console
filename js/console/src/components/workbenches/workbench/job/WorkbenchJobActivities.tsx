@@ -12,6 +12,7 @@ import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { VirtualList } from 'components/utils/VirtualList'
 import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
+import { usePollWhileRunning } from './usePollWhileRunning'
 import { useWorkbenchJobStreams } from './useWorkbenchJobStreams'
 import {
   isJobRunning,
@@ -38,13 +39,14 @@ export function WorkbenchJobActivities({
 }) {
   const { spacing } = useTheme()
 
-  const { data, loading, error } = useWorkbenchJobActivitiesQuery({
+  const query = useWorkbenchJobActivitiesQuery({
     variables: { id: jobId },
     fetchPolicy: 'cache-and-network',
-    pollInterval: 15_000,
   })
+  const { data, loading, error } = query
 
   const job = data?.workbenchJob
+  usePollWhileRunning(query, isJobRunning(job?.status))
   const activities = useMemo(
     () => mapExistingNodes(job?.activities),
     [job?.activities]

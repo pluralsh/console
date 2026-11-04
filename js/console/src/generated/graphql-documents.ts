@@ -12102,6 +12102,17 @@ export const WorkbenchJobThoughtDeltaDocument = /*#__PURE__*/ gql`
   }
 }
     ${WorkbenchJobThoughtFragmentDoc}` as unknown as DocumentNode<Types.WorkbenchJobThoughtDeltaSubscription, Types.WorkbenchJobThoughtDeltaSubscriptionVariables>;
+export const QueuedPromptDeltaDocument = /*#__PURE__*/ gql`
+    subscription QueuedPromptDelta($jobId: ID!) {
+  queuedPromptDelta(jobId: $jobId) {
+    delta
+    payload {
+      ...QueuedPromptTiny
+      consumedAt
+    }
+  }
+}
+    ${QueuedPromptTinyFragmentDoc}` as unknown as DocumentNode<Types.QueuedPromptDeltaSubscription, Types.QueuedPromptDeltaSubscriptionVariables>;
 export const WorkbenchJobProgressDocument = /*#__PURE__*/ gql`
     subscription WorkbenchJobProgress($jobId: ID!) {
   workbenchJobProgress(jobId: $jobId) {

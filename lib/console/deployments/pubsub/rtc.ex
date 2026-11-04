@@ -101,6 +101,18 @@ defimpl Console.PubSub.Rtc, for: Console.PubSub.WorkbenchJobThoughtCreated do
   def deliver(%{item: thought}), do: {thought, :create}
 end
 
+defimpl Console.PubSub.Rtc, for: Console.PubSub.WorkbenchQueuedPromptCreated do
+  def deliver(%{item: prompt}), do: {prompt, :create}
+end
+
+defimpl Console.PubSub.Rtc, for: Console.PubSub.WorkbenchQueuedPromptUpdated do
+  def deliver(%{item: prompt}), do: {prompt, :update}
+end
+
+defimpl Console.PubSub.Rtc, for: Console.PubSub.WorkbenchQueuedPromptDeleted do
+  def deliver(%{item: prompt}), do: {prompt, :delete}
+end
+
 defimpl Console.PubSub.Rtc, for: [
   Console.PubSub.DashboardCreated,
   Console.PubSub.MonitorCreated,

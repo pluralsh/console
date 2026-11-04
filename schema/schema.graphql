@@ -1912,6 +1912,9 @@ type RootSubscriptionType {
 
   workbenchJobActivityDelta(jobId: ID!): WorkbenchJobActivityDelta
 
+  "Queued prompts for a job as they're queued, consumed or deleted. Consumed and deleted prompts no longer belong in the job's queued prompts."
+  queuedPromptDelta(jobId: ID!): QueuedPromptDelta
+
   workbenchJobThoughtDelta(jobId: ID!): WorkbenchJobThoughtDelta
 
   workbenchJobProgress(jobId: ID!): WorkbenchJobProgress
@@ -6202,6 +6205,11 @@ type WorkbenchJobActivityDelta {
 type WorkbenchJobThoughtDelta {
   delta: Delta
   payload: WorkbenchJobThought
+}
+
+type QueuedPromptDelta {
+  delta: Delta
+  payload: QueuedPrompt
 }
 
 enum SentinelCheckType {

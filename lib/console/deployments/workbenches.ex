@@ -1133,6 +1133,7 @@ defmodule Console.Deployments.Workbenches do
     get_queued_prompt!(id)
     |> allow(user, :read)
     |> when_ok(:delete)
+    |> notify(:delete, user)
   end
 
   @spec dequeue_prompt(QueuedPrompt.t()) :: activity_resp
@@ -1154,7 +1155,13 @@ defmodule Console.Deployments.Workbenches do
     |> add_operation(:attachments, fn %{job: activity} ->
       Attachments.move_queued(prompt.id, activity)
     end)
-    |> execute(extract: :job)
+    |> execute()
+    |> case do
+      {:ok, %{consume: prompt, job: activity}} ->
+        notify({:ok, prompt}, :update)
+        {:ok, activity}
+      err -> err
+    end
   end
 
   def kick_workbench(%StackRun{status: :successful, id: id} = run) do
@@ -1677,6 +1684,8 @@ defmodule Console.Deployments.Workbenches do
     do: handle_notify(PubSub.WorkbenchPromptDeleted, prompt, actor: user)
   defp notify({:ok, %QueuedPrompt{} = prompt}, :create, user),
     do: handle_notify(PubSub.WorkbenchQueuedPromptCreated, prompt, actor: user)
+  defp notify({:ok, %QueuedPrompt{} = prompt}, :delete, user),
+    do: handle_notify(PubSub.WorkbenchQueuedPromptDeleted, prompt, actor: user)
   defp notify({:ok, %WorkbenchSkill{} = skill}, :create, user),
     do: handle_notify(PubSub.WorkbenchSkillCreated, skill, actor: user)
   defp notify({:ok, %WorkbenchSkill{} = skill}, :update, user),
@@ -1727,6 +1736,8 @@ defmodule Console.Deployments.Workbenches do
     do: handle_notify(PubSub.WorkbenchJobUpdated, job)
   def notify({:ok, %WorkbenchJobActivity{} = activity}, :update),
     do: handle_notify(PubSub.WorkbenchJobActivityUpdated, activity)
+  def notify({:ok, %QueuedPrompt{} = prompt}, :update),
+    do: handle_notify(PubSub.WorkbenchQueuedPromptUpdated, prompt)
   def notify(pass, _), do: pass
 
   defp notify_status_change({:ok, %WorkbenchJob{status: status}} = pass, status), do: pass

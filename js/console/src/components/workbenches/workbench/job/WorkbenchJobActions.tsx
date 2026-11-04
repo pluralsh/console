@@ -13,21 +13,30 @@ import { useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { WorkbenchJobActionCard } from './WorkbenchJobActionCard'
 import { WorkbenchJobActionDetail } from './WorkbenchJobActionDetail'
+import { usePollWhileRunning } from './usePollWhileRunning'
 import {
   groupWorkbenchJobActions,
   mapActionNodes,
 } from './workbenchJobActionsUtils'
 
-export function WorkbenchJobActions({ jobId }: { jobId: string }) {
+export function WorkbenchJobActions({
+  jobId,
+  running,
+}: {
+  jobId: string
+  running: boolean
+}) {
   const theme = useTheme()
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
-  const { data, loading, error } = useWorkbenchJobActionsQuery({
+  const query = useWorkbenchJobActionsQuery({
     variables: { id: jobId },
     skip: !jobId,
     fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
   })
+  const { data, loading, error } = query
+  // approvals are waited on while the job runs, so keep this responsive then
+  usePollWhileRunning(query, running, POLL_INTERVAL)
 
   const actions = useMemo(
     () =>

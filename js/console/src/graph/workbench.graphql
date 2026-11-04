@@ -2127,6 +2127,16 @@ subscription WorkbenchJobThoughtDelta($jobId: ID!) {
   }
 }
 
+subscription QueuedPromptDelta($jobId: ID!) {
+  queuedPromptDelta(jobId: $jobId) {
+    delta
+    payload {
+      ...QueuedPromptTiny
+      consumedAt
+    }
+  }
+}
+
 subscription WorkbenchJobProgress($jobId: ID!) {
   workbenchJobProgress(jobId: $jobId) {
     ...WorkbenchJobProgress

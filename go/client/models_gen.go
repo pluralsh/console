@@ -8255,6 +8255,11 @@ type QueuedPromptConnection struct {
 	Edges    []*QueuedPromptEdge `json:"edges,omitempty"`
 }
 
+type QueuedPromptDelta struct {
+	Delta   *Delta        `json:"delta,omitempty"`
+	Payload *QueuedPrompt `json:"payload,omitempty"`
+}
+
 type QueuedPromptEdge struct {
 	Node   *QueuedPrompt `json:"node,omitempty"`
 	Cursor *string       `json:"cursor,omitempty"`

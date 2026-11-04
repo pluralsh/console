@@ -1238,6 +1238,8 @@ defmodule Console.Deployments.WorkbenchesTest do
 
       assert deleted.id == prompt.id
       refute refetch(prompt)
+
+      assert_receive {:event, %PubSub.WorkbenchQueuedPromptDeleted{item: ^deleted}}
     end
 
     test "users without read access cannot delete queued prompts" do
@@ -1265,6 +1267,10 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert activity.user_id == user.id
       assert Console.Repo.get!(QueuedPrompt, prompt.id).consumed_at
       assert refetch(job).status == :pending
+
+      assert_receive {:event, %PubSub.WorkbenchQueuedPromptUpdated{item: consumed}}
+      assert consumed.id == prompt.id
+      assert consumed.consumed_at
     end
 
     test "applies queued mode overrides when creating the message" do
@@ -1303,6 +1309,7 @@ defmodule Console.Deployments.WorkbenchesTest do
                Workbenches.dequeue_prompt(prompt)
 
       refute Console.Repo.get!(QueuedPrompt, prompt.id).consumed_at
+      refute_receive {:event, %PubSub.WorkbenchQueuedPromptUpdated{}}
     end
   end
 

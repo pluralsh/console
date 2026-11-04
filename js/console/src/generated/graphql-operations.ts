@@ -493,6 +493,7 @@ export { DeleteIssueWebhookDocument as DeleteIssueWebhook } from './graphql-docu
 export { WorkbenchJobDeltaDocument as WorkbenchJobDelta } from './graphql-documents'
 export { WorkbenchJobActivityDeltaDocument as WorkbenchJobActivityDelta } from './graphql-documents'
 export { WorkbenchJobThoughtDeltaDocument as WorkbenchJobThoughtDelta } from './graphql-documents'
+export { QueuedPromptDeltaDocument as QueuedPromptDelta } from './graphql-documents'
 export { WorkbenchJobProgressDocument as WorkbenchJobProgress } from './graphql-documents'
 export { WorkbenchCanvasStreamDocument as WorkbenchCanvasStream } from './graphql-documents'
 export { WorkbenchExecStreamDocument as WorkbenchExecStream } from './graphql-documents'
