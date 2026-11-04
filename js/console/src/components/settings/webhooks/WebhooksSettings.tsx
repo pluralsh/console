@@ -1,8 +1,4 @@
-import {
-  ArrowTopRightIcon,
-  Breadcrumb,
-  useSetBreadcrumbs,
-} from '@pluralsh/design-system'
+import { Breadcrumb, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { PageToolbarPortal } from 'components/layout/PageToolbar'
 import { WEBHOOKS_SETTINGS_ABS_PATH } from 'routes/settingsRoutesConst'
 
@@ -28,7 +24,6 @@ export default function WebhooksSettings() {
           buttonProps={{
             secondary: true,
             small: true,
-            endIcon: <ArrowTopRightIcon />,
           }}
         />
       </PageToolbarPortal>
