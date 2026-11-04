@@ -1,4 +1,5 @@
 import {
+  Callout,
   EmptyState,
   Flex,
   IconFrame,
@@ -114,6 +115,17 @@ export function SentinelRunJob() {
           height="100%"
           maxWidth="100%"
         >
+          {runJob?.error && (
+            <Callout
+              severity="danger"
+              title="This job encountered an error"
+              css={{ flexShrink: 0 }}
+            >
+              <span css={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                {runJob.error}
+              </span>
+            </Callout>
+          )}
           <SubTabs directory={directory} />
           {runJob || isLoading ? (
             <Outlet context={ctx} />

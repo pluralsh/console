@@ -140,6 +140,7 @@ fragment SentinelRunJob on SentinelRunJob {
   ...SentinelRunJobTiny
   format
   output
+  error
   sentinelRun {
     id
     sentinel {

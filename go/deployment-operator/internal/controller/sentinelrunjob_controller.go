@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	console "github.com/pluralsh/console/go/client"
@@ -104,7 +105,7 @@ func (r *SentinelRunJobReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 
 	job, err := r.reconcileRunJob(ctx, srj, run)
 	if err != nil {
-		return ctrl.Result{}, err
+		return r.handleProvisioningError(ctx, srj, run, err)
 	}
 
 	if err := utils.TryAddOwnerRef(ctx, r.Client, job, secret, r.Scheme); err != nil {
@@ -125,12 +126,14 @@ func (r *SentinelRunJobReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 	}
 	srj.Status.JobRef = &corev1.LocalObjectReference{Name: job.Name}
 	status := run.Status
+	var jobError string
 	if isSentinelControlledJobTimedOut(job) {
 		if err := r.killRunJob(ctx, job); err != nil {
 			return ctrl.Result{}, err
 		}
 		srj.Status.JobStatus = string(common.HealthStatusDegraded)
 		status = console.SentinelRunJobStatusFailed
+		jobError = fmt.Sprintf("job exceeded the max lifetime of %s and was killed", sentinelControlledJobMaxLifetime)
 		fromContext.V(2).Info("sentinel run job exceeded max lifetime, failing", "name", job.Name, "namespace", job.Namespace)
 	} else if health != nil {
 		srj.Status.JobStatus = string(health.Status)
@@ -139,24 +142,67 @@ func (r *SentinelRunJobReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		}
 	}
 
-	if err := r.ConsoleClient.UpdateSentinelRunJobStatus(srj.Spec.RunID, &console.SentinelRunJobUpdateAttributes{
+	if jobError == "" && !isTerminalSentinelRunStatus(run.Status) {
+		jobError = r.getJobErrorMessage(ctx, job, health)
+	}
+
+	attrs := &console.SentinelRunJobUpdateAttributes{
 		Status: &status,
 		Reference: &console.NamespacedName{
 			Name:      job.Name,
 			Namespace: job.Namespace,
 		},
-	}); err != nil {
+	}
+	// the harness reports its own errors, which are more precise than anything inferred from the job's pods
+	if jobError != "" && lo.FromPtr(run.Error) == "" {
+		attrs.Error = lo.ToPtr(jobError)
+	}
+
+	if err := r.ConsoleClient.UpdateSentinelRunJobStatus(srj.Spec.RunID, attrs); err != nil {
 		return ctrl.Result{}, err
 	}
+
+	utils.MarkCondition(srj.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+	utils.MarkCondition(srj.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
 	if isTerminalSentinelRunStatus(status) {
 		if err := r.Delete(ctx, srj); err != nil && !apierrs.IsNotFound(err) {
 			return ctrl.Result{}, err
 		}
+		return ctrl.Result{}, nil
 	}
 
-	utils.MarkCondition(srj.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
-	utils.MarkCondition(srj.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
+	// pod-level failures (image pulls, scheduling, etc.) don't update the job, so poll while it's still active
+	return jitterRequeue(requeueAfter, jitter), nil
+}
+
+// handleProvisioningError reports a failure to create the job back to the console. Permanent failures (e.g. an invalid
+// job spec) fail the run, while transient ones are retried.
+func (r *SentinelRunJobReconciler) handleProvisioningError(ctx context.Context, srj *v1alpha1.SentinelRunJob, run *console.SentinelRunJobFragment, err error) (ctrl.Result, error) {
+	msg := provisioningErrorMessage(err)
+	permanent := isPermanentProvisioningError(err)
+	attrs := &console.SentinelRunJobUpdateAttributes{}
+	if permanent {
+		attrs.Status = lo.ToPtr(console.SentinelRunJobStatusFailed)
+	}
+	if lo.FromPtr(run.Error) != msg {
+		attrs.Error = lo.ToPtr(msg)
+	}
+
+	if attrs.Status != nil || attrs.Error != nil {
+		if updateErr := r.ConsoleClient.UpdateSentinelRunJobStatus(srj.Spec.RunID, attrs); updateErr != nil {
+			return ctrl.Result{}, fmt.Errorf("%w; failed to report error to console: %w", err, updateErr)
+		}
+	}
+
+	if !permanent {
+		return ctrl.Result{}, err
+	}
+
+	log.FromContext(ctx).Error(err, "failed to provision sentinel run job, failing", "name", srj.Name, "namespace", srj.Namespace)
+	if err := r.Delete(ctx, srj); err != nil && !apierrs.IsNotFound(err) {
+		return ctrl.Result{}, err
+	}
 	return ctrl.Result{}, nil
 }
 

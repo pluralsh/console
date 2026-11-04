@@ -8,7 +8,13 @@
 - Cluster: <%= cluster(@job) %>
 - Repository ID: <%= nullable(@job.repository_id) %>
 - Completed at: <%= nullable(@job.completed_at) %>
+<%= if @job.error do %>
+## Error
 
+```
+<%= @job.error %>
+```
+<% end %>
 ## Kubernetes Job
 
 - Namespace: <%= nullable(@job.reference && @job.reference.namespace) %>

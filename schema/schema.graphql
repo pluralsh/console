@@ -6405,6 +6405,9 @@ input SentinelRunJobUpdateAttributes {
 
   "the output of the job"
   output: String
+
+  "a runtime or configuration error encountered while running the job"
+  error: String
 }
 
 input SentinelCheckGotestsumAttributes {
@@ -6816,6 +6819,9 @@ type SentinelRunJob {
 
   "the output of the job"
   output: String
+
+  "a runtime or configuration error encountered while running the job"
+  error: String
 
   "the time the job completed"
   completedAt: DateTime

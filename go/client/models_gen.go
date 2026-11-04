@@ -9121,6 +9121,8 @@ type SentinelRunJob struct {
 	Check *string `json:"check,omitempty"`
 	// the output of the job
 	Output *string `json:"output,omitempty"`
+	// a runtime or configuration error encountered while running the job
+	Error *string `json:"error,omitempty"`
 	// the time the job completed
 	CompletedAt *string `json:"completedAt,omitempty"`
 	// the git repository to use for this job
@@ -9160,6 +9162,8 @@ type SentinelRunJobUpdateAttributes struct {
 	Reference *NamespacedName `json:"reference,omitempty"`
 	// the output of the job
 	Output *string `json:"output,omitempty"`
+	// a runtime or configuration error encountered while running the job
+	Error *string `json:"error,omitempty"`
 }
 
 type SentinelRunOverrides struct {

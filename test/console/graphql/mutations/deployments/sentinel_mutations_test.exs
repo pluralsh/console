@@ -147,5 +147,26 @@ defmodule Console.GraphQl.Deployments.SentinelMutationsTest do
       assert updated["id"] == sentinel_run_job.id
       assert updated["status"] == "SUCCESS"
     end
+
+    test "it can report an error on a sentinel run job" do
+      sentinel_run_job = insert(:sentinel_run_job)
+
+      {:ok, %{data: %{"updateSentinelRunJob" => updated}}} = run_query("""
+        mutation SentinelRunJobUpdate($id: ID!, $attributes: SentinelRunJobUpdateAttributes!) {
+          updateSentinelRunJob(id: $id, attributes: $attributes) {
+            id
+            status
+            error
+          }
+        }
+      """, %{
+        "id" => sentinel_run_job.id,
+        "attributes" => %{"status" => "FAILED", "error" => "failed to pull image"}
+      }, %{cluster: sentinel_run_job.cluster})
+
+      assert updated["id"] == sentinel_run_job.id
+      assert updated["status"] == "FAILED"
+      assert updated["error"] == "failed to pull image"
+    end
   end
 end

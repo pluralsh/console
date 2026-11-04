@@ -14975,6 +14975,8 @@ export type SentinelRunJob = {
   cluster?: Maybe<Cluster>;
   /** the time the job completed */
   completedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** a runtime or configuration error encountered while running the job */
+  error?: Maybe<Scalars['String']['output']>;
   /** the format of the job output */
   format: SentinelRunJobFormat;
   /** the git repository to use for this job */
@@ -15026,6 +15028,8 @@ export enum SentinelRunJobStatus {
 }
 
 export type SentinelRunJobUpdateAttributes = {
+  /** a runtime or configuration error encountered while running the job */
+  error?: InputMaybe<Scalars['String']['input']>;
   /** the output of the job */
   output?: InputMaybe<Scalars['String']['input']>;
   /** the reference to the job that was run */
@@ -20555,7 +20559,7 @@ export type SentinelStatisticFragment = { __typename?: 'SentinelStatistic', stat
 
 export type SentinelRunJobTinyFragment = { __typename?: 'SentinelRunJob', id: string, status: SentinelRunJobStatus, insertedAt?: string | null, completedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, reference?: { __typename?: 'JobReference', namespace: string, name: string } | null };
 
-export type SentinelRunJobFragment = { __typename?: 'SentinelRunJob', format: SentinelRunJobFormat, output?: string | null, id: string, status: SentinelRunJobStatus, insertedAt?: string | null, completedAt?: string | null, sentinelRun?: { __typename?: 'SentinelRun', id: string, sentinel?: { __typename?: 'Sentinel', id: string, name: string } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, reference?: { __typename?: 'JobReference', namespace: string, name: string } | null };
+export type SentinelRunJobFragment = { __typename?: 'SentinelRunJob', format: SentinelRunJobFormat, output?: string | null, error?: string | null, id: string, status: SentinelRunJobStatus, insertedAt?: string | null, completedAt?: string | null, sentinelRun?: { __typename?: 'SentinelRun', id: string, sentinel?: { __typename?: 'Sentinel', id: string, name: string } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, reference?: { __typename?: 'JobReference', namespace: string, name: string } | null };
 
 export type SentinelsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -20615,7 +20619,7 @@ export type SentinelRunJobQueryVariables = Exact<{
 }>;
 
 
-export type SentinelRunJobQuery = { __typename?: 'RootQueryType', sentinelRunJob?: { __typename?: 'SentinelRunJob', format: SentinelRunJobFormat, output?: string | null, id: string, status: SentinelRunJobStatus, insertedAt?: string | null, completedAt?: string | null, sentinelRun?: { __typename?: 'SentinelRun', id: string, sentinel?: { __typename?: 'Sentinel', id: string, name: string } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, reference?: { __typename?: 'JobReference', namespace: string, name: string } | null } | null };
+export type SentinelRunJobQuery = { __typename?: 'RootQueryType', sentinelRunJob?: { __typename?: 'SentinelRunJob', format: SentinelRunJobFormat, output?: string | null, error?: string | null, id: string, status: SentinelRunJobStatus, insertedAt?: string | null, completedAt?: string | null, sentinelRun?: { __typename?: 'SentinelRun', id: string, sentinel?: { __typename?: 'Sentinel', id: string, name: string } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, reference?: { __typename?: 'JobReference', namespace: string, name: string } | null } | null };
 
 export type SentinelRunJobK8sJobQueryVariables = Exact<{
   id: Scalars['ID']['input'];

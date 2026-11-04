@@ -5829,6 +5829,7 @@ type SentinelRunJobFragment struct {
 	Check       *string                           "json:\"check,omitempty\" graphql:\"check\""
 	Status      SentinelRunJobStatus              "json:\"status\" graphql:\"status\""
 	Format      SentinelRunJobFormat              "json:\"format\" graphql:\"format\""
+	Error       *string                           "json:\"error,omitempty\" graphql:\"error\""
 	UsesGit     *bool                             "json:\"usesGit,omitempty\" graphql:\"usesGit\""
 	JobSpec     *JobSpecFragment                  "json:\"jobSpec,omitempty\" graphql:\"jobSpec\""
 	Reference   *SentinelRunJobFragment_Reference "json:\"reference,omitempty\" graphql:\"reference\""
@@ -5859,6 +5860,12 @@ func (t *SentinelRunJobFragment) GetFormat() *SentinelRunJobFormat {
 		t = &SentinelRunJobFragment{}
 	}
 	return &t.Format
+}
+func (t *SentinelRunJobFragment) GetError() *string {
+	if t == nil {
+		t = &SentinelRunJobFragment{}
+	}
+	return t.Error
 }
 func (t *SentinelRunJobFragment) GetUsesGit() *bool {
 	if t == nil {
@@ -68228,6 +68235,7 @@ fragment SentinelRunJobFragment on SentinelRunJob {
 	check
 	status
 	format
+	error
 	usesGit
 	jobSpec {
 		... JobSpecFragment
@@ -68427,6 +68435,7 @@ fragment SentinelRunJobFragment on SentinelRunJob {
 	check
 	status
 	format
+	error
 	usesGit
 	jobSpec {
 		... JobSpecFragment
@@ -68796,6 +68805,7 @@ fragment SentinelRunJobFragment on SentinelRunJob {
 	check
 	status
 	format
+	error
 	usesGit
 	jobSpec {
 		... JobSpecFragment

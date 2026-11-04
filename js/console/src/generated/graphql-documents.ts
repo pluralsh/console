@@ -1176,6 +1176,7 @@ export const SentinelRunJobFragmentDoc = /*#__PURE__*/ gql`
   ...SentinelRunJobTiny
   format
   output
+  error
   sentinelRun {
     id
     sentinel {
