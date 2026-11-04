@@ -23,7 +23,12 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     Infrastructure.PodLogs,
     Infrastructure.Vulns,
     Infrastructure.Manifests,
-    Infrastructure.StateSearch
+    Infrastructure.StateSearch,
+    Sentinel.FetchSentinelRun,
+    Sentinel.FetchSentinelRunJob,
+    Sentinel.ListSentinels,
+    Sentinel.ListSentinelRuns,
+    Sentinel.ListSentinelRunJobs
   }
   alias Console.AI.Tools.Agent.{ServiceComponent, Stack}
   alias Console.AI.Workbench.{Environment, FileCache, Tools}
@@ -36,7 +41,12 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
 
     MemoryEngine.new(tools, 50,
       engine_opts(environment) ++ [
-        system_prompt: &String.trim(system_prompt(cloud_tools: has_cloud_tools?(environment), docker_tools: has_docker_tools?(environment), engine: &1)),
+        system_prompt: &String.trim(system_prompt(
+          cloud_tools: has_cloud_tools?(environment),
+          docker_tools: has_docker_tools?(environment),
+          sentinel_tools: has_sentinel_tools?(job),
+          engine: &1
+        )),
         acc: %{},
         continue_msg: cont_msg(),
         tool_search: length(tools) > 10,
@@ -69,6 +79,7 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
 
     core_tools(job, environment)
     |> Enum.concat(vuln_tools(bench, user))
+    |> Enum.concat(sentinel_tools(bench, user))
     |> Enum.concat(manifests_tools(bench, job, user, cache))
     |> Enum.concat(search_tools(environment, :infrastructure))
     |> Enum.concat(skill_knowledge_tools(job, skills) ++ [
@@ -154,6 +165,20 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
 
   defp vuln_tools(%Workbench{configuration: %{infrastructure: %{vulnerabilities: true}}}, %User{} = user), do: [%Vulns{user: user}]
   defp vuln_tools(_, _), do: []
+
+  @doc "Read-only tools for inspecting sentinels and their run results"
+  def sentinel_tools(%Workbench{configuration: %{infrastructure: %{sentinels: true}}}, %User{} = user) do
+    [
+      %ListSentinels{user: user},
+      %ListSentinelRuns{user: user},
+      %FetchSentinelRun{user: user},
+      %ListSentinelRunJobs{user: user},
+      %FetchSentinelRunJob{user: user}
+    ]
+  end
+  def sentinel_tools(_, _), do: []
+
+  defp has_sentinel_tools?(%WorkbenchJob{workbench: bench, user: user}), do: sentinel_tools(bench, user) != []
 
   EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "infrastructure.md.eex"]), [:assigns])
 end

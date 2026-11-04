@@ -17,8 +17,9 @@ export const CHIP_DATA_ATTR = 'data-chip'
 export const CHIP_TAG_ATTR = 'data-plrl-tag'
 export const CHIP_ATTR_PREFIX = 'data-attr-'
 
+// longest first, since some tags (plrl-sentinel-run) prefix others (plrl-sentinel-run-job)
 const PLRL_CHIP_REGEX = new RegExp(
-  `<(${Object.values(MentionKind).join('|')})\\b([^>]*)></\\1>`,
+  `<(${[...Object.values(MentionKind)].sort((a, b) => b.length - a.length).join('|')})\\b([^>]*)></\\1>`,
   'gi'
 )
 const CHIP_ATTR_REGEX = /([a-z-]+)\s*=\s*"([^"]*)"/g

@@ -131,5 +131,22 @@ defmodule Console.AI.Workbench.Subagents.InfrastructureTest do
       assert "docker_dockerhub_search_tags" in names
       assert "docker_dockerhub_fetch_manifest" in names
     end
+
+    test "includes read-only sentinel tools only when sentinels are enabled" do
+      sentinel_tools = ~w(plrl_list_sentinels plrl_sentinel_runs plrl_sentinel_run plrl_sentinel_run_jobs plrl_sentinel_run_job)
+
+      enabled = insert(:workbench, configuration: %{infrastructure: %{services: true, sentinels: true}})
+      job = insert(:workbench_job, workbench: enabled) |> Repo.preload([:user, workbench: :tools])
+      names = Subagents.Infrastructure.tools(job, Environment.new(job, [], [])) |> Enum.map(&Tool.name/1)
+
+      for tool <- sentinel_tools, do: assert tool in names
+      refute "plrl_run_sentinel" in names
+
+      disabled = insert(:workbench, configuration: %{infrastructure: %{services: true}})
+      job = insert(:workbench_job, workbench: disabled) |> Repo.preload([:user, workbench: :tools])
+      names = Subagents.Infrastructure.tools(job, Environment.new(job, [], [])) |> Enum.map(&Tool.name/1)
+
+      for tool <- sentinel_tools, do: refute tool in names
+    end
   end
 end

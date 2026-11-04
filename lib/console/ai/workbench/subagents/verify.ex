@@ -4,12 +4,7 @@ defmodule Console.AI.Workbench.Subagents.Verify do
   alias Console.Deployments.Sentinels
   alias Console.Schema.{SentinelRun, WorkbenchJob, WorkbenchJobActivity}
   alias Console.AI.Tools.Workbench.{Result, Scratchpad}
-  alias Console.AI.Tools.Workbench.Sentinel.{
-    FetchSentinelRun,
-    FetchSentinelRunJob,
-    ListSentinels,
-    RunSentinel
-  }
+  alias Console.AI.Tools.Workbench.Sentinel.{FetchSentinelRun, RunSentinel}
   alias Console.AI.Workbench.Environment
   import Console.AI.Workbench.Environment, only: [engine_opts: 1]
 
@@ -61,15 +56,12 @@ defmodule Console.AI.Workbench.Subagents.Verify do
     ])
   end
 
-  defp sentinel_tools(%WorkbenchJob{workbench: %{configuration: %{infrastructure: %{sentinels: true}}}, user: user}) do
-    [
-      %ListSentinels{user: user},
-      %FetchSentinelRun{user: user},
-      %FetchSentinelRunJob{user: user},
-      %RunSentinel{user: user}
-    ]
+  defp sentinel_tools(%WorkbenchJob{workbench: bench, user: user}) do
+    case Infrastructure.sentinel_tools(bench, user) do
+      [_ | _] = tools -> tools ++ [%RunSentinel{user: user}]
+      [] -> []
+    end
   end
-  defp sentinel_tools(_), do: []
 
   defp run_and_poll_sentinel(%RunSentinel{user: user, sentinel: %{id: id}, overrides: overrides} = tool) do
     with {:ok, run} <- Sentinels.run_sentinel(overrides || %{}, Sentinels.get_sentinel!(id), user),
@@ -91,7 +83,7 @@ defmodule Console.AI.Workbench.Subagents.Verify do
   defp poll_sentinel_run(run, iter \\ 0)
   defp poll_sentinel_run(%SentinelRun{} = run, iter) when iter >= @poll_iters, do: {:timeout, run}
   defp poll_sentinel_run(%SentinelRun{status: status} = run, _) when status in [:success, :failed],
-    do: {:ok, Repo.preload(run, [:jobs], force: true)}
+    do: {:ok, Repo.preload(run, [:jobs, :errors], force: true)}
   defp poll_sentinel_run(%SentinelRun{id: id} = run, iter) do
     :timer.sleep(@poll_interval)
 

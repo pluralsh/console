@@ -1135,6 +1135,10 @@ export const SentinelRunFragmentDoc = /*#__PURE__*/ gql`
   results {
     ...SentinelRunResult
   }
+  errors {
+    source
+    message
+  }
   checks {
     ...SentinelCheck
   }
@@ -1160,6 +1164,7 @@ export const SentinelRunJobTinyFragmentDoc = /*#__PURE__*/ gql`
     fragment SentinelRunJobTiny on SentinelRunJob {
   id
   status
+  check
   cluster {
     ...ClusterMinimal
   }

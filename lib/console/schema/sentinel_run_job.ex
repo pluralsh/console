@@ -63,6 +63,17 @@ defmodule Console.Schema.SentinelRunJob do
     from(s in query, where: s.cluster_id == ^cluster_id)
   end
 
+  def for_cluster_handle(query \\ __MODULE__, handle) do
+    from(s in query,
+      join: c in assoc(s, :cluster),
+      where: c.handle == ^handle
+    )
+  end
+
+  def preloaded(query \\ __MODULE__, preloads) do
+    from(s in query, preload: ^preloads)
+  end
+
   def statistics(query \\ __MODULE__) do
     from(s in query, group_by: s.status, select: %{status: s.status, count: count(s.id, :distinct)})
   end

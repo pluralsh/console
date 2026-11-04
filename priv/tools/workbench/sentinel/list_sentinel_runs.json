@@ -1,0 +1,19 @@
+{
+    "type": "object",
+    "properties": {
+        "sentinel_id": {
+            "type": "string",
+            "description": "UUID of the sentinel whose runs should be listed"
+        },
+        "status": {
+            "type": "string",
+            "enum": ["pending", "success", "failed"],
+            "description": "Optional filter for the run status"
+        },
+        "limit": {
+            "type": "integer",
+            "description": "Maximum number of runs to return, from 1 to 25. Defaults to 10."
+        }
+    },
+    "required": ["sentinel_id"]
+}
