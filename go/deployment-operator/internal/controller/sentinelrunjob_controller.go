@@ -115,50 +115,8 @@ func (r *SentinelRunJobReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		return ctrl.Result{}, err
 	}
 
-	unstructuredJob, err := common.ToUnstructured(job)
+	status, err := r.syncJobStatus(ctx, srj, run, job)
 	if err != nil {
-		return ctrl.Result{}, err
-	}
-
-	health, err := common.GetResourceHealth(unstructuredJob)
-	if err != nil {
-		return ctrl.Result{}, err
-	}
-	srj.Status.JobRef = &corev1.LocalObjectReference{Name: job.Name}
-	status := run.Status
-	var jobError string
-	if isSentinelControlledJobTimedOut(job) {
-		if err := r.killRunJob(ctx, job); err != nil {
-			return ctrl.Result{}, err
-		}
-		srj.Status.JobStatus = string(common.HealthStatusDegraded)
-		status = console.SentinelRunJobStatusFailed
-		jobError = fmt.Sprintf("job exceeded the max lifetime of %s and was killed", sentinelControlledJobMaxLifetime)
-		fromContext.V(2).Info("sentinel run job exceeded max lifetime, failing", "name", job.Name, "namespace", job.Namespace)
-	} else if health != nil {
-		srj.Status.JobStatus = string(health.Status)
-		if health.Status == common.HealthStatusDegraded {
-			status = console.SentinelRunJobStatusFailed
-		}
-	}
-
-	if jobError == "" && !isTerminalSentinelRunStatus(run.Status) {
-		jobError = r.getJobErrorMessage(ctx, job, health)
-	}
-
-	attrs := &console.SentinelRunJobUpdateAttributes{
-		Status: &status,
-		Reference: &console.NamespacedName{
-			Name:      job.Name,
-			Namespace: job.Namespace,
-		},
-	}
-	// the harness reports its own errors, which are more precise than anything inferred from the job's pods
-	if jobError != "" && lo.FromPtr(run.Error) == "" {
-		attrs.Error = lo.ToPtr(jobError)
-	}
-
-	if err := r.ConsoleClient.UpdateSentinelRunJobStatus(srj.Spec.RunID, attrs); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -174,6 +132,64 @@ func (r *SentinelRunJobReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 
 	// pod-level failures (image pulls, scheduling, etc.) don't update the job, so poll while it's still active
 	return jitterRequeue(requeueAfter, jitter), nil
+}
+
+// syncJobStatus derives the run job's status and any runtime error from its kubernetes job and reports both to the
+// console, returning the reported status.
+func (r *SentinelRunJobReconciler) syncJobStatus(ctx context.Context, srj *v1alpha1.SentinelRunJob, run *console.SentinelRunJobFragment, job *batchv1.Job) (console.SentinelRunJobStatus, error) {
+	status, jobError, err := r.getJobStatus(ctx, srj, run, job)
+	if err != nil {
+		return status, err
+	}
+
+	attrs := &console.SentinelRunJobUpdateAttributes{
+		Status: &status,
+		Reference: &console.NamespacedName{
+			Name:      job.Name,
+			Namespace: job.Namespace,
+		},
+	}
+	// the harness reports its own errors, which are more precise than anything inferred from the job's pods
+	if jobError != "" && lo.FromPtr(run.Error) == "" {
+		attrs.Error = lo.ToPtr(jobError)
+	}
+
+	return status, r.ConsoleClient.UpdateSentinelRunJobStatus(srj.Spec.RunID, attrs)
+}
+
+func (r *SentinelRunJobReconciler) getJobStatus(ctx context.Context, srj *v1alpha1.SentinelRunJob, run *console.SentinelRunJobFragment, job *batchv1.Job) (console.SentinelRunJobStatus, string, error) {
+	unstructuredJob, err := common.ToUnstructured(job)
+	if err != nil {
+		return run.Status, "", err
+	}
+
+	health, err := common.GetResourceHealth(unstructuredJob)
+	if err != nil {
+		return run.Status, "", err
+	}
+	srj.Status.JobRef = &corev1.LocalObjectReference{Name: job.Name}
+
+	if isSentinelControlledJobTimedOut(job) {
+		if err := r.killRunJob(ctx, job); err != nil {
+			return run.Status, "", err
+		}
+		srj.Status.JobStatus = string(common.HealthStatusDegraded)
+		log.FromContext(ctx).V(2).Info("sentinel run job exceeded max lifetime, failing", "name", job.Name, "namespace", job.Namespace)
+		return console.SentinelRunJobStatusFailed, fmt.Sprintf("job exceeded the max lifetime of %s and was killed", sentinelControlledJobMaxLifetime), nil
+	}
+
+	status := run.Status
+	if health != nil {
+		srj.Status.JobStatus = string(health.Status)
+		if health.Status == common.HealthStatusDegraded {
+			status = console.SentinelRunJobStatusFailed
+		}
+	}
+
+	if isTerminalSentinelRunStatus(run.Status) {
+		return status, "", nil
+	}
+	return status, r.getJobErrorMessage(ctx, job, health), nil
 }
 
 // handleProvisioningError reports a failure to create the job back to the console. Permanent failures (e.g. an invalid

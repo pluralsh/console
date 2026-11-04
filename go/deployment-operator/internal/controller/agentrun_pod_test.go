@@ -1035,3 +1035,34 @@ func TestBuildAgentRunPod_DeployTokenIsolation(t *testing.T) {
 	}
 	assert.Equal(t, 2, found)
 }
+
+func TestBuildAgentRunPod_TemplateMetadata(t *testing.T) {
+	var manifest struct {
+		Template corev1.PodTemplateSpec `json:"template"`
+	}
+	err := yaml.Unmarshal([]byte(`
+template:
+  metadata:
+    labels:
+      team: platform
+      app.kubernetes.io/name: user-override
+    annotations:
+      example.com/owner: agents
+      kubectl.kubernetes.io/default-container: user-override
+`), &manifest)
+	assert.NoError(t, err)
+
+	run := &v1alpha1.AgentRun{ObjectMeta: metav1.ObjectMeta{Name: "run", Namespace: "ns"}}
+	runtime := &v1alpha1.AgentRuntime{Spec: v1alpha1.AgentRuntimeSpec{Template: &manifest.Template}}
+
+	pod := buildAgentRunPod(run, runtime)
+
+	assert.Equal(t, "platform", pod.Labels["team"])
+	assert.Equal(t, "agent-harness", pod.Labels["app.kubernetes.io/name"])
+	assert.Equal(t, "agent-run", pod.Labels["app.kubernetes.io/component"])
+	assert.Equal(t, "agents", pod.Annotations["example.com/owner"])
+	assert.Equal(t, defaultContainer, pod.Annotations[podDefaultContainerAnnotation])
+
+	assert.Equal(t, map[string]string{"team": "platform", "app.kubernetes.io/name": "user-override"}, runtime.Spec.Template.Labels)
+	assert.Equal(t, "user-override", runtime.Spec.Template.Annotations[podDefaultContainerAnnotation])
+}

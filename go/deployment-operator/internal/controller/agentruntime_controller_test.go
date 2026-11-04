@@ -89,6 +89,32 @@ func TestCreateAgentRunPropagatesWorkbenchMCPURL(t *testing.T) {
 }
 
 var _ = Describe("AgentRuntime Controller", func() {
+	It("persists pod template metadata", func() {
+		ctx := context.Background()
+		agentRuntime := &v1alpha1.AgentRuntime{
+			ObjectMeta: metav1.ObjectMeta{Name: "template-metadata"},
+			Spec: v1alpha1.AgentRuntimeSpec{
+				TargetNamespace: "agents",
+				Type:            console.AgentRuntimeTypeClaude,
+				Template: &corev1.PodTemplateSpec{
+					ObjectMeta: metav1.ObjectMeta{
+						Labels:      map[string]string{"team": "platform"},
+						Annotations: map[string]string{"example.com/owner": "agents"},
+					},
+					Spec: corev1.PodSpec{Containers: []corev1.Container{{Name: defaultContainer}}},
+				},
+			},
+		}
+		Expect(kClient.Create(ctx, agentRuntime)).To(Succeed())
+		DeferCleanup(func() { Expect(kClient.Delete(ctx, agentRuntime)).To(Succeed()) })
+
+		persisted := &v1alpha1.AgentRuntime{}
+		Expect(kClient.Get(ctx, client.ObjectKeyFromObject(agentRuntime), persisted)).To(Succeed())
+		Expect(persisted.Spec.Template).NotTo(BeNil())
+		Expect(persisted.Spec.Template.Labels).To(HaveKeyWithValue("team", "platform"))
+		Expect(persisted.Spec.Template.Annotations).To(HaveKeyWithValue("example.com/owner", "agents"))
+	})
+
 	Describe("createRunFromID", func() {
 		It("retries pending run fetches and fails the run with the GraphQL error", func() {
 			previousDelay := pendingAgentRunFetchDelay
