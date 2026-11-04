@@ -201,7 +201,7 @@ func (in *agentRunController) init() (Controller, error) {
 //
 //  1. Analysis persistence (if configured)
 //  2. Post-run poll (approval mode): queued user prompts or approval → PR prompt
-//  3. Babysit loop (if enabled): user prompts every promptPollInterval (5s, 30s when kicked),
+//  3. Babysit loop (if enabled): user prompts on every pushed status, or every promptPollInterval,
 //     PR/SCM checks every babysitInterval (default 60s)
 //
 // When both approval and babysit are enabled, approval follow-up creates the PR
@@ -234,7 +234,7 @@ func (in *agentRunController) babysitLoop(ctx context.Context, callback func(ctx
 	}
 
 	for {
-		agentRun, err := in.consoleClient.GetAgentRunStatus(ctx, in.agentRunID)
+		agentRun, err := in.runStatus(ctx)
 		if err != nil {
 			klog.ErrorS(err, "could not poll agent run during babysit", "id", in.agentRunID)
 			if in.waitForPoll(ctx) {

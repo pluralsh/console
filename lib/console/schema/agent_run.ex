@@ -99,6 +99,14 @@ defmodule Console.Schema.AgentRun do
     from(ar in query, where: ar.session_id == ^session_id)
   end
 
+  def cluster_id(query \\ __MODULE__, id) do
+    from(ar in query,
+      join: rt in assoc(ar, :runtime),
+      where: ar.id == ^id,
+      select: rt.cluster_id
+    )
+  end
+
   def for_status(query \\ __MODULE__, status) do
     from(ar in query, where: ar.status == ^status)
   end

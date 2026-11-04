@@ -114,6 +114,7 @@ var _ = Describe("AgentRuntime Controller", func() {
 				Once()
 
 			reconciler := &AgentRuntimeReconciler{
+				Client:        newAgentRunFakeClient(),
 				Ctx:           context.Background(),
 				ConsoleClient: consoleClient,
 			}
@@ -122,5 +123,32 @@ var _ = Describe("AgentRuntime Controller", func() {
 			Expect(err).To(MatchError(ContainSubstring("failed to get agent run after retries")))
 			Expect(err).To(MatchError(ContainSubstring(gqlErr.Error())))
 		})
+
+		It("does not fetch runs that already have a custom resource", func() {
+			runID := "run-123"
+			existing := &v1alpha1.AgentRun{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      runID,
+					Namespace: "agents",
+					Labels:    map[string]string{v1alpha1.AgentRunIDLabel: runID},
+				},
+				Spec: v1alpha1.AgentRunSpec{Mode: console.AgentRunModeAnalyze},
+			}
+
+			reconciler := &AgentRuntimeReconciler{
+				Client:        newAgentRunFakeClient(existing),
+				Ctx:           context.Background(),
+				ConsoleClient: mocks.NewClientMock(GinkgoT()),
+			}
+
+			Expect(reconciler.createRunFromID(runID)).To(Succeed())
+		})
 	})
 })
+
+func newAgentRunFakeClient(objects ...client.Object) client.Client {
+	scheme := runtime.NewScheme()
+	Expect(corev1.AddToScheme(scheme)).To(Succeed())
+	Expect(v1alpha1.AddToScheme(scheme)).To(Succeed())
+	return fake.NewClientBuilder().WithScheme(scheme).WithObjects(objects...).Build()
+}

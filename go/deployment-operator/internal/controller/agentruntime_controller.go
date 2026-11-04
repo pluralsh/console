@@ -353,6 +353,14 @@ func (r *AgentRuntimeReconciler) Publish(runID string, kick bool) {
 
 func (r *AgentRuntimeReconciler) createRunFromID(runID string) error {
 	logger := log.FromContext(r.Ctx)
+	// Console broadcasts every update of a run, not only its creation, so skip runs that already
+	// have a custom resource instead of refetching them from Console.
+	if exists, err := r.agentRunExists(r.Ctx, runID); err != nil {
+		return fmt.Errorf("failed to lookup agent run: %w", err)
+	} else if exists {
+		return nil
+	}
+
 	run, err := r.getPendingAgentRunWithRetry(r.Ctx, runID)
 	if err != nil {
 		if failErr := r.failPendingAgentRunFetch(r.Ctx, runID, err); failErr != nil {
@@ -373,6 +381,16 @@ func (r *AgentRuntimeReconciler) createRunFromID(runID string) error {
 	}
 
 	return r.createAgentRun(r.Ctx, agentRuntime, run)
+}
+
+func (r *AgentRuntimeReconciler) agentRunExists(ctx context.Context, runID string) (bool, error) {
+	runs := &v1alpha1.AgentRunList{}
+	if err := r.List(ctx, runs, client.MatchingLabels{v1alpha1.AgentRunIDLabel: runID}); err != nil {
+		return false, err
+	}
+	return lo.ContainsBy(runs.Items, func(run v1alpha1.AgentRun) bool {
+		return run.DeletionTimestamp == nil
+	}), nil
 }
 
 func (r *AgentRuntimeReconciler) getPendingAgentRunWithRetry(ctx context.Context, runID string) (*console.AgentRunPendingFragment, error) {

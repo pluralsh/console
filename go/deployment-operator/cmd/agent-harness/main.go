@@ -2,9 +2,12 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"os"
+	"time"
 
+	gqlclient "github.com/pluralsh/console/go/client"
 	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/deployment-operator/cmd/agent-harness/args"
@@ -20,21 +23,27 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
 
+// statusResyncInterval bounds how long a missed status push can go unnoticed.
+const statusResyncInterval = 5 * time.Minute
+
 func main() {
 	klog.V(log.LogLevelDefault).InfoS("starting agent harness", "version", environment.Version)
 
 	consoleClient := client.New(common.AgentConsoleExtGQLURL, "")
 	watcher := events.NewWatcher(common.AgentRunEventsURL)
+	status := events.NewStatus(watcher, statusResyncInterval, func(ctx context.Context) (*gqlclient.AgentRunStatusFragment, error) {
+		return consoleClient.GetAgentRunStatus(ctx, args.AgentRunID())
+	})
 	ctx := signals.NewCancelableContext(
 		signals.SetupSignalHandler(signals.ExitCodeTerminated),
-		agentsignals.NewConsoleSignal(consoleClient, args.AgentRunID(), watcher.Subscribe()),
+		agentsignals.NewConsoleSignal(status, args.AgentRunID()),
 	)
 	go watcher.Run(ctx)
 
 	opts := []controller.Option{
 		controller.WithAgentRun(args.AgentRunID()),
 		controller.WithConsoleClient(consoleClient),
-		controller.WithKicks(watcher.Subscribe()),
+		controller.WithStatus(status),
 		controller.WithWorkingDir(args.WorkingDir()),
 	}
 

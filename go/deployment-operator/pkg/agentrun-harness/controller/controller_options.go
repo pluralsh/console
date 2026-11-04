@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/events"
 	console "github.com/pluralsh/console/go/deployment-operator/pkg/client"
 )
 
@@ -16,10 +17,12 @@ func WithConsoleClient(client console.Client) Option {
 	}
 }
 
-// WithKicks wakes the approval and babysit loops early when Console notifies about this run.
-func WithKicks(kicks <-chan struct{}) Option {
+// WithStatus has the approval and babysit loops read the run's status from Console's pushes and
+// wake on each one.
+func WithStatus(status *events.Status) Option {
 	return func(s *agentRunController) {
-		s.kicks = kicks
+		s.status = status
+		s.kicks = status.Subscribe()
 	}
 }
 

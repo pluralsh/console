@@ -660,6 +660,17 @@ defmodule Console.GraphQl.Deployments.Agent do
     end
   end
 
+  object :public_agent_subscriptions do
+    field :agent_run_delta, :agent_run_delta do
+      arg :id, non_null(:id)
+
+      config fn args, ctx ->
+        with {:ok, run} <- Deployments.agent_run(args, ctx),
+          do: {:ok, topic: "agent_runs:#{run.id}"}
+      end
+    end
+  end
+
   object :agent_subscriptions do
     field :agent_message_delta, :agent_message_delta do
       arg :run_id, non_null(:id)

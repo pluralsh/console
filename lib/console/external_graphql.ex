@@ -132,6 +132,7 @@ defmodule Console.ExternalGraphQl do
 
   subscription do
     import_fields :public_deployment_subscriptions
+    import_fields :public_agent_subscriptions
   end
 
   defp make_labels(nil), do: []
