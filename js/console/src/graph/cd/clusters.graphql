@@ -914,40 +914,40 @@ fragment ClusterKubernetesMetrics on Cluster {
     stop: $stop
     step: $step
   ) {
-    cpu {
+    cpu @include(if: $cpu) {
       ...MetricResponse
     }
-    mem {
+    mem @include(if: $mem) {
       ...MetricResponse
     }
-    podCpu {
+    podCpu @include(if: $podCpu) {
       ...MetricResponse
     }
-    podMem {
+    podMem @include(if: $podMem) {
       ...MetricResponse
     }
-    cpuRequests {
+    cpuRequests @include(if: $cpuRequests) {
       ...MetricResponse
     }
-    memRequests {
+    memRequests @include(if: $memRequests) {
       ...MetricResponse
     }
-    cpuLimits {
+    cpuLimits @include(if: $cpuLimits) {
       ...MetricResponse
     }
-    memLimits {
+    memLimits @include(if: $memLimits) {
       ...MetricResponse
     }
-    podCpuRequests {
+    podCpuRequests @include(if: $podCpuRequests) {
       ...MetricResponse
     }
-    podMemRequests {
+    podMemRequests @include(if: $podMemRequests) {
       ...MetricResponse
     }
-    podCpuLimits {
+    podCpuLimits @include(if: $podCpuLimits) {
       ...MetricResponse
     }
-    podMemLimits {
+    podMemLimits @include(if: $podMemLimits) {
       ...MetricResponse
     }
   }
@@ -963,6 +963,18 @@ query ClusterKubernetesMetrics(
   $start: DateTime
   $stop: DateTime
   $step: String
+  $cpu: Boolean! = false
+  $mem: Boolean! = false
+  $podCpu: Boolean! = false
+  $podMem: Boolean! = false
+  $cpuRequests: Boolean! = false
+  $memRequests: Boolean! = false
+  $cpuLimits: Boolean! = false
+  $memLimits: Boolean! = false
+  $podCpuRequests: Boolean! = false
+  $podMemRequests: Boolean! = false
+  $podCpuLimits: Boolean! = false
+  $podMemLimits: Boolean! = false
 ) {
   cluster(id: $clusterId) {
     ...ClusterKubernetesMetrics

@@ -1959,40 +1959,40 @@ export const ClusterKubernetesMetricsFragmentDoc = /*#__PURE__*/ gql`
     stop: $stop
     step: $step
   ) {
-    cpu {
+    cpu @include(if: $cpu) {
       ...MetricResponse
     }
-    mem {
+    mem @include(if: $mem) {
       ...MetricResponse
     }
-    podCpu {
+    podCpu @include(if: $podCpu) {
       ...MetricResponse
     }
-    podMem {
+    podMem @include(if: $podMem) {
       ...MetricResponse
     }
-    cpuRequests {
+    cpuRequests @include(if: $cpuRequests) {
       ...MetricResponse
     }
-    memRequests {
+    memRequests @include(if: $memRequests) {
       ...MetricResponse
     }
-    cpuLimits {
+    cpuLimits @include(if: $cpuLimits) {
       ...MetricResponse
     }
-    memLimits {
+    memLimits @include(if: $memLimits) {
       ...MetricResponse
     }
-    podCpuRequests {
+    podCpuRequests @include(if: $podCpuRequests) {
       ...MetricResponse
     }
-    podMemRequests {
+    podMemRequests @include(if: $podMemRequests) {
       ...MetricResponse
     }
-    podCpuLimits {
+    podCpuLimits @include(if: $podCpuLimits) {
       ...MetricResponse
     }
-    podMemLimits {
+    podMemLimits @include(if: $podMemLimits) {
       ...MetricResponse
     }
   }
@@ -2103,40 +2103,40 @@ export const ComponentMetricsFragmentFragmentDoc = /*#__PURE__*/ gql`
     stop: $stop
     step: $step
   ) {
-    cpu {
+    cpu @include(if: $cpu) {
       ...MetricResponse
     }
-    mem {
+    mem @include(if: $mem) {
       ...MetricResponse
     }
-    podCpu {
+    podCpu @include(if: $podCpu) {
       ...MetricResponse
     }
-    podMem {
+    podMem @include(if: $podMem) {
       ...MetricResponse
     }
-    cpuRequests {
+    cpuRequests @include(if: $cpuRequests) {
       ...MetricResponse
     }
-    memRequests {
+    memRequests @include(if: $memRequests) {
       ...MetricResponse
     }
-    cpuLimits {
+    cpuLimits @include(if: $cpuLimits) {
       ...MetricResponse
     }
-    memLimits {
+    memLimits @include(if: $memLimits) {
       ...MetricResponse
     }
-    podCpuRequests {
+    podCpuRequests @include(if: $podCpuRequests) {
       ...MetricResponse
     }
-    podMemRequests {
+    podMemRequests @include(if: $podMemRequests) {
       ...MetricResponse
     }
-    podCpuLimits {
+    podCpuLimits @include(if: $podCpuLimits) {
       ...MetricResponse
     }
-    podMemLimits {
+    podMemLimits @include(if: $podMemLimits) {
       ...MetricResponse
     }
   }
@@ -4419,55 +4419,55 @@ export const PodWithEventsFragmentDoc = /*#__PURE__*/ gql`
 ${EventFragmentDoc}` as unknown as DocumentNode<Types.PodWithEventsFragment, unknown>;
 export const PodMetricsFragmentDoc = /*#__PURE__*/ gql`
     fragment PodMetrics on PodMetrics {
-  cpu {
+  cpu @include(if: $cpu) {
     ...MetricResponse
   }
-  cpuRequests {
+  cpuRequests @include(if: $cpuRequests) {
     ...MetricResponse
   }
-  cpuLimits {
+  cpuLimits @include(if: $cpuLimits) {
     ...MetricResponse
   }
-  cpuThrottling {
+  cpuThrottling @include(if: $cpuThrottling) {
     ...MetricResponse
   }
-  memory {
+  memory @include(if: $memory) {
     ...MetricResponse
   }
-  memoryRequests {
+  memoryRequests @include(if: $memoryRequests) {
     ...MetricResponse
   }
-  memoryLimits {
+  memoryLimits @include(if: $memoryLimits) {
     ...MetricResponse
   }
-  ephemeralStorage {
+  ephemeralStorage @include(if: $ephemeralStorage) {
     ...MetricResponse
   }
-  ephemeralStorageRequests {
+  ephemeralStorageRequests @include(if: $ephemeralStorageRequests) {
     ...MetricResponse
   }
-  ephemeralStorageLimits {
+  ephemeralStorageLimits @include(if: $ephemeralStorageLimits) {
     ...MetricResponse
   }
-  fsReads {
+  fsReads @include(if: $fsReads) {
     ...MetricResponse
   }
-  fsWrites {
+  fsWrites @include(if: $fsWrites) {
     ...MetricResponse
   }
-  networkReceive {
+  networkReceive @include(if: $networkReceive) {
     ...MetricResponse
   }
-  networkTransmit {
+  networkTransmit @include(if: $networkTransmit) {
     ...MetricResponse
   }
-  networkReceiveDropped {
+  networkReceiveDropped @include(if: $networkReceiveDropped) {
     ...MetricResponse
   }
-  networkTransmitDropped {
+  networkTransmitDropped @include(if: $networkTransmitDropped) {
     ...MetricResponse
   }
-  restarts {
+  restarts @include(if: $restarts) {
     ...MetricResponse
   }
 }
@@ -7995,7 +7995,7 @@ export const ClusterNetworkGraphDocument = /*#__PURE__*/ gql`
 }
     ${NetworkMeshEdgeFragmentDoc}` as unknown as DocumentNode<Types.ClusterNetworkGraphQuery, Types.ClusterNetworkGraphQueryVariables>;
 export const ClusterKubernetesMetricsDocument = /*#__PURE__*/ gql`
-    query ClusterKubernetesMetrics($clusterId: ID!, $group: String!, $version: String!, $kind: String!, $name: String!, $namespace: String!, $start: DateTime, $stop: DateTime, $step: String) {
+    query ClusterKubernetesMetrics($clusterId: ID!, $group: String!, $version: String!, $kind: String!, $name: String!, $namespace: String!, $start: DateTime, $stop: DateTime, $step: String, $cpu: Boolean! = false, $mem: Boolean! = false, $podCpu: Boolean! = false, $podMem: Boolean! = false, $cpuRequests: Boolean! = false, $memRequests: Boolean! = false, $cpuLimits: Boolean! = false, $memLimits: Boolean! = false, $podCpuRequests: Boolean! = false, $podMemRequests: Boolean! = false, $podCpuLimits: Boolean! = false, $podMemLimits: Boolean! = false) {
   cluster(id: $clusterId) {
     ...ClusterKubernetesMetrics
   }
@@ -8050,7 +8050,7 @@ export const ClusterDeltaDocument = /*#__PURE__*/ gql`
 }
     ` as unknown as DocumentNode<Types.ClusterDeltaSubscription, Types.ClusterDeltaSubscriptionVariables>;
 export const ServiceDeploymentComponentMetricsDocument = /*#__PURE__*/ gql`
-    query ServiceDeploymentComponentMetrics($id: ID, $name: String, $cluster: String, $componentId: ID!, $start: DateTime, $stop: DateTime, $step: String) {
+    query ServiceDeploymentComponentMetrics($id: ID, $name: String, $cluster: String, $componentId: ID!, $start: DateTime, $stop: DateTime, $step: String, $cpu: Boolean! = false, $mem: Boolean! = false, $podCpu: Boolean! = false, $podMem: Boolean! = false, $cpuRequests: Boolean! = false, $memRequests: Boolean! = false, $cpuLimits: Boolean! = false, $memLimits: Boolean! = false, $podCpuRequests: Boolean! = false, $podMemRequests: Boolean! = false, $podCpuLimits: Boolean! = false, $podMemLimits: Boolean! = false) {
   serviceDeployment(id: $id, name: $name, cluster: $cluster) {
     ...ComponentMetricsFragment
   }
@@ -9429,7 +9429,7 @@ export const PodLogsDocument = /*#__PURE__*/ gql`
 }
     ` as unknown as DocumentNode<Types.PodLogsQuery, Types.PodLogsQueryVariables>;
 export const PodMetricsDocument = /*#__PURE__*/ gql`
-    query PodMetrics($name: String!, $namespace: String!, $clusterId: ID, $serviceId: ID, $start: DateTime, $stop: DateTime, $step: String) {
+    query PodMetrics($name: String!, $namespace: String!, $clusterId: ID, $serviceId: ID, $start: DateTime, $stop: DateTime, $step: String, $cpu: Boolean! = false, $cpuRequests: Boolean! = false, $cpuLimits: Boolean! = false, $cpuThrottling: Boolean! = false, $memory: Boolean! = false, $memoryRequests: Boolean! = false, $memoryLimits: Boolean! = false, $ephemeralStorage: Boolean! = false, $ephemeralStorageRequests: Boolean! = false, $ephemeralStorageLimits: Boolean! = false, $fsReads: Boolean! = false, $fsWrites: Boolean! = false, $networkReceive: Boolean! = false, $networkTransmit: Boolean! = false, $networkReceiveDropped: Boolean! = false, $networkTransmitDropped: Boolean! = false, $restarts: Boolean! = false) {
   pod(
     name: $name
     namespace: $namespace
@@ -12075,13 +12075,20 @@ export const WorkbenchJobDeltaDocument = /*#__PURE__*/ gql`
       ...WorkbenchJobTiny
       error
       result {
-        ...WorkbenchJobResult
+        id
+        workingTheory
+        criticism
+        conclusion
+        topology
+        todos {
+          ...WorkbenchJobResultTodo
+        }
       }
     }
   }
 }
     ${WorkbenchJobTinyFragmentDoc}
-${WorkbenchJobResultFragmentDoc}` as unknown as DocumentNode<Types.WorkbenchJobDeltaSubscription, Types.WorkbenchJobDeltaSubscriptionVariables>;
+${WorkbenchJobResultTodoFragmentDoc}` as unknown as DocumentNode<Types.WorkbenchJobDeltaSubscription, Types.WorkbenchJobDeltaSubscriptionVariables>;
 export const WorkbenchJobActivityDeltaDocument = /*#__PURE__*/ gql`
     subscription WorkbenchJobActivityDelta($jobId: ID!) {
   workbenchJobActivityDelta(jobId: $jobId) {

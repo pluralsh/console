@@ -21360,6 +21360,18 @@ export type ClusterKubernetesMetricsQueryVariables = Exact<{
   start?: InputMaybe<Scalars['DateTime']['input']>;
   stop?: InputMaybe<Scalars['DateTime']['input']>;
   step?: InputMaybe<Scalars['String']['input']>;
+  cpu?: Scalars['Boolean']['input'];
+  mem?: Scalars['Boolean']['input'];
+  podCpu?: Scalars['Boolean']['input'];
+  podMem?: Scalars['Boolean']['input'];
+  cpuRequests?: Scalars['Boolean']['input'];
+  memRequests?: Scalars['Boolean']['input'];
+  cpuLimits?: Scalars['Boolean']['input'];
+  memLimits?: Scalars['Boolean']['input'];
+  podCpuRequests?: Scalars['Boolean']['input'];
+  podMemRequests?: Scalars['Boolean']['input'];
+  podCpuLimits?: Scalars['Boolean']['input'];
+  podMemLimits?: Scalars['Boolean']['input'];
 }>;
 
 
@@ -21427,6 +21439,18 @@ export type ServiceDeploymentComponentMetricsQueryVariables = Exact<{
   start?: InputMaybe<Scalars['DateTime']['input']>;
   stop?: InputMaybe<Scalars['DateTime']['input']>;
   step?: InputMaybe<Scalars['String']['input']>;
+  cpu?: Scalars['Boolean']['input'];
+  mem?: Scalars['Boolean']['input'];
+  podCpu?: Scalars['Boolean']['input'];
+  podMem?: Scalars['Boolean']['input'];
+  cpuRequests?: Scalars['Boolean']['input'];
+  memRequests?: Scalars['Boolean']['input'];
+  cpuLimits?: Scalars['Boolean']['input'];
+  memLimits?: Scalars['Boolean']['input'];
+  podCpuRequests?: Scalars['Boolean']['input'];
+  podMemRequests?: Scalars['Boolean']['input'];
+  podCpuLimits?: Scalars['Boolean']['input'];
+  podMemLimits?: Scalars['Boolean']['input'];
 }>;
 
 
@@ -22760,6 +22784,23 @@ export type PodMetricsQueryVariables = Exact<{
   start?: InputMaybe<Scalars['DateTime']['input']>;
   stop?: InputMaybe<Scalars['DateTime']['input']>;
   step?: InputMaybe<Scalars['String']['input']>;
+  cpu?: Scalars['Boolean']['input'];
+  cpuRequests?: Scalars['Boolean']['input'];
+  cpuLimits?: Scalars['Boolean']['input'];
+  cpuThrottling?: Scalars['Boolean']['input'];
+  memory?: Scalars['Boolean']['input'];
+  memoryRequests?: Scalars['Boolean']['input'];
+  memoryLimits?: Scalars['Boolean']['input'];
+  ephemeralStorage?: Scalars['Boolean']['input'];
+  ephemeralStorageRequests?: Scalars['Boolean']['input'];
+  ephemeralStorageLimits?: Scalars['Boolean']['input'];
+  fsReads?: Scalars['Boolean']['input'];
+  fsWrites?: Scalars['Boolean']['input'];
+  networkReceive?: Scalars['Boolean']['input'];
+  networkTransmit?: Scalars['Boolean']['input'];
+  networkReceiveDropped?: Scalars['Boolean']['input'];
+  networkTransmitDropped?: Scalars['Boolean']['input'];
+  restarts?: Scalars['Boolean']['input'];
 }>;
 
 
@@ -24812,7 +24853,7 @@ export type WorkbenchJobDeltaSubscriptionVariables = Exact<{
 }>;
 
 
-export type WorkbenchJobDeltaSubscription = { __typename?: 'RootSubscriptionType', workbenchJobDelta?: { __typename?: 'WorkbenchJobDelta', delta?: Delta | null, payload?: { __typename?: 'WorkbenchJob', error?: string | null, id: string, prompt?: string | null, status: WorkbenchJobStatus, insertedAt?: string | null, queuedPromptCount: number, result?: { __typename?: 'WorkbenchJobResult', id: string, conclusion?: string | null, workingTheory?: string | null, criticism?: string | null, topology?: string | null, todos?: Array<{ __typename?: 'WorkbenchJobResultTodo', name?: string | null, description?: string | null, done?: boolean | null } | null> | null, canvas?: Array<{ __typename?: 'WorkbenchCanvasBlock', identifier?: string | null, type?: WorkbenchCanvasBlockType | null, title?: string | null, description?: string | null, sectionId?: string | null, collapsed?: boolean | null, layout?: { __typename?: 'WorkbenchCanvasBlockLayout', x?: number | null, y?: number | null, w?: number | null, h?: number | null } | null, content?: { __typename?: 'WorkbenchCanvasBlockContent', markdown?: string | null, metrics?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, logs?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, traces?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, pie?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null, bar?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null } | null } | null> | null } | null, queuedPromptSummary: { __typename?: 'QueuedPromptSummary', readyCount: number, pendingCount: number, nextAt?: string | null }, usage?: { __typename?: 'WorkbenchJobUsage', cachedTokens?: number | null, inputTokens?: number | null, outputTokens?: number | null, totalCost?: number | null, totalTokens?: number | null } | null, modes?: { __typename?: 'WorkbenchJobModes', budget?: { __typename?: 'WorkbenchJobBudget', cost?: number | null, tokens?: number | null } | null } | null, user?: { __typename?: 'User', id: string, name: string, profile?: string | null } | null, workbench?: { __typename?: 'Workbench', id: string, name: string } | null, alert?: { __typename?: 'Alert', id: string, state: AlertState, url?: string | null } | null, issue?: { __typename?: 'Issue', id: string, status: IssueStatus, url: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', patch?: string | null, id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, evalResult?: { __typename?: 'WorkbenchEvalResult', id: string, grade?: number | null } | null, chatbotMessage?: { __typename?: 'ChatbotMessage', id: string, channel?: string | null, message?: string | null, chatConnection?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType } | null } | null } | null } | null };
+export type WorkbenchJobDeltaSubscription = { __typename?: 'RootSubscriptionType', workbenchJobDelta?: { __typename?: 'WorkbenchJobDelta', delta?: Delta | null, payload?: { __typename?: 'WorkbenchJob', error?: string | null, id: string, prompt?: string | null, status: WorkbenchJobStatus, insertedAt?: string | null, queuedPromptCount: number, result?: { __typename?: 'WorkbenchJobResult', id: string, workingTheory?: string | null, criticism?: string | null, conclusion?: string | null, topology?: string | null, todos?: Array<{ __typename?: 'WorkbenchJobResultTodo', name?: string | null, description?: string | null, done?: boolean | null } | null> | null } | null, queuedPromptSummary: { __typename?: 'QueuedPromptSummary', readyCount: number, pendingCount: number, nextAt?: string | null }, usage?: { __typename?: 'WorkbenchJobUsage', cachedTokens?: number | null, inputTokens?: number | null, outputTokens?: number | null, totalCost?: number | null, totalTokens?: number | null } | null, modes?: { __typename?: 'WorkbenchJobModes', budget?: { __typename?: 'WorkbenchJobBudget', cost?: number | null, tokens?: number | null } | null } | null, user?: { __typename?: 'User', id: string, name: string, profile?: string | null } | null, workbench?: { __typename?: 'Workbench', id: string, name: string } | null, alert?: { __typename?: 'Alert', id: string, state: AlertState, url?: string | null } | null, issue?: { __typename?: 'Issue', id: string, status: IssueStatus, url: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', patch?: string | null, id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, evalResult?: { __typename?: 'WorkbenchEvalResult', id: string, grade?: number | null } | null, chatbotMessage?: { __typename?: 'ChatbotMessage', id: string, channel?: string | null, message?: string | null, chatConnection?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType } | null } | null } | null } | null };
 
 export type WorkbenchJobActivityDeltaSubscriptionVariables = Exact<{
   jobId: Scalars['ID']['input'];
@@ -29459,6 +29500,18 @@ export type ClusterNetworkGraphQueryResult = Apollo.QueryResult<ClusterNetworkGr
  *      start: // value for 'start'
  *      stop: // value for 'stop'
  *      step: // value for 'step'
+ *      cpu: // value for 'cpu'
+ *      mem: // value for 'mem'
+ *      podCpu: // value for 'podCpu'
+ *      podMem: // value for 'podMem'
+ *      cpuRequests: // value for 'cpuRequests'
+ *      memRequests: // value for 'memRequests'
+ *      cpuLimits: // value for 'cpuLimits'
+ *      memLimits: // value for 'memLimits'
+ *      podCpuRequests: // value for 'podCpuRequests'
+ *      podMemRequests: // value for 'podMemRequests'
+ *      podCpuLimits: // value for 'podCpuLimits'
+ *      podMemLimits: // value for 'podMemLimits'
  *   },
  * });
  */
@@ -29596,6 +29649,18 @@ export type ClusterDeltaSubscriptionResult = Apollo.SubscriptionResult<ClusterDe
  *      start: // value for 'start'
  *      stop: // value for 'stop'
  *      step: // value for 'step'
+ *      cpu: // value for 'cpu'
+ *      mem: // value for 'mem'
+ *      podCpu: // value for 'podCpu'
+ *      podMem: // value for 'podMem'
+ *      cpuRequests: // value for 'cpuRequests'
+ *      memRequests: // value for 'memRequests'
+ *      cpuLimits: // value for 'cpuLimits'
+ *      memLimits: // value for 'memLimits'
+ *      podCpuRequests: // value for 'podCpuRequests'
+ *      podMemRequests: // value for 'podMemRequests'
+ *      podCpuLimits: // value for 'podCpuLimits'
+ *      podMemLimits: // value for 'podMemLimits'
  *   },
  * });
  */
@@ -34022,6 +34087,23 @@ export type PodLogsQueryResult = Apollo.QueryResult<PodLogsQuery, PodLogsQueryVa
  *      start: // value for 'start'
  *      stop: // value for 'stop'
  *      step: // value for 'step'
+ *      cpu: // value for 'cpu'
+ *      cpuRequests: // value for 'cpuRequests'
+ *      cpuLimits: // value for 'cpuLimits'
+ *      cpuThrottling: // value for 'cpuThrottling'
+ *      memory: // value for 'memory'
+ *      memoryRequests: // value for 'memoryRequests'
+ *      memoryLimits: // value for 'memoryLimits'
+ *      ephemeralStorage: // value for 'ephemeralStorage'
+ *      ephemeralStorageRequests: // value for 'ephemeralStorageRequests'
+ *      ephemeralStorageLimits: // value for 'ephemeralStorageLimits'
+ *      fsReads: // value for 'fsReads'
+ *      fsWrites: // value for 'fsWrites'
+ *      networkReceive: // value for 'networkReceive'
+ *      networkTransmit: // value for 'networkTransmit'
+ *      networkReceiveDropped: // value for 'networkReceiveDropped'
+ *      networkTransmitDropped: // value for 'networkTransmitDropped'
+ *      restarts: // value for 'restarts'
  *   },
  * });
  */

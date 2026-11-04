@@ -2096,6 +2096,7 @@ mutation DeleteIssueWebhook($id: ID!) {
   }
 }
 
+# canvas is left out: it can be hundreds of KB and arrives through WorkbenchCanvasStream instead
 subscription WorkbenchJobDelta($id: ID, $workbenchId: ID) {
   workbenchJobDelta(id: $id, workbenchId: $workbenchId) {
     delta
@@ -2103,7 +2104,14 @@ subscription WorkbenchJobDelta($id: ID, $workbenchId: ID) {
       ...WorkbenchJobTiny
       error
       result {
-        ...WorkbenchJobResult
+        id
+        workingTheory
+        criticism
+        conclusion
+        topology
+        todos {
+          ...WorkbenchJobResultTodo
+        }
       }
     }
   }

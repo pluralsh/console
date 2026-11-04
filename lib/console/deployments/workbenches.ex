@@ -1723,23 +1723,45 @@ defmodule Console.Deployments.Workbenches do
   defp notify({:ok, %WorkbenchPolicy{} = policy}, :delete, user),
     do: handle_notify(PubSub.WorkbenchPolicyDeleted, policy, actor: user)
   defp notify({:ok, %WorkbenchJobActivity{} = activity}, :create, user),
-    do: handle_notify(PubSub.WorkbenchJobActivityCreated, activity, actor: user)
+    do: slim_notify(PubSub.WorkbenchJobActivityCreated, activity, actor: user)
   defp notify(pass, _, _), do: pass
 
   def notify({:ok, %WorkbenchJobThought{} = thought}, :create),
-    do: handle_notify(PubSub.WorkbenchJobThoughtCreated, thought)
+    do: slim_notify(PubSub.WorkbenchJobThoughtCreated, thought)
   def notify({:ok, %WorkbenchJobActivity{} = activity}, :create),
-    do: handle_notify(PubSub.WorkbenchJobActivityCreated, activity)
+    do: slim_notify(PubSub.WorkbenchJobActivityCreated, activity)
   def notify({:ok, %WorkbenchEvalResult{} = result}, :create),
     do: handle_notify(PubSub.WorkbenchEvalResultCreated, result)
   def notify({:ok, %WorkbenchJob{} = job}, :update),
-    do: handle_notify(PubSub.WorkbenchJobUpdated, job)
+    do: slim_notify(PubSub.WorkbenchJobUpdated, job)
   def notify({:ok, %WorkbenchJobActivity{} = activity}, :update),
-    do: handle_notify(PubSub.WorkbenchJobActivityUpdated, activity)
+    do: slim_notify(PubSub.WorkbenchJobActivityUpdated, activity)
   def notify({:ok, %QueuedPrompt{} = prompt}, :update),
     do: handle_notify(PubSub.WorkbenchQueuedPromptUpdated, prompt)
   def notify(pass, _), do: pass
 
   defp notify_status_change({:ok, %WorkbenchJob{status: status}} = pass, status), do: pass
   defp notify_status_change(pass, _), do: notify(pass, :update)
+
+  # Events are copied into a task per consumer and sent to every node, while callers often hold the
+  # engine's fully preloaded job, so only publish what subscribers render. Callers get the original back.
+  defp slim_notify(event, resource, additional \\ %{}) do
+    with {:ok, _} <- handle_notify(event, slim(resource), additional),
+      do: {:ok, resource}
+  end
+
+  defp slim(%WorkbenchJob{} = job), do: unload(job, [:result])
+  defp slim(%WorkbenchJobActivity{} = activity),
+    do: unload(activity, [:user, :attachments, :agent_run, :agent_runs])
+  defp slim(%WorkbenchJobThought{activity: %WorkbenchJobActivity{} = activity} = thought),
+    do: %{unload(thought, [:tool, :activity]) | activity: unload(activity, [])}
+  defp slim(%WorkbenchJobThought{} = thought), do: unload(thought, [:tool])
+
+  defp unload(%schema{} = struct, keep) do
+    (schema.__schema__(:associations) -- keep)
+    |> Enum.reduce(struct, fn field, acc ->
+      %{cardinality: cardinality} = schema.__schema__(:association, field)
+      Map.put(acc, field, %Ecto.Association.NotLoaded{__field__: field, __owner__: schema, __cardinality__: cardinality})
+    end)
+  end
 end
