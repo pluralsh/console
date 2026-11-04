@@ -3,97 +3,119 @@ icon: https://artifacthub.io/image/0ca7dd5c-47ec-4d6a-87b7-2f2b74a3cca5
 git_url: https://repo1.dso.mil/big-bang/bigbang
 release_url: https://repo1.dso.mil/big-bang/bigbang/-/releases/{vsn}
 versions:
-- version: 3.35.1
+- version: 4.0.0
   kube: ['1.36']
   requirements:
-  - name: updated
-    version: 4.3.2-bb.2
+  - name: Alloy
+    version: 4.5.5-bb.0
   - name: Anchore Enterprise
-    version: 4.1.2-bb.2
+    version: 4.4.1-bb.1
   - name: Argocd
-    version: 10.2.1-bb.2
+    version: 10.11.6-bb.0
   - name: Authservice
-    version: 1.1.8-bb.3
+    version: 1.1.8-bb.6
   - name: Cert Manager
-    version: v1.20.3-bb.2
-  - name: updated
-    version: 3.5.0-bb.2
-  - name: updated
-    version: 1.44.0-bb.1
-  - name: updated
-    version: 2.12.0-bb.0
-  - name: updated
-    version: 0.58.3-bb.0
+    version: v1.21.3-bb.2
+  - name: Eck Operator
+    version: 3.5.0-bb.3
+  - name: Elasticsearch Kibana
+    version: 1.44.0-bb.5
+  - name: External Secrets Operator
+    version: 2.14.0-bb.0
+  - name: Fluentbit
+    version: 0.58.3-bb.2
   - name: Fortify
-    version: 26.2.0-bb.6
-  - name: updated
-    version: 3.23.1-bb.1
+    version: 26.2.0-bb.7
+  - name: Gatekeeper
+    version: 3.23.1-bb.4
   - name: Gateway Api
-    version: 1.6.2-bb.0
-  - name: updated
-    version: 10.4.2-bb.0
-  - name: updated
-    version: 0.91.2-bb.3
+    version: 1.6.3-bb.0
+  - name: Gitlab
+    version: 10.5.1-bb.0
+  - name: Gitlab Runner
+    version: 0.91.2-bb.4
   - name: Grafana
-    version: 13.2.4-bb.0
-  - name: updated
-    version: 1.19.2-bb.3
-  - name: updated
-    version: 0.45.0-bb.1
-  - name: updated
-    version: 1.31.1-bb.0
-  - name: updated
+    version: 14.2.0-bb.1
+  - name: Harbor
+    version: 1.19.4-bb.2
+  - name: Headlamp
+    version: 0.46.0-bb.0
+  - name: Istio Cni
+    version: 1.31.3-bb.0
+  - name: Istio Crds
+    version: 1.31.3-bb.0
+  - name: Istio Egress Gateway
     version: 0.1.5-bb.0
-  - name: updated
-    version: 7.3.2-bb.1
+  - name: Istio Gateway
+    version: 1.31.3-bb.0
+  - name: Istiod
+    version: 1.31.3-bb.0
+  - name: Keycloak
+    version: 7.3.2-bb.2
   - name: Kiali
-    version: 2.32.0-bb.0
-  - name: updated
-    version: 3.9.1-bb.1
+    version: 2.33.0-bb.1
+  - name: Kyverno
+    version: 3.9.2-bb.0
   - name: Kyverno Policies
-    version: 3.3.4-bb.87
+    version: 3.3.4-bb.91
   - name: Kyverno Reporter
-    version: 3.10.0-bb.2
-  - name: updated
-    version: 6.55.0-bb.9
+    version: 3.11.2-bb.0
+  - name: Loki
+    version: 6.55.0-bb.11
   - name: Mattermost
-    version: 11.11.0-bb.0
+    version: 12.0.1-bb.0
   - name: Mattermost Operator
-    version: 1.25.9-bb.1
-  - name: updated
-    version: 3.14.0-bb.1
-  - name: updated
-    version: 6.2.1-bb.1
-  - name: updated
-    version: 7.1.1-bb.25
+    version: 1.25.9-bb.4
+  - name: Metrics Server
+    version: 3.14.0-bb.2
+  - name: Mimir
+    version: 6.2.2-bb.0
+  - name: Minio
+    version: 7.1.1-bb.26
   - name: Minio Operator
-    version: 7.1.1-bb.11
+    version: 7.1.1-bb.13
   - name: Monitoring
-    version: 91.4.1-bb.1
+    version: 92.13.1-bb.0
   - name: Neuvector
-    version: 2.11.2-bb.0
+    version: 2.11.4-bb.0
   - name: Prometheus Operator Crds
-    version: 31.0.1-bb.0
+    version: 32.0.2-bb.1
   - name: Renovate
-    version: 46.316.0-bb.0
+    version: 46.388.0-bb.0
   - name: Sonarqube
-    version: 2026.4.1-bb.4
+    version: 2026.5.1002-bb.1
   - name: Tempo
-    version: 2.1.0-bb.3
+    version: 3.2.1-bb.1
   - name: Thanos
-    version: 17.6.0-bb.3
-  - name: updated
-    version: 0.31.0-bb.0
+    version: 17.6.0-bb.7
+  - name: Twistlock
+    version: 0.32.0-bb.1
   - name: Vault
-    version: 0.34.1-bb.2
-  - name: updated
-    version: 12.2.1-bb.0
+    version: 0.34.1-bb.7
+  - name: Velero
+    version: 12.2.1-bb.3
   - name: Wrapper
     version: 0.4.15
+  - name: Ztunnel
+    version: 1.31.3-bb.0
   incompatibilities: []
-  summary: null
-  chart_version: 3.35.1
-  images: ['registry1.dso.mil/ironbank/big-bang/p1-keycloak-plugin:3.7.32', 'registry1.dso.mil/ironbank/big-bang/base:2.1.0']
+  summary:
+    helm_changes: ''
+    chart_updates: ['Major Big Bang upgrade from 3.35.0 to 4.0.0 includes a large
+        set of component version bumps plus many newly-added packages (Alloy, ECK,
+        Elasticsearch/Kibana, External Secrets, Fluentbit, Gatekeeper, GitLab, GitLab
+        Runner, Harbor, Headlamp, full Istio stack incl. ztunnel, Keycloak, Kyverno,
+        Loki, Metrics Server, Mimir, Minio, Velero, Twistlock, etc.).', One component
+        labeled `updated` is removed in 4.0.0 (was 12.2.1-bb.0).]
+    features: ['Adds many new optional packages (logging/observability: Alloy/Fluentbit/Loki/Mimir/Tempo;
+        security/policy: Gatekeeper/Kyverno; secrets: External Secrets Operator; GitLab
+        suite; Harbor; Keycloak; Velero backups; Istio ambient components like ztunnel).']
+    breaking_changes: [Expect breaking changes due to major version bump and introduction/removal
+        of multiple packages; verify cluster prerequisites/CRDs and any renamed/removed
+        packages (notably the `updated` package is removed).]
+  chart_version: 4.0.0
+  images: ['registry1.dso.mil/ironbank/opensource/kyverno/policy-reporter/kyverno-plugin:0.6.2',
+    'registry1.dso.mil/ironbank/big-bang/p1-keycloak-plugin:3.6.10']
 - version: 3.35.0
   kube: ['1.36']
   requirements:

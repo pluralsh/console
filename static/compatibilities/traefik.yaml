@@ -4,19 +4,21 @@ release_url: https://github.com/traefik/traefik/releases/tag/v{vsn}
 helm_repository_url: https://traefik.github.io/charts
 eolApiSlug: traefik
 versions:
-- version: 3.7.16
+- version: 3.7.17
   kube: ['1.37', '1.36', '1.35', '1.34']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
     chart_updates: []
-    features: ['Security fix: includes remediation for advisory GHSA-hrpp-p4fc-wwf8
-        (upgrade recommended).', ForwardAuth now supports NTLM and Kerberos authentication
-        (also supported via ingress-nginx auth-url integration).]
+    features: ['Security fix: includes a patch for GHSA-xv5x-242w-7hf7.', 'Operational
+        controls: adds an entryPoint option to cap the number of request header values,
+        and introduces a global default for aliasHeadersStrategy.', 'Kubernetes Gateway
+        API compatibility: better handling of Gateway status conditions when multiple
+        controllers are involved.']
     breaking_changes: []
-  chart_version: 42.2.0
-  images: ['docker.io/traefik:v3.7.16']
+  chart_version: 42.3.0
+  images: ['docker.io/traefik:v3.7.17']
 - version: 3.7.4
   kube: ['1.37', '1.36', '1.35', '1.34']
   requirements: []
