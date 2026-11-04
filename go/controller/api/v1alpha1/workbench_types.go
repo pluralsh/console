@@ -228,6 +228,10 @@ type WorkbenchInfrastructureConfig struct {
 	// Kubernetes enables the Kubernetes capability.
 	// +kubebuilder:validation:Optional
 	Kubernetes *bool `json:"kubernetes,omitempty"`
+
+	// Sentinels enables tools to inspect sentinels, their runs and run job results.
+	// +kubebuilder:validation:Optional
+	Sentinels *bool `json:"sentinels,omitempty"`
 }
 
 func (c *WorkbenchInfrastructureConfig) Attributes() *console.WorkbenchInfrastructureAttributes {
@@ -240,6 +244,7 @@ func (c *WorkbenchInfrastructureConfig) Attributes() *console.WorkbenchInfrastru
 		Services:    c.Services,
 		Stacks:      c.Stacks,
 		Kubernetes:  c.Kubernetes,
+		Sentinels:   c.Sentinels,
 	}
 }
 

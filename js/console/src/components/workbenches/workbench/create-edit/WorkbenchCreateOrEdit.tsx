@@ -544,6 +544,7 @@ function modesToAttributes(
 // if WorkbenchAttributes gains a new field, this will fail to compile until the mapping is added here
 // (and the corresponding field is added to the Workbench GraphQL fragment)
 function sanitizeInitialForm({
+  id,
   name,
   description = '',
   configuration,
@@ -560,13 +561,16 @@ function sanitizeInitialForm({
   writeBindings,
 }: WorkbenchFragment): WorkbenchFormState {
   const { infrastructure, coding, observability } = configuration ?? {}
+  // new workbenches start with the core plural-native infrastructure tools on
+  const isNew = !id
   const {
     selfService,
-    kubernetes,
-    services,
-    stacks,
+    kubernetes = isNew,
+    services = isNew,
+    stacks = isNew,
     podLogs,
     vulnerabilities,
+    sentinels = isNew,
   } = infrastructure ?? {}
   const { logs, metrics } = observability ?? {}
   const { mode, repositories, enableBabysitting } = coding ?? {}
@@ -613,6 +617,7 @@ function sanitizeInitialForm({
         stacks,
         podLogs,
         vulnerabilities,
+        sentinels,
       },
       observability: { logs, metrics },
       coding: { mode, repositories, enableBabysitting },

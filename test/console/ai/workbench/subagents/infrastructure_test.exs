@@ -142,7 +142,7 @@ defmodule Console.AI.Workbench.Subagents.InfrastructureTest do
       for tool <- sentinel_tools, do: assert tool in names
       refute "plrl_run_sentinel" in names
 
-      disabled = insert(:workbench, configuration: %{infrastructure: %{services: true}})
+      disabled = insert(:workbench, configuration: %{infrastructure: %{services: true, sentinels: false}})
       job = insert(:workbench_job, workbench: disabled) |> Repo.preload([:user, workbench: :tools])
       names = Subagents.Infrastructure.tools(job, Environment.new(job, [], [])) |> Enum.map(&Tool.name/1)
 

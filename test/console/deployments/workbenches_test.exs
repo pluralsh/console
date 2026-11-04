@@ -85,6 +85,42 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert_receive {:event, %PubSub.WorkbenchCreated{item: ^workbench}}
     end
 
+    test "new workbenches default on the core infrastructure tools" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+
+      {:ok, workbench} = Workbenches.create_workbench(%{name: "defaults", project_id: project.id}, user)
+
+      %{configuration: %{infrastructure: infra}} = refetch(workbench)
+      assert infra.services
+      assert infra.stacks
+      assert infra.kubernetes
+      assert infra.sentinels
+      refute infra.self_service
+      refute infra.pod_logs
+
+      {:ok, workbench} = Workbenches.create_workbench(%{
+        name: "explicit",
+        project_id: project.id,
+        configuration: %{infrastructure: %{sentinels: false, pod_logs: true}}
+      }, user)
+
+      %{configuration: %{infrastructure: infra}} = refetch(workbench)
+      assert infra.services
+      assert infra.pod_logs
+      refute infra.sentinels
+    end
+
+    test "updates don't grant default infrastructure tools to existing workbenches" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project, configuration: nil)
+
+      {:ok, updated} = Workbenches.update_workbench(%{description: "updated"}, workbench.id, user)
+
+      refute refetch(updated).configuration
+    end
+
     test "project readers cannot create a workbench" do
       user = insert(:user)
       project = insert(:project, read_bindings: [%{user_id: user.id}])

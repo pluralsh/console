@@ -261,6 +261,19 @@ export function WorkbenchSetupStep({
                   })
                 }
               />
+              <CapabilityCheckbox
+                label="Sentinels"
+                checked={infra?.sentinels ?? false}
+                tooltip="Expose tools to list sentinels and inspect their runs, run jobs, errors and integration test output."
+                onCheckedChange={(checked) =>
+                  update((d) => {
+                    d.configuration = d.configuration ?? {}
+                    d.configuration.infrastructure =
+                      d.configuration.infrastructure ?? {}
+                    d.configuration.infrastructure.sentinels = checked
+                  })
+                }
+              />
             </Flex>
           </Flex>
         </FormField>
