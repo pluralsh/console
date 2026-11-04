@@ -1,5 +1,5 @@
 import { Breadcrumbs, Chip, Flex, ReturnIcon } from '@pluralsh/design-system'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import styled from 'styled-components'
 
 import BillingLegacyUserMessage from 'components/billing/BillingLegacyUserMessage'
@@ -14,6 +14,17 @@ import { HeaderProjectSelect } from './HeaderProjectSelect'
 import { HeaderWorkbenchSelect } from './HeaderWorkbenchSelect'
 import { HEADER_HEIGHT } from './layoutConsts'
 import { useSubheaderBackButton } from './useSubheaderBackButton'
+import { AI_AGENT_RUNS_ABS_PATH } from 'routes/aiRoutesConsts'
+import { WORKBENCHES_ABS_PATH } from 'routes/workbenchesRoutesConsts'
+
+const HIDE_WORKBENCH_SELECT_PATHS = [
+  WORKBENCHES_ABS_PATH,
+  AI_AGENT_RUNS_ABS_PATH,
+]
+
+function isUnder(pathname: string, path: string) {
+  return pathname === path || pathname.startsWith(`${path}/`)
+}
 
 const HeaderSC = styled.div(({ theme }) => ({
   backgroundColor: theme.colors['fill-accent'],
@@ -30,6 +41,10 @@ const HeaderContentSC = styled.div(({ theme }) => ({
 
 export default function Header() {
   const backButton = useSubheaderBackButton()
+  const { pathname } = useLocation()
+  const showWorkbenchSelect = !HIDE_WORKBENCH_SELECT_PATHS.some((path) =>
+    isUnder(pathname, path)
+  )
 
   return (
     <HeaderSC>
@@ -63,11 +78,11 @@ export default function Header() {
           gap="small"
           flexShrink={0}
         >
-          <CommandPaletteLauncher />
           <BillingLegacyUserMessage />
           <AwaitingReviewLauncher />
           <NotificationsLauncher />
-          <HeaderWorkbenchSelect />
+          <CommandPaletteLauncher />
+          {showWorkbenchSelect && <HeaderWorkbenchSelect />}
           <ChatbotLauncher />
         </Flex>
       </HeaderContentSC>

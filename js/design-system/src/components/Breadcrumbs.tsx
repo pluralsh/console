@@ -231,14 +231,13 @@ function CrumbList({
       ? CrumbListVariant.heightlessHidden
       : CrumbListVariant.normal
 
-  const head = maxLength > 1 ? [breadcrumbs[0]] : []
+  // keep the leading (higher-level) crumbs and the current page, folding the
+  // crumbs just before the current page into the overflow menu first
+  const tail = maxLength > 0 ? breadcrumbs.slice(-1) : []
+  const head = breadcrumbs.slice(0, Math.max(maxLength - 1, 0))
   const middle = breadcrumbs.slice(
     head.length,
-    breadcrumbs.length + head.length - maxLength
-  )
-  const tail = breadcrumbs.slice(
-    breadcrumbs.length + head.length - maxLength,
-    breadcrumbs.length
+    breadcrumbs.length - tail.length
   )
   const isDisabled = variant === CrumbListVariant.heightlessHidden
 
