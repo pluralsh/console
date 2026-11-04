@@ -88,23 +88,9 @@ export function useWorkbenchJobStreams(
       setLatestThoughtMap((prev) => ({ ...prev, [activityId]: thought }))
     },
   })
-  useWorkbenchJobActivityDeltaSubscription({
-    variables: { jobId: jobId ?? '' },
-    skip: !jobId || !activityQueryLoaded,
-    ignoreResults: true,
-    onData: ({ data: { data } }) => {
-      const activityDelta = data?.workbenchJobActivityDelta
-      const activity = activityDelta?.payload
-
-      if (activityDelta?.delta === Delta.Create) setJobLevelThinking([])
-
-      appendActivityToCache(client.cache, jobId ?? '', activity)
-
-      // action lists and summaries are separate connections the delta can't
-      // update in place
-      if (activity && isWorkbenchJobAction(activity))
-        client.refetchQueries({ include: ACTION_QUERIES })
-    },
+  useWorkbenchJobActivityDeltas(jobId, {
+    skip: !activityQueryLoaded,
+    onCreate: () => setJobLevelThinking([]),
   })
   useQueuedPromptDeltaSubscription({
     variables: { jobId: jobId ?? '' },
@@ -133,6 +119,33 @@ export function useWorkbenchJobStreams(
   })
 
   return { latestThoughtMap, jobLevelThinking }
+}
+
+// keeps the job's cached activities, and the action queries fed by them, current
+export function useWorkbenchJobActivityDeltas(
+  jobId: Nullable<string>,
+  { skip = false, onCreate }: { skip?: boolean; onCreate?: () => void } = {}
+) {
+  const client = useApolloClient()
+
+  useWorkbenchJobActivityDeltaSubscription({
+    variables: { jobId: jobId ?? '' },
+    skip: !jobId || skip,
+    ignoreResults: true,
+    onData: ({ data: { data } }) => {
+      const activityDelta = data?.workbenchJobActivityDelta
+      const activity = activityDelta?.payload
+
+      if (activityDelta?.delta === Delta.Create) onCreate?.()
+
+      appendActivityToCache(client.cache, jobId ?? '', activity)
+
+      // action lists and summaries are separate connections the delta can't
+      // update in place
+      if (activity && isWorkbenchJobAction(activity))
+        client.refetchQueries({ include: ACTION_QUERIES })
+    },
+  })
 }
 
 export const appendActivityToCache = (

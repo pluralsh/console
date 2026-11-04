@@ -113,6 +113,8 @@ type ConsoleClient interface {
 	GetServiceDeploymentComponents(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentComponents, error)
 	GetServiceDeploymentForAgent(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentForAgent, error)
 	GetServiceDeploymentByHandle(ctx context.Context, cluster string, name string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentByHandle, error)
+	GetServiceDeploymentStatusByHandle(ctx context.Context, cluster string, name string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentStatusByHandle, error)
+	GetServiceDeploymentStatus(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentStatus, error)
 	GetServiceDeploymentTinyByHandle(ctx context.Context, cluster string, name string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentTinyByHandle, error)
 	GetServiceTarball(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetServiceTarball, error)
 	ListServiceDeployment(ctx context.Context, after *string, before *string, last *int64, clusterID *string, interceptors ...clientv2.RequestInterceptor) (*ListServiceDeployment, error)
@@ -3112,6 +3114,38 @@ func (t *ServiceDeploymentFragment) GetMetadata() *ServiceDeploymentFragment_Met
 		t = &ServiceDeploymentFragment{}
 	}
 	return t.Metadata
+}
+
+type ServiceDeploymentStatusFragment struct {
+	ID         string                                        "json:\"id\" graphql:\"id\""
+	DeletedAt  *string                                       "json:\"deletedAt,omitempty\" graphql:\"deletedAt\""
+	Errors     []*ErrorFragment                              "json:\"errors,omitempty\" graphql:\"errors\""
+	Components []*ServiceDeploymentStatusFragment_Components "json:\"components,omitempty\" graphql:\"components\""
+}
+
+func (t *ServiceDeploymentStatusFragment) GetID() string {
+	if t == nil {
+		t = &ServiceDeploymentStatusFragment{}
+	}
+	return t.ID
+}
+func (t *ServiceDeploymentStatusFragment) GetDeletedAt() *string {
+	if t == nil {
+		t = &ServiceDeploymentStatusFragment{}
+	}
+	return t.DeletedAt
+}
+func (t *ServiceDeploymentStatusFragment) GetErrors() []*ErrorFragment {
+	if t == nil {
+		t = &ServiceDeploymentStatusFragment{}
+	}
+	return t.Errors
+}
+func (t *ServiceDeploymentStatusFragment) GetComponents() []*ServiceDeploymentStatusFragment_Components {
+	if t == nil {
+		t = &ServiceDeploymentStatusFragment{}
+	}
+	return t.Components
 }
 
 type ServiceDeploymentExtended struct {
@@ -9574,6 +9608,66 @@ func (t *ServiceDeploymentFragment_Metadata) GetImages() []*string {
 		t = &ServiceDeploymentFragment_Metadata{}
 	}
 	return t.Images
+}
+
+type ServiceDeploymentStatusFragment_Components struct {
+	Group     *string         "json:\"group,omitempty\" graphql:\"group\""
+	ID        string          "json:\"id\" graphql:\"id\""
+	Kind      string          "json:\"kind\" graphql:\"kind\""
+	Name      string          "json:\"name\" graphql:\"name\""
+	Namespace *string         "json:\"namespace,omitempty\" graphql:\"namespace\""
+	State     *ComponentState "json:\"state,omitempty\" graphql:\"state\""
+	Synced    bool            "json:\"synced\" graphql:\"synced\""
+	Version   *string         "json:\"version,omitempty\" graphql:\"version\""
+}
+
+func (t *ServiceDeploymentStatusFragment_Components) GetGroup() *string {
+	if t == nil {
+		t = &ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Group
+}
+func (t *ServiceDeploymentStatusFragment_Components) GetID() string {
+	if t == nil {
+		t = &ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.ID
+}
+func (t *ServiceDeploymentStatusFragment_Components) GetKind() string {
+	if t == nil {
+		t = &ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Kind
+}
+func (t *ServiceDeploymentStatusFragment_Components) GetName() string {
+	if t == nil {
+		t = &ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Name
+}
+func (t *ServiceDeploymentStatusFragment_Components) GetNamespace() *string {
+	if t == nil {
+		t = &ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Namespace
+}
+func (t *ServiceDeploymentStatusFragment_Components) GetState() *ComponentState {
+	if t == nil {
+		t = &ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.State
+}
+func (t *ServiceDeploymentStatusFragment_Components) GetSynced() bool {
+	if t == nil {
+		t = &ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Synced
+}
+func (t *ServiceDeploymentStatusFragment_Components) GetVersion() *string {
+	if t == nil {
+		t = &ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Version
 }
 
 type ServiceDeploymentExtended_Revision_RevisionFragment_Git struct {
@@ -25001,6 +25095,126 @@ func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtende
 		t = &GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_Imports{}
 	}
 	return t.Stack
+}
+
+type GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components struct {
+	Group     *string         "json:\"group,omitempty\" graphql:\"group\""
+	ID        string          "json:\"id\" graphql:\"id\""
+	Kind      string          "json:\"kind\" graphql:\"kind\""
+	Name      string          "json:\"name\" graphql:\"name\""
+	Namespace *string         "json:\"namespace,omitempty\" graphql:\"namespace\""
+	State     *ComponentState "json:\"state,omitempty\" graphql:\"state\""
+	Synced    bool            "json:\"synced\" graphql:\"synced\""
+	Version   *string         "json:\"version,omitempty\" graphql:\"version\""
+}
+
+func (t *GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetGroup() *string {
+	if t == nil {
+		t = &GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Group
+}
+func (t *GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetID() string {
+	if t == nil {
+		t = &GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.ID
+}
+func (t *GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetKind() string {
+	if t == nil {
+		t = &GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Kind
+}
+func (t *GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetName() string {
+	if t == nil {
+		t = &GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Name
+}
+func (t *GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetNamespace() *string {
+	if t == nil {
+		t = &GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Namespace
+}
+func (t *GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetState() *ComponentState {
+	if t == nil {
+		t = &GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.State
+}
+func (t *GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetSynced() bool {
+	if t == nil {
+		t = &GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Synced
+}
+func (t *GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetVersion() *string {
+	if t == nil {
+		t = &GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Version
+}
+
+type GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components struct {
+	Group     *string         "json:\"group,omitempty\" graphql:\"group\""
+	ID        string          "json:\"id\" graphql:\"id\""
+	Kind      string          "json:\"kind\" graphql:\"kind\""
+	Name      string          "json:\"name\" graphql:\"name\""
+	Namespace *string         "json:\"namespace,omitempty\" graphql:\"namespace\""
+	State     *ComponentState "json:\"state,omitempty\" graphql:\"state\""
+	Synced    bool            "json:\"synced\" graphql:\"synced\""
+	Version   *string         "json:\"version,omitempty\" graphql:\"version\""
+}
+
+func (t *GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetGroup() *string {
+	if t == nil {
+		t = &GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Group
+}
+func (t *GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetID() string {
+	if t == nil {
+		t = &GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.ID
+}
+func (t *GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetKind() string {
+	if t == nil {
+		t = &GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Kind
+}
+func (t *GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetName() string {
+	if t == nil {
+		t = &GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Name
+}
+func (t *GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetNamespace() *string {
+	if t == nil {
+		t = &GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Namespace
+}
+func (t *GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetState() *ComponentState {
+	if t == nil {
+		t = &GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.State
+}
+func (t *GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetSynced() bool {
+	if t == nil {
+		t = &GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Synced
+}
+func (t *GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetVersion() *string {
+	if t == nil {
+		t = &GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Version
 }
 
 type GetServiceDeploymentTinyByHandle_ServiceDeployment struct {
@@ -48112,6 +48326,28 @@ func (t *GetServiceDeploymentByHandle) GetServiceDeployment() *ServiceDeployment
 	return t.ServiceDeployment
 }
 
+type GetServiceDeploymentStatusByHandle struct {
+	ServiceDeployment *ServiceDeploymentStatusFragment "json:\"serviceDeployment,omitempty\" graphql:\"serviceDeployment\""
+}
+
+func (t *GetServiceDeploymentStatusByHandle) GetServiceDeployment() *ServiceDeploymentStatusFragment {
+	if t == nil {
+		t = &GetServiceDeploymentStatusByHandle{}
+	}
+	return t.ServiceDeployment
+}
+
+type GetServiceDeploymentStatus struct {
+	ServiceDeployment *ServiceDeploymentStatusFragment "json:\"serviceDeployment,omitempty\" graphql:\"serviceDeployment\""
+}
+
+func (t *GetServiceDeploymentStatus) GetServiceDeployment() *ServiceDeploymentStatusFragment {
+	if t == nil {
+		t = &GetServiceDeploymentStatus{}
+	}
+	return t.ServiceDeployment
+}
+
 type GetServiceDeploymentTinyByHandle struct {
 	ServiceDeployment *GetServiceDeploymentTinyByHandle_ServiceDeployment "json:\"serviceDeployment,omitempty\" graphql:\"serviceDeployment\""
 }
@@ -59456,6 +59692,97 @@ func (c *Client) GetServiceDeploymentByHandle(ctx context.Context, cluster strin
 
 	var res GetServiceDeploymentByHandle
 	if err := c.Client.Post(ctx, "GetServiceDeploymentByHandle", GetServiceDeploymentByHandleDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetServiceDeploymentStatusByHandleDocument = `query GetServiceDeploymentStatusByHandle ($cluster: String!, $name: String!) {
+	serviceDeployment(cluster: $cluster, name: $name) {
+		... ServiceDeploymentStatusFragment
+	}
+}
+fragment ServiceDeploymentStatusFragment on ServiceDeployment {
+	id
+	deletedAt
+	errors {
+		... ErrorFragment
+	}
+	components {
+		id
+		name
+		group
+		kind
+		namespace
+		state
+		synced
+		version
+	}
+}
+fragment ErrorFragment on ServiceError {
+	source
+	message
+}
+`
+
+func (c *Client) GetServiceDeploymentStatusByHandle(ctx context.Context, cluster string, name string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentStatusByHandle, error) {
+	vars := map[string]any{
+		"cluster": cluster,
+		"name":    name,
+	}
+
+	var res GetServiceDeploymentStatusByHandle
+	if err := c.Client.Post(ctx, "GetServiceDeploymentStatusByHandle", GetServiceDeploymentStatusByHandleDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetServiceDeploymentStatusDocument = `query GetServiceDeploymentStatus ($id: ID!) {
+	serviceDeployment(id: $id) {
+		... ServiceDeploymentStatusFragment
+	}
+}
+fragment ServiceDeploymentStatusFragment on ServiceDeployment {
+	id
+	deletedAt
+	errors {
+		... ErrorFragment
+	}
+	components {
+		id
+		name
+		group
+		kind
+		namespace
+		state
+		synced
+		version
+	}
+}
+fragment ErrorFragment on ServiceError {
+	source
+	message
+}
+`
+
+func (c *Client) GetServiceDeploymentStatus(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentStatus, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetServiceDeploymentStatus
+	if err := c.Client.Post(ctx, "GetServiceDeploymentStatus", GetServiceDeploymentStatusDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -76935,6 +77262,8 @@ var DocumentOperationNames = map[string]string{
 	GetServiceDeploymentComponentsDocument:            "GetServiceDeploymentComponents",
 	GetServiceDeploymentForAgentDocument:              "GetServiceDeploymentForAgent",
 	GetServiceDeploymentByHandleDocument:              "GetServiceDeploymentByHandle",
+	GetServiceDeploymentStatusByHandleDocument:        "GetServiceDeploymentStatusByHandle",
+	GetServiceDeploymentStatusDocument:                "GetServiceDeploymentStatus",
 	GetServiceDeploymentTinyByHandleDocument:          "GetServiceDeploymentTinyByHandle",
 	GetServiceTarballDocument:                         "GetServiceTarball",
 	ListServiceDeploymentDocument:                     "ListServiceDeployment",

@@ -34,7 +34,6 @@ import {
   WorkbenchToolIcon,
 } from 'components/workbenches/tools/workbenchToolsUtils'
 import pluralize from 'pluralize'
-import { POLL_INTERVAL } from 'components/cluster/constants'
 import { AILoadingText } from 'components/utils/AILoadingText'
 import { GqlError } from 'components/utils/Alert'
 import { prettifyPrompt } from 'components/utils/contentEditableChips'
@@ -265,7 +264,12 @@ export function WorkbenchJobActivity({
             activityId={id}
             skip={!isOpen}
           />
-          {isRunning && <AILoadingText activityId={id} />}
+          {isRunning && (
+            <AILoadingText
+              activityId={id}
+              refreshKey={latestThought?.id}
+            />
+          )}
         </CollapseWhenEmptySC>
         <WorkbenchJobActivityResult
           activity={activity}
@@ -548,11 +552,11 @@ function WorkbenchJobActivityThoughts({
   const { spacing } = useTheme()
   const [isExpanded, setIsExpanded] = useState(false)
 
+  // the job's thought stream appends to this activity's cached thoughts
   const { data, loading, error } = useWorkbenchJobActivityQuery({
     variables: { id: activityId },
     fetchPolicy: 'cache-and-network',
     skip,
-    pollInterval: POLL_INTERVAL,
   })
   const isLoading = !data && loading
   const activity = data?.workbenchJobActivity

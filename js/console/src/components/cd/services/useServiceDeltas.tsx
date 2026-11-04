@@ -9,6 +9,18 @@ import { useDebouncedRefetch } from 'components/hooks/useDebouncedRefetch'
 
 // polling is only a fallback for missed socket events once a view subscribes
 export const SERVICE_DELTA_FALLBACK_POLL_INTERVAL = 30_000
+// a single service's details pull every component, so its fallback is slower
+export const SERVICE_DETAILS_FALLBACK_POLL_INTERVAL = 60_000
+
+// components aren't carried by the delta, but state changes to them move the
+// service's readiness rollup; anything else is left to the fallback poll
+export const componentsChanged = (
+  prev: Nullable<{ status?: unknown; componentStatus?: Nullable<string> }>,
+  next: ServiceDeltaPayload
+) =>
+  !prev ||
+  prev.status !== next.status ||
+  prev.componentStatus !== next.componentStatus
 
 // root fields holding service connections, which deleted services are pruned from
 const SERVICE_LIST_FIELDS = ['serviceDeployments', 'serviceTree']
@@ -28,8 +40,9 @@ type ServiceConnection = { edges?: Nullable<{ node?: Reference }[]> }
  * Results are deliberately not written to the cache directly, since an
  * unscoped subscription would otherwise pull in every service it hears about.
  *
- * `refetch` is called (debounced) on any delta, for views showing fields the
- * delta doesn't carry, like components. `refetchOnCreate` is only
+ * `refetch` is called (debounced) for views showing fields the delta doesn't
+ * carry, like components, on every delta or only those passing `refetchIf`,
+ * which sees the payload before it's merged. `refetchOnCreate` is only
  * called for creates, for filtered or paginated lists that can't place a new
  * service themselves.
  */
@@ -37,12 +50,14 @@ export function useServiceDeltas({
   id,
   clusterId,
   refetch,
+  refetchIf,
   refetchOnCreate,
   skip,
 }: {
   id?: Nullable<string>
   clusterId?: Nullable<string>
   refetch?: Nullable<() => unknown>
+  refetchIf?: (service: ServiceDeltaPayload) => boolean
   refetchOnCreate?: Nullable<() => unknown>
   skip?: boolean
 } = {}) {
@@ -60,10 +75,11 @@ export function useServiceDeltas({
       const service = event?.payload
       if (!event?.delta || !service?.id) return
 
+      const shouldRefetch = refetchIf?.(service) ?? true
       if (event.delta === Delta.Delete) removeService(cache, service.id)
       else mergeService(cache, service)
 
-      onDelta()
+      if (shouldRefetch) onDelta()
       if (event.delta === Delta.Create) onCreate()
     },
   })

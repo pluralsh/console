@@ -240,7 +240,7 @@ func (r *ServiceDeploymentReconciler) getClusterID(ctx context.Context, service 
 	return cluster.Status.GetID(), nil
 }
 
-func updateStatus(r *v1alpha1.ServiceDeployment, existingService *console.ServiceDeploymentExtended, sha string) {
+func updateStatus(r *v1alpha1.ServiceDeployment, existingService *console.ServiceDeploymentStatusFragment, sha string) {
 	r.Status.ID = &existingService.ID
 	r.Status.SHA = &sha
 	if existingService.Errors != nil {

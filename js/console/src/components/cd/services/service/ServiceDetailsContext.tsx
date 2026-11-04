@@ -12,6 +12,8 @@ export type ServiceDetailsContextType = {
   refetch: () => Promise<ApolloQueryResult<ServiceDeploymentQuery>>
   isRefetching: boolean
   isLoading: boolean
+  // bumped whenever a delta suggests the service's components changed
+  componentsVersion: number
   setSidenavContent: (content: ReactNode | null) => void
 }
 

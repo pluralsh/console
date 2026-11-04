@@ -11,7 +11,6 @@ import {
   SubTab,
   TabList,
 } from '@pluralsh/design-system'
-import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { WorkbenchFileContext } from 'components/ai/chatbot/PlrlFileChip'
 import {
   PanelHeaderSC,
@@ -61,10 +60,8 @@ import {
 import { hasWorkbenchJobResultContent } from './workbenchJobResultUtils'
 import { WorkbenchJobUsage } from './WorkbenchJobUsage'
 import { useWorkbenchJobActionSummary } from './useWorkbenchJobActionSummary'
-import {
-  usePollWhileRunning,
-  WORKBENCH_JOB_FALLBACK_POLL_INTERVAL,
-} from './usePollWhileRunning'
+import { usePollWhileRunning } from './usePollWhileRunning'
+import { useWorkbenchJobActivityDeltas } from './useWorkbenchJobStreams'
 
 const SIDE_PANEL_TYPE: SidePanel = 'workbench-job'
 type JobPanelTab =
@@ -202,22 +199,17 @@ export function useWorkbenchJobTabsData(
     fetchPolicy: inDetailsView ? 'cache-and-network' : 'cache-first',
   })
   const activitiesData = activitiesQuery.data
-  // only the details view polls activities, the job page's activity list
-  // already keeps them current
-  usePollWhileRunning(activitiesQuery, inDetailsView && running, POLL_INTERVAL)
+  // the job page's activity list already follows activities, so only the
+  // details view subscribes here; either way polling is only a fallback
+  useWorkbenchJobActivityDeltas(jobId, { skip: !inDetailsView || !running })
+  usePollWhileRunning(activitiesQuery, inDetailsView && running)
 
-  // the job page refetches actions on action activity deltas, so its poll is
-  // only a fallback; the details view has no such subscription
+  // actions are refetched on action activity deltas
   const {
     hasActions,
     hasActionsAwaitingApproval,
     isLoading: areActionsLoading,
-  } = useWorkbenchJobActionSummary(jobId, {
-    running,
-    interval: inDetailsView
-      ? POLL_INTERVAL
-      : WORKBENCH_JOB_FALLBACK_POLL_INTERVAL,
-  })
+  } = useWorkbenchJobActionSummary(jobId, { running })
 
   const activities = useMemo(
     () =>

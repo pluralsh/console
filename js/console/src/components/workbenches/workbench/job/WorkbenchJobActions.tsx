@@ -1,6 +1,5 @@
 import { Flex } from '@pluralsh/design-system'
 import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
-import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { GqlError } from 'components/utils/Alert'
 import { TableSkeleton } from 'components/utils/SkeletonLoaders'
 import { CaptionP } from 'components/utils/typography/Text'
@@ -35,8 +34,8 @@ export function WorkbenchJobActions({
     fetchPolicy: 'cache-and-network',
   })
   const { data, loading, error } = query
-  // approvals are waited on while the job runs, so keep this responsive then
-  usePollWhileRunning(query, running, POLL_INTERVAL)
+  // refetched on action activity deltas, so polling is only a fallback
+  usePollWhileRunning(query, running)
 
   const actions = useMemo(
     () =>

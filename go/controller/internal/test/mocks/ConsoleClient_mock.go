@@ -7084,23 +7084,23 @@ func (_c *ConsoleClientMock_GetSentinelRun_Call) RunAndReturn(run func(context.C
 }
 
 // GetService provides a mock function with given fields: clusterID, serviceName
-func (_m *ConsoleClientMock) GetService(clusterID string, serviceName string) (*client.ServiceDeploymentExtended, error) {
+func (_m *ConsoleClientMock) GetService(clusterID string, serviceName string) (*client.ServiceDeploymentStatusFragment, error) {
 	ret := _m.Called(clusterID, serviceName)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetService")
 	}
 
-	var r0 *client.ServiceDeploymentExtended
+	var r0 *client.ServiceDeploymentStatusFragment
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string, string) (*client.ServiceDeploymentExtended, error)); ok {
+	if rf, ok := ret.Get(0).(func(string, string) (*client.ServiceDeploymentStatusFragment, error)); ok {
 		return rf(clusterID, serviceName)
 	}
-	if rf, ok := ret.Get(0).(func(string, string) *client.ServiceDeploymentExtended); ok {
+	if rf, ok := ret.Get(0).(func(string, string) *client.ServiceDeploymentStatusFragment); ok {
 		r0 = rf(clusterID, serviceName)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*client.ServiceDeploymentExtended)
+			r0 = ret.Get(0).(*client.ServiceDeploymentStatusFragment)
 		}
 	}
 
@@ -7132,12 +7132,12 @@ func (_c *ConsoleClientMock_GetService_Call) Run(run func(clusterID string, serv
 	return _c
 }
 
-func (_c *ConsoleClientMock_GetService_Call) Return(_a0 *client.ServiceDeploymentExtended, _a1 error) *ConsoleClientMock_GetService_Call {
+func (_c *ConsoleClientMock_GetService_Call) Return(_a0 *client.ServiceDeploymentStatusFragment, _a1 error) *ConsoleClientMock_GetService_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *ConsoleClientMock_GetService_Call) RunAndReturn(run func(string, string) (*client.ServiceDeploymentExtended, error)) *ConsoleClientMock_GetService_Call {
+func (_c *ConsoleClientMock_GetService_Call) RunAndReturn(run func(string, string) (*client.ServiceDeploymentStatusFragment, error)) *ConsoleClientMock_GetService_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -7202,23 +7202,23 @@ func (_c *ConsoleClientMock_GetServiceAccount_Call) RunAndReturn(run func(contex
 }
 
 // GetServiceById provides a mock function with given fields: id
-func (_m *ConsoleClientMock) GetServiceById(id string) (*client.ServiceDeploymentExtended, error) {
+func (_m *ConsoleClientMock) GetServiceById(id string) (*client.ServiceDeploymentStatusFragment, error) {
 	ret := _m.Called(id)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetServiceById")
 	}
 
-	var r0 *client.ServiceDeploymentExtended
+	var r0 *client.ServiceDeploymentStatusFragment
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string) (*client.ServiceDeploymentExtended, error)); ok {
+	if rf, ok := ret.Get(0).(func(string) (*client.ServiceDeploymentStatusFragment, error)); ok {
 		return rf(id)
 	}
-	if rf, ok := ret.Get(0).(func(string) *client.ServiceDeploymentExtended); ok {
+	if rf, ok := ret.Get(0).(func(string) *client.ServiceDeploymentStatusFragment); ok {
 		r0 = rf(id)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*client.ServiceDeploymentExtended)
+			r0 = ret.Get(0).(*client.ServiceDeploymentStatusFragment)
 		}
 	}
 
@@ -7249,12 +7249,12 @@ func (_c *ConsoleClientMock_GetServiceById_Call) Run(run func(id string)) *Conso
 	return _c
 }
 
-func (_c *ConsoleClientMock_GetServiceById_Call) Return(_a0 *client.ServiceDeploymentExtended, _a1 error) *ConsoleClientMock_GetServiceById_Call {
+func (_c *ConsoleClientMock_GetServiceById_Call) Return(_a0 *client.ServiceDeploymentStatusFragment, _a1 error) *ConsoleClientMock_GetServiceById_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *ConsoleClientMock_GetServiceById_Call) RunAndReturn(run func(string) (*client.ServiceDeploymentExtended, error)) *ConsoleClientMock_GetServiceById_Call {
+func (_c *ConsoleClientMock_GetServiceById_Call) RunAndReturn(run func(string) (*client.ServiceDeploymentStatusFragment, error)) *ConsoleClientMock_GetServiceById_Call {
 	_c.Call.Return(run)
 	return _c
 }
