@@ -59,8 +59,19 @@ defmodule Console.Schema.DeploymentSettings do
       |> cast(attrs, ~w(enabled type token_url client_id client_secret private_key key_id audience resource scopes)a)
       |> trim_changes(~w(client_secret private_key)a)
       |> validate_required([:type, :token_url, :client_id])
+      |> validate_change(:token_url, &validate_token_url/2)
       |> validate_credentials()
       |> validate_private_key(:private_key)
+    end
+
+    defp validate_token_url(:token_url, url) do
+      case URI.new(url) do
+        {:ok, %URI{scheme: scheme, host: host, path: path}}
+            when scheme in ~w(http https) and is_binary(host) and host != "" and path not in [nil, "", "/"] -> []
+        {:ok, %URI{scheme: scheme, host: host}} when scheme in ~w(http https) and is_binary(host) and host != "" ->
+          [token_url: "must include the token endpoint path, eg https://login.example.com/oauth2/token"]
+        _ -> [token_url: "must be an absolute http(s) url"]
+      end
     end
 
     defp validate_credentials(changeset) do

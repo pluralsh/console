@@ -89,6 +89,52 @@ defmodule Console.AI.Provider.TokenExchangeTest do
                TokenExchange.exchange(@token_url, @client_id, @client_secret)
     end
 
+    test "posts to a token url without a path" do
+      url = "https://example.com"
+      stub(Console.Cache, :get, fn _ -> nil end)
+      stub(Console.Cache, :put, fn _, _, _ -> :ok end)
+
+      Tesla.Mock.mock(fn env ->
+        assert env.url == url
+
+        %Tesla.Env{
+          status: 200,
+          headers: [{"content-type", "application/json"}],
+          body: Jason.encode!(%{"access_token" => "root-token", "token_type" => "Bearer"})
+        }
+      end)
+
+      assert {:ok, %OAuth2.AccessToken{access_token: "root-token"}} =
+               TokenExchange.exchange(url, @client_id, @client_secret)
+    end
+
+    test "keeps the query string of the token url" do
+      url = @token_url <> "?tenant=abc"
+      stub(Console.Cache, :get, fn _ -> nil end)
+      stub(Console.Cache, :put, fn _, _, _ -> :ok end)
+
+      Tesla.Mock.mock(fn env ->
+        assert env.url == url
+
+        %Tesla.Env{
+          status: 200,
+          headers: [{"content-type", "application/json"}],
+          body: Jason.encode!(%{"access_token" => "query-token", "token_type" => "Bearer"})
+        }
+      end)
+
+      assert {:ok, %OAuth2.AccessToken{access_token: "query-token"}} =
+               TokenExchange.exchange(url, @client_id, @client_secret)
+    end
+
+    test "rejects token urls that aren't absolute http(s) urls" do
+      stub(Console.Cache, :get, fn _ -> nil end)
+      Tesla.Mock.mock(fn _ -> flunk("token endpoint should not be called for an invalid url") end)
+
+      assert {:error, "invalid token url" <> _} =
+               TokenExchange.exchange("example.com/oauth2/token", @client_id, @client_secret)
+    end
+
     test "returns a cached bearer token without issuing an HTTP request" do
       cached = %OAuth2.AccessToken{
         access_token: "from-cache",
@@ -365,6 +411,20 @@ defmodule Console.AI.Provider.TokenExchangeTest do
 
       assert secret_changeset.valid?
       assert assertion_changeset.valid?
+    end
+
+    test "requires an absolute token url with an endpoint path" do
+      for url <- ["https://example.com", "https://example.com/", "example.com/oauth2/token", "ftp://example.com/token"] do
+        changeset =
+          OauthToken.changeset(%OauthToken{}, %{
+            token_url: url,
+            client_id: @client_id,
+            client_secret: @client_secret
+          })
+
+        refute changeset.valid?, "expected #{url} to be rejected"
+        assert changeset.errors[:token_url]
+      end
     end
   end
 

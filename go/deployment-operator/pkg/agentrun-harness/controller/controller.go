@@ -540,6 +540,7 @@ func buildBabysitPrompt(branch, _ string, prs []toolv1.EnrichedPR, lastChecked t
 		}
 		if len(pending) > 0 {
 			sb.WriteString("### CI checks still running\n\n")
+			sb.WriteString("Do not wait for or poll these checks. The harness keeps monitoring the PR and will reprompt you if they fail.\n\n")
 			for _, ci := range pending {
 				_, _ = fmt.Fprintf(&sb, "- **%s**: %s\n", ci.Name, ci.Status)
 			}
@@ -549,6 +550,9 @@ func buildBabysitPrompt(branch, _ string, prs []toolv1.EnrichedPR, lastChecked t
 			sb.WriteString("All CI checks passed.\n\n")
 		}
 	}
+	sb.WriteString("Handle only the activity above, then end this turn. PR monitoring runs outside your session: " +
+		"the harness polls CI and comments itself and starts a new turn when there is more to act on, " +
+		"so do not loop, sleep, or repeatedly call `getPRState` waiting for changes.\n")
 	return sb.String()
 }
 
