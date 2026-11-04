@@ -6074,12 +6074,6 @@ export const WorkbenchJobProgressFragmentDoc = /*#__PURE__*/ gql`
   arguments
 }
     ` as unknown as DocumentNode<Types.WorkbenchJobProgressFragment, unknown>;
-export const WorkbenchTextStreamFragmentDoc = /*#__PURE__*/ gql`
-    fragment WorkbenchTextStream on WorkbenchTextStream {
-  activityId
-  text
-}
-    ` as unknown as DocumentNode<Types.WorkbenchTextStreamFragment, unknown>;
 export const WorkbenchCronFragmentDoc = /*#__PURE__*/ gql`
     fragment WorkbenchCron on WorkbenchCron {
   id
@@ -12115,13 +12109,6 @@ export const WorkbenchJobProgressDocument = /*#__PURE__*/ gql`
   }
 }
     ${WorkbenchJobProgressFragmentDoc}` as unknown as DocumentNode<Types.WorkbenchJobProgressSubscription, Types.WorkbenchJobProgressSubscriptionVariables>;
-export const WorkbenchTextStreamDocument = /*#__PURE__*/ gql`
-    subscription WorkbenchTextStream($jobId: ID!) {
-  workbenchTextStream(jobId: $jobId) {
-    ...WorkbenchTextStream
-  }
-}
-    ${WorkbenchTextStreamFragmentDoc}` as unknown as DocumentNode<Types.WorkbenchTextStreamSubscription, Types.WorkbenchTextStreamSubscriptionVariables>;
 export const WorkbenchCanvasStreamDocument = /*#__PURE__*/ gql`
     subscription WorkbenchCanvasStream($jobId: ID!, $activityId: ID) {
   workbenchCanvasStream(jobId: $jobId, activityId: $activityId) {

@@ -6,7 +6,6 @@ import {
   useWorkbenchJobDeltaSubscription,
   useWorkbenchJobProgressSubscription,
   useWorkbenchJobThoughtDeltaSubscription,
-  useWorkbenchTextStreamSubscription,
   WorkbenchCanvasBlockFragment,
   WorkbenchJobActivitiesQuery,
   WorkbenchJobActivityFragment,
@@ -27,10 +26,6 @@ import {
 } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import { isJobRunning } from './WorkbenchJobActivity'
-import { produce } from 'immer'
-
-// keyed by activity id, 'none' value puts it at the top level of the job
-type WorkbenchJobTextStreamMap = Record<string, string>
 
 // keyed by activity id
 type WorkbenchJobLatestThoughtMap = Record<string, WorkbenchJobThoughtFragment>
@@ -45,9 +40,6 @@ export function useWorkbenchJobStreams(
   activityQueryLoaded: boolean
 ) {
   const client = useApolloClient()
-  const [textStreamMap, setTextStreamMap] = useState<WorkbenchJobTextStreamMap>(
-    {}
-  )
   const [latestThoughtMap, setLatestThoughtMap] =
     useState<WorkbenchJobLatestThoughtMap>({})
   const [jobLevelThinking, setJobLevelThinking] = useState<
@@ -78,20 +70,6 @@ export function useWorkbenchJobStreams(
     },
   })
 
-  useWorkbenchTextStreamSubscription({
-    variables: { jobId: jobId ?? '' },
-    skip: !jobId,
-    ignoreResults: true,
-    onData: ({ data: { data } }) => {
-      if (!data?.workbenchTextStream) return
-      setTextStreamMap((prev) =>
-        produce(prev, (d) => {
-          d[data.workbenchTextStream?.activityId || 'none'] +=
-            data.workbenchTextStream?.text ?? ''
-        })
-      )
-    },
-  })
   useWorkbenchJobThoughtDeltaSubscription({
     variables: { jobId: jobId ?? '' },
     skip: !jobId,
@@ -131,7 +109,7 @@ export function useWorkbenchJobStreams(
     },
   })
 
-  return { textStreamMap, latestThoughtMap, jobLevelThinking }
+  return { latestThoughtMap, jobLevelThinking }
 }
 
 export const appendActivityToCache = (

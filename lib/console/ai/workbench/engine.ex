@@ -310,7 +310,6 @@ defmodule Console.AI.Workbench.Engine do
     Console.AI.Provider.external_errors()
     Console.AI.Tool.context(runtime: job.workbench.agent_runtime, user: job.user, job: job)
     with {:ok, activity} <- Workbenches.create_job_activity(%{type: type, prompt: prompt, tool_call: tool_attrs(call)}, job) do
-      # stream_callbacks(activity)
       Console.safely(fn ->
         module.run(activity, job, environment)
       end, &crash_fallback/1)
@@ -327,7 +326,6 @@ defmodule Console.AI.Workbench.Engine do
     Console.AI.Provider.external_errors()
 
     with {:ok, activity} <- Workbenches.create_job_activity(%{type: :skill, prompt: prompt, tool_call: tool_attrs(call)}, job) do
-      # stream_callbacks(activity)
       Console.safely(fn ->
         SA.Skill.run(activity, job, environment)
       end, &crash_fallback/1)

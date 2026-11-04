@@ -593,11 +593,6 @@ fragment WorkbenchJobProgress on WorkbenchJobProgress {
   arguments
 }
 
-fragment WorkbenchTextStream on WorkbenchTextStream {
-  activityId
-  text
-}
-
 fragment WorkbenchCron on WorkbenchCron {
   id
   crontab
@@ -2135,12 +2130,6 @@ subscription WorkbenchJobThoughtDelta($jobId: ID!) {
 subscription WorkbenchJobProgress($jobId: ID!) {
   workbenchJobProgress(jobId: $jobId) {
     ...WorkbenchJobProgress
-  }
-}
-
-subscription WorkbenchTextStream($jobId: ID!) {
-  workbenchTextStream(jobId: $jobId) {
-    ...WorkbenchTextStream
   }
 }
 

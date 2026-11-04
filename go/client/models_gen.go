@@ -4728,12 +4728,12 @@ type InfrastructureStack struct {
 	StackPolicies   *StackPolicyConnection    `json:"stackPolicies,omitempty"`
 	// key/value tags to filter stacks
 	Tags []*Tag `json:"tags,omitempty"`
-	// Infracost resource rows attached to this stack (newest first)
-	InfracostResources []*StackInfracostResource `json:"infracostResources,omitempty"`
-	ReadBindings       []*PolicyBinding          `json:"readBindings,omitempty"`
-	WriteBindings      []*PolicyBinding          `json:"writeBindings,omitempty"`
-	InsertedAt         *string                   `json:"insertedAt,omitempty"`
-	UpdatedAt          *string                   `json:"updatedAt,omitempty"`
+	// Infracost resource rows attached to this stack (newest first), only fetchable for a single stack
+	InfracostResources *StackInfracostResourceConnection `json:"infracostResources,omitempty"`
+	ReadBindings       []*PolicyBinding                  `json:"readBindings,omitempty"`
+	WriteBindings      []*PolicyBinding                  `json:"writeBindings,omitempty"`
+	InsertedAt         *string                           `json:"insertedAt,omitempty"`
+	UpdatedAt          *string                           `json:"updatedAt,omitempty"`
 }
 
 type InfrastructureStackConnection struct {
@@ -9932,6 +9932,16 @@ type StackInfracostResourceAttributes struct {
 	RawResource      *string  `json:"rawResource,omitempty"`
 }
 
+type StackInfracostResourceConnection struct {
+	PageInfo PageInfo                      `json:"pageInfo"`
+	Edges    []*StackInfracostResourceEdge `json:"edges,omitempty"`
+}
+
+type StackInfracostResourceEdge struct {
+	Node   *StackInfracostResource `json:"node,omitempty"`
+	Cursor *string                 `json:"cursor,omitempty"`
+}
+
 type StackOutput struct {
 	Name   string `json:"name"`
 	Value  string `json:"value"`
@@ -10096,10 +10106,10 @@ type StackRun struct {
 	Repository *GitRepository `json:"repository,omitempty"`
 	// policy violations for this stack
 	Violations []*StackPolicyViolation `json:"violations,omitempty"`
-	// Infracost resource rows attached to this run (newest first)
-	InfracostResources []*StackInfracostResource `json:"infracostResources,omitempty"`
-	InsertedAt         *string                   `json:"insertedAt,omitempty"`
-	UpdatedAt          *string                   `json:"updatedAt,omitempty"`
+	// Infracost resource rows attached to this run (most expensive first), only fetchable for a single run
+	InfracostResources *StackInfracostResourceConnection `json:"infracostResources,omitempty"`
+	InsertedAt         *string                           `json:"insertedAt,omitempty"`
+	UpdatedAt          *string                           `json:"updatedAt,omitempty"`
 }
 
 type StackRunApprovalResult struct {
@@ -12310,11 +12320,6 @@ type WorkbenchSkillsAttributes struct {
 	Ref *GitRefAttributes `json:"ref,omitempty"`
 	// files to include
 	Files []*string `json:"files,omitempty"`
-}
-
-type WorkbenchTextStream struct {
-	ActivityID *string `json:"activityId,omitempty"`
-	Text       *string `json:"text,omitempty"`
 }
 
 type WorkbenchTool struct {

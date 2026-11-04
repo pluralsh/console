@@ -40,11 +40,7 @@ import { GqlError } from 'components/utils/Alert'
 import { prettifyPrompt } from 'components/utils/contentEditableChips'
 import { StackedText } from 'components/utils/table/StackedText'
 import { EaseIn } from 'components/utils/EaseIn'
-import {
-  Body2BoldP,
-  Body2P,
-  shimmerWithinCss,
-} from 'components/utils/typography/Text'
+import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
 import {
   AgentRunStatus,
   useWorkbenchJobActivityQuery,
@@ -82,7 +78,6 @@ import { WorkbenchJobInlineActionCard } from './WorkbenchJobInlineActionCard'
 export function WorkbenchJobActivity({
   isOpen,
   activity,
-  textStream,
   latestThought,
   jobId,
   workbenchId,
@@ -90,14 +85,12 @@ export function WorkbenchJobActivity({
 }: {
   isOpen: boolean
   activity: WorkbenchJobActivityFragment
-  textStream: Nullable<string>
   latestThought?: Nullable<WorkbenchJobThoughtFragment>
   jobId: string
   workbenchId: string
   workbenchName: string
 }) {
-  const theme = useTheme()
-  const { spacing } = theme
+  const { spacing } = useTheme()
   const { id, status, type, prompt, agentRun, result } = activity
   const isRunning = isJobRunning(status)
 
@@ -272,19 +265,6 @@ export function WorkbenchJobActivity({
             activityId={id}
             skip={!isOpen}
           />
-          {textStream && (
-            <Flex
-              direction="column"
-              maxHeight={120}
-              overflow="auto"
-              css={isRunning ? shimmerWithinCss(theme) : undefined}
-            >
-              <SimplifiedMarkdown
-                text={textStream}
-                tone="thought"
-              />
-            </Flex>
-          )}
           {isRunning && <AILoadingText activityId={id} />}
         </CollapseWhenEmptySC>
         <WorkbenchJobActivityResult
@@ -299,10 +279,8 @@ export function WorkbenchJobActivity({
 
 export function WorkbenchJobMemoGroup({
   activities,
-  textStreamMap,
 }: {
   activities: WorkbenchJobActivityFragment[]
-  textStreamMap: Record<string, string>
 }) {
   const { spacing } = useTheme()
   const [isExpanded, setIsExpanded] = useState(false)
@@ -320,7 +298,6 @@ export function WorkbenchJobMemoGroup({
             <WorkbenchJobMemo
               key={activity.id}
               activity={activity}
-              textStream={textStreamMap[activity.id] ?? ''}
             />
           ))}
         </Flex>
@@ -347,17 +324,13 @@ export function WorkbenchJobMemoGroup({
             <WorkbenchJobMemo
               key={activity.id}
               activity={activity}
-              textStream={textStreamMap[activity.id] ?? ''}
             />
           ))}
         </Flex>
       </SimpleAccordion>
       {!isExpanded && lastMemo && isJobRunning(lastMemo.status) && (
         <EaseIn currentKey={lastMemo.id}>
-          <WorkbenchJobMemo
-            activity={lastMemo}
-            textStream={textStreamMap[lastMemo.id] ?? ''}
-          />
+          <WorkbenchJobMemo activity={lastMemo} />
         </EaseIn>
       )}
     </MemoGroupSC>
@@ -366,10 +339,8 @@ export function WorkbenchJobMemoGroup({
 
 function WorkbenchJobMemo({
   activity,
-  textStream,
 }: {
   activity: WorkbenchJobActivityFragment
-  textStream: string
 }) {
   const { spacing } = useTheme()
   const [isExpanded, setIsExpanded] = useState(false)
@@ -377,7 +348,7 @@ function WorkbenchJobMemo({
   const isFailed = activity.status === WorkbenchJobActivityStatus.Failed
   const isRejected = activity.status === WorkbenchJobActivityStatus.Rejected
   const { prompt, result } = activity
-  const summary = textStream || result?.output || prompt || ''
+  const summary = result?.output || prompt || ''
   const workingTheory =
     result?.jobUpdate?.workingTheory?.trim() ||
     result?.jobUpdate?.conclusion?.trim() ||

@@ -14120,7 +14120,6 @@ export type RootSubscriptionType = {
   workbenchJobProgress?: Maybe<WorkbenchJobProgress>;
   workbenchJobThoughtDelta?: Maybe<WorkbenchJobThoughtDelta>;
   workbenchMonitorDelta?: Maybe<MonitorDelta>;
-  workbenchTextStream?: Maybe<WorkbenchTextStream>;
 };
 
 
@@ -14224,11 +14223,6 @@ export type RootSubscriptionTypeWorkbenchJobThoughtDeltaArgs = {
 export type RootSubscriptionTypeWorkbenchMonitorDeltaArgs = {
   id?: InputMaybe<Scalars['ID']['input']>;
   workbenchId?: InputMaybe<Scalars['ID']['input']>;
-};
-
-
-export type RootSubscriptionTypeWorkbenchTextStreamArgs = {
-  jobId: Scalars['ID']['input'];
 };
 
 export type RouterFilterAttributes = {
@@ -18969,12 +18963,6 @@ export enum WorkbenchSort {
   Name = 'NAME',
   UpdatedAt = 'UPDATED_AT'
 }
-
-export type WorkbenchTextStream = {
-  __typename?: 'WorkbenchTextStream';
-  activityId?: Maybe<Scalars['ID']['output']>;
-  text?: Maybe<Scalars['String']['output']>;
-};
 
 export type WorkbenchTool = {
   __typename?: 'WorkbenchTool';
@@ -24041,8 +24029,6 @@ export type WorkbenchJobActivityWithThoughtsFragment = { __typename?: 'Workbench
 
 export type WorkbenchJobProgressFragment = { __typename?: 'WorkbenchJobProgress', activityId?: string | null, tool?: string | null, text?: string | null, arguments?: Record<string, unknown> | null };
 
-export type WorkbenchTextStreamFragment = { __typename?: 'WorkbenchTextStream', activityId?: string | null, text?: string | null };
-
 export type WorkbenchCronFragment = { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, userId?: string | null, lastRunAt?: string | null, nextRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, modes?: { __typename?: 'WorkbenchJobModes', plan?: boolean | null, verification?: boolean | null, model?: { __typename?: 'WorkbenchJobModel', provider?: AiProvider | null, model?: string | null } | null, coding?: { __typename?: 'WorkbenchJobCodingModes', approval?: boolean | null, babysit?: boolean | null, review?: boolean | null } | null, budget?: { __typename?: 'WorkbenchJobBudget', cost?: number | null, tokens?: number | null } | null, kubernetes?: { __typename?: 'WorkbenchJobKubernetesModes', update?: boolean | null, delete?: boolean | null, exec?: boolean | null, drain?: boolean | null, excludeNamespaces?: Array<string | null> | null, requireNamespaces?: Array<string | null> | null } | null } | null };
 
 export type WorkbenchPromptFragment = { __typename?: 'WorkbenchPrompt', id: string, title: string, category: string, prompt?: string | null, insertedAt?: string | null, updatedAt?: string | null };
@@ -24835,13 +24821,6 @@ export type WorkbenchJobProgressSubscriptionVariables = Exact<{
 
 
 export type WorkbenchJobProgressSubscription = { __typename?: 'RootSubscriptionType', workbenchJobProgress?: { __typename?: 'WorkbenchJobProgress', activityId?: string | null, tool?: string | null, text?: string | null, arguments?: Record<string, unknown> | null } | null };
-
-export type WorkbenchTextStreamSubscriptionVariables = Exact<{
-  jobId: Scalars['ID']['input'];
-}>;
-
-
-export type WorkbenchTextStreamSubscription = { __typename?: 'RootSubscriptionType', workbenchTextStream?: { __typename?: 'WorkbenchTextStream', activityId?: string | null, text?: string | null } | null };
 
 export type WorkbenchCanvasStreamSubscriptionVariables = Exact<{
   jobId: Scalars['ID']['input'];
@@ -41390,29 +41369,6 @@ export type WorkbenchJobProgressSubscriptionHookResult = ReturnType<typeof useWo
 export type WorkbenchJobProgressSubscriptionResult = Apollo.SubscriptionResult<WorkbenchJobProgressSubscription>;
 
 /**
- * __useWorkbenchTextStreamSubscription__
- *
- * To run a query within a React component, call `useWorkbenchTextStreamSubscription` and pass it any options that fit your needs.
- * When your component renders, `useWorkbenchTextStreamSubscription` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useWorkbenchTextStreamSubscription({
- *   variables: {
- *      jobId: // value for 'jobId'
- *   },
- * });
- */
-export function useWorkbenchTextStreamSubscription(baseOptions: Apollo.SubscriptionHookOptions<WorkbenchTextStreamSubscription, WorkbenchTextStreamSubscriptionVariables> & ({ variables: WorkbenchTextStreamSubscriptionVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useSubscription<WorkbenchTextStreamSubscription, WorkbenchTextStreamSubscriptionVariables>(Operations.WorkbenchTextStream, options);
-      }
-export type WorkbenchTextStreamSubscriptionHookResult = ReturnType<typeof useWorkbenchTextStreamSubscription>;
-export type WorkbenchTextStreamSubscriptionResult = Apollo.SubscriptionResult<WorkbenchTextStreamSubscription>;
-
-/**
  * __useWorkbenchCanvasStreamSubscription__
  *
  * To run a query within a React component, call `useWorkbenchCanvasStreamSubscription` and pass it any options that fit your needs.
@@ -42618,7 +42574,6 @@ export const namedOperations = {
     WorkbenchJobActivityDelta: 'WorkbenchJobActivityDelta',
     WorkbenchJobThoughtDelta: 'WorkbenchJobThoughtDelta',
     WorkbenchJobProgress: 'WorkbenchJobProgress',
-    WorkbenchTextStream: 'WorkbenchTextStream',
     WorkbenchCanvasStream: 'WorkbenchCanvasStream',
     WorkbenchExecStream: 'WorkbenchExecStream',
     WorkbenchDashboardDelta: 'WorkbenchDashboardDelta',
@@ -42946,7 +42901,6 @@ export const namedOperations = {
     WorkbenchJobActivity: 'WorkbenchJobActivity',
     WorkbenchJobActivityWithThoughts: 'WorkbenchJobActivityWithThoughts',
     WorkbenchJobProgress: 'WorkbenchJobProgress',
-    WorkbenchTextStream: 'WorkbenchTextStream',
     WorkbenchCron: 'WorkbenchCron',
     WorkbenchPrompt: 'WorkbenchPrompt',
     WorkbenchWebhook: 'WorkbenchWebhook',

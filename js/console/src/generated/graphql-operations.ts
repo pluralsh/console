@@ -494,7 +494,6 @@ export { WorkbenchJobDeltaDocument as WorkbenchJobDelta } from './graphql-docume
 export { WorkbenchJobActivityDeltaDocument as WorkbenchJobActivityDelta } from './graphql-documents'
 export { WorkbenchJobThoughtDeltaDocument as WorkbenchJobThoughtDelta } from './graphql-documents'
 export { WorkbenchJobProgressDocument as WorkbenchJobProgress } from './graphql-documents'
-export { WorkbenchTextStreamDocument as WorkbenchTextStream } from './graphql-documents'
 export { WorkbenchCanvasStreamDocument as WorkbenchCanvasStream } from './graphql-documents'
 export { WorkbenchExecStreamDocument as WorkbenchExecStream } from './graphql-documents'
 export { WorkbenchFilesDocument as WorkbenchFiles } from './graphql-documents'

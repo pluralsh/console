@@ -2482,11 +2482,6 @@
          "name": "WorkbenchJobProgress",
          "body": "subscription WorkbenchJobProgress($jobId: ID!) {\n  workbenchJobProgress(jobId: $jobId) {\n    ...WorkbenchJobProgress\n    __typename\n  }\n}\n\nfragment WorkbenchJobProgress on WorkbenchJobProgress {\n  activityId\n  tool\n  text\n  arguments\n  __typename\n}"
       },
-      "sha256:7154de8994da5890419ae791726210e5e3ea57b7bd4e3c659afb3123a2a31241": {
-         "type": "subscription",
-         "name": "WorkbenchTextStream",
-         "body": "subscription WorkbenchTextStream($jobId: ID!) {\n  workbenchTextStream(jobId: $jobId) {\n    ...WorkbenchTextStream\n    __typename\n  }\n}\n\nfragment WorkbenchTextStream on WorkbenchTextStream {\n  activityId\n  text\n  __typename\n}"
-      },
       "sha256:43bac708131d4cd22896f4068daa82f1081e428625b2f84a787d8180879e4ce7": {
          "type": "subscription",
          "name": "WorkbenchCanvasStream",

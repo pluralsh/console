@@ -6,10 +6,7 @@ import {
 } from 'generated/graphql'
 import { useMemo, useState } from 'react'
 
-import {
-  hoverCaretAccordionCss,
-  SimplifiedMarkdown,
-} from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
+import { hoverCaretAccordionCss } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { VirtualList } from 'components/utils/VirtualList'
@@ -59,8 +56,10 @@ export function WorkbenchJobActivities({
 
   const [openIds, setOpenIds] = useState<string[]>([])
 
-  const { textStreamMap, latestThoughtMap, jobLevelThinking } =
-    useWorkbenchJobStreams(jobId, !!data)
+  const { latestThoughtMap, jobLevelThinking } = useWorkbenchJobStreams(
+    jobId,
+    !!data
+  )
 
   const userPromptIndices = useMemo(() => {
     const indices = [0] // 0 is initial user prompt in topContent
@@ -71,7 +70,6 @@ export function WorkbenchJobActivities({
     return indices
   }, [activityGroups])
 
-  const noneStream = textStreamMap['none'] ?? ''
   const showBottomLoader =
     isJobRunning(job?.status) &&
     activities.every(({ status }) => isActivityTerminal(status)) &&
@@ -95,16 +93,10 @@ export function WorkbenchJobActivities({
             jobId={jobId}
           />
         )}
-        {noneStream && (
-          <SimplifiedMarkdown
-            text={noneStream}
-            tone="thought"
-          />
-        )}
         <ChatEndSpaceSC />
       </>
     ),
-    [bottomStatus, job?.status, jobId, jobLevelThinking, noneStream]
+    [bottomStatus, job?.status, jobId, jobLevelThinking]
   )
 
   if (!data && loading)
@@ -161,10 +153,7 @@ export function WorkbenchJobActivities({
               const [activity] = rowData.activities
 
               return activity.type === WorkbenchJobActivityType.Memo ? (
-                <WorkbenchJobMemoGroup
-                  activities={rowData.activities}
-                  textStreamMap={textStreamMap}
-                />
+                <WorkbenchJobMemoGroup activities={rowData.activities} />
               ) : (
                 <WorkbenchJobActivity
                   isOpen={
@@ -176,7 +165,6 @@ export function WorkbenchJobActivities({
                   jobId={jobId}
                   workbenchId={workbenchId}
                   workbenchName={workbenchName}
-                  textStream={textStreamMap[activity.id] ?? ''}
                   latestThought={latestThoughtMap[activity.id]}
                 />
               )
