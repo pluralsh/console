@@ -10,7 +10,17 @@ versions:
     '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: [Bumped kube-prometheus-stack dependencies with non-major updates
+        (chart dependency refresh)., Updated Grafana image tag to v14.3.0 (carried
+        in 92.17.0)., 'Subchart updates included: prometheus-yet-another-cloudwatch-exporter,
+        prometheus-statsd-exporter, prometheus-postgres-exporter.']
+    features: ['prometheus-yet-another-cloudwatch-exporter: added support for extraManifests,
+        revisionHistoryLimit, and enableServiceLinks.', 'prometheus-statsd-exporter:
+        added Gateway API HTTPRoute support.', 'prometheus-postgres-exporter: fixed
+        PrometheusRule rendering for the chart''s rules template.']
+    breaking_changes: []
   chart_version: 92.17.1
   images: ['docker.io/bats/bats:1.14.0', 'docker.io/grafana/grafana:13.3.0-distroless',
     'ghcr.io/jkroepke/kube-webhook-certgen:1.11.0', 'quay.io/kiwigrid/k8s-sidecar:2.14.3',

@@ -4,6 +4,26 @@ release_url: https://github.com/kubernetes/autoscaler/releases/tag/cluster-autos
 helm_repository_url: https://kubernetes.github.io/autoscaler
 chart_name: cluster-autoscaler
 versions:
+- version: 1.37.0
+  kube: ['1.37']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [CapacityBuffer v1beta1 API released; integrates with ResourceQuotas
+        and emits scale-up events., 'New flags/metrics: --max-node-startup-time, --predicate-parallelism,
+        and optional node deletion duration histogram; optimized scaling loop interval
+        is now default.', 'Expanded resource support: CSI volume limit accounting;
+        additional GPU/resource names (amd.com/gpu, gpu.intel.com/xe, habana.ai/gaudi).',
+      'Chart addition: vpa.recommender value; updater deployment can now receive imagePullSecrets.']
+    breaking_changes: [Capacitybuffers.autoscaling.x-k8s.io scope changed from Cluster
+        to Namespaced; API types adjusted (ProvisioningStrategy string)., External
+        gRPC cloudprovider API deprecates several fields in favor of duration/bytes-based
+        replacements., scale-down-enabled flag deprecated; plan to migrate away from
+        relying on it.]
+  chart_version: 9.60.0
+  images: ['registry.k8s.io/autoscaling/cluster-autoscaler:v1.37.0']
 - version: 1.35.0
   kube: ['1.35']
   requirements: []
