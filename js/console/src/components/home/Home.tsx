@@ -1,10 +1,6 @@
 import { AGGREGATE_POLL_INTERVAL } from 'components/cluster/constants'
 import { Breadcrumb, Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
-import {
-  useCloudSetupUnfinished,
-  useIsDeveloperPersona,
-  useLogin,
-} from 'components/contexts'
+import { useIsDeveloperPersona, useLogin } from 'components/contexts'
 import { useOnboarded } from '../contexts/DeploymentSettingsContext.tsx'
 import { HomeWorkbenches } from './HomeWorkbenches.tsx'
 
@@ -24,7 +20,7 @@ import {
 } from 'generated/graphql.ts'
 import { ClustersDocument } from 'generated/graphql-documents'
 import { useMemo, useState } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Navigate, useSearchParams } from 'react-router-dom'
 import { FLOWS_ABS_PATH } from 'routes/flowRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql.ts'
@@ -48,17 +44,28 @@ import {
   GettingStartedPopup,
 } from './GettingStarted.tsx'
 import { Body1BoldP } from 'components/utils/typography/Text.tsx'
+import { CloudSetupChecklist } from 'components/cloud-setup/CloudSetupChecklist.tsx'
+import { useCloudSetupState } from 'components/cloud-setup/cloudSetupSteps.tsx'
+import { INSTALLATION_ID_PARAM } from 'components/cloud-setup/steps/scm-setup/GitHubSetupStep.tsx'
 
 const breadcrumbs: Breadcrumb[] = [{ label: 'home', url: '/' }]
 
 export function Home() {
   const { me } = useLogin()
   const isDeveloperPersona = useIsDeveloperPersona()
+  const { isCloud, cloudConnected } = useCloudSetupState()
+  const [params] = useSearchParams()
+  const returningFromGitHub = !!params.get(INSTALLATION_ID_PARAM)
   const homepage =
     isDeveloperPersona || me?.homepage === Homepage.Flows
       ? Homepage.Flows
       : me?.homepage
 
+  // Plural Cloud setup lives in a card on the clusters Home, so show that view
+  // until the cloud is connected (whatever the user's homepage), and when the
+  // GitHub app install redirects back to finish registering the app.
+  if (isCloud && (!cloudConnected || returningFromGitHub))
+    return <HomeClusters />
   if (homepage === Homepage.Flows)
     return (
       <Navigate
@@ -73,10 +80,11 @@ export function Home() {
 function HomeClusters() {
   const { borders } = useTheme()
   const { configuration } = useLogin()
+  const { isCloud, cloudConnected } = useCloudSetupState()
+  const [params] = useSearchParams()
+  const returningFromGitHub = !!params.get(INSTALLATION_ID_PARAM)
   const projectId = useProjectId()
   useSetBreadcrumbs(breadcrumbs)
-  // we don't want a double popup, and cloud setup would come first if relevant
-  const isCloudSetupUnfinished = useCloudSetupUnfinished()
   const onboarded = useOnboarded()
 
   const [healthScoreOption, setHealthScoreLabelOption] =
@@ -162,6 +170,13 @@ function HomeClusters() {
       overflow="auto"
       height="100%"
     >
+      {isCloud && (
+        <ChecklistSectionSC>
+          <WidthLimiterSC>
+            <CloudSetupChecklist />
+          </WidthLimiterSC>
+        </ChecklistSectionSC>
+      )}
       <ChartSectionSC>
         <WidthLimiterSC $type="charts">
           <ChartAndFilterWrapperSC css={{ borderRight: borders.default }}>
@@ -226,7 +241,11 @@ function HomeClusters() {
           )}
         </WidthLimiterSC>
       </TableSectionSC>
-      {!onboarded && !isCloudSetupUnfinished && <GettingStartedPopup />}
+      {/* don't stack the welcome popup on top of unfinished cloud setup,
+          including while finishing a GitHub app install */}
+      {!onboarded && !(isCloud && (!cloudConnected || returningFromGitHub)) && (
+        <GettingStartedPopup />
+      )}
     </Flex>
   )
 }
@@ -240,6 +259,14 @@ const ChartAndFilterWrapperSC = styled.div(({ theme }) => ({
   whiteSpace: 'nowrap',
   height: '100%',
   '& g:first-of-type, & canvas': { cursor: 'pointer' },
+}))
+
+const ChecklistSectionSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'center',
+  padding: theme.spacing.large,
+  // the card renders nothing once setup is done or dismissed
+  '&:has(> div:empty)': { display: 'none' },
 }))
 
 const ChartSectionSC = styled.div(({ theme }) => ({

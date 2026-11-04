@@ -1,10 +1,15 @@
-import { useCloudSetupUnfinished } from 'components/contexts'
-import { Navigate } from 'react-router-dom'
+import { Navigate, useSearchParams } from 'react-router-dom'
 
+// GitHub app installs redirect here (via app.plural.sh) with an installation_id.
+// Forward to Home, where the setup checklist finishes registering the app.
 export function GitHubSetup() {
-  const isCloudSetupUnfinished = useCloudSetupUnfinished()
+  const [params] = useSearchParams()
+  const search = params.toString()
 
-  if (!isCloudSetupUnfinished) return <Navigate to="/" />
-
-  return null
+  return (
+    <Navigate
+      replace
+      to={search ? `/home?${search}` : '/home'}
+    />
+  )
 }
