@@ -4,14 +4,53 @@ release_url: https://github.com/argoproj/argo-cd/releases/tag/v{vsn}
 helm_repository_url: https://argoproj.github.io/argo-helm
 eolApiSlug: argocd
 versions:
-- version: 3.5.7
+- version: 3.6.1
   kube: ['1.37', '1.36', '1.35']
   requirements: []
   incompatibilities: []
-  summary: null
-  chart_version: 10.11.7
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [No new features in v3.6.1 vs v3.6.0; this is a patch release focused
+        on UI bug fixes.]
+    breaking_changes: [No breaking changes called out in v3.6.1 vs v3.6.0.]
+  chart_version: 10.12.1
   images: ['ecr-public.aws.com/docker/library/redis:8.6.4-alpine', 'ghcr.io/dexidp/dex:v2.46.1',
-    'quay.io/argoproj/argocd:v3.5.7']
+    'quay.io/argoproj/argocd:v3.6.1']
+- version: 3.6.0
+  kube: ['1.37', '1.36', '1.35']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['ApplicationSet progressive sync improvements: new metrics, reconciliation
+        control annotations, clearer condition reasons/messages, and configurable
+        workqueue rate limiting.', 'New UI capabilities and performance: virtual scrolling
+        for large app lists, lazy loading, improved search/filtering (regex toggle,
+        server-side name filter), and a new resources explorer view.', 'Expanded built-in
+        health checks and resource customizations for many CRDs/providers (e.g., Kyverno,
+        TLSRoute, ACK, CloudNativePG, cert-manager, Tekton, Velero, Prometheus Operator,
+        Pulumi, etc.).', 'Dex and TLS hardening/configurability: configurable TLS
+        min version, cipher suites/curves, plus more Dex storage/config options via
+        argocd-cm.', 'Observability and performance enhancements: optional OpenTelemetry
+        spans with configurable sampling, improved manifest caching/serialization/compression,
+        and assorted controller/repo-server performance work.', 'Security/usability
+        enhancements: login attempt logging (username), UI anti-indexing header (X-Robots-Tag),
+        optional Swagger UI disable, support for ignoring diffs via annotation, and
+        new CNPG hibernate/rehydrate actions.']
+    breaking_changes: ['SyncWindow rename: SyncWindow was renamed to InlineSyncWindow,
+        which may break manifests/policies/automation that reference the old kind/field
+        name.', 'Default sync behavior change: Argo CD now defaults to Server-Side
+        Diff (SSD) with Server-Side Apply (SSA) and removes/retire SMD, which can
+        change diff/apply behavior and may require reviewing sync options and RBAC/field
+        ownership expectations.', 'Config/flag surface changes worth reviewing in
+        automation: new/changed CLI behavior (e.g., admin export can exclude status;
+        deprecation warnings around --signature-keys) and additional controller/appset
+        flags now configurable via argocd-cmd-params-cm.']
+  chart_version: 10.12.0
+  images: ['ecr-public.aws.com/docker/library/redis:8.6.4-alpine', 'ghcr.io/dexidp/dex:v2.46.1',
+    'quay.io/argoproj/argocd:v3.6.0']
 - version: 3.5.1
   kube: ['1.37', '1.36', '1.35']
   requirements: []
@@ -115,6 +154,7 @@ versions:
   chart_version: 9.5.10
   images: ['ecr-public.aws.com/docker/library/redis:8.2.3-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
     'quay.io/argoproj/argocd:v3.3.8']
+  eolAt: '2026-11-04'
 - version: 3.3.0
   kube: ['1.35', '1.34', '1.33']
   requirements: []
@@ -155,6 +195,7 @@ versions:
   chart_version: 9.4.2
   images: ['ecr-public.aws.com/docker/library/redis:8.2.3-alpine', 'ghcr.io/dexidp/dex:v2.44.0',
     'quay.io/argoproj/argocd:v3.3.0']
+  eolAt: '2026-11-04'
 - version: 3.2.1
   kube: ['1.35', '1.34', '1.33']
   requirements: []
