@@ -737,6 +737,11 @@ export const redirects = [
     permanent: true,
   },
   {
+    source: '/plural-features/notifications/index',
+    destination: '/plural-features/notifications',
+    permanent: true,
+  },
+  {
     source: '/faq/plural-paid-tiers',
     destination: '/faq/paid-tiers',
     permanent: true,
