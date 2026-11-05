@@ -1241,6 +1241,16 @@
   publisher: sagemaker
 - name: amazon-sagemaker-hyperpod-observability
   versions:
+  - version: v1.2.0-eksbuild.5
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v1.2.0-eksbuild.4
     compatibilities:
     - '1.37'
@@ -1706,6 +1716,12 @@
   publisher: sagemaker
 - name: amazon-sagemaker-spaces
   versions:
+  - version: v0.2.1-eksbuild.1
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
   - version: v0.2.0-eksbuild.2
     compatibilities:
     - '1.36'
@@ -2939,6 +2955,16 @@
   publisher: eks
 - name: aws-efs-csi-driver
   versions:
+  - version: v3.5.4-eksbuild.1
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v3.5.3-eksbuild.1
     compatibilities:
     - '1.37'
@@ -4602,6 +4628,15 @@
   publisher: eks
 - name: aws-privateca-connector-for-kubernetes
   versions:
+  - version: v1.12.0-eksbuild.2
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
   - version: v1.12.0-eksbuild.1
     compatibilities:
     - '1.37'
@@ -4748,6 +4783,15 @@
   publisher: aws-privateca
 - name: aws-secrets-store-csi-driver-provider
   versions:
+  - version: v3.1.4-eksbuild.4
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
   - version: v3.1.4-eksbuild.3
     compatibilities:
     - '1.37'
@@ -5760,6 +5804,14 @@
   publisher: Chainguard
 - name: chainguard_aws-efs-csi-driver-fips
   versions:
+  - version: v4.5.10004020261102-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v4.5.10003020261031-eksbuild.1
     compatibilities:
     - '1.35'
@@ -6308,6 +6360,11 @@
   publisher: Chainguard
 - name: chainguard_coredns-fips
   versions:
+  - version: v1.50.10000020261102-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
   - version: v1.49.10000020261031-eksbuild.1
     compatibilities:
     - '1.35'
@@ -6664,6 +6721,11 @@
   publisher: cloudsoft
 - name: coredns
   versions:
+  - version: v1.14.7-eksbuild.28
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
   - version: v1.14.7-eksbuild.22
     compatibilities:
     - '1.37'
@@ -6729,6 +6791,13 @@
     - '1.37'
     - '1.36'
     - '1.35'
+  - version: v1.13.2-eksbuild.68
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
   - version: v1.13.2-eksbuild.62
     compatibilities:
     - '1.37'
@@ -6841,6 +6910,11 @@
     - '1.35'
     - '1.34'
     - '1.33'
+  - version: v1.12.4-eksbuild.75
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
   - version: v1.12.4-eksbuild.70
     compatibilities:
     - '1.35'
@@ -6941,6 +7015,14 @@
     - '1.35'
     - '1.34'
     - '1.33'
+  - version: v1.11.4-eksbuild.97
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
   - version: v1.11.4-eksbuild.92
     compatibilities:
     - '1.34'
@@ -9932,6 +10014,9 @@
   publisher: kong
 - name: kube-proxy
   versions:
+  - version: v1.37.0-eksbuild.34
+    compatibilities:
+    - '1.37'
   - version: v1.37.0-eksbuild.32
     compatibilities:
     - '1.37'
@@ -9950,6 +10035,10 @@
   - version: v1.37.0-eksbuild.4
     compatibilities:
     - '1.37'
+  - version: v1.36.0-eksbuild.60
+    compatibilities:
+    - '1.37'
+    - '1.36'
   - version: v1.36.0-eksbuild.58
     compatibilities:
     - '1.37'
@@ -10010,6 +10099,11 @@
     compatibilities:
     - '1.37'
     - '1.36'
+  - version: v1.35.3-eksbuild.64
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
   - version: v1.35.3-eksbuild.62
     compatibilities:
     - '1.37'
@@ -10100,6 +10194,12 @@
     - '1.37'
     - '1.36'
     - '1.35'
+  - version: v1.34.6-eksbuild.64
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
+    - '1.34'
   - version: v1.34.6-eksbuild.62
     compatibilities:
     - '1.37'
@@ -10232,6 +10332,12 @@
     - '1.36'
     - '1.35'
     - '1.34'
+  - version: v1.33.10-eksbuild.64
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
   - version: v1.33.10-eksbuild.62
     compatibilities:
     - '1.36'
@@ -10376,6 +10482,12 @@
     - '1.35'
     - '1.34'
     - '1.33'
+  - version: v1.32.13-eksbuild.67
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
   - version: v1.32.13-eksbuild.65
     compatibilities:
     - '1.35'
@@ -10544,6 +10656,12 @@
     - '1.34'
     - '1.33'
     - '1.32'
+  - version: v1.31.14-eksbuild.71
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
   - version: v1.31.14-eksbuild.69
     compatibilities:
     - '1.34'
@@ -13950,6 +14068,15 @@
   publisher: Spacelift Inc.
 - name: splunk_splunk-otel-collector-chart
   versions:
+  - version: v0.164.0-eksbuild.1
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
   - version: v0.162.0-eksbuild.1
     compatibilities:
     - '1.37'
@@ -14147,6 +14274,16 @@
   publisher: Splunk
 - name: sriov-network-metrics-exporter
   versions:
+  - version: v1.2.0-eksbuild.16
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v1.2.0-eksbuild.15
     compatibilities:
     - '1.37'
