@@ -4,14 +4,59 @@ release_url: https://github.com/argoproj/argo-cd/releases/tag/v{vsn}
 helm_repository_url: https://argoproj.github.io/argo-helm
 eolApiSlug: argocd
 versions:
-- version: 3.5.7
+- version: 3.6.1
   kube: ['1.37', '1.36', '1.35']
   requirements: []
   incompatibilities: []
-  summary: null
-  chart_version: 10.11.7
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: []
+    breaking_changes: []
+  chart_version: 10.14.0
   images: ['ecr-public.aws.com/docker/library/redis:8.6.4-alpine', 'ghcr.io/dexidp/dex:v2.46.1',
-    'quay.io/argoproj/argocd:v3.5.7']
+    'quay.io/argoproj/argocd:v3.6.1']
+- version: 3.6.0
+  kube: ['1.37', '1.36', '1.35']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['Minor-version upgrade of Argo CD from v3.5.x to v3.6.0 with many
+        new features across ApplicationSet, UI, Dex/SSO, health checks, performance,
+        and security fixes.', 'Notable operational change documented for 3.6: server-side
+        diff default behavior is called out in the 3.6 upgrade guide (ensure you review/validate
+        how diffs are computed in your environment).', 'Large volume of bugfixes/perf
+        work in controller/repo-server/appset; expect behavior changes mainly around
+        progressive sync, server-side diff, caching, and OIDC session refresh handling.']
+    features: ['ApplicationSet progressive sync enhancements: new metrics, conditions/messages
+        that surface the active scenario, and annotations to force reconciliation
+        before proceeding; plus workqueue rate limiter flags exposed for applicationset-controller.',
+      'ApplicationSet gains an OCI generator, and go-templating adds a `tpl` function
+        to help render nested templates.', 'Dex/SSO hardening and configurability:
+        Dex TLS min version, cipher suites, curve preferences; Dex storage type/config
+        can be set from argocd-cm; UI can customize SSO login button text; server
+        can optionally redirect to a selected Dex connector (alpha).', 'Observability/perf:
+        optional OpenTelemetry spans with configurable sampling; more controller metrics
+        flags via argocd-cmd-params-cm; multiple controller/repo-server performance
+        improvements (less copying, faster counting, partial JSON unmarshalling, improved
+        caching/compression).', 'Policy/health coverage expands significantly with
+        many new built-in health checks (Kyverno, Tekton, Velero, cert-manager resources,
+        Prometheus Operator resources, CloudNativePG resources, ACK resources, and
+        more) plus customizations like ignored status support for VictoriaMetrics
+        healthchecks.', 'Security/usability: login attempts can log username; UI sets
+        X-Robots-Tag to prevent indexing; CLI `argocd admin export` can exclude status;
+        `--signature-keys` usage now emits a deprecation warning and output uses SOURCE-INTEGRITY
+        terminology instead.']
+    breaking_changes: ['Potentially behavior-affecting change around server-side diff
+        defaults in 3.6 (explicitly referenced in the 3.6 upgrade guide). Validate
+        diff/replace behavior in a staging environment, especially if you rely on
+        server-side diff/SSA.', 'Terminology/deprecation: `--signature-keys` is now
+        warned as deprecated and output fields shift from SIGNATURE-KEYS to SOURCE-INTEGRITY;
+        update any automation parsing CLI output or relying on that flag/field name.']
+  chart_version: 10.12.0
+  images: ['ecr-public.aws.com/docker/library/redis:8.6.4-alpine', 'ghcr.io/dexidp/dex:v2.46.1',
+    'quay.io/argoproj/argocd:v3.6.0']
 - version: 3.5.1
   kube: ['1.37', '1.36', '1.35']
   requirements: []
@@ -115,6 +160,7 @@ versions:
   chart_version: 9.5.10
   images: ['ecr-public.aws.com/docker/library/redis:8.2.3-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
     'quay.io/argoproj/argocd:v3.3.8']
+  eolAt: '2026-11-04'
 - version: 3.3.0
   kube: ['1.35', '1.34', '1.33']
   requirements: []
@@ -155,6 +201,7 @@ versions:
   chart_version: 9.4.2
   images: ['ecr-public.aws.com/docker/library/redis:8.2.3-alpine', 'ghcr.io/dexidp/dex:v2.44.0',
     'quay.io/argoproj/argocd:v3.3.0']
+  eolAt: '2026-11-04'
 - version: 3.2.1
   kube: ['1.35', '1.34', '1.33']
   requirements: []
