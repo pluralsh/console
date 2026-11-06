@@ -112,7 +112,7 @@ spec:
     # example configurations of the various different AI providers supported, its not necessary to
     # configure all of them
     anthropic:
-      model: claude-sonnet-4-5
+      model: claude-sonnet-5-5
       tokenSecretRef:
         name: ai-config
         key: anthropic
@@ -183,7 +183,7 @@ For Vertex AI:
 
 Note that Anthropic has no embedding model, so you'll always have to mix providers. This is a decent setup:
 
-1. Configure `claude-sonnet-4-5` for tools (set as `toolProvider`)
+1. Configure `claude-sonnet-5-5` for tools (set as `toolProvider`)
 2. OpenAI gpt-4.1-mini for volume, which is our default (it's cheaper than most Anthropic models) (set as `provider`)
 3. OpenAI `text-embedding-3-large` as your embedding model, which is our default and would be selected since OpenAI is the base provider.
 
