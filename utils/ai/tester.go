@@ -32,7 +32,7 @@ func testOpenAIConnection(baseURL, apiKey *string) bool {
 
 	// Create request body
 	reqBody := []byte(`{
-		"model": "gpt-5-mini",
+		"model": "gpt-5.6-luna",
 		"messages": [
 			{
 				"role": "user", 
