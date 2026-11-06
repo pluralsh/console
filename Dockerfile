@@ -1,9 +1,9 @@
 ARG ELIXIR_VERSION=1.19.4
 ARG OTP_VERSION=28.5
 ARG OS_VARIANT=alpine
-ARG OS_VERSION=3.23.4
+ARG OS_VERSION=3.23.6
 ARG TOOLS_IMAGE=${OS_VARIANT}:${OS_VERSION}
-ARG RUNNER_IMAGE=alpine:3.23.4 # TODO: change back to ${OS_VARIANT}:${OS_VERSION}
+ARG RUNNER_IMAGE=alpine:3.23.6 # TODO: change back to ${OS_VARIANT}:${OS_VERSION}
 
 FROM node:26.12.0-alpine as node
 
@@ -122,7 +122,9 @@ COPY --from=tools /usr/local/bin/plural /usr/local/bin/plural
 
 WORKDIR /opt/app
 
-RUN [ "$OS_VARIANT" = "alpine" ] && apk update && apk upgrade --no-cache libexpat zlib=1.3.2-r1 musl musl-utils || true
+# Pin the fixed Alpine packages so a rebuilt runtime image contains scanner-visible fixes.
+RUN [ "$OS_VARIANT" = "alpine" ] && apk update && \
+  apk add --no-cache --upgrade libexpat=2.10.0-r0 zlib=1.4-r0 musl=1.2.5-r24 musl-utils=1.2.5-r24
 
 COPY bin/setup/${OS_VARIANT}.sh /opt/app/bin/setup.sh
 RUN /bin/sh /opt/app/bin/setup.sh && rm /opt/app/bin/setup.sh
