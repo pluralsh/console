@@ -5,27 +5,26 @@ readme_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/m
 helm_repository_url: https://prometheus-community.github.io/helm-charts
 chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
 versions:
-- version: 92.17.1
+- version: 92.21.1
   kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
     '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
-    chart_updates: [Bumped kube-prometheus-stack dependencies with non-major updates
-        (chart dependency refresh)., Updated Grafana image tag to v14.3.0 (carried
-        in 92.17.0)., 'Subchart updates included: prometheus-yet-another-cloudwatch-exporter,
-        prometheus-statsd-exporter, prometheus-postgres-exporter.']
-    features: ['prometheus-yet-another-cloudwatch-exporter: added support for extraManifests,
-        revisionHistoryLimit, and enableServiceLinks.', 'prometheus-statsd-exporter:
-        added Gateway API HTTPRoute support.', 'prometheus-postgres-exporter: fixed
-        PrometheusRule rendering for the chart''s rules template.']
+    chart_updates: [Grafana image tag updated to `v14.3.0` (from 92.17.0 notes).,
+      Dependencies bumped to Prometheus Operator `v0.95.1` for both `prometheus-operator-crds`
+        and `prometheus-operator-admission-webhook` components (92.21.1)., Misc non-major
+        dependency updates in kube-prometheus-stack (92.21.1).]
+    features: [Updated bundled Grafana version to 14.3.0., Prometheus Operator and
+        related webhook/CRDs updated to v0.95.1 (may include fixes/improvements from
+        upstream).]
     breaking_changes: []
-  chart_version: 92.17.1
+  chart_version: 92.21.1
   images: ['docker.io/bats/bats:1.14.0', 'docker.io/grafana/grafana:13.3.0-distroless',
     'ghcr.io/jkroepke/kube-webhook-certgen:1.11.0', 'quay.io/kiwigrid/k8s-sidecar:2.14.3',
     'quay.io/prometheus-operator/prometheus-operator:v0.94.2', 'quay.io/prometheus/alertmanager:v0.34.2',
-    'quay.io/prometheus/node-exporter:v1.12.1-distroless', 'quay.io/prometheus/prometheus:v3.15.1-distroless',
+    'quay.io/prometheus/node-exporter:v1.12.1-distroless', 'quay.io/prometheus/prometheus:v3.16.0-distroless',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
 - version: 92.17.0
   kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
