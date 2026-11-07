@@ -5,6 +5,63 @@ readme_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/m
 helm_repository_url: https://prometheus-community.github.io/helm-charts
 chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
 versions:
+- version: 92.22.0
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: '- **Alertmanager PVC**: New support for `volumeAttributesClassName`
+      (see PR #7475). If you use Alertmanager persistence with CSI volume attributes
+      classes, you can now set the corresponding Helm value (look for an Alertmanager
+      persistence/storage section exposing `volumeAttributesClassName`). Otherwise
+      no action needed.
+
+      - **prometheus-rabbitmq-exporter**: Service label rendering was fixed (#7544).
+      If you set `service.labels`, verify the rendered Service manifest matches your
+      expectations after upgrade.
+
+      - **prometheus-memcached-exporter**: Exporter and ServiceMonitor ports were
+      synchronized (#7357). If you override ports, re-check that the Service and ServiceMonitor
+      still align.
+
+      - **prometheus-nats-exporter**: `extraContainers` is now rendered in the Deployment
+      (#7526). If you configured `extraContainers` previously and it was ignored,
+      it will start taking effect after upgrade.
+
+      - **prometheus-node-exporter**: Security hardening defaults changed (#7451)
+      and image tag updated to `v5` (#7551). If you relied on privileged settings/capabilities,
+      you may need to explicitly relax the securityContext.
+
+      - **prometheus**: Alertmanager Docker tag updated to `v2.3.0` (#7550). Validate
+      compatibility with your Alertmanager configuration and any sidecars/automation
+      that depends on image/tag behavior.'
+    chart_updates: [Fixed `service.labels` templating for `prometheus-rabbitmq-exporter`
+        (#7544)., Alertmanager templates support `volumeAttributesClassName` for storage
+        volumes (#7475)., Prometheus chart updated Alertmanager image tag to `v2.3.0`
+        (#7550)., Memcached exporter chart syncs exporter and ServiceMonitor ports
+        (#7357)., SNMP exporter chart removes chart version from pod labels (#7541).,
+      NATS exporter chart now renders `extraContainers` in Deployment (#7526)., NGINX
+        exporter chart removes chart version from pod labels (#7539)., MongoDB exporter
+        README examples corrected (#7479)., 'Node exporter chart defaults hardened:
+        RuntimeDefault seccomp, drop all capabilities, disallow privilege escalation
+        (#7451).', kube-prometheus-stack updates node-exporter image tag to `v5` (#7551).]
+    features: ['Alertmanager can now set `volumeAttributesClassName` on volumes/PVC-related
+        resources, enabling CSI volume attribute class usage without extra templating.',
+      NATS exporter now supports adding sidecars via `extraContainers` in its Deployment
+        (previously values may have been ignored).]
+    breaking_changes: ['Node exporter securityContext defaults are more restrictive
+        (RuntimeDefault seccomp, drop all Linux capabilities, no privilege escalation).
+        This can break environments that require elevated privileges or custom capabilities
+        unless you override the security settings explicitly.', 'Exporter pod labels
+        for SNMP and NGINX exporters no longer include the chart version; if you have
+        label selectors, dashboards, or policies matching the old label, update them.']
+  chart_version: 92.22.0
+  images: ['docker.io/bats/bats:1.14.0', 'docker.io/grafana/grafana:13.3.0-distroless',
+    'ghcr.io/jkroepke/kube-webhook-certgen:1.11.1', 'quay.io/kiwigrid/k8s-sidecar:2.14.3',
+    'quay.io/prometheus-operator/prometheus-operator:v0.94.2', 'quay.io/prometheus/alertmanager:v0.34.2',
+    'quay.io/prometheus/node-exporter:v1.12.1-distroless', 'quay.io/prometheus/prometheus:v3.16.0-distroless',
+    'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
 - version: 92.21.1
   kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
     '1.27', '1.26', '1.25']

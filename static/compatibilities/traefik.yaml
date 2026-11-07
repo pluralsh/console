@@ -17,7 +17,7 @@ versions:
         API compatibility: better handling of Gateway status conditions when multiple
         controllers are involved.']
     breaking_changes: []
-  chart_version: 42.3.0
+  chart_version: 42.3.1
   images: ['docker.io/traefik:v3.7.17']
 - version: 3.7.4
   kube: ['1.37', '1.36', '1.35', '1.34']
