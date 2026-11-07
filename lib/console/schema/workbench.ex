@@ -219,7 +219,8 @@ defmodule Console.Schema.Workbench do
     from(w in __MODULE__, where: w.id in subquery(ids(query)))
   end
 
-  def for_user(query \\ __MODULE__, %User{} = user) do
+  def for_user(query \\ __MODULE__, user)
+  def for_user(query, %User{} = user) do
     Rbac.globally_readable(query, user, fn query, id, groups ->
       from(w in query,
         join: p in assoc(w, :project),
@@ -231,6 +232,7 @@ defmodule Console.Schema.Workbench do
       )
     end)
   end
+  def for_user(query, _), do: from(w in query, where: false)
 
   @valid ~w(name description system_prompt project_id repository_id agent_runtime_id bot_user_id)a
 

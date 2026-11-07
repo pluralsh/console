@@ -3,7 +3,9 @@ import {
   Flex,
   FormField,
   Input,
+  ListBoxItem,
   Modal,
+  Select,
   Switch,
 } from '@pluralsh/design-system'
 
@@ -11,9 +13,13 @@ import { useUpdateState } from 'components/hooks/useUpdateState'
 
 import { GqlError } from 'components/utils/Alert'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
+import { SearchableWorkbenchSelector } from 'components/workbenches/WorkbenchSelector'
+import { useSearchableWorkbenchOptions } from 'components/workbenches/useWorkbenchOptions'
 
 import {
+  ClusterUpdateAttributes,
   ClustersRowFragment,
+  InsightComponentPriority,
   useUpdateClusterMutation,
 } from 'generated/graphql'
 import isEqual from 'lodash/isEqual'
@@ -21,6 +27,62 @@ import { ComponentProps, useMemo } from 'react'
 
 import { tagsToNameValue } from '../services/CreateGlobalService'
 import { TagSelection } from '../services/TagSelection'
+
+const REMEDIATION_PRIORITIES = [
+  { value: InsightComponentPriority.Low, label: 'Low' },
+  { value: InsightComponentPriority.Medium, label: 'Medium' },
+  { value: InsightComponentPriority.High, label: 'High' },
+  { value: InsightComponentPriority.Critical, label: 'Critical' },
+]
+
+const DEFAULT_REMEDIATION_WINDOW = 21_600
+const DEFAULT_REMEDIATION_MAX_JOBS = 3
+
+type RemediationForm = {
+  autoRemediate: boolean
+  remediationWorkbenchId: Nullable<string>
+  remediationMinPriority: InsightComponentPriority
+  remediationWindow: number
+  remediationMaxJobs: number
+}
+
+type ChangedRemediationAttributes = Pick<
+  ClusterUpdateAttributes,
+  | 'remediationWorkbenchId'
+  | 'remediationMinPriority'
+  | 'remediationWindow'
+  | 'remediationMaxJobs'
+>
+
+function changedRemediationAttributes(
+  current: RemediationForm,
+  initial: RemediationForm
+): ChangedRemediationAttributes {
+  const attributes: ChangedRemediationAttributes = {}
+  const workbenchId = current.autoRemediate
+    ? current.remediationWorkbenchId
+    : null
+  const initialWorkbenchId = initial.autoRemediate
+    ? initial.remediationWorkbenchId
+    : null
+
+  if (workbenchId !== initialWorkbenchId)
+    attributes.remediationWorkbenchId = workbenchId
+  if (current.remediationMinPriority !== initial.remediationMinPriority)
+    attributes.remediationMinPriority = current.remediationMinPriority
+  if (current.remediationWindow !== initial.remediationWindow) {
+    attributes.remediationWindow = Number.isFinite(current.remediationWindow)
+      ? current.remediationWindow
+      : DEFAULT_REMEDIATION_WINDOW
+  }
+  if (current.remediationMaxJobs !== initial.remediationMaxJobs) {
+    attributes.remediationMaxJobs = Number.isFinite(current.remediationMaxJobs)
+      ? current.remediationMaxJobs
+      : DEFAULT_REMEDIATION_MAX_JOBS
+  }
+
+  return attributes
+}
 
 function ClusterSettingsModalInner({
   cluster,
@@ -41,15 +103,34 @@ function ClusterSettingsModalInner({
   )
 
   const {
-    state: { name, protect, tags, disableAi },
+    state: {
+      name,
+      protect,
+      tags,
+      disableAi,
+      autoRemediate,
+      remediationWorkbenchId,
+      remediationMinPriority,
+      remediationWindow,
+      remediationMaxJobs,
+    },
     update: updateState,
     hasUpdates,
+    initialState,
   } = useUpdateState(
     {
       name: cluster?.name,
       protect: !!cluster?.protect,
       tags: initialTags,
       disableAi: !!cluster?.disableAi,
+      autoRemediate: !!cluster?.remediationWorkbench?.id,
+      remediationWorkbenchId: cluster?.remediationWorkbench?.id ?? null,
+      remediationMinPriority:
+        cluster?.remediationMinPriority ?? InsightComponentPriority.High,
+      remediationWindow:
+        cluster?.remediationWindow ?? DEFAULT_REMEDIATION_WINDOW,
+      remediationMaxJobs:
+        cluster?.remediationMaxJobs ?? DEFAULT_REMEDIATION_MAX_JOBS,
     },
     { tags: (a, b) => !isEqual(a, b) }
   )
@@ -59,7 +140,7 @@ function ClusterSettingsModalInner({
 
   if (!cluster) return null
 
-  const allowSubmit = hasUpdates
+  const allowSubmit = hasUpdates && (!autoRemediate || !!remediationWorkbenchId)
 
   return (
     <Modal
@@ -80,6 +161,16 @@ function ClusterSettingsModalInner({
                   protect,
                   tags: tagsToNameValue(tags),
                   disableAi,
+                  ...changedRemediationAttributes(
+                    {
+                      autoRemediate,
+                      remediationWorkbenchId,
+                      remediationMinPriority,
+                      remediationWindow,
+                      remediationMaxJobs,
+                    },
+                    initialState
+                  ),
                 },
               },
             })
@@ -140,9 +231,120 @@ function ClusterSettingsModalInner({
         >
           Disable AI insights
         </Switch>
+        <Switch
+          checked={autoRemediate}
+          onChange={(checked) => updateState({ autoRemediate: checked })}
+        >
+          Auto-remediate cluster insights
+        </Switch>
+        {autoRemediate && (
+          <>
+            <RemediationWorkbenchField
+              workbenchId={remediationWorkbenchId}
+              setWorkbenchId={(id) =>
+                updateState({ remediationWorkbenchId: id })
+              }
+            />
+            <FormField label="Minimum severity">
+              <Select
+                label="Minimum severity"
+                selectedKey={remediationMinPriority}
+                onSelectionChange={(key) =>
+                  updateState({
+                    remediationMinPriority: key
+                      ? (String(key) as InsightComponentPriority)
+                      : InsightComponentPriority.High,
+                  })
+                }
+              >
+                {REMEDIATION_PRIORITIES.map(({ value, label }) => (
+                  <ListBoxItem
+                    key={value}
+                    label={label}
+                  />
+                ))}
+              </Select>
+            </FormField>
+            <FormField
+              label="Throttle window (seconds)"
+              hint="Duplicate findings are suppressed for this long. 21600 seconds is 6 hours."
+            >
+              <Input
+                type="number"
+                min={1}
+                value={remediationWindow}
+                onChange={(event) =>
+                  updateState({
+                    remediationWindow: Number.parseInt(event.target.value, 10),
+                  })
+                }
+              />
+            </FormField>
+            <FormField
+              label="Max jobs per window"
+              hint="Maximum remediation jobs to start for this cluster during the window."
+            >
+              <Input
+                type="number"
+                min={1}
+                value={remediationMaxJobs}
+                onChange={(event) =>
+                  updateState({
+                    remediationMaxJobs: Number.parseInt(event.target.value, 10),
+                  })
+                }
+              />
+            </FormField>
+          </>
+        )}
         {error && <GqlError error={error} />}
       </Flex>
     </Modal>
+  )
+}
+
+function RemediationWorkbenchField({
+  workbenchId,
+  setWorkbenchId,
+}: {
+  workbenchId: Nullable<string>
+  setWorkbenchId: (id: Nullable<string>) => void
+}) {
+  const {
+    workbenches,
+    selectedWorkbench,
+    hasWorkbenches,
+    loading,
+    fetchingMore,
+    query,
+    setQuery,
+    hasNextPage,
+    fetchNextPage,
+  } = useSearchableWorkbenchOptions(workbenchId)
+
+  return (
+    <FormField
+      label="Remediation workbench"
+      hint={
+        !loading && !hasWorkbenches
+          ? 'Create a workbench before enabling auto-remediation.'
+          : 'Jobs are sent here when an insight component meets the severity below.'
+      }
+    >
+      <SearchableWorkbenchSelector
+        workbenchId={workbenchId}
+        setWorkbenchId={setWorkbenchId}
+        workbenches={workbenches}
+        selectedWorkbench={selectedWorkbench}
+        loading={loading}
+        fetchingMore={fetchingMore}
+        query={query}
+        onQueryChange={setQuery}
+        hasNextPage={hasNextPage}
+        onLoadMore={fetchNextPage}
+        disabled={!loading && !hasWorkbenches}
+      />
+    </FormField>
   )
 }
 

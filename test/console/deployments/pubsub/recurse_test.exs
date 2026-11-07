@@ -970,6 +970,46 @@ defmodule Console.Deployments.PubSub.RecurseSyncTest do
     end
   end
 
+  describe "ClusterInsight" do
+    test "starts a remediation job for a qualifying component" do
+      insert(:user, bot_name: "console", roles: %{admin: true})
+      bot = insert(:user, roles: %{admin: true})
+      workbench = insert(:workbench, bot_user: bot)
+      cluster = insert(:cluster, remediation_workbench: workbench, remediation_min_priority: :high)
+      insight = insert(:ai_insight, text: "Certificate is not ready", sha: "cert-sha")
+      insert(:cluster_insight_component,
+        cluster: cluster,
+        priority: :critical,
+        group: "cert-manager.io",
+        version: "v1",
+        kind: "Certificate",
+        namespace: "cert-manager",
+        name: "serving-cert",
+        insight: insight
+      )
+
+      event = %PubSub.ClusterInsight{item: {cluster, insight}}
+      {:ok, [job]} = Recurse.handle_event(event)
+
+      assert job.workbench_id == workbench.id
+      assert job.user_id == bot.id
+      assert job.cluster_id == cluster.id
+      assert job.insight_sha == "cert-sha"
+      assert job.prompt =~ "serving-cert"
+      assert_receive {:event, %PubSub.WorkbenchJobCreated{item: ^job}}
+    end
+
+    test "does nothing when the cluster has no remediation workbench" do
+      cluster = insert(:cluster)
+      insight = insert(:ai_insight, text: "Certificate is not ready", sha: "cert-sha")
+      insert(:cluster_insight_component, cluster: cluster, priority: :critical, insight: insight)
+
+      :ok = Recurse.handle_event(%PubSub.ClusterInsight{item: {cluster, insight}})
+
+      refute_receive {:event, %PubSub.WorkbenchJobCreated{}}
+    end
+  end
+
   describe "IssueCreated" do
     test "creates a workbench job owned by the workbench bot user when issue targets a workbench" do
       insert(:user, bot_name: "console", roles: %{admin: true})

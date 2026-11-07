@@ -348,6 +348,10 @@ defmodule Console.Schema.Service do
     from(s in query, where: s.cluster_id == ^cluster_id)
   end
 
+  def in_k8s_namespace(query \\ __MODULE__, namespace) when is_binary(namespace) do
+    from(s in query, where: s.namespace == ^namespace)
+  end
+
   def for_cluster_handle(query \\ __MODULE__, handle) do
     from(s in query,
       join: c in assoc(s, :cluster),

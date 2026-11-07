@@ -1622,6 +1622,13 @@ export const ClustersRowFragmentDoc = /*#__PURE__*/ gql`
     extendedFrom
   }
   disableAi
+  remediationMinPriority
+  remediationWindow
+  remediationMaxJobs
+  remediationWorkbench {
+    id
+    name
+  }
 }
     ${ClusterUpgradePlanFragmentDoc}
 ${AiInsightSummaryFragmentDoc}` as unknown as DocumentNode<Types.ClustersRowFragment, unknown>;
@@ -10949,6 +10956,24 @@ export const WorkbenchesDocument = /*#__PURE__*/ gql`
 }
     ${PageInfoFragmentDoc}
 ${WorkbenchTinyFragmentDoc}` as unknown as DocumentNode<Types.WorkbenchesQuery, Types.WorkbenchesQueryVariables>;
+export const WorkbenchSelectorOptionsDocument = /*#__PURE__*/ gql`
+    query WorkbenchSelectorOptions($first: Int, $after: String, $q: String, $currentWorkbenchId: ID, $hasCurrentWorkbench: Boolean! = false) {
+  workbenches(first: $first, after: $after, q: $q) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...WorkbenchTiny
+      }
+    }
+  }
+  workbench(id: $currentWorkbenchId) @include(if: $hasCurrentWorkbench) {
+    ...WorkbenchTiny
+  }
+}
+    ${PageInfoFragmentDoc}
+${WorkbenchTinyFragmentDoc}` as unknown as DocumentNode<Types.WorkbenchSelectorOptionsQuery, Types.WorkbenchSelectorOptionsQueryVariables>;
 export const WorkbenchDashboardDocument = /*#__PURE__*/ gql`
     query WorkbenchDashboard {
   workbenchAggregates {
