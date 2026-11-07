@@ -1,4 +1,4 @@
-import { POLL_INTERVAL } from 'components/cluster/constants'
+import { WORKBENCH_POLL_INTERVAL } from 'components/workbenches/workbench/job/usePollWhileRunning'
 import { TicketIcon } from '@pluralsh/design-system'
 import { WorkbenchIssuesTable } from 'components/workbenches/common/WorkbenchIssuesTable'
 import { WorkbenchTabHeader } from 'components/workbenches/common/WorkbenchTabHeader'
@@ -12,7 +12,7 @@ import { mapExistingNodes } from 'utils/graphql'
 export function WorkbenchesIssues() {
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData({
-      pollInterval: POLL_INTERVAL,
+      pollInterval: WORKBENCH_POLL_INTERVAL,
       query: WorkbenchesIssuesDocument,
       keyPath: ['workbenchIssues'],
     })

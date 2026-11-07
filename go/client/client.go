@@ -18,6 +18,7 @@ type ConsoleClient interface {
 	GetAgentRun(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRun, error)
 	GetAgentRunCredentials(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRunCredentials, error)
 	GetAgentRunStatus(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRunStatus, error)
+	GetAgentRunPending(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRunPending, error)
 	GetAgentRunMinimal(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRunMinimal, error)
 	ListAgentRuns(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListAgentRuns, error)
 	ListAgentRunsMinimal(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListAgentRunsMinimal, error)
@@ -112,6 +113,8 @@ type ConsoleClient interface {
 	GetServiceDeploymentComponents(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentComponents, error)
 	GetServiceDeploymentForAgent(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentForAgent, error)
 	GetServiceDeploymentByHandle(ctx context.Context, cluster string, name string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentByHandle, error)
+	GetServiceDeploymentStatusByHandle(ctx context.Context, cluster string, name string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentStatusByHandle, error)
+	GetServiceDeploymentStatus(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentStatus, error)
 	GetServiceDeploymentTinyByHandle(ctx context.Context, cluster string, name string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentTinyByHandle, error)
 	GetServiceTarball(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetServiceTarball, error)
 	ListServiceDeployment(ctx context.Context, after *string, before *string, last *int64, clusterID *string, interceptors ...clientv2.RequestInterceptor) (*ListServiceDeployment, error)
@@ -989,6 +992,112 @@ func (t *AgentRunStatusFragment) GetPrompts() []*AgentRunStatusFragment_Prompts 
 		t = &AgentRunStatusFragment{}
 	}
 	return t.Prompts
+}
+
+type AgentRunPendingFragment struct {
+	ID              string                           "json:\"id\" graphql:\"id\""
+	Prompt          string                           "json:\"prompt\" graphql:\"prompt\""
+	Repository      string                           "json:\"repository\" graphql:\"repository\""
+	Mode            AgentRunMode                     "json:\"mode\" graphql:\"mode\""
+	ReviewDepth     *AgentReviewDepth                "json:\"reviewDepth,omitempty\" graphql:\"reviewDepth\""
+	Language        *AgentRunLanguage                "json:\"language,omitempty\" graphql:\"language\""
+	LanguageVersion *string                          "json:\"languageVersion,omitempty\" graphql:\"languageVersion\""
+	WorkbenchMcpURL *string                          "json:\"workbenchMcpUrl,omitempty\" graphql:\"workbenchMcpUrl\""
+	Runtime         *AgentRunPendingFragment_Runtime "json:\"runtime,omitempty\" graphql:\"runtime\""
+	Flow            *AgentRunPendingFragment_Flow    "json:\"flow,omitempty\" graphql:\"flow\""
+}
+
+func (t *AgentRunPendingFragment) GetID() string {
+	if t == nil {
+		t = &AgentRunPendingFragment{}
+	}
+	return t.ID
+}
+func (t *AgentRunPendingFragment) GetPrompt() string {
+	if t == nil {
+		t = &AgentRunPendingFragment{}
+	}
+	return t.Prompt
+}
+func (t *AgentRunPendingFragment) GetRepository() string {
+	if t == nil {
+		t = &AgentRunPendingFragment{}
+	}
+	return t.Repository
+}
+func (t *AgentRunPendingFragment) GetMode() *AgentRunMode {
+	if t == nil {
+		t = &AgentRunPendingFragment{}
+	}
+	return &t.Mode
+}
+func (t *AgentRunPendingFragment) GetReviewDepth() *AgentReviewDepth {
+	if t == nil {
+		t = &AgentRunPendingFragment{}
+	}
+	return t.ReviewDepth
+}
+func (t *AgentRunPendingFragment) GetLanguage() *AgentRunLanguage {
+	if t == nil {
+		t = &AgentRunPendingFragment{}
+	}
+	return t.Language
+}
+func (t *AgentRunPendingFragment) GetLanguageVersion() *string {
+	if t == nil {
+		t = &AgentRunPendingFragment{}
+	}
+	return t.LanguageVersion
+}
+func (t *AgentRunPendingFragment) GetWorkbenchMcpURL() *string {
+	if t == nil {
+		t = &AgentRunPendingFragment{}
+	}
+	return t.WorkbenchMcpURL
+}
+func (t *AgentRunPendingFragment) GetRuntime() *AgentRunPendingFragment_Runtime {
+	if t == nil {
+		t = &AgentRunPendingFragment{}
+	}
+	return t.Runtime
+}
+func (t *AgentRunPendingFragment) GetFlow() *AgentRunPendingFragment_Flow {
+	if t == nil {
+		t = &AgentRunPendingFragment{}
+	}
+	return t.Flow
+}
+
+type AgentRunUpdateFragment struct {
+	ID            string                                 "json:\"id\" graphql:\"id\""
+	Status        AgentRunStatus                         "json:\"status\" graphql:\"status\""
+	FollowupPrURL *string                                "json:\"followupPrUrl,omitempty\" graphql:\"followupPrUrl\""
+	PullRequests  []*AgentRunUpdateFragment_PullRequests "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
+}
+
+func (t *AgentRunUpdateFragment) GetID() string {
+	if t == nil {
+		t = &AgentRunUpdateFragment{}
+	}
+	return t.ID
+}
+func (t *AgentRunUpdateFragment) GetStatus() *AgentRunStatus {
+	if t == nil {
+		t = &AgentRunUpdateFragment{}
+	}
+	return &t.Status
+}
+func (t *AgentRunUpdateFragment) GetFollowupPrURL() *string {
+	if t == nil {
+		t = &AgentRunUpdateFragment{}
+	}
+	return t.FollowupPrURL
+}
+func (t *AgentRunUpdateFragment) GetPullRequests() []*AgentRunUpdateFragment_PullRequests {
+	if t == nil {
+		t = &AgentRunUpdateFragment{}
+	}
+	return t.PullRequests
 }
 
 type AgentRunMinimalFragment struct {
@@ -3005,6 +3114,38 @@ func (t *ServiceDeploymentFragment) GetMetadata() *ServiceDeploymentFragment_Met
 		t = &ServiceDeploymentFragment{}
 	}
 	return t.Metadata
+}
+
+type ServiceDeploymentStatusFragment struct {
+	ID         string                                        "json:\"id\" graphql:\"id\""
+	DeletedAt  *string                                       "json:\"deletedAt,omitempty\" graphql:\"deletedAt\""
+	Errors     []*ErrorFragment                              "json:\"errors,omitempty\" graphql:\"errors\""
+	Components []*ServiceDeploymentStatusFragment_Components "json:\"components,omitempty\" graphql:\"components\""
+}
+
+func (t *ServiceDeploymentStatusFragment) GetID() string {
+	if t == nil {
+		t = &ServiceDeploymentStatusFragment{}
+	}
+	return t.ID
+}
+func (t *ServiceDeploymentStatusFragment) GetDeletedAt() *string {
+	if t == nil {
+		t = &ServiceDeploymentStatusFragment{}
+	}
+	return t.DeletedAt
+}
+func (t *ServiceDeploymentStatusFragment) GetErrors() []*ErrorFragment {
+	if t == nil {
+		t = &ServiceDeploymentStatusFragment{}
+	}
+	return t.Errors
+}
+func (t *ServiceDeploymentStatusFragment) GetComponents() []*ServiceDeploymentStatusFragment_Components {
+	if t == nil {
+		t = &ServiceDeploymentStatusFragment{}
+	}
+	return t.Components
 }
 
 type ServiceDeploymentExtended struct {
@@ -5688,6 +5829,7 @@ type SentinelRunJobFragment struct {
 	Check       *string                           "json:\"check,omitempty\" graphql:\"check\""
 	Status      SentinelRunJobStatus              "json:\"status\" graphql:\"status\""
 	Format      SentinelRunJobFormat              "json:\"format\" graphql:\"format\""
+	Error       *string                           "json:\"error,omitempty\" graphql:\"error\""
 	UsesGit     *bool                             "json:\"usesGit,omitempty\" graphql:\"usesGit\""
 	JobSpec     *JobSpecFragment                  "json:\"jobSpec,omitempty\" graphql:\"jobSpec\""
 	Reference   *SentinelRunJobFragment_Reference "json:\"reference,omitempty\" graphql:\"reference\""
@@ -5718,6 +5860,12 @@ func (t *SentinelRunJobFragment) GetFormat() *SentinelRunJobFormat {
 		t = &SentinelRunJobFragment{}
 	}
 	return &t.Format
+}
+func (t *SentinelRunJobFragment) GetError() *string {
+	if t == nil {
+		t = &SentinelRunJobFragment{}
+	}
+	return t.Error
 }
 func (t *SentinelRunJobFragment) GetUsesGit() *bool {
 	if t == nil {
@@ -8098,6 +8246,46 @@ func (t *AgentRunStatusFragment_Prompts) GetSeq() int64 {
 	return t.Seq
 }
 
+type AgentRunPendingFragment_Runtime struct {
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *AgentRunPendingFragment_Runtime) GetName() string {
+	if t == nil {
+		t = &AgentRunPendingFragment_Runtime{}
+	}
+	return t.Name
+}
+
+type AgentRunPendingFragment_Flow struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *AgentRunPendingFragment_Flow) GetID() string {
+	if t == nil {
+		t = &AgentRunPendingFragment_Flow{}
+	}
+	return t.ID
+}
+
+type AgentRunUpdateFragment_PullRequests struct {
+	ID  string "json:\"id\" graphql:\"id\""
+	URL string "json:\"url\" graphql:\"url\""
+}
+
+func (t *AgentRunUpdateFragment_PullRequests) GetID() string {
+	if t == nil {
+		t = &AgentRunUpdateFragment_PullRequests{}
+	}
+	return t.ID
+}
+func (t *AgentRunUpdateFragment_PullRequests) GetURL() string {
+	if t == nil {
+		t = &AgentRunUpdateFragment_PullRequests{}
+	}
+	return t.URL
+}
+
 type AgentRunMinimalFragment_Runtime struct {
 	Type AgentRuntimeType "json:\"type\" graphql:\"type\""
 }
@@ -9427,6 +9615,66 @@ func (t *ServiceDeploymentFragment_Metadata) GetImages() []*string {
 		t = &ServiceDeploymentFragment_Metadata{}
 	}
 	return t.Images
+}
+
+type ServiceDeploymentStatusFragment_Components struct {
+	Group     *string         "json:\"group,omitempty\" graphql:\"group\""
+	ID        string          "json:\"id\" graphql:\"id\""
+	Kind      string          "json:\"kind\" graphql:\"kind\""
+	Name      string          "json:\"name\" graphql:\"name\""
+	Namespace *string         "json:\"namespace,omitempty\" graphql:\"namespace\""
+	State     *ComponentState "json:\"state,omitempty\" graphql:\"state\""
+	Synced    bool            "json:\"synced\" graphql:\"synced\""
+	Version   *string         "json:\"version,omitempty\" graphql:\"version\""
+}
+
+func (t *ServiceDeploymentStatusFragment_Components) GetGroup() *string {
+	if t == nil {
+		t = &ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Group
+}
+func (t *ServiceDeploymentStatusFragment_Components) GetID() string {
+	if t == nil {
+		t = &ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.ID
+}
+func (t *ServiceDeploymentStatusFragment_Components) GetKind() string {
+	if t == nil {
+		t = &ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Kind
+}
+func (t *ServiceDeploymentStatusFragment_Components) GetName() string {
+	if t == nil {
+		t = &ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Name
+}
+func (t *ServiceDeploymentStatusFragment_Components) GetNamespace() *string {
+	if t == nil {
+		t = &ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Namespace
+}
+func (t *ServiceDeploymentStatusFragment_Components) GetState() *ComponentState {
+	if t == nil {
+		t = &ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.State
+}
+func (t *ServiceDeploymentStatusFragment_Components) GetSynced() bool {
+	if t == nil {
+		t = &ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Synced
+}
+func (t *ServiceDeploymentStatusFragment_Components) GetVersion() *string {
+	if t == nil {
+		t = &ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Version
 }
 
 type ServiceDeploymentExtended_Revision_RevisionFragment_Git struct {
@@ -18016,6 +18264,28 @@ func (t *GetAgentRunStatus_AgentRun_AgentRunStatusFragment_Prompts) GetSeq() int
 	return t.Seq
 }
 
+type GetAgentRunPending_AgentRun_AgentRunPendingFragment_Runtime struct {
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *GetAgentRunPending_AgentRun_AgentRunPendingFragment_Runtime) GetName() string {
+	if t == nil {
+		t = &GetAgentRunPending_AgentRun_AgentRunPendingFragment_Runtime{}
+	}
+	return t.Name
+}
+
+type GetAgentRunPending_AgentRun_AgentRunPendingFragment_Flow struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *GetAgentRunPending_AgentRun_AgentRunPendingFragment_Flow) GetID() string {
+	if t == nil {
+		t = &GetAgentRunPending_AgentRun_AgentRunPendingFragment_Flow{}
+	}
+	return t.ID
+}
+
 type GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_Runtime struct {
 	Type AgentRuntimeType "json:\"type\" graphql:\"type\""
 }
@@ -18352,139 +18622,33 @@ func (t *ListAgentRunsMinimal_AgentRuns) GetPageInfo() *PageInfoFragment {
 	return &t.PageInfo
 }
 
-type ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Skills struct {
-	Contents    string  "json:\"contents\" graphql:\"contents\""
-	Description *string "json:\"description,omitempty\" graphql:\"description\""
-	Name        string  "json:\"name\" graphql:\"name\""
-}
-
-func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Skills) GetContents() string {
-	if t == nil {
-		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Skills{}
-	}
-	return t.Contents
-}
-func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Skills) GetDescription() *string {
-	if t == nil {
-		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Skills{}
-	}
-	return t.Description
-}
-func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Skills) GetName() string {
-	if t == nil {
-		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Skills{}
-	}
-	return t.Name
-}
-
-type ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage struct {
-	CachedTokens    *int64   "json:\"cachedTokens,omitempty\" graphql:\"cachedTokens\""
-	InputCost       *float64 "json:\"inputCost,omitempty\" graphql:\"inputCost\""
-	InputTokens     *int64   "json:\"inputTokens,omitempty\" graphql:\"inputTokens\""
-	OutputCost      *float64 "json:\"outputCost,omitempty\" graphql:\"outputCost\""
-	OutputTokens    *int64   "json:\"outputTokens,omitempty\" graphql:\"outputTokens\""
-	ReasoningTokens *int64   "json:\"reasoningTokens,omitempty\" graphql:\"reasoningTokens\""
-	TotalCost       *float64 "json:\"totalCost,omitempty\" graphql:\"totalCost\""
-	TotalTokens     *int64   "json:\"totalTokens,omitempty\" graphql:\"totalTokens\""
-}
-
-func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage) GetCachedTokens() *int64 {
-	if t == nil {
-		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage{}
-	}
-	return t.CachedTokens
-}
-func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage) GetInputCost() *float64 {
-	if t == nil {
-		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage{}
-	}
-	return t.InputCost
-}
-func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage) GetInputTokens() *int64 {
-	if t == nil {
-		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage{}
-	}
-	return t.InputTokens
-}
-func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage) GetOutputCost() *float64 {
-	if t == nil {
-		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage{}
-	}
-	return t.OutputCost
-}
-func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage) GetOutputTokens() *int64 {
-	if t == nil {
-		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage{}
-	}
-	return t.OutputTokens
-}
-func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage) GetReasoningTokens() *int64 {
-	if t == nil {
-		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage{}
-	}
-	return t.ReasoningTokens
-}
-func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage) GetTotalCost() *float64 {
-	if t == nil {
-		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage{}
-	}
-	return t.TotalCost
-}
-func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage) GetTotalTokens() *int64 {
-	if t == nil {
-		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage{}
-	}
-	return t.TotalTokens
-}
-
-type ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User struct {
-	Email string "json:\"email\" graphql:\"email\""
-	ID    string "json:\"id\" graphql:\"id\""
-	Name  string "json:\"name\" graphql:\"name\""
-}
-
-func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User) GetEmail() string {
-	if t == nil {
-		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User{}
-	}
-	return t.Email
-}
-func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User) GetID() string {
-	if t == nil {
-		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User{}
-	}
-	return t.ID
-}
-func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User) GetName() string {
-	if t == nil {
-		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User{}
-	}
-	return t.Name
-}
-
-type ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Flow struct {
-	ID   string "json:\"id\" graphql:\"id\""
+type ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunPendingFragment_Runtime struct {
 	Name string "json:\"name\" graphql:\"name\""
 }
 
-func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Flow) GetID() string {
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunPendingFragment_Runtime) GetName() string {
 	if t == nil {
-		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Flow{}
-	}
-	return t.ID
-}
-func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Flow) GetName() string {
-	if t == nil {
-		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Flow{}
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunPendingFragment_Runtime{}
 	}
 	return t.Name
 }
 
-type ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges struct {
-	Node *AgentRunFragment "json:\"node,omitempty\" graphql:\"node\""
+type ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunPendingFragment_Flow struct {
+	ID string "json:\"id\" graphql:\"id\""
 }
 
-func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges) GetNode() *AgentRunFragment {
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunPendingFragment_Flow) GetID() string {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunPendingFragment_Flow{}
+	}
+	return t.ID
+}
+
+type ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges struct {
+	Node *AgentRunPendingFragment "json:\"node,omitempty\" graphql:\"node\""
+}
+
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges) GetNode() *AgentRunPendingFragment {
 	if t == nil {
 		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges{}
 	}
@@ -18670,132 +18834,22 @@ func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Flow) GetName() string {
 	return t.Name
 }
 
-type UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Skills struct {
-	Contents    string  "json:\"contents\" graphql:\"contents\""
-	Description *string "json:\"description,omitempty\" graphql:\"description\""
-	Name        string  "json:\"name\" graphql:\"name\""
+type UpdateAgentRun_UpdateAgentRun_AgentRunUpdateFragment_PullRequests struct {
+	ID  string "json:\"id\" graphql:\"id\""
+	URL string "json:\"url\" graphql:\"url\""
 }
 
-func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Skills) GetContents() string {
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunUpdateFragment_PullRequests) GetID() string {
 	if t == nil {
-		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Skills{}
-	}
-	return t.Contents
-}
-func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Skills) GetDescription() *string {
-	if t == nil {
-		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Skills{}
-	}
-	return t.Description
-}
-func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Skills) GetName() string {
-	if t == nil {
-		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Skills{}
-	}
-	return t.Name
-}
-
-type UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage struct {
-	CachedTokens    *int64   "json:\"cachedTokens,omitempty\" graphql:\"cachedTokens\""
-	InputCost       *float64 "json:\"inputCost,omitempty\" graphql:\"inputCost\""
-	InputTokens     *int64   "json:\"inputTokens,omitempty\" graphql:\"inputTokens\""
-	OutputCost      *float64 "json:\"outputCost,omitempty\" graphql:\"outputCost\""
-	OutputTokens    *int64   "json:\"outputTokens,omitempty\" graphql:\"outputTokens\""
-	ReasoningTokens *int64   "json:\"reasoningTokens,omitempty\" graphql:\"reasoningTokens\""
-	TotalCost       *float64 "json:\"totalCost,omitempty\" graphql:\"totalCost\""
-	TotalTokens     *int64   "json:\"totalTokens,omitempty\" graphql:\"totalTokens\""
-}
-
-func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetCachedTokens() *int64 {
-	if t == nil {
-		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
-	}
-	return t.CachedTokens
-}
-func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetInputCost() *float64 {
-	if t == nil {
-		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
-	}
-	return t.InputCost
-}
-func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetInputTokens() *int64 {
-	if t == nil {
-		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
-	}
-	return t.InputTokens
-}
-func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetOutputCost() *float64 {
-	if t == nil {
-		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
-	}
-	return t.OutputCost
-}
-func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetOutputTokens() *int64 {
-	if t == nil {
-		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
-	}
-	return t.OutputTokens
-}
-func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetReasoningTokens() *int64 {
-	if t == nil {
-		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
-	}
-	return t.ReasoningTokens
-}
-func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetTotalCost() *float64 {
-	if t == nil {
-		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
-	}
-	return t.TotalCost
-}
-func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetTotalTokens() *int64 {
-	if t == nil {
-		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
-	}
-	return t.TotalTokens
-}
-
-type UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User struct {
-	Email string "json:\"email\" graphql:\"email\""
-	ID    string "json:\"id\" graphql:\"id\""
-	Name  string "json:\"name\" graphql:\"name\""
-}
-
-func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User) GetEmail() string {
-	if t == nil {
-		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User{}
-	}
-	return t.Email
-}
-func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User) GetID() string {
-	if t == nil {
-		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User{}
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunUpdateFragment_PullRequests{}
 	}
 	return t.ID
 }
-func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User) GetName() string {
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunUpdateFragment_PullRequests) GetURL() string {
 	if t == nil {
-		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User{}
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunUpdateFragment_PullRequests{}
 	}
-	return t.Name
-}
-
-type UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Flow struct {
-	ID   string "json:\"id\" graphql:\"id\""
-	Name string "json:\"name\" graphql:\"name\""
-}
-
-func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Flow) GetID() string {
-	if t == nil {
-		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Flow{}
-	}
-	return t.ID
-}
-func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Flow) GetName() string {
-	if t == nil {
-		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Flow{}
-	}
-	return t.Name
+	return t.URL
 }
 
 type CreateAgentMessage_CreateAgentMessage struct {
@@ -25048,6 +25102,126 @@ func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtende
 		t = &GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_Imports{}
 	}
 	return t.Stack
+}
+
+type GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components struct {
+	Group     *string         "json:\"group,omitempty\" graphql:\"group\""
+	ID        string          "json:\"id\" graphql:\"id\""
+	Kind      string          "json:\"kind\" graphql:\"kind\""
+	Name      string          "json:\"name\" graphql:\"name\""
+	Namespace *string         "json:\"namespace,omitempty\" graphql:\"namespace\""
+	State     *ComponentState "json:\"state,omitempty\" graphql:\"state\""
+	Synced    bool            "json:\"synced\" graphql:\"synced\""
+	Version   *string         "json:\"version,omitempty\" graphql:\"version\""
+}
+
+func (t *GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetGroup() *string {
+	if t == nil {
+		t = &GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Group
+}
+func (t *GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetID() string {
+	if t == nil {
+		t = &GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.ID
+}
+func (t *GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetKind() string {
+	if t == nil {
+		t = &GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Kind
+}
+func (t *GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetName() string {
+	if t == nil {
+		t = &GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Name
+}
+func (t *GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetNamespace() *string {
+	if t == nil {
+		t = &GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Namespace
+}
+func (t *GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetState() *ComponentState {
+	if t == nil {
+		t = &GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.State
+}
+func (t *GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetSynced() bool {
+	if t == nil {
+		t = &GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Synced
+}
+func (t *GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetVersion() *string {
+	if t == nil {
+		t = &GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Version
+}
+
+type GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components struct {
+	Group     *string         "json:\"group,omitempty\" graphql:\"group\""
+	ID        string          "json:\"id\" graphql:\"id\""
+	Kind      string          "json:\"kind\" graphql:\"kind\""
+	Name      string          "json:\"name\" graphql:\"name\""
+	Namespace *string         "json:\"namespace,omitempty\" graphql:\"namespace\""
+	State     *ComponentState "json:\"state,omitempty\" graphql:\"state\""
+	Synced    bool            "json:\"synced\" graphql:\"synced\""
+	Version   *string         "json:\"version,omitempty\" graphql:\"version\""
+}
+
+func (t *GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetGroup() *string {
+	if t == nil {
+		t = &GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Group
+}
+func (t *GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetID() string {
+	if t == nil {
+		t = &GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.ID
+}
+func (t *GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetKind() string {
+	if t == nil {
+		t = &GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Kind
+}
+func (t *GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetName() string {
+	if t == nil {
+		t = &GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Name
+}
+func (t *GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetNamespace() *string {
+	if t == nil {
+		t = &GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Namespace
+}
+func (t *GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetState() *ComponentState {
+	if t == nil {
+		t = &GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.State
+}
+func (t *GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetSynced() bool {
+	if t == nil {
+		t = &GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Synced
+}
+func (t *GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetVersion() *string {
+	if t == nil {
+		t = &GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Version
 }
 
 type GetServiceDeploymentTinyByHandle_ServiceDeployment struct {
@@ -47114,6 +47288,17 @@ func (t *GetAgentRunStatus) GetAgentRun() *AgentRunStatusFragment {
 	return t.AgentRun
 }
 
+type GetAgentRunPending struct {
+	AgentRun *AgentRunPendingFragment "json:\"agentRun,omitempty\" graphql:\"agentRun\""
+}
+
+func (t *GetAgentRunPending) GetAgentRun() *AgentRunPendingFragment {
+	if t == nil {
+		t = &GetAgentRunPending{}
+	}
+	return t.AgentRun
+}
+
 type GetAgentRunMinimal struct {
 	AgentRun *AgentRunMinimalFragment "json:\"agentRun,omitempty\" graphql:\"agentRun\""
 }
@@ -47192,10 +47377,10 @@ func (t *CreateAgentRun) GetCreateAgentRun() *AgentRunFragment {
 }
 
 type UpdateAgentRun struct {
-	UpdateAgentRun *AgentRunFragment "json:\"updateAgentRun,omitempty\" graphql:\"updateAgentRun\""
+	UpdateAgentRun *AgentRunUpdateFragment "json:\"updateAgentRun,omitempty\" graphql:\"updateAgentRun\""
 }
 
-func (t *UpdateAgentRun) GetUpdateAgentRun() *AgentRunFragment {
+func (t *UpdateAgentRun) GetUpdateAgentRun() *AgentRunUpdateFragment {
 	if t == nil {
 		t = &UpdateAgentRun{}
 	}
@@ -48144,6 +48329,28 @@ type GetServiceDeploymentByHandle struct {
 func (t *GetServiceDeploymentByHandle) GetServiceDeployment() *ServiceDeploymentExtended {
 	if t == nil {
 		t = &GetServiceDeploymentByHandle{}
+	}
+	return t.ServiceDeployment
+}
+
+type GetServiceDeploymentStatusByHandle struct {
+	ServiceDeployment *ServiceDeploymentStatusFragment "json:\"serviceDeployment,omitempty\" graphql:\"serviceDeployment\""
+}
+
+func (t *GetServiceDeploymentStatusByHandle) GetServiceDeployment() *ServiceDeploymentStatusFragment {
+	if t == nil {
+		t = &GetServiceDeploymentStatusByHandle{}
+	}
+	return t.ServiceDeployment
+}
+
+type GetServiceDeploymentStatus struct {
+	ServiceDeployment *ServiceDeploymentStatusFragment "json:\"serviceDeployment,omitempty\" graphql:\"serviceDeployment\""
+}
+
+func (t *GetServiceDeploymentStatus) GetServiceDeployment() *ServiceDeploymentStatusFragment {
+	if t == nil {
+		t = &GetServiceDeploymentStatus{}
 	}
 	return t.ServiceDeployment
 }
@@ -51441,6 +51648,46 @@ func (c *Client) GetAgentRunStatus(ctx context.Context, id string, interceptors 
 	return &res, nil
 }
 
+const GetAgentRunPendingDocument = `query GetAgentRunPending ($id: ID!) {
+	agentRun(id: $id) {
+		... AgentRunPendingFragment
+	}
+}
+fragment AgentRunPendingFragment on AgentRun {
+	id
+	prompt
+	repository
+	mode
+	reviewDepth
+	language
+	languageVersion
+	workbenchMcpUrl
+	runtime {
+		name
+	}
+	flow {
+		id
+	}
+}
+`
+
+func (c *Client) GetAgentRunPending(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRunPending, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetAgentRunPending
+	if err := c.Client.Post(ctx, "GetAgentRunPending", GetAgentRunPendingDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const GetAgentRunMinimalDocument = `query GetAgentRunMinimal ($id: ID!) {
 	agentRun(id: $id) {
 		... AgentRunMinimalFragment
@@ -51748,7 +51995,7 @@ const ListAgentRuntimePendingRunsDocument = `query ListAgentRuntimePendingRuns (
 		pendingRuns(after: $after, first: $first, before: $before, last: $last) {
 			edges {
 				node {
-					... AgentRunFragment
+					... AgentRunPendingFragment
 				}
 			}
 			pageInfo {
@@ -51757,163 +52004,21 @@ const ListAgentRuntimePendingRunsDocument = `query ListAgentRuntimePendingRuns (
 		}
 	}
 }
-fragment AgentRunFragment on AgentRun {
+fragment AgentRunPendingFragment on AgentRun {
 	id
 	prompt
 	repository
-	branch
-	headBranch
 	mode
 	reviewDepth
 	language
 	languageVersion
-	todos {
-		... AgentTodoFragment
-	}
-	prompts {
-		... AgentPromptFragment
-	}
-	attachments {
-		... AgentAttachmentFragment
-	}
-	skills {
-		name
-		description
-		contents
-	}
-	status
-	podReference {
-		... AgentPodReferenceFragment
-	}
-	error
-	analysis {
-		... AgentAnalysisFragment
-	}
-	usage {
-		inputTokens
-		outputTokens
-		totalTokens
-		cachedTokens
-		reasoningTokens
-		inputCost
-		outputCost
-		totalCost
-	}
 	workbenchMcpUrl
 	runtime {
-		... AgentRuntimeFragment
-	}
-	user {
-		id
 		name
-		email
 	}
 	flow {
 		id
-		name
 	}
-	pullRequests {
-		... PullRequestFragment
-	}
-	upload {
-		... AgentRunUploadFragment
-	}
-	babysit
-	babysitInterval
-	approval
-	approvedAt
-	followup
-	followupPrUrl
-}
-fragment AgentTodoFragment on AgentTodo {
-	description
-	done
-	title
-}
-fragment AgentPromptFragment on AgentPrompt {
-	id
-	prompt
-	seq
-	attachments {
-		... AgentAttachmentFragment
-	}
-}
-fragment AgentAttachmentFragment on Attachment {
-	id
-	filename
-	filetype
-	size
-	downloadUrl
-}
-fragment AgentPodReferenceFragment on AgentPodReference {
-	name
-	namespace
-}
-fragment AgentAnalysisFragment on AgentAnalysis {
-	summary
-	analysis
-	bullets
-}
-fragment AgentRuntimeFragment on AgentRuntime {
-	id
-	name
-	type
-	aiProxy
-	cluster {
-		... TinyClusterFragment
-	}
-	createBindings {
-		... PolicyBindingFragment
-	}
-}
-fragment TinyClusterFragment on Cluster {
-	id
-	name
-	handle
-	self
-	deletedAt
-	project {
-		... TinyProjectFragment
-	}
-}
-fragment TinyProjectFragment on Project {
-	id
-	name
-	default
-}
-fragment PolicyBindingFragment on PolicyBinding {
-	id
-	group {
-		... GroupFragment
-	}
-	user {
-		... UserFragment
-	}
-}
-fragment GroupFragment on Group {
-	id
-	name
-	description
-	global
-}
-fragment UserFragment on User {
-	name
-	id
-	email
-}
-fragment PullRequestFragment on PullRequest {
-	id
-	status
-	url
-	title
-	creator
-	ref
-}
-fragment AgentRunUploadFragment on AgentRunUpload {
-	id
-	session
-	screenRecording
-	patch
 }
 fragment PageInfoFragment on PageInfo {
 	hasNextPage
@@ -52182,166 +52287,17 @@ func (c *Client) CreateAgentRun(ctx context.Context, runtimeID string, attribute
 
 const UpdateAgentRunDocument = `mutation UpdateAgentRun ($id: ID!, $attributes: AgentRunStatusAttributes!) {
 	updateAgentRun(id: $id, attributes: $attributes) {
-		... AgentRunFragment
+		... AgentRunUpdateFragment
 	}
 }
-fragment AgentRunFragment on AgentRun {
+fragment AgentRunUpdateFragment on AgentRun {
 	id
-	prompt
-	repository
-	branch
-	headBranch
-	mode
-	reviewDepth
-	language
-	languageVersion
-	todos {
-		... AgentTodoFragment
-	}
-	prompts {
-		... AgentPromptFragment
-	}
-	attachments {
-		... AgentAttachmentFragment
-	}
-	skills {
-		name
-		description
-		contents
-	}
 	status
-	podReference {
-		... AgentPodReferenceFragment
-	}
-	error
-	analysis {
-		... AgentAnalysisFragment
-	}
-	usage {
-		inputTokens
-		outputTokens
-		totalTokens
-		cachedTokens
-		reasoningTokens
-		inputCost
-		outputCost
-		totalCost
-	}
-	workbenchMcpUrl
-	runtime {
-		... AgentRuntimeFragment
-	}
-	user {
-		id
-		name
-		email
-	}
-	flow {
-		id
-		name
-	}
-	pullRequests {
-		... PullRequestFragment
-	}
-	upload {
-		... AgentRunUploadFragment
-	}
-	babysit
-	babysitInterval
-	approval
-	approvedAt
-	followup
 	followupPrUrl
-}
-fragment AgentTodoFragment on AgentTodo {
-	description
-	done
-	title
-}
-fragment AgentPromptFragment on AgentPrompt {
-	id
-	prompt
-	seq
-	attachments {
-		... AgentAttachmentFragment
+	pullRequests {
+		id
+		url
 	}
-}
-fragment AgentAttachmentFragment on Attachment {
-	id
-	filename
-	filetype
-	size
-	downloadUrl
-}
-fragment AgentPodReferenceFragment on AgentPodReference {
-	name
-	namespace
-}
-fragment AgentAnalysisFragment on AgentAnalysis {
-	summary
-	analysis
-	bullets
-}
-fragment AgentRuntimeFragment on AgentRuntime {
-	id
-	name
-	type
-	aiProxy
-	cluster {
-		... TinyClusterFragment
-	}
-	createBindings {
-		... PolicyBindingFragment
-	}
-}
-fragment TinyClusterFragment on Cluster {
-	id
-	name
-	handle
-	self
-	deletedAt
-	project {
-		... TinyProjectFragment
-	}
-}
-fragment TinyProjectFragment on Project {
-	id
-	name
-	default
-}
-fragment PolicyBindingFragment on PolicyBinding {
-	id
-	group {
-		... GroupFragment
-	}
-	user {
-		... UserFragment
-	}
-}
-fragment GroupFragment on Group {
-	id
-	name
-	description
-	global
-}
-fragment UserFragment on User {
-	name
-	id
-	email
-}
-fragment PullRequestFragment on PullRequest {
-	id
-	status
-	url
-	title
-	creator
-	ref
-}
-fragment AgentRunUploadFragment on AgentRunUpload {
-	id
-	session
-	screenRecording
-	patch
 }
 `
 
@@ -59743,6 +59699,97 @@ func (c *Client) GetServiceDeploymentByHandle(ctx context.Context, cluster strin
 
 	var res GetServiceDeploymentByHandle
 	if err := c.Client.Post(ctx, "GetServiceDeploymentByHandle", GetServiceDeploymentByHandleDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetServiceDeploymentStatusByHandleDocument = `query GetServiceDeploymentStatusByHandle ($cluster: String!, $name: String!) {
+	serviceDeployment(cluster: $cluster, name: $name) {
+		... ServiceDeploymentStatusFragment
+	}
+}
+fragment ServiceDeploymentStatusFragment on ServiceDeployment {
+	id
+	deletedAt
+	errors {
+		... ErrorFragment
+	}
+	components {
+		id
+		name
+		group
+		kind
+		namespace
+		state
+		synced
+		version
+	}
+}
+fragment ErrorFragment on ServiceError {
+	source
+	message
+}
+`
+
+func (c *Client) GetServiceDeploymentStatusByHandle(ctx context.Context, cluster string, name string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentStatusByHandle, error) {
+	vars := map[string]any{
+		"cluster": cluster,
+		"name":    name,
+	}
+
+	var res GetServiceDeploymentStatusByHandle
+	if err := c.Client.Post(ctx, "GetServiceDeploymentStatusByHandle", GetServiceDeploymentStatusByHandleDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetServiceDeploymentStatusDocument = `query GetServiceDeploymentStatus ($id: ID!) {
+	serviceDeployment(id: $id) {
+		... ServiceDeploymentStatusFragment
+	}
+}
+fragment ServiceDeploymentStatusFragment on ServiceDeployment {
+	id
+	deletedAt
+	errors {
+		... ErrorFragment
+	}
+	components {
+		id
+		name
+		group
+		kind
+		namespace
+		state
+		synced
+		version
+	}
+}
+fragment ErrorFragment on ServiceError {
+	source
+	message
+}
+`
+
+func (c *Client) GetServiceDeploymentStatus(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentStatus, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetServiceDeploymentStatus
+	if err := c.Client.Post(ctx, "GetServiceDeploymentStatus", GetServiceDeploymentStatusDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -68188,6 +68235,7 @@ fragment SentinelRunJobFragment on SentinelRunJob {
 	check
 	status
 	format
+	error
 	usesGit
 	jobSpec {
 		... JobSpecFragment
@@ -68387,6 +68435,7 @@ fragment SentinelRunJobFragment on SentinelRunJob {
 	check
 	status
 	format
+	error
 	usesGit
 	jobSpec {
 		... JobSpecFragment
@@ -68756,6 +68805,7 @@ fragment SentinelRunJobFragment on SentinelRunJob {
 	check
 	status
 	format
+	error
 	usesGit
 	jobSpec {
 		... JobSpecFragment
@@ -77127,6 +77177,7 @@ var DocumentOperationNames = map[string]string{
 	GetAgentRunDocument:                               "GetAgentRun",
 	GetAgentRunCredentialsDocument:                    "GetAgentRunCredentials",
 	GetAgentRunStatusDocument:                         "GetAgentRunStatus",
+	GetAgentRunPendingDocument:                        "GetAgentRunPending",
 	GetAgentRunMinimalDocument:                        "GetAgentRunMinimal",
 	ListAgentRunsDocument:                             "ListAgentRuns",
 	ListAgentRunsMinimalDocument:                      "ListAgentRunsMinimal",
@@ -77221,6 +77272,8 @@ var DocumentOperationNames = map[string]string{
 	GetServiceDeploymentComponentsDocument:            "GetServiceDeploymentComponents",
 	GetServiceDeploymentForAgentDocument:              "GetServiceDeploymentForAgent",
 	GetServiceDeploymentByHandleDocument:              "GetServiceDeploymentByHandle",
+	GetServiceDeploymentStatusByHandleDocument:        "GetServiceDeploymentStatusByHandle",
+	GetServiceDeploymentStatusDocument:                "GetServiceDeploymentStatus",
 	GetServiceDeploymentTinyByHandleDocument:          "GetServiceDeploymentTinyByHandle",
 	GetServiceTarballDocument:                         "GetServiceTarball",
 	ListServiceDeploymentDocument:                     "ListServiceDeployment",

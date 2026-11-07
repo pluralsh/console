@@ -175,6 +175,40 @@ func TestDecodeTestJSONFileToString_OutputLines(t *testing.T) {
 	}
 }
 
+func TestDecodeTestJSONFile_BuildFailure(t *testing.T) {
+	events := []TestEvent{
+		{Action: "build-output", ImportPath: "example.com/user-tests [example.com/user-tests.test]", Output: "# example.com/user-tests\n"},
+		{Action: "build-output", ImportPath: "example.com/user-tests [example.com/user-tests.test]", Output: "./foo_test.go:3:1: undefined: bar\n"},
+		{Action: "build-fail", ImportPath: "example.com/user-tests [example.com/user-tests.test]"},
+		{Action: "fail", Package: "example.com/user-tests"},
+	}
+	file := writeTempJSONFile(t, events)
+	defer os.Remove(file)
+	result, err := decodeTestJSONFile(file)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if result.passed {
+		t.Errorf("expected passed=false, got true")
+	}
+	if !strings.Contains(result.buildErrors, "undefined: bar") {
+		t.Errorf("build errors missing compiler output: %q", result.buildErrors)
+	}
+	if result.tests != 0 {
+		t.Errorf("expected no tests to run, got %d", result.tests)
+	}
+}
+
+func TestRunPostrunScript_FailureIncludesOutput(t *testing.T) {
+	script := "echo cleanup-broke && exit 3"
+	err := runPostrunScript(&console.SentinelCheckIntegrationTestConfigurationFragment{
+		PostrunScript: &script,
+	})
+	if err == nil || !strings.Contains(err.Error(), "cleanup-broke") {
+		t.Fatalf("expected error to include script output, got: %v", err)
+	}
+}
+
 func TestRunPostrunScript_SkipsWhenUnset(t *testing.T) {
 	if err := runPostrunScript(nil); err != nil {
 		t.Fatalf("unexpected error: %v", err)

@@ -195,7 +195,7 @@ defmodule Console.AI.Chat.MemoryEngine do
         loop(engine, iter + 1)
 
       {:error, %ReqLLM.Error.API.Request{status: status, reason: body}} when status >= 400 and status < 500 ->
-        {:error, "llm provider HTTP #{status} : #{Console.truncate(body, 200)}"}
+        {:error, "llm provider HTTP #{status} : #{Console.truncate(body, 1000)}"}
 
       {:error, %ReqLLM.Error.API.Request{reason: reason}} ->
         Logger.warning "llm provider socket closed, retrying: #{inspect(reason)}"

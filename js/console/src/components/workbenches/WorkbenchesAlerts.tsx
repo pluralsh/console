@@ -1,4 +1,4 @@
-import { POLL_INTERVAL } from 'components/cluster/constants'
+import { WORKBENCH_POLL_INTERVAL } from 'components/workbenches/workbench/job/usePollWhileRunning'
 import { MegaphoneIcon } from '@pluralsh/design-system'
 import { WorkbenchTabHeader } from 'components/workbenches/common/WorkbenchTabHeader'
 import { WorkbenchTabWrapper } from 'components/workbenches/common/WorkbenchTabWrapper'
@@ -11,7 +11,7 @@ import { mapExistingNodes } from 'utils/graphql'
 export function WorkbenchesAlerts() {
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData({
-      pollInterval: POLL_INTERVAL,
+      pollInterval: WORKBENCH_POLL_INTERVAL,
       query: WorkbenchesAlertsDocument,
       keyPath: ['workbenchAlerts'],
     })

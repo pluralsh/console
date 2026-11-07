@@ -296,6 +296,19 @@ func TestStreamerIgnoresWritesAfterClose(t *testing.T) {
 	s.CloseAll()
 }
 
+func TestStreamerDiscardDropsUnflushedOutput(t *testing.T) {
+	t.Parallel()
+
+	m := mocks.NewClientMock(t)
+	s := New(t.Context(), m).WithSizeLimit(1024).WithFlushInterval(time.Hour)
+	s.Write("call-1", "msg-1", "done")
+	s.Discard("call-1")
+	s.Write("call-1", "msg-1", "done too late")
+	s.CloseAll()
+
+	m.AssertNotCalled(t, "AgentMessageOutput", mock.Anything, mock.Anything)
+}
+
 func TestStreamerIgnoresRegressedAccumulatedStdout(t *testing.T) {
 	t.Parallel()
 

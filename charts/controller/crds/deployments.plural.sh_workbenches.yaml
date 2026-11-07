@@ -135,6 +135,10 @@ spec:
                         description: SelfService enables the self-service subagent
                           for catalog and PR automation workflows.
                         type: boolean
+                      sentinels:
+                        description: Sentinels enables tools to inspect sentinels,
+                          their runs and run job results.
+                        type: boolean
                       services:
                         description: Services enables the services capability.
                         type: boolean

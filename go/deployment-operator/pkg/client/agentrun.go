@@ -12,7 +12,7 @@ import (
 )
 
 func (c *client) IsAgentRunExists(ctx context.Context, id string) (bool, error) {
-	scm, err := c.GetAgentRun(ctx, id)
+	scm, err := c.GetAgentRunStatus(ctx, id)
 	if errors.IsNotFound(err) {
 		return false, nil
 	}
@@ -62,6 +62,25 @@ func (c *client) GetAgentRunStatus(ctx context.Context, id string) (*console.Age
 	return response.AgentRun, err
 }
 
+func (c *client) GetAgentRunPending(ctx context.Context, id string) (*console.AgentRunPendingFragment, error) {
+	if id == "" {
+		return nil, fmt.Errorf("no id specified")
+	}
+
+	response, err := c.consoleClient.GetAgentRunPending(ctx, id)
+	if internalerror.IsNotFound(err) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, id)
+	}
+	if err == nil && (response == nil || response.AgentRun == nil) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, id)
+	}
+	if response == nil {
+		return nil, err
+	}
+
+	return response.AgentRun, err
+}
+
 func (c *client) GetAgentRunCredentials(ctx context.Context, id string) (*console.AgentRunCredentialsFragment, error) {
 	if id == "" {
 		return nil, fmt.Errorf("no id specified")
@@ -94,7 +113,7 @@ func (c *client) CreateAgentRun(ctx context.Context, runtimeID string, attrs con
 	return response.CreateAgentRun, nil
 }
 
-func (c *client) UpdateAgentRun(ctx context.Context, id string, attrs console.AgentRunStatusAttributes) (*console.AgentRunFragment, error) {
+func (c *client) UpdateAgentRun(ctx context.Context, id string, attrs console.AgentRunStatusAttributes) (*console.AgentRunUpdateFragment, error) {
 	response, err := c.consoleClient.UpdateAgentRun(ctx, id, attrs)
 	if err != nil {
 		return nil, err

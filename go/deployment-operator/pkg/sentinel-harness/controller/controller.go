@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/url"
 	"os"
@@ -31,6 +32,10 @@ const (
 	testCaseFilePathEnvVar = "TEST_CASES_FILE_PATH"
 
 	userTestDir = "user-tests"
+
+	// maxErrorLength mirrors the length limit on the console's sentinel_run_jobs.error column.
+	maxErrorLength         = 2000
+	maxCommandOutputLength = 1000
 )
 
 func NewSentinelRunController(options ...Option) (Controller, error) {
@@ -43,7 +48,7 @@ func NewSentinelRunController(options ...Option) (Controller, error) {
 	return ctrl.init()
 }
 
-func (in *sentinelRunController) Start(_ context.Context) error {
+func (in *sentinelRunController) Start(_ context.Context) (retErr error) {
 	sentinelRunJob, err := in.consoleClient.GetSentinelRunJob(in.sentinelRunID)
 	if err != nil {
 		return err
@@ -58,19 +63,38 @@ func (in *sentinelRunController) Start(_ context.Context) error {
 		return err
 	}
 
+	defer func() {
+		if r := recover(); r != nil {
+			retErr = in.reportFailure("", fmt.Errorf("sentinel harness panicked: %v", r))
+		}
+	}()
+
 	output, passed, err := in.runTests(sentinelRunJob)
 	if err != nil {
-		updateErr := in.consoleClient.UpdateSentinelRunJobStatus(in.sentinelRunID, &console.SentinelRunJobUpdateAttributes{
-			Status: lo.ToPtr(console.SentinelRunJobStatusFailed),
-		})
-
-		return fmt.Errorf("error running tests: %w; update status err: %w", err, updateErr)
+		return in.reportFailure(output, err)
 	}
 
 	return in.consoleClient.UpdateSentinelRunJobStatus(in.sentinelRunID, &console.SentinelRunJobUpdateAttributes{
 		Status: lo.Ternary(passed, lo.ToPtr(console.SentinelRunJobStatusSuccess), lo.ToPtr(console.SentinelRunJobStatusFailed)),
 		Output: lo.ToPtr(output),
 	})
+}
+
+// reportFailure marks the run job as failed in the console, surfacing err as the job's runtime error alongside any
+// test output collected before the failure.
+func (in *sentinelRunController) reportFailure(output string, err error) error {
+	attrs := &console.SentinelRunJobUpdateAttributes{
+		Status: lo.ToPtr(console.SentinelRunJobStatusFailed),
+		Error:  lo.ToPtr(truncateHead(err.Error(), maxErrorLength)),
+	}
+	if output != "" {
+		attrs.Output = lo.ToPtr(output)
+	}
+
+	if updateErr := in.consoleClient.UpdateSentinelRunJobStatus(in.sentinelRunID, attrs); updateErr != nil {
+		return fmt.Errorf("error running tests: %w; update status err: %w", err, updateErr)
+	}
+	return fmt.Errorf("error running tests: %w", err)
 }
 
 func (in *sentinelRunController) runTests(fragment *console.SentinelRunJobFragment) (string, bool, error) {
@@ -80,7 +104,7 @@ func (in *sentinelRunController) runTests(fragment *console.SentinelRunJobFragme
 		klog.V(log.LogLevelDefault).InfoS("getting git repository")
 		err := in.fetch()
 		if err != nil {
-			return "", false, err
+			return "", false, fmt.Errorf("error fetching test code from git: %w", err)
 		}
 		modules = append(modules, filepath.Join(in.testDir, userTestDir))
 		userTests = true
@@ -90,8 +114,8 @@ func (in *sentinelRunController) runTests(fragment *console.SentinelRunJobFragme
 	args = append(args, modules...)
 	goCmd := exec.Command("go", args...)
 	goCmd.Dir = in.testDir
-	if err := goCmd.Run(); err != nil {
-		return "", false, fmt.Errorf("error initializing go modules: %w", err)
+	if out, err := goCmd.CombinedOutput(); err != nil {
+		return "", false, withCommandOutput(fmt.Errorf("error initializing go modules: %w", err), out)
 	}
 
 	integrationTestConfig, err := in.getIntegrationTestConfiguration(fragment)
@@ -123,28 +147,41 @@ func (in *sentinelRunController) runTests(fragment *console.SentinelRunJobFragme
 	args = buildGotestsumRunArgs(in.outputDir, junitPath, in.timeoutDuration, integrationTestConfig, userTests)
 	klog.V(log.LogLevelDefault).InfoS("running gotestsum", "args", args)
 
-	if err := cmd.Run("", args); err != nil {
-		klog.Warningf("gotestsum returned an error: %v", err)
+	runErr := cmd.Run("", args)
+	if runErr != nil {
+		klog.Warningf("gotestsum returned an error: %v", runErr)
 	}
 
-	output, passed, err := DecodeTestJSONFileToString(filepath.Join(in.outputDir, jsonFile))
+	result, err := decodeTestJSONFile(filepath.Join(in.outputDir, jsonFile))
 	if err != nil {
-		return "", false, err
+		if runErr != nil {
+			err = fmt.Errorf("gotestsum failed: %w (%w)", runErr, err)
+		}
+		return "", false, errors.Join(err, runPostrunScript(integrationTestConfig))
 	}
 
+	output := result.output
 	if in.outputFormat == junitFormat {
 		out, err := os.ReadFile(junitPath)
 		if err != nil {
-			return "", false, err
+			return "", false, errors.Join(fmt.Errorf("error reading junit output: %w", err), runPostrunScript(integrationTestConfig))
 		}
 		output = string(out)
 	}
 
-	if err := runPostrunScript(integrationTestConfig); err != nil {
-		return output, false, nil
+	var testErr error
+	switch {
+	case result.buildErrors != "":
+		testErr = fmt.Errorf("test packages failed to build:\n%s", result.buildErrors)
+	case result.tests == 0 && runErr != nil:
+		testErr = fmt.Errorf("no tests were run, gotestsum failed: %w", runErr)
 	}
 
-	return output, passed, nil
+	if err := errors.Join(testErr, runPostrunScript(integrationTestConfig)); err != nil {
+		return output, false, err
+	}
+
+	return output, result.passed, nil
 }
 
 func buildGotestsumRunArgs(outputDir, junitPath, timeout string, integrationTestConfig *console.SentinelCheckIntegrationTestConfigurationFragment, useUserTests bool) []string {
@@ -219,10 +256,33 @@ func runPostrunScript(integrationTestConfig *console.SentinelCheckIntegrationTes
 		if len(output) > 0 {
 			klog.Warningf("postrun script output: %s", string(output))
 		}
-		return fmt.Errorf("postrun script failed: %w", err)
+		return withCommandOutput(fmt.Errorf("postrun script failed: %w", err), output)
 	}
 
 	return nil
+}
+
+// withCommandOutput appends the tail of a failed command's output to err, since that's usually where the cause is.
+func withCommandOutput(err error, output []byte) error {
+	out := strings.TrimSpace(string(output))
+	if out == "" {
+		return err
+	}
+	return fmt.Errorf("%w:\n%s", err, truncateTail(out, maxCommandOutputLength))
+}
+
+func truncateHead(s string, n int) string {
+	if runes := []rune(s); len(runes) > n {
+		return string(runes[:n-3]) + "..."
+	}
+	return s
+}
+
+func truncateTail(s string, n int) string {
+	if runes := []rune(s); len(runes) > n {
+		return "..." + string(runes[len(runes)-n+3:])
+	}
+	return s
 }
 
 func (in *sentinelRunController) getIntegrationTestConfiguration(fragment *console.SentinelRunJobFragment) (*console.SentinelCheckIntegrationTestConfigurationFragment, error) {
@@ -305,17 +365,33 @@ func createTarballURL(consoleURL, runJobId string) (string, error) {
 }
 
 type TestEvent struct {
-	Action  string  `json:"Action"`
-	Test    string  `json:"Test,omitempty"`
-	Output  string  `json:"Output,omitempty"`
-	Elapsed float64 `json:"Elapsed,omitempty"`
-	Package string  `json:"Package,omitempty"`
+	Action     string  `json:"Action"`
+	Test       string  `json:"Test,omitempty"`
+	Output     string  `json:"Output,omitempty"`
+	Elapsed    float64 `json:"Elapsed,omitempty"`
+	Package    string  `json:"Package,omitempty"`
+	ImportPath string  `json:"ImportPath,omitempty"`
+}
+
+type testResult struct {
+	output      string
+	passed      bool
+	tests       int
+	buildErrors string
 }
 
 func DecodeTestJSONFileToString(fileName string) (string, bool, error) {
+	result, err := decodeTestJSONFile(fileName)
+	if err != nil {
+		return "", false, err
+	}
+	return result.output, result.passed, nil
+}
+
+func decodeTestJSONFile(fileName string) (*testResult, error) {
 	f, err := os.Open(fileName)
 	if err != nil {
-		return "", false, fmt.Errorf("error opening file: %w", err)
+		return nil, fmt.Errorf("error opening file: %w", err)
 	}
 	defer func(f *os.File) {
 		err := f.Close()
@@ -324,18 +400,19 @@ func DecodeTestJSONFileToString(fileName string) (string, bool, error) {
 		}
 	}(f)
 
-	var buf bytes.Buffer
+	var buf, buildOutput, buildErrors bytes.Buffer
 	dec := json.NewDecoder(f)
-	passed := true
+	result := &testResult{passed: true}
 
 	for dec.More() {
 		var ev TestEvent
 		if err := dec.Decode(&ev); err != nil {
-			return "", false, fmt.Errorf("error decoding JSON: %w", err)
+			return nil, fmt.Errorf("error decoding JSON: %w", err)
 		}
 
 		switch ev.Action {
 		case "run":
+			result.tests++
 			_, _ = fmt.Fprintf(&buf, "=== RUN   %s\n", ev.Test)
 		case "pass":
 			if ev.Test != "" {
@@ -345,13 +422,22 @@ func DecodeTestJSONFileToString(fileName string) (string, bool, error) {
 			if ev.Test != "" {
 				_, _ = fmt.Fprintf(&buf, "--- FAIL: %s (%.2fs)\n", ev.Test, ev.Elapsed)
 			}
-			passed = false
+			result.passed = false
 		case "output":
 			buf.WriteString(ev.Output)
+		case "build-output":
+			buf.WriteString(ev.Output)
+			buildOutput.WriteString(ev.Output)
+		case "build-fail":
+			result.passed = false
+			buildErrors.Write(buildOutput.Bytes())
+			buildOutput.Reset()
 		}
 	}
 
-	return buf.String(), passed, nil
+	result.output = buf.String()
+	result.buildErrors = strings.TrimSpace(buildErrors.String())
+	return result, nil
 }
 
 func createTestCasesFile(configuration *console.SentinelCheckIntegrationTestConfigurationFragment, cluster *console.SentinelRunJobFragment_Cluster) (string, error) {

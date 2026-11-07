@@ -110,12 +110,12 @@ defmodule Console.Schema.Workbench do
     embeds_one :configuration, Configuration, on_replace: :update do
       embeds_one :infrastructure, Infrastructure, on_replace: :update do
         field :self_service,    :boolean, default: false
-        field :services,        :boolean
-        field :stacks,          :boolean
-        field :kubernetes,      :boolean
+        field :services,        :boolean, default: true
+        field :stacks,          :boolean, default: true
+        field :kubernetes,      :boolean, default: true
         field :pod_logs,        :boolean
         field :vulnerabilities, :boolean
-        field :sentinels,       :boolean
+        field :sentinels,       :boolean, default: true
       end
 
       embeds_one :observability, Observability, on_replace: :update do
@@ -245,6 +245,7 @@ defmodule Console.Schema.Workbench do
     |> cast_embed(:modes)
     |> cast_embed(:skills, with: &skills_changeset/2)
     |> cast_embed(:configuration, with: &configuration_changeset/2)
+    |> default_infrastructure()
     |> cast_embed(:budget)
     |> unique_constraint(:name)
     |> foreign_key_constraint(:project_id)
@@ -255,6 +256,18 @@ defmodule Console.Schema.Workbench do
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> validate_required([:name])
   end
+
+  # only new workbenches get the default infrastructure tools, so existing ones aren't silently granted them
+  defp default_infrastructure(%Ecto.Changeset{data: %__MODULE__{id: nil}} = cs) do
+    case get_field(cs, :configuration) do
+      nil ->
+        put_embed(cs, :configuration, %__MODULE__.Configuration{infrastructure: %__MODULE__.Configuration.Infrastructure{}})
+      %{infrastructure: nil} = conf ->
+        put_embed(cs, :configuration, %{conf | infrastructure: %__MODULE__.Configuration.Infrastructure{}})
+      _ -> cs
+    end
+  end
+  defp default_infrastructure(cs), do: cs
 
   def rbac_changeset(model, attrs \\ %{}) do
     model

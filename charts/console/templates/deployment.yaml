@@ -101,6 +101,10 @@ spec:
         {{- end }}
         - name: REPLICAS
           value: {{ .Values.replicaCount | quote }}
+        {{- with .Values.console.beamSchedulers }}
+        - name: BEAM_SCHEDULERS
+          value: {{ . | quote }}
+        {{- end }}
         {{- if .Values.console.tls.enabled }}
         - name: CONSOLE_TLS_CERT_FILE
           value: /etc/plrl/tls.crt

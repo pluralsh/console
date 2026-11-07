@@ -17,7 +17,11 @@ import {
 import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import { Line } from '@nivo/line'
 import { RunStatusIcon } from 'components/ai/agent-runs/AgentRunInfoDisplays'
-import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
+import {
+  WORKBENCH_JOB_FALLBACK_POLL_INTERVAL,
+  WORKBENCH_MONITORING_FALLBACK_POLL_INTERVAL,
+} from '../job/usePollWhileRunning'
+import { useWorkbenchJobDeltaListener } from '../useWorkbenchJobsDelta'
 import { GqlError } from 'components/utils/Alert'
 import { alertSeverityToChipSeverity } from 'components/utils/alerts/AlertsTable'
 import { SliceTooltip } from 'components/utils/ChartTooltip'
@@ -146,7 +150,7 @@ export function MonitorDetail({
   const { data, loading, error } = useWorkbenchMonitorQuery({
     variables: { id: monitorId },
     fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
+    pollInterval: WORKBENCH_MONITORING_FALLBACK_POLL_INTERVAL,
   })
   const { data: deltaData } = useWorkbenchMonitorDeltaSubscription({
     variables: { id: monitorId },
@@ -750,7 +754,12 @@ function useMonitorJobs(workbenchId: string | undefined, monitorId: string) {
       first: RECENT_JOBS_COUNT,
     },
     fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
+    pollInterval: WORKBENCH_JOB_FALLBACK_POLL_INTERVAL,
+  })
+  // job updates are normalized into the list, only new jobs need a refetch
+  const { refetch } = result
+  useWorkbenchJobDeltaListener(workbenchId ?? '', (delta) => {
+    if (delta === Delta.Create) refetch()
   })
   const data = result.data ?? result.previousData
   const jobs = useMemo(() => mapExistingNodes(data?.workbench?.runs), [data])

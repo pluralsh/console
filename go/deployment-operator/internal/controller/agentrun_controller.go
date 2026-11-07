@@ -166,7 +166,7 @@ func (r *AgentRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 		return ctrl.Result{}, err
 	}
 
-	apiAgentRun, err := r.ConsoleClient.GetAgentRun(ctx, run.GetAgentRunID())
+	apiAgentRun, err := r.ConsoleClient.GetAgentRunStatus(ctx, run.GetAgentRunID())
 	if err != nil {
 		// If the error is different from not found, return it.
 		if !errors.IsNotFound(err) {

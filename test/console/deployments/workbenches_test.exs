@@ -85,6 +85,42 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert_receive {:event, %PubSub.WorkbenchCreated{item: ^workbench}}
     end
 
+    test "new workbenches default on the core infrastructure tools" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+
+      {:ok, workbench} = Workbenches.create_workbench(%{name: "defaults", project_id: project.id}, user)
+
+      %{configuration: %{infrastructure: infra}} = refetch(workbench)
+      assert infra.services
+      assert infra.stacks
+      assert infra.kubernetes
+      assert infra.sentinels
+      refute infra.self_service
+      refute infra.pod_logs
+
+      {:ok, workbench} = Workbenches.create_workbench(%{
+        name: "explicit",
+        project_id: project.id,
+        configuration: %{infrastructure: %{sentinels: false, pod_logs: true}}
+      }, user)
+
+      %{configuration: %{infrastructure: infra}} = refetch(workbench)
+      assert infra.services
+      assert infra.pod_logs
+      refute infra.sentinels
+    end
+
+    test "updates don't grant default infrastructure tools to existing workbenches" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project, configuration: nil)
+
+      {:ok, updated} = Workbenches.update_workbench(%{description: "updated"}, workbench.id, user)
+
+      refute refetch(updated).configuration
+    end
+
     test "project readers cannot create a workbench" do
       user = insert(:user)
       project = insert(:project, read_bindings: [%{user_id: user.id}])
@@ -962,7 +998,8 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert refetch(running).status == :cancelled
       assert refetch(pending_approval).status == :pending_approval
       assert refetch(babysitting).status == :babysitting
-      assert_receive {:event, %PubSub.WorkbenchJobUpdated{item: ^paused}}
+      %{id: id} = paused
+      assert_receive {:event, %PubSub.WorkbenchJobUpdated{item: %{id: ^id}}}
     end
 
     test "persists usage when provided" do
@@ -973,7 +1010,8 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert paused.status == :paused
       assert_usage(paused.usage, @usage)
       assert_usage(refetch(job).usage, @usage)
-      assert_receive {:event, %PubSub.WorkbenchJobUpdated{item: ^paused}}
+      %{id: id} = paused
+      assert_receive {:event, %PubSub.WorkbenchJobUpdated{item: %{id: ^id}}}
     end
   end
 
@@ -1007,7 +1045,8 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert updated.status == :running
       assert_usage(updated.usage, @usage)
       assert_usage(refetch(job).usage, @usage)
-      assert_receive {:event, %PubSub.WorkbenchJobUpdated{item: ^updated}}
+      %{id: id} = updated
+      assert_receive {:event, %PubSub.WorkbenchJobUpdated{item: %{id: ^id}}}
     end
 
     test "sanitizes mixed-key usage before persisting" do
@@ -1031,7 +1070,8 @@ defmodule Console.Deployments.WorkbenchesTest do
 
       assert_usage(updated.usage, expected)
       assert_usage(refetch(job).usage, expected)
-      assert_receive {:event, %PubSub.WorkbenchJobUpdated{item: ^updated}}
+      %{id: id} = updated
+      assert_receive {:event, %PubSub.WorkbenchJobUpdated{item: %{id: ^id}}}
     end
   end
 
@@ -1238,6 +1278,8 @@ defmodule Console.Deployments.WorkbenchesTest do
 
       assert deleted.id == prompt.id
       refute refetch(prompt)
+
+      assert_receive {:event, %PubSub.WorkbenchQueuedPromptDeleted{item: ^deleted}}
     end
 
     test "users without read access cannot delete queued prompts" do
@@ -1265,6 +1307,10 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert activity.user_id == user.id
       assert Console.Repo.get!(QueuedPrompt, prompt.id).consumed_at
       assert refetch(job).status == :pending
+
+      assert_receive {:event, %PubSub.WorkbenchQueuedPromptUpdated{item: consumed}}
+      assert consumed.id == prompt.id
+      assert consumed.consumed_at
     end
 
     test "applies queued mode overrides when creating the message" do
@@ -1303,6 +1349,7 @@ defmodule Console.Deployments.WorkbenchesTest do
                Workbenches.dequeue_prompt(prompt)
 
       refute Console.Repo.get!(QueuedPrompt, prompt.id).consumed_at
+      refute_receive {:event, %PubSub.WorkbenchQueuedPromptUpdated{}}
     end
   end
 
@@ -1559,7 +1606,8 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert updated.id == activity.id
       assert updated.status == :successful
       assert updated.prompt == "completed analysis"
-      assert_receive {:event, %PubSub.WorkbenchJobActivityUpdated{item: ^updated}}
+      %{id: id} = updated
+      assert_receive {:event, %PubSub.WorkbenchJobActivityUpdated{item: %{id: ^id}}}
 
       job = refetch(job)
       assert job.status == :pending
@@ -1577,7 +1625,8 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert updated.id == activity.id
       assert updated.status == :failed
       assert updated.type == :observability
-      assert_receive {:event, %PubSub.WorkbenchJobActivityUpdated{item: ^updated}}
+      %{id: id} = updated
+      assert_receive {:event, %PubSub.WorkbenchJobActivityUpdated{item: %{id: ^id}}}
 
       assert DateTime.compare(refetch(job).updated_at, job_updated_at) == :eq
     end
@@ -1594,7 +1643,8 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert updated.id == activity.id
       assert updated.status == :running
       assert updated.result.error == error_msg
-      assert_receive {:event, %PubSub.WorkbenchJobActivityUpdated{item: ^updated}}
+      %{id: id} = updated
+      assert_receive {:event, %PubSub.WorkbenchJobActivityUpdated{item: %{id: ^id}}}
 
       reloaded = refetch(updated)
       assert reloaded.result.error == error_msg
@@ -2310,6 +2360,25 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert updated_job.id == job.id
     end
 
+    test "publishes the job without the caller's preloads, keeping its result" do
+      job =
+        insert(:workbench_job, result: %{working_theory: "old theory"})
+        |> Console.Repo.preload([:user, workbench: :tools])
+
+      {:ok, _} =
+        Workbenches.update_job_status(
+          %{prompt: "status update", output: "summary", status: %{working_theory: "new theory"}},
+          job
+        )
+
+      assert_receive {:event, %PubSub.WorkbenchJobUpdated{item: %{result: %{working_theory: "new theory"}} = published}}
+      refute Ecto.assoc_loaded?(published.workbench)
+      refute Ecto.assoc_loaded?(published.user)
+
+      assert_receive {:event, %PubSub.WorkbenchJobActivityCreated{item: activity}}
+      refute Ecto.assoc_loaded?(activity.workbench_job)
+    end
+
     test "creates a result when job has no results yet" do
       job = insert(:workbench_job)
 
@@ -2434,7 +2503,8 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert failed.error == "Something went wrong."
       assert_usage(failed.usage, @usage)
       assert_usage(refetch(job).usage, @usage)
-      assert_receive {:event, %PubSub.WorkbenchJobUpdated{item: ^failed}}
+      %{id: id} = failed
+      assert_receive {:event, %PubSub.WorkbenchJobUpdated{item: %{id: ^id}}}
     end
   end
 

@@ -130,14 +130,22 @@ defmodule Console.GraphQl.Schema.Base do
 
   def filter_loader(dataloader, func) when is_function(dataloader, 3) and is_function(func, 3) do
     fn parent, args, res ->
-      with {:ok, result} <- dataloader.(parent, args, res) do
-        case func.(parent, result, res) do
-          l when is_list(l) -> {:ok, l}
-          res -> res
-        end
-      end
+      dataloader.(parent, args, res)
+      |> filter_loaded(&func.(parent, &1, res))
     end
   end
+
+  # dataloader returns a middleware tuple until the batch is loaded, so the filter has to wrap its callback
+  defp filter_loaded({:middleware, Absinthe.Middleware.Dataloader = mod, {loader, callback}}, filter),
+    do: {:middleware, mod, {loader, &filter_loaded(callback.(&1), filter)}}
+  defp filter_loaded({:ok, result}, filter) do
+    case filter.(result) do
+      {:ok, _} = ok -> ok
+      {:error, _} = err -> err
+      res -> {:ok, res}
+    end
+  end
+  defp filter_loaded(other, _), do: other
 
   def safe_resolver(fun) when is_function(fun, 2) do
     fn args, ctx ->

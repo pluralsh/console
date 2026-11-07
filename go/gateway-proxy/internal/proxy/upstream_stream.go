@@ -155,7 +155,7 @@ func (f *streamForwarder) forward(payload []byte) error {
 		}
 	case "message_stop":
 		f.done = true
-	case "error":
+	case sseErrorEvent:
 		f.done = true
 	}
 

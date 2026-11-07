@@ -6,6 +6,7 @@ import (
 	"time"
 
 	agentrunv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/events"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/output"
 	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/usage"
@@ -29,7 +30,10 @@ type agentRunController struct {
 	// consoleClient is the client for Console API
 	consoleClient console.Client
 
-	// kicks fires when Console notifies about this run, so polls don't wait for the next tick.
+	// status serves the run's status from Console's pushes. When nil, every check fetches it.
+	status *events.Status
+
+	// kicks fires when Console pushes a new status, so polls don't wait for the next tick.
 	kicks <-chan struct{}
 
 	// tool is the agent run tool that is being executed
@@ -88,6 +92,17 @@ type agentRunController struct {
 	// toolCallMessageIDs maps provider tool call IDs to Console agent message IDs
 	// so long-running tools can be created on start and updated on completion.
 	toolCallMessageIDs map[string]string
+
+	// toolCallWriteMu serializes tool call message writes, so a delayed create can't race the
+	// tool's later updates and output. It guards pendingToolCalls.
+	toolCallWriteMu sync.Mutex
+
+	// pendingToolCalls holds open tool calls whose create is delayed by toolCallCreateDelay.
+	pendingToolCalls map[string]*pendingToolCall
+	pendingSeq       uint64
+
+	// toolCallCreateDelay overrides defaultToolCallCreateDelay when set.
+	toolCallCreateDelay time.Duration
 
 	// output streams buffered tool stdout to Console.
 	output *output.Streamer

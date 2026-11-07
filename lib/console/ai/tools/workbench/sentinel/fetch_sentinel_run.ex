@@ -23,13 +23,13 @@ defmodule Console.AI.Tools.Workbench.Sentinel.FetchSentinelRun do
 
   def json_schema(_), do: @json_schema
   def name(_), do: "plrl_sentinel_run"
-  def description(_), do: "Fetch a Plural sentinel run by id, with run jobs compressed to id and status."
+  def description(_), do: "Fetch a Plural sentinel run by id, with run jobs compressed to id, check, status and whether they hit a runtime error."
 
   def implement(%__MODULE__{user: %User{} = user, sentinel_run_id: id}) do
     with %SentinelRun{} = run <- Sentinels.get_sentinel_run(id),
          {:ok, run} <- allow(run, user, :read) do
       run
-      |> Repo.preload([:jobs])
+      |> Repo.preload([:jobs, :errors])
       |> run_summary()
       |> Jason.encode()
     else
@@ -40,15 +40,24 @@ defmodule Console.AI.Tools.Workbench.Sentinel.FetchSentinelRun do
   end
 
   def run_summary(%SentinelRun{} = run) do
+    run_brief(run)
+    |> Map.put(:jobs, jobs_summary(run.jobs))
+  end
+
+  @doc "A sentinel run's status, check results and errors, without its jobs"
+  def run_brief(%SentinelRun{} = run) do
     Map.take(run, [:id, :status, :sentinel_id, :completed_at, :polled_at, :inserted_at, :updated_at])
     |> Map.put(:results, Enum.map(run.results || [], &result_summary/1))
-    |> Map.put(:jobs, jobs_summary(run.jobs))
+    |> Map.put(:errors, errors_summary(run.errors))
   end
 
   defp result_summary(result),
     do: Map.take(result, [:name, :status, :reason, :job_count, :successful_count, :failed_count])
 
-  defp job_summary(job), do: %{id: job.id, status: job.status}
+  defp errors_summary(errors) when is_list(errors), do: Enum.map(errors, &Map.take(&1, [:source, :message]))
+  defp errors_summary(_), do: []
+
+  defp job_summary(job), do: %{id: job.id, check: job.check, status: job.status, has_error: is_binary(job.error)}
 
   defp jobs_summary(jobs) when is_list(jobs), do: Enum.map(jobs, &job_summary/1)
   defp jobs_summary(_), do: []

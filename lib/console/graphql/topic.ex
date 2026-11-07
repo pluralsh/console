@@ -87,6 +87,10 @@ defimpl Console.GraphQl.Topic, for: Console.Schema.WorkbenchJobThought do
     do: [workbench_job_thought_delta: "workbench_jobs:#{job_id}:thoughts"]
 end
 
+defimpl Console.GraphQl.Topic, for: Console.Schema.QueuedPrompt do
+  def infer(%@for{workbench_job_id: job_id}, _), do: [queued_prompt_delta: "workbench_jobs:#{job_id}:queued_prompts"]
+end
+
 defimpl Console.GraphQl.Topic, for: Console.Schema.Dashboard do
   def infer(%@for{id: id, workbench_id: workbench_id}, _),
     do: [

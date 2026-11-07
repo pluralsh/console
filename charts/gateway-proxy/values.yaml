@@ -32,7 +32,9 @@ config:
   keepaliveInterval: 10s
   # Strip cache_control from system, messages and tools before forwarding.
   stripCacheControl: false
-  # Only forward these anthropic-beta values; empty forwards all.
+  # Only forward these exact anthropic-beta values. When empty, betas Bedrock is known to accept
+  # (interleaved-thinking-*, context-1m-*, computer-use-*, ...) are forwarded and Anthropic-API-only
+  # ones like tools-2024-05-16 or prompt-caching-2024-07-31 are dropped.
   betaAllowlist: []
   # debug, info, warn or error.
   logLevel: info

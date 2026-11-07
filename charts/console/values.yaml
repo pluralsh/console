@@ -61,6 +61,9 @@ migrator:
 
 # console is used to configure the layout of the main Console containers, hosting the core console api and webserver.
 console:
+  # beamSchedulers pins the Erlang VM's scheduler count. Without a CPU limit the VM starts one
+  # scheduler per node core, so set this near the CPU request on large nodes. Unset uses the VM default.
+  beamSchedulers: ""
   # tls configures the console web server to terminate TLS in the pod.
   tls:
     enabled: false

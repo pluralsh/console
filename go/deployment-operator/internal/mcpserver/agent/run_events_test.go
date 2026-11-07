@@ -2,76 +2,89 @@ package agent
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 
+	console "github.com/pluralsh/console/go/client"
 	"github.com/stretchr/testify/require"
 
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/events"
-	"github.com/pluralsh/console/go/deployment-operator/pkg/websocket"
 )
 
-type fakeSocket struct {
-	publishers map[string]websocket.Publisher
+type fakeSocket struct{}
+
+func (fakeSocket) Join() error     { return nil }
+func (fakeSocket) Close() error    { return nil }
+func (fakeSocket) Connected() bool { return true }
+
+func newTestRunEvents() *runEvents {
+	runEvents := newRunEvents()
+	runEvents.socket = fakeSocket{}
+	return runEvents
 }
 
-func (s *fakeSocket) AddPublisher(event string, publisher websocket.Publisher) {
-	s.publishers[event] = publisher
-}
-func (s *fakeSocket) Join() error  { return nil }
-func (s *fakeSocket) Close() error { return nil }
-
-func TestRunEventsAnswersOnceGenerationChanges(t *testing.T) {
-	socket := &fakeSocket{publishers: map[string]websocket.Publisher{}}
-	runEvents := newRunEvents("run-id", socket)
+func TestRunEventsAnswersWithPushedStatus(t *testing.T) {
+	runEvents := newTestRunEvents()
 	server := httptest.NewServer(runEvents)
 	t.Cleanup(server.Close)
 
-	done := make(chan string, 1)
+	done := make(chan events.Update, 1)
 	go func() {
-		resp, err := http.Get(server.URL + "?since=0")
+		resp, err := http.Get(server.URL + "?since=0&connected=true")
 		if err != nil {
-			done <- err.Error()
+			done <- events.Update{}
 			return
 		}
 		defer resp.Body.Close()
-		body := make([]byte, 8)
-		n, _ := resp.Body.Read(body)
-		done <- string(body[:n])
+		var update events.Update
+		_ = json.NewDecoder(resp.Body).Decode(&update)
+		done <- update
 	}()
 
 	time.Sleep(50 * time.Millisecond)
-	socket.publishers[agentRunNotification].Publish("other-run", false)
 	select {
 	case got := <-done:
-		t.Fatalf("other runs must not answer the long-poll, got %q", got)
-	case <-time.After(50 * time.Millisecond):
+		t.Fatalf("the long-poll must wait for a push, got %+v", got)
+	default:
 	}
 
-	socket.publishers[agentRunNotification].Publish("run-id", false)
+	runEvents.publish(&console.AgentRunStatusFragment{ID: "run-id", Status: console.AgentRunStatusCancelled})
 	select {
 	case got := <-done:
-		require.Equal(t, "1", got)
+		require.Equal(t, uint64(1), got.Generation)
+		require.True(t, got.Connected)
+		require.NotNil(t, got.Run)
+		require.Equal(t, console.AgentRunStatusCancelled, got.Run.Status)
 	case <-time.After(5 * time.Second):
-		t.Fatal("expected the long-poll to answer after the run's notification")
+		t.Fatal("expected the long-poll to answer after the push")
 	}
 
-	resp, err := http.Get(server.URL + "?since=0")
-	require.NoError(t, err)
-	t.Cleanup(func() { _ = resp.Body.Close() })
-	require.Equal(t, http.StatusOK, resp.StatusCode)
-
-	resp, err = http.Get(server.URL)
+	resp, err := http.Get(server.URL)
 	require.NoError(t, err)
 	t.Cleanup(func() { _ = resp.Body.Close() })
 	require.Equal(t, http.StatusBadRequest, resp.StatusCode)
 }
 
-func TestWatcherKicksSubscribersOnRunEvents(t *testing.T) {
-	socket := &fakeSocket{publishers: map[string]websocket.Publisher{}}
-	runEvents := newRunEvents("run-id", socket)
+func TestRunEventsAnswersStaleConnectionStateImmediately(t *testing.T) {
+	server := httptest.NewServer(newTestRunEvents())
+	t.Cleanup(server.Close)
+
+	client := &http.Client{Timeout: 5 * time.Second}
+	resp, err := client.Get(server.URL + "?since=0&connected=false")
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = resp.Body.Close() })
+
+	var update events.Update
+	require.NoError(t, json.NewDecoder(resp.Body).Decode(&update))
+	require.True(t, update.Connected)
+	require.Nil(t, update.Run)
+}
+
+func TestWatcherKicksSubscribersOnPushedStatus(t *testing.T) {
+	runEvents := newTestRunEvents()
 	server := httptest.NewServer(runEvents)
 	t.Cleanup(server.Close)
 	t.Cleanup(func() { _ = runEvents.close() })
@@ -83,8 +96,9 @@ func TestWatcherKicksSubscribersOnRunEvents(t *testing.T) {
 	go watcher.Run(ctx)
 
 	time.Sleep(50 * time.Millisecond)
-	socket.publishers[agentRunNotification].Publish("run-id", false)
+	runEvents.publish(&console.AgentRunStatusFragment{ID: "run-id", Status: console.AgentRunStatusRunning})
 
+	require.Eventually(t, func() bool { return watcher.Latest().Run != nil }, 5*time.Second, 10*time.Millisecond)
 	for _, kicks := range []<-chan struct{}{first, second} {
 		select {
 		case <-kicks:
@@ -92,4 +106,5 @@ func TestWatcherKicksSubscribersOnRunEvents(t *testing.T) {
 			t.Fatal("expected every subscriber to be kicked")
 		}
 	}
+	require.Equal(t, console.AgentRunStatusRunning, watcher.Latest().Run.Status)
 }

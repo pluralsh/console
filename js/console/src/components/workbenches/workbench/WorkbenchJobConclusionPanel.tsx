@@ -1,5 +1,4 @@
 import { Flex } from '@pluralsh/design-system'
-import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import {
@@ -10,11 +9,16 @@ import {
   DetailsTitleSC,
 } from 'components/workbenches/common/WorkbenchDetailsView'
 import { WorkbenchViewJobChip } from 'components/workbenches/common/WorkbenchViewJobChip'
-import { useWorkbenchJobQuery, WorkbenchJobStatus } from 'generated/graphql'
-import { ReactNode, useEffect, useRef, useState } from 'react'
+import {
+  useWorkbenchJobDeltaSubscription,
+  useWorkbenchJobQuery,
+  WorkbenchJobStatus,
+} from 'generated/graphql'
+import { ReactNode, useRef, useState } from 'react'
 import styled from 'styled-components'
 import { WorkbenchJobMeta } from './job/WorkbenchJobMeta'
 import { isJobRunning } from './job/WorkbenchJobActivity'
+import { usePollWhileRunning } from './job/usePollWhileRunning'
 import { WorkbenchJobResultContent } from './job/WorkbenchJobResult'
 import {
   useClampOverflow,
@@ -23,8 +27,10 @@ import {
 
 const PROMPT_CLAMP_LINES = 4
 
-// Job for a details panel, polled only while it runs (finished jobs don't
-// change). The status from the list is used until the job loads.
+// Job for a details panel, followed only while it runs (finished jobs don't
+// change) through its deltas, which are normalized into it, with polling as a
+// fallback for missed events. The status from the list is used until the job
+// loads.
 export function usePolledWorkbenchJob(
   jobId: string,
   listStatus?: Nullable<WorkbenchJobStatus>
@@ -33,14 +39,13 @@ export function usePolledWorkbenchJob(
     variables: { id: jobId },
     fetchPolicy: 'cache-and-network',
   })
-  const { startPolling, stopPolling } = query
   const running = isJobRunning(query.data?.workbenchJob?.status ?? listStatus)
 
-  useEffect(() => {
-    if (!running) return
-    startPolling(POLL_INTERVAL)
-    return () => stopPolling()
-  }, [running, startPolling, stopPolling])
+  useWorkbenchJobDeltaSubscription({
+    variables: { id: jobId },
+    skip: !jobId || !running,
+  })
+  usePollWhileRunning(query, running)
 
   return query
 }

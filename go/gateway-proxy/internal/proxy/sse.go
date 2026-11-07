@@ -7,10 +7,14 @@ import (
 	"net/http"
 )
 
+const sseErrorEvent = "error"
+
 // sseWriter writes Anthropic-style server-sent events and flushes after each one.
 type sseWriter struct {
 	w       io.Writer
 	flusher http.Flusher
+	// onError, when set, observes the payload of every error event sent to the client.
+	onError func(payload []byte)
 }
 
 func newSSEWriter(w io.Writer) *sseWriter {
@@ -27,6 +31,9 @@ func (s *sseWriter) send(event string, data any) error {
 }
 
 func (s *sseWriter) sendRaw(event string, payload []byte) error {
+	if event == sseErrorEvent && s.onError != nil {
+		s.onError(payload)
+	}
 	if _, err := fmt.Fprintf(s.w, "event: %s\ndata: %s\n\n", event, payload); err != nil {
 		return err
 	}
@@ -41,7 +48,7 @@ func (s *sseWriter) ping() error {
 }
 
 func (s *sseWriter) error(e *APIError) error {
-	return s.send("error", e.body())
+	return s.send(sseErrorEvent, e.body())
 }
 
 func setSSEHeaders(h http.Header) {

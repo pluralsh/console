@@ -176,12 +176,15 @@ defmodule Console.AI.Provider.TokenExchange do
      :crypto.hash(:sha256, credential || ""), config.audience, config.resource, config.scopes}
   end
 
-  defp parse_url(url) do
+  # oauth2 uses an absolute token_url as-is, and crashes on a nil one (eg a url with no path)
+  defp parse_url(url) when is_binary(url) do
     case URI.parse(url) do
-      %URI{path: path} = uri -> {:ok, URI.to_string(%{uri | path: ""}), path}
-      _ -> {:error, "invalid url: #{url}"}
+      %URI{scheme: scheme, host: host} = uri when scheme in ~w(http https) and is_binary(host) and host != "" ->
+        {:ok, URI.to_string(%{uri | path: nil, query: nil, fragment: nil}), url}
+      _ -> {:error, "invalid token url #{inspect(url)}, expected an absolute http(s) url"}
     end
   end
+  defp parse_url(url), do: {:error, "invalid token url: #{inspect(url)}"}
 
   defp expiry(expires_at) when is_integer(expires_at), do: expires_at - unix_now()
   defp expiry(_), do: :timer.minutes(15)

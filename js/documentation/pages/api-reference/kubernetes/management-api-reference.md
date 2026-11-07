@@ -6280,6 +6280,7 @@ _Appears in:_
 | `services` _boolean_ | Services enables the services capability. |  | Optional: \{\} <br /> |
 | `stacks` _boolean_ | Stacks enables the stacks capability. |  | Optional: \{\} <br /> |
 | `kubernetes` _boolean_ | Kubernetes enables the Kubernetes capability. |  | Optional: \{\} <br /> |
+| `sentinels` _boolean_ | Sentinels enables tools to inspect sentinels, their runs and run job results. |  | Optional: \{\} <br /> |
 
 
 #### WorkbenchJobBudget

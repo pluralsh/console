@@ -244,7 +244,10 @@ config :sentry,
 config :kazan, :httpoison_options,
   hackney: [pool: :kazan_pool]
 
+config :kazan, json_library: Console.JSON
+
 config :req_llm,
+  json_library: Console.JSON,
   receive_timeout: :timer.minutes(3),
   finch: [
     name: ReqLLM.Finch,

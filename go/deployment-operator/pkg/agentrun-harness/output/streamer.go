@@ -115,19 +115,34 @@ func (s *Streamer) Write(callID, messageID, accumulated string) {
 
 // Close flushes remaining output for callID and stops its watcher.
 func (s *Streamer) Close(callID string) {
+	st := s.stop(callID)
+	if st == nil {
+		return
+	}
+	ctx, cancel := s.finalContext()
+	defer cancel()
+	s.flushFinal(ctx, st)
+}
+
+// Discard stops the watcher for callID and drops its unflushed output. Use it once the
+// terminal tool message carrying the full output has been sent, since Console stops
+// rendering streamed output for completed tool calls.
+func (s *Streamer) Discard(callID string) {
+	s.stop(callID)
+}
+
+func (s *Streamer) stop(callID string) *stream {
 	s.mu.Lock()
 	st := s.streams[callID]
 	s.streams[callID] = nil
 	s.mu.Unlock()
 	if st == nil {
-		return
+		return nil
 	}
 	st.close()
 	close(st.stop)
 	<-st.done
-	ctx, cancel := s.finalContext()
-	defer cancel()
-	s.flushFinal(ctx, st)
+	return st
 }
 
 // CloseAll flushes and stops every active stream.

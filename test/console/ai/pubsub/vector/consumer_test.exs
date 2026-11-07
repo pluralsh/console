@@ -300,6 +300,14 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
   #   end
   # end
 
+  describe "select?/1" do
+    test "it only takes workbench job updates once the job is finished" do
+      refute Consumer.select?(%PubSub.WorkbenchJobUpdated{item: build(:workbench_job, status: :running)})
+      assert Consumer.select?(%PubSub.WorkbenchJobUpdated{item: build(:workbench_job, status: :successful)})
+      assert Consumer.select?(%PubSub.WorkbenchJobCreated{item: build(:workbench_job, status: :pending)})
+    end
+  end
+
   describe "AlertResolutionCreated" do
     test "it can vector index alerts" do
       deployment_settings(ai: %{

@@ -258,10 +258,11 @@ defmodule Console.Deployments.AgentsTest do
       assert updated.status == :running
     end
 
-    test "it can update agent run messages" do
+    test "it ignores messages passed to run updates" do
       cluster = insert(:cluster)
       runtime = insert(:agent_runtime, cluster: cluster)
       run = insert(:agent_run, runtime: runtime)
+      msg = insert(:agent_message, agent_run: run)
 
       {:ok, updated} = Agents.update_agent_run(%{
         pod_reference: %{namespace: "ns", name: "name"},
@@ -273,6 +274,9 @@ defmodule Console.Deployments.AgentsTest do
       assert updated.pod_reference.namespace == "ns"
       assert updated.pod_reference.name == "name"
       assert updated.status == :running
+
+      [found] = Console.Repo.preload(updated, :messages, force: true).messages
+      assert found.id == msg.id
     end
 
     test "clusters cannot update other's agent runs" do

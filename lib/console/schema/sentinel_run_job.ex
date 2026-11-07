@@ -17,6 +17,7 @@ defmodule Console.Schema.SentinelRunJob do
     field :check,  :string
     field :status, Status, default: :pending
     field :format, Format, default: :junit
+    field :error,  :string
 
     field :completed_at, :utc_datetime_usec
 
@@ -62,11 +63,22 @@ defmodule Console.Schema.SentinelRunJob do
     from(s in query, where: s.cluster_id == ^cluster_id)
   end
 
+  def for_cluster_handle(query \\ __MODULE__, handle) do
+    from(s in query,
+      join: c in assoc(s, :cluster),
+      where: c.handle == ^handle
+    )
+  end
+
+  def preloaded(query \\ __MODULE__, preloads) do
+    from(s in query, preload: ^preloads)
+  end
+
   def statistics(query \\ __MODULE__) do
     from(s in query, group_by: s.status, select: %{status: s.status, count: count(s.id, :distinct)})
   end
 
-  @valid ~w(check format status cluster_id output sentinel_run_id repository_id)a
+  @valid ~w(check format status error cluster_id output sentinel_run_id repository_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -74,6 +86,7 @@ defmodule Console.Schema.SentinelRunJob do
     |> cast_embed(:job)
     |> cast_embed(:git)
     |> cast_embed(:reference, with: &reference_changeset/2)
+    |> validate_length(:error, max: 2048)
     |> validate_required(~w(check format status cluster_id sentinel_run_id)a)
     |> SentinelRun.add_completed_at()
   end

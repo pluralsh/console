@@ -640,6 +640,14 @@ defmodule Console.Factory do
     }
   end
 
+  def stack_infracost_resource_factory do
+    %Schema.StackInfracostResource{
+      resource_scope: "breakdown",
+      name: sequence(:infracost_resource, &"aws_instance.web#{&1}"),
+      monthly_cost: Decimal.new("10.0")
+    }
+  end
+
   def stack_environment_factory do
     %Schema.StackEnvironment{
       name: "foo",
