@@ -23,9 +23,9 @@ func TestResolveBabysitPRURLsPrefersCreatedPR(t *testing.T) {
 		agentRun: &agentrunv1.AgentRun{PRURL: followup},
 	}
 
-	urls := in.resolveBabysitPRURLs(&gqlclient.AgentRunFragment{
+	urls := in.resolveBabysitPRURLs(&gqlclient.AgentRunUpdateFragment{
 		FollowupPrURL: &followup,
-		PullRequests:  []*gqlclient.PullRequestFragment{{URL: created}},
+		PullRequests:  []*gqlclient.AgentRunUpdateFragment_PullRequests{{URL: created}},
 	})
 	require.Equal(t, []string{created}, urls)
 	require.Equal(t, []string{created}, in.babysitPRURLs)
@@ -39,7 +39,7 @@ func TestResolveBabysitPRURLsUsesFollowupWhenNoCreatedPR(t *testing.T) {
 		agentRun: &agentrunv1.AgentRun{PRURL: followup},
 	}
 
-	urls := in.resolveBabysitPRURLs(&gqlclient.AgentRunFragment{})
+	urls := in.resolveBabysitPRURLs(&gqlclient.AgentRunUpdateFragment{})
 	require.Equal(t, []string{followup}, urls)
 }
 
@@ -49,7 +49,7 @@ func TestResolveBabysitPRURLsUsesSideloadedFollowupPrURL(t *testing.T) {
 	followup := "https://github.com/pluralsh/console/pull/1"
 	in := &agentRunController{}
 
-	urls := in.resolveBabysitPRURLs(&gqlclient.AgentRunFragment{FollowupPrURL: &followup})
+	urls := in.resolveBabysitPRURLs(&gqlclient.AgentRunUpdateFragment{FollowupPrURL: &followup})
 	require.Equal(t, []string{followup}, urls)
 }
 
@@ -60,7 +60,7 @@ func TestRunBabysitPRStopsWhenFollowupPRMerged(t *testing.T) {
 	m := mocks.NewClientMock(t)
 	m.On("UpdateAgentRun", mock.Anything, "r1", mock.MatchedBy(func(attrs gqlclient.AgentRunStatusAttributes) bool {
 		return attrs.Status == gqlclient.AgentRunStatusBabysitting
-	})).Return(&gqlclient.AgentRunFragment{ID: "r1", FollowupPrURL: &prURL}, nil).Once()
+	})).Return(&gqlclient.AgentRunUpdateFragment{ID: "r1", FollowupPrURL: &prURL}, nil).Once()
 
 	in := &agentRunController{
 		agentRunID:    "r1",
@@ -89,7 +89,7 @@ func TestRunBabysitPRContinuesWhenFollowupPROpen(t *testing.T) {
 	m := mocks.NewClientMock(t)
 	m.On("UpdateAgentRun", mock.Anything, "r1", mock.MatchedBy(func(attrs gqlclient.AgentRunStatusAttributes) bool {
 		return attrs.Status == gqlclient.AgentRunStatusBabysitting
-	})).Return(&gqlclient.AgentRunFragment{ID: "r1"}, nil).Once()
+	})).Return(&gqlclient.AgentRunUpdateFragment{ID: "r1"}, nil).Once()
 
 	in := &agentRunController{
 		agentRunID:    "r1",
@@ -121,10 +121,10 @@ func TestRunBabysitPRUsesCreatedPRURL(t *testing.T) {
 	m := mocks.NewClientMock(t)
 	m.On("UpdateAgentRun", mock.Anything, "r1", mock.MatchedBy(func(attrs gqlclient.AgentRunStatusAttributes) bool {
 		return attrs.Status == gqlclient.AgentRunStatusBabysitting
-	})).Return(&gqlclient.AgentRunFragment{
+	})).Return(&gqlclient.AgentRunUpdateFragment{
 		ID:            "r1",
 		FollowupPrURL: &followup,
-		PullRequests:  []*gqlclient.PullRequestFragment{{URL: created}},
+		PullRequests:  []*gqlclient.AgentRunUpdateFragment_PullRequests{{URL: created}},
 	}, nil).Once()
 
 	var polled []string
@@ -158,7 +158,7 @@ func TestRunBabysitPRStopsWithoutPRURL(t *testing.T) {
 
 	m := mocks.NewClientMock(t)
 	m.On("UpdateAgentRun", mock.Anything, "r1", mock.Anything).
-		Return(&gqlclient.AgentRunFragment{ID: "r1"}, nil).Once()
+		Return(&gqlclient.AgentRunUpdateFragment{ID: "r1"}, nil).Once()
 
 	in := &agentRunController{
 		agentRunID:    "r1",

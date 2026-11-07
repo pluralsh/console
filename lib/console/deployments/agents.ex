@@ -211,7 +211,7 @@ defmodule Console.Deployments.Agents do
   @spec update_agent_run(map, binary, Cluster.t) :: agent_run_resp
   def update_agent_run(attrs, run_id, %Cluster{} = cluster) do
     start_transaction()
-    |> add_operation(:run, fn _ -> validate_run(run_id, cluster, [:runtime, :messages]) end)
+    |> add_operation(:run, fn _ -> validate_run(run_id, cluster) end)
     |> add_operation(:update, fn %{run: run} ->
       AgentRun.changeset(run, attrs)
       |> Repo.update()
@@ -310,29 +310,40 @@ defmodule Console.Deployments.Agents do
 
   @spec create_agent_message(map, binary, Cluster.t) :: agent_msg_resp
   def create_agent_message(attrs, run_id, %Cluster{} = cluster) do
-    start_transaction()
-    |> add_operation(:run, fn _ -> validate_run(run_id, cluster) end)
-    |> add_operation(:create, fn %{run: run} ->
-      %AgentMessage{agent_run_id: run.id}
+    with :ok <- validate_run_owner(run_id, cluster) do
+      %AgentMessage{agent_run_id: run_id}
       |> AgentMessage.changeset(attrs)
       |> Repo.insert()
-    end)
-    |> execute(extract: :create)
-    |> notify(:create)
+      |> notify(:create)
+    end
   end
 
   @spec update_agent_message(map, binary, Cluster.t) :: agent_msg_resp
   def update_agent_message(attrs, message_id, %Cluster{} = cluster) do
-    start_transaction()
-    |> add_operation(:message, fn _ -> {:ok, Repo.get!(AgentMessage, message_id)} end)
-    |> add_operation(:validate, fn %{message: message} -> validate_run(message.agent_run_id, cluster) end)
-    |> add_operation(:update, fn %{message: message} ->
-      AgentMessage.changeset(message, attrs)
+    message = Repo.get!(AgentMessage, message_id)
+    with :ok <- validate_run_owner(message.agent_run_id, cluster) do
+      message
+      |> AgentMessage.changeset(attrs)
       |> Repo.update()
-    end)
-    |> execute(extract: :update)
-    |> notify(:update)
+      |> notify(:update)
+    end
   end
+
+  defp validate_run_owner(run_id, %Cluster{id: cluster_id}) do
+    case agent_run_cluster_id(run_id) do
+      ^cluster_id -> :ok
+      _ -> {:error, "clusters can only update their own agent runs"}
+    end
+  end
+
+  # a run's runtime, and so its cluster, never changes, so this is safe to cache for the life of the run
+  @decorate cacheable(
+              cache: @multilevel_adapter,
+              key: {:agent_run_cluster, run_id},
+              opts: [ttl: :timer.hours(1)]
+            )
+  defp agent_run_cluster_id(run_id),
+    do: Repo.one(AgentRun.cluster_id(run_id))
 
   defp validate_run(run_id, %Cluster{id: cluster_id}, preloads \\ [:runtime]) do
     get_agent_run!(run_id)

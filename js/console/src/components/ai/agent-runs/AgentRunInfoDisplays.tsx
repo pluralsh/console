@@ -28,9 +28,11 @@ import {
   AgentRunStatus,
   AgentRunTinyFragment,
   AgentRuntimeType,
+  useAgentRunDeltaSubscription,
   useAgentRunTinyQuery,
   WorkbenchJobStatus,
 } from 'generated/graphql'
+import { usePollWhileRunning } from 'components/workbenches/workbench/job/usePollWhileRunning'
 import { capitalize } from 'lodash'
 import { Link } from 'react-router-dom'
 import { getAgentRunAbsPath } from 'routes/aiRoutesConsts'
@@ -94,15 +96,15 @@ export function AgentRunInfoCard({
         }
       : {}),
   })
-  // Keep polling while the parent prop still looks active; presentation uses
-  // the freshest polled status so the card doesn't disagree with itself.
-  const shouldPoll =
+  // Keep following the run while the parent prop still looks active;
+  // presentation uses the freshest status so the card doesn't disagree with
+  // itself. Deltas are normalized into the query, polling covers missed ones.
+  const shouldFollow =
     status === AgentRunStatus.Running || status === AgentRunStatus.Pending
-  const { data } = useAgentRunTinyQuery({
+  const { data, startPolling, stopPolling, refetch } = useAgentRunTinyQuery({
     variables: { id },
-    skip: !shouldPoll,
+    skip: !shouldFollow,
     fetchPolicy: 'cache-and-network',
-    pollInterval: 5000,
   })
   const polled = data?.agentRun
   const resolvedStatus = polled?.status ?? status
@@ -110,6 +112,19 @@ export function AgentRunInfoCard({
   const isRunning =
     resolvedStatus === AgentRunStatus.Running ||
     resolvedStatus === AgentRunStatus.Pending
+  useAgentRunDeltaSubscription({
+    variables: { runId: id },
+    skip: !shouldFollow || !isRunning,
+  })
+  usePollWhileRunning(
+    {
+      startPolling,
+      stopPolling,
+      // once the parent sees it finish the query is skipped and the prop is final
+      refetch: () => shouldFollow && refetch(),
+    },
+    shouldFollow && isRunning
+  )
 
   if (!agentRun) return null
 

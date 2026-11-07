@@ -97,7 +97,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
   def kubernetes_metrics(
     %Cluster{} = cluster,
     %{group: group, version: version, kind: kind, name: name, namespace: namespace} = args,
-    %{context: %{current_user: user}}
+    %{context: %{current_user: user}} = info
   ) do
     Console.Deployments.Clusters.control_plane(cluster, user)
     |> Kube.Utils.save_kubeconfig()
@@ -115,27 +115,24 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
         namespace: namespace,
         service: %Service{cluster: cluster}
       }
-      |> Observability.query(start, stop, step)
+      |> Observability.query(start, stop, step, selected(info))
     end
   end
 
-  def pod_metrics(%{metadata: %{namespace: ns, name: name}}, args, %{context: %{cluster: %Cluster{} = cluster}}) do
+  def pod_metrics(%{metadata: %{namespace: ns, name: name}}, args, %{context: %{cluster: %Cluster{} = cluster}} = info) do
     {start, stop, step} = prom_args(args)
-    Observability.query({:pod, cluster, ns, name}, start, stop, step)
+    Observability.query({:pod, cluster, ns, name}, start, stop, step, selected(info))
   end
   def pod_metrics(_, _, _), do: {:error, "pod metrics require a cluster or service scoped pod query"}
 
-  # each metric is its own prometheus range query, so only run the ones actually selected
   def cluster_usage_metrics(%Cluster{} = cluster, args, info) do
     {start, stop, step} = prom_args(args)
-    keys = Enum.map(Absinthe.Resolution.project(info), & &1.schema_node.identifier)
-    Observability.query({:usage, cluster, args[:group_by] || :cluster, keys}, start, stop, step)
+    Observability.query({:usage, cluster, args[:group_by] || :cluster, selected(info)}, start, stop, step)
   end
 
   def service_usage_metrics(%Service{} = service, args, info) do
     {start, stop, step} = prom_args(args)
-    keys = Enum.map(Absinthe.Resolution.project(info), & &1.schema_node.identifier)
-    Observability.query({:usage, service, args[:group_by] || :service, keys}, start, stop, step)
+    Observability.query({:usage, service, args[:group_by] || :service, selected(info)}, start, stop, step)
   end
 
   # node names are interpolated straight into promql, so anything that isn't a valid
@@ -146,35 +143,37 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
     case String.match?(node, @node_name) do
       true ->
         {start, stop, step} = prom_args(args)
-        keys = Enum.map(Absinthe.Resolution.project(info), & &1.schema_node.identifier)
-        Observability.query({:node_usage, cluster, node, args[:group_by] || :node, keys}, start, stop, step)
+        Observability.query({:node_usage, cluster, node, args[:group_by] || :node, selected(info)}, start, stop, step)
       false -> {:error, "invalid node name #{inspect(node)}"}
     end
   end
 
-  def metrics(%Cluster{} = cluster, %{node: node} = args, _) when is_binary(node) do
+  def metrics(%Cluster{} = cluster, %{node: node} = args, info) when is_binary(node) do
     {start, stop, step} = prom_args(args)
-    Observability.query({cluster, node}, start, stop, step)
+    Observability.query({cluster, node}, start, stop, step, selected(info))
   end
 
-  def metrics(%Cluster{} = cluster, args, _) do
+  def metrics(%Cluster{} = cluster, args, info) do
     {start, stop, step} = prom_args(args)
-    Observability.query(cluster, start, stop, step)
+    Observability.query(cluster, start, stop, step, selected(info))
   end
 
-  def metrics(%Service{id: id}, %{component_id: comp_id} = args, _) when is_binary(comp_id) do
+  def metrics(%Service{id: id}, %{component_id: comp_id} = args, info) when is_binary(comp_id) do
     {start, stop, step} = prom_args(args)
     case Services.get_service_component!(comp_id) do
       %ServiceComponent{service_id: ^id} = comp ->
-        Observability.query(comp, start, stop, step)
+        Observability.query(comp, start, stop, step, selected(info))
       _ -> {:error, "component with id #{comp_id} not found"}
     end
   end
 
-  def metrics(%Service{} = service, args, _) do
+  def metrics(%Service{} = service, args, info) do
     {start, stop, step} = prom_args(args)
-    Observability.query(service, start, stop, step)
+    Observability.query(service, start, stop, step, selected(info))
   end
+
+  # each metric is its own prometheus range query, so only run the ones actually selected
+  defp selected(info), do: Enum.map(Absinthe.Resolution.project(info), & &1.schema_node.identifier)
 
   def cluster_logs(cluster, %{query: query} = args, _) do
     with_client(:loki, fn ->

@@ -89,7 +89,7 @@ func (in *agentRunController) runPostRunPollLoop(ctx context.Context) {
 			return
 		}
 
-		run, err := in.consoleClient.GetAgentRunStatus(ctx, in.agentRunID)
+		run, err := in.runStatus(ctx)
 		if err != nil {
 			klog.ErrorS(err, "could not poll agent run state", "id", in.agentRunID)
 			continue

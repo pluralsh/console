@@ -336,10 +336,13 @@ defmodule Console.GraphQl.Deployments.Stack do
 
     field :tags, list_of(:tag), resolve: dataloader(Deployments), description: "key/value tags to filter stacks"
 
-    field :infracost_resources, list_of(:stack_infracost_resource),
-      description: "Infracost resource rows attached to this stack (newest first)" do
+    @desc "Infracost resource rows attached to this stack (newest first), only fetchable for a single stack"
+    connection field :infracost_resources, node_type: :stack_infracost_resource do
       middleware Nested, check: true, msg: "stack cost data cannot be fetched through a policy"
-      arg :limit, :integer
+      middleware Console.Graphql.Middleware.SingleItem, msg: "infracostResources can only be fetched for a single stack"
+      arg :resource_scope, :string, description: "only rows of this scope (breakdown | past_breakdown | diff | free)"
+
+      complexity &Console.GraphQl.Complexity.paginated/2
       resolve &Deployments.list_stack_infracost_resources/3
     end
 
@@ -520,9 +523,12 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :repository,      :git_repository, resolve: dataloader(Deployments), description: "the git repository you're sourcing IaC from"
     field :violations,      list_of(:stack_policy_violation), resolve: dataloader(Deployments), description: "policy violations for this stack"
 
-    field :infracost_resources, list_of(:stack_infracost_resource),
-      description: "Infracost resource rows attached to this run (newest first)" do
-      arg :limit, :integer
+    @desc "Infracost resource rows attached to this run (most expensive first), only fetchable for a single run"
+    connection field :infracost_resources, node_type: :stack_infracost_resource do
+      middleware Console.Graphql.Middleware.SingleItem, msg: "infracostResources can only be fetched for a single run, use stackRun instead"
+      arg :resource_scope, :string, description: "only rows of this scope (breakdown | past_breakdown | diff | free)"
+
+      complexity &Console.GraphQl.Complexity.paginated/2
       resolve &Deployments.list_stack_run_infracost_resources/3
     end
 
@@ -704,6 +710,7 @@ defmodule Console.GraphQl.Deployments.Stack do
   connection node_type: :custom_stack_run
   connection node_type: :stack_definition
   connection node_type: :stack_policy
+  connection node_type: :stack_infracost_resource
 
   delta :run_logs
   delta :run_step

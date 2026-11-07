@@ -22,6 +22,26 @@ defmodule Console.JSONTest do
       assert %{"key" => "k", "value" => "v"} = decoded["taint"]
     end
 
+    test "it encodes ReqLLM's ordered objects in order" do
+      schema = Jason.OrderedObject.new([{"type", "object"}, {"properties", Jason.OrderedObject.new(b: %{}, a: %{})}])
+
+      assert ReqLLM.JSON.Codec.library() == Console.JSON
+      assert Console.JSON.encode(schema) == {:ok, ~s({"type":"object","properties":{"b":{},"a":{}}})}
+    end
+
+    test "it encodes kazan request bodies without falling back to Poison" do
+      config_map = %Kazan.Apis.Core.V1.ConfigMap{
+        metadata: %Kazan.Models.Apimachinery.Meta.V1.ObjectMeta{name: "cm", labels: %{"a" => "b"}},
+        data: %{"key" => "value"}
+      }
+      {:ok, data} = Kazan.Apis.Core.V1.ConfigMap.encode(config_map)
+      %Kazan.Request{body: body} = Kazan.Apis.Core.V1.create_namespaced_config_map!(config_map, "ns")
+
+      assert Kazan.JSON.library() == Console.JSON
+      assert {:ok, ^body} = Console.JSON.encode(data)
+      assert Jason.decode!(body) == Jason.decode!(Poison.encode!(data))
+    end
+
     test "it raises on structs without an implementation" do
       assert_raise ArgumentError, fn -> Console.JSON.encode!(%{uri: URI.parse("https://plural.sh")}) end
     end

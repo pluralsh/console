@@ -47,6 +47,7 @@ import styled from 'styled-components'
 import { fromNow } from 'utils/datetime'
 import { mapExistingNodes } from 'utils/graphql'
 import { WORKBENCH_SIDEBAR_WIDTH } from '../WorkbenchSidePanel'
+import { WORKBENCH_MONITORING_FALLBACK_POLL_INTERVAL } from '../job/usePollWhileRunning'
 
 function isNearBottom(el: HTMLElement) {
   return el.scrollHeight - el.scrollTop - el.clientHeight < 200
@@ -65,7 +66,7 @@ export function WorkbenchMonitoringSidebar({
 
   const dashboards = useFetchPaginatedData(
     {
-      pollInterval: 60_000,
+      pollInterval: WORKBENCH_MONITORING_FALLBACK_POLL_INTERVAL,
       query: WorkbenchDashboardsDocument,
       keyPath: ['workbench', 'workbenchDashboards'],
       keepLoadedPages: true,
@@ -74,7 +75,7 @@ export function WorkbenchMonitoringSidebar({
   )
   const monitors = useFetchPaginatedData(
     {
-      pollInterval: 60_000,
+      pollInterval: WORKBENCH_MONITORING_FALLBACK_POLL_INTERVAL,
       query: WorkbenchMonitorsDocument,
       keyPath: ['workbench', 'monitors'],
       keepLoadedPages: true,

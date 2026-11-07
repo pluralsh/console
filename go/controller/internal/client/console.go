@@ -18,8 +18,8 @@ type client struct {
 
 type ConsoleClient interface {
 	GetServices() ([]*console.ServiceDeploymentBaseFragment, error)
-	GetService(clusterID, serviceName string) (*console.ServiceDeploymentExtended, error)
-	GetServiceById(id string) (*console.ServiceDeploymentExtended, error)
+	GetService(clusterID, serviceName string) (*console.ServiceDeploymentStatusFragment, error)
+	GetServiceById(id string) (*console.ServiceDeploymentStatusFragment, error)
 	GetServiceTinyByHandle(clusterHandle, serviceName string) (*console.GetServiceDeploymentTinyByHandle_ServiceDeployment, error)
 	CreateRepository(url string, privateKey, passphrase, username, password *string) (*console.CreateGitRepository, error)
 	CreateGitRepository(attrs console.GitAttributes) (*console.CreateGitRepository, error)

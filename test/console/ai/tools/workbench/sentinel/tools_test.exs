@@ -6,6 +6,8 @@ defmodule Console.AI.Tools.Workbench.Sentinel.ToolsTest do
     FetchSentinelRun,
     FetchSentinelRunJob,
     ListSentinels,
+    ListSentinelRuns,
+    ListSentinelRunJobs,
     RunSentinel
   }
   alias Console.Schema.SentinelRun
@@ -83,6 +85,62 @@ defmodule Console.AI.Tools.Workbench.Sentinel.ToolsTest do
       assert markdown =~ "- ID: `#{job.id}`"
       assert markdown =~ "- Status: `success`"
       assert markdown =~ "integration test output"
+    end
+  end
+
+  describe "ListSentinelRuns (plrl_sentinel_runs)" do
+    test "returns the sentinel's runs, newest first, filtered by status" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      sentinel = insert(:sentinel, project: project)
+      old = insert(:sentinel_run, sentinel: sentinel, status: :failed, inserted_at: Timex.now() |> Timex.shift(hours: -2))
+      new = insert(:sentinel_run, sentinel: sentinel, status: :failed)
+      insert(:sentinel_run, sentinel: sentinel, status: :success)
+      insert(:sentinel_run, status: :failed)
+
+      assert {:ok, parsed} =
+               Tool.validate(%ListSentinelRuns{user: user}, %{
+                 "sentinel_id" => sentinel.id,
+                 "status" => "failed"
+               })
+
+      assert {:ok, json} = ListSentinelRuns.implement(parsed)
+      assert {:ok, runs} = Jason.decode(json)
+      assert Enum.map(runs, & &1["id"]) == [new.id, old.id]
+      refute Map.has_key?(hd(runs), "jobs")
+    end
+
+    test "it rejects users who can't read the sentinel" do
+      sentinel = insert(:sentinel)
+
+      assert {:ok, parsed} = Tool.validate(%ListSentinelRuns{user: insert(:user)}, %{"sentinel_id" => sentinel.id})
+      assert {:error, _} = ListSentinelRuns.implement(parsed)
+    end
+  end
+
+  describe "ListSentinelRunJobs (plrl_sentinel_run_jobs)" do
+    test "returns the run's jobs filtered by status and cluster handle, with errors" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      run = insert(:sentinel_run, sentinel: insert(:sentinel, project: project))
+      cluster = insert(:cluster, handle: "prod-usw2")
+      job = insert(:sentinel_run_job, sentinel_run: run, cluster: cluster, status: :failed, error: "pod was OOMKilled")
+      insert(:sentinel_run_job, sentinel_run: run, status: :failed)
+      insert(:sentinel_run_job, sentinel_run: run, cluster: cluster, status: :success)
+
+      assert {:ok, parsed} =
+               Tool.validate(%ListSentinelRunJobs{user: user}, %{
+                 "sentinel_run_id" => run.id,
+                 "status" => "failed",
+                 "cluster" => "prod-usw2"
+               })
+
+      assert {:ok, json} = ListSentinelRunJobs.implement(parsed)
+      assert {:ok, [found]} = Jason.decode(json)
+      assert found["id"] == job.id
+      assert found["error"] == "pod was OOMKilled"
+      assert found["cluster"]["handle"] == "prod-usw2"
+      refute Map.has_key?(found, "output")
     end
   end
 

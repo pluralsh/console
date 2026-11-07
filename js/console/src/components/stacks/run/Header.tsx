@@ -32,6 +32,7 @@ import {
   STACK_RUNS_REPOSITORY_REL_PATH,
   STACK_RUNS_STATE_REL_PATH,
   STACK_RUNS_VIOLATIONS_REL_PATH,
+  STACK_RUNS_COST_REL_PATH,
 } from '../../../routes/stacksRoutesConsts'
 import { TRUNCATE } from '../../utils/truncate'
 import StackRunIcon from '../common/StackRunIcon.tsx'
@@ -65,6 +66,7 @@ export function getStackRunDirectory(stackRun: StackRunDetailsFragment) {
       label: 'Violations',
       condition: (s: StackRunDetailsFragment) => !isEmpty(s.violations),
     },
+    { path: STACK_RUNS_COST_REL_PATH, label: 'Cost' },
   ]
 }
 

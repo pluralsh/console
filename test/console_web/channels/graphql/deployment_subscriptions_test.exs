@@ -55,6 +55,49 @@ defmodule ConsoleWeb.GraphQl.DeploymentsSubscriptionTest do
     end
   end
 
+  describe "queuedPromptDelta" do
+    @queued_prompt_delta """
+      subscription QueuedPrompts($jobId: ID!) {
+        queuedPromptDelta(jobId: $jobId) {
+          delta
+          payload { id prompt consumedAt }
+        }
+      }
+    """
+
+    test "queued prompt changes broadcast deltas to the job's subscribers" do
+      user = insert(:user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      job = insert(:workbench_job, workbench: workbench)
+      prompt = insert(:queued_prompt, workbench_job: job, user: user)
+
+      {:ok, socket} = establish_socket(user)
+      ref = push_doc(socket, @queued_prompt_delta, variables: %{"jobId" => job.id})
+      assert_reply(ref, :ok, %{subscriptionId: _})
+
+      for {event, delta} <- [
+            {PubSub.WorkbenchQueuedPromptCreated, "CREATE"},
+            {PubSub.WorkbenchQueuedPromptUpdated, "UPDATE"},
+            {PubSub.WorkbenchQueuedPromptDeleted, "DELETE"}
+          ] do
+        Rtc.handle_event(struct(event, item: prompt))
+
+        assert_push("subscription:data", %{result: %{data: %{"queuedPromptDelta" => pushed}}})
+        assert pushed["delta"] == delta
+        assert pushed["payload"]["id"] == prompt.id
+      end
+    end
+
+    test "users who can't read the job can't subscribe" do
+      user = insert(:user)
+      job = insert(:workbench_job)
+
+      {:ok, socket} = establish_socket(user)
+      ref = push_doc(socket, @queued_prompt_delta, variables: %{"jobId" => job.id})
+      assert_reply(ref, :error, _)
+    end
+  end
+
   describe "runStepDelta" do
     @step_delta """
       subscription Steps($runId: ID!) {
@@ -937,6 +980,51 @@ defmodule ConsoleWeb.GraphQl.DeploymentsSubscriptionTest do
       """, variables: %{"runId" => run.id})
 
       assert_reply(ref, :error, %{errors: [%{message: "forbidden"}]})
+    end
+  end
+
+  describe "agentRunDelta" do
+    @agent_run_delta """
+      subscription AgentRun($id: ID!) {
+        agentRunDelta(id: $id) {
+          delta
+          payload { id status prompts { id seq } }
+        }
+      }
+    """
+
+    test "queued prompts broadcast the run's delta" do
+      user = insert(:user)
+      run = insert(:agent_run, user: user)
+      {:ok, socket} = establish_socket(user)
+
+      ref = push_doc(socket, @agent_run_delta, variables: %{"id" => run.id})
+      assert_reply(ref, :ok, %{subscriptionId: _})
+
+      prompt = insert(:agent_prompt, agent_run: run, seq: 1)
+      Rtc.handle_event(%PubSub.AgentPromptCreated{item: prompt})
+
+      assert_push("subscription:data", %{result: %{data: %{"agentRunDelta" => delta}}})
+      assert delta["delta"] == "UPDATE"
+      assert delta["payload"]["id"] == run.id
+      assert [%{"id" => id}] = delta["payload"]["prompts"]
+      assert id == prompt.id
+    end
+
+    test "the run's cluster can subscribe over the external schema" do
+      run = insert(:agent_run)
+      %{runtime: %{cluster: cluster}} = Console.Repo.preload(run, runtime: :cluster)
+
+      {:ok, %{"subscribed" => topic}} = Absinthe.run(@agent_run_delta, Console.ExternalGraphQl,
+        variables: %{"id" => run.id},
+        context: %{cluster: cluster, pubsub: ConsoleWeb.Endpoint}
+      )
+      assert is_binary(topic)
+
+      {:ok, %{errors: [_ | _]}} = Absinthe.run(@agent_run_delta, Console.ExternalGraphQl,
+        variables: %{"id" => run.id},
+        context: %{cluster: insert(:cluster), pubsub: ConsoleWeb.Endpoint}
+      )
     end
   end
 end

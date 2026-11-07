@@ -45,8 +45,8 @@ type Config struct {
 	// StripCacheControl removes cache_control from system, message content and tools
 	// (GATEWAY_STRIP_CACHE_CONTROL).
 	StripCacheControl bool
-	// BetaAllowlist limits which anthropic-beta values are forwarded; empty forwards all
-	// (GATEWAY_BETA_ALLOWLIST, comma separated).
+	// BetaAllowlist limits which anthropic-beta values are forwarded; empty forwards only betas
+	// Bedrock is known to accept (GATEWAY_BETA_ALLOWLIST, comma separated).
 	BetaAllowlist []string
 
 	OAuth OAuth

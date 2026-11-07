@@ -15,10 +15,15 @@ defmodule Console.PubSub.Consumer do
         opts = [strategy: :one_for_one, subscribe_to: [{
           unquote(broadcaster),
           max_demand: unquote(demand),
-          selector: &implemented(@proto, @any_proto, &1)
+          selector: &__MODULE__.select?/1
         }]]
         ConsumerSupervisor.init(children, opts)
       end
+
+      # runs in the broadcaster for every event, so overrides must stay cheap pattern matches
+      def select?(event), do: implemented(@proto, @any_proto, event)
+
+      defoverridable select?: 1
     end
   end
 

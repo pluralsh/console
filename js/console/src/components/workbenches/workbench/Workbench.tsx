@@ -18,6 +18,7 @@ import {
 } from '@pluralsh/design-system'
 import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import {
+  Delta,
   useWorkbenchJobCountsQuery,
   WorkbenchJobStatus,
   useDeleteWorkbenchMutation,
@@ -85,7 +86,12 @@ import {
   WorkbenchSidePanel,
 } from './WorkbenchSidePanel'
 import { WorkbenchToolsEditModal } from './WorkbenchToolsEditModal'
-import { useWorkbenchJobsDelta } from './useWorkbenchJobsDelta'
+import {
+  useWorkbenchJobDeltaListener,
+  useWorkbenchJobsDelta,
+} from './useWorkbenchJobsDelta'
+import { WORKBENCH_JOB_FALLBACK_POLL_INTERVAL } from './job/usePollWhileRunning'
+import { isJobRunning } from './job/WorkbenchJobActivity'
 
 export const getWorkbenchBreadcrumbs = (
   workbench: Nullable<WorkbenchTinyFragment>
@@ -509,11 +515,16 @@ export function WorkbenchTabs() {
 // reads the status counts rather than a page of jobs, so this poll never
 // overwrites the paginated jobs list in the cache
 function useWorkbenchHasInProgressJobs(workbenchId: string) {
-  const { data } = useWorkbenchJobCountsQuery({
+  const { data, refetch } = useWorkbenchJobCountsQuery({
     variables: { id: workbenchId },
     skip: !workbenchId,
-    pollInterval: 5_000,
+    pollInterval: WORKBENCH_JOB_FALLBACK_POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
+  })
+
+  // only a new job or one that stopped running changes whether any are in progress
+  useWorkbenchJobDeltaListener(workbenchId, (delta, job) => {
+    if (delta === Delta.Create || !isJobRunning(job.status)) refetch()
   })
 
   return useMemo(

@@ -1,5 +1,13 @@
 import { Chip, Flex, Select, useSetBreadcrumbs } from '@pluralsh/design-system'
-import { memo, ReactNode, Suspense, useMemo, useState } from 'react'
+import {
+  memo,
+  ReactNode,
+  Suspense,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { Outlet, useMatch, useParams } from 'react-router-dom'
 import styled from 'styled-components'
 
@@ -48,7 +56,8 @@ import {
 
 import { ServiceSelector } from '../ServiceSelector'
 import {
-  SERVICE_DELTA_FALLBACK_POLL_INTERVAL,
+  componentsChanged,
+  SERVICE_DETAILS_FALLBACK_POLL_INTERVAL,
   useServiceDeltas,
 } from '../useServiceDeltas'
 
@@ -260,15 +269,29 @@ function ServiceDetailsBase() {
   const [toolbarStart, setToolbarStart] = useState<HTMLDivElement | null>(null)
   const [toolbarEnd, setToolbarEnd] = useState<HTMLDivElement | null>(null)
 
+  const [componentsVersion, setComponentsVersion] = useState(0)
+
   const { data, loading, error, refetch } = useServiceDeploymentQuery({
     variables: { id: serviceId ?? '' },
-    pollInterval: SERVICE_DELTA_FALLBACK_POLL_INTERVAL,
+    pollInterval: SERVICE_DETAILS_FALLBACK_POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
     errorPolicy: 'all',
   })
-  // component syncs aren't carried by the delta itself
-  useServiceDeltas({ id: serviceId, refetch, skip: !serviceId })
   const { serviceDeployment } = data ?? {}
+  const serviceRef = useRef(serviceDeployment)
+  useLayoutEffect(() => {
+    serviceRef.current = serviceDeployment
+  })
+
+  useServiceDeltas({
+    id: serviceId,
+    refetch: () => {
+      setComponentsVersion((v) => v + 1)
+      return refetch()
+    },
+    refetchIf: (next) => componentsChanged(serviceRef.current, next),
+    skip: !serviceId,
+  })
   const isLoading = !data && loading
   const clusterId = serviceDeployment?.cluster?.id
 
@@ -372,6 +395,7 @@ function ServiceDetailsBase() {
                       },
                       isRefetching,
                       isLoading,
+                      componentsVersion,
                       setSidenavContent,
                     } satisfies ServiceDetailsContextType
                   }

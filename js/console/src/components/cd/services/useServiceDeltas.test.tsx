@@ -2,7 +2,11 @@ import { gql, InMemoryCache } from '@apollo/client'
 import { ServiceDeploymentStatus } from 'generated/graphql'
 import { describe, expect, it } from 'vitest'
 
-import { mergeService, removeService } from './useServiceDeltas'
+import {
+  componentsChanged,
+  mergeService,
+  removeService,
+} from './useServiceDeltas'
 
 const LIST = gql`
   query List($clusterId: ID) {
@@ -112,6 +116,80 @@ describe('mergeService', () => {
     mergeService(cache, delta('unseen', ServiceDeploymentStatus.Healthy))
 
     expect(cache.extract()['ServiceDeployment:unseen']).toBeUndefined()
+  })
+})
+
+describe('componentsChanged', () => {
+  const healthy = {
+    status: ServiceDeploymentStatus.Healthy,
+    componentStatus: '3/3',
+  }
+
+  it('ignores deltas that keep the readiness rollup', () => {
+    expect(
+      componentsChanged(healthy, {
+        ...delta('a', ServiceDeploymentStatus.Healthy),
+        componentStatus: '3/3',
+      })
+    ).toBe(false)
+  })
+
+  it('flags a moved component count or service status', () => {
+    expect(
+      componentsChanged(healthy, {
+        ...delta('a', ServiceDeploymentStatus.Healthy),
+        componentStatus: '2/3',
+      })
+    ).toBe(true)
+    expect(
+      componentsChanged(healthy, {
+        ...delta('a', ServiceDeploymentStatus.Stale),
+        componentStatus: '3/3',
+      })
+    ).toBe(true)
+  })
+
+  it('flags anything before the service has loaded', () => {
+    expect(
+      componentsChanged(undefined, delta('a', ServiceDeploymentStatus.Healthy))
+    ).toBe(true)
+  })
+})
+
+describe('componentsChanged', () => {
+  const healthy = {
+    status: ServiceDeploymentStatus.Healthy,
+    componentStatus: '3/3',
+  }
+
+  it('ignores deltas that keep the readiness rollup', () => {
+    expect(
+      componentsChanged(healthy, {
+        ...delta('a', ServiceDeploymentStatus.Healthy),
+        componentStatus: '3/3',
+      })
+    ).toBe(false)
+  })
+
+  it('flags a moved component count or service status', () => {
+    expect(
+      componentsChanged(healthy, {
+        ...delta('a', ServiceDeploymentStatus.Healthy),
+        componentStatus: '2/3',
+      })
+    ).toBe(true)
+    expect(
+      componentsChanged(healthy, {
+        ...delta('a', ServiceDeploymentStatus.Stale),
+        componentStatus: '3/3',
+      })
+    ).toBe(true)
+  })
+
+  it('flags anything before the service has loaded', () => {
+    expect(
+      componentsChanged(undefined, delta('a', ServiceDeploymentStatus.Healthy))
+    ).toBe(true)
   })
 })
 

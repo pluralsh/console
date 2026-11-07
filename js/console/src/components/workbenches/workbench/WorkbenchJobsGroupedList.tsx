@@ -8,7 +8,7 @@ import {
   SpinnerAlt,
   Tooltip,
 } from '@pluralsh/design-system'
-import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
+import { WORKBENCH_JOB_FALLBACK_POLL_INTERVAL } from './job/usePollWhileRunning'
 import { truncateKeepingChips } from 'components/utils/contentEditableChips'
 import { toCounts } from 'components/utils/display/DisplayPanel'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
@@ -148,7 +148,7 @@ export function WorkbenchJobsGroupedList({
       insertedAfter: filters.insertedAfter,
     },
     fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
+    pollInterval: WORKBENCH_JOB_FALLBACK_POLL_INTERVAL,
   })
   const countsData = data ?? previousData
   const { listedStatuses, refresh } = useJobDeltaRefresh(
@@ -294,7 +294,7 @@ function JobStatusGroup({
   const { data, loading, pageInfo, fetchNextPage, fetchingMore, refetch } =
     useFetchPaginatedData(
       {
-        pollInterval: POLL_INTERVAL,
+        pollInterval: WORKBENCH_JOB_FALLBACK_POLL_INTERVAL,
         query: WorkbenchJobsForStatusDocument,
         keyPath: RUNS_KEY_PATH,
         pageSize,

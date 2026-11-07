@@ -32,6 +32,10 @@ type socket struct {
 	clientGen    atomic.Uint64
 	joining      atomic.Bool
 	closed       atomic.Bool
+	connected    atomic.Bool
+
+	// subscribe registers the socket's subscription on a fresh client.
+	subscribe func(client *graphql.SubscriptionClient, gen uint64) error
 }
 
 type subscriptionHandle struct {
@@ -85,8 +89,21 @@ func newSocket(clusterID string, endpoint *url.URL, deployToken string, closed b
 		deployToken: deployToken,
 		publishers:  cmap.New[Publisher](),
 	}
+	s.subscribe = s.subscribeNotifications
 	s.closed.Store(closed)
 	return s
+}
+
+func (s *socket) subscribeNotifications(client *graphql.SubscriptionClient, gen uint64) error {
+	if _, err := client.Subscribe(&notificationSubscription{}, nil, s.subscriptionHandler(gen)); err != nil {
+		return fmt.Errorf("failed to subscribe to deploy agent notifications: %w", err)
+	}
+	return nil
+}
+
+// Connected reports whether the websocket connection is currently established.
+func (s *socket) Connected() bool {
+	return s.connected.Load()
 }
 
 func (s *socket) AddPublisher(event string, publisher Publisher) {
@@ -127,12 +144,10 @@ func (s *socket) Join() error {
 
 	client := s.newSubscriptionClient(gen)
 
-	subscription := &notificationSubscription{}
-	_, err := client.Subscribe(subscription, nil, s.subscriptionHandler(gen))
-	if err != nil {
+	if err := s.subscribe(client, gen); err != nil {
 		s.joining.Store(false)
 		s.closed.Store(true)
-		return fmt.Errorf("failed to subscribe to deploy agent notifications: %w", err)
+		return err
 	}
 
 	runCtx, cancel := context.WithCancel(context.Background())
@@ -186,6 +201,7 @@ func (s *socket) runSubscriptionClient(ctx context.Context, gen uint64, handle *
 	}
 
 	s.joining.Store(false)
+	s.connected.Store(false)
 	s.clientHandle.CompareAndSwap(handle, nil)
 
 	if !s.closed.Load() {
@@ -224,6 +240,12 @@ func (s *socket) newSubscriptionClient(gen uint64) *graphql.SubscriptionClient {
 				"endpoint", s.endpoint.String(),
 			)
 			s.joining.Store(false)
+			s.connected.Store(true)
+		}).
+		OnDisconnected(func() {
+			if gen == s.clientGen.Load() {
+				s.connected.Store(false)
+			}
 		}).
 		OnError(func(_ *graphql.SubscriptionClient, err error) error {
 			if err == nil {
@@ -291,6 +313,7 @@ func (s *socket) Close() error {
 	}
 
 	s.joining.Store(false)
+	s.connected.Store(false)
 	handle := s.clientHandle.Swap(nil)
 
 	klog.V(log.LogLevelDefault).Info("closing graphql websocket subscription client")

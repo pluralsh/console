@@ -276,7 +276,7 @@ defmodule Console.Deployments.Init do
           name: "plural",
           description: "Workbench pre-configured with all plural-native tools",
           configuration: %{
-            infrastructure: %{services: true, stacks: true, kubernetes: true},
+            infrastructure: %{services: true, stacks: true, kubernetes: true, sentinels: true},
             observability: %{logs: true, metrics: true}
           },
           tool_associations: [%{tool_id: exa_id}]

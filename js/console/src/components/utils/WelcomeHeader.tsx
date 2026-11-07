@@ -4,7 +4,7 @@ import { DefaultTheme, useTheme } from 'styled-components'
 import { Title1H1 } from 'components/utils/typography/Text'
 
 export function WelcomeHeader({
-  heading = 'Welcome to Plural Console',
+  heading = 'Welcome to the Plural Console',
   marginBottom,
   textAlign = 'center',
   ...props

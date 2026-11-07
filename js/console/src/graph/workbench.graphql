@@ -593,11 +593,6 @@ fragment WorkbenchJobProgress on WorkbenchJobProgress {
   arguments
 }
 
-fragment WorkbenchTextStream on WorkbenchTextStream {
-  activityId
-  text
-}
-
 fragment WorkbenchCron on WorkbenchCron {
   id
   crontab
@@ -2101,6 +2096,7 @@ mutation DeleteIssueWebhook($id: ID!) {
   }
 }
 
+# canvas is left out: it can be hundreds of KB and arrives through WorkbenchCanvasStream instead
 subscription WorkbenchJobDelta($id: ID, $workbenchId: ID) {
   workbenchJobDelta(id: $id, workbenchId: $workbenchId) {
     delta
@@ -2108,7 +2104,14 @@ subscription WorkbenchJobDelta($id: ID, $workbenchId: ID) {
       ...WorkbenchJobTiny
       error
       result {
-        ...WorkbenchJobResult
+        id
+        workingTheory
+        criticism
+        conclusion
+        topology
+        todos {
+          ...WorkbenchJobResultTodo
+        }
       }
     }
   }
@@ -2132,15 +2135,19 @@ subscription WorkbenchJobThoughtDelta($jobId: ID!) {
   }
 }
 
-subscription WorkbenchJobProgress($jobId: ID!) {
-  workbenchJobProgress(jobId: $jobId) {
-    ...WorkbenchJobProgress
+subscription QueuedPromptDelta($jobId: ID!) {
+  queuedPromptDelta(jobId: $jobId) {
+    delta
+    payload {
+      ...QueuedPromptTiny
+      consumedAt
+    }
   }
 }
 
-subscription WorkbenchTextStream($jobId: ID!) {
-  workbenchTextStream(jobId: $jobId) {
-    ...WorkbenchTextStream
+subscription WorkbenchJobProgress($jobId: ID!) {
+  workbenchJobProgress(jobId: $jobId) {
+    ...WorkbenchJobProgress
   }
 }
 

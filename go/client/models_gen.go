@@ -565,7 +565,7 @@ type AgentRunRepositoryEdge struct {
 type AgentRunStatusAttributes struct {
 	// the status of this agent run
 	Status AgentRunStatus `json:"status"`
-	// the messages this agent run has generated during its run
+	// ignored, messages are created with createAgentMessage
 	Messages []*AgentMessageAttributes `json:"messages,omitempty"`
 	// the error reason of the agent run
 	Error *string `json:"error,omitempty"`
@@ -4728,12 +4728,12 @@ type InfrastructureStack struct {
 	StackPolicies   *StackPolicyConnection    `json:"stackPolicies,omitempty"`
 	// key/value tags to filter stacks
 	Tags []*Tag `json:"tags,omitempty"`
-	// Infracost resource rows attached to this stack (newest first)
-	InfracostResources []*StackInfracostResource `json:"infracostResources,omitempty"`
-	ReadBindings       []*PolicyBinding          `json:"readBindings,omitempty"`
-	WriteBindings      []*PolicyBinding          `json:"writeBindings,omitempty"`
-	InsertedAt         *string                   `json:"insertedAt,omitempty"`
-	UpdatedAt          *string                   `json:"updatedAt,omitempty"`
+	// Infracost resource rows attached to this stack (newest first), only fetchable for a single stack
+	InfracostResources *StackInfracostResourceConnection `json:"infracostResources,omitempty"`
+	ReadBindings       []*PolicyBinding                  `json:"readBindings,omitempty"`
+	WriteBindings      []*PolicyBinding                  `json:"writeBindings,omitempty"`
+	InsertedAt         *string                           `json:"insertedAt,omitempty"`
+	UpdatedAt          *string                           `json:"updatedAt,omitempty"`
 }
 
 type InfrastructureStackConnection struct {
@@ -8255,6 +8255,11 @@ type QueuedPromptConnection struct {
 	Edges    []*QueuedPromptEdge `json:"edges,omitempty"`
 }
 
+type QueuedPromptDelta struct {
+	Delta   *Delta        `json:"delta,omitempty"`
+	Payload *QueuedPrompt `json:"payload,omitempty"`
+}
+
 type QueuedPromptEdge struct {
 	Node   *QueuedPrompt `json:"node,omitempty"`
 	Cursor *string       `json:"cursor,omitempty"`
@@ -9116,6 +9121,8 @@ type SentinelRunJob struct {
 	Check *string `json:"check,omitempty"`
 	// the output of the job
 	Output *string `json:"output,omitempty"`
+	// a runtime or configuration error encountered while running the job
+	Error *string `json:"error,omitempty"`
 	// the time the job completed
 	CompletedAt *string `json:"completedAt,omitempty"`
 	// the git repository to use for this job
@@ -9155,6 +9162,8 @@ type SentinelRunJobUpdateAttributes struct {
 	Reference *NamespacedName `json:"reference,omitempty"`
 	// the output of the job
 	Output *string `json:"output,omitempty"`
+	// a runtime or configuration error encountered while running the job
+	Error *string `json:"error,omitempty"`
 }
 
 type SentinelRunOverrides struct {
@@ -9932,6 +9941,16 @@ type StackInfracostResourceAttributes struct {
 	RawResource      *string  `json:"rawResource,omitempty"`
 }
 
+type StackInfracostResourceConnection struct {
+	PageInfo PageInfo                      `json:"pageInfo"`
+	Edges    []*StackInfracostResourceEdge `json:"edges,omitempty"`
+}
+
+type StackInfracostResourceEdge struct {
+	Node   *StackInfracostResource `json:"node,omitempty"`
+	Cursor *string                 `json:"cursor,omitempty"`
+}
+
 type StackOutput struct {
 	Name   string `json:"name"`
 	Value  string `json:"value"`
@@ -10096,10 +10115,10 @@ type StackRun struct {
 	Repository *GitRepository `json:"repository,omitempty"`
 	// policy violations for this stack
 	Violations []*StackPolicyViolation `json:"violations,omitempty"`
-	// Infracost resource rows attached to this run (newest first)
-	InfracostResources []*StackInfracostResource `json:"infracostResources,omitempty"`
-	InsertedAt         *string                   `json:"insertedAt,omitempty"`
-	UpdatedAt          *string                   `json:"updatedAt,omitempty"`
+	// Infracost resource rows attached to this run (most expensive first), only fetchable for a single run
+	InfracostResources *StackInfracostResourceConnection `json:"infracostResources,omitempty"`
+	InsertedAt         *string                           `json:"insertedAt,omitempty"`
+	UpdatedAt          *string                           `json:"updatedAt,omitempty"`
 }
 
 type StackRunApprovalResult struct {
@@ -12310,11 +12329,6 @@ type WorkbenchSkillsAttributes struct {
 	Ref *GitRefAttributes `json:"ref,omitempty"`
 	// files to include
 	Files []*string `json:"files,omitempty"`
-}
-
-type WorkbenchTextStream struct {
-	ActivityID *string `json:"activityId,omitempty"`
-	Text       *string `json:"text,omitempty"`
 }
 
 type WorkbenchTool struct {

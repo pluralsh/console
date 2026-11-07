@@ -60,8 +60,8 @@ defmodule Console.AI.Tools.Workbench.Subagents do
   defp subagent_description(_, :self_service, _, _), do: "Invoke a self-service subagent to discover Plural catalogs and PR automations, then invoke a clear GitOps provisioning pathway. Prefer this for repeatable golden-path provisioning; punt undefined or custom code work to the coding subagent."
   defp subagent_description(_, _, _, _), do: "Unknown subagent"
 
-  defp infra_description(%{vulnerabilities: vulns, pod_logs: logs}) when vulns or logs do
-    Enum.filter([additional(:vulns, vulns), additional(:pod_logs, logs)], & &1 != nil)
+  defp infra_description(%{vulnerabilities: vulns, pod_logs: logs, sentinels: sentinels}) when vulns == true or logs == true or sentinels == true do
+    Enum.filter([additional(:vulns, vulns), additional(:pod_logs, logs), additional(:sentinels, sentinels)], & &1 != nil)
     |> Enum.join(" and ")
     |> then(& "#{subagent_description(nil, :infrastructure, nil)} including #{&1}")
   end
@@ -69,6 +69,7 @@ defmodule Console.AI.Tools.Workbench.Subagents do
 
   defp additional(:vulns, true), do: "the ability to fetch plural integrated vulnerabilities from trivy"
   defp additional(:pod_logs, true), do: "the ability to fetch container stdout/stderr logs from pods"
+  defp additional(:sentinels, true), do: "the ability to inspect plural sentinels, their runs and per-cluster run job errors/test output"
   defp additional(_, _), do: nil
 
   defp observability_categories(cats) when is_list(cats) do

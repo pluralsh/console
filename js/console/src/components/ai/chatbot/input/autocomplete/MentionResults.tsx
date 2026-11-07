@@ -8,8 +8,10 @@ import {
   ClusterIcon,
   DashboardIcon,
   GitPullIcon,
+  SentinelIcon,
   SirenIcon,
   StackIcon,
+  TestTubeIcon,
   WarningShieldIcon,
   WorkbenchIcon,
 } from '@pluralsh/design-system'
@@ -29,6 +31,8 @@ const itemToIcon: Record<MentionKind, ReactNode> = {
   [MentionKind.Vulnerability]: <WarningShieldIcon size={14} />,
   [MentionKind.Repository]: <GitPullIcon size={14} />,
   [MentionKind.Monitoring]: <DashboardIcon size={14} />,
+  [MentionKind.SentinelRun]: <SentinelIcon size={14} />,
+  [MentionKind.SentinelRunJob]: <TestTubeIcon size={14} />,
 }
 
 function iconForItem(item: ChipAttrs): ReactNode {
@@ -94,6 +98,10 @@ function subtitleForItem(item: ChipAttrs) {
       return item['repo-slug'] ? item['repo-url'] : undefined
     case MentionKind.Monitoring:
       return item['resource-type']
+    case MentionKind.SentinelRun:
+      return item['sentinel-name'] ?? item.status ?? undefined
+    case MentionKind.SentinelRunJob:
+      return item['cluster-handle'] ?? item.status ?? undefined
   }
 }
 

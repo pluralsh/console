@@ -1,6 +1,5 @@
 import { Flex } from '@pluralsh/design-system'
 import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
-import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { GqlError } from 'components/utils/Alert'
 import { TableSkeleton } from 'components/utils/SkeletonLoaders'
 import { CaptionP } from 'components/utils/typography/Text'
@@ -13,21 +12,30 @@ import { useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { WorkbenchJobActionCard } from './WorkbenchJobActionCard'
 import { WorkbenchJobActionDetail } from './WorkbenchJobActionDetail'
+import { usePollWhileRunning } from './usePollWhileRunning'
 import {
   groupWorkbenchJobActions,
   mapActionNodes,
 } from './workbenchJobActionsUtils'
 
-export function WorkbenchJobActions({ jobId }: { jobId: string }) {
+export function WorkbenchJobActions({
+  jobId,
+  running,
+}: {
+  jobId: string
+  running: boolean
+}) {
   const theme = useTheme()
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
-  const { data, loading, error } = useWorkbenchJobActionsQuery({
+  const query = useWorkbenchJobActionsQuery({
     variables: { id: jobId },
     skip: !jobId,
     fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
   })
+  const { data, loading, error } = query
+  // refetched on action activity deltas, so polling is only a fallback
+  usePollWhileRunning(query, running)
 
   const actions = useMemo(
     () =>

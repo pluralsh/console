@@ -1,6 +1,9 @@
-import { EmptyState } from '@pluralsh/design-system'
-import { MetricsCard } from 'components/utils/metrics/MetricsCard'
-import { MetricsScrollSC } from 'components/utils/metrics/MetricsGraphCard'
+import { usageFieldVariables } from 'components/cd/cluster/metrics/clusterMetricsGraphs'
+import { UsageMetricGraphCard } from 'components/cd/cluster/metrics/UsageMetricGraphCard'
+import {
+  MetricsGraphGrid,
+  MetricsScrollSC,
+} from 'components/utils/metrics/MetricsGraphCard'
 
 import { MetricsTimeRangeControl } from 'components/utils/timerange/MetricsTimeRangeControl'
 import { metricsQueryWindow } from 'components/utils/timerange/timeRange'
@@ -14,38 +17,32 @@ import { useClusterKubernetesMetricsQuery } from 'generated/graphql'
 
 import { useMemo } from 'react'
 import { useTheme } from 'styled-components'
-import { isNonNullable } from 'utils/isNonNullable'
 import { useMetricsEnabled } from 'components/contexts/DeploymentSettingsContext'
-import { GqlError } from 'components/utils/Alert.tsx'
 import { MetricsEmptyState } from '../../cd/cluster/ClusterMetrics.tsx'
-import { RectangleSkeleton } from '../../utils/SkeletonLoaders.tsx'
-import { PodResourceReservation } from 'components/utils/metrics/podResourceReservations.ts'
 import {
-  ResourceMetricsGraphs,
-  hasResourceMetrics,
-} from 'components/utils/metrics/ResourceMetricsGraphs.tsx'
+  type ResourceMetricGraph,
+  resourceMetricGraphs,
+} from 'components/utils/metrics/resourceMetricGraphs'
 import { useKubernetesPodResourceReservations } from 'components/utils/metrics/useKubernetesPodResourceReservations.ts'
 
-function Metric({
-  clusterId,
-  group,
-  version,
-  kind,
-  name,
-  namespace,
-  podReservations,
-  timeRange,
-}: {
+type Resource = {
   clusterId: string
   group: string
   version: string
   kind: string
   name: string
   namespace: string
-  podReservations?: PodResourceReservation[]
+}
+
+function KubernetesMetricGraphCard({
+  resource,
+  graph,
+  timeRange,
+}: {
+  resource: Resource
+  graph: ResourceMetricGraph
   timeRange: TimeRangeState
 }) {
-  const theme = useTheme()
   const {
     data: currentData,
     previousData,
@@ -53,118 +50,27 @@ function Metric({
     error,
   } = useClusterKubernetesMetricsQuery({
     variables: {
-      clusterId,
-      group,
-      version,
-      kind,
-      name,
-      namespace,
+      ...resource,
       ...metricsQueryWindow(timeRange.timeWindow),
+      ...usageFieldVariables(graph.fields),
     },
-    skip: !clusterId || !name || !namespace,
-    fetchPolicy: 'cache-and-network',
+    skip: !resource.clusterId || !resource.name || !resource.namespace,
+    // every graph selects different fields of one un-normalized object, so
+    // caching makes each response re-diff every other graph's series
+    fetchPolicy: 'no-cache',
   })
   const data = useRangeQueryData(
     { data: currentData, previousData },
     timeRange.revision
   )
 
-  const {
-    cpu,
-    mem,
-    podCpu,
-    podMem,
-    cpuRequests,
-    memRequests,
-    cpuLimits,
-    memLimits,
-    podCpuRequests,
-    podMemRequests,
-    podCpuLimits,
-    podMemLimits,
-  } = useMemo(() => {
-    const {
-      cpu,
-      mem,
-      podCpu,
-      podMem,
-      cpuRequests,
-      memRequests,
-      cpuLimits,
-      memLimits,
-      podCpuRequests,
-      podMemRequests,
-      podCpuLimits,
-      podMemLimits,
-    } = data?.cluster?.componentMetrics || {}
-
-    return {
-      cpu: (cpu || []).filter(isNonNullable),
-      mem: (mem || []).filter(isNonNullable),
-      podCpu: (podCpu || []).filter(isNonNullable),
-      podMem: (podMem || []).filter(isNonNullable),
-      cpuRequests: (cpuRequests || []).filter(isNonNullable),
-      memRequests: (memRequests || []).filter(isNonNullable),
-      cpuLimits: (cpuLimits || []).filter(isNonNullable),
-      memLimits: (memLimits || []).filter(isNonNullable),
-      podCpuRequests: (podCpuRequests || []).filter(isNonNullable),
-      podMemRequests: (podMemRequests || []).filter(isNonNullable),
-      podCpuLimits: (podCpuLimits || []).filter(isNonNullable),
-      podMemLimits: (podMemLimits || []).filter(isNonNullable),
-    }
-  }, [data])
-
-  if (error) {
-    return <GqlError error={error} />
-  }
-
-  if (loading && !data)
-    return (
-      <RectangleSkeleton
-        $height="100%"
-        $width="100%"
-      />
-    )
-
-  if (
-    !hasResourceMetrics({
-      cpu,
-      mem,
-      podCpu,
-      podMem,
-      cpuRequests,
-      memRequests,
-      cpuLimits,
-      memLimits,
-      podCpuRequests,
-      podMemRequests,
-      podCpuLimits,
-      podMemLimits,
-    })
-  )
-    return (
-      <MetricsCard css={{ padding: theme.spacing.medium }}>
-        <EmptyState message="No metrics available" />
-      </MetricsCard>
-    )
-
   return (
-    <ResourceMetricsGraphs
-      cpu={cpu}
-      mem={mem}
-      podCpu={podCpu}
-      podMem={podMem}
-      cpuRequests={cpuRequests}
-      memRequests={memRequests}
-      cpuLimits={cpuLimits}
-      memLimits={memLimits}
-      podCpuRequests={podCpuRequests}
-      podMemRequests={podMemRequests}
-      podCpuLimits={podCpuLimits}
-      podMemLimits={podMemLimits}
-      podReservations={podReservations}
-      timeWindow={timeRange.timeWindow}
-      onRangeSelect={timeRange.selectWindow}
+    <UsageMetricGraphCard
+      graph={graph}
+      metrics={data?.cluster?.componentMetrics}
+      loading={loading}
+      error={error}
+      timeRange={timeRange}
     />
   )
 }
@@ -176,14 +82,7 @@ export default function KubernetesMetrics({
   kind,
   name,
   namespace,
-}: {
-  clusterId: string
-  group: string
-  version: string
-  kind: string
-  name: string
-  namespace: string
-}) {
+}: Resource) {
   const theme = useTheme()
   const timeRange = useTimeRange()
   const metricsEnabled = useMetricsEnabled()
@@ -194,6 +93,14 @@ export default function KubernetesMetrics({
     name,
     namespace,
   })
+  const graphs = useMemo(
+    () => resourceMetricGraphs(podReservations),
+    [podReservations]
+  )
+  const resource = useMemo(
+    () => ({ clusterId, group, version, kind, name, namespace }),
+    [clusterId, group, version, kind, name, namespace]
+  )
 
   if (!metricsEnabled) return <MetricsEmptyState />
 
@@ -209,16 +116,16 @@ export default function KubernetesMetrics({
     >
       <MetricsTimeRangeControl timeRange={timeRange} />
       <MetricsScrollSC>
-        <Metric
-          clusterId={clusterId}
-          group={group}
-          version={version}
-          kind={kind}
-          name={name}
-          namespace={namespace}
-          podReservations={podReservations}
-          timeRange={timeRange}
-        />
+        <MetricsGraphGrid>
+          {graphs.map((graph) => (
+            <KubernetesMetricGraphCard
+              key={graph.key}
+              resource={resource}
+              graph={graph}
+              timeRange={timeRange}
+            />
+          ))}
+        </MetricsGraphGrid>
       </MetricsScrollSC>
     </div>
   )
