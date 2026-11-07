@@ -47,14 +47,14 @@ export const StyledTreeView = styled(SimpleTreeView)(({ theme }) => ({
 
   [`& .${treeItemClasses.groupTransition}`]: {
     paddingLeft:
-      'calc(var(--TreeView-itemChildrenIndentation)) - max(0, (var(--TreeView-itemDepth) - 2) * 0.75rem))',
-    borderLeft: `1px solid ${theme.colors['border']}`,
+      'calc(var(--TreeView-itemChildrenIndentation) - max(0rem, (var(--TreeView-itemDepth) - 2) * 0.75rem))',
+    borderLeft: `1px solid ${theme.colors.border}`,
     margin: `0.125rem 0 0.125rem 0.875rem`,
   },
 
   [`& .${treeItemClasses.root}.parent-of-selected > .${treeItemClasses.groupTransition}:has(.${treeItemClasses.root}.file-selected)`]:
     {
-      borderLeftColor: theme.colors.grey[600],
+      borderLeftColor: theme.colors['border-fill-two'],
     },
 }))
 
@@ -139,9 +139,10 @@ function FileTypeTextIcon({
         width: size,
         height: size,
         color: theme.colors['text-success'],
-        fontFamily: 'Inter',
+        fontFamily: theme.fontFamilies.sans,
         fontWeight: 600,
         fontSize: Math.round(size / 2),
+        lineHeight: 1,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',

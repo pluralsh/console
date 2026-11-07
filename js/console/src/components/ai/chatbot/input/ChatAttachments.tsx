@@ -215,8 +215,8 @@ function RemoveButton({ onClick }: { onClick: () => void }) {
 export function DropOverlay() {
   return (
     <DropOverlaySC>
-      <PaperclipIcon size={16} />
-      Drop files to attach
+      <PaperclipIcon size={20} />
+      <span>Drop files to attach</span>
     </DropOverlaySC>
   )
 }
@@ -237,11 +237,12 @@ const ShelfSC = styled.div<{ $compact: boolean }>(({ theme, $compact }) => ({
   }),
 }))
 
-const AttachmentItemSC = styled.div({
+const AttachmentItemSC = styled.div(({ theme }) => ({
   position: 'relative',
   display: 'flex',
+  borderRadius: theme.borderRadiuses.medium,
   '&:hover .remove, &:focus-within .remove': { opacity: 1 },
-})
+}))
 
 const ImageThumbSC = styled.img(({ theme }) => ({
   display: 'block',
@@ -251,6 +252,10 @@ const ImageThumbSC = styled.img(({ theme }) => ({
   borderRadius: theme.borderRadiuses.medium,
   border: theme.borders['fill-two'],
   background: theme.colors['fill-two'],
+  transition: 'border-color 0.1s ease-in-out',
+  'a:hover &, button:hover &': {
+    borderColor: theme.colors['border-fill-two'],
+  },
 }))
 
 const FileChipSC = styled.div(({ theme }) => ({
@@ -265,6 +270,10 @@ const FileChipSC = styled.div(({ theme }) => ({
   border: theme.borders['fill-two'],
   background: theme.colors['fill-two'],
   color: theme.colors.text,
+  transition: 'background 0.1s ease-in-out, border-color 0.1s ease-in-out',
+  'a:hover &, button:hover &': {
+    background: theme.colors['fill-two-hover'],
+  },
   '.name': {
     overflow: 'hidden',
     textOverflow: 'ellipsis',
@@ -282,8 +291,8 @@ const RemoveButtonSC = styled.button(({ theme }) => ({
   position: 'absolute',
   top: -6,
   right: -6,
-  width: 16,
-  height: 16,
+  width: 18,
+  height: 18,
   padding: 0,
   display: 'flex',
   alignItems: 'center',
@@ -291,11 +300,15 @@ const RemoveButtonSC = styled.button(({ theme }) => ({
   borderRadius: '50%',
   border: theme.borders.input,
   background: theme.colors['fill-three'],
-  color: theme.colors['icon-default'],
+  color: theme.colors['icon-light'],
   cursor: 'pointer',
   opacity: 0,
-  transition: 'opacity 0.1s ease-in-out',
-  '&:hover': { background: theme.colors['fill-three-hover'] },
+  transition: 'opacity 0.1s ease-in-out, background 0.1s ease-in-out',
+  boxShadow: theme.boxShadows.slight,
+  '&:hover': {
+    background: theme.colors['fill-three-hover'],
+    color: theme.colors['icon-danger'],
+  },
 }))
 
 const DropOverlaySC = styled.div(({ theme }) => ({
@@ -304,17 +317,17 @@ const DropOverlaySC = styled.div(({ theme }) => ({
   inset: 0,
   zIndex: 2,
   display: 'flex',
+  flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
   gap: theme.spacing.xsmall,
   borderRadius: theme.borderRadiuses.large,
-  border: `1px dashed ${theme.colors['border-primary']}`,
-  background: theme.colors['fill-zero-selected'],
-  opacity: 0.95,
+  border: `1.5px dashed ${theme.colors['border-primary']}`,
+  background: `${theme.colors['fill-zero-selected']}ee`,
   color: theme.colors.text,
   pointerEvents: 'none',
 }))
 
 export function withAttachmentHint(placeholder: string) {
-  return `${placeholder.trim().replace(/[.\s]+$/, '')}. Drag and drop files to attach them.`
+  return `${placeholder.trim().replace(/[.\s]+$/, '')}. Drag and drop or paste files to attach.`
 }
