@@ -1,6 +1,7 @@
 import {
   AccordionItem,
   AgentLoadingIcon,
+  Card,
   CaretDownIcon,
   DiffMethod,
   DiffViewer,
@@ -38,6 +39,7 @@ import { AILoadingText } from 'components/utils/AILoadingText'
 import { GqlError } from 'components/utils/Alert'
 import { prettifyPrompt } from 'components/utils/contentEditableChips'
 import { StackedText } from 'components/utils/table/StackedText'
+import { TRUNCATE } from 'components/utils/truncate'
 import { EaseIn } from 'components/utils/EaseIn'
 import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
 import {
@@ -338,6 +340,120 @@ export function WorkbenchJobMemoGroup({
         </EaseIn>
       )}
     </MemoGroupSC>
+  )
+}
+
+/**
+ * Consecutive coding agent runs launched by the orchestrator. The latest run
+ * gets the full card, earlier ones are minimized to a single line each.
+ */
+export function WorkbenchJobCodingAgentGroup({
+  activities,
+}: {
+  activities: WorkbenchJobActivityFragment[]
+}) {
+  const { spacing } = useTheme()
+  const earlier = activities.slice(0, -1)
+  const latest = activities.at(-1)
+
+  if (!latest) return null
+
+  return (
+    <Flex
+      direction="column"
+      gap="small"
+      width="100%"
+      minWidth={0}
+    >
+      {!isEmpty(earlier) && (
+        <>
+          <StackedText
+            first="Earlier agent runs"
+            firstPartialType="body2Bold"
+            firstColor="text-xlight"
+            icon={<AgentRunIcon size={12} />}
+          />
+          {earlier.map(({ id, agentRun, prompt, status }) =>
+            agentRun ? (
+              <AgentRunInfoSimple
+                key={id}
+                agentRun={agentRun}
+                css={{ padding: `0 ${spacing.small}` }}
+              />
+            ) : (
+              <Flex
+                key={id}
+                alignItems="center"
+                gap="xsmall"
+                css={{ padding: `0 ${spacing.small}` }}
+              >
+                <Body2P
+                  $color="text-xlight"
+                  $shimmer={isJobRunning(status)}
+                  css={{ ...TRUNCATE, flex: 1, minWidth: 0 }}
+                >
+                  {prompt}
+                </Body2P>
+                {status === WorkbenchJobActivityStatus.Failed && (
+                  <FailedFilledIcon
+                    size={12}
+                    color="icon-danger"
+                  />
+                )}
+              </Flex>
+            )
+          )}
+        </>
+      )}
+      {latest.agentRun ? (
+        <AgentRunInfoCard
+          showLinkButton
+          fillLevel={1}
+          agentRun={latest.agentRun}
+        />
+      ) : (
+        isJobRunning(latest.status) && (
+          <Card
+            fillLevel={1}
+            css={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: spacing.small,
+              padding: spacing.medium,
+            }}
+          >
+            <StackedText
+              first={
+                <Body2P
+                  $color="text-light"
+                  $shimmer
+                >
+                  Starting agent run
+                </Body2P>
+              }
+              icon={
+                <IconFrame
+                  type="secondary"
+                  icon={<AgentRunIcon size={16} />}
+                />
+              }
+            />
+            <Body2P
+              $color="text-xlight"
+              css={TRUNCATE}
+            >
+              {latest.prompt}
+            </Body2P>
+          </Card>
+        )
+      )}
+      {latest.result?.error && (
+        <GqlError
+          error={latest.result.error}
+          css={{ wordBreak: 'break-word' }}
+        />
+      )}
+    </Flex>
   )
 }
 

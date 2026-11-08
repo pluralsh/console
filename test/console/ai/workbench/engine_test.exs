@@ -524,6 +524,150 @@ defmodule Console.AI.Workbench.EngineTest do
       assert result.status == :successful
     end
 
+    test "spawns coding agents directly and resolves their activities once the run completes" do
+      deployment_settings(
+        logging: %{enabled: true, driver: :elastic, elastic: es_settings()},
+        ai: %{
+          enabled: true,
+          provider: :openai,
+          openai: %{access_token: "key"},
+          vector_store: %{
+            enabled: true,
+            store: :elastic,
+            elastic: es_vector_settings(),
+          },
+        }
+      )
+
+      me = self()
+
+      expect_reqllm_completion(fn _, opts ->
+        names = Enum.map(opts[:plural], &Tool.name/1)
+        assert "workbench_coding_agent" in names
+        assert "pull_requests" in names
+
+        subagent_tool = Enum.find(opts[:plural], &(Tool.name(&1) == "workbench_subagent"))
+        refute :coding in get_in(Tool.json_schema(subagent_tool), ["properties", "subagent", "enum"])
+
+        {:ok, "fix the bug", [
+          %Tool{
+            id: "coding-1",
+            name: "workbench_coding_agent",
+            arguments: %{
+              "mode" => "write",
+              "repository" => "https://github.com/pluralsh/console.git",
+              "prompt" => "fix the bug"
+            }
+          }
+        ]}
+      end)
+
+      expect_reqllm_completion(fn messages, _ ->
+        send(me, {:coding_result, Enum.find(messages, &match?({:tool, _, %{call_id: "coding-1"}}, &1))})
+
+        {:ok, "complete", [
+          %Tool{
+            name: "workbench_complete",
+            arguments: %{
+              "conclusion" => "complete",
+              "todos" => [%{name: "fix", description: "fix", done: true}]
+            }
+          }
+        ]}
+      end)
+
+      runtime = insert(:agent_runtime)
+      workbench = insert(:workbench, agent_runtime: runtime)
+      job = insert(:workbench_job, workbench: workbench, user: admin_user())
+
+      spawn_link(fn ->
+        {:ok, engine} = Engine.new(job)
+        send(me, {:result, Engine.run(engine)})
+      end)
+
+      activity = wait_for_coding_activity(job.id)
+      run = Repo.get!(Console.Schema.AgentRun, activity.agent_run_id)
+      wait_for_run_subscriber(run.id)
+
+      pr = insert(:pull_request, agent_run: run, url: "https://github.com/pluralsh/console/pull/1234")
+      {:ok, run} = update_record(run, %{status: :successful})
+      Recurse.handle_event(%Console.PubSub.AgentRunUpdated{item: run})
+
+      assert_receive {:coding_result, {:tool, content, _}}, :timer.seconds(20)
+      assert content =~ pr.url
+
+      assert_receive {:result, {:ok, result}}, :timer.seconds(20)
+      assert result.status == :successful
+
+      activity = refetch(activity)
+      assert activity.status == :successful
+      assert activity.type == :coding
+      assert activity.agent_run_id == run.id
+      assert activity.tool_call.name == "workbench_coding_agent"
+      assert activity.result.output =~ pr.url
+    end
+
+    test "reattaches to in-flight coding agent runs when the engine restarts" do
+      deployment_settings(
+        logging: %{enabled: true, driver: :elastic, elastic: es_settings()},
+        ai: %{
+          enabled: true,
+          provider: :openai,
+          openai: %{access_token: "key"},
+          vector_store: %{
+            enabled: true,
+            store: :elastic,
+            elastic: es_vector_settings(),
+          },
+        }
+      )
+
+      me = self()
+
+      expect_reqllm_completion(fn messages, _ ->
+        send(me, {:coding_result, Enum.find(messages, &match?({:tool, _, %{call_id: "coding-1"}}, &1))})
+
+        {:ok, "complete", [
+          %Tool{
+            name: "workbench_complete",
+            arguments: %{
+              "conclusion" => "complete",
+              "todos" => [%{name: "fix", description: "fix", done: true}]
+            }
+          }
+        ]}
+      end)
+
+      runtime = insert(:agent_runtime)
+      workbench = insert(:workbench, agent_runtime: runtime)
+      job = insert(:workbench_job, workbench: workbench, user: admin_user())
+      run = insert(:agent_run, runtime: runtime, mode: :analyze, status: :running)
+
+      {:ok, activity} =
+        Workbenches.create_job_activity(%{
+          type: :coding,
+          status: :pending,
+          prompt: "analyze the bug",
+          tool_call: %{call_id: "coding-1", name: "workbench_coding_agent", arguments: %{}}
+        }, job)
+      {:ok, activity} = Workbenches.associate_agent_run(activity, run.id)
+
+      spawn_link(fn ->
+        {:ok, engine} = Engine.new(job)
+        send(me, {:result, Engine.run(engine)})
+      end)
+
+      wait_for_run_subscriber(run.id)
+      {:ok, run} = update_record(run, %{status: :successful, analysis: %{summary: "found it", analysis: "the bug is in foo.ex"}})
+      Recurse.handle_event(%Console.PubSub.AgentRunUpdated{item: run})
+
+      assert_receive {:coding_result, {:tool, content, _}}, :timer.seconds(20)
+      assert content =~ "the bug is in foo.ex"
+
+      assert_receive {:result, {:ok, %{status: :successful}}}, :timer.seconds(20)
+      assert refetch(activity).status == :successful
+    end
+
     test "dispatches canvas_subagent tool calls, persists the canvas activity, and completes the job" do
       deployment_settings(
         logging: %{enabled: true, driver: :elastic, elastic: es_settings()},
@@ -856,6 +1000,31 @@ defmodule Console.AI.Workbench.EngineTest do
       nil ->
         Process.sleep(50)
         await_job_activity(job_id, attempts - 1)
+    end
+  end
+
+  defp wait_for_coding_activity(job_id, attempts \\ 100)
+  defp wait_for_coding_activity(_, 0), do: flunk("timed out waiting for coding activity")
+  defp wait_for_coding_activity(job_id, attempts) do
+    Console.Schema.WorkbenchJobActivity.for_workbench_job(job_id)
+    |> Console.Schema.WorkbenchJobActivity.for_type(:coding)
+    |> Repo.one()
+    |> case do
+      %{agent_run_id: id} = activity when is_binary(id) -> activity
+      _ ->
+        Process.sleep(50)
+        wait_for_coding_activity(job_id, attempts - 1)
+    end
+  end
+
+  defp wait_for_run_subscriber(run_id, attempts \\ 100)
+  defp wait_for_run_subscriber(_, 0), do: flunk("timed out waiting for the engine to await the agent run")
+  defp wait_for_run_subscriber(run_id, attempts) do
+    case :pg.get_members({:wb_agent, run_id}) do
+      [_ | _] -> :ok
+      [] ->
+        Process.sleep(50)
+        wait_for_run_subscriber(run_id, attempts - 1)
     end
   end
 

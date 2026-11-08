@@ -4825,6 +4825,9 @@ type WorkbenchJobActivity {
   "embedded result (output, metrics, logs) when present"
   result: WorkbenchJobActivityResult
 
+  "the orchestrator tool call that spawned this activity, if any"
+  toolCall: WorkbenchJobActivityToolCall
+
   "thoughts emitted during this activity"
   thoughts: [WorkbenchJobThought]
 
@@ -4849,6 +4852,14 @@ type WorkbenchJobActivity {
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+type WorkbenchJobActivityToolCall {
+  "the id of the tool call"
+  callId: String
+
+  "the name of the tool that was called, eg workbench_coding_agent for coding agent runs"
+  name: String
 }
 
 type WorkbenchJobThought {

@@ -571,6 +571,10 @@ fragment WorkbenchJobActivity on WorkbenchJobActivity {
   result {
     ...WorkbenchJobActivityResult
   }
+  toolCall {
+    callId
+    name
+  }
   agentRun {
     ...AgentRunTiny
   }

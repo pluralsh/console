@@ -2,7 +2,6 @@ defmodule Console.AI.Workbench.Subagents do
   alias Console.AI.Tool
   alias Console.AI.Workbench.Environment
   alias Console.AI.Workbench.Subagents.{
-    Coding,
     History,
     Infrastructure,
     Integration,
@@ -44,7 +43,6 @@ defmodule Console.AI.Workbench.Subagents do
     do: Infrastructure.tools(job, environment)
 
   defp tools(:integration, environment), do: Integration.tools(environment)
-  defp tools(:coding, environment), do: Coding.tools(environment)
   defp tools(:observability, environment), do: Observability.tools(environment)
 
   defp tools(:monitoring, %Environment{job: job} = environment),

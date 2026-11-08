@@ -2,7 +2,7 @@ defmodule Console.AI.Workbench.Tracking do
   @moduledoc """
   OpenTelemetry span names and attributes for workbench job execution.
   """
-  alias Console.Schema.WorkbenchJob
+  alias Console.Schema.{WorkbenchJob, AgentRun}
   alias Console.AI.Tools.Workbench.{
     Subagent,
     SkillBackfill,
@@ -41,6 +41,7 @@ defmodule Console.AI.Workbench.Tracking do
   end
 
   defp activity_span_name(%Subagent{subagent: type}), do: "workbench.activity.subagent.#{type}"
+  defp activity_span_name(%AgentRun{}), do: "workbench.activity.coding_agent"
   defp activity_span_name(%SkillBackfill{}), do: "workbench.activity.skill_backfill"
   defp activity_span_name(%CanvasTool{}), do: "workbench.activity.canvas"
   defp activity_span_name(%Notes{}), do: "workbench.activity.notes"
@@ -55,6 +56,8 @@ defmodule Console.AI.Workbench.Tracking do
   end
 
   defp action_attributes(%Subagent{subagent: type}), do: %{"workbench.activity.kind" => "subagent", "workbench.subagent" => to_string(type)}
+  defp action_attributes(%AgentRun{id: id, mode: mode}),
+    do: %{"workbench.activity.kind" => "coding_agent", "workbench.agent_run.id" => id, "workbench.agent_run.mode" => to_string(mode)}
   defp action_attributes(%SkillBackfill{}), do: %{"workbench.activity.kind" => "skill_backfill"}
   defp action_attributes(%CanvasTool{}), do: %{"workbench.activity.kind" => "canvas"}
   defp action_attributes(%Notes{}), do: %{"workbench.activity.kind" => "notes"}

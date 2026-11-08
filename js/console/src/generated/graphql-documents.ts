@@ -6014,6 +6014,10 @@ export const WorkbenchJobActivityFragmentDoc = /*#__PURE__*/ gql`
   result {
     ...WorkbenchJobActivityResult
   }
+  toolCall {
+    callId
+    name
+  }
   agentRun {
     ...AgentRunTiny
   }
