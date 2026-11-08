@@ -15,7 +15,7 @@ import { createLink } from 'apollo-absinthe-upload-link'
 import { createClient } from 'graphql-ws'
 import { Socket as PhoenixSocket } from 'phoenix'
 import { mergeConnectionsByNodeId } from 'utils/graphql'
-import { isDocumentHidden } from 'utils/visibility'
+import { isDocumentHidden, onReturnToTab } from 'utils/visibility'
 
 import fragments from '../generated/fragments.json'
 import { fetchToken } from './auth'
@@ -28,6 +28,7 @@ import customFetch from './uploadLink'
 const GQL_URL = '/gql'
 const WS_URI = '/socket'
 const GQL_WS_URI = '/socket/gql-ws'
+const RETURN_TO_TAB_MIN_HIDDEN_MS = 5_000
 
 export const authlessCacheConfig: InMemoryCacheConfig = {
   typePolicies: {
@@ -203,7 +204,19 @@ export function buildClient(
   if (import.meta.env.MODE !== 'test')
     setInterval(() => maybeReconnect(socket), 5000)
 
+  // a background tab skips its polls and can miss subscription events (eg a frozen socket),
+  // so catch the polling queries up right away instead of waiting for their next tick
+  onReturnToTab(
+    () => refetchPollingQueries(client),
+    RETURN_TO_TAB_MIN_HIDDEN_MS
+  )
+
   return { client, socket }
+}
+export function refetchPollingQueries(client: ApolloClient<unknown>) {
+  client.getObservableQueries('active').forEach((query) => {
+    if (query.options.pollInterval) query.refetch().catch(() => {})
+  })
 }
 
 // partially adapted from https://github.com/apollographql/apollo-utils/blob/main/packages/persisted-query-lists/
