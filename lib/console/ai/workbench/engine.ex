@@ -61,6 +61,14 @@ defmodule Console.AI.Workbench.Engine do
 
   defstruct [:job, :user, :environment, :context, iterations: 0, max: 200, verifiable: false]
 
+  # providers need a user turn after a text-only assistant reply; keep it neutral so it
+  # doesn't push the model to keep working when it should wrap up
+  @decide_msg """
+  Decide the next step based on the work so far. If the objective has been met, or further work \
+  wouldn't meaningfully change the conclusion, call `workbench_complete` now. Otherwise, call the \
+  tool for the next step that's still needed. Don't repeat work that has already been done.
+  """
+
   def new(%WorkbenchJob{} = job) do
     %{user: user, workbench: workbench} = job = preload_job(job)
 
@@ -123,7 +131,8 @@ defmodule Console.AI.Workbench.Engine do
         [
           system_prompt: &sysprompt(job, environment, &1),
           acc: [],
-          callback: &callback(job, &1)
+          callback: &callback(job, &1),
+          continue_msg: @decide_msg
         ]
     )
     |> MemoryEngine.reduce_with_context(context, &reducer/2)

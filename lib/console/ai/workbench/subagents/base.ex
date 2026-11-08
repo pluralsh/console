@@ -25,7 +25,22 @@ defmodule Console.AI.Workbench.Subagents.Base do
     |> Map.new()
   end
 
-  def cont_msg(), do: "looks like we aren't done, let's continue and if you're done just call subagent_result to wrap up"
+  @doc """
+  User turn sent after a text-only reply. Kept neutral so it doesn't push the subagent to keep
+  working when it should hand back its result.
+  """
+  def cont_msg(result_tools \\ Console.AI.Tools.Workbench.Result.name()) do
+    "Decide the next step based on the work so far. If the delegated task is done, or further work " <>
+      "wouldn't meaningfully change the result, call #{tool_list(result_tools)} now. Otherwise, call the tool " <>
+      "for the next step that's still needed. Don't repeat work that has already been done."
+  end
+
+  defp tool_list(tool) when is_binary(tool), do: "`#{tool}`"
+  defp tool_list([tool]), do: tool_list(tool)
+  defp tool_list([_ | _] = tools) do
+    {rest, [last]} = tools |> Enum.map(&tool_list/1) |> Enum.split(-1)
+    Enum.join(rest, ", ") <> " or " <> last
+  end
 
   def if_vector_store_enabled(tools) when is_list(tools) do
     case VectorStore.enabled?() do

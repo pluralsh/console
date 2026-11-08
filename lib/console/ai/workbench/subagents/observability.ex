@@ -19,7 +19,7 @@ defmodule Console.AI.Workbench.Subagents.Observability do
         callback: &callback(activity, environment, &1),
         tool_search: length(tools) > 10,
         pre_enable: [%ObservabilityResult{} | skill_knowledge_pre_enable()],
-        continue_msg: "looks like we aren't done, let's continue and if you're done just call observability_result to wrap up"
+        continue_msg: cont_msg(ObservabilityResult.name())
       ]
     )
     |> MemoryEngine.reduce([{:user, prompt}], &reducer(&1, &2, environment))
