@@ -846,7 +846,12 @@ defmodule Console.AI.Workbench.EngineTest do
         ]}
       end)
 
-      expect_reqllm_completion(fn _, _ ->
+      expect_reqllm_completion(fn messages, _ ->
+        assert Enum.any?(messages, fn
+          {:tool, content, %{call_id: "kube-update-1"}} -> !(content =~ "produced no result")
+          _ -> false
+        end)
+
         {:ok, "complete", [
           %Tool{
             name: "workbench_complete",
@@ -948,7 +953,12 @@ defmodule Console.AI.Workbench.EngineTest do
         ]}
       end)
 
-      expect_reqllm_completion(fn _, _ ->
+      expect_reqllm_completion(fn messages, _ ->
+        assert Enum.any?(messages, fn
+          {:tool, content, %{call_id: "exec-1"}} -> !(content =~ "produced no result")
+          _ -> false
+        end)
+
         {:ok, "complete", [
           %Tool{
             name: "workbench_complete",

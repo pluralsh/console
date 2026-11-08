@@ -292,6 +292,30 @@ defmodule Console.AI.Workbench.Engine do
           end
       end
     end)
+    |> backfill_tool_results()
+  end
+
+  # providers reject a tool call without a matching result, so never let one through unanswered,
+  # eg if an action struct didn't carry its originating tool call
+  defp backfill_tool_results(%Context{messages: messages} = context) do
+    {answers, rest} =
+      messages
+      |> Enum.reverse()
+      |> Enum.split_while(&(!match?(%ReqLLM.Message{role: :assistant, tool_calls: [_ | _]}, &1)))
+
+    case rest do
+      [%ReqLLM.Message{tool_calls: calls} | _] ->
+        answered = MapSet.new(answers, & &1.tool_call_id)
+
+        calls
+        |> Enum.reject(&MapSet.member?(answered, &1.id))
+        |> Enum.reduce(context, fn call, context ->
+          Logger.warning("workbench tool call #{call.id} produced no result, backfilling one")
+          Context.append(context, Context.tool_result(call.id, ReqLLM.ToolCall.name(call), "tool call produced no result"))
+        end)
+
+      _ -> context
+    end
   end
 
   defp append_tool_result(
@@ -405,7 +429,7 @@ defmodule Console.AI.Workbench.Engine do
       result: Map.merge(%{
         output: "request pending user approval",
         explanation: request.explanation,
-        kube_request: Console.mapify(request)
+        kube_request: action_attrs(request)
       }, Approval.attrs(request.approval))
     }
     with {:ok, activity} <- Workbenches.create_job_activity(attrs, job),
@@ -421,7 +445,7 @@ defmodule Console.AI.Workbench.Engine do
       result: Map.merge(%{
         output: "request pending user approval",
         explanation: request.explanation,
-        kube_drain: Console.mapify(request)
+        kube_drain: action_attrs(request)
       }, Approval.attrs(request.approval))
     }
     with {:ok, activity} <- Workbenches.create_job_activity(attrs, job),
@@ -437,7 +461,7 @@ defmodule Console.AI.Workbench.Engine do
       result: Map.merge(%{
         output: "request pending user approval",
         explanation: request.explanation,
-        kube_exec: Console.mapify(request)
+        kube_exec: action_attrs(request)
       }, Approval.attrs(request.approval))
     }
     with {:ok, activity} <- Workbenches.create_job_activity(attrs, job),
@@ -470,6 +494,9 @@ defmodule Console.AI.Workbench.Engine do
   defp subagent_module(:search), do: SA.Search
   defp subagent_module(:verify), do: SA.Verify
   defp subagent_module(:self_service), do: SA.SelfService
+
+  # the id holds the originating tool call, which isn't part of the persisted request
+  defp action_attrs(request), do: request |> Map.delete(:id) |> Console.mapify()
 
   defp tool_attrs(%{id: %Console.AI.Tool{id: id, name: name, arguments: arguments}}) when is_binary(id) and is_binary(name),
     do: %{call_id: id, name: name, arguments: arguments}

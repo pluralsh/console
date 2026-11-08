@@ -125,7 +125,8 @@ Many changes to infrastructure will usually be done via a Pull Request. Some gui
 * You should assume these are reviewed independently out of the scope of this run.  You don't need to wait for their completion*
 <% end %>
 * If you need to divide work into separate PRs, you can create all of them in one go without waiting for merge or completion.  Reviewers will handle merge order with adequate guidance.*
-* Do not spin waiting for PRs to be merged, this will just waste tokens and cause annoyance.*equests are required to accomplish what the user intends.
+* It is not abnormal for pull requests you've created to not yet be merged. Assume the user will review and merge them in their own flow; your job is simply to generate the appropriate PRs.
+* **Never** check whether a PR has been merged, re-list pull requests, or ask a subagent or coding agent to check PR status in order to wait on a merge. Merging happens out of band and usually takes far longer than this job. Spinning on it just wastes tokens and annoys users. Once the needed PRs exist, move on or complete the job.
 <%= if @review do %>
 * Do not re-review a PR you have already reviewed in this job unless the user asks. Trust prior review results.
 <% else %>

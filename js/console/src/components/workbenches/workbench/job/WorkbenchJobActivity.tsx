@@ -44,6 +44,7 @@ import { EaseIn } from 'components/utils/EaseIn'
 import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
 import {
   AgentRunStatus,
+  useAgentRunDeltaSubscription,
   useWorkbenchJobActivityQuery,
   WorkbenchJobActivityFragment,
   WorkbenchJobActivityStatus,
@@ -54,7 +55,7 @@ import {
   WorkbenchToolTinyFragment,
 } from 'generated/graphql'
 import { isEmpty, startCase } from 'lodash'
-import { type ReactNode, useMemo, useState } from 'react'
+import { type ComponentProps, type ReactNode, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getAgentRunAbsPath } from 'routes/aiRoutesConsts'
 import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
@@ -375,7 +376,7 @@ export function WorkbenchJobCodingAgentGroup({
           />
           {earlier.map(({ id, agentRun, prompt, status }) =>
             agentRun ? (
-              <AgentRunInfoSimple
+              <FollowedAgentRunInfoSimple
                 key={id}
                 agentRun={agentRun}
                 css={{ padding: `0 ${spacing.small}` }}
@@ -454,6 +455,27 @@ export function WorkbenchJobCodingAgentGroup({
         />
       )}
     </Flex>
+  )
+}
+
+// Earlier runs can still be in flight when several are launched in parallel, so follow their
+// deltas too. Apollo normalizes them into the cached run this row renders from.
+function FollowedAgentRunInfoSimple({
+  agentRun,
+  ...props
+}: ComponentProps<typeof AgentRunInfoSimple> & {
+  agentRun: NonNullable<WorkbenchJobActivityFragment['agentRun']>
+}) {
+  useAgentRunDeltaSubscription({
+    variables: { runId: agentRun.id },
+    skip: !isJobRunning(agentRun.status),
+  })
+
+  return (
+    <AgentRunInfoSimple
+      agentRun={agentRun}
+      {...props}
+    />
   )
 }
 
