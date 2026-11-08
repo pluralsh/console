@@ -34,7 +34,11 @@ defmodule Console.AI.Workbench.Knowledge.Backfill do
       base = {:user, "Here is a description of the job that was just completed:\n\n#{String.trim(job_prompt(job: job))}"}
 
       tools(job, Map.new(skills, & {&1.name, &1}))
-      |> MemoryEngine.new(20, system_prompt: String.trim(system_prompt(job: job)), acc: %{})
+      |> MemoryEngine.new(20,
+        system_prompt: String.trim(system_prompt(job: job)),
+        acc: %{},
+        continue_msg: cont_msg(["workbench_skill_update", "workbench_skill_create", "workbench_skill_ignore"])
+      )
       |> MemoryEngine.reduce([base | prompt], &reducer/2)
       |> case do
         {:ok, attrs} -> attrs

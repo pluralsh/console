@@ -17,13 +17,17 @@ import { useWorkbenchJobStreams } from './useWorkbenchJobStreams'
 import {
   isJobRunning,
   WorkbenchJobActivity,
+  WorkbenchJobCodingAgentGroup,
   WorkbenchJobJobLevelThinking,
   WorkbenchJobMemoGroup,
 } from './WorkbenchJobActivity'
 import { WorkbenchJobEvalPromptCard } from './WorkbenchJobEvalPromptCard'
 import { ExpandableUserPrompt } from './WorkbenchJobActivityResults'
 import { WorkbenchJobPromptInput } from './WorkbenchJobPromptInput'
-import { isActivityTerminal } from './workbenchJobActivityCollapse'
+import {
+  isActivityTerminal,
+  isCodingAgentActivity,
+} from './workbenchJobActivityCollapse'
 
 /** The only space between top-level rows. Rows add no vertical padding of their own. */
 export const ACTIVITY_GAP = 'small' as const
@@ -52,7 +56,7 @@ export function WorkbenchJobActivities({
     [job?.activities]
   )
   const activityGroups = useMemo(
-    () => groupConsecutiveMemos(activities),
+    () => groupConsecutiveActivities(activities),
     [activities]
   )
 
@@ -154,9 +158,16 @@ export function WorkbenchJobActivities({
             renderer={({ rowData }) => {
               const [activity] = rowData.activities
 
-              return activity.type === WorkbenchJobActivityType.Memo ? (
-                <WorkbenchJobMemoGroup activities={rowData.activities} />
-              ) : (
+              if (rowData.kind === 'memo')
+                return <WorkbenchJobMemoGroup activities={rowData.activities} />
+              if (rowData.kind === 'codingAgent')
+                return (
+                  <WorkbenchJobCodingAgentGroup
+                    activities={rowData.activities}
+                  />
+                )
+
+              return (
                 <WorkbenchJobActivity
                   isOpen={
                     openIds.includes(activity.id) ||
@@ -179,27 +190,38 @@ export function WorkbenchJobActivities({
   )
 }
 
+type WorkbenchJobActivityGroupKind = 'memo' | 'codingAgent' | 'single'
+
 type WorkbenchJobActivityGroup = {
   id: string
+  kind: WorkbenchJobActivityGroupKind
   activities: WorkbenchJobActivityFragment[]
 }
 
-export function groupConsecutiveMemos(
+function activityGroupKind(
+  activity: WorkbenchJobActivityFragment
+): WorkbenchJobActivityGroupKind {
+  if (activity.type === WorkbenchJobActivityType.Memo) return 'memo'
+  if (isCodingAgentActivity(activity)) return 'codingAgent'
+
+  return 'single'
+}
+
+/** Folds consecutive memos, and consecutive coding agent runs, into a single row each. */
+export function groupConsecutiveActivities(
   activities: WorkbenchJobActivityFragment[]
 ): WorkbenchJobActivityGroup[] {
   return activities.reduce<WorkbenchJobActivityGroup[]>((groups, activity) => {
     const lastGroup = groups.at(-1)
-    const isMemo = activity.type === WorkbenchJobActivityType.Memo
-    const followsMemo =
-      lastGroup?.activities[0]?.type === WorkbenchJobActivityType.Memo
+    const kind = activityGroupKind(activity)
 
-    if (isMemo && followsMemo) {
+    if (kind !== 'single' && lastGroup?.kind === kind) {
       lastGroup.activities.push(activity)
 
       return groups
     }
 
-    groups.push({ id: activity.id, activities: [activity] })
+    groups.push({ id: activity.id, kind, activities: [activity] })
 
     return groups
   }, [])

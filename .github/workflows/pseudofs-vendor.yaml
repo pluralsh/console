@@ -13,7 +13,7 @@ permissions:
 env:
   SOURCE_IMAGE: ghcr.io/pluralsh/pseudofs
   # bump alongside the pseudofs images in docker-compose.yml and docker-compose.test.yml
-  PSEUDOFS_VERSION: 0.2.11
+  PSEUDOFS_VERSION: 0.3.27
   DOCKER_METADATA_PR_HEAD_SHA: 'true'
 
 jobs:

@@ -955,6 +955,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :type,     :workbench_job_activity_type, description: "the type of the activity"
     field :prompt,   :string, description: "the prompt for this activity"
     field :result,   :workbench_job_activity_result, description: "embedded result (output, metrics, logs) when present"
+    field :tool_call, :workbench_job_activity_tool_call, description: "the orchestrator tool call that spawned this activity, if any"
     field :thoughts, list_of(:workbench_job_thought), resolve: dataloader(Deployments), description: "thoughts emitted during this activity"
 
     field :whimsey, :string, description: "whimsically describes current progress for you", resolve: &Deployments.whimsey_text/3
@@ -966,6 +967,11 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :user,         :user, resolve: dataloader(User), description: "the user who created, approved, or denied this activity"
 
     timestamps()
+  end
+
+  object :workbench_job_activity_tool_call do
+    field :call_id, :string, description: "the id of the tool call"
+    field :name,    :string, description: "the name of the tool that was called, eg workbench_coding_agent for coding agent runs"
   end
 
   object :workbench_job_thought do

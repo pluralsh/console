@@ -1,4 +1,9 @@
-import { InMemoryCache } from '@apollo/client'
+import {
+  ApolloClient,
+  ApolloLink,
+  InMemoryCache,
+  Observable,
+} from '@apollo/client'
 import {
   DashboardGraphType,
   PublicWorkbenchDashboardGraphQuery,
@@ -10,7 +15,11 @@ import {
 } from 'generated/graphql-documents'
 import { describe, expect, it, vi } from 'vitest'
 
-import { authlessCacheConfig, buildClient } from './client'
+import {
+  authlessCacheConfig,
+  buildClient,
+  refetchPollingQueries,
+} from './client'
 
 vi.mock('./auth', () => ({ fetchToken: () => null }))
 
@@ -145,5 +154,35 @@ describe('buildClient', () => {
 
     visibility.mockReturnValue('visible')
     expect(options.skipPollAttempt?.()).toBe(false)
+  })
+})
+
+describe('refetchPollingQueries', () => {
+  it('refetches only the active queries that poll', () => {
+    const client = new ApolloClient({
+      cache: new InMemoryCache(authlessCacheConfig),
+      link: new ApolloLink(() => Observable.of({ data: page })),
+    })
+    const watch = (pollInterval?: number) =>
+      client.watchQuery({
+        query: PublicWorkbenchDashboardDocument,
+        variables: { publicId },
+        pollInterval,
+      })
+    const [polling, idle] = [watch(60_000), watch()]
+    const subscriptions = [
+      polling.subscribe(() => {}),
+      idle.subscribe(() => {}),
+    ]
+    const [pollingRefetch, idleRefetch] = [
+      vi.spyOn(polling, 'refetch'),
+      vi.spyOn(idle, 'refetch'),
+    ]
+
+    refetchPollingQueries(client)
+
+    expect(pollingRefetch).toHaveBeenCalledTimes(1)
+    expect(idleRefetch).not.toHaveBeenCalled()
+    subscriptions.forEach((subscription) => subscription.unsubscribe())
   })
 })

@@ -5,7 +5,9 @@ defmodule Console.AI.Workbench.Engine do
   1. Runs a small agentic process to fetch skill information or take notes, but ultimately delegates to a variety of subagents
   2. Each subagent does work independently and comes back with a result, these are marked as activities that can be presented in UI but also as
      message history to the memory engine to inform the next iteration of the loop.
-  3. A complete tool is used to mark the conclusion of the job.
+  3. Coding agents are spawned directly by the engine, so their prompts benefit from the full job context.  Each run is tracked as a `:coding` activity
+     that is awaited until the run completes.
+  4. A complete tool is used to mark the conclusion of the job.
   """
   import Console.AI.Workbench.Subagents.Base, only: [drop_empty: 1, log_error: 2, skill_knowledge_tools: 2, knowledge_tools: 1, search_tools: 2]
   import Console.AI.Agents.Base, only: [publish_absinthe: 2]
@@ -15,10 +17,11 @@ defmodule Console.AI.Workbench.Engine do
   alias Console.AI.Chat.MemoryEngine
   alias Console.AI.Provider.Base, as: ProviderBase
   alias Console.Deployments.{Workbenches, Attachments}
-  alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity, WorkbenchTool, ChatConnection, ChatbotMessage, User}
+  alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity, WorkbenchTool, ChatConnection, ChatbotMessage, User, AgentRun}
   alias Console.AI.Workbench.Skills, as: SkillsUtil
   alias Console.AI.Workbench.Subagents, as: SA
   alias Console.AI.Workbench.{
+    AgentRuns,
     Environment,
     Message,
     MCP,
@@ -30,6 +33,7 @@ defmodule Console.AI.Workbench.Engine do
   }
   alias Console.AI.Tools.Workbench.{
     Codemode,
+    CodingAgent,
     Complete,
     Subagents,
     Subagent,
@@ -44,7 +48,8 @@ defmodule Console.AI.Workbench.Engine do
     KubeShell,
     Infrastructure.KubeExec,
     Infrastructure.KubeUpdate,
-    Infrastructure.KubeDelete
+    Infrastructure.KubeDelete,
+    Coding.PullRequests
   }
   alias Console.AI.Tools.Workbench.Infrastructure.KubeDrain, as: KubeDrainTool
   alias Console.AI.Tool.Approval, as: Approval
@@ -55,6 +60,14 @@ defmodule Console.AI.Workbench.Engine do
   require Logger
 
   defstruct [:job, :user, :environment, :context, iterations: 0, max: 200, verifiable: false]
+
+  # providers need a user turn after a text-only assistant reply; keep it neutral so it
+  # doesn't push the model to keep working when it should wrap up
+  @decide_msg """
+  Decide the next step based on the work so far. If the objective has been met, or further work \
+  wouldn't meaningfully change the conclusion, call `workbench_complete` now. Otherwise, call the \
+  tool for the next step that's still needed. Don't repeat work that has already been done.
+  """
 
   def new(%WorkbenchJob{} = job) do
     %{user: user, workbench: workbench} = job = preload_job(job)
@@ -95,6 +108,7 @@ defmodule Console.AI.Workbench.Engine do
       Console.AI.Provider.external_errors()
 
       list_activities(job)
+      |> resume_agent_runs(job)
       |> then(&put_in(engine.environment.activities, &1))
       |> verifiable()
       |> loop()
@@ -117,7 +131,8 @@ defmodule Console.AI.Workbench.Engine do
         [
           system_prompt: &sysprompt(job, environment, &1),
           acc: [],
-          callback: &callback(job, &1)
+          callback: &callback(job, &1),
+          continue_msg: @decide_msg
         ]
     )
     |> MemoryEngine.reduce_with_context(context, &reducer/2)
@@ -168,6 +183,7 @@ defmodule Console.AI.Workbench.Engine do
   end
 
   defp activity?(%Subagent{}), do: true
+  defp activity?(%AgentRun{}), do: true
   defp activity?(%FunctionCall{}), do: true
   defp activity?(%CanvasTool{}), do: true
   defp activity?(%Notes{}), do: true
@@ -252,6 +268,9 @@ defmodule Console.AI.Workbench.Engine do
   defp failed_activity_result(action, error),
     do: tool_result(action, "failed to run activity: #{inspect(error)}")
 
+  defp tool_result(%AgentRun{tool: %Console.AI.Tool{} = tool}, content),
+    do: tool_result(%{id: tool}, content)
+
   defp tool_result(
          %{id: %Console.AI.Tool{id: id, name: name}},
          content
@@ -282,6 +301,30 @@ defmodule Console.AI.Workbench.Engine do
           end
       end
     end)
+    |> backfill_tool_results()
+  end
+
+  # providers reject a tool call without a matching result, so never let one through unanswered,
+  # eg if an action struct didn't carry its originating tool call
+  defp backfill_tool_results(%Context{messages: messages} = context) do
+    {answers, rest} =
+      messages
+      |> Enum.reverse()
+      |> Enum.split_while(&(!match?(%ReqLLM.Message{role: :assistant, tool_calls: [_ | _]}, &1)))
+
+    case rest do
+      [%ReqLLM.Message{tool_calls: calls} | _] ->
+        answered = MapSet.new(answers, & &1.tool_call_id)
+
+        calls
+        |> Enum.reject(&MapSet.member?(answered, &1.id))
+        |> Enum.reduce(context, fn call, context ->
+          Logger.warning("workbench tool call #{call.id} produced no result, backfilling one")
+          Context.append(context, Context.tool_result(call.id, ReqLLM.ToolCall.name(call), "tool call produced no result"))
+        end)
+
+      _ -> context
+    end
   end
 
   defp append_tool_result(
@@ -290,10 +333,11 @@ defmodule Console.AI.Workbench.Engine do
        ),
        do: Context.append(context, result)
 
+  defp action_call_id(%AgentRun{tool: %Console.AI.Tool{id: id}}), do: id
   defp action_call_id(%{id: %Console.AI.Tool{id: id}}), do: id
   defp action_call_id(_), do: nil
 
-  @supported_subagents ~w(infrastructure integration coding observability monitoring memory skill history search verify self_service)a
+  @supported_subagents ~w(infrastructure integration observability monitoring memory skill history search verify self_service)a
 
   defp spawn_activity(action, %__MODULE__{job: job} = engine) do
     Tracking.with_activity(action, job, fn ->
@@ -315,6 +359,13 @@ defmodule Console.AI.Workbench.Engine do
       end, &crash_fallback/1)
       |> Workbenches.update_job_activity(activity)
       |> log_error("Failed to update job activity")
+    end
+  end
+
+  defp do_spawn_activity(%AgentRun{} = run, %__MODULE__{job: job}) do
+    case Repo.preload(run, [:workbench_job_activity], force: true) do
+      %AgentRun{workbench_job_activity: %WorkbenchJobActivity{} = activity} -> AgentRuns.await(activity, job)
+      _ -> {:error, "agent run #{run.id} is not associated with a workbench activity"}
     end
   end
 
@@ -387,7 +438,7 @@ defmodule Console.AI.Workbench.Engine do
       result: Map.merge(%{
         output: "request pending user approval",
         explanation: request.explanation,
-        kube_request: Console.mapify(request)
+        kube_request: action_attrs(request)
       }, Approval.attrs(request.approval))
     }
     with {:ok, activity} <- Workbenches.create_job_activity(attrs, job),
@@ -403,7 +454,7 @@ defmodule Console.AI.Workbench.Engine do
       result: Map.merge(%{
         output: "request pending user approval",
         explanation: request.explanation,
-        kube_drain: Console.mapify(request)
+        kube_drain: action_attrs(request)
       }, Approval.attrs(request.approval))
     }
     with {:ok, activity} <- Workbenches.create_job_activity(attrs, job),
@@ -419,7 +470,7 @@ defmodule Console.AI.Workbench.Engine do
       result: Map.merge(%{
         output: "request pending user approval",
         explanation: request.explanation,
-        kube_exec: Console.mapify(request)
+        kube_exec: action_attrs(request)
       }, Approval.attrs(request.approval))
     }
     with {:ok, activity} <- Workbenches.create_job_activity(attrs, job),
@@ -444,7 +495,6 @@ defmodule Console.AI.Workbench.Engine do
 
   defp subagent_module(:infrastructure), do: SA.Infrastructure
   defp subagent_module(:integration), do: SA.Integration
-  defp subagent_module(:coding), do: SA.Coding
   defp subagent_module(:observability), do: SA.Observability
   defp subagent_module(:monitoring), do: SA.Monitoring
   defp subagent_module(:memory), do: SA.Memory
@@ -453,6 +503,9 @@ defmodule Console.AI.Workbench.Engine do
   defp subagent_module(:search), do: SA.Search
   defp subagent_module(:verify), do: SA.Verify
   defp subagent_module(:self_service), do: SA.SelfService
+
+  # the id holds the originating tool call, which isn't part of the persisted request
+  defp action_attrs(request), do: request |> Map.delete(:id) |> Console.mapify()
 
   defp tool_attrs(%{id: %Console.AI.Tool{id: id, name: name, arguments: arguments}}) when is_binary(id) and is_binary(name),
     do: %{call_id: id, name: name, arguments: arguments}
@@ -481,17 +534,31 @@ defmodule Console.AI.Workbench.Engine do
     |> Enum.reverse()
   end
 
+  # coding agent runs outlive the engine process, so reattach to any still in flight (eg after a restart)
+  # rather than leaving their activities running forever
+  defp resume_agent_runs(activities, %WorkbenchJob{} = job) do
+    case Enum.filter(activities, &AgentRuns.pending?/1) do
+      [] -> activities
+      pending ->
+        Tracking.async_stream(pending, &AgentRuns.await(&1, job), max_concurrency: 10, timeout: :timer.hours(4))
+        |> Stream.run()
+
+        list_activities(job)
+    end
+  end
+
   defp refresh_job(%WorkbenchJob{id: id}) do
     Console.Repo.get!(WorkbenchJob, id)
     |> preload_job()
   end
 
   defp tools(%WorkbenchJob{} = job, %Environment{skills: skills} = env, activities) do
-    subagents = Environment.subagents(env)
-                |> maybe_add_memory(activities)
+    {coding, subagents} = Environment.subagents(env)
+                          |> maybe_add_memory(activities)
+                          |> Enum.split_with(& &1 == :coding)
 
     categories = Environment.categories(job)
-    skills = Environment.with_builtins(skills) |> Environment.subagent_skills(:orchestrator)
+    skills = orchestrator_skills(skills, coding)
     tool_names = SA.tool_names(subagents, env)
 
     skill_knowledge_tools(job, skills) ++ knowledge_tools([%KnowledgeUpsert{job: job}, %KnowledgeDelete{job: job}]) ++ [
@@ -505,13 +572,29 @@ defmodule Console.AI.Workbench.Engine do
       %Subagent{subagents: subagents},
       %FetchNotes{job: job},
       %Codemode{tools: [], workbench_id: job.workbench_id},
+      %PullRequests{job: job},
       Notes,
       %Complete{job: job, user: env.user},
     ] ++ type_tools(job)
+      ++ coding_tools(coding, env)
       ++ search_tools(env, :orchestrator)
       ++ function_tools(env)
       ++ kube_tools(job)
       ++ include_backfill(job)
+  end
+
+  defp coding_tools([_ | _], %Environment{job: job, skills: skills}),
+    do: [%CodingAgent{workbench: job.workbench, job: job, skills: Environment.subagent_skills(skills, :coding)}]
+  defp coding_tools(_, _), do: []
+
+  # the orchestrator now prompts coding agents itself, so it needs any skills scoped to coding as well
+  defp orchestrator_skills(skills, coding) do
+    skills = Environment.with_builtins(skills)
+    orchestrator = Environment.subagent_skills(skills, :orchestrator)
+    case coding do
+      [_ | _] -> Map.merge(Environment.subagent_skills(skills, :coding), orchestrator)
+      _ -> orchestrator
+    end
   end
 
   defp include_backfill(%WorkbenchJob{result: %{conclusion: c}}) when is_binary(c) and byte_size(c) > 0, do: [SkillBackfill]
@@ -543,6 +626,7 @@ defmodule Console.AI.Workbench.Engine do
       job: job,
       engine: engine,
       actions: Environment.actions(environment),
+      coding: :coding in Environment.subagents(environment),
       review: WorkbenchJob.coding_review?(job),
       self_service: :self_service in Environment.subagents(environment),
       filesystem: Console.PseudoFS.enabled?()

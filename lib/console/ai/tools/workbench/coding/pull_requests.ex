@@ -11,7 +11,10 @@ defmodule Console.AI.Tools.Workbench.Coding.PullRequests do
 
   def json_schema(_), do: @json_schema
   def name(_), do: "pull_requests"
-  def description(_), do: "Lists pull request details that have been created so far for the given job"
+  def description(_) do
+    "Lists pull request details that have been created so far for the given job, eg to avoid duplicating one or to continue work on it. " <>
+      "Do not use this to poll for or wait on merges, PRs are merged out of band by users."
+  end
 
   def changeset(model, attrs) do
     model

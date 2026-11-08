@@ -1,6 +1,6 @@
 defmodule Console.AI.Tools.Workbench.Subagents do
   use Console.AI.Tools.Workbench.Base
-  alias Console.Schema.{Workbench, WorkbenchJob}
+  alias Console.Schema.Workbench
 
   embedded_schema do
     field :bench, :map, virtual: true
@@ -39,14 +39,6 @@ defmodule Console.AI.Tools.Workbench.Subagents do
 
   defp subagent_description(bench, type, categories, job \\ nil)
 
-  defp subagent_description(_, :coding, _, job) do
-    case WorkbenchJob.coding_review?(job) do
-      true ->
-        "Invoke a coding subagent to analyze or modify code, generating a pull request, or to review an existing pull request. Review mode is enabled for this job: when the task is to review a PR, include the PR URL and its head branch and instruct the coding agent to use review mode."
-      _ ->
-        "Invoke a coding subagent to analyze or modify code, generating a pull request.  This subagent will use either direct repository urls or container image urls to determine where to make code changes, so include either or both to guide it appropriately, alongside a clear spec of the change or analysis needed."
-    end
-  end
   defp subagent_description(%Workbench{configuration: %{infrastructure: %{} = infra}}, :infrastructure, _, _), do: infra_description(infra)
   defp subagent_description(_, :infrastructure, _, _), do: "Invoke an infrastructure subagent to determine infrastructure state and configuration.  Use this to deeply investiage kubernetes, IaaS, or Docker/OCI registry data necessary for the job at hand."
   defp subagent_description(_, :observability, categories, _), do: "Invoke an observability subagent to query and analyze observability data.  Supported tool capabilities are: #{observability_categories(categories)}"
@@ -57,7 +49,7 @@ defmodule Console.AI.Tools.Workbench.Subagents do
   defp subagent_description(_, :history, _, _), do: "Invoke a history subagent to search past workbench activities.  Useful to remember what has been done so far, with regex support for finding past work."
   defp subagent_description(_, :search, _, _), do: "Invoke a web search subagent to search the public web for information.  Useful to find documentation, public pricing information, and anything else that's not specific to deployed infrastructure."
   defp subagent_description(_, :verify, _, _), do: "Invoke a verification subagent to verify the job was successfully completed based on infrastructure and observability state."
-  defp subagent_description(_, :self_service, _, _), do: "Invoke a self-service subagent to discover Plural catalogs and PR automations, then invoke a clear GitOps provisioning pathway. Prefer this for repeatable golden-path provisioning; punt undefined or custom code work to the coding subagent."
+  defp subagent_description(_, :self_service, _, _), do: "Invoke a self-service subagent to discover Plural catalogs and PR automations, then invoke a clear GitOps provisioning pathway. Prefer this for repeatable golden-path provisioning; punt undefined or custom code work to the `workbench_coding_agent` tool."
   defp subagent_description(_, _, _, _), do: "Unknown subagent"
 
   defp infra_description(%{vulnerabilities: vulns, pod_logs: logs, sentinels: sentinels}) when vulns == true or logs == true or sentinels == true do

@@ -272,31 +272,36 @@ export function Sidebar() {
 
   return (
     <SidebarSC $isExpanded={isExpanded}>
-      <SidebarSection flex={1}>
-        {menuItems.map((item, i) =>
-          item.path === '/' && updateAvailable ? (
-            <ApplicationUpdateNavButton key={i} />
-          ) : (
-            <SidebarItem
-              key={i}
-              asLink
-              to={item.path}
-              active={isActive(item)}
-              expandedLabel={item.expandedLabel}
-              tooltip={
-                <Flex
-                  gap="small"
-                  align="center"
-                >
-                  {item.expandedLabel}
-                  <CommandPaletteShortcuts shortcuts={item.hotkeys} />
-                </Flex>
-              }
-            >
-              {item.icon}
-            </SidebarItem>
-          )
-        )}
+      <SidebarSection
+        flex={1}
+        minHeight={0}
+      >
+        <SidebarNavItemsSC>
+          {menuItems.map((item, i) =>
+            item.path === '/' && updateAvailable ? (
+              <ApplicationUpdateNavButton key={i} />
+            ) : (
+              <SidebarItem
+                key={i}
+                asLink
+                to={item.path}
+                active={isActive(item)}
+                expandedLabel={item.expandedLabel}
+                tooltip={
+                  <Flex
+                    gap="small"
+                    align="center"
+                  >
+                    {item.expandedLabel}
+                    <CommandPaletteShortcuts shortcuts={item.hotkeys} />
+                  </Flex>
+                }
+              >
+                {item.icon}
+              </SidebarItem>
+            )
+          )}
+        </SidebarNavItemsSC>
         <Flex flex={1} />
         <HelpLauncher />
         <ProfileMenu />
@@ -304,7 +309,7 @@ export function Sidebar() {
           <ConsoleVersion version={configuration.consoleVersion} />
         )}
       </SidebarSection>
-      <div css={{ height: 40, width: '100%' }}>
+      <div css={{ height: 40, width: '100%', flexShrink: 0 }}>
         <WrapWithIf
           condition={!isExpanded}
           wrapper={
@@ -397,6 +402,20 @@ const ToggleSidebarButtonSC = styled.button<{
   '&:focus-visible': {
     outline: theme.borders['outline-focused'],
   },
+}))
+
+// only the nav items scroll on short windows: the help and profile menus below are
+// absolutely positioned popups that a scroll container would clip
+const SidebarNavItemsSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  gap: theme.spacing.xxsmall,
+  width: '100%',
+  minHeight: 0,
+  overflowX: 'hidden',
+  overflowY: 'auto',
+  scrollbarWidth: 'none',
 }))
 
 const SidebarSC = styled.div<{

@@ -1,6 +1,6 @@
 import { Flex, MarkdocContextProvider } from '@pluralsh/design-system'
 import { Suspense, useRef } from 'react'
-import styled from 'styled-components'
+import styled, { createGlobalStyle } from 'styled-components'
 
 import { BillingSubscriptionProvider } from 'components/billing/BillingSubscriptionProvider'
 import BreadcrumbsProvider from 'components/contexts/BreadcrumbsProvider'
@@ -99,7 +99,9 @@ function ConsoleContent() {
       flexGrow={1}
       minHeight={0}
       alignItems="stretch"
+      overflow="clip"
     >
+      <ConsoleBodyStyle />
       <Sidebar />
       <Flex
         ref={wrapperRef}
@@ -136,6 +138,10 @@ function ConsoleContent() {
     </Flex>
   )
 }
+
+// the shell is pinned to the viewport, so anything overflowing it (eg portaled popovers)
+// must not make the page itself scrollable, or wheel scrolls chain out and shift the whole app
+const ConsoleBodyStyle = createGlobalStyle({ body: { overflow: 'hidden' } })
 
 const ConsoleRoutesSC = styled(Flex)(({ theme }) => ({
   backgroundColor:
