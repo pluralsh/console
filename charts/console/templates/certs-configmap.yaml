@@ -1,0 +1,11 @@
+{{- range $cert := .Values.certs }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "console.fullname" $ }}-{{ $cert.name }}
+  labels:
+    {{- include "console.labels" $ | nindent 4 }}
+data:
+  {{ $cert.file }}: {{ $cert.data | quote }}
+{{- end }}

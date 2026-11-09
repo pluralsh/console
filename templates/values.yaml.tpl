@@ -1,4 +1,12 @@
 
+{{ if .Values.privateCaPem }}
+certs:
+  - name: ca-bundle
+    file: ca-certificates.crt
+    data: |
+{{ .Values.privateCaPem }}
+{{ end }}
+
 ingress:
   console_dns: {{ .Values.consoleDns }}
   kas_dns: {{ .Values.kasDns }}

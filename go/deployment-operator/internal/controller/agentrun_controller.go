@@ -472,6 +472,10 @@ func (r *AgentRunReconciler) reconcilePod(ctx context.Context, run *v1alpha1.Age
 		}
 		pod = buildAgentRunPod(run, runtime)
 
+		if err := common.EnsureSpawnedCAConfigMap(ctx, r.Client, pod.Namespace); err != nil {
+			return nil, fmt.Errorf("failed to ensure spawned CA configmap: %w", err)
+		}
+
 		// Set the controller reference on the pod so that it can be garbage collected when the agent run is deleted.
 		// Set before creating the pod so that the pod can be owned by the agent run.
 		if err := controllerutil.SetControllerReference(run, pod, r.Scheme); err != nil {

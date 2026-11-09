@@ -7,6 +7,23 @@ global:
   additionalVolumeMounts: ~
   registry: ghcr.io/pluralsh
 
+# Allows mounting custom CA certs into console and KAS pods.
+# Certificates are mounted under "/etc/ssl/certs" via subPath so they are additive
+# with the image OS trust store (or can replace ca-certificates.crt when file is set
+# to that name with a merged private+public bundle).
+#
+# When set and console.config.agentHelmValues is empty, the same certs are also
+# seeded into CONSOLE_AGENT_HELM_VALUES so agents inherit the bundle on bootstrap.
+#
+# Example (merged private chain + public roots as ca-certificates.crt):
+#  - name: ca-bundle
+#    data: |
+#      -----BEGIN CERTIFICATE-----
+#      ...
+#      -----END CERTIFICATE-----
+#    file: ca-certificates.crt
+certs: []
+
 cloud:
   enabled: false
   o11y:

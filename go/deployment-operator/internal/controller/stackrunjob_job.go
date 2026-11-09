@@ -78,6 +78,9 @@ func (r *StackRunJobReconciler) reconcileJob(ctx context.Context, run *v1alpha1.
 		if err != nil {
 			return nil, err
 		}
+		if err := common.EnsureSpawnedCAConfigMap(ctx, r.Client, run.Namespace); err != nil {
+			return nil, fmt.Errorf("failed to ensure spawned CA configmap: %w", err)
+		}
 		if err := r.Create(ctx, job); err != nil {
 			return nil, err
 		}
@@ -118,6 +121,8 @@ func (r *StackRunJobReconciler) GenerateRunJob(run *console.StackRunMinimalFragm
 	jobSpec.Template.Spec.Volumes = r.ensureDefaultVolumes(jobSpec.Template.Spec.Volumes)
 
 	jobSpec.Template.Spec.SecurityContext = r.ensureDefaultPodSecurityContext(jobSpec.Template.Spec.SecurityContext)
+
+	common.ApplySpawnedCAToPodSpec(&jobSpec.Template.Spec)
 
 	return &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
