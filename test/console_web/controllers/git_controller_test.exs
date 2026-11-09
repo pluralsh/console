@@ -2,6 +2,9 @@ defmodule ConsoleWeb.GitControllerTest do
   use ConsoleWeb.ConnCase, async: false
   use Mimic
   alias Console.Deployments.Git.Discovery
+  alias Console.Deployments.Local.Server
+  alias Console.Deployments.Services
+  alias Console.Schema.Revision
 
   describe "agent_chart/2" do
     test "it can download the current valid agent chart", %{conn: conn} do
@@ -167,6 +170,60 @@ defmodule ConsoleWeb.GitControllerTest do
       |> add_auth_headers(insert(:cluster))
       |> get("/v1/git/tarballs", %{id: svc.id})
       |> response(403)
+    end
+
+    test "it records a new commit when the tarball is served from cache", %{conn: conn} do
+      svc = cached_git_service("old-sha", :synced)
+      new_sha = "new-sha"
+      {fingerprint, chart} = prime_tarball_cache(svc)
+
+      expect(Discovery, :commit, fn repo, ref ->
+        assert repo.id == svc.repository_id
+        assert ref.ref == "master"
+        assert ref.folder == "bin"
+        {:ok, new_sha, "cached commit"}
+      end)
+
+      conn =
+        conn
+        |> add_auth_headers(svc.cluster)
+        |> get("/v1/git/tarballs", %{id: svc.id})
+
+      assert response(conn, 200) == File.read!(chart)
+      assert get_resp_header(conn, "x-plrl-digest") == [fingerprint]
+
+      svc = refetch(svc)
+      assert svc.sha == new_sha
+      assert svc.status == :stale
+      assert svc.message == "cached commit"
+
+      revisions = Revision.for_service(svc.id) |> Console.Repo.all()
+      assert length(revisions) == 2
+      assert Enum.all?(revisions, & &1.sha == new_sha)
+    end
+
+    test "it leaves the service alone when the cached commit is unchanged", %{conn: conn} do
+      sha = "same-sha"
+      svc = cached_git_service(sha, :synced)
+      before = refetch(svc)
+      count = revision_count(svc.id)
+      {fingerprint, chart} = prime_tarball_cache(svc)
+
+      expect(Discovery, :commit, fn _, _ -> {:ok, sha, "ignored"} end)
+
+      conn =
+        conn
+        |> add_auth_headers(svc.cluster)
+        |> get("/v1/git/tarballs", %{id: svc.id})
+
+      assert response(conn, 200) == File.read!(chart)
+      assert get_resp_header(conn, "x-plrl-digest") == [fingerprint]
+
+      svc = refetch(svc)
+      assert svc.sha == sha
+      assert svc.status == :synced
+      assert svc.updated_at == before.updated_at
+      assert revision_count(svc.id) == count
     end
   end
 
@@ -439,5 +496,36 @@ defmodule ConsoleWeb.GitControllerTest do
       |> post("/ext/v1/rollback/#{svc.id}")
       |> response(402)
     end
+  end
+
+  defp cached_git_service(sha, status) do
+    cluster = insert(:cluster)
+    git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
+
+    {:ok, svc} = Services.create_service(%{
+      name: "cache-hit",
+      namespace: "test",
+      version: "0.0.1",
+      repository_id: git.id,
+      git: %{ref: "master", folder: "bin"}
+    }, cluster.id, admin_user())
+
+    svc = Console.Repo.preload(svc, [:revision])
+    {:ok, _} = Ecto.Changeset.change(svc.revision, %{sha: sha}) |> Console.Repo.update()
+    {:ok, svc} = Ecto.Changeset.change(svc, %{sha: sha, status: status}) |> Console.Repo.update()
+    Console.Repo.preload(svc, [:cluster, :revision], force: true)
+  end
+
+  defp prime_tarball_cache(svc) do
+    stub(Discovery, :digest, fn _, _ -> {:ok, "discovery-digest"} end)
+    {:ok, fingerprint} = Services.digest(svc)
+    chart = Console.Deployments.Settings.agent_service_chart()
+    {:ok, _} = Server.fetch(fingerprint, fn -> File.open(chart) end)
+    {fingerprint, chart}
+  end
+
+  defp revision_count(service_id) do
+    Revision.for_service(service_id)
+    |> Console.Repo.aggregate(:count)
   end
 end
