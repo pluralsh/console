@@ -122,7 +122,12 @@ COPY --from=tools /usr/local/bin/plural /usr/local/bin/plural
 
 WORKDIR /opt/app
 
-RUN [ "$OS_VARIANT" = "alpine" ] && apk update && apk upgrade --no-cache libexpat zlib=1.3.2-r1 musl musl-utils || true
+# Refresh the runtime packages from the supported Alpine 3.23 repository.  In
+# particular, this takes zlib and musl-utils past their vulnerable base-image
+# revisions without relying on a package version that may have been superseded.
+RUN if [ "$OS_VARIANT" = "alpine" ]; then \
+      apk update && apk upgrade --no-cache libexpat zlib musl musl-utils; \
+    fi
 
 COPY bin/setup/${OS_VARIANT}.sh /opt/app/bin/setup.sh
 RUN /bin/sh /opt/app/bin/setup.sh && rm /opt/app/bin/setup.sh
