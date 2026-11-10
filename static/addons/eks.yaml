@@ -6559,6 +6559,11 @@
     - '1.35'
     - '1.34'
     - '1.33'
+  - version: v0.0.10009020261107-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
   - version: v0.0.10009020261025-eksbuild.1
     compatibilities:
     - '1.35'
@@ -10070,6 +10075,9 @@
   publisher: kong
 - name: kube-proxy
   versions:
+  - version: v1.37.0-eksbuild.39
+    compatibilities:
+    - '1.37'
   - version: v1.37.0-eksbuild.34
     compatibilities:
     - '1.37'
@@ -10091,6 +10099,10 @@
   - version: v1.37.0-eksbuild.4
     compatibilities:
     - '1.37'
+  - version: v1.36.0-eksbuild.65
+    compatibilities:
+    - '1.37'
+    - '1.36'
   - version: v1.36.0-eksbuild.60
     compatibilities:
     - '1.37'
@@ -10155,6 +10167,11 @@
     compatibilities:
     - '1.37'
     - '1.36'
+  - version: v1.35.3-eksbuild.69
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
   - version: v1.35.3-eksbuild.64
     compatibilities:
     - '1.37'
@@ -10250,6 +10267,12 @@
     - '1.37'
     - '1.36'
     - '1.35'
+  - version: v1.34.6-eksbuild.69
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
+    - '1.34'
   - version: v1.34.6-eksbuild.64
     compatibilities:
     - '1.37'
@@ -10388,6 +10411,12 @@
     - '1.36'
     - '1.35'
     - '1.34'
+  - version: v1.33.10-eksbuild.69
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
   - version: v1.33.10-eksbuild.64
     compatibilities:
     - '1.36'
@@ -10538,6 +10567,12 @@
     - '1.35'
     - '1.34'
     - '1.33'
+  - version: v1.32.13-eksbuild.72
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
   - version: v1.32.13-eksbuild.67
     compatibilities:
     - '1.35'
@@ -10712,6 +10747,12 @@
     - '1.34'
     - '1.33'
     - '1.32'
+  - version: v1.31.14-eksbuild.76
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
   - version: v1.31.14-eksbuild.71
     compatibilities:
     - '1.34'
@@ -14870,6 +14911,15 @@
   publisher: Upwind Security
 - name: vpc-cni
   versions:
+  - version: v1.23.2-eksbuild.12
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
   - version: v1.23.2-eksbuild.10
     compatibilities:
     - '1.37'
@@ -14942,6 +14992,16 @@
     - '1.33'
     - '1.32'
     - '1.31'
+  - version: v1.22.4-eksbuild.14
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v1.22.4-eksbuild.12
     compatibilities:
     - '1.37'
