@@ -4,8 +4,8 @@ import {
   IconFrame,
   prettifyRepoUrl,
 } from '@pluralsh/design-system'
-import { PrStatusChip } from 'components/self-service/pr/queue/PrQueueColumns'
 import { StackedText } from 'components/utils/table/StackedText'
+import { WorkbenchPrStatusChip } from 'components/workbenches/common/WorkbenchJobPrIcon'
 import { PullRequestBasicFragment } from 'generated/graphql'
 import styled from 'styled-components'
 
@@ -36,7 +36,7 @@ export function AgentRunPullRequests({
             second={pr.title}
           />
           <RightActionsSC>
-            <PrStatusChip status={pr.status} />
+            <WorkbenchPrStatusChip status={pr.status} />
             <IconFrame
               size="small"
               tooltip="View PR"

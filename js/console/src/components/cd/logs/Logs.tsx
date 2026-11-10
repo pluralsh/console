@@ -280,6 +280,7 @@ const MainContentWrapperSC = styled.div(({ theme }) => ({
 const ToolbarSC = styled.div(({ theme }) => ({
   alignItems: 'center',
   display: 'flex',
+  flexWrap: 'wrap',
   gap: theme.spacing.small,
   minWidth: 0,
 }))

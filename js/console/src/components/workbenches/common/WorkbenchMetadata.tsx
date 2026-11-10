@@ -12,7 +12,8 @@ const METADATA_ICON_SIZE = 16
 
 export function WorkbenchCodingAgent({
   agentRuntime,
-}: Pick<WorkbenchTinyFragment, 'agentRuntime'>) {
+  iconSize = METADATA_ICON_SIZE,
+}: Pick<WorkbenchTinyFragment, 'agentRuntime'> & { iconSize?: number }) {
   const RuntimeIcon =
     runtimeToIcon[agentRuntime?.type ?? AgentRuntimeType.Custom]
 
@@ -26,7 +27,7 @@ export function WorkbenchCodingAgent({
     >
       <RuntimeIcon
         fullColor
-        size={METADATA_ICON_SIZE}
+        size={iconSize}
       />
       <CaptionP
         $color="text-xlight"
@@ -40,7 +41,8 @@ export function WorkbenchCodingAgent({
 
 export function WorkbenchToolIcons({
   tools,
-}: Pick<WorkbenchTinyFragment, 'tools'>) {
+  iconSize = METADATA_ICON_SIZE,
+}: Pick<WorkbenchTinyFragment, 'tools'> & { iconSize?: number }) {
   const items = tools?.filter(isNonNullable) ?? []
 
   if (!items.length) return null
@@ -55,7 +57,7 @@ export function WorkbenchToolIcons({
           <WorkbenchToolIcon
             type={tool.tool}
             provider={tool.cloudConnection?.provider}
-            size={METADATA_ICON_SIZE}
+            size={iconSize}
           />
         ),
       }))}

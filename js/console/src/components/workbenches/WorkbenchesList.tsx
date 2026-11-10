@@ -324,6 +324,8 @@ function formatHours(hours: number) {
   return `${Math.round(hours).toLocaleString()}h`
 }
 
+const CARD_METADATA_ICON_SIZE = 12
+
 export function WorkbenchCard({
   workbench,
   favorited,
@@ -367,7 +369,10 @@ export function WorkbenchCard({
               <>
                 <MetadataLabelSC>coding agent</MetadataLabelSC>
                 <MetadataValueSC>
-                  <WorkbenchCodingAgent agentRuntime={agentRuntime} />
+                  <WorkbenchCodingAgent
+                    agentRuntime={agentRuntime}
+                    iconSize={CARD_METADATA_ICON_SIZE}
+                  />
                 </MetadataValueSC>
               </>
             )}
@@ -375,7 +380,10 @@ export function WorkbenchCard({
               <>
                 <MetadataLabelSC>bound tools</MetadataLabelSC>
                 <MetadataValueSC>
-                  <WorkbenchToolIcons tools={tools} />
+                  <WorkbenchToolIcons
+                    tools={tools}
+                    iconSize={CARD_METADATA_ICON_SIZE}
+                  />
                 </MetadataValueSC>
               </>
             )}
