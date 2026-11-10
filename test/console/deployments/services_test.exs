@@ -3,6 +3,8 @@ defmodule Console.Deployments.ServicesTest do
   use Mimic
   alias Console.PubSub
   alias Console.Deployments.Services
+  alias Console.Deployments.Git.Discovery
+  alias Console.Schema.Revision
 
   describe "#create_service/3" do
     test "it can create a new service and initial revision" do
@@ -784,6 +786,147 @@ defmodule Console.Deployments.ServicesTest do
     end
   end
 
+  describe "#record_cached_sha/1" do
+    test "it records a changed git sha" do
+      git = insert(:git_repository)
+      svc = pinned_service(%{
+        repository_id: git.id,
+        git: %{ref: "main", folder: "k8s"}
+      }, "old-sha", :synced)
+
+      expect(Discovery, :commit, fn repo, ref ->
+        assert repo.id == git.id
+        assert ref.ref == "main"
+        assert ref.folder == "k8s"
+        {:ok, "new-sha", "landed"}
+      end)
+
+      assert :ok = Services.record_cached_sha(svc)
+
+      svc = refetch(svc) |> Repo.preload(:revision)
+      assert svc.sha == "new-sha"
+      assert svc.status == :stale
+      assert svc.message == "landed"
+      assert svc.revision.sha == "new-sha"
+      assert svc.revision.message == "landed"
+      assert revision_count(svc.id) == 2
+    end
+
+    test "it does not write when the commit is unchanged" do
+      git = insert(:git_repository)
+      sha = "same-sha"
+      svc = pinned_service(%{
+        repository_id: git.id,
+        git: %{ref: "main", folder: "k8s"}
+      }, sha, :healthy)
+      before = refetch(svc)
+
+      expect(Discovery, :commit, fn _, _ -> {:ok, sha, "ignored"} end)
+
+      assert :ok = Services.record_cached_sha(svc)
+
+      svc = refetch(svc)
+      assert svc.sha == sha
+      assert svc.status == :healthy
+      assert svc.updated_at == before.updated_at
+      assert revision_count(svc.id) == 1
+    end
+
+    test "it does not record a sha for a helm url chart without values files" do
+      sha = "chart-digest"
+      svc = pinned_service(%{
+        helm: %{
+          url: "https://pluralsh.github.io/console",
+          chart: "console",
+          version: "0.3.15"
+        }
+      }, sha, :healthy)
+      before = refetch(svc)
+
+      reject(&Discovery.commit/2)
+
+      assert :ok = Services.record_cached_sha(svc)
+
+      svc = refetch(svc)
+      assert svc.sha == sha
+      assert svc.status == :healthy
+      assert svc.updated_at == before.updated_at
+    end
+
+    test "it records the service git ref when helm values files are spliced" do
+      git = insert(:git_repository)
+      chart = insert(:git_repository)
+      svc = pinned_service(%{
+        repository_id: git.id,
+        git: %{ref: "main", folder: "templates"},
+        helm: %{
+          repository_id: chart.id,
+          git: %{ref: "master", folder: "charts/console"},
+          values_files: ["values.yaml.tpl"]
+        }
+      }, "old-sha", :synced)
+
+      expect(Discovery, :commit, 1, fn repo, ref ->
+        assert repo.id == git.id
+        assert ref.ref == "main"
+        assert ref.folder == "templates"
+        {:ok, "git-sha", "from git"}
+      end)
+
+      assert :ok = Services.record_cached_sha(svc)
+
+      svc = refetch(svc) |> Repo.preload(:revision)
+      assert svc.sha == "git-sha"
+      assert svc.message == "from git"
+      assert svc.revision.sha == "git-sha"
+      assert revision_count(svc.id) == 2
+    end
+
+    test "it looks up only the service git ref when extra sources are present" do
+      git = insert(:git_repository)
+      other = insert(:git_repository)
+      svc = pinned_service(%{
+        repository_id: git.id,
+        git: %{ref: "main", folder: "k8s"},
+        sources: [
+          %{path: "overrides", repository_id: other.id, git: %{ref: "master", folder: "charts/other"}}
+        ]
+      }, "old-sha", :synced)
+
+      expect(Discovery, :commit, 1, fn repo, ref ->
+        assert repo.id == git.id
+        assert ref.ref == "main"
+        assert ref.folder == "k8s"
+        {:ok, "source-sha", "from service"}
+      end)
+
+      assert :ok = Services.record_cached_sha(svc)
+
+      assert refetch(svc).sha == "source-sha"
+    end
+
+    test "it does not record a sha for a git helm chart without a service git ref" do
+      chart = insert(:git_repository)
+      sha = "untouched"
+      svc = pinned_service(%{
+        helm: %{
+          repository_id: chart.id,
+          git: %{ref: "master", folder: "charts/console"}
+        }
+      }, sha, :healthy)
+      before = refetch(svc)
+
+      reject(&Discovery.commit/2)
+
+      assert :ok = Services.record_cached_sha(svc)
+
+      svc = refetch(svc)
+      assert svc.sha == sha
+      assert svc.updated_at == before.updated_at
+      assert revision_count(svc.id) == 1
+    end
+  end
+
   describe "#self_manage/2" do
     test "admins can convert their byok consoles to self-managed" do
       admin = admin_user()
@@ -1310,6 +1453,26 @@ defmodule Console.Deployments.ServicesTest do
       {:ok, _}    = Services.authorized(service, child, user)
       {:error, _} = Services.authorized(service, child, reader)
     end
+  end
+
+  defp pinned_service(attrs, sha, status) do
+    cluster = insert(:cluster)
+
+    {:ok, svc} = Services.create_service(Map.merge(%{
+      name: "cached-sha",
+      namespace: "test",
+      version: "0.0.1"
+    }, attrs), cluster.id, admin_user())
+
+    svc = Repo.preload(svc, [:revision])
+    {:ok, _} = change(svc.revision, %{sha: sha}) |> Repo.update()
+    {:ok, svc} = change(svc, %{sha: sha, status: status}) |> Repo.update()
+    Repo.preload(svc, [:revision], force: true)
+  end
+
+  defp revision_count(service_id) do
+    Revision.for_service(service_id)
+    |> Repo.aggregate(:count)
   end
 end
 

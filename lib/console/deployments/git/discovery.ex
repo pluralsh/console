@@ -47,6 +47,13 @@ defmodule Console.Deployments.Git.Discovery do
     end)
   end
 
+  @spec commit(GitRepository.t, Service.Git.t) :: {:ok, binary, binary | nil} | error
+  def commit(%GitRepository{} = repo, %Service.Git{} = ref) do
+    Tracing.span("git.commit", git_attrs(repo, ref), fn ->
+      maybe_rpc(repo, &Agent.commit(&1, ref))
+    end)
+  end
+
   @spec tags(GitRepository.t) :: {:ok, [binary]} | error
   def tags(%GitRepository{} = repo), do: maybe_rpc(repo, &Agent.tags/1)
 

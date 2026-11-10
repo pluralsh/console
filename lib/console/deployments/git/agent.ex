@@ -64,6 +64,15 @@ defmodule Console.Deployments.Git.Agent do
     end
   end
 
+  def commit(pid, %Service.Git{} = git) do
+    with {:ok, tid} <- Supervisor.table(pid),
+         {:ok, sha, message} <- Cache.read_commit(tid, git) do
+      {:ok, sha, message}
+    else
+      _ -> rate_limited({:tar, pid}, fn -> GenServer.call(pid, {:commit, git}, @timeout) end)
+    end
+  end
+
   def changes(pid, sha1, sha2, folder) do
     with {:ok, tid} <- Supervisor.table(pid),
          %Cache.Change{result: result} = change <- Cache.get_change(tid, sha1, sha2, folder),
@@ -153,6 +162,10 @@ defmodule Console.Deployments.Git.Agent do
 
   def handle_call({:sha, ref}, _, %State{cache: cache} = state) do
     {:reply, Cache.commit(cache, ref), state}
+  end
+
+  def handle_call({:commit, %Service.Git{} = git}, _, %State{cache: cache} = state) do
+    {:reply, Cache.read_commit(cache, git), state}
   end
 
   def handle_call({:changes, sha1, sha2, folder}, _, %State{cache: cache} = state) do

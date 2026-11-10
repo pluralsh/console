@@ -135,8 +135,14 @@ defmodule ConsoleWeb.GitController do
     do: {:ok, Settings.agent_service_chart(), agent_chart_digest()}
   defp fetch_tarball(params, svc) do
     with {:ok, sha} <- get_digest(params, svc),
-      do: FileServer.fetch_with_sha(sha, fn -> svc_tarball(svc) end)
+         {:ok, file, digest, source} <- FileServer.fetch_with_sha(sha, fn -> svc_tarball(svc) end) do
+      maybe_record_cached_sha(source, svc)
+      {:ok, file, digest}
+    end
   end
+
+  defp maybe_record_cached_sha(:hit, svc), do: Services.record_cached_sha(svc)
+  defp maybe_record_cached_sha(:miss, _svc), do: :ok
 
   @decorate cacheable(
               cache: @local_cache,

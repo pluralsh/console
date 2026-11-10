@@ -62,14 +62,14 @@ defmodule Console.Deployments.Local.Server do
     end
   end
 
-  @spec fetch_with_sha(binary, function) :: {:ok, SmartFile.t, binary} | error
+  @spec fetch_with_sha(binary, function) :: {:ok, SmartFile.t, binary, :hit | :miss} | error
   def fetch_with_sha(digest, reader) when is_function(reader, 0) do
     with nil <- Cache.find(@table_name, digest),
          {:ok, f, sha} <- reader.(),
          {:ok, sf} <- GenServer.call(__MODULE__, {:proxy, digest, f}, @timeout) do
-      {:ok, sf, sha}
+      {:ok, sf, sha, :miss}
     else
-      %Cache.Line{file: fname} -> {:ok, SmartFile.new(fname), digest}
+      %Cache.Line{file: fname} -> {:ok, SmartFile.new(fname), digest, :hit}
       err -> err
     end
   end

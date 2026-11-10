@@ -173,6 +173,30 @@ defmodule Console.Deployments.Git.Cache do
     end
   end
 
+  @doc """
+  Resolves a git spec from the heads table and returns that sha plus the
+  message on the matching cache line, when the line is still present.
+
+  Uses the same cache key as `get/2` (`sha`, folder, and `files`). Reads only:
+  no checkout, no git log, and the line is left untouched.
+  """
+  def read_commit(%__MODULE__{table: tid}, %Git{} = git), do: read_commit(tid, git)
+  def read_commit(tid, %Git{ref: ref} = git) do
+    with {:ok, sha} <- commit(tid, ref),
+      do: {:ok, sha, cached_message(tid, sha, git)}
+  end
+
+  defp cached_message(tid, sha, %Git{folder: folder, files: [_ | _] = files}),
+    do: cached_message(tid, sha, folder, files)
+  defp cached_message(tid, sha, %Git{folder: folder}),
+    do: cached_message(tid, sha, folder, fn _ -> true end)
+  defp cached_message(tid, sha, path, filter) do
+    case get_commit(tid, sha, path, filter) do
+      {:ok, %Line{message: message}} -> message
+      _ -> nil
+    end
+  end
+
   def cached_changes(%__MODULE__{table: tid} = c, from, to, folder) do
     with {:cache, nil} <- {:cache, get_change(tid, from, to, folder)},
          {:ok, _, _} = result <- changes(c, from, to, folder) do

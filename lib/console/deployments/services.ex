@@ -626,6 +626,91 @@ defmodule Console.Deployments.Services do
     |> notify(:update, :ignore)
   end
 
+  @doc """
+  Records the service git commit after a tarball cache hit, using the same cases
+  as `tarstream/1` and `tarfile/1`. A lookup or write failure is logged so the
+  cached tarball is still served.
+  """
+  @spec record_cached_sha(Service.t) :: :ok
+  def record_cached_sha(%Service{} = svc) do
+    if records_cached_sha?(svc), do: write_cached_sha(svc), else: :ok
+  rescue
+    e ->
+      Logger.warning("failed to record cached sha for service #{svc.id}: #{Exception.message(e)}")
+      :ok
+  end
+
+  defp records_cached_sha?(%Service{sources: [_ | _]} = svc),
+    do: records_cached_sha?(%{svc | sources: []})
+
+  defp records_cached_sha?(%Service{repository_id: id, git: %Service.Git{}, helm: %Service.Helm{repository_id: rid, chart: c, lua_script: script}})
+       when is_binary(id) and (is_binary(c) or is_binary(rid)) and is_binary(script),
+       do: true
+
+  defp records_cached_sha?(%Service{repository_id: id, git: %Service.Git{}, helm: %Service.Helm{repository_id: rid, chart: c, values_files: [_ | _]}})
+       when is_binary(id) and (is_binary(c) or is_binary(rid)),
+       do: true
+
+  defp records_cached_sha?(%Service{helm: %Service.Helm{values: values}} = svc) when is_binary(values),
+    do: tarfile_records_cached_sha?(svc)
+
+  defp records_cached_sha?(%Service{} = svc), do: tarfile_records_cached_sha?(svc)
+
+  defp tarfile_records_cached_sha?(%Service{helm: %Service.Helm{repository_id: id, git: %Service.Git{}}}) when is_binary(id),
+    do: false
+
+  defp tarfile_records_cached_sha?(%Service{helm: %Service.Helm{chart: c, version: v, url: url}})
+       when is_binary(c) and is_binary(v) and is_binary(url),
+       do: false
+
+  defp tarfile_records_cached_sha?(%Service{helm: %Service.Helm{chart: c, version: v}})
+       when is_binary(c) and is_binary(v),
+       do: false
+
+  defp tarfile_records_cached_sha?(%Service{repository_id: id, git: %Service.Git{}}) when is_binary(id),
+    do: true
+
+  defp tarfile_records_cached_sha?(_), do: false
+
+  defp write_cached_sha(%Service{repository_id: id, git: git} = svc) do
+    case Git.cached!(id) |> Git.Discovery.commit(git) do
+      {:ok, sha, message} ->
+        case persist_cached_sha(svc, sha, message) do
+          {:ok, _} -> :ok
+          {:error, err} ->
+            Logger.warning("failed to record cached sha for service #{svc.id}: #{inspect(err)}")
+            :ok
+        end
+      {:error, err} ->
+        Logger.warning("failed to look up cached sha for service #{svc.id}: #{inspect(err)}")
+        :ok
+      other ->
+        Logger.warning("failed to look up cached sha for service #{svc.id}: #{inspect(other)}")
+        :ok
+    end
+  end
+
+  defp persist_cached_sha(%Service{revision: %Revision{sha: sha}} = svc, sha, _message),
+    do: update_sha(svc, sha, "")
+
+  defp persist_cached_sha(%Service{} = svc, sha, message) when is_binary(message),
+    do: update_sha(svc, sha, message)
+
+  defp persist_cached_sha(%Service{} = svc, sha, _message),
+    do: update_sha(svc, sha, revision_message(svc.id, sha))
+
+  defp revision_message(service_id, sha) do
+    Revision.for_service(service_id)
+    |> Revision.for_sha(sha)
+    |> Revision.ordered()
+    |> Revision.limit(1)
+    |> Repo.one()
+    |> case do
+      %Revision{message: message} when is_binary(message) -> message
+      _ -> ""
+    end
+  end
+
   defp update_sha_without_revision(%Service{norevise: true} = svc, _), do: {:ok, svc}
   defp update_sha_without_revision(%Service{revision: %Revision{sha: sha}} = svc, sha), do: {:ok, svc}
   defp update_sha_without_revision(%Service{id: id}, sha) do
