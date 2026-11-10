@@ -15,7 +15,7 @@ versions:
         harness improvements, reduced reliance on the GitHub API in tests, and a Go
         toolchain bump to 1.26.10.']
     breaking_changes: []
-  chart_version: 2.43.9
+  chart_version: 2.43.12
   images: ['quay.io/argoproj/argo-rollouts:v1.10.2']
 - version: 1.10.0
   kube: ['1.35', '1.34', '1.33', '1.32']

@@ -4,6 +4,47 @@ release_url: https://github.com/kserve/kserve/releases/tag/v{vsn}
 helm_repository_url: oci://ghcr.io/kserve/charts/kserve
 chart_name: kserve
 versions:
+- version: 0.21.0
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [CRD management was restructured to support independent installation;
+        expect CRDs to be split into separate/standalone artifacts and installed/managed
+        separately from controller resources., RBAC hardening for controller-manager
+        ClusterRoles; review any custom RBAC overlays/aggregation rules for conflicts.,
+      'ConfigMap templating changes: storage resources are now templated in the inferenceservice-config
+        ConfigMap; verify any custom inferenceservice-config overrides still render
+        as expected.', 'New/updated install and dependency scripts were added/updated
+        (standard/knative mode, KEDA/LLMISVC/localmodel); if you rely on generated
+        manifests or scripts, rebase to the v0.21.0 versions.']
+    features: [Independent CRD installation workflow (CRD management restructure)
+        to decouple CRDs from controller/resource deployment., ServingRuntime adds
+        resourceClaims support for DRA (Dynamic Resource Allocation) allowing runtimes
+        to request/consume resource claims., Cluster TLS security profile integration
+        and support for reloading rotated TLS certificates to better align with cluster
+        security posture., 'LLMInferenceService improvements: tokenizer sidecar replaced
+        with vLLM render deployment; annotation-based discovery migration; direct
+        KEDA scaling and true scale-to-zero (idleReplicaCount=0); rolloutStrategy
+        support; better template validation; LoRA localModelCache support.', 'Model
+        delivery/storage enhancements: KServe-side OCI pull via oci+fetch://, ModelScope
+        ms:// downloads, and Power architecture support for storage-initializer.',
+      'Canary rollout improvements: canary traffic splitting for RawDeployment HTTPRoutes
+        plus readiness-gated canary traffic to reduce transient 503s.', 'API additions:
+        InferenceService tracing configuration to enable distributed tracing setup. ']
+    breaking_changes: ["CRD/layout expectations may change due to the CRD management\
+        \ restructure and new split charts (kserve-crd, llmisvc-crd, localmodel-crd).\
+        \ If you previously applied a single combined manifest or relied on Helm\u2019\
+        s CRD handling, adjust your install/upgrade sequence to ensure CRDs are installed\
+        \ before controllers/webhooks.", "LLMInferenceService API/sample version migration\
+        \ (v1alpha1 \u2192 v1alpha2 in docs/samples) indicates ongoing API evolution;\
+        \ validate your existing LLMInferenceService/InferencePool manifests against\
+        \ the v0.21.0 CRDs and admission chain, especially around deprecated/renamed\
+        \ flags and annotations (e.g., TLS flags, metrics flags/plugins, WVA discovery\
+        \ changes)."]
+  chart_version: v0.21.0
+  images: []
 - version: 0.20.0
   kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32']
   requirements: []
