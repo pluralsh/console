@@ -3,7 +3,7 @@
 # Usage: docker run <image> [api|kas|agentk] [args...]
 
 # Builder stage for all binaries
-FROM golang:1.27.2-alpine AS builder
+FROM golang:1.27.4-alpine AS builder
 
 ARG TARGETARCH
 ARG TARGETOS
@@ -45,7 +45,7 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build \
     -o /binaries/agentk ./cmd/agentk
 
 # Final stage - minimal image with all three binaries
-FROM gcr.io/distroless/static-debian12:nonroot AS final
+FROM gcr.io/distroless/static-debian13:nonroot AS final
 
 ARG BUILD_TIME=1970-01-01T00:00:00Z
 ARG GIT_COMMIT=unknown
@@ -69,7 +69,7 @@ LABEL source="https://github.com/pluralsh/console/go/kubernetes-agent" \
       org.opencontainers.image.licenses="MIT" \
       org.opencontainers.image.title="Kubernetes Agent" \
       org.opencontainers.image.description="Agentk image for Plural CD" \
-      org.opencontainers.image.base.name="gcr.io/distroless/static-debian12:nonroot" \
+      org.opencontainers.image.base.name="gcr.io/distroless/static-debian13:nonroot" \
       org.opencontainers.image.rebuild-trigger="2026-06-26-agentk"
 
 # Copy all binaries from builder

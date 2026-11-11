@@ -1,4 +1,4 @@
-FROM golang:1.27.2 as builder
+FROM golang:1.27.4 as builder
 ARG TARGETOS
 ARG TARGETARCH
 
@@ -22,7 +22,7 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} go build -ldflags
 
 # Use distroless as minimal base image to package the oci-auth binary
 # Refer to https://github.com/GoogleContainerTools/distroless for more details
-FROM gcr.io/distroless/static:nonroot
+FROM gcr.io/distroless/static-debian13:nonroot
 WORKDIR /
 COPY --from=builder /workspace/oci-auth/oci-auth .
 USER 65532:65532
