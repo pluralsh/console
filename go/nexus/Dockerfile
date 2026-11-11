@@ -1,5 +1,5 @@
 # Build stage
-FROM golang:1.27.3-alpine AS builder
+FROM golang:1.27.4-alpine AS builder
 
 WORKDIR /build
 
@@ -27,7 +27,11 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
     ./cmd/main.go
 
 # Runtime stage
-FROM gcr.io/distroless/static-debian12:nonroot
+FROM debian:12-slim AS final
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends tzdata ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
 ARG BUILD_TIME=1970-01-01T00:00:00Z
 ARG GIT_COMMIT=unknown
@@ -45,7 +49,7 @@ LABEL org.opencontainers.image.created="${BUILD_TIME}" \
       org.opencontainers.image.licenses="MIT" \
       org.opencontainers.image.title="Nexus" \
       org.opencontainers.image.description="AI proxy service for Plural Console" \
-      org.opencontainers.image.base.name="gcr.io/distroless/static-debian12:nonroot" \
+      org.opencontainers.image.base.name="debian:12-slim" \
       org.opencontainers.image.rebuild-trigger="2026-06-26-nexus"
 
 WORKDIR /app
@@ -60,7 +64,7 @@ COPY --from=builder /build/config/config.yaml /app/config/config.yaml
 EXPOSE 8080
 
 # Run as non-root user
-USER nonroot:nonroot
+USER 65532:65532
 
 ENTRYPOINT ["/app/nexus"]
 CMD ["--config", "/app/config/config.yaml"]

@@ -1,5 +1,5 @@
 # Build the manager binary
-FROM golang:1.27.3 AS builder
+FROM golang:1.27.4 AS builder
 ARG TARGETOS
 ARG TARGETARCH
 ARG GIT_COMMIT=unknown
@@ -32,7 +32,11 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} go build -ldflags
 
 # Use distroless as minimal base image to package the manager binary
 # Refer to https://github.com/GoogleContainerTools/distroless for more details
-FROM gcr.io/distroless/static:nonroot
+FROM debian:12-slim AS runtime
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends tzdata ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
 ARG BUILD_TIME=1970-01-01T00:00:00Z
 ARG GIT_COMMIT=unknown
@@ -50,7 +54,7 @@ LABEL org.opencontainers.image.created="${BUILD_TIME}" \
       org.opencontainers.image.licenses="MIT" \
       org.opencontainers.image.title="Deployment Controller" \
       org.opencontainers.image.description="Deployment controller for Plural Console" \
-      org.opencontainers.image.base.name="gcr.io/distroless/static:nonroot" \
+      org.opencontainers.image.base.name="debian:12-slim" \
       org.opencontainers.image.rebuild-trigger="2026-06-26-deployment-controller"
 
 WORKDIR /
