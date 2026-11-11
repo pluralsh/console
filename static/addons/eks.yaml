@@ -6391,6 +6391,11 @@
   publisher: Chainguard
 - name: chainguard_coredns-fips
   versions:
+  - version: v1.50.10002020261108-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
   - version: v1.50.10000020261102-eksbuild.1
     compatibilities:
     - '1.35'
@@ -13546,6 +13551,15 @@
   publisher: rafay-systems
 - name: snapshot-controller
   versions:
+  - version: v8.7.0-eksbuild.4
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
   - version: v8.7.0-eksbuild.2
     compatibilities:
     - '1.37'
@@ -14911,6 +14925,15 @@
   publisher: Upwind Security
 - name: vpc-cni
   versions:
+  - version: v1.23.3-eksbuild.1
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
   - version: v1.23.2-eksbuild.12
     compatibilities:
     - '1.37'
