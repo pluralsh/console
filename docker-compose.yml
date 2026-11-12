@@ -96,7 +96,7 @@ services:
     restart: on-failure
   pseudofs:
     # keep in sync with PSEUDOFS_VERSION in .github/workflows/pseudofs-vendor.yaml
-    image: ghcr.io/pluralsh/pseudofs:0.3.27
+    image: ghcr.io/pluralsh/pseudofs:0.3.32
     restart: always
     command: ["--config", "/etc/pseudofs/pseudofs.yaml"]
     ports:
