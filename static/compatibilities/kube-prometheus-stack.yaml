@@ -5,23 +5,44 @@ readme_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/m
 helm_repository_url: https://prometheus-community.github.io/helm-charts
 chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
 versions:
-- version: 93.1.1
+- version: 93.2.2
   kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
     '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
-    helm_changes: ''
-    chart_updates: ['prometheus-stackdriver-exporter: Fix NOTES template to match
-        current values (docs/templating fix).', 'alertmanager: Roll back config reloader
-        image to v0.94.2.', 'kube-prometheus-stack: Select the operator CiliumNetworkPolicy
-        using pod labels (more robust policy targeting).']
-    features: []
-    breaking_changes: []
-  chart_version: 93.1.1
-  images: ['docker.io/bats/bats:1.14.0', 'docker.io/grafana/grafana:13.3.0-distroless',
+    helm_changes: "- **Ingress `pathType` defaults may change**: The chart now sets\
+      \ a default `pathType` on **Thanos** and **per-replica ingresses**. If you previously\
+      \ relied on your Ingress controller\u2019s implicit default, verify the rendered\
+      \ Ingress manifests and set an explicit `pathType` in your values if needed\
+      \ to preserve behavior.\n\n- **New optional values exposed (93.1.0)**:\n  -\
+      \ `extraScrapeMetrics` (kube-prometheus-stack): newly exposed; if you need additional\
+      \ metrics scraped, you can now configure them directly via values.\n  - `alertmanagerConfigFileSystemMode`:\
+      \ newly exposed; allows controlling filesystem mode for Alertmanager config\
+      \ (useful for hardened clusters / restrictive security policies).\n\n- **prometheus-pushgateway\
+      \ behavior/value interactions (93.1.0)**: Pushgateway now keeps its web config\
+      \ volume even when using `extraVolumes`/`extraVolumeMounts`-style customization.\
+      \ If you previously worked around missing volumes, re-check your values to avoid\
+      \ duplicate mounts/paths."
+    chart_updates: [Ingress templates updated to apply a default `pathType` for Thanos
+        and per-replica ingresses (93.2.2)., prometheus-pushgateway chart/templates
+        adjusted to retain the web config volume when extra volumes are configured
+        (93.1.0)., prometheus-pushgateway image tag bumped to `v3.11.2` (93.1.0).,
+      Values/schema surface area expanded to expose `extraScrapeMetrics` and `alertmanagerConfigFileSystemMode`
+        (93.1.0).]
+    features: [Ability to configure additional scrape metrics via the newly exposed
+        `extraScrapeMetrics` value., Ability to control Alertmanager config filesystem
+        permissions via `alertmanagerConfigFileSystemMode` for security/hardening
+        needs., More predictable Ingress resources due to explicit default `pathType`
+        on Thanos and per-replica ingresses.]
+    breaking_changes: [Potential behavioral change in Ingress routing/validation if
+        your cluster previously depended on an implicit/legacy `pathType` default;
+        some Kubernetes versions/controllers require explicit `pathType` and may behave
+        differently once set.]
+  chart_version: 93.2.2
+  images: ['docker.io/bats/bats:1.14.0', 'docker.io/grafana/grafana:13.3.1-distroless',
     'ghcr.io/jkroepke/kube-webhook-certgen:1.11.1', 'quay.io/kiwigrid/k8s-sidecar:2.14.3',
-    'quay.io/prometheus-operator/prometheus-operator:v0.95.1', 'quay.io/prometheus/alertmanager:v0.34.2',
+    'quay.io/prometheus-operator/prometheus-operator:v0.95.2', 'quay.io/prometheus/alertmanager:v0.35.0',
     'quay.io/prometheus/node-exporter:v1.12.1-distroless', 'quay.io/prometheus/prometheus:v3.16.0-distroless',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
 - version: 93.1.0
