@@ -122,7 +122,9 @@ COPY --from=tools /usr/local/bin/plural /usr/local/bin/plural
 
 WORKDIR /opt/app
 
-RUN [ "$OS_VARIANT" = "alpine" ] && apk update && apk upgrade --no-cache libexpat zlib=1.3.2-r1 musl musl-utils || true
+RUN [ "$OS_VARIANT" = "alpine" ] && apk update && \
+  apk upgrade --no-cache libexpat musl && \
+  apk add --no-cache zlib=1.4-r0 musl-utils=1.2.5-r24
 
 COPY bin/setup/${OS_VARIANT}.sh /opt/app/bin/setup.sh
 RUN /bin/sh /opt/app/bin/setup.sh && rm /opt/app/bin/setup.sh
