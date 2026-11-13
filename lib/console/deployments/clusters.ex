@@ -35,6 +35,7 @@ defmodule Console.Deployments.Clusters do
     DeploymentSettings,
     DeprecatedCustomResource,
     UpgradePlanCallout,
+    Workbench,
     CustomCompatibilityMatrix,
     ClusterUpgrade
   }
@@ -458,6 +459,9 @@ defmodule Console.Deployments.Clusters do
 
   def create_cluster_raw(attrs, %User{} = user) do
     start_transaction()
+    |> add_operation(:remediation_workbench, fn _ ->
+      authorize_remediation_workbench(attrs, user)
+    end)
     |> add_operation(:cloud, fn _ -> {:ok, Console.cloud?()} end)
     |> add_operation(:limit, fn _ ->
       case !attrs[:ignore_limit] && cluster_limit?() do
@@ -529,6 +533,9 @@ defmodule Console.Deployments.Clusters do
   @spec upsert_virtual_cluster(map, binary, User.t) :: cluster_resp
   def upsert_virtual_cluster(attrs, parent_id, %User{} = user) do
     start_transaction()
+    |> add_operation(:remediation_workbench, fn _ ->
+      authorize_remediation_workbench(attrs, user)
+    end)
     |> add_operation(:parent, fn _ ->
       get_cluster!(parent_id)
       |> Repo.preload([:read_bindings, :write_bindings])
@@ -579,6 +586,9 @@ defmodule Console.Deployments.Clusters do
       get_cluster!(id)
       |> allow(user, :write)
     end)
+    |> add_operation(:remediation_workbench, fn _ ->
+      authorize_remediation_workbench(attrs, user)
+    end)
     |> add_operation(:cluster, fn %{auth: auth} ->
       auth
       |> Console.Repo.preload([:node_pools, :service, :tags, :read_bindings, :write_bindings])
@@ -602,9 +612,19 @@ defmodule Console.Deployments.Clusters do
     |> notify(:update, user)
   end
 
-  defp clean_cluster_attrs(%{project_id: nil} = attrs), do: Map.delete(attrs, :project_id)
-  defp clean_cluster_attrs(%{project_id: ""} = attrs), do: Map.delete(attrs, :project_id)
+  defp clean_cluster_attrs(%{project_id: nil} = attrs), do: Map.delete(attrs, :project_id) |> clean_cluster_attrs()
+  defp clean_cluster_attrs(%{project_id: ""} = attrs), do: Map.delete(attrs, :project_id) |> clean_cluster_attrs()
+  defp clean_cluster_attrs(%{remediation_workbench_id: ""} = attrs),
+    do: %{attrs | remediation_workbench_id: nil}
   defp clean_cluster_attrs(attrs), do: attrs
+
+  defp authorize_remediation_workbench(%{remediation_workbench_id: id}, %User{} = user) when is_binary(id) and id != "" do
+    case Repo.get(Workbench, id) do
+      %Workbench{} = bench -> allow(bench, user, :write)
+      _ -> {:error, "workbench not found"}
+    end
+  end
+  defp authorize_remediation_workbench(_, _), do: {:ok, nil}
 
   @doc """
   Determines whether the current cluster's version displays kubelet version skew

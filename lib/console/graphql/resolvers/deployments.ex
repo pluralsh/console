@@ -232,6 +232,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(ChatbotMessage, _), do: ChatbotMessage
   def query(ClusterUpgrade, _), do: ClusterUpgrade
   def query(ClusterUpgradeStep, _), do: ClusterUpgradeStep
+  def query(Workbench, %{readable: true} = params), do: Workbench.for_user(params[:current_user])
   def query(Workbench, _), do: Workbench
   def query(WorkbenchPolicy, _), do: WorkbenchPolicy
   def query(StackPolicy, _), do: StackPolicy
@@ -255,6 +256,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(Monitor, _), do: Monitor
   def query(Dashboard, _), do: Dashboard.ordered()
   def query(Console.Schema.Attachment, _), do: Console.Schema.Attachment.ordered()
+  def query(Cluster, %{readable: true} = params), do: Cluster.for_user(params[:current_user])
   def query(_, _), do: Cluster
 
   delegates Console.GraphQl.Resolvers.Deployments.Git

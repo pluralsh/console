@@ -1,6 +1,10 @@
 import {
+  ComboBox,
   Flex,
+  ListBoxFooter,
+  ListBoxFooterPlus,
   ListBoxItem,
+  SearchIcon,
   Select,
   SelectButton,
 } from '@pluralsh/design-system'
@@ -11,6 +15,7 @@ import { TRUNCATE } from 'components/utils/truncate'
 import { Body2P, CaptionP } from 'components/utils/typography/Text'
 import { WorkbenchToolIcon } from 'components/workbenches/tools/workbenchToolsUtils'
 import { AgentRuntimeType, WorkbenchTinyFragment } from 'generated/graphql'
+import isEmpty from 'lodash/isEmpty'
 import { ReactElement, ReactNode, useState } from 'react'
 import { isNonNullable } from 'utils/isNonNullable'
 
@@ -86,35 +91,125 @@ export function WorkbenchSelector({
         )
       }
     >
-      {workbenches.map((workbench) => {
-        const ProviderIcon =
-          runtimeToIcon[workbench.agentRuntime?.type ?? AgentRuntimeType.Custom]
-
-        return (
-          <ListBoxItem
-            key={workbench.id}
-            label={workbench.name}
-            description={workbench.description ?? undefined}
-            leftContent={
-              <ProviderIcon
-                fullColor
-                size={16}
-              />
-            }
-            rightContent={<WorkbenchToolIcons workbench={workbench} />}
-            css={{
-              '.center-content': {
-                flexGrow: 1,
-                minWidth: 0,
-                width: 'auto',
-                overflow: 'hidden',
-              },
-              '.label, .description': TRUNCATE,
-            }}
-          />
-        )
-      })}
+      {workbenches.map(workbenchListItem)}
     </Select>
+  )
+}
+
+export function SearchableWorkbenchSelector({
+  workbenchId,
+  setWorkbenchId,
+  workbenches,
+  selectedWorkbench,
+  loading,
+  fetchingMore,
+  query,
+  onQueryChange,
+  hasNextPage,
+  onLoadMore,
+  disabled,
+}: {
+  workbenchId: Nullable<string>
+  setWorkbenchId: (id: Nullable<string>) => void
+  workbenches: WorkbenchTinyFragment[]
+  selectedWorkbench: WorkbenchTinyFragment | null
+  loading: boolean
+  fetchingMore: boolean
+  query: string
+  onQueryChange: (query: string) => void
+  hasNextPage: boolean
+  onLoadMore: () => void
+  disabled?: boolean
+}) {
+  const [isOpen, setIsOpen] = useState(false)
+  const showSelection = !isOpen && !!selectedWorkbench
+
+  return (
+    <ComboBox
+      isDisabled={disabled}
+      width="100%"
+      inputValue={query}
+      onInputChange={onQueryChange}
+      inputProps={{
+        placeholder: showSelection
+          ? undefined
+          : isOpen
+            ? 'Search workbenches'
+            : loading
+              ? 'Loading workbench'
+              : 'Select workbench',
+      }}
+      inputContent={
+        showSelection && selectedWorkbench ? (
+          <WorkbenchOptionLabel workbench={selectedWorkbench} />
+        ) : undefined
+      }
+      startIcon={showSelection ? undefined : <SearchIcon />}
+      endIcon={
+        showSelection && selectedWorkbench ? (
+          <WorkbenchToolIcons workbench={selectedWorkbench} />
+        ) : undefined
+      }
+      loading={isOpen && (loading || fetchingMore)}
+      isOpen={isOpen}
+      onOpenChange={(open) => {
+        setIsOpen(open)
+        if (!open) onQueryChange('')
+      }}
+      selectedKey={workbenchId ?? ''}
+      onSelectionChange={(key) => {
+        setWorkbenchId(key ? `${key}` : null)
+        onQueryChange('')
+        setIsOpen(false)
+      }}
+      defaultFilter={() => true}
+      arrowSize="small"
+      dropdownFooter={
+        loading && isEmpty(workbenches) ? (
+          <ListBoxFooter>Loading</ListBoxFooter>
+        ) : isEmpty(workbenches) ? (
+          <ListBoxFooter>No results</ListBoxFooter>
+        ) : hasNextPage ? (
+          <ListBoxFooterPlus>Show more</ListBoxFooterPlus>
+        ) : undefined
+      }
+      onFooterClick={() => {
+        if (hasNextPage) onLoadMore()
+        else setIsOpen(false)
+      }}
+    >
+      {workbenches.map(workbenchListItem)}
+    </ComboBox>
+  )
+}
+
+function workbenchListItem(workbench: WorkbenchTinyFragment) {
+  const ProviderIcon =
+    runtimeToIcon[workbench.agentRuntime?.type ?? AgentRuntimeType.Custom]
+
+  return (
+    <ListBoxItem
+      key={workbench.id}
+      label={workbench.name}
+      description={workbench.description ?? undefined}
+      textValue={workbench.name}
+      leftContent={
+        <ProviderIcon
+          fullColor
+          size={16}
+        />
+      }
+      rightContent={<WorkbenchToolIcons workbench={workbench} />}
+      css={{
+        '.center-content': {
+          flexGrow: 1,
+          minWidth: 0,
+          width: 'auto',
+          overflow: 'hidden',
+        },
+        '.label, .description': TRUNCATE,
+      }}
+    />
   )
 }
 

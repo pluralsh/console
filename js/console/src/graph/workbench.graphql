@@ -895,6 +895,28 @@ query Workbenches(
   }
 }
 
+query WorkbenchSelectorOptions(
+  $first: Int
+  $after: String
+  $q: String
+  $currentWorkbenchId: ID
+  $hasCurrentWorkbench: Boolean! = false
+) {
+  workbenches(first: $first, after: $after, q: $q) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...WorkbenchTiny
+      }
+    }
+  }
+  workbench(id: $currentWorkbenchId) @include(if: $hasCurrentWorkbench) {
+    ...WorkbenchTiny
+  }
+}
+
 query WorkbenchDashboard {
   workbenchAggregates {
     pullRequests

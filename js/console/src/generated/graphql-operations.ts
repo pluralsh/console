@@ -401,6 +401,7 @@ export { VulnerabilityReportDocument as VulnerabilityReport } from './graphql-do
 export { VulnerabilityStatisticsDocument as VulnerabilityStatistics } from './graphql-documents'
 export { ClusterVulnerabilityAggregateDocument as ClusterVulnerabilityAggregate } from './graphql-documents'
 export { WorkbenchesDocument as Workbenches } from './graphql-documents'
+export { WorkbenchSelectorOptionsDocument as WorkbenchSelectorOptions } from './graphql-documents'
 export { WorkbenchDashboardDocument as WorkbenchDashboard } from './graphql-documents'
 export { WorkbenchesSummaryDocument as WorkbenchesSummary } from './graphql-documents'
 export { WorkbenchesEvalsMergeRateGraphDocument as WorkbenchesEvalsMergeRateGraph } from './graphql-documents'
