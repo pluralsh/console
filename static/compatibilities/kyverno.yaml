@@ -4,6 +4,68 @@ release_url: https://github.com/kyverno/kyverno/releases/tag/v{vsn}
 helm_repository_url: https://kyverno.github.io/kyverno/
 eolApiSlug: kyverno
 versions:
+- version: 1.20.0
+  kube: ['1.37', '1.36', '1.35', '1.34']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "### Helm chart / values changes to plan for\n- **New default-on\
+      \ upgrade/install gate for legacy `kyverno.io/*` policy CRs.** The chart adds\
+      \ a required, default-enabled guard which will block install/upgrade if legacy\
+      \ Kyverno policy CRs (e.g., `ClusterPolicy`, `Policy`, `PolicyException`, cleanup\
+      \ policies under the `kyverno.io` API group) are still present. Plan to migrate\
+      \ or delete legacy objects before upgrading, or explicitly use the chart\u2019\
+      s documented escape hatch/override for this gate if you must proceed.\n- **Helm\
+      \ now protects legacy policy CRDs from pruning** using `helm.sh/resource-policy:\
+      \ keep` to avoid accidental deletion during upgrades.\n- **Lifecycle hooks are\
+      \ configurable on all controllers** (if you were not using this in 1.19, you\
+      \ can now add `lifecycle` configuration for kyverno/admission/background/cleanup/reports\
+      \ controllers as needed).\n- **Bundled dependency bump:** the chart bumps the\
+      \ bundled `reports-server` dependency to **v0.1.7**.\n- **Scale-to-zero hook\
+      \ scoping fix:** the \u201Cscale-to-zero\u201D hook is now scoped to the Helm\
+      \ release (important for multi-release/multi-namespace patterns).\n- **Chart-specific\
+      \ policy bundles updates:** Kyverno Policies chart content changed (PSS/CEL\
+      \ policy updates such as Windows pod handling, drop ALL, deny `runAsNonRoot=false`,\
+      \ disallow host probes, user namespaces support, PSA version selection, dashboard\
+      \ type additions). Review if you deploy kyverno-policies via Helm.\n"
+    chart_updates: [Introduces an install/upgrade-time legacy-policy safeguard gate
+        (default-on) and additional Helm protections to avoid pruning legacy CRDs.,
+      Adds configurable lifecycle hooks for all controller Deployments., Updates bundled
+        reports-server dependency to v0.1.7., Fixes Helm hook behavior by scoping
+        the scale-to-zero hook to the specific release., 'Updates dashboards/policy
+        bundles to include `policies.kyverno.io` types and refreshes PSS/CEL policy
+        logic (Windows pods, PSA allow-lists, host probes baseline policy, stricter
+        drop capabilities/runAsNonRoot handling, user namespaces support, selectable
+        PSA version).']
+    features: ['Legacy Kyverno (`kyverno.io/*`) policy APIs are now actively phased
+        out: Kyverno can block creates/updates of legacy policy APIs, signals remaining
+        legacy policies via startup warnings/metrics, and adds stronger deprecation
+        plumbing.', 'CLI gains OCI-native policy workflows (OCI bundle format plus
+        `kyverno oci validate/inspect/resolve`), improved output (JSON/YAML version
+        output, colorized summaries), and robustness improvements (timeouts, error
+        handling).', CEL/autogen enhancements extend support to additional workload
+        CRDs (structural extraction) and add more explicit autogen toggles for pod
+        controllers., GlobalContextEntry projections add a CEL expression field and
+        jmesPath projections are deprecated with usage measurement., 'Operational
+        hardening: numerous fixes for leaks, races, and watchdog behaviors; improved
+        bounds/cost controls for CEL evaluation and wildcard matching; multiple CVE-related
+        dependency/toolchain updates.']
+    breaking_changes: ['**Major behavioral break:** Kyverno 1.20 removes **legacy
+        `kyverno.io` policy execution** from admission, background, and reports controllers
+        and ultimately deletes the legacy `kyverno.io` policy engine/Go API. Legacy
+        `kyverno.io` policy CRs may remain stored but will no longer enforce; you
+        must migrate to `policies.kyverno.io/*` (CEL-based) equivalents to keep enforcement.',
+      '**Upgrade can be blocked by Helm gate:** the Kyverno Helm chart adds a default-on
+        install/upgrade guard for legacy policy CRs; if your cluster still has `kyverno.io/*`
+        policy resources, the Helm upgrade may fail until you migrate/delete them
+        or explicitly override the gate.', 'CLI/test tooling changes: removal of `kyverno-json`
+        and the JSON scan command means any pipelines relying on those components
+        must be updated/removed.']
+  chart_version: 3.10.0
+  images: ['ghcr.io/kyverno/readiness-checker:v1.20.0', 'reg.kyverno.io/kyverno/background-controller:v1.20.0',
+    'reg.kyverno.io/kyverno/cleanup-controller:v1.20.0', 'reg.kyverno.io/kyverno/kyverno-cli:v1.20.0',
+    'reg.kyverno.io/kyverno/kyverno:v1.20.0', 'reg.kyverno.io/kyverno/kyvernopre:v1.20.0',
+    'reg.kyverno.io/kyverno/reports-controller:v1.20.0']
 - version: 1.19.0
   kube: ['1.35', '1.34', '1.33']
   requirements: []

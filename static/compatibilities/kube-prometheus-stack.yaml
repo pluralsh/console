@@ -5,23 +5,38 @@ readme_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/m
 helm_repository_url: https://prometheus-community.github.io/helm-charts
 chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
 versions:
-- version: 93.1.1
+- version: 93.2.2
   kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
     '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
-    helm_changes: ''
-    chart_updates: ['prometheus-stackdriver-exporter: Fix NOTES template to match
-        current values (docs/templating fix).', 'alertmanager: Roll back config reloader
-        image to v0.94.2.', 'kube-prometheus-stack: Select the operator CiliumNetworkPolicy
-        using pod labels (more robust policy targeting).']
-    features: []
-    breaking_changes: []
-  chart_version: 93.1.1
-  images: ['docker.io/bats/bats:1.14.0', 'docker.io/grafana/grafana:13.3.0-distroless',
+    helm_changes: "- No explicit `values.yaml` migration notes were included in the\
+      \ provided release notes between `93.1.0` and `93.2.2`.\n- **Ingress defaulting\
+      \ change**: `93.2.2` sets a default `pathType` for **Thanos** and **per-replica\
+      \ ingresses**. If you previously omitted `pathType`, behavior may change depending\
+      \ on your cluster\u2019s Ingress controller/Kubernetes version. If you need\
+      \ a specific behavior, explicitly set `pathType` in the relevant ingress values.\n\
+      - From `93.1.0` (already in your starting version):\n  - New values exposed:\
+      \ `kube-prometheus-stack.extraScrapeMetrics` and `alertmanagerConfigFileSystemMode`\
+      \ (only relevant if you want to use them; no action required otherwise)."
+    chart_updates: ['`93.2.2`: Adds a default `pathType` on Thanos and per-replica
+        ingresses (PR #7594).', '`93.1.0`: Prometheus Pushgateway web config volume
+        handling with extra volumes; Pushgateway image tag updated to `v3.11.2`; exposes
+        `extraScrapeMetrics` and `alertmanagerConfigFileSystemMode` (PRs #7484, #7559,
+        #7557).']
+    features: ['Default `pathType` is now applied for Thanos and per-replica ingresses,
+        reducing the need to specify it manually on newer Kubernetes versions.', New
+        chart values are available to expose extra scrape metrics and to control Alertmanager
+        config file permissions (`alertmanagerConfigFileSystemMode`).]
+    breaking_changes: ['Potential behavior change for users who rely on implicit/unspecified
+        Ingress `pathType` for Thanos or per-replica ingresses; after upgrade, the
+        rendered Ingress manifests will include a default `pathType`, which may affect
+        routing on some ingress controllers.']
+  chart_version: 93.2.2
+  images: ['docker.io/bats/bats:1.14.0', 'docker.io/grafana/grafana:13.3.1-distroless',
     'ghcr.io/jkroepke/kube-webhook-certgen:1.11.1', 'quay.io/kiwigrid/k8s-sidecar:2.14.3',
-    'quay.io/prometheus-operator/prometheus-operator:v0.95.1', 'quay.io/prometheus/alertmanager:v0.34.2',
+    'quay.io/prometheus-operator/prometheus-operator:v0.95.2', 'quay.io/prometheus/alertmanager:v0.35.0',
     'quay.io/prometheus/node-exporter:v1.12.1-distroless', 'quay.io/prometheus/prometheus:v3.16.0-distroless',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
 - version: 93.1.0
