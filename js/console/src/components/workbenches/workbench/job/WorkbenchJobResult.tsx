@@ -12,16 +12,18 @@ import {
   WarningOutlineIcon,
 } from '@pluralsh/design-system'
 import { ChatMarkdown } from 'components/ai/chatbot/ChatMarkdown'
-import { PrStatusChip } from 'components/self-service/pr/queue/PrQueueColumns'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { StackedText } from 'components/utils/table/StackedText'
 import { Body2BoldP, Subtitle2H1 } from 'components/utils/typography/Text'
 import { WorkbenchEvalGradeBadge } from 'components/workbenches/common/WorkbenchEvalGradeBadge'
 import { WorkbenchEvalSkillButton } from 'components/workbenches/common/WorkbenchEvalSkillButton'
+import { WorkbenchPrStatusChip } from 'components/workbenches/common/WorkbenchJobPrIcon'
 import {
   AgentRunTinyFragment,
+  PrStatus,
   PullRequestBasicFragment,
+  useWorkbenchJobQuery,
   WorkbenchJobFragment,
 } from 'generated/graphql'
 import { isEmpty, truncate } from 'lodash'
@@ -30,6 +32,10 @@ import { Link } from 'react-router-dom'
 import { getAgentRunAbsPath } from 'routes/aiRoutesConsts'
 import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
+import {
+  usePollWhileRunning,
+  WORKBENCH_POLL_INTERVAL,
+} from './usePollWhileRunning'
 import { isJobRunning } from './WorkbenchJobActivity'
 import { WorkbenchJobTodos } from './WorkbenchJobTodos'
 import { WorkbenchJobTriggerAlert } from './WorkbenchJobTriggerAlert'
@@ -131,6 +137,19 @@ export function WorkbenchJobTopology({ topology }: { topology: string }) {
   )
 }
 
+// PR merges and closes don't send job deltas, and the job stops polling once it
+// finishes, so the PR tab re-reads the job when shown and polls while any PR is
+// still open (which also gets it refetched on returning to the browser tab).
+function useFollowOpenPrs(jobId: string, prs: PullRequestBasicFragment[]) {
+  const hasOpenPrs = prs.some((pr) => pr.status === PrStatus.Open)
+  const query = useWorkbenchJobQuery({
+    skip: !jobId || isEmpty(prs),
+    variables: { id: jobId },
+    fetchPolicy: 'cache-and-network',
+  })
+  usePollWhileRunning(query, hasOpenPrs, WORKBENCH_POLL_INTERVAL)
+}
+
 export function WorkbenchJobPrs({
   generatedPrs,
   draftPrs,
@@ -145,6 +164,7 @@ export function WorkbenchJobPrs({
   jobId: string
 }) {
   const { spacing } = useTheme()
+  useFollowOpenPrs(jobId, generatedPrs)
 
   return (
     <Flex
@@ -182,7 +202,7 @@ export function WorkbenchJobPrs({
                 second={pr.title}
               />
               <RightActionsSC>
-                <PrStatusChip status={pr.status} />
+                <WorkbenchPrStatusChip status={pr.status} />
                 <IconFrame
                   size="small"
                   tooltip="View PR"
