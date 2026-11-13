@@ -1,1 +1,7 @@
 <%= @inner_content %>
+
+--
+© Plural <%= Date.utc_today().year %> · 1460 Broadway Fl 11, New York, NY 10036
+GitHub: https://github.com/pluralsh/plural
+Discord: https://discord.gg/pluralsh
+X: https://x.com/plural_sh

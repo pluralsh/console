@@ -1,154 +1,114 @@
 <!doctype html>
-<html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
   <head>
-    <title>
-    </title>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <!--[if !mso]><!-->
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <!--<![endif]-->
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
+    <meta name="x-apple-disable-message-reformatting">
+    <meta name="format-detection" content="telephone=no,date=no,address=no,email=no,url=no">
+    <meta name="color-scheme" content="only dark">
+    <meta name="supported-color-schemes" content="only dark">
+    <title>Plural</title>
+    <!--[if mso]>
+    <noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
+    <![endif]-->
     <style>
-      /* Globals */
-      body,
-      .email-full-container {
-        margin: 0;
-        padding: 0;
-        width: 100%;
-        color: white;
-        background-color: #171A21;
-        font-family: "Inter", sans-serif;
+      :root { color-scheme: only dark; supported-color-schemes: only dark; }
+      body { margin: 0 !important; padding: 0 !important; width: 100% !important; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+      table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+      img { border: 0; outline: none; text-decoration: none; -ms-interpolation-mode: bicubic; }
+      a[x-apple-data-detectors], u + .px-body a, #MessageViewBody a { color: inherit !important; text-decoration: none !important; font-size: inherit !important; font-family: inherit !important; font-weight: inherit !important; line-height: inherit !important; }
+      a.px-link, #MessageViewBody a.px-link, u + .px-body a.px-link { color: #99daff !important; text-decoration: underline !important; }
+      a.px-cta, #MessageViewBody a.px-cta, u + .px-body a.px-cta { color: #0e1015 !important; text-decoration: none !important; }
+      @media only screen and (max-width: 480px) {
+        .px-gutter { padding-left: 12px !important; padding-right: 12px !important; }
+        .px-card { padding: 24px 20px !important; }
+        .px-h1 { font-size: 22px !important; line-height: 30px !important; }
+        .px-stack { display: block !important; width: 100% !important; box-sizing: border-box !important; border-right: 0 !important; }
+        .px-stack-divider { border-top: 1px solid #383d47 !important; }
+        .px-stack-right { text-align: left !important; padding: 8px 0 0 !important; }
       }
-      .email-full-container {
-        padding-top: 48px;
-        padding-bottom: 48px;
-      }
-      a {
-        text-decoration: none;
-        color: inherit;
-      }
-      p {
-        margin: 0;
-      }
-      /* Helpers */
-      .margin-horizontal-auto {
-        margin-left: auto;
-        margin-right: auto;
-      }
-      .margin-top-large {
-        margin-top: 24px;
-      }
-      .flex {
-        display: flex; /* https://www.caniemail.com/features/css-display-flex/ */
-      }
-      .fit-content {
-        width: fit-content;
-      }
-      .text-align-center {
-        text-align: center;
-      }
-      .margin-left-medium {
-        margin-left: 16px;
-      }
-      /* Content */
-      .email-container {
-        max-width: 504px;
-        padding-left: 24px;
-        padding-right: 24px;
-      }
-      .header-logo {
-        height: 48px;
-      }
-      .company-info {
-        font-family: monospace;
-        font-size: 12px;
-        line-height: 16px;
-        color: #9095A2;
-      }
-      .social-icon {
-        width: 48px;
-        height: 48px;
-      }
-      .content-container {
-        margin-top: 48px;
-        margin-bottom: 24px;
-        border-radius: 6px;
-        overflow: hidden;
-        background-color: #21242C;
-      }
-      .top-gradient {
-        width: 100%;
-        height: 4px;
-        background: linear-gradient(to right, #373EF1 0%, #969AF8 100%);
-      }
-      .content-wrapper {
-        padding: 32px;
-      }
-      .text-lead {
-        color: #C5C9D3;
-        font-size: 24px;
-        line-height: 32px;
-        letter-spacing: -0.25px;
-      }
-      .text-content {
-        color: #C5C9D3;
-        font-size: 16px;
-        line-height: 24px;
-        letter-spacing: 0.5px;
-      }
-      a.button,
-      a:any-link.button,
-      .button {
-        display: block;
-        padding: 12px 24px;
-        text-align: center;
-        color: #EBEFF0;
-        background-color: #4A51F2;
-        border-radius: 3px;
-        font-weight: 500;
-        font-size: 16px;
-        line-height: 24px;
-        letter-spacing: 0.5px;
-      }
+      [data-ogsc] .px-text { color: #eef0f1 !important; }
+      [data-ogsc] .px-text-light { color: #c5c9d2 !important; }
+      [data-ogsc] .px-text-xlight { color: #a1a5b0 !important; }
+      [data-ogsc] .px-accent { color: #99daff !important; }
+      [data-ogsc] .px-cta { color: #0e1015 !important; }
+      [data-ogsb] .px-page { background-color: #0e1015 !important; }
+      [data-ogsb] .px-band { background-color: #171a21 !important; }
+      [data-ogsb] .px-card { background-color: #21242c !important; }
+      [data-ogsb] .px-cell { background-color: #252932 !important; }
+      [data-ogsb] .px-cta-bg { background-color: #99daff !important; }
     </style>
   </head>
-  <body style="background-color: #171A21">
-    <div class="email-full-container" style="background-color: #171A21">
-    <div class="email-container margin-horizontal-auto">
-      <div class="margin-horizontal-auto">
-        <div class="flex margin-horizontal-auto fit-content">
-          <a href="https://plural.sh" target="_blank">
-            <img alt="Plural" src="https://app.plural.sh/plural-email-header@2x.png" class="header-logo" />
-          </a>
-        </div>
-      </div>
-      <div class="content-container margin-horizontal-auto">
-        <div class="top-gradient"></div>
-        <div class="content-wrapper">
-          <%= @inner_content %>
-      </div>
-      <div class="margin-horizontal-auto fit-content">
-        <div class="company-info margin-horizontal-auto text-align-center fit-content">
-          <div>© Plural 2025</div>
-          <div>1460 Broadway Fl 11</div>
-          <div>New York, NY 10036</div>
-        </div>
-        <div class="margin-horizontal-auto flex fit-content">
-          <a href="https://github.com/pluralsh/plural" target="_blank">
-            <img alt="GitHub" src="https://app.plural.sh/github_logo@2x.png" class="social-icon" />
-          </a>
-          <a href="https://discord.gg/pluralsh" target="_blank">
-            <img alt="Discord" src="https://app.plural.sh/discord_logo@2x.png" class="social-icon" />
-          </a>
-          <a href="https://twitter.com/plural_sh" target="_blank">
-            <img alt="Twitter" src="https://app.plural.sh/twitter_logo@2x.png" class="social-icon" />
-          </a>
-        </div>
-      </div>
-    </div>
-    </div>
+  <body class="px-body px-page" style="margin:0;padding:0;width:100%;background-color:#0e1015;">
+    <table role="presentation" class="px-page" width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#0e1015" style="width:100%;background-color:#0e1015;border-collapse:collapse;">
+      <tr>
+        <td align="center" style="padding:0;">
+          <!--[if mso]><table role="presentation" width="600" border="0" cellpadding="0" cellspacing="0" align="center"><tr><td><![endif]-->
+          <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;max-width:600px;margin:0 auto;border-collapse:collapse;">
+            <tr>
+              <td class="px-page" bgcolor="#0e1015" style="padding:0;background-color:#0e1015;line-height:0;font-size:0;">
+                <img src="<%= email_asset("email/stripe-band.png") %>" width="600" alt="" style="display:block;width:100%;max-width:600px;height:auto;border:0;background-color:#0e1015;">
+              </td>
+            </tr>
+            <tr>
+              <td class="px-band" bgcolor="#171a21" style="padding:24px;background-color:#171a21;border-top:1px solid #2a2e37;border-bottom:1px solid #2a2e37;">
+                <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">
+                  <tr>
+                    <td valign="middle" style="padding:0;">
+                      <a href="https://plural.sh" target="_blank" style="text-decoration:none;">
+                        <img src="<%= email_asset("plural-email-header@2x.png") %>" width="98" height="24" alt="Plural" style="display:block;width:98px;height:24px;border:0;color:#eef0f1;font-family:<%= email_font(:mono) %>;font-size:18px;line-height:24px;">
+                      </a>
+                    </td>
+                    <td align="right" valign="middle" class="px-accent" style="padding:0 0 0 16px;font-family:<%= email_font(:mono) %>;font-size:15px;line-height:20px;letter-spacing:1px;text-transform:uppercase;color:#99daff;">
+                      <%= assigns[:label] %>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td class="px-band px-gutter" bgcolor="#171a21" background="<%= email_asset("email/hatch.png") %>" style="padding:24px;background-color:#171a21;background-image:url('<%= email_asset("email/hatch.png") %>');background-repeat:repeat;background-size:20px 40px;">
+                <!--[if gte mso 9]>
+                <v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="width:552px;">
+                <v:fill type="tile" src="<%= email_asset("email/hatch.png") %>" color="#171a21" />
+                <v:textbox style="mso-fit-shape-to-text:true" inset="0,0,0,0">
+                <![endif]-->
+                <%= @inner_content %>
+                <!--[if gte mso 9]>
+                </v:textbox>
+                </v:rect>
+                <![endif]-->
+              </td>
+            </tr>
+            <tr>
+              <td class="px-band" bgcolor="#171a21" style="padding:16px 24px;background-color:#171a21;border-top:1px solid #2a2e37;">
+                <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">
+                  <tr>
+                    <td class="px-stack px-text-xlight" valign="top" style="padding:0;font-family:<%= email_font(:mono) %>;font-size:11px;line-height:16px;color:#a1a5b0;">
+                      <span style="color:#a1a5b0;text-decoration:none;">&copy; Plural <%= Date.utc_today().year %> &middot; 1460 Broadway&#8203; Fl 11, New&#8203; York, NY&#8203; 10036</span>
+                    </td>
+                    <td class="px-stack px-stack-right" align="right" valign="top" style="padding:0 0 0 16px;font-family:<%= email_font(:mono) %>;font-size:11px;line-height:16px;color:#a1a5b0;white-space:nowrap;">
+                      <a class="px-link" href="https://github.com/pluralsh/plural" target="_blank" style="color:#99daff;text-decoration:underline;">GitHub</a>&nbsp;&nbsp;
+                      <a class="px-link" href="https://discord.gg/pluralsh" target="_blank" style="color:#99daff;text-decoration:underline;">Discord</a>&nbsp;&nbsp;
+                      <a class="px-link" href="https://x.com/plural_sh" target="_blank" style="color:#99daff;text-decoration:underline;">X</a>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td class="px-page" bgcolor="#0e1015" style="padding:0;background-color:#0e1015;line-height:0;font-size:0;">
+                <img src="<%= email_asset("email/stripe-band.png") %>" width="600" alt="" style="display:block;width:100%;max-width:600px;height:auto;border:0;background-color:#0e1015;">
+              </td>
+            </tr>
+          </table>
+          <!--[if mso]></td></tr></table><![endif]-->
+        </td>
+      </tr>
+    </table>
   </body>
 </html>
