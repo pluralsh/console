@@ -6585,6 +6585,11 @@
     - '1.35'
     - '1.34'
     - '1.33'
+  - version: v0.0.10009020261111-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
   - version: v0.0.10009020261109-eksbuild.1
     compatibilities:
     - '1.35'
@@ -12575,6 +12580,17 @@
     - '1.24'
     - '1.23'
   publisher: leaksignal
+- name: log10x_log10x-reporter
+  versions:
+  - version: v1.3.4-eksbuild.1
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+  publisher: Log10x
 - name: metrics-server
   versions:
   - version: v0.9.1-eksbuild.1
