@@ -5,35 +5,40 @@ helm_repository_url: https://aws.github.io/eks-charts
 helm_values: clusterName=example
 chart_name: aws-load-balancer-controller
 versions:
-- version: 3.6.2
+- version: 3.6.3
   kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
     '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
   summary:
-    helm_changes: "- **CRDs:** If upgrading from **3.6.0 to 3.6.2**, **no CRD updates\
-      \ are required** (patch release).\n- If upgrading from **< 3.6.0**, first apply\
-      \ the **v3.6.0 CRD update steps**:\n  - `kubectl apply -k \"github.com/aws/eks-charts/stable/aws-load-balancer-controller/crds?ref=master\"\
-      `\n  - `kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/refs/heads/main/config/crd/gateway/gateway-crds.yaml`\n\
-      - No helm values changes are called out in these notes; verify any opt-in behaviors/annotations\
-      \ you plan to use (below) are reflected in manifests/annotations rather than\
-      \ chart values."
-    chart_updates: []
-    features: ["Cross-account TargetGroupBinding gained an **opt-in** mode to register\
-        \ IP targets with the pod\u2019s **actual Availability Zone**, improving cross-account\
-        \ zonal routing while preserving existing behavior by default.", New Ingress
-        annotation **`frontend-nlb-status-only`** allows writing only the frontend
-        NLB hostname into Ingress status (helps ExternalDNS when an ALB Ingress is
-        fronted by an NLB; writes nothing until the NLB exists)., Gateway API importers
-        can now customize Gateway names/finalizers/controller wiring; ReferenceGrant
-        now uses **`v1`** apiVersion.]
-    breaking_changes: ['**Security/trust change in 3.6.2:** controller image base
-        updated to distrust 5 certificate authorities (removes certain eMudhra/emSign
-        roots from the image CA bundle). This can break outbound TLS connections to
-        endpoints using those roots, even though controller config/behavior is otherwise
-        unchanged.']
-  chart_version: 3.6.2
-  images: ['public.ecr.aws/eks/aws-load-balancer-controller:v3.6.2']
+    helm_changes: "## Helm values / manifests to review\n- **Webhooks: Service webhook\
+      \ `matchConditions` support (new in chart)**\n  - The chart can now add **`matchConditions`**\
+      \ to the **Service** mutating/validating webhook so it only triggers for the\
+      \ Service objects it cares about.\n  - Recommended default condition from the\
+      \ release notes: `object.spec.type == 'LoadBalancer'`.\n  - **Action:** if you\
+      \ rely on the webhook to enforce behavior on *all* Services, verify the new\
+      \ default/your overrides; otherwise, consider enabling/keeping the condition\
+      \ to reduce blast radius when the webhook is down and to avoid bootstrap cyclic\
+      \ dependencies.\n\n## CRDs\n- **v3.6.0:** Apply latest AWS-vended CRDs **before**\
+      \ upgrading (safety recommendation); Gateway API CRDs remain at v1.6.0.\n- **v3.6.3:**\
+      \ **No CRD updates required** (patch release)."
+    chart_updates: ['Helm chart: add `matchConditions` support for the Service webhook
+        so it only fires for relevant Services; improves cluster bootstrap behavior
+        and allows creating non-LB Services when webhook is unavailable.']
+    features: ['Cross-account TargetGroupBinding: opt-in AZ-aware IP target registration
+        to improve zonal routing in cross-account setups.', 'Ingress: new `frontend-nlb-status-only`
+        annotation to control whether status hostname reports only the frontend NLB
+        (helps ExternalDNS when an NLB fronts an ALB).', 'Gateway API (for importers/automode):
+        customization hooks for Gateway naming/finalizers/controller wiring; ReferenceGrant
+        uses `v1` apiVersion.']
+    breaking_changes: ['Potential behavior change if you enable/accept new Service
+        webhook `matchConditions`: webhook may no longer evaluate non-LoadBalancer
+        Services (usually desirable, but confirm if you depended on the broader scope).',
+      'For upgrades from < v3.6.0: CRD application step is effectively mandatory to
+        align with current AWS-vended CRDs (recommended as ''action required'' in
+        v3.6.0 notes).']
+  chart_version: 3.6.3
+  images: ['public.ecr.aws/eks/aws-load-balancer-controller:v3.6.3']
 - version: 3.6.0
   kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
     '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
