@@ -41,6 +41,57 @@ defmodule ConsoleWeb.Plugs.WorkbenchMCPTest do
       request(admin(), %{id: "not-a-uuid"}, initialize())
       |> response(404)
     end
+
+  end
+
+  describe "devbox console tokens" do
+    test "they reach the instance's own workbench as its owner" do
+      inst = insert(:devbox_instance, user: admin())
+      {:ok, token, _} = Console.Devboxes.Credentials.console_token(inst)
+
+      devbox_request(token, inst.workbench_id)
+      |> response(200)
+    end
+
+    test "they can't reach other workbenches, even ones the owner can read" do
+      inst = insert(:devbox_instance, user: admin())
+      {:ok, token, _} = Console.Devboxes.Credentials.console_token(inst)
+
+      devbox_request(token, insert(:workbench).id)
+      |> response(403)
+    end
+
+    test "they stop working once the instance ends" do
+      inst = insert(:devbox_instance, user: admin())
+      {:ok, token, _} = Console.Devboxes.Credentials.console_token(inst)
+      {:ok, _} = Console.Devboxes.end_instance(inst, :cancelled, "test")
+
+      devbox_request(token, inst.workbench_id)
+      |> response(401)
+    end
+
+    test "they need the workbench_mcp scope" do
+      inst = insert(:devbox_instance, user: admin())
+      {:ok, token, _} = Console.Devboxes.Credentials.mint_ai_proxy_token(inst)
+
+      devbox_request(token, inst.workbench_id)
+      |> response(401)
+    end
+
+    test "they aren't a console login" do
+      inst = insert(:devbox_instance, user: admin())
+      {:ok, token, _} = Console.Devboxes.Credentials.console_token(inst)
+
+      build_conn()
+      |> put_req_header("authorization", "Bearer #{token}")
+      |> put_req_header("content-type", "application/json")
+      |> post("/gql", Jason.encode!(%{query: "query { me { id } }"}))
+      |> json_response(200)
+      |> case do
+        %{"data" => %{"me" => nil}, "errors" => [%{"message" => "unauthenticated"}]} -> :ok
+        resp -> flunk("devbox token authenticated /gql: #{inspect(resp)}")
+      end
+    end
   end
 
   describe "tools/list" do
@@ -324,6 +375,13 @@ defmodule ConsoleWeb.Plugs.WorkbenchMCPTest do
     |> mcp_headers()
     |> session_header(opts[:session])
     |> post("/mcp/workbench/#{bench.id}#{opts[:query]}", Jason.encode!(body))
+  end
+
+  defp devbox_request(token, workbench_id) do
+    build_conn()
+    |> put_req_header("authorization", "Bearer #{token}")
+    |> mcp_headers()
+    |> post("/mcp/workbench/#{workbench_id}", Jason.encode!(initialize()))
   end
 
   defp mcp_headers(conn) do

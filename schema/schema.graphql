@@ -215,7 +215,32 @@ type RootQueryType {
   prGovernance(id: ID, name: String): PrGovernance
 
   pullRequests(
-    after: String, first: Int, before: String, last: Int, clusterId: ID, serviceId: ID, open: Boolean, q: String, authorId: ID
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    clusterId: ID
+
+    serviceId: ID
+
+    open: Boolean
+
+    q: String
+
+    authorId: ID
+
+    "only prs created from this devbox"
+    devboxId: ID
+
+    "only prs created from this devbox instance"
+    devboxInstanceId: ID
+
+    "only prs created from this devbox thread"
+    devboxThreadId: ID
   ): PullRequestConnection
 
   scmWebhook(id: ID, externalId: String): ScmWebhook
@@ -798,6 +823,66 @@ type RootQueryType {
   issueWebhooks(after: String, first: Int, before: String, last: Int): IssueWebhookConnection
 
   searchConversations(chatConnectionId: ID!, query: String): [ChatbotConversation]
+
+  devboxes(after: String, first: Int, before: String, last: Int, q: String, clusterId: ID, workbenchId: ID): DevboxConnection
+
+  devboxAgents(workbenchId: ID!, devboxId: ID!): [DevboxAgent]
+
+  devboxInstance(id: ID!): DevboxInstance
+
+  devboxSnapshot(id: ID!): DevboxSnapshot
+
+  devboxThread(id: ID!): DevboxThread
+
+  devboxInstanceCommands(threadId: ID!): [DevboxCommand]
+
+  devboxRepositories(instanceId: ID!): [DevboxRepository]
+
+  devboxTimeline(
+    instanceId: ID!
+
+    "the ACP session id of the thread or subagent"
+    sessionId: String!
+
+    "page backwards from this position; without before or after, the newest page"
+    before: Long
+
+    "page forwards from this position"
+    after: Long
+
+    limit: Int
+  ): DevboxTimeline
+
+  devboxSessions(instanceId: ID!): [DevboxSessionSummary]
+
+  devboxImportableSessions(instanceId: ID!): [DevboxImportableSession]
+
+  "One directory level of an instance's workspace"
+  devboxFiles(
+    instanceId: ID!
+
+    "relative to ~, the home directory if unset"
+    path: String
+  ): [DevboxFileEntry]
+
+  devboxFile(instanceId: ID!, path: String!): DevboxFile
+
+  "Uncommitted changes of an instance, grouped by repository"
+  devboxChanges(
+    instanceId: ID!
+
+    "a thread's worktrees instead of the main checkouts"
+    threadId: ID
+
+    repositories: [String]
+
+    includeDiff: Boolean
+  ): [DevboxRepositoryChanges]
+
+  "Your linked coding agent subscriptions"
+  agentCredentials: [AgentCredential]
+
+  devbox(id: ID, name: String, clusterId: ID): Devbox
 
   aiInsight(id: ID!): AiInsight
 
@@ -1773,6 +1858,118 @@ type RootMutationType {
 
   deleteIssueWebhook(id: ID!): IssueWebhook
 
+  attachDevbox(workbenchId: ID!, devboxId: ID!): Devbox
+
+  detachDevbox(workbenchId: ID!, devboxId: ID!): Devbox
+
+  createDevboxInstance(workbenchId: ID!, attributes: DevboxInstanceAttributes!): DevboxInstance
+
+  restoreDevboxSnapshot(
+    "the snapshot to start an instance from"
+    id: ID!
+
+    attributes: DevboxInstanceAttributes
+  ): DevboxInstance
+
+  cancelDevboxInstance(id: ID!): DevboxInstance
+
+  suspendDevboxInstance(id: ID!): DevboxInstance
+
+  resumeDevboxInstance(id: ID!): DevboxInstance
+
+  "Marks you as viewing an instance (call about every 30s while its tab is visible), which keeps it awake and resumes it if suspended"
+  pingDevboxInstance(id: ID!): DevboxInstance
+
+  leaveDevboxInstance(id: ID!): DevboxInstance
+
+  "Keeps an instance awake until a time, clamped to the box's maxDeferral and maxContinuousAwake"
+  keepDevboxInstanceAwake(id: ID!, until: DateTime!): DevboxInstance
+
+  cancelDevboxKeepAwake(id: ID!): DevboxInstance
+
+  createDevboxSnapshot(instanceId: ID!, attributes: DevboxSnapshotAttributes): DevboxSnapshot
+
+  deleteDevboxSnapshot(id: ID!): DevboxSnapshot
+
+  createDevboxThread(instanceId: ID!, attributes: DevboxThreadAttributes): DevboxThread
+
+  importDevboxThread(instanceId: ID!, attributes: DevboxImportAttributes!): DevboxThread
+
+  resumeDevboxThread(id: ID!): DevboxThread
+
+  closeDevboxThread(id: ID!): DevboxThread
+
+  deleteDevboxThread(id: ID!): DevboxThread
+
+  forkDevboxThread(id: ID!, title: String): DevboxThread
+
+  renameDevboxThread(id: ID!, title: String!): DevboxThread
+
+  promptDevboxThread(
+    id: ID!
+
+    prompt: String
+
+    content: [DevboxPromptBlockAttributes]
+
+    "files to attach (at most 10, 24MB in total); they're written into the devbox and linked from the prompt, and images are also sent inline to agents that accept them"
+    attachments: [Upload]
+  ): DevboxThread
+
+  cancelDevboxPrompt(id: ID!): DevboxThread
+
+  setDevboxThreadConfigOption(id: ID!, configId: String!, value: String!): DevboxThread
+
+  respondDevboxInteraction(id: ID!, response: DevboxInteractionResponseAttributes!): DevboxInteraction
+
+  addDevboxRepository(instanceId: ID!, repository: String!): DevboxInstance
+
+  "Opens a terminal, vnc or preview stream to an instance, returning its websocket url and a short-lived token"
+  openDevboxStream(
+    instanceId: ID!
+
+    kind: DevboxStreamKind!
+
+    "reattach to a terminal, a new one is created if unset"
+    terminalId: String
+
+    "the port to preview"
+    port: Int
+
+    "for vnc streams, an http(s) url to open in the instance's browser"
+    url: String
+  ): DevboxStream
+
+  writeDevboxFile(
+    instanceId: ID!
+
+    path: String!
+
+    content: String!
+
+    "fail if the file changed since it was read"
+    expectedSha256: String
+  ): DevboxFileWrite
+
+  "Switches one agent of your instance between the AI proxy and your subscription"
+  setDevboxAgentBilling(instanceId: ID!, attributes: DevboxAgentBillingAttributes!): DevboxInstance
+
+  "Links (or relinks) your coding agent subscription, verifying it once with the vendor"
+  linkAgentCredential(attributes: AgentCredentialAttributes!): AgentCredential
+
+  deleteAgentCredential(id: ID!): AgentCredential
+
+  "Sets whether new instances bill a provider's agent to your subscription by default"
+  setDefaultAgentBilling(provider: AgentCredentialProvider!, enabled: Boolean!): AgentCredential
+
+  upsertDevbox(attributes: DevboxAttributes!): Devbox
+
+  heartbeatDevbox(id: ID!, attributes: DevboxHeartbeatAttributes!): Devbox
+
+  deleteDevbox(id: ID!): Devbox
+
+  mintDevboxProbeToken(id: ID!): DevboxProbeToken
+
   "a reusable mutation for updating rbac settings on core services"
   updateRbac(
     rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID, pipelineId: ID, stackId: ID, projectId: ID, catalogId: ID, flowId: ID, serverId: ID
@@ -1929,6 +2126,18 @@ type RootSubscriptionType {
 
   workbenchExecStream(activityId: ID!): WorkbenchJobExecStream
 
+  devboxInstanceStatusDelta(id: ID, workbenchId: ID): DevboxInstanceDelta
+
+  devboxThreadDelta(instanceId: ID!): DevboxThreadDelta
+
+  devboxSnapshotDelta(workbenchId: ID!): DevboxSnapshotDelta
+
+  "Live transcript deltas (including settle), never stored"
+  devboxInstanceDelta(instanceId: ID!): DevboxEntityChangeDelta
+
+  "Thread and interaction index changes"
+  devboxInstanceIndexDelta(instanceId: ID!): DevboxIndexChangeDelta
+
   workbenchDashboardDelta(id: ID, workbenchId: ID): WorkbenchDashboardDelta
 
   workbenchMonitorDelta(id: ID, workbenchId: ID): MonitorDelta
@@ -1995,6 +2204,1390 @@ type PolicyBinding {
 input RbacAttributes {
   readBindings: [PolicyBindingAttributes]
   writeBindings: [PolicyBindingAttributes]
+}
+
+enum DevboxStatus {
+  PENDING
+  READY
+  DEGRADED
+  FAILED
+}
+
+enum DevboxAgentType {
+  CLAUDE
+  CODEX
+  OPENCODE
+  GEMINI
+  PI
+}
+
+enum DevboxProbeStatus {
+  PENDING
+  OK
+  FAILED
+  MISSING
+}
+
+enum DevboxInstanceStatus {
+  PENDING
+  PROVISIONING
+  RUNNING
+  SUSPENDED
+  SNAPSHOTTING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum DevboxForegroundState {
+  IDLE
+  RUNNING
+  REQUIRES_ACTION
+}
+
+enum DevboxSnapshotFidelity {
+  MEMORY
+  FILESYSTEM
+}
+
+enum DevboxThreadKind {
+  THREAD
+  SUBAGENT
+}
+
+enum DevboxThreadStatus {
+  ACTIVE
+  WAITING
+  CLOSED
+  DELETED
+}
+
+enum DevboxInteractionKind {
+  PERMISSION
+  FORM_ELICITATION
+  URL_ELICITATION
+}
+
+enum DevboxInteractionState {
+  PENDING
+  ANSWERED
+  CANCELLED
+  EXPIRED
+}
+
+enum DevboxSnapshotStatus {
+  PENDING
+  READY
+  FAILED
+  DELETING
+}
+
+enum PullRequestSource {
+  MCP
+  EGRESS
+}
+
+enum DevboxCloudProvider {
+  AWS
+  GCP
+  AZURE
+}
+
+enum AgentCredentialProvider {
+  CLAUDE
+  CODEX
+}
+
+enum AgentCredentialKind {
+  CLAUDE_OAUTH_TOKEN
+  CODEX_CHATGPT_AUTH
+  CODEX_ACCESS_TOKEN
+}
+
+enum AgentCredentialStatus {
+  VALID
+  INVALID
+  EXPIRED
+}
+
+enum DevboxBillingMode {
+  "billed through the Plural AI proxy against the workbench budget"
+  PROXY
+
+  "billed to the instance owner's linked subscription"
+  SUBSCRIPTION
+}
+
+enum DevboxStreamKind {
+  TERMINAL
+  VNC
+  PREVIEW
+}
+
+enum DevboxSnippetFormat {
+  TERRAFORM
+  CLI
+}
+
+enum DevboxEntityType {
+  USER_MESSAGE
+  AGENT_MESSAGE
+  AGENT_THOUGHT
+  SESSION_MESSAGE
+  TOOL_CALL
+  PLAN
+  TERMINAL
+  COMPACTION
+  UNKNOWN
+}
+
+enum DevboxDeltaOp {
+  "a chunk appended to an entity, e.g. message text"
+  APPEND
+
+  "an ACP upsert patch: omitted fields unchanged, null clears, values replace"
+  PATCH
+
+  "a live-only notice, never stored in the transcript"
+  NOTICE
+
+  "session state: config options, available commands, session info or usage"
+  STATE
+
+  "the entity settled, `entity` holds its final revision"
+  SETTLE
+
+  "a pull request was created from the thread"
+  PULL_REQUEST
+}
+
+enum DevboxContentBlockType {
+  TEXT
+  IMAGE
+  AUDIO
+  RESOURCE
+  RESOURCE_LINK
+  UNKNOWN
+}
+
+enum DevboxToolCallContentType {
+  CONTENT
+  DIFF
+  TERMINAL
+  UNKNOWN
+}
+
+enum DevboxLeaseKind {
+  VIEWER
+  DEFERRAL
+}
+
+enum DevboxElicitationAction {
+  ACCEPT
+  DECLINE
+  CANCEL
+}
+
+input DevboxAttributes {
+  "the name of the DevboxRunner"
+  name: String!
+
+  "the cluster this box runs on (required for user-authenticated upserts)"
+  clusterId: ID
+
+  "the box image as specified on the DevboxRunner"
+  image: String
+
+  "the image pinned by digest"
+  resolvedImage: String
+
+  "the golden template revision instances boot from"
+  templateRevision: String
+
+  status: DevboxStatus
+
+  "the resources for each instance"
+  resources: Json
+
+  "repositories instances may check out, all if unset"
+  allowedRepositories: [String]
+
+  "the most live instances this box may run at once"
+  maxInstances: Int
+
+  "whether instances get a browser sidecar"
+  browser: Boolean
+
+  "names of the scm connections instances may use"
+  scmConnections: [String]
+
+  "the probed agent catalog"
+  agents: [DevboxAgentAttributes]
+
+  "hosts instances may reach"
+  httpAllowlist: [DevboxHttpAllowAttributes]
+
+  idlePolicy: DevboxIdlePolicyAttributes
+
+  conditions: [DevboxConditionAttributes]
+
+  "cloud identities instances get workload identity tokens for"
+  cloudIdentities: [DevboxCloudIdentityAttributes]
+}
+
+input DevboxCloudIdentityAttributes {
+  name: String!
+
+  provider: DevboxCloudProvider!
+
+  default: Boolean
+
+  "aws: the role to assume with the token"
+  roleArn: String
+
+  "token lifetime, at most an hour"
+  durationSeconds: Int
+
+  "gcp: projects\/<number>\/locations\/global\/workloadIdentityPools\/<pool>\/providers\/<provider>"
+  workloadIdentityProvider: String
+
+  "gcp: the service account to impersonate"
+  serviceAccount: String
+
+  "azure: the Entra ID tenant"
+  tenantId: String
+
+  "azure: the application (client) id"
+  clientId: String
+
+  "azure: the authority host, for sovereign clouds"
+  authorityHost: String
+}
+
+input DevboxAgentAttributes {
+  type: DevboxAgentType!
+
+  "whether this is the box's default agent (exactly one must be)"
+  default: Boolean
+
+  adapterName: String
+
+  adapterVersion: String
+
+  adapterPin: String
+
+  "the negotiated ACP protocol version"
+  protocolVersion: Int
+
+  acpV2: Boolean
+
+  "the verbatim agentCapabilities from initialize"
+  capabilities: Json
+
+  "the DevboxRunner's model allowlist"
+  allowedModels: [String]
+
+  defaultModel: String
+
+  "the agent's own current model in a fresh session"
+  currentModel: String
+
+  modelSwitchable: Boolean
+
+  probeStatus: DevboxProbeStatus
+
+  probeError: String
+
+  "values of the model config option"
+  models: [DevboxModelAttributes]
+
+  "the commands of a fresh session"
+  commands: [DevboxCommandAttributes]
+
+  "config options of a fresh session"
+  configOptions: [DevboxConfigOptionAttributes]
+
+  sessionCapabilities: DevboxSessionCapabilitiesAttributes
+}
+
+input DevboxModelAttributes {
+  id: String!
+  name: String
+  description: String
+}
+
+input DevboxCommandAttributes {
+  name: String!
+  description: String
+  inputHint: String
+}
+
+input DevboxConfigOptionAttributes {
+  configId: String!
+  name: String
+  description: String
+  category: String
+  type: String
+  currentValue: String
+  options: [DevboxConfigValueOptionAttributes]
+}
+
+input DevboxConfigValueOptionAttributes {
+  value: String!
+  name: String
+  description: String
+  group: String
+}
+
+input DevboxSessionCapabilitiesAttributes {
+  list: Boolean
+  resume: Boolean
+  load: Boolean
+  close: Boolean
+  delete: Boolean
+  fork: Boolean
+}
+
+input DevboxHttpAllowAttributes {
+  host: String!
+  port: Int
+  passthrough: Boolean
+}
+
+input DevboxIdlePolicyAttributes {
+  "seconds"
+  activityWindow: Int
+
+  cpuThreshold: Float
+
+  "seconds"
+  gracePeriod: Int
+
+  "seconds"
+  maxDeferral: Int
+
+  "seconds"
+  maxContinuousAwake: Int
+
+  "seconds"
+  completeAfter: Int
+}
+
+input DevboxConditionAttributes {
+  type: String!
+  status: String!
+  reason: String
+  message: String
+}
+
+input DevboxHeartbeatAttributes {
+  status: DevboxStatus
+  resolvedImage: String
+  templateRevision: String
+  conditions: [DevboxConditionAttributes]
+}
+
+input DevboxConfigValueAttributes {
+  "the ACP config option id"
+  configId: String!
+
+  value: String!
+}
+
+input DevboxInstanceAttributes {
+  "the attached box to start (defaults to the snapshot's box when restoring)"
+  devboxId: ID
+
+  "a ready snapshot to restore from"
+  snapshotId: ID
+
+  name: String
+
+  "defaults to the box's default agent"
+  agent: DevboxAgentType
+
+  "defaults to the agent's default model"
+  model: String
+
+  "defaults to the workbench's coding repositories allowed on the box"
+  repositories: [String]
+
+  "initial values for other config options"
+  configOptions: [DevboxConfigValueAttributes]
+
+  maxRunningThreads: Int
+
+  "how each agent is billed, defaults to your credentials marked default where the workbench allows it, otherwise the AI proxy"
+  agentBilling: [DevboxAgentBillingAttributes]
+}
+
+input DevboxAgentBillingAttributes {
+  agent: DevboxAgentType!
+
+  billing: DevboxBillingMode!
+
+  "let other workbench users prompt this agent on your subscription"
+  allowCollaborators: Boolean
+}
+
+input AgentCredentialAttributes {
+  kind: AgentCredentialKind!
+
+  "the setup-token, auth.json contents or access token, write-only"
+  secret: String!
+
+  label: String
+
+  "when the access token expires, for expiry warnings"
+  expiresAt: DateTime
+
+  "bill new instances' agents of this provider to it by default"
+  defaultBilling: Boolean
+}
+
+input DevboxSnapshotAttributes {
+  name: String
+}
+
+input DevboxPromptBlockAttributes {
+  type: DevboxContentBlockType!
+
+  text: String
+
+  "base64 data for images and audio"
+  data: String
+
+  mimeType: String
+
+  uri: String
+
+  name: String
+}
+
+input DevboxThreadAttributes {
+  "defaults to the instance's agent"
+  agent: DevboxAgentType
+
+  model: String
+
+  configOptions: [DevboxConfigValueAttributes]
+
+  "~ or ~\/<repository>"
+  cwd: String
+
+  "repositories to give the thread its own worktree of"
+  worktreeRepos: [String]
+
+  title: String
+
+  "an optional first prompt"
+  prompt: String
+
+  "an optional first prompt, as content blocks"
+  content: [DevboxPromptBlockAttributes]
+}
+
+input DevboxImportAttributes {
+  agent: DevboxAgentType!
+
+  "the agent's session id, from devboxImportableSessions"
+  sessionId: String!
+
+  title: String
+
+  cwd: String
+}
+
+input DevboxInteractionResponseAttributes {
+  "the selected option of a permission request"
+  optionId: String
+
+  "cancel a permission request"
+  cancelled: Boolean
+
+  "the answer to an elicitation"
+  action: DevboxElicitationAction
+
+  "form content for an accepted form elicitation"
+  content: Json
+}
+
+type Devbox {
+  id: ID!
+
+  name: String!
+
+  image: String
+
+  resolvedImage: String
+
+  templateRevision: String
+
+  status: DevboxStatus
+
+  resources: Map
+
+  allowedRepositories: [String]
+
+  maxInstances: Int
+
+  browser: Boolean
+
+  lastHeartbeatAt: DateTime
+
+  agents: [DevboxAgent]
+
+  httpAllowlist: [DevboxHttpAllow]
+
+  idlePolicy: DevboxIdlePolicy
+
+  conditions: [DevboxCondition]
+
+  cloudIdentities: [DevboxCloudIdentity]
+
+  cluster: Cluster
+
+  scmConnections: [ScmConnection]
+
+  "the box's workload identity issuer and how to trust it from cloud accounts"
+  workloadIdentity: DevboxWorkloadIdentity
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type DevboxCloudIdentity {
+  name: String!
+  provider: DevboxCloudProvider!
+  default: Boolean
+  roleArn: String
+  durationSeconds: Int
+  workloadIdentityProvider: String
+  serviceAccount: String
+  tenantId: String
+  clientId: String
+  authorityHost: String
+}
+
+type DevboxWorkloadIdentity {
+  "the OIDC issuer cloud accounts federate with"
+  issuerUrl: String!
+
+  "the sub claim of every token from this box"
+  subject: String!
+
+  "audiences the box can mint tokens for"
+  audiences: [String]
+
+  snippets: [DevboxTrustSnippet]
+}
+
+type DevboxTrustSnippet {
+  provider: DevboxCloudProvider!
+  format: DevboxSnippetFormat!
+  title: String!
+  content: String!
+}
+
+type DevboxAgent {
+  type: DevboxAgentType!
+
+  default: Boolean
+
+  adapterName: String
+
+  adapterVersion: String
+
+  protocolVersion: Int
+
+  acpV2: Boolean
+
+  capabilities: Map
+
+  modelSwitchable: Boolean
+
+  probeStatus: DevboxProbeStatus
+
+  probeError: String
+
+  commands: [DevboxCommand]
+
+  configOptions: [DevboxConfigOption]
+
+  sessionCapabilities: DevboxSessionCapabilities
+
+  "the models offered: probed values narrowed by the box's allowlist"
+  models: [DevboxModel]
+
+  "the model preselected when starting an instance"
+  defaultModel: String
+}
+
+type DevboxModel {
+  id: String!
+  name: String
+  description: String
+}
+
+type DevboxCommand {
+  name: String!
+  description: String
+  inputHint: String
+}
+
+type DevboxConfigOption {
+  "the ACP config option id"
+  configId: String!
+
+  name: String
+
+  description: String
+
+  "model, mode, thought_level, ..."
+  category: String
+
+  type: String
+
+  currentValue: String
+
+  options: [DevboxConfigOptionValue]
+}
+
+type DevboxConfigOptionValue {
+  value: String!
+  name: String
+  description: String
+  group: String
+}
+
+type DevboxSessionCapabilities {
+  list: Boolean
+  resume: Boolean
+  load: Boolean
+  close: Boolean
+  delete: Boolean
+  fork: Boolean
+}
+
+type DevboxHttpAllow {
+  host: String!
+  port: Int
+  passthrough: Boolean
+}
+
+type DevboxIdlePolicy {
+  activityWindow: Int
+  cpuThreshold: Float
+  gracePeriod: Int
+  maxDeferral: Int
+  maxContinuousAwake: Int
+  completeAfter: Int
+}
+
+type DevboxCondition {
+  type: String!
+  status: String!
+  reason: String
+  message: String
+}
+
+type DevboxProbeToken {
+  token: String!
+  expiresAt: DateTime!
+}
+
+type DevboxInstance {
+  id: ID!
+
+  name: String
+
+  agent: DevboxAgentType
+
+  requestedModel: String
+
+  repositories: [String]
+
+  "initial config option values, by config id"
+  configOptions: Map
+
+  maxRunningThreads: Int
+
+  status: DevboxInstanceStatus!
+
+  statusReason: String
+
+  templateRevision: String
+
+  imageDigest: String
+
+  "filesystem if the box's template changed since the snapshot, so the instance cold-boots"
+  restoreFidelity: DevboxSnapshotFidelity
+
+  "requires_action if any thread needs you"
+  foregroundState: DevboxForegroundState
+
+  runningThreads: Int
+
+  waitingThreads: Int
+
+  keepAwakeUntil: DateTime
+
+  awakeSince: DateTime
+
+  startedAt: DateTime
+
+  suspendedAt: DateTime
+
+  completedAt: DateTime
+
+  lastActivityAt: DateTime
+
+  agentConnections: [DevboxAgentConnection]
+
+  checkouts: [DevboxCheckout]
+
+  idleState: DevboxIdleState
+
+  viewerCount: Int
+
+  leases: [DevboxLease]
+
+  agentBilling: [DevboxAgentBilling]
+
+  workbench: Workbench
+
+  devbox: Devbox
+
+  snapshot: DevboxSnapshot
+
+  user: User
+
+  keepAwakeBy: User
+
+  threads(includeDeleted: Boolean): [DevboxThread]
+
+  interactions(pending: Boolean): [DevboxInteraction]
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type DevboxAgentConnection {
+  agent: DevboxAgentType
+
+  protocolVersion: Int
+
+  adapterName: String
+
+  adapterVersion: String
+
+  capabilities: Map
+
+  "proxy or subscription"
+  billing: String
+}
+
+type DevboxAgentBilling {
+  agent: DevboxAgentType
+  billing: DevboxBillingMode
+  credentialKind: String
+  allowCollaborators: Boolean
+}
+
+type DevboxStream {
+  streamId: String!
+
+  kind: DevboxStreamKind!
+
+  "the websocket to connect to"
+  url: String!
+
+  "a short-lived bearer token for the websocket"
+  token: String!
+
+  "connect before this"
+  expiresAt: DateTime
+
+  subprotocols: [String]
+
+  terminalId: String
+}
+
+type DevboxFileEntry {
+  path: String!
+
+  name: String
+
+  "file, directory, symlink or other"
+  type: String
+
+  size: Long
+
+  mode: Int
+
+  modifiedAt: DateTime
+
+  symlinkTarget: String
+
+  "the checkout containing the file"
+  repository: String
+
+  "the porcelain git status, e.g. \" M\" or \"??\""
+  gitStatus: String
+}
+
+type DevboxFile {
+  entry: DevboxFileEntry
+
+  "the text content, null for binary files"
+  content: String
+
+  "pass back as expectedSha256 when writing"
+  sha256: String
+
+  truncated: Boolean
+
+  mimeType: String
+
+  binary: Boolean
+}
+
+type DevboxFileWrite {
+  entry: DevboxFileEntry
+  sha256: String
+}
+
+type DevboxRepositoryChanges {
+  checkout: DevboxCheckout
+  baseRef: String
+  baseSha: String
+  additions: Int
+  deletions: Int
+  files: [DevboxFileChange]
+}
+
+type DevboxFileChange {
+  path: String!
+
+  oldPath: String
+
+  "added, modified, deleted, renamed, copied, untracked, conflicted or type_changed"
+  status: String
+
+  staged: Boolean
+
+  additions: Int
+
+  deletions: Int
+
+  binary: Boolean
+
+  diff: String
+
+  diffTruncated: Boolean
+}
+
+"A linked coding agent subscription.  The secret is write-only and never returned."
+type AgentCredential {
+  id: ID!
+  provider: AgentCredentialProvider!
+  kind: AgentCredentialKind!
+  label: String
+  status: AgentCredentialStatus!
+  version: Long
+  defaultBilling: Boolean
+  failureCount: Int
+  email: String
+  plan: String
+  linkedAt: DateTime
+  expiresAt: DateTime
+  lastRefreshedAt: DateTime
+  lastUsedAt: DateTime
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
+type DevboxCheckout {
+  path: String
+  name: String
+  remoteUrl: String
+  defaultBranch: String
+  branch: String
+  headSha: String
+  dirty: Boolean
+  worktreeThreadId: String
+  ahead: Int
+  behind: Int
+}
+
+type DevboxIdleState {
+  idle: Boolean
+  idleSince: DateTime
+  suspendsAt: DateTime
+  busyReasons: [Map]
+  message: String
+}
+
+type DevboxLease {
+  kind: DevboxLeaseKind!
+  expiresAt: DateTime!
+  holder: User
+}
+
+type DevboxSnapshot {
+  id: ID!
+  name: String
+  status: DevboxSnapshotStatus!
+  fidelity: DevboxSnapshotFidelity
+  sizeBytes: Long
+  error: String
+  templateRevision: String
+  workbench: Workbench
+  devbox: Devbox
+  instance: DevboxInstance
+  user: User
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
+"A top-level ACP session console knows about, or (as a subagent) one spawned by it"
+type DevboxThread {
+  id: ID!
+
+  "the ACP session id, unset while a waiting thread hasn't started"
+  sessionId: String
+
+  kind: DevboxThreadKind!
+
+  agent: DevboxAgentType
+
+  title: String
+
+  "the agent-owned title"
+  agentTitle: String
+
+  "the current model-category config value"
+  model: String
+
+  cwd: String
+
+  worktreeRepos: [String]
+
+  status: DevboxThreadStatus!
+
+  imported: Boolean
+
+  lastActivityAt: DateTime
+
+  entityCount: Int
+
+  foregroundState: DevboxForegroundState
+
+  stopReason: String
+
+  error: Map
+
+  backgroundWork: Map
+
+  billing: String
+
+  revision: Int
+
+  configOptions: [DevboxConfigOption]
+
+  availableCommands: [DevboxCommand]
+
+  usage: DevboxUsage
+
+  instance: DevboxInstance
+
+  parent: DevboxThread
+
+  user: User
+
+  "subagent sessions spawned by this one"
+  subagents: [DevboxThread]
+
+  interactions: [DevboxInteraction]
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type DevboxUsage {
+  inputTokens: Int
+  outputTokens: Int
+  cachedTokens: Int
+  reasoningTokens: Int
+  totalTokens: Int
+  contextSize: Int
+  contextUsed: Int
+  totalCost: Float
+  currency: String
+}
+
+"A permission request or elicitation from an agent"
+type DevboxInteraction {
+  id: ID!
+
+  "the daemon-allocated interaction id"
+  externalId: String!
+
+  "set when scoped to a tool call (render it inline)"
+  toolCallId: String
+
+  kind: DevboxInteractionKind!
+
+  state: DevboxInteractionState!
+
+  title: String
+
+  message: String
+
+  "json schema for a form elicitation"
+  requestedSchema: Map
+
+  "the url of a url elicitation"
+  url: String
+
+  options: [DevboxPermissionOption]
+
+  response: Map
+
+  answeredAt: DateTime
+
+  expiresAt: DateTime
+
+  instance: DevboxInstance
+
+  thread: DevboxThread
+
+  answeredBy: User
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type DevboxPermissionOption {
+  optionId: String!
+
+  name: String
+
+  "allow_once, allow_always, reject_once or reject_always"
+  kind: String
+}
+
+type DevboxImportableSession {
+  agent: DevboxAgentType
+  sessionId: String!
+  title: String
+  cwd: String
+  updatedAt: DateTime
+}
+
+type DevboxSessionSummary {
+  sessionId: String
+  threadId: String
+  kind: DevboxThreadKind
+  parentSessionId: String
+  agent: DevboxAgentType
+  title: String
+  status: DevboxThreadStatus
+  foregroundState: DevboxForegroundState
+  lastActivityAt: DateTime
+}
+
+type DevboxRepository {
+  path: String
+  name: String
+  remoteUrl: String
+  defaultBranch: String
+  branch: String
+  headSha: String
+  dirty: Boolean
+  worktreeThreadId: String
+  ahead: Int
+  behind: Int
+}
+
+"A page of a session's transcript, served by the box: settled entities merged with in-flight state"
+type DevboxTimeline {
+  entities: [DevboxEntity]
+
+  "apply live deltas with a greater offset on top of this page"
+  deltaOffset: Long
+
+  "more entities lie in the paging direction (older ones, unless paging with after)"
+  hasMore: Boolean
+}
+
+"An ACP transcript entity, with a typed view for its type and the verbatim ACP JSON in `raw`"
+type DevboxEntity {
+  id: String
+
+  sessionId: String
+
+  type: DevboxEntityType!
+
+  position: Long
+
+  revision: Long
+
+  settled: Boolean
+
+  createdAt: DateTime
+
+  updatedAt: DateTime
+
+  raw: Map
+
+  "for user_message, agent_message and agent_thought"
+  message: DevboxMessageEntity
+
+  "a message between sessions (e.g. to a subagent)"
+  sessionMessage: DevboxSessionMessageEntity
+
+  toolCall: DevboxToolCall
+
+  plan: DevboxPlan
+
+  terminal: DevboxTerminal
+
+  compaction: DevboxCompaction
+}
+
+type DevboxMessageEntity {
+  messageId: String
+  content: [DevboxContentBlock]
+  promptId: String
+  sentById: String
+  meta: Map
+}
+
+type DevboxSessionMessageEntity {
+  messageId: String
+  fromSessionId: String
+  toSessionId: String
+  content: [DevboxContentBlock]
+  meta: Map
+}
+
+union DevboxContentBlock = DevboxTextContent | DevboxImageContent | DevboxAudioContent | DevboxResourceContent | DevboxResourceLinkContent | DevboxUnknownContent
+
+type DevboxTextContent {
+  type: DevboxContentBlockType!
+  text: String
+  annotations: Map
+}
+
+type DevboxImageContent {
+  type: DevboxContentBlockType!
+  data: String
+  mimeType: String
+  uri: String
+}
+
+type DevboxAudioContent {
+  type: DevboxContentBlockType!
+  data: String
+  mimeType: String
+}
+
+type DevboxResourceContent {
+  type: DevboxContentBlockType!
+  uri: String
+  mimeType: String
+  text: String
+  blob: String
+}
+
+type DevboxResourceLinkContent {
+  type: DevboxContentBlockType!
+  uri: String
+  name: String
+  title: String
+  description: String
+  mimeType: String
+  size: Long
+}
+
+type DevboxUnknownContent {
+  type: DevboxContentBlockType!
+
+  "the unrecognized ACP type"
+  variant: String
+
+  raw: Map
+}
+
+type DevboxToolCall {
+  toolCallId: String
+
+  title: String
+
+  "read, edit, delete, move, search, execute, think, fetch, other, ..."
+  kind: String
+
+  "pending, in_progress, completed or failed"
+  status: String
+
+  content: [DevboxToolCallContent]
+
+  locations: [DevboxToolCallLocation]
+
+  rawInput: Map
+
+  rawOutput: Map
+
+  meta: Map
+}
+
+union DevboxToolCallContent = DevboxToolCallBlock | DevboxToolCallDiff | DevboxToolCallTerminal | DevboxToolCallUnknown
+
+type DevboxToolCallBlock {
+  type: DevboxToolCallContentType!
+  content: DevboxContentBlock
+}
+
+type DevboxToolCallDiff {
+  type: DevboxToolCallContentType!
+  path: String
+  oldText: String
+  newText: String
+}
+
+type DevboxToolCallTerminal {
+  type: DevboxToolCallContentType!
+  terminalId: String
+}
+
+type DevboxToolCallUnknown {
+  type: DevboxToolCallContentType!
+  variant: String
+  raw: Map
+}
+
+type DevboxToolCallLocation {
+  path: String
+  line: Int
+}
+
+type DevboxPlan {
+  planId: String
+  entries: [DevboxPlanEntry]
+  meta: Map
+}
+
+type DevboxPlanEntry {
+  content: String
+
+  "high, medium or low"
+  priority: String
+
+  "pending, in_progress or completed"
+  status: String
+}
+
+type DevboxTerminal {
+  terminalId: String
+  command: String
+  args: [String]
+  cwd: String
+  output: String
+  truncated: Boolean
+  exitCode: Int
+  signal: String
+  meta: Map
+}
+
+type DevboxCompaction {
+  compactionId: String
+  status: String
+  summary: [DevboxContentBlock]
+  meta: Map
+}
+
+"A live entity change, never stored"
+type DevboxEntityChange {
+  instanceId: ID!
+
+  sessionId: String
+
+  threadId: String
+
+  entityType: DevboxEntityType
+
+  entityId: String
+
+  position: Long
+
+  op: DevboxDeltaOp!
+
+  "for state deltas, which ACP update this is"
+  stateKind: String
+
+  "the verbatim ACP chunk, patch, notice or state update"
+  payload: Map
+
+  "for settle deltas, the final entity"
+  entity: DevboxEntity
+
+  offset: Long
+
+  emittedAt: DateTime
+}
+
+"The index rows an UpsertInstanceIndex call changed (revision and foreground state only when the instance aggregate changed)"
+type DevboxIndexChange {
+  instanceId: ID!
+  revision: Long
+  foregroundState: DevboxForegroundState
+  threads: [DevboxThread]
+  interactions: [DevboxInteraction]
+}
+
+type DevboxConnection {
+  pageInfo: PageInfo!
+  edges: [DevboxEdge]
+}
+
+type DevboxInstanceConnection {
+  pageInfo: PageInfo!
+  edges: [DevboxInstanceEdge]
+}
+
+type DevboxSnapshotConnection {
+  pageInfo: PageInfo!
+  edges: [DevboxSnapshotEdge]
+}
+
+type DevboxInstanceDelta {
+  delta: Delta
+  payload: DevboxInstance
+}
+
+type DevboxThreadDelta {
+  delta: Delta
+  payload: DevboxThread
+}
+
+type DevboxSnapshotDelta {
+  delta: Delta
+  payload: DevboxSnapshot
+}
+
+type DevboxEntityChangeDelta {
+  delta: Delta
+  payload: DevboxEntityChange
+}
+
+type DevboxIndexChangeDelta {
+  delta: Delta
+  payload: DevboxIndexChange
 }
 
 enum ChatProviderConnectionType {
@@ -3396,6 +4989,20 @@ input WorkbenchConfigurationAttributes {
 
   "observability capabilities (logs, metrics)"
   observability: WorkbenchObservabilityAttributes
+
+  "limits for devbox instances started from this workbench"
+  devbox: WorkbenchDevboxConfigAttributes
+}
+
+input WorkbenchDevboxConfigAttributes {
+  "the most ready snapshots to keep, the oldest are deleted beyond it"
+  maxSnapshots: Int
+
+  "lowers the boxes' maxDeferral (in seconds) for keep-awake requests"
+  maxDeferral: Int
+
+  "let users bill devbox agents to their own linked subscriptions instead of the AI proxy (default off)"
+  allowSubscriptionCredentials: Boolean
 }
 
 input WorkbenchInfrastructureAttributes {
@@ -4438,6 +6045,30 @@ type Workbench {
 
   crons(after: String, first: Int, before: String, last: Int): WorkbenchCronConnection
 
+  "the devboxes attached to this workbench"
+  devboxes: [Devbox]
+
+  devboxInstances(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    "filter instances by status"
+    statuses: [DevboxInstanceStatus]
+
+    "only show instances you started"
+    mine: Boolean
+  ): DevboxInstanceConnection
+
+  devboxSnapshots(after: String, first: Int, before: String, last: Int): DevboxSnapshotConnection
+
+  "pending devbox permission requests and elicitations across this workbench's instances"
+  devboxInbox: [DevboxInteraction]
+
   prompts(after: String, first: Int, before: String, last: Int): WorkbenchPromptConnection
 
   workbenchSkills(after: String, first: Int, before: String, last: Int): WorkbenchSkillConnection
@@ -5197,6 +6828,20 @@ type WorkbenchConfiguration {
 
   "observability capabilities"
   observability: WorkbenchObservability
+
+  "limits for devbox instances"
+  devbox: WorkbenchDevboxConfig
+}
+
+type WorkbenchDevboxConfig {
+  "the most ready snapshots kept for this workbench"
+  maxSnapshots: Int
+
+  "the longest keep-awake deferral (in seconds) allowed from this workbench"
+  maxDeferral: Int
+
+  "whether devbox agents may bill to their owner's linked subscription"
+  allowSubscriptionCredentials: Boolean
 }
 
 type WorkbenchInfrastructure {
@@ -16876,6 +18521,21 @@ type PullRequest {
   "the service this pr is meant to modify"
   service: ServiceDeployment
 
+  "how a devbox pr was recorded: through the devbox mcp, or observed at egress"
+  source: PullRequestSource
+
+  "devbox attribution details, e.g. the subagent session and tool call that created it"
+  metadata: Map
+
+  "the devbox this pr was created from"
+  devbox: Devbox
+
+  "the devbox instance this pr was created from"
+  devboxInstance: DevboxInstance
+
+  "the devbox thread this pr was created from"
+  devboxThread: DevboxThread
+
   insertedAt: DateTime
 
   updatedAt: DateTime
@@ -19855,5 +21515,20 @@ type IssueWebhookEdge {
 
 type ChatProviderConnectionEdge {
   node: ChatProviderConnection
+  cursor: String
+}
+
+type DevboxSnapshotEdge {
+  node: DevboxSnapshot
+  cursor: String
+}
+
+type DevboxInstanceEdge {
+  node: DevboxInstance
+  cursor: String
+}
+
+type DevboxEdge {
+  node: Devbox
   cursor: String
 }

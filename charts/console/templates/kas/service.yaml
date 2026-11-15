@@ -31,6 +31,15 @@ spec:
       {{- else if and .Values.gatewayApi.enabled .Values.gatewayApi.appProtocol }}
       appProtocol: {{ .Values.gatewayApi.appProtocol | quote }}
       {{- end }}
+    {{- if .Values.kas.devbox.enabled }}
+    - port: {{ .Values.kas.service.devboxPort }}
+      targetPort: {{ .Values.kas.service.devboxPort }}
+      protocol: TCP
+      name: tcp-{{ include "kas.name" . }}-devbox
+      {{- if and .Values.gatewayApi.enabled .Values.gatewayApi.appProtocol }}
+      appProtocol: {{ .Values.gatewayApi.appProtocol | quote }}
+      {{- end }}
+    {{- end }}
     - port: {{ .Values.kas.api.port }}
       targetPort: {{ .Values.kas.api.port }}
       protocol: TCP

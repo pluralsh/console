@@ -1,0 +1,261 @@
+{{- $ns := include "substrate.namespace" . -}}
+{{- $v := .Values.apiServer -}}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ate-api-server
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+  {{- with $v.serviceAccount.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: ate-api-server
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "watch", "list"]
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["get"]
+  - apiGroups: ["ate.dev"]
+    resources: ["workerpools", "csidriverconfigs"]
+    verbs: ["get", "watch", "list"]
+  - apiGroups: ["storage.k8s.io"]
+    resources: ["storageclasses"]
+    verbs: ["get", "watch", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ate-api-server
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+subjects:
+  - kind: ServiceAccount
+    name: ate-api-server
+    namespace: {{ $ns }}
+roleRef:
+  kind: ClusterRole
+  name: ate-api-server
+  apiGroup: rbac.authorization.k8s.io
+{{- if $v.pdb.enabled }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: ate-api-server
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: ate-api-server
+{{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+spec:
+  clusterIP: None
+  ipFamilyPolicy: PreferDualStack
+  selector:
+    app: ate-api-server
+  ports:
+    - name: grpc
+      protocol: TCP
+      port: 443
+      targetPort: 443
+    - name: exchange
+      protocol: TCP
+      port: 8445
+      targetPort: 8445
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ate-api-server
+  namespace: {{ $ns }}
+  labels:
+    app: ate-api-server
+    {{- include "substrate.labels" . | nindent 4 }}
+spec:
+  replicas: {{ $v.replicas }}
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: ate-api-server
+  template:
+    metadata:
+      labels:
+        app: ate-api-server
+        {{- include "substrate.systemInfraPodLabels" . | nindent 8 }}
+        {{- with $v.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+        checksum/api-config: {{ include "substrate.checksum" (list . "api-server-config.yaml") }}
+        checksum/otel-config: {{ include "substrate.checksum" (list . "otel-config.yaml") }}
+        checksum/authentication: {{ printf "%s|%s" .Values.auth.expectedJWTIssuer (include "substrate.namespace" .) | sha256sum }}
+        {{- with $v.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: ate-api-server
+      terminationGracePeriodSeconds: 40
+      {{- include "substrate.imagePullSecrets" . | nindent 6 }}
+      {{- include "substrate.systemInfraScheduling" . | nindent 6 }}
+      initContainers:
+        {{- include "substrate.objectstoreSidecar" (dict "ctx" . "mode" "control") | nindent 8 }}
+      containers:
+        - name: ate-api-server
+          image: {{ include "substrate.image" (dict "ctx" . "key" "ateapi" "name" "ateapi") }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - --grpc-server-cred-bundle=/run/servicedns.podcert.ate.dev/credential-bundle.pem
+            - --config-file=/run/apiconfig.ate.dev/apiconfig.textproto
+            - --authentication-config=/etc/ateapi/authentication/authentication.yaml
+            - --postgres-read-write-connection-string=@env
+            - --postgres-owner-connection-string=@env
+            - --postgres-read-write-role=@env
+            - --postgres-owner-role=@env
+            - --postgres-schema=@env
+            - --actor-id-jwt-pool=/run/actor-id-jwt-pool/pool.json
+            - --actor-jwt-issuer=@env
+            - --actor-id-ca-pool=/run/actor-id-ca-pool/pool.json
+            - --atelet-client-cred-bundle=/run/podidentity.podcert.ate.dev/credential-bundle.pem
+            - --pod-identity-ca-certs=/run/podidentity.podcert.ate.dev/trust-bundle.pem
+            - --default-egress-gateway-address=atenet-egress.{{ $ns }}.svc:443
+            - --drain-delay=13s
+            - --drain-timeout=15s
+            - --objectstore-plugin-socket=/run/objectstore-plugin/control.sock
+            {{- if include "substrate.snapshotLocation" . }}
+            - --snapshot-location=@env
+            {{- end }}
+            - --authz-bootstrap-owners={{ include "substrate.bootstrapOwners" . }}
+            {{- with (include "substrate.devboxes" . | fromJson).egressGatewayExtraSPIFFEIDs }}
+            - --egress-gateway-spiffe-id={{ include "substrate.spiffeID" (list $ns "atenet-egress") }}
+            {{- range . }}
+            - --egress-gateway-spiffe-id={{ . }}
+            {{- end }}
+            {{- end }}
+            - {{ include "substrate.previewArg" . }}
+            {{- with $v.extraArgs }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            capabilities:
+              add:
+                - NET_BIND_SERVICE
+              drop:
+                - ALL
+          env:
+            {{- include "substrate.podEnv" . | nindent 12 }}
+            {{- include "substrate.postgres.env" . | nindent 12 }}
+            {{- with $v.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          envFrom:
+            - configMapRef:
+                name: ate-otel-config
+            - configMapRef:
+                name: ate-api-server-envvars
+          {{- with $v.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: objectstore-plugin
+              mountPath: /run/objectstore-plugin
+            - name: servicedns
+              mountPath: /run/servicedns.podcert.ate.dev
+            - name: podidentity
+              mountPath: /run/podidentity.podcert.ate.dev
+            - name: actor-id-jwt-pool
+              mountPath: /run/actor-id-jwt-pool
+            - name: actor-id-ca-pool
+              mountPath: /run/actor-id-ca-pool
+              readOnly: true
+            - name: api-config
+              mountPath: /run/apiconfig.ate.dev
+              readOnly: true
+            - name: authentication-config
+              mountPath: /etc/ateapi/authentication
+              readOnly: true
+            - name: postgres-server-ca
+              mountPath: /run/postgres-server-ca
+              readOnly: true
+          ports:
+            - containerPort: 443
+            - name: prometheus
+              containerPort: 9090
+            - name: health
+              containerPort: 9091
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: health
+            initialDelaySeconds: 5
+            periodSeconds: 2
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: health
+            periodSeconds: 5
+            failureThreshold: 24
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: health
+            initialDelaySeconds: 10
+            periodSeconds: 10
+      volumes:
+        - name: objectstore-plugin
+          emptyDir: {}
+        {{- include "substrate.podCertVolume" (dict "name" "servicedns" "signer" "servicedns" "ca" true) | nindent 8 }}
+        {{- include "substrate.podCertVolume" (dict "name" "podidentity" "signer" "podidentity" "ca" true) | nindent 8 }}
+        - name: actor-id-jwt-pool
+          projected:
+            sources:
+              - secret:
+                  name: actor-id-jwt-pool
+                  items:
+                    - key: pool
+                      path: pool.json
+        - name: actor-id-ca-pool
+          projected:
+            sources:
+              - secret:
+                  name: actor-id-ca-pool
+                  items:
+                    - key: pool
+                      path: pool.json
+        - name: api-config
+          configMap:
+            name: ate-api-config
+        - name: authentication-config
+          configMap:
+            name: ate-api-authentication
+        {{- include "substrate.postgres.serverCAVolume" . | nindent 8 }}
+        {{- include "substrate.azureTokenVolume" . | nindent 8 }}

@@ -25,7 +25,13 @@ defmodule Console.Deployments.Policies do
     WorkbenchJob,
     Flow,
     FlowWorkbench,
-    WorkbenchJobActivity
+    WorkbenchJobActivity,
+    Devbox,
+    DevboxInstance,
+    DevboxInstanceSession,
+    DevboxInstanceInteraction,
+    DevboxSnapshot,
+    WorkbenchDevbox
   }
 
   def can?(%User{bootstrap: %BootstrapToken{}} = user, res, action), do: BootstrapPolicies.can?(user, res, action)
@@ -86,6 +92,28 @@ defmodule Console.Deployments.Policies do
   end
 
   def can?(%User{id: id}, %AgentRun{user_id: id}, _), do: :pass
+
+  def can?(%Cluster{id: id}, %Devbox{cluster_id: id}, _), do: :pass
+  def can?(%Cluster{id: id}, %DevboxInstance{} = inst, _) do
+    case Repo.preload(inst, [:devbox]) do
+      %DevboxInstance{devbox: %Devbox{cluster_id: ^id}} -> :pass
+      _ -> {:error, "clusters can only access instances of their own devboxes"}
+    end
+  end
+  def can?(%Cluster{}, %Devbox{}, _), do: {:error, "clusters can only access their own devboxes"}
+  def can?(user, %DevboxInstance{} = inst, action) when action in ~w(create pr prompt keep_awake)a,
+    do: can?(user, inst, :read)
+  def can?(%User{id: id}, %DevboxInstance{user_id: id}, :cancel), do: :pass
+  def can?(user, %DevboxInstance{} = inst, :cancel), do: can?(user, inst, :write)
+  def can?(user, %DevboxSnapshot{} = snap, :create), do: can?(user, snap, :read)
+  def can?(%User{id: id}, %DevboxSnapshot{user_id: id}, :delete), do: :pass
+  def can?(user, %DevboxInstanceSession{} = thread, action) when action in ~w(create prompt)a,
+    do: can?(user, thread, :read)
+  def can?(%User{id: id}, %DevboxInstanceSession{user_id: id}, :delete), do: :pass
+  def can?(user, %DevboxInstanceInteraction{} = i, :respond), do: can?(user, i, :read)
+  def can?(user, %struct{} = res, :delete)
+    when struct in [Devbox, DevboxInstanceSession, DevboxInstanceInteraction, DevboxSnapshot, WorkbenchDevbox],
+    do: can?(user, res, :write)
 
   def can?(%Cluster{id: id}, %ClusterRestore{} = restore, :read) do
     case Repo.preload(restore, [:backup]) do

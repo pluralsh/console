@@ -1,0 +1,5 @@
+#!/bin/sh
+# Loads the daemon's identity environment (AWS_ROLE_ARN, AWS_WEB_IDENTITY_TOKEN_FILE,
+# AWS_ROLE_SESSION_NAME) so the CLI assumes the box's role from the federated token.
+. /usr/local/lib/devbox/devbox.sh
+exec /usr/local/aws-cli/bin/aws "$@"

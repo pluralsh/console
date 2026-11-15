@@ -3443,6 +3443,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@novnc/novnc@npm:1.4.0":
+  version: 1.4.0
+  resolution: "@novnc/novnc@npm:1.4.0"
+  checksum: 10/886d6ac457973fd08b803e5b583078e3e49169292c2c856e24262169e186c4eaae7048d61f42e5bd50de979a271fe059b403a5c443f383e0e91a65ff56b357f8
+  languageName: node
+  linkType: hard
+
 "@open-draft/until@npm:2.1.0":
   version: 2.1.0
   resolution: "@open-draft/until@npm:2.1.0"
@@ -5820,6 +5827,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/novnc__novnc@npm:1.6.0":
+  version: 1.6.0
+  resolution: "@types/novnc__novnc@npm:1.6.0"
+  checksum: 10/70582737f2c1e42163f65e42ed68577d7ea2cf27040c4fd0fb974812016c31c30e52713f6c91eaa5a05c7cb1c63f7d5dbb85ef9c6d2ed35c2d6101083a9005c0
+  languageName: node
+  linkType: hard
+
 "@types/parse-json@npm:^4.0.0":
   version: 4.0.2
   resolution: "@types/parse-json@npm:4.0.2"
@@ -7232,6 +7246,7 @@ __metadata:
     "@nivo/theming": "npm:0.99.0"
     "@nivo/tooltip": "npm:0.99.0"
     "@nivo/treemap": "npm:0.99.0"
+    "@novnc/novnc": "npm:1.4.0"
     "@pluralsh/design-system": "workspace:*"
     "@react-hooks-library/core": "npm:0.6.2"
     "@react-spring/web": "npm:10.1.2"
@@ -7248,6 +7263,7 @@ __metadata:
     "@types/ejs": "npm:3.1.5"
     "@types/lodash": "npm:4.17.26"
     "@types/node": "npm:26.6.5"
+    "@types/novnc__novnc": "npm:1.6.0"
     "@types/react": "npm:19.3.0"
     "@types/react-dom": "npm:19.3.0"
     "@vitejs/plugin-basic-ssl": "npm:2.3.0"

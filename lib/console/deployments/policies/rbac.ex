@@ -63,6 +63,12 @@ defmodule Console.Deployments.Policies.Rbac do
     WorkbenchEvalResult,
     WorkbenchWebhook,
     WorkbenchChatbot,
+    WorkbenchDevbox,
+    Devbox,
+    DevboxInstance,
+    DevboxInstanceSession,
+    DevboxInstanceInteraction,
+    DevboxSnapshot,
     IssueWebhook,
     ObservabilityWebhook,
     Monitor,
@@ -189,6 +195,18 @@ defmodule Console.Deployments.Policies.Rbac do
     do: recurse(webhook, user, action, & &1.workbench)
   def evaluate(%WorkbenchChatbot{} = chatbot, user, action),
     do: recurse(chatbot, user, action, & &1.workbench)
+  def evaluate(%Devbox{} = devbox, %User{} = user, action),
+    do: recurse(devbox, user, action, fn _ -> Settings.fetch() end)
+  def evaluate(%WorkbenchDevbox{} = wd, user, action),
+    do: recurse(wd, user, action, & &1.workbench)
+  def evaluate(%DevboxInstance{} = inst, user, action),
+    do: recurse(inst, user, action, & &1.workbench)
+  def evaluate(%DevboxSnapshot{} = snapshot, user, action),
+    do: recurse(snapshot, user, action, & &1.workbench)
+  def evaluate(%DevboxInstanceSession{} = session, user, action),
+    do: recurse(session, user, action, & &1.instance)
+  def evaluate(%DevboxInstanceInteraction{} = interaction, user, action),
+    do: recurse(interaction, user, action, & &1.instance)
   def evaluate(%Monitor{} = monitor, %User{} = user, action),
     do: recurse(monitor, user, action, &(&1.service || &1.workbench))
   def evaluate(%Dashboard{} = dashboard, %User{} = user, action),
@@ -421,6 +439,16 @@ defmodule Console.Deployments.Policies.Rbac do
     do: Repo.preload(webhook, [workbench: [:read_bindings, :write_bindings, project: @bindings]])
   def preload(%WorkbenchChatbot{} = chatbot),
     do: Repo.preload(chatbot, [workbench: [:read_bindings, :write_bindings, project: @bindings]])
+  def preload(%WorkbenchDevbox{} = wd),
+    do: Repo.preload(wd, [workbench: [:read_bindings, :write_bindings, project: @bindings]])
+  def preload(%DevboxInstance{} = inst),
+    do: Repo.preload(inst, [workbench: [:read_bindings, :write_bindings, project: @bindings]])
+  def preload(%DevboxSnapshot{} = snapshot),
+    do: Repo.preload(snapshot, [workbench: [:read_bindings, :write_bindings, project: @bindings]])
+  def preload(%DevboxInstanceSession{} = session),
+    do: Repo.preload(session, [instance: [workbench: [:read_bindings, :write_bindings, project: @bindings]]])
+  def preload(%DevboxInstanceInteraction{} = interaction),
+    do: Repo.preload(interaction, [instance: [workbench: [:read_bindings, :write_bindings, project: @bindings]]])
   def preload(%ObservabilityWebhook{} = webhook),
     do: Repo.preload(webhook, [:read_bindings, :write_bindings])
   def preload(%IssueWebhook{} = webhook),

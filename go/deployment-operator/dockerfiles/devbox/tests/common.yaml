@@ -1,0 +1,260 @@
+# Image contract v1 and devbox-minimal contents. Applies to devbox-minimal,
+# devbox-fat and custom images built FROM them.
+schemaVersion: 2.0.0
+
+metadataTest:
+  labels:
+    - key: sh.plural.devbox/contract
+      value: v1
+    - key: sh.plural.devbox/daemon-version
+      value: ".+"
+      isRegex: true
+  entrypoint: ["/usr/local/bin/devbox-daemon"]
+  workdir: /home/dev
+  exposedPorts: ["80"]
+  envVars:
+    - key: HOME
+      value: /home/dev
+    - key: USER
+      value: dev
+    - key: DEVBOX_CONTRACT
+      value: v1
+    - key: DEVBOX_SKEL_DIR
+      value: /etc/devbox/skel
+    - key: DEVBOX_TRUST_DIR
+      value: /var/lib/devbox/trust
+    - key: DEVBOX_IDENTITY_DIR
+      value: /run/plural/identity
+    - key: DEVBOX_CHROMIUM
+      value: /usr/bin/chromium
+    - key: DISPLAY
+      value: ":99"
+    - key: SSL_CERT_FILE
+      value: /var/lib/devbox/trust/ca-bundle.pem
+    - key: NODE_EXTRA_CA_CERTS
+      value: /var/lib/devbox/trust/ca-bundle.pem
+    - key: REQUESTS_CA_BUNDLE
+      value: /var/lib/devbox/trust/ca-bundle.pem
+    - key: CURL_CA_BUNDLE
+      value: /var/lib/devbox/trust/ca-bundle.pem
+    - key: GIT_SSL_CAINFO
+      value: /var/lib/devbox/trust/ca-bundle.pem
+    - key: PIP_CERT
+      value: /var/lib/devbox/trust/ca-bundle.pem
+    - key: AWS_CA_BUNDLE
+      value: /var/lib/devbox/trust/ca-bundle.pem
+    - key: CARGO_HTTP_CAINFO
+      value: /var/lib/devbox/trust/ca-bundle.pem
+    - key: CLOUDSDK_CORE_CUSTOM_CA_CERTS_FILE
+      value: /var/lib/devbox/trust/ca-bundle.pem
+    - key: PATH
+      value: "^/home/dev/.local/share/mise/shims:/home/dev/.local/bin:"
+      isRegex: true
+
+fileExistenceTests:
+  - name: devbox-daemon
+    path: /usr/local/bin/devbox-daemon
+    shouldExist: true
+    permissions: "-rwxr-xr-x"
+  - name: skel .bashrc
+    path: /etc/devbox/skel/.bashrc
+    shouldExist: true
+  - name: skel .zshrc
+    path: /etc/devbox/skel/.zshrc
+    shouldExist: true
+  - name: skel .profile
+    path: /etc/devbox/skel/.profile
+    shouldExist: true
+  - name: skel .gitconfig
+    path: /etc/devbox/skel/.gitconfig
+    shouldExist: true
+  - name: skel .tmux.conf
+    path: /etc/devbox/skel/.tmux.conf
+    shouldExist: true
+  - name: image manifest
+    path: /etc/devbox/image.json
+    shouldExist: true
+  - name: trust dir owned by dev
+    path: /var/lib/devbox/trust
+    shouldExist: true
+    uid: 1000
+    gid: 1000
+  - name: identity dir owned by dev
+    path: /run/plural/identity
+    shouldExist: true
+    uid: 1000
+    gid: 1000
+  - name: agent-auth dir private to dev
+    path: /run/plural/agent-auth
+    shouldExist: true
+    uid: 1000
+    permissions: "drwx------"
+  - name: X11 socket dir
+    path: /tmp/.X11-unix
+    shouldExist: true
+    permissions: "dtrwxrwxrwx"
+  - name: sudoers
+    path: /etc/sudoers.d/dev
+    shouldExist: true
+    permissions: "-r--r-----"
+  - name: pi MCP adapter
+    path: /opt/pi-mcp-adapter/node_modules/pi-mcp-adapter/package.json
+    shouldExist: true
+  - name: no agent-harness binary
+    path: /agent-harness
+    shouldExist: false
+  - name: no agent-mcpserver binary
+    path: /agent-mcpserver
+    shouldExist: false
+  - name: no agent-run prompt templates
+    path: /plural/system
+    shouldExist: false
+  - name: no podman store
+    path: /etc/containers
+    shouldExist: false
+
+# container-structure-test expands $VAR in arguments with the image environment
+# before the command runs, so these scripts avoid shell variables. Go regexps
+# need (?m) for ^ and $ to match around the trailing newline.
+commandTests:
+  - name: dev is UID 1000 with home /home/dev
+    command: getent
+    args: ["passwd", "dev"]
+    expectedOutput: ["(?m)^dev:x:1000:1000::/home/dev:/bin/bash$"]
+  - name: runs as dev
+    command: id
+    args: ["-un"]
+    expectedOutput: ["(?m)^dev$"]
+  - name: home directory is empty in the image
+    command: sh
+    args: ["-c", "find /home/dev -mindepth 1 | wc -l"]
+    expectedOutput: ["(?m)^0$"]
+  - name: passwordless sudo
+    command: sudo
+    args: ["-n", "true"]
+    exitCode: 0
+  - name: sudo keeps the trust environment
+    command: sudo
+    args: ["-n", "env"]
+    expectedOutput:
+      - "(?m)^SSL_CERT_FILE=/var/lib/devbox/trust/ca-bundle.pem$"
+      - "(?m)^NODE_EXTRA_CA_CERTS=/var/lib/devbox/trust/ca-bundle.pem$"
+  - name: trust bundle is writable and resolves to system CAs by default
+    command: sh
+    args: ["-c", "test -w /var/lib/devbox/trust && test -s /var/lib/devbox/trust/ca-bundle.pem && readlink /var/lib/devbox/trust/ca-bundle.pem"]
+    expectedOutput: ["(?m)^/etc/ssl/certs/ca-certificates.crt$"]
+  - name: run dirs writable by dev
+    command: sh
+    args: ["-c", "touch /run/plural/identity/.t /run/plural/agent-auth/.t && echo ok"]
+    expectedOutput: ["(?m)^ok$"]
+  - name: identity env is loaded by the shell helper
+    command: sh
+    args: ["-c", "printf 'DEVBOX_TEST_ROLE=arn:aws:iam::1:role/x\\nGOOGLE_APPLICATION_CREDENTIALS=/run/plural/identity/gcp/config.json\\n' > /run/plural/identity/env && . /usr/local/lib/devbox/devbox.sh && env"]
+    expectedOutput:
+      - "(?m)^DEVBOX_TEST_ROLE=arn:aws:iam::1:role/x$"
+      - "(?m)^CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE=/run/plural/identity/gcp/config.json$"
+  - name: manifest declares contract v1
+    command: jq
+    args: ["-r", ".contract", "/etc/devbox/image.json"]
+    expectedOutput: ["(?m)^v1$"]
+  - name: manifest names the Playwright MCP command
+    command: sh
+    args: ["-c", "jq -r .playwrightMcp /etc/devbox/image.json | xargs which"]
+    expectedOutput: ["(?m)^/usr/local/bin/playwright-mcp$"]
+  - name: manifest agent and ACP commands exist
+    command: sh
+    args: ["-c", "jq -r '.agents[] | .command, .acp.command' /etc/devbox/image.json | sort -u | xargs which"]
+    exitCode: 0
+  - name: manifest lists every agent
+    command: jq
+    args: ["-r", ".agents | keys | join(\",\")", "/etc/devbox/image.json"]
+    expectedOutput: ["(?m)^claude,codex,gemini,opencode,pi$"]
+
+  # Harnesses and ACP adapters (versions match the agent-run images).
+  - name: node
+    command: node
+    args: ["--version"]
+    expectedOutput: ["(?m)^v24\\."]
+  - name: claude
+    command: claude
+    args: ["--version"]
+    expectedOutput: ["2\\.1\\.236"]
+  - name: claude-agent-acp
+    command: claude-agent-acp
+    args: ["--version"]
+    expectedOutput: ["0\\.75\\.1"]
+  - name: codex
+    command: codex
+    args: ["--version"]
+    expectedOutput: ["0\\.153\\.4"]
+  - name: codex-acp
+    command: codex-acp
+    args: ["--version"]
+    expectedOutput: ["1\\.10\\.0"]
+  - name: opencode
+    command: opencode
+    args: ["--version"]
+    expectedOutput: ["1\\.18\\.23"]
+  - name: gemini
+    command: gemini
+    args: ["--version"]
+    expectedOutput: ["0\\.44\\.1"]
+  - name: pi
+    command: pi
+    args: ["--version"]
+    expectedOutput: ["0\\.84\\.1"]
+  - name: pi-acp (a stdio server with no --version output)
+    command: jq
+    args: ["-r", ".version", "/usr/local/lib/node_modules/pi-acp/package.json"]
+    expectedOutput: ["(?m)^0\\.0\\.33$"]
+  - name: playwright-mcp
+    command: playwright-mcp
+    args: ["--version"]
+    expectedOutput: ["0\\.0\\.85"]
+  - name: harness launchers use the image's Node, not mise shims
+    command: sh
+    args: ["-c", "head -q -n1 /usr/local/bin/claude-agent-acp /usr/local/bin/codex-acp /usr/local/bin/gemini /usr/local/bin/pi /usr/local/bin/pi-acp /usr/local/bin/playwright-mcp"]
+    excludedOutput: ["/usr/bin/env node"]
+
+  # Browser stack.
+  - name: chromium
+    command: chromium
+    args: ["--version"]
+    expectedOutput: ["Chromium \\d+"]
+  - name: chromium headless smoke
+    command: sh
+    args: ["-c", "chromium --headless --no-sandbox --disable-gpu --dump-dom 'data:text/html,<p>devbox-ok</p>' 2>/dev/null"]
+    expectedOutput: ["devbox-ok"]
+  - name: Xvfb and x11vnc
+    command: which
+    args: ["Xvfb", "x11vnc"]
+    exitCode: 0
+
+  # Interactive shell environment.
+  - name: shells, editors and CLI tools
+    command: which
+    args: ["bash", "zsh", "tmux", "vim", "nano", "less", "curl", "make", "gcc", "git", "git-lfs", "rg", "fd", "jq", "gh", "glab", "mise", "sudo"]
+    exitCode: 0
+  - name: git-lfs enabled system-wide
+    command: git
+    args: ["config", "--system", "--get", "filter.lfs.process"]
+    expectedOutput: ["git-lfs filter-process"]
+  - name: gh
+    command: gh
+    args: ["--version"]
+    expectedOutput: ["gh version 2\\.104\\.0"]
+  - name: glab
+    command: glab
+    args: ["--version"]
+    expectedOutput: ["1\\.130\\.0"]
+  - name: mise
+    command: mise
+    args: ["--version"]
+    expectedOutput: ["2026\\.11\\.8"]
+
+  # Left out on purpose (DBX-49).
+  - name: excluded tools are absent
+    command: sh
+    args: ["-c", "which agent-harness agent-mcpserver agent-bootstrap codebase-memory-mcp podman docker dockerd containerd fuse-overlayfs newuidmap newgidmap; true"]
+    excludedOutput: [".+"]
+

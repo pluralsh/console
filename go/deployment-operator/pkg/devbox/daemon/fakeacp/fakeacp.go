@@ -1,0 +1,227 @@
+// Package fakeacp is a scripted ACP v1 agent for tests. A test binary re-executes itself with EnvVar=1 and calls
+// Main from TestMain; the agent then speaks ACP over stdio, logs every request it receives to $LogEnv (one JSON
+// object per line), and scripts each turn from the prompt's first text block:
+//
+//	slow:<ms>   sleep, tracking concurrent turns (logged as {"method":"_active","n":N})
+//	block       wait for session/cancel, then stop with "cancelled"
+//	permission  ask session/request_permission and echo the outcome
+//	subagent    a Task tool call and a child update tagged with claude-agent-acp's parentToolUseId
+//	unknown     an unknown content block and an unknown session update kind
+//	authfail    fail the turn with -32000 "Authentication required"
+//	anything    echo it back as "echo:<text>"
+package fakeacp
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"os"
+	"strconv"
+	"strings"
+	"sync"
+	"time"
+
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/acp"
+)
+
+const (
+	fastModel = "fast"
+	// EnvVar makes a re-executed test binary run the fake agent.
+	EnvVar = "DEVBOX_FAKE_ACP"
+	// LogEnv is the request log path.
+	LogEnv = "FAKE_ACP_LOG"
+)
+
+// Enabled reports whether this process should be the fake agent.
+func Enabled() bool { return os.Getenv(EnvVar) == "1" }
+
+// Main runs the fake agent until stdin closes.
+func Main() {
+	f := &fakeAgent{models: map[string]string{}, cancels: map[string]context.CancelFunc{}}
+	if p := os.Getenv(LogEnv); p != "" {
+		f.log, _ = os.OpenFile(p, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o600)
+	}
+	f.conn = acp.NewConn(os.Stdout, os.Stdin, f, nil)
+	<-f.conn.Done()
+}
+
+type fakeAgent struct {
+	conn *acp.Conn
+
+	mu       sync.Mutex
+	n        int
+	models   map[string]string
+	cancels  map[string]context.CancelFunc
+	active   int
+	logMu    sync.Mutex
+	log      *os.File
+	sessions []string
+}
+
+func (f *fakeAgent) record(method string, params any) {
+	if f.log == nil {
+		return
+	}
+	f.logMu.Lock()
+	defer f.logMu.Unlock()
+	data, _ := json.Marshal(map[string]any{"method": method, "params": params})
+	_, _ = f.log.Write(append(data, '\n'))
+}
+
+func (f *fakeAgent) HandleNotification(context.Context, string, json.RawMessage) {}
+
+func (f *fakeAgent) modelOptions(current string) []any {
+	return []any{map[string]any{
+		"id": "model", "name": "Model", "category": "model", "type": "select", "currentValue": current,
+		"options": []any{
+			map[string]any{"value": "fast", "name": "Fast"},
+			map[string]any{"value": "smart", "name": "Smart"},
+		},
+	}}
+}
+
+func (f *fakeAgent) update(sid string, u map[string]any) {
+	_ = f.conn.Notify(context.Background(), acp.MethodSessionUpdate, map[string]any{"sessionId": sid, "update": u})
+}
+
+func (f *fakeAgent) HandleRequest(ctx context.Context, method string, raw json.RawMessage) (any, *acp.RequestError) {
+	params := acp.RawObject(raw)
+	f.record(method, params)
+	sid := acp.Str(params, "sessionId")
+	switch method {
+	case acp.MethodInitialize:
+		return map[string]any{
+			"protocolVersion": 1,
+			"agentCapabilities": map[string]any{
+				"loadSession":         true,
+				"sessionCapabilities": map[string]any{"list": map[string]any{}, "resume": map[string]any{}, "close": map[string]any{}, "delete": map[string]any{}, "fork": map[string]any{}},
+				"mcpCapabilities":     map[string]any{"http": true},
+				"promptCapabilities":  map[string]any{"image": true, "embeddedContext": true},
+			},
+			"agentInfo":   map[string]any{"name": "fake-acp", "version": "1.0.0"},
+			"authMethods": []any{},
+		}, nil
+	case acp.MethodSessionNew, acp.MethodSessionFork:
+		f.mu.Lock()
+		f.n++
+		id := "sess-" + strconv.Itoa(f.n)
+		f.models[id] = fastModel
+		f.sessions = append(f.sessions, id)
+		f.mu.Unlock()
+		go func() {
+			time.Sleep(50 * time.Millisecond)
+			f.update(id, map[string]any{"sessionUpdate": "available_commands_update", "availableCommands": []any{
+				map[string]any{"name": "review", "description": "Review the diff", "input": map[string]any{"hint": "focus"}},
+			}})
+		}()
+		return map[string]any{"sessionId": id, "configOptions": f.modelOptions("fast")}, nil
+	case acp.MethodSessionResume, acp.MethodSessionLoad:
+		f.mu.Lock()
+		cur := f.models[sid]
+		f.mu.Unlock()
+		if cur == "" {
+			cur = fastModel
+		}
+		return map[string]any{"configOptions": f.modelOptions(cur)}, nil
+	case acp.MethodSessionList:
+		f.mu.Lock()
+		defer f.mu.Unlock()
+		var out []any
+		for _, id := range f.sessions {
+			out = append(out, map[string]any{"sessionId": id, "cwd": "/tmp", "title": "t " + id})
+		}
+		out = append(out, map[string]any{"sessionId": "external-1", "cwd": "/tmp", "title": "made in a terminal"})
+		return map[string]any{"sessions": out}, nil
+	case acp.MethodSessionClose, acp.MethodSessionDelete:
+		return map[string]any{}, nil
+	case acp.MethodSetConfigOption:
+		v := acp.Str(params, "value")
+		if v != fastModel && v != "smart" {
+			return nil, &acp.RequestError{Code: -32602, Message: "invalid value"}
+		}
+		f.mu.Lock()
+		f.models[sid] = v
+		f.mu.Unlock()
+		return map[string]any{"configOptions": f.modelOptions(v)}, nil
+	case acp.MethodSessionCancel:
+		f.mu.Lock()
+		if c := f.cancels[sid]; c != nil {
+			c()
+		}
+		f.mu.Unlock()
+		return nil, nil
+	case acp.MethodSessionPrompt:
+		return f.prompt(sid, params)
+	}
+	return nil, &acp.RequestError{Code: -32601, Message: "method not found: " + method}
+}
+
+func (f *fakeAgent) prompt(sid string, params acp.Object) (any, *acp.RequestError) {
+	text := ""
+	for _, b := range acp.Arr(params, "prompt") {
+		if o, ok := b.(map[string]any); ok && acp.Str(o, "type") == "text" {
+			text = acp.Str(o, "text")
+			break
+		}
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	f.mu.Lock()
+	f.cancels[sid] = cancel
+	f.active++
+	f.record("_active", map[string]any{"n": f.active})
+	f.mu.Unlock()
+	defer func() {
+		f.mu.Lock()
+		f.active--
+		delete(f.cancels, sid)
+		f.mu.Unlock()
+	}()
+	msg := func(s string) {
+		f.update(sid, map[string]any{"sessionUpdate": "agent_message_chunk", "content": map[string]any{"type": "text", "text": s}})
+	}
+	done := map[string]any{"stopReason": "end_turn", "usage": map[string]any{"inputTokens": 10, "outputTokens": 5, "totalTokens": 15}}
+
+	switch {
+	case strings.HasPrefix(text, "slow:"):
+		ms, _ := strconv.Atoi(strings.TrimPrefix(text, "slow:"))
+		select {
+		case <-time.After(time.Duration(ms) * time.Millisecond):
+		case <-ctx.Done():
+			return map[string]any{"stopReason": "cancelled"}, nil
+		}
+		msg("slept " + strconv.Itoa(ms))
+	case text == "block":
+		<-ctx.Done()
+		return map[string]any{"stopReason": "cancelled"}, nil
+	case text == "permission":
+		res, err := f.conn.Call(context.Background(), acp.MethodRequestPermission, map[string]any{
+			"sessionId": sid,
+			"toolCall":  map[string]any{"toolCallId": "tc-perm", "title": "rm -rf build", "kind": "execute", "status": "pending"},
+			"options": []any{
+				map[string]any{"optionId": "allow", "name": "Allow once", "kind": "allow_once"},
+				map[string]any{"optionId": "reject", "name": "Reject", "kind": "reject_once"},
+			},
+		})
+		if err != nil {
+			return nil, &acp.RequestError{Code: -32603, Message: err.Error()}
+		}
+		out := acp.Obj(acp.RawObject(res), "outcome")
+		msg(fmt.Sprintf("outcome:%s:%s", acp.Str(out, "outcome"), acp.Str(out, "optionId")))
+	case text == "subagent":
+		f.update(sid, map[string]any{"sessionUpdate": "tool_call", "toolCallId": "task-1", "title": "Explore the repo",
+			"kind": "think", "status": "in_progress", "_meta": map[string]any{"claudeCode": map[string]any{"toolName": "Task"}}})
+		f.update(sid, map[string]any{"sessionUpdate": "agent_message_chunk", "content": map[string]any{"type": "text", "text": "child says hi"},
+			"_meta": map[string]any{"claudeCode": map[string]any{"parentToolUseId": "task-1"}}})
+		f.update(sid, map[string]any{"sessionUpdate": "tool_call_update", "toolCallId": "task-1", "status": "completed"})
+		msg("parent done")
+	case text == "unknown":
+		f.update(sid, map[string]any{"sessionUpdate": "agent_message_chunk", "content": map[string]any{"type": "hologram", "shape": "cube", "size": 3}})
+		f.update(sid, map[string]any{"sessionUpdate": "future_widget", "widgetId": "w1", "payload": map[string]any{"a": 1, "nested": []any{"x"}}})
+	case text == "authfail":
+		return nil, &acp.RequestError{Code: -32000, Message: "Authentication required"}
+	default:
+		msg("echo:" + text)
+	}
+	return done, nil
+}

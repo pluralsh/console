@@ -12,7 +12,10 @@ defmodule Console.Schema.PullRequest do
     User,
     WorkbenchJob,
     Workbench,
-    StackRun
+    StackRun,
+    Devbox,
+    DevboxInstance,
+    DevboxInstanceSession
   }
 
   defmodule Aggregate do
@@ -21,6 +24,7 @@ defmodule Console.Schema.PullRequest do
 
   defenum Status, open: 0, merged: 1, closed: 2
   defenum ChangeType, gitops: 0, application: 1, configuration: 2
+  defenum Source, mcp: 0, egress: 1
 
   schema "pull_requests" do
     field :url,                :string
@@ -46,6 +50,8 @@ defmodule Console.Schema.PullRequest do
     field :next_poll_at,       :utc_datetime_usec
     field :merge_cron,         :string
     field :merge_attempt_at,   :utc_datetime_usec
+    field :source,             Source
+    field :metadata,           :map
 
     field :notifications_policy_id, :binary_id
 
@@ -69,6 +75,9 @@ defmodule Console.Schema.PullRequest do
     belongs_to :workbench_job,  WorkbenchJob
     belongs_to :workbench,      Workbench
     belongs_to :stack_run,      StackRun
+    belongs_to :devbox,         Devbox
+    belongs_to :devbox_instance, DevboxInstance
+    belongs_to :devbox_instance_session, DevboxInstanceSession
 
     has_many :notifications_bindings, PolicyBinding,
       on_replace: :delete,
@@ -141,6 +150,18 @@ defmodule Console.Schema.PullRequest do
 
   def for_author(query \\ __MODULE__, author_id) do
     from(pr in query, where: pr.author_id == ^author_id)
+  end
+
+  def for_devbox(query \\ __MODULE__, devbox_id) do
+    from(pr in query, where: pr.devbox_id == ^devbox_id)
+  end
+
+  def for_devbox_instance(query \\ __MODULE__, instance_id) do
+    from(pr in query, where: pr.devbox_instance_id == ^instance_id)
+  end
+
+  def for_devbox_thread(query \\ __MODULE__, session_id) do
+    from(pr in query, where: pr.devbox_instance_session_id == ^session_id)
   end
 
   def with_workbench(query \\ __MODULE__) do
@@ -311,6 +332,11 @@ defmodule Console.Schema.PullRequest do
     workbench_job_id
     workbench_id
     stack_run_id
+    devbox_id
+    devbox_instance_id
+    devbox_instance_session_id
+    source
+    metadata
   )a
 
   def changeset(model, attrs \\ %{}) do

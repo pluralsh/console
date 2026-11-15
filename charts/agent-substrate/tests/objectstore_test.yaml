@@ -1,0 +1,261 @@
+suite: object store backends
+release:
+  name: ate
+  namespace: ate-system
+capabilities:
+  majorVersion: 1
+  minorVersion: 34
+templates:
+  - templates/*.yaml
+set:
+  objectStore.snapshotLocation: s3://snapshots/ate/
+tests:
+  - it: s3 sets the backend, region and endpoint on both sidecars
+    template: templates/atelet.yaml
+    documentSelector:
+      path: kind
+      value: DaemonSet
+    set:
+      objectStore.s3.region: us-east-2
+      objectStore.s3.endpoint: https://s3.example.com
+      objectStore.s3.usePathStyle: true
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[0].image
+          value: ghcr.io/agent-substrate/substrate/objectstore-plugin:v1.0.0
+      - contains:
+          path: spec.template.spec.initContainers[0].env
+          content:
+            name: ATE_STORAGE_BACKEND
+            value: s3
+      - contains:
+          path: spec.template.spec.initContainers[0].env
+          content:
+            name: AWS_REGION
+            value: us-east-2
+      - contains:
+          path: spec.template.spec.initContainers[0].env
+          content:
+            name: AWS_ENDPOINT_URL
+            value: https://s3.example.com
+      - contains:
+          path: spec.template.spec.initContainers[0].env
+          content:
+            name: AWS_S3_USE_PATH_STYLE
+            value: "true"
+
+  - it: s3 static credentials come from the named secret
+    template: templates/api-server.yaml
+    documentSelector:
+      path: kind
+      value: Deployment
+    set:
+      objectStore.s3.credentialsSecret: s3-creds
+    asserts:
+      - contains:
+          path: spec.template.spec.initContainers[0].env
+          content:
+            name: AWS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: s3-creds
+                key: AWS_ACCESS_KEY_ID
+
+  - it: the snapshot location reaches ate-api-server
+    template: templates/api-server-config.yaml
+    documentSelector:
+      path: metadata.name
+      value: ate-api-server-envvars
+    asserts:
+      - equal:
+          path: data.ATE_API_SNAPSHOT_LOCATION
+          value: s3://snapshots/ate/
+
+  - it: gcs sets only the backend
+    template: templates/api-server.yaml
+    documentSelector:
+      path: kind
+      value: Deployment
+    set:
+      objectStore.backend: gcs
+      objectStore.snapshotLocation: gs://snapshots/ate/
+    asserts:
+      - contains:
+          path: spec.template.spec.initContainers[0].env
+          content:
+            name: ATE_STORAGE_BACKEND
+            value: gcs
+      - notContains:
+          path: spec.template.spec.initContainers[0].env
+          content:
+            name: AWS_REGION
+          any: true
+
+  - it: rustfs wires the embedded endpoint, credentials and default location
+    templates:
+      - templates/api-server.yaml
+      - templates/api-server-config.yaml
+      - templates/rustfs.yaml
+    set:
+      objectStore.snapshotLocation: ""
+      rustfs.enabled: true
+    asserts:
+      - contains:
+          path: spec.template.spec.initContainers[0].env
+          content:
+            name: AWS_ENDPOINT_URL
+            value: http://rustfs.ate-system.svc:9000
+        template: templates/api-server.yaml
+        documentSelector:
+          path: kind
+          value: Deployment
+      - equal:
+          path: data.ATE_API_SNAPSHOT_LOCATION
+          value: s3://ate-snapshots/
+        template: templates/api-server-config.yaml
+        documentSelector:
+          path: metadata.name
+          value: ate-api-server-envvars
+      - containsDocument:
+          kind: Job
+          apiVersion: batch/v1
+          name: rustfs-bucket-init
+          any: true
+        template: templates/rustfs.yaml
+      - notExists:
+          path: metadata.annotations["helm.sh/hook"]
+        template: templates/rustfs.yaml
+        documentSelector:
+          path: kind
+          value: Job
+
+  - it: azureBlob swaps the node sidecar for the Azure plugin (config/node + config/assets)
+    template: templates/atelet.yaml
+    documentSelector:
+      path: kind
+      value: DaemonSet
+    set: &azure
+      objectStore.backend: azureBlob
+      objectStore.snapshotLocation: azblob://snapshots/ate/
+      objectStore.azureBlob.image.digest: sha256:1111111111111111111111111111111111111111111111111111111111111111
+      objectStore.azureBlob.accountUrl: https://acct.blob.core.windows.net
+      objectStore.azureBlob.containers: [snapshots, assets]
+      objectStore.azureBlob.prefix: ate
+      objectStore.azureBlob.tenantId: tenant
+      objectStore.azureBlob.nodeClientId: node-client
+      objectStore.azureBlob.controlClientId: control-client
+      objectStore.azureBlob.assetContainers: [assets]
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[0].image
+          value: ghcr.io/pluralsh/objectstore-azure-blob@sha256:1111111111111111111111111111111111111111111111111111111111111111
+      - equal:
+          path: spec.template.spec.initContainers[0].args
+          value:
+            - node
+            - --socket=/run/objectstore-plugin/node.sock
+            - --root=/var/lib/ate
+            - --account-url=https://acct.blob.core.windows.net
+            - --containers=snapshots,assets
+            - --prefix=ate
+            - --asset-staging-dir=/var/lib/objectstore-plugin/asset-staging
+            - --asset-staging-capacity=8Gi
+      - equal:
+          path: spec.template.spec.initContainers[0].startupProbe.exec.command[0]
+          value: /ko-app/azure-blob-objectstore-plugin
+      - notContains:
+          path: spec.template.spec.initContainers[0].env
+          content:
+            name: ATE_STORAGE_BACKEND
+          any: true
+      - contains:
+          path: spec.template.spec.initContainers[0].env
+          content:
+            name: AZURE_CLIENT_ID
+            value: node-client
+      - contains:
+          path: spec.template.spec.initContainers[0].env
+          content:
+            name: AZURE_TENANT_ID
+            value: tenant
+      - contains:
+          path: spec.template.spec.initContainers[0].env
+          content:
+            name: AZURE_FEDERATED_TOKEN_FILE
+            value: /var/run/secrets/azure/tokens/azure-identity-token
+      - contains:
+          path: spec.template.spec.initContainers[0].env
+          content:
+            name: AZURE_STORAGE_ASSET_CONTAINERS
+            value: assets
+      - contains:
+          path: spec.template.spec.initContainers[0].volumeMounts
+          content:
+            name: azure-identity-token
+            mountPath: /var/run/secrets/azure/tokens
+            readOnly: true
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: azure-identity-token
+            projected:
+              sources:
+                - serviceAccountToken:
+                    audience: api://AzureADTokenExchange
+                    expirationSeconds: 3600
+                    path: azure-identity-token
+
+  - it: azureBlob swaps the control sidecar for the Azure plugin (config/control)
+    template: templates/api-server.yaml
+    documentSelector:
+      path: kind
+      value: Deployment
+    set: *azure
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[0].args
+          value:
+            - control
+            - --socket=/run/objectstore-plugin/control.sock
+            - --account-url=https://acct.blob.core.windows.net
+            - --containers=snapshots,assets
+            - --prefix=ate
+      - contains:
+          path: spec.template.spec.initContainers[0].env
+          content:
+            name: AZURE_CLIENT_ID
+            value: control-client
+      - contains:
+          path: spec.template.spec.initContainers[0].env
+          content:
+            name: ATE_API_SNAPSHOT_TRANSFER_SERVICE_ACCOUNT
+            valueFrom:
+              configMapKeyRef:
+                name: ate-api-server-envvars
+                key: ATE_API_SNAPSHOT_TRANSFER_SERVICE_ACCOUNT
+      - notContains:
+          path: spec.template.spec.initContainers[0].env
+          content:
+            name: AZURE_STORAGE_ASSET_CONTAINERS
+          any: true
+      - notContains:
+          path: spec.template.spec.initContainers[0].args
+          content: --preview=
+
+  - it: azureBlob requires substrate.objectstore.v1
+    template: templates/validate.yaml
+    set:
+      <<: *azure
+      substrateVersion: v0.9.0
+    asserts:
+      - failedTemplate:
+          errorPattern: substrate.objectstore.v1
+
+  - it: azureBlob requires an image digest or tag
+    template: templates/validate.yaml
+    set:
+      <<: *azure
+      objectStore.azureBlob.image.digest: ""
+    asserts:
+      - failedTemplate:
+          errorPattern: azureBlob.image

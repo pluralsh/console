@@ -1,0 +1,33 @@
+# kind / local dev: embedded RustFS, a single-instance CNPG Postgres (with the
+# bundled operator), the gVisor SandboxConfig and the devboxes preset (for a
+# deployment-operator in plrl-deploy-operator). Used by hack/kind-up.sh.
+otel:
+  endpoint: ""
+
+devboxes:
+  enabled: true
+
+apiServer:
+  replicas: 1
+idpServer:
+  replicas: 1
+
+rustfs:
+  enabled: true
+
+objectStore:
+  backend: s3
+
+postgres:
+  mode: cnpg
+  cnpg:
+    instances: 1
+    storage:
+      size: 2Gi
+
+sandboxConfigs:
+  gvisor:
+    enabled: true
+
+cloudnative-pg:
+  enabled: true

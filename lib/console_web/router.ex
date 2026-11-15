@@ -38,8 +38,15 @@ defmodule ConsoleWeb.Router do
   end
 
   pipeline :mcp do
+    plug ConsoleWeb.Plugs.DevboxToken
     plug ConsoleWeb.GuardianPipeline
     plug ConsoleWeb.Plugs.EnsureAuthenticated
+  end
+
+  scope "/oidc/:scope_type/:scope_id", ConsoleWeb do
+    get "/.well-known/openid-configuration", OIDCController, :discovery
+    get "/jwks", OIDCController, :jwks
+    get "/jwks.json", OIDCController, :jwks
   end
 
   scope "/mcp", ConsoleWeb do

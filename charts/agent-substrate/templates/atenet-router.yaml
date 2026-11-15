@@ -1,0 +1,246 @@
+{{- $ns := include "substrate.namespace" . -}}
+{{- $v := .Values.atenet.router -}}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: atenet-router
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: atenet-router-endpointslices
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+rules:
+  - apiGroups: ["discovery.k8s.io"]
+    resources: ["endpointslices"]
+    verbs: ["get", "watch", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: atenet-router-endpointslices
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+subjects:
+  - kind: ServiceAccount
+    name: atenet-router
+    namespace: {{ $ns }}
+roleRef:
+  kind: Role
+  name: atenet-router-endpointslices
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: atenet-router-envoy-config
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+data:
+  envoy.yaml: |
+    {{- .Files.Get "files/envoy/router.yaml" | nindent 4 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: atenet-router
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ipFamilyPolicy: PreferDualStack
+  selector:
+    app: atenet-router
+  ports:
+    - name: https
+      port: 443
+      targetPort: 8443
+      protocol: TCP
+    - name: connect-tls
+      port: 8444
+      targetPort: 8444
+      protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: atenet-router
+  namespace: {{ $ns }}
+  labels:
+    app: atenet-router
+    {{- include "substrate.labels" . | nindent 4 }}
+spec:
+  replicas: {{ $v.replicas }}
+  selector:
+    matchLabels:
+      app: atenet-router
+  template:
+    metadata:
+      labels:
+        app: atenet-router
+        {{- include "substrate.systemInfraPodLabels" . | nindent 8 }}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+        checksum/envoy-config: {{ .Files.Get "files/envoy/router.yaml" | sha256sum }}
+        checksum/otel-config: {{ include "substrate.checksum" (list . "otel-config.yaml") }}
+    spec:
+      serviceAccountName: atenet-router
+      terminationGracePeriodSeconds: {{ $v.terminationGracePeriodSeconds }}
+      {{- include "substrate.imagePullSecrets" . | nindent 6 }}
+      {{- include "substrate.systemInfraScheduling" . | nindent 6 }}
+      containers:
+        - name: atenet-router
+          image: {{ include "substrate.image" (dict "ctx" . "key" "atenet" "name" "atenet") }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - router
+            - --mode=ingress
+            - --namespace={{ $ns }}
+            - --port-xds=18000
+            - --port-extproc=50051
+            - --extproc-address=127.0.0.1
+            - --status-port=4040
+            - --port-https=8443
+            - --envoy-cert-path=/run/servicedns.podcert.ate.dev/credential-bundle.pem
+            - --port-connect-tls=8444
+            - --ingress-client-ca-file=/run/podidentity.podcert.ate.dev/trust-bundle.pem
+            - --ateapi-address=k8s:///api.{{ $ns }}.svc:443
+            - --ateapi-ca-file=/run/servicedns-ca/trust-bundle.pem
+            - --ateapi-client-cert=/run/podidentity.podcert.ate.dev/credential-bundle.pem
+            - --drain-delay=13s
+            - --log-level={{ include "substrate.logLevel" (list . $v.logLevel) }}
+            {{- $dbx := include "substrate.devboxes" . | fromJson }}
+            {{- with $dbx.routeTimeout }}
+            - --route-timeout={{ . }}
+            {{- end }}
+            {{- with $dbx.ingressAllowedSPIFFEIDs }}
+            - --ingress-allowed-spiffe-ids={{ join "," . }}
+            {{- end }}
+            - {{ include "substrate.previewArg" . }}
+            {{- with $v.extraArgs }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            capabilities:
+              drop:
+                - ALL
+          env:
+            {{- include "substrate.podEnv" . | nindent 12 }}
+          envFrom:
+            - configMapRef:
+                name: ate-otel-config
+          {{- with $v.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: extproc
+              containerPort: 50051
+            - name: metrics
+              containerPort: 9090
+            - name: health
+              containerPort: 9091
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: health
+            initialDelaySeconds: 5
+            periodSeconds: 2
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: health
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          volumeMounts:
+            - name: podidentity
+              mountPath: /run/podidentity.podcert.ate.dev
+            - name: servicedns-ca
+              mountPath: /run/servicedns-ca
+            - name: drain-signal
+              mountPath: /var/run/atenet
+        - name: envoy
+          image: {{ include "substrate.image" (dict "ctx" . "key" "envoyDataplane" "name" "envoy-dataplane") }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - /usr/local/bin/envoy
+            - -c
+            - /etc/envoy/envoy.yaml
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 65532
+            capabilities:
+              drop:
+                - ALL
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sh", "-c", "while [ ! -f /var/run/atenet/drain-complete ]; do sleep 0.5; done"]
+          {{- with $v.envoyResources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: https
+              containerPort: 8443
+            - name: connect-tls
+              containerPort: 8444
+            - name: envoy-metrics
+              containerPort: 9902
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: envoy-metrics
+            periodSeconds: 2
+          volumeMounts:
+            - name: envoy-config
+              mountPath: /etc/envoy
+            - name: servicedns
+              mountPath: /run/servicedns.podcert.ate.dev
+            - name: podidentity
+              mountPath: /run/podidentity.podcert.ate.dev
+            - name: drain-signal
+              mountPath: /var/run/atenet
+              readOnly: true
+      volumes:
+        - name: envoy-config
+          configMap:
+            name: atenet-router-envoy-config
+        - name: drain-signal
+          emptyDir: {}
+        {{- include "substrate.podCertVolume" (dict "name" "servicedns" "signer" "servicedns") | nindent 8 }}
+        {{- include "substrate.podCertVolume" (dict "name" "podidentity" "signer" "podidentity" "ca" true) | nindent 8 }}
+        {{- include "substrate.podCertVolume" (dict "name" "servicedns-ca" "signer" "servicedns" "caOnly" true) | nindent 8 }}
+{{- $mon := toString $v.monitoring.enabled }}
+{{- if or (eq $mon "true") (and (eq $mon "auto") (.Capabilities.APIVersions.Has "monitoring.googleapis.com/v1/PodMonitoring")) }}
+---
+apiVersion: monitoring.googleapis.com/v1
+kind: PodMonitoring
+metadata:
+  name: atenet-router-envoy
+  namespace: {{ $ns }}
+  labels:
+    app: atenet-router
+    {{- include "substrate.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app: atenet-router
+  endpoints:
+    - port: envoy-metrics
+      path: /stats/prometheus
+      interval: 30s
+{{- end }}

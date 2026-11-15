@@ -1,0 +1,10 @@
+# Seeded from /etc/devbox/skel on the instance's first boot. Yours to edit.
+# Credentials are injected by the egress gateway, so no credential helper is set.
+[init]
+	defaultBranch = main
+[pull]
+	rebase = false
+[push]
+	autoSetupRemote = true
+[fetch]
+	prune = true

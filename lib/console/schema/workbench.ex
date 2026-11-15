@@ -21,7 +21,9 @@ defmodule Console.Schema.Workbench do
     FlowWorkbench,
     User,
     AgentRun,
-    Alert
+    Alert,
+    WorkbenchDevbox,
+    DevboxInstance
   }
   alias Console.Deployments.Policies.Rbac
   alias Console.Uploads.Type
@@ -128,6 +130,12 @@ defmodule Console.Schema.Workbench do
         field :enable_babysitting, :boolean
         field :repositories,       {:array, :string}
       end
+
+      embeds_one :devbox, Devbox, on_replace: :update do
+        field :max_snapshots, :integer
+        field :max_deferral,  :integer
+        field :allow_subscription_credentials, :boolean, default: false
+      end
     end
 
     embeds_one :modes, WorkbenchJob.Modes, on_replace: :update
@@ -167,11 +175,14 @@ defmodule Console.Schema.Workbench do
     has_many :workbench_policies,  WorkbenchPolicy,          on_replace: :delete
     has_many :dashboards,          Dashboard,                on_replace: :delete
     has_many :alerts,              Alert
+    has_many :workbench_devboxes,  WorkbenchDevbox
+    has_many :devbox_instances,    DevboxInstance
 
     has_one :eval,                 WorkbenchEval
 
     has_many :tools, through: [:tool_associations, :tool]
     has_many :policies, through: [:workbench_policies, :policy]
+    has_many :devboxes, through: [:workbench_devboxes, :devbox]
 
     timestamps()
   end
@@ -289,6 +300,14 @@ defmodule Console.Schema.Workbench do
     |> cast_embed(:infrastructure, with: &infrastructure_changeset/2)
     |> cast_embed(:coding, with: &coding_changeset/2)
     |> cast_embed(:observability, with: &observability_changeset/2)
+    |> cast_embed(:devbox, with: &devbox_changeset/2)
+  end
+
+  def devbox_changeset(model, attrs \\ %{}) do
+    model
+    |> cast(attrs, ~w(max_snapshots max_deferral allow_subscription_credentials)a)
+    |> validate_number(:max_snapshots, greater_than: 0)
+    |> validate_number(:max_deferral, greater_than: 0)
   end
 
   def infrastructure_changeset(model, attrs \\ %{}) do

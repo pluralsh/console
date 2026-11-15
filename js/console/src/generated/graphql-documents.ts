@@ -3438,6 +3438,682 @@ export const ClusterNamespaceUsageFragmentDoc = /*#__PURE__*/ gql`
   storageCost
 }
     ` as unknown as DocumentNode<Types.ClusterNamespaceUsageFragment, unknown>;
+export const DevboxSnapshotFragmentDoc = /*#__PURE__*/ gql`
+    fragment DevboxSnapshot on DevboxSnapshot {
+  id
+  name
+  status
+  fidelity
+  sizeBytes
+  error
+  templateRevision
+  devbox {
+    id
+    name
+    templateRevision
+  }
+  instance {
+    id
+    name
+  }
+  user {
+    id
+    name
+    email
+  }
+  insertedAt
+  updatedAt
+}
+    ` as unknown as DocumentNode<Types.DevboxSnapshotFragment, unknown>;
+export const DevboxInstanceTinyFragmentDoc = /*#__PURE__*/ gql`
+    fragment DevboxInstanceTiny on DevboxInstance {
+  id
+  name
+  agent
+  requestedModel
+  repositories
+  status
+  statusReason
+  foregroundState
+  runningThreads
+  waitingThreads
+  keepAwakeUntil
+  awakeSince
+  startedAt
+  suspendedAt
+  lastActivityAt
+  viewerCount
+  devbox {
+    id
+    name
+    browser
+  }
+  user {
+    id
+    name
+    email
+  }
+  insertedAt
+  updatedAt
+}
+    ` as unknown as DocumentNode<Types.DevboxInstanceTinyFragment, unknown>;
+export const DevboxAgentBillingFragmentDoc = /*#__PURE__*/ gql`
+    fragment DevboxAgentBilling on DevboxAgentBilling {
+  agent
+  billing
+  credentialKind
+  allowCollaborators
+}
+    ` as unknown as DocumentNode<Types.DevboxAgentBillingFragment, unknown>;
+export const DevboxCheckoutFragmentDoc = /*#__PURE__*/ gql`
+    fragment DevboxCheckout on DevboxCheckout {
+  path
+  name
+  remoteUrl
+  defaultBranch
+  branch
+  headSha
+  dirty
+  worktreeThreadId
+  ahead
+  behind
+}
+    ` as unknown as DocumentNode<Types.DevboxCheckoutFragment, unknown>;
+export const DevboxTinyFragmentDoc = /*#__PURE__*/ gql`
+    fragment DevboxTiny on Devbox {
+  id
+  name
+  status
+  image
+  resolvedImage
+  templateRevision
+  browser
+  maxInstances
+  lastHeartbeatAt
+  cluster {
+    id
+    name
+    handle
+  }
+  agents {
+    type
+    default
+    probeStatus
+  }
+}
+    ` as unknown as DocumentNode<Types.DevboxTinyFragment, unknown>;
+export const DevboxModelFragmentDoc = /*#__PURE__*/ gql`
+    fragment DevboxModel on DevboxModel {
+  id
+  name
+  description
+}
+    ` as unknown as DocumentNode<Types.DevboxModelFragment, unknown>;
+export const DevboxCommandFragmentDoc = /*#__PURE__*/ gql`
+    fragment DevboxCommand on DevboxCommand {
+  name
+  description
+  inputHint
+}
+    ` as unknown as DocumentNode<Types.DevboxCommandFragment, unknown>;
+export const DevboxConfigOptionFragmentDoc = /*#__PURE__*/ gql`
+    fragment DevboxConfigOption on DevboxConfigOption {
+  configId
+  name
+  description
+  category
+  type
+  currentValue
+  options {
+    value
+    name
+    description
+    group
+  }
+}
+    ` as unknown as DocumentNode<Types.DevboxConfigOptionFragment, unknown>;
+export const DevboxSessionCapabilitiesFragmentDoc = /*#__PURE__*/ gql`
+    fragment DevboxSessionCapabilities on DevboxSessionCapabilities {
+  list
+  resume
+  load
+  close
+  delete
+  fork
+}
+    ` as unknown as DocumentNode<Types.DevboxSessionCapabilitiesFragment, unknown>;
+export const DevboxAgentFragmentDoc = /*#__PURE__*/ gql`
+    fragment DevboxAgent on DevboxAgent {
+  type
+  default
+  adapterName
+  adapterVersion
+  protocolVersion
+  acpV2
+  modelSwitchable
+  probeStatus
+  probeError
+  defaultModel
+  models {
+    ...DevboxModel
+  }
+  commands {
+    ...DevboxCommand
+  }
+  configOptions {
+    ...DevboxConfigOption
+  }
+  sessionCapabilities {
+    ...DevboxSessionCapabilities
+  }
+}
+    ${DevboxModelFragmentDoc}
+${DevboxCommandFragmentDoc}
+${DevboxConfigOptionFragmentDoc}
+${DevboxSessionCapabilitiesFragmentDoc}` as unknown as DocumentNode<Types.DevboxAgentFragment, unknown>;
+export const DevboxFragmentDoc = /*#__PURE__*/ gql`
+    fragment Devbox on Devbox {
+  ...DevboxTiny
+  resources
+  allowedRepositories
+  insertedAt
+  updatedAt
+  agents {
+    ...DevboxAgent
+  }
+  httpAllowlist {
+    host
+    port
+    passthrough
+  }
+  idlePolicy {
+    activityWindow
+    cpuThreshold
+    gracePeriod
+    maxDeferral
+    maxContinuousAwake
+    completeAfter
+  }
+  conditions {
+    type
+    status
+    reason
+    message
+  }
+  scmConnections {
+    id
+    name
+    type
+  }
+  cloudIdentities {
+    name
+    provider
+    default
+    roleArn
+    workloadIdentityProvider
+    serviceAccount
+    tenantId
+    clientId
+  }
+  workloadIdentity {
+    issuerUrl
+    subject
+    audiences
+    snippets {
+      provider
+      format
+      title
+      content
+    }
+  }
+}
+    ${DevboxTinyFragmentDoc}
+${DevboxAgentFragmentDoc}` as unknown as DocumentNode<Types.DevboxFragment, unknown>;
+export const DevboxUsageFragmentDoc = /*#__PURE__*/ gql`
+    fragment DevboxUsage on DevboxUsage {
+  inputTokens
+  outputTokens
+  cachedTokens
+  reasoningTokens
+  totalTokens
+  contextSize
+  contextUsed
+  totalCost
+  currency
+}
+    ` as unknown as DocumentNode<Types.DevboxUsageFragment, unknown>;
+export const DevboxThreadFragmentDoc = /*#__PURE__*/ gql`
+    fragment DevboxThread on DevboxThread {
+  id
+  sessionId
+  kind
+  agent
+  title
+  agentTitle
+  model
+  cwd
+  worktreeRepos
+  status
+  imported
+  lastActivityAt
+  entityCount
+  foregroundState
+  stopReason
+  error
+  backgroundWork
+  billing
+  revision
+  configOptions {
+    ...DevboxConfigOption
+  }
+  availableCommands {
+    ...DevboxCommand
+  }
+  usage {
+    ...DevboxUsage
+  }
+  parent {
+    id
+    sessionId
+  }
+  user {
+    id
+    name
+    email
+  }
+  insertedAt
+  updatedAt
+}
+    ${DevboxConfigOptionFragmentDoc}
+${DevboxCommandFragmentDoc}
+${DevboxUsageFragmentDoc}` as unknown as DocumentNode<Types.DevboxThreadFragment, unknown>;
+export const DevboxInteractionFragmentDoc = /*#__PURE__*/ gql`
+    fragment DevboxInteraction on DevboxInteraction {
+  id
+  externalId
+  toolCallId
+  kind
+  state
+  title
+  message
+  requestedSchema
+  url
+  options {
+    optionId
+    name
+    kind
+  }
+  response
+  answeredAt
+  expiresAt
+  thread {
+    id
+    sessionId
+    title
+  }
+  instance {
+    id
+    name
+  }
+  answeredBy {
+    id
+    name
+    email
+  }
+  insertedAt
+  updatedAt
+}
+    ` as unknown as DocumentNode<Types.DevboxInteractionFragment, unknown>;
+export const DevboxInstanceFragmentDoc = /*#__PURE__*/ gql`
+    fragment DevboxInstance on DevboxInstance {
+  ...DevboxInstanceTiny
+  configOptions
+  maxRunningThreads
+  templateRevision
+  imageDigest
+  restoreFidelity
+  completedAt
+  agentConnections {
+    agent
+    protocolVersion
+    adapterName
+    adapterVersion
+    capabilities
+    billing
+  }
+  agentBilling {
+    ...DevboxAgentBilling
+  }
+  checkouts {
+    ...DevboxCheckout
+  }
+  idleState {
+    idle
+    idleSince
+    suspendsAt
+    busyReasons
+    message
+  }
+  leases {
+    kind
+    expiresAt
+    holder {
+      id
+      name
+      email
+    }
+  }
+  keepAwakeBy {
+    id
+    name
+    email
+  }
+  workbench {
+    id
+    name
+  }
+  snapshot {
+    id
+    name
+    fidelity
+  }
+  devbox {
+    ...Devbox
+  }
+  threads {
+    ...DevboxThread
+  }
+  interactions(pending: true) {
+    ...DevboxInteraction
+  }
+}
+    ${DevboxInstanceTinyFragmentDoc}
+${DevboxAgentBillingFragmentDoc}
+${DevboxCheckoutFragmentDoc}
+${DevboxFragmentDoc}
+${DevboxThreadFragmentDoc}
+${DevboxInteractionFragmentDoc}` as unknown as DocumentNode<Types.DevboxInstanceFragment, unknown>;
+export const DevboxFileEntryFragmentDoc = /*#__PURE__*/ gql`
+    fragment DevboxFileEntry on DevboxFileEntry {
+  path
+  name
+  type
+  size
+  modifiedAt
+  symlinkTarget
+  repository
+  gitStatus
+}
+    ` as unknown as DocumentNode<Types.DevboxFileEntryFragment, unknown>;
+export const DevboxFileFragmentDoc = /*#__PURE__*/ gql`
+    fragment DevboxFile on DevboxFile {
+  entry {
+    ...DevboxFileEntry
+  }
+  content
+  sha256
+  truncated
+  mimeType
+  binary
+}
+    ${DevboxFileEntryFragmentDoc}` as unknown as DocumentNode<Types.DevboxFileFragment, unknown>;
+export const DevboxFileChangeFragmentDoc = /*#__PURE__*/ gql`
+    fragment DevboxFileChange on DevboxFileChange {
+  path
+  oldPath
+  status
+  staged
+  additions
+  deletions
+  binary
+  diff
+  diffTruncated
+}
+    ` as unknown as DocumentNode<Types.DevboxFileChangeFragment, unknown>;
+export const DevboxRepositoryChangesFragmentDoc = /*#__PURE__*/ gql`
+    fragment DevboxRepositoryChanges on DevboxRepositoryChanges {
+  checkout {
+    ...DevboxCheckout
+  }
+  baseRef
+  baseSha
+  additions
+  deletions
+  files {
+    ...DevboxFileChange
+  }
+}
+    ${DevboxCheckoutFragmentDoc}
+${DevboxFileChangeFragmentDoc}` as unknown as DocumentNode<Types.DevboxRepositoryChangesFragment, unknown>;
+export const DevboxStreamFragmentDoc = /*#__PURE__*/ gql`
+    fragment DevboxStream on DevboxStream {
+  streamId
+  kind
+  url
+  token
+  expiresAt
+  subprotocols
+  terminalId
+}
+    ` as unknown as DocumentNode<Types.DevboxStreamFragment, unknown>;
+export const AgentCredentialFragmentDoc = /*#__PURE__*/ gql`
+    fragment AgentCredential on AgentCredential {
+  id
+  provider
+  kind
+  label
+  status
+  version
+  defaultBilling
+  failureCount
+  email
+  plan
+  linkedAt
+  expiresAt
+  lastRefreshedAt
+  lastUsedAt
+  insertedAt
+  updatedAt
+}
+    ` as unknown as DocumentNode<Types.AgentCredentialFragment, unknown>;
+export const DevboxRepositoryFragmentDoc = /*#__PURE__*/ gql`
+    fragment DevboxRepository on DevboxRepository {
+  path
+  name
+  remoteUrl
+  defaultBranch
+  branch
+  headSha
+  dirty
+  worktreeThreadId
+  ahead
+  behind
+}
+    ` as unknown as DocumentNode<Types.DevboxRepositoryFragment, unknown>;
+export const DevboxContentBlockFragmentDoc = /*#__PURE__*/ gql`
+    fragment DevboxContentBlock on DevboxContentBlock {
+  ... on DevboxTextContent {
+    type
+    text
+    annotations
+  }
+  ... on DevboxImageContent {
+    type
+    data
+    mimeType
+    uri
+  }
+  ... on DevboxAudioContent {
+    type
+    data
+    mimeType
+  }
+  ... on DevboxResourceContent {
+    type
+    uri
+    mimeType
+    text
+    blob
+  }
+  ... on DevboxResourceLinkContent {
+    type
+    uri
+    name
+    title
+    description
+    mimeType
+    size
+  }
+  ... on DevboxUnknownContent {
+    type
+    variant
+    raw
+  }
+}
+    ` as unknown as DocumentNode<Types.DevboxContentBlockFragment, unknown>;
+export const DevboxToolCallFragmentDoc = /*#__PURE__*/ gql`
+    fragment DevboxToolCall on DevboxToolCall {
+  toolCallId
+  title
+  kind
+  status
+  rawInput
+  rawOutput
+  meta
+  locations {
+    path
+    line
+  }
+  content {
+    ... on DevboxToolCallBlock {
+      type
+      content {
+        ...DevboxContentBlock
+      }
+    }
+    ... on DevboxToolCallDiff {
+      type
+      path
+      oldText
+      newText
+    }
+    ... on DevboxToolCallTerminal {
+      type
+      terminalId
+    }
+    ... on DevboxToolCallUnknown {
+      type
+      variant
+      raw
+    }
+  }
+}
+    ${DevboxContentBlockFragmentDoc}` as unknown as DocumentNode<Types.DevboxToolCallFragment, unknown>;
+export const DevboxEntityFragmentDoc = /*#__PURE__*/ gql`
+    fragment DevboxEntity on DevboxEntity {
+  id
+  sessionId
+  type
+  position
+  revision
+  settled
+  createdAt
+  updatedAt
+  raw
+  message {
+    messageId
+    promptId
+    sentById
+    meta
+    content {
+      ...DevboxContentBlock
+    }
+  }
+  sessionMessage {
+    messageId
+    fromSessionId
+    toSessionId
+    meta
+    content {
+      ...DevboxContentBlock
+    }
+  }
+  toolCall {
+    ...DevboxToolCall
+  }
+  plan {
+    planId
+    meta
+    entries {
+      content
+      priority
+      status
+    }
+  }
+  terminal {
+    terminalId
+    command
+    args
+    cwd
+    output
+    truncated
+    exitCode
+    signal
+    meta
+  }
+  compaction {
+    compactionId
+    status
+    meta
+    summary {
+      ...DevboxContentBlock
+    }
+  }
+}
+    ${DevboxContentBlockFragmentDoc}
+${DevboxToolCallFragmentDoc}` as unknown as DocumentNode<Types.DevboxEntityFragment, unknown>;
+export const DevboxEntityChangeFragmentDoc = /*#__PURE__*/ gql`
+    fragment DevboxEntityChange on DevboxEntityChange {
+  instanceId
+  sessionId
+  threadId
+  entityType
+  entityId
+  position
+  op
+  stateKind
+  payload
+  offset
+  emittedAt
+  entity {
+    ...DevboxEntity
+  }
+}
+    ${DevboxEntityFragmentDoc}` as unknown as DocumentNode<Types.DevboxEntityChangeFragment, unknown>;
+export const DevboxPullRequestFragmentDoc = /*#__PURE__*/ gql`
+    fragment DevboxPullRequest on PullRequest {
+  ...PullRequestBasic
+  source
+  metadata
+  devbox {
+    id
+    name
+  }
+  devboxInstance {
+    id
+    name
+    workbench {
+      id
+    }
+  }
+  devboxThread {
+    id
+    title
+    agentTitle
+    sessionId
+  }
+}
+    ${PullRequestBasicFragmentDoc}` as unknown as DocumentNode<Types.DevboxPullRequestFragment, unknown>;
 export const TagFragmentDoc = /*#__PURE__*/ gql`
     fragment Tag on Tag {
   name
@@ -5765,6 +6441,11 @@ export const WorkbenchFragmentDoc = /*#__PURE__*/ gql`
       mode
       repositories
       enableBabysitting
+    }
+    devbox {
+      maxSnapshots
+      maxDeferral
+      allowSubscriptionCredentials
     }
   }
   modes {
@@ -8970,6 +9651,584 @@ export const ApplyScalingRecommendationDocument = /*#__PURE__*/ gql`
   }
 }
     ${PullRequestFragmentDoc}` as unknown as DocumentNode<Types.ApplyScalingRecommendationMutation, Types.ApplyScalingRecommendationMutationVariables>;
+export const WorkbenchDevboxesDocument = /*#__PURE__*/ gql`
+    query WorkbenchDevboxes($id: ID!) {
+  workbench(id: $id) {
+    id
+    configuration {
+      coding {
+        repositories
+      }
+      devbox {
+        maxSnapshots
+        maxDeferral
+        allowSubscriptionCredentials
+      }
+    }
+    devboxes {
+      ...DevboxTiny
+      allowedRepositories
+      agents {
+        ...DevboxAgent
+      }
+    }
+  }
+}
+    ${DevboxTinyFragmentDoc}
+${DevboxAgentFragmentDoc}` as unknown as DocumentNode<Types.WorkbenchDevboxesQuery, Types.WorkbenchDevboxesQueryVariables>;
+export const DevboxesDocument = /*#__PURE__*/ gql`
+    query Devboxes($q: String, $clusterId: ID, $workbenchId: ID, $first: Int = 100, $after: String) {
+  devboxes(
+    q: $q
+    clusterId: $clusterId
+    workbenchId: $workbenchId
+    first: $first
+    after: $after
+  ) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...DevboxTiny
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${DevboxTinyFragmentDoc}` as unknown as DocumentNode<Types.DevboxesQuery, Types.DevboxesQueryVariables>;
+export const DevboxDocument = /*#__PURE__*/ gql`
+    query Devbox($id: ID!) {
+  devbox(id: $id) {
+    ...Devbox
+  }
+}
+    ${DevboxFragmentDoc}` as unknown as DocumentNode<Types.DevboxQuery, Types.DevboxQueryVariables>;
+export const DevboxAgentsDocument = /*#__PURE__*/ gql`
+    query DevboxAgents($workbenchId: ID!, $devboxId: ID!) {
+  devboxAgents(workbenchId: $workbenchId, devboxId: $devboxId) {
+    ...DevboxAgent
+  }
+}
+    ${DevboxAgentFragmentDoc}` as unknown as DocumentNode<Types.DevboxAgentsQuery, Types.DevboxAgentsQueryVariables>;
+export const WorkbenchDevboxInstancesDocument = /*#__PURE__*/ gql`
+    query WorkbenchDevboxInstances($id: ID!, $first: Int = 50, $after: String, $statuses: [DevboxInstanceStatus], $mine: Boolean) {
+  workbench(id: $id) {
+    id
+    devboxInstances(first: $first, after: $after, statuses: $statuses, mine: $mine) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...DevboxInstanceTiny
+        }
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${DevboxInstanceTinyFragmentDoc}` as unknown as DocumentNode<Types.WorkbenchDevboxInstancesQuery, Types.WorkbenchDevboxInstancesQueryVariables>;
+export const WorkbenchDevboxSnapshotsDocument = /*#__PURE__*/ gql`
+    query WorkbenchDevboxSnapshots($id: ID!, $first: Int = 50, $after: String) {
+  workbench(id: $id) {
+    id
+    devboxSnapshots(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...DevboxSnapshot
+        }
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${DevboxSnapshotFragmentDoc}` as unknown as DocumentNode<Types.WorkbenchDevboxSnapshotsQuery, Types.WorkbenchDevboxSnapshotsQueryVariables>;
+export const WorkbenchDevboxInboxDocument = /*#__PURE__*/ gql`
+    query WorkbenchDevboxInbox($id: ID!) {
+  workbench(id: $id) {
+    id
+    devboxInbox {
+      ...DevboxInteraction
+    }
+  }
+}
+    ${DevboxInteractionFragmentDoc}` as unknown as DocumentNode<Types.WorkbenchDevboxInboxQuery, Types.WorkbenchDevboxInboxQueryVariables>;
+export const DevboxInstanceDocument = /*#__PURE__*/ gql`
+    query DevboxInstance($id: ID!) {
+  devboxInstance(id: $id) {
+    ...DevboxInstance
+  }
+}
+    ${DevboxInstanceFragmentDoc}` as unknown as DocumentNode<Types.DevboxInstanceQuery, Types.DevboxInstanceQueryVariables>;
+export const DevboxThreadDocument = /*#__PURE__*/ gql`
+    query DevboxThread($id: ID!) {
+  devboxThread(id: $id) {
+    ...DevboxThread
+    subagents {
+      ...DevboxThread
+    }
+    interactions {
+      ...DevboxInteraction
+    }
+  }
+}
+    ${DevboxThreadFragmentDoc}
+${DevboxInteractionFragmentDoc}` as unknown as DocumentNode<Types.DevboxThreadQuery, Types.DevboxThreadQueryVariables>;
+export const DevboxInstanceCommandsDocument = /*#__PURE__*/ gql`
+    query DevboxInstanceCommands($threadId: ID!) {
+  devboxInstanceCommands(threadId: $threadId) {
+    ...DevboxCommand
+  }
+}
+    ${DevboxCommandFragmentDoc}` as unknown as DocumentNode<Types.DevboxInstanceCommandsQuery, Types.DevboxInstanceCommandsQueryVariables>;
+export const DevboxRepositoriesDocument = /*#__PURE__*/ gql`
+    query DevboxRepositories($instanceId: ID!) {
+  devboxRepositories(instanceId: $instanceId) {
+    ...DevboxRepository
+  }
+}
+    ${DevboxRepositoryFragmentDoc}` as unknown as DocumentNode<Types.DevboxRepositoriesQuery, Types.DevboxRepositoriesQueryVariables>;
+export const DevboxTimelineDocument = /*#__PURE__*/ gql`
+    query DevboxTimeline($instanceId: ID!, $sessionId: String!, $before: Long, $after: Long, $limit: Int) {
+  devboxTimeline(
+    instanceId: $instanceId
+    sessionId: $sessionId
+    before: $before
+    after: $after
+    limit: $limit
+  ) {
+    deltaOffset
+    hasMore
+    entities {
+      ...DevboxEntity
+    }
+  }
+}
+    ${DevboxEntityFragmentDoc}` as unknown as DocumentNode<Types.DevboxTimelineQuery, Types.DevboxTimelineQueryVariables>;
+export const DevboxSessionsDocument = /*#__PURE__*/ gql`
+    query DevboxSessions($instanceId: ID!) {
+  devboxSessions(instanceId: $instanceId) {
+    sessionId
+    threadId
+    kind
+    parentSessionId
+    agent
+    title
+    status
+    foregroundState
+    lastActivityAt
+  }
+}
+    ` as unknown as DocumentNode<Types.DevboxSessionsQuery, Types.DevboxSessionsQueryVariables>;
+export const DevboxImportableSessionsDocument = /*#__PURE__*/ gql`
+    query DevboxImportableSessions($instanceId: ID!) {
+  devboxImportableSessions(instanceId: $instanceId) {
+    agent
+    sessionId
+    title
+    cwd
+    updatedAt
+  }
+}
+    ` as unknown as DocumentNode<Types.DevboxImportableSessionsQuery, Types.DevboxImportableSessionsQueryVariables>;
+export const DevboxPullRequestsDocument = /*#__PURE__*/ gql`
+    query DevboxPullRequests($devboxId: ID, $devboxInstanceId: ID, $devboxThreadId: ID, $first: Int = 50) {
+  pullRequests(
+    devboxId: $devboxId
+    devboxInstanceId: $devboxInstanceId
+    devboxThreadId: $devboxThreadId
+    first: $first
+  ) {
+    edges {
+      node {
+        ...DevboxPullRequest
+      }
+    }
+  }
+}
+    ${DevboxPullRequestFragmentDoc}` as unknown as DocumentNode<Types.DevboxPullRequestsQuery, Types.DevboxPullRequestsQueryVariables>;
+export const DevboxFilesDocument = /*#__PURE__*/ gql`
+    query DevboxFiles($instanceId: ID!, $path: String) {
+  devboxFiles(instanceId: $instanceId, path: $path) {
+    ...DevboxFileEntry
+  }
+}
+    ${DevboxFileEntryFragmentDoc}` as unknown as DocumentNode<Types.DevboxFilesQuery, Types.DevboxFilesQueryVariables>;
+export const DevboxFileDocument = /*#__PURE__*/ gql`
+    query DevboxFile($instanceId: ID!, $path: String!) {
+  devboxFile(instanceId: $instanceId, path: $path) {
+    ...DevboxFile
+  }
+}
+    ${DevboxFileFragmentDoc}` as unknown as DocumentNode<Types.DevboxFileQuery, Types.DevboxFileQueryVariables>;
+export const DevboxChangesDocument = /*#__PURE__*/ gql`
+    query DevboxChanges($instanceId: ID!, $threadId: ID, $repositories: [String], $includeDiff: Boolean = true) {
+  devboxChanges(
+    instanceId: $instanceId
+    threadId: $threadId
+    repositories: $repositories
+    includeDiff: $includeDiff
+  ) {
+    ...DevboxRepositoryChanges
+  }
+}
+    ${DevboxRepositoryChangesFragmentDoc}` as unknown as DocumentNode<Types.DevboxChangesQuery, Types.DevboxChangesQueryVariables>;
+export const AgentCredentialsDocument = /*#__PURE__*/ gql`
+    query AgentCredentials {
+  agentCredentials {
+    ...AgentCredential
+  }
+}
+    ${AgentCredentialFragmentDoc}` as unknown as DocumentNode<Types.AgentCredentialsQuery, Types.AgentCredentialsQueryVariables>;
+export const OpenDevboxStreamDocument = /*#__PURE__*/ gql`
+    mutation OpenDevboxStream($instanceId: ID!, $kind: DevboxStreamKind!, $terminalId: String, $port: Int, $url: String) {
+  openDevboxStream(
+    instanceId: $instanceId
+    kind: $kind
+    terminalId: $terminalId
+    port: $port
+    url: $url
+  ) {
+    ...DevboxStream
+  }
+}
+    ${DevboxStreamFragmentDoc}` as unknown as DocumentNode<Types.OpenDevboxStreamMutation, Types.OpenDevboxStreamMutationVariables>;
+export const WriteDevboxFileDocument = /*#__PURE__*/ gql`
+    mutation WriteDevboxFile($instanceId: ID!, $path: String!, $content: String!, $expectedSha256: String) {
+  writeDevboxFile(
+    instanceId: $instanceId
+    path: $path
+    content: $content
+    expectedSha256: $expectedSha256
+  ) {
+    entry {
+      ...DevboxFileEntry
+    }
+    sha256
+  }
+}
+    ${DevboxFileEntryFragmentDoc}` as unknown as DocumentNode<Types.WriteDevboxFileMutation, Types.WriteDevboxFileMutationVariables>;
+export const SetDevboxAgentBillingDocument = /*#__PURE__*/ gql`
+    mutation SetDevboxAgentBilling($instanceId: ID!, $attributes: DevboxAgentBillingAttributes!) {
+  setDevboxAgentBilling(instanceId: $instanceId, attributes: $attributes) {
+    id
+    agentBilling {
+      ...DevboxAgentBilling
+    }
+    agentConnections {
+      agent
+      billing
+    }
+  }
+}
+    ${DevboxAgentBillingFragmentDoc}` as unknown as DocumentNode<Types.SetDevboxAgentBillingMutation, Types.SetDevboxAgentBillingMutationVariables>;
+export const LinkAgentCredentialDocument = /*#__PURE__*/ gql`
+    mutation LinkAgentCredential($attributes: AgentCredentialAttributes!) {
+  linkAgentCredential(attributes: $attributes) {
+    ...AgentCredential
+  }
+}
+    ${AgentCredentialFragmentDoc}` as unknown as DocumentNode<Types.LinkAgentCredentialMutation, Types.LinkAgentCredentialMutationVariables>;
+export const DeleteAgentCredentialDocument = /*#__PURE__*/ gql`
+    mutation DeleteAgentCredential($id: ID!) {
+  deleteAgentCredential(id: $id) {
+    ...AgentCredential
+  }
+}
+    ${AgentCredentialFragmentDoc}` as unknown as DocumentNode<Types.DeleteAgentCredentialMutation, Types.DeleteAgentCredentialMutationVariables>;
+export const SetDefaultAgentBillingDocument = /*#__PURE__*/ gql`
+    mutation SetDefaultAgentBilling($provider: AgentCredentialProvider!, $enabled: Boolean!) {
+  setDefaultAgentBilling(provider: $provider, enabled: $enabled) {
+    ...AgentCredential
+  }
+}
+    ${AgentCredentialFragmentDoc}` as unknown as DocumentNode<Types.SetDefaultAgentBillingMutation, Types.SetDefaultAgentBillingMutationVariables>;
+export const AttachDevboxDocument = /*#__PURE__*/ gql`
+    mutation AttachDevbox($workbenchId: ID!, $devboxId: ID!) {
+  attachDevbox(workbenchId: $workbenchId, devboxId: $devboxId) {
+    ...DevboxTiny
+  }
+}
+    ${DevboxTinyFragmentDoc}` as unknown as DocumentNode<Types.AttachDevboxMutation, Types.AttachDevboxMutationVariables>;
+export const DetachDevboxDocument = /*#__PURE__*/ gql`
+    mutation DetachDevbox($workbenchId: ID!, $devboxId: ID!) {
+  detachDevbox(workbenchId: $workbenchId, devboxId: $devboxId) {
+    ...DevboxTiny
+  }
+}
+    ${DevboxTinyFragmentDoc}` as unknown as DocumentNode<Types.DetachDevboxMutation, Types.DetachDevboxMutationVariables>;
+export const CreateDevboxInstanceDocument = /*#__PURE__*/ gql`
+    mutation CreateDevboxInstance($workbenchId: ID!, $attributes: DevboxInstanceAttributes!) {
+  createDevboxInstance(workbenchId: $workbenchId, attributes: $attributes) {
+    ...DevboxInstanceTiny
+  }
+}
+    ${DevboxInstanceTinyFragmentDoc}` as unknown as DocumentNode<Types.CreateDevboxInstanceMutation, Types.CreateDevboxInstanceMutationVariables>;
+export const RestoreDevboxSnapshotDocument = /*#__PURE__*/ gql`
+    mutation RestoreDevboxSnapshot($id: ID!, $attributes: DevboxInstanceAttributes) {
+  restoreDevboxSnapshot(id: $id, attributes: $attributes) {
+    ...DevboxInstanceTiny
+  }
+}
+    ${DevboxInstanceTinyFragmentDoc}` as unknown as DocumentNode<Types.RestoreDevboxSnapshotMutation, Types.RestoreDevboxSnapshotMutationVariables>;
+export const CancelDevboxInstanceDocument = /*#__PURE__*/ gql`
+    mutation CancelDevboxInstance($id: ID!) {
+  cancelDevboxInstance(id: $id) {
+    ...DevboxInstanceTiny
+  }
+}
+    ${DevboxInstanceTinyFragmentDoc}` as unknown as DocumentNode<Types.CancelDevboxInstanceMutation, Types.CancelDevboxInstanceMutationVariables>;
+export const SuspendDevboxInstanceDocument = /*#__PURE__*/ gql`
+    mutation SuspendDevboxInstance($id: ID!) {
+  suspendDevboxInstance(id: $id) {
+    ...DevboxInstanceTiny
+  }
+}
+    ${DevboxInstanceTinyFragmentDoc}` as unknown as DocumentNode<Types.SuspendDevboxInstanceMutation, Types.SuspendDevboxInstanceMutationVariables>;
+export const ResumeDevboxInstanceDocument = /*#__PURE__*/ gql`
+    mutation ResumeDevboxInstance($id: ID!) {
+  resumeDevboxInstance(id: $id) {
+    ...DevboxInstanceTiny
+  }
+}
+    ${DevboxInstanceTinyFragmentDoc}` as unknown as DocumentNode<Types.ResumeDevboxInstanceMutation, Types.ResumeDevboxInstanceMutationVariables>;
+export const PingDevboxInstanceDocument = /*#__PURE__*/ gql`
+    mutation PingDevboxInstance($id: ID!) {
+  pingDevboxInstance(id: $id) {
+    id
+    viewerCount
+  }
+}
+    ` as unknown as DocumentNode<Types.PingDevboxInstanceMutation, Types.PingDevboxInstanceMutationVariables>;
+export const LeaveDevboxInstanceDocument = /*#__PURE__*/ gql`
+    mutation LeaveDevboxInstance($id: ID!) {
+  leaveDevboxInstance(id: $id) {
+    id
+    viewerCount
+  }
+}
+    ` as unknown as DocumentNode<Types.LeaveDevboxInstanceMutation, Types.LeaveDevboxInstanceMutationVariables>;
+export const KeepDevboxInstanceAwakeDocument = /*#__PURE__*/ gql`
+    mutation KeepDevboxInstanceAwake($id: ID!, $until: DateTime!) {
+  keepDevboxInstanceAwake(id: $id, until: $until) {
+    id
+    keepAwakeUntil
+    keepAwakeBy {
+      id
+      name
+      email
+    }
+    leases {
+      kind
+      expiresAt
+      holder {
+        id
+        name
+        email
+      }
+    }
+  }
+}
+    ` as unknown as DocumentNode<Types.KeepDevboxInstanceAwakeMutation, Types.KeepDevboxInstanceAwakeMutationVariables>;
+export const CancelDevboxKeepAwakeDocument = /*#__PURE__*/ gql`
+    mutation CancelDevboxKeepAwake($id: ID!) {
+  cancelDevboxKeepAwake(id: $id) {
+    id
+    keepAwakeUntil
+    keepAwakeBy {
+      id
+      name
+      email
+    }
+    leases {
+      kind
+      expiresAt
+      holder {
+        id
+        name
+        email
+      }
+    }
+  }
+}
+    ` as unknown as DocumentNode<Types.CancelDevboxKeepAwakeMutation, Types.CancelDevboxKeepAwakeMutationVariables>;
+export const CreateDevboxSnapshotDocument = /*#__PURE__*/ gql`
+    mutation CreateDevboxSnapshot($instanceId: ID!, $attributes: DevboxSnapshotAttributes) {
+  createDevboxSnapshot(instanceId: $instanceId, attributes: $attributes) {
+    ...DevboxSnapshot
+  }
+}
+    ${DevboxSnapshotFragmentDoc}` as unknown as DocumentNode<Types.CreateDevboxSnapshotMutation, Types.CreateDevboxSnapshotMutationVariables>;
+export const DeleteDevboxSnapshotDocument = /*#__PURE__*/ gql`
+    mutation DeleteDevboxSnapshot($id: ID!) {
+  deleteDevboxSnapshot(id: $id) {
+    ...DevboxSnapshot
+  }
+}
+    ${DevboxSnapshotFragmentDoc}` as unknown as DocumentNode<Types.DeleteDevboxSnapshotMutation, Types.DeleteDevboxSnapshotMutationVariables>;
+export const CreateDevboxThreadDocument = /*#__PURE__*/ gql`
+    mutation CreateDevboxThread($instanceId: ID!, $attributes: DevboxThreadAttributes) {
+  createDevboxThread(instanceId: $instanceId, attributes: $attributes) {
+    ...DevboxThread
+  }
+}
+    ${DevboxThreadFragmentDoc}` as unknown as DocumentNode<Types.CreateDevboxThreadMutation, Types.CreateDevboxThreadMutationVariables>;
+export const ImportDevboxThreadDocument = /*#__PURE__*/ gql`
+    mutation ImportDevboxThread($instanceId: ID!, $attributes: DevboxImportAttributes!) {
+  importDevboxThread(instanceId: $instanceId, attributes: $attributes) {
+    ...DevboxThread
+  }
+}
+    ${DevboxThreadFragmentDoc}` as unknown as DocumentNode<Types.ImportDevboxThreadMutation, Types.ImportDevboxThreadMutationVariables>;
+export const ResumeDevboxThreadDocument = /*#__PURE__*/ gql`
+    mutation ResumeDevboxThread($id: ID!) {
+  resumeDevboxThread(id: $id) {
+    ...DevboxThread
+  }
+}
+    ${DevboxThreadFragmentDoc}` as unknown as DocumentNode<Types.ResumeDevboxThreadMutation, Types.ResumeDevboxThreadMutationVariables>;
+export const CloseDevboxThreadDocument = /*#__PURE__*/ gql`
+    mutation CloseDevboxThread($id: ID!) {
+  closeDevboxThread(id: $id) {
+    ...DevboxThread
+  }
+}
+    ${DevboxThreadFragmentDoc}` as unknown as DocumentNode<Types.CloseDevboxThreadMutation, Types.CloseDevboxThreadMutationVariables>;
+export const DeleteDevboxThreadDocument = /*#__PURE__*/ gql`
+    mutation DeleteDevboxThread($id: ID!) {
+  deleteDevboxThread(id: $id) {
+    ...DevboxThread
+  }
+}
+    ${DevboxThreadFragmentDoc}` as unknown as DocumentNode<Types.DeleteDevboxThreadMutation, Types.DeleteDevboxThreadMutationVariables>;
+export const ForkDevboxThreadDocument = /*#__PURE__*/ gql`
+    mutation ForkDevboxThread($id: ID!, $title: String) {
+  forkDevboxThread(id: $id, title: $title) {
+    ...DevboxThread
+  }
+}
+    ${DevboxThreadFragmentDoc}` as unknown as DocumentNode<Types.ForkDevboxThreadMutation, Types.ForkDevboxThreadMutationVariables>;
+export const RenameDevboxThreadDocument = /*#__PURE__*/ gql`
+    mutation RenameDevboxThread($id: ID!, $title: String!) {
+  renameDevboxThread(id: $id, title: $title) {
+    ...DevboxThread
+  }
+}
+    ${DevboxThreadFragmentDoc}` as unknown as DocumentNode<Types.RenameDevboxThreadMutation, Types.RenameDevboxThreadMutationVariables>;
+export const PromptDevboxThreadDocument = /*#__PURE__*/ gql`
+    mutation PromptDevboxThread($id: ID!, $prompt: String, $content: [DevboxPromptBlockAttributes], $attachments: [Upload]) {
+  promptDevboxThread(
+    id: $id
+    prompt: $prompt
+    content: $content
+    attachments: $attachments
+  ) {
+    ...DevboxThread
+  }
+}
+    ${DevboxThreadFragmentDoc}` as unknown as DocumentNode<Types.PromptDevboxThreadMutation, Types.PromptDevboxThreadMutationVariables>;
+export const CancelDevboxPromptDocument = /*#__PURE__*/ gql`
+    mutation CancelDevboxPrompt($id: ID!) {
+  cancelDevboxPrompt(id: $id) {
+    ...DevboxThread
+  }
+}
+    ${DevboxThreadFragmentDoc}` as unknown as DocumentNode<Types.CancelDevboxPromptMutation, Types.CancelDevboxPromptMutationVariables>;
+export const SetDevboxThreadConfigOptionDocument = /*#__PURE__*/ gql`
+    mutation SetDevboxThreadConfigOption($id: ID!, $configId: String!, $value: String!) {
+  setDevboxThreadConfigOption(id: $id, configId: $configId, value: $value) {
+    ...DevboxThread
+  }
+}
+    ${DevboxThreadFragmentDoc}` as unknown as DocumentNode<Types.SetDevboxThreadConfigOptionMutation, Types.SetDevboxThreadConfigOptionMutationVariables>;
+export const RespondDevboxInteractionDocument = /*#__PURE__*/ gql`
+    mutation RespondDevboxInteraction($id: ID!, $response: DevboxInteractionResponseAttributes!) {
+  respondDevboxInteraction(id: $id, response: $response) {
+    ...DevboxInteraction
+  }
+}
+    ${DevboxInteractionFragmentDoc}` as unknown as DocumentNode<Types.RespondDevboxInteractionMutation, Types.RespondDevboxInteractionMutationVariables>;
+export const AddDevboxRepositoryDocument = /*#__PURE__*/ gql`
+    mutation AddDevboxRepository($instanceId: ID!, $repository: String!) {
+  addDevboxRepository(instanceId: $instanceId, repository: $repository) {
+    id
+    repositories
+    checkouts {
+      ...DevboxCheckout
+    }
+  }
+}
+    ${DevboxCheckoutFragmentDoc}` as unknown as DocumentNode<Types.AddDevboxRepositoryMutation, Types.AddDevboxRepositoryMutationVariables>;
+export const DevboxInstanceStatusDeltaDocument = /*#__PURE__*/ gql`
+    subscription DevboxInstanceStatusDelta($id: ID, $workbenchId: ID) {
+  devboxInstanceStatusDelta(id: $id, workbenchId: $workbenchId) {
+    delta
+    payload {
+      ...DevboxInstanceTiny
+      idleState {
+        idle
+        idleSince
+        suspendsAt
+        busyReasons
+        message
+      }
+    }
+  }
+}
+    ${DevboxInstanceTinyFragmentDoc}` as unknown as DocumentNode<Types.DevboxInstanceStatusDeltaSubscription, Types.DevboxInstanceStatusDeltaSubscriptionVariables>;
+export const DevboxThreadDeltaDocument = /*#__PURE__*/ gql`
+    subscription DevboxThreadDelta($instanceId: ID!) {
+  devboxThreadDelta(instanceId: $instanceId) {
+    delta
+    payload {
+      ...DevboxThread
+    }
+  }
+}
+    ${DevboxThreadFragmentDoc}` as unknown as DocumentNode<Types.DevboxThreadDeltaSubscription, Types.DevboxThreadDeltaSubscriptionVariables>;
+export const DevboxSnapshotDeltaDocument = /*#__PURE__*/ gql`
+    subscription DevboxSnapshotDelta($workbenchId: ID!) {
+  devboxSnapshotDelta(workbenchId: $workbenchId) {
+    delta
+    payload {
+      ...DevboxSnapshot
+    }
+  }
+}
+    ${DevboxSnapshotFragmentDoc}` as unknown as DocumentNode<Types.DevboxSnapshotDeltaSubscription, Types.DevboxSnapshotDeltaSubscriptionVariables>;
+export const DevboxInstanceEntityDeltaDocument = /*#__PURE__*/ gql`
+    subscription DevboxInstanceEntityDelta($instanceId: ID!) {
+  devboxInstanceDelta(instanceId: $instanceId) {
+    delta
+    payload {
+      ...DevboxEntityChange
+    }
+  }
+}
+    ${DevboxEntityChangeFragmentDoc}` as unknown as DocumentNode<Types.DevboxInstanceEntityDeltaSubscription, Types.DevboxInstanceEntityDeltaSubscriptionVariables>;
+export const DevboxInstanceIndexDeltaDocument = /*#__PURE__*/ gql`
+    subscription DevboxInstanceIndexDelta($instanceId: ID!) {
+  devboxInstanceIndexDelta(instanceId: $instanceId) {
+    delta
+    payload {
+      instanceId
+      revision
+      foregroundState
+      threads {
+        ...DevboxThread
+      }
+      interactions {
+        ...DevboxInteraction
+      }
+    }
+  }
+}
+    ${DevboxThreadFragmentDoc}
+${DevboxInteractionFragmentDoc}` as unknown as DocumentNode<Types.DevboxInstanceIndexDeltaSubscription, Types.DevboxInstanceIndexDeltaSubscriptionVariables>;
 export const ClusterRegistrationDocument = /*#__PURE__*/ gql`
     query ClusterRegistration($id: ID, $machineId: String) {
   clusterRegistration(id: $id, machineId: $machineId) {

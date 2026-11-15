@@ -1,0 +1,258 @@
+syntax = "proto3";
+
+// Package devbox.v1 is the contract between the DevBoxes components:
+//
+//   console  --Control-->  KAS  --Gateway (reverse tunnel)-->  devbox-gateway  --Daemon-->  devbox-daemon
+//   console  <--Ingest---  KAS  <--Ingest (wss /ext/devbox)--  devbox-gateway
+//   devbox-daemon --SandboxCredentials (via atenet-egress, actor JWT)--> devbox-gateway
+//
+// Conventions used throughout the package:
+//
+//   * IDs. `instance_id`, `devbox_id`, `workbench_id`, `snapshot_id`, `thread_id` and `interaction_id` are
+//     console-allocated UUIDs. `session_id` is the ACP session ID chosen by the agent. A thread is a top-level
+//     ACP session that console knows about; it has both a `thread_id` and (once `session/new` returns) a
+//     `session_id`. Subagent sessions only have a `session_id`.
+//   * Routing. Every Control call carries the target cluster in the `devbox-cluster-id` gRPC metadata entry (see
+//     the constants in the Go package, `metadata.go`). KAS strips any client-supplied value on Ingest calls and
+//     stamps the cluster it verified from the gateway's deploy token instead, so console must only trust the
+//     KAS-stamped value.
+//   * ACP values. Enum-like values that come from the Agent Client Protocol (tool kinds, stop reasons, config
+//     option categories, ...) are carried as strings, not proto enums, so values introduced by newer ACP
+//     versions are preserved verbatim. Known values are listed in comments. Enums owned by Plural (instance
+//     status, agent type, billing, ...) are proto enums.
+//   * ACP `_meta`. Every ACP-derived message has a `meta` field holding the verbatim `_meta` object.
+//   * Idempotency. Mutating calls that may be retried carry an `idempotency_key` or a monotonic `revision`.
+//     Receivers must treat a repeated key, or a revision lower than or equal to the stored one, as a no-op that
+//     returns the current state.
+package devbox.v1;
+
+option go_package = "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1;devboxv1";
+
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+
+// AgentType is a harness a box can run (DevboxRunner.spec.agents[].type).
+enum AgentType {
+  AGENT_TYPE_UNSPECIFIED = 0;
+  AGENT_TYPE_CLAUDE = 1;
+  AGENT_TYPE_CODEX = 2;
+  AGENT_TYPE_OPENCODE = 3;
+  AGENT_TYPE_GEMINI = 4;
+  AGENT_TYPE_PI = 5;
+}
+
+// InstanceStatus is the DevboxInstance state machine (DBX-60), kept in sync between console and the gateway.
+enum InstanceStatus {
+  INSTANCE_STATUS_UNSPECIFIED = 0;
+  // Created in console, not yet acknowledged by the gateway.
+  INSTANCE_STATUS_PENDING = 1;
+  // The gateway is creating the actor, its egress policy, or the daemon is hydrating the workspace.
+  INSTANCE_STATUS_PROVISIONING = 2;
+  INSTANCE_STATUS_RUNNING = 3;
+  INSTANCE_STATUS_SUSPENDED = 4;
+  INSTANCE_STATUS_SNAPSHOTTING = 5;
+  // Suspended for longer than `completeAfter`, or stopped explicitly. The actor is deleted, and with it the
+  // transcript on its workspace volume; snapshots are kept.
+  INSTANCE_STATUS_COMPLETED = 6;
+  INSTANCE_STATUS_FAILED = 7;
+  INSTANCE_STATUS_CANCELLED = 8;
+}
+
+// BillingMode selects how an agent connection pays for model traffic (section 4.11).
+enum BillingMode {
+  BILLING_MODE_UNSPECIFIED = 0;
+  // Through the console AI proxy, with the instance's proxy token injected at egress.
+  BILLING_MODE_PROXY = 1;
+  // On the instance owner's linked Claude or ChatGPT plan.
+  BILLING_MODE_SUBSCRIPTION = 2;
+}
+
+// SnapshotFidelity says what a snapshot, or a restore from it, preserves.
+enum SnapshotFidelity {
+  SNAPSHOT_FIDELITY_UNSPECIFIED = 0;
+  // Memory and filesystem: running processes are restored.
+  SNAPSHOT_FIDELITY_MEMORY = 1;
+  // Filesystem only: the instance cold-boots (for example because the box's template changed since).
+  SNAPSHOT_FIDELITY_FILESYSTEM = 2;
+}
+
+// ErrorReason is attached to gRPC errors as an ErrorDetail status detail so callers can branch on it.
+enum ErrorReason {
+  ERROR_REASON_UNSPECIFIED = 0;
+  // The agent does not support the requested thread action (code UNIMPLEMENTED or FAILED_PRECONDITION).
+  ERROR_REASON_UNSUPPORTED = 1;
+  // No gateway tunnel for the cluster (code UNAVAILABLE). The UI falls back to the console index.
+  ERROR_REASON_CLUSTER_OFFLINE = 2;
+  // The call needs a running sandbox but the instance is suspended. Console resumes and retries where allowed.
+  ERROR_REASON_INSTANCE_SUSPENDED = 3;
+  ERROR_REASON_INSTANCE_NOT_FOUND = 4;
+  ERROR_REASON_THREAD_NOT_FOUND = 5;
+  // A revision or compare-and-swap version was older than the stored one (code ABORTED).
+  ERROR_REASON_STALE_REVISION = 6;
+  // Credentials could not be fetched or refreshed (code UNAVAILABLE).
+  ERROR_REASON_CREDENTIALS_UNAVAILABLE = 7;
+  // The repository is outside the box's effective allowlist (code PERMISSION_DENIED).
+  ERROR_REASON_REPOSITORY_NOT_ALLOWED = 8;
+  reserved 9;
+  reserved "ERROR_REASON_ARCHIVE_UNAVAILABLE";
+  // The per-instance running-thread limit is reached; the thread is queued as `waiting`.
+  ERROR_REASON_THREAD_LIMIT_REACHED = 10;
+  // The agent's subscription credential was rejected (401) by the vendor.
+  ERROR_REASON_AGENT_AUTH_FAILED = 11;
+  // The agent's subscription plan rate limit was reached.
+  ERROR_REASON_PLAN_LIMIT_REACHED = 12;
+  // The agent, model or config value is outside the box's catalog.
+  ERROR_REASON_INVALID_AGENT_OR_MODEL = 13;
+  // A file write precondition (expected sha256) did not match (code FAILED_PRECONDITION).
+  ERROR_REASON_FILE_CONFLICT = 14;
+}
+
+// ErrorDetail is attached to gRPC status details, and embedded where errors are reported as data.
+message ErrorDetail {
+  ErrorReason reason = 1;
+  // Human-readable message, safe to show to users.
+  string message = 2;
+  // Extra structured context, e.g. {"action": "fork"} for UNSUPPORTED.
+  map<string, string> metadata = 3;
+}
+
+// Principal identifies the console user on whose behalf a call is made, for attribution
+// (thread `created_by`, interaction `answered_by`, lease holders).
+message Principal {
+  string user_id = 1;
+  string email = 2;
+  string name = 3;
+}
+
+// RepositorySpec is a repository to check out at `~/<repo>` (section 4.2b).
+message RepositorySpec {
+  // Clone URL, normalized to https (as `Git.normalize_url`), e.g. https://github.com/pluralsh/console.git.
+  string url = 1;
+  // Checkout directory name under `~`. Empty means the daemon applies the naming rule: `<repo>`, or
+  // `<owner>-<repo>` on a collision.
+  string directory = 2;
+  // Branch to check out. Empty means the remote's default branch.
+  string branch = 3;
+  // Human description from console's repository metadata, used to seed `Project.md`.
+  string description = 4;
+}
+
+// Checkout is a git checkout discovered under the home directory or a thread worktree.
+message Checkout {
+  // Absolute path, e.g. /home/dev/console or /home/dev/.threads/<thread_id>/console.
+  string path = 1;
+  // Directory name, e.g. "console".
+  string name = 2;
+  string remote_url = 3;
+  string default_branch = 4;
+  string branch = 5;
+  string head_sha = 6;
+  bool dirty = 7;
+  // Set when the checkout is a per-thread worktree.
+  string worktree_thread_id = 8;
+  int32 ahead = 9;
+  int32 behind = 10;
+}
+
+// IdlePolicy mirrors DevboxRunner.spec.idlePolicy after workbench narrowing (section 4.3a).
+message IdlePolicy {
+  // Default 2m.
+  google.protobuf.Duration activity_window = 1;
+  // Sustained CPU below this percentage of one core counts as idle. Default 5.
+  double cpu_threshold_percent = 2;
+  // Default 5m.
+  google.protobuf.Duration grace_period = 3;
+  // Default 12h.
+  google.protobuf.Duration max_deferral = 4;
+  // Default 24h.
+  google.protobuf.Duration max_continuous_awake = 5;
+  // Default 14d.
+  google.protobuf.Duration complete_after = 6;
+}
+
+enum LeaseKind {
+  LEASE_KIND_UNSPECIFIED = 0;
+  // A visible workbench tab, or a CLI attach/port-forward session. Always keeps the box awake.
+  LEASE_KIND_VIEWER = 1;
+  // "Keep awake until T", clamped to maxDeferral.
+  LEASE_KIND_DEFERRAL = 2;
+}
+
+// Lease is an absolute-expiry keep-awake input pushed down by console. Expired leases are ignored, so an outage
+// can never keep boxes running.
+message Lease {
+  LeaseKind kind = 1;
+  // Who holds it, for status text ("Kept awake until 6:40 PM by Alice").
+  Principal holder = 2;
+  google.protobuf.Timestamp expires_at = 3;
+  // For deferrals: what the user asked for before clamping.
+  google.protobuf.Timestamp requested_until = 4;
+}
+
+// BusyReasonKind is an activity signal from section 4.3a.
+enum BusyReasonKind {
+  BUSY_REASON_KIND_UNSPECIFIED = 0;
+  BUSY_REASON_KIND_AGENT_TURN = 1;
+  BUSY_REASON_KIND_PROCESS_ACTIVITY = 2;
+  BUSY_REASON_KIND_TERMINAL_JOB = 3;
+  BUSY_REASON_KIND_INTERACTIVE_STREAM = 4;
+  BUSY_REASON_KIND_VIEWER_LEASE = 5;
+  BUSY_REASON_KIND_DEFERRAL_LEASE = 6;
+  BUSY_REASON_KIND_PENDING_INTERACTION = 7;
+}
+
+message BusyReason {
+  BusyReasonKind kind = 1;
+  // e.g. "go test ./..." or the thread title.
+  string detail = 2;
+  // When this signal stops counting as busy if nothing else happens.
+  google.protobuf.Timestamp until = 3;
+  // Thread or terminal the signal belongs to, if any.
+  string thread_id = 4;
+  string terminal_id = 5;
+}
+
+// IdleState is what the daemon thinks about the box, shown in the instance status pill.
+message IdleState {
+  bool idle = 1;
+  google.protobuf.Timestamp idle_since = 2;
+  repeated BusyReason busy_reasons = 3;
+  // When the daemon will emit SuspendRequested if nothing changes (idle_since + grace period).
+  google.protobuf.Timestamp suspend_at = 4;
+  google.protobuf.Timestamp evaluated_at = 5;
+}
+
+// SuspendReason says why an instance is (being) suspended.
+enum SuspendReason {
+  SUSPEND_REASON_UNSPECIFIED = 0;
+  SUSPEND_REASON_IDLE = 1;
+  SUSPEND_REASON_USER = 2;
+  SUSPEND_REASON_MAX_CONTINUOUS_AWAKE = 3;
+  SUSPEND_REASON_DAEMON_UNRESPONSIVE = 4;
+  SUSPEND_REASON_EVICTION = 5;
+  SUSPEND_REASON_SNAPSHOT = 6;
+}
+
+// AgentLaunch configures one agent connection in an instance. Billing is fixed per agent connection because the
+// daemon runs one ACP process per agent type (section 4.6b).
+message AgentLaunch {
+  AgentType agent = 1;
+  BillingMode billing = 2;
+  // AgentCredential ID when billing is SUBSCRIPTION. The secret is fetched with GetInstanceCredentials.
+  string credential_id = 3;
+  // `claude_oauth_token`, `codex_chatgpt_auth` or `codex_access_token`.
+  string credential_kind = 4;
+  // Negotiate ACP v2 when the adapter serves it (DevboxRunner.spec.agents[].acpV2).
+  bool acp_v2 = 5;
+  // Owner opted in to let collaborators prompt threads on this subscription-backed agent.
+  bool allow_collaborators = 6;
+}
+
+// ConfigOptionSetting sets one ACP session config option (model, mode, thought level, ...).
+message ConfigOptionSetting {
+  // ACP config option ID. For the model the daemon also accepts the literal "model", resolved to the option with
+  // `category: model`.
+  string config_id = 1;
+  // ACP select value.
+  string value = 2;
+}

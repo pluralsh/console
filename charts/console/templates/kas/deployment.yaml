@@ -75,6 +75,9 @@ spec:
             - containerPort: {{ .Values.kas.service.privateApiPort }}
             - containerPort: {{ .Values.kas.service.observabilityPort }}
             - containerPort: {{ .Values.kas.service.agentProxyPort }}
+            {{- if .Values.kas.devbox.enabled }}
+            - containerPort: {{ .Values.kas.service.devboxPort }}
+            {{- end }}
           readinessProbe:
             httpGet:
               path: /readiness
@@ -179,6 +182,15 @@ spec:
                 items:
                   - key: {{ .Values.kas.jwtSecret.key }}
                     path: jwt_secret
+            {{- if .Values.kas.devbox.enabled }}
+            {{- with .Values.kas.devbox.streamTokenSecret }}
+            - secret:
+                name: {{ .name }}
+                items:
+                  - key: {{ .key }}
+                    path: devbox_stream_token
+            {{- end }}
+            {{- end }}
             {{- if .Values.kas.tls.enabled }}
             - secret:
                 name: {{ required "kas.tls.existingSecret is required when KAS TLS is enabled" .Values.kas.tls.existingSecret }}

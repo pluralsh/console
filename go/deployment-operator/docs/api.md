@@ -15,6 +15,7 @@ Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 AP
 - [ClusterDrain](#clusterdrain)
 - [CustomHealth](#customhealth)
 - [CustomInsightPriority](#custominsightpriority)
+- [DevboxRunner](#devboxrunner)
 - [ImageWarmer](#imagewarmer)
 - [IngressReplica](#ingressreplica)
 - [KubecostExtractor](#kubecostextractor)
@@ -644,6 +645,538 @@ _Appears in:_
 
 
 
+#### DevboxAWSIdentity
+
+
+
+
+
+
+
+_Appears in:_
+- [DevboxCloudIdentity](#devboxcloudidentity)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `roleArn` _string_ |  |  | Pattern: `^arn:aws[a-zA-Z-]*:iam::[0-9]\{12\}:role/.+$` <br />Required: \{\} <br /> |
+| `durationSeconds` _integer_ |  |  | Maximum: 43200 <br />Minimum: 900 <br />Optional: \{\} <br /> |
+| `sessionPolicy` _string_ | SessionPolicy is an inline IAM policy JSON further scoping the session. |  | Optional: \{\} <br /> |
+
+
+#### DevboxAgent
+
+
+
+DevboxAgent declares one supported harness.
+
+
+
+_Appears in:_
+- [DevboxRunnerSpec](#devboxrunnerspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `type` _[DevboxAgentType](#devboxagenttype)_ | Type of the harness. |  | Enum: [claude codex opencode gemini pi] <br />Required: \{\} <br /> |
+| `default` _boolean_ | Default marks the agent used when a workbench doesn't pick one. |  | Optional: \{\} <br /> |
+| `adapterVersion` _string_ | AdapterVersion pins the ACP adapter version. Defaults to the version shipped in the image. |  | Optional: \{\} <br /> |
+| `models` _string array_ | Models is an allowlist of model ids. Empty allows every model the agent reports. |  | MaxItems: 64 <br />Optional: \{\} <br /> |
+| `defaultModel` _string_ | DefaultModel is the model new sessions start on. |  | Optional: \{\} <br /> |
+| `acpV2` _boolean_ | ACPV2 opts the harness into the ACP v2 protocol where the adapter supports it. |  | Optional: \{\} <br /> |
+
+
+#### DevboxAgentStatus
+
+
+
+
+
+
+
+_Appears in:_
+- [DevboxRunnerStatus](#devboxrunnerstatus)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `type` _[DevboxAgentType](#devboxagenttype)_ |  |  | Enum: [claude codex opencode gemini pi] <br /> |
+| `probeStatus` _string_ | ProbeStatus is OK, FAILED or MISSING. |  |  |
+| `adapterVersion` _string_ |  |  | Optional: \{\} <br /> |
+| `probeError` _string_ |  |  | Optional: \{\} <br /> |
+
+
+#### DevboxAgentType
+
+_Underlying type:_ _string_
+
+DevboxAgentType is a coding-agent harness a devbox can run (section 4.2a).
+
+_Validation:_
+- Enum: [claude codex opencode gemini pi]
+
+_Appears in:_
+- [DevboxAgent](#devboxagent)
+- [DevboxAgentStatus](#devboxagentstatus)
+
+| Field | Description |
+| --- | --- |
+| `claude` |  |
+| `codex` |  |
+| `opencode` |  |
+| `gemini` |  |
+| `pi` |  |
+
+
+#### DevboxAzureIdentity
+
+
+
+
+
+
+
+_Appears in:_
+- [DevboxCloudIdentity](#devboxcloudidentity)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `tenantId` _string_ |  |  | Required: \{\} <br /> |
+| `clientId` _string_ |  |  | Required: \{\} <br /> |
+
+
+#### DevboxBrowser
+
+
+
+
+
+
+
+_Appears in:_
+- [DevboxRunnerSpec](#devboxrunnerspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `enabled` _boolean_ |  |  | Optional: \{\} <br /> |
+
+
+#### DevboxCapacityStatus
+
+
+
+DevboxCapacityStatus reports how instances are sized from the WorkerPool and how the autoscaler sees it.
+
+
+
+_Appears in:_
+- [DevboxRunnerStatus](#devboxrunnerstatus)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `instancesPerWorker` _integer_ | InstancesPerWorker is how many instances one worker hosts at once. |  |  |
+| `limitedBy` _string_ | LimitedBy is the worker resource (cpu, memory or disk) that bounds InstancesPerWorker. |  | Optional: \{\} <br /> |
+| `instanceCPU` _[Quantity](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#quantity-resource-api)_ | InstanceCPU and InstanceMemory are the limits each instance runs with. |  |  |
+| `instanceMemory` _[Quantity](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#quantity-resource-api)_ |  |  |  |
+| `instanceDisk` _[Quantity](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#quantity-resource-api)_ | InstanceDisk is each instance's share of the worker's budgeted disk, when DiskSize is set. |  | Optional: \{\} <br /> |
+| `workers` _integer_ | Workers are the managed pool's schedulable workers, DrainingWorkers those being removed. |  | Optional: \{\} <br /> |
+| `drainingWorkers` _integer_ |  |  | Optional: \{\} <br /> |
+| `runningInstances` _integer_ | RunningInstances are instances placed on the managed pool's schedulable workers. |  | Optional: \{\} <br /> |
+| `additionalFreeInstances` _integer_ | AdditionalFreeInstances are the instance slots free on AdditionalPools. |  | Optional: \{\} <br /> |
+| `desiredWorkers` _integer_ | DesiredWorkers is the autoscaler's target for the managed pool. |  | Optional: \{\} <br /> |
+| `lastScaleTime` _[Time](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#time-v1-meta)_ |  |  | Optional: \{\} <br /> |
+
+
+#### DevboxCloudIdentity
+
+
+
+DevboxCloudIdentity is one named cloud identity. Exactly one provider must be set.
+
+
+
+_Appears in:_
+- [DevboxRunnerSpec](#devboxrunnerspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `name` _string_ |  |  | MaxLength: 63 <br />Pattern: `^[a-z0-9]([-a-z0-9]*[a-z0-9])?$` <br />Required: \{\} <br /> |
+| `default` _boolean_ | Default marks the identity instances get when a workbench doesn't pick one. |  | Optional: \{\} <br /> |
+| `aws` _[DevboxAWSIdentity](#devboxawsidentity)_ |  |  | Optional: \{\} <br /> |
+| `gcp` _[DevboxGCPIdentity](#devboxgcpidentity)_ |  |  | Optional: \{\} <br /> |
+| `azure` _[DevboxAzureIdentity](#devboxazureidentity)_ |  |  | Optional: \{\} <br /> |
+| `extraHosts` _string array_ | ExtraHosts are API hosts allowlisted only when this identity is attached. |  | Optional: \{\} <br /> |
+
+
+#### DevboxEnvVar
+
+
+
+
+
+
+
+_Appears in:_
+- [DevboxRunnerSpec](#devboxrunnerspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `name` _string_ |  |  | MaxLength: 256 <br />Pattern: `^[A-Za-z_][A-Za-z0-9_]*$` <br />Required: \{\} <br /> |
+| `value` _string_ |  |  | Optional: \{\} <br /> |
+| `valueFrom` _[DevboxEnvVarSource](#devboxenvvarsource)_ |  |  | Optional: \{\} <br /> |
+
+
+#### DevboxEnvVarSource
+
+
+
+
+
+
+
+_Appears in:_
+- [DevboxEnvVar](#devboxenvvar)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `secretKeyRef` _[DevboxSecretKeySelector](#devboxsecretkeyselector)_ |  |  | Required: \{\} <br /> |
+
+
+#### DevboxGCPIdentity
+
+
+
+
+
+
+
+_Appears in:_
+- [DevboxCloudIdentity](#devboxcloudidentity)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `workloadIdentityProvider` _string_ | WorkloadIdentityProvider is the full provider resource name<br />(projects/<n>/locations/global/workloadIdentityPools/<pool>/providers/<provider>). |  | Required: \{\} <br /> |
+| `serviceAccount` _string_ | ServiceAccount is the email of the service account to impersonate. |  | Required: \{\} <br /> |
+
+
+#### DevboxHTTPAllowlistEntry
+
+
+
+
+
+
+
+_Appears in:_
+- [DevboxRunnerSpec](#devboxrunnerspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `host` _string_ | Host is a hostname or a *.suffix wildcard. |  | MinLength: 1 <br />Required: \{\} <br /> |
+| `port` _integer_ |  | 443 | Maximum: 65535 <br />Minimum: 1 <br />Optional: \{\} <br /> |
+| `passthrough` _boolean_ | Passthrough tunnels TLS without interception (no credential injection or request authz). |  | Optional: \{\} <br /> |
+
+
+#### DevboxIdlePolicy
+
+
+
+
+
+
+
+_Appears in:_
+- [DevboxRunnerSpec](#devboxrunnerspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `activityWindow` _[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#duration-v1-meta)_ | ActivityWindow is how far back activity counts toward keeping an instance awake. | 2m | Optional: \{\} <br /> |
+| `cpuThreshold` _string_ | CPUThreshold is the CPU utilization above which an instance counts as active, e.g. "5%". | 5% | Optional: \{\} <br />Pattern: `^([0-9]\|[1-9][0-9]\|100)(\.[0-9]+)?%$` <br /> |
+| `gracePeriod` _[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#duration-v1-meta)_ | GracePeriod is how long an instance stays idle before it is suspended. | 5m | Optional: \{\} <br /> |
+| `maxDeferral` _[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#duration-v1-meta)_ | MaxDeferral bounds how long agents can defer a suspension. | 12h | Optional: \{\} <br /> |
+| `maxContinuousAwake` _[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#duration-v1-meta)_ | MaxContinuousAwake bounds how long an instance can stay awake. | 24h | Optional: \{\} <br /> |
+| `completeAfter` _[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#duration-v1-meta)_ | CompleteAfter is how long a suspended instance is kept before it is completed. | 336h | Optional: \{\} <br /> |
+
+
+#### DevboxImageUpdateMode
+
+_Underlying type:_ _string_
+
+DevboxImageUpdateMode controls whether the operator re-resolves spec.image.
+
+_Validation:_
+- Enum: [pinned poll]
+
+_Appears in:_
+- [DevboxImageUpdatePolicy](#devboximageupdatepolicy)
+
+| Field | Description |
+| --- | --- |
+| `pinned` | DevboxImageUpdatePinned keeps the resolved digest until the spec changes.<br /> |
+| `poll` | DevboxImageUpdatePoll re-resolves the tag every interval and rolls a new revision when the digest changes.<br /> |
+
+
+#### DevboxImageUpdatePolicy
+
+
+
+
+
+
+
+_Appears in:_
+- [DevboxRunnerSpec](#devboxrunnerspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `mode` _[DevboxImageUpdateMode](#devboximageupdatemode)_ | Mode is pinned or poll. |  | Enum: [pinned poll] <br />Optional: \{\} <br /> |
+| `interval` _[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#duration-v1-meta)_ | Interval between re-resolutions in poll mode. Defaults to 1h. |  | Optional: \{\} <br /> |
+
+
+#### DevboxPackageServers
+
+
+
+DevboxPackageServers enables egress to each ecosystem's public registries (see PackageServerHosts).
+
+
+
+_Appears in:_
+- [DevboxRunnerSpec](#devboxrunnerspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `go` _boolean_ | Go: proxy.golang.org and sum.golang.org. | true | Optional: \{\} <br /> |
+| `rust` _boolean_ | Rust: crates.io and rustup's static.rust-lang.org. | true | Optional: \{\} <br /> |
+| `javascript` _boolean_ | JavaScript: the npm and yarn registries and nodejs.org. | true | Optional: \{\} <br /> |
+| `java` _boolean_ | Java: Maven Central and the Gradle plugin portal and distributions. | true | Optional: \{\} <br /> |
+| `elixir` _boolean_ | Elixir: hex.pm and its package and build repositories. | true | Optional: \{\} <br /> |
+| `python` _boolean_ | Python: PyPI. | true | Optional: \{\} <br /> |
+| `ruby` _boolean_ | Ruby: rubygems.org. |  | Optional: \{\} <br /> |
+| `php` _boolean_ | PHP: Packagist. |  | Optional: \{\} <br /> |
+| `dotnet` _boolean_ | Dotnet: NuGet. |  | Optional: \{\} <br /> |
+
+
+#### DevboxResources
+
+
+
+
+
+
+
+_Appears in:_
+- [DevboxRunnerSpec](#devboxrunnerspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `cpu` _[Quantity](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#quantity-resource-api)_ | CPU limit per instance. When the WorkerPool has limits this is the minimum, and instances get an even share<br />of the worker's CPU. | 2 | Optional: \{\} <br /> |
+| `memory` _[Quantity](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#quantity-resource-api)_ | Memory limit per instance, a minimum in the same way as CPU. | 4Gi | Optional: \{\} <br /> |
+| `disk` _[Quantity](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#quantity-resource-api)_ | Disk is the size of the durable /home/dev workspace volume. Each instance slot is budgeted Disk plus Memory<br />for its own snapshot and Memory for each of the WorkerPool's SuspendedSnapshotsPerInstance. | 20Gi | Optional: \{\} <br /> |
+
+
+#### DevboxRevision
+
+
+
+
+
+
+
+_Appears in:_
+- [DevboxRunnerStatus](#devboxrunnerstatus)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `revision` _integer_ |  |  |  |
+| `name` _string_ | Name is the ActorTemplate name. |  |  |
+| `hash` _string_ | Hash of the inputs that produced this revision. |  |  |
+| `image` _string_ |  |  |  |
+| `phase` _[DevboxRevisionPhase](#devboxrevisionphase)_ |  |  |  |
+| `goldenTag` _string_ |  |  | Optional: \{\} <br /> |
+| `message` _string_ |  |  | Optional: \{\} <br /> |
+| `createdAt` _[Time](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#time-v1-meta)_ |  |  | Optional: \{\} <br /> |
+
+
+#### DevboxRevisionPhase
+
+_Underlying type:_ _string_
+
+DevboxRevisionPhase is the lifecycle of one ActorTemplate revision.
+
+
+
+_Appears in:_
+- [DevboxRevision](#devboxrevision)
+
+| Field | Description |
+| --- | --- |
+| `Building` | DevboxRevisionBuilding means the ActorTemplate exists and its golden snapshot is not ready yet.<br /> |
+| `Probing` | DevboxRevisionProbing means the golden snapshot is ready and the agent probe is running.<br /> |
+| `Ready` | DevboxRevisionReady means the revision passed the probe and may serve new instances.<br /> |
+| `Failed` | DevboxRevisionFailed is terminal: the golden boot, image contract or agent probe failed.<br /> |
+| `Retired` | DevboxRevisionRetired means a newer revision is current; the revision stays until nothing references it.<br /> |
+
+
+#### DevboxRunner
+
+
+
+DevboxRunner is the Schema for the devboxrunners API. It defines one kind of devbox
+(image, agents, limits, egress) backed by a Substrate WorkerPool and ActorTemplate revisions.
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `DevboxRunner` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[DevboxRunnerSpec](#devboxrunnerspec)_ |  |  |  |
+
+
+#### DevboxRunnerSpec
+
+
+
+DevboxRunnerSpec defines the desired state of DevboxRunner.
+
+
+
+_Appears in:_
+- [DevboxRunner](#devboxrunner)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `name` _string_ | Name of the Devbox in console. Defaults to metadata.name. |  | Optional: \{\} <br /> |
+| `image` _string_ | Image is the devbox image. Defaults to ghcr.io/pluralsh/devbox-fat at the operator's version;<br />ghcr.io/pluralsh/devbox-minimal is the lean alternative. Custom images must meet the image<br />contract (sh.plural.devbox/contract=v1 label, devbox-daemon entrypoint, UID 1000) and are<br />normally built FROM one of these. |  | Optional: \{\} <br /> |
+| `imageUpdatePolicy` _[DevboxImageUpdatePolicy](#devboximageupdatepolicy)_ | ImageUpdatePolicy controls re-resolution of spec.image. Defaults to pinned for digest<br />references and to poll every hour for tag references. |  | Optional: \{\} <br /> |
+| `imagePullSecrets` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core) array_ | ImagePullSecrets are dockerconfigjson secrets used only to resolve spec.image to a digest.<br />Nodes pull with their own credentials (Substrate's image credential provider). |  | Optional: \{\} <br /> |
+| `agents` _[DevboxAgent](#devboxagent) array_ | Agents are the coding-agent harnesses this devbox supports. Exactly one must be the default. |  | MaxItems: 5 <br />MinItems: 1 <br />Required: \{\} <br /> |
+| `resources` _[DevboxResources](#devboxresources)_ | Resources are the per-instance limits. |  | Optional: \{\} <br /> |
+| `workerPool` _[DevboxWorkerPool](#devboxworkerpool)_ | WorkerPool sizes the Substrate WorkerPool backing this runner. |  | Optional: \{\} <br /> |
+| `scmConnections` _string array_ | ScmConnections are names of console SCM connections instances may use for git credentials. |  | Optional: \{\} <br /> |
+| `allowedRepositories` _string array_ | AllowedRepositories the git repositories allowed to be used with this devbox,<br />with the same semantics as AgentRuntime.spec.allowedRepositories. |  | Optional: \{\} <br /> |
+| `httpAllowlist` _[DevboxHTTPAllowlistEntry](#devboxhttpallowlistentry) array_ | HTTPAllowlist are extra hosts instances may reach, on top of the built-in ones. |  | MaxItems: 256 <br />Optional: \{\} <br /> |
+| `packageServers` _[DevboxPackageServers](#devboxpackageservers)_ | PackageServers opens egress to public package registries by ecosystem. Go, Rust, JavaScript, Java, Elixir<br />and Python are on unless set to false. | \{  \} | Optional: \{\} <br /> |
+| `env` _[DevboxEnvVar](#devboxenvvar) array_ | Env are environment variables for every process the box starts: agents, terminals and git. Plain values<br />are part of the template, so changing them rolls a new revision. Secret values are read when an instance<br />wakes and are never baked into the template, the golden snapshot or the workspace volume. |  | MaxItems: 128 <br />Optional: \{\} <br /> |
+| `browser` _[DevboxBrowser](#devboxbrowser)_ | Browser enables the in-box headless browser. |  | Optional: \{\} <br /> |
+| `bootstrapScript` _string_ | BootstrapScript runs once during the golden boot, so its results are baked into the snapshot. |  | Optional: \{\} <br /> |
+| `mise` _[MiseSpec](#misespec)_ | Mise is an inline mise.toml installed during the golden boot. |  | Optional: \{\} <br /> |
+| `idlePolicy` _[DevboxIdlePolicy](#devboxidlepolicy)_ | IdlePolicy bounds idle suspension. Workbenches can only lower these values. |  | Optional: \{\} <br /> |
+| `cloudIdentities` _[DevboxCloudIdentity](#devboxcloudidentity) array_ | CloudIdentities are named cloud identities instances can assume. At most one is the default. |  | MaxItems: 16 <br />Optional: \{\} <br /> |
+
+
+
+
+#### DevboxSandboxClass
+
+_Underlying type:_ _string_
+
+DevboxSandboxClass is the Substrate sandbox class backing the runner's WorkerPool.
+
+_Validation:_
+- Enum: [gvisor microvm]
+
+_Appears in:_
+- [DevboxWorkerPool](#devboxworkerpool)
+
+| Field | Description |
+| --- | --- |
+| `gvisor` |  |
+| `microvm` |  |
+
+
+#### DevboxSecretKeySelector
+
+
+
+
+
+
+
+_Appears in:_
+- [DevboxEnvVarSource](#devboxenvvarsource)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `namespace` _string_ | Namespace of the Secret; defaults to the operator's namespace. |  | Optional: \{\} <br /> |
+| `name` _string_ |  |  | MinLength: 1 <br />Required: \{\} <br /> |
+| `key` _string_ |  |  | MinLength: 1 <br />Required: \{\} <br /> |
+
+
+#### DevboxWorkerAutoscaling
+
+
+
+
+
+
+
+_Appears in:_
+- [DevboxWorkerPool](#devboxworkerpool)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `minReplicas` _integer_ |  | 1 | Minimum: 0 <br />Optional: \{\} <br /> |
+| `maxReplicas` _integer_ |  |  | Minimum: 1 <br />Required: \{\} <br /> |
+| `spareInstances` _integer_ | SpareInstances is how many free instance slots are kept across the runner's pools, so a resume doesn't<br />wait for a new worker (and node) to start. | 1 | Minimum: 0 <br />Optional: \{\} <br /> |
+| `scaleDownDelay` _[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#duration-v1-meta)_ | ScaleDownDelay is how long after the last scaling event idle workers are kept before being removed. | 10m | Optional: \{\} <br /> |
+
+
+#### DevboxWorkerPool
+
+
+
+DevboxWorkerPool is the Substrate WorkerPool the operator runs for the runner. Each worker is expected to have a
+node to itself (requests close to the node's allocatable), so the pool's limits and DiskSize describe one node.
+
+Instances are sized from the pool: the instances one worker hosts is the most that fit its CPU and memory
+limits and its DiskSize, given spec.resources as each instance's minimum, and every instance then gets an even
+share of the worker's CPU and memory. Substrate places instances by those limits, so a worker never hosts more
+instances than its disk was budgeted for.
+
+
+
+_Appears in:_
+- [DevboxRunnerSpec](#devboxrunnerspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `replicas` _integer_ | Replicas is the number of Substrate workers. Ignored when Autoscaling is set. | 1 | Minimum: 0 <br />Optional: \{\} <br /> |
+| `autoscaling` _[DevboxWorkerAutoscaling](#devboxworkerautoscaling)_ | Autoscaling lets the operator size the pool to demand: it keeps SpareInstances free instance slots and<br />removes only workers that host no instance. |  | Optional: \{\} <br /> |
+| `diskSize` _[Quantity](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#quantity-resource-api)_ | DiskSize is the size of the disk backing /var/lib/ate on each worker's node (e.g. the devbox-nodes<br />catalog's data disk). Unset leaves disk out of instance sizing. |  | Optional: \{\} <br /> |
+| `diskReservePercent` _integer_ | DiskReservePercent of DiskSize is kept for the image cache and snapshot staging rather than budgeted to<br />instances. | 20 | Maximum: 90 <br />Minimum: 0 <br />Optional: \{\} <br /> |
+| `suspendedSnapshotsPerInstance` _integer_ | SuspendedSnapshotsPerInstance is how many suspended instances' snapshots each instance slot budgets disk<br />for. A suspended instance frees its slot at once, but its snapshot stays on the node until Substrate<br />detaches it (30 minutes by default), so heavy suspend and resume churn stacks snapshots on a full worker. | 1 | Maximum: 10 <br />Minimum: 0 <br />Optional: \{\} <br /> |
+| `additionalPools` _[DevboxWorkerPoolRef](#devboxworkerpoolref) array_ | AdditionalPools are existing Substrate WorkerPools this runner's instances may also run on. The operator<br />labels each with the runner's worker selector and removes the label when the pool leaves this list. They<br />should run the same sandbox class as the runner, and their free capacity counts toward SpareInstances. |  | Optional: \{\} <br /> |
+| `maxInstances` _integer_ | MaxInstances caps concurrently running instances in console. Unset means unlimited. |  | Minimum: 1 <br />Optional: \{\} <br /> |
+| `sandboxClass` _[DevboxSandboxClass](#devboxsandboxclass)_ | SandboxClass is the isolation technology. Immutable once the WorkerPool exists. | gvisor | Enum: [gvisor microvm] <br />Optional: \{\} <br /> |
+| `sandboxConfig` _string_ | SandboxConfig names a Substrate sandbox class ConfigMap (WorkerPool sandboxClasses[].configRef). |  | Optional: \{\} <br /> |
+| `workerImage` _string_ | WorkerImage overrides the Substrate worker image configured on the operator for the sandbox class. |  | Optional: \{\} <br /> |
+| `resources` _[ResourceRequirements](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#resourcerequirements-v1-core)_ | Resources of each worker pod. |  | Optional: \{\} <br /> |
+| `nodeSelector` _object (keys:string, values:string)_ |  |  | Optional: \{\} <br /> |
+| `nodeAffinity` _[NodeAffinity](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#nodeaffinity-v1-core)_ | NodeAffinity scheduling rules for the worker pods (WorkerPool template.nodeAffinity). |  | Optional: \{\} <br /> |
+| `tolerations` _[Toleration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#toleration-v1-core) array_ |  |  | Optional: \{\} <br /> |
+| `podAnnotations` _object (keys:string, values:string)_ | PodAnnotations are added to the worker pods, e.g. karpenter.sh/do-not-disrupt. Keys in the ate.dev domain<br />are reserved by Substrate. |  | Optional: \{\} <br /> |
+| `priorityClassName` _string_ |  |  | Optional: \{\} <br /> |
+
+
+#### DevboxWorkerPoolRef
+
+
+
+
+
+
+
+_Appears in:_
+- [DevboxWorkerPool](#devboxworkerpool)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `name` _string_ |  |  | MinLength: 1 <br />Required: \{\} <br /> |
+| `namespace` _string_ | Namespace defaults to the namespace the operator runs devbox WorkerPools in. |  | Optional: \{\} <br /> |
+
+
 #### ExaConnection
 
 
@@ -1083,6 +1616,7 @@ See https://mise.jdx.dev/bootstrap.html
 
 _Appears in:_
 - [AgentRuntimeSpec](#agentruntimespec)
+- [DevboxRunnerSpec](#devboxrunnerspec)
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
@@ -1416,6 +1950,7 @@ _Appears in:_
 _Appears in:_
 - [AgentRunStatus](#agentrunstatus)
 - [AgentRuntimeStatus](#agentruntimestatus)
+- [DevboxRunnerStatus](#devboxrunnerstatus)
 - [SentinelRunJobStatus](#sentinelrunjobstatus)
 - [StackRunJobStatus](#stackrunjobstatus)
 - [VirtualClusterStatus](#virtualclusterstatus)

@@ -1,3 +1,18 @@
 {
-  "possibleTypes": {}
+  "possibleTypes": {
+    "DevboxContentBlock": [
+      "DevboxAudioContent",
+      "DevboxImageContent",
+      "DevboxResourceContent",
+      "DevboxResourceLinkContent",
+      "DevboxTextContent",
+      "DevboxUnknownContent"
+    ],
+    "DevboxToolCallContent": [
+      "DevboxToolCallBlock",
+      "DevboxToolCallDiff",
+      "DevboxToolCallTerminal",
+      "DevboxToolCallUnknown"
+    ]
+  }
 }

@@ -487,6 +487,12 @@ if is_set("CONSOLE_PSEUDOFS_ADDR") do
   config :console, pseudofs: get_env("CONSOLE_PSEUDOFS_ADDR")
 end
 
+config :console,
+  kas_devbox_grpc_addr: get_env("KAS_DEVBOX_GRPC_ADDR"),
+  kas_devbox_secret: get_env("KAS_DEVBOX_SECRET"),
+  kas_devbox_stream_url: get_env("KAS_DEVBOX_STREAM_URL"),
+  devbox_stream_token_key: get_env("DEVBOX_STREAM_TOKEN_KEY") || get_env("KAS_DEVBOX_SECRET")
+
 if is_set("CONSOLE_INSTANCE_DETAILS") do
   case JSON.decode(get_env("CONSOLE_INSTANCE_DETAILS")) do
     {:ok, %{} = details} -> config :console, :details, details

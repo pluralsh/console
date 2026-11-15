@@ -1,0 +1,22 @@
+apiVersion: v2
+name: agent-substrate
+description: >-
+  Installs Agent Substrate (ate-api-server, ate-controller, ate-idp-server, atelet, atenet and the
+  pod-certificate controller) with CloudNativePG or external Postgres and S3, GCS or Azure Blob
+  snapshot storage
+type: application
+version: 0.1.0
+appVersion: v1.0.0
+kubeVersion: ">=1.34.0-0"
+home: https://github.com/agent-substrate/substrate
+sources:
+  - https://github.com/agent-substrate/substrate
+  - https://github.com/pluralsh/console/tree/master/charts/agent-substrate
+maintainers:
+  - name: Plural
+    email: support@plural.sh
+dependencies:
+  - name: cloudnative-pg
+    version: 0.29.1
+    repository: https://cloudnative-pg.github.io/charts
+    condition: cloudnative-pg.enabled

@@ -35,6 +35,21 @@ data:
       listen:
         address: ":{{ .Values.kas.service.privateApiPort }}"
         authentication_secret_file: "/etc/kas/.privateapi_secret"
+    {{- if .Values.kas.devbox.enabled }}
+    devbox:
+      listen:
+        address: ":{{ .Values.kas.service.devboxPort }}"
+        {{- with .Values.kas.devbox.connectionsPerTokenPerMinute }}
+        connections_per_token_per_minute: {{ . }}
+        {{- end }}
+      url_path_prefix: "{{ .Values.kas.devbox.path }}"
+      console:
+        address: "{{ .Values.kas.devbox.consoleGrpcAddress | default (printf "console.%s:50051" .Release.Namespace) }}"
+      {{- with .Values.kas.devbox.streamTokenSecret }}
+      streams:
+        token_secret_file: "/etc/kas/devbox_stream_token"
+      {{- end }}
+    {{- end }}
     {{- if .Values.console.tls.enabled }}
     plural_url: "https://console.{{ .Release.Namespace }}:{{ .Values.service.port }}/gql"
     plural_insecure_skip_tls_verify: true

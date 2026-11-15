@@ -1,0 +1,2 @@
+# Fetched by `helm dependency build` (Chart.lock pins it).
+charts/*.tgz

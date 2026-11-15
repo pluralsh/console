@@ -1,0 +1,222 @@
+suite: postgres
+release:
+  name: ate
+  namespace: ate-system
+capabilities:
+  majorVersion: 1
+  minorVersion: 34
+templates:
+  - templates/*.yaml
+set:
+  rustfs.enabled: true
+tests:
+  - it: cnpg DSNs use the CNPG app and readwrite secrets and verify the cluster CA
+    template: templates/api-server.yaml
+    documentSelector:
+      path: kind
+      value: Deployment
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: PG_OWNER_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: ate-postgres-app
+                key: password
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: PG_READ_WRITE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: ate-postgres-readwrite
+                key: password
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: ATE_API_POSTGRES_READ_WRITE_CONNECTION_STRING
+            value: postgresql://substrate_readwrite_user:$(PG_READ_WRITE_PASSWORD)@ate-postgres-rw.ate-system.svc:5432/atepg?sslmode=verify-full&sslrootcert=/run/postgres-server-ca/server-ca.pem
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: postgres-server-ca
+            secret:
+              secretName: ate-postgres-ca
+              items:
+                - key: ca.crt
+                  path: server-ca.pem
+
+  - it: size10 appends pgxpool parameters to the DSNs
+    template: templates/api-server.yaml
+    documentSelector:
+      path: kind
+      value: Deployment
+    set:
+      clusterSize: size10
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: ATE_API_POSTGRES_OWNER_CONNECTION_STRING
+            value: postgresql://substrate_owner_user:$(PG_OWNER_PASSWORD)@ate-postgres-rw.ate-system.svc:5432/atepg?sslmode=verify-full&sslrootcert=/run/postgres-server-ca/server-ca.pem&pool_max_conns=64&pool_min_conns=4
+
+  - it: renders the CNPG Cluster inline once its CRD is served
+    template: templates/custom-resources.yaml
+    capabilities:
+      apiVersions:
+        - postgresql.cnpg.io/v1/Cluster
+    documentSelector:
+      path: kind
+      value: Cluster
+    asserts:
+      - equal:
+          path: spec.bootstrap.initdb.owner
+          value: substrate_owner_user
+      - equal:
+          path: spec.bootstrap.initdb.database
+          value: atepg
+      - contains:
+          path: spec.bootstrap.initdb.postInitApplicationSQL
+          content: CREATE SCHEMA substrate AUTHORIZATION substrate_owner
+      - equal:
+          path: spec.managed.roles[0]
+          value:
+            name: substrate_readwrite_user
+            ensure: present
+            login: true
+            inherit: false
+            inRoles: [substrate_readwrite]
+            passwordSecret:
+              name: ate-postgres-readwrite
+      - equal:
+          path: spec.enableSuperuserAccess
+          value: false
+      - equal:
+          path: metadata.annotations["helm.sh/resource-policy"]
+          value: keep
+
+  - it: size10 selects the CNPG size10 preset
+    template: templates/custom-resources.yaml
+    capabilities:
+      apiVersions:
+        - postgresql.cnpg.io/v1/Cluster
+    documentSelector:
+      path: kind
+      value: Cluster
+    set:
+      clusterSize: size10
+    asserts:
+      - equal:
+          path: spec.postgresql.parameters.max_connections
+          value: "500"
+
+  - it: barman backup renders a ScheduledBackup and rustfs credentials
+    template: templates/custom-resources.yaml
+    capabilities:
+      apiVersions:
+        - postgresql.cnpg.io/v1/Cluster
+    set:
+      postgres.cnpg.backup.enabled: true
+      postgres.cnpg.backup.destinationPath: s3://ate-snapshots/pg/
+    asserts:
+      - equal:
+          path: spec.backup.barmanObjectStore.endpointURL
+          value: http://rustfs.ate-system.svc:9000
+        documentSelector:
+          path: kind
+          value: Cluster
+      - equal:
+          path: spec.backup.barmanObjectStore.s3Credentials.accessKeyId.name
+          value: rustfs-credentials
+        documentSelector:
+          path: kind
+          value: Cluster
+      - equal:
+          path: spec.schedule
+          value: "0 0 3 * * *"
+        documentSelector:
+          path: kind
+          value: ScheduledBackup
+
+  - it: defers the CNPG Cluster to the bootstrap Job before its CRD exists
+    template: templates/bootstrap-job.yaml
+    documentSelector:
+      path: kind
+      value: ConfigMap
+    asserts:
+      - exists:
+          path: data["01-cluster-ate-postgres.yaml"]
+      - matchRegex:
+          path: data["01-cluster-ate-postgres.yaml"]
+          pattern: "meta.helm.sh/release-name: ate"
+
+  - it: external mode reads DSNs from secrets and ships the server CA
+    template: templates/api-server.yaml
+    documentSelector:
+      path: kind
+      value: Deployment
+    set:
+      postgres.mode: external
+      postgres.external.readWrite.secretName: pg-dsn
+      postgres.external.readWrite.key: rw
+      postgres.external.serverCA.pem: "-----BEGIN CERTIFICATE-----"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: ATE_API_POSTGRES_READ_WRITE_CONNECTION_STRING
+            valueFrom:
+              secretKeyRef:
+                name: pg-dsn
+                key: rw
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: ATE_API_POSTGRES_OWNER_CONNECTION_STRING
+            valueFrom:
+              secretKeyRef:
+                name: pg-dsn
+                key: rw
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: PG_OWNER_PASSWORD
+          any: true
+
+  - it: external mode renders the server CA secret from PEM
+    template: templates/api-server-config.yaml
+    set:
+      postgres.mode: external
+      postgres.external.readWrite.secretName: pg-dsn
+      postgres.external.serverCA.pem: "-----BEGIN CERTIFICATE-----"
+    documentSelector:
+      path: kind
+      value: Secret
+    asserts:
+      - equal:
+          path: metadata.name
+          value: postgres-server-ca
+      - exists:
+          path: stringData["server-ca.pem"]
+
+  - it: external mode renders no CNPG objects or postgres NetworkPolicy
+    templates:
+      - templates/custom-resources.yaml
+      - templates/networkpolicies.yaml
+    capabilities:
+      apiVersions:
+        - postgresql.cnpg.io/v1/Cluster
+    set:
+      postgres.mode: external
+      postgres.external.readWrite.secretName: pg-dsn
+    asserts:
+      - hasDocuments:
+          count: 0
+        template: templates/custom-resources.yaml
+      - containsDocument:
+          kind: NetworkPolicy
+          apiVersion: networking.k8s.io/v1
+          name: postgres
+        template: templates/networkpolicies.yaml
+        not: true

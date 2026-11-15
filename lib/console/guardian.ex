@@ -2,7 +2,7 @@ defmodule Console.Guardian do
   use Guardian, otp_app: :console
   import Console.Schema.Stack, only: [is_terminal: 1]
   require Logger
-  alias Console.Schema.{User, StackRun, AccessToken.Scope}
+  alias Console.Schema.{User, StackRun, AccessToken.Scope, Devbox, DevboxInstance}
   alias Console.Deployments.Stacks
   use Nebulex.Caching
 
@@ -11,6 +11,10 @@ defmodule Console.Guardian do
 
   def subject_for_token(%User{id: id}, _claims),
     do: {:ok, "user:#{id}"}
+  def subject_for_token(%DevboxInstance{id: id}, _claims),
+    do: {:ok, "devbox_instance:#{id}"}
+  def subject_for_token(%Devbox{id: id}, _claims),
+    do: {:ok, "devbox:#{id}"}
   def subject_for_token(_, _), do: {:error, :invalid_argument}
 
   def build_claims(%{} = claims, %User{} = user, _) do
@@ -20,6 +24,7 @@ defmodule Console.Guardian do
     |> Map.put("groups", groups(user))
     |> then(& {:ok, &1})
   end
+  def build_claims(claims, _, _), do: {:ok, claims}
 
   def resource_from_claims(%{"run_id" => run_id} = claims) do
     case Stacks.get_run(run_id) do
@@ -29,6 +34,9 @@ defmodule Console.Guardian do
       _ -> {:error, :invalid_token}
     end
   end
+
+  # never a console login: devbox tokens are only accepted, for their scopes, by `Console.Devboxes.Credentials.verify/2`
+  def resource_from_claims(%{"typ" => "devbox"}), do: {:error, :invalid_token}
 
   def resource_from_claims(%{"sub" => "user:" <> id} = claims) do
     case possibly_cached(id, claims) do

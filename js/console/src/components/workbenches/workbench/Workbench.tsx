@@ -72,6 +72,7 @@ import {
   WORKBENCH_JOBS_REL_PATH,
   WORKBENCH_PARAM_ID,
   WORKBENCHES_ABS_PATH,
+  WORKBENCH_DEVBOXES_REL_PATH,
   WORKBENCHES_ALERTS_REL_PATH,
   WORKBENCHES_EDIT_REL_PATH,
   WORKBENCHES_EVALS_REL_PATH,
@@ -317,6 +318,10 @@ export function WorkbenchTabs() {
           </Flex>
         ),
         path: jobsTabPath,
+      },
+      {
+        label: 'Devboxes',
+        path: `${workbenchBasePath}/${WORKBENCH_DEVBOXES_REL_PATH}`,
       },
       {
         label: 'Monitoring',

@@ -33,6 +33,7 @@ jobs:
           helm repo add bitnami https://charts.bitnami.com/bitnami
           helm repo add plural https://pluralsh.github.io/module-library
           helm repo add ory https://k8s.ory.sh/helm/charts
+          helm repo add cnpg https://cloudnative-pg.github.io/charts
       - name: Run chart-releaser
         id: release
         uses: helm/chart-releaser-action@v1.7.0

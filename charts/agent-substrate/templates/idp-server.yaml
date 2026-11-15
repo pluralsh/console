@@ -1,0 +1,121 @@
+{{- $ns := include "substrate.namespace" . -}}
+{{- $v := .Values.idpServer -}}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ate-idp-server
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+automountServiceAccountToken: false
+{{- if $v.pdb.enabled }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: ate-idp-server
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: ate-idp-server
+{{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: idp
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+spec:
+  selector:
+    app: ate-idp-server
+  ports:
+    - name: https
+      port: 443
+      targetPort: https
+      appProtocol: https
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ate-idp-server
+  namespace: {{ $ns }}
+  labels:
+    app: ate-idp-server
+    {{- include "substrate.labels" . | nindent 4 }}
+spec:
+  replicas: {{ $v.replicas }}
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: ate-idp-server
+  template:
+    metadata:
+      labels:
+        app: ate-idp-server
+        {{- include "substrate.systemInfraPodLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: ate-idp-server
+      {{- include "substrate.imagePullSecrets" . | nindent 6 }}
+      {{- include "substrate.systemInfraScheduling" . | nindent 6 }}
+      containers:
+        - name: ate-idp-server
+          image: {{ include "substrate.image" (dict "ctx" . "key" "ateIdpServer" "name" "ate-idp-server") }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - --actor-id-jwt-pool=/run/actor-id-jwt-pool/pool.json
+            - --server-cred-bundle=/run/servicedns.podcert.ate.dev/credential-bundle.pem
+            - --issuer={{ include "substrate.actorJWTIssuer" . }}
+            - --log-level={{ include "substrate.logLevel" (list . $v.logLevel) }}
+            - {{ include "substrate.previewArg" . }}
+            {{- with $v.extraArgs }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          ports:
+            - name: https
+              containerPort: 8443
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: https
+              scheme: HTTPS
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: https
+              scheme: HTTPS
+            periodSeconds: 10
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            capabilities:
+              drop:
+                - ALL
+          {{- with $v.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: servicedns
+              mountPath: /run/servicedns.podcert.ate.dev
+            - name: actor-id-jwt-pool
+              mountPath: /run/actor-id-jwt-pool
+      volumes:
+        {{- include "substrate.podCertVolume" (dict "name" "servicedns" "signer" "servicedns") | nindent 8 }}
+        - name: actor-id-jwt-pool
+          projected:
+            sources:
+              - secret:
+                  name: actor-id-jwt-pool
+                  items:
+                    - key: pool
+                      path: pool.json

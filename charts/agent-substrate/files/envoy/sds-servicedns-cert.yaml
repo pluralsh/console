@@ -1,0 +1,8 @@
+resources:
+- "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.Secret
+  name: servicedns_serving_cert
+  tls_certificate:
+    certificate_chain: { filename: /run/servicedns.podcert.ate.dev/credential-bundle.pem }
+    private_key: { filename: /run/servicedns.podcert.ate.dev/credential-bundle.pem }
+    watched_directory: { path: /run/servicedns.podcert.ate.dev }
+

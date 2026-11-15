@@ -560,7 +560,7 @@ function sanitizeInitialForm({
   readBindings,
   writeBindings,
 }: WorkbenchFragment): WorkbenchFormState {
-  const { infrastructure, coding, observability } = configuration ?? {}
+  const { infrastructure, coding, observability, devbox } = configuration ?? {}
   // new workbenches start with the core plural-native infrastructure tools on
   const isNew = !id
   const {
@@ -621,6 +621,11 @@ function sanitizeInitialForm({
       },
       observability: { logs, metrics },
       coding: { mode, repositories, enableBabysitting },
+      devbox: {
+        maxSnapshots: devbox?.maxSnapshots,
+        maxDeferral: devbox?.maxDeferral,
+        allowSubscriptionCredentials: devbox?.allowSubscriptionCredentials,
+      },
     },
     modes: modesFormValue(modes),
     budget: budget ?? null,

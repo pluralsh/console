@@ -1,0 +1,316 @@
+syntax = "proto3";
+
+// devbox.v1.Daemon: devbox-gateway -> atenet-router (mTLS, ate-target-actor) -> devbox-daemon on port 80.
+//
+// The daemon is PID 1 in the sandbox. It owns the harnesses' ACP connections (one per agent type, shared by that
+// agent's threads), normalizes ACP v1 into v2 entities, and appends every change to an offset-addressed event log
+// on the sandbox disk that the gateway consumes with SubscribeEvents. Settled entities go to a transcript store on
+// the same workspace volume, which serves GetTimeline. The same port also serves HTTP:
+// /readyz (Substrate's wakeup probe), /terminals/<id>/ws, /browser/vnc and /preview/<port>/*.
+//
+// Every call carries a console-signed `devbox-request-token` metadata entry that the daemon validates as defence
+// in depth (DBX-40), with keys from InitializeRequest.request_token_jwks.
+//
+// Thread, turn, file and workspace methods take the same messages as devbox.v1.Control; the daemon ignores
+// `instance_id`, other than checking it matches the instance it was initialized for.
+//
+// Any request resumes a suspended actor, so the gateway sends nothing to a suspended instance.
+package devbox.v1;
+
+option go_package = "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1;devboxv1";
+
+import "google/protobuf/timestamp.proto";
+import "devbox/v1/common.proto";
+import "devbox/v1/acp.proto";
+import "devbox/v1/control.proto";
+import "devbox/v1/credentials.proto";
+import "devbox/v1/ingest.proto";
+import "devbox/v1/workspace.proto";
+
+service Daemon {
+  // ---- Daemon lifecycle ----
+
+  // Health is the gRPC twin of /readyz.
+  rpc Health(HealthRequest) returns (HealthResponse);
+  // Initialize hands the daemon its instance configuration after boot. Idempotent: a restored or restarted
+  // daemon returns `already_initialized` and keeps its workspace, applying only lease and endpoint changes.
+  rpc Initialize(InitializeRequest) returns (InitializeResponse);
+  // GetInfo returns the daemon version, agent catalog and live connections.
+  rpc GetInfo(GetInfoRequest) returns (DaemonInfo);
+  // ProbeAgents runs the section 4.2a probe (`initialize` + `session/new` in a scratch dir, no prompt) for the
+  // golden template build.
+  rpc ProbeAgents(ProbeAgentsRequest) returns (ProbeAgentsResponse);
+  // PrepareSuspend settles every in-flight entity and, for snapshots, clears token files, tmpfs credentials and
+  // cloud SDK caches (and stops subscription-backed Codex processes for shared snapshots). The gateway calls it
+  // before SuspendActor and before snapshots, after reading the event stream up to `settled_offset`.
+  rpc PrepareSuspend(PrepareSuspendRequest) returns (PrepareSuspendResponse);
+
+  // ---- Event log ----
+
+  // SubscribeEvents streams the event log from an offset, then follows it live. The gateway holds exactly one
+  // subscription per running instance, and closes it before suspending.
+  rpc SubscribeEvents(SubscribeEventsRequest) returns (stream DaemonEvent);
+  // AckEvents acknowledges that everything up to an offset reached console; the daemon may trim its log.
+  rpc AckEvents(AckEventsRequest) returns (AckEventsResponse);
+
+  // ---- History ----
+
+  // GetTimeline pages a session's transcript: settled entities from the workspace volume merged with in-flight
+  // ones, plus the event log head the page reflects.
+  rpc GetTimeline(GetTimelineRequest) returns (GetTimelineResponse);
+  // GetSessions returns every thread and subagent row and the live agent connections.
+  rpc GetSessions(GetSessionsRequest) returns (GetSessionsResponse);
+
+  // ---- Threads, turns and agents ----
+
+  rpc CreateThread(CreateThreadRequest) returns (ThreadResponse);
+  rpc ListThreads(ListThreadsRequest) returns (ListThreadsResponse);
+  rpc ImportThread(ImportThreadRequest) returns (ThreadResponse);
+  rpc ResumeThread(ResumeThreadRequest) returns (ThreadResponse);
+  rpc CloseThread(ThreadActionRequest) returns (ThreadResponse);
+  rpc DeleteThread(ThreadActionRequest) returns (DeleteThreadResponse);
+  rpc ForkThread(ForkThreadRequest) returns (ThreadResponse);
+  rpc Prompt(PromptRequest) returns (PromptResponse);
+  rpc CancelPrompt(CancelPromptRequest) returns (CancelPromptResponse);
+  rpc SetThreadConfigOption(SetThreadConfigOptionRequest) returns (SetThreadConfigOptionResponse);
+  rpc RespondInteraction(RespondInteractionRequest) returns (RespondInteractionResponse);
+  rpc ListCommands(ListCommandsRequest) returns (ListCommandsResponse);
+  rpc SetAgentBilling(SetAgentBillingRequest) returns (SetAgentBillingResponse);
+
+  // ---- Terminals ----
+
+  rpc CreateTerminal(CreateTerminalRequest) returns (TerminalInfo);
+  rpc ListTerminals(ListTerminalsRequest) returns (ListTerminalsResponse);
+  rpc ResizeTerminal(ResizeTerminalRequest) returns (TerminalInfo);
+  rpc CloseTerminal(CloseTerminalRequest) returns (TerminalInfo);
+  // AttachTerminal is the gRPC form of /terminals/<id>/ws (used by the CLI path). First frame: `attach`.
+  rpc AttachTerminal(stream TerminalInput) returns (stream TerminalOutput);
+
+  // ---- Filesystem and changes ----
+
+  rpc ListFiles(ListFilesRequest) returns (ListFilesResponse);
+  rpc StatFile(StatFileRequest) returns (StatFileResponse);
+  rpc ReadFile(ReadFileRequest) returns (ReadFileResponse);
+  rpc WriteFile(WriteFileRequest) returns (WriteFileResponse);
+  rpc WatchFiles(WatchFilesRequest) returns (stream FileEvent);
+  rpc GetChanges(GetChangesRequest) returns (GetChangesResponse);
+
+  // ---- Workspace ----
+
+  // AddRepository clones through egress into ~/<repo> and registers it in Project.md's managed table.
+  rpc AddRepository(AddRepositoryRequest) returns (AddRepositoryResponse);
+  rpc ListRepositories(ListRepositoriesRequest) returns (ListRepositoriesResponse);
+
+  // ---- Browser ----
+
+  rpc StartBrowser(StartBrowserRequest) returns (BrowserInfo);
+  rpc StopBrowser(StopBrowserRequest) returns (BrowserInfo);
+  rpc GetBrowser(GetBrowserRequest) returns (BrowserInfo);
+
+  // ---- Idle detection ----
+
+  // SetLeases relays Control.SetInstanceLeases.
+  rpc SetLeases(SetInstanceLeasesRequest) returns (SetInstanceLeasesResponse);
+  rpc GetIdleState(GetIdleStateRequest) returns (IdleState);
+
+  // ---- Credential delivery ----
+
+  // PushCredential installs a Codex bundle refreshed elsewhere (fan-out from the lease holder) or a changed
+  // refresh lease. Only kind CODEX is accepted.
+  rpc PushCredential(PushCredentialRequest) returns (PushCredentialResponse);
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Lifecycle
+// ---------------------------------------------------------------------------------------------------------------
+
+message HealthRequest {
+}
+
+message HealthResponse {
+  bool ready = 1;
+  // booting, hydrating, ready, degraded.
+  string status = 2;
+  string version = 3;
+  // Changes on every daemon process start (not on memory restore).
+  string boot_id = 4;
+  // A memory restore was detected since the previous probe; activity timers were reset.
+  bool restored = 5;
+  bool workspace_hydrated = 6;
+}
+
+// HarnessEndpoints are the URLs harnesses are configured with. All are reached through atenet-egress, which
+// injects the real credentials.
+message HarnessEndpoints {
+  string console_url = 1;
+  string ai_proxy_url = 2;
+  string workbench_mcp_url = 3;
+  // The gateway's devbox MCP; the daemon adds a per-thread `X-Devbox-Thread` header to each session's entry.
+  string devbox_mcp_url = 4;
+  // The gateway's SandboxCredentials service.
+  string sandbox_credentials_url = 5;
+}
+
+message InitializeRequest {
+  string instance_id = 1;
+  string devbox_id = 2;
+  string workbench_id = 3;
+  Principal owner = 4;
+  AgentType agent = 5;
+  string model = 6;
+  repeated ConfigOptionSetting config_options = 7;
+  repeated AgentLaunch agents = 8;
+  repeated RepositorySpec repositories = 9;
+  string first_thread_id = 10;
+  string first_thread_title = 11;
+  IdlePolicy idle_policy = 12;
+  int32 max_running_threads = 13;
+  repeated Lease leases = 14;
+  uint64 lease_generation = 15;
+  repeated CloudIdentity cloud_identities = 16;
+  HarnessEndpoints endpoints = 17;
+  // The instance was created from a snapshot; FILESYSTEM means a cold boot over a restored workspace.
+  bool restored_from_snapshot = 18;
+  SnapshotFidelity restore_fidelity = 19;
+  // JWKS (JSON) for validating `devbox-request-token`.
+  bytes request_token_jwks = 20;
+  // The runner's secret env vars. Kept in memory only, never written to disk; the gateway resends them on every
+  // Initialize, including after a daemon restart.
+  map<string, string> env = 21;
+}
+
+message InitializeResponse {
+  DaemonInfo info = 1;
+  bool already_initialized = 2;
+}
+
+message GetInfoRequest {
+}
+
+message DaemonInfo {
+  string version = 1;
+  // Image contract (sh.plural.devbox/contract), "v1".
+  string contract_version = 2;
+  string boot_id = 3;
+  google.protobuf.Timestamp started_at = 4;
+  string instance_id = 5;
+  repeated AgentCatalogEntry agents = 6;
+  repeated AgentConnection connections = 7;
+  // Latest offset written to the event log, and the latest the gateway acknowledged.
+  uint64 head_offset = 8;
+  uint64 acked_offset = 9;
+}
+
+message AgentProbeSpec {
+  AgentType type = 1;
+  bool is_default = 2;
+  string adapter_version = 3;
+  // CRD allowlist; recorded, not applied (console narrows).
+  repeated string models = 4;
+  string default_model = 5;
+  bool acp_v2 = 6;
+}
+
+message ProbeAgentsRequest {
+  repeated AgentProbeSpec agents = 1;
+  // Box-scoped AI proxy endpoints, so adapters that list models only when authenticated still work.
+  HarnessEndpoints endpoints = 2;
+}
+
+message ProbeAgentsResponse {
+  repeated AgentCatalogEntry agents = 1;
+}
+
+message PrepareSuspendRequest {
+  SuspendReason reason = 1;
+  // Snapshot only: the snapshot will be named or shared (stop subscription-backed Codex processes).
+  bool shared_snapshot = 2;
+}
+
+message PrepareSuspendResponse {
+  // Every entity is settled up to here; the gateway forwards through this offset before suspending.
+  uint64 settled_offset = 1;
+  repeated AgentType stopped_agents = 2;
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Event log
+// ---------------------------------------------------------------------------------------------------------------
+
+message SubscribeEventsRequest {
+  // Deliver events with offset > from_offset (DaemonInfo.acked_offset when the gateway starts forwarding).
+  uint64 from_offset = 1;
+}
+
+// DaemonEvent is one event-log record. Records are replayed after reconnects; index upserts are idempotent on
+// revision, so duplicates are harmless.
+message DaemonEvent {
+  // Strictly increasing per instance and persisted across suspends and snapshots. Heartbeats carry the current
+  // head offset and are not log records.
+  uint64 offset = 1;
+  google.protobuf.Timestamp emitted_at = 2;
+
+  reserved 10;
+  reserved "entity";
+
+  oneof event {
+    // A live delta, to forward with Ingest.PushInstanceDeltas (including SETTLE).
+    Delta delta = 11;
+    // Index changes, to forward with Ingest.UpsertInstanceIndex.
+    Session session = 12;
+    Interaction interaction = 13;
+    InstanceAggregate aggregate = 14;
+    // Idle detection.
+    IdleState idle_state = 15;
+    SuspendRequested suspend_requested = 16;
+    // Daemon-level conditions shown in the instance view.
+    DaemonCondition condition = 17;
+    DaemonHeartbeat heartbeat = 18;
+  }
+}
+
+message SuspendRequested {
+  SuspendReason reason = 1;
+  google.protobuf.Timestamp idle_since = 2;
+  // Offset through which every entity is settled.
+  uint64 settled_offset = 3;
+}
+
+// DaemonCondition is a daemon-level warning, e.g. a vendor login made inside the box.
+message DaemonCondition {
+  // e.g. in_box_login_detected, workspace_hydration_failed, agent_missing.
+  string type = 1;
+  // info, warning, error.
+  string severity = 2;
+  string message = 3;
+  ErrorDetail error = 4;
+  bool active = 5;
+}
+
+message DaemonHeartbeat {
+  uint64 head_offset = 1;
+  IdleState idle = 2;
+}
+
+message AckEventsRequest {
+  uint64 offset = 1;
+}
+
+message AckEventsResponse {
+  uint64 acked_offset = 1;
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Idle and credentials
+// ---------------------------------------------------------------------------------------------------------------
+
+message GetIdleStateRequest {
+}
+
+message PushCredentialRequest {
+  InstanceCredential credential = 1;
+}
+
+message PushCredentialResponse {
+  bool applied = 1;
+}

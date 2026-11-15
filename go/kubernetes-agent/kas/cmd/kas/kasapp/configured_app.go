@@ -25,6 +25,8 @@ import (
 	agent_registrar_server "github.com/pluralsh/console/go/kubernetes-agent/pkg/module/agent_registrar/server"
 	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/agent_tracker"
 	agent_tracker_server "github.com/pluralsh/console/go/kubernetes-agent/pkg/module/agent_tracker/server"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/devbox"
+	devbox_server "github.com/pluralsh/console/go/kubernetes-agent/pkg/module/devbox/server"
 	kubernetes_api_server "github.com/pluralsh/console/go/kubernetes-agent/pkg/module/kubernetes_api/server"
 	modserver2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modserver"
 	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modshared"
@@ -214,6 +216,17 @@ func (a *ConfiguredApp) Run(ctx context.Context) (retErr error) {
 		return err
 	}
 
+	// Devbox gateways listener and Control router
+	var devboxSrv *devboxServer
+	if a.Configuration.Devbox != nil {
+		devboxSrv, err = newDevboxServer(a.Log.With(logz.ModuleName(devbox.ModuleName)), a.Configuration, srvApi, dt, dm, tp, mp, // nolint: contextcheck
+			redisClient, ssh, agentRpcApiFactory, probeRegistry, reg, streamProm, unaryProm, grpcServerErrorReporter,
+			privateApiSrv.kasPool, privateApiSrv.ownUrl, internalSrv.server, privateApiSrv, pollConfig)
+		if err != nil {
+			return fmt.Errorf("devbox server: %w", err)
+		}
+	}
+
 	// Agent tracker
 	agentTracker := a.constructAgentTracker(errRep, redisClient)
 
@@ -238,6 +251,15 @@ func (a *ConfiguredApp) Run(ctx context.Context) (retErr error) {
 			TunnelHandler: agentSrv.tunnelRegistry,
 		},
 		&kubernetes_api_server.Factory{},
+	}
+	if devboxSrv != nil {
+		factories = append(factories, &devbox_server.Factory{
+			GatewayServer:     devboxSrv.server,
+			TunnelHandler:     devboxSrv.tunnelRegistry,
+			TunnelQuerier:     devboxSrv.tunnelRegistry,
+			GatewayConn:       internalSrv.inMemConn,
+			SetStreamsHandler: devboxSrv.setStreamsHandler,
+		})
 	}
 
 	var beforeServersModules, afterServersModules []modserver2.Module
@@ -305,6 +327,9 @@ func (a *ConfiguredApp) Run(ctx context.Context) (retErr error) {
 			}
 			apiSrv.Start(stage)
 			privateApiSrv.Start(stage)
+			if devboxSrv != nil {
+				devboxSrv.Start(stage)
+			}
 		},
 		// Start modules.
 		func(stage stager.Stage) {

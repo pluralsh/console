@@ -16,6 +16,8 @@ defmodule Console.Middleware.ErrorHandler do
   defp format(%HTTPoison.Error{reason: reason}), do: "upstream request failed: #{inspect(reason)}"
   defp format(%{__exception__: true} = exception), do: exception_message(exception)
   defp format(%{"message" => msg}) when is_binary(msg), do: msg
+  defp format(%{message: msg, extensions: %{code: code}}) when is_binary(msg) and is_binary(code),
+    do: %{message: msg, extensions: %{code: code}}
   defp format(%{message: msg}) when is_binary(msg), do: msg
   defp format({:http_error, _, %{"message" => msg}}) when is_binary(msg), do: msg
   defp format({:http_error, _, err}) when is_binary(err) and byte_size(err) > 0, do: err

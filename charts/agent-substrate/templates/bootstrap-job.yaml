@@ -1,0 +1,165 @@
+{{- $ns := include "substrate.namespace" . -}}
+{{- $deferred := list -}}
+{{- $crds := list -}}
+{{- if not (include "substrate.sandboxConfigCRDServed" .) -}}
+{{- range include "substrate.sandboxConfigs" . | fromYamlArray -}}
+{{- $deferred = append $deferred . -}}
+{{- $crds = append $crds "sandboxconfigs.ate.dev" -}}
+{{- end -}}
+{{- end -}}
+{{- $cnpg := and (eq .Values.postgres.mode "cnpg") (not (include "substrate.cnpgCRDServed" .)) -}}
+{{- if $cnpg -}}
+{{- range include "substrate.cnpg.objects" . | fromYamlArray -}}
+{{- $deferred = append $deferred . -}}
+{{- end -}}
+{{- $crds = concat $crds (list "clusters.postgresql.cnpg.io" "scheduledbackups.postgresql.cnpg.io") -}}
+{{- end -}}
+{{- if $deferred }}
+{{- $adopt := include "substrate.adoptionMetadata" . | fromYaml -}}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: agent-substrate-bootstrap
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: agent-substrate-bootstrap
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+rules:
+  - apiGroups: ["apiextensions.k8s.io"]
+    resources: ["customresourcedefinitions"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["ate.dev"]
+    resources: ["sandboxconfigs"]
+    verbs: ["get", "list", "create", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: agent-substrate-bootstrap
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+subjects:
+  - kind: ServiceAccount
+    name: agent-substrate-bootstrap
+    namespace: {{ $ns }}
+roleRef:
+  kind: ClusterRole
+  name: agent-substrate-bootstrap
+  apiGroup: rbac.authorization.k8s.io
+{{- if $cnpg }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: agent-substrate-bootstrap
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+rules:
+  - apiGroups: ["postgresql.cnpg.io"]
+    resources: ["clusters", "scheduledbackups"]
+    verbs: ["get", "list", "create", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: agent-substrate-bootstrap
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+subjects:
+  - kind: ServiceAccount
+    name: agent-substrate-bootstrap
+    namespace: {{ $ns }}
+roleRef:
+  kind: Role
+  name: agent-substrate-bootstrap
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: agent-substrate-bootstrap
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+data:
+  {{- range $i, $obj := $deferred }}
+  {{- $meta := $obj.metadata }}
+  {{- $_ := set $meta "labels" (merge ($meta.labels | default dict) $adopt.labels (include "substrate.labels" $ | fromYaml)) }}
+  {{- $_ := set $meta "annotations" (merge ($meta.annotations | default dict) $adopt.annotations) }}
+  {{ printf "%02d-%s-%s.yaml" $i ($obj.kind | lower) $meta.name }}: |
+    {{- toYaml $obj | nindent 4 }}
+  {{- end }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: agent-substrate-bootstrap
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+spec:
+  backoffLimit: 3
+  activeDeadlineSeconds: 1200
+  template:
+    metadata:
+      labels:
+        app: agent-substrate-bootstrap
+    spec:
+      serviceAccountName: agent-substrate-bootstrap
+      restartPolicy: OnFailure
+      {{- include "substrate.imagePullSecrets" . | nindent 6 }}
+      {{- include "substrate.systemInfraScheduling" . | nindent 6 }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: apply
+          image: {{ .Values.bootstrapJob.image }}
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/sh", "-ec"]
+          args:
+            - |
+              # Wait for the CRDs this release installs, then apply the custom
+              # resources that couldn't be rendered before they existed.
+              for crd in {{ $crds | uniq | join " " }}; do
+                until kubectl get crd "$crd" >/dev/null 2>&1; do
+                  echo "waiting for CRD $crd"; sleep 5
+                done
+                kubectl wait --for=condition=Established --timeout=300s "crd/$crd"
+              done
+              # Webhooks (CNPG's) may take a while to serve; retry until they do.
+              until kubectl apply -f /manifests/; do
+                echo "apply failed; retrying in 10s"; sleep 10
+              done
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: manifests
+              mountPath: /manifests
+            - name: tmp
+              mountPath: /tmp
+          env:
+            - name: HOME
+              value: /tmp
+      volumes:
+        - name: manifests
+          configMap:
+            name: agent-substrate-bootstrap
+        - name: tmp
+          emptyDir: {}
+{{- end }}

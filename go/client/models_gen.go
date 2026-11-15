@@ -11,6 +11,14 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 )
 
+type DevboxContentBlock interface {
+	IsDevboxContentBlock()
+}
+
+type DevboxToolCallContent interface {
+	IsDevboxToolCallContent()
+}
+
 type AccessToken struct {
 	ID         *string                     `json:"id,omitempty"`
 	Token      *string                     `json:"token,omitempty"`
@@ -153,6 +161,37 @@ type AgentBindingAttributes struct {
 	UserEmail *string `json:"userEmail,omitempty"`
 	// the name of the group this binding is for
 	GroupName *string `json:"groupName,omitempty"`
+}
+
+// A linked coding agent subscription.  The secret is write-only and never returned.
+type AgentCredential struct {
+	ID              string                  `json:"id"`
+	Provider        AgentCredentialProvider `json:"provider"`
+	Kind            AgentCredentialKind     `json:"kind"`
+	Label           *string                 `json:"label,omitempty"`
+	Status          AgentCredentialStatus   `json:"status"`
+	Version         *string                 `json:"version,omitempty"`
+	DefaultBilling  *bool                   `json:"defaultBilling,omitempty"`
+	FailureCount    *int64                  `json:"failureCount,omitempty"`
+	Email           *string                 `json:"email,omitempty"`
+	Plan            *string                 `json:"plan,omitempty"`
+	LinkedAt        *string                 `json:"linkedAt,omitempty"`
+	ExpiresAt       *string                 `json:"expiresAt,omitempty"`
+	LastRefreshedAt *string                 `json:"lastRefreshedAt,omitempty"`
+	LastUsedAt      *string                 `json:"lastUsedAt,omitempty"`
+	InsertedAt      *string                 `json:"insertedAt,omitempty"`
+	UpdatedAt       *string                 `json:"updatedAt,omitempty"`
+}
+
+type AgentCredentialAttributes struct {
+	Kind AgentCredentialKind `json:"kind"`
+	// the setup-token, auth.json contents or access token, write-only
+	Secret string  `json:"secret"`
+	Label  *string `json:"label,omitempty"`
+	// when the access token expires, for expiry warnings
+	ExpiresAt *string `json:"expiresAt,omitempty"`
+	// bill new instances' agents of this provider to it by default
+	DefaultBilling *bool `json:"defaultBilling,omitempty"`
 }
 
 type AgentMessage struct {
@@ -3803,6 +3842,933 @@ type DeprecatedCustomResourceConnection struct {
 type DeprecatedCustomResourceEdge struct {
 	Node   *DeprecatedCustomResource `json:"node,omitempty"`
 	Cursor *string                   `json:"cursor,omitempty"`
+}
+
+type Devbox struct {
+	ID                  string                 `json:"id"`
+	Name                string                 `json:"name"`
+	Image               *string                `json:"image,omitempty"`
+	ResolvedImage       *string                `json:"resolvedImage,omitempty"`
+	TemplateRevision    *string                `json:"templateRevision,omitempty"`
+	Status              *DevboxStatus          `json:"status,omitempty"`
+	Resources           map[string]any         `json:"resources,omitempty"`
+	AllowedRepositories []*string              `json:"allowedRepositories,omitempty"`
+	MaxInstances        *int64                 `json:"maxInstances,omitempty"`
+	Browser             *bool                  `json:"browser,omitempty"`
+	LastHeartbeatAt     *string                `json:"lastHeartbeatAt,omitempty"`
+	Agents              []*DevboxAgent         `json:"agents,omitempty"`
+	HTTPAllowlist       []*DevboxHTTPAllow     `json:"httpAllowlist,omitempty"`
+	IdlePolicy          *DevboxIdlePolicy      `json:"idlePolicy,omitempty"`
+	Conditions          []*DevboxCondition     `json:"conditions,omitempty"`
+	CloudIdentities     []*DevboxCloudIdentity `json:"cloudIdentities,omitempty"`
+	Cluster             *Cluster               `json:"cluster,omitempty"`
+	ScmConnections      []*ScmConnection       `json:"scmConnections,omitempty"`
+	// the box's workload identity issuer and how to trust it from cloud accounts
+	WorkloadIdentity *DevboxWorkloadIdentity `json:"workloadIdentity,omitempty"`
+	InsertedAt       *string                 `json:"insertedAt,omitempty"`
+	UpdatedAt        *string                 `json:"updatedAt,omitempty"`
+}
+
+type DevboxAgent struct {
+	Type                DevboxAgentType            `json:"type"`
+	Default             *bool                      `json:"default,omitempty"`
+	AdapterName         *string                    `json:"adapterName,omitempty"`
+	AdapterVersion      *string                    `json:"adapterVersion,omitempty"`
+	ProtocolVersion     *int64                     `json:"protocolVersion,omitempty"`
+	AcpV2               *bool                      `json:"acpV2,omitempty"`
+	Capabilities        map[string]any             `json:"capabilities,omitempty"`
+	ModelSwitchable     *bool                      `json:"modelSwitchable,omitempty"`
+	ProbeStatus         *DevboxProbeStatus         `json:"probeStatus,omitempty"`
+	ProbeError          *string                    `json:"probeError,omitempty"`
+	Commands            []*DevboxCommand           `json:"commands,omitempty"`
+	ConfigOptions       []*DevboxConfigOption      `json:"configOptions,omitempty"`
+	SessionCapabilities *DevboxSessionCapabilities `json:"sessionCapabilities,omitempty"`
+	// the models offered: probed values narrowed by the box's allowlist
+	Models []*DevboxModel `json:"models,omitempty"`
+	// the model preselected when starting an instance
+	DefaultModel *string `json:"defaultModel,omitempty"`
+}
+
+type DevboxAgentAttributes struct {
+	Type DevboxAgentType `json:"type"`
+	// whether this is the box's default agent (exactly one must be)
+	Default        *bool   `json:"default,omitempty"`
+	AdapterName    *string `json:"adapterName,omitempty"`
+	AdapterVersion *string `json:"adapterVersion,omitempty"`
+	AdapterPin     *string `json:"adapterPin,omitempty"`
+	// the negotiated ACP protocol version
+	ProtocolVersion *int64 `json:"protocolVersion,omitempty"`
+	AcpV2           *bool  `json:"acpV2,omitempty"`
+	// the verbatim agentCapabilities from initialize
+	Capabilities *string `json:"capabilities,omitempty"`
+	// the DevboxRunner's model allowlist
+	AllowedModels []*string `json:"allowedModels,omitempty"`
+	DefaultModel  *string   `json:"defaultModel,omitempty"`
+	// the agent's own current model in a fresh session
+	CurrentModel    *string            `json:"currentModel,omitempty"`
+	ModelSwitchable *bool              `json:"modelSwitchable,omitempty"`
+	ProbeStatus     *DevboxProbeStatus `json:"probeStatus,omitempty"`
+	ProbeError      *string            `json:"probeError,omitempty"`
+	// values of the model config option
+	Models []*DevboxModelAttributes `json:"models,omitempty"`
+	// the commands of a fresh session
+	Commands []*DevboxCommandAttributes `json:"commands,omitempty"`
+	// config options of a fresh session
+	ConfigOptions       []*DevboxConfigOptionAttributes      `json:"configOptions,omitempty"`
+	SessionCapabilities *DevboxSessionCapabilitiesAttributes `json:"sessionCapabilities,omitempty"`
+}
+
+type DevboxAgentBilling struct {
+	Agent              *DevboxAgentType   `json:"agent,omitempty"`
+	Billing            *DevboxBillingMode `json:"billing,omitempty"`
+	CredentialKind     *string            `json:"credentialKind,omitempty"`
+	AllowCollaborators *bool              `json:"allowCollaborators,omitempty"`
+}
+
+type DevboxAgentBillingAttributes struct {
+	Agent   DevboxAgentType   `json:"agent"`
+	Billing DevboxBillingMode `json:"billing"`
+	// let other workbench users prompt this agent on your subscription
+	AllowCollaborators *bool `json:"allowCollaborators,omitempty"`
+}
+
+type DevboxAgentConnection struct {
+	Agent           *DevboxAgentType `json:"agent,omitempty"`
+	ProtocolVersion *int64           `json:"protocolVersion,omitempty"`
+	AdapterName     *string          `json:"adapterName,omitempty"`
+	AdapterVersion  *string          `json:"adapterVersion,omitempty"`
+	Capabilities    map[string]any   `json:"capabilities,omitempty"`
+	// proxy or subscription
+	Billing *string `json:"billing,omitempty"`
+}
+
+type DevboxAttributes struct {
+	// the name of the DevboxRunner
+	Name string `json:"name"`
+	// the cluster this box runs on (required for user-authenticated upserts)
+	ClusterID *string `json:"clusterId,omitempty"`
+	// the box image as specified on the DevboxRunner
+	Image *string `json:"image,omitempty"`
+	// the image pinned by digest
+	ResolvedImage *string `json:"resolvedImage,omitempty"`
+	// the golden template revision instances boot from
+	TemplateRevision *string       `json:"templateRevision,omitempty"`
+	Status           *DevboxStatus `json:"status,omitempty"`
+	// the resources for each instance
+	Resources *string `json:"resources,omitempty"`
+	// repositories instances may check out, all if unset
+	AllowedRepositories []*string `json:"allowedRepositories,omitempty"`
+	// the most live instances this box may run at once
+	MaxInstances *int64 `json:"maxInstances,omitempty"`
+	// whether instances get a browser sidecar
+	Browser *bool `json:"browser,omitempty"`
+	// names of the scm connections instances may use
+	ScmConnections []*string `json:"scmConnections,omitempty"`
+	// the probed agent catalog
+	Agents []*DevboxAgentAttributes `json:"agents,omitempty"`
+	// hosts instances may reach
+	HTTPAllowlist []*DevboxHTTPAllowAttributes `json:"httpAllowlist,omitempty"`
+	IdlePolicy    *DevboxIdlePolicyAttributes  `json:"idlePolicy,omitempty"`
+	Conditions    []*DevboxConditionAttributes `json:"conditions,omitempty"`
+	// cloud identities instances get workload identity tokens for
+	CloudIdentities []*DevboxCloudIdentityAttributes `json:"cloudIdentities,omitempty"`
+}
+
+type DevboxAudioContent struct {
+	Type     DevboxContentBlockType `json:"type"`
+	Data     *string                `json:"data,omitempty"`
+	MimeType *string                `json:"mimeType,omitempty"`
+}
+
+func (DevboxAudioContent) IsDevboxContentBlock() {}
+
+type DevboxCheckout struct {
+	Path             *string `json:"path,omitempty"`
+	Name             *string `json:"name,omitempty"`
+	RemoteURL        *string `json:"remoteUrl,omitempty"`
+	DefaultBranch    *string `json:"defaultBranch,omitempty"`
+	Branch           *string `json:"branch,omitempty"`
+	HeadSha          *string `json:"headSha,omitempty"`
+	Dirty            *bool   `json:"dirty,omitempty"`
+	WorktreeThreadID *string `json:"worktreeThreadId,omitempty"`
+	Ahead            *int64  `json:"ahead,omitempty"`
+	Behind           *int64  `json:"behind,omitempty"`
+}
+
+type DevboxCloudIdentity struct {
+	Name                     string              `json:"name"`
+	Provider                 DevboxCloudProvider `json:"provider"`
+	Default                  *bool               `json:"default,omitempty"`
+	RoleArn                  *string             `json:"roleArn,omitempty"`
+	DurationSeconds          *int64              `json:"durationSeconds,omitempty"`
+	WorkloadIdentityProvider *string             `json:"workloadIdentityProvider,omitempty"`
+	ServiceAccount           *string             `json:"serviceAccount,omitempty"`
+	TenantID                 *string             `json:"tenantId,omitempty"`
+	ClientID                 *string             `json:"clientId,omitempty"`
+	AuthorityHost            *string             `json:"authorityHost,omitempty"`
+}
+
+type DevboxCloudIdentityAttributes struct {
+	Name     string              `json:"name"`
+	Provider DevboxCloudProvider `json:"provider"`
+	Default  *bool               `json:"default,omitempty"`
+	// aws: the role to assume with the token
+	RoleArn *string `json:"roleArn,omitempty"`
+	// token lifetime, at most an hour
+	DurationSeconds *int64 `json:"durationSeconds,omitempty"`
+	// gcp: projects/<number>/locations/global/workloadIdentityPools/<pool>/providers/<provider>
+	WorkloadIdentityProvider *string `json:"workloadIdentityProvider,omitempty"`
+	// gcp: the service account to impersonate
+	ServiceAccount *string `json:"serviceAccount,omitempty"`
+	// azure: the Entra ID tenant
+	TenantID *string `json:"tenantId,omitempty"`
+	// azure: the application (client) id
+	ClientID *string `json:"clientId,omitempty"`
+	// azure: the authority host, for sovereign clouds
+	AuthorityHost *string `json:"authorityHost,omitempty"`
+}
+
+type DevboxCommand struct {
+	Name        string  `json:"name"`
+	Description *string `json:"description,omitempty"`
+	InputHint   *string `json:"inputHint,omitempty"`
+}
+
+type DevboxCommandAttributes struct {
+	Name        string  `json:"name"`
+	Description *string `json:"description,omitempty"`
+	InputHint   *string `json:"inputHint,omitempty"`
+}
+
+type DevboxCompaction struct {
+	CompactionID *string              `json:"compactionId,omitempty"`
+	Status       *string              `json:"status,omitempty"`
+	Summary      []DevboxContentBlock `json:"summary,omitempty"`
+	Meta         map[string]any       `json:"meta,omitempty"`
+}
+
+type DevboxCondition struct {
+	Type    string  `json:"type"`
+	Status  string  `json:"status"`
+	Reason  *string `json:"reason,omitempty"`
+	Message *string `json:"message,omitempty"`
+}
+
+type DevboxConditionAttributes struct {
+	Type    string  `json:"type"`
+	Status  string  `json:"status"`
+	Reason  *string `json:"reason,omitempty"`
+	Message *string `json:"message,omitempty"`
+}
+
+type DevboxConfigOption struct {
+	// the ACP config option id
+	ConfigID    string  `json:"configId"`
+	Name        *string `json:"name,omitempty"`
+	Description *string `json:"description,omitempty"`
+	// model, mode, thought_level, ...
+	Category     *string                    `json:"category,omitempty"`
+	Type         *string                    `json:"type,omitempty"`
+	CurrentValue *string                    `json:"currentValue,omitempty"`
+	Options      []*DevboxConfigOptionValue `json:"options,omitempty"`
+}
+
+type DevboxConfigOptionAttributes struct {
+	ConfigID     string                               `json:"configId"`
+	Name         *string                              `json:"name,omitempty"`
+	Description  *string                              `json:"description,omitempty"`
+	Category     *string                              `json:"category,omitempty"`
+	Type         *string                              `json:"type,omitempty"`
+	CurrentValue *string                              `json:"currentValue,omitempty"`
+	Options      []*DevboxConfigValueOptionAttributes `json:"options,omitempty"`
+}
+
+type DevboxConfigOptionValue struct {
+	Value       string  `json:"value"`
+	Name        *string `json:"name,omitempty"`
+	Description *string `json:"description,omitempty"`
+	Group       *string `json:"group,omitempty"`
+}
+
+type DevboxConfigValueAttributes struct {
+	// the ACP config option id
+	ConfigID string `json:"configId"`
+	Value    string `json:"value"`
+}
+
+type DevboxConfigValueOptionAttributes struct {
+	Value       string  `json:"value"`
+	Name        *string `json:"name,omitempty"`
+	Description *string `json:"description,omitempty"`
+	Group       *string `json:"group,omitempty"`
+}
+
+type DevboxConnection struct {
+	PageInfo PageInfo      `json:"pageInfo"`
+	Edges    []*DevboxEdge `json:"edges,omitempty"`
+}
+
+type DevboxEdge struct {
+	Node   *Devbox `json:"node,omitempty"`
+	Cursor *string `json:"cursor,omitempty"`
+}
+
+// An ACP transcript entity, with a typed view for its type and the verbatim ACP JSON in `raw`
+type DevboxEntity struct {
+	ID        *string          `json:"id,omitempty"`
+	SessionID *string          `json:"sessionId,omitempty"`
+	Type      DevboxEntityType `json:"type"`
+	Position  *string          `json:"position,omitempty"`
+	Revision  *string          `json:"revision,omitempty"`
+	Settled   *bool            `json:"settled,omitempty"`
+	CreatedAt *string          `json:"createdAt,omitempty"`
+	UpdatedAt *string          `json:"updatedAt,omitempty"`
+	Raw       map[string]any   `json:"raw,omitempty"`
+	// for user_message, agent_message and agent_thought
+	Message *DevboxMessageEntity `json:"message,omitempty"`
+	// a message between sessions (e.g. to a subagent)
+	SessionMessage *DevboxSessionMessageEntity `json:"sessionMessage,omitempty"`
+	ToolCall       *DevboxToolCall             `json:"toolCall,omitempty"`
+	Plan           *DevboxPlan                 `json:"plan,omitempty"`
+	Terminal       *DevboxTerminal             `json:"terminal,omitempty"`
+	Compaction     *DevboxCompaction           `json:"compaction,omitempty"`
+}
+
+// A live entity change, never stored
+type DevboxEntityChange struct {
+	InstanceID string            `json:"instanceId"`
+	SessionID  *string           `json:"sessionId,omitempty"`
+	ThreadID   *string           `json:"threadId,omitempty"`
+	EntityType *DevboxEntityType `json:"entityType,omitempty"`
+	EntityID   *string           `json:"entityId,omitempty"`
+	Position   *string           `json:"position,omitempty"`
+	Op         DevboxDeltaOp     `json:"op"`
+	// for state deltas, which ACP update this is
+	StateKind *string `json:"stateKind,omitempty"`
+	// the verbatim ACP chunk, patch, notice or state update
+	Payload map[string]any `json:"payload,omitempty"`
+	// for settle deltas, the final entity
+	Entity    *DevboxEntity `json:"entity,omitempty"`
+	Offset    *string       `json:"offset,omitempty"`
+	EmittedAt *string       `json:"emittedAt,omitempty"`
+}
+
+type DevboxEntityChangeDelta struct {
+	Delta   *Delta              `json:"delta,omitempty"`
+	Payload *DevboxEntityChange `json:"payload,omitempty"`
+}
+
+type DevboxFile struct {
+	Entry *DevboxFileEntry `json:"entry,omitempty"`
+	// the text content, null for binary files
+	Content *string `json:"content,omitempty"`
+	// pass back as expectedSha256 when writing
+	Sha256    *string `json:"sha256,omitempty"`
+	Truncated *bool   `json:"truncated,omitempty"`
+	MimeType  *string `json:"mimeType,omitempty"`
+	Binary    *bool   `json:"binary,omitempty"`
+}
+
+type DevboxFileChange struct {
+	Path    string  `json:"path"`
+	OldPath *string `json:"oldPath,omitempty"`
+	// added, modified, deleted, renamed, copied, untracked, conflicted or type_changed
+	Status        *string `json:"status,omitempty"`
+	Staged        *bool   `json:"staged,omitempty"`
+	Additions     *int64  `json:"additions,omitempty"`
+	Deletions     *int64  `json:"deletions,omitempty"`
+	Binary        *bool   `json:"binary,omitempty"`
+	Diff          *string `json:"diff,omitempty"`
+	DiffTruncated *bool   `json:"diffTruncated,omitempty"`
+}
+
+type DevboxFileEntry struct {
+	Path string  `json:"path"`
+	Name *string `json:"name,omitempty"`
+	// file, directory, symlink or other
+	Type          *string `json:"type,omitempty"`
+	Size          *string `json:"size,omitempty"`
+	Mode          *int64  `json:"mode,omitempty"`
+	ModifiedAt    *string `json:"modifiedAt,omitempty"`
+	SymlinkTarget *string `json:"symlinkTarget,omitempty"`
+	// the checkout containing the file
+	Repository *string `json:"repository,omitempty"`
+	// the porcelain git status, e.g. " M" or "??"
+	GitStatus *string `json:"gitStatus,omitempty"`
+}
+
+type DevboxFileWrite struct {
+	Entry  *DevboxFileEntry `json:"entry,omitempty"`
+	Sha256 *string          `json:"sha256,omitempty"`
+}
+
+type DevboxHeartbeatAttributes struct {
+	Status           *DevboxStatus                `json:"status,omitempty"`
+	ResolvedImage    *string                      `json:"resolvedImage,omitempty"`
+	TemplateRevision *string                      `json:"templateRevision,omitempty"`
+	Conditions       []*DevboxConditionAttributes `json:"conditions,omitempty"`
+}
+
+type DevboxHTTPAllow struct {
+	Host        string `json:"host"`
+	Port        *int64 `json:"port,omitempty"`
+	Passthrough *bool  `json:"passthrough,omitempty"`
+}
+
+type DevboxHTTPAllowAttributes struct {
+	Host        string `json:"host"`
+	Port        *int64 `json:"port,omitempty"`
+	Passthrough *bool  `json:"passthrough,omitempty"`
+}
+
+type DevboxIdlePolicy struct {
+	ActivityWindow     *int64   `json:"activityWindow,omitempty"`
+	CPUThreshold       *float64 `json:"cpuThreshold,omitempty"`
+	GracePeriod        *int64   `json:"gracePeriod,omitempty"`
+	MaxDeferral        *int64   `json:"maxDeferral,omitempty"`
+	MaxContinuousAwake *int64   `json:"maxContinuousAwake,omitempty"`
+	CompleteAfter      *int64   `json:"completeAfter,omitempty"`
+}
+
+type DevboxIdlePolicyAttributes struct {
+	// seconds
+	ActivityWindow *int64   `json:"activityWindow,omitempty"`
+	CPUThreshold   *float64 `json:"cpuThreshold,omitempty"`
+	// seconds
+	GracePeriod *int64 `json:"gracePeriod,omitempty"`
+	// seconds
+	MaxDeferral *int64 `json:"maxDeferral,omitempty"`
+	// seconds
+	MaxContinuousAwake *int64 `json:"maxContinuousAwake,omitempty"`
+	// seconds
+	CompleteAfter *int64 `json:"completeAfter,omitempty"`
+}
+
+type DevboxIdleState struct {
+	Idle        *bool            `json:"idle,omitempty"`
+	IdleSince   *string          `json:"idleSince,omitempty"`
+	SuspendsAt  *string          `json:"suspendsAt,omitempty"`
+	BusyReasons []map[string]any `json:"busyReasons,omitempty"`
+	Message     *string          `json:"message,omitempty"`
+}
+
+type DevboxImageContent struct {
+	Type     DevboxContentBlockType `json:"type"`
+	Data     *string                `json:"data,omitempty"`
+	MimeType *string                `json:"mimeType,omitempty"`
+	URI      *string                `json:"uri,omitempty"`
+}
+
+func (DevboxImageContent) IsDevboxContentBlock() {}
+
+type DevboxImportAttributes struct {
+	Agent DevboxAgentType `json:"agent"`
+	// the agent's session id, from devboxImportableSessions
+	SessionID string  `json:"sessionId"`
+	Title     *string `json:"title,omitempty"`
+	Cwd       *string `json:"cwd,omitempty"`
+}
+
+type DevboxImportableSession struct {
+	Agent     *DevboxAgentType `json:"agent,omitempty"`
+	SessionID string           `json:"sessionId"`
+	Title     *string          `json:"title,omitempty"`
+	Cwd       *string          `json:"cwd,omitempty"`
+	UpdatedAt *string          `json:"updatedAt,omitempty"`
+}
+
+// The index rows an UpsertInstanceIndex call changed (revision and foreground state only when the instance aggregate changed)
+type DevboxIndexChange struct {
+	InstanceID      string                 `json:"instanceId"`
+	Revision        *string                `json:"revision,omitempty"`
+	ForegroundState *DevboxForegroundState `json:"foregroundState,omitempty"`
+	Threads         []*DevboxThread        `json:"threads,omitempty"`
+	Interactions    []*DevboxInteraction   `json:"interactions,omitempty"`
+}
+
+type DevboxIndexChangeDelta struct {
+	Delta   *Delta             `json:"delta,omitempty"`
+	Payload *DevboxIndexChange `json:"payload,omitempty"`
+}
+
+type DevboxInstance struct {
+	ID             string           `json:"id"`
+	Name           *string          `json:"name,omitempty"`
+	Agent          *DevboxAgentType `json:"agent,omitempty"`
+	RequestedModel *string          `json:"requestedModel,omitempty"`
+	Repositories   []*string        `json:"repositories,omitempty"`
+	// initial config option values, by config id
+	ConfigOptions     map[string]any       `json:"configOptions,omitempty"`
+	MaxRunningThreads *int64               `json:"maxRunningThreads,omitempty"`
+	Status            DevboxInstanceStatus `json:"status"`
+	StatusReason      *string              `json:"statusReason,omitempty"`
+	TemplateRevision  *string              `json:"templateRevision,omitempty"`
+	ImageDigest       *string              `json:"imageDigest,omitempty"`
+	// filesystem if the box's template changed since the snapshot, so the instance cold-boots
+	RestoreFidelity *DevboxSnapshotFidelity `json:"restoreFidelity,omitempty"`
+	// requires_action if any thread needs you
+	ForegroundState  *DevboxForegroundState   `json:"foregroundState,omitempty"`
+	RunningThreads   *int64                   `json:"runningThreads,omitempty"`
+	WaitingThreads   *int64                   `json:"waitingThreads,omitempty"`
+	KeepAwakeUntil   *string                  `json:"keepAwakeUntil,omitempty"`
+	AwakeSince       *string                  `json:"awakeSince,omitempty"`
+	StartedAt        *string                  `json:"startedAt,omitempty"`
+	SuspendedAt      *string                  `json:"suspendedAt,omitempty"`
+	CompletedAt      *string                  `json:"completedAt,omitempty"`
+	LastActivityAt   *string                  `json:"lastActivityAt,omitempty"`
+	AgentConnections []*DevboxAgentConnection `json:"agentConnections,omitempty"`
+	Checkouts        []*DevboxCheckout        `json:"checkouts,omitempty"`
+	IdleState        *DevboxIdleState         `json:"idleState,omitempty"`
+	ViewerCount      *int64                   `json:"viewerCount,omitempty"`
+	Leases           []*DevboxLease           `json:"leases,omitempty"`
+	AgentBilling     []*DevboxAgentBilling    `json:"agentBilling,omitempty"`
+	Workbench        *Workbench               `json:"workbench,omitempty"`
+	Devbox           *Devbox                  `json:"devbox,omitempty"`
+	Snapshot         *DevboxSnapshot          `json:"snapshot,omitempty"`
+	User             *User                    `json:"user,omitempty"`
+	KeepAwakeBy      *User                    `json:"keepAwakeBy,omitempty"`
+	Threads          []*DevboxThread          `json:"threads,omitempty"`
+	Interactions     []*DevboxInteraction     `json:"interactions,omitempty"`
+	InsertedAt       *string                  `json:"insertedAt,omitempty"`
+	UpdatedAt        *string                  `json:"updatedAt,omitempty"`
+}
+
+type DevboxInstanceAttributes struct {
+	// the attached box to start (defaults to the snapshot's box when restoring)
+	DevboxID *string `json:"devboxId,omitempty"`
+	// a ready snapshot to restore from
+	SnapshotID *string `json:"snapshotId,omitempty"`
+	Name       *string `json:"name,omitempty"`
+	// defaults to the box's default agent
+	Agent *DevboxAgentType `json:"agent,omitempty"`
+	// defaults to the agent's default model
+	Model *string `json:"model,omitempty"`
+	// defaults to the workbench's coding repositories allowed on the box
+	Repositories []*string `json:"repositories,omitempty"`
+	// initial values for other config options
+	ConfigOptions     []*DevboxConfigValueAttributes `json:"configOptions,omitempty"`
+	MaxRunningThreads *int64                         `json:"maxRunningThreads,omitempty"`
+	// how each agent is billed, defaults to your credentials marked default where the workbench allows it, otherwise the AI proxy
+	AgentBilling []*DevboxAgentBillingAttributes `json:"agentBilling,omitempty"`
+}
+
+type DevboxInstanceConnection struct {
+	PageInfo PageInfo              `json:"pageInfo"`
+	Edges    []*DevboxInstanceEdge `json:"edges,omitempty"`
+}
+
+type DevboxInstanceDelta struct {
+	Delta   *Delta          `json:"delta,omitempty"`
+	Payload *DevboxInstance `json:"payload,omitempty"`
+}
+
+type DevboxInstanceEdge struct {
+	Node   *DevboxInstance `json:"node,omitempty"`
+	Cursor *string         `json:"cursor,omitempty"`
+}
+
+// A permission request or elicitation from an agent
+type DevboxInteraction struct {
+	ID string `json:"id"`
+	// the daemon-allocated interaction id
+	ExternalID string `json:"externalId"`
+	// set when scoped to a tool call (render it inline)
+	ToolCallID *string                `json:"toolCallId,omitempty"`
+	Kind       DevboxInteractionKind  `json:"kind"`
+	State      DevboxInteractionState `json:"state"`
+	Title      *string                `json:"title,omitempty"`
+	Message    *string                `json:"message,omitempty"`
+	// json schema for a form elicitation
+	RequestedSchema map[string]any `json:"requestedSchema,omitempty"`
+	// the url of a url elicitation
+	URL        *string                   `json:"url,omitempty"`
+	Options    []*DevboxPermissionOption `json:"options,omitempty"`
+	Response   map[string]any            `json:"response,omitempty"`
+	AnsweredAt *string                   `json:"answeredAt,omitempty"`
+	ExpiresAt  *string                   `json:"expiresAt,omitempty"`
+	Instance   *DevboxInstance           `json:"instance,omitempty"`
+	Thread     *DevboxThread             `json:"thread,omitempty"`
+	AnsweredBy *User                     `json:"answeredBy,omitempty"`
+	InsertedAt *string                   `json:"insertedAt,omitempty"`
+	UpdatedAt  *string                   `json:"updatedAt,omitempty"`
+}
+
+type DevboxInteractionResponseAttributes struct {
+	// the selected option of a permission request
+	OptionID *string `json:"optionId,omitempty"`
+	// cancel a permission request
+	Cancelled *bool `json:"cancelled,omitempty"`
+	// the answer to an elicitation
+	Action *DevboxElicitationAction `json:"action,omitempty"`
+	// form content for an accepted form elicitation
+	Content *string `json:"content,omitempty"`
+}
+
+type DevboxLease struct {
+	Kind      DevboxLeaseKind `json:"kind"`
+	ExpiresAt string          `json:"expiresAt"`
+	Holder    *User           `json:"holder,omitempty"`
+}
+
+type DevboxMessageEntity struct {
+	MessageID *string              `json:"messageId,omitempty"`
+	Content   []DevboxContentBlock `json:"content,omitempty"`
+	PromptID  *string              `json:"promptId,omitempty"`
+	SentByID  *string              `json:"sentById,omitempty"`
+	Meta      map[string]any       `json:"meta,omitempty"`
+}
+
+type DevboxModel struct {
+	ID          string  `json:"id"`
+	Name        *string `json:"name,omitempty"`
+	Description *string `json:"description,omitempty"`
+}
+
+type DevboxModelAttributes struct {
+	ID          string  `json:"id"`
+	Name        *string `json:"name,omitempty"`
+	Description *string `json:"description,omitempty"`
+}
+
+type DevboxPermissionOption struct {
+	OptionID string  `json:"optionId"`
+	Name     *string `json:"name,omitempty"`
+	// allow_once, allow_always, reject_once or reject_always
+	Kind *string `json:"kind,omitempty"`
+}
+
+type DevboxPlan struct {
+	PlanID  *string            `json:"planId,omitempty"`
+	Entries []*DevboxPlanEntry `json:"entries,omitempty"`
+	Meta    map[string]any     `json:"meta,omitempty"`
+}
+
+type DevboxPlanEntry struct {
+	Content *string `json:"content,omitempty"`
+	// high, medium or low
+	Priority *string `json:"priority,omitempty"`
+	// pending, in_progress or completed
+	Status *string `json:"status,omitempty"`
+}
+
+type DevboxProbeToken struct {
+	Token     string `json:"token"`
+	ExpiresAt string `json:"expiresAt"`
+}
+
+type DevboxPromptBlockAttributes struct {
+	Type DevboxContentBlockType `json:"type"`
+	Text *string                `json:"text,omitempty"`
+	// base64 data for images and audio
+	Data     *string `json:"data,omitempty"`
+	MimeType *string `json:"mimeType,omitempty"`
+	URI      *string `json:"uri,omitempty"`
+	Name     *string `json:"name,omitempty"`
+}
+
+type DevboxRepository struct {
+	Path             *string `json:"path,omitempty"`
+	Name             *string `json:"name,omitempty"`
+	RemoteURL        *string `json:"remoteUrl,omitempty"`
+	DefaultBranch    *string `json:"defaultBranch,omitempty"`
+	Branch           *string `json:"branch,omitempty"`
+	HeadSha          *string `json:"headSha,omitempty"`
+	Dirty            *bool   `json:"dirty,omitempty"`
+	WorktreeThreadID *string `json:"worktreeThreadId,omitempty"`
+	Ahead            *int64  `json:"ahead,omitempty"`
+	Behind           *int64  `json:"behind,omitempty"`
+}
+
+type DevboxRepositoryChanges struct {
+	Checkout  *DevboxCheckout     `json:"checkout,omitempty"`
+	BaseRef   *string             `json:"baseRef,omitempty"`
+	BaseSha   *string             `json:"baseSha,omitempty"`
+	Additions *int64              `json:"additions,omitempty"`
+	Deletions *int64              `json:"deletions,omitempty"`
+	Files     []*DevboxFileChange `json:"files,omitempty"`
+}
+
+type DevboxResourceContent struct {
+	Type     DevboxContentBlockType `json:"type"`
+	URI      *string                `json:"uri,omitempty"`
+	MimeType *string                `json:"mimeType,omitempty"`
+	Text     *string                `json:"text,omitempty"`
+	Blob     *string                `json:"blob,omitempty"`
+}
+
+func (DevboxResourceContent) IsDevboxContentBlock() {}
+
+type DevboxResourceLinkContent struct {
+	Type        DevboxContentBlockType `json:"type"`
+	URI         *string                `json:"uri,omitempty"`
+	Name        *string                `json:"name,omitempty"`
+	Title       *string                `json:"title,omitempty"`
+	Description *string                `json:"description,omitempty"`
+	MimeType    *string                `json:"mimeType,omitempty"`
+	Size        *string                `json:"size,omitempty"`
+}
+
+func (DevboxResourceLinkContent) IsDevboxContentBlock() {}
+
+type DevboxSessionCapabilities struct {
+	List   *bool `json:"list,omitempty"`
+	Resume *bool `json:"resume,omitempty"`
+	Load   *bool `json:"load,omitempty"`
+	Close  *bool `json:"close,omitempty"`
+	Delete *bool `json:"delete,omitempty"`
+	Fork   *bool `json:"fork,omitempty"`
+}
+
+type DevboxSessionCapabilitiesAttributes struct {
+	List   *bool `json:"list,omitempty"`
+	Resume *bool `json:"resume,omitempty"`
+	Load   *bool `json:"load,omitempty"`
+	Close  *bool `json:"close,omitempty"`
+	Delete *bool `json:"delete,omitempty"`
+	Fork   *bool `json:"fork,omitempty"`
+}
+
+type DevboxSessionMessageEntity struct {
+	MessageID     *string              `json:"messageId,omitempty"`
+	FromSessionID *string              `json:"fromSessionId,omitempty"`
+	ToSessionID   *string              `json:"toSessionId,omitempty"`
+	Content       []DevboxContentBlock `json:"content,omitempty"`
+	Meta          map[string]any       `json:"meta,omitempty"`
+}
+
+type DevboxSessionSummary struct {
+	SessionID       *string                `json:"sessionId,omitempty"`
+	ThreadID        *string                `json:"threadId,omitempty"`
+	Kind            *DevboxThreadKind      `json:"kind,omitempty"`
+	ParentSessionID *string                `json:"parentSessionId,omitempty"`
+	Agent           *DevboxAgentType       `json:"agent,omitempty"`
+	Title           *string                `json:"title,omitempty"`
+	Status          *DevboxThreadStatus    `json:"status,omitempty"`
+	ForegroundState *DevboxForegroundState `json:"foregroundState,omitempty"`
+	LastActivityAt  *string                `json:"lastActivityAt,omitempty"`
+}
+
+type DevboxSnapshot struct {
+	ID               string                  `json:"id"`
+	Name             *string                 `json:"name,omitempty"`
+	Status           DevboxSnapshotStatus    `json:"status"`
+	Fidelity         *DevboxSnapshotFidelity `json:"fidelity,omitempty"`
+	SizeBytes        *string                 `json:"sizeBytes,omitempty"`
+	Error            *string                 `json:"error,omitempty"`
+	TemplateRevision *string                 `json:"templateRevision,omitempty"`
+	Workbench        *Workbench              `json:"workbench,omitempty"`
+	Devbox           *Devbox                 `json:"devbox,omitempty"`
+	Instance         *DevboxInstance         `json:"instance,omitempty"`
+	User             *User                   `json:"user,omitempty"`
+	InsertedAt       *string                 `json:"insertedAt,omitempty"`
+	UpdatedAt        *string                 `json:"updatedAt,omitempty"`
+}
+
+type DevboxSnapshotAttributes struct {
+	Name *string `json:"name,omitempty"`
+}
+
+type DevboxSnapshotConnection struct {
+	PageInfo PageInfo              `json:"pageInfo"`
+	Edges    []*DevboxSnapshotEdge `json:"edges,omitempty"`
+}
+
+type DevboxSnapshotDelta struct {
+	Delta   *Delta          `json:"delta,omitempty"`
+	Payload *DevboxSnapshot `json:"payload,omitempty"`
+}
+
+type DevboxSnapshotEdge struct {
+	Node   *DevboxSnapshot `json:"node,omitempty"`
+	Cursor *string         `json:"cursor,omitempty"`
+}
+
+type DevboxStream struct {
+	StreamID string           `json:"streamId"`
+	Kind     DevboxStreamKind `json:"kind"`
+	// the websocket to connect to
+	URL string `json:"url"`
+	// a short-lived bearer token for the websocket
+	Token string `json:"token"`
+	// connect before this
+	ExpiresAt    *string   `json:"expiresAt,omitempty"`
+	Subprotocols []*string `json:"subprotocols,omitempty"`
+	TerminalID   *string   `json:"terminalId,omitempty"`
+}
+
+type DevboxTerminal struct {
+	TerminalID *string        `json:"terminalId,omitempty"`
+	Command    *string        `json:"command,omitempty"`
+	Args       []*string      `json:"args,omitempty"`
+	Cwd        *string        `json:"cwd,omitempty"`
+	Output     *string        `json:"output,omitempty"`
+	Truncated  *bool          `json:"truncated,omitempty"`
+	ExitCode   *int64         `json:"exitCode,omitempty"`
+	Signal     *string        `json:"signal,omitempty"`
+	Meta       map[string]any `json:"meta,omitempty"`
+}
+
+type DevboxTextContent struct {
+	Type        DevboxContentBlockType `json:"type"`
+	Text        *string                `json:"text,omitempty"`
+	Annotations map[string]any         `json:"annotations,omitempty"`
+}
+
+func (DevboxTextContent) IsDevboxContentBlock() {}
+
+// A top-level ACP session console knows about, or (as a subagent) one spawned by it
+type DevboxThread struct {
+	ID string `json:"id"`
+	// the ACP session id, unset while a waiting thread hasn't started
+	SessionID *string          `json:"sessionId,omitempty"`
+	Kind      DevboxThreadKind `json:"kind"`
+	Agent     *DevboxAgentType `json:"agent,omitempty"`
+	Title     *string          `json:"title,omitempty"`
+	// the agent-owned title
+	AgentTitle *string `json:"agentTitle,omitempty"`
+	// the current model-category config value
+	Model             *string                `json:"model,omitempty"`
+	Cwd               *string                `json:"cwd,omitempty"`
+	WorktreeRepos     []*string              `json:"worktreeRepos,omitempty"`
+	Status            DevboxThreadStatus     `json:"status"`
+	Imported          *bool                  `json:"imported,omitempty"`
+	LastActivityAt    *string                `json:"lastActivityAt,omitempty"`
+	EntityCount       *int64                 `json:"entityCount,omitempty"`
+	ForegroundState   *DevboxForegroundState `json:"foregroundState,omitempty"`
+	StopReason        *string                `json:"stopReason,omitempty"`
+	Error             map[string]any         `json:"error,omitempty"`
+	BackgroundWork    map[string]any         `json:"backgroundWork,omitempty"`
+	Billing           *string                `json:"billing,omitempty"`
+	Revision          *int64                 `json:"revision,omitempty"`
+	ConfigOptions     []*DevboxConfigOption  `json:"configOptions,omitempty"`
+	AvailableCommands []*DevboxCommand       `json:"availableCommands,omitempty"`
+	Usage             *DevboxUsage           `json:"usage,omitempty"`
+	Instance          *DevboxInstance        `json:"instance,omitempty"`
+	Parent            *DevboxThread          `json:"parent,omitempty"`
+	User              *User                  `json:"user,omitempty"`
+	// subagent sessions spawned by this one
+	Subagents    []*DevboxThread      `json:"subagents,omitempty"`
+	Interactions []*DevboxInteraction `json:"interactions,omitempty"`
+	InsertedAt   *string              `json:"insertedAt,omitempty"`
+	UpdatedAt    *string              `json:"updatedAt,omitempty"`
+}
+
+type DevboxThreadAttributes struct {
+	// defaults to the instance's agent
+	Agent         *DevboxAgentType               `json:"agent,omitempty"`
+	Model         *string                        `json:"model,omitempty"`
+	ConfigOptions []*DevboxConfigValueAttributes `json:"configOptions,omitempty"`
+	// ~ or ~/<repository>
+	Cwd *string `json:"cwd,omitempty"`
+	// repositories to give the thread its own worktree of
+	WorktreeRepos []*string `json:"worktreeRepos,omitempty"`
+	Title         *string   `json:"title,omitempty"`
+	// an optional first prompt
+	Prompt *string `json:"prompt,omitempty"`
+	// an optional first prompt, as content blocks
+	Content []*DevboxPromptBlockAttributes `json:"content,omitempty"`
+}
+
+type DevboxThreadDelta struct {
+	Delta   *Delta        `json:"delta,omitempty"`
+	Payload *DevboxThread `json:"payload,omitempty"`
+}
+
+// A page of a session's transcript, served by the box: settled entities merged with in-flight state
+type DevboxTimeline struct {
+	Entities []*DevboxEntity `json:"entities,omitempty"`
+	// apply live deltas with a greater offset on top of this page
+	DeltaOffset *string `json:"deltaOffset,omitempty"`
+	// more entities lie in the paging direction (older ones, unless paging with after)
+	HasMore *bool `json:"hasMore,omitempty"`
+}
+
+type DevboxToolCall struct {
+	ToolCallID *string `json:"toolCallId,omitempty"`
+	Title      *string `json:"title,omitempty"`
+	// read, edit, delete, move, search, execute, think, fetch, other, ...
+	Kind *string `json:"kind,omitempty"`
+	// pending, in_progress, completed or failed
+	Status    *string                   `json:"status,omitempty"`
+	Content   []DevboxToolCallContent   `json:"content,omitempty"`
+	Locations []*DevboxToolCallLocation `json:"locations,omitempty"`
+	RawInput  map[string]any            `json:"rawInput,omitempty"`
+	RawOutput map[string]any            `json:"rawOutput,omitempty"`
+	Meta      map[string]any            `json:"meta,omitempty"`
+}
+
+type DevboxToolCallBlock struct {
+	Type    DevboxToolCallContentType `json:"type"`
+	Content DevboxContentBlock        `json:"content,omitempty"`
+}
+
+func (DevboxToolCallBlock) IsDevboxToolCallContent() {}
+
+type DevboxToolCallDiff struct {
+	Type    DevboxToolCallContentType `json:"type"`
+	Path    *string                   `json:"path,omitempty"`
+	OldText *string                   `json:"oldText,omitempty"`
+	NewText *string                   `json:"newText,omitempty"`
+}
+
+func (DevboxToolCallDiff) IsDevboxToolCallContent() {}
+
+type DevboxToolCallLocation struct {
+	Path *string `json:"path,omitempty"`
+	Line *int64  `json:"line,omitempty"`
+}
+
+type DevboxToolCallTerminal struct {
+	Type       DevboxToolCallContentType `json:"type"`
+	TerminalID *string                   `json:"terminalId,omitempty"`
+}
+
+func (DevboxToolCallTerminal) IsDevboxToolCallContent() {}
+
+type DevboxToolCallUnknown struct {
+	Type    DevboxToolCallContentType `json:"type"`
+	Variant *string                   `json:"variant,omitempty"`
+	Raw     map[string]any            `json:"raw,omitempty"`
+}
+
+func (DevboxToolCallUnknown) IsDevboxToolCallContent() {}
+
+type DevboxTrustSnippet struct {
+	Provider DevboxCloudProvider `json:"provider"`
+	Format   DevboxSnippetFormat `json:"format"`
+	Title    string              `json:"title"`
+	Content  string              `json:"content"`
+}
+
+type DevboxUnknownContent struct {
+	Type DevboxContentBlockType `json:"type"`
+	// the unrecognized ACP type
+	Variant *string        `json:"variant,omitempty"`
+	Raw     map[string]any `json:"raw,omitempty"`
+}
+
+func (DevboxUnknownContent) IsDevboxContentBlock() {}
+
+type DevboxUsage struct {
+	InputTokens     *int64   `json:"inputTokens,omitempty"`
+	OutputTokens    *int64   `json:"outputTokens,omitempty"`
+	CachedTokens    *int64   `json:"cachedTokens,omitempty"`
+	ReasoningTokens *int64   `json:"reasoningTokens,omitempty"`
+	TotalTokens     *int64   `json:"totalTokens,omitempty"`
+	ContextSize     *int64   `json:"contextSize,omitempty"`
+	ContextUsed     *int64   `json:"contextUsed,omitempty"`
+	TotalCost       *float64 `json:"totalCost,omitempty"`
+	Currency        *string  `json:"currency,omitempty"`
+}
+
+type DevboxWorkloadIdentity struct {
+	// the OIDC issuer cloud accounts federate with
+	IssuerURL string `json:"issuerUrl"`
+	// the sub claim of every token from this box
+	Subject string `json:"subject"`
+	// audiences the box can mint tokens for
+	Audiences []*string             `json:"audiences,omitempty"`
+	Snippets  []*DevboxTrustSnippet `json:"snippets,omitempty"`
 }
 
 // Allows you to control whether a specific set of fields in a kubernetes object is drift detected
@@ -8122,9 +9088,19 @@ type PullRequest struct {
 	// the cluster this pr is meant to modify
 	Cluster *Cluster `json:"cluster,omitempty"`
 	// the service this pr is meant to modify
-	Service    *ServiceDeployment `json:"service,omitempty"`
-	InsertedAt *string            `json:"insertedAt,omitempty"`
-	UpdatedAt  *string            `json:"updatedAt,omitempty"`
+	Service *ServiceDeployment `json:"service,omitempty"`
+	// how a devbox pr was recorded: through the devbox mcp, or observed at egress
+	Source *PullRequestSource `json:"source,omitempty"`
+	// devbox attribution details, e.g. the subagent session and tool call that created it
+	Metadata map[string]any `json:"metadata,omitempty"`
+	// the devbox this pr was created from
+	Devbox *Devbox `json:"devbox,omitempty"`
+	// the devbox instance this pr was created from
+	DevboxInstance *DevboxInstance `json:"devboxInstance,omitempty"`
+	// the devbox thread this pr was created from
+	DevboxThread *DevboxThread `json:"devboxThread,omitempty"`
+	InsertedAt   *string       `json:"insertedAt,omitempty"`
+	UpdatedAt    *string       `json:"updatedAt,omitempty"`
 }
 
 // attributes for a pull request pointer record
@@ -11036,10 +12012,16 @@ type Workbench struct {
 	// files matching a glob pattern, supporting `*`, `?`, `**` and `{a,b}`
 	GlobFiles []*WorkbenchFile `json:"globFiles,omitempty"`
 	// lines matching a regex within a file, directory or glob pattern
-	GrepFiles           []*WorkbenchGrepMatch         `json:"grepFiles,omitempty"`
-	Runs                *WorkbenchJobConnection       `json:"runs,omitempty"`
-	RunCounts           *WorkbenchJobCounts           `json:"runCounts,omitempty"`
-	Crons               *WorkbenchCronConnection      `json:"crons,omitempty"`
+	GrepFiles []*WorkbenchGrepMatch    `json:"grepFiles,omitempty"`
+	Runs      *WorkbenchJobConnection  `json:"runs,omitempty"`
+	RunCounts *WorkbenchJobCounts      `json:"runCounts,omitempty"`
+	Crons     *WorkbenchCronConnection `json:"crons,omitempty"`
+	// the devboxes attached to this workbench
+	Devboxes        []*Devbox                 `json:"devboxes,omitempty"`
+	DevboxInstances *DevboxInstanceConnection `json:"devboxInstances,omitempty"`
+	DevboxSnapshots *DevboxSnapshotConnection `json:"devboxSnapshots,omitempty"`
+	// pending devbox permission requests and elicitations across this workbench's instances
+	DevboxInbox         []*DevboxInteraction          `json:"devboxInbox,omitempty"`
 	Prompts             *WorkbenchPromptConnection    `json:"prompts,omitempty"`
 	WorkbenchSkills     *WorkbenchSkillConnection     `json:"workbenchSkills,omitempty"`
 	WorkbenchKnowledge  *WorkbenchKnowledgeConnection `json:"workbenchKnowledge,omitempty"`
@@ -11264,6 +12246,8 @@ type WorkbenchConfiguration struct {
 	Coding *WorkbenchCoding `json:"coding,omitempty"`
 	// observability capabilities
 	Observability *WorkbenchObservability `json:"observability,omitempty"`
+	// limits for devbox instances
+	Devbox *WorkbenchDevboxConfig `json:"devbox,omitempty"`
 }
 
 type WorkbenchConfigurationAttributes struct {
@@ -11273,6 +12257,8 @@ type WorkbenchConfigurationAttributes struct {
 	Coding *WorkbenchCodingAttributes `json:"coding,omitempty"`
 	// observability capabilities (logs, metrics)
 	Observability *WorkbenchObservabilityAttributes `json:"observability,omitempty"`
+	// limits for devbox instances started from this workbench
+	Devbox *WorkbenchDevboxConfigAttributes `json:"devbox,omitempty"`
 }
 
 type WorkbenchConnection struct {
@@ -11433,6 +12419,24 @@ type WorkbenchDashboardInput struct {
 	Required *bool `json:"required,omitempty"`
 	// Tool query used to populate input options, such as metric label search
 	Datasource *WorkbenchDashboardDatasource `json:"datasource,omitempty"`
+}
+
+type WorkbenchDevboxConfig struct {
+	// the most ready snapshots kept for this workbench
+	MaxSnapshots *int64 `json:"maxSnapshots,omitempty"`
+	// the longest keep-awake deferral (in seconds) allowed from this workbench
+	MaxDeferral *int64 `json:"maxDeferral,omitempty"`
+	// whether devbox agents may bill to their owner's linked subscription
+	AllowSubscriptionCredentials *bool `json:"allowSubscriptionCredentials,omitempty"`
+}
+
+type WorkbenchDevboxConfigAttributes struct {
+	// the most ready snapshots to keep, the oldest are deleted beyond it
+	MaxSnapshots *int64 `json:"maxSnapshots,omitempty"`
+	// lowers the boxes' maxDeferral (in seconds) for keep-awake requests
+	MaxDeferral *int64 `json:"maxDeferral,omitempty"`
+	// let users bill devbox agents to their own linked subscriptions instead of the AI proxy (default off)
+	AllowSubscriptionCredentials *bool `json:"allowSubscriptionCredentials,omitempty"`
 }
 
 type WorkbenchEdge struct {
@@ -11680,6 +12684,8 @@ type WorkbenchJobActivity struct {
 	Prompt *string `json:"prompt,omitempty"`
 	// embedded result (output, metrics, logs) when present
 	Result *WorkbenchJobActivityResult `json:"result,omitempty"`
+	// the orchestrator tool call that spawned this activity, if any
+	ToolCall *WorkbenchJobActivityToolCall `json:"toolCall,omitempty"`
 	// thoughts emitted during this activity
 	Thoughts []*WorkbenchJobThought `json:"thoughts,omitempty"`
 	// whimsically describes current progress for you
@@ -11825,6 +12831,13 @@ type WorkbenchJobActivityResult struct {
 	LogsQuery *WorkbenchToolQueryData `json:"logsQuery,omitempty"`
 	// primary traces tool query for this activity
 	TracesQuery *WorkbenchToolQueryData `json:"tracesQuery,omitempty"`
+}
+
+type WorkbenchJobActivityToolCall struct {
+	// the id of the tool call
+	CallID *string `json:"callId,omitempty"`
+	// the name of the tool that was called, eg workbench_coding_agent for coding agent runs
+	Name *string `json:"name,omitempty"`
 }
 
 type WorkbenchJobActivityTrace struct {
@@ -13248,6 +14261,175 @@ type YamlOverlayAttributes struct {
 	ListMerge *ListMerge `json:"listMerge,omitempty"`
 	// whether you want to apply liquid templating on the yaml before compiling
 	Templated *bool `json:"templated,omitempty"`
+}
+
+type AgentCredentialKind string
+
+const (
+	AgentCredentialKindClaudeOauthToken AgentCredentialKind = "CLAUDE_OAUTH_TOKEN"
+	AgentCredentialKindCodexChatgptAuth AgentCredentialKind = "CODEX_CHATGPT_AUTH"
+	AgentCredentialKindCodexAccessToken AgentCredentialKind = "CODEX_ACCESS_TOKEN"
+)
+
+var AllAgentCredentialKind = []AgentCredentialKind{
+	AgentCredentialKindClaudeOauthToken,
+	AgentCredentialKindCodexChatgptAuth,
+	AgentCredentialKindCodexAccessToken,
+}
+
+func (e AgentCredentialKind) IsValid() bool {
+	switch e {
+	case AgentCredentialKindClaudeOauthToken, AgentCredentialKindCodexChatgptAuth, AgentCredentialKindCodexAccessToken:
+		return true
+	}
+	return false
+}
+
+func (e AgentCredentialKind) String() string {
+	return string(e)
+}
+
+func (e *AgentCredentialKind) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AgentCredentialKind(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AgentCredentialKind", str)
+	}
+	return nil
+}
+
+func (e AgentCredentialKind) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *AgentCredentialKind) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e AgentCredentialKind) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type AgentCredentialProvider string
+
+const (
+	AgentCredentialProviderClaude AgentCredentialProvider = "CLAUDE"
+	AgentCredentialProviderCodex  AgentCredentialProvider = "CODEX"
+)
+
+var AllAgentCredentialProvider = []AgentCredentialProvider{
+	AgentCredentialProviderClaude,
+	AgentCredentialProviderCodex,
+}
+
+func (e AgentCredentialProvider) IsValid() bool {
+	switch e {
+	case AgentCredentialProviderClaude, AgentCredentialProviderCodex:
+		return true
+	}
+	return false
+}
+
+func (e AgentCredentialProvider) String() string {
+	return string(e)
+}
+
+func (e *AgentCredentialProvider) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AgentCredentialProvider(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AgentCredentialProvider", str)
+	}
+	return nil
+}
+
+func (e AgentCredentialProvider) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *AgentCredentialProvider) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e AgentCredentialProvider) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type AgentCredentialStatus string
+
+const (
+	AgentCredentialStatusValid   AgentCredentialStatus = "VALID"
+	AgentCredentialStatusInvalid AgentCredentialStatus = "INVALID"
+	AgentCredentialStatusExpired AgentCredentialStatus = "EXPIRED"
+)
+
+var AllAgentCredentialStatus = []AgentCredentialStatus{
+	AgentCredentialStatusValid,
+	AgentCredentialStatusInvalid,
+	AgentCredentialStatusExpired,
+}
+
+func (e AgentCredentialStatus) IsValid() bool {
+	switch e {
+	case AgentCredentialStatusValid, AgentCredentialStatusInvalid, AgentCredentialStatusExpired:
+		return true
+	}
+	return false
+}
+
+func (e AgentCredentialStatus) String() string {
+	return string(e)
+}
+
+func (e *AgentCredentialStatus) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AgentCredentialStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AgentCredentialStatus", str)
+	}
+	return nil
+}
+
+func (e AgentCredentialStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *AgentCredentialStatus) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e AgentCredentialStatus) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 type AgentMessageToolState string
@@ -15618,6 +16800,1251 @@ func (e *Delta) UnmarshalJSON(b []byte) error {
 }
 
 func (e Delta) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type DevboxAgentType string
+
+const (
+	DevboxAgentTypeClaude   DevboxAgentType = "CLAUDE"
+	DevboxAgentTypeCodex    DevboxAgentType = "CODEX"
+	DevboxAgentTypeOpencode DevboxAgentType = "OPENCODE"
+	DevboxAgentTypeGemini   DevboxAgentType = "GEMINI"
+	DevboxAgentTypePi       DevboxAgentType = "PI"
+)
+
+var AllDevboxAgentType = []DevboxAgentType{
+	DevboxAgentTypeClaude,
+	DevboxAgentTypeCodex,
+	DevboxAgentTypeOpencode,
+	DevboxAgentTypeGemini,
+	DevboxAgentTypePi,
+}
+
+func (e DevboxAgentType) IsValid() bool {
+	switch e {
+	case DevboxAgentTypeClaude, DevboxAgentTypeCodex, DevboxAgentTypeOpencode, DevboxAgentTypeGemini, DevboxAgentTypePi:
+		return true
+	}
+	return false
+}
+
+func (e DevboxAgentType) String() string {
+	return string(e)
+}
+
+func (e *DevboxAgentType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DevboxAgentType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid DevboxAgentType", str)
+	}
+	return nil
+}
+
+func (e DevboxAgentType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *DevboxAgentType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e DevboxAgentType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type DevboxBillingMode string
+
+const (
+	// billed through the Plural AI proxy against the workbench budget
+	DevboxBillingModeProxy DevboxBillingMode = "PROXY"
+	// billed to the instance owner's linked subscription
+	DevboxBillingModeSubscription DevboxBillingMode = "SUBSCRIPTION"
+)
+
+var AllDevboxBillingMode = []DevboxBillingMode{
+	DevboxBillingModeProxy,
+	DevboxBillingModeSubscription,
+}
+
+func (e DevboxBillingMode) IsValid() bool {
+	switch e {
+	case DevboxBillingModeProxy, DevboxBillingModeSubscription:
+		return true
+	}
+	return false
+}
+
+func (e DevboxBillingMode) String() string {
+	return string(e)
+}
+
+func (e *DevboxBillingMode) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DevboxBillingMode(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid DevboxBillingMode", str)
+	}
+	return nil
+}
+
+func (e DevboxBillingMode) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *DevboxBillingMode) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e DevboxBillingMode) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type DevboxCloudProvider string
+
+const (
+	DevboxCloudProviderAWS   DevboxCloudProvider = "AWS"
+	DevboxCloudProviderGCP   DevboxCloudProvider = "GCP"
+	DevboxCloudProviderAzure DevboxCloudProvider = "AZURE"
+)
+
+var AllDevboxCloudProvider = []DevboxCloudProvider{
+	DevboxCloudProviderAWS,
+	DevboxCloudProviderGCP,
+	DevboxCloudProviderAzure,
+}
+
+func (e DevboxCloudProvider) IsValid() bool {
+	switch e {
+	case DevboxCloudProviderAWS, DevboxCloudProviderGCP, DevboxCloudProviderAzure:
+		return true
+	}
+	return false
+}
+
+func (e DevboxCloudProvider) String() string {
+	return string(e)
+}
+
+func (e *DevboxCloudProvider) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DevboxCloudProvider(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid DevboxCloudProvider", str)
+	}
+	return nil
+}
+
+func (e DevboxCloudProvider) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *DevboxCloudProvider) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e DevboxCloudProvider) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type DevboxContentBlockType string
+
+const (
+	DevboxContentBlockTypeText         DevboxContentBlockType = "TEXT"
+	DevboxContentBlockTypeImage        DevboxContentBlockType = "IMAGE"
+	DevboxContentBlockTypeAudio        DevboxContentBlockType = "AUDIO"
+	DevboxContentBlockTypeResource     DevboxContentBlockType = "RESOURCE"
+	DevboxContentBlockTypeResourceLink DevboxContentBlockType = "RESOURCE_LINK"
+	DevboxContentBlockTypeUnknown      DevboxContentBlockType = "UNKNOWN"
+)
+
+var AllDevboxContentBlockType = []DevboxContentBlockType{
+	DevboxContentBlockTypeText,
+	DevboxContentBlockTypeImage,
+	DevboxContentBlockTypeAudio,
+	DevboxContentBlockTypeResource,
+	DevboxContentBlockTypeResourceLink,
+	DevboxContentBlockTypeUnknown,
+}
+
+func (e DevboxContentBlockType) IsValid() bool {
+	switch e {
+	case DevboxContentBlockTypeText, DevboxContentBlockTypeImage, DevboxContentBlockTypeAudio, DevboxContentBlockTypeResource, DevboxContentBlockTypeResourceLink, DevboxContentBlockTypeUnknown:
+		return true
+	}
+	return false
+}
+
+func (e DevboxContentBlockType) String() string {
+	return string(e)
+}
+
+func (e *DevboxContentBlockType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DevboxContentBlockType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid DevboxContentBlockType", str)
+	}
+	return nil
+}
+
+func (e DevboxContentBlockType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *DevboxContentBlockType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e DevboxContentBlockType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type DevboxDeltaOp string
+
+const (
+	// a chunk appended to an entity, e.g. message text
+	DevboxDeltaOpAppend DevboxDeltaOp = "APPEND"
+	// an ACP upsert patch: omitted fields unchanged, null clears, values replace
+	DevboxDeltaOpPatch DevboxDeltaOp = "PATCH"
+	// a live-only notice, never stored in the transcript
+	DevboxDeltaOpNotice DevboxDeltaOp = "NOTICE"
+	// session state: config options, available commands, session info or usage
+	DevboxDeltaOpState DevboxDeltaOp = "STATE"
+	// the entity settled, `entity` holds its final revision
+	DevboxDeltaOpSettle DevboxDeltaOp = "SETTLE"
+	// a pull request was created from the thread
+	DevboxDeltaOpPullRequest DevboxDeltaOp = "PULL_REQUEST"
+)
+
+var AllDevboxDeltaOp = []DevboxDeltaOp{
+	DevboxDeltaOpAppend,
+	DevboxDeltaOpPatch,
+	DevboxDeltaOpNotice,
+	DevboxDeltaOpState,
+	DevboxDeltaOpSettle,
+	DevboxDeltaOpPullRequest,
+}
+
+func (e DevboxDeltaOp) IsValid() bool {
+	switch e {
+	case DevboxDeltaOpAppend, DevboxDeltaOpPatch, DevboxDeltaOpNotice, DevboxDeltaOpState, DevboxDeltaOpSettle, DevboxDeltaOpPullRequest:
+		return true
+	}
+	return false
+}
+
+func (e DevboxDeltaOp) String() string {
+	return string(e)
+}
+
+func (e *DevboxDeltaOp) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DevboxDeltaOp(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid DevboxDeltaOp", str)
+	}
+	return nil
+}
+
+func (e DevboxDeltaOp) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *DevboxDeltaOp) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e DevboxDeltaOp) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type DevboxElicitationAction string
+
+const (
+	DevboxElicitationActionAccept  DevboxElicitationAction = "ACCEPT"
+	DevboxElicitationActionDecline DevboxElicitationAction = "DECLINE"
+	DevboxElicitationActionCancel  DevboxElicitationAction = "CANCEL"
+)
+
+var AllDevboxElicitationAction = []DevboxElicitationAction{
+	DevboxElicitationActionAccept,
+	DevboxElicitationActionDecline,
+	DevboxElicitationActionCancel,
+}
+
+func (e DevboxElicitationAction) IsValid() bool {
+	switch e {
+	case DevboxElicitationActionAccept, DevboxElicitationActionDecline, DevboxElicitationActionCancel:
+		return true
+	}
+	return false
+}
+
+func (e DevboxElicitationAction) String() string {
+	return string(e)
+}
+
+func (e *DevboxElicitationAction) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DevboxElicitationAction(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid DevboxElicitationAction", str)
+	}
+	return nil
+}
+
+func (e DevboxElicitationAction) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *DevboxElicitationAction) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e DevboxElicitationAction) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type DevboxEntityType string
+
+const (
+	DevboxEntityTypeUserMessage    DevboxEntityType = "USER_MESSAGE"
+	DevboxEntityTypeAgentMessage   DevboxEntityType = "AGENT_MESSAGE"
+	DevboxEntityTypeAgentThought   DevboxEntityType = "AGENT_THOUGHT"
+	DevboxEntityTypeSessionMessage DevboxEntityType = "SESSION_MESSAGE"
+	DevboxEntityTypeToolCall       DevboxEntityType = "TOOL_CALL"
+	DevboxEntityTypePlan           DevboxEntityType = "PLAN"
+	DevboxEntityTypeTerminal       DevboxEntityType = "TERMINAL"
+	DevboxEntityTypeCompaction     DevboxEntityType = "COMPACTION"
+	DevboxEntityTypeUnknown        DevboxEntityType = "UNKNOWN"
+)
+
+var AllDevboxEntityType = []DevboxEntityType{
+	DevboxEntityTypeUserMessage,
+	DevboxEntityTypeAgentMessage,
+	DevboxEntityTypeAgentThought,
+	DevboxEntityTypeSessionMessage,
+	DevboxEntityTypeToolCall,
+	DevboxEntityTypePlan,
+	DevboxEntityTypeTerminal,
+	DevboxEntityTypeCompaction,
+	DevboxEntityTypeUnknown,
+}
+
+func (e DevboxEntityType) IsValid() bool {
+	switch e {
+	case DevboxEntityTypeUserMessage, DevboxEntityTypeAgentMessage, DevboxEntityTypeAgentThought, DevboxEntityTypeSessionMessage, DevboxEntityTypeToolCall, DevboxEntityTypePlan, DevboxEntityTypeTerminal, DevboxEntityTypeCompaction, DevboxEntityTypeUnknown:
+		return true
+	}
+	return false
+}
+
+func (e DevboxEntityType) String() string {
+	return string(e)
+}
+
+func (e *DevboxEntityType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DevboxEntityType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid DevboxEntityType", str)
+	}
+	return nil
+}
+
+func (e DevboxEntityType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *DevboxEntityType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e DevboxEntityType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type DevboxForegroundState string
+
+const (
+	DevboxForegroundStateIdle           DevboxForegroundState = "IDLE"
+	DevboxForegroundStateRunning        DevboxForegroundState = "RUNNING"
+	DevboxForegroundStateRequiresAction DevboxForegroundState = "REQUIRES_ACTION"
+)
+
+var AllDevboxForegroundState = []DevboxForegroundState{
+	DevboxForegroundStateIdle,
+	DevboxForegroundStateRunning,
+	DevboxForegroundStateRequiresAction,
+}
+
+func (e DevboxForegroundState) IsValid() bool {
+	switch e {
+	case DevboxForegroundStateIdle, DevboxForegroundStateRunning, DevboxForegroundStateRequiresAction:
+		return true
+	}
+	return false
+}
+
+func (e DevboxForegroundState) String() string {
+	return string(e)
+}
+
+func (e *DevboxForegroundState) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DevboxForegroundState(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid DevboxForegroundState", str)
+	}
+	return nil
+}
+
+func (e DevboxForegroundState) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *DevboxForegroundState) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e DevboxForegroundState) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type DevboxInstanceStatus string
+
+const (
+	DevboxInstanceStatusPending      DevboxInstanceStatus = "PENDING"
+	DevboxInstanceStatusProvisioning DevboxInstanceStatus = "PROVISIONING"
+	DevboxInstanceStatusRunning      DevboxInstanceStatus = "RUNNING"
+	DevboxInstanceStatusSuspended    DevboxInstanceStatus = "SUSPENDED"
+	DevboxInstanceStatusSnapshotting DevboxInstanceStatus = "SNAPSHOTTING"
+	DevboxInstanceStatusCompleted    DevboxInstanceStatus = "COMPLETED"
+	DevboxInstanceStatusFailed       DevboxInstanceStatus = "FAILED"
+	DevboxInstanceStatusCancelled    DevboxInstanceStatus = "CANCELLED"
+)
+
+var AllDevboxInstanceStatus = []DevboxInstanceStatus{
+	DevboxInstanceStatusPending,
+	DevboxInstanceStatusProvisioning,
+	DevboxInstanceStatusRunning,
+	DevboxInstanceStatusSuspended,
+	DevboxInstanceStatusSnapshotting,
+	DevboxInstanceStatusCompleted,
+	DevboxInstanceStatusFailed,
+	DevboxInstanceStatusCancelled,
+}
+
+func (e DevboxInstanceStatus) IsValid() bool {
+	switch e {
+	case DevboxInstanceStatusPending, DevboxInstanceStatusProvisioning, DevboxInstanceStatusRunning, DevboxInstanceStatusSuspended, DevboxInstanceStatusSnapshotting, DevboxInstanceStatusCompleted, DevboxInstanceStatusFailed, DevboxInstanceStatusCancelled:
+		return true
+	}
+	return false
+}
+
+func (e DevboxInstanceStatus) String() string {
+	return string(e)
+}
+
+func (e *DevboxInstanceStatus) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DevboxInstanceStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid DevboxInstanceStatus", str)
+	}
+	return nil
+}
+
+func (e DevboxInstanceStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *DevboxInstanceStatus) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e DevboxInstanceStatus) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type DevboxInteractionKind string
+
+const (
+	DevboxInteractionKindPermission      DevboxInteractionKind = "PERMISSION"
+	DevboxInteractionKindFormElicitation DevboxInteractionKind = "FORM_ELICITATION"
+	DevboxInteractionKindURLElicitation  DevboxInteractionKind = "URL_ELICITATION"
+)
+
+var AllDevboxInteractionKind = []DevboxInteractionKind{
+	DevboxInteractionKindPermission,
+	DevboxInteractionKindFormElicitation,
+	DevboxInteractionKindURLElicitation,
+}
+
+func (e DevboxInteractionKind) IsValid() bool {
+	switch e {
+	case DevboxInteractionKindPermission, DevboxInteractionKindFormElicitation, DevboxInteractionKindURLElicitation:
+		return true
+	}
+	return false
+}
+
+func (e DevboxInteractionKind) String() string {
+	return string(e)
+}
+
+func (e *DevboxInteractionKind) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DevboxInteractionKind(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid DevboxInteractionKind", str)
+	}
+	return nil
+}
+
+func (e DevboxInteractionKind) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *DevboxInteractionKind) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e DevboxInteractionKind) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type DevboxInteractionState string
+
+const (
+	DevboxInteractionStatePending   DevboxInteractionState = "PENDING"
+	DevboxInteractionStateAnswered  DevboxInteractionState = "ANSWERED"
+	DevboxInteractionStateCancelled DevboxInteractionState = "CANCELLED"
+	DevboxInteractionStateExpired   DevboxInteractionState = "EXPIRED"
+)
+
+var AllDevboxInteractionState = []DevboxInteractionState{
+	DevboxInteractionStatePending,
+	DevboxInteractionStateAnswered,
+	DevboxInteractionStateCancelled,
+	DevboxInteractionStateExpired,
+}
+
+func (e DevboxInteractionState) IsValid() bool {
+	switch e {
+	case DevboxInteractionStatePending, DevboxInteractionStateAnswered, DevboxInteractionStateCancelled, DevboxInteractionStateExpired:
+		return true
+	}
+	return false
+}
+
+func (e DevboxInteractionState) String() string {
+	return string(e)
+}
+
+func (e *DevboxInteractionState) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DevboxInteractionState(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid DevboxInteractionState", str)
+	}
+	return nil
+}
+
+func (e DevboxInteractionState) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *DevboxInteractionState) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e DevboxInteractionState) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type DevboxLeaseKind string
+
+const (
+	DevboxLeaseKindViewer   DevboxLeaseKind = "VIEWER"
+	DevboxLeaseKindDeferral DevboxLeaseKind = "DEFERRAL"
+)
+
+var AllDevboxLeaseKind = []DevboxLeaseKind{
+	DevboxLeaseKindViewer,
+	DevboxLeaseKindDeferral,
+}
+
+func (e DevboxLeaseKind) IsValid() bool {
+	switch e {
+	case DevboxLeaseKindViewer, DevboxLeaseKindDeferral:
+		return true
+	}
+	return false
+}
+
+func (e DevboxLeaseKind) String() string {
+	return string(e)
+}
+
+func (e *DevboxLeaseKind) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DevboxLeaseKind(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid DevboxLeaseKind", str)
+	}
+	return nil
+}
+
+func (e DevboxLeaseKind) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *DevboxLeaseKind) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e DevboxLeaseKind) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type DevboxProbeStatus string
+
+const (
+	DevboxProbeStatusPending DevboxProbeStatus = "PENDING"
+	DevboxProbeStatusOk      DevboxProbeStatus = "OK"
+	DevboxProbeStatusFailed  DevboxProbeStatus = "FAILED"
+	DevboxProbeStatusMissing DevboxProbeStatus = "MISSING"
+)
+
+var AllDevboxProbeStatus = []DevboxProbeStatus{
+	DevboxProbeStatusPending,
+	DevboxProbeStatusOk,
+	DevboxProbeStatusFailed,
+	DevboxProbeStatusMissing,
+}
+
+func (e DevboxProbeStatus) IsValid() bool {
+	switch e {
+	case DevboxProbeStatusPending, DevboxProbeStatusOk, DevboxProbeStatusFailed, DevboxProbeStatusMissing:
+		return true
+	}
+	return false
+}
+
+func (e DevboxProbeStatus) String() string {
+	return string(e)
+}
+
+func (e *DevboxProbeStatus) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DevboxProbeStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid DevboxProbeStatus", str)
+	}
+	return nil
+}
+
+func (e DevboxProbeStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *DevboxProbeStatus) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e DevboxProbeStatus) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type DevboxSnapshotFidelity string
+
+const (
+	DevboxSnapshotFidelityMemory     DevboxSnapshotFidelity = "MEMORY"
+	DevboxSnapshotFidelityFilesystem DevboxSnapshotFidelity = "FILESYSTEM"
+)
+
+var AllDevboxSnapshotFidelity = []DevboxSnapshotFidelity{
+	DevboxSnapshotFidelityMemory,
+	DevboxSnapshotFidelityFilesystem,
+}
+
+func (e DevboxSnapshotFidelity) IsValid() bool {
+	switch e {
+	case DevboxSnapshotFidelityMemory, DevboxSnapshotFidelityFilesystem:
+		return true
+	}
+	return false
+}
+
+func (e DevboxSnapshotFidelity) String() string {
+	return string(e)
+}
+
+func (e *DevboxSnapshotFidelity) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DevboxSnapshotFidelity(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid DevboxSnapshotFidelity", str)
+	}
+	return nil
+}
+
+func (e DevboxSnapshotFidelity) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *DevboxSnapshotFidelity) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e DevboxSnapshotFidelity) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type DevboxSnapshotStatus string
+
+const (
+	DevboxSnapshotStatusPending  DevboxSnapshotStatus = "PENDING"
+	DevboxSnapshotStatusReady    DevboxSnapshotStatus = "READY"
+	DevboxSnapshotStatusFailed   DevboxSnapshotStatus = "FAILED"
+	DevboxSnapshotStatusDeleting DevboxSnapshotStatus = "DELETING"
+)
+
+var AllDevboxSnapshotStatus = []DevboxSnapshotStatus{
+	DevboxSnapshotStatusPending,
+	DevboxSnapshotStatusReady,
+	DevboxSnapshotStatusFailed,
+	DevboxSnapshotStatusDeleting,
+}
+
+func (e DevboxSnapshotStatus) IsValid() bool {
+	switch e {
+	case DevboxSnapshotStatusPending, DevboxSnapshotStatusReady, DevboxSnapshotStatusFailed, DevboxSnapshotStatusDeleting:
+		return true
+	}
+	return false
+}
+
+func (e DevboxSnapshotStatus) String() string {
+	return string(e)
+}
+
+func (e *DevboxSnapshotStatus) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DevboxSnapshotStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid DevboxSnapshotStatus", str)
+	}
+	return nil
+}
+
+func (e DevboxSnapshotStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *DevboxSnapshotStatus) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e DevboxSnapshotStatus) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type DevboxSnippetFormat string
+
+const (
+	DevboxSnippetFormatTerraform DevboxSnippetFormat = "TERRAFORM"
+	DevboxSnippetFormatCli       DevboxSnippetFormat = "CLI"
+)
+
+var AllDevboxSnippetFormat = []DevboxSnippetFormat{
+	DevboxSnippetFormatTerraform,
+	DevboxSnippetFormatCli,
+}
+
+func (e DevboxSnippetFormat) IsValid() bool {
+	switch e {
+	case DevboxSnippetFormatTerraform, DevboxSnippetFormatCli:
+		return true
+	}
+	return false
+}
+
+func (e DevboxSnippetFormat) String() string {
+	return string(e)
+}
+
+func (e *DevboxSnippetFormat) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DevboxSnippetFormat(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid DevboxSnippetFormat", str)
+	}
+	return nil
+}
+
+func (e DevboxSnippetFormat) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *DevboxSnippetFormat) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e DevboxSnippetFormat) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type DevboxStatus string
+
+const (
+	DevboxStatusPending  DevboxStatus = "PENDING"
+	DevboxStatusReady    DevboxStatus = "READY"
+	DevboxStatusDegraded DevboxStatus = "DEGRADED"
+	DevboxStatusFailed   DevboxStatus = "FAILED"
+)
+
+var AllDevboxStatus = []DevboxStatus{
+	DevboxStatusPending,
+	DevboxStatusReady,
+	DevboxStatusDegraded,
+	DevboxStatusFailed,
+}
+
+func (e DevboxStatus) IsValid() bool {
+	switch e {
+	case DevboxStatusPending, DevboxStatusReady, DevboxStatusDegraded, DevboxStatusFailed:
+		return true
+	}
+	return false
+}
+
+func (e DevboxStatus) String() string {
+	return string(e)
+}
+
+func (e *DevboxStatus) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DevboxStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid DevboxStatus", str)
+	}
+	return nil
+}
+
+func (e DevboxStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *DevboxStatus) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e DevboxStatus) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type DevboxStreamKind string
+
+const (
+	DevboxStreamKindTerminal DevboxStreamKind = "TERMINAL"
+	DevboxStreamKindVnc      DevboxStreamKind = "VNC"
+	DevboxStreamKindPreview  DevboxStreamKind = "PREVIEW"
+)
+
+var AllDevboxStreamKind = []DevboxStreamKind{
+	DevboxStreamKindTerminal,
+	DevboxStreamKindVnc,
+	DevboxStreamKindPreview,
+}
+
+func (e DevboxStreamKind) IsValid() bool {
+	switch e {
+	case DevboxStreamKindTerminal, DevboxStreamKindVnc, DevboxStreamKindPreview:
+		return true
+	}
+	return false
+}
+
+func (e DevboxStreamKind) String() string {
+	return string(e)
+}
+
+func (e *DevboxStreamKind) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DevboxStreamKind(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid DevboxStreamKind", str)
+	}
+	return nil
+}
+
+func (e DevboxStreamKind) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *DevboxStreamKind) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e DevboxStreamKind) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type DevboxThreadKind string
+
+const (
+	DevboxThreadKindThread   DevboxThreadKind = "THREAD"
+	DevboxThreadKindSubagent DevboxThreadKind = "SUBAGENT"
+)
+
+var AllDevboxThreadKind = []DevboxThreadKind{
+	DevboxThreadKindThread,
+	DevboxThreadKindSubagent,
+}
+
+func (e DevboxThreadKind) IsValid() bool {
+	switch e {
+	case DevboxThreadKindThread, DevboxThreadKindSubagent:
+		return true
+	}
+	return false
+}
+
+func (e DevboxThreadKind) String() string {
+	return string(e)
+}
+
+func (e *DevboxThreadKind) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DevboxThreadKind(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid DevboxThreadKind", str)
+	}
+	return nil
+}
+
+func (e DevboxThreadKind) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *DevboxThreadKind) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e DevboxThreadKind) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type DevboxThreadStatus string
+
+const (
+	DevboxThreadStatusActive  DevboxThreadStatus = "ACTIVE"
+	DevboxThreadStatusWaiting DevboxThreadStatus = "WAITING"
+	DevboxThreadStatusClosed  DevboxThreadStatus = "CLOSED"
+	DevboxThreadStatusDeleted DevboxThreadStatus = "DELETED"
+)
+
+var AllDevboxThreadStatus = []DevboxThreadStatus{
+	DevboxThreadStatusActive,
+	DevboxThreadStatusWaiting,
+	DevboxThreadStatusClosed,
+	DevboxThreadStatusDeleted,
+}
+
+func (e DevboxThreadStatus) IsValid() bool {
+	switch e {
+	case DevboxThreadStatusActive, DevboxThreadStatusWaiting, DevboxThreadStatusClosed, DevboxThreadStatusDeleted:
+		return true
+	}
+	return false
+}
+
+func (e DevboxThreadStatus) String() string {
+	return string(e)
+}
+
+func (e *DevboxThreadStatus) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DevboxThreadStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid DevboxThreadStatus", str)
+	}
+	return nil
+}
+
+func (e DevboxThreadStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *DevboxThreadStatus) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e DevboxThreadStatus) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type DevboxToolCallContentType string
+
+const (
+	DevboxToolCallContentTypeContent  DevboxToolCallContentType = "CONTENT"
+	DevboxToolCallContentTypeDiff     DevboxToolCallContentType = "DIFF"
+	DevboxToolCallContentTypeTerminal DevboxToolCallContentType = "TERMINAL"
+	DevboxToolCallContentTypeUnknown  DevboxToolCallContentType = "UNKNOWN"
+)
+
+var AllDevboxToolCallContentType = []DevboxToolCallContentType{
+	DevboxToolCallContentTypeContent,
+	DevboxToolCallContentTypeDiff,
+	DevboxToolCallContentTypeTerminal,
+	DevboxToolCallContentTypeUnknown,
+}
+
+func (e DevboxToolCallContentType) IsValid() bool {
+	switch e {
+	case DevboxToolCallContentTypeContent, DevboxToolCallContentTypeDiff, DevboxToolCallContentTypeTerminal, DevboxToolCallContentTypeUnknown:
+		return true
+	}
+	return false
+}
+
+func (e DevboxToolCallContentType) String() string {
+	return string(e)
+}
+
+func (e *DevboxToolCallContentType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DevboxToolCallContentType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid DevboxToolCallContentType", str)
+	}
+	return nil
+}
+
+func (e DevboxToolCallContentType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *DevboxToolCallContentType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e DevboxToolCallContentType) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil
@@ -18514,6 +20941,61 @@ func (e *Provider) UnmarshalJSON(b []byte) error {
 }
 
 func (e Provider) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type PullRequestSource string
+
+const (
+	PullRequestSourceMcp    PullRequestSource = "MCP"
+	PullRequestSourceEgress PullRequestSource = "EGRESS"
+)
+
+var AllPullRequestSource = []PullRequestSource{
+	PullRequestSourceMcp,
+	PullRequestSourceEgress,
+}
+
+func (e PullRequestSource) IsValid() bool {
+	switch e {
+	case PullRequestSourceMcp, PullRequestSourceEgress:
+		return true
+	}
+	return false
+}
+
+func (e PullRequestSource) String() string {
+	return string(e)
+}
+
+func (e *PullRequestSource) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = PullRequestSource(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid PullRequestSource", str)
+	}
+	return nil
+}
+
+func (e PullRequestSource) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *PullRequestSource) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e PullRequestSource) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

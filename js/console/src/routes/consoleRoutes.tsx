@@ -20,6 +20,8 @@ import { settingsRoutes } from './settingsRoutes'
 import { stacksRoutes } from './stacksRoutes'
 import { workbenchesRoutes } from './workbenchesRoutes'
 import { AccessTokens } from 'components/profile/access-tokens/AccessTokens.tsx'
+import { AiSubscriptions } from 'components/profile/ai-subscriptions/AiSubscriptions'
+import { AI_SUBSCRIPTIONS_REL_PATH } from 'components/workbenches/workbench/devboxes/devboxCredentials'
 
 const profileRoutes = [
   <Route
@@ -54,6 +56,10 @@ const profileRoutes = [
     <Route
       path="access-tokens"
       element={<AccessTokens />}
+    />
+    <Route
+      path={AI_SUBSCRIPTIONS_REL_PATH}
+      element={<AiSubscriptions />}
     />
   </Route>,
 ]

@@ -1,0 +1,126 @@
+suite: render-time validation
+release:
+  name: ate
+  namespace: ate-system
+capabilities:
+  majorVersion: 1
+  minorVersion: 34
+templates:
+  - templates/validate.yaml
+set:
+  objectStore.snapshotLocation: s3://snapshots/ate/
+tests:
+  - it: accepts the defaults
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: requires the ate-system namespace
+    release:
+      namespace: substrate
+    asserts:
+      - failedTemplate:
+          errorPattern: ate-system
+
+  - it: cnpg mode without the bundled operator needs the CNPG CRD
+    set:
+      cloudnative-pg.enabled: false
+    asserts:
+      - failedTemplate:
+          errorPattern: "cloudnative-pg.enabled"
+
+  - it: cnpg mode without the bundled operator passes when the CRD is served
+    set:
+      cloudnative-pg.enabled: false
+    capabilities:
+      apiVersions:
+        - postgresql.cnpg.io/v1/Cluster
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: external mode needs a read-write DSN secret
+    set:
+      postgres.mode: external
+    asserts:
+      - failedTemplate:
+          errorPattern: readWrite.secretName
+
+  - it: rejects an unknown postgres mode
+    set:
+      postgres.mode: sqlite
+    asserts:
+      - failedTemplate: {}
+
+  - it: backups need a destinationPath
+    set:
+      postgres.cnpg.backup.enabled: true
+    asserts:
+      - failedTemplate:
+          errorPattern: destinationPath
+
+  - it: needs a snapshot location
+    set:
+      objectStore.snapshotLocation: ""
+    asserts:
+      - failedTemplate:
+          errorPattern: snapshotLocation
+
+  - it: PerTemplateSnapshotLocation lifts the snapshot location requirement
+    set:
+      objectStore.snapshotLocation: ""
+      previewGates: [PerTemplateSnapshotLocation]
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: the snapshot location must match the backend
+    set:
+      objectStore.backend: gcs
+      objectStore.snapshotLocation: s3://snapshots/ate/
+    asserts:
+      - failedTemplate:
+          errorPattern: snapshotLocation
+
+  - it: rustfs needs the s3 backend
+    set:
+      rustfs.enabled: true
+      objectStore.backend: gcs
+      objectStore.snapshotLocation: gs://snapshots/ate/
+    asserts:
+      - failedTemplate:
+          errorPattern: rustfs
+
+  - it: rejects an unknown backend
+    set:
+      objectStore.backend: minio
+    asserts:
+      - failedTemplate: {}
+
+  - it: only the envoy dataplane is supported
+    set:
+      atenet.dataplane: agentgateway
+    asserts:
+      - failedTemplate:
+          errorPattern: dataplane
+
+  - it: the actor JWT issuer must be https
+    set:
+      auth.actorJWTIssuer: http://idp.ate-system.svc
+    asserts:
+      - failedTemplate:
+          errorPattern: actorJWTIssuer
+
+  - it: rejects an unknown cluster size
+    set:
+      clusterSize: size100
+    asserts:
+      - failedTemplate:
+          errorPattern: clusterSize
+
+  - it: microvm needs its asset bucket
+    set:
+      sandboxConfigs.microvm.enabled: true
+    asserts:
+      - failedTemplate:
+          errorPattern: microvm

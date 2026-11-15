@@ -1,0 +1,466 @@
+# Default values for agent-substrate.
+#
+# The chart installs Agent Substrate into the release namespace, which must be
+# `ate-system`: the Substrate binaries default every in-cluster address and
+# SPIFFE ID to it. Install with `--namespace ate-system --create-namespace`.
+
+# -- Substrate release this chart installs. Image tags default to it, and the
+# chart gates features on it (Azure Blob needs substrate.objectstore.v1, first
+# released in v1.0.0). Defaults to the chart's appVersion.
+substrateVersion: ""
+
+# -- Override the substrate.objectstore.v1 capability check for images whose tag
+# is not a semver release (e.g. a digest or a main-branch build): "auto"
+# derives it from substrateVersion, "true"/"false" force it.
+objectstoreV1Support: auto
+
+image:
+  # -- Registry and repository prefix of the published Substrate images.
+  registry: ghcr.io/agent-substrate/substrate
+  # -- Tag for every Substrate image. Defaults to substrateVersion.
+  tag: ""
+  pullPolicy: IfNotPresent
+  # -- imagePullSecrets for every pod the chart creates.
+  pullSecrets: []
+
+# -- Per-image overrides. Each takes `repository` (full reference without tag),
+# `tag` and `digest` (sha256:..., wins over tag).
+images:
+  ateapi: {}
+  atecontroller: {}
+  ateIdpServer: {}
+  atelet: {}
+  atenet: {}
+  objectstorePlugin: {}
+  podcertcontroller: {}
+  envoyDataplane: {}
+  kubernetesSecrets: {}
+
+# -- Default log level (debug, info, warn, error) for every component that takes
+# one: ate-api-server (through its APIConfig), atelet, ate-controller,
+# ate-idp-server, atenet router/egress/sdsmint and the k8s credential provider.
+logLevel: info
+
+# -- Preview gates passed to every Substrate container as --preview=<a,b>
+# ("ALL" enables all of them). Empty passes `--preview=`.
+previewGates: []
+
+# -- Coarse sizing, as ate-setup's --cluster-size: size0 or size10. size10
+# raises pod-certificate controller QPS, adds pgxpool parameters to the
+# Postgres DSNs and selects the size10 CNPG preset.
+clusterSize: size0
+
+# -- Scheduling for the system-infra Deployments (ate-api-server,
+# ate-idp-server, ate-controller, atenet-router, atenet-egress,
+# podcertificate-controller, k8s-credential-provider and rustfs).
+systemInfra:
+  # -- Apply ate-setup's --cordon-system-infra-components scheduling: a
+  # nodeSelector, toleration and pod label `ate.dev/workloadType:
+  # ate-system-infra`, plus a hostname topology spread.
+  cordon: false
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  topologySpreadConstraints: []
+
+otel:
+  # -- OTLP collector endpoint for control-plane telemetry
+  # (OTEL_EXPORTER_OTLP_ENDPOINT). Empty disables trace, metric and log export.
+  endpoint: ""
+  # -- Extra variables for the shared ate-otel-config ConfigMap, e.g.
+  # OTEL_TRACES_SAMPLER or ATE_WORKER_OTEL_LOGS_EXPORTER.
+  extraEnv: {}
+
+# Identity and authorization of ate-api-server.
+auth:
+  # -- Kubernetes service account token issuer ate-api-server trusts. Empty: the
+  # secrets hook discovers it from /.well-known/openid-configuration (EKS, AKS
+  # and GKE publish their OIDC issuer there; kind and kubeadm return
+  # https://kubernetes.default.svc.cluster.local).
+  expectedJWTIssuer: ""
+  # -- Principals that always own global:root. Empty means kubectl-ate's
+  # service account, system:serviceaccount:<namespace>:ate-client.
+  bootstrapOwners: []
+  # -- Issuer of actor ID JWTs, served by ate-idp-server. Must be https.
+  # Defaults to https://idp.<namespace>.svc.
+  actorJWTIssuer: ""
+  # -- Algorithm of the generated actor ID JWT signing key (ES256 or RS256).
+  actorJWTAlgorithm: ES256
+  # -- Extra SPIFFE IDs holding ate-api-server's egress_gateway role next to
+  # atenet-egress (--egress-gateway-spiffe-id), e.g. devbox-gateway's
+  # spiffe://cluster.local/ns/<ns>/sa/devbox-gateway when it mints actor JWTs as
+  # a credential provider. devboxes.enabled defaults it to that ID.
+  egressGatewayExtraSPIFFEIDs: []
+
+apiServer:
+  replicas: 2
+  # -- ate-api-server log level. Defaults to logLevel.
+  logLevel: ""
+  resources: {}
+  # -- ATE_API_SNAPSHOT_TRANSFER_SERVICE_ACCOUNT, the identity the object store
+  # plugin's credential exchange hands out (a GCP service account on GKE).
+  snapshotTransferServiceAccount: ""
+  # -- ATE_API_POSTGRES_POOL_MAX_CONNS, pgxpool's maximum connections.
+  postgresPoolMaxConns: ""
+  serviceAccount:
+    # -- Annotations for workload identity (IRSA, GKE Workload Identity).
+    annotations: {}
+  podLabels: {}
+  podAnnotations: {}
+  extraArgs: []
+  extraEnv: []
+  pdb:
+    enabled: true
+
+controller:
+  replicas: 1
+  logLevel: ""
+  resources: {}
+  # -- --dns-egress-policy propagated to worker pods.
+  dnsEgressPolicy: enforce-in-atunnel
+  extraArgs: []
+
+idpServer:
+  replicas: 2
+  logLevel: ""
+  resources: {}
+  extraArgs: []
+  pdb:
+    enabled: true
+
+atelet:
+  logLevel: ""
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+  tolerations:
+    - key: ate.dev/sandboxClass
+      operator: Exists
+      effect: NoSchedule
+    - key: cloud.google.com/compute-class
+      operator: Exists
+      effect: NoSchedule
+  nodeSelector: {}
+  affinity: {}
+  priorityClassName: system-cluster-critical
+  serviceAccount:
+    annotations: {}
+  podLabels: {}
+  extraArgs: []
+  extraEnv: []
+  # Node disk use. A suspended actor frees its worker slot at once but its latest snapshot stays on the node
+  # until it is detached, and the file caches only shrink when they have a budget.
+  snapshots:
+    # -- `--snapshot-upload-delay`: how long after a suspend its snapshot is uploaded in the background.
+    uploadDelay: 5m
+    # -- `--snapshot-detach-delay`: how long a suspended actor's snapshot is kept on the node, so a resume
+    # there skips the download. Substrate's default is 30m. Must not be shorter than uploadDelay.
+    detachDelay: 10m
+  # -- `--snapshot-cache-max-bytes`: budget for the shared snapshot cache (golden snapshots), in bytes. 0 lets it
+  # grow without bound. Default 50Gi.
+  snapshotCacheMaxBytes: 53687091200
+  # -- `--sandbox-asset-cache-max-bytes`: budget for the sandbox runtime cache (gVisor releases, micro-VM kernels
+  # and guest images), in bytes. 0 lets it grow without bound. Default 10Gi.
+  sandboxAssetCacheMaxBytes: 10737418240
+  objectstorePlugin:
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+    # -- Most bytes asset downloads may hold at once in the plugin's staging dir.
+    assetStagingCapacity: 8Gi
+
+  # Kubelet credential providers atelet runs to pull private actor images
+  # (section 4.1a). atelet runs the exec plugins itself, inside its container,
+  # so they authenticate as atelet's pod: annotate atelet.serviceAccount for
+  # IRSA/Workload Identity, or use the node identity where the cloud allows it.
+  imageCredentialProvider:
+    enabled: false
+    # -- ecr, gar, acr or custom.
+    preset: ""
+    # -- Host directory holding the provider binaries, mounted read-only.
+    # Defaults per preset: ecr /etc/eks/image-credential-provider, gar
+    # /home/kubernetes/bin, acr /var/lib/kubelet/credential-provider.
+    binDir: ""
+    # -- Override the preset's matchImages.
+    matchImages: []
+    # -- Override the preset's provider args.
+    args: []
+    # -- Extra environment for the provider ([{name, value}]).
+    env: []
+    # -- Override the preset's defaultCacheDuration.
+    defaultCacheDuration: ""
+    # -- preset=custom: the CredentialProviderConfig `providers` list, verbatim.
+    providers: []
+    # -- Extra host files or directories the providers read, mounted read-only
+    # into atelet at the same path ([{name, path, type}]). The acr preset adds
+    # /etc/kubernetes/azure.json.
+    extraHostPaths: []
+
+atenet:
+  # -- Ingress and egress dataplane. Only envoy is implemented by this chart.
+  dataplane: envoy
+  router:
+    replicas: 1
+    logLevel: ""
+    # -- Envoy's end-to-end timeout on the actor route (--route-timeout, default
+    # 5m upstream). Long-lived devbox streams need more; devboxes.enabled
+    # defaults it to devboxes.routeTimeout.
+    routeTimeout: ""
+    # -- SPIFFE IDs allowed to reach actors through the router
+    # (--ingress-allowed-spiffe-ids). Empty: no client may reach actors.
+    # devboxes.enabled defaults it to the devbox-gateway's SPIFFE ID.
+    ingressAllowedSPIFFEIDs: []
+    terminationGracePeriodSeconds: 60
+    resources: {}
+    envoyResources: {}
+    extraArgs: []
+    monitoring:
+      # -- Render the GMP PodMonitoring for the router's Envoy: auto (only when
+      # monitoring.googleapis.com/v1 is served), true or false.
+      enabled: auto
+  egress:
+    replicas: 1
+    logLevel: ""
+    # -- Credential providers the egress gateway injects from. `k8s.io` is the
+    # bundled Kubernetes Secrets provider (installed when listed); others need
+    # an `address` (host:port) serving mTLS with a servicedns certificate.
+    # devboxes.enabled adds plural.sh at devbox-gateway.<gatewayNamespace>.svc:50052
+    # unless this is changed from the default.
+    credentialProviders:
+      - name: k8s.io
+    # -- Additional ext_proc authorization filter served by NS/SVC:PORT, spliced
+    # into the egress Envoy config as ate-setup's
+    # --experimental-additional-egress-extproc-service does. devboxes.enabled
+    # defaults it to <gatewayNamespace>/devbox-egress-authz:50053.
+    additionalExtprocService: ""
+    # -- Set allow_mode_override on that filter, so the processor can ask for
+    # a request's response headers. Unset (null) follows devboxes.enabled;
+    # devbox-egress-authz needs it to see the responses to PRs it attributes.
+    additionalExtprocAllowModeOverride: null
+    # -- Envoy worker threads (--concurrency). 0 keeps Envoy's default.
+    envoyConcurrency: 0
+    resources: {}
+    envoyResources: {}
+    sdsmintResources:
+      requests:
+        cpu: 200m
+        memory: 512Mi
+      limits:
+        memory: 768Mi
+    extraArgs: []
+
+# Preset for Plural devboxes: wires Substrate to the devbox-gateway the
+# deployment-operator runs (with devboxes.enabled in its chart), as its
+# DevboxRunner controller checks. Each setting below only fills a value left at
+# its default; explicit atenet/auth values win.
+devboxes:
+  enabled: false
+  # -- Namespace of the deployment-operator, where it runs the devbox-gateway
+  # and devbox-egress-authz Services and the devbox-gateway ServiceAccount.
+  gatewayNamespace: plrl-deploy-operator
+  # -- atenet.router.routeTimeout for long-lived devbox streams.
+  routeTimeout: 1h
+  # -- NS/NAME of the deployment-operator's ServiceAccount. It creates
+  # atespaces, so it's added (as system:serviceaccount:NS:NAME) to the
+  # bootstrap owners: auth.bootstrapOwners, or ate-client when that's empty.
+  # Empty adds nothing.
+  operatorServiceAccount: plrl-deploy-operator/deployment-operator
+  # Sets, unless given explicitly:
+  #   atenet.egress.credentialProviders: [{name: k8s.io},
+  #     {name: plural.sh, address: devbox-gateway.<gatewayNamespace>.svc:50052}]
+  #   atenet.egress.additionalExtprocService: <gatewayNamespace>/devbox-egress-authz:50053
+  #   atenet.router.ingressAllowedSPIFFEIDs and auth.egressGatewayExtraSPIFFEIDs:
+  #     [spiffe://cluster.local/ns/<gatewayNamespace>/sa/devbox-gateway]
+  #   atenet.router.routeTimeout: devboxes.routeTimeout
+  #   atenet.egress.additionalExtprocAllowModeOverride: true
+
+# The bundled Kubernetes Secrets credential provider (`k8s.io`).
+k8sCredentialProvider:
+  # -- Atespace allow-list (namespace-policy.yaml `policies`).
+  namespacePolicies: []
+  resources: {}
+
+podCertificateController:
+  # -- Namespace of the pod-certificate controller and its CA pools. The secrets
+  # hook creates it; it isn't a release resource, so uninstall keeps it.
+  namespace: podcertificate-controller-system
+  workersPerSigner: 1
+  resources: {}
+  # -- --kube-api-qps/--kube-api-burst. Empty: 100/200 for size10, else the
+  # binary's defaults.
+  kubeAPIQPS: ""
+  kubeAPIBurst: ""
+
+sandboxConfigs:
+  gvisor:
+    # -- Install the gvisor-default SandboxConfig (the gVisor class default).
+    enabled: true
+    # -- Merged over the upstream spec (files/sandboxconfig/gvisor.yaml).
+    specOverrides: {}
+  microvm:
+    # -- Install the microvm SandboxConfig. Its assets must already be staged
+    # at <scheme>://<bucket>/microvm-assets/<arch>/<sha256> (ate-setup's
+    # `deploy sandboxconfig` does that); this chart does not stage them.
+    enabled: false
+    assetScheme: ""
+    assetBucket: ""
+    specOverrides: {}
+  # -- Install the sandboxconfig-assets ValidatingAdmissionPolicy.
+  validationPolicy: true
+
+networkPolicies:
+  # -- Render Substrate's ate-system NetworkPolicies (default deny plus
+  # per-component allows), and allows for CNPG and rustfs.
+  enabled: true
+  # -- Namespaces whose pods (outside worker pools) may call ate-api-server.
+  apiAccessNamespaceSelector:
+    matchLabels:
+      ate.dev/api-access: "true"
+
+crds:
+  # -- Render the ate.dev CRDs.
+  install: true
+  # -- Annotate the CRDs with helm.sh/resource-policy: keep so uninstall keeps
+  # them (and every WorkerPool/SandboxConfig).
+  keep: true
+
+postgres:
+  # -- cnpg (CloudNativePG Cluster, the default) or external.
+  mode: cnpg
+  database: atepg
+  schema: substrate
+  ownerRole: substrate_owner
+  readWriteRole: substrate_readwrite
+  ownerUser: substrate_owner_user
+  readWriteUser: substrate_readwrite_user
+
+  cnpg:
+    clusterName: ate-postgres
+    # -- 1 by default; 3 for HA.
+    instances: 1
+    # -- Postgres image. Empty uses the operator's default.
+    imageName: ""
+    storage:
+      size: 20Gi
+      storageClass: ""
+    walStorage:
+      enabled: false
+      size: 10Gi
+      storageClass: ""
+    # -- "" or size10 (ate-setup's postgres-size10 profile). Defaults to
+    # clusterSize.
+    preset: ""
+    # -- Overrides the preset's resources.
+    resources: {}
+    # -- Postgres parameters, merged over the preset.
+    parameters: {}
+    # -- CNPG `affinity` (nodeSelector, tolerations, podAntiAffinityType, ...).
+    # Empty: a dedicated-pool toleration/nodeSelector when systemInfra.cordon.
+    affinity: {}
+    # -- Annotations for the instance pods' service account (backup identity).
+    serviceAccountAnnotations: {}
+    # -- Keep the Cluster (and so its volumes) on helm uninstall.
+    keepOnUninstall: true
+    monitoring:
+      enablePodMonitor: false
+    backup:
+      # -- Barman object store backups to the snapshot provider.
+      enabled: false
+      # -- s3://, gs:// or https://<account>.blob.core.windows.net/<container>
+      # path for base backups and WAL.
+      destinationPath: ""
+      retentionPolicy: 30d
+      # -- ScheduledBackup cron (six fields, seconds first).
+      schedule: "0 0 3 * * *"
+      # -- Merged over the generated barmanObjectStore (credentials default to
+      # the pod identity of objectStore.backend).
+      barmanObjectStore: {}
+
+  external:
+    # -- Secret and key holding the read-write DSN (required).
+    readWrite:
+      secretName: ""
+      key: dsn
+    # -- Secret and key holding the owner DSN. Defaults to the read-write one.
+    owner:
+      secretName: ""
+      key: dsn
+    # -- Server CA bundle, mounted at /run/postgres-server-ca/server-ca.pem for
+    # sslmode=verify-ca/verify-full DSNs. Either an existing secret or PEM.
+    serverCA:
+      secretName: ""
+      key: server-ca.pem
+      pem: ""
+
+objectStore:
+  # -- s3, gcs or azureBlob.
+  backend: s3
+  # -- Cluster snapshot location (s3://bucket/prefix/, gs://bucket/prefix/ or
+  # azblob://container/prefix/). Required unless the PerTemplateSnapshotLocation
+  # preview gate is on. Defaults to s3://<rustfs bucket>/ with rustfs.
+  snapshotLocation: ""
+  s3:
+    region: ""
+    # -- Custom endpoint for S3-compatible stores (AWS_ENDPOINT_URL).
+    endpoint: ""
+    usePathStyle: false
+    # -- Static credentials secret (keys AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY).
+    # Leave empty for IRSA or EKS Pod Identity.
+    credentialsSecret: ""
+  gcs: {}
+  azureBlob:
+    image:
+      repository: ghcr.io/pluralsh/objectstore-azure-blob
+      tag: ""
+      # -- Image digest (sha256:...). Required unless tag is set.
+      digest: ""
+    # -- https://<account>.blob.core.windows.net
+    accountUrl: ""
+    # -- Blob containers snapshot URIs may name.
+    containers: []
+    prefix: ""
+    tenantId: ""
+    # -- Entra client ID federated to system:serviceaccount:ate-system:atelet.
+    nodeClientId: ""
+    # -- Entra client ID federated to system:serviceaccount:ate-system:ate-api-server.
+    controlClientId: ""
+    # -- Containers that also serve SandboxConfig assets (config/assets).
+    assetContainers: []
+    tokenExpirationSeconds: 3600
+
+# Embedded RustFS (S3-compatible) for kind and dev only.
+rustfs:
+  enabled: false
+  image: rustfs/rustfs:1.0.3@sha256:9ca9559533b537d10482fe923288b676ad08f92a7069d9a17327fbae3cab688b
+  bucketInitImage: amazon/aws-cli:2.38.5@sha256:c8156a0e74e13929a42d7e60f0d4e14e7d28d980cd21822505d4bff80e5460c1
+  bucket: ate-snapshots
+  accessKey: rustfsadmin
+  secretKey: rustfsadmin
+  persistence:
+    size: 1Gi
+    storageClass: ""
+
+# The pre-install/pre-upgrade hook that generates CA pools, the JWT pool, the
+# Postgres read-write password and the authentication config. It never
+# overwrites an existing secret.
+secretsHook:
+  # -- Generates key material (needs sh and openssl).
+  opensslImage: alpine/openssl:3.5.9
+  # -- Creates the objects (needs sh and kubectl).
+  kubectlImage: alpine/kubectl:1.37.2
+  # -- Validity of generated CA roots, in days (ate-setup: 365).
+  caValidityDays: 365
+  activeDeadlineSeconds: 600
+  resources: {}
+
+# Applies the SandboxConfigs and the CNPG Cluster on the first install, when
+# their CRDs (installed by this release) aren't served yet at render time.
+bootstrapJob:
+  image: alpine/kubectl:1.37.2
+
+# The CloudNativePG operator. Disable where it already runs: it's cluster-wide,
+# and two copies conflict.
+cloudnative-pg:
+  enabled: true

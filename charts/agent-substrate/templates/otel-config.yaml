@@ -1,0 +1,20 @@
+{{- $data := dict -}}
+{{- if .Values.otel.endpoint -}}
+{{- $_ := set $data "OTEL_EXPORTER_OTLP_ENDPOINT" .Values.otel.endpoint -}}
+{{- else -}}
+{{- range $k := list "OTEL_TRACES_EXPORTER" "OTEL_METRICS_EXPORTER" "OTEL_LOGS_EXPORTER" "ATE_WORKER_OTEL_TRACES_EXPORTER" "ATE_WORKER_OTEL_METRICS_EXPORTER" "ATE_WORKER_OTEL_LOGS_EXPORTER" -}}
+{{- $_ := set $data $k "none" -}}
+{{- end -}}
+{{- end -}}
+{{- range $k, $v := .Values.otel.extraEnv -}}
+{{- $_ := set $data $k (toString $v) -}}
+{{- end -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ate-otel-config
+  namespace: {{ include "substrate.namespace" . }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+data:
+  {{- toYaml $data | nindent 2 }}

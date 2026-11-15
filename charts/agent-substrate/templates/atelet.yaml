@@ -1,0 +1,332 @@
+{{- $ns := include "substrate.namespace" . -}}
+{{- $v := .Values.atelet -}}
+{{- $icp := $v.imageCredentialProvider -}}
+{{- $icpResolved := dict -}}
+{{- if $icp.enabled -}}
+{{- $icpResolved = include "substrate.icp.resolved" . | fromYaml -}}
+{{- end -}}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: atelet
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+  {{- with $v.serviceAccount.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: atelet
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "watch", "list"]
+  - apiGroups: ["ate.dev"]
+    resources: ["csidriverconfigs"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["ate.dev"]
+    resources: ["sandboxconfigs"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["ate.dev"]
+    resources: ["workerpools"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["events.k8s.io"]
+    resources: ["events"]
+    verbs: ["create", "patch"]
+  - apiGroups: ["certificates.k8s.io"]
+    resources: ["clustertrustbundles"]
+    verbs: ["get", "watch", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: atelet
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+subjects:
+  - kind: ServiceAccount
+    name: atelet
+    namespace: {{ $ns }}
+roleRef:
+  kind: ClusterRole
+  name: atelet
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: atelet-endpointslices
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+rules:
+  - apiGroups: ["discovery.k8s.io"]
+    resources: ["endpointslices"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: atelet-endpointslices
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+subjects:
+  - kind: ServiceAccount
+    name: atelet
+    namespace: {{ $ns }}
+roleRef:
+  kind: Role
+  name: atelet-endpointslices
+  apiGroup: rbac.authorization.k8s.io
+---
+# Pods with system-*-critical priority outside kube-system need a quota that
+# admits them.
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: atelet-critical-pods
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+spec:
+  hard:
+    pods: 1G
+  scopeSelector:
+    matchExpressions:
+      - scopeName: PriorityClass
+        operator: In
+        values:
+          - system-node-critical
+          - system-cluster-critical
+{{- if $icp.enabled }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: atelet-image-credential-provider
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+data:
+  config.yaml: |
+    {{- include "substrate.icp.config" . | nindent 4 }}
+{{- end }}
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: atelet
+  namespace: {{ $ns }}
+  labels:
+    app: atelet
+    {{- include "substrate.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app: atelet
+  template:
+    metadata:
+      labels:
+        app: atelet
+        {{- with $v.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+        checksum/otel-config: {{ include "substrate.checksum" (list . "otel-config.yaml") }}
+        {{- if $icp.enabled }}
+        checksum/image-credential-provider: {{ include "substrate.icp.config" . | sha256sum }}
+        {{- end }}
+    spec:
+      serviceAccountName: atelet
+      priorityClassName: {{ $v.priorityClassName }}
+      terminationGracePeriodSeconds: 330
+      {{- include "substrate.imagePullSecrets" . | nindent 6 }}
+      {{- with $v.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $v.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $v.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        {{- include "substrate.objectstoreSidecar" (dict "ctx" . "mode" "node") | nindent 8 }}
+      containers:
+        - name: atelet
+          image: {{ include "substrate.image" (dict "ctx" . "key" "atelet" "name" "atelet") }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            {{- if $icp.enabled }}
+            - --image-credential-provider-config=/run/image-credential-provider/config.yaml
+            - --image-credential-provider-bin-dir=/run/image-credential-provider/bin
+            {{- end }}
+            - --grpc-server-cred-bundle=/run/podidentity.podcert.ate.dev/credential-bundle.pem
+            - --client-ca-certs=/run/podidentity.podcert.ate.dev/trust-bundle.pem
+            - --ateapi-ca-file=/run/servicedns.podcert.ate.dev/trust-bundle.pem
+            - --drain-delay=0s
+            - --drain-timeout=5m
+            - --objectstore-plugin-socket=/run/objectstore-plugin/node.sock
+            {{- with $v.snapshots }}
+            {{- with .uploadDelay }}
+            - --snapshot-upload-delay={{ . }}
+            {{- end }}
+            {{- with .detachDelay }}
+            - --snapshot-detach-delay={{ . }}
+            {{- end }}
+            {{- end }}
+            - --snapshot-cache-max-bytes={{ int64 ($v.snapshotCacheMaxBytes | default 0) }}
+            - --sandbox-asset-cache-max-bytes={{ int64 ($v.sandboxAssetCacheMaxBytes | default 0) }}
+            - --log-level={{ include "substrate.logLevel" (list . $v.logLevel) }}
+            - {{ include "substrate.previewArg" . }}
+            {{- with $v.extraArgs }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsUser: 0
+            runAsGroup: 0
+            capabilities:
+              drop:
+                - ALL
+              add:
+                - CHOWN
+                - DAC_OVERRIDE
+                - FOWNER
+                - FSETID
+          {{- with $v.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_UID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.uid
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              value: k8s.namespace.name=$(POD_NAMESPACE),k8s.pod.name=$(POD_NAME),k8s.pod.uid=$(POD_UID),k8s.node.name=$(NODE_NAME),service.instance.id=$(POD_UID)
+            {{- with $v.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          envFrom:
+            - configMapRef:
+                name: ate-otel-config
+          ports:
+            - name: grpc
+              containerPort: 21998
+            - name: prometheus
+              containerPort: 9090
+              protocol: TCP
+            - name: health
+              containerPort: 9091
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: health
+            initialDelaySeconds: 5
+            periodSeconds: 2
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: health
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          volumeMounts:
+            - name: ate-base
+              mountPath: /var/lib/ate
+              mountPropagation: HostToContainer
+            - name: objectstore-plugin
+              mountPath: /run/objectstore-plugin
+            - name: podidentity
+              mountPath: /run/podidentity.podcert.ate.dev
+            - name: servicedns-ca
+              mountPath: /run/servicedns.podcert.ate.dev
+              readOnly: true
+            - name: kubelet-plugins
+              mountPath: /var/lib/kubelet/plugins
+            - name: device-plugins
+              mountPath: /var/lib/kubelet/device-plugins
+            - name: host-dev
+              mountPath: /host/dev
+              readOnly: true
+            {{- if $icp.enabled }}
+            - name: image-credential-provider-bin
+              mountPath: /run/image-credential-provider/bin
+              readOnly: true
+            - name: image-credential-provider-config
+              mountPath: /run/image-credential-provider/config.yaml
+              subPath: config.yaml
+              readOnly: true
+            {{- range $icpResolved.extraHostPaths }}
+            - name: {{ .name }}
+              mountPath: {{ .path }}
+              readOnly: true
+            {{- end }}
+            {{- end }}
+      volumes:
+        - name: objectstore-plugin
+          emptyDir: {}
+        - name: asset-staging
+          emptyDir: {}
+        - name: ate-base
+          hostPath:
+            path: /var/lib/ate
+            type: DirectoryOrCreate
+        - name: kubelet-plugins
+          hostPath:
+            path: /var/lib/kubelet/plugins
+            type: DirectoryOrCreate
+        - name: device-plugins
+          hostPath:
+            path: /var/lib/kubelet/device-plugins
+            type: DirectoryOrCreate
+        - name: host-dev
+          hostPath:
+            path: /dev
+            type: Directory
+        {{- if $icp.enabled }}
+        - name: image-credential-provider-bin
+          hostPath:
+            path: {{ $icpResolved.binDir }}
+            type: Directory
+        - name: image-credential-provider-config
+          configMap:
+            name: atelet-image-credential-provider
+        {{- range $icpResolved.extraHostPaths }}
+        - name: {{ .name }}
+          hostPath:
+            path: {{ .path }}
+            {{- with .type }}
+            type: {{ . }}
+            {{- end }}
+        {{- end }}
+        {{- end }}
+        {{- include "substrate.podCertVolume" (dict "name" "podidentity" "signer" "podidentity" "ca" true) | nindent 8 }}
+        {{- include "substrate.podCertVolume" (dict "name" "servicedns-ca" "signer" "servicedns" "caOnly" true) | nindent 8 }}
+        {{- include "substrate.azureTokenVolume" . | nindent 8 }}

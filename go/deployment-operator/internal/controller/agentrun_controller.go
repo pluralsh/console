@@ -698,7 +698,7 @@ func (r *AgentRunReconciler) getSecretData(run *v1alpha1.AgentRun, config *v1alp
 			result[EnvOpenCodeMethod] = config.OpenCode.Method.String()
 		}
 		if config.OpenCode.OpenAICompatible {
-			result[EnvOpenCodeOpenAICompatible] = "true"
+			result[EnvOpenCodeOpenAICompatible] = stringTrue
 		}
 		if config.OpenCode.Timeout != nil {
 			result[EnvExecTimeout] = config.OpenCode.Timeout.Duration.String()
