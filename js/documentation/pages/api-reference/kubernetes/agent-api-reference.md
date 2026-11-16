@@ -845,6 +845,24 @@ _Appears in:_
 | `extraHosts` _string array_ | ExtraHosts are API hosts allowlisted only when this identity is attached. |  | Optional: \{\} <br /> |
 
 
+#### DevboxCloudProviders
+
+
+
+DevboxCloudProviders enables egress to each cloud's API endpoints (see CloudProviderHosts).
+
+
+
+_Appears in:_
+- [DevboxRunnerSpec](#devboxrunnerspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `aws` _boolean_ | AWS: the regional and global service endpoints under amazonaws.com and api.aws. |  | Optional: \{\} <br /> |
+| `gcp` _boolean_ | GCP: the Google APIs under googleapis.com and Google's OAuth endpoint. |  | Optional: \{\} <br /> |
+| `azure` _boolean_ | Azure: Resource Manager, Entra ID sign-in, Microsoft Graph, Key Vault and Storage. |  | Optional: \{\} <br /> |
+
+
 #### DevboxEnvVar
 
 
@@ -1098,6 +1116,7 @@ _Appears in:_
 | `allowedRepositories` _string array_ | AllowedRepositories the git repositories allowed to be used with this devbox,<br />with the same semantics as AgentRuntime.spec.allowedRepositories. |  | Optional: \{\} <br /> |
 | `httpAllowlist` _[DevboxHTTPAllowlistEntry](#devboxhttpallowlistentry) array_ | HTTPAllowlist are extra hosts instances may reach, on top of the built-in ones. |  | MaxItems: 256 <br />Optional: \{\} <br /> |
 | `packageServers` _[DevboxPackageServers](#devboxpackageservers)_ | PackageServers opens egress to public package registries by ecosystem. Go, Rust, JavaScript, Java, Elixir<br />and Python are on unless set to false. | \{  \} | Optional: \{\} <br /> |
+| `cloudProviders` _[DevboxCloudProviders](#devboxcloudproviders)_ | CloudProviders opens egress to cloud providers' API endpoints. A provider is on when the runner has a cloud<br />identity for it, unless set to false. | \{  \} | Optional: \{\} <br /> |
 | `env` _[DevboxEnvVar](#devboxenvvar) array_ | Env are environment variables for every process the box starts: agents, terminals and git. Plain values<br />are part of the template, so changing them rolls a new revision. Secret values are read when an instance<br />wakes and are never baked into the template, the golden snapshot or the workspace volume. |  | MaxItems: 128 <br />Optional: \{\} <br /> |
 | `browser` _[DevboxBrowser](#devboxbrowser)_ | Browser enables the in-box headless browser. |  | Optional: \{\} <br /> |
 | `bootstrapScript` _string_ | BootstrapScript runs once during the golden boot, so its results are baked into the snapshot. |  | Optional: \{\} <br /> |

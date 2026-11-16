@@ -136,3 +136,35 @@ func TestRunnerFromCRDPackageServers(t *testing.T) {
 		t.Fatalf("all package servers off: %v, want %v", none.HTTPAllowlist, want)
 	}
 }
+
+func TestRunnerFromCRDCloudProviders(t *testing.T) {
+	noPackages := &v1alpha1.DevboxPackageServers{Go: ptr.To(false), Rust: ptr.To(false), JavaScript: ptr.To(false),
+		Java: ptr.To(false), Elixir: ptr.To(false), Python: ptr.To(false)}
+	hosts := func(spec v1alpha1.DevboxRunnerSpec) []string {
+		spec.PackageServers = noPackages
+		var out []string
+		for _, e := range RunnerFromCRD(&v1alpha1.DevboxRunner{Spec: spec}).HTTPAllowlist {
+			out = append(out, e.Host)
+		}
+		return out
+	}
+
+	if got := hosts(v1alpha1.DevboxRunnerSpec{}); len(got) != 0 {
+		t.Fatalf("cloud providers open without identities: %v", got)
+	}
+
+	aws := []v1alpha1.DevboxCloudIdentity{{Name: "aws", AWS: &v1alpha1.DevboxAWSIdentity{RoleArn: "arn:aws:iam::123456789012:role/devbox"}}}
+	if got := hosts(v1alpha1.DevboxRunnerSpec{CloudIdentities: aws}); !slices.Contains(got, "*.amazonaws.com") || slices.Contains(got, "*.googleapis.com") {
+		t.Fatalf("an aws identity opens aws only: %v", got)
+	}
+	if got := hosts(v1alpha1.DevboxRunnerSpec{CloudIdentities: aws, CloudProviders: &v1alpha1.DevboxCloudProviders{AWS: ptr.To(false)}}); slices.Contains(got, "*.amazonaws.com") {
+		t.Fatalf("aws disabled despite the identity: %v", got)
+	}
+
+	got := hosts(v1alpha1.DevboxRunnerSpec{CloudProviders: &v1alpha1.DevboxCloudProviders{GCP: ptr.To(true), Azure: ptr.To(true)}})
+	for _, h := range []string{"*.googleapis.com", "management.azure.com", "login.microsoftonline.com"} {
+		if !slices.Contains(got, h) {
+			t.Errorf("enabled clouds missing %s: %v", h, got)
+		}
+	}
+}

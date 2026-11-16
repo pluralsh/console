@@ -232,6 +232,25 @@ spec:
                 x-kubernetes-validations:
                 - message: at most one cloud identity can be marked default
                   rule: self.filter(i, has(i.default) && i.default).size() <= 1
+              cloudProviders:
+                default: {}
+                description: |-
+                  CloudProviders opens egress to cloud providers' API endpoints. A provider is on when the runner has a cloud
+                  identity for it, unless set to false.
+                properties:
+                  aws:
+                    description: 'AWS: the regional and global service endpoints under
+                      amazonaws.com and api.aws.'
+                    type: boolean
+                  azure:
+                    description: 'Azure: Resource Manager, Entra ID sign-in, Microsoft
+                      Graph, Key Vault and Storage.'
+                    type: boolean
+                  gcp:
+                    description: 'GCP: the Google APIs under googleapis.com and Google''s
+                      OAuth endpoint.'
+                    type: boolean
+                type: object
               env:
                 description: |-
                   Env are environment variables for every process the box starts: agents, terminals and git. Plain values

@@ -158,6 +158,12 @@ type DevboxRunnerSpec struct {
 	// +kubebuilder:default={}
 	PackageServers *DevboxPackageServers `json:"packageServers,omitempty"`
 
+	// CloudProviders opens egress to cloud providers' API endpoints. A provider is on when the runner has a cloud
+	// identity for it, unless set to false.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default={}
+	CloudProviders *DevboxCloudProviders `json:"cloudProviders,omitempty"`
+
 	// Env are environment variables for every process the box starts: agents, terminals and git. Plain values
 	// are part of the template, so changing them rolls a new revision. Secret values are read when an instance
 	// wakes and are never baked into the template, the golden snapshot or the workspace volume.
@@ -437,6 +443,21 @@ type DevboxHTTPAllowlistEntry struct {
 	// Passthrough tunnels TLS without interception (no credential injection or request authz).
 	// +kubebuilder:validation:Optional
 	Passthrough *bool `json:"passthrough,omitempty"`
+}
+
+// DevboxCloudProviders enables egress to each cloud's API endpoints (see CloudProviderHosts).
+type DevboxCloudProviders struct {
+	// AWS: the regional and global service endpoints under amazonaws.com and api.aws.
+	// +kubebuilder:validation:Optional
+	AWS *bool `json:"aws,omitempty"`
+
+	// GCP: the Google APIs under googleapis.com and Google's OAuth endpoint.
+	// +kubebuilder:validation:Optional
+	GCP *bool `json:"gcp,omitempty"`
+
+	// Azure: Resource Manager, Entra ID sign-in, Microsoft Graph, Key Vault and Storage.
+	// +kubebuilder:validation:Optional
+	Azure *bool `json:"azure,omitempty"`
 }
 
 // DevboxPackageServers enables egress to each ecosystem's public registries (see PackageServerHosts).
@@ -882,6 +903,46 @@ func (in *DevboxRunnerSpec) PackageServerHosts() []string {
 	} {
 		if eco.enabled {
 			out = append(out, packageServerHosts[eco.name]...)
+		}
+	}
+	return out
+}
+
+// cloudProviderHosts are the API hosts each cloud's CLIs and SDKs need, all on 443.
+var cloudProviderHosts = map[string][]string{
+	"aws":   {"*.amazonaws.com", "*.api.aws"},
+	"gcp":   {"*.googleapis.com", "accounts.google.com"},
+	"azure": {"management.azure.com", "login.microsoftonline.com", "graph.microsoft.com", "*.vault.azure.net", "*.core.windows.net"},
+}
+
+// CloudProviderHosts returns the API hosts the enabled clouds need, in a stable order. An unset cloud is on when
+// a cloud identity targets it.
+func (in *DevboxRunnerSpec) CloudProviderHosts() []string {
+	cp := in.CloudProviders
+	if cp == nil {
+		cp = &DevboxCloudProviders{}
+	}
+	var aws, gcp, azure bool
+	for _, ci := range in.CloudIdentities {
+		aws, gcp, azure = aws || ci.AWS != nil, gcp || ci.GCP != nil, azure || ci.Azure != nil
+	}
+	on := func(v *bool, def bool) bool {
+		if v == nil {
+			return def
+		}
+		return *v
+	}
+	var out []string
+	for _, cloud := range []struct {
+		name    string
+		enabled bool
+	}{
+		{"aws", on(cp.AWS, aws)},
+		{"gcp", on(cp.GCP, gcp)},
+		{"azure", on(cp.Azure, azure)},
+	} {
+		if cloud.enabled {
+			out = append(out, cloudProviderHosts[cloud.name]...)
 		}
 	}
 	return out
