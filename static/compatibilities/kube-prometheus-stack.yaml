@@ -5,6 +5,34 @@ readme_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/m
 helm_repository_url: https://prometheus-community.github.io/helm-charts
 chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
 versions:
+- version: 93.3.0
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: '- No user-facing Helm values changes are called out in the provided
+      notes for `kube-prometheus-stack` 93.3.0.
+
+      - Expect no action required unless you rely on chart defaults affected indirectly
+      by bundled subcharts/mixins; still run a `helm diff upgrade` to confirm rendered
+      manifest changes.'
+    chart_updates: [Updated kubernetes-mixin (dashboards/rules) digest to `bacbfe0`
+        (will change some generated PrometheusRule and Grafana dashboard content).,
+      "Subchart/embedded component maintenance fixes:\n  - prometheus-blackbox-exporter:\
+        \ documentation link fixes in `values.yaml`.\n  - prometheus-adapter: preserve\
+        \ zero disruption budget constraints.\n  - prom-label-proxy: fix `kubeRBACProxy.resources`\
+        \ indentation.\n  - prometheus-sql-exporter: roll pods when config changes.\n\
+        \  - CI workflow dependency update (no runtime impact)."]
+    features: ['Prometheus SQL Exporter now triggers a pod rollout when its configuration
+        changes, reducing the risk of stale config running in existing pods.']
+    breaking_changes: []
+  chart_version: 93.3.0
+  images: ['docker.io/bats/bats:1.14.0', 'docker.io/grafana/grafana:13.3.1-distroless',
+    'ghcr.io/jkroepke/kube-webhook-certgen:1.11.1', 'quay.io/kiwigrid/k8s-sidecar:2.14.3',
+    'quay.io/prometheus-operator/prometheus-operator:v0.95.2', 'quay.io/prometheus/alertmanager:v0.35.0',
+    'quay.io/prometheus/node-exporter:v1.12.1-distroless', 'quay.io/prometheus/prometheus:v3.16.0-distroless',
+    'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
 - version: 93.2.2
   kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
     '1.27', '1.26', '1.25']
