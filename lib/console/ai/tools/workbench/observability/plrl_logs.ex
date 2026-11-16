@@ -56,8 +56,9 @@ defmodule Console.AI.Tools.Workbench.Observability.Plrl.Logs do
   end
 
   def structured(%__MODULE__{} = logs) do
-    with {:ok, query} <- logs_query(logs),
-         {:ok, logs} <- Provider.query(query) do
+    query = logs_query(logs)
+
+    with {:ok, logs} <- Provider.query(query) do
       {:ok, Enum.map(logs, &to_log/1)}
     end
   end
