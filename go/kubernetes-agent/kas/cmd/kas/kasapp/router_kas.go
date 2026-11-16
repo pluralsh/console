@@ -79,6 +79,10 @@ func (r *router) findReadyTunnel(ctx context.Context, rpcApi modserver.RpcApi, m
 			findCtxErr := findCtx.Err()
 			span.SetStatus(otelcodes.Error, "Timed out")
 			span.RecordError(findCtxErr)
+			if r.tunnelNotFoundErr != nil {
+				log.Debug("Tunnel not found", logz.Error(findCtxErr))
+				return readyTunnel{}, r.tunnelNotFoundErr()
+			}
 			rpcApi.HandleProcessingError(log, agentId, "Agent connection not found", errors.New(findCtxErr.Error()))
 			return readyTunnel{}, status.Error(codes.DeadlineExceeded, "Agent connection not found. Is agent up to date and connected?")
 		default: // This should never happen, but let's handle a non-ctx error for completeness and future-proofing.

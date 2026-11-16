@@ -99,6 +99,15 @@ spec:
         - name: KAS_INSECURE_SKIP_TLS_VERIFY
           value: "true"
         {{- end }}
+        {{- if .Values.kas.devbox.enabled }}
+        - name: KAS_DEVBOX_GRPC_ADDR
+          value: {{ printf "%s.%s:%v" (include "kas.serviceName" .) .Release.Namespace .Values.kas.service.apiInternalPort | quote }}
+        - name: KAS_DEVBOX_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: api
+              key: secret
+        {{- end }}
         - name: REPLICAS
           value: {{ .Values.replicaCount | quote }}
         {{- with .Values.console.beamSchedulers }}

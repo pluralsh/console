@@ -29,6 +29,8 @@ const modelTooltip =
 const embeddingModelTooltip = 'Model used for embeddings and vector search.'
 const toolModelTooltip =
   'Model used for tool calls and general chat, which are less frequent and benefit from more complex reasoning.'
+const decisionModelTooltip =
+  'Model that classifies and approves actions, like devbox agent permission requests at autonomy auto. Leave blank to let the AI proxy pick one, falling back to the tool or chat model.'
 const bedrockModelIdTooltip =
   'Primary Bedrock model for Explain/Fix with AI, Insights, and similar features. Leave blank to use Plural defaults.'
 const bedrockEmbeddingModelTooltip =
@@ -94,7 +96,7 @@ export const aiProviderToLabel = {
 
 type ModelDefaults = Pick<
   ModelDefault,
-  'model' | 'toolModel' | 'embeddingModel'
+  'model' | 'toolModel' | 'embeddingModel' | 'decisionModel'
 >
 
 export function initialSettingsAttributes(
@@ -107,6 +109,7 @@ export function initialSettingsAttributes(
               anthropic: {
                 model: ai.anthropic.model,
                 toolModel: ai.anthropic.toolModel,
+                decisionModel: ai.anthropic.decisionModel,
                 baseUrl: ai.anthropic.baseUrl,
                 accessToken: '',
               },
@@ -120,6 +123,7 @@ export function initialSettingsAttributes(
                 model: ai.azure.model,
                 embeddingModel: ai.azure.embeddingModel,
                 toolModel: ai.azure.toolModel,
+                decisionModel: ai.azure.decisionModel,
                 accessToken: '',
               },
             }
@@ -129,6 +133,7 @@ export function initialSettingsAttributes(
             ? {
                 modelId: ai.bedrock.modelId,
                 toolModelId: ai.bedrock.toolModelId,
+                decisionModel: ai.bedrock.decisionModel,
                 embeddingModel: ai.bedrock.embeddingModel,
                 modelSettings: ai.bedrock.modelSettings?.map((settings) => ({
                   modelId: settings?.modelId ?? '',
@@ -156,6 +161,7 @@ export function initialSettingsAttributes(
               openai: {
                 model: ai.openai.model,
                 toolModel: ai.openai.toolModel,
+                decisionModel: ai.openai.decisionModel,
                 embeddingModel: ai.openai.embeddingModel,
                 baseUrl: ai.openai.baseUrl,
                 method: ai.openai.method,
@@ -168,6 +174,7 @@ export function initialSettingsAttributes(
               openaiCompatible: {
                 model: ai.openaiCompatible.model,
                 toolModel: ai.openaiCompatible.toolModel,
+                decisionModel: ai.openaiCompatible.decisionModel,
                 embeddingModel: ai.openaiCompatible.embeddingModel,
                 baseUrl: ai.openaiCompatible.baseUrl,
                 method: ai.openaiCompatible.method,
@@ -180,6 +187,7 @@ export function initialSettingsAttributes(
               xai: {
                 model: ai.xai.model,
                 toolModel: ai.xai.toolModel,
+                decisionModel: ai.xai.decisionModel,
                 embeddingModel: ai.xai.embeddingModel,
                 baseUrl: ai.xai.baseUrl,
                 method: ai.xai.method,
@@ -193,6 +201,7 @@ export function initialSettingsAttributes(
                 model: ai.vertex.model,
                 embeddingModel: ai.vertex.embeddingModel,
                 toolModel: ai.vertex.toolModel,
+                decisionModel: ai.vertex.decisionModel,
                 project: ai.vertex.project,
                 location: ai.vertex.location,
                 endpoint: ai.vertex.endpoint,
@@ -292,6 +301,19 @@ export function OpenAISettings({
         />
       </FormField>
       <FormField
+        label="Decision model"
+        infoTooltip={decisionModelTooltip}
+        style={{ flex: 1 }}
+      >
+        <Input
+          disabled={!enabled}
+          value={settings?.decisionModel ?? modelDefaults?.decisionModel ?? ''}
+          onChange={(e) =>
+            updateSettings({ decisionModel: e.currentTarget.value })
+          }
+        />
+      </FormField>
+      <FormField
         label="Base URL"
         infoTooltip="Optional custom API base URL for OpenAI-compatible providers. Leave blank to use OpenAI."
         style={{ flex: 1 }}
@@ -380,6 +402,19 @@ export function AnthropicSettings({
           disabled={!enabled}
           value={settings?.toolModel ?? modelDefaults?.toolModel ?? ''}
           onChange={(e) => updateSettings({ toolModel: e.currentTarget.value })}
+        />
+      </FormField>
+      <FormField
+        label="Decision model"
+        infoTooltip={decisionModelTooltip}
+        style={{ flex: 1 }}
+      >
+        <Input
+          disabled={!enabled}
+          value={settings?.decisionModel ?? modelDefaults?.decisionModel ?? ''}
+          onChange={(e) =>
+            updateSettings({ decisionModel: e.currentTarget.value })
+          }
         />
       </FormField>
       <FormField
@@ -512,6 +547,19 @@ export function BedrockSettings({
           value={settings?.toolModelId ?? modelDefaults?.toolModel ?? ''}
           onChange={(e) =>
             updateSettings({ toolModelId: e.currentTarget.value })
+          }
+        />
+      </FormField>
+      <FormField
+        label="Decision model"
+        infoTooltip={decisionModelTooltip}
+        style={{ flex: 1 }}
+      >
+        <Input
+          disabled={!enabled}
+          value={settings?.decisionModel ?? modelDefaults?.decisionModel ?? ''}
+          onChange={(e) =>
+            updateSettings({ decisionModel: e.currentTarget.value })
           }
         />
       </FormField>
@@ -771,6 +819,19 @@ export function AzureSettings({
         />
       </FormField>
       <FormField
+        label="Decision model"
+        infoTooltip={decisionModelTooltip}
+        style={{ flex: 1 }}
+      >
+        <Input
+          disabled={!enabled}
+          value={settings?.decisionModel ?? modelDefaults?.decisionModel ?? ''}
+          onChange={(e) =>
+            updateSettings({ decisionModel: e.currentTarget.value })
+          }
+        />
+      </FormField>
+      <FormField
         label="Endpoint"
         infoTooltip="The endpoint of your Azure OpenAI version. It should look like https://{endpoint}/openai/deployments."
         required={enabled}
@@ -902,6 +963,19 @@ export function VertexSettings({
           disabled={!enabled}
           value={settings?.toolModel ?? modelDefaults?.toolModel ?? ''}
           onChange={(e) => updateSettings({ toolModel: e.currentTarget.value })}
+        />
+      </FormField>
+      <FormField
+        label="Decision model"
+        infoTooltip={decisionModelTooltip}
+        style={{ flex: 1 }}
+      >
+        <Input
+          disabled={!enabled}
+          value={settings?.decisionModel ?? modelDefaults?.decisionModel ?? ''}
+          onChange={(e) =>
+            updateSettings({ decisionModel: e.currentTarget.value })
+          }
         />
       </FormField>
       <FormField

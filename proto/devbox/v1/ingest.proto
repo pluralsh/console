@@ -1,0 +1,310 @@
+syntax = "proto3";
+
+// devbox.v1.Ingest: devbox-gateway -> KAS -> console (:50051).
+//
+// The gateway calls Ingest on KAS's devbox listener with its deploy token. KAS forwards to console's gRPC server,
+// replacing any `devbox-cluster-id` metadata with the cluster it verified. Console must check that every
+// instance, devbox or snapshot named in a request belongs to that cluster.
+//
+// Console never receives transcript content through Ingest: only the thin index, live deltas (broadcast and
+// dropped), status and credentials.
+package devbox.v1;
+
+option go_package = "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1;devboxv1";
+
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+import "devbox/v1/common.proto";
+import "devbox/v1/acp.proto";
+import "devbox/v1/control.proto";
+import "devbox/v1/credentials.proto";
+
+service Ingest {
+  // RegisterGateway announces a gateway replica after it connects, and returns what console expects it to run.
+  rpc RegisterGateway(RegisterGatewayRequest) returns (RegisterGatewayResponse);
+  // Heartbeat reports gateway liveness and a summary of every instance it manages.
+  rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse);
+
+  // UpsertInstanceIndex writes the thin index in one transaction: sessions (threads and subagents) with their
+  // current-state columns, interactions, and instance-level aggregates. Rows are applied only when their revision
+  // is newer than the stored one, so retries and reordering are harmless. Publishes devboxInstanceIndexDelta.
+  rpc UpsertInstanceIndex(UpsertInstanceIndexRequest) returns (UpsertInstanceIndexResponse);
+  // PushInstanceDeltas carries coalesced live deltas (about 50 ms windows) for one or more instances. Console
+  // wraps each in DevboxInstance.Delta, publishes it on devbox_instances:<id>:deltas and stores nothing. Fire and
+  // forget: the gateway drops batches under backpressure.
+  rpc PushInstanceDeltas(PushInstanceDeltasRequest) returns (PushInstanceDeltasResponse);
+  // ReportInstanceStatus reports state machine transitions and idle state.
+  rpc ReportInstanceStatus(ReportInstanceStatusRequest) returns (ReportInstanceStatusResponse);
+  // ReportSnapshot reports the outcome of SnapshotInstance.
+  rpc ReportSnapshot(ReportSnapshotRequest) returns (ReportSnapshotResponse);
+
+  // GetInstanceCredentials mints or returns instance-scoped credentials for the credential provider cache
+  // (scm, ai-proxy, console, claude-oauth) and for daemon delivery (oidc, codex).
+  rpc GetInstanceCredentials(GetInstanceCredentialsRequest) returns (GetInstanceCredentialsResponse);
+  // UpdateAgentCredential writes back a refreshed Codex auth.json, compare-and-swap on the credential version.
+  rpc UpdateAgentCredential(UpdateAgentCredentialRequest) returns (UpdateAgentCredentialResponse);
+
+  // ReportPullRequest records a PR observed at egress (section 4.10 backstop). Upserts by URL with
+  // source: egress; never overrides an MCP-created record.
+  rpc ReportPullRequest(ReportPullRequestRequest) returns (ReportPullRequestResponse);
+  // DevboxPullRequest creates a PR on behalf of the devbox MCP's create_pull_request tool (Dispatcher.pr), with
+  // instance and thread attribution.
+  rpc DevboxPullRequest(DevboxPullRequestRequest) returns (DevboxPullRequestResponse);
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Gateway registration and heartbeat
+// ---------------------------------------------------------------------------------------------------------------
+
+message RegisterGatewayRequest {
+  // Pod name of the replica.
+  string gateway_id = 1;
+  string version = 2;
+  // Optional features the gateway supports, e.g. "acp-v2", "claude-oauth", "egress-pr-observation".
+  repeated string capabilities = 3;
+  string substrate_version = 4;
+  // Install-time prerequisites the gateway checked (DBX-22).
+  bool credential_provider_registered = 5;
+  bool egress_authz_registered = 6;
+  reserved 7;
+  reserved "transcript_store";
+}
+
+message RegisterGatewayResponse {
+  // The cluster KAS verified.
+  string cluster_id = 1;
+  int32 heartbeat_interval_seconds = 2;
+  // Instances console believes are live on this cluster, for reconciliation after a gateway restart.
+  repeated InstanceSummary instances = 3;
+}
+
+message InstanceSummary {
+  string instance_id = 1;
+  string devbox_id = 2;
+  InstanceStatus status = 3;
+  repeated Lease leases = 4;
+  uint64 lease_generation = 5;
+}
+
+message HeartbeatRequest {
+  string gateway_id = 1;
+  repeated InstanceHeartbeat instances = 2;
+}
+
+message InstanceHeartbeat {
+  string instance_id = 1;
+  InstanceStatus status = 2;
+  IdleState idle = 3;
+  google.protobuf.Timestamp last_daemon_contact = 4;
+  // Last daemon event offset forwarded to console.
+  uint64 acked_offset = 5;
+  // Credentials unavailable, agent missing, ...
+  repeated ErrorDetail conditions = 6;
+}
+
+message HeartbeatResponse {
+  // Instances the gateway reported that console doesn't know or has ended; the gateway garbage-collects them.
+  repeated string unknown_instance_ids = 1;
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Thin index
+// ---------------------------------------------------------------------------------------------------------------
+
+// InstanceAggregate holds instance-level current state (on DevboxInstance).
+message InstanceAggregate {
+  // RUNNING if any thread is running, REQUIRES_ACTION ("needs you") if any thread requires action.
+  ForegroundStateKind foreground = 1;
+  int32 running_threads = 2;
+  int32 waiting_threads = 3;
+  repeated AgentConnection connections = 4;
+  repeated Checkout checkouts = 5;
+  // Monotonic per instance.
+  uint64 revision = 6;
+}
+
+message UpsertInstanceIndexRequest {
+  string instance_id = 1;
+  repeated Session sessions = 2;
+  repeated Interaction interactions = 3;
+  InstanceAggregate aggregate = 4;
+  // Daemon event offset this index reflects, for diagnostics.
+  uint64 offset = 5;
+}
+
+message UpsertInstanceIndexResponse {
+  // Rows applied (stale revisions are skipped silently).
+  int32 sessions_applied = 1;
+  int32 interactions_applied = 2;
+}
+
+enum DeltaOp {
+  DELTA_OP_UNSPECIFIED = 0;
+  // A chunk appended to an entity (e.g. message text). payload_json is the ACP chunk.
+  DELTA_OP_APPEND = 1;
+  // An ACP upsert patch: omitted fields unchanged, null clears, values replace.
+  DELTA_OP_PATCH = 2;
+  // A live-only `notice` (shown as a toast, never archived).
+  DELTA_OP_NOTICE = 3;
+  // Session state: state_update, config options, available commands, session info, usage. `state_kind` says
+  // which; payload_json is the ACP update.
+  DELTA_OP_STATE = 4;
+  // The entity settled; `entity` holds its final revision so clients drop their in-flight copy.
+  DELTA_OP_SETTLE = 5;
+}
+
+// Delta is one live change. It is never stored.
+message Delta {
+  string instance_id = 1;
+  string session_id = 2;
+  // Unset for STATE and NOTICE.
+  EntityType entity_type = 3;
+  string entity_id = 4;
+  uint64 position = 5;
+  DeltaOp op = 6;
+  // For STATE: state_update, config_option_update, available_commands_update, session_info_update, usage_update.
+  string state_kind = 7;
+  // Verbatim ACP JSON of the chunk, patch, notice or state update.
+  bytes payload_json = 8;
+  // SETTLE only.
+  AcpEntity entity = 9;
+  // Daemon event-log offset; clients apply deltas with offset > the timeline page's delta_offset.
+  uint64 offset = 10;
+  google.protobuf.Timestamp emitted_at = 11;
+}
+
+message PushInstanceDeltasRequest {
+  repeated Delta deltas = 1;
+}
+
+message PushInstanceDeltasResponse {
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Status and snapshots
+// ---------------------------------------------------------------------------------------------------------------
+
+message ReportInstanceStatusRequest {
+  string instance_id = 1;
+  InstanceStatus status = 2;
+  SuspendReason suspend_reason = 3;
+  string message = 4;
+  ErrorDetail error = 5;
+  string actor_id = 6;
+  string image_digest = 7;
+  int64 template_revision = 8;
+  IdleState idle = 9;
+  google.protobuf.Timestamp observed_at = 10;
+  // Monotonic per instance; console ignores older reports.
+  uint64 generation = 11;
+}
+
+message ReportInstanceStatusResponse {
+  // Console's view after applying the report (e.g. CANCELLED wins over a late RUNNING).
+  InstanceStatus status = 1;
+}
+
+enum SnapshotState {
+  SNAPSHOT_STATE_UNSPECIFIED = 0;
+  SNAPSHOT_STATE_SUCCEEDED = 1;
+  SNAPSHOT_STATE_FAILED = 2;
+}
+
+message ReportSnapshotRequest {
+  string snapshot_id = 1;
+  string instance_id = 2;
+  SnapshotState state = 3;
+  SnapshotRef snapshot = 4;
+  int64 size_bytes = 5;
+  ErrorDetail error = 6;
+  google.protobuf.Timestamp completed_at = 7;
+}
+
+message ReportSnapshotResponse {
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Credentials
+// ---------------------------------------------------------------------------------------------------------------
+
+message GetInstanceCredentialsRequest {
+  string instance_id = 1;
+  repeated CredentialSelector credentials = 2;
+}
+
+message GetInstanceCredentialsResponse {
+  repeated InstanceCredential credentials = 1;
+}
+
+message UpdateAgentCredentialRequest {
+  string instance_id = 1;
+  string credential_id = 2;
+  // The version the bundle was derived from.
+  int64 expected_version = 3;
+  // The refreshed auth.json.
+  bytes bundle_json = 4;
+  google.protobuf.Timestamp refreshed_at = 5;
+}
+
+message UpdateAgentCredentialResponse {
+  // False when expected_version was stale; `current` holds the newer bundle to install instead.
+  bool applied = 1;
+  InstanceCredential current = 2;
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Pull requests (section 4.10)
+// ---------------------------------------------------------------------------------------------------------------
+
+message ReportPullRequestRequest {
+  string instance_id = 1;
+  // Verified actor SPIFFE ID that made the request.
+  string actor_id = 2;
+  string url = 3;
+  // github, gitlab, bitbucket, azure_devops.
+  string provider = 4;
+  // Normalized repository URL.
+  string repository = 5;
+  int64 number = 6;
+  string head_branch = 7;
+  string base_branch = 8;
+  google.protobuf.Timestamp observed_at = 9;
+}
+
+message ReportPullRequestResponse {
+  string pull_request_id = 1;
+  // False if a record for the URL already existed.
+  bool created = 2;
+}
+
+message PullRequestAttributes {
+  // Normalized repository URL, checked against the box allowlist.
+  string repository = 1;
+  string title = 2;
+  string body = 3;
+  string head_branch = 4;
+  string base_branch = 5;
+  bool draft = 6;
+  repeated string labels = 7;
+  // Linked PRs from a multi-repo change.
+  repeated string related_urls = 8;
+  google.protobuf.Struct extra = 9;
+}
+
+message DevboxPullRequestRequest {
+  string instance_id = 1;
+  // From the `X-Devbox-Thread` header. Empty for imported sessions (instance-only attribution).
+  string thread_id = 2;
+  // Set when the call came from a subagent; console stores it in the PR's metadata.
+  string subagent_session_id = 3;
+  PullRequestAttributes attributes = 4;
+  // Archive position of the create_pull_request tool call, for deep links.
+  string tool_call_id = 5;
+  uint64 position = 6;
+}
+
+message DevboxPullRequestResponse {
+  string pull_request_id = 1;
+  string url = 2;
+  int64 number = 3;
+}

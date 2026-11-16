@@ -1,0 +1,159 @@
+fragment DevboxModelFragment on DevboxModel {
+    id
+    name
+    description
+}
+
+fragment DevboxCommandFragment on DevboxCommand {
+    name
+    description
+    inputHint
+}
+
+fragment DevboxConfigOptionFragment on DevboxConfigOption {
+    configId
+    name
+    description
+    category
+    type
+    currentValue
+    options {
+        value
+        name
+        description
+        group
+    }
+}
+
+fragment DevboxAgentFragment on DevboxAgent {
+    type
+    default
+    adapterName
+    adapterVersion
+    protocolVersion
+    acpV2
+    modelSwitchable
+    probeStatus
+    probeError
+    defaultModel
+    models {
+        ...DevboxModelFragment
+    }
+    commands {
+        ...DevboxCommandFragment
+    }
+    configOptions {
+        ...DevboxConfigOptionFragment
+    }
+    sessionCapabilities {
+        list
+        resume
+        load
+        close
+        delete
+        fork
+    }
+}
+
+fragment DevboxConditionFragment on DevboxCondition {
+    type
+    status
+    reason
+    message
+}
+
+fragment DevboxFragment on Devbox {
+    id
+    name
+    image
+    resolvedImage
+    templateRevision
+    status
+    allowedRepositories
+    maxInstances
+    browser
+    lastHeartbeatAt
+    agents {
+        ...DevboxAgentFragment
+    }
+    conditions {
+        ...DevboxConditionFragment
+    }
+}
+
+query GetDevbox($id: ID!) {
+    devbox(id: $id) {
+        ...DevboxFragment
+    }
+}
+
+query GetDevboxByName($name: String!, $clusterId: ID) {
+    devbox(name: $name, clusterId: $clusterId) {
+        ...DevboxFragment
+    }
+}
+
+# Called by the deployment operator when reconciling a DevboxRunner, with its probed agent catalog.
+mutation UpsertDevbox($attributes: DevboxAttributes!) {
+    upsertDevbox(attributes: $attributes) {
+        ...DevboxFragment
+    }
+}
+
+mutation HeartbeatDevbox($id: ID!, $attributes: DevboxHeartbeatAttributes!) {
+    heartbeatDevbox(id: $id, attributes: $attributes) {
+        id
+        status
+        lastHeartbeatAt
+    }
+}
+
+mutation DeleteDevbox($id: ID!) {
+    deleteDevbox(id: $id) {
+        id
+    }
+}
+
+# A short-lived token for the catalog probe job's AI proxy access.
+mutation MintDevboxProbeToken($id: ID!) {
+    mintDevboxProbeToken(id: $id) {
+        token
+        expiresAt
+    }
+}
+
+fragment AgentCredentialFragment on AgentCredential {
+    id
+    provider
+    kind
+    label
+    status
+    version
+    defaultBilling
+    failureCount
+    email
+    plan
+    linkedAt
+    expiresAt
+    lastRefreshedAt
+    lastUsedAt
+}
+
+# Links (or relinks) the current user's coding agent subscription.  The secret is write-only.
+mutation LinkAgentCredential($attributes: AgentCredentialAttributes!) {
+    linkAgentCredential(attributes: $attributes) {
+        ...AgentCredentialFragment
+    }
+}
+
+query ListAgentCredentials {
+    agentCredentials {
+        ...AgentCredentialFragment
+    }
+}
+
+mutation DeleteAgentCredential($id: ID!) {
+    deleteAgentCredential(id: $id) {
+        id
+    }
+}

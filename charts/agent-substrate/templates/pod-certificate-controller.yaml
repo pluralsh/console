@@ -1,0 +1,185 @@
+{{- $ns := include "substrate.podcertNamespace" . -}}
+{{- $v := .Values.podCertificateController -}}
+{{- $qps := $v.kubeAPIQPS | default (ternary "100" "" (eq .Values.clusterSize "size10")) -}}
+{{- $burst := $v.kubeAPIBurst | default (ternary "200" "" (eq .Values.clusterSize "size10")) -}}
+# The namespace is created by the secrets hook, before anything else, since its
+# CA pools live there. Helm can't adopt an object a hook created during the same
+# install, so it isn't a release resource, and uninstall keeps it with the pools.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: podcertificate-controller
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: podcert-ate-dev-signer
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+rules:
+  - apiGroups: [""]
+    resources: ["services", "pods"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["certificates.k8s.io"]
+    resources: ["podcertificaterequests"]
+    verbs: ["get", "list", "watch", "update"]
+  - apiGroups: ["certificates.k8s.io"]
+    resources: ["clustertrustbundles"]
+    verbs: ["create", "get", "list", "watch", "update", "delete"]
+  - apiGroups: ["certificates.k8s.io"]
+    resources: ["podcertificaterequests/status"]
+    verbs: ["update"]
+  - apiGroups: ["certificates.k8s.io"]
+    resources: ["signers"]
+    resourceNames:
+      - servicedns.podcert.ate.dev/*
+      - podidentity.podcert.ate.dev/*
+      - postgres.podcert.ate.dev/*
+    verbs: ["sign", "attest"]
+  - apiGroups: ["events.k8s.io"]
+    resources: ["events"]
+    verbs: ["create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: podcert-ate-dev-signer
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: podcert-ate-dev-signer
+subjects:
+  - kind: ServiceAccount
+    namespace: {{ $ns }}
+    name: podcertificate-controller
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: coordinator
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+rules:
+  - apiGroups: ["coordination.k8s.io"]
+    resources: ["leases"]
+    verbs: ["create", "get", "list", "watch", "update", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: podcertificate-controller-is-a-coordinator
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: coordinator
+subjects:
+  - kind: ServiceAccount
+    namespace: {{ $ns }}
+    name: podcertificate-controller
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: podcertificate-controller
+  namespace: {{ $ns }}
+  labels:
+    app: podcertificate-controller
+    {{- include "substrate.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: podcertificate-controller
+  template:
+    metadata:
+      labels:
+        app: podcertificate-controller
+        {{- include "substrate.systemInfraPodLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: podcertificate-controller
+      dnsPolicy: Default
+      {{- include "substrate.imagePullSecrets" . | nindent 6 }}
+      {{- $sched := include "substrate.systemInfraScheduling" . | fromYaml }}
+      {{- $_ := set $sched "nodeSelector" (merge (dict "kubernetes.io/os" "linux") ($sched.nodeSelector | default dict)) }}
+      {{- toYaml $sched | nindent 6 }}
+      containers:
+        - name: controller
+          image: {{ include "substrate.image" (dict "ctx" . "key" "podcertcontroller" "name" "podcertcontroller") }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - --in-cluster=true
+            - --sharding-pod-namespace=$(POD_NAMESPACE)
+            - --sharding-pod-name=$(POD_NAME)
+            - --sharding-pod-uid=$(POD_UID)
+            - --sharding-application-name=podcertificate-controller
+            - --service-dns-ca-pool=/run/ca-state/service-dns-pool.json
+            - --pod-identity-ca-pool=/run/ca-state/pod-identity-pool.json
+            - --postgres-ca-pool=/run/ca-state/postgres-pool.json
+            - --postgres-client-namespace={{ include "substrate.namespace" . }}
+            - --workers-per-signer=$(WORKERS_PER_SIGNER)
+            {{- with $qps }}
+            - --kube-api-qps={{ . }}
+            {{- end }}
+            {{- with $burst }}
+            - --kube-api-burst={{ . }}
+            {{- end }}
+            - {{ include "substrate.previewArg" . }}
+          env:
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_UID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.uid
+            - name: WORKERS_PER_SIGNER
+              value: {{ $v.workersPerSigner | toString | quote }}
+          {{- with $v.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: ca-state
+              mountPath: /run/ca-state
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            capabilities:
+              add:
+                - NET_BIND_SERVICE
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+      volumes:
+        - name: ca-state
+          projected:
+            sources:
+              - secret:
+                  name: service-dns-ca-pool
+                  items:
+                    - key: pool
+                      path: service-dns-pool.json
+              - secret:
+                  name: pod-identity-ca-pool
+                  items:
+                    - key: pool
+                      path: pod-identity-pool.json
+              - secret:
+                  name: postgres-ca-pool
+                  items:
+                    - key: pool
+                      path: postgres-pool.json

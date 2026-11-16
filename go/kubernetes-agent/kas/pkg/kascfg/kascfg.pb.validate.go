@@ -3982,6 +3982,768 @@ var _ interface {
 	ErrorName() string
 } = PrivateApiCFValidationError{}
 
+// Validate checks the field values on ListenDevboxCF with the rules defined in
+// the proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *ListenDevboxCF) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ListenDevboxCF with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in ListenDevboxCFMultiError,
+// or nil if none found.
+func (m *ListenDevboxCF) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ListenDevboxCF) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Address
+
+	// no validation rules for CertificateFile
+
+	// no validation rules for KeyFile
+
+	// no validation rules for ConnectionsPerTokenPerMinute
+
+	if d := m.GetMaxConnectionAge(); d != nil {
+		dur, err := d.AsDuration(), d.CheckValid()
+		if err != nil {
+			err = ListenDevboxCFValidationError{
+				field:  "MaxConnectionAge",
+				reason: "value is not a valid duration",
+				cause:  err,
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
+		} else {
+
+			gt := time.Duration(0*time.Second + 0*time.Nanosecond)
+
+			if dur <= gt {
+				err := ListenDevboxCFValidationError{
+					field:  "MaxConnectionAge",
+					reason: "value must be greater than 0s",
+				}
+				if !all {
+					return err
+				}
+				errors = append(errors, err)
+			}
+
+		}
+	}
+
+	if d := m.GetListenGracePeriod(); d != nil {
+		dur, err := d.AsDuration(), d.CheckValid()
+		if err != nil {
+			err = ListenDevboxCFValidationError{
+				field:  "ListenGracePeriod",
+				reason: "value is not a valid duration",
+				cause:  err,
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
+		} else {
+
+			gt := time.Duration(0*time.Second + 0*time.Nanosecond)
+
+			if dur <= gt {
+				err := ListenDevboxCFValidationError{
+					field:  "ListenGracePeriod",
+					reason: "value must be greater than 0s",
+				}
+				if !all {
+					return err
+				}
+				errors = append(errors, err)
+			}
+
+		}
+	}
+
+	// no validation rules for MaxMessageSize
+
+	if m.Network != nil {
+
+		if _, ok := _ListenDevboxCF_Network_InLookup[m.GetNetwork()]; !ok {
+			err := ListenDevboxCFValidationError{
+				field:  "Network",
+				reason: "value must be in list [tcp tcp4 tcp6 unix]",
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return ListenDevboxCFMultiError(errors)
+	}
+
+	return nil
+}
+
+// ListenDevboxCFMultiError is an error wrapping multiple validation errors
+// returned by ListenDevboxCF.ValidateAll() if the designated constraints
+// aren't met.
+type ListenDevboxCFMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ListenDevboxCFMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ListenDevboxCFMultiError) AllErrors() []error { return m }
+
+// ListenDevboxCFValidationError is the validation error returned by
+// ListenDevboxCF.Validate if the designated constraints aren't met.
+type ListenDevboxCFValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ListenDevboxCFValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ListenDevboxCFValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ListenDevboxCFValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ListenDevboxCFValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ListenDevboxCFValidationError) ErrorName() string { return "ListenDevboxCFValidationError" }
+
+// Error satisfies the builtin error interface
+func (e ListenDevboxCFValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sListenDevboxCF.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ListenDevboxCFValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ListenDevboxCFValidationError{}
+
+var _ListenDevboxCF_Network_InLookup = map[string]struct{}{
+	"tcp":  {},
+	"tcp4": {},
+	"tcp6": {},
+	"unix": {},
+}
+
+// Validate checks the field values on DevboxConsoleCF with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *DevboxConsoleCF) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on DevboxConsoleCF with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// DevboxConsoleCFMultiError, or nil if none found.
+func (m *DevboxConsoleCF) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *DevboxConsoleCF) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(m.GetAddress()) < 1 {
+		err := DevboxConsoleCFValidationError{
+			field:  "Address",
+			reason: "value length must be at least 1 bytes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	// no validation rules for AuthenticationSecretFile
+
+	// no validation rules for Tls
+
+	// no validation rules for CaCertificateFile
+
+	if d := m.GetTimeout(); d != nil {
+		dur, err := d.AsDuration(), d.CheckValid()
+		if err != nil {
+			err = DevboxConsoleCFValidationError{
+				field:  "Timeout",
+				reason: "value is not a valid duration",
+				cause:  err,
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
+		} else {
+
+			gt := time.Duration(0*time.Second + 0*time.Nanosecond)
+
+			if dur <= gt {
+				err := DevboxConsoleCFValidationError{
+					field:  "Timeout",
+					reason: "value must be greater than 0s",
+				}
+				if !all {
+					return err
+				}
+				errors = append(errors, err)
+			}
+
+		}
+	}
+
+	if len(errors) > 0 {
+		return DevboxConsoleCFMultiError(errors)
+	}
+
+	return nil
+}
+
+// DevboxConsoleCFMultiError is an error wrapping multiple validation errors
+// returned by DevboxConsoleCF.ValidateAll() if the designated constraints
+// aren't met.
+type DevboxConsoleCFMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m DevboxConsoleCFMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m DevboxConsoleCFMultiError) AllErrors() []error { return m }
+
+// DevboxConsoleCFValidationError is the validation error returned by
+// DevboxConsoleCF.Validate if the designated constraints aren't met.
+type DevboxConsoleCFValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e DevboxConsoleCFValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e DevboxConsoleCFValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e DevboxConsoleCFValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e DevboxConsoleCFValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e DevboxConsoleCFValidationError) ErrorName() string { return "DevboxConsoleCFValidationError" }
+
+// Error satisfies the builtin error interface
+func (e DevboxConsoleCFValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sDevboxConsoleCF.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = DevboxConsoleCFValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = DevboxConsoleCFValidationError{}
+
+// Validate checks the field values on DevboxStreamsCF with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *DevboxStreamsCF) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on DevboxStreamsCF with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// DevboxStreamsCFMultiError, or nil if none found.
+func (m *DevboxStreamsCF) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *DevboxStreamsCF) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for TokenSecretFile
+
+	// no validation rules for TokenAudience
+
+	if d := m.GetTokenLeeway(); d != nil {
+		dur, err := d.AsDuration(), d.CheckValid()
+		if err != nil {
+			err = DevboxStreamsCFValidationError{
+				field:  "TokenLeeway",
+				reason: "value is not a valid duration",
+				cause:  err,
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
+		} else {
+
+			gte := time.Duration(0*time.Second + 0*time.Nanosecond)
+
+			if dur < gte {
+				err := DevboxStreamsCFValidationError{
+					field:  "TokenLeeway",
+					reason: "value must be greater than or equal to 0s",
+				}
+				if !all {
+					return err
+				}
+				errors = append(errors, err)
+			}
+
+		}
+	}
+
+	if len(errors) > 0 {
+		return DevboxStreamsCFMultiError(errors)
+	}
+
+	return nil
+}
+
+// DevboxStreamsCFMultiError is an error wrapping multiple validation errors
+// returned by DevboxStreamsCF.ValidateAll() if the designated constraints
+// aren't met.
+type DevboxStreamsCFMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m DevboxStreamsCFMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m DevboxStreamsCFMultiError) AllErrors() []error { return m }
+
+// DevboxStreamsCFValidationError is the validation error returned by
+// DevboxStreamsCF.Validate if the designated constraints aren't met.
+type DevboxStreamsCFValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e DevboxStreamsCFValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e DevboxStreamsCFValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e DevboxStreamsCFValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e DevboxStreamsCFValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e DevboxStreamsCFValidationError) ErrorName() string { return "DevboxStreamsCFValidationError" }
+
+// Error satisfies the builtin error interface
+func (e DevboxStreamsCFValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sDevboxStreamsCF.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = DevboxStreamsCFValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = DevboxStreamsCFValidationError{}
+
+// Validate checks the field values on DevboxCF with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *DevboxCF) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on DevboxCF with the rules defined in
+// the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in DevboxCFMultiError, or nil
+// if none found.
+func (m *DevboxCF) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *DevboxCF) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetListen()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, DevboxCFValidationError{
+					field:  "Listen",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, DevboxCFValidationError{
+					field:  "Listen",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetListen()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return DevboxCFValidationError{
+				field:  "Listen",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	// no validation rules for UrlPathPrefix
+
+	if m.GetConsole() == nil {
+		err := DevboxCFValidationError{
+			field:  "Console",
+			reason: "value is required",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if all {
+		switch v := interface{}(m.GetConsole()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, DevboxCFValidationError{
+					field:  "Console",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, DevboxCFValidationError{
+					field:  "Console",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetConsole()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return DevboxCFValidationError{
+				field:  "Console",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if all {
+		switch v := interface{}(m.GetStreams()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, DevboxCFValidationError{
+					field:  "Streams",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, DevboxCFValidationError{
+					field:  "Streams",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetStreams()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return DevboxCFValidationError{
+				field:  "Streams",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if d := m.GetRoutingTimeout(); d != nil {
+		dur, err := d.AsDuration(), d.CheckValid()
+		if err != nil {
+			err = DevboxCFValidationError{
+				field:  "RoutingTimeout",
+				reason: "value is not a valid duration",
+				cause:  err,
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
+		} else {
+
+			gt := time.Duration(0*time.Second + 0*time.Nanosecond)
+
+			if dur <= gt {
+				err := DevboxCFValidationError{
+					field:  "RoutingTimeout",
+					reason: "value must be greater than 0s",
+				}
+				if !all {
+					return err
+				}
+				errors = append(errors, err)
+			}
+
+		}
+	}
+
+	if d := m.GetRedisConnInfoTtl(); d != nil {
+		dur, err := d.AsDuration(), d.CheckValid()
+		if err != nil {
+			err = DevboxCFValidationError{
+				field:  "RedisConnInfoTtl",
+				reason: "value is not a valid duration",
+				cause:  err,
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
+		} else {
+
+			gt := time.Duration(0*time.Second + 0*time.Nanosecond)
+
+			if dur <= gt {
+				err := DevboxCFValidationError{
+					field:  "RedisConnInfoTtl",
+					reason: "value must be greater than 0s",
+				}
+				if !all {
+					return err
+				}
+				errors = append(errors, err)
+			}
+
+		}
+	}
+
+	if d := m.GetRedisConnInfoRefresh(); d != nil {
+		dur, err := d.AsDuration(), d.CheckValid()
+		if err != nil {
+			err = DevboxCFValidationError{
+				field:  "RedisConnInfoRefresh",
+				reason: "value is not a valid duration",
+				cause:  err,
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
+		} else {
+
+			gt := time.Duration(0*time.Second + 0*time.Nanosecond)
+
+			if dur <= gt {
+				err := DevboxCFValidationError{
+					field:  "RedisConnInfoRefresh",
+					reason: "value must be greater than 0s",
+				}
+				if !all {
+					return err
+				}
+				errors = append(errors, err)
+			}
+
+		}
+	}
+
+	if len(errors) > 0 {
+		return DevboxCFMultiError(errors)
+	}
+
+	return nil
+}
+
+// DevboxCFMultiError is an error wrapping multiple validation errors returned
+// by DevboxCF.ValidateAll() if the designated constraints aren't met.
+type DevboxCFMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m DevboxCFMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m DevboxCFMultiError) AllErrors() []error { return m }
+
+// DevboxCFValidationError is the validation error returned by
+// DevboxCF.Validate if the designated constraints aren't met.
+type DevboxCFValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e DevboxCFValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e DevboxCFValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e DevboxCFValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e DevboxCFValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e DevboxCFValidationError) ErrorName() string { return "DevboxCFValidationError" }
+
+// Error satisfies the builtin error interface
+func (e DevboxCFValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sDevboxCF.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = DevboxCFValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = DevboxCFValidationError{}
+
 // Validate checks the field values on ConfigurationFile with the rules defined
 // in the proto definition for this message. If any rules are violated, the
 // first error encountered is returned, or nil if there are no violations.
@@ -4185,6 +4947,35 @@ func (m *ConfigurationFile) validate(all bool) error {
 	// no validation rules for PluralUrl
 
 	// no validation rules for PluralInsecureSkipTlsVerify
+
+	if all {
+		switch v := interface{}(m.GetDevbox()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, ConfigurationFileValidationError{
+					field:  "Devbox",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, ConfigurationFileValidationError{
+					field:  "Devbox",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetDevbox()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return ConfigurationFileValidationError{
+				field:  "Devbox",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
 
 	if len(errors) > 0 {
 		return ConfigurationFileMultiError(errors)

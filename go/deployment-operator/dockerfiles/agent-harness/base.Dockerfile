@@ -55,6 +55,16 @@ RUN CGO_ENABLED=0 \
     -o /agent-bootstrap \
     cmd/agent-bootstrap/main.go
 
+# Build the devbox node disk preparation binary
+RUN CGO_ENABLED=0 \
+    GOOS=${TARGETOS} \
+    GOARCH=${TARGETARCH} \
+    go build \
+    -trimpath \
+    -ldflags="-s -w" \
+    -o /devbox-disk-prep \
+    ./cmd/devbox-disk-prep
+
 FROM rust:1.90-bookworm AS fcp
 ARG FCP_VERSION=0.2.2
 RUN cargo install fcp --version "${FCP_VERSION}" --locked --root /opt/fcp
@@ -104,7 +114,10 @@ RUN set -eux; \
            gzip \
            jq \
            make \
-           tar; then \
+           mdadm \
+           tar \
+           util-linux \
+           xfsprogs; then \
         break; \
       fi; \
       if [ "${attempt}" -eq 5 ]; then \
@@ -114,6 +127,7 @@ RUN set -eux; \
       sleep "${attempt}"; \
     done; \
     command -v git >/dev/null; \
+    for tool in mdadm mkfs.xfs lsblk blkid mount; do command -v "${tool}" >/dev/null; done; \
     rm -rf /var/lib/apt/lists/*
 
 RUN set -eux; \
@@ -194,6 +208,7 @@ ENV PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${PATH}"
 COPY --from=builder /agent-harness /agent-harness
 COPY --from=builder /agent-mcpserver /agent-mcpserver
 COPY --from=builder /agent-bootstrap /agent-bootstrap
+COPY --from=builder /devbox-disk-prep /devbox-disk-prep
 COPY --from=fcp /opt/fcp/bin/fcp /usr/local/bin/fcp
 COPY --from=terraform /bin/terraform /usr/local/bin/terraform
 COPY --from=helm /usr/bin/helm /usr/local/bin/helm

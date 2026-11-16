@@ -255,14 +255,14 @@ func (r *KubecostExtractorReconciler) getAllocation(ctx context.Context, srv *co
 	queryParams := map[string]string{
 		"window":     "10d",
 		"aggregate":  aggregate,
-		"accumulate": "true",
+		"accumulate": stringTrue,
 	}
 	if multiAggregation != "" {
 		queryParams["aggregate"] = multiAggregation
 	}
 
 	if idle {
-		queryParams["shareIdle"] = "true"
+		queryParams["shareIdle"] = stringTrue
 	}
 
 	if recommendations != nil {

@@ -7,14 +7,59 @@ rules:
 - apiGroups:
   - ""
   resources:
+  - configmaps
+  - secrets
+  - serviceaccounts
+  - services
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
   - events
   verbs:
   - create
   - patch
 - apiGroups:
+  - ""
+  resources:
+  - namespaces
+  verbs:
+  - get
+  - list
+  - patch
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+  - list
+  - patch
+- apiGroups:
   - apps
   resources:
   - daemonsets
+  - deployments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ate.dev
+  resources:
+  - workerpools
   verbs:
   - create
   - delete
@@ -42,6 +87,7 @@ rules:
   - agentruntimes
   - customhealths
   - custominsightpriorities
+  - devboxrunners
   - imagewarmers
   - kubecostextractors
   - pipelinegates
@@ -59,6 +105,7 @@ rules:
   - agentruntimes/finalizers
   - customhealths/finalizers
   - custominsightpriorities/finalizers
+  - devboxrunners/finalizers
   - imagewarmers/finalizers
   - kubecostextractors/finalizers
   - pipelinegates/finalizers
@@ -70,6 +117,7 @@ rules:
   - agentruntimes/status
   - customhealths/status
   - custominsightpriorities/status
+  - devboxrunners/status
   - imagewarmers/status
   - kubecostextractors/status
   - pipelinegates/status
@@ -77,3 +125,15 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - networkpolicies
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch

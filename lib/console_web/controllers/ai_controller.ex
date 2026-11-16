@@ -3,6 +3,7 @@ defmodule ConsoleWeb.AIController do
   import ConsoleWeb.IngestController, only: [convert_headers: 2]
   alias Console.Schema.Cluster
   alias Console.Deployments.Agents
+  alias Console.Devboxes.Credentials
 
   @options [receive_timeout: :timer.minutes(5), connect_options: [timeout: :timer.minutes(5)]]
   @stream_timeout :timer.minutes(5)
@@ -99,12 +100,28 @@ defmodule ConsoleWeb.AIController do
 
   def verify(conn, _) do
     with [token | _] <- get_req_header(conn, "authorization"),
-         %Cluster{} = cluster <- Console.authed_user(extract(token)),
-         true <- Agents.has_runtime?(cluster) do
+         :ok <- verify_token(extract(token)) do
       conn
     else
+      {:error, "workbench budget is exhausted" = msg} -> send_resp(conn, 402, msg) |> halt()
       _ -> send_resp(conn, 401, "unauthenticated") |> halt()
     end
+  end
+
+  defp verify_token(token) do
+    if Credentials.devbox_token?(token) do
+      verify_devbox(token)
+    else
+      case Console.authed_user(token) do
+        %Cluster{} = cluster -> Agents.has_runtime?(cluster) && :ok
+        _ -> :error
+      end
+    end
+  end
+
+  defp verify_devbox(token) do
+    with {:ok, _} <- Credentials.verify_ai_proxy(token),
+      do: :ok
   end
 
   defp extract(token) do

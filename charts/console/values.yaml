@@ -1046,6 +1046,7 @@ kas:
     kubernetesApiPort: 8154
     privateApiPort: 8155
     observabilityPort: 8151
+    devboxPort: 8156
     type: ClusterIP
   serviceAccount:
     create: true
@@ -1079,6 +1080,22 @@ kas:
     redis: ""
   agent:
     path: /ext/kas
+  # devbox enables the DevBoxes listener, routed at <path> on both the console and KAS hosts: devbox-gateway
+  # tunnels (wss://<console_dns><path> by default), console's
+  # devbox.v1.Control calls (on the internal api port) and browser streams (<path>/streams/<stream_id>).
+  devbox:
+    enabled: false
+    path: /ext/devbox
+    # consoleGrpcAddress is console's gRPC server, where gateways' devbox.v1.Ingest calls are forwarded.
+    # Defaults to console.<namespace>:50051.
+    consoleGrpcAddress: ""
+    # streamTokenSecret holds console's DEVBOX_STREAM_TOKEN_KEY (console reads the same key from console-env);
+    # it must exist when devbox is enabled.
+    streamTokenSecret:
+      name: console-env
+      key: DEVBOX_STREAM_TOKEN_KEY
+    # connectionsPerTokenPerMinute limits gateway gRPC calls per deploy token; 0 disables the limit.
+    connectionsPerTokenPerMinute: 0
   api:
     path: /api
     port: 8000
@@ -1091,6 +1108,9 @@ kas:
     annotations:
       kubernetes.io/tls-acme: "true"
       cert-manager.io/cluster-issuer: letsencrypt-prod
+      # devbox tunnels and terminal streams are long-lived WebSockets
+      nginx.ingress.kubernetes.io/proxy-read-timeout: '3600'
+      nginx.ingress.kubernetes.io/proxy-send-timeout: '3600'
   redis:
     # Simplified Redis deployment using standalone mode, without sentinel support and other unused features.
     #

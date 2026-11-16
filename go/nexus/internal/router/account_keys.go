@@ -66,7 +66,7 @@ func (in *Account) handleOpenAIKeys(ctx context.Context, config *pb.OpenAiConfig
 				Val: apiKey,
 			},
 			Models: in.filterModels(append(
-				[]string{config.GetModel(), config.GetToolModel(), config.GetEmbeddingModel()},
+				[]string{config.GetModel(), config.GetToolModel(), config.GetEmbeddingModel(), config.GetDecisionModel()},
 				config.GetProxyModels()...,
 			)),
 			UseForBatchAPI: lo.ToPtr(true),
@@ -108,7 +108,7 @@ func (in *Account) handleAnthropicKeys(config *pb.AnthropicConfig) ([]schemas.Ke
 				Val: config.GetApiKey(),
 			},
 			Models: in.filterModels(append(
-				[]string{config.GetModel(), config.GetToolModel()},
+				[]string{config.GetModel(), config.GetToolModel(), config.GetDecisionModel()},
 				config.GetProxyModels()...,
 			)),
 			UseForBatchAPI: lo.ToPtr(true),
@@ -134,6 +134,7 @@ func (in *Account) handleVertexKeys(config *pb.VertexAiConfig) ([]schemas.Key, e
 				config.GetModel(),
 				config.GetToolModel(),
 				config.GetEmbeddingModel(),
+				config.GetDecisionModel(),
 			}, config.GetProxyModels()...)),
 			VertexKeyConfig: &schemas.VertexKeyConfig{
 				ProjectID: schemas.SecretVar{
@@ -204,7 +205,7 @@ func (in *Account) handleBedrockKeys(config *pb.BedrockConfig, provider schemas.
 
 func (in *Account) bedrockModels(config *pb.BedrockConfig, provider schemas.ModelProvider) []string {
 	if provider == schemas.BedrockMantle {
-		return in.filterModels(append(config.GetProxyModels(), config.GetModelId(), config.GetToolModelId()))
+		return in.filterModels(append(config.GetProxyModels(), config.GetModelId(), config.GetToolModelId(), config.GetDecisionModelId()))
 	}
 
 	if bedrockProvider(config) == schemas.BedrockMantle {
@@ -234,7 +235,7 @@ func (in *Account) bedrockEmbeddingDeployments(config *pb.BedrockConfig) schemas
 // Model ID: anthropic.claude-haiku-4-5-20251001-v1:0
 func (in *Account) toBedrockModels(config *pb.BedrockConfig) []string {
 	result := make([]string, 0)
-	models := append(config.GetProxyModels(), config.GetModelId(), config.GetToolModelId(), config.GetEmbeddingModelId())
+	models := append(config.GetProxyModels(), config.GetModelId(), config.GetToolModelId(), config.GetEmbeddingModelId(), config.GetDecisionModelId())
 	for _, modelID := range models {
 		if len(modelID) == 0 {
 			continue
@@ -256,7 +257,7 @@ func (in *Account) toBedrockModels(config *pb.BedrockConfig) []string {
 // Model ID: anthropic.claude-haiku-4-5-20251001-v1:0
 func (in *Account) bedrockDeployments(config *pb.BedrockConfig) schemas.KeyAliases {
 	deployments := in.toKeyAliases(config.GetDeployments())
-	models := append(config.GetProxyModels(), config.GetModelId(), config.GetToolModelId(), config.GetEmbeddingModelId())
+	models := append(config.GetProxyModels(), config.GetModelId(), config.GetToolModelId(), config.GetEmbeddingModelId(), config.GetDecisionModelId())
 
 	// Augment configured deployments with provided profiles ids.
 	for _, modelID := range models {
@@ -344,6 +345,7 @@ func (in *Account) handleAzureKeys(config *pb.AzureOpenAiConfig) ([]schemas.Key,
 				config.GetModel(),
 				config.GetToolModel(),
 				config.GetEmbeddingModel(),
+				config.GetDecisionModel(),
 			}, config.GetProxyModels()...)),
 			Aliases: in.toKeyAliases(config.GetDeployments()),
 			Value: schemas.SecretVar{

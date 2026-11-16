@@ -808,6 +808,15 @@ defmodule Console.GraphQl.Deployments.Git do
     field :service, :service_deployment, description: "the service this pr is meant to modify",
       resolve: dataloader(Deployments)
 
+    field :source,   :pull_request_source, description: "how a devbox pr was recorded: through the devbox mcp, or observed at egress"
+    field :metadata, :map, description: "devbox attribution details, e.g. the subagent session and tool call that created it"
+    field :devbox,   :devbox, description: "the devbox this pr was created from",
+      resolve: dataloader(Deployments)
+    field :devbox_instance, :devbox_instance, description: "the devbox instance this pr was created from",
+      resolve: dataloader(Deployments)
+    field :devbox_thread, :devbox_thread, description: "the devbox thread this pr was created from",
+      resolve: dataloader(Deployments, :devbox_instance_session)
+
     timestamps()
   end
 
@@ -1200,6 +1209,9 @@ defmodule Console.GraphQl.Deployments.Git do
       arg :open,       :boolean
       arg :q,          :string
       arg :author_id,  :id
+      arg :devbox_id,          :id, description: "only prs created from this devbox"
+      arg :devbox_instance_id, :id, description: "only prs created from this devbox instance"
+      arg :devbox_thread_id,   :id, description: "only prs created from this devbox thread"
 
       resolve &Deployments.list_pull_requests/2
     end

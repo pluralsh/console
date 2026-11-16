@@ -1,0 +1,18 @@
+# devbox-minimal only (run together with common.yaml).
+schemaVersion: 2.0.0
+
+metadataTest:
+  user: "1000:1000"
+  labels:
+    - key: sh.plural.devbox/flavor
+      value: minimal
+
+commandTests:
+  - name: manifest flavor
+    command: jq
+    args: ["-r", ".flavor", "/etc/devbox/image.json"]
+    expectedOutput: ["(?m)^minimal$"]
+  - name: no baked-in language toolchains, DevOps tools or cloud CLIs
+    command: sh
+    args: ["-c", "which go cargo rustc java dotnet python3 uv kubectl helm terraform aws gcloud az; true"]
+    excludedOutput: [".+"]

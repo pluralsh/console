@@ -1,0 +1,1173 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.19.0
+  name: devboxrunners.deployments.plural.sh
+spec:
+  group: deployments.plural.sh
+  names:
+    kind: DevboxRunner
+    listKind: DevboxRunnerList
+    plural: devboxrunners
+    singular: devboxrunner
+  scope: Cluster
+  versions:
+  - additionalPrinterColumns:
+    - description: Console ID
+      jsonPath: .status.id
+      name: Id
+      type: string
+    - description: Current template revision
+      jsonPath: .status.templateRevision
+      name: Revision
+      type: integer
+    - description: Resolved image
+      jsonPath: .status.resolvedImage
+      name: Image
+      priority: 1
+      type: string
+    - jsonPath: .status.conditions[?(@.type=="Ready")].status
+      name: Ready
+      type: string
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: |-
+          DevboxRunner is the Schema for the devboxrunners API. It defines one kind of devbox
+          (image, agents, limits, egress) backed by a Substrate WorkerPool and ActorTemplate revisions.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: DevboxRunnerSpec defines the desired state of DevboxRunner.
+            properties:
+              agents:
+                description: Agents are the coding-agent harnesses this devbox supports.
+                  Exactly one must be the default.
+                items:
+                  description: DevboxAgent declares one supported harness.
+                  properties:
+                    acpV2:
+                      description: ACPV2 opts the harness into the ACP v2 protocol
+                        where the adapter supports it.
+                      type: boolean
+                    adapterVersion:
+                      description: AdapterVersion pins the ACP adapter version. Defaults
+                        to the version shipped in the image.
+                      type: string
+                    default:
+                      description: Default marks the agent used when a workbench doesn't
+                        pick one.
+                      type: boolean
+                    defaultModel:
+                      description: DefaultModel is the model new sessions start on.
+                      type: string
+                    models:
+                      description: Models is an allowlist of model ids. Empty allows
+                        every model the agent reports.
+                      items:
+                        type: string
+                      maxItems: 64
+                      type: array
+                    type:
+                      description: Type of the harness.
+                      enum:
+                      - claude
+                      - codex
+                      - opencode
+                      - gemini
+                      - pi
+                      type: string
+                  required:
+                  - type
+                  type: object
+                  x-kubernetes-validations:
+                  - message: defaultModel must be one of models
+                    rule: '!has(self.defaultModel) || !has(self.models) || size(self.models)
+                      == 0 || self.defaultModel in self.models'
+                maxItems: 5
+                minItems: 1
+                type: array
+                x-kubernetes-list-map-keys:
+                - type
+                x-kubernetes-list-type: map
+                x-kubernetes-validations:
+                - message: exactly one agent must be marked default
+                  rule: self.filter(a, has(a.default) && a.default).size() == 1
+              allowedRepositories:
+                description: |-
+                  AllowedRepositories the git repositories allowed to be used with this devbox,
+                  with the same semantics as AgentRuntime.spec.allowedRepositories.
+                items:
+                  type: string
+                type: array
+              autonomy:
+                description: |-
+                  Autonomy sets how agents' permission requests are answered: the level new threads start at and the highest
+                  level users can switch a thread to. Defaults to auto for both, so full autonomy needs an explicit max: full.
+                properties:
+                  default:
+                    description: Default is the level new threads start at, lowered
+                      to max and to what the agent supports. Defaults to auto.
+                    enum:
+                    - manual
+                    - auto
+                    - full
+                    type: string
+                  max:
+                    description: Max is the highest level a thread can use. Defaults
+                      to auto.
+                    enum:
+                    - manual
+                    - auto
+                    - full
+                    type: string
+                type: object
+                x-kubernetes-validations:
+                - message: default must not be above max
+                  rule: '!has(self.default) || !has(self.max) || (self.default ==
+                    ''manual'' || self.max == ''full'' || self.default == self.max)'
+              bootstrapScript:
+                description: BootstrapScript runs once during the golden boot, so
+                  its results are baked into the snapshot.
+                type: string
+              browser:
+                description: Browser enables the in-box headless browser.
+                properties:
+                  enabled:
+                    type: boolean
+                type: object
+              cloudIdentities:
+                description: CloudIdentities are named cloud identities instances
+                  can assume. At most one is the default.
+                items:
+                  description: DevboxCloudIdentity is one named cloud identity. Exactly
+                    one provider must be set.
+                  properties:
+                    aws:
+                      properties:
+                        durationSeconds:
+                          format: int32
+                          maximum: 43200
+                          minimum: 900
+                          type: integer
+                        roleArn:
+                          pattern: ^arn:aws[a-zA-Z-]*:iam::[0-9]{12}:role/.+$
+                          type: string
+                        sessionPolicy:
+                          description: SessionPolicy is an inline IAM policy JSON
+                            further scoping the session.
+                          type: string
+                      required:
+                      - roleArn
+                      type: object
+                    azure:
+                      properties:
+                        clientId:
+                          type: string
+                        tenantId:
+                          type: string
+                      required:
+                      - clientId
+                      - tenantId
+                      type: object
+                    default:
+                      description: Default marks the identity instances get when a
+                        workbench doesn't pick one.
+                      type: boolean
+                    extraHosts:
+                      description: ExtraHosts are API hosts allowlisted only when
+                        this identity is attached.
+                      items:
+                        type: string
+                      type: array
+                    gcp:
+                      properties:
+                        serviceAccount:
+                          description: ServiceAccount is the email of the service
+                            account to impersonate.
+                          type: string
+                        workloadIdentityProvider:
+                          description: |-
+                            WorkloadIdentityProvider is the full provider resource name
+                            (projects/<n>/locations/global/workloadIdentityPools/<pool>/providers/<provider>).
+                          type: string
+                      required:
+                      - serviceAccount
+                      - workloadIdentityProvider
+                      type: object
+                    name:
+                      maxLength: 63
+                      pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
+                      type: string
+                  required:
+                  - name
+                  type: object
+                  x-kubernetes-validations:
+                  - message: exactly one of aws, gcp or azure must be set
+                    rule: '[has(self.aws), has(self.gcp), has(self.azure)].filter(x,
+                      x).size() == 1'
+                maxItems: 16
+                type: array
+                x-kubernetes-list-map-keys:
+                - name
+                x-kubernetes-list-type: map
+                x-kubernetes-validations:
+                - message: at most one cloud identity can be marked default
+                  rule: self.filter(i, has(i.default) && i.default).size() <= 1
+              cloudProviders:
+                default: {}
+                description: |-
+                  CloudProviders opens egress to cloud providers' API endpoints. A provider is on when the runner has a cloud
+                  identity for it, unless set to false.
+                properties:
+                  aws:
+                    description: 'AWS: the regional and global service endpoints under
+                      amazonaws.com and api.aws.'
+                    type: boolean
+                  azure:
+                    description: 'Azure: Resource Manager, Entra ID sign-in, Microsoft
+                      Graph, Key Vault and Storage.'
+                    type: boolean
+                  gcp:
+                    description: 'GCP: the Google APIs under googleapis.com and Google''s
+                      OAuth endpoint.'
+                    type: boolean
+                type: object
+              env:
+                description: |-
+                  Env are environment variables for every process the box starts: agents, terminals and git. Plain values
+                  are part of the template, so changing them rolls a new revision. Secret values are read when an instance
+                  wakes and are never baked into the template, the golden snapshot or the workspace volume.
+                items:
+                  properties:
+                    name:
+                      maxLength: 256
+                      pattern: ^[A-Za-z_][A-Za-z0-9_]*$
+                      type: string
+                      x-kubernetes-validations:
+                      - message: DEVBOX_ variables are reserved
+                        rule: '!self.startsWith(''DEVBOX_'')'
+                    value:
+                      type: string
+                    valueFrom:
+                      properties:
+                        secretKeyRef:
+                          properties:
+                            key:
+                              minLength: 1
+                              type: string
+                            name:
+                              minLength: 1
+                              type: string
+                            namespace:
+                              description: Namespace of the Secret; defaults to the
+                                operator's namespace.
+                              type: string
+                          required:
+                          - key
+                          - name
+                          type: object
+                      required:
+                      - secretKeyRef
+                      type: object
+                  required:
+                  - name
+                  type: object
+                  x-kubernetes-validations:
+                  - message: set exactly one of value and valueFrom
+                    rule: has(self.value) != has(self.valueFrom)
+                maxItems: 128
+                type: array
+                x-kubernetes-list-map-keys:
+                - name
+                x-kubernetes-list-type: map
+              httpAllowlist:
+                description: HTTPAllowlist are extra hosts instances may reach, on
+                  top of the built-in ones.
+                items:
+                  properties:
+                    host:
+                      description: Host is a hostname or a *.suffix wildcard.
+                      minLength: 1
+                      type: string
+                    passthrough:
+                      description: Passthrough tunnels TLS without interception (no
+                        credential injection or request authz).
+                      type: boolean
+                    port:
+                      default: 443
+                      format: int32
+                      maximum: 65535
+                      minimum: 1
+                      type: integer
+                  required:
+                  - host
+                  type: object
+                maxItems: 256
+                type: array
+              idlePolicy:
+                description: IdlePolicy bounds idle suspension. Workbenches can only
+                  lower these values.
+                properties:
+                  activityWindow:
+                    default: 2m
+                    description: ActivityWindow is how far back activity counts toward
+                      keeping an instance awake.
+                    type: string
+                  completeAfter:
+                    default: 336h
+                    description: CompleteAfter is how long a suspended instance is
+                      kept before it is completed.
+                    type: string
+                  cpuThreshold:
+                    default: 5%
+                    description: CPUThreshold is the CPU utilization above which an
+                      instance counts as active, e.g. "5%".
+                    pattern: ^([0-9]|[1-9][0-9]|100)(\.[0-9]+)?%$
+                    type: string
+                  gracePeriod:
+                    default: 5m
+                    description: GracePeriod is how long an instance stays idle before
+                      it is suspended.
+                    type: string
+                  maxContinuousAwake:
+                    default: 24h
+                    description: MaxContinuousAwake bounds how long an instance can
+                      stay awake.
+                    type: string
+                  maxDeferral:
+                    default: 12h
+                    description: MaxDeferral bounds how long agents can defer a suspension.
+                    type: string
+                type: object
+              image:
+                description: |-
+                  Image is the devbox image. Defaults to ghcr.io/pluralsh/devbox-fat at the operator's version;
+                  ghcr.io/pluralsh/devbox-minimal is the lean alternative. Custom images must meet the image
+                  contract (sh.plural.devbox/contract=v1 label, devbox-daemon entrypoint, UID 1000) and are
+                  normally built FROM one of these.
+                type: string
+              imagePullSecrets:
+                description: |-
+                  ImagePullSecrets are dockerconfigjson secrets used only to resolve spec.image to a digest.
+                  Nodes pull with their own credentials (Substrate's image credential provider).
+                items:
+                  description: |-
+                    SecretReference represents a Secret Reference. It has enough information to retrieve secret
+                    in any namespace
+                  properties:
+                    name:
+                      description: name is unique within a namespace to reference
+                        a secret resource.
+                      type: string
+                    namespace:
+                      description: namespace defines the space within which the secret
+                        name must be unique.
+                      type: string
+                  type: object
+                  x-kubernetes-map-type: atomic
+                type: array
+              imageUpdatePolicy:
+                description: |-
+                  ImageUpdatePolicy controls re-resolution of spec.image. Defaults to pinned for digest
+                  references and to poll every hour for tag references.
+                properties:
+                  interval:
+                    description: Interval between re-resolutions in poll mode. Defaults
+                      to 1h.
+                    type: string
+                  mode:
+                    description: Mode is pinned or poll.
+                    enum:
+                    - pinned
+                    - poll
+                    type: string
+                type: object
+              mise:
+                description: Mise is an inline mise.toml installed during the golden
+                  boot.
+                properties:
+                  config:
+                    description: Config is the contents of a mise.toml.
+                    type: string
+                type: object
+              name:
+                description: Name of the Devbox in console. Defaults to metadata.name.
+                type: string
+              packageServers:
+                default: {}
+                description: |-
+                  PackageServers opens egress to public package registries by ecosystem. Go, Rust, JavaScript, Java, Elixir
+                  and Python are on unless set to false.
+                properties:
+                  dotnet:
+                    description: 'Dotnet: NuGet.'
+                    type: boolean
+                  elixir:
+                    default: true
+                    description: 'Elixir: hex.pm and its package and build repositories.'
+                    type: boolean
+                  go:
+                    default: true
+                    description: 'Go: proxy.golang.org and sum.golang.org.'
+                    type: boolean
+                  java:
+                    default: true
+                    description: 'Java: Maven Central and the Gradle plugin portal
+                      and distributions.'
+                    type: boolean
+                  javascript:
+                    default: true
+                    description: 'JavaScript: the npm and yarn registries and nodejs.org.'
+                    type: boolean
+                  php:
+                    description: 'PHP: Packagist.'
+                    type: boolean
+                  python:
+                    default: true
+                    description: 'Python: PyPI.'
+                    type: boolean
+                  ruby:
+                    description: 'Ruby: rubygems.org.'
+                    type: boolean
+                  rust:
+                    default: true
+                    description: 'Rust: crates.io and rustup''s static.rust-lang.org.'
+                    type: boolean
+                type: object
+              resources:
+                description: Resources are the per-instance limits.
+                properties:
+                  cpu:
+                    anyOf:
+                    - type: integer
+                    - type: string
+                    default: "2"
+                    description: |-
+                      CPU limit per instance. When the WorkerPool has limits this is the minimum, and instances get an even share
+                      of the worker's CPU.
+                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                    x-kubernetes-int-or-string: true
+                  disk:
+                    anyOf:
+                    - type: integer
+                    - type: string
+                    default: 20Gi
+                    description: |-
+                      Disk is the size of the durable /home/dev workspace volume. Each instance slot is budgeted Disk plus Memory
+                      for its own snapshot and Memory for each of the WorkerPool's SuspendedSnapshotsPerInstance.
+                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                    x-kubernetes-int-or-string: true
+                  memory:
+                    anyOf:
+                    - type: integer
+                    - type: string
+                    default: 4Gi
+                    description: Memory limit per instance, a minimum in the same
+                      way as CPU.
+                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                    x-kubernetes-int-or-string: true
+                type: object
+              scmConnections:
+                description: ScmConnections are names of console SCM connections instances
+                  may use for git credentials.
+                items:
+                  type: string
+                type: array
+              workerPool:
+                description: WorkerPool sizes the Substrate WorkerPool backing this
+                  runner.
+                properties:
+                  additionalPools:
+                    description: |-
+                      AdditionalPools are existing Substrate WorkerPools this runner's instances may also run on. The operator
+                      labels each with the runner's worker selector and removes the label when the pool leaves this list. They
+                      should run the same sandbox class as the runner, and their free capacity counts toward SpareInstances.
+                    items:
+                      properties:
+                        name:
+                          minLength: 1
+                          type: string
+                        namespace:
+                          default: ""
+                          description: Namespace defaults to the namespace the operator
+                            runs devbox WorkerPools in.
+                          type: string
+                      required:
+                      - name
+                      type: object
+                    type: array
+                    x-kubernetes-list-map-keys:
+                    - name
+                    - namespace
+                    x-kubernetes-list-type: map
+                  autoscaling:
+                    description: |-
+                      Autoscaling lets the operator size the pool to demand: it keeps SpareInstances free instance slots and
+                      removes only workers that host no instance.
+                    properties:
+                      maxReplicas:
+                        format: int32
+                        minimum: 1
+                        type: integer
+                      minReplicas:
+                        default: 1
+                        format: int32
+                        minimum: 0
+                        type: integer
+                      scaleDownDelay:
+                        default: 10m
+                        description: ScaleDownDelay is how long after the last scaling
+                          event idle workers are kept before being removed.
+                        type: string
+                      spareInstances:
+                        default: 1
+                        description: |-
+                          SpareInstances is how many free instance slots are kept across the runner's pools, so a resume doesn't
+                          wait for a new worker (and node) to start.
+                        format: int32
+                        minimum: 0
+                        type: integer
+                    required:
+                    - maxReplicas
+                    type: object
+                  diskReservePercent:
+                    default: 20
+                    description: |-
+                      DiskReservePercent of DiskSize is kept for the image cache and snapshot staging rather than budgeted to
+                      instances.
+                    format: int32
+                    maximum: 90
+                    minimum: 0
+                    type: integer
+                  diskSize:
+                    anyOf:
+                    - type: integer
+                    - type: string
+                    description: |-
+                      DiskSize is the size of the disk backing /var/lib/ate on each worker's node (e.g. the devbox-nodes
+                      catalog's data disk). Unset leaves disk out of instance sizing.
+                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                    x-kubernetes-int-or-string: true
+                  maxInstances:
+                    description: MaxInstances caps concurrently running instances
+                      in console. Unset means unlimited.
+                    format: int32
+                    minimum: 1
+                    type: integer
+                  nodeAffinity:
+                    description: NodeAffinity scheduling rules for the worker pods
+                      (WorkerPool template.nodeAffinity).
+                    properties:
+                      preferredDuringSchedulingIgnoredDuringExecution:
+                        description: |-
+                          The scheduler will prefer to schedule pods to nodes that satisfy
+                          the affinity expressions specified by this field, but it may choose
+                          a node that violates one or more of the expressions. The node that is
+                          most preferred is the one with the greatest sum of weights, i.e.
+                          for each node that meets all of the scheduling requirements (resource
+                          request, requiredDuringScheduling affinity expressions, etc.),
+                          compute a sum by iterating through the elements of this field and adding
+                          "weight" to the sum if the node matches the corresponding matchExpressions; the
+                          node(s) with the highest sum are the most preferred.
+                        items:
+                          description: |-
+                            An empty preferred scheduling term matches all objects with implicit weight 0
+                            (i.e. it's a no-op). A null preferred scheduling term matches no objects (i.e. is also a no-op).
+                          properties:
+                            preference:
+                              description: A node selector term, associated with the
+                                corresponding weight.
+                              properties:
+                                matchExpressions:
+                                  description: A list of node selector requirements
+                                    by node's labels.
+                                  items:
+                                    description: |-
+                                      A node selector requirement is a selector that contains values, a key, and an operator
+                                      that relates the key and values.
+                                    properties:
+                                      key:
+                                        description: The label key that the selector
+                                          applies to.
+                                        type: string
+                                      operator:
+                                        description: |-
+                                          Represents a key's relationship to a set of values.
+                                          Valid operators are In, NotIn, Exists, DoesNotExist. Gt, and Lt.
+                                        type: string
+                                      values:
+                                        description: |-
+                                          An array of string values. If the operator is In or NotIn,
+                                          the values array must be non-empty. If the operator is Exists or DoesNotExist,
+                                          the values array must be empty. If the operator is Gt or Lt, the values
+                                          array must have a single element, which will be interpreted as an integer.
+                                          This array is replaced during a strategic merge patch.
+                                        items:
+                                          type: string
+                                        type: array
+                                        x-kubernetes-list-type: atomic
+                                    required:
+                                    - key
+                                    - operator
+                                    type: object
+                                  type: array
+                                  x-kubernetes-list-type: atomic
+                                matchFields:
+                                  description: A list of node selector requirements
+                                    by node's fields.
+                                  items:
+                                    description: |-
+                                      A node selector requirement is a selector that contains values, a key, and an operator
+                                      that relates the key and values.
+                                    properties:
+                                      key:
+                                        description: The label key that the selector
+                                          applies to.
+                                        type: string
+                                      operator:
+                                        description: |-
+                                          Represents a key's relationship to a set of values.
+                                          Valid operators are In, NotIn, Exists, DoesNotExist. Gt, and Lt.
+                                        type: string
+                                      values:
+                                        description: |-
+                                          An array of string values. If the operator is In or NotIn,
+                                          the values array must be non-empty. If the operator is Exists or DoesNotExist,
+                                          the values array must be empty. If the operator is Gt or Lt, the values
+                                          array must have a single element, which will be interpreted as an integer.
+                                          This array is replaced during a strategic merge patch.
+                                        items:
+                                          type: string
+                                        type: array
+                                        x-kubernetes-list-type: atomic
+                                    required:
+                                    - key
+                                    - operator
+                                    type: object
+                                  type: array
+                                  x-kubernetes-list-type: atomic
+                              type: object
+                              x-kubernetes-map-type: atomic
+                            weight:
+                              description: Weight associated with matching the corresponding
+                                nodeSelectorTerm, in the range 1-100.
+                              format: int32
+                              type: integer
+                          required:
+                          - preference
+                          - weight
+                          type: object
+                        type: array
+                        x-kubernetes-list-type: atomic
+                      requiredDuringSchedulingIgnoredDuringExecution:
+                        description: |-
+                          If the affinity requirements specified by this field are not met at
+                          scheduling time, the pod will not be scheduled onto the node.
+                          If the affinity requirements specified by this field cease to be met
+                          at some point during pod execution (e.g. due to an update), the system
+                          may or may not try to eventually evict the pod from its node.
+                        properties:
+                          nodeSelectorTerms:
+                            description: Required. A list of node selector terms.
+                              The terms are ORed.
+                            items:
+                              description: |-
+                                A null or empty node selector term matches no objects. The requirements of
+                                them are ANDed.
+                                The TopologySelectorTerm type implements a subset of the NodeSelectorTerm.
+                              properties:
+                                matchExpressions:
+                                  description: A list of node selector requirements
+                                    by node's labels.
+                                  items:
+                                    description: |-
+                                      A node selector requirement is a selector that contains values, a key, and an operator
+                                      that relates the key and values.
+                                    properties:
+                                      key:
+                                        description: The label key that the selector
+                                          applies to.
+                                        type: string
+                                      operator:
+                                        description: |-
+                                          Represents a key's relationship to a set of values.
+                                          Valid operators are In, NotIn, Exists, DoesNotExist. Gt, and Lt.
+                                        type: string
+                                      values:
+                                        description: |-
+                                          An array of string values. If the operator is In or NotIn,
+                                          the values array must be non-empty. If the operator is Exists or DoesNotExist,
+                                          the values array must be empty. If the operator is Gt or Lt, the values
+                                          array must have a single element, which will be interpreted as an integer.
+                                          This array is replaced during a strategic merge patch.
+                                        items:
+                                          type: string
+                                        type: array
+                                        x-kubernetes-list-type: atomic
+                                    required:
+                                    - key
+                                    - operator
+                                    type: object
+                                  type: array
+                                  x-kubernetes-list-type: atomic
+                                matchFields:
+                                  description: A list of node selector requirements
+                                    by node's fields.
+                                  items:
+                                    description: |-
+                                      A node selector requirement is a selector that contains values, a key, and an operator
+                                      that relates the key and values.
+                                    properties:
+                                      key:
+                                        description: The label key that the selector
+                                          applies to.
+                                        type: string
+                                      operator:
+                                        description: |-
+                                          Represents a key's relationship to a set of values.
+                                          Valid operators are In, NotIn, Exists, DoesNotExist. Gt, and Lt.
+                                        type: string
+                                      values:
+                                        description: |-
+                                          An array of string values. If the operator is In or NotIn,
+                                          the values array must be non-empty. If the operator is Exists or DoesNotExist,
+                                          the values array must be empty. If the operator is Gt or Lt, the values
+                                          array must have a single element, which will be interpreted as an integer.
+                                          This array is replaced during a strategic merge patch.
+                                        items:
+                                          type: string
+                                        type: array
+                                        x-kubernetes-list-type: atomic
+                                    required:
+                                    - key
+                                    - operator
+                                    type: object
+                                  type: array
+                                  x-kubernetes-list-type: atomic
+                              type: object
+                              x-kubernetes-map-type: atomic
+                            type: array
+                            x-kubernetes-list-type: atomic
+                        required:
+                        - nodeSelectorTerms
+                        type: object
+                        x-kubernetes-map-type: atomic
+                    type: object
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  podAnnotations:
+                    additionalProperties:
+                      type: string
+                    description: |-
+                      PodAnnotations are added to the worker pods, e.g. karpenter.sh/do-not-disrupt. Keys in the ate.dev domain
+                      are reserved by Substrate.
+                    type: object
+                    x-kubernetes-validations:
+                    - message: ate.dev and its subdomains are reserved
+                      rule: self.all(key, !key.startsWith('ate.dev/') && !key.contains('.ate.dev/'))
+                  priorityClassName:
+                    type: string
+                  replicas:
+                    default: 1
+                    description: Replicas is the number of Substrate workers. Ignored
+                      when Autoscaling is set.
+                    format: int32
+                    minimum: 0
+                    type: integer
+                  resources:
+                    description: Resources of each worker pod.
+                    properties:
+                      claims:
+                        description: |-
+                          Claims lists the names of resources, defined in spec.resourceClaims,
+                          that are used by this container.
+
+                          This field depends on the
+                          DynamicResourceAllocation feature gate.
+
+                          This field is immutable. It can only be set for containers.
+                        items:
+                          description: ResourceClaim references one entry in PodSpec.ResourceClaims.
+                          properties:
+                            name:
+                              description: |-
+                                Name must match the name of one entry in pod.spec.resourceClaims of
+                                the Pod where this field is used. It makes that resource available
+                                inside a container.
+                              type: string
+                            request:
+                              description: |-
+                                Request is the name chosen for a request in the referenced claim.
+                                If empty, everything from the claim is made available, otherwise
+                                only the result of this request.
+                              type: string
+                          required:
+                          - name
+                          type: object
+                        type: array
+                        x-kubernetes-list-map-keys:
+                        - name
+                        x-kubernetes-list-type: map
+                      limits:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: |-
+                          Limits describes the maximum amount of compute resources allowed.
+                          More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                        type: object
+                      requests:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: |-
+                          Requests describes the minimum amount of compute resources required.
+                          If Requests is omitted for a container, it defaults to Limits if that is explicitly specified,
+                          otherwise to an implementation-defined value. Requests cannot exceed Limits.
+                          More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                        type: object
+                    type: object
+                  sandboxClass:
+                    default: gvisor
+                    description: SandboxClass is the isolation technology. Immutable
+                      once the WorkerPool exists.
+                    enum:
+                    - gvisor
+                    - microvm
+                    type: string
+                    x-kubernetes-validations:
+                    - message: sandboxClass is immutable
+                      rule: self == oldSelf
+                  sandboxConfig:
+                    description: SandboxConfig names a Substrate sandbox class ConfigMap
+                      (WorkerPool sandboxClasses[].configRef).
+                    type: string
+                  suspendedSnapshotsPerInstance:
+                    default: 1
+                    description: |-
+                      SuspendedSnapshotsPerInstance is how many suspended instances' snapshots each instance slot budgets disk
+                      for. A suspended instance frees its slot at once, but its snapshot stays on the node until Substrate
+                      detaches it (30 minutes by default), so heavy suspend and resume churn stacks snapshots on a full worker.
+                    format: int32
+                    maximum: 10
+                    minimum: 0
+                    type: integer
+                  tolerations:
+                    items:
+                      description: |-
+                        The pod this Toleration is attached to tolerates any taint that matches
+                        the triple <key,value,effect> using the matching operator <operator>.
+                      properties:
+                        effect:
+                          description: |-
+                            Effect indicates the taint effect to match. Empty means match all taint effects.
+                            When specified, allowed values are NoSchedule, PreferNoSchedule and NoExecute.
+                          type: string
+                        key:
+                          description: |-
+                            Key is the taint key that the toleration applies to. Empty means match all taint keys.
+                            If the key is empty, operator must be Exists; this combination means to match all values and all keys.
+                          type: string
+                        operator:
+                          description: |-
+                            Operator represents a key's relationship to the value.
+                            Valid operators are Exists, Equal, Lt, and Gt. Defaults to Equal.
+                            Exists is equivalent to wildcard for value, so that a pod can
+                            tolerate all taints of a particular category.
+                            Lt and Gt perform numeric comparisons (requires feature gate TaintTolerationComparisonOperators).
+                          type: string
+                        tolerationSeconds:
+                          description: |-
+                            TolerationSeconds represents the period of time the toleration (which must be
+                            of effect NoExecute, otherwise this field is ignored) tolerates the taint. By default,
+                            it is not set, which means tolerate the taint forever (do not evict). Zero and
+                            negative values will be treated as 0 (evict immediately) by the system.
+                          format: int64
+                          type: integer
+                        value:
+                          description: |-
+                            Value is the taint value the toleration matches to.
+                            If the operator is Exists, the value should be empty, otherwise just a regular string.
+                          type: string
+                      type: object
+                    type: array
+                  workerImage:
+                    description: WorkerImage overrides the Substrate worker image
+                      configured on the operator for the sandbox class.
+                    type: string
+                type: object
+                x-kubernetes-validations:
+                - message: autoscaling.minReplicas must not exceed maxReplicas
+                  rule: '!has(self.autoscaling) || !has(self.autoscaling.minReplicas)
+                    || self.autoscaling.minReplicas <= self.autoscaling.maxReplicas'
+            required:
+            - agents
+            type: object
+          status:
+            description: DevboxRunnerStatus defines the observed state of DevboxRunner.
+            properties:
+              additionalWorkerPools:
+                description: AdditionalWorkerPools are the namespace/name of the AdditionalPools
+                  carrying the runner's worker selector.
+                items:
+                  type: string
+                type: array
+              agents:
+                description: Agents is the probed agent catalog of the current revision.
+                items:
+                  properties:
+                    adapterVersion:
+                      type: string
+                    probeError:
+                      type: string
+                    probeStatus:
+                      description: ProbeStatus is OK, FAILED or MISSING.
+                      type: string
+                    type:
+                      description: DevboxAgentType is a coding-agent harness a devbox
+                        can run (section 4.2a).
+                      enum:
+                      - claude
+                      - codex
+                      - opencode
+                      - gemini
+                      - pi
+                      type: string
+                  required:
+                  - probeStatus
+                  - type
+                  type: object
+                type: array
+              atespace:
+                description: |-
+                  Atespace is the Substrate atespace holding this runner's templates and instances.
+                  Atespace names are never reused, so it embeds part of the runner's UID.
+                type: string
+              capacity:
+                description: Capacity reports instance sizing and autoscaling.
+                properties:
+                  additionalFreeInstances:
+                    description: AdditionalFreeInstances are the instance slots free
+                      on AdditionalPools.
+                    format: int32
+                    type: integer
+                  desiredWorkers:
+                    description: DesiredWorkers is the autoscaler's target for the
+                      managed pool.
+                    format: int32
+                    type: integer
+                  drainingWorkers:
+                    format: int32
+                    type: integer
+                  instanceCPU:
+                    anyOf:
+                    - type: integer
+                    - type: string
+                    description: InstanceCPU and InstanceMemory are the limits each
+                      instance runs with.
+                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                    x-kubernetes-int-or-string: true
+                  instanceDisk:
+                    anyOf:
+                    - type: integer
+                    - type: string
+                    description: InstanceDisk is each instance's share of the worker's
+                      budgeted disk, when DiskSize is set.
+                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                    x-kubernetes-int-or-string: true
+                  instanceMemory:
+                    anyOf:
+                    - type: integer
+                    - type: string
+                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                    x-kubernetes-int-or-string: true
+                  instancesPerWorker:
+                    description: InstancesPerWorker is how many instances one worker
+                      hosts at once.
+                    format: int32
+                    type: integer
+                  lastScaleTime:
+                    format: date-time
+                    type: string
+                  limitedBy:
+                    description: LimitedBy is the worker resource (cpu, memory or
+                      disk) that bounds InstancesPerWorker.
+                    type: string
+                  runningInstances:
+                    description: RunningInstances are instances placed on the managed
+                      pool's schedulable workers.
+                    format: int32
+                    type: integer
+                  workers:
+                    description: Workers are the managed pool's schedulable workers,
+                      DrainingWorkers those being removed.
+                    format: int32
+                    type: integer
+                required:
+                - instancesPerWorker
+                type: object
+              conditions:
+                description: Represents the observations of a PrAutomation's current
+                  state.
+                items:
+                  description: Condition contains details for one aspect of the current
+                    state of this API Resource.
+                  properties:
+                    lastTransitionTime:
+                      description: |-
+                        lastTransitionTime is the last time the condition transitioned from one status to another.
+                        This should be when the underlying condition changed.  If that is not known, then using the time when the API field changed is acceptable.
+                      format: date-time
+                      type: string
+                    message:
+                      description: |-
+                        message is a human readable message indicating details about the transition.
+                        This may be an empty string.
+                      maxLength: 32768
+                      type: string
+                    observedGeneration:
+                      description: |-
+                        observedGeneration represents the .metadata.generation that the condition was set based upon.
+                        For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date
+                        with respect to the current state of the instance.
+                      format: int64
+                      minimum: 0
+                      type: integer
+                    reason:
+                      description: |-
+                        reason contains a programmatic identifier indicating the reason for the condition's last transition.
+                        Producers of specific condition types may define expected values and meanings for this field,
+                        and whether the values are considered a guaranteed API.
+                        The value should be a CamelCase string.
+                        This field may not be empty.
+                      maxLength: 1024
+                      minLength: 1
+                      pattern: ^[A-Za-z]([A-Za-z0-9_,:]*[A-Za-z0-9_])?$
+                      type: string
+                    status:
+                      description: status of the condition, one of True, False, Unknown.
+                      enum:
+                      - "True"
+                      - "False"
+                      - Unknown
+                      type: string
+                    type:
+                      description: type of condition in CamelCase or in foo.example.com/CamelCase.
+                      maxLength: 316
+                      pattern: ^([a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*/)?(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])$
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - message
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+                x-kubernetes-list-map-keys:
+                - type
+                x-kubernetes-list-type: map
+              daemonVersion:
+                description: DaemonVersion is the devbox-daemon version from the resolved
+                  image's labels.
+                type: string
+              id:
+                description: ID of the resource in the Console API.
+                type: string
+              imageResolvedAt:
+                description: ImageResolvedAt is when spec.image was last resolved.
+                format: date-time
+                type: string
+              lastHeartbeat:
+                description: LastHeartbeat is the last successful console heartbeat.
+                format: date-time
+                type: string
+              resolvedFrom:
+                description: ResolvedFrom is the image reference ResolvedImage was
+                  resolved from.
+                type: string
+              resolvedImage:
+                description: ResolvedImage is spec.image pinned by digest.
+                type: string
+              revisions:
+                description: Revisions are the ActorTemplate revisions that still
+                  exist, newest first.
+                items:
+                  properties:
+                    createdAt:
+                      format: date-time
+                      type: string
+                    goldenTag:
+                      type: string
+                    hash:
+                      description: Hash of the inputs that produced this revision.
+                      type: string
+                    image:
+                      type: string
+                    message:
+                      type: string
+                    name:
+                      description: Name is the ActorTemplate name.
+                      type: string
+                    phase:
+                      description: DevboxRevisionPhase is the lifecycle of one ActorTemplate
+                        revision.
+                      type: string
+                    revision:
+                      format: int64
+                      type: integer
+                  required:
+                  - hash
+                  - image
+                  - name
+                  - phase
+                  - revision
+                  type: object
+                type: array
+              sha:
+                description: SHA of last applied configuration.
+                type: string
+              templateName:
+                description: TemplateName is the ActorTemplate name of TemplateRevision.
+                type: string
+              templateRevision:
+                description: TemplateRevision is the revision new instances start
+                  from.
+                format: int64
+                type: integer
+              workerPool:
+                description: WorkerPool is the namespaced name of the Substrate WorkerPool.
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

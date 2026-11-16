@@ -29,6 +29,7 @@ const directory: Directory = [
   { path: 'security', label: 'Security' },
   { path: 'groups', label: 'Groups' },
   { path: 'access-tokens', label: 'Access tokens' },
+  { path: 'ai-subscriptions', label: 'AI subscriptions' },
 ]
 
 export const PROFILE_BREADCRUMBS = [{ label: 'profile', url: PROFILE_ABS_PATH }]

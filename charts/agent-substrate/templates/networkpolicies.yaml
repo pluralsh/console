@@ -1,0 +1,261 @@
+{{- if .Values.networkPolicies.enabled }}
+{{- $ns := include "substrate.namespace" . -}}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ate-api-server
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app: ate-api-server
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchExpressions:
+              - key: app
+                operator: In
+                values: [ate-controller, atelet, atenet-egress, atenet-router]
+        - namespaceSelector:
+            {{- toYaml .Values.networkPolicies.apiAccessNamespaceSelector | nindent 12 }}
+          podSelector:
+            matchExpressions:
+              - key: ate.dev/worker-pool
+                operator: DoesNotExist
+      ports:
+        - protocol: TCP
+          port: 443
+    - from:
+        - podSelector:
+            matchLabels:
+              app: atelet
+      ports:
+        - protocol: TCP
+          port: 8445
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: atelet
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app: atelet
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: ate-api-server
+      ports:
+        - protocol: TCP
+          port: grpc
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: atenet-router
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app: atenet-router
+  policyTypes:
+    - Ingress
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: https
+        - protocol: TCP
+          port: connect-tls
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ate-idp-server
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app: ate-idp-server
+  policyTypes:
+    - Ingress
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: https
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: atenet-egress
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app: atenet-egress
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector: {}
+          podSelector:
+            matchExpressions:
+              - key: ate.dev/worker-pool
+                operator: Exists
+      ports:
+        - protocol: TCP
+          port: https
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ate-system-observability
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchExpressions:
+      - key: app
+        operator: NotIn
+        values: [k8s-credential-provider]
+  policyTypes:
+    - Ingress
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: metrics
+        - protocol: TCP
+          port: prometheus
+        - protocol: TCP
+          port: envoy-metrics
+        - protocol: TCP
+          port: health
+        - protocol: TCP
+          port: healthz
+        - protocol: TCP
+          port: stats
+        - protocol: TCP
+          port: readiness
+{{- if eq .Values.postgres.mode "cnpg" }}
+---
+# CNPG instances: ate-api-server, the other instances (replication) and the
+# operator (status on 8000, and 5432 for its own checks).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: postgres
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      cnpg.io/cluster: {{ .Values.postgres.cnpg.clusterName }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: ate-api-server
+        - podSelector:
+            matchLabels:
+              cnpg.io/cluster: {{ .Values.postgres.cnpg.clusterName }}
+      ports:
+        - protocol: TCP
+          port: 5432
+    - from:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: cloudnative-pg
+      ports:
+        - protocol: TCP
+          port: 5432
+        - protocol: TCP
+          port: 8000
+    - ports:
+        - protocol: TCP
+          port: 9187
+{{- if (index .Values "cloudnative-pg").enabled }}
+---
+# The bundled operator's webhook, called by the kube-apiserver.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cloudnative-pg-operator
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: cloudnative-pg
+  policyTypes:
+    - Ingress
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: 9443
+        - protocol: TCP
+          port: 8080
+{{- end }}
+{{- end }}
+{{- if .Values.rustfs.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: rustfs
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app: rustfs
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchExpressions:
+              - key: app
+                operator: In
+                values: [ate-api-server, atelet]
+        - podSelector:
+            matchLabels:
+              batch.kubernetes.io/job-name: rustfs-bucket-init
+      ports:
+        - protocol: TCP
+          port: api
+{{- end }}
+{{- end }}

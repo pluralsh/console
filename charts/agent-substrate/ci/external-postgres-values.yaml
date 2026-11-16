@@ -1,0 +1,48 @@
+# Managed Postgres (RDS, Cloud SQL, Azure Flexible Server) with DSNs from
+# existing secrets and a server CA, plus a custom credential provider.
+objectStore:
+  backend: s3
+  snapshotLocation: s3://plural-ate-snapshots/substrate/
+  s3:
+    region: us-east-2
+    credentialsSecret: ate-s3-credentials
+
+postgres:
+  mode: external
+  external:
+    readWrite:
+      secretName: ate-postgres-dsn
+      key: read-write
+    owner:
+      secretName: ate-postgres-dsn
+      key: owner
+    serverCA:
+      pem: |
+        -----BEGIN CERTIFICATE-----
+        MIIBdzCCAR2gAwIBAgIUZXhhbXBsZS1jYS1mb3ItY2ktdmFsdWVzMAoGCCqGSM49
+        BAMCMBExDzANBgNVBAMMBmNpLWNhMB4XDTI2MDEwMTAwMDAwMFoXDTM2MDEwMTAw
+        MDAwMFowETEPMA0GA1UEAwwGY2ktY2EwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNC
+        AAQ=
+        -----END CERTIFICATE-----
+
+atelet:
+  imageCredentialProvider:
+    enabled: true
+    preset: custom
+    binDir: /opt/credential-providers
+    providers:
+      - name: registry-credential-provider
+        apiVersion: credentialprovider.kubelet.k8s.io/v1
+        matchImages:
+          - "registry.example.com"
+        defaultCacheDuration: 5m
+        args:
+          - --config=/etc/registry/config.json
+    extraHostPaths:
+      - name: registry-config
+        path: /etc/registry
+        type: Directory
+
+# No CNPG in external mode.
+cloudnative-pg:
+  enabled: false

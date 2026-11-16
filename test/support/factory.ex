@@ -1513,6 +1513,105 @@ defmodule Console.Factory do
     %{token.user | bootstrap: token}
   end
 
+  def devbox_factory do
+    %Schema.Devbox{
+      name: sequence(:devbox, & "devbox-#{&1}"),
+      image: "ghcr.io/pluralsh/devbox:latest",
+      template_revision: "rev-1",
+      status: :ready,
+      cluster: build(:cluster),
+      agents: [
+        %Schema.Devbox.Agent{
+          type: :claude,
+          default: true,
+          probe_status: :ok,
+          default_model: "sonnet",
+          models: [%Schema.Devbox.Agent.Model{id: "sonnet"}, %Schema.Devbox.Agent.Model{id: "opus"}],
+          session_capabilities: %Schema.Devbox.Agent.SessionCapabilities{
+            list: true,
+            resume: true,
+            load: true,
+            close: true,
+            delete: true,
+            fork: true
+          }
+        }
+      ]
+    }
+  end
+
+  def devbox_scm_connection_factory do
+    %Schema.DevboxScmConnection{
+      devbox: build(:devbox),
+      connection: build(:scm_connection)
+    }
+  end
+
+  def workbench_devbox_factory do
+    %Schema.WorkbenchDevbox{
+      workbench: build(:workbench),
+      devbox: build(:devbox)
+    }
+  end
+
+  def devbox_instance_factory do
+    %Schema.DevboxInstance{
+      name: sequence(:devbox_instance, & "instance-#{&1}"),
+      agent: :claude,
+      requested_model: "sonnet",
+      status: :running,
+      workbench: build(:workbench),
+      devbox: build(:devbox),
+      user: build(:user)
+    }
+  end
+
+  def devbox_instance_session_factory do
+    %Schema.DevboxInstanceSession{
+      acp_session_id: sequence(:devbox_session, & "sess-#{&1}"),
+      kind: :thread,
+      status: :active,
+      agent: :claude,
+      cwd: "~",
+      instance: build(:devbox_instance)
+    }
+  end
+
+  def devbox_instance_interaction_factory do
+    %Schema.DevboxInstanceInteraction{
+      external_id: sequence(:devbox_interaction, & "int-#{&1}"),
+      kind: :permission,
+      state: :pending,
+      title: "allow tool call",
+      options: [%Schema.DevboxInstanceInteraction.Option{option_id: "allow", name: "Allow", kind: "allow_once"}],
+      instance: build(:devbox_instance)
+    }
+  end
+
+  def agent_credential_factory do
+    %Schema.AgentCredential{
+      provider: :claude,
+      kind: :claude_oauth_token,
+      secret: "sk-ant-oat01-" <> String.duplicate("a", 40),
+      status: :valid,
+      version: 1,
+      linked_at: DateTime.utc_now(),
+      user: build(:user)
+    }
+  end
+
+  def devbox_snapshot_factory do
+    %Schema.DevboxSnapshot{
+      name: sequence(:devbox_snapshot, & "snapshot-#{&1}"),
+      status: :ready,
+      tag_ref: "registry/devbox@sha256:abc",
+      fidelity: :filesystem,
+      template_revision: "rev-1",
+      workbench: build(:workbench),
+      devbox: build(:devbox)
+    }
+  end
+
   def bot(name) do
     insert(:user, bot_name: name, roles: %{admin: true})
   end

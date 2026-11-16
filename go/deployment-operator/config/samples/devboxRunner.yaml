@@ -1,0 +1,58 @@
+apiVersion: deployments.plural.sh/v1alpha1
+kind: DevboxRunner
+metadata:
+  name: platform
+spec:
+  # Defaults to ghcr.io/pluralsh/devbox-fat at the operator's version.
+  image: ghcr.io/pluralsh/devbox-minimal:0.12.0
+  imageUpdatePolicy:
+    mode: poll
+    interval: 1h
+  agents:
+    - type: claude
+      default: true
+      models: [claude-sonnet-4-5, claude-opus-4-1]
+      defaultModel: claude-sonnet-4-5
+    - type: codex
+      acpV2: true
+  resources:
+    cpu: "4"
+    memory: 8Gi
+    disk: 50Gi
+  workerPool:
+    replicas: 2
+    maxInstances: 20
+    sandboxClass: gvisor
+  scmConnections: [github]
+  allowedRepositories:
+    - pluralsh/console
+  httpAllowlist:
+    - host: registry.npmjs.org
+    - host: proxy.golang.org
+    - host: db.internal.example.com
+      port: 5432
+      passthrough: true
+  browser:
+    enabled: true
+  bootstrapScript: |
+    #!/bin/bash
+    set -euo pipefail
+    npm install -g pnpm
+  mise:
+    config: |
+      [tools]
+      node = "22"
+      go = "1.27"
+  idlePolicy:
+    gracePeriod: 10m
+  cloudIdentities:
+    - name: dev-aws
+      default: true
+      aws:
+        roleArn: arn:aws:iam::123456789012:role/devbox
+        durationSeconds: 3600
+    - name: dev-gcp
+      gcp:
+        workloadIdentityProvider: projects/123/locations/global/workloadIdentityPools/plural/providers/devbox
+        serviceAccount: devbox@project.iam.gserviceaccount.com
+      extraHosts: [storage.googleapis.com]

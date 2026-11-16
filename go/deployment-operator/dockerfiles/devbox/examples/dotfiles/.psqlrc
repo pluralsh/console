@@ -1,0 +1,4 @@
+\set QUIET 1
+\pset null '(null)'
+\x auto
+\unset QUIET

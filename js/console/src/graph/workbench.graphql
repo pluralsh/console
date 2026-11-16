@@ -111,6 +111,11 @@ fragment Workbench on Workbench {
       repositories
       enableBabysitting
     }
+    devbox {
+      maxSnapshots
+      maxDeferral
+      allowSubscriptionCredentials
+    }
   }
   modes {
     ...WorkbenchJobModesFields

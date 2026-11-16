@@ -1,0 +1,228 @@
+{
+  "Rules": [
+    {
+      "Host": "github.com",
+      "Port": 443,
+      "Scheme": "https",
+      "InjectHeader": "Authorization",
+      "SecretURI": "ate-secret://plural.sh/instances/i-2/scm/github.com",
+      "ActorJWT": false,
+      "Prefix": "",
+      "ActorJWTAudiences": null,
+      "ActorJWTExpirationSeconds": 0,
+      "ExtraHeaders": [
+        {
+          "Header": "PRIVATE-TOKEN",
+          "SecretURI": "ate-secret://plural.sh/instances/i-2/scm-token/github.com"
+        }
+      ]
+    },
+    {
+      "Host": "api.github.com",
+      "Port": 443,
+      "Scheme": "https",
+      "InjectHeader": "Authorization",
+      "SecretURI": "ate-secret://plural.sh/instances/i-2/scm/github.com",
+      "ActorJWT": false,
+      "Prefix": "",
+      "ActorJWTAudiences": null,
+      "ActorJWTExpirationSeconds": 0,
+      "ExtraHeaders": [
+        {
+          "Header": "PRIVATE-TOKEN",
+          "SecretURI": "ate-secret://plural.sh/instances/i-2/scm-token/github.com"
+        }
+      ]
+    },
+    {
+      "Host": "codeload.github.com",
+      "Port": 443,
+      "Scheme": "https",
+      "InjectHeader": "Authorization",
+      "SecretURI": "ate-secret://plural.sh/instances/i-2/scm/github.com",
+      "ActorJWT": false,
+      "Prefix": "",
+      "ActorJWTAudiences": null,
+      "ActorJWTExpirationSeconds": 0,
+      "ExtraHeaders": [
+        {
+          "Header": "PRIVATE-TOKEN",
+          "SecretURI": "ate-secret://plural.sh/instances/i-2/scm-token/github.com"
+        }
+      ]
+    },
+    {
+      "Host": "raw.githubusercontent.com",
+      "Port": 443,
+      "Scheme": "https",
+      "InjectHeader": "Authorization",
+      "SecretURI": "ate-secret://plural.sh/instances/i-2/scm/github.com",
+      "ActorJWT": false,
+      "Prefix": "",
+      "ActorJWTAudiences": null,
+      "ActorJWTExpirationSeconds": 0,
+      "ExtraHeaders": [
+        {
+          "Header": "PRIVATE-TOKEN",
+          "SecretURI": "ate-secret://plural.sh/instances/i-2/scm-token/github.com"
+        }
+      ]
+    },
+    {
+      "Host": "uploads.github.com",
+      "Port": 443,
+      "Scheme": "https",
+      "InjectHeader": "Authorization",
+      "SecretURI": "ate-secret://plural.sh/instances/i-2/scm/github.com",
+      "ActorJWT": false,
+      "Prefix": "",
+      "ActorJWTAudiences": null,
+      "ActorJWTExpirationSeconds": 0,
+      "ExtraHeaders": [
+        {
+          "Header": "PRIVATE-TOKEN",
+          "SecretURI": "ate-secret://plural.sh/instances/i-2/scm-token/github.com"
+        }
+      ]
+    },
+    {
+      "Host": "objects.githubusercontent.com",
+      "Port": 443,
+      "Scheme": "https",
+      "InjectHeader": "",
+      "SecretURI": "",
+      "ActorJWT": false,
+      "Prefix": "",
+      "ActorJWTAudiences": null,
+      "ActorJWTExpirationSeconds": 0,
+      "ExtraHeaders": null
+    },
+    {
+      "Host": "github-releases.githubusercontent.com",
+      "Port": 443,
+      "Scheme": "https",
+      "InjectHeader": "",
+      "SecretURI": "",
+      "ActorJWT": false,
+      "Prefix": "",
+      "ActorJWTAudiences": null,
+      "ActorJWTExpirationSeconds": 0,
+      "ExtraHeaders": null
+    },
+    {
+      "Host": "release-assets.githubusercontent.com",
+      "Port": 443,
+      "Scheme": "https",
+      "InjectHeader": "",
+      "SecretURI": "",
+      "ActorJWT": false,
+      "Prefix": "",
+      "ActorJWTAudiences": null,
+      "ActorJWTExpirationSeconds": 0,
+      "ExtraHeaders": null
+    },
+    {
+      "Host": "github-cloud.githubusercontent.com",
+      "Port": 443,
+      "Scheme": "https",
+      "InjectHeader": "",
+      "SecretURI": "",
+      "ActorJWT": false,
+      "Prefix": "",
+      "ActorJWTAudiences": null,
+      "ActorJWTExpirationSeconds": 0,
+      "ExtraHeaders": null
+    },
+    {
+      "Host": "github-cloud.s3.amazonaws.com",
+      "Port": 443,
+      "Scheme": "https",
+      "InjectHeader": "",
+      "SecretURI": "",
+      "ActorJWT": false,
+      "Prefix": "",
+      "ActorJWTAudiences": null,
+      "ActorJWTExpirationSeconds": 0,
+      "ExtraHeaders": null
+    },
+    {
+      "Host": "gitlab.example.com",
+      "Port": 443,
+      "Scheme": "https",
+      "InjectHeader": "Authorization",
+      "SecretURI": "ate-secret://plural.sh/instances/i-2/scm/gitlab.example.com",
+      "ActorJWT": false,
+      "Prefix": "",
+      "ActorJWTAudiences": null,
+      "ActorJWTExpirationSeconds": 0,
+      "ExtraHeaders": [
+        {
+          "Header": "PRIVATE-TOKEN",
+          "SecretURI": "ate-secret://plural.sh/instances/i-2/scm-token/gitlab.example.com"
+        }
+      ]
+    },
+    {
+      "Host": "console.example.com",
+      "Port": 443,
+      "Scheme": "https",
+      "InjectHeader": "Authorization",
+      "SecretURI": "ate-secret://plural.sh/instances/i-2/console",
+      "ActorJWT": false,
+      "Prefix": "",
+      "ActorJWTAudiences": null,
+      "ActorJWTExpirationSeconds": 0,
+      "ExtraHeaders": null
+    },
+    {
+      "Host": "devbox-gateway.plrl-deploy-operator.svc",
+      "Port": 8080,
+      "Scheme": "http",
+      "InjectHeader": "Authorization",
+      "SecretURI": "",
+      "ActorJWT": true,
+      "Prefix": "Bearer ",
+      "ActorJWTAudiences": [
+        "http://devbox-gateway.plrl-deploy-operator.svc:8080"
+      ],
+      "ActorJWTExpirationSeconds": 900,
+      "ExtraHeaders": null
+    },
+    {
+      "Host": "pypi.org",
+      "Port": 443,
+      "Scheme": "https",
+      "InjectHeader": "",
+      "SecretURI": "",
+      "ActorJWT": false,
+      "Prefix": "",
+      "ActorJWTAudiences": null,
+      "ActorJWTExpirationSeconds": 0,
+      "ExtraHeaders": null
+    },
+    {
+      "Host": "registry.npmjs.org",
+      "Port": 8443,
+      "Scheme": "https",
+      "InjectHeader": "",
+      "SecretURI": "",
+      "ActorJWT": false,
+      "Prefix": "",
+      "ActorJWTAudiences": null,
+      "ActorJWTExpirationSeconds": 0,
+      "ExtraHeaders": null
+    },
+    {
+      "Host": "db.internal.example.com",
+      "Port": 5432,
+      "Scheme": "tls_passthrough",
+      "InjectHeader": "",
+      "SecretURI": "",
+      "ActorJWT": false,
+      "Prefix": "",
+      "ActorJWTAudiences": null,
+      "ActorJWTExpirationSeconds": 0,
+      "ExtraHeaders": null
+    }
+  ]
+}

@@ -18,6 +18,15 @@ spec:
     backendRefs:
     - name: {{ include "kas.serviceName" . }}
       port: {{ .Values.kas.service.kubernetesApiPort }}
+  {{- if .Values.kas.devbox.enabled }}
+  - matches:
+    - path:
+        type: PathPrefix
+        value: {{ .Values.kas.devbox.path }}
+    backendRefs:
+    - name: {{ include "kas.serviceName" . }}
+      port: {{ .Values.kas.service.devboxPort }}
+  {{- end }}
   - matches:
     - path:
         type: PathPrefix

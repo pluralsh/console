@@ -199,3 +199,8 @@ proto: .PHONY ## generates protobufs schemas for elixir
 	cd go/cloud-query/api/proto && protoc --elixir_out=plugins=grpc:./../../../../lib/cloud_query toolquery.proto
 	cd proto && pwd && protoc --elixir_out=plugins=grpc:./../lib/grpc console.proto
 	cd proto && protoc --elixir_out=plugins=grpc:./../lib/grpc pseudofs.proto
+
+devbox-proto: .PHONY ## generates the devbox.v1 gRPC contract for elixir (lib/grpc/devbox) and go (deployment-operator)
+	rm -f lib/grpc/devbox/v1/*.pb.ex
+	cd proto && protoc --elixir_out=plugins=grpc:./../lib/grpc devbox/v1/*.proto
+	$(MAKE) -C go/deployment-operator devbox-proto

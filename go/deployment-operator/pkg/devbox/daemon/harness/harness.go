@@ -1,0 +1,387 @@
+// Package harness builds the launch configuration for each agent harness (DBX-46, DBX-57): the ACP command,
+// environment pointing model traffic at the console AI proxy with a placeholder key (or at the owner's plan),
+// CA trust, home instruction files and the per-harness model boot flags used when an adapter has no ACP model
+// control. It never writes model choices into config files; models are set over ACP.
+package harness
+
+import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io/fs"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strings"
+
+	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/acp"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/internal/fsutil"
+)
+
+// PlaceholderKey is the API key harnesses send; atenet-egress replaces the auth header with the instance's AI
+// proxy token, so the real token never enters the sandbox.
+const PlaceholderKey = "plural-devbox-placeholder"
+
+// ClaudeOAuthPlaceholder has the real `sk-ant-oat01-` prefix, so Claude Code accepts it; egress swaps in the
+// owner's token for api.anthropic.com (section 4.11).
+const ClaudeOAuthPlaceholder = "sk-ant-oat01-plural-devbox-placeholder"
+
+// ImageAgent is one agent entry in /etc/devbox/image.json, written by the devbox image build (DBX-49).
+type ImageAgent struct {
+	Command string `json:"command"`
+	Version string `json:"version"`
+	ACP     struct {
+		Command string   `json:"command"`
+		Args    []string `json:"args"`
+		Version string   `json:"version"`
+	} `json:"acp"`
+}
+
+// ImageInfo is /etc/devbox/image.json.
+type ImageInfo struct {
+	Contract      string                `json:"contract"`
+	Flavor        string                `json:"flavor"`
+	DaemonVersion string                `json:"daemonVersion"`
+	PlaywrightMCP string                `json:"playwrightMcp"`
+	Agents        map[string]ImageAgent `json:"agents"`
+}
+
+// LoadImageInfo reads the image description. A missing file yields built-in defaults.
+func LoadImageInfo(path string) (*ImageInfo, error) {
+	info := &ImageInfo{}
+	data, err := os.ReadFile(path)
+	if errors.Is(err, fs.ErrNotExist) {
+		return info, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	if err := json.Unmarshal(data, info); err != nil {
+		return nil, fmt.Errorf("decode %s: %w", path, err)
+	}
+	return info, nil
+}
+
+// AgentName is the lowercase name used in image.json and CRDs.
+func AgentName(t devboxv1.AgentType) string {
+	return strings.ToLower(strings.TrimPrefix(t.String(), "AGENT_TYPE_"))
+}
+
+// ParseAgent parses an agent name ("claude", "AGENT_TYPE_CLAUDE").
+func ParseAgent(s string) (devboxv1.AgentType, bool) {
+	s = strings.ToUpper(strings.TrimSpace(s))
+	if !strings.HasPrefix(s, "AGENT_TYPE_") {
+		s = "AGENT_TYPE_" + s
+	}
+	v, ok := devboxv1.AgentType_value[s]
+	return devboxv1.AgentType(v), ok && v != 0
+}
+
+// AllAgents lists the supported harnesses.
+var AllAgents = []devboxv1.AgentType{
+	devboxv1.AgentType_AGENT_TYPE_CLAUDE, devboxv1.AgentType_AGENT_TYPE_CODEX, devboxv1.AgentType_AGENT_TYPE_OPENCODE,
+	devboxv1.AgentType_AGENT_TYPE_GEMINI, devboxv1.AgentType_AGENT_TYPE_PI,
+}
+
+type agentDefaults struct {
+	command string
+	args    []string
+	// binary is the harness CLI itself (used for `codex login` and presence checks).
+	binary string
+	// modelArg/modelEnv pass the model at boot for adapters without ACP model control.
+	modelArg string
+	modelEnv string
+	// proxyProvider is the AI proxy provider prefix for bare model names (pkg/agentrun-harness/model/proxy.go).
+	proxyProvider string
+	lineage       acp.LineageExtractor
+	// v2 is whether the pinned adapter can negotiate ACP v2 (section 4.6a); only used with the box's acpV2 flag.
+	v2 bool
+}
+
+var defaults = map[devboxv1.AgentType]agentDefaults{
+	devboxv1.AgentType_AGENT_TYPE_CLAUDE:   {command: "claude-agent-acp", binary: "claude", modelEnv: "ANTHROPIC_MODEL", proxyProvider: "anthropic", lineage: acp.ClaudeLineage, v2: true},
+	devboxv1.AgentType_AGENT_TYPE_CODEX:    {command: "codex-acp", binary: "codex", modelArg: "-c", proxyProvider: "openai", lineage: acp.NoLineage{}, v2: true},
+	devboxv1.AgentType_AGENT_TYPE_OPENCODE: {command: "opencode", args: []string{"acp"}, binary: "opencode", proxyProvider: "openai", lineage: acp.NoLineage{}},
+	devboxv1.AgentType_AGENT_TYPE_GEMINI:   {command: "gemini", args: []string{"--experimental-acp"}, binary: "gemini", modelArg: "--model", proxyProvider: "vertex", lineage: acp.NoLineage{}},
+	devboxv1.AgentType_AGENT_TYPE_PI:       {command: "pi-acp", binary: "pi", proxyProvider: "openai", lineage: acp.NoLineage{}},
+}
+
+// Command overrides an agent's ACP command (tests and custom images).
+type Command struct {
+	Path string
+	Args []string
+	Env  []string
+}
+
+// Config is the harness configuration shared by every agent.
+type Config struct {
+	Home string
+	// StateDir is ~/.plural; daemon-managed harness config lives under StateDir/harness.
+	StateDir string
+	Image    *ImageInfo
+	// AgentAuthDir is the tmpfs for subscription credentials (/run/plural/agent-auth).
+	AgentAuthDir string
+	// BaseEnv returns the environment every child process gets (CA trust, identity, PATH, ...).
+	BaseEnv func() []string
+	// Overrides replace the ACP command per agent.
+	Overrides map[devboxv1.AgentType]Command
+}
+
+// Spec is everything needed to start one agent's ACP process.
+type Spec struct {
+	Agent   devboxv1.AgentType
+	Path    string
+	Args    []string
+	Env     []string
+	Dir     string
+	Lineage acp.LineageExtractor
+	// RequestV2 asks for protocol version 2 at initialize (acpV2 flag and adapter support).
+	RequestV2 bool
+	// BootModel is the model passed through flags/env, for adapters without ACP model control.
+	BootModel string
+	Billing   devboxv1.BillingMode
+	// AuthMethodID, when set, is sent with `authenticate` after initialize.
+	AuthMethodID string
+}
+
+// Binary returns the harness CLI for an agent (claude, codex, ...).
+func Binary(t devboxv1.AgentType) string { return defaults[t].binary }
+
+// CodexHome is where Codex keeps its state (sessions, config) on the workspace volume.
+func (c *Config) CodexHome() string { return filepath.Join(c.Home, ".codex") }
+
+// CodexAuthDir is the tmpfs CODEX_HOME holding auth.json for subscription billing.
+func (c *Config) CodexAuthDir() string { return filepath.Join(c.AgentAuthDir, "codex") }
+
+// Present reports whether the agent's ACP command is on PATH.
+func (c *Config) Present(t devboxv1.AgentType) (string, bool) {
+	path, _ := c.command(t)
+	if filepath.IsAbs(path) {
+		_, err := os.Stat(path)
+		return path, err == nil
+	}
+	p, err := exec.LookPath(path)
+	return p, err == nil
+}
+
+// AdapterVersion is the pinned adapter version from image.json, if known.
+func (c *Config) AdapterVersion(t devboxv1.AgentType) string {
+	if c.Image == nil {
+		return ""
+	}
+	a := c.Image.Agents[AgentName(t)]
+	if a.ACP.Version != "" {
+		return a.ACP.Version
+	}
+	return a.Version
+}
+
+func (c *Config) command(t devboxv1.AgentType) (string, []string) {
+	if o, ok := c.Overrides[t]; ok {
+		return o.Path, o.Args
+	}
+	if c.Image != nil {
+		if a, ok := c.Image.Agents[AgentName(t)]; ok && a.ACP.Command != "" {
+			return a.ACP.Command, a.ACP.Args
+		}
+	}
+	d := defaults[t]
+	return d.command, d.args
+}
+
+// ProxyModel prefixes a bare model with the AI proxy provider, as the agent-run harness does.
+func ProxyModel(t devboxv1.AgentType, model string) string {
+	model = strings.TrimSpace(model)
+	if model == "" || strings.Contains(model, "/") {
+		return model
+	}
+	if p := defaults[t].proxyProvider; p != "" {
+		return p + "/" + model
+	}
+	return model
+}
+
+// Spec builds the launch spec for one agent connection.
+func (c *Config) Spec(launch *devboxv1.AgentLaunch, endpoints *devboxv1.HarnessEndpoints, bootModel string) (*Spec, error) {
+	t := launch.GetAgent()
+	d, ok := defaults[t]
+	if !ok {
+		return nil, fmt.Errorf("unsupported agent %s", t)
+	}
+	path, args := c.command(t)
+	billing := launch.GetBilling()
+	if billing == devboxv1.BillingMode_BILLING_MODE_UNSPECIFIED {
+		billing = devboxv1.BillingMode_BILLING_MODE_PROXY
+	}
+	spec := &Spec{
+		Agent: t, Path: path, Args: append([]string(nil), args...), Dir: c.Home, Lineage: d.lineage,
+		RequestV2: launch.GetAcpV2() && d.v2, BootModel: bootModel, Billing: billing,
+	}
+	env := c.baseEnv()
+	aiProxy := strings.TrimSuffix(endpoints.GetAiProxyUrl(), "/")
+	subscription := billing == devboxv1.BillingMode_BILLING_MODE_SUBSCRIPTION
+	set := func(kv ...string) {
+		for i := 0; i+1 < len(kv); i += 2 {
+			env = setEnv(env, kv[i], kv[i+1])
+		}
+	}
+	switch t {
+	case devboxv1.AgentType_AGENT_TYPE_CLAUDE:
+		env = unsetEnv(env, "ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_BASE_URL", "CLAUDE_CODE_OAUTH_TOKEN")
+		set("CLAUDE_CONFIG_DIR", filepath.Join(c.Home, ".claude"), "DISABLE_AUTOUPDATER", "1")
+		if subscription {
+			set("CLAUDE_CODE_OAUTH_TOKEN", ClaudeOAuthPlaceholder)
+		} else if aiProxy != "" {
+			set("ANTHROPIC_BASE_URL", aiProxy+"/anthropic", "ANTHROPIC_AUTH_TOKEN", PlaceholderKey)
+		}
+		if bootModel != "" {
+			set(d.modelEnv, bootModel)
+		}
+	case devboxv1.AgentType_AGENT_TYPE_CODEX:
+		env = unsetEnv(env, "OPENAI_API_KEY", "CODEX_API_KEY", "DEFAULT_AUTH_REQUEST")
+		set("CODEX_HOME", c.CodexHome(), "NO_BROWSER", "1")
+		if subscription {
+			// auth.json is a symlink into the tmpfs; keep Codex off the OS keyring so it reads and rewrites it.
+			spec.Args = append(spec.Args, "-c", `cli_auth_credentials_store="file"`)
+		} else if aiProxy != "" {
+			set("CODEX_API_KEY", PlaceholderKey, "DEFAULT_AUTH_REQUEST", `{"methodId":"api-key"}`)
+			spec.Args = append(spec.Args,
+				"-c", `model_provider="plural"`,
+				"-c", `model_providers.plural.name="plural"`,
+				"-c", fmt.Sprintf("model_providers.plural.base_url=%q", aiProxy+"/v1"),
+				"-c", `model_providers.plural.env_key="CODEX_API_KEY"`,
+				"-c", `model_providers.plural.wire_api="responses"`,
+			)
+		}
+		if bootModel != "" {
+			spec.Args = append(spec.Args, "-c", fmt.Sprintf("model=%q", bootModel))
+		}
+	case devboxv1.AgentType_AGENT_TYPE_OPENCODE:
+		cfg, err := c.writeOpenCodeConfig(aiProxy, bootModel)
+		if err != nil {
+			return nil, err
+		}
+		set("OPENCODE_CONFIG", cfg)
+	case devboxv1.AgentType_AGENT_TYPE_GEMINI:
+		set("GEMINI_CLI_TRUST_WORKSPACE", "true")
+		if aiProxy != "" {
+			set("GEMINI_API_KEY", PlaceholderKey, "GOOGLE_GEMINI_BASE_URL", aiProxy+"/gemini")
+		}
+		if bootModel != "" {
+			spec.Args = append(spec.Args, d.modelArg, bootModel)
+		}
+	case devboxv1.AgentType_AGENT_TYPE_PI:
+		if aiProxy != "" {
+			set("OPENAI_API_KEY", PlaceholderKey, "OPENAI_BASE_URL", aiProxy+"/v1")
+		}
+		if bootModel != "" {
+			set("PI_MODEL", bootModel)
+		}
+	}
+	if o, ok := c.Overrides[t]; ok {
+		env = append(env, o.Env...)
+	}
+	spec.Env = env
+	return spec, nil
+}
+
+func (c *Config) baseEnv() []string {
+	if c.BaseEnv != nil {
+		return c.BaseEnv()
+	}
+	return os.Environ()
+}
+
+// writeOpenCodeConfig writes the daemon-managed OpenCode config (OPENCODE_CONFIG merges with the user's own).
+func (c *Config) writeOpenCodeConfig(aiProxy, bootModel string) (string, error) {
+	cfg := map[string]any{
+		"$schema":      "https://opencode.ai/config.json",
+		"instructions": []string{filepath.Join(c.Home, "AGENTS.md")},
+		// OpenCode's permissions are process-wide, so it asks for everything but reads and the daemon answers per
+		// thread autonomy: forwarded to a human at manual, approved at full.
+		"permission": map[string]any{
+			"*": "ask", "read": "allow", "glob": "allow", "grep": "allow", "list": "allow", "todoread": "allow", "todowrite": "allow",
+		},
+	}
+	if aiProxy != "" {
+		cfg["provider"] = map[string]any{
+			"plural": map[string]any{
+				"npm":     "@ai-sdk/openai-compatible",
+				"name":    "Plural AI proxy",
+				"options": map[string]any{"baseURL": aiProxy + "/v1", "apiKey": PlaceholderKey},
+			},
+		}
+	}
+	if bootModel != "" {
+		cfg["model"] = "plural/" + bootModel
+	}
+	path := filepath.Join(c.StateDir, "harness", "opencode.json")
+	if err := fsutil.WriteJSON(path, cfg, 0o644); err != nil {
+		return "", err
+	}
+	return path, nil
+}
+
+// InstructionLinks are each harness's global instruction file, symlinked to ~/AGENTS.md so the devbox
+// conventions apply whatever the session's cwd.
+func (c *Config) InstructionLinks() map[string]string {
+	return map[string]string{
+		filepath.Join(c.Home, ".claude", "CLAUDE.md"):             "claude",
+		filepath.Join(c.Home, ".codex", "AGENTS.md"):              "codex",
+		filepath.Join(c.Home, ".gemini", "GEMINI.md"):             "gemini",
+		filepath.Join(c.Home, ".config", "opencode", "AGENTS.md"): "opencode",
+		filepath.Join(c.Home, ".pi", "agent", "AGENTS.md"):        "pi",
+	}
+}
+
+// LinkInstructions creates the global instruction symlinks that don't exist yet.
+func (c *Config) LinkInstructions() error {
+	target := filepath.Join(c.Home, "AGENTS.md")
+	var errs []error
+	for link := range c.InstructionLinks() {
+		if _, err := os.Lstat(link); err == nil {
+			continue
+		}
+		if err := os.MkdirAll(filepath.Dir(link), 0o755); err != nil {
+			errs = append(errs, err)
+			continue
+		}
+		if err := os.Symlink(target, link); err != nil {
+			errs = append(errs, err)
+		}
+	}
+	return errors.Join(errs...)
+}
+
+func setEnv(env []string, k, v string) []string {
+	env = unsetEnv(env, k)
+	return append(env, k+"="+v)
+}
+
+func unsetEnv(env []string, keys ...string) []string {
+	out := env[:0:0]
+	for _, kv := range env {
+		drop := false
+		for _, k := range keys {
+			if strings.HasPrefix(kv, k+"=") {
+				drop = true
+				break
+			}
+		}
+		if !drop {
+			out = append(out, kv)
+		}
+	}
+	return out
+}
+
+// EnvValue returns the value of k in env.
+func EnvValue(env []string, k string) (string, bool) {
+	for i := len(env) - 1; i >= 0; i-- {
+		if v, ok := strings.CutPrefix(env[i], k+"="); ok {
+			return v, true
+		}
+	}
+	return "", false
+}

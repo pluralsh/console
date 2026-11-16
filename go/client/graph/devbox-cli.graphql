@@ -1,0 +1,387 @@
+# Operations used by the `plural devbox` CLI commands.
+
+fragment CliDevboxTinyFragment on Devbox {
+    id
+    name
+    status
+}
+
+fragment CliDevboxFragment on Devbox {
+    id
+    name
+    status
+    agents {
+        ...CliDevboxAgentFragment
+    }
+}
+
+fragment CliDevboxCommandFragment on DevboxCommand {
+    name
+    description
+    inputHint
+}
+
+fragment CliDevboxAgentFragment on DevboxAgent {
+    type
+    default
+    adapterName
+    adapterVersion
+    modelSwitchable
+    probeStatus
+    probeError
+    defaultModel
+    models {
+        id
+        name
+        description
+    }
+    sessionCapabilities {
+        list
+        resume
+        load
+        close
+        delete
+        fork
+    }
+}
+
+fragment CliDevboxThreadFragment on DevboxThread {
+    id
+    sessionId
+    kind
+    agent
+    title
+    agentTitle
+    model
+    cwd
+    status
+    imported
+    billing
+    foregroundState
+    stopReason
+    lastActivityAt
+    insertedAt
+    instance {
+        id
+    }
+}
+
+fragment CliDevboxInteractionFragment on DevboxInteraction {
+    id
+    kind
+    state
+    title
+    message
+    url
+    toolCallId
+    options {
+        optionId
+        name
+        kind
+    }
+    thread {
+        id
+    }
+}
+
+fragment CliDevboxInstanceFragment on DevboxInstance {
+    id
+    name
+    agent
+    requestedModel
+    repositories
+    status
+    statusReason
+    foregroundState
+    runningThreads
+    waitingThreads
+    keepAwakeUntil
+    awakeSince
+    startedAt
+    suspendedAt
+    lastActivityAt
+    viewerCount
+    insertedAt
+    agentConnections {
+        agent
+        adapterName
+        adapterVersion
+        billing
+    }
+    agentBilling {
+        agent
+        billing
+        credentialKind
+        allowCollaborators
+    }
+    checkouts {
+        ...CliDevboxCheckoutFragment
+    }
+    idleState {
+        idle
+        idleSince
+        suspendsAt
+        message
+    }
+    workbench {
+        id
+        name
+    }
+    devbox {
+        id
+        name
+    }
+    keepAwakeBy {
+        email
+    }
+    threads {
+        ...CliDevboxThreadFragment
+    }
+    interactions(pending: true) {
+        ...CliDevboxInteractionFragment
+    }
+}
+
+fragment CliDevboxCheckoutFragment on DevboxCheckout {
+    path
+    name
+    remoteUrl
+    defaultBranch
+    branch
+    headSha
+    dirty
+    ahead
+    behind
+}
+
+fragment CliDevboxRepositoryFragment on DevboxRepository {
+    path
+    name
+    remoteUrl
+    defaultBranch
+    branch
+    headSha
+    dirty
+    ahead
+    behind
+}
+
+fragment CliDevboxEntityFragment on DevboxEntity {
+    id
+    sessionId
+    type
+    position
+    revision
+    settled
+    raw
+    toolCall {
+        toolCallId
+        title
+        kind
+        status
+    }
+    plan {
+        entries {
+            content
+            priority
+            status
+        }
+    }
+    terminal {
+        terminalId
+        command
+        output
+        exitCode
+    }
+}
+
+query CliListDevboxes($workbenchId: ID, $q: String, $first: Int) {
+    devboxes(workbenchId: $workbenchId, q: $q, first: $first) {
+        edges {
+            node {
+                ...CliDevboxTinyFragment
+            }
+        }
+    }
+}
+
+query CliGetDevbox($id: ID, $name: String) {
+    devbox(id: $id, name: $name) {
+        ...CliDevboxFragment
+    }
+}
+
+query CliDevboxAgents($workbenchId: ID!, $devboxId: ID!) {
+    devboxAgents(workbenchId: $workbenchId, devboxId: $devboxId) {
+        ...CliDevboxAgentFragment
+    }
+}
+
+query CliListDevboxInstances($workbenchId: ID!, $first: Int, $mine: Boolean, $statuses: [DevboxInstanceStatus]) {
+    workbench(id: $workbenchId) {
+        devboxInstances(first: $first, mine: $mine, statuses: $statuses) {
+            edges {
+                node {
+                    ...CliDevboxInstanceFragment
+                }
+            }
+        }
+    }
+}
+
+query CliGetDevboxInstance($id: ID!) {
+    devboxInstance(id: $id) {
+        ...CliDevboxInstanceFragment
+    }
+}
+
+query CliGetDevboxThread($id: ID!) {
+    devboxThread(id: $id) {
+        ...CliDevboxThreadFragment
+    }
+}
+
+query CliDevboxInstanceCommands($threadId: ID!) {
+    devboxInstanceCommands(threadId: $threadId) {
+        ...CliDevboxCommandFragment
+    }
+}
+
+query CliDevboxRepositories($instanceId: ID!) {
+    devboxRepositories(instanceId: $instanceId) {
+        ...CliDevboxRepositoryFragment
+    }
+}
+
+query CliDevboxImportableSessions($instanceId: ID!) {
+    devboxImportableSessions(instanceId: $instanceId) {
+        agent
+        sessionId
+        title
+        cwd
+        updatedAt
+    }
+}
+
+query CliDevboxTimeline($instanceId: ID!, $sessionId: String!, $before: Long, $after: Long, $limit: Int) {
+    devboxTimeline(instanceId: $instanceId, sessionId: $sessionId, before: $before, after: $after, limit: $limit) {
+        entities {
+            ...CliDevboxEntityFragment
+        }
+        deltaOffset
+        hasMore
+    }
+}
+
+mutation CliCreateDevboxInstance($workbenchId: ID!, $attributes: DevboxInstanceAttributes!) {
+    createDevboxInstance(workbenchId: $workbenchId, attributes: $attributes) {
+        ...CliDevboxInstanceFragment
+    }
+}
+
+mutation CliCancelDevboxInstance($id: ID!) {
+    cancelDevboxInstance(id: $id) {
+        ...CliDevboxInstanceFragment
+    }
+}
+
+mutation CliSuspendDevboxInstance($id: ID!) {
+    suspendDevboxInstance(id: $id) {
+        ...CliDevboxInstanceFragment
+    }
+}
+
+mutation CliResumeDevboxInstance($id: ID!) {
+    resumeDevboxInstance(id: $id) {
+        ...CliDevboxInstanceFragment
+    }
+}
+
+mutation CliPingDevboxInstance($id: ID!) {
+    pingDevboxInstance(id: $id) {
+        id
+        status
+    }
+}
+
+mutation CliLeaveDevboxInstance($id: ID!) {
+    leaveDevboxInstance(id: $id) {
+        id
+    }
+}
+
+mutation CliKeepDevboxInstanceAwake($id: ID!, $until: DateTime!) {
+    keepDevboxInstanceAwake(id: $id, until: $until) {
+        ...CliDevboxInstanceFragment
+    }
+}
+
+mutation CliCancelDevboxKeepAwake($id: ID!) {
+    cancelDevboxKeepAwake(id: $id) {
+        ...CliDevboxInstanceFragment
+    }
+}
+
+mutation CliAddDevboxRepository($instanceId: ID!, $repository: String!) {
+    addDevboxRepository(instanceId: $instanceId, repository: $repository) {
+        ...CliDevboxInstanceFragment
+    }
+}
+
+mutation CliCreateDevboxThread($instanceId: ID!, $attributes: DevboxThreadAttributes) {
+    createDevboxThread(instanceId: $instanceId, attributes: $attributes) {
+        ...CliDevboxThreadFragment
+    }
+}
+
+mutation CliImportDevboxThread($instanceId: ID!, $attributes: DevboxImportAttributes!) {
+    importDevboxThread(instanceId: $instanceId, attributes: $attributes) {
+        ...CliDevboxThreadFragment
+    }
+}
+
+mutation CliCloseDevboxThread($id: ID!) {
+    closeDevboxThread(id: $id) {
+        ...CliDevboxThreadFragment
+    }
+}
+
+mutation CliForkDevboxThread($id: ID!, $title: String) {
+    forkDevboxThread(id: $id, title: $title) {
+        ...CliDevboxThreadFragment
+    }
+}
+
+mutation CliPromptDevboxThread($id: ID!, $prompt: String, $attachments: [Upload]) {
+    promptDevboxThread(id: $id, prompt: $prompt, attachments: $attachments) {
+        ...CliDevboxThreadFragment
+    }
+}
+
+mutation CliCancelDevboxPrompt($id: ID!) {
+    cancelDevboxPrompt(id: $id) {
+        ...CliDevboxThreadFragment
+    }
+}
+
+mutation CliRespondDevboxInteraction($id: ID!, $response: DevboxInteractionResponseAttributes!) {
+    respondDevboxInteraction(id: $id, response: $response) {
+        ...CliDevboxInteractionFragment
+    }
+}
+
+mutation CliOpenDevboxStream($instanceId: ID!, $kind: DevboxStreamKind!, $terminalId: String, $port: Int) {
+    openDevboxStream(instanceId: $instanceId, kind: $kind, terminalId: $terminalId, port: $port) {
+        ...CliDevboxStreamFragment
+    }
+}
+
+fragment CliDevboxStreamFragment on DevboxStream {
+    streamId
+    kind
+    url
+    token
+    expiresAt
+    subprotocols
+    terminalId
+}

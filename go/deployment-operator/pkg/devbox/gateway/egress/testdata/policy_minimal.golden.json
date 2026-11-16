@@ -1,0 +1,18 @@
+{
+  "Rules": [
+    {
+      "Host": "devbox-gateway.plrl-deploy-operator.svc",
+      "Port": 8080,
+      "Scheme": "http",
+      "InjectHeader": "Authorization",
+      "SecretURI": "",
+      "ActorJWT": true,
+      "Prefix": "Bearer ",
+      "ActorJWTAudiences": [
+        "http://devbox-gateway.plrl-deploy-operator.svc:8080"
+      ],
+      "ActorJWTExpirationSeconds": 900,
+      "ExtraHeaders": null
+    }
+  ]
+}

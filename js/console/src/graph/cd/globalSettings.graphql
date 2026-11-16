@@ -16,6 +16,7 @@ fragment AiSettings on AiSettings {
     baseUrl
     model
     toolModel
+    decisionModel
     proxy {
       enabled
       url
@@ -26,6 +27,7 @@ fragment AiSettings on AiSettings {
     baseUrl
     model
     toolModel
+    decisionModel
     embeddingModel
     method
     proxy {
@@ -38,6 +40,7 @@ fragment AiSettings on AiSettings {
     baseUrl
     model
     toolModel
+    decisionModel
     embeddingModel
     method
     proxy {
@@ -50,6 +53,7 @@ fragment AiSettings on AiSettings {
     baseUrl
     model
     toolModel
+    decisionModel
     embeddingModel
     method
     proxy {
@@ -64,6 +68,7 @@ fragment AiSettings on AiSettings {
     model
     embeddingModel
     toolModel
+    decisionModel
     proxy {
       enabled
       url
@@ -84,6 +89,7 @@ fragment AiSettings on AiSettings {
     model
     embeddingModel
     toolModel
+    decisionModel
     project
     location
     endpoint
@@ -96,6 +102,7 @@ fragment AiSettings on AiSettings {
   bedrock {
     modelId
     toolModelId
+    decisionModel
     embeddingModel
     modelSettings {
       modelId
@@ -115,6 +122,7 @@ fragment AiSettings on AiSettings {
   provider
   toolProvider
   embeddingProvider
+  decisionProvider
   analysisRates {
     fast
     slow
@@ -210,6 +218,7 @@ query DeploymentSettings {
     model
     toolModel
     embeddingModel
+    decisionModel
   }
 }
 

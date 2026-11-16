@@ -59,6 +59,7 @@ export function AISettingsModelRouting() {
             provider: routing.provider,
             toolProvider: routing.toolProvider,
             embeddingProvider: routing.embeddingProvider,
+            decisionProvider: routing.decisionProvider,
           },
         },
       },

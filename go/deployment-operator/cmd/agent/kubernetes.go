@@ -338,6 +338,8 @@ func registerKubeReconcilersOrDie(
 	}
 	consoleManager.Socket.AddPublisher("agent_run", agentRuntimeReconciler)
 
+	registerDevboxRunner(manager, operatorNamespace, consoleURL, deployToken, cluster.MyCluster.ID)
+
 	if err := (&controller.ImageWarmerReconciler{
 		Client: manager.GetClient(),
 		Scheme: manager.GetScheme(),

@@ -51,6 +51,10 @@ linters:
       - path: (^|/)polly/template($|/)
         linters:
           - goconst
+      # SCM API routes are matched segment by segment; the literal path segments read better inline.
+      - path: (^|/)deployment-operator/pkg/devbox/gateway/egress/scmpath/scmpath\.go$
+        linters:
+          - goconst
       # Proto-gen repeats field names for validation errors.
       - path: .*\.pb\.validate\.go$
         linters:

@@ -1,0 +1,29 @@
+# AKS: Azure Blob snapshots through the objectstore-azure-blob plugin with
+# Workload Identity, and ACR pulls.
+objectStore:
+  backend: azureBlob
+  snapshotLocation: azblob://snapshots/substrate/
+  azureBlob:
+    image:
+      digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
+    accountUrl: https://pluralate.blob.core.windows.net
+    containers:
+      - snapshots
+      - assets
+    tenantId: 00000000-0000-0000-0000-000000000001
+    nodeClientId: 00000000-0000-0000-0000-000000000002
+    controlClientId: 00000000-0000-0000-0000-000000000003
+    assetContainers:
+      - assets
+
+atelet:
+  imageCredentialProvider:
+    enabled: true
+    preset: acr
+
+postgres:
+  mode: cnpg
+  cnpg:
+    backup:
+      enabled: true
+      destinationPath: https://pluralate.blob.core.windows.net/pg-backups/ate-postgres

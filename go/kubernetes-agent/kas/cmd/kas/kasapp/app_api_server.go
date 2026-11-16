@@ -86,10 +86,21 @@ func newApiServer(log *zap.Logger, cfg *kascfg.ConfigurationFile, tp trace.Trace
 				PermitWithoutStream: true,
 			}),
 			keepaliveOpt,
-		}, credsOpt...)...),
+			// devbox.v1.Control is forwarded to gateways as raw frames.
+			grpc.ForceServerCodec(grpctool2.RawCodecWithProtoFallback{}),
+		}, append(devboxMessageSize(cfg), credsOpt...)...)...),
 		auxCancel: auxCancel,
 		ready:     probeRegistry.RegisterReadinessToggle("apiServer"),
 	}, nil
+}
+
+// devboxMessageSize lets Control calls (prompts with attachments) be as large as the devbox listener forwards them.
+func devboxMessageSize(cfg *kascfg.ConfigurationFile) []grpc.ServerOption {
+	if cfg.Devbox == nil || cfg.Devbox.Listen == nil || cfg.Devbox.Listen.MaxMessageSize == 0 {
+		return nil
+	}
+	n := int(cfg.Devbox.Listen.MaxMessageSize)
+	return []grpc.ServerOption{grpc.MaxRecvMsgSize(n), grpc.MaxSendMsgSize(n)}
 }
 
 func (s *apiServer) Start(stage stager.Stage) {

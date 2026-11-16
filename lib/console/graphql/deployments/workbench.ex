@@ -112,6 +112,13 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :infrastructure, :workbench_infrastructure_attributes, description: "infrastructure capabilities (services, stacks, kubernetes)"
     field :coding,         :workbench_coding_attributes, description: "coding capabilities (mode, repositories, babysitting)"
     field :observability,  :workbench_observability_attributes, description: "observability capabilities (logs, metrics)"
+    field :devbox,         :workbench_devbox_config_attributes, description: "limits for devbox instances started from this workbench"
+  end
+
+  input_object :workbench_devbox_config_attributes do
+    field :max_snapshots, :integer, description: "the most ready snapshots to keep, the oldest are deleted beyond it"
+    field :max_deferral,  :integer, description: "lowers the boxes' maxDeferral (in seconds) for keep-awake requests"
+    field :allow_subscription_credentials, :boolean, description: "let users bill devbox agents to their own linked subscriptions instead of the AI proxy (default off)"
   end
 
   input_object :workbench_infrastructure_attributes do
@@ -699,6 +706,29 @@ defmodule Console.GraphQl.Deployments.Workbench do
       resolve &Deployments.list_workbench_crons/3
     end
 
+    field :devboxes, list_of(:devbox), description: "the devboxes attached to this workbench" do
+      middleware Nested, check: true, msg: "workbench devboxes cannot be fetched through a policy"
+      resolve dataloader(Deployments)
+    end
+
+    connection field :devbox_instances, node_type: :devbox_instance do
+      middleware Nested, check: true, msg: "workbench devbox instances cannot be fetched through a policy"
+      arg :statuses, list_of(:devbox_instance_status), description: "filter instances by status"
+      arg :mine,     :boolean, description: "only show instances you started"
+
+      resolve &Deployments.list_workbench_devbox_instances/3
+    end
+
+    connection field :devbox_snapshots, node_type: :devbox_snapshot do
+      middleware Nested, check: true, msg: "workbench devbox snapshots cannot be fetched through a policy"
+      resolve &Deployments.list_workbench_devbox_snapshots/3
+    end
+
+    field :devbox_inbox, list_of(:devbox_interaction), description: "pending devbox permission requests and elicitations across this workbench's instances" do
+      middleware Nested, check: true, msg: "workbench devbox interactions cannot be fetched through a policy"
+      resolve &Deployments.workbench_devbox_inbox/3
+    end
+
     connection field :prompts, node_type: :workbench_prompt do
       middleware Nested, check: true, msg: "workbench prompts cannot be fetched through a policy"
       resolve &Deployments.list_workbench_prompts/3
@@ -1173,6 +1203,13 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :infrastructure, :workbench_infrastructure, description: "infrastructure capabilities"
     field :coding,         :workbench_coding, description: "coding capabilities"
     field :observability,  :workbench_observability, description: "observability capabilities"
+    field :devbox,         :workbench_devbox_config, description: "limits for devbox instances"
+  end
+
+  object :workbench_devbox_config do
+    field :max_snapshots, :integer, description: "the most ready snapshots kept for this workbench"
+    field :max_deferral,  :integer, description: "the longest keep-awake deferral (in seconds) allowed from this workbench"
+    field :allow_subscription_credentials, :boolean, description: "whether devbox agents may bill to their owner's linked subscription"
   end
 
   object :workbench_infrastructure do

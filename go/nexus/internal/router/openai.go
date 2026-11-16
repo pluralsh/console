@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/go-chi/chi/v5"
 	bifrostcore "github.com/maximhq/bifrost/core"
 	"github.com/maximhq/bifrost/core/schemas"
 	"github.com/pluralsh/console/go/nexus/internal/console"
@@ -22,6 +23,7 @@ const (
 	RouteChatCompletions Route = "/v1/chat/completions"
 	RouteResponses       Route = "/v1/responses"
 	RouteModels          Route = "/v1/models"
+	RouteDecisions       Route = "/v1/decisions"
 
 	openAICompatibleProvider schemas.ModelProvider = "openai-compatible"
 )
@@ -116,7 +118,7 @@ func openAIConfigHasModel(cfg *pb.OpenAiConfig, model string) bool {
 	if cfg == nil || model == "" {
 		return false
 	}
-	models := append([]string{cfg.GetModel(), cfg.GetToolModel(), cfg.GetEmbeddingModel()}, cfg.GetProxyModels()...)
+	models := append([]string{cfg.GetModel(), cfg.GetToolModel(), cfg.GetEmbeddingModel(), cfg.GetDecisionModel()}, cfg.GetProxyModels()...)
 	for _, configured := range models {
 		if configured == model {
 			return true
@@ -139,6 +141,12 @@ func (in *OpenAIRouter) init() Router {
 	}
 
 	return in
+}
+
+func (in *OpenAIRouter) RegisterRoutes(r chi.Router) {
+	in.GenericRouter.RegisterRoutes(r)
+	r.Post(string(RouteDecisions), in.handleDecisions)
+	in.logger.Info("registered route", zap.String("method", "POST"), zap.String("path", string(RouteDecisions)))
 }
 
 func NewOpenAIRouter(bifrostClient *bifrostcore.Bifrost, resolver *EmbeddingsResolver, consoleClient console.Client) Router {

@@ -1,0 +1,281 @@
+{
+  "Rules": [
+    {
+      "Host": "github.com",
+      "Port": 443,
+      "Scheme": "https",
+      "InjectHeader": "Authorization",
+      "SecretURI": "ate-secret://plural.sh/instances/i-3/scm/github.com",
+      "ActorJWT": false,
+      "Prefix": "",
+      "ActorJWTAudiences": null,
+      "ActorJWTExpirationSeconds": 0,
+      "ExtraHeaders": [
+        {
+          "Header": "PRIVATE-TOKEN",
+          "SecretURI": "ate-secret://plural.sh/instances/i-3/scm-token/github.com"
+        }
+      ]
+    },
+    {
+      "Host": "api.github.com",
+      "Port": 443,
+      "Scheme": "https",
+      "InjectHeader": "Authorization",
+      "SecretURI": "ate-secret://plural.sh/instances/i-3/scm/github.com",
+      "ActorJWT": false,
+      "Prefix": "",
+      "ActorJWTAudiences": null,
+      "ActorJWTExpirationSeconds": 0,
+      "ExtraHeaders": [
+        {
+          "Header": "PRIVATE-TOKEN",
+          "SecretURI": "ate-secret://plural.sh/instances/i-3/scm-token/github.com"
+        }
+      ]
+    },
+    {
+      "Host": "codeload.github.com",
+      "Port": 443,
+      "Scheme": "https",
+      "InjectHeader": "Authorization",
+      "SecretURI": "ate-secret://plural.sh/instances/i-3/scm/github.com",
+      "ActorJWT": false,
+      "Prefix": "",
+      "ActorJWTAudiences": null,
+      "ActorJWTExpirationSeconds": 0,
+      "ExtraHeaders": [
+        {
+          "Header": "PRIVATE-TOKEN",
+          "SecretURI": "ate-secret://plural.sh/instances/i-3/scm-token/github.com"
+        }
+      ]
+    },
+    {
+      "Host": "raw.githubusercontent.com",
+      "Port": 443,
+      "Scheme": "https",
+      "InjectHeader": "Authorization",
+      "SecretURI": "ate-secret://plural.sh/instances/i-3/scm/github.com",
+      "ActorJWT": false,
+      "Prefix": "",
+      "ActorJWTAudiences": null,
+      "ActorJWTExpirationSeconds": 0,
+      "ExtraHeaders": [
+        {
+          "Header": "PRIVATE-TOKEN",
+          "SecretURI": "ate-secret://plural.sh/instances/i-3/scm-token/github.com"
+        }
+      ]
+    },
+    {
+      "Host": "uploads.github.com",
+      "Port": 443,
+      "Scheme": "https",
+      "InjectHeader": "Authorization",
+      "SecretURI": "ate-secret://plural.sh/instances/i-3/scm/github.com",
+      "ActorJWT": false,
+      "Prefix": "",
+      "ActorJWTAudiences": null,
+      "ActorJWTExpirationSeconds": 0,
+      "ExtraHeaders": [
+        {
+          "Header": "PRIVATE-TOKEN",
+          "SecretURI": "ate-secret://plural.sh/instances/i-3/scm-token/github.com"
+        }
+      ]
+    },
+    {
+      "Host": "objects.githubusercontent.com",
+      "Port": 443,
+      "Scheme": "https",
+      "InjectHeader": "",
+      "SecretURI": "",
+      "ActorJWT": false,
+      "Prefix": "",
+      "ActorJWTAudiences": null,
+      "ActorJWTExpirationSeconds": 0,
+      "ExtraHeaders": null
+    },
+    {
+      "Host": "github-releases.githubusercontent.com",
+      "Port": 443,
+      "Scheme": "https",
+      "InjectHeader": "",
+      "SecretURI": "",
+      "ActorJWT": false,
+      "Prefix": "",
+      "ActorJWTAudiences": null,
+      "ActorJWTExpirationSeconds": 0,
+      "ExtraHeaders": null
+    },
+    {
+      "Host": "release-assets.githubusercontent.com",
+      "Port": 443,
+      "Scheme": "https",
+      "InjectHeader": "",
+      "SecretURI": "",
+      "ActorJWT": false,
+      "Prefix": "",
+      "ActorJWTAudiences": null,
+      "ActorJWTExpirationSeconds": 0,
+      "ExtraHeaders": null
+    },
+    {
+      "Host": "github-cloud.githubusercontent.com",
+      "Port": 443,
+      "Scheme": "https",
+      "InjectHeader": "",
+      "SecretURI": "",
+      "ActorJWT": false,
+      "Prefix": "",
+      "ActorJWTAudiences": null,
+      "ActorJWTExpirationSeconds": 0,
+      "ExtraHeaders": null
+    },
+    {
+      "Host": "github-cloud.s3.amazonaws.com",
+      "Port": 443,
+      "Scheme": "https",
+      "InjectHeader": "",
+      "SecretURI": "",
+      "ActorJWT": false,
+      "Prefix": "",
+      "ActorJWTAudiences": null,
+      "ActorJWTExpirationSeconds": 0,
+      "ExtraHeaders": null
+    },
+    {
+      "Host": "bitbucket.org",
+      "Port": 443,
+      "Scheme": "https",
+      "InjectHeader": "Authorization",
+      "SecretURI": "ate-secret://plural.sh/instances/i-3/scm/bitbucket.org",
+      "ActorJWT": false,
+      "Prefix": "",
+      "ActorJWTAudiences": null,
+      "ActorJWTExpirationSeconds": 0,
+      "ExtraHeaders": [
+        {
+          "Header": "PRIVATE-TOKEN",
+          "SecretURI": "ate-secret://plural.sh/instances/i-3/scm-token/bitbucket.org"
+        }
+      ]
+    },
+    {
+      "Host": "api.bitbucket.org",
+      "Port": 443,
+      "Scheme": "https",
+      "InjectHeader": "Authorization",
+      "SecretURI": "ate-secret://plural.sh/instances/i-3/scm/bitbucket.org",
+      "ActorJWT": false,
+      "Prefix": "",
+      "ActorJWTAudiences": null,
+      "ActorJWTExpirationSeconds": 0,
+      "ExtraHeaders": [
+        {
+          "Header": "PRIVATE-TOKEN",
+          "SecretURI": "ate-secret://plural.sh/instances/i-3/scm-token/bitbucket.org"
+        }
+      ]
+    },
+    {
+      "Host": "bbuseruploads.s3.amazonaws.com",
+      "Port": 443,
+      "Scheme": "https",
+      "InjectHeader": "",
+      "SecretURI": "",
+      "ActorJWT": false,
+      "Prefix": "",
+      "ActorJWTAudiences": null,
+      "ActorJWTExpirationSeconds": 0,
+      "ExtraHeaders": null
+    },
+    {
+      "Host": "console.example.com",
+      "Port": 443,
+      "Scheme": "https",
+      "InjectHeader": "Authorization",
+      "SecretURI": "ate-secret://plural.sh/instances/i-3/console",
+      "ActorJWT": false,
+      "Prefix": "",
+      "ActorJWTAudiences": null,
+      "ActorJWTExpirationSeconds": 0,
+      "ExtraHeaders": null
+    },
+    {
+      "Host": "ai.example.com",
+      "Port": 443,
+      "Scheme": "https",
+      "InjectHeader": "Authorization",
+      "SecretURI": "ate-secret://plural.sh/instances/i-3/ai-proxy",
+      "ActorJWT": false,
+      "Prefix": "",
+      "ActorJWTAudiences": null,
+      "ActorJWTExpirationSeconds": 0,
+      "ExtraHeaders": null
+    },
+    {
+      "Host": "devbox-gateway.plrl.svc",
+      "Port": 443,
+      "Scheme": "https",
+      "InjectHeader": "Authorization",
+      "SecretURI": "",
+      "ActorJWT": true,
+      "Prefix": "Bearer ",
+      "ActorJWTAudiences": [
+        "devbox-mcp"
+      ],
+      "ActorJWTExpirationSeconds": 600,
+      "ExtraHeaders": null
+    },
+    {
+      "Host": "api.anthropic.com",
+      "Port": 443,
+      "Scheme": "https",
+      "InjectHeader": "Authorization",
+      "SecretURI": "ate-secret://plural.sh/instances/i-3/claude-oauth",
+      "ActorJWT": false,
+      "Prefix": "",
+      "ActorJWTAudiences": null,
+      "ActorJWTExpirationSeconds": 0,
+      "ExtraHeaders": null
+    },
+    {
+      "Host": "chatgpt.com",
+      "Port": 443,
+      "Scheme": "https",
+      "InjectHeader": "",
+      "SecretURI": "",
+      "ActorJWT": false,
+      "Prefix": "",
+      "ActorJWTAudiences": null,
+      "ActorJWTExpirationSeconds": 0,
+      "ExtraHeaders": null
+    },
+    {
+      "Host": "auth.openai.com",
+      "Port": 443,
+      "Scheme": "https",
+      "InjectHeader": "",
+      "SecretURI": "",
+      "ActorJWT": false,
+      "Prefix": "",
+      "ActorJWTAudiences": null,
+      "ActorJWTExpirationSeconds": 0,
+      "ExtraHeaders": null
+    },
+    {
+      "Host": "sts.amazonaws.com",
+      "Port": 443,
+      "Scheme": "https",
+      "InjectHeader": "",
+      "SecretURI": "",
+      "ActorJWT": false,
+      "Prefix": "",
+      "ActorJWTAudiences": null,
+      "ActorJWTExpirationSeconds": 0,
+      "ExtraHeaders": null
+    }
+  ]
+}
