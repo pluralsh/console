@@ -294,6 +294,21 @@ const TOOL_STATUS_SEVERITY: Record<string, ChipSeverity> = {
   failed: 'danger',
 }
 
+// Codex's guardian reports each auto-review as a tool call with this id prefix; its status is the verdict.
+const GUARDIAN_REVIEW_PREFIX = 'guardian_assessment:'
+
+const GUARDIAN_REVIEW_TITLE: Record<string, string> = {
+  pending: 'Codex reviewer is checking',
+  in_progress: 'Codex reviewer is checking',
+  completed: 'Approved by Codex reviewer',
+  failed: 'Not approved by Codex reviewer',
+}
+
+const GUARDIAN_REVIEW_STATUS: Record<string, string> = {
+  completed: 'approved',
+  failed: 'not approved',
+}
+
 function ToolCallView({
   toolCall,
   settled,
@@ -307,6 +322,7 @@ function ToolCallView({
   const status = `${toolCall.status ?? (settled ? 'completed' : 'pending')}`
   const hasDiff = content.some((c) => c.__typename === 'DevboxToolCallDiff')
   const locations = (toolCall.locations ?? []).filter(isNonNullable)
+  const review = toolCall.toolCallId?.startsWith(GUARDIAN_REVIEW_PREFIX)
   return (
     <ToolCallSC data-entity="tool-call">
       <Collapsible
@@ -328,14 +344,20 @@ function ToolCallView({
               <ToolIcon size={12} />
             )}
             <ToolTitleSC>
-              {toolCall.title || toolCall.kind || 'Tool call'}
+              {(review && GUARDIAN_REVIEW_TITLE[status]) ||
+                toolCall.title ||
+                toolCall.kind ||
+                'Tool call'}
             </ToolTitleSC>
-            {toolCall.kind && <Chip size="small">{toolCall.kind}</Chip>}
+            {toolCall.kind && !review && (
+              <Chip size="small">{toolCall.kind}</Chip>
+            )}
             <Chip
               size="small"
               severity={TOOL_STATUS_SEVERITY[status] ?? 'neutral'}
             >
-              {status.replace(/_/g, ' ')}
+              {(review && GUARDIAN_REVIEW_STATUS[status]) ||
+                status.replace(/_/g, ' ')}
             </Chip>
           </Flex>
         }

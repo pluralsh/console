@@ -399,9 +399,22 @@ defmodule Console.Devboxes.Ingest do
       options: Acp.get(permission, :options) && Enum.map(Acp.get(permission, :options), &permission_option/1),
       response: mapify(attrs[:response]),
       answered_by_id: answered_by && Repo.get(User, answered_by) && answered_by,
+      answered_by_policy: attrs[:answered_by] && blank(Acp.get(attrs[:answered_by], :policy)),
       answered_at: Acp.timestamp(attrs[:answered_at]),
+      review: interaction_review(attrs[:review]),
       revision: attrs[:revision]
     })
+  end
+
+  defp interaction_review(nil), do: nil
+  defp interaction_review(review) do
+    %{
+      verdict: blank(Acp.get(review, :verdict)),
+      confidence: Acp.get(review, :confidence),
+      risk: blank(Acp.get(review, :risk)),
+      model: blank(Acp.get(review, :model)),
+      escalation: blank(Acp.get(review, :escalation))
+    }
   end
 
   defp permission_option(opt), do: %{option_id: Acp.get(opt, :option_id), name: Acp.get(opt, :name), kind: Acp.get(opt, :kind)}

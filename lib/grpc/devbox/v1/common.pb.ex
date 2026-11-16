@@ -49,6 +49,21 @@ defmodule Devbox.V1.BillingMode do
   field :BILLING_MODE_SUBSCRIPTION, 2
 end
 
+defmodule Devbox.V1.Autonomy do
+  @moduledoc false
+
+  use Protobuf,
+    enum: true,
+    full_name: "devbox.v1.Autonomy",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :AUTONOMY_UNSPECIFIED, 0
+  field :AUTONOMY_MANUAL, 1
+  field :AUTONOMY_AUTO, 2
+  field :AUTONOMY_FULL, 3
+end
+
 defmodule Devbox.V1.SnapshotFidelity do
   @moduledoc false
 
@@ -139,6 +154,18 @@ defmodule Devbox.V1.SuspendReason do
   field :SUSPEND_REASON_SNAPSHOT, 6
 end
 
+defmodule Devbox.V1.AutonomyPolicy do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "devbox.v1.AutonomyPolicy",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :default, 1, type: Devbox.V1.Autonomy, enum: true
+  field :max, 2, type: Devbox.V1.Autonomy, enum: true
+end
+
 defmodule Devbox.V1.ErrorDetail.MetadataEntry do
   @moduledoc false
 
@@ -176,6 +203,7 @@ defmodule Devbox.V1.Principal do
   field :user_id, 1, type: :string, json_name: "userId"
   field :email, 2, type: :string
   field :name, 3, type: :string
+  field :policy, 4, type: :string
 end
 
 defmodule Devbox.V1.RepositorySpec do

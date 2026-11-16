@@ -63,12 +63,19 @@ export function DevboxInteractionCard({
             {interaction.state?.toLowerCase()}
             {interaction.answeredBy?.name
               ? ` by ${interaction.answeredBy.name}`
-              : ''}
+              : interaction.answeredByPolicy?.startsWith('autonomy:')
+                ? ` by ${interaction.answeredByPolicy.slice('autonomy:'.length)} autonomy`
+                : ''}
           </Chip>
         )}
       </Flex>
       {interaction.message && (
         <CaptionP $color="text-light">{interaction.message}</CaptionP>
+      )}
+      {interaction.review && (
+        <CaptionP $color="text-xlight">
+          {reviewSummary(interaction.review)}
+        </CaptionP>
       )}
       {pending &&
         (interaction.kind === DevboxInteractionKind.Permission ? (
@@ -103,6 +110,25 @@ export function DevboxInteractionCard({
       {error}
     </InteractionSC>
   )
+}
+
+// the devbox reviewer's verdict at autonomy auto, and why it still asked a human if it did
+export function reviewSummary(
+  review: NonNullable<DevboxInteractionFragment['review']>
+): string {
+  const details = [
+    review.verdict &&
+      (review.confidence != null
+        ? `${review.verdict} at ${Math.round(review.confidence * 100)}%`
+        : review.verdict),
+    review.risk && review.risk !== 'none'
+      ? `risk: ${review.risk.replaceAll('_', ' ')}`
+      : null,
+  ].filter(Boolean)
+  const suffix = details.length ? ` (${details.join(', ')})` : ''
+  return review.escalation
+    ? `Asked you because ${review.escalation}${suffix}`
+    : `Approved by the reviewer${suffix}`
 }
 
 const defaultTitle = (kind: Nullable<DevboxInteractionKind>) =>

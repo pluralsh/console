@@ -226,6 +226,7 @@ func (m *Manager) applyStateLocked(s *session, ch acp.Change) {
 		return
 	case acp.StateConfigOptionUpdate:
 		s.options = mergeConfigOptions(s.options, acp.Arr(p, "configOptions"))
+		m.syncAutonomyLocked(s)
 	case acp.StateCommandsUpdate:
 		s.commands = nil
 		for _, c := range acp.Arr(p, "availableCommands") {
@@ -252,11 +253,13 @@ func (m *Manager) applyStateLocked(s *session, ch acp.Change) {
 		}
 	case acp.StateCurrentModeUpdate:
 		mode := acp.Str(p, "currentModeId")
+		s.modeUpdates++
 		for _, o := range s.options {
-			if o.synthetic == "mode" {
+			if o.synthetic == modeCategory {
 				o.raw["currentValue"] = mode
 			}
 		}
+		m.syncAutonomyLocked(s)
 	}
 	m.emitDeltaLocked(&devboxv1.Delta{SessionId: s.id, Op: devboxv1.DeltaOp_DELTA_OP_STATE, StateKind: ch.StateKind, PayloadJson: acp.MustJSON(p)})
 }

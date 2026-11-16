@@ -68,7 +68,7 @@ func (m *Manager) resolveInteractionLocked(in *interaction, state devboxv1.Inter
 		return
 	}
 	for _, other := range m.interactions {
-		if other.proto.GetThreadId() == t.id && other.proto.GetState() == devboxv1.InteractionState_INTERACTION_STATE_PENDING {
+		if !other.reviewing && other.proto.GetThreadId() == t.id && other.proto.GetState() == devboxv1.InteractionState_INTERACTION_STATE_PENDING {
 			return
 		}
 	}
@@ -114,6 +114,32 @@ func (m *Manager) onPermissionRequest(ctx context.Context, c *agentConn, params 
 	}
 	in := m.newInteractionLocked(s, devboxv1.InteractionKind_INTERACTION_KIND_PERMISSION, title, acp.Str(tc, "toolCallId"), params)
 	in.proto.Request = &devboxv1.Interaction_Permission{Permission: pr}
+	if id := m.autoApproveLocked(s, pr); id != "" {
+		in.proto.AnsweredAt = in.proto.GetCreatedAt()
+		return m.answerByPolicyLocked(in, id, AutonomyPrincipal(devboxv1.Autonomy_AUTONOMY_FULL)), nil
+	}
+	if m.reviewingLocked(s.thread) && allowOption(pr) != "" {
+		in.reviewing = true
+		rr := m.reviewRequestLocked(s, tc)
+		m.mu.Unlock()
+		review := m.review(ctx, rr)
+		m.mu.Lock()
+		in.reviewing = false
+		in.proto.Review = review
+		if in.proto.GetState() != devboxv1.InteractionState_INTERACTION_STATE_PENDING || ctx.Err() != nil {
+			// Cancelled while under review: the turn was cancelled or the agent withdrew the request.
+			m.resolveInteractionLocked(in, devboxv1.InteractionState_INTERACTION_STATE_CANCELLED, nil, nil)
+			delete(m.interactions, in.proto.GetInteractionId())
+			m.mu.Unlock()
+			return permissionCancelled, nil
+		}
+		if review.GetEscalation() == "" {
+			in.proto.AnsweredAt = timestamppb.New(m.clock.Now())
+			return m.answerByPolicyLocked(in, allowOption(pr), ReviewerPrincipal()), nil
+		}
+		m.log.Info("reviewer escalated a permission request", "thread", in.proto.GetThreadId(), "verdict", review.GetVerdict(),
+			"confidence", review.GetConfidence(), "risk", review.GetRisk(), "reason", review.GetEscalation())
+	}
 	m.publishInteractionLocked(in)
 	m.mu.Unlock()
 
@@ -122,6 +148,21 @@ func (m *Manager) onPermissionRequest(ctx context.Context, c *agentConn, params 
 		return map[string]any{"outcome": map[string]any{"outcome": "selected", "optionId": po.GetSelectedOptionId()}}, nil
 	}
 	return permissionCancelled, nil
+}
+
+// answerByPolicyLocked records a permission request the daemon answered itself, so the timeline shows what was
+// approved and by which policy, and returns the agent's response. It releases the lock.
+func (m *Manager) answerByPolicyLocked(in *interaction, optionID string, by *devboxv1.Principal) any {
+	in.proto.State = devboxv1.InteractionState_INTERACTION_STATE_ANSWERED
+	in.proto.Response = &devboxv1.InteractionResponse{Response: &devboxv1.InteractionResponse_Permission{
+		Permission: &devboxv1.PermissionOutcome{Outcome: &devboxv1.PermissionOutcome_SelectedOptionId{SelectedOptionId: optionID}},
+	}}
+	in.proto.AnsweredBy = by
+	m.emitLocked(&devboxv1.DaemonEvent{Event: &devboxv1.DaemonEvent_Interaction{Interaction: in.proto}})
+	delete(m.interactions, in.proto.GetInteractionId())
+	m.dirty = true
+	m.mu.Unlock()
+	return map[string]any{"outcome": map[string]any{"outcome": "selected", "optionId": optionID}}
 }
 
 // onElicitation serves `elicitation/create` (form and URL modes).
@@ -255,7 +296,7 @@ func (m *Manager) Interactions() []*devboxv1.Interaction {
 	defer m.mu.Unlock()
 	var out []*devboxv1.Interaction
 	for _, in := range m.interactions {
-		if in.proto.GetState() == devboxv1.InteractionState_INTERACTION_STATE_PENDING {
+		if !in.reviewing && in.proto.GetState() == devboxv1.InteractionState_INTERACTION_STATE_PENDING {
 			out = append(out, in.proto)
 		}
 	}

@@ -95,6 +95,8 @@ defmodule Devbox.V1.InitializeRequest do
 
   field :request_token_jwks, 20, type: :bytes, json_name: "requestTokenJwks"
   field :env, 21, repeated: true, type: Devbox.V1.InitializeRequest.EnvEntry, map: true
+  field :autonomy, 22, type: Devbox.V1.AutonomyPolicy
+  field :decision_review, 23, type: :bool, json_name: "decisionReview"
 end
 
 defmodule Devbox.V1.InitializeResponse do

@@ -5,6 +5,8 @@ package daemon
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -188,7 +190,7 @@ func New(cfg Config) (*Daemon, error) {
 	d.agents = agents.New(agents.Options{Home: cfg.Home, StateDir: cfg.StateDir, Emitter: agents.EmitterFunc(d.emit),
 		Head: d.events.Head, Transcript: d.transcript, Launcher: launcher{d}, Supervisor: d.sup, Clock: cfg.Clock, Log: d.log.With("component", "agents"),
 		MaxRunning: cfg.MaxRunningThreads, Endpoints: d.endpoints, Worktrees: d.ws.Worktrees,
-		Checkouts: d.ws.CheckoutInfo, ExtraMCPServers: d.extraMCPServers})
+		Checkouts: d.ws.CheckoutInfo, ExtraMCPServers: d.extraMCPServers, ReviewClient: d.reviewClient()})
 
 	sampler := &cpuSampler{d: d, inner: &idle.ProcSampler{Root: "/proc"}}
 	d.idle = idle.New(cfg.Clock, idle.PolicyOf(nil), idle.Sources{
@@ -352,6 +354,23 @@ func (d *Daemon) endpoints() *devboxv1.HarnessEndpoints {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 	return d.req.GetEndpoints()
+}
+
+// reviewClient is the agent reviewer's client for the AI proxy, which it reaches through the egress proxy's TLS
+// interception like the harnesses do.
+func (d *Daemon) reviewClient() *http.Client {
+	tr := http.DefaultTransport.(*http.Transport).Clone()
+	if d.trustOK {
+		if pem, err := os.ReadFile(d.cfg.TrustBundle()); err == nil {
+			pool, _ := x509.SystemCertPool()
+			if pool == nil {
+				pool = x509.NewCertPool()
+			}
+			pool.AppendCertsFromPEM(pem)
+			tr.TLSClientConfig = &tls.Config{MinVersion: tls.VersionTLS12, RootCAs: pool}
+		}
+	}
+	return &http.Client{Transport: tr}
 }
 
 func (d *Daemon) sandboxCredentials() devboxv1.SandboxCredentialsClient {
@@ -638,6 +657,8 @@ func (d *Daemon) apply(req *devboxv1.InitializeRequest) {
 	}
 	d.agents.Configure(req.GetInstanceId(), req.GetAgent(), req.GetModel(), req.GetConfigOptions(), req.GetAgents(),
 		int(req.GetMaxRunningThreads()))
+	d.agents.SetAutonomy(req.GetAutonomy())
+	d.agents.SetDecisionReview(req.GetDecisionReview())
 	d.idle.SetPolicy(idle.PolicyOf(req.GetIdlePolicy()))
 	d.idle.SetLeases(req.GetLeases(), req.GetLeaseGeneration())
 	if err := d.creds.SetIdentities(req.GetCloudIdentities()); err != nil {

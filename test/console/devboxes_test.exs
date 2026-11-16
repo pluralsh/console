@@ -3,7 +3,7 @@ defmodule Console.DevboxesTest do
   use Mimic
   alias Console.{Devboxes, PubSub}
   alias Console.Devboxes.Control
-  alias Console.Schema.{DevboxInstance, DevboxSnapshot, WorkbenchDevbox}
+  alias Console.Schema.{Devbox, DevboxInstance, DevboxSnapshot, WorkbenchDevbox}
 
   @catalog %{
     name: "dev",
@@ -48,6 +48,20 @@ defmodule Console.DevboxesTest do
       assert found.id == conn.id
 
       {:error, _} = Devboxes.upsert_devbox(Map.put(@catalog, :scm_connections, ["missing"]), cluster)
+    end
+
+    test "it stores the runner's autonomy policy, defaulting to auto" do
+      cluster = insert(:cluster)
+
+      {:ok, devbox} = Devboxes.upsert_devbox(@catalog, cluster)
+      assert Devbox.autonomy(devbox) == %{default: :auto, max: :auto}
+
+      {:ok, devbox} = Devboxes.upsert_devbox(Map.put(@catalog, :autonomy, %{default: :full, max: :manual}), cluster)
+      assert Devbox.autonomy(devbox) == %{default: :manual, max: :manual}
+      refute Devbox.autonomy_allowed?(devbox, "auto")
+
+      {:ok, devbox} = Devboxes.upsert_devbox(Map.put(@catalog, :autonomy, %{max: :full}), cluster)
+      assert Devbox.autonomy_allowed?(devbox, "full")
     end
 
     test "it requires exactly one default agent" do
@@ -160,6 +174,22 @@ defmodule Console.DevboxesTest do
       {:error, _} = Devboxes.create_instance(%{devbox_id: devbox.id, model: "haiku"}, wb.id, user)
       {:error, _} = Devboxes.create_instance(%{devbox_id: devbox.id, agent: :gemini}, wb.id, user)
       {:error, _} = Devboxes.create_instance(%{devbox_id: devbox.id, config_options: [%{config_id: "mode", value: "yolo"}]}, wb.id, user)
+    end
+
+    test "auto autonomy needs the agent billed to a subscription", %{user: user, workbench: wb, devbox: devbox} do
+      {:error, msg} = Devboxes.create_instance(%{devbox_id: devbox.id, config_options: [%{config_id: "autonomy", value: "auto"}]}, wb.id, user)
+      assert msg =~ "provider that serves decisions"
+
+      {:ok, inst} = Devboxes.create_instance(%{devbox_id: devbox.id, config_options: [%{config_id: "autonomy", value: "manual"}]}, wb.id, user)
+      assert inst.config_options == %{"autonomy" => "manual"}
+    end
+
+    test "auto autonomy on the AI proxy when a decision model can review", %{user: user, workbench: wb, devbox: devbox} do
+      deployment_settings(ai: %{enabled: true, provider: :anthropic, anthropic: %{access_token: "key"}})
+
+      {:ok, inst} = Devboxes.create_instance(%{devbox_id: devbox.id, config_options: [%{config_id: "autonomy", value: "auto"}]}, wb.id, user)
+      assert inst.config_options == %{"autonomy" => "auto"}
+      assert Devboxes.decision_review?()
     end
 
     test "it enforces the repository allowlist", %{user: user, workbench: wb, devbox: devbox} do
@@ -411,6 +441,11 @@ defmodule Console.DevboxesTest do
                 %Console.Schema.DevboxInstanceSession.ConfigOption.Value{value: "plan"},
                 %Console.Schema.DevboxInstanceSession.ConfigOption.Value{value: "code"}
               ]
+            },
+            %Console.Schema.DevboxInstanceSession.ConfigOption{
+              config_id: "autonomy",
+              name: "Autonomy",
+              options: Enum.map(~w(manual auto), &%Console.Schema.DevboxInstanceSession.ConfigOption.Value{value: &1})
             }
           ]
         }

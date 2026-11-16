@@ -107,6 +107,11 @@ spec:
                           BaseUrl is a custom base url to use, for reimplementations
                           of the same API scheme (for instance Together.ai uses the OpenAI API spec)
                         type: string
+                      decisionModel:
+                        description: |-
+                          DecisionModel is a cheap, fast model for decision (classification) calls, like reviewing devbox agent
+                          tool calls. Models without native decision support are emulated through the AI proxy.
+                        type: string
                       embeddingModel:
                         description: EmbeddingModel to use for generating embeddings
                         type: string
@@ -180,6 +185,11 @@ spec:
                         description: |-
                           The azure openai Data plane - inference api version to use,
                           defaults to 2024-10-01-preview or the latest available
+                        type: string
+                      decisionModel:
+                        description: |-
+                          DecisionModel is a cheap, fast model for decision (classification) calls, like reviewing devbox agent
+                          tool calls. Models without native decision support are emulated through the AI proxy.
                         type: string
                       deployments:
                         additionalProperties:
@@ -290,6 +300,11 @@ spec:
                         - key
                         type: object
                         x-kubernetes-map-type: atomic
+                      decisionModel:
+                        description: |-
+                          DecisionModel is a cheap, fast model for decision (classification) calls, like reviewing devbox agent
+                          tool calls. Models without native decision support are emulated through the AI proxy.
+                        type: string
                       deployments:
                         additionalProperties:
                           type: string
@@ -402,6 +417,19 @@ spec:
                     required:
                     - region
                     type: object
+                  decisionProvider:
+                    description: |-
+                      DecisionProvider to use for decision (classification) calls, like reviewing devbox agent tool calls.
+                      Defaults to the first provider with a decision model, falling back to the main provider's models.
+                    enum:
+                    - OPENAI
+                    - OPENAI_COMPATIBLE
+                    - ANTHROPIC
+                    - AZURE
+                    - BEDROCK
+                    - VERTEX
+                    - XAI
+                    type: string
                   embeddingProvider:
                     description: |-
                       EmbeddingProvider to use for generating embeddings. Oftentimes foundational
@@ -599,6 +627,11 @@ spec:
                           of the same API scheme (for instance Together.ai uses the
                           OpenAI API spec).  Should be similar to https://api.openai.com/v1
                         type: string
+                      decisionModel:
+                        description: |-
+                          DecisionModel is a cheap, fast model for decision (classification) calls, like reviewing devbox agent
+                          tool calls. Models without native decision support are emulated through the AI proxy.
+                        type: string
                       embeddingModel:
                         description: EmbeddingModel to use for generating embeddings
                         type: string
@@ -790,6 +823,11 @@ spec:
                         description: BaseUrl is a custom base url to use, for reimplementations
                           of the same API scheme (for instance Together.ai uses the
                           OpenAI API spec).  Should be similar to https://api.openai.com/v1
+                        type: string
+                      decisionModel:
+                        description: |-
+                          DecisionModel is a cheap, fast model for decision (classification) calls, like reviewing devbox agent
+                          tool calls. Models without native decision support are emulated through the AI proxy.
                         type: string
                       embeddingModel:
                         description: EmbeddingModel to use for generating embeddings
@@ -1246,6 +1284,11 @@ spec:
                     description: Vertex holds configuration for using GCP VertexAI
                       to generate LLM insights
                     properties:
+                      decisionModel:
+                        description: |-
+                          DecisionModel is a cheap, fast model for decision (classification) calls, like reviewing devbox agent
+                          tool calls. Models without native decision support are emulated through the AI proxy.
+                        type: string
                       embeddingModel:
                         description: |-
                           EmbeddingModel to use for generating embeddings.
@@ -1338,6 +1381,11 @@ spec:
                         description: BaseUrl is a custom base url to use, for reimplementations
                           of the same API scheme (for instance Together.ai uses the
                           OpenAI API spec).  Should be similar to https://api.openai.com/v1
+                        type: string
+                      decisionModel:
+                        description: |-
+                          DecisionModel is a cheap, fast model for decision (classification) calls, like reviewing devbox agent
+                          tool calls. Models without native decision support are emulated through the AI proxy.
                         type: string
                       embeddingModel:
                         description: EmbeddingModel to use for generating embeddings

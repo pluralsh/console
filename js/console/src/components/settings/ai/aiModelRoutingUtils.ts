@@ -10,19 +10,21 @@ export const DEFAULT_MODEL_ROUTING_OPTION = 'default'
 
 type ModelDefaultField = keyof Pick<
   ModelDefault,
-  'model' | 'toolModel' | 'embeddingModel'
+  'model' | 'toolModel' | 'embeddingModel' | 'decisionModel'
 >
 
 const ModelDefaultField = {
   Model: 'model',
   ToolModel: 'toolModel',
   EmbeddingModel: 'embeddingModel',
+  DecisionModel: 'decisionModel',
 } as const satisfies Record<string, ModelDefaultField>
 
 export const ModelRoutingRole = {
   Chat: 'chat',
   Tool: 'tool',
   Embedding: 'embedding',
+  Decision: 'decision',
 } as const
 
 export type ModelRoutingRole =
@@ -32,6 +34,7 @@ const modelDefaultFieldByRole = {
   [ModelRoutingRole.Chat]: ModelDefaultField.Model,
   [ModelRoutingRole.Tool]: ModelDefaultField.ToolModel,
   [ModelRoutingRole.Embedding]: ModelDefaultField.EmbeddingModel,
+  [ModelRoutingRole.Decision]: ModelDefaultField.DecisionModel,
 } as const satisfies Record<ModelRoutingRole, ModelDefaultField>
 
 export const providerSettingsKey: Record<
@@ -52,12 +55,14 @@ const modelRoutingStateKeys = [
   'provider',
   'toolProvider',
   'embeddingProvider',
+  'decisionProvider',
 ] as const
 
 export const modelRoutingRoles = [
   ModelRoutingRole.Chat,
   ModelRoutingRole.Embedding,
   ModelRoutingRole.Tool,
+  ModelRoutingRole.Decision,
 ] as const satisfies readonly ModelRoutingRole[]
 
 export const modelRoutingRoleMeta = {
@@ -75,6 +80,12 @@ export const modelRoutingRoleMeta = {
   [ModelRoutingRole.Tool]: {
     title: 'Tool model',
     description: 'Used for complex agentic inference.',
+    modelHint: 'Configured in the provider connection settings.',
+  },
+  [ModelRoutingRole.Decision]: {
+    title: 'Decision model',
+    description:
+      'Classifies and approves actions, like devbox agent permission requests at autonomy auto. Without one, the AI proxy picks from your providers.',
     modelHint: 'Configured in the provider connection settings.',
   },
 } as const satisfies Record<
@@ -101,6 +112,8 @@ function modelFieldKeyFor(
         return 'modelId'
       case ModelRoutingRole.Tool:
         return 'toolModelId'
+      case ModelRoutingRole.Decision:
+        return 'decisionModel'
       default:
         return 'embeddingModel'
     }
@@ -129,6 +142,8 @@ function selectedProviderForRole(
       return routing.provider
     case ModelRoutingRole.Tool:
       return routing.toolProvider
+    case ModelRoutingRole.Decision:
+      return routing.decisionProvider
     default:
       return routing.embeddingProvider
   }
@@ -240,6 +255,8 @@ export function setRoutingProvider(
       return provider ? { ...routing, provider } : routing
     case ModelRoutingRole.Tool:
       return { ...routing, toolProvider: provider }
+    case ModelRoutingRole.Decision:
+      return { ...routing, decisionProvider: provider }
     default:
       return { ...routing, embeddingProvider: provider }
   }

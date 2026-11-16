@@ -8,7 +8,10 @@
 //	subagent    a Task tool call and a child update tagged with claude-agent-acp's parentToolUseId
 //	unknown     an unknown content block and an unknown session update kind
 //	authfail    fail the turn with -32000 "Authentication required"
+//	mode:<id>   switch the session's mode itself (current_mode_update), like leaving plan mode
 //	anything    echo it back as "echo:<text>"
+//
+// Like a Claude model without Auto support, the "smart" model answers the auto mode with acceptEdits.
 package fakeacp
 
 import (
@@ -26,6 +29,10 @@ import (
 
 const (
 	fastModel = "fast"
+	// noAutoModel answers autoMode with autoFallback, like claude-agent-acp on models without Auto support.
+	noAutoModel  = "smart"
+	autoMode     = "auto"
+	autoFallback = "acceptEdits"
 	// EnvVar makes a re-executed test binary run the fake agent.
 	EnvVar = "DEVBOX_FAKE_ACP"
 	// LogEnv is the request log path.
@@ -37,7 +44,7 @@ func Enabled() bool { return os.Getenv(EnvVar) == "1" }
 
 // Main runs the fake agent until stdin closes.
 func Main() {
-	f := &fakeAgent{models: map[string]string{}, cancels: map[string]context.CancelFunc{}}
+	f := &fakeAgent{models: map[string]string{}, modes: map[string]string{}, cancels: map[string]context.CancelFunc{}}
 	if p := os.Getenv(LogEnv); p != "" {
 		f.log, _ = os.OpenFile(p, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o600)
 	}
@@ -51,6 +58,7 @@ type fakeAgent struct {
 	mu       sync.Mutex
 	n        int
 	models   map[string]string
+	modes    map[string]string
 	cancels  map[string]context.CancelFunc
 	active   int
 	logMu    sync.Mutex
@@ -78,6 +86,16 @@ func (f *fakeAgent) modelOptions(current string) []any {
 			map[string]any{"value": "smart", "name": "Smart"},
 		},
 	}}
+}
+
+// modes mirrors claude-agent-acp's v1 session modes.
+func modes(current string) map[string]any {
+	ids := []string{"default", "acceptEdits", "plan", "auto", "bypassPermissions"}
+	avail := make([]any, 0, len(ids))
+	for _, id := range ids {
+		avail = append(avail, map[string]any{"id": id, "name": id})
+	}
+	return map[string]any{"currentModeId": current, "availableModes": avail}
 }
 
 func (f *fakeAgent) update(sid string, u map[string]any) {
@@ -114,7 +132,7 @@ func (f *fakeAgent) HandleRequest(ctx context.Context, method string, raw json.R
 				map[string]any{"name": "review", "description": "Review the diff", "input": map[string]any{"hint": "focus"}},
 			}})
 		}()
-		return map[string]any{"sessionId": id, "configOptions": f.modelOptions("fast")}, nil
+		return map[string]any{"sessionId": id, "configOptions": f.modelOptions("fast"), "modes": modes("default")}, nil
 	case acp.MethodSessionResume, acp.MethodSessionLoad:
 		f.mu.Lock()
 		cur := f.models[sid]
@@ -122,7 +140,20 @@ func (f *fakeAgent) HandleRequest(ctx context.Context, method string, raw json.R
 		if cur == "" {
 			cur = fastModel
 		}
-		return map[string]any{"configOptions": f.modelOptions(cur)}, nil
+		// Like claude-agent-acp, a reopened session starts in the default mode.
+		return map[string]any{"configOptions": f.modelOptions(cur), "modes": modes("default")}, nil
+	case acp.MethodSetMode:
+		mode := acp.Str(params, "modeId")
+		f.mu.Lock()
+		if mode == autoMode && f.models[sid] == noAutoModel {
+			mode = autoFallback
+		}
+		f.modes[sid] = mode
+		f.mu.Unlock()
+		if mode != acp.Str(params, "modeId") {
+			f.update(sid, map[string]any{"sessionUpdate": "current_mode_update", "currentModeId": mode})
+		}
+		return map[string]any{}, nil
 	case acp.MethodSessionList:
 		f.mu.Lock()
 		defer f.mu.Unlock()
@@ -141,7 +172,14 @@ func (f *fakeAgent) HandleRequest(ctx context.Context, method string, raw json.R
 		}
 		f.mu.Lock()
 		f.models[sid] = v
+		downgrade := v == noAutoModel && f.modes[sid] == autoMode
+		if downgrade {
+			f.modes[sid] = autoFallback
+		}
 		f.mu.Unlock()
+		if downgrade {
+			f.update(sid, map[string]any{"sessionUpdate": "current_mode_update", "currentModeId": autoFallback})
+		}
 		return map[string]any{"configOptions": f.modelOptions(v)}, nil
 	case acp.MethodSessionCancel:
 		f.mu.Lock()
@@ -218,6 +256,12 @@ func (f *fakeAgent) prompt(sid string, params acp.Object) (any, *acp.RequestErro
 	case text == "unknown":
 		f.update(sid, map[string]any{"sessionUpdate": "agent_message_chunk", "content": map[string]any{"type": "hologram", "shape": "cube", "size": 3}})
 		f.update(sid, map[string]any{"sessionUpdate": "future_widget", "widgetId": "w1", "payload": map[string]any{"a": 1, "nested": []any{"x"}}})
+	case strings.HasPrefix(text, "mode:"):
+		f.mu.Lock()
+		f.modes[sid] = strings.TrimPrefix(text, "mode:")
+		f.mu.Unlock()
+		f.update(sid, map[string]any{"sessionUpdate": "current_mode_update", "currentModeId": strings.TrimPrefix(text, "mode:")})
+		msg("mode changed")
 	case text == "authfail":
 		return nil, &acp.RequestError{Code: -32000, Message: "Authentication required"}
 	default:

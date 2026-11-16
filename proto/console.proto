@@ -17,6 +17,9 @@ message AiConfig {
   AzureOpenAiConfig azure = 6;
   OpenAiConfig openaiCompatible = 7;
   OpenAiConfig xai = 8;
+  // the default and decision providers, as console's ai provider names (openai, anthropic, vertex, ...)
+  optional string provider = 9;
+  optional string decisionProvider = 10;
 }
 
 message HttpProxyConfig {
@@ -50,6 +53,7 @@ message OpenAiConfig {
   optional OpenAiTokenExchange tokenExchange = 7;
   optional OpenAiMethod method = 8;
   optional HttpProxyConfig proxy = 9;
+  optional string decisionModel = 10;
 }
 
 message AnthropicConfig {
@@ -60,6 +64,7 @@ message AnthropicConfig {
   optional string toolModel = 5;
   repeated string proxyModels = 6;
   optional HttpProxyConfig proxy = 7;
+  optional string decisionModel = 8;
 }
 
 message VertexAiConfig {
@@ -73,6 +78,7 @@ message VertexAiConfig {
   optional string location = 8;
   repeated string proxyModels = 9;
   optional HttpProxyConfig proxy = 10;
+  optional string decisionModel = 11;
 }
 
 enum BedrockEndpoint {
@@ -98,6 +104,7 @@ message BedrockConfig {
   optional BedrockEndpoint endpoint = 10;
   repeated BedrockModelSettings modelSettings = 11;
   optional HttpProxyConfig proxy = 12;
+  optional string decisionModelId = 13;
 }
 
 message AzureOpenAiConfig {
@@ -110,6 +117,7 @@ message AzureOpenAiConfig {
   repeated string proxyModels = 8;
   map<string, string> deployments = 9;
   optional HttpProxyConfig proxy = 10;
+  optional string decisionModel = 11;
 }
 
 message ProxyAuthenticationRequest {

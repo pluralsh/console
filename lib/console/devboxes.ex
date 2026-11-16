@@ -176,6 +176,9 @@ defmodule Console.Devboxes do
       resolve_repositories(devbox, wb, attrs[:repositories])
     end)
     |> add_operation(:billing, fn %{devbox: devbox, workbench: wb} -> Billing.resolve(devbox, wb, user, attrs[:agent_billing]) end)
+    |> add_operation(:autonomy, fn %{catalog: catalog, billing: billing} ->
+      check_proxy_auto(%DevboxInstance{agent_billing: billing}, catalog.agent, catalog.config_options)
+    end)
     |> add_operation(:instance, fn %{devbox: devbox, snapshot: snapshot, catalog: catalog, repositories: repos, billing: billing} ->
       %DevboxInstance{workbench_id: workbench_id, devbox_id: devbox.id, user_id: user_id}
       |> DevboxInstance.changeset(%{
@@ -244,7 +247,8 @@ defmodule Console.Devboxes do
   def resolve_catalog(%Devbox{} = devbox, attrs) do
     with %Devbox.Agent{} = agent <- Devbox.agent(devbox, attrs[:agent]),
          {:ok, model} <- resolve_model(agent, attrs[:model]),
-         {:ok, opts} <- resolve_config_options(agent.config_options, attrs[:config_options]) do
+         {:ok, opts} <- resolve_config_options(agent.config_options, attrs[:config_options]),
+         {:ok, opts} <- check_autonomy(devbox, opts) do
       {:ok, %{agent: agent.type, model: model, config_options: opts}}
     else
       nil -> {:error, "agent #{attrs[:agent] || "default"} is not offered by devbox #{devbox.name}"}
@@ -265,6 +269,48 @@ defmodule Console.Devboxes do
       false -> {:error, "model #{model} is not offered for the #{agent.type} agent, available models: #{Enum.join(Devbox.Agent.offered_models(agent), ", ")}"}
     end
   end
+
+  @doc """
+  Rejects an `autonomy` config option value above the box's cap. The probed catalog lists every level an agent
+  supports, whatever the runner allows; the daemon enforces the cap too.
+  """
+  @spec check_autonomy(Devbox.t, map) :: {:ok, map} | error
+  def check_autonomy(devbox, %{"autonomy" => level} = opts) do
+    case Devbox.autonomy_allowed?(devbox, level) do
+      true -> {:ok, opts}
+      false -> {:error, "autonomy #{level} is above this devbox's max of #{Devbox.autonomy(devbox).max}"}
+    end
+  end
+  def check_autonomy(_, opts), do: {:ok, opts}
+
+  @doc """
+  Rejects `autonomy: auto` for an agent billed to the AI proxy when the proxy can't serve decisions: the
+  harnesses' own reviewers call models the proxy can't route, so there the daemon reviews with a decision model
+  instead (see `decision_review?/0`). The probed catalog lists auto regardless, since it covers subscription-billed
+  instances too.
+  """
+  @spec check_proxy_auto(DevboxInstance.t, atom | binary, map) :: {:ok, map} | error
+  def check_proxy_auto(inst, agent, %{"autonomy" => "auto"} = opts) do
+    case Billing.subscription?(inst, agent) || decision_review?() do
+      true -> {:ok, opts}
+      false -> {:error, "autonomy auto needs the #{agent} agent billed to a subscription, or AI enabled in deployment settings with a provider that serves decisions"}
+    end
+  end
+  def check_proxy_auto(_, _, opts), do: {:ok, opts}
+
+  @doc """
+  Whether the AI proxy serves `/v1/decisions`, so devbox daemons can review permission requests at autonomy auto:
+  AI is enabled with a provider nexus routes decisions to (natively, or emulated with the provider's chat model).
+  """
+  @spec decision_review?() :: boolean
+  def decision_review?() do
+    case Console.Deployments.Settings.cached() do
+      %{ai: %{enabled: true} = ai} -> decision_provider?(ai.decision_provider) || decision_provider?(ai.provider)
+      _ -> false
+    end
+  end
+
+  defp decision_provider?(provider), do: provider in ~w(openai openai_compatible anthropic azure bedrock vertex xai)a
 
   @doc """
   Validates config option values (`[%{config_id, value}]`) against the options the agent advertises.

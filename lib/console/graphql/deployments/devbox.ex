@@ -24,6 +24,7 @@ defmodule Console.GraphQl.Deployments.Devbox do
   ecto_enum :devbox_snapshot_status, DevboxSnapshot.Status
   ecto_enum :pull_request_source, PullRequest.Source
   ecto_enum :devbox_cloud_provider, Devbox.CloudProvider
+  ecto_enum :devbox_autonomy, Devbox.Autonomy
   ecto_enum :agent_credential_provider, AgentCredential.Provider
   ecto_enum :agent_credential_kind, AgentCredential.Kind
   ecto_enum :agent_credential_status, AgentCredential.Status
@@ -107,6 +108,7 @@ defmodule Console.GraphQl.Deployments.Devbox do
     field :agents,               list_of(:devbox_agent_attributes), description: "the probed agent catalog"
     field :http_allowlist,       list_of(:devbox_http_allow_attributes), description: "hosts instances may reach"
     field :idle_policy,          :devbox_idle_policy_attributes
+    field :autonomy,             :devbox_autonomy_attributes
     field :conditions,           list_of(:devbox_condition_attributes)
     field :cloud_identities,     list_of(:devbox_cloud_identity_attributes),
       description: "cloud identities instances get workload identity tokens for"
@@ -189,6 +191,11 @@ defmodule Console.GraphQl.Deployments.Devbox do
     field :host,        non_null(:string)
     field :port,        :integer
     field :passthrough, :boolean
+  end
+
+  input_object :devbox_autonomy_attributes do
+    field :default, :devbox_autonomy, description: "the level new threads start at"
+    field :max,     :devbox_autonomy, description: "the highest level a thread may use"
   end
 
   input_object :devbox_idle_policy_attributes do
@@ -299,6 +306,12 @@ defmodule Console.GraphQl.Deployments.Devbox do
     field :agents,               list_of(:devbox_agent)
     field :http_allowlist,       list_of(:devbox_http_allow)
     field :idle_policy,          :devbox_idle_policy, resolve: fn devbox, _, _ -> {:ok, Devbox.idle_policy(devbox)} end
+    field :autonomy,             non_null(:devbox_autonomy_policy),
+      description: "how agents' permission requests are answered",
+      resolve: fn devbox, _, _ -> {:ok, Devbox.autonomy(devbox)} end
+    field :decision_review,      :boolean,
+      description: "whether agents billed to the AI proxy can run at autonomy auto, reviewed by a decision model",
+      resolve: fn _, _, _ -> {:ok, Console.Devboxes.decision_review?()} end
     field :conditions,           list_of(:devbox_condition)
 
     field :cloud_identities, list_of(:devbox_cloud_identity)
@@ -404,6 +417,11 @@ defmodule Console.GraphQl.Deployments.Devbox do
     field :host,        non_null(:string)
     field :port,        :integer
     field :passthrough, :boolean
+  end
+
+  object :devbox_autonomy_policy do
+    field :default, non_null(:devbox_autonomy), description: "the level new threads start at"
+    field :max,     non_null(:devbox_autonomy), description: "the highest level a thread may use"
   end
 
   object :devbox_idle_policy do
@@ -684,8 +702,19 @@ defmodule Console.GraphQl.Deployments.Devbox do
     field :instance,    :devbox_instance, resolve: dataloader(Deployments)
     field :thread,      :devbox_thread, resolve: dataloader(Deployments, :session)
     field :answered_by, :user, resolve: dataloader(User)
+    field :answered_by_policy, :string, description: "set when the devbox answered by policy, e.g. autonomy:full"
+    field :review,             :devbox_interaction_review, description: "the devbox reviewer's verdict at autonomy auto"
 
     timestamps()
+  end
+
+  @desc "A decision model's review of a permission request at autonomy auto"
+  object :devbox_interaction_review do
+    field :verdict,    :string, description: "allow, deny or ask"
+    field :confidence, :float, description: "the verdict's probability, 0 to 1"
+    field :risk,       :string, description: "none, destructive, exfiltration, credentials, out_of_scope or external"
+    field :model,      :string, description: "the decision model that answered"
+    field :escalation, :string, description: "why a human was still asked, when they were"
   end
 
   object :devbox_permission_option do

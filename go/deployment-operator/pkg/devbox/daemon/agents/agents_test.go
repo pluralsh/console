@@ -92,21 +92,35 @@ type harnessT struct {
 
 func newManager(t *testing.T, maxRunning int) *harnessT {
 	t.Helper()
+	return newManagerBilling(t, maxRunning, devboxv1.BillingMode_BILLING_MODE_PROXY)
+}
+
+func newManagerBilling(t *testing.T, maxRunning int, billing devboxv1.BillingMode) *harnessT {
+	t.Helper()
+	return newManagerWith(t, maxRunning, billing, nil)
+}
+
+func newManagerWith(t *testing.T, maxRunning int, billing devboxv1.BillingMode, configure func(*Options)) *harnessT {
+	t.Helper()
 	dir := t.TempDir()
 	logPath := filepath.Join(dir, "agent.log")
 	rec := &recorder{}
 	log := slog.New(slog.NewTextHandler(io.Discard, nil))
-	m := New(Options{
+	opts := Options{
 		Home: filepath.Join(dir, "home"), StateDir: filepath.Join(dir, "state"), Emitter: rec,
 		Launcher: testLauncher{log: logPath}, Supervisor: proc.NewSupervisor(log), Log: log, MaxRunning: maxRunning,
 		Endpoints: func() *devboxv1.HarnessEndpoints {
 			return &devboxv1.HarnessEndpoints{DevboxMcpUrl: "http://gateway/mcp", WorkbenchMcpUrl: "http://console/mcp"}
 		},
-	})
+	}
+	if configure != nil {
+		configure(&opts)
+	}
+	m := New(opts)
 	if err := os.MkdirAll(filepath.Join(dir, "home"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	m.Configure(instance, claude, "", nil, []*devboxv1.AgentLaunch{{Agent: claude, Billing: devboxv1.BillingMode_BILLING_MODE_PROXY}}, maxRunning)
+	m.Configure(instance, claude, "", nil, []*devboxv1.AgentLaunch{{Agent: claude, Billing: billing}}, maxRunning)
 	if err := m.Start(); err != nil {
 		t.Fatal(err)
 	}

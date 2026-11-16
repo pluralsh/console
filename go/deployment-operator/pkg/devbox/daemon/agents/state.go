@@ -36,6 +36,9 @@ type thread struct {
 	closed    bool
 	deleted   bool
 	model     string
+	autonomy  devboxv1.Autonomy
+	// lowering is set while the thread's mode is being reset to the runner's autonomy cap.
+	lowering bool
 
 	queue      []*queuedPrompt
 	running    bool
@@ -43,6 +46,8 @@ type thread struct {
 	turnCancel func()
 	prompts    map[string]string
 	promptIDs  []string
+	// recentPrompts are the text of the last few prompts, context for the reviewer; not persisted.
+	recentPrompts []string
 
 	rev   uint64
 	dirty bool
@@ -86,7 +91,8 @@ func (t *thread) rememberPrompt(promptID, messageID string) {
 }
 
 // cfgOption is a normalized session config option. synthetic is "model" or "mode" when the daemon built it from
-// v1's `models` / `modes` fields, which are changed with session/set_model / session/set_mode.
+// v1's `models` / `modes` fields, which are changed with session/set_model / session/set_mode, and "autonomy"
+// for the daemon's own autonomy option.
 type cfgOption struct {
 	raw       acp.Object
 	synthetic string
@@ -108,6 +114,13 @@ type session struct {
 	meta    acp.Object
 	store   *acp.Store
 	options []*cfgOption
+	// modeView replaces the mode option in reported options: its values within the runner's autonomy cap, or
+	// hidden (an empty object) when autonomy covers every mode. Nil reports the mode option as is.
+	modeView acp.Object
+	// noAuto are the models the agent fell back from its auto mode on (Claude models without Auto support).
+	noAuto map[string]bool
+	// modeUpdates counts current_mode_updates, so a set_mode call can tell the agent reported a different mode.
+	modeUpdates int
 	// commands are the latest available_commands_update, normalized to v2 shapes.
 	commands   []*devboxv1.AvailableCommand
 	foreground *devboxv1.ForegroundState
@@ -129,16 +142,30 @@ type session struct {
 
 func (s *session) configProtos() []*devboxv1.ConfigOption {
 	out := make([]*devboxv1.ConfigOption, 0, len(s.options))
-	for _, o := range s.options {
-		out = append(out, o.proto())
+	for _, raw := range s.reported() {
+		out = append(out, acp.ConfigOptionOf(raw))
 	}
 	return out
 }
 
 func (s *session) configJSON() []any {
 	out := make([]any, 0, len(s.options))
+	for _, raw := range s.reported() {
+		out = append(out, raw)
+	}
+	return out
+}
+
+// reported are the options as shown to console, with the mode option replaced by modeView.
+func (s *session) reported() []acp.Object {
+	out := make([]acp.Object, 0, len(s.options))
 	for _, o := range s.options {
-		out = append(out, o.raw)
+		switch {
+		case o.category() != modeCategory || s.modeView == nil:
+			out = append(out, o.raw)
+		case len(s.modeView) > 0:
+			out = append(out, s.modeView)
+		}
 	}
 	return out
 }
@@ -147,6 +174,8 @@ type interaction struct {
 	proto   *devboxv1.Interaction
 	session *session
 	resp    chan *devboxv1.InteractionResponse
+	// reviewing is set while the daemon's reviewer judges the request; it isn't shown to humans until it's done.
+	reviewing bool
 }
 
 // ---------------------------------------------------------------------------------------------------------------
@@ -184,6 +213,7 @@ type persistedThread struct {
 	Closed    bool              `json:"closed,omitempty"`
 	Deleted   bool              `json:"deleted,omitempty"`
 	Model     string            `json:"model,omitempty"`
+	Autonomy  int32             `json:"autonomy,omitempty"`
 	Revision  uint64            `json:"revision"`
 	PromptIDs []string          `json:"promptIds,omitempty"`
 	Messages  []string          `json:"messages,omitempty"`
@@ -256,7 +286,7 @@ func (m *Manager) saveLocked() error {
 	for _, t := range m.threads {
 		pt := persistedThread{
 			ID: t.id, Agent: int32(t.agent), Cwd: t.cwd, Worktrees: t.worktrees, CreatedAt: t.createdAt, Title: t.title,
-			Imported: t.imported, Closed: t.closed, Deleted: t.deleted, Model: t.model, Revision: t.rev,
+			Imported: t.imported, Closed: t.closed, Deleted: t.deleted, Model: t.model, Autonomy: int32(t.autonomy), Revision: t.rev,
 		}
 		if t.createdBy != nil {
 			pt.CreatedBy, _ = protojson.Marshal(t.createdBy)
@@ -276,7 +306,7 @@ func (m *Manager) saveLocked() error {
 		}
 	}
 	for _, in := range m.interactions {
-		if in.proto.GetState() == devboxv1.InteractionState_INTERACTION_STATE_PENDING {
+		if !in.reviewing && in.proto.GetState() == devboxv1.InteractionState_INTERACTION_STATE_PENDING {
 			raw, _ := protojson.Marshal(in.proto)
 			st.Interactions = append(st.Interactions, persistedInteraction{Proto: raw})
 		}
@@ -301,7 +331,8 @@ func (m *Manager) load() error {
 	for _, pt := range st.Threads {
 		t := &thread{
 			id: pt.ID, agent: devboxv1.AgentType(pt.Agent), cwd: pt.Cwd, worktrees: pt.Worktrees, createdAt: pt.CreatedAt,
-			title: pt.Title, imported: pt.Imported, closed: pt.Closed, deleted: pt.Deleted, model: pt.Model, rev: pt.Revision,
+			title: pt.Title, imported: pt.Imported, closed: pt.Closed, deleted: pt.Deleted, model: pt.Model,
+			autonomy: devboxv1.Autonomy(pt.Autonomy), rev: pt.Revision,
 		}
 		if len(pt.CreatedBy) > 0 {
 			p := &devboxv1.Principal{}

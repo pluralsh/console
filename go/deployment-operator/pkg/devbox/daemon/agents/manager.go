@@ -8,6 +8,7 @@ package agents
 import (
 	"context"
 	"log/slog"
+	"net/http"
 	"path/filepath"
 	"sort"
 	"sync"
@@ -83,6 +84,8 @@ type Options struct {
 	ExtraMCPServers func() []any
 	// OnAgentProcess is told about every harness process start and stop (credential managers hook in here).
 	OnAgentProcess func(agent devboxv1.AgentType, started bool)
+	// ReviewClient calls the AI proxy's decisions route for reviewed AUTO; http.DefaultClient when nil.
+	ReviewClient *http.Client
 }
 
 // Manager owns every agent connection, thread and subagent session in the instance.
@@ -99,18 +102,25 @@ type Manager struct {
 	defaultAgent devboxv1.AgentType
 	defaultModel string
 	defaultOpts  []*devboxv1.ConfigOptionSetting
-	launches     map[devboxv1.AgentType]*devboxv1.AgentLaunch
-	conns        map[devboxv1.AgentType]*agentConn
-	starting     map[devboxv1.AgentType]chan struct{}
-	threads      map[string]*thread
-	sessions     map[string]*session
-	interactions map[string]*interaction
-	running      int
-	waitQ        []*thread
-	pending      map[string][]bufferedUpdate
-	aggRevision  uint64
-	lastAgg      string
-	dirty        bool
+	// autonomyDefault and autonomyMax are the runner's autonomy policy; unset means AUTO.
+	autonomyDefault devboxv1.Autonomy
+	autonomyMax     devboxv1.Autonomy
+	// probe lists AUTO on proxy billing too, since the catalog covers subscription-billed instances as well.
+	probe bool
+	// decisionReview is whether the AI proxy serves decisions, so AUTO can run reviewed by the daemon.
+	decisionReview bool
+	launches       map[devboxv1.AgentType]*devboxv1.AgentLaunch
+	conns          map[devboxv1.AgentType]*agentConn
+	starting       map[devboxv1.AgentType]chan struct{}
+	threads        map[string]*thread
+	sessions       map[string]*session
+	interactions   map[string]*interaction
+	running        int
+	waitQ          []*thread
+	pending        map[string][]bufferedUpdate
+	aggRevision    uint64
+	lastAgg        string
+	dirty          bool
 	// unwritten are settled revisions not yet in the transcript; timelines merge them in until the next flush.
 	unwritten map[entityRef]*devboxv1.AcpEntity
 
@@ -131,6 +141,9 @@ func New(opts Options) *Manager {
 	}
 	if opts.Endpoints == nil {
 		opts.Endpoints = func() *devboxv1.HarnessEndpoints { return &devboxv1.HarnessEndpoints{} }
+	}
+	if opts.ReviewClient == nil {
+		opts.ReviewClient = http.DefaultClient
 	}
 	if opts.Supervisor == nil {
 		opts.Supervisor = proc.NewSupervisor(opts.Log)

@@ -411,6 +411,7 @@ func (r *DevboxRunnerReconciler) devboxAttributes(runner *v1alpha1.DevboxRunner,
 			return &console.DevboxHTTPAllowAttributes{Host: h, Port: lo.ToPtr(int64(443))}
 		})...),
 		IdlePolicy: devboxIdlePolicyAttributes(runner.Spec.IdlePolicy),
+		Autonomy:   devboxAutonomyAttributes(runner),
 	}
 	if wp := runner.Spec.WorkerPool; wp != nil && wp.MaxInstances != nil {
 		attrs.MaxInstances = lo.ToPtr(int64(*wp.MaxInstances))
@@ -489,6 +490,14 @@ func devboxAgentAttributes(runner *v1alpha1.DevboxRunner, catalog *DevboxProbeRe
 		})
 		return attrs
 	})
+}
+
+func devboxAutonomyAttributes(runner *v1alpha1.DevboxRunner) *console.DevboxAutonomyAttributes {
+	def, maxLevel := runner.Spec.AutonomyPolicy()
+	return &console.DevboxAutonomyAttributes{
+		Default: lo.ToPtr(console.DevboxAutonomy(strings.ToUpper(string(def)))),
+		Max:     lo.ToPtr(console.DevboxAutonomy(strings.ToUpper(string(maxLevel)))),
+	}
 }
 
 func devboxIdlePolicyAttributes(p *v1alpha1.DevboxIdlePolicy) *console.DevboxIdlePolicyAttributes {

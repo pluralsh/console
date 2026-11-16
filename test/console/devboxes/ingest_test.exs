@@ -140,6 +140,7 @@ defmodule Console.Devboxes.IngestTest do
             state: :INTERACTION_STATE_PENDING,
             title: "run rm -rf",
             permission: %{options: [%{option_id: "allow", name: "Allow", kind: "allow_once"}]},
+            review: %{verdict: "ask", confidence: 0.9, risk: "destructive", model: "openai/gpt-6-luna", escalation: "the reviewer wants you to decide"},
             revision: 1
           }
         ],
@@ -161,6 +162,7 @@ defmodule Console.Devboxes.IngestTest do
       assert interaction.session_id == thread.id
       assert interaction.kind == :permission
       assert [%{option_id: "allow"}] = interaction.options
+      assert %{verdict: "ask", risk: "destructive", escalation: "the reviewer wants you to decide"} = interaction.review
 
       inst = refetch(inst)
       assert inst.index_revision == 3

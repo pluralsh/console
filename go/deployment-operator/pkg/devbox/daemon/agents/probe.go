@@ -78,6 +78,9 @@ func probeOne(ctx context.Context, opts ProbeOptions, spec *devboxv1.AgentProbeS
 	defer pm.Stop(context.Background())
 	launch := &devboxv1.AgentLaunch{Agent: spec.GetType(), Billing: devboxv1.BillingMode_BILLING_MODE_PROXY, AcpV2: spec.GetAcpV2()}
 	pm.Configure("probe", spec.GetType(), "", nil, []*devboxv1.AgentLaunch{launch}, 1)
+	// The catalog lists every level the agent supports; console narrows it to each runner's cap.
+	pm.SetAutonomy(&devboxv1.AutonomyPolicy{Default: devboxv1.Autonomy_AUTONOMY_MANUAL, Max: devboxv1.Autonomy_AUTONOMY_FULL})
+	pm.probe = true
 	row, err := pm.CreateThread(ctx, &devboxv1.CreateThreadRequest{ThreadId: "probe", Agent: spec.GetType(), Cwd: dir})
 	if err != nil {
 		return fail(err)

@@ -253,6 +253,7 @@ defmodule Console.Schema.DeploymentSettings do
       field :model,           :string
       field :tool_model,      :string
       field :embedding_model, :string
+      field :decision_model,  :string
       field :method,          OpenAIMethod, default: :auto
 
       embeds_one :token_exchange, OauthToken, on_replace: :update
@@ -268,7 +269,7 @@ defmodule Console.Schema.DeploymentSettings do
 
     def changeset(model, attrs) do
       model
-      |> cast(attrs, ~w(base_url access_token model tool_model embedding_model method proxy_models)a)
+      |> cast(attrs, ~w(base_url access_token model tool_model embedding_model decision_model method proxy_models)a)
       |> trim_changes(~w(access_token)a)
       |> cast_embed(:token_exchange)
       |> cast_embed(:proxy, with: &proxy_changeset/2)
@@ -354,6 +355,7 @@ defmodule Console.Schema.DeploymentSettings do
       field :provider,           AIProvider, default: :openai
       field :tool_provider,      AIProvider
       field :embedding_provider, AIProvider
+      field :decision_provider,  AIProvider
       field :log_analysis,       :boolean, default: false
       field :streaming,          :boolean, default: true
 
@@ -395,6 +397,7 @@ defmodule Console.Schema.DeploymentSettings do
         field :model,           :string
         field :tool_model,      :string
         field :embedding_model, :string
+        field :decision_model,  :string
 
         field :proxy_models,    {:array, :string}
         embeds_one :proxy, ScmConnection.Proxy, on_replace: :update
@@ -417,6 +420,7 @@ defmodule Console.Schema.DeploymentSettings do
         field :model,           :string
         field :tool_model,      :string
         field :embedding_model, :string
+        field :decision_model,  :string
         field :access_token,    EncryptedString
         field :deployments,      :map
 
@@ -431,6 +435,7 @@ defmodule Console.Schema.DeploymentSettings do
         field :access_token,          EncryptedString
         field :region,                :string
         field :embedding_model,       :string
+        field :decision_model,        :string
         field :aws_access_key_id,     :string
         field :aws_secret_access_key, EncryptedString
         # Additional model/profile IDs for the Nexus proxy; same formats as model_id.
@@ -454,6 +459,7 @@ defmodule Console.Schema.DeploymentSettings do
         field :endpoint,             :string
         field :location,             :string
         field :embedding_model,      :string
+        field :decision_model,       :string
         field :proxy_models,         {:array, :string}
         embeds_one :proxy, ScmConnection.Proxy, on_replace: :update
       end
@@ -544,7 +550,7 @@ defmodule Console.Schema.DeploymentSettings do
 
   defp ai_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(enabled provider streaming tool_provider embedding_provider log_analysis)a)
+    |> cast(attrs, ~w(enabled provider streaming tool_provider embedding_provider decision_provider log_analysis)a)
     |> cast_embed(:tools, with: &tool_config_changeset/2)
     |> cast_embed(:analysis_rates, with: &analysis_rates_changeset/2)
     |> cast_embed(:vector_store, with: &vector_store_changeset/2)
@@ -571,7 +577,7 @@ defmodule Console.Schema.DeploymentSettings do
 
   defp ai_api_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(access_token model tool_model embedding_model base_url proxy_models)a)
+    |> cast(attrs, ~w(access_token model tool_model embedding_model decision_model base_url proxy_models)a)
     |> trim_changes(~w(access_token)a)
     |> cast_embed(:proxy, with: &proxy_changeset/2)
   end
@@ -586,7 +592,7 @@ defmodule Console.Schema.DeploymentSettings do
 
   defp azure_openai_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(endpoint api_version access_token tool_model embedding_model model proxy_models deployments)a)
+    |> cast(attrs, ~w(endpoint api_version access_token tool_model embedding_model decision_model model proxy_models deployments)a)
     |> trim_changes(~w(access_token)a)
     |> cast_embed(:proxy, with: &proxy_changeset/2)
     |> validate_required(~w(access_token endpoint)a)
@@ -603,7 +609,7 @@ defmodule Console.Schema.DeploymentSettings do
 
   defp bedrock_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(model_id tool_model_id access_token region embedding_model aws_access_key_id aws_secret_access_key proxy_models deployments endpoint)a)
+    |> cast(attrs, ~w(model_id tool_model_id access_token region embedding_model decision_model aws_access_key_id aws_secret_access_key proxy_models deployments endpoint)a)
     |> cast_embed(:model_settings, with: &bedrock_model_settings_changeset/2)
     |> cast_embed(:proxy, with: &proxy_changeset/2)
     |> trim_changes(~w(access_token aws_access_key_id aws_secret_access_key)a)
@@ -618,7 +624,7 @@ defmodule Console.Schema.DeploymentSettings do
 
   defp vertex_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(model tool_model embedding_model service_account_json project location endpoint proxy_models)a)
+    |> cast(attrs, ~w(model tool_model embedding_model decision_model service_account_json project location endpoint proxy_models)a)
     |> cast_embed(:proxy, with: &proxy_changeset/2)
     |> validate_required([:project, :location])
     |> validate_change(:service_account_json, fn :service_account_json, json ->

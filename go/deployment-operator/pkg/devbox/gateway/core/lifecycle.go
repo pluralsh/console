@@ -251,8 +251,9 @@ func (g *Gateway) initRequest(inst *Instance) *devboxv1.InitializeRequest {
 	req := inst.req
 	var cloud []*devboxv1.CloudIdentity
 	var env map[string]string
+	var autonomy *devboxv1.AutonomyPolicy
 	if inst.runner != nil {
-		cloud, env = inst.runner.CloudIdentities, inst.runner.Env
+		cloud, env, autonomy = inst.runner.CloudIdentities, inst.runner.Env, inst.runner.Autonomy
 	}
 	return &devboxv1.InitializeRequest{
 		InstanceId:           req.GetInstanceId(),
@@ -272,6 +273,8 @@ func (g *Gateway) initRequest(inst *Instance) *devboxv1.InitializeRequest {
 		LeaseGeneration:      inst.leaseGen,
 		CloudIdentities:      cloud,
 		Env:                  env,
+		Autonomy:             autonomy,
+		DecisionReview:       req.GetDecisionReview(),
 		Endpoints:            g.endpoints(),
 		RestoredFromSnapshot: inst.rec.RestoredFrom != "",
 		RestoreFidelity:      devboxv1.SnapshotFidelity(devboxv1.SnapshotFidelity_value[inst.rec.RestoreFidelity]),

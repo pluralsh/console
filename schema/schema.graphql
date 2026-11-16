@@ -2293,6 +2293,12 @@ enum DevboxCloudProvider {
   AZURE
 }
 
+enum DevboxAutonomy {
+  MANUAL
+  AUTO
+  FULL
+}
+
 enum AgentCredentialProvider {
   CLAUDE
   CODEX
@@ -2429,6 +2435,8 @@ input DevboxAttributes {
 
   idlePolicy: DevboxIdlePolicyAttributes
 
+  autonomy: DevboxAutonomyAttributes
+
   conditions: [DevboxConditionAttributes]
 
   "cloud identities instances get workload identity tokens for"
@@ -2552,6 +2560,14 @@ input DevboxHttpAllowAttributes {
   host: String!
   port: Int
   passthrough: Boolean
+}
+
+input DevboxAutonomyAttributes {
+  "the level new threads start at"
+  default: DevboxAutonomy
+
+  "the highest level a thread may use"
+  max: DevboxAutonomy
 }
 
 input DevboxIdlePolicyAttributes {
@@ -2741,6 +2757,12 @@ type Devbox {
 
   idlePolicy: DevboxIdlePolicy
 
+  "how agents' permission requests are answered"
+  autonomy: DevboxAutonomyPolicy!
+
+  "whether agents billed to the AI proxy can run at autonomy auto, reviewed by a decision model"
+  decisionReview: Boolean
+
   conditions: [DevboxCondition]
 
   cloudIdentities: [DevboxCloudIdentity]
@@ -2874,6 +2896,14 @@ type DevboxHttpAllow {
   host: String!
   port: Int
   passthrough: Boolean
+}
+
+type DevboxAutonomyPolicy {
+  "the level new threads start at"
+  default: DevboxAutonomy!
+
+  "the highest level a thread may use"
+  max: DevboxAutonomy!
 }
 
 type DevboxIdlePolicy {
@@ -3267,9 +3297,33 @@ type DevboxInteraction {
 
   answeredBy: User
 
+  "set when the devbox answered by policy, e.g. autonomy:full"
+  answeredByPolicy: String
+
+  "the devbox reviewer's verdict at autonomy auto"
+  review: DevboxInteractionReview
+
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+"A decision model's review of a permission request at autonomy auto"
+type DevboxInteractionReview {
+  "allow, deny or ask"
+  verdict: String
+
+  "the verdict's probability, 0 to 1"
+  confidence: Float
+
+  "none, destructive, exfiltration, credentials, out_of_scope or external"
+  risk: String
+
+  "the decision model that answered"
+  model: String
+
+  "why a human was still asked, when they were"
+  escalation: String
 }
 
 type DevboxPermissionOption {
@@ -9183,6 +9237,9 @@ input AiSettingsAttributes {
   "ai provider to use with embeddings (for vector indexing)"
   embeddingProvider: AiProvider
 
+  "ai provider to use for decision (classification) calls, like reviewing devbox agent tool calls"
+  decisionProvider: AiProvider
+
   "whether to enable log analysis in AI insights (turn off to save on log query costs)"
   logAnalysis: Boolean
 
@@ -9250,6 +9307,9 @@ input OpenaiSettingsAttributes {
   "the model to use for vector embeddings"
   embeddingModel: String
 
+  "a cheap, fast model for decision (classification) calls, like reviewing devbox agent tool calls. Models without native decision support are emulated"
+  decisionModel: String
+
   "the method to use for openai api calls (defaults to auto, but can be used to restrict to only responses or chat completions)"
   method: OpenAiMethod
 
@@ -9308,6 +9368,9 @@ input AnthropicSettingsAttributes {
   "the model to use for vector embeddings"
   embeddingModel: String
 
+  "a cheap, fast model for decision (classification) calls, like reviewing devbox agent tool calls. Models without native decision support are emulated"
+  decisionModel: String
+
   "addditional models to support within the integrated ai proxy"
   proxyModels: [String]
 }
@@ -9349,6 +9412,9 @@ input AzureOpenaiAttributes {
   "the model to use for vector embeddings"
   embeddingModel: String
 
+  "a cheap, fast model for decision (classification) calls, like reviewing devbox agent tool calls. Models without native decision support are emulated"
+  decisionModel: String
+
   "the azure openai access token to use"
   accessToken: String!
 
@@ -9387,6 +9453,9 @@ input BedrockAiAttributes {
   "Bedrock model or inference profile for embeddings. Same ID formats as modelId."
   embeddingModel: String
 
+  "a cheap, fast model for decision (classification) calls, like reviewing devbox agent tool calls. Models without native decision support are emulated"
+  decisionModel: String
+
   "AWS Bedrock API surface to use. RUNTIME (default) uses InvokeModel or Converse on bedrock-runtime; MANTLE uses the Bedrock Mantle Anthropic\/OpenAI-compatible APIs."
   endpoint: BedrockEndpoint
 
@@ -9420,6 +9489,9 @@ input VertexAiAttributes {
 
   "the model to use for vector embeddings"
   embeddingModel: String
+
+  "a cheap, fast model for decision (classification) calls, like reviewing devbox agent tool calls. Models without native decision support are emulated"
+  decisionModel: String
 
   "optional service account json to auth to the GCP vertex apis"
   serviceAccountJson: String
@@ -9717,6 +9789,9 @@ type AiSettings {
   "ai provider to use with embeddings (for vector indexing)"
   embeddingProvider: AiProvider
 
+  "ai provider to use for decision (classification) calls"
+  decisionProvider: AiProvider
+
   "whether to enable log analysis in AI insights (turn off to save on log query costs)"
   logAnalysis: Boolean
 
@@ -9780,6 +9855,9 @@ type OpenaiSettings {
   "the model to use for vector embeddings"
   embeddingModel: String
 
+  "a cheap, fast model for decision (classification) calls, like reviewing devbox agent tool calls. Models without native decision support are emulated"
+  decisionModel: String
+
   "the method to use for openai api calls (defaults to auto, but can be used to restrict to only responses or chat completions)"
   method: OpenAiMethod
 
@@ -9832,6 +9910,9 @@ type AnthropicSettings {
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
 
+  "a cheap, fast model for decision (classification) calls, like reviewing devbox agent tool calls. Models without native decision support are emulated"
+  decisionModel: String
+
   "addditional models to support within the integrated ai proxy"
   proxyModels: [String]
 }
@@ -9862,6 +9943,9 @@ type AzureOpenaiSettings {
 
   "the model to use for vector embeddings"
   embeddingModel: String
+
+  "a cheap, fast model for decision (classification) calls, like reviewing devbox agent tool calls. Models without native decision support are emulated"
+  decisionModel: String
 
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
@@ -9896,6 +9980,9 @@ type BedrockAiSettings {
   "Bedrock model or inference profile for embeddings. Same ID formats as modelId."
   embeddingModel: String
 
+  "a cheap, fast model for decision (classification) calls, like reviewing devbox agent tool calls. Models without native decision support are emulated"
+  decisionModel: String
+
   "AWS Bedrock API surface to use. RUNTIME (default) uses InvokeModel or Converse on bedrock-runtime; MANTLE uses the Bedrock Mantle Anthropic\/OpenAI-compatible APIs."
   endpoint: BedrockEndpoint
 
@@ -9924,6 +10011,9 @@ type VertexAiSettings {
 
   "the model to use for vector embeddings"
   embeddingModel: String
+
+  "a cheap, fast model for decision (classification) calls, like reviewing devbox agent tool calls. Models without native decision support are emulated"
+  decisionModel: String
 
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
@@ -10114,6 +10204,7 @@ type ModelDefault {
   model: String
   toolModel: String
   embeddingModel: String
+  decisionModel: String
 }
 
 type ProjectConnection {

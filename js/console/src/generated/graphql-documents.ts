@@ -2389,6 +2389,7 @@ export const AiSettingsFragmentDoc = /*#__PURE__*/ gql`
     baseUrl
     model
     toolModel
+    decisionModel
     proxy {
       enabled
       url
@@ -2399,6 +2400,7 @@ export const AiSettingsFragmentDoc = /*#__PURE__*/ gql`
     baseUrl
     model
     toolModel
+    decisionModel
     embeddingModel
     method
     proxy {
@@ -2411,6 +2413,7 @@ export const AiSettingsFragmentDoc = /*#__PURE__*/ gql`
     baseUrl
     model
     toolModel
+    decisionModel
     embeddingModel
     method
     proxy {
@@ -2423,6 +2426,7 @@ export const AiSettingsFragmentDoc = /*#__PURE__*/ gql`
     baseUrl
     model
     toolModel
+    decisionModel
     embeddingModel
     method
     proxy {
@@ -2437,6 +2441,7 @@ export const AiSettingsFragmentDoc = /*#__PURE__*/ gql`
     model
     embeddingModel
     toolModel
+    decisionModel
     proxy {
       enabled
       url
@@ -2457,6 +2462,7 @@ export const AiSettingsFragmentDoc = /*#__PURE__*/ gql`
     model
     embeddingModel
     toolModel
+    decisionModel
     project
     location
     endpoint
@@ -2469,6 +2475,7 @@ export const AiSettingsFragmentDoc = /*#__PURE__*/ gql`
   bedrock {
     modelId
     toolModelId
+    decisionModel
     embeddingModel
     modelSettings {
       modelId
@@ -2488,6 +2495,7 @@ export const AiSettingsFragmentDoc = /*#__PURE__*/ gql`
   provider
   toolProvider
   embeddingProvider
+  decisionProvider
   analysisRates {
     fast
     slow
@@ -3530,6 +3538,11 @@ export const DevboxTinyFragmentDoc = /*#__PURE__*/ gql`
   browser
   maxInstances
   lastHeartbeatAt
+  autonomy {
+    default
+    max
+  }
+  decisionReview
   cluster {
     id
     name
@@ -3759,6 +3772,14 @@ export const DevboxInteractionFragmentDoc = /*#__PURE__*/ gql`
     id
     name
     email
+  }
+  answeredByPolicy
+  review {
+    verdict
+    confidence
+    risk
+    model
+    escalation
   }
   insertedAt
   updatedAt
@@ -8962,6 +8983,7 @@ export const DeploymentSettingsDocument = /*#__PURE__*/ gql`
     model
     toolModel
     embeddingModel
+    decisionModel
   }
 }
     ${DeploymentSettingsFragmentDoc}` as unknown as DocumentNode<Types.DeploymentSettingsQuery, Types.DeploymentSettingsQueryVariables>;

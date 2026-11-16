@@ -67,6 +67,25 @@ enum BillingMode {
   BILLING_MODE_SUBSCRIPTION = 2;
 }
 
+// Autonomy is how a thread's permission requests are answered. The levels are ordered: a cap of AUTO allows
+// MANUAL and AUTO.
+enum Autonomy {
+  AUTONOMY_UNSPECIFIED = 0;
+  // Every permission request goes to a human.
+  AUTONOMY_MANUAL = 1;
+  // A reviewer approves what it can and the rest goes to a human: the harness's own (Claude's auto mode, Codex's
+  // guardian) where it runs, otherwise the daemon's, asking the AI proxy's decision model.
+  AUTONOMY_AUTO = 2;
+  // Everything is approved without asking.
+  AUTONOMY_FULL = 3;
+}
+
+// AutonomyPolicy is a runner's autonomy setting for new threads and the highest level a thread may use.
+message AutonomyPolicy {
+  Autonomy default = 1;
+  Autonomy max = 2;
+}
+
 // SnapshotFidelity says what a snapshot, or a restore from it, preserves.
 enum SnapshotFidelity {
   SNAPSHOT_FIDELITY_UNSPECIFIED = 0;
@@ -122,6 +141,8 @@ message Principal {
   string user_id = 1;
   string email = 2;
   string name = 3;
+  // Set instead of a user when the daemon answered by policy, e.g. "autonomy:full".
+  string policy = 4;
 }
 
 // RepositorySpec is a repository to check out at `~/<repo>` (section 4.2b).

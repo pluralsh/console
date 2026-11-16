@@ -7,6 +7,9 @@ defmodule Console.Schema.Devbox do
   defenum AgentType, claude: 0, codex: 1, opencode: 2, gemini: 3, pi: 4
   defenum ProbeStatus, pending: 0, ok: 1, failed: 2, missing: 3
   defenum CloudProvider, aws: 0, gcp: 1, azure: 2
+  defenum Autonomy, manual: 0, auto: 1, full: 2
+
+  @autonomy_rank %{manual: 0, auto: 1, full: 2}
 
   @default_idle_policy %{
     activity_window: 120,
@@ -148,6 +151,11 @@ defmodule Console.Schema.Devbox do
       field :complete_after,       :integer
     end
 
+    embeds_one :autonomy, AutonomyPolicy, on_replace: :update do
+      field :default, Console.Schema.Devbox.Autonomy
+      field :max,     Console.Schema.Devbox.Autonomy
+    end
+
     embeds_many :cloud_identities, CloudIdentity, on_replace: :delete, primary_key: false do
       field :name,                       :string
       field :provider,                   Console.Schema.Devbox.CloudProvider
@@ -199,6 +207,30 @@ defmodule Console.Schema.Devbox do
   end
   def idle_policy(_), do: @default_idle_policy
 
+  @doc """
+  The box's autonomy policy: the level new threads start at and the highest a thread may use, both `:auto` when
+  the runner sets nothing, with the default lowered to the max.
+  """
+  @spec autonomy(t) :: %{default: atom, max: atom}
+  def autonomy(%__MODULE__{autonomy: %{} = a}) do
+    max = a.max || :auto
+    default = a.default || :auto
+    %{default: (if @autonomy_rank[default] > @autonomy_rank[max], do: max, else: default), max: max}
+  end
+  def autonomy(_), do: %{default: :auto, max: :auto}
+
+  @doc """
+  Whether an autonomy config option value (`"manual"`, `"auto"` or `"full"`) is within the box's cap.
+  """
+  @spec autonomy_allowed?(t, binary) :: boolean
+  def autonomy_allowed?(devbox, value) do
+    %{max: max} = autonomy(devbox)
+    case Enum.find(Map.keys(@autonomy_rank), &(Atom.to_string(&1) == value)) do
+      nil -> false
+      level -> @autonomy_rank[level] <= @autonomy_rank[max]
+    end
+  end
+
   def for_cluster(query \\ __MODULE__, cluster_id) do
     from(d in query, where: d.cluster_id == ^cluster_id)
   end
@@ -226,6 +258,7 @@ defmodule Console.Schema.Devbox do
     |> cast_embed(:http_allowlist, with: &http_changeset/2)
     |> cast_embed(:conditions, with: &condition_changeset/2)
     |> cast_embed(:idle_policy, with: &idle_changeset/2)
+    |> cast_embed(:autonomy, with: &autonomy_changeset/2)
     |> cast_embed(:cloud_identities, with: &cloud_identity_changeset/2)
     |> cast_assoc(:scm_connection_associations)
     |> unique_constraint(:name, name: :devboxes_cluster_id_name_uniq_index, message: "a devbox with this name already exists for this cluster")
@@ -292,4 +325,6 @@ defmodule Console.Schema.Devbox do
     model
     |> cast(attrs, ~w(activity_window cpu_threshold grace_period max_deferral max_continuous_awake complete_after)a)
   end
+
+  defp autonomy_changeset(model, attrs), do: cast(model, attrs, ~w(default max)a)
 end

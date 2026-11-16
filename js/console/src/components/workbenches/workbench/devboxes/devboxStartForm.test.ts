@@ -8,8 +8,10 @@ import {
 import { describe, expect, it } from 'vitest'
 
 import {
+  billedToProxy,
   DevboxStartBox,
   defaultStartValues,
+  dropProxyAuto,
   hasStartErrors,
   reconcileStartValues,
   toInstanceAttributes,
@@ -54,6 +56,34 @@ describe('devbox start form', () => {
       repositories: ['git@github.com:acme/web.git'],
     })
     expect(hasStartErrors(validateStartValues(values, box))).toBe(false)
+  })
+
+  it('drops a picked auto autonomy once the agent bills to the proxy', () => {
+    const values = {
+      ...defaultStartValues(box, []),
+      configOptions: { autonomy: 'auto', effort: 'auto' },
+      billing: { [DevboxAgentType.Claude]: 'subscription' as const },
+    }
+    expect(dropProxyAuto(values, 'autonomy')).toBe(values)
+    const proxied = dropProxyAuto(
+      { ...values, billing: { [DevboxAgentType.Claude]: 'proxy' as const } },
+      'autonomy'
+    )
+    expect(proxied.configOptions).toEqual({ effort: 'auto' })
+    expect(
+      dropProxyAuto(
+        { ...values, billing: { [DevboxAgentType.Claude]: 'proxy' as const } },
+        'autonomy',
+        null,
+        true
+      ).configOptions
+    ).toEqual({ autonomy: 'auto', effort: 'auto' })
+    expect(
+      billedToProxy(
+        { ...values, billing: {} },
+        { [DevboxAgentType.Claude]: 'subscription' }
+      )
+    ).toBe(false)
   })
 
   it('requires a box unless restoring a snapshot', () => {

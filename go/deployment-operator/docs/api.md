@@ -725,6 +725,46 @@ _Appears in:_
 | `pi` |  |
 
 
+#### DevboxAutonomy
+
+
+
+
+
+
+
+_Appears in:_
+- [DevboxRunnerSpec](#devboxrunnerspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `default` _[DevboxAutonomyLevel](#devboxautonomylevel)_ | Default is the level new threads start at, lowered to max and to what the agent supports. Defaults to auto. |  | Enum: [manual auto full] <br />Optional: \{\} <br /> |
+| `max` _[DevboxAutonomyLevel](#devboxautonomylevel)_ | Max is the highest level a thread can use. Defaults to auto. |  | Enum: [manual auto full] <br />Optional: \{\} <br /> |
+
+
+#### DevboxAutonomyLevel
+
+_Underlying type:_ _string_
+
+DevboxAutonomyLevel is one of:
+  - manual: every permission request goes to a human.
+  - auto: the agent's own reviewer approves what it can (Claude's auto mode, Codex's guardian); the rest goes to
+    a human.
+  - full: everything is approved without asking.
+
+_Validation:_
+- Enum: [manual auto full]
+
+_Appears in:_
+- [DevboxAutonomy](#devboxautonomy)
+
+| Field | Description |
+| --- | --- |
+| `manual` |  |
+| `auto` |  |
+| `full` |  |
+
+
 #### DevboxAzureIdentity
 
 
@@ -1063,6 +1103,7 @@ _Appears in:_
 | `bootstrapScript` _string_ | BootstrapScript runs once during the golden boot, so its results are baked into the snapshot. |  | Optional: \{\} <br /> |
 | `mise` _[MiseSpec](#misespec)_ | Mise is an inline mise.toml installed during the golden boot. |  | Optional: \{\} <br /> |
 | `idlePolicy` _[DevboxIdlePolicy](#devboxidlepolicy)_ | IdlePolicy bounds idle suspension. Workbenches can only lower these values. |  | Optional: \{\} <br /> |
+| `autonomy` _[DevboxAutonomy](#devboxautonomy)_ | Autonomy sets how agents' permission requests are answered: the level new threads start at and the highest<br />level users can switch a thread to. Defaults to auto for both, so full autonomy needs an explicit max: full. |  | Optional: \{\} <br /> |
 | `cloudIdentities` _[DevboxCloudIdentity](#devboxcloudidentity) array_ | CloudIdentities are named cloud identities instances can assume. At most one is the default. |  | MaxItems: 16 <br />Optional: \{\} <br /> |
 
 

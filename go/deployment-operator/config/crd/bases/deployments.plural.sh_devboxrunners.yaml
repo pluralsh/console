@@ -118,6 +118,32 @@ spec:
                 items:
                   type: string
                 type: array
+              autonomy:
+                description: |-
+                  Autonomy sets how agents' permission requests are answered: the level new threads start at and the highest
+                  level users can switch a thread to. Defaults to auto for both, so full autonomy needs an explicit max: full.
+                properties:
+                  default:
+                    description: Default is the level new threads start at, lowered
+                      to max and to what the agent supports. Defaults to auto.
+                    enum:
+                    - manual
+                    - auto
+                    - full
+                    type: string
+                  max:
+                    description: Max is the highest level a thread can use. Defaults
+                      to auto.
+                    enum:
+                    - manual
+                    - auto
+                    - full
+                    type: string
+                type: object
+                x-kubernetes-validations:
+                - message: default must not be above max
+                  rule: '!has(self.default) || !has(self.max) || (self.default ==
+                    ''manual'' || self.max == ''full'' || self.default == self.max)'
               bootstrapScript:
                 description: BootstrapScript runs once during the golden boot, so
                   its results are baked into the snapshot.

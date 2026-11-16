@@ -162,6 +162,42 @@ describe('DevboxTranscript', () => {
     expect(screen.getByText('widget tool content')).toBeTruthy()
   })
 
+  it('attributes Codex guardian reviews to the reviewer', () => {
+    renderTranscript(
+      <DevboxTranscript
+        entities={[
+          entity({
+            type: DevboxEntityType.ToolCall,
+            position: 1,
+            toolCall: {
+              toolCallId: 'guardian_assessment:r1',
+              title: 'Guardian Review',
+              kind: 'think',
+              status: 'completed',
+              content: [],
+            },
+          }),
+          entity({
+            type: DevboxEntityType.ToolCall,
+            position: 2,
+            toolCall: {
+              toolCallId: 'guardian_assessment:r2',
+              title: 'Guardian Review',
+              kind: 'think',
+              status: 'failed',
+              content: [],
+            },
+          }),
+        ]}
+      />
+    )
+    expect(screen.getByText('Approved by Codex reviewer')).toBeTruthy()
+    expect(screen.getByText('approved')).toBeTruthy()
+    expect(screen.getByText('Not approved by Codex reviewer')).toBeTruthy()
+    expect(screen.queryByText('Guardian Review')).toBeNull()
+    expect(screen.queryByText('think')).toBeNull()
+  })
+
   it('places subagent lanes after the session message that links them', () => {
     const { container } = renderTranscript(
       <DevboxTranscript

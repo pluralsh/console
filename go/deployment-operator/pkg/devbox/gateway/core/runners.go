@@ -37,6 +37,7 @@ type Runner struct {
 	CloudIdentities     []*devboxv1.CloudIdentity
 	CloudIdentityHosts  []string
 	IdlePolicy          *devboxv1.IdlePolicy
+	Autonomy            *devboxv1.AutonomyPolicy
 	// Env is the runner's resolved secret env vars, sent with every Initialize.
 	Env map[string]string
 }
@@ -224,7 +225,21 @@ func RunnerFromCRD(obj *v1alpha1.DevboxRunner) *Runner {
 		}
 		r.IdlePolicy = ip
 	}
+	def, maxLevel := obj.Spec.AutonomyPolicy()
+	r.Autonomy = &devboxv1.AutonomyPolicy{Default: AutonomyOf(def), Max: AutonomyOf(maxLevel)}
 	return r
+}
+
+// AutonomyOf converts a CRD autonomy level.
+func AutonomyOf(l v1alpha1.DevboxAutonomyLevel) devboxv1.Autonomy {
+	switch l {
+	case v1alpha1.DevboxAutonomyManual:
+		return devboxv1.Autonomy_AUTONOMY_MANUAL
+	case v1alpha1.DevboxAutonomyFull:
+		return devboxv1.Autonomy_AUTONOMY_FULL
+	default:
+		return devboxv1.Autonomy_AUTONOMY_AUTO
+	}
 }
 
 func deref[T any](p *T) T {

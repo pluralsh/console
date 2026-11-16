@@ -183,6 +183,11 @@ type DevboxRunnerSpec struct {
 	// +kubebuilder:validation:Optional
 	IdlePolicy *DevboxIdlePolicy `json:"idlePolicy,omitempty"`
 
+	// Autonomy sets how agents' permission requests are answered: the level new threads start at and the highest
+	// level users can switch a thread to. Defaults to auto for both, so full autonomy needs an explicit max: full.
+	// +kubebuilder:validation:Optional
+	Autonomy *DevboxAutonomy `json:"autonomy,omitempty"`
+
 	// CloudIdentities are named cloud identities instances can assume. At most one is the default.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:MaxItems=16
@@ -516,6 +521,51 @@ type DevboxSecretKeySelector struct {
 type DevboxBrowser struct {
 	// +kubebuilder:validation:Optional
 	Enabled bool `json:"enabled,omitempty"`
+}
+
+// DevboxAutonomyLevel is one of:
+//   - manual: every permission request goes to a human.
+//   - auto: the agent's own reviewer approves what it can (Claude's auto mode, Codex's guardian); the rest goes to
+//     a human.
+//   - full: everything is approved without asking.
+//
+// +kubebuilder:validation:Enum=manual;auto;full
+type DevboxAutonomyLevel string
+
+const (
+	DevboxAutonomyManual DevboxAutonomyLevel = "manual"
+	DevboxAutonomyAuto   DevboxAutonomyLevel = "auto"
+	DevboxAutonomyFull   DevboxAutonomyLevel = "full"
+)
+
+// +kubebuilder:validation:XValidation:rule="!has(self.default) || !has(self.max) || (self.default == 'manual' || self.max == 'full' || self.default == self.max)",message="default must not be above max"
+type DevboxAutonomy struct {
+	// Default is the level new threads start at, lowered to max and to what the agent supports. Defaults to auto.
+	// +kubebuilder:validation:Optional
+	Default *DevboxAutonomyLevel `json:"default,omitempty"`
+
+	// Max is the highest level a thread can use. Defaults to auto.
+	// +kubebuilder:validation:Optional
+	Max *DevboxAutonomyLevel `json:"max,omitempty"`
+}
+
+var autonomyRank = map[DevboxAutonomyLevel]int{DevboxAutonomyManual: 1, DevboxAutonomyAuto: 2, DevboxAutonomyFull: 3}
+
+// AutonomyPolicy returns the effective policy: auto/auto when unset, with the default lowered to max.
+func (in *DevboxRunnerSpec) AutonomyPolicy() (def, maxLevel DevboxAutonomyLevel) {
+	def, maxLevel = DevboxAutonomyAuto, DevboxAutonomyAuto
+	if in.Autonomy != nil {
+		if in.Autonomy.Default != nil {
+			def = *in.Autonomy.Default
+		}
+		if in.Autonomy.Max != nil {
+			maxLevel = *in.Autonomy.Max
+		}
+	}
+	if autonomyRank[def] > autonomyRank[maxLevel] {
+		def = maxLevel
+	}
+	return def, maxLevel
 }
 
 type DevboxIdlePolicy struct {

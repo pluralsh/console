@@ -59,6 +59,7 @@ defmodule Devbox.V1.CreateInstanceRequest do
   field :max_running_threads, 16, type: :int32, json_name: "maxRunningThreads"
   field :leases, 17, repeated: true, type: Devbox.V1.Lease
   field :idempotency_key, 18, type: :string, json_name: "idempotencyKey"
+  field :decision_review, 19, type: :bool, json_name: "decisionReview"
 end
 
 defmodule Devbox.V1.CreateInstanceResponse do

@@ -146,6 +146,9 @@ message CreateInstanceRequest {
   repeated Lease leases = 17;
   // Repeating a key returns the existing instance.
   string idempotency_key = 18;
+  // Console's AI proxy serves decision models, so threads can run at AUTO with the daemon reviewing permission
+  // requests where the agent's own reviewer isn't available.
+  bool decision_review = 19;
 }
 
 message CreateInstanceResponse {

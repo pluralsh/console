@@ -19,6 +19,17 @@ defmodule Console.Schema.DevboxInstanceInteraction do
     field :response,         :map
     field :expires_at,       :utc_datetime_usec
     field :revision,         :integer, default: 0
+    # Set instead of answered_by when the daemon answered by policy, e.g. "autonomy:full".
+    field :answered_by_policy, :string
+
+    # The daemon reviewer's verdict at autonomy auto; escalation says why a human was still asked.
+    embeds_one :review, Review, on_replace: :update do
+      field :verdict,    :string
+      field :confidence, :float
+      field :risk,       :string
+      field :model,      :string
+      field :escalation, :string
+    end
 
     embeds_many :options, Option, on_replace: :delete do
       field :option_id, :string
@@ -53,18 +64,21 @@ defmodule Console.Schema.DevboxInstanceInteraction do
   end
 
   @valid ~w(instance_id session_id external_id jsonrpc_id tool_call_id kind title message requested_schema url state
-            answered_by_id answered_at response expires_at revision)a
+            answered_by_id answered_by_policy answered_at response expires_at revision)a
 
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
     |> cast_embed(:options, with: &option_changeset/2)
+    |> cast_embed(:review, with: &review_changeset/2)
     |> foreign_key_constraint(:instance_id)
     |> foreign_key_constraint(:session_id)
     |> unique_constraint([:instance_id, :external_id])
     |> validate_length(:title, max: 255)
     |> validate_required([:instance_id, :external_id, :kind, :state])
   end
+
+  defp review_changeset(model, attrs), do: cast(model, attrs, ~w(verdict confidence risk model escalation)a)
 
   defp option_changeset(model, attrs) do
     model

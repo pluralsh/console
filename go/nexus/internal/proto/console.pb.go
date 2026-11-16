@@ -166,6 +166,9 @@ type AiConfig struct {
 	Azure            *AzureOpenAiConfig     `protobuf:"bytes,6,opt,name=azure,proto3" json:"azure,omitempty"`
 	OpenaiCompatible *OpenAiConfig          `protobuf:"bytes,7,opt,name=openaiCompatible,proto3" json:"openaiCompatible,omitempty"`
 	Xai              *OpenAiConfig          `protobuf:"bytes,8,opt,name=xai,proto3" json:"xai,omitempty"`
+	// the default and decision providers, as console's ai provider names (openai, anthropic, vertex, ...)
+	Provider         *string `protobuf:"bytes,9,opt,name=provider,proto3,oneof" json:"provider,omitempty"`
+	DecisionProvider *string `protobuf:"bytes,10,opt,name=decisionProvider,proto3,oneof" json:"decisionProvider,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -254,6 +257,20 @@ func (x *AiConfig) GetXai() *OpenAiConfig {
 		return x.Xai
 	}
 	return nil
+}
+
+func (x *AiConfig) GetProvider() string {
+	if x != nil && x.Provider != nil {
+		return *x.Provider
+	}
+	return ""
+}
+
+func (x *AiConfig) GetDecisionProvider() string {
+	if x != nil && x.DecisionProvider != nil {
+		return *x.DecisionProvider
+	}
+	return ""
 }
 
 type HttpProxyConfig struct {
@@ -395,6 +412,7 @@ type OpenAiConfig struct {
 	TokenExchange  *OpenAiTokenExchange   `protobuf:"bytes,7,opt,name=tokenExchange,proto3,oneof" json:"tokenExchange,omitempty"`
 	Method         *OpenAiMethod          `protobuf:"varint,8,opt,name=method,proto3,enum=plrl.OpenAiMethod,oneof" json:"method,omitempty"`
 	Proxy          *HttpProxyConfig       `protobuf:"bytes,9,opt,name=proxy,proto3,oneof" json:"proxy,omitempty"`
+	DecisionModel  *string                `protobuf:"bytes,10,opt,name=decisionModel,proto3,oneof" json:"decisionModel,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -492,6 +510,13 @@ func (x *OpenAiConfig) GetProxy() *HttpProxyConfig {
 	return nil
 }
 
+func (x *OpenAiConfig) GetDecisionModel() string {
+	if x != nil && x.DecisionModel != nil {
+		return *x.DecisionModel
+	}
+	return ""
+}
+
 type AnthropicConfig struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	BaseUrl        *string                `protobuf:"bytes,1,opt,name=baseUrl,proto3,oneof" json:"baseUrl,omitempty"`
@@ -501,6 +526,7 @@ type AnthropicConfig struct {
 	ToolModel      *string                `protobuf:"bytes,5,opt,name=toolModel,proto3,oneof" json:"toolModel,omitempty"`
 	ProxyModels    []string               `protobuf:"bytes,6,rep,name=proxyModels,proto3" json:"proxyModels,omitempty"`
 	Proxy          *HttpProxyConfig       `protobuf:"bytes,7,opt,name=proxy,proto3,oneof" json:"proxy,omitempty"`
+	DecisionModel  *string                `protobuf:"bytes,8,opt,name=decisionModel,proto3,oneof" json:"decisionModel,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -584,6 +610,13 @@ func (x *AnthropicConfig) GetProxy() *HttpProxyConfig {
 	return nil
 }
 
+func (x *AnthropicConfig) GetDecisionModel() string {
+	if x != nil && x.DecisionModel != nil {
+		return *x.DecisionModel
+	}
+	return ""
+}
+
 type VertexAiConfig struct {
 	state              protoimpl.MessageState `protogen:"open.v1"`
 	ApiKey             *string                `protobuf:"bytes,1,opt,name=apiKey,proto3,oneof" json:"apiKey,omitempty"`
@@ -596,6 +629,7 @@ type VertexAiConfig struct {
 	Location           *string                `protobuf:"bytes,8,opt,name=location,proto3,oneof" json:"location,omitempty"`
 	ProxyModels        []string               `protobuf:"bytes,9,rep,name=proxyModels,proto3" json:"proxyModels,omitempty"`
 	Proxy              *HttpProxyConfig       `protobuf:"bytes,10,opt,name=proxy,proto3,oneof" json:"proxy,omitempty"`
+	DecisionModel      *string                `protobuf:"bytes,11,opt,name=decisionModel,proto3,oneof" json:"decisionModel,omitempty"`
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
 }
@@ -700,6 +734,13 @@ func (x *VertexAiConfig) GetProxy() *HttpProxyConfig {
 	return nil
 }
 
+func (x *VertexAiConfig) GetDecisionModel() string {
+	if x != nil && x.DecisionModel != nil {
+		return *x.DecisionModel
+	}
+	return ""
+}
+
 type BedrockModelSettings struct {
 	state               protoimpl.MessageState `protogen:"open.v1"`
 	ModelId             string                 `protobuf:"bytes,1,opt,name=modelId,proto3" json:"modelId,omitempty"`
@@ -766,6 +807,7 @@ type BedrockConfig struct {
 	Endpoint           *BedrockEndpoint        `protobuf:"varint,10,opt,name=endpoint,proto3,enum=plrl.BedrockEndpoint,oneof" json:"endpoint,omitempty"`
 	ModelSettings      []*BedrockModelSettings `protobuf:"bytes,11,rep,name=modelSettings,proto3" json:"modelSettings,omitempty"`
 	Proxy              *HttpProxyConfig        `protobuf:"bytes,12,opt,name=proxy,proto3,oneof" json:"proxy,omitempty"`
+	DecisionModelId    *string                 `protobuf:"bytes,13,opt,name=decisionModelId,proto3,oneof" json:"decisionModelId,omitempty"`
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
 }
@@ -884,6 +926,13 @@ func (x *BedrockConfig) GetProxy() *HttpProxyConfig {
 	return nil
 }
 
+func (x *BedrockConfig) GetDecisionModelId() string {
+	if x != nil && x.DecisionModelId != nil {
+		return *x.DecisionModelId
+	}
+	return ""
+}
+
 type AzureOpenAiConfig struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	ApiVersion     *string                `protobuf:"bytes,1,opt,name=apiVersion,proto3,oneof" json:"apiVersion,omitempty"`
@@ -895,6 +944,7 @@ type AzureOpenAiConfig struct {
 	ProxyModels    []string               `protobuf:"bytes,8,rep,name=proxyModels,proto3" json:"proxyModels,omitempty"`
 	Deployments    map[string]string      `protobuf:"bytes,9,rep,name=deployments,proto3" json:"deployments,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	Proxy          *HttpProxyConfig       `protobuf:"bytes,10,opt,name=proxy,proto3,oneof" json:"proxy,omitempty"`
+	DecisionModel  *string                `protobuf:"bytes,11,opt,name=decisionModel,proto3,oneof" json:"decisionModel,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -990,6 +1040,13 @@ func (x *AzureOpenAiConfig) GetProxy() *HttpProxyConfig {
 		return x.Proxy
 	}
 	return nil
+}
+
+func (x *AzureOpenAiConfig) GetDecisionModel() string {
+	if x != nil && x.DecisionModel != nil {
+		return *x.DecisionModel
+	}
+	return ""
 }
 
 type ProxyAuthenticationRequest struct {
@@ -1409,7 +1466,7 @@ var File_console_proto protoreflect.FileDescriptor
 const file_console_proto_rawDesc = "" +
 	"\n" +
 	"\rconsole.proto\x12\x04plrl\"\x11\n" +
-	"\x0fAiConfigRequest\"\xfb\x02\n" +
+	"\x0fAiConfigRequest\"\xef\x03\n" +
 	"\bAiConfig\x12\x18\n" +
 	"\aenabled\x18\x01 \x01(\bR\aenabled\x12*\n" +
 	"\x06openai\x18\x02 \x01(\v2\x12.plrl.OpenAiConfigR\x06openai\x123\n" +
@@ -1418,7 +1475,12 @@ const file_console_proto_rawDesc = "" +
 	"\abedrock\x18\x05 \x01(\v2\x13.plrl.BedrockConfigR\abedrock\x12-\n" +
 	"\x05azure\x18\x06 \x01(\v2\x17.plrl.AzureOpenAiConfigR\x05azure\x12>\n" +
 	"\x10openaiCompatible\x18\a \x01(\v2\x12.plrl.OpenAiConfigR\x10openaiCompatible\x12$\n" +
-	"\x03xai\x18\b \x01(\v2\x12.plrl.OpenAiConfigR\x03xai\"y\n" +
+	"\x03xai\x18\b \x01(\v2\x12.plrl.OpenAiConfigR\x03xai\x12\x1f\n" +
+	"\bprovider\x18\t \x01(\tH\x00R\bprovider\x88\x01\x01\x12/\n" +
+	"\x10decisionProvider\x18\n" +
+	" \x01(\tH\x01R\x10decisionProvider\x88\x01\x01B\v\n" +
+	"\t_providerB\x13\n" +
+	"\x11_decisionProvider\"y\n" +
 	"\x0fHttpProxyConfig\x12\x10\n" +
 	"\x03url\x18\x01 \x01(\tR\x03url\x12\x1d\n" +
 	"\anoProxy\x18\x02 \x01(\tH\x00R\anoProxy\x88\x01\x01\x12\x1d\n" +
@@ -1436,7 +1498,7 @@ const file_console_proto_rawDesc = "" +
 	"\b_enabledB\v\n" +
 	"\t_tokenUrlB\v\n" +
 	"\t_clientIdB\x0f\n" +
-	"\r_clientSecret\"\xe9\x03\n" +
+	"\r_clientSecret\"\xa6\x04\n" +
 	"\fOpenAiConfig\x12\x1b\n" +
 	"\x06apiKey\x18\x01 \x01(\tH\x00R\x06apiKey\x88\x01\x01\x12\x19\n" +
 	"\x05model\x18\x02 \x01(\tH\x01R\x05model\x88\x01\x01\x12+\n" +
@@ -1446,7 +1508,9 @@ const file_console_proto_rawDesc = "" +
 	"\vproxyModels\x18\x06 \x03(\tR\vproxyModels\x12D\n" +
 	"\rtokenExchange\x18\a \x01(\v2\x19.plrl.OpenAiTokenExchangeH\x05R\rtokenExchange\x88\x01\x01\x12/\n" +
 	"\x06method\x18\b \x01(\x0e2\x12.plrl.OpenAiMethodH\x06R\x06method\x88\x01\x01\x120\n" +
-	"\x05proxy\x18\t \x01(\v2\x15.plrl.HttpProxyConfigH\aR\x05proxy\x88\x01\x01B\t\n" +
+	"\x05proxy\x18\t \x01(\v2\x15.plrl.HttpProxyConfigH\aR\x05proxy\x88\x01\x01\x12)\n" +
+	"\rdecisionModel\x18\n" +
+	" \x01(\tH\bR\rdecisionModel\x88\x01\x01B\t\n" +
 	"\a_apiKeyB\b\n" +
 	"\x06_modelB\x11\n" +
 	"\x0f_embeddingModelB\f\n" +
@@ -1456,7 +1520,8 @@ const file_console_proto_rawDesc = "" +
 	"\b_baseUrlB\x10\n" +
 	"\x0e_tokenExchangeB\t\n" +
 	"\a_methodB\b\n" +
-	"\x06_proxy\"\xd8\x02\n" +
+	"\x06_proxyB\x10\n" +
+	"\x0e_decisionModel\"\x95\x03\n" +
 	"\x0fAnthropicConfig\x12\x1d\n" +
 	"\abaseUrl\x18\x01 \x01(\tH\x00R\abaseUrl\x88\x01\x01\x12\x1b\n" +
 	"\x06apiKey\x18\x02 \x01(\tH\x01R\x06apiKey\x88\x01\x01\x12\x19\n" +
@@ -1464,7 +1529,8 @@ const file_console_proto_rawDesc = "" +
 	"\x0eembeddingModel\x18\x04 \x01(\tH\x03R\x0eembeddingModel\x88\x01\x01\x12!\n" +
 	"\ttoolModel\x18\x05 \x01(\tH\x04R\ttoolModel\x88\x01\x01\x12 \n" +
 	"\vproxyModels\x18\x06 \x03(\tR\vproxyModels\x120\n" +
-	"\x05proxy\x18\a \x01(\v2\x15.plrl.HttpProxyConfigH\x05R\x05proxy\x88\x01\x01B\n" +
+	"\x05proxy\x18\a \x01(\v2\x15.plrl.HttpProxyConfigH\x05R\x05proxy\x88\x01\x01\x12)\n" +
+	"\rdecisionModel\x18\b \x01(\tH\x06R\rdecisionModel\x88\x01\x01B\n" +
 	"\n" +
 	"\b_baseUrlB\t\n" +
 	"\a_apiKeyB\b\n" +
@@ -1472,7 +1538,8 @@ const file_console_proto_rawDesc = "" +
 	"\x0f_embeddingModelB\f\n" +
 	"\n" +
 	"_toolModelB\b\n" +
-	"\x06_proxy\"\xff\x03\n" +
+	"\x06_proxyB\x10\n" +
+	"\x0e_decisionModel\"\xbc\x04\n" +
 	"\x0eVertexAiConfig\x12\x1b\n" +
 	"\x06apiKey\x18\x01 \x01(\tH\x00R\x06apiKey\x88\x01\x01\x12\x19\n" +
 	"\x05model\x18\x02 \x01(\tH\x01R\x05model\x88\x01\x01\x12\x1f\n" +
@@ -1484,7 +1551,8 @@ const file_console_proto_rawDesc = "" +
 	"\blocation\x18\b \x01(\tH\aR\blocation\x88\x01\x01\x12 \n" +
 	"\vproxyModels\x18\t \x03(\tR\vproxyModels\x120\n" +
 	"\x05proxy\x18\n" +
-	" \x01(\v2\x15.plrl.HttpProxyConfigH\bR\x05proxy\x88\x01\x01B\t\n" +
+	" \x01(\v2\x15.plrl.HttpProxyConfigH\bR\x05proxy\x88\x01\x01\x12)\n" +
+	"\rdecisionModel\x18\v \x01(\tH\tR\rdecisionModel\x88\x01\x01B\t\n" +
 	"\a_apiKeyB\b\n" +
 	"\x06_modelB\v\n" +
 	"\t_endpointB\x15\n" +
@@ -1495,10 +1563,11 @@ const file_console_proto_rawDesc = "" +
 	"\n" +
 	"\b_projectB\v\n" +
 	"\t_locationB\b\n" +
-	"\x06_proxy\"b\n" +
+	"\x06_proxyB\x10\n" +
+	"\x0e_decisionModel\"b\n" +
 	"\x14BedrockModelSettings\x12\x18\n" +
 	"\amodelId\x18\x01 \x01(\tR\amodelId\x120\n" +
-	"\x13inferenceProfileArn\x18\x02 \x01(\tR\x13inferenceProfileArn\"\x8f\x06\n" +
+	"\x13inferenceProfileArn\x18\x02 \x01(\tR\x13inferenceProfileArn\"\xd2\x06\n" +
 	"\rBedrockConfig\x12\x1d\n" +
 	"\amodelId\x18\x01 \x01(\tH\x00R\amodelId\x88\x01\x01\x12%\n" +
 	"\vtoolModelId\x18\x02 \x01(\tH\x01R\vtoolModelId\x88\x01\x01\x12%\n" +
@@ -1512,7 +1581,8 @@ const file_console_proto_rawDesc = "" +
 	"\bendpoint\x18\n" +
 	" \x01(\x0e2\x15.plrl.BedrockEndpointH\aR\bendpoint\x88\x01\x01\x12@\n" +
 	"\rmodelSettings\x18\v \x03(\v2\x1a.plrl.BedrockModelSettingsR\rmodelSettings\x120\n" +
-	"\x05proxy\x18\f \x01(\v2\x15.plrl.HttpProxyConfigH\bR\x05proxy\x88\x01\x01\x1a>\n" +
+	"\x05proxy\x18\f \x01(\v2\x15.plrl.HttpProxyConfigH\bR\x05proxy\x88\x01\x01\x12-\n" +
+	"\x0fdecisionModelId\x18\r \x01(\tH\tR\x0fdecisionModelId\x88\x01\x01\x1a>\n" +
 	"\x10DeploymentsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\n" +
@@ -1525,7 +1595,8 @@ const file_console_proto_rawDesc = "" +
 	"\x0f_awsAccessKeyIdB\x15\n" +
 	"\x13_awsSecretAccessKeyB\v\n" +
 	"\t_endpointB\b\n" +
-	"\x06_proxy\"\xac\x04\n" +
+	"\x06_proxyB\x12\n" +
+	"\x10_decisionModelId\"\xe9\x04\n" +
 	"\x11AzureOpenAiConfig\x12#\n" +
 	"\n" +
 	"apiVersion\x18\x01 \x01(\tH\x00R\n" +
@@ -1538,7 +1609,8 @@ const file_console_proto_rawDesc = "" +
 	"\vproxyModels\x18\b \x03(\tR\vproxyModels\x12J\n" +
 	"\vdeployments\x18\t \x03(\v2(.plrl.AzureOpenAiConfig.DeploymentsEntryR\vdeployments\x120\n" +
 	"\x05proxy\x18\n" +
-	" \x01(\v2\x15.plrl.HttpProxyConfigH\x06R\x05proxy\x88\x01\x01\x1a>\n" +
+	" \x01(\v2\x15.plrl.HttpProxyConfigH\x06R\x05proxy\x88\x01\x01\x12)\n" +
+	"\rdecisionModel\x18\v \x01(\tH\aR\rdecisionModel\x88\x01\x01\x1a>\n" +
 	"\x10DeploymentsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\r\n" +
@@ -1549,7 +1621,8 @@ const file_console_proto_rawDesc = "" +
 	"\n" +
 	"_toolModelB\x0e\n" +
 	"\f_accessTokenB\b\n" +
-	"\x06_proxy\"2\n" +
+	"\x06_proxyB\x10\n" +
+	"\x0e_decisionModel\"2\n" +
 	"\x1aProxyAuthenticationRequest\x12\x14\n" +
 	"\x05token\x18\x01 \x01(\tR\x05token\"C\n" +
 	"\x1bProxyAuthenticationResponse\x12$\n" +
@@ -1676,6 +1749,7 @@ func file_console_proto_init() {
 	if File_console_proto != nil {
 		return
 	}
+	file_console_proto_msgTypes[1].OneofWrappers = []any{}
 	file_console_proto_msgTypes[2].OneofWrappers = []any{}
 	file_console_proto_msgTypes[3].OneofWrappers = []any{}
 	file_console_proto_msgTypes[4].OneofWrappers = []any{}

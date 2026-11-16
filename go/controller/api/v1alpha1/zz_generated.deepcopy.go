@@ -51,6 +51,11 @@ func (in *AIProviderSettings) DeepCopyInto(out *AIProviderSettings) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.DecisionModel != nil {
+		in, out := &in.DecisionModel, &out.DecisionModel
+		*out = new(string)
+		**out = **in
+	}
 	if in.ProxyModels != nil {
 		in, out := &in.ProxyModels, &out.ProxyModels
 		*out = make([]string, len(*in))
@@ -109,6 +114,11 @@ func (in *AISettings) DeepCopyInto(out *AISettings) {
 	}
 	if in.EmbeddingProvider != nil {
 		in, out := &in.EmbeddingProvider, &out.EmbeddingProvider
+		*out = new(client.AiProvider)
+		**out = **in
+	}
+	if in.DecisionProvider != nil {
+		in, out := &in.DecisionProvider, &out.DecisionProvider
 		*out = new(client.AiProvider)
 		**out = **in
 	}
@@ -548,6 +558,11 @@ func (in *AzureOpenAISettings) DeepCopyInto(out *AzureOpenAISettings) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.DecisionModel != nil {
+		in, out := &in.DecisionModel, &out.DecisionModel
+		*out = new(string)
+		**out = **in
+	}
 	if in.Deployments != nil {
 		in, out := &in.Deployments, &out.Deployments
 		*out = make(map[string]string, len(*in))
@@ -608,6 +623,11 @@ func (in *BedrockSettings) DeepCopyInto(out *BedrockSettings) {
 	}
 	if in.EmbeddingModel != nil {
 		in, out := &in.EmbeddingModel, &out.EmbeddingModel
+		*out = new(string)
+		**out = **in
+	}
+	if in.DecisionModel != nil {
+		in, out := &in.DecisionModel, &out.DecisionModel
 		*out = new(string)
 		**out = **in
 	}
@@ -6493,6 +6513,11 @@ func (in *OpenAISettings) DeepCopyInto(out *OpenAISettings) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.DecisionModel != nil {
+		in, out := &in.DecisionModel, &out.DecisionModel
+		*out = new(string)
+		**out = **in
+	}
 	if in.ProxyModels != nil {
 		in, out := &in.ProxyModels, &out.ProxyModels
 		*out = make([]string, len(*in))
@@ -11340,6 +11365,11 @@ func (in *VertexSettings) DeepCopyInto(out *VertexSettings) {
 	}
 	if in.EmbeddingModel != nil {
 		in, out := &in.EmbeddingModel, &out.EmbeddingModel
+		*out = new(string)
+		**out = **in
+	}
+	if in.DecisionModel != nil {
+		in, out := &in.DecisionModel, &out.DecisionModel
 		*out = new(string)
 		**out = **in
 	}

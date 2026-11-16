@@ -177,6 +177,9 @@ type CreateInstanceRequest struct {
 	Leases []*Lease `protobuf:"bytes,17,rep,name=leases,proto3" json:"leases,omitempty"`
 	// Repeating a key returns the existing instance.
 	IdempotencyKey string `protobuf:"bytes,18,opt,name=idempotency_key,json=idempotencyKey,proto3" json:"idempotency_key,omitempty"`
+	// Console's AI proxy serves decision models, so threads can run at AUTO with the daemon reviewing permission
+	// requests where the agent's own reviewer isn't available.
+	DecisionReview bool `protobuf:"varint,19,opt,name=decision_review,json=decisionReview,proto3" json:"decision_review,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -335,6 +338,13 @@ func (x *CreateInstanceRequest) GetIdempotencyKey() string {
 		return x.IdempotencyKey
 	}
 	return ""
+}
+
+func (x *CreateInstanceRequest) GetDecisionReview() bool {
+	if x != nil {
+		return x.DecisionReview
+	}
+	return false
 }
 
 type CreateInstanceResponse struct {
@@ -3058,7 +3068,7 @@ var File_devbox_v1_control_proto protoreflect.FileDescriptor
 
 const file_devbox_v1_control_proto_rawDesc = "" +
 	"\n" +
-	"\x17devbox/v1/control.proto\x12\tdevbox.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x16devbox/v1/common.proto\x1a\x13devbox/v1/acp.proto\x1a\x19devbox/v1/workspace.proto\"\xac\x06\n" +
+	"\x17devbox/v1/control.proto\x12\tdevbox.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x16devbox/v1/common.proto\x1a\x13devbox/v1/acp.proto\x1a\x19devbox/v1/workspace.proto\"\xd5\x06\n" +
 	"\x15CreateInstanceRequest\x12\x1f\n" +
 	"\vinstance_id\x18\x01 \x01(\tR\n" +
 	"instanceId\x12\x1b\n" +
@@ -3081,7 +3091,8 @@ const file_devbox_v1_control_proto_rawDesc = "" +
 	"idlePolicy\x12.\n" +
 	"\x13max_running_threads\x18\x10 \x01(\x05R\x11maxRunningThreads\x12(\n" +
 	"\x06leases\x18\x11 \x03(\v2\x10.devbox.v1.LeaseR\x06leases\x12'\n" +
-	"\x0fidempotency_key\x18\x12 \x01(\tR\x0eidempotencyKey\"\xb9\x02\n" +
+	"\x0fidempotency_key\x18\x12 \x01(\tR\x0eidempotencyKey\x12'\n" +
+	"\x0fdecision_review\x18\x13 \x01(\bR\x0edecisionReview\"\xb9\x02\n" +
 	"\x16CreateInstanceResponse\x12\x1f\n" +
 	"\vinstance_id\x18\x01 \x01(\tR\n" +
 	"instanceId\x121\n" +

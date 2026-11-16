@@ -69,6 +69,11 @@ fragment DevboxTiny on Devbox {
   browser
   maxInstances
   lastHeartbeatAt
+  autonomy {
+    default
+    max
+  }
+  decisionReview
   cluster {
     id
     name
@@ -222,6 +227,14 @@ fragment DevboxInteraction on DevboxInteraction {
     id
     name
     email
+  }
+  answeredByPolicy
+  review {
+    verdict
+    confidence
+    risk
+    model
+    escalation
   }
   insertedAt
   updatedAt

@@ -969,6 +969,8 @@ type AiSettings struct {
 	Streaming *bool `json:"streaming,omitempty"`
 	// ai provider to use with embeddings (for vector indexing)
 	EmbeddingProvider *AiProvider `json:"embeddingProvider,omitempty"`
+	// ai provider to use for decision (classification) calls
+	DecisionProvider *AiProvider `json:"decisionProvider,omitempty"`
 	// whether to enable log analysis in AI insights (turn off to save on log query costs)
 	LogAnalysis *bool `json:"logAnalysis,omitempty"`
 	// settings for vector-backed search
@@ -996,6 +998,8 @@ type AiSettingsAttributes struct {
 	Streaming *bool `json:"streaming,omitempty"`
 	// ai provider to use with embeddings (for vector indexing)
 	EmbeddingProvider *AiProvider `json:"embeddingProvider,omitempty"`
+	// ai provider to use for decision (classification) calls, like reviewing devbox agent tool calls
+	DecisionProvider *AiProvider `json:"decisionProvider,omitempty"`
 	// whether to enable log analysis in AI insights (turn off to save on log query costs)
 	LogAnalysis      *bool                        `json:"logAnalysis,omitempty"`
 	Openai           *OpenaiSettingsAttributes    `json:"openai,omitempty"`
@@ -1189,6 +1193,8 @@ type AnthropicSettings struct {
 	Proxy *HTTPProxyConfiguration `json:"proxy,omitempty"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning
 	ToolModel *string `json:"toolModel,omitempty"`
+	// a cheap, fast model for decision (classification) calls, like reviewing devbox agent tool calls. Models without native decision support are emulated
+	DecisionModel *string `json:"decisionModel,omitempty"`
 	// addditional models to support within the integrated ai proxy
 	ProxyModels []*string `json:"proxyModels,omitempty"`
 }
@@ -1204,6 +1210,8 @@ type AnthropicSettingsAttributes struct {
 	ToolModel *string `json:"toolModel,omitempty"`
 	// the model to use for vector embeddings
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
+	// a cheap, fast model for decision (classification) calls, like reviewing devbox agent tool calls. Models without native decision support are emulated
+	DecisionModel *string `json:"decisionModel,omitempty"`
 	// addditional models to support within the integrated ai proxy
 	ProxyModels []*string `json:"proxyModels,omitempty"`
 }
@@ -1470,6 +1478,8 @@ type AzureOpenaiAttributes struct {
 	ToolModel *string `json:"toolModel,omitempty"`
 	// the model to use for vector embeddings
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
+	// a cheap, fast model for decision (classification) calls, like reviewing devbox agent tool calls. Models without native decision support are emulated
+	DecisionModel *string `json:"decisionModel,omitempty"`
 	// the azure openai access token to use
 	AccessToken string `json:"accessToken"`
 	// an HTTP proxy to use for this provider's API calls
@@ -1489,6 +1499,8 @@ type AzureOpenaiSettings struct {
 	Proxy *HTTPProxyConfiguration `json:"proxy,omitempty"`
 	// the model to use for vector embeddings
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
+	// a cheap, fast model for decision (classification) calls, like reviewing devbox agent tool calls. Models without native decision support are emulated
+	DecisionModel *string `json:"decisionModel,omitempty"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning
 	ToolModel *string `json:"toolModel,omitempty"`
 	// the api version you want to use
@@ -1551,6 +1563,8 @@ type BedrockAiAttributes struct {
 	AWSSecretAccessKey *string `json:"awsSecretAccessKey,omitempty"`
 	// Bedrock model or inference profile for embeddings. Same ID formats as modelId.
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
+	// a cheap, fast model for decision (classification) calls, like reviewing devbox agent tool calls. Models without native decision support are emulated
+	DecisionModel *string `json:"decisionModel,omitempty"`
 	// AWS Bedrock API surface to use. RUNTIME (default) uses InvokeModel or Converse on bedrock-runtime; MANTLE uses the Bedrock Mantle Anthropic/OpenAI-compatible APIs.
 	Endpoint *BedrockEndpoint `json:"endpoint,omitempty"`
 	// Additional Bedrock model or inference profile IDs exposed through the Nexus OpenAI-compatible proxy beyond modelId, toolModelId, and embeddingModel. Same ID formats as modelId.
@@ -1575,6 +1589,8 @@ type BedrockAiSettings struct {
 	Region *string `json:"region,omitempty"`
 	// Bedrock model or inference profile for embeddings. Same ID formats as modelId.
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
+	// a cheap, fast model for decision (classification) calls, like reviewing devbox agent tool calls. Models without native decision support are emulated
+	DecisionModel *string `json:"decisionModel,omitempty"`
 	// AWS Bedrock API surface to use. RUNTIME (default) uses InvokeModel or Converse on bedrock-runtime; MANTLE uses the Bedrock Mantle Anthropic/OpenAI-compatible APIs.
 	Endpoint *BedrockEndpoint `json:"endpoint,omitempty"`
 	// Additional Bedrock model or inference profile IDs exposed through the Nexus OpenAI-compatible proxy beyond modelId, toolModelId, and embeddingModel. Same ID formats as modelId.
@@ -3845,24 +3861,28 @@ type DeprecatedCustomResourceEdge struct {
 }
 
 type Devbox struct {
-	ID                  string                 `json:"id"`
-	Name                string                 `json:"name"`
-	Image               *string                `json:"image,omitempty"`
-	ResolvedImage       *string                `json:"resolvedImage,omitempty"`
-	TemplateRevision    *string                `json:"templateRevision,omitempty"`
-	Status              *DevboxStatus          `json:"status,omitempty"`
-	Resources           map[string]any         `json:"resources,omitempty"`
-	AllowedRepositories []*string              `json:"allowedRepositories,omitempty"`
-	MaxInstances        *int64                 `json:"maxInstances,omitempty"`
-	Browser             *bool                  `json:"browser,omitempty"`
-	LastHeartbeatAt     *string                `json:"lastHeartbeatAt,omitempty"`
-	Agents              []*DevboxAgent         `json:"agents,omitempty"`
-	HTTPAllowlist       []*DevboxHTTPAllow     `json:"httpAllowlist,omitempty"`
-	IdlePolicy          *DevboxIdlePolicy      `json:"idlePolicy,omitempty"`
-	Conditions          []*DevboxCondition     `json:"conditions,omitempty"`
-	CloudIdentities     []*DevboxCloudIdentity `json:"cloudIdentities,omitempty"`
-	Cluster             *Cluster               `json:"cluster,omitempty"`
-	ScmConnections      []*ScmConnection       `json:"scmConnections,omitempty"`
+	ID                  string             `json:"id"`
+	Name                string             `json:"name"`
+	Image               *string            `json:"image,omitempty"`
+	ResolvedImage       *string            `json:"resolvedImage,omitempty"`
+	TemplateRevision    *string            `json:"templateRevision,omitempty"`
+	Status              *DevboxStatus      `json:"status,omitempty"`
+	Resources           map[string]any     `json:"resources,omitempty"`
+	AllowedRepositories []*string          `json:"allowedRepositories,omitempty"`
+	MaxInstances        *int64             `json:"maxInstances,omitempty"`
+	Browser             *bool              `json:"browser,omitempty"`
+	LastHeartbeatAt     *string            `json:"lastHeartbeatAt,omitempty"`
+	Agents              []*DevboxAgent     `json:"agents,omitempty"`
+	HTTPAllowlist       []*DevboxHTTPAllow `json:"httpAllowlist,omitempty"`
+	IdlePolicy          *DevboxIdlePolicy  `json:"idlePolicy,omitempty"`
+	// how agents' permission requests are answered
+	Autonomy DevboxAutonomyPolicy `json:"autonomy"`
+	// whether agents billed to the AI proxy can run at autonomy auto, reviewed by a decision model
+	DecisionReview  *bool                  `json:"decisionReview,omitempty"`
+	Conditions      []*DevboxCondition     `json:"conditions,omitempty"`
+	CloudIdentities []*DevboxCloudIdentity `json:"cloudIdentities,omitempty"`
+	Cluster         *Cluster               `json:"cluster,omitempty"`
+	ScmConnections  []*ScmConnection       `json:"scmConnections,omitempty"`
 	// the box's workload identity issuer and how to trust it from cloud accounts
 	WorkloadIdentity *DevboxWorkloadIdentity `json:"workloadIdentity,omitempty"`
 	InsertedAt       *string                 `json:"insertedAt,omitempty"`
@@ -3969,6 +3989,7 @@ type DevboxAttributes struct {
 	// hosts instances may reach
 	HTTPAllowlist []*DevboxHTTPAllowAttributes `json:"httpAllowlist,omitempty"`
 	IdlePolicy    *DevboxIdlePolicyAttributes  `json:"idlePolicy,omitempty"`
+	Autonomy      *DevboxAutonomyAttributes    `json:"autonomy,omitempty"`
 	Conditions    []*DevboxConditionAttributes `json:"conditions,omitempty"`
 	// cloud identities instances get workload identity tokens for
 	CloudIdentities []*DevboxCloudIdentityAttributes `json:"cloudIdentities,omitempty"`
@@ -3981,6 +4002,20 @@ type DevboxAudioContent struct {
 }
 
 func (DevboxAudioContent) IsDevboxContentBlock() {}
+
+type DevboxAutonomyAttributes struct {
+	// the level new threads start at
+	Default *DevboxAutonomy `json:"default,omitempty"`
+	// the highest level a thread may use
+	Max *DevboxAutonomy `json:"max,omitempty"`
+}
+
+type DevboxAutonomyPolicy struct {
+	// the level new threads start at
+	Default DevboxAutonomy `json:"default"`
+	// the highest level a thread may use
+	Max DevboxAutonomy `json:"max"`
+}
 
 type DevboxCheckout struct {
 	Path             *string `json:"path,omitempty"`
@@ -4389,8 +4424,12 @@ type DevboxInteraction struct {
 	Instance   *DevboxInstance           `json:"instance,omitempty"`
 	Thread     *DevboxThread             `json:"thread,omitempty"`
 	AnsweredBy *User                     `json:"answeredBy,omitempty"`
-	InsertedAt *string                   `json:"insertedAt,omitempty"`
-	UpdatedAt  *string                   `json:"updatedAt,omitempty"`
+	// set when the devbox answered by policy, e.g. autonomy:full
+	AnsweredByPolicy *string `json:"answeredByPolicy,omitempty"`
+	// the devbox reviewer's verdict at autonomy auto
+	Review     *DevboxInteractionReview `json:"review,omitempty"`
+	InsertedAt *string                  `json:"insertedAt,omitempty"`
+	UpdatedAt  *string                  `json:"updatedAt,omitempty"`
 }
 
 type DevboxInteractionResponseAttributes struct {
@@ -4402,6 +4441,20 @@ type DevboxInteractionResponseAttributes struct {
 	Action *DevboxElicitationAction `json:"action,omitempty"`
 	// form content for an accepted form elicitation
 	Content *string `json:"content,omitempty"`
+}
+
+// A decision model's review of a permission request at autonomy auto
+type DevboxInteractionReview struct {
+	// allow, deny or ask
+	Verdict *string `json:"verdict,omitempty"`
+	// the verdict's probability, 0 to 1
+	Confidence *float64 `json:"confidence,omitempty"`
+	// none, destructive, exfiltration, credentials, out_of_scope or external
+	Risk *string `json:"risk,omitempty"`
+	// the decision model that answered
+	Model *string `json:"model,omitempty"`
+	// why a human was still asked, when they were
+	Escalation *string `json:"escalation,omitempty"`
 }
 
 type DevboxLease struct {
@@ -6419,6 +6472,7 @@ type ModelDefault struct {
 	Model          *string    `json:"model,omitempty"`
 	ToolModel      *string    `json:"toolModel,omitempty"`
 	EmbeddingModel *string    `json:"embeddingModel,omitempty"`
+	DecisionModel  *string    `json:"decisionModel,omitempty"`
 }
 
 // A monitor defines a recurring check over observability data that can raise alerts
@@ -7518,6 +7572,8 @@ type OpenaiSettings struct {
 	ToolModel *string `json:"toolModel,omitempty"`
 	// the model to use for vector embeddings
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
+	// a cheap, fast model for decision (classification) calls, like reviewing devbox agent tool calls. Models without native decision support are emulated
+	DecisionModel *string `json:"decisionModel,omitempty"`
 	// the method to use for openai api calls (defaults to auto, but can be used to restrict to only responses or chat completions)
 	Method *OpenAiMethod `json:"method,omitempty"`
 	// addditional models to support within the integrated ai proxy
@@ -7538,6 +7594,8 @@ type OpenaiSettingsAttributes struct {
 	ToolModel *string `json:"toolModel,omitempty"`
 	// the model to use for vector embeddings
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
+	// a cheap, fast model for decision (classification) calls, like reviewing devbox agent tool calls. Models without native decision support are emulated
+	DecisionModel *string `json:"decisionModel,omitempty"`
 	// the method to use for openai api calls (defaults to auto, but can be used to restrict to only responses or chat completions)
 	Method *OpenAiMethod `json:"method,omitempty"`
 	// addditional models to support within the integrated ai proxy
@@ -11709,6 +11767,8 @@ type VertexAiAttributes struct {
 	ToolModel *string `json:"toolModel,omitempty"`
 	// the model to use for vector embeddings
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
+	// a cheap, fast model for decision (classification) calls, like reviewing devbox agent tool calls. Models without native decision support are emulated
+	DecisionModel *string `json:"decisionModel,omitempty"`
 	// optional service account json to auth to the GCP vertex apis
 	ServiceAccountJSON *string `json:"serviceAccountJson,omitempty"`
 	// custom vertexai endpoint if for dedicated customer deployments
@@ -11729,6 +11789,8 @@ type VertexAiSettings struct {
 	Proxy *HTTPProxyConfiguration `json:"proxy,omitempty"`
 	// the model to use for vector embeddings
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
+	// a cheap, fast model for decision (classification) calls, like reviewing devbox agent tool calls. Models without native decision support are emulated
+	DecisionModel *string `json:"decisionModel,omitempty"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning
 	ToolModel *string `json:"toolModel,omitempty"`
 	// the gcp project id to use
@@ -16861,6 +16923,63 @@ func (e *DevboxAgentType) UnmarshalJSON(b []byte) error {
 }
 
 func (e DevboxAgentType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type DevboxAutonomy string
+
+const (
+	DevboxAutonomyManual DevboxAutonomy = "MANUAL"
+	DevboxAutonomyAuto   DevboxAutonomy = "AUTO"
+	DevboxAutonomyFull   DevboxAutonomy = "FULL"
+)
+
+var AllDevboxAutonomy = []DevboxAutonomy{
+	DevboxAutonomyManual,
+	DevboxAutonomyAuto,
+	DevboxAutonomyFull,
+}
+
+func (e DevboxAutonomy) IsValid() bool {
+	switch e {
+	case DevboxAutonomyManual, DevboxAutonomyAuto, DevboxAutonomyFull:
+		return true
+	}
+	return false
+}
+
+func (e DevboxAutonomy) String() string {
+	return string(e)
+}
+
+func (e *DevboxAutonomy) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DevboxAutonomy(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid DevboxAutonomy", str)
+	}
+	return nil
+}
+
+func (e DevboxAutonomy) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *DevboxAutonomy) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e DevboxAutonomy) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

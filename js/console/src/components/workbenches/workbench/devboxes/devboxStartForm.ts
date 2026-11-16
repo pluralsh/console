@@ -7,6 +7,11 @@ import {
   DevboxStatus,
 } from 'generated/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
+import {
+  defaultAutonomy,
+  DevboxAutonomyPolicy,
+  isAutonomyOption,
+} from './devboxAutonomy'
 
 export type DevboxBilling = 'proxy' | 'subscription'
 
@@ -16,6 +21,9 @@ export type DevboxStartBox = {
   status?: Nullable<DevboxStatus>
   allowedRepositories?: Nullable<Nullable<string>[]>
   agents?: Nullable<Nullable<DevboxAgentFragment>[]>
+  autonomy?: Nullable<DevboxAutonomyPolicy>
+  // a decision model reviews permission requests at auto, so proxy billing doesn't rule auto out
+  decisionReview?: Nullable<boolean>
 }
 
 export type DevboxStartValues = {
@@ -158,6 +166,11 @@ export function validateStartValues(
   else if (!agent) errors.agent = `${box.name} doesn't offer this agent`
   else if (agent.probeStatus === DevboxProbeStatus.Missing)
     errors.agent = "This agent isn't installed in the box's image"
+  else {
+    const autonomy = agent.configOptions?.find(isAutonomyOption)
+    if (autonomy && !defaultAutonomy(autonomy, box.autonomy))
+      errors.agent = `This agent never asks for permission, so it needs ${box.name} to allow full autonomy`
+  }
 
   const models = modelsOf(agent)
   if (agent && models.length) {
@@ -176,6 +189,36 @@ export function validateStartValues(
       errors.repositories = `Not allowed on this box: ${outside.join(', ')}`
   }
   return errors
+}
+
+// whether the picked agent bills to the AI proxy, given the owner's default billing per agent
+export function billedToProxy(
+  values: DevboxStartValues,
+  defaults?: Nullable<Partial<Record<DevboxAgentType, DevboxBilling>>>
+): boolean {
+  if (!values.agent) return true
+  return (
+    (values.billing[values.agent] ?? defaults?.[values.agent] ?? 'proxy') ===
+    'proxy'
+  )
+}
+
+// drops a picked auto autonomy once the agent bills to the AI proxy, unless a decision model reviews for it
+export function dropProxyAuto(
+  values: DevboxStartValues,
+  autonomyId: Nullable<string>,
+  defaults?: Nullable<Partial<Record<DevboxAgentType, DevboxBilling>>>,
+  decisionReview?: Nullable<boolean>
+): DevboxStartValues {
+  if (
+    decisionReview ||
+    !autonomyId ||
+    values.configOptions[autonomyId] !== 'auto' ||
+    !billedToProxy(values, defaults)
+  )
+    return values
+  const { [autonomyId]: _, ...configOptions } = values.configOptions
+  return { ...values, configOptions }
 }
 
 export const hasStartErrors = (errors: DevboxStartErrors) =>

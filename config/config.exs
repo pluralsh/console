@@ -99,6 +99,7 @@ config :console, :ai_defaults,
     model: "gpt-5.6-luna",
     tool_model: "gpt-5.6-terra",
     embedding_model: "text-embedding-3-large",
+    decision_model: "gpt-6-luna",
     proxy_models: ["gpt-5.4", "gpt-5.4-mini"]
   },
   xai: %{

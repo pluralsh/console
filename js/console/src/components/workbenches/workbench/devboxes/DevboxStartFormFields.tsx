@@ -13,12 +13,19 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { isNonNullable } from 'utils/isNonNullable'
 import {
+  autonomyChoices,
+  defaultAutonomy,
+  isAutonomyOption,
+} from './devboxAutonomy'
+import {
   agentLabel,
   agentsOf,
+  billedToProxy,
   DevboxBilling,
   DevboxStartBox,
   DevboxStartErrors,
   DevboxStartValues,
+  dropProxyAuto,
   findAgent,
   MODEL_CATEGORY,
   modelsOf,
@@ -58,9 +65,21 @@ export function DevboxStartFormFields({
   const agents = agentsOf(box)
   const agent = findAgent(box, values.agent)
   const models = modelsOf(agent)
-  const extraOptions = (agent?.configOptions ?? [])
-    .filter(isNonNullable)
-    .filter((o) => o.category !== MODEL_CATEGORY && o.options?.length)
+  const agentOptions = (agent?.configOptions ?? []).filter(isNonNullable)
+  const autonomyOption = agentOptions.find(isAutonomyOption)
+  const proxyBilled =
+    !box?.decisionReview &&
+    billedToProxy(values, billing?.allowed ? billing.defaults : null)
+  const autonomyLevels = autonomyOption
+    ? autonomyChoices(autonomyOption, box?.autonomy, proxyBilled)
+    : []
+  const pickedAutonomy = autonomyOption
+    ? values.configOptions[autonomyOption.configId]
+    : undefined
+  const extraOptions = agentOptions.filter(
+    (o) =>
+      o.category !== MODEL_CATEGORY && !isAutonomyOption(o) && o.options?.length
+  )
   const commands = (agent?.commands ?? []).filter(isNonNullable)
   const [newRepo, setNewRepo] = useState('')
 
@@ -190,6 +209,45 @@ export function DevboxStartFormFields({
           </Select>
         </FormField>
       </Flex>
+      {autonomyOption && (
+        <FormField
+          label="Autonomy"
+          hint="How the agent's permission requests are answered"
+        >
+          <Select
+            label="Pick an autonomy level"
+            selectedKey={
+              (autonomyLevels.some(
+                (c) => c.value === pickedAutonomy && !c.unavailable
+              )
+                ? pickedAutonomy
+                : defaultAutonomy(
+                    autonomyOption,
+                    box?.autonomy,
+                    proxyBilled
+                  )) ?? null
+            }
+            onSelectionChange={(key) =>
+              onChange({
+                ...values,
+                configOptions: {
+                  ...values.configOptions,
+                  [autonomyOption.configId]: `${key}`,
+                },
+              })
+            }
+          >
+            {autonomyLevels.map((c) => (
+              <ListBoxItem
+                key={c.value}
+                label={c.label}
+                disabled={!!c.unavailable}
+                description={c.unavailable ?? c.description}
+              />
+            ))}
+          </Select>
+        </FormField>
+      )}
       {extraOptions.map((option) => (
         <FormField
           key={option.configId}
@@ -227,7 +285,16 @@ export function DevboxStartFormFields({
         <DevboxBillingFields
           agents={agents.map((a) => a.type)}
           values={values}
-          onChange={onChange}
+          onChange={(next) =>
+            onChange(
+              dropProxyAuto(
+                next,
+                autonomyOption?.configId,
+                billing.defaults,
+                box?.decisionReview
+              )
+            )
+          }
           billing={billing}
         />
       )}

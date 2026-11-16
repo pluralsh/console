@@ -62,6 +62,7 @@ func (m *Manager) Prompt(ctx context.Context, req *devboxv1.PromptRequest) (*dev
 	}
 	qp := &queuedPrompt{promptID: req.GetPromptId(), messageID: promptMessageID(req.GetPromptId()), content: content, sentBy: req.GetSentBy()}
 	t.rememberPrompt(qp.promptID, qp.messageID)
+	t.notePromptText(req.GetContent())
 	m.dirty = true
 	resp.MessageId = qp.messageID
 	if m.enqueueLocked(t, qp) {

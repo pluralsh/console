@@ -37,6 +37,7 @@ import {
   matchSlashCommands,
   slashCommandHint,
 } from './devboxSlashCommands'
+import { autonomyChoices, isAutonomyOption } from './devboxAutonomy'
 import { MODEL_CATEGORY } from './devboxStartForm'
 
 const MAX_SUGGESTIONS = 50
@@ -187,6 +188,7 @@ export function DevboxComposer({
   const options = (configOptions ?? [])
     .filter(isNonNullable)
     .filter((o) => o.options?.length)
+    .sort((a, b) => Number(isAutonomyOption(b)) - Number(isAutonomyOption(a)))
 
   return (
     <ComposerSC {...getRootProps()}>
@@ -293,13 +295,28 @@ export function DevboxComposer({
                     onSetConfigOption?.(option.configId, `${key}`)
                   }
                 >
-                  {(option.options ?? []).filter(isNonNullable).map((o) => (
-                    <ListBoxItem
-                      key={o.value}
-                      label={o.name ?? o.value}
-                      description={o.description ?? undefined}
-                    />
-                  ))}
+                  {isAutonomyOption(option)
+                    ? autonomyChoices(option).map((c) => (
+                        <ListBoxItem
+                          key={c.value}
+                          label={c.label}
+                          disabled={!!c.unavailable}
+                          description={
+                            !c.unavailable
+                              ? c.description
+                              : c.value === 'auto'
+                                ? c.unavailable
+                                : 'Not available for this agent on this box'
+                          }
+                        />
+                      ))
+                    : (option.options ?? []).filter(isNonNullable).map((o) => (
+                        <ListBoxItem
+                          key={o.value}
+                          label={o.name ?? o.value}
+                          description={o.description ?? undefined}
+                        />
+                      ))}
                 </Select>
               </ConfigSelectSC>
             )

@@ -298,6 +298,11 @@ func (c *Config) writeOpenCodeConfig(aiProxy, bootModel string) (string, error) 
 	cfg := map[string]any{
 		"$schema":      "https://opencode.ai/config.json",
 		"instructions": []string{filepath.Join(c.Home, "AGENTS.md")},
+		// OpenCode's permissions are process-wide, so it asks for everything but reads and the daemon answers per
+		// thread autonomy: forwarded to a human at manual, approved at full.
+		"permission": map[string]any{
+			"*": "ask", "read": "allow", "glob": "allow", "grep": "allow", "list": "allow", "todoread": "allow", "todowrite": "allow",
+		},
 	}
 	if aiProxy != "" {
 		cfg["provider"] = map[string]any{

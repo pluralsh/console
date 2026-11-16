@@ -470,6 +470,22 @@ message Interaction {
   uint64 revision = 16;
   // Verbatim JSON-RPC request params.
   bytes raw_json = 17;
+  // Set when the daemon's reviewer judged a permission request at AUTO, whether it approved it or passed it on.
+  Review review = 18;
+}
+
+// Review is the daemon reviewer's verdict on a permission request.
+message Review {
+  // allow, deny or ask.
+  string verdict = 1;
+  // The verdict's probability, 0 to 1.
+  double confidence = 2;
+  // The most likely risk: none, destructive, exfiltration, credentials, out_of_scope or external.
+  string risk = 3;
+  // The decision model that answered.
+  string model = 4;
+  // Why the request still went to a human: low confidence, a deny verdict, or the reviewer failing.
+  string escalation = 5;
 }
 
 message PermissionRequest {

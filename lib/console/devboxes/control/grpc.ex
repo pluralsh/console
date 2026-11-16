@@ -60,7 +60,8 @@ defmodule Console.Devboxes.Control.Grpc do
       allowed_repositories: devbox.allowed_repositories || [],
       idle_policy: idle_policy(opts[:idle_policy] || Devbox.idle_policy(devbox)),
       max_running_threads: inst.max_running_threads || 0,
-      idempotency_key: inst.id
+      idempotency_key: inst.id,
+      decision_review: Console.Devboxes.decision_review?()
     }
 
     case opts[:snapshot] do

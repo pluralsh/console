@@ -25,6 +25,9 @@ const listPagesMax = 20
 // modelCategory is the ACP session config option category (and synthetic option id) for model selection.
 const modelCategory = "model"
 
+// modeCategory is the ACP session config option category (and synthetic option id) for session modes.
+const modeCategory = "mode"
+
 // ToStatus converts agent failures to gRPC errors with typed reasons; other errors pass through.
 func ToStatus(err error) error {
 	if err == nil {
@@ -132,7 +135,7 @@ func sessionResult(s *session, res acp.Object) {
 			"currentValue": acp.Str(models, "currentModelId"), "options": values,
 		}})
 	}
-	if modes := acp.Obj(res, "modes"); modes != nil && !has("mode") {
+	if modes := acp.Obj(res, "modes"); modes != nil && !has(modeCategory) {
 		var values []any
 		for _, mv := range acp.Arr(modes, "availableModes") {
 			if mo, ok := mv.(map[string]any); ok {
@@ -143,8 +146,8 @@ func sessionResult(s *session, res acp.Object) {
 				values = append(values, v)
 			}
 		}
-		s.options = append(s.options, &cfgOption{synthetic: "mode", raw: acp.Object{
-			"id": "mode", "name": "Mode", "category": "mode", "type": "select",
+		s.options = append(s.options, &cfgOption{synthetic: modeCategory, raw: acp.Object{
+			"id": modeCategory, "name": "Mode", "category": modeCategory, "type": "select",
 			"currentValue": acp.Str(modes, "currentModeId"), "options": values,
 		}})
 	}
@@ -193,6 +196,22 @@ func (m *Manager) CreateThread(ctx context.Context, req *devboxv1.CreateThreadRe
 			settings = m.defaultOpts
 		}
 	}
+	if err := m.checkAutonomyLocked(agent); err != nil {
+		m.mu.Unlock()
+		return nil, err
+	}
+	autonomy := m.autonomyDefaultLocked()
+	var rest []*devboxv1.ConfigOptionSetting
+	for _, st := range settings {
+		if st.GetConfigId() == autonomyCategory {
+			if lvl := autonomyOfValue(st.GetValue()); lvl != devboxv1.Autonomy_AUTONOMY_UNSPECIFIED {
+				autonomy = lvl
+			}
+			continue
+		}
+		rest = append(rest, st)
+	}
+	settings = rest
 	m.mu.Unlock()
 
 	cwd := m.resolveCwd(req.GetCwd())
@@ -233,7 +252,12 @@ func (m *Manager) CreateThread(ctx context.Context, req *devboxv1.CreateThreadRe
 	m.dirty = true
 	m.mu.Unlock()
 
-	if err := m.applyInitialConfig(ctx, c, t, model, settings); err != nil {
+	err = m.applyInitialConfig(ctx, c, t, model, settings)
+	m.mu.Lock()
+	autonomy = clampAutonomy(min(autonomy, m.autonomyMaxLocked()), m.supportedLevelsLocked(agent, s))
+	m.mu.Unlock()
+	err = errors.Join(err, m.applyAutonomy(ctx, c, t, autonomy))
+	if err != nil {
 		m.log.Warn("initial thread config failed", "thread", id, "err", err)
 		m.mu.Lock()
 		m.emitConditionLocked("thread_config_failed", "warning", fmt.Sprintf("thread %s: %v", id, err), true)
@@ -283,6 +307,21 @@ func (m *Manager) applyInitialConfig(ctx context.Context, c *agentConn, t *threa
 
 // setConfig changes one config option and returns the agent's reported options.
 func (m *Manager) setConfig(ctx context.Context, c *agentConn, s *session, configID, value string) ([]*devboxv1.ConfigOption, error) {
+	if configID == autonomyCategory {
+		lvl := autonomyOfValue(value)
+		if lvl == devboxv1.Autonomy_AUTONOMY_UNSPECIFIED {
+			return nil, derr.InvalidAgentOrModel(fmt.Sprintf("%q is not a valid value for autonomy", value))
+		}
+		if s.thread == nil {
+			return nil, derr.InvalidAgentOrModel("autonomy is set per thread")
+		}
+		if err := m.applyAutonomy(ctx, c, s.thread, lvl); err != nil {
+			return nil, err
+		}
+		m.mu.Lock()
+		defer m.mu.Unlock()
+		return s.configProtos(), nil
+	}
 	m.mu.Lock()
 	var opt *cfgOption
 	for _, o := range s.options {
@@ -304,7 +343,19 @@ func (m *Manager) setConfig(ctx context.Context, c *agentConn, s *session, confi
 			return nil, derr.InvalidAgentOrModel(fmt.Sprintf("%q is not a valid value for %s", value, opt.id()))
 		}
 	}
+	if opt.category() == modeCategory {
+		if err := m.modeAllowedLocked(s.agent, s, value); err != nil {
+			m.mu.Unlock()
+			return nil, err
+		}
+	}
 	synthetic, id, sid := opt.synthetic, opt.id(), s.id
+	wasAuto := s.thread != nil && s.thread.autonomy == devboxv1.Autonomy_AUTONOMY_AUTO
+	requestedMode := ""
+	if opt.category() == modeCategory {
+		requestedMode = value
+	}
+	modeUpdates := s.modeUpdates
 	m.mu.Unlock()
 
 	var res acp.Object
@@ -312,7 +363,7 @@ func (m *Manager) setConfig(ctx context.Context, c *agentConn, s *session, confi
 	switch synthetic {
 	case modelCategory:
 		res, err = c.call(ctx, acp.MethodSetModel, map[string]any{"sessionId": sid, "modelId": value})
-	case "mode":
+	case modeCategory:
 		res, err = c.call(ctx, acp.MethodSetMode, map[string]any{"sessionId": sid, "modeId": value})
 	default:
 		res, err = c.call(ctx, acp.MethodSetConfigOption, map[string]any{"sessionId": sid, "configId": id, "value": value})
@@ -324,12 +375,22 @@ func (m *Manager) setConfig(ctx context.Context, c *agentConn, s *session, confi
 	defer m.mu.Unlock()
 	if opts := acp.Arr(res, "configOptions"); opts != nil {
 		s.options = mergeConfigOptions(s.options, opts)
-	} else if synthetic != "" {
+	} else if synthetic != "" && (synthetic != modeCategory || s.modeUpdates == modeUpdates) {
+		// The ACP SDK delivers notifications sent before a response first, so a current_mode_update during
+		// set_mode (Claude's Auto fallback) is the effective mode.
 		opt.raw["currentValue"] = value
 	}
 	if opt.category() == modelCategory && s.thread != nil && s.thread.session == s {
 		s.thread.model = value
 	}
+	noteAutoFallbackLocked(s, wasAuto, requestedMode)
+	m.syncAutonomyLocked(s)
+	m.emitConfigLocked(s)
+	return s.configProtos(), nil
+}
+
+// emitConfigLocked marks a session's options changed and emits them as a config_option_update.
+func (m *Manager) emitConfigLocked(s *session) {
 	s.dirty = true
 	if s.thread != nil {
 		s.thread.dirty = true
@@ -337,7 +398,6 @@ func (m *Manager) setConfig(ctx context.Context, c *agentConn, s *session, confi
 	m.dirty = true
 	m.emitDeltaLocked(&devboxv1.Delta{SessionId: s.id, Op: devboxv1.DeltaOp_DELTA_OP_STATE, StateKind: acp.StateConfigOptionUpdate,
 		PayloadJson: acp.MustJSON(acp.Object{"sessionUpdate": acp.StateConfigOptionUpdate, "configOptions": s.configJSON()})})
-	return s.configProtos(), nil
 }
 
 // optionAllows checks a value against a select option's values (grouped or flat). Non-select options accept any.
@@ -428,8 +488,15 @@ func (m *Manager) ensureAttached(ctx context.Context, c *agentConn, t *thread, r
 	for _, child := range m.childrenLocked(s.id) {
 		child.attached = true
 	}
+	autonomy := t.autonomy
+	// The agent's fresh mode isn't the thread's level until the level is reapplied below.
+	t.autonomy = devboxv1.Autonomy_AUTONOMY_UNSPECIFIED
 	sessionResult(s, res)
 	s.dirty, t.dirty, m.dirty = true, true, true
+	if autonomy == devboxv1.Autonomy_AUTONOMY_UNSPECIFIED {
+		autonomy = m.autonomyDefaultLocked()
+	}
+	autonomy = clampAutonomy(min(autonomy, m.autonomyMaxLocked()), m.supportedLevelsLocked(t.agent, s))
 	model := t.model
 	var cur string
 	for _, o := range s.options {
@@ -441,6 +508,11 @@ func (m *Manager) ensureAttached(ctx context.Context, c *agentConn, t *thread, r
 	if model != "" && cur != "" && cur != model {
 		if _, err := m.setConfig(ctx, c, s, "model", model); err != nil {
 			m.log.Warn("restore thread model", "thread", t.id, "err", err)
+		}
+	}
+	if autonomy != devboxv1.Autonomy_AUTONOMY_UNSPECIFIED {
+		if err := m.applyAutonomy(ctx, c, t, autonomy); err != nil {
+			m.log.Warn("restore thread autonomy", "thread", t.id, "err", err)
 		}
 	}
 	return nil
@@ -571,10 +643,10 @@ func (m *Manager) ImportThread(ctx context.Context, req *devboxv1.ImportThreadRe
 	}
 	res, err := c.call(ctx, method, params)
 	m.mu.Lock()
-	defer m.mu.Unlock()
 	if err != nil {
 		delete(m.threads, id)
 		delete(m.sessions, s.id)
+		m.mu.Unlock()
 		return nil, ToStatus(agentFailure(err, method))
 	}
 	if cwd := acp.Str(res, "cwd"); cwd != "" {
@@ -584,6 +656,13 @@ func (m *Manager) ImportThread(ctx context.Context, req *devboxv1.ImportThreadRe
 	sessionResult(s, res)
 	m.settleSessionLocked(s)
 	m.dirty = true
+	autonomy := clampAutonomy(min(m.autonomyDefaultLocked(), m.autonomyMaxLocked()), m.supportedLevelsLocked(agent, s))
+	m.mu.Unlock()
+	if err := m.applyAutonomy(ctx, c, t, autonomy); err != nil {
+		m.log.Warn("imported thread autonomy", "thread", id, "err", err)
+	}
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	m.flushLocked()
 	return m.threadRowLocked(t), nil
 }
@@ -735,7 +814,7 @@ func (m *Manager) ForkThread(ctx context.Context, req *devboxv1.ForkThreadReques
 	defer m.mu.Unlock()
 	nt := &thread{
 		id: newID, agent: agent, cwd: cwd, worktrees: t.worktrees, createdBy: req.GetRequestedBy(), createdAt: m.clock.Now(),
-		title: req.GetTitle(), model: t.model, dirty: true,
+		title: req.GetTitle(), model: t.model, autonomy: t.autonomy, dirty: true,
 	}
 	m.threads[newID] = nt
 	ns := m.newSessionLocked(nt, acp.Str(res, "sessionId"))
@@ -745,6 +824,7 @@ func (m *Manager) ForkThread(ctx context.Context, req *devboxv1.ForkThreadReques
 	}
 	ns.commands = src.commands
 	sessionResult(ns, res)
+	m.syncAutonomyLocked(ns)
 	m.dirty = true
 	m.flushLocked()
 	return m.threadRowLocked(nt), nil

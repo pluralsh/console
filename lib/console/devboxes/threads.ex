@@ -45,6 +45,9 @@ defmodule Console.Devboxes.Threads do
     |> add_operation(:catalog, fn %{instance: inst} ->
       Devboxes.resolve_catalog(inst.devbox, Map.put_new(attrs, :agent, inst.agent))
     end)
+    |> add_operation(:autonomy, fn %{instance: inst, catalog: catalog} ->
+      Devboxes.check_proxy_auto(inst, catalog.agent, catalog.config_options)
+    end)
     |> add_operation(:budget, fn %{instance: inst, catalog: catalog} -> Billing.check(inst, catalog.agent, user) end)
     |> add_operation(:thread, fn %{instance: inst, catalog: catalog} ->
       %DevboxInstanceSession{instance_id: inst.id, user_id: user_id, kind: :thread}
@@ -279,7 +282,9 @@ defmodule Console.Devboxes.Threads do
   def set_config_option(id, config_id, value, %User{} = user) do
     with {:ok, thread} <- allow(get_thread!(id), user, :prompt),
          {:ok, inst} <- live_instance(thread.instance_id),
-         {:ok, _} <- resolve_config_options(config_options(thread, inst), [%{config_id: config_id, value: value}]),
+         {:ok, opts} <- resolve_config_options(config_options(thread, inst), [%{config_id: config_id, value: value}]),
+         {:ok, _} <- Devboxes.check_autonomy(inst.devbox, opts),
+         {:ok, _} <- Devboxes.check_proxy_auto(inst, thread.agent || inst.agent, opts),
       do: Control.set_config_option(inst, thread, config_id, value) |> control_result(thread)
   end
 

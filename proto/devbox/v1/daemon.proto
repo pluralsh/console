@@ -177,6 +177,10 @@ message InitializeRequest {
   // The runner's secret env vars. Kept in memory only, never written to disk; the gateway resends them on every
   // Initialize, including after a daemon restart.
   map<string, string> env = 21;
+  // From the DevboxRunner, not console: the daemon enforces the cap on every thread.
+  AutonomyPolicy autonomy = 22;
+  // From console (CreateInstanceRequest.decision_review): the AI proxy serves `POST /v1/decisions`.
+  bool decision_review = 23;
 }
 
 message InitializeResponse {

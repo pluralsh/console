@@ -172,6 +172,34 @@ defmodule Console.Devboxes.ThreadsTest do
       {:error, _} = Threads.set_config_option(thread.id, "mode", "yolo", thread.user)
       {:error, _} = Threads.set_config_option(thread.id, "other", "x", thread.user)
     end
+
+    test "autonomy is capped by the devbox's max" do
+      levels = Enum.map(~w(manual auto full), &%DevboxInstanceSession.ConfigOption.Value{value: &1})
+      thread = owned_thread(
+        agent: :claude,
+        config_options: [%DevboxInstanceSession.ConfigOption{config_id: "autonomy", options: levels}],
+        devbox_attrs: [autonomy: %Devbox.AutonomyPolicy{max: :auto}],
+        instance_attrs: [agent_billing: %{"claude" => "subscription"}]
+      )
+
+      {:ok, _} = Threads.set_config_option(thread.id, "autonomy", "manual", thread.user)
+      {:ok, _} = Threads.set_config_option(thread.id, "autonomy", "auto", thread.user)
+      {:error, msg} = Threads.set_config_option(thread.id, "autonomy", "full", thread.user)
+      assert msg =~ "above this devbox's max of auto"
+    end
+
+    test "auto needs subscription billing" do
+      levels = Enum.map(~w(manual auto full), &%DevboxInstanceSession.ConfigOption.Value{value: &1})
+      thread = owned_thread(
+        agent: :claude,
+        config_options: [%DevboxInstanceSession.ConfigOption{config_id: "autonomy", options: levels}],
+        devbox_attrs: [autonomy: %Devbox.AutonomyPolicy{max: :full}]
+      )
+
+      {:ok, _} = Threads.set_config_option(thread.id, "autonomy", "full", thread.user)
+      {:error, msg} = Threads.set_config_option(thread.id, "autonomy", "auto", thread.user)
+      assert msg =~ "provider that serves decisions"
+    end
   end
 
   describe "#list_commands/2" do
@@ -286,7 +314,8 @@ defmodule Console.Devboxes.ThreadsTest do
 
   defp owned_thread(attrs \\ []) do
     {devbox_attrs, attrs} = Keyword.pop(attrs, :devbox_attrs, [])
-    inst = owned_instance(devbox_attrs: devbox_attrs)
+    {inst_attrs, attrs} = Keyword.pop(attrs, :instance_attrs, [])
+    inst = owned_instance(Keyword.put(inst_attrs, :devbox_attrs, devbox_attrs))
     insert(:devbox_instance_session, Keyword.merge(attrs, instance: inst, user: inst.user))
   end
 end

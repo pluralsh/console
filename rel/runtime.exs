@@ -401,7 +401,8 @@ if is_set("CONSOLE_AI_DEFAULTS") do
       config :console, :ai_defaults, "#{key}": %{
         model: value["model"],
         tool_model: value["tool_model"],
-        embedding_model: value["embedding_model"]
+        embedding_model: value["embedding_model"],
+        decision_model: value["decision_model"]
       }
     _ -> :ok
   end)

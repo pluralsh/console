@@ -667,6 +667,22 @@ defmodule Devbox.V1.Interaction do
   field :created_at, 15, type: Google.Protobuf.Timestamp, json_name: "createdAt"
   field :revision, 16, type: :uint64
   field :raw_json, 17, type: :bytes, json_name: "rawJson"
+  field :review, 18, type: Devbox.V1.Review
+end
+
+defmodule Devbox.V1.Review do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "devbox.v1.Review",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :verdict, 1, type: :string
+  field :confidence, 2, type: :double
+  field :risk, 3, type: :string
+  field :model, 4, type: :string
+  field :escalation, 5, type: :string
 end
 
 defmodule Devbox.V1.PermissionRequest do

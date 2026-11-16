@@ -231,6 +231,64 @@ func (BillingMode) EnumDescriptor() ([]byte, []int) {
 	return file_devbox_v1_common_proto_rawDescGZIP(), []int{2}
 }
 
+// Autonomy is how a thread's permission requests are answered. The levels are ordered: a cap of AUTO allows
+// MANUAL and AUTO.
+type Autonomy int32
+
+const (
+	Autonomy_AUTONOMY_UNSPECIFIED Autonomy = 0
+	// Every permission request goes to a human.
+	Autonomy_AUTONOMY_MANUAL Autonomy = 1
+	// A reviewer approves what it can and the rest goes to a human: the harness's own (Claude's auto mode, Codex's
+	// guardian) where it runs, otherwise the daemon's, asking the AI proxy's decision model.
+	Autonomy_AUTONOMY_AUTO Autonomy = 2
+	// Everything is approved without asking.
+	Autonomy_AUTONOMY_FULL Autonomy = 3
+)
+
+// Enum value maps for Autonomy.
+var (
+	Autonomy_name = map[int32]string{
+		0: "AUTONOMY_UNSPECIFIED",
+		1: "AUTONOMY_MANUAL",
+		2: "AUTONOMY_AUTO",
+		3: "AUTONOMY_FULL",
+	}
+	Autonomy_value = map[string]int32{
+		"AUTONOMY_UNSPECIFIED": 0,
+		"AUTONOMY_MANUAL":      1,
+		"AUTONOMY_AUTO":        2,
+		"AUTONOMY_FULL":        3,
+	}
+)
+
+func (x Autonomy) Enum() *Autonomy {
+	p := new(Autonomy)
+	*p = x
+	return p
+}
+
+func (x Autonomy) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (Autonomy) Descriptor() protoreflect.EnumDescriptor {
+	return file_devbox_v1_common_proto_enumTypes[3].Descriptor()
+}
+
+func (Autonomy) Type() protoreflect.EnumType {
+	return &file_devbox_v1_common_proto_enumTypes[3]
+}
+
+func (x Autonomy) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use Autonomy.Descriptor instead.
+func (Autonomy) EnumDescriptor() ([]byte, []int) {
+	return file_devbox_v1_common_proto_rawDescGZIP(), []int{3}
+}
+
 // SnapshotFidelity says what a snapshot, or a restore from it, preserves.
 type SnapshotFidelity int32
 
@@ -267,11 +325,11 @@ func (x SnapshotFidelity) String() string {
 }
 
 func (SnapshotFidelity) Descriptor() protoreflect.EnumDescriptor {
-	return file_devbox_v1_common_proto_enumTypes[3].Descriptor()
+	return file_devbox_v1_common_proto_enumTypes[4].Descriptor()
 }
 
 func (SnapshotFidelity) Type() protoreflect.EnumType {
-	return &file_devbox_v1_common_proto_enumTypes[3]
+	return &file_devbox_v1_common_proto_enumTypes[4]
 }
 
 func (x SnapshotFidelity) Number() protoreflect.EnumNumber {
@@ -280,7 +338,7 @@ func (x SnapshotFidelity) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use SnapshotFidelity.Descriptor instead.
 func (SnapshotFidelity) EnumDescriptor() ([]byte, []int) {
-	return file_devbox_v1_common_proto_rawDescGZIP(), []int{3}
+	return file_devbox_v1_common_proto_rawDescGZIP(), []int{4}
 }
 
 // ErrorReason is attached to gRPC errors as an ErrorDetail status detail so callers can branch on it.
@@ -361,11 +419,11 @@ func (x ErrorReason) String() string {
 }
 
 func (ErrorReason) Descriptor() protoreflect.EnumDescriptor {
-	return file_devbox_v1_common_proto_enumTypes[4].Descriptor()
+	return file_devbox_v1_common_proto_enumTypes[5].Descriptor()
 }
 
 func (ErrorReason) Type() protoreflect.EnumType {
-	return &file_devbox_v1_common_proto_enumTypes[4]
+	return &file_devbox_v1_common_proto_enumTypes[5]
 }
 
 func (x ErrorReason) Number() protoreflect.EnumNumber {
@@ -374,7 +432,7 @@ func (x ErrorReason) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use ErrorReason.Descriptor instead.
 func (ErrorReason) EnumDescriptor() ([]byte, []int) {
-	return file_devbox_v1_common_proto_rawDescGZIP(), []int{4}
+	return file_devbox_v1_common_proto_rawDescGZIP(), []int{5}
 }
 
 type LeaseKind int32
@@ -412,11 +470,11 @@ func (x LeaseKind) String() string {
 }
 
 func (LeaseKind) Descriptor() protoreflect.EnumDescriptor {
-	return file_devbox_v1_common_proto_enumTypes[5].Descriptor()
+	return file_devbox_v1_common_proto_enumTypes[6].Descriptor()
 }
 
 func (LeaseKind) Type() protoreflect.EnumType {
-	return &file_devbox_v1_common_proto_enumTypes[5]
+	return &file_devbox_v1_common_proto_enumTypes[6]
 }
 
 func (x LeaseKind) Number() protoreflect.EnumNumber {
@@ -425,7 +483,7 @@ func (x LeaseKind) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use LeaseKind.Descriptor instead.
 func (LeaseKind) EnumDescriptor() ([]byte, []int) {
-	return file_devbox_v1_common_proto_rawDescGZIP(), []int{5}
+	return file_devbox_v1_common_proto_rawDescGZIP(), []int{6}
 }
 
 // BusyReasonKind is an activity signal from section 4.3a.
@@ -477,11 +535,11 @@ func (x BusyReasonKind) String() string {
 }
 
 func (BusyReasonKind) Descriptor() protoreflect.EnumDescriptor {
-	return file_devbox_v1_common_proto_enumTypes[6].Descriptor()
+	return file_devbox_v1_common_proto_enumTypes[7].Descriptor()
 }
 
 func (BusyReasonKind) Type() protoreflect.EnumType {
-	return &file_devbox_v1_common_proto_enumTypes[6]
+	return &file_devbox_v1_common_proto_enumTypes[7]
 }
 
 func (x BusyReasonKind) Number() protoreflect.EnumNumber {
@@ -490,7 +548,7 @@ func (x BusyReasonKind) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use BusyReasonKind.Descriptor instead.
 func (BusyReasonKind) EnumDescriptor() ([]byte, []int) {
-	return file_devbox_v1_common_proto_rawDescGZIP(), []int{6}
+	return file_devbox_v1_common_proto_rawDescGZIP(), []int{7}
 }
 
 // SuspendReason says why an instance is (being) suspended.
@@ -539,11 +597,11 @@ func (x SuspendReason) String() string {
 }
 
 func (SuspendReason) Descriptor() protoreflect.EnumDescriptor {
-	return file_devbox_v1_common_proto_enumTypes[7].Descriptor()
+	return file_devbox_v1_common_proto_enumTypes[8].Descriptor()
 }
 
 func (SuspendReason) Type() protoreflect.EnumType {
-	return &file_devbox_v1_common_proto_enumTypes[7]
+	return &file_devbox_v1_common_proto_enumTypes[8]
 }
 
 func (x SuspendReason) Number() protoreflect.EnumNumber {
@@ -552,7 +610,60 @@ func (x SuspendReason) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use SuspendReason.Descriptor instead.
 func (SuspendReason) EnumDescriptor() ([]byte, []int) {
-	return file_devbox_v1_common_proto_rawDescGZIP(), []int{7}
+	return file_devbox_v1_common_proto_rawDescGZIP(), []int{8}
+}
+
+// AutonomyPolicy is a runner's autonomy setting for new threads and the highest level a thread may use.
+type AutonomyPolicy struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Default       Autonomy               `protobuf:"varint,1,opt,name=default,proto3,enum=devbox.v1.Autonomy" json:"default,omitempty"`
+	Max           Autonomy               `protobuf:"varint,2,opt,name=max,proto3,enum=devbox.v1.Autonomy" json:"max,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AutonomyPolicy) Reset() {
+	*x = AutonomyPolicy{}
+	mi := &file_devbox_v1_common_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AutonomyPolicy) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AutonomyPolicy) ProtoMessage() {}
+
+func (x *AutonomyPolicy) ProtoReflect() protoreflect.Message {
+	mi := &file_devbox_v1_common_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AutonomyPolicy.ProtoReflect.Descriptor instead.
+func (*AutonomyPolicy) Descriptor() ([]byte, []int) {
+	return file_devbox_v1_common_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *AutonomyPolicy) GetDefault() Autonomy {
+	if x != nil {
+		return x.Default
+	}
+	return Autonomy_AUTONOMY_UNSPECIFIED
+}
+
+func (x *AutonomyPolicy) GetMax() Autonomy {
+	if x != nil {
+		return x.Max
+	}
+	return Autonomy_AUTONOMY_UNSPECIFIED
 }
 
 // ErrorDetail is attached to gRPC status details, and embedded where errors are reported as data.
@@ -569,7 +680,7 @@ type ErrorDetail struct {
 
 func (x *ErrorDetail) Reset() {
 	*x = ErrorDetail{}
-	mi := &file_devbox_v1_common_proto_msgTypes[0]
+	mi := &file_devbox_v1_common_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -581,7 +692,7 @@ func (x *ErrorDetail) String() string {
 func (*ErrorDetail) ProtoMessage() {}
 
 func (x *ErrorDetail) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_common_proto_msgTypes[0]
+	mi := &file_devbox_v1_common_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -594,7 +705,7 @@ func (x *ErrorDetail) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ErrorDetail.ProtoReflect.Descriptor instead.
 func (*ErrorDetail) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_common_proto_rawDescGZIP(), []int{0}
+	return file_devbox_v1_common_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *ErrorDetail) GetReason() ErrorReason {
@@ -621,17 +732,19 @@ func (x *ErrorDetail) GetMetadata() map[string]string {
 // Principal identifies the console user on whose behalf a call is made, for attribution
 // (thread `created_by`, interaction `answered_by`, lease holders).
 type Principal struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
-	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	state  protoimpl.MessageState `protogen:"open.v1"`
+	UserId string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Email  string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
+	Name   string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	// Set instead of a user when the daemon answered by policy, e.g. "autonomy:full".
+	Policy        string `protobuf:"bytes,4,opt,name=policy,proto3" json:"policy,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Principal) Reset() {
 	*x = Principal{}
-	mi := &file_devbox_v1_common_proto_msgTypes[1]
+	mi := &file_devbox_v1_common_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -643,7 +756,7 @@ func (x *Principal) String() string {
 func (*Principal) ProtoMessage() {}
 
 func (x *Principal) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_common_proto_msgTypes[1]
+	mi := &file_devbox_v1_common_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -656,7 +769,7 @@ func (x *Principal) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Principal.ProtoReflect.Descriptor instead.
 func (*Principal) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_common_proto_rawDescGZIP(), []int{1}
+	return file_devbox_v1_common_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *Principal) GetUserId() string {
@@ -680,6 +793,13 @@ func (x *Principal) GetName() string {
 	return ""
 }
 
+func (x *Principal) GetPolicy() string {
+	if x != nil {
+		return x.Policy
+	}
+	return ""
+}
+
 // RepositorySpec is a repository to check out at `~/<repo>` (section 4.2b).
 type RepositorySpec struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -698,7 +818,7 @@ type RepositorySpec struct {
 
 func (x *RepositorySpec) Reset() {
 	*x = RepositorySpec{}
-	mi := &file_devbox_v1_common_proto_msgTypes[2]
+	mi := &file_devbox_v1_common_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -710,7 +830,7 @@ func (x *RepositorySpec) String() string {
 func (*RepositorySpec) ProtoMessage() {}
 
 func (x *RepositorySpec) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_common_proto_msgTypes[2]
+	mi := &file_devbox_v1_common_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -723,7 +843,7 @@ func (x *RepositorySpec) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RepositorySpec.ProtoReflect.Descriptor instead.
 func (*RepositorySpec) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_common_proto_rawDescGZIP(), []int{2}
+	return file_devbox_v1_common_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *RepositorySpec) GetUrl() string {
@@ -776,7 +896,7 @@ type Checkout struct {
 
 func (x *Checkout) Reset() {
 	*x = Checkout{}
-	mi := &file_devbox_v1_common_proto_msgTypes[3]
+	mi := &file_devbox_v1_common_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -788,7 +908,7 @@ func (x *Checkout) String() string {
 func (*Checkout) ProtoMessage() {}
 
 func (x *Checkout) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_common_proto_msgTypes[3]
+	mi := &file_devbox_v1_common_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -801,7 +921,7 @@ func (x *Checkout) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Checkout.ProtoReflect.Descriptor instead.
 func (*Checkout) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_common_proto_rawDescGZIP(), []int{3}
+	return file_devbox_v1_common_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *Checkout) GetPath() string {
@@ -895,7 +1015,7 @@ type IdlePolicy struct {
 
 func (x *IdlePolicy) Reset() {
 	*x = IdlePolicy{}
-	mi := &file_devbox_v1_common_proto_msgTypes[4]
+	mi := &file_devbox_v1_common_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -907,7 +1027,7 @@ func (x *IdlePolicy) String() string {
 func (*IdlePolicy) ProtoMessage() {}
 
 func (x *IdlePolicy) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_common_proto_msgTypes[4]
+	mi := &file_devbox_v1_common_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -920,7 +1040,7 @@ func (x *IdlePolicy) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IdlePolicy.ProtoReflect.Descriptor instead.
 func (*IdlePolicy) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_common_proto_rawDescGZIP(), []int{4}
+	return file_devbox_v1_common_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *IdlePolicy) GetActivityWindow() *durationpb.Duration {
@@ -981,7 +1101,7 @@ type Lease struct {
 
 func (x *Lease) Reset() {
 	*x = Lease{}
-	mi := &file_devbox_v1_common_proto_msgTypes[5]
+	mi := &file_devbox_v1_common_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -993,7 +1113,7 @@ func (x *Lease) String() string {
 func (*Lease) ProtoMessage() {}
 
 func (x *Lease) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_common_proto_msgTypes[5]
+	mi := &file_devbox_v1_common_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1006,7 +1126,7 @@ func (x *Lease) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Lease.ProtoReflect.Descriptor instead.
 func (*Lease) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_common_proto_rawDescGZIP(), []int{5}
+	return file_devbox_v1_common_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *Lease) GetKind() LeaseKind {
@@ -1053,7 +1173,7 @@ type BusyReason struct {
 
 func (x *BusyReason) Reset() {
 	*x = BusyReason{}
-	mi := &file_devbox_v1_common_proto_msgTypes[6]
+	mi := &file_devbox_v1_common_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1065,7 +1185,7 @@ func (x *BusyReason) String() string {
 func (*BusyReason) ProtoMessage() {}
 
 func (x *BusyReason) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_common_proto_msgTypes[6]
+	mi := &file_devbox_v1_common_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1078,7 +1198,7 @@ func (x *BusyReason) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BusyReason.ProtoReflect.Descriptor instead.
 func (*BusyReason) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_common_proto_rawDescGZIP(), []int{6}
+	return file_devbox_v1_common_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *BusyReason) GetKind() BusyReasonKind {
@@ -1131,7 +1251,7 @@ type IdleState struct {
 
 func (x *IdleState) Reset() {
 	*x = IdleState{}
-	mi := &file_devbox_v1_common_proto_msgTypes[7]
+	mi := &file_devbox_v1_common_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1143,7 +1263,7 @@ func (x *IdleState) String() string {
 func (*IdleState) ProtoMessage() {}
 
 func (x *IdleState) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_common_proto_msgTypes[7]
+	mi := &file_devbox_v1_common_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1156,7 +1276,7 @@ func (x *IdleState) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IdleState.ProtoReflect.Descriptor instead.
 func (*IdleState) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_common_proto_rawDescGZIP(), []int{7}
+	return file_devbox_v1_common_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *IdleState) GetIdle() bool {
@@ -1214,7 +1334,7 @@ type AgentLaunch struct {
 
 func (x *AgentLaunch) Reset() {
 	*x = AgentLaunch{}
-	mi := &file_devbox_v1_common_proto_msgTypes[8]
+	mi := &file_devbox_v1_common_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1226,7 +1346,7 @@ func (x *AgentLaunch) String() string {
 func (*AgentLaunch) ProtoMessage() {}
 
 func (x *AgentLaunch) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_common_proto_msgTypes[8]
+	mi := &file_devbox_v1_common_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1239,7 +1359,7 @@ func (x *AgentLaunch) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AgentLaunch.ProtoReflect.Descriptor instead.
 func (*AgentLaunch) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_common_proto_rawDescGZIP(), []int{8}
+	return file_devbox_v1_common_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *AgentLaunch) GetAgent() AgentType {
@@ -1298,7 +1418,7 @@ type ConfigOptionSetting struct {
 
 func (x *ConfigOptionSetting) Reset() {
 	*x = ConfigOptionSetting{}
-	mi := &file_devbox_v1_common_proto_msgTypes[9]
+	mi := &file_devbox_v1_common_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1310,7 +1430,7 @@ func (x *ConfigOptionSetting) String() string {
 func (*ConfigOptionSetting) ProtoMessage() {}
 
 func (x *ConfigOptionSetting) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_common_proto_msgTypes[9]
+	mi := &file_devbox_v1_common_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1323,7 +1443,7 @@ func (x *ConfigOptionSetting) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConfigOptionSetting.ProtoReflect.Descriptor instead.
 func (*ConfigOptionSetting) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_common_proto_rawDescGZIP(), []int{9}
+	return file_devbox_v1_common_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *ConfigOptionSetting) GetConfigId() string {
@@ -1344,18 +1464,22 @@ var File_devbox_v1_common_proto protoreflect.FileDescriptor
 
 const file_devbox_v1_common_proto_rawDesc = "" +
 	"\n" +
-	"\x16devbox/v1/common.proto\x12\tdevbox.v1\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xd6\x01\n" +
+	"\x16devbox/v1/common.proto\x12\tdevbox.v1\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"f\n" +
+	"\x0eAutonomyPolicy\x12-\n" +
+	"\adefault\x18\x01 \x01(\x0e2\x13.devbox.v1.AutonomyR\adefault\x12%\n" +
+	"\x03max\x18\x02 \x01(\x0e2\x13.devbox.v1.AutonomyR\x03max\"\xd6\x01\n" +
 	"\vErrorDetail\x12.\n" +
 	"\x06reason\x18\x01 \x01(\x0e2\x16.devbox.v1.ErrorReasonR\x06reason\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\x12@\n" +
 	"\bmetadata\x18\x03 \x03(\v2$.devbox.v1.ErrorDetail.MetadataEntryR\bmetadata\x1a;\n" +
 	"\rMetadataEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"N\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"f\n" +
 	"\tPrincipal\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x14\n" +
 	"\x05email\x18\x02 \x01(\tR\x05email\x12\x12\n" +
-	"\x04name\x18\x03 \x01(\tR\x04name\"z\n" +
+	"\x04name\x18\x03 \x01(\tR\x04name\x12\x16\n" +
+	"\x06policy\x18\x04 \x01(\tR\x06policy\"z\n" +
 	"\x0eRepositorySpec\x12\x10\n" +
 	"\x03url\x18\x01 \x01(\tR\x03url\x12\x1c\n" +
 	"\tdirectory\x18\x02 \x01(\tR\tdirectory\x12\x16\n" +
@@ -1434,7 +1558,12 @@ const file_devbox_v1_common_proto_rawDesc = "" +
 	"\vBillingMode\x12\x1c\n" +
 	"\x18BILLING_MODE_UNSPECIFIED\x10\x00\x12\x16\n" +
 	"\x12BILLING_MODE_PROXY\x10\x01\x12\x1d\n" +
-	"\x19BILLING_MODE_SUBSCRIPTION\x10\x02*u\n" +
+	"\x19BILLING_MODE_SUBSCRIPTION\x10\x02*_\n" +
+	"\bAutonomy\x12\x18\n" +
+	"\x14AUTONOMY_UNSPECIFIED\x10\x00\x12\x13\n" +
+	"\x0fAUTONOMY_MANUAL\x10\x01\x12\x11\n" +
+	"\rAUTONOMY_AUTO\x10\x02\x12\x11\n" +
+	"\rAUTONOMY_FULL\x10\x03*u\n" +
 	"\x10SnapshotFidelity\x12!\n" +
 	"\x1dSNAPSHOT_FIDELITY_UNSPECIFIED\x10\x00\x12\x1c\n" +
 	"\x18SNAPSHOT_FIDELITY_MEMORY\x10\x01\x12 \n" +
@@ -1489,56 +1618,60 @@ func file_devbox_v1_common_proto_rawDescGZIP() []byte {
 	return file_devbox_v1_common_proto_rawDescData
 }
 
-var file_devbox_v1_common_proto_enumTypes = make([]protoimpl.EnumInfo, 8)
-var file_devbox_v1_common_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_devbox_v1_common_proto_enumTypes = make([]protoimpl.EnumInfo, 9)
+var file_devbox_v1_common_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_devbox_v1_common_proto_goTypes = []any{
 	(AgentType)(0),                // 0: devbox.v1.AgentType
 	(InstanceStatus)(0),           // 1: devbox.v1.InstanceStatus
 	(BillingMode)(0),              // 2: devbox.v1.BillingMode
-	(SnapshotFidelity)(0),         // 3: devbox.v1.SnapshotFidelity
-	(ErrorReason)(0),              // 4: devbox.v1.ErrorReason
-	(LeaseKind)(0),                // 5: devbox.v1.LeaseKind
-	(BusyReasonKind)(0),           // 6: devbox.v1.BusyReasonKind
-	(SuspendReason)(0),            // 7: devbox.v1.SuspendReason
-	(*ErrorDetail)(nil),           // 8: devbox.v1.ErrorDetail
-	(*Principal)(nil),             // 9: devbox.v1.Principal
-	(*RepositorySpec)(nil),        // 10: devbox.v1.RepositorySpec
-	(*Checkout)(nil),              // 11: devbox.v1.Checkout
-	(*IdlePolicy)(nil),            // 12: devbox.v1.IdlePolicy
-	(*Lease)(nil),                 // 13: devbox.v1.Lease
-	(*BusyReason)(nil),            // 14: devbox.v1.BusyReason
-	(*IdleState)(nil),             // 15: devbox.v1.IdleState
-	(*AgentLaunch)(nil),           // 16: devbox.v1.AgentLaunch
-	(*ConfigOptionSetting)(nil),   // 17: devbox.v1.ConfigOptionSetting
-	nil,                           // 18: devbox.v1.ErrorDetail.MetadataEntry
-	(*durationpb.Duration)(nil),   // 19: google.protobuf.Duration
-	(*timestamppb.Timestamp)(nil), // 20: google.protobuf.Timestamp
+	(Autonomy)(0),                 // 3: devbox.v1.Autonomy
+	(SnapshotFidelity)(0),         // 4: devbox.v1.SnapshotFidelity
+	(ErrorReason)(0),              // 5: devbox.v1.ErrorReason
+	(LeaseKind)(0),                // 6: devbox.v1.LeaseKind
+	(BusyReasonKind)(0),           // 7: devbox.v1.BusyReasonKind
+	(SuspendReason)(0),            // 8: devbox.v1.SuspendReason
+	(*AutonomyPolicy)(nil),        // 9: devbox.v1.AutonomyPolicy
+	(*ErrorDetail)(nil),           // 10: devbox.v1.ErrorDetail
+	(*Principal)(nil),             // 11: devbox.v1.Principal
+	(*RepositorySpec)(nil),        // 12: devbox.v1.RepositorySpec
+	(*Checkout)(nil),              // 13: devbox.v1.Checkout
+	(*IdlePolicy)(nil),            // 14: devbox.v1.IdlePolicy
+	(*Lease)(nil),                 // 15: devbox.v1.Lease
+	(*BusyReason)(nil),            // 16: devbox.v1.BusyReason
+	(*IdleState)(nil),             // 17: devbox.v1.IdleState
+	(*AgentLaunch)(nil),           // 18: devbox.v1.AgentLaunch
+	(*ConfigOptionSetting)(nil),   // 19: devbox.v1.ConfigOptionSetting
+	nil,                           // 20: devbox.v1.ErrorDetail.MetadataEntry
+	(*durationpb.Duration)(nil),   // 21: google.protobuf.Duration
+	(*timestamppb.Timestamp)(nil), // 22: google.protobuf.Timestamp
 }
 var file_devbox_v1_common_proto_depIdxs = []int32{
-	4,  // 0: devbox.v1.ErrorDetail.reason:type_name -> devbox.v1.ErrorReason
-	18, // 1: devbox.v1.ErrorDetail.metadata:type_name -> devbox.v1.ErrorDetail.MetadataEntry
-	19, // 2: devbox.v1.IdlePolicy.activity_window:type_name -> google.protobuf.Duration
-	19, // 3: devbox.v1.IdlePolicy.grace_period:type_name -> google.protobuf.Duration
-	19, // 4: devbox.v1.IdlePolicy.max_deferral:type_name -> google.protobuf.Duration
-	19, // 5: devbox.v1.IdlePolicy.max_continuous_awake:type_name -> google.protobuf.Duration
-	19, // 6: devbox.v1.IdlePolicy.complete_after:type_name -> google.protobuf.Duration
-	5,  // 7: devbox.v1.Lease.kind:type_name -> devbox.v1.LeaseKind
-	9,  // 8: devbox.v1.Lease.holder:type_name -> devbox.v1.Principal
-	20, // 9: devbox.v1.Lease.expires_at:type_name -> google.protobuf.Timestamp
-	20, // 10: devbox.v1.Lease.requested_until:type_name -> google.protobuf.Timestamp
-	6,  // 11: devbox.v1.BusyReason.kind:type_name -> devbox.v1.BusyReasonKind
-	20, // 12: devbox.v1.BusyReason.until:type_name -> google.protobuf.Timestamp
-	20, // 13: devbox.v1.IdleState.idle_since:type_name -> google.protobuf.Timestamp
-	14, // 14: devbox.v1.IdleState.busy_reasons:type_name -> devbox.v1.BusyReason
-	20, // 15: devbox.v1.IdleState.suspend_at:type_name -> google.protobuf.Timestamp
-	20, // 16: devbox.v1.IdleState.evaluated_at:type_name -> google.protobuf.Timestamp
-	0,  // 17: devbox.v1.AgentLaunch.agent:type_name -> devbox.v1.AgentType
-	2,  // 18: devbox.v1.AgentLaunch.billing:type_name -> devbox.v1.BillingMode
-	19, // [19:19] is the sub-list for method output_type
-	19, // [19:19] is the sub-list for method input_type
-	19, // [19:19] is the sub-list for extension type_name
-	19, // [19:19] is the sub-list for extension extendee
-	0,  // [0:19] is the sub-list for field type_name
+	3,  // 0: devbox.v1.AutonomyPolicy.default:type_name -> devbox.v1.Autonomy
+	3,  // 1: devbox.v1.AutonomyPolicy.max:type_name -> devbox.v1.Autonomy
+	5,  // 2: devbox.v1.ErrorDetail.reason:type_name -> devbox.v1.ErrorReason
+	20, // 3: devbox.v1.ErrorDetail.metadata:type_name -> devbox.v1.ErrorDetail.MetadataEntry
+	21, // 4: devbox.v1.IdlePolicy.activity_window:type_name -> google.protobuf.Duration
+	21, // 5: devbox.v1.IdlePolicy.grace_period:type_name -> google.protobuf.Duration
+	21, // 6: devbox.v1.IdlePolicy.max_deferral:type_name -> google.protobuf.Duration
+	21, // 7: devbox.v1.IdlePolicy.max_continuous_awake:type_name -> google.protobuf.Duration
+	21, // 8: devbox.v1.IdlePolicy.complete_after:type_name -> google.protobuf.Duration
+	6,  // 9: devbox.v1.Lease.kind:type_name -> devbox.v1.LeaseKind
+	11, // 10: devbox.v1.Lease.holder:type_name -> devbox.v1.Principal
+	22, // 11: devbox.v1.Lease.expires_at:type_name -> google.protobuf.Timestamp
+	22, // 12: devbox.v1.Lease.requested_until:type_name -> google.protobuf.Timestamp
+	7,  // 13: devbox.v1.BusyReason.kind:type_name -> devbox.v1.BusyReasonKind
+	22, // 14: devbox.v1.BusyReason.until:type_name -> google.protobuf.Timestamp
+	22, // 15: devbox.v1.IdleState.idle_since:type_name -> google.protobuf.Timestamp
+	16, // 16: devbox.v1.IdleState.busy_reasons:type_name -> devbox.v1.BusyReason
+	22, // 17: devbox.v1.IdleState.suspend_at:type_name -> google.protobuf.Timestamp
+	22, // 18: devbox.v1.IdleState.evaluated_at:type_name -> google.protobuf.Timestamp
+	0,  // 19: devbox.v1.AgentLaunch.agent:type_name -> devbox.v1.AgentType
+	2,  // 20: devbox.v1.AgentLaunch.billing:type_name -> devbox.v1.BillingMode
+	21, // [21:21] is the sub-list for method output_type
+	21, // [21:21] is the sub-list for method input_type
+	21, // [21:21] is the sub-list for extension type_name
+	21, // [21:21] is the sub-list for extension extendee
+	0,  // [0:21] is the sub-list for field type_name
 }
 
 func init() { file_devbox_v1_common_proto_init() }
@@ -1551,8 +1684,8 @@ func file_devbox_v1_common_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_devbox_v1_common_proto_rawDesc), len(file_devbox_v1_common_proto_rawDesc)),
-			NumEnums:      8,
-			NumMessages:   11,
+			NumEnums:      9,
+			NumMessages:   12,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
