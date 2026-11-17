@@ -181,7 +181,7 @@ func (r *DevboxRunnerReconciler) requeue(runner *v1alpha1.DevboxRunner, nextPoll
 func (r *DevboxRunnerReconciler) reconcileImage(ctx context.Context, runner *v1alpha1.DevboxRunner) (time.Duration, error) {
 	image := lo.FromPtr(runner.Spec.Image)
 	if image == "" {
-		image = r.Config.DefaultImage
+		image = r.Config.DevboxImage()
 	}
 	mode := runner.UpdateMode(image)
 	interval := defaultPollInterval
@@ -380,7 +380,7 @@ func devboxConsoleConditions(runner *v1alpha1.DevboxRunner) []*console.DevboxCon
 func (r *DevboxRunnerReconciler) devboxAttributes(runner *v1alpha1.DevboxRunner, catalog *DevboxProbeResult) (console.DevboxAttributes, error) {
 	image := lo.FromPtr(runner.Spec.Image)
 	if image == "" {
-		image = r.Config.DefaultImage
+		image = r.Config.DevboxImage()
 	}
 
 	res := lo.FromPtr(runner.Spec.Resources)

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate"
 )
 
@@ -34,9 +35,10 @@ type DevboxConfig struct {
 	// OperatorServiceAccount is the operator's own ServiceAccount, granted owner on each atespace.
 	OperatorServiceAccount string
 
-	// DefaultImage is DEVBOX_DEFAULT_IMAGE, the image for runners without spec.image.
+	// DefaultImage is DEVBOX_DEFAULT_IMAGE, the image for runners without spec.image. When unset, DevboxImage
+	// falls back to devbox-fat at OperatorVersion on the agent's base registry.
 	DefaultImage string
-	// GatewayImage is DEVBOX_GATEWAY_IMAGE.
+	// GatewayImage is DEVBOX_GATEWAY_IMAGE. When unset, GatewayImageRef falls back like DefaultImage.
 	GatewayImage string
 	// GatewayReplicas is DEVBOX_GATEWAY_REPLICAS.
 	GatewayReplicas int32
@@ -74,8 +76,8 @@ func LoadDevboxConfig(operatorNamespace, consoleURL, deployToken, clusterID stri
 		OperatorVersion:                  version,
 		OperatorNamespace:                operatorNamespace,
 		OperatorServiceAccount:           envOr("DEVBOX_OPERATOR_SERVICE_ACCOUNT", "deployment-operator"),
-		DefaultImage:                     envOr("DEVBOX_DEFAULT_IMAGE", imageAtVersion(defaultDevboxImageRepository, version)),
-		GatewayImage:                     envOr("DEVBOX_GATEWAY_IMAGE", imageAtVersion(defaultGatewayImageRepository, version)),
+		DefaultImage:                     os.Getenv("DEVBOX_DEFAULT_IMAGE"),
+		GatewayImage:                     os.Getenv("DEVBOX_GATEWAY_IMAGE"),
 		GatewayReplicas:                  int32(envInt("DEVBOX_GATEWAY_REPLICAS", 1)),
 		GatewayServiceAccountAnnotations: parseKeyValues(os.Getenv("DEVBOX_GATEWAY_SA_ANNOTATIONS")),
 		WorkerImages: map[v1alpha1.DevboxSandboxClass]string{
@@ -113,6 +115,23 @@ func (c DevboxConfig) GatewayPrincipal() string {
 
 func (c DevboxConfig) OperatorPrincipal() string {
 	return "system:serviceaccount:" + c.OperatorNamespace + ":" + c.OperatorServiceAccount
+}
+
+// DevboxImage is the image for runners without spec.image. The base registry is read on every call since the
+// agent configuration can change it at runtime.
+func (c DevboxConfig) DevboxImage() string {
+	return c.imageOrDefault(c.DefaultImage, defaultDevboxImageRepository)
+}
+
+func (c DevboxConfig) GatewayImageRef() string {
+	return c.imageOrDefault(c.GatewayImage, defaultGatewayImageRepository)
+}
+
+func (c DevboxConfig) imageOrDefault(image, repository string) string {
+	if image != "" {
+		return image
+	}
+	return common.GetConfigurationManager().SwapBaseRegistry(imageAtVersion(repository, c.OperatorVersion))
 }
 
 func imageAtVersion(repository, version string) string {

@@ -211,7 +211,7 @@ func (r *DevboxRunnerReconciler) gatewayPodTemplate(checksum string) corev1.PodT
 			},
 			Containers: []corev1.Container{{
 				Name:            "gateway",
-				Image:           r.Config.GatewayImage,
+				Image:           r.Config.GatewayImageRef(),
 				ImagePullPolicy: corev1.PullIfNotPresent,
 				Env:             env,
 				Ports: []corev1.ContainerPort{
