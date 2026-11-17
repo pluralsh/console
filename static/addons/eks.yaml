@@ -6407,6 +6407,11 @@
   publisher: Chainguard
 - name: chainguard_coredns-fips
   versions:
+  - version: v1.50.10007020261115-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
   - version: v1.50.10005020261113-eksbuild.1
     compatibilities:
     - '1.35'
@@ -12603,6 +12608,12 @@
   publisher: Log10x
 - name: metrics-server
   versions:
+  - version: v0.9.1-eksbuild.2
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
+    - '1.34'
   - version: v0.9.1-eksbuild.1
     compatibilities:
     - '1.37'
