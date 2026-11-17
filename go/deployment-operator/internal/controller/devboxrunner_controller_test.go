@@ -74,6 +74,7 @@ func startDevboxEnv(t *testing.T) *devboxEnv {
 	testEnv.ControlPlane.GetAPIServer().Configure().Set("advertise-address", "127.0.0.1")
 	// Substrate needs pod certificates; without the gate the API server drops the gateway's podCertificate volumes.
 	testEnv.ControlPlane.GetAPIServer().Configure().Set("feature-gates", "PodCertificateRequest=true,ClusterTrustBundle=true,ClusterTrustBundleProjection=true")
+	testEnv.ControlPlane.GetAPIServer().Configure().Set("runtime-config", "certificates.k8s.io/v1beta1=true")
 	cfg, err := testEnv.Start()
 	if err != nil {
 		t.Fatalf("starting envtest: %v", err)

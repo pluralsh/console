@@ -16,8 +16,6 @@ const (
 	defaultDevboxImageRepository  = "ghcr.io/pluralsh/devbox-fat"
 	defaultGatewayImageRepository = "ghcr.io/pluralsh/devbox-gateway"
 	defaultSubstrateNamespace     = "ate-system"
-	defaultSubstrateTokenFile     = "/var/run/secrets/ate.dev/api/token"
-	defaultSubstrateCAFile        = "/var/run/secrets/ate.dev/api/ca.crt"
 	defaultPollInterval           = time.Hour
 	defaultDrainTimeout           = 30 * time.Minute
 	defaultHeartbeatInterval      = 2 * time.Minute
@@ -52,7 +50,8 @@ type DevboxConfig struct {
 
 	// SubstrateNamespace is SUBSTRATE_NAMESPACE, where atenet-egress and atenet-router run.
 	SubstrateNamespace string
-	Substrate          substrate.Config
+	// SubstrateAddress is ATE_API_ADDRESS, ate-api-server's address for runners without spec.substrate.address.
+	SubstrateAddress string
 	// RouterAddress is DEVBOX_ROUTER_ADDRESS, atenet-router's gRPC address; defaults to atenet-router.<SubstrateNamespace>.svc:443.
 	RouterAddress string
 	// ActorJWTIssuer is DEVBOX_ACTOR_JWT_ISSUER, Substrate's actor JWT issuer; defaults to the agent-substrate chart's https://idp.<SubstrateNamespace>.svc.
@@ -86,17 +85,13 @@ func LoadDevboxConfig(operatorNamespace, consoleURL, deployToken, clusterID stri
 		},
 		WorkerPoolNamespace: envOr("DEVBOX_WORKERPOOL_NAMESPACE", operatorNamespace),
 		SubstrateNamespace:  envOr("SUBSTRATE_NAMESPACE", defaultSubstrateNamespace),
-		Substrate: substrate.Config{
-			Address:   envOr("ATE_API_ADDRESS", substrate.DefaultAddress),
-			TokenFile: envOr("ATE_API_TOKEN_FILE", defaultSubstrateTokenFile),
-			CAFile:    envOr("ATE_API_CA_FILE", defaultSubstrateCAFile),
-		},
-		ConsoleURL:        consoleURL,
-		DeployToken:       deployToken,
-		KasURL:            envOr("DEVBOX_KAS_URL", kasDevboxURL(consoleURL)),
-		ClusterID:         clusterID,
-		DrainTimeout:      envDuration("DEVBOX_DRAIN_TIMEOUT", defaultDrainTimeout),
-		HeartbeatInterval: envDuration("DEVBOX_HEARTBEAT_INTERVAL", defaultHeartbeatInterval),
+		SubstrateAddress:    envOr("ATE_API_ADDRESS", substrate.DefaultAddress),
+		ConsoleURL:          consoleURL,
+		DeployToken:         deployToken,
+		KasURL:              envOr("DEVBOX_KAS_URL", kasDevboxURL(consoleURL)),
+		ClusterID:           clusterID,
+		DrainTimeout:        envDuration("DEVBOX_DRAIN_TIMEOUT", defaultDrainTimeout),
+		HeartbeatInterval:   envDuration("DEVBOX_HEARTBEAT_INTERVAL", defaultHeartbeatInterval),
 	}
 	cfg.RouterAddress = envOr("DEVBOX_ROUTER_ADDRESS", "atenet-router."+cfg.SubstrateNamespace+".svc:443")
 	cfg.ActorJWTIssuer = envOr("DEVBOX_ACTOR_JWT_ISSUER", "https://idp."+cfg.SubstrateNamespace+".svc")

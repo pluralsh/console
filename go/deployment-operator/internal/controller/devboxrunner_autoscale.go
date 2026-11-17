@@ -15,6 +15,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate/ateapi"
 )
 
@@ -134,7 +135,7 @@ func desiredDevboxWorkers(as *v1alpha1.DevboxWorkerAutoscaling, perWorker, used,
 // node holds no snapshot that is yet to be uploaded (once the worker goes, the node autoscaler may remove it): it
 // drains them in Substrate so nothing new lands on them, re-checks they are still empty, and gives their pods
 // the lowest deletion cost before lowering replicas so the ReplicaSet removes exactly those pods.
-func (r *DevboxRunnerReconciler) autoscaleWorkerPool(ctx context.Context, runner *v1alpha1.DevboxRunner, pool *unstructured.Unstructured, class v1alpha1.DevboxSandboxClass, capacity devboxCapacity) (int64, error) {
+func (r *DevboxRunnerReconciler) autoscaleWorkerPool(ctx context.Context, api substrate.API, runner *v1alpha1.DevboxRunner, pool *unstructured.Unstructured, class v1alpha1.DevboxSandboxClass, capacity devboxCapacity) (int64, error) {
 	wp := lo.FromPtr(runner.Spec.WorkerPool)
 	as := wp.Autoscaling
 	status := lo.FromPtr(runner.Status.Capacity)
@@ -158,13 +159,13 @@ func (r *DevboxRunnerReconciler) autoscaleWorkerPool(ctx context.Context, runner
 	if err := r.APIReader.List(ctx, pods, client.InNamespace(pool.GetNamespace()), client.MatchingLabelsSelector{Selector: parsed}); err != nil {
 		return current, fmt.Errorf("listing worker pods: %w", err)
 	}
-	workers, err := r.Substrate.ListWorkers(ctx)
+	workers, err := api.ListWorkers(ctx)
 	if err != nil {
 		return current, fmt.Errorf("listing Substrate workers: %w", err)
 	}
 	var pinned map[string]bool
 	if atespace := lo.FromPtr(runner.Status.Atespace); atespace != "" {
-		actors, err := r.Substrate.ListActors(ctx, atespace)
+		actors, err := api.ListActors(ctx, atespace)
 		if err != nil {
 			return current, fmt.Errorf("listing actors: %w", err)
 		}
@@ -184,7 +185,7 @@ func (r *DevboxRunnerReconciler) autoscaleWorkerPool(ctx context.Context, runner
 	case desired > active:
 		active, scaled = desired, true
 	case desired < active && cooledDown:
-		drained, err := r.drainIdleWorkers(ctx, &view, active-desired, pinned)
+		drained, err := r.drainIdleWorkers(ctx, api, &view, active-desired, pinned)
 		if err != nil {
 			return current, err
 		}
@@ -218,7 +219,7 @@ func (r *DevboxRunnerReconciler) autoscaleWorkerPool(ctx context.Context, runner
 // drainIdleWorkers drains up to n active workers that host no instance and whose node holds no undurable
 // snapshot, moving them to view.drainedIdle, or to view.held if an instance landed on one before the drain took
 // effect. It returns how many left schedulable.
-func (r *DevboxRunnerReconciler) drainIdleWorkers(ctx context.Context, view *devboxPoolView, n int64, pinned map[string]bool) (int64, error) {
+func (r *DevboxRunnerReconciler) drainIdleWorkers(ctx context.Context, api substrate.API, view *devboxPoolView, n int64, pinned map[string]bool) (int64, error) {
 	idle := lo.Filter(view.schedulable, func(p devboxWorkerPod, _ int) bool {
 		return p.state() == ateapi.WorkerState_WORKER_STATE_ACTIVE && p.actors() == 0 && !pinned[p.pod.Spec.NodeName]
 	})
@@ -226,7 +227,7 @@ func (r *DevboxRunnerReconciler) drainIdleWorkers(ctx context.Context, view *dev
 
 	drained := map[types.UID]bool{}
 	for _, p := range idle[:min(int(n), len(idle))] {
-		worker, err := r.Substrate.DrainWorker(ctx, p.worker.GetMetadata().GetName())
+		worker, err := api.DrainWorker(ctx, p.worker.GetMetadata().GetName())
 		if err != nil {
 			return 0, fmt.Errorf("draining worker %s: %w", p.worker.GetMetadata().GetName(), err)
 		}

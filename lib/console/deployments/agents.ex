@@ -10,6 +10,7 @@ defmodule Console.Deployments.Agents do
   alias Console.Deployments.{Clusters, Pr.Dispatcher, Git, Workbenches, Attachments}
   alias Console.AI.Tool
   alias Console.PubSub
+  alias Console.Prom.Tokens
   alias Kazan.Apis.Core.V1, as: CoreV1
   alias Console.Schema.{
     AgentRuntime,
@@ -216,7 +217,13 @@ defmodule Console.Deployments.Agents do
       AgentRun.changeset(run, attrs)
       |> Repo.update()
     end)
-    |> execute(extract: :update)
+    |> execute()
+    |> case do
+      {:ok, %{run: prior, update: run}} ->
+        Tokens.record_delta(run.usage, prior.usage, %{source: "agent_run", agent: prior.runtime.type})
+        {:ok, run}
+      err -> err
+    end
     |> notify(:update)
   end
 

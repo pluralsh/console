@@ -8,11 +8,11 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 	"github.com/pluralsh/console/go/deployment-operator/cmd/agent/args"
 	"github.com/pluralsh/console/go/deployment-operator/internal/controller"
-	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate"
 )
 
 // registerDevboxRunner starts the DevboxRunner controller when the chart enabled devboxes and the CRD exists.
-// Without Substrate credentials the controller still runs, reporting Substrate API errors on each runner.
+// Substrate credentials are loaded per runner when it is reconciled, so the controller runs without Substrate and
+// reports the API errors on each runner.
 func registerDevboxRunner(manager ctrl.Manager, operatorNamespace, consoleURL, deployToken, clusterID string) {
 	cfg := controller.LoadDevboxConfig(operatorNamespace, consoleURL, deployToken, clusterID)
 	if !cfg.Enabled {
@@ -34,13 +34,6 @@ func registerDevboxRunner(manager ctrl.Manager, operatorNamespace, consoleURL, d
 		setupLog.Info("Substrate WorkerPool CRD is not installed, DevboxRunners will report errors until it is", "controller", "DevboxRunner")
 	}
 
-	var api substrate.API = substrate.Unconfigured{}
-	if client, err := substrate.Dial(cfg.Substrate); err != nil {
-		setupLog.Error(err, "unable to create the Substrate API client", "controller", "DevboxRunner")
-	} else {
-		api = client
-	}
-
 	consoleClient := controller.NewGraphQLDevboxConsoleClient(consoleURL, deployToken)
 	if err := (&controller.DevboxRunnerReconciler{
 		Client:    manager.GetClient(),
@@ -48,7 +41,13 @@ func registerDevboxRunner(manager ctrl.Manager, operatorNamespace, consoleURL, d
 		Scheme:    manager.GetScheme(),
 		Config:    cfg,
 		Console:   consoleClient,
-		Substrate: api,
+		Substrate: &controller.ClusterSubstrateClients{
+			Client:                manager.GetClient(),
+			Reader:                manager.GetAPIReader(),
+			Namespace:             operatorNamespace,
+			DefaultAddress:        cfg.SubstrateAddress,
+			DefaultServiceAccount: cfg.OperatorServiceAccount,
+		},
 		Images: &controller.RegistryImageResolver{
 			Client:          manager.GetClient(),
 			SecretNamespace: operatorNamespace,

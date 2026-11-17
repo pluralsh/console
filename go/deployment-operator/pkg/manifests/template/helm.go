@@ -33,6 +33,7 @@ import (
 	"helm.sh/helm/v3/pkg/release"
 	"helm.sh/helm/v3/pkg/repo"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/util/validation"
 	"k8s.io/client-go/util/homedir"
 	"sigs.k8s.io/yaml"
 
@@ -239,7 +240,7 @@ func (h *helm) stitchManifests(manifests []unstructured.Unstructured, rel *relea
 			labels[appNameLabel] = rel.Chart.Name()
 		}
 		if _, ok := labels[helmChartLabel]; !ok && rel.Chart.Metadata != nil {
-			labels[helmChartLabel] = rel.Chart.Name() + "-" + strings.ReplaceAll(rel.Chart.Metadata.Version, "+", "_")
+			labels[helmChartLabel] = helmChartLabelValue(rel.Chart.Name(), rel.Chart.Metadata.Version)
 		}
 		manifest.SetLabels(labels)
 
@@ -252,6 +253,16 @@ func (h *helm) stitchManifests(manifests []unstructured.Unstructured, rel *relea
 		annotations[helmReleaseNamespaceAnnotation] = rel.Namespace
 		manifest.SetAnnotations(annotations)
 	}
+}
+
+// helmChartLabelValue is <name>-<version> as Helm's own chart label helpers build it: label values are at
+// most 63 characters and can't hold "+", which pre-release versions like 0.0.0+sha-<sha> do.
+func helmChartLabelValue(name, version string) string {
+	value := name + "-" + strings.ReplaceAll(version, "+", "_")
+	if len(value) > validation.LabelValueMaxLength {
+		value = value[:validation.LabelValueMaxLength]
+	}
+	return strings.TrimRight(value, "-_.")
 }
 
 func (h *helm) luaValues(svc *console.ServiceDeploymentForAgent) (map[string]any, []string, error) {

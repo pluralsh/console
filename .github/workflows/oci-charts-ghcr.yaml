@@ -81,7 +81,7 @@ jobs:
           repository: pluralsh/controller-chart
         - name: agent-substrate
           dir: charts/agent-substrate
-          repository: pluralsh/agent-substrate-chart
+          repository: pluralsh/charts
     steps:
     - name: Checkout
       uses: actions/checkout@v7

@@ -31,6 +31,7 @@ import {
   Dispatch,
   ReactNode,
   SetStateAction,
+  use,
   useCallback,
   useEffect,
   useId,
@@ -49,6 +50,7 @@ import {
   GitRepositoryImportFields,
   useGitRepositoryImport,
 } from 'components/cd/repos/GitRepositoriesImportGit'
+import { FeatureFlagContext } from 'components/flows/FeatureFlagContext'
 import { FormBindings } from 'components/utils/bindings'
 import { EditableDiv } from 'components/utils/EditableDiv'
 import {
@@ -130,6 +132,7 @@ export function WorkbenchSetupStep({
   const update = createFormUpdater(setFormState)
   const infra = formState.configuration?.infrastructure
   const observability = formState.configuration?.observability
+  const { featureFlags } = use(FeatureFlagContext)
   const capabilityCheckboxGridCss = {
     display: 'grid',
     gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
@@ -318,33 +321,37 @@ export function WorkbenchSetupStep({
             </Flex>
           </Flex>
         </FormField>
-        <FormField label="Devboxes">
-          <Flex
-            direction="column"
-            gap="small"
-          >
-            <Switch
-              checked={
-                formState.configuration?.devbox?.allowSubscriptionCredentials ??
-                false
-              }
-              onChange={(checked) =>
-                update((d) => {
-                  d.configuration = d.configuration ?? {}
-                  d.configuration.devbox = d.configuration.devbox ?? {}
-                  d.configuration.devbox.allowSubscriptionCredentials = checked
-                })
-              }
+        {featureFlags.Devboxes && (
+          <FormField label="Devboxes">
+            <Flex
+              direction="column"
+              gap="small"
             >
-              Allow personal AI subscriptions
-            </Switch>
-            <CaptionP $color="text-light">
-              Lets members bill devbox agents to their own Claude or ChatGPT
-              plan. That traffic goes straight to Anthropic or OpenAI, bypassing
-              the Plural AI proxy&apos;s audit, budgets and model policy.
-            </CaptionP>
-          </Flex>
-        </FormField>
+              <Switch
+                checked={
+                  formState.configuration?.devbox
+                    ?.allowSubscriptionCredentials ?? false
+                }
+                onChange={(checked) =>
+                  update((d) => {
+                    d.configuration = d.configuration ?? {}
+                    d.configuration.devbox = d.configuration.devbox ?? {}
+                    d.configuration.devbox.allowSubscriptionCredentials =
+                      checked
+                  })
+                }
+              >
+                Allow personal AI subscriptions
+              </Switch>
+              <CaptionP $color="text-light">
+                Lets members bill devbox agents to their own Claude or ChatGPT
+                plan. That traffic goes straight to Anthropic or OpenAI,
+                bypassing the Plural AI proxy&apos;s audit, budgets and model
+                policy.
+              </CaptionP>
+            </Flex>
+          </FormField>
+        )}
       </Flex>
     </>
   )

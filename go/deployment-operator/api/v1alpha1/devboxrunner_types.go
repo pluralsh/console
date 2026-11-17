@@ -201,6 +201,30 @@ type DevboxRunnerSpec struct {
 	// +listMapKey=name
 	// +kubebuilder:validation:XValidation:rule="self.filter(i, has(i.default) && i.default).size() <= 1",message="at most one cloud identity can be marked default"
 	CloudIdentities []DevboxCloudIdentity `json:"cloudIdentities,omitempty"`
+
+	// Substrate overrides where the operator reaches the Substrate API and the identity it calls it as. The
+	// operator mints the token and reads the CA bundle from the cluster when it reconciles the runner, so
+	// nothing is mounted into the operator.
+	// +kubebuilder:validation:Optional
+	Substrate *DevboxSubstrate `json:"substrate,omitempty"`
+}
+
+// DevboxSubstrate locates the Substrate API credentials the operator loads for a runner.
+type DevboxSubstrate struct {
+	// Address of ate-api-server. Defaults to the deployment-operator chart's devboxes.substrate.apiAddress.
+	// +kubebuilder:validation:Optional
+	Address *string `json:"address,omitempty"`
+
+	// ServiceAccountName is a ServiceAccount in the operator's namespace that the operator mints Substrate API
+	// tokens for. It must be a Substrate global owner, since it creates atespaces and drains workers. Defaults
+	// to the operator's own ServiceAccount.
+	// +kubebuilder:validation:Optional
+	ServiceAccountName *string `json:"serviceAccountName,omitempty"`
+
+	// CASignerName is the signer of the ClusterTrustBundles that verify ate-api-server's serving certificate.
+	// Defaults to servicedns.podcert.ate.dev/identity.
+	// +kubebuilder:validation:Optional
+	CASignerName *string `json:"caSignerName,omitempty"`
 }
 
 type DevboxImageUpdatePolicy struct {

@@ -12,6 +12,7 @@ defmodule Console.Devboxes.Ingest do
   import Console.Deployments.Pr.Git, only: [backfill_token: 1, to_http: 2]
   alias Console.PubSub
   alias Console.Devboxes
+  alias Console.Prom.Tokens
   alias Console.Devboxes.{Acp, AgentCredentials, Credentials}
   alias Console.Deployments.Pr.Dispatcher
   alias Console.Deployments.Workbenches
@@ -209,6 +210,10 @@ defmodule Console.Devboxes.Ingest do
     |> execute()
     |> case do
       {:ok, %{sessions: sessions, interactions: interactions, aggregate: inst}} ->
+        Enum.each(sessions, fn
+          {%DevboxInstanceSession{imported: true}, _} -> :ok
+          {session, prior} -> Tokens.record_delta(session.usage, prior, %{source: "devbox", agent: session.agent})
+        end)
         sessions = Enum.map(sessions, &elem(&1, 0))
         Enum.each(sessions, &handle_notify(PubSub.DevboxThreadUpdated, &1))
         track_agent_auth(inst, attrs[:aggregate][:connections])
@@ -360,7 +365,10 @@ defmodule Console.Devboxes.Ingest do
     })
   end
 
-  defp session_cost(%DevboxInstanceSession{usage: %{total_cost: c, total_tokens: t}}), do: %{total_cost: c || 0, total_tokens: t || 0}
+  defp session_cost(%DevboxInstanceSession{usage: %{total_cost: c, total_tokens: t} = usage}) do
+    Map.take(usage, ~w(input_tokens output_tokens cached_tokens reasoning_tokens)a)
+    |> Map.merge(%{total_cost: c || 0, total_tokens: t || 0})
+  end
   defp session_cost(_), do: %{total_cost: 0, total_tokens: 0}
 
   defp upsert_interaction(instance_id, %{interaction_id: ext_id} = attrs) when is_binary(ext_id) and byte_size(ext_id) > 0 do

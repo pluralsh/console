@@ -20,6 +20,7 @@ import { settingsRoutes } from './settingsRoutes'
 import { stacksRoutes } from './stacksRoutes'
 import { workbenchesRoutes } from './workbenchesRoutes'
 import { AccessTokens } from 'components/profile/access-tokens/AccessTokens.tsx'
+import { FeatureFlagGate } from 'components/flows/FeatureFlagContext'
 import { AiSubscriptions } from 'components/profile/ai-subscriptions/AiSubscriptions'
 import { AI_SUBSCRIPTIONS_REL_PATH } from 'components/workbenches/workbench/devboxes/devboxCredentials'
 
@@ -59,7 +60,11 @@ const profileRoutes = [
     />
     <Route
       path={AI_SUBSCRIPTIONS_REL_PATH}
-      element={<AiSubscriptions />}
+      element={
+        <FeatureFlagGate flag="Devboxes">
+          <AiSubscriptions />
+        </FeatureFlagGate>
+      }
     />
   </Route>,
 ]

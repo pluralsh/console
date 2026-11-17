@@ -135,7 +135,7 @@ func (r *DevboxRunnerReconciler) sandboxClass(runner *v1alpha1.DevboxRunner) v1a
 // reconcileWorkerPool creates or updates the runner's WorkerPool and labels its AdditionalPools. The
 // ActorTemplate worker_selector matches WorkerPool metadata labels, so every pool carries the runner's worker
 // selector.
-func (r *DevboxRunnerReconciler) reconcileWorkerPool(ctx context.Context, runner *v1alpha1.DevboxRunner) error {
+func (r *DevboxRunnerReconciler) reconcileWorkerPool(ctx context.Context, api substrate.API, runner *v1alpha1.DevboxRunner) error {
 	class := r.sandboxClass(runner)
 	wp := lo.FromPtr(runner.Spec.WorkerPool)
 
@@ -210,7 +210,7 @@ func (r *DevboxRunnerReconciler) reconcileWorkerPool(ctx context.Context, runner
 	replicas := int64(lo.FromPtrOr(wp.Replicas, 1))
 	var autoscaleErr error
 	if wp.Autoscaling != nil {
-		replicas, autoscaleErr = r.autoscaleWorkerPool(ctx, runner, pool, class, capacity)
+		replicas, autoscaleErr = r.autoscaleWorkerPool(ctx, api, runner, pool, class, capacity)
 	}
 
 	_, err = controllerutil.CreateOrPatch(ctx, r.Client, pool, func() error {
@@ -365,15 +365,15 @@ func toUnstructured(v any) (any, error) {
 // ensureAtespace creates the runner's atespace and grants the gateway editor on it, so the gateway can create
 // instance actors, tags and egress policies. The operator itself creates atespaces as a global owner, a
 // Substrate install setting (DBX-23).
-func (r *DevboxRunnerReconciler) ensureAtespace(ctx context.Context, runner *v1alpha1.DevboxRunner) (string, error) {
+func (r *DevboxRunnerReconciler) ensureAtespace(ctx context.Context, api substrate.API, runner *v1alpha1.DevboxRunner) (string, error) {
 	atespace := lo.FromPtr(runner.Status.Atespace)
 	if atespace == "" {
 		atespace = devboxAtespaceName(runner)
 	}
-	if err := r.Substrate.EnsureAtespace(ctx, atespace); err != nil {
+	if err := api.EnsureAtespace(ctx, atespace); err != nil {
 		return "", fmt.Errorf("ensuring atespace %s: %w", atespace, err)
 	}
-	if err := r.Substrate.EnsureAtespaceAccessPolicy(ctx, atespace, substrate.RoleEditor, r.Config.GatewayPrincipal()); err != nil {
+	if err := api.EnsureAtespaceAccessPolicy(ctx, atespace, substrate.RoleEditor, r.Config.GatewayPrincipal()); err != nil {
 		return "", fmt.Errorf("granting the gateway editor on atespace %s: %w", atespace, err)
 	}
 	runner.Status.Atespace = &atespace
@@ -498,7 +498,7 @@ func devboxGoldenEgressPolicy(runner *v1alpha1.DevboxRunner) *ateapi.EgressPolic
 // in-flight revision: Building (waiting for the golden tag), Probing (waiting for the gateway's agent probe),
 // and finally Ready or Failed. The newest Ready revision is the one new instances start from; older Ready
 // revisions are Retired and kept until garbage collection finds nothing references them.
-func (r *DevboxRunnerReconciler) reconcileRevisions(ctx context.Context, runner *v1alpha1.DevboxRunner, atespace, image string) error {
+func (r *DevboxRunnerReconciler) reconcileRevisions(ctx context.Context, api substrate.API, runner *v1alpha1.DevboxRunner, atespace, image string) error {
 	template, hash, err := r.buildActorTemplate(runner, atespace, image)
 	if err != nil {
 		utils.MarkCondition(runner.SetCondition, v1alpha1.DevboxTemplateReadyConditionType, metav1.ConditionFalse, v1alpha1.DevboxMisconfiguredReason, err.Error())
@@ -513,7 +513,7 @@ func (r *DevboxRunnerReconciler) reconcileRevisions(ctx context.Context, runner 
 		}
 		name := devboxTemplateName(runner, next)
 		template.Metadata.Name = name
-		if _, err := r.Substrate.CreateActorTemplate(ctx, template, template.GoldenEgressPolicy != nil); err != nil {
+		if _, err := api.CreateActorTemplate(ctx, template, template.GoldenEgressPolicy != nil); err != nil {
 			utils.MarkCondition(runner.SetCondition, v1alpha1.DevboxTemplateReadyConditionType, metav1.ConditionFalse, v1alpha1.DevboxFailedReason,
 				fmt.Sprintf("creating ActorTemplate %s: %s", name, err))
 			return err
@@ -543,7 +543,7 @@ func (r *DevboxRunnerReconciler) reconcileRevisions(ctx context.Context, runner 
 		rev := &runner.Status.Revisions[i]
 		switch rev.Phase {
 		case v1alpha1.DevboxRevisionBuilding:
-			if err := r.advanceBuilding(ctx, runner, atespace, rev); err != nil {
+			if err := r.advanceBuilding(ctx, api, runner, atespace, rev); err != nil {
 				return err
 			}
 		case v1alpha1.DevboxRevisionProbing:
@@ -557,8 +557,8 @@ func (r *DevboxRunnerReconciler) reconcileRevisions(ctx context.Context, runner 
 	return nil
 }
 
-func (r *DevboxRunnerReconciler) advanceBuilding(ctx context.Context, runner *v1alpha1.DevboxRunner, atespace string, rev *v1alpha1.DevboxRevision) error {
-	tmpl, err := r.Substrate.GetActorTemplate(ctx, atespace, rev.Name)
+func (r *DevboxRunnerReconciler) advanceBuilding(ctx context.Context, api substrate.API, runner *v1alpha1.DevboxRunner, atespace string, rev *v1alpha1.DevboxRevision) error {
+	tmpl, err := api.GetActorTemplate(ctx, atespace, rev.Name)
 	if substrate.IsNotFound(err) {
 		rev.Phase = v1alpha1.DevboxRevisionFailed
 		rev.Message = lo.ToPtr("ActorTemplate no longer exists in Substrate")
@@ -678,7 +678,7 @@ func (r *DevboxRunnerReconciler) promoteCurrentRevision(runner *v1alpha1.DevboxR
 // truth for references: each instance is an actor of a template, and each snapshot is a tag whose status
 // records the template UID. A revision's own golden tag does not count, and is deleted with it. The newest
 // revision is always kept, since its hash is what stops a failed spec from being rebuilt on every reconcile.
-func (r *DevboxRunnerReconciler) gcRevisions(ctx context.Context, runner *v1alpha1.DevboxRunner, atespace string) error {
+func (r *DevboxRunnerReconciler) gcRevisions(ctx context.Context, api substrate.API, runner *v1alpha1.DevboxRunner, atespace string) error {
 	latest := runner.LatestRevision()
 	collectable := lo.Filter(runner.Status.Revisions, func(rev v1alpha1.DevboxRevision, _ int) bool {
 		if latest != nil && rev.Revision == latest.Revision {
@@ -690,7 +690,7 @@ func (r *DevboxRunnerReconciler) gcRevisions(ctx context.Context, runner *v1alph
 		return nil
 	}
 
-	referenced, err := r.referencedTemplates(ctx, atespace, runner)
+	referenced, err := r.referencedTemplates(ctx, api, atespace, runner)
 	if err != nil {
 		return err
 	}
@@ -701,11 +701,11 @@ func (r *DevboxRunnerReconciler) gcRevisions(ctx context.Context, runner *v1alph
 			continue
 		}
 		if rev.GoldenTag != nil {
-			if err := r.Substrate.DeleteTag(ctx, atespace, *rev.GoldenTag); err != nil {
+			if err := api.DeleteTag(ctx, atespace, *rev.GoldenTag); err != nil {
 				return fmt.Errorf("deleting golden tag %s: %w", *rev.GoldenTag, err)
 			}
 		}
-		if err := r.Substrate.DeleteActorTemplate(ctx, atespace, rev.Name); err != nil {
+		if err := api.DeleteActorTemplate(ctx, atespace, rev.Name); err != nil {
 			return fmt.Errorf("deleting ActorTemplate %s: %w", rev.Name, err)
 		}
 		if err := r.Probe.Cleanup(ctx, runner.Name, rev.Revision); err != nil {
@@ -720,10 +720,10 @@ func (r *DevboxRunnerReconciler) gcRevisions(ctx context.Context, runner *v1alph
 	return nil
 }
 
-func (r *DevboxRunnerReconciler) referencedTemplates(ctx context.Context, atespace string, runner *v1alpha1.DevboxRunner) (map[string]bool, error) {
+func (r *DevboxRunnerReconciler) referencedTemplates(ctx context.Context, api substrate.API, atespace string, runner *v1alpha1.DevboxRunner) (map[string]bool, error) {
 	referenced := map[string]bool{}
 
-	actors, err := r.Substrate.ListActors(ctx, atespace)
+	actors, err := api.ListActors(ctx, atespace)
 	if err != nil {
 		return nil, fmt.Errorf("listing actors: %w", err)
 	}
@@ -731,7 +731,7 @@ func (r *DevboxRunnerReconciler) referencedTemplates(ctx context.Context, atespa
 		referenced[actor.GetActorTemplate().GetName()] = true
 	}
 
-	templates, err := r.Substrate.ListActorTemplates(ctx, atespace)
+	templates, err := api.ListActorTemplates(ctx, atespace)
 	if err != nil {
 		return nil, fmt.Errorf("listing ActorTemplates: %w", err)
 	}
@@ -746,7 +746,7 @@ func (r *DevboxRunnerReconciler) referencedTemplates(ctx context.Context, atespa
 			goldenTags[*rev.GoldenTag] = true
 		}
 	}
-	tags, err := r.Substrate.ListTags(ctx, atespace)
+	tags, err := api.ListTags(ctx, atespace)
 	if err != nil {
 		return nil, fmt.Errorf("listing tags: %w", err)
 	}

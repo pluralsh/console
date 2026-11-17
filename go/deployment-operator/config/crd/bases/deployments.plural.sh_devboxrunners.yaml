@@ -492,6 +492,28 @@ spec:
                 items:
                   type: string
                 type: array
+              substrate:
+                description: |-
+                  Substrate overrides where the operator reaches the Substrate API and the identity it calls it as. The
+                  operator mints the token and reads the CA bundle from the cluster when it reconciles the runner, so
+                  nothing is mounted into the operator.
+                properties:
+                  address:
+                    description: Address of ate-api-server. Defaults to the deployment-operator
+                      chart's devboxes.substrate.apiAddress.
+                    type: string
+                  caSignerName:
+                    description: |-
+                      CASignerName is the signer of the ClusterTrustBundles that verify ate-api-server's serving certificate.
+                      Defaults to servicedns.podcert.ate.dev/identity.
+                    type: string
+                  serviceAccountName:
+                    description: |-
+                      ServiceAccountName is a ServiceAccount in the operator's namespace that the operator mints Substrate API
+                      tokens for. It must be a Substrate global owner, since it creates atespaces and drains workers. Defaults
+                      to the operator's own ServiceAccount.
+                    type: string
+                type: object
               workerPool:
                 description: WorkerPool sizes the Substrate WorkerPool backing this
                   runner.

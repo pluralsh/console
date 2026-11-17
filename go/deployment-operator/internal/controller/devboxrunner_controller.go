@@ -53,7 +53,7 @@ type DevboxRunnerReconciler struct {
 	Scheme           *runtime.Scheme
 	Config           DevboxConfig
 	Console          DevboxConsoleClient
-	Substrate        substrate.API
+	Substrate        SubstrateClients
 	Images           DevboxImageResolver
 	Probe            DevboxProbeClient
 	CacheSyncTimeout time.Duration
@@ -125,11 +125,15 @@ func (r *DevboxRunnerReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		return ctrl.Result{RequeueAfter: nextPoll}, nil
 	}
 
-	atespace, err := r.ensureAtespace(ctx, runner)
+	api, err := r.Substrate.For(ctx, runner)
 	if err != nil {
 		return r.substrateError(ctx, runner, err)
 	}
-	if err := r.reconcileWorkerPool(ctx, runner); err != nil {
+	atespace, err := r.ensureAtespace(ctx, api, runner)
+	if err != nil {
+		return r.substrateError(ctx, runner, err)
+	}
+	if err := r.reconcileWorkerPool(ctx, api, runner); err != nil {
 		utils.MarkCondition(runner.SetCondition, v1alpha1.DevboxWorkerPoolReadyConditionType, metav1.ConditionFalse, v1alpha1.ErrorConditionReason, err.Error())
 		r.markReady(runner)
 		r.trySyncConsole(ctx, runner)
@@ -141,10 +145,10 @@ func (r *DevboxRunnerReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		return jitterRequeue(requeueDevboxRunnerError, jitter), nil
 	}
 
-	if err := r.reconcileRevisions(ctx, runner, atespace, lo.FromPtr(runner.Status.ResolvedImage)); err != nil {
+	if err := r.reconcileRevisions(ctx, api, runner, atespace, lo.FromPtr(runner.Status.ResolvedImage)); err != nil {
 		return r.substrateError(ctx, runner, err)
 	}
-	if err := r.gcRevisions(ctx, runner, atespace); err != nil {
+	if err := r.gcRevisions(ctx, api, runner, atespace); err != nil {
 		logger.Error(err, "unable to garbage collect devbox template revisions")
 	}
 
@@ -542,8 +546,13 @@ func (r *DevboxRunnerReconciler) handleDelete(ctx context.Context, runner *v1alp
 		})
 	}
 
+	var api substrate.API
 	if atespace != "" {
-		actors, err := r.Substrate.ListActors(ctx, atespace)
+		var err error
+		if api, err = r.Substrate.For(ctx, runner); err != nil {
+			return r.deleteBlocked(runner, v1alpha1.ErrorConditionReason, "Substrate API: "+err.Error())
+		}
+		actors, err := api.ListActors(ctx, atespace)
 		if err != nil && !substrate.IsNotFound(err) {
 			return r.deleteBlocked(runner, v1alpha1.ErrorConditionReason, "listing instances: "+err.Error())
 		}
@@ -566,7 +575,7 @@ func (r *DevboxRunnerReconciler) handleDelete(ctx context.Context, runner *v1alp
 	}
 
 	if atespace != "" {
-		if err := r.deleteSubstrateObjects(ctx, runner, atespace); err != nil {
+		if err := r.deleteSubstrateObjects(ctx, api, runner, atespace); err != nil {
 			return r.deleteBlocked(runner, v1alpha1.ErrorConditionReason, err.Error())
 		}
 	}
@@ -603,38 +612,38 @@ func (r *DevboxRunnerReconciler) deleteBlocked(runner *v1alpha1.DevboxRunner, re
 	return jitterRequeue(requeueAfter, jitter), nil
 }
 
-func (r *DevboxRunnerReconciler) deleteSubstrateObjects(ctx context.Context, runner *v1alpha1.DevboxRunner, atespace string) error {
-	actors, err := r.Substrate.ListActors(ctx, atespace)
+func (r *DevboxRunnerReconciler) deleteSubstrateObjects(ctx context.Context, api substrate.API, runner *v1alpha1.DevboxRunner, atespace string) error {
+	actors, err := api.ListActors(ctx, atespace)
 	if err != nil && !substrate.IsNotFound(err) {
 		return fmt.Errorf("listing actors: %w", err)
 	}
 	for _, a := range actors {
-		if err := r.Substrate.DeleteActor(ctx, atespace, a.GetMetadata().GetName()); err != nil {
+		if err := api.DeleteActor(ctx, atespace, a.GetMetadata().GetName()); err != nil {
 			return fmt.Errorf("deleting actor %s: %w", a.GetMetadata().GetName(), err)
 		}
 	}
 
-	tags, err := r.Substrate.ListTags(ctx, atespace)
+	tags, err := api.ListTags(ctx, atespace)
 	if err != nil && !substrate.IsNotFound(err) {
 		return fmt.Errorf("listing tags: %w", err)
 	}
 	for _, t := range tags {
-		if err := r.Substrate.DeleteTag(ctx, atespace, t.GetMetadata().GetName()); err != nil {
+		if err := api.DeleteTag(ctx, atespace, t.GetMetadata().GetName()); err != nil {
 			return fmt.Errorf("deleting tag %s: %w", t.GetMetadata().GetName(), err)
 		}
 	}
 
-	templates, err := r.Substrate.ListActorTemplates(ctx, atespace)
+	templates, err := api.ListActorTemplates(ctx, atespace)
 	if err != nil && !substrate.IsNotFound(err) {
 		return fmt.Errorf("listing ActorTemplates: %w", err)
 	}
 	for _, t := range templates {
-		if err := r.Substrate.DeleteActorTemplate(ctx, atespace, t.GetMetadata().GetName()); err != nil {
+		if err := api.DeleteActorTemplate(ctx, atespace, t.GetMetadata().GetName()); err != nil {
 			return fmt.Errorf("deleting ActorTemplate %s: %w", t.GetMetadata().GetName(), err)
 		}
 	}
 
-	if err := r.Substrate.DeleteAtespace(ctx, atespace); err != nil {
+	if err := api.DeleteAtespace(ctx, atespace); err != nil {
 		return fmt.Errorf("deleting atespace %s: %w", atespace, err)
 	}
 	runner.Status.Revisions = nil

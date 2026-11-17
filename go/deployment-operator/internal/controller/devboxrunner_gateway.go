@@ -7,10 +7,13 @@ import (
 
 	"github.com/samber/lo"
 	appsv1 "k8s.io/api/apps/v1"
+	certificatesv1 "k8s.io/api/certificates/v1"
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -64,6 +67,10 @@ func devboxGatewaySelector() map[string]string {
 // the gateway and egress-authz Services, and a NetworkPolicy admitting only atenet-egress to its ports.
 // It is shared by every DevboxRunner, so it carries no owner reference and is deleted with the last runner.
 func (r *DevboxRunnerReconciler) reconcileGateway(ctx context.Context, runner *v1alpha1.DevboxRunner) error {
+	if err := r.checkPodCertificates(); err != nil {
+		return err
+	}
+
 	ns := r.Config.OperatorNamespace
 	if err := r.labelNamespaceForSubstrate(ctx, ns); err != nil {
 		return err
@@ -147,6 +154,27 @@ func (r *DevboxRunnerReconciler) reconcileGateway(ctx context.Context, runner *v
 	return nil
 }
 
+// checkPodCertificates fails unless certificates.k8s.io serves the kinds behind the gateway's projected volumes.
+// Without them the API server silently drops the podCertificate and clusterTrustBundle sources, and the gateway
+// starts without its Substrate token CA or identity and never becomes ready.
+func (r *DevboxRunnerReconciler) checkPodCertificates() error {
+	var missing []string
+	for _, kind := range []string{"PodCertificateRequest", "ClusterTrustBundle"} {
+		_, err := r.RESTMapper().RESTMapping(schema.GroupKind{Group: certificatesv1.GroupName, Kind: kind}, clusterTrustBundleVersions...)
+		switch {
+		case meta.IsNoMatchError(err):
+			missing = append(missing, kind)
+		case err != nil:
+			return err
+		}
+	}
+	if len(missing) > 0 {
+		return fmt.Errorf("certificates.k8s.io doesn't serve %s, which devbox-gateway and Substrate need for pod certificates; "+
+			"they're on by default from Kubernetes 1.37 (EKS, GKE and AKS can't enable them earlier)", strings.Join(missing, " or "))
+	}
+	return nil
+}
+
 func (r *DevboxRunnerReconciler) gatewayService(name string, ports []corev1.ServicePort) *corev1.Service {
 	return &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: r.Config.OperatorNamespace, Labels: devboxGatewayLabels()},
@@ -160,7 +188,7 @@ func (r *DevboxRunnerReconciler) gatewayEnv() []corev1.EnvVar {
 		{Name: "DEVBOX_KAS_URL", Value: r.Config.KasURL},
 		{Name: "CLUSTER_ID", Value: r.Config.ClusterID},
 		{Name: "DEVBOX_OPERATOR_VERSION", Value: r.Config.OperatorVersion},
-		{Name: "ATE_API_ADDRESS", Value: r.Config.Substrate.Address},
+		{Name: "ATE_API_ADDRESS", Value: r.Config.SubstrateAddress},
 		{Name: "ATE_API_TOKEN_FILE", Value: gatewayAteAPIMount + "/token"},
 		{Name: "ATE_API_CA_FILE", Value: gatewayAteAPIMount + "/ca.crt"},
 		{Name: "DEVBOX_POD_IDENTITY_DIR", Value: gatewayPodIdentityMount},

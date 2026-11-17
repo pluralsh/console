@@ -176,7 +176,7 @@ func TestUndurableSnapshotNodes(t *testing.T) {
 func TestDrainIdleWorkersSkipsPinnedNodes(t *testing.T) {
 	g := NewWithT(t)
 	fake := newFakeSubstrate()
-	r := &DevboxRunnerReconciler{Substrate: fake}
+	r := &DevboxRunnerReconciler{}
 	var view devboxPoolView
 	for _, name := range []string{"a", "b"} {
 		w := testWorker("pool", name, ateapi.WorkerState_WORKER_STATE_ACTIVE, 0)
@@ -187,7 +187,7 @@ func TestDrainIdleWorkersSkipsPinnedNodes(t *testing.T) {
 		})
 	}
 
-	drained, err := r.drainIdleWorkers(context.Background(), &view, 2, map[string]bool{"node-b": true})
+	drained, err := r.drainIdleWorkers(context.Background(), fake, &view, 2, map[string]bool{"node-b": true})
 	g.Expect(err).NotTo(HaveOccurred())
 	g.Expect(drained).To(Equal(int64(1)))
 	g.Expect(fake.workers["w-a"].Status.State).To(Equal(ateapi.WorkerState_WORKER_STATE_DRAINING))

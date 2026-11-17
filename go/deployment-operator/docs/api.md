@@ -1124,6 +1124,7 @@ _Appears in:_
 | `idlePolicy` _[DevboxIdlePolicy](#devboxidlepolicy)_ | IdlePolicy bounds idle suspension. Workbenches can only lower these values. |  | Optional: \{\} <br /> |
 | `autonomy` _[DevboxAutonomy](#devboxautonomy)_ | Autonomy sets how agents' permission requests are answered: the level new threads start at and the highest<br />level users can switch a thread to. Defaults to auto for both, so full autonomy needs an explicit max: full. |  | Optional: \{\} <br /> |
 | `cloudIdentities` _[DevboxCloudIdentity](#devboxcloudidentity) array_ | CloudIdentities are named cloud identities instances can assume. At most one is the default. |  | MaxItems: 16 <br />Optional: \{\} <br /> |
+| `substrate` _[DevboxSubstrate](#devboxsubstrate)_ | Substrate overrides where the operator reaches the Substrate API and the identity it calls it as. The<br />operator mints the token and reads the CA bundle from the cluster when it reconciles the runner, so<br />nothing is mounted into the operator. |  | Optional: \{\} <br /> |
 
 
 
@@ -1162,6 +1163,24 @@ _Appears in:_
 | `namespace` _string_ | Namespace of the Secret; defaults to the operator's namespace. |  | Optional: \{\} <br /> |
 | `name` _string_ |  |  | MinLength: 1 <br />Required: \{\} <br /> |
 | `key` _string_ |  |  | MinLength: 1 <br />Required: \{\} <br /> |
+
+
+#### DevboxSubstrate
+
+
+
+DevboxSubstrate locates the Substrate API credentials the operator loads for a runner.
+
+
+
+_Appears in:_
+- [DevboxRunnerSpec](#devboxrunnerspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `address` _string_ | Address of ate-api-server. Defaults to the deployment-operator chart's devboxes.substrate.apiAddress. |  | Optional: \{\} <br /> |
+| `serviceAccountName` _string_ | ServiceAccountName is a ServiceAccount in the operator's namespace that the operator mints Substrate API<br />tokens for. It must be a Substrate global owner, since it creates atespaces and drains workers. Defaults<br />to the operator's own ServiceAccount. |  | Optional: \{\} <br /> |
+| `caSignerName` _string_ | CASignerName is the signer of the ClusterTrustBundles that verify ate-api-server's serving certificate.<br />Defaults to servicedns.podcert.ate.dev/identity. |  | Optional: \{\} <br /> |
 
 
 #### DevboxWorkerAutoscaling

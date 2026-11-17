@@ -13,6 +13,7 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 
+	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/probe"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate/ateapi"
@@ -33,6 +34,11 @@ type fakeSubstrate struct {
 }
 
 var _ substrate.API = &fakeSubstrate{}
+
+// For makes the fake its own SubstrateClients, handing every runner the same API.
+func (f *fakeSubstrate) For(context.Context, *v1alpha1.DevboxRunner) (substrate.API, error) {
+	return f, nil
+}
 
 func newFakeSubstrate() *fakeSubstrate {
 	return &fakeSubstrate{

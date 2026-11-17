@@ -33,6 +33,7 @@ import { WorkbenchMonitoring } from 'components/workbenches/workbench/monitoring
 import { WorkbenchMonitorSettings } from 'components/workbenches/workbench/monitoring/WorkbenchMonitorSettings'
 import { WorkbenchFiles } from 'components/workbenches/workbench/files/WorkbenchFiles'
 import { Navigate, Route } from 'react-router-dom'
+import { FeatureFlagGate } from 'components/flows/FeatureFlagContext'
 import { CHATBOTS_SETTINGS_CREATE_ABS_PATH } from './settingsRoutesConst'
 import {
   WORKBENCH_DEVBOX_BOXES_REL_PATH,
@@ -184,15 +185,27 @@ export const workbenchesRoutes = [
       />
       <Route
         path={WORKBENCH_DEVBOXES_REL_PATH}
-        element={<WorkbenchDevboxes />}
+        element={
+          <FeatureFlagGate flag="Devboxes">
+            <WorkbenchDevboxes />
+          </FeatureFlagGate>
+        }
       />
       <Route
         path={`${WORKBENCH_DEVBOXES_REL_PATH}/${WORKBENCH_DEVBOX_BOXES_REL_PATH}/:${WORKBENCH_DEVBOX_PARAM_ID}`}
-        element={<DevboxDetail />}
+        element={
+          <FeatureFlagGate flag="Devboxes">
+            <DevboxDetail />
+          </FeatureFlagGate>
+        }
       />
       <Route
         path={`${WORKBENCH_DEVBOXES_REL_PATH}/${WORKBENCH_DEVBOX_START_REL_PATH}`}
-        element={<DevboxInstanceStart />}
+        element={
+          <FeatureFlagGate flag="Devboxes">
+            <DevboxInstanceStart />
+          </FeatureFlagGate>
+        }
       />
     </Route>
     <Route
@@ -201,7 +214,11 @@ export const workbenchesRoutes = [
     />
     <Route
       path={`${WORKBENCH_DEVBOXES_REL_PATH}/${WORKBENCH_DEVBOX_INSTANCES_REL_PATH}/:${WORKBENCH_DEVBOX_INSTANCE_PARAM_ID}`}
-      element={<DevboxInstanceWorkspace />}
+      element={
+        <FeatureFlagGate flag="Devboxes">
+          <DevboxInstanceWorkspace />
+        </FeatureFlagGate>
+      }
     />
   </Route>,
   <Route

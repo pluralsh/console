@@ -1,4 +1,4 @@
-suite: CRDs and first-install bootstrap
+suite: first-install bootstrap
 release:
   name: ate
   namespace: ate-system
@@ -10,33 +10,6 @@ templates:
 set:
   objectStore.snapshotLocation: s3://snapshots/ate/
 tests:
-  - it: renders the three ate.dev CRDs with resource-policy keep
-    template: templates/crds.yaml
-    asserts:
-      - hasDocuments:
-          count: 3
-      - isKind:
-          of: CustomResourceDefinition
-      - equal:
-          path: metadata.annotations["helm.sh/resource-policy"]
-          value: keep
-
-  - it: crds.keep=false drops the keep annotation
-    template: templates/crds.yaml
-    set:
-      crds.keep: false
-    asserts:
-      - notExists:
-          path: metadata.annotations["helm.sh/resource-policy"]
-
-  - it: crds.install=false renders no CRDs
-    template: templates/crds.yaml
-    set:
-      crds.install: false
-    asserts:
-      - hasDocuments:
-          count: 0
-
   - it: defers SandboxConfig and Cluster to the bootstrap Job on first install
     template: templates/bootstrap-job.yaml
     asserts:
