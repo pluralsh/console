@@ -84,8 +84,12 @@ defmodule Console.Devboxes.StreamToken do
 
   defp signer() do
     case Console.conf(:devbox_stream_token_key) do
-      key when is_binary(key) and byte_size(key) > 0 -> {:ok, Joken.Signer.create("HS256", key)}
-      _ -> {:error, "no devbox stream token key is configured"}
+      key when is_binary(key) -> signer(String.trim(key))
+      _ -> signer("")
     end
   end
+
+  # KAS trims whitespace from its copy of the key
+  defp signer(""), do: {:error, "no devbox stream token key is configured"}
+  defp signer(key), do: {:ok, Joken.Signer.create("HS256", key)}
 end

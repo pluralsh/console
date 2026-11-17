@@ -1,6 +1,16 @@
 name: CD / Devbox images
 
+# Images are tagged like the deployment operator's (sha-<head sha> and pr-<number> on pull requests, the
+# release version on tags), since the operator defaults devbox-fat and devbox-gateway to its own IMAGE_TAG.
 on:
+  pull_request:
+    branches:
+    - "master"
+    paths:
+    - ".github/workflows/deployment-operator-cd-devbox.yaml"
+    - "go/deployment-operator/**"
+    - "go/polly/**"
+    - "go/client/**"
   push:
     tags:
     - 'go/deployment-operator/v*.*.*'
@@ -14,28 +24,49 @@ on:
 permissions:
   contents: read
 
+env:
+  DOCKER_METADATA_PR_HEAD_SHA: 'true'
+  IMAGE_TAGS: |
+    type=semver,pattern={{version}},value=${{ inputs.version }},enable=${{ inputs.version != '' }},priority=1100
+    type=semver,pattern={{major}}.{{minor}},value=${{ inputs.version }},enable=${{ inputs.version != '' }}
+    type=semver,pattern={{version}},value=${{ github.ref_name }},match=go/deployment-operator/v(\d+\.\d+\.\d+)$,priority=1000
+    type=semver,pattern={{major}}.{{minor}},value=${{ github.ref_name }},match=go/deployment-operator/v(\d+\.\d+\.\d+)$
+    type=sha,priority=800
+    type=ref,event=pr,priority=600
+
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}-${{ inputs.version }}
-  cancel-in-progress: false
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-${{ inputs.version }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  vouch:
+    name: Vouch
+    uses: ./.github/workflows/vouch-gate.yml
+    permissions:
+      contents: read
+
   version:
     name: Resolve version
+    needs: [vouch]
     runs-on: ubuntu-latest
     outputs:
-      version: ${{ steps.version.outputs.version }}
+      version: ${{ steps.meta.outputs.version }}
     steps:
-      - id: version
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ghcr.io/pluralsh/devbox-minimal
+          tags: ${{ env.IMAGE_TAGS }}
+      - name: Check release version
+        if: github.event_name != 'pull_request'
         env:
-          INPUT_VERSION: ${{ inputs.version }}
+          VERSION: ${{ steps.meta.outputs.version }}
         run: |
-          version="${INPUT_VERSION:-${GITHUB_REF_NAME#go/deployment-operator/v}}"
-          version="${version#v}"
-          if ! [[ "${version}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "Invalid version: ${version}" >&2
+          if ! [[ "${VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid version: ${VERSION}" >&2
             exit 1
           fi
-          echo "version=${version}" >> "$GITHUB_OUTPUT"
 
   build-minimal:
     name: Build devbox-minimal (${{ matrix.platforms.platform }})
@@ -134,10 +165,7 @@ jobs:
         uses: docker/metadata-action@v6
         with:
           images: ghcr.io/pluralsh/devbox-minimal
-          tags: |
-            type=semver,pattern={{version}},value=${{ needs.version.outputs.version }}
-            type=semver,pattern={{major}}.{{minor}},value=${{ needs.version.outputs.version }}
-            type=sha
+          tags: ${{ env.IMAGE_TAGS }}
       - name: Create manifest list and push
         working-directory: ${{ runner.temp }}/digests
         run: |
@@ -253,10 +281,7 @@ jobs:
         uses: docker/metadata-action@v6
         with:
           images: ghcr.io/pluralsh/devbox-fat
-          tags: |
-            type=semver,pattern={{version}},value=${{ needs.version.outputs.version }}
-            type=semver,pattern={{major}}.{{minor}},value=${{ needs.version.outputs.version }}
-            type=sha
+          tags: ${{ env.IMAGE_TAGS }}
       - name: Create manifest list and push
         working-directory: ${{ runner.temp }}/digests
         run: |
@@ -290,10 +315,7 @@ jobs:
         uses: docker/metadata-action@v6
         with:
           images: ghcr.io/pluralsh/devbox-gateway
-          tags: |
-            type=semver,pattern={{version}},value=${{ needs.version.outputs.version }}
-            type=semver,pattern={{major}}.{{minor}},value=${{ needs.version.outputs.version }}
-            type=sha
+          tags: ${{ env.IMAGE_TAGS }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
       - name: Login to GHCR

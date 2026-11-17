@@ -1084,15 +1084,15 @@ kas:
   # tunnels (wss://<console_dns><path> by default), console's
   # devbox.v1.Control calls (on the internal api port) and browser streams (<path>/streams/<stream_id>).
   devbox:
-    enabled: false
+    enabled: true
     path: /ext/devbox
     # consoleGrpcAddress is console's gRPC server, where gateways' devbox.v1.Ingest calls are forwarded.
     # Defaults to console.<namespace>:50051.
     consoleGrpcAddress: ""
-    # streamTokenSecret holds console's DEVBOX_STREAM_TOKEN_KEY (console reads the same key from console-env);
-    # it must exist when devbox is enabled.
+    # streamTokenSecret is the key console signs browser stream tokens with and KAS verifies them with. When
+    # name is empty, both reuse KAS's existing api secret; set name and key to use a dedicated secret instead.
     streamTokenSecret:
-      name: console-env
+      name: ""
       key: DEVBOX_STREAM_TOKEN_KEY
     # connectionsPerTokenPerMinute limits gateway gRPC calls per deploy token; 0 disables the limit.
     connectionsPerTokenPerMinute: 0
