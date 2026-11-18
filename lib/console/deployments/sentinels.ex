@@ -155,6 +155,7 @@ defmodule Console.Deployments.Sentinels do
       Cluster.target(test)
       |> Cluster.ordered(asc: :id)
       |> Repo.stream(method: :keyset)
+      |> Stream.uniq_by(& &1.id)
       |> Stream.chunk_every(100)
       |> Stream.map(fn chunk ->
         attrs = Enum.map(chunk, fn cluster -> timestamped(%{
@@ -168,14 +169,22 @@ defmodule Console.Deployments.Sentinels do
           repository_id: test.repository_id,
         }) end)
 
-        {count, jobs} = Repo.insert_all(SentinelRunJob, attrs, returning: true)
+        {count, jobs} = Repo.insert_all(SentinelRunJob, attrs,
+          on_conflict: :nothing,
+          conflict_target: [:sentinel_run_id, :check, :cluster_id],
+          returning: true
+        )
         Enum.each(jobs, &handle_notify(PubSub.SentinelRunJobCreated, &1))
+
+        inserted = MapSet.new(jobs, & &1.cluster_id)
         Enum.each(chunk, fn cluster ->
-          :telemetry.execute(
-            metric_scope(:sentinel_run_job),
-            %{count: 1},
-            %{status: :pending, sentinel_run_id: id, cluster: cluster.handle}
-          )
+          if MapSet.member?(inserted, cluster.id) do
+            :telemetry.execute(
+              metric_scope(:sentinel_run_job),
+              %{count: 1},
+              %{status: :pending, sentinel_run_id: id, cluster: cluster.handle}
+            )
+          end
         end)
 
         count

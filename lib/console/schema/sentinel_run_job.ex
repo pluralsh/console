@@ -88,6 +88,10 @@ defmodule Console.Schema.SentinelRunJob do
     |> cast_embed(:reference, with: &reference_changeset/2)
     |> validate_length(:error, max: 2048)
     |> validate_required(~w(check format status cluster_id sentinel_run_id)a)
+    |> unique_constraint([:sentinel_run_id, :check, :cluster_id],
+      name: :sentinel_run_jobs_run_check_cluster_index,
+      message: "a job for this cluster and check already exists on the run"
+    )
     |> SentinelRun.add_completed_at()
   end
 
