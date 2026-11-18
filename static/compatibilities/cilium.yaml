@@ -4,23 +4,30 @@ helm_repository_url: https://helm.cilium.io/
 helm_values: debug.verbose=flow
 eolApiSlug: cilium
 versions:
-- version: 1.20.4
+- version: 1.20.5
   kube: ['1.37', '1.36', '1.35']
   requirements: []
   incompatibilities: []
   summary:
-    helm_changes: ''
-    chart_updates: []
-    features: ['Security patch release: upgrades Go to 1.26.10 to address CVE-2026-111943
-        (compromised eMudhra intermediate CA trust) and updates dependencies to latest
-        patch versions.', 'AlibabaCloud IPAM: adds support for RRSA (RAM Roles for
-        Service Accounts) credentials, in addition to static AccessKeys and ECS RAM
-        roles.']
+    helm_changes: '- **cilium-operator tolerations:** As of **v1.20.5**, the Helm
+      chart adds `node-role.kubernetes.io/etcd` to the *default* `cilium-operator`
+      tolerations. If you previously depended on strict toleration defaults, re-check
+      operator scheduling behavior on etcd-tainted/control-plane nodes.
+
+      - **SPIRE agent scheduling:** Helm chart change allows the **SPIRE agent** (if
+      enabled) to schedule on **etcd-tainted** nodes. Verify this aligns with your
+      node taints/placement policy.
+
+      '
+    chart_updates: [Default `cilium-operator` tolerations expanded to include `node-role.kubernetes.io/etcd`.,
+      SPIRE agent (when enabled via Helm) can now tolerate etcd-tainted nodes.]
+    features: ['Load balancer control plane adds metrics to expose capacity/utilization
+        of ID allocators, improving observability for LB/NodePort-related scale issues.']
     breaking_changes: []
-  chart_version: 1.20.4
-  images: ['quay.io/cilium/cilium-envoy:v1.39.5-1792733054-8c73b2816bc8239e27f1fd53b271884688137459@sha256:547ab45f6092f681d9f54f3be9fa8fb1e705c9c5dc2df388efe3a52aa6965629',
-    'quay.io/cilium/cilium:v1.20.4@sha256:20fe92e4c86641233a450098c158d2d29085f3419931ab6bf681d2485dedf16e',
-    'quay.io/cilium/operator-generic:v1.20.4@sha256:7a7a3489dc66ad67e420d285c8a8d2e169b0957ad15e120f593d27081bf38d82']
+  chart_version: 1.20.5
+  images: ['quay.io/cilium/cilium-envoy:v1.39.6-1794557904-dee711ff0e84b106edd0abcdd71961af1b870359@sha256:bdef13043ebaa7b9dcd8e3a86be41080bb5369e017cd759a12daf89e2b8fafe7',
+    'quay.io/cilium/cilium:v1.20.5@sha256:aa72499f075ad729947ea91b026218aceba24f1a8e4534bf36b8368c7c561526',
+    'quay.io/cilium/operator-generic:v1.20.5@sha256:c6e7de6665aa9701db86c4fe46828a75a0d167afe084a9ffb5bce34b2c4fa8c4']
 - version: 1.20.2
   kube: ['1.37', '1.36', '1.35']
   requirements: []
