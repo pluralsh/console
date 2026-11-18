@@ -415,6 +415,9 @@ func TestDevboxRunnerController(t *testing.T) {
 		deployment := &appsv1.Deployment{}
 		g.Expect(env.client.Get(ctx, client.ObjectKey{Name: devboxGatewayName, Namespace: devboxTestNamespace}, deployment)).To(Succeed())
 		g.Expect(deployment.Spec.Template.Spec.Containers[0].Image).To(Equal("ghcr.io/pluralsh/devbox-gateway:" + devboxTestVersion))
+		// The shared gateway image owns its executable through the OCI entrypoint.
+		g.Expect(deployment.Spec.Template.Spec.Containers[0].Command).To(BeEmpty())
+		g.Expect(deployment.Spec.Template.Spec.Containers[0].Args).To(BeEmpty())
 		g.Expect(deployment.Spec.Template.Spec.ServiceAccountName).To(Equal(devboxGatewayName))
 		g.Expect(deployment.Spec.Template.Spec.Containers[0].Env).To(ContainElements(
 			corev1.EnvVar{Name: "CONSOLE_URL", Value: "https://console.example.com/ext/gql"},

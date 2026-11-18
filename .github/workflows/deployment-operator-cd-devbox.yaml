@@ -1,6 +1,15 @@
 name: CD / Devbox images
 
+# PR images use the exact head SHA so sha-<head> tags identify their source.
 on:
+  pull_request:
+    branches:
+    - "**"
+    paths:
+    - ".github/workflows/deployment-operator-cd-devbox.yaml"
+    - "go/deployment-operator/**"
+    - "go/polly/**"
+    - "go/client/**"
   push:
     tags:
     - 'go/deployment-operator/v*.*.*'
@@ -14,28 +23,49 @@ on:
 permissions:
   contents: read
 
+env:
+  DOCKER_METADATA_PR_HEAD_SHA: 'true'
+  IMAGE_TAGS: |
+    type=semver,pattern={{version}},value=${{ inputs.version }},enable=${{ inputs.version != '' }},priority=1100
+    type=semver,pattern={{major}}.{{minor}},value=${{ inputs.version }},enable=${{ inputs.version != '' }}
+    type=semver,pattern={{version}},value=${{ github.ref_name }},match=go/deployment-operator/v(\d+\.\d+\.\d+)$,priority=1000
+    type=semver,pattern={{major}}.{{minor}},value=${{ github.ref_name }},match=go/deployment-operator/v(\d+\.\d+\.\d+)$
+    type=sha,priority=800
+    type=ref,event=pr,priority=600
+
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}-${{ inputs.version }}
-  cancel-in-progress: false
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-${{ inputs.version }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  vouch:
+    name: Vouch
+    uses: ./.github/workflows/vouch-gate.yml
+    permissions:
+      contents: read
+
   version:
     name: Resolve version
+    needs: [vouch]
     runs-on: ubuntu-latest
     outputs:
-      version: ${{ steps.version.outputs.version }}
+      version: ${{ steps.meta.outputs.version }}
     steps:
-      - id: version
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ghcr.io/pluralsh/devbox-minimal
+          tags: ${{ env.IMAGE_TAGS }}
+      - name: Check release version
+        if: github.event_name != 'pull_request'
         env:
-          INPUT_VERSION: ${{ inputs.version }}
+          VERSION: ${{ steps.meta.outputs.version }}
         run: |
-          version="${INPUT_VERSION:-${GITHUB_REF_NAME#go/deployment-operator/v}}"
-          version="${version#v}"
-          if ! [[ "${version}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "Invalid version: ${version}" >&2
+          if ! [[ "${VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid version: ${VERSION}" >&2
             exit 1
           fi
-          echo "version=${version}" >> "$GITHUB_OUTPUT"
 
   build-minimal:
     name: Build devbox-minimal (${{ matrix.platforms.platform }})
@@ -55,6 +85,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Prepare
         run: |
           platform=${{ matrix.platforms.platform }}
@@ -114,6 +146,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
         with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 1
       - name: Download digests
         uses: actions/download-artifact@v8
@@ -134,10 +167,7 @@ jobs:
         uses: docker/metadata-action@v6
         with:
           images: ghcr.io/pluralsh/devbox-minimal
-          tags: |
-            type=semver,pattern={{version}},value=${{ needs.version.outputs.version }}
-            type=semver,pattern={{major}}.{{minor}},value=${{ needs.version.outputs.version }}
-            type=sha
+          tags: ${{ env.IMAGE_TAGS }}
       - name: Create manifest list and push
         working-directory: ${{ runner.temp }}/digests
         run: |
@@ -177,6 +207,8 @@ jobs:
           df -h /
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Prepare
         run: |
           platform=${{ matrix.platforms.platform }}
@@ -233,6 +265,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
         with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 1
       - name: Download digests
         uses: actions/download-artifact@v8
@@ -253,10 +286,7 @@ jobs:
         uses: docker/metadata-action@v6
         with:
           images: ghcr.io/pluralsh/devbox-fat
-          tags: |
-            type=semver,pattern={{version}},value=${{ needs.version.outputs.version }}
-            type=semver,pattern={{major}}.{{minor}},value=${{ needs.version.outputs.version }}
-            type=sha
+          tags: ${{ env.IMAGE_TAGS }}
       - name: Create manifest list and push
         working-directory: ${{ runner.temp }}/digests
         run: |
@@ -274,26 +304,35 @@ jobs:
           digest: ${{ steps.inspect.outputs.digest }}
           images: ghcr.io/pluralsh/devbox-fat
 
-  publish-gateway:
-    name: Build and publish devbox-gateway
+  build-gateway:
+    name: Build devbox-gateway (${{ matrix.platforms.platform }})
     needs: [version]
     permissions:
       contents: read
-      id-token: write
       packages: write
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        platforms:
+          - platform: linux/amd64
+            runner: ubuntu-24.04
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.platforms.runner }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Prepare
+        run: |
+          platform=${{ matrix.platforms.platform }}
+          echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v6
         with:
           images: ghcr.io/pluralsh/devbox-gateway
-          tags: |
-            type=semver,pattern={{version}},value=${{ needs.version.outputs.version }}
-            type=semver,pattern={{major}}.{{minor}},value=${{ needs.version.outputs.version }}
-            type=sha
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
       - name: Login to GHCR
@@ -302,24 +341,86 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      # The Go build cross-compiles on the build platform, so no QEMU is needed.
-      - name: Build and push
+      - name: Build and push by digest
         id: build
         uses: docker/build-push-action@v7
         with:
           context: "./go"
           file: "./go/deployment-operator/dockerfiles/devbox/gateway.Dockerfile"
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: ghcr.io/pluralsh/devbox-gateway
           labels: ${{ steps.meta.outputs.labels }}
-          platforms: linux/amd64,linux/arm64
-          cache-from: type=gha,scope=devbox-gateway
-          cache-to: type=gha,mode=max,scope=devbox-gateway
+          platforms: ${{ matrix.platforms.platform }}
+          outputs: type=image,push-by-digest=true,name-canonical=true,push=true
+          cache-from: type=gha,scope=devbox-gateway-${{ env.PLATFORM_PAIR }}
+          cache-to: type=gha,mode=max,scope=devbox-gateway-${{ env.PLATFORM_PAIR }}
           build-args: |
             VERSION=${{ needs.version.outputs.version }}
             GATEWAY_SOURCE=build
+      - name: Validate pushed gateway artifact
+        env:
+          GATEWAY_IMAGE: ghcr.io/pluralsh/devbox-gateway@${{ steps.build.outputs.digest }}
+          PLATFORM: ${{ matrix.platforms.platform }}
+        working-directory: go/deployment-operator/dockerfiles/devbox
+        run: ./test.sh gateway-validate
+      - name: Export digest
+        run: |
+          mkdir -p ${{ runner.temp }}/digests
+          digest="${{ steps.build.outputs.digest }}"
+          touch "${{ runner.temp }}/digests/${digest#sha256:}"
+      - name: Upload digest
+        uses: actions/upload-artifact@v7
+        with:
+          name: digests-gateway-${{ env.PLATFORM_PAIR }}
+          path: ${{ runner.temp }}/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  publish-gateway:
+    name: Publish devbox-gateway
+    needs: [version, build-gateway]
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Download digests
+        uses: actions/download-artifact@v8
+        with:
+          path: ${{ runner.temp }}/digests
+          pattern: digests-gateway-*
+          merge-multiple: true
+      - name: Login to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ghcr.io/pluralsh/devbox-gateway
+          tags: ${{ env.IMAGE_TAGS }}
+      - name: Create manifest list and push
+        working-directory: ${{ runner.temp }}/digests
+        run: |
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf 'ghcr.io/pluralsh/devbox-gateway@sha256:%s ' *)
+      - name: Resolve digest
+        id: inspect
+        run: |
+          digest=$(docker buildx imagetools inspect ghcr.io/pluralsh/devbox-gateway:${{ needs.version.outputs.version }} --format '{{.Manifest.Digest}}')
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+          echo "ghcr.io/pluralsh/devbox-gateway@${digest}" >> "$GITHUB_STEP_SUMMARY"
       - name: Cosign sign
         uses: ./.github/actions/cosign-sign
         with:
-          digest: ${{ steps.build.outputs.digest }}
+          digest: ${{ steps.inspect.outputs.digest }}
           images: ghcr.io/pluralsh/devbox-gateway
