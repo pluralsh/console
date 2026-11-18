@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Builds and tests the devbox images.
 #
-#   ./test.sh [step...]     steps: versions lint minimal gateway fat fat-check example all
+#   ./test.sh [step...]     steps: versions lint minimal gateway gateway-validate fat fat-check example all
 #                           (default: versions lint minimal gateway fat-check)
 #
 # Environment:
@@ -13,6 +13,7 @@
 #                   --load), so their cache can be dropped with the builder. fat and
 #                   example build FROM a local image and always use the default builder.
 #   KEEP_IMAGES=1   keep the built images instead of removing them at exit
+#   GATEWAY_IMAGE    published image reference to validate with gateway-validate
 set -euo pipefail
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -128,6 +129,44 @@ runtime_test() {
   echo "PID 1 ok, /readyz $([ -n "${ready}" ] && echo ok || echo skipped), SIGTERM exit in $((end - start))s"
 }
 
+# The final gateway image must have a native, static executable at its OCI entrypoint.
+gateway_binary_test() {
+  local image="$1" container binary info arch
+  container="devbox-gateway-inspect-$$"
+  binary="$(mktemp)"
+  trap 'rm -f "${binary}"; docker rm -f "${container}" >/dev/null 2>&1 || true; cleanup' EXIT
+  docker create --name "${container}" "${image}" >/dev/null
+  docker cp "${container}:/devbox-gateway" "${binary}"
+  docker rm "${container}" >/dev/null
+  info="$(file -b "${binary}")"
+  case "${PLATFORM:-linux/$(uname -m | sed 's/x86_64/amd64/; s/aarch64/arm64/')}" in
+    linux/amd64) arch='x86-64' ;;
+    linux/arm64) arch='ARM aarch64' ;;
+    *) echo "unsupported gateway platform: ${PLATFORM}" >&2; return 1 ;;
+  esac
+  [[ "${info}" == *"ELF 64-bit"* && "${info}" == *"${arch}"* && "${info}" == *"statically linked"* ]] || {
+    echo "/devbox-gateway is not a static ${arch} ELF: ${info}" >&2; return 1;
+  }
+  ! readelf -l "${binary}" | grep -q 'INTERP' || {
+    echo "/devbox-gateway unexpectedly has a dynamic ELF interpreter" >&2; return 1;
+  }
+  rm -f "${binary}"
+  trap cleanup EXIT
+}
+
+gateway_runtime_test() {
+  local image="$1"
+  log "Gateway entrypoint execution test ${image}"
+  docker run --rm ${platform_args[@]+"${platform_args[@]}"} "${image}" --version | grep -q '.+'
+}
+
+validate_gateway_image() {
+  local image="$1"
+  structure_test "${image}" gateway.yaml
+  gateway_binary_test "${image}"
+  gateway_runtime_test "${image}"
+}
+
 # Harness pins must match the agent-run images.
 step_versions() {
   log "Checking harness versions against dockerfiles/agent-harness"
@@ -172,7 +211,14 @@ step_minimal() {
 step_gateway() {
   build_isolated "${gateway_image}" gateway.Dockerfile \
     --build-arg GATEWAY_SOURCE="${GATEWAY_SOURCE}" --build-arg VERSION="0.0.0-${TAG}"
-  structure_test "${gateway_image}" gateway.yaml
+  validate_gateway_image "${gateway_image}"
+}
+
+step_gateway_validate() {
+  : "${GATEWAY_IMAGE:?GATEWAY_IMAGE is required for gateway-validate}"
+  log "Pulling published gateway artifact ${GATEWAY_IMAGE}"
+  docker pull ${platform_args[@]+"${platform_args[@]}"} "${GATEWAY_IMAGE}"
+  validate_gateway_image "${GATEWAY_IMAGE}"
 }
 
 ensure_minimal() {
