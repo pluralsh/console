@@ -1140,6 +1140,16 @@
   publisher: eks
 - name: amazon-sagemaker-hyperpod-inference
   versions:
+  - version: v3.0.0-eksbuild.1
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v2.1.0-eksbuild.1
     compatibilities:
     - '1.37'
@@ -2995,6 +3005,16 @@
   publisher: eks
 - name: aws-efs-csi-driver
   versions:
+  - version: v3.6.0-eksbuild.1
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v3.5.4-eksbuild.1
     compatibilities:
     - '1.37'
@@ -3736,6 +3756,30 @@
   publisher: eks
 - name: aws-guardduty-agent
   versions:
+  - version: v1.17.4-eksbuild.2
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+  - version: v1.17.4-eksbuild.1
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v1.17.3-eksbuild.2
     compatibilities:
     - '1.37'
@@ -4496,6 +4540,18 @@
   publisher: s3
 - name: aws-network-flow-monitoring-agent
   versions:
+  - version: v1.1.9-eksbuild.2
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v1.1.8-eksbuild.2
     compatibilities:
     - '1.37'
@@ -5232,6 +5288,16 @@
     - '1.34'
     - '1.33'
     - '1.32'
+  - version: v1.19.6-eksbuild.13
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v1.19.6-eksbuild.12
     compatibilities:
     - '1.37'
@@ -6407,6 +6473,11 @@
   publisher: Chainguard
 - name: chainguard_coredns-fips
   versions:
+  - version: v1.50.10007020261115-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
   - version: v1.50.10005020261113-eksbuild.1
     compatibilities:
     - '1.35'
@@ -9167,6 +9238,16 @@
   publisher: Elastic
 - name: external-dns
   versions:
+  - version: v0.24.0-eksbuild.2
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v0.24.0-eksbuild.1
     compatibilities:
     - '1.37'
@@ -12603,6 +12684,12 @@
   publisher: Log10x
 - name: metrics-server
   versions:
+  - version: v0.9.1-eksbuild.2
+    compatibilities:
+    - '1.37'
+    - '1.36'
+    - '1.35'
+    - '1.34'
   - version: v0.9.1-eksbuild.1
     compatibilities:
     - '1.37'
