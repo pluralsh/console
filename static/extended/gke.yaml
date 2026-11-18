@@ -8,8 +8,8 @@
   extended: false
   extended_from: '2027-02-28'
 - version: '1.34'
-  extended: true
-  extended_from: '2026-08-30'
+  extended: false
+  extended_from: '2026-11-30'
 - version: '1.33'
   extended: true
   extended_from: '2026-06-30'
