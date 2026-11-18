@@ -41,6 +41,7 @@ const (
 	stringTrue               = "true"
 	atenetEgressName         = "atenet-egress"
 	atenetRouterName         = "atenet-router"
+	ateControllerName        = "ate-controller"
 	servicednsSigner         = "servicedns.podcert.ate.dev/identity"
 	podidentitySigner        = "podidentity.podcert.ate.dev/identity"
 	podcertCanaryingLabel    = "podcert.ate.dev/canarying"

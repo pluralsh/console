@@ -103,13 +103,13 @@ func (c DevboxConfig) GatewaySpiffeID() string {
 	return "spiffe://cluster.local/ns/" + c.OperatorNamespace + "/sa/" + devboxGatewayName
 }
 
-// GatewayPrincipal is the gateway's Substrate API principal.
+// GatewayPrincipal is the gateway's Substrate API principal, as an access policy member ("user:<id>").
 func (c DevboxConfig) GatewayPrincipal() string {
-	return "system:serviceaccount:" + c.OperatorNamespace + ":" + devboxGatewayName
+	return "user:system:serviceaccount:" + c.OperatorNamespace + ":" + devboxGatewayName
 }
 
 func (c DevboxConfig) OperatorPrincipal() string {
-	return "system:serviceaccount:" + c.OperatorNamespace + ":" + c.OperatorServiceAccount
+	return "user:system:serviceaccount:" + c.OperatorNamespace + ":" + c.OperatorServiceAccount
 }
 
 // DevboxImage is the image for runners without spec.image. The base registry is read on every call since the

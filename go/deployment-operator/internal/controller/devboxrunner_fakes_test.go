@@ -181,6 +181,12 @@ func (f *fakeSubstrate) DeleteTag(_ context.Context, atespace, name string) erro
 }
 
 // finishGoldenBoot plays Substrate's template controller: it records the golden tag on the template.
+func (f *fakeSubstrate) failGoldenBoot(atespace, template, msg string) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.templates[atespace][template].Status = &ateapi.ActorTemplateStatus{GoldenSnapshotStatus: &ateapi.GoldenSnapshotStatus{ErrorMessage: msg}}
+}
+
 func (f *fakeSubstrate) finishGoldenBoot(atespace, template string) string {
 	f.mu.Lock()
 	defer f.mu.Unlock()

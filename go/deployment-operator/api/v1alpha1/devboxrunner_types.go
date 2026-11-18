@@ -94,9 +94,18 @@ const (
 	DevboxRevisionReady DevboxRevisionPhase = "Ready"
 	// DevboxRevisionFailed is terminal: the golden boot, image contract or agent probe failed.
 	DevboxRevisionFailed DevboxRevisionPhase = "Failed"
-	// DevboxRevisionRetired means a newer revision is current; the revision stays until nothing references it.
+	// DevboxRevisionRetired means a newer revision is current, or its golden boot lost its worker and it is rebuilt as
+	// a new revision; the revision stays until nothing references it.
 	DevboxRevisionRetired DevboxRevisionPhase = "Retired"
 )
+
+type DevboxRunnerBindings struct {
+	// Create bindings control who can attach this devbox to a workbench and start instances on it.
+	// Only users and groups resolvable by userEmail or groupName apply. If none are set, console falls
+	// back to its global create policy, which admins always pass.
+	// +kubebuilder:validation:Optional
+	Create []Binding `json:"create,omitempty"`
+}
 
 // DevboxRunnerSpec defines the desired state of DevboxRunner.
 type DevboxRunnerSpec struct {
@@ -141,6 +150,10 @@ type DevboxRunnerSpec struct {
 	// ScmConnections are names of console SCM connections instances may use for git credentials.
 	// +kubebuilder:validation:Optional
 	ScmConnections []string `json:"scmConnections,omitempty"`
+
+	// Bindings control who can use this devbox in console.
+	// +kubebuilder:validation:Optional
+	Bindings *DevboxRunnerBindings `json:"bindings,omitempty"`
 
 	// AllowedRepositories the git repositories allowed to be used with this devbox,
 	// with the same semantics as AgentRuntime.spec.allowedRepositories.

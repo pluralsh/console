@@ -420,6 +420,11 @@ func (r *DevboxRunnerReconciler) devboxAttributes(runner *v1alpha1.DevboxRunner,
 	if wp := runner.Spec.WorkerPool; wp != nil && wp.MaxInstances != nil {
 		attrs.MaxInstances = lo.ToPtr(int64(*wp.MaxInstances))
 	}
+	if b := runner.Spec.Bindings; b != nil {
+		attrs.CreateBindings = lo.Map(b.Create, func(b v1alpha1.Binding, _ int) *console.AgentBindingAttributes {
+			return &console.AgentBindingAttributes{UserEmail: b.UserEmail, GroupName: b.GroupName}
+		})
+	}
 	return attrs, nil
 }
 

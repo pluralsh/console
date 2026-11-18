@@ -195,7 +195,7 @@ func (g *Gateway) wake(ctx context.Context, inst *Instance) error {
 		return err
 	}
 	daemon := g.deps.Router.Daemon(ref.String())
-	if err := waitHealthy(ctx, daemon); err != nil {
+	if err := waitServing(ctx, daemon); err != nil {
 		return fmt.Errorf("waiting for the daemon of %s: %w", ref, err)
 	}
 	g.refreshRunner(ctx, inst)
@@ -221,25 +221,21 @@ func (g *Gateway) refreshRunner(ctx context.Context, inst *Instance) {
 	inst.mu.Unlock()
 }
 
-func waitHealthy(ctx context.Context, d devboxv1.DaemonClient) error {
+// waitServing waits for the daemon to answer Health. It doesn't wait for Ready: a daemon is only Ready after
+// Initialize, which needs it serving.
+func waitServing(ctx context.Context, d devboxv1.DaemonClient) error {
 	t := time.NewTicker(500 * time.Millisecond)
 	defer t.Stop()
-	var last error
 	for {
 		hctx, cancel := context.WithTimeout(ctx, 5*time.Second)
-		resp, err := d.Health(hctx, &devboxv1.HealthRequest{})
+		_, err := d.Health(hctx, &devboxv1.HealthRequest{})
 		cancel()
-		if err == nil && resp.GetReady() {
+		if err == nil {
 			return nil
-		}
-		if err != nil {
-			last = err
-		} else {
-			last = fmt.Errorf("daemon not ready: %s", resp.GetStatus())
 		}
 		select {
 		case <-ctx.Done():
-			return errors.Join(ctx.Err(), last)
+			return errors.Join(ctx.Err(), err)
 		case <-t.C:
 		}
 	}

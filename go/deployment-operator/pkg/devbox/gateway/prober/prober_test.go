@@ -39,7 +39,7 @@ type fakeDaemon struct {
 }
 
 func (d fakeDaemon) Health(context.Context, *devboxv1.HealthRequest, ...grpc.CallOption) (*devboxv1.HealthResponse, error) {
-	return &devboxv1.HealthResponse{Ready: true}, nil
+	return &devboxv1.HealthResponse{Status: "booting"}, nil
 }
 
 func (d fakeDaemon) ProbeAgents(ctx context.Context, in *devboxv1.ProbeAgentsRequest, _ ...grpc.CallOption) (*devboxv1.ProbeAgentsResponse, error) {

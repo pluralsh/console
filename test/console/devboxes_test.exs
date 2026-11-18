@@ -50,6 +50,24 @@ defmodule Console.DevboxesTest do
       {:error, _} = Devboxes.upsert_devbox(Map.put(@catalog, :scm_connections, ["missing"]), cluster)
     end
 
+    test "it resolves create bindings by email and group name, keeping them stable across upserts" do
+      cluster = insert(:cluster)
+      user = insert(:user)
+      group = insert(:group)
+      bindings = [%{user_email: user.email}, %{group_name: group.name}, %{user_email: "nobody@example.com"}]
+
+      {:ok, devbox} = Devboxes.upsert_devbox(Map.put(@catalog, :create_bindings, bindings), cluster)
+      %{create_bindings: created} = Console.Repo.preload(devbox, :create_bindings)
+      assert Enum.sort(Enum.map(created, & &1.user_id || &1.group_id)) == Enum.sort([user.id, group.id])
+
+      {:ok, devbox} = Devboxes.upsert_devbox(Map.put(@catalog, :create_bindings, bindings), cluster)
+      %{create_bindings: again} = Console.Repo.preload(devbox, :create_bindings)
+      assert Enum.sort(Enum.map(again, & &1.id)) == Enum.sort(Enum.map(created, & &1.id))
+
+      {:ok, devbox} = Devboxes.upsert_devbox(@catalog, cluster)
+      assert Console.Repo.preload(devbox, :create_bindings).create_bindings == []
+    end
+
     test "it stores the runner's autonomy policy, defaulting to auto" do
       cluster = insert(:cluster)
 
@@ -121,21 +139,50 @@ defmodule Console.DevboxesTest do
   end
 
   describe "#attach_devbox/3" do
-    test "workbench writers can attach and detach a devbox" do
+    test "workbench writers with create access to the devbox can attach and detach it" do
       user = insert(:user)
       workbench = insert(:workbench, write_bindings: [%{user_id: user.id}])
-      devbox = insert(:devbox)
+      devbox = insert(:devbox, create_bindings: [%{user_id: user.id}])
 
       {:ok, %WorkbenchDevbox{}} = Devboxes.attach_devbox(workbench.id, devbox.id, user)
       {:ok, _} = Devboxes.detach_devbox(workbench.id, devbox.id, user)
       {:error, _} = Devboxes.detach_devbox(workbench.id, devbox.id, user)
     end
 
+    test "group create bindings grant attach" do
+      user = insert(:user)
+      group = insert(:group)
+      insert(:group_member, user: user, group: group)
+      workbench = insert(:workbench, write_bindings: [%{user_id: user.id}])
+      devbox = insert(:devbox, create_bindings: [%{group_id: group.id}])
+
+      {:ok, %WorkbenchDevbox{}} = Devboxes.attach_devbox(workbench.id, devbox.id, Console.Repo.preload(user, [:groups]))
+    end
+
+    test "without devbox bindings it falls back to the global create policy" do
+      user = insert(:user)
+      workbench = insert(:workbench, write_bindings: [%{user_id: user.id}])
+      devbox = insert(:devbox)
+
+      {:error, "forbidden"} = Devboxes.attach_devbox(workbench.id, devbox.id, user)
+
+      deployment_settings(create_bindings: [%{user_id: user.id}])
+      {:ok, %WorkbenchDevbox{}} = Devboxes.attach_devbox(workbench.id, devbox.id, user)
+    end
+
+    test "workbench writers without create access to the devbox cannot attach it" do
+      user = insert(:user)
+      workbench = insert(:workbench, write_bindings: [%{user_id: user.id}])
+      devbox = insert(:devbox, create_bindings: [%{user_id: insert(:user).id}])
+
+      {:error, "forbidden"} = Devboxes.attach_devbox(workbench.id, devbox.id, user)
+    end
+
     test "readers cannot attach a devbox" do
       user = insert(:user)
       workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
 
-      {:error, _} = Devboxes.attach_devbox(workbench.id, insert(:devbox).id, user)
+      {:error, _} = Devboxes.attach_devbox(workbench.id, insert(:devbox, create_bindings: [%{user_id: user.id}]).id, user)
     end
   end
 
@@ -214,6 +261,14 @@ defmodule Console.DevboxesTest do
 
     test "users without access cannot start instances", %{workbench: wb, devbox: devbox} do
       {:error, _} = Devboxes.create_instance(%{devbox_id: devbox.id}, wb.id, insert(:user))
+    end
+
+    test "workbench readers outside the devbox's create bindings cannot start instances", %{devbox: devbox} do
+      reader = insert(:user)
+      wb = insert(:workbench, read_bindings: [%{user_id: reader.id}])
+      insert(:workbench_devbox, workbench: wb, devbox: devbox)
+
+      {:error, "forbidden"} = Devboxes.create_instance(%{devbox_id: devbox.id}, wb.id, reader)
     end
 
     test "it returns a typed error when the cluster is offline", %{user: user, workbench: wb, devbox: devbox} do
@@ -424,6 +479,7 @@ defmodule Console.DevboxesTest do
     user = insert(:user)
     wb = insert(:workbench, read_bindings: [%{user_id: user.id}], configuration: devbox_config(max_deferral: 3_600))
     devbox = insert(:devbox,
+      create_bindings: [%{user_id: user.id}],
       max_instances: 2,
       allowed_repositories: ["https://github.com/pluralsh/console"],
       agents: [

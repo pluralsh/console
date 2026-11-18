@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/samber/lo"
+	appsv1 "k8s.io/api/apps/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -158,7 +159,13 @@ func (r *DevboxRunnerReconciler) reconcileWorkerPool(ctx context.Context, api su
 		image = r.Config.WorkerImages[class]
 	}
 	if image == "" {
-		return fmt.Errorf("no Substrate worker image configured for sandbox class %s, set devboxes.workerImages.%s in the deployment-operator chart or spec.workerPool.workerImage", class, class)
+		if image, err = r.installedWorkerImage(ctx, class); err != nil {
+			return err
+		}
+	}
+	if image == "" {
+		return fmt.Errorf("no Substrate worker image configured for sandbox class %s and none derivable from %s/%s, set devboxes.workerImages.%s in the deployment-operator chart or spec.workerPool.workerImage",
+			class, r.Config.SubstrateNamespace, ateControllerName, class)
 	}
 
 	sandboxClass := map[string]any{"name": string(class)}
@@ -206,6 +213,8 @@ func (r *DevboxRunnerReconciler) reconcileWorkerPool(ctx context.Context, api su
 	pool.SetGroupVersionKind(workerPoolGVK)
 	pool.SetName(devboxWorkerPoolName(runner))
 	pool.SetNamespace(r.Config.WorkerPoolNamespace)
+	// Read before CreateOrPatch, which strips status from an unstructured object it doesn't patch.
+	ready, _, _ := unstructured.NestedInt64(pool.Object, "status", "readyReplicas")
 
 	replicas := int64(lo.FromPtrOr(wp.Replicas, 1))
 	var autoscaleErr error
@@ -246,7 +255,6 @@ func (r *DevboxRunnerReconciler) reconcileWorkerPool(ctx context.Context, api su
 		utils.MarkCondition(runner.SetCondition, v1alpha1.DevboxWorkerPoolReadyConditionType, metav1.ConditionFalse, v1alpha1.ErrorConditionReason, err.Error())
 		return nil
 	}
-	ready, _, _ := unstructured.NestedInt64(pool.Object, "status", "readyReplicas")
 	if replicas > 0 && ready == 0 {
 		utils.MarkCondition(runner.SetCondition, v1alpha1.DevboxWorkerPoolReadyConditionType, metav1.ConditionFalse, v1alpha1.DevboxPendingReason,
 			fmt.Sprintf("WorkerPool %s has no ready workers yet", pool.GetName()))
@@ -266,6 +274,32 @@ func devboxWorkerPoolRefs(runner *v1alpha1.DevboxRunner, defaultNamespace string
 
 // reconcileAdditionalPools puts the runner's worker selector on its AdditionalPools and takes it off pools that
 // left the list. Status keeps the pools labeled, so a missing pool is retried and a removed one cleaned up.
+// installedWorkerImage derives a sandbox class's worker image from the installed ate-controller's, so workers
+// match the Substrate release and registry: <registry>/atecontroller:<tag> becomes <registry>/ateworker-<class>:<tag>.
+// It returns "" when ate-controller is missing or its image isn't a tagged atecontroller reference.
+func (r *DevboxRunnerReconciler) installedWorkerImage(ctx context.Context, class v1alpha1.DevboxSandboxClass) (string, error) {
+	controller := &appsv1.Deployment{}
+	if err := r.Get(ctx, client.ObjectKey{Name: ateControllerName, Namespace: r.Config.SubstrateNamespace}, controller); err != nil {
+		return "", client.IgnoreNotFound(err)
+	}
+	for _, c := range controller.Spec.Template.Spec.Containers {
+		if image := workerImageFor(c.Image, class); image != "" {
+			return image, nil
+		}
+	}
+	return "", nil
+}
+
+func workerImageFor(controllerImage string, class v1alpha1.DevboxSandboxClass) string {
+	ref, _, _ := strings.Cut(controllerImage, "@")
+	slash := strings.LastIndex(ref, "/")
+	name, tag, ok := strings.Cut(ref[slash+1:], ":")
+	if !ok || tag == "" || name != "atecontroller" {
+		return ""
+	}
+	return ref[:slash+1] + "ateworker-" + string(class) + ":" + tag
+}
+
 func (r *DevboxRunnerReconciler) reconcileAdditionalPools(ctx context.Context, runner *v1alpha1.DevboxRunner) error {
 	desired := devboxWorkerPoolRefs(runner, r.Config.WorkerPoolNamespace)
 	var errs []error
@@ -506,7 +540,8 @@ func (r *DevboxRunnerReconciler) reconcileRevisions(ctx context.Context, api sub
 	}
 
 	latest := runner.LatestRevision()
-	if latest == nil || latest.Hash != hash {
+	// The latest revision is only Retired without a newer one when its golden boot lost its worker.
+	if latest == nil || latest.Hash != hash || latest.Phase == v1alpha1.DevboxRevisionRetired {
 		next := int64(1)
 		if latest != nil {
 			next = latest.Revision + 1
@@ -570,6 +605,11 @@ func (r *DevboxRunnerReconciler) advanceBuilding(ctx context.Context, api substr
 
 	golden := tmpl.GetStatus().GetGoldenSnapshotStatus()
 	if msg := golden.GetErrorMessage(); msg != "" {
+		if goldenLostWorker(msg) {
+			rev.Phase = v1alpha1.DevboxRevisionRetired
+			rev.Message = lo.ToPtr("golden boot lost its worker, rebuilding: " + msg)
+			return nil
+		}
 		rev.Phase = v1alpha1.DevboxRevisionFailed
 		rev.Message = lo.ToPtr("golden boot failed: " + msg)
 		return nil
@@ -582,6 +622,20 @@ func (r *DevboxRunnerReconciler) advanceBuilding(ctx context.Context, api substr
 	rev.GoldenTag = &tag
 	rev.Phase = v1alpha1.DevboxRevisionProbing
 	return r.Probe.Request(ctx, probeRequest(runner, atespace, rev))
+}
+
+// goldenWorkerLossCrashes are Substrate's fixed actor crash messages for losing the worker or node, not a fault of
+// the image, so a golden boot that failed with one is rebuilt rather than failing the revision.
+var goldenWorkerLossCrashes = []string{
+	"worker pod went away while hosting the actor",
+	"worker restarted while hosting the actor",
+	"assigned worker is draining",
+	"assigned worker no longer satisfies the actor's placement constraints",
+	"node holding the actor's latest snapshot no longer exists",
+}
+
+func goldenLostWorker(msg string) bool {
+	return lo.SomeBy(goldenWorkerLossCrashes, func(crash string) bool { return strings.Contains(msg, crash) })
 }
 
 func probeRequest(runner *v1alpha1.DevboxRunner, atespace string, rev *v1alpha1.DevboxRevision) DevboxProbeRequest {

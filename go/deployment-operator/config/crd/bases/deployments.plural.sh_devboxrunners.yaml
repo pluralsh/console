@@ -144,6 +144,30 @@ spec:
                 - message: default must not be above max
                   rule: '!has(self.default) || !has(self.max) || (self.default ==
                     ''manual'' || self.max == ''full'' || self.default == self.max)'
+              bindings:
+                description: Bindings control who can use this devbox in console.
+                properties:
+                  create:
+                    description: |-
+                      Create bindings control who can attach this devbox to a workbench and start instances on it.
+                      Only users and groups resolvable by userEmail or groupName apply. If none are set, console falls
+                      back to its global create policy, which admins always pass.
+                    items:
+                      description: Binding ...
+                      properties:
+                        UserID:
+                          type: string
+                        groupID:
+                          type: string
+                        groupName:
+                          type: string
+                        id:
+                          type: string
+                        userEmail:
+                          type: string
+                      type: object
+                    type: array
+                type: object
               bootstrapScript:
                 description: BootstrapScript runs once during the golden boot, so
                   its results are baked into the snapshot.

@@ -11,6 +11,7 @@ defmodule Console.Devboxes do
   alias Console.Deployments.{Git, Workbenches}
   alias Console.Devboxes.{Billing, Control, Credentials, Error}
   alias Console.WorkloadIdentity
+  alias Console.Services.Users
   alias Console.WorkloadIdentity.Scopes.Devboxes, as: DevboxScope
   alias Console.Schema.{
     Cluster,
@@ -48,15 +49,17 @@ defmodule Console.Devboxes do
 
   @doc """
   Upserts a devbox, keyed by name and cluster.  Performed by the deployment operator reconciling a `DevboxRunner`,
-  with its probed agent catalog.  `scm_connections` names the scm connections the box may use.
+  with its probed agent catalog.  `scm_connections` names the scm connections the box may use.  `create_bindings`
+  is the runner's full binding list, so omitting it clears them and falls back to the global create policy.
   """
   @spec upsert_devbox(map, Cluster.t, User.t | Cluster.t) :: devbox_resp
   def upsert_devbox(attrs, cluster, actor \\ nil)
   def upsert_devbox(%{name: name} = attrs, %Cluster{id: cid} = cluster, actor) do
-    devbox = get_devbox_by_name(cid, name) |> Repo.preload([:scm_connection_associations])
+    devbox = get_devbox_by_name(cid, name) |> Repo.preload([:scm_connection_associations, :create_bindings])
 
     with {:ok, _} <- allow(devbox || %Devbox{cluster_id: cid}, actor || cluster, :write),
          {:ok, attrs} <- resolve_scm_connections(attrs, devbox) do
+      attrs = stabilize_bindings(Map.put_new(attrs, :create_bindings, []), devbox)
       start_transaction()
       |> add_operation(:devbox, fn _ ->
         (devbox || %Devbox{cluster_id: cid})
@@ -85,6 +88,10 @@ defmodule Console.Devboxes do
   defp resolve_scm_connections(%{scm_connections: []} = attrs, _),
     do: {:ok, Map.delete(attrs, :scm_connections) |> Map.put(:scm_connection_associations, [])}
   defp resolve_scm_connections(attrs, _), do: {:ok, attrs}
+
+  defp stabilize_bindings(%{create_bindings: bindings} = attrs, devbox) when is_list(bindings),
+    do: Map.put(attrs, :create_bindings, Users.stabilize_bindings(bindings, devbox && devbox.create_bindings))
+  defp stabilize_bindings(attrs, _), do: attrs
 
   @doc """
   Records an operator heartbeat for a box: status, conditions and the resolved image digest and template revision.
@@ -126,14 +133,16 @@ defmodule Console.Devboxes do
   end
 
   @doc """
-  Attaches a box to a workbench, requires write access to the workbench.
+  Attaches a box to a workbench, requires write access to the workbench and create access to the box.
   """
   @spec attach_devbox(binary, binary, User.t) :: {:ok, WorkbenchDevbox.t} | error
   def attach_devbox(workbench_id, devbox_id, %User{} = user) do
-    %WorkbenchDevbox{}
-    |> WorkbenchDevbox.changeset(%{workbench_id: workbench_id, devbox_id: devbox_id})
-    |> allow(user, :write)
-    |> when_ok(:insert)
+    with {:ok, _} <- allow(get_devbox!(devbox_id), user, :create) do
+      %WorkbenchDevbox{}
+      |> WorkbenchDevbox.changeset(%{workbench_id: workbench_id, devbox_id: devbox_id})
+      |> allow(user, :write)
+      |> when_ok(:insert)
+    end
   end
 
   @doc """
@@ -156,8 +165,9 @@ defmodule Console.Devboxes do
   def fetch_instance(id, actor), do: get_instance!(id) |> allow(actor, :read)
 
   @doc """
-  Starts an instance of an attached box (or restores one from a snapshot).  Validates the agent, model, config
-  options and repositories against the box's catalog and allowlist, and the box's `maxInstances`.
+  Starts an instance of an attached box (or restores one from a snapshot), requiring create access to the box.
+  Validates the agent, model, config options and repositories against the box's catalog and allowlist, and the
+  box's `maxInstances`.
   """
   @spec create_instance(map, binary, User.t) :: instance_resp
   def create_instance(attrs, workbench_id, %User{id: user_id} = user) do
@@ -170,6 +180,7 @@ defmodule Console.Devboxes do
     |> add_operation(:devbox, fn %{snapshot: snapshot} ->
       attached_devbox(workbench_id, attrs[:devbox_id] || (snapshot && snapshot.devbox_id))
     end)
+    |> add_operation(:access, fn %{devbox: devbox} -> allow(devbox, user, :create) end)
     |> add_operation(:capacity, fn %{devbox: devbox} -> check_capacity(devbox) end)
     |> add_operation(:catalog, fn %{devbox: devbox} -> resolve_catalog(devbox, attrs) end)
     |> add_operation(:repositories, fn %{devbox: devbox, workbench: wb} ->

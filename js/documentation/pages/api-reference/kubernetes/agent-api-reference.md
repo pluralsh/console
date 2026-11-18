@@ -308,6 +308,7 @@ Binding ...
 _Appears in:_
 - [AgentRuntimeBindings](#agentruntimebindings)
 - [Bindings](#bindings)
+- [DevboxRunnerBindings](#devboxrunnerbindings)
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
@@ -1070,7 +1071,7 @@ _Appears in:_
 | `Probing` | DevboxRevisionProbing means the golden snapshot is ready and the agent probe is running.<br /> |
 | `Ready` | DevboxRevisionReady means the revision passed the probe and may serve new instances.<br /> |
 | `Failed` | DevboxRevisionFailed is terminal: the golden boot, image contract or agent probe failed.<br /> |
-| `Retired` | DevboxRevisionRetired means a newer revision is current; the revision stays until nothing references it.<br /> |
+| `Retired` | DevboxRevisionRetired means a newer revision is current, or its golden boot lost its worker and it is rebuilt as<br />a new revision; the revision stays until nothing references it.<br /> |
 
 
 #### DevboxRunner
@@ -1090,6 +1091,22 @@ DevboxRunner is the Schema for the devboxrunners API. It defines one kind of dev
 | `kind` _string_ | `DevboxRunner` | | |
 | `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
 | `spec` _[DevboxRunnerSpec](#devboxrunnerspec)_ |  |  |  |
+
+
+#### DevboxRunnerBindings
+
+
+
+
+
+
+
+_Appears in:_
+- [DevboxRunnerSpec](#devboxrunnerspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `create` _[Binding](#binding) array_ | Create bindings control who can attach this devbox to a workbench and start instances on it.<br />Only users and groups resolvable by userEmail or groupName apply. If none are set, console falls<br />back to its global create policy, which admins always pass. |  | Optional: \{\} <br /> |
 
 
 #### DevboxRunnerSpec
@@ -1113,6 +1130,7 @@ _Appears in:_
 | `resources` _[DevboxResources](#devboxresources)_ | Resources are the per-instance limits. |  | Optional: \{\} <br /> |
 | `workerPool` _[DevboxWorkerPool](#devboxworkerpool)_ | WorkerPool sizes the Substrate WorkerPool backing this runner. |  | Optional: \{\} <br /> |
 | `scmConnections` _string array_ | ScmConnections are names of console SCM connections instances may use for git credentials. |  | Optional: \{\} <br /> |
+| `bindings` _[DevboxRunnerBindings](#devboxrunnerbindings)_ | Bindings control who can use this devbox in console. |  | Optional: \{\} <br /> |
 | `allowedRepositories` _string array_ | AllowedRepositories the git repositories allowed to be used with this devbox,<br />with the same semantics as AgentRuntime.spec.allowedRepositories. |  | Optional: \{\} <br /> |
 | `httpAllowlist` _[DevboxHTTPAllowlistEntry](#devboxhttpallowlistentry) array_ | HTTPAllowlist are extra hosts instances may reach, on top of the built-in ones. |  | MaxItems: 256 <br />Optional: \{\} <br /> |
 | `packageServers` _[DevboxPackageServers](#devboxpackageservers)_ | PackageServers opens egress to public package registries by ecosystem. Go, Rust, JavaScript, Java, Elixir<br />and Python are on unless set to false. | \{  \} | Optional: \{\} <br /> |

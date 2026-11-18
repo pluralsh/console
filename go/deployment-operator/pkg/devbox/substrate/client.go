@@ -36,6 +36,9 @@ const (
 	RoleEditor = "editor"
 	RoleViewer = "viewer"
 
+	// accessPolicyName is the name of every access policy, a singleton under its parent.
+	accessPolicyName = "default"
+
 	pageSize = 500
 )
 
@@ -179,16 +182,20 @@ func (c *Client) DeleteAtespace(ctx context.Context, name string) error {
 
 func (c *Client) EnsureAtespaceAccessPolicy(ctx context.Context, atespace, role string, members ...string) error {
 	ref := &ateapi.ObjectRef{Name: atespace}
-	policy, err := c.control.GetAtespaceAccessPolicy(ctx, &ateapi.GetAtespaceAccessPolicyRequest{Atespace: ref})
+	get := &ateapi.GetAtespaceAccessPolicyRequest{Atespace: ref, Name: accessPolicyName}
+	policy, err := c.control.GetAtespaceAccessPolicy(ctx, get)
 	if IsNotFound(err) {
 		_, err = c.control.CreateAtespaceAccessPolicy(ctx, &ateapi.CreateAtespaceAccessPolicyRequest{
-			Atespace:     ref,
-			AccessPolicy: &ateapi.AccessPolicy{Bindings: []*ateapi.Binding{{Role: role, Members: members}}},
+			Atespace: ref,
+			AccessPolicy: &ateapi.AccessPolicy{
+				Metadata: &ateapi.ResourceMetadata{Name: accessPolicyName},
+				Bindings: []*ateapi.Binding{{Role: role, Members: members}},
+			},
 		})
 		if !IsAlreadyExists(err) {
 			return err
 		}
-		policy, err = c.control.GetAtespaceAccessPolicy(ctx, &ateapi.GetAtespaceAccessPolicyRequest{Atespace: ref})
+		policy, err = c.control.GetAtespaceAccessPolicy(ctx, get)
 	}
 	if err != nil {
 		return err

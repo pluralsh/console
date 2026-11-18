@@ -71,6 +71,11 @@ func (d *fakeDaemon) note(ctx context.Context) {
 }
 
 func (d *fakeDaemon) Health(context.Context, *devboxv1.HealthRequest) (*devboxv1.HealthResponse, error) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	if len(d.initialized) == 0 {
+		return &devboxv1.HealthResponse{Status: "booting"}, nil
+	}
 	return &devboxv1.HealthResponse{Ready: true, Status: "ready"}, nil
 }
 

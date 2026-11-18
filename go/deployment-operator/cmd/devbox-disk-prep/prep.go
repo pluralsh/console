@@ -15,6 +15,7 @@ import (
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/util/retry"
@@ -62,6 +63,7 @@ type prep struct {
 	config
 	exec      executor
 	nodes     typedcorev1.NodeInterface
+	pods      typedcorev1.PodsGetter
 	mountinfo string
 }
 
@@ -86,6 +88,9 @@ func (p *prep) reconcile(ctx context.Context) error {
 	if err := p.ensureMounted(ctx); err != nil {
 		return err
 	}
+	if err := p.restartStalePods(ctx); err != nil {
+		return err
+	}
 	if err := p.ensureUntainted(ctx); err != nil {
 		return err
 	}
@@ -99,6 +104,11 @@ func (p *prep) target() string {
 // marker records that disks were claimed on this boot disk, so CSI volumes attached later are never formatted.
 func (p *prep) marker() string {
 	return filepath.Join(p.hostRoot, "var/lib/plural-devbox-disk-prep")
+}
+
+// mountedMarker is touched on the boot disk after each mount, so its mtime is when the data disk was last mounted.
+func (p *prep) mountedMarker() string {
+	return filepath.Join(p.hostRoot, "var/lib/plural-devbox-disk-prep-mounted")
 }
 
 func (p *prep) ensureMounted(ctx context.Context) error {
@@ -138,7 +148,54 @@ func (p *prep) ensureMounted(ctx context.Context) error {
 		return err
 	}
 	klog.InfoS("mounted data disk", "device", dev, "path", p.mountPath)
+	return os.WriteFile(p.mountedMarker(), nil, 0o644)
+}
+
+// restartStalePods deletes this node's pods that mount the data disk's path from the host but started before it was
+// mounted, so their controllers recreate them on the data disk. They would otherwise keep writing to the boot disk
+// directory the mount hides, e.g. a Substrate worker whose socket atelet can then never reach. Workers tolerate the
+// startup taint so the cluster autoscaler can size the pool from its template, and atelet can race a remount after a
+// reboot, so both can start first.
+func (p *prep) restartStalePods(ctx context.Context) error {
+	info, err := os.Stat(p.mountedMarker())
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	mountedAt := info.ModTime()
+
+	pods, err := p.pods.Pods(metav1.NamespaceAll).List(ctx, metav1.ListOptions{FieldSelector: "spec.nodeName=" + p.nodeName})
+	if err != nil {
+		return fmt.Errorf("listing pods on %s: %w", p.nodeName, err)
+	}
+	for _, pod := range pods.Items {
+		if pod.Spec.NodeName != p.nodeName || pod.DeletionTimestamp != nil || pod.Status.StartTime == nil ||
+			!pod.Status.StartTime.Time.Before(mountedAt) || !p.mountsDataPath(pod) {
+			continue
+		}
+		if err := p.pods.Pods(pod.Namespace).Delete(ctx, pod.Name, metav1.DeleteOptions{}); err != nil && !apierrors.IsNotFound(err) {
+			return fmt.Errorf("restarting pod %s/%s: %w", pod.Namespace, pod.Name, err)
+		}
+		klog.InfoS("restarted pod that started before the data disk was mounted", "pod", klog.KObj(&pod), "path", p.mountPath)
+	}
 	return nil
+}
+
+// mountsDataPath reports whether the pod mounts the data disk's path, or a directory under it, from the host.
+func (p *prep) mountsDataPath(pod corev1.Pod) bool {
+	root := filepath.Clean(p.mountPath)
+	for _, v := range pod.Spec.Volumes {
+		if v.HostPath == nil {
+			continue
+		}
+		path := filepath.Clean(v.HostPath.Path)
+		if path == root || strings.HasPrefix(path, root+"/") {
+			return true
+		}
+	}
+	return false
 }
 
 // format claims every candidate disk and returns the formatted device, or "" when there is none.

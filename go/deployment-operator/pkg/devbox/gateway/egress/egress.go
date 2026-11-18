@@ -220,6 +220,18 @@ type Rule struct {
 	ExtraHeaders []HeaderSecret
 }
 
+// EffectivePort is Port, or the scheme's default when it is unset.
+func (r Rule) EffectivePort() int32 {
+	switch {
+	case r.Port != 0:
+		return r.Port
+	case r.Scheme == SchemeHTTP:
+		return 80
+	default:
+		return 443
+	}
+}
+
 // HeaderSecret replaces Header with the credential SecretURI resolves to.
 type HeaderSecret struct {
 	Header    string

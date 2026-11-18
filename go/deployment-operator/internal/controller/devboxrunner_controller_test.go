@@ -412,6 +412,13 @@ func TestDevboxRunnerController(t *testing.T) {
 		g.Expect(classes).To(ConsistOf(HaveKeyWithValue("name", "gvisor")))
 		workerImage, _, _ := unstructured.NestedString(pool.Object, "spec", "workerImage")
 		g.Expect(workerImage).To(Equal("ghcr.io/example/ateworker-gvisor@sha256:abc"))
+		g.Expect(condition(runner, v1alpha1.DevboxWorkerPoolReadyConditionType).Status).To(Equal(metav1.ConditionFalse))
+
+		g.Expect(unstructured.SetNestedField(pool.Object, map[string]any{"replicas": int64(1), "readyReplicas": int64(1)}, "status")).To(Succeed())
+		g.Expect(env.client.Status().Update(ctx, pool)).To(Succeed())
+		runner = env.reconcile(t, "platform", 2)
+		g.Expect(condition(runner, v1alpha1.DevboxWorkerPoolReadyConditionType)).To(HaveField("Status", metav1.ConditionTrue),
+			"an unchanged WorkerPool still reports its ready workers")
 
 		deployment := &appsv1.Deployment{}
 		g.Expect(env.client.Get(ctx, client.ObjectKey{Name: devboxGatewayName, Namespace: devboxTestNamespace}, deployment)).To(Succeed())
@@ -470,7 +477,7 @@ func TestDevboxRunnerController(t *testing.T) {
 		atespace := *runner.Status.Atespace
 		g.Expect(atespace).To(HavePrefix("devbox-platform-"))
 		g.Expect(env.substrate.hasAtespace(atespace)).To(BeTrue())
-		g.Expect(env.substrate.policies[atespace]["editor"]).To(ContainElement("system:serviceaccount:" + devboxTestNamespace + ":devbox-gateway"))
+		g.Expect(env.substrate.policies[atespace]["editor"]).To(ContainElement("user:system:serviceaccount:" + devboxTestNamespace + ":devbox-gateway"))
 
 		g.Expect(runner.Status.Revisions).To(HaveLen(1))
 		g.Expect(runner.Status.Revisions[0].Phase).To(Equal(v1alpha1.DevboxRevisionBuilding))
@@ -654,6 +661,28 @@ func TestDevboxRunnerController(t *testing.T) {
 		g.Expect(probeCondition.Message).To(ContainSubstring("agent codex is not installed"))
 		template := condition(runner, v1alpha1.DevboxTemplateReadyConditionType)
 		g.Expect(template.Status).To(Equal(metav1.ConditionFalse))
+	})
+
+	t.Run("a golden boot that lost its worker is rebuilt, one that crashed fails", func(t *testing.T) {
+		g := NewWithT(t)
+		env.push(t, "devbox:v1")
+		env.newRunner(t, "rebuild", "devbox:v1")
+		runner := env.reconcile(t, "rebuild", 2)
+		g.Expect(runner.LatestRevision()).To(HaveField("Phase", v1alpha1.DevboxRevisionBuilding))
+
+		first := *runner.LatestRevision()
+		env.substrate.failGoldenBoot(*runner.Status.Atespace, first.Name,
+			"GoldenActorCrashed: golden actor crashed before its snapshot was taken: resume failed: worker pod went away while hosting the actor")
+		runner = env.reconcile(t, "rebuild", 2)
+		g.Expect(runner.RevisionByNumber(1)).To(BeNil(), "the retired r1 was collected")
+		latest := runner.LatestRevision()
+		g.Expect(latest.Revision).To(Equal(int64(2)))
+		g.Expect(latest.Hash).To(Equal(first.Hash), "the same template is rebuilt")
+		g.Expect(latest.Phase).To(Equal(v1alpha1.DevboxRevisionBuilding))
+
+		env.substrate.failGoldenBoot(*runner.Status.Atespace, latest.Name, "GoldenActorCrashed: golden actor crashed before its snapshot was taken: exited with code 1")
+		runner = env.reconcile(t, "rebuild", 2)
+		g.Expect(runner.LatestRevision()).To(SatisfyAll(HaveField("Revision", int64(2)), HaveField("Phase", v1alpha1.DevboxRevisionFailed)))
 	})
 
 	t.Run("an image that overrides ENTRYPOINT fails the contract", func(t *testing.T) {
@@ -911,7 +940,7 @@ func TestDevboxRunnerController(t *testing.T) {
 
 	t.Run("deleting the last runner removes the gateway", func(t *testing.T) {
 		g := NewWithT(t)
-		for _, name := range []string{"custom", "old", "scheduled", "elastic"} {
+		for _, name := range []string{"custom", "old", "scheduled", "elastic", "rebuild"} {
 			g.Expect(env.client.Delete(ctx, env.get(t, name))).To(Succeed())
 			_, err := env.r.Reconcile(ctx, ctrl.Request{NamespacedName: client.ObjectKey{Name: name}})
 			g.Expect(err).NotTo(HaveOccurred())

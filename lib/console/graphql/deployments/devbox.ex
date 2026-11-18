@@ -112,6 +112,8 @@ defmodule Console.GraphQl.Deployments.Devbox do
     field :conditions,           list_of(:devbox_condition_attributes)
     field :cloud_identities,     list_of(:devbox_cloud_identity_attributes),
       description: "cloud identities instances get workload identity tokens for"
+    field :create_bindings,      list_of(:agent_binding_attributes),
+      description: "who may attach this box to a workbench and start instances on it, falling back to the global create policy if empty"
   end
 
   input_object :devbox_cloud_identity_attributes do
@@ -318,6 +320,8 @@ defmodule Console.GraphQl.Deployments.Devbox do
 
     field :cluster,         :cluster, resolve: dataloader(Deployments)
     field :scm_connections, list_of(:scm_connection), resolve: dataloader(Deployments)
+    field :create_bindings, list_of(:policy_binding), resolve: dataloader(Deployments),
+      description: "who may attach this box to a workbench and start instances on it"
 
     @desc "the box's workload identity issuer and how to trust it from cloud accounts"
     field :workload_identity, :devbox_workload_identity, resolve: &Deployments.devbox_workload_identity/3

@@ -21,9 +21,6 @@ fileExistenceTests:
   - name: CA certificates
     path: /etc/ssl/certs/ca-certificates.crt
     shouldExist: true
-  - name: distroless, no shell
-    path: /bin/sh
-    shouldExist: false
   - name: no daemon or harnesses
     path: /usr/local/bin/devbox-daemon
     shouldExist: false

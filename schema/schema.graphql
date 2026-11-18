@@ -2441,6 +2441,9 @@ input DevboxAttributes {
 
   "cloud identities instances get workload identity tokens for"
   cloudIdentities: [DevboxCloudIdentityAttributes]
+
+  "who may attach this box to a workbench and start instances on it, falling back to the global create policy if empty"
+  createBindings: [AgentBindingAttributes]
 }
 
 input DevboxCloudIdentityAttributes {
@@ -2770,6 +2773,9 @@ type Devbox {
   cluster: Cluster
 
   scmConnections: [ScmConnection]
+
+  "who may attach this box to a workbench and start instances on it"
+  createBindings: [PolicyBinding]
 
   "the box's workload identity issuer and how to trust it from cloud accounts"
   workloadIdentity: DevboxWorkloadIdentity

@@ -199,12 +199,7 @@ func (b *policyBuilder) add(r Rule) {
 	if r.Host == "" {
 		return
 	}
-	if r.Port == 0 {
-		r.Port = 443
-		if r.Scheme == SchemeHTTP {
-			r.Port = 80
-		}
-	}
+	r.Port = r.EffectivePort()
 	key := fmt.Sprintf("%s:%d", r.Host, r.Port)
 	if b.seen[key] {
 		return
