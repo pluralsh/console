@@ -340,6 +340,8 @@ jobs:
           build-args: |
             VERSION=${{ needs.version.outputs.version }}
             GATEWAY_SOURCE=build
+      - name: Smoke test
+        run: docker run --rm --platform linux/amd64 ghcr.io/pluralsh/devbox-gateway@${{ steps.build.outputs.digest }} -version
       - name: Cosign sign
         uses: ./.github/actions/cosign-sign
         with:

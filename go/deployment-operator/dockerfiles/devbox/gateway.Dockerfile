@@ -6,9 +6,13 @@
 #   docker build -f deployment-operator/dockerfiles/devbox/gateway.Dockerfile go
 #
 # GATEWAY_SOURCE=stub swaps in a placeholder health server for local testing.
+#
+# The runtime is distroless/base, not static: the binary links gomonty (through
+# the agent run packages), whose purego FFI makes even a CGO_ENABLED=0 build
+# dynamically linked against glibc's loader.
 
 ARG GO_IMAGE=golang:1.27.2-trixie
-ARG RUNTIME_IMAGE=gcr.io/distroless/static-debian13:nonroot
+ARG RUNTIME_IMAGE=gcr.io/distroless/base-debian13:nonroot
 ARG GATEWAY_SOURCE=build
 
 FROM --platform=${BUILDPLATFORM} ${GO_IMAGE} AS gateway-build

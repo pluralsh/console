@@ -417,6 +417,10 @@ func TestDevboxRunnerController(t *testing.T) {
 		g.Expect(env.client.Get(ctx, client.ObjectKey{Name: devboxGatewayName, Namespace: devboxTestNamespace}, deployment)).To(Succeed())
 		g.Expect(deployment.Spec.Template.Spec.Containers[0].Image).To(Equal("ghcr.io/pluralsh/devbox-gateway:" + devboxTestVersion))
 		g.Expect(deployment.Spec.Template.Spec.ServiceAccountName).To(Equal(devboxGatewayName))
+		platform := env.get(t, "platform")
+		g.Expect(deployment.GetOwnerReferences()).To(ContainElement(SatisfyAll(
+			HaveField("UID", platform.UID), HaveField("Kind", "DevboxRunner"), HaveField("Controller", BeNil()),
+		)), "the shared gateway is owned by, but not controlled by, each runner")
 		g.Expect(deployment.Spec.Template.Spec.Containers[0].Env).To(ContainElements(
 			corev1.EnvVar{Name: "CONSOLE_URL", Value: "https://console.example.com/ext/gql"},
 			corev1.EnvVar{Name: "CLUSTER_ID", Value: "cluster-id"},
@@ -887,8 +891,22 @@ func TestDevboxRunnerController(t *testing.T) {
 		pool.SetGroupVersionKind(workerPoolGVK)
 		err = env.client.Get(ctx, client.ObjectKey{Name: "devbox-platform", Namespace: devboxTestNamespace}, pool)
 		g.Expect(apierrors.IsNotFound(err)).To(BeTrue())
-		g.Expect(env.client.Get(ctx, client.ObjectKey{Name: devboxGatewayName, Namespace: devboxTestNamespace}, &appsv1.Deployment{})).
+		gateway := &appsv1.Deployment{}
+		g.Expect(env.client.Get(ctx, client.ObjectKey{Name: devboxGatewayName, Namespace: devboxTestNamespace}, gateway)).
 			To(Succeed(), "other runners still need the gateway")
+		g.Expect(lo.Map(gateway.GetOwnerReferences(), func(ref metav1.OwnerReference, _ int) string { return ref.Name })).
+			To(ContainElements("custom", "old", "scheduled", "elastic"), "every runner sharing the gateway owns it")
+		for name, obj := range map[string]client.Object{
+			devboxGatewayName:       &corev1.ServiceAccount{},
+			devboxGatewaySecretName: &corev1.Secret{},
+			devboxEgressAuthzName:   &corev1.Service{},
+		} {
+			g.Expect(env.client.Get(ctx, client.ObjectKey{Name: name, Namespace: devboxTestNamespace}, obj)).To(Succeed())
+			g.Expect(obj.GetOwnerReferences()).To(HaveLen(len(gateway.GetOwnerReferences())), "%T %s has the gateway's owners", obj, name)
+		}
+		policy := &networkingv1.NetworkPolicy{}
+		g.Expect(env.client.Get(ctx, client.ObjectKey{Name: devboxGatewayName, Namespace: devboxTestNamespace}, policy)).To(Succeed())
+		g.Expect(policy.GetOwnerReferences()).To(HaveLen(len(gateway.GetOwnerReferences())))
 	})
 
 	t.Run("deleting the last runner removes the gateway", func(t *testing.T) {

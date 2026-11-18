@@ -7,6 +7,12 @@ metadataTest:
   entrypoint: ["/devbox-gateway"]
   user: "65532:65532"
 
+commandTests:
+  - name: the binary executes
+    command: /devbox-gateway
+    args: ["-version"]
+    exitCode: 0
+
 fileExistenceTests:
   - name: devbox-gateway
     path: /devbox-gateway

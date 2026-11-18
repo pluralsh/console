@@ -65,7 +65,9 @@ func devboxGatewaySelector() map[string]string {
 
 // reconcileGateway deploys the single per-cluster devbox-gateway: ServiceAccount, env Secret, Deployment,
 // the gateway and egress-authz Services, and a NetworkPolicy admitting only atenet-egress to its ports.
-// It is shared by every DevboxRunner, so it carries no owner reference and is deleted with the last runner.
+// It is shared by every DevboxRunner, so each runner adds itself as a (non-controller) owner: garbage collection
+// drops a deleted runner's reference and removes the gateway with its last owner, even if a runner's finalizer
+// never ran. The finalizer still deletes it with the last runner, without waiting on garbage collection.
 func (r *DevboxRunnerReconciler) reconcileGateway(ctx context.Context, runner *v1alpha1.DevboxRunner) error {
 	if err := r.checkPodCertificates(); err != nil {
 		return err
@@ -80,7 +82,7 @@ func (r *DevboxRunnerReconciler) reconcileGateway(ctx context.Context, runner *v
 	if _, err := controllerutil.CreateOrPatch(ctx, r.Client, sa, func() error {
 		sa.Labels = lo.Assign(sa.Labels, devboxGatewayLabels())
 		sa.Annotations = lo.Assign(sa.Annotations, r.Config.GatewayServiceAccountAnnotations)
-		return nil
+		return r.ownGateway(runner, sa)
 	}); err != nil {
 		return fmt.Errorf("reconciling gateway ServiceAccount: %w", err)
 	}
@@ -90,7 +92,7 @@ func (r *DevboxRunnerReconciler) reconcileGateway(ctx context.Context, runner *v
 		secret.Labels = lo.Assign(secret.Labels, devboxGatewayLabels())
 		secret.Type = corev1.SecretTypeOpaque
 		secret.Data = map[string][]byte{"DEPLOY_TOKEN": []byte(r.Config.DeployToken)}
-		return nil
+		return r.ownGateway(runner, secret)
 	}); err != nil {
 		return fmt.Errorf("reconciling gateway Secret: %w", err)
 	}
@@ -113,7 +115,7 @@ func (r *DevboxRunnerReconciler) reconcileGateway(ctx context.Context, runner *v
 			svc.Labels = lo.Assign(svc.Labels, desired.Labels)
 			svc.Spec.Selector = desired.Spec.Selector
 			svc.Spec.Ports = desired.Spec.Ports
-			return nil
+			return r.ownGateway(runner, svc)
 		}); err != nil {
 			return fmt.Errorf("reconciling gateway Service %s: %w", svc.Name, err)
 		}
@@ -135,7 +137,7 @@ func (r *DevboxRunnerReconciler) reconcileGateway(ctx context.Context, runner *v
 		deployment.Spec.Replicas = lo.ToPtr(r.Config.GatewayReplicas)
 		deployment.Spec.Selector = &metav1.LabelSelector{MatchLabels: devboxGatewaySelector()}
 		deployment.Spec.Template = r.gatewayPodTemplate(checksum)
-		return nil
+		return r.ownGateway(runner, deployment)
 	}); err != nil {
 		return fmt.Errorf("reconciling gateway Deployment: %w", err)
 	}
@@ -144,7 +146,7 @@ func (r *DevboxRunnerReconciler) reconcileGateway(ctx context.Context, runner *v
 	if _, err := controllerutil.CreateOrPatch(ctx, r.Client, policy, func() error {
 		policy.Labels = lo.Assign(policy.Labels, devboxGatewayLabels())
 		policy.Spec = r.gatewayNetworkPolicySpec()
-		return nil
+		return r.ownGateway(runner, policy)
 	}); err != nil {
 		return fmt.Errorf("reconciling gateway NetworkPolicy: %w", err)
 	}
@@ -152,6 +154,11 @@ func (r *DevboxRunnerReconciler) reconcileGateway(ctx context.Context, runner *v
 	r.markGatewayReady(runner, deployment)
 	r.checkSubstrateInstall(ctx, runner)
 	return nil
+}
+
+// ownGateway adds runner to obj's owners, next to every other DevboxRunner sharing the gateway.
+func (r *DevboxRunnerReconciler) ownGateway(runner *v1alpha1.DevboxRunner, obj client.Object) error {
+	return controllerutil.SetOwnerReference(runner, obj, r.Scheme)
 }
 
 // checkPodCertificates fails unless certificates.k8s.io serves the kinds behind the gateway's projected volumes.
