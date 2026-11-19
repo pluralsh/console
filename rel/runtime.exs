@@ -69,7 +69,8 @@ if get_env("OIDC_CLIENT_ID") do
       redirect_uri: "https://#{get_env("HOST")}/oauth/callback",
       response_type: "code",
       pkce_enabled: get_env("OIDC_PKCE_ENABLED") == "true",
-      scope: get_env("OIDC_SCOPES") || "openid email"
+      scope: get_env("OIDC_SCOPES") || "openid email",
+      userinfo: get_env("OIDC_USERINFO") == "true"
     ]
 end
 
