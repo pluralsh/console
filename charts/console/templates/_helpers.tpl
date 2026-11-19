@@ -184,6 +184,15 @@ Custom CA volumes backed by chart-rendered ConfigMaps.
 {{- end -}}
 
 {{/*
+Checksum of chart-managed CA data so pods with subPath mounts restart on rotation.
+*/}}
+{{- define "console.certs.checksum" -}}
+{{- if .Values.certs -}}
+{{- .Values.certs | toYaml | sha256sum -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Agent helm values seeded from certs when console.config.agentHelmValues is unset.
 Enables spawned-workload CA injection on the deployment-operator chart.
 */}}

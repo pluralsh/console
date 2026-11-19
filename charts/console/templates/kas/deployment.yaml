@@ -18,6 +18,9 @@ spec:
     metadata:
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/kas/configmap.yaml") . | sha256sum }}
+        {{- with include "console.certs.checksum" . }}
+        checksum/certs: {{ . }}
+        {{- end }}
         cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
         {{- if and .Values.kas.metrics.enabled (not .Values.kas.metrics.serviceMonitor.enabled) }}
         prometheus.io/scrape: "true"

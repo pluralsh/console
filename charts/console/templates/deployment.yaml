@@ -32,6 +32,9 @@ spec:
         prometheus.io/path: "/metrics"
         prometheus.io/port: "9090"
         checksum/config: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
+        {{- with include "console.certs.checksum" . }}
+        checksum/certs: {{ . }}
+        {{- end }}
 
     spec:
       serviceAccountName: console

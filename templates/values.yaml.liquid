@@ -3,7 +3,7 @@ certs:
   - name: ca-bundle
     file: ca-certificates.crt
     data: |
-{{ configuration.privateCaPem }}
+{{ configuration.privateCaPem | trim | indent: 6 }}
 {% endif %}
 
 ingress:

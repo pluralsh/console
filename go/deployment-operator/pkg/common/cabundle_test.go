@@ -14,7 +14,6 @@ func TestApplySpawnedCAToPodSpec(t *testing.T) {
 		Enabled:   true,
 		ConfigMap: "plural-ca-bundle",
 		Key:       "ca-certificates.crt",
-		PEM:       []byte("pem"),
 	})
 	t.Cleanup(func() {
 		SetSpawnedCAConfigForTest(SpawnedCAConfig{})
@@ -49,7 +48,34 @@ func TestApplySpawnedCAToPodSpec(t *testing.T) {
 	require.Len(t, spec.Containers[0].VolumeMounts, 1)
 }
 
-func TestLoadSpawnedCAConfigReadsPEM(t *testing.T) {
+func TestApplySpawnedCAToPodSpecSkipsExistingMountPath(t *testing.T) {
+	SetSpawnedCAConfigForTest(SpawnedCAConfig{
+		Enabled:   true,
+		ConfigMap: "plural-ca-bundle",
+		Key:       "ca-certificates.crt",
+	})
+	t.Cleanup(func() {
+		SetSpawnedCAConfigForTest(SpawnedCAConfig{})
+	})
+
+	spec := &corev1.PodSpec{
+		Containers: []corev1.Container{{
+			Name: "default",
+			VolumeMounts: []corev1.VolumeMount{{
+				Name:      "manual-ca",
+				MountPath: "/etc/ssl/certs/ca-certificates.crt",
+				SubPath:   "ca-certificates.crt",
+				ReadOnly:  true,
+			}},
+		}},
+	}
+
+	ApplySpawnedCAToPodSpec(spec)
+	require.Len(t, spec.Containers[0].VolumeMounts, 1)
+	require.Equal(t, "manual-ca", spec.Containers[0].VolumeMounts[0].Name)
+}
+
+func TestLoadSpawnedCAConfigReadsSettings(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "ca-certificates.crt")
 	require.NoError(t, os.WriteFile(path, []byte("-----BEGIN CERTIFICATE-----\nX\n-----END CERTIFICATE-----\n"), 0o644))
@@ -61,5 +87,18 @@ func TestLoadSpawnedCAConfigReadsPEM(t *testing.T) {
 	cfg := loadSpawnedCAConfig()
 	require.True(t, cfg.Enabled)
 	require.Equal(t, "custom-bundle", cfg.ConfigMap)
-	require.Contains(t, string(cfg.PEM), "BEGIN CERTIFICATE")
+	require.Equal(t, path, cfg.SourceFile)
+
+	pem, err := readSpawnedCAPEM(cfg)
+	require.NoError(t, err)
+	require.Contains(t, string(pem), "BEGIN CERTIFICATE")
+}
+
+func TestReadSpawnedCAPEMReportsMissingFile(t *testing.T) {
+	_, err := readSpawnedCAPEM(SpawnedCAConfig{
+		Enabled:    true,
+		SourceFile: "/tmp/does-not-exist-plural-ca.crt",
+		Key:        DefaultSpawnedCAKey,
+	})
+	require.Error(t, err)
 }

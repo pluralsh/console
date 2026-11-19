@@ -23,6 +23,10 @@ const (
 	DefaultSpawnedCASourceFile = "/etc/ssl/certs/ca-certificates.crt"
 	DefaultSpawnedCAKey        = "ca-certificates.crt"
 	SpawnedCAVolumeName        = "plural-ca-bundle"
+	SpawnedCAManagedByLabel    = "app.kubernetes.io/managed-by"
+	SpawnedCAManagedByValue    = "deployment-operator"
+	SpawnedCAComponentLabel    = "app.kubernetes.io/component"
+	SpawnedCAComponentValue    = "ca-bundle"
 )
 
 var (
@@ -38,11 +42,11 @@ type SpawnedCAConfig struct {
 	ConfigMap  string
 	SourceFile string
 	Key        string
-	PEM        []byte
+	loadErr    error
 }
 
-// GetSpawnedCAConfig returns the process-wide spawned CA configuration, loading
-// PEM from the operator filesystem once when enabled.
+// GetSpawnedCAConfig returns the process-wide spawned CA settings (without PEM).
+// PEM bytes are always re-read from SourceFile so rotated mounts take effect.
 func GetSpawnedCAConfig() SpawnedCAConfig {
 	spawnedCAMu.RLock()
 	if spawnedCALoaded {
@@ -70,23 +74,12 @@ func SetSpawnedCAConfigForTest(cfg SpawnedCAConfig) {
 }
 
 func loadSpawnedCAConfig() SpawnedCAConfig {
-	cfg := SpawnedCAConfig{
+	return SpawnedCAConfig{
 		Enabled:    os.Getenv(EnvSpawnedCAEnabled) == "true",
 		ConfigMap:  envOr(EnvSpawnedCAConfigMap, DefaultSpawnedCAConfigMap),
 		SourceFile: envOr(EnvSpawnedCASourceFile, DefaultSpawnedCASourceFile),
 		Key:        envOr(EnvSpawnedCAKey, DefaultSpawnedCAKey),
 	}
-	if !cfg.Enabled {
-		return cfg
-	}
-
-	pem, err := os.ReadFile(cfg.SourceFile)
-	if err != nil || len(pem) == 0 {
-		cfg.Enabled = false
-		return cfg
-	}
-	cfg.PEM = pem
-	return cfg
 }
 
 func envOr(key, fallback string) string {
@@ -96,6 +89,28 @@ func envOr(key, fallback string) string {
 	return fallback
 }
 
+func readSpawnedCAPEM(cfg SpawnedCAConfig) ([]byte, error) {
+	if cfg.loadErr != nil {
+		return nil, cfg.loadErr
+	}
+	pem, err := os.ReadFile(cfg.SourceFile)
+	if err != nil {
+		return nil, fmt.Errorf("read spawned CA source %q: %w", cfg.SourceFile, err)
+	}
+	if len(pem) == 0 {
+		return nil, fmt.Errorf("spawned CA source %q is empty", cfg.SourceFile)
+	}
+	return pem, nil
+}
+
+func isOperatorManagedCAConfigMap(cm *corev1.ConfigMap) bool {
+	if cm.Labels == nil {
+		return false
+	}
+	return cm.Labels[SpawnedCAManagedByLabel] == SpawnedCAManagedByValue &&
+		cm.Labels[SpawnedCAComponentLabel] == SpawnedCAComponentValue
+}
+
 // EnsureSpawnedCAConfigMap creates or updates the CA ConfigMap in namespace.
 func EnsureSpawnedCAConfigMap(ctx context.Context, c client.Client, namespace string) error {
 	cfg := GetSpawnedCAConfig()
@@ -103,24 +118,30 @@ func EnsureSpawnedCAConfigMap(ctx context.Context, c client.Client, namespace st
 		return nil
 	}
 
-	desired := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      cfg.ConfigMap,
-			Namespace: namespace,
-			Labels: map[string]string{
-				"app.kubernetes.io/name":       "deployment-operator",
-				"app.kubernetes.io/managed-by": "deployment-operator",
-				"app.kubernetes.io/component":  "ca-bundle",
-			},
-		},
-		Data: map[string]string{
-			cfg.Key: string(cfg.PEM),
-		},
+	pem, err := readSpawnedCAPEM(cfg)
+	if err != nil {
+		return err
+	}
+
+	desiredLabels := map[string]string{
+		"app.kubernetes.io/name": SpawnedCAManagedByValue,
+		SpawnedCAManagedByLabel:  SpawnedCAManagedByValue,
+		SpawnedCAComponentLabel:  SpawnedCAComponentValue,
 	}
 
 	existing := &corev1.ConfigMap{}
-	err := c.Get(ctx, client.ObjectKey{Name: cfg.ConfigMap, Namespace: namespace}, existing)
+	err = c.Get(ctx, client.ObjectKey{Name: cfg.ConfigMap, Namespace: namespace}, existing)
 	if apierrors.IsNotFound(err) {
+		desired := &corev1.ConfigMap{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      cfg.ConfigMap,
+				Namespace: namespace,
+				Labels:    desiredLabels,
+			},
+			Data: map[string]string{
+				cfg.Key: string(pem),
+			},
+		}
 		if err := c.Create(ctx, desired); err != nil {
 			return fmt.Errorf("create spawned CA configmap: %w", err)
 		}
@@ -130,14 +151,21 @@ func EnsureSpawnedCAConfigMap(ctx context.Context, c client.Client, namespace st
 		return fmt.Errorf("get spawned CA configmap: %w", err)
 	}
 
-	if existing.Data != nil && existing.Data[cfg.Key] == string(cfg.PEM) {
+	if !isOperatorManagedCAConfigMap(existing) {
+		return fmt.Errorf("configmap %s/%s exists but is not managed by deployment-operator; refuse to overwrite", namespace, cfg.ConfigMap)
+	}
+
+	if existing.Data != nil && existing.Data[cfg.Key] == string(pem) {
 		return nil
 	}
-	existing.Data = desired.Data
+	if existing.Data == nil {
+		existing.Data = map[string]string{}
+	}
+	existing.Data[cfg.Key] = string(pem)
 	if existing.Labels == nil {
 		existing.Labels = map[string]string{}
 	}
-	for k, v := range desired.Labels {
+	for k, v := range desiredLabels {
 		existing.Labels[k] = v
 	}
 	if err := c.Update(ctx, existing); err != nil {
@@ -154,9 +182,10 @@ func ApplySpawnedCAToPodSpec(spec *corev1.PodSpec) {
 		return
 	}
 
+	mountPath := "/etc/ssl/certs/" + cfg.Key
 	mount := corev1.VolumeMount{
 		Name:      SpawnedCAVolumeName,
-		MountPath: "/etc/ssl/certs/" + cfg.Key,
+		MountPath: mountPath,
 		SubPath:   cfg.Key,
 		ReadOnly:  true,
 	}
@@ -189,7 +218,7 @@ func ensureSpawnedCAVolume(volumes []corev1.Volume, cfg SpawnedCAConfig) []corev
 
 func ensureSpawnedCAMount(mounts []corev1.VolumeMount, mount corev1.VolumeMount) []corev1.VolumeMount {
 	for _, m := range mounts {
-		if m.Name == SpawnedCAVolumeName {
+		if m.Name == SpawnedCAVolumeName || m.MountPath == mount.MountPath {
 			return mounts
 		}
 	}
