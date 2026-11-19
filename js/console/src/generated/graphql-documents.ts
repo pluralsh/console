@@ -3536,6 +3536,7 @@ export const DevboxTinyFragmentDoc = /*#__PURE__*/ gql`
   resolvedImage
   templateRevision
   browser
+  resources
   maxInstances
   lastHeartbeatAt
   autonomy {

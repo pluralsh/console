@@ -8,29 +8,25 @@ import {
 } from '@pluralsh/design-system'
 import { useThrottle } from 'components/hooks/useThrottle'
 import { GqlError } from 'components/utils/Alert'
-import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
-import { useAttachDevboxMutation, useDevboxesQuery } from 'generated/graphql'
+import { DevboxTinyFragment, useDevboxesQuery } from 'generated/graphql'
 import { useState } from 'react'
 import { mapExistingNodes } from 'utils/graphql'
 import { DevboxStatusChip } from './DevboxChips'
-import { agentLabel } from './devboxStartForm'
+import { devboxSizing } from './devboxSizing'
 
 export function DevboxAttachModal({
   open,
   onClose,
-  workbenchId,
   attachedIds,
-  onAttached,
+  onAttach,
 }: {
   open: boolean
   onClose: () => void
-  workbenchId: string
   attachedIds: string[]
-  onAttached: () => void
+  onAttach: (box: DevboxTinyFragment) => void
 }) {
-  const { popToast } = useSimpleToast()
   const [q, setQ] = useState('')
   const query = useThrottle(q, 300)
   const { data, loading, error } = useDevboxesQuery({
@@ -38,16 +34,6 @@ export function DevboxAttachModal({
     skip: !open,
     fetchPolicy: 'cache-and-network',
   })
-  const [attach, { loading: attaching, error: attachError }] =
-    useAttachDevboxMutation({
-      onCompleted: ({ attachDevbox }) => {
-        onAttached()
-        popToast({
-          content: `${attachDevbox?.name ?? 'Box'} attached`,
-          severity: 'success',
-        })
-      },
-    })
   const boxes = mapExistingNodes(data?.devboxes).filter(
     ({ id }) => !attachedIds.includes(id)
   )
@@ -56,7 +42,7 @@ export function DevboxAttachModal({
     <Modal
       open={open}
       onClose={onClose}
-      header="Attach a box"
+      header="Attach a devbox"
       size="large"
       actions={
         <Button
@@ -73,12 +59,11 @@ export function DevboxAttachModal({
       >
         <Input
           startIcon={<SearchIcon />}
-          placeholder="Search boxes"
+          placeholder="Search devboxes"
           value={q}
           onChange={(e) => setQ(e.currentTarget.value)}
         />
         {error && <GqlError error={error} />}
-        {attachError && <GqlError error={attachError} />}
         {!data && loading ? (
           <RectangleSkeleton
             $height={80}
@@ -86,7 +71,7 @@ export function DevboxAttachModal({
           />
         ) : !boxes.length ? (
           <CaptionP $color="text-xlight">
-            No other boxes found. Boxes are registered by applying a
+            No other devboxes found. They're registered by applying a
             DevboxRunner in a cluster with Agent Substrate installed.
           </CaptionP>
         ) : (
@@ -112,19 +97,14 @@ export function DevboxAttachModal({
                     <DevboxStatusChip status={box.status} />
                   </Flex>
                   <CaptionP $color="text-xlight">
-                    {box.cluster?.name}
-                    {' · '}
-                    {(box.agents ?? [])
-                      .map((a) => agentLabel(a?.type))
-                      .join(', ')}
+                    {[devboxSizing(box.resources), box.cluster?.name]
+                      .filter(Boolean)
+                      .join(' · ')}
                   </CaptionP>
                 </Flex>
                 <Button
                   small
-                  loading={attaching}
-                  onClick={() =>
-                    attach({ variables: { workbenchId, devboxId: box.id } })
-                  }
+                  onClick={() => onAttach(box)}
                 >
                   Attach
                 </Button>

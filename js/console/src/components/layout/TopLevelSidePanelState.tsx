@@ -77,7 +77,13 @@ type TopLevelSidePanelContextT = {
   closeSidePanel: (panel: SidePanel) => void
   widthOverride: SidePanelWidthOverride | null
   setWidthOverride: (override: SidePanelWidthOverride | null) => void
+  // the tab a panel shows, set from the page too (e.g. its collapsed rail),
+  // as panels render outside the page's tree. `key` scopes it to an entity
+  panelTabs: Partial<Record<SidePanel, SidePanelTab>>
+  setPanelTab: (panel: SidePanel, tab: SidePanelTab) => void
 }
+
+export type SidePanelTab = { tab: string; key?: Nullable<string> }
 
 const TopLevelSidePanelContext = createContext<TopLevelSidePanelContextT>({
   sidePanel: null,
@@ -85,6 +91,8 @@ const TopLevelSidePanelContext = createContext<TopLevelSidePanelContextT>({
   closeSidePanel: () => {},
   widthOverride: null,
   setWidthOverride: () => {},
+  panelTabs: {},
+  setPanelTab: () => {},
 })
 
 export function useTopLevelSidePanel() {
@@ -170,6 +178,15 @@ export function TopLevelSidePanelProvider({
     []
   )
 
+  const [panelTabs, setPanelTabs] = useState<
+    Partial<Record<SidePanel, SidePanelTab>>
+  >({})
+  const setPanelTab = useCallback(
+    (panel: SidePanel, tab: SidePanelTab) =>
+      setPanelTabs((tabs) => ({ ...tabs, [panel]: tab })),
+    []
+  )
+
   const ctx = useMemo(
     () => ({
       sidePanel,
@@ -177,8 +194,10 @@ export function TopLevelSidePanelProvider({
       closeSidePanel,
       widthOverride,
       setWidthOverride,
+      panelTabs,
+      setPanelTab,
     }),
-    [sidePanel, closeSidePanel, widthOverride]
+    [sidePanel, closeSidePanel, widthOverride, panelTabs, setPanelTab]
   )
 
   return (

@@ -211,6 +211,10 @@ defmodule Console.Schema.DevboxInstance do
     from(i in query, where: i.status not in ^@terminal)
   end
 
+  def names(query \\ __MODULE__) do
+    from(i in query, select: i.name)
+  end
+
   def suspended_before(query \\ __MODULE__, ts) do
     from(i in query, where: i.status == ^:suspended and i.suspended_at < ^ts)
   end

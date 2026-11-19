@@ -5,13 +5,13 @@ import {
   CircleDashIcon,
   Flex,
   IconFrame,
-  SidePanelOpenIcon,
   SpinnerAlt,
   Toast,
   TrashCanIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { SimpleAccordion } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
+import { PanelRail } from 'components/layout/PanelRail'
 import { GqlError } from 'components/utils/Alert'
 import { prettifyPrompt } from 'components/utils/contentEditableChips'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders.tsx'
@@ -50,7 +50,11 @@ import { AIAgentRunLocalButton } from './AIAgentRunLocalButton.tsx'
 import { AIAgentRunMessages } from './AIAgentRunMessages.tsx'
 import { AIAgentRunShareButton } from './AIAgentRunShareButton.tsx'
 import { AgentRunMetadata } from './AIAgentRunSidecar.tsx'
-import { useAgentRunPanel } from './AgentRunPanel.tsx'
+import {
+  AGENT_RUN_PANEL_TAB_ICONS,
+  getAgentRunPanelTabs,
+  useAgentRunPanel,
+} from './AgentRunPanel.tsx'
 import { hasAgentRunPanelContent } from './agentRunPanelUtils.ts'
 
 const TERMINAL_AGENT_RUN_STATUSES = new Set<AgentRunStatus>([
@@ -242,12 +246,14 @@ export function AIAgentRun() {
           </Flex>
         </WrapperSC>
         {showSidePanel && !isOpen && (
-          <PanelOpenBtnSC
-            tertiary
-            onClick={() => setOpen(true)}
-          >
-            <SidePanelOpenIcon />
-          </PanelOpenBtnSC>
+          <PanelRail
+            tabs={getAgentRunPanelTabs(run).map((tab) => ({
+              key: tab,
+              label: tab,
+              icon: AGENT_RUN_PANEL_TAB_ICONS[tab](16),
+            }))}
+            onOpen={(tab) => setOpen(true, tab)}
+          />
         )}
       </StretchedFlex>
       <Toast
@@ -442,11 +448,6 @@ function agentRunRepromptPlaceholder(status: AgentRunStatus) {
       return 'Send an additional message to this agent run.'
   }
 }
-
-const PanelOpenBtnSC = styled(Button)(({ theme }) => ({
-  height: '100%',
-  borderLeft: theme.borders.default,
-}))
 
 const RepromptInputWrapperSC = styled.div(({ theme }) => ({
   display: 'flex',

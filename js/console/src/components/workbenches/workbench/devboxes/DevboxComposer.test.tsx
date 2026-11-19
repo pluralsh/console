@@ -21,6 +21,7 @@ import {
   matchSlashCommands,
   slashCommandHint,
 } from './devboxSlashCommands'
+import { getMentionQuery } from './devboxFileMentions'
 
 const commands = [
   {
@@ -132,6 +133,52 @@ describe('DevboxComposer slash autocomplete', () => {
     renderComposer({ running: true, onCancel })
     fireEvent.click(screen.getByRole('button', { name: 'Stop' }))
     expect(onCancel).toHaveBeenCalled()
+  })
+})
+
+describe('DevboxComposer file mentions', () => {
+  const home = [
+    { path: '/home/devbox/src', name: 'src', type: 'directory' },
+    { path: '/home/devbox/README.md', name: 'README.md', type: 'file' },
+    { path: '/home/devbox/.bashrc', name: '.bashrc', type: 'file' },
+  ]
+  const src = [
+    { path: '/home/devbox/src/main.go', name: 'main.go', type: 'file' },
+  ]
+  const listFiles = vi.fn(async (path: string) =>
+    path === '~' ? home : path === 'src' ? src : []
+  )
+
+  it('browses directories and inserts absolute file paths', async () => {
+    const { prompt } = renderComposer({ listFiles })
+    type(prompt, 'look at @')
+    const files = await screen.findByRole('listbox', { name: 'Files' })
+    expect(
+      within(files)
+        .getAllByRole('option')
+        .map((o) => o.textContent)
+    ).toEqual(['src//home/devbox/src', 'README.md/home/devbox/README.md'])
+
+    fireEvent.keyDown(prompt, { key: 'Enter' })
+    expect((prompt as HTMLTextAreaElement).value).toBe('look at @src/')
+    expect(listFiles).toHaveBeenLastCalledWith('src')
+
+    await screen.findByText('main.go')
+    fireEvent.keyDown(prompt, { key: 'Tab' })
+    expect((prompt as HTMLTextAreaElement).value).toBe(
+      'look at @/home/devbox/src/main.go '
+    )
+    expect(screen.queryByRole('listbox')).toBeNull()
+  })
+
+  it('only completes @ at a word start', () => {
+    expect(getMentionQuery('mail me@x')).toBeNull()
+    expect(getMentionQuery('@src/ma')).toEqual({
+      start: 0,
+      end: 7,
+      dir: 'src/',
+      leaf: 'ma',
+    })
   })
 })
 

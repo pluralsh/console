@@ -13,6 +13,7 @@ import {
   defaultStartValues,
   dropProxyAuto,
   hasStartErrors,
+  modelDisplayName,
   reconcileStartValues,
   toInstanceAttributes,
   validateStartValues,
@@ -163,5 +164,46 @@ describe('devbox start form', () => {
         { agent: DevboxAgentType.Codex, billing: DevboxBillingMode.Proxy },
       ],
     })
+  })
+})
+
+describe('modelDisplayName', () => {
+  it('resolves an alias to the model it points at', () => {
+    expect(
+      modelDisplayName({
+        id: 'default',
+        name: 'Default (recommended)',
+        description: 'Opus 4.5 · Most capable for complex work',
+      })
+    ).toBe('Opus 4.5')
+    expect(
+      modelDisplayName({
+        id: 'default',
+        name: 'Default (recommended)',
+        description: 'Use the default model (currently Sonnet 4.5) · $3/$15',
+      })
+    ).toBe('Sonnet 4.5')
+  })
+
+  it('adds the version a named model describes', () => {
+    expect(
+      modelDisplayName({
+        id: 'sonnet',
+        name: 'Sonnet',
+        description: 'Sonnet 4.5 · Best for everyday tasks',
+      })
+    ).toBe('Sonnet 4.5')
+  })
+
+  it('keeps names it cannot resolve', () => {
+    expect(modelDisplayName({ id: 'gpt-5', name: 'GPT-5' })).toBe('GPT-5')
+    expect(modelDisplayName({ id: 'default', name: 'Default' })).toBe('Default')
+    expect(
+      modelDisplayName({
+        id: 'opus',
+        name: 'Opus',
+        description: 'For the hardest problems',
+      })
+    ).toBe('Opus')
   })
 })

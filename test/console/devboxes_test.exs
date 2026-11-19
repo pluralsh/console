@@ -203,8 +203,17 @@ defmodule Console.DevboxesTest do
       assert inst.requested_model == "sonnet"
       assert inst.user_id == user.id
       assert inst.template_revision == devbox.template_revision
+      assert inst.name =~ ~r/^[a-z]+-[a-z]+$/
       assert_receive {:event, %Console.PubSub.DevboxInstanceCreated{item: %{id: id}}}
       assert id == inst.id
+    end
+
+    test "it keeps a name the user gives", %{user: user, workbench: wb, devbox: devbox} do
+      expect(Control.Test, :create_instance, fn _, _ -> :ok end)
+
+      {:ok, inst} = Devboxes.create_instance(%{devbox_id: devbox.id, name: "my-box"}, wb.id, user)
+
+      assert inst.name == "my-box"
     end
 
     test "it validates the agent, model and config options", %{user: user, workbench: wb, devbox: devbox} do

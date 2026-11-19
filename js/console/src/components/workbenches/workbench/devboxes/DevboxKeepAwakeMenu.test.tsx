@@ -1,5 +1,11 @@
 import { styledThemeDark } from '@pluralsh/design-system'
-import { fireEvent, render, screen } from '@testing-library/react'
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react'
 import dayjs from 'dayjs'
 import { ThemeProvider } from 'styled-components'
 import { describe, expect, it, vi } from 'vitest'
@@ -30,12 +36,14 @@ function renderMenu(
   return { onKeepAwake, onCancel }
 }
 
-const items = () => screen.getAllByRole('menuitem')
+const items = () => screen.getAllByRole('option')
+const openMenu = (name: RegExp) =>
+  fireEvent.click(screen.getByRole('button', { name }))
 
 describe('DevboxKeepAwakeMenu', () => {
-  it('offers presets capped at the max deferral', () => {
+  it('offers presets capped at the max deferral', async () => {
     const { onKeepAwake } = renderMenu(null)
-    fireEvent.click(screen.getByRole('button', { name: /Keep awake/ }))
+    openMenu(/Keep awake/)
     expect(items().map((i) => i.textContent)).toEqual([
       '30 minutesuntil 10:30 AM',
       '1 houruntil 11:00 AM',
@@ -45,38 +53,37 @@ describe('DevboxKeepAwakeMenu', () => {
     ])
     fireEvent.click(items()[1])
     expect(onKeepAwake).toHaveBeenCalledWith(new Date('2026-11-14T11:00:00'))
-    expect(screen.queryByRole('menu')).toBeNull()
+    await waitFor(() => expect(screen.queryByRole('listbox')).toBeNull())
   })
 
-  it('extends from the current deferral and can cancel it', () => {
+  it('extends from the current deferral and can cancel it', async () => {
     const { onKeepAwake, onCancel } = renderMenu('2026-11-14T11:00:00')
-    fireEvent.click(screen.getByRole('button', { name: /Kept awake/ }))
+    openMenu(/Kept awake/)
     expect(screen.getByText('Until 11:00 AM; extend by')).toBeTruthy()
-    fireEvent.click(screen.getByRole('menuitem', { name: /30 minutes/ }))
+    fireEvent.click(screen.getByRole('option', { name: /30 minutes/ }))
     expect(onKeepAwake).toHaveBeenCalledWith(new Date('2026-11-14T11:30:00'))
 
-    fireEvent.click(screen.getByRole('button', { name: /Kept awake/ }))
+    await waitFor(() => expect(screen.queryByRole('listbox')).toBeNull())
+    openMenu(/Kept awake/)
     fireEvent.click(
-      screen.getByRole('menuitem', { name: 'Let it sleep when idle' })
+      screen.getByRole('option', { name: 'Let it sleep when idle' })
     )
     expect(onCancel).toHaveBeenCalled()
   })
 
   it('clamps a custom time and rejects past times', () => {
     const { onKeepAwake } = renderMenu(null)
-    fireEvent.click(screen.getByRole('button', { name: /Keep awake/ }))
-    fireEvent.click(screen.getByRole('menuitem', { name: 'Custom…' }))
-    const input = screen.getByLabelText('Keep awake until')
+    openMenu(/Keep awake/)
+    fireEvent.click(screen.getByRole('option', { name: 'Custom…' }))
+    const dialog = screen.getByRole('dialog')
+    const input = within(dialog).getByLabelText('Keep awake until')
 
     fireEvent.change(input, { target: { value: '2026-11-14T09:00' } })
     expect(screen.getByText('Pick a time in the future')).toBeTruthy()
 
     fireEvent.change(input, { target: { value: '2026-11-14T20:00' } })
     expect(screen.getByText(/Capped at Nov 14, 2:00 PM/)).toBeTruthy()
-    const submit = screen
-      .getAllByRole('button', { name: 'Keep awake' })
-      .find((b) => !b.hasAttribute('aria-haspopup'))
-    fireEvent.click(submit!)
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Keep awake' }))
     expect(onKeepAwake).toHaveBeenCalledWith(new Date('2026-11-14T14:00:00'))
   })
 })

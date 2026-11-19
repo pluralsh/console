@@ -26,9 +26,10 @@ import { DevboxComposer } from './DevboxComposer'
 import { describeThreadError } from './devboxErrors'
 import { isInstanceLive } from './devboxIdle'
 import { DevboxInteractionCard } from './DevboxInteractionCard'
-import { findAgent } from './devboxStartForm'
+import { findAgent, isProxyBilled } from './devboxStartForm'
 import { selectOrderedEntities, selectTerminalOutput } from './devboxTimeline'
 import { DevboxTranscript } from './DevboxTranscript'
+import { useDevboxWorkspaceApi } from './devboxWorkspaceApi'
 import { DevboxTimelineStoreApi } from './useDevboxTimeline'
 
 export function DevboxThreadPane({
@@ -99,6 +100,7 @@ export function DevboxThreadPane({
     thread.status === DevboxThreadStatus.Closed ||
     thread.status === DevboxThreadStatus.Deleted
   const subagent = thread.kind === DevboxThreadKind.Subagent
+  const { listFiles } = useDevboxWorkspaceApi(live ? instance.id : null)
 
   const sessionError = sessionId ? timeline.errors[sessionId] : undefined
 
@@ -151,6 +153,9 @@ export function DevboxThreadPane({
         <DevboxComposer
           commands={commands}
           configOptions={thread.configOptions}
+          autonomyPolicy={instance.devbox?.autonomy}
+          proxyBilled={isProxyBilled(instance, thread.agent)}
+          listFiles={listFiles}
           modelSwitchable={agent?.modelSwitchable !== false}
           running={thread.foregroundState === DevboxForegroundState.Running}
           disabled={closed || !live}

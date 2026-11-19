@@ -87,6 +87,38 @@ export function modelsOf(agent: Nullable<DevboxAgentFragment>) {
     }))
 }
 
+// agents list aliases like Claude Code's "Default (recommended)", whose
+// description leads with the model it resolves to, e.g. "Opus 4.5 · Most capable"
+export function modelDisplayName(model: {
+  id: string
+  name?: Nullable<string>
+  description?: Nullable<string>
+}) {
+  const name = model.name || model.id
+  const description = model.description ?? ''
+  const resolved = (
+    description.match(/currently ([^)]+)\)/i)?.[1] ??
+    description.split(' · ')[0]
+  ).trim()
+  const alias = /^default\b/i.test(name)
+  const usable = !!resolved && resolved.length <= 32
+  if (
+    usable &&
+    (alias || resolved.toLowerCase().startsWith(name.toLowerCase()))
+  )
+    return resolved
+  return alias ? name.replace(/\s*\(recommended\)\s*$/i, '') : name
+}
+
+export function modelDisplayNameOf(
+  agent: Nullable<DevboxAgentFragment>,
+  id: Nullable<string>
+) {
+  if (!id) return null
+  const model = modelsOf(agent).find((m) => m.id === id)
+  return model ? modelDisplayName(model) : id
+}
+
 export function defaultModelOf(agent: Nullable<DevboxAgentFragment>) {
   const models = modelsOf(agent)
   const preferred = [
@@ -200,6 +232,27 @@ export function billedToProxy(
   return (
     (values.billing[values.agent] ?? defaults?.[values.agent] ?? 'proxy') ===
     'proxy'
+  )
+}
+
+// whether a running instance's agent bills to the AI proxy, where its own reviewer can't run, so auto needs the
+// box's decision model to review instead
+export function isProxyBilled(
+  instance: {
+    devbox?: Nullable<{ decisionReview?: Nullable<unknown> }>
+    agentBilling?: Nullable<
+      Nullable<{
+        agent?: Nullable<DevboxAgentType>
+        billing?: Nullable<DevboxBillingMode>
+      }>[]
+    >
+  },
+  agent: Nullable<DevboxAgentType>
+): boolean {
+  return (
+    !instance.devbox?.decisionReview &&
+    (instance.agentBilling ?? []).find((b) => b?.agent === agent)?.billing !==
+      DevboxBillingMode.Subscription
   )
 }
 

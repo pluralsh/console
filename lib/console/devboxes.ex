@@ -9,7 +9,7 @@ defmodule Console.Devboxes do
   require Logger
   alias Console.PubSub
   alias Console.Deployments.{Git, Workbenches}
-  alias Console.Devboxes.{Billing, Control, Credentials, Error}
+  alias Console.Devboxes.{Billing, Control, Credentials, Error, Names}
   alias Console.WorkloadIdentity
   alias Console.Services.Users
   alias Console.WorkloadIdentity.Scopes.Devboxes, as: DevboxScope
@@ -193,7 +193,7 @@ defmodule Console.Devboxes do
     |> add_operation(:instance, fn %{devbox: devbox, snapshot: snapshot, catalog: catalog, repositories: repos, billing: billing} ->
       %DevboxInstance{workbench_id: workbench_id, devbox_id: devbox.id, user_id: user_id}
       |> DevboxInstance.changeset(%{
-        name: attrs[:name],
+        name: instance_name(attrs[:name], workbench_id),
         agent: catalog.agent,
         requested_model: catalog.model,
         config_options: catalog.config_options,
@@ -219,6 +219,15 @@ defmodule Console.Devboxes do
     end)
     |> execute(extract: :instance)
     |> notify(:create)
+  end
+
+  defp instance_name(name, _) when is_binary(name) and byte_size(name) > 0, do: name
+  defp instance_name(_, workbench_id) do
+    DevboxInstance.for_workbench(workbench_id)
+    |> DevboxInstance.live()
+    |> DevboxInstance.names()
+    |> Repo.all()
+    |> Names.generate()
   end
 
   defp instance_snapshot(nil, _), do: {:ok, nil}

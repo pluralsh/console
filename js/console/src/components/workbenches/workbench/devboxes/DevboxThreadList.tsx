@@ -1,27 +1,24 @@
 import {
   BotIcon,
   Button,
-  Checkbox,
   Chip,
   Flex,
-  FormField,
   Input,
   ListBoxItem,
   Modal,
-  PlusIcon,
-  Select,
 } from '@pluralsh/design-system'
+import { ApolloError } from '@apollo/client'
 import { GqlError } from 'components/utils/Alert'
 import { Confirm } from 'components/utils/Confirm'
 import { MoreMenu } from 'components/utils/MoreMenu'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
+import { TRUNCATE } from 'components/utils/truncate'
 import { CaptionP } from 'components/utils/typography/Text'
 import {
   DevboxAgentType,
   DevboxInstanceFragment,
   DevboxThreadFragment,
   useCloseDevboxThreadMutation,
-  useCreateDevboxThreadMutation,
   useDeleteDevboxThreadMutation,
   useDevboxImportableSessionsQuery,
   useForkDevboxThreadMutation,
@@ -29,27 +26,17 @@ import {
   useRenameDevboxThreadMutation,
   useResumeDevboxThreadMutation,
 } from 'generated/graphql'
-import { ApolloError } from '@apollo/client'
 import { useState } from 'react'
 import styled from 'styled-components'
 import { fromNow } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
 import { isUnsupportedError } from './devboxErrors'
+import { agentLabel } from './devboxStartForm'
 import {
-  agentLabel,
-  agentsOf,
-  defaultModelOf,
-  findAgent,
-  modelsOf,
-} from './devboxStartForm'
-import {
-  ALL_REPOSITORIES_CWD,
   availableThreadActions,
   buildThreadTree,
-  canImportSessions,
   capabilitiesFor,
   DevboxThreadAction,
-  repoCwd,
   threadState,
   threadTitle,
 } from './devboxThreads'
@@ -62,24 +49,32 @@ const STATE_SEVERITY = {
   closed: 'neutral',
 } as const
 
-export function DevboxThreadsSidebar({
+const ACTION_LABELS: Record<DevboxThreadAction, string> = {
+  rename: 'Rename',
+  fork: 'Fork',
+  close: 'Close',
+  resume: 'Resume',
+  delete: 'Delete',
+}
+
+export function DevboxThreadList({
   instance,
   selectedThreadId,
   onSelect,
-  unread,
   disabled,
 }: {
   instance: DevboxInstanceFragment
   selectedThreadId: Nullable<string>
   onSelect: (threadId: string) => void
-  unread: ReadonlySet<string>
   disabled?: boolean
 }) {
   const { popToast } = useSimpleToast()
   const agents = instance.devbox?.agents
   const tree = buildThreadTree(instance.threads)
-  const [newOpen, setNewOpen] = useState(false)
-  const [importOpen, setImportOpen] = useState(false)
+  const unread = useUnreadThreads(
+    (instance.threads ?? []).filter(isNonNullable),
+    selectedThreadId
+  )
   const [renaming, setRenaming] = useState<Nullable<DevboxThreadFragment>>(null)
   const [deleting, setDeleting] = useState<Nullable<DevboxThreadFragment>>(null)
   // per agent: actions that came back UNSUPPORTED at runtime
@@ -130,41 +125,11 @@ export function DevboxThreadsSidebar({
     }
   }
 
+  if (!tree.length)
+    return <EmptySC $color="text-xlight">No threads yet</EmptySC>
+
   return (
-    <SidebarSC>
-      <Flex
-        justify="space-between"
-        align="center"
-        gap="xsmall"
-      >
-        <CaptionP $color="text-light">Threads</CaptionP>
-        <Flex gap="xxsmall">
-          {canImportSessions(agents) && (
-            <Button
-              small
-              tertiary
-              disabled={disabled}
-              onClick={() => setImportOpen(true)}
-            >
-              Import
-            </Button>
-          )}
-          <Button
-            small
-            secondary
-            startIcon={<PlusIcon />}
-            disabled={disabled}
-            onClick={() => setNewOpen(true)}
-          >
-            New
-          </Button>
-        </Flex>
-      </Flex>
-      {!tree.length && (
-        <CaptionP $color="text-xlight">
-          No threads yet. Start one to talk to the agent.
-        </CaptionP>
-      )}
+    <ListSC>
       {tree.map((thread) => {
         const actions = availableThreadActions(
           thread,
@@ -209,20 +174,6 @@ export function DevboxThreadsSidebar({
           </div>
         )
       })}
-      {newOpen && (
-        <NewThreadModal
-          instance={instance}
-          onClose={() => setNewOpen(false)}
-          onCreated={onSelect}
-        />
-      )}
-      {importOpen && (
-        <ImportThreadModal
-          instance={instance}
-          onClose={() => setImportOpen(false)}
-          onImported={onSelect}
-        />
-      )}
       {renaming && (
         <RenameThreadModal
           thread={renaming}
@@ -252,16 +203,34 @@ export function DevboxThreadsSidebar({
           })
         }
       />
-    </SidebarSC>
+    </ListSC>
   )
 }
 
-const ACTION_LABELS: Record<DevboxThreadAction, string> = {
-  rename: 'Rename',
-  fork: 'Fork',
-  close: 'Close',
-  resume: 'Resume',
-  delete: 'Delete',
+// a thread is unread when it has activity the viewer hasn't opened since
+function useUnreadThreads(
+  threads: { id: string; lastActivityAt?: Nullable<string> }[],
+  selectedId: Nullable<string>
+) {
+  // the last activity the user saw per thread; first sight counts as read
+  const [seen, setSeen] = useState<Record<string, string>>({})
+  const newlySeen = Object.fromEntries(
+    threads
+      .filter((t) => !(t.id in seen) || t.id === selectedId)
+      .map((t) => [t.id, t.lastActivityAt ?? ''])
+      .filter(([id, activity]) => seen[id] !== activity)
+  )
+  if (Object.keys(newlySeen).length) setSeen({ ...seen, ...newlySeen })
+  return new Set(
+    threads
+      .filter(
+        (t) =>
+          t.id !== selectedId &&
+          t.id in seen &&
+          (t.lastActivityAt ?? '') > seen[t.id]
+      )
+      .map((t) => t.id)
+  )
 }
 
 function ThreadRow({
@@ -298,11 +267,6 @@ function ThreadRow({
           {nested && <BotIcon size={10} />}
           {unread && <UnreadDotSC aria-label="unread" />}
           <ThreadTitleSC $unread={unread}>{threadTitle(thread)}</ThreadTitleSC>
-        </Flex>
-        <Flex
-          gap="xsmall"
-          align="center"
-        >
           {state !== 'idle' && (
             <Chip
               size="small"
@@ -311,202 +275,18 @@ function ThreadRow({
               {state}
             </Chip>
           )}
-          <CaptionP $color="text-xlight">
-            {agentLabel(thread.agent)}
-            {thread.lastActivityAt
-              ? ` · ${fromNow(thread.lastActivityAt)}`
-              : ''}
-          </CaptionP>
         </Flex>
+        <ThreadMetaSC>
+          {agentLabel(thread.agent)}
+          {thread.lastActivityAt ? ` · ${fromNow(thread.lastActivityAt)}` : ''}
+        </ThreadMetaSC>
       </ThreadButtonSC>
       {actions}
     </ThreadRowSC>
   )
 }
 
-export function NewThreadModal({
-  instance,
-  onClose,
-  onCreated,
-}: {
-  instance: DevboxInstanceFragment
-  onClose: () => void
-  onCreated: (threadId: string) => void
-}) {
-  const box = instance.devbox
-  const agents = agentsOf(box)
-  const checkouts = (instance.checkouts ?? []).filter(isNonNullable)
-  const [agent, setAgent] = useState<Nullable<DevboxAgentType>>(
-    instance.agent ?? agents.find((a) => a.default)?.type ?? null
-  )
-  const agentEntry = findAgent(box, agent)
-  const models = modelsOf(agentEntry)
-  const [model, setModel] = useState<Nullable<string>>(() =>
-    defaultModelOf(agentEntry)
-  )
-  const [title, setTitle] = useState('')
-  const [cwd, setCwd] = useState(ALL_REPOSITORIES_CWD)
-  const [worktrees, setWorktrees] = useState<string[]>([])
-  const [create, { loading, error }] = useCreateDevboxThreadMutation({
-    onCompleted: (d) => {
-      if (d.createDevboxThread?.id) onCreated(d.createDevboxThread.id)
-      onClose()
-    },
-  })
-
-  return (
-    <Modal
-      open
-      onClose={onClose}
-      header="New thread"
-      size="large"
-      actions={
-        <Flex gap="small">
-          <Button
-            secondary
-            onClick={onClose}
-          >
-            Cancel
-          </Button>
-          <Button
-            loading={loading}
-            disabled={!agent}
-            onClick={() =>
-              create({
-                variables: {
-                  instanceId: instance.id,
-                  attributes: {
-                    agent,
-                    ...(model ? { model } : {}),
-                    ...(title.trim() ? { title: title.trim() } : {}),
-                    cwd,
-                    ...(worktrees.length ? { worktreeRepos: worktrees } : {}),
-                  },
-                },
-              })
-            }
-          >
-            Start thread
-          </Button>
-        </Flex>
-      }
-    >
-      <Flex
-        direction="column"
-        gap="large"
-      >
-        {error && <GqlError error={error} />}
-        <Flex gap="medium">
-          <FormField
-            label="Agent"
-            css={{ flex: 1 }}
-          >
-            <Select
-              label="Pick an agent"
-              selectedKey={agent}
-              onSelectionChange={(key) => {
-                const next = key as DevboxAgentType
-                setAgent(next)
-                setModel(defaultModelOf(findAgent(box, next)))
-              }}
-            >
-              {agents.map((a) => (
-                <ListBoxItem
-                  key={a.type}
-                  label={agentLabel(a.type)}
-                />
-              ))}
-            </Select>
-          </FormField>
-          <FormField
-            label="Model"
-            css={{ flex: 1 }}
-          >
-            <Select
-              label={models.length ? 'Pick a model' : "The agent's default"}
-              isDisabled={!models.length}
-              selectedKey={model}
-              onSelectionChange={(key) => setModel(`${key}`)}
-            >
-              {models.map((m) => (
-                <ListBoxItem
-                  key={m.id}
-                  label={m.name}
-                />
-              ))}
-            </Select>
-          </FormField>
-        </Flex>
-        <FormField
-          label="Working directory"
-          hint="Threads share the checkout unless you give them a worktree"
-        >
-          <Select
-            label="All repositories"
-            selectedKey={cwd}
-            onSelectionChange={(key) => setCwd(`${key}`)}
-          >
-            {[
-              <ListBoxItem
-                key={ALL_REPOSITORIES_CWD}
-                label="All repositories (~)"
-              />,
-              ...checkouts.map((c) => (
-                <ListBoxItem
-                  key={repoCwd(c.name ?? c.path ?? '')}
-                  label={c.name ?? c.path ?? ''}
-                  description={c.branch ?? undefined}
-                />
-              )),
-            ]}
-          </Select>
-        </FormField>
-        {!!checkouts.length && (
-          <FormField
-            label="Worktrees"
-            hint="Isolate this thread's changes on its own branch"
-          >
-            <Flex
-              direction="column"
-              gap="xxsmall"
-            >
-              {checkouts.map((c) => {
-                const name = c.name ?? c.path ?? ''
-                return (
-                  <Checkbox
-                    key={name}
-                    small
-                    checked={worktrees.includes(name)}
-                    onChange={(e) =>
-                      setWorktrees((w) =>
-                        e.target.checked
-                          ? [...w, name]
-                          : w.filter((n) => n !== name)
-                      )
-                    }
-                  >
-                    {name}
-                  </Checkbox>
-                )
-              })}
-            </Flex>
-          </FormField>
-        )}
-        <FormField
-          label="Title"
-          hint="Optional; the agent usually names the thread"
-        >
-          <Input
-            value={title}
-            onChange={(e) => setTitle(e.currentTarget.value)}
-          />
-        </FormField>
-      </Flex>
-    </Modal>
-  )
-}
-
-function ImportThreadModal({
+export function ImportThreadModal({
   instance,
   onClose,
   onImported,
@@ -636,13 +416,10 @@ function RenameThreadModal({
   )
 }
 
-const SidebarSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.xsmall,
-  padding: theme.spacing.medium,
-  height: '100%',
-  overflowY: 'auto',
+const ListSC = styled.div({ display: 'flex', flexDirection: 'column' })
+
+const EmptySC = styled(CaptionP)(({ theme }) => ({
+  padding: `${theme.spacing.xsmall} ${theme.spacing.medium}`,
 }))
 
 const ThreadRowSC = styled.div<{ $selected: boolean; $nested: boolean }>(
@@ -650,8 +427,8 @@ const ThreadRowSC = styled.div<{ $selected: boolean; $nested: boolean }>(
     display: 'flex',
     alignItems: 'center',
     gap: theme.spacing.xxsmall,
-    marginLeft: $nested ? theme.spacing.medium : 0,
-    borderRadius: theme.borderRadiuses.medium,
+    paddingLeft: $nested ? theme.spacing.xlarge : theme.spacing.medium,
+    paddingRight: theme.spacing.xsmall,
     backgroundColor: $selected
       ? theme.colors['fill-zero-selected']
       : 'transparent',
@@ -660,27 +437,31 @@ const ThreadRowSC = styled.div<{ $selected: boolean; $nested: boolean }>(
 )
 
 const ThreadButtonSC = styled.button(({ theme }) => ({
+  ...theme.partials.reset.button,
   flex: 1,
   minWidth: 0,
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.xxxsmall,
-  padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
-  background: 'none',
-  border: 'none',
-  cursor: 'pointer',
+  padding: `${theme.spacing.xsmall} 0`,
   textAlign: 'left',
   color: theme.colors.text,
 }))
 
 const ThreadTitleSC = styled.span<{ $unread: boolean }>(
   ({ theme, $unread }) => ({
+    ...TRUNCATE,
     ...($unread ? theme.partials.text.body2Bold : theme.partials.text.body2),
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
+    flex: 1,
+    minWidth: 0,
   })
 )
+
+const ThreadMetaSC = styled.span(({ theme }) => ({
+  ...TRUNCATE,
+  ...theme.partials.text.caption,
+  color: theme.colors['text-xlight'],
+}))
 
 const UnreadDotSC = styled.span(({ theme }) => ({
   width: 6,

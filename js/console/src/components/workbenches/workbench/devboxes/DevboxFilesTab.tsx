@@ -13,10 +13,9 @@ import {
 import { GqlError } from 'components/utils/Alert'
 import { CaptionP } from 'components/utils/typography/Text'
 import { useCallback, useEffect, useState } from 'react'
-import styled from 'styled-components'
+import styled, { DefaultTheme } from 'styled-components'
 import { DevboxUnavailable } from './DevboxUnavailable'
 import {
-  DevboxChangeGroup,
   DevboxFileContent,
   DevboxFileEntry,
   DevboxWorkspaceApi,
@@ -28,21 +27,19 @@ const ROOT = '~'
 export function DevboxFilesTab({
   api,
   live,
-  initialPath,
+  selected,
+  onSelect,
 }: {
   api: DevboxWorkspaceApi
   live: boolean
-  initialPath?: Nullable<string>
+  selected: Nullable<string>
+  onSelect: (path: string) => void
 }) {
-  const [view, setView] = useState<'changes' | 'files'>('changes')
-  const [selected, setSelected] = useState<Nullable<string>>(
-    initialPath ?? null
-  )
-  if (!api.listFiles && !api.changes)
+  if (!api.listFiles)
     return (
       <DevboxUnavailable
         title="Files unavailable"
-        message="Console doesn't serve devbox files yet (devboxFiles, devboxFile, devboxChanges)."
+        message="Console doesn't serve devbox files yet (devboxFiles, devboxFile)."
       />
     )
   if (!live)
@@ -53,62 +50,28 @@ export function DevboxFilesTab({
       />
     )
   return (
-    <Flex
-      direction="column"
-      gap="small"
-      height="100%"
-    >
-      <Flex gap="xsmall">
-        <Button
-          small
-          secondary={view !== 'changes'}
-          onClick={() => setView('changes')}
-          disabled={!api.changes}
-        >
-          Changes
-        </Button>
-        <Button
-          small
-          secondary={view !== 'files'}
-          onClick={() => setView('files')}
-          disabled={!api.listFiles}
-        >
-          Files
-        </Button>
-      </Flex>
-      {view === 'changes' && api.changes ? (
-        <DevboxChanges
-          changes={api.changes}
-          onOpen={(path) => {
-            setSelected(path)
-            setView('files')
-          }}
+    <SplitSC>
+      <TreeSC>
+        <DirectoryNode
+          api={api}
+          entry={{ path: ROOT, name: ROOT, type: 'directory' }}
+          selected={selected}
+          onSelect={onSelect}
+          defaultOpen
         />
-      ) : (
-        <SplitSC>
-          <TreeSC>
-            <DirectoryNode
-              api={api}
-              entry={{ path: ROOT, name: ROOT, type: 'directory' }}
-              selected={selected}
-              onSelect={setSelected}
-              defaultOpen
-            />
-          </TreeSC>
-          <ViewerSC>
-            {selected ? (
-              <FileViewer
-                key={selected}
-                api={api}
-                path={selected}
-              />
-            ) : (
-              <CaptionP $color="text-xlight">Pick a file</CaptionP>
-            )}
-          </ViewerSC>
-        </SplitSC>
-      )}
-    </Flex>
+      </TreeSC>
+      <ViewerSC>
+        {selected ? (
+          <FileViewer
+            key={selected}
+            api={api}
+            path={selected}
+          />
+        ) : (
+          <CaptionP $color="text-xlight">Pick a file</CaptionP>
+        )}
+      </ViewerSC>
+    </SplitSC>
   )
 }
 
@@ -132,7 +95,7 @@ function DirectoryNode({
   const [error, setError] = useState<Nullable<Error>>(null)
 
   useEffect(() => {
-    if (!open || children || !api.listFiles) return
+    if (!open || children || error || !api.listFiles) return
     api
       .listFiles(entry.path)
       .then((entries) =>
@@ -145,26 +108,29 @@ function DirectoryNode({
         )
       )
       .catch(setError)
-  }, [api, children, entry.path, open])
+  }, [api, children, entry.path, error, open])
 
   return (
     <div>
       <TreeRowSC
         type="button"
         $depth={depth}
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => {
+          setOpen((o) => !o)
+          setError(null)
+        }}
       >
         {open ? <CaretDownIcon size={10} /> : <CaretRightIcon size={10} />}
         <FolderIcon size={12} />
         {entry.name}
       </TreeRowSC>
-      {open && error && (
-        <CaptionP
-          $color="text-danger"
-          css={{ paddingLeft: (depth + 1) * 12 }}
+      {open && (error || !children || !children.length) && (
+        <TreeNoteSC
+          $depth={depth + 1}
+          $danger={!!error}
         >
-          {error.message}
-        </CaptionP>
+          {error ? error.message : !children ? 'Loading…' : 'Empty'}
+        </TreeNoteSC>
       )}
       {open &&
         children?.map((child) =>
@@ -269,124 +235,6 @@ function FileViewer({ api, path }: { api: DevboxWorkspaceApi; path: string }) {
   )
 }
 
-function DevboxChanges({
-  changes,
-  onOpen,
-}: {
-  changes: NonNullable<DevboxWorkspaceApi['changes']>
-  onOpen: (path: string) => void
-}) {
-  const [groups, setGroups] = useState<Nullable<DevboxChangeGroup[]>>(null)
-  const [error, setError] = useState<Nullable<Error>>(null)
-  const load = useCallback(() => {
-    changes()
-      .then((g) => {
-        setGroups(g)
-        setError(null)
-      })
-      .catch(setError)
-  }, [changes])
-  useEffect(() => load(), [load])
-
-  if (error) return <GqlError error={error} />
-  if (!groups) return <CaptionP $color="text-xlight">Loading changes…</CaptionP>
-  if (!groups.some((g) => g.files.length))
-    return <CaptionP $color="text-xlight">No uncommitted changes.</CaptionP>
-  return (
-    <DevboxChangeGroups
-      groups={groups}
-      onOpen={onOpen}
-      onRefresh={load}
-    />
-  )
-}
-
-export function DevboxChangeGroups({
-  groups,
-  onOpen,
-  onRefresh,
-}: {
-  groups: DevboxChangeGroup[]
-  onOpen?: (path: string) => void
-  onRefresh?: () => void
-}) {
-  return (
-    <Flex
-      direction="column"
-      gap="large"
-      css={{ overflowY: 'auto' }}
-    >
-      {onRefresh && (
-        <Button
-          small
-          tertiary
-          startIcon={<ReloadIcon />}
-          onClick={onRefresh}
-          css={{ alignSelf: 'flex-end' }}
-        >
-          Refresh
-        </Button>
-      )}
-      {groups
-        .filter((g) => g.files.length)
-        .map((group) => (
-          <Flex
-            key={group.repository}
-            direction="column"
-            gap="small"
-          >
-            <Flex
-              gap="small"
-              align="center"
-            >
-              <strong>{group.repository}</strong>
-              {group.branch && <Chip size="small">{group.branch}</Chip>}
-              <CaptionP $color="text-xlight">
-                {group.files.length} file{group.files.length === 1 ? '' : 's'}
-              </CaptionP>
-            </Flex>
-            {group.files.map((file) => (
-              <Flex
-                key={file.path}
-                direction="column"
-                gap="xxsmall"
-              >
-                <Flex
-                  gap="small"
-                  align="center"
-                >
-                  <FileLinkSC
-                    type="button"
-                    onClick={() =>
-                      onOpen?.(
-                        group.path ? `${group.path}/${file.path}` : file.path
-                      )
-                    }
-                  >
-                    {file.oldPath
-                      ? `${file.oldPath} → ${file.path}`
-                      : file.path}
-                  </FileLinkSC>
-                  {file.status && <Chip size="small">{file.status}</Chip>}
-                  {(file.additions != null || file.deletions != null) && (
-                    <CaptionP $color="text-xlight">
-                      +{file.additions ?? 0} −{file.deletions ?? 0}
-                    </CaptionP>
-                  )}
-                </Flex>
-                {file.binary ? (
-                  <CaptionP $color="text-xlight">Binary file</CaptionP>
-                ) : file.patch ? (
-                  <Code language="diff">{file.patch}</Code>
-                ) : null}
-              </Flex>
-            ))}
-          </Flex>
-        ))}
-    </Flex>
-  )
-}
-
 const EXTENSION_LANGUAGES: Record<string, string> = {
   ts: 'typescript',
   tsx: 'typescript',
@@ -419,7 +267,7 @@ const SplitSC = styled.div(({ theme }) => ({
 }))
 
 const TreeSC = styled.div(({ theme }) => ({
-  width: 280,
+  width: 200,
   flexShrink: 0,
   overflowY: 'auto',
   borderRight: theme.borders.default,
@@ -428,6 +276,9 @@ const TreeSC = styled.div(({ theme }) => ({
 
 const ViewerSC = styled.div({ flex: 1, minWidth: 0, overflow: 'auto' })
 
+const treeIndent = (theme: DefaultTheme, depth: number) =>
+  `calc(${depth * 12}px + ${theme.spacing.xsmall})`
+
 const TreeRowSC = styled.button<{ $depth: number; $selected?: boolean }>(
   ({ theme, $depth, $selected }) => ({
     ...theme.partials.text.caption,
@@ -435,22 +286,26 @@ const TreeRowSC = styled.button<{ $depth: number; $selected?: boolean }>(
     alignItems: 'center',
     gap: theme.spacing.xxsmall,
     width: '100%',
-    padding: `2px ${theme.spacing.xsmall}px`,
-    paddingLeft: $depth * 12 + theme.spacing.xsmall,
+    padding: `2px ${theme.spacing.xsmall}`,
+    paddingLeft: treeIndent(theme, $depth),
+    borderRadius: theme.borderRadiuses.medium,
     background: $selected ? theme.colors['fill-zero-selected'] : 'none',
     border: 'none',
     cursor: 'pointer',
     color: theme.colors.text,
     textAlign: 'left',
     whiteSpace: 'nowrap',
+    '&:hover': {
+      background: $selected ? undefined : theme.colors['fill-zero-hover'],
+    },
   })
 )
 
-const FileLinkSC = styled.button(({ theme }) => ({
-  ...theme.partials.text.code,
-  background: 'none',
-  border: 'none',
-  padding: 0,
-  cursor: 'pointer',
-  color: theme.colors['text-primary-accent'],
-}))
+const TreeNoteSC = styled.div<{ $depth: number; $danger: boolean }>(
+  ({ theme, $depth, $danger }) => ({
+    ...theme.partials.text.caption,
+    padding: `2px ${theme.spacing.xsmall}`,
+    paddingLeft: treeIndent(theme, $depth),
+    color: theme.colors[$danger ? 'text-danger' : 'text-xlight'],
+  })
+)

@@ -67,6 +67,7 @@ fragment DevboxTiny on Devbox {
   resolvedImage
   templateRevision
   browser
+  resources
   maxInstances
   lastHeartbeatAt
   autonomy {

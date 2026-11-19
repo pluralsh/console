@@ -36,11 +36,8 @@ import { Navigate, Route } from 'react-router-dom'
 import { FeatureFlagGate } from 'components/flows/FeatureFlagContext'
 import { CHATBOTS_SETTINGS_CREATE_ABS_PATH } from './settingsRoutesConst'
 import {
-  WORKBENCH_DEVBOX_BOXES_REL_PATH,
   WORKBENCH_DEVBOX_INSTANCE_PARAM_ID,
   WORKBENCH_DEVBOX_INSTANCES_REL_PATH,
-  WORKBENCH_DEVBOX_PARAM_ID,
-  WORKBENCH_DEVBOX_START_REL_PATH,
   WORKBENCH_DEVBOXES_REL_PATH,
   WORKBENCH_EVAL_SETTINGS_REL_PATH,
   WORKBENCH_EVAL_RESULT_PARAM_ID,
@@ -79,10 +76,7 @@ import {
   WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH,
 } from './workbenchesRoutesConsts'
 import { WorkbenchJob } from 'components/workbenches/workbench/job/WorkbenchJob'
-import { WorkbenchDevboxes } from 'components/workbenches/workbench/devboxes/WorkbenchDevboxes'
-import { DevboxDetail } from 'components/workbenches/workbench/devboxes/DevboxDetail'
-import { DevboxInstanceStart } from 'components/workbenches/workbench/devboxes/DevboxInstanceStart'
-import { DevboxInstanceWorkspace } from 'components/workbenches/workbench/devboxes/DevboxInstanceWorkspace'
+import { DevboxWorkspace } from 'components/workbenches/workbench/devboxes/DevboxWorkspace'
 
 export const workbenchesRoutes = [
   <Route
@@ -183,42 +177,24 @@ export const workbenchesRoutes = [
         path={WORKBENCHES_FILES_REL_PATH}
         element={<WorkbenchFiles />}
       />
-      <Route
-        path={WORKBENCH_DEVBOXES_REL_PATH}
-        element={
-          <FeatureFlagGate flag="Devboxes">
-            <WorkbenchDevboxes />
-          </FeatureFlagGate>
-        }
-      />
-      <Route
-        path={`${WORKBENCH_DEVBOXES_REL_PATH}/${WORKBENCH_DEVBOX_BOXES_REL_PATH}/:${WORKBENCH_DEVBOX_PARAM_ID}`}
-        element={
-          <FeatureFlagGate flag="Devboxes">
-            <DevboxDetail />
-          </FeatureFlagGate>
-        }
-      />
-      <Route
-        path={`${WORKBENCH_DEVBOXES_REL_PATH}/${WORKBENCH_DEVBOX_START_REL_PATH}`}
-        element={
-          <FeatureFlagGate flag="Devboxes">
-            <DevboxInstanceStart />
-          </FeatureFlagGate>
-        }
-      />
+      {[
+        WORKBENCH_DEVBOXES_REL_PATH,
+        `${WORKBENCH_DEVBOXES_REL_PATH}/${WORKBENCH_DEVBOX_INSTANCES_REL_PATH}/:${WORKBENCH_DEVBOX_INSTANCE_PARAM_ID}`,
+      ].map((path) => (
+        <Route
+          key={path}
+          path={path}
+          element={
+            <FeatureFlagGate flag="Devboxes">
+              <DevboxWorkspace />
+            </FeatureFlagGate>
+          }
+        />
+      ))}
     </Route>
     <Route
       path={`${WORKBENCH_JOBS_REL_PATH}/:${WORKBENCH_JOBS_PARAM_JOB}`}
       element={<WorkbenchJob />}
-    />
-    <Route
-      path={`${WORKBENCH_DEVBOXES_REL_PATH}/${WORKBENCH_DEVBOX_INSTANCES_REL_PATH}/:${WORKBENCH_DEVBOX_INSTANCE_PARAM_ID}`}
-      element={
-        <FeatureFlagGate flag="Devboxes">
-          <DevboxInstanceWorkspace />
-        </FeatureFlagGate>
-      }
     />
   </Route>,
   <Route

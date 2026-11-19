@@ -87,6 +87,7 @@ import { WorkbenchesConfiguredToolMetadata } from '../../WorkbenchesConfiguredTo
 import { WorkbenchModesForm } from '../WorkbenchPromptModeSelector/WorkbenchModesForm'
 import { KnowledgeSubStep } from './KnowledgeSubStep'
 import { PluralSkillsSubStep } from './PluralSkillsSubStep'
+import { WorkbenchDevboxesSubStep } from './WorkbenchDevboxesSubStep'
 import {
   useWorkbenchFormCardTabs,
   useWorkbenchFormFooterActions,
@@ -132,7 +133,6 @@ export function WorkbenchSetupStep({
   const update = createFormUpdater(setFormState)
   const infra = formState.configuration?.infrastructure
   const observability = formState.configuration?.observability
-  const { featureFlags } = use(FeatureFlagContext)
   const capabilityCheckboxGridCss = {
     display: 'grid',
     gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
@@ -321,37 +321,6 @@ export function WorkbenchSetupStep({
             </Flex>
           </Flex>
         </FormField>
-        {featureFlags.Devboxes && (
-          <FormField label="Devboxes">
-            <Flex
-              direction="column"
-              gap="small"
-            >
-              <Switch
-                checked={
-                  formState.configuration?.devbox
-                    ?.allowSubscriptionCredentials ?? false
-                }
-                onChange={(checked) =>
-                  update((d) => {
-                    d.configuration = d.configuration ?? {}
-                    d.configuration.devbox = d.configuration.devbox ?? {}
-                    d.configuration.devbox.allowSubscriptionCredentials =
-                      checked
-                  })
-                }
-              >
-                Allow personal AI subscriptions
-              </Switch>
-              <CaptionP $color="text-light">
-                Lets members bill devbox agents to their own Claude or ChatGPT
-                plan. That traffic goes straight to Anthropic or OpenAI,
-                bypassing the Plural AI proxy&apos;s audit, budgets and model
-                policy.
-              </CaptionP>
-            </Flex>
-          </FormField>
-        )}
       </Flex>
     </>
   )
@@ -639,7 +608,40 @@ function GitRepositoryImportSubStep({
   )
 }
 
-export function WorkbenchCodingAgentStep({
+export function WorkbenchCodingAgentStep(props: WorkbenchFormStepProps) {
+  const { setTabs } = useWorkbenchFormCardTabs()
+  const { featureFlags } = use(FeatureFlagContext)
+  const [subTab, setSubTab] = useState<'runtime' | 'devboxes'>('runtime')
+
+  useEffect(() => {
+    if (!featureFlags.Devboxes) return
+    setTabs(
+      <CardTabs>
+        <CardTab
+          active={subTab === 'runtime'}
+          onClick={() => setSubTab('runtime')}
+        >
+          Agent runtime
+        </CardTab>
+        <CardTab
+          active={subTab === 'devboxes'}
+          onClick={() => setSubTab('devboxes')}
+        >
+          Devboxes
+        </CardTab>
+      </CardTabs>
+    )
+    return () => setTabs(null)
+  }, [setTabs, subTab, featureFlags.Devboxes])
+
+  return featureFlags.Devboxes && subTab === 'devboxes' ? (
+    <WorkbenchDevboxesSubStep {...props} />
+  ) : (
+    <WorkbenchAgentRuntimeSubStep {...props} />
+  )
+}
+
+function WorkbenchAgentRuntimeSubStep({
   formState,
   setFormState,
 }: WorkbenchFormStepProps) {

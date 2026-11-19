@@ -23,6 +23,26 @@ export type DevboxThreadState =
   | 'idle'
   | 'closed'
 
+// the thread param while composing a new session
+export const NEW_SESSION = 'new'
+
+// the thread in the URL, else the first live top-level one
+export function selectedThread(
+  threads: Nullable<Nullable<DevboxThreadFragment>[]>,
+  threadId: Nullable<string>
+) {
+  if (threadId === NEW_SESSION) return undefined
+  const all = (threads ?? []).filter(isNonNullable)
+  return (
+    all.find((t) => t.id === threadId) ??
+    all.find(
+      (t) =>
+        t.kind !== DevboxThreadKind.Subagent &&
+        t.status !== DevboxThreadStatus.Deleted
+    )
+  )
+}
+
 export function threadState(
   thread: Pick<DevboxThreadFragment, 'status' | 'foregroundState'>
 ): DevboxThreadState {

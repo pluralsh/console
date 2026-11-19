@@ -1,12 +1,9 @@
 import {
-  Button,
-  Flex,
-  IconFrame,
+  FileIcon,
+  FolderIcon,
   ListBoxItem,
   PaperclipIcon,
-  Select,
-  SendMessageIcon,
-  StopIcon,
+  Tooltip,
 } from '@pluralsh/design-system'
 import {
   AttachmentShelf,
@@ -14,6 +11,7 @@ import {
   mergeAttachments,
   usePendingAttachmentItems,
 } from 'components/ai/chatbot/input/ChatAttachments'
+import { ChatInputIconFrame } from 'components/ai/chatbot/input/ChatInputIconFrame'
 import { CaptionP } from 'components/utils/typography/Text'
 import {
   DevboxCommandFragment,
@@ -22,6 +20,7 @@ import {
 import {
   ClipboardEvent,
   KeyboardEvent,
+  ReactNode,
   useEffect,
   useRef,
   useState,
@@ -31,14 +30,32 @@ import styled from 'styled-components'
 import { formatFileSize } from 'utils/file'
 import { isNonNullable } from 'utils/isNonNullable'
 import {
+  WorkbenchPromptCancelButton,
+  WorkbenchPromptOptionsGroup,
+  WorkbenchPromptSubmitButton,
+} from '../WorkbenchPromptControls'
+import {
+  autonomyChoices,
+  DevboxAutonomyPolicy,
+  isAutonomyOption,
+} from './devboxAutonomy'
+import {
+  applyFileMention,
+  getMentionQuery,
+  matchFiles,
+  useDevboxDirectory,
+} from './devboxFileMentions'
+import { AutonomyPillSelect, PillSelect } from './DevboxPromptPills'
+import {
   applySlashCommand,
   getSlashQuery,
   groupSlashCommands,
   matchSlashCommands,
   slashCommandHint,
 } from './devboxSlashCommands'
-import { autonomyChoices, isAutonomyOption } from './devboxAutonomy'
 import { MODEL_CATEGORY } from './devboxStartForm'
+import { DevboxSuggestion, DevboxSuggestionMenu } from './DevboxSuggestionMenu'
+import { DevboxFileEntry, isDirectory } from './devboxWorkspaceApi'
 
 const MAX_SUGGESTIONS = 50
 
@@ -60,20 +77,34 @@ const NO_FILES: File[] = []
 export function DevboxComposer({
   commands,
   configOptions,
+  autonomyPolicy,
+  proxyBilled = false,
   modelSwitchable = true,
+  listFiles,
   running = false,
   disabled = false,
-  placeholder = 'Message the agent, or / for commands',
+  placeholder = 'Message the agent, / for commands or @ for files',
+  allowEmpty = false,
+  autoFocus = false,
+  toolbar,
   onSubmit,
   onCancel,
   onSetConfigOption,
 }: {
   commands: Nullable<Nullable<DevboxCommandFragment>[]>
   configOptions?: Nullable<Nullable<DevboxConfigOptionFragment>[]>
+  autonomyPolicy?: Nullable<DevboxAutonomyPolicy>
+  proxyBilled?: boolean
   modelSwitchable?: boolean
+  // completes `@path` mentions against the instance's files
+  listFiles?: Nullable<(path: string) => Promise<DevboxFileEntry[]>>
   running?: boolean
   disabled?: boolean
   placeholder?: string
+  allowEmpty?: boolean
+  autoFocus?: boolean
+  // extra controls beside the attach button
+  toolbar?: ReactNode
   // resolving to false (a failed send) keeps the draft
   onSubmit: (
     prompt: string,
@@ -113,13 +144,39 @@ export function DevboxComposer({
   }
 
   const slash = getSlashQuery(text, caret)
-  const groups = slash
+  const commandMatches = slash
     ? groupSlashCommands(
         matchSlashCommands(commands, slash.query).slice(0, MAX_SUGGESTIONS)
-      )
+      ).flatMap((g) => g.items.map((cmd) => ({ cmd, group: g.label })))
     : []
-  const flat = groups.flatMap((g) => g.items)
-  const slashOpen = !!slash && flat.length > 0 && dismissed !== text
+  const mention = !slash && listFiles ? getMentionQuery(text, caret) : null
+  const directory = useDevboxDirectory(listFiles, mention?.dir)
+  const fileMatches = mention
+    ? matchFiles(directory.entries, mention.leaf).slice(0, MAX_SUGGESTIONS)
+    : []
+
+  const suggestions: DevboxSuggestion[] = slash
+    ? commandMatches.map(({ cmd, group }) => ({
+        key: cmd.name,
+        title: `/${cmd.name}`,
+        subtitle: cmd.description,
+        group,
+        mono: true,
+      }))
+    : fileMatches.map((entry) => ({
+        key: entry.path,
+        title: isDirectory(entry) ? `${entry.name}/` : entry.name,
+        subtitle: entry.path,
+        icon: isDirectory(entry) ? (
+          <FolderIcon size={14} />
+        ) : (
+          <FileIcon size={14} />
+        ),
+        kind: entry.gitStatus ?? undefined,
+      }))
+  const menuOpen =
+    dismissed !== text &&
+    (slash ? suggestions.length > 0 : !!mention && !disabled)
   const hint = slashCommandHint(text, commands)
 
   const update = (value: string, pos?: number) => {
@@ -128,18 +185,28 @@ export function DevboxComposer({
     setActive(0)
   }
 
-  const pick = (cmd: DevboxCommandFragment) => {
-    const next = applySlashCommand(text, cmd)
-    const pos = cmd.name.length + 2
-    update(next, pos)
+  const moveCaret = (value: string, pos: number) => {
+    update(value, pos)
     requestAnimationFrame(() => {
       ref.current?.focus()
       ref.current?.setSelectionRange(pos, pos)
     })
   }
 
+  const pick = (idx: number) => {
+    if (slash) {
+      const cmd = commandMatches[idx]?.cmd
+      if (cmd) moveCaret(applySlashCommand(text, cmd), cmd.name.length + 2)
+      return
+    }
+    const entry = fileMatches[idx]
+    if (!entry || !mention) return
+    const next = applyFileMention(text, mention, entry)
+    moveCaret(next.text, next.caret)
+  }
+
   const canSubmit =
-    (!!text.trim() || files.length > 0) && !fileError && !sending
+    (allowEmpty || !!text.trim() || files.length > 0) && !fileError && !sending
   const submit = () => {
     if (!canSubmit || disabled) return
     const sent = { text, files }
@@ -156,26 +223,26 @@ export function DevboxComposer({
   }
 
   const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (slashOpen) {
-      if (e.key === 'ArrowDown') {
-        e.preventDefault()
-        setActive((i) => (i + 1) % flat.length)
-        return
-      }
-      if (e.key === 'ArrowUp') {
-        e.preventDefault()
-        setActive((i) => (i - 1 + flat.length) % flat.length)
-        return
-      }
-      if (e.key === 'Enter' || e.key === 'Tab') {
-        e.preventDefault()
-        const cmd = flat[Math.min(active, flat.length - 1)]
-        if (cmd) pick(cmd)
-        return
-      }
+    if (menuOpen) {
+      const count = suggestions.length
       if (e.key === 'Escape') {
         e.preventDefault()
         setDismissed(text)
+        return
+      }
+      if (count > 0 && e.key === 'ArrowDown') {
+        e.preventDefault()
+        setActive((i) => (i + 1) % count)
+        return
+      }
+      if (count > 0 && e.key === 'ArrowUp') {
+        e.preventDefault()
+        setActive((i) => (i - 1 + count) % count)
+        return
+      }
+      if (count > 0 && (e.key === 'Enter' || e.key === 'Tab')) {
+        e.preventDefault()
+        pick(Math.min(active, count - 1))
         return
       }
     }
@@ -188,7 +255,7 @@ export function DevboxComposer({
   const options = (configOptions ?? [])
     .filter(isNonNullable)
     .filter((o) => o.options?.length)
-    .sort((a, b) => Number(isAutonomyOption(b)) - Number(isAutonomyOption(a)))
+    .sort((a, b) => Number(isAutonomyOption(a)) - Number(isAutonomyOption(b)))
 
   return (
     <ComposerSC {...getRootProps()}>
@@ -198,45 +265,22 @@ export function DevboxComposer({
       />
       {isDragActive && <DropOverlay />}
       <AttachmentShelf items={fileItems} />
-      {slashOpen && (
-        <SuggestionsSC
-          role="listbox"
-          aria-label="Slash commands"
-        >
-          {groups.map((group) => (
-            <div key={group.label}>
-              <GroupLabelSC>{group.label}</GroupLabelSC>
-              {group.items.map((cmd) => {
-                const idx = flat.indexOf(cmd)
-                return (
-                  <SuggestionSC
-                    key={cmd.name}
-                    role="option"
-                    aria-selected={idx === active}
-                    $active={idx === active}
-                    onMouseDown={(e) => {
-                      e.preventDefault()
-                      pick(cmd)
-                    }}
-                    onMouseEnter={() => setActive(idx)}
-                  >
-                    <code>/{cmd.name}</code>
-                    {cmd.description && (
-                      <CaptionP $color="text-xlight">
-                        {cmd.description}
-                      </CaptionP>
-                    )}
-                  </SuggestionSC>
-                )
-              })}
-            </div>
-          ))}
-        </SuggestionsSC>
+      {menuOpen && (
+        <DevboxSuggestionMenu
+          label={slash ? 'Slash commands' : 'Files'}
+          items={suggestions}
+          active={active}
+          loading={directory.loading}
+          empty={directory.error ? "Couldn't list this directory" : undefined}
+          onPick={pick}
+          onHover={setActive}
+        />
       )}
       <TextareaSC
         ref={ref}
         aria-label="Prompt"
         rows={3}
+        autoFocus={autoFocus}
         value={text}
         disabled={disabled}
         placeholder={placeholder}
@@ -263,85 +307,76 @@ export function DevboxComposer({
           {fileError}
         </CaptionP>
       )}
-      <Flex
-        justify="space-between"
-        align="center"
-        gap="small"
-      >
-        <Flex
-          gap="small"
-          align="center"
-          wrap="wrap"
-        >
-          <IconFrame
-            clickable
-            size="small"
+      <OptionsRowSC>
+        <WorkbenchPromptOptionsGroup>
+          <ChatInputIconFrame
             icon={<PaperclipIcon />}
             tooltip="Attach files"
             aria-label="Attach files"
             disabled={disabled}
             onClick={open}
           />
+          {toolbar}
           {options.map((option) => {
-            const fixed = option.category === MODEL_CATEGORY && !modelSwitchable
+            const name = option.name ?? option.configId
+            const locked =
+              (option.category === MODEL_CATEGORY && !modelSwitchable) ||
+              !onSetConfigOption ||
+              disabled
+            const select = (value: string) =>
+              onSetConfigOption?.(option.configId, value)
+            if (isAutonomyOption(option))
+              return (
+                <AutonomyPillSelect
+                  key={option.configId}
+                  levels={autonomyChoices(option, autonomyPolicy, proxyBilled)}
+                  value={option.currentValue}
+                  onSelect={select}
+                  disabled={locked}
+                />
+              )
+            const values = (option.options ?? []).filter(isNonNullable)
+            const current = values.find((o) => o.value === option.currentValue)
             return (
-              <ConfigSelectSC key={option.configId}>
-                <Select
-                  size="small"
-                  label={option.name ?? option.configId}
-                  isDisabled={fixed || !onSetConfigOption || disabled}
-                  selectedKey={option.currentValue ?? null}
-                  onSelectionChange={(key) =>
-                    onSetConfigOption?.(option.configId, `${key}`)
-                  }
-                >
-                  {isAutonomyOption(option)
-                    ? autonomyChoices(option).map((c) => (
-                        <ListBoxItem
-                          key={c.value}
-                          label={c.label}
-                          disabled={!!c.unavailable}
-                          description={
-                            !c.unavailable
-                              ? c.description
-                              : c.value === 'auto'
-                                ? c.unavailable
-                                : 'Not available for this agent on this box'
-                          }
-                        />
-                      ))
-                    : (option.options ?? []).filter(isNonNullable).map((o) => (
-                        <ListBoxItem
-                          key={o.value}
-                          label={o.name ?? o.value}
-                          description={o.description ?? undefined}
-                        />
-                      ))}
-                </Select>
-              </ConfigSelectSC>
+              <PillSelect
+                key={option.configId}
+                label={name}
+                selectedKey={option.currentValue}
+                onSelect={select}
+                disabled={locked}
+                trigger={
+                  option.category === MODEL_CATEGORY
+                    ? (current?.name ?? current?.value ?? name)
+                    : `${name}: ${current?.name ?? current?.value ?? '–'}`
+                }
+              >
+                {values.map((o) => (
+                  <ListBoxItem
+                    key={o.value}
+                    label={o.name ?? o.value}
+                    description={o.description ?? undefined}
+                  />
+                ))}
+              </PillSelect>
             )
           })}
-        </Flex>
-        {running && onCancel ? (
-          <Button
-            small
-            secondary
-            startIcon={<StopIcon />}
+        </WorkbenchPromptOptionsGroup>
+      </OptionsRowSC>
+      {running && onCancel ? (
+        <Tooltip label="Stop the agent">
+          <WorkbenchPromptCancelButton
+            aria-label="Stop"
             onClick={onCancel}
-          >
-            Stop
-          </Button>
-        ) : (
-          <Button
-            small
-            startIcon={<SendMessageIcon />}
-            disabled={disabled || !canSubmit}
-            onClick={submit}
-          >
-            Send
-          </Button>
-        )}
-      </Flex>
+          />
+        </Tooltip>
+      ) : (
+        <WorkbenchPromptSubmitButton
+          aria-label="Send"
+          loading={sending}
+          disabled={disabled || !canSubmit}
+          onClick={submit}
+        />
+      )}
     </ComposerSC>
   )
 }
@@ -351,10 +386,15 @@ const ComposerSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.small,
-  padding: theme.spacing.medium,
+  padding: theme.spacing.small,
   borderRadius: theme.borderRadiuses.large,
   border: theme.borders.input,
-  backgroundColor: theme.colors['fill-one'],
+  backgroundColor:
+    theme.mode === 'light'
+      ? theme.colors['fill-zero']
+      : theme.colors['fill-zero-selected'],
+  transition: 'border 0.16s ease-in-out',
+  '&:has(textarea:focus)': { border: theme.borders['outline-focused'] },
 }))
 
 const TextareaSC = styled.textarea(({ theme }) => ({
@@ -362,40 +402,13 @@ const TextareaSC = styled.textarea(({ theme }) => ({
   resize: 'none',
   border: 'none',
   outline: 'none',
+  padding: `${theme.spacing.xxsmall} ${theme.spacing.xsmall}`,
   background: 'transparent',
   color: theme.colors.text,
   '&::placeholder': { color: theme.colors['text-xlight'] },
 }))
 
-const SuggestionsSC = styled.div(({ theme }) => ({
-  position: 'absolute',
-  left: 0,
-  right: 0,
-  bottom: 'calc(100% + 4px)',
-  maxHeight: 320,
-  overflowY: 'auto',
-  zIndex: theme.zIndexes.selectPopover,
-  padding: `${theme.spacing.xsmall}px 0`,
-  borderRadius: theme.borderRadiuses.large,
-  border: theme.borders['fill-two'],
-  backgroundColor: theme.colors['fill-two'],
-  boxShadow: theme.boxShadows.moderate,
+// leaves room for the absolutely positioned send button
+const OptionsRowSC = styled.div(({ theme }) => ({
+  paddingRight: theme.spacing.xlarge,
 }))
-
-const GroupLabelSC = styled.div(({ theme }) => ({
-  ...theme.partials.text.overline,
-  padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
-  color: theme.colors['text-xlight'],
-}))
-
-const SuggestionSC = styled.div<{ $active: boolean }>(({ theme, $active }) => ({
-  display: 'flex',
-  alignItems: 'baseline',
-  gap: theme.spacing.small,
-  padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
-  cursor: 'pointer',
-  backgroundColor: $active ? theme.colors['fill-two-hover'] : 'transparent',
-  code: { ...theme.partials.text.code, color: theme.colors.text },
-}))
-
-const ConfigSelectSC = styled.div({ minWidth: 160 })
