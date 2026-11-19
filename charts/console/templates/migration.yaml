@@ -43,6 +43,7 @@ spec:
             name: console-migration-env
         env:
         {{ include "console.env" . | nindent 8 }}
+        {{- include "console.agentHelmValues.env" . | nindent 8 }}
         - name: DB_POOL_TARGET
           value: '1000'
         {{- if  .Values.extraEnv }}
@@ -63,6 +64,7 @@ spec:
         {{ end }}
         {{ end }}
         {{- include "console.certs.volumeMounts" . | nindent 8 }}
+        {{- include "console.agentHelmValues.volumeMount" . | nindent 8 }}
       restartPolicy: Never
       {{ with .Values.migrator.nodeSelector}}
       nodeSelector:
@@ -86,4 +88,5 @@ spec:
       {{ toYaml .Values.global.additionalVolumes | nindent 6 }}
       {{ end }}
       {{- include "console.certs.volumes" . | nindent 6 }}
+      {{- include "console.agentHelmValues.volume" . | nindent 6 }}
   backoffLimit: 5

@@ -207,3 +207,32 @@ spawnedWorkloads:
     enabled: true
 {{- end -}}
 {{- end -}}
+
+{{/*
+Mount large agent helm values from a Secret file instead of envFrom.
+Merged CA PEMs blow ARG_MAX when injected as CONSOLE_AGENT_HELM_VALUES.
+*/}}
+{{- define "console.agentHelmValues.volume" -}}
+{{- if include "console.agentHelmValues" . }}
+- name: agent-helm-values
+  secret:
+    secretName: console-agent-helm-values
+    defaultMode: 0644
+{{- end -}}
+{{- end -}}
+
+{{- define "console.agentHelmValues.volumeMount" -}}
+{{- if include "console.agentHelmValues" . }}
+- name: agent-helm-values
+  mountPath: /etc/console/agent-helm-values.yaml
+  subPath: values.yaml
+  readOnly: true
+{{- end -}}
+{{- end -}}
+
+{{- define "console.agentHelmValues.env" -}}
+{{- if include "console.agentHelmValues" . }}
+- name: CONSOLE_AGENT_HELM_VALUES_PATH
+  value: /etc/console/agent-helm-values.yaml
+{{- end -}}
+{{- end -}}
