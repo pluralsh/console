@@ -3,7 +3,7 @@
 # Usage: docker run <image> [api|kas|agentk] [args...]
 
 # Builder stage for all binaries
-FROM golang:1.27.2-alpine AS builder
+FROM golang:1.27.4-alpine AS builder
 
 ARG TARGETARCH
 ARG TARGETOS
@@ -92,7 +92,7 @@ LABEL source="https://github.com/pluralsh/console/go/kubernetes-agent" \
       org.opencontainers.image.title="KAS Server" \
       org.opencontainers.image.description="KAS server image for Plural CD" \
       org.opencontainers.image.base.name="gcr.io/distroless/static-debian12:nonroot" \
-      org.opencontainers.image.rebuild-trigger="2026-06-26-kas"
+      org.opencontainers.image.rebuild-trigger="2026-11-19-kas"
 
 # Copy all binaries from builder
 COPY --from=builder /binaries/api /api

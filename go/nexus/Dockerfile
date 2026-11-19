@@ -1,5 +1,5 @@
 # Build stage
-FROM golang:1.27.2-alpine AS builder
+FROM golang:1.27.4-alpine AS builder
 
 WORKDIR /build
 
@@ -46,7 +46,7 @@ LABEL org.opencontainers.image.created="${BUILD_TIME}" \
       org.opencontainers.image.title="Nexus" \
       org.opencontainers.image.description="AI proxy service for Plural Console" \
       org.opencontainers.image.base.name="gcr.io/distroless/static-debian12:nonroot" \
-      org.opencontainers.image.rebuild-trigger="2026-06-26-nexus"
+      org.opencontainers.image.rebuild-trigger="2026-11-19-nexus"
 
 WORKDIR /app
 
