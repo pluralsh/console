@@ -246,6 +246,17 @@ addons:
   release_url: https://github.com/kubernetes-sigs/aws-ebs-csi-driver/releases/tag/v{vsn}
   helm_repository_url: https://kubernetes-sigs.github.io/aws-ebs-csi-driver
   versions:
+  - version: 1.68.1
+    kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29',
+      '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 2.68.1
+    images: ['public.ecr.aws/csi-components/csi-attacher:v4.13.0-eksbuild.6', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.18.0-eksbuild.6',
+      'public.ecr.aws/csi-components/csi-provisioner:v6.4.0-eksbuild.6', 'public.ecr.aws/csi-components/csi-resizer:v2.3.0-eksbuild.6',
+      'public.ecr.aws/csi-components/livenessprobe:v2.20.0-eksbuild.6', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.68.1',
+      'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20261102-7f9e993948-master@sha256:026a3a75edd3963f325473ee22f40be8a7d3135df8baa7bdcb29c20d40197b64']
   - version: 1.68.0
     kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29',
       '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
@@ -21014,6 +21025,32 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
+  - version: 93.4.1
+    kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29',
+      '1.28', '1.27', '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ["**kube-prometheus-stack:** Dropped fine-grained `apiserver_watch_events_dispatch_duration_seconds`\
+          \ histogram buckets (changes the metric\u2019s bucket layout/series).",
+        '**prometheus-postgres-exporter dependency:** Bumped `prometheus-community/postgres_exporter`
+          chart to **v0.21.1** (may change exporter deployment/manifests/values under
+          that subchart).', '**CI only:** Updated `actions/create-github-app-token`
+          to v3.4.0 (no runtime impact).']
+      features: [Updated the bundled Postgres exporter dependency to v0.21.1., 'Adjusted
+          API server watch event dispatch duration histogram buckets to a less fine-grained
+          set, reducing time series/cardinality.']
+      breaking_changes: ['If you have alerts, dashboards, or recording rules that
+          depend on specific `apiserver_watch_events_dispatch_duration_seconds_bucket`
+          boundaries, they may need to be updated because the bucket labels/series
+          will change.']
+    chart_version: 93.4.1
+    images: ['docker.io/bats/bats:1.14.0', 'docker.io/grafana/grafana:13.3.1-distroless',
+      'ghcr.io/jkroepke/kube-webhook-certgen:1.11.1', 'quay.io/kiwigrid/k8s-sidecar:2.14.3',
+      'quay.io/prometheus-operator/prometheus-operator:v0.95.2', 'quay.io/prometheus/alertmanager:v0.35.0',
+      'quay.io/prometheus/node-exporter:v1.12.1-distroless', 'quay.io/prometheus/prometheus:v3.16.0-distroless',
+      'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
   - version: 93.4.0
     kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29',
       '1.28', '1.27', '1.26', '1.25']
@@ -26775,29 +26812,27 @@ addons:
     summary:
       helm_changes: ''
       chart_updates: []
-      features: ["Modernized fs-backup into a micro-service architecture, adding concurrency\
-          \ control, cancel/resume, and better isolation so one failed transfer won\u2019\
-          t impact others.", fs-backup now supports Windows workloads by allowing
-          data mover pods to run on Windows nodes for backup/restore., 'Adds (beta)
-          Kubernetes VolumeGroupSnapshot support for CSI snapshot backups and CSI
-          snapshot data movement to get crash-consistent, point-in-time snapshots
-          across multiple volumes.', 'Adds PriorityClass support across Velero components
-          (server, node-agent, data movers, and repo maintenance jobs).', Improves
-          scalability/resiliency for data movers via a node-agent `PrepareQueueLength`
-          setting to avoid creating excessive pending pods and by improving restart/orphan
-          handling so transfers can resume or cancel appropriately., Adds reusable
-          include/exclude filters via `includeExcludePolicy` in resource policy ConfigMaps.,
-        Adds operational improvements like BSL availability metrics and BSL status
-          checks for backup/restore operations.]
-      breaking_changes: ['Restic uploader path removed: `--uploader-type=restic` is
-          no longer valid for new installs/backups; restores from existing restic-based
-          backups are supported only until v1.19.', Repository maintenance job settings
-          were removed from Velero server flags and must be configured via the repository
-          maintenance job ConfigMap (flags like `--keep-latest-maintenance-jobs` and
-          CPU/memory request/limit flags are removed)., 'PVC restore behavior change:
-          Velero now always removes the `selected-node` annotation during PVC restore
-          when no node mapping exists; previously it could be preserved if the node
-          existed.']
+      features: ['Modernized file-system backup (fs-backup) to a micro-service architecture,
+          enabling better concurrency control, cancel/resume, and improved robustness/resource
+          usage of node-agent.', fs-backup now supports Windows clusters by allowing
+          data mover pods to run on Windows nodes for volume backup/restore., Adds
+          beta support for Kubernetes VolumeGroupSnapshot workflows for point-in-time
+          consistent snapshots across multiple volumes (for CSI snapshot backup and
+          CSI snapshot data movement)., 'Adds PriorityClass configuration support
+          across Velero components (server, node-agent, data mover pods, repo maintenance
+          jobs).', Improves data mover scalability/resiliency with node-agent PrepareQueueLength
+          throttling and better restart/orphan handling; also adds restore node-selection
+          parity and per-storageclass node selection for CSI snapshot data movement.,
+        Extends Resource Policy with reusable include/exclude filters via includeExcludePolicy
+          (in addition to volumePolicy).]
+      breaking_changes: ['Restic uploader path removed for new backups: --uploader-type=restic
+          is no longer a valid install config; restores from existing Restic backups
+          remain supported until v1.19.', Repository maintenance job tuning flags
+          removed from velero server args (--keep-latest-maintenance-jobs and resource
+          request/limit flags); configuration moves to a ConfigMap (CLI fallback exists
+          for keepLatestMaintenanceJobs)., 'Behavior change on PVC restore: selected-node
+          annotation is always removed when no node mapping exists (previously preserved
+          if node existed).']
     chart_version: 11.4.0
     images: ['docker.io/bitnamilegacy/kubectl:1.37', 'docker.io/velero/velero:v1.17.1']
   - version: 1.17.0
@@ -26855,36 +26890,27 @@ addons:
     summary:
       helm_changes: ''
       chart_updates: []
-      features: ['Windows cluster support: Velero can now run in Windows/hybrid clusters,
-          with node-agent, data mover pods, and maintenance jobs schedulable on Windows
-          nodes; built-in data mover supports Windows workloads end-to-end (discovery,
-          backup/restore, hooks).', 'Parallel Item Block backup: item blocks (groups
-          of correlated resources) are now processed concurrently; pre/post hooks
-          run within item blocks and can run in parallel. Parallelism is configurable
-          via `--item-block-worker-count` (default 1).', 'Data mover restore scalability:
-          new node-agent config flag `ignoreDelayBinding` allows data mover restores
-          for WaitForFirstConsumer PVCs to be spread evenly across nodes instead of
-          being constrained to the attached node.', 'Improved data mover observability:
-          node-agent logs now include more intermediate object statuses on failures
-          and emit errors when cleanup of intermediate objects fails.', 'CSI snapshot
-          usability improvement: Velero no longer retains and backs up unnecessary
-          VolumeSnapshotContent objects, reducing cross-cluster sync/restore noise
-          for shared BSLs.', 'Backup repository maintenance resiliency/observability:
-          BackupRepository CR now tracks `RecentMaintenance` history; running maintenance
-          jobs are recaptured after server restarts; maintenance/init is skipped for
-          readOnly BSLs; configurable Kopia maintenance cadence via `fullMaintenanceInterval`
-          (normal/fast/eager GC).', 'Volume Policy enhancement: can filter volumes
-          by PVC labels in addition to existing criteria.', 'Object-level resource
-          status restore: restore status behavior can be controlled per object via
-          `velero.io/restore-status` annotation.', 'Velero restore helper binary consolidation:
-          velero, velero-helper, and velero-restore-helper are now shipped in a single
-          Velero image.']
-      breaking_changes: ['Behavioral change: item blocks and hooks may now execute
-          in parallel; workloads relying on implicit ordering may need review, and
-          cluster/API load may increase unless `--item-block-worker-count` is tuned.',
-        'Windows support limitations: fs-backup is not supported for Windows workloads;
-          NTFS security descriptors/extended attributes are not backed up/restored,
-          so non-admin Windows workloads may not restore correctly.']
+      features: ['Windows cluster support: Velero components (node-agent, data mover
+          pods, maintenance jobs) can run on Windows nodes and Velero can back up/restore
+          Windows workloads; fs-backup remains Linux-only.', 'Parallel ItemBlock backup:
+          backup engine can process ItemBlocks concurrently to improve throughput;
+          configure with the new `--item-block-worker-count` server/install flag (default
+          1).', 'Data mover restore scalability for WaitForFirstConsumer volumes:
+          option to spread restores across nodes by setting `ignoreDelayBinding` in
+          the node-agent configuration.', 'Improved observability for data mover:
+          richer status/error logging for intermediate objects and cleanup failures
+          in node-agent logs (enabled by default).', "CSI snapshot usability improvement:\
+          \ stop retaining VolumeSnapshotContent in backups so it won\u2019t be synced/restored\
+          \ unnecessarily across clusters.", "BackupRepository maintenance resiliency/observability:\
+          \ `RecentMaintenance` history in BackupRepository CR, maintenance jobs are\
+          \ re-captured after server restarts, and readOnly BSLs/repos won\u2019t\
+          \ run maintenance or initialize repos; configurable `fullMaintenanceInterval`\
+          \ (normal/fast/eager GC).", 'Volume Policy enhancement: filter volumes by
+          PVC labels.', 'Per-object resource status restore control: set annotation
+          `velero.io/restore-status` on objects to decide whether status is restored.',
+        'Velero image packaging: velero, velero-helper, and velero-restore-helper
+          binaries are now bundled into the single `velero/velero:v1.16.0` image.']
+      breaking_changes: []
     chart_version: 10.1.3
     images: ['docker.io/bitnamilegacy/kubectl:1.37', 'velero/velero:v1.16.2']
   - version: 1.15.0
@@ -26894,36 +26920,56 @@ addons:
     requirements: []
     incompatibilities: []
     summary:
-      helm_changes: ''
+      helm_changes: "## Helm/values changes to plan for\nThe notes you provided are\
+        \ **application** release notes, not the Velero Helm chart changelog, so there\
+        \ are **no explicit Helm values changes** to quote from a chart changelog.\n\
+        \nThat said, when upgrading Velero via Helm from **v1.14.x \u2192 v1.15.0**,\
+        \ you should review/update values in these areas (because the *server flags/config*\
+        \ behavior changed):\n\n- **Node-agent config map name is no longer assumed**\n\
+        \  - If you use a node-agent config `ConfigMap`, ensure the chart sets the\
+        \ Velero server arg `--node-agent-configmap=<name>` to match your actual ConfigMap\
+        \ name.\n\n- **Repository maintenance job settings move from server flags\
+        \ to a ConfigMap (preferred)**\n  - If you currently set any of these server\
+        \ flags, consider migrating them into the **repository maintenance job configuration\
+        \ ConfigMap** (Velero will prefer ConfigMap values over flags):\n    - `--keep-latest-maintenance-jobs`\n\
+        \    - `--maintenance-job-cpu-request`\n    - `--maintenance-job-mem-request`\n\
+        \    - `--maintenance-job-cpu-limit`\n    - `--maintenance-job-mem-limit`\n\
+        \n- **New ConfigMaps you may want to template via Helm** (optional, but new\
+        \ in 1.15):\n  - *Repository maintenance configuration* (adds node selection\
+        \ for maintenance jobs)\n  - *Backup PVC configuration* (read-only mounts\
+        \ / storage class / no-relabeling)\n  - *Backup repository configuration*\
+        \ (repo cache size limit)\n\n- **Restic deprecation warnings**\n  - If your\
+        \ Helm values still set `--uploader-type=restic` or otherwise enable Restic-based\
+        \ fs-backups, expect warning logs/events; plan a migration toward Kopia where\
+        \ applicable.\n"
       chart_updates: []
-      features: ['Data mover micro service: CSI Snapshot Data Movement transfers move
-          from node-agent pods into dedicated per-backup/restore pods, improving security
-          (no hostPath), resource isolation, resilience, and avoiding unnecessary
-          full backups due to hostPath changes.', "Item Block model + ItemBlockAction\
-          \ (IBA) plugin type: resources can be grouped into correlated \u201Citem\
-          \ blocks\u201D for future concurrent processing; built-in IBAs provided\
-          \ for Pods and PVCs and custom IBAs supported (multi-thread processing not\
-          \ yet enabled in 1.15).", 'Repository maintenance job node selection: you
-          can target specific nodes for repo maintenance jobs via a new repository
-          maintenance configuration ConfigMap.', 'Backup PVC configuration: support
-          read-only mounts for backupPVCs (can speed expose for some storage like
-          Ceph) and allow selecting a different storageClass for backupPVCs via a
-          new backup PVC configuration ConfigMap.', 'Backup repository cache limit
-          configuration: configure per-repository cache size to reduce risk of pod
-          eviction due to ephemeral storage exhaustion.', 'Performance/stability fixes:
-          fix server memory leak after plugin calls, automatically pass client QPS/burst
-          to plugins for faster API-heavy operations, and include Kopia upstream improvements
-          reducing memory for maintenance in large repositories.']
-      breaking_changes: ['Restic fs-backup path is deprecated starting in 1.15: backups/restores
-          still succeed but warnings will appear when installing with `--uploader-type=restic`
-          or when using the restic path; plan migration off restic per deprecation
-          policy.', 'Node-agent ConfigMap name is no longer fixed: if you customize
-          it, you must set the node-agent server parameter `node-agent-configmap`
-          to the chosen name.', Repository maintenance job settings are moving from
-          server flags to a repository maintenance job configuration ConfigMap; flags
-          remain for backward compatibility but the ConfigMap takes precedence when
-          both are present., Changing PVC selected-node feature is deprecated in 1.15
-          and should not be relied upon; expect removal in a future release.]
+      features: ['Data mover micro service: CSI snapshot data movement shifts from
+          node-agent hostPath-based access to dedicated per-backup/per-restore pods,
+          improving security isolation and allowing granular CPU/memory settings per
+          operation.', 'Item Block model plus ItemBlockAction (IBA) plugin type: resources
+          can be grouped into correlated blocks (built-ins for Pods/PVCs; custom IBAs
+          supported) to enable future parallel backup processing; in 1.15 the processing
+          remains single-threaded.', 'Node selection for repository maintenance jobs
+          via a new repository-maintenance ConfigMap, letting you steer heavy maintenance
+          workloads to specific nodes.', 'Backup PVC configuration via a new ConfigMap:
+          support for read-only mounting of backupPVCs (can speed up expose on some
+          storage like Ceph) and selecting the storage class used for backupPVCs.',
+        Backup repository cache size configuration via a new backup-repository ConfigMap
+          to cap client-side cache usage and reduce evictions due to ephemeral storage
+          pressure., 'Performance improvements: fixes a Velero server memory leak
+          after plugin calls, passes client-qps/burst settings through to plugins,
+          and includes Kopia upstream improvements reducing memory blowups during
+          maintenance on large repos.']
+      breaking_changes: ['Restic is deprecated for fs-backup starting in 1.15: backups/restores
+          still succeed but emit warnings when Restic is used (including `--uploader-type=restic`);
+          plan to migrate to Kopia to avoid future removal.', Node-agent configuration
+          ConfigMap name is now configurable; Velero no longer assumes a fixed name
+          and requires explicitly setting the `--node-agent-configmap` server parameter
+          to match., Repository maintenance job settings should move from Velero server
+          flags into the new repository-maintenance job configuration ConfigMap; flags
+          remain for backward compatibility but ConfigMap values take precedence if
+          both are set., "The \u201Cchanging PVC selected-node\u201D feature is deprecated\
+          \ in 1.15 and should not be relied on; it will be removed in a future release."]
     chart_version: 8.7.2
     images: ['docker.io/bitnami/kubectl:1.37', 'velero/velero:v1.15.2']
   - version: 1.14.0
@@ -28571,7 +28617,7 @@ addons:
       chart_updates: []
       features: []
       breaking_changes: []
-    chart_version: 10.18.0
+    chart_version: 10.18.1
     images: ['ecr-public.aws.com/docker/library/redis:8.6.4-alpine', 'ghcr.io/dexidp/dex:v2.46.1',
       'quay.io/argoproj/argocd:v3.6.1']
   - version: 3.6.0
