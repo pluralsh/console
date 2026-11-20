@@ -38,11 +38,11 @@ export function LogsEvidencePanel({
           <Flex padding="medium">
             <Button
               secondary
-              endIcon={<ReturnIcon />}
+              startIcon={<ReturnIcon />}
               onClick={() => setSelectedLog(null)}
               width="100%"
             >
-              Back to all log evidence
+              Back to all logs
             </Button>
           </Flex>
           {logLines.map((line, i) => (
