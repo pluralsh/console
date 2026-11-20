@@ -5,6 +5,7 @@ import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import {
   Delta,
   DevboxInstanceStatus,
+  useDevboxInstanceIndexDeltaSubscription,
   useDevboxInstanceQuery,
   useDevboxInstanceStatusDeltaSubscription,
   useDevboxPullRequestsQuery,
@@ -20,9 +21,11 @@ import {
 } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
+import { isNonNullable } from 'utils/isNonNullable'
 import { WorkbenchEmptyState } from '../../common/WorkbenchEmptyState'
 import { DevboxPanelRail, useDevboxPanel } from './DevboxControlPanel'
 import { isClusterOfflineError } from './devboxErrors'
+import { mergePendingInteractions } from './devboxInteractions'
 import { DevboxFileViewer } from './DevboxFileViewer'
 import {
   effectiveMaxDeferral,
@@ -77,6 +80,20 @@ export function DevboxInstanceView({ instanceId }: { instanceId: string }) {
       const delta = data?.devboxThreadDelta?.delta
       if (delta && delta !== Delta.Update) refetch()
     },
+  })
+
+  // approvals and questions the agent is blocked on arrive here, not as thread deltas
+  useDevboxInstanceIndexDeltaSubscription({
+    variables: { instanceId },
+    skip: !instanceId,
+    onData: ({ client, data: { data } }) =>
+      mergePendingInteractions(
+        client.cache,
+        instanceId,
+        (data?.devboxInstanceIndexDelta?.payload?.interactions ?? []).filter(
+          isNonNullable
+        )
+      ),
   })
 
   const timeline = useDevboxTimelineStore(instanceId)

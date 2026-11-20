@@ -143,7 +143,7 @@ defmodule Console.Application do
             %{
               issuer: iss,
               name: OAuth.name(),
-              provider_configuration_opts: %{quirks: %{allow_issuer_mismatch: true}},
+              provider_configuration_opts: %{quirks: OAuth.provider_quirks()},
               backoff_type: :exponential
             }
           }

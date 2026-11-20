@@ -131,6 +131,33 @@ defmodule Console.Devboxes.IngestTest do
   end
 
   describe "#upsert_instance_index/2" do
+    test "a later turn without an error clears the last one" do
+      inst = insert(:devbox_instance)
+      thread = insert(:devbox_instance_session,
+        instance: inst,
+        acp_session_id: "s1",
+        stop_reason: "error",
+        error: %{"message" => "API Error: 400"}
+      )
+
+      {:ok, _} = Ingest.upsert_instance_index(%{
+        instance_id: inst.id,
+        sessions: [%{thread_id: thread.id, session_id: "s1", revision: 2, foreground: %{state: :FOREGROUND_STATE_KIND_RUNNING}}]
+      }, inst.devbox.cluster)
+
+      updated = refetch(thread)
+      assert updated.foreground_state == :running
+      refute updated.error
+      refute updated.stop_reason
+
+      {:ok, _} = Ingest.upsert_instance_index(%{
+        instance_id: inst.id,
+        sessions: [%{thread_id: thread.id, session_id: "s1", revision: 3, title: "renamed"}]
+      }, inst.devbox.cluster)
+
+      assert refetch(thread).title == "renamed"
+    end
+
     test "it upserts sessions and interactions and links subagents" do
       inst = insert(:devbox_instance)
       thread = insert(:devbox_instance_session, instance: inst, acp_session_id: "parent")

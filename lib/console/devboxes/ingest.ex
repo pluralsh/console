@@ -322,7 +322,16 @@ defmodule Console.Devboxes.Ingest do
       available_commands: attrs[:available_commands] && Enum.map(attrs[:available_commands], &command/1),
       usage: usage && usage_attrs(usage)
     })
+    |> clear_foreground(attrs[:foreground])
   end
+
+  # a reported foreground replaces the last one whole, so a later turn without an error clears it
+  defp clear_foreground(session, %{} = _foreground) do
+    session
+    |> Map.put_new(:error, nil)
+    |> Map.put_new(:stop_reason, nil)
+  end
+  defp clear_foreground(session, _), do: session
 
   # the daemon reports absolute paths under the home directory, threads store ~-relative ones
   defp relative_cwd(nil), do: nil

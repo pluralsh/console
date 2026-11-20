@@ -2,10 +2,17 @@ defmodule Console.Services.OAuth do
   @moduledoc """
   Business logic for managing OIDC logins.  Uses the oidcc erlang/elixir library which seems to be the best supported at the moment,
   and also conditionally handles pkce negotiation by saving in cache, which is durable enough for short duration storage.
+
+  If a client private key is configured, the client authenticates to the token endpoint with a signed
+  `urn:ietf:params:oauth:client-assertion-type:jwt-bearer` assertion (private_key_jwt) instead of a client secret.
+  We mint that assertion ourselves rather than use oidcc's built-in private_key_jwt support, since oidcc only sets
+  a `kid` header and IdPs like ADFS/Entra require `x5t` too.  oidcc then sends it as an extension of the `none` auth method.
   """
   use Console.Services.Base
+  alias Console.AI.Provider.TokenExchange.Assertion
 
   @well_known_url "/.well-known/openid-configuration"
+  @assertion_type "urn:ietf:params:oauth:client-assertion-type:jwt-bearer"
   @name Console.OidcConfigProvider
 
   @cache_adapter Console.conf(:cache_adapter)
@@ -39,6 +46,31 @@ defmodule Console.Services.OAuth do
   end
 
   @doc """
+  Whether the client authenticates to the token endpoint with a private key jwt assertion
+  """
+  @spec client_assertion?() :: boolean
+  def client_assertion?() do
+    case configuration(:client_private_key) do
+      key when is_binary(key) and byte_size(key) > 0 -> true
+      _ -> false
+    end
+  end
+
+  @doc """
+  Provider configuration quirks for the oidcc worker.  When using client assertions, the advertised token endpoint
+  auth methods are pinned to `none` so oidcc never falls back to secret-based auth, and our assertion is sent as a
+  body extension instead.
+  """
+  @spec provider_quirks() :: map
+  def provider_quirks() do
+    quirks = %{allow_issuer_mismatch: true}
+    case client_assertion?() do
+      true -> Map.put(quirks, :document_overrides, %{"token_endpoint_auth_methods_supported" => ["none"]})
+      false -> quirks
+    end
+  end
+
+  @doc """
   Formats a valid oidc redirect uri, or raises if none can be generated
   """
   @spec redirect_uri(binary | nil) :: binary
@@ -46,7 +78,7 @@ defmodule Console.Services.OAuth do
     Oidcc.create_redirect_url(
       @name,
       configuration(:client_id),
-      configuration(:client_secret),
+      client_secret(),
       create_pkce_token(%{
         redirect_uri: redirect || configuration(:redirect_uri),
         state: state_token(),
@@ -63,14 +95,10 @@ defmodule Console.Services.OAuth do
   @spec retrieve_token(map) :: {:ok, Oidcc.Token.t()} | Console.error
   def retrieve_token(args) do
     {code, args} = Map.pop(args, :code)
-    case Oidcc.retrieve_token(
-      code,
-      @name,
-      configuration(:client_id),
-      configuration(:client_secret),
-      token_args(args)
-    ) do
-      {:ok, res} -> {:ok, res}
+    with {:ok, opts} <- token_args(args),
+         {:ok, res} <- Oidcc.retrieve_token(code, @name, configuration(:client_id), client_secret(), opts) do
+      {:ok, res}
+    else
       err -> {:error, "oidc handshake error: #{inspect(err)}"}
     end
   end
@@ -80,6 +108,39 @@ defmodule Console.Services.OAuth do
     |> Map.put(:redirect_uri, args[:redirect] || configuration(:redirect_uri))
     |> Map.put(:scope, scopes())
     |> add_pkce_token()
+    |> add_client_assertion(client_assertion?())
+  end
+
+  defp add_client_assertion(args, true) do
+    with {:ok, assertion} <- Assertion.mint(
+                               configuration(:client_id),
+                               assertion_audience(),
+                               configuration(:client_private_key),
+                               configuration(:client_key_id)
+                             ) do
+      {:ok, Map.merge(args, %{
+        preferred_auth_methods: [:none],
+        body_extension: [
+          {"client_assertion_type", @assertion_type},
+          {"client_assertion", assertion}
+        ]
+      })}
+    end
+  end
+  defp add_client_assertion(args, _), do: {:ok, args}
+
+  defp assertion_audience() do
+    case configuration(:client_assertion_audience) do
+      aud when is_binary(aud) and byte_size(aud) > 0 -> aud
+      _ -> Oidcc.ProviderConfiguration.Worker.get_provider_configuration(@name).token_endpoint
+    end
+  end
+
+  defp client_secret() do
+    case client_assertion?() do
+      true -> :unauthenticated
+      false -> configuration(:client_secret)
+    end
   end
 
   defp state_token() do

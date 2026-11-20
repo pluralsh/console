@@ -195,6 +195,12 @@ console:
     clientId: ~
     # clientSecret is used to configure the client secret for the custom oidc authentication.
     clientSecret: ~
+    # privateKey is a PEM-encoded RSA private key.  If set, console authenticates to the token endpoint with a signed jwt client assertion (private_key_jwt) instead of clientSecret.
+    privateKey: ~
+    # keyId is the key id/certificate thumbprint of privateKey registered with your idp, sent as the kid and x5t headers of the client assertion.
+    keyId: ~
+    # assertionAudience overrides the aud claim of the client assertion (defaults to the provider's token endpoint).
+    assertionAudience: ~
     # discoveryUrl is used to configure the discovery url for the custom oidc authentication. It is usually something like https://{your-idp-domain}/.well-known/openid-configuration
     discoveryUrl: ~
     # scopes is used to configure the scopes for the custom oidc authentication. (defaults to "openid email")
