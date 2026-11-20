@@ -45,7 +45,7 @@ export const evidenceDirectory: Record<
   { icon: ReactNode; label: string }
 > = {
   [EvidenceType.Log]: { icon: <LogsIcon />, label: 'Logs' },
-  [EvidenceType.Pr]: { icon: <PrOpenIcon />, label: 'PRs' },
+  [EvidenceType.Pr]: { icon: <PrOpenIcon />, label: 'Pull requests' },
   [EvidenceType.Alert]: { icon: <SirenIcon />, label: 'Alerts' },
   [EvidenceType.Knowledge]: { icon: <BrainIcon />, label: 'Knowledge' },
 }
