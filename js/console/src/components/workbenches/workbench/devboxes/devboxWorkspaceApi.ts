@@ -185,25 +185,29 @@ export function createWorkspaceApi(
         variables: { instanceId, threadId, includeDiff: true },
         fetchPolicy: 'network-only',
       })
-      return (data?.devboxChanges ?? []).filter(isNonNullable).map((g) => ({
-        repository: g.checkout?.name ?? g.checkout?.path ?? 'workspace',
-        path: g.checkout?.path,
-        branch: g.checkout?.branch,
-        files: (g.files ?? []).filter(isNonNullable).map((f) => ({
-          path: f.path,
-          oldPath: f.oldPath,
-          status: f.status,
-          additions: f.additions,
-          deletions: f.deletions,
-          binary: f.binary,
-          patch:
-            f.diffTruncated && f.diff
-              ? `${f.diff}\n… (diff truncated)`
-              : f.diff,
-        })),
-      }))
+      return toChangeGroups(data)
     },
   }
+}
+
+export function toChangeGroups(
+  data: Nullable<DevboxChangesQuery>
+): DevboxChangeGroup[] {
+  return (data?.devboxChanges ?? []).filter(isNonNullable).map((g) => ({
+    repository: g.checkout?.name ?? g.checkout?.path ?? 'workspace',
+    path: g.checkout?.path,
+    branch: g.checkout?.branch,
+    files: (g.files ?? []).filter(isNonNullable).map((f) => ({
+      path: f.path,
+      oldPath: f.oldPath,
+      status: f.status,
+      additions: f.additions,
+      deletions: f.deletions,
+      binary: f.binary,
+      patch:
+        f.diffTruncated && f.diff ? `${f.diff}\n… (diff truncated)` : f.diff,
+    })),
+  }))
 }
 
 // browsers can't set headers on WebSockets, so the token rides in the query

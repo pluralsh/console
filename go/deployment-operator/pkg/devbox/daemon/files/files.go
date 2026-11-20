@@ -50,6 +50,8 @@ type Checkouts interface {
 type Service struct {
 	Home      string
 	Checkouts Checkouts
+	// ChangesCache, when set, serves GetChanges from checkouts' background-maintained changes.
+	ChangesCache *ChangesCache
 
 	writeMu sync.Mutex
 }
@@ -455,26 +457,51 @@ func (s *Service) Changes(ctx context.Context, req *devboxv1.GetChangesRequest) 
 		}
 		pathAbs = p
 	}
-	resp := &devboxv1.GetChangesResponse{}
-	for _, repo := range repos {
-		opts := gitutil.ChangesOptions{Base: req.GetBase(), IncludeDiff: req.GetIncludeDiff(), MaxDiffBytes: int(req.GetMaxDiffBytes())}
-		if pathAbs != "" {
-			if !fsutil.Within(repo, pathAbs) {
-				continue
-			}
-			rel, _ := filepath.Rel(repo, pathAbs)
-			if rel != "." {
-				opts.Path = filepath.ToSlash(rel)
+	if pathAbs != "" {
+		kept := repos[:0:0]
+		for _, r := range repos {
+			if fsutil.Within(r, pathAbs) {
+				kept = append(kept, r)
 			}
 		}
-		rc, err := gitutil.Changes(ctx, repo, opts)
-		if err != nil {
-			rc = &devboxv1.RepositoryChanges{Checkout: &devboxv1.Checkout{Path: repo, Name: filepath.Base(repo)}}
-		}
-		if req.GetThreadId() != "" {
-			rc.Checkout.WorktreeThreadId = req.GetThreadId()
-		}
-		resp.Repositories = append(resp.Repositories, rc)
+		repos = kept
 	}
-	return resp, nil
+
+	results := make([]*devboxv1.RepositoryChanges, len(repos))
+	var wg sync.WaitGroup
+	sem := make(chan struct{}, changesConcurrency)
+	for i, repo := range repos {
+		wg.Add(1)
+		sem <- struct{}{}
+		go func() {
+			defer func() { <-sem; wg.Done() }()
+			rc, err := s.repoChanges(ctx, repo, req, pathAbs)
+			if err != nil {
+				rc = &devboxv1.RepositoryChanges{Checkout: &devboxv1.Checkout{Path: repo, Name: filepath.Base(repo)}}
+			}
+			if req.GetThreadId() != "" {
+				rc.Checkout.WorktreeThreadId = req.GetThreadId()
+			}
+			results[i] = rc
+		}()
+	}
+	wg.Wait()
+	return &devboxv1.GetChangesResponse{Repositories: results}, nil
+}
+
+// changesConcurrency bounds the checkouts GetChanges inspects at once.
+const changesConcurrency = 8
+
+func (s *Service) repoChanges(ctx context.Context, repo string, req *devboxv1.GetChangesRequest, pathAbs string) (*devboxv1.RepositoryChanges, error) {
+	opts := gitutil.ChangesOptions{Base: req.GetBase(), IncludeDiff: req.GetIncludeDiff(), MaxDiffBytes: int(req.GetMaxDiffBytes())}
+	if pathAbs != "" {
+		if rel, _ := filepath.Rel(repo, pathAbs); rel != "." {
+			opts.Path = filepath.ToSlash(rel)
+		}
+	}
+	// path-scoped lookups are cheap and rare; whole-checkout views are what the cache keeps
+	if s.ChangesCache == nil || opts.Path != "" {
+		return gitutil.Changes(ctx, repo, opts)
+	}
+	return s.ChangesCache.Get(ctx, changesKey{repo: repo, base: opts.Base, diff: opts.IncludeDiff, maxDiff: opts.MaxDiffBytes})
 }

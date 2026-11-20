@@ -5,6 +5,7 @@ import {
   DevboxInteractionFragment,
   DevboxInteractionKind,
   DevboxInteractionState,
+  DevboxToolCallFragment,
 } from 'generated/graphql'
 import { ThemeProvider } from 'styled-components'
 import { describe, expect, it, vi } from 'vitest'
@@ -25,12 +26,16 @@ const interaction = (
   ...i,
 })
 
-const renderCard = (i: DevboxInteractionFragment) => {
+const renderCard = (
+  i: DevboxInteractionFragment,
+  toolCall?: DevboxToolCallFragment
+) => {
   const onRespond = vi.fn()
   render(
     <ThemeProvider theme={styledThemeDark}>
       <DevboxInteractionCard
         interaction={i}
+        toolCall={toolCall}
         onRespond={onRespond}
       />
     </ThemeProvider>
@@ -49,6 +54,18 @@ const schema = {
 }
 
 describe('DevboxInteractionCard', () => {
+  it('shows the command a permission request would run', () => {
+    renderCard(interaction({ title: 'Run command' }), {
+      toolCallId: 'tc-1',
+      kind: 'execute',
+      rawInput: { command: 'git push --force', cwd: '/home/dev/console' },
+    } as DevboxToolCallFragment)
+    expect(
+      document.querySelector('[data-preview="command"]')?.textContent
+    ).toContain('git push --force')
+    expect(screen.getByText('in /home/dev/console')).toBeTruthy()
+  })
+
   it('answers a permission request with the chosen option or cancel', () => {
     const onRespond = renderCard(
       interaction({

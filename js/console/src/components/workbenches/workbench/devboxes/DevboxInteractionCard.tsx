@@ -16,11 +16,14 @@ import {
   DevboxInteractionKind,
   DevboxInteractionResponseAttributes,
   DevboxInteractionState,
+  DevboxToolCallFragment,
 } from 'generated/graphql'
 import { FormEvent, ReactNode, useState } from 'react'
 import styled from 'styled-components'
 import { fromNow } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
+import { DevboxApprovalPreview } from './DevboxApprovalPreview'
+import { approvalPreview } from './devboxApprovals'
 
 export type DevboxRespond = (
   response: DevboxInteractionResponseAttributes
@@ -28,16 +31,23 @@ export type DevboxRespond = (
 
 export function DevboxInteractionCard({
   interaction,
+  toolCall,
   onRespond,
   loading = false,
   error,
 }: {
   interaction: DevboxInteractionFragment
+  // the call a permission request was raised for, to show what it would do
+  toolCall?: Nullable<DevboxToolCallFragment>
   onRespond: DevboxRespond
   loading?: boolean
   error?: ReactNode
 }) {
   const pending = interaction.state === DevboxInteractionState.Pending
+  const preview =
+    interaction.kind === DevboxInteractionKind.Permission
+      ? approvalPreview(toolCall)
+      : null
   return (
     <InteractionSC
       $pending={pending}
@@ -72,6 +82,7 @@ export function DevboxInteractionCard({
       {interaction.message && (
         <CaptionP $color="text-light">{interaction.message}</CaptionP>
       )}
+      {preview && <DevboxApprovalPreview preview={preview} />}
       {interaction.review && (
         <CaptionP $color="text-xlight">
           {reviewSummary(interaction.review)}

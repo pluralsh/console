@@ -291,6 +291,7 @@ export const WORKBENCH_DEVBOX_START_SNAPSHOT_QUERY_PARAM = 'snapshot'
 export const WORKBENCH_DEVBOX_THREAD_QUERY_PARAM = 'thread'
 export const WORKBENCH_DEVBOX_TAB_QUERY_PARAM = 'tab'
 export const WORKBENCH_DEVBOX_FILE_QUERY_PARAM = 'file'
+export const WORKBENCH_DEVBOX_CHANGE_QUERY_PARAM = 'change'
 export const WORKBENCH_DEVBOX_POSITION_QUERY_PARAM = 'position'
 // the devboxes root opens the latest live instance unless this asks to create one
 export const WORKBENCH_DEVBOX_NEW_QUERY_PARAM = 'new'

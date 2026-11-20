@@ -23,6 +23,7 @@ import {
 import { ReactElement, useCallback, useEffect, useState } from 'react'
 import { matchPath, useLocation, useSearchParams } from 'react-router-dom'
 import {
+  WORKBENCH_DEVBOX_CHANGE_QUERY_PARAM,
   WORKBENCH_DEVBOX_INSTANCE_ABS_PATH,
   WORKBENCH_DEVBOX_FILE_QUERY_PARAM,
   WORKBENCH_DEVBOX_INSTANCE_PARAM_ID,
@@ -88,19 +89,30 @@ export function useDevboxPanel() {
     )
   const setTab = (tab: DevboxPanelTab) =>
     update({ [WORKBENCH_DEVBOX_TAB_QUERY_PARAM]: tab === 'files' ? null : tab })
+  // the main view shows at most one of an open file or a change's diff
   const selectFile = (path: Nullable<string>) =>
-    update({ [WORKBENCH_DEVBOX_FILE_QUERY_PARAM]: path })
+    update({
+      [WORKBENCH_DEVBOX_FILE_QUERY_PARAM]: path,
+      [WORKBENCH_DEVBOX_CHANGE_QUERY_PARAM]: null,
+    })
+  const selectChange = (change: Nullable<string>) =>
+    update({
+      [WORKBENCH_DEVBOX_CHANGE_QUERY_PARAM]: change,
+      [WORKBENCH_DEVBOX_FILE_QUERY_PARAM]: null,
+    })
   // a trailing `/` only reveals a directory in the tree, a file also replaces
   // the instance's main view with the file
   const openFile = (path: string) => {
     update({
       [WORKBENCH_DEVBOX_TAB_QUERY_PARAM]: null,
       [WORKBENCH_DEVBOX_FILE_QUERY_PARAM]: path,
+      [WORKBENCH_DEVBOX_CHANGE_QUERY_PARAM]: null,
     })
     setOpen(true)
   }
 
   const file = params.get(WORKBENCH_DEVBOX_FILE_QUERY_PARAM)
+  const change = params.get(WORKBENCH_DEVBOX_CHANGE_QUERY_PARAM)
 
   return {
     isOpen: sidePanel === SIDE_PANEL_TYPE,
@@ -111,6 +123,8 @@ export function useDevboxPanel() {
     viewedFile: file && !file.endsWith('/') ? file : null,
     selectFile,
     openFile,
+    change,
+    selectChange,
   }
 }
 
@@ -162,7 +176,8 @@ export function DevboxPanelContent() {
     setTab,
     file: filePath,
     selectFile,
-    openFile,
+    change,
+    selectChange,
   } = useDevboxPanel()
 
   const [headerActions, setHeaderActions] =
@@ -227,9 +242,11 @@ export function DevboxPanelContent() {
           )}
           {active.key === 'changes' && (
             <DevboxDiffTab
-              api={api}
+              instanceId={instanceId}
               live={live}
-              onOpen={openFile}
+              selected={change}
+              onSelect={selectChange}
+              headerActions={headerActions}
             />
           )}
           {active.key === 'terminal' && (

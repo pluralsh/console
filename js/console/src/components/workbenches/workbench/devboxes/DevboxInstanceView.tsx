@@ -26,6 +26,7 @@ import { WorkbenchEmptyState } from '../../common/WorkbenchEmptyState'
 import { DevboxPanelRail, useDevboxPanel } from './DevboxControlPanel'
 import { isClusterOfflineError } from './devboxErrors'
 import { mergePendingInteractions } from './devboxInteractions'
+import { DevboxChangesViewer } from './DevboxChangesViewer'
 import { DevboxFileViewer } from './DevboxFileViewer'
 import {
   effectiveMaxDeferral,
@@ -98,7 +99,8 @@ export function DevboxInstanceView({ instanceId }: { instanceId: string }) {
 
   const timeline = useDevboxTimelineStore(instanceId)
   const live = isInstanceLive(instance?.status)
-  const { viewedFile, selectFile } = useDevboxPanel()
+  const { viewedFile, selectFile, change, selectChange, openFile } =
+    useDevboxPanel()
   const api = useDevboxWorkspaceApi(instanceId)
   useDevboxPresence(instanceId, live)
 
@@ -214,7 +216,14 @@ export function DevboxInstanceView({ instanceId }: { instanceId: string }) {
             onImportSession={() => setImportOpen(true)}
           />
         </HeaderBarSC>
-        {live && viewedFile ? (
+        {live && change ? (
+          <DevboxChangesViewer
+            instanceId={instanceId}
+            change={change}
+            onOpenFile={openFile}
+            onClose={() => selectChange(null)}
+          />
+        ) : live && viewedFile ? (
           <DevboxFileViewer
             key={viewedFile}
             api={api}

@@ -134,8 +134,9 @@ describe('DevboxTranscript', () => {
     ])
     expect(screen.getByText('fix the build')).toBeTruthy()
     expect(screen.getByText('On it')).toBeTruthy()
-    expect(screen.getByText('edit')).toBeTruthy()
-    expect(screen.getByText('src/main.ts')).toBeTruthy()
+    const diff = container.querySelector('[data-content="diff"]')
+    expect(diff?.textContent).toContain('src/main.ts')
+    expect(diff?.textContent).toContain('+1')
     expect(screen.queryByText('hidden')).toBeNull()
     expect(screen.getByText('Plan · 1/2')).toBeTruthy()
     expect(screen.getByText('Fix bug')).toBeTruthy()
@@ -166,12 +167,22 @@ describe('DevboxTranscript', () => {
           tool(2, 'read', { file_path: 'b.ts' }),
           tool(3, 'search', { pattern: 'foo' }),
           tool(4, 'execute', { command: 'ls -la' }),
+          tool(5, 'read', { file_path: 'c.ts' }),
+          tool(6, 'edit', {
+            file_path: 'c.ts',
+            old_string: 'foo',
+            new_string: 'bar',
+          }),
+          tool(7, 'read', { file_path: 'd.ts' }),
         ]}
       />
     )
     expect(screen.getByText('2 reads, 1 grep')).toBeTruthy()
     expect(screen.queryByText('a.ts')).toBeNull()
     expect(container.textContent).toContain('ls -la')
+    expect(
+      container.querySelector('[data-content="diff"]')?.textContent
+    ).toContain('c.ts')
   })
 
   it('renders unknown entity, content and tool content variants generically', () => {

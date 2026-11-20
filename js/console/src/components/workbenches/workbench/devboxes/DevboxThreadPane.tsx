@@ -8,6 +8,7 @@ import {
   DevboxThreadFragment,
   DevboxThreadKind,
   DevboxThreadStatus,
+  DevboxToolCallFragment,
   DevboxForegroundState,
   useCancelDevboxPromptMutation,
   useDevboxInstanceCommandsQuery,
@@ -23,6 +24,7 @@ import {
   AI_SUBSCRIPTIONS_ABS_PATH,
   useSwitchToProxy,
 } from './devboxCredentials'
+import { findToolCall } from './devboxApprovals'
 import { DevboxComposer } from './DevboxComposer'
 import { useDevboxPanel } from './DevboxControlPanel'
 import { describeThreadError } from './devboxErrors'
@@ -153,6 +155,7 @@ export function DevboxThreadPane({
             <InteractionWithMutation
               key={interaction.id}
               interaction={interaction}
+              toolCall={findToolCall(timeline.store, interaction.toolCallId)}
             />
           ))}
         </ScrollSC>
@@ -241,13 +244,16 @@ function SubagentTranscript({
 
 function InteractionWithMutation({
   interaction,
+  toolCall,
 }: {
   interaction: NonNullable<DevboxInstanceFragment['interactions']>[number] & {}
+  toolCall: Nullable<DevboxToolCallFragment>
 }) {
   const [respond, { loading, error }] = useRespondDevboxInteractionMutation()
   return (
     <DevboxInteractionCard
       interaction={interaction}
+      toolCall={toolCall}
       loading={loading}
       error={error && <GqlError error={error} />}
       onRespond={(response) =>

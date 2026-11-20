@@ -160,6 +160,9 @@ func New(cfg Config) (*Daemon, error) {
 	d.ws, err = workspace.New(workspace.Options{Home: cfg.Home, StateDir: cfg.StateDir, SkelDir: cfg.SkelDir,
 		Log: d.log.With("component", "workspace"), Condition: d.condition, OnChange: func() {
 			d.writeGitAuth()
+			if d.files != nil {
+				d.files.ChangesCache.Warm(d.ctx, d.ws.Checkouts())
+			}
 			if d.agents != nil {
 				d.agents.Flush()
 			}
@@ -177,7 +180,8 @@ func New(cfg Config) (*Daemon, error) {
 	if err := d.harness.LinkInstructions(); err != nil {
 		d.log.Warn("harness instruction links", "err", err)
 	}
-	d.files = &files.Service{Home: cfg.Home, Checkouts: d.ws}
+	d.files = &files.Service{Home: cfg.Home, Checkouts: d.ws,
+		ChangesCache: files.NewChangesCache(d.log.With("component", "changes"))}
 	d.terms = terminal.New(terminal.Options{Home: cfg.Home, Shell: cfg.Shell, Env: d.baseEnv, Clock: cfg.Clock,
 		Log: d.log.With("component", "terminal")})
 	d.browser = browser.New(browser.Options{Chromium: cfg.Chromium, Xvfb: cfg.Xvfb, X11VNC: cfg.X11VNC,
@@ -232,6 +236,8 @@ func (d *Daemon) Serve(ctx context.Context, ln net.Listener) error {
 	}
 	d.bg.Go(func() { d.events.SyncEvery(d.ctx, time.Second) })
 	d.bg.Go(func() { d.ws.Watch(d.ctx) })
+	d.bg.Go(func() { d.files.ChangesCache.Run(d.ctx) })
+	d.files.ChangesCache.Warm(d.ctx, d.ws.Checkouts())
 	d.bg.Go(func() { d.browser.IdleLoop(d.ctx) })
 	d.bg.Go(func() {
 		if err := d.browser.ServeCDP(d.ctx); err != nil && d.ctx.Err() == nil {

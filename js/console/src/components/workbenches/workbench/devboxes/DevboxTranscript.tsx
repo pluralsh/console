@@ -1,7 +1,6 @@
 import {
   Chip,
   Code,
-  DiffViewer,
   FailedFilledIcon,
   Flex,
   LinkoutIcon,
@@ -38,6 +37,8 @@ import {
 import { ReactNode, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
+import { isFileEditToolCall, toolCallDiffs } from './devboxApprovals'
+import { DevboxFileDiff } from './DevboxFileDiff'
 import { DevboxContentBlock, DevboxToolCallContent } from './devboxTimeline'
 import { threadTitle } from './devboxThreads'
 
@@ -414,6 +415,8 @@ function isGroupableToolCall(entity: DevboxEntityFragment) {
     entity.toolCall.toolCallId?.startsWith(GUARDIAN_REVIEW_PREFIX)
   )
     return false
+  // edits stay in the stream so their diffs can be read without expanding a rollup
+  if (isFileEditToolCall(entity.toolCall)) return false
   const { name, arguments: args } = toolIdentity(entity.toolCall)
   return !isCmdToolKind(resolveToolCallKind(name, args))
 }
@@ -511,6 +514,30 @@ function ToolCallView({
         c.content?.__typename === 'DevboxTextContent'
       )
   )
+  const diffs =
+    !review && isFileEditToolCall(toolCall) ? toolCallDiffs(toolCall) : []
+  if (diffs.length)
+    return (
+      <Flex
+        direction="column"
+        gap="xsmall"
+        data-entity="tool-call"
+      >
+        {diffs.map((diff, i) => (
+          <DevboxFileDiff
+            key={i}
+            diff={diff}
+            status={<EditStatus status={status} />}
+          />
+        ))}
+        {status === 'failed' && output && (
+          <SimplifiedMarkdown
+            text={output}
+            tone="meta"
+          />
+        )}
+      </Flex>
+    )
   // edit rows use their content as the subtitle; keep it to the path
   const edit = kind === 'edit'
   return (
@@ -562,6 +589,28 @@ function ToolCallView({
   )
 }
 
+function EditStatus({ status }: { status: string }) {
+  if (status === 'failed')
+    return (
+      <Chip
+        size="small"
+        severity="danger"
+      >
+        Failed
+      </Chip>
+    )
+  if (isPendingStatus(status))
+    return (
+      <Chip
+        size="small"
+        loading
+      >
+        Editing
+      </Chip>
+    )
+  return null
+}
+
 function ToolCallContentView({ content }: { content: DevboxToolCallContent }) {
   switch (content.__typename) {
     case 'DevboxToolCallBlock':
@@ -570,18 +619,13 @@ function ToolCallContentView({ content }: { content: DevboxToolCallContent }) {
       ) : null
     case 'DevboxToolCallDiff':
       return (
-        <Flex
-          direction="column"
-          gap="xxsmall"
-          data-content="diff"
-        >
-          <Body2P $color="text-xlight">{content.path}</Body2P>
-          <DiffViewer
-            oldValue={content.oldText ?? ''}
-            newValue={content.newText ?? ''}
-            splitView={false}
-          />
-        </Flex>
+        <DevboxFileDiff
+          diff={{
+            path: content.path ?? '',
+            oldText: content.oldText ?? '',
+            newText: content.newText ?? '',
+          }}
+        />
       )
     case 'DevboxToolCallUnknown':
       return (
