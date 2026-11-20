@@ -267,6 +267,20 @@ message AgentLaunch {
   bool acp_v2 = 5;
   // Owner opted in to let collaborators prompt threads on this subscription-backed agent.
   bool allow_collaborators = 6;
+  // Models the console AI proxy serves this agent, set when billing is PROXY. Unset leaves the harness defaults.
+  ProxyModels proxy_models = 7;
+}
+
+// ProxyModels are the console AI proxy models one agent may use, as `provider/model` IDs the proxy routes on
+// (`anthropic/claude-sonnet-4-5`, `bedrock/us.anthropic.claude-opus-4-1-v1:0`). Console derives them from the
+// deployment settings' AI providers, the same list the proxy allows.
+message ProxyModels {
+  // Model used when neither the thread nor the box picks one.
+  string default_model = 1;
+  // Every model the agent may use, default first.
+  repeated string models = 2;
+  // Harness model aliases resolved to proxy models, e.g. Claude Code's `opus`, `sonnet` and `haiku`.
+  map<string, string> aliases = 3;
 }
 
 // ConfigOptionSetting sets one ACP session config option (model, mode, thought level, ...).

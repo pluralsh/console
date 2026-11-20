@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 	"slices"
+	"strings"
 	"testing"
 	"time"
 
@@ -66,7 +67,7 @@ func TestCreateInstanceProvisionsAndInitializes(t *testing.T) {
 	init := h.daemon.initialized[0]
 	h.daemon.mu.Unlock()
 	if init.GetInstanceId() != "inst-1" || init.GetEndpoints().GetDevboxMcpUrl() != "http://devbox-gateway.ns.svc:8080/mcp" ||
-		init.GetEndpoints().GetAiProxyUrl() != "https://console.example.com/ext/v1/ai" {
+		init.GetEndpoints().GetAiProxyUrl() != "https://console.example.com/ext/ai" {
 		t.Fatalf("unexpected Initialize: %v", init)
 	}
 	if got := h.ingest.statusList(); !slices.Equal(got, []string{"PROVISIONING", "RUNNING"}) {
@@ -86,6 +87,31 @@ func TestCreateInstanceProvisionsAndInitializes(t *testing.T) {
 	}
 	if info.AgentBilling["AGENT_TYPE_CLAUDE"] != "BILLING_MODE_PROXY" {
 		t.Fatalf("billing = %v", info.AgentBilling)
+	}
+}
+
+// A restore routed to a worker that just went away fails Unavailable; provisioning retries instead of failing the
+// instance.
+func TestProvisionRetriesUnavailableResume(t *testing.T) {
+	prev := resumeBackoff
+	resumeBackoff = 5 * time.Millisecond
+	t.Cleanup(func() { resumeBackoff = prev })
+	h := newHarness(t, nil)
+	h.ate.FailResume = status.Error(codes.Unavailable, "dial unix /var/lib/ate/workers/w/worker.sock: connect: no such file or directory")
+	h.ate.FailResumeTimes = 2
+	h.running("inst-1")
+
+	resumes := 0
+	for _, c := range h.ate.CallsSnapshot() {
+		if strings.HasPrefix(c, "ResumeActor") {
+			resumes++
+		}
+	}
+	if resumes != 3 {
+		t.Fatalf("want 3 resume attempts, got %d", resumes)
+	}
+	if got := h.ingest.statusList(); !slices.Equal(got, []string{"PROVISIONING", "RUNNING"}) {
+		t.Fatalf("status reports = %v", got)
 	}
 }
 

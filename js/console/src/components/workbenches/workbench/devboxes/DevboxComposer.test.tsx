@@ -21,7 +21,7 @@ import {
   matchSlashCommands,
   slashCommandHint,
 } from './devboxSlashCommands'
-import { getMentionQuery } from './devboxFileMentions'
+import { compileFileMentions, getMentionQuery } from './devboxFileMentions'
 
 const commands = [
   {
@@ -164,11 +164,55 @@ describe('DevboxComposer file mentions', () => {
     expect(listFiles).toHaveBeenLastCalledWith('src')
 
     await screen.findByText('main.go')
+    fireEvent.keyDown(prompt, { key: 'ArrowDown' })
     fireEvent.keyDown(prompt, { key: 'Tab' })
     expect((prompt as HTMLTextAreaElement).value).toBe(
       'look at @/home/devbox/src/main.go '
     )
     expect(screen.queryByRole('listbox')).toBeNull()
+  })
+
+  it('mentions the folder being browsed', async () => {
+    const { prompt, onSubmit } = renderComposer({ listFiles })
+    type(prompt, 'refactor @')
+    await screen.findByRole('listbox', { name: 'Files' })
+    fireEvent.keyDown(prompt, { key: 'Enter' })
+    await screen.findByText('Mention this folder')
+    fireEvent.keyDown(prompt, { key: 'Enter' })
+    expect((prompt as HTMLTextAreaElement).value).toBe(
+      'refactor @/home/devbox/src/ '
+    )
+    expect(screen.queryByRole('listbox')).toBeNull()
+
+    fireEvent.keyDown(prompt, { key: 'Enter' })
+    expect(onSubmit).toHaveBeenCalledWith(
+      'refactor <plrl-devbox-file path="/home/devbox/src/"></plrl-devbox-file>',
+      []
+    )
+  })
+
+  it('sends picked mentions as file tags', async () => {
+    const { prompt, onSubmit } = renderComposer({ listFiles })
+    type(prompt, 'explain @')
+    await screen.findByRole('listbox', { name: 'Files' })
+    fireEvent.keyDown(prompt, { key: 'Enter' })
+    type(prompt, 'explain @src/ and @README.md vs mail@x')
+    fireEvent.keyDown(prompt, { key: 'Escape' })
+    fireEvent.keyDown(prompt, { key: 'Enter' })
+    expect(onSubmit).toHaveBeenCalledWith(
+      'explain <plrl-devbox-file path="/home/devbox/src/"></plrl-devbox-file> and @README.md vs mail@x',
+      []
+    )
+  })
+
+  it('compiles only whole picked tokens', () => {
+    expect(
+      compileFileMentions('see @/a/b.go, @/a/b.go\nand @/a/b.gox', {
+        '/a/b.go': '/a/b.go',
+      })
+    ).toBe(
+      'see @/a/b.go, <plrl-devbox-file path="/a/b.go"></plrl-devbox-file>\nand @/a/b.gox'
+    )
   })
 
   it('only completes @ at a word start', () => {

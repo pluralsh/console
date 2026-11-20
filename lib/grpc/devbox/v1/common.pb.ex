@@ -311,6 +311,33 @@ defmodule Devbox.V1.AgentLaunch do
   field :credential_kind, 4, type: :string, json_name: "credentialKind"
   field :acp_v2, 5, type: :bool, json_name: "acpV2"
   field :allow_collaborators, 6, type: :bool, json_name: "allowCollaborators"
+  field :proxy_models, 7, type: Devbox.V1.ProxyModels, json_name: "proxyModels"
+end
+
+defmodule Devbox.V1.ProxyModels.AliasesEntry do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "devbox.v1.ProxyModels.AliasesEntry",
+    map: true,
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :key, 1, type: :string
+  field :value, 2, type: :string
+end
+
+defmodule Devbox.V1.ProxyModels do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "devbox.v1.ProxyModels",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :default_model, 1, type: :string, json_name: "defaultModel"
+  field :models, 2, repeated: true, type: :string
+  field :aliases, 3, repeated: true, type: Devbox.V1.ProxyModels.AliasesEntry, map: true
 end
 
 defmodule Devbox.V1.ConfigOptionSetting do

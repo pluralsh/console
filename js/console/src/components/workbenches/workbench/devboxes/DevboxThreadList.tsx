@@ -2,10 +2,16 @@ import {
   BotIcon,
   Button,
   Chip,
+  CloseIcon,
+  EditIcon,
   Flex,
+  GitForkIcon,
+  ICON_FRAME_ICON_SIZE,
   Input,
   ListBoxItem,
   Modal,
+  PlayIcon,
+  TrashCanIcon,
 } from '@pluralsh/design-system'
 import { ApolloError } from '@apollo/client'
 import { GqlError } from 'components/utils/Alert'
@@ -26,7 +32,7 @@ import {
   useRenameDevboxThreadMutation,
   useResumeDevboxThreadMutation,
 } from 'generated/graphql'
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
 import styled from 'styled-components'
 import { fromNow } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
@@ -55,6 +61,19 @@ const ACTION_LABELS: Record<DevboxThreadAction, string> = {
   close: 'Close',
   resume: 'Resume',
   delete: 'Delete',
+}
+
+const ACTION_ICONS: Record<DevboxThreadAction, ReactNode> = {
+  rename: <EditIcon size={ICON_FRAME_ICON_SIZE.small} />,
+  fork: <GitForkIcon size={ICON_FRAME_ICON_SIZE.small} />,
+  close: <CloseIcon size={ICON_FRAME_ICON_SIZE.small} />,
+  resume: <PlayIcon size={ICON_FRAME_ICON_SIZE.small} />,
+  delete: (
+    <TrashCanIcon
+      size={ICON_FRAME_ICON_SIZE.small}
+      color="icon-danger"
+    />
+  ),
 }
 
 export function DevboxThreadList({
@@ -154,6 +173,7 @@ export function DevboxThreadList({
                       <ListBoxItem
                         key={action}
                         label={ACTION_LABELS[action]}
+                        leftContent={ACTION_ICONS[action]}
                         destructive={action === 'delete'}
                       />
                     ))}

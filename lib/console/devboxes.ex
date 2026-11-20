@@ -9,7 +9,7 @@ defmodule Console.Devboxes do
   require Logger
   alias Console.PubSub
   alias Console.Deployments.{Git, Workbenches}
-  alias Console.Devboxes.{Billing, Control, Credentials, Error, Names}
+  alias Console.Devboxes.{Billing, Control, Credentials, Error, Names, ProxyModels}
   alias Console.WorkloadIdentity
   alias Console.Services.Users
   alias Console.WorkloadIdentity.Scopes.Devboxes, as: DevboxScope
@@ -276,17 +276,35 @@ defmodule Console.Devboxes do
     end
   end
 
-  defp resolve_model(agent, nil), do: {:ok, Devbox.Agent.default_model(agent)}
+  defp resolve_model(agent, nil), do: {:ok, default_model(agent)}
   defp resolve_model(%Devbox.Agent{model_switchable: false} = agent, model) do
-    case Devbox.Agent.default_model(agent) do
-      ^model -> {:ok, model}
-      _ -> {:error, "the #{agent.type} agent on this devbox doesn't allow choosing a model"}
+    case {default_model(agent), offered_models(agent)} do
+      {^model, _} -> {:ok, model}
+      {_, offered} -> if model in offered, do: {:ok, model}, else: {:error, "the #{agent.type} agent on this devbox doesn't allow choosing a model"}
     end
   end
   defp resolve_model(agent, model) do
-    case Enum.member?(Devbox.Agent.offered_models(agent), model) do
+    offered = offered_models(agent)
+    case model in offered do
       true -> {:ok, model}
-      false -> {:error, "model #{model} is not offered for the #{agent.type} agent, available models: #{Enum.join(Devbox.Agent.offered_models(agent), ", ")}"}
+      false -> {:error, "model #{model} is not offered for the #{agent.type} agent, available models: #{Enum.join(offered, ", ")}"}
+    end
+  end
+
+  @doc """
+  The models offered for a box's agent: its probed catalog narrowed by the runner's allowlist and by what the AI
+  proxy serves.
+  """
+  @spec offered_models(Devbox.Agent.t) :: [binary]
+  def offered_models(%Devbox.Agent{} = agent),
+    do: ProxyModels.narrow(agent, Devbox.Agent.offered_models(agent), ProxyModels.for_agent(agent.type))
+
+  @doc "The model preselected for a box's agent, kept within `offered_models/1`"
+  @spec default_model(Devbox.Agent.t) :: binary | nil
+  def default_model(%Devbox.Agent{} = agent) do
+    case {Devbox.Agent.default_model(agent), offered_models(agent)} do
+      {m, []} -> m
+      {m, offered} -> if m in offered, do: m, else: hd(offered)
     end
   end
 

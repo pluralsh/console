@@ -9,11 +9,13 @@ import {
 } from '@pluralsh/design-system'
 import { AgentRunPatchView } from 'components/ai/agent-runs/details/AgentRunPatchView'
 import { GqlError } from 'components/utils/Alert'
+import { FileTypeIcon } from 'components/utils/fileTree'
 import { TRUNCATE_LEFT } from 'components/utils/truncate'
 import { CaptionP } from 'components/utils/typography/Text'
 import pluralize from 'pluralize'
 import { useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
+import { basename } from '../files/workbenchFilePaths'
 import { DevboxUnavailable } from './DevboxUnavailable'
 import {
   DevboxChangedFile,
@@ -143,6 +145,10 @@ function DiffFileCard({
           icon={open ? <CaretDownIcon /> : <CaretRightIcon />}
           tooltip={open ? 'Collapse' : 'Expand'}
           onClick={() => setOpen((o) => !o)}
+        />
+        <FileTypeIcon
+          fileName={basename(file.path)}
+          size={16}
         />
         <FilePathSC title={file.path}>
           {file.oldPath ? `${file.oldPath} → ${file.path}` : file.path}

@@ -57,12 +57,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Devbox do
 
   def offered_models(%Devbox.Agent{} = agent, _, _) do
     names = Map.new(agent.models || [], & {&1.id, &1})
-    Devbox.Agent.offered_models(agent)
+    Devboxes.offered_models(agent)
     |> Enum.map(fn id -> Map.get(names, id, %{id: id, name: id, description: nil}) end)
     |> ok()
   end
 
-  def devbox_default_model(%Devbox.Agent{} = agent, _, _), do: {:ok, Devbox.Agent.default_model(agent)}
+  def devbox_default_model(%Devbox.Agent{} = agent, _, _), do: {:ok, Devboxes.default_model(agent)}
 
   def upsert_devbox(%{attributes: attrs}, ctx),
     do: Devboxes.upsert_devbox(attrs, fetch_cluster(attrs, ctx), actor(ctx))

@@ -420,7 +420,7 @@ func newHarness(t *testing.T, handler http.Handler) *harness {
 	h.records = &MemoryRecords{}
 	h.g, err = New(Config{
 		ConsoleURL:          "https://console.example.com",
-		AIProxyURL:          "https://console.example.com/ext/v1/ai",
+		AIProxyURL:          "https://console.example.com/ext/ai",
 		GatewayURL:          "http://devbox-gateway.ns.svc:8080",
 		ReadyTimeout:        5 * time.Second,
 		PrepareTimeout:      2 * time.Second,

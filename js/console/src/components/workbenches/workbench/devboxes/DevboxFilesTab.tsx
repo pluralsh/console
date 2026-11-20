@@ -1,19 +1,30 @@
+import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
+import { TreeItem, treeItemClasses } from '@mui/x-tree-view/TreeItem'
 import {
   Button,
-  CaretDownIcon,
-  CaretRightIcon,
   Chip,
   Code,
   CodeEditor,
-  FileIcon,
-  Flex,
   FolderIcon,
   ReloadIcon,
+  Spinner,
+  Tooltip,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
-import { CaptionP } from 'components/utils/typography/Text'
-import { useCallback, useEffect, useState } from 'react'
-import styled, { DefaultTheme } from 'styled-components'
+import {
+  FileTypeIcon,
+  fileTreeMuiTheme,
+  StyledTreeView,
+  TreeItemIcon,
+  TreeItemText,
+} from 'components/utils/fileTree'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
+import { Body2P, CaptionP } from 'components/utils/typography/Text'
+import { PathBreadcrumb } from 'components/workbenches/workbench/files/WorkbenchFileViewer'
+import { uniq } from 'lodash'
+import { ReactNode, useCallback, useEffect, useState } from 'react'
+import styled from 'styled-components'
+import { basename } from '../files/workbenchFilePaths'
 import { DevboxUnavailable } from './DevboxUnavailable'
 import {
   DevboxFileContent,
@@ -23,6 +34,20 @@ import {
 } from './devboxWorkspaceApi'
 
 const ROOT = '~'
+
+// directories and status rows get prefixed item ids so selection can tell them from files
+const DIR_PREFIX = 'dir:'
+const STATUS_PREFIX = 'status:'
+const trimSlash = (path: string) => path.replace(/\/$/, '')
+const dirItemId = (path: string) => `${DIR_PREFIX}${trimSlash(path)}`
+
+// directories containing a path, plus the path itself when it's a directory
+function revealedDirectories(path: Nullable<string>): string[] {
+  if (!path) return []
+  const parts = path.split('/').filter(Boolean)
+  const dirs = path.endsWith('/') ? parts : parts.slice(0, -1)
+  return dirs.map((_, i) => dirItemId(`/${dirs.slice(0, i + 1).join('/')}`))
+}
 
 export function DevboxFilesTab({
   api,
@@ -35,72 +60,107 @@ export function DevboxFilesTab({
   selected: Nullable<string>
   onSelect: (path: string) => void
 }) {
+  const [expanded, setExpanded] = useState<string[]>(() =>
+    revealedDirectories(selected)
+  )
+  const [prevSelected, setPrevSelected] = useState(selected)
+
+  // reveal paths opened from outside the tree, eg a mention or the changes tab
+  if (selected !== prevSelected) {
+    setPrevSelected(selected)
+    const required = revealedDirectories(selected)
+    if (required.some((id) => !expanded.includes(id)))
+      setExpanded(uniq([...expanded, ...required]))
+  }
+
   if (!api.listFiles)
     return (
-      <DevboxUnavailable
-        title="Files unavailable"
-        message="Console doesn't serve devbox files yet (devboxFiles, devboxFile)."
-      />
+      <PaddedSC>
+        <DevboxUnavailable
+          title="Files unavailable"
+          message="Console doesn't serve devbox files yet (devboxFiles, devboxFile)."
+        />
+      </PaddedSC>
     )
   if (!live)
     return (
-      <DevboxUnavailable
-        title="Instance isn't running"
-        message="Resume the instance to browse its files."
-      />
+      <PaddedSC>
+        <DevboxUnavailable
+          title="Instance isn't running"
+          message="Resume the instance to browse its files."
+        />
+      </PaddedSC>
     )
+
+  const selectedItem = selected?.endsWith('/')
+    ? dirItemId(selected)
+    : (selected ?? null)
+
   return (
     <SplitSC>
       <TreeSC>
-        <DirectoryNode
-          api={api}
-          entry={{ path: ROOT, name: ROOT, type: 'directory' }}
-          selected={selected}
-          onSelect={onSelect}
-          defaultOpen
-        />
+        <MuiThemeProvider theme={fileTreeMuiTheme}>
+          <StyledTreeView
+            itemChildrenIndentation={12}
+            expandedItems={expanded}
+            onExpandedItemsChange={(_, ids) => setExpanded(ids)}
+            selectedItems={selectedItem}
+            onItemSelectionToggle={(_, id, isSelected) => {
+              if (
+                isSelected &&
+                !id.startsWith(DIR_PREFIX) &&
+                !id.startsWith(STATUS_PREFIX)
+              )
+                onSelect(id)
+            }}
+          >
+            <DirectoryEntries
+              api={api}
+              path={ROOT}
+              expanded={expanded}
+              selected={selected}
+            />
+          </StyledTreeView>
+        </MuiThemeProvider>
       </TreeSC>
       <ViewerSC>
-        {selected ? (
+        {selected && !selected.endsWith('/') ? (
           <FileViewer
             key={selected}
             api={api}
             path={selected}
           />
         ) : (
-          <CaptionP $color="text-xlight">Pick a file</CaptionP>
+          <PaddedSC>
+            <CaptionP $color="text-xlight">Pick a file</CaptionP>
+          </PaddedSC>
         )}
       </ViewerSC>
     </SplitSC>
   )
 }
 
-function DirectoryNode({
+// each directory only lists its children once it's expanded
+function DirectoryEntries({
   api,
-  entry,
+  path,
+  expanded,
   selected,
-  onSelect,
-  defaultOpen = false,
-  depth = 0,
 }: {
   api: DevboxWorkspaceApi
-  entry: DevboxFileEntry
+  path: string
+  expanded: string[]
   selected: Nullable<string>
-  onSelect: (path: string) => void
-  defaultOpen?: boolean
-  depth?: number
 }) {
-  const [open, setOpen] = useState(defaultOpen)
-  const [children, setChildren] = useState<Nullable<DevboxFileEntry[]>>(null)
+  const [entries, setEntries] = useState<Nullable<DevboxFileEntry[]>>(null)
   const [error, setError] = useState<Nullable<Error>>(null)
 
   useEffect(() => {
-    if (!open || children || error || !api.listFiles) return
     api
-      .listFiles(entry.path)
-      .then((entries) =>
-        setChildren(
-          entries.toSorted(
+      .listFiles?.(path)
+      .then((list) =>
+        setEntries(
+          list.toSorted(
             (a, b) =>
               Number(isDirectory(b)) - Number(isDirectory(a)) ||
               a.name.localeCompare(b.name)
@@ -108,55 +168,125 @@ function DirectoryNode({
         )
       )
       .catch(setError)
-  }, [api, children, entry.path, error, open])
+  }, [api, path])
 
-  return (
-    <div>
-      <TreeRowSC
-        type="button"
-        $depth={depth}
-        onClick={() => {
-          setOpen((o) => !o)
-          setError(null)
-        }}
-      >
-        {open ? <CaretDownIcon size={10} /> : <CaretRightIcon size={10} />}
-        <FolderIcon size={12} />
-        {entry.name}
-      </TreeRowSC>
-      {open && (error || !children || !children.length) && (
-        <TreeNoteSC
-          $depth={depth + 1}
-          $danger={!!error}
-        >
-          {error ? error.message : !children ? 'Loading…' : 'Empty'}
-        </TreeNoteSC>
-      )}
-      {open &&
-        children?.map((child) =>
-          isDirectory(child) ? (
-            <DirectoryNode
-              key={child.path}
-              api={api}
-              entry={child}
-              selected={selected}
-              onSelect={onSelect}
-              depth={depth + 1}
+  if (error)
+    return (
+      <StatusItem
+        path={path}
+        label="Couldn’t load"
+        danger
+      />
+    )
+  if (!entries)
+    return (
+      <StatusItem
+        path={path}
+        label={
+          <>
+            <Spinner size={12} /> Loading…
+          </>
+        }
+      />
+    )
+  if (!entries.length)
+    return (
+      <StatusItem
+        path={path}
+        label="Empty folder"
+      />
+    )
+
+  return entries.map((entry) => {
+    if (!isDirectory(entry))
+      return (
+        <TreeItem
+          key={entry.path}
+          itemId={entry.path}
+          className={entry.path === selected ? 'file-selected' : undefined}
+          label={
+            <EntryLabel
+              name={entry.name}
+              icon={
+                <FileTypeIcon
+                  fileName={entry.name}
+                  size={16}
+                />
+              }
             />
-          ) : (
-            <TreeRowSC
-              key={child.path}
-              type="button"
-              $depth={depth + 1}
-              $selected={child.path === selected}
-              onClick={() => onSelect(child.path)}
-            >
-              <FileIcon size={12} />
-              {child.name}
-            </TreeRowSC>
-          )
+          }
+        />
+      )
+
+    const id = dirItemId(entry.path)
+    return (
+      <TreeItem
+        key={entry.path}
+        itemId={id}
+        className={
+          selected?.startsWith(`${trimSlash(entry.path)}/`)
+            ? 'parent-of-selected'
+            : undefined
+        }
+        label={
+          <EntryLabel
+            name={entry.name}
+            icon={<FolderIcon size={14} />}
+          />
+        }
+      >
+        {expanded.includes(id) ? (
+          <DirectoryEntries
+            api={api}
+            path={entry.path}
+            expanded={expanded}
+            selected={selected}
+          />
+        ) : (
+          // keeps the expand affordance until the directory is listed
+          <StatusItem
+            path={entry.path}
+            label=""
+          />
         )}
-    </div>
+      </TreeItem>
+    )
+  })
+}
+
+function EntryLabel({ name, icon }: { name: string; icon: ReactNode }) {
+  return (
+    <Tooltip label={name}>
+      <EntryNameSC>
+        <TreeItemIcon>{icon}</TreeItemIcon>
+        <TreeItemText>{name}</TreeItemText>
+      </EntryNameSC>
+    </Tooltip>
+  )
+}
+
+function StatusItem({
+  path,
+  label,
+  danger = false,
+}: {
+  path: string
+  label: ReactNode
+  danger?: boolean
+}) {
+  return (
+    <TreeItem
+      itemId={`${STATUS_PREFIX}${path}`}
+      disabled
+      label={
+        <Body2P
+          $color={danger ? 'text-danger-light' : 'text-xlight'}
+          css={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}
+        >
+          {label}
+        </Body2P>
+      }
+    />
   )
 }
 
@@ -176,25 +306,67 @@ function FileViewer({ api, path }: { api: DevboxWorkspaceApi; path: string }) {
   }, [api, path])
   useEffect(() => load(), [load])
 
-  if (error) return <GqlError error={error} />
-  if (!file) return <CaptionP $color="text-xlight">Loading…</CaptionP>
-  if (file.binary)
-    return <CaptionP $color="text-xlight">Binary file, not shown.</CaptionP>
-
-  const editable = !!api.writeFile && !file.truncated
-  return (
-    <Flex
-      direction="column"
-      gap="small"
-      height="100%"
-    >
-      <Flex
-        justify="space-between"
-        align="center"
+  const editable = !!file && !file.binary && !!api.writeFile && !file.truncated
+  let body: ReactNode
+  if (error)
+    body = (
+      <PaddedSC>
+        <GqlError error={error} />
+      </PaddedSC>
+    )
+  else if (!file)
+    body = (
+      <RectangleSkeleton
+        $height="100%"
+        $width="100%"
+      />
+    )
+  else if (file.binary)
+    body = (
+      <PaddedSC>
+        <CaptionP $color="text-xlight">Binary file, not shown.</CaptionP>
+      </PaddedSC>
+    )
+  else if (editable)
+    body = (
+      <CodeEditor
+        value={file.content ?? ''}
+        language={languageForPath(path)}
+        height="100%"
+        save
+        saving={saving}
+        onSave={(content) => {
+          setSaving(true)
+          api.writeFile!(path, content, file.sha256)
+            .then(setFile)
+            // a sha mismatch means someone (often the agent) changed it
+            .catch((e) => setError(e as Error))
+            .then(() => setSaving(false))
+        }}
+      />
+    )
+  else
+    body = (
+      <Code
+        height="100%"
+        language={languageForPath(path)}
+        showHeader={false}
+        showLineNumbers
       >
-        <CaptionP $color="text-light">{path}</CaptionP>
-        <Flex gap="xsmall">
-          {file.truncated && (
+        {file.content ?? ''}
+      </Code>
+    )
+
+  return (
+    <>
+      <ViewerHeaderSC>
+        <FileTypeIcon
+          fileName={basename(path)}
+          size={20}
+        />
+        <PathBreadcrumb path={path} />
+        <HeaderActionsSC>
+          {file?.truncated && (
             <Chip
               size="small"
               severity="warning"
@@ -210,28 +382,10 @@ function FileViewer({ api, path }: { api: DevboxWorkspaceApi; path: string }) {
           >
             Reload
           </Button>
-        </Flex>
-      </Flex>
-      {editable ? (
-        <CodeEditor
-          value={file.content ?? ''}
-          language={languageForPath(path)}
-          height="100%"
-          save
-          saving={saving}
-          onSave={(content) => {
-            setSaving(true)
-            api.writeFile!(path, content, file.sha256)
-              .then(setFile)
-              // a sha mismatch means someone (often the agent) changed it
-              .catch((e) => setError(e as Error))
-              .then(() => setSaving(false))
-          }}
-        />
-      ) : (
-        <Code language={languageForPath(path)}>{file.content ?? ''}</Code>
-      )}
-    </Flex>
+        </HeaderActionsSC>
+      </ViewerHeaderSC>
+      <ViewerBodySC>{body}</ViewerBodySC>
+    </>
   )
 }
 
@@ -259,53 +413,68 @@ export function languageForPath(path: string) {
   return EXTENSION_LANGUAGES[ext] ?? 'plaintext'
 }
 
-const SplitSC = styled.div(({ theme }) => ({
+const SplitSC = styled.div({
   display: 'flex',
   flex: 1,
   minHeight: 0,
-  gap: theme.spacing.medium,
-}))
+})
 
 const TreeSC = styled.div(({ theme }) => ({
-  width: 200,
+  width: 220,
   flexShrink: 0,
-  overflowY: 'auto',
-  borderRight: theme.borders.default,
-  paddingRight: theme.spacing.small,
+  overflow: 'auto',
+  padding: theme.spacing.small,
+  backgroundColor: theme.colors['fill-accent'],
+  borderRight: theme.borders.hairline,
+  [`&& .${treeItemClasses.content}`]: {
+    ...theme.partials.text.caption,
+    padding: `${theme.spacing.xxxsmall} ${theme.spacing.xsmall}`,
+  },
 }))
 
-const ViewerSC = styled.div({ flex: 1, minWidth: 0, overflow: 'auto' })
+const EntryNameSC = styled.div({
+  display: 'flex',
+  marginLeft: '0.375rem',
+  alignItems: 'center',
+  flex: 1,
+  minWidth: 0,
+})
 
-const treeIndent = (theme: DefaultTheme, depth: number) =>
-  `calc(${depth * 12}px + ${theme.spacing.xsmall})`
+const ViewerSC = styled.div({
+  display: 'flex',
+  flexDirection: 'column',
+  flex: 1,
+  minWidth: 0,
+  minHeight: 0,
+})
 
-const TreeRowSC = styled.button<{ $depth: number; $selected?: boolean }>(
-  ({ theme, $depth, $selected }) => ({
-    ...theme.partials.text.caption,
-    display: 'flex',
-    alignItems: 'center',
-    gap: theme.spacing.xxsmall,
-    width: '100%',
-    padding: `2px ${theme.spacing.xsmall}`,
-    paddingLeft: treeIndent(theme, $depth),
-    borderRadius: theme.borderRadiuses.medium,
-    background: $selected ? theme.colors['fill-zero-selected'] : 'none',
-    border: 'none',
-    cursor: 'pointer',
-    color: theme.colors.text,
-    textAlign: 'left',
-    whiteSpace: 'nowrap',
-    '&:hover': {
-      background: $selected ? undefined : theme.colors['fill-zero-hover'],
-    },
-  })
-)
+const ViewerHeaderSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing.small,
+  boxSizing: 'border-box',
+  minHeight: 48,
+  padding: `${theme.spacing.xsmall} ${theme.spacing.medium}`,
+  borderBottom: theme.borders.hairline,
+  flexShrink: 0,
+}))
 
-const TreeNoteSC = styled.div<{ $depth: number; $danger: boolean }>(
-  ({ theme, $depth, $danger }) => ({
-    ...theme.partials.text.caption,
-    padding: `2px ${theme.spacing.xsmall}`,
-    paddingLeft: treeIndent(theme, $depth),
-    color: theme.colors[$danger ? 'text-danger' : 'text-xlight'],
-  })
-)
+const HeaderActionsSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing.xxsmall,
+  flexShrink: 0,
+  marginLeft: 'auto',
+}))
+
+// the code card's own border and rounding double up against the panel edges
+const ViewerBodySC = styled.div({
+  display: 'flex',
+  flexDirection: 'column',
+  flex: 1,
+  minHeight: 0,
+  overflow: 'auto',
+  '& > *': { border: 'none', borderRadius: 0 },
+})
+
+const PaddedSC = styled.div(({ theme }) => ({ padding: theme.spacing.medium }))

@@ -1,5 +1,5 @@
 import { styledThemeDark } from '@pluralsh/design-system'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import {
   DevboxContentBlockType,
   DevboxEntityFragment,
@@ -8,14 +8,27 @@ import {
 } from 'generated/graphql'
 import { ReactNode } from 'react'
 import { ThemeProvider } from 'styled-components'
-import { describe, expect, it, vi } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 
 import { DevboxTranscript } from './DevboxTranscript'
 import { acpContentBlock, acpToolCallContent } from './devboxTimeline'
 
-vi.mock('components/ai/chatbot/ChatMarkdown', () => ({
+vi.mock('components/ai/chatbot/ChatMarkdown', async (importOriginal) => ({
+  ...(await importOriginal<object>()),
   ChatMarkdown: ({ text }: { text: string }) => <p>{text}</p>,
 }))
+
+beforeAll(() => {
+  vi.stubGlobal(
+    'ResizeObserver',
+    class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    }
+  )
+})
+afterAll(() => vi.unstubAllGlobals())
 
 const renderTranscript = (node: ReactNode) =>
   render(<ThemeProvider theme={styledThemeDark}>{node}</ThemeProvider>)
@@ -34,6 +47,11 @@ const text = (t: string) => ({
   type: DevboxContentBlockType.Text,
   text: t,
 })
+
+const kindsOf = (container: HTMLElement) =>
+  [...container.querySelectorAll('[data-entity]')].map((n) =>
+    n.getAttribute('data-entity')
+  )
 
 describe('DevboxTranscript', () => {
   it('renders each known entity kind', () => {
@@ -90,37 +108,70 @@ describe('DevboxTranscript', () => {
               ],
             },
           }),
+          entity({
+            type: DevboxEntityType.Terminal,
+            position: 6,
+            terminal: {
+              terminalId: 'term-2',
+              command: 'yarn',
+              args: ['build'],
+              output: 'built',
+              exitCode: 0,
+            },
+          }),
         ]}
         terminal={(id) =>
-          id === 'term-1'
-            ? {
-                terminalId: id,
-                command: 'yarn',
-                args: ['build'],
-                output: 'ok',
-                exitCode: 0,
-              }
-            : null
+          id === 'term-1' ? { terminalId: id, output: 'ok', exitCode: 0 } : null
         }
       />
     )
-    const kinds = [...container.querySelectorAll('[data-entity]')].map((n) =>
-      n.getAttribute('data-entity')
-    )
-    expect(kinds).toEqual([
+    expect(kindsOf(container)).toEqual([
       'user-message',
       'agent-message',
       'tool-call',
-      'terminal',
       'plan',
+      'terminal',
     ])
     expect(screen.getByText('fix the build')).toBeTruthy()
-    expect(screen.getByText('Edit main.ts')).toBeTruthy()
-    expect(screen.getByText('src/main.ts:4')).toBeTruthy()
-    expect(screen.getByText('yarn build')).toBeTruthy()
-    expect(screen.getByText('exit 0')).toBeTruthy()
+    expect(screen.getByText('On it')).toBeTruthy()
+    expect(screen.getByText('edit')).toBeTruthy()
+    expect(screen.getByText('src/main.ts')).toBeTruthy()
     expect(screen.queryByText('hidden')).toBeNull()
     expect(screen.getByText('Plan · 1/2')).toBeTruthy()
+    expect(screen.getByText('Fix bug')).toBeTruthy()
+    expect(container.textContent).toContain('yarn build')
+  })
+
+  it('groups consecutive tool calls and keeps commands standalone', () => {
+    const tool = (
+      position: number,
+      kind: string,
+      rawInput: Record<string, unknown>
+    ) =>
+      entity({
+        type: DevboxEntityType.ToolCall,
+        position,
+        toolCall: {
+          toolCallId: `tc-${position}`,
+          kind,
+          status: 'completed',
+          rawInput,
+          content: [],
+        },
+      })
+    const { container } = renderTranscript(
+      <DevboxTranscript
+        entities={[
+          tool(1, 'read', { file_path: 'a.ts' }),
+          tool(2, 'read', { file_path: 'b.ts' }),
+          tool(3, 'search', { pattern: 'foo' }),
+          tool(4, 'execute', { command: 'ls -la' }),
+        ]}
+      />
+    )
+    expect(screen.getByText('2 reads, 1 grep')).toBeTruthy()
+    expect(screen.queryByText('a.ts')).toBeNull()
+    expect(container.textContent).toContain('ls -la')
   })
 
   it('renders unknown entity, content and tool content variants generically', () => {
@@ -152,14 +203,15 @@ describe('DevboxTranscript', () => {
         ]}
       />
     )
+    expect(screen.getByText('UNKNOWN entity')).toBeTruthy()
+    expect(screen.getByText('hologram content')).toBeTruthy()
+    expect(container.textContent).toContain('future_update')
+    expect(container.textContent).toContain('"beam": 42')
+    fireEvent.click(screen.getByText('Mystery tool'))
+    expect(screen.getByText('widget tool content')).toBeTruthy()
     expect(container.querySelectorAll('[data-entity="generic"]')).toHaveLength(
       3
     )
-    expect(screen.getByText('UNKNOWN entity')).toBeTruthy()
-    expect(screen.getByText(/future_update/)).toBeTruthy()
-    expect(screen.getByText('hologram content')).toBeTruthy()
-    expect(screen.getByText(/"beam": 42/)).toBeTruthy()
-    expect(screen.getByText('widget tool content')).toBeTruthy()
   })
 
   it('attributes Codex guardian reviews to the reviewer', () => {
@@ -192,7 +244,6 @@ describe('DevboxTranscript', () => {
       />
     )
     expect(screen.getByText('Approved by Codex reviewer')).toBeTruthy()
-    expect(screen.getByText('approved')).toBeTruthy()
     expect(screen.getByText('Not approved by Codex reviewer')).toBeTruthy()
     expect(screen.queryByText('Guardian Review')).toBeNull()
     expect(screen.queryByText('think')).toBeNull()
@@ -223,10 +274,11 @@ describe('DevboxTranscript', () => {
         renderSubagentLane={(s) => <span>lane {s.id}</span>}
       />
     )
-    const kinds = [...container.querySelectorAll('[data-entity]')].map((n) =>
-      n.getAttribute('data-entity')
-    )
-    expect(kinds).toEqual(['session-message', 'subagent-lane', 'agent-message'])
+    expect(kindsOf(container)).toEqual([
+      'session-message',
+      'subagent-lane',
+      'agent-message',
+    ])
     expect(screen.getByText('Subagent · Researcher')).toBeTruthy()
   })
 })

@@ -3,9 +3,8 @@ import {
   CameraIcon,
   Chip,
   DownloadIcon,
-  ExpandIcon,
   Flex,
-  IconFrame,
+  ICON_FRAME_ICON_SIZE,
   Input,
   ListBoxItem,
   Modal,
@@ -28,9 +27,8 @@ import {
   useKeepDevboxInstanceAwakeMutation,
   useSuspendDevboxInstanceMutation,
 } from 'generated/graphql'
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { isNonNullable } from 'utils/isNonNullable'
-import { ExitFullscreenButton } from '../monitoring/ExitFullscreenButton'
 import { billingBadgeLabel, toBillingMode } from './devboxCredentials'
 import { DevboxPrChips } from './DevboxChips'
 import { isInstanceLive, isInstanceTerminal } from './devboxIdle'
@@ -45,8 +43,6 @@ export function DevboxInstanceHeader({
   onResume,
   resuming,
   onImportSession,
-  fullscreen,
-  onFullscreenChange,
 }: {
   instance: DevboxInstanceFragment
   maxDeferralSeconds: number
@@ -55,20 +51,8 @@ export function DevboxInstanceHeader({
   onResume: () => void
   resuming: boolean
   onImportSession?: () => void
-  fullscreen: boolean
-  onFullscreenChange: (fullscreen: boolean) => void
 }) {
   const { popToast } = useSimpleToast()
-  const fullscreenTriggerRef = useRef<HTMLDivElement>(null)
-  const wasFullscreen = useRef(false)
-  // back on the trigger once fullscreen closes, not on mount
-  useEffect(() => {
-    if (fullscreen) wasFullscreen.current = true
-    else if (wasFullscreen.current) {
-      wasFullscreen.current = false
-      requestAnimationFrame(() => fullscreenTriggerRef.current?.focus())
-    }
-  }, [fullscreen])
   const [stopOpen, setStopOpen] = useState(false)
   const [snapshotOpen, setSnapshotOpen] = useState(false)
   const live = isInstanceLive(instance.status)
@@ -102,20 +86,29 @@ export function DevboxInstanceHeader({
     live && {
       key: 'snapshot',
       label: 'Take snapshot',
-      icon: <CameraIcon />,
+      icon: <CameraIcon size={ICON_FRAME_ICON_SIZE.small} />,
       disabled: instance.status === DevboxInstanceStatus.Snapshotting,
     },
     live &&
       onImportSession && {
         key: 'import',
         label: 'Import a session',
-        icon: <DownloadIcon />,
+        icon: <DownloadIcon size={ICON_FRAME_ICON_SIZE.small} />,
       },
-    live && { key: 'suspend', label: 'Suspend', icon: <MoonIcon /> },
+    live && {
+      key: 'suspend',
+      label: 'Suspend',
+      icon: <MoonIcon size={ICON_FRAME_ICON_SIZE.small} />,
+    },
     !terminal && {
       key: 'stop',
       label: 'Stop instance',
-      icon: <StopIcon color="icon-danger" />,
+      icon: (
+        <StopIcon
+          size={ICON_FRAME_ICON_SIZE.small}
+          color="icon-danger"
+        />
+      ),
       destructive: true,
     },
   ].filter((a) => !!a)
@@ -184,20 +177,6 @@ export function DevboxInstanceHeader({
               Resume
             </Button>
           )}
-          {fullscreen ? (
-            <ExitFullscreenButton onClick={() => onFullscreenChange(false)} />
-          ) : (
-            <IconFrame
-              ref={fullscreenTriggerRef}
-              clickable
-              size="medium"
-              type="tertiary"
-              icon={<ExpandIcon />}
-              textValue="Full screen"
-              tooltip="Full screen"
-              onClick={() => onFullscreenChange(true)}
-            />
-          )}
           {!!actions.length && (
             <MoreMenu
               disabled={suspendState.loading}
@@ -232,7 +211,7 @@ export function DevboxInstanceHeader({
             <Chip
               key={badge}
               size="small"
-              severity={badge.includes('plan') ? 'info' : 'neutral'}
+              severity="info"
             >
               {badge}
             </Chip>

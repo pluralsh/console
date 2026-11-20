@@ -12,7 +12,7 @@ defmodule Console.Devboxes.Control.Grpc do
   @behaviour Console.Devboxes.Control
   require Logger
   alias Console.Repo
-  alias Console.Devboxes.Ingest
+  alias Console.Devboxes.{Billing, Ingest, ProxyModels}
   alias Console.GRPC.Devbox.{Auth, Proto}
   alias Console.Schema.{
     Devbox,
@@ -55,7 +55,7 @@ defmodule Console.Devboxes.Control.Grpc do
       agent: Proto.enum(inst.agent, V1.AgentType),
       model: Proto.str(inst.requested_model),
       config_options: config_settings(inst.config_options),
-      agents: agent_launches(inst),
+      agents: agent_launches(inst, devbox),
       repositories: Enum.map(inst.repositories || [], &%V1.RepositorySpec{url: &1}),
       allowed_repositories: devbox.allowed_repositories || [],
       idle_policy: idle_policy(opts[:idle_policy] || Devbox.idle_policy(devbox)),
@@ -478,10 +478,10 @@ defmodule Console.Devboxes.Control.Grpc do
     end
   end
 
-  defp agent_launches(%DevboxInstance{agent_billing: %{} = billing}) do
-    Enum.map(billing, fn {agent, launch} -> agent_launch(Console.Devboxes.Billing.launch(agent, launch)) end)
+  # every agent the box offers gets a launch, so proxy-billed ones learn the proxy's models too
+  defp agent_launches(%DevboxInstance{} = inst, %Devbox{agents: agents}) do
+    Enum.map(agents || [], &agent_launch(Billing.for_agent(inst, &1.type)))
   end
-  defp agent_launches(_), do: []
 
   defp agent_launch(launch) do
     %V1.AgentLaunch{
@@ -489,9 +489,18 @@ defmodule Console.Devboxes.Control.Grpc do
       billing: Proto.enum(launch[:billing], V1.BillingMode),
       credential_id: Proto.str(launch[:credential_id]),
       credential_kind: Proto.str(launch[:credential_kind]),
-      allow_collaborators: !!launch[:allow_collaborators]
+      allow_collaborators: !!launch[:allow_collaborators],
+      proxy_models: proxy_models(launch)
     }
   end
+
+  defp proxy_models(%{billing: :proxy, agent: agent}) do
+    case ProxyModels.for_agent(agent) do
+      %{} = m -> %V1.ProxyModels{default_model: m.default_model, models: m.models, aliases: m.aliases}
+      nil -> nil
+    end
+  end
+  defp proxy_models(_), do: nil
 
   defp interaction_response(%{option_id: id}),
     do: %V1.InteractionResponse{response: {:permission, %V1.PermissionOutcome{outcome: {:selected_option_id, id}}}}

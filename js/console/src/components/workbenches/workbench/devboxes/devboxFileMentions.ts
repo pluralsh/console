@@ -1,3 +1,4 @@
+import { DEVBOX_FILE_TAG } from 'components/ai/chatbot/DevboxFileChip'
 import Fuse from 'fuse.js'
 import { useEffect, useRef, useState } from 'react'
 import { DevboxFileEntry, isDirectory } from './devboxWorkspaceApi'
@@ -65,15 +66,68 @@ export function applyFileMention(
   query: DevboxMentionQuery,
   entry: DevboxFileEntry
 ) {
-  const token = isDirectory(entry)
-    ? `@${query.dir}${entry.name}/`
-    : `@${entry.path} `
+  const dir = isDirectory(entry)
+  const token = dir ? `${query.dir}${entry.name}/` : entry.path
+  const inserted = `@${token}${dir ? '' : ' '}`
   const after = text.slice(query.end).replace(/^ /, '')
   return {
-    text: `${text.slice(0, query.start)}${token}${after}`,
-    caret: query.start + token.length,
+    text: `${text.slice(0, query.start)}${inserted}${after}`,
+    caret: query.start + inserted.length,
+    token,
+    path: dir ? `${entry.path.replace(/\/$/, '')}/` : entry.path,
   }
 }
+
+// the absolute path of the directory being browsed: as recorded when it was
+// picked, else the parent of its entries, else the typed path when absolute
+export function resolveMentionDir(
+  dir: string,
+  mentions: Record<string, string>,
+  entries: DevboxFileEntry[]
+): Nullable<string> {
+  if (!dir) return null
+  if (mentions[dir]) return mentions[dir]
+  const child = entries[0]?.path
+  if (child) return `${child.slice(0, child.lastIndexOf('/'))}/`
+  return dir.startsWith('/') ? dir : null
+}
+
+// mentions the browsed directory itself, closing the menu like a file does
+export function applyFolderMention(
+  text: string,
+  query: DevboxMentionQuery,
+  path: string
+) {
+  const inserted = `@${path} `
+  const after = text.slice(query.end).replace(/^ /, '')
+  return {
+    text: `${text.slice(0, query.start)}${inserted}${after}`,
+    caret: query.start + inserted.length,
+    token: path,
+    path,
+  }
+}
+
+// picked mentions (token → path) still in the prompt become file tags; typed `@` text is left alone
+export function compileFileMentions(
+  text: string,
+  mentions: Record<string, string>
+) {
+  return Object.entries(mentions).reduce(
+    (acc, [token, path]) =>
+      acc.replace(
+        new RegExp(`(^|\\s)@${escapeRegExp(token)}(?=\\s|$)`, 'g'),
+        (_, lead: string) =>
+          `${lead}<${DEVBOX_FILE_TAG} path="${escapeAttribute(path)}"></${DEVBOX_FILE_TAG}>`
+      ),
+    text
+  )
+}
+
+const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+const escapeAttribute = (s: string) =>
+  s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;')
 
 type Listing = { entries: DevboxFileEntry[]; error?: boolean }
 

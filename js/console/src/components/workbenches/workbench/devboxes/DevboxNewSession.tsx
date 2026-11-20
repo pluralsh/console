@@ -1,6 +1,6 @@
 import { ListBoxItem } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
-import { CaptionP, Subtitle1H1 } from 'components/utils/typography/Text'
+import { CaptionP } from 'components/utils/typography/Text'
 import {
   DevboxAgentType,
   DevboxInstanceFragment,
@@ -13,6 +13,7 @@ import {
   defaultAutonomy,
   isAutonomyOption,
 } from './devboxAutonomy'
+import { DevboxModelLabel, DevboxModelProviderIcon } from './DevboxChips'
 import { DevboxComposer } from './DevboxComposer'
 import { isInstanceLive, isInstanceTerminal } from './devboxIdle'
 import { AutonomyPillSelect, PillSelect } from './DevboxPromptPills'
@@ -72,7 +73,6 @@ export function DevboxNewSession({
 
   return (
     <CenterSC>
-      <Subtitle1H1>New session</Subtitle1H1>
       {error && <GqlError error={error} />}
       {terminal ? (
         <CaptionP $color="text-xlight">
@@ -145,13 +145,19 @@ export function DevboxNewSession({
                   label="Model"
                   selectedKey={model}
                   onSelect={(key) => setPicks({ ...picks, model: key })}
-                  trigger={modelDisplayNameOf(agentEntry, model) ?? 'Model'}
+                  trigger={
+                    <DevboxModelLabel
+                      model={model}
+                      label={modelDisplayNameOf(agentEntry, model) ?? 'Model'}
+                    />
+                  }
                 >
                   {models.map((m) => (
                     <ListBoxItem
                       key={m.id}
                       label={modelDisplayName(m)}
                       description={m.description ?? undefined}
+                      leftContent={<DevboxModelProviderIcon model={m.id} />}
                     />
                   ))}
                 </PillSelect>

@@ -1,6 +1,7 @@
 import {
   AddIcon,
   Button,
+  ICON_FRAME_ICON_SIZE,
   ListBoxFooterPlus,
   ListBoxItem,
   PlusIcon,
@@ -181,7 +182,7 @@ function InstanceSessions({ instanceId }: { instanceId: string }) {
         <Button
           small
           tertiary
-          startIcon={<PlusIcon />}
+          startIcon={<PlusIcon size={ICON_FRAME_ICON_SIZE.small} />}
           disabled={isInstanceTerminal(instance.status)}
           onClick={() => select(NEW_SESSION)}
         >

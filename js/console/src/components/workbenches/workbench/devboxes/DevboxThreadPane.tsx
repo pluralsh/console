@@ -1,4 +1,5 @@
 import { Button, Callout, Flex } from '@pluralsh/design-system'
+import { DevboxFileOpenContext } from 'components/ai/chatbot/DevboxFileChip'
 import { GqlError } from 'components/utils/Alert'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { CaptionP } from 'components/utils/typography/Text'
@@ -23,6 +24,7 @@ import {
   useSwitchToProxy,
 } from './devboxCredentials'
 import { DevboxComposer } from './DevboxComposer'
+import { useDevboxPanel } from './DevboxControlPanel'
 import { describeThreadError } from './devboxErrors'
 import { isInstanceLive } from './devboxIdle'
 import { DevboxInteractionCard } from './DevboxInteractionCard'
@@ -103,47 +105,50 @@ export function DevboxThreadPane({
   const { listFiles } = useDevboxWorkspaceApi(live ? instance.id : null)
 
   const sessionError = sessionId ? timeline.errors[sessionId] : undefined
+  const { openFile } = useDevboxPanel()
 
   return (
     <PaneSC>
-      <ScrollSC ref={scrollRef}>
-        {sessionError && <GqlError error={sessionError} />}
-        {session?.hasMore && sessionId && (
-          <Button
-            small
-            tertiary
-            loading={!!timeline.loading[sessionId]}
-            onClick={() => timeline.loadOlder(sessionId)}
-            css={{ alignSelf: 'center' }}
-          >
-            Load earlier messages
-          </Button>
-        )}
-        <DevboxTranscript
-          entities={entities}
-          terminal={(id) => selectTerminalOutput(session, id)}
-          subagents={subagents}
-          renderSubagentLane={(s) => (
-            <SubagentTranscript
-              subagent={s}
-              timeline={timeline}
-            />
+      <DevboxFileOpenContext value={live ? openFile : null}>
+        <ScrollSC ref={scrollRef}>
+          {sessionError && <GqlError error={sessionError} />}
+          {session?.hasMore && sessionId && (
+            <Button
+              small
+              tertiary
+              loading={!!timeline.loading[sessionId]}
+              onClick={() => timeline.loadOlder(sessionId)}
+              css={{ alignSelf: 'center' }}
+            >
+              Load earlier messages
+            </Button>
           )}
-          empty={
-            <CaptionP $color="text-xlight">
-              {session?.loaded || !sessionId
-                ? 'Nothing here yet. Send a prompt to get started.'
-                : 'Loading transcript…'}
-            </CaptionP>
-          }
-        />
-        {interactions.map((interaction) => (
-          <InteractionWithMutation
-            key={interaction.id}
-            interaction={interaction}
+          <DevboxTranscript
+            entities={entities}
+            terminal={(id) => selectTerminalOutput(session, id)}
+            subagents={subagents}
+            renderSubagentLane={(s) => (
+              <SubagentTranscript
+                subagent={s}
+                timeline={timeline}
+              />
+            )}
+            empty={
+              <CaptionP $color="text-xlight">
+                {session?.loaded || !sessionId
+                  ? 'Nothing here yet. Send a prompt to get started.'
+                  : 'Loading transcript…'}
+              </CaptionP>
+            }
           />
-        ))}
-      </ScrollSC>
+          {interactions.map((interaction) => (
+            <InteractionWithMutation
+              key={interaction.id}
+              interaction={interaction}
+            />
+          ))}
+        </ScrollSC>
+      </DevboxFileOpenContext>
       <ThreadErrorBanner
         thread={thread}
         instance={instance}

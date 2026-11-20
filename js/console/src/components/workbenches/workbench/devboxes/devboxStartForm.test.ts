@@ -1,4 +1,5 @@
 import {
+  AiProvider,
   DevboxAgentFragment,
   DevboxAgentType,
   DevboxBillingMode,
@@ -14,6 +15,7 @@ import {
   dropProxyAuto,
   hasStartErrors,
   modelDisplayName,
+  proxyModelOf,
   reconcileStartValues,
   toInstanceAttributes,
   validateStartValues,
@@ -205,5 +207,34 @@ describe('modelDisplayName', () => {
         description: 'For the hardest problems',
       })
     ).toBe('Opus')
+  })
+
+  it('shows a proxy model by its slug, not the alias it matched', () => {
+    expect(
+      modelDisplayName({
+        id: 'bedrock/us.anthropic.claude-opus-4-5-v1:0',
+        name: 'Opus',
+        description: 'Opus 4.5 · Most capable',
+      })
+    ).toBe('us.anthropic.claude-opus-4-5-v1:0')
+  })
+})
+
+describe('proxyModelOf', () => {
+  it('splits an AI proxy id into provider and slug', () => {
+    expect(proxyModelOf('openai/gpt-5')).toEqual({
+      provider: AiProvider.Openai,
+      slug: 'gpt-5',
+    })
+    expect(proxyModelOf('plural/anthropic/claude-sonnet-4-5')).toEqual({
+      provider: AiProvider.Anthropic,
+      slug: 'claude-sonnet-4-5',
+    })
+  })
+
+  it('ignores agent aliases and unknown prefixes', () => {
+    expect(proxyModelOf('opus')).toBeNull()
+    expect(proxyModelOf('acme/model')).toBeNull()
+    expect(proxyModelOf(null)).toBeNull()
   })
 })

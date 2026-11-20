@@ -126,6 +126,8 @@ type Config struct {
 	BaseEnv func() []string
 	// Overrides replace the ACP command per agent.
 	Overrides map[devboxv1.AgentType]Command
+	// CodexBundledModels returns Codex's bundled model catalog; it defaults to `codex debug models --bundled`.
+	CodexBundledModels func() ([]byte, error)
 }
 
 // Spec is everything needed to start one agent's ACP process.
@@ -221,6 +223,15 @@ func (c *Config) Spec(launch *devboxv1.AgentLaunch, endpoints *devboxv1.HarnessE
 	env := c.baseEnv()
 	aiProxy := strings.TrimSuffix(endpoints.GetAiProxyUrl(), "/")
 	subscription := billing == devboxv1.BillingMode_BILLING_MODE_SUBSCRIPTION
+	var proxyModels *devboxv1.ProxyModels
+	if !subscription && aiProxy != "" {
+		proxyModels = launch.GetProxyModels()
+	}
+	// the box's model wins; otherwise the proxy's default, so harnesses never fall back to a model it doesn't serve
+	model := bootModel
+	if model == "" {
+		model = proxyModels.GetDefaultModel()
+	}
 	set := func(kv ...string) {
 		for i := 0; i+1 < len(kv); i += 2 {
 			env = setEnv(env, kv[i], kv[i+1])
@@ -228,15 +239,29 @@ func (c *Config) Spec(launch *devboxv1.AgentLaunch, endpoints *devboxv1.HarnessE
 	}
 	switch t {
 	case devboxv1.AgentType_AGENT_TYPE_CLAUDE:
-		env = unsetEnv(env, "ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_BASE_URL", "CLAUDE_CODE_OAUTH_TOKEN")
+		env = unsetEnv(env, append([]string{"ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_BASE_URL", "CLAUDE_CODE_OAUTH_TOKEN"}, claudeTierEnv...)...)
 		set("CLAUDE_CONFIG_DIR", filepath.Join(c.Home, ".claude"), "DISABLE_AUTOUPDATER", "1")
 		if subscription {
 			set("CLAUDE_CODE_OAUTH_TOKEN", ClaudeOAuthPlaceholder)
 		} else if aiProxy != "" {
 			set("ANTHROPIC_BASE_URL", aiProxy+"/anthropic", "ANTHROPIC_AUTH_TOKEN", PlaceholderKey)
 		}
+		// Claude Code picks models by tier alias (including for background work), so each tier is pinned to a
+		// proxy model; ANTHROPIC_MODEL stays the box's choice so the session's model picker keeps working.
+		aliases := proxyModels.GetAliases()
+		for tier, key := range claudeTiers {
+			if m := aliases[tier]; m != "" {
+				set(key, m)
+			}
+		}
+		if m := aliases["haiku"]; m != "" {
+			set("ANTHROPIC_SMALL_FAST_MODEL", m)
+		}
 		if bootModel != "" {
 			set(d.modelEnv, bootModel)
+		}
+		if err := c.syncClaudeAvailableModels(proxyModels.GetModels()); err != nil {
+			return nil, err
 		}
 	case devboxv1.AgentType_AGENT_TYPE_CODEX:
 		env = unsetEnv(env, "OPENAI_API_KEY", "CODEX_API_KEY", "DEFAULT_AUTH_REQUEST")
@@ -253,12 +278,19 @@ func (c *Config) Spec(launch *devboxv1.AgentLaunch, endpoints *devboxv1.HarnessE
 				"-c", `model_providers.plural.env_key="CODEX_API_KEY"`,
 				"-c", `model_providers.plural.wire_api="responses"`,
 			)
+			catalog, err := c.writeCodexCatalog(proxyModels.GetModels())
+			if err != nil {
+				return nil, err
+			}
+			if catalog != "" {
+				spec.Args = append(spec.Args, "-c", fmt.Sprintf("model_catalog_json=%q", catalog))
+			}
 		}
-		if bootModel != "" {
-			spec.Args = append(spec.Args, "-c", fmt.Sprintf("model=%q", bootModel))
+		if model != "" {
+			spec.Args = append(spec.Args, "-c", fmt.Sprintf("model=%q", model))
 		}
 	case devboxv1.AgentType_AGENT_TYPE_OPENCODE:
-		cfg, err := c.writeOpenCodeConfig(aiProxy, bootModel)
+		cfg, err := c.writeOpenCodeConfig(aiProxy, model, proxyModels.GetModels())
 		if err != nil {
 			return nil, err
 		}
@@ -268,15 +300,14 @@ func (c *Config) Spec(launch *devboxv1.AgentLaunch, endpoints *devboxv1.HarnessE
 		if aiProxy != "" {
 			set("GEMINI_API_KEY", PlaceholderKey, "GOOGLE_GEMINI_BASE_URL", aiProxy+"/gemini")
 		}
-		if bootModel != "" {
-			spec.Args = append(spec.Args, d.modelArg, bootModel)
+		// the proxy's Gemini route takes the model from a URL path segment, so it can't carry a provider prefix
+		if model = strings.TrimPrefix(model, "vertex/"); model != "" {
+			spec.Args = append(spec.Args, d.modelArg, model)
 		}
 	case devboxv1.AgentType_AGENT_TYPE_PI:
-		if aiProxy != "" {
-			set("OPENAI_API_KEY", PlaceholderKey, "OPENAI_BASE_URL", aiProxy+"/v1")
-		}
-		if bootModel != "" {
-			set("PI_MODEL", bootModel)
+		// Pi reads custom endpoints from models.json, not the environment; the model is set over ACP
+		if err := c.syncPiProvider(aiProxy, proxyModels.GetModels()); err != nil {
+			return nil, err
 		}
 	}
 	if o, ok := c.Overrides[t]; ok {
@@ -293,8 +324,20 @@ func (c *Config) baseEnv() []string {
 	return os.Environ()
 }
 
+// claudeTiers are Claude Code's per-tier model overrides, keyed by alias.
+var claudeTiers = map[string]string{
+	"opus":   "ANTHROPIC_DEFAULT_OPUS_MODEL",
+	"sonnet": "ANTHROPIC_DEFAULT_SONNET_MODEL",
+	"haiku":  "ANTHROPIC_DEFAULT_HAIKU_MODEL",
+}
+
+var claudeTierEnv = []string{
+	"ANTHROPIC_DEFAULT_OPUS_MODEL", "ANTHROPIC_DEFAULT_SONNET_MODEL", "ANTHROPIC_DEFAULT_HAIKU_MODEL", "ANTHROPIC_SMALL_FAST_MODEL",
+}
+
 // writeOpenCodeConfig writes the daemon-managed OpenCode config (OPENCODE_CONFIG merges with the user's own).
-func (c *Config) writeOpenCodeConfig(aiProxy, bootModel string) (string, error) {
+// The proxy's models are listed under the plural provider so OpenCode offers them.
+func (c *Config) writeOpenCodeConfig(aiProxy, model string, proxyModels []string) (string, error) {
 	cfg := map[string]any{
 		"$schema":      "https://opencode.ai/config.json",
 		"instructions": []string{filepath.Join(c.Home, "AGENTS.md")},
@@ -305,22 +348,204 @@ func (c *Config) writeOpenCodeConfig(aiProxy, bootModel string) (string, error) 
 		},
 	}
 	if aiProxy != "" {
-		cfg["provider"] = map[string]any{
-			"plural": map[string]any{
-				"npm":     "@ai-sdk/openai-compatible",
-				"name":    "Plural AI proxy",
-				"options": map[string]any{"baseURL": aiProxy + "/v1", "apiKey": PlaceholderKey},
-			},
+		plural := map[string]any{
+			"npm":     "@ai-sdk/openai-compatible",
+			"name":    "Plural AI proxy",
+			"options": map[string]any{"baseURL": aiProxy + "/v1", "apiKey": PlaceholderKey},
 		}
+		if len(proxyModels) > 0 {
+			models := make(map[string]any, len(proxyModels))
+			for _, m := range proxyModels {
+				models[m] = map[string]any{"name": m}
+			}
+			plural["models"] = models
+		}
+		cfg["provider"] = map[string]any{"plural": plural}
 	}
-	if bootModel != "" {
-		cfg["model"] = "plural/" + bootModel
+	if model != "" {
+		cfg["model"] = "plural/" + strings.TrimPrefix(model, "plural/")
 	}
 	path := filepath.Join(c.StateDir, "harness", "opencode.json")
 	if err := fsutil.WriteJSON(path, cfg, 0o644); err != nil {
 		return "", err
 	}
 	return path, nil
+}
+
+// syncClaudeAvailableModels makes Claude Code's model picker offer the proxy's models: claude-agent-acp lists
+// `availableModels` from settings.json (plus Default) and passes the chosen ID verbatim to the API, which the
+// proxy routes on. The list the daemon last wrote is kept beside its other harness config, so a list the user
+// edited is left alone and the daemon's is removed once the box stops billing to the proxy.
+func (c *Config) syncClaudeAvailableModels(models []string) error {
+	settingsPath := filepath.Join(c.Home, ".claude", "settings.json")
+	statePath := filepath.Join(c.StateDir, "harness", "claude-available-models.json")
+
+	settings := map[string]any{}
+	if _, err := fsutil.ReadJSON(settingsPath, &settings); err != nil {
+		return err
+	}
+	var written []string
+	if _, err := fsutil.ReadJSON(statePath, &written); err != nil {
+		return err
+	}
+	current, present := settings["availableModels"]
+	if present && !sameModels(current, written) {
+		return nil
+	}
+
+	switch {
+	case len(models) > 0:
+		settings["availableModels"] = models
+	case present:
+		delete(settings, "availableModels")
+	default:
+		return nil
+	}
+	if err := fsutil.WriteJSON(settingsPath, settings, 0o644); err != nil {
+		return err
+	}
+	return fsutil.WriteJSON(statePath, models, 0o644)
+}
+
+func sameModels(current any, written []string) bool {
+	list, ok := current.([]any)
+	if !ok || len(list) != len(written) {
+		return false
+	}
+	for i, m := range list {
+		if s, ok := m.(string); !ok || s != written[i] {
+			return false
+		}
+	}
+	return true
+}
+
+// writeCodexCatalog replaces Codex's model list with the proxy's models, so its picker (`model/list`) offers them.
+// Each entry clones the bundled model of the same name, or a bundled one on the classic Responses API, keeping
+// Codex's prompts and tool setup; the proxy routes the `provider/model` slug. Without a bundled catalog Codex keeps
+// its own list.
+func (c *Config) writeCodexCatalog(models []string) (string, error) {
+	if len(models) == 0 {
+		return "", nil
+	}
+	bundled := c.CodexBundledModels
+	if bundled == nil {
+		bundled = c.codexBundledModels
+	}
+	data, err := bundled()
+	if err != nil {
+		return "", nil
+	}
+	catalog, err := codexCatalog(data, models)
+	if err != nil {
+		return "", nil
+	}
+	path := filepath.Join(c.StateDir, "harness", "codex-models.json")
+	if err := fsutil.WriteJSON(path, catalog, 0o644); err != nil {
+		return "", err
+	}
+	return path, nil
+}
+
+func (c *Config) codexBundledModels() ([]byte, error) {
+	cmd := exec.Command(Binary(devboxv1.AgentType_AGENT_TYPE_CODEX), "debug", "models", "--bundled")
+	cmd.Env = setEnv(c.baseEnv(), "CODEX_HOME", c.CodexHome())
+	return cmd.Output()
+}
+
+func codexCatalog(bundled []byte, models []string) (map[string]any, error) {
+	var doc struct {
+		Models []map[string]any `json:"models"`
+	}
+	if err := json.Unmarshal(bundled, &doc); err != nil {
+		return nil, err
+	}
+	if len(doc.Models) == 0 {
+		return nil, errors.New("empty bundled catalog")
+	}
+	// the leading bundled model on the classic Responses API, which any proxied model can serve
+	var fallback map[string]any
+	for _, m := range doc.Models {
+		classic := m["use_responses_lite"] != true && m["tool_mode"] == nil
+		if classic && (fallback == nil || priority(m) < priority(fallback)) {
+			fallback = m
+		}
+	}
+	if fallback == nil {
+		fallback = doc.Models[0]
+	}
+
+	out := make([]map[string]any, 0, len(models))
+	for i, id := range models {
+		_, bare, ok := strings.Cut(id, "/")
+		if !ok {
+			bare = id
+		}
+		tmpl := fallback
+		for _, m := range doc.Models {
+			if m["slug"] == bare {
+				tmpl = m
+				break
+			}
+		}
+		entry := make(map[string]any, len(tmpl))
+		for k, v := range tmpl {
+			entry[k] = v
+		}
+		// priority tiers and upgrade prompts are OpenAI account features the proxy doesn't serve
+		entry["slug"], entry["display_name"], entry["description"] = id, bare, ""
+		entry["visibility"], entry["priority"] = "list", i
+		entry["upgrade"], entry["availability_nux"] = nil, nil
+		entry["service_tiers"], entry["additional_speed_tiers"] = []any{}, []any{}
+		out = append(out, entry)
+	}
+	return map[string]any{"models": out}, nil
+}
+
+func priority(m map[string]any) float64 {
+	if p, ok := m["priority"].(float64); ok {
+		return p
+	}
+	return 1 << 30
+}
+
+// syncPiProvider registers the proxy as Pi's `plural` provider in ~/.pi/agent/models.json, so its models show up
+// as `plural/<provider>/<model>`. The rest of the file is the user's; the provider is removed once the box stops
+// billing to the proxy.
+func (c *Config) syncPiProvider(aiProxy string, models []string) error {
+	path := filepath.Join(c.Home, ".pi", "agent", "models.json")
+	cfg := map[string]any{}
+	exists, err := fsutil.ReadJSON(path, &cfg)
+	if err != nil {
+		return err
+	}
+	providers, _ := cfg["providers"].(map[string]any)
+	if providers == nil {
+		providers = map[string]any{}
+	}
+
+	if aiProxy == "" || len(models) == 0 {
+		if _, ok := providers["plural"]; !ok {
+			return nil
+		}
+		delete(providers, "plural")
+	} else {
+		entries := make([]any, 0, len(models))
+		for _, m := range models {
+			entries = append(entries, map[string]any{"id": m, "name": m})
+		}
+		providers["plural"] = map[string]any{
+			"baseUrl": aiProxy + "/v1",
+			"api":     "openai-completions",
+			"apiKey":  PlaceholderKey,
+			"models":  entries,
+		}
+	}
+	if !exists && len(providers) == 0 {
+		return nil
+	}
+	cfg["providers"] = providers
+	return fsutil.WriteJSON(path, cfg, 0o644)
 }
 
 // InstructionLinks are each harness's global instruction file, symlinked to ~/AGENTS.md so the devbox

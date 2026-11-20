@@ -21,6 +21,11 @@ defmodule Console.Devboxes.Control.GrpcTest do
       %V1.GetTimelineResponse{}
     end
 
+    def create_instance(%V1.CreateInstanceRequest{} = req, _) do
+      send(:persistent_term.get({__MODULE__, :test}), {:create, req})
+      %V1.CreateInstanceResponse{}
+    end
+
     def prompt(%V1.PromptRequest{} = req, _) do
       send(:persistent_term.get({__MODULE__, :test}), {:prompt, req})
       %V1.PromptResponse{prompt_id: req.prompt_id, disposition: :PROMPT_DISPOSITION_SENT}
@@ -50,6 +55,31 @@ defmodule Console.Devboxes.Control.GrpcTest do
     "Bearer " <> token = headers["authorization"]
     signer = Joken.Signer.create("HS256", Base.decode64!(Console.conf(:kas_devbox_secret)))
     assert {:ok, %{"aud" => "gitlab-kas"}} = Joken.verify(token, signer)
+  end
+
+  test "every agent launches, and proxy-billed ones carry the proxy's models", %{inst: inst} do
+    deployment_settings(ai: %{
+      enabled: true,
+      provider: :anthropic,
+      anthropic: %{access_token: "key", model: "claude-sonnet-4-5", tool_model: "claude-haiku-4-5", proxy_models: ["claude-sonnet-4-5"]}
+    })
+    codex = %Console.Schema.Devbox.Agent{type: :codex}
+    devbox = %{inst.devbox | agents: inst.devbox.agents ++ [codex]}
+    inst = %{inst | agent_billing: %{"codex" => %{"billing" => "subscription", "credential_id" => "cred", "credential_kind" => "codex_chatgpt_auth"}}}
+
+    {:ok, _} = Grpc.create_instance(inst, devbox: devbox)
+
+    assert_receive {:create, %V1.CreateInstanceRequest{agents: [claude, codex]}}
+    assert claude.agent == :AGENT_TYPE_CLAUDE
+    assert claude.billing == :BILLING_MODE_PROXY
+    assert claude.proxy_models.default_model == "anthropic/claude-sonnet-4-5"
+    assert claude.proxy_models.aliases == %{
+             "opus" => "anthropic/claude-sonnet-4-5",
+             "sonnet" => "anthropic/claude-sonnet-4-5",
+             "haiku" => "anthropic/claude-haiku-4-5"
+           }
+    assert codex.billing == :BILLING_MODE_SUBSCRIPTION
+    assert codex.proxy_models == nil
   end
 
   test "prompts carry their attachments", %{inst: inst} do

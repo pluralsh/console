@@ -1,5 +1,4 @@
 import {
-  FileIcon,
   FolderIcon,
   ListBoxItem,
   PaperclipIcon,
@@ -12,6 +11,7 @@ import {
   usePendingAttachmentItems,
 } from 'components/ai/chatbot/input/ChatAttachments'
 import { ChatInputIconFrame } from 'components/ai/chatbot/input/ChatInputIconFrame'
+import { FileTypeIcon } from 'components/utils/fileTree'
 import { CaptionP } from 'components/utils/typography/Text'
 import {
   DevboxCommandFragment,
@@ -41,8 +41,11 @@ import {
 } from './devboxAutonomy'
 import {
   applyFileMention,
+  applyFolderMention,
+  compileFileMentions,
   getMentionQuery,
   matchFiles,
+  resolveMentionDir,
   useDevboxDirectory,
 } from './devboxFileMentions'
 import { AutonomyPillSelect, PillSelect } from './DevboxPromptPills'
@@ -53,7 +56,8 @@ import {
   matchSlashCommands,
   slashCommandHint,
 } from './devboxSlashCommands'
-import { MODEL_CATEGORY } from './devboxStartForm'
+import { DevboxModelLabel, DevboxModelProviderIcon } from './DevboxChips'
+import { MODEL_CATEGORY, proxyModelOf } from './devboxStartForm'
 import { DevboxSuggestion, DevboxSuggestionMenu } from './DevboxSuggestionMenu'
 import { DevboxFileEntry, isDirectory } from './devboxWorkspaceApi'
 
@@ -119,6 +123,7 @@ export function DevboxComposer({
   const [dismissed, setDismissed] = useState<Nullable<string>>(null)
   const [files, setFiles] = useState<File[]>(NO_FILES)
   const [sending, setSending] = useState(false)
+  const [mentions, setMentions] = useState<Record<string, string>>({})
   const ref = useRef<HTMLTextAreaElement>(null)
   const draft = useRef({ text, files })
   useEffect(() => {
@@ -154,6 +159,11 @@ export function DevboxComposer({
   const fileMatches = mention
     ? matchFiles(directory.entries, mention.leaf).slice(0, MAX_SUGGESTIONS)
     : []
+  // browsing into a directory offers it first, so folders can be mentioned too
+  const folder =
+    mention && !mention.leaf && !directory.loading && !directory.error
+      ? resolveMentionDir(mention.dir, mentions, directory.entries)
+      : null
 
   const suggestions: DevboxSuggestion[] = slash
     ? commandMatches.map(({ cmd, group }) => ({
@@ -163,17 +173,32 @@ export function DevboxComposer({
         group,
         mono: true,
       }))
-    : fileMatches.map((entry) => ({
-        key: entry.path,
-        title: isDirectory(entry) ? `${entry.name}/` : entry.name,
-        subtitle: entry.path,
-        icon: isDirectory(entry) ? (
-          <FolderIcon size={14} />
-        ) : (
-          <FileIcon size={14} />
-        ),
-        kind: entry.gitStatus ?? undefined,
-      }))
+    : [
+        ...(folder
+          ? [
+              {
+                key: `folder:${folder}`,
+                title: mention?.dir ?? folder,
+                subtitle: 'Mention this folder',
+                icon: <FolderIcon size={14} />,
+              },
+            ]
+          : []),
+        ...fileMatches.map((entry) => ({
+          key: entry.path,
+          title: isDirectory(entry) ? `${entry.name}/` : entry.name,
+          subtitle: entry.path,
+          icon: isDirectory(entry) ? (
+            <FolderIcon size={14} />
+          ) : (
+            <FileTypeIcon
+              fileName={entry.name}
+              size={14}
+            />
+          ),
+          kind: entry.gitStatus ?? undefined,
+        })),
+      ]
   const menuOpen =
     dismissed !== text &&
     (slash ? suggestions.length > 0 : !!mention && !disabled)
@@ -199,9 +224,17 @@ export function DevboxComposer({
       if (cmd) moveCaret(applySlashCommand(text, cmd), cmd.name.length + 2)
       return
     }
-    const entry = fileMatches[idx]
-    if (!entry || !mention) return
+    if (!mention) return
+    if (folder && idx === 0) {
+      const next = applyFolderMention(text, mention, folder)
+      setMentions((cur) => ({ ...cur, [next.token]: next.path }))
+      moveCaret(next.text, next.caret)
+      return
+    }
+    const entry = fileMatches[folder ? idx - 1 : idx]
+    if (!entry) return
     const next = applyFileMention(text, mention, entry)
+    setMentions((cur) => ({ ...cur, [next.token]: next.path }))
     moveCaret(next.text, next.caret)
   }
 
@@ -213,10 +246,13 @@ export function DevboxComposer({
     // only clear what was sent; the user may have kept typing while it was in flight
     const clear = (ok: void | boolean) => {
       if (ok === false) return
-      if (draft.current.text === sent.text) update('')
+      if (draft.current.text === sent.text) {
+        update('')
+        setMentions({})
+      }
       if (draft.current.files === sent.files) setFiles(NO_FILES)
     }
-    const result = onSubmit(text.trim(), files)
+    const result = onSubmit(compileFileMentions(text.trim(), mentions), files)
     if (!(result instanceof Promise)) return clear(result)
     setSending(true)
     result.then(clear, () => undefined).finally(() => setSending(false))
@@ -345,18 +381,41 @@ export function DevboxComposer({
                 onSelect={select}
                 disabled={locked}
                 trigger={
-                  option.category === MODEL_CATEGORY
-                    ? (current?.name ?? current?.value ?? name)
-                    : `${name}: ${current?.name ?? current?.value ?? '–'}`
+                  option.category === MODEL_CATEGORY ? (
+                    <DevboxModelLabel
+                      model={option.currentValue}
+                      label={
+                        proxyModelOf(option.currentValue)?.slug ??
+                        current?.name ??
+                        current?.value ??
+                        name
+                      }
+                    />
+                  ) : (
+                    `${name}: ${current?.name ?? current?.value ?? '–'}`
+                  )
                 }
               >
-                {values.map((o) => (
-                  <ListBoxItem
-                    key={o.value}
-                    label={o.name ?? o.value}
-                    description={o.description ?? undefined}
-                  />
-                ))}
+                {values.map((o) => {
+                  const proxy =
+                    option.category === MODEL_CATEGORY
+                      ? proxyModelOf(o.value)
+                      : null
+                  return (
+                    <ListBoxItem
+                      key={o.value}
+                      label={proxy?.slug ?? o.name ?? o.value}
+                      description={
+                        proxy ? undefined : (o.description ?? undefined)
+                      }
+                      leftContent={
+                        proxy ? (
+                          <DevboxModelProviderIcon model={o.value} />
+                        ) : undefined
+                      }
+                    />
+                  )
+                })}
               </PillSelect>
             )
           })}

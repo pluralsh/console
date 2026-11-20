@@ -21,6 +21,7 @@ import {
 import { AI_AGENT_RUNS_PATH_MATCHER_ABS } from 'routes/aiRoutesConsts'
 import {
   WORKBENCH_CHATBOTS_PATH_MATCHER_ABS,
+  WORKBENCH_DEVBOX_INSTANCE_ABS_PATH,
   WORKBENCH_JOBS_PATH_MATCHER_ABS,
   WORKBENCH_TOOLS_ADD_PATH_MATCHER_ABS,
   WORKBENCH_TOOLS_YOUR_PATH_MATCHER_ABS,
@@ -32,6 +33,7 @@ export type SidePanel =
   | 'ai-chat'
   | 'webhook-setup-guide'
   | 'workbench-job'
+  | 'devbox'
 
 export type SidePanelWidthOverride = {
   minWidth?: number
@@ -56,6 +58,7 @@ const ALLOWED_ROUTES: Record<Exclude<SidePanel, 'ai-chat'>, string[]> = {
     AI_SETTINGS_MCP_SERVERS_EDIT_PATH_MATCHER_ABS,
   ],
   'workbench-job': [WORKBENCH_JOBS_PATH_MATCHER_ABS],
+  devbox: [WORKBENCH_DEVBOX_INSTANCE_ABS_PATH],
   'agent-run': [AI_AGENT_RUNS_PATH_MATCHER_ABS],
 }
 

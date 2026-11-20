@@ -1,4 +1,5 @@
 import {
+  AiProvider,
   DevboxAgentFragment,
   DevboxAgentType,
   DevboxBillingMode,
@@ -72,19 +73,40 @@ export const modelConfigOption = (agent: Nullable<DevboxAgentFragment>) =>
 // values when the catalog lists none
 export function modelsOf(agent: Nullable<DevboxAgentFragment>) {
   const models = (agent?.models ?? []).filter(isNonNullable)
-  if (models.length)
-    return models.map(({ id, name, description }) => ({
-      id,
-      name: name ?? id,
-      description,
-    }))
-  return (modelConfigOption(agent)?.options ?? [])
-    .filter(isNonNullable)
-    .map(({ value, name, description }) => ({
-      id: value,
-      name: name ?? value,
-      description,
-    }))
+  const entries = models.length
+    ? models.map(({ id, name, description }) => ({ id, name, description }))
+    : (modelConfigOption(agent)?.options ?? [])
+        .filter(isNonNullable)
+        .map(({ value, name, description }) => ({
+          id: value,
+          name,
+          description,
+        }))
+  // a proxy model's agent-side name and description describe the alias it was
+  // matched to, not the model the proxy routes to
+  return entries.map((m) =>
+    proxyModelOf(m.id)
+      ? { id: m.id, name: m.id, description: null }
+      : { ...m, name: m.name ?? m.id }
+  )
+}
+
+const PROXY_PROVIDERS: Record<string, AiProvider> = {
+  anthropic: AiProvider.Anthropic,
+  bedrock: AiProvider.Bedrock,
+  vertex: AiProvider.Vertex,
+  openai: AiProvider.Openai,
+  'openai-compatible': AiProvider.OpenaiCompatible,
+  azure: AiProvider.Azure,
+  xai: AiProvider.Xai,
+  ollama: AiProvider.Ollama,
+}
+
+// AI proxy model IDs are `provider/model`, with a `plural/` prefix under OpenCode
+export function proxyModelOf(id: Nullable<string>) {
+  const [prefix, ...rest] = (id ?? '').replace(/^plural\//, '').split('/')
+  const provider = PROXY_PROVIDERS[prefix]
+  return provider && rest.length ? { provider, slug: rest.join('/') } : null
 }
 
 // agents list aliases like Claude Code's "Default (recommended)", whose
@@ -94,6 +116,8 @@ export function modelDisplayName(model: {
   name?: Nullable<string>
   description?: Nullable<string>
 }) {
+  const proxy = proxyModelOf(model.id)
+  if (proxy) return proxy.slug
   const name = model.name || model.id
   const description = model.description ?? ''
   const resolved = (
@@ -116,7 +140,7 @@ export function modelDisplayNameOf(
 ) {
   if (!id) return null
   const model = modelsOf(agent).find((m) => m.id === id)
-  return model ? modelDisplayName(model) : id
+  return model ? modelDisplayName(model) : (proxyModelOf(id)?.slug ?? id)
 }
 
 export function defaultModelOf(agent: Nullable<DevboxAgentFragment>) {

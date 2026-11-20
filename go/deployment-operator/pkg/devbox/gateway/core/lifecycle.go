@@ -188,7 +188,7 @@ func (g *Gateway) wake(ctx context.Context, inst *Instance) error {
 	ref := inst.ref()
 	ctx, cancel := context.WithTimeout(ctx, g.cfg.ReadyTimeout)
 	defer cancel()
-	if err := g.deps.Actors.Resume(ctx, ref); err != nil {
+	if err := g.resumeActor(ctx, ref); err != nil {
 		return fmt.Errorf("resuming actor %s: %w", ref, err)
 	}
 	if _, err := g.deps.Actors.WaitState(ctx, ref, ateapi.ActorState_ACTOR_STATE_RUNNING); err != nil {
@@ -203,6 +203,34 @@ func (g *Gateway) wake(ctx context.Context, inst *Instance) error {
 		return fmt.Errorf("initializing the daemon of %s: %w", ref, err)
 	}
 	return nil
+}
+
+var (
+	resumeBackoff    = 2 * time.Second
+	maxResumeBackoff = 15 * time.Second
+)
+
+// resumeActor retries Unavailable until ctx ends. Substrate can place a restore on a worker that just went away
+// (its worker.sock is gone) before it marks the worker unavailable; a later attempt lands on a live one. A restore
+// that failed that way can leave the actor crashed, so it is reverted before the next attempt.
+func (g *Gateway) resumeActor(ctx context.Context, ref actors.Ref) error {
+	backoff := resumeBackoff
+	for {
+		err := g.deps.Actors.Resume(ctx, ref)
+		if status.Code(err) != codes.Unavailable {
+			return err
+		}
+		g.log.Info("resume unavailable; retrying", "actor", ref.String(), "error", err.Error())
+		if a, gerr := g.deps.Actors.GetActor(ctx, ref); gerr == nil && a.GetStatus().GetState() == ateapi.ActorState_ACTOR_STATE_CRASHED {
+			_ = g.deps.Actors.Revert(ctx, ref)
+		}
+		select {
+		case <-ctx.Done():
+			return err
+		case <-time.After(backoff):
+		}
+		backoff = min(backoff*2, maxResumeBackoff)
+	}
 }
 
 // refreshRunner rereads the instance's runner so Initialize carries current secret env; on failure the instance

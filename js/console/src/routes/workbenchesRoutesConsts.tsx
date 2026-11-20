@@ -290,6 +290,7 @@ export const WORKBENCH_DEVBOX_START_BOX_QUERY_PARAM = 'devbox'
 export const WORKBENCH_DEVBOX_START_SNAPSHOT_QUERY_PARAM = 'snapshot'
 export const WORKBENCH_DEVBOX_THREAD_QUERY_PARAM = 'thread'
 export const WORKBENCH_DEVBOX_TAB_QUERY_PARAM = 'tab'
+export const WORKBENCH_DEVBOX_FILE_QUERY_PARAM = 'file'
 export const WORKBENCH_DEVBOX_POSITION_QUERY_PARAM = 'position'
 // the devboxes root opens the latest live instance unless this asks to create one
 export const WORKBENCH_DEVBOX_NEW_QUERY_PARAM = 'new'
@@ -336,3 +337,6 @@ export const getWorkbenchDevboxInstanceAbsPath = ({
   const query = params.toString()
   return `${getWorkbenchDevboxesAbsPath(workbenchId)}/${WORKBENCH_DEVBOX_INSTANCES_REL_PATH}/${instanceId ?? ''}${query ? `?${query}` : ''}`
 }
+
+export const WORKBENCH_DEVBOX_INSTANCE_REL_PATH = `${WORKBENCH_DEVBOXES_REL_PATH}/${WORKBENCH_DEVBOX_INSTANCES_REL_PATH}/:${WORKBENCH_DEVBOX_INSTANCE_PARAM_ID}`
+export const WORKBENCH_DEVBOX_INSTANCE_ABS_PATH = `${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCH_DEVBOX_INSTANCE_REL_PATH}`

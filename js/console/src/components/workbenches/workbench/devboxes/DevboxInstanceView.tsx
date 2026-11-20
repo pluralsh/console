@@ -12,22 +12,16 @@ import {
   useResumeDevboxInstanceMutation,
   useWorkbenchDevboxesQuery,
 } from 'generated/graphql'
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
+import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import {
   WORKBENCH_DEVBOX_POSITION_QUERY_PARAM,
-  WORKBENCH_DEVBOX_TAB_QUERY_PARAM,
   WORKBENCH_DEVBOX_THREAD_QUERY_PARAM,
 } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { WorkbenchEmptyState } from '../../common/WorkbenchEmptyState'
-import {
-  DevboxControlPanel,
-  isPanelTab,
-  useDevboxPanelOpen,
-} from './DevboxControlPanel'
+import { DevboxPanelRail } from './DevboxControlPanel'
 import { isClusterOfflineError } from './devboxErrors'
 import {
   effectiveMaxDeferral,
@@ -39,37 +33,23 @@ import { DevboxNewSession } from './DevboxNewSession'
 import { DevboxThreadPane } from './DevboxThreadPane'
 import { ImportThreadModal } from './DevboxThreadList'
 import { selectedThread } from './devboxThreads'
-import { useDevboxWorkspaceApi } from './devboxWorkspaceApi'
 import { useDevboxPresence } from './useDevboxPresence'
 import { useDevboxTimelineStore } from './useDevboxTimeline'
 
 export function DevboxInstanceView({ instanceId }: { instanceId: string }) {
   const [params, setParams] = useSearchParams()
   const { popToast } = useSimpleToast()
-  const tabParam = params.get(WORKBENCH_DEVBOX_TAB_QUERY_PARAM)
   const threadParam = params.get(WORKBENCH_DEVBOX_THREAD_QUERY_PARAM)
   const positionParam = params.get(WORKBENCH_DEVBOX_POSITION_QUERY_PARAM)
   const position = positionParam ? Number(positionParam) : null
-  const [panelOpen, setPanelOpen] = useDevboxPanelOpen()
   const [importOpen, setImportOpen] = useState(false)
-  const [fullscreen, setFullscreen] = useState(false)
-  const { slotRef, host } = useMovablePortal(fullscreen)
 
-  useEffect(() => {
-    if (!fullscreen) return
-    const onKeyDown = (e: KeyboardEvent) => {
-      // menus and dialogs claim Escape first
-      if (e.key === 'Escape' && !e.defaultPrevented) setFullscreen(false)
-    }
-    window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
-  }, [fullscreen])
-
-  const { data, loading, error, refetch } = useDevboxInstanceQuery({
+  const query = useDevboxInstanceQuery({
     variables: { id: instanceId },
     skip: !instanceId,
     fetchPolicy: 'cache-and-network',
   })
+  const { data, loading, error, refetch } = query
   const instance = data?.devboxInstance
   const workbenchId = instance?.workbench?.id ?? ''
 
@@ -98,7 +78,6 @@ export function DevboxInstanceView({ instanceId }: { instanceId: string }) {
   })
 
   const timeline = useDevboxTimelineStore(instanceId)
-  const api = useDevboxWorkspaceApi(instanceId)
   const live = isInstanceLive(instance?.status)
   useDevboxPresence(instanceId, live)
 
@@ -114,6 +93,13 @@ export function DevboxInstanceView({ instanceId }: { instanceId: string }) {
     resume({ variables: { id: instanceId } })
   }, [instanceId, resume, suspended])
   const resuming = resumeState.loading || (!!resumeState.data && suspended)
+  useStatusFallback(query, {
+    settling:
+      resuming ||
+      instance?.status === DevboxInstanceStatus.Pending ||
+      instance?.status === DevboxInstanceStatus.Provisioning,
+    live,
+  })
 
   const [now, setNow] = useState(() => new Date())
   useEffect(() => {
@@ -192,8 +178,8 @@ export function DevboxInstanceView({ instanceId }: { instanceId: string }) {
     !!timeline.subscriptionError ||
     isClusterOfflineError(error)
 
-  const view = (
-    <ViewSC $fullscreen={fullscreen}>
+  return (
+    <ViewSC>
       <MainSC>
         <HeaderBarSC>
           <DevboxInstanceHeader
@@ -204,8 +190,6 @@ export function DevboxInstanceView({ instanceId }: { instanceId: string }) {
             resuming={resuming}
             onResume={() => resume({ variables: { id: instance.id } })}
             onImportSession={() => setImportOpen(true)}
-            fullscreen={fullscreen}
-            onFullscreenChange={setFullscreen}
           />
         </HeaderBarSC>
         <BodySC>
@@ -267,20 +251,7 @@ export function DevboxInstanceView({ instanceId }: { instanceId: string }) {
           </ConversationSC>
         </BodySC>
       </MainSC>
-      <DevboxControlPanel
-        instance={instance}
-        api={api}
-        live={live}
-        tab={isPanelTab(tabParam) ? tabParam : 'files'}
-        onTabChange={(tab) =>
-          setParam(
-            WORKBENCH_DEVBOX_TAB_QUERY_PARAM,
-            tab === 'files' ? null : tab
-          )
-        }
-        open={panelOpen}
-        onOpenChange={setPanelOpen}
-      />
+      <DevboxPanelRail instance={instance} />
       {importOpen && (
         <ImportThreadModal
           instance={instance}
@@ -290,35 +261,36 @@ export function DevboxInstanceView({ instanceId }: { instanceId: string }) {
       )}
     </ViewSC>
   )
-
-  return (
-    <>
-      <SlotSC ref={slotRef} />
-      {createPortal(view, host)}
-    </>
-  )
 }
 
-// renders into one node that moves between the layout and the body, so going
-// fullscreen keeps terminals, streams and drafts mounted; the body escapes
-// ancestors whose overflow or containment would trap position: fixed
-function useMovablePortal(fullscreen: boolean) {
-  const slotRef = useRef<HTMLDivElement>(null)
-  const [host] = useState(() => {
-    const node = document.createElement('div')
-    node.style.display = 'contents'
-    return node
-  })
+const SETTLING_POLL_INTERVAL = 5_000
 
-  useEffect(() => () => host.remove(), [host])
+// Status reaches the page by subscription, which only starts after the first
+// fetch, so a box that came up in between would look like it's starting forever.
+// Polls while the status should be changing, and refetches the full instance
+// (agents, billing, threads) once it's live, as status deltas carry only part of it.
+function useStatusFallback(
+  {
+    refetch,
+    startPolling,
+    stopPolling,
+  }: Pick<
+    ReturnType<typeof useDevboxInstanceQuery>,
+    'refetch' | 'startPolling' | 'stopPolling'
+  >,
+  { settling, live }: { settling: boolean; live: boolean }
+) {
+  useEffect(() => {
+    if (!settling) return
+    startPolling(SETTLING_POLL_INTERVAL)
+    return () => stopPolling()
+  }, [settling, startPolling, stopPolling])
 
-  // every render, as the slot only mounts once the instance has loaded
-  useLayoutEffect(() => {
-    const parent = fullscreen ? document.body : slotRef.current
-    if (parent && host.parentNode !== parent) parent.appendChild(host)
-  })
-
-  return { slotRef, host }
+  const wasLive = useRef(live)
+  useEffect(() => {
+    if (live && !wasLive.current) refetch()
+    wasLive.current = live
+  }, [live, refetch])
 }
 
 function useSuspendingSoonToast(
@@ -345,30 +317,13 @@ function useSuspendingSoonToast(
   }, [name, popToast, suspendingSoon])
 }
 
-const SlotSC = styled.div({
+const ViewSC = styled.div({
   display: 'flex',
   flex: 1,
   height: '100%',
   minHeight: 0,
   minWidth: 0,
-  width: '100%',
 })
-
-const ViewSC = styled.div<{ $fullscreen: boolean }>(
-  ({ theme, $fullscreen }) => ({
-    display: 'flex',
-    height: '100%',
-    minHeight: 0,
-    width: '100%',
-    ...($fullscreen && {
-      position: 'fixed',
-      inset: 0,
-      backgroundColor: theme.colors['fill-accent'],
-      // below dialogs, so modals opened from within stay visible
-      zIndex: theme.zIndexes.modal - 1,
-    }),
-  })
-)
 
 const MainSC = styled.div({
   display: 'flex',
