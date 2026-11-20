@@ -47,7 +47,8 @@ export function PrEvidenceDetails({
           align="center"
         >
           <IconFrame
-            type="floating"
+            type="secondary"
+            circle
             size="large"
             css={{ flexShrink: 0 }}
             icon={<PrOpenIcon color="icon-light" />}
