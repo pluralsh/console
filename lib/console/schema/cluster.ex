@@ -428,11 +428,15 @@ defmodule Console.Schema.Cluster do
 
   def healthy(query \\ __MODULE__), do: health(query, true)
 
+  # a semi-join, so a cluster with more than one matching tag row is not repeated
   def with_tag(query \\ __MODULE__, name, value) do
-    from(c in query,
-      join: t in assoc(c, :tags),
-      where: t.value == ^value and t.name == ^name
-    )
+    ids =
+      from(t in Tag,
+        where: t.name == ^name and t.value == ^value and not is_nil(t.cluster_id),
+        select: t.cluster_id
+      )
+
+    from(c in query, where: c.id in subquery(ids))
   end
 
   # a semi-join, since joining matched tags would repeat clusters in aggregates like statistics/1
