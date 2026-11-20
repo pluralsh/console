@@ -155,7 +155,6 @@ defmodule Console.Deployments.Sentinels do
       Cluster.target(test)
       |> Cluster.ordered(asc: :id)
       |> Repo.stream(method: :keyset)
-      |> Stream.uniq_by(& &1.id)
       |> Stream.chunk_every(100)
       |> Stream.map(fn chunk ->
         attrs = Enum.map(chunk, fn cluster -> timestamped(%{
