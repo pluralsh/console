@@ -20,6 +20,9 @@ const nextConfig: NextConfig = {
     emotion: true,
   },
   pageExtensions: ['js', 'jsx', 'ts', 'tsx'],
+  experimental: {
+    agentUpgrade: 'security',
+  },
   async redirects() {
     return redirects
   },
