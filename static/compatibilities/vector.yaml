@@ -3,6 +3,21 @@ git_url: https://github.com/vectordotdev/vector/
 release_url: https://github.com/vectordotdev/vector/releases/tag/v{vsn}
 helm_repository_url: https://helm.vector.dev/
 versions:
+- version: 0.62.0
+  kube: ['1.37', '1.36', '1.35']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Vector 0.62.0 is a new minor release over 0.61.0, with 3 new features
+        mentioned in the release announcement (details not included in the provided
+        notes).']
+    breaking_changes: ['Vector 0.62.0 includes 6 breaking changes per the release
+        summary, so assume configuration or behavior changes may affect existing pipelines
+        until reviewed in the full release notes/upgrade guide.']
+  chart_version: 0.62.1
+  images: ['docker.io/timberio/vector:0.62.0-distroless-libc']
 - version: 0.61.0
   kube: ['1.37', '1.36', '1.35']
   requirements: []

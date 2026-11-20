@@ -5,6 +5,52 @@ readme_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/m
 helm_repository_url: https://prometheus-community.github.io/helm-charts
 chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
 versions:
+- version: 93.4.1
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['CI only: GitHub Action `actions/create-github-app-token` bumped
+        to v3.4.0 (no runtime impact).', 'Dependency bump: `prometheus-community/postgres_exporter`
+        updated to v0.21.1 for the `prometheus-postgres-exporter` subchart/component.',
+      'Prometheus rule/recording/alerting change: removed fine-grained histogram buckets
+        for `apiserver_watch_events_dispatch_duration_seconds` in kube-prometheus-stack.']
+    features: [Updated the bundled postgres exporter to v0.21.1 via the `prometheus-postgres-exporter`
+        dependency.]
+    breaking_changes: ['The chart drops fine-grained buckets for `apiserver_watch_events_dispatch_duration_seconds`,
+        which can change the time series emitted (bucket labels/series count). Dashboards/alerts
+        recording rules that expect the old bucket boundaries may need updates and
+        historical comparisons may show discontinuities.']
+  chart_version: 93.4.1
+  images: ['docker.io/bats/bats:1.14.0', 'docker.io/grafana/grafana:13.3.1-distroless',
+    'ghcr.io/jkroepke/kube-webhook-certgen:1.11.1', 'quay.io/kiwigrid/k8s-sidecar:2.14.3',
+    'quay.io/prometheus-operator/prometheus-operator:v0.95.2', 'quay.io/prometheus/alertmanager:v0.35.0',
+    'quay.io/prometheus/node-exporter:v1.12.1-distroless', 'quay.io/prometheus/prometheus:v3.16.0-distroless',
+    'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
+- version: 93.4.0
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['prometheus-sql-exporter: switched PodDisruptionBudget to the
+        stable API version (policy/v1).', 'kube-prometheus-stack: bumped bundled Grafana
+        image tag to v14.5.0.']
+    features: [Grafana version bump to 14.5.0 (may include new dashboards/features/fixes
+        from Grafana upstream)., 'prometheus-sql-exporter now uses the stable PodDisruptionBudget
+        API, improving compatibility on clusters where older beta APIs are removed.']
+    breaking_changes: [Potential compatibility issue if you run very old Kubernetes
+        versions that don't support policy/v1 PodDisruptionBudget; otherwise this
+        is generally non-breaking.]
+  chart_version: 93.4.0
+  images: ['docker.io/bats/bats:1.14.0', 'docker.io/grafana/grafana:13.3.1-distroless',
+    'ghcr.io/jkroepke/kube-webhook-certgen:1.11.1', 'quay.io/kiwigrid/k8s-sidecar:2.14.3',
+    'quay.io/prometheus-operator/prometheus-operator:v0.95.2', 'quay.io/prometheus/alertmanager:v0.35.0',
+    'quay.io/prometheus/node-exporter:v1.12.1-distroless', 'quay.io/prometheus/prometheus:v3.16.0-distroless',
+    'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
 - version: 93.3.0
   kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
     '1.27', '1.26', '1.25']

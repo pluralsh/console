@@ -121,7 +121,7 @@ defmodule Console.GraphQl.Resolvers.User do
   end
 
   def oauth_callback(args, _) do
-    with {:ok, %Oidcc.Token{id: %Oidcc.Token.Id{claims: claims}}} <- OAuth.retrieve_token(args) do
+    with {:ok, claims} <- OAuth.retrieve_claims(args) do
       Map.new(claims, fn
         {k, :null} -> {k, nil}
         {k, v} -> {k, v}

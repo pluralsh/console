@@ -205,6 +205,8 @@ console:
     discoveryUrl: ~
     # scopes is used to configure the scopes for the custom oidc authentication. (defaults to "openid email")
     scopes: "openid email"
+    # userinfo loads groups from the OIDC userinfo endpoint. GitLab omits groups from the ID token and requires this.
+    userinfo: false
 
   additionalContainers: ~
   containerSecurityContext:

@@ -23,6 +23,8 @@ kas:
     ingressClass: <new-ingress-class>
 ```
 
+Management clusters created with `plural up` serve the `nginx` and `internal-nginx` classes with Traefik. If yours still runs ingress-nginx, see [Migrating from ingress-nginx to Traefik](/getting-started/advanced-config/ingress-migration).
+
 Both KAS and the console leverage websockets for some portion of their functionality. In the case of the console, the websockets are also far more performant with connection stickiness in place. Some ingress controllers have inconsistent websocket support (or require paid versions to unlock it), which is worth keeping in mind.
 
 Also, we configure the ingresses with cert-manager by default. Some orgs will set a wildcard cert at the ingress level, in which case you'd want to disable the ingress-level certs.

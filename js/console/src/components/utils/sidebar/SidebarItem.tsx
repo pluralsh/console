@@ -4,6 +4,7 @@ import chroma from 'chroma-js'
 
 import { Tooltip, WrapWithIf } from '@pluralsh/design-system'
 import { SidebarContext } from 'components/layout/Sidebar'
+import { TRUNCATE } from 'components/utils/truncate'
 import { Link, LinkProps } from 'react-router-dom'
 
 type SidebarItemProps = ComponentPropsWithRef<'button'> & {
@@ -67,7 +68,14 @@ export function SidebarItem({
         $isExpanded={isExpanded}
       >
         {children}
-        {isExpanded && expandedLabel ? expandedLabel : null}
+        {isExpanded && expandedLabel ? (
+          <span
+            title={expandedLabel}
+            css={{ ...TRUNCATE, minWidth: 0 }}
+          >
+            {expandedLabel}
+          </span>
+        ) : null}
       </ItemSC>
     </WrapWithIf>
   )
