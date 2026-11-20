@@ -90,22 +90,21 @@ defmodule Console.Services.OAuth do
   defp id_claims(%Oidcc.Token{id: %Oidcc.Token.Id{claims: claims}}), do: {:ok, claims}
   defp id_claims(%Oidcc.Token{}), do: {:error, "oidc handshake error: id token missing"}
 
-  defp merge_userinfo(token, claims) do
-    if configuration(:userinfo) == true do
-      case Oidcc.retrieve_userinfo(
-        token,
-        @name,
-        configuration(:client_id),
-        configuration(:client_secret),
-        %{}
-      ) do
-        {:ok, userinfo} -> {:ok, Map.merge(claims, userinfo)}
-        err -> {:error, "oidc userinfo error: #{inspect(err)}"}
-      end
-    else
-      {:ok, claims}
+  defp merge_userinfo(token, claims), do: merge_userinfo(configuration(:userinfo), token, claims)
+
+  defp merge_userinfo(true, token, claims) do
+    case Oidcc.retrieve_userinfo(
+      token,
+      @name,
+      configuration(:client_id),
+      configuration(:client_secret),
+      %{}
+    ) do
+      {:ok, userinfo} -> {:ok, Map.merge(claims, userinfo)}
+      err -> {:error, "oidc userinfo error: #{inspect(err)}"}
     end
   end
+  defp merge_userinfo(_, _token, claims), do: {:ok, claims}
 
   defp token_args(args) do
     args
