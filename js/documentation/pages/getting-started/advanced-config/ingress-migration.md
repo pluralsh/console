@@ -43,7 +43,37 @@ spec:
 
 ### 2. Rename the values keys
 
-In `helm/runtime.yaml.liquid`, rename the `ingress-nginx` key to `traefik` and `ingress-nginx-private` to `traefik-private`. The settings under `controller:` are specific to ingress-nginx and can be removed. The chart's defaults already include the load balancer annotations for each cloud.
+In `helm/runtime.yaml.liquid`, rename the `ingress-nginx` key to `traefik` and `ingress-nginx-private` to `traefik-private`. The settings under `controller:` are specific to ingress-nginx. The chart's defaults already include the load balancer annotations for each cloud, so the generated defaults can be removed.
+
+{% callout severity="warning" %}
+Carry over anything you added under `controller:` before you delete it. The Services are updated in place, and any field missing from the new values is removed from them. For example, dropping `controller.service.loadBalancerSourceRanges` opens your load balancer, and with it the console, to every address.
+{% /callout %}
+
+Custom Service settings move to `service` and `service.spec` of the matching Traefik instance:
+
+| ingress-nginx (`controller.…`) | Traefik (`traefik.…` or `traefik-private.…`) |
+| --- | --- |
+| `service.loadBalancerSourceRanges` | `service.spec.loadBalancerSourceRanges` |
+| `service.loadBalancerIP` | `service.spec.loadBalancerIP` |
+| `service.externalTrafficPolicy` | `service.spec.externalTrafficPolicy` |
+| `service.annotations` you added yourself | `service.annotations` |
+| global `config:` options such as `whitelist-source-range` | no global equivalent. Restrict at the load balancer with `service.spec.loadBalancerSourceRanges`, or check the [supported annotations](https://doc.traefik.io/traefik/reference/routing-configuration/kubernetes/ingress-nginx/) for a per-Ingress replacement |
+
+For example, to keep a source range restriction on the public load balancer:
+
+```yaml
+traefik:
+  service:
+    spec:
+      loadBalancerSourceRanges:
+      - 203.0.113.0/24
+```
+
+To find the custom settings, save the current Services before you push and compare them with the new values afterwards:
+
+```sh
+kubectl -n plural-runtime get svc runtime-ingress-nginx-controller runtime-ingress-nginx-private-controller -o yaml > services-before.yaml
+```
 
 ### 3. Keep the existing load balancers
 
@@ -162,6 +192,12 @@ Once the `runtime` service shows as healthy in the console, check that:
 
   ```sh
   kubectl -n plural-runtime get svc runtime-ingress-nginx-controller runtime-ingress-nginx-private-controller -o wide
+  ```
+
+- any custom Service settings you carried over, such as `loadBalancerSourceRanges`, are still set. Compare the output of the following with `services-before.yaml`:
+
+  ```sh
+  kubectl -n plural-runtime get svc runtime-ingress-nginx-controller runtime-ingress-nginx-private-controller -o yaml
   ```
 
 - your Ingresses still show the same address:
