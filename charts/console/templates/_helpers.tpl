@@ -193,18 +193,18 @@ Checksum of chart-managed CA data so pods with subPath mounts restart on rotatio
 {{- end -}}
 
 {{/*
-Agent helm values seeded from certs when console.config.agentHelmValues is unset.
-Enables spawned-workload CA injection on the deployment-operator chart.
+Agent helm values for bootstrap. Chart certs are merged into agentHelmValues so
+private-CA installs can still set custom agent values (e.g. vendored images).
+User-provided keys win over the CA defaults (deep merge).
 */}}
 {{- define "console.agentHelmValues" -}}
-{{- if .Values.console.config.agentHelmValues -}}
-{{- .Values.console.config.agentHelmValues | toYaml -}}
-{{- else if .Values.certs -}}
-certs:
-{{- .Values.certs | toYaml | nindent 2 }}
-spawnedWorkloads:
-  caBundle:
-    enabled: true
+{{- if or .Values.console.config.agentHelmValues .Values.certs -}}
+{{- $ca := dict -}}
+{{- if .Values.certs -}}
+{{- $ca = dict "certs" .Values.certs "spawnedWorkloads" (dict "caBundle" (dict "enabled" true)) -}}
+{{- end -}}
+{{- $user := .Values.console.config.agentHelmValues | default dict -}}
+{{- mergeOverwrite (deepCopy $ca) $user | toYaml -}}
 {{- end -}}
 {{- end -}}
 

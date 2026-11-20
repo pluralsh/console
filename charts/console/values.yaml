@@ -12,9 +12,10 @@ global:
 # with the image OS trust store (or can replace ca-certificates.crt when file is set
 # to that name with a merged private+public bundle).
 #
-# When set and console.config.agentHelmValues is empty, the same certs are also
-# seeded into a console-agent-helm-values Secret (mounted as a file, not env)
-# so agents inherit the bundle on bootstrap without blowing ARG_MAX.
+# When set, the same certs are merged into the console-agent-helm-values Secret
+# (mounted as a file, not env) alongside any console.config.agentHelmValues, so
+# agents inherit the bundle on bootstrap without blowing ARG_MAX. Explicit keys
+# in agentHelmValues win over these CA defaults.
 #
 # Example (merged private chain + public roots as ca-certificates.crt):
 #  - name: ca-bundle
