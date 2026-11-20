@@ -12,6 +12,7 @@ import {
 } from 'components/ai/agent-runs/details/AIAgentRunMessages'
 import { AgentTodosTimeline } from 'components/ai/common/AgentTodosTimeline'
 import { ChatMarkdown } from 'components/ai/chatbot/ChatMarkdown'
+import { withSlashCommandChip } from 'components/ai/chatbot/DevboxFileChip'
 import { ChatMessage } from 'components/ai/chatbot/ChatMessage'
 import {
   SimpleAccordion,
@@ -262,7 +263,8 @@ function MessageView({
 }) {
   const theme = useTheme()
   const list = (blocks ?? []).filter(isNonNullable)
-  const text = blocksText(list)
+  const raw = blocksText(list)
+  const text = role === AiRole.User ? withSlashCommandChip(raw) : raw
   const rich = list.filter((b) => b.__typename !== 'DevboxTextContent')
   return (
     <Flex

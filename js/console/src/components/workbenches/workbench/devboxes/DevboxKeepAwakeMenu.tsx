@@ -2,18 +2,15 @@ import {
   Button,
   Chip,
   ClockIcon,
-  DropdownArrowIcon,
   Flex,
   FormField,
+  ICON_FRAME_ICON_SIZE,
   Input,
-  ListBoxItem,
   Modal,
   MoonIcon,
-  Select,
 } from '@pluralsh/design-system'
 import dayjs from 'dayjs'
-import { useState } from 'react'
-import styled from 'styled-components'
+import { ReactNode, useState } from 'react'
 import { awakeToneSeverity } from './DevboxChips'
 import {
   clampCustomKeepAwake,
@@ -40,27 +37,34 @@ const DATETIME_LOCAL = 'YYYY-MM-DDTHH:mm'
 const CUSTOM = 'custom'
 const SLEEP = 'sleep'
 
-export function DevboxKeepAwakeMenu({
+export const KEEP_AWAKE_KEY_PREFIX = 'awake:'
+
+export type KeepAwakeItem = {
+  key: string
+  label: string
+  description?: string
+  icon: ReactNode
+  destructive?: boolean
+}
+
+// keep-awake entries for a menu, with their select handler and the custom-time modal to render
+export function useKeepAwakeActions({
   keepAwakeUntil: currentUntil,
   maxDeferralSeconds,
   onKeepAwake,
   onCancel,
-  loading = false,
-  disabled = false,
   now,
 }: {
   keepAwakeUntil: Nullable<string>
   maxDeferralSeconds: number
   onKeepAwake: (until: Date) => void
   onCancel: () => void
-  loading?: boolean
-  disabled?: boolean
   now: Date
 }) {
-  const [open, setOpen] = useState(false)
   const [custom, setCustom] = useState<Nullable<string>>(null)
   const kept = isKeptAwake({ keepAwakeUntil: currentUntil }, now)
   const ceiling = dayjs(now).add(maxDeferralSeconds, 'second')
+  const clock = <ClockIcon size={ICON_FRAME_ICON_SIZE.small} />
 
   const presets = KEEP_AWAKE_PRESETS.map((preset) => {
     const until = keepAwakeUntil({
@@ -72,90 +76,65 @@ export function DevboxKeepAwakeMenu({
     return { ...preset, until, capped: !dayjs(until).isBefore(ceiling) }
   })
 
-  const onSelect = (key: string) => {
-    setOpen(false)
-    if (key === SLEEP) return onCancel()
-    if (key === CUSTOM)
-      return setCustom(
-        dayjs(kept && currentUntil ? currentUntil : now)
-          .add(2, 'hour')
-          .format(DATETIME_LOCAL)
-      )
-    const preset = presets.find((p) => p.key === key)
-    if (preset) onKeepAwake(preset.until)
-  }
-
-  const items = [
-    ...presets.map((p) => (
-      <ListBoxItem
-        key={p.key}
-        label={p.label}
-        description={`until ${dayjs(p.until).format('h:mm A')}${p.capped ? ' (max)' : ''}`}
-      />
-    )),
-    <ListBoxItem
-      key={CUSTOM}
-      label="Custom…"
-    />,
+  const items: KeepAwakeItem[] = [
+    ...presets.map((p) => ({
+      key: `${KEEP_AWAKE_KEY_PREFIX}${p.key}`,
+      label: `${kept ? 'Extend by' : 'Keep awake for'} ${p.label}`,
+      description: `until ${dayjs(p.until).format('h:mm A')}${p.capped ? ' (max)' : ''}`,
+      icon: clock,
+    })),
+    {
+      key: `${KEEP_AWAKE_KEY_PREFIX}${CUSTOM}`,
+      label: 'Keep awake until…',
+      icon: clock,
+    },
     ...(kept
       ? [
-          <ListBoxItem
-            key={SLEEP}
-            label="Let it sleep when idle"
-            destructive
-          />,
+          {
+            key: `${KEEP_AWAKE_KEY_PREFIX}${SLEEP}`,
+            label: 'Let it sleep when idle',
+            icon: <MoonIcon size={ICON_FRAME_ICON_SIZE.small} />,
+            destructive: true,
+          },
         ]
       : []),
   ]
 
-  return (
-    <>
-      <Select
-        label="Keep awake"
-        isOpen={open}
-        onOpenChange={setOpen}
-        isDisabled={disabled}
-        placement="right"
-        width={260}
-        selectedKey={null}
-        onSelectionChange={(key) => onSelect(`${key}`)}
-        dropdownHeaderFixed={
-          <HeaderSC>
-            {kept
-              ? `Until ${dayjs(currentUntil).format('h:mm A')}; extend by`
-              : 'Keep this instance awake for'}
-          </HeaderSC>
-        }
-        triggerButton={
-          <Button
-            small
-            secondary
-            startIcon={<ClockIcon />}
-            endIcon={<DropdownArrowIcon />}
-            loading={loading}
-            disabled={disabled}
-          >
-            {kept ? 'Kept awake' : 'Keep awake'}
-          </Button>
-        }
-      >
-        {items}
-      </Select>
-      <CustomKeepAwakeModal
-        value={custom}
-        onChange={setCustom}
-        onClose={() => setCustom(null)}
-        onSubmit={(until) => {
-          onKeepAwake(until)
-          setCustom(null)
-        }}
-        min={dayjs(now).format(DATETIME_LOCAL)}
-        max={ceiling.format(DATETIME_LOCAL)}
-        maxDeferralSeconds={maxDeferralSeconds}
-        now={now}
-      />
-    </>
+  // whether the key was a keep-awake entry
+  const onSelect = (selected: string) => {
+    if (!selected.startsWith(KEEP_AWAKE_KEY_PREFIX)) return false
+    const key = selected.slice(KEEP_AWAKE_KEY_PREFIX.length)
+    if (key === SLEEP) onCancel()
+    else if (key === CUSTOM)
+      setCustom(
+        dayjs(kept && currentUntil ? currentUntil : now)
+          .add(2, 'hour')
+          .format(DATETIME_LOCAL)
+      )
+    else {
+      const preset = presets.find((p) => p.key === key)
+      if (preset) onKeepAwake(preset.until)
+    }
+    return true
+  }
+
+  const modal = (
+    <CustomKeepAwakeModal
+      value={custom}
+      onChange={setCustom}
+      onClose={() => setCustom(null)}
+      onSubmit={(until) => {
+        onKeepAwake(until)
+        setCustom(null)
+      }}
+      min={dayjs(now).format(DATETIME_LOCAL)}
+      max={ceiling.format(DATETIME_LOCAL)}
+      maxDeferralSeconds={maxDeferralSeconds}
+      now={now}
+    />
   )
+
+  return { items, onSelect, modal }
 }
 
 function CustomKeepAwakeModal({
@@ -222,9 +201,3 @@ function CustomKeepAwakeModal({
     </Modal>
   )
 }
-
-const HeaderSC = styled.div(({ theme }) => ({
-  ...theme.partials.text.caption,
-  color: theme.colors['text-xlight'],
-  padding: `${theme.spacing.small} ${theme.spacing.medium} ${theme.spacing.xsmall}`,
-}))

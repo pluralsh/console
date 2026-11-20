@@ -2324,6 +2324,17 @@ enum DevboxBillingMode {
   SUBSCRIPTION
 }
 
+enum DevboxThreadStage {
+  "a turn is in flight or queued"
+  RUNNING
+
+  "the agent is waiting on a person: a permission, a question, or a finished or failed turn"
+  NEEDS_REVIEW
+
+  "the thread was closed"
+  COMPLETED
+}
+
 enum DevboxStreamKind {
   TERMINAL
   VNC
@@ -2845,11 +2856,11 @@ type DevboxAgent {
 
   sessionCapabilities: DevboxSessionCapabilities
 
-  "the models offered: probed values narrowed by the box's allowlist"
-  models: [DevboxModel]
+  "the models offered under a billing mode (proxy by default): the AI proxy's models, or on a subscription the probed values narrowed by the box's allowlist"
+  models(billing: DevboxBillingMode): [DevboxModel]
 
-  "the model preselected when starting an instance"
-  defaultModel: String
+  "the model preselected when starting an instance under a billing mode (proxy by default)"
+  defaultModel(billing: DevboxBillingMode): String
 }
 
 type DevboxModel {
@@ -3001,7 +3012,12 @@ type DevboxInstance {
 
   keepAwakeBy: User
 
-  threads(includeDeleted: Boolean): [DevboxThread]
+  threads(
+    includeDeleted: Boolean
+
+    "only threads in these stages"
+    stages: [DevboxThreadStage]
+  ): [DevboxThread]
 
   interactions(pending: Boolean): [DevboxInteraction]
 
@@ -3212,6 +3228,9 @@ type DevboxThread {
   worktreeRepos: [String]
 
   status: DevboxThreadStatus!
+
+  "where the thread sits in its lifecycle, for grouping"
+  stage: DevboxThreadStage!
 
   imported: Boolean
 
@@ -6117,11 +6136,14 @@ type Workbench {
 
     last: Int
 
-    "filter instances by status"
+    "filter instances by status (overrides include_ended)"
     statuses: [DevboxInstanceStatus]
 
     "only show instances you started"
     mine: Boolean
+
+    "also list completed, failed and cancelled instances"
+    includeEnded: Boolean
   ): DevboxInstanceConnection
 
   devboxSnapshots(after: String, first: Int, before: String, last: Int): DevboxSnapshotConnection

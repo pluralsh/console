@@ -26,6 +26,8 @@ defmodule Console.Devboxes.Credentials do
 
   @ttl 60 * 60
   @refresh_ahead 10 * 60
+  @cache Console.conf(:cache_adapter)
+  @proxy_ttl :timer.minutes(1)
   @typ "devbox"
   @scopes ~w(ai_proxy workbench_mcp)
 
@@ -81,16 +83,33 @@ defmodule Console.Devboxes.Credentials do
   """
   @spec verify(binary, binary) :: {:ok, DevboxInstance.t} | Console.error
   def verify(token, scope) when scope in @scopes do
+    with {:ok, inst} <- verified_instance(token, scope, &Repo.get(DevboxInstance, &1)) do
+      if live?(inst), do: {:ok, Repo.preload(inst, [:workbench, :user])}, else: {:error, "devbox instance has ended"}
+    end
+  end
+
+  defp verified_instance(token, scope, fetch) do
     with {:ok, %{"sub" => "devbox_instance:" <> id, "scopes" => scopes} = claims} <-
            Console.Guardian.decode_and_verify(token, %{"typ" => @typ}),
          true <- scope in scopes,
-         %DevboxInstance{workbench_id: wb_id} = inst <- Repo.get(DevboxInstance, id),
+         %DevboxInstance{workbench_id: wb_id} = inst <- fetch.(id),
          true <- claims["workbench_id"] == wb_id do
-      if live?(inst), do: {:ok, Repo.preload(inst, [:workbench, :user])}, else: {:error, "devbox instance has ended"}
+      {:ok, inst}
     else
       _ -> {:error, "invalid devbox token"}
     end
   end
+
+  # the proxy authenticates every model call, so the instance and its workbench are cached in the partitioned
+  # cache; `revoke/1` evicts it cluster-wide, so only budget changes can lag, by up to the ttl
+  defp proxy_instance(id) do
+    Console.Cache.fetch_or_store(@cache, proxy_key(id), fn ->
+      with %DevboxInstance{} = inst <- Repo.get(DevboxInstance, id),
+        do: Repo.preload(inst, [:workbench])
+    end, ttl: @proxy_ttl, negative_ttl: @proxy_ttl)
+  end
+
+  defp proxy_key(id), do: {:devbox_proxy_auth, id}
 
   @doc """
   Verifies a token presented to the AI proxy by a devbox instance, returning the instance with the workbench
@@ -100,7 +119,7 @@ defmodule Console.Devboxes.Credentials do
   """
   @spec verify_ai_proxy(binary) :: {:ok, DevboxInstance.t} | Console.error
   def verify_ai_proxy(token) when is_binary(token) do
-    with {:ok, inst} <- verify(token, "ai_proxy"),
+    with {:ok, inst} <- verified_instance(token, "ai_proxy", &proxy_instance/1),
       do: verify_instance(inst)
   end
   def verify_ai_proxy(_), do: {:error, "invalid devbox token"}
@@ -142,10 +161,14 @@ defmodule Console.Devboxes.Credentials do
   """
   @spec revoke(DevboxInstance.t) :: {:ok, DevboxInstance.t} | Console.error
   def revoke(%DevboxInstance{credentials_revoked_at: %DateTime{}} = inst), do: {:ok, inst}
-  def revoke(%DevboxInstance{} = inst) do
+  def revoke(%DevboxInstance{id: id} = inst) do
     inst
     |> DevboxInstance.changeset(%{credentials_revoked_at: DateTime.utc_now()})
     |> Repo.update()
+    |> when_ok(fn revoked ->
+      @cache.delete(proxy_key(id))
+      revoked
+    end)
   end
 
   @doc """

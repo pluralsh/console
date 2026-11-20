@@ -1,5 +1,6 @@
 import { FolderIcon, Tooltip } from '@pluralsh/design-system'
 import { FileTypeIcon } from 'components/utils/fileTree'
+import escape from 'lodash/escape'
 import { createContext, ReactNode, useContext } from 'react'
 import type { ExtraProps } from 'react-markdown'
 import styled from 'styled-components'
@@ -58,7 +59,39 @@ export function DevboxFileChip({
   )
 }
 
-export const devboxFileChipComponents = { [DEVBOX_FILE_TAG]: DevboxFileChip }
+// display-only: agents only recognize a slash command as a plain `/name` at the
+// start of the prompt, so the tag is added when rendering, never sent
+export const DEVBOX_COMMAND_TAG = 'plrl-devbox-command'
+export const DEVBOX_COMMAND_ATTRIBUTES = ['command']
+
+export function withSlashCommandChip(text: string) {
+  return text.replace(
+    /^\/([^\s<]+)/,
+    (_, command: string) =>
+      `<${DEVBOX_COMMAND_TAG} command="${escape(command)}"></${DEVBOX_COMMAND_TAG}>`
+  )
+}
+
+function DevboxCommandChip({
+  command,
+}: { command?: string; children?: ReactNode } & ExtraProps) {
+  if (!command) return null
+  return (
+    <ChipBody icon={null}>
+      <CommandSC>{`/${command}`}</CommandSC>
+    </ChipBody>
+  )
+}
+
+export const devboxFileChipComponents = {
+  [DEVBOX_FILE_TAG]: DevboxFileChip,
+  [DEVBOX_COMMAND_TAG]: DevboxCommandChip,
+}
+
+const CommandSC = styled.span(({ theme }) => ({
+  fontFamily: theme.fontFamilies.mono,
+  color: theme.colors['text-primary-accent'],
+}))
 
 const ChipButtonSC = styled.button(({ theme }) => ({
   ...theme.partials.reset.button,

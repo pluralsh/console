@@ -1,4 +1,12 @@
 import { DEVBOX_FILE_TAG } from 'components/ai/chatbot/DevboxFileChip'
+import {
+  CHIP_ATTR_PREFIX,
+  CHIP_DATA_ATTR,
+  CHIP_TAG_ATTR,
+  insertChipAtRange,
+  serializeEditableDiv,
+  serializeRange,
+} from 'components/utils/contentEditableChips'
 import Fuse from 'fuse.js'
 import { useEffect, useRef, useState } from 'react'
 import { DevboxFileEntry, isDirectory } from './devboxWorkspaceApi'
@@ -59,24 +67,77 @@ export function matchFiles(
   ]
 }
 
-// directories keep the menu open on their contents; files insert their
-// absolute path, which agents resolve regardless of their working directory
-export function applyFileMention(
-  text: string,
+// the serialized prompt up to the caret, so offsets line up with `serializeEditableDiv`
+export function caretOffset(container: HTMLElement): number {
+  const sel = document.getSelection()
+  const end = sel?.rangeCount ? sel.getRangeAt(0) : null
+  if (!end || !container.contains(end.endContainer))
+    return serializeEditableDiv(container).length
+  const before = document.createRange()
+  before.selectNodeContents(container)
+  before.setEnd(end.endContainer, end.endOffset)
+  return serializeRange(before).length
+}
+
+// replaces `before` characters before the caret and `after` after it (a typed
+// token, never spanning a chip) with a chip or text, leaving the caret past it
+export function replaceAtCaret(
+  container: HTMLElement,
+  before: number,
+  after: number,
+  replacement: HTMLElement | string
+) {
+  const sel = document.getSelection()
+  const caret = sel?.rangeCount ? textCaret(sel.getRangeAt(0)) : null
+  if (!sel || !caret) return
+  const { node, offset } = caret
+  const range = document.createRange()
+  range.setStart(node, Math.max(0, offset - before))
+  range.setEnd(node, Math.min(node.length, offset + after))
+  if (typeof replacement === 'string') {
+    range.deleteContents()
+    const text = document.createTextNode(replacement)
+    range.insertNode(text)
+    range.setStart(text, text.length)
+    range.collapse(true)
+    sel.removeAllRanges()
+    sel.addRange(range)
+  } else insertChipAtRange(container, replacement, range)
+  container.dispatchEvent(new InputEvent('input', { bubbles: true }))
+}
+
+// the caret as a text position; after an insertion it can sit between nodes
+function textCaret(range: Range): Nullable<{ node: Text; offset: number }> {
+  const { endContainer: node, endOffset: offset } = range
+  if (node instanceof Text) return { node, offset }
+  const prev = node.childNodes[offset - 1]
+  return prev instanceof Text ? { node: prev, offset: prev.length } : null
+}
+
+// an inline chip serializing to a file tag with the absolute path, which agents
+// resolve regardless of their working directory
+export function fileMentionChip(path: string): HTMLElement {
+  const chip = document.createElement('span')
+  chip.setAttribute(CHIP_DATA_ATTR, 'true')
+  chip.setAttribute(CHIP_TAG_ATTR, DEVBOX_FILE_TAG)
+  chip.setAttribute(`${CHIP_ATTR_PREFIX}path`, path)
+  chip.setAttribute('contenteditable', 'false')
+  chip.title = path
+  const label = document.createElement('span')
+  const name = path.replace(/\/$/, '').split('/').pop() || path
+  label.textContent = path.endsWith('/') ? `${name}/` : name
+  chip.appendChild(label)
+  return chip
+}
+
+// a picked directory is browsed into as typed text, keeping the menu open on its contents
+export const directoryToken = (
   query: DevboxMentionQuery,
   entry: DevboxFileEntry
-) {
-  const dir = isDirectory(entry)
-  const token = dir ? `${query.dir}${entry.name}/` : entry.path
-  const inserted = `@${token}${dir ? '' : ' '}`
-  const after = text.slice(query.end).replace(/^ /, '')
-  return {
-    text: `${text.slice(0, query.start)}${inserted}${after}`,
-    caret: query.start + inserted.length,
-    token,
-    path: dir ? `${entry.path.replace(/\/$/, '')}/` : entry.path,
-  }
-}
+) => ({
+  token: `${query.dir}${entry.name}/`,
+  path: `${entry.path.replace(/\/$/, '')}/`,
+})
 
 // the absolute path of the directory being browsed: as recorded when it was
 // picked, else the parent of its entries, else the typed path when absolute
@@ -91,43 +152,6 @@ export function resolveMentionDir(
   if (child) return `${child.slice(0, child.lastIndexOf('/'))}/`
   return dir.startsWith('/') ? dir : null
 }
-
-// mentions the browsed directory itself, closing the menu like a file does
-export function applyFolderMention(
-  text: string,
-  query: DevboxMentionQuery,
-  path: string
-) {
-  const inserted = `@${path} `
-  const after = text.slice(query.end).replace(/^ /, '')
-  return {
-    text: `${text.slice(0, query.start)}${inserted}${after}`,
-    caret: query.start + inserted.length,
-    token: path,
-    path,
-  }
-}
-
-// picked mentions (token → path) still in the prompt become file tags; typed `@` text is left alone
-export function compileFileMentions(
-  text: string,
-  mentions: Record<string, string>
-) {
-  return Object.entries(mentions).reduce(
-    (acc, [token, path]) =>
-      acc.replace(
-        new RegExp(`(^|\\s)@${escapeRegExp(token)}(?=\\s|$)`, 'g'),
-        (_, lead: string) =>
-          `${lead}<${DEVBOX_FILE_TAG} path="${escapeAttribute(path)}"></${DEVBOX_FILE_TAG}>`
-      ),
-    text
-  )
-}
-
-const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-
-const escapeAttribute = (s: string) =>
-  s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;')
 
 type Listing = { entries: DevboxFileEntry[]; error?: boolean }
 

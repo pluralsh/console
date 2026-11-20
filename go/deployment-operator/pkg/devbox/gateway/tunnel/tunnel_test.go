@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net"
+	"slices"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -44,6 +45,7 @@ type result struct {
 	msgs    [][]byte
 	trailer bool
 	err     *devboxv1.TunnelStatus
+	frames  []string
 }
 
 func (k *fakeKAS) Connect(stream devboxv1.Tunnel_ConnectServer) error {
@@ -87,12 +89,16 @@ func (k *fakeKAS) Connect(stream devboxv1.Tunnel_ConnectServer) error {
 		switch m := msg.GetMsg().(type) {
 		case *devboxv1.TunnelConnectRequest_Header:
 			r.header = m.Header.GetMeta()
+			r.frames = append(r.frames, "header")
 		case *devboxv1.TunnelConnectRequest_Message:
 			r.msgs = append(r.msgs, m.Message.GetData())
+			r.frames = append(r.frames, "message")
 		case *devboxv1.TunnelConnectRequest_Trailer:
 			r.trailer = true
+			r.frames = append(r.frames, "trailer")
 		case *devboxv1.TunnelConnectRequest_Error:
 			r.err = m.Error.GetStatus()
+			r.frames = append(r.frames, "error")
 		}
 	}
 	k.results <- r
@@ -117,6 +123,10 @@ func (g *fakeGateway) GetSessions(ctx context.Context, req *devboxv1.GetSessions
 	g.mu.Lock()
 	g.seen = append(g.seen, first(md.Get("devbox-request-token")))
 	g.mu.Unlock()
+	if req.GetInstanceId() == "suspended" {
+		_ = grpc.SendHeader(ctx, metadata.Pairs("x-served-by", "fake"))
+		return nil, status.Error(codes.FailedPrecondition, "instance is suspended")
+	}
 	_ = grpc.SetHeader(ctx, metadata.Pairs("x-served-by", "fake"))
 	return &devboxv1.GetSessionsResponse{Sessions: []*devboxv1.Session{{SessionId: "s-" + req.GetInstanceId()}}}, nil
 }
@@ -223,6 +233,14 @@ func TestTunnelReconnectsWithBackoffAndServesCalls(t *testing.T) {
 	r = waitResult(t, k)
 	if r.err == nil || codes.Code(r.err.GetCode()) != codes.Unimplemented {
 		t.Fatalf("expected Unimplemented error frame, got %+v", r)
+	}
+
+	// A call that fails after its header was sent ends with a trailer, then the error, as KAS's stream automata
+	// only allows an error after a trailer once a header went out.
+	k.calls <- call{method: devboxv1.Gateway_GetSessions_FullMethodName, req: &devboxv1.GetSessionsRequest{InstanceId: "suspended"}}
+	r = waitResult(t, k)
+	if !slices.Equal(r.frames, []string{"header", "trailer", "error"}) || codes.Code(r.err.GetCode()) != codes.FailedPrecondition {
+		t.Fatalf("frames = %v, error = %v", r.frames, r.err)
 	}
 
 	desc := k.descriptor.Load()

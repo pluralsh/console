@@ -124,6 +124,8 @@ defmodule Console.Devboxes.Ingest do
 
     case status && DevboxInstance.can_transition?(inst.status, status) do
       true ->
+        # idleness from before a suspend or resume no longer holds; the next heartbeat reports it afresh
+        base = if status != inst.status, do: Map.put_new(base, :idle_state, idle_state(%{})), else: base
         inst
         |> DevboxInstance.changeset(Map.merge(base, %{status: status, status_reason: status_reason(attrs)}))
         |> Repo.update()
@@ -753,14 +755,15 @@ defmodule Console.Devboxes.Ingest do
   end
   def enum(_, _), do: nil
 
+  # every field is set, nil included, so a report replaces the previous idle state rather than merging into it
   defp idle_state(idle) do
-    drop_nils(%{
-      idle: Acp.get(idle, :idle),
+    %{
+      idle: Acp.get(idle, :idle) == true,
       idle_since: Acp.timestamp(Acp.get(idle, :idle_since)),
       suspends_at: Acp.timestamp(Acp.get(idle, :suspend_at)),
-      busy_reasons: Acp.get(idle, :busy_reasons) && Enum.map(Acp.get(idle, :busy_reasons), &busy_reason/1),
+      busy_reasons: Enum.map(Acp.get(idle, :busy_reasons) || [], &busy_reason/1),
       message: Acp.get(idle, :message)
-    })
+    }
   end
 
   defp busy_reason(reason) do

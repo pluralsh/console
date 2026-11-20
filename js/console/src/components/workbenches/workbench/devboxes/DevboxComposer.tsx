@@ -17,14 +17,8 @@ import {
   DevboxCommandFragment,
   DevboxConfigOptionFragment,
 } from 'generated/graphql'
-import {
-  ClipboardEvent,
-  KeyboardEvent,
-  ReactNode,
-  useEffect,
-  useRef,
-  useState,
-} from 'react'
+import { EditableDiv } from 'components/utils/EditableDiv'
+import { KeyboardEvent, ReactNode, useEffect, useRef, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
 import styled from 'styled-components'
 import { formatFileSize } from 'utils/file'
@@ -40,20 +34,22 @@ import {
   isAutonomyOption,
 } from './devboxAutonomy'
 import {
-  applyFileMention,
-  applyFolderMention,
-  compileFileMentions,
+  caretOffset,
+  directoryToken,
+  fileMentionChip,
   getMentionQuery,
   matchFiles,
+  replaceAtCaret,
   resolveMentionDir,
   useDevboxDirectory,
 } from './devboxFileMentions'
 import { AutonomyPillSelect, PillSelect } from './DevboxPromptPills'
 import {
-  applySlashCommand,
   getSlashQuery,
   groupSlashCommands,
   matchSlashCommands,
+  SLASH_COMMAND_ATTR,
+  slashCommandChip,
   slashCommandHint,
 } from './devboxSlashCommands'
 import { DevboxModelLabel, DevboxModelProviderIcon } from './DevboxChips'
@@ -78,12 +74,36 @@ export function attachmentError(files: File[]): Nullable<string> {
 
 const NO_FILES: File[] = []
 
+type ConfigValue = NonNullable<
+  NonNullable<DevboxConfigOptionFragment['options']>[number]
+>
+
+// the proxy's models under the IDs the agent knows them by (OpenCode prefixes
+// `plural/`), keeping the current value when it's an alias like Default
+export function proxyModelValues(
+  option: DevboxConfigOptionFragment,
+  proxyModels: string[]
+): ConfigValue[] {
+  const reported = (option.options ?? []).filter(isNonNullable)
+  const values = proxyModels.map(
+    (id) =>
+      reported.find((o) => o.value === id || o.value === `plural/${id}`) ?? {
+        value: id,
+      }
+  )
+  const current = reported.find((o) => o.value === option.currentValue)
+  return current && !values.some((v) => v.value === current.value)
+    ? [current, ...values]
+    : values
+}
+
 export function DevboxComposer({
   commands,
   configOptions,
   autonomyPolicy,
   proxyBilled = false,
   modelSwitchable = true,
+  proxyModels,
   listFiles,
   running = false,
   disabled = false,
@@ -100,6 +120,8 @@ export function DevboxComposer({
   autonomyPolicy?: Nullable<DevboxAutonomyPolicy>
   proxyBilled?: boolean
   modelSwitchable?: boolean
+  // replaces the agent's own model values, which needn't list the proxy's
+  proxyModels?: Nullable<string[]>
   // completes `@path` mentions against the instance's files
   listFiles?: Nullable<(path: string) => Promise<DevboxFileEntry[]>>
   running?: boolean
@@ -123,12 +145,29 @@ export function DevboxComposer({
   const [dismissed, setDismissed] = useState<Nullable<string>>(null)
   const [files, setFiles] = useState<File[]>(NO_FILES)
   const [sending, setSending] = useState(false)
+  // directories browsed into (typed token → absolute path)
   const [mentions, setMentions] = useState<Record<string, string>>({})
-  const ref = useRef<HTMLTextAreaElement>(null)
+  const ref = useRef<HTMLDivElement>(null)
   const draft = useRef({ text, files })
   useEffect(() => {
     draft.current = { text, files }
   }, [text, files])
+
+  useEffect(() => {
+    if (autoFocus) ref.current?.focus()
+  }, [autoFocus])
+
+  useEffect(() => {
+    const onSelectionChange = () => {
+      const node = ref.current
+      const sel = document.getSelection()
+      if (node && sel?.rangeCount && node.contains(sel.anchorNode))
+        setCaret(caretOffset(node))
+    }
+    document.addEventListener('selectionchange', onSelectionChange)
+    return () =>
+      document.removeEventListener('selectionchange', onSelectionChange)
+  }, [])
 
   const addFiles = (added: File[]) =>
     added.length > 0 && setFiles((cur) => mergeAttachments(cur, added))
@@ -140,13 +179,6 @@ export function DevboxComposer({
     noKeyboard: true,
     disabled,
   })
-
-  const onPaste = (e: ClipboardEvent<HTMLTextAreaElement>) => {
-    const pasted = Array.from(e.clipboardData?.files ?? [])
-    if (pasted.length === 0) return
-    e.preventDefault()
-    addFiles(pasted)
-  }
 
   const slash = getSlashQuery(text, caret)
   const commandMatches = slash
@@ -204,38 +236,50 @@ export function DevboxComposer({
     (slash ? suggestions.length > 0 : !!mention && !disabled)
   const hint = slashCommandHint(text, commands)
 
-  const update = (value: string, pos?: number) => {
+  const update = (value: string) => {
     setText(value)
-    setCaret(pos ?? value.length)
+    setCaret(ref.current ? caretOffset(ref.current) : value.length)
     setActive(0)
   }
 
-  const moveCaret = (value: string, pos: number) => {
-    update(value, pos)
-    requestAnimationFrame(() => {
-      ref.current?.focus()
-      ref.current?.setSelectionRange(pos, pos)
-    })
+  // swaps the token under the caret, swallowing one space after it
+  const replaceToken = (
+    start: number,
+    end: number,
+    replacement: HTMLElement | string
+  ) => {
+    const node = ref.current
+    const sel = document.getSelection()
+    if (!node || !sel?.rangeCount) return
+    // focusing an unfocused contenteditable moves the caret to its start
+    const saved = sel.getRangeAt(0).cloneRange()
+    node.focus()
+    sel.removeAllRanges()
+    sel.addRange(saved)
+    const after = end - caret + (text[end] === ' ' ? 1 : 0)
+    replaceAtCaret(node, caret - start, after, replacement)
   }
 
   const pick = (idx: number) => {
     if (slash) {
       const cmd = commandMatches[idx]?.cmd
-      if (cmd) moveCaret(applySlashCommand(text, cmd), cmd.name.length + 2)
+      if (cmd) replaceToken(0, slash.end, slashCommandChip(cmd.name))
       return
     }
     if (!mention) return
-    if (folder && idx === 0) {
-      const next = applyFolderMention(text, mention, folder)
-      setMentions((cur) => ({ ...cur, [next.token]: next.path }))
-      moveCaret(next.text, next.caret)
-      return
-    }
+    if (folder && idx === 0)
+      return replaceToken(mention.start, mention.end, fileMentionChip(folder))
     const entry = fileMatches[folder ? idx - 1 : idx]
     if (!entry) return
-    const next = applyFileMention(text, mention, entry)
-    setMentions((cur) => ({ ...cur, [next.token]: next.path }))
-    moveCaret(next.text, next.caret)
+    if (!isDirectory(entry))
+      return replaceToken(
+        mention.start,
+        mention.end,
+        fileMentionChip(entry.path)
+      )
+    const { token, path } = directoryToken(mention, entry)
+    setMentions((cur) => ({ ...cur, [token]: path }))
+    replaceToken(mention.start, mention.end, `@${token}`)
   }
 
   const canSubmit =
@@ -246,19 +290,20 @@ export function DevboxComposer({
     // only clear what was sent; the user may have kept typing while it was in flight
     const clear = (ok: void | boolean) => {
       if (ok === false) return
-      if (draft.current.text === sent.text) {
+      if (draft.current.text === sent.text && ref.current) {
+        ref.current.innerHTML = ''
         update('')
         setMentions({})
       }
       if (draft.current.files === sent.files) setFiles(NO_FILES)
     }
-    const result = onSubmit(compileFileMentions(text.trim(), mentions), files)
+    const result = onSubmit(text.trim(), files)
     if (!(result instanceof Promise)) return clear(result)
     setSending(true)
     result.then(clear, () => undefined).finally(() => setSending(false))
   }
 
-  const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+  const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (menuOpen) {
       const count = suggestions.length
       if (e.key === 'Escape') {
@@ -312,20 +357,16 @@ export function DevboxComposer({
           onHover={setActive}
         />
       )}
-      <TextareaSC
+      <PromptSC
         ref={ref}
+        role="textbox"
         aria-label="Prompt"
-        rows={3}
-        autoFocus={autoFocus}
-        value={text}
+        aria-multiline
         disabled={disabled}
         placeholder={placeholder}
-        onChange={(e) =>
-          update(e.currentTarget.value, e.currentTarget.selectionStart ?? 0)
-        }
-        onSelect={(e) => setCaret(e.currentTarget.selectionStart ?? 0)}
+        setValue={update}
         onKeyDown={onKeyDown}
-        onPaste={onPaste}
+        onPasteFiles={addFiles}
       />
       {hint && (
         <CaptionP
@@ -371,7 +412,10 @@ export function DevboxComposer({
                   disabled={locked}
                 />
               )
-            const values = (option.options ?? []).filter(isNonNullable)
+            const values =
+              option.category === MODEL_CATEGORY && proxyModels?.length
+                ? proxyModelValues(option, proxyModels)
+                : (option.options ?? []).filter(isNonNullable)
             const current = values.find((o) => o.value === option.currentValue)
             return (
               <PillSelect
@@ -453,18 +497,26 @@ const ComposerSC = styled.div(({ theme }) => ({
       ? theme.colors['fill-zero']
       : theme.colors['fill-zero-selected'],
   transition: 'border 0.16s ease-in-out',
-  '&:has(textarea:focus)': { border: theme.borders['outline-focused'] },
+  '&:has([role="textbox"]:focus)': {
+    border: theme.borders['outline-focused'],
+  },
 }))
 
-const TextareaSC = styled.textarea(({ theme }) => ({
-  ...theme.partials.text.body2,
-  resize: 'none',
-  border: 'none',
-  outline: 'none',
+const PromptSC = styled(EditableDiv)(({ theme }) => ({
+  flex: 'none',
+  minHeight: '4.5em',
+  maxHeight: '40vh',
   padding: `${theme.spacing.xxsmall} ${theme.spacing.xsmall}`,
-  background: 'transparent',
   color: theme.colors.text,
-  '&::placeholder': { color: theme.colors['text-xlight'] },
+  [`[${SLASH_COMMAND_ATTR}]`]: {
+    fontFamily: theme.fontFamilies.mono,
+    color: theme.colors['text-primary-accent'],
+    background: theme.colors['fill-two'],
+    border: theme.borders['fill-two'],
+    borderRadius: theme.borderRadiuses.medium,
+    padding: `0 ${theme.spacing.xsmall}`,
+    userSelect: 'none',
+  },
 }))
 
 // leaves room for the absolutely positioned send button

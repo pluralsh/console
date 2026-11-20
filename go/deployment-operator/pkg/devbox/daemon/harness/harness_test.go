@@ -331,3 +331,22 @@ func TestGeminiDropsTheProviderPrefix(t *testing.T) {
 		t.Errorf("args = %v", spec.Args)
 	}
 }
+
+func TestModelIDsMatchEachPicker(t *testing.T) {
+	for _, tc := range []struct {
+		agent devboxv1.AgentType
+		model string
+		want  []string
+	}{
+		{devboxv1.AgentType_AGENT_TYPE_CLAUDE, "anthropic/claude-opus-4-1", []string{"anthropic/claude-opus-4-1"}},
+		{devboxv1.AgentType_AGENT_TYPE_CODEX, "gpt-5", []string{"gpt-5", "openai/gpt-5"}},
+		{devboxv1.AgentType_AGENT_TYPE_OPENCODE, "openai/gpt-5", []string{"openai/gpt-5", "plural/openai/gpt-5"}},
+		{devboxv1.AgentType_AGENT_TYPE_PI, "anthropic/claude-sonnet-4-5", []string{"anthropic/claude-sonnet-4-5", "plural/anthropic/claude-sonnet-4-5"}},
+		{devboxv1.AgentType_AGENT_TYPE_PI, "plural/openai/gpt-5", []string{"plural/openai/gpt-5"}},
+		{devboxv1.AgentType_AGENT_TYPE_GEMINI, "vertex/gemini-2.5-pro", []string{"vertex/gemini-2.5-pro", "gemini-2.5-pro"}},
+	} {
+		if got := ModelIDs(tc.agent, tc.model); !slices.Equal(got, tc.want) {
+			t.Errorf("ModelIDs(%s, %q) = %v, want %v", tc.agent, tc.model, got, tc.want)
+		}
+	}
+}

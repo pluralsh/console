@@ -3,7 +3,6 @@ import {
   CloseIcon,
   FileDiffIcon,
   FolderIcon,
-  GitPullIcon,
   IconFrame,
   TerminalIcon,
   Tooltip,
@@ -34,19 +33,13 @@ import { DevboxBrowserTab } from './DevboxBrowserTab'
 import { DevboxDiffTab } from './DevboxDiffTab'
 import { DevboxFilesTab } from './DevboxFilesTab'
 import { isInstanceLive } from './devboxIdle'
-import { DevboxRepositoriesTab } from './DevboxRepositoriesTab'
 import { DevboxTerminalTab } from './DevboxTerminalTab'
 import { useDevboxWorkspaceApi } from './devboxWorkspaceApi'
 
 const SIDE_PANEL_TYPE: SidePanel = 'devbox'
 const OPEN_KEY = 'plural-devbox-panel-open'
 
-export type DevboxPanelTab =
-  | 'files'
-  | 'changes'
-  | 'terminal'
-  | 'browser'
-  | 'repositories'
+export type DevboxPanelTab = 'files' | 'changes' | 'terminal' | 'browser'
 
 const PANEL_TABS: {
   key: DevboxPanelTab
@@ -57,11 +50,6 @@ const PANEL_TABS: {
   { key: 'changes', label: 'Changes', icon: <FileDiffIcon size={14} /> },
   { key: 'terminal', label: 'Terminal', icon: <TerminalIcon size={14} /> },
   { key: 'browser', label: 'Browser', icon: <BrowserIcon size={14} /> },
-  {
-    key: 'repositories',
-    label: 'Repositories',
-    icon: <GitPullIcon size={14} />,
-  },
 ]
 
 export const isPanelTab = (tab: Nullable<string>): tab is DevboxPanelTab =>
@@ -102,7 +90,8 @@ export function useDevboxPanel() {
     update({ [WORKBENCH_DEVBOX_TAB_QUERY_PARAM]: tab === 'files' ? null : tab })
   const selectFile = (path: Nullable<string>) =>
     update({ [WORKBENCH_DEVBOX_FILE_QUERY_PARAM]: path })
-  // a trailing `/` reveals a directory in the tree
+  // a trailing `/` only reveals a directory in the tree, a file also replaces
+  // the instance's main view with the file
   const openFile = (path: string) => {
     update({
       [WORKBENCH_DEVBOX_TAB_QUERY_PARAM]: null,
@@ -111,12 +100,15 @@ export function useDevboxPanel() {
     setOpen(true)
   }
 
+  const file = params.get(WORKBENCH_DEVBOX_FILE_QUERY_PARAM)
+
   return {
     isOpen: sidePanel === SIDE_PANEL_TYPE,
     setOpen,
     tab: isPanelTab(tabParam) ? tabParam : 'files',
     setTab,
-    file: params.get(WORKBENCH_DEVBOX_FILE_QUERY_PARAM),
+    file,
+    viewedFile: file && !file.endsWith('/') ? file : null,
     selectFile,
     openFile,
   }
@@ -252,13 +244,6 @@ export function DevboxPanelContent() {
               api={api}
               live={live}
               browserEnabled={!!instance.devbox?.browser}
-            />
-          )}
-          {active.key === 'repositories' && (
-            <DevboxRepositoriesTab
-              instance={instance}
-              api={api}
-              live={live}
             />
           )}
         </PanelBodySC>

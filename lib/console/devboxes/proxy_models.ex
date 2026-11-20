@@ -32,6 +32,9 @@ defmodule Console.Devboxes.ProxyModels do
     pi: :all
   }
 
+  # harnesses the daemon registers the proxy models with, so their pickers list them
+  @registered ~w(claude codex opencode pi)a
+
   # only these model families speak each harness's native API
   @agent_families %{gemini: "gemini"}
   # families a harness runs best on, offered first
@@ -56,20 +59,21 @@ defmodule Console.Devboxes.ProxyModels do
   end
 
   @doc """
-  Narrows an agent's probed models to what the proxy serves.  Claude offers the proxy models themselves: its probe
-  only sees Claude Code's built-in tier aliases, while the daemon lists the proxy models in the instance's
-  `availableModels`.  A runner allowlist naming proxy IDs still applies.  Other agents keep the probed IDs the proxy
+  The models a proxy-billed agent offers.  The proxy models are the source of truth for every agent the daemon
+  registers them with (Claude's `availableModels`, Codex's model catalog, OpenCode's and Pi's `plural` provider):
+  the box's probe ran without them, so its catalog only holds each harness's built-in models.  A runner allowlist
+  naming proxy IDs still applies.  Gemini CLI's model list is hardcoded, so it keeps the probed models the proxy
   serves, if any match.  An agent the proxy serves nothing for keeps its probed models.
   """
   @spec narrow(Devbox.Agent.t, [binary], t | nil) :: [binary]
   def narrow(_, offered, nil), do: offered
-  def narrow(%Devbox.Agent{type: :claude, allowed_models: allowed}, _, %{models: models}) do
-    case Enum.filter(allowed || [], &(&1 in models)) do
+  def narrow(%Devbox.Agent{type: type, allowed_models: allowed}, _, %{models: models}) when type in @registered do
+    allowed = Enum.map(allowed || [], &String.replace_prefix(&1, "plural/", ""))
+    case Enum.filter(models, &(&1 in allowed)) do
       [] -> models
-      allowed -> Enum.filter(models, &(&1 in allowed))
+      allowed -> allowed
     end
   end
-  def narrow(%Devbox.Agent{model_switchable: false}, [], %{models: models}), do: models
   def narrow(_, offered, %{models: models}) do
     case Enum.filter(offered, &served?(&1, models)) do
       [] -> offered

@@ -48,6 +48,10 @@ fragment DevboxAgent on DevboxAgent {
   models {
     ...DevboxModel
   }
+  subscriptionDefaultModel: defaultModel(billing: SUBSCRIPTION)
+  subscriptionModels: models(billing: SUBSCRIPTION) {
+    ...DevboxModel
+  }
   commands {
     ...DevboxCommand
   }
@@ -166,6 +170,7 @@ fragment DevboxThread on DevboxThread {
   cwd
   worktreeRepos
   status
+  stage
   imported
   lastActivityAt
   entityCount
@@ -714,6 +719,7 @@ query WorkbenchDevboxInstances(
   $after: String
   $statuses: [DevboxInstanceStatus]
   $mine: Boolean
+  $includeEnded: Boolean
 ) {
   workbench(id: $id) {
     id
@@ -722,6 +728,7 @@ query WorkbenchDevboxInstances(
       after: $after
       statuses: $statuses
       mine: $mine
+      includeEnded: $includeEnded
     ) {
       pageInfo {
         ...PageInfo

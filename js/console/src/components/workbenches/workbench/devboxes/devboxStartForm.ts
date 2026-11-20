@@ -69,10 +69,17 @@ export const defaultAgentOf = (box: Nullable<DevboxStartBox>) => {
 export const modelConfigOption = (agent: Nullable<DevboxAgentFragment>) =>
   agent?.configOptions?.find((o) => o?.category === MODEL_CATEGORY)
 
-// the probed models narrowed by the box's allowlist; the model config option's
+// the models offered under a billing: the AI proxy's, or on a subscription the
+// probed models narrowed by the box's allowlist; the model config option's
 // values when the catalog lists none
-export function modelsOf(agent: Nullable<DevboxAgentFragment>) {
-  const models = (agent?.models ?? []).filter(isNonNullable)
+export function modelsOf(
+  agent: Nullable<DevboxAgentFragment>,
+  billing: DevboxBilling = 'proxy'
+) {
+  const models = (
+    (billing === 'subscription' ? agent?.subscriptionModels : agent?.models) ??
+    []
+  ).filter(isNonNullable)
   const entries = models.length
     ? models.map(({ id, name, description }) => ({ id, name, description }))
     : (modelConfigOption(agent)?.options ?? [])
@@ -139,14 +146,21 @@ export function modelDisplayNameOf(
   id: Nullable<string>
 ) {
   if (!id) return null
-  const model = modelsOf(agent).find((m) => m.id === id)
+  const model = [...modelsOf(agent), ...modelsOf(agent, 'subscription')].find(
+    (m) => m.id === id
+  )
   return model ? modelDisplayName(model) : (proxyModelOf(id)?.slug ?? id)
 }
 
-export function defaultModelOf(agent: Nullable<DevboxAgentFragment>) {
-  const models = modelsOf(agent)
+export function defaultModelOf(
+  agent: Nullable<DevboxAgentFragment>,
+  billing: DevboxBilling = 'proxy'
+) {
+  const models = modelsOf(agent, billing)
   const preferred = [
-    agent?.defaultModel,
+    billing === 'subscription'
+      ? agent?.subscriptionDefaultModel
+      : agent?.defaultModel,
     modelConfigOption(agent)?.currentValue,
   ]
   for (const id of preferred)
@@ -164,22 +178,28 @@ export function allowedRepositoriesFor(
   return candidates.filter((r) => set.has(normalizeRepoUrl(r)))
 }
 
+const billingFor = (
+  billing: DevboxStartValues['billing'],
+  agent: Nullable<DevboxAgentType>
+): DevboxBilling => (agent && billing[agent]) || 'proxy'
+
 export function defaultStartValues(
   box: Nullable<DevboxStartBox>,
-  workbenchRepositories: Nullable<Nullable<string>[]>
+  workbenchRepositories: Nullable<Nullable<string>[]>,
+  billing: DevboxStartValues['billing'] = {}
 ): DevboxStartValues {
   const agent = defaultAgentOf(box)
   return {
     devboxId: box?.id ?? null,
     name: '',
     agent: agent?.type ?? null,
-    model: defaultModelOf(agent),
+    model: defaultModelOf(agent, billingFor(billing, agent?.type)),
     repositories: allowedRepositoriesFor(
       box,
       (workbenchRepositories ?? []).filter(isNonNullable)
     ),
     configOptions: {},
-    billing: {},
+    billing,
   }
 }
 
@@ -189,13 +209,14 @@ export function reconcileStartValues(
   box: Nullable<DevboxStartBox>
 ): DevboxStartValues {
   const agent = findAgent(box, values.agent) ?? defaultAgentOf(box)
-  const models = modelsOf(agent)
+  const billing = billingFor(values.billing, agent?.type)
+  const models = modelsOf(agent, billing)
   const model =
     values.model &&
     agent?.type === values.agent &&
     (!models.length || models.some((m) => m.id === values.model))
       ? values.model
-      : defaultModelOf(agent)
+      : defaultModelOf(agent, billing)
   return {
     ...values,
     devboxId: box?.id ?? null,
@@ -228,7 +249,7 @@ export function validateStartValues(
       errors.agent = `This agent never asks for permission, so it needs ${box.name} to allow full autonomy`
   }
 
-  const models = modelsOf(agent)
+  const models = modelsOf(agent, billingFor(values.billing, values.agent))
   if (agent && models.length) {
     if (!values.model) errors.model = 'Pick a model'
     else if (!models.some((m) => m.id === values.model))
@@ -258,6 +279,22 @@ export function billedToProxy(
     'proxy'
   )
 }
+
+export const instanceBilling = (
+  instance: {
+    agentBilling?: Nullable<
+      Nullable<{
+        agent?: Nullable<DevboxAgentType>
+        billing?: Nullable<DevboxBillingMode>
+      }>[]
+    >
+  },
+  agent: Nullable<DevboxAgentType>
+): DevboxBilling =>
+  (instance.agentBilling ?? []).find((b) => b?.agent === agent)?.billing ===
+  DevboxBillingMode.Subscription
+    ? 'subscription'
+    : 'proxy'
 
 // whether a running instance's agent bills to the AI proxy, where its own reviewer can't run, so auto needs the
 // box's decision model to review instead

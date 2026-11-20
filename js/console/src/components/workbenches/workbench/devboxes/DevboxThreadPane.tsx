@@ -26,7 +26,7 @@ import {
 import { DevboxComposer } from './DevboxComposer'
 import { useDevboxPanel } from './DevboxControlPanel'
 import { describeThreadError } from './devboxErrors'
-import { isInstanceLive } from './devboxIdle'
+import { isInstanceLive, isInstanceTerminal } from './devboxIdle'
 import { DevboxInteractionCard } from './DevboxInteractionCard'
 import { findAgent, isProxyBilled } from './devboxStartForm'
 import { selectOrderedEntities, selectTerminalOutput } from './devboxTimeline'
@@ -46,13 +46,17 @@ export function DevboxThreadPane({
   position?: Nullable<number>
 }) {
   const live = isInstanceLive(instance.status)
+  // an ended instance's actor is deleted, and its transcript with it
+  const ended = isInstanceTerminal(instance.status)
   const sessionId = thread.sessionId
   const session = sessionId ? timeline.store.sessions[sessionId] : undefined
   const scrollRef = useRef<HTMLDivElement>(null)
   const [scrolledTo, setScrolledTo] = useState<Nullable<number>>(null)
 
   const { ensureSession } = timeline
-  useEffect(() => ensureSession(sessionId), [ensureSession, sessionId])
+  useEffect(() => {
+    if (!ended) ensureSession(sessionId)
+  }, [ended, ensureSession, sessionId])
 
   const entities = selectOrderedEntities(session)
   const subagents = (instance.threads ?? [])
@@ -85,6 +89,7 @@ export function DevboxThreadPane({
   }, [entities.length, position, scrolledTo, session?.loaded])
 
   const agent = findAgent(instance.devbox, thread.agent)
+  const proxyBilled = isProxyBilled(instance, thread.agent)
   const { data: commandsData } = useDevboxInstanceCommandsQuery({
     variables: { threadId: thread.id },
     skip: !live || thread.status === DevboxThreadStatus.Closed,
@@ -131,13 +136,16 @@ export function DevboxThreadPane({
               <SubagentTranscript
                 subagent={s}
                 timeline={timeline}
+                ended={ended}
               />
             )}
             empty={
               <CaptionP $color="text-xlight">
-                {session?.loaded || !sessionId
-                  ? 'Nothing here yet. Send a prompt to get started.'
-                  : 'Loading transcript…'}
+                {ended
+                  ? "This instance has ended, so its transcript isn't available anymore."
+                  : session?.loaded || !sessionId
+                    ? 'Nothing here yet. Send a prompt to get started.'
+                    : 'Loading transcript…'}
               </CaptionP>
             }
           />
@@ -159,7 +167,12 @@ export function DevboxThreadPane({
           commands={commands}
           configOptions={thread.configOptions}
           autonomyPolicy={instance.devbox?.autonomy}
-          proxyBilled={isProxyBilled(instance, thread.agent)}
+          proxyBilled={proxyBilled}
+          proxyModels={
+            proxyBilled
+              ? agent?.models?.filter(isNonNullable).map((m) => m.id)
+              : null
+          }
           listFiles={listFiles}
           modelSwitchable={agent?.modelSwitchable !== false}
           running={thread.foregroundState === DevboxForegroundState.Running}
@@ -196,25 +209,30 @@ export function DevboxThreadPane({
 function SubagentTranscript({
   subagent,
   timeline,
+  ended,
 }: {
   subagent: DevboxThreadFragment
   timeline: DevboxTimelineStoreApi
+  ended: boolean
 }) {
   const session = subagent.sessionId
     ? timeline.store.sessions[subagent.sessionId]
     : undefined
   const { ensureSession } = timeline
-  useEffect(
-    () => ensureSession(subagent.sessionId),
-    [ensureSession, subagent.sessionId]
-  )
+  useEffect(() => {
+    if (!ended) ensureSession(subagent.sessionId)
+  }, [ended, ensureSession, subagent.sessionId])
   return (
     <DevboxTranscript
       entities={selectOrderedEntities(session)}
       terminal={(id) => selectTerminalOutput(session, id)}
       empty={
         <CaptionP $color="text-xlight">
-          {session?.loaded ? 'No activity yet.' : 'Loading…'}
+          {ended
+            ? 'Not available.'
+            : session?.loaded
+              ? 'No activity yet.'
+              : 'Loading…'}
         </CaptionP>
       }
     />

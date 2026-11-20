@@ -42,6 +42,8 @@ import {
 } from '../input/autocomplete/mentionTypes'
 import { plrlChipComponents } from '../input/autocomplete/PlrlChipMdRenderers'
 import {
+  DEVBOX_COMMAND_ATTRIBUTES,
+  DEVBOX_COMMAND_TAG,
   DEVBOX_FILE_ATTRIBUTES,
   DEVBOX_FILE_TAG,
   devboxFileChipComponents,
@@ -59,12 +61,14 @@ const chipSanitizeSchema = {
     ...PLRL_CHIP_TAG_NAMES,
     PLRL_FILE_TAG,
     DEVBOX_FILE_TAG,
+    DEVBOX_COMMAND_TAG,
   ],
   attributes: {
     ...markdownSanitizeSchema.attributes,
     ...CHIP_ATTRIBUTE_SCHEMA,
     [PLRL_FILE_TAG]: PLRL_FILE_ATTRIBUTES,
     [DEVBOX_FILE_TAG]: DEVBOX_FILE_ATTRIBUTES,
+    [DEVBOX_COMMAND_TAG]: DEVBOX_COMMAND_ATTRIBUTES,
   },
 }
 

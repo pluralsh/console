@@ -14,6 +14,12 @@ import {
   TrashCanIcon,
 } from '@pluralsh/design-system'
 import { ApolloError } from '@apollo/client'
+import usePersistedState from 'components/hooks/usePersistedState'
+import { ProgressRingGlyph } from 'components/workbenches/common/IssueStatusGlyph'
+import {
+  ListGroup,
+  ListGroupHeader,
+} from 'components/workbenches/common/WorkbenchGroupedList'
 import { GqlError } from 'components/utils/Alert'
 import { Confirm } from 'components/utils/Confirm'
 import { MoreMenu } from 'components/utils/MoreMenu'
@@ -24,6 +30,7 @@ import {
   DevboxAgentType,
   DevboxInstanceFragment,
   DevboxThreadFragment,
+  DevboxThreadStage,
   useCloseDevboxThreadMutation,
   useDeleteDevboxThreadMutation,
   useDevboxImportableSessionsQuery,
@@ -31,8 +38,10 @@ import {
   useImportDevboxThreadMutation,
   useRenameDevboxThreadMutation,
   useResumeDevboxThreadMutation,
+  WorkbenchJobStatus,
 } from 'generated/graphql'
 import { ReactNode, useState } from 'react'
+import { JOB_STATUS_COLORS, JobStatusIcon } from '../WorkbenchJobsGroupedList'
 import styled from 'styled-components'
 import { fromNow } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
@@ -43,17 +52,44 @@ import {
   buildThreadTree,
   capabilitiesFor,
   DevboxThreadAction,
+  DevboxThreadNode,
+  DevboxThreadState,
+  groupThreadsByStage,
   threadState,
   threadTitle,
 } from './devboxThreads'
 
-const STATE_SEVERITY = {
-  running: 'info',
-  'needs you': 'warning',
-  waiting: 'neutral',
-  idle: 'neutral',
-  closed: 'neutral',
-} as const
+const COLLAPSED_STAGES_KEY = 'plural-devbox-collapsed-thread-stages'
+
+// running and completed read like the matching job statuses; needs review is
+// Linear's In Review ring
+const STAGE_STYLES: Record<
+  DevboxThreadStage,
+  Pick<ListGroup<DevboxThreadStage>, 'icon' | 'color'>
+> = {
+  [DevboxThreadStage.NeedsReview]: {
+    color: 'icon-warning',
+    icon: (
+      <ProgressRingGlyph
+        progress={0.75}
+        color="icon-warning"
+      />
+    ),
+  },
+  [DevboxThreadStage.Running]: {
+    color: JOB_STATUS_COLORS[WorkbenchJobStatus.Running],
+    icon: <JobStatusIcon status={WorkbenchJobStatus.Running} />,
+  },
+  [DevboxThreadStage.Completed]: {
+    color: JOB_STATUS_COLORS[WorkbenchJobStatus.Successful],
+    icon: <JobStatusIcon status={WorkbenchJobStatus.Successful} />,
+  },
+}
+
+// the group already says running, idle or closed; only these add anything
+const STATE_SEVERITY: Partial<
+  Record<DevboxThreadState, 'warning' | 'neutral'>
+> = { 'needs you': 'warning', waiting: 'neutral' }
 
 const ACTION_LABELS: Record<DevboxThreadAction, string> = {
   rename: 'Rename',
@@ -96,6 +132,10 @@ export function DevboxThreadList({
   )
   const [renaming, setRenaming] = useState<Nullable<DevboxThreadFragment>>(null)
   const [deleting, setDeleting] = useState<Nullable<DevboxThreadFragment>>(null)
+  const [collapsed, setCollapsed] = usePersistedState<DevboxThreadStage[]>(
+    COLLAPSED_STAGES_KEY,
+    [DevboxThreadStage.Completed]
+  )
   // per agent: actions that came back UNSUPPORTED at runtime
   const [unsupported, setUnsupported] = useState<
     Partial<Record<DevboxAgentType, Set<DevboxThreadAction>>>
@@ -147,50 +187,82 @@ export function DevboxThreadList({
   if (!tree.length)
     return <EmptySC $color="text-xlight">No threads yet</EmptySC>
 
+  const renderThread = (thread: DevboxThreadNode) => {
+    const actions = availableThreadActions(
+      thread,
+      capabilitiesFor(agents, thread.agent),
+      thread.agent ? unsupported[thread.agent] : undefined
+    )
+    return (
+      <div key={thread.id}>
+        <ThreadRow
+          thread={thread}
+          selected={thread.id === selectedThreadId}
+          unread={unread.has(thread.id)}
+          onSelect={() => onSelect(thread.id)}
+          actions={
+            actions.length && !disabled ? (
+              <MoreMenu
+                onSelectionChange={(key) =>
+                  run(thread, key as DevboxThreadAction)
+                }
+              >
+                {actions.map((action) => (
+                  <ListBoxItem
+                    key={action}
+                    label={ACTION_LABELS[action]}
+                    leftContent={ACTION_ICONS[action]}
+                    destructive={action === 'delete'}
+                  />
+                ))}
+              </MoreMenu>
+            ) : null
+          }
+        />
+        {thread.children.map((child) => (
+          <ThreadRow
+            key={child.id}
+            nested
+            thread={child}
+            selected={child.id === selectedThreadId}
+            unread={unread.has(child.id)}
+            onSelect={() => onSelect(child.id)}
+          />
+        ))}
+      </div>
+    )
+  }
+
   return (
     <ListSC>
-      {tree.map((thread) => {
-        const actions = availableThreadActions(
-          thread,
-          capabilitiesFor(agents, thread.agent),
-          thread.agent ? unsupported[thread.agent] : undefined
+      {groupThreadsByStage(tree).map((group) => {
+        const holdsSelected = group.threads.some(
+          (t) =>
+            t.id === selectedThreadId ||
+            t.children.some((c) => c.id === selectedThreadId)
         )
+        const open = holdsSelected || !collapsed.includes(group.stage)
         return (
-          <div key={thread.id}>
-            <ThreadRow
-              thread={thread}
-              selected={thread.id === selectedThreadId}
-              unread={unread.has(thread.id)}
-              onSelect={() => onSelect(thread.id)}
-              actions={
-                actions.length && !disabled ? (
-                  <MoreMenu
-                    onSelectionChange={(key) =>
-                      run(thread, key as DevboxThreadAction)
-                    }
-                  >
-                    {actions.map((action) => (
-                      <ListBoxItem
-                        key={action}
-                        label={ACTION_LABELS[action]}
-                        leftContent={ACTION_ICONS[action]}
-                        destructive={action === 'delete'}
-                      />
-                    ))}
-                  </MoreMenu>
-                ) : null
-              }
-            />
-            {thread.children.map((child) => (
-              <ThreadRow
-                key={child.id}
-                nested
-                thread={child}
-                selected={child.id === selectedThreadId}
-                unread={unread.has(child.id)}
-                onSelect={() => onSelect(child.id)}
+          <div key={group.stage}>
+            <GroupHeaderWrapSC>
+              <ListGroupHeader
+                group={{
+                  key: group.stage,
+                  label: group.label,
+                  count: group.threads.length,
+                  ...STAGE_STYLES[group.stage],
+                }}
+                collapsed={!open}
+                onToggle={() =>
+                  setCollapsed(
+                    collapsed.includes(group.stage)
+                      ? collapsed.filter((s) => s !== group.stage)
+                      : [...collapsed, group.stage]
+                  )
+                }
               />
-            ))}
+            </GroupHeaderWrapSC>
+            {open && group.threads.map(renderThread)}
           </div>
         )
       })}
@@ -287,7 +359,7 @@ function ThreadRow({
           {nested && <BotIcon size={10} />}
           {unread && <UnreadDotSC aria-label="unread" />}
           <ThreadTitleSC $unread={unread}>{threadTitle(thread)}</ThreadTitleSC>
-          {state !== 'idle' && (
+          {STATE_SEVERITY[state] && (
             <Chip
               size="small"
               severity={STATE_SEVERITY[state]}
@@ -437,6 +509,16 @@ function RenameThreadModal({
 }
 
 const ListSC = styled.div({ display: 'flex', flexDirection: 'column' })
+
+const GroupHeaderWrapSC = styled.div(({ theme }) => ({
+  position: 'sticky',
+  top: 0,
+  zIndex: 1,
+  display: 'flex',
+  flexDirection: 'column',
+  padding: `${theme.spacing.xsmall} ${theme.spacing.xsmall} 0`,
+  backgroundColor: theme.colors['fill-accent'],
+}))
 
 const EmptySC = styled(CaptionP)(({ theme }) => ({
   padding: `${theme.spacing.xsmall} ${theme.spacing.medium}`,

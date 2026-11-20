@@ -188,6 +188,25 @@ defmodule Console.Devboxes.ThreadsTest do
       assert msg =~ "above this devbox's max of auto"
     end
 
+    test "a proxy-billed model option accepts the AI proxy's models" do
+      deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key", model: "gpt-5"}})
+      thread = owned_thread(
+        agent: :claude,
+        config_options: [
+          %DevboxInstanceSession.ConfigOption{
+            config_id: "model",
+            category: "model",
+            options: [%DevboxInstanceSession.ConfigOption.Value{value: "default"}]
+          }
+        ],
+        devbox_attrs: [agents: [%Devbox.Agent{type: :claude}]]
+      )
+
+      {:ok, _} = Threads.set_config_option(thread.id, "model", "openai/gpt-5", thread.user)
+      {:ok, _} = Threads.set_config_option(thread.id, "model", "default", thread.user)
+      {:error, _} = Threads.set_config_option(thread.id, "model", "anthropic/claude-opus-4-1", thread.user)
+    end
+
     test "auto needs subscription billing" do
       levels = Enum.map(~w(manual auto full), &%DevboxInstanceSession.ConfigOption.Value{value: &1})
       thread = owned_thread(

@@ -78,16 +78,23 @@ defmodule Console.Devboxes.ProxyModelsTest do
       assert ProxyModels.narrow(agent, ~w(default), @proxy) == ~w(anthropic/claude-haiku-4-5)
     end
 
-    test "other agents keep probed ids the proxy serves, or everything if none match" do
-      agent = %Devbox.Agent{type: :opencode, model_switchable: true}
-      assert ProxyModels.narrow(agent, ~w(plural/anthropic/claude-haiku-4-5 plural/openai/gpt-5), @proxy) ==
-               ~w(plural/anthropic/claude-haiku-4-5)
-      assert ProxyModels.narrow(agent, ~w(gpt-5-codex), @proxy) == ~w(gpt-5-codex)
+    test "codex, opencode and pi offer the proxy models whatever their probe saw" do
+      for type <- ~w(codex opencode pi)a do
+        assert ProxyModels.narrow(%Devbox.Agent{type: type}, ~w(gpt-5-codex opencode/grok-code), @proxy) == @proxy.models
+        assert ProxyModels.narrow(%Devbox.Agent{type: type}, [], @proxy) == @proxy.models
+      end
     end
 
-    test "agents without model control offer the proxy models at boot" do
-      agent = %Devbox.Agent{type: :pi, model_switchable: false}
-      assert ProxyModels.narrow(agent, [], @proxy) == @proxy.models
+    test "an allowlist matches proxy ids with or without the plural/ prefix" do
+      agent = %Devbox.Agent{type: :opencode, allowed_models: ~w(plural/anthropic/claude-haiku-4-5)}
+      assert ProxyModels.narrow(agent, [], @proxy) == ~w(anthropic/claude-haiku-4-5)
+    end
+
+    test "gemini keeps its hardcoded models the proxy serves, or everything if none match" do
+      proxy = %{default_model: "vertex/gemini-2.5-pro", models: ["vertex/gemini-2.5-pro"], aliases: %{}}
+      agent = %Devbox.Agent{type: :gemini}
+      assert ProxyModels.narrow(agent, ~w(gemini-2.5-pro gemini-2.5-flash), proxy) == ~w(gemini-2.5-pro)
+      assert ProxyModels.narrow(agent, ~w(gemini-3-pro), proxy) == ~w(gemini-3-pro)
     end
 
     test "no proxy leaves the catalog alone" do
@@ -101,5 +108,13 @@ defmodule Console.Devboxes.ProxyModelsTest do
 
     assert Devboxes.offered_models(agent) == ["anthropic/claude-sonnet-4-5"]
     assert Devboxes.default_model(agent) == "anthropic/claude-sonnet-4-5"
+  end
+
+  test "a subscription-billed agent offers its probed catalog" do
+    settings(%{provider: :anthropic, anthropic: %{access_token: "key", model: "claude-sonnet-4-5", tool_model: "claude-sonnet-4-5", proxy_models: ["claude-sonnet-4-5"]}})
+    agent = %Devbox.Agent{type: :claude, default_model: "opus", models: [%Devbox.Agent.Model{id: "opus"}, %Devbox.Agent.Model{id: "sonnet"}]}
+
+    assert Devboxes.offered_models(agent, :subscription) == ~w(opus sonnet)
+    assert Devboxes.default_model(agent, :subscription) == "opus"
   end
 end

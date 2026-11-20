@@ -1,6 +1,9 @@
 import {
   Button,
   CameraIcon,
+  CaretLeftIcon,
+  CaretRightIcon,
+  ClockIcon,
   Chip,
   DownloadIcon,
   Flex,
@@ -11,7 +14,9 @@ import {
   MoonIcon,
   PlayIcon,
   StopIcon,
+  Tooltip,
 } from '@pluralsh/design-system'
+import dayjs from 'dayjs'
 import { GqlError } from 'components/utils/Alert'
 import { Confirm } from 'components/utils/Confirm'
 import { MoreMenu } from 'components/utils/MoreMenu'
@@ -27,16 +32,111 @@ import {
   useKeepDevboxInstanceAwakeMutation,
   useSuspendDevboxInstanceMutation,
 } from 'generated/graphql'
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
+import styled from 'styled-components'
+import { formatDateTime, fromNow } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
 import { billingBadgeLabel, toBillingMode } from './devboxCredentials'
 import { DevboxPrChips } from './DevboxChips'
-import { isInstanceLive, isInstanceTerminal } from './devboxIdle'
-import { DevboxKeepAwakeMenu } from './DevboxKeepAwakeMenu'
-import { agentLabel, findAgent, modelDisplayNameOf } from './devboxStartForm'
+import {
+  DevboxAwakeStatus,
+  isInstanceLive,
+  isInstanceTerminal,
+} from './devboxIdle'
+import { devboxSizing } from './devboxSizing'
+import { DevboxAwakePill, useKeepAwakeActions } from './DevboxKeepAwakeMenu'
+
+type InstanceDetail = { label: string; value: string; tooltip?: string }
+
+// the facts worth a glance: what the box runs on, how long it's been up, and what it works on
+export function instanceDetails(
+  instance: DevboxInstanceFragment,
+  now: Date
+): InstanceDetail[] {
+  const box = instance.devbox
+  const repos = (instance.repositories ?? []).filter(isNonNullable)
+  const running = instance.runningThreads ?? 0
+  const waiting = instance.waitingThreads ?? 0
+  const uptime: Nullable<InstanceDetail> =
+    isInstanceLive(instance.status) && instance.awakeSince
+      ? {
+          label: 'Up',
+          value: elapsed(instance.awakeSince, now),
+          tooltip: `Awake since ${formatDateTime(instance.awakeSince)}`,
+        }
+      : instance.status === DevboxInstanceStatus.Suspended &&
+          instance.suspendedAt
+        ? { label: 'Suspended', value: fromNow(instance.suspendedAt) }
+        : isInstanceTerminal(instance.status) && instance.completedAt
+          ? { label: 'Ended', value: fromNow(instance.completedAt) }
+          : null
+
+  return [
+    box?.name && { label: 'Box', value: box.name },
+    {
+      label: 'Size',
+      value: devboxSizing(box?.resources) ?? 'default',
+    },
+    box?.cluster?.name && { label: 'Cluster', value: box.cluster.name },
+    uptime,
+    (running || waiting) && {
+      label: 'Threads',
+      value: [running && `${running} running`, waiting && `${waiting} waiting`]
+        .filter(Boolean)
+        .join(', '),
+    },
+    !!repos.length && {
+      label: repos.length === 1 ? 'Repo' : 'Repos',
+      value: repos.length === 1 ? repoName(repos[0]) : `${repos.length}`,
+      tooltip: repos.join('\n'),
+    },
+    instance.snapshot && {
+      label: 'From snapshot',
+      value: instance.snapshot.name || instance.snapshot.id.slice(0, 8),
+    },
+    (instance.viewerCount ?? 0) > 1 && {
+      label: 'Watching',
+      value: `${instance.viewerCount}`,
+    },
+  ].filter((d): d is InstanceDetail => !!d)
+}
+
+// e.g. "3d 4h", "2h 15m", "<1m"
+function elapsed(from: string, now: Date) {
+  const minutes = Math.max(0, dayjs(now).diff(from, 'minute'))
+  const [d, h, m] = [
+    Math.floor(minutes / 1440),
+    Math.floor((minutes % 1440) / 60),
+    minutes % 60,
+  ]
+  if (d) return h ? `${d}d ${h}h` : `${d}d`
+  if (h) return m ? `${h}h ${m}m` : `${h}h`
+  return m ? `${m}m` : '<1m'
+}
+
+type MenuAction = {
+  key: string
+  label: string
+  description?: string
+  icon: ReactNode
+  right?: ReactNode
+  disabled?: boolean
+  destructive?: boolean
+}
+
+const AWAKE_MENU_KEY = 'awake-menu'
+const AWAKE_BACK_KEY = 'awake-back'
+
+const repoName = (url: string) =>
+  url
+    .replace(/\.git$/, '')
+    .split(/[/:]/)
+    .slice(-2)
+    .join('/')
 
 export function DevboxInstanceHeader({
   instance,
+  awake,
   maxDeferralSeconds,
   now,
   pullRequests,
@@ -45,6 +145,7 @@ export function DevboxInstanceHeader({
   onImportSession,
 }: {
   instance: DevboxInstanceFragment
+  awake: Nullable<DevboxAwakeStatus>
   maxDeferralSeconds: number
   now: Date
   pullRequests: DevboxPullRequestFragment[]
@@ -55,6 +156,7 @@ export function DevboxInstanceHeader({
   const { popToast } = useSimpleToast()
   const [stopOpen, setStopOpen] = useState(false)
   const [snapshotOpen, setSnapshotOpen] = useState(false)
+  const [submenu, setSubmenu] = useState(false)
   const live = isInstanceLive(instance.status)
   const terminal = isInstanceTerminal(instance.status)
   const suspended = instance.status === DevboxInstanceStatus.Suspended
@@ -82,36 +184,65 @@ export function DevboxInstanceHeader({
     .map((b) => billingBadgeLabel(b, instance.user?.name))
     .filter(isNonNullable)
 
-  const actions = [
-    live && {
-      key: 'snapshot',
-      label: 'Take snapshot',
-      icon: <CameraIcon size={ICON_FRAME_ICON_SIZE.small} />,
-      disabled: instance.status === DevboxInstanceStatus.Snapshotting,
+  const details = instanceDetails(instance, now)
+  const keepAwakeActions = useKeepAwakeActions({
+    keepAwakeUntil: instance.keepAwakeUntil,
+    maxDeferralSeconds,
+    now,
+    onKeepAwake: (until) =>
+      keepAwake({
+        variables: { id: instance.id, until: until.toISOString() },
+      }),
+    onCancel: () => cancelKeepAwake({ variables: { id: instance.id } }),
+  })
+
+  const awakeActions: MenuAction[] = [
+    {
+      key: AWAKE_BACK_KEY,
+      label: 'Back',
+      icon: <CaretLeftIcon size={ICON_FRAME_ICON_SIZE.small} />,
     },
-    live &&
-      onImportSession && {
-        key: 'import',
-        label: 'Import a session',
-        icon: <DownloadIcon size={ICON_FRAME_ICON_SIZE.small} />,
+    ...keepAwakeActions.items,
+  ]
+  const mainActions = (
+    [
+      live && {
+        key: AWAKE_MENU_KEY,
+        label: 'Keep awake',
+        icon: <ClockIcon size={ICON_FRAME_ICON_SIZE.small} />,
+        right: <CaretRightIcon size={ICON_FRAME_ICON_SIZE.small} />,
       },
-    live && {
-      key: 'suspend',
-      label: 'Suspend',
-      icon: <MoonIcon size={ICON_FRAME_ICON_SIZE.small} />,
-    },
-    !terminal && {
-      key: 'stop',
-      label: 'Stop instance',
-      icon: (
-        <StopIcon
-          size={ICON_FRAME_ICON_SIZE.small}
-          color="icon-danger"
-        />
-      ),
-      destructive: true,
-    },
-  ].filter((a) => !!a)
+      live && {
+        key: 'snapshot',
+        label: 'Take snapshot',
+        icon: <CameraIcon size={ICON_FRAME_ICON_SIZE.small} />,
+        disabled: instance.status === DevboxInstanceStatus.Snapshotting,
+      },
+      live &&
+        onImportSession && {
+          key: 'import',
+          label: 'Import a session',
+          icon: <DownloadIcon size={ICON_FRAME_ICON_SIZE.small} />,
+        },
+      live && {
+        key: 'suspend',
+        label: 'Suspend',
+        icon: <MoonIcon size={ICON_FRAME_ICON_SIZE.small} />,
+      },
+      !terminal && {
+        key: 'stop',
+        label: 'Stop instance',
+        icon: (
+          <StopIcon
+            size={ICON_FRAME_ICON_SIZE.small}
+            color="icon-danger"
+          />
+        ),
+        destructive: true,
+      },
+    ] as (MenuAction | false | undefined)[]
+  ).filter((a): a is MenuAction => !!a)
+  const actions = submenu ? awakeActions : mainActions
 
   return (
     <Flex
@@ -130,20 +261,9 @@ export function DevboxInstanceHeader({
         >
           <StackedText
             truncate
-            first={instance.name || instance.id.slice(0, 8)}
+            first={<span>{instance.name || instance.id.slice(0, 8)}</span>}
             firstPartialType="body2Bold"
             firstColor="text"
-            second={[
-              instance.devbox?.name,
-              agentLabel(instance.agent),
-              modelDisplayNameOf(
-                findAgent(instance.devbox, instance.agent),
-                instance.requestedModel
-              ),
-              instance.user?.name && `started by ${instance.user.name}`,
-            ]
-              .filter(Boolean)
-              .join(' · ')}
           />
         </Flex>
         <Flex
@@ -151,22 +271,7 @@ export function DevboxInstanceHeader({
           align="center"
           css={{ flexShrink: 0 }}
         >
-          {live && (
-            <DevboxKeepAwakeMenu
-              keepAwakeUntil={instance.keepAwakeUntil}
-              maxDeferralSeconds={maxDeferralSeconds}
-              now={now}
-              loading={keepAwakeState.loading || cancelKeepAwakeState.loading}
-              onKeepAwake={(until) =>
-                keepAwake({
-                  variables: { id: instance.id, until: until.toISOString() },
-                })
-              }
-              onCancel={() =>
-                cancelKeepAwake({ variables: { id: instance.id } })
-              }
-            />
-          )}
+          {awake && <DevboxAwakePill status={awake} />}
           {suspended && (
             <Button
               small
@@ -179,8 +284,20 @@ export function DevboxInstanceHeader({
           )}
           {!!actions.length && (
             <MoreMenu
-              disabled={suspendState.loading}
+              disabled={
+                suspendState.loading ||
+                keepAwakeState.loading ||
+                cancelKeepAwakeState.loading
+              }
+              keepOpenOn={(key) =>
+                key === AWAKE_MENU_KEY || key === AWAKE_BACK_KEY
+              }
+              onOpenChange={(open) => !open && setSubmenu(false)}
               onSelectionChange={(key) => {
+                if (key === AWAKE_MENU_KEY) return setSubmenu(true)
+                if (key === AWAKE_BACK_KEY) return setSubmenu(false)
+                setSubmenu(false)
+                if (keepAwakeActions.onSelect(`${key}`)) return
                 if (key === 'snapshot') setSnapshotOpen(true)
                 if (key === 'import') onImportSession?.()
                 if (key === 'suspend')
@@ -192,7 +309,9 @@ export function DevboxInstanceHeader({
                 <ListBoxItem
                   key={a.key}
                   label={a.label}
+                  description={a.description}
                   leftContent={a.icon}
+                  rightContent={a.right}
                   disabled={a.disabled}
                   destructive={a.destructive}
                 />
@@ -201,6 +320,29 @@ export function DevboxInstanceHeader({
           )}
         </Flex>
       </Flex>
+      {!!details.length && (
+        <DetailsSC>
+          {details.map(({ label, value, tooltip }) => {
+            const item = (
+              <DetailSC key={label}>
+                <DetailLabelSC>{label}</DetailLabelSC>
+                <span>{value}</span>
+              </DetailSC>
+            )
+            return tooltip ? (
+              <Tooltip
+                key={label}
+                label={tooltip}
+                placement="bottom"
+              >
+                {item}
+              </Tooltip>
+            ) : (
+              item
+            )
+          })}
+        </DetailsSC>
+      )}
       {(!!badges.length || !!pullRequests.length) && (
         <Flex
           gap="xsmall"
@@ -230,6 +372,7 @@ export function DevboxInstanceHeader({
         error={stopState.error}
         submit={() => stop({ variables: { id: instance.id } })}
       />
+      {keepAwakeActions.modal}
       {snapshotOpen && (
         <SnapshotModal
           instance={instance}
@@ -239,6 +382,25 @@ export function DevboxInstanceHeader({
     </Flex>
   )
 }
+
+const DetailsSC = styled.div(({ theme }) => ({
+  ...theme.partials.text.caption,
+  display: 'flex',
+  flexWrap: 'wrap',
+  columnGap: theme.spacing.large,
+  rowGap: theme.spacing.xxsmall,
+  color: theme.colors['text-light'],
+}))
+
+const DetailSC = styled.span(({ theme }) => ({
+  display: 'inline-flex',
+  gap: theme.spacing.xsmall,
+  whiteSpace: 'nowrap',
+}))
+
+const DetailLabelSC = styled.span(({ theme }) => ({
+  color: theme.colors['text-xlight'],
+}))
 
 function SnapshotModal({
   instance,

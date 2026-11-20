@@ -80,6 +80,40 @@ defmodule Console.GraphQl.Deployments.DevboxQueriesTest do
       assert iid == interaction.id
     end
 
+    test "it stages threads and filters them by stage" do
+      user = insert(:user)
+      inst = insert(:devbox_instance, workbench: insert(:workbench, read_bindings: [%{user_id: user.id}]))
+      running = insert(:devbox_instance_session, instance: inst, foreground_state: :running)
+      queued = insert(:devbox_instance_session, instance: inst, status: :waiting)
+      asking = insert(:devbox_instance_session, instance: inst, foreground_state: :requires_action)
+      finished = insert(:devbox_instance_session, instance: inst, stop_reason: "end_turn")
+      closed = insert(:devbox_instance_session, instance: inst, status: :closed)
+
+      query = """
+        query Instance($id: ID!, $stages: [DevboxThreadStage]) {
+          devboxInstance(id: $id) { threads(stages: $stages) { id stage } }
+        }
+      """
+
+      {:ok, %{data: %{"devboxInstance" => %{"threads" => threads}}}} =
+        run_query(query, %{"id" => inst.id}, %{current_user: user})
+
+      assert Map.new(threads, &{&1["id"], &1["stage"]}) == %{
+        running.id => "RUNNING",
+        queued.id => "RUNNING",
+        asking.id => "NEEDS_REVIEW",
+        finished.id => "NEEDS_REVIEW",
+        closed.id => "COMPLETED"
+      }
+
+      for {stage, expected} <- [{"RUNNING", [running, queued]}, {"NEEDS_REVIEW", [asking, finished]}, {"COMPLETED", [closed]}] do
+        {:ok, %{data: %{"devboxInstance" => %{"threads" => threads}}}} =
+          run_query(query, %{"id" => inst.id, "stages" => [stage]}, %{current_user: user})
+
+        assert ids_equal(threads, expected)
+      end
+    end
+
     test "users without workbench access cannot read instances" do
       inst = insert(:devbox_instance)
 
@@ -119,6 +153,29 @@ defmodule Console.GraphQl.Deployments.DevboxQueriesTest do
       assert from_connection(found["devboxSnapshots"]) |> ids_equal([snapshot])
       assert [%{"id" => pid}] = found["devboxInbox"]
       assert pid == pending.id
+    end
+
+    test "it hides ended instances unless asked for them" do
+      user = insert(:user)
+      wb = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      running = insert(:devbox_instance, workbench: wb)
+      suspended = insert(:devbox_instance, workbench: wb, status: :suspended)
+      cancelled = insert(:devbox_instance, workbench: wb, status: :cancelled)
+      failed = insert(:devbox_instance, workbench: wb, status: :failed)
+
+      {:ok, %{data: %{"workbench" => found}}} = run_query("""
+        query Workbench($id: ID!) {
+          workbench(id: $id) {
+            live: devboxInstances(first: 10) { edges { node { id } } }
+            all: devboxInstances(first: 10, includeEnded: true) { edges { node { id } } }
+            cancelled: devboxInstances(first: 10, statuses: [CANCELLED]) { edges { node { id } } }
+          }
+        }
+      """, %{"id" => wb.id}, %{current_user: user})
+
+      assert from_connection(found["live"]) |> ids_equal([running, suspended])
+      assert from_connection(found["all"]) |> ids_equal([running, suspended, cancelled, failed])
+      assert from_connection(found["cancelled"]) |> ids_equal([cancelled])
     end
   end
 

@@ -13,6 +13,7 @@ import {
   attachmentError,
   DevboxComposer,
   MAX_ATTACHMENTS,
+  proxyModelValues,
 } from './DevboxComposer'
 import {
   applySlashCommand,
@@ -21,7 +22,8 @@ import {
   matchSlashCommands,
   slashCommandHint,
 } from './devboxSlashCommands'
-import { compileFileMentions, getMentionQuery } from './devboxFileMentions'
+import { getMentionQuery } from './devboxFileMentions'
+import { serializeEditableDiv } from 'components/utils/contentEditableChips'
 
 const commands = [
   {
@@ -50,8 +52,19 @@ function renderComposer(
   return { onSubmit, prompt: screen.getByLabelText('Prompt') }
 }
 
-const type = (el: HTMLElement, value: string) =>
-  fireEvent.change(el, { target: { value, selectionStart: value.length } })
+// replaces the prompt's content and puts the caret at its end
+const type = (el: HTMLElement, value: string) => {
+  el.textContent = value
+  const range = document.createRange()
+  if (el.firstChild) range.setStart(el.firstChild, value.length)
+  else range.setStart(el, 0)
+  range.collapse(true)
+  document.getSelection()?.removeAllRanges()
+  document.getSelection()?.addRange(range)
+  fireEvent.input(el)
+}
+
+const valueOf = (el: HTMLElement) => serializeEditableDiv(el)
 
 const options = () =>
   within(screen.getByRole('listbox', { name: 'Slash commands' }))
@@ -77,7 +90,10 @@ describe('DevboxComposer slash autocomplete', () => {
     type(prompt, '/re')
     expect(options()[0]).toBe('/review')
     fireEvent.keyDown(prompt, { key: 'Enter' })
-    expect((prompt as HTMLTextAreaElement).value).toBe('/review ')
+    expect(valueOf(prompt)).toBe('/review ')
+    expect(prompt.querySelector('[data-slash-command]')?.textContent).toBe(
+      '/review'
+    )
     expect(onSubmit).not.toHaveBeenCalled()
     expect(screen.queryByRole('listbox')).toBeNull()
     expect(screen.getByTestId('slash-hint').textContent).toBe(
@@ -87,7 +103,7 @@ describe('DevboxComposer slash autocomplete', () => {
     type(prompt, '/review tests')
     fireEvent.keyDown(prompt, { key: 'Enter' })
     expect(onSubmit).toHaveBeenCalledWith('/review tests', [])
-    expect((prompt as HTMLTextAreaElement).value).toBe('')
+    expect(valueOf(prompt)).toBe('')
   })
 
   it('navigates with arrows, picks with the mouse and dismisses with escape', () => {
@@ -102,7 +118,7 @@ describe('DevboxComposer slash autocomplete', () => {
 
     type(prompt, '/c')
     fireEvent.mouseDown(screen.getByText('/compact'))
-    expect((prompt as HTMLTextAreaElement).value).toBe('/compact ')
+    expect(valueOf(prompt)).toBe('/compact ')
   })
 
   it('keeps the draft when the send fails and clears it once one succeeds', async () => {
@@ -121,10 +137,10 @@ describe('DevboxComposer slash autocomplete', () => {
           .disabled
       ).toBe(false)
     )
-    expect((prompt as HTMLTextAreaElement).value).toBe('fix the build')
+    expect(valueOf(prompt)).toBe('fix the build')
 
     fireEvent.keyDown(prompt, { key: 'Enter' })
-    await waitFor(() => expect((prompt as HTMLTextAreaElement).value).toBe(''))
+    await waitFor(() => expect(valueOf(prompt)).toBe(''))
     expect(onSubmit).toHaveBeenCalledTimes(2)
   })
 
@@ -160,28 +176,27 @@ describe('DevboxComposer file mentions', () => {
     ).toEqual(['src//home/devbox/src', 'README.md/home/devbox/README.md'])
 
     fireEvent.keyDown(prompt, { key: 'Enter' })
-    expect((prompt as HTMLTextAreaElement).value).toBe('look at @src/')
+    expect(valueOf(prompt)).toBe('look at @src/')
     expect(listFiles).toHaveBeenLastCalledWith('src')
 
     await screen.findByText('main.go')
     fireEvent.keyDown(prompt, { key: 'ArrowDown' })
     fireEvent.keyDown(prompt, { key: 'Tab' })
-    expect((prompt as HTMLTextAreaElement).value).toBe(
-      'look at @/home/devbox/src/main.go '
+    expect(valueOf(prompt)).toBe(
+      'look at <plrl-devbox-file path="/home/devbox/src/main.go"></plrl-devbox-file> '
     )
+    expect(prompt.querySelector('[data-chip]')?.textContent).toBe('main.go')
     expect(screen.queryByRole('listbox')).toBeNull()
   })
 
-  it('mentions the folder being browsed', async () => {
+  it('mentions the folder being browsed as a chip', async () => {
     const { prompt, onSubmit } = renderComposer({ listFiles })
     type(prompt, 'refactor @')
     await screen.findByRole('listbox', { name: 'Files' })
     fireEvent.keyDown(prompt, { key: 'Enter' })
     await screen.findByText('Mention this folder')
     fireEvent.keyDown(prompt, { key: 'Enter' })
-    expect((prompt as HTMLTextAreaElement).value).toBe(
-      'refactor @/home/devbox/src/ '
-    )
+    expect(prompt.querySelector('[data-chip]')?.textContent).toBe('src/')
     expect(screen.queryByRole('listbox')).toBeNull()
 
     fireEvent.keyDown(prompt, { key: 'Enter' })
@@ -191,28 +206,12 @@ describe('DevboxComposer file mentions', () => {
     )
   })
 
-  it('sends picked mentions as file tags', async () => {
+  it('leaves typed @ text alone', () => {
     const { prompt, onSubmit } = renderComposer({ listFiles })
-    type(prompt, 'explain @')
-    await screen.findByRole('listbox', { name: 'Files' })
-    fireEvent.keyDown(prompt, { key: 'Enter' })
-    type(prompt, 'explain @src/ and @README.md vs mail@x')
+    type(prompt, 'explain @README.md vs mail@x')
     fireEvent.keyDown(prompt, { key: 'Escape' })
     fireEvent.keyDown(prompt, { key: 'Enter' })
-    expect(onSubmit).toHaveBeenCalledWith(
-      'explain <plrl-devbox-file path="/home/devbox/src/"></plrl-devbox-file> and @README.md vs mail@x',
-      []
-    )
-  })
-
-  it('compiles only whole picked tokens', () => {
-    expect(
-      compileFileMentions('see @/a/b.go, @/a/b.go\nand @/a/b.gox', {
-        '/a/b.go': '/a/b.go',
-      })
-    ).toBe(
-      'see @/a/b.go, <plrl-devbox-file path="/a/b.go"></plrl-devbox-file>\nand @/a/b.gox'
-    )
+    expect(onSubmit).toHaveBeenCalledWith('explain @README.md vs mail@x', [])
   })
 
   it('only completes @ at a word start', () => {
@@ -270,6 +269,28 @@ describe('DevboxComposer attachments', () => {
       )
     ).toMatch(/At most 10/)
     expect(attachmentError([file('ok')])).toBeNull()
+  })
+})
+
+describe('proxyModelValues', () => {
+  it("lists the proxy's models under the agent's IDs, keeping a current alias", () => {
+    const option = {
+      configId: 'model',
+      category: 'model',
+      currentValue: 'default',
+      options: [
+        { value: 'default', name: 'Default (recommended)' },
+        { value: 'opus', name: 'Opus' },
+        { value: 'plural/openai/gpt-5', name: 'gpt-5' },
+      ],
+    }
+    expect(
+      proxyModelValues(option, ['openai/gpt-5', 'anthropic/claude-opus-4-1'])
+    ).toEqual([
+      { value: 'default', name: 'Default (recommended)' },
+      { value: 'plural/openai/gpt-5', name: 'gpt-5' },
+      { value: 'anthropic/claude-opus-4-1' },
+    ])
   })
 })
 

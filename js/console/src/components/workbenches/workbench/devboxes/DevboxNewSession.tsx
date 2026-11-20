@@ -23,6 +23,7 @@ import {
   defaultAgentOf,
   defaultModelOf,
   findAgent,
+  instanceBilling,
   isProxyBilled,
   modelDisplayName,
   modelDisplayNameOf,
@@ -48,7 +49,8 @@ export function DevboxNewSession({
   }>(() => ({ agent: instance.agent ?? defaultAgentOf(box)?.type ?? null }))
   const { agent } = picks
   const agentEntry = findAgent(box, agent)
-  const models = modelsOf(agentEntry)
+  const billing = instanceBilling(instance, agent)
+  const models = modelsOf(agentEntry, billing)
   const autonomyOption = (agentEntry?.configOptions ?? []).find(
     isAutonomyOption
   )
@@ -58,7 +60,9 @@ export function DevboxNewSession({
     : []
 
   const model =
-    picks.model !== undefined ? picks.model : defaultModelOf(agentEntry)
+    picks.model !== undefined
+      ? picks.model
+      : defaultModelOf(agentEntry, billing)
   const autonomy =
     picks.autonomy !== undefined
       ? picks.autonomy

@@ -1,16 +1,6 @@
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
 import { TreeItem, treeItemClasses } from '@mui/x-tree-view/TreeItem'
-import {
-  Button,
-  Chip,
-  Code,
-  CodeEditor,
-  FolderIcon,
-  ReloadIcon,
-  Spinner,
-  Tooltip,
-} from '@pluralsh/design-system'
-import { GqlError } from 'components/utils/Alert'
+import { FolderIcon, Spinner, Tooltip } from '@pluralsh/design-system'
 import {
   FileTypeIcon,
   fileTreeMuiTheme,
@@ -18,16 +8,12 @@ import {
   TreeItemIcon,
   TreeItemText,
 } from 'components/utils/fileTree'
-import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
-import { Body2P, CaptionP } from 'components/utils/typography/Text'
-import { PathBreadcrumb } from 'components/workbenches/workbench/files/WorkbenchFileViewer'
+import { Body2P } from 'components/utils/typography/Text'
 import { uniq } from 'lodash'
-import { ReactNode, useCallback, useEffect, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { basename } from '../files/workbenchFilePaths'
 import { DevboxUnavailable } from './DevboxUnavailable'
 import {
-  DevboxFileContent,
   DevboxFileEntry,
   DevboxWorkspaceApi,
   isDirectory,
@@ -97,46 +83,31 @@ export function DevboxFilesTab({
     : (selected ?? null)
 
   return (
-    <SplitSC>
-      <TreeSC>
-        <MuiThemeProvider theme={fileTreeMuiTheme}>
-          <StyledTreeView
-            itemChildrenIndentation={12}
-            expandedItems={expanded}
-            onExpandedItemsChange={(_, ids) => setExpanded(ids)}
-            selectedItems={selectedItem}
-            onItemSelectionToggle={(_, id, isSelected) => {
-              if (
-                isSelected &&
-                !id.startsWith(DIR_PREFIX) &&
-                !id.startsWith(STATUS_PREFIX)
-              )
-                onSelect(id)
-            }}
-          >
-            <DirectoryEntries
-              api={api}
-              path={ROOT}
-              expanded={expanded}
-              selected={selected}
-            />
-          </StyledTreeView>
-        </MuiThemeProvider>
-      </TreeSC>
-      <ViewerSC>
-        {selected && !selected.endsWith('/') ? (
-          <FileViewer
-            key={selected}
+    <TreeSC>
+      <MuiThemeProvider theme={fileTreeMuiTheme}>
+        <StyledTreeView
+          itemChildrenIndentation={12}
+          expandedItems={expanded}
+          onExpandedItemsChange={(_, ids) => setExpanded(ids)}
+          selectedItems={selectedItem}
+          onItemSelectionToggle={(_, id, isSelected) => {
+            if (
+              isSelected &&
+              !id.startsWith(DIR_PREFIX) &&
+              !id.startsWith(STATUS_PREFIX)
+            )
+              onSelect(id)
+          }}
+        >
+          <DirectoryEntries
             api={api}
-            path={selected}
+            path={ROOT}
+            expanded={expanded}
+            selected={selected}
           />
-        ) : (
-          <PaddedSC>
-            <CaptionP $color="text-xlight">Pick a file</CaptionP>
-          </PaddedSC>
-        )}
-      </ViewerSC>
-    </SplitSC>
+        </StyledTreeView>
+      </MuiThemeProvider>
+    </TreeSC>
   )
 }
 
@@ -290,142 +261,12 @@ function StatusItem({
   )
 }
 
-function FileViewer({ api, path }: { api: DevboxWorkspaceApi; path: string }) {
-  const [file, setFile] = useState<Nullable<DevboxFileContent>>(null)
-  const [error, setError] = useState<Nullable<Error>>(null)
-  const [saving, setSaving] = useState(false)
-
-  const load = useCallback(() => {
-    api
-      .readFile?.(path)
-      .then((f) => {
-        setFile(f)
-        setError(null)
-      })
-      .catch(setError)
-  }, [api, path])
-  useEffect(() => load(), [load])
-
-  const editable = !!file && !file.binary && !!api.writeFile && !file.truncated
-  let body: ReactNode
-  if (error)
-    body = (
-      <PaddedSC>
-        <GqlError error={error} />
-      </PaddedSC>
-    )
-  else if (!file)
-    body = (
-      <RectangleSkeleton
-        $height="100%"
-        $width="100%"
-      />
-    )
-  else if (file.binary)
-    body = (
-      <PaddedSC>
-        <CaptionP $color="text-xlight">Binary file, not shown.</CaptionP>
-      </PaddedSC>
-    )
-  else if (editable)
-    body = (
-      <CodeEditor
-        value={file.content ?? ''}
-        language={languageForPath(path)}
-        height="100%"
-        save
-        saving={saving}
-        onSave={(content) => {
-          setSaving(true)
-          api.writeFile!(path, content, file.sha256)
-            .then(setFile)
-            // a sha mismatch means someone (often the agent) changed it
-            .catch((e) => setError(e as Error))
-            .then(() => setSaving(false))
-        }}
-      />
-    )
-  else
-    body = (
-      <Code
-        height="100%"
-        language={languageForPath(path)}
-        showHeader={false}
-        showLineNumbers
-      >
-        {file.content ?? ''}
-      </Code>
-    )
-
-  return (
-    <>
-      <ViewerHeaderSC>
-        <FileTypeIcon
-          fileName={basename(path)}
-          size={20}
-        />
-        <PathBreadcrumb path={path} />
-        <HeaderActionsSC>
-          {file?.truncated && (
-            <Chip
-              size="small"
-              severity="warning"
-            >
-              truncated
-            </Chip>
-          )}
-          <Button
-            small
-            tertiary
-            startIcon={<ReloadIcon />}
-            onClick={load}
-          >
-            Reload
-          </Button>
-        </HeaderActionsSC>
-      </ViewerHeaderSC>
-      <ViewerBodySC>{body}</ViewerBodySC>
-    </>
-  )
-}
-
-const EXTENSION_LANGUAGES: Record<string, string> = {
-  ts: 'typescript',
-  tsx: 'typescript',
-  js: 'javascript',
-  jsx: 'javascript',
-  ex: 'elixir',
-  exs: 'elixir',
-  go: 'go',
-  py: 'python',
-  rb: 'ruby',
-  rs: 'rust',
-  md: 'markdown',
-  yml: 'yaml',
-  yaml: 'yaml',
-  json: 'json',
-  tf: 'hcl',
-  sh: 'shell',
-}
-
-export function languageForPath(path: string) {
-  const ext = path.split('.').pop()?.toLowerCase() ?? ''
-  return EXTENSION_LANGUAGES[ext] ?? 'plaintext'
-}
-
-const SplitSC = styled.div({
-  display: 'flex',
-  flex: 1,
-  minHeight: 0,
-})
-
 const TreeSC = styled.div(({ theme }) => ({
-  width: 220,
-  flexShrink: 0,
+  flex: 1,
+  minWidth: 0,
   overflow: 'auto',
   padding: theme.spacing.small,
   backgroundColor: theme.colors['fill-accent'],
-  borderRight: theme.borders.hairline,
   [`&& .${treeItemClasses.content}`]: {
     ...theme.partials.text.caption,
     padding: `${theme.spacing.xxxsmall} ${theme.spacing.xsmall}`,
@@ -438,43 +279,6 @@ const EntryNameSC = styled.div({
   alignItems: 'center',
   flex: 1,
   minWidth: 0,
-})
-
-const ViewerSC = styled.div({
-  display: 'flex',
-  flexDirection: 'column',
-  flex: 1,
-  minWidth: 0,
-  minHeight: 0,
-})
-
-const ViewerHeaderSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  gap: theme.spacing.small,
-  boxSizing: 'border-box',
-  minHeight: 48,
-  padding: `${theme.spacing.xsmall} ${theme.spacing.medium}`,
-  borderBottom: theme.borders.hairline,
-  flexShrink: 0,
-}))
-
-const HeaderActionsSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  gap: theme.spacing.xxsmall,
-  flexShrink: 0,
-  marginLeft: 'auto',
-}))
-
-// the code card's own border and rounding double up against the panel edges
-const ViewerBodySC = styled.div({
-  display: 'flex',
-  flexDirection: 'column',
-  flex: 1,
-  minHeight: 0,
-  overflow: 'auto',
-  '& > *': { border: 'none', borderRadius: 0 },
 })
 
 const PaddedSC = styled.div(({ theme }) => ({ padding: theme.spacing.medium }))

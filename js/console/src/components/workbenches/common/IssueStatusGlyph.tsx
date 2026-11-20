@@ -36,6 +36,15 @@ export function IssueStatusGlyph({
   const color = theme.colors[ISSUE_STATUS_COLORS[status]]
   const progress = ISSUE_STATUS_PROGRESS[status]
 
+  if (progress !== undefined)
+    return (
+      <ProgressRingGlyph
+        progress={progress}
+        color={ISSUE_STATUS_COLORS[status]}
+        size={size}
+      />
+    )
+
   return (
     <svg
       width={size}
@@ -44,51 +53,68 @@ export function IssueStatusGlyph({
       fill="none"
       css={{ flexShrink: 0, display: 'block' }}
     >
-      {progress !== undefined ? (
-        <>
-          <circle
-            cx={CENTER}
-            cy={CENTER}
-            r={RING_RADIUS}
-            stroke={color}
-            strokeWidth={1.5}
-          />
-          {progress > 0 && (
-            <path
-              d={piePath(progress)}
-              fill={color}
-            />
-          )}
-        </>
-      ) : (
-        <>
-          <mask id={maskId}>
-            <circle
-              cx={CENTER}
-              cy={CENTER}
-              r={CENTER}
-              fill="white"
-            />
-            <path
-              d={
-                status === IssueStatus.Completed
-                  ? 'M4.25 7.25l1.85 1.85 3.65-3.85'
-                  : 'M4.75 4.75l4.5 4.5M9.25 4.75l-4.5 4.5'
-              }
-              stroke="black"
-              strokeWidth={1.5}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </mask>
-          <circle
-            cx={CENTER}
-            cy={CENTER}
-            r={CENTER}
-            fill={color}
-            mask={`url(#${maskId})`}
-          />
-        </>
+      <mask id={maskId}>
+        <circle
+          cx={CENTER}
+          cy={CENTER}
+          r={CENTER}
+          fill="white"
+        />
+        <path
+          d={
+            status === IssueStatus.Completed
+              ? 'M4.25 7.25l1.85 1.85 3.65-3.85'
+              : 'M4.75 4.75l4.5 4.5M9.25 4.75l-4.5 4.5'
+          }
+          stroke="black"
+          strokeWidth={1.5}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </mask>
+      <circle
+        cx={CENTER}
+        cy={CENTER}
+        r={CENTER}
+        fill={color}
+        mask={`url(#${maskId})`}
+      />
+    </svg>
+  )
+}
+
+// the in-flight half of the glyph: a ring filled in `progress` of the way
+export function ProgressRingGlyph({
+  progress,
+  color,
+  size = 14,
+}: {
+  progress: number
+  color: IconColor
+  size?: number
+}) {
+  const fill = useTheme().colors[color]
+
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox={`0 0 ${VIEWBOX} ${VIEWBOX}`}
+      fill="none"
+      css={{ flexShrink: 0, display: 'block' }}
+    >
+      <circle
+        cx={CENTER}
+        cy={CENTER}
+        r={RING_RADIUS}
+        stroke={fill}
+        strokeWidth={1.5}
+      />
+      {progress > 0 && (
+        <path
+          d={piePath(progress)}
+          fill={fill}
+        />
       )}
     </svg>
   )

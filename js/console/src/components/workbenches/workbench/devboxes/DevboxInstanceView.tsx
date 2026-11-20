@@ -21,8 +21,9 @@ import {
 import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { WorkbenchEmptyState } from '../../common/WorkbenchEmptyState'
-import { DevboxPanelRail } from './DevboxControlPanel'
+import { DevboxPanelRail, useDevboxPanel } from './DevboxControlPanel'
 import { isClusterOfflineError } from './devboxErrors'
+import { DevboxFileViewer } from './DevboxFileViewer'
 import {
   effectiveMaxDeferral,
   getDevboxAwakeStatus,
@@ -35,6 +36,7 @@ import { ImportThreadModal } from './DevboxThreadList'
 import { selectedThread } from './devboxThreads'
 import { useDevboxPresence } from './useDevboxPresence'
 import { useDevboxTimelineStore } from './useDevboxTimeline'
+import { useDevboxWorkspaceApi } from './devboxWorkspaceApi'
 
 export function DevboxInstanceView({ instanceId }: { instanceId: string }) {
   const [params, setParams] = useSearchParams()
@@ -79,6 +81,8 @@ export function DevboxInstanceView({ instanceId }: { instanceId: string }) {
 
   const timeline = useDevboxTimelineStore(instanceId)
   const live = isInstanceLive(instance?.status)
+  const { viewedFile, selectFile } = useDevboxPanel()
+  const api = useDevboxWorkspaceApi(instanceId)
   useDevboxPresence(instanceId, live)
 
   // opening a suspended instance resumes it
@@ -184,6 +188,7 @@ export function DevboxInstanceView({ instanceId }: { instanceId: string }) {
         <HeaderBarSC>
           <DevboxInstanceHeader
             instance={instance}
+            awake={awake}
             maxDeferralSeconds={maxDeferral}
             now={now}
             pullRequests={pullRequests}
@@ -192,64 +197,73 @@ export function DevboxInstanceView({ instanceId }: { instanceId: string }) {
             onImportSession={() => setImportOpen(true)}
           />
         </HeaderBarSC>
-        <BodySC>
-          {disconnected && (
-            <Callout
-              severity="warning"
-              title={
-                isClusterOfflineError(error)
-                  ? "The box's cluster is offline"
-                  : 'Live updates disconnected'
-              }
-            >
-              <Flex
-                gap="small"
-                align="center"
-              >
-                <span>
-                  Showing the last known state. Reconnect to catch up on
-                  anything missed.
-                </span>
-                <Button
-                  small
-                  secondary
-                  startIcon={<ReloadIcon />}
-                  onClick={() => {
-                    refetch()
-                    timeline.reload()
-                  }}
-                >
-                  Reconnect
-                </Button>
-              </Flex>
-            </Callout>
-          )}
-          {instance.statusReason &&
-            instance.status === DevboxInstanceStatus.Failed && (
+        {live && viewedFile ? (
+          <DevboxFileViewer
+            key={viewedFile}
+            api={api}
+            path={viewedFile}
+            onClose={() => selectFile(null)}
+          />
+        ) : (
+          <BodySC>
+            {disconnected && (
               <Callout
-                severity="danger"
-                title="Instance failed"
+                severity="warning"
+                title={
+                  isClusterOfflineError(error)
+                    ? "The box's cluster is offline"
+                    : 'Live updates disconnected'
+                }
               >
-                {instance.statusReason}
+                <Flex
+                  gap="small"
+                  align="center"
+                >
+                  <span>
+                    Showing the last known state. Reconnect to catch up on
+                    anything missed.
+                  </span>
+                  <Button
+                    small
+                    secondary
+                    startIcon={<ReloadIcon />}
+                    onClick={() => {
+                      refetch()
+                      timeline.reload()
+                    }}
+                  >
+                    Reconnect
+                  </Button>
+                </Flex>
               </Callout>
             )}
-          <ConversationSC>
-            {selected ? (
-              <DevboxThreadPane
-                key={selected.id}
-                instance={instance}
-                thread={selected}
-                timeline={timeline}
-                position={selected.id === threadParam ? position : null}
-              />
-            ) : (
-              <DevboxNewSession
-                instance={instance}
-                onStarted={selectThread}
-              />
-            )}
-          </ConversationSC>
-        </BodySC>
+            {instance.statusReason &&
+              instance.status === DevboxInstanceStatus.Failed && (
+                <Callout
+                  severity="danger"
+                  title="Instance failed"
+                >
+                  {instance.statusReason}
+                </Callout>
+              )}
+            <ConversationSC>
+              {selected ? (
+                <DevboxThreadPane
+                  key={selected.id}
+                  instance={instance}
+                  thread={selected}
+                  timeline={timeline}
+                  position={selected.id === threadParam ? position : null}
+                />
+              ) : (
+                <DevboxNewSession
+                  instance={instance}
+                  onStarted={selectThread}
+                />
+              )}
+            </ConversationSC>
+          </BodySC>
+        )}
       </MainSC>
       <DevboxPanelRail instance={instance} />
       {importOpen && (

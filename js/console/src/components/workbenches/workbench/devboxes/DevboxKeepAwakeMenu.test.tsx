@@ -1,4 +1,9 @@
-import { styledThemeDark } from '@pluralsh/design-system'
+import {
+  Button,
+  ListBoxItem,
+  Select,
+  styledThemeDark,
+} from '@pluralsh/design-system'
 import {
   fireEvent,
   render,
@@ -7,14 +12,45 @@ import {
   within,
 } from '@testing-library/react'
 import dayjs from 'dayjs'
+import { useState } from 'react'
 import { ThemeProvider } from 'styled-components'
 import { describe, expect, it, vi } from 'vitest'
 
-import { DevboxKeepAwakeMenu } from './DevboxKeepAwakeMenu'
+import { useKeepAwakeActions } from './DevboxKeepAwakeMenu'
 import { clampCustomKeepAwake, keepAwakeUntil } from './devboxIdle'
 
 const NOW = new Date('2026-11-14T10:00:00')
 const HOUR = 60 * 60
+
+function KeepAwakeMenu(props: Parameters<typeof useKeepAwakeActions>[0]) {
+  const { items, onSelect, modal } = useKeepAwakeActions(props)
+  const [open, setOpen] = useState(false)
+  return (
+    <>
+      <Select
+        label="Instance actions"
+        isOpen={open}
+        onOpenChange={setOpen}
+        selectedKey={null}
+        onSelectionChange={(key) => {
+          setOpen(false)
+          onSelect(`${key}`)
+        }}
+        triggerButton={<Button>Instance actions</Button>}
+      >
+        {items.map((i) => (
+          <ListBoxItem
+            key={i.key}
+            label={i.label}
+            description={i.description}
+            destructive={i.destructive}
+          />
+        ))}
+      </Select>
+      {modal}
+    </>
+  )
+}
 
 function renderMenu(
   keepAwake: Nullable<string>,
@@ -24,7 +60,7 @@ function renderMenu(
   const onCancel = vi.fn()
   render(
     <ThemeProvider theme={styledThemeDark}>
-      <DevboxKeepAwakeMenu
+      <KeepAwakeMenu
         keepAwakeUntil={keepAwake}
         maxDeferralSeconds={maxDeferralSeconds}
         onKeepAwake={onKeepAwake}
@@ -37,19 +73,19 @@ function renderMenu(
 }
 
 const items = () => screen.getAllByRole('option')
-const openMenu = (name: RegExp) =>
-  fireEvent.click(screen.getByRole('button', { name }))
+const openMenu = () =>
+  fireEvent.click(screen.getByRole('button', { name: 'Instance actions' }))
 
-describe('DevboxKeepAwakeMenu', () => {
+describe('useKeepAwakeActions', () => {
   it('offers presets capped at the max deferral', async () => {
     const { onKeepAwake } = renderMenu(null)
-    openMenu(/Keep awake/)
+    openMenu()
     expect(items().map((i) => i.textContent)).toEqual([
-      '30 minutesuntil 10:30 AM',
-      '1 houruntil 11:00 AM',
-      '4 hoursuntil 2:00 PM (max)',
-      '12 hoursuntil 2:00 PM (max)',
-      'Custom…',
+      'Keep awake for 30 minutesuntil 10:30 AM',
+      'Keep awake for 1 houruntil 11:00 AM',
+      'Keep awake for 4 hoursuntil 2:00 PM (max)',
+      'Keep awake for 12 hoursuntil 2:00 PM (max)',
+      'Keep awake until…',
     ])
     fireEvent.click(items()[1])
     expect(onKeepAwake).toHaveBeenCalledWith(new Date('2026-11-14T11:00:00'))
@@ -58,13 +94,14 @@ describe('DevboxKeepAwakeMenu', () => {
 
   it('extends from the current deferral and can cancel it', async () => {
     const { onKeepAwake, onCancel } = renderMenu('2026-11-14T11:00:00')
-    openMenu(/Kept awake/)
-    expect(screen.getByText('Until 11:00 AM; extend by')).toBeTruthy()
-    fireEvent.click(screen.getByRole('option', { name: /30 minutes/ }))
+    openMenu()
+    fireEvent.click(
+      screen.getByRole('option', { name: /Extend by 30 minutes/ })
+    )
     expect(onKeepAwake).toHaveBeenCalledWith(new Date('2026-11-14T11:30:00'))
 
     await waitFor(() => expect(screen.queryByRole('listbox')).toBeNull())
-    openMenu(/Kept awake/)
+    openMenu()
     fireEvent.click(
       screen.getByRole('option', { name: 'Let it sleep when idle' })
     )
@@ -73,8 +110,8 @@ describe('DevboxKeepAwakeMenu', () => {
 
   it('clamps a custom time and rejects past times', () => {
     const { onKeepAwake } = renderMenu(null)
-    openMenu(/Keep awake/)
-    fireEvent.click(screen.getByRole('option', { name: 'Custom…' }))
+    openMenu()
+    fireEvent.click(screen.getByRole('option', { name: 'Keep awake until…' }))
     const dialog = screen.getByRole('dialog')
     const input = within(dialog).getByLabelText('Keep awake until')
 

@@ -47,6 +47,12 @@ describe('DevboxFilesTab', () => {
   it('reveals a selected file inside a folder', async () => {
     renderTab('/home/devbox/src/values.yaml')
     expect(await screen.findByText('values.yaml')).toBeTruthy()
-    expect(screen.getAllByAltText('yaml').length).toBeGreaterThan(0)
+    expect(screen.getByAltText('yaml')).toBeTruthy()
+  })
+
+  it('only shows the tree, leaving the file to the main view', async () => {
+    renderTab('/home/devbox/README.md')
+    await screen.findByText('README.md')
+    expect(screen.queryByText('a: 1')).toBeNull()
   })
 })

@@ -34,6 +34,14 @@ defmodule Console.Devboxes.IngestTest do
       assert Enum.sort(ids) == Enum.sort([ended.id, unknown])
       assert refetch(inst).idle_state.idle
     end
+
+    test "a heartbeat replaces the previous idle state" do
+      inst = insert(:devbox_instance, idle_state: %{idle: true, suspends_at: Timex.now(), message: "idle"})
+
+      Ingest.heartbeat(%{instances: [%{instance_id: inst.id, idle: %{idle: false, message: "agent working"}}]}, inst.devbox.cluster)
+
+      assert %{idle: false, suspends_at: nil, message: "agent working"} = refetch(inst).idle_state
+    end
   end
 
   describe "#report_instance_status/2" do
@@ -52,6 +60,16 @@ defmodule Console.Devboxes.IngestTest do
       assert updated.actor_ref == "actor-1"
       assert updated.started_at
       assert_receive {:event, %PubSub.DevboxInstanceUpdated{}}
+    end
+
+    test "resuming clears the idle state from before the suspend" do
+      past = Timex.now() |> Timex.shift(minutes: -5)
+      inst = insert(:devbox_instance, status: :suspended, idle_state: %{idle: true, idle_since: past, suspends_at: past})
+
+      {:ok, updated} = Ingest.report_instance_status(%{instance_id: inst.id, status: :INSTANCE_STATUS_RUNNING, generation: 1}, inst.devbox.cluster)
+
+      assert updated.status == :running
+      assert %{idle: false, idle_since: nil, suspends_at: nil} = updated.idle_state
     end
 
     test "it ignores stale generations" do

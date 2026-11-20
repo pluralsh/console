@@ -3611,6 +3611,10 @@ export const DevboxAgentFragmentDoc = /*#__PURE__*/ gql`
   models {
     ...DevboxModel
   }
+  subscriptionDefaultModel: defaultModel(billing: SUBSCRIPTION)
+  subscriptionModels: models(billing: SUBSCRIPTION) {
+    ...DevboxModel
+  }
   commands {
     ...DevboxCommand
   }
@@ -3708,6 +3712,7 @@ export const DevboxThreadFragmentDoc = /*#__PURE__*/ gql`
   cwd
   worktreeRepos
   status
+  stage
   imported
   lastActivityAt
   entityCount
@@ -9735,10 +9740,16 @@ export const DevboxAgentsDocument = /*#__PURE__*/ gql`
 }
     ${DevboxAgentFragmentDoc}` as unknown as DocumentNode<Types.DevboxAgentsQuery, Types.DevboxAgentsQueryVariables>;
 export const WorkbenchDevboxInstancesDocument = /*#__PURE__*/ gql`
-    query WorkbenchDevboxInstances($id: ID!, $first: Int = 50, $after: String, $statuses: [DevboxInstanceStatus], $mine: Boolean) {
+    query WorkbenchDevboxInstances($id: ID!, $first: Int = 50, $after: String, $statuses: [DevboxInstanceStatus], $mine: Boolean, $includeEnded: Boolean) {
   workbench(id: $id) {
     id
-    devboxInstances(first: $first, after: $after, statuses: $statuses, mine: $mine) {
+    devboxInstances(
+      first: $first
+      after: $after
+      statuses: $statuses
+      mine: $mine
+      includeEnded: $includeEnded
+    ) {
       pageInfo {
         ...PageInfo
       }

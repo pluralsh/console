@@ -17,6 +17,7 @@ defmodule Console.Devboxes.Threads do
     DevboxInstanceInteraction,
     User
   }
+  alias Console.Schema.DevboxInstanceSession.ConfigOption
 
   @type error :: Console.error
   @type thread_resp :: {:ok, DevboxInstanceSession.t} | error
@@ -43,7 +44,7 @@ defmodule Console.Devboxes.Threads do
     start_transaction()
     |> add_operation(:instance, fn _ -> live_instance(instance_id) end)
     |> add_operation(:catalog, fn %{instance: inst} ->
-      Devboxes.resolve_catalog(inst.devbox, Map.put_new(attrs, :agent, inst.agent))
+      Devboxes.resolve_catalog(inst.devbox, Map.put_new(attrs, :agent, inst.agent), inst.agent_billing)
     end)
     |> add_operation(:autonomy, fn %{instance: inst, catalog: catalog} ->
       Devboxes.check_proxy_auto(inst, catalog.agent, catalog.config_options)
@@ -282,11 +283,30 @@ defmodule Console.Devboxes.Threads do
   def set_config_option(id, config_id, value, %User{} = user) do
     with {:ok, thread} <- allow(get_thread!(id), user, :prompt),
          {:ok, inst} <- live_instance(thread.instance_id),
-         {:ok, opts} <- resolve_config_options(config_options(thread, inst), [%{config_id: config_id, value: value}]),
+         {:ok, opts} <- resolve_config_options(offered_config_options(thread, inst), [%{config_id: config_id, value: value}]),
          {:ok, _} <- Devboxes.check_autonomy(inst.devbox, opts),
          {:ok, _} <- Devboxes.check_proxy_auto(inst, thread.agent || inst.agent, opts),
       do: Control.set_config_option(inst, thread, config_id, value) |> control_result(thread)
   end
+
+  # a proxy-billed agent's model picker offers the AI proxy's models, whatever the agent itself lists
+  defp offered_config_options(%DevboxInstanceSession{} = thread, %DevboxInstance{} = inst) do
+    agent = thread.agent || inst.agent
+    opts = config_options(thread, inst)
+    with false <- Billing.subscription?(inst, agent),
+         %Devbox.Agent{} = box_agent <- Devbox.agent(inst.devbox, agent),
+         [_ | _] = models <- Devboxes.offered_models(box_agent, :proxy) do
+      Enum.map(opts, &with_proxy_models(&1, models))
+    else
+      _ -> opts
+    end
+  end
+
+  defp with_proxy_models(%ConfigOption{category: "model", options: values} = opt, models) do
+    known = MapSet.new(values || [], & &1.value)
+    %{opt | options: (values || []) ++ for(m <- models, !MapSet.member?(known, m), do: %ConfigOption.Value{value: m})}
+  end
+  defp with_proxy_models(opt, _), do: opt
 
   defp config_options(%DevboxInstanceSession{config_options: [_ | _] = opts}, _), do: opts
   defp config_options(%DevboxInstanceSession{agent: agent}, %DevboxInstance{devbox: devbox}) do

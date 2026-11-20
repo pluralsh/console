@@ -34,6 +34,12 @@ defmodule Console.GraphQl.Deployments.Devbox do
     value :subscription, description: "billed to the instance owner's linked subscription"
   end
 
+  enum :devbox_thread_stage do
+    value :running,      description: "a turn is in flight or queued"
+    value :needs_review, description: "the agent is waiting on a person: a permission, a question, or a finished or failed turn"
+    value :completed,    description: "the thread was closed"
+  end
+
   enum :devbox_stream_kind do
     value :terminal
     value :vnc
@@ -372,11 +378,15 @@ defmodule Console.GraphQl.Deployments.Devbox do
     field :session_capabilities, :devbox_session_capabilities
 
     field :models, list_of(:devbox_model),
-      description: "the models offered: probed values narrowed by the box's allowlist",
-      resolve: &Deployments.offered_models/3
+      description: "the models offered under a billing mode (proxy by default): the AI proxy's models, or on a subscription the probed values narrowed by the box's allowlist" do
+      arg :billing, :devbox_billing_mode
+      resolve &Deployments.offered_models/3
+    end
     field :default_model, :string,
-      description: "the model preselected when starting an instance",
-      resolve: &Deployments.devbox_default_model/3
+      description: "the model preselected when starting an instance under a billing mode (proxy by default)" do
+      arg :billing, :devbox_billing_mode
+      resolve &Deployments.devbox_default_model/3
+    end
   end
 
   object :devbox_model do
@@ -488,6 +498,7 @@ defmodule Console.GraphQl.Deployments.Devbox do
 
     field :threads, list_of(:devbox_thread) do
       arg :include_deleted, :boolean
+      arg :stages,          list_of(:devbox_thread_stage), description: "only threads in these stages"
       resolve &Deployments.devbox_instance_threads/3
     end
 
@@ -652,6 +663,8 @@ defmodule Console.GraphQl.Deployments.Devbox do
     field :cwd,               :string
     field :worktree_repos,    list_of(:string)
     field :status,            non_null(:devbox_thread_status)
+    field :stage,             non_null(:devbox_thread_stage), description: "where the thread sits in its lifecycle, for grouping",
+      resolve: fn s, _, _ -> {:ok, DevboxInstanceSession.stage(s)} end
     field :imported,          :boolean
     field :last_activity_at,  :datetime
     field :entity_count,      :integer

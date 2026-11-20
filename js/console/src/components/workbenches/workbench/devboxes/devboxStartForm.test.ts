@@ -15,6 +15,7 @@ import {
   dropProxyAuto,
   hasStartErrors,
   modelDisplayName,
+  modelsOf,
   proxyModelOf,
   reconcileStartValues,
   toInstanceAttributes,
@@ -87,6 +88,35 @@ describe('devbox start form', () => {
         { [DevboxAgentType.Claude]: 'subscription' }
       )
     ).toBe(false)
+  })
+
+  it('offers the proxy models, or the probed ones on a subscription', () => {
+    const proxied = {
+      ...claude,
+      defaultModel: 'anthropic/claude-sonnet-4-5',
+      models: [{ id: 'anthropic/claude-sonnet-4-5' }, { id: 'openai/gpt-5' }],
+      subscriptionDefaultModel: 'sonnet',
+      subscriptionModels: claude.models,
+    } as DevboxAgentFragment
+    const proxyBox = { ...box, agents: [proxied] }
+    expect(modelsOf(proxied).map((m) => m.id)).toEqual([
+      'anthropic/claude-sonnet-4-5',
+      'openai/gpt-5',
+    ])
+    expect(defaultStartValues(proxyBox, []).model).toBe(
+      'anthropic/claude-sonnet-4-5'
+    )
+    const subscribed = defaultStartValues(proxyBox, [], {
+      [DevboxAgentType.Claude]: 'subscription',
+    })
+    expect(subscribed.model).toBe('sonnet')
+    expect(hasStartErrors(validateStartValues(subscribed, proxyBox))).toBe(
+      false
+    )
+    expect(
+      validateStartValues({ ...subscribed, model: 'openai/gpt-5' }, proxyBox)
+        .model
+    ).toMatch(/isn't in the agent's catalog/)
   })
 
   it('requires a box unless restoring a snapshot', () => {

@@ -28,7 +28,7 @@ import { fromNow } from 'utils/datetime'
 import { mapExistingNodes } from 'utils/graphql'
 import { isInstanceLive, isInstanceTerminal } from './devboxIdle'
 import { DevboxThreadList } from './DevboxThreadList'
-import { NEW_SESSION, selectedThread } from './devboxThreads'
+import { buildThreadTree, NEW_SESSION, selectedThread } from './devboxThreads'
 import { useDevboxWorkbenchDeltas } from './useDevboxWorkbenchDeltas'
 
 export const DEVBOX_SESSIONS_SIDEBAR_WIDTH = 280
@@ -87,8 +87,18 @@ function InstanceSwitcher({
     fetchPolicy: 'cache-and-network',
   })
   useDevboxWorkbenchDeltas(workbenchId, { onInstanceListChange: refetch })
+  // an ended instance opened by link stays selectable while ended ones are hidden
+  const { data: currentData } = useDevboxInstanceQuery({
+    variables: { id: instanceId ?? '' },
+    skip: !instanceId,
+    fetchPolicy: 'cache-first',
+  })
+  const listed = mapExistingNodes(data?.workbench?.devboxInstances)
+  const opened = currentData?.devboxInstance
   const instances = sortInstances(
-    mapExistingNodes(data?.workbench?.devboxInstances)
+    opened && !listed.some((i) => i.id === opened.id)
+      ? [...listed, opened]
+      : listed
   )
   const current = instances.find((i) => i.id === instanceId)
 
@@ -175,19 +185,23 @@ function InstanceSessions({ instanceId }: { instanceId: string }) {
     ) : null
 
   const live = isInstanceLive(instance.status)
+  // without threads the instance view already shows the new-session composer
+  const hasThreads = buildThreadTree(instance.threads).length > 0
   return (
     <>
       <SessionsHeaderSC>
         <span>Sessions</span>
-        <Button
-          small
-          tertiary
-          startIcon={<PlusIcon size={ICON_FRAME_ICON_SIZE.small} />}
-          disabled={isInstanceTerminal(instance.status)}
-          onClick={() => select(NEW_SESSION)}
-        >
-          New session
-        </Button>
+        {hasThreads && (
+          <Button
+            small
+            tertiary
+            startIcon={<PlusIcon size={ICON_FRAME_ICON_SIZE.small} />}
+            disabled={isInstanceTerminal(instance.status)}
+            onClick={() => select(NEW_SESSION)}
+          >
+            New session
+          </Button>
+        )}
       </SessionsHeaderSC>
       <ScrollSC>
         <DevboxThreadList

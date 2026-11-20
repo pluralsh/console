@@ -5,7 +5,7 @@ import { ThemeProvider } from 'styled-components'
 import { describe, expect, it, vi } from 'vitest'
 
 import { ChatMarkdown } from './ChatMarkdown'
-import { DevboxFileOpenContext } from './DevboxFileChip'
+import { DevboxFileOpenContext, withSlashCommandChip } from './DevboxFileChip'
 
 const renderMarkdown = (text: string, openFile?: (path: string) => void) =>
   render(
@@ -17,6 +17,18 @@ const renderMarkdown = (text: string, openFile?: (path: string) => void) =>
       </ThemeProvider>
     </MemoryRouter>
   )
+
+describe('withSlashCommandChip', () => {
+  it('chips only a leading command and renders it', () => {
+    expect(withSlashCommandChip('/review the tests')).toBe(
+      '<plrl-devbox-command command="review"></plrl-devbox-command> the tests'
+    )
+    expect(withSlashCommandChip('run /review')).toBe('run /review')
+
+    renderMarkdown(withSlashCommandChip('/skill:refactor now'))
+    expect(screen.getByText('/skill:refactor')).toBeTruthy()
+  })
+})
 
 describe('DevboxFileChip', () => {
   it('renders file tags as chips that open the path', () => {

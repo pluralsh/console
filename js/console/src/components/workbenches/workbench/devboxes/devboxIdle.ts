@@ -157,7 +157,11 @@ export function getDevboxAwakeStatus(
   }
 
   const idle = instance.idleState
-  if (idle?.idle && idle.suspendsAt) {
+  // a deadline long past belongs to an earlier suspend, not to this running instance
+  const stale =
+    !!idle?.suspendsAt &&
+    dayjs(now).diff(idle.suspendsAt, 'second') > SUSPENDING_SOON_SECONDS
+  if (idle?.idle && idle.suspendsAt && !stale) {
     const seconds = Math.max(0, dayjs(idle.suspendsAt).diff(now, 'second'))
     const mins = Math.ceil(seconds / 60)
     return {

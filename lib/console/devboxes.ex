@@ -182,11 +182,11 @@ defmodule Console.Devboxes do
     end)
     |> add_operation(:access, fn %{devbox: devbox} -> allow(devbox, user, :create) end)
     |> add_operation(:capacity, fn %{devbox: devbox} -> check_capacity(devbox) end)
-    |> add_operation(:catalog, fn %{devbox: devbox} -> resolve_catalog(devbox, attrs) end)
+    |> add_operation(:billing, fn %{devbox: devbox, workbench: wb} -> Billing.resolve(devbox, wb, user, attrs[:agent_billing]) end)
+    |> add_operation(:catalog, fn %{devbox: devbox, billing: billing} -> resolve_catalog(devbox, attrs, billing) end)
     |> add_operation(:repositories, fn %{devbox: devbox, workbench: wb} ->
       resolve_repositories(devbox, wb, attrs[:repositories])
     end)
-    |> add_operation(:billing, fn %{devbox: devbox, workbench: wb} -> Billing.resolve(devbox, wb, user, attrs[:agent_billing]) end)
     |> add_operation(:autonomy, fn %{catalog: catalog, billing: billing} ->
       check_proxy_auto(%DevboxInstance{agent_billing: billing}, catalog.agent, catalog.config_options)
     end)
@@ -261,12 +261,14 @@ defmodule Console.Devboxes do
   defp check_capacity(_), do: {:ok, 0}
 
   @doc """
-  Validates an agent, model and config options against a box's probed catalog, filling in the defaults.
+  Validates an agent, model and config options against a box's catalog, filling in the defaults.  The model is
+  checked against what the agent offers under its billing in `agent_billing` (the AI proxy when unlisted).
   """
-  @spec resolve_catalog(Devbox.t, map) :: {:ok, %{agent: atom, model: binary | nil, config_options: map}} | error
-  def resolve_catalog(%Devbox{} = devbox, attrs) do
+  @spec resolve_catalog(Devbox.t, map, map | nil) :: {:ok, %{agent: atom, model: binary | nil, config_options: map}} | error
+  def resolve_catalog(%Devbox{} = devbox, attrs, agent_billing \\ nil) do
     with %Devbox.Agent{} = agent <- Devbox.agent(devbox, attrs[:agent]),
-         {:ok, model} <- resolve_model(agent, attrs[:model]),
+         billing = Billing.for_agent(%DevboxInstance{agent_billing: agent_billing}, agent.type).billing,
+         {:ok, model} <- resolve_model(agent, attrs[:model], billing),
          {:ok, opts} <- resolve_config_options(agent.config_options, attrs[:config_options]),
          {:ok, opts} <- check_autonomy(devbox, opts) do
       {:ok, %{agent: agent.type, model: model, config_options: opts}}
@@ -276,15 +278,15 @@ defmodule Console.Devboxes do
     end
   end
 
-  defp resolve_model(agent, nil), do: {:ok, default_model(agent)}
-  defp resolve_model(%Devbox.Agent{model_switchable: false} = agent, model) do
-    case {default_model(agent), offered_models(agent)} do
+  defp resolve_model(agent, nil, billing), do: {:ok, default_model(agent, billing)}
+  defp resolve_model(%Devbox.Agent{model_switchable: false} = agent, model, billing) do
+    case {default_model(agent, billing), offered_models(agent, billing)} do
       {^model, _} -> {:ok, model}
       {_, offered} -> if model in offered, do: {:ok, model}, else: {:error, "the #{agent.type} agent on this devbox doesn't allow choosing a model"}
     end
   end
-  defp resolve_model(agent, model) do
-    offered = offered_models(agent)
+  defp resolve_model(agent, model, billing) do
+    offered = offered_models(agent, billing)
     case model in offered do
       true -> {:ok, model}
       false -> {:error, "model #{model} is not offered for the #{agent.type} agent, available models: #{Enum.join(offered, ", ")}"}
@@ -292,17 +294,19 @@ defmodule Console.Devboxes do
   end
 
   @doc """
-  The models offered for a box's agent: its probed catalog narrowed by the runner's allowlist and by what the AI
-  proxy serves.
+  The models offered for a box's agent under a billing mode.  On the AI proxy these are the proxy's models (see
+  `ProxyModels.narrow/3`); on a subscription, the probed catalog narrowed by the runner's allowlist.
   """
-  @spec offered_models(Devbox.Agent.t) :: [binary]
-  def offered_models(%Devbox.Agent{} = agent),
+  @spec offered_models(Devbox.Agent.t, :proxy | :subscription) :: [binary]
+  def offered_models(agent, billing \\ :proxy)
+  def offered_models(%Devbox.Agent{} = agent, :subscription), do: Devbox.Agent.offered_models(agent)
+  def offered_models(%Devbox.Agent{} = agent, _),
     do: ProxyModels.narrow(agent, Devbox.Agent.offered_models(agent), ProxyModels.for_agent(agent.type))
 
-  @doc "The model preselected for a box's agent, kept within `offered_models/1`"
-  @spec default_model(Devbox.Agent.t) :: binary | nil
-  def default_model(%Devbox.Agent{} = agent) do
-    case {Devbox.Agent.default_model(agent), offered_models(agent)} do
+  @doc "The model preselected for a box's agent, kept within `offered_models/2`"
+  @spec default_model(Devbox.Agent.t, :proxy | :subscription) :: binary | nil
+  def default_model(%Devbox.Agent{} = agent, billing \\ :proxy) do
+    case {Devbox.Agent.default_model(agent), offered_models(agent, billing)} do
       {m, []} -> m
       {m, offered} -> if m in offered, do: m, else: hd(offered)
     end

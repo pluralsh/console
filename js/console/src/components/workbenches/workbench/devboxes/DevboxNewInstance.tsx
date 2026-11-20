@@ -120,7 +120,8 @@ export function DevboxNewInstance({ workbenchId }: { workbenchId: string }) {
   const values = {
     ...defaultStartValues(
       box,
-      data?.workbench?.configuration?.coding?.repositories
+      data?.workbench?.configuration?.coding?.repositories,
+      allowsSubscriptions ? defaultBillingFrom(credentials.credentials) : {}
     ),
     snapshotId: snapshot?.id,
   }
@@ -128,12 +129,7 @@ export function DevboxNewInstance({ workbenchId }: { workbenchId: string }) {
 
   const start = () => {
     if (invalid) return
-    const attributes = toInstanceAttributes({
-      ...values,
-      billing: allowsSubscriptions
-        ? defaultBillingFrom(credentials.credentials)
-        : {},
-    })
+    const attributes = toInstanceAttributes(values)
     if (snapshot) {
       const { snapshotId: _s, devboxId: _d, ...rest } = attributes
       restore({ variables: { id: snapshot.id, attributes: rest } })

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 	"time"
@@ -286,7 +287,7 @@ func (m *Manager) applyInitialConfig(ctx context.Context, c *agentConn, t *threa
 		m.mu.Unlock()
 		switch {
 		case opt != nil:
-			if acp.Str(opt.raw, "currentValue") != model && acp.Str(opt.raw, "currentValue") != harness.ProxyModel(t.agent, model) {
+			if !slices.Contains(harness.ModelIDs(t.agent, model), acp.Str(opt.raw, "currentValue")) {
 				if _, err := m.setConfig(ctx, c, s, opt.id(), model); err != nil {
 					errs = append(errs, err)
 				}
@@ -335,13 +336,20 @@ func (m *Manager) setConfig(ctx context.Context, c *agentConn, s *session, confi
 		return nil, derr.InvalidAgentOrModel(fmt.Sprintf("unknown config option %q", configID))
 	}
 	if !optionAllows(opt.raw, value) {
-		alt := harness.ProxyModel(s.agent, value)
-		if opt.category() == modelCategory && optionAllows(opt.raw, alt) {
-			value = alt
-		} else {
+		alt := ""
+		if opt.category() == modelCategory {
+			for _, id := range harness.ModelIDs(s.agent, value)[1:] {
+				if optionAllows(opt.raw, id) {
+					alt = id
+					break
+				}
+			}
+		}
+		if alt == "" {
 			m.mu.Unlock()
 			return nil, derr.InvalidAgentOrModel(fmt.Sprintf("%q is not a valid value for %s", value, opt.id()))
 		}
+		value = alt
 	}
 	if opt.category() == modeCategory {
 		if err := m.modeAllowedLocked(s.agent, s, value); err != nil {

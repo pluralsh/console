@@ -55,14 +55,15 @@ defmodule Console.GraphQl.Resolvers.Deployments.Devbox do
     end
   end
 
-  def offered_models(%Devbox.Agent{} = agent, _, _) do
+  def offered_models(%Devbox.Agent{} = agent, args, _) do
     names = Map.new(agent.models || [], & {&1.id, &1})
-    Devboxes.offered_models(agent)
+    Devboxes.offered_models(agent, args[:billing] || :proxy)
     |> Enum.map(fn id -> Map.get(names, id, %{id: id, name: id, description: nil}) end)
     |> ok()
   end
 
-  def devbox_default_model(%Devbox.Agent{} = agent, _, _), do: {:ok, Devboxes.default_model(agent)}
+  def devbox_default_model(%Devbox.Agent{} = agent, args, _),
+    do: {:ok, Devboxes.default_model(agent, args[:billing] || :proxy)}
 
   def upsert_devbox(%{attributes: attrs}, ctx),
     do: Devboxes.upsert_devbox(attrs, fetch_cluster(attrs, ctx), actor(ctx))
@@ -97,6 +98,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Devbox do
   end
 
   defp instance_filters(query, args, %User{id: user_id}) do
+    query = case args do
+      %{statuses: [_ | _]} -> query
+      %{include_ended: true} -> query
+      _ -> DevboxInstance.live(query)
+    end
+
     Enum.reduce(args, query, fn
       {:statuses, [_ | _] = statuses}, q -> DevboxInstance.for_statuses(q, statuses)
       {:mine, true}, q -> DevboxInstance.for_user(q, user_id)
@@ -127,8 +134,15 @@ defmodule Console.GraphQl.Resolvers.Deployments.Devbox do
     |> ok()
   end
 
-  defp thread_filters(query, %{include_deleted: true}), do: query
-  defp thread_filters(query, _), do: DevboxInstanceSession.visible(query)
+  defp thread_filters(query, args) do
+    Enum.reduce(args, maybe_visible(query, args), fn
+      {:stages, [_ | _] = stages}, q -> DevboxInstanceSession.for_stages(q, stages)
+      _, q -> q
+    end)
+  end
+
+  defp maybe_visible(query, %{include_deleted: true}), do: query
+  defp maybe_visible(query, _), do: DevboxInstanceSession.visible(query)
 
   def devbox_instance_interactions(%DevboxInstance{id: id}, args, _) do
     DevboxInstanceInteraction.for_instance(id)

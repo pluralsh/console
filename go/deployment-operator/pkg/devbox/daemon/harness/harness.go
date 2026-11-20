@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
@@ -202,6 +203,29 @@ func ProxyModel(t devboxv1.AgentType, model string) string {
 		return p + "/" + model
 	}
 	return model
+}
+
+// ModelIDs are the IDs an agent's picker may list a console model under, most specific first: the ID itself, a
+// bare model under the agent's proxy provider, the `plural/` provider OpenCode and Pi register the proxy models
+// under, and Gemini CLI's bare names.
+func ModelIDs(t devboxv1.AgentType, model string) []string {
+	model = strings.TrimSpace(model)
+	ids := []string{model}
+	add := func(id string) {
+		if id != "" && !slices.Contains(ids, id) {
+			ids = append(ids, id)
+		}
+	}
+	add(ProxyModel(t, model))
+	switch t {
+	case devboxv1.AgentType_AGENT_TYPE_OPENCODE, devboxv1.AgentType_AGENT_TYPE_PI:
+		if strings.Contains(model, "/") && !strings.HasPrefix(model, "plural/") {
+			add("plural/" + model)
+		}
+	case devboxv1.AgentType_AGENT_TYPE_GEMINI:
+		add(strings.TrimPrefix(model, defaults[t].proxyProvider+"/"))
+	}
+	return ids
 }
 
 // Spec builds the launch spec for one agent connection.

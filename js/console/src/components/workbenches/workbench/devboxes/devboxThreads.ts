@@ -5,6 +5,7 @@ import {
   DevboxSessionCapabilitiesFragment,
   DevboxThreadFragment,
   DevboxThreadKind,
+  DevboxThreadStage,
   DevboxThreadStatus,
 } from 'generated/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
@@ -58,9 +59,17 @@ export function threadState(
   return 'idle'
 }
 
+// titles taken from a prompt carry its file mention tags
+const FILE_MENTION_TAG =
+  /<plrl-devbox-file\s+path="([^"]*)"\s*(?:\/>|><\/plrl-devbox-file>)/g
+
 export const threadTitle = (
   thread: Pick<DevboxThreadFragment, 'title' | 'agentTitle' | 'id'>
-) => thread.title || thread.agentTitle || 'Untitled thread'
+) =>
+  (thread.title || thread.agentTitle || 'Untitled thread').replace(
+    FILE_MENTION_TAG,
+    (_, path: string) => `@${path.replace(/\/$/, '').split('/').pop() || path}`
+  )
 
 export function capabilitiesFor(
   agents: Nullable<Nullable<DevboxAgentFragment>[]>,
@@ -118,6 +127,26 @@ export function buildThreadTree(
       )
     )
     .map((t) => ({ ...t, children: children.get(t.id) ?? [] }))
+}
+
+export const THREAD_STAGES = [
+  { stage: DevboxThreadStage.NeedsReview, label: 'Needs review' },
+  { stage: DevboxThreadStage.Running, label: 'Running' },
+  { stage: DevboxThreadStage.Completed, label: 'Completed' },
+] as const
+
+export type DevboxThreadGroup = (typeof THREAD_STAGES)[number] & {
+  threads: DevboxThreadNode[]
+}
+
+// the thread tree split by the server-computed stage, empty stages dropped
+export function groupThreadsByStage(
+  tree: DevboxThreadNode[]
+): DevboxThreadGroup[] {
+  return THREAD_STAGES.map((group) => ({
+    ...group,
+    threads: tree.filter((t) => t.stage === group.stage),
+  })).filter((group) => group.threads.length)
 }
 
 export const ALL_REPOSITORIES_CWD = '~'
