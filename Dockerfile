@@ -3,7 +3,7 @@ ARG OTP_VERSION=28.5
 ARG OS_VARIANT=alpine
 ARG OS_VERSION=3.23.4
 ARG TOOLS_IMAGE=${OS_VARIANT}:${OS_VERSION}
-ARG RUNNER_IMAGE=alpine:3.23.4 # TODO: change back to ${OS_VARIANT}:${OS_VERSION}
+ARG RUNNER_IMAGE=alpine:3.24.4 # TODO: change back to ${OS_VARIANT}:${OS_VERSION}
 
 FROM node:26.12.0-alpine as node
 
@@ -122,7 +122,7 @@ COPY --from=tools /usr/local/bin/plural /usr/local/bin/plural
 
 WORKDIR /opt/app
 
-RUN [ "$OS_VARIANT" = "alpine" ] && apk update && apk upgrade --no-cache libexpat zlib=1.3.2-r1 musl musl-utils || true
+RUN [ "$OS_VARIANT" = "alpine" ] && apk update && apk upgrade --no-cache libexpat zlib=1.4-r0 musl musl-utils=1.2.6-r3 || true
 
 COPY bin/setup/${OS_VARIANT}.sh /opt/app/bin/setup.sh
 RUN /bin/sh /opt/app/bin/setup.sh && rm /opt/app/bin/setup.sh
