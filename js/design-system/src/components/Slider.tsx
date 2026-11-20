@@ -73,6 +73,11 @@ const SliderWrap = styled.div<SliderWrapProps>(
         },
       },
 
+      '&.disabled': {
+        opacity: 0.4,
+        pointerEvents: 'none',
+      },
+
       '.&.vertical': {
         height: $size || 300,
 
@@ -130,10 +135,6 @@ const SliderWrap = styled.div<SliderWrapProps>(
 
       '&.dragging, &.focus': {
         background: `radial-gradient(${theme.colors['action-always-white']} 37%, ${theme.colors['fill-primary-hover']} 40%)`,
-      },
-
-      '&.disabled': {
-        opacity: 0.4,
       },
     },
 
@@ -208,7 +209,7 @@ function Slider({
     >
       <div
         {...groupProps}
-        className={`slider ${state.orientation}`}
+        className={`slider ${state.orientation} ${state.isDisabled ? 'disabled' : ''}`}
       >
         {props.label && (
           <div className="label-container">
@@ -235,7 +236,9 @@ function Slider({
                 key={value}
                 $percent={state.getValuePercent(value)}
                 $active={value === state.getThumbValue(0)}
-                onClick={() => state.setThumbValue(0, value)}
+                onClick={() =>
+                  !state.isDisabled && state.setThumbValue(0, value)
+                }
                 $thumbRadius={thumbRadius}
               >
                 {label || value}
