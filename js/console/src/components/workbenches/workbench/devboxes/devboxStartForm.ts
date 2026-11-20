@@ -117,7 +117,7 @@ export function proxyModelOf(id: Nullable<string>) {
 }
 
 // agents list aliases like Claude Code's "Default (recommended)", whose
-// description leads with the model it resolves to, e.g. "Opus 4.5 · Most capable"
+// description leads with the model it resolves to, e.g. "Opus 5.5 · Most capable"
 export function modelDisplayName(model: {
   id: string
   name?: Nullable<string>

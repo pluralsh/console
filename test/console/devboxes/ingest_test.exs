@@ -368,7 +368,10 @@ defmodule Console.Devboxes.IngestTest do
       thread = insert(:devbox_instance_session, instance: inst)
       subagent = insert(:devbox_instance_session, instance: inst, kind: :subagent, parent: thread)
 
-      expect(Console.Deployments.Pr.Dispatcher, :pr, fn _, "a pr", "a body", "https://github.com/pluralsh/console.git", "main", "devbox/branch" ->
+      expect(Console.Deployments.Pr.Dispatcher, :pr, fn conn, "a pr", "a body", "https://github.com/pluralsh/console.git", "main", "devbox/branch", opts ->
+        assert conn.commit_shas == %{"devbox/branch" => "head-sha", "main" => "base-sha"}
+        assert opts[:draft]
+        assert opts[:labels] == ["devbox"]
         {:ok, %{url: "https://github.com/pluralsh/console/pull/1", title: "a pr"}}
       end)
 
@@ -378,7 +381,11 @@ defmodule Console.Devboxes.IngestTest do
           title: "a pr",
           body: "a body",
           base_branch: "main",
-          head_branch: "devbox/branch"
+          head_branch: "devbox/branch",
+          draft: true,
+          labels: ["devbox"],
+          difficulty: %{change_type: "GITOPS", lines: 42},
+          commit_shas: [%{branch: "devbox/branch", sha: "head-sha"}, %{branch: "main", sha: "base-sha"}]
         },
         tool_call_id: "tc-1"
       }, inst.id, subagent.id, inst.devbox.cluster)
@@ -388,6 +395,9 @@ defmodule Console.Devboxes.IngestTest do
       assert pr.devbox_instance_id == inst.id
       assert pr.devbox_instance_session_id == thread.id
       assert pr.workbench_id == inst.workbench_id
+      assert pr.difficulty.type == :gitops
+      assert pr.difficulty.lines == 42
+      assert pr.labels == ["devbox"]
       assert pr.metadata["tool_call_id"] || pr.metadata[:tool_call_id]
       assert_receive {:event, %PubSub.PullRequestCreated{}}
       assert_receive {:event, %PubSub.DevboxInstanceDeltaCreated{item: %{op: :pull_request}}}

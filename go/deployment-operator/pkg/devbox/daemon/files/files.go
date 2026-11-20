@@ -25,6 +25,7 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/derr"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/gitutil"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/internal/fsutil"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/egress/scmpath"
 )
 
 const (
@@ -504,4 +505,47 @@ func (s *Service) repoChanges(ctx context.Context, repo string, req *devboxv1.Ge
 		return gitutil.Changes(ctx, repo, opts)
 	}
 	return s.ChangesCache.Get(ctx, changesKey{repo: repo, base: opts.Base, diff: opts.IncludeDiff, maxDiff: opts.MaxDiffBytes})
+}
+
+// BranchDiffStat sizes a pull request's branch in the checkout req.Repository names, matched by name, path or remote.
+func (s *Service) BranchDiffStat(ctx context.Context, req *devboxv1.BranchDiffStatRequest) (*devboxv1.BranchDiffStatResponse, error) {
+	if req.GetRepository() == "" || req.GetBase() == "" || req.GetHead() == "" {
+		return nil, invalid("repository, base and head are required")
+	}
+	dir := s.checkoutFor(ctx, req.GetRepository())
+	if dir == "" {
+		return nil, derr.New(codes.NotFound, devboxv1.ErrorReason_ERROR_REASON_UNSPECIFIED,
+			"no checkout of "+req.GetRepository(), map[string]string{"repository": req.GetRepository()})
+	}
+	st, err := gitutil.BranchDiffStat(ctx, dir, req.GetBase(), req.GetHead())
+	if err != nil {
+		return nil, derr.New(codes.FailedPrecondition, devboxv1.ErrorReason_ERROR_REASON_UNSPECIFIED, err.Error(), nil)
+	}
+	return &devboxv1.BranchDiffStatResponse{
+		Additions: int32(st.Additions),
+		Deletions: int32(st.Deletions),
+		Files:     int32(st.Files),
+		BaseSha:   st.BaseSHA,
+		HeadSha:   st.HeadSHA,
+	}, nil
+}
+
+func (s *Service) checkoutFor(ctx context.Context, repository string) string {
+	if s.Checkouts == nil {
+		return ""
+	}
+	repos := s.Checkouts.Checkouts()
+	want := strings.TrimSuffix(repository, "/")
+	for _, r := range repos {
+		if r == want || filepath.Base(r) == want {
+			return r
+		}
+	}
+	id := scmpath.Normalize(repository)
+	for _, r := range repos {
+		if remote, err := gitutil.Run(ctx, r, "remote", "get-url", "origin"); err == nil && scmpath.Normalize(string(remote)) == id {
+			return r
+		}
+	}
+	return ""
 }

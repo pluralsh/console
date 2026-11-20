@@ -69,6 +69,7 @@ if get_env("OIDC_CLIENT_ID") do
       client_private_key: get_env("OIDC_CLIENT_PRIVATE_KEY"),
       client_key_id: get_env("OIDC_CLIENT_KEY_ID"),
       client_assertion_audience: get_env("OIDC_CLIENT_ASSERTION_AUDIENCE"),
+      auth_method: get_env("OIDC_AUTH_METHOD"),
       redirect_uri: "https://#{get_env("HOST")}/oauth/callback",
       response_type: "code",
       pkce_enabled: get_env("OIDC_PKCE_ENABLED") == "true",

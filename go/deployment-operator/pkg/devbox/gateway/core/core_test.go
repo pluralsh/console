@@ -713,3 +713,46 @@ func TestRegistrationReconcilesAndHeartbeats(t *testing.T) {
 		return false
 	})
 }
+
+func TestEndpointsScopeWorkbenchMCPToTheInstance(t *testing.T) {
+	g := &Gateway{cfg: Config{WorkbenchMCPURL: "https://console.example.com/mcp/workbench/"}}
+	if got := g.endpoints("wb-1").GetWorkbenchMcpUrl(); got != "https://console.example.com/mcp/workbench/wb-1" {
+		t.Fatalf("workbench mcp = %q", got)
+	}
+	if got := g.endpoints("").GetWorkbenchMcpUrl(); got != "" {
+		t.Fatalf("workbench mcp without a workbench = %q", got)
+	}
+}
+
+func TestResumeOutlivesTheCallersDeadline(t *testing.T) {
+	prev := resumeBackoff
+	resumeBackoff = 100 * time.Millisecond
+	t.Cleanup(func() { resumeBackoff = prev })
+	h := newHarness(t, nil)
+	h.running("inst-1")
+	if _, err := h.g.SuspendInstance(context.Background(), &devboxv1.InstanceActionRequest{InstanceId: "inst-1"}); err != nil {
+		t.Fatal(err)
+	}
+	// a slow restore: substrate is unavailable for the first two attempts
+	h.ate.FailResume = status.Error(codes.Unavailable, "worker gone")
+	h.ate.FailResumeTimes = 2
+
+	req := &devboxv1.InstanceActionRequest{InstanceId: "inst-1"}
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Millisecond)
+	defer cancel()
+	_, err := h.g.ResumeInstance(ctx, req)
+	if status.Code(err) != codes.Unavailable || reasonOf(err) != devboxv1.ErrorReason_ERROR_REASON_INSTANCE_STARTING {
+		t.Fatalf("an impatient resume = %v", err)
+	}
+	// a second caller joins the wake in flight rather than starting another
+	resp, err := h.g.ResumeInstance(context.Background(), req)
+	if err != nil || resp.GetStatus() != devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING {
+		t.Fatalf("joined resume = %v, %v", resp, err)
+	}
+	if got := h.ate.State(testAtespace, "dbx-inst-1"); got != ateapi.ActorState_ACTOR_STATE_RUNNING {
+		t.Fatalf("actor state = %s", got)
+	}
+	if inits, _, _, _ := h.daemon.snapshot(); inits != 2 {
+		t.Fatalf("the daemon should be initialized once per wake, got %d inits", inits)
+	}
+}

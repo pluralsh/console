@@ -124,27 +124,27 @@ defmodule Console.Schema.DevboxInstanceSession do
   def model(_), do: nil
 
   @doc """
-  Where a thread sits in its lifecycle: `:running` while a turn is in flight or queued, `:needs_review` once the
-  agent waits on a person (a permission or question, or a finished or failed turn), `:completed` once closed.
-  `for_stages/2` is the same rule as a query.
+  Where a thread sits in its lifecycle: `:needs_review` only while an interaction (a permission or question) is
+  pending, `:running` while a turn is in flight or queued, otherwise `:completed` (its last turn finished or
+  failed, or it was closed).  `for_stages/2` is the same rule as a query.
   """
   @spec stage(map) :: :running | :needs_review | :completed
   def stage(%{status: s}) when s in [:closed, :deleted], do: :completed
   def stage(%{foreground_state: :requires_action}), do: :needs_review
   def stage(%{status: :waiting}), do: :running
   def stage(%{foreground_state: :running}), do: :running
-  def stage(_), do: :needs_review
+  def stage(_), do: :completed
 
   def for_stages(query \\ __MODULE__, stages) do
     conditions = Enum.reduce(stages, dynamic(false), fn
       :completed, acc ->
-        dynamic([s], ^acc or s.status in ^[:closed, :deleted])
+        dynamic([s], ^acc or s.status in ^[:closed, :deleted] or
+                              (s.foreground_state not in ^[:requires_action, :running] and s.status != ^:waiting))
       :running, acc ->
         dynamic([s], ^acc or (s.status not in ^[:closed, :deleted] and s.foreground_state != ^:requires_action and
                               (s.status == ^:waiting or s.foreground_state == ^:running)))
       :needs_review, acc ->
-        dynamic([s], ^acc or (s.status not in ^[:closed, :deleted] and (s.foreground_state == ^:requires_action or
-                              (s.status != ^:waiting and s.foreground_state != ^:running))))
+        dynamic([s], ^acc or (s.status not in ^[:closed, :deleted] and s.foreground_state == ^:requires_action))
       _, acc -> acc
     end)
     from(s in query, where: ^conditions)

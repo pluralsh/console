@@ -36,8 +36,8 @@ defmodule Console.GraphQl.Deployments.Devbox do
 
   enum :devbox_thread_stage do
     value :running,      description: "a turn is in flight or queued"
-    value :needs_review, description: "the agent is waiting on a person: a permission, a question, or a finished or failed turn"
-    value :completed,    description: "the thread was closed"
+    value :needs_review, description: "the agent is waiting on a person to answer a permission request or question"
+    value :completed,    description: "the last turn finished or failed, or the thread was closed"
   end
 
   enum :devbox_stream_kind do

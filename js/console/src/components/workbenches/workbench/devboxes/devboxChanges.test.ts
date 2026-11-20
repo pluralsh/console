@@ -32,16 +32,21 @@ describe('buildChangeTree', () => {
       ]),
     ])
     expect(shape(tree)).toEqual([
-      { docs: ['webhooks.mdx'] },
       {
-        'monolith / src': [
-          { lib: ['rate-limit.test.ts', 'rate-limit.ts'] },
-          { routes: ['webhooks.ts'] },
+        console: [
+          { docs: ['webhooks.mdx'] },
+          {
+            'monolith / src': [
+              { lib: ['rate-limit.test.ts', 'rate-limit.ts'] },
+              { routes: ['webhooks.ts'] },
+            ],
+          },
+          'README.md',
         ],
       },
-      'README.md',
     ])
-    const file = tree.at(-1)
+    const [repo] = tree
+    const file = repo.kind === 'dir' ? repo.children.at(-1) : undefined
     expect(file?.id).toBe('/home/dev/console/README.md')
   })
 

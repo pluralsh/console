@@ -33,6 +33,7 @@ defmodule Console.Schema.PrAutomation do
     field :branch_prefix,    :string
     field :labels,           {:array, :string}
     field :ignore_templates, :boolean, virtual: true
+    field :draft,            :boolean, virtual: true
 
     embeds_one :git, Service.Git, on_replace: :update
     embeds_one :proxy, ScmConnection.Proxy, on_replace: :update

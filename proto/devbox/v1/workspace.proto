@@ -189,6 +189,22 @@ message GetChangesRequest {
   string path = 7;
 }
 
+message BranchDiffStatRequest {
+  string instance_id = 1;
+  // A checkout's name or path, or its remote URL.
+  string repository = 2;
+  string base = 3;
+  string head = 4;
+}
+
+message BranchDiffStatResponse {
+  int32 additions = 1;
+  int32 deletions = 2;
+  int32 files = 3;
+  string base_sha = 4;
+  string head_sha = 5;
+}
+
 message GetChangesResponse {
   repeated RepositoryChanges repositories = 1;
 }

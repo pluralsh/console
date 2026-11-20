@@ -2,6 +2,8 @@ import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
 import { TreeItem, treeItemClasses } from '@mui/x-tree-view/TreeItem'
 import { FolderIcon, Spinner, Tooltip } from '@pluralsh/design-system'
 import {
+  FILE_TREE_GLYPH_SIZE,
+  FILE_TREE_ICON_SIZE,
   FileTypeIcon,
   fileTreeMuiTheme,
   StyledTreeView,
@@ -181,7 +183,7 @@ function DirectoryEntries({
               icon={
                 <FileTypeIcon
                   fileName={entry.name}
-                  size={16}
+                  size={FILE_TREE_ICON_SIZE}
                 />
               }
             />
@@ -202,7 +204,7 @@ function DirectoryEntries({
         label={
           <EntryLabel
             name={entry.name}
-            icon={<FolderIcon size={14} />}
+            icon={<FolderIcon size={FILE_TREE_GLYPH_SIZE} />}
           />
         }
       >

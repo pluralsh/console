@@ -94,6 +94,8 @@ service Daemon {
   rpc WriteFile(WriteFileRequest) returns (WriteFileResponse);
   rpc WatchFiles(WatchFilesRequest) returns (stream FileEvent);
   rpc GetChanges(GetChangesRequest) returns (GetChangesResponse);
+  // GetBranchDiffStat sizes a pull request: head against its merge base with base, for the devbox MCP.
+  rpc GetBranchDiffStat(BranchDiffStatRequest) returns (BranchDiffStatResponse);
 
   // ---- Workspace ----
 

@@ -4,7 +4,7 @@ import {
   CaretRightIcon,
   Chip,
   CloseIcon,
-  FileDiffIcon,
+  GitCompareIcon,
   FileIcon,
   IconFrame,
   ReloadIcon,
@@ -103,7 +103,7 @@ export function DevboxChangesViewer({
       <ViewerHeaderSC>
         {all ? (
           <>
-            <FileDiffIcon size={16} />
+            <GitCompareIcon size={16} />
             <TitleSC>All changes</TitleSC>
             {groups && (
               <CaptionP $color="text-xlight">

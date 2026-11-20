@@ -413,6 +413,8 @@ defmodule Devbox.V1.Daemon.Service do
 
   rpc :GetChanges, Devbox.V1.GetChangesRequest, Devbox.V1.GetChangesResponse
 
+  rpc :GetBranchDiffStat, Devbox.V1.BranchDiffStatRequest, Devbox.V1.BranchDiffStatResponse
+
   rpc :AddRepository, Devbox.V1.AddRepositoryRequest, Devbox.V1.AddRepositoryResponse
 
   rpc :ListRepositories, Devbox.V1.ListRepositoriesRequest, Devbox.V1.ListRepositoriesResponse

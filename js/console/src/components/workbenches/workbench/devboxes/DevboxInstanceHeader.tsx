@@ -88,7 +88,6 @@ export function instanceDetails(
     !!repos.length && {
       label: repos.length === 1 ? 'Repo' : 'Repos',
       value: repos.length === 1 ? repoName(repos[0]) : `${repos.length}`,
-      tooltip: repos.join('\n'),
     },
     instance.snapshot && {
       label: 'From snapshot',
@@ -197,12 +196,12 @@ export function DevboxInstanceHeader({
   })
 
   const awakeActions: MenuAction[] = [
+    ...keepAwakeActions.items,
     {
       key: AWAKE_BACK_KEY,
       label: 'Back',
       icon: <CaretLeftIcon size={ICON_FRAME_ICON_SIZE.small} />,
     },
-    ...keepAwakeActions.items,
   ]
   const mainActions = (
     [
@@ -248,6 +247,7 @@ export function DevboxInstanceHeader({
     <Flex
       direction="column"
       gap="xsmall"
+      css={{ minWidth: 0 }}
     >
       <Flex
         justify="space-between"
@@ -383,22 +383,22 @@ export function DevboxInstanceHeader({
   )
 }
 
+// one line, ellipsized; items stay inline so the ellipsis can cut mid-item
 const DetailsSC = styled.div(({ theme }) => ({
   ...theme.partials.text.caption,
-  display: 'flex',
-  flexWrap: 'wrap',
-  columnGap: theme.spacing.large,
-  rowGap: theme.spacing.xxsmall,
+  minWidth: 0,
+  overflow: 'hidden',
+  whiteSpace: 'nowrap',
+  textOverflow: 'ellipsis',
   color: theme.colors['text-light'],
 }))
 
 const DetailSC = styled.span(({ theme }) => ({
-  display: 'inline-flex',
-  gap: theme.spacing.xsmall,
-  whiteSpace: 'nowrap',
+  '&:not(:last-child)': { marginRight: theme.spacing.large },
 }))
 
 const DetailLabelSC = styled.span(({ theme }) => ({
+  marginRight: theme.spacing.xsmall,
   color: theme.colors['text-xlight'],
 }))
 

@@ -6,6 +6,27 @@ defmodule Console.Services.OAuthTest do
   @client_id "console"
   @token_url "https://idp.example.com/oauth2/token"
 
+  # trimmed from a PingFederate discovery document that advertises an optional PAR endpoint
+  @ping_discovery %{
+    "issuer" => "https://authn-qa.example.com",
+    "authorization_endpoint" => "https://authn-qa.example.com/as/authorization.oauth2",
+    "token_endpoint" => "https://authn-qa.example.com/as/token.oauth2",
+    "userinfo_endpoint" => "https://authn-qa.example.com/idp/userinfo.openid",
+    "jwks_uri" => "https://authn-qa.example.com/pf/JWKS",
+    "pushed_authorization_request_endpoint" => "https://authn-qa.example.com/as/par.oauth2",
+    "scopes_supported" => ["openid", "profile"],
+    "response_types_supported" => ["code", "token", "id_token"],
+    "grant_types_supported" => ["implicit", "authorization_code", "refresh_token", "client_credentials"],
+    "subject_types_supported" => ["public", "pairwise"],
+    "id_token_signing_alg_values_supported" => ["RS256", "ES256"],
+    "token_endpoint_auth_methods_supported" => ["client_secret_basic", "client_secret_post", "client_secret_jwt", "private_key_jwt", "tls_client_auth", "none"],
+    "token_endpoint_auth_signing_alg_values_supported" => ["RS256", "PS256", "HS256"],
+    "request_parameter_supported" => true,
+    "request_object_signing_alg_values_supported" => ["RS256", "ES256", "PS256"],
+    "code_challenge_methods_supported" => ["plain", "S256"],
+    "dpop_signing_alg_values_supported" => ["RS256", "ES256"]
+  }
+
   setup do
     prev = Application.get_env(:console, :oidc_providers)
     on_exit(fn -> Application.put_env(:console, :oidc_providers, prev) end)
@@ -65,6 +86,114 @@ defmodule Console.Services.OAuthTest do
 
       {:ok, _} = OAuth.retrieve_token(%{code: "code"})
     end
+  end
+
+  describe "#redirect_uri/1" do
+    test "it uses the authorization endpoint if pushed authorization requests are optional" do
+      configure(client_secret: "secret")
+      ctx = client_context(%{"require_pushed_authorization_requests" => false}, "secret")
+      expect(Oidcc.ClientContext, :from_configuration_worker, fn _, @client_id, "secret" -> {:ok, ctx} end)
+
+      uri = URI.parse(OAuth.redirect_uri(nil))
+      assert "#{uri.scheme}://#{uri.host}#{uri.path}" == "https://authn-qa.example.com/as/authorization.oauth2"
+
+      query = URI.decode_query(uri.query)
+      refute query["request_uri"]
+      assert query["client_id"] == @client_id
+      assert query["response_type"] == "code"
+      assert query["redirect_uri"] == "https://console.example.com/oauth/callback"
+      assert query["scope"] == "openid email"
+    end
+
+    test "it still pushes the authorization request if the provider requires it" do
+      configure(client_secret: "secret")
+      ctx = client_context(%{"require_pushed_authorization_requests" => true}, "secret")
+      expect(Oidcc.ClientContext, :from_configuration_worker, fn _, _, _ -> {:ok, ctx} end)
+      expect(Oidcc.Authorization, :create_redirect_url, fn passed, _ ->
+        assert passed.provider_configuration.pushed_authorization_request_endpoint == "https://authn-qa.example.com/as/par.oauth2"
+        {:ok, "https://authn-qa.example.com/as/authorization.oauth2?request_uri=urn"}
+      end)
+
+      assert OAuth.redirect_uri(nil) =~ "request_uri"
+    end
+  end
+
+  describe "auth methods" do
+    test "oidcc defaults to an hmac client assertion against providers advertising client_secret_jwt" do
+      %{provider_configuration: conf} = ctx = client_context(%{}, "secret")
+
+      {:ok, {body, _}, method} = :oidcc_auth_util.add_client_authentication(
+        [],
+        [],
+        conf.token_endpoint_auth_methods_supported,
+        conf.token_endpoint_auth_signing_alg_values_supported,
+        %{},
+        Oidcc.ClientContext.struct_to_record(ctx)
+      )
+
+      assert method == :client_secret_jwt
+      assert Map.new(body)["client_assertion_type"] == "urn:ietf:params:oauth:client-assertion-type:jwt-bearer"
+
+      {:ok, {body, _}, :none} = :oidcc_auth_util.add_client_authentication(
+        [],
+        [],
+        conf.token_endpoint_auth_methods_supported,
+        conf.token_endpoint_auth_signing_alg_values_supported,
+        %{preferred_auth_methods: [:none]},
+        Oidcc.ClientContext.struct_to_record(client_context(%{}, :unauthenticated))
+      )
+
+      assert body == [{"client_id", @client_id}]
+    end
+
+    test "it authenticates as a public client with the none auth method" do
+      configure(client_secret: "secret", auth_method: "none")
+
+      expect(Oidcc, :retrieve_token, fn "code", _, @client_id, :unauthenticated, opts ->
+        assert opts.preferred_auth_methods == [:none]
+        refute Map.has_key?(opts, :body_extension)
+        {:ok, %Oidcc.Token{}}
+      end)
+
+      {:ok, _} = OAuth.retrieve_token(%{code: "code"})
+    end
+
+    test "it pins secret based auth methods" do
+      configure(client_secret: "secret", auth_method: "client_secret_basic")
+
+      expect(Oidcc, :retrieve_token, fn _, _, @client_id, "secret", opts ->
+        assert opts.preferred_auth_methods == [:client_secret_basic]
+        {:ok, %Oidcc.Token{}}
+      end)
+
+      {:ok, _} = OAuth.retrieve_token(%{code: "code"})
+    end
+
+    test "it pins the auth method for pushed authorization requests" do
+      configure(client_secret: "secret", auth_method: "none")
+      ctx = client_context(%{"require_pushed_authorization_requests" => true}, :unauthenticated)
+      expect(Oidcc.ClientContext, :from_configuration_worker, fn _, _, :unauthenticated -> {:ok, ctx} end)
+      expect(Oidcc.Authorization, :create_redirect_url, fn _, opts ->
+        assert opts.preferred_auth_methods == [:none]
+        {:ok, "https://authn-qa.example.com/as/authorization.oauth2?request_uri=urn"}
+      end)
+
+      OAuth.redirect_uri(nil)
+    end
+
+    test "it rejects unsupported auth methods" do
+      configure(auth_method: "private_key")
+      assert_raise ArgumentError, fn -> OAuth.auth_method() end
+    end
+  end
+
+  defp client_context(overrides, secret) do
+    {:ok, conf} =
+      @ping_discovery
+      |> Map.merge(overrides)
+      |> Oidcc.ProviderConfiguration.decode_configuration()
+
+    Oidcc.ClientContext.from_manual(conf, JOSE.JWK.from_map(%{"keys" => []}), @client_id, secret)
   end
 
   defp configure(conf) do

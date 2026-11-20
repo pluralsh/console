@@ -5,6 +5,14 @@ import { TRUNCATE_LEFT } from 'components/utils/truncate'
 import styled, { useTheme } from 'styled-components'
 import { getFileTypeIconKey } from 'utils/file'
 
+// trees read as secondary navigation, a step below body text, with icons sized to match
+export const FILE_TREE_ICON_SIZE = 14
+export const FILE_TREE_GLYPH_SIZE = 12
+export const FILE_TREE_TEXT = {
+  fontSize: '0.8125rem',
+  lineHeight: '1.25rem',
+} as const
+
 export const StyledTreeView = styled(SimpleTreeView)(({ theme }) => ({
   height: '100%',
   width: '100%',
@@ -19,6 +27,7 @@ export const StyledTreeView = styled(SimpleTreeView)(({ theme }) => ({
     borderRadius: theme.borderRadiuses.medium,
     padding: `${theme.spacing.xxsmall} ${theme.spacing.xsmall}`,
     ...theme.partials.text.body2,
+    ...FILE_TREE_TEXT,
     color: theme.colors['text-light'],
     width: '100%',
     minWidth: 0,
@@ -61,6 +70,9 @@ export const StyledTreeView = styled(SimpleTreeView)(({ theme }) => ({
 export const TreeItemIcon = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
+  justifyContent: 'center',
+  // folders and files of different glyph sizes still line their names up
+  width: FILE_TREE_ICON_SIZE,
   marginRight: theme.spacing.xsmall,
   color: theme.colors['icon-default'],
   flexShrink: 0,

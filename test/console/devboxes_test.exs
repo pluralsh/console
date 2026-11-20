@@ -364,6 +364,15 @@ defmodule Console.DevboxesTest do
       assert Devboxes.complete_stale_instances() == []
       assert refetch(inst).status == :suspended
     end
+
+    test "a wake that outlasts the call is accepted, while failures stay errors" do
+      inst = owned_instance(status: :suspended)
+      expect(Control.Test, :resume_instance, fn _ -> {:error, :starting} end)
+      {:ok, _} = Devboxes.resume_instance(inst.id, inst.user)
+
+      expect(Control.Test, :resume_instance, fn _ -> {:error, "resuming instance: actor crashed"} end)
+      {:error, "resuming instance: actor crashed"} = Devboxes.resume_instance(inst.id, inst.user)
+    end
   end
 
   describe "#complete_stale_instances/0" do

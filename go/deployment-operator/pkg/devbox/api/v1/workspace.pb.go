@@ -1349,6 +1349,151 @@ func (x *GetChangesRequest) GetPath() string {
 	return ""
 }
 
+type BranchDiffStatRequest struct {
+	state      protoimpl.MessageState `protogen:"open.v1"`
+	InstanceId string                 `protobuf:"bytes,1,opt,name=instance_id,json=instanceId,proto3" json:"instance_id,omitempty"`
+	// A checkout's name or path, or its remote URL.
+	Repository    string `protobuf:"bytes,2,opt,name=repository,proto3" json:"repository,omitempty"`
+	Base          string `protobuf:"bytes,3,opt,name=base,proto3" json:"base,omitempty"`
+	Head          string `protobuf:"bytes,4,opt,name=head,proto3" json:"head,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *BranchDiffStatRequest) Reset() {
+	*x = BranchDiffStatRequest{}
+	mi := &file_devbox_v1_workspace_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BranchDiffStatRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BranchDiffStatRequest) ProtoMessage() {}
+
+func (x *BranchDiffStatRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_devbox_v1_workspace_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BranchDiffStatRequest.ProtoReflect.Descriptor instead.
+func (*BranchDiffStatRequest) Descriptor() ([]byte, []int) {
+	return file_devbox_v1_workspace_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *BranchDiffStatRequest) GetInstanceId() string {
+	if x != nil {
+		return x.InstanceId
+	}
+	return ""
+}
+
+func (x *BranchDiffStatRequest) GetRepository() string {
+	if x != nil {
+		return x.Repository
+	}
+	return ""
+}
+
+func (x *BranchDiffStatRequest) GetBase() string {
+	if x != nil {
+		return x.Base
+	}
+	return ""
+}
+
+func (x *BranchDiffStatRequest) GetHead() string {
+	if x != nil {
+		return x.Head
+	}
+	return ""
+}
+
+type BranchDiffStatResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Additions     int32                  `protobuf:"varint,1,opt,name=additions,proto3" json:"additions,omitempty"`
+	Deletions     int32                  `protobuf:"varint,2,opt,name=deletions,proto3" json:"deletions,omitempty"`
+	Files         int32                  `protobuf:"varint,3,opt,name=files,proto3" json:"files,omitempty"`
+	BaseSha       string                 `protobuf:"bytes,4,opt,name=base_sha,json=baseSha,proto3" json:"base_sha,omitempty"`
+	HeadSha       string                 `protobuf:"bytes,5,opt,name=head_sha,json=headSha,proto3" json:"head_sha,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *BranchDiffStatResponse) Reset() {
+	*x = BranchDiffStatResponse{}
+	mi := &file_devbox_v1_workspace_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BranchDiffStatResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BranchDiffStatResponse) ProtoMessage() {}
+
+func (x *BranchDiffStatResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_devbox_v1_workspace_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BranchDiffStatResponse.ProtoReflect.Descriptor instead.
+func (*BranchDiffStatResponse) Descriptor() ([]byte, []int) {
+	return file_devbox_v1_workspace_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *BranchDiffStatResponse) GetAdditions() int32 {
+	if x != nil {
+		return x.Additions
+	}
+	return 0
+}
+
+func (x *BranchDiffStatResponse) GetDeletions() int32 {
+	if x != nil {
+		return x.Deletions
+	}
+	return 0
+}
+
+func (x *BranchDiffStatResponse) GetFiles() int32 {
+	if x != nil {
+		return x.Files
+	}
+	return 0
+}
+
+func (x *BranchDiffStatResponse) GetBaseSha() string {
+	if x != nil {
+		return x.BaseSha
+	}
+	return ""
+}
+
+func (x *BranchDiffStatResponse) GetHeadSha() string {
+	if x != nil {
+		return x.HeadSha
+	}
+	return ""
+}
+
 type GetChangesResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Repositories  []*RepositoryChanges   `protobuf:"bytes,1,rep,name=repositories,proto3" json:"repositories,omitempty"`
@@ -1358,7 +1503,7 @@ type GetChangesResponse struct {
 
 func (x *GetChangesResponse) Reset() {
 	*x = GetChangesResponse{}
-	mi := &file_devbox_v1_workspace_proto_msgTypes[16]
+	mi := &file_devbox_v1_workspace_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1370,7 +1515,7 @@ func (x *GetChangesResponse) String() string {
 func (*GetChangesResponse) ProtoMessage() {}
 
 func (x *GetChangesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_workspace_proto_msgTypes[16]
+	mi := &file_devbox_v1_workspace_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1383,7 +1528,7 @@ func (x *GetChangesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetChangesResponse.ProtoReflect.Descriptor instead.
 func (*GetChangesResponse) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_workspace_proto_rawDescGZIP(), []int{16}
+	return file_devbox_v1_workspace_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *GetChangesResponse) GetRepositories() []*RepositoryChanges {
@@ -1407,7 +1552,7 @@ type RepositoryChanges struct {
 
 func (x *RepositoryChanges) Reset() {
 	*x = RepositoryChanges{}
-	mi := &file_devbox_v1_workspace_proto_msgTypes[17]
+	mi := &file_devbox_v1_workspace_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1419,7 +1564,7 @@ func (x *RepositoryChanges) String() string {
 func (*RepositoryChanges) ProtoMessage() {}
 
 func (x *RepositoryChanges) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_workspace_proto_msgTypes[17]
+	mi := &file_devbox_v1_workspace_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1432,7 +1577,7 @@ func (x *RepositoryChanges) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RepositoryChanges.ProtoReflect.Descriptor instead.
 func (*RepositoryChanges) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_workspace_proto_rawDescGZIP(), []int{17}
+	return file_devbox_v1_workspace_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *RepositoryChanges) GetCheckout() *Checkout {
@@ -1495,7 +1640,7 @@ type FileChange struct {
 
 func (x *FileChange) Reset() {
 	*x = FileChange{}
-	mi := &file_devbox_v1_workspace_proto_msgTypes[18]
+	mi := &file_devbox_v1_workspace_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1507,7 +1652,7 @@ func (x *FileChange) String() string {
 func (*FileChange) ProtoMessage() {}
 
 func (x *FileChange) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_workspace_proto_msgTypes[18]
+	mi := &file_devbox_v1_workspace_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1520,7 +1665,7 @@ func (x *FileChange) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FileChange.ProtoReflect.Descriptor instead.
 func (*FileChange) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_workspace_proto_rawDescGZIP(), []int{18}
+	return file_devbox_v1_workspace_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *FileChange) GetPath() string {
@@ -1607,7 +1752,7 @@ type TerminalInfo struct {
 
 func (x *TerminalInfo) Reset() {
 	*x = TerminalInfo{}
-	mi := &file_devbox_v1_workspace_proto_msgTypes[19]
+	mi := &file_devbox_v1_workspace_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1619,7 +1764,7 @@ func (x *TerminalInfo) String() string {
 func (*TerminalInfo) ProtoMessage() {}
 
 func (x *TerminalInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_workspace_proto_msgTypes[19]
+	mi := &file_devbox_v1_workspace_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1632,7 +1777,7 @@ func (x *TerminalInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TerminalInfo.ProtoReflect.Descriptor instead.
 func (*TerminalInfo) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_workspace_proto_rawDescGZIP(), []int{19}
+	return file_devbox_v1_workspace_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *TerminalInfo) GetTerminalId() string {
@@ -1732,7 +1877,7 @@ type CreateTerminalRequest struct {
 
 func (x *CreateTerminalRequest) Reset() {
 	*x = CreateTerminalRequest{}
-	mi := &file_devbox_v1_workspace_proto_msgTypes[20]
+	mi := &file_devbox_v1_workspace_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1744,7 +1889,7 @@ func (x *CreateTerminalRequest) String() string {
 func (*CreateTerminalRequest) ProtoMessage() {}
 
 func (x *CreateTerminalRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_workspace_proto_msgTypes[20]
+	mi := &file_devbox_v1_workspace_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1757,7 +1902,7 @@ func (x *CreateTerminalRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateTerminalRequest.ProtoReflect.Descriptor instead.
 func (*CreateTerminalRequest) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_workspace_proto_rawDescGZIP(), []int{20}
+	return file_devbox_v1_workspace_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *CreateTerminalRequest) GetInstanceId() string {
@@ -1832,7 +1977,7 @@ type ListTerminalsRequest struct {
 
 func (x *ListTerminalsRequest) Reset() {
 	*x = ListTerminalsRequest{}
-	mi := &file_devbox_v1_workspace_proto_msgTypes[21]
+	mi := &file_devbox_v1_workspace_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1844,7 +1989,7 @@ func (x *ListTerminalsRequest) String() string {
 func (*ListTerminalsRequest) ProtoMessage() {}
 
 func (x *ListTerminalsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_workspace_proto_msgTypes[21]
+	mi := &file_devbox_v1_workspace_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1857,7 +2002,7 @@ func (x *ListTerminalsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListTerminalsRequest.ProtoReflect.Descriptor instead.
 func (*ListTerminalsRequest) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_workspace_proto_rawDescGZIP(), []int{21}
+	return file_devbox_v1_workspace_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *ListTerminalsRequest) GetInstanceId() string {
@@ -1876,7 +2021,7 @@ type ListTerminalsResponse struct {
 
 func (x *ListTerminalsResponse) Reset() {
 	*x = ListTerminalsResponse{}
-	mi := &file_devbox_v1_workspace_proto_msgTypes[22]
+	mi := &file_devbox_v1_workspace_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1888,7 +2033,7 @@ func (x *ListTerminalsResponse) String() string {
 func (*ListTerminalsResponse) ProtoMessage() {}
 
 func (x *ListTerminalsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_workspace_proto_msgTypes[22]
+	mi := &file_devbox_v1_workspace_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1901,7 +2046,7 @@ func (x *ListTerminalsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListTerminalsResponse.ProtoReflect.Descriptor instead.
 func (*ListTerminalsResponse) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_workspace_proto_rawDescGZIP(), []int{22}
+	return file_devbox_v1_workspace_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *ListTerminalsResponse) GetTerminals() []*TerminalInfo {
@@ -1923,7 +2068,7 @@ type ResizeTerminalRequest struct {
 
 func (x *ResizeTerminalRequest) Reset() {
 	*x = ResizeTerminalRequest{}
-	mi := &file_devbox_v1_workspace_proto_msgTypes[23]
+	mi := &file_devbox_v1_workspace_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1935,7 +2080,7 @@ func (x *ResizeTerminalRequest) String() string {
 func (*ResizeTerminalRequest) ProtoMessage() {}
 
 func (x *ResizeTerminalRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_workspace_proto_msgTypes[23]
+	mi := &file_devbox_v1_workspace_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1948,7 +2093,7 @@ func (x *ResizeTerminalRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResizeTerminalRequest.ProtoReflect.Descriptor instead.
 func (*ResizeTerminalRequest) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_workspace_proto_rawDescGZIP(), []int{23}
+	return file_devbox_v1_workspace_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *ResizeTerminalRequest) GetInstanceId() string {
@@ -1991,7 +2136,7 @@ type CloseTerminalRequest struct {
 
 func (x *CloseTerminalRequest) Reset() {
 	*x = CloseTerminalRequest{}
-	mi := &file_devbox_v1_workspace_proto_msgTypes[24]
+	mi := &file_devbox_v1_workspace_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2003,7 +2148,7 @@ func (x *CloseTerminalRequest) String() string {
 func (*CloseTerminalRequest) ProtoMessage() {}
 
 func (x *CloseTerminalRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_workspace_proto_msgTypes[24]
+	mi := &file_devbox_v1_workspace_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2016,7 +2161,7 @@ func (x *CloseTerminalRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CloseTerminalRequest.ProtoReflect.Descriptor instead.
 func (*CloseTerminalRequest) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_workspace_proto_rawDescGZIP(), []int{24}
+	return file_devbox_v1_workspace_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *CloseTerminalRequest) GetInstanceId() string {
@@ -2055,7 +2200,7 @@ type TerminalInput struct {
 
 func (x *TerminalInput) Reset() {
 	*x = TerminalInput{}
-	mi := &file_devbox_v1_workspace_proto_msgTypes[25]
+	mi := &file_devbox_v1_workspace_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2067,7 +2212,7 @@ func (x *TerminalInput) String() string {
 func (*TerminalInput) ProtoMessage() {}
 
 func (x *TerminalInput) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_workspace_proto_msgTypes[25]
+	mi := &file_devbox_v1_workspace_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2080,7 +2225,7 @@ func (x *TerminalInput) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TerminalInput.ProtoReflect.Descriptor instead.
 func (*TerminalInput) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_workspace_proto_rawDescGZIP(), []int{25}
+	return file_devbox_v1_workspace_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *TerminalInput) GetInput() isTerminalInput_Input {
@@ -2150,7 +2295,7 @@ type TerminalAttach struct {
 
 func (x *TerminalAttach) Reset() {
 	*x = TerminalAttach{}
-	mi := &file_devbox_v1_workspace_proto_msgTypes[26]
+	mi := &file_devbox_v1_workspace_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2162,7 +2307,7 @@ func (x *TerminalAttach) String() string {
 func (*TerminalAttach) ProtoMessage() {}
 
 func (x *TerminalAttach) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_workspace_proto_msgTypes[26]
+	mi := &file_devbox_v1_workspace_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2175,7 +2320,7 @@ func (x *TerminalAttach) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TerminalAttach.ProtoReflect.Descriptor instead.
 func (*TerminalAttach) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_workspace_proto_rawDescGZIP(), []int{26}
+	return file_devbox_v1_workspace_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *TerminalAttach) GetTerminalId() string {
@@ -2202,7 +2347,7 @@ type TerminalSize struct {
 
 func (x *TerminalSize) Reset() {
 	*x = TerminalSize{}
-	mi := &file_devbox_v1_workspace_proto_msgTypes[27]
+	mi := &file_devbox_v1_workspace_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2214,7 +2359,7 @@ func (x *TerminalSize) String() string {
 func (*TerminalSize) ProtoMessage() {}
 
 func (x *TerminalSize) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_workspace_proto_msgTypes[27]
+	mi := &file_devbox_v1_workspace_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2227,7 +2372,7 @@ func (x *TerminalSize) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TerminalSize.ProtoReflect.Descriptor instead.
 func (*TerminalSize) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_workspace_proto_rawDescGZIP(), []int{27}
+	return file_devbox_v1_workspace_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *TerminalSize) GetCols() int32 {
@@ -2258,7 +2403,7 @@ type TerminalOutput struct {
 
 func (x *TerminalOutput) Reset() {
 	*x = TerminalOutput{}
-	mi := &file_devbox_v1_workspace_proto_msgTypes[28]
+	mi := &file_devbox_v1_workspace_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2270,7 +2415,7 @@ func (x *TerminalOutput) String() string {
 func (*TerminalOutput) ProtoMessage() {}
 
 func (x *TerminalOutput) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_workspace_proto_msgTypes[28]
+	mi := &file_devbox_v1_workspace_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2283,7 +2428,7 @@ func (x *TerminalOutput) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TerminalOutput.ProtoReflect.Descriptor instead.
 func (*TerminalOutput) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_workspace_proto_rawDescGZIP(), []int{28}
+	return file_devbox_v1_workspace_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *TerminalOutput) GetOutput() isTerminalOutput_Output {
@@ -2353,7 +2498,7 @@ type TerminalData struct {
 
 func (x *TerminalData) Reset() {
 	*x = TerminalData{}
-	mi := &file_devbox_v1_workspace_proto_msgTypes[29]
+	mi := &file_devbox_v1_workspace_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2365,7 +2510,7 @@ func (x *TerminalData) String() string {
 func (*TerminalData) ProtoMessage() {}
 
 func (x *TerminalData) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_workspace_proto_msgTypes[29]
+	mi := &file_devbox_v1_workspace_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2378,7 +2523,7 @@ func (x *TerminalData) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TerminalData.ProtoReflect.Descriptor instead.
 func (*TerminalData) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_workspace_proto_rawDescGZIP(), []int{29}
+	return file_devbox_v1_workspace_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *TerminalData) GetData() []byte {
@@ -2405,7 +2550,7 @@ type TerminalExit struct {
 
 func (x *TerminalExit) Reset() {
 	*x = TerminalExit{}
-	mi := &file_devbox_v1_workspace_proto_msgTypes[30]
+	mi := &file_devbox_v1_workspace_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2417,7 +2562,7 @@ func (x *TerminalExit) String() string {
 func (*TerminalExit) ProtoMessage() {}
 
 func (x *TerminalExit) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_workspace_proto_msgTypes[30]
+	mi := &file_devbox_v1_workspace_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2430,7 +2575,7 @@ func (x *TerminalExit) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TerminalExit.ProtoReflect.Descriptor instead.
 func (*TerminalExit) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_workspace_proto_rawDescGZIP(), []int{30}
+	return file_devbox_v1_workspace_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *TerminalExit) GetExitCode() int32 {
@@ -2460,7 +2605,7 @@ type StartBrowserRequest struct {
 
 func (x *StartBrowserRequest) Reset() {
 	*x = StartBrowserRequest{}
-	mi := &file_devbox_v1_workspace_proto_msgTypes[31]
+	mi := &file_devbox_v1_workspace_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2472,7 +2617,7 @@ func (x *StartBrowserRequest) String() string {
 func (*StartBrowserRequest) ProtoMessage() {}
 
 func (x *StartBrowserRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_workspace_proto_msgTypes[31]
+	mi := &file_devbox_v1_workspace_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2485,7 +2630,7 @@ func (x *StartBrowserRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StartBrowserRequest.ProtoReflect.Descriptor instead.
 func (*StartBrowserRequest) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_workspace_proto_rawDescGZIP(), []int{31}
+	return file_devbox_v1_workspace_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *StartBrowserRequest) GetInstanceId() string {
@@ -2525,7 +2670,7 @@ type StopBrowserRequest struct {
 
 func (x *StopBrowserRequest) Reset() {
 	*x = StopBrowserRequest{}
-	mi := &file_devbox_v1_workspace_proto_msgTypes[32]
+	mi := &file_devbox_v1_workspace_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2537,7 +2682,7 @@ func (x *StopBrowserRequest) String() string {
 func (*StopBrowserRequest) ProtoMessage() {}
 
 func (x *StopBrowserRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_workspace_proto_msgTypes[32]
+	mi := &file_devbox_v1_workspace_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2550,7 +2695,7 @@ func (x *StopBrowserRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StopBrowserRequest.ProtoReflect.Descriptor instead.
 func (*StopBrowserRequest) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_workspace_proto_rawDescGZIP(), []int{32}
+	return file_devbox_v1_workspace_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *StopBrowserRequest) GetInstanceId() string {
@@ -2569,7 +2714,7 @@ type GetBrowserRequest struct {
 
 func (x *GetBrowserRequest) Reset() {
 	*x = GetBrowserRequest{}
-	mi := &file_devbox_v1_workspace_proto_msgTypes[33]
+	mi := &file_devbox_v1_workspace_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2581,7 +2726,7 @@ func (x *GetBrowserRequest) String() string {
 func (*GetBrowserRequest) ProtoMessage() {}
 
 func (x *GetBrowserRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_workspace_proto_msgTypes[33]
+	mi := &file_devbox_v1_workspace_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2594,7 +2739,7 @@ func (x *GetBrowserRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetBrowserRequest.ProtoReflect.Descriptor instead.
 func (*GetBrowserRequest) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_workspace_proto_rawDescGZIP(), []int{33}
+	return file_devbox_v1_workspace_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *GetBrowserRequest) GetInstanceId() string {
@@ -2620,7 +2765,7 @@ type BrowserInfo struct {
 
 func (x *BrowserInfo) Reset() {
 	*x = BrowserInfo{}
-	mi := &file_devbox_v1_workspace_proto_msgTypes[34]
+	mi := &file_devbox_v1_workspace_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2632,7 +2777,7 @@ func (x *BrowserInfo) String() string {
 func (*BrowserInfo) ProtoMessage() {}
 
 func (x *BrowserInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_workspace_proto_msgTypes[34]
+	mi := &file_devbox_v1_workspace_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2645,7 +2790,7 @@ func (x *BrowserInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BrowserInfo.ProtoReflect.Descriptor instead.
 func (*BrowserInfo) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_workspace_proto_rawDescGZIP(), []int{34}
+	return file_devbox_v1_workspace_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *BrowserInfo) GetRunning() bool {
@@ -2788,7 +2933,21 @@ const file_devbox_v1_workspace_proto_rawDesc = "" +
 	"\x04base\x18\x04 \x01(\x0e2\x16.devbox.v1.ChangesBaseR\x04base\x12!\n" +
 	"\finclude_diff\x18\x05 \x01(\bR\vincludeDiff\x12$\n" +
 	"\x0emax_diff_bytes\x18\x06 \x01(\x05R\fmaxDiffBytes\x12\x12\n" +
-	"\x04path\x18\a \x01(\tR\x04path\"V\n" +
+	"\x04path\x18\a \x01(\tR\x04path\"\x80\x01\n" +
+	"\x15BranchDiffStatRequest\x12\x1f\n" +
+	"\vinstance_id\x18\x01 \x01(\tR\n" +
+	"instanceId\x12\x1e\n" +
+	"\n" +
+	"repository\x18\x02 \x01(\tR\n" +
+	"repository\x12\x12\n" +
+	"\x04base\x18\x03 \x01(\tR\x04base\x12\x12\n" +
+	"\x04head\x18\x04 \x01(\tR\x04head\"\xa0\x01\n" +
+	"\x16BranchDiffStatResponse\x12\x1c\n" +
+	"\tadditions\x18\x01 \x01(\x05R\tadditions\x12\x1c\n" +
+	"\tdeletions\x18\x02 \x01(\x05R\tdeletions\x12\x14\n" +
+	"\x05files\x18\x03 \x01(\x05R\x05files\x12\x19\n" +
+	"\bbase_sha\x18\x04 \x01(\tR\abaseSha\x12\x19\n" +
+	"\bhead_sha\x18\x05 \x01(\tR\aheadSha\"V\n" +
 	"\x12GetChangesResponse\x12@\n" +
 	"\frepositories\x18\x01 \x03(\v2\x1c.devbox.v1.RepositoryChangesR\frepositories\"\xe3\x01\n" +
 	"\x11RepositoryChanges\x12/\n" +
@@ -2948,7 +3107,7 @@ func file_devbox_v1_workspace_proto_rawDescGZIP() []byte {
 }
 
 var file_devbox_v1_workspace_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
-var file_devbox_v1_workspace_proto_msgTypes = make([]protoimpl.MessageInfo, 36)
+var file_devbox_v1_workspace_proto_msgTypes = make([]protoimpl.MessageInfo, 38)
 var file_devbox_v1_workspace_proto_goTypes = []any{
 	(FileType)(0),                    // 0: devbox.v1.FileType
 	(FileEventType)(0),               // 1: devbox.v1.FileEventType
@@ -2970,61 +3129,63 @@ var file_devbox_v1_workspace_proto_goTypes = []any{
 	(*WatchFilesRequest)(nil),        // 17: devbox.v1.WatchFilesRequest
 	(*FileEvent)(nil),                // 18: devbox.v1.FileEvent
 	(*GetChangesRequest)(nil),        // 19: devbox.v1.GetChangesRequest
-	(*GetChangesResponse)(nil),       // 20: devbox.v1.GetChangesResponse
-	(*RepositoryChanges)(nil),        // 21: devbox.v1.RepositoryChanges
-	(*FileChange)(nil),               // 22: devbox.v1.FileChange
-	(*TerminalInfo)(nil),             // 23: devbox.v1.TerminalInfo
-	(*CreateTerminalRequest)(nil),    // 24: devbox.v1.CreateTerminalRequest
-	(*ListTerminalsRequest)(nil),     // 25: devbox.v1.ListTerminalsRequest
-	(*ListTerminalsResponse)(nil),    // 26: devbox.v1.ListTerminalsResponse
-	(*ResizeTerminalRequest)(nil),    // 27: devbox.v1.ResizeTerminalRequest
-	(*CloseTerminalRequest)(nil),     // 28: devbox.v1.CloseTerminalRequest
-	(*TerminalInput)(nil),            // 29: devbox.v1.TerminalInput
-	(*TerminalAttach)(nil),           // 30: devbox.v1.TerminalAttach
-	(*TerminalSize)(nil),             // 31: devbox.v1.TerminalSize
-	(*TerminalOutput)(nil),           // 32: devbox.v1.TerminalOutput
-	(*TerminalData)(nil),             // 33: devbox.v1.TerminalData
-	(*TerminalExit)(nil),             // 34: devbox.v1.TerminalExit
-	(*StartBrowserRequest)(nil),      // 35: devbox.v1.StartBrowserRequest
-	(*StopBrowserRequest)(nil),       // 36: devbox.v1.StopBrowserRequest
-	(*GetBrowserRequest)(nil),        // 37: devbox.v1.GetBrowserRequest
-	(*BrowserInfo)(nil),              // 38: devbox.v1.BrowserInfo
-	nil,                              // 39: devbox.v1.CreateTerminalRequest.EnvEntry
-	(*Checkout)(nil),                 // 40: devbox.v1.Checkout
-	(*RepositorySpec)(nil),           // 41: devbox.v1.RepositorySpec
-	(*Principal)(nil),                // 42: devbox.v1.Principal
-	(*timestamppb.Timestamp)(nil),    // 43: google.protobuf.Timestamp
+	(*BranchDiffStatRequest)(nil),    // 20: devbox.v1.BranchDiffStatRequest
+	(*BranchDiffStatResponse)(nil),   // 21: devbox.v1.BranchDiffStatResponse
+	(*GetChangesResponse)(nil),       // 22: devbox.v1.GetChangesResponse
+	(*RepositoryChanges)(nil),        // 23: devbox.v1.RepositoryChanges
+	(*FileChange)(nil),               // 24: devbox.v1.FileChange
+	(*TerminalInfo)(nil),             // 25: devbox.v1.TerminalInfo
+	(*CreateTerminalRequest)(nil),    // 26: devbox.v1.CreateTerminalRequest
+	(*ListTerminalsRequest)(nil),     // 27: devbox.v1.ListTerminalsRequest
+	(*ListTerminalsResponse)(nil),    // 28: devbox.v1.ListTerminalsResponse
+	(*ResizeTerminalRequest)(nil),    // 29: devbox.v1.ResizeTerminalRequest
+	(*CloseTerminalRequest)(nil),     // 30: devbox.v1.CloseTerminalRequest
+	(*TerminalInput)(nil),            // 31: devbox.v1.TerminalInput
+	(*TerminalAttach)(nil),           // 32: devbox.v1.TerminalAttach
+	(*TerminalSize)(nil),             // 33: devbox.v1.TerminalSize
+	(*TerminalOutput)(nil),           // 34: devbox.v1.TerminalOutput
+	(*TerminalData)(nil),             // 35: devbox.v1.TerminalData
+	(*TerminalExit)(nil),             // 36: devbox.v1.TerminalExit
+	(*StartBrowserRequest)(nil),      // 37: devbox.v1.StartBrowserRequest
+	(*StopBrowserRequest)(nil),       // 38: devbox.v1.StopBrowserRequest
+	(*GetBrowserRequest)(nil),        // 39: devbox.v1.GetBrowserRequest
+	(*BrowserInfo)(nil),              // 40: devbox.v1.BrowserInfo
+	nil,                              // 41: devbox.v1.CreateTerminalRequest.EnvEntry
+	(*Checkout)(nil),                 // 42: devbox.v1.Checkout
+	(*RepositorySpec)(nil),           // 43: devbox.v1.RepositorySpec
+	(*Principal)(nil),                // 44: devbox.v1.Principal
+	(*timestamppb.Timestamp)(nil),    // 45: google.protobuf.Timestamp
 }
 var file_devbox_v1_workspace_proto_depIdxs = []int32{
-	40, // 0: devbox.v1.ListRepositoriesResponse.checkouts:type_name -> devbox.v1.Checkout
-	41, // 1: devbox.v1.AddRepositoryRequest.repository:type_name -> devbox.v1.RepositorySpec
-	42, // 2: devbox.v1.AddRepositoryRequest.requested_by:type_name -> devbox.v1.Principal
-	40, // 3: devbox.v1.AddRepositoryResponse.checkout:type_name -> devbox.v1.Checkout
+	42, // 0: devbox.v1.ListRepositoriesResponse.checkouts:type_name -> devbox.v1.Checkout
+	43, // 1: devbox.v1.AddRepositoryRequest.repository:type_name -> devbox.v1.RepositorySpec
+	44, // 2: devbox.v1.AddRepositoryRequest.requested_by:type_name -> devbox.v1.Principal
+	42, // 3: devbox.v1.AddRepositoryResponse.checkout:type_name -> devbox.v1.Checkout
 	0,  // 4: devbox.v1.FileEntry.type:type_name -> devbox.v1.FileType
-	43, // 5: devbox.v1.FileEntry.modified_at:type_name -> google.protobuf.Timestamp
+	45, // 5: devbox.v1.FileEntry.modified_at:type_name -> google.protobuf.Timestamp
 	8,  // 6: devbox.v1.ListFilesResponse.entries:type_name -> devbox.v1.FileEntry
 	8,  // 7: devbox.v1.StatFileResponse.entry:type_name -> devbox.v1.FileEntry
 	8,  // 8: devbox.v1.ReadFileResponse.entry:type_name -> devbox.v1.FileEntry
-	42, // 9: devbox.v1.WriteFileRequest.written_by:type_name -> devbox.v1.Principal
+	44, // 9: devbox.v1.WriteFileRequest.written_by:type_name -> devbox.v1.Principal
 	8,  // 10: devbox.v1.WriteFileResponse.entry:type_name -> devbox.v1.FileEntry
 	1,  // 11: devbox.v1.FileEvent.type:type_name -> devbox.v1.FileEventType
 	8,  // 12: devbox.v1.FileEvent.entry:type_name -> devbox.v1.FileEntry
 	2,  // 13: devbox.v1.GetChangesRequest.base:type_name -> devbox.v1.ChangesBase
-	21, // 14: devbox.v1.GetChangesResponse.repositories:type_name -> devbox.v1.RepositoryChanges
-	40, // 15: devbox.v1.RepositoryChanges.checkout:type_name -> devbox.v1.Checkout
-	22, // 16: devbox.v1.RepositoryChanges.files:type_name -> devbox.v1.FileChange
+	23, // 14: devbox.v1.GetChangesResponse.repositories:type_name -> devbox.v1.RepositoryChanges
+	42, // 15: devbox.v1.RepositoryChanges.checkout:type_name -> devbox.v1.Checkout
+	24, // 16: devbox.v1.RepositoryChanges.files:type_name -> devbox.v1.FileChange
 	3,  // 17: devbox.v1.FileChange.status:type_name -> devbox.v1.ChangeStatus
-	43, // 18: devbox.v1.TerminalInfo.created_at:type_name -> google.protobuf.Timestamp
-	42, // 19: devbox.v1.TerminalInfo.created_by:type_name -> devbox.v1.Principal
-	39, // 20: devbox.v1.CreateTerminalRequest.env:type_name -> devbox.v1.CreateTerminalRequest.EnvEntry
-	42, // 21: devbox.v1.CreateTerminalRequest.created_by:type_name -> devbox.v1.Principal
-	23, // 22: devbox.v1.ListTerminalsResponse.terminals:type_name -> devbox.v1.TerminalInfo
-	30, // 23: devbox.v1.TerminalInput.attach:type_name -> devbox.v1.TerminalAttach
-	31, // 24: devbox.v1.TerminalInput.resize:type_name -> devbox.v1.TerminalSize
-	33, // 25: devbox.v1.TerminalOutput.data:type_name -> devbox.v1.TerminalData
-	23, // 26: devbox.v1.TerminalOutput.info:type_name -> devbox.v1.TerminalInfo
-	34, // 27: devbox.v1.TerminalOutput.exit:type_name -> devbox.v1.TerminalExit
-	43, // 28: devbox.v1.BrowserInfo.started_at:type_name -> google.protobuf.Timestamp
+	45, // 18: devbox.v1.TerminalInfo.created_at:type_name -> google.protobuf.Timestamp
+	44, // 19: devbox.v1.TerminalInfo.created_by:type_name -> devbox.v1.Principal
+	41, // 20: devbox.v1.CreateTerminalRequest.env:type_name -> devbox.v1.CreateTerminalRequest.EnvEntry
+	44, // 21: devbox.v1.CreateTerminalRequest.created_by:type_name -> devbox.v1.Principal
+	25, // 22: devbox.v1.ListTerminalsResponse.terminals:type_name -> devbox.v1.TerminalInfo
+	32, // 23: devbox.v1.TerminalInput.attach:type_name -> devbox.v1.TerminalAttach
+	33, // 24: devbox.v1.TerminalInput.resize:type_name -> devbox.v1.TerminalSize
+	35, // 25: devbox.v1.TerminalOutput.data:type_name -> devbox.v1.TerminalData
+	25, // 26: devbox.v1.TerminalOutput.info:type_name -> devbox.v1.TerminalInfo
+	36, // 27: devbox.v1.TerminalOutput.exit:type_name -> devbox.v1.TerminalExit
+	45, // 28: devbox.v1.BrowserInfo.started_at:type_name -> google.protobuf.Timestamp
 	29, // [29:29] is the sub-list for method output_type
 	29, // [29:29] is the sub-list for method input_type
 	29, // [29:29] is the sub-list for extension type_name
@@ -3039,25 +3200,25 @@ func file_devbox_v1_workspace_proto_init() {
 	}
 	file_devbox_v1_common_proto_init()
 	file_devbox_v1_workspace_proto_msgTypes[11].OneofWrappers = []any{}
-	file_devbox_v1_workspace_proto_msgTypes[19].OneofWrappers = []any{}
-	file_devbox_v1_workspace_proto_msgTypes[25].OneofWrappers = []any{
+	file_devbox_v1_workspace_proto_msgTypes[21].OneofWrappers = []any{}
+	file_devbox_v1_workspace_proto_msgTypes[27].OneofWrappers = []any{
 		(*TerminalInput_Attach)(nil),
 		(*TerminalInput_Data)(nil),
 		(*TerminalInput_Resize)(nil),
 	}
-	file_devbox_v1_workspace_proto_msgTypes[28].OneofWrappers = []any{
+	file_devbox_v1_workspace_proto_msgTypes[30].OneofWrappers = []any{
 		(*TerminalOutput_Data)(nil),
 		(*TerminalOutput_Info)(nil),
 		(*TerminalOutput_Exit)(nil),
 	}
-	file_devbox_v1_workspace_proto_msgTypes[30].OneofWrappers = []any{}
+	file_devbox_v1_workspace_proto_msgTypes[32].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_devbox_v1_workspace_proto_rawDesc), len(file_devbox_v1_workspace_proto_rawDesc)),
 			NumEnums:      4,
-			NumMessages:   36,
+			NumMessages:   38,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

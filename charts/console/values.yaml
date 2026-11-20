@@ -201,6 +201,10 @@ console:
     keyId: ~
     # assertionAudience overrides the aud claim of the client assertion (defaults to the provider's token endpoint).
     assertionAudience: ~
+    # authMethod pins the token endpoint auth method to one of none, client_secret_basic, client_secret_post or client_secret_jwt (defaults to the strongest method your idp advertises).  Use none for public clients, ideally alongside pkce.
+    authMethod: ~
+    # pkce enables PKCE on the authorization code flow, which public clients should always use.
+    pkce: false
     # discoveryUrl is used to configure the discovery url for the custom oidc authentication. It is usually something like https://{your-idp-domain}/.well-known/openid-configuration
     discoveryUrl: ~
     # scopes is used to configure the scopes for the custom oidc authentication. (defaults to "openid email")

@@ -128,6 +128,17 @@ defmodule Console.Devboxes.Control.GrpcTest do
         {:error, :suspended}
       assert Grpc.result({:error, %GRPC.RPCError{status: GRPC.Status.internal(), message: "boom"}}) == {:error, "boom"}
     end
+
+    test "only an unexplained or offline UNAVAILABLE means the cluster is unreachable" do
+      starting = detail(:ERROR_REASON_INSTANCE_STARTING, "instance inst-1 is still starting")
+      creds = detail(:ERROR_REASON_CREDENTIALS_UNAVAILABLE, "fetching the scm token: timeout")
+      unavailable = GRPC.Status.unavailable()
+
+      assert Grpc.result({:error, %GRPC.RPCError{status: unavailable, message: "x", details: [starting]}}) == {:error, :starting}
+      assert Grpc.result({:error, %GRPC.RPCError{status: unavailable, message: "x", details: [creds]}}) ==
+        {:error, "fetching the scm token: timeout"}
+      assert Grpc.result({:error, %GRPC.RPCError{status: unavailable, message: "no route"}}) == {:error, :not_connected}
+    end
   end
 
   test "without a connection calls are not connected" do

@@ -370,6 +370,9 @@ const (
 	ErrorReason_ERROR_REASON_INVALID_AGENT_OR_MODEL ErrorReason = 13
 	// A file write precondition (expected sha256) did not match (code FAILED_PRECONDITION).
 	ErrorReason_ERROR_REASON_FILE_CONFLICT ErrorReason = 14
+	// The instance is waking (or otherwise starting) and the call gave up waiting; the operation continues in the
+	// background, so retry shortly (code UNAVAILABLE).
+	ErrorReason_ERROR_REASON_INSTANCE_STARTING ErrorReason = 15
 )
 
 // Enum value maps for ErrorReason.
@@ -389,6 +392,7 @@ var (
 		12: "ERROR_REASON_PLAN_LIMIT_REACHED",
 		13: "ERROR_REASON_INVALID_AGENT_OR_MODEL",
 		14: "ERROR_REASON_FILE_CONFLICT",
+		15: "ERROR_REASON_INSTANCE_STARTING",
 	}
 	ErrorReason_value = map[string]int32{
 		"ERROR_REASON_UNSPECIFIED":             0,
@@ -405,6 +409,7 @@ var (
 		"ERROR_REASON_PLAN_LIMIT_REACHED":      12,
 		"ERROR_REASON_INVALID_AGENT_OR_MODEL":  13,
 		"ERROR_REASON_FILE_CONFLICT":           14,
+		"ERROR_REASON_INSTANCE_STARTING":       15,
 	}
 )
 
@@ -1650,7 +1655,7 @@ const file_devbox_v1_common_proto_rawDesc = "" +
 	"\x10SnapshotFidelity\x12!\n" +
 	"\x1dSNAPSHOT_FIDELITY_UNSPECIFIED\x10\x00\x12\x1c\n" +
 	"\x18SNAPSHOT_FIDELITY_MEMORY\x10\x01\x12 \n" +
-	"\x1cSNAPSHOT_FIDELITY_FILESYSTEM\x10\x02*\xad\x04\n" +
+	"\x1cSNAPSHOT_FIDELITY_FILESYSTEM\x10\x02*\xd1\x04\n" +
 	"\vErrorReason\x12\x1c\n" +
 	"\x18ERROR_REASON_UNSPECIFIED\x10\x00\x12\x1c\n" +
 	"\x18ERROR_REASON_UNSUPPORTED\x10\x01\x12 \n" +
@@ -1666,7 +1671,8 @@ const file_devbox_v1_common_proto_rawDesc = "" +
 	"\x1eERROR_REASON_AGENT_AUTH_FAILED\x10\v\x12#\n" +
 	"\x1fERROR_REASON_PLAN_LIMIT_REACHED\x10\f\x12'\n" +
 	"#ERROR_REASON_INVALID_AGENT_OR_MODEL\x10\r\x12\x1e\n" +
-	"\x1aERROR_REASON_FILE_CONFLICT\x10\x0e\"\x04\b\t\x10\t* ERROR_REASON_ARCHIVE_UNAVAILABLE*W\n" +
+	"\x1aERROR_REASON_FILE_CONFLICT\x10\x0e\x12\"\n" +
+	"\x1eERROR_REASON_INSTANCE_STARTING\x10\x0f\"\x04\b\t\x10\t* ERROR_REASON_ARCHIVE_UNAVAILABLE*W\n" +
 	"\tLeaseKind\x12\x1a\n" +
 	"\x16LEASE_KIND_UNSPECIFIED\x10\x00\x12\x15\n" +
 	"\x11LEASE_KIND_VIEWER\x10\x01\x12\x17\n" +

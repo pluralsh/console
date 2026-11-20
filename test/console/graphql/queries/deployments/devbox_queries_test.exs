@@ -102,11 +102,11 @@ defmodule Console.GraphQl.Deployments.DevboxQueriesTest do
         running.id => "RUNNING",
         queued.id => "RUNNING",
         asking.id => "NEEDS_REVIEW",
-        finished.id => "NEEDS_REVIEW",
+        finished.id => "COMPLETED",
         closed.id => "COMPLETED"
       }
 
-      for {stage, expected} <- [{"RUNNING", [running, queued]}, {"NEEDS_REVIEW", [asking, finished]}, {"COMPLETED", [closed]}] do
+      for {stage, expected} <- [{"RUNNING", [running, queued]}, {"NEEDS_REVIEW", [asking]}, {"COMPLETED", [finished, closed]}] do
         {:ok, %{data: %{"devboxInstance" => %{"threads" => threads}}}} =
           run_query(query, %{"id" => inst.id, "stages" => [stage]}, %{current_user: user})
 

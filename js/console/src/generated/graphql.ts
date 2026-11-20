@@ -5800,9 +5800,9 @@ export enum DevboxThreadKind {
 }
 
 export enum DevboxThreadStage {
-  /** the thread was closed */
+  /** the last turn finished or failed, or the thread was closed */
   Completed = 'COMPLETED',
-  /** the agent is waiting on a person: a permission, a question, or a finished or failed turn */
+  /** the agent is waiting on a person to answer a permission request or question */
   NeedsReview = 'NEEDS_REVIEW',
   /** a turn is in flight or queued */
   Running = 'RUNNING'

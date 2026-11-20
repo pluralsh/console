@@ -1735,7 +1735,7 @@ const file_devbox_v1_daemon_proto_rawDesc = "" +
 	"credential\x18\x01 \x01(\v2\x1d.devbox.v1.InstanceCredentialR\n" +
 	"credential\"2\n" +
 	"\x16PushCredentialResponse\x12\x18\n" +
-	"\aapplied\x18\x01 \x01(\bR\aapplied2\xe8\x18\n" +
+	"\aapplied\x18\x01 \x01(\bR\aapplied2\xc2\x19\n" +
 	"\x06Daemon\x12=\n" +
 	"\x06Health\x12\x18.devbox.v1.HealthRequest\x1a\x19.devbox.v1.HealthResponse\x12I\n" +
 	"\n" +
@@ -1773,7 +1773,8 @@ const file_devbox_v1_daemon_proto_rawDesc = "" +
 	"\n" +
 	"WatchFiles\x12\x1c.devbox.v1.WatchFilesRequest\x1a\x14.devbox.v1.FileEvent0\x01\x12I\n" +
 	"\n" +
-	"GetChanges\x12\x1c.devbox.v1.GetChangesRequest\x1a\x1d.devbox.v1.GetChangesResponse\x12R\n" +
+	"GetChanges\x12\x1c.devbox.v1.GetChangesRequest\x1a\x1d.devbox.v1.GetChangesResponse\x12X\n" +
+	"\x11GetBranchDiffStat\x12 .devbox.v1.BranchDiffStatRequest\x1a!.devbox.v1.BranchDiffStatResponse\x12R\n" +
 	"\rAddRepository\x12\x1f.devbox.v1.AddRepositoryRequest\x1a .devbox.v1.AddRepositoryResponse\x12[\n" +
 	"\x10ListRepositories\x12\".devbox.v1.ListRepositoriesRequest\x1a#.devbox.v1.ListRepositoriesResponse\x12F\n" +
 	"\fStartBrowser\x12\x1e.devbox.v1.StartBrowserRequest\x1a\x16.devbox.v1.BrowserInfo\x12D\n" +
@@ -1867,161 +1868,165 @@ var file_devbox_v1_daemon_proto_goTypes = []any{
 	(*WriteFileRequest)(nil),              // 66: devbox.v1.WriteFileRequest
 	(*WatchFilesRequest)(nil),             // 67: devbox.v1.WatchFilesRequest
 	(*GetChangesRequest)(nil),             // 68: devbox.v1.GetChangesRequest
-	(*AddRepositoryRequest)(nil),          // 69: devbox.v1.AddRepositoryRequest
-	(*ListRepositoriesRequest)(nil),       // 70: devbox.v1.ListRepositoriesRequest
-	(*StartBrowserRequest)(nil),           // 71: devbox.v1.StartBrowserRequest
-	(*StopBrowserRequest)(nil),            // 72: devbox.v1.StopBrowserRequest
-	(*GetBrowserRequest)(nil),             // 73: devbox.v1.GetBrowserRequest
-	(*SetInstanceLeasesRequest)(nil),      // 74: devbox.v1.SetInstanceLeasesRequest
-	(*GetTimelineResponse)(nil),           // 75: devbox.v1.GetTimelineResponse
-	(*GetSessionsResponse)(nil),           // 76: devbox.v1.GetSessionsResponse
-	(*ThreadResponse)(nil),                // 77: devbox.v1.ThreadResponse
-	(*ListThreadsResponse)(nil),           // 78: devbox.v1.ListThreadsResponse
-	(*DeleteThreadResponse)(nil),          // 79: devbox.v1.DeleteThreadResponse
-	(*PromptResponse)(nil),                // 80: devbox.v1.PromptResponse
-	(*CancelPromptResponse)(nil),          // 81: devbox.v1.CancelPromptResponse
-	(*SetThreadConfigOptionResponse)(nil), // 82: devbox.v1.SetThreadConfigOptionResponse
-	(*RespondInteractionResponse)(nil),    // 83: devbox.v1.RespondInteractionResponse
-	(*ListCommandsResponse)(nil),          // 84: devbox.v1.ListCommandsResponse
-	(*SetAgentBillingResponse)(nil),       // 85: devbox.v1.SetAgentBillingResponse
-	(*TerminalInfo)(nil),                  // 86: devbox.v1.TerminalInfo
-	(*ListTerminalsResponse)(nil),         // 87: devbox.v1.ListTerminalsResponse
-	(*TerminalOutput)(nil),                // 88: devbox.v1.TerminalOutput
-	(*ListFilesResponse)(nil),             // 89: devbox.v1.ListFilesResponse
-	(*StatFileResponse)(nil),              // 90: devbox.v1.StatFileResponse
-	(*ReadFileResponse)(nil),              // 91: devbox.v1.ReadFileResponse
-	(*WriteFileResponse)(nil),             // 92: devbox.v1.WriteFileResponse
-	(*FileEvent)(nil),                     // 93: devbox.v1.FileEvent
-	(*GetChangesResponse)(nil),            // 94: devbox.v1.GetChangesResponse
-	(*AddRepositoryResponse)(nil),         // 95: devbox.v1.AddRepositoryResponse
-	(*ListRepositoriesResponse)(nil),      // 96: devbox.v1.ListRepositoriesResponse
-	(*BrowserInfo)(nil),                   // 97: devbox.v1.BrowserInfo
-	(*SetInstanceLeasesResponse)(nil),     // 98: devbox.v1.SetInstanceLeasesResponse
+	(*BranchDiffStatRequest)(nil),         // 69: devbox.v1.BranchDiffStatRequest
+	(*AddRepositoryRequest)(nil),          // 70: devbox.v1.AddRepositoryRequest
+	(*ListRepositoriesRequest)(nil),       // 71: devbox.v1.ListRepositoriesRequest
+	(*StartBrowserRequest)(nil),           // 72: devbox.v1.StartBrowserRequest
+	(*StopBrowserRequest)(nil),            // 73: devbox.v1.StopBrowserRequest
+	(*GetBrowserRequest)(nil),             // 74: devbox.v1.GetBrowserRequest
+	(*SetInstanceLeasesRequest)(nil),      // 75: devbox.v1.SetInstanceLeasesRequest
+	(*GetTimelineResponse)(nil),           // 76: devbox.v1.GetTimelineResponse
+	(*GetSessionsResponse)(nil),           // 77: devbox.v1.GetSessionsResponse
+	(*ThreadResponse)(nil),                // 78: devbox.v1.ThreadResponse
+	(*ListThreadsResponse)(nil),           // 79: devbox.v1.ListThreadsResponse
+	(*DeleteThreadResponse)(nil),          // 80: devbox.v1.DeleteThreadResponse
+	(*PromptResponse)(nil),                // 81: devbox.v1.PromptResponse
+	(*CancelPromptResponse)(nil),          // 82: devbox.v1.CancelPromptResponse
+	(*SetThreadConfigOptionResponse)(nil), // 83: devbox.v1.SetThreadConfigOptionResponse
+	(*RespondInteractionResponse)(nil),    // 84: devbox.v1.RespondInteractionResponse
+	(*ListCommandsResponse)(nil),          // 85: devbox.v1.ListCommandsResponse
+	(*SetAgentBillingResponse)(nil),       // 86: devbox.v1.SetAgentBillingResponse
+	(*TerminalInfo)(nil),                  // 87: devbox.v1.TerminalInfo
+	(*ListTerminalsResponse)(nil),         // 88: devbox.v1.ListTerminalsResponse
+	(*TerminalOutput)(nil),                // 89: devbox.v1.TerminalOutput
+	(*ListFilesResponse)(nil),             // 90: devbox.v1.ListFilesResponse
+	(*StatFileResponse)(nil),              // 91: devbox.v1.StatFileResponse
+	(*ReadFileResponse)(nil),              // 92: devbox.v1.ReadFileResponse
+	(*WriteFileResponse)(nil),             // 93: devbox.v1.WriteFileResponse
+	(*FileEvent)(nil),                     // 94: devbox.v1.FileEvent
+	(*GetChangesResponse)(nil),            // 95: devbox.v1.GetChangesResponse
+	(*BranchDiffStatResponse)(nil),        // 96: devbox.v1.BranchDiffStatResponse
+	(*AddRepositoryResponse)(nil),         // 97: devbox.v1.AddRepositoryResponse
+	(*ListRepositoriesResponse)(nil),      // 98: devbox.v1.ListRepositoriesResponse
+	(*BrowserInfo)(nil),                   // 99: devbox.v1.BrowserInfo
+	(*SetInstanceLeasesResponse)(nil),     // 100: devbox.v1.SetInstanceLeasesResponse
 }
 var file_devbox_v1_daemon_proto_depIdxs = []int32{
-	23, // 0: devbox.v1.InitializeRequest.owner:type_name -> devbox.v1.Principal
-	24, // 1: devbox.v1.InitializeRequest.agent:type_name -> devbox.v1.AgentType
-	25, // 2: devbox.v1.InitializeRequest.config_options:type_name -> devbox.v1.ConfigOptionSetting
-	26, // 3: devbox.v1.InitializeRequest.agents:type_name -> devbox.v1.AgentLaunch
-	27, // 4: devbox.v1.InitializeRequest.repositories:type_name -> devbox.v1.RepositorySpec
-	28, // 5: devbox.v1.InitializeRequest.idle_policy:type_name -> devbox.v1.IdlePolicy
-	29, // 6: devbox.v1.InitializeRequest.leases:type_name -> devbox.v1.Lease
-	30, // 7: devbox.v1.InitializeRequest.cloud_identities:type_name -> devbox.v1.CloudIdentity
-	2,  // 8: devbox.v1.InitializeRequest.endpoints:type_name -> devbox.v1.HarnessEndpoints
-	31, // 9: devbox.v1.InitializeRequest.restore_fidelity:type_name -> devbox.v1.SnapshotFidelity
-	22, // 10: devbox.v1.InitializeRequest.env:type_name -> devbox.v1.InitializeRequest.EnvEntry
-	32, // 11: devbox.v1.InitializeRequest.autonomy:type_name -> devbox.v1.AutonomyPolicy
-	6,  // 12: devbox.v1.InitializeResponse.info:type_name -> devbox.v1.DaemonInfo
-	33, // 13: devbox.v1.DaemonInfo.started_at:type_name -> google.protobuf.Timestamp
-	34, // 14: devbox.v1.DaemonInfo.agents:type_name -> devbox.v1.AgentCatalogEntry
-	35, // 15: devbox.v1.DaemonInfo.connections:type_name -> devbox.v1.AgentConnection
-	24, // 16: devbox.v1.AgentProbeSpec.type:type_name -> devbox.v1.AgentType
-	7,  // 17: devbox.v1.ProbeAgentsRequest.agents:type_name -> devbox.v1.AgentProbeSpec
-	2,  // 18: devbox.v1.ProbeAgentsRequest.endpoints:type_name -> devbox.v1.HarnessEndpoints
-	34, // 19: devbox.v1.ProbeAgentsResponse.agents:type_name -> devbox.v1.AgentCatalogEntry
-	36, // 20: devbox.v1.PrepareSuspendRequest.reason:type_name -> devbox.v1.SuspendReason
-	24, // 21: devbox.v1.PrepareSuspendResponse.stopped_agents:type_name -> devbox.v1.AgentType
-	33, // 22: devbox.v1.DaemonEvent.emitted_at:type_name -> google.protobuf.Timestamp
-	37, // 23: devbox.v1.DaemonEvent.delta:type_name -> devbox.v1.Delta
-	38, // 24: devbox.v1.DaemonEvent.session:type_name -> devbox.v1.Session
-	39, // 25: devbox.v1.DaemonEvent.interaction:type_name -> devbox.v1.Interaction
-	40, // 26: devbox.v1.DaemonEvent.aggregate:type_name -> devbox.v1.InstanceAggregate
-	41, // 27: devbox.v1.DaemonEvent.idle_state:type_name -> devbox.v1.IdleState
-	14, // 28: devbox.v1.DaemonEvent.suspend_requested:type_name -> devbox.v1.SuspendRequested
-	15, // 29: devbox.v1.DaemonEvent.condition:type_name -> devbox.v1.DaemonCondition
-	16, // 30: devbox.v1.DaemonEvent.heartbeat:type_name -> devbox.v1.DaemonHeartbeat
-	36, // 31: devbox.v1.SuspendRequested.reason:type_name -> devbox.v1.SuspendReason
-	33, // 32: devbox.v1.SuspendRequested.idle_since:type_name -> google.protobuf.Timestamp
-	42, // 33: devbox.v1.DaemonCondition.error:type_name -> devbox.v1.ErrorDetail
-	41, // 34: devbox.v1.DaemonHeartbeat.idle:type_name -> devbox.v1.IdleState
-	43, // 35: devbox.v1.PushCredentialRequest.credential:type_name -> devbox.v1.InstanceCredential
-	0,  // 36: devbox.v1.Daemon.Health:input_type -> devbox.v1.HealthRequest
-	3,  // 37: devbox.v1.Daemon.Initialize:input_type -> devbox.v1.InitializeRequest
-	5,  // 38: devbox.v1.Daemon.GetInfo:input_type -> devbox.v1.GetInfoRequest
-	8,  // 39: devbox.v1.Daemon.ProbeAgents:input_type -> devbox.v1.ProbeAgentsRequest
-	10, // 40: devbox.v1.Daemon.PrepareSuspend:input_type -> devbox.v1.PrepareSuspendRequest
-	12, // 41: devbox.v1.Daemon.SubscribeEvents:input_type -> devbox.v1.SubscribeEventsRequest
-	17, // 42: devbox.v1.Daemon.AckEvents:input_type -> devbox.v1.AckEventsRequest
-	44, // 43: devbox.v1.Daemon.GetTimeline:input_type -> devbox.v1.GetTimelineRequest
-	45, // 44: devbox.v1.Daemon.GetSessions:input_type -> devbox.v1.GetSessionsRequest
-	46, // 45: devbox.v1.Daemon.CreateThread:input_type -> devbox.v1.CreateThreadRequest
-	47, // 46: devbox.v1.Daemon.ListThreads:input_type -> devbox.v1.ListThreadsRequest
-	48, // 47: devbox.v1.Daemon.ImportThread:input_type -> devbox.v1.ImportThreadRequest
-	49, // 48: devbox.v1.Daemon.ResumeThread:input_type -> devbox.v1.ResumeThreadRequest
-	50, // 49: devbox.v1.Daemon.CloseThread:input_type -> devbox.v1.ThreadActionRequest
-	50, // 50: devbox.v1.Daemon.DeleteThread:input_type -> devbox.v1.ThreadActionRequest
-	51, // 51: devbox.v1.Daemon.ForkThread:input_type -> devbox.v1.ForkThreadRequest
-	52, // 52: devbox.v1.Daemon.Prompt:input_type -> devbox.v1.PromptRequest
-	53, // 53: devbox.v1.Daemon.CancelPrompt:input_type -> devbox.v1.CancelPromptRequest
-	54, // 54: devbox.v1.Daemon.SetThreadConfigOption:input_type -> devbox.v1.SetThreadConfigOptionRequest
-	55, // 55: devbox.v1.Daemon.RespondInteraction:input_type -> devbox.v1.RespondInteractionRequest
-	56, // 56: devbox.v1.Daemon.ListCommands:input_type -> devbox.v1.ListCommandsRequest
-	57, // 57: devbox.v1.Daemon.SetAgentBilling:input_type -> devbox.v1.SetAgentBillingRequest
-	58, // 58: devbox.v1.Daemon.CreateTerminal:input_type -> devbox.v1.CreateTerminalRequest
-	59, // 59: devbox.v1.Daemon.ListTerminals:input_type -> devbox.v1.ListTerminalsRequest
-	60, // 60: devbox.v1.Daemon.ResizeTerminal:input_type -> devbox.v1.ResizeTerminalRequest
-	61, // 61: devbox.v1.Daemon.CloseTerminal:input_type -> devbox.v1.CloseTerminalRequest
-	62, // 62: devbox.v1.Daemon.AttachTerminal:input_type -> devbox.v1.TerminalInput
-	63, // 63: devbox.v1.Daemon.ListFiles:input_type -> devbox.v1.ListFilesRequest
-	64, // 64: devbox.v1.Daemon.StatFile:input_type -> devbox.v1.StatFileRequest
-	65, // 65: devbox.v1.Daemon.ReadFile:input_type -> devbox.v1.ReadFileRequest
-	66, // 66: devbox.v1.Daemon.WriteFile:input_type -> devbox.v1.WriteFileRequest
-	67, // 67: devbox.v1.Daemon.WatchFiles:input_type -> devbox.v1.WatchFilesRequest
-	68, // 68: devbox.v1.Daemon.GetChanges:input_type -> devbox.v1.GetChangesRequest
-	69, // 69: devbox.v1.Daemon.AddRepository:input_type -> devbox.v1.AddRepositoryRequest
-	70, // 70: devbox.v1.Daemon.ListRepositories:input_type -> devbox.v1.ListRepositoriesRequest
-	71, // 71: devbox.v1.Daemon.StartBrowser:input_type -> devbox.v1.StartBrowserRequest
-	72, // 72: devbox.v1.Daemon.StopBrowser:input_type -> devbox.v1.StopBrowserRequest
-	73, // 73: devbox.v1.Daemon.GetBrowser:input_type -> devbox.v1.GetBrowserRequest
-	74, // 74: devbox.v1.Daemon.SetLeases:input_type -> devbox.v1.SetInstanceLeasesRequest
-	19, // 75: devbox.v1.Daemon.GetIdleState:input_type -> devbox.v1.GetIdleStateRequest
-	20, // 76: devbox.v1.Daemon.PushCredential:input_type -> devbox.v1.PushCredentialRequest
-	1,  // 77: devbox.v1.Daemon.Health:output_type -> devbox.v1.HealthResponse
-	4,  // 78: devbox.v1.Daemon.Initialize:output_type -> devbox.v1.InitializeResponse
-	6,  // 79: devbox.v1.Daemon.GetInfo:output_type -> devbox.v1.DaemonInfo
-	9,  // 80: devbox.v1.Daemon.ProbeAgents:output_type -> devbox.v1.ProbeAgentsResponse
-	11, // 81: devbox.v1.Daemon.PrepareSuspend:output_type -> devbox.v1.PrepareSuspendResponse
-	13, // 82: devbox.v1.Daemon.SubscribeEvents:output_type -> devbox.v1.DaemonEvent
-	18, // 83: devbox.v1.Daemon.AckEvents:output_type -> devbox.v1.AckEventsResponse
-	75, // 84: devbox.v1.Daemon.GetTimeline:output_type -> devbox.v1.GetTimelineResponse
-	76, // 85: devbox.v1.Daemon.GetSessions:output_type -> devbox.v1.GetSessionsResponse
-	77, // 86: devbox.v1.Daemon.CreateThread:output_type -> devbox.v1.ThreadResponse
-	78, // 87: devbox.v1.Daemon.ListThreads:output_type -> devbox.v1.ListThreadsResponse
-	77, // 88: devbox.v1.Daemon.ImportThread:output_type -> devbox.v1.ThreadResponse
-	77, // 89: devbox.v1.Daemon.ResumeThread:output_type -> devbox.v1.ThreadResponse
-	77, // 90: devbox.v1.Daemon.CloseThread:output_type -> devbox.v1.ThreadResponse
-	79, // 91: devbox.v1.Daemon.DeleteThread:output_type -> devbox.v1.DeleteThreadResponse
-	77, // 92: devbox.v1.Daemon.ForkThread:output_type -> devbox.v1.ThreadResponse
-	80, // 93: devbox.v1.Daemon.Prompt:output_type -> devbox.v1.PromptResponse
-	81, // 94: devbox.v1.Daemon.CancelPrompt:output_type -> devbox.v1.CancelPromptResponse
-	82, // 95: devbox.v1.Daemon.SetThreadConfigOption:output_type -> devbox.v1.SetThreadConfigOptionResponse
-	83, // 96: devbox.v1.Daemon.RespondInteraction:output_type -> devbox.v1.RespondInteractionResponse
-	84, // 97: devbox.v1.Daemon.ListCommands:output_type -> devbox.v1.ListCommandsResponse
-	85, // 98: devbox.v1.Daemon.SetAgentBilling:output_type -> devbox.v1.SetAgentBillingResponse
-	86, // 99: devbox.v1.Daemon.CreateTerminal:output_type -> devbox.v1.TerminalInfo
-	87, // 100: devbox.v1.Daemon.ListTerminals:output_type -> devbox.v1.ListTerminalsResponse
-	86, // 101: devbox.v1.Daemon.ResizeTerminal:output_type -> devbox.v1.TerminalInfo
-	86, // 102: devbox.v1.Daemon.CloseTerminal:output_type -> devbox.v1.TerminalInfo
-	88, // 103: devbox.v1.Daemon.AttachTerminal:output_type -> devbox.v1.TerminalOutput
-	89, // 104: devbox.v1.Daemon.ListFiles:output_type -> devbox.v1.ListFilesResponse
-	90, // 105: devbox.v1.Daemon.StatFile:output_type -> devbox.v1.StatFileResponse
-	91, // 106: devbox.v1.Daemon.ReadFile:output_type -> devbox.v1.ReadFileResponse
-	92, // 107: devbox.v1.Daemon.WriteFile:output_type -> devbox.v1.WriteFileResponse
-	93, // 108: devbox.v1.Daemon.WatchFiles:output_type -> devbox.v1.FileEvent
-	94, // 109: devbox.v1.Daemon.GetChanges:output_type -> devbox.v1.GetChangesResponse
-	95, // 110: devbox.v1.Daemon.AddRepository:output_type -> devbox.v1.AddRepositoryResponse
-	96, // 111: devbox.v1.Daemon.ListRepositories:output_type -> devbox.v1.ListRepositoriesResponse
-	97, // 112: devbox.v1.Daemon.StartBrowser:output_type -> devbox.v1.BrowserInfo
-	97, // 113: devbox.v1.Daemon.StopBrowser:output_type -> devbox.v1.BrowserInfo
-	97, // 114: devbox.v1.Daemon.GetBrowser:output_type -> devbox.v1.BrowserInfo
-	98, // 115: devbox.v1.Daemon.SetLeases:output_type -> devbox.v1.SetInstanceLeasesResponse
-	41, // 116: devbox.v1.Daemon.GetIdleState:output_type -> devbox.v1.IdleState
-	21, // 117: devbox.v1.Daemon.PushCredential:output_type -> devbox.v1.PushCredentialResponse
-	77, // [77:118] is the sub-list for method output_type
-	36, // [36:77] is the sub-list for method input_type
-	36, // [36:36] is the sub-list for extension type_name
-	36, // [36:36] is the sub-list for extension extendee
-	0,  // [0:36] is the sub-list for field type_name
+	23,  // 0: devbox.v1.InitializeRequest.owner:type_name -> devbox.v1.Principal
+	24,  // 1: devbox.v1.InitializeRequest.agent:type_name -> devbox.v1.AgentType
+	25,  // 2: devbox.v1.InitializeRequest.config_options:type_name -> devbox.v1.ConfigOptionSetting
+	26,  // 3: devbox.v1.InitializeRequest.agents:type_name -> devbox.v1.AgentLaunch
+	27,  // 4: devbox.v1.InitializeRequest.repositories:type_name -> devbox.v1.RepositorySpec
+	28,  // 5: devbox.v1.InitializeRequest.idle_policy:type_name -> devbox.v1.IdlePolicy
+	29,  // 6: devbox.v1.InitializeRequest.leases:type_name -> devbox.v1.Lease
+	30,  // 7: devbox.v1.InitializeRequest.cloud_identities:type_name -> devbox.v1.CloudIdentity
+	2,   // 8: devbox.v1.InitializeRequest.endpoints:type_name -> devbox.v1.HarnessEndpoints
+	31,  // 9: devbox.v1.InitializeRequest.restore_fidelity:type_name -> devbox.v1.SnapshotFidelity
+	22,  // 10: devbox.v1.InitializeRequest.env:type_name -> devbox.v1.InitializeRequest.EnvEntry
+	32,  // 11: devbox.v1.InitializeRequest.autonomy:type_name -> devbox.v1.AutonomyPolicy
+	6,   // 12: devbox.v1.InitializeResponse.info:type_name -> devbox.v1.DaemonInfo
+	33,  // 13: devbox.v1.DaemonInfo.started_at:type_name -> google.protobuf.Timestamp
+	34,  // 14: devbox.v1.DaemonInfo.agents:type_name -> devbox.v1.AgentCatalogEntry
+	35,  // 15: devbox.v1.DaemonInfo.connections:type_name -> devbox.v1.AgentConnection
+	24,  // 16: devbox.v1.AgentProbeSpec.type:type_name -> devbox.v1.AgentType
+	7,   // 17: devbox.v1.ProbeAgentsRequest.agents:type_name -> devbox.v1.AgentProbeSpec
+	2,   // 18: devbox.v1.ProbeAgentsRequest.endpoints:type_name -> devbox.v1.HarnessEndpoints
+	34,  // 19: devbox.v1.ProbeAgentsResponse.agents:type_name -> devbox.v1.AgentCatalogEntry
+	36,  // 20: devbox.v1.PrepareSuspendRequest.reason:type_name -> devbox.v1.SuspendReason
+	24,  // 21: devbox.v1.PrepareSuspendResponse.stopped_agents:type_name -> devbox.v1.AgentType
+	33,  // 22: devbox.v1.DaemonEvent.emitted_at:type_name -> google.protobuf.Timestamp
+	37,  // 23: devbox.v1.DaemonEvent.delta:type_name -> devbox.v1.Delta
+	38,  // 24: devbox.v1.DaemonEvent.session:type_name -> devbox.v1.Session
+	39,  // 25: devbox.v1.DaemonEvent.interaction:type_name -> devbox.v1.Interaction
+	40,  // 26: devbox.v1.DaemonEvent.aggregate:type_name -> devbox.v1.InstanceAggregate
+	41,  // 27: devbox.v1.DaemonEvent.idle_state:type_name -> devbox.v1.IdleState
+	14,  // 28: devbox.v1.DaemonEvent.suspend_requested:type_name -> devbox.v1.SuspendRequested
+	15,  // 29: devbox.v1.DaemonEvent.condition:type_name -> devbox.v1.DaemonCondition
+	16,  // 30: devbox.v1.DaemonEvent.heartbeat:type_name -> devbox.v1.DaemonHeartbeat
+	36,  // 31: devbox.v1.SuspendRequested.reason:type_name -> devbox.v1.SuspendReason
+	33,  // 32: devbox.v1.SuspendRequested.idle_since:type_name -> google.protobuf.Timestamp
+	42,  // 33: devbox.v1.DaemonCondition.error:type_name -> devbox.v1.ErrorDetail
+	41,  // 34: devbox.v1.DaemonHeartbeat.idle:type_name -> devbox.v1.IdleState
+	43,  // 35: devbox.v1.PushCredentialRequest.credential:type_name -> devbox.v1.InstanceCredential
+	0,   // 36: devbox.v1.Daemon.Health:input_type -> devbox.v1.HealthRequest
+	3,   // 37: devbox.v1.Daemon.Initialize:input_type -> devbox.v1.InitializeRequest
+	5,   // 38: devbox.v1.Daemon.GetInfo:input_type -> devbox.v1.GetInfoRequest
+	8,   // 39: devbox.v1.Daemon.ProbeAgents:input_type -> devbox.v1.ProbeAgentsRequest
+	10,  // 40: devbox.v1.Daemon.PrepareSuspend:input_type -> devbox.v1.PrepareSuspendRequest
+	12,  // 41: devbox.v1.Daemon.SubscribeEvents:input_type -> devbox.v1.SubscribeEventsRequest
+	17,  // 42: devbox.v1.Daemon.AckEvents:input_type -> devbox.v1.AckEventsRequest
+	44,  // 43: devbox.v1.Daemon.GetTimeline:input_type -> devbox.v1.GetTimelineRequest
+	45,  // 44: devbox.v1.Daemon.GetSessions:input_type -> devbox.v1.GetSessionsRequest
+	46,  // 45: devbox.v1.Daemon.CreateThread:input_type -> devbox.v1.CreateThreadRequest
+	47,  // 46: devbox.v1.Daemon.ListThreads:input_type -> devbox.v1.ListThreadsRequest
+	48,  // 47: devbox.v1.Daemon.ImportThread:input_type -> devbox.v1.ImportThreadRequest
+	49,  // 48: devbox.v1.Daemon.ResumeThread:input_type -> devbox.v1.ResumeThreadRequest
+	50,  // 49: devbox.v1.Daemon.CloseThread:input_type -> devbox.v1.ThreadActionRequest
+	50,  // 50: devbox.v1.Daemon.DeleteThread:input_type -> devbox.v1.ThreadActionRequest
+	51,  // 51: devbox.v1.Daemon.ForkThread:input_type -> devbox.v1.ForkThreadRequest
+	52,  // 52: devbox.v1.Daemon.Prompt:input_type -> devbox.v1.PromptRequest
+	53,  // 53: devbox.v1.Daemon.CancelPrompt:input_type -> devbox.v1.CancelPromptRequest
+	54,  // 54: devbox.v1.Daemon.SetThreadConfigOption:input_type -> devbox.v1.SetThreadConfigOptionRequest
+	55,  // 55: devbox.v1.Daemon.RespondInteraction:input_type -> devbox.v1.RespondInteractionRequest
+	56,  // 56: devbox.v1.Daemon.ListCommands:input_type -> devbox.v1.ListCommandsRequest
+	57,  // 57: devbox.v1.Daemon.SetAgentBilling:input_type -> devbox.v1.SetAgentBillingRequest
+	58,  // 58: devbox.v1.Daemon.CreateTerminal:input_type -> devbox.v1.CreateTerminalRequest
+	59,  // 59: devbox.v1.Daemon.ListTerminals:input_type -> devbox.v1.ListTerminalsRequest
+	60,  // 60: devbox.v1.Daemon.ResizeTerminal:input_type -> devbox.v1.ResizeTerminalRequest
+	61,  // 61: devbox.v1.Daemon.CloseTerminal:input_type -> devbox.v1.CloseTerminalRequest
+	62,  // 62: devbox.v1.Daemon.AttachTerminal:input_type -> devbox.v1.TerminalInput
+	63,  // 63: devbox.v1.Daemon.ListFiles:input_type -> devbox.v1.ListFilesRequest
+	64,  // 64: devbox.v1.Daemon.StatFile:input_type -> devbox.v1.StatFileRequest
+	65,  // 65: devbox.v1.Daemon.ReadFile:input_type -> devbox.v1.ReadFileRequest
+	66,  // 66: devbox.v1.Daemon.WriteFile:input_type -> devbox.v1.WriteFileRequest
+	67,  // 67: devbox.v1.Daemon.WatchFiles:input_type -> devbox.v1.WatchFilesRequest
+	68,  // 68: devbox.v1.Daemon.GetChanges:input_type -> devbox.v1.GetChangesRequest
+	69,  // 69: devbox.v1.Daemon.GetBranchDiffStat:input_type -> devbox.v1.BranchDiffStatRequest
+	70,  // 70: devbox.v1.Daemon.AddRepository:input_type -> devbox.v1.AddRepositoryRequest
+	71,  // 71: devbox.v1.Daemon.ListRepositories:input_type -> devbox.v1.ListRepositoriesRequest
+	72,  // 72: devbox.v1.Daemon.StartBrowser:input_type -> devbox.v1.StartBrowserRequest
+	73,  // 73: devbox.v1.Daemon.StopBrowser:input_type -> devbox.v1.StopBrowserRequest
+	74,  // 74: devbox.v1.Daemon.GetBrowser:input_type -> devbox.v1.GetBrowserRequest
+	75,  // 75: devbox.v1.Daemon.SetLeases:input_type -> devbox.v1.SetInstanceLeasesRequest
+	19,  // 76: devbox.v1.Daemon.GetIdleState:input_type -> devbox.v1.GetIdleStateRequest
+	20,  // 77: devbox.v1.Daemon.PushCredential:input_type -> devbox.v1.PushCredentialRequest
+	1,   // 78: devbox.v1.Daemon.Health:output_type -> devbox.v1.HealthResponse
+	4,   // 79: devbox.v1.Daemon.Initialize:output_type -> devbox.v1.InitializeResponse
+	6,   // 80: devbox.v1.Daemon.GetInfo:output_type -> devbox.v1.DaemonInfo
+	9,   // 81: devbox.v1.Daemon.ProbeAgents:output_type -> devbox.v1.ProbeAgentsResponse
+	11,  // 82: devbox.v1.Daemon.PrepareSuspend:output_type -> devbox.v1.PrepareSuspendResponse
+	13,  // 83: devbox.v1.Daemon.SubscribeEvents:output_type -> devbox.v1.DaemonEvent
+	18,  // 84: devbox.v1.Daemon.AckEvents:output_type -> devbox.v1.AckEventsResponse
+	76,  // 85: devbox.v1.Daemon.GetTimeline:output_type -> devbox.v1.GetTimelineResponse
+	77,  // 86: devbox.v1.Daemon.GetSessions:output_type -> devbox.v1.GetSessionsResponse
+	78,  // 87: devbox.v1.Daemon.CreateThread:output_type -> devbox.v1.ThreadResponse
+	79,  // 88: devbox.v1.Daemon.ListThreads:output_type -> devbox.v1.ListThreadsResponse
+	78,  // 89: devbox.v1.Daemon.ImportThread:output_type -> devbox.v1.ThreadResponse
+	78,  // 90: devbox.v1.Daemon.ResumeThread:output_type -> devbox.v1.ThreadResponse
+	78,  // 91: devbox.v1.Daemon.CloseThread:output_type -> devbox.v1.ThreadResponse
+	80,  // 92: devbox.v1.Daemon.DeleteThread:output_type -> devbox.v1.DeleteThreadResponse
+	78,  // 93: devbox.v1.Daemon.ForkThread:output_type -> devbox.v1.ThreadResponse
+	81,  // 94: devbox.v1.Daemon.Prompt:output_type -> devbox.v1.PromptResponse
+	82,  // 95: devbox.v1.Daemon.CancelPrompt:output_type -> devbox.v1.CancelPromptResponse
+	83,  // 96: devbox.v1.Daemon.SetThreadConfigOption:output_type -> devbox.v1.SetThreadConfigOptionResponse
+	84,  // 97: devbox.v1.Daemon.RespondInteraction:output_type -> devbox.v1.RespondInteractionResponse
+	85,  // 98: devbox.v1.Daemon.ListCommands:output_type -> devbox.v1.ListCommandsResponse
+	86,  // 99: devbox.v1.Daemon.SetAgentBilling:output_type -> devbox.v1.SetAgentBillingResponse
+	87,  // 100: devbox.v1.Daemon.CreateTerminal:output_type -> devbox.v1.TerminalInfo
+	88,  // 101: devbox.v1.Daemon.ListTerminals:output_type -> devbox.v1.ListTerminalsResponse
+	87,  // 102: devbox.v1.Daemon.ResizeTerminal:output_type -> devbox.v1.TerminalInfo
+	87,  // 103: devbox.v1.Daemon.CloseTerminal:output_type -> devbox.v1.TerminalInfo
+	89,  // 104: devbox.v1.Daemon.AttachTerminal:output_type -> devbox.v1.TerminalOutput
+	90,  // 105: devbox.v1.Daemon.ListFiles:output_type -> devbox.v1.ListFilesResponse
+	91,  // 106: devbox.v1.Daemon.StatFile:output_type -> devbox.v1.StatFileResponse
+	92,  // 107: devbox.v1.Daemon.ReadFile:output_type -> devbox.v1.ReadFileResponse
+	93,  // 108: devbox.v1.Daemon.WriteFile:output_type -> devbox.v1.WriteFileResponse
+	94,  // 109: devbox.v1.Daemon.WatchFiles:output_type -> devbox.v1.FileEvent
+	95,  // 110: devbox.v1.Daemon.GetChanges:output_type -> devbox.v1.GetChangesResponse
+	96,  // 111: devbox.v1.Daemon.GetBranchDiffStat:output_type -> devbox.v1.BranchDiffStatResponse
+	97,  // 112: devbox.v1.Daemon.AddRepository:output_type -> devbox.v1.AddRepositoryResponse
+	98,  // 113: devbox.v1.Daemon.ListRepositories:output_type -> devbox.v1.ListRepositoriesResponse
+	99,  // 114: devbox.v1.Daemon.StartBrowser:output_type -> devbox.v1.BrowserInfo
+	99,  // 115: devbox.v1.Daemon.StopBrowser:output_type -> devbox.v1.BrowserInfo
+	99,  // 116: devbox.v1.Daemon.GetBrowser:output_type -> devbox.v1.BrowserInfo
+	100, // 117: devbox.v1.Daemon.SetLeases:output_type -> devbox.v1.SetInstanceLeasesResponse
+	41,  // 118: devbox.v1.Daemon.GetIdleState:output_type -> devbox.v1.IdleState
+	21,  // 119: devbox.v1.Daemon.PushCredential:output_type -> devbox.v1.PushCredentialResponse
+	78,  // [78:120] is the sub-list for method output_type
+	36,  // [36:78] is the sub-list for method input_type
+	36,  // [36:36] is the sub-list for extension type_name
+	36,  // [36:36] is the sub-list for extension extendee
+	0,   // [0:36] is the sub-list for field type_name
 }
 
 func init() { file_devbox_v1_daemon_proto_init() }

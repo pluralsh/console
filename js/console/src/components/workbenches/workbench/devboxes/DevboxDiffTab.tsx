@@ -2,13 +2,16 @@ import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
 import { TreeItem, treeItemClasses } from '@mui/x-tree-view/TreeItem'
 import {
   Chip,
-  FileDiffIcon,
+  GitCompareIcon,
+  FolderIcon,
   IconFrame,
   ReloadIcon,
   Spinner,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import {
+  FILE_TREE_GLYPH_SIZE,
+  FILE_TREE_ICON_SIZE,
   FileTypeIcon,
   fileTreeMuiTheme,
   StyledTreeView,
@@ -95,7 +98,7 @@ export function DevboxDiffTab({
             label={
               <RowSC>
                 <TreeItemIcon>
-                  <FileDiffIcon size={14} />
+                  <GitCompareIcon size={FILE_TREE_GLYPH_SIZE} />
                 </TreeItemIcon>
                 <TreeItemText>All changes</TreeItemText>
                 <MetaSC>
@@ -143,7 +146,7 @@ function ChangeTreeItem({
             <TreeItemIcon>
               <FileTypeIcon
                 fileName={node.name}
-                size={16}
+                size={FILE_TREE_ICON_SIZE}
               />
             </TreeItemIcon>
             <NameSC $deleted={node.file.status === 'deleted'}>
@@ -169,6 +172,9 @@ function ChangeTreeItem({
       }
       label={
         <RowSC>
+          <TreeItemIcon>
+            <FolderIcon size={FILE_TREE_GLYPH_SIZE} />
+          </TreeItemIcon>
           <TreeItemText>{node.name}</TreeItemText>
           <MetaSC>
             {node.repository?.branch && (

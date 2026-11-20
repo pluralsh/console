@@ -62,9 +62,10 @@ func (m *Manager) resolveInteractionLocked(in *interaction, state devboxv1.Inter
 	default:
 	}
 	m.dirty = true
-	// Back to running once the thread has nothing else pending.
+	// Once the thread has nothing else pending it is back to running, or idle if its turn already ended, so it
+	// doesn't keep reading as needing review.
 	t := in.session.thread
-	if t == nil || !t.running || t.session == nil {
+	if t == nil || t.session == nil {
 		return
 	}
 	for _, other := range m.interactions {
@@ -72,10 +73,16 @@ func (m *Manager) resolveInteractionLocked(in *interaction, state devboxv1.Inter
 			return
 		}
 	}
+	next := devboxv1.ForegroundStateKind_FOREGROUND_STATE_KIND_RUNNING
+	if !t.running {
+		next = devboxv1.ForegroundStateKind_FOREGROUND_STATE_KIND_IDLE
+	}
 	now := timestamppb.New(m.clock.Now())
-	m.setForegroundLocked(t.session, &devboxv1.ForegroundState{State: devboxv1.ForegroundStateKind_FOREGROUND_STATE_KIND_RUNNING, UpdatedAt: now})
-	if in.session != t.session {
-		m.setForegroundLocked(in.session, &devboxv1.ForegroundState{State: devboxv1.ForegroundStateKind_FOREGROUND_STATE_KIND_RUNNING, UpdatedAt: now})
+	if t.running || t.session.foreground.GetState() == devboxv1.ForegroundStateKind_FOREGROUND_STATE_KIND_REQUIRES_ACTION {
+		m.setForegroundLocked(t.session, &devboxv1.ForegroundState{State: next, UpdatedAt: now})
+	}
+	if in.session != t.session && (t.running || in.session.foreground.GetState() == devboxv1.ForegroundStateKind_FOREGROUND_STATE_KIND_REQUIRES_ACTION) {
+		m.setForegroundLocked(in.session, &devboxv1.ForegroundState{State: next, UpdatedAt: now})
 	}
 }
 

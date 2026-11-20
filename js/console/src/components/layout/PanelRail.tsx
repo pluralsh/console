@@ -1,4 +1,5 @@
 import { Tooltip } from '@pluralsh/design-system'
+import { CountBadge } from 'components/utils/CountBadge'
 import { navInteractionFill } from 'components/utils/sidebar/SidebarItem'
 import { ComponentPropsWithRef, ReactNode } from 'react'
 import styled from 'styled-components'
@@ -8,6 +9,9 @@ export type PanelRailTab<T extends string = string> = {
   label: string
   icon: ReactNode
   showDot?: boolean
+  count?: number
+  // a custom corner badge, positioned by the caller
+  badge?: ReactNode
 }
 
 // A collapsed side panel: its tabs as icons, each opening the panel on it
@@ -25,6 +29,8 @@ export function PanelRail<T extends string>({
           key={t.key}
           label={t.label}
           showDot={t.showDot}
+          count={t.count}
+          badge={t.badge}
           tooltipPlacement="left"
           onClick={() => onOpen(t.key)}
         >
@@ -39,6 +45,8 @@ export function PanelRailButton({
   label,
   active = false,
   showDot = false,
+  count,
+  badge,
   tooltipPlacement = 'bottom',
   children,
   ...props
@@ -46,6 +54,8 @@ export function PanelRailButton({
   label: string
   active?: boolean
   showDot?: boolean
+  count?: number
+  badge?: ReactNode
   tooltipPlacement?: 'bottom' | 'left'
 } & ComponentPropsWithRef<'button'>) {
   return (
@@ -61,7 +71,14 @@ export function PanelRailButton({
         {...props}
       >
         {children}
-        {showDot && <DotSC />}
+        {badge}
+        {showDot && !count && !badge && <DotSC />}
+        <CountBadge
+          count={count}
+          size="small"
+          variant="warning"
+          css={{ position: 'absolute', top: 1, right: 1 }}
+        />
       </ButtonSC>
     </Tooltip>
   )

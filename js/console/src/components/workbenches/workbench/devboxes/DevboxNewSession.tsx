@@ -13,7 +13,12 @@ import {
   defaultAutonomy,
   isAutonomyOption,
 } from './devboxAutonomy'
-import { DevboxModelLabel, DevboxModelProviderIcon } from './DevboxChips'
+import {
+  DevboxAgentIcon,
+  DevboxAgentLabel,
+  DevboxModelLabel,
+  DevboxModelProviderIcon,
+} from './DevboxChips'
 import { DevboxComposer } from './DevboxComposer'
 import { isInstanceLive, isInstanceTerminal } from './devboxIdle'
 import { AutonomyPillSelect, PillSelect } from './DevboxPromptPills'
@@ -128,12 +133,13 @@ export function DevboxNewSession({
                       ? `${agentLabel(agent)}, the only one this box offers`
                       : undefined
                   }
-                  trigger={agentLabel(agent)}
+                  trigger={<DevboxAgentLabel agent={agent} />}
                 >
                   {agents.map((a) => (
                     <ListBoxItem
                       key={a.type}
                       label={agentLabel(a.type)}
+                      leftContent={<DevboxAgentIcon agent={a.type} />}
                       disabled={unavailable(a.probeStatus)}
                       description={
                         unavailable(a.probeStatus)

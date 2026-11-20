@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/url"
 	"strings"
 	"time"
 
@@ -299,18 +300,21 @@ func (g *Gateway) initRequest(inst *Instance) *devboxv1.InitializeRequest {
 		Env:                  env,
 		Autonomy:             autonomy,
 		DecisionReview:       req.GetDecisionReview(),
-		Endpoints:            g.endpoints(),
+		Endpoints:            g.endpoints(req.GetWorkbenchId()),
 		RestoredFromSnapshot: inst.rec.RestoredFrom != "",
 		RestoreFidelity:      devboxv1.SnapshotFidelity(devboxv1.SnapshotFidelity_value[inst.rec.RestoreFidelity]),
 		RequestTokenJwks:     g.cfg.RequestTokenJWKS,
 	}
 }
 
-func (g *Gateway) endpoints() *devboxv1.HarnessEndpoints {
+func (g *Gateway) endpoints(workbenchID string) *devboxv1.HarnessEndpoints {
 	ep := &devboxv1.HarnessEndpoints{
-		ConsoleUrl:      g.cfg.ConsoleURL,
-		AiProxyUrl:      g.cfg.AIProxyURL,
-		WorkbenchMcpUrl: g.cfg.WorkbenchMCPURL,
+		ConsoleUrl: g.cfg.ConsoleURL,
+		AiProxyUrl: g.cfg.AIProxyURL,
+	}
+	// console serves each workbench's MCP at <base>/<workbench-id>
+	if base := strings.TrimSuffix(g.cfg.WorkbenchMCPURL, "/"); base != "" && workbenchID != "" {
+		ep.WorkbenchMcpUrl = base + "/" + url.PathEscape(workbenchID)
 	}
 	if gw := strings.TrimSuffix(g.cfg.GatewayURL, "/"); gw != "" {
 		ep.DevboxMcpUrl = gw + egress.MCPPath
@@ -405,10 +409,43 @@ func (i *Instance) sharedSnapshot() bool {
 }
 
 // resume wakes a suspended instance (DBX-61).
+type wakeOp struct {
+	done   chan struct{}
+	status devboxv1.InstanceStatus
+	err    error
+}
+
+// resume wakes inst in the background, bounded by ReadyTimeout rather than the caller's deadline: a cold restore
+// can outlast a control call, and cancelling it midway left the actor half resumed for the next caller to restart.
+// Concurrent callers share one wake; a caller whose context ends first gets errStarting while the wake continues.
 func (g *Gateway) resume(ctx context.Context, inst *Instance) (devboxv1.InstanceStatus, error) {
-	inst.op.Lock()
-	defer inst.op.Unlock()
-	return g.resumeLocked(ctx, inst)
+	op := g.startWake(inst)
+	select {
+	case <-op.done:
+		return op.status, op.err
+	case <-ctx.Done():
+		return inst.status(), errStarting(inst.ID)
+	}
+}
+
+func (g *Gateway) startWake(inst *Instance) *wakeOp {
+	inst.mu.Lock()
+	defer inst.mu.Unlock()
+	if inst.waking != nil {
+		return inst.waking
+	}
+	op := &wakeOp{done: make(chan struct{})}
+	inst.waking = op
+	g.goBackground(func(ctx context.Context) {
+		inst.op.Lock()
+		op.status, op.err = g.resumeLocked(ctx, inst)
+		inst.op.Unlock()
+		inst.mu.Lock()
+		inst.waking = nil
+		inst.mu.Unlock()
+		close(op.done)
+	})
+	return op
 }
 
 func (g *Gateway) resumeLocked(ctx context.Context, inst *Instance) (devboxv1.InstanceStatus, error) {
@@ -423,7 +460,8 @@ func (g *Gateway) resumeLocked(ctx context.Context, inst *Instance) (devboxv1.In
 		if errors.Is(err, actors.ErrCrashed) {
 			_ = g.deps.Actors.Revert(ctx, inst.ref())
 		}
-		return devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED, status.Errorf(codes.Unavailable, "resuming instance %s: %v", inst.ID, err)
+		// not Unavailable: console reads that as the cluster being offline, which hides the real failure
+		return devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED, status.Errorf(codes.Internal, "resuming instance %s: %v", inst.ID, err)
 	}
 	g.setStatus(ctx, inst, statusUpdate{status: devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING})
 	g.startForwarder(inst)
@@ -449,7 +487,7 @@ func (g *Gateway) running(ctx context.Context, id string, resumeIfSuspended bool
 	case devboxv1.InstanceStatus_INSTANCE_STATUS_PROVISIONING, devboxv1.InstanceStatus_INSTANCE_STATUS_PENDING,
 		devboxv1.InstanceStatus_INSTANCE_STATUS_SNAPSHOTTING:
 		if !resumeIfSuspended {
-			return inst, nil, status.Errorf(codes.Unavailable, "instance %s is %s", id, st)
+			return inst, nil, statusError(codes.Unavailable, devboxv1.ErrorReason_ERROR_REASON_INSTANCE_STARTING, "instance %s is %s", id, st)
 		}
 		// Wait for the operation in flight, then re-check.
 		inst.op.Lock()

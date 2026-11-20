@@ -325,7 +325,7 @@ defmodule Console.Devboxes.Threads do
          {:ok, inst} <- live_instance(thread.instance_id) do
       case Control.list_commands(inst, thread) do
         {:ok, commands} -> {:ok, commands}
-        {:error, :not_connected} -> {:ok, thread.available_commands || []}
+        {:error, reason} when reason in [:not_connected, :starting] -> {:ok, thread.available_commands || []}
         err -> Error.control(err)
       end
     end
@@ -404,7 +404,7 @@ defmodule Console.Devboxes.Threads do
     with {:ok, inst} <- read_instance(instance_id, user) do
       case Control.list_repositories(inst) do
         {:ok, repos} -> {:ok, repos}
-        {:error, :not_connected} -> {:ok, Enum.map(inst.checkouts || [], &Map.from_struct/1)}
+        {:error, reason} when reason in [:not_connected, :starting] -> {:ok, Enum.map(inst.checkouts || [], &Map.from_struct/1)}
         err -> Error.control(err)
       end
     end
@@ -433,7 +433,7 @@ defmodule Console.Devboxes.Threads do
     with {:ok, inst} <- read_instance(instance_id, user) do
       case Control.get_sessions(inst) do
         {:ok, sessions} -> {:ok, sessions}
-        {:error, reason} when reason in [:not_connected, :suspended] ->
+        {:error, reason} when reason in [:not_connected, :suspended, :starting] ->
           {:ok, DevboxInstanceSession.for_instance(inst.id) |> DevboxInstanceSession.visible() |> Repo.all()}
         err -> Error.control(err)
       end

@@ -2328,10 +2328,10 @@ enum DevboxThreadStage {
   "a turn is in flight or queued"
   RUNNING
 
-  "the agent is waiting on a person: a permission, a question, or a finished or failed turn"
+  "the agent is waiting on a person to answer a permission request or question"
   NEEDS_REVIEW
 
-  "the thread was closed"
+  "the last turn finished or failed, or the thread was closed"
   COMPLETED
 }
 

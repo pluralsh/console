@@ -3,15 +3,18 @@ package daemon
 import (
 	"bytes"
 	"encoding/base64"
+	"fmt"
 	"maps"
 	"net/url"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
 	"slices"
 	"sort"
 	"strings"
 
+	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/harness"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/internal/fsutil"
 )
@@ -130,9 +133,44 @@ func (d *Daemon) writeGitAuth(extra ...string) {
 			return
 		}
 	}
-	if err := ensureGitInclude(filepath.Join(d.cfg.Home, ".gitconfig")); err != nil {
+	gitconfig := filepath.Join(d.cfg.Home, ".gitconfig")
+	if err := ensureGitInclude(gitconfig); err != nil {
 		d.log.Warn("git include", "err", err)
 	}
+	d.mu.Lock()
+	owner := d.req.GetOwner()
+	d.mu.Unlock()
+	if err := ensureGitIdentity(owner, gitconfig); err != nil {
+		d.log.Warn("git identity", "err", err)
+	}
+}
+
+// ensureGitIdentity commits as the instance owner. It writes ~/.gitconfig itself rather than the include, since
+// `git config --global` (how agents check for an identity) doesn't follow includes; fields the user (or the image
+// skeleton) already set are left alone.
+func ensureGitIdentity(owner *devboxv1.Principal, gitconfig string) error {
+	fields := []struct{ key, value string }{{"name", owner.GetName()}, {"email", owner.GetEmail()}}
+	if fields[0].value == "" {
+		fields[0].value, _, _ = strings.Cut(fields[1].value, "@")
+	}
+	for _, f := range fields {
+		value := strings.NewReplacer("\n", " ", "\r", " ").Replace(f.value)
+		if value == "" || gitConfigSet(gitconfig, "user."+f.key) {
+			continue
+		}
+		if out, err := exec.Command("git", "config", "--file", gitconfig, "user."+f.key, value).CombinedOutput(); err != nil {
+			return fmt.Errorf("git config user.%s: %w: %s", f.key, err, out)
+		}
+	}
+	return nil
+}
+
+func gitConfigSet(gitconfig, key string) bool {
+	if _, err := os.Stat(gitconfig); err != nil {
+		return false
+	}
+	out, err := exec.Command("git", "config", "--file", gitconfig, "--get", key).Output()
+	return err == nil && strings.TrimSpace(string(out)) != ""
 }
 
 // ensureGitInclude appends `[include] path = .plural/gitconfig` to ~/.gitconfig unless it is already there.

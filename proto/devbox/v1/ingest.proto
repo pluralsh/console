@@ -289,6 +289,20 @@ message PullRequestAttributes {
   // Linked PRs from a multi-repo change.
   repeated string related_urls = 8;
   google.protobuf.Struct extra = 9;
+  PullRequestDifficulty difficulty = 10;
+  repeated CommitSha commit_shas = 11;
+}
+
+// The classified kind and changed line count of a pull request, for workbench metrics.
+message PullRequestDifficulty {
+  // GITOPS, APPLICATION or CONFIGURATION.
+  string change_type = 1;
+  int32 lines = 2;
+}
+
+message CommitSha {
+  string branch = 1;
+  string sha = 2;
 }
 
 message DevboxPullRequestRequest {

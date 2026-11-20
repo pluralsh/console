@@ -1,4 +1,4 @@
-import { Button, Callout, Flex } from '@pluralsh/design-system'
+import { Button, Callout, Flex, ListBoxItem } from '@pluralsh/design-system'
 import { DevboxFileOpenContext } from 'components/ai/chatbot/DevboxFileChip'
 import { GqlError } from 'components/utils/Alert'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
@@ -25,12 +25,15 @@ import {
   useSwitchToProxy,
 } from './devboxCredentials'
 import { findToolCall } from './devboxApprovals'
+import { useFollowBottom } from './useFollowBottom'
+import { DevboxAgentIcon, DevboxAgentLabel } from './DevboxChips'
 import { DevboxComposer } from './DevboxComposer'
 import { useDevboxPanel } from './DevboxControlPanel'
 import { describeThreadError } from './devboxErrors'
 import { isInstanceLive, isInstanceTerminal } from './devboxIdle'
 import { DevboxInteractionCard } from './DevboxInteractionCard'
-import { findAgent, isProxyBilled } from './devboxStartForm'
+import { PillSelect } from './DevboxPromptPills'
+import { agentLabel, findAgent, isProxyBilled } from './devboxStartForm'
 import { selectOrderedEntities, selectTerminalOutput } from './devboxTimeline'
 import { DevboxTranscript } from './DevboxTranscript'
 import { useDevboxWorkspaceApi } from './devboxWorkspaceApi'
@@ -53,7 +56,13 @@ export function DevboxThreadPane({
   const sessionId = thread.sessionId
   const session = sessionId ? timeline.store.sessions[sessionId] : undefined
   const scrollRef = useRef<HTMLDivElement>(null)
+  const contentRef = useRef<HTMLDivElement>(null)
   const [scrolledTo, setScrolledTo] = useState<Nullable<number>>(null)
+  // a deep link holds its position instead of following the stream
+  const followBottom = useFollowBottom(scrollRef, contentRef, {
+    enabled: !!session?.loaded,
+    initiallyPinned: position == null,
+  })
 
   const { ensureSession } = timeline
   useEffect(() => {
@@ -71,23 +80,15 @@ export function DevboxThreadPane({
     .filter(isNonNullable)
     .filter((i) => i.thread?.id && threadIds.has(i.thread.id))
 
-  // follow the transcript while new entities arrive, unless deep-linked
   useEffect(() => {
     const el = scrollRef.current
-    if (!el || !session?.loaded) return
-    if (position != null && scrolledTo !== position) {
-      const target = el.querySelector(`[data-position="${position}"]`)
-      if (target) {
-        target.scrollIntoView({ block: 'center' })
-        setScrolledTo(position)
-        return
-      }
+    if (!el || !session?.loaded || position == null || scrolledTo === position)
+      return
+    const target = el.querySelector(`[data-position="${position}"]`)
+    if (target) {
+      target.scrollIntoView({ block: 'center' })
+      setScrolledTo(position)
     }
-    if (
-      position == null &&
-      el.scrollHeight - el.scrollTop - el.clientHeight < 200
-    )
-      el.scrollTop = el.scrollHeight
   }, [entities.length, position, scrolledTo, session?.loaded])
 
   const agent = findAgent(instance.devbox, thread.agent)
@@ -118,46 +119,48 @@ export function DevboxThreadPane({
     <PaneSC>
       <DevboxFileOpenContext value={live ? openFile : null}>
         <ScrollSC ref={scrollRef}>
-          {sessionError && <GqlError error={sessionError} />}
-          {session?.hasMore && sessionId && (
-            <Button
-              small
-              tertiary
-              loading={!!timeline.loading[sessionId]}
-              onClick={() => timeline.loadOlder(sessionId)}
-              css={{ alignSelf: 'center' }}
-            >
-              Load earlier messages
-            </Button>
-          )}
-          <DevboxTranscript
-            entities={entities}
-            terminal={(id) => selectTerminalOutput(session, id)}
-            subagents={subagents}
-            renderSubagentLane={(s) => (
-              <SubagentTranscript
-                subagent={s}
-                timeline={timeline}
-                ended={ended}
-              />
+          <ContentSC ref={contentRef}>
+            {sessionError && <GqlError error={sessionError} />}
+            {session?.hasMore && sessionId && (
+              <Button
+                small
+                tertiary
+                loading={!!timeline.loading[sessionId]}
+                onClick={() => timeline.loadOlder(sessionId)}
+                css={{ alignSelf: 'center' }}
+              >
+                Load earlier messages
+              </Button>
             )}
-            empty={
-              <CaptionP $color="text-xlight">
-                {ended
-                  ? "This instance has ended, so its transcript isn't available anymore."
-                  : session?.loaded || !sessionId
-                    ? 'Nothing here yet. Send a prompt to get started.'
-                    : 'Loading transcript…'}
-              </CaptionP>
-            }
-          />
-          {interactions.map((interaction) => (
-            <InteractionWithMutation
-              key={interaction.id}
-              interaction={interaction}
-              toolCall={findToolCall(timeline.store, interaction.toolCallId)}
+            <DevboxTranscript
+              entities={entities}
+              terminal={(id) => selectTerminalOutput(session, id)}
+              subagents={subagents}
+              renderSubagentLane={(s) => (
+                <SubagentTranscript
+                  subagent={s}
+                  timeline={timeline}
+                  ended={ended}
+                />
+              )}
+              empty={
+                <CaptionP $color="text-xlight">
+                  {ended
+                    ? "This instance has ended, so its transcript isn't available anymore."
+                    : session?.loaded || !sessionId
+                      ? 'Nothing here yet. Send a prompt to get started.'
+                      : 'Loading transcript…'}
+                </CaptionP>
+              }
             />
-          ))}
+            {interactions.map((interaction) => (
+              <InteractionWithMutation
+                key={interaction.id}
+                interaction={interaction}
+                toolCall={findToolCall(timeline.store, interaction.toolCallId)}
+              />
+            ))}
+          </ContentSC>
         </ScrollSC>
       </DevboxFileOpenContext>
       <ThreadErrorBanner
@@ -177,6 +180,24 @@ export function DevboxThreadPane({
               : null
           }
           listFiles={listFiles}
+          toolbar={
+            thread.agent && (
+              <PillSelect
+                label="Agent"
+                selectedKey={thread.agent}
+                onSelect={() => {}}
+                disabled
+                title={`${agentLabel(thread.agent)}, fixed for this session`}
+                trigger={<DevboxAgentLabel agent={thread.agent} />}
+              >
+                <ListBoxItem
+                  key={thread.agent}
+                  label={agentLabel(thread.agent)}
+                  leftContent={<DevboxAgentIcon agent={thread.agent} />}
+                />
+              </PillSelect>
+            )
+          }
           modelSwitchable={agent?.modelSwitchable !== false}
           running={thread.foregroundState === DevboxForegroundState.Running}
           disabled={closed || !live}
@@ -187,8 +208,9 @@ export function DevboxThreadPane({
                 ? 'Resume the instance to continue'
                 : undefined
           }
-          onSubmit={(text, attachments) =>
-            prompt({
+          onSubmit={(text, attachments) => {
+            followBottom()
+            return prompt({
               variables: {
                 id: thread.id,
                 prompt: text || null,
@@ -198,7 +220,7 @@ export function DevboxThreadPane({
               ({ errors }) => !errors?.length,
               () => false
             )
-          }
+          }}
           onCancel={() => cancel({ variables: { id: thread.id } })}
           onSetConfigOption={(configId, value) =>
             setOption({ variables: { id: thread.id, configId, value } })
@@ -343,8 +365,11 @@ const ScrollSC = styled.div(({ theme }) => ({
   flex: 1,
   minHeight: 0,
   overflowY: 'auto',
+  paddingRight: theme.spacing.small,
+}))
+
+const ContentSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.medium,
-  paddingRight: theme.spacing.small,
 }))

@@ -287,6 +287,35 @@ defmodule Devbox.V1.GetChangesRequest do
   field :path, 7, type: :string
 end
 
+defmodule Devbox.V1.BranchDiffStatRequest do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "devbox.v1.BranchDiffStatRequest",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :instance_id, 1, type: :string, json_name: "instanceId"
+  field :repository, 2, type: :string
+  field :base, 3, type: :string
+  field :head, 4, type: :string
+end
+
+defmodule Devbox.V1.BranchDiffStatResponse do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "devbox.v1.BranchDiffStatResponse",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :additions, 1, type: :int32
+  field :deletions, 2, type: :int32
+  field :files, 3, type: :int32
+  field :base_sha, 4, type: :string, json_name: "baseSha"
+  field :head_sha, 5, type: :string, json_name: "headSha"
+end
+
 defmodule Devbox.V1.GetChangesResponse do
   @moduledoc false
 

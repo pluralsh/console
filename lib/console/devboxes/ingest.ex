@@ -627,11 +627,14 @@ defmodule Console.Devboxes.Ingest do
          true <- Devbox.allowed_repository?(inst.devbox, repo) || {:error, "repository #{repo} is not allowed on this devbox"},
          %ScmConnection{} = conn <- Credentials.scm_connection(inst.devbox, repo),
          {:ok, conn} <- backfill_token(conn),
-         {:ok, pr_info} <- Dispatcher.pr(conn, title, pr[:body] || "", to_http(conn, repo), base, head) do
+         conn = %{conn | commit_shas: commit_shas(pr[:commit_shas])},
+         {:ok, pr_info} <- Dispatcher.pr(conn, title, pr[:body] || "", to_http(conn, repo), base, head,
+                                         draft: !!pr[:draft], labels: pr[:labels] || []) do
       %PullRequest{fresh: true}
       |> PullRequest.changeset(
         pr_info
         |> Map.merge(attribution(inst, thread))
+        |> Map.merge(drop_nils(%{labels: blank_list(pr[:labels]), difficulty: difficulty(pr[:difficulty])}))
         |> Map.merge(%{
           source: :mcp,
           metadata: drop_nils(%{
@@ -650,6 +653,21 @@ defmodule Console.Devboxes.Ingest do
       err -> err
     end
   end
+
+  defp commit_shas(shas) when is_list(shas),
+    do: Map.new(Enum.filter(shas, & &1[:branch] && &1[:sha]), & {&1.branch, &1.sha})
+  defp commit_shas(_), do: %{}
+
+  defp difficulty(%{change_type: type} = d) when is_binary(type) do
+    case Ecto.Type.cast(PullRequest.ChangeType, String.downcase(type)) do
+      {:ok, type} -> %{type: type, lines: d[:lines] || 0}
+      _ -> nil
+    end
+  end
+  defp difficulty(_), do: nil
+
+  defp blank_list([_ | _] = l), do: l
+  defp blank_list(_), do: nil
 
   defp pr_thread(_, empty) when empty in [nil, ""], do: {:ok, nil}
   defp pr_thread(%DevboxInstance{id: id}, thread_id) do

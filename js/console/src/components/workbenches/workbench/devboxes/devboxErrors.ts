@@ -1,7 +1,10 @@
 import { ApolloError } from '@apollo/client'
 import { DevboxThreadFragment } from 'generated/graphql'
 
-export type DevboxErrorCode = 'UNSUPPORTED' | 'CLUSTER_OFFLINE'
+export type DevboxErrorCode =
+  | 'UNSUPPORTED'
+  | 'CLUSTER_OFFLINE'
+  | 'INSTANCE_STARTING'
 
 export function devboxErrorCode(
   error: Nullable<ApolloError | Error>

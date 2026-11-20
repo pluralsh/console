@@ -14,6 +14,7 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
+	"github.com/pluralsh/console/go/client"
 
 	"github.com/pluralsh/console/go/deployment-operator/internal/mcpserver/agent/tool"
 	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
@@ -64,6 +65,7 @@ type mcpServer struct {
 	creds    *credentialCache
 	prs      *prRegistry
 	owner    PullRequestOwner
+	diffs    BranchDiffs
 	scmOpts  []scm.ClientOption
 	log      logr.Logger
 	// scmClient builds the client for a token; tests replace it.
@@ -137,6 +139,7 @@ func (m *mcpServer) installPullRequestTools(s *server.MCPServer) {
 		mcp.WithString("title", mcp.Required(), mcp.Description("The title of the pull request")),
 		mcp.WithString("body", mcp.Required(), mcp.Description("The body/description of the pull request")),
 		mcp.WithString("head", mcp.Required(), mcp.Description("The pushed branch with the changes")),
+		changeTypeArg(),
 		mcp.WithString("base", mcp.Description("The branch to merge into. Defaults to the checkout's default branch.")),
 		mcp.WithBoolean("draft", mcp.Description("Open the pull request as a draft")),
 		mcp.WithArray("labels", mcp.WithStringItems(), mcp.Description("Labels to apply")),
@@ -148,12 +151,13 @@ func (m *mcpServer) installPullRequestTools(s *server.MCPServer) {
 		mcp.WithDescription("Open one pull request per repository for a change that spans several repositories. Each pull request links to the others."),
 		mcp.WithArray("pullRequests", mcp.Required(), mcp.Description("One entry per repository"), mcp.Items(map[string]any{
 			"type":     "object",
-			"required": []string{"repository", "title", "body", "head"},
+			"required": []string{"repository", "title", "body", "head", "changeType"},
 			"properties": map[string]any{
 				"repository": map[string]any{"type": "string", "description": "Remote URL, workspace path or checkout directory name"},
 				"title":      map[string]any{"type": "string"},
 				"body":       map[string]any{"type": "string"},
 				"head":       map[string]any{"type": "string"},
+				"changeType": map[string]any{"type": "string", "enum": changeTypes, "description": changeTypeDescription},
 				"base":       map[string]any{"type": "string"},
 				"draft":      map[string]any{"type": "boolean"},
 			},
@@ -165,11 +169,25 @@ func (m *mcpServer) installPullRequestTools(s *server.MCPServer) {
 	), m.listPullRequests)
 }
 
+var changeTypes = []string{
+	string(client.PrChangeTypeGitops),
+	string(client.PrChangeTypeApplication),
+	string(client.PrChangeTypeConfiguration),
+}
+
+const changeTypeDescription = "The primary kind of change: GITOPS (deployment manifests and other gitops config), " +
+	"APPLICATION (application code) or CONFIGURATION (other configuration)"
+
+func changeTypeArg() mcp.ToolOption {
+	return mcp.WithString("changeType", mcp.Required(), mcp.Enum(changeTypes...), mcp.Description(changeTypeDescription))
+}
+
 type prInput struct {
 	Repository  string
 	Title       string
 	Body        string
 	Head        string
+	ChangeType  string
 	Base        string
 	Draft       bool
 	Labels      []string
@@ -191,6 +209,7 @@ func (m *mcpServer) createPullRequest(ctx context.Context, req mcp.CallToolReque
 		Title:       req.GetString("title", ""),
 		Body:        req.GetString("body", ""),
 		Head:        req.GetString("head", ""),
+		ChangeType:  req.GetString("changeType", ""),
 		Base:        req.GetString("base", ""),
 		Draft:       req.GetBool("draft", false),
 		Labels:      req.GetStringSlice("labels", nil),
@@ -216,7 +235,8 @@ func (m *mcpServer) createLinkedPullRequests(ctx context.Context, req mcp.CallTo
 		}
 		str := func(k string) string { s, _ := obj[k].(string); return s }
 		draft, _ := obj["draft"].(bool)
-		inputs = append(inputs, prInput{Repository: str("repository"), Title: str("title"), Body: str("body"), Head: str("head"), Base: str("base"), Draft: draft})
+		inputs = append(inputs, prInput{Repository: str("repository"), Title: str("title"), Body: str("body"), Head: str("head"),
+			ChangeType: str("changeType"), Base: str("base"), Draft: draft})
 	}
 
 	// Each PR links to the ones opened before it; console fills in the reverse links from related_urls.
@@ -249,10 +269,13 @@ func (m *mcpServer) openPullRequest(ctx context.Context, in prInput, toolCall st
 	if !ok {
 		return nil, errors.New("unauthenticated")
 	}
-	for name, v := range map[string]string{"repository": in.Repository, "title": in.Title, "body": in.Body, "head": in.Head} {
+	for name, v := range map[string]string{"repository": in.Repository, "title": in.Title, "body": in.Body, "head": in.Head, "changeType": in.ChangeType} {
 		if strings.TrimSpace(v) == "" {
 			return nil, fmt.Errorf("%s is required", name)
 		}
+	}
+	if !slices.Contains(changeTypes, in.ChangeType) {
+		return nil, fmt.Errorf("changeType must be one of %s", strings.Join(changeTypes, ", "))
 	}
 	remote, checkout := resolveRepository(caller.Instance, in.Repository)
 	repo, err := authorizeRepository(caller.Instance, remote)
@@ -264,6 +287,7 @@ func (m *mcpServer) openPullRequest(ctx context.Context, in prInput, toolCall st
 		base = checkout.GetDefaultBranch()
 	}
 
+	difficulty, shas := m.sizePullRequest(ctx, caller.Instance, in, repo, checkout, base)
 	resp, err := m.ingest.DevboxPullRequest(ctx, &devboxv1.DevboxPullRequestRequest{
 		InstanceId: caller.Instance.InstanceID,
 		ThreadId:   caller.ThreadID,
@@ -277,6 +301,8 @@ func (m *mcpServer) openPullRequest(ctx context.Context, in prInput, toolCall st
 			Draft:       in.Draft,
 			Labels:      in.Labels,
 			RelatedUrls: in.RelatedURLs,
+			Difficulty:  difficulty,
+			CommitShas:  shas,
 		},
 	})
 	if err != nil {
@@ -290,6 +316,31 @@ func (m *mcpServer) openPullRequest(ctx context.Context, in prInput, toolCall st
 		PullRequestURL: resp.GetUrl(),
 		Number:         resp.GetNumber(),
 	}, nil
+}
+
+// sizePullRequest counts the branch's changed lines in the instance's checkout, as agent runs do. A failure only
+// costs the line count and SHAs, never the pull request.
+func (m *mcpServer) sizePullRequest(ctx context.Context, info *InstanceInfo, in prInput, repo string, checkout *devboxv1.Checkout, base string) (*devboxv1.PullRequestDifficulty, []*devboxv1.CommitSha) {
+	difficulty := &devboxv1.PullRequestDifficulty{ChangeType: in.ChangeType}
+	if m.diffs == nil || base == "" {
+		return difficulty, nil
+	}
+	target := repo
+	if checkout != nil && checkout.GetName() != "" {
+		target = checkout.GetName()
+	}
+	st, err := m.diffs.GetBranchDiffStat(ctx, &devboxv1.BranchDiffStatRequest{
+		InstanceId: info.InstanceID, Repository: target, Base: base, Head: in.Head,
+	})
+	if err != nil {
+		m.log.Info("couldn't size the pull request's branch", "instance", info.InstanceID, "repository", repo, "error", err.Error())
+		return difficulty, nil
+	}
+	difficulty.Lines = st.GetAdditions() + st.GetDeletions()
+	return difficulty, []*devboxv1.CommitSha{
+		{Branch: in.Head, Sha: st.GetHeadSha()},
+		{Branch: base, Sha: st.GetBaseSha()},
+	}
 }
 
 func (m *mcpServer) listPullRequests(ctx context.Context, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {

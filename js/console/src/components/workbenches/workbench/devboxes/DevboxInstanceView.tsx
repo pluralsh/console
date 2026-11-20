@@ -35,6 +35,7 @@ import {
 } from './devboxIdle'
 import { DevboxInstanceHeader } from './DevboxInstanceHeader'
 import { DevboxNewSession } from './DevboxNewSession'
+import { DEVBOX_HEADER_HEIGHT } from './DevboxSessionsSidebar'
 import { DevboxThreadPane } from './DevboxThreadPane'
 import { ImportThreadModal } from './DevboxThreadList'
 import { selectedThread } from './devboxThreads'
@@ -374,8 +375,13 @@ const MainSC = styled.div({
 })
 
 const HeaderBarSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'center',
   flexShrink: 0,
-  padding: `${theme.spacing.small} ${theme.spacing.large}`,
+  boxSizing: 'border-box',
+  height: DEVBOX_HEADER_HEIGHT,
+  padding: `0 ${theme.spacing.large}`,
   backgroundColor: theme.colors['fill-one'],
   borderBottom: theme.borders.default,
 }))

@@ -405,6 +405,23 @@ func TestPermissionInteraction(t *testing.T) {
 	}
 }
 
+func TestResolvingAfterTheTurnEndedLeavesTheThreadIdle(t *testing.T) {
+	h := newManager(t, 4)
+	s := h.create(t, "t1")
+	h.prompt(t, s, "p1", "permission")
+	eventually(t, "pending interaction", func() bool { return len(h.m.Interactions()) > 0 })
+
+	h.m.mu.Lock()
+	for _, in := range h.m.interactions {
+		in.session.thread.running = false
+		h.m.resolveInteractionLocked(in, devboxv1.InteractionState_INTERACTION_STATE_CANCELLED, nil, nil)
+	}
+	h.m.mu.Unlock()
+	if st := h.thread("t1").GetForeground().GetState(); st != devboxv1.ForegroundStateKind_FOREGROUND_STATE_KIND_IDLE {
+		t.Fatalf("foreground after the last interaction resolved on an ended turn: %v", st)
+	}
+}
+
 func TestActivityAloneReemitsTheRowOnlyEveryInterval(t *testing.T) {
 	h := newManager(t, 4)
 	s := h.create(t, "t1")

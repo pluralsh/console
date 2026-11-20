@@ -112,17 +112,17 @@ config :console, :ai_defaults,
     embedding_model: "text-embedding-3-large"
   },
   vertex: %{
-    model: "claude-haiku-4-5@20251001",
-    tool_model: "claude-sonnet-5@default",
+    model: "claude-haiku-5-5",
+    tool_model: "claude-sonnet-5-5",
     embedding_model: "gemini-embedding-001"
   },
   anthropic: %{
-    model: "claude-4-5-haiku-latest",
-    tool_model: "claude-sonnet-5-latest"
+    model: "claude-haiku-5-5",
+    tool_model: "claude-sonnet-5-5"
   },
   bedrock: %{
-    model: "global.anthropic.claude-haiku-4-5-20251001-v1:0",
-    tool_model: "global.anthropic.claude-sonnet-5",
+    model: "anthropic.claude-haiku-5-5",
+    tool_model: "anthropic.claude-sonnet-5-5",
     embedding_model: "cohere.embed-english-v3"
   },
   ollama: %{},

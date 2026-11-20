@@ -6,7 +6,8 @@ defmodule Console.Devboxes.Control.Grpc do
 
   The connection is a supervised `GRPC.Client.Connection` registered under this module's name and started when
   `KAS_DEVBOX_GRPC_ADDR` is set.  Failures map to the behaviour's errors: `UNAVAILABLE` (or an unreachable KAS)
-  and `ErrorDetail{CLUSTER_OFFLINE}` become `{:error, :not_connected}`, `UNIMPLEMENTED` and
+  and `ErrorDetail{CLUSTER_OFFLINE}` become `{:error, :not_connected}`, `ErrorDetail{INSTANCE_STARTING}` (a wake
+  that outlasted the call, still running on the gateway) becomes `{:error, :starting}`, `UNIMPLEMENTED` and
   `ErrorDetail{UNSUPPORTED}` become `{:error, :unsupported}`.
   """
   @behaviour Console.Devboxes.Control
@@ -408,10 +409,13 @@ defmodule Console.Devboxes.Control.Grpc do
   end
 
   defp rpc_error(_, %V1.ErrorDetail{reason: :ERROR_REASON_CLUSTER_OFFLINE}), do: {:error, :not_connected}
+  defp rpc_error(_, %V1.ErrorDetail{reason: :ERROR_REASON_INSTANCE_STARTING}), do: {:error, :starting}
   defp rpc_error(_, %V1.ErrorDetail{reason: :ERROR_REASON_INSTANCE_SUSPENDED}), do: {:error, :suspended}
   defp rpc_error(_, %V1.ErrorDetail{reason: :ERROR_REASON_UNSUPPORTED, message: msg}) when byte_size(msg) > 0,
     do: {:error, {:unsupported, msg}}
   defp rpc_error(_, %V1.ErrorDetail{reason: :ERROR_REASON_UNSUPPORTED}), do: {:error, :unsupported}
+  # an UNAVAILABLE that explains itself (e.g. credentials) is that failure, not an unreachable cluster
+  defp rpc_error(%GRPC.RPCError{status: @unavailable}, %V1.ErrorDetail{message: msg}) when byte_size(msg) > 0, do: {:error, msg}
   defp rpc_error(%GRPC.RPCError{status: @unavailable}, _), do: {:error, :not_connected}
   defp rpc_error(%GRPC.RPCError{status: @unimplemented}, _), do: {:error, :unsupported}
   defp rpc_error(_, %V1.ErrorDetail{message: msg}) when byte_size(msg) > 0, do: {:error, msg}

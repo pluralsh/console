@@ -34,7 +34,7 @@ defmodule Console.Deployments.Pr.Impl.BitBucketDatacenter do
         },
         title: title,
         description: body,
-      }, "1.0")
+      } |> Map.merge(if(pr.draft, do: %{draft: true}, else: %{})), "1.0")
       |> case do
         {:ok, %{"id" => id} = mr} ->
           {:ok, %{

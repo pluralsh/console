@@ -78,7 +78,9 @@ type Instance struct {
 	awakeSince  time.Time
 	fwd         *forwarder
 	suspending  bool
-	sharedSnap  bool
+	// waking is the resume in flight, shared by every caller that needs the instance running.
+	waking     *wakeOp
+	sharedSnap bool
 	// scmHosts are the hosts of the box's SCM connections as console reports them; nil until fetched.
 	scmHosts []string
 }

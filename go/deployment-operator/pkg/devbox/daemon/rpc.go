@@ -462,6 +462,10 @@ func (d *Daemon) GetChanges(ctx context.Context, req *devboxv1.GetChangesRequest
 	return d.files.Changes(ctx, req)
 }
 
+func (d *Daemon) GetBranchDiffStat(ctx context.Context, req *devboxv1.BranchDiffStatRequest) (*devboxv1.BranchDiffStatResponse, error) {
+	return d.files.BranchDiffStat(ctx, req)
+}
+
 // ---- workspace ----
 
 func (d *Daemon) AddRepository(ctx context.Context, req *devboxv1.AddRepositoryRequest) (*devboxv1.AddRepositoryResponse, error) {

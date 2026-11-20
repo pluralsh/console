@@ -1,7 +1,7 @@
 import {
-  BrowserIcon,
+  MonitorIcon,
   CloseIcon,
-  FileDiffIcon,
+  GitCompareIcon,
   FolderIcon,
   IconFrame,
   TerminalIcon,
@@ -31,6 +31,12 @@ import {
 } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
 import { DevboxBrowserTab } from './DevboxBrowserTab'
+import { useDevboxChangeStat } from './devboxChanges'
+import {
+  DevboxDiffBlock,
+  DevboxDiffStat,
+  diffStatLabel,
+} from './DevboxDiffStat'
 import { DevboxDiffTab } from './DevboxDiffTab'
 import { DevboxFilesTab } from './DevboxFilesTab'
 import { isInstanceLive } from './devboxIdle'
@@ -48,9 +54,9 @@ const PANEL_TABS: {
   icon: ReactElement
 }[] = [
   { key: 'files', label: 'Files', icon: <FolderIcon size={14} /> },
-  { key: 'changes', label: 'Changes', icon: <FileDiffIcon size={14} /> },
+  { key: 'changes', label: 'Changes', icon: <GitCompareIcon size={14} /> },
   { key: 'terminal', label: 'Terminal', icon: <TerminalIcon size={14} /> },
-  { key: 'browser', label: 'Browser', icon: <BrowserIcon size={14} /> },
+  { key: 'browser', label: 'Browser', icon: <MonitorIcon size={14} /> },
 ]
 
 export const isPanelTab = (tab: Nullable<string>): tab is DevboxPanelTab =>
@@ -143,10 +149,22 @@ export function DevboxPanelRail({
   instance: DevboxInstanceFragment
 }) {
   const { isOpen, setOpen, setTab } = useDevboxPanel()
+  const changes = useDevboxChangeStat(
+    isOpen ? null : instance.id,
+    isInstanceLive(instance.status)
+  )
   if (isOpen) return null
   return (
     <PanelRail
-      tabs={panelTabsFor(instance)}
+      tabs={panelTabsFor(instance).map((t) =>
+        t.key === 'changes' && changes.files
+          ? {
+              ...t,
+              label: `${t.label}: ${diffStatLabel(changes)}`,
+              badge: <DevboxDiffBlock stat={changes} />,
+            }
+          : t
+      )}
       onOpen={(tab) => {
         setTab(tab)
         setOpen(true)
@@ -183,6 +201,7 @@ export function DevboxPanelContent() {
   const [headerActions, setHeaderActions] =
     useState<Nullable<HTMLDivElement>>(null)
 
+  const changes = useDevboxChangeStat(instanceId || null, live)
   const tabs = panelTabsFor(instance)
   const active = tabs.find((t) => t.key === tab) ?? tabs[0]
 
@@ -204,6 +223,7 @@ export function DevboxPanelContent() {
               >
                 {t.icon}
                 {selected && <span>{t.label}</span>}
+                {t.key === 'changes' && <DevboxDiffStat stat={changes} />}
               </TabSC>
             )
             return selected ? (
@@ -272,7 +292,7 @@ export function DevboxPanelContent() {
 const TabStripSC = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
-  gap: theme.spacing.xxsmall,
+  gap: theme.spacing.small,
   flex: 1,
   minWidth: 0,
   overflowX: 'auto',

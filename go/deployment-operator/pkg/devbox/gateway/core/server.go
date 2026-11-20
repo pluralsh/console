@@ -279,6 +279,14 @@ func (g *Gateway) GetChanges(ctx context.Context, req *devboxv1.GetChangesReques
 	return d.GetChanges(ctx, req)
 }
 
+func (g *Gateway) GetBranchDiffStat(ctx context.Context, req *devboxv1.BranchDiffStatRequest) (*devboxv1.BranchDiffStatResponse, error) {
+	_, d, err := g.running(ctx, req.GetInstanceId(), false)
+	if err != nil {
+		return nil, err
+	}
+	return d.GetBranchDiffStat(ctx, req)
+}
+
 // ---- history (served by the box) ----
 
 func (g *Gateway) GetTimeline(ctx context.Context, req *devboxv1.GetTimelineRequest) (*devboxv1.GetTimelineResponse, error) {

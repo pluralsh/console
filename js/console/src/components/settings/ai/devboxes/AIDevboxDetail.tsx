@@ -39,6 +39,7 @@ import { fromNow } from 'utils/datetime'
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import {
+  DevboxAgentLabel,
   DevboxPrChips,
   DevboxProbeChip,
   DevboxStatusChip,
@@ -50,10 +51,7 @@ import {
   devboxTrustSnippets,
 } from 'components/workbenches/workbench/devboxes/devboxCloudTrust'
 import { devboxSizing } from 'components/workbenches/workbench/devboxes/devboxSizing'
-import {
-  agentLabel,
-  modelsOf,
-} from 'components/workbenches/workbench/devboxes/devboxStartForm'
+import { modelsOf } from 'components/workbenches/workbench/devboxes/devboxStartForm'
 import { SETTINGS_BREADCRUMBS } from '../../Settings'
 
 export function devboxIssuerOf(
@@ -278,7 +276,7 @@ export function DevboxAgentCatalog({
             gap="xsmall"
             align="center"
           >
-            <span>{agentLabel(a.type)}</span>
+            <DevboxAgentLabel agent={a.type} />
             {a.default && (
               <Chip
                 size="small"

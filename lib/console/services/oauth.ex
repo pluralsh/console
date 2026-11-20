@@ -7,11 +7,16 @@ defmodule Console.Services.OAuth do
   `urn:ietf:params:oauth:client-assertion-type:jwt-bearer` assertion (private_key_jwt) instead of a client secret.
   We mint that assertion ourselves rather than use oidcc's built-in private_key_jwt support, since oidcc only sets
   a `kid` header and IdPs like ADFS/Entra require `x5t` too.  oidcc then sends it as an extension of the `none` auth method.
+
+  Otherwise oidcc picks the token endpoint auth method from what the provider advertises, preferring `client_secret_jwt`
+  over `client_secret_basic`/`client_secret_post`.  `auth_method` pins it instead, eg to `none` for public clients, which
+  some IdPs (PingFederate 13.1+) require since they reject any client assertion from a client registered without auth.
   """
   use Console.Services.Base
   alias Console.AI.Provider.TokenExchange.Assertion
 
   @well_known_url "/.well-known/openid-configuration"
+  @auth_methods ~w(none client_secret_basic client_secret_post client_secret_jwt)
   @assertion_type "urn:ietf:params:oauth:client-assertion-type:jwt-bearer"
   @name Console.OidcConfigProvider
 
@@ -57,6 +62,19 @@ defmodule Console.Services.OAuth do
   end
 
   @doc """
+  The explicitly configured token endpoint auth method, if any.  Raises on unsupported values so a typo doesn't
+  silently fall back to oidcc's default choice.
+  """
+  @spec auth_method() :: atom | nil
+  def auth_method() do
+    case configuration(:auth_method) do
+      m when m in [nil, ""] -> nil
+      m when m in @auth_methods -> String.to_atom(m)
+      m -> raise ArgumentError, "unsupported OIDC_AUTH_METHOD #{inspect(m)}, must be one of #{Enum.join(@auth_methods, ", ")}"
+    end
+  end
+
+  @doc """
   Provider configuration quirks for the oidcc worker.  When using client assertions, the advertised token endpoint
   auth methods are pinned to `none` so oidcc never falls back to secret-based auth, and our assertion is sent as a
   body extension instead.
@@ -75,19 +93,29 @@ defmodule Console.Services.OAuth do
   """
   @spec redirect_uri(binary | nil) :: binary
   def redirect_uri(redirect) do
-    Oidcc.create_redirect_url(
-      @name,
-      configuration(:client_id),
-      client_secret(),
-      create_pkce_token(%{
-        redirect_uri: redirect || configuration(:redirect_uri),
-        state: state_token(),
-        scopes: scopes()
-      }, configuration(:pkce_enabled))
-    )
+    opts = create_pkce_token(%{
+      redirect_uri: redirect || configuration(:redirect_uri),
+      state: state_token(),
+      scopes: scopes()
+    }, configuration(:pkce_enabled))
+
+    opts
+    |> add_auth_method()
+    |> create_redirect_url()
     |> bang!()
     |> IO.iodata_to_binary()
   end
+
+  defp create_redirect_url(opts) do
+    with {:ok, ctx} <- Oidcc.ClientContext.from_configuration_worker(@name, configuration(:client_id), client_secret()),
+      do: Oidcc.Authorization.create_redirect_url(without_optional_par(ctx), opts)
+  end
+
+  # oidcc uses a provider's PAR endpoint whenever one is advertised, even if `require_pushed_authorization_requests` is false
+  defp without_optional_par(%Oidcc.ClientContext{provider_configuration: %{require_pushed_authorization_requests: true}} = ctx),
+    do: ctx
+  defp without_optional_par(%Oidcc.ClientContext{provider_configuration: conf} = ctx),
+    do: %{ctx | provider_configuration: %{conf | pushed_authorization_request_endpoint: :undefined}}
 
   @doc """
   Retrieves a token using the default oidc configuration.
@@ -139,7 +167,15 @@ defmodule Console.Services.OAuth do
     |> Map.put(:redirect_uri, args[:redirect] || configuration(:redirect_uri))
     |> Map.put(:scope, scopes())
     |> add_pkce_token()
+    |> add_auth_method()
     |> add_client_assertion(client_assertion?())
+  end
+
+  defp add_auth_method(opts) do
+    case auth_method() do
+      nil -> opts
+      method -> Map.put(opts, :preferred_auth_methods, [method])
+    end
   end
 
   defp add_client_assertion(args, true) do
@@ -168,9 +204,9 @@ defmodule Console.Services.OAuth do
   end
 
   defp client_secret() do
-    case client_assertion?() do
-      true -> :unauthenticated
-      false -> configuration(:client_secret)
+    case {client_assertion?(), auth_method()} do
+      {false, method} when method != :none -> configuration(:client_secret)
+      _ -> :unauthenticated
     end
   end
 

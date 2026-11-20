@@ -1,5 +1,7 @@
 import { Chip, ChipSeverity, Flex, PrOpenIcon } from '@pluralsh/design-system'
 import {
+  AgentRuntimeType,
+  DevboxAgentType,
   DevboxInstanceStatus,
   DevboxProbeStatus,
   DevboxPullRequestFragment,
@@ -8,11 +10,54 @@ import {
   PullRequestSource,
 } from 'generated/graphql'
 import { aiProviderToIcon } from 'components/settings/ai/AISettingsConfiguredProviders'
+import { runtimeToIcon } from 'components/settings/ai/agent-runtimes/AIAgentRuntimeIcon'
 import { Link } from 'react-router-dom'
 import { getWorkbenchDevboxInstanceAbsPath } from 'routes/workbenchesRoutesConsts'
 import { DevboxAwakeTone } from './devboxIdle'
-import { proxyModelOf } from './devboxStartForm'
+import { agentLabel, proxyModelOf } from './devboxStartForm'
 import { threadTitle } from './devboxThreads'
+
+const AGENT_RUNTIME: Record<DevboxAgentType, AgentRuntimeType> = {
+  [DevboxAgentType.Claude]: AgentRuntimeType.Claude,
+  [DevboxAgentType.Codex]: AgentRuntimeType.Codex,
+  [DevboxAgentType.Gemini]: AgentRuntimeType.Gemini,
+  [DevboxAgentType.Opencode]: AgentRuntimeType.Opencode,
+  [DevboxAgentType.Pi]: AgentRuntimeType.Pi,
+}
+
+export function DevboxAgentIcon({
+  agent,
+  size = 14,
+}: {
+  agent: Nullable<DevboxAgentType>
+  size?: number
+}) {
+  const Icon =
+    runtimeToIcon[(agent && AGENT_RUNTIME[agent]) || AgentRuntimeType.Custom]
+  return (
+    <Icon
+      size={size}
+      fullColor
+    />
+  )
+}
+
+export function DevboxAgentLabel({
+  agent,
+}: {
+  agent: Nullable<DevboxAgentType>
+}) {
+  return (
+    <Flex
+      gap="xsmall"
+      align="center"
+      as="span"
+    >
+      <DevboxAgentIcon agent={agent} />
+      {agentLabel(agent)}
+    </Flex>
+  )
+}
 
 // the AI provider an AI proxy model routes to, nothing for an agent's own aliases
 export function DevboxModelProviderIcon({

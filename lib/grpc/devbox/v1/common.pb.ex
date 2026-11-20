@@ -101,6 +101,7 @@ defmodule Devbox.V1.ErrorReason do
   field :ERROR_REASON_PLAN_LIMIT_REACHED, 12
   field :ERROR_REASON_INVALID_AGENT_OR_MODEL, 13
   field :ERROR_REASON_FILE_CONFLICT, 14
+  field :ERROR_REASON_INSTANCE_STARTING, 15
 end
 
 defmodule Devbox.V1.LeaseKind do

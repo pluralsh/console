@@ -36,7 +36,7 @@ func TestSkelAndGitAuthPlaceholders(t *testing.T) {
 	}
 
 	d.mu.Lock()
-	d.req = &devboxv1.InitializeRequest{Repositories: []*devboxv1.RepositorySpec{
+	d.req = &devboxv1.InitializeRequest{Owner: &devboxv1.Principal{Name: "Jane Doe", Email: "jane@example.com"}, Repositories: []*devboxv1.RepositorySpec{
 		{Url: "https://GitHub.com/acme/api.git"}, {Url: "https://github.com/acme/web"},
 		{Url: "git@gitlab.com:acme/x.git"}, {Url: "ssh://git@GitLab.com/acme/y.git"},
 		{Url: "https://git.corp.example:8443/team/repo"}, {Url: "ssh://git@ssh.example:7999/z.git"},
@@ -88,5 +88,55 @@ func TestSkelAndGitAuthPlaceholders(t *testing.T) {
 	}
 	if out := git("", "ls-remote", "--get-url", "git@gitlab.com:acme/x.git"); strings.TrimSpace(out) != "https://gitlab.com/acme/x.git" {
 		t.Fatalf("ssh remote resolved to %q, want the https rewrite", out)
+	}
+	// commits as the owner, without overriding the name the skeleton already set; --global doesn't follow
+	// includes, so the identity has to be visible there too
+	if out := git("", "config", "--global", "--get", "user.email"); strings.TrimSpace(out) != "jane@example.com" {
+		t.Fatalf("user.email = %q", out)
+	}
+	if out := git("", "config", "--get", "user.name"); strings.TrimSpace(out) != "Dev" {
+		t.Fatalf("user.name = %q, want the skeleton's", out)
+	}
+}
+
+func TestGitIdentity(t *testing.T) {
+	if _, err := exec.LookPath("git"); err != nil {
+		t.Skip("git not installed")
+	}
+	get := func(gitconfig, key string) string {
+		t.Helper()
+		out, _ := exec.Command("git", "config", "--file", gitconfig, "--get", key).Output()
+		return strings.TrimSpace(string(out))
+	}
+	gitconfig := filepath.Join(t.TempDir(), ".gitconfig")
+	if err := ensureGitIdentity(&devboxv1.Principal{Name: `Jane "JD" Doe; \ops`, Email: "jane@example.com"}, gitconfig); err != nil {
+		t.Fatal(err)
+	}
+	if got := get(gitconfig, "user.name"); got != `Jane "JD" Doe; \ops` {
+		t.Fatalf("user.name round trip: %q", got)
+	}
+	if got := get(gitconfig, "user.email"); got != "jane@example.com" {
+		t.Fatalf("user.email: %q", got)
+	}
+	if err := ensureGitIdentity(&devboxv1.Principal{Name: "Other", Email: "o@example.com"}, gitconfig); err != nil {
+		t.Fatal(err)
+	}
+	if got := get(gitconfig, "user.email"); got != "jane@example.com" {
+		t.Fatalf("set fields should be left alone: %q", got)
+	}
+
+	bare := filepath.Join(t.TempDir(), ".gitconfig")
+	if err := ensureGitIdentity(&devboxv1.Principal{Email: "sam@example.com"}, bare); err != nil {
+		t.Fatal(err)
+	}
+	if got := get(bare, "user.name"); got != "sam" {
+		t.Fatalf("name should fall back to the email's local part: %q", got)
+	}
+	none := filepath.Join(t.TempDir(), ".gitconfig")
+	if err := ensureGitIdentity(nil, none); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(none); !os.IsNotExist(err) {
+		t.Fatalf("no owner should write nothing: %v", err)
 	}
 }

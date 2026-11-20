@@ -53,8 +53,9 @@ type Config struct {
 	EgressAuthzRegistered        bool
 
 	// Harness endpoints handed to daemons in Initialize.
-	ConsoleURL      string
-	AIProxyURL      string
+	ConsoleURL string
+	AIProxyURL string
+	// WorkbenchMCPURL is the base of console's workbench MCP; each instance gets <base>/<workbench-id>.
 	WorkbenchMCPURL string
 	// GatewayURL is where sandboxes reach the gateway's devbox MCP (GatewayURL + /mcp) and SandboxCredentials
 	// (GatewayURL), through egress which injects the actor JWT.

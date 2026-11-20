@@ -472,8 +472,13 @@ defmodule Console.Devboxes do
   @spec resume_instance(binary, User.t) :: instance_resp
   def resume_instance(id, %User{} = user) do
     with {:ok, inst} <- allow(get_instance!(id), user, :keep_awake),
-         {:ok, inst} <- claim_resume(inst.id),
-      do: Control.resume_instance(inst) |> control_result(inst)
+         {:ok, inst} <- claim_resume(inst.id) do
+      case Control.resume_instance(inst) do
+        # the gateway keeps waking it and reports running when it's up
+        {:error, :starting} -> {:ok, inst}
+        res -> control_result(res, inst)
+      end
+    end
   end
 
   # Restarts a suspended instance's completeAfter clock under its lock, so `complete_stale_instances` can't end it

@@ -18,16 +18,17 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
     end
   end
 
-  def create(%PrAutomation{} = pr, branch, ctx, _labels \\ []) do
+  def create(%PrAutomation{} = pr, branch, ctx, labels \\ []) do
     with {:ok, conn} <- connection(pr),
          {:ok, title, body} <- description(pr, ctx) do
-      post(conn, "/api/v4/projects/#{uri_encode(pr.identifier)}/merge_requests", %{
+      title = if pr.draft, do: "Draft: #{title}", else: title
+      post(conn, "/api/v4/projects/#{uri_encode(pr.identifier)}/merge_requests", Map.merge(%{
         source_branch: branch,
         target_branch: pr.branch || "master",
         title: title,
         description: body,
         allow_collaboration: true,
-      })
+      }, if(labels != [], do: %{labels: Enum.join(labels, ",")}, else: %{})))
       |> case do
         {:ok, %{"web_url" => url} = mr} ->
           target = pr.branch || "master"

@@ -42,6 +42,30 @@ export function useDevboxChanges(
   return { groups, error, loading, refetch }
 }
 
+export type DevboxChangeStat = {
+  files: number
+  additions: number
+  deletions: number
+}
+
+// outstanding lines across every repo, for badging the Changes tab
+export function useDevboxChangeStat(
+  instanceId: Nullable<string>,
+  live: boolean
+): DevboxChangeStat {
+  const { groups } = useDevboxChanges(instanceId, live, { poll: true })
+  return useMemo(() => {
+    const stat = { files: 0, additions: 0, deletions: 0 }
+    for (const group of groups ?? [])
+      for (const file of group.files) {
+        stat.files += 1
+        stat.additions += file.additions ?? 0
+        stat.deletions += file.deletions ?? 0
+      }
+    return stat
+  }, [groups])
+}
+
 export function findChange(
   groups: Nullable<DevboxChangeGroup[]>,
   key: string
@@ -62,8 +86,9 @@ export type ChangeTreeNode =
     }
   | { kind: 'file'; id: string; name: string; file: DevboxChangedFile }
 
-// repositories (when more than one changed), then directories, with single-directory
-// chains folded into one row as in `monolith / src`
+// repositories, then directories, with single-directory chains folded into one row as
+// in `monolith / src`; the repository row stays even when it's the only one, since a
+// workspace holds many checkouts
 export function buildChangeTree(groups: DevboxChangeGroup[]): ChangeTreeNode[] {
   const repoTrees = groups.map((group) => {
     const root: ChangeTreeNode & { kind: 'dir' } = {
@@ -97,7 +122,7 @@ export function buildChangeTree(groups: DevboxChangeGroup[]): ChangeTreeNode[] {
     }
     return { ...root, children: root.children.map(fold).sort(byKind) }
   })
-  return repoTrees.length === 1 ? repoTrees[0].children : repoTrees
+  return repoTrees
 }
 
 function fold(node: ChangeTreeNode): ChangeTreeNode {

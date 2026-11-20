@@ -32,6 +32,8 @@ import { buildThreadTree, NEW_SESSION, selectedThread } from './devboxThreads'
 import { useDevboxWorkbenchDeltas } from './useDevboxWorkbenchDeltas'
 
 export const DEVBOX_SESSIONS_SIDEBAR_WIDTH = 280
+// shared by the sidebar's switcher and the instance header so their bottom edges line up
+export const DEVBOX_HEADER_HEIGHT = 72
 
 export const DEVBOX_SWITCHER_PAGE_SIZE = 100
 
@@ -249,8 +251,14 @@ const WrapperSC = styled.div(({ theme }) => ({
 }))
 
 const HeaderSC = styled.div(({ theme }) => ({
-  padding: theme.spacing.medium,
-  borderBottom: theme.borders.hairline,
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'center',
+  flexShrink: 0,
+  boxSizing: 'border-box',
+  height: DEVBOX_HEADER_HEIGHT,
+  padding: `0 ${theme.spacing.medium}`,
+  borderBottom: theme.borders.default,
 }))
 
 const SessionsHeaderSC = styled.div(({ theme }) => ({

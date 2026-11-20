@@ -124,6 +124,9 @@ enum ErrorReason {
   ERROR_REASON_INVALID_AGENT_OR_MODEL = 13;
   // A file write precondition (expected sha256) did not match (code FAILED_PRECONDITION).
   ERROR_REASON_FILE_CONFLICT = 14;
+  // The instance is waking (or otherwise starting) and the call gave up waiting; the operation continues in the
+  // background, so retry shortly (code UNAVAILABLE).
+  ERROR_REASON_INSTANCE_STARTING = 15;
 }
 
 // ErrorDetail is attached to gRPC status details, and embedded where errors are reported as data.
