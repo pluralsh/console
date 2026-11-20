@@ -1,7 +1,7 @@
 defmodule Console.AI.RemediationTest do
   use Console.DataCase, async: true
   alias Console.AI.Remediation
-  alias Console.Schema.{ClusterInsightComponent, WorkbenchJob}
+  alias Console.Schema.WorkbenchJob
 
   describe "#remediate/1" do
     test "starts a job that includes same-namespace services" do
@@ -14,9 +14,12 @@ defmodule Console.AI.RemediationTest do
       assert job.workbench_id == workbench.id
       assert job.user_id == bot.id
       assert job.cluster_id == cluster.id
-      assert job.component_key == ClusterInsightComponent.key(comp)
-      assert job.insight_sha == "cert-sha"
       assert job.status == :pending
+
+      insight = Console.Repo.reload!(comp.insight)
+      assert insight.remediated_sha == "cert-sha"
+      assert insight.remediation_job_id == job.id
+      assert insight.remediated_at
       assert job.prompt =~ "serving-cert"
       assert job.prompt =~ "cert-manager.io/v1"
       assert job.prompt =~ svc.name
@@ -49,14 +52,8 @@ defmodule Console.AI.RemediationTest do
     test "suppresses a repeat of the same insight sha inside the window" do
       {cluster, workbench, bot} = remediation_cluster()
       comp = component(cluster, sha: "same-sha")
-      insert(:workbench_job,
-        workbench: workbench,
-        user: bot,
-        cluster: cluster,
-        component_key: ClusterInsightComponent.key(comp),
-        insight_sha: "same-sha",
-        status: :successful
-      )
+      job = insert(:workbench_job, workbench: workbench, user: bot, cluster: cluster, status: :successful)
+      mark_remediated(comp, job)
 
       assert Remediation.remediate(cluster) == :ok
       assert job_count(cluster) == 1
@@ -65,18 +62,8 @@ defmodule Console.AI.RemediationTest do
     test "starts again once the same insight sha is outside the window" do
       {cluster, workbench, bot} = remediation_cluster(window: 3600)
       comp = component(cluster, sha: "same-sha")
-      job = insert(:workbench_job,
-        workbench: workbench,
-        user: bot,
-        cluster: cluster,
-        component_key: ClusterInsightComponent.key(comp),
-        insight_sha: "same-sha",
-        status: :successful
-      )
-
-      job
-      |> Ecto.Changeset.change(inserted_at: DateTime.add(DateTime.utc_now(), -7200, :second))
-      |> Console.Repo.update!()
+      job = insert(:workbench_job, workbench: workbench, user: bot, cluster: cluster, status: :successful)
+      mark_remediated(comp, job, at: DateTime.add(DateTime.utc_now(), -7200, :second))
 
       {:ok, [created]} = Remediation.remediate(cluster)
 
@@ -84,17 +71,11 @@ defmodule Console.AI.RemediationTest do
       assert job_count(cluster) == 2
     end
 
-    test "suppresses a component that already has an active job" do
+    test "suppresses a component whose insight job is still active" do
       {cluster, workbench, bot} = remediation_cluster()
       comp = component(cluster, sha: "new-sha")
-      insert(:workbench_job,
-        workbench: workbench,
-        user: bot,
-        cluster: cluster,
-        component_key: ClusterInsightComponent.key(comp),
-        insight_sha: "old-sha",
-        status: :running
-      )
+      job = insert(:workbench_job, workbench: workbench, user: bot, cluster: cluster, status: :running)
+      mark_remediated(comp, job, sha: "old-sha")
 
       assert Remediation.remediate(cluster) == :ok
       assert job_count(cluster) == 1
@@ -118,6 +99,41 @@ defmodule Console.AI.RemediationTest do
 
       assert {:error, "workbench does not have a bot user"} = Remediation.remediate(cluster)
     end
+
+    test "runs as the configured user and applies job modes" do
+      bot = insert(:user, roles: %{admin: true})
+      actor = insert(:user)
+      workbench = insert(:workbench, bot_user: bot, read_bindings: [%{user_id: actor.id}])
+      cluster = insert(:cluster,
+        remediation_workbench: workbench,
+        remediation: %{
+          user_id: actor.id,
+          modes: %{coding: %{review: true}, budget: %{tokens: 25}}
+        }
+      )
+      component(cluster, priority: :critical)
+
+      {:ok, [job]} = Remediation.remediate(cluster)
+
+      assert job.user_id == actor.id
+      assert job.user_id != bot.id
+      assert job.modes.coding.review
+      assert job.modes.budget.tokens == 25
+    end
+
+    test "rejects a configured user who cannot read the workbench" do
+      bot = insert(:user, roles: %{admin: true})
+      actor = insert(:user)
+      workbench = insert(:workbench, bot_user: bot, project: insert(:project))
+      cluster = insert(:cluster,
+        remediation_workbench: workbench,
+        remediation: %{user_id: actor.id}
+      )
+      component(cluster, priority: :critical)
+
+      assert {:error, "remediation user cannot read this workbench"} = Remediation.remediate(cluster)
+      assert job_count(cluster) == 0
+    end
   end
 
   defp remediation_cluster(opts \\ []) do
@@ -125,9 +141,11 @@ defmodule Console.AI.RemediationTest do
     workbench = insert(:workbench, bot_user: bot)
     cluster = insert(:cluster,
       remediation_workbench: workbench,
-      remediation_min_priority: Keyword.get(opts, :min_priority, :high),
-      remediation_window: Keyword.get(opts, :window, 21_600),
-      remediation_max_jobs: Keyword.get(opts, :max_jobs, 3)
+      remediation: %{
+        min_priority: Keyword.get(opts, :min_priority, :high),
+        window: Keyword.get(opts, :window, 21_600),
+        max_jobs: Keyword.get(opts, :max_jobs, 3)
+      }
     )
 
     {cluster, workbench, bot}
@@ -149,6 +167,16 @@ defmodule Console.AI.RemediationTest do
       version: "v1",
       insight: insight
     )
+  end
+
+  defp mark_remediated(comp, job, opts \\ []) do
+    comp.insight
+    |> Ecto.Changeset.change(%{
+      remediated_sha: Keyword.get(opts, :sha, comp.insight.sha),
+      remediated_at: Keyword.get(opts, :at, DateTime.utc_now()),
+      remediation_job_id: job.id
+    })
+    |> Console.Repo.update!()
   end
 
   defp job_count(cluster) do

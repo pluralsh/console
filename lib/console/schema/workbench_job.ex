@@ -127,9 +127,6 @@ defmodule Console.Schema.WorkbenchJob do
 
     field :started_at,   :utc_datetime_usec
     field :completed_at, :utc_datetime_usec
-    field :component_key, :string
-    field :insight_sha,   :string
-
     embeds_one :modes, Modes, on_replace: :update
 
     embeds_one :usage, AIUsage, on_replace: :update
@@ -201,14 +198,6 @@ defmodule Console.Schema.WorkbenchJob do
 
   def for_cluster(query \\ __MODULE__, cluster_id) do
     from(j in query, where: j.cluster_id == ^cluster_id)
-  end
-
-  def for_component_key(query \\ __MODULE__, key) do
-    from(j in query, where: j.component_key == ^key)
-  end
-
-  def for_insight_sha(query \\ __MODULE__, sha) do
-    from(j in query, where: j.insight_sha == ^sha)
   end
 
   def inserted_since(query \\ __MODULE__, %DateTime{} = since) do
@@ -385,7 +374,7 @@ defmodule Console.Schema.WorkbenchJob do
     )
   end
 
-  @valid ~w(status type prompt workbench_id error user_id started_at completed_at alert_id issue_id referenced_job_id flow_id cluster_id component_key insight_sha)a
+  @valid ~w(status type prompt workbench_id error user_id started_at completed_at alert_id issue_id referenced_job_id flow_id cluster_id)a
 
   def changeset(model, attrs \\ %{}) do
     model

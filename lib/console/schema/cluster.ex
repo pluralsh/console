@@ -91,6 +91,29 @@ defmodule Console.Schema.Cluster do
     end
   end
 
+  defmodule Remediation do
+    use Console.Schema.Base
+    alias Console.Schema.{ClusterInsightComponent, User, WorkbenchJob}
+
+    embedded_schema do
+      field :min_priority, ClusterInsightComponent.Priority, default: :high
+      field :window,       :integer, default: 21_600
+      field :max_jobs,     :integer, default: 3
+
+      belongs_to :user, User
+
+      embeds_one :modes, WorkbenchJob.Modes, on_replace: :update
+    end
+
+    def changeset(model, attrs \\ %{}) do
+      model
+      |> cast(attrs, ~w(min_priority window max_jobs user_id)a)
+      |> cast_embed(:modes)
+      |> validate_number(:window, greater_than: 0)
+      |> validate_number(:max_jobs, greater_than: 0)
+    end
+  end
+
   schema "clusters" do
     field :handle,          :string
     field :name,            :string
@@ -103,9 +126,6 @@ defmodule Console.Schema.Cluster do
     field :health_score,    :integer
     field :ping_interval,   :integer
     field :disable_ai,      :boolean, default: false
-    field :remediation_min_priority, ClusterInsightComponent.Priority, default: :high
-    field :remediation_window,       :integer, default: 21_600
-    field :remediation_max_jobs,     :integer, default: 3
 
     field :version,         :string
     field :current_version, :string
@@ -132,6 +152,8 @@ defmodule Console.Schema.Cluster do
     field :token_readable,  :boolean, default: false, virtual: true
     field :gs_instance,     :map, virtual: true
     field :ignore_limit,    :boolean, default: false, virtual: true
+
+    embeds_one :remediation, Remediation, on_replace: :update
 
     embeds_one :upgrade_plan, UpgradePlan, on_replace: :update do
       boolean_fields [:deprecations, :compatibilities, :incompatibilities, :kubelet_skew]
@@ -495,7 +517,7 @@ defmodule Console.Schema.Cluster do
 
   def preloaded(query \\ __MODULE__, preloads \\ [:provider, :credential]), do: from(c in query, preload: ^preloads)
 
-  @valid ~w(provider_id ai_poll_at disable_ai remediation_workbench_id remediation_min_priority remediation_window remediation_max_jobs distro metadata protect project_id service_id credential_id self version current_version name handle installed ignore_limit)a
+  @valid ~w(provider_id ai_poll_at disable_ai remediation_workbench_id distro metadata protect project_id service_id credential_id self version current_version name handle installed ignore_limit)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -506,6 +528,7 @@ defmodule Console.Schema.Cluster do
     |> cast_embed(:kubeconfig)
     |> cast_embed(:resource)
     |> cast_embed(:cloud_settings)
+    |> cast_embed(:remediation)
     |> cast_embed(:upgrade_plan, with: &upgrade_plan_cs/2)
     |> cast_assoc(:node_pools)
     |> cast_assoc(:read_bindings)
@@ -518,8 +541,6 @@ defmodule Console.Schema.Cluster do
     |> foreign_key_constraint(:provider_id)
     |> foreign_key_constraint(:credential_id)
     |> foreign_key_constraint(:remediation_workbench_id)
-    |> validate_number(:remediation_window, greater_than: 0)
-    |> validate_number(:remediation_max_jobs, greater_than: 0)
     |> foreign_key_constraint(:id, name: :global_services, match: :prefix, message: "Cannot delete due to existing undeletable services bound to this cluster")
     |> foreign_key_constraint(:id, name: :services, match: :prefix, message: "Cannot delete due to existing undeletable services bound to this cluster")
     |> foreign_key_constraint(:id, name: :stacks, match: :prefix, message: "cannot delete due to stacks referencing this cluster")

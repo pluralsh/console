@@ -15,12 +15,20 @@ import { GqlError } from 'components/utils/Alert'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { SearchableWorkbenchSelector } from 'components/workbenches/WorkbenchSelector'
 import { useSearchableWorkbenchOptions } from 'components/workbenches/useWorkbenchOptions'
+import { WorkbenchAccessibleUserSelect } from 'components/workbenches/workbench/WorkbenchAccessibleUserSelect'
+import { WorkbenchModesForm } from 'components/workbenches/workbench/WorkbenchPromptModeSelector/WorkbenchModesForm'
+import {
+  modesAttributes,
+  modesFormValue,
+} from 'components/workbenches/workbench/WorkbenchPromptModeSelector/workbenchPromptModes'
 
 import {
+  ClusterRemediationAttributes,
   ClusterUpdateAttributes,
   ClustersRowFragment,
   InsightComponentPriority,
   useUpdateClusterMutation,
+  WorkbenchJobModesAttributes,
 } from 'generated/graphql'
 import isEqual from 'lodash/isEqual'
 import { ComponentProps, useMemo } from 'react'
@@ -41,17 +49,16 @@ const DEFAULT_REMEDIATION_MAX_JOBS = 3
 type RemediationForm = {
   autoRemediate: boolean
   remediationWorkbenchId: Nullable<string>
-  remediationMinPriority: InsightComponentPriority
-  remediationWindow: number
-  remediationMaxJobs: number
+  minPriority: InsightComponentPriority
+  window: number
+  maxJobs: number
+  userId: Nullable<string>
+  modes: WorkbenchJobModesAttributes | null
 }
 
 type ChangedRemediationAttributes = Pick<
   ClusterUpdateAttributes,
-  | 'remediationWorkbenchId'
-  | 'remediationMinPriority'
-  | 'remediationWindow'
-  | 'remediationMaxJobs'
+  'remediationWorkbenchId' | 'remediation'
 >
 
 function changedRemediationAttributes(
@@ -65,21 +72,26 @@ function changedRemediationAttributes(
   const initialWorkbenchId = initial.autoRemediate
     ? initial.remediationWorkbenchId
     : null
+  const remediation: ClusterRemediationAttributes = {}
 
   if (workbenchId !== initialWorkbenchId)
     attributes.remediationWorkbenchId = workbenchId
-  if (current.remediationMinPriority !== initial.remediationMinPriority)
-    attributes.remediationMinPriority = current.remediationMinPriority
-  if (current.remediationWindow !== initial.remediationWindow) {
-    attributes.remediationWindow = Number.isFinite(current.remediationWindow)
-      ? current.remediationWindow
+  if (current.minPriority !== initial.minPriority)
+    remediation.minPriority = current.minPriority
+  if (current.window !== initial.window) {
+    remediation.window = Number.isFinite(current.window)
+      ? current.window
       : DEFAULT_REMEDIATION_WINDOW
   }
-  if (current.remediationMaxJobs !== initial.remediationMaxJobs) {
-    attributes.remediationMaxJobs = Number.isFinite(current.remediationMaxJobs)
-      ? current.remediationMaxJobs
+  if (current.maxJobs !== initial.maxJobs) {
+    remediation.maxJobs = Number.isFinite(current.maxJobs)
+      ? current.maxJobs
       : DEFAULT_REMEDIATION_MAX_JOBS
   }
+  if (current.userId !== initial.userId) remediation.userId = current.userId
+  if (!isEqual(current.modes, initial.modes))
+    remediation.modes = modesAttributes(current.modes) ?? null
+  if (Object.keys(remediation).length > 0) attributes.remediation = remediation
 
   return attributes
 }
@@ -110,9 +122,11 @@ function ClusterSettingsModalInner({
       disableAi,
       autoRemediate,
       remediationWorkbenchId,
-      remediationMinPriority,
-      remediationWindow,
-      remediationMaxJobs,
+      minPriority,
+      window,
+      maxJobs,
+      userId,
+      modes,
     },
     update: updateState,
     hasUpdates,
@@ -125,12 +139,12 @@ function ClusterSettingsModalInner({
       disableAi: !!cluster?.disableAi,
       autoRemediate: !!cluster?.remediationWorkbench?.id,
       remediationWorkbenchId: cluster?.remediationWorkbench?.id ?? null,
-      remediationMinPriority:
-        cluster?.remediationMinPriority ?? InsightComponentPriority.High,
-      remediationWindow:
-        cluster?.remediationWindow ?? DEFAULT_REMEDIATION_WINDOW,
-      remediationMaxJobs:
-        cluster?.remediationMaxJobs ?? DEFAULT_REMEDIATION_MAX_JOBS,
+      minPriority:
+        cluster?.remediation?.minPriority ?? InsightComponentPriority.High,
+      window: cluster?.remediation?.window ?? DEFAULT_REMEDIATION_WINDOW,
+      maxJobs: cluster?.remediation?.maxJobs ?? DEFAULT_REMEDIATION_MAX_JOBS,
+      userId: cluster?.remediation?.user?.id ?? null,
+      modes: modesFormValue(cluster?.remediation?.modes),
     },
     { tags: (a, b) => !isEqual(a, b) }
   )
@@ -165,9 +179,11 @@ function ClusterSettingsModalInner({
                     {
                       autoRemediate,
                       remediationWorkbenchId,
-                      remediationMinPriority,
-                      remediationWindow,
-                      remediationMaxJobs,
+                      minPriority,
+                      window,
+                      maxJobs,
+                      userId,
+                      modes,
                     },
                     initialState
                   ),
@@ -248,10 +264,10 @@ function ClusterSettingsModalInner({
             <FormField label="Minimum severity">
               <Select
                 label="Minimum severity"
-                selectedKey={remediationMinPriority}
+                selectedKey={minPriority}
                 onSelectionChange={(key) =>
                   updateState({
-                    remediationMinPriority: key
+                    minPriority: key
                       ? (String(key) as InsightComponentPriority)
                       : InsightComponentPriority.High,
                   })
@@ -272,10 +288,10 @@ function ClusterSettingsModalInner({
               <Input
                 type="number"
                 min={1}
-                value={remediationWindow}
+                value={window}
                 onChange={(event) =>
                   updateState({
-                    remediationWindow: Number.parseInt(event.target.value, 10),
+                    window: Number.parseInt(event.target.value, 10),
                   })
                 }
               />
@@ -287,14 +303,41 @@ function ClusterSettingsModalInner({
               <Input
                 type="number"
                 min={1}
-                value={remediationMaxJobs}
+                value={maxJobs}
                 onChange={(event) =>
                   updateState({
-                    remediationMaxJobs: Number.parseInt(event.target.value, 10),
+                    maxJobs: Number.parseInt(event.target.value, 10),
                   })
                 }
               />
             </FormField>
+            {remediationWorkbenchId && (
+              <>
+                <WorkbenchAccessibleUserSelect
+                  key={remediationWorkbenchId}
+                  workbenchId={remediationWorkbenchId}
+                  selectedUserId={userId ?? ''}
+                  onSelectionChange={(id) => updateState({ userId: id })}
+                  hint="Leave unset to run jobs as the workbench bot user. A selected user must be able to read the workbench."
+                />
+                {userId && (
+                  <Button
+                    type="button"
+                    secondary
+                    small
+                    alignSelf="flex-start"
+                    onClick={() => updateState({ userId: null })}
+                  >
+                    Use workbench bot
+                  </Button>
+                )}
+                <WorkbenchModesForm
+                  workbenchId={remediationWorkbenchId}
+                  value={modes}
+                  onChange={(next) => updateState({ modes: next })}
+                />
+              </>
+            )}
           </>
         )}
         {error && <GqlError error={error} />}

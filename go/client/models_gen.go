@@ -839,7 +839,13 @@ type AiInsight struct {
 	// a shortish summary of this insight
 	Summary *string `json:"summary,omitempty"`
 	// any errors generated when compiling this insight
-	Error                   []*ServiceError          `json:"error,omitempty"`
+	Error []*ServiceError `json:"error,omitempty"`
+	// sha of this insight when auto-remediation last started a job for it
+	RemediatedSha *string `json:"remediatedSha,omitempty"`
+	// when auto-remediation last started a job for this insight
+	RemediatedAt *string `json:"remediatedAt,omitempty"`
+	// the workbench job auto-remediation last started for this insight
+	RemediationJob          *WorkbenchJob            `json:"remediationJob,omitempty"`
 	Freshness               *InsightFreshness        `json:"freshness,omitempty"`
 	Alert                   *Alert                   `json:"alert,omitempty"`
 	Service                 *ServiceDeployment       `json:"service,omitempty"`
@@ -2140,12 +2146,8 @@ type Cluster struct {
 	PingInterval *int64 `json:"pingInterval,omitempty"`
 	// whether to disable ai insights for this cluster
 	DisableAi *bool `json:"disableAi,omitempty"`
-	// minimum insight component priority required before auto-remediation starts a job
-	RemediationMinPriority *InsightComponentPriority `json:"remediationMinPriority,omitempty"`
-	// seconds to suppress another auto-remediation job for the same finding
-	RemediationWindow *int64 `json:"remediationWindow,omitempty"`
-	// maximum auto-remediation jobs to start for this cluster within the throttle window
-	RemediationMaxJobs *int64 `json:"remediationMaxJobs,omitempty"`
+	// auto-remediation policy, run-as user, and job modes
+	Remediation *ClusterRemediation `json:"remediation,omitempty"`
 	// The version of OpenShift this cluster is running
 	OpenshiftVersion *string `json:"openshiftVersion,omitempty"`
 	// The number of nodes in this cluster
@@ -2300,13 +2302,9 @@ type ClusterAttributes struct {
 	DisableAi *bool `json:"disableAi,omitempty"`
 	// workbench that receives auto-remediation jobs for this cluster
 	RemediationWorkbenchID *string `json:"remediationWorkbenchId,omitempty"`
-	// minimum insight component priority required before auto-remediation starts a job
-	RemediationMinPriority *InsightComponentPriority `json:"remediationMinPriority,omitempty"`
-	// seconds to suppress another auto-remediation job for the same finding
-	RemediationWindow *int64 `json:"remediationWindow,omitempty"`
-	// maximum auto-remediation jobs to start for this cluster within the throttle window
-	RemediationMaxJobs *int64                   `json:"remediationMaxJobs,omitempty"`
-	CloudSettings      *CloudSettingsAttributes `json:"cloudSettings,omitempty"`
+	// auto-remediation policy, run-as user, and job modes
+	Remediation   *ClusterRemediationAttributes `json:"remediation,omitempty"`
+	CloudSettings *CloudSettingsAttributes      `json:"cloudSettings,omitempty"`
 	// the project id this cluster will belong to
 	ProjectID *string `json:"projectId,omitempty"`
 	// status of the upgrade plan for this cluster
@@ -2315,6 +2313,34 @@ type ClusterAttributes struct {
 	ReadBindings  []*PolicyBindingAttributes `json:"readBindings,omitempty"`
 	WriteBindings []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
 	Tags          []*TagAttributes           `json:"tags,omitempty"`
+}
+
+type ClusterRemediation struct {
+	// minimum insight component priority required before auto-remediation starts a job
+	MinPriority *InsightComponentPriority `json:"minPriority,omitempty"`
+	// seconds to suppress another auto-remediation job for the same finding
+	Window *int64 `json:"window,omitempty"`
+	// maximum auto-remediation jobs to start for this cluster within the throttle window
+	MaxJobs *int64 `json:"maxJobs,omitempty"`
+	// user auto-remediation jobs run as when set. Unset jobs run as the workbench bot user
+	UserID *string `json:"userId,omitempty"`
+	// user auto-remediation jobs run as when set
+	User *User `json:"user,omitempty"`
+	// job mode overrides applied to auto-remediation jobs
+	Modes *WorkbenchJobModes `json:"modes,omitempty"`
+}
+
+type ClusterRemediationAttributes struct {
+	// minimum insight component priority required before auto-remediation starts a job
+	MinPriority *InsightComponentPriority `json:"minPriority,omitempty"`
+	// seconds to suppress another auto-remediation job for the same finding
+	Window *int64 `json:"window,omitempty"`
+	// maximum auto-remediation jobs to start for this cluster within the throttle window
+	MaxJobs *int64 `json:"maxJobs,omitempty"`
+	// user auto-remediation jobs run as. Leave unset to run as the workbench bot user. Must be able to read the workbench, and only admins can choose someone other than themselves
+	UserID *string `json:"userId,omitempty"`
+	// job mode overrides, matching the options on workbench webhooks and crons
+	Modes *WorkbenchJobModesAttributes `json:"modes,omitempty"`
 }
 
 type ClusterAuditAttributes struct {
@@ -2821,16 +2847,12 @@ type ClusterUpdateAttributes struct {
 	DisableAi *bool `json:"disableAi,omitempty"`
 	// workbench that receives auto-remediation jobs for this cluster. Clear to disable auto-remediation
 	RemediationWorkbenchID *string `json:"remediationWorkbenchId,omitempty"`
-	// minimum insight component priority required before auto-remediation starts a job
-	RemediationMinPriority *InsightComponentPriority `json:"remediationMinPriority,omitempty"`
-	// seconds to suppress another auto-remediation job for the same finding
-	RemediationWindow *int64 `json:"remediationWindow,omitempty"`
-	// maximum auto-remediation jobs to start for this cluster within the throttle window
-	RemediationMaxJobs *int64                     `json:"remediationMaxJobs,omitempty"`
-	NodePools          []*NodePoolAttributes      `json:"nodePools,omitempty"`
-	Tags               []*TagAttributes           `json:"tags,omitempty"`
-	ReadBindings       []*PolicyBindingAttributes `json:"readBindings,omitempty"`
-	WriteBindings      []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
+	// auto-remediation policy, run-as user, and job modes. Omitted fields are left unchanged
+	Remediation   *ClusterRemediationAttributes `json:"remediation,omitempty"`
+	NodePools     []*NodePoolAttributes         `json:"nodePools,omitempty"`
+	Tags          []*TagAttributes              `json:"tags,omitempty"`
+	ReadBindings  []*PolicyBindingAttributes    `json:"readBindings,omitempty"`
+	WriteBindings []*PolicyBindingAttributes    `json:"writeBindings,omitempty"`
 }
 
 // A representation of an agentic attempt to upgrade this cluster
@@ -11642,10 +11664,6 @@ type WorkbenchJob struct {
 	Issue *Issue `json:"issue,omitempty"`
 	// the cluster this job was spawned to remediate
 	Cluster *Cluster `json:"cluster,omitempty"`
-	// identity of the cluster insight component this job remediates
-	ComponentKey *string `json:"componentKey,omitempty"`
-	// sha of the component insight this job was started from
-	InsightSha *string `json:"insightSha,omitempty"`
 	// the original job this job was spawned from (e.g. eval skill jobs) (sideloadable)
 	ReferencedJob *WorkbenchJob                   `json:"referencedJob,omitempty"`
 	Activities    *WorkbenchJobActivityConnection `json:"activities,omitempty"`

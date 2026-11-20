@@ -1569,6 +1569,33 @@ export const ClusterUpgradePlanFragmentDoc = /*#__PURE__*/ gql`
   kubeletSkew
 }
     ` as unknown as DocumentNode<Types.ClusterUpgradePlanFragment, unknown>;
+export const WorkbenchJobModesFieldsFragmentDoc = /*#__PURE__*/ gql`
+    fragment WorkbenchJobModesFields on WorkbenchJobModes {
+  plan
+  verification
+  model {
+    provider
+    model
+  }
+  coding {
+    approval
+    babysit
+    review
+  }
+  budget {
+    cost
+    tokens
+  }
+  kubernetes {
+    update
+    delete
+    exec
+    drain
+    excludeNamespaces
+    requireNamespaces
+  }
+}
+    ` as unknown as DocumentNode<Types.WorkbenchJobModesFieldsFragment, unknown>;
 export const ClustersRowFragmentDoc = /*#__PURE__*/ gql`
     fragment ClustersRow on Cluster {
   currentVersion
@@ -1622,16 +1649,25 @@ export const ClustersRowFragmentDoc = /*#__PURE__*/ gql`
     extendedFrom
   }
   disableAi
-  remediationMinPriority
-  remediationWindow
-  remediationMaxJobs
+  remediation {
+    minPriority
+    window
+    maxJobs
+    user {
+      id
+    }
+    modes {
+      ...WorkbenchJobModesFields
+    }
+  }
   remediationWorkbench {
     id
     name
   }
 }
     ${ClusterUpgradePlanFragmentDoc}
-${AiInsightSummaryFragmentDoc}` as unknown as DocumentNode<Types.ClustersRowFragment, unknown>;
+${AiInsightSummaryFragmentDoc}
+${WorkbenchJobModesFieldsFragmentDoc}` as unknown as DocumentNode<Types.ClustersRowFragment, unknown>;
 export const ApiDeprecationFragmentDoc = /*#__PURE__*/ gql`
     fragment ApiDeprecation on ApiDeprecation {
   availableIn
@@ -5535,33 +5571,6 @@ export const WorkbenchTinyFragmentDoc = /*#__PURE__*/ gql`
 }
     ${WorkbenchToolTinyFragmentDoc}
 ${WorkbenchWebhookTinyFragmentDoc}` as unknown as DocumentNode<Types.WorkbenchTinyFragment, unknown>;
-export const WorkbenchJobModesFieldsFragmentDoc = /*#__PURE__*/ gql`
-    fragment WorkbenchJobModesFields on WorkbenchJobModes {
-  plan
-  verification
-  model {
-    provider
-    model
-  }
-  coding {
-    approval
-    babysit
-    review
-  }
-  budget {
-    cost
-    tokens
-  }
-  kubernetes {
-    update
-    delete
-    exec
-    drain
-    excludeNamespaces
-    requireNamespaces
-  }
-}
-    ` as unknown as DocumentNode<Types.WorkbenchJobModesFieldsFragment, unknown>;
 export const WorkbenchToolConfigurationFieldsFragmentDoc = /*#__PURE__*/ gql`
     fragment WorkbenchToolConfigurationFields on WorkbenchToolConfiguration {
   http {

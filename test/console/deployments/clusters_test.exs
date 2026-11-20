@@ -664,15 +664,73 @@ defmodule Console.Deployments.ClustersTest do
 
       {:ok, updated} = Clusters.update_cluster(%{
         remediation_workbench_id: workbench.id,
-        remediation_min_priority: :critical,
-        remediation_window: 3600,
-        remediation_max_jobs: 1
+        remediation: %{min_priority: :critical, window: 3600, max_jobs: 1}
       }, cluster.id, user)
 
       assert updated.remediation_workbench_id == workbench.id
-      assert updated.remediation_min_priority == :critical
-      assert updated.remediation_window == 3600
-      assert updated.remediation_max_jobs == 1
+      assert updated.remediation.min_priority == :critical
+      assert updated.remediation.window == 3600
+      assert updated.remediation.max_jobs == 1
+    end
+
+    test "admins can run remediation as a user who can read the workbench" do
+      admin = admin_user()
+      actor = insert(:user)
+      cluster = insert(:cluster)
+      workbench = insert(:workbench, read_bindings: [%{user_id: actor.id}])
+
+      {:ok, updated} = Clusters.update_cluster(%{
+        remediation_workbench_id: workbench.id,
+        remediation: %{user_id: actor.id, modes: %{budget: %{tokens: 50}}}
+      }, cluster.id, admin)
+
+      assert updated.remediation.user_id == actor.id
+      assert updated.remediation.modes.budget.tokens == 50
+    end
+
+    test "writers can run remediation as themselves" do
+      user = insert(:user)
+      cluster = insert(:cluster, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, write_bindings: [%{user_id: user.id}])
+
+      {:ok, updated} = Clusters.update_cluster(%{
+        remediation_workbench_id: workbench.id,
+        remediation: %{user_id: user.id, max_jobs: 2}
+      }, cluster.id, user)
+
+      assert updated.remediation.user_id == user.id
+      assert updated.remediation.max_jobs == 2
+    end
+
+    test "writers cannot run remediation as another user" do
+      user = insert(:user)
+      other = insert(:user)
+      cluster = insert(:cluster, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench,
+        write_bindings: [%{user_id: user.id}],
+        read_bindings: [%{user_id: other.id}]
+      )
+
+      assert {:error, "you can only run remediation as yourself"} = Clusters.update_cluster(%{
+        remediation_workbench_id: workbench.id,
+        remediation: %{user_id: other.id}
+      }, cluster.id, user)
+
+      refute Console.Repo.reload!(cluster).remediation_workbench_id
+    end
+
+    test "admins cannot run remediation as a user who cannot read the workbench" do
+      admin = admin_user()
+      actor = insert(:user)
+      cluster = insert(:cluster)
+      workbench = insert(:workbench, project: insert(:project))
+
+      assert {:error, "remediation user cannot read this workbench"} = Clusters.update_cluster(%{
+        remediation_workbench_id: workbench.id,
+        remediation: %{user_id: actor.id}
+      }, cluster.id, admin)
+
+      refute Console.Repo.reload!(cluster).remediation_workbench_id
     end
 
     test "writers cannot target a remediation workbench they cannot read" do

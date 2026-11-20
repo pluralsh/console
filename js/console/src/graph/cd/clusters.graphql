@@ -218,9 +218,17 @@ fragment ClustersRow on Cluster {
     extendedFrom
   }
   disableAi
-  remediationMinPriority
-  remediationWindow
-  remediationMaxJobs
+  remediation {
+    minPriority
+    window
+    maxJobs
+    user {
+      id
+    }
+    modes {
+      ...WorkbenchJobModesFields
+    }
+  }
   remediationWorkbench {
     id
     name

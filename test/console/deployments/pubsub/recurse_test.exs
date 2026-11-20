@@ -975,9 +975,9 @@ defmodule Console.Deployments.PubSub.RecurseSyncTest do
       insert(:user, bot_name: "console", roles: %{admin: true})
       bot = insert(:user, roles: %{admin: true})
       workbench = insert(:workbench, bot_user: bot)
-      cluster = insert(:cluster, remediation_workbench: workbench, remediation_min_priority: :high)
+      cluster = insert(:cluster, remediation_workbench: workbench, remediation: %{min_priority: :high})
       insight = insert(:ai_insight, text: "Certificate is not ready", sha: "cert-sha")
-      insert(:cluster_insight_component,
+      component = insert(:cluster_insight_component,
         cluster: cluster,
         priority: :critical,
         group: "cert-manager.io",
@@ -994,8 +994,8 @@ defmodule Console.Deployments.PubSub.RecurseSyncTest do
       assert job.workbench_id == workbench.id
       assert job.user_id == bot.id
       assert job.cluster_id == cluster.id
-      assert job.insight_sha == "cert-sha"
       assert job.prompt =~ "serving-cert"
+      assert Console.Repo.reload!(component.insight).remediation_job_id == job.id
       assert_receive {:event, %PubSub.WorkbenchJobCreated{item: ^job}}
     end
 

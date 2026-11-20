@@ -59,9 +59,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :kubeconfig,     :kubeconfig_attributes
     field :disable_ai,     :boolean, description: "whether to disable ai insights for this cluster"
     field :remediation_workbench_id, :id, description: "workbench that receives auto-remediation jobs for this cluster"
-    field :remediation_min_priority, :insight_component_priority, description: "minimum insight component priority required before auto-remediation starts a job"
-    field :remediation_window, :integer, description: "seconds to suppress another auto-remediation job for the same finding"
-    field :remediation_max_jobs, :integer, description: "maximum auto-remediation jobs to start for this cluster within the throttle window"
+    field :remediation, :cluster_remediation_attributes, description: "auto-remediation policy, run-as user, and job modes"
     field :cloud_settings, :cloud_settings_attributes
     field :project_id,     :id, description: "the project id this cluster will belong to"
     field :upgrade_plan,   :upgrade_plan_attributes, description: "status of the upgrade plan for this cluster"
@@ -128,9 +126,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :metadata,     :json
     field :disable_ai,   :boolean, description: "whether to disable ai insights for this cluster"
     field :remediation_workbench_id, :id, description: "workbench that receives auto-remediation jobs for this cluster. Clear to disable auto-remediation"
-    field :remediation_min_priority, :insight_component_priority, description: "minimum insight component priority required before auto-remediation starts a job"
-    field :remediation_window, :integer, description: "seconds to suppress another auto-remediation job for the same finding"
-    field :remediation_max_jobs, :integer, description: "maximum auto-remediation jobs to start for this cluster within the throttle window"
+    field :remediation, :cluster_remediation_attributes, description: "auto-remediation policy, run-as user, and job modes. Omitted fields are left unchanged"
     field :node_pools,   list_of(:node_pool_attributes)
     field :tags,         list_of(:tag_attributes)
     field :read_bindings,  list_of(:policy_binding_attributes)
@@ -559,6 +555,23 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :memory_usage, list_of(:metric_response)
   end
 
+  input_object :cluster_remediation_attributes do
+    field :min_priority, :insight_component_priority, description: "minimum insight component priority required before auto-remediation starts a job"
+    field :window, :integer, description: "seconds to suppress another auto-remediation job for the same finding"
+    field :max_jobs, :integer, description: "maximum auto-remediation jobs to start for this cluster within the throttle window"
+    field :user_id, :id, description: "user auto-remediation jobs run as. Leave unset to run as the workbench bot user. Must be able to read the workbench, and only admins can choose someone other than themselves"
+    field :modes, :workbench_job_modes_attributes, description: "job mode overrides, matching the options on workbench webhooks and crons"
+  end
+
+  object :cluster_remediation do
+    field :min_priority, :insight_component_priority, description: "minimum insight component priority required before auto-remediation starts a job"
+    field :window, :integer, description: "seconds to suppress another auto-remediation job for the same finding"
+    field :max_jobs, :integer, description: "maximum auto-remediation jobs to start for this cluster within the throttle window"
+    field :user_id, :id, description: "user auto-remediation jobs run as when set. Unset jobs run as the workbench bot user"
+    field :user, :user, resolve: dataloader(User), description: "user auto-remediation jobs run as when set"
+    field :modes, :workbench_job_modes, description: "job mode overrides applied to auto-remediation jobs"
+  end
+
   @desc "a representation of a cluster you can deploy to"
   object :cluster do
     field :id,                non_null(:id), description: "internal id of this cluster"
@@ -578,9 +591,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :upgrade_plan,      :cluster_upgrade_plan, description: "Checklist of tasks to complete to safely upgrade this cluster"
     field :ping_interval,      :integer, description: "the interval in seconds between pings to the cluster"
     field :disable_ai,         :boolean, description: "whether to disable ai insights for this cluster"
-    field :remediation_min_priority, :insight_component_priority, description: "minimum insight component priority required before auto-remediation starts a job"
-    field :remediation_window,       :integer, description: "seconds to suppress another auto-remediation job for the same finding"
-    field :remediation_max_jobs,     :integer, description: "maximum auto-remediation jobs to start for this cluster within the throttle window"
+    field :remediation,        :cluster_remediation, description: "auto-remediation policy, run-as user, and job modes"
 
     field :openshift_version,  :string, description: "The version of OpenShift this cluster is running"
     field :node_count,         :integer, description: "The number of nodes in this cluster"
