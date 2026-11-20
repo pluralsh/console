@@ -1,13 +1,11 @@
 import {
   Accordion,
   AccordionItem,
-  AiSparkleOutlineIcon,
   Button,
   Flex,
   HamburgerMenuCollapseIcon,
   IconFrame,
   SearchDocsIcon,
-  SearchIcon,
 } from '@pluralsh/design-system'
 import { ARBITRARY_VALUE_NAME } from 'components/utils/IconExpander'
 import { CaptionP } from 'components/utils/typography/Text'
@@ -31,7 +29,7 @@ export function InsightDisplay({
   insight: Nullable<AiInsightFragment>
   kind: Nullable<string>
   loading: boolean
-  /** When set, merges title, last-updated, and actions into one panel header. */
+  /** When set, shows last-updated and these actions on the right of the panel header. */
   headerActions?: ReactNode
 }) {
   const evidence = insight?.evidence?.filter(isNonNullable)
@@ -43,30 +41,20 @@ export function InsightDisplay({
   return (
     <WrapperSC>
       <LeftSideSC>
-        <ContentHeaderSC $compact={compactHeader}>
-          {compactHeader ? (
-            <Flex
-              direction="column"
-              gap="xxsmall"
-              justify="center"
-            >
-              <span>insight</span>
-              {insight?.updatedAt && (
-                <CaptionP $color="text-xlight">
-                  Last updated {fromNow(insight.updatedAt)}
-                </CaptionP>
-              )}
-            </Flex>
-          ) : (
-            <Flex gap="small">
-              <AiSparkleOutlineIcon />
-              <span>insight</span>
-            </Flex>
-          )}
+        <ContentHeaderSC>
+          <span>insights</span>
           <Flex
             align="center"
             gap="small"
           >
+            {compactHeader && insight?.updatedAt && (
+              <CaptionP
+                $color="text-xlight"
+                css={{ textTransform: 'none' }}
+              >
+                Last updated {fromNow(insight.updatedAt)}
+              </CaptionP>
+            )}
             {hasEvidence && !isExpanded && (
               <Button
                 secondary
@@ -102,10 +90,7 @@ export function InsightDisplay({
           >
             <RightSideSC>
               <ContentHeaderSC css={{ paddingRight: 0 }}>
-                <Flex gap="small">
-                  <SearchIcon />
-                  <span>evidence</span>
-                </Flex>
+                <span>evidence</span>
                 <IconFrame
                   clickable
                   size="large"
@@ -139,25 +124,23 @@ const WrapperSC = styled.div(({ theme }) => ({
       : theme.colors['fill-one'],
 }))
 
-const ContentHeaderSC = styled.div<{ $compact?: boolean }>(
-  ({ theme, $compact }) => ({
-    ...theme.partials.text.overline,
-    color: theme.colors['text-xlight'],
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: theme.spacing.small,
-    height: $compact ? 'auto' : HEADER_HEIGHT,
-    minHeight: HEADER_HEIGHT,
-    minWidth: 0,
-    background:
-      theme.mode === 'light'
-        ? theme.colors['fill-one']
-        : theme.colors['fill-two'],
-    borderBottom: theme.borders['fill-two'],
-    padding: `${theme.spacing.small} ${theme.spacing.medium}`,
-  })
-)
+const ContentHeaderSC = styled.div(({ theme }) => ({
+  ...theme.partials.text.overline,
+  color: theme.colors['text-xlight'],
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: theme.spacing.small,
+  height: HEADER_HEIGHT,
+  flexShrink: 0,
+  minWidth: 0,
+  background:
+    theme.mode === 'light'
+      ? theme.colors['fill-one']
+      : theme.colors['fill-two'],
+  borderBottom: theme.borders['fill-two'],
+  padding: `0 ${theme.spacing.medium}`,
+}))
 
 const LeftSideSC = styled.div({
   display: 'flex',

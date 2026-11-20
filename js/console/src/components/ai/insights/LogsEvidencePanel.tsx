@@ -4,7 +4,6 @@ import {
   CaretRightIcon,
   Flex,
   IconFrame,
-  LogsIcon,
   ReturnIcon,
   WrapWithIf,
 } from '@pluralsh/design-system'
@@ -62,7 +61,6 @@ export function LogsEvidencePanel({
           >
             <BasicEvidenceLine
               key={i}
-              icon={<LogsIcon />}
               content={log.line ?? log.lines?.[0]?.log}
               onClick={() => setSelectedLog(log)}
               isTable={isTable}
@@ -80,7 +78,7 @@ export function BasicEvidenceLine({
   onClick,
   isTable,
 }: {
-  icon: ReactElement
+  icon?: ReactElement
   content: ReactNode
   onClick: () => void
   isTable: boolean
@@ -90,11 +88,13 @@ export function BasicEvidenceLine({
       $table={isTable}
       onClick={onClick}
     >
-      <IconFrame
-        icon={icon}
-        css={{ flexShrink: 0 }}
-        type="secondary"
-      />
+      {icon && (
+        <IconFrame
+          icon={icon}
+          css={{ flexShrink: 0 }}
+          type="secondary"
+        />
+      )}
       <span css={{ ...TRUNCATE, flex: 1 }}>{content}</span>
       <IconFrame
         clickable
