@@ -4,32 +4,28 @@ release_url: https://github.com/chaos-mesh/chaos-mesh/releases/tag/v{vsn}
 helm_repository_url: https://charts.chaos-mesh.org
 chart_name: chaos-mesh
 versions:
-- version: 2.8.7
+- version: 2.8.8
   kube: ['1.37', '1.36', '1.35']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
-    chart_updates: ['Workflow task pods can now be configured with `serviceAccountName`,
-        `nodeSelector`, and `tolerations` (new options added alongside application
-        support).', Helm-based installs should account for `enableCtrlServer` defaulting
-        to `false` since v2.8.0 (verify if your deployment depends on the controller
-        server being enabled)., 'Helm chart supports deploying extra Kubernetes objects
-        (introduced in v2.8.0), which you can use to manage additional RBAC/Secrets/Configs
-        as part of the release.']
-    features: ['Workflow tasks: can set `serviceAccountName` for task pods and also
-        apply `nodeSelector`/`tolerations` to schedule task pods onto specific nodes
-        (v2.8.7).', Helm chart can deploy extra Kubernetes objects as part of the
-        release (v2.8.0)., 'Workflow templates: supports adding labels to `workflow.spec.templates.task`
-        (v2.8.0).']
-    breaking_changes: [Docker runtime client migrated to the Moby SDK with automatic
-        API negotiation; requires Docker Engine 19.03+ on nodes running the Chaos
-        Daemon (v2.8.7)., 'Helm chart default changed: `enableCtrlServer` is `false`
-        by default starting v2.8.0; deployments relying on the controller server endpoint
-        must explicitly enable it.']
-  chart_version: 2.8.7
-  images: ['ghcr.io/chaos-mesh/chaos-coredns:v0.2.8', 'ghcr.io/chaos-mesh/chaos-daemon:v2.8.7',
-    'ghcr.io/chaos-mesh/chaos-dashboard:v2.8.7', 'ghcr.io/chaos-mesh/chaos-mesh:v2.8.7']
+    chart_updates: [Chaosd/PhysicalMachineChaos config mapping corrections and improved
+        controller selection via enabledControllers., 'Default behavior change: when
+        podPhaseSelectors is unset, Succeeded/Failed pods are skipped.', 'Build/packaging
+        changes: Go build metadata used for version info; chaos-daemon-helper now
+        built without CGO.']
+    features: ['Helm chart can deploy extra Kubernetes objects (useful for additional
+        RBAC, NetworkPolicies, etc.).', Workflow task templates now support labels
+        for better selection/organization.]
+    breaking_changes: [Redis Sentinel `redisPath` type corrected from boolean to string
+        directory path to the `redis-server` executable; existing boolean values must
+        be removed or replaced before upgrade., 'PhysicalMachineChaos disk-fill behavior
+        corrected: `fill-by-fallocate=true` uses fallocate; `false` or unset now uses
+        dd (previously mismapped).']
+  chart_version: 2.8.8
+  images: ['ghcr.io/chaos-mesh/chaos-coredns:v0.2.8', 'ghcr.io/chaos-mesh/chaos-daemon:v2.8.8',
+    'ghcr.io/chaos-mesh/chaos-dashboard:v2.8.8', 'ghcr.io/chaos-mesh/chaos-mesh:v2.8.8']
 - version: 2.8.0
   kube: ['1.37', '1.36', '1.35']
   requirements: []

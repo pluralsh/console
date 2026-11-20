@@ -1,8 +1,9 @@
-import { EmptyState } from '@pluralsh/design-system'
-import { MetricsCard } from 'components/utils/metrics/MetricsCard'
-import { MetricsScrollSC } from 'components/utils/metrics/MetricsGraphCard'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
-
+import { usageFieldVariables } from 'components/cd/cluster/metrics/clusterMetricsGraphs'
+import { UsageMetricGraphCard } from 'components/cd/cluster/metrics/UsageMetricGraphCard'
+import {
+  MetricsGraphGrid,
+  MetricsScrollSC,
+} from 'components/utils/metrics/MetricsGraphCard'
 import { MetricsTimeRangeControl } from 'components/utils/timerange/MetricsTimeRangeControl'
 import { metricsQueryWindow } from 'components/utils/timerange/timeRange'
 import {
@@ -16,135 +17,55 @@ import { useServiceDeploymentComponentMetricsQuery } from 'generated/graphql'
 import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
-import { isNonNullable } from 'utils/isNonNullable'
 
 import { ComponentDetailsContext } from './ComponentDetails'
+import { getPodResourceReservations } from 'components/utils/metrics/podResourceReservations.ts'
 import {
-  PodResourceReservation,
-  getPodResourceReservations,
-} from 'components/utils/metrics/podResourceReservations.ts'
-import {
-  ResourceMetricsGraphs,
-  hasResourceMetrics,
-} from 'components/utils/metrics/ResourceMetricsGraphs.tsx'
+  type ResourceMetricGraph,
+  resourceMetricGraphs,
+} from 'components/utils/metrics/resourceMetricGraphs'
 import { ComponentDetailsWithPodsT } from './useFetchComponentDetails.tsx'
 
-function Metric({
+function ComponentMetricGraphCard({
   serviceId,
   componentId,
-  podReservations,
+  graph,
   timeRange,
 }: {
   serviceId?: string
   componentId?: string
-  podReservations?: PodResourceReservation[]
+  graph: ResourceMetricGraph
   timeRange: TimeRangeState
 }) {
-  const theme = useTheme()
   const {
     data: currentData,
     previousData,
     loading,
+    error,
   } = useServiceDeploymentComponentMetricsQuery({
     variables: {
       id: serviceId,
       componentId: componentId ?? '',
       ...metricsQueryWindow(timeRange.timeWindow),
+      ...usageFieldVariables(graph.fields),
     },
     skip: !serviceId || !componentId,
-    fetchPolicy: 'cache-and-network',
+    // every graph selects different fields of one un-normalized object, so
+    // caching makes each response re-diff every other graph's series
+    fetchPolicy: 'no-cache',
   })
   const data = useRangeQueryData(
     { data: currentData, previousData },
     timeRange.revision
   )
 
-  const {
-    cpu,
-    mem,
-    podCpu,
-    podMem,
-    cpuRequests,
-    memRequests,
-    cpuLimits,
-    memLimits,
-    podCpuRequests,
-    podMemRequests,
-    podCpuLimits,
-    podMemLimits,
-  } = useMemo(() => {
-    const {
-      cpu,
-      mem,
-      podCpu,
-      podMem,
-      cpuRequests,
-      memRequests,
-      cpuLimits,
-      memLimits,
-      podCpuRequests,
-      podMemRequests,
-      podCpuLimits,
-      podMemLimits,
-    } = data?.serviceDeployment?.componentMetrics || {}
-
-    return {
-      cpu: (cpu || []).filter(isNonNullable),
-      mem: (mem || []).filter(isNonNullable),
-      podCpu: (podCpu || []).filter(isNonNullable),
-      podMem: (podMem || []).filter(isNonNullable),
-      cpuRequests: (cpuRequests || []).filter(isNonNullable),
-      memRequests: (memRequests || []).filter(isNonNullable),
-      cpuLimits: (cpuLimits || []).filter(isNonNullable),
-      memLimits: (memLimits || []).filter(isNonNullable),
-      podCpuRequests: (podCpuRequests || []).filter(isNonNullable),
-      podMemRequests: (podMemRequests || []).filter(isNonNullable),
-      podCpuLimits: (podCpuLimits || []).filter(isNonNullable),
-      podMemLimits: (podMemLimits || []).filter(isNonNullable),
-    }
-  }, [data])
-
-  if (loading && !data) return <LoadingIndicator />
-
-  if (
-    !hasResourceMetrics({
-      cpu,
-      mem,
-      podCpu,
-      podMem,
-      cpuRequests,
-      memRequests,
-      cpuLimits,
-      memLimits,
-      podCpuRequests,
-      podMemRequests,
-      podCpuLimits,
-      podMemLimits,
-    })
-  )
-    return (
-      <MetricsCard css={{ padding: theme.spacing.medium }}>
-        <EmptyState message="No metrics available" />
-      </MetricsCard>
-    )
-
   return (
-    <ResourceMetricsGraphs
-      cpu={cpu}
-      mem={mem}
-      podCpu={podCpu}
-      podMem={podMem}
-      cpuRequests={cpuRequests}
-      memRequests={memRequests}
-      cpuLimits={cpuLimits}
-      memLimits={memLimits}
-      podCpuRequests={podCpuRequests}
-      podMemRequests={podMemRequests}
-      podCpuLimits={podCpuLimits}
-      podMemLimits={podMemLimits}
-      podReservations={podReservations}
-      timeWindow={timeRange.timeWindow}
-      onRangeSelect={timeRange.selectWindow}
+    <UsageMetricGraphCard
+      graph={graph}
+      metrics={data?.serviceDeployment?.componentMetrics}
+      loading={loading}
+      error={error}
+      timeRange={timeRange}
     />
   )
 }
@@ -155,10 +76,12 @@ export default function ComponentMetrics() {
   const { component, componentDetails, serviceId } =
     useOutletContext<ComponentDetailsContext>()
 
-  const podReservations = useMemo(
+  const graphs = useMemo(
     () =>
-      getPodResourceReservations(
-        (componentDetails as ComponentDetailsWithPodsT)?.pods
+      resourceMetricGraphs(
+        getPodResourceReservations(
+          (componentDetails as ComponentDetailsWithPodsT)?.pods
+        )
       ),
     [componentDetails]
   )
@@ -175,12 +98,17 @@ export default function ComponentMetrics() {
     >
       <MetricsTimeRangeControl timeRange={timeRange} />
       <MetricsScrollSC>
-        <Metric
-          serviceId={serviceId}
-          componentId={component?.id}
-          podReservations={podReservations}
-          timeRange={timeRange}
-        />
+        <MetricsGraphGrid>
+          {graphs.map((graph) => (
+            <ComponentMetricGraphCard
+              key={graph.key}
+              serviceId={serviceId}
+              componentId={component?.id}
+              graph={graph}
+              timeRange={timeRange}
+            />
+          ))}
+        </MetricsGraphGrid>
       </MetricsScrollSC>
     </div>
   )

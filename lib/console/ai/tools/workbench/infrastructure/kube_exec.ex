@@ -50,6 +50,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.KubeExec do
     case Clusters.get_cluster_by_handle(handle) do
       %Cluster{} ->
         KubeShell.new(
+          id: comp.id,
           handle: handle,
           namespace: ns,
           pod: p,

@@ -8,10 +8,14 @@
     - [AgentConfigurationCF](#plural-agent-kascfg-AgentConfigurationCF)
     - [ApiCF](#plural-agent-kascfg-ApiCF)
     - [ConfigurationFile](#plural-agent-kascfg-ConfigurationFile)
+    - [DevboxCF](#plural-agent-kascfg-DevboxCF)
+    - [DevboxConsoleCF](#plural-agent-kascfg-DevboxConsoleCF)
+    - [DevboxStreamsCF](#plural-agent-kascfg-DevboxStreamsCF)
     - [GoogleProfilerCF](#plural-agent-kascfg-GoogleProfilerCF)
     - [KubernetesApiCF](#plural-agent-kascfg-KubernetesApiCF)
     - [ListenAgentCF](#plural-agent-kascfg-ListenAgentCF)
     - [ListenApiCF](#plural-agent-kascfg-ListenApiCF)
+    - [ListenDevboxCF](#plural-agent-kascfg-ListenDevboxCF)
     - [ListenKubernetesApiCF](#plural-agent-kascfg-ListenKubernetesApiCF)
     - [ListenPrivateApiCF](#plural-agent-kascfg-ListenPrivateApiCF)
     - [LivenessProbeCF](#plural-agent-kascfg-LivenessProbeCF)
@@ -110,6 +114,64 @@ ConfigurationFile represents kas configuration file.
 | private_api | [PrivateApiCF](#plural-agent-kascfg-PrivateApiCF) |  | Private API for kas-&gt;kas communication. |
 | plural_url | [string](#string) |  | Plural URL address |
 | plural_insecure_skip_tls_verify | [bool](#bool) |  | Skip TLS certificate verification when connecting to Plural Console. |
+| devbox | [DevboxCF](#plural-agent-kascfg-DevboxCF) |  | DevBoxes: gateway tunnels, Control routing, Ingest forwarding and stream proxying. Disabled when unset. |
+
+
+
+
+
+
+<a name="plural-agent-kascfg-DevboxCF"></a>
+
+### DevboxCF
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| listen | [ListenDevboxCF](#plural-agent-kascfg-ListenDevboxCF) |  | Listener for devbox-gateway connections (gRPC over WebSocket) and browser stream WebSockets. |
+| url_path_prefix | [string](#string) |  | URL path prefix of the listener. Gateways connect to &lt;prefix&gt; and browsers to &lt;prefix&gt;/streams/&lt;stream_id&gt;. |
+| console | [DevboxConsoleCF](#plural-agent-kascfg-DevboxConsoleCF) |  | Console&#39;s gRPC server, where gateways&#39; devbox.v1.Ingest calls are forwarded. |
+| streams | [DevboxStreamsCF](#plural-agent-kascfg-DevboxStreamsCF) |  | Browser stream (terminal, VNC, preview) proxying. |
+| routing_timeout | [google.protobuf.Duration](#google-protobuf-Duration) |  | How long a devbox.v1.Control call waits for a gateway tunnel before failing with CLUSTER_OFFLINE. Must be shorter than console&#39;s Control call timeout (30s). |
+| redis_conn_info_ttl | [google.protobuf.Duration](#google-protobuf-Duration) |  | TTL and refresh period of the Redis records saying which KAS replica holds a cluster&#39;s gateway tunnels. |
+| redis_conn_info_refresh | [google.protobuf.Duration](#google-protobuf-Duration) |  |  |
+
+
+
+
+
+
+<a name="plural-agent-kascfg-DevboxConsoleCF"></a>
+
+### DevboxConsoleCF
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| address | [string](#string) |  | host:port of console&#39;s gRPC server (devbox.v1.Ingest), e.g. console.plrl-console:50051. |
+| authentication_secret_file | [string](#string) |  | Secret (base64, like api.listen.authentication_secret_file) used to sign the short-lived `aud: plural-console` JWT KAS sends with every forwarded Ingest call. Defaults to api.listen.authentication_secret_file. |
+| tls | [bool](#bool) |  | Dial console with TLS. |
+| ca_certificate_file | [string](#string) |  | Optional X.509 CA certificate in PEM format to verify console&#39;s certificate when tls is set. |
+| timeout | [google.protobuf.Duration](#google-protobuf-Duration) |  | Timeout for a forwarded Ingest call if the gateway set no deadline. |
+
+
+
+
+
+
+<a name="plural-agent-kascfg-DevboxStreamsCF"></a>
+
+### DevboxStreamsCF
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| token_secret_file | [string](#string) |  | File holding the HS256 key console signs stream tokens with (the raw bytes of console&#39;s DEVBOX_STREAM_TOKEN_KEY; surrounding whitespace is trimmed). Streams are disabled when unset. |
+| token_audience | [string](#string) |  | Expected `aud` claim of stream tokens. |
+| token_leeway | [google.protobuf.Duration](#google-protobuf-Duration) |  | Allowed clock skew when checking `exp` and `nbf`. |
 
 
 
@@ -193,6 +255,28 @@ ConfigurationFile represents kas configuration file.
 | key_file | [string](#string) |  | X.509 key file for TLS in PEM format. TLS is enabled iff both certificate_file and key_file are provided. |
 | max_connection_age | [google.protobuf.Duration](#google-protobuf-Duration) |  | Max age of a connection. Connection is closed gracefully once it&#39;s too old and there is no streaming happening. |
 | listen_grace_period | [google.protobuf.Duration](#google-protobuf-Duration) |  | How much time to wait before stopping accepting new connections on shutdown. |
+
+
+
+
+
+
+<a name="plural-agent-kascfg-ListenDevboxCF"></a>
+
+### ListenDevboxCF
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| network | [string](#string) | optional | Network type to listen on. Supported values: tcp, tcp4, tcp6, unix. |
+| address | [string](#string) |  | Address to listen on. |
+| certificate_file | [string](#string) |  | X.509 certificate for TLS in PEM format. TLS is enabled iff both certificate_file and key_file are provided. |
+| key_file | [string](#string) |  | X.509 key file for TLS in PEM format. TLS is enabled iff both certificate_file and key_file are provided. |
+| connections_per_token_per_minute | [uint32](#uint32) |  | Maximum number of gRPC calls (tunnels and Ingest calls) to allow per deploy token per minute. |
+| max_connection_age | [google.protobuf.Duration](#google-protobuf-Duration) |  | Max age of a connection. Connection is closed gracefully once it&#39;s too old and there is no streaming happening. |
+| listen_grace_period | [google.protobuf.Duration](#google-protobuf-Duration) |  | How much time to wait before stopping accepting new connections on shutdown. |
+| max_message_size | [uint32](#uint32) |  | Maximum size of a gRPC message or WebSocket frame on this listener, in bytes. |
 
 
 

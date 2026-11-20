@@ -22,6 +22,15 @@ spec:
                 name: {{ include "kas.serviceName" . }}
                 port:
                   number: {{ .Values.kas.service.kubernetesApiPort }}
+          {{- if .Values.kas.devbox.enabled }}
+          - path: {{ .Values.kas.devbox.path }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "kas.serviceName" . }}
+                port:
+                  number: {{ .Values.kas.service.devboxPort }}
+          {{- end }}
           - path: /
             pathType: Prefix
             backend:

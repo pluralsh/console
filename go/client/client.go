@@ -18,6 +18,7 @@ type ConsoleClient interface {
 	GetAgentRun(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRun, error)
 	GetAgentRunCredentials(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRunCredentials, error)
 	GetAgentRunStatus(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRunStatus, error)
+	GetAgentRunPending(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRunPending, error)
 	GetAgentRunMinimal(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRunMinimal, error)
 	ListAgentRuns(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListAgentRuns, error)
 	ListAgentRunsMinimal(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListAgentRunsMinimal, error)
@@ -112,6 +113,8 @@ type ConsoleClient interface {
 	GetServiceDeploymentComponents(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentComponents, error)
 	GetServiceDeploymentForAgent(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentForAgent, error)
 	GetServiceDeploymentByHandle(ctx context.Context, cluster string, name string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentByHandle, error)
+	GetServiceDeploymentStatusByHandle(ctx context.Context, cluster string, name string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentStatusByHandle, error)
+	GetServiceDeploymentStatus(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentStatus, error)
 	GetServiceDeploymentTinyByHandle(ctx context.Context, cluster string, name string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentTinyByHandle, error)
 	GetServiceTarball(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetServiceTarball, error)
 	ListServiceDeployment(ctx context.Context, after *string, before *string, last *int64, clusterID *string, interceptors ...clientv2.RequestInterceptor) (*ListServiceDeployment, error)
@@ -128,6 +131,42 @@ type ConsoleClient interface {
 	DeleteGlobalService(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteGlobalService, error)
 	KickService(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*KickService, error)
 	KickServiceByHandle(ctx context.Context, cluster string, name string, interceptors ...clientv2.RequestInterceptor) (*KickServiceByHandle, error)
+	CliListDevboxes(ctx context.Context, workbenchID *string, q *string, first *int64, interceptors ...clientv2.RequestInterceptor) (*CliListDevboxes, error)
+	CliGetDevbox(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*CliGetDevbox, error)
+	CliDevboxAgents(ctx context.Context, workbenchID string, devboxID string, interceptors ...clientv2.RequestInterceptor) (*CliDevboxAgents, error)
+	CliListDevboxInstances(ctx context.Context, workbenchID string, first *int64, mine *bool, statuses []*DevboxInstanceStatus, interceptors ...clientv2.RequestInterceptor) (*CliListDevboxInstances, error)
+	CliGetDevboxInstance(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*CliGetDevboxInstance, error)
+	CliGetDevboxThread(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*CliGetDevboxThread, error)
+	CliDevboxInstanceCommands(ctx context.Context, threadID string, interceptors ...clientv2.RequestInterceptor) (*CliDevboxInstanceCommands, error)
+	CliDevboxRepositories(ctx context.Context, instanceID string, interceptors ...clientv2.RequestInterceptor) (*CliDevboxRepositories, error)
+	CliDevboxImportableSessions(ctx context.Context, instanceID string, interceptors ...clientv2.RequestInterceptor) (*CliDevboxImportableSessions, error)
+	CliDevboxTimeline(ctx context.Context, instanceID string, sessionID string, before *string, after *string, limit *int64, interceptors ...clientv2.RequestInterceptor) (*CliDevboxTimeline, error)
+	CliCreateDevboxInstance(ctx context.Context, workbenchID string, attributes DevboxInstanceAttributes, interceptors ...clientv2.RequestInterceptor) (*CliCreateDevboxInstance, error)
+	CliCancelDevboxInstance(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*CliCancelDevboxInstance, error)
+	CliSuspendDevboxInstance(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*CliSuspendDevboxInstance, error)
+	CliResumeDevboxInstance(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*CliResumeDevboxInstance, error)
+	CliPingDevboxInstance(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*CliPingDevboxInstance, error)
+	CliLeaveDevboxInstance(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*CliLeaveDevboxInstance, error)
+	CliKeepDevboxInstanceAwake(ctx context.Context, id string, until string, interceptors ...clientv2.RequestInterceptor) (*CliKeepDevboxInstanceAwake, error)
+	CliCancelDevboxKeepAwake(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*CliCancelDevboxKeepAwake, error)
+	CliAddDevboxRepository(ctx context.Context, instanceID string, repository string, interceptors ...clientv2.RequestInterceptor) (*CliAddDevboxRepository, error)
+	CliCreateDevboxThread(ctx context.Context, instanceID string, attributes *DevboxThreadAttributes, interceptors ...clientv2.RequestInterceptor) (*CliCreateDevboxThread, error)
+	CliImportDevboxThread(ctx context.Context, instanceID string, attributes DevboxImportAttributes, interceptors ...clientv2.RequestInterceptor) (*CliImportDevboxThread, error)
+	CliCloseDevboxThread(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*CliCloseDevboxThread, error)
+	CliForkDevboxThread(ctx context.Context, id string, title *string, interceptors ...clientv2.RequestInterceptor) (*CliForkDevboxThread, error)
+	CliPromptDevboxThread(ctx context.Context, id string, prompt *string, attachments []*graphql.Upload, interceptors ...clientv2.RequestInterceptor) (*CliPromptDevboxThread, error)
+	CliCancelDevboxPrompt(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*CliCancelDevboxPrompt, error)
+	CliRespondDevboxInteraction(ctx context.Context, id string, response DevboxInteractionResponseAttributes, interceptors ...clientv2.RequestInterceptor) (*CliRespondDevboxInteraction, error)
+	CliOpenDevboxStream(ctx context.Context, instanceID string, kind DevboxStreamKind, terminalID *string, port *int64, interceptors ...clientv2.RequestInterceptor) (*CliOpenDevboxStream, error)
+	GetDevbox(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetDevbox, error)
+	GetDevboxByName(ctx context.Context, name string, clusterID *string, interceptors ...clientv2.RequestInterceptor) (*GetDevboxByName, error)
+	UpsertDevbox(ctx context.Context, attributes DevboxAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertDevbox, error)
+	HeartbeatDevbox(ctx context.Context, id string, attributes DevboxHeartbeatAttributes, interceptors ...clientv2.RequestInterceptor) (*HeartbeatDevbox, error)
+	DeleteDevbox(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteDevbox, error)
+	MintDevboxProbeToken(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*MintDevboxProbeToken, error)
+	LinkAgentCredential(ctx context.Context, attributes AgentCredentialAttributes, interceptors ...clientv2.RequestInterceptor) (*LinkAgentCredential, error)
+	ListAgentCredentials(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*ListAgentCredentials, error)
+	DeleteAgentCredential(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteAgentCredential, error)
 	GetClusterRegistration(ctx context.Context, id *string, machineID *string, interceptors ...clientv2.RequestInterceptor) (*GetClusterRegistration, error)
 	GetClusterRegistrations(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*GetClusterRegistrations, error)
 	CreateClusterRegistration(ctx context.Context, attributes ClusterRegistrationCreateAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateClusterRegistration, error)
@@ -989,6 +1028,112 @@ func (t *AgentRunStatusFragment) GetPrompts() []*AgentRunStatusFragment_Prompts 
 		t = &AgentRunStatusFragment{}
 	}
 	return t.Prompts
+}
+
+type AgentRunPendingFragment struct {
+	ID              string                           "json:\"id\" graphql:\"id\""
+	Prompt          string                           "json:\"prompt\" graphql:\"prompt\""
+	Repository      string                           "json:\"repository\" graphql:\"repository\""
+	Mode            AgentRunMode                     "json:\"mode\" graphql:\"mode\""
+	ReviewDepth     *AgentReviewDepth                "json:\"reviewDepth,omitempty\" graphql:\"reviewDepth\""
+	Language        *AgentRunLanguage                "json:\"language,omitempty\" graphql:\"language\""
+	LanguageVersion *string                          "json:\"languageVersion,omitempty\" graphql:\"languageVersion\""
+	WorkbenchMcpURL *string                          "json:\"workbenchMcpUrl,omitempty\" graphql:\"workbenchMcpUrl\""
+	Runtime         *AgentRunPendingFragment_Runtime "json:\"runtime,omitempty\" graphql:\"runtime\""
+	Flow            *AgentRunPendingFragment_Flow    "json:\"flow,omitempty\" graphql:\"flow\""
+}
+
+func (t *AgentRunPendingFragment) GetID() string {
+	if t == nil {
+		t = &AgentRunPendingFragment{}
+	}
+	return t.ID
+}
+func (t *AgentRunPendingFragment) GetPrompt() string {
+	if t == nil {
+		t = &AgentRunPendingFragment{}
+	}
+	return t.Prompt
+}
+func (t *AgentRunPendingFragment) GetRepository() string {
+	if t == nil {
+		t = &AgentRunPendingFragment{}
+	}
+	return t.Repository
+}
+func (t *AgentRunPendingFragment) GetMode() *AgentRunMode {
+	if t == nil {
+		t = &AgentRunPendingFragment{}
+	}
+	return &t.Mode
+}
+func (t *AgentRunPendingFragment) GetReviewDepth() *AgentReviewDepth {
+	if t == nil {
+		t = &AgentRunPendingFragment{}
+	}
+	return t.ReviewDepth
+}
+func (t *AgentRunPendingFragment) GetLanguage() *AgentRunLanguage {
+	if t == nil {
+		t = &AgentRunPendingFragment{}
+	}
+	return t.Language
+}
+func (t *AgentRunPendingFragment) GetLanguageVersion() *string {
+	if t == nil {
+		t = &AgentRunPendingFragment{}
+	}
+	return t.LanguageVersion
+}
+func (t *AgentRunPendingFragment) GetWorkbenchMcpURL() *string {
+	if t == nil {
+		t = &AgentRunPendingFragment{}
+	}
+	return t.WorkbenchMcpURL
+}
+func (t *AgentRunPendingFragment) GetRuntime() *AgentRunPendingFragment_Runtime {
+	if t == nil {
+		t = &AgentRunPendingFragment{}
+	}
+	return t.Runtime
+}
+func (t *AgentRunPendingFragment) GetFlow() *AgentRunPendingFragment_Flow {
+	if t == nil {
+		t = &AgentRunPendingFragment{}
+	}
+	return t.Flow
+}
+
+type AgentRunUpdateFragment struct {
+	ID            string                                 "json:\"id\" graphql:\"id\""
+	Status        AgentRunStatus                         "json:\"status\" graphql:\"status\""
+	FollowupPrURL *string                                "json:\"followupPrUrl,omitempty\" graphql:\"followupPrUrl\""
+	PullRequests  []*AgentRunUpdateFragment_PullRequests "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
+}
+
+func (t *AgentRunUpdateFragment) GetID() string {
+	if t == nil {
+		t = &AgentRunUpdateFragment{}
+	}
+	return t.ID
+}
+func (t *AgentRunUpdateFragment) GetStatus() *AgentRunStatus {
+	if t == nil {
+		t = &AgentRunUpdateFragment{}
+	}
+	return &t.Status
+}
+func (t *AgentRunUpdateFragment) GetFollowupPrURL() *string {
+	if t == nil {
+		t = &AgentRunUpdateFragment{}
+	}
+	return t.FollowupPrURL
+}
+func (t *AgentRunUpdateFragment) GetPullRequests() []*AgentRunUpdateFragment_PullRequests {
+	if t == nil {
+		t = &AgentRunUpdateFragment{}
+	}
+	return t.PullRequests
 }
 
 type AgentRunMinimalFragment struct {
@@ -1969,6 +2114,1219 @@ func (t *ServiceDeploymentForAgent) GetDependencies() []*ServiceDependencyFragme
 		t = &ServiceDeploymentForAgent{}
 	}
 	return t.Dependencies
+}
+
+type CliDevboxTinyFragment struct {
+	ID     string        "json:\"id\" graphql:\"id\""
+	Name   string        "json:\"name\" graphql:\"name\""
+	Status *DevboxStatus "json:\"status,omitempty\" graphql:\"status\""
+}
+
+func (t *CliDevboxTinyFragment) GetID() string {
+	if t == nil {
+		t = &CliDevboxTinyFragment{}
+	}
+	return t.ID
+}
+func (t *CliDevboxTinyFragment) GetName() string {
+	if t == nil {
+		t = &CliDevboxTinyFragment{}
+	}
+	return t.Name
+}
+func (t *CliDevboxTinyFragment) GetStatus() *DevboxStatus {
+	if t == nil {
+		t = &CliDevboxTinyFragment{}
+	}
+	return t.Status
+}
+
+type CliDevboxFragment struct {
+	ID     string                    "json:\"id\" graphql:\"id\""
+	Name   string                    "json:\"name\" graphql:\"name\""
+	Status *DevboxStatus             "json:\"status,omitempty\" graphql:\"status\""
+	Agents []*CliDevboxAgentFragment "json:\"agents,omitempty\" graphql:\"agents\""
+}
+
+func (t *CliDevboxFragment) GetID() string {
+	if t == nil {
+		t = &CliDevboxFragment{}
+	}
+	return t.ID
+}
+func (t *CliDevboxFragment) GetName() string {
+	if t == nil {
+		t = &CliDevboxFragment{}
+	}
+	return t.Name
+}
+func (t *CliDevboxFragment) GetStatus() *DevboxStatus {
+	if t == nil {
+		t = &CliDevboxFragment{}
+	}
+	return t.Status
+}
+func (t *CliDevboxFragment) GetAgents() []*CliDevboxAgentFragment {
+	if t == nil {
+		t = &CliDevboxFragment{}
+	}
+	return t.Agents
+}
+
+type CliDevboxCommandFragment struct {
+	Name        string  "json:\"name\" graphql:\"name\""
+	Description *string "json:\"description,omitempty\" graphql:\"description\""
+	InputHint   *string "json:\"inputHint,omitempty\" graphql:\"inputHint\""
+}
+
+func (t *CliDevboxCommandFragment) GetName() string {
+	if t == nil {
+		t = &CliDevboxCommandFragment{}
+	}
+	return t.Name
+}
+func (t *CliDevboxCommandFragment) GetDescription() *string {
+	if t == nil {
+		t = &CliDevboxCommandFragment{}
+	}
+	return t.Description
+}
+func (t *CliDevboxCommandFragment) GetInputHint() *string {
+	if t == nil {
+		t = &CliDevboxCommandFragment{}
+	}
+	return t.InputHint
+}
+
+type CliDevboxAgentFragment struct {
+	Type                DevboxAgentType                             "json:\"type\" graphql:\"type\""
+	Default             *bool                                       "json:\"default,omitempty\" graphql:\"default\""
+	AdapterName         *string                                     "json:\"adapterName,omitempty\" graphql:\"adapterName\""
+	AdapterVersion      *string                                     "json:\"adapterVersion,omitempty\" graphql:\"adapterVersion\""
+	ModelSwitchable     *bool                                       "json:\"modelSwitchable,omitempty\" graphql:\"modelSwitchable\""
+	ProbeStatus         *DevboxProbeStatus                          "json:\"probeStatus,omitempty\" graphql:\"probeStatus\""
+	ProbeError          *string                                     "json:\"probeError,omitempty\" graphql:\"probeError\""
+	DefaultModel        *string                                     "json:\"defaultModel,omitempty\" graphql:\"defaultModel\""
+	Models              []*CliDevboxAgentFragment_Models            "json:\"models,omitempty\" graphql:\"models\""
+	SessionCapabilities *CliDevboxAgentFragment_SessionCapabilities "json:\"sessionCapabilities,omitempty\" graphql:\"sessionCapabilities\""
+}
+
+func (t *CliDevboxAgentFragment) GetType() *DevboxAgentType {
+	if t == nil {
+		t = &CliDevboxAgentFragment{}
+	}
+	return &t.Type
+}
+func (t *CliDevboxAgentFragment) GetDefault() *bool {
+	if t == nil {
+		t = &CliDevboxAgentFragment{}
+	}
+	return t.Default
+}
+func (t *CliDevboxAgentFragment) GetAdapterName() *string {
+	if t == nil {
+		t = &CliDevboxAgentFragment{}
+	}
+	return t.AdapterName
+}
+func (t *CliDevboxAgentFragment) GetAdapterVersion() *string {
+	if t == nil {
+		t = &CliDevboxAgentFragment{}
+	}
+	return t.AdapterVersion
+}
+func (t *CliDevboxAgentFragment) GetModelSwitchable() *bool {
+	if t == nil {
+		t = &CliDevboxAgentFragment{}
+	}
+	return t.ModelSwitchable
+}
+func (t *CliDevboxAgentFragment) GetProbeStatus() *DevboxProbeStatus {
+	if t == nil {
+		t = &CliDevboxAgentFragment{}
+	}
+	return t.ProbeStatus
+}
+func (t *CliDevboxAgentFragment) GetProbeError() *string {
+	if t == nil {
+		t = &CliDevboxAgentFragment{}
+	}
+	return t.ProbeError
+}
+func (t *CliDevboxAgentFragment) GetDefaultModel() *string {
+	if t == nil {
+		t = &CliDevboxAgentFragment{}
+	}
+	return t.DefaultModel
+}
+func (t *CliDevboxAgentFragment) GetModels() []*CliDevboxAgentFragment_Models {
+	if t == nil {
+		t = &CliDevboxAgentFragment{}
+	}
+	return t.Models
+}
+func (t *CliDevboxAgentFragment) GetSessionCapabilities() *CliDevboxAgentFragment_SessionCapabilities {
+	if t == nil {
+		t = &CliDevboxAgentFragment{}
+	}
+	return t.SessionCapabilities
+}
+
+type CliDevboxThreadFragment struct {
+	ID              string                            "json:\"id\" graphql:\"id\""
+	SessionID       *string                           "json:\"sessionId,omitempty\" graphql:\"sessionId\""
+	Kind            DevboxThreadKind                  "json:\"kind\" graphql:\"kind\""
+	Agent           *DevboxAgentType                  "json:\"agent,omitempty\" graphql:\"agent\""
+	Title           *string                           "json:\"title,omitempty\" graphql:\"title\""
+	AgentTitle      *string                           "json:\"agentTitle,omitempty\" graphql:\"agentTitle\""
+	Model           *string                           "json:\"model,omitempty\" graphql:\"model\""
+	Cwd             *string                           "json:\"cwd,omitempty\" graphql:\"cwd\""
+	Status          DevboxThreadStatus                "json:\"status\" graphql:\"status\""
+	Imported        *bool                             "json:\"imported,omitempty\" graphql:\"imported\""
+	Billing         *string                           "json:\"billing,omitempty\" graphql:\"billing\""
+	ForegroundState *DevboxForegroundState            "json:\"foregroundState,omitempty\" graphql:\"foregroundState\""
+	StopReason      *string                           "json:\"stopReason,omitempty\" graphql:\"stopReason\""
+	LastActivityAt  *string                           "json:\"lastActivityAt,omitempty\" graphql:\"lastActivityAt\""
+	InsertedAt      *string                           "json:\"insertedAt,omitempty\" graphql:\"insertedAt\""
+	Instance        *CliDevboxThreadFragment_Instance "json:\"instance,omitempty\" graphql:\"instance\""
+}
+
+func (t *CliDevboxThreadFragment) GetID() string {
+	if t == nil {
+		t = &CliDevboxThreadFragment{}
+	}
+	return t.ID
+}
+func (t *CliDevboxThreadFragment) GetSessionID() *string {
+	if t == nil {
+		t = &CliDevboxThreadFragment{}
+	}
+	return t.SessionID
+}
+func (t *CliDevboxThreadFragment) GetKind() *DevboxThreadKind {
+	if t == nil {
+		t = &CliDevboxThreadFragment{}
+	}
+	return &t.Kind
+}
+func (t *CliDevboxThreadFragment) GetAgent() *DevboxAgentType {
+	if t == nil {
+		t = &CliDevboxThreadFragment{}
+	}
+	return t.Agent
+}
+func (t *CliDevboxThreadFragment) GetTitle() *string {
+	if t == nil {
+		t = &CliDevboxThreadFragment{}
+	}
+	return t.Title
+}
+func (t *CliDevboxThreadFragment) GetAgentTitle() *string {
+	if t == nil {
+		t = &CliDevboxThreadFragment{}
+	}
+	return t.AgentTitle
+}
+func (t *CliDevboxThreadFragment) GetModel() *string {
+	if t == nil {
+		t = &CliDevboxThreadFragment{}
+	}
+	return t.Model
+}
+func (t *CliDevboxThreadFragment) GetCwd() *string {
+	if t == nil {
+		t = &CliDevboxThreadFragment{}
+	}
+	return t.Cwd
+}
+func (t *CliDevboxThreadFragment) GetStatus() *DevboxThreadStatus {
+	if t == nil {
+		t = &CliDevboxThreadFragment{}
+	}
+	return &t.Status
+}
+func (t *CliDevboxThreadFragment) GetImported() *bool {
+	if t == nil {
+		t = &CliDevboxThreadFragment{}
+	}
+	return t.Imported
+}
+func (t *CliDevboxThreadFragment) GetBilling() *string {
+	if t == nil {
+		t = &CliDevboxThreadFragment{}
+	}
+	return t.Billing
+}
+func (t *CliDevboxThreadFragment) GetForegroundState() *DevboxForegroundState {
+	if t == nil {
+		t = &CliDevboxThreadFragment{}
+	}
+	return t.ForegroundState
+}
+func (t *CliDevboxThreadFragment) GetStopReason() *string {
+	if t == nil {
+		t = &CliDevboxThreadFragment{}
+	}
+	return t.StopReason
+}
+func (t *CliDevboxThreadFragment) GetLastActivityAt() *string {
+	if t == nil {
+		t = &CliDevboxThreadFragment{}
+	}
+	return t.LastActivityAt
+}
+func (t *CliDevboxThreadFragment) GetInsertedAt() *string {
+	if t == nil {
+		t = &CliDevboxThreadFragment{}
+	}
+	return t.InsertedAt
+}
+func (t *CliDevboxThreadFragment) GetInstance() *CliDevboxThreadFragment_Instance {
+	if t == nil {
+		t = &CliDevboxThreadFragment{}
+	}
+	return t.Instance
+}
+
+type CliDevboxInteractionFragment struct {
+	ID         string                                  "json:\"id\" graphql:\"id\""
+	Kind       DevboxInteractionKind                   "json:\"kind\" graphql:\"kind\""
+	State      DevboxInteractionState                  "json:\"state\" graphql:\"state\""
+	Title      *string                                 "json:\"title,omitempty\" graphql:\"title\""
+	Message    *string                                 "json:\"message,omitempty\" graphql:\"message\""
+	URL        *string                                 "json:\"url,omitempty\" graphql:\"url\""
+	ToolCallID *string                                 "json:\"toolCallId,omitempty\" graphql:\"toolCallId\""
+	Options    []*CliDevboxInteractionFragment_Options "json:\"options,omitempty\" graphql:\"options\""
+	Thread     *CliDevboxInteractionFragment_Thread    "json:\"thread,omitempty\" graphql:\"thread\""
+}
+
+func (t *CliDevboxInteractionFragment) GetID() string {
+	if t == nil {
+		t = &CliDevboxInteractionFragment{}
+	}
+	return t.ID
+}
+func (t *CliDevboxInteractionFragment) GetKind() *DevboxInteractionKind {
+	if t == nil {
+		t = &CliDevboxInteractionFragment{}
+	}
+	return &t.Kind
+}
+func (t *CliDevboxInteractionFragment) GetState() *DevboxInteractionState {
+	if t == nil {
+		t = &CliDevboxInteractionFragment{}
+	}
+	return &t.State
+}
+func (t *CliDevboxInteractionFragment) GetTitle() *string {
+	if t == nil {
+		t = &CliDevboxInteractionFragment{}
+	}
+	return t.Title
+}
+func (t *CliDevboxInteractionFragment) GetMessage() *string {
+	if t == nil {
+		t = &CliDevboxInteractionFragment{}
+	}
+	return t.Message
+}
+func (t *CliDevboxInteractionFragment) GetURL() *string {
+	if t == nil {
+		t = &CliDevboxInteractionFragment{}
+	}
+	return t.URL
+}
+func (t *CliDevboxInteractionFragment) GetToolCallID() *string {
+	if t == nil {
+		t = &CliDevboxInteractionFragment{}
+	}
+	return t.ToolCallID
+}
+func (t *CliDevboxInteractionFragment) GetOptions() []*CliDevboxInteractionFragment_Options {
+	if t == nil {
+		t = &CliDevboxInteractionFragment{}
+	}
+	return t.Options
+}
+func (t *CliDevboxInteractionFragment) GetThread() *CliDevboxInteractionFragment_Thread {
+	if t == nil {
+		t = &CliDevboxInteractionFragment{}
+	}
+	return t.Thread
+}
+
+type CliDevboxInstanceFragment struct {
+	ID               string                                        "json:\"id\" graphql:\"id\""
+	Name             *string                                       "json:\"name,omitempty\" graphql:\"name\""
+	Agent            *DevboxAgentType                              "json:\"agent,omitempty\" graphql:\"agent\""
+	RequestedModel   *string                                       "json:\"requestedModel,omitempty\" graphql:\"requestedModel\""
+	Repositories     []*string                                     "json:\"repositories,omitempty\" graphql:\"repositories\""
+	Status           DevboxInstanceStatus                          "json:\"status\" graphql:\"status\""
+	StatusReason     *string                                       "json:\"statusReason,omitempty\" graphql:\"statusReason\""
+	ForegroundState  *DevboxForegroundState                        "json:\"foregroundState,omitempty\" graphql:\"foregroundState\""
+	RunningThreads   *int64                                        "json:\"runningThreads,omitempty\" graphql:\"runningThreads\""
+	WaitingThreads   *int64                                        "json:\"waitingThreads,omitempty\" graphql:\"waitingThreads\""
+	KeepAwakeUntil   *string                                       "json:\"keepAwakeUntil,omitempty\" graphql:\"keepAwakeUntil\""
+	AwakeSince       *string                                       "json:\"awakeSince,omitempty\" graphql:\"awakeSince\""
+	StartedAt        *string                                       "json:\"startedAt,omitempty\" graphql:\"startedAt\""
+	SuspendedAt      *string                                       "json:\"suspendedAt,omitempty\" graphql:\"suspendedAt\""
+	LastActivityAt   *string                                       "json:\"lastActivityAt,omitempty\" graphql:\"lastActivityAt\""
+	ViewerCount      *int64                                        "json:\"viewerCount,omitempty\" graphql:\"viewerCount\""
+	InsertedAt       *string                                       "json:\"insertedAt,omitempty\" graphql:\"insertedAt\""
+	AgentConnections []*CliDevboxInstanceFragment_AgentConnections "json:\"agentConnections,omitempty\" graphql:\"agentConnections\""
+	AgentBilling     []*CliDevboxInstanceFragment_AgentBilling     "json:\"agentBilling,omitempty\" graphql:\"agentBilling\""
+	Checkouts        []*CliDevboxCheckoutFragment                  "json:\"checkouts,omitempty\" graphql:\"checkouts\""
+	IdleState        *CliDevboxInstanceFragment_IdleState          "json:\"idleState,omitempty\" graphql:\"idleState\""
+	Workbench        *CliDevboxInstanceFragment_Workbench          "json:\"workbench,omitempty\" graphql:\"workbench\""
+	Devbox           *CliDevboxInstanceFragment_Devbox             "json:\"devbox,omitempty\" graphql:\"devbox\""
+	KeepAwakeBy      *CliDevboxInstanceFragment_KeepAwakeBy        "json:\"keepAwakeBy,omitempty\" graphql:\"keepAwakeBy\""
+	Threads          []*CliDevboxThreadFragment                    "json:\"threads,omitempty\" graphql:\"threads\""
+	Interactions     []*CliDevboxInteractionFragment               "json:\"interactions,omitempty\" graphql:\"interactions\""
+}
+
+func (t *CliDevboxInstanceFragment) GetID() string {
+	if t == nil {
+		t = &CliDevboxInstanceFragment{}
+	}
+	return t.ID
+}
+func (t *CliDevboxInstanceFragment) GetName() *string {
+	if t == nil {
+		t = &CliDevboxInstanceFragment{}
+	}
+	return t.Name
+}
+func (t *CliDevboxInstanceFragment) GetAgent() *DevboxAgentType {
+	if t == nil {
+		t = &CliDevboxInstanceFragment{}
+	}
+	return t.Agent
+}
+func (t *CliDevboxInstanceFragment) GetRequestedModel() *string {
+	if t == nil {
+		t = &CliDevboxInstanceFragment{}
+	}
+	return t.RequestedModel
+}
+func (t *CliDevboxInstanceFragment) GetRepositories() []*string {
+	if t == nil {
+		t = &CliDevboxInstanceFragment{}
+	}
+	return t.Repositories
+}
+func (t *CliDevboxInstanceFragment) GetStatus() *DevboxInstanceStatus {
+	if t == nil {
+		t = &CliDevboxInstanceFragment{}
+	}
+	return &t.Status
+}
+func (t *CliDevboxInstanceFragment) GetStatusReason() *string {
+	if t == nil {
+		t = &CliDevboxInstanceFragment{}
+	}
+	return t.StatusReason
+}
+func (t *CliDevboxInstanceFragment) GetForegroundState() *DevboxForegroundState {
+	if t == nil {
+		t = &CliDevboxInstanceFragment{}
+	}
+	return t.ForegroundState
+}
+func (t *CliDevboxInstanceFragment) GetRunningThreads() *int64 {
+	if t == nil {
+		t = &CliDevboxInstanceFragment{}
+	}
+	return t.RunningThreads
+}
+func (t *CliDevboxInstanceFragment) GetWaitingThreads() *int64 {
+	if t == nil {
+		t = &CliDevboxInstanceFragment{}
+	}
+	return t.WaitingThreads
+}
+func (t *CliDevboxInstanceFragment) GetKeepAwakeUntil() *string {
+	if t == nil {
+		t = &CliDevboxInstanceFragment{}
+	}
+	return t.KeepAwakeUntil
+}
+func (t *CliDevboxInstanceFragment) GetAwakeSince() *string {
+	if t == nil {
+		t = &CliDevboxInstanceFragment{}
+	}
+	return t.AwakeSince
+}
+func (t *CliDevboxInstanceFragment) GetStartedAt() *string {
+	if t == nil {
+		t = &CliDevboxInstanceFragment{}
+	}
+	return t.StartedAt
+}
+func (t *CliDevboxInstanceFragment) GetSuspendedAt() *string {
+	if t == nil {
+		t = &CliDevboxInstanceFragment{}
+	}
+	return t.SuspendedAt
+}
+func (t *CliDevboxInstanceFragment) GetLastActivityAt() *string {
+	if t == nil {
+		t = &CliDevboxInstanceFragment{}
+	}
+	return t.LastActivityAt
+}
+func (t *CliDevboxInstanceFragment) GetViewerCount() *int64 {
+	if t == nil {
+		t = &CliDevboxInstanceFragment{}
+	}
+	return t.ViewerCount
+}
+func (t *CliDevboxInstanceFragment) GetInsertedAt() *string {
+	if t == nil {
+		t = &CliDevboxInstanceFragment{}
+	}
+	return t.InsertedAt
+}
+func (t *CliDevboxInstanceFragment) GetAgentConnections() []*CliDevboxInstanceFragment_AgentConnections {
+	if t == nil {
+		t = &CliDevboxInstanceFragment{}
+	}
+	return t.AgentConnections
+}
+func (t *CliDevboxInstanceFragment) GetAgentBilling() []*CliDevboxInstanceFragment_AgentBilling {
+	if t == nil {
+		t = &CliDevboxInstanceFragment{}
+	}
+	return t.AgentBilling
+}
+func (t *CliDevboxInstanceFragment) GetCheckouts() []*CliDevboxCheckoutFragment {
+	if t == nil {
+		t = &CliDevboxInstanceFragment{}
+	}
+	return t.Checkouts
+}
+func (t *CliDevboxInstanceFragment) GetIdleState() *CliDevboxInstanceFragment_IdleState {
+	if t == nil {
+		t = &CliDevboxInstanceFragment{}
+	}
+	return t.IdleState
+}
+func (t *CliDevboxInstanceFragment) GetWorkbench() *CliDevboxInstanceFragment_Workbench {
+	if t == nil {
+		t = &CliDevboxInstanceFragment{}
+	}
+	return t.Workbench
+}
+func (t *CliDevboxInstanceFragment) GetDevbox() *CliDevboxInstanceFragment_Devbox {
+	if t == nil {
+		t = &CliDevboxInstanceFragment{}
+	}
+	return t.Devbox
+}
+func (t *CliDevboxInstanceFragment) GetKeepAwakeBy() *CliDevboxInstanceFragment_KeepAwakeBy {
+	if t == nil {
+		t = &CliDevboxInstanceFragment{}
+	}
+	return t.KeepAwakeBy
+}
+func (t *CliDevboxInstanceFragment) GetThreads() []*CliDevboxThreadFragment {
+	if t == nil {
+		t = &CliDevboxInstanceFragment{}
+	}
+	return t.Threads
+}
+func (t *CliDevboxInstanceFragment) GetInteractions() []*CliDevboxInteractionFragment {
+	if t == nil {
+		t = &CliDevboxInstanceFragment{}
+	}
+	return t.Interactions
+}
+
+type CliDevboxCheckoutFragment struct {
+	Path          *string "json:\"path,omitempty\" graphql:\"path\""
+	Name          *string "json:\"name,omitempty\" graphql:\"name\""
+	RemoteURL     *string "json:\"remoteUrl,omitempty\" graphql:\"remoteUrl\""
+	DefaultBranch *string "json:\"defaultBranch,omitempty\" graphql:\"defaultBranch\""
+	Branch        *string "json:\"branch,omitempty\" graphql:\"branch\""
+	HeadSha       *string "json:\"headSha,omitempty\" graphql:\"headSha\""
+	Dirty         *bool   "json:\"dirty,omitempty\" graphql:\"dirty\""
+	Ahead         *int64  "json:\"ahead,omitempty\" graphql:\"ahead\""
+	Behind        *int64  "json:\"behind,omitempty\" graphql:\"behind\""
+}
+
+func (t *CliDevboxCheckoutFragment) GetPath() *string {
+	if t == nil {
+		t = &CliDevboxCheckoutFragment{}
+	}
+	return t.Path
+}
+func (t *CliDevboxCheckoutFragment) GetName() *string {
+	if t == nil {
+		t = &CliDevboxCheckoutFragment{}
+	}
+	return t.Name
+}
+func (t *CliDevboxCheckoutFragment) GetRemoteURL() *string {
+	if t == nil {
+		t = &CliDevboxCheckoutFragment{}
+	}
+	return t.RemoteURL
+}
+func (t *CliDevboxCheckoutFragment) GetDefaultBranch() *string {
+	if t == nil {
+		t = &CliDevboxCheckoutFragment{}
+	}
+	return t.DefaultBranch
+}
+func (t *CliDevboxCheckoutFragment) GetBranch() *string {
+	if t == nil {
+		t = &CliDevboxCheckoutFragment{}
+	}
+	return t.Branch
+}
+func (t *CliDevboxCheckoutFragment) GetHeadSha() *string {
+	if t == nil {
+		t = &CliDevboxCheckoutFragment{}
+	}
+	return t.HeadSha
+}
+func (t *CliDevboxCheckoutFragment) GetDirty() *bool {
+	if t == nil {
+		t = &CliDevboxCheckoutFragment{}
+	}
+	return t.Dirty
+}
+func (t *CliDevboxCheckoutFragment) GetAhead() *int64 {
+	if t == nil {
+		t = &CliDevboxCheckoutFragment{}
+	}
+	return t.Ahead
+}
+func (t *CliDevboxCheckoutFragment) GetBehind() *int64 {
+	if t == nil {
+		t = &CliDevboxCheckoutFragment{}
+	}
+	return t.Behind
+}
+
+type CliDevboxRepositoryFragment struct {
+	Path          *string "json:\"path,omitempty\" graphql:\"path\""
+	Name          *string "json:\"name,omitempty\" graphql:\"name\""
+	RemoteURL     *string "json:\"remoteUrl,omitempty\" graphql:\"remoteUrl\""
+	DefaultBranch *string "json:\"defaultBranch,omitempty\" graphql:\"defaultBranch\""
+	Branch        *string "json:\"branch,omitempty\" graphql:\"branch\""
+	HeadSha       *string "json:\"headSha,omitempty\" graphql:\"headSha\""
+	Dirty         *bool   "json:\"dirty,omitempty\" graphql:\"dirty\""
+	Ahead         *int64  "json:\"ahead,omitempty\" graphql:\"ahead\""
+	Behind        *int64  "json:\"behind,omitempty\" graphql:\"behind\""
+}
+
+func (t *CliDevboxRepositoryFragment) GetPath() *string {
+	if t == nil {
+		t = &CliDevboxRepositoryFragment{}
+	}
+	return t.Path
+}
+func (t *CliDevboxRepositoryFragment) GetName() *string {
+	if t == nil {
+		t = &CliDevboxRepositoryFragment{}
+	}
+	return t.Name
+}
+func (t *CliDevboxRepositoryFragment) GetRemoteURL() *string {
+	if t == nil {
+		t = &CliDevboxRepositoryFragment{}
+	}
+	return t.RemoteURL
+}
+func (t *CliDevboxRepositoryFragment) GetDefaultBranch() *string {
+	if t == nil {
+		t = &CliDevboxRepositoryFragment{}
+	}
+	return t.DefaultBranch
+}
+func (t *CliDevboxRepositoryFragment) GetBranch() *string {
+	if t == nil {
+		t = &CliDevboxRepositoryFragment{}
+	}
+	return t.Branch
+}
+func (t *CliDevboxRepositoryFragment) GetHeadSha() *string {
+	if t == nil {
+		t = &CliDevboxRepositoryFragment{}
+	}
+	return t.HeadSha
+}
+func (t *CliDevboxRepositoryFragment) GetDirty() *bool {
+	if t == nil {
+		t = &CliDevboxRepositoryFragment{}
+	}
+	return t.Dirty
+}
+func (t *CliDevboxRepositoryFragment) GetAhead() *int64 {
+	if t == nil {
+		t = &CliDevboxRepositoryFragment{}
+	}
+	return t.Ahead
+}
+func (t *CliDevboxRepositoryFragment) GetBehind() *int64 {
+	if t == nil {
+		t = &CliDevboxRepositoryFragment{}
+	}
+	return t.Behind
+}
+
+type CliDevboxEntityFragment struct {
+	ID        *string                           "json:\"id,omitempty\" graphql:\"id\""
+	SessionID *string                           "json:\"sessionId,omitempty\" graphql:\"sessionId\""
+	Type      DevboxEntityType                  "json:\"type\" graphql:\"type\""
+	Position  *string                           "json:\"position,omitempty\" graphql:\"position\""
+	Revision  *string                           "json:\"revision,omitempty\" graphql:\"revision\""
+	Settled   *bool                             "json:\"settled,omitempty\" graphql:\"settled\""
+	Raw       map[string]any                    "json:\"raw,omitempty\" graphql:\"raw\""
+	ToolCall  *CliDevboxEntityFragment_ToolCall "json:\"toolCall,omitempty\" graphql:\"toolCall\""
+	Plan      *CliDevboxEntityFragment_Plan     "json:\"plan,omitempty\" graphql:\"plan\""
+	Terminal  *CliDevboxEntityFragment_Terminal "json:\"terminal,omitempty\" graphql:\"terminal\""
+}
+
+func (t *CliDevboxEntityFragment) GetID() *string {
+	if t == nil {
+		t = &CliDevboxEntityFragment{}
+	}
+	return t.ID
+}
+func (t *CliDevboxEntityFragment) GetSessionID() *string {
+	if t == nil {
+		t = &CliDevboxEntityFragment{}
+	}
+	return t.SessionID
+}
+func (t *CliDevboxEntityFragment) GetType() *DevboxEntityType {
+	if t == nil {
+		t = &CliDevboxEntityFragment{}
+	}
+	return &t.Type
+}
+func (t *CliDevboxEntityFragment) GetPosition() *string {
+	if t == nil {
+		t = &CliDevboxEntityFragment{}
+	}
+	return t.Position
+}
+func (t *CliDevboxEntityFragment) GetRevision() *string {
+	if t == nil {
+		t = &CliDevboxEntityFragment{}
+	}
+	return t.Revision
+}
+func (t *CliDevboxEntityFragment) GetSettled() *bool {
+	if t == nil {
+		t = &CliDevboxEntityFragment{}
+	}
+	return t.Settled
+}
+func (t *CliDevboxEntityFragment) GetRaw() map[string]any {
+	if t == nil {
+		t = &CliDevboxEntityFragment{}
+	}
+	return t.Raw
+}
+func (t *CliDevboxEntityFragment) GetToolCall() *CliDevboxEntityFragment_ToolCall {
+	if t == nil {
+		t = &CliDevboxEntityFragment{}
+	}
+	return t.ToolCall
+}
+func (t *CliDevboxEntityFragment) GetPlan() *CliDevboxEntityFragment_Plan {
+	if t == nil {
+		t = &CliDevboxEntityFragment{}
+	}
+	return t.Plan
+}
+func (t *CliDevboxEntityFragment) GetTerminal() *CliDevboxEntityFragment_Terminal {
+	if t == nil {
+		t = &CliDevboxEntityFragment{}
+	}
+	return t.Terminal
+}
+
+type CliDevboxStreamFragment struct {
+	StreamID     string           "json:\"streamId\" graphql:\"streamId\""
+	Kind         DevboxStreamKind "json:\"kind\" graphql:\"kind\""
+	URL          string           "json:\"url\" graphql:\"url\""
+	Token        string           "json:\"token\" graphql:\"token\""
+	ExpiresAt    *string          "json:\"expiresAt,omitempty\" graphql:\"expiresAt\""
+	Subprotocols []*string        "json:\"subprotocols,omitempty\" graphql:\"subprotocols\""
+	TerminalID   *string          "json:\"terminalId,omitempty\" graphql:\"terminalId\""
+}
+
+func (t *CliDevboxStreamFragment) GetStreamID() string {
+	if t == nil {
+		t = &CliDevboxStreamFragment{}
+	}
+	return t.StreamID
+}
+func (t *CliDevboxStreamFragment) GetKind() *DevboxStreamKind {
+	if t == nil {
+		t = &CliDevboxStreamFragment{}
+	}
+	return &t.Kind
+}
+func (t *CliDevboxStreamFragment) GetURL() string {
+	if t == nil {
+		t = &CliDevboxStreamFragment{}
+	}
+	return t.URL
+}
+func (t *CliDevboxStreamFragment) GetToken() string {
+	if t == nil {
+		t = &CliDevboxStreamFragment{}
+	}
+	return t.Token
+}
+func (t *CliDevboxStreamFragment) GetExpiresAt() *string {
+	if t == nil {
+		t = &CliDevboxStreamFragment{}
+	}
+	return t.ExpiresAt
+}
+func (t *CliDevboxStreamFragment) GetSubprotocols() []*string {
+	if t == nil {
+		t = &CliDevboxStreamFragment{}
+	}
+	return t.Subprotocols
+}
+func (t *CliDevboxStreamFragment) GetTerminalID() *string {
+	if t == nil {
+		t = &CliDevboxStreamFragment{}
+	}
+	return t.TerminalID
+}
+
+type DevboxModelFragment struct {
+	ID          string  "json:\"id\" graphql:\"id\""
+	Name        *string "json:\"name,omitempty\" graphql:\"name\""
+	Description *string "json:\"description,omitempty\" graphql:\"description\""
+}
+
+func (t *DevboxModelFragment) GetID() string {
+	if t == nil {
+		t = &DevboxModelFragment{}
+	}
+	return t.ID
+}
+func (t *DevboxModelFragment) GetName() *string {
+	if t == nil {
+		t = &DevboxModelFragment{}
+	}
+	return t.Name
+}
+func (t *DevboxModelFragment) GetDescription() *string {
+	if t == nil {
+		t = &DevboxModelFragment{}
+	}
+	return t.Description
+}
+
+type DevboxCommandFragment struct {
+	Name        string  "json:\"name\" graphql:\"name\""
+	Description *string "json:\"description,omitempty\" graphql:\"description\""
+	InputHint   *string "json:\"inputHint,omitempty\" graphql:\"inputHint\""
+}
+
+func (t *DevboxCommandFragment) GetName() string {
+	if t == nil {
+		t = &DevboxCommandFragment{}
+	}
+	return t.Name
+}
+func (t *DevboxCommandFragment) GetDescription() *string {
+	if t == nil {
+		t = &DevboxCommandFragment{}
+	}
+	return t.Description
+}
+func (t *DevboxCommandFragment) GetInputHint() *string {
+	if t == nil {
+		t = &DevboxCommandFragment{}
+	}
+	return t.InputHint
+}
+
+type DevboxConfigOptionFragment struct {
+	ConfigID     string                                "json:\"configId\" graphql:\"configId\""
+	Name         *string                               "json:\"name,omitempty\" graphql:\"name\""
+	Description  *string                               "json:\"description,omitempty\" graphql:\"description\""
+	Category     *string                               "json:\"category,omitempty\" graphql:\"category\""
+	Type         *string                               "json:\"type,omitempty\" graphql:\"type\""
+	CurrentValue *string                               "json:\"currentValue,omitempty\" graphql:\"currentValue\""
+	Options      []*DevboxConfigOptionFragment_Options "json:\"options,omitempty\" graphql:\"options\""
+}
+
+func (t *DevboxConfigOptionFragment) GetConfigID() string {
+	if t == nil {
+		t = &DevboxConfigOptionFragment{}
+	}
+	return t.ConfigID
+}
+func (t *DevboxConfigOptionFragment) GetName() *string {
+	if t == nil {
+		t = &DevboxConfigOptionFragment{}
+	}
+	return t.Name
+}
+func (t *DevboxConfigOptionFragment) GetDescription() *string {
+	if t == nil {
+		t = &DevboxConfigOptionFragment{}
+	}
+	return t.Description
+}
+func (t *DevboxConfigOptionFragment) GetCategory() *string {
+	if t == nil {
+		t = &DevboxConfigOptionFragment{}
+	}
+	return t.Category
+}
+func (t *DevboxConfigOptionFragment) GetType() *string {
+	if t == nil {
+		t = &DevboxConfigOptionFragment{}
+	}
+	return t.Type
+}
+func (t *DevboxConfigOptionFragment) GetCurrentValue() *string {
+	if t == nil {
+		t = &DevboxConfigOptionFragment{}
+	}
+	return t.CurrentValue
+}
+func (t *DevboxConfigOptionFragment) GetOptions() []*DevboxConfigOptionFragment_Options {
+	if t == nil {
+		t = &DevboxConfigOptionFragment{}
+	}
+	return t.Options
+}
+
+type DevboxAgentFragment struct {
+	Type                DevboxAgentType                          "json:\"type\" graphql:\"type\""
+	Default             *bool                                    "json:\"default,omitempty\" graphql:\"default\""
+	AdapterName         *string                                  "json:\"adapterName,omitempty\" graphql:\"adapterName\""
+	AdapterVersion      *string                                  "json:\"adapterVersion,omitempty\" graphql:\"adapterVersion\""
+	ProtocolVersion     *int64                                   "json:\"protocolVersion,omitempty\" graphql:\"protocolVersion\""
+	AcpV2               *bool                                    "json:\"acpV2,omitempty\" graphql:\"acpV2\""
+	ModelSwitchable     *bool                                    "json:\"modelSwitchable,omitempty\" graphql:\"modelSwitchable\""
+	ProbeStatus         *DevboxProbeStatus                       "json:\"probeStatus,omitempty\" graphql:\"probeStatus\""
+	ProbeError          *string                                  "json:\"probeError,omitempty\" graphql:\"probeError\""
+	DefaultModel        *string                                  "json:\"defaultModel,omitempty\" graphql:\"defaultModel\""
+	Models              []*DevboxModelFragment                   "json:\"models,omitempty\" graphql:\"models\""
+	Commands            []*DevboxCommandFragment                 "json:\"commands,omitempty\" graphql:\"commands\""
+	ConfigOptions       []*DevboxConfigOptionFragment            "json:\"configOptions,omitempty\" graphql:\"configOptions\""
+	SessionCapabilities *DevboxAgentFragment_SessionCapabilities "json:\"sessionCapabilities,omitempty\" graphql:\"sessionCapabilities\""
+}
+
+func (t *DevboxAgentFragment) GetType() *DevboxAgentType {
+	if t == nil {
+		t = &DevboxAgentFragment{}
+	}
+	return &t.Type
+}
+func (t *DevboxAgentFragment) GetDefault() *bool {
+	if t == nil {
+		t = &DevboxAgentFragment{}
+	}
+	return t.Default
+}
+func (t *DevboxAgentFragment) GetAdapterName() *string {
+	if t == nil {
+		t = &DevboxAgentFragment{}
+	}
+	return t.AdapterName
+}
+func (t *DevboxAgentFragment) GetAdapterVersion() *string {
+	if t == nil {
+		t = &DevboxAgentFragment{}
+	}
+	return t.AdapterVersion
+}
+func (t *DevboxAgentFragment) GetProtocolVersion() *int64 {
+	if t == nil {
+		t = &DevboxAgentFragment{}
+	}
+	return t.ProtocolVersion
+}
+func (t *DevboxAgentFragment) GetAcpV2() *bool {
+	if t == nil {
+		t = &DevboxAgentFragment{}
+	}
+	return t.AcpV2
+}
+func (t *DevboxAgentFragment) GetModelSwitchable() *bool {
+	if t == nil {
+		t = &DevboxAgentFragment{}
+	}
+	return t.ModelSwitchable
+}
+func (t *DevboxAgentFragment) GetProbeStatus() *DevboxProbeStatus {
+	if t == nil {
+		t = &DevboxAgentFragment{}
+	}
+	return t.ProbeStatus
+}
+func (t *DevboxAgentFragment) GetProbeError() *string {
+	if t == nil {
+		t = &DevboxAgentFragment{}
+	}
+	return t.ProbeError
+}
+func (t *DevboxAgentFragment) GetDefaultModel() *string {
+	if t == nil {
+		t = &DevboxAgentFragment{}
+	}
+	return t.DefaultModel
+}
+func (t *DevboxAgentFragment) GetModels() []*DevboxModelFragment {
+	if t == nil {
+		t = &DevboxAgentFragment{}
+	}
+	return t.Models
+}
+func (t *DevboxAgentFragment) GetCommands() []*DevboxCommandFragment {
+	if t == nil {
+		t = &DevboxAgentFragment{}
+	}
+	return t.Commands
+}
+func (t *DevboxAgentFragment) GetConfigOptions() []*DevboxConfigOptionFragment {
+	if t == nil {
+		t = &DevboxAgentFragment{}
+	}
+	return t.ConfigOptions
+}
+func (t *DevboxAgentFragment) GetSessionCapabilities() *DevboxAgentFragment_SessionCapabilities {
+	if t == nil {
+		t = &DevboxAgentFragment{}
+	}
+	return t.SessionCapabilities
+}
+
+type DevboxConditionFragment struct {
+	Type    string  "json:\"type\" graphql:\"type\""
+	Status  string  "json:\"status\" graphql:\"status\""
+	Reason  *string "json:\"reason,omitempty\" graphql:\"reason\""
+	Message *string "json:\"message,omitempty\" graphql:\"message\""
+}
+
+func (t *DevboxConditionFragment) GetType() string {
+	if t == nil {
+		t = &DevboxConditionFragment{}
+	}
+	return t.Type
+}
+func (t *DevboxConditionFragment) GetStatus() string {
+	if t == nil {
+		t = &DevboxConditionFragment{}
+	}
+	return t.Status
+}
+func (t *DevboxConditionFragment) GetReason() *string {
+	if t == nil {
+		t = &DevboxConditionFragment{}
+	}
+	return t.Reason
+}
+func (t *DevboxConditionFragment) GetMessage() *string {
+	if t == nil {
+		t = &DevboxConditionFragment{}
+	}
+	return t.Message
+}
+
+type DevboxFragment struct {
+	ID                  string                     "json:\"id\" graphql:\"id\""
+	Name                string                     "json:\"name\" graphql:\"name\""
+	Image               *string                    "json:\"image,omitempty\" graphql:\"image\""
+	ResolvedImage       *string                    "json:\"resolvedImage,omitempty\" graphql:\"resolvedImage\""
+	TemplateRevision    *string                    "json:\"templateRevision,omitempty\" graphql:\"templateRevision\""
+	Status              *DevboxStatus              "json:\"status,omitempty\" graphql:\"status\""
+	AllowedRepositories []*string                  "json:\"allowedRepositories,omitempty\" graphql:\"allowedRepositories\""
+	MaxInstances        *int64                     "json:\"maxInstances,omitempty\" graphql:\"maxInstances\""
+	Browser             *bool                      "json:\"browser,omitempty\" graphql:\"browser\""
+	LastHeartbeatAt     *string                    "json:\"lastHeartbeatAt,omitempty\" graphql:\"lastHeartbeatAt\""
+	Agents              []*DevboxAgentFragment     "json:\"agents,omitempty\" graphql:\"agents\""
+	Conditions          []*DevboxConditionFragment "json:\"conditions,omitempty\" graphql:\"conditions\""
+}
+
+func (t *DevboxFragment) GetID() string {
+	if t == nil {
+		t = &DevboxFragment{}
+	}
+	return t.ID
+}
+func (t *DevboxFragment) GetName() string {
+	if t == nil {
+		t = &DevboxFragment{}
+	}
+	return t.Name
+}
+func (t *DevboxFragment) GetImage() *string {
+	if t == nil {
+		t = &DevboxFragment{}
+	}
+	return t.Image
+}
+func (t *DevboxFragment) GetResolvedImage() *string {
+	if t == nil {
+		t = &DevboxFragment{}
+	}
+	return t.ResolvedImage
+}
+func (t *DevboxFragment) GetTemplateRevision() *string {
+	if t == nil {
+		t = &DevboxFragment{}
+	}
+	return t.TemplateRevision
+}
+func (t *DevboxFragment) GetStatus() *DevboxStatus {
+	if t == nil {
+		t = &DevboxFragment{}
+	}
+	return t.Status
+}
+func (t *DevboxFragment) GetAllowedRepositories() []*string {
+	if t == nil {
+		t = &DevboxFragment{}
+	}
+	return t.AllowedRepositories
+}
+func (t *DevboxFragment) GetMaxInstances() *int64 {
+	if t == nil {
+		t = &DevboxFragment{}
+	}
+	return t.MaxInstances
+}
+func (t *DevboxFragment) GetBrowser() *bool {
+	if t == nil {
+		t = &DevboxFragment{}
+	}
+	return t.Browser
+}
+func (t *DevboxFragment) GetLastHeartbeatAt() *string {
+	if t == nil {
+		t = &DevboxFragment{}
+	}
+	return t.LastHeartbeatAt
+}
+func (t *DevboxFragment) GetAgents() []*DevboxAgentFragment {
+	if t == nil {
+		t = &DevboxFragment{}
+	}
+	return t.Agents
+}
+func (t *DevboxFragment) GetConditions() []*DevboxConditionFragment {
+	if t == nil {
+		t = &DevboxFragment{}
+	}
+	return t.Conditions
+}
+
+type AgentCredentialFragment struct {
+	ID              string                  "json:\"id\" graphql:\"id\""
+	Provider        AgentCredentialProvider "json:\"provider\" graphql:\"provider\""
+	Kind            AgentCredentialKind     "json:\"kind\" graphql:\"kind\""
+	Label           *string                 "json:\"label,omitempty\" graphql:\"label\""
+	Status          AgentCredentialStatus   "json:\"status\" graphql:\"status\""
+	Version         *string                 "json:\"version,omitempty\" graphql:\"version\""
+	DefaultBilling  *bool                   "json:\"defaultBilling,omitempty\" graphql:\"defaultBilling\""
+	FailureCount    *int64                  "json:\"failureCount,omitempty\" graphql:\"failureCount\""
+	Email           *string                 "json:\"email,omitempty\" graphql:\"email\""
+	Plan            *string                 "json:\"plan,omitempty\" graphql:\"plan\""
+	LinkedAt        *string                 "json:\"linkedAt,omitempty\" graphql:\"linkedAt\""
+	ExpiresAt       *string                 "json:\"expiresAt,omitempty\" graphql:\"expiresAt\""
+	LastRefreshedAt *string                 "json:\"lastRefreshedAt,omitempty\" graphql:\"lastRefreshedAt\""
+	LastUsedAt      *string                 "json:\"lastUsedAt,omitempty\" graphql:\"lastUsedAt\""
+}
+
+func (t *AgentCredentialFragment) GetID() string {
+	if t == nil {
+		t = &AgentCredentialFragment{}
+	}
+	return t.ID
+}
+func (t *AgentCredentialFragment) GetProvider() *AgentCredentialProvider {
+	if t == nil {
+		t = &AgentCredentialFragment{}
+	}
+	return &t.Provider
+}
+func (t *AgentCredentialFragment) GetKind() *AgentCredentialKind {
+	if t == nil {
+		t = &AgentCredentialFragment{}
+	}
+	return &t.Kind
+}
+func (t *AgentCredentialFragment) GetLabel() *string {
+	if t == nil {
+		t = &AgentCredentialFragment{}
+	}
+	return t.Label
+}
+func (t *AgentCredentialFragment) GetStatus() *AgentCredentialStatus {
+	if t == nil {
+		t = &AgentCredentialFragment{}
+	}
+	return &t.Status
+}
+func (t *AgentCredentialFragment) GetVersion() *string {
+	if t == nil {
+		t = &AgentCredentialFragment{}
+	}
+	return t.Version
+}
+func (t *AgentCredentialFragment) GetDefaultBilling() *bool {
+	if t == nil {
+		t = &AgentCredentialFragment{}
+	}
+	return t.DefaultBilling
+}
+func (t *AgentCredentialFragment) GetFailureCount() *int64 {
+	if t == nil {
+		t = &AgentCredentialFragment{}
+	}
+	return t.FailureCount
+}
+func (t *AgentCredentialFragment) GetEmail() *string {
+	if t == nil {
+		t = &AgentCredentialFragment{}
+	}
+	return t.Email
+}
+func (t *AgentCredentialFragment) GetPlan() *string {
+	if t == nil {
+		t = &AgentCredentialFragment{}
+	}
+	return t.Plan
+}
+func (t *AgentCredentialFragment) GetLinkedAt() *string {
+	if t == nil {
+		t = &AgentCredentialFragment{}
+	}
+	return t.LinkedAt
+}
+func (t *AgentCredentialFragment) GetExpiresAt() *string {
+	if t == nil {
+		t = &AgentCredentialFragment{}
+	}
+	return t.ExpiresAt
+}
+func (t *AgentCredentialFragment) GetLastRefreshedAt() *string {
+	if t == nil {
+		t = &AgentCredentialFragment{}
+	}
+	return t.LastRefreshedAt
+}
+func (t *AgentCredentialFragment) GetLastUsedAt() *string {
+	if t == nil {
+		t = &AgentCredentialFragment{}
+	}
+	return t.LastUsedAt
 }
 
 type ClusterRegistrationFragment struct {
@@ -3005,6 +4363,38 @@ func (t *ServiceDeploymentFragment) GetMetadata() *ServiceDeploymentFragment_Met
 		t = &ServiceDeploymentFragment{}
 	}
 	return t.Metadata
+}
+
+type ServiceDeploymentStatusFragment struct {
+	ID         string                                        "json:\"id\" graphql:\"id\""
+	DeletedAt  *string                                       "json:\"deletedAt,omitempty\" graphql:\"deletedAt\""
+	Errors     []*ErrorFragment                              "json:\"errors,omitempty\" graphql:\"errors\""
+	Components []*ServiceDeploymentStatusFragment_Components "json:\"components,omitempty\" graphql:\"components\""
+}
+
+func (t *ServiceDeploymentStatusFragment) GetID() string {
+	if t == nil {
+		t = &ServiceDeploymentStatusFragment{}
+	}
+	return t.ID
+}
+func (t *ServiceDeploymentStatusFragment) GetDeletedAt() *string {
+	if t == nil {
+		t = &ServiceDeploymentStatusFragment{}
+	}
+	return t.DeletedAt
+}
+func (t *ServiceDeploymentStatusFragment) GetErrors() []*ErrorFragment {
+	if t == nil {
+		t = &ServiceDeploymentStatusFragment{}
+	}
+	return t.Errors
+}
+func (t *ServiceDeploymentStatusFragment) GetComponents() []*ServiceDeploymentStatusFragment_Components {
+	if t == nil {
+		t = &ServiceDeploymentStatusFragment{}
+	}
+	return t.Components
 }
 
 type ServiceDeploymentExtended struct {
@@ -5688,6 +7078,7 @@ type SentinelRunJobFragment struct {
 	Check       *string                           "json:\"check,omitempty\" graphql:\"check\""
 	Status      SentinelRunJobStatus              "json:\"status\" graphql:\"status\""
 	Format      SentinelRunJobFormat              "json:\"format\" graphql:\"format\""
+	Error       *string                           "json:\"error,omitempty\" graphql:\"error\""
 	UsesGit     *bool                             "json:\"usesGit,omitempty\" graphql:\"usesGit\""
 	JobSpec     *JobSpecFragment                  "json:\"jobSpec,omitempty\" graphql:\"jobSpec\""
 	Reference   *SentinelRunJobFragment_Reference "json:\"reference,omitempty\" graphql:\"reference\""
@@ -5718,6 +7109,12 @@ func (t *SentinelRunJobFragment) GetFormat() *SentinelRunJobFormat {
 		t = &SentinelRunJobFragment{}
 	}
 	return &t.Format
+}
+func (t *SentinelRunJobFragment) GetError() *string {
+	if t == nil {
+		t = &SentinelRunJobFragment{}
+	}
+	return t.Error
 }
 func (t *SentinelRunJobFragment) GetUsesGit() *bool {
 	if t == nil {
@@ -8098,6 +9495,46 @@ func (t *AgentRunStatusFragment_Prompts) GetSeq() int64 {
 	return t.Seq
 }
 
+type AgentRunPendingFragment_Runtime struct {
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *AgentRunPendingFragment_Runtime) GetName() string {
+	if t == nil {
+		t = &AgentRunPendingFragment_Runtime{}
+	}
+	return t.Name
+}
+
+type AgentRunPendingFragment_Flow struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *AgentRunPendingFragment_Flow) GetID() string {
+	if t == nil {
+		t = &AgentRunPendingFragment_Flow{}
+	}
+	return t.ID
+}
+
+type AgentRunUpdateFragment_PullRequests struct {
+	ID  string "json:\"id\" graphql:\"id\""
+	URL string "json:\"url\" graphql:\"url\""
+}
+
+func (t *AgentRunUpdateFragment_PullRequests) GetID() string {
+	if t == nil {
+		t = &AgentRunUpdateFragment_PullRequests{}
+	}
+	return t.ID
+}
+func (t *AgentRunUpdateFragment_PullRequests) GetURL() string {
+	if t == nil {
+		t = &AgentRunUpdateFragment_PullRequests{}
+	}
+	return t.URL
+}
+
 type AgentRunMinimalFragment_Runtime struct {
 	Type AgentRuntimeType "json:\"type\" graphql:\"type\""
 }
@@ -8878,6 +10315,673 @@ func (t *ServiceDeploymentForAgent_Imports) GetStack() *ServiceDeploymentForAgen
 	return t.Stack
 }
 
+type CliDevboxFragment_Agents_CliDevboxAgentFragment_Models struct {
+	Description *string "json:\"description,omitempty\" graphql:\"description\""
+	ID          string  "json:\"id\" graphql:\"id\""
+	Name        *string "json:\"name,omitempty\" graphql:\"name\""
+}
+
+func (t *CliDevboxFragment_Agents_CliDevboxAgentFragment_Models) GetDescription() *string {
+	if t == nil {
+		t = &CliDevboxFragment_Agents_CliDevboxAgentFragment_Models{}
+	}
+	return t.Description
+}
+func (t *CliDevboxFragment_Agents_CliDevboxAgentFragment_Models) GetID() string {
+	if t == nil {
+		t = &CliDevboxFragment_Agents_CliDevboxAgentFragment_Models{}
+	}
+	return t.ID
+}
+func (t *CliDevboxFragment_Agents_CliDevboxAgentFragment_Models) GetName() *string {
+	if t == nil {
+		t = &CliDevboxFragment_Agents_CliDevboxAgentFragment_Models{}
+	}
+	return t.Name
+}
+
+type CliDevboxFragment_Agents_CliDevboxAgentFragment_SessionCapabilities struct {
+	Close  *bool "json:\"close,omitempty\" graphql:\"close\""
+	Delete *bool "json:\"delete,omitempty\" graphql:\"delete\""
+	Fork   *bool "json:\"fork,omitempty\" graphql:\"fork\""
+	List   *bool "json:\"list,omitempty\" graphql:\"list\""
+	Load   *bool "json:\"load,omitempty\" graphql:\"load\""
+	Resume *bool "json:\"resume,omitempty\" graphql:\"resume\""
+}
+
+func (t *CliDevboxFragment_Agents_CliDevboxAgentFragment_SessionCapabilities) GetClose() *bool {
+	if t == nil {
+		t = &CliDevboxFragment_Agents_CliDevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Close
+}
+func (t *CliDevboxFragment_Agents_CliDevboxAgentFragment_SessionCapabilities) GetDelete() *bool {
+	if t == nil {
+		t = &CliDevboxFragment_Agents_CliDevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Delete
+}
+func (t *CliDevboxFragment_Agents_CliDevboxAgentFragment_SessionCapabilities) GetFork() *bool {
+	if t == nil {
+		t = &CliDevboxFragment_Agents_CliDevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Fork
+}
+func (t *CliDevboxFragment_Agents_CliDevboxAgentFragment_SessionCapabilities) GetList() *bool {
+	if t == nil {
+		t = &CliDevboxFragment_Agents_CliDevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.List
+}
+func (t *CliDevboxFragment_Agents_CliDevboxAgentFragment_SessionCapabilities) GetLoad() *bool {
+	if t == nil {
+		t = &CliDevboxFragment_Agents_CliDevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Load
+}
+func (t *CliDevboxFragment_Agents_CliDevboxAgentFragment_SessionCapabilities) GetResume() *bool {
+	if t == nil {
+		t = &CliDevboxFragment_Agents_CliDevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Resume
+}
+
+type CliDevboxAgentFragment_Models struct {
+	Description *string "json:\"description,omitempty\" graphql:\"description\""
+	ID          string  "json:\"id\" graphql:\"id\""
+	Name        *string "json:\"name,omitempty\" graphql:\"name\""
+}
+
+func (t *CliDevboxAgentFragment_Models) GetDescription() *string {
+	if t == nil {
+		t = &CliDevboxAgentFragment_Models{}
+	}
+	return t.Description
+}
+func (t *CliDevboxAgentFragment_Models) GetID() string {
+	if t == nil {
+		t = &CliDevboxAgentFragment_Models{}
+	}
+	return t.ID
+}
+func (t *CliDevboxAgentFragment_Models) GetName() *string {
+	if t == nil {
+		t = &CliDevboxAgentFragment_Models{}
+	}
+	return t.Name
+}
+
+type CliDevboxAgentFragment_SessionCapabilities struct {
+	Close  *bool "json:\"close,omitempty\" graphql:\"close\""
+	Delete *bool "json:\"delete,omitempty\" graphql:\"delete\""
+	Fork   *bool "json:\"fork,omitempty\" graphql:\"fork\""
+	List   *bool "json:\"list,omitempty\" graphql:\"list\""
+	Load   *bool "json:\"load,omitempty\" graphql:\"load\""
+	Resume *bool "json:\"resume,omitempty\" graphql:\"resume\""
+}
+
+func (t *CliDevboxAgentFragment_SessionCapabilities) GetClose() *bool {
+	if t == nil {
+		t = &CliDevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Close
+}
+func (t *CliDevboxAgentFragment_SessionCapabilities) GetDelete() *bool {
+	if t == nil {
+		t = &CliDevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Delete
+}
+func (t *CliDevboxAgentFragment_SessionCapabilities) GetFork() *bool {
+	if t == nil {
+		t = &CliDevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Fork
+}
+func (t *CliDevboxAgentFragment_SessionCapabilities) GetList() *bool {
+	if t == nil {
+		t = &CliDevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.List
+}
+func (t *CliDevboxAgentFragment_SessionCapabilities) GetLoad() *bool {
+	if t == nil {
+		t = &CliDevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Load
+}
+func (t *CliDevboxAgentFragment_SessionCapabilities) GetResume() *bool {
+	if t == nil {
+		t = &CliDevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Resume
+}
+
+type CliDevboxThreadFragment_Instance struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *CliDevboxThreadFragment_Instance) GetID() string {
+	if t == nil {
+		t = &CliDevboxThreadFragment_Instance{}
+	}
+	return t.ID
+}
+
+type CliDevboxInteractionFragment_Options struct {
+	Kind     *string "json:\"kind,omitempty\" graphql:\"kind\""
+	Name     *string "json:\"name,omitempty\" graphql:\"name\""
+	OptionID string  "json:\"optionId\" graphql:\"optionId\""
+}
+
+func (t *CliDevboxInteractionFragment_Options) GetKind() *string {
+	if t == nil {
+		t = &CliDevboxInteractionFragment_Options{}
+	}
+	return t.Kind
+}
+func (t *CliDevboxInteractionFragment_Options) GetName() *string {
+	if t == nil {
+		t = &CliDevboxInteractionFragment_Options{}
+	}
+	return t.Name
+}
+func (t *CliDevboxInteractionFragment_Options) GetOptionID() string {
+	if t == nil {
+		t = &CliDevboxInteractionFragment_Options{}
+	}
+	return t.OptionID
+}
+
+type CliDevboxInteractionFragment_Thread struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *CliDevboxInteractionFragment_Thread) GetID() string {
+	if t == nil {
+		t = &CliDevboxInteractionFragment_Thread{}
+	}
+	return t.ID
+}
+
+type CliDevboxInstanceFragment_AgentConnections struct {
+	AdapterName    *string          "json:\"adapterName,omitempty\" graphql:\"adapterName\""
+	AdapterVersion *string          "json:\"adapterVersion,omitempty\" graphql:\"adapterVersion\""
+	Agent          *DevboxAgentType "json:\"agent,omitempty\" graphql:\"agent\""
+	Billing        *string          "json:\"billing,omitempty\" graphql:\"billing\""
+}
+
+func (t *CliDevboxInstanceFragment_AgentConnections) GetAdapterName() *string {
+	if t == nil {
+		t = &CliDevboxInstanceFragment_AgentConnections{}
+	}
+	return t.AdapterName
+}
+func (t *CliDevboxInstanceFragment_AgentConnections) GetAdapterVersion() *string {
+	if t == nil {
+		t = &CliDevboxInstanceFragment_AgentConnections{}
+	}
+	return t.AdapterVersion
+}
+func (t *CliDevboxInstanceFragment_AgentConnections) GetAgent() *DevboxAgentType {
+	if t == nil {
+		t = &CliDevboxInstanceFragment_AgentConnections{}
+	}
+	return t.Agent
+}
+func (t *CliDevboxInstanceFragment_AgentConnections) GetBilling() *string {
+	if t == nil {
+		t = &CliDevboxInstanceFragment_AgentConnections{}
+	}
+	return t.Billing
+}
+
+type CliDevboxInstanceFragment_AgentBilling struct {
+	Agent              *DevboxAgentType   "json:\"agent,omitempty\" graphql:\"agent\""
+	AllowCollaborators *bool              "json:\"allowCollaborators,omitempty\" graphql:\"allowCollaborators\""
+	Billing            *DevboxBillingMode "json:\"billing,omitempty\" graphql:\"billing\""
+	CredentialKind     *string            "json:\"credentialKind,omitempty\" graphql:\"credentialKind\""
+}
+
+func (t *CliDevboxInstanceFragment_AgentBilling) GetAgent() *DevboxAgentType {
+	if t == nil {
+		t = &CliDevboxInstanceFragment_AgentBilling{}
+	}
+	return t.Agent
+}
+func (t *CliDevboxInstanceFragment_AgentBilling) GetAllowCollaborators() *bool {
+	if t == nil {
+		t = &CliDevboxInstanceFragment_AgentBilling{}
+	}
+	return t.AllowCollaborators
+}
+func (t *CliDevboxInstanceFragment_AgentBilling) GetBilling() *DevboxBillingMode {
+	if t == nil {
+		t = &CliDevboxInstanceFragment_AgentBilling{}
+	}
+	return t.Billing
+}
+func (t *CliDevboxInstanceFragment_AgentBilling) GetCredentialKind() *string {
+	if t == nil {
+		t = &CliDevboxInstanceFragment_AgentBilling{}
+	}
+	return t.CredentialKind
+}
+
+type CliDevboxInstanceFragment_IdleState struct {
+	Idle       *bool   "json:\"idle,omitempty\" graphql:\"idle\""
+	IdleSince  *string "json:\"idleSince,omitempty\" graphql:\"idleSince\""
+	Message    *string "json:\"message,omitempty\" graphql:\"message\""
+	SuspendsAt *string "json:\"suspendsAt,omitempty\" graphql:\"suspendsAt\""
+}
+
+func (t *CliDevboxInstanceFragment_IdleState) GetIdle() *bool {
+	if t == nil {
+		t = &CliDevboxInstanceFragment_IdleState{}
+	}
+	return t.Idle
+}
+func (t *CliDevboxInstanceFragment_IdleState) GetIdleSince() *string {
+	if t == nil {
+		t = &CliDevboxInstanceFragment_IdleState{}
+	}
+	return t.IdleSince
+}
+func (t *CliDevboxInstanceFragment_IdleState) GetMessage() *string {
+	if t == nil {
+		t = &CliDevboxInstanceFragment_IdleState{}
+	}
+	return t.Message
+}
+func (t *CliDevboxInstanceFragment_IdleState) GetSuspendsAt() *string {
+	if t == nil {
+		t = &CliDevboxInstanceFragment_IdleState{}
+	}
+	return t.SuspendsAt
+}
+
+type CliDevboxInstanceFragment_Workbench struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *CliDevboxInstanceFragment_Workbench) GetID() string {
+	if t == nil {
+		t = &CliDevboxInstanceFragment_Workbench{}
+	}
+	return t.ID
+}
+func (t *CliDevboxInstanceFragment_Workbench) GetName() string {
+	if t == nil {
+		t = &CliDevboxInstanceFragment_Workbench{}
+	}
+	return t.Name
+}
+
+type CliDevboxInstanceFragment_Devbox struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *CliDevboxInstanceFragment_Devbox) GetID() string {
+	if t == nil {
+		t = &CliDevboxInstanceFragment_Devbox{}
+	}
+	return t.ID
+}
+func (t *CliDevboxInstanceFragment_Devbox) GetName() string {
+	if t == nil {
+		t = &CliDevboxInstanceFragment_Devbox{}
+	}
+	return t.Name
+}
+
+type CliDevboxInstanceFragment_KeepAwakeBy struct {
+	Email string "json:\"email\" graphql:\"email\""
+}
+
+func (t *CliDevboxInstanceFragment_KeepAwakeBy) GetEmail() string {
+	if t == nil {
+		t = &CliDevboxInstanceFragment_KeepAwakeBy{}
+	}
+	return t.Email
+}
+
+type CliDevboxInstanceFragment_Threads_CliDevboxThreadFragment_Instance struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *CliDevboxInstanceFragment_Threads_CliDevboxThreadFragment_Instance) GetID() string {
+	if t == nil {
+		t = &CliDevboxInstanceFragment_Threads_CliDevboxThreadFragment_Instance{}
+	}
+	return t.ID
+}
+
+type CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options struct {
+	Kind     *string "json:\"kind,omitempty\" graphql:\"kind\""
+	Name     *string "json:\"name,omitempty\" graphql:\"name\""
+	OptionID string  "json:\"optionId\" graphql:\"optionId\""
+}
+
+func (t *CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options) GetKind() *string {
+	if t == nil {
+		t = &CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options{}
+	}
+	return t.Kind
+}
+func (t *CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options) GetName() *string {
+	if t == nil {
+		t = &CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options{}
+	}
+	return t.Name
+}
+func (t *CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options) GetOptionID() string {
+	if t == nil {
+		t = &CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options{}
+	}
+	return t.OptionID
+}
+
+type CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Thread struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Thread) GetID() string {
+	if t == nil {
+		t = &CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Thread{}
+	}
+	return t.ID
+}
+
+type CliDevboxEntityFragment_ToolCall struct {
+	Kind       *string "json:\"kind,omitempty\" graphql:\"kind\""
+	Status     *string "json:\"status,omitempty\" graphql:\"status\""
+	Title      *string "json:\"title,omitempty\" graphql:\"title\""
+	ToolCallID *string "json:\"toolCallId,omitempty\" graphql:\"toolCallId\""
+}
+
+func (t *CliDevboxEntityFragment_ToolCall) GetKind() *string {
+	if t == nil {
+		t = &CliDevboxEntityFragment_ToolCall{}
+	}
+	return t.Kind
+}
+func (t *CliDevboxEntityFragment_ToolCall) GetStatus() *string {
+	if t == nil {
+		t = &CliDevboxEntityFragment_ToolCall{}
+	}
+	return t.Status
+}
+func (t *CliDevboxEntityFragment_ToolCall) GetTitle() *string {
+	if t == nil {
+		t = &CliDevboxEntityFragment_ToolCall{}
+	}
+	return t.Title
+}
+func (t *CliDevboxEntityFragment_ToolCall) GetToolCallID() *string {
+	if t == nil {
+		t = &CliDevboxEntityFragment_ToolCall{}
+	}
+	return t.ToolCallID
+}
+
+type CliDevboxEntityFragment_Plan_Entries struct {
+	Content  *string "json:\"content,omitempty\" graphql:\"content\""
+	Priority *string "json:\"priority,omitempty\" graphql:\"priority\""
+	Status   *string "json:\"status,omitempty\" graphql:\"status\""
+}
+
+func (t *CliDevboxEntityFragment_Plan_Entries) GetContent() *string {
+	if t == nil {
+		t = &CliDevboxEntityFragment_Plan_Entries{}
+	}
+	return t.Content
+}
+func (t *CliDevboxEntityFragment_Plan_Entries) GetPriority() *string {
+	if t == nil {
+		t = &CliDevboxEntityFragment_Plan_Entries{}
+	}
+	return t.Priority
+}
+func (t *CliDevboxEntityFragment_Plan_Entries) GetStatus() *string {
+	if t == nil {
+		t = &CliDevboxEntityFragment_Plan_Entries{}
+	}
+	return t.Status
+}
+
+type CliDevboxEntityFragment_Plan struct {
+	Entries []*CliDevboxEntityFragment_Plan_Entries "json:\"entries,omitempty\" graphql:\"entries\""
+}
+
+func (t *CliDevboxEntityFragment_Plan) GetEntries() []*CliDevboxEntityFragment_Plan_Entries {
+	if t == nil {
+		t = &CliDevboxEntityFragment_Plan{}
+	}
+	return t.Entries
+}
+
+type CliDevboxEntityFragment_Terminal struct {
+	Command    *string "json:\"command,omitempty\" graphql:\"command\""
+	ExitCode   *int64  "json:\"exitCode,omitempty\" graphql:\"exitCode\""
+	Output     *string "json:\"output,omitempty\" graphql:\"output\""
+	TerminalID *string "json:\"terminalId,omitempty\" graphql:\"terminalId\""
+}
+
+func (t *CliDevboxEntityFragment_Terminal) GetCommand() *string {
+	if t == nil {
+		t = &CliDevboxEntityFragment_Terminal{}
+	}
+	return t.Command
+}
+func (t *CliDevboxEntityFragment_Terminal) GetExitCode() *int64 {
+	if t == nil {
+		t = &CliDevboxEntityFragment_Terminal{}
+	}
+	return t.ExitCode
+}
+func (t *CliDevboxEntityFragment_Terminal) GetOutput() *string {
+	if t == nil {
+		t = &CliDevboxEntityFragment_Terminal{}
+	}
+	return t.Output
+}
+func (t *CliDevboxEntityFragment_Terminal) GetTerminalID() *string {
+	if t == nil {
+		t = &CliDevboxEntityFragment_Terminal{}
+	}
+	return t.TerminalID
+}
+
+type DevboxConfigOptionFragment_Options struct {
+	Description *string "json:\"description,omitempty\" graphql:\"description\""
+	Group       *string "json:\"group,omitempty\" graphql:\"group\""
+	Name        *string "json:\"name,omitempty\" graphql:\"name\""
+	Value       string  "json:\"value\" graphql:\"value\""
+}
+
+func (t *DevboxConfigOptionFragment_Options) GetDescription() *string {
+	if t == nil {
+		t = &DevboxConfigOptionFragment_Options{}
+	}
+	return t.Description
+}
+func (t *DevboxConfigOptionFragment_Options) GetGroup() *string {
+	if t == nil {
+		t = &DevboxConfigOptionFragment_Options{}
+	}
+	return t.Group
+}
+func (t *DevboxConfigOptionFragment_Options) GetName() *string {
+	if t == nil {
+		t = &DevboxConfigOptionFragment_Options{}
+	}
+	return t.Name
+}
+func (t *DevboxConfigOptionFragment_Options) GetValue() string {
+	if t == nil {
+		t = &DevboxConfigOptionFragment_Options{}
+	}
+	return t.Value
+}
+
+type DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options struct {
+	Description *string "json:\"description,omitempty\" graphql:\"description\""
+	Group       *string "json:\"group,omitempty\" graphql:\"group\""
+	Name        *string "json:\"name,omitempty\" graphql:\"name\""
+	Value       string  "json:\"value\" graphql:\"value\""
+}
+
+func (t *DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options) GetDescription() *string {
+	if t == nil {
+		t = &DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options{}
+	}
+	return t.Description
+}
+func (t *DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options) GetGroup() *string {
+	if t == nil {
+		t = &DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options{}
+	}
+	return t.Group
+}
+func (t *DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options) GetName() *string {
+	if t == nil {
+		t = &DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options{}
+	}
+	return t.Name
+}
+func (t *DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options) GetValue() string {
+	if t == nil {
+		t = &DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options{}
+	}
+	return t.Value
+}
+
+type DevboxAgentFragment_SessionCapabilities struct {
+	Close  *bool "json:\"close,omitempty\" graphql:\"close\""
+	Delete *bool "json:\"delete,omitempty\" graphql:\"delete\""
+	Fork   *bool "json:\"fork,omitempty\" graphql:\"fork\""
+	List   *bool "json:\"list,omitempty\" graphql:\"list\""
+	Load   *bool "json:\"load,omitempty\" graphql:\"load\""
+	Resume *bool "json:\"resume,omitempty\" graphql:\"resume\""
+}
+
+func (t *DevboxAgentFragment_SessionCapabilities) GetClose() *bool {
+	if t == nil {
+		t = &DevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Close
+}
+func (t *DevboxAgentFragment_SessionCapabilities) GetDelete() *bool {
+	if t == nil {
+		t = &DevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Delete
+}
+func (t *DevboxAgentFragment_SessionCapabilities) GetFork() *bool {
+	if t == nil {
+		t = &DevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Fork
+}
+func (t *DevboxAgentFragment_SessionCapabilities) GetList() *bool {
+	if t == nil {
+		t = &DevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.List
+}
+func (t *DevboxAgentFragment_SessionCapabilities) GetLoad() *bool {
+	if t == nil {
+		t = &DevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Load
+}
+func (t *DevboxAgentFragment_SessionCapabilities) GetResume() *bool {
+	if t == nil {
+		t = &DevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Resume
+}
+
+type DevboxFragment_Agents_DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options struct {
+	Description *string "json:\"description,omitempty\" graphql:\"description\""
+	Group       *string "json:\"group,omitempty\" graphql:\"group\""
+	Name        *string "json:\"name,omitempty\" graphql:\"name\""
+	Value       string  "json:\"value\" graphql:\"value\""
+}
+
+func (t *DevboxFragment_Agents_DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options) GetDescription() *string {
+	if t == nil {
+		t = &DevboxFragment_Agents_DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options{}
+	}
+	return t.Description
+}
+func (t *DevboxFragment_Agents_DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options) GetGroup() *string {
+	if t == nil {
+		t = &DevboxFragment_Agents_DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options{}
+	}
+	return t.Group
+}
+func (t *DevboxFragment_Agents_DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options) GetName() *string {
+	if t == nil {
+		t = &DevboxFragment_Agents_DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options{}
+	}
+	return t.Name
+}
+func (t *DevboxFragment_Agents_DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options) GetValue() string {
+	if t == nil {
+		t = &DevboxFragment_Agents_DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options{}
+	}
+	return t.Value
+}
+
+type DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities struct {
+	Close  *bool "json:\"close,omitempty\" graphql:\"close\""
+	Delete *bool "json:\"delete,omitempty\" graphql:\"delete\""
+	Fork   *bool "json:\"fork,omitempty\" graphql:\"fork\""
+	List   *bool "json:\"list,omitempty\" graphql:\"list\""
+	Load   *bool "json:\"load,omitempty\" graphql:\"load\""
+	Resume *bool "json:\"resume,omitempty\" graphql:\"resume\""
+}
+
+func (t *DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities) GetClose() *bool {
+	if t == nil {
+		t = &DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Close
+}
+func (t *DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities) GetDelete() *bool {
+	if t == nil {
+		t = &DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Delete
+}
+func (t *DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities) GetFork() *bool {
+	if t == nil {
+		t = &DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Fork
+}
+func (t *DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities) GetList() *bool {
+	if t == nil {
+		t = &DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.List
+}
+func (t *DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities) GetLoad() *bool {
+	if t == nil {
+		t = &DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Load
+}
+func (t *DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities) GetResume() *bool {
+	if t == nil {
+		t = &DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Resume
+}
+
 type FederatedCredentialFragment_User struct {
 	Email string "json:\"email\" graphql:\"email\""
 	ID    string "json:\"id\" graphql:\"id\""
@@ -9427,6 +11531,66 @@ func (t *ServiceDeploymentFragment_Metadata) GetImages() []*string {
 		t = &ServiceDeploymentFragment_Metadata{}
 	}
 	return t.Images
+}
+
+type ServiceDeploymentStatusFragment_Components struct {
+	Group     *string         "json:\"group,omitempty\" graphql:\"group\""
+	ID        string          "json:\"id\" graphql:\"id\""
+	Kind      string          "json:\"kind\" graphql:\"kind\""
+	Name      string          "json:\"name\" graphql:\"name\""
+	Namespace *string         "json:\"namespace,omitempty\" graphql:\"namespace\""
+	State     *ComponentState "json:\"state,omitempty\" graphql:\"state\""
+	Synced    bool            "json:\"synced\" graphql:\"synced\""
+	Version   *string         "json:\"version,omitempty\" graphql:\"version\""
+}
+
+func (t *ServiceDeploymentStatusFragment_Components) GetGroup() *string {
+	if t == nil {
+		t = &ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Group
+}
+func (t *ServiceDeploymentStatusFragment_Components) GetID() string {
+	if t == nil {
+		t = &ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.ID
+}
+func (t *ServiceDeploymentStatusFragment_Components) GetKind() string {
+	if t == nil {
+		t = &ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Kind
+}
+func (t *ServiceDeploymentStatusFragment_Components) GetName() string {
+	if t == nil {
+		t = &ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Name
+}
+func (t *ServiceDeploymentStatusFragment_Components) GetNamespace() *string {
+	if t == nil {
+		t = &ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Namespace
+}
+func (t *ServiceDeploymentStatusFragment_Components) GetState() *ComponentState {
+	if t == nil {
+		t = &ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.State
+}
+func (t *ServiceDeploymentStatusFragment_Components) GetSynced() bool {
+	if t == nil {
+		t = &ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Synced
+}
+func (t *ServiceDeploymentStatusFragment_Components) GetVersion() *string {
+	if t == nil {
+		t = &ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Version
 }
 
 type ServiceDeploymentExtended_Revision_RevisionFragment_Git struct {
@@ -18016,6 +20180,28 @@ func (t *GetAgentRunStatus_AgentRun_AgentRunStatusFragment_Prompts) GetSeq() int
 	return t.Seq
 }
 
+type GetAgentRunPending_AgentRun_AgentRunPendingFragment_Runtime struct {
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *GetAgentRunPending_AgentRun_AgentRunPendingFragment_Runtime) GetName() string {
+	if t == nil {
+		t = &GetAgentRunPending_AgentRun_AgentRunPendingFragment_Runtime{}
+	}
+	return t.Name
+}
+
+type GetAgentRunPending_AgentRun_AgentRunPendingFragment_Flow struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *GetAgentRunPending_AgentRun_AgentRunPendingFragment_Flow) GetID() string {
+	if t == nil {
+		t = &GetAgentRunPending_AgentRun_AgentRunPendingFragment_Flow{}
+	}
+	return t.ID
+}
+
 type GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_Runtime struct {
 	Type AgentRuntimeType "json:\"type\" graphql:\"type\""
 }
@@ -18352,139 +20538,33 @@ func (t *ListAgentRunsMinimal_AgentRuns) GetPageInfo() *PageInfoFragment {
 	return &t.PageInfo
 }
 
-type ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Skills struct {
-	Contents    string  "json:\"contents\" graphql:\"contents\""
-	Description *string "json:\"description,omitempty\" graphql:\"description\""
-	Name        string  "json:\"name\" graphql:\"name\""
-}
-
-func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Skills) GetContents() string {
-	if t == nil {
-		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Skills{}
-	}
-	return t.Contents
-}
-func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Skills) GetDescription() *string {
-	if t == nil {
-		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Skills{}
-	}
-	return t.Description
-}
-func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Skills) GetName() string {
-	if t == nil {
-		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Skills{}
-	}
-	return t.Name
-}
-
-type ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage struct {
-	CachedTokens    *int64   "json:\"cachedTokens,omitempty\" graphql:\"cachedTokens\""
-	InputCost       *float64 "json:\"inputCost,omitempty\" graphql:\"inputCost\""
-	InputTokens     *int64   "json:\"inputTokens,omitempty\" graphql:\"inputTokens\""
-	OutputCost      *float64 "json:\"outputCost,omitempty\" graphql:\"outputCost\""
-	OutputTokens    *int64   "json:\"outputTokens,omitempty\" graphql:\"outputTokens\""
-	ReasoningTokens *int64   "json:\"reasoningTokens,omitempty\" graphql:\"reasoningTokens\""
-	TotalCost       *float64 "json:\"totalCost,omitempty\" graphql:\"totalCost\""
-	TotalTokens     *int64   "json:\"totalTokens,omitempty\" graphql:\"totalTokens\""
-}
-
-func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage) GetCachedTokens() *int64 {
-	if t == nil {
-		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage{}
-	}
-	return t.CachedTokens
-}
-func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage) GetInputCost() *float64 {
-	if t == nil {
-		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage{}
-	}
-	return t.InputCost
-}
-func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage) GetInputTokens() *int64 {
-	if t == nil {
-		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage{}
-	}
-	return t.InputTokens
-}
-func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage) GetOutputCost() *float64 {
-	if t == nil {
-		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage{}
-	}
-	return t.OutputCost
-}
-func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage) GetOutputTokens() *int64 {
-	if t == nil {
-		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage{}
-	}
-	return t.OutputTokens
-}
-func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage) GetReasoningTokens() *int64 {
-	if t == nil {
-		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage{}
-	}
-	return t.ReasoningTokens
-}
-func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage) GetTotalCost() *float64 {
-	if t == nil {
-		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage{}
-	}
-	return t.TotalCost
-}
-func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage) GetTotalTokens() *int64 {
-	if t == nil {
-		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage{}
-	}
-	return t.TotalTokens
-}
-
-type ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User struct {
-	Email string "json:\"email\" graphql:\"email\""
-	ID    string "json:\"id\" graphql:\"id\""
-	Name  string "json:\"name\" graphql:\"name\""
-}
-
-func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User) GetEmail() string {
-	if t == nil {
-		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User{}
-	}
-	return t.Email
-}
-func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User) GetID() string {
-	if t == nil {
-		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User{}
-	}
-	return t.ID
-}
-func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User) GetName() string {
-	if t == nil {
-		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User{}
-	}
-	return t.Name
-}
-
-type ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Flow struct {
-	ID   string "json:\"id\" graphql:\"id\""
+type ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunPendingFragment_Runtime struct {
 	Name string "json:\"name\" graphql:\"name\""
 }
 
-func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Flow) GetID() string {
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunPendingFragment_Runtime) GetName() string {
 	if t == nil {
-		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Flow{}
-	}
-	return t.ID
-}
-func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Flow) GetName() string {
-	if t == nil {
-		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Flow{}
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunPendingFragment_Runtime{}
 	}
 	return t.Name
 }
 
-type ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges struct {
-	Node *AgentRunFragment "json:\"node,omitempty\" graphql:\"node\""
+type ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunPendingFragment_Flow struct {
+	ID string "json:\"id\" graphql:\"id\""
 }
 
-func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges) GetNode() *AgentRunFragment {
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunPendingFragment_Flow) GetID() string {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunPendingFragment_Flow{}
+	}
+	return t.ID
+}
+
+type ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges struct {
+	Node *AgentRunPendingFragment "json:\"node,omitempty\" graphql:\"node\""
+}
+
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges) GetNode() *AgentRunPendingFragment {
 	if t == nil {
 		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges{}
 	}
@@ -18670,132 +20750,22 @@ func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Flow) GetName() string {
 	return t.Name
 }
 
-type UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Skills struct {
-	Contents    string  "json:\"contents\" graphql:\"contents\""
-	Description *string "json:\"description,omitempty\" graphql:\"description\""
-	Name        string  "json:\"name\" graphql:\"name\""
+type UpdateAgentRun_UpdateAgentRun_AgentRunUpdateFragment_PullRequests struct {
+	ID  string "json:\"id\" graphql:\"id\""
+	URL string "json:\"url\" graphql:\"url\""
 }
 
-func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Skills) GetContents() string {
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunUpdateFragment_PullRequests) GetID() string {
 	if t == nil {
-		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Skills{}
-	}
-	return t.Contents
-}
-func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Skills) GetDescription() *string {
-	if t == nil {
-		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Skills{}
-	}
-	return t.Description
-}
-func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Skills) GetName() string {
-	if t == nil {
-		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Skills{}
-	}
-	return t.Name
-}
-
-type UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage struct {
-	CachedTokens    *int64   "json:\"cachedTokens,omitempty\" graphql:\"cachedTokens\""
-	InputCost       *float64 "json:\"inputCost,omitempty\" graphql:\"inputCost\""
-	InputTokens     *int64   "json:\"inputTokens,omitempty\" graphql:\"inputTokens\""
-	OutputCost      *float64 "json:\"outputCost,omitempty\" graphql:\"outputCost\""
-	OutputTokens    *int64   "json:\"outputTokens,omitempty\" graphql:\"outputTokens\""
-	ReasoningTokens *int64   "json:\"reasoningTokens,omitempty\" graphql:\"reasoningTokens\""
-	TotalCost       *float64 "json:\"totalCost,omitempty\" graphql:\"totalCost\""
-	TotalTokens     *int64   "json:\"totalTokens,omitempty\" graphql:\"totalTokens\""
-}
-
-func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetCachedTokens() *int64 {
-	if t == nil {
-		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
-	}
-	return t.CachedTokens
-}
-func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetInputCost() *float64 {
-	if t == nil {
-		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
-	}
-	return t.InputCost
-}
-func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetInputTokens() *int64 {
-	if t == nil {
-		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
-	}
-	return t.InputTokens
-}
-func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetOutputCost() *float64 {
-	if t == nil {
-		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
-	}
-	return t.OutputCost
-}
-func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetOutputTokens() *int64 {
-	if t == nil {
-		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
-	}
-	return t.OutputTokens
-}
-func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetReasoningTokens() *int64 {
-	if t == nil {
-		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
-	}
-	return t.ReasoningTokens
-}
-func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetTotalCost() *float64 {
-	if t == nil {
-		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
-	}
-	return t.TotalCost
-}
-func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetTotalTokens() *int64 {
-	if t == nil {
-		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
-	}
-	return t.TotalTokens
-}
-
-type UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User struct {
-	Email string "json:\"email\" graphql:\"email\""
-	ID    string "json:\"id\" graphql:\"id\""
-	Name  string "json:\"name\" graphql:\"name\""
-}
-
-func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User) GetEmail() string {
-	if t == nil {
-		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User{}
-	}
-	return t.Email
-}
-func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User) GetID() string {
-	if t == nil {
-		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User{}
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunUpdateFragment_PullRequests{}
 	}
 	return t.ID
 }
-func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User) GetName() string {
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunUpdateFragment_PullRequests) GetURL() string {
 	if t == nil {
-		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User{}
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunUpdateFragment_PullRequests{}
 	}
-	return t.Name
-}
-
-type UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Flow struct {
-	ID   string "json:\"id\" graphql:\"id\""
-	Name string "json:\"name\" graphql:\"name\""
-}
-
-func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Flow) GetID() string {
-	if t == nil {
-		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Flow{}
-	}
-	return t.ID
-}
-func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Flow) GetName() string {
-	if t == nil {
-		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Flow{}
-	}
-	return t.Name
+	return t.URL
 }
 
 type CreateAgentMessage_CreateAgentMessage struct {
@@ -25050,6 +27020,126 @@ func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtende
 	return t.Stack
 }
 
+type GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components struct {
+	Group     *string         "json:\"group,omitempty\" graphql:\"group\""
+	ID        string          "json:\"id\" graphql:\"id\""
+	Kind      string          "json:\"kind\" graphql:\"kind\""
+	Name      string          "json:\"name\" graphql:\"name\""
+	Namespace *string         "json:\"namespace,omitempty\" graphql:\"namespace\""
+	State     *ComponentState "json:\"state,omitempty\" graphql:\"state\""
+	Synced    bool            "json:\"synced\" graphql:\"synced\""
+	Version   *string         "json:\"version,omitempty\" graphql:\"version\""
+}
+
+func (t *GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetGroup() *string {
+	if t == nil {
+		t = &GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Group
+}
+func (t *GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetID() string {
+	if t == nil {
+		t = &GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.ID
+}
+func (t *GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetKind() string {
+	if t == nil {
+		t = &GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Kind
+}
+func (t *GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetName() string {
+	if t == nil {
+		t = &GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Name
+}
+func (t *GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetNamespace() *string {
+	if t == nil {
+		t = &GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Namespace
+}
+func (t *GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetState() *ComponentState {
+	if t == nil {
+		t = &GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.State
+}
+func (t *GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetSynced() bool {
+	if t == nil {
+		t = &GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Synced
+}
+func (t *GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetVersion() *string {
+	if t == nil {
+		t = &GetServiceDeploymentStatusByHandle_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Version
+}
+
+type GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components struct {
+	Group     *string         "json:\"group,omitempty\" graphql:\"group\""
+	ID        string          "json:\"id\" graphql:\"id\""
+	Kind      string          "json:\"kind\" graphql:\"kind\""
+	Name      string          "json:\"name\" graphql:\"name\""
+	Namespace *string         "json:\"namespace,omitempty\" graphql:\"namespace\""
+	State     *ComponentState "json:\"state,omitempty\" graphql:\"state\""
+	Synced    bool            "json:\"synced\" graphql:\"synced\""
+	Version   *string         "json:\"version,omitempty\" graphql:\"version\""
+}
+
+func (t *GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetGroup() *string {
+	if t == nil {
+		t = &GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Group
+}
+func (t *GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetID() string {
+	if t == nil {
+		t = &GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.ID
+}
+func (t *GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetKind() string {
+	if t == nil {
+		t = &GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Kind
+}
+func (t *GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetName() string {
+	if t == nil {
+		t = &GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Name
+}
+func (t *GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetNamespace() *string {
+	if t == nil {
+		t = &GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Namespace
+}
+func (t *GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetState() *ComponentState {
+	if t == nil {
+		t = &GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.State
+}
+func (t *GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetSynced() bool {
+	if t == nil {
+		t = &GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Synced
+}
+func (t *GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components) GetVersion() *string {
+	if t == nil {
+		t = &GetServiceDeploymentStatus_ServiceDeployment_ServiceDeploymentStatusFragment_Components{}
+	}
+	return t.Version
+}
+
 type GetServiceDeploymentTinyByHandle_ServiceDeployment struct {
 	ID   string "json:\"id\" graphql:\"id\""
 	Name string "json:\"name\" graphql:\"name\""
@@ -25999,6 +28089,2518 @@ func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_Imports) GetS
 		t = &KickServiceByHandle_KickService_ServiceDeploymentExtended_Imports{}
 	}
 	return t.Stack
+}
+
+type CliListDevboxes_Devboxes_Edges struct {
+	Node *CliDevboxTinyFragment "json:\"node,omitempty\" graphql:\"node\""
+}
+
+func (t *CliListDevboxes_Devboxes_Edges) GetNode() *CliDevboxTinyFragment {
+	if t == nil {
+		t = &CliListDevboxes_Devboxes_Edges{}
+	}
+	return t.Node
+}
+
+type CliListDevboxes_Devboxes struct {
+	Edges []*CliListDevboxes_Devboxes_Edges "json:\"edges,omitempty\" graphql:\"edges\""
+}
+
+func (t *CliListDevboxes_Devboxes) GetEdges() []*CliListDevboxes_Devboxes_Edges {
+	if t == nil {
+		t = &CliListDevboxes_Devboxes{}
+	}
+	return t.Edges
+}
+
+type CliGetDevbox_Devbox_CliDevboxFragment_Agents_CliDevboxAgentFragment_Models struct {
+	Description *string "json:\"description,omitempty\" graphql:\"description\""
+	ID          string  "json:\"id\" graphql:\"id\""
+	Name        *string "json:\"name,omitempty\" graphql:\"name\""
+}
+
+func (t *CliGetDevbox_Devbox_CliDevboxFragment_Agents_CliDevboxAgentFragment_Models) GetDescription() *string {
+	if t == nil {
+		t = &CliGetDevbox_Devbox_CliDevboxFragment_Agents_CliDevboxAgentFragment_Models{}
+	}
+	return t.Description
+}
+func (t *CliGetDevbox_Devbox_CliDevboxFragment_Agents_CliDevboxAgentFragment_Models) GetID() string {
+	if t == nil {
+		t = &CliGetDevbox_Devbox_CliDevboxFragment_Agents_CliDevboxAgentFragment_Models{}
+	}
+	return t.ID
+}
+func (t *CliGetDevbox_Devbox_CliDevboxFragment_Agents_CliDevboxAgentFragment_Models) GetName() *string {
+	if t == nil {
+		t = &CliGetDevbox_Devbox_CliDevboxFragment_Agents_CliDevboxAgentFragment_Models{}
+	}
+	return t.Name
+}
+
+type CliGetDevbox_Devbox_CliDevboxFragment_Agents_CliDevboxAgentFragment_SessionCapabilities struct {
+	Close  *bool "json:\"close,omitempty\" graphql:\"close\""
+	Delete *bool "json:\"delete,omitempty\" graphql:\"delete\""
+	Fork   *bool "json:\"fork,omitempty\" graphql:\"fork\""
+	List   *bool "json:\"list,omitempty\" graphql:\"list\""
+	Load   *bool "json:\"load,omitempty\" graphql:\"load\""
+	Resume *bool "json:\"resume,omitempty\" graphql:\"resume\""
+}
+
+func (t *CliGetDevbox_Devbox_CliDevboxFragment_Agents_CliDevboxAgentFragment_SessionCapabilities) GetClose() *bool {
+	if t == nil {
+		t = &CliGetDevbox_Devbox_CliDevboxFragment_Agents_CliDevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Close
+}
+func (t *CliGetDevbox_Devbox_CliDevboxFragment_Agents_CliDevboxAgentFragment_SessionCapabilities) GetDelete() *bool {
+	if t == nil {
+		t = &CliGetDevbox_Devbox_CliDevboxFragment_Agents_CliDevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Delete
+}
+func (t *CliGetDevbox_Devbox_CliDevboxFragment_Agents_CliDevboxAgentFragment_SessionCapabilities) GetFork() *bool {
+	if t == nil {
+		t = &CliGetDevbox_Devbox_CliDevboxFragment_Agents_CliDevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Fork
+}
+func (t *CliGetDevbox_Devbox_CliDevboxFragment_Agents_CliDevboxAgentFragment_SessionCapabilities) GetList() *bool {
+	if t == nil {
+		t = &CliGetDevbox_Devbox_CliDevboxFragment_Agents_CliDevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.List
+}
+func (t *CliGetDevbox_Devbox_CliDevboxFragment_Agents_CliDevboxAgentFragment_SessionCapabilities) GetLoad() *bool {
+	if t == nil {
+		t = &CliGetDevbox_Devbox_CliDevboxFragment_Agents_CliDevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Load
+}
+func (t *CliGetDevbox_Devbox_CliDevboxFragment_Agents_CliDevboxAgentFragment_SessionCapabilities) GetResume() *bool {
+	if t == nil {
+		t = &CliGetDevbox_Devbox_CliDevboxFragment_Agents_CliDevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Resume
+}
+
+type CliDevboxAgents_DevboxAgents_CliDevboxAgentFragment_Models struct {
+	Description *string "json:\"description,omitempty\" graphql:\"description\""
+	ID          string  "json:\"id\" graphql:\"id\""
+	Name        *string "json:\"name,omitempty\" graphql:\"name\""
+}
+
+func (t *CliDevboxAgents_DevboxAgents_CliDevboxAgentFragment_Models) GetDescription() *string {
+	if t == nil {
+		t = &CliDevboxAgents_DevboxAgents_CliDevboxAgentFragment_Models{}
+	}
+	return t.Description
+}
+func (t *CliDevboxAgents_DevboxAgents_CliDevboxAgentFragment_Models) GetID() string {
+	if t == nil {
+		t = &CliDevboxAgents_DevboxAgents_CliDevboxAgentFragment_Models{}
+	}
+	return t.ID
+}
+func (t *CliDevboxAgents_DevboxAgents_CliDevboxAgentFragment_Models) GetName() *string {
+	if t == nil {
+		t = &CliDevboxAgents_DevboxAgents_CliDevboxAgentFragment_Models{}
+	}
+	return t.Name
+}
+
+type CliDevboxAgents_DevboxAgents_CliDevboxAgentFragment_SessionCapabilities struct {
+	Close  *bool "json:\"close,omitempty\" graphql:\"close\""
+	Delete *bool "json:\"delete,omitempty\" graphql:\"delete\""
+	Fork   *bool "json:\"fork,omitempty\" graphql:\"fork\""
+	List   *bool "json:\"list,omitempty\" graphql:\"list\""
+	Load   *bool "json:\"load,omitempty\" graphql:\"load\""
+	Resume *bool "json:\"resume,omitempty\" graphql:\"resume\""
+}
+
+func (t *CliDevboxAgents_DevboxAgents_CliDevboxAgentFragment_SessionCapabilities) GetClose() *bool {
+	if t == nil {
+		t = &CliDevboxAgents_DevboxAgents_CliDevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Close
+}
+func (t *CliDevboxAgents_DevboxAgents_CliDevboxAgentFragment_SessionCapabilities) GetDelete() *bool {
+	if t == nil {
+		t = &CliDevboxAgents_DevboxAgents_CliDevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Delete
+}
+func (t *CliDevboxAgents_DevboxAgents_CliDevboxAgentFragment_SessionCapabilities) GetFork() *bool {
+	if t == nil {
+		t = &CliDevboxAgents_DevboxAgents_CliDevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Fork
+}
+func (t *CliDevboxAgents_DevboxAgents_CliDevboxAgentFragment_SessionCapabilities) GetList() *bool {
+	if t == nil {
+		t = &CliDevboxAgents_DevboxAgents_CliDevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.List
+}
+func (t *CliDevboxAgents_DevboxAgents_CliDevboxAgentFragment_SessionCapabilities) GetLoad() *bool {
+	if t == nil {
+		t = &CliDevboxAgents_DevboxAgents_CliDevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Load
+}
+func (t *CliDevboxAgents_DevboxAgents_CliDevboxAgentFragment_SessionCapabilities) GetResume() *bool {
+	if t == nil {
+		t = &CliDevboxAgents_DevboxAgents_CliDevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Resume
+}
+
+type CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_AgentConnections struct {
+	AdapterName    *string          "json:\"adapterName,omitempty\" graphql:\"adapterName\""
+	AdapterVersion *string          "json:\"adapterVersion,omitempty\" graphql:\"adapterVersion\""
+	Agent          *DevboxAgentType "json:\"agent,omitempty\" graphql:\"agent\""
+	Billing        *string          "json:\"billing,omitempty\" graphql:\"billing\""
+}
+
+func (t *CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_AgentConnections) GetAdapterName() *string {
+	if t == nil {
+		t = &CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_AgentConnections{}
+	}
+	return t.AdapterName
+}
+func (t *CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_AgentConnections) GetAdapterVersion() *string {
+	if t == nil {
+		t = &CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_AgentConnections{}
+	}
+	return t.AdapterVersion
+}
+func (t *CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_AgentConnections) GetAgent() *DevboxAgentType {
+	if t == nil {
+		t = &CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_AgentConnections{}
+	}
+	return t.Agent
+}
+func (t *CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_AgentConnections) GetBilling() *string {
+	if t == nil {
+		t = &CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_AgentConnections{}
+	}
+	return t.Billing
+}
+
+type CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_AgentBilling struct {
+	Agent              *DevboxAgentType   "json:\"agent,omitempty\" graphql:\"agent\""
+	AllowCollaborators *bool              "json:\"allowCollaborators,omitempty\" graphql:\"allowCollaborators\""
+	Billing            *DevboxBillingMode "json:\"billing,omitempty\" graphql:\"billing\""
+	CredentialKind     *string            "json:\"credentialKind,omitempty\" graphql:\"credentialKind\""
+}
+
+func (t *CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_AgentBilling) GetAgent() *DevboxAgentType {
+	if t == nil {
+		t = &CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_AgentBilling{}
+	}
+	return t.Agent
+}
+func (t *CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_AgentBilling) GetAllowCollaborators() *bool {
+	if t == nil {
+		t = &CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_AgentBilling{}
+	}
+	return t.AllowCollaborators
+}
+func (t *CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_AgentBilling) GetBilling() *DevboxBillingMode {
+	if t == nil {
+		t = &CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_AgentBilling{}
+	}
+	return t.Billing
+}
+func (t *CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_AgentBilling) GetCredentialKind() *string {
+	if t == nil {
+		t = &CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_AgentBilling{}
+	}
+	return t.CredentialKind
+}
+
+type CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_IdleState struct {
+	Idle       *bool   "json:\"idle,omitempty\" graphql:\"idle\""
+	IdleSince  *string "json:\"idleSince,omitempty\" graphql:\"idleSince\""
+	Message    *string "json:\"message,omitempty\" graphql:\"message\""
+	SuspendsAt *string "json:\"suspendsAt,omitempty\" graphql:\"suspendsAt\""
+}
+
+func (t *CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_IdleState) GetIdle() *bool {
+	if t == nil {
+		t = &CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_IdleState{}
+	}
+	return t.Idle
+}
+func (t *CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_IdleState) GetIdleSince() *string {
+	if t == nil {
+		t = &CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_IdleState{}
+	}
+	return t.IdleSince
+}
+func (t *CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_IdleState) GetMessage() *string {
+	if t == nil {
+		t = &CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_IdleState{}
+	}
+	return t.Message
+}
+func (t *CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_IdleState) GetSuspendsAt() *string {
+	if t == nil {
+		t = &CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_IdleState{}
+	}
+	return t.SuspendsAt
+}
+
+type CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_Workbench struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_Workbench) GetID() string {
+	if t == nil {
+		t = &CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_Workbench{}
+	}
+	return t.ID
+}
+func (t *CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_Workbench) GetName() string {
+	if t == nil {
+		t = &CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_Workbench{}
+	}
+	return t.Name
+}
+
+type CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_Devbox struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_Devbox) GetID() string {
+	if t == nil {
+		t = &CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_Devbox{}
+	}
+	return t.ID
+}
+func (t *CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_Devbox) GetName() string {
+	if t == nil {
+		t = &CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_Devbox{}
+	}
+	return t.Name
+}
+
+type CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_KeepAwakeBy struct {
+	Email string "json:\"email\" graphql:\"email\""
+}
+
+func (t *CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_KeepAwakeBy) GetEmail() string {
+	if t == nil {
+		t = &CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_KeepAwakeBy{}
+	}
+	return t.Email
+}
+
+type CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_Threads_CliDevboxThreadFragment_Instance struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_Threads_CliDevboxThreadFragment_Instance) GetID() string {
+	if t == nil {
+		t = &CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_Threads_CliDevboxThreadFragment_Instance{}
+	}
+	return t.ID
+}
+
+type CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options struct {
+	Kind     *string "json:\"kind,omitempty\" graphql:\"kind\""
+	Name     *string "json:\"name,omitempty\" graphql:\"name\""
+	OptionID string  "json:\"optionId\" graphql:\"optionId\""
+}
+
+func (t *CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options) GetKind() *string {
+	if t == nil {
+		t = &CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options{}
+	}
+	return t.Kind
+}
+func (t *CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options) GetName() *string {
+	if t == nil {
+		t = &CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options{}
+	}
+	return t.Name
+}
+func (t *CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options) GetOptionID() string {
+	if t == nil {
+		t = &CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options{}
+	}
+	return t.OptionID
+}
+
+type CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Thread struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Thread) GetID() string {
+	if t == nil {
+		t = &CliListDevboxInstances_Workbench_DevboxInstances_Edges_Node_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Thread{}
+	}
+	return t.ID
+}
+
+type CliListDevboxInstances_Workbench_DevboxInstances_Edges struct {
+	Node *CliDevboxInstanceFragment "json:\"node,omitempty\" graphql:\"node\""
+}
+
+func (t *CliListDevboxInstances_Workbench_DevboxInstances_Edges) GetNode() *CliDevboxInstanceFragment {
+	if t == nil {
+		t = &CliListDevboxInstances_Workbench_DevboxInstances_Edges{}
+	}
+	return t.Node
+}
+
+type CliListDevboxInstances_Workbench_DevboxInstances struct {
+	Edges []*CliListDevboxInstances_Workbench_DevboxInstances_Edges "json:\"edges,omitempty\" graphql:\"edges\""
+}
+
+func (t *CliListDevboxInstances_Workbench_DevboxInstances) GetEdges() []*CliListDevboxInstances_Workbench_DevboxInstances_Edges {
+	if t == nil {
+		t = &CliListDevboxInstances_Workbench_DevboxInstances{}
+	}
+	return t.Edges
+}
+
+type CliListDevboxInstances_Workbench struct {
+	DevboxInstances *CliListDevboxInstances_Workbench_DevboxInstances "json:\"devboxInstances,omitempty\" graphql:\"devboxInstances\""
+}
+
+func (t *CliListDevboxInstances_Workbench) GetDevboxInstances() *CliListDevboxInstances_Workbench_DevboxInstances {
+	if t == nil {
+		t = &CliListDevboxInstances_Workbench{}
+	}
+	return t.DevboxInstances
+}
+
+type CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_AgentConnections struct {
+	AdapterName    *string          "json:\"adapterName,omitempty\" graphql:\"adapterName\""
+	AdapterVersion *string          "json:\"adapterVersion,omitempty\" graphql:\"adapterVersion\""
+	Agent          *DevboxAgentType "json:\"agent,omitempty\" graphql:\"agent\""
+	Billing        *string          "json:\"billing,omitempty\" graphql:\"billing\""
+}
+
+func (t *CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_AgentConnections) GetAdapterName() *string {
+	if t == nil {
+		t = &CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_AgentConnections{}
+	}
+	return t.AdapterName
+}
+func (t *CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_AgentConnections) GetAdapterVersion() *string {
+	if t == nil {
+		t = &CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_AgentConnections{}
+	}
+	return t.AdapterVersion
+}
+func (t *CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_AgentConnections) GetAgent() *DevboxAgentType {
+	if t == nil {
+		t = &CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_AgentConnections{}
+	}
+	return t.Agent
+}
+func (t *CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_AgentConnections) GetBilling() *string {
+	if t == nil {
+		t = &CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_AgentConnections{}
+	}
+	return t.Billing
+}
+
+type CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_AgentBilling struct {
+	Agent              *DevboxAgentType   "json:\"agent,omitempty\" graphql:\"agent\""
+	AllowCollaborators *bool              "json:\"allowCollaborators,omitempty\" graphql:\"allowCollaborators\""
+	Billing            *DevboxBillingMode "json:\"billing,omitempty\" graphql:\"billing\""
+	CredentialKind     *string            "json:\"credentialKind,omitempty\" graphql:\"credentialKind\""
+}
+
+func (t *CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_AgentBilling) GetAgent() *DevboxAgentType {
+	if t == nil {
+		t = &CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_AgentBilling{}
+	}
+	return t.Agent
+}
+func (t *CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_AgentBilling) GetAllowCollaborators() *bool {
+	if t == nil {
+		t = &CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_AgentBilling{}
+	}
+	return t.AllowCollaborators
+}
+func (t *CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_AgentBilling) GetBilling() *DevboxBillingMode {
+	if t == nil {
+		t = &CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_AgentBilling{}
+	}
+	return t.Billing
+}
+func (t *CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_AgentBilling) GetCredentialKind() *string {
+	if t == nil {
+		t = &CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_AgentBilling{}
+	}
+	return t.CredentialKind
+}
+
+type CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_IdleState struct {
+	Idle       *bool   "json:\"idle,omitempty\" graphql:\"idle\""
+	IdleSince  *string "json:\"idleSince,omitempty\" graphql:\"idleSince\""
+	Message    *string "json:\"message,omitempty\" graphql:\"message\""
+	SuspendsAt *string "json:\"suspendsAt,omitempty\" graphql:\"suspendsAt\""
+}
+
+func (t *CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_IdleState) GetIdle() *bool {
+	if t == nil {
+		t = &CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_IdleState{}
+	}
+	return t.Idle
+}
+func (t *CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_IdleState) GetIdleSince() *string {
+	if t == nil {
+		t = &CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_IdleState{}
+	}
+	return t.IdleSince
+}
+func (t *CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_IdleState) GetMessage() *string {
+	if t == nil {
+		t = &CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_IdleState{}
+	}
+	return t.Message
+}
+func (t *CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_IdleState) GetSuspendsAt() *string {
+	if t == nil {
+		t = &CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_IdleState{}
+	}
+	return t.SuspendsAt
+}
+
+type CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_Workbench struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_Workbench) GetID() string {
+	if t == nil {
+		t = &CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_Workbench{}
+	}
+	return t.ID
+}
+func (t *CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_Workbench) GetName() string {
+	if t == nil {
+		t = &CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_Workbench{}
+	}
+	return t.Name
+}
+
+type CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_Devbox struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_Devbox) GetID() string {
+	if t == nil {
+		t = &CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_Devbox{}
+	}
+	return t.ID
+}
+func (t *CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_Devbox) GetName() string {
+	if t == nil {
+		t = &CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_Devbox{}
+	}
+	return t.Name
+}
+
+type CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_KeepAwakeBy struct {
+	Email string "json:\"email\" graphql:\"email\""
+}
+
+func (t *CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_KeepAwakeBy) GetEmail() string {
+	if t == nil {
+		t = &CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_KeepAwakeBy{}
+	}
+	return t.Email
+}
+
+type CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_Threads_CliDevboxThreadFragment_Instance struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_Threads_CliDevboxThreadFragment_Instance) GetID() string {
+	if t == nil {
+		t = &CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_Threads_CliDevboxThreadFragment_Instance{}
+	}
+	return t.ID
+}
+
+type CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options struct {
+	Kind     *string "json:\"kind,omitempty\" graphql:\"kind\""
+	Name     *string "json:\"name,omitempty\" graphql:\"name\""
+	OptionID string  "json:\"optionId\" graphql:\"optionId\""
+}
+
+func (t *CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options) GetKind() *string {
+	if t == nil {
+		t = &CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options{}
+	}
+	return t.Kind
+}
+func (t *CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options) GetName() *string {
+	if t == nil {
+		t = &CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options{}
+	}
+	return t.Name
+}
+func (t *CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options) GetOptionID() string {
+	if t == nil {
+		t = &CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options{}
+	}
+	return t.OptionID
+}
+
+type CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Thread struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Thread) GetID() string {
+	if t == nil {
+		t = &CliGetDevboxInstance_DevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Thread{}
+	}
+	return t.ID
+}
+
+type CliGetDevboxThread_DevboxThread_CliDevboxThreadFragment_Instance struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *CliGetDevboxThread_DevboxThread_CliDevboxThreadFragment_Instance) GetID() string {
+	if t == nil {
+		t = &CliGetDevboxThread_DevboxThread_CliDevboxThreadFragment_Instance{}
+	}
+	return t.ID
+}
+
+type CliDevboxImportableSessions_DevboxImportableSessions struct {
+	Agent     *DevboxAgentType "json:\"agent,omitempty\" graphql:\"agent\""
+	Cwd       *string          "json:\"cwd,omitempty\" graphql:\"cwd\""
+	SessionID string           "json:\"sessionId\" graphql:\"sessionId\""
+	Title     *string          "json:\"title,omitempty\" graphql:\"title\""
+	UpdatedAt *string          "json:\"updatedAt,omitempty\" graphql:\"updatedAt\""
+}
+
+func (t *CliDevboxImportableSessions_DevboxImportableSessions) GetAgent() *DevboxAgentType {
+	if t == nil {
+		t = &CliDevboxImportableSessions_DevboxImportableSessions{}
+	}
+	return t.Agent
+}
+func (t *CliDevboxImportableSessions_DevboxImportableSessions) GetCwd() *string {
+	if t == nil {
+		t = &CliDevboxImportableSessions_DevboxImportableSessions{}
+	}
+	return t.Cwd
+}
+func (t *CliDevboxImportableSessions_DevboxImportableSessions) GetSessionID() string {
+	if t == nil {
+		t = &CliDevboxImportableSessions_DevboxImportableSessions{}
+	}
+	return t.SessionID
+}
+func (t *CliDevboxImportableSessions_DevboxImportableSessions) GetTitle() *string {
+	if t == nil {
+		t = &CliDevboxImportableSessions_DevboxImportableSessions{}
+	}
+	return t.Title
+}
+func (t *CliDevboxImportableSessions_DevboxImportableSessions) GetUpdatedAt() *string {
+	if t == nil {
+		t = &CliDevboxImportableSessions_DevboxImportableSessions{}
+	}
+	return t.UpdatedAt
+}
+
+type CliDevboxTimeline_DevboxTimeline_Entities_CliDevboxEntityFragment_ToolCall struct {
+	Kind       *string "json:\"kind,omitempty\" graphql:\"kind\""
+	Status     *string "json:\"status,omitempty\" graphql:\"status\""
+	Title      *string "json:\"title,omitempty\" graphql:\"title\""
+	ToolCallID *string "json:\"toolCallId,omitempty\" graphql:\"toolCallId\""
+}
+
+func (t *CliDevboxTimeline_DevboxTimeline_Entities_CliDevboxEntityFragment_ToolCall) GetKind() *string {
+	if t == nil {
+		t = &CliDevboxTimeline_DevboxTimeline_Entities_CliDevboxEntityFragment_ToolCall{}
+	}
+	return t.Kind
+}
+func (t *CliDevboxTimeline_DevboxTimeline_Entities_CliDevboxEntityFragment_ToolCall) GetStatus() *string {
+	if t == nil {
+		t = &CliDevboxTimeline_DevboxTimeline_Entities_CliDevboxEntityFragment_ToolCall{}
+	}
+	return t.Status
+}
+func (t *CliDevboxTimeline_DevboxTimeline_Entities_CliDevboxEntityFragment_ToolCall) GetTitle() *string {
+	if t == nil {
+		t = &CliDevboxTimeline_DevboxTimeline_Entities_CliDevboxEntityFragment_ToolCall{}
+	}
+	return t.Title
+}
+func (t *CliDevboxTimeline_DevboxTimeline_Entities_CliDevboxEntityFragment_ToolCall) GetToolCallID() *string {
+	if t == nil {
+		t = &CliDevboxTimeline_DevboxTimeline_Entities_CliDevboxEntityFragment_ToolCall{}
+	}
+	return t.ToolCallID
+}
+
+type CliDevboxTimeline_DevboxTimeline_Entities_CliDevboxEntityFragment_Plan_Entries struct {
+	Content  *string "json:\"content,omitempty\" graphql:\"content\""
+	Priority *string "json:\"priority,omitempty\" graphql:\"priority\""
+	Status   *string "json:\"status,omitempty\" graphql:\"status\""
+}
+
+func (t *CliDevboxTimeline_DevboxTimeline_Entities_CliDevboxEntityFragment_Plan_Entries) GetContent() *string {
+	if t == nil {
+		t = &CliDevboxTimeline_DevboxTimeline_Entities_CliDevboxEntityFragment_Plan_Entries{}
+	}
+	return t.Content
+}
+func (t *CliDevboxTimeline_DevboxTimeline_Entities_CliDevboxEntityFragment_Plan_Entries) GetPriority() *string {
+	if t == nil {
+		t = &CliDevboxTimeline_DevboxTimeline_Entities_CliDevboxEntityFragment_Plan_Entries{}
+	}
+	return t.Priority
+}
+func (t *CliDevboxTimeline_DevboxTimeline_Entities_CliDevboxEntityFragment_Plan_Entries) GetStatus() *string {
+	if t == nil {
+		t = &CliDevboxTimeline_DevboxTimeline_Entities_CliDevboxEntityFragment_Plan_Entries{}
+	}
+	return t.Status
+}
+
+type CliDevboxTimeline_DevboxTimeline_Entities_CliDevboxEntityFragment_Plan struct {
+	Entries []*CliDevboxTimeline_DevboxTimeline_Entities_CliDevboxEntityFragment_Plan_Entries "json:\"entries,omitempty\" graphql:\"entries\""
+}
+
+func (t *CliDevboxTimeline_DevboxTimeline_Entities_CliDevboxEntityFragment_Plan) GetEntries() []*CliDevboxTimeline_DevboxTimeline_Entities_CliDevboxEntityFragment_Plan_Entries {
+	if t == nil {
+		t = &CliDevboxTimeline_DevboxTimeline_Entities_CliDevboxEntityFragment_Plan{}
+	}
+	return t.Entries
+}
+
+type CliDevboxTimeline_DevboxTimeline_Entities_CliDevboxEntityFragment_Terminal struct {
+	Command    *string "json:\"command,omitempty\" graphql:\"command\""
+	ExitCode   *int64  "json:\"exitCode,omitempty\" graphql:\"exitCode\""
+	Output     *string "json:\"output,omitempty\" graphql:\"output\""
+	TerminalID *string "json:\"terminalId,omitempty\" graphql:\"terminalId\""
+}
+
+func (t *CliDevboxTimeline_DevboxTimeline_Entities_CliDevboxEntityFragment_Terminal) GetCommand() *string {
+	if t == nil {
+		t = &CliDevboxTimeline_DevboxTimeline_Entities_CliDevboxEntityFragment_Terminal{}
+	}
+	return t.Command
+}
+func (t *CliDevboxTimeline_DevboxTimeline_Entities_CliDevboxEntityFragment_Terminal) GetExitCode() *int64 {
+	if t == nil {
+		t = &CliDevboxTimeline_DevboxTimeline_Entities_CliDevboxEntityFragment_Terminal{}
+	}
+	return t.ExitCode
+}
+func (t *CliDevboxTimeline_DevboxTimeline_Entities_CliDevboxEntityFragment_Terminal) GetOutput() *string {
+	if t == nil {
+		t = &CliDevboxTimeline_DevboxTimeline_Entities_CliDevboxEntityFragment_Terminal{}
+	}
+	return t.Output
+}
+func (t *CliDevboxTimeline_DevboxTimeline_Entities_CliDevboxEntityFragment_Terminal) GetTerminalID() *string {
+	if t == nil {
+		t = &CliDevboxTimeline_DevboxTimeline_Entities_CliDevboxEntityFragment_Terminal{}
+	}
+	return t.TerminalID
+}
+
+type CliDevboxTimeline_DevboxTimeline struct {
+	DeltaOffset *string                    "json:\"deltaOffset,omitempty\" graphql:\"deltaOffset\""
+	Entities    []*CliDevboxEntityFragment "json:\"entities,omitempty\" graphql:\"entities\""
+	HasMore     *bool                      "json:\"hasMore,omitempty\" graphql:\"hasMore\""
+}
+
+func (t *CliDevboxTimeline_DevboxTimeline) GetDeltaOffset() *string {
+	if t == nil {
+		t = &CliDevboxTimeline_DevboxTimeline{}
+	}
+	return t.DeltaOffset
+}
+func (t *CliDevboxTimeline_DevboxTimeline) GetEntities() []*CliDevboxEntityFragment {
+	if t == nil {
+		t = &CliDevboxTimeline_DevboxTimeline{}
+	}
+	return t.Entities
+}
+func (t *CliDevboxTimeline_DevboxTimeline) GetHasMore() *bool {
+	if t == nil {
+		t = &CliDevboxTimeline_DevboxTimeline{}
+	}
+	return t.HasMore
+}
+
+type CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_AgentConnections struct {
+	AdapterName    *string          "json:\"adapterName,omitempty\" graphql:\"adapterName\""
+	AdapterVersion *string          "json:\"adapterVersion,omitempty\" graphql:\"adapterVersion\""
+	Agent          *DevboxAgentType "json:\"agent,omitempty\" graphql:\"agent\""
+	Billing        *string          "json:\"billing,omitempty\" graphql:\"billing\""
+}
+
+func (t *CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_AgentConnections) GetAdapterName() *string {
+	if t == nil {
+		t = &CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_AgentConnections{}
+	}
+	return t.AdapterName
+}
+func (t *CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_AgentConnections) GetAdapterVersion() *string {
+	if t == nil {
+		t = &CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_AgentConnections{}
+	}
+	return t.AdapterVersion
+}
+func (t *CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_AgentConnections) GetAgent() *DevboxAgentType {
+	if t == nil {
+		t = &CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_AgentConnections{}
+	}
+	return t.Agent
+}
+func (t *CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_AgentConnections) GetBilling() *string {
+	if t == nil {
+		t = &CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_AgentConnections{}
+	}
+	return t.Billing
+}
+
+type CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_AgentBilling struct {
+	Agent              *DevboxAgentType   "json:\"agent,omitempty\" graphql:\"agent\""
+	AllowCollaborators *bool              "json:\"allowCollaborators,omitempty\" graphql:\"allowCollaborators\""
+	Billing            *DevboxBillingMode "json:\"billing,omitempty\" graphql:\"billing\""
+	CredentialKind     *string            "json:\"credentialKind,omitempty\" graphql:\"credentialKind\""
+}
+
+func (t *CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_AgentBilling) GetAgent() *DevboxAgentType {
+	if t == nil {
+		t = &CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_AgentBilling{}
+	}
+	return t.Agent
+}
+func (t *CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_AgentBilling) GetAllowCollaborators() *bool {
+	if t == nil {
+		t = &CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_AgentBilling{}
+	}
+	return t.AllowCollaborators
+}
+func (t *CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_AgentBilling) GetBilling() *DevboxBillingMode {
+	if t == nil {
+		t = &CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_AgentBilling{}
+	}
+	return t.Billing
+}
+func (t *CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_AgentBilling) GetCredentialKind() *string {
+	if t == nil {
+		t = &CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_AgentBilling{}
+	}
+	return t.CredentialKind
+}
+
+type CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_IdleState struct {
+	Idle       *bool   "json:\"idle,omitempty\" graphql:\"idle\""
+	IdleSince  *string "json:\"idleSince,omitempty\" graphql:\"idleSince\""
+	Message    *string "json:\"message,omitempty\" graphql:\"message\""
+	SuspendsAt *string "json:\"suspendsAt,omitempty\" graphql:\"suspendsAt\""
+}
+
+func (t *CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_IdleState) GetIdle() *bool {
+	if t == nil {
+		t = &CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_IdleState{}
+	}
+	return t.Idle
+}
+func (t *CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_IdleState) GetIdleSince() *string {
+	if t == nil {
+		t = &CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_IdleState{}
+	}
+	return t.IdleSince
+}
+func (t *CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_IdleState) GetMessage() *string {
+	if t == nil {
+		t = &CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_IdleState{}
+	}
+	return t.Message
+}
+func (t *CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_IdleState) GetSuspendsAt() *string {
+	if t == nil {
+		t = &CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_IdleState{}
+	}
+	return t.SuspendsAt
+}
+
+type CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_Workbench struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_Workbench) GetID() string {
+	if t == nil {
+		t = &CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_Workbench{}
+	}
+	return t.ID
+}
+func (t *CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_Workbench) GetName() string {
+	if t == nil {
+		t = &CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_Workbench{}
+	}
+	return t.Name
+}
+
+type CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_Devbox struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_Devbox) GetID() string {
+	if t == nil {
+		t = &CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_Devbox{}
+	}
+	return t.ID
+}
+func (t *CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_Devbox) GetName() string {
+	if t == nil {
+		t = &CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_Devbox{}
+	}
+	return t.Name
+}
+
+type CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_KeepAwakeBy struct {
+	Email string "json:\"email\" graphql:\"email\""
+}
+
+func (t *CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_KeepAwakeBy) GetEmail() string {
+	if t == nil {
+		t = &CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_KeepAwakeBy{}
+	}
+	return t.Email
+}
+
+type CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_Threads_CliDevboxThreadFragment_Instance struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_Threads_CliDevboxThreadFragment_Instance) GetID() string {
+	if t == nil {
+		t = &CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_Threads_CliDevboxThreadFragment_Instance{}
+	}
+	return t.ID
+}
+
+type CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options struct {
+	Kind     *string "json:\"kind,omitempty\" graphql:\"kind\""
+	Name     *string "json:\"name,omitempty\" graphql:\"name\""
+	OptionID string  "json:\"optionId\" graphql:\"optionId\""
+}
+
+func (t *CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options) GetKind() *string {
+	if t == nil {
+		t = &CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options{}
+	}
+	return t.Kind
+}
+func (t *CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options) GetName() *string {
+	if t == nil {
+		t = &CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options{}
+	}
+	return t.Name
+}
+func (t *CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options) GetOptionID() string {
+	if t == nil {
+		t = &CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options{}
+	}
+	return t.OptionID
+}
+
+type CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Thread struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Thread) GetID() string {
+	if t == nil {
+		t = &CliCreateDevboxInstance_CreateDevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Thread{}
+	}
+	return t.ID
+}
+
+type CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_AgentConnections struct {
+	AdapterName    *string          "json:\"adapterName,omitempty\" graphql:\"adapterName\""
+	AdapterVersion *string          "json:\"adapterVersion,omitempty\" graphql:\"adapterVersion\""
+	Agent          *DevboxAgentType "json:\"agent,omitempty\" graphql:\"agent\""
+	Billing        *string          "json:\"billing,omitempty\" graphql:\"billing\""
+}
+
+func (t *CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_AgentConnections) GetAdapterName() *string {
+	if t == nil {
+		t = &CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_AgentConnections{}
+	}
+	return t.AdapterName
+}
+func (t *CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_AgentConnections) GetAdapterVersion() *string {
+	if t == nil {
+		t = &CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_AgentConnections{}
+	}
+	return t.AdapterVersion
+}
+func (t *CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_AgentConnections) GetAgent() *DevboxAgentType {
+	if t == nil {
+		t = &CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_AgentConnections{}
+	}
+	return t.Agent
+}
+func (t *CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_AgentConnections) GetBilling() *string {
+	if t == nil {
+		t = &CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_AgentConnections{}
+	}
+	return t.Billing
+}
+
+type CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_AgentBilling struct {
+	Agent              *DevboxAgentType   "json:\"agent,omitempty\" graphql:\"agent\""
+	AllowCollaborators *bool              "json:\"allowCollaborators,omitempty\" graphql:\"allowCollaborators\""
+	Billing            *DevboxBillingMode "json:\"billing,omitempty\" graphql:\"billing\""
+	CredentialKind     *string            "json:\"credentialKind,omitempty\" graphql:\"credentialKind\""
+}
+
+func (t *CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_AgentBilling) GetAgent() *DevboxAgentType {
+	if t == nil {
+		t = &CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_AgentBilling{}
+	}
+	return t.Agent
+}
+func (t *CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_AgentBilling) GetAllowCollaborators() *bool {
+	if t == nil {
+		t = &CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_AgentBilling{}
+	}
+	return t.AllowCollaborators
+}
+func (t *CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_AgentBilling) GetBilling() *DevboxBillingMode {
+	if t == nil {
+		t = &CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_AgentBilling{}
+	}
+	return t.Billing
+}
+func (t *CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_AgentBilling) GetCredentialKind() *string {
+	if t == nil {
+		t = &CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_AgentBilling{}
+	}
+	return t.CredentialKind
+}
+
+type CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_IdleState struct {
+	Idle       *bool   "json:\"idle,omitempty\" graphql:\"idle\""
+	IdleSince  *string "json:\"idleSince,omitempty\" graphql:\"idleSince\""
+	Message    *string "json:\"message,omitempty\" graphql:\"message\""
+	SuspendsAt *string "json:\"suspendsAt,omitempty\" graphql:\"suspendsAt\""
+}
+
+func (t *CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_IdleState) GetIdle() *bool {
+	if t == nil {
+		t = &CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_IdleState{}
+	}
+	return t.Idle
+}
+func (t *CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_IdleState) GetIdleSince() *string {
+	if t == nil {
+		t = &CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_IdleState{}
+	}
+	return t.IdleSince
+}
+func (t *CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_IdleState) GetMessage() *string {
+	if t == nil {
+		t = &CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_IdleState{}
+	}
+	return t.Message
+}
+func (t *CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_IdleState) GetSuspendsAt() *string {
+	if t == nil {
+		t = &CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_IdleState{}
+	}
+	return t.SuspendsAt
+}
+
+type CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_Workbench struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_Workbench) GetID() string {
+	if t == nil {
+		t = &CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_Workbench{}
+	}
+	return t.ID
+}
+func (t *CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_Workbench) GetName() string {
+	if t == nil {
+		t = &CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_Workbench{}
+	}
+	return t.Name
+}
+
+type CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_Devbox struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_Devbox) GetID() string {
+	if t == nil {
+		t = &CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_Devbox{}
+	}
+	return t.ID
+}
+func (t *CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_Devbox) GetName() string {
+	if t == nil {
+		t = &CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_Devbox{}
+	}
+	return t.Name
+}
+
+type CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_KeepAwakeBy struct {
+	Email string "json:\"email\" graphql:\"email\""
+}
+
+func (t *CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_KeepAwakeBy) GetEmail() string {
+	if t == nil {
+		t = &CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_KeepAwakeBy{}
+	}
+	return t.Email
+}
+
+type CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_Threads_CliDevboxThreadFragment_Instance struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_Threads_CliDevboxThreadFragment_Instance) GetID() string {
+	if t == nil {
+		t = &CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_Threads_CliDevboxThreadFragment_Instance{}
+	}
+	return t.ID
+}
+
+type CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options struct {
+	Kind     *string "json:\"kind,omitempty\" graphql:\"kind\""
+	Name     *string "json:\"name,omitempty\" graphql:\"name\""
+	OptionID string  "json:\"optionId\" graphql:\"optionId\""
+}
+
+func (t *CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options) GetKind() *string {
+	if t == nil {
+		t = &CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options{}
+	}
+	return t.Kind
+}
+func (t *CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options) GetName() *string {
+	if t == nil {
+		t = &CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options{}
+	}
+	return t.Name
+}
+func (t *CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options) GetOptionID() string {
+	if t == nil {
+		t = &CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options{}
+	}
+	return t.OptionID
+}
+
+type CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Thread struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Thread) GetID() string {
+	if t == nil {
+		t = &CliCancelDevboxInstance_CancelDevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Thread{}
+	}
+	return t.ID
+}
+
+type CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_AgentConnections struct {
+	AdapterName    *string          "json:\"adapterName,omitempty\" graphql:\"adapterName\""
+	AdapterVersion *string          "json:\"adapterVersion,omitempty\" graphql:\"adapterVersion\""
+	Agent          *DevboxAgentType "json:\"agent,omitempty\" graphql:\"agent\""
+	Billing        *string          "json:\"billing,omitempty\" graphql:\"billing\""
+}
+
+func (t *CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_AgentConnections) GetAdapterName() *string {
+	if t == nil {
+		t = &CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_AgentConnections{}
+	}
+	return t.AdapterName
+}
+func (t *CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_AgentConnections) GetAdapterVersion() *string {
+	if t == nil {
+		t = &CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_AgentConnections{}
+	}
+	return t.AdapterVersion
+}
+func (t *CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_AgentConnections) GetAgent() *DevboxAgentType {
+	if t == nil {
+		t = &CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_AgentConnections{}
+	}
+	return t.Agent
+}
+func (t *CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_AgentConnections) GetBilling() *string {
+	if t == nil {
+		t = &CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_AgentConnections{}
+	}
+	return t.Billing
+}
+
+type CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_AgentBilling struct {
+	Agent              *DevboxAgentType   "json:\"agent,omitempty\" graphql:\"agent\""
+	AllowCollaborators *bool              "json:\"allowCollaborators,omitempty\" graphql:\"allowCollaborators\""
+	Billing            *DevboxBillingMode "json:\"billing,omitempty\" graphql:\"billing\""
+	CredentialKind     *string            "json:\"credentialKind,omitempty\" graphql:\"credentialKind\""
+}
+
+func (t *CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_AgentBilling) GetAgent() *DevboxAgentType {
+	if t == nil {
+		t = &CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_AgentBilling{}
+	}
+	return t.Agent
+}
+func (t *CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_AgentBilling) GetAllowCollaborators() *bool {
+	if t == nil {
+		t = &CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_AgentBilling{}
+	}
+	return t.AllowCollaborators
+}
+func (t *CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_AgentBilling) GetBilling() *DevboxBillingMode {
+	if t == nil {
+		t = &CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_AgentBilling{}
+	}
+	return t.Billing
+}
+func (t *CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_AgentBilling) GetCredentialKind() *string {
+	if t == nil {
+		t = &CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_AgentBilling{}
+	}
+	return t.CredentialKind
+}
+
+type CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_IdleState struct {
+	Idle       *bool   "json:\"idle,omitempty\" graphql:\"idle\""
+	IdleSince  *string "json:\"idleSince,omitempty\" graphql:\"idleSince\""
+	Message    *string "json:\"message,omitempty\" graphql:\"message\""
+	SuspendsAt *string "json:\"suspendsAt,omitempty\" graphql:\"suspendsAt\""
+}
+
+func (t *CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_IdleState) GetIdle() *bool {
+	if t == nil {
+		t = &CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_IdleState{}
+	}
+	return t.Idle
+}
+func (t *CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_IdleState) GetIdleSince() *string {
+	if t == nil {
+		t = &CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_IdleState{}
+	}
+	return t.IdleSince
+}
+func (t *CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_IdleState) GetMessage() *string {
+	if t == nil {
+		t = &CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_IdleState{}
+	}
+	return t.Message
+}
+func (t *CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_IdleState) GetSuspendsAt() *string {
+	if t == nil {
+		t = &CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_IdleState{}
+	}
+	return t.SuspendsAt
+}
+
+type CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_Workbench struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_Workbench) GetID() string {
+	if t == nil {
+		t = &CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_Workbench{}
+	}
+	return t.ID
+}
+func (t *CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_Workbench) GetName() string {
+	if t == nil {
+		t = &CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_Workbench{}
+	}
+	return t.Name
+}
+
+type CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_Devbox struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_Devbox) GetID() string {
+	if t == nil {
+		t = &CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_Devbox{}
+	}
+	return t.ID
+}
+func (t *CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_Devbox) GetName() string {
+	if t == nil {
+		t = &CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_Devbox{}
+	}
+	return t.Name
+}
+
+type CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_KeepAwakeBy struct {
+	Email string "json:\"email\" graphql:\"email\""
+}
+
+func (t *CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_KeepAwakeBy) GetEmail() string {
+	if t == nil {
+		t = &CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_KeepAwakeBy{}
+	}
+	return t.Email
+}
+
+type CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_Threads_CliDevboxThreadFragment_Instance struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_Threads_CliDevboxThreadFragment_Instance) GetID() string {
+	if t == nil {
+		t = &CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_Threads_CliDevboxThreadFragment_Instance{}
+	}
+	return t.ID
+}
+
+type CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options struct {
+	Kind     *string "json:\"kind,omitempty\" graphql:\"kind\""
+	Name     *string "json:\"name,omitempty\" graphql:\"name\""
+	OptionID string  "json:\"optionId\" graphql:\"optionId\""
+}
+
+func (t *CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options) GetKind() *string {
+	if t == nil {
+		t = &CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options{}
+	}
+	return t.Kind
+}
+func (t *CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options) GetName() *string {
+	if t == nil {
+		t = &CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options{}
+	}
+	return t.Name
+}
+func (t *CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options) GetOptionID() string {
+	if t == nil {
+		t = &CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options{}
+	}
+	return t.OptionID
+}
+
+type CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Thread struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Thread) GetID() string {
+	if t == nil {
+		t = &CliSuspendDevboxInstance_SuspendDevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Thread{}
+	}
+	return t.ID
+}
+
+type CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_AgentConnections struct {
+	AdapterName    *string          "json:\"adapterName,omitempty\" graphql:\"adapterName\""
+	AdapterVersion *string          "json:\"adapterVersion,omitempty\" graphql:\"adapterVersion\""
+	Agent          *DevboxAgentType "json:\"agent,omitempty\" graphql:\"agent\""
+	Billing        *string          "json:\"billing,omitempty\" graphql:\"billing\""
+}
+
+func (t *CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_AgentConnections) GetAdapterName() *string {
+	if t == nil {
+		t = &CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_AgentConnections{}
+	}
+	return t.AdapterName
+}
+func (t *CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_AgentConnections) GetAdapterVersion() *string {
+	if t == nil {
+		t = &CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_AgentConnections{}
+	}
+	return t.AdapterVersion
+}
+func (t *CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_AgentConnections) GetAgent() *DevboxAgentType {
+	if t == nil {
+		t = &CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_AgentConnections{}
+	}
+	return t.Agent
+}
+func (t *CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_AgentConnections) GetBilling() *string {
+	if t == nil {
+		t = &CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_AgentConnections{}
+	}
+	return t.Billing
+}
+
+type CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_AgentBilling struct {
+	Agent              *DevboxAgentType   "json:\"agent,omitempty\" graphql:\"agent\""
+	AllowCollaborators *bool              "json:\"allowCollaborators,omitempty\" graphql:\"allowCollaborators\""
+	Billing            *DevboxBillingMode "json:\"billing,omitempty\" graphql:\"billing\""
+	CredentialKind     *string            "json:\"credentialKind,omitempty\" graphql:\"credentialKind\""
+}
+
+func (t *CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_AgentBilling) GetAgent() *DevboxAgentType {
+	if t == nil {
+		t = &CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_AgentBilling{}
+	}
+	return t.Agent
+}
+func (t *CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_AgentBilling) GetAllowCollaborators() *bool {
+	if t == nil {
+		t = &CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_AgentBilling{}
+	}
+	return t.AllowCollaborators
+}
+func (t *CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_AgentBilling) GetBilling() *DevboxBillingMode {
+	if t == nil {
+		t = &CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_AgentBilling{}
+	}
+	return t.Billing
+}
+func (t *CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_AgentBilling) GetCredentialKind() *string {
+	if t == nil {
+		t = &CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_AgentBilling{}
+	}
+	return t.CredentialKind
+}
+
+type CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_IdleState struct {
+	Idle       *bool   "json:\"idle,omitempty\" graphql:\"idle\""
+	IdleSince  *string "json:\"idleSince,omitempty\" graphql:\"idleSince\""
+	Message    *string "json:\"message,omitempty\" graphql:\"message\""
+	SuspendsAt *string "json:\"suspendsAt,omitempty\" graphql:\"suspendsAt\""
+}
+
+func (t *CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_IdleState) GetIdle() *bool {
+	if t == nil {
+		t = &CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_IdleState{}
+	}
+	return t.Idle
+}
+func (t *CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_IdleState) GetIdleSince() *string {
+	if t == nil {
+		t = &CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_IdleState{}
+	}
+	return t.IdleSince
+}
+func (t *CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_IdleState) GetMessage() *string {
+	if t == nil {
+		t = &CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_IdleState{}
+	}
+	return t.Message
+}
+func (t *CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_IdleState) GetSuspendsAt() *string {
+	if t == nil {
+		t = &CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_IdleState{}
+	}
+	return t.SuspendsAt
+}
+
+type CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_Workbench struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_Workbench) GetID() string {
+	if t == nil {
+		t = &CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_Workbench{}
+	}
+	return t.ID
+}
+func (t *CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_Workbench) GetName() string {
+	if t == nil {
+		t = &CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_Workbench{}
+	}
+	return t.Name
+}
+
+type CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_Devbox struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_Devbox) GetID() string {
+	if t == nil {
+		t = &CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_Devbox{}
+	}
+	return t.ID
+}
+func (t *CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_Devbox) GetName() string {
+	if t == nil {
+		t = &CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_Devbox{}
+	}
+	return t.Name
+}
+
+type CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_KeepAwakeBy struct {
+	Email string "json:\"email\" graphql:\"email\""
+}
+
+func (t *CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_KeepAwakeBy) GetEmail() string {
+	if t == nil {
+		t = &CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_KeepAwakeBy{}
+	}
+	return t.Email
+}
+
+type CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_Threads_CliDevboxThreadFragment_Instance struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_Threads_CliDevboxThreadFragment_Instance) GetID() string {
+	if t == nil {
+		t = &CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_Threads_CliDevboxThreadFragment_Instance{}
+	}
+	return t.ID
+}
+
+type CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options struct {
+	Kind     *string "json:\"kind,omitempty\" graphql:\"kind\""
+	Name     *string "json:\"name,omitempty\" graphql:\"name\""
+	OptionID string  "json:\"optionId\" graphql:\"optionId\""
+}
+
+func (t *CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options) GetKind() *string {
+	if t == nil {
+		t = &CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options{}
+	}
+	return t.Kind
+}
+func (t *CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options) GetName() *string {
+	if t == nil {
+		t = &CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options{}
+	}
+	return t.Name
+}
+func (t *CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options) GetOptionID() string {
+	if t == nil {
+		t = &CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options{}
+	}
+	return t.OptionID
+}
+
+type CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Thread struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Thread) GetID() string {
+	if t == nil {
+		t = &CliResumeDevboxInstance_ResumeDevboxInstance_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Thread{}
+	}
+	return t.ID
+}
+
+type CliPingDevboxInstance_PingDevboxInstance struct {
+	ID     string               "json:\"id\" graphql:\"id\""
+	Status DevboxInstanceStatus "json:\"status\" graphql:\"status\""
+}
+
+func (t *CliPingDevboxInstance_PingDevboxInstance) GetID() string {
+	if t == nil {
+		t = &CliPingDevboxInstance_PingDevboxInstance{}
+	}
+	return t.ID
+}
+func (t *CliPingDevboxInstance_PingDevboxInstance) GetStatus() *DevboxInstanceStatus {
+	if t == nil {
+		t = &CliPingDevboxInstance_PingDevboxInstance{}
+	}
+	return &t.Status
+}
+
+type CliLeaveDevboxInstance_LeaveDevboxInstance struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *CliLeaveDevboxInstance_LeaveDevboxInstance) GetID() string {
+	if t == nil {
+		t = &CliLeaveDevboxInstance_LeaveDevboxInstance{}
+	}
+	return t.ID
+}
+
+type CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_AgentConnections struct {
+	AdapterName    *string          "json:\"adapterName,omitempty\" graphql:\"adapterName\""
+	AdapterVersion *string          "json:\"adapterVersion,omitempty\" graphql:\"adapterVersion\""
+	Agent          *DevboxAgentType "json:\"agent,omitempty\" graphql:\"agent\""
+	Billing        *string          "json:\"billing,omitempty\" graphql:\"billing\""
+}
+
+func (t *CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_AgentConnections) GetAdapterName() *string {
+	if t == nil {
+		t = &CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_AgentConnections{}
+	}
+	return t.AdapterName
+}
+func (t *CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_AgentConnections) GetAdapterVersion() *string {
+	if t == nil {
+		t = &CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_AgentConnections{}
+	}
+	return t.AdapterVersion
+}
+func (t *CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_AgentConnections) GetAgent() *DevboxAgentType {
+	if t == nil {
+		t = &CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_AgentConnections{}
+	}
+	return t.Agent
+}
+func (t *CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_AgentConnections) GetBilling() *string {
+	if t == nil {
+		t = &CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_AgentConnections{}
+	}
+	return t.Billing
+}
+
+type CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_AgentBilling struct {
+	Agent              *DevboxAgentType   "json:\"agent,omitempty\" graphql:\"agent\""
+	AllowCollaborators *bool              "json:\"allowCollaborators,omitempty\" graphql:\"allowCollaborators\""
+	Billing            *DevboxBillingMode "json:\"billing,omitempty\" graphql:\"billing\""
+	CredentialKind     *string            "json:\"credentialKind,omitempty\" graphql:\"credentialKind\""
+}
+
+func (t *CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_AgentBilling) GetAgent() *DevboxAgentType {
+	if t == nil {
+		t = &CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_AgentBilling{}
+	}
+	return t.Agent
+}
+func (t *CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_AgentBilling) GetAllowCollaborators() *bool {
+	if t == nil {
+		t = &CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_AgentBilling{}
+	}
+	return t.AllowCollaborators
+}
+func (t *CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_AgentBilling) GetBilling() *DevboxBillingMode {
+	if t == nil {
+		t = &CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_AgentBilling{}
+	}
+	return t.Billing
+}
+func (t *CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_AgentBilling) GetCredentialKind() *string {
+	if t == nil {
+		t = &CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_AgentBilling{}
+	}
+	return t.CredentialKind
+}
+
+type CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_IdleState struct {
+	Idle       *bool   "json:\"idle,omitempty\" graphql:\"idle\""
+	IdleSince  *string "json:\"idleSince,omitempty\" graphql:\"idleSince\""
+	Message    *string "json:\"message,omitempty\" graphql:\"message\""
+	SuspendsAt *string "json:\"suspendsAt,omitempty\" graphql:\"suspendsAt\""
+}
+
+func (t *CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_IdleState) GetIdle() *bool {
+	if t == nil {
+		t = &CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_IdleState{}
+	}
+	return t.Idle
+}
+func (t *CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_IdleState) GetIdleSince() *string {
+	if t == nil {
+		t = &CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_IdleState{}
+	}
+	return t.IdleSince
+}
+func (t *CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_IdleState) GetMessage() *string {
+	if t == nil {
+		t = &CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_IdleState{}
+	}
+	return t.Message
+}
+func (t *CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_IdleState) GetSuspendsAt() *string {
+	if t == nil {
+		t = &CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_IdleState{}
+	}
+	return t.SuspendsAt
+}
+
+type CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_Workbench struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_Workbench) GetID() string {
+	if t == nil {
+		t = &CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_Workbench{}
+	}
+	return t.ID
+}
+func (t *CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_Workbench) GetName() string {
+	if t == nil {
+		t = &CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_Workbench{}
+	}
+	return t.Name
+}
+
+type CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_Devbox struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_Devbox) GetID() string {
+	if t == nil {
+		t = &CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_Devbox{}
+	}
+	return t.ID
+}
+func (t *CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_Devbox) GetName() string {
+	if t == nil {
+		t = &CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_Devbox{}
+	}
+	return t.Name
+}
+
+type CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_KeepAwakeBy struct {
+	Email string "json:\"email\" graphql:\"email\""
+}
+
+func (t *CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_KeepAwakeBy) GetEmail() string {
+	if t == nil {
+		t = &CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_KeepAwakeBy{}
+	}
+	return t.Email
+}
+
+type CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_Threads_CliDevboxThreadFragment_Instance struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_Threads_CliDevboxThreadFragment_Instance) GetID() string {
+	if t == nil {
+		t = &CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_Threads_CliDevboxThreadFragment_Instance{}
+	}
+	return t.ID
+}
+
+type CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options struct {
+	Kind     *string "json:\"kind,omitempty\" graphql:\"kind\""
+	Name     *string "json:\"name,omitempty\" graphql:\"name\""
+	OptionID string  "json:\"optionId\" graphql:\"optionId\""
+}
+
+func (t *CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options) GetKind() *string {
+	if t == nil {
+		t = &CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options{}
+	}
+	return t.Kind
+}
+func (t *CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options) GetName() *string {
+	if t == nil {
+		t = &CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options{}
+	}
+	return t.Name
+}
+func (t *CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options) GetOptionID() string {
+	if t == nil {
+		t = &CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options{}
+	}
+	return t.OptionID
+}
+
+type CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Thread struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Thread) GetID() string {
+	if t == nil {
+		t = &CliKeepDevboxInstanceAwake_KeepDevboxInstanceAwake_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Thread{}
+	}
+	return t.ID
+}
+
+type CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_AgentConnections struct {
+	AdapterName    *string          "json:\"adapterName,omitempty\" graphql:\"adapterName\""
+	AdapterVersion *string          "json:\"adapterVersion,omitempty\" graphql:\"adapterVersion\""
+	Agent          *DevboxAgentType "json:\"agent,omitempty\" graphql:\"agent\""
+	Billing        *string          "json:\"billing,omitempty\" graphql:\"billing\""
+}
+
+func (t *CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_AgentConnections) GetAdapterName() *string {
+	if t == nil {
+		t = &CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_AgentConnections{}
+	}
+	return t.AdapterName
+}
+func (t *CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_AgentConnections) GetAdapterVersion() *string {
+	if t == nil {
+		t = &CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_AgentConnections{}
+	}
+	return t.AdapterVersion
+}
+func (t *CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_AgentConnections) GetAgent() *DevboxAgentType {
+	if t == nil {
+		t = &CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_AgentConnections{}
+	}
+	return t.Agent
+}
+func (t *CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_AgentConnections) GetBilling() *string {
+	if t == nil {
+		t = &CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_AgentConnections{}
+	}
+	return t.Billing
+}
+
+type CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_AgentBilling struct {
+	Agent              *DevboxAgentType   "json:\"agent,omitempty\" graphql:\"agent\""
+	AllowCollaborators *bool              "json:\"allowCollaborators,omitempty\" graphql:\"allowCollaborators\""
+	Billing            *DevboxBillingMode "json:\"billing,omitempty\" graphql:\"billing\""
+	CredentialKind     *string            "json:\"credentialKind,omitempty\" graphql:\"credentialKind\""
+}
+
+func (t *CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_AgentBilling) GetAgent() *DevboxAgentType {
+	if t == nil {
+		t = &CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_AgentBilling{}
+	}
+	return t.Agent
+}
+func (t *CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_AgentBilling) GetAllowCollaborators() *bool {
+	if t == nil {
+		t = &CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_AgentBilling{}
+	}
+	return t.AllowCollaborators
+}
+func (t *CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_AgentBilling) GetBilling() *DevboxBillingMode {
+	if t == nil {
+		t = &CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_AgentBilling{}
+	}
+	return t.Billing
+}
+func (t *CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_AgentBilling) GetCredentialKind() *string {
+	if t == nil {
+		t = &CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_AgentBilling{}
+	}
+	return t.CredentialKind
+}
+
+type CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_IdleState struct {
+	Idle       *bool   "json:\"idle,omitempty\" graphql:\"idle\""
+	IdleSince  *string "json:\"idleSince,omitempty\" graphql:\"idleSince\""
+	Message    *string "json:\"message,omitempty\" graphql:\"message\""
+	SuspendsAt *string "json:\"suspendsAt,omitempty\" graphql:\"suspendsAt\""
+}
+
+func (t *CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_IdleState) GetIdle() *bool {
+	if t == nil {
+		t = &CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_IdleState{}
+	}
+	return t.Idle
+}
+func (t *CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_IdleState) GetIdleSince() *string {
+	if t == nil {
+		t = &CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_IdleState{}
+	}
+	return t.IdleSince
+}
+func (t *CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_IdleState) GetMessage() *string {
+	if t == nil {
+		t = &CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_IdleState{}
+	}
+	return t.Message
+}
+func (t *CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_IdleState) GetSuspendsAt() *string {
+	if t == nil {
+		t = &CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_IdleState{}
+	}
+	return t.SuspendsAt
+}
+
+type CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_Workbench struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_Workbench) GetID() string {
+	if t == nil {
+		t = &CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_Workbench{}
+	}
+	return t.ID
+}
+func (t *CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_Workbench) GetName() string {
+	if t == nil {
+		t = &CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_Workbench{}
+	}
+	return t.Name
+}
+
+type CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_Devbox struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_Devbox) GetID() string {
+	if t == nil {
+		t = &CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_Devbox{}
+	}
+	return t.ID
+}
+func (t *CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_Devbox) GetName() string {
+	if t == nil {
+		t = &CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_Devbox{}
+	}
+	return t.Name
+}
+
+type CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_KeepAwakeBy struct {
+	Email string "json:\"email\" graphql:\"email\""
+}
+
+func (t *CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_KeepAwakeBy) GetEmail() string {
+	if t == nil {
+		t = &CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_KeepAwakeBy{}
+	}
+	return t.Email
+}
+
+type CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_Threads_CliDevboxThreadFragment_Instance struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_Threads_CliDevboxThreadFragment_Instance) GetID() string {
+	if t == nil {
+		t = &CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_Threads_CliDevboxThreadFragment_Instance{}
+	}
+	return t.ID
+}
+
+type CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options struct {
+	Kind     *string "json:\"kind,omitempty\" graphql:\"kind\""
+	Name     *string "json:\"name,omitempty\" graphql:\"name\""
+	OptionID string  "json:\"optionId\" graphql:\"optionId\""
+}
+
+func (t *CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options) GetKind() *string {
+	if t == nil {
+		t = &CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options{}
+	}
+	return t.Kind
+}
+func (t *CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options) GetName() *string {
+	if t == nil {
+		t = &CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options{}
+	}
+	return t.Name
+}
+func (t *CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options) GetOptionID() string {
+	if t == nil {
+		t = &CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options{}
+	}
+	return t.OptionID
+}
+
+type CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Thread struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Thread) GetID() string {
+	if t == nil {
+		t = &CliCancelDevboxKeepAwake_CancelDevboxKeepAwake_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Thread{}
+	}
+	return t.ID
+}
+
+type CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_AgentConnections struct {
+	AdapterName    *string          "json:\"adapterName,omitempty\" graphql:\"adapterName\""
+	AdapterVersion *string          "json:\"adapterVersion,omitempty\" graphql:\"adapterVersion\""
+	Agent          *DevboxAgentType "json:\"agent,omitempty\" graphql:\"agent\""
+	Billing        *string          "json:\"billing,omitempty\" graphql:\"billing\""
+}
+
+func (t *CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_AgentConnections) GetAdapterName() *string {
+	if t == nil {
+		t = &CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_AgentConnections{}
+	}
+	return t.AdapterName
+}
+func (t *CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_AgentConnections) GetAdapterVersion() *string {
+	if t == nil {
+		t = &CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_AgentConnections{}
+	}
+	return t.AdapterVersion
+}
+func (t *CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_AgentConnections) GetAgent() *DevboxAgentType {
+	if t == nil {
+		t = &CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_AgentConnections{}
+	}
+	return t.Agent
+}
+func (t *CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_AgentConnections) GetBilling() *string {
+	if t == nil {
+		t = &CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_AgentConnections{}
+	}
+	return t.Billing
+}
+
+type CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_AgentBilling struct {
+	Agent              *DevboxAgentType   "json:\"agent,omitempty\" graphql:\"agent\""
+	AllowCollaborators *bool              "json:\"allowCollaborators,omitempty\" graphql:\"allowCollaborators\""
+	Billing            *DevboxBillingMode "json:\"billing,omitempty\" graphql:\"billing\""
+	CredentialKind     *string            "json:\"credentialKind,omitempty\" graphql:\"credentialKind\""
+}
+
+func (t *CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_AgentBilling) GetAgent() *DevboxAgentType {
+	if t == nil {
+		t = &CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_AgentBilling{}
+	}
+	return t.Agent
+}
+func (t *CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_AgentBilling) GetAllowCollaborators() *bool {
+	if t == nil {
+		t = &CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_AgentBilling{}
+	}
+	return t.AllowCollaborators
+}
+func (t *CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_AgentBilling) GetBilling() *DevboxBillingMode {
+	if t == nil {
+		t = &CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_AgentBilling{}
+	}
+	return t.Billing
+}
+func (t *CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_AgentBilling) GetCredentialKind() *string {
+	if t == nil {
+		t = &CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_AgentBilling{}
+	}
+	return t.CredentialKind
+}
+
+type CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_IdleState struct {
+	Idle       *bool   "json:\"idle,omitempty\" graphql:\"idle\""
+	IdleSince  *string "json:\"idleSince,omitempty\" graphql:\"idleSince\""
+	Message    *string "json:\"message,omitempty\" graphql:\"message\""
+	SuspendsAt *string "json:\"suspendsAt,omitempty\" graphql:\"suspendsAt\""
+}
+
+func (t *CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_IdleState) GetIdle() *bool {
+	if t == nil {
+		t = &CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_IdleState{}
+	}
+	return t.Idle
+}
+func (t *CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_IdleState) GetIdleSince() *string {
+	if t == nil {
+		t = &CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_IdleState{}
+	}
+	return t.IdleSince
+}
+func (t *CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_IdleState) GetMessage() *string {
+	if t == nil {
+		t = &CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_IdleState{}
+	}
+	return t.Message
+}
+func (t *CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_IdleState) GetSuspendsAt() *string {
+	if t == nil {
+		t = &CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_IdleState{}
+	}
+	return t.SuspendsAt
+}
+
+type CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_Workbench struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_Workbench) GetID() string {
+	if t == nil {
+		t = &CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_Workbench{}
+	}
+	return t.ID
+}
+func (t *CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_Workbench) GetName() string {
+	if t == nil {
+		t = &CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_Workbench{}
+	}
+	return t.Name
+}
+
+type CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_Devbox struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_Devbox) GetID() string {
+	if t == nil {
+		t = &CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_Devbox{}
+	}
+	return t.ID
+}
+func (t *CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_Devbox) GetName() string {
+	if t == nil {
+		t = &CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_Devbox{}
+	}
+	return t.Name
+}
+
+type CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_KeepAwakeBy struct {
+	Email string "json:\"email\" graphql:\"email\""
+}
+
+func (t *CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_KeepAwakeBy) GetEmail() string {
+	if t == nil {
+		t = &CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_KeepAwakeBy{}
+	}
+	return t.Email
+}
+
+type CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_Threads_CliDevboxThreadFragment_Instance struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_Threads_CliDevboxThreadFragment_Instance) GetID() string {
+	if t == nil {
+		t = &CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_Threads_CliDevboxThreadFragment_Instance{}
+	}
+	return t.ID
+}
+
+type CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options struct {
+	Kind     *string "json:\"kind,omitempty\" graphql:\"kind\""
+	Name     *string "json:\"name,omitempty\" graphql:\"name\""
+	OptionID string  "json:\"optionId\" graphql:\"optionId\""
+}
+
+func (t *CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options) GetKind() *string {
+	if t == nil {
+		t = &CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options{}
+	}
+	return t.Kind
+}
+func (t *CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options) GetName() *string {
+	if t == nil {
+		t = &CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options{}
+	}
+	return t.Name
+}
+func (t *CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options) GetOptionID() string {
+	if t == nil {
+		t = &CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Options{}
+	}
+	return t.OptionID
+}
+
+type CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Thread struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Thread) GetID() string {
+	if t == nil {
+		t = &CliAddDevboxRepository_AddDevboxRepository_CliDevboxInstanceFragment_Interactions_CliDevboxInteractionFragment_Thread{}
+	}
+	return t.ID
+}
+
+type CliCreateDevboxThread_CreateDevboxThread_CliDevboxThreadFragment_Instance struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *CliCreateDevboxThread_CreateDevboxThread_CliDevboxThreadFragment_Instance) GetID() string {
+	if t == nil {
+		t = &CliCreateDevboxThread_CreateDevboxThread_CliDevboxThreadFragment_Instance{}
+	}
+	return t.ID
+}
+
+type CliImportDevboxThread_ImportDevboxThread_CliDevboxThreadFragment_Instance struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *CliImportDevboxThread_ImportDevboxThread_CliDevboxThreadFragment_Instance) GetID() string {
+	if t == nil {
+		t = &CliImportDevboxThread_ImportDevboxThread_CliDevboxThreadFragment_Instance{}
+	}
+	return t.ID
+}
+
+type CliCloseDevboxThread_CloseDevboxThread_CliDevboxThreadFragment_Instance struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *CliCloseDevboxThread_CloseDevboxThread_CliDevboxThreadFragment_Instance) GetID() string {
+	if t == nil {
+		t = &CliCloseDevboxThread_CloseDevboxThread_CliDevboxThreadFragment_Instance{}
+	}
+	return t.ID
+}
+
+type CliForkDevboxThread_ForkDevboxThread_CliDevboxThreadFragment_Instance struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *CliForkDevboxThread_ForkDevboxThread_CliDevboxThreadFragment_Instance) GetID() string {
+	if t == nil {
+		t = &CliForkDevboxThread_ForkDevboxThread_CliDevboxThreadFragment_Instance{}
+	}
+	return t.ID
+}
+
+type CliPromptDevboxThread_PromptDevboxThread_CliDevboxThreadFragment_Instance struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *CliPromptDevboxThread_PromptDevboxThread_CliDevboxThreadFragment_Instance) GetID() string {
+	if t == nil {
+		t = &CliPromptDevboxThread_PromptDevboxThread_CliDevboxThreadFragment_Instance{}
+	}
+	return t.ID
+}
+
+type CliCancelDevboxPrompt_CancelDevboxPrompt_CliDevboxThreadFragment_Instance struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *CliCancelDevboxPrompt_CancelDevboxPrompt_CliDevboxThreadFragment_Instance) GetID() string {
+	if t == nil {
+		t = &CliCancelDevboxPrompt_CancelDevboxPrompt_CliDevboxThreadFragment_Instance{}
+	}
+	return t.ID
+}
+
+type CliRespondDevboxInteraction_RespondDevboxInteraction_CliDevboxInteractionFragment_Options struct {
+	Kind     *string "json:\"kind,omitempty\" graphql:\"kind\""
+	Name     *string "json:\"name,omitempty\" graphql:\"name\""
+	OptionID string  "json:\"optionId\" graphql:\"optionId\""
+}
+
+func (t *CliRespondDevboxInteraction_RespondDevboxInteraction_CliDevboxInteractionFragment_Options) GetKind() *string {
+	if t == nil {
+		t = &CliRespondDevboxInteraction_RespondDevboxInteraction_CliDevboxInteractionFragment_Options{}
+	}
+	return t.Kind
+}
+func (t *CliRespondDevboxInteraction_RespondDevboxInteraction_CliDevboxInteractionFragment_Options) GetName() *string {
+	if t == nil {
+		t = &CliRespondDevboxInteraction_RespondDevboxInteraction_CliDevboxInteractionFragment_Options{}
+	}
+	return t.Name
+}
+func (t *CliRespondDevboxInteraction_RespondDevboxInteraction_CliDevboxInteractionFragment_Options) GetOptionID() string {
+	if t == nil {
+		t = &CliRespondDevboxInteraction_RespondDevboxInteraction_CliDevboxInteractionFragment_Options{}
+	}
+	return t.OptionID
+}
+
+type CliRespondDevboxInteraction_RespondDevboxInteraction_CliDevboxInteractionFragment_Thread struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *CliRespondDevboxInteraction_RespondDevboxInteraction_CliDevboxInteractionFragment_Thread) GetID() string {
+	if t == nil {
+		t = &CliRespondDevboxInteraction_RespondDevboxInteraction_CliDevboxInteractionFragment_Thread{}
+	}
+	return t.ID
+}
+
+type GetDevbox_Devbox_DevboxFragment_Agents_DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options struct {
+	Description *string "json:\"description,omitempty\" graphql:\"description\""
+	Group       *string "json:\"group,omitempty\" graphql:\"group\""
+	Name        *string "json:\"name,omitempty\" graphql:\"name\""
+	Value       string  "json:\"value\" graphql:\"value\""
+}
+
+func (t *GetDevbox_Devbox_DevboxFragment_Agents_DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options) GetDescription() *string {
+	if t == nil {
+		t = &GetDevbox_Devbox_DevboxFragment_Agents_DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options{}
+	}
+	return t.Description
+}
+func (t *GetDevbox_Devbox_DevboxFragment_Agents_DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options) GetGroup() *string {
+	if t == nil {
+		t = &GetDevbox_Devbox_DevboxFragment_Agents_DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options{}
+	}
+	return t.Group
+}
+func (t *GetDevbox_Devbox_DevboxFragment_Agents_DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options) GetName() *string {
+	if t == nil {
+		t = &GetDevbox_Devbox_DevboxFragment_Agents_DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options{}
+	}
+	return t.Name
+}
+func (t *GetDevbox_Devbox_DevboxFragment_Agents_DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options) GetValue() string {
+	if t == nil {
+		t = &GetDevbox_Devbox_DevboxFragment_Agents_DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options{}
+	}
+	return t.Value
+}
+
+type GetDevbox_Devbox_DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities struct {
+	Close  *bool "json:\"close,omitempty\" graphql:\"close\""
+	Delete *bool "json:\"delete,omitempty\" graphql:\"delete\""
+	Fork   *bool "json:\"fork,omitempty\" graphql:\"fork\""
+	List   *bool "json:\"list,omitempty\" graphql:\"list\""
+	Load   *bool "json:\"load,omitempty\" graphql:\"load\""
+	Resume *bool "json:\"resume,omitempty\" graphql:\"resume\""
+}
+
+func (t *GetDevbox_Devbox_DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities) GetClose() *bool {
+	if t == nil {
+		t = &GetDevbox_Devbox_DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Close
+}
+func (t *GetDevbox_Devbox_DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities) GetDelete() *bool {
+	if t == nil {
+		t = &GetDevbox_Devbox_DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Delete
+}
+func (t *GetDevbox_Devbox_DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities) GetFork() *bool {
+	if t == nil {
+		t = &GetDevbox_Devbox_DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Fork
+}
+func (t *GetDevbox_Devbox_DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities) GetList() *bool {
+	if t == nil {
+		t = &GetDevbox_Devbox_DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.List
+}
+func (t *GetDevbox_Devbox_DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities) GetLoad() *bool {
+	if t == nil {
+		t = &GetDevbox_Devbox_DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Load
+}
+func (t *GetDevbox_Devbox_DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities) GetResume() *bool {
+	if t == nil {
+		t = &GetDevbox_Devbox_DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Resume
+}
+
+type GetDevboxByName_Devbox_DevboxFragment_Agents_DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options struct {
+	Description *string "json:\"description,omitempty\" graphql:\"description\""
+	Group       *string "json:\"group,omitempty\" graphql:\"group\""
+	Name        *string "json:\"name,omitempty\" graphql:\"name\""
+	Value       string  "json:\"value\" graphql:\"value\""
+}
+
+func (t *GetDevboxByName_Devbox_DevboxFragment_Agents_DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options) GetDescription() *string {
+	if t == nil {
+		t = &GetDevboxByName_Devbox_DevboxFragment_Agents_DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options{}
+	}
+	return t.Description
+}
+func (t *GetDevboxByName_Devbox_DevboxFragment_Agents_DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options) GetGroup() *string {
+	if t == nil {
+		t = &GetDevboxByName_Devbox_DevboxFragment_Agents_DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options{}
+	}
+	return t.Group
+}
+func (t *GetDevboxByName_Devbox_DevboxFragment_Agents_DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options) GetName() *string {
+	if t == nil {
+		t = &GetDevboxByName_Devbox_DevboxFragment_Agents_DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options{}
+	}
+	return t.Name
+}
+func (t *GetDevboxByName_Devbox_DevboxFragment_Agents_DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options) GetValue() string {
+	if t == nil {
+		t = &GetDevboxByName_Devbox_DevboxFragment_Agents_DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options{}
+	}
+	return t.Value
+}
+
+type GetDevboxByName_Devbox_DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities struct {
+	Close  *bool "json:\"close,omitempty\" graphql:\"close\""
+	Delete *bool "json:\"delete,omitempty\" graphql:\"delete\""
+	Fork   *bool "json:\"fork,omitempty\" graphql:\"fork\""
+	List   *bool "json:\"list,omitempty\" graphql:\"list\""
+	Load   *bool "json:\"load,omitempty\" graphql:\"load\""
+	Resume *bool "json:\"resume,omitempty\" graphql:\"resume\""
+}
+
+func (t *GetDevboxByName_Devbox_DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities) GetClose() *bool {
+	if t == nil {
+		t = &GetDevboxByName_Devbox_DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Close
+}
+func (t *GetDevboxByName_Devbox_DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities) GetDelete() *bool {
+	if t == nil {
+		t = &GetDevboxByName_Devbox_DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Delete
+}
+func (t *GetDevboxByName_Devbox_DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities) GetFork() *bool {
+	if t == nil {
+		t = &GetDevboxByName_Devbox_DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Fork
+}
+func (t *GetDevboxByName_Devbox_DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities) GetList() *bool {
+	if t == nil {
+		t = &GetDevboxByName_Devbox_DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.List
+}
+func (t *GetDevboxByName_Devbox_DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities) GetLoad() *bool {
+	if t == nil {
+		t = &GetDevboxByName_Devbox_DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Load
+}
+func (t *GetDevboxByName_Devbox_DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities) GetResume() *bool {
+	if t == nil {
+		t = &GetDevboxByName_Devbox_DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Resume
+}
+
+type UpsertDevbox_UpsertDevbox_DevboxFragment_Agents_DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options struct {
+	Description *string "json:\"description,omitempty\" graphql:\"description\""
+	Group       *string "json:\"group,omitempty\" graphql:\"group\""
+	Name        *string "json:\"name,omitempty\" graphql:\"name\""
+	Value       string  "json:\"value\" graphql:\"value\""
+}
+
+func (t *UpsertDevbox_UpsertDevbox_DevboxFragment_Agents_DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options) GetDescription() *string {
+	if t == nil {
+		t = &UpsertDevbox_UpsertDevbox_DevboxFragment_Agents_DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options{}
+	}
+	return t.Description
+}
+func (t *UpsertDevbox_UpsertDevbox_DevboxFragment_Agents_DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options) GetGroup() *string {
+	if t == nil {
+		t = &UpsertDevbox_UpsertDevbox_DevboxFragment_Agents_DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options{}
+	}
+	return t.Group
+}
+func (t *UpsertDevbox_UpsertDevbox_DevboxFragment_Agents_DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options) GetName() *string {
+	if t == nil {
+		t = &UpsertDevbox_UpsertDevbox_DevboxFragment_Agents_DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options{}
+	}
+	return t.Name
+}
+func (t *UpsertDevbox_UpsertDevbox_DevboxFragment_Agents_DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options) GetValue() string {
+	if t == nil {
+		t = &UpsertDevbox_UpsertDevbox_DevboxFragment_Agents_DevboxAgentFragment_ConfigOptions_DevboxConfigOptionFragment_Options{}
+	}
+	return t.Value
+}
+
+type UpsertDevbox_UpsertDevbox_DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities struct {
+	Close  *bool "json:\"close,omitempty\" graphql:\"close\""
+	Delete *bool "json:\"delete,omitempty\" graphql:\"delete\""
+	Fork   *bool "json:\"fork,omitempty\" graphql:\"fork\""
+	List   *bool "json:\"list,omitempty\" graphql:\"list\""
+	Load   *bool "json:\"load,omitempty\" graphql:\"load\""
+	Resume *bool "json:\"resume,omitempty\" graphql:\"resume\""
+}
+
+func (t *UpsertDevbox_UpsertDevbox_DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities) GetClose() *bool {
+	if t == nil {
+		t = &UpsertDevbox_UpsertDevbox_DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Close
+}
+func (t *UpsertDevbox_UpsertDevbox_DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities) GetDelete() *bool {
+	if t == nil {
+		t = &UpsertDevbox_UpsertDevbox_DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Delete
+}
+func (t *UpsertDevbox_UpsertDevbox_DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities) GetFork() *bool {
+	if t == nil {
+		t = &UpsertDevbox_UpsertDevbox_DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Fork
+}
+func (t *UpsertDevbox_UpsertDevbox_DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities) GetList() *bool {
+	if t == nil {
+		t = &UpsertDevbox_UpsertDevbox_DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.List
+}
+func (t *UpsertDevbox_UpsertDevbox_DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities) GetLoad() *bool {
+	if t == nil {
+		t = &UpsertDevbox_UpsertDevbox_DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Load
+}
+func (t *UpsertDevbox_UpsertDevbox_DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities) GetResume() *bool {
+	if t == nil {
+		t = &UpsertDevbox_UpsertDevbox_DevboxFragment_Agents_DevboxAgentFragment_SessionCapabilities{}
+	}
+	return t.Resume
+}
+
+type HeartbeatDevbox_HeartbeatDevbox struct {
+	ID              string        "json:\"id\" graphql:\"id\""
+	LastHeartbeatAt *string       "json:\"lastHeartbeatAt,omitempty\" graphql:\"lastHeartbeatAt\""
+	Status          *DevboxStatus "json:\"status,omitempty\" graphql:\"status\""
+}
+
+func (t *HeartbeatDevbox_HeartbeatDevbox) GetID() string {
+	if t == nil {
+		t = &HeartbeatDevbox_HeartbeatDevbox{}
+	}
+	return t.ID
+}
+func (t *HeartbeatDevbox_HeartbeatDevbox) GetLastHeartbeatAt() *string {
+	if t == nil {
+		t = &HeartbeatDevbox_HeartbeatDevbox{}
+	}
+	return t.LastHeartbeatAt
+}
+func (t *HeartbeatDevbox_HeartbeatDevbox) GetStatus() *DevboxStatus {
+	if t == nil {
+		t = &HeartbeatDevbox_HeartbeatDevbox{}
+	}
+	return t.Status
+}
+
+type DeleteDevbox_DeleteDevbox struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *DeleteDevbox_DeleteDevbox) GetID() string {
+	if t == nil {
+		t = &DeleteDevbox_DeleteDevbox{}
+	}
+	return t.ID
+}
+
+type MintDevboxProbeToken_MintDevboxProbeToken struct {
+	ExpiresAt string "json:\"expiresAt\" graphql:\"expiresAt\""
+	Token     string "json:\"token\" graphql:\"token\""
+}
+
+func (t *MintDevboxProbeToken_MintDevboxProbeToken) GetExpiresAt() string {
+	if t == nil {
+		t = &MintDevboxProbeToken_MintDevboxProbeToken{}
+	}
+	return t.ExpiresAt
+}
+func (t *MintDevboxProbeToken_MintDevboxProbeToken) GetToken() string {
+	if t == nil {
+		t = &MintDevboxProbeToken_MintDevboxProbeToken{}
+	}
+	return t.Token
+}
+
+type DeleteAgentCredential_DeleteAgentCredential struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *DeleteAgentCredential_DeleteAgentCredential) GetID() string {
+	if t == nil {
+		t = &DeleteAgentCredential_DeleteAgentCredential{}
+	}
+	return t.ID
 }
 
 type GetClusterRegistrations_ClusterRegistrations_Edges struct {
@@ -47114,6 +51716,17 @@ func (t *GetAgentRunStatus) GetAgentRun() *AgentRunStatusFragment {
 	return t.AgentRun
 }
 
+type GetAgentRunPending struct {
+	AgentRun *AgentRunPendingFragment "json:\"agentRun,omitempty\" graphql:\"agentRun\""
+}
+
+func (t *GetAgentRunPending) GetAgentRun() *AgentRunPendingFragment {
+	if t == nil {
+		t = &GetAgentRunPending{}
+	}
+	return t.AgentRun
+}
+
 type GetAgentRunMinimal struct {
 	AgentRun *AgentRunMinimalFragment "json:\"agentRun,omitempty\" graphql:\"agentRun\""
 }
@@ -47192,10 +51805,10 @@ func (t *CreateAgentRun) GetCreateAgentRun() *AgentRunFragment {
 }
 
 type UpdateAgentRun struct {
-	UpdateAgentRun *AgentRunFragment "json:\"updateAgentRun,omitempty\" graphql:\"updateAgentRun\""
+	UpdateAgentRun *AgentRunUpdateFragment "json:\"updateAgentRun,omitempty\" graphql:\"updateAgentRun\""
 }
 
-func (t *UpdateAgentRun) GetUpdateAgentRun() *AgentRunFragment {
+func (t *UpdateAgentRun) GetUpdateAgentRun() *AgentRunUpdateFragment {
 	if t == nil {
 		t = &UpdateAgentRun{}
 	}
@@ -48148,6 +52761,28 @@ func (t *GetServiceDeploymentByHandle) GetServiceDeployment() *ServiceDeployment
 	return t.ServiceDeployment
 }
 
+type GetServiceDeploymentStatusByHandle struct {
+	ServiceDeployment *ServiceDeploymentStatusFragment "json:\"serviceDeployment,omitempty\" graphql:\"serviceDeployment\""
+}
+
+func (t *GetServiceDeploymentStatusByHandle) GetServiceDeployment() *ServiceDeploymentStatusFragment {
+	if t == nil {
+		t = &GetServiceDeploymentStatusByHandle{}
+	}
+	return t.ServiceDeployment
+}
+
+type GetServiceDeploymentStatus struct {
+	ServiceDeployment *ServiceDeploymentStatusFragment "json:\"serviceDeployment,omitempty\" graphql:\"serviceDeployment\""
+}
+
+func (t *GetServiceDeploymentStatus) GetServiceDeployment() *ServiceDeploymentStatusFragment {
+	if t == nil {
+		t = &GetServiceDeploymentStatus{}
+	}
+	return t.ServiceDeployment
+}
+
 type GetServiceDeploymentTinyByHandle struct {
 	ServiceDeployment *GetServiceDeploymentTinyByHandle_ServiceDeployment "json:\"serviceDeployment,omitempty\" graphql:\"serviceDeployment\""
 }
@@ -48322,6 +52957,402 @@ func (t *KickServiceByHandle) GetKickService() *ServiceDeploymentExtended {
 		t = &KickServiceByHandle{}
 	}
 	return t.KickService
+}
+
+type CliListDevboxes struct {
+	Devboxes *CliListDevboxes_Devboxes "json:\"devboxes,omitempty\" graphql:\"devboxes\""
+}
+
+func (t *CliListDevboxes) GetDevboxes() *CliListDevboxes_Devboxes {
+	if t == nil {
+		t = &CliListDevboxes{}
+	}
+	return t.Devboxes
+}
+
+type CliGetDevbox struct {
+	Devbox *CliDevboxFragment "json:\"devbox,omitempty\" graphql:\"devbox\""
+}
+
+func (t *CliGetDevbox) GetDevbox() *CliDevboxFragment {
+	if t == nil {
+		t = &CliGetDevbox{}
+	}
+	return t.Devbox
+}
+
+type CliDevboxAgents struct {
+	DevboxAgents []*CliDevboxAgentFragment "json:\"devboxAgents,omitempty\" graphql:\"devboxAgents\""
+}
+
+func (t *CliDevboxAgents) GetDevboxAgents() []*CliDevboxAgentFragment {
+	if t == nil {
+		t = &CliDevboxAgents{}
+	}
+	return t.DevboxAgents
+}
+
+type CliListDevboxInstances struct {
+	Workbench *CliListDevboxInstances_Workbench "json:\"workbench,omitempty\" graphql:\"workbench\""
+}
+
+func (t *CliListDevboxInstances) GetWorkbench() *CliListDevboxInstances_Workbench {
+	if t == nil {
+		t = &CliListDevboxInstances{}
+	}
+	return t.Workbench
+}
+
+type CliGetDevboxInstance struct {
+	DevboxInstance *CliDevboxInstanceFragment "json:\"devboxInstance,omitempty\" graphql:\"devboxInstance\""
+}
+
+func (t *CliGetDevboxInstance) GetDevboxInstance() *CliDevboxInstanceFragment {
+	if t == nil {
+		t = &CliGetDevboxInstance{}
+	}
+	return t.DevboxInstance
+}
+
+type CliGetDevboxThread struct {
+	DevboxThread *CliDevboxThreadFragment "json:\"devboxThread,omitempty\" graphql:\"devboxThread\""
+}
+
+func (t *CliGetDevboxThread) GetDevboxThread() *CliDevboxThreadFragment {
+	if t == nil {
+		t = &CliGetDevboxThread{}
+	}
+	return t.DevboxThread
+}
+
+type CliDevboxInstanceCommands struct {
+	DevboxInstanceCommands []*CliDevboxCommandFragment "json:\"devboxInstanceCommands,omitempty\" graphql:\"devboxInstanceCommands\""
+}
+
+func (t *CliDevboxInstanceCommands) GetDevboxInstanceCommands() []*CliDevboxCommandFragment {
+	if t == nil {
+		t = &CliDevboxInstanceCommands{}
+	}
+	return t.DevboxInstanceCommands
+}
+
+type CliDevboxRepositories struct {
+	DevboxRepositories []*CliDevboxRepositoryFragment "json:\"devboxRepositories,omitempty\" graphql:\"devboxRepositories\""
+}
+
+func (t *CliDevboxRepositories) GetDevboxRepositories() []*CliDevboxRepositoryFragment {
+	if t == nil {
+		t = &CliDevboxRepositories{}
+	}
+	return t.DevboxRepositories
+}
+
+type CliDevboxImportableSessions struct {
+	DevboxImportableSessions []*CliDevboxImportableSessions_DevboxImportableSessions "json:\"devboxImportableSessions,omitempty\" graphql:\"devboxImportableSessions\""
+}
+
+func (t *CliDevboxImportableSessions) GetDevboxImportableSessions() []*CliDevboxImportableSessions_DevboxImportableSessions {
+	if t == nil {
+		t = &CliDevboxImportableSessions{}
+	}
+	return t.DevboxImportableSessions
+}
+
+type CliDevboxTimeline struct {
+	DevboxTimeline *CliDevboxTimeline_DevboxTimeline "json:\"devboxTimeline,omitempty\" graphql:\"devboxTimeline\""
+}
+
+func (t *CliDevboxTimeline) GetDevboxTimeline() *CliDevboxTimeline_DevboxTimeline {
+	if t == nil {
+		t = &CliDevboxTimeline{}
+	}
+	return t.DevboxTimeline
+}
+
+type CliCreateDevboxInstance struct {
+	CreateDevboxInstance *CliDevboxInstanceFragment "json:\"createDevboxInstance,omitempty\" graphql:\"createDevboxInstance\""
+}
+
+func (t *CliCreateDevboxInstance) GetCreateDevboxInstance() *CliDevboxInstanceFragment {
+	if t == nil {
+		t = &CliCreateDevboxInstance{}
+	}
+	return t.CreateDevboxInstance
+}
+
+type CliCancelDevboxInstance struct {
+	CancelDevboxInstance *CliDevboxInstanceFragment "json:\"cancelDevboxInstance,omitempty\" graphql:\"cancelDevboxInstance\""
+}
+
+func (t *CliCancelDevboxInstance) GetCancelDevboxInstance() *CliDevboxInstanceFragment {
+	if t == nil {
+		t = &CliCancelDevboxInstance{}
+	}
+	return t.CancelDevboxInstance
+}
+
+type CliSuspendDevboxInstance struct {
+	SuspendDevboxInstance *CliDevboxInstanceFragment "json:\"suspendDevboxInstance,omitempty\" graphql:\"suspendDevboxInstance\""
+}
+
+func (t *CliSuspendDevboxInstance) GetSuspendDevboxInstance() *CliDevboxInstanceFragment {
+	if t == nil {
+		t = &CliSuspendDevboxInstance{}
+	}
+	return t.SuspendDevboxInstance
+}
+
+type CliResumeDevboxInstance struct {
+	ResumeDevboxInstance *CliDevboxInstanceFragment "json:\"resumeDevboxInstance,omitempty\" graphql:\"resumeDevboxInstance\""
+}
+
+func (t *CliResumeDevboxInstance) GetResumeDevboxInstance() *CliDevboxInstanceFragment {
+	if t == nil {
+		t = &CliResumeDevboxInstance{}
+	}
+	return t.ResumeDevboxInstance
+}
+
+type CliPingDevboxInstance struct {
+	PingDevboxInstance *CliPingDevboxInstance_PingDevboxInstance "json:\"pingDevboxInstance,omitempty\" graphql:\"pingDevboxInstance\""
+}
+
+func (t *CliPingDevboxInstance) GetPingDevboxInstance() *CliPingDevboxInstance_PingDevboxInstance {
+	if t == nil {
+		t = &CliPingDevboxInstance{}
+	}
+	return t.PingDevboxInstance
+}
+
+type CliLeaveDevboxInstance struct {
+	LeaveDevboxInstance *CliLeaveDevboxInstance_LeaveDevboxInstance "json:\"leaveDevboxInstance,omitempty\" graphql:\"leaveDevboxInstance\""
+}
+
+func (t *CliLeaveDevboxInstance) GetLeaveDevboxInstance() *CliLeaveDevboxInstance_LeaveDevboxInstance {
+	if t == nil {
+		t = &CliLeaveDevboxInstance{}
+	}
+	return t.LeaveDevboxInstance
+}
+
+type CliKeepDevboxInstanceAwake struct {
+	KeepDevboxInstanceAwake *CliDevboxInstanceFragment "json:\"keepDevboxInstanceAwake,omitempty\" graphql:\"keepDevboxInstanceAwake\""
+}
+
+func (t *CliKeepDevboxInstanceAwake) GetKeepDevboxInstanceAwake() *CliDevboxInstanceFragment {
+	if t == nil {
+		t = &CliKeepDevboxInstanceAwake{}
+	}
+	return t.KeepDevboxInstanceAwake
+}
+
+type CliCancelDevboxKeepAwake struct {
+	CancelDevboxKeepAwake *CliDevboxInstanceFragment "json:\"cancelDevboxKeepAwake,omitempty\" graphql:\"cancelDevboxKeepAwake\""
+}
+
+func (t *CliCancelDevboxKeepAwake) GetCancelDevboxKeepAwake() *CliDevboxInstanceFragment {
+	if t == nil {
+		t = &CliCancelDevboxKeepAwake{}
+	}
+	return t.CancelDevboxKeepAwake
+}
+
+type CliAddDevboxRepository struct {
+	AddDevboxRepository *CliDevboxInstanceFragment "json:\"addDevboxRepository,omitempty\" graphql:\"addDevboxRepository\""
+}
+
+func (t *CliAddDevboxRepository) GetAddDevboxRepository() *CliDevboxInstanceFragment {
+	if t == nil {
+		t = &CliAddDevboxRepository{}
+	}
+	return t.AddDevboxRepository
+}
+
+type CliCreateDevboxThread struct {
+	CreateDevboxThread *CliDevboxThreadFragment "json:\"createDevboxThread,omitempty\" graphql:\"createDevboxThread\""
+}
+
+func (t *CliCreateDevboxThread) GetCreateDevboxThread() *CliDevboxThreadFragment {
+	if t == nil {
+		t = &CliCreateDevboxThread{}
+	}
+	return t.CreateDevboxThread
+}
+
+type CliImportDevboxThread struct {
+	ImportDevboxThread *CliDevboxThreadFragment "json:\"importDevboxThread,omitempty\" graphql:\"importDevboxThread\""
+}
+
+func (t *CliImportDevboxThread) GetImportDevboxThread() *CliDevboxThreadFragment {
+	if t == nil {
+		t = &CliImportDevboxThread{}
+	}
+	return t.ImportDevboxThread
+}
+
+type CliCloseDevboxThread struct {
+	CloseDevboxThread *CliDevboxThreadFragment "json:\"closeDevboxThread,omitempty\" graphql:\"closeDevboxThread\""
+}
+
+func (t *CliCloseDevboxThread) GetCloseDevboxThread() *CliDevboxThreadFragment {
+	if t == nil {
+		t = &CliCloseDevboxThread{}
+	}
+	return t.CloseDevboxThread
+}
+
+type CliForkDevboxThread struct {
+	ForkDevboxThread *CliDevboxThreadFragment "json:\"forkDevboxThread,omitempty\" graphql:\"forkDevboxThread\""
+}
+
+func (t *CliForkDevboxThread) GetForkDevboxThread() *CliDevboxThreadFragment {
+	if t == nil {
+		t = &CliForkDevboxThread{}
+	}
+	return t.ForkDevboxThread
+}
+
+type CliPromptDevboxThread struct {
+	PromptDevboxThread *CliDevboxThreadFragment "json:\"promptDevboxThread,omitempty\" graphql:\"promptDevboxThread\""
+}
+
+func (t *CliPromptDevboxThread) GetPromptDevboxThread() *CliDevboxThreadFragment {
+	if t == nil {
+		t = &CliPromptDevboxThread{}
+	}
+	return t.PromptDevboxThread
+}
+
+type CliCancelDevboxPrompt struct {
+	CancelDevboxPrompt *CliDevboxThreadFragment "json:\"cancelDevboxPrompt,omitempty\" graphql:\"cancelDevboxPrompt\""
+}
+
+func (t *CliCancelDevboxPrompt) GetCancelDevboxPrompt() *CliDevboxThreadFragment {
+	if t == nil {
+		t = &CliCancelDevboxPrompt{}
+	}
+	return t.CancelDevboxPrompt
+}
+
+type CliRespondDevboxInteraction struct {
+	RespondDevboxInteraction *CliDevboxInteractionFragment "json:\"respondDevboxInteraction,omitempty\" graphql:\"respondDevboxInteraction\""
+}
+
+func (t *CliRespondDevboxInteraction) GetRespondDevboxInteraction() *CliDevboxInteractionFragment {
+	if t == nil {
+		t = &CliRespondDevboxInteraction{}
+	}
+	return t.RespondDevboxInteraction
+}
+
+type CliOpenDevboxStream struct {
+	OpenDevboxStream *CliDevboxStreamFragment "json:\"openDevboxStream,omitempty\" graphql:\"openDevboxStream\""
+}
+
+func (t *CliOpenDevboxStream) GetOpenDevboxStream() *CliDevboxStreamFragment {
+	if t == nil {
+		t = &CliOpenDevboxStream{}
+	}
+	return t.OpenDevboxStream
+}
+
+type GetDevbox struct {
+	Devbox *DevboxFragment "json:\"devbox,omitempty\" graphql:\"devbox\""
+}
+
+func (t *GetDevbox) GetDevbox() *DevboxFragment {
+	if t == nil {
+		t = &GetDevbox{}
+	}
+	return t.Devbox
+}
+
+type GetDevboxByName struct {
+	Devbox *DevboxFragment "json:\"devbox,omitempty\" graphql:\"devbox\""
+}
+
+func (t *GetDevboxByName) GetDevbox() *DevboxFragment {
+	if t == nil {
+		t = &GetDevboxByName{}
+	}
+	return t.Devbox
+}
+
+type UpsertDevbox struct {
+	UpsertDevbox *DevboxFragment "json:\"upsertDevbox,omitempty\" graphql:\"upsertDevbox\""
+}
+
+func (t *UpsertDevbox) GetUpsertDevbox() *DevboxFragment {
+	if t == nil {
+		t = &UpsertDevbox{}
+	}
+	return t.UpsertDevbox
+}
+
+type HeartbeatDevbox struct {
+	HeartbeatDevbox *HeartbeatDevbox_HeartbeatDevbox "json:\"heartbeatDevbox,omitempty\" graphql:\"heartbeatDevbox\""
+}
+
+func (t *HeartbeatDevbox) GetHeartbeatDevbox() *HeartbeatDevbox_HeartbeatDevbox {
+	if t == nil {
+		t = &HeartbeatDevbox{}
+	}
+	return t.HeartbeatDevbox
+}
+
+type DeleteDevbox struct {
+	DeleteDevbox *DeleteDevbox_DeleteDevbox "json:\"deleteDevbox,omitempty\" graphql:\"deleteDevbox\""
+}
+
+func (t *DeleteDevbox) GetDeleteDevbox() *DeleteDevbox_DeleteDevbox {
+	if t == nil {
+		t = &DeleteDevbox{}
+	}
+	return t.DeleteDevbox
+}
+
+type MintDevboxProbeToken struct {
+	MintDevboxProbeToken *MintDevboxProbeToken_MintDevboxProbeToken "json:\"mintDevboxProbeToken,omitempty\" graphql:\"mintDevboxProbeToken\""
+}
+
+func (t *MintDevboxProbeToken) GetMintDevboxProbeToken() *MintDevboxProbeToken_MintDevboxProbeToken {
+	if t == nil {
+		t = &MintDevboxProbeToken{}
+	}
+	return t.MintDevboxProbeToken
+}
+
+type LinkAgentCredential struct {
+	LinkAgentCredential *AgentCredentialFragment "json:\"linkAgentCredential,omitempty\" graphql:\"linkAgentCredential\""
+}
+
+func (t *LinkAgentCredential) GetLinkAgentCredential() *AgentCredentialFragment {
+	if t == nil {
+		t = &LinkAgentCredential{}
+	}
+	return t.LinkAgentCredential
+}
+
+type ListAgentCredentials struct {
+	AgentCredentials []*AgentCredentialFragment "json:\"agentCredentials,omitempty\" graphql:\"agentCredentials\""
+}
+
+func (t *ListAgentCredentials) GetAgentCredentials() []*AgentCredentialFragment {
+	if t == nil {
+		t = &ListAgentCredentials{}
+	}
+	return t.AgentCredentials
+}
+
+type DeleteAgentCredential struct {
+	DeleteAgentCredential *DeleteAgentCredential_DeleteAgentCredential "json:\"deleteAgentCredential,omitempty\" graphql:\"deleteAgentCredential\""
+}
+
+func (t *DeleteAgentCredential) GetDeleteAgentCredential() *DeleteAgentCredential_DeleteAgentCredential {
+	if t == nil {
+		t = &DeleteAgentCredential{}
+	}
+	return t.DeleteAgentCredential
 }
 
 type GetClusterRegistration struct {
@@ -51441,6 +56472,46 @@ func (c *Client) GetAgentRunStatus(ctx context.Context, id string, interceptors 
 	return &res, nil
 }
 
+const GetAgentRunPendingDocument = `query GetAgentRunPending ($id: ID!) {
+	agentRun(id: $id) {
+		... AgentRunPendingFragment
+	}
+}
+fragment AgentRunPendingFragment on AgentRun {
+	id
+	prompt
+	repository
+	mode
+	reviewDepth
+	language
+	languageVersion
+	workbenchMcpUrl
+	runtime {
+		name
+	}
+	flow {
+		id
+	}
+}
+`
+
+func (c *Client) GetAgentRunPending(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRunPending, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetAgentRunPending
+	if err := c.Client.Post(ctx, "GetAgentRunPending", GetAgentRunPendingDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const GetAgentRunMinimalDocument = `query GetAgentRunMinimal ($id: ID!) {
 	agentRun(id: $id) {
 		... AgentRunMinimalFragment
@@ -51748,7 +56819,7 @@ const ListAgentRuntimePendingRunsDocument = `query ListAgentRuntimePendingRuns (
 		pendingRuns(after: $after, first: $first, before: $before, last: $last) {
 			edges {
 				node {
-					... AgentRunFragment
+					... AgentRunPendingFragment
 				}
 			}
 			pageInfo {
@@ -51757,163 +56828,21 @@ const ListAgentRuntimePendingRunsDocument = `query ListAgentRuntimePendingRuns (
 		}
 	}
 }
-fragment AgentRunFragment on AgentRun {
+fragment AgentRunPendingFragment on AgentRun {
 	id
 	prompt
 	repository
-	branch
-	headBranch
 	mode
 	reviewDepth
 	language
 	languageVersion
-	todos {
-		... AgentTodoFragment
-	}
-	prompts {
-		... AgentPromptFragment
-	}
-	attachments {
-		... AgentAttachmentFragment
-	}
-	skills {
-		name
-		description
-		contents
-	}
-	status
-	podReference {
-		... AgentPodReferenceFragment
-	}
-	error
-	analysis {
-		... AgentAnalysisFragment
-	}
-	usage {
-		inputTokens
-		outputTokens
-		totalTokens
-		cachedTokens
-		reasoningTokens
-		inputCost
-		outputCost
-		totalCost
-	}
 	workbenchMcpUrl
 	runtime {
-		... AgentRuntimeFragment
-	}
-	user {
-		id
 		name
-		email
 	}
 	flow {
 		id
-		name
 	}
-	pullRequests {
-		... PullRequestFragment
-	}
-	upload {
-		... AgentRunUploadFragment
-	}
-	babysit
-	babysitInterval
-	approval
-	approvedAt
-	followup
-	followupPrUrl
-}
-fragment AgentTodoFragment on AgentTodo {
-	description
-	done
-	title
-}
-fragment AgentPromptFragment on AgentPrompt {
-	id
-	prompt
-	seq
-	attachments {
-		... AgentAttachmentFragment
-	}
-}
-fragment AgentAttachmentFragment on Attachment {
-	id
-	filename
-	filetype
-	size
-	downloadUrl
-}
-fragment AgentPodReferenceFragment on AgentPodReference {
-	name
-	namespace
-}
-fragment AgentAnalysisFragment on AgentAnalysis {
-	summary
-	analysis
-	bullets
-}
-fragment AgentRuntimeFragment on AgentRuntime {
-	id
-	name
-	type
-	aiProxy
-	cluster {
-		... TinyClusterFragment
-	}
-	createBindings {
-		... PolicyBindingFragment
-	}
-}
-fragment TinyClusterFragment on Cluster {
-	id
-	name
-	handle
-	self
-	deletedAt
-	project {
-		... TinyProjectFragment
-	}
-}
-fragment TinyProjectFragment on Project {
-	id
-	name
-	default
-}
-fragment PolicyBindingFragment on PolicyBinding {
-	id
-	group {
-		... GroupFragment
-	}
-	user {
-		... UserFragment
-	}
-}
-fragment GroupFragment on Group {
-	id
-	name
-	description
-	global
-}
-fragment UserFragment on User {
-	name
-	id
-	email
-}
-fragment PullRequestFragment on PullRequest {
-	id
-	status
-	url
-	title
-	creator
-	ref
-}
-fragment AgentRunUploadFragment on AgentRunUpload {
-	id
-	session
-	screenRecording
-	patch
 }
 fragment PageInfoFragment on PageInfo {
 	hasNextPage
@@ -52182,166 +57111,17 @@ func (c *Client) CreateAgentRun(ctx context.Context, runtimeID string, attribute
 
 const UpdateAgentRunDocument = `mutation UpdateAgentRun ($id: ID!, $attributes: AgentRunStatusAttributes!) {
 	updateAgentRun(id: $id, attributes: $attributes) {
-		... AgentRunFragment
+		... AgentRunUpdateFragment
 	}
 }
-fragment AgentRunFragment on AgentRun {
+fragment AgentRunUpdateFragment on AgentRun {
 	id
-	prompt
-	repository
-	branch
-	headBranch
-	mode
-	reviewDepth
-	language
-	languageVersion
-	todos {
-		... AgentTodoFragment
-	}
-	prompts {
-		... AgentPromptFragment
-	}
-	attachments {
-		... AgentAttachmentFragment
-	}
-	skills {
-		name
-		description
-		contents
-	}
 	status
-	podReference {
-		... AgentPodReferenceFragment
-	}
-	error
-	analysis {
-		... AgentAnalysisFragment
-	}
-	usage {
-		inputTokens
-		outputTokens
-		totalTokens
-		cachedTokens
-		reasoningTokens
-		inputCost
-		outputCost
-		totalCost
-	}
-	workbenchMcpUrl
-	runtime {
-		... AgentRuntimeFragment
-	}
-	user {
-		id
-		name
-		email
-	}
-	flow {
-		id
-		name
-	}
-	pullRequests {
-		... PullRequestFragment
-	}
-	upload {
-		... AgentRunUploadFragment
-	}
-	babysit
-	babysitInterval
-	approval
-	approvedAt
-	followup
 	followupPrUrl
-}
-fragment AgentTodoFragment on AgentTodo {
-	description
-	done
-	title
-}
-fragment AgentPromptFragment on AgentPrompt {
-	id
-	prompt
-	seq
-	attachments {
-		... AgentAttachmentFragment
+	pullRequests {
+		id
+		url
 	}
-}
-fragment AgentAttachmentFragment on Attachment {
-	id
-	filename
-	filetype
-	size
-	downloadUrl
-}
-fragment AgentPodReferenceFragment on AgentPodReference {
-	name
-	namespace
-}
-fragment AgentAnalysisFragment on AgentAnalysis {
-	summary
-	analysis
-	bullets
-}
-fragment AgentRuntimeFragment on AgentRuntime {
-	id
-	name
-	type
-	aiProxy
-	cluster {
-		... TinyClusterFragment
-	}
-	createBindings {
-		... PolicyBindingFragment
-	}
-}
-fragment TinyClusterFragment on Cluster {
-	id
-	name
-	handle
-	self
-	deletedAt
-	project {
-		... TinyProjectFragment
-	}
-}
-fragment TinyProjectFragment on Project {
-	id
-	name
-	default
-}
-fragment PolicyBindingFragment on PolicyBinding {
-	id
-	group {
-		... GroupFragment
-	}
-	user {
-		... UserFragment
-	}
-}
-fragment GroupFragment on Group {
-	id
-	name
-	description
-	global
-}
-fragment UserFragment on User {
-	name
-	id
-	email
-}
-fragment PullRequestFragment on PullRequest {
-	id
-	status
-	url
-	title
-	creator
-	ref
-}
-fragment AgentRunUploadFragment on AgentRunUpload {
-	id
-	session
-	screenRecording
-	patch
 }
 `
 
@@ -59753,6 +64533,97 @@ func (c *Client) GetServiceDeploymentByHandle(ctx context.Context, cluster strin
 	return &res, nil
 }
 
+const GetServiceDeploymentStatusByHandleDocument = `query GetServiceDeploymentStatusByHandle ($cluster: String!, $name: String!) {
+	serviceDeployment(cluster: $cluster, name: $name) {
+		... ServiceDeploymentStatusFragment
+	}
+}
+fragment ServiceDeploymentStatusFragment on ServiceDeployment {
+	id
+	deletedAt
+	errors {
+		... ErrorFragment
+	}
+	components {
+		id
+		name
+		group
+		kind
+		namespace
+		state
+		synced
+		version
+	}
+}
+fragment ErrorFragment on ServiceError {
+	source
+	message
+}
+`
+
+func (c *Client) GetServiceDeploymentStatusByHandle(ctx context.Context, cluster string, name string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentStatusByHandle, error) {
+	vars := map[string]any{
+		"cluster": cluster,
+		"name":    name,
+	}
+
+	var res GetServiceDeploymentStatusByHandle
+	if err := c.Client.Post(ctx, "GetServiceDeploymentStatusByHandle", GetServiceDeploymentStatusByHandleDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetServiceDeploymentStatusDocument = `query GetServiceDeploymentStatus ($id: ID!) {
+	serviceDeployment(id: $id) {
+		... ServiceDeploymentStatusFragment
+	}
+}
+fragment ServiceDeploymentStatusFragment on ServiceDeployment {
+	id
+	deletedAt
+	errors {
+		... ErrorFragment
+	}
+	components {
+		id
+		name
+		group
+		kind
+		namespace
+		state
+		synced
+		version
+	}
+}
+fragment ErrorFragment on ServiceError {
+	source
+	message
+}
+`
+
+func (c *Client) GetServiceDeploymentStatus(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentStatus, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetServiceDeploymentStatus
+	if err := c.Client.Post(ctx, "GetServiceDeploymentStatus", GetServiceDeploymentStatusDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const GetServiceDeploymentTinyByHandleDocument = `query GetServiceDeploymentTinyByHandle ($cluster: String!, $name: String!) {
 	serviceDeployment(cluster: $cluster, name: $name) {
 		id
@@ -60979,6 +65850,2392 @@ func (c *Client) KickServiceByHandle(ctx context.Context, cluster string, name s
 
 	var res KickServiceByHandle
 	if err := c.Client.Post(ctx, "KickServiceByHandle", KickServiceByHandleDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CliListDevboxesDocument = `query CliListDevboxes ($workbenchId: ID, $q: String, $first: Int) {
+	devboxes(workbenchId: $workbenchId, q: $q, first: $first) {
+		edges {
+			node {
+				... CliDevboxTinyFragment
+			}
+		}
+	}
+}
+fragment CliDevboxTinyFragment on Devbox {
+	id
+	name
+	status
+}
+`
+
+func (c *Client) CliListDevboxes(ctx context.Context, workbenchID *string, q *string, first *int64, interceptors ...clientv2.RequestInterceptor) (*CliListDevboxes, error) {
+	vars := map[string]any{
+		"workbenchId": workbenchID,
+		"q":           q,
+		"first":       first,
+	}
+
+	var res CliListDevboxes
+	if err := c.Client.Post(ctx, "CliListDevboxes", CliListDevboxesDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CliGetDevboxDocument = `query CliGetDevbox ($id: ID, $name: String) {
+	devbox(id: $id, name: $name) {
+		... CliDevboxFragment
+	}
+}
+fragment CliDevboxFragment on Devbox {
+	id
+	name
+	status
+	agents {
+		... CliDevboxAgentFragment
+	}
+}
+fragment CliDevboxAgentFragment on DevboxAgent {
+	type
+	default
+	adapterName
+	adapterVersion
+	modelSwitchable
+	probeStatus
+	probeError
+	defaultModel
+	models {
+		id
+		name
+		description
+	}
+	sessionCapabilities {
+		list
+		resume
+		load
+		close
+		delete
+		fork
+	}
+}
+`
+
+func (c *Client) CliGetDevbox(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*CliGetDevbox, error) {
+	vars := map[string]any{
+		"id":   id,
+		"name": name,
+	}
+
+	var res CliGetDevbox
+	if err := c.Client.Post(ctx, "CliGetDevbox", CliGetDevboxDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CliDevboxAgentsDocument = `query CliDevboxAgents ($workbenchId: ID!, $devboxId: ID!) {
+	devboxAgents(workbenchId: $workbenchId, devboxId: $devboxId) {
+		... CliDevboxAgentFragment
+	}
+}
+fragment CliDevboxAgentFragment on DevboxAgent {
+	type
+	default
+	adapterName
+	adapterVersion
+	modelSwitchable
+	probeStatus
+	probeError
+	defaultModel
+	models {
+		id
+		name
+		description
+	}
+	sessionCapabilities {
+		list
+		resume
+		load
+		close
+		delete
+		fork
+	}
+}
+`
+
+func (c *Client) CliDevboxAgents(ctx context.Context, workbenchID string, devboxID string, interceptors ...clientv2.RequestInterceptor) (*CliDevboxAgents, error) {
+	vars := map[string]any{
+		"workbenchId": workbenchID,
+		"devboxId":    devboxID,
+	}
+
+	var res CliDevboxAgents
+	if err := c.Client.Post(ctx, "CliDevboxAgents", CliDevboxAgentsDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CliListDevboxInstancesDocument = `query CliListDevboxInstances ($workbenchId: ID!, $first: Int, $mine: Boolean, $statuses: [DevboxInstanceStatus]) {
+	workbench(id: $workbenchId) {
+		devboxInstances(first: $first, mine: $mine, statuses: $statuses) {
+			edges {
+				node {
+					... CliDevboxInstanceFragment
+				}
+			}
+		}
+	}
+}
+fragment CliDevboxInstanceFragment on DevboxInstance {
+	id
+	name
+	agent
+	requestedModel
+	repositories
+	status
+	statusReason
+	foregroundState
+	runningThreads
+	waitingThreads
+	keepAwakeUntil
+	awakeSince
+	startedAt
+	suspendedAt
+	lastActivityAt
+	viewerCount
+	insertedAt
+	agentConnections {
+		agent
+		adapterName
+		adapterVersion
+		billing
+	}
+	agentBilling {
+		agent
+		billing
+		credentialKind
+		allowCollaborators
+	}
+	checkouts {
+		... CliDevboxCheckoutFragment
+	}
+	idleState {
+		idle
+		idleSince
+		suspendsAt
+		message
+	}
+	workbench {
+		id
+		name
+	}
+	devbox {
+		id
+		name
+	}
+	keepAwakeBy {
+		email
+	}
+	threads {
+		... CliDevboxThreadFragment
+	}
+	interactions(pending: true) {
+		... CliDevboxInteractionFragment
+	}
+}
+fragment CliDevboxCheckoutFragment on DevboxCheckout {
+	path
+	name
+	remoteUrl
+	defaultBranch
+	branch
+	headSha
+	dirty
+	ahead
+	behind
+}
+fragment CliDevboxThreadFragment on DevboxThread {
+	id
+	sessionId
+	kind
+	agent
+	title
+	agentTitle
+	model
+	cwd
+	status
+	imported
+	billing
+	foregroundState
+	stopReason
+	lastActivityAt
+	insertedAt
+	instance {
+		id
+	}
+}
+fragment CliDevboxInteractionFragment on DevboxInteraction {
+	id
+	kind
+	state
+	title
+	message
+	url
+	toolCallId
+	options {
+		optionId
+		name
+		kind
+	}
+	thread {
+		id
+	}
+}
+`
+
+func (c *Client) CliListDevboxInstances(ctx context.Context, workbenchID string, first *int64, mine *bool, statuses []*DevboxInstanceStatus, interceptors ...clientv2.RequestInterceptor) (*CliListDevboxInstances, error) {
+	vars := map[string]any{
+		"workbenchId": workbenchID,
+		"first":       first,
+		"mine":        mine,
+		"statuses":    statuses,
+	}
+
+	var res CliListDevboxInstances
+	if err := c.Client.Post(ctx, "CliListDevboxInstances", CliListDevboxInstancesDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CliGetDevboxInstanceDocument = `query CliGetDevboxInstance ($id: ID!) {
+	devboxInstance(id: $id) {
+		... CliDevboxInstanceFragment
+	}
+}
+fragment CliDevboxInstanceFragment on DevboxInstance {
+	id
+	name
+	agent
+	requestedModel
+	repositories
+	status
+	statusReason
+	foregroundState
+	runningThreads
+	waitingThreads
+	keepAwakeUntil
+	awakeSince
+	startedAt
+	suspendedAt
+	lastActivityAt
+	viewerCount
+	insertedAt
+	agentConnections {
+		agent
+		adapterName
+		adapterVersion
+		billing
+	}
+	agentBilling {
+		agent
+		billing
+		credentialKind
+		allowCollaborators
+	}
+	checkouts {
+		... CliDevboxCheckoutFragment
+	}
+	idleState {
+		idle
+		idleSince
+		suspendsAt
+		message
+	}
+	workbench {
+		id
+		name
+	}
+	devbox {
+		id
+		name
+	}
+	keepAwakeBy {
+		email
+	}
+	threads {
+		... CliDevboxThreadFragment
+	}
+	interactions(pending: true) {
+		... CliDevboxInteractionFragment
+	}
+}
+fragment CliDevboxCheckoutFragment on DevboxCheckout {
+	path
+	name
+	remoteUrl
+	defaultBranch
+	branch
+	headSha
+	dirty
+	ahead
+	behind
+}
+fragment CliDevboxThreadFragment on DevboxThread {
+	id
+	sessionId
+	kind
+	agent
+	title
+	agentTitle
+	model
+	cwd
+	status
+	imported
+	billing
+	foregroundState
+	stopReason
+	lastActivityAt
+	insertedAt
+	instance {
+		id
+	}
+}
+fragment CliDevboxInteractionFragment on DevboxInteraction {
+	id
+	kind
+	state
+	title
+	message
+	url
+	toolCallId
+	options {
+		optionId
+		name
+		kind
+	}
+	thread {
+		id
+	}
+}
+`
+
+func (c *Client) CliGetDevboxInstance(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*CliGetDevboxInstance, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res CliGetDevboxInstance
+	if err := c.Client.Post(ctx, "CliGetDevboxInstance", CliGetDevboxInstanceDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CliGetDevboxThreadDocument = `query CliGetDevboxThread ($id: ID!) {
+	devboxThread(id: $id) {
+		... CliDevboxThreadFragment
+	}
+}
+fragment CliDevboxThreadFragment on DevboxThread {
+	id
+	sessionId
+	kind
+	agent
+	title
+	agentTitle
+	model
+	cwd
+	status
+	imported
+	billing
+	foregroundState
+	stopReason
+	lastActivityAt
+	insertedAt
+	instance {
+		id
+	}
+}
+`
+
+func (c *Client) CliGetDevboxThread(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*CliGetDevboxThread, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res CliGetDevboxThread
+	if err := c.Client.Post(ctx, "CliGetDevboxThread", CliGetDevboxThreadDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CliDevboxInstanceCommandsDocument = `query CliDevboxInstanceCommands ($threadId: ID!) {
+	devboxInstanceCommands(threadId: $threadId) {
+		... CliDevboxCommandFragment
+	}
+}
+fragment CliDevboxCommandFragment on DevboxCommand {
+	name
+	description
+	inputHint
+}
+`
+
+func (c *Client) CliDevboxInstanceCommands(ctx context.Context, threadID string, interceptors ...clientv2.RequestInterceptor) (*CliDevboxInstanceCommands, error) {
+	vars := map[string]any{
+		"threadId": threadID,
+	}
+
+	var res CliDevboxInstanceCommands
+	if err := c.Client.Post(ctx, "CliDevboxInstanceCommands", CliDevboxInstanceCommandsDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CliDevboxRepositoriesDocument = `query CliDevboxRepositories ($instanceId: ID!) {
+	devboxRepositories(instanceId: $instanceId) {
+		... CliDevboxRepositoryFragment
+	}
+}
+fragment CliDevboxRepositoryFragment on DevboxRepository {
+	path
+	name
+	remoteUrl
+	defaultBranch
+	branch
+	headSha
+	dirty
+	ahead
+	behind
+}
+`
+
+func (c *Client) CliDevboxRepositories(ctx context.Context, instanceID string, interceptors ...clientv2.RequestInterceptor) (*CliDevboxRepositories, error) {
+	vars := map[string]any{
+		"instanceId": instanceID,
+	}
+
+	var res CliDevboxRepositories
+	if err := c.Client.Post(ctx, "CliDevboxRepositories", CliDevboxRepositoriesDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CliDevboxImportableSessionsDocument = `query CliDevboxImportableSessions ($instanceId: ID!) {
+	devboxImportableSessions(instanceId: $instanceId) {
+		agent
+		sessionId
+		title
+		cwd
+		updatedAt
+	}
+}
+`
+
+func (c *Client) CliDevboxImportableSessions(ctx context.Context, instanceID string, interceptors ...clientv2.RequestInterceptor) (*CliDevboxImportableSessions, error) {
+	vars := map[string]any{
+		"instanceId": instanceID,
+	}
+
+	var res CliDevboxImportableSessions
+	if err := c.Client.Post(ctx, "CliDevboxImportableSessions", CliDevboxImportableSessionsDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CliDevboxTimelineDocument = `query CliDevboxTimeline ($instanceId: ID!, $sessionId: String!, $before: Long, $after: Long, $limit: Int) {
+	devboxTimeline(instanceId: $instanceId, sessionId: $sessionId, before: $before, after: $after, limit: $limit) {
+		entities {
+			... CliDevboxEntityFragment
+		}
+		deltaOffset
+		hasMore
+	}
+}
+fragment CliDevboxEntityFragment on DevboxEntity {
+	id
+	sessionId
+	type
+	position
+	revision
+	settled
+	raw
+	toolCall {
+		toolCallId
+		title
+		kind
+		status
+	}
+	plan {
+		entries {
+			content
+			priority
+			status
+		}
+	}
+	terminal {
+		terminalId
+		command
+		output
+		exitCode
+	}
+}
+`
+
+func (c *Client) CliDevboxTimeline(ctx context.Context, instanceID string, sessionID string, before *string, after *string, limit *int64, interceptors ...clientv2.RequestInterceptor) (*CliDevboxTimeline, error) {
+	vars := map[string]any{
+		"instanceId": instanceID,
+		"sessionId":  sessionID,
+		"before":     before,
+		"after":      after,
+		"limit":      limit,
+	}
+
+	var res CliDevboxTimeline
+	if err := c.Client.Post(ctx, "CliDevboxTimeline", CliDevboxTimelineDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CliCreateDevboxInstanceDocument = `mutation CliCreateDevboxInstance ($workbenchId: ID!, $attributes: DevboxInstanceAttributes!) {
+	createDevboxInstance(workbenchId: $workbenchId, attributes: $attributes) {
+		... CliDevboxInstanceFragment
+	}
+}
+fragment CliDevboxInstanceFragment on DevboxInstance {
+	id
+	name
+	agent
+	requestedModel
+	repositories
+	status
+	statusReason
+	foregroundState
+	runningThreads
+	waitingThreads
+	keepAwakeUntil
+	awakeSince
+	startedAt
+	suspendedAt
+	lastActivityAt
+	viewerCount
+	insertedAt
+	agentConnections {
+		agent
+		adapterName
+		adapterVersion
+		billing
+	}
+	agentBilling {
+		agent
+		billing
+		credentialKind
+		allowCollaborators
+	}
+	checkouts {
+		... CliDevboxCheckoutFragment
+	}
+	idleState {
+		idle
+		idleSince
+		suspendsAt
+		message
+	}
+	workbench {
+		id
+		name
+	}
+	devbox {
+		id
+		name
+	}
+	keepAwakeBy {
+		email
+	}
+	threads {
+		... CliDevboxThreadFragment
+	}
+	interactions(pending: true) {
+		... CliDevboxInteractionFragment
+	}
+}
+fragment CliDevboxCheckoutFragment on DevboxCheckout {
+	path
+	name
+	remoteUrl
+	defaultBranch
+	branch
+	headSha
+	dirty
+	ahead
+	behind
+}
+fragment CliDevboxThreadFragment on DevboxThread {
+	id
+	sessionId
+	kind
+	agent
+	title
+	agentTitle
+	model
+	cwd
+	status
+	imported
+	billing
+	foregroundState
+	stopReason
+	lastActivityAt
+	insertedAt
+	instance {
+		id
+	}
+}
+fragment CliDevboxInteractionFragment on DevboxInteraction {
+	id
+	kind
+	state
+	title
+	message
+	url
+	toolCallId
+	options {
+		optionId
+		name
+		kind
+	}
+	thread {
+		id
+	}
+}
+`
+
+func (c *Client) CliCreateDevboxInstance(ctx context.Context, workbenchID string, attributes DevboxInstanceAttributes, interceptors ...clientv2.RequestInterceptor) (*CliCreateDevboxInstance, error) {
+	vars := map[string]any{
+		"workbenchId": workbenchID,
+		"attributes":  attributes,
+	}
+
+	var res CliCreateDevboxInstance
+	if err := c.Client.Post(ctx, "CliCreateDevboxInstance", CliCreateDevboxInstanceDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CliCancelDevboxInstanceDocument = `mutation CliCancelDevboxInstance ($id: ID!) {
+	cancelDevboxInstance(id: $id) {
+		... CliDevboxInstanceFragment
+	}
+}
+fragment CliDevboxInstanceFragment on DevboxInstance {
+	id
+	name
+	agent
+	requestedModel
+	repositories
+	status
+	statusReason
+	foregroundState
+	runningThreads
+	waitingThreads
+	keepAwakeUntil
+	awakeSince
+	startedAt
+	suspendedAt
+	lastActivityAt
+	viewerCount
+	insertedAt
+	agentConnections {
+		agent
+		adapterName
+		adapterVersion
+		billing
+	}
+	agentBilling {
+		agent
+		billing
+		credentialKind
+		allowCollaborators
+	}
+	checkouts {
+		... CliDevboxCheckoutFragment
+	}
+	idleState {
+		idle
+		idleSince
+		suspendsAt
+		message
+	}
+	workbench {
+		id
+		name
+	}
+	devbox {
+		id
+		name
+	}
+	keepAwakeBy {
+		email
+	}
+	threads {
+		... CliDevboxThreadFragment
+	}
+	interactions(pending: true) {
+		... CliDevboxInteractionFragment
+	}
+}
+fragment CliDevboxCheckoutFragment on DevboxCheckout {
+	path
+	name
+	remoteUrl
+	defaultBranch
+	branch
+	headSha
+	dirty
+	ahead
+	behind
+}
+fragment CliDevboxThreadFragment on DevboxThread {
+	id
+	sessionId
+	kind
+	agent
+	title
+	agentTitle
+	model
+	cwd
+	status
+	imported
+	billing
+	foregroundState
+	stopReason
+	lastActivityAt
+	insertedAt
+	instance {
+		id
+	}
+}
+fragment CliDevboxInteractionFragment on DevboxInteraction {
+	id
+	kind
+	state
+	title
+	message
+	url
+	toolCallId
+	options {
+		optionId
+		name
+		kind
+	}
+	thread {
+		id
+	}
+}
+`
+
+func (c *Client) CliCancelDevboxInstance(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*CliCancelDevboxInstance, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res CliCancelDevboxInstance
+	if err := c.Client.Post(ctx, "CliCancelDevboxInstance", CliCancelDevboxInstanceDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CliSuspendDevboxInstanceDocument = `mutation CliSuspendDevboxInstance ($id: ID!) {
+	suspendDevboxInstance(id: $id) {
+		... CliDevboxInstanceFragment
+	}
+}
+fragment CliDevboxInstanceFragment on DevboxInstance {
+	id
+	name
+	agent
+	requestedModel
+	repositories
+	status
+	statusReason
+	foregroundState
+	runningThreads
+	waitingThreads
+	keepAwakeUntil
+	awakeSince
+	startedAt
+	suspendedAt
+	lastActivityAt
+	viewerCount
+	insertedAt
+	agentConnections {
+		agent
+		adapterName
+		adapterVersion
+		billing
+	}
+	agentBilling {
+		agent
+		billing
+		credentialKind
+		allowCollaborators
+	}
+	checkouts {
+		... CliDevboxCheckoutFragment
+	}
+	idleState {
+		idle
+		idleSince
+		suspendsAt
+		message
+	}
+	workbench {
+		id
+		name
+	}
+	devbox {
+		id
+		name
+	}
+	keepAwakeBy {
+		email
+	}
+	threads {
+		... CliDevboxThreadFragment
+	}
+	interactions(pending: true) {
+		... CliDevboxInteractionFragment
+	}
+}
+fragment CliDevboxCheckoutFragment on DevboxCheckout {
+	path
+	name
+	remoteUrl
+	defaultBranch
+	branch
+	headSha
+	dirty
+	ahead
+	behind
+}
+fragment CliDevboxThreadFragment on DevboxThread {
+	id
+	sessionId
+	kind
+	agent
+	title
+	agentTitle
+	model
+	cwd
+	status
+	imported
+	billing
+	foregroundState
+	stopReason
+	lastActivityAt
+	insertedAt
+	instance {
+		id
+	}
+}
+fragment CliDevboxInteractionFragment on DevboxInteraction {
+	id
+	kind
+	state
+	title
+	message
+	url
+	toolCallId
+	options {
+		optionId
+		name
+		kind
+	}
+	thread {
+		id
+	}
+}
+`
+
+func (c *Client) CliSuspendDevboxInstance(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*CliSuspendDevboxInstance, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res CliSuspendDevboxInstance
+	if err := c.Client.Post(ctx, "CliSuspendDevboxInstance", CliSuspendDevboxInstanceDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CliResumeDevboxInstanceDocument = `mutation CliResumeDevboxInstance ($id: ID!) {
+	resumeDevboxInstance(id: $id) {
+		... CliDevboxInstanceFragment
+	}
+}
+fragment CliDevboxInstanceFragment on DevboxInstance {
+	id
+	name
+	agent
+	requestedModel
+	repositories
+	status
+	statusReason
+	foregroundState
+	runningThreads
+	waitingThreads
+	keepAwakeUntil
+	awakeSince
+	startedAt
+	suspendedAt
+	lastActivityAt
+	viewerCount
+	insertedAt
+	agentConnections {
+		agent
+		adapterName
+		adapterVersion
+		billing
+	}
+	agentBilling {
+		agent
+		billing
+		credentialKind
+		allowCollaborators
+	}
+	checkouts {
+		... CliDevboxCheckoutFragment
+	}
+	idleState {
+		idle
+		idleSince
+		suspendsAt
+		message
+	}
+	workbench {
+		id
+		name
+	}
+	devbox {
+		id
+		name
+	}
+	keepAwakeBy {
+		email
+	}
+	threads {
+		... CliDevboxThreadFragment
+	}
+	interactions(pending: true) {
+		... CliDevboxInteractionFragment
+	}
+}
+fragment CliDevboxCheckoutFragment on DevboxCheckout {
+	path
+	name
+	remoteUrl
+	defaultBranch
+	branch
+	headSha
+	dirty
+	ahead
+	behind
+}
+fragment CliDevboxThreadFragment on DevboxThread {
+	id
+	sessionId
+	kind
+	agent
+	title
+	agentTitle
+	model
+	cwd
+	status
+	imported
+	billing
+	foregroundState
+	stopReason
+	lastActivityAt
+	insertedAt
+	instance {
+		id
+	}
+}
+fragment CliDevboxInteractionFragment on DevboxInteraction {
+	id
+	kind
+	state
+	title
+	message
+	url
+	toolCallId
+	options {
+		optionId
+		name
+		kind
+	}
+	thread {
+		id
+	}
+}
+`
+
+func (c *Client) CliResumeDevboxInstance(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*CliResumeDevboxInstance, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res CliResumeDevboxInstance
+	if err := c.Client.Post(ctx, "CliResumeDevboxInstance", CliResumeDevboxInstanceDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CliPingDevboxInstanceDocument = `mutation CliPingDevboxInstance ($id: ID!) {
+	pingDevboxInstance(id: $id) {
+		id
+		status
+	}
+}
+`
+
+func (c *Client) CliPingDevboxInstance(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*CliPingDevboxInstance, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res CliPingDevboxInstance
+	if err := c.Client.Post(ctx, "CliPingDevboxInstance", CliPingDevboxInstanceDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CliLeaveDevboxInstanceDocument = `mutation CliLeaveDevboxInstance ($id: ID!) {
+	leaveDevboxInstance(id: $id) {
+		id
+	}
+}
+`
+
+func (c *Client) CliLeaveDevboxInstance(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*CliLeaveDevboxInstance, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res CliLeaveDevboxInstance
+	if err := c.Client.Post(ctx, "CliLeaveDevboxInstance", CliLeaveDevboxInstanceDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CliKeepDevboxInstanceAwakeDocument = `mutation CliKeepDevboxInstanceAwake ($id: ID!, $until: DateTime!) {
+	keepDevboxInstanceAwake(id: $id, until: $until) {
+		... CliDevboxInstanceFragment
+	}
+}
+fragment CliDevboxInstanceFragment on DevboxInstance {
+	id
+	name
+	agent
+	requestedModel
+	repositories
+	status
+	statusReason
+	foregroundState
+	runningThreads
+	waitingThreads
+	keepAwakeUntil
+	awakeSince
+	startedAt
+	suspendedAt
+	lastActivityAt
+	viewerCount
+	insertedAt
+	agentConnections {
+		agent
+		adapterName
+		adapterVersion
+		billing
+	}
+	agentBilling {
+		agent
+		billing
+		credentialKind
+		allowCollaborators
+	}
+	checkouts {
+		... CliDevboxCheckoutFragment
+	}
+	idleState {
+		idle
+		idleSince
+		suspendsAt
+		message
+	}
+	workbench {
+		id
+		name
+	}
+	devbox {
+		id
+		name
+	}
+	keepAwakeBy {
+		email
+	}
+	threads {
+		... CliDevboxThreadFragment
+	}
+	interactions(pending: true) {
+		... CliDevboxInteractionFragment
+	}
+}
+fragment CliDevboxCheckoutFragment on DevboxCheckout {
+	path
+	name
+	remoteUrl
+	defaultBranch
+	branch
+	headSha
+	dirty
+	ahead
+	behind
+}
+fragment CliDevboxThreadFragment on DevboxThread {
+	id
+	sessionId
+	kind
+	agent
+	title
+	agentTitle
+	model
+	cwd
+	status
+	imported
+	billing
+	foregroundState
+	stopReason
+	lastActivityAt
+	insertedAt
+	instance {
+		id
+	}
+}
+fragment CliDevboxInteractionFragment on DevboxInteraction {
+	id
+	kind
+	state
+	title
+	message
+	url
+	toolCallId
+	options {
+		optionId
+		name
+		kind
+	}
+	thread {
+		id
+	}
+}
+`
+
+func (c *Client) CliKeepDevboxInstanceAwake(ctx context.Context, id string, until string, interceptors ...clientv2.RequestInterceptor) (*CliKeepDevboxInstanceAwake, error) {
+	vars := map[string]any{
+		"id":    id,
+		"until": until,
+	}
+
+	var res CliKeepDevboxInstanceAwake
+	if err := c.Client.Post(ctx, "CliKeepDevboxInstanceAwake", CliKeepDevboxInstanceAwakeDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CliCancelDevboxKeepAwakeDocument = `mutation CliCancelDevboxKeepAwake ($id: ID!) {
+	cancelDevboxKeepAwake(id: $id) {
+		... CliDevboxInstanceFragment
+	}
+}
+fragment CliDevboxInstanceFragment on DevboxInstance {
+	id
+	name
+	agent
+	requestedModel
+	repositories
+	status
+	statusReason
+	foregroundState
+	runningThreads
+	waitingThreads
+	keepAwakeUntil
+	awakeSince
+	startedAt
+	suspendedAt
+	lastActivityAt
+	viewerCount
+	insertedAt
+	agentConnections {
+		agent
+		adapterName
+		adapterVersion
+		billing
+	}
+	agentBilling {
+		agent
+		billing
+		credentialKind
+		allowCollaborators
+	}
+	checkouts {
+		... CliDevboxCheckoutFragment
+	}
+	idleState {
+		idle
+		idleSince
+		suspendsAt
+		message
+	}
+	workbench {
+		id
+		name
+	}
+	devbox {
+		id
+		name
+	}
+	keepAwakeBy {
+		email
+	}
+	threads {
+		... CliDevboxThreadFragment
+	}
+	interactions(pending: true) {
+		... CliDevboxInteractionFragment
+	}
+}
+fragment CliDevboxCheckoutFragment on DevboxCheckout {
+	path
+	name
+	remoteUrl
+	defaultBranch
+	branch
+	headSha
+	dirty
+	ahead
+	behind
+}
+fragment CliDevboxThreadFragment on DevboxThread {
+	id
+	sessionId
+	kind
+	agent
+	title
+	agentTitle
+	model
+	cwd
+	status
+	imported
+	billing
+	foregroundState
+	stopReason
+	lastActivityAt
+	insertedAt
+	instance {
+		id
+	}
+}
+fragment CliDevboxInteractionFragment on DevboxInteraction {
+	id
+	kind
+	state
+	title
+	message
+	url
+	toolCallId
+	options {
+		optionId
+		name
+		kind
+	}
+	thread {
+		id
+	}
+}
+`
+
+func (c *Client) CliCancelDevboxKeepAwake(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*CliCancelDevboxKeepAwake, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res CliCancelDevboxKeepAwake
+	if err := c.Client.Post(ctx, "CliCancelDevboxKeepAwake", CliCancelDevboxKeepAwakeDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CliAddDevboxRepositoryDocument = `mutation CliAddDevboxRepository ($instanceId: ID!, $repository: String!) {
+	addDevboxRepository(instanceId: $instanceId, repository: $repository) {
+		... CliDevboxInstanceFragment
+	}
+}
+fragment CliDevboxInstanceFragment on DevboxInstance {
+	id
+	name
+	agent
+	requestedModel
+	repositories
+	status
+	statusReason
+	foregroundState
+	runningThreads
+	waitingThreads
+	keepAwakeUntil
+	awakeSince
+	startedAt
+	suspendedAt
+	lastActivityAt
+	viewerCount
+	insertedAt
+	agentConnections {
+		agent
+		adapterName
+		adapterVersion
+		billing
+	}
+	agentBilling {
+		agent
+		billing
+		credentialKind
+		allowCollaborators
+	}
+	checkouts {
+		... CliDevboxCheckoutFragment
+	}
+	idleState {
+		idle
+		idleSince
+		suspendsAt
+		message
+	}
+	workbench {
+		id
+		name
+	}
+	devbox {
+		id
+		name
+	}
+	keepAwakeBy {
+		email
+	}
+	threads {
+		... CliDevboxThreadFragment
+	}
+	interactions(pending: true) {
+		... CliDevboxInteractionFragment
+	}
+}
+fragment CliDevboxCheckoutFragment on DevboxCheckout {
+	path
+	name
+	remoteUrl
+	defaultBranch
+	branch
+	headSha
+	dirty
+	ahead
+	behind
+}
+fragment CliDevboxThreadFragment on DevboxThread {
+	id
+	sessionId
+	kind
+	agent
+	title
+	agentTitle
+	model
+	cwd
+	status
+	imported
+	billing
+	foregroundState
+	stopReason
+	lastActivityAt
+	insertedAt
+	instance {
+		id
+	}
+}
+fragment CliDevboxInteractionFragment on DevboxInteraction {
+	id
+	kind
+	state
+	title
+	message
+	url
+	toolCallId
+	options {
+		optionId
+		name
+		kind
+	}
+	thread {
+		id
+	}
+}
+`
+
+func (c *Client) CliAddDevboxRepository(ctx context.Context, instanceID string, repository string, interceptors ...clientv2.RequestInterceptor) (*CliAddDevboxRepository, error) {
+	vars := map[string]any{
+		"instanceId": instanceID,
+		"repository": repository,
+	}
+
+	var res CliAddDevboxRepository
+	if err := c.Client.Post(ctx, "CliAddDevboxRepository", CliAddDevboxRepositoryDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CliCreateDevboxThreadDocument = `mutation CliCreateDevboxThread ($instanceId: ID!, $attributes: DevboxThreadAttributes) {
+	createDevboxThread(instanceId: $instanceId, attributes: $attributes) {
+		... CliDevboxThreadFragment
+	}
+}
+fragment CliDevboxThreadFragment on DevboxThread {
+	id
+	sessionId
+	kind
+	agent
+	title
+	agentTitle
+	model
+	cwd
+	status
+	imported
+	billing
+	foregroundState
+	stopReason
+	lastActivityAt
+	insertedAt
+	instance {
+		id
+	}
+}
+`
+
+func (c *Client) CliCreateDevboxThread(ctx context.Context, instanceID string, attributes *DevboxThreadAttributes, interceptors ...clientv2.RequestInterceptor) (*CliCreateDevboxThread, error) {
+	vars := map[string]any{
+		"instanceId": instanceID,
+		"attributes": attributes,
+	}
+
+	var res CliCreateDevboxThread
+	if err := c.Client.Post(ctx, "CliCreateDevboxThread", CliCreateDevboxThreadDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CliImportDevboxThreadDocument = `mutation CliImportDevboxThread ($instanceId: ID!, $attributes: DevboxImportAttributes!) {
+	importDevboxThread(instanceId: $instanceId, attributes: $attributes) {
+		... CliDevboxThreadFragment
+	}
+}
+fragment CliDevboxThreadFragment on DevboxThread {
+	id
+	sessionId
+	kind
+	agent
+	title
+	agentTitle
+	model
+	cwd
+	status
+	imported
+	billing
+	foregroundState
+	stopReason
+	lastActivityAt
+	insertedAt
+	instance {
+		id
+	}
+}
+`
+
+func (c *Client) CliImportDevboxThread(ctx context.Context, instanceID string, attributes DevboxImportAttributes, interceptors ...clientv2.RequestInterceptor) (*CliImportDevboxThread, error) {
+	vars := map[string]any{
+		"instanceId": instanceID,
+		"attributes": attributes,
+	}
+
+	var res CliImportDevboxThread
+	if err := c.Client.Post(ctx, "CliImportDevboxThread", CliImportDevboxThreadDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CliCloseDevboxThreadDocument = `mutation CliCloseDevboxThread ($id: ID!) {
+	closeDevboxThread(id: $id) {
+		... CliDevboxThreadFragment
+	}
+}
+fragment CliDevboxThreadFragment on DevboxThread {
+	id
+	sessionId
+	kind
+	agent
+	title
+	agentTitle
+	model
+	cwd
+	status
+	imported
+	billing
+	foregroundState
+	stopReason
+	lastActivityAt
+	insertedAt
+	instance {
+		id
+	}
+}
+`
+
+func (c *Client) CliCloseDevboxThread(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*CliCloseDevboxThread, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res CliCloseDevboxThread
+	if err := c.Client.Post(ctx, "CliCloseDevboxThread", CliCloseDevboxThreadDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CliForkDevboxThreadDocument = `mutation CliForkDevboxThread ($id: ID!, $title: String) {
+	forkDevboxThread(id: $id, title: $title) {
+		... CliDevboxThreadFragment
+	}
+}
+fragment CliDevboxThreadFragment on DevboxThread {
+	id
+	sessionId
+	kind
+	agent
+	title
+	agentTitle
+	model
+	cwd
+	status
+	imported
+	billing
+	foregroundState
+	stopReason
+	lastActivityAt
+	insertedAt
+	instance {
+		id
+	}
+}
+`
+
+func (c *Client) CliForkDevboxThread(ctx context.Context, id string, title *string, interceptors ...clientv2.RequestInterceptor) (*CliForkDevboxThread, error) {
+	vars := map[string]any{
+		"id":    id,
+		"title": title,
+	}
+
+	var res CliForkDevboxThread
+	if err := c.Client.Post(ctx, "CliForkDevboxThread", CliForkDevboxThreadDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CliPromptDevboxThreadDocument = `mutation CliPromptDevboxThread ($id: ID!, $prompt: String, $attachments: [Upload]) {
+	promptDevboxThread(id: $id, prompt: $prompt, attachments: $attachments) {
+		... CliDevboxThreadFragment
+	}
+}
+fragment CliDevboxThreadFragment on DevboxThread {
+	id
+	sessionId
+	kind
+	agent
+	title
+	agentTitle
+	model
+	cwd
+	status
+	imported
+	billing
+	foregroundState
+	stopReason
+	lastActivityAt
+	insertedAt
+	instance {
+		id
+	}
+}
+`
+
+func (c *Client) CliPromptDevboxThread(ctx context.Context, id string, prompt *string, attachments []*graphql.Upload, interceptors ...clientv2.RequestInterceptor) (*CliPromptDevboxThread, error) {
+	vars := map[string]any{
+		"id":          id,
+		"prompt":      prompt,
+		"attachments": attachments,
+	}
+
+	var res CliPromptDevboxThread
+	if err := c.Client.Post(ctx, "CliPromptDevboxThread", CliPromptDevboxThreadDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CliCancelDevboxPromptDocument = `mutation CliCancelDevboxPrompt ($id: ID!) {
+	cancelDevboxPrompt(id: $id) {
+		... CliDevboxThreadFragment
+	}
+}
+fragment CliDevboxThreadFragment on DevboxThread {
+	id
+	sessionId
+	kind
+	agent
+	title
+	agentTitle
+	model
+	cwd
+	status
+	imported
+	billing
+	foregroundState
+	stopReason
+	lastActivityAt
+	insertedAt
+	instance {
+		id
+	}
+}
+`
+
+func (c *Client) CliCancelDevboxPrompt(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*CliCancelDevboxPrompt, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res CliCancelDevboxPrompt
+	if err := c.Client.Post(ctx, "CliCancelDevboxPrompt", CliCancelDevboxPromptDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CliRespondDevboxInteractionDocument = `mutation CliRespondDevboxInteraction ($id: ID!, $response: DevboxInteractionResponseAttributes!) {
+	respondDevboxInteraction(id: $id, response: $response) {
+		... CliDevboxInteractionFragment
+	}
+}
+fragment CliDevboxInteractionFragment on DevboxInteraction {
+	id
+	kind
+	state
+	title
+	message
+	url
+	toolCallId
+	options {
+		optionId
+		name
+		kind
+	}
+	thread {
+		id
+	}
+}
+`
+
+func (c *Client) CliRespondDevboxInteraction(ctx context.Context, id string, response DevboxInteractionResponseAttributes, interceptors ...clientv2.RequestInterceptor) (*CliRespondDevboxInteraction, error) {
+	vars := map[string]any{
+		"id":       id,
+		"response": response,
+	}
+
+	var res CliRespondDevboxInteraction
+	if err := c.Client.Post(ctx, "CliRespondDevboxInteraction", CliRespondDevboxInteractionDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CliOpenDevboxStreamDocument = `mutation CliOpenDevboxStream ($instanceId: ID!, $kind: DevboxStreamKind!, $terminalId: String, $port: Int) {
+	openDevboxStream(instanceId: $instanceId, kind: $kind, terminalId: $terminalId, port: $port) {
+		... CliDevboxStreamFragment
+	}
+}
+fragment CliDevboxStreamFragment on DevboxStream {
+	streamId
+	kind
+	url
+	token
+	expiresAt
+	subprotocols
+	terminalId
+}
+`
+
+func (c *Client) CliOpenDevboxStream(ctx context.Context, instanceID string, kind DevboxStreamKind, terminalID *string, port *int64, interceptors ...clientv2.RequestInterceptor) (*CliOpenDevboxStream, error) {
+	vars := map[string]any{
+		"instanceId": instanceID,
+		"kind":       kind,
+		"terminalId": terminalID,
+		"port":       port,
+	}
+
+	var res CliOpenDevboxStream
+	if err := c.Client.Post(ctx, "CliOpenDevboxStream", CliOpenDevboxStreamDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetDevboxDocument = `query GetDevbox ($id: ID!) {
+	devbox(id: $id) {
+		... DevboxFragment
+	}
+}
+fragment DevboxFragment on Devbox {
+	id
+	name
+	image
+	resolvedImage
+	templateRevision
+	status
+	allowedRepositories
+	maxInstances
+	browser
+	lastHeartbeatAt
+	agents {
+		... DevboxAgentFragment
+	}
+	conditions {
+		... DevboxConditionFragment
+	}
+}
+fragment DevboxAgentFragment on DevboxAgent {
+	type
+	default
+	adapterName
+	adapterVersion
+	protocolVersion
+	acpV2
+	modelSwitchable
+	probeStatus
+	probeError
+	defaultModel
+	models {
+		... DevboxModelFragment
+	}
+	commands {
+		... DevboxCommandFragment
+	}
+	configOptions {
+		... DevboxConfigOptionFragment
+	}
+	sessionCapabilities {
+		list
+		resume
+		load
+		close
+		delete
+		fork
+	}
+}
+fragment DevboxModelFragment on DevboxModel {
+	id
+	name
+	description
+}
+fragment DevboxCommandFragment on DevboxCommand {
+	name
+	description
+	inputHint
+}
+fragment DevboxConfigOptionFragment on DevboxConfigOption {
+	configId
+	name
+	description
+	category
+	type
+	currentValue
+	options {
+		value
+		name
+		description
+		group
+	}
+}
+fragment DevboxConditionFragment on DevboxCondition {
+	type
+	status
+	reason
+	message
+}
+`
+
+func (c *Client) GetDevbox(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetDevbox, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetDevbox
+	if err := c.Client.Post(ctx, "GetDevbox", GetDevboxDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetDevboxByNameDocument = `query GetDevboxByName ($name: String!, $clusterId: ID) {
+	devbox(name: $name, clusterId: $clusterId) {
+		... DevboxFragment
+	}
+}
+fragment DevboxFragment on Devbox {
+	id
+	name
+	image
+	resolvedImage
+	templateRevision
+	status
+	allowedRepositories
+	maxInstances
+	browser
+	lastHeartbeatAt
+	agents {
+		... DevboxAgentFragment
+	}
+	conditions {
+		... DevboxConditionFragment
+	}
+}
+fragment DevboxAgentFragment on DevboxAgent {
+	type
+	default
+	adapterName
+	adapterVersion
+	protocolVersion
+	acpV2
+	modelSwitchable
+	probeStatus
+	probeError
+	defaultModel
+	models {
+		... DevboxModelFragment
+	}
+	commands {
+		... DevboxCommandFragment
+	}
+	configOptions {
+		... DevboxConfigOptionFragment
+	}
+	sessionCapabilities {
+		list
+		resume
+		load
+		close
+		delete
+		fork
+	}
+}
+fragment DevboxModelFragment on DevboxModel {
+	id
+	name
+	description
+}
+fragment DevboxCommandFragment on DevboxCommand {
+	name
+	description
+	inputHint
+}
+fragment DevboxConfigOptionFragment on DevboxConfigOption {
+	configId
+	name
+	description
+	category
+	type
+	currentValue
+	options {
+		value
+		name
+		description
+		group
+	}
+}
+fragment DevboxConditionFragment on DevboxCondition {
+	type
+	status
+	reason
+	message
+}
+`
+
+func (c *Client) GetDevboxByName(ctx context.Context, name string, clusterID *string, interceptors ...clientv2.RequestInterceptor) (*GetDevboxByName, error) {
+	vars := map[string]any{
+		"name":      name,
+		"clusterId": clusterID,
+	}
+
+	var res GetDevboxByName
+	if err := c.Client.Post(ctx, "GetDevboxByName", GetDevboxByNameDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpsertDevboxDocument = `mutation UpsertDevbox ($attributes: DevboxAttributes!) {
+	upsertDevbox(attributes: $attributes) {
+		... DevboxFragment
+	}
+}
+fragment DevboxFragment on Devbox {
+	id
+	name
+	image
+	resolvedImage
+	templateRevision
+	status
+	allowedRepositories
+	maxInstances
+	browser
+	lastHeartbeatAt
+	agents {
+		... DevboxAgentFragment
+	}
+	conditions {
+		... DevboxConditionFragment
+	}
+}
+fragment DevboxAgentFragment on DevboxAgent {
+	type
+	default
+	adapterName
+	adapterVersion
+	protocolVersion
+	acpV2
+	modelSwitchable
+	probeStatus
+	probeError
+	defaultModel
+	models {
+		... DevboxModelFragment
+	}
+	commands {
+		... DevboxCommandFragment
+	}
+	configOptions {
+		... DevboxConfigOptionFragment
+	}
+	sessionCapabilities {
+		list
+		resume
+		load
+		close
+		delete
+		fork
+	}
+}
+fragment DevboxModelFragment on DevboxModel {
+	id
+	name
+	description
+}
+fragment DevboxCommandFragment on DevboxCommand {
+	name
+	description
+	inputHint
+}
+fragment DevboxConfigOptionFragment on DevboxConfigOption {
+	configId
+	name
+	description
+	category
+	type
+	currentValue
+	options {
+		value
+		name
+		description
+		group
+	}
+}
+fragment DevboxConditionFragment on DevboxCondition {
+	type
+	status
+	reason
+	message
+}
+`
+
+func (c *Client) UpsertDevbox(ctx context.Context, attributes DevboxAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertDevbox, error) {
+	vars := map[string]any{
+		"attributes": attributes,
+	}
+
+	var res UpsertDevbox
+	if err := c.Client.Post(ctx, "UpsertDevbox", UpsertDevboxDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const HeartbeatDevboxDocument = `mutation HeartbeatDevbox ($id: ID!, $attributes: DevboxHeartbeatAttributes!) {
+	heartbeatDevbox(id: $id, attributes: $attributes) {
+		id
+		status
+		lastHeartbeatAt
+	}
+}
+`
+
+func (c *Client) HeartbeatDevbox(ctx context.Context, id string, attributes DevboxHeartbeatAttributes, interceptors ...clientv2.RequestInterceptor) (*HeartbeatDevbox, error) {
+	vars := map[string]any{
+		"id":         id,
+		"attributes": attributes,
+	}
+
+	var res HeartbeatDevbox
+	if err := c.Client.Post(ctx, "HeartbeatDevbox", HeartbeatDevboxDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const DeleteDevboxDocument = `mutation DeleteDevbox ($id: ID!) {
+	deleteDevbox(id: $id) {
+		id
+	}
+}
+`
+
+func (c *Client) DeleteDevbox(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteDevbox, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res DeleteDevbox
+	if err := c.Client.Post(ctx, "DeleteDevbox", DeleteDevboxDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const MintDevboxProbeTokenDocument = `mutation MintDevboxProbeToken ($id: ID!) {
+	mintDevboxProbeToken(id: $id) {
+		token
+		expiresAt
+	}
+}
+`
+
+func (c *Client) MintDevboxProbeToken(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*MintDevboxProbeToken, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res MintDevboxProbeToken
+	if err := c.Client.Post(ctx, "MintDevboxProbeToken", MintDevboxProbeTokenDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const LinkAgentCredentialDocument = `mutation LinkAgentCredential ($attributes: AgentCredentialAttributes!) {
+	linkAgentCredential(attributes: $attributes) {
+		... AgentCredentialFragment
+	}
+}
+fragment AgentCredentialFragment on AgentCredential {
+	id
+	provider
+	kind
+	label
+	status
+	version
+	defaultBilling
+	failureCount
+	email
+	plan
+	linkedAt
+	expiresAt
+	lastRefreshedAt
+	lastUsedAt
+}
+`
+
+func (c *Client) LinkAgentCredential(ctx context.Context, attributes AgentCredentialAttributes, interceptors ...clientv2.RequestInterceptor) (*LinkAgentCredential, error) {
+	vars := map[string]any{
+		"attributes": attributes,
+	}
+
+	var res LinkAgentCredential
+	if err := c.Client.Post(ctx, "LinkAgentCredential", LinkAgentCredentialDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const ListAgentCredentialsDocument = `query ListAgentCredentials {
+	agentCredentials {
+		... AgentCredentialFragment
+	}
+}
+fragment AgentCredentialFragment on AgentCredential {
+	id
+	provider
+	kind
+	label
+	status
+	version
+	defaultBilling
+	failureCount
+	email
+	plan
+	linkedAt
+	expiresAt
+	lastRefreshedAt
+	lastUsedAt
+}
+`
+
+func (c *Client) ListAgentCredentials(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*ListAgentCredentials, error) {
+	vars := map[string]any{}
+
+	var res ListAgentCredentials
+	if err := c.Client.Post(ctx, "ListAgentCredentials", ListAgentCredentialsDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const DeleteAgentCredentialDocument = `mutation DeleteAgentCredential ($id: ID!) {
+	deleteAgentCredential(id: $id) {
+		id
+	}
+}
+`
+
+func (c *Client) DeleteAgentCredential(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteAgentCredential, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res DeleteAgentCredential
+	if err := c.Client.Post(ctx, "DeleteAgentCredential", DeleteAgentCredentialDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -68188,6 +75445,7 @@ fragment SentinelRunJobFragment on SentinelRunJob {
 	check
 	status
 	format
+	error
 	usesGit
 	jobSpec {
 		... JobSpecFragment
@@ -68387,6 +75645,7 @@ fragment SentinelRunJobFragment on SentinelRunJob {
 	check
 	status
 	format
+	error
 	usesGit
 	jobSpec {
 		... JobSpecFragment
@@ -68756,6 +76015,7 @@ fragment SentinelRunJobFragment on SentinelRunJob {
 	check
 	status
 	format
+	error
 	usesGit
 	jobSpec {
 		... JobSpecFragment
@@ -77127,6 +84387,7 @@ var DocumentOperationNames = map[string]string{
 	GetAgentRunDocument:                               "GetAgentRun",
 	GetAgentRunCredentialsDocument:                    "GetAgentRunCredentials",
 	GetAgentRunStatusDocument:                         "GetAgentRunStatus",
+	GetAgentRunPendingDocument:                        "GetAgentRunPending",
 	GetAgentRunMinimalDocument:                        "GetAgentRunMinimal",
 	ListAgentRunsDocument:                             "ListAgentRuns",
 	ListAgentRunsMinimalDocument:                      "ListAgentRunsMinimal",
@@ -77221,6 +84482,8 @@ var DocumentOperationNames = map[string]string{
 	GetServiceDeploymentComponentsDocument:            "GetServiceDeploymentComponents",
 	GetServiceDeploymentForAgentDocument:              "GetServiceDeploymentForAgent",
 	GetServiceDeploymentByHandleDocument:              "GetServiceDeploymentByHandle",
+	GetServiceDeploymentStatusByHandleDocument:        "GetServiceDeploymentStatusByHandle",
+	GetServiceDeploymentStatusDocument:                "GetServiceDeploymentStatus",
 	GetServiceDeploymentTinyByHandleDocument:          "GetServiceDeploymentTinyByHandle",
 	GetServiceTarballDocument:                         "GetServiceTarball",
 	ListServiceDeploymentDocument:                     "ListServiceDeployment",
@@ -77237,6 +84500,42 @@ var DocumentOperationNames = map[string]string{
 	DeleteGlobalServiceDocument:                       "DeleteGlobalService",
 	KickServiceDocument:                               "KickService",
 	KickServiceByHandleDocument:                       "KickServiceByHandle",
+	CliListDevboxesDocument:                           "CliListDevboxes",
+	CliGetDevboxDocument:                              "CliGetDevbox",
+	CliDevboxAgentsDocument:                           "CliDevboxAgents",
+	CliListDevboxInstancesDocument:                    "CliListDevboxInstances",
+	CliGetDevboxInstanceDocument:                      "CliGetDevboxInstance",
+	CliGetDevboxThreadDocument:                        "CliGetDevboxThread",
+	CliDevboxInstanceCommandsDocument:                 "CliDevboxInstanceCommands",
+	CliDevboxRepositoriesDocument:                     "CliDevboxRepositories",
+	CliDevboxImportableSessionsDocument:               "CliDevboxImportableSessions",
+	CliDevboxTimelineDocument:                         "CliDevboxTimeline",
+	CliCreateDevboxInstanceDocument:                   "CliCreateDevboxInstance",
+	CliCancelDevboxInstanceDocument:                   "CliCancelDevboxInstance",
+	CliSuspendDevboxInstanceDocument:                  "CliSuspendDevboxInstance",
+	CliResumeDevboxInstanceDocument:                   "CliResumeDevboxInstance",
+	CliPingDevboxInstanceDocument:                     "CliPingDevboxInstance",
+	CliLeaveDevboxInstanceDocument:                    "CliLeaveDevboxInstance",
+	CliKeepDevboxInstanceAwakeDocument:                "CliKeepDevboxInstanceAwake",
+	CliCancelDevboxKeepAwakeDocument:                  "CliCancelDevboxKeepAwake",
+	CliAddDevboxRepositoryDocument:                    "CliAddDevboxRepository",
+	CliCreateDevboxThreadDocument:                     "CliCreateDevboxThread",
+	CliImportDevboxThreadDocument:                     "CliImportDevboxThread",
+	CliCloseDevboxThreadDocument:                      "CliCloseDevboxThread",
+	CliForkDevboxThreadDocument:                       "CliForkDevboxThread",
+	CliPromptDevboxThreadDocument:                     "CliPromptDevboxThread",
+	CliCancelDevboxPromptDocument:                     "CliCancelDevboxPrompt",
+	CliRespondDevboxInteractionDocument:               "CliRespondDevboxInteraction",
+	CliOpenDevboxStreamDocument:                       "CliOpenDevboxStream",
+	GetDevboxDocument:                                 "GetDevbox",
+	GetDevboxByNameDocument:                           "GetDevboxByName",
+	UpsertDevboxDocument:                              "UpsertDevbox",
+	HeartbeatDevboxDocument:                           "HeartbeatDevbox",
+	DeleteDevboxDocument:                              "DeleteDevbox",
+	MintDevboxProbeTokenDocument:                      "MintDevboxProbeToken",
+	LinkAgentCredentialDocument:                       "LinkAgentCredential",
+	ListAgentCredentialsDocument:                      "ListAgentCredentials",
+	DeleteAgentCredentialDocument:                     "DeleteAgentCredential",
 	GetClusterRegistrationDocument:                    "GetClusterRegistration",
 	GetClusterRegistrationsDocument:                   "GetClusterRegistrations",
 	CreateClusterRegistrationDocument:                 "CreateClusterRegistration",

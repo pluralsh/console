@@ -34,10 +34,10 @@ defmodule Console.AI.Workbench.Subagents.History do
     end
   end
 
-  def tools(%Environment{skills: skills}, job) do
+  def tools(%Environment{skills: skills} = environment, job) do
     job = Repo.preload(job, [referenced_job: [activities: :thoughts]])
     skills = Environment.subagent_skills(skills, :memory)
-    skill_knowledge_tools(job, skills) ++ [
+    skill_knowledge_tools(job, skills) ++ search_tools(environment, :history) ++ [
       Scratchpad,
       %Search{activities: job.referenced_job.activities},
       Result

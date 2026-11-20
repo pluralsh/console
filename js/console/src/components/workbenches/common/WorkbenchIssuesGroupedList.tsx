@@ -1,4 +1,4 @@
-import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
+import { WORKBENCH_POLL_INTERVAL } from 'components/workbenches/workbench/job/usePollWhileRunning'
 import { toCounts } from 'components/utils/display/DisplayPanel'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { IssueLink } from 'components/workbenches/common/IssueLink'
@@ -72,7 +72,7 @@ export function WorkbenchIssuesGroupedList({
   const { data, previousData, loading } = useWorkbenchIssueStatusCountsQuery({
     variables: { id: workbenchId, q: filters.q, providers: filters.providers },
     fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
+    pollInterval: WORKBENCH_POLL_INTERVAL,
   })
   const countsData = data ?? previousData
   const groups = useMemo(() => {
@@ -131,7 +131,7 @@ function IssueStatusGroup({
   const { data, loading, pageInfo, fetchNextPage, fetchingMore } =
     useFetchPaginatedData(
       {
-        pollInterval: POLL_INTERVAL,
+        pollInterval: WORKBENCH_POLL_INTERVAL,
         query: WorkbenchIssuesForStatusDocument,
         keyPath: ISSUES_KEY_PATH,
         pageSize: PAGE_SIZE,

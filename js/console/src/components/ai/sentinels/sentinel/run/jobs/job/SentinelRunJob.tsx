@@ -1,10 +1,12 @@
 import {
+  Callout,
   EmptyState,
   Flex,
   IconFrame,
   ReturnIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { SendSentinelRunJobToWorkbenchButton } from 'components/ai/sentinels/SendSentinelToWorkbench'
 import { DetailsPageWithSidecarWrapper } from 'components/ai/sentinels/sentinel/Sentinel'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { GqlError } from 'components/utils/Alert'
@@ -85,26 +87,32 @@ export function SentinelRunJob() {
   return (
     <DetailsPageWithSidecarWrapper
       header={
-        <StackedText
-          loading={!runJob && loading}
-          first={error ? 'Error' : (runJob?.reference?.name ?? '')}
-          firstPartialType="subtitle1"
-          firstColor="text"
-          second={runJob?.reference?.namespace ?? ''}
-          secondPartialType="body2"
-          secondColor="text-xlight"
-          icon={
-            <IconFrame
-              clickable
-              as={Link}
-              to={getSentinelRunAbsPath({ sentinelId, runId })}
-              icon={<ReturnIcon />}
-              type="secondary"
-              size="large"
-              tooltip="Back to sentinel run"
-            />
-          }
-        />
+        <>
+          <StackedText
+            loading={!runJob && loading}
+            first={error ? 'Error' : (runJob?.reference?.name ?? '')}
+            firstPartialType="subtitle1"
+            firstColor="text"
+            second={runJob?.reference?.namespace ?? ''}
+            secondPartialType="body2"
+            secondColor="text-xlight"
+            icon={
+              <IconFrame
+                clickable
+                as={Link}
+                to={getSentinelRunAbsPath({ sentinelId, runId })}
+                icon={<ReturnIcon />}
+                type="secondary"
+                size="large"
+                tooltip="Back to sentinel run"
+              />
+            }
+          />
+          <SendSentinelRunJobToWorkbenchButton
+            small
+            job={runJob}
+          />
+        </>
       }
       content={
         <Flex
@@ -114,6 +122,17 @@ export function SentinelRunJob() {
           height="100%"
           maxWidth="100%"
         >
+          {runJob?.error && (
+            <Callout
+              severity="danger"
+              title="This job encountered an error"
+              css={{ flexShrink: 0 }}
+            >
+              <span css={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                {runJob.error}
+              </span>
+            </Callout>
+          )}
           <SubTabs directory={directory} />
           {runJob || isLoading ? (
             <Outlet context={ctx} />

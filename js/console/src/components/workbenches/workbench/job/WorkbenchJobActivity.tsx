@@ -1,6 +1,7 @@
 import {
   AccordionItem,
   AgentLoadingIcon,
+  Card,
   CaretDownIcon,
   DiffMethod,
   DiffViewer,
@@ -34,19 +35,16 @@ import {
   WorkbenchToolIcon,
 } from 'components/workbenches/tools/workbenchToolsUtils'
 import pluralize from 'pluralize'
-import { POLL_INTERVAL } from 'components/cluster/constants'
 import { AILoadingText } from 'components/utils/AILoadingText'
 import { GqlError } from 'components/utils/Alert'
 import { prettifyPrompt } from 'components/utils/contentEditableChips'
 import { StackedText } from 'components/utils/table/StackedText'
+import { TRUNCATE } from 'components/utils/truncate'
 import { EaseIn } from 'components/utils/EaseIn'
-import {
-  Body2BoldP,
-  Body2P,
-  shimmerWithinCss,
-} from 'components/utils/typography/Text'
+import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
 import {
   AgentRunStatus,
+  useAgentRunDeltaSubscription,
   useWorkbenchJobActivityQuery,
   WorkbenchJobActivityFragment,
   WorkbenchJobActivityStatus,
@@ -57,7 +55,7 @@ import {
   WorkbenchToolTinyFragment,
 } from 'generated/graphql'
 import { isEmpty, startCase } from 'lodash'
-import { type ReactNode, useMemo, useState } from 'react'
+import { type ComponentProps, type ReactNode, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getAgentRunAbsPath } from 'routes/aiRoutesConsts'
 import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
@@ -82,7 +80,6 @@ import { WorkbenchJobInlineActionCard } from './WorkbenchJobInlineActionCard'
 export function WorkbenchJobActivity({
   isOpen,
   activity,
-  textStream,
   latestThought,
   jobId,
   workbenchId,
@@ -90,14 +87,12 @@ export function WorkbenchJobActivity({
 }: {
   isOpen: boolean
   activity: WorkbenchJobActivityFragment
-  textStream: Nullable<string>
   latestThought?: Nullable<WorkbenchJobThoughtFragment>
   jobId: string
   workbenchId: string
   workbenchName: string
 }) {
-  const theme = useTheme()
-  const { spacing } = theme
+  const { spacing } = useTheme()
   const { id, status, type, prompt, agentRun, result } = activity
   const isRunning = isJobRunning(status)
 
@@ -272,20 +267,12 @@ export function WorkbenchJobActivity({
             activityId={id}
             skip={!isOpen}
           />
-          {textStream && (
-            <Flex
-              direction="column"
-              maxHeight={120}
-              overflow="auto"
-              css={isRunning ? shimmerWithinCss(theme) : undefined}
-            >
-              <SimplifiedMarkdown
-                text={textStream}
-                tone="thought"
-              />
-            </Flex>
+          {isRunning && (
+            <AILoadingText
+              activityId={id}
+              refreshKey={latestThought?.id}
+            />
           )}
-          {isRunning && <AILoadingText activityId={id} />}
         </CollapseWhenEmptySC>
         <WorkbenchJobActivityResult
           activity={activity}
@@ -299,10 +286,8 @@ export function WorkbenchJobActivity({
 
 export function WorkbenchJobMemoGroup({
   activities,
-  textStreamMap,
 }: {
   activities: WorkbenchJobActivityFragment[]
-  textStreamMap: Record<string, string>
 }) {
   const { spacing } = useTheme()
   const [isExpanded, setIsExpanded] = useState(false)
@@ -320,7 +305,6 @@ export function WorkbenchJobMemoGroup({
             <WorkbenchJobMemo
               key={activity.id}
               activity={activity}
-              textStream={textStreamMap[activity.id] ?? ''}
             />
           ))}
         </Flex>
@@ -347,29 +331,158 @@ export function WorkbenchJobMemoGroup({
             <WorkbenchJobMemo
               key={activity.id}
               activity={activity}
-              textStream={textStreamMap[activity.id] ?? ''}
             />
           ))}
         </Flex>
       </SimpleAccordion>
       {!isExpanded && lastMemo && isJobRunning(lastMemo.status) && (
         <EaseIn currentKey={lastMemo.id}>
-          <WorkbenchJobMemo
-            activity={lastMemo}
-            textStream={textStreamMap[lastMemo.id] ?? ''}
-          />
+          <WorkbenchJobMemo activity={lastMemo} />
         </EaseIn>
       )}
     </MemoGroupSC>
   )
 }
 
+/**
+ * Consecutive coding agent runs launched by the orchestrator. The latest run
+ * gets the full card, earlier ones are minimized to a single line each.
+ */
+export function WorkbenchJobCodingAgentGroup({
+  activities,
+}: {
+  activities: WorkbenchJobActivityFragment[]
+}) {
+  const { spacing } = useTheme()
+  const earlier = activities.slice(0, -1)
+  const latest = activities.at(-1)
+
+  if (!latest) return null
+
+  return (
+    <Flex
+      direction="column"
+      gap="small"
+      width="100%"
+      minWidth={0}
+    >
+      {!isEmpty(earlier) && (
+        <>
+          <StackedText
+            first="Earlier agent runs"
+            firstPartialType="body2Bold"
+            firstColor="text-xlight"
+            icon={<AgentRunIcon size={12} />}
+          />
+          {earlier.map(({ id, agentRun, prompt, status }) =>
+            agentRun ? (
+              <FollowedAgentRunInfoSimple
+                key={id}
+                agentRun={agentRun}
+                css={{ padding: `0 ${spacing.small}` }}
+              />
+            ) : (
+              <Flex
+                key={id}
+                alignItems="center"
+                gap="xsmall"
+                css={{ padding: `0 ${spacing.small}` }}
+              >
+                <Body2P
+                  $color="text-xlight"
+                  $shimmer={isJobRunning(status)}
+                  css={{ ...TRUNCATE, flex: 1, minWidth: 0 }}
+                >
+                  {prompt}
+                </Body2P>
+                {status === WorkbenchJobActivityStatus.Failed && (
+                  <FailedFilledIcon
+                    size={12}
+                    color="icon-danger"
+                  />
+                )}
+              </Flex>
+            )
+          )}
+        </>
+      )}
+      {latest.agentRun ? (
+        <AgentRunInfoCard
+          showLinkButton
+          fillLevel={1}
+          agentRun={latest.agentRun}
+        />
+      ) : (
+        isJobRunning(latest.status) && (
+          <Card
+            fillLevel={1}
+            css={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: spacing.small,
+              padding: spacing.medium,
+            }}
+          >
+            <StackedText
+              first={
+                <Body2P
+                  $color="text-light"
+                  $shimmer
+                >
+                  Starting agent run
+                </Body2P>
+              }
+              icon={
+                <IconFrame
+                  type="secondary"
+                  icon={<AgentRunIcon size={16} />}
+                />
+              }
+            />
+            <Body2P
+              $color="text-xlight"
+              css={TRUNCATE}
+            >
+              {latest.prompt}
+            </Body2P>
+          </Card>
+        )
+      )}
+      {latest.result?.error && (
+        <GqlError
+          error={latest.result.error}
+          css={{ wordBreak: 'break-word' }}
+        />
+      )}
+    </Flex>
+  )
+}
+
+// Earlier runs can still be in flight when several are launched in parallel, so follow their
+// deltas too. Apollo normalizes them into the cached run this row renders from.
+function FollowedAgentRunInfoSimple({
+  agentRun,
+  ...props
+}: ComponentProps<typeof AgentRunInfoSimple> & {
+  agentRun: NonNullable<WorkbenchJobActivityFragment['agentRun']>
+}) {
+  useAgentRunDeltaSubscription({
+    variables: { runId: agentRun.id },
+    skip: !isJobRunning(agentRun.status),
+  })
+
+  return (
+    <AgentRunInfoSimple
+      agentRun={agentRun}
+      {...props}
+    />
+  )
+}
+
 function WorkbenchJobMemo({
   activity,
-  textStream,
 }: {
   activity: WorkbenchJobActivityFragment
-  textStream: string
 }) {
   const { spacing } = useTheme()
   const [isExpanded, setIsExpanded] = useState(false)
@@ -377,7 +490,7 @@ function WorkbenchJobMemo({
   const isFailed = activity.status === WorkbenchJobActivityStatus.Failed
   const isRejected = activity.status === WorkbenchJobActivityStatus.Rejected
   const { prompt, result } = activity
-  const summary = textStream || result?.output || prompt || ''
+  const summary = result?.output || prompt || ''
   const workingTheory =
     result?.jobUpdate?.workingTheory?.trim() ||
     result?.jobUpdate?.conclusion?.trim() ||
@@ -577,11 +690,11 @@ function WorkbenchJobActivityThoughts({
   const { spacing } = useTheme()
   const [isExpanded, setIsExpanded] = useState(false)
 
+  // the job's thought stream appends to this activity's cached thoughts
   const { data, loading, error } = useWorkbenchJobActivityQuery({
     variables: { id: activityId },
     fetchPolicy: 'cache-and-network',
     skip,
-    pollInterval: POLL_INTERVAL,
   })
   const isLoading = !data && loading
   const activity = data?.workbenchJobActivity

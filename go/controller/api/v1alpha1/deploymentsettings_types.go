@@ -545,6 +545,13 @@ type AISettings struct {
 	// +kubebuilder:validation:Optional
 	EmbeddingProvider *console.AiProvider `json:"embeddingProvider,omitempty"`
 
+	// DecisionProvider to use for decision (classification) calls, like reviewing devbox agent tool calls.
+	// Defaults to the first provider with a decision model, falling back to the main provider's models.
+	//
+	// +kubebuilder:validation:Enum=OPENAI;OPENAI_COMPATIBLE;ANTHROPIC;AZURE;BEDROCK;VERTEX;XAI
+	// +kubebuilder:validation:Optional
+	DecisionProvider *console.AiProvider `json:"decisionProvider,omitempty"`
+
 	// LogAnalysis defines whether to enable log analysis in AI insights (turn off to save on log query costs)
 	//
 	// +kubebuilder:validation:Optional
@@ -693,6 +700,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 		ToolProvider:      in.ToolProvider,
 		Streaming:         in.Streaming,
 		EmbeddingProvider: in.EmbeddingProvider,
+		DecisionProvider:  in.DecisionProvider,
 		VectorStore:       vectorStoreAttributes,
 		Graph:             graphStoreAttributes,
 		LogAnalysis:       in.LogAnalysis,
@@ -763,6 +771,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			Model:          in.Anthropic.Model,
 			ToolModel:      in.Anthropic.ToolModel,
 			EmbeddingModel: in.Anthropic.EmbeddingModel,
+			DecisionModel:  in.Anthropic.DecisionModel,
 			ProxyModels:    lo.ToSlicePtr(in.Anthropic.ProxyModels),
 			Proxy:          in.Anthropic.Proxy.Attributes(),
 		}
@@ -790,6 +799,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			Model:          in.Azure.Model,
 			ToolModel:      in.Azure.ToolModel,
 			EmbeddingModel: in.Azure.EmbeddingModel,
+			DecisionModel:  in.Azure.DecisionModel,
 			AccessToken:    token,
 			Deployments:    deployments,
 			ProxyModels:    lo.ToSlicePtr(in.Azure.ProxyModels),
@@ -814,6 +824,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			Location:           in.Vertex.Location,
 			Endpoint:           in.Vertex.Endpoint,
 			EmbeddingModel:     in.Vertex.EmbeddingModel,
+			DecisionModel:      in.Vertex.DecisionModel,
 			ToolModel:          in.Vertex.ToolModel,
 			ProxyModels:        lo.ToSlicePtr(in.Vertex.ProxyModels),
 			Proxy:              in.Vertex.Proxy.Attributes(),
@@ -858,6 +869,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			AccessToken:        secret,
 			Region:             lo.ToPtr(in.Bedrock.Region),
 			EmbeddingModel:     in.Bedrock.EmbeddingModel,
+			DecisionModel:      in.Bedrock.DecisionModel,
 			Endpoint:           in.Bedrock.Endpoint,
 			ProxyModels:        lo.ToSlicePtr(in.Bedrock.ProxyModels),
 			AWSSecretAccessKey: secretKey,
@@ -911,6 +923,10 @@ func (in *AISettings) validateProviders() error {
 	}
 
 	if err := in.checkProvider(in.ToolProvider, "tool provider"); err != nil {
+		return err
+	}
+
+	if err := in.checkProvider(in.DecisionProvider, "decision provider"); err != nil {
 		return err
 	}
 
@@ -990,6 +1006,12 @@ type AIProviderSettings struct {
 	// +kubebuilder:validation:Optional
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
 
+	// DecisionModel is a cheap, fast model for decision (classification) calls, like reviewing devbox agent
+	// tool calls. Models without native decision support are emulated through the AI proxy.
+	//
+	// +kubebuilder:validation:Optional
+	DecisionModel *string `json:"decisionModel,omitempty"`
+
 	// ProxyModels are additional models to support within our integrated ai proxy.
 	//
 	// +kubebuilder:validation:Optional
@@ -1028,6 +1050,12 @@ type OpenAISettings struct {
 	//
 	// +kubebuilder:validation:Optional
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
+
+	// DecisionModel is a cheap, fast model for decision (classification) calls, like reviewing devbox agent
+	// tool calls. Models without native decision support are emulated through the AI proxy.
+	//
+	// +kubebuilder:validation:Optional
+	DecisionModel *string `json:"decisionModel,omitempty"`
 
 	// ProxyModels are additional models to support within our integrated ai proxy.
 	//
@@ -1255,6 +1283,12 @@ type AzureOpenAISettings struct {
 	// +kubebuilder:validation:Optional
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
 
+	// DecisionModel is a cheap, fast model for decision (classification) calls, like reviewing devbox agent
+	// tool calls. Models without native decision support are emulated through the AI proxy.
+	//
+	// +kubebuilder:validation:Optional
+	DecisionModel *string `json:"decisionModel,omitempty"`
+
 	// Deployments is a mapping from model id to azure OpenAI deployment if those require additional configuration
 	//
 	// +kubebuilder:validation:Optional
@@ -1306,6 +1340,12 @@ type BedrockSettings struct {
 	//
 	// +kubebuilder:validation:Optional
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
+
+	// DecisionModel is a cheap, fast model for decision (classification) calls, like reviewing devbox agent
+	// tool calls. Models without native decision support are emulated through the AI proxy.
+	//
+	// +kubebuilder:validation:Optional
+	DecisionModel *string `json:"decisionModel,omitempty"`
 
 	// Endpoint selects the AWS Bedrock API surface. RUNTIME (the default) uses InvokeModel or
 	// Converse on bedrock-runtime; MANTLE uses the Bedrock Mantle Anthropic/OpenAI-compatible APIs.
@@ -1380,6 +1420,12 @@ type VertexSettings struct {
 	//
 	// +kubebuilder:validation:Optional
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
+
+	// DecisionModel is a cheap, fast model for decision (classification) calls, like reviewing devbox agent
+	// tool calls. Models without native decision support are emulated through the AI proxy.
+	//
+	// +kubebuilder:validation:Optional
+	DecisionModel *string `json:"decisionModel,omitempty"`
 
 	// ProxyModels are additional models to support within the integrated ai proxy.
 	//
@@ -1499,6 +1545,7 @@ func (in *OpenAISettings) Attributes(ctx context.Context, c client.Client, names
 		BaseURL:        in.BaseUrl,
 		ToolModel:      in.ToolModel,
 		EmbeddingModel: in.EmbeddingModel,
+		DecisionModel:  in.DecisionModel,
 		Method:         in.Method,
 		ProxyModels:    lo.ToSlicePtr(in.ProxyModels),
 		Headers:        httpHeaderAttributes(in.Headers),
@@ -1650,7 +1697,7 @@ type VectorStore struct {
 
 	// VectorStore is the type of the vector store to use.
 	//
-	// +kubebuilder:validation:Enum=ELASTIC;OPENSEARCH;POSTGRES
+	// +kubebuilder:validation:Enum=ELASTIC;OPENSEARCH;POSTGRES;PLURAL
 	// +kubebuilder:validation:Optional
 	VectorStore *console.VectorStore `json:"vectorStore,omitempty"`
 
@@ -1663,6 +1710,11 @@ type VectorStore struct {
 	//
 	// +kubebuilder:validation:Optional
 	Opensearch *OpensearchConnectionSettings `json:"opensearch,omitempty"`
+
+	// Plural vector db configuration for the vector store.
+	//
+	// +kubebuilder:validation:Optional
+	Plural *PluralVectorConnectionSettings `json:"plural,omitempty"`
 }
 
 func (in *VectorStore) Attributes(ctx context.Context, c client.Client, namespace string) (*console.VectorStoreAttributes, error) {
@@ -1717,8 +1769,78 @@ func (in *VectorStore) Attributes(ctx context.Context, c client.Client, namespac
 			AWSSecretAccessKey: awsSecretAccessKey,
 			AWSRegion:          in.Opensearch.AwsRegion,
 		}
+	case console.VectorStorePlural:
+		if in.Plural == nil {
+			return nil, fmt.Errorf("must provide plural configuration to set the provider to PLURAL")
+		}
+
+		plural, err := in.Plural.Attributes(ctx, c, namespace)
+		if err != nil {
+			return nil, err
+		}
+		attr.Plural = plural
 	case console.VectorStorePostgres:
 	}
+	return attr, nil
+}
+
+type PluralVectorConnectionSettings struct {
+	// Host is the base url of the plural vector cluster api, including any configured path prefix.
+	//
+	// +kubebuilder:validation:Required
+	Host string `json:"host"`
+
+	// Namespace is the vector db namespace to store embeddings in, defaults to console.
+	//
+	// +kubebuilder:validation:Optional
+	Namespace *string `json:"namespace,omitempty"`
+
+	// User is the user to authenticate with basic auth.
+	//
+	// +kubebuilder:validation:Optional
+	User *string `json:"user,omitempty"`
+
+	// PasswordSecretRef is a reference to the local secret holding the basic auth password.
+	//
+	// +kubebuilder:validation:Optional
+	PasswordSecretRef *corev1.SecretKeySelector `json:"passwordSecretRef,omitempty"`
+
+	// TokenSecretRef is a reference to the local secret holding a bearer token, which takes precedence over basic auth.
+	//
+	// +kubebuilder:validation:Optional
+	TokenSecretRef *corev1.SecretKeySelector `json:"tokenSecretRef,omitempty"`
+
+	// DeferEmbeddings lets the vector db embed text with its own configured embedding model,
+	// rather than computing embeddings in the console.
+	//
+	// +kubebuilder:validation:Optional
+	DeferEmbeddings *bool `json:"deferEmbeddings,omitempty"`
+}
+
+func (in *PluralVectorConnectionSettings) Attributes(ctx context.Context, c client.Client, namespace string) (*console.PluralVectorConnectionAttributes, error) {
+	attr := &console.PluralVectorConnectionAttributes{
+		Host:            in.Host,
+		Namespace:       in.Namespace,
+		User:            in.User,
+		DeferEmbeddings: in.DeferEmbeddings,
+	}
+
+	if in.PasswordSecretRef != nil {
+		password, err := utils.GetSecretKey(ctx, c, in.PasswordSecretRef, namespace)
+		if err != nil {
+			return nil, err
+		}
+		attr.Password = lo.ToPtr(password)
+	}
+
+	if in.TokenSecretRef != nil {
+		token, err := utils.GetSecretKey(ctx, c, in.TokenSecretRef, namespace)
+		if err != nil {
+			return nil, err
+		}
+		attr.Token = lo.ToPtr(token)
+	}
+
 	return attr, nil
 }
 

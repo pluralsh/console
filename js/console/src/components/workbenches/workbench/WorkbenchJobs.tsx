@@ -1,5 +1,4 @@
 import { useDebounce } from '@react-hooks-library/core'
-import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import {
   DisplayButton,
   DisplayPanel,
@@ -11,6 +10,7 @@ import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedD
 import { WorkbenchMonitoringContent } from 'components/workbenches/common/WorkbenchMonitoringContent'
 import { WorkbenchHeaderSearch } from 'components/workbenches/common/WorkbenchSearchInput'
 import {
+  Delta,
   SortDirection,
   useWorkbenchJobCountsQuery,
   useWorkbenchJobSearchQuery,
@@ -39,6 +39,8 @@ import {
   toJobFilterVariables,
   WORKBENCH_JOBS_PAGE_SIZE,
 } from './workbenchJobsDisplay'
+import { WORKBENCH_JOB_FALLBACK_POLL_INTERVAL } from './job/usePollWhileRunning'
+import { useWorkbenchJobDeltaListener } from './useWorkbenchJobsDelta'
 
 // bumped when the default moved to list, so a stored board view from the
 // previous default doesn't keep hiding it
@@ -145,7 +147,7 @@ export function WorkbenchJobs() {
     !searching &&
     !filterEmptyKind &&
     filters.direction !== SortDirection.Desc
-  const { data: recentData } = useWorkbenchJobsQuery({
+  const { data: recentData, refetch: refetchRecent } = useWorkbenchJobsQuery({
     variables: {
       id: workbenchId,
       first: BOARD_RECENT_JOBS_COUNT,
@@ -153,7 +155,11 @@ export function WorkbenchJobs() {
     },
     skip: !fetchRecent,
     fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
+    pollInterval: WORKBENCH_JOB_FALLBACK_POLL_INTERVAL,
+  })
+  // job updates are normalized into the list, only new jobs need a refetch
+  useWorkbenchJobDeltaListener(workbenchId, (delta) => {
+    if (fetchRecent && delta === Delta.Create) refetchRecent()
   })
   const recentJobs = useMemo(
     () =>

@@ -527,6 +527,47 @@ defmodule Console.Deployments.InitTest do
 
       assert {:error, _} = Init.migrate_plural_telemetry()
     end
+
+    test "migrate_plural_vector/0 moves the vector store onto telemetry" do
+      insert(:deployment_settings, ai: %{
+        enabled: true,
+        vector_store: %{
+          enabled: false,
+          initialized: true,
+          store: :elastic,
+          elastic: %{host: "http://test.es.com", index: "plrl-test-vectors", user: "plrl-test", password: "secret"}
+        },
+        graph: %{enabled: false}
+      })
+
+      {:ok, %DeploymentSettings{}} = Init.migrate_plural_vector()
+
+      %{ai: %{vector_store: vs} = ai} = Settings.fetch_consistent()
+      assert vs.enabled
+      refute vs.initialized
+      assert vs.store == :plural
+      assert vs.plural.host == "https://telemetry.example.com/vector"
+      assert vs.plural.namespace == "test"
+      assert vs.plural.user == "plrl"
+      assert vs.plural.password == "secret"
+      assert vs.plural.defer_embeddings
+      assert ai.enabled
+      refute ai.graph.enabled
+    end
+
+    test "migrate_plural_vector/0 errors without a telemetry url" do
+      insert(:deployment_settings)
+      stub(Console, :conf, fn
+        :cloud -> true
+        :cloud_instance -> "test"
+        :plural_o11y -> true
+        :es_url -> "http://test.es.com"
+        :es_password -> "secret"
+        key -> Application.get_env(:console, key, nil)
+      end)
+
+      assert {:error, _} = Init.migrate_plural_vector()
+    end
   end
 
   describe "#setup_groups/0" do

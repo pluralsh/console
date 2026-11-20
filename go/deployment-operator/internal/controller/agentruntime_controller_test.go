@@ -72,13 +72,13 @@ func TestCreateAgentRunPropagatesWorkbenchMCPURL(t *testing.T) {
 		},
 	}
 	workbenchMCPURL := "https://console.example/mcp/workbench/workbench-id"
-	run := &console.AgentRunFragment{
+	run := &console.AgentRunPendingFragment{
 		ID:              "run-id",
 		Prompt:          "investigate",
 		Repository:      "https://github.com/pluralsh/console",
 		Mode:            console.AgentRunModeAnalyze,
 		WorkbenchMcpURL: &workbenchMCPURL,
-		Runtime:         &console.AgentRuntimeFragment{Name: "runtime"},
+		Runtime:         &console.AgentRunPendingFragment_Runtime{Name: "runtime"},
 	}
 
 	g.Expect(reconciler.createAgentRun(context.Background(), agentRuntime, run)).To(Succeed())
@@ -89,6 +89,32 @@ func TestCreateAgentRunPropagatesWorkbenchMCPURL(t *testing.T) {
 }
 
 var _ = Describe("AgentRuntime Controller", func() {
+	It("persists pod template metadata", func() {
+		ctx := context.Background()
+		agentRuntime := &v1alpha1.AgentRuntime{
+			ObjectMeta: metav1.ObjectMeta{Name: "template-metadata"},
+			Spec: v1alpha1.AgentRuntimeSpec{
+				TargetNamespace: "agents",
+				Type:            console.AgentRuntimeTypeClaude,
+				Template: &corev1.PodTemplateSpec{
+					ObjectMeta: metav1.ObjectMeta{
+						Labels:      map[string]string{"team": "platform"},
+						Annotations: map[string]string{"example.com/owner": "agents"},
+					},
+					Spec: corev1.PodSpec{Containers: []corev1.Container{{Name: defaultContainer}}},
+				},
+			},
+		}
+		Expect(kClient.Create(ctx, agentRuntime)).To(Succeed())
+		DeferCleanup(func() { Expect(kClient.Delete(ctx, agentRuntime)).To(Succeed()) })
+
+		persisted := &v1alpha1.AgentRuntime{}
+		Expect(kClient.Get(ctx, client.ObjectKeyFromObject(agentRuntime), persisted)).To(Succeed())
+		Expect(persisted.Spec.Template).NotTo(BeNil())
+		Expect(persisted.Spec.Template.Labels).To(HaveKeyWithValue("team", "platform"))
+		Expect(persisted.Spec.Template.Annotations).To(HaveKeyWithValue("example.com/owner", "agents"))
+	})
+
 	Describe("createRunFromID", func() {
 		It("retries pending run fetches and fails the run with the GraphQL error", func() {
 			previousDelay := pendingAgentRunFetchDelay
@@ -101,7 +127,7 @@ var _ = Describe("AgentRuntime Controller", func() {
 			gqlErr := errors.New("graphql: pending run is unavailable")
 			consoleClient := mocks.NewClientMock(GinkgoT())
 			consoleClient.EXPECT().
-				GetAgentRun(mock.Anything, runID).
+				GetAgentRunPending(mock.Anything, runID).
 				Return(nil, gqlErr).
 				Times(pendingAgentRunFetchRetries + 1)
 			consoleClient.EXPECT().
@@ -110,10 +136,11 @@ var _ = Describe("AgentRuntime Controller", func() {
 						attrs.Error != nil &&
 						*attrs.Error == gqlErr.Error()
 				})).
-				Return(&console.AgentRunFragment{ID: runID}, nil).
+				Return(&console.AgentRunUpdateFragment{ID: runID}, nil).
 				Once()
 
 			reconciler := &AgentRuntimeReconciler{
+				Client:        newAgentRunFakeClient(),
 				Ctx:           context.Background(),
 				ConsoleClient: consoleClient,
 			}
@@ -122,5 +149,32 @@ var _ = Describe("AgentRuntime Controller", func() {
 			Expect(err).To(MatchError(ContainSubstring("failed to get agent run after retries")))
 			Expect(err).To(MatchError(ContainSubstring(gqlErr.Error())))
 		})
+
+		It("does not fetch runs that already have a custom resource", func() {
+			runID := "run-123"
+			existing := &v1alpha1.AgentRun{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      runID,
+					Namespace: "agents",
+					Labels:    map[string]string{v1alpha1.AgentRunIDLabel: runID},
+				},
+				Spec: v1alpha1.AgentRunSpec{Mode: console.AgentRunModeAnalyze},
+			}
+
+			reconciler := &AgentRuntimeReconciler{
+				Client:        newAgentRunFakeClient(existing),
+				Ctx:           context.Background(),
+				ConsoleClient: mocks.NewClientMock(GinkgoT()),
+			}
+
+			Expect(reconciler.createRunFromID(runID)).To(Succeed())
+		})
 	})
 })
+
+func newAgentRunFakeClient(objects ...client.Object) client.Client {
+	scheme := runtime.NewScheme()
+	Expect(corev1.AddToScheme(scheme)).To(Succeed())
+	Expect(v1alpha1.AddToScheme(scheme)).To(Succeed())
+	return fake.NewClientBuilder().WithScheme(scheme).WithObjects(objects...).Build()
+}

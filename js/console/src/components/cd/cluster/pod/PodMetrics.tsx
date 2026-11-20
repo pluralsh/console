@@ -1,32 +1,72 @@
-import { EmptyState } from '@pluralsh/design-system'
-import isEmpty from 'lodash/isEmpty'
-import { useMemo } from 'react'
 import { useOutletContext, useParams } from 'react-router-dom'
 import styled from 'styled-components'
 
 import { MetricsEmptyState } from 'components/cd/cluster/ClusterMetrics'
+import { usageFieldVariables } from 'components/cd/cluster/metrics/clusterMetricsGraphs'
+import { UsageMetricGraphCard } from 'components/cd/cluster/metrics/UsageMetricGraphCard'
 import { useMetricsEnabled } from 'components/contexts/DeploymentSettingsContext'
-import { GqlError } from 'components/utils/Alert'
 import {
-  MetricsGraphCard,
   MetricsGraphGrid,
   MetricsScrollSC,
 } from 'components/utils/metrics/MetricsGraphCard'
-import { Graph } from 'components/utils/Graph'
-import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { MetricsTimeRangeControl } from 'components/utils/timerange/MetricsTimeRangeControl'
 import { metricsQueryWindow } from 'components/utils/timerange/timeRange'
 import {
+  type TimeRangeState,
   useRangeQueryData,
   useTimeRange,
 } from 'components/utils/timerange/useTimeRange'
 import { usePodMetricsQuery } from 'generated/graphql'
 
-import {
-  METRIC_FORMATTERS,
-  METRIC_TICK_BASES,
-} from 'components/utils/metrics/metricFormats'
-import { buildPodMetricGraphs } from './podMetricsGraphs'
+import { POD_METRIC_GRAPHS, type PodMetricGraph } from './podMetricsGraphs'
+
+type PodScope = { clusterId: string } | { serviceId: string }
+
+function PodMetricGraphCard({
+  scope,
+  name,
+  namespace,
+  graph,
+  timeRange,
+}: {
+  scope: PodScope
+  name: string
+  namespace: string
+  graph: PodMetricGraph
+  timeRange: TimeRangeState
+}) {
+  const {
+    data: currentData,
+    previousData,
+    loading,
+    error,
+  } = usePodMetricsQuery({
+    variables: {
+      name,
+      namespace,
+      ...scope,
+      ...metricsQueryWindow(timeRange.timeWindow),
+      ...usageFieldVariables(graph.fields),
+    },
+    // every graph selects different fields of one un-normalized object, so
+    // caching makes each response re-diff every other graph's series
+    fetchPolicy: 'no-cache',
+  })
+  const data = useRangeQueryData(
+    { data: currentData, previousData },
+    timeRange.revision
+  )
+
+  return (
+    <UsageMetricGraphCard
+      graph={graph}
+      metrics={data?.pod?.metrics}
+      loading={loading}
+      error={error}
+      timeRange={timeRange}
+    />
+  )
+}
 
 export function PodMetrics({
   clusterId,
@@ -43,75 +83,27 @@ export function PodMetrics({
   const timeRange = useTimeRange()
   const scope = serviceId ? { serviceId } : clusterId ? { clusterId } : null
 
-  const {
-    data: currentData,
-    previousData,
-    loading,
-    error,
-  } = usePodMetricsQuery({
-    variables: {
-      name,
-      namespace,
-      ...scope,
-      ...metricsQueryWindow(timeRange.timeWindow),
-    },
-    skip: !metricsEnabled || !scope || !name || !namespace,
-    fetchPolicy: 'cache-and-network',
-  })
-  const data = useRangeQueryData(
-    { data: currentData, previousData },
-    timeRange.revision
-  )
-  const graphs = useMemo(
-    () =>
-      buildPodMetricGraphs(data?.pod?.metrics).filter(
-        ({ data }) => !isEmpty(data)
-      ),
-    [data]
-  )
-
   if (!metricsEnabled) return <MetricsEmptyState />
-
-  let content = (
-    <EmptyState
-      message="No metrics available"
-      description="Prometheus returned no series for this pod in the selected time range."
-    />
-  )
-
-  if (error) content = <GqlError error={error} />
-  else if (loading && !data)
-    content = (
-      <RectangleSkeleton
-        $height={640}
-        $width="100%"
-      />
-    )
-  else if (!isEmpty(graphs))
-    content = (
-      <MetricsGraphGrid>
-        {graphs.map(({ key, title, tooltip, format, data }) => (
-          <MetricsGraphCard
-            key={key}
-            title={title}
-            tooltip={tooltip}
-          >
-            <Graph
-              data={data}
-              yFormat={METRIC_FORMATTERS[format]}
-              yTickBase={METRIC_TICK_BASES[format]}
-              timeWindow={timeRange.timeWindow}
-              onRangeSelect={timeRange.selectWindow}
-            />
-          </MetricsGraphCard>
-        ))}
-      </MetricsGraphGrid>
-    )
 
   return (
     <WrapperSC>
       <MetricsTimeRangeControl timeRange={timeRange} />
-      <MetricsScrollSC>{content}</MetricsScrollSC>
+      <MetricsScrollSC>
+        {scope && name && namespace && (
+          <MetricsGraphGrid>
+            {POD_METRIC_GRAPHS.map((graph) => (
+              <PodMetricGraphCard
+                key={graph.key}
+                scope={scope}
+                name={name}
+                namespace={namespace}
+                graph={graph}
+                timeRange={timeRange}
+              />
+            ))}
+          </MetricsGraphGrid>
+        )}
+      </MetricsScrollSC>
     </WrapperSC>
   )
 }

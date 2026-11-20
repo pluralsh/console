@@ -248,6 +248,18 @@ query GetServiceDeploymentByHandle($cluster: String!, $name: String!) {
     }
 }
 
+query GetServiceDeploymentStatusByHandle($cluster: String!, $name: String!) {
+    serviceDeployment(cluster: $cluster, name: $name) {
+        ...ServiceDeploymentStatusFragment
+    }
+}
+
+query GetServiceDeploymentStatus($id: ID!) {
+    serviceDeployment(id: $id) {
+        ...ServiceDeploymentStatusFragment
+    }
+}
+
 query GetServiceDeploymentTinyByHandle($cluster: String!, $name: String!) {
     serviceDeployment(cluster: $cluster, name: $name) {
         id

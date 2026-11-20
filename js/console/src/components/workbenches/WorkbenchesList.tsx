@@ -1,4 +1,4 @@
-import { POLL_INTERVAL } from 'components/cluster/constants'
+import { WORKBENCH_POLL_INTERVAL } from 'components/workbenches/workbench/job/usePollWhileRunning'
 import {
   AddIcon,
   Button,
@@ -27,11 +27,8 @@ import {
   useDisplayState,
 } from 'components/utils/display/DisplayPanel'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import {
-  Body1BoldP,
-  Body2BoldP,
-  Body2P,
-} from 'components/utils/typography/Text'
+import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
+import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
 import {
   WorkbenchTinyFragment,
   useWorkbenchesSummaryQuery,
@@ -85,7 +82,7 @@ export function WorkbenchesList() {
   const { data, error, loading, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
       {
-        pollInterval: POLL_INTERVAL,
+        pollInterval: WORKBENCH_POLL_INTERVAL,
         query: WorkbenchesDocument,
         keyPath: ['workbenches'],
       },
@@ -106,9 +103,37 @@ export function WorkbenchesList() {
   const showSearchEmptyState = hasActiveSearch && workbenches.length === 0
 
   const workbenchCount =
-    !data && loading
-      ? null
-      : `${workbenches.length}${pageInfo?.hasNextPage ? '+' : ''}`
+    workbenches.length > 0
+      ? `${workbenches.length}${pageInfo?.hasNextPage ? '+' : ''}`
+      : null
+
+  useSetPageHeaderContent(
+    useMemo(
+      () => (
+        <>
+          <ToolbarSearchInput
+            placeholder="Search workbenches"
+            value={searchString}
+            onChange={setSearchString}
+          />
+          <DisplayButton
+            showDot={false}
+            expanded={displayOpen}
+            onClick={() => setDisplayOpen((open) => !open)}
+          />
+          <Button
+            small
+            as={Link}
+            to={WORKBENCHES_CREATE_ABS_PATH}
+            startIcon={<AddIcon />}
+          >
+            Create workbench
+          </Button>
+        </>
+      ),
+      [searchString, displayOpen]
+    )
+  )
 
   const content = () => {
     if (!data && loading)
@@ -177,7 +202,19 @@ export function WorkbenchesList() {
   return (
     <WrapperSC>
       <WorkbenchTabHeader
-        title="Workbenches"
+        title={
+          <Flex
+            align="baseline"
+            gap="xsmall"
+          >
+            Workbenches
+            {workbenchCount && (
+              <span css={{ color: theme.colors['text-xlight'] }}>
+                {workbenchCount}
+              </span>
+            )}
+          </Flex>
+        }
         icon={WorkbenchIcon ? <WorkbenchIcon /> : undefined}
         description={
           <>
@@ -195,39 +232,6 @@ export function WorkbenchesList() {
       />
       <WorkbenchesSummary projectId={projectId} />
       <ListSectionSC>
-        <ListHeaderSC>
-          <Body1BoldP>
-            All workbenches{' '}
-            {workbenchCount && (
-              <span css={{ color: theme.colors['text-xlight'] }}>
-                {workbenchCount}
-              </span>
-            )}
-          </Body1BoldP>
-          <Flex
-            align="center"
-            gap="medium"
-          >
-            <ToolbarSearchInput
-              placeholder="Search workbenches"
-              value={searchString}
-              onChange={setSearchString}
-            />
-            <DisplayButton
-              showDot={false}
-              expanded={displayOpen}
-              onClick={() => setDisplayOpen((open) => !open)}
-            />
-            <Button
-              small
-              as={Link}
-              to={WORKBENCHES_CREATE_ABS_PATH}
-              startIcon={<AddIcon />}
-            >
-              Create workbench
-            </Button>
-          </Flex>
-        </ListHeaderSC>
         {error && <GqlError error={error} />}
         {content()}
       </ListSectionSC>
@@ -320,6 +324,8 @@ function formatHours(hours: number) {
   return `${Math.round(hours).toLocaleString()}h`
 }
 
+const CARD_METADATA_ICON_SIZE = 12
+
 export function WorkbenchCard({
   workbench,
   favorited,
@@ -363,7 +369,10 @@ export function WorkbenchCard({
               <>
                 <MetadataLabelSC>coding agent</MetadataLabelSC>
                 <MetadataValueSC>
-                  <WorkbenchCodingAgent agentRuntime={agentRuntime} />
+                  <WorkbenchCodingAgent
+                    agentRuntime={agentRuntime}
+                    iconSize={CARD_METADATA_ICON_SIZE}
+                  />
                 </MetadataValueSC>
               </>
             )}
@@ -371,7 +380,10 @@ export function WorkbenchCard({
               <>
                 <MetadataLabelSC>bound tools</MetadataLabelSC>
                 <MetadataValueSC>
-                  <WorkbenchToolIcons tools={tools} />
+                  <WorkbenchToolIcons
+                    tools={tools}
+                    iconSize={CARD_METADATA_ICON_SIZE}
+                  />
                 </MetadataValueSC>
               </>
             )}
@@ -493,15 +505,6 @@ const ListSectionSC = styled.div(({ theme }) => ({
   gap: theme.spacing.medium,
   flex: 1,
   minHeight: 0,
-}))
-
-const ListHeaderSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  flexWrap: 'wrap',
-  gap: theme.spacing.medium,
-  flexShrink: 0,
 }))
 
 const WrapperSC = styled.div(({ theme }) => ({

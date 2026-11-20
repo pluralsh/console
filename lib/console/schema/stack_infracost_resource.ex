@@ -22,6 +22,26 @@ defmodule Console.Schema.StackInfracostResource do
     timestamps()
   end
 
+  def for_stack(query \\ __MODULE__, stack_id) do
+    from(r in query, where: r.stack_id == ^stack_id)
+  end
+
+  def for_run(query \\ __MODULE__, run_id) do
+    from(r in query, where: r.stack_run_id == ^run_id)
+  end
+
+  def for_scope(query \\ __MODULE__, scope) do
+    from(r in query, where: r.resource_scope == ^scope)
+  end
+
+  def ordered(query \\ __MODULE__, order \\ [desc: :inserted_at, desc: :id]) do
+    from(r in query, order_by: ^order)
+  end
+
+  def by_cost(query \\ __MODULE__) do
+    from(r in query, order_by: [desc_nulls_last: r.monthly_cost, asc: r.name, asc: r.id])
+  end
+
   @cast ~w(resource_scope project_name name resource_type
            hourly_cost monthly_cost monthly_usage_cost
            raw_resource stack_id stack_run_id)a

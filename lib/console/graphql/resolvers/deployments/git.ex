@@ -237,6 +237,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
       {:service_id, sid}, q when is_binary(sid) -> PullRequest.for_service(q, sid)
       {:open, true}, q -> PullRequest.open(q)
       {:author_id, aid}, q when is_binary(aid)-> PullRequest.for_author(q, aid)
+      {:devbox_id, did}, q when is_binary(did) -> PullRequest.for_devbox(q, did)
+      {:devbox_instance_id, iid}, q when is_binary(iid) -> PullRequest.for_devbox_instance(q, iid)
+      {:devbox_thread_id, tid}, q when is_binary(tid) -> PullRequest.for_devbox_thread(q, tid)
       _, q -> q
     end)
   end

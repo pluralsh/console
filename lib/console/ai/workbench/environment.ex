@@ -206,9 +206,9 @@ defmodule Console.AI.Workbench.Environment do
   defp coding_agents(_), do: []
 
   defp infra_agents(%Workbench{
-         configuration: %{infrastructure: %{services: s, stacks: st, kubernetes: k, pod_logs: pl}}
+         configuration: %{infrastructure: %{services: s, stacks: st, kubernetes: k, pod_logs: pl, sentinels: sn}}
        }) do
-    case s || st || k || pl do
+    case s || st || k || pl || sn do
       true -> [:infrastructure]
       _ -> []
     end

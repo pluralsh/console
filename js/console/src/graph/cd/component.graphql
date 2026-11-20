@@ -5,43 +5,43 @@ fragment ComponentMetricsFragment on ServiceDeployment {
     stop: $stop
     step: $step
   ) {
-    cpu {
+    cpu @include(if: $cpu) {
       ...MetricResponse
     }
-    mem {
-      ...MetricResponse
-    }
-
-    podCpu {
-      ...MetricResponse
-    }
-    podMem {
+    mem @include(if: $mem) {
       ...MetricResponse
     }
 
-    cpuRequests {
+    podCpu @include(if: $podCpu) {
       ...MetricResponse
     }
-    memRequests {
-      ...MetricResponse
-    }
-    cpuLimits {
-      ...MetricResponse
-    }
-    memLimits {
+    podMem @include(if: $podMem) {
       ...MetricResponse
     }
 
-    podCpuRequests {
+    cpuRequests @include(if: $cpuRequests) {
       ...MetricResponse
     }
-    podMemRequests {
+    memRequests @include(if: $memRequests) {
       ...MetricResponse
     }
-    podCpuLimits {
+    cpuLimits @include(if: $cpuLimits) {
       ...MetricResponse
     }
-    podMemLimits {
+    memLimits @include(if: $memLimits) {
+      ...MetricResponse
+    }
+
+    podCpuRequests @include(if: $podCpuRequests) {
+      ...MetricResponse
+    }
+    podMemRequests @include(if: $podMemRequests) {
+      ...MetricResponse
+    }
+    podCpuLimits @include(if: $podCpuLimits) {
+      ...MetricResponse
+    }
+    podMemLimits @include(if: $podMemLimits) {
       ...MetricResponse
     }
   }
@@ -55,6 +55,18 @@ query ServiceDeploymentComponentMetrics(
   $start: DateTime
   $stop: DateTime
   $step: String
+  $cpu: Boolean! = false
+  $mem: Boolean! = false
+  $podCpu: Boolean! = false
+  $podMem: Boolean! = false
+  $cpuRequests: Boolean! = false
+  $memRequests: Boolean! = false
+  $cpuLimits: Boolean! = false
+  $memLimits: Boolean! = false
+  $podCpuRequests: Boolean! = false
+  $podMemRequests: Boolean! = false
+  $podCpuLimits: Boolean! = false
+  $podMemLimits: Boolean! = false
 ) {
   serviceDeployment(id: $id, name: $name, cluster: $cluster) {
     ...ComponentMetricsFragment

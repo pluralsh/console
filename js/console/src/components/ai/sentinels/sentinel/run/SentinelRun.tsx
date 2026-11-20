@@ -1,9 +1,11 @@
 import {
+  Flex,
   IconFrame,
   ReturnIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { getAIBreadcrumbs } from 'components/ai/AI'
+import { SendSentinelRunToWorkbenchButton } from 'components/ai/sentinels/SendSentinelToWorkbench'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { GqlError } from 'components/utils/Alert'
 import { StackedText } from 'components/utils/table/StackedText'
@@ -121,15 +123,24 @@ export function SentinelRun() {
               />
             }
           />
-          {run?.status && (
-            <SentinelStatusChip
-              filled
-              showIcon
-              showSeverity
-              status={run.status}
-              numErrors={numErrors}
+          <Flex
+            align="center"
+            gap="small"
+          >
+            {run?.status && (
+              <SentinelStatusChip
+                filled
+                showIcon
+                showSeverity
+                status={run.status}
+                numErrors={numErrors}
+              />
+            )}
+            <SendSentinelRunToWorkbenchButton
+              small
+              run={run}
             />
-          )}
+          </Flex>
         </>
       }
       content={

@@ -277,6 +277,16 @@ When you reach the final todo:
 
 ---
 
+## PR monitoring is handled outside this session
+
+Do **not** babysit the pull request yourself. Once your commit is pushed (and, for a new PR, `agentPullRequest` succeeds), your work in this session is done:
+
+- Do **not** wait for CI to start or finish, and do not wait for reviews.
+- Do **not** poll `getPRState`, `getCILogs`, or the SCM provider in a loop, and do not use `sleep`, `watch`, retries, or similar waiting tricks to check on the PR.
+- The Plural agent harness monitors the PR outside your session. When babysitting is enabled for this run, it polls CI and review comments on its own schedule and starts a **new turn** with the details when there is something to act on.
+
+---
+
 ## 7. Final summary
 
 After the PR todo is done, report:

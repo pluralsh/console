@@ -46,7 +46,7 @@ PRE = --ensure
 .PHONY: manifests
 manifests: TOOL = controller-gen
 manifests: --tool ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
-	$(CONTROLLER_GEN) rbac:roleName=manager-role crd webhook paths="$(CONTROLLER_GEN_PATHS)" output:crd:artifacts:config=config/crd/bases
+	$(CONTROLLER_GEN) rbac:roleName=manager-role crd:generateEmbeddedObjectMeta=true webhook paths="$(CONTROLLER_GEN_PATHS)" output:crd:artifacts:config=config/crd/bases
 	@$(MAKE) -s codegen-chart-crds
 
 .PHONY: generate
@@ -95,6 +95,55 @@ scm-grpc: --tool install-protoc ## regenerate SCM gRPC protobuf/go bindings
 		--go-grpc_opt=module=github.com/pluralsh/console/go/deployment-operator \
 		--proto_path=. \
 		internal/proto/scm/scm.proto
+
+DEVBOX_PROTO_DIR := $(abspath $(ROOT_DIRECTORY)/proto)
+PROTOC_INCLUDE_DIR := $(BINARIES_DIR)/include
+PROTOC_RELEASE_OS := $(if $(filter Darwin,$(shell uname -s)),osx,linux)
+PROTOC_RELEASE_ARCH := $(if $(filter arm64 aarch64,$(shell uname -m)),aarch_64,x86_64)
+
+# install-protoc only keeps the protoc binary; the devbox protos also need the well-known types it ships with.
+.PHONY: --protoc-include
+--protoc-include:
+	@if [ ! -f "$(PROTOC_INCLUDE_DIR)/google/protobuf/timestamp.proto" ]; then \
+		PROTOC_VERSION="$$($(PROTOC) --version | awk '{print $$2}')" && \
+		PROTOC_ZIP="protoc-$${PROTOC_VERSION}-$(PROTOC_RELEASE_OS)-$(PROTOC_RELEASE_ARCH).zip" && \
+		TEMP_DIR=$$(mktemp -d) && \
+		curl -fsSL "https://github.com/protocolbuffers/protobuf/releases/download/v$${PROTOC_VERSION}/$${PROTOC_ZIP}" -o "$${TEMP_DIR}/$${PROTOC_ZIP}" && \
+		unzip -q "$${TEMP_DIR}/$${PROTOC_ZIP}" 'include/*' -d "$${TEMP_DIR}" && \
+		mkdir -p "$(PROTOC_INCLUDE_DIR)" && cp -R "$${TEMP_DIR}/include/." "$(PROTOC_INCLUDE_DIR)/" && \
+		rm -rf "$${TEMP_DIR}" && \
+		echo "Installed protoc well-known types in $(PROTOC_INCLUDE_DIR)"; \
+	fi
+
+.PHONY: devbox-proto
+devbox-proto: TOOL = protoc-gen-go protoc-gen-go-grpc
+devbox-proto: --tool install-protoc --protoc-include ## regenerate the devbox.v1 gRPC go bindings from proto/devbox/v1 in the repository root
+	rm -f pkg/devbox/api/v1/*.pb.go
+	$(PROTOC) \
+		--plugin=protoc-gen-go=$(BINARIES_DIR)/protoc-gen-go \
+		--plugin=protoc-gen-go-grpc=$(BINARIES_DIR)/protoc-gen-go-grpc \
+		--go_out=. \
+		--go_opt=module=github.com/pluralsh/console/go/deployment-operator \
+		--go-grpc_out=. \
+		--go-grpc_opt=module=github.com/pluralsh/console/go/deployment-operator \
+		--proto_path=$(DEVBOX_PROTO_DIR) \
+		--proto_path=$(PROTOC_INCLUDE_DIR) \
+		$(DEVBOX_PROTO_DIR)/devbox/v1/*.proto
+
+.PHONY: substrate-proto
+substrate-proto: TOOL = protoc-gen-go protoc-gen-go-grpc
+substrate-proto: --tool install-protoc --protoc-include ## regenerate the vendored Agent Substrate control API (substrate.ateapi.v1) go bindings
+	rm -f pkg/devbox/substrate/ateapi/*.pb.go
+	$(PROTOC) \
+		--plugin=protoc-gen-go=$(BINARIES_DIR)/protoc-gen-go \
+		--plugin=protoc-gen-go-grpc=$(BINARIES_DIR)/protoc-gen-go-grpc \
+		--go_out=. \
+		--go_opt=module=github.com/pluralsh/console/go/deployment-operator \
+		--go-grpc_out=. \
+		--go-grpc_opt=module=github.com/pluralsh/console/go/deployment-operator \
+		--proto_path=pkg/devbox \
+		--proto_path=$(PROTOC_INCLUDE_DIR) \
+		pkg/devbox/substrate/ateapi/ateapi.proto
 
 ##@ Run
 

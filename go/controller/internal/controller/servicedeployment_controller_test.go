@@ -121,7 +121,7 @@ var _ = Describe("Service Controller", Ordered, func() {
 		It("should successfully reconcile the resource", func() {
 			By("Create resource")
 			test := struct {
-				returnGetService *gqlclient.ServiceDeploymentExtended
+				returnGetService *gqlclient.ServiceDeploymentStatusFragment
 				expectedStatus   v1alpha1.ServiceStatus
 			}{
 				expectedStatus: v1alpha1.ServiceStatus{
@@ -149,7 +149,7 @@ var _ = Describe("Service Controller", Ordered, func() {
 						},
 					},
 				},
-				returnGetService: &gqlclient.ServiceDeploymentExtended{
+				returnGetService: &gqlclient.ServiceDeploymentStatusFragment{
 					ID: "123",
 				},
 			}
@@ -181,7 +181,7 @@ var _ = Describe("Service Controller", Ordered, func() {
 		It("should successfully reconcile the resource", func() {
 			By("Update resource")
 			test := struct {
-				returnGetService *gqlclient.ServiceDeploymentExtended
+				returnGetService *gqlclient.ServiceDeploymentStatusFragment
 				expectedStatus   v1alpha1.ServiceStatus
 			}{
 				expectedStatus: v1alpha1.ServiceStatus{
@@ -209,7 +209,7 @@ var _ = Describe("Service Controller", Ordered, func() {
 						},
 					},
 				},
-				returnGetService: &gqlclient.ServiceDeploymentExtended{
+				returnGetService: &gqlclient.ServiceDeploymentStatusFragment{
 					ID: "123",
 				},
 			}
@@ -247,7 +247,7 @@ var _ = Describe("Service Controller", Ordered, func() {
 		It("should successfully reconcile the resource", func() {
 			By("Update resource with the dependencies")
 			test := struct {
-				returnGetService *gqlclient.ServiceDeploymentExtended
+				returnGetService *gqlclient.ServiceDeploymentStatusFragment
 				expectedStatus   v1alpha1.ServiceStatus
 			}{
 				expectedStatus: v1alpha1.ServiceStatus{
@@ -275,7 +275,7 @@ var _ = Describe("Service Controller", Ordered, func() {
 						},
 					},
 				},
-				returnGetService: &gqlclient.ServiceDeploymentExtended{
+				returnGetService: &gqlclient.ServiceDeploymentStatusFragment{
 					ID: "123",
 				},
 			}
@@ -435,7 +435,7 @@ var _ = Describe("wait for resources", Ordered, func() {
 		It("should wait for resources", func() {
 			By("Create resource")
 			test := struct {
-				returnGetService *gqlclient.ServiceDeploymentExtended
+				returnGetService *gqlclient.ServiceDeploymentStatusFragment
 				expectedStatus   v1alpha1.ServiceStatus
 			}{
 				expectedStatus: v1alpha1.ServiceStatus{
@@ -462,7 +462,7 @@ var _ = Describe("wait for resources", Ordered, func() {
 						},
 					},
 				},
-				returnGetService: &gqlclient.ServiceDeploymentExtended{
+				returnGetService: &gqlclient.ServiceDeploymentStatusFragment{
 					ID: "123",
 				},
 			}
@@ -780,7 +780,7 @@ var _ = Describe("Get DiffNormalizerAttributes", Ordered, func() {
 		It("should successfully reconcile the resource", func() {
 			By("Create resource")
 			test := struct {
-				returnGetService *gqlclient.ServiceDeploymentExtended
+				returnGetService *gqlclient.ServiceDeploymentStatusFragment
 				expectedStatus   v1alpha1.ServiceStatus
 			}{
 				expectedStatus: v1alpha1.ServiceStatus{
@@ -808,7 +808,7 @@ var _ = Describe("Get DiffNormalizerAttributes", Ordered, func() {
 						},
 					},
 				},
-				returnGetService: &gqlclient.ServiceDeploymentExtended{
+				returnGetService: &gqlclient.ServiceDeploymentStatusFragment{
 					ID: "123",
 				},
 			}

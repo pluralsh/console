@@ -1,0 +1,6 @@
+ignored:
+  # Debian packages track the pinned base image snapshot; pinning each apt
+  # package version breaks on every point release.
+  - DL3008
+  # `cd` inside RUN is used deliberately for temporary download directories.
+  - DL3003

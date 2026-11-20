@@ -1,15 +1,15 @@
 import { ArrowTopRightIcon, Button, Flex } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
-import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import {
   useCancelWorkbenchJobMutation,
+  useWorkbenchJobDeltaSubscription,
   useWorkbenchJobQuery,
   WorkbenchJobFragment,
 } from 'generated/graphql'
 import { isJobRunning } from 'components/workbenches/workbench/job/WorkbenchJobActivity'
+import { usePollWhileRunning } from 'components/workbenches/workbench/job/usePollWhileRunning'
 import { RunStatusChip } from 'components/ai/infra-research/details/InfraResearch'
-import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
@@ -23,28 +23,23 @@ export function WorkbenchStartedJobPanel({
   jobId: string
   workbenchId: string
 }) {
-  const {
-    data,
-    error: queryError,
-    startPolling,
-    stopPolling,
-  } = useWorkbenchJobQuery({
+  const query = useWorkbenchJobQuery({
     variables: { id: jobId },
     fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
     skip: !jobId,
     notifyOnNetworkStatusChange: true,
   })
+  const { data, error: queryError } = query
 
   const job = data?.workbenchJob ?? initialJob
   const cancellable = isJobRunning(job.status)
 
-  useEffect(() => {
-    if (cancellable) startPolling(POLL_INTERVAL)
-    else stopPolling()
-
-    return () => stopPolling()
-  }, [cancellable, startPolling, stopPolling])
+  // the delta is normalized into the job, so polling only covers missed events
+  useWorkbenchJobDeltaSubscription({
+    variables: { id: jobId },
+    skip: !jobId || !cancellable,
+  })
+  usePollWhileRunning(query, cancellable)
 
   const [cancelWorkbenchJob, { loading, error: cancelError }] =
     useCancelWorkbenchJobMutation({

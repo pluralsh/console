@@ -35,55 +35,55 @@ query PodLogs(
 }
 
 fragment PodMetrics on PodMetrics {
-  cpu {
+  cpu @include(if: $cpu) {
     ...MetricResponse
   }
-  cpuRequests {
+  cpuRequests @include(if: $cpuRequests) {
     ...MetricResponse
   }
-  cpuLimits {
+  cpuLimits @include(if: $cpuLimits) {
     ...MetricResponse
   }
-  cpuThrottling {
+  cpuThrottling @include(if: $cpuThrottling) {
     ...MetricResponse
   }
-  memory {
+  memory @include(if: $memory) {
     ...MetricResponse
   }
-  memoryRequests {
+  memoryRequests @include(if: $memoryRequests) {
     ...MetricResponse
   }
-  memoryLimits {
+  memoryLimits @include(if: $memoryLimits) {
     ...MetricResponse
   }
-  ephemeralStorage {
+  ephemeralStorage @include(if: $ephemeralStorage) {
     ...MetricResponse
   }
-  ephemeralStorageRequests {
+  ephemeralStorageRequests @include(if: $ephemeralStorageRequests) {
     ...MetricResponse
   }
-  ephemeralStorageLimits {
+  ephemeralStorageLimits @include(if: $ephemeralStorageLimits) {
     ...MetricResponse
   }
-  fsReads {
+  fsReads @include(if: $fsReads) {
     ...MetricResponse
   }
-  fsWrites {
+  fsWrites @include(if: $fsWrites) {
     ...MetricResponse
   }
-  networkReceive {
+  networkReceive @include(if: $networkReceive) {
     ...MetricResponse
   }
-  networkTransmit {
+  networkTransmit @include(if: $networkTransmit) {
     ...MetricResponse
   }
-  networkReceiveDropped {
+  networkReceiveDropped @include(if: $networkReceiveDropped) {
     ...MetricResponse
   }
-  networkTransmitDropped {
+  networkTransmitDropped @include(if: $networkTransmitDropped) {
     ...MetricResponse
   }
-  restarts {
+  restarts @include(if: $restarts) {
     ...MetricResponse
   }
 }
@@ -96,6 +96,23 @@ query PodMetrics(
   $start: DateTime
   $stop: DateTime
   $step: String
+  $cpu: Boolean! = false
+  $cpuRequests: Boolean! = false
+  $cpuLimits: Boolean! = false
+  $cpuThrottling: Boolean! = false
+  $memory: Boolean! = false
+  $memoryRequests: Boolean! = false
+  $memoryLimits: Boolean! = false
+  $ephemeralStorage: Boolean! = false
+  $ephemeralStorageRequests: Boolean! = false
+  $ephemeralStorageLimits: Boolean! = false
+  $fsReads: Boolean! = false
+  $fsWrites: Boolean! = false
+  $networkReceive: Boolean! = false
+  $networkTransmit: Boolean! = false
+  $networkReceiveDropped: Boolean! = false
+  $networkTransmitDropped: Boolean! = false
+  $restarts: Boolean! = false
 ) {
   pod(
     name: $name

@@ -4,6 +4,90 @@ release_url: https://github.com/kubescape/helm-charts/releases/tag/kubescape-ope
 helm_repository_url: https://kubescape.github.io/helm-charts
 helm_values: clusterName=example,account=example
 versions:
+- version: 1.42.0
+  kube: ['1.37', '1.36', '1.35']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "## Helm values / configuration changes to review\n\n### 1) NetworkPolicies\
+      \ now enabled by default\n- **Change:** `networkpolicy` is now **on by default**.\n\
+      - **Upgrade impact:** If you previously relied on open in-cluster connectivity,\
+      \ the upgrade may **block traffic** until allow rules are correct.\n- **Action:**\
+      \ Validate `networkpolicy.enabled` (or equivalent) matches your intent, and\
+      \ confirm connectivity between:\n  - node-agent \u2194 synchronizer\n  - kubevuln\
+      \ \u2194 API server\n  - kubevuln \u2194 grype-offline-db (if used)\n  - operator\
+      \ \u2194 internal APIs (now more restricted/secured)\n\n### 2) In-cluster API\
+      \ authentication (ServiceAccount token auth)\n- **Change:** new **apiauth**\
+      \ feature introduces **ServiceAccount-based authentication** for Kubescape in-cluster\
+      \ APIs; operator trigger API is protected.\n- **Upgrade impact:** Components\
+      \ must present tokens when calling each other; misconfig may look like timeouts/401/403\
+      \ between operator/kubescape/kubevuln/synchronizer.\n- **Action:** Review and\
+      \ set any new/updated values under an `apiauth` section (names may include enable/issuer/audience/token\
+      \ projection settings). Ensure RBAC is installed and tokens are mounted/projected\
+      \ as expected.\n\n### 3) Live namespace filtering integrated via Helm\n- **Change:**\
+      \ Helm chart now integrates **live namespace filtering** (operator can reload\
+      \ namespace filters from a ConfigMap; regex supported).\n- **Upgrade impact:**\
+      \ If you use namespace allow/deny lists, there may be new values for:\n  - enabling\
+      \ live namespace filtering\n  - ConfigMap name/namespace\n  - regex patterns\n\
+      - **Action:** Decide whether to adopt live filtering; verify existing namespace\
+      \ filtering values still apply as expected.\n\n### 4) Storage MCP endpoint values\
+      \ added\n- **Change:** new `storage.mcp` values for a **read-only MCP endpoint**.\n\
+      - **Upgrade impact:** No behavior change unless enabled, but new service/port/ingress-like\
+      \ settings may appear.\n- **Action:** If you plan to use MCP, configure `storage.mcp.*`\
+      \ and validate NetworkPolicy allows intended access.\n\n### 5) Storage: opt-in\
+      \ SQLite backend settings for ContainerProfiles\n- **Change:** chart exposes\
+      \ **opt-in** SQLite backend settings for ContainerProfile storage.\n- **Upgrade\
+      \ impact:** Only if enabled; could change persistence/perf characteristics.\n\
+      - **Action:** Leave disabled unless you\u2019ve planned a migration; if enabling,\
+      \ confirm PVC/storageClass and backup/restore expectations.\n\n### 6) Optional\
+      \ gVisor start-collection deployment\n- **Change:** new **opt-in** deployment\
+      \ for collecting gVisor container starts.\n- **Upgrade impact:** Adds workload(s)\
+      \ and possibly RBAC/permissions when enabled.\n- **Action:** Only enable if\
+      \ you use gVisor and need start verification; confirm node compatibility.\n\n\
+      ### 7) Node-agent: new capability `sandboxSeccomp`\n- **Change:** chart adds\
+      \ `sandboxSeccomp` capability.\n- **Upgrade impact:** May affect PodSecurity/PSA/SELinux/seccomp\
+      \ constraints.\n- **Action:** If your cluster enforces restrictive seccomp/PSA,\
+      \ validate node-agent still schedules and has required permissions.\n\n### 8)\
+      \ Scheduler moved to kubescape-ops-tool\n- **Change:** scan schedulers now run\
+      \ via **kubescape-ops-tool** (and ops-tool gained `create-operator-command`).\n\
+      - **Upgrade impact:** CronJobs/Jobs may change images/commands.\n- **Action:**\
+      \ If you override scheduler images/args, re-check overrides still apply; validate\
+      \ RBAC for creating `OperatorCommand` CRs.\n\n### 9) Component bumps\n- **Change:**\
+      \ storage/node-agent/kubevuln bumped for **syft v1.55**; ops-tool bumped **0.1.0-r1\
+      \ \u2192 0.2.0-r1**.\n- **Upgrade impact:** Resource usage and image contents\
+      \ may change; validate quotas/limits.\n"
+    chart_updates: [NetworkPolicies enabled by default and accompanying NetworkPolicy
+        logic fixes (proxy handling/egress derivation)., Introduced ServiceAccount-based
+        API authentication across in-cluster components; operator trigger API is now
+        protected., "Integrated live namespace filtering into the Helm chart (aligning\
+        \ with operator\u2019s ConfigMap-driven/regex filtering).", "Added `storage.mcp`\
+        \ chart configuration and wiring for storage\u2019s read-only MCP endpoint.",
+      Added opt-in ContainerProfile SQLite backend settings in storage., Schedulers
+        now run on `kubescape-ops-tool`; ops-tool includes a `create-operator-command`
+        subcommand., Added an opt-in gVisor start collection deployment., Node-agent
+        default rules synced with kubescape/rulelibrary; added sandboxSeccomp capability.,
+      Removed dead component auto-bump workflow; pinned Helm unittest image., Bumped
+        core component images (storage/node-agent/kubevuln) for syft v1.55 and bumped
+        kubescape-ops-tool version.]
+    features: [NetworkPolicies are now enabled by default to provide tighter network
+        segmentation out of the box., 'ServiceAccount-based authentication added for
+        in-cluster APIs, securing component-to-component calls and the operator trigger
+        API.', 'Live namespace filtering (ConfigMap-driven, including regex support)
+        is now integrated at the Helm-chart level.', Storage can optionally expose
+        a read-only MCP endpoint; new `storage.mcp` settings added., Schedulers can
+        now run via kubescape-ops-tool and create `OperatorCommand` CRs instead of
+        hitting trigger endpoints., Optional gVisor start collection deployment can
+        be enabled for runtime-verified container start tracking., Storage adds opt-in
+        SQLite backend settings for ContainerProfile data.]
+    breaking_changes: ['**NetworkPolicies default to enabled**; clusters that previously
+        depended on unrestricted pod-to-pod connectivity may see blocked traffic until
+        policies/overrides are validated.', '**In-cluster APIs are now authenticated
+        via ServiceAccounts**; misconfigured tokens/RBAC can break internal calls
+        (401/403/timeouts) until `apiauth` is configured correctly.']
+  chart_version: 1.42.0
+  images: ['quay.io/kubescape/kubescape-ops-tool:0.2.0-r1', 'quay.io/kubescape/kubescape:v4.0.20',
+    'quay.io/kubescape/kubevuln:v0.3.578', 'quay.io/kubescape/node-agent:v0.3.310',
+    'quay.io/kubescape/operator:v0.2.209', 'quay.io/kubescape/storage:v0.0.382']
 - version: 1.41.0
   kube: ['1.37', '1.36', '1.35']
   requirements: []

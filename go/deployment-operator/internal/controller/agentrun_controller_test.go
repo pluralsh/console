@@ -126,13 +126,12 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 
 		It("should create secret and pod for AgentRun", func() {
 			fakeConsoleClient := mocks.NewClientMock(mocks.TestingT)
-			fakeConsoleClient.On("GetAgentRun", mock.Anything, runID).Return(&console.AgentRunFragment{
+			fakeConsoleClient.On("GetAgentRunStatus", mock.Anything, runID).Return(&console.AgentRunStatusFragment{
 				ID:     runID,
 				Status: console.AgentRunStatusPending,
 			}, nil)
-			fakeConsoleClient.On("UpdateAgentRun", mock.Anything, mock.Anything, mock.Anything).Return(&console.AgentRunFragment{
-				ID:     runID,
-				Status: console.AgentRunStatusPending,
+			fakeConsoleClient.On("UpdateAgentRun", mock.Anything, mock.Anything, mock.Anything).Return(&console.AgentRunUpdateFragment{
+				ID: runID,
 			}, nil)
 
 			reconciler := &AgentRunReconciler{
@@ -273,13 +272,12 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 
 			fakeConsoleClient := mocks.NewClientMock(mocks.TestingT)
 			// First return Pending so resources get created
-			fakeConsoleClient.On("GetAgentRun", mock.Anything, terminalRunID).Return(&console.AgentRunFragment{
+			fakeConsoleClient.On("GetAgentRunStatus", mock.Anything, terminalRunID).Return(&console.AgentRunStatusFragment{
 				ID:     terminalRunID,
 				Status: console.AgentRunStatusPending,
 			}, nil)
-			fakeConsoleClient.On("UpdateAgentRun", mock.Anything, mock.Anything, mock.Anything).Return(&console.AgentRunFragment{
-				ID:     terminalRunID,
-				Status: console.AgentRunStatusPending,
+			fakeConsoleClient.On("UpdateAgentRun", mock.Anything, mock.Anything, mock.Anything).Return(&console.AgentRunUpdateFragment{
+				ID: terminalRunID,
 			}, nil)
 
 			reconciler := &AgentRunReconciler{
@@ -302,7 +300,7 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 
 			// Now update the mock to return terminal status
 			fakeConsoleClient.ExpectedCalls = nil
-			fakeConsoleClient.On("GetAgentRun", mock.Anything, terminalRunID).Return(&console.AgentRunFragment{
+			fakeConsoleClient.On("GetAgentRunStatus", mock.Anything, terminalRunID).Return(&console.AgentRunStatusFragment{
 				ID:     terminalRunID,
 				Status: console.AgentRunStatusSuccessful,
 			}, nil)
@@ -365,13 +363,12 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 
 			fakeConsoleClient := mocks.NewClientMock(mocks.TestingT)
 			// First return Running so resources get created
-			fakeConsoleClient.On("GetAgentRun", mock.Anything, terminalFailedRunID).Return(&console.AgentRunFragment{
+			fakeConsoleClient.On("GetAgentRunStatus", mock.Anything, terminalFailedRunID).Return(&console.AgentRunStatusFragment{
 				ID:     terminalFailedRunID,
 				Status: console.AgentRunStatusRunning,
 			}, nil)
-			fakeConsoleClient.On("UpdateAgentRun", mock.Anything, mock.Anything, mock.Anything).Return(&console.AgentRunFragment{
-				ID:     terminalFailedRunID,
-				Status: console.AgentRunStatusRunning,
+			fakeConsoleClient.On("UpdateAgentRun", mock.Anything, mock.Anything, mock.Anything).Return(&console.AgentRunUpdateFragment{
+				ID: terminalFailedRunID,
 			}, nil)
 
 			reconciler := &AgentRunReconciler{
@@ -394,7 +391,7 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 
 			// Now update the mock to return terminal status
 			fakeConsoleClient.ExpectedCalls = nil
-			fakeConsoleClient.On("GetAgentRun", mock.Anything, terminalFailedRunID).Return(&console.AgentRunFragment{
+			fakeConsoleClient.On("GetAgentRunStatus", mock.Anything, terminalFailedRunID).Return(&console.AgentRunStatusFragment{
 				ID:     terminalFailedRunID,
 				Status: console.AgentRunStatusFailed,
 			}, nil)
@@ -457,13 +454,12 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 
 			fakeConsoleClient := mocks.NewClientMock(mocks.TestingT)
 			// First return Pending so resources get created
-			fakeConsoleClient.On("GetAgentRun", mock.Anything, terminalCancelledRunID).Return(&console.AgentRunFragment{
+			fakeConsoleClient.On("GetAgentRunStatus", mock.Anything, terminalCancelledRunID).Return(&console.AgentRunStatusFragment{
 				ID:     terminalCancelledRunID,
 				Status: console.AgentRunStatusPending,
 			}, nil)
-			fakeConsoleClient.On("UpdateAgentRun", mock.Anything, mock.Anything, mock.Anything).Return(&console.AgentRunFragment{
-				ID:     terminalCancelledRunID,
-				Status: console.AgentRunStatusPending,
+			fakeConsoleClient.On("UpdateAgentRun", mock.Anything, mock.Anything, mock.Anything).Return(&console.AgentRunUpdateFragment{
+				ID: terminalCancelledRunID,
 			}, nil)
 
 			reconciler := &AgentRunReconciler{
@@ -486,7 +482,7 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 
 			// Now update the mock to return terminal status
 			fakeConsoleClient.ExpectedCalls = nil
-			fakeConsoleClient.On("GetAgentRun", mock.Anything, terminalCancelledRunID).Return(&console.AgentRunFragment{
+			fakeConsoleClient.On("GetAgentRunStatus", mock.Anything, terminalCancelledRunID).Return(&console.AgentRunStatusFragment{
 				ID:     terminalCancelledRunID,
 				Status: console.AgentRunStatusCancelled,
 			}, nil)
@@ -548,21 +544,19 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 			Expect(kClient.Status().Update(ctx, resource)).To(Succeed())
 
 			fakeConsoleClient := mocks.NewClientMock(mocks.TestingT)
-			fakeConsoleClient.On("GetAgentRun", mock.Anything, timeoutRunID).Return(&console.AgentRunFragment{
+			fakeConsoleClient.On("GetAgentRunStatus", mock.Anything, timeoutRunID).Return(&console.AgentRunStatusFragment{
 				ID:     timeoutRunID,
 				Status: console.AgentRunStatusPending,
 			}, nil).Twice()
 			fakeConsoleClient.On("UpdateAgentRun", mock.Anything, timeoutRunID, mock.MatchedBy(func(attrs console.AgentRunStatusAttributes) bool {
 				return attrs.Status == console.AgentRunStatusPending
-			})).Return(&console.AgentRunFragment{
-				ID:     timeoutRunID,
-				Status: console.AgentRunStatusPending,
+			})).Return(&console.AgentRunUpdateFragment{
+				ID: timeoutRunID,
 			}, nil).Once()
 			fakeConsoleClient.On("UpdateAgentRun", mock.Anything, timeoutRunID, mock.MatchedBy(func(attrs console.AgentRunStatusAttributes) bool {
 				return attrs.Status == console.AgentRunStatusCancelled
-			})).Return(&console.AgentRunFragment{
-				ID:     timeoutRunID,
-				Status: console.AgentRunStatusCancelled,
+			})).Return(&console.AgentRunUpdateFragment{
+				ID: timeoutRunID,
 			}, nil).Once()
 
 			reconciler := &AgentRunReconciler{
@@ -628,23 +622,21 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 			Expect(kClient.Status().Update(ctx, resource)).To(Succeed())
 
 			fakeConsoleClient := mocks.NewClientMock(mocks.TestingT)
-			fakeConsoleClient.On("GetAgentRun", mock.Anything, failedInitRunID).Return(&console.AgentRunFragment{
+			fakeConsoleClient.On("GetAgentRunStatus", mock.Anything, failedInitRunID).Return(&console.AgentRunStatusFragment{
 				ID:     failedInitRunID,
 				Status: console.AgentRunStatusPending,
 			}, nil).Times(3)
 			fakeConsoleClient.On("UpdateAgentRun", mock.Anything, failedInitRunID, mock.MatchedBy(func(attrs console.AgentRunStatusAttributes) bool {
 				return attrs.Status == console.AgentRunStatusPending
-			})).Return(&console.AgentRunFragment{
-				ID:     failedInitRunID,
-				Status: console.AgentRunStatusPending,
+			})).Return(&console.AgentRunUpdateFragment{
+				ID: failedInitRunID,
 			}, nil).Once()
 			fakeConsoleClient.On("UpdateAgentRun", mock.Anything, failedInitRunID, mock.MatchedBy(func(attrs console.AgentRunStatusAttributes) bool {
 				return attrs.Status == console.AgentRunStatusFailed &&
 					attrs.Error != nil &&
 					*attrs.Error == "init container \"agent-bootstrap\" failed with exit code 1: bootstrap failed"
-			})).Return(&console.AgentRunFragment{
-				ID:     failedInitRunID,
-				Status: console.AgentRunStatusFailed,
+			})).Return(&console.AgentRunUpdateFragment{
+				ID: failedInitRunID,
 			}, nil).Once()
 
 			reconciler := &AgentRunReconciler{

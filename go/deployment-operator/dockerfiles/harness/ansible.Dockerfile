@@ -57,7 +57,8 @@ RUN apk add --no-cache \
 ARG TARGETARCH
 RUN set -eux; \
     for attempt in 1 2 3; do \
-      if VERSION=$(curl -fsSL --retry 3 --retry-all-errors https://api.github.com/repos/pluralsh/plural-cli/releases/latest | jq -er '.tag_name | ltrimstr("v")') && \
+      if VERSION=$(curl -fsSL --retry 3 --retry-all-errors -o /dev/null -w '%{url_effective}' https://github.com/pluralsh/plural-cli/releases/latest | sed -n 's|.*/tag/v||p') && \
+        test -n "${VERSION}" && \
         curl -fsSL --retry 3 --retry-all-errors -o /tmp/plural-cli.tar.gz https://github.com/pluralsh/plural-cli/releases/download/v${VERSION}/plural-cli_${VERSION}_Linux_${TARGETARCH}.tar.gz && \
         tar -xzf /tmp/plural-cli.tar.gz && \
         test -x plural; then \

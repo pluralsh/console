@@ -102,10 +102,15 @@ defmodule Console.GRPC.Server do
       anthropic: to_anthropic_pb(Map.get(ai, :anthropic)),
       vertexAi: to_vertex_pb(Map.get(ai, :vertex)),
       bedrock: to_bedrock_pb(Map.get(ai, :bedrock)),
-      azure: to_azure_pb(Map.get(ai, :azure))
+      azure: to_azure_pb(Map.get(ai, :azure)),
+      provider: provider_name(Map.get(ai, :provider)),
+      decisionProvider: provider_name(Map.get(ai, :decision_provider))
     }
   end
   defp to_pb(_), do: %Plrl.AiConfig{enabled: false}
+
+  defp provider_name(nil), do: nil
+  defp provider_name(provider), do: to_string(provider)
 
   defp to_openai_pb(openai, defaults_provider \\ :openai)
   defp to_openai_pb(%{} = openai, defaults_provider) do
@@ -116,6 +121,7 @@ defmodule Console.GRPC.Server do
       model: Map.get(openai, :model) || defaults[:model],
       embeddingModel: Map.get(openai, :embedding_model) || defaults[:embedding_model],
       toolModel: Map.get(openai, :tool_model) || defaults[:tool_model],
+      decisionModel: Map.get(openai, :decision_model) || defaults[:decision_model],
       baseUrl: Map.get(openai, :base_url),
       proxyModels: proxy_models(openai, defaults),
       tokenExchange: to_openai_token_exchange_pb(Map.get(openai, :token_exchange)),
@@ -151,6 +157,7 @@ defmodule Console.GRPC.Server do
       apiKey: Map.get(anthropic, :access_token),
       model: Map.get(anthropic, :model) || defaults[:model],
       toolModel: Map.get(anthropic, :tool_model) || defaults[:tool_model],
+      decisionModel: Map.get(anthropic, :decision_model) || defaults[:decision_model],
       baseUrl: Map.get(anthropic, :base_url),
       proxyModels: proxy_models(anthropic, defaults),
       proxy: to_proxy_pb(Map.get(anthropic, :proxy))
@@ -167,6 +174,7 @@ defmodule Console.GRPC.Server do
       toolModel: Map.get(vertex_ai, :tool_model) || defaults[:tool_model],
       endpoint: Map.get(vertex_ai, :endpoint),
       embeddingModel: Map.get(vertex_ai, :embedding_model) || defaults[:embedding_model],
+      decisionModel: Map.get(vertex_ai, :decision_model) || defaults[:decision_model],
       project: Map.get(vertex_ai, :project),
       location: Map.get(vertex_ai, :location),
       proxyModels: proxy_models(vertex_ai, defaults),
@@ -182,6 +190,7 @@ defmodule Console.GRPC.Server do
       modelId: Map.get(bedrock, :model_id) || defaults[:model],
       toolModelId: Map.get(bedrock, :tool_model_id) || defaults[:tool_model],
       embeddingModelId: Map.get(bedrock, :embedding_model) || defaults[:embedding_model],
+      decisionModelId: Map.get(bedrock, :decision_model) || defaults[:decision_model],
       accessToken: Map.get(bedrock, :access_token),
       region: Map.get(bedrock, :region),
       awsAccessKeyId: Map.get(bedrock, :aws_access_key_id),
@@ -203,6 +212,7 @@ defmodule Console.GRPC.Server do
       endpoint: Map.get(azure, :endpoint),
       embeddingModel: Map.get(azure, :embedding_model) || defaults[:embedding_model],
       toolModel: Map.get(azure, :tool_model) || defaults[:tool_model],
+      decisionModel: Map.get(azure, :decision_model) || defaults[:decision_model],
       accessToken: Map.get(azure, :access_token),
       deployments: to_string_map(Map.get(azure, :deployments)),
       proxyModels: proxy_models(azure, defaults),

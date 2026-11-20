@@ -1,0 +1,35 @@
+# GKE: GCS snapshots through Workload Identity, Artifact Registry pulls, and
+# CNPG backups to GCS.
+otel:
+  endpoint: http://otel-collector.observability.svc:4317
+
+auth:
+  expectedJWTIssuer: https://container.googleapis.com/v1/projects/plural-dev/locations/us-central1/clusters/devboxes
+
+apiServer:
+  snapshotTransferServiceAccount: ate-snapshots@plural-dev.iam.gserviceaccount.com
+  serviceAccount:
+    annotations:
+      iam.gke.io/gcp-service-account: ate-api-server@plural-dev.iam.gserviceaccount.com
+
+atelet:
+  serviceAccount:
+    annotations:
+      iam.gke.io/gcp-service-account: atelet@plural-dev.iam.gserviceaccount.com
+  imageCredentialProvider:
+    enabled: true
+    preset: gar
+
+objectStore:
+  backend: gcs
+  snapshotLocation: gs://plural-ate-snapshots/substrate/
+
+previewGates:
+  - PerTemplateSnapshotLocation
+
+postgres:
+  mode: cnpg
+  cnpg:
+    backup:
+      enabled: true
+      destinationPath: gs://plural-ate-pg-backups/ate-postgres/

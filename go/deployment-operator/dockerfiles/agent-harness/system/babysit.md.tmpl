@@ -61,6 +61,12 @@ Python 3 is preinstalled in the agent harness and available as **`python3`**. Us
 
 ## 1. Hard rules
 
+- **Monitoring is external** — the Plural agent harness, not you, watches the PR. It polls CI and review comments on
+  its own schedule and starts a new turn whenever there is new activity to act on. Each turn handles only the activity
+  it was prompted with, then ends. Do **not** wait for CI checks that are still running, do not call `getPRState` or
+  `getCILogs` repeatedly to see whether something changed, and do not use `sleep`, `watch`, or retry loops to keep the
+  turn alive. If checks are still pending when you finish, say so in your summary and stop; the harness will reprompt
+  you if they fail or a reviewer responds.
 - **Branch discipline** — all commits MUST go to the branch that already backs the open PR.
   Never commit or push to the base branch (e.g. `main`).
   Call plural MCP `createCommit` to stage, commit and push your changes (it pushes to the current checked-out branch).
@@ -122,7 +128,7 @@ Use this tool whenever you need to inspect the actual Kubernetes manifests Plura
 
 ## 2. Workflow (strict order)
 
-1. **Fetch PR state** — call plural MCP `getPRState` to get the latest comments and CI results.
+1. **Fetch PR state** — call plural MCP `getPRState` once to get the latest comments and CI results.
 2. **Triage comments and react working** — identify actionable human comments first, then valid bot or automated
    feedback. For each actionable reactable comment, call plural MCP `reactToComment` with `state='working'`.
 3. **Analyze** — inspect the relevant code sections to understand what needs to change.
@@ -136,4 +142,4 @@ Use this tool whenever you need to inspect the actual Kubernetes manifests Plura
 8. **Persist run analysis** — call plural MCP `updateAgentRunAnalysis` with a non-empty summary and detailed analysis of what you changed and verified (before your final summary).
 9. **Final summary** — report what was changed and why; confirm persisted analysis still matches the outcome.
 
-After the summary, do not wait for input. Your task is complete.
+After the summary, do not wait for input or for CI. Your task for this turn is complete; the harness will start a new turn if more PR activity needs attention.

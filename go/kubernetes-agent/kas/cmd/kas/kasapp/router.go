@@ -53,17 +53,45 @@ type router struct {
 	kasRoutingDurationTimeout prometheus.Counter
 	tunnelFindTimeout         time.Duration
 	tryNewKasInterval         time.Duration
+	// tunnelNotFoundErr, if set, is returned instead of the default DeadlineExceeded error when no tunnel is
+	// found within tunnelFindTimeout.
+	tunnelNotFoundErr func() error
+	// sanitizeTunnelMeta, if set, is applied to the request metadata (after hop metadata is removed) before the
+	// request is sent through the tunnel.
+	sanitizeTunnelMeta func(metadata.MD) metadata.MD
+}
+
+// routerOptions customizes a router for a tunnel registry other than agentk's.
+type routerOptions struct {
+	routingDurationMetricName string
+	routingTimeoutMetricName  string
+	tunnelFindTimeout         time.Duration
+	tunnelNotFoundErr         func() error
+	sanitizeTunnelMeta        func(metadata.MD) metadata.MD
 }
 
 func newRouter(kasPool grpctool2.PoolInterface, tunnelQuerier tunnel2.PollingQuerier,
 	tunnelFinder tunnel2.Finder, ownPrivateApiUrl string,
 	internalServer, privateApiServer grpc.ServiceRegistrar,
 	pollConfig retry.PollConfigFactory, tp trace.TracerProvider, registerer prometheus.Registerer) (*router, error) {
+	return newRouterWithOptions(kasPool, tunnelQuerier, tunnelFinder, ownPrivateApiUrl, internalServer, privateApiServer,
+		pollConfig, tp, registerer, routerOptions{
+			routingDurationMetricName: kasRoutingDurationMetricName,
+			routingTimeoutMetricName:  kasRoutingTimeoutMetricName,
+			tunnelFindTimeout:         routingTunnelFindTimeout,
+		})
+}
+
+func newRouterWithOptions(kasPool grpctool2.PoolInterface, tunnelQuerier tunnel2.PollingQuerier,
+	tunnelFinder tunnel2.Finder, ownPrivateApiUrl string,
+	internalServer, privateApiServer grpc.ServiceRegistrar,
+	pollConfig retry.PollConfigFactory, tp trace.TracerProvider, registerer prometheus.Registerer,
+	opts routerOptions) (*router, error) {
 	gatewayKasVisitor, err := grpctool2.NewStreamVisitor(&GatewayKasResponse{})
 	if err != nil {
 		return nil, err
 	}
-	routingDuration, timeoutCounter := constructKasRoutingMetrics()
+	routingDuration, timeoutCounter := constructRoutingMetrics(opts.routingDurationMetricName, opts.routingTimeoutMetricName)
 	err = metric.Register(registerer, routingDuration, timeoutCounter)
 	if err != nil {
 		return nil, err
@@ -81,19 +109,21 @@ func newRouter(kasPool grpctool2.PoolInterface, tunnelQuerier tunnel2.PollingQue
 		kasRoutingDurationSuccess: routingDuration.WithLabelValues(kasRoutingStatusSuccessLabelValue),
 		kasRoutingDurationAborted: routingDuration.WithLabelValues(kasRoutingStatusAbortedLabelValue),
 		kasRoutingDurationTimeout: timeoutCounter,
-		tunnelFindTimeout:         routingTunnelFindTimeout,
+		tunnelFindTimeout:         opts.tunnelFindTimeout,
 		tryNewKasInterval:         routingTryNewKasInterval,
+		tunnelNotFoundErr:         opts.tunnelNotFoundErr,
+		sanitizeTunnelMeta:        opts.sanitizeTunnelMeta,
 	}, nil
 }
 
-func constructKasRoutingMetrics() (*prometheus.HistogramVec, prometheus.Counter) {
+func constructRoutingMetrics(durationMetricName, timeoutMetricName string) (*prometheus.HistogramVec, prometheus.Counter) {
 	hist := prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Name:    kasRoutingDurationMetricName,
+		Name:    durationMetricName,
 		Help:    "The time it takes the routing kas to find a suitable tunnel in seconds",
 		Buckets: prometheus.ExponentialBuckets(time.Millisecond.Seconds(), 4, 8), // 8 buckets: 0.001s,0.004s,0.016s,0.064s,0.256s,1.024s,4.096s,16.384s, implicit: +Infs
 	}, []string{kasRoutingStatusLabelName})
 	timeoutCounter := prometheus.NewCounter(prometheus.CounterOpts{
-		Name: kasRoutingTimeoutMetricName,
+		Name: timeoutMetricName,
 		Help: "The total number of times routing timed out i.e. didn't find a suitable agent connection within allocated time",
 	})
 	return hist, timeoutCounter

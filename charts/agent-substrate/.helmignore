@@ -1,0 +1,15 @@
+.DS_Store
+.git/
+.gitignore
+*.swp
+*.bak
+*.tmp
+*.orig
+*~
+.idea/
+.vscode/
+# Development only: not part of the packaged chart.
+ci/
+hack/
+tests/
+files/UPSTREAM

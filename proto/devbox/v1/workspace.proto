@@ -1,0 +1,343 @@
+syntax = "proto3";
+
+// Workspace, filesystem, changes, terminal and browser messages. They are shared by Control (console -> gateway)
+// and Daemon (gateway -> devbox-daemon), so the gateway forwards most of these calls unchanged.
+//
+// Paths are absolute inside the sandbox (/home/dev/...) or relative to the home directory. The daemon rejects
+// paths that resolve outside the home directory and the thread worktrees.
+package devbox.v1;
+
+option go_package = "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1;devboxv1";
+
+import "google/protobuf/timestamp.proto";
+import "devbox/v1/common.proto";
+
+// ---------------------------------------------------------------------------------------------------------------
+// Repositories (section 4.2b). Project.md is an ordinary file served through the filesystem RPCs.
+// ---------------------------------------------------------------------------------------------------------------
+
+message ListRepositoriesRequest {
+  string instance_id = 1;
+  // Include per-thread worktrees under ~/.threads.
+  bool include_worktrees = 2;
+}
+
+message ListRepositoriesResponse {
+  repeated Checkout checkouts = 1;
+  // Absolute path of the instance's Project.md.
+  string project_md_path = 2;
+}
+
+message AddRepositoryRequest {
+  string instance_id = 1;
+  RepositorySpec repository = 2;
+  Principal requested_by = 3;
+  // Repeating a key returns the existing checkout.
+  string idempotency_key = 4;
+}
+
+message AddRepositoryResponse {
+  Checkout checkout = 1;
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Filesystem
+// ---------------------------------------------------------------------------------------------------------------
+
+enum FileType {
+  FILE_TYPE_UNSPECIFIED = 0;
+  FILE_TYPE_FILE = 1;
+  FILE_TYPE_DIRECTORY = 2;
+  FILE_TYPE_SYMLINK = 3;
+  FILE_TYPE_OTHER = 4;
+}
+
+message FileEntry {
+  string path = 1;
+  string name = 2;
+  FileType type = 3;
+  int64 size = 4;
+  uint32 mode = 5;
+  google.protobuf.Timestamp modified_at = 6;
+  string symlink_target = 7;
+  // Name of the checkout containing the file, if any.
+  string repository = 8;
+  // Git status letter pair from `git status --porcelain` (e.g. " M", "??"), empty when clean or untracked by git.
+  string git_status = 9;
+}
+
+message ListFilesRequest {
+  string instance_id = 1;
+  // Directory to list. Empty means the home directory.
+  string path = 2;
+  // 1 lists direct children (the default when 0); larger values recurse.
+  int32 depth = 3;
+  bool include_hidden = 4;
+  bool respect_gitignore = 5;
+  // Maximum entries returned; the daemon caps it.
+  int32 limit = 6;
+}
+
+message ListFilesResponse {
+  repeated FileEntry entries = 1;
+  bool truncated = 2;
+}
+
+message StatFileRequest {
+  string instance_id = 1;
+  string path = 2;
+}
+
+message StatFileResponse {
+  FileEntry entry = 1;
+}
+
+message ReadFileRequest {
+  string instance_id = 1;
+  string path = 2;
+  int64 offset = 3;
+  // Maximum bytes. 0 means the daemon default (1 MiB).
+  int64 limit = 4;
+}
+
+message ReadFileResponse {
+  FileEntry entry = 1;
+  bytes content = 2;
+  // Hex sha256 of the whole file, for WriteFile's compare-and-swap.
+  string sha256 = 3;
+  bool truncated = 4;
+  string mime_type = 5;
+  bool binary = 6;
+}
+
+message WriteFileRequest {
+  string instance_id = 1;
+  string path = 2;
+  bytes content = 3;
+  // When set, the write fails with FILE_CONFLICT unless the current file's sha256 matches. Set to "" to require
+  // that the file doesn't exist.
+  optional string expected_sha256 = 4;
+  bool create_parents = 5;
+  // 0 keeps the existing mode, or 0644 for new files.
+  uint32 mode = 6;
+  Principal written_by = 7;
+}
+
+message WriteFileResponse {
+  FileEntry entry = 1;
+  string sha256 = 2;
+}
+
+message WatchFilesRequest {
+  string instance_id = 1;
+  string path = 2;
+  bool recursive = 3;
+}
+
+enum FileEventType {
+  FILE_EVENT_TYPE_UNSPECIFIED = 0;
+  FILE_EVENT_TYPE_CREATED = 1;
+  FILE_EVENT_TYPE_MODIFIED = 2;
+  FILE_EVENT_TYPE_DELETED = 3;
+  FILE_EVENT_TYPE_RENAMED = 4;
+}
+
+message FileEvent {
+  FileEventType type = 1;
+  string path = 2;
+  string old_path = 3;
+  FileEntry entry = 4;
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Changes (grouped by repository)
+// ---------------------------------------------------------------------------------------------------------------
+
+enum ChangesBase {
+  CHANGES_BASE_UNSPECIFIED = 0;
+  // Uncommitted changes: working tree and index against HEAD (the default).
+  CHANGES_BASE_HEAD = 1;
+  // Everything on the branch: working tree against the merge base with the remote default branch.
+  CHANGES_BASE_DEFAULT_BRANCH = 2;
+  // Only the last commit.
+  CHANGES_BASE_LAST_COMMIT = 3;
+}
+
+enum ChangeStatus {
+  CHANGE_STATUS_UNSPECIFIED = 0;
+  CHANGE_STATUS_ADDED = 1;
+  CHANGE_STATUS_MODIFIED = 2;
+  CHANGE_STATUS_DELETED = 3;
+  CHANGE_STATUS_RENAMED = 4;
+  CHANGE_STATUS_COPIED = 5;
+  CHANGE_STATUS_UNTRACKED = 6;
+  CHANGE_STATUS_CONFLICTED = 7;
+  CHANGE_STATUS_TYPE_CHANGED = 8;
+}
+
+message GetChangesRequest {
+  string instance_id = 1;
+  // Restrict to a thread's worktrees. Empty means the main checkouts under ~.
+  string thread_id = 2;
+  // Restrict to these checkout names. Empty means all.
+  repeated string repositories = 3;
+  ChangesBase base = 4;
+  bool include_diff = 5;
+  // Cap per file diff; 0 means the daemon default (256 KiB).
+  int32 max_diff_bytes = 6;
+  // Restrict to one path (for a single-file diff view).
+  string path = 7;
+}
+
+message GetChangesResponse {
+  repeated RepositoryChanges repositories = 1;
+}
+
+message RepositoryChanges {
+  Checkout checkout = 1;
+  string base_ref = 2;
+  string base_sha = 3;
+  repeated FileChange files = 4;
+  int32 additions = 5;
+  int32 deletions = 6;
+}
+
+message FileChange {
+  string path = 1;
+  string old_path = 2;
+  ChangeStatus status = 3;
+  bool staged = 4;
+  int32 additions = 5;
+  int32 deletions = 6;
+  bool binary = 7;
+  // Unified diff, when requested.
+  string diff = 8;
+  bool diff_truncated = 9;
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Terminals (PTY sessions, DBX-42)
+// ---------------------------------------------------------------------------------------------------------------
+
+message TerminalInfo {
+  string terminal_id = 1;
+  string cwd = 2;
+  string command = 3;
+  int32 cols = 4;
+  int32 rows = 5;
+  google.protobuf.Timestamp created_at = 6;
+  // Foreground process group's command, when it isn't the login shell.
+  string foreground_command = 7;
+  bool exited = 8;
+  optional int32 exit_code = 9;
+  // Byte offset of the end of the replay buffer; attach with from_offset to replay.
+  uint64 output_offset = 10;
+  Principal created_by = 11;
+}
+
+message CreateTerminalRequest {
+  string instance_id = 1;
+  // Optional caller-chosen ID; repeating it returns the existing terminal.
+  string terminal_id = 2;
+  // Defaults to the home directory.
+  string cwd = 3;
+  // Defaults to the user's login shell.
+  string command = 4;
+  repeated string args = 5;
+  map<string, string> env = 6;
+  int32 cols = 7;
+  int32 rows = 8;
+  Principal created_by = 9;
+}
+
+message ListTerminalsRequest {
+  string instance_id = 1;
+}
+
+message ListTerminalsResponse {
+  repeated TerminalInfo terminals = 1;
+}
+
+message ResizeTerminalRequest {
+  string instance_id = 1;
+  string terminal_id = 2;
+  int32 cols = 3;
+  int32 rows = 4;
+}
+
+message CloseTerminalRequest {
+  string instance_id = 1;
+  string terminal_id = 2;
+  // Signal name to send before closing, default SIGHUP.
+  string signal = 3;
+}
+
+// TerminalInput is a client frame on Daemon.AttachTerminal. The first frame must be `attach`.
+message TerminalInput {
+  oneof input {
+    TerminalAttach attach = 1;
+    bytes data = 2;
+    TerminalSize resize = 3;
+  }
+}
+
+message TerminalAttach {
+  string terminal_id = 1;
+  // Replay output from this byte offset (0 replays the whole buffer that is still retained).
+  uint64 from_offset = 2;
+}
+
+message TerminalSize {
+  int32 cols = 1;
+  int32 rows = 2;
+}
+
+message TerminalOutput {
+  oneof output {
+    TerminalData data = 1;
+    TerminalInfo info = 2;
+    TerminalExit exit = 3;
+  }
+}
+
+message TerminalData {
+  bytes data = 1;
+  // Offset of the first byte of `data`.
+  uint64 offset = 2;
+}
+
+message TerminalExit {
+  optional int32 exit_code = 1;
+  string signal = 2;
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Browser (DBX-45). VNC is served by the daemon at /browser/vnc (WebSocket), previews at /preview/:port/*.
+// ---------------------------------------------------------------------------------------------------------------
+
+message StartBrowserRequest {
+  string instance_id = 1;
+  int32 width = 2;
+  int32 height = 3;
+  // Optional URL to open.
+  string url = 4;
+}
+
+message StopBrowserRequest {
+  string instance_id = 1;
+}
+
+message GetBrowserRequest {
+  string instance_id = 1;
+}
+
+message BrowserInfo {
+  bool running = 1;
+  // Daemon HTTP path of the VNC WebSocket bridge.
+  string vnc_path = 2;
+  // Chromium --remote-debugging-port, on localhost inside the sandbox.
+  int32 cdp_port = 3;
+  google.protobuf.Timestamp started_at = 4;
+  int32 width = 5;
+  int32 height = 6;
+}

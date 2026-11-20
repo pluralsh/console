@@ -46,6 +46,12 @@ var (
 		{Kind: "Metrics", Store: "metrics"},
 		{Kind: "Logs", Store: "logs"},
 		{Kind: "Traces", Store: "traces"},
+		{Kind: "Vector", Store: "vector"},
+	}
+	vectorSchema = common.ManifestKey{
+		Name:      "plrl-test-vector",
+		Namespace: telemetryNamespace,
+		GroupKind: schema.GroupKind{Group: telemetryGroup, Kind: "NamespaceSchema"},
 	}
 )
 
@@ -63,7 +69,7 @@ func (in telemetryAuth) Key() common.ManifestKey {
 }
 
 func allO11yAuthKeys() []common.ManifestKey {
-	keys := []common.ManifestKey{elasticUserSecret, elasticUser, vmUser, telemetryAuthSecret}
+	keys := []common.ManifestKey{elasticUserSecret, elasticUser, vmUser, telemetryAuthSecret, vectorSchema}
 	for _, auth := range telemetryAuths {
 		keys = append(keys, auth.Key())
 	}
@@ -117,6 +123,7 @@ var _ = Describe("Cloud observability", func() {
 				for _, auth := range telemetryAuths {
 					Expect(manifests).NotTo(HaveKey(auth.Key().String()))
 				}
+				Expect(manifests).NotTo(HaveKey(vectorSchema.String()))
 			})
 
 			It("does not enable plural telemetry in the console env", func() {
@@ -165,6 +172,18 @@ var _ = Describe("Cloud observability", func() {
 						"secretKeyRef": map[string]interface{}{"name": telemetryAuthSecret.Name, "key": "password"},
 					}))
 				}
+			})
+
+			It("declares the vector namespace schema", func() {
+				raw, exists := manifests[vectorSchema.String()]
+				Expect(exists).To(BeTrue())
+
+				spec, _, err := unstructured.NestedMap(raw.Object, "spec")
+				Expect(err).NotTo(HaveOccurred())
+				Expect(spec["dataStoreRef"]).To(Equal(map[string]interface{}{"kind": "Vector", "name": "vector"}))
+				Expect(spec["namespace"]).To(Equal("test"))
+				Expect(spec["schema"]).To(HaveKeyWithValue("text", map[string]interface{}{"type": "string", "embed": true}))
+				Expect(spec["schema"]).To(HaveKeyWithValue("user_ids", map[string]interface{}{"type": "[]string"}))
 			})
 
 			It("enables plural telemetry in the console env", func() {

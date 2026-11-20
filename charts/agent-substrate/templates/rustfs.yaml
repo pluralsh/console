@@ -1,0 +1,166 @@
+{{- if .Values.rustfs.enabled }}
+{{- $ns := include "substrate.namespace" . -}}
+{{- $r := .Values.rustfs -}}
+# S3-compatible snapshot store for kind and dev only
+# (manifests/ate-install/kind/rustfs.yaml).
+apiVersion: v1
+kind: Secret
+metadata:
+  name: rustfs-credentials
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+type: Opaque
+stringData:
+  AWS_ACCESS_KEY_ID: {{ $r.accessKey | quote }}
+  AWS_SECRET_ACCESS_KEY: {{ $r.secretKey | quote }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: rustfs-data
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  {{- with $r.persistence.storageClass }}
+  storageClassName: {{ . }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ $r.persistence.size }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rustfs
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+spec:
+  selector:
+    app: rustfs
+  ports:
+    - name: api
+      port: 9000
+      targetPort: api
+    - name: console
+      port: 9001
+      targetPort: console
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rustfs
+  namespace: {{ $ns }}
+  labels:
+    app: rustfs
+    {{- include "substrate.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: rustfs
+  template:
+    metadata:
+      labels:
+        app: rustfs
+    spec:
+      securityContext:
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+      {{- include "substrate.systemInfraScheduling" . | nindent 6 }}
+      containers:
+        - name: rustfs
+          image: {{ $r.image }}
+          env:
+            - name: RUSTFS_ADDRESS
+              value: ":9000"
+            - name: RUSTFS_CONSOLE_ADDRESS
+              value: ":9001"
+            - name: RUSTFS_CONSOLE_ENABLE
+              value: "true"
+            - name: RUSTFS_VOLUMES
+              value: /data
+            - name: RUSTFS_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: rustfs-credentials
+                  key: AWS_ACCESS_KEY_ID
+            - name: RUSTFS_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: rustfs-credentials
+                  key: AWS_SECRET_ACCESS_KEY
+          ports:
+            - name: api
+              containerPort: 9000
+            - name: console
+              containerPort: 9001
+          readinessProbe:
+            tcpSocket:
+              port: api
+            periodSeconds: 5
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: rustfs-data
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: rustfs-bucket-init
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+spec:
+  backoffLimit: 6
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: create-bucket
+          image: {{ $r.bucketInitImage }}
+          env:
+            - name: AWS_REGION
+              value: us-east-1
+            - name: AWS_ENDPOINT_URL
+              value: http://rustfs.{{ $ns }}.svc:9000
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: rustfs-credentials
+                  key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: rustfs-credentials
+                  key: AWS_SECRET_ACCESS_KEY
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              for i in $(seq 1 60); do
+                if aws s3api head-bucket --bucket {{ $r.bucket }} 2>/dev/null; then
+                  echo "bucket {{ $r.bucket }} already exists"
+                  exit 0
+                fi
+                if aws s3api create-bucket --bucket {{ $r.bucket }} 2>/dev/null; then
+                  echo "bucket {{ $r.bucket }} created"
+                  exit 0
+                fi
+                echo "waiting for rustfs to become available... ($i/60)"
+                sleep 2
+              done
+              echo "timed out waiting for rustfs"
+              exit 1
+{{- end }}

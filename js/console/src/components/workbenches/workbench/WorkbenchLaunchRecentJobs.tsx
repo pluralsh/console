@@ -7,7 +7,7 @@ import {
   WORKBENCH_JOBS_REL_PATH,
 } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
-import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
+import { WORKBENCH_JOB_FALLBACK_POLL_INTERVAL } from './job/usePollWhileRunning'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { CaptionP, Subtitle2H1 } from 'components/utils/typography/Text'
@@ -49,7 +49,7 @@ export function WorkbenchLaunchRecentJobs({
       },
       skip: !workbenchId,
       fetchPolicy: 'cache-and-network',
-      pollInterval: POLL_INTERVAL,
+      pollInterval: WORKBENCH_JOB_FALLBACK_POLL_INTERVAL,
     })
   const countsData = data ?? previousData
   const hasJobs = (countsData?.workbench?.runCounts?.statuses ?? []).some(

@@ -1,0 +1,7 @@
+resources:
+- "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.Secret
+  name: actor_identity_validation_context
+  validation_context:
+    trusted_ca: { filename: /run/actor-id-ca-certs/ca.crt }
+    watched_directory: { path: /run/actor-id-ca-certs }
+

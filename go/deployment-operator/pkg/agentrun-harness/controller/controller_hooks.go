@@ -56,6 +56,7 @@ func (in *agentRunController) preStart(ctx context.Context) error {
 
 // postStart function is executed after all agent run steps
 func (in *agentRunController) postStart(err error) {
+	in.flushPendingToolCalls()
 	if in.output != nil {
 		in.output.CloseAll()
 	}

@@ -829,7 +829,7 @@ defmodule Console.Deployments.Services do
       _, v -> {:cont, v}
     end)
   end
-  defp base_status(_), do: :stale
+  defp base_status(_), do: :healthy
 
   defp status_from_errors(%Service{errors: errors}),
     do: status_from_errors(errors)

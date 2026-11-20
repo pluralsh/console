@@ -28,10 +28,30 @@ var gatewayFields = map[string]bool{
 	"stop_sequences":    true,
 }
 
+// bedrockBetaPrefixes are the anthropic-beta families Bedrock InvokeModel accepts. Clients built
+// for the Anthropic API send others (tools-2024-05-16, prompt-caching-2024-07-31,
+// files-api-2025-04-14, claude-code-20250219, ...) that Bedrock rejects with a 400, so anything
+// outside this list is dropped unless an explicit allowlist is configured.
+var bedrockBetaPrefixes = []string{
+	"computer-use-",
+	"token-efficient-tools-",
+	"interleaved-thinking-",
+	"output-128k-",
+	"dev-full-thinking-",
+	"context-1m-",
+	"context-management-",
+	"effort-",
+	"tool-search-tool-",
+	"tool-examples-",
+	"compact-",
+	"fine-grained-tool-streaming-",
+}
+
 type RequestOptions struct {
 	ResolveModel      func(string) string
 	StripCacheControl bool
-	BetaAllowlist     []string
+	// BetaAllowlist, when set, replaces the Bedrock defaults: only exactly matching betas are kept.
+	BetaAllowlist []string
 }
 
 // PreparedRequest is an Anthropic Messages request rewritten for the gateway invoke endpoint.
@@ -44,6 +64,9 @@ type PreparedRequest struct {
 	Body    []byte
 	// Dropped lists top-level request fields that were not forwarded.
 	Dropped []string
+	// Betas are the anthropic-beta values forwarded; DroppedBetas were filtered out.
+	Betas        []string
+	DroppedBetas []string
 }
 
 // PrepareRequest converts an Anthropic Messages API request body into a Bedrock invoke body.
@@ -91,10 +114,11 @@ func PrepareRequest(body []byte, header http.Header, opts RequestOptions) (*Prep
 
 	fields["anthropic_version"] = mustMarshal(bedrockAnthropicVersion)
 
-	betas, err := mergeBetas(fields["anthropic_beta"], header.Values("anthropic-beta"), opts.BetaAllowlist)
+	betas, droppedBetas, err := mergeBetas(fields["anthropic_beta"], header.Values("anthropic-beta"), opts.BetaAllowlist)
 	if err != nil {
 		return nil, err
 	}
+	out.Betas, out.DroppedBetas = betas, droppedBetas
 	if len(betas) > 0 {
 		fields["anthropic_beta"] = mustMarshal(betas)
 	} else {
@@ -121,11 +145,11 @@ func PrepareRequest(body []byte, header http.Header, opts RequestOptions) (*Prep
 	return out, nil
 }
 
-func mergeBetas(bodyBetas json.RawMessage, headerValues []string, allowlist []string) ([]string, *APIError) {
+func mergeBetas(bodyBetas json.RawMessage, headerValues []string, allowlist []string) (kept, dropped []string, apiErr *APIError) {
 	var betas []string
 	if len(bodyBetas) > 0 && !isNull(bodyBetas) {
 		if err := json.Unmarshal(bodyBetas, &betas); err != nil {
-			return nil, invalidRequest("anthropic_beta: must be an array of strings")
+			return nil, nil, invalidRequest("anthropic_beta: must be an array of strings")
 		}
 	}
 	for _, value := range headerValues {
@@ -134,17 +158,27 @@ func mergeBetas(bodyBetas json.RawMessage, headerValues []string, allowlist []st
 		}
 	}
 
-	out := make([]string, 0, len(betas))
+	kept = make([]string, 0, len(betas))
 	for _, beta := range betas {
-		if beta == "" || slices.Contains(out, beta) {
+		if beta == "" || slices.Contains(kept, beta) || slices.Contains(dropped, beta) {
 			continue
 		}
-		if len(allowlist) > 0 && !slices.Contains(allowlist, beta) {
+		if !betaAllowed(beta, allowlist) {
+			dropped = append(dropped, beta)
 			continue
 		}
-		out = append(out, beta)
+		kept = append(kept, beta)
 	}
-	return out, nil
+	return kept, dropped, nil
+}
+
+func betaAllowed(beta string, allowlist []string) bool {
+	if len(allowlist) > 0 {
+		return slices.Contains(allowlist, beta)
+	}
+	return slices.ContainsFunc(bedrockBetaPrefixes, func(prefix string) bool {
+		return strings.HasPrefix(beta, prefix)
+	})
 }
 
 // stripCacheControl removes cache hints from a system, messages or tools value. Only the

@@ -69,6 +69,10 @@ export const docsStructure: DocSection[] = [
           { path: 'sandboxing', title: 'Sandboxing your cluster' },
           { path: 'edge-configuration', title: 'Edge configuration' },
           { path: 'network-configuration', title: 'Network configuration' },
+          {
+            path: 'ingress-migration',
+            title: 'Migrating from ingress-nginx to Traefik',
+          },
           { path: 'private-ca', title: 'Handling private CAs' },
         ],
       },
@@ -733,6 +737,11 @@ export const redirects = [
   },
   {
     source: '/deployments/notifications',
+    destination: '/plural-features/notifications',
+    permanent: true,
+  },
+  {
+    source: '/plural-features/notifications/index',
     destination: '/plural-features/notifications',
     permanent: true,
   },

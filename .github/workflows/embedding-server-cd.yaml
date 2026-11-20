@@ -113,6 +113,10 @@ jobs:
       id-token: write
       packages: write
     steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
       - name: Download image digests
         uses: actions/download-artifact@v7
         with:
@@ -147,4 +151,13 @@ jobs:
             $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
 
       - name: Inspect published version
-        run: docker buildx imagetools inspect "${REGISTRY_IMAGE}:${{ steps.meta.outputs.version }}"
+        id: inspect
+        run: |
+          digest=$(docker buildx imagetools inspect "${REGISTRY_IMAGE}:${{ steps.meta.outputs.version }}" --format '{{.Manifest.Digest}}')
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+          docker buildx imagetools inspect "${REGISTRY_IMAGE}:${{ steps.meta.outputs.version }}"
+      - name: Cosign sign
+        uses: ./.github/actions/cosign-sign
+        with:
+          digest: ${{ steps.inspect.outputs.digest }}
+          images: ${{ env.REGISTRY_IMAGE }}

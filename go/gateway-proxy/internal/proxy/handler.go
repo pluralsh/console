@@ -126,9 +126,16 @@ func (h *Handler) messages(w http.ResponseWriter, r *http.Request) {
 		writeError(w, apiErr, nil)
 		return
 	}
-	if len(prep.Dropped) > 0 {
-		h.opts.Logger.Debug("dropped request fields unsupported by gateway", "fields", prep.Dropped, "request_id", correlationID)
-	}
+	h.opts.Logger.Debug("proxying request",
+		"request_id", correlationID,
+		"headers", redactHeaders(r.Header),
+		"model", prep.Model,
+		"model_id", prep.ModelID,
+		"stream", prep.Stream,
+		"betas", prep.Betas,
+		"dropped_betas", prep.DroppedBetas,
+		"dropped_fields", prep.Dropped,
+	)
 
 	ctx := r.Context()
 	if h.opts.Timeout > 0 {
@@ -164,22 +171,28 @@ type invokeResult struct {
 
 // invoke performs a non-streaming gateway call and converts the result.
 func (h *Handler) invoke(ctx context.Context, req invokeRequest, model string) invokeResult {
+	start := time.Now()
 	resp, err := h.opts.Gateway.Invoke(ctx, req)
 	if err != nil {
+		h.logGatewayFailure(req, start, err)
 		return invokeResult{err: transportError(ctx, err)}
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(io.LimitReader(resp.Body, defaultMaxResponseBytes))
 	if err != nil {
+		h.logGatewayFailure(req, start, err)
 		return invokeResult{err: transportError(ctx, err), header: resp.Header}
 	}
+	h.logGatewayResponse(req, resp, start, body)
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
 		return invokeResult{err: GatewayError(resp.StatusCode, body), header: resp.Header}
 	}
 
 	msg, err := ParseGatewayResponse(body, model)
 	if err != nil {
+		h.opts.Logger.Warn("unparseable gateway response", "request_id", req.CorrelationID, "error", err)
+		h.opts.Logger.Debug("unparseable gateway response body", "request_id", req.CorrelationID, "body", truncateForLog(body))
 		return invokeResult{err: upstreamFailure(err.Error()), header: resp.Header}
 	}
 	return invokeResult{msg: msg, header: resp.Header}
@@ -235,8 +248,10 @@ func (h *Handler) streamSynthesized(ctx context.Context, w http.ResponseWriter, 
 }
 
 func (h *Handler) streamUpstream(ctx context.Context, w http.ResponseWriter, req invokeRequest, model string) {
+	start := time.Now()
 	resp, err := h.opts.Gateway.Invoke(ctx, req)
 	if err != nil {
+		h.logGatewayFailure(req, start, err)
 		writeError(w, transportError(ctx, err), nil)
 		return
 	}
@@ -244,9 +259,11 @@ func (h *Handler) streamUpstream(ctx context.Context, w http.ResponseWriter, req
 
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
 		body, _ := io.ReadAll(io.LimitReader(resp.Body, 1<<20))
+		h.logGatewayResponse(req, resp, start, body)
 		writeError(w, GatewayError(resp.StatusCode, body), resp.Header)
 		return
 	}
+	h.logGatewayResponse(req, resp, start, nil)
 
 	contentType := resp.Header.Get("Content-Type")
 	if mediaType, _, _ := mime.ParseMediaType(contentType); mediaType == "application/json" {
@@ -276,9 +293,48 @@ func (h *Handler) streamUpstream(ctx context.Context, w http.ResponseWriter, req
 	copyHeaders(w.Header(), resp.Header)
 	setSSEHeaders(w.Header())
 	w.WriteHeader(http.StatusOK)
-	if err := forwardStream(resp.Body, contentType, model, newSSEWriter(w)); err != nil {
+	sse := newSSEWriter(w)
+	sse.onError = func(payload []byte) {
+		h.opts.Logger.Warn("gateway stream error",
+			"request_id", req.CorrelationID,
+			"model_id", req.ModelID,
+			"event", truncateForLog(payload),
+		)
+	}
+	if err := forwardStream(resp.Body, contentType, model, sse); err != nil {
 		h.opts.Logger.Debug("client stream write failed", "error", err, "request_id", req.CorrelationID)
 	}
+}
+
+// logGatewayResponse logs every gateway answer at debug level, including the body for non-2xx
+// responses. Errors also get a warn-level summary so they show up without debug logging.
+func (h *Handler) logGatewayResponse(req invokeRequest, resp *http.Response, start time.Time, body []byte) {
+	attrs := []any{
+		"request_id", req.CorrelationID,
+		"model_id", req.ModelID,
+		"stream", req.Stream,
+		"status", resp.StatusCode,
+		"duration_ms", time.Since(start).Milliseconds(),
+	}
+	if resp.StatusCode >= 200 && resp.StatusCode <= 299 {
+		h.opts.Logger.Debug("gateway response", append(attrs, "headers", redactHeaders(resp.Header))...)
+		return
+	}
+	h.opts.Logger.Warn("gateway error response", append(attrs, "message", gatewayErrorMessage(body))...)
+	h.opts.Logger.Debug("gateway error response body", append(attrs,
+		"headers", redactHeaders(resp.Header),
+		"body", truncateForLog(body),
+	)...)
+}
+
+func (h *Handler) logGatewayFailure(req invokeRequest, start time.Time, err error) {
+	h.opts.Logger.Warn("gateway request failed",
+		"request_id", req.CorrelationID,
+		"model_id", req.ModelID,
+		"stream", req.Stream,
+		"duration_ms", time.Since(start).Milliseconds(),
+		"error", err,
+	)
 }
 
 func transportError(ctx context.Context, err error) *APIError {

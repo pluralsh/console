@@ -23,6 +23,7 @@ import {
   AgentRunFragment,
   AgentRunMode,
   AgentRunStatus,
+  useAgentRunDeltaSubscription,
   useAgentRunQuery,
   useApproveAgentRunMutation,
   useCancelAgentRunMutation,
@@ -39,6 +40,7 @@ import {
 } from 'routes/aiRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { useLogin } from 'components/contexts'
+import { usePollWhileRunning } from 'components/workbenches/workbench/job/usePollWhileRunning'
 import { getAIBreadcrumbs } from '../../AI.tsx'
 import {
   ChatInputSimple,
@@ -56,9 +58,6 @@ const TERMINAL_AGENT_RUN_STATUSES = new Set<AgentRunStatus>([
   AgentRunStatus.Failed,
   AgentRunStatus.Cancelled,
 ])
-
-const AGENT_RUN_POLL_INTERVAL = 5_000
-
 export const getAgentRunBreadcrumbs = (
   runId: string,
   prompt: string,
@@ -89,15 +88,23 @@ export function AIAgentRun() {
       refetchQueries: ['AgentRun', 'PendingApprovalAgentRuns'],
     })
 
-  const { data, error, loading } = useAgentRunQuery({
-    variables: { id },
-    fetchPolicy: 'cache-and-network',
-    pollInterval: AGENT_RUN_POLL_INTERVAL,
-    skip: !id,
-  })
+  const { data, error, loading, startPolling, stopPolling, refetch } =
+    useAgentRunQuery({
+      variables: { id },
+      fetchPolicy: 'cache-and-network',
+      skip: !id,
+    })
 
   const runLoading = !data && loading
   const run = data?.agentRun
+  // messages stream in separately, and the delta is normalized into this run,
+  // so polling only covers missed socket events
+  const isActive = !!run?.status && !TERMINAL_AGENT_RUN_STATUSES.has(run.status)
+  useAgentRunDeltaSubscription({
+    variables: { runId: id },
+    skip: !id || !isActive,
+  })
+  usePollWhileRunning({ startPolling, stopPolling, refetch }, isActive)
   const showSidePanel = hasAgentRunPanelContent(run)
   const { isOpen, setOpen, setApproval } = useAgentRunPanel({
     hasContent: showSidePanel,

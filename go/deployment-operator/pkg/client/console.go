@@ -114,11 +114,12 @@ type Client interface {
 	IsAgentRunExists(ctx context.Context, id string) (bool, error)
 	GetAgentRun(ctx context.Context, id string) (*console.AgentRunFragment, error)
 	GetAgentRunStatus(ctx context.Context, id string) (*console.AgentRunStatusFragment, error)
+	GetAgentRunPending(ctx context.Context, id string) (*console.AgentRunPendingFragment, error)
 	GetAgentRunCredentials(ctx context.Context, id string) (*console.AgentRunCredentialsFragment, error)
 	GetAgentRunTodos(ctx context.Context, id string) ([]*console.AgentTodoFragment, error)
 	CancelAgentRun(ctx context.Context, id string) error
 	CreateAgentRun(ctx context.Context, runtimeID string, attrs console.AgentRunAttributes) (*console.AgentRunFragment, error)
-	UpdateAgentRun(ctx context.Context, id string, attrs console.AgentRunStatusAttributes) (*console.AgentRunFragment, error)
+	UpdateAgentRun(ctx context.Context, id string, attrs console.AgentRunStatusAttributes) (*console.AgentRunUpdateFragment, error)
 	UpdateAgentRunAnalysis(ctx context.Context, runtimeID string, attrs console.AgentAnalysisAttributes) (*console.AgentRunBaseFragment, error)
 	UpdateAgentRunTodos(ctx context.Context, id string, attrs []*console.AgentTodoAttributes) (*console.AgentRunBaseFragment, error)
 	CreateAgentPullRequest(ctx context.Context, runID string, attrs console.AgentPullRequestAttributes) (*console.PullRequestFragment, error)

@@ -1,0 +1,389 @@
+suite: devboxes preset
+release:
+  name: ate
+  namespace: ate-system
+capabilities:
+  majorVersion: 1
+  minorVersion: 34
+templates:
+  - templates/*.yaml
+set:
+  objectStore.snapshotLocation: s3://snapshots/ate/
+tests:
+  # The three checks of the deployment-operator's checkSubstrateInstall, verbatim:
+  # an atenet-egress container arg containing --credential-provider-name=plural.sh,
+  # a value of ConfigMap atenet-egress containing devbox-egress-authz.<ns>.svc,
+  # and an atenet-router container arg containing the gateway's SPIFFE ID.
+  - it: satisfies checkSubstrateInstall's credential provider check
+    template: templates/atenet-egress.yaml
+    documentSelector:
+      path: kind
+      value: Deployment
+    set:
+      devboxes.enabled: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[?(@.name=="ext-proc")].args
+          content: --credential-provider-name=plural.sh
+      - contains:
+          path: spec.template.spec.containers[?(@.name=="ext-proc")].args
+          content: --credential-provider-address=devbox-gateway.plrl-deploy-operator.svc:50052
+      - contains:
+          path: spec.template.spec.containers[?(@.name=="ext-proc")].args
+          content: --credential-provider-server-name=devbox-gateway.plrl-deploy-operator.svc
+      - contains:
+          path: spec.template.spec.containers[?(@.name=="ext-proc")].args
+          content: --credential-provider-name=k8s.io
+
+  - it: keeps the bundled k8s.io provider
+    template: templates/k8s-credential-provider.yaml
+    set:
+      devboxes.enabled: true
+    asserts:
+      - containsDocument:
+          kind: Deployment
+          apiVersion: apps/v1
+          name: k8s-credential-provider
+          any: true
+
+  - it: satisfies checkSubstrateInstall's ext_proc check
+    template: templates/atenet-egress.yaml
+    documentSelector:
+      path: kind
+      value: ConfigMap
+    set:
+      devboxes.enabled: true
+    asserts:
+      - matchRegex:
+          path: data["envoy.yaml"]
+          pattern: "devbox-egress-authz\\.plrl-deploy-operator\\.svc"
+      - matchRegex:
+          path: data["envoy.yaml"]
+          pattern: "address: devbox-egress-authz.plrl-deploy-operator.svc.cluster.local\n\\s+port_value: 50053"
+      - notMatchRegex:
+          path: data["envoy.yaml"]
+          pattern: "(?m)^\\s*#ATE_MITM_EXTPROC_(FILTER|CLUSTER) --"
+
+  - it: satisfies checkSubstrateInstall's router SPIFFE ID check and raises routeTimeout
+    template: templates/atenet-router.yaml
+    documentSelector:
+      path: kind
+      value: Deployment
+    set:
+      devboxes.enabled: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --ingress-allowed-spiffe-ids=spiffe://cluster.local/ns/plrl-deploy-operator/sa/devbox-gateway
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --route-timeout=1h
+
+  - it: gives the gateway ate-api-server's egress_gateway role
+    template: templates/api-server.yaml
+    documentSelector:
+      path: kind
+      value: Deployment
+    set:
+      devboxes.enabled: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --egress-gateway-spiffe-id=spiffe://cluster.local/ns/ate-system/sa/atenet-egress
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --egress-gateway-spiffe-id=spiffe://cluster.local/ns/plrl-deploy-operator/sa/devbox-gateway
+
+  - it: follows devboxes.gatewayNamespace
+    templates:
+      - templates/atenet-egress.yaml
+      - templates/atenet-router.yaml
+    set:
+      devboxes.enabled: true
+      devboxes.gatewayNamespace: plrl-agents
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[?(@.name=="ext-proc")].args
+          content: --credential-provider-address=devbox-gateway.plrl-agents.svc:50052
+        template: templates/atenet-egress.yaml
+        documentSelector:
+          path: kind
+          value: Deployment
+      - matchRegex:
+          path: data["envoy.yaml"]
+          pattern: "devbox-egress-authz\\.plrl-agents\\.svc"
+        template: templates/atenet-egress.yaml
+        documentSelector:
+          path: kind
+          value: ConfigMap
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --ingress-allowed-spiffe-ids=spiffe://cluster.local/ns/plrl-agents/sa/devbox-gateway
+        template: templates/atenet-router.yaml
+        documentSelector:
+          path: kind
+          value: Deployment
+
+  - it: is off by default
+    templates:
+      - templates/atenet-egress.yaml
+      - templates/atenet-router.yaml
+      - templates/api-server.yaml
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[?(@.name=="ext-proc")].args
+          content: --credential-provider-name=plural.sh
+        template: templates/atenet-egress.yaml
+        documentSelector:
+          path: kind
+          value: Deployment
+      - notMatchRegex:
+          path: data["envoy.yaml"]
+          pattern: devbox-egress-authz
+        template: templates/atenet-egress.yaml
+        documentSelector:
+          path: kind
+          value: ConfigMap
+      - notContains:
+          path: spec.template.spec.containers[0].args
+          content: --route-timeout=1h
+        template: templates/atenet-router.yaml
+        documentSelector:
+          path: kind
+          value: Deployment
+      - notContains:
+          path: spec.template.spec.containers[0].args
+          content: --ingress-allowed-spiffe-ids=spiffe://cluster.local/ns/plrl-deploy-operator/sa/devbox-gateway
+        template: templates/atenet-router.yaml
+        documentSelector:
+          path: kind
+          value: Deployment
+      - notContains:
+          path: spec.template.spec.containers[0].args
+          content: --egress-gateway-spiffe-id=spiffe://cluster.local/ns/ate-system/sa/atenet-egress
+        template: templates/api-server.yaml
+        documentSelector:
+          path: kind
+          value: Deployment
+
+  - it: explicit values override the preset
+    templates:
+      - templates/atenet-egress.yaml
+      - templates/atenet-router.yaml
+      - templates/api-server.yaml
+    set:
+      devboxes.enabled: true
+      atenet.router.routeTimeout: 24h
+      atenet.router.ingressAllowedSPIFFEIDs:
+        - spiffe://cluster.local/ns/other/sa/client
+      auth.egressGatewayExtraSPIFFEIDs:
+        - spiffe://cluster.local/ns/other/sa/minter
+      atenet.egress.additionalExtprocService: other/authz:9000
+      atenet.egress.credentialProviders:
+        - name: k8s.io
+        - name: plural.sh
+          address: gw.other.svc:7000
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[?(@.name=="ext-proc")].args
+          content: --credential-provider-address=gw.other.svc:7000
+        template: templates/atenet-egress.yaml
+        documentSelector:
+          path: kind
+          value: Deployment
+      - notContains:
+          path: spec.template.spec.containers[?(@.name=="ext-proc")].args
+          content: --credential-provider-address=devbox-gateway.plrl-deploy-operator.svc:50052
+        template: templates/atenet-egress.yaml
+        documentSelector:
+          path: kind
+          value: Deployment
+      - matchRegex:
+          path: data["envoy.yaml"]
+          pattern: "sni: authz.other.svc\n"
+        template: templates/atenet-egress.yaml
+        documentSelector:
+          path: kind
+          value: ConfigMap
+      - notMatchRegex:
+          path: data["envoy.yaml"]
+          pattern: devbox-egress-authz
+        template: templates/atenet-egress.yaml
+        documentSelector:
+          path: kind
+          value: ConfigMap
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --route-timeout=24h
+        template: templates/atenet-router.yaml
+        documentSelector:
+          path: kind
+          value: Deployment
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --ingress-allowed-spiffe-ids=spiffe://cluster.local/ns/other/sa/client
+        template: templates/atenet-router.yaml
+        documentSelector:
+          path: kind
+          value: Deployment
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --egress-gateway-spiffe-id=spiffe://cluster.local/ns/other/sa/minter
+        template: templates/api-server.yaml
+        documentSelector:
+          path: kind
+          value: Deployment
+      - notContains:
+          path: spec.template.spec.containers[0].args
+          content: --egress-gateway-spiffe-id=spiffe://cluster.local/ns/plrl-deploy-operator/sa/devbox-gateway
+        template: templates/api-server.yaml
+        documentSelector:
+          path: kind
+          value: Deployment
+
+  - it: rejects an invalid gatewayNamespace
+    template: templates/validate.yaml
+    set:
+      devboxes.enabled: true
+      devboxes.gatewayNamespace: Not_A_Namespace
+    asserts:
+      - failedTemplate:
+          errorPattern: devboxes.gatewayNamespace
+
+  - it: makes the operator's ServiceAccount a bootstrap owner alongside ate-client
+    template: templates/api-server.yaml
+    documentSelector:
+      path: kind
+      value: Deployment
+    set:
+      devboxes.enabled: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --authz-bootstrap-owners=system:serviceaccount:ate-system:ate-client,system:serviceaccount:plrl-deploy-operator:deployment-operator
+
+  - it: adds the operator to explicit bootstrap owners, once
+    template: templates/api-server.yaml
+    documentSelector:
+      path: kind
+      value: Deployment
+    set:
+      devboxes.enabled: true
+      devboxes.operatorServiceAccount: plrl-agents/operator
+      auth.bootstrapOwners:
+        - user:alice@example.com
+        - system:serviceaccount:plrl-agents:operator
+        - user:alice@example.com
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --authz-bootstrap-owners=user:alice@example.com,system:serviceaccount:plrl-agents:operator
+
+  - it: keeps explicit bootstrap owners and appends the operator
+    template: templates/api-server.yaml
+    documentSelector:
+      path: kind
+      value: Deployment
+    set:
+      devboxes.enabled: true
+      auth.bootstrapOwners:
+        - user:alice@example.com
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --authz-bootstrap-owners=user:alice@example.com,system:serviceaccount:plrl-deploy-operator:deployment-operator
+
+  - it: adds no bootstrap owner with an empty operatorServiceAccount
+    template: templates/api-server.yaml
+    documentSelector:
+      path: kind
+      value: Deployment
+    set:
+      devboxes.enabled: true
+      devboxes.operatorServiceAccount: ""
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --authz-bootstrap-owners=system:serviceaccount:ate-system:ate-client
+
+  - it: adds no bootstrap owner by default
+    template: templates/api-server.yaml
+    documentSelector:
+      path: kind
+      value: Deployment
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --authz-bootstrap-owners=system:serviceaccount:ate-system:ate-client
+
+  - it: rejects an invalid operatorServiceAccount
+    template: templates/validate.yaml
+    set:
+      devboxes.enabled: true
+      devboxes.operatorServiceAccount: deployment-operator
+    asserts:
+      - failedTemplate:
+          errorPattern: devboxes.operatorServiceAccount must be NAMESPACE/NAME
+
+  # devbox-egress-authz asks for a PR request's response headers with
+  # mode_override, which Envoy honours only with allow_mode_override.
+  - it: lets devbox-egress-authz override the processing mode
+    template: templates/atenet-egress.yaml
+    documentSelector:
+      path: kind
+      value: ConfigMap
+    set:
+      devboxes.enabled: true
+    asserts:
+      # Once in each of the two spliced filters, and nowhere else.
+      - matchRegex:
+          path: data["envoy.yaml"]
+          pattern: "cluster_name: additional_egress_ext_proc\n(?:[^\n]*\n){0,8}?\\s*allow_mode_override: true\n\\s+processing_mode:\n\\s+request_header_mode: SEND\n\\s+response_header_mode: SKIP\n"
+      - matchRegex:
+          path: data["envoy.yaml"]
+          pattern: "(?s)allow_mode_override.*allow_mode_override"
+      - notMatchRegex:
+          path: data["envoy.yaml"]
+          pattern: "(?s)allow_mode_override.*allow_mode_override.*allow_mode_override"
+
+  - it: leaves mode overrides off without the preset
+    template: templates/atenet-egress.yaml
+    documentSelector:
+      path: kind
+      value: ConfigMap
+    set:
+      atenet.egress.additionalExtprocService: other/authz:9000
+    asserts:
+      - matchRegex:
+          path: data["envoy.yaml"]
+          pattern: "cluster_name: additional_egress_ext_proc"
+      - notMatchRegex:
+          path: data["envoy.yaml"]
+          pattern: allow_mode_override
+
+  - it: honours an explicit additionalExtprocAllowModeOverride
+    templates:
+      - templates/atenet-egress.yaml
+    documentSelector:
+      path: kind
+      value: ConfigMap
+    set:
+      devboxes.enabled: true
+      atenet.egress.additionalExtprocAllowModeOverride: false
+    asserts:
+      - notMatchRegex:
+          path: data["envoy.yaml"]
+          pattern: allow_mode_override
+
+  - it: allows mode overrides without the preset when asked
+    template: templates/atenet-egress.yaml
+    documentSelector:
+      path: kind
+      value: ConfigMap
+    set:
+      atenet.egress.additionalExtprocService: other/authz:9000
+      atenet.egress.additionalExtprocAllowModeOverride: true
+    asserts:
+      - matchRegex:
+          path: data["envoy.yaml"]
+          pattern: "allow_mode_override: true"

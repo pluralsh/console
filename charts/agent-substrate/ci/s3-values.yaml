@@ -1,0 +1,46 @@
+# EKS: S3 snapshots through IRSA, CNPG Postgres backed up to S3, ECR pulls
+# through the kubelet credential provider, and the devbox wiring.
+clusterSize: size10
+
+systemInfra:
+  cordon: true
+
+otel:
+  endpoint: http://otel-collector.observability.svc:4317
+
+apiServer:
+  serviceAccount:
+    annotations:
+      eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/ate-api-server
+
+atelet:
+  serviceAccount:
+    annotations:
+      eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/atelet
+  imageCredentialProvider:
+    enabled: true
+    preset: ecr
+
+# The devbox gateway, with a longer route timeout than the preset's.
+devboxes:
+  enabled: true
+
+atenet:
+  router:
+    routeTimeout: 24h
+
+objectStore:
+  backend: s3
+  snapshotLocation: s3://plural-ate-snapshots/substrate/
+  s3:
+    region: us-east-2
+
+postgres:
+  mode: cnpg
+  cnpg:
+    instances: 3
+    serviceAccountAnnotations:
+      eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/ate-postgres-backup
+    backup:
+      enabled: true
+      destinationPath: s3://plural-ate-pg-backups/ate-postgres/

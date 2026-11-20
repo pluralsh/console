@@ -45,7 +45,7 @@ defmodule Console.AI.Workbench.Subagents.SelfService do
     end
   end
 
-  def tools(%Environment{skills: skills, job: job, activities: activities}) do
+  def tools(%Environment{skills: skills, job: job, activities: activities} = environment) do
     skills = Environment.subagent_skills(skills, :self_service)
 
     [
@@ -56,6 +56,7 @@ defmodule Console.AI.Workbench.Subagents.SelfService do
       %InvokePrAutomation{job: job},
       %PullRequests{job: job}
     ]
+    |> Enum.concat(search_tools(environment, :self_service))
     |> Enum.concat(skill_knowledge_tools(job, skills) ++ [
       Scratchpad,
       %History{job: job, activities: activities},

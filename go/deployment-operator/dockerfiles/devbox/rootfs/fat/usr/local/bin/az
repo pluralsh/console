@@ -1,0 +1,27 @@
+#!/bin/bash
+# az has no file-based workload identity login, so log in with the federated token
+# whenever the daemon has rewritten it since the last login.
+. /usr/local/lib/devbox/devbox.sh
+
+real=/opt/az/bin/az
+
+if [ -n "${AZURE_FEDERATED_TOKEN_FILE:-}" ] && [ -r "${AZURE_FEDERATED_TOKEN_FILE}" ] \
+  && [ -n "${AZURE_CLIENT_ID:-}" ] && [ -n "${AZURE_TENANT_ID:-}" ]; then
+  case "${1:-}" in
+    login | logout) ;;
+    *)
+      config_dir="${AZURE_CONFIG_DIR:-${HOME}/.azure}"
+      marker="${config_dir}/.devbox-federated-login"
+      if [ ! -f "${marker}" ] || [ "${AZURE_FEDERATED_TOKEN_FILE}" -nt "${marker}" ]; then
+        mkdir -p "${config_dir}"
+        "${real}" login --service-principal \
+          --username "${AZURE_CLIENT_ID}" \
+          --tenant "${AZURE_TENANT_ID}" \
+          --federated-token "$(cat "${AZURE_FEDERATED_TOKEN_FILE}")" \
+          --allow-no-subscriptions --output none && touch "${marker}"
+      fi
+      ;;
+  esac
+fi
+
+exec "${real}" "$@"

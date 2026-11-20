@@ -1,19 +1,20 @@
 import { describe, expect, it } from 'vitest'
 import type { PodMetricsFragment } from 'generated/graphql'
 import { METRIC_FORMATTERS } from 'components/utils/metrics/metricFormats'
-import { buildPodMetricGraphs } from './podMetricsGraphs'
+import { POD_METRIC_GRAPHS } from './podMetricsGraphs'
 
 const series = (container: string | null, value = '1') => ({
   metric: container ? { container } : {},
   values: [{ timestamp: 1700000000, value }],
 })
 
-const graph = (metrics: Partial<PodMetricsFragment>, key: string) =>
-  buildPodMetricGraphs(metrics as PodMetricsFragment).find(
-    (g) => g.key === key
-  )!
+const graph = (metrics: Partial<PodMetricsFragment>, key: string) => ({
+  data: POD_METRIC_GRAPHS.find((g) => g.key === key)!.series(
+    metrics as PodMetricsFragment
+  ),
+})
 
-describe('buildPodMetricGraphs', () => {
+describe('POD_METRIC_GRAPHS', () => {
   it('drops the container prefix on reservations for single-container pods', () => {
     const cpu = graph(
       {

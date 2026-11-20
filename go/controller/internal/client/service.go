@@ -18,8 +18,8 @@ func (c *client) GetServices() ([]*console.ServiceDeploymentBaseFragment, error)
 	return resp.ClusterServices, nil
 }
 
-func (c *client) GetService(clusterID, serviceName string) (*console.ServiceDeploymentExtended, error) {
-	resp, err := c.consoleClient.GetServiceDeploymentByHandle(c.ctx, clusterID, serviceName)
+func (c *client) GetService(clusterID, serviceName string) (*console.ServiceDeploymentStatusFragment, error) {
+	resp, err := c.consoleClient.GetServiceDeploymentStatusByHandle(c.ctx, clusterID, serviceName)
 	if err != nil {
 		return nil, err
 	}
@@ -47,12 +47,12 @@ func (c *client) GetServiceTinyByHandle(clusterHandle, serviceName string) (*con
 	return response.ServiceDeployment, err
 }
 
-func (c *client) GetServiceById(id string) (*console.ServiceDeploymentExtended, error) {
+func (c *client) GetServiceById(id string) (*console.ServiceDeploymentStatusFragment, error) {
 	if id == "" {
 		return nil, errors.NewNotFound(schema.GroupResource{}, "")
 	}
 
-	response, err := c.consoleClient.GetServiceDeployment(c.ctx, id)
+	response, err := c.consoleClient.GetServiceDeploymentStatus(c.ctx, id)
 	if internalerror.IsNotFound(err) {
 		return nil, errors.NewNotFound(schema.GroupResource{}, id)
 	}

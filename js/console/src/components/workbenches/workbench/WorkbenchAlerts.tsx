@@ -1,5 +1,4 @@
 import { useDebounce } from '@react-hooks-library/core'
-import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import {
   DisplayButton,
   DisplayPanel,
@@ -42,6 +41,8 @@ import {
 
 const WORKBENCH_ALERTS_VIEW_STORAGE_KEY = 'workbench-alerts-view'
 const PAGE_SIZE = 50
+// alerts have no subscription, and arrive on monitor schedules anyway
+const ALERTS_POLL_INTERVAL = 30_000
 
 // stable, so the paginated data callbacks don't change every render
 const ALERTS_KEY_PATH = ['workbench', 'alerts']
@@ -66,7 +67,7 @@ export function WorkbenchAlerts() {
     fetchingMore,
   } = useFetchPaginatedData(
     {
-      pollInterval: POLL_INTERVAL,
+      pollInterval: ALERTS_POLL_INTERVAL,
       query: WorkbenchAlertsDocument,
       keyPath: ALERTS_KEY_PATH,
       pageSize: PAGE_SIZE,
@@ -82,7 +83,7 @@ export function WorkbenchAlerts() {
   const { data: countsData } = useWorkbenchAlertCountsQuery({
     variables: { id: workbenchId },
     fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
+    pollInterval: ALERTS_POLL_INTERVAL,
   })
   const typeCounts = useMemo(
     () => toCounts(countsData?.workbench?.alertCounts?.types, (e) => e.type),

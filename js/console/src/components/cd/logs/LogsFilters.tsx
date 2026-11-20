@@ -171,14 +171,20 @@ export function LogsLabelsPicker({
   const [comboBoxInput, setComboBoxInput] = useState('')
   const small = size === 'small'
 
+  // keys accumulate so the picker stays usable when a filter narrows results to nothing
+  const source = `${clusterId}/${serviceId}/${node}`
+  const [seen, setSeen] = useState({ source, keys: new Set<string>() })
+  const seenKeys = new Set(seen.source === source ? seen.keys : [])
+  logs.forEach(({ facets }) =>
+    facets?.forEach((facet) => facet?.key && seenKeys.add(facet.key))
+  )
+  if (seen.source !== source || seenKeys.size !== seen.keys.size)
+    setSeen({ source, keys: seenKeys })
+
   const facetKeys = useMemo(() => {
-    const allKeys = new Set<string>()
-    logs.forEach(({ facets }) =>
-      facets?.forEach((facet) => facet?.key && allKeys.add(facet.key))
-    )
     const selectedSet = new Set<string>(selectedLabels.map(({ key }) => key))
-    return Array.from(allKeys.difference(selectedSet))
-  }, [logs, selectedLabels])
+    return Array.from(seen.keys.difference(selectedSet)).sort()
+  }, [seen.keys, selectedLabels])
 
   const { data, loading } = useLogLabelsQuery({
     variables: { field, clusterId, serviceId, node, query, time, levels },

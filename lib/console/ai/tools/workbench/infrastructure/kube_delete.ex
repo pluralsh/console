@@ -45,6 +45,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.KubeDelete do
          {:kind, kind} when kind not in @kind_blacklist <- {:kind, get_kind(cluster, g, v, k)},
          path <- Kube.Client.Base.path(g, v, kind, comp.namespace, comp.name) do
       KubeRequest.new(
+        id: comp.id,
         handle: handle,
         method: "delete",
         path: path,

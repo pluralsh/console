@@ -1,17 +1,18 @@
-import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { useWorkbenchJobActionSummaryQuery } from 'generated/graphql'
+import { usePollWhileRunning } from './usePollWhileRunning'
 
-// `poll: false` fetches once, e.g. for a finished job whose actions won't change
+// polls only while the job runs, e.g. a finished job's actions won't change
 export function useWorkbenchJobActionSummary(
   jobId: string,
-  { poll = true }: { poll?: boolean } = {}
+  { running, interval }: { running: boolean; interval?: number }
 ) {
-  const { data, loading, refetch } = useWorkbenchJobActionSummaryQuery({
+  const query = useWorkbenchJobActionSummaryQuery({
     skip: !jobId,
     variables: { id: jobId },
     fetchPolicy: 'cache-and-network',
-    pollInterval: poll ? POLL_INTERVAL : 0,
   })
+  const { data, loading } = query
+  usePollWhileRunning(query, running, interval)
   const job = data?.workbenchJob
 
   return {
@@ -23,6 +24,5 @@ export function useWorkbenchJobActionSummary(
       (edge) => !!edge?.node?.id
     ),
     isLoading: loading && !data,
-    refetch,
   }
 }

@@ -26,6 +26,7 @@ defmodule ConsoleWeb.Plugs.WorkbenchMCP do
 
     with {:user, %User{} = user} <- {:user, Guardian.Plug.current_resource(conn)},
          {:bench, %Workbench{} = bench} <- {:bench, workbench(id)},
+         {:devbox, true} <- {:devbox, devbox_allowed?(conn, bench)},
          {:filter, {:ok, filter}} <- {:filter, filter(conn.query_params)},
          {:allow, {:ok, %Workbench{} = bench}} <- {:allow, Policies.allow(bench, user, :read)} do
       conn
@@ -38,11 +39,16 @@ defmodule ConsoleWeb.Plugs.WorkbenchMCP do
     else
       {:user, _} -> deny(conn, 401, "unauthenticated")
       {:bench, _} -> deny(conn, 404, "workbench not found")
+      {:devbox, _} -> deny(conn, 403, "devbox instances can only reach their own workbench")
       {:filter, _} -> deny(conn, 400, "unknown tool category in the categories filter")
       {:allow, _} -> deny(conn, 403, "you do not have read access to this workbench")
     end
   end
   def call(conn, _), do: deny(conn, 404, "workbench not found")
+
+  defp devbox_allowed?(%Plug.Conn{assigns: %{devbox_instance: %{workbench_id: id}}}, %Workbench{id: id}), do: true
+  defp devbox_allowed?(%Plug.Conn{assigns: %{devbox_instance: _}}, _), do: false
+  defp devbox_allowed?(_, _), do: true
 
   defp workbench(id) do
     with {:ok, id} <- Ecto.UUID.cast(id),

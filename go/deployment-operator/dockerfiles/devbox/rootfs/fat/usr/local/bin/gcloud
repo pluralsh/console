@@ -1,0 +1,5 @@
+#!/bin/sh
+# Loads the daemon's identity environment and points gcloud at the external_account
+# config in GOOGLE_APPLICATION_CREDENTIALS (via CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE).
+. /usr/local/lib/devbox/devbox.sh
+exec /opt/google-cloud-sdk/bin/gcloud "$@"

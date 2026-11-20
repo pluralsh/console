@@ -1,0 +1,613 @@
+syntax = "proto3";
+
+// ACP entity model (section 4.6a). The daemon normalizes ACP v1 into v2 entities before anything leaves the
+// sandbox, so everything here has v2 shapes. Messages mirror ACP's JSON closely: field names are the snake_case
+// form of the ACP camelCase names, and every variant has an `unknown` escape hatch carrying raw JSON, so nothing
+// the agent sends is ever flattened or dropped.
+package devbox.v1;
+
+option go_package = "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1;devboxv1";
+
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+import "devbox/v1/common.proto";
+
+// ---------------------------------------------------------------------------------------------------------------
+// Content
+// ---------------------------------------------------------------------------------------------------------------
+
+// Annotations is ACP's (MCP-derived) content annotations object.
+message Annotations {
+  // "user" and/or "assistant".
+  repeated string audience = 1;
+  optional double priority = 2;
+  // RFC 3339 timestamp, kept as the string the agent sent.
+  string last_modified = 3;
+  google.protobuf.Struct meta = 4;
+}
+
+// ContentBlock is ACP's ContentBlock union.
+message ContentBlock {
+  oneof block {
+    TextContent text = 1;
+    ImageContent image = 2;
+    AudioContent audio = 3;
+    // `type: resource` (embedded resource).
+    EmbeddedResource resource = 4;
+    // `type: resource_link`.
+    ResourceLink resource_link = 5;
+    // Any `type` this version of the contract does not know.
+    UnknownVariant unknown = 15;
+  }
+}
+
+message TextContent {
+  string text = 1;
+  Annotations annotations = 2;
+  google.protobuf.Struct meta = 3;
+}
+
+message ImageContent {
+  // Base64 data exactly as sent over ACP.
+  string data = 1;
+  string mime_type = 2;
+  string uri = 3;
+  Annotations annotations = 4;
+  google.protobuf.Struct meta = 5;
+}
+
+message AudioContent {
+  // Base64 data exactly as sent over ACP.
+  string data = 1;
+  string mime_type = 2;
+  Annotations annotations = 3;
+  google.protobuf.Struct meta = 4;
+}
+
+message ResourceLink {
+  string uri = 1;
+  string name = 2;
+  string title = 3;
+  string description = 4;
+  string mime_type = 5;
+  optional int64 size = 6;
+  Annotations annotations = 7;
+  google.protobuf.Struct meta = 8;
+}
+
+message EmbeddedResource {
+  oneof resource {
+    TextResourceContents text = 1;
+    BlobResourceContents blob = 2;
+    UnknownVariant unknown = 15;
+  }
+  Annotations annotations = 3;
+  google.protobuf.Struct meta = 4;
+}
+
+message TextResourceContents {
+  string uri = 1;
+  string mime_type = 2;
+  string text = 3;
+  google.protobuf.Struct meta = 4;
+}
+
+message BlobResourceContents {
+  string uri = 1;
+  string mime_type = 2;
+  // Base64 data exactly as sent over ACP.
+  string blob = 3;
+  google.protobuf.Struct meta = 4;
+}
+
+// UnknownVariant preserves a union member, or an entire update, that this contract has no typed message for.
+message UnknownVariant {
+  // The discriminator value, e.g. the unrecognized `type` or `sessionUpdate`.
+  string type = 1;
+  // The verbatim JSON object.
+  bytes raw_json = 2;
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Tool calls
+// ---------------------------------------------------------------------------------------------------------------
+
+message ToolCall {
+  string tool_call_id = 1;
+  string title = 2;
+  // read, edit, delete, move, search, execute, think, fetch, switch_mode, other.
+  string kind = 3;
+  // pending, in_progress, completed, failed.
+  string status = 4;
+  repeated ToolCallContent content = 5;
+  repeated ToolCallLocation locations = 6;
+  google.protobuf.Value raw_input = 7;
+  google.protobuf.Value raw_output = 8;
+  google.protobuf.Struct meta = 9;
+}
+
+// ToolCallContent is ACP's tool call content union.
+message ToolCallContent {
+  oneof content {
+    // `type: content`.
+    ContentBlock block = 1;
+    // `type: diff`.
+    Diff diff = 2;
+    // `type: terminal`: a reference to a display terminal entity.
+    TerminalRef terminal = 3;
+    UnknownVariant unknown = 15;
+  }
+}
+
+message Diff {
+  string path = 1;
+  // Unset for a new file.
+  optional string old_text = 2;
+  string new_text = 3;
+  google.protobuf.Struct meta = 4;
+}
+
+message TerminalRef {
+  string terminal_id = 1;
+  google.protobuf.Struct meta = 2;
+}
+
+message ToolCallLocation {
+  string path = 1;
+  optional int64 line = 2;
+  google.protobuf.Struct meta = 3;
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Entities
+// ---------------------------------------------------------------------------------------------------------------
+
+// EntityType is the transcript entity kind. UNKNOWN entities keep the raw `sessionUpdate`.
+enum EntityType {
+  ENTITY_TYPE_UNSPECIFIED = 0;
+  ENTITY_TYPE_USER_MESSAGE = 1;
+  ENTITY_TYPE_AGENT_MESSAGE = 2;
+  ENTITY_TYPE_AGENT_THOUGHT = 3;
+  // Subagent RFD: a message linking a parent and a child session.
+  ENTITY_TYPE_SESSION_MESSAGE = 4;
+  ENTITY_TYPE_TOOL_CALL = 5;
+  ENTITY_TYPE_PLAN = 6;
+  // Display terminal (v2), with final state and output capped at 1 MB.
+  ENTITY_TYPE_TERMINAL = 7;
+  ENTITY_TYPE_COMPACTION = 8;
+  ENTITY_TYPE_UNKNOWN = 15;
+}
+
+// EntityKey identifies an entity within an instance. Transcript writes are idempotent on (key, revision).
+message EntityKey {
+  string session_id = 1;
+  EntityType type = 2;
+  // The ACP ID (messageId, toolCallId, planId, terminalId, compactionId), or a daemon-synthesized ID for v1
+  // chunks without a messageId and v1 plans.
+  string id = 3;
+}
+
+// AcpEntity is one revision of an ACP entity: what the box's transcript stores and timelines return.
+message AcpEntity {
+  EntityKey key = 1;
+  // First-seen ordinal within the session; ACP's timeline position. Never changes once assigned.
+  uint64 position = 2;
+  // Starts at 1 and increments every time the entity is (re)settled, including patches after `idle`.
+  uint64 revision = 3;
+  google.protobuf.Timestamp created_at = 4;
+  google.protobuf.Timestamp updated_at = 5;
+  // False for in-flight entities merged into a timeline read by the gateway.
+  bool settled = 6;
+  // The verbatim ACP v2 entity JSON. This is authoritative; the typed `body` below is a decoded view that the
+  // daemon fills on a best-effort basis (and leaves as `unknown` when it can't decode the payload).
+  bytes acp_json = 7;
+
+  oneof body {
+    // USER_MESSAGE, AGENT_MESSAGE, AGENT_THOUGHT.
+    MessageEntity message = 10;
+    SessionMessageEntity session_message = 11;
+    ToolCall tool_call = 12;
+    PlanEntity plan = 13;
+    TerminalEntity terminal = 14;
+    CompactionEntity compaction = 15;
+    UnknownVariant unknown = 20;
+  }
+}
+
+message MessageEntity {
+  string message_id = 1;
+  repeated ContentBlock content = 2;
+  // Console thread ID and principal when the message is a prompt sent through console (user messages only).
+  string prompt_id = 3;
+  Principal sent_by = 4;
+  google.protobuf.Struct meta = 5;
+}
+
+// SessionMessageEntity links messages between a parent and a child session (subagent RFD `session_message`).
+message SessionMessageEntity {
+  string message_id = 1;
+  string from_session_id = 2;
+  string to_session_id = 3;
+  repeated ContentBlock content = 4;
+  google.protobuf.Struct meta = 5;
+}
+
+message PlanEntity {
+  string plan_id = 1;
+  repeated PlanEntry entries = 2;
+  google.protobuf.Struct meta = 3;
+}
+
+message PlanEntry {
+  string content = 1;
+  // high, medium, low.
+  string priority = 2;
+  // pending, in_progress, completed.
+  string status = 3;
+  google.protobuf.Struct meta = 4;
+}
+
+message TerminalEntity {
+  string terminal_id = 1;
+  string command = 2;
+  repeated string args = 3;
+  string cwd = 4;
+  string output = 5;
+  // Output was capped at 1 MB in the transcript.
+  bool truncated = 6;
+  TerminalExitStatus exit_status = 7;
+  google.protobuf.Struct meta = 8;
+}
+
+message TerminalExitStatus {
+  optional int32 exit_code = 1;
+  string signal = 2;
+}
+
+message CompactionEntity {
+  string compaction_id = 1;
+  // ACP compaction state, e.g. in_progress, completed.
+  string status = 2;
+  repeated ContentBlock summary = 3;
+  google.protobuf.Struct meta = 4;
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Session current state (columns on devbox_instance_sessions, not history)
+// ---------------------------------------------------------------------------------------------------------------
+
+enum ForegroundStateKind {
+  FOREGROUND_STATE_KIND_UNSPECIFIED = 0;
+  FOREGROUND_STATE_KIND_RUNNING = 1;
+  // "Needs you": a permission or elicitation is pending.
+  FOREGROUND_STATE_KIND_REQUIRES_ACTION = 2;
+  FOREGROUND_STATE_KIND_IDLE = 3;
+}
+
+// ForegroundState is the session's latest ACP `state_update`.
+message ForegroundState {
+  ForegroundStateKind state = 1;
+  // end_turn, max_tokens, max_turn_requests, refusal, cancelled (set when idle).
+  string stop_reason = 2;
+  // Typed thread error, e.g. AGENT_AUTH_FAILED or PLAN_LIMIT_REACHED, plus the agent's JSON-RPC error.
+  AgentError error = 3;
+  // Background work the agent reports while foreground is idle, verbatim.
+  google.protobuf.Value background_work = 4;
+  google.protobuf.Timestamp updated_at = 5;
+  google.protobuf.Struct meta = 6;
+}
+
+message AgentError {
+  ErrorDetail detail = 1;
+  // JSON-RPC error code and data from the agent, if any.
+  int32 code = 2;
+  string message = 3;
+  google.protobuf.Value data = 4;
+}
+
+// ConfigOption is an ACP session config option. On v2 modes are config options; v1 `models` / `set_model` and
+// `current_mode_update` are normalized into options with category `model` / `mode`.
+message ConfigOption {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  // model, mode, thought_level, other.
+  string category = 4;
+  // select (only type today).
+  string type = 5;
+  // The agent's reported current value, not the last requested one.
+  string current_value = 6;
+  repeated ConfigOptionValue options = 7;
+  google.protobuf.Struct meta = 8;
+  // Verbatim ACP JSON for option types this contract does not model.
+  bytes raw_json = 9;
+}
+
+message ConfigOptionValue {
+  string value = 1;
+  string name = 2;
+  string description = 3;
+  // Group name for grouped select options.
+  string group = 4;
+  google.protobuf.Struct meta = 5;
+}
+
+// AvailableCommand is an ACP slash command (DBX-48), normalized to v2 shapes.
+message AvailableCommand {
+  string name = 1;
+  string description = 2;
+  // v2 `input`: {type: "text", hint}. Unset when the command takes no input.
+  CommandInput input = 3;
+  google.protobuf.Struct meta = 4;
+}
+
+message CommandInput {
+  // "text".
+  string type = 1;
+  string hint = 2;
+}
+
+// Usage is the session's latest ACP `usage_update`.
+message Usage {
+  // Tokens used in the context window and its size.
+  int64 used = 1;
+  int64 size = 2;
+  Cost cost = 3;
+  BillingMode billing = 4;
+  google.protobuf.Struct meta = 5;
+}
+
+message Cost {
+  double amount = 1;
+  string currency = 2;
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Sessions (threads and subagents)
+// ---------------------------------------------------------------------------------------------------------------
+
+enum SessionKind {
+  SESSION_KIND_UNSPECIFIED = 0;
+  SESSION_KIND_THREAD = 1;
+  SESSION_KIND_SUBAGENT = 2;
+}
+
+enum ThreadStatus {
+  THREAD_STATUS_UNSPECIFIED = 0;
+  THREAD_STATUS_ACTIVE = 1;
+  // Queued behind the per-instance running-thread limit.
+  THREAD_STATUS_WAITING = 2;
+  THREAD_STATUS_CLOSED = 3;
+  THREAD_STATUS_DELETED = 4;
+}
+
+// Session is one row of devbox_instance_sessions. It never carries transcript content.
+message Session {
+  // Console thread ID. Empty for subagents and for importable sessions not yet imported.
+  string thread_id = 1;
+  // ACP session ID. Empty while a WAITING thread hasn't reached `session/new`.
+  string session_id = 2;
+  SessionKind kind = 3;
+  string parent_session_id = 4;
+  AgentType agent = 5;
+  // Agent-owned title from `session_info_update`.
+  string title = 6;
+  // ~ or ~/<repo> or ~/.threads/<id>/<repo> (absolute path).
+  string cwd = 7;
+  repeated string worktree_repos = 8;
+  ThreadStatus status = 9;
+  Principal created_by = 10;
+  google.protobuf.Timestamp created_at = 11;
+  google.protobuf.Timestamp last_activity_at = 12;
+  uint64 entity_count = 13;
+  ForegroundState foreground = 14;
+  repeated ConfigOption config_options = 15;
+  repeated AvailableCommand available_commands = 16;
+  Usage usage = 17;
+  // The session was started outside console (session/list) and imported.
+  bool imported = 18;
+  // Monotonic per (instance, session); UpsertInstanceIndex applies a row only when newer than the stored one.
+  uint64 revision = 19;
+  google.protobuf.Struct meta = 20;
+}
+
+// ImportableSession is a session the agent lists (`session/list`) that console doesn't have a thread for.
+message ImportableSession {
+  AgentType agent = 1;
+  string session_id = 2;
+  string title = 3;
+  string cwd = 4;
+  google.protobuf.Timestamp updated_at = 5;
+  google.protobuf.Struct meta = 6;
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Interactions (permission requests and elicitations)
+// ---------------------------------------------------------------------------------------------------------------
+
+enum InteractionKind {
+  INTERACTION_KIND_UNSPECIFIED = 0;
+  // `session/request_permission`.
+  INTERACTION_KIND_PERMISSION = 1;
+  // `elicitation/create` in form mode.
+  INTERACTION_KIND_ELICITATION_FORM = 2;
+  // `elicitation/create` in URL mode; completes on `elicitation/complete`.
+  INTERACTION_KIND_ELICITATION_URL = 3;
+}
+
+enum InteractionState {
+  INTERACTION_STATE_UNSPECIFIED = 0;
+  INTERACTION_STATE_PENDING = 1;
+  INTERACTION_STATE_ANSWERED = 2;
+  INTERACTION_STATE_CANCELLED = 3;
+  INTERACTION_STATE_EXPIRED = 4;
+}
+
+// Interaction is one row of devbox_instance_interactions. Stored when pending and again when resolved.
+message Interaction {
+  // Daemon-allocated UUID, stable across suspend/resume.
+  string interaction_id = 1;
+  string session_id = 2;
+  string thread_id = 3;
+  // JSON-RPC request ID from the agent, as a string.
+  string jsonrpc_id = 4;
+  // Set when the interaction is scoped to a tool call (render inline).
+  string tool_call_id = 5;
+  InteractionKind kind = 6;
+  InteractionState state = 7;
+  string title = 8;
+
+  oneof request {
+    PermissionRequest permission = 10;
+    ElicitationRequest elicitation = 11;
+  }
+
+  InteractionResponse response = 12;
+  Principal answered_by = 13;
+  google.protobuf.Timestamp answered_at = 14;
+  google.protobuf.Timestamp created_at = 15;
+  // Monotonic per interaction.
+  uint64 revision = 16;
+  // Verbatim JSON-RPC request params.
+  bytes raw_json = 17;
+  // Set when the daemon's reviewer judged a permission request at AUTO, whether it approved it or passed it on.
+  Review review = 18;
+}
+
+// Review is the daemon reviewer's verdict on a permission request.
+message Review {
+  // allow, deny or ask.
+  string verdict = 1;
+  // The verdict's probability, 0 to 1.
+  double confidence = 2;
+  // The most likely risk: none, destructive, exfiltration, credentials, out_of_scope or external.
+  string risk = 3;
+  // The decision model that answered.
+  string model = 4;
+  // Why the request still went to a human: low confidence, a deny verdict, or the reviewer failing.
+  string escalation = 5;
+}
+
+message PermissionRequest {
+  repeated PermissionOption options = 1;
+  // The tool call update included in the request.
+  ToolCall tool_call = 2;
+  google.protobuf.Struct meta = 3;
+}
+
+message PermissionOption {
+  string option_id = 1;
+  string name = 2;
+  // allow_once, allow_always, reject_once, reject_always.
+  string kind = 3;
+  google.protobuf.Struct meta = 4;
+}
+
+// ElicitationRequest follows the MCP 2026-07-28 elicitation data model adopted by ACP.
+message ElicitationRequest {
+  string message = 1;
+  // Form mode: JSON Schema for the response content.
+  google.protobuf.Struct requested_schema = 2;
+  // URL mode.
+  string url = 3;
+  string elicitation_id = 4;
+  google.protobuf.Struct meta = 5;
+}
+
+message InteractionResponse {
+  oneof response {
+    PermissionOutcome permission = 1;
+    ElicitationResponse elicitation = 2;
+  }
+}
+
+message PermissionOutcome {
+  oneof outcome {
+    string selected_option_id = 1;
+    // The request was cancelled (e.g. the prompt turn was cancelled).
+    bool cancelled = 2;
+  }
+}
+
+message ElicitationResponse {
+  // accept, decline, cancel.
+  string action = 1;
+  // Form content, validated by console against `requested_schema`.
+  google.protobuf.Struct content = 2;
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Agent catalog and connections (section 4.2a)
+// ---------------------------------------------------------------------------------------------------------------
+
+// LifecycleSupport says which thread actions the agent supports, from negotiated capabilities (section 4.6b).
+message LifecycleSupport {
+  bool list = 1;
+  bool resume = 2;
+  // v1 `loadSession`.
+  bool load = 3;
+  bool close = 4;
+  bool delete = 5;
+  bool fork = 6;
+  // v2 `session/resume` with `replayFrom`.
+  bool replay = 7;
+}
+
+message AgentCapabilities {
+  LifecycleSupport lifecycle = 1;
+  bool prompt_image = 2;
+  bool prompt_audio = 3;
+  bool prompt_embedded_context = 4;
+  bool mcp_http = 5;
+  bool subagents = 6;
+  bool elicitation = 7;
+  // Verbatim `agentCapabilities` from `initialize`.
+  google.protobuf.Struct raw = 15;
+}
+
+enum ProbeStatus {
+  PROBE_STATUS_UNSPECIFIED = 0;
+  PROBE_STATUS_OK = 1;
+  // The probe failed; models come from the CRD alone and the box shows a warning.
+  PROBE_STATUS_FAILED = 2;
+  // The agent binary is not in the image; the template revision fails.
+  PROBE_STATUS_MISSING = 3;
+}
+
+// AgentCatalogEntry is one agent of a box, as probed during the golden boot.
+message AgentCatalogEntry {
+  AgentType type = 1;
+  bool is_default = 2;
+  string adapter_name = 3;
+  string adapter_version = 4;
+  int32 protocol_version = 5;
+  AgentCapabilities capabilities = 6;
+  // Values of the model-category config option, before console narrows them by the CRD allowlist and the AI
+  // proxy's configured models.
+  repeated ConfigOptionValue models = 7;
+  // The agent's current value for the model option in a fresh session.
+  string current_model = 8;
+  // DevboxRunner.spec.agents[].defaultModel.
+  string default_model = 9;
+  // False when the adapter has no ACP model control (model set by boot flags; UI disables changes).
+  bool model_switchable = 10;
+  string model_config_option_id = 11;
+  repeated ConfigOption config_options = 12;
+  repeated AvailableCommand initial_commands = 13;
+  ProbeStatus probe_status = 14;
+  string probe_error = 15;
+  google.protobuf.Timestamp probed_at = 16;
+}
+
+// AgentConnection is a live ACP connection inside an instance (one per agent type).
+message AgentConnection {
+  AgentType agent = 1;
+  int32 protocol_version = 2;
+  string adapter_name = 3;
+  string adapter_version = 4;
+  AgentCapabilities capabilities = 5;
+  BillingMode billing = 6;
+  // running, starting, stopped, failed.
+  string state = 7;
+  AgentError error = 8;
+}

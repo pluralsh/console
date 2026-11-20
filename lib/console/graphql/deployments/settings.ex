@@ -18,6 +18,7 @@ defmodule Console.GraphQl.Deployments.Settings do
   @bedrock_deployments_doc "Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically), and modelSettings for application inference profiles. Still supported for explicit client model name overrides or when alias mapping cannot be inferred. Maps client-facing model ID to Bedrock model or profile ID."
 
   @bedrock_endpoint_doc "AWS Bedrock API surface to use. RUNTIME (default) uses InvokeModel or Converse on bedrock-runtime; MANTLE uses the Bedrock Mantle Anthropic/OpenAI-compatible APIs."
+  @decision_model_doc "a cheap, fast model for decision (classification) calls, like reviewing devbox agent tool calls. Models without native decision support are emulated"
   @bedrock_model_settings_doc "Per-model Bedrock settings. Associates a foundation model ID with an application inference profile ARN while retaining the model ID for request formatting and metadata."
 
   input_object :project_attributes do
@@ -152,6 +153,9 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :embedding_provider, :ai_provider,
       description: "ai provider to use with embeddings (for vector indexing)"
 
+    field :decision_provider, :ai_provider,
+      description: "ai provider to use for decision (classification) calls, like reviewing devbox agent tool calls"
+
     field :log_analysis, :boolean,
       description:
         "whether to enable log analysis in AI insights (turn off to save on log query costs)"
@@ -206,6 +210,7 @@ defmodule Console.GraphQl.Deployments.Settings do
         "the model to use for tool calls, which are less frequent and require more complex reasoning"
 
     field :embedding_model, :string, description: "the model to use for vector embeddings"
+    field :decision_model, :string, description: @decision_model_doc
 
     field :method, :open_ai_method,
       description:
@@ -252,6 +257,7 @@ defmodule Console.GraphQl.Deployments.Settings do
         "the model to use for tool calls, which are less frequent and require more complex reasoning"
 
     field :embedding_model, :string, description: "the model to use for vector embeddings"
+    field :decision_model, :string, description: @decision_model_doc
 
     field :proxy_models, list_of(:string),
       description: "addditional models to support within the integrated ai proxy"
@@ -288,6 +294,7 @@ defmodule Console.GraphQl.Deployments.Settings do
         "the model to use for tool calls, which are less frequent and require more complex reasoning"
 
     field :embedding_model, :string, description: "the model to use for vector embeddings"
+    field :decision_model, :string, description: @decision_model_doc
     field :access_token, non_null(:string), description: "the azure openai access token to use"
     field :proxy, :http_proxy_attributes, description: "an HTTP proxy to use for this provider's API calls"
 
@@ -317,6 +324,7 @@ defmodule Console.GraphQl.Deployments.Settings do
       description:
         "Bedrock model or inference profile for embeddings. Same ID formats as modelId."
 
+    field :decision_model, :string, description: @decision_model_doc
     field :endpoint, :bedrock_endpoint, description: @bedrock_endpoint_doc
     field :proxy_models, list_of(:string), description: @bedrock_proxy_models_doc
     field :deployments, :json, description: @bedrock_deployments_doc
@@ -341,6 +349,7 @@ defmodule Console.GraphQl.Deployments.Settings do
         "the model to use for tool calls, which are less frequent and require more complex reasoning"
 
     field :embedding_model, :string, description: "the model to use for vector embeddings"
+    field :decision_model, :string, description: @decision_model_doc
 
     field :service_account_json, :string,
       description: "optional service account json to auth to the GCP vertex apis"
@@ -360,6 +369,20 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :store, :vector_store
     field :elastic, :elasticsearch_connection_attributes
     field :opensearch, :opensearch_connection_attributes
+    field :plural, :plural_vector_connection_attributes
+  end
+
+  input_object :plural_vector_connection_attributes do
+    field :host, non_null(:string),
+      description: "base url of the plural vector cluster api, including any configured path prefix"
+
+    field :namespace, :string, description: "the namespace to store vectors in, defaults to console"
+    field :user, :string, description: "user to connect w/ for basic auth"
+    field :password, :string, description: "password to connect w/ for basic auth"
+    field :token, :string, description: "a bearer token (jwt) to authenticate with, takes precedence over basic auth"
+
+    field :defer_embeddings, :boolean,
+      description: "whether to let the vector db embed text with its own configured embedding model, rather than computing embeddings in the console"
   end
 
   input_object :graph_store_attributes do
@@ -591,6 +614,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :streaming, :boolean, description: "whether to stream responses from LLM providers"
 
     field :embedding_provider, :ai_provider, description: "ai provider to use with embeddings (for vector indexing)"
+    field :decision_provider, :ai_provider, description: "ai provider to use for decision (classification) calls"
     field :log_analysis, :boolean, description: "whether to enable log analysis in AI insights (turn off to save on log query costs)"
 
     field :vector_store, :vector_store_settings, description: "settings for vector-backed search"
@@ -642,6 +666,7 @@ defmodule Console.GraphQl.Deployments.Settings do
         "the model to use for tool calls, which are less frequent and require more complex reasoning"
 
     field :embedding_model, :string, description: "the model to use for vector embeddings"
+    field :decision_model, :string, description: @decision_model_doc
 
     field :method, :open_ai_method,
       description:
@@ -686,6 +711,8 @@ defmodule Console.GraphQl.Deployments.Settings do
       description:
         "the model to use for tool calls, which are less frequent and require more complex reasoning"
 
+    field :decision_model, :string, description: @decision_model_doc
+
     field :proxy_models, list_of(:string),
       description: "addditional models to support within the integrated ai proxy"
   end
@@ -711,6 +738,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :model, :string
     field :proxy, :http_proxy_configuration, description: "the HTTP proxy used for this provider's API calls"
     field :embedding_model, :string, description: "the model to use for vector embeddings"
+    field :decision_model, :string, description: @decision_model_doc
 
     field :tool_model, :string,
       description:
@@ -744,6 +772,7 @@ defmodule Console.GraphQl.Deployments.Settings do
       description:
         "Bedrock model or inference profile for embeddings. Same ID formats as modelId."
 
+    field :decision_model, :string, description: @decision_model_doc
     field :endpoint, :bedrock_endpoint, description: @bedrock_endpoint_doc
     field :proxy_models, list_of(:string), description: @bedrock_proxy_models_doc
     field :deployments, :map, description: @bedrock_deployments_doc
@@ -761,6 +790,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :model, :string, description: "the vertex ai model to use"
     field :proxy, :http_proxy_configuration, description: "the HTTP proxy used for this provider's API calls"
     field :embedding_model, :string, description: "the model to use for vector embeddings"
+    field :decision_model, :string, description: @decision_model_doc
 
     field :tool_model, :string,
       description:
@@ -904,6 +934,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :model,           :string
     field :tool_model,      :string
     field :embedding_model, :string
+    field :decision_model,  :string
   end
 
   connection node_type: :project

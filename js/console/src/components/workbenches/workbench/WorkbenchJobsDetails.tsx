@@ -1,6 +1,5 @@
 import {
   ArrowTopRightIcon,
-  Chip,
   Flex,
   prettifyRepoUrl,
 } from '@pluralsh/design-system'
@@ -31,15 +30,17 @@ import {
   getJobGutterStatus,
   useDetailsViewState,
 } from 'components/workbenches/common/WorkbenchDetailsView'
-import { WorkbenchJobPrIcon } from 'components/workbenches/common/WorkbenchJobPrIcon'
+import {
+  WorkbenchJobPrIcon,
+  WorkbenchPrStatusChip,
+} from 'components/workbenches/common/WorkbenchJobPrIcon'
 import { WorkbenchSearchInput } from 'components/workbenches/common/WorkbenchSearchInput'
 import {
-  PrStatus,
   PullRequestBasicFragment,
   WorkbenchJobTinyFragment,
 } from 'generated/graphql'
 import { isEmpty } from 'lodash'
-import { ComponentProps, useMemo } from 'react'
+import { useMemo } from 'react'
 import styled from 'styled-components'
 import { formatShortAge, fromNow } from 'utils/datetime'
 import { ensureURLValidity } from 'utils/url'
@@ -318,13 +319,10 @@ function PrRow({ pr }: { pr: PullRequestBasicFragment }) {
         css={{ flex: 1 }}
       />
       {pr.status && (
-        <Chip
-          size="small"
+        <WorkbenchPrStatusChip
+          status={pr.status}
           fillLevel={1}
-          severity={PR_STATUS_SEVERITY[pr.status]}
-        >
-          {PR_STATUS_LABEL[pr.status]}
-        </Chip>
+        />
       )}
       <ArrowTopRightIcon
         size={12}
@@ -333,21 +331,6 @@ function PrRow({ pr }: { pr: PullRequestBasicFragment }) {
       />
     </DetailsLinkRowSC>
   )
-}
-
-const PR_STATUS_SEVERITY: Record<
-  PrStatus,
-  ComponentProps<typeof Chip>['severity']
-> = {
-  [PrStatus.Open]: 'neutral',
-  [PrStatus.Merged]: 'success',
-  [PrStatus.Closed]: 'danger',
-}
-
-const PR_STATUS_LABEL: Record<PrStatus, string> = {
-  [PrStatus.Open]: 'Open',
-  [PrStatus.Merged]: 'Merged',
-  [PrStatus.Closed]: 'Closed',
 }
 
 function getDetailsTabs({

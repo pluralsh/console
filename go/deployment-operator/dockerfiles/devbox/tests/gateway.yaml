@@ -1,0 +1,23 @@
+schemaVersion: 2.0.0
+
+metadataTest:
+  labels:
+    - key: sh.plural.devbox/component
+      value: gateway
+  entrypoint: ["/devbox-gateway"]
+  user: "65532:65532"
+
+fileExistenceTests:
+  - name: devbox-gateway
+    path: /devbox-gateway
+    shouldExist: true
+    permissions: "-rwxr-xr-x"
+  - name: CA certificates
+    path: /etc/ssl/certs/ca-certificates.crt
+    shouldExist: true
+  - name: distroless, no shell
+    path: /bin/sh
+    shouldExist: false
+  - name: no daemon or harnesses
+    path: /usr/local/bin/devbox-daemon
+    shouldExist: false

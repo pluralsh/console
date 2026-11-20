@@ -68,9 +68,21 @@ func TestSystemPromptTemplate_EmbedsOriginalPrompt(t *testing.T) {
 					"CI flakes are not defects",
 					"Do **not** call `createCommit`",
 					"transient network/DNS errors",
+					"Monitoring is external",
+					"Do **not** wait for CI checks that are still running",
 				} {
 					if !strings.Contains(content, expected) {
 						t.Fatalf("expected babysit instructions to contain %q", expected)
+					}
+				}
+			}
+			if tc.name == "write" {
+				for _, expected := range []string{
+					"PR monitoring is handled outside this session",
+					"Do **not** babysit the pull request yourself",
+				} {
+					if !strings.Contains(content, expected) {
+						t.Fatalf("expected write instructions to contain %q", expected)
 					}
 				}
 			}

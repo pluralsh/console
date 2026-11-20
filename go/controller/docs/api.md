@@ -82,6 +82,7 @@ _Appears in:_
 | `model` _string_ | Model is the LLM model name to use. |  | Optional: \{\} <br /> |
 | `toolModel` _string_ | ToolModel to use for tool calling, which is less frequent and often requires more advanced reasoning |  | Optional: \{\} <br /> |
 | `embeddingModel` _string_ | EmbeddingModel to use for generating embeddings |  | Optional: \{\} <br /> |
+| `decisionModel` _string_ | DecisionModel is a cheap, fast model for decision (classification) calls, like reviewing devbox agent<br />tool calls. Models without native decision support are emulated through the AI proxy. |  | Optional: \{\} <br /> |
 | `proxyModels` _string array_ | ProxyModels are additional models to support within our integrated ai proxy. |  | Optional: \{\} <br /> |
 | `baseUrl` _string_ | BaseUrl is a custom base url to use, for reimplementations<br />of the same API scheme (for instance Together.ai uses the OpenAI API spec) |  | Optional: \{\} <br /> |
 | `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to the local secret holding the token to access<br />the configured AI provider. |  | Required: \{\} <br /> |
@@ -107,6 +108,7 @@ _Appears in:_
 | `toolProvider` _[AiProvider](#aiprovider)_ | ToolProvider to use for tool calling, in case you want to use a different LLM more optimized to those tasks |  | Enum: [OPENAI OPENAI_COMPATIBLE XAI ANTHROPIC OLLAMA AZURE BEDROCK VERTEX] <br />Optional: \{\} <br /> |
 | `streaming` _boolean_ | Streaming defines whether to stream responses from LLM providers. | true | Optional: \{\} <br /> |
 | `embeddingProvider` _[AiProvider](#aiprovider)_ | EmbeddingProvider to use for generating embeddings. Oftentimes foundational<br />model providers do not have embeddings models, and it's better to simply use OpenAI. |  | Enum: [OPENAI OPENAI_COMPATIBLE ANTHROPIC OLLAMA AZURE BEDROCK VERTEX] <br />Optional: \{\} <br /> |
+| `decisionProvider` _[AiProvider](#aiprovider)_ | DecisionProvider to use for decision (classification) calls, like reviewing devbox agent tool calls.<br />Defaults to the first provider with a decision model, falling back to the main provider's models. |  | Enum: [OPENAI OPENAI_COMPATIBLE ANTHROPIC AZURE BEDROCK VERTEX XAI] <br />Optional: \{\} <br /> |
 | `logAnalysis` _boolean_ | LogAnalysis defines whether to enable log analysis in AI insights (turn off to save on log query costs) |  | Optional: \{\} <br /> |
 | `openAI` _[OpenAISettings](#openaisettings)_ | OpenAI holds the OpenAI provider configuration. |  | Optional: \{\} <br /> |
 | `openAICompatible` _[OpenAISettings](#openaisettings)_ | OpenAICompatible holds the OpenAI-compatible provider configuration. |  | Optional: \{\} <br /> |
@@ -371,6 +373,7 @@ _Appears in:_
 | `model` _string_ | Model - the OpenAi model you wish to use. If not specified, Plural will provide a default. |  | Optional: \{\} <br /> |
 | `toolModel` _string_ | ToolModel to use for tool calling, which is less frequent and often requires more advanced reasoning. |  | Optional: \{\} <br /> |
 | `embeddingModel` _string_ | EmbeddingModel to use for generating embeddings. |  | Optional: \{\} <br /> |
+| `decisionModel` _string_ | DecisionModel is a cheap, fast model for decision (classification) calls, like reviewing devbox agent<br />tool calls. Models without native decision support are emulated through the AI proxy. |  | Optional: \{\} <br /> |
 | `deployments` _object (keys:string, values:string)_ | Deployments is a mapping from model id to azure OpenAI deployment if those require additional configuration |  | Optional: \{\} <br /> |
 | `proxyModels` _string array_ | ProxyModels are additional models to support within the integrated ai proxy. |  | Optional: \{\} <br /> |
 | `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to the local secret holding the token to access<br />the configured AI provider. |  | Required: \{\} <br /> |
@@ -410,6 +413,7 @@ _Appears in:_
 | `modelId` _string_ | ModelID is the primary AWS Bedrock model or inference profile identifier.<br />Use a egional inference profile ID with three dot-separated segments (e.g. us.anthropic.claude-3-5-sonnet-20241022-v2:0,<br />global.anthropic.claude-haiku-4-5-20251001-v1:0). |  | Optional: \{\} <br /> |
 | `toolModelId` _string_ | ToolModelId is the Bedrock model or inference profile for tool calling. Same ID formats as modelId. |  | Optional: \{\} <br /> |
 | `embeddingModel` _string_ | EmbeddingModel is the Bedrock model or inference profile for embeddings. Same ID formats as modelId. |  | Optional: \{\} <br /> |
+| `decisionModel` _string_ | DecisionModel is a cheap, fast model for decision (classification) calls, like reviewing devbox agent<br />tool calls. Models without native decision support are emulated through the AI proxy. |  | Optional: \{\} <br /> |
 | `endpoint` _[BedrockEndpoint](#bedrockendpoint)_ | Endpoint selects the AWS Bedrock API surface. RUNTIME (the default) uses InvokeModel or<br />Converse on bedrock-runtime; MANTLE uses the Bedrock Mantle Anthropic/OpenAI-compatible APIs. | RUNTIME | Enum: [RUNTIME MANTLE] <br />Optional: \{\} <br /> |
 | `proxyModels` _string array_ | ProxyModels lists additional Bedrock model or inference profile IDs exposed through the Nexus<br />OpenAI-compatible proxy beyond modelId, toolModelId, and embeddingModel. Same ID formats as modelId. |  | Optional: \{\} <br /> |
 | `region` _string_ | Region is the AWS region the model is hosted in |  | Required: \{\} <br /> |
@@ -3622,6 +3626,7 @@ _Appears in:_
 | `model` _string_ | Model is the LLM model name to use. |  | Optional: \{\} <br /> |
 | `toolModel` _string_ | ToolModel to use for tool calling, which is less frequent and often requires more advanced reasoning |  | Optional: \{\} <br /> |
 | `embeddingModel` _string_ | EmbeddingModel to use for generating embeddings |  | Optional: \{\} <br /> |
+| `decisionModel` _string_ | DecisionModel is a cheap, fast model for decision (classification) calls, like reviewing devbox agent<br />tool calls. Models without native decision support are emulated through the AI proxy. |  | Optional: \{\} <br /> |
 | `proxyModels` _string array_ | ProxyModels are additional models to support within our integrated ai proxy. |  | Optional: \{\} <br /> |
 | `baseUrl` _string_ | BaseUrl is a custom base url to use, for reimplementations of the same API scheme (for instance Together.ai uses the OpenAI API spec).  Should be similar to https://api.openai.com/v1 |  | Optional: \{\} <br /> |
 | `tokenExchange` _[OAuth2TokenExchange](#oauth2tokenexchange)_ | TokenExchange configures OAuth2 client credentials against a token endpoint to obtain access tokens for OpenAI-compatible APIs. |  | Optional: \{\} <br /> |
@@ -4098,6 +4103,27 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `priority` _[NotificationPriority](#notificationpriority)_ | Priority determines the importance level of notifications delivered through this sink.<br />Higher priority notifications may be displayed more prominently in the Console UI<br />and can influence notification filtering and display behavior. |  | Enum: [LOW MEDIUM HIGH] <br />Optional: \{\} <br /> |
 | `urgent` _boolean_ | Urgent controls whether notifications should be immediately delivered via email.<br />When true, notifications sent to this sink will trigger immediate SMTP delivery<br />in addition to appearing in the Console UI, useful for critical alerts. |  | Optional: \{\} <br /> |
+
+
+#### PluralVectorConnectionSettings
+
+
+
+
+
+
+
+_Appears in:_
+- [VectorStore](#vectorstore)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `host` _string_ | Host is the base url of the plural vector cluster api, including any configured path prefix. |  | Required: \{\} <br /> |
+| `namespace` _string_ | Namespace is the vector db namespace to store embeddings in, defaults to console. |  | Optional: \{\} <br /> |
+| `user` _string_ | User is the user to authenticate with basic auth. |  | Optional: \{\} <br /> |
+| `passwordSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | PasswordSecretRef is a reference to the local secret holding the basic auth password. |  | Optional: \{\} <br /> |
+| `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to the local secret holding a bearer token, which takes precedence over basic auth. |  | Optional: \{\} <br /> |
+| `deferEmbeddings` _boolean_ | DeferEmbeddings lets the vector db embed text with its own configured embedding model,<br />rather than computing embeddings in the console. |  | Optional: \{\} <br /> |
 
 
 #### Policy
@@ -6083,9 +6109,10 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `enabled` _boolean_ | Enabled controls whether the vector store is enabled or not.. | false | Optional: \{\} <br /> |
-| `vectorStore` _[VectorStore](#vectorstore)_ | VectorStore is the type of the vector store to use. |  | Enum: [ELASTIC OPENSEARCH POSTGRES] <br />Optional: \{\} <br /> |
+| `vectorStore` _[VectorStore](#vectorstore)_ | VectorStore is the type of the vector store to use. |  | Enum: [ELASTIC OPENSEARCH POSTGRES PLURAL] <br />Optional: \{\} <br /> |
 | `elastic` _[ElasticsearchConnectionSettings](#elasticsearchconnectionsettings)_ | Elastic configuration for the vector store. |  | Optional: \{\} <br /> |
 | `opensearch` _[OpensearchConnectionSettings](#opensearchconnectionsettings)_ | Opensearch configuration for the vector store. |  | Optional: \{\} <br /> |
+| `plural` _[PluralVectorConnectionSettings](#pluralvectorconnectionsettings)_ | Plural vector db configuration for the vector store. |  | Optional: \{\} <br /> |
 
 
 #### VertexSettings
@@ -6105,6 +6132,7 @@ _Appears in:_
 | `model` _string_ | Model is the Vertex AI model to use. This should be a model listed currently on models.dev, for instance here: https://models.dev/?search=google-vertex |  | Optional: \{\} <br /> |
 | `toolModel` _string_ | ToolModel to use for tool calling, which is less frequent and often requires more advanced reasoning. This should be a model listed currently on models.dev, for instance here: https://models.dev/?search=google-vertex |  | Optional: \{\} <br /> |
 | `embeddingModel` _string_ | EmbeddingModel to use for generating embeddings.<br />This should be a model listed currently on models.dev, for instance here: https://models.dev/?search=google-vertex.<br />Default is gemini-embedding-001. |  | Optional: \{\} <br /> |
+| `decisionModel` _string_ | DecisionModel is a cheap, fast model for decision (classification) calls, like reviewing devbox agent<br />tool calls. Models without native decision support are emulated through the AI proxy. |  | Optional: \{\} <br /> |
 | `proxyModels` _string array_ | ProxyModels are additional models to support within the integrated ai proxy. |  | Optional: \{\} <br /> |
 | `project` _string_ | Project is the GCP project you'll be using |  | Required: \{\} <br /> |
 | `location` _string_ | Location is the GCP region Vertex is queried from |  | Required: \{\} <br /> |
@@ -6258,6 +6286,7 @@ _Appears in:_
 | `services` _boolean_ | Services enables the services capability. |  | Optional: \{\} <br /> |
 | `stacks` _boolean_ | Stacks enables the stacks capability. |  | Optional: \{\} <br /> |
 | `kubernetes` _boolean_ | Kubernetes enables the Kubernetes capability. |  | Optional: \{\} <br /> |
+| `sentinels` _boolean_ | Sentinels enables tools to inspect sentinels, their runs and run job results. |  | Optional: \{\} <br /> |
 
 
 #### WorkbenchJobBudget

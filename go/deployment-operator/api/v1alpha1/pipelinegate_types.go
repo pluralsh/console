@@ -152,9 +152,5 @@ func (pg *PipelineGate) CreateNewJobName() string {
 }
 
 func (pg *PipelineGate) CreateNewJobRef() console.NamespacedName {
-	jobRef := console.NamespacedName{Name: pg.CreateNewJobName(), Namespace: pg.Namespace}
-	if pg.Spec.GateSpec != nil && pg.Spec.GateSpec.JobSpec != nil && pg.Spec.GateSpec.JobSpec.Template.Namespace != "" {
-		pg.Namespace = pg.Spec.GateSpec.JobSpec.Template.Namespace
-	}
-	return jobRef
+	return console.NamespacedName{Name: pg.CreateNewJobName(), Namespace: pg.Namespace}
 }

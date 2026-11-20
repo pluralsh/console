@@ -47,6 +47,7 @@
   import_types Console.GraphQl.Deployments.Workbench
   import_types Console.GraphQl.Deployments.Agent
   import_types Console.GraphQl.Deployments.Integration
+  import_types Console.GraphQl.Deployments.Devbox
 
   enum :agent_notification_resource do
     value :service
@@ -93,6 +94,8 @@
     import_fields :public_agent_queries
     import_fields :public_sentinel_queries
     import_fields :integration_queries
+    import_fields :devbox_queries
+    import_fields :public_devbox_queries
   end
 
   object :deployment_mutations do
@@ -121,6 +124,8 @@
     import_fields :public_agent_mutations
     import_fields :public_sentinel_mutations
     import_fields :integration_mutations
+    import_fields :devbox_mutations
+    import_fields :public_devbox_mutations
 
     @desc "a reusable mutation for updating rbac settings on core services"
     field :update_rbac, :boolean do

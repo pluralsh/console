@@ -33,3 +33,23 @@ jobs:
           fetch-depth: 0
       - uses: azure/setup-helm@v5.0.1
       - run: helm template ${{ matrix.chart }} --set dashboard.app.security.csrfKey=dummycsrfkey
+
+  agent-substrate:
+    needs: [vouch]
+    name: Test agent-substrate chart
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - uses: azure/setup-helm@v5.0.1
+        with:
+          version: v3.18.3
+      - name: Install helm-unittest and kubeconform
+        run: |
+          helm plugin install https://github.com/helm-unittest/helm-unittest --version v1.2.1
+          curl -sSL https://github.com/yannh/kubeconform/releases/download/v0.8.0/kubeconform-linux-amd64.tar.gz |
+            sudo tar -xz -C /usr/local/bin kubeconform
+      - name: Add repos
+        run: helm repo add cnpg https://cloudnative-pg.github.io/charts
+      - name: Lint, template, kubeconform, unittest
+        run: charts/agent-substrate/hack/test.sh

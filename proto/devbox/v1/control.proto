@@ -1,0 +1,515 @@
+syntax = "proto3";
+
+// devbox.v1.Control: console -> KAS -> devbox-gateway.
+//
+// Console calls Control on KAS's internal API listener, authenticated with the shared KAS JWT secret, with the
+// target cluster in the `devbox-cluster-id` metadata entry. KAS finds the cluster's tunnel (across replicas) and
+// forwards each call as the same-named devbox.v1.Gateway RPC: `/devbox.v1.Control/<M>` becomes
+// `/devbox.v1.Gateway/<M>` with identical request and response messages, so KAS forwards raw frames without
+// decoding them. Gateway calls that need the sandbox are then forwarded to devbox.v1.Daemon via atenet-router.
+//
+// Which calls touch the sandbox matters, because any request through the router resumes a suspended actor:
+//   * Never touch the sandbox: DeleteSnapshot, InvalidateAllowlist, SetInstanceLeases (relayed only while running).
+//   * Resume a suspended instance only when the request sets `resume_if_suspended`; otherwise they fail with
+//     ERROR_REASON_INSTANCE_SUSPENDED: everything else that reaches the daemon (threads, prompts, files,
+//     timelines and sessions, which the box serves from its own workspace volume).
+//   * ListCommands on a suspended instance is answered by console from its index, never forwarded.
+package devbox.v1;
+
+option go_package = "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1;devboxv1";
+
+import "google/protobuf/timestamp.proto";
+import "devbox/v1/common.proto";
+import "devbox/v1/acp.proto";
+import "devbox/v1/workspace.proto";
+
+service Control {
+  // ---- Instance lifecycle ----
+
+  // CreateInstance creates the actor from the box's golden template tag, registers the instance with the
+  // credential provider, applies its EgressPolicy and resumes it. Idempotent on instance_id. Returns once the
+  // gateway has accepted the work; progress arrives through Ingest.ReportInstanceStatus.
+  rpc CreateInstance(CreateInstanceRequest) returns (CreateInstanceResponse);
+  // StartFromSnapshot is CreateInstance from a snapshot's tag.
+  rpc StartFromSnapshot(StartFromSnapshotRequest) returns (CreateInstanceResponse);
+  // CancelInstance stops the instance for good: deletes the actor (and with it the transcript on its workspace
+  // volume) and egress policy and revokes cached credentials. Snapshots are kept.
+  rpc CancelInstance(InstanceActionRequest) returns (InstanceActionResponse);
+  // SuspendInstance settles in-flight entities, closes the event subscription and suspends the actor.
+  rpc SuspendInstance(InstanceActionRequest) returns (InstanceActionResponse);
+  // ResumeInstance resumes a suspended actor and re-subscribes to its events (resume-on-open/prompt).
+  rpc ResumeInstance(InstanceActionRequest) returns (InstanceActionResponse);
+  // SnapshotInstance runs prepare (settle, scrub credentials), synchronous suspend, CreateTag, resume. Returns
+  // when accepted; the result arrives through Ingest.ReportSnapshot.
+  rpc SnapshotInstance(SnapshotInstanceRequest) returns (SnapshotInstanceResponse);
+  // DeleteSnapshot deletes the snapshot's Substrate tag.
+  rpc DeleteSnapshot(DeleteSnapshotRequest) returns (DeleteSnapshotResponse);
+  // SetAgentBilling restarts one agent connection with different billing ("Switch to Plural AI proxy") and
+  // resumes its threads.
+  rpc SetAgentBilling(SetAgentBillingRequest) returns (SetAgentBillingResponse);
+
+  // ---- Threads (each maps to an ACP built-in, section 4.6b) ----
+
+  // CreateThread: `session/new` (plus `session/set_config_option` for model and initial options).
+  rpc CreateThread(CreateThreadRequest) returns (ThreadResponse);
+  // ListThreads: the daemon's threads plus, when requested, importable sessions from `session/list`.
+  rpc ListThreads(ListThreadsRequest) returns (ListThreadsResponse);
+  // ImportThread: `session/resume` with `replayFrom: start` (or `session/load` on v1) for a listed session.
+  rpc ImportThread(ImportThreadRequest) returns (ThreadResponse);
+  // ResumeThread: reopen a closed thread, `session/resume` (or `session/load`).
+  rpc ResumeThread(ResumeThreadRequest) returns (ThreadResponse);
+  // CloseThread: `session/close` (or cancel + drop on agents without close).
+  rpc CloseThread(ThreadActionRequest) returns (ThreadResponse);
+  // DeleteThread: `session/delete` when supported; `agent_side_deleted` says whether it was.
+  rpc DeleteThread(ThreadActionRequest) returns (DeleteThreadResponse);
+  // ForkThread: `session/fork` or `unstable_forkSession`. UNSUPPORTED when not advertised.
+  rpc ForkThread(ForkThreadRequest) returns (ThreadResponse);
+
+  // ---- Turns ----
+
+  // Prompt sends `session/prompt`. Returns once the daemon accepted (or queued) it; the turn's progress arrives
+  // as entities and `state_update`. Idempotent on prompt_id.
+  rpc Prompt(PromptRequest) returns (PromptResponse);
+  // CancelPrompt sends `session/cancel` for the thread's current turn.
+  rpc CancelPrompt(CancelPromptRequest) returns (CancelPromptResponse);
+  // SetThreadConfigOption: `session/set_config_option`. Returns the agent's reported options.
+  rpc SetThreadConfigOption(SetThreadConfigOptionRequest) returns (SetThreadConfigOptionResponse);
+  // RespondInteraction answers a pending permission request or elicitation.
+  rpc RespondInteraction(RespondInteractionRequest) returns (RespondInteractionResponse);
+  // ListCommands returns the session's live slash commands (running instances only).
+  rpc ListCommands(ListCommandsRequest) returns (ListCommandsResponse);
+
+  // ---- History, served by the box ----
+
+  // GetTimeline pages a session's settled entities by position, merged with in-flight state.
+  rpc GetTimeline(GetTimelineRequest) returns (GetTimelineResponse);
+  // GetSessions returns the thread and subagent tree.
+  rpc GetSessions(GetSessionsRequest) returns (GetSessionsResponse);
+
+  // ---- Idle policy inputs ----
+
+  // SetInstanceLeases replaces the instance's viewer and deferral leases (section 4.3a).
+  rpc SetInstanceLeases(SetInstanceLeasesRequest) returns (SetInstanceLeasesResponse);
+
+  // ---- Workspace, files and changes ----
+
+  rpc AddRepository(AddRepositoryRequest) returns (AddRepositoryResponse);
+  rpc ListRepositories(ListRepositoriesRequest) returns (ListRepositoriesResponse);
+  rpc ListFiles(ListFilesRequest) returns (ListFilesResponse);
+  rpc ReadFile(ReadFileRequest) returns (ReadFileResponse);
+  rpc WriteFile(WriteFileRequest) returns (WriteFileResponse);
+  rpc GetChanges(GetChangesRequest) returns (GetChangesResponse);
+
+  // ---- Interactive streams ----
+
+  // OpenStream prepares a terminal, VNC or preview target and returns a short-lived descriptor. Console mints
+  // the stream token around it; the browser then connects to KAS at /ext/devbox/streams/... (section 4.6).
+  rpc OpenStream(OpenStreamRequest) returns (OpenStreamResponse);
+
+  // ---- Egress ----
+
+  // InvalidateAllowlist drops the gateway's cached repository allowlist for a box or instance, and re-applies
+  // egress policies, after console changes the runner or workbench repositories.
+  rpc InvalidateAllowlist(InvalidateAllowlistRequest) returns (InvalidateAllowlistResponse);
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Instance lifecycle
+// ---------------------------------------------------------------------------------------------------------------
+
+message CreateInstanceRequest {
+  string instance_id = 1;
+  string devbox_id = 2;
+  string workbench_id = 3;
+  // The instance owner, whose subscription credentials (if any) are used.
+  Principal owner = 4;
+  // DevboxRunner the box was registered from (namespace/name in the workload cluster).
+  string runner_namespace = 5;
+  string runner_name = 6;
+  // Default agent and model for new threads.
+  AgentType agent = 7;
+  string model = 8;
+  // Initial values for other config options (mode, thought level, ...).
+  repeated ConfigOptionSetting config_options = 9;
+  // One entry per agent the instance may use, with billing. Agents not listed use the AI proxy.
+  repeated AgentLaunch agents = 10;
+  repeated RepositorySpec repositories = 11;
+  // The effective repository allowlist (runner list narrowed by the workbench). Empty means the runner's list.
+  repeated string allowed_repositories = 12;
+  // Console thread ID and title for the instance's first thread.
+  string first_thread_id = 13;
+  string first_thread_title = 14;
+  // Effective idle policy and running-thread limit (default 4).
+  IdlePolicy idle_policy = 15;
+  int32 max_running_threads = 16;
+  // Initial leases, typically the creator's viewer lease.
+  repeated Lease leases = 17;
+  // Repeating a key returns the existing instance.
+  string idempotency_key = 18;
+  // Console's AI proxy serves decision models, so threads can run at AUTO with the daemon reviewing permission
+  // requests where the agent's own reviewer isn't available.
+  bool decision_review = 19;
+}
+
+message CreateInstanceResponse {
+  string instance_id = 1;
+  InstanceStatus status = 2;
+  // Substrate actor name.
+  string actor_id = 3;
+  int64 template_revision = 4;
+  // Image digest the instance runs.
+  string image_digest = 5;
+  // For StartFromSnapshot: FILESYSTEM when the template changed and the restore cold-boots (the UI must say so).
+  SnapshotFidelity restore_fidelity = 6;
+  string message = 7;
+}
+
+message SnapshotRef {
+  string snapshot_id = 1;
+  // Substrate tag reference.
+  string tag = 2;
+  int64 template_revision = 3;
+  SnapshotFidelity fidelity = 4;
+}
+
+message StartFromSnapshotRequest {
+  CreateInstanceRequest instance = 1;
+  SnapshotRef snapshot = 2;
+  reserved 3, 4;
+  reserved "source_instance_id", "copy_transcript";
+}
+
+message InstanceActionRequest {
+  string instance_id = 1;
+  Principal requested_by = 2;
+  SuspendReason reason = 3;
+  string message = 4;
+}
+
+message InstanceActionResponse {
+  string instance_id = 1;
+  InstanceStatus status = 2;
+  string message = 3;
+}
+
+message SnapshotInstanceRequest {
+  string instance_id = 1;
+  string snapshot_id = 2;
+  string name = 3;
+  SnapshotFidelity fidelity = 4;
+  // Named or workbench-shared snapshots outlive the owner's own suspend/resume: the daemon stops
+  // subscription-backed Codex processes before capturing memory (section 4.11).
+  bool shared = 5;
+  Principal requested_by = 6;
+}
+
+message SnapshotInstanceResponse {
+  string snapshot_id = 1;
+  bool accepted = 2;
+}
+
+message DeleteSnapshotRequest {
+  SnapshotRef snapshot = 1;
+}
+
+message DeleteSnapshotResponse {
+  bool deleted = 1;
+}
+
+message SetAgentBillingRequest {
+  string instance_id = 1;
+  AgentLaunch agent = 2;
+  Principal requested_by = 3;
+}
+
+message SetAgentBillingResponse {
+  AgentConnection connection = 1;
+  // Threads resumed on the restarted connection.
+  repeated string thread_ids = 2;
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Threads
+// ---------------------------------------------------------------------------------------------------------------
+
+// ThreadRef addresses a thread. `session_id` may be empty when the caller only knows the thread ID.
+message ThreadRef {
+  string instance_id = 1;
+  string thread_id = 2;
+  string session_id = 3;
+}
+
+message CreateThreadRequest {
+  string instance_id = 1;
+  // Console-allocated before `session/new`, so the per-thread MCP entry can carry `X-Devbox-Thread`.
+  string thread_id = 2;
+  // Unset means the instance default.
+  AgentType agent = 3;
+  string model = 4;
+  repeated ConfigOptionSetting config_options = 5;
+  string title = 6;
+  // "~" (default) or "~/<repo>".
+  string cwd = 7;
+  // Create ~/.threads/<thread_id>/<repo> worktrees for these checkouts and use them as the session cwd.
+  repeated string worktree_repos = 8;
+  Principal created_by = 9;
+  bool resume_if_suspended = 10;
+}
+
+message ThreadResponse {
+  Session session = 1;
+}
+
+message ListThreadsRequest {
+  string instance_id = 1;
+  bool include_importable = 2;
+}
+
+message ListThreadsResponse {
+  repeated Session threads = 1;
+  repeated ImportableSession importable = 2;
+}
+
+message ImportThreadRequest {
+  string instance_id = 1;
+  string thread_id = 2;
+  AgentType agent = 3;
+  string agent_session_id = 4;
+  Principal imported_by = 5;
+  bool resume_if_suspended = 6;
+}
+
+message ResumeThreadRequest {
+  ThreadRef thread = 1;
+  // Force `replayFrom: start` even if the transcript looks complete.
+  bool replay = 2;
+  Principal requested_by = 3;
+  bool resume_if_suspended = 4;
+}
+
+message ThreadActionRequest {
+  ThreadRef thread = 1;
+  Principal requested_by = 2;
+  bool resume_if_suspended = 3;
+}
+
+message DeleteThreadResponse {
+  Session session = 1;
+  bool agent_side_deleted = 2;
+}
+
+message ForkThreadRequest {
+  ThreadRef thread = 1;
+  string new_thread_id = 2;
+  string title = 3;
+  Principal requested_by = 4;
+  bool resume_if_suspended = 5;
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Turns
+// ---------------------------------------------------------------------------------------------------------------
+
+message PromptRequest {
+  ThreadRef thread = 1;
+  // Idempotency key; echoed on the resulting user_message entity.
+  string prompt_id = 2;
+  // A slash command is a prompt whose first text block starts with "/<name>".
+  repeated ContentBlock content = 3;
+  Principal sent_by = 4;
+  // Resume a suspended instance and deliver once ready (resume-on-prompt).
+  bool resume_if_suspended = 5;
+  // Files attached to the prompt. The daemon writes them into the box and appends a resource_link block per file
+  // to content; agents that accept images also get supported images inline.
+  repeated PromptAttachment attachments = 6;
+}
+
+message PromptAttachment {
+  // File name; the daemon reduces it to a safe base name.
+  string name = 1;
+  string mime_type = 2;
+  bytes data = 3;
+}
+
+enum PromptDisposition {
+  PROMPT_DISPOSITION_UNSPECIFIED = 0;
+  // Sent to the agent.
+  PROMPT_DISPOSITION_SENT = 1;
+  // Held because the thread is busy or waiting on the running-thread limit.
+  PROMPT_DISPOSITION_QUEUED = 2;
+  // Repeated prompt_id; nothing sent.
+  PROMPT_DISPOSITION_DUPLICATE = 3;
+}
+
+message PromptResponse {
+  string prompt_id = 1;
+  PromptDisposition disposition = 2;
+  // The user_message entity ID, when known.
+  string message_id = 3;
+}
+
+message CancelPromptRequest {
+  ThreadRef thread = 1;
+  Principal requested_by = 2;
+}
+
+message CancelPromptResponse {
+  bool cancelled = 1;
+}
+
+message SetThreadConfigOptionRequest {
+  ThreadRef thread = 1;
+  ConfigOptionSetting option = 2;
+  Principal requested_by = 3;
+  bool resume_if_suspended = 4;
+}
+
+message SetThreadConfigOptionResponse {
+  // The agent's reported options after the change (which may differ from the request).
+  repeated ConfigOption config_options = 1;
+}
+
+message RespondInteractionRequest {
+  string instance_id = 1;
+  string interaction_id = 2;
+  string session_id = 3;
+  InteractionResponse response = 4;
+  Principal answered_by = 5;
+  bool resume_if_suspended = 6;
+}
+
+message RespondInteractionResponse {
+  Interaction interaction = 1;
+}
+
+message ListCommandsRequest {
+  ThreadRef thread = 1;
+  // Address a subagent session directly instead of a thread.
+  string session_id = 2;
+}
+
+message ListCommandsResponse {
+  repeated AvailableCommand commands = 1;
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// History (also served by devbox.v1.Daemon)
+// ---------------------------------------------------------------------------------------------------------------
+
+message GetTimelineRequest {
+  string instance_id = 1;
+  string session_id = 2;
+  // Without a cursor the page is the newest `limit` entities, and has_more says older ones exist.
+  oneof cursor {
+    // The oldest `limit` entities with position > after_position. 0 starts from the beginning.
+    uint64 after_position = 3;
+    // The newest `limit` entities with position < before_position.
+    uint64 before_position = 6;
+  }
+  // Page size; capped at 1000 (default 200).
+  int32 limit = 4;
+  bool resume_if_suspended = 5;
+}
+
+message GetTimelineResponse {
+  // Latest revision of each entity, ordered by position. In-flight entities have settled = false.
+  repeated AcpEntity entities = 1;
+  // The cursor for the next page in the same direction: the last position when paging forwards, the first when
+  // paging backwards (or without a cursor).
+  uint64 next_position = 2;
+  // More entities exist in the paging direction.
+  bool has_more = 3;
+  // Apply live deltas with offset > delta_offset on top of this page.
+  uint64 delta_offset = 4;
+  reserved 5;
+  reserved "archive_degraded";
+}
+
+message GetSessionsRequest {
+  string instance_id = 1;
+}
+
+message GetSessionsResponse {
+  // Threads and subagents, flat; build the tree with parent_session_id.
+  repeated Session sessions = 1;
+  repeated AgentConnection connections = 2;
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Leases
+// ---------------------------------------------------------------------------------------------------------------
+
+message SetInstanceLeasesRequest {
+  string instance_id = 1;
+  // The full set, replacing any previous one.
+  repeated Lease leases = 2;
+  // Monotonic per instance; older generations are ignored.
+  uint64 generation = 3;
+}
+
+message SetInstanceLeasesResponse {
+  // Leases as applied, with deferrals clamped to maxDeferral.
+  repeated Lease leases = 1;
+  IdleState idle = 2;
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Streams
+// ---------------------------------------------------------------------------------------------------------------
+
+enum StreamKind {
+  STREAM_KIND_UNSPECIFIED = 0;
+  // PTY over WebSocket.
+  STREAM_KIND_TERMINAL = 1;
+  // noVNC over WebSocket (/browser/vnc).
+  STREAM_KIND_VNC = 2;
+  // HTTP(S)/WebSocket to a sandbox port (/preview/:port/*).
+  STREAM_KIND_PREVIEW = 3;
+}
+
+message OpenStreamRequest {
+  string instance_id = 1;
+  StreamKind kind = 2;
+  // TERMINAL: attach to this terminal, or create one from `create_terminal` when empty.
+  string terminal_id = 3;
+  CreateTerminalRequest create_terminal = 4;
+  // PREVIEW: the sandbox port.
+  int32 port = 5;
+  // VNC: start the browser if it isn't running.
+  StartBrowserRequest start_browser = 6;
+  Principal requested_by = 7;
+  bool resume_if_suspended = 8;
+}
+
+// OpenStreamResponse describes a stream target the gateway registered for a short time. Console mints a stream
+// token whose claims are {cluster_id, instance_id, stream_id, kind, sub, exp <= expires_at}; KAS validates it
+// and forwards the WebSocket through Gateway.ProxyStream with `devbox-stream-id` metadata. The gateway maps the
+// stream ID to `daemon_path` on that instance only, so callers can never name an actor or path themselves.
+message OpenStreamResponse {
+  string stream_id = 1;
+  StreamKind kind = 2;
+  // Daemon HTTP path the stream connects to, e.g. /terminals/<id>/ws, /browser/vnc or /preview/3000/.
+  string daemon_path = 3;
+  // Connect before this time. Established streams stay open.
+  google.protobuf.Timestamp expires_at = 4;
+  repeated string subprotocols = 5;
+  TerminalInfo terminal = 6;
+  BrowserInfo browser = 7;
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Egress
+// ---------------------------------------------------------------------------------------------------------------
+
+message InvalidateAllowlistRequest {
+  // Invalidate every instance of the box, or only one instance.
+  string devbox_id = 1;
+  string instance_id = 2;
+  // When set, the new effective allowlist; otherwise the gateway refetches lazily.
+  repeated string allowed_repositories = 3;
+  uint64 generation = 4;
+}
+
+message InvalidateAllowlistResponse {
+  int32 instances_updated = 1;
+}

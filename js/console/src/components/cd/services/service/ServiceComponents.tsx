@@ -194,9 +194,10 @@ function ComponentsListView({
   const throttledSearchQuery = useThrottle(searchQuery, 250)
   const [showDeprecations, setShowDeprecations] = useState(false)
 
+  // kept fresh through the cache by the parent service details query, which
+  // refetches the same components on deltas
   const { data, loading, error } = useServiceDeploymentComponentsQuery({
     variables: { id: serviceId || '' },
-    pollInterval: 15_000, // 15 seconds
     fetchPolicy: 'cache-and-network',
   })
 

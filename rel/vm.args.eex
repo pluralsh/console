@@ -7,6 +7,10 @@
 ## Tweak GC to run more often
 ##-env ERL_FULLSWEEP_AFTER 10
 
+## Don't busy-wait idle schedulers (normal, dirty cpu and dirty io). Spinning burns CPU the
+## container is billed and throttled for, and starves neighbours on a shared node.
 +sbwt none
++sbwtdcpu none
++sbwtdio none
 
 -kernel inet_dist_listen_min 6000 inet_dist_listen_max 6000

@@ -236,6 +236,18 @@ export type AzureShellCredentialsAttributes = {
   tenantId: Scalars['String']['input'];
 };
 
+/** usage for an account, read back from stripe's billing meters */
+export type BillingUsage = {
+  __typename?: 'BillingUsage';
+  /** clusters currently counted for billing */
+  clusterCount: Scalars['Int']['output'];
+  endTime: Scalars['DateTime']['output'];
+  meters: Array<MeterUsage>;
+  startTime: Scalars['DateTime']['output'];
+  /** users in the account, which aren't billed */
+  userCount: Scalars['Int']['output'];
+};
+
 export type BindingAttributes = {
   groupId?: InputMaybe<Scalars['ID']['input']>;
   id?: InputMaybe<Scalars['ID']['input']>;
@@ -434,12 +446,16 @@ export type Cluster = {
   /** The ID of the cluster. */
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the cluster owner's installation of a repository, authorized through the owner's impersonation policy */
+  installation?: Maybe<Installation>;
   /** whether this is a legacy OSS cluster */
   legacy?: Maybe<Scalars['Boolean']['output']>;
   /** whether any installation in the cluster has been locked */
   locked?: Maybe<Scalars['Boolean']['output']>;
   /** The name of the cluster. */
   name: Scalars['String']['output'];
+  /** oidc providers owned by the cluster's owner, authorized through the owner's impersonation policy */
+  oidcProviders?: Maybe<OidcProviderConnection>;
   /** The user that owns the cluster. */
   owner?: Maybe<User>;
   /** The last time the cluster was pinged. */
@@ -459,6 +475,21 @@ export type Cluster = {
   upgradeInfo?: Maybe<Array<Maybe<UpgradeInfo>>>;
   /** CPU/Memory history for this cluster */
   usageHistory?: Maybe<Array<Maybe<ClusterUsageHistory>>>;
+};
+
+
+/** A Kubernetes cluster that can be used to deploy applications on with Plural. */
+export type ClusterInstallationArgs = {
+  repository: Scalars['String']['input'];
+};
+
+
+/** A Kubernetes cluster that can be used to deploy applications on with Plural. */
+export type ClusterOidcProvidersArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -1131,6 +1162,7 @@ export type Group = {
   global?: Maybe<Scalars['Boolean']['output']>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  memberCount?: Maybe<Scalars['Int']['output']>;
   name: Scalars['String']['output'];
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
@@ -1751,6 +1783,14 @@ export enum MessageEntityType {
   Emoji = 'EMOJI',
   Mention = 'MENTION'
 }
+
+export type MeterUsage = {
+  __typename?: 'MeterUsage';
+  buckets: Array<UsageBucket>;
+  meter: UsageMeter;
+  /** the sum of every bucket in the range */
+  total: Scalars['Float']['output'];
+};
 
 export type Metric = {
   __typename?: 'Metric';
@@ -2994,7 +3034,7 @@ export type RootMutationType = {
   passwordlessLogin?: Maybe<User>;
   pingCluster?: Maybe<Cluster>;
   pingWebhook?: Maybe<WebhookResponse>;
-  /** moves up the upgrade waterline for a user */
+  /** moves up the upgrade waterline for a user, or for the owner of the given cluster */
   promote?: Maybe<User>;
   provisionDomain?: Maybe<DnsDomain>;
   publishLogs?: Maybe<TestStep>;
@@ -3178,6 +3218,7 @@ export type RootMutationTypeCreateOauthIntegrationArgs = {
 
 export type RootMutationTypeCreateOidcProviderArgs = {
   attributes: OidcAttributes;
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
   installationId?: InputMaybe<Scalars['ID']['input']>;
 };
 
@@ -3576,6 +3617,11 @@ export type RootMutationTypePingWebhookArgs = {
 };
 
 
+export type RootMutationTypePromoteArgs = {
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
 export type RootMutationTypeProvisionDomainArgs = {
   name: Scalars['String']['input'];
 };
@@ -3856,6 +3902,8 @@ export type RootQueryType = {
   account?: Maybe<Account>;
   auditMetrics?: Maybe<Array<Maybe<GeoMetric>>>;
   audits?: Maybe<AuditConnection>;
+  /** daily usage from stripe's billing meters, defaulting to the last 30 days of every meter */
+  billingUsage?: Maybe<BillingUsage>;
   categories?: Maybe<Array<Maybe<CategoryInfo>>>;
   category?: Maybe<CategoryInfo>;
   chart?: Maybe<Chart>;
@@ -3881,6 +3929,7 @@ export type RootQueryType = {
   dockerRepositories?: Maybe<DockerRepositoryConnection>;
   eabCredential?: Maybe<EabCredential>;
   eabCredentials?: Maybe<Array<Maybe<EabCredential>>>;
+  group?: Maybe<Group>;
   groupMembers?: Maybe<GroupMemberConnection>;
   groups?: Maybe<GroupConnection>;
   helpQuestion?: Maybe<Scalars['String']['output']>;
@@ -3963,6 +4012,13 @@ export type RootQueryTypeAuditsArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type RootQueryTypeBillingUsageArgs = {
+  endTime?: InputMaybe<Scalars['DateTime']['input']>;
+  meters?: InputMaybe<Array<UsageMeter>>;
+  startTime?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
 
@@ -4098,6 +4154,11 @@ export type RootQueryTypeDockerRepositoriesArgs = {
 export type RootQueryTypeEabCredentialArgs = {
   cluster: Scalars['String']['input'];
   provider: Provider;
+};
+
+
+export type RootQueryTypeGroupArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -5106,6 +5167,21 @@ export enum UpgradeType {
   Config = 'CONFIG',
   Dedicated = 'DEDICATED',
   Deploy = 'DEPLOY'
+}
+
+/** a day of usage aggregated by stripe for one billing meter */
+export type UsageBucket = {
+  __typename?: 'UsageBucket';
+  endTime: Scalars['DateTime']['output'];
+  startTime: Scalars['DateTime']['output'];
+  value: Scalars['Float']['output'];
+};
+
+export enum UsageMeter {
+  /** clusters reported for billing */
+  Clusters = 'CLUSTERS',
+  /** bytes of telemetry data ingested */
+  Ingest = 'INGEST'
 }
 
 export type User = {

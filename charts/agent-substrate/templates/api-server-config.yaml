@@ -1,0 +1,44 @@
+{{- $ns := include "substrate.namespace" . -}}
+{{- $pg := .Values.postgres -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ate-api-config
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+data:
+  apiconfig.textproto: |
+    logging: {level: {{ include "substrate.logLevel" (list . .Values.apiServer.logLevel) | quote }}}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ate-api-server-envvars
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+data:
+  ATE_API_POSTGRES_READ_WRITE_ROLE: {{ $pg.readWriteRole | quote }}
+  ATE_API_POSTGRES_OWNER_ROLE: {{ $pg.ownerRole | quote }}
+  ATE_API_POSTGRES_SCHEMA: {{ $pg.schema | quote }}
+  {{- with .Values.apiServer.postgresPoolMaxConns }}
+  ATE_API_POSTGRES_POOL_MAX_CONNS: {{ . | toString | quote }}
+  {{- end }}
+  ATE_API_ACTOR_JWT_ISSUER: {{ include "substrate.actorJWTIssuer" . | quote }}
+  ATE_API_SNAPSHOT_TRANSFER_SERVICE_ACCOUNT: {{ .Values.apiServer.snapshotTransferServiceAccount | quote }}
+  ATE_API_SNAPSHOT_LOCATION: {{ include "substrate.snapshotLocation" . | quote }}
+{{- if and (eq $pg.mode "external") $pg.external.serverCA.pem }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-server-ca
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+type: Opaque
+stringData:
+  server-ca.pem: |
+    {{- $pg.external.serverCA.pem | nindent 4 }}
+{{- end }}

@@ -57,6 +57,13 @@ query GetAgentRunStatus($id: ID!) {
     }
 }
 
+# Fetched by the operator when a pending run is announced over the websocket.
+query GetAgentRunPending($id: ID!) {
+    agentRun(id: $id) {
+        ...AgentRunPendingFragment
+    }
+}
+
 query GetAgentRunMinimal($id: ID!) {
     agentRun(id: $id) {
         ...AgentRunMinimalFragment
@@ -94,7 +101,7 @@ query ListAgentRuntimePendingRuns($id: ID!, $after: String, $first: Int, $before
         pendingRuns(after: $after, first: $first, before: $before, last: $last) {
             edges {
                 node {
-                    ...AgentRunFragment
+                    ...AgentRunPendingFragment
                 }
             }
             pageInfo {
@@ -126,7 +133,7 @@ mutation CreateAgentRun($runtimeId: ID!, $attributes: AgentRunAttributes!) {
 
 mutation UpdateAgentRun($id: ID!, $attributes: AgentRunStatusAttributes!) {
     updateAgentRun(id: $id, attributes: $attributes) {
-        ...AgentRunFragment
+        ...AgentRunUpdateFragment
     }
 }
 
@@ -364,6 +371,35 @@ fragment AgentRunStatusFragment on AgentRun {
     prompts {
         id
         seq
+    }
+}
+
+# What the operator needs to create the AgentRun custom resource for a pending run.
+fragment AgentRunPendingFragment on AgentRun {
+    id
+    prompt
+    repository
+    mode
+    reviewDepth
+    language
+    languageVersion
+    workbenchMcpUrl
+    runtime {
+        name
+    }
+    flow {
+        id
+    }
+}
+
+# Returned by status updates, which the harness sends on every babysit cycle.
+fragment AgentRunUpdateFragment on AgentRun {
+    id
+    status
+    followupPrUrl
+    pullRequests {
+        id
+        url
     }
 }
 

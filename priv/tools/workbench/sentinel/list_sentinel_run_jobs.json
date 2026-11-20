@@ -1,0 +1,27 @@
+{
+    "type": "object",
+    "properties": {
+        "sentinel_run_id": {
+            "type": "string",
+            "description": "UUID of the sentinel run whose jobs should be listed"
+        },
+        "status": {
+            "type": "string",
+            "enum": ["pending", "running", "success", "failed"],
+            "description": "Optional filter for the job status, use failed to find broken jobs"
+        },
+        "check": {
+            "type": "string",
+            "description": "Optional name of the integration test check the jobs belong to"
+        },
+        "cluster": {
+            "type": "string",
+            "description": "Optional Plural cluster handle to only return jobs that ran on that cluster"
+        },
+        "limit": {
+            "type": "integer",
+            "description": "Maximum number of jobs to return, from 1 to 100. Defaults to 25."
+        }
+    },
+    "required": ["sentinel_run_id"]
+}

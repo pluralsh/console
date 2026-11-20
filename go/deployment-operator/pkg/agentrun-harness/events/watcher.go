@@ -1,18 +1,19 @@
-// Package events relays Console notifications about this agent run from the mcpserver sidecar,
-// which holds the deploy token and the websocket, to the harness's poll loops.
+// Package events relays the agent run status Console pushes to the mcpserver sidecar, which holds
+// the deploy token and the websocket, to the harness's poll loops.
 package events
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 
+	console "github.com/pluralsh/console/go/client"
 	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
@@ -22,16 +23,26 @@ const (
 	// requestTimeout must outlast the sidecar's long-poll wait.
 	requestTimeout = 2 * time.Minute
 	retryDelay     = 5 * time.Second
+	maxUpdateBytes = 1 << 20
 )
 
-// Watcher long-polls the sidecar's events endpoint and kicks every subscriber when the run's
-// event generation changes.
+// Update is the sidecar's long-poll answer. Run is the latest status Console pushed, nil until the
+// first push, and Connected reports whether the sidecar's websocket is up.
+type Update struct {
+	Generation uint64                          `json:"generation"`
+	Connected  bool                            `json:"connected"`
+	Run        *console.AgentRunStatusFragment `json:"run,omitempty"`
+}
+
+// Watcher long-polls the sidecar's events endpoint and kicks every subscriber when Console pushes a
+// new status for the run.
 type Watcher struct {
 	url    string
 	client *http.Client
 
 	mu          sync.Mutex
 	subscribers []chan struct{}
+	latest      Update
 }
 
 func NewWatcher(url string) *Watcher {
@@ -52,13 +63,24 @@ func (in *Watcher) Subscribe() <-chan struct{} {
 	return ch
 }
 
+// Latest returns the last update from the sidecar. A nil Watcher is never connected.
+func (in *Watcher) Latest() Update {
+	if in == nil {
+		return Update{}
+	}
+
+	in.mu.Lock()
+	defer in.mu.Unlock()
+	return in.latest
+}
+
 // Run long-polls until ctx is done.
 func (in *Watcher) Run(ctx context.Context) {
-	var generation uint64
 	for ctx.Err() == nil {
-		next, err := in.poll(ctx, generation)
+		update, err := in.poll(ctx, in.Latest())
 		if err != nil {
 			klog.V(log.LogLevelDebug).InfoS("could not poll agent run events", "error", err)
+			in.disconnect()
 			select {
 			case <-ctx.Done():
 			case <-time.After(retryDelay):
@@ -66,33 +88,48 @@ func (in *Watcher) Run(ctx context.Context) {
 			continue
 		}
 
-		if next != generation {
-			generation = next
+		in.mu.Lock()
+		changed := update.Generation != in.latest.Generation || update.Connected != in.latest.Connected
+		in.latest = update
+		in.mu.Unlock()
+		if changed {
 			in.kick()
 		}
 	}
 }
 
-func (in *Watcher) poll(ctx context.Context, since uint64) (uint64, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, in.url+"?"+url.Values{"since": {strconv.FormatUint(since, 10)}}.Encode(), nil)
+func (in *Watcher) disconnect() {
+	in.mu.Lock()
+	wasConnected := in.latest.Connected
+	in.latest.Connected = false
+	in.mu.Unlock()
+	if wasConnected {
+		in.kick()
+	}
+}
+
+func (in *Watcher) poll(ctx context.Context, last Update) (Update, error) {
+	var update Update
+	query := url.Values{
+		"since":     {strconv.FormatUint(last.Generation, 10)},
+		"connected": {strconv.FormatBool(last.Connected)},
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, in.url+"?"+query.Encode(), nil)
 	if err != nil {
-		return 0, err
+		return update, err
 	}
 
 	resp, err := in.client.Do(req)
 	if err != nil {
-		return 0, err
+		return update, err
 	}
 	defer resp.Body.Close()
 
-	body, err := io.ReadAll(io.LimitReader(resp.Body, 64))
-	if err != nil {
-		return 0, err
-	}
 	if resp.StatusCode != http.StatusOK {
-		return 0, fmt.Errorf("unexpected status %d", resp.StatusCode)
+		return update, fmt.Errorf("unexpected status %d", resp.StatusCode)
 	}
-	return strconv.ParseUint(strings.TrimSpace(string(body)), 10, 64)
+	err = json.NewDecoder(io.LimitReader(resp.Body, maxUpdateBytes)).Decode(&update)
+	return update, err
 }
 
 func (in *Watcher) kick() {

@@ -69,6 +69,7 @@ fragment SentinelRunJobFragment on SentinelRunJob {
     check
     status
     format
+    error
     usesGit
     jobSpec {
         ...JobSpecFragment

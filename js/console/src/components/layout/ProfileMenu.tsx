@@ -13,7 +13,9 @@ import { useLogin } from 'components/contexts'
 import { useOutsideClick } from 'components/hooks/useOutsideClick'
 import { useServiceAccountImpersonation } from 'components/hooks/useServiceAccountImpersonation'
 import { SimplePopupMenu } from 'components/layout/HeaderPopupMenu'
-import { useCallback, useRef, useState } from 'react'
+import { SidebarContext } from 'components/layout/Sidebar'
+import { SidebarItem } from 'components/utils/sidebar/SidebarItem'
+import { MouseEvent, use, useCallback, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 
@@ -28,7 +30,8 @@ export function ProfileMenu() {
     restoring,
     restoreSession,
   } = useServiceAccountImpersonation(me?.email)
-  const menuBtnRef = useRef<HTMLButtonElement>(null)
+  const { isExpanded } = use(SidebarContext)
+  const menuBtnRef = useRef<HTMLDivElement>(null)
   useOutsideClick(menuBtnRef, () => setIsMenuOpen(false))
 
   const handleLogout = useCallback(() => {
@@ -43,79 +46,113 @@ export function ProfileMenu() {
     ? `Return to ${originalUserLabel}`
     : 'Return to my account'
 
+  const ariaLabel = impersonating
+    ? `Open profile menu. Impersonating service account ${impersonatedEmail ?? ''}`
+    : 'Open profile menu'
+  const toggleMenu = (e: MouseEvent) => {
+    e.stopPropagation()
+    setIsMenuOpen((open) => !open)
+  }
+
+  const avatar = (size: number) => (
+    <AvatarWrapperSC>
+      <Avatar
+        name={me?.name ?? undefined}
+        src={me?.profile ?? undefined}
+        size={size}
+        css={{
+          transition: 'background-color 0.1s ease, filter 0.1s ease',
+          ...(me?.profile
+            ? {
+                '&:hover, button:hover &': {
+                  filter:
+                    theme.mode === 'light' ? 'brightness(0.92)' : undefined,
+                },
+              }
+            : {
+                backgroundColor: theme.colors['fill-three'],
+                border: theme.borders.input,
+                fontSize: size < 32 ? '0.625rem' : '0.75rem',
+                ...(theme.mode === 'light' && {
+                  // Initials default to white (for action-primary fill);
+                  // on light grey chrome use default dark text.
+                  color: theme.colors.text,
+                }),
+                'button:hover &, button:focus-visible &': {
+                  backgroundColor: theme.colors['fill-three-hover'],
+                },
+              }),
+        }}
+      />
+      {impersonating && (
+        <ImpersonationIconSC>
+          {restoring ? (
+            <Spinner size={10} />
+          ) : (
+            <KeyIcon
+              size={14}
+              color="icon-info"
+            />
+          )}
+        </ImpersonationIconSC>
+      )}
+    </AvatarWrapperSC>
+  )
+
   return (
-    <div css={{ position: 'relative' }}>
-      <Tooltip
-        arrow
-        placement="left-start"
-        label={profileLabel}
-      >
-        <ProfileButtonSC
-          ref={menuBtnRef}
-          tertiary
-          onClick={() => setIsMenuOpen((open) => !open)}
-          css={{
-            borderRadius: theme.borderRadiuses.medium,
-            padding: 0,
-            ...(theme.mode === 'light' && {
-              // Tertiary hover uses a light wash — keep the avatar chrome instead
-              '&:hover': { background: 'transparent' },
-              '&:focus-visible': { background: 'transparent' },
-            }),
-          }}
+    <div
+      ref={menuBtnRef}
+      css={{
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        alignSelf: 'stretch',
+      }}
+    >
+      {isExpanded ? (
+        <SidebarItem
+          type="button"
+          expandedLabel={me?.name ?? 'Profile'}
+          onClick={toggleMenu}
+          css={{ color: theme.colors['text-xlight'] }}
           aria-haspopup="menu"
           aria-expanded={isMenuOpen}
-          aria-label={
-            impersonating
-              ? `Open profile menu. Impersonating service account ${impersonatedEmail ?? ''}`
-              : 'Open profile menu'
-          }
+          aria-label={ariaLabel}
         >
-          <Avatar
-            name={me?.name ?? undefined}
-            src={me?.profile ?? undefined}
-            size={32}
+          {avatar(20)}
+        </SidebarItem>
+      ) : (
+        <Tooltip
+          arrow
+          placement="right"
+          label={profileLabel}
+          displayOn={isMenuOpen ? 'none' : undefined}
+        >
+          <ProfileButtonSC
+            tertiary
+            onClick={toggleMenu}
             css={{
-              transition: 'background-color 0.1s ease, filter 0.1s ease',
-              ...(me?.profile
-                ? {
-                    '&:hover, button:hover &': {
-                      filter:
-                        theme.mode === 'light' ? 'brightness(0.92)' : undefined,
-                    },
-                  }
-                : {
-                    backgroundColor: theme.colors['fill-three'],
-                    border: theme.borders.input,
-                    fontSize: '0.75rem',
-                    ...(theme.mode === 'light' && {
-                      // Initials default to white (for action-primary fill);
-                      // on light grey chrome use default dark text.
-                      color: theme.colors.text,
-                    }),
-                    'button:hover &, button:focus-visible &': {
-                      backgroundColor: theme.colors['fill-three-hover'],
-                    },
-                  }),
+              borderRadius: theme.borderRadiuses.medium,
+              padding: 0,
+              ...(theme.mode === 'light' && {
+                // Tertiary hover uses a light wash — keep the avatar chrome instead
+                '&:hover': { background: 'transparent' },
+                '&:focus-visible': { background: 'transparent' },
+              }),
             }}
-          />
-          {impersonating && (
-            <ImpersonationIconSC>
-              {restoring ? (
-                <Spinner size={10} />
-              ) : (
-                <KeyIcon
-                  size={14}
-                  color="icon-info"
-                />
-              )}
-            </ImpersonationIconSC>
-          )}
-        </ProfileButtonSC>
-      </Tooltip>
+            aria-haspopup="menu"
+            aria-expanded={isMenuOpen}
+            aria-label={ariaLabel}
+          >
+            {avatar(32)}
+          </ProfileButtonSC>
+        </Tooltip>
+      )}
       <SimplePopupMenu
         isOpen={isMenuOpen}
         setIsOpen={setIsMenuOpen}
+        type="sidebar"
         css={{ width: 260 }}
       >
         {impersonating && (
@@ -180,6 +217,12 @@ const ProfileButtonSC = styled(Button)(({ theme }) => ({
     '&:hover': { filter: 'brightness(1.1)' },
   }),
 }))
+
+const AvatarWrapperSC = styled.span({
+  position: 'relative',
+  display: 'inline-flex',
+  flexShrink: 0,
+})
 
 const ImpersonationIconSC = styled.span(({ theme }) => ({
   alignItems: 'center',

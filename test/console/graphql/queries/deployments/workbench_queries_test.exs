@@ -1785,6 +1785,47 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert found["evalResult"]["feedback"]["summary"] == "strong result"
     end
 
+    test "it resolves logsTool with the native Plural logs tool" do
+      workbench = insert(:workbench, configuration: %{observability: %{logs: true}})
+      job = insert(:workbench_job, workbench: workbench)
+      service = insert(:service)
+
+      expect(Console.Logs.Provider, :query, fn query ->
+        assert query.service_id == service.id
+        assert query.query == "level:error"
+        assert query.limit == 10
+
+        {:ok,
+         [
+           %Console.Logs.Line{
+             timestamp: DateTime.utc_now(),
+             log: "database connection failed",
+             facets: [%{key: "service", value: "api"}]
+           }
+         ]}
+      end)
+
+      {:ok, %{data: %{"workbenchJob" => found}}} = run_query("""
+        query WorkbenchJob($id: ID!, $arguments: Json) {
+          workbenchJob(id: $id) {
+            logsTool(name: "plrl_logs", arguments: $arguments) {
+              timestamp
+              message
+              labels
+            }
+          }
+        }
+      """, %{
+        "id" => job.id,
+        "arguments" => Jason.encode!(%{"service_id" => service.id, "query" => "level:error", "limit" => 10})
+      }, %{current_user: admin_user()})
+
+      [log] = found["logsTool"]
+      assert log["timestamp"]
+      assert log["message"] == "database connection failed"
+      assert log["labels"] == %{"service" => "api"}
+    end
+
     test "it resolves metricsTool using the generated observability metrics tool name and parses GraphQL output" do
       workbench = insert(:workbench)
       tool = insert(:workbench_tool,

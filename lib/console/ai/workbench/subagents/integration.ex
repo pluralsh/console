@@ -37,11 +37,12 @@ defmodule Console.AI.Workbench.Subagents.Integration do
     end
   end
 
-  def tools(%Environment{skills: skills, tools: tools, job: job}) do
+  def tools(%Environment{skills: skills, tools: tools, job: job} = environment) do
     skills = Environment.subagent_skills(skills, :integration)
 
     Tools.integration_tools(tools)
     |> Enum.concat(MCP.expand_tools(Environment.subagent_tools(tools, :integration), job))
+    |> Enum.concat(search_tools(environment, :integration))
     |> Enum.concat(skill_knowledge_tools(job, skills) ++ [
       Scratchpad,
       Result

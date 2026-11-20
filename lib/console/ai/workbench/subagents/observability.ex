@@ -19,7 +19,7 @@ defmodule Console.AI.Workbench.Subagents.Observability do
         callback: &callback(activity, environment, &1),
         tool_search: length(tools) > 10,
         pre_enable: [%ObservabilityResult{} | skill_knowledge_pre_enable()],
-        continue_msg: "looks like we aren't done, let's continue and if you're done just call observability_result to wrap up"
+        continue_msg: cont_msg(ObservabilityResult.name())
       ]
     )
     |> MemoryEngine.reduce([{:user, prompt}], &reducer(&1, &2, environment))
@@ -48,6 +48,7 @@ defmodule Console.AI.Workbench.Subagents.Observability do
 
     core_tools(job, environment, user)
     |> Enum.concat(MCP.expand_tools(Environment.subagent_tools(tools, :observability), job))
+    |> Enum.concat(search_tools(environment, :observability))
     |> Enum.concat(pod_logs_tools(job, user))
     |> Enum.concat(Monitoring.read_tools(job))
     |> Enum.concat(skill_knowledge_tools(job, skills) ++ [

@@ -2578,6 +2578,10 @@
             "format": "date-time",
             "type": "string"
           },
+          "error": {
+            "description": "Runtime or configuration error encountered while running the job",
+            "type": "string"
+          },
           "format": {
             "description": "Output format of the job (plaintext, junit)",
             "enum": [

@@ -87,6 +87,22 @@
       ]
     },
     {
+      "description": "Devbox harness pins must match the agent-run images (dockerfiles/devbox/test.sh versions checks this); bump them together",
+      "matchFileNames": ["go/deployment-operator/dockerfiles/devbox/**"],
+      "matchDepNames": [
+        "@anthropic-ai/claude-code",
+        "@agentclientprotocol/claude-agent-acp",
+        "@openai/codex",
+        "@agentclientprotocol/codex-acp",
+        "opencode-ai",
+        "@google/gemini-cli",
+        "@earendil-works/pi-coding-agent",
+        "pi-acp",
+        "pi-mcp-adapter"
+      ],
+      "groupName": "agent harnesses"
+    },
+    {
       "matchManagers": ["mix"],
       "additionalBranchPrefix": "backend/",
       "semanticCommitScope": "backend",
@@ -102,6 +118,14 @@
         "datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s(?:ENV|ARG) .*?_VERSION=(?<currentValue>.*)\\s"
       ],
       "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
+    },
+    {
+      "description": "Devbox image tool versions annotated with '# renovate:' comments above their ARG",
+      "fileMatch": ["^go/deployment-operator/dockerfiles/devbox/.+\\.Dockerfile$"],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)( extractVersion=(?<extractVersion>\\S+))?\\s+ARG \\w+=(?<currentValue>\\S+)"
+      ],
+      "extractVersionTemplate": "{{#if extractVersion}}{{{extractVersion}}}{{else}}^v?(?<version>.+)${{/if}}"
     }
   ],
   "postUpdateOptions": ["yarnDedupeHighest"],

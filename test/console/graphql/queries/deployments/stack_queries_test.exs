@@ -192,7 +192,7 @@ defmodule Console.GraphQl.Deployments.StackQueriesTest do
       """, %{"id" => stack.id}, %{current_user: insert(:user)})
     end
 
-    test "it can list stack infracost resources with limit" do
+    test "it can paginate stack infracost resources" do
       user = insert(:user)
       stack = insert(:stack, write_bindings: [%{user_id: user.id}])
       run1 = insert(:stack_run, stack: stack)
@@ -220,19 +220,30 @@ defmodule Console.GraphQl.Deployments.StackQueriesTest do
       {:ok, %{data: %{"infrastructureStack" => found}}} = run_query("""
         query Stack($id: ID!) {
           infrastructureStack(id: $id) {
-            infracostResources(limit: 1) {
-              id
-              resourceScope
-              projectName
-              name
-              monthlyCost
+            infracostResources(first: 1) {
+              pageInfo { hasNextPage endCursor }
+              edges { node { id resourceScope projectName name monthlyCost } }
             }
           }
         }
       """, %{"id" => stack.id}, %{current_user: user})
 
-      assert [%{"id" => newest_id, "resourceScope" => "breakdown", "name" => "aws_instance.foo"}] = found["infracostResources"]
+      assert found["infracostResources"]["pageInfo"]["hasNextPage"]
+      assert [%{"id" => newest_id, "resourceScope" => "breakdown", "name" => "aws_instance.foo"}] =
+               from_connection(found["infracostResources"])
       assert newest_id == newer.id
+
+      {:ok, %{data: %{"infrastructureStack" => found}}} = run_query("""
+        query Stack($id: ID!, $after: String) {
+          infrastructureStack(id: $id) {
+            infracostResources(first: 1, after: $after) {
+              edges { node { name } }
+            }
+          }
+        }
+      """, %{"id" => stack.id, "after" => found["infracostResources"]["pageInfo"]["endCursor"]}, %{current_user: user})
+
+      assert [%{"name" => "aws_instance.old"}] = from_connection(found["infracostResources"])
     end
 
     test "users without stack read access cannot list stack infracost resources" do
@@ -241,12 +252,51 @@ defmodule Console.GraphQl.Deployments.StackQueriesTest do
       {:ok, %{errors: [_ | _]}} = run_query("""
         query Stack($id: ID!) {
           infrastructureStack(id: $id) {
-            infracostResources {
-              id
+            infracostResources(first: 10) {
+              edges { node { id } }
             }
           }
         }
       """, %{"id" => stack.id}, %{current_user: insert(:user)})
+    end
+
+    test "infracost resource pages scale query complexity with their size" do
+      stack = insert(:stack)
+      page = "infracostResources(first: 100) { edges { node { id name monthlyCost } } }"
+      opts = [variables: %{"id" => stack.id}, context: %{current_user: admin_user()}, analyze_complexity: true, max_complexity: 650]
+
+      {:ok, %{data: _} = result} = Absinthe.run("""
+        query Stack($id: ID!) { infrastructureStack(id: $id) { #{page} } }
+      """, Console.GraphQl, opts)
+      refute result[:errors]
+
+      {:ok, %{errors: [%{message: msg} | _]}} = Absinthe.run("""
+        query Stack($id: ID!) {
+          a: infrastructureStack(id: $id) { #{page} }
+          b: infrastructureStack(id: $id) { #{page} }
+        }
+      """, Console.GraphQl, opts)
+      assert msg =~ "too complex"
+    end
+
+    test "infracost resources cannot be fetched for a list of runs" do
+      stack = insert(:stack)
+      run = insert(:stack_run, stack: stack)
+      insert(:stack_infracost_resource, stack: stack, stack_run: run)
+
+      {:ok, %{data: %{"infrastructureStack" => found}, errors: [%{message: msg}]}} = run_query("""
+        query Stack($id: ID!) {
+          infrastructureStack(id: $id) {
+            runs(first: 5) {
+              edges { node { id infracostResources(first: 5) { edges { node { id } } } } }
+            }
+          }
+        }
+      """, %{"id" => stack.id}, %{current_user: admin_user()})
+
+      assert msg =~ "single run"
+      assert [%{"id" => id, "infracostResources" => nil}] = from_connection(found["runs"])
+      assert id == run.id
     end
   end
 
@@ -416,6 +466,29 @@ defmodule Console.GraphQl.Deployments.StackQueriesTest do
 
       assert found["id"] == run.id
       assert found["committer"] == "alice@example.com"
+    end
+
+    test "readers cannot fetch write-protected run fields" do
+      user = insert(:user)
+      stack = insert(:stack, read_bindings: [%{user_id: user.id}])
+      run = insert(:stack_run, stack: stack)
+      insert(:stack_file, run: run, stack: stack)
+      insert(:stack_infracost_resource, stack_run: run, stack: stack)
+
+      {:ok, %{data: %{"stackRun" => found}, errors: errors}} = run_query("""
+        query StackRun($id: ID!) {
+          stackRun(id: $id) {
+            id
+            files { path }
+            infracostResources(first: 5) { edges { node { id } } }
+          }
+        }
+      """, %{"id" => run.id}, %{current_user: user})
+
+      assert found["id"] == run.id
+      refute found["files"]
+      refute found["infracostResources"]
+      assert length(errors) == 2
     end
 
     test "only writers can view variables" do
@@ -590,43 +663,45 @@ defmodule Console.GraphQl.Deployments.StackQueriesTest do
       """, %{"id" => run.id}, %{current_user: insert(:user)})
     end
 
-    test "it can list stack run infracost resources with limit" do
+    test "it can paginate stack run infracost resources, most expensive first" do
       user = insert(:user)
       stack = insert(:stack, write_bindings: [%{user_id: user.id}])
       run = insert(:stack_run, stack: stack)
 
-      Repo.insert!(%StackInfracostResource{
-        resource_scope: "breakdown",
-        name: "aws_instance.old",
-        stack_id: stack.id,
-        stack_run_id: run.id,
-        monthly_cost: Decimal.new("5.10")
-      })
-
-      newer =
-        Repo.insert!(%StackInfracostResource{
-          resource_scope: "breakdown",
-          name: "aws_instance.new",
-          stack_id: stack.id,
-          stack_run_id: run.id,
-          monthly_cost: Decimal.new("9.20")
-        })
+      pricey = insert(:stack_infracost_resource, stack: stack, stack_run: run, monthly_cost: Decimal.new("9.20"))
+      insert(:stack_infracost_resource, stack: stack, stack_run: run, monthly_cost: Decimal.new("5.10"))
+      insert(:stack_infracost_resource, stack: stack, stack_run: run, monthly_cost: nil)
+      insert(:stack_infracost_resource, stack: stack, stack_run: run, resource_scope: "diff", monthly_cost: Decimal.new("100"))
 
       {:ok, %{data: %{"stackRun" => found}}} = run_query("""
         query StackRun($id: ID!) {
           stackRun(id: $id) {
-            infracostResources(limit: 1) {
-              id
-              resourceScope
-              name
-              monthlyCost
+            infracostResources(first: 2, resourceScope: "breakdown") {
+              pageInfo { hasNextPage endCursor }
+              edges { node { id resourceScope monthlyCost } }
             }
           }
         }
       """, %{"id" => run.id}, %{current_user: user})
 
-      assert [%{"id" => newest_id, "resourceScope" => "breakdown", "name" => "aws_instance.new"}] = found["infracostResources"]
-      assert newest_id == newer.id
+      assert found["infracostResources"]["pageInfo"]["hasNextPage"]
+      assert [%{"id" => pricey_id, "monthlyCost" => 9.2}, %{"monthlyCost" => 5.1}] =
+               from_connection(found["infracostResources"])
+      assert pricey_id == pricey.id
+
+      {:ok, %{data: %{"stackRun" => found}}} = run_query("""
+        query StackRun($id: ID!, $after: String) {
+          stackRun(id: $id) {
+            infracostResources(first: 2, after: $after, resourceScope: "breakdown") {
+              pageInfo { hasNextPage }
+              edges { node { monthlyCost } }
+            }
+          }
+        }
+      """, %{"id" => run.id, "after" => found["infracostResources"]["pageInfo"]["endCursor"]}, %{current_user: user})
+
+      assert [%{"monthlyCost" => nil}] = from_connection(found["infracostResources"])
+      refute found["infracostResources"]["pageInfo"]["hasNextPage"]
     end
 
     test "only writers and owning cluster can view stack run infracost resources" do
@@ -646,32 +721,32 @@ defmodule Console.GraphQl.Deployments.StackQueriesTest do
       {:ok, %{data: %{"stackRun" => found}}} = run_query("""
         query StackRun($id: ID!) {
           stackRun(id: $id) {
-            infracostResources {
-              id
+            infracostResources(first: 10) {
+              edges { node { id } }
             }
           }
         }
       """, %{"id" => run.id}, %{current_user: user})
 
-      assert [%{"id" => ^resource_id}] = found["infracostResources"]
+      assert [%{"id" => ^resource_id}] = from_connection(found["infracostResources"])
 
       {:ok, %{data: %{"stackRun" => found}}} = run_query("""
         query StackRun($id: ID!) {
           stackRun(id: $id) {
-            infracostResources {
-              id
+            infracostResources(first: 10) {
+              edges { node { id } }
             }
           }
         }
       """, %{"id" => run.id}, %{cluster: run.cluster})
 
-      assert [%{"id" => ^resource_id}] = found["infracostResources"]
+      assert [%{"id" => ^resource_id}] = from_connection(found["infracostResources"])
 
       {:ok, %{errors: [_ | _]}} = run_query("""
         query StackRun($id: ID!) {
           stackRun(id: $id) {
-            infracostResources {
-              id
+            infracostResources(first: 10) {
+              edges { node { id } }
             }
           }
         }

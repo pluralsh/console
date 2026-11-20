@@ -1,6 +1,6 @@
 import { Flex, MarkdocContextProvider } from '@pluralsh/design-system'
 import { Suspense, useRef } from 'react'
-import styled from 'styled-components'
+import styled, { createGlobalStyle } from 'styled-components'
 
 import { BillingSubscriptionProvider } from 'components/billing/BillingSubscriptionProvider'
 import BreadcrumbsProvider from 'components/contexts/BreadcrumbsProvider'
@@ -13,8 +13,6 @@ import LoadingIndicator, {
 
 import { DeploymentSettingsProvider } from 'components/contexts/DeploymentSettingsContext'
 import { AwaitingReviewProvider } from 'components/contexts/AwaitingReviewContext'
-
-import { useCloudSetupUnfinished } from 'components/contexts'
 
 import { EnsureLogin } from '../login/Login'
 import TerminalThemeProvider from '../terminal/TerminalThemeProvider'
@@ -30,7 +28,6 @@ import { FeatureFlagProvider } from 'components/flows/FeatureFlagContext'
 import { useNativeDomEvent } from 'components/hooks/useNativeDomEvent'
 import { AccessTokenProvider } from 'components/profile/access-tokens/AccessTokenContext'
 import { SimpleToastProvider } from 'components/utils/SimpleToastContext'
-import { CloudConsoleWelcomeModal } from '../cloud-setup/CloudConsoleWelcomeModal'
 import { QoveScriptLoader } from '../QoveScriptLoader'
 import { SentryInitializer } from '../SentryInitializer'
 import Header from './Header'
@@ -88,7 +85,6 @@ export default function Console() {
 }
 
 function ConsoleContent() {
-  const isCloudSetupUnfinished = useCloudSetupUnfinished()
   const { setActionsPanelOpen } = useChatbot()
 
   // need to do this natively instead of using onPointerDown so that clicking portaled elements like modals don't close the actions panel
@@ -103,7 +99,9 @@ function ConsoleContent() {
       flexGrow={1}
       minHeight={0}
       alignItems="stretch"
+      overflow="clip"
     >
+      <ConsoleBodyStyle />
       <Sidebar />
       <Flex
         ref={wrapperRef}
@@ -115,7 +113,6 @@ function ConsoleContent() {
         minWidth={0}
         zIndex={0} // needed so chatbot flyovers render over main console content
       >
-        {isCloudSetupUnfinished && <CloudConsoleWelcomeModal />}
         <Header />
         <Flex
           width="100%"
@@ -141,6 +138,10 @@ function ConsoleContent() {
     </Flex>
   )
 }
+
+// the shell is pinned to the viewport, so anything overflowing it (eg portaled popovers)
+// must not make the page itself scrollable, or wheel scrolls chain out and shift the whole app
+const ConsoleBodyStyle = createGlobalStyle({ body: { overflow: 'hidden' } })
 
 const ConsoleRoutesSC = styled(Flex)(({ theme }) => ({
   backgroundColor:

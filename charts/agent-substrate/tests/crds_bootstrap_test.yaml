@@ -1,0 +1,101 @@
+suite: CRDs and first-install bootstrap
+release:
+  name: ate
+  namespace: ate-system
+capabilities:
+  majorVersion: 1
+  minorVersion: 34
+templates:
+  - templates/*.yaml
+set:
+  objectStore.snapshotLocation: s3://snapshots/ate/
+tests:
+  - it: renders the three ate.dev CRDs with resource-policy keep
+    template: templates/crds.yaml
+    asserts:
+      - hasDocuments:
+          count: 3
+      - isKind:
+          of: CustomResourceDefinition
+      - equal:
+          path: metadata.annotations["helm.sh/resource-policy"]
+          value: keep
+
+  - it: crds.keep=false drops the keep annotation
+    template: templates/crds.yaml
+    set:
+      crds.keep: false
+    asserts:
+      - notExists:
+          path: metadata.annotations["helm.sh/resource-policy"]
+
+  - it: crds.install=false renders no CRDs
+    template: templates/crds.yaml
+    set:
+      crds.install: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: defers SandboxConfig and Cluster to the bootstrap Job on first install
+    template: templates/bootstrap-job.yaml
+    asserts:
+      - containsDocument:
+          kind: Job
+          apiVersion: batch/v1
+          name: agent-substrate-bootstrap
+          any: true
+      - exists:
+          path: data["00-sandboxconfig-gvisor-default.yaml"]
+        documentSelector:
+          path: kind
+          value: ConfigMap
+      - notExists:
+          path: metadata.annotations["helm.sh/hook"]
+        documentSelector:
+          path: kind
+          value: Job
+
+  - it: renders them inline (and no Job) once the CRDs are served
+    templates:
+      - templates/bootstrap-job.yaml
+      - templates/custom-resources.yaml
+    capabilities:
+      apiVersions:
+        - ate.dev/v1/SandboxConfig
+        - postgresql.cnpg.io/v1/Cluster
+    asserts:
+      - hasDocuments:
+          count: 0
+        template: templates/bootstrap-job.yaml
+      - containsDocument:
+          kind: SandboxConfig
+          apiVersion: ate.dev/v1
+          name: gvisor-default
+          any: true
+        template: templates/custom-resources.yaml
+      - containsDocument:
+          kind: Cluster
+          apiVersion: postgresql.cnpg.io/v1
+          name: ate-postgres
+          any: true
+        template: templates/custom-resources.yaml
+
+  - it: microvm substitutes its asset bucket
+    template: templates/custom-resources.yaml
+    capabilities:
+      apiVersions:
+        - ate.dev/v1/SandboxConfig
+    set:
+      sandboxConfigs.microvm.enabled: true
+      sandboxConfigs.microvm.assetScheme: s3
+      sandboxConfigs.microvm.assetBucket: ate-assets
+    documentSelector:
+      path: metadata.name
+      value: microvm
+    asserts:
+      - isKind:
+          of: SandboxConfig
+      - equal:
+          path: spec.versions[0].assets.arm64.cloud-hypervisor.url
+          value: s3://ate-assets/microvm-assets/arm64/f192b510eea1c710cbc439d716bb0573c223fc463dbe3e6523788a2b7ef62850

@@ -1,6 +1,8 @@
 defmodule ConsoleWeb.GraphqlWSSocket do
   use Absinthe.GraphqlWS.Socket,
     schema: Console.GraphQl
+  alias Console.Schema.User
+  alias Console.Services.Users
 
   # 5s graphql-ws text-frame ping interval (see comment on ExternalGraphqlWSSocket below)
   @gql_ping_interval 5_000
@@ -8,7 +10,7 @@ defmodule ConsoleWeb.GraphqlWSSocket do
   @impl Absinthe.GraphqlWS.Socket
   def handle_init(params, socket) do
     with {:ok, token} <- fetch_token(params),
-         {:ok, current_user, _claims} = Console.Guardian.resource_from_token(token) do
+         {:ok, current_user} <- resolve_user(token) do
       :timer.send_interval(@gql_ping_interval, :gql_ws_keepalive)
       # subscriptions authorize every delivery against this user, so its groups must be loaded up front
       current_user = Console.Services.Rbac.preload(current_user)
@@ -25,9 +27,25 @@ defmodule ConsoleWeb.GraphqlWSSocket do
   def handle_message(_message, socket), do: {:ok, socket}
 
   def fetch_token(%{"Authorization" => "Bearer " <> token}), do: {:ok, token}
+  def fetch_token(%{"Authorization" => "Token " <> token}), do: {:ok, token}
   def fetch_token(%{"token" => "Bearer " <> token}), do: {:ok, token}
+  def fetch_token(%{"token" => "Token " <> token}), do: {:ok, token}
   def fetch_token(%{"token" => token}), do: {:ok, token}
   def fetch_token(_), do: {:error, :notoken}
+
+  defp resolve_user("console-" <> _ = token) do
+    case Users.get_by_token(token) do
+      %User{} = user -> {:ok, user}
+      _ -> {:error, :unauthorized}
+    end
+  end
+
+  defp resolve_user(token) do
+    case Console.Guardian.resource_from_token(token) do
+      {:ok, %User{} = user, _claims} -> {:ok, user}
+      _ -> {:error, :unauthorized}
+    end
+  end
 end
 
 defmodule ConsoleWeb.ExternalGraphqlWSSocket do

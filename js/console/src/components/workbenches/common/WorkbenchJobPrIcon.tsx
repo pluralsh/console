@@ -9,16 +9,21 @@ import {
   PrOpenIcon,
   Table,
 } from '@pluralsh/design-system'
+import { createColumnHelper } from '@tanstack/react-table'
 import {
   ColInsertedAt,
   ColLinkout,
-  ColStatus,
   ColTitle,
 } from 'components/self-service/pr/queue/PrQueueColumns'
-import { PrStatus, PullRequestBasicFragment } from 'generated/graphql'
+import {
+  PrStatus,
+  PullRequestBasicFragment,
+  PullRequestFragment,
+} from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import { useState } from 'react'
 import { useTheme } from 'styled-components'
+import { Edge } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 
 const PR_STATUS_LABEL: Record<PrStatus, string> = {
@@ -89,7 +94,46 @@ export function WorkbenchJobPrIcon({
   )
 }
 
-const PR_TABLE_COLUMNS = [ColTitle, ColStatus, ColInsertedAt, ColLinkout]
+export function WorkbenchPrStatusChip({
+  status,
+  fillLevel,
+}: {
+  status: Nullable<PrStatus>
+  fillLevel?: ChipProps['fillLevel']
+}) {
+  if (!status) return null
+
+  return (
+    <Chip
+      size="small"
+      fillLevel={fillLevel}
+    >
+      <Flex
+        gap="xsmall"
+        align="center"
+      >
+        <PrStatusIcon
+          status={status}
+          size={12}
+        />
+        <span css={{ whiteSpace: 'nowrap' }}>{PR_STATUS_LABEL[status]}</span>
+      </Flex>
+    </Chip>
+  )
+}
+
+const ColPrStatus = createColumnHelper<Edge<PullRequestFragment>>().accessor(
+  ({ node }) => node?.status,
+  {
+    id: 'status',
+    header: 'Status',
+    cell: function Cell({ getValue }) {
+      return <WorkbenchPrStatusChip status={getValue()} />
+    },
+  }
+)
+
+const PR_TABLE_COLUMNS = [ColTitle, ColPrStatus, ColInsertedAt, ColLinkout]
 
 // A job's PRs as a chip: a single one by its number, opening it; several by
 // their count, listed in a modal. Nothing renders without any.

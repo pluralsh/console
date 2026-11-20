@@ -5,8 +5,10 @@ import {
   GitHubLogoIcon,
   GitLabLogoIcon,
   DashboardIcon,
+  SentinelIcon,
   SirenIcon,
   StackIcon,
+  TestTubeIcon,
   Tooltip,
   WarningShieldIcon,
   WorkbenchIcon,
@@ -14,13 +16,23 @@ import {
 } from '@pluralsh/design-system'
 import { ClusterProviderIcon } from 'components/utils/Provider'
 import { ClusterDistro, ScmType } from 'generated/graphql'
-import { ComponentPropsWithoutRef, ComponentType, Ref, ReactNode } from 'react'
+import {
+  ComponentProps,
+  ComponentPropsWithoutRef,
+  ComponentType,
+  Ref,
+  ReactNode,
+} from 'react'
 import type { ExtraProps } from 'react-markdown'
 import { Link } from 'react-router-dom'
 import {
   getClusterDetailsPath,
   getServiceDetailsPath,
 } from 'routes/cdRoutesConsts'
+import {
+  getSentinelRunAbsPath,
+  getSentinelRunJobAbsPath,
+} from 'routes/aiRoutesConsts'
 import { getStacksAbsPath } from 'routes/stacksRoutesConsts'
 import {
   getWorkbenchMonitoringDashboardAbsPath,
@@ -33,6 +45,10 @@ import {
   VulnerabilityChipTooltipLabel,
   vulnerabilityChipTooltipText,
 } from './VulnerabilityChipTooltipLabel'
+import {
+  SentinelChipTooltipLabel,
+  sentinelChipTooltipText,
+} from './SentinelChipTooltipLabel'
 
 // span-only so chips can safely render inside markdown <p> (as opposed to our DS chip)
 type ChipBodyProps = {
@@ -253,6 +269,100 @@ function PlrlMonitoringChip(props: RenderedChipProps<MentionKind.Monitoring>) {
   )
 }
 
+function PlrlSentinelRunChip(
+  props: RenderedChipProps<MentionKind.SentinelRun>
+) {
+  const id = props['item-id']
+  const sentinelId = props['sentinel-id']
+  const label = props['item-name'] || id
+
+  return (
+    <SentinelChipTooltip
+      kind={MentionKind.SentinelRun}
+      attrs={props}
+    >
+      <WrapWithIf
+        condition={!!id && !!sentinelId}
+        wrapper={
+          <ChipLinkSC
+            to={getSentinelRunAbsPath({ sentinelId: sentinelId!, runId: id })}
+          />
+        }
+      >
+        <ChipBody icon={<SentinelIcon size={12} />}>{label}</ChipBody>
+      </WrapWithIf>
+    </SentinelChipTooltip>
+  )
+}
+
+function PlrlSentinelRunJobChip(
+  props: RenderedChipProps<MentionKind.SentinelRunJob>
+) {
+  const id = props['item-id']
+  const sentinelId = props['sentinel-id']
+  const runId = props['run-id']
+  const label =
+    chipDisplayText(MentionKind.SentinelRunJob, {
+      'item-name': props['item-name'],
+      'cluster-handle': props['cluster-handle'],
+    }) || id
+
+  return (
+    <SentinelChipTooltip
+      kind={MentionKind.SentinelRunJob}
+      attrs={props}
+    >
+      <WrapWithIf
+        condition={!!id && !!sentinelId && !!runId}
+        wrapper={
+          <ChipLinkSC
+            to={getSentinelRunJobAbsPath({
+              sentinelId: sentinelId!,
+              runId: runId!,
+              jobId: id,
+            })}
+          />
+        }
+      >
+        <ChipBody icon={<TestTubeIcon size={12} />}>{label}</ChipBody>
+      </WrapWithIf>
+    </SentinelChipTooltip>
+  )
+}
+
+function SentinelChipTooltip({
+  kind,
+  attrs,
+  children,
+}: {
+  kind: MentionKind.SentinelRun | MentionKind.SentinelRunJob
+  attrs: ComponentProps<typeof SentinelChipTooltipLabel>['attrs']
+  children: ReactNode
+}) {
+  const textValue = sentinelChipTooltipText(kind, attrs)
+
+  return (
+    <WrapWithIf
+      condition={!!textValue}
+      wrapper={
+        <Tooltip
+          label={
+            <SentinelChipTooltipLabel
+              kind={kind}
+              attrs={attrs}
+            />
+          }
+          textValue={textValue}
+          placement="top"
+          style={{ maxWidth: 500, overflowWrap: 'break-word' }}
+        />
+      }
+    >
+      {children}
+    </WrapWithIf>
+  )
+}
+
 function repositoryChipIcon(provider?: string): ReactNode {
   switch (provider) {
     case ScmType.Github:
@@ -296,6 +406,8 @@ export const plrlChipComponents = {
   [MentionKind.Vulnerability]: PlrlVulnerabilityChip,
   [MentionKind.Repository]: PlrlRepositoryChip,
   [MentionKind.Monitoring]: PlrlMonitoringChip,
+  [MentionKind.SentinelRun]: PlrlSentinelRunChip,
+  [MentionKind.SentinelRunJob]: PlrlSentinelRunJobChip,
 } satisfies {
   [K in MentionKind]: ComponentType<RenderedChipProps<K>>
 }

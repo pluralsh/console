@@ -18,10 +18,28 @@ import {
   VulnerabilityChipTooltipLabel,
   vulnerabilityChipTooltipText,
 } from './VulnerabilityChipTooltipLabel'
+import {
+  SentinelChipTooltipLabel,
+  sentinelChipTooltipText,
+} from './SentinelChipTooltipLabel'
 
-const PLRL_CHIP_SELECTOR = [MentionKind.Skill, MentionKind.Vulnerability]
+const PLRL_CHIP_SELECTOR = [
+  MentionKind.Skill,
+  MentionKind.Vulnerability,
+  MentionKind.SentinelRun,
+  MentionKind.SentinelRunJob,
+]
   .map((kind) => `[${CHIP_DATA_ATTR}="true"][${CHIP_TAG_ATTR}="${kind}"]`)
   .join(',')
+
+function chipAttrs(chip: HTMLElement): Record<string, string> {
+  const attrs: Record<string, string> = {}
+  for (const attr of Array.from(chip.attributes)) {
+    if (attr.name.startsWith(CHIP_ATTR_PREFIX))
+      attrs[attr.name.slice(CHIP_ATTR_PREFIX.length)] = attr.value
+  }
+  return attrs
+}
 const DESC_ATTR = `${CHIP_ATTR_PREFIX}description`
 const NAME_ATTR = `${CHIP_ATTR_PREFIX}item-name`
 const TITLE_ATTR = `${CHIP_ATTR_PREFIX}title`
@@ -32,9 +50,14 @@ const TIP_ON_INPUT_STYLE = {
   zIndex: 11_000,
 }
 
-function chipHintFromTarget(
-  eventTarget: EventTarget | null
-): { chip: HTMLElement; label: ReactNode; hintKey: string } | null {
+type ChipHint = {
+  chip: HTMLElement
+  label: ReactNode
+  hintKey: string
+  textValue?: string
+}
+
+function chipHintFromTarget(eventTarget: EventTarget | null): ChipHint | null {
   if (!(eventTarget instanceof Element)) return null
   const chip = eventTarget.closest(PLRL_CHIP_SELECTOR)
   if (!(chip instanceof HTMLElement)) return null
@@ -66,6 +89,23 @@ function chipHintFromTarget(
           />
         ),
         hintKey: `${tag}|${itemId}|${title ?? ''}|${description ?? ''}`,
+      }
+    }
+    case MentionKind.SentinelRun:
+    case MentionKind.SentinelRunJob: {
+      const attrs = chipAttrs(chip)
+      const text = sentinelChipTooltipText(tag, attrs)
+      if (!text) return null
+      return {
+        chip,
+        label: (
+          <SentinelChipTooltipLabel
+            kind={tag}
+            attrs={attrs}
+          />
+        ),
+        textValue: text,
+        hintKey: `${tag}|${itemId}|${text}`,
       }
     }
     default:
@@ -121,11 +161,7 @@ export function EditableSkillChipTooltip({
 }: {
   containerRef: RefObject<HTMLElement | null>
 }) {
-  const [hint, setHint] = useState<{
-    chip: HTMLElement
-    label: ReactNode
-    hintKey: string
-  } | null>(null)
+  const [hint, setHint] = useState<ChipHint | null>(null)
 
   useEffect(() => {
     const editorRoot = containerRef.current
@@ -154,14 +190,15 @@ export function EditableSkillChipTooltip({
   if (!hint) return null
 
   const textValue =
-    hint.chip.getAttribute(CHIP_TAG_ATTR) === MentionKind.Vulnerability
+    hint.textValue ??
+    (hint.chip.getAttribute(CHIP_TAG_ATTR) === MentionKind.Vulnerability
       ? vulnerabilityChipTooltipText({
           title: hint.chip.getAttribute(TITLE_ATTR) ?? undefined,
           description: hint.chip.getAttribute(DESC_ATTR) ?? undefined,
         })
       : typeof hint.label === 'string'
         ? hint.label
-        : undefined
+        : undefined)
 
   return (
     <Tooltip

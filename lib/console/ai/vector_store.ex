@@ -2,6 +2,8 @@ defmodule Console.AI.VectorStore do
   alias Console.AI.Vector.Elastic
   alias Console.AI.Vector.Opensearch
   alias Console.AI.Vector.Postgres
+  alias Console.AI.Vector.Plural
+  alias Console.AI.Vector.{Bulk, Buffer}
   alias Console.Schema.{
     DeploymentSettings,
     DeploymentSettings.AI,
@@ -31,7 +33,7 @@ defmodule Console.AI.VectorStore do
 
   @latest_version Settings.vector_store_version()
 
-  @type store :: Console.AI.Vector.Elastic.t | Console.AI.Vector.Opensearch.t | Console.AI.Vector.Postgres.t
+  @type store :: Console.AI.Vector.Elastic.t | Console.AI.Vector.Opensearch.t | Console.AI.Vector.Postgres.t | Console.AI.Vector.Plural.t
   @type data :: Response.t
   @type error :: Console.error
 
@@ -62,11 +64,18 @@ defmodule Console.AI.VectorStore do
       do: mod.init(store)
   end
 
+  @doc """
+  Inserts into the configured store.  Stores implementing `Console.AI.Vector.Bulk` are written
+  through `Console.AI.Vector.Buffer` unless `buffer: false` is passed.
+  """
   def insert(struct, opts \\ []) do
     settings = Settings.cached()
     with {:ok, %{__struct__: mod} = store} <- store(settings),
-         :ok <- maybe_init(settings, store),
-      do: mod.insert(store, struct, opts)
+         :ok <- maybe_init(settings, store) do
+      if buffer?(mod, opts),
+        do: push(store, mod.prepare(store, struct, opts)),
+        else: mod.insert(store, struct, opts)
+    end
   end
 
   @spec fetch(binary, keyword) :: {:ok, [data]} | error
@@ -76,10 +85,16 @@ defmodule Console.AI.VectorStore do
       do: mod.fetch(store, text, opts)
   end
 
+  @doc """
+  Deletes from the configured store, buffered alongside inserts like `insert/2`.
+  """
   def delete(opts \\ []) do
     settings = Settings.cached()
-    with {:ok, %{__struct__: mod} = store} <- store(settings),
-      do: mod.delete(store, opts)
+    with {:ok, %{__struct__: mod} = store} <- store(settings) do
+      if buffer?(mod, opts),
+        do: push(store, mod.prepare_delete(store, opts)),
+        else: mod.delete(store, opts)
+    end
   end
 
   def expire(opts \\ []) do
@@ -87,6 +102,11 @@ defmodule Console.AI.VectorStore do
     with {:ok, %{__struct__: mod} = store} <- store(settings),
       do: mod.expire(store, opts)
   end
+
+  defp buffer?(mod, opts), do: Bulk.bulk?(mod) && Keyword.get(opts, :buffer, true)
+
+  defp push(store, {:ok, entry}), do: Buffer.push(store, entry)
+  defp push(_, result), do: result
 
   defp maybe_init(%DeploymentSettings{ai: %AI{vector_store: %VectorStore{initialized: true, version: version}}}, _)
     when is_integer(version) and version >= @latest_version, do: :ok
@@ -100,5 +120,7 @@ defmodule Console.AI.VectorStore do
     do: {:ok, Opensearch.new(opensearch, version: version, settings: vs)}
   defp store(%DeploymentSettings{ai: %AI{vector_store: %VectorStore{store: :postgres, version: version} = vs}}),
     do: {:ok, Postgres.new(version: version, settings: vs)}
+  defp store(%DeploymentSettings{ai: %AI{vector_store: %VectorStore{store: :plural, plural: %{} = plural, version: version} = vs}}),
+    do: {:ok, Plural.new(plural, version: version, settings: vs)}
   defp store(_), do: {:error, "AI vector store not yet configured"}
 end

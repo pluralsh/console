@@ -85,7 +85,6 @@ export function WorkbenchFiles() {
           key={selectedPath}
           workbenchId={workbenchId}
           path={selectedPath}
-          onDelete={setToDelete}
         />
       ) : hasFiles ? (
         <WorkbenchEmptyState

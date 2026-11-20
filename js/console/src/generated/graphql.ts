@@ -206,6 +206,55 @@ export type AgentBindingAttributes = {
   userEmail?: InputMaybe<Scalars['String']['input']>;
 };
 
+/** A linked coding agent subscription.  The secret is write-only and never returned. */
+export type AgentCredential = {
+  __typename?: 'AgentCredential';
+  defaultBilling?: Maybe<Scalars['Boolean']['output']>;
+  email?: Maybe<Scalars['String']['output']>;
+  expiresAt?: Maybe<Scalars['DateTime']['output']>;
+  failureCount?: Maybe<Scalars['Int']['output']>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  kind: AgentCredentialKind;
+  label?: Maybe<Scalars['String']['output']>;
+  lastRefreshedAt?: Maybe<Scalars['DateTime']['output']>;
+  lastUsedAt?: Maybe<Scalars['DateTime']['output']>;
+  linkedAt?: Maybe<Scalars['DateTime']['output']>;
+  plan?: Maybe<Scalars['String']['output']>;
+  provider: AgentCredentialProvider;
+  status: AgentCredentialStatus;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  version?: Maybe<Scalars['Long']['output']>;
+};
+
+export type AgentCredentialAttributes = {
+  /** bill new instances' agents of this provider to it by default */
+  defaultBilling?: InputMaybe<Scalars['Boolean']['input']>;
+  /** when the access token expires, for expiry warnings */
+  expiresAt?: InputMaybe<Scalars['DateTime']['input']>;
+  kind: AgentCredentialKind;
+  label?: InputMaybe<Scalars['String']['input']>;
+  /** the setup-token, auth.json contents or access token, write-only */
+  secret: Scalars['String']['input'];
+};
+
+export enum AgentCredentialKind {
+  ClaudeOauthToken = 'CLAUDE_OAUTH_TOKEN',
+  CodexAccessToken = 'CODEX_ACCESS_TOKEN',
+  CodexChatgptAuth = 'CODEX_CHATGPT_AUTH'
+}
+
+export enum AgentCredentialProvider {
+  Claude = 'CLAUDE',
+  Codex = 'CODEX'
+}
+
+export enum AgentCredentialStatus {
+  Expired = 'EXPIRED',
+  Invalid = 'INVALID',
+  Valid = 'VALID'
+}
+
 export type AgentMessage = {
   __typename?: 'AgentMessage';
   /** the cost of the message */
@@ -708,7 +757,10 @@ export type AgentRunStatusAttributes = {
   followupPrUrl?: InputMaybe<Scalars['String']['input']>;
   /** the head branch this agent run has created for its pull request */
   headBranch?: InputMaybe<Scalars['String']['input']>;
-  /** the messages this agent run has generated during its run */
+  /**
+   * ignored, messages are created with createAgentMessage
+   * @deprecated use createAgentMessage instead
+   */
   messages?: InputMaybe<Array<InputMaybe<AgentMessageAttributes>>>;
   /** the kubernetes pod this agent is running on */
   podReference?: InputMaybe<NamespacedName>;
@@ -1168,6 +1220,8 @@ export type AiSettings = {
   anthropic?: Maybe<AnthropicSettings>;
   azure?: Maybe<AzureOpenaiSettings>;
   bedrock?: Maybe<BedrockAiSettings>;
+  /** ai provider to use for decision (classification) calls */
+  decisionProvider?: Maybe<AiProvider>;
   /** ai provider to use with embeddings (for vector indexing) */
   embeddingProvider?: Maybe<AiProvider>;
   enabled?: Maybe<Scalars['Boolean']['output']>;
@@ -1195,6 +1249,8 @@ export type AiSettingsAttributes = {
   anthropic?: InputMaybe<AnthropicSettingsAttributes>;
   azure?: InputMaybe<AzureOpenaiAttributes>;
   bedrock?: InputMaybe<BedrockAiAttributes>;
+  /** ai provider to use for decision (classification) calls, like reviewing devbox agent tool calls */
+  decisionProvider?: InputMaybe<AiProvider>;
   /** ai provider to use with embeddings (for vector indexing) */
   embeddingProvider?: InputMaybe<AiProvider>;
   enabled?: InputMaybe<Scalars['Boolean']['input']>;
@@ -1420,6 +1476,8 @@ export type AnthropicSettings = {
   __typename?: 'AnthropicSettings';
   /** the base url to use when querying an Anthropic compatible API, leave blank for Anthropic */
   baseUrl?: Maybe<Scalars['String']['output']>;
+  /** a cheap, fast model for decision (classification) calls, like reviewing devbox agent tool calls. Models without native decision support are emulated */
+  decisionModel?: Maybe<Scalars['String']['output']>;
   /** the anthropic model version to use */
   model?: Maybe<Scalars['String']['output']>;
   /** the HTTP proxy used for this provider's API calls */
@@ -1434,6 +1492,8 @@ export type AnthropicSettingsAttributes = {
   accessToken?: InputMaybe<Scalars['String']['input']>;
   /** a custom base url for an Anthropic compatible API, leave blank for Anthropic */
   baseUrl?: InputMaybe<Scalars['String']['input']>;
+  /** a cheap, fast model for decision (classification) calls, like reviewing devbox agent tool calls. Models without native decision support are emulated */
+  decisionModel?: InputMaybe<Scalars['String']['input']>;
   /** the model to use for vector embeddings */
   embeddingModel?: InputMaybe<Scalars['String']['input']>;
   model?: InputMaybe<Scalars['String']['input']>;
@@ -1775,6 +1835,8 @@ export type AzureOpenaiAttributes = {
   accessToken: Scalars['String']['input'];
   /** the api version you want to use */
   apiVersion?: InputMaybe<Scalars['String']['input']>;
+  /** a cheap, fast model for decision (classification) calls, like reviewing devbox agent tool calls. Models without native decision support are emulated */
+  decisionModel?: InputMaybe<Scalars['String']['input']>;
   /** mapping from model id to azure openai deployment name */
   deployments?: InputMaybe<Scalars['Json']['input']>;
   /** the model to use for vector embeddings */
@@ -1796,6 +1858,8 @@ export type AzureOpenaiSettings = {
   __typename?: 'AzureOpenaiSettings';
   /** the api version you want to use */
   apiVersion?: Maybe<Scalars['String']['output']>;
+  /** a cheap, fast model for decision (classification) calls, like reviewing devbox agent tool calls. Models without native decision support are emulated */
+  decisionModel?: Maybe<Scalars['String']['output']>;
   /** mapping from model id to azure openai deployment name */
   deployments?: Maybe<Scalars['Map']['output']>;
   /** the model to use for vector embeddings */
@@ -1854,6 +1918,8 @@ export type BedrockAiAttributes = {
   awsAccessKeyId?: InputMaybe<Scalars['String']['input']>;
   /** the aws secret access key to use (DEPRECATED) */
   awsSecretAccessKey?: InputMaybe<Scalars['String']['input']>;
+  /** a cheap, fast model for decision (classification) calls, like reviewing devbox agent tool calls. Models without native decision support are emulated */
+  decisionModel?: InputMaybe<Scalars['String']['input']>;
   /** Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically), and modelSettings for application inference profiles. Still supported for explicit client model name overrides or when alias mapping cannot be inferred. Maps client-facing model ID to Bedrock model or profile ID. */
   deployments?: InputMaybe<Scalars['Json']['input']>;
   /** Bedrock model or inference profile for embeddings. Same ID formats as modelId. */
@@ -1879,6 +1945,8 @@ export type BedrockAiSettings = {
   __typename?: 'BedrockAiSettings';
   /** the openai bedrock aws access key id to use (DEPRECATED) */
   accessKeyId?: Maybe<Scalars['String']['output']>;
+  /** a cheap, fast model for decision (classification) calls, like reviewing devbox agent tool calls. Models without native decision support are emulated */
+  decisionModel?: Maybe<Scalars['String']['output']>;
   /** Deprecated for most configurations: prefer regional-prefixed inference profile IDs in modelId or proxyModels (aliases are inferred automatically), and modelSettings for application inference profiles. Still supported for explicit client model name overrides or when alias mapping cannot be inferred. Maps client-facing model ID to Bedrock model or profile ID. */
   deployments?: Maybe<Scalars['Map']['output']>;
   /** Bedrock model or inference profile for embeddings. Same ID formats as modelId. */
@@ -4688,6 +4756,1193 @@ export type DeprecatedCustomResourceEdge = {
   node?: Maybe<DeprecatedCustomResource>;
 };
 
+export type Devbox = {
+  __typename?: 'Devbox';
+  agents?: Maybe<Array<Maybe<DevboxAgent>>>;
+  allowedRepositories?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** how agents' permission requests are answered */
+  autonomy: DevboxAutonomyPolicy;
+  browser?: Maybe<Scalars['Boolean']['output']>;
+  cloudIdentities?: Maybe<Array<Maybe<DevboxCloudIdentity>>>;
+  cluster?: Maybe<Cluster>;
+  conditions?: Maybe<Array<Maybe<DevboxCondition>>>;
+  /** whether agents billed to the AI proxy can run at autonomy auto, reviewed by a decision model */
+  decisionReview?: Maybe<Scalars['Boolean']['output']>;
+  httpAllowlist?: Maybe<Array<Maybe<DevboxHttpAllow>>>;
+  id: Scalars['ID']['output'];
+  idlePolicy?: Maybe<DevboxIdlePolicy>;
+  image?: Maybe<Scalars['String']['output']>;
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  lastHeartbeatAt?: Maybe<Scalars['DateTime']['output']>;
+  maxInstances?: Maybe<Scalars['Int']['output']>;
+  name: Scalars['String']['output'];
+  resolvedImage?: Maybe<Scalars['String']['output']>;
+  resources?: Maybe<Scalars['Map']['output']>;
+  scmConnections?: Maybe<Array<Maybe<ScmConnection>>>;
+  status?: Maybe<DevboxStatus>;
+  templateRevision?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the box's workload identity issuer and how to trust it from cloud accounts */
+  workloadIdentity?: Maybe<DevboxWorkloadIdentity>;
+};
+
+export type DevboxAgent = {
+  __typename?: 'DevboxAgent';
+  acpV2?: Maybe<Scalars['Boolean']['output']>;
+  adapterName?: Maybe<Scalars['String']['output']>;
+  adapterVersion?: Maybe<Scalars['String']['output']>;
+  capabilities?: Maybe<Scalars['Map']['output']>;
+  commands?: Maybe<Array<Maybe<DevboxCommand>>>;
+  configOptions?: Maybe<Array<Maybe<DevboxConfigOption>>>;
+  default?: Maybe<Scalars['Boolean']['output']>;
+  /** the model preselected when starting an instance */
+  defaultModel?: Maybe<Scalars['String']['output']>;
+  modelSwitchable?: Maybe<Scalars['Boolean']['output']>;
+  /** the models offered: probed values narrowed by the box's allowlist */
+  models?: Maybe<Array<Maybe<DevboxModel>>>;
+  probeError?: Maybe<Scalars['String']['output']>;
+  probeStatus?: Maybe<DevboxProbeStatus>;
+  protocolVersion?: Maybe<Scalars['Int']['output']>;
+  sessionCapabilities?: Maybe<DevboxSessionCapabilities>;
+  type: DevboxAgentType;
+};
+
+export type DevboxAgentAttributes = {
+  acpV2?: InputMaybe<Scalars['Boolean']['input']>;
+  adapterName?: InputMaybe<Scalars['String']['input']>;
+  adapterPin?: InputMaybe<Scalars['String']['input']>;
+  adapterVersion?: InputMaybe<Scalars['String']['input']>;
+  /** the DevboxRunner's model allowlist */
+  allowedModels?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  /** the verbatim agentCapabilities from initialize */
+  capabilities?: InputMaybe<Scalars['Json']['input']>;
+  /** the commands of a fresh session */
+  commands?: InputMaybe<Array<InputMaybe<DevboxCommandAttributes>>>;
+  /** config options of a fresh session */
+  configOptions?: InputMaybe<Array<InputMaybe<DevboxConfigOptionAttributes>>>;
+  /** the agent's own current model in a fresh session */
+  currentModel?: InputMaybe<Scalars['String']['input']>;
+  /** whether this is the box's default agent (exactly one must be) */
+  default?: InputMaybe<Scalars['Boolean']['input']>;
+  defaultModel?: InputMaybe<Scalars['String']['input']>;
+  modelSwitchable?: InputMaybe<Scalars['Boolean']['input']>;
+  /** values of the model config option */
+  models?: InputMaybe<Array<InputMaybe<DevboxModelAttributes>>>;
+  probeError?: InputMaybe<Scalars['String']['input']>;
+  probeStatus?: InputMaybe<DevboxProbeStatus>;
+  /** the negotiated ACP protocol version */
+  protocolVersion?: InputMaybe<Scalars['Int']['input']>;
+  sessionCapabilities?: InputMaybe<DevboxSessionCapabilitiesAttributes>;
+  type: DevboxAgentType;
+};
+
+export type DevboxAgentBilling = {
+  __typename?: 'DevboxAgentBilling';
+  agent?: Maybe<DevboxAgentType>;
+  allowCollaborators?: Maybe<Scalars['Boolean']['output']>;
+  billing?: Maybe<DevboxBillingMode>;
+  credentialKind?: Maybe<Scalars['String']['output']>;
+};
+
+export type DevboxAgentBillingAttributes = {
+  agent: DevboxAgentType;
+  /** let other workbench users prompt this agent on your subscription */
+  allowCollaborators?: InputMaybe<Scalars['Boolean']['input']>;
+  billing: DevboxBillingMode;
+};
+
+export type DevboxAgentConnection = {
+  __typename?: 'DevboxAgentConnection';
+  adapterName?: Maybe<Scalars['String']['output']>;
+  adapterVersion?: Maybe<Scalars['String']['output']>;
+  agent?: Maybe<DevboxAgentType>;
+  /** proxy or subscription */
+  billing?: Maybe<Scalars['String']['output']>;
+  capabilities?: Maybe<Scalars['Map']['output']>;
+  protocolVersion?: Maybe<Scalars['Int']['output']>;
+};
+
+export enum DevboxAgentType {
+  Claude = 'CLAUDE',
+  Codex = 'CODEX',
+  Gemini = 'GEMINI',
+  Opencode = 'OPENCODE',
+  Pi = 'PI'
+}
+
+export type DevboxAttributes = {
+  /** the probed agent catalog */
+  agents?: InputMaybe<Array<InputMaybe<DevboxAgentAttributes>>>;
+  /** repositories instances may check out, all if unset */
+  allowedRepositories?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  autonomy?: InputMaybe<DevboxAutonomyAttributes>;
+  /** whether instances get a browser sidecar */
+  browser?: InputMaybe<Scalars['Boolean']['input']>;
+  /** cloud identities instances get workload identity tokens for */
+  cloudIdentities?: InputMaybe<Array<InputMaybe<DevboxCloudIdentityAttributes>>>;
+  /** the cluster this box runs on (required for user-authenticated upserts) */
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  conditions?: InputMaybe<Array<InputMaybe<DevboxConditionAttributes>>>;
+  /** hosts instances may reach */
+  httpAllowlist?: InputMaybe<Array<InputMaybe<DevboxHttpAllowAttributes>>>;
+  idlePolicy?: InputMaybe<DevboxIdlePolicyAttributes>;
+  /** the box image as specified on the DevboxRunner */
+  image?: InputMaybe<Scalars['String']['input']>;
+  /** the most live instances this box may run at once */
+  maxInstances?: InputMaybe<Scalars['Int']['input']>;
+  /** the name of the DevboxRunner */
+  name: Scalars['String']['input'];
+  /** the image pinned by digest */
+  resolvedImage?: InputMaybe<Scalars['String']['input']>;
+  /** the resources for each instance */
+  resources?: InputMaybe<Scalars['Json']['input']>;
+  /** names of the scm connections instances may use */
+  scmConnections?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  status?: InputMaybe<DevboxStatus>;
+  /** the golden template revision instances boot from */
+  templateRevision?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type DevboxAudioContent = {
+  __typename?: 'DevboxAudioContent';
+  data?: Maybe<Scalars['String']['output']>;
+  mimeType?: Maybe<Scalars['String']['output']>;
+  type: DevboxContentBlockType;
+};
+
+export enum DevboxAutonomy {
+  Auto = 'AUTO',
+  Full = 'FULL',
+  Manual = 'MANUAL'
+}
+
+export type DevboxAutonomyAttributes = {
+  /** the level new threads start at */
+  default?: InputMaybe<DevboxAutonomy>;
+  /** the highest level a thread may use */
+  max?: InputMaybe<DevboxAutonomy>;
+};
+
+export type DevboxAutonomyPolicy = {
+  __typename?: 'DevboxAutonomyPolicy';
+  /** the level new threads start at */
+  default: DevboxAutonomy;
+  /** the highest level a thread may use */
+  max: DevboxAutonomy;
+};
+
+export enum DevboxBillingMode {
+  /** billed through the Plural AI proxy against the workbench budget */
+  Proxy = 'PROXY',
+  /** billed to the instance owner's linked subscription */
+  Subscription = 'SUBSCRIPTION'
+}
+
+export type DevboxCheckout = {
+  __typename?: 'DevboxCheckout';
+  ahead?: Maybe<Scalars['Int']['output']>;
+  behind?: Maybe<Scalars['Int']['output']>;
+  branch?: Maybe<Scalars['String']['output']>;
+  defaultBranch?: Maybe<Scalars['String']['output']>;
+  dirty?: Maybe<Scalars['Boolean']['output']>;
+  headSha?: Maybe<Scalars['String']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  path?: Maybe<Scalars['String']['output']>;
+  remoteUrl?: Maybe<Scalars['String']['output']>;
+  worktreeThreadId?: Maybe<Scalars['String']['output']>;
+};
+
+export type DevboxCloudIdentity = {
+  __typename?: 'DevboxCloudIdentity';
+  authorityHost?: Maybe<Scalars['String']['output']>;
+  clientId?: Maybe<Scalars['String']['output']>;
+  default?: Maybe<Scalars['Boolean']['output']>;
+  durationSeconds?: Maybe<Scalars['Int']['output']>;
+  name: Scalars['String']['output'];
+  provider: DevboxCloudProvider;
+  roleArn?: Maybe<Scalars['String']['output']>;
+  serviceAccount?: Maybe<Scalars['String']['output']>;
+  tenantId?: Maybe<Scalars['String']['output']>;
+  workloadIdentityProvider?: Maybe<Scalars['String']['output']>;
+};
+
+export type DevboxCloudIdentityAttributes = {
+  /** azure: the authority host, for sovereign clouds */
+  authorityHost?: InputMaybe<Scalars['String']['input']>;
+  /** azure: the application (client) id */
+  clientId?: InputMaybe<Scalars['String']['input']>;
+  default?: InputMaybe<Scalars['Boolean']['input']>;
+  /** token lifetime, at most an hour */
+  durationSeconds?: InputMaybe<Scalars['Int']['input']>;
+  name: Scalars['String']['input'];
+  provider: DevboxCloudProvider;
+  /** aws: the role to assume with the token */
+  roleArn?: InputMaybe<Scalars['String']['input']>;
+  /** gcp: the service account to impersonate */
+  serviceAccount?: InputMaybe<Scalars['String']['input']>;
+  /** azure: the Entra ID tenant */
+  tenantId?: InputMaybe<Scalars['String']['input']>;
+  /** gcp: projects/<number>/locations/global/workloadIdentityPools/<pool>/providers/<provider> */
+  workloadIdentityProvider?: InputMaybe<Scalars['String']['input']>;
+};
+
+export enum DevboxCloudProvider {
+  Aws = 'AWS',
+  Azure = 'AZURE',
+  Gcp = 'GCP'
+}
+
+export type DevboxCommand = {
+  __typename?: 'DevboxCommand';
+  description?: Maybe<Scalars['String']['output']>;
+  inputHint?: Maybe<Scalars['String']['output']>;
+  name: Scalars['String']['output'];
+};
+
+export type DevboxCommandAttributes = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  inputHint?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+};
+
+export type DevboxCompaction = {
+  __typename?: 'DevboxCompaction';
+  compactionId?: Maybe<Scalars['String']['output']>;
+  meta?: Maybe<Scalars['Map']['output']>;
+  status?: Maybe<Scalars['String']['output']>;
+  summary?: Maybe<Array<Maybe<DevboxContentBlock>>>;
+};
+
+export type DevboxCondition = {
+  __typename?: 'DevboxCondition';
+  message?: Maybe<Scalars['String']['output']>;
+  reason?: Maybe<Scalars['String']['output']>;
+  status: Scalars['String']['output'];
+  type: Scalars['String']['output'];
+};
+
+export type DevboxConditionAttributes = {
+  message?: InputMaybe<Scalars['String']['input']>;
+  reason?: InputMaybe<Scalars['String']['input']>;
+  status: Scalars['String']['input'];
+  type: Scalars['String']['input'];
+};
+
+export type DevboxConfigOption = {
+  __typename?: 'DevboxConfigOption';
+  /** model, mode, thought_level, ... */
+  category?: Maybe<Scalars['String']['output']>;
+  /** the ACP config option id */
+  configId: Scalars['String']['output'];
+  currentValue?: Maybe<Scalars['String']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  options?: Maybe<Array<Maybe<DevboxConfigOptionValue>>>;
+  type?: Maybe<Scalars['String']['output']>;
+};
+
+export type DevboxConfigOptionAttributes = {
+  category?: InputMaybe<Scalars['String']['input']>;
+  configId: Scalars['String']['input'];
+  currentValue?: InputMaybe<Scalars['String']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  options?: InputMaybe<Array<InputMaybe<DevboxConfigValueOptionAttributes>>>;
+  type?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type DevboxConfigOptionValue = {
+  __typename?: 'DevboxConfigOptionValue';
+  description?: Maybe<Scalars['String']['output']>;
+  group?: Maybe<Scalars['String']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  value: Scalars['String']['output'];
+};
+
+export type DevboxConfigValueAttributes = {
+  /** the ACP config option id */
+  configId: Scalars['String']['input'];
+  value: Scalars['String']['input'];
+};
+
+export type DevboxConfigValueOptionAttributes = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  group?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  value: Scalars['String']['input'];
+};
+
+export type DevboxConnection = {
+  __typename?: 'DevboxConnection';
+  edges?: Maybe<Array<Maybe<DevboxEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type DevboxContentBlock = DevboxAudioContent | DevboxImageContent | DevboxResourceContent | DevboxResourceLinkContent | DevboxTextContent | DevboxUnknownContent;
+
+export enum DevboxContentBlockType {
+  Audio = 'AUDIO',
+  Image = 'IMAGE',
+  Resource = 'RESOURCE',
+  ResourceLink = 'RESOURCE_LINK',
+  Text = 'TEXT',
+  Unknown = 'UNKNOWN'
+}
+
+export enum DevboxDeltaOp {
+  /** a chunk appended to an entity, e.g. message text */
+  Append = 'APPEND',
+  /** a live-only notice, never stored in the transcript */
+  Notice = 'NOTICE',
+  /** an ACP upsert patch: omitted fields unchanged, null clears, values replace */
+  Patch = 'PATCH',
+  /** a pull request was created from the thread */
+  PullRequest = 'PULL_REQUEST',
+  /** the entity settled, `entity` holds its final revision */
+  Settle = 'SETTLE',
+  /** session state: config options, available commands, session info or usage */
+  State = 'STATE'
+}
+
+export type DevboxEdge = {
+  __typename?: 'DevboxEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<Devbox>;
+};
+
+export enum DevboxElicitationAction {
+  Accept = 'ACCEPT',
+  Cancel = 'CANCEL',
+  Decline = 'DECLINE'
+}
+
+/** An ACP transcript entity, with a typed view for its type and the verbatim ACP JSON in `raw` */
+export type DevboxEntity = {
+  __typename?: 'DevboxEntity';
+  compaction?: Maybe<DevboxCompaction>;
+  createdAt?: Maybe<Scalars['DateTime']['output']>;
+  id?: Maybe<Scalars['String']['output']>;
+  /** for user_message, agent_message and agent_thought */
+  message?: Maybe<DevboxMessageEntity>;
+  plan?: Maybe<DevboxPlan>;
+  position?: Maybe<Scalars['Long']['output']>;
+  raw?: Maybe<Scalars['Map']['output']>;
+  revision?: Maybe<Scalars['Long']['output']>;
+  sessionId?: Maybe<Scalars['String']['output']>;
+  /** a message between sessions (e.g. to a subagent) */
+  sessionMessage?: Maybe<DevboxSessionMessageEntity>;
+  settled?: Maybe<Scalars['Boolean']['output']>;
+  terminal?: Maybe<DevboxTerminal>;
+  toolCall?: Maybe<DevboxToolCall>;
+  type: DevboxEntityType;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** A live entity change, never stored */
+export type DevboxEntityChange = {
+  __typename?: 'DevboxEntityChange';
+  emittedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** for settle deltas, the final entity */
+  entity?: Maybe<DevboxEntity>;
+  entityId?: Maybe<Scalars['String']['output']>;
+  entityType?: Maybe<DevboxEntityType>;
+  instanceId: Scalars['ID']['output'];
+  offset?: Maybe<Scalars['Long']['output']>;
+  op: DevboxDeltaOp;
+  /** the verbatim ACP chunk, patch, notice or state update */
+  payload?: Maybe<Scalars['Map']['output']>;
+  position?: Maybe<Scalars['Long']['output']>;
+  sessionId?: Maybe<Scalars['String']['output']>;
+  /** for state deltas, which ACP update this is */
+  stateKind?: Maybe<Scalars['String']['output']>;
+  threadId?: Maybe<Scalars['String']['output']>;
+};
+
+export type DevboxEntityChangeDelta = {
+  __typename?: 'DevboxEntityChangeDelta';
+  delta?: Maybe<Delta>;
+  payload?: Maybe<DevboxEntityChange>;
+};
+
+export enum DevboxEntityType {
+  AgentMessage = 'AGENT_MESSAGE',
+  AgentThought = 'AGENT_THOUGHT',
+  Compaction = 'COMPACTION',
+  Plan = 'PLAN',
+  SessionMessage = 'SESSION_MESSAGE',
+  Terminal = 'TERMINAL',
+  ToolCall = 'TOOL_CALL',
+  Unknown = 'UNKNOWN',
+  UserMessage = 'USER_MESSAGE'
+}
+
+export type DevboxFile = {
+  __typename?: 'DevboxFile';
+  binary?: Maybe<Scalars['Boolean']['output']>;
+  /** the text content, null for binary files */
+  content?: Maybe<Scalars['String']['output']>;
+  entry?: Maybe<DevboxFileEntry>;
+  mimeType?: Maybe<Scalars['String']['output']>;
+  /** pass back as expectedSha256 when writing */
+  sha256?: Maybe<Scalars['String']['output']>;
+  truncated?: Maybe<Scalars['Boolean']['output']>;
+};
+
+export type DevboxFileChange = {
+  __typename?: 'DevboxFileChange';
+  additions?: Maybe<Scalars['Int']['output']>;
+  binary?: Maybe<Scalars['Boolean']['output']>;
+  deletions?: Maybe<Scalars['Int']['output']>;
+  diff?: Maybe<Scalars['String']['output']>;
+  diffTruncated?: Maybe<Scalars['Boolean']['output']>;
+  oldPath?: Maybe<Scalars['String']['output']>;
+  path: Scalars['String']['output'];
+  staged?: Maybe<Scalars['Boolean']['output']>;
+  /** added, modified, deleted, renamed, copied, untracked, conflicted or type_changed */
+  status?: Maybe<Scalars['String']['output']>;
+};
+
+export type DevboxFileEntry = {
+  __typename?: 'DevboxFileEntry';
+  /** the porcelain git status, e.g. " M" or "??" */
+  gitStatus?: Maybe<Scalars['String']['output']>;
+  mode?: Maybe<Scalars['Int']['output']>;
+  modifiedAt?: Maybe<Scalars['DateTime']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  path: Scalars['String']['output'];
+  /** the checkout containing the file */
+  repository?: Maybe<Scalars['String']['output']>;
+  size?: Maybe<Scalars['Long']['output']>;
+  symlinkTarget?: Maybe<Scalars['String']['output']>;
+  /** file, directory, symlink or other */
+  type?: Maybe<Scalars['String']['output']>;
+};
+
+export type DevboxFileWrite = {
+  __typename?: 'DevboxFileWrite';
+  entry?: Maybe<DevboxFileEntry>;
+  sha256?: Maybe<Scalars['String']['output']>;
+};
+
+export enum DevboxForegroundState {
+  Idle = 'IDLE',
+  RequiresAction = 'REQUIRES_ACTION',
+  Running = 'RUNNING'
+}
+
+export type DevboxHeartbeatAttributes = {
+  conditions?: InputMaybe<Array<InputMaybe<DevboxConditionAttributes>>>;
+  resolvedImage?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<DevboxStatus>;
+  templateRevision?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type DevboxHttpAllow = {
+  __typename?: 'DevboxHttpAllow';
+  host: Scalars['String']['output'];
+  passthrough?: Maybe<Scalars['Boolean']['output']>;
+  port?: Maybe<Scalars['Int']['output']>;
+};
+
+export type DevboxHttpAllowAttributes = {
+  host: Scalars['String']['input'];
+  passthrough?: InputMaybe<Scalars['Boolean']['input']>;
+  port?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type DevboxIdlePolicy = {
+  __typename?: 'DevboxIdlePolicy';
+  activityWindow?: Maybe<Scalars['Int']['output']>;
+  completeAfter?: Maybe<Scalars['Int']['output']>;
+  cpuThreshold?: Maybe<Scalars['Float']['output']>;
+  gracePeriod?: Maybe<Scalars['Int']['output']>;
+  maxContinuousAwake?: Maybe<Scalars['Int']['output']>;
+  maxDeferral?: Maybe<Scalars['Int']['output']>;
+};
+
+export type DevboxIdlePolicyAttributes = {
+  /** seconds */
+  activityWindow?: InputMaybe<Scalars['Int']['input']>;
+  /** seconds */
+  completeAfter?: InputMaybe<Scalars['Int']['input']>;
+  cpuThreshold?: InputMaybe<Scalars['Float']['input']>;
+  /** seconds */
+  gracePeriod?: InputMaybe<Scalars['Int']['input']>;
+  /** seconds */
+  maxContinuousAwake?: InputMaybe<Scalars['Int']['input']>;
+  /** seconds */
+  maxDeferral?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type DevboxIdleState = {
+  __typename?: 'DevboxIdleState';
+  busyReasons?: Maybe<Array<Maybe<Scalars['Map']['output']>>>;
+  idle?: Maybe<Scalars['Boolean']['output']>;
+  idleSince?: Maybe<Scalars['DateTime']['output']>;
+  message?: Maybe<Scalars['String']['output']>;
+  suspendsAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type DevboxImageContent = {
+  __typename?: 'DevboxImageContent';
+  data?: Maybe<Scalars['String']['output']>;
+  mimeType?: Maybe<Scalars['String']['output']>;
+  type: DevboxContentBlockType;
+  uri?: Maybe<Scalars['String']['output']>;
+};
+
+export type DevboxImportAttributes = {
+  agent: DevboxAgentType;
+  cwd?: InputMaybe<Scalars['String']['input']>;
+  /** the agent's session id, from devboxImportableSessions */
+  sessionId: Scalars['String']['input'];
+  title?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type DevboxImportableSession = {
+  __typename?: 'DevboxImportableSession';
+  agent?: Maybe<DevboxAgentType>;
+  cwd?: Maybe<Scalars['String']['output']>;
+  sessionId: Scalars['String']['output'];
+  title?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** The index rows an UpsertInstanceIndex call changed (revision and foreground state only when the instance aggregate changed) */
+export type DevboxIndexChange = {
+  __typename?: 'DevboxIndexChange';
+  foregroundState?: Maybe<DevboxForegroundState>;
+  instanceId: Scalars['ID']['output'];
+  interactions?: Maybe<Array<Maybe<DevboxInteraction>>>;
+  revision?: Maybe<Scalars['Long']['output']>;
+  threads?: Maybe<Array<Maybe<DevboxThread>>>;
+};
+
+export type DevboxIndexChangeDelta = {
+  __typename?: 'DevboxIndexChangeDelta';
+  delta?: Maybe<Delta>;
+  payload?: Maybe<DevboxIndexChange>;
+};
+
+export type DevboxInstance = {
+  __typename?: 'DevboxInstance';
+  agent?: Maybe<DevboxAgentType>;
+  agentBilling?: Maybe<Array<Maybe<DevboxAgentBilling>>>;
+  agentConnections?: Maybe<Array<Maybe<DevboxAgentConnection>>>;
+  awakeSince?: Maybe<Scalars['DateTime']['output']>;
+  checkouts?: Maybe<Array<Maybe<DevboxCheckout>>>;
+  completedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** initial config option values, by config id */
+  configOptions?: Maybe<Scalars['Map']['output']>;
+  devbox?: Maybe<Devbox>;
+  /** requires_action if any thread needs you */
+  foregroundState?: Maybe<DevboxForegroundState>;
+  id: Scalars['ID']['output'];
+  idleState?: Maybe<DevboxIdleState>;
+  imageDigest?: Maybe<Scalars['String']['output']>;
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  interactions?: Maybe<Array<Maybe<DevboxInteraction>>>;
+  keepAwakeBy?: Maybe<User>;
+  keepAwakeUntil?: Maybe<Scalars['DateTime']['output']>;
+  lastActivityAt?: Maybe<Scalars['DateTime']['output']>;
+  leases?: Maybe<Array<Maybe<DevboxLease>>>;
+  maxRunningThreads?: Maybe<Scalars['Int']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  repositories?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  requestedModel?: Maybe<Scalars['String']['output']>;
+  /** filesystem if the box's template changed since the snapshot, so the instance cold-boots */
+  restoreFidelity?: Maybe<DevboxSnapshotFidelity>;
+  runningThreads?: Maybe<Scalars['Int']['output']>;
+  snapshot?: Maybe<DevboxSnapshot>;
+  startedAt?: Maybe<Scalars['DateTime']['output']>;
+  status: DevboxInstanceStatus;
+  statusReason?: Maybe<Scalars['String']['output']>;
+  suspendedAt?: Maybe<Scalars['DateTime']['output']>;
+  templateRevision?: Maybe<Scalars['String']['output']>;
+  threads?: Maybe<Array<Maybe<DevboxThread>>>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  user?: Maybe<User>;
+  viewerCount?: Maybe<Scalars['Int']['output']>;
+  waitingThreads?: Maybe<Scalars['Int']['output']>;
+  workbench?: Maybe<Workbench>;
+};
+
+
+export type DevboxInstanceInteractionsArgs = {
+  pending?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+export type DevboxInstanceThreadsArgs = {
+  includeDeleted?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+export type DevboxInstanceAttributes = {
+  /** defaults to the box's default agent */
+  agent?: InputMaybe<DevboxAgentType>;
+  /** how each agent is billed, defaults to your credentials marked default where the workbench allows it, otherwise the AI proxy */
+  agentBilling?: InputMaybe<Array<InputMaybe<DevboxAgentBillingAttributes>>>;
+  /** initial values for other config options */
+  configOptions?: InputMaybe<Array<InputMaybe<DevboxConfigValueAttributes>>>;
+  /** the attached box to start (defaults to the snapshot's box when restoring) */
+  devboxId?: InputMaybe<Scalars['ID']['input']>;
+  maxRunningThreads?: InputMaybe<Scalars['Int']['input']>;
+  /** defaults to the agent's default model */
+  model?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  /** defaults to the workbench's coding repositories allowed on the box */
+  repositories?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  /** a ready snapshot to restore from */
+  snapshotId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+export type DevboxInstanceConnection = {
+  __typename?: 'DevboxInstanceConnection';
+  edges?: Maybe<Array<Maybe<DevboxInstanceEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type DevboxInstanceDelta = {
+  __typename?: 'DevboxInstanceDelta';
+  delta?: Maybe<Delta>;
+  payload?: Maybe<DevboxInstance>;
+};
+
+export type DevboxInstanceEdge = {
+  __typename?: 'DevboxInstanceEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<DevboxInstance>;
+};
+
+export enum DevboxInstanceStatus {
+  Cancelled = 'CANCELLED',
+  Completed = 'COMPLETED',
+  Failed = 'FAILED',
+  Pending = 'PENDING',
+  Provisioning = 'PROVISIONING',
+  Running = 'RUNNING',
+  Snapshotting = 'SNAPSHOTTING',
+  Suspended = 'SUSPENDED'
+}
+
+/** A permission request or elicitation from an agent */
+export type DevboxInteraction = {
+  __typename?: 'DevboxInteraction';
+  answeredAt?: Maybe<Scalars['DateTime']['output']>;
+  answeredBy?: Maybe<User>;
+  /** set when the devbox answered by policy, e.g. autonomy:full */
+  answeredByPolicy?: Maybe<Scalars['String']['output']>;
+  expiresAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the daemon-allocated interaction id */
+  externalId: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  instance?: Maybe<DevboxInstance>;
+  kind: DevboxInteractionKind;
+  message?: Maybe<Scalars['String']['output']>;
+  options?: Maybe<Array<Maybe<DevboxPermissionOption>>>;
+  /** json schema for a form elicitation */
+  requestedSchema?: Maybe<Scalars['Map']['output']>;
+  response?: Maybe<Scalars['Map']['output']>;
+  /** the devbox reviewer's verdict at autonomy auto */
+  review?: Maybe<DevboxInteractionReview>;
+  state: DevboxInteractionState;
+  thread?: Maybe<DevboxThread>;
+  title?: Maybe<Scalars['String']['output']>;
+  /** set when scoped to a tool call (render it inline) */
+  toolCallId?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the url of a url elicitation */
+  url?: Maybe<Scalars['String']['output']>;
+};
+
+export enum DevboxInteractionKind {
+  FormElicitation = 'FORM_ELICITATION',
+  Permission = 'PERMISSION',
+  UrlElicitation = 'URL_ELICITATION'
+}
+
+export type DevboxInteractionResponseAttributes = {
+  /** the answer to an elicitation */
+  action?: InputMaybe<DevboxElicitationAction>;
+  /** cancel a permission request */
+  cancelled?: InputMaybe<Scalars['Boolean']['input']>;
+  /** form content for an accepted form elicitation */
+  content?: InputMaybe<Scalars['Json']['input']>;
+  /** the selected option of a permission request */
+  optionId?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** A decision model's review of a permission request at autonomy auto */
+export type DevboxInteractionReview = {
+  __typename?: 'DevboxInteractionReview';
+  /** the verdict's probability, 0 to 1 */
+  confidence?: Maybe<Scalars['Float']['output']>;
+  /** why a human was still asked, when they were */
+  escalation?: Maybe<Scalars['String']['output']>;
+  /** the decision model that answered */
+  model?: Maybe<Scalars['String']['output']>;
+  /** none, destructive, exfiltration, credentials, out_of_scope or external */
+  risk?: Maybe<Scalars['String']['output']>;
+  /** allow, deny or ask */
+  verdict?: Maybe<Scalars['String']['output']>;
+};
+
+export enum DevboxInteractionState {
+  Answered = 'ANSWERED',
+  Cancelled = 'CANCELLED',
+  Expired = 'EXPIRED',
+  Pending = 'PENDING'
+}
+
+export type DevboxLease = {
+  __typename?: 'DevboxLease';
+  expiresAt: Scalars['DateTime']['output'];
+  holder?: Maybe<User>;
+  kind: DevboxLeaseKind;
+};
+
+export enum DevboxLeaseKind {
+  Deferral = 'DEFERRAL',
+  Viewer = 'VIEWER'
+}
+
+export type DevboxMessageEntity = {
+  __typename?: 'DevboxMessageEntity';
+  content?: Maybe<Array<Maybe<DevboxContentBlock>>>;
+  messageId?: Maybe<Scalars['String']['output']>;
+  meta?: Maybe<Scalars['Map']['output']>;
+  promptId?: Maybe<Scalars['String']['output']>;
+  sentById?: Maybe<Scalars['String']['output']>;
+};
+
+export type DevboxModel = {
+  __typename?: 'DevboxModel';
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['String']['output'];
+  name?: Maybe<Scalars['String']['output']>;
+};
+
+export type DevboxModelAttributes = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  id: Scalars['String']['input'];
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type DevboxPermissionOption = {
+  __typename?: 'DevboxPermissionOption';
+  /** allow_once, allow_always, reject_once or reject_always */
+  kind?: Maybe<Scalars['String']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  optionId: Scalars['String']['output'];
+};
+
+export type DevboxPlan = {
+  __typename?: 'DevboxPlan';
+  entries?: Maybe<Array<Maybe<DevboxPlanEntry>>>;
+  meta?: Maybe<Scalars['Map']['output']>;
+  planId?: Maybe<Scalars['String']['output']>;
+};
+
+export type DevboxPlanEntry = {
+  __typename?: 'DevboxPlanEntry';
+  content?: Maybe<Scalars['String']['output']>;
+  /** high, medium or low */
+  priority?: Maybe<Scalars['String']['output']>;
+  /** pending, in_progress or completed */
+  status?: Maybe<Scalars['String']['output']>;
+};
+
+export enum DevboxProbeStatus {
+  Failed = 'FAILED',
+  Missing = 'MISSING',
+  Ok = 'OK',
+  Pending = 'PENDING'
+}
+
+export type DevboxProbeToken = {
+  __typename?: 'DevboxProbeToken';
+  expiresAt: Scalars['DateTime']['output'];
+  token: Scalars['String']['output'];
+};
+
+export type DevboxPromptBlockAttributes = {
+  /** base64 data for images and audio */
+  data?: InputMaybe<Scalars['String']['input']>;
+  mimeType?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  text?: InputMaybe<Scalars['String']['input']>;
+  type: DevboxContentBlockType;
+  uri?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type DevboxRepository = {
+  __typename?: 'DevboxRepository';
+  ahead?: Maybe<Scalars['Int']['output']>;
+  behind?: Maybe<Scalars['Int']['output']>;
+  branch?: Maybe<Scalars['String']['output']>;
+  defaultBranch?: Maybe<Scalars['String']['output']>;
+  dirty?: Maybe<Scalars['Boolean']['output']>;
+  headSha?: Maybe<Scalars['String']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  path?: Maybe<Scalars['String']['output']>;
+  remoteUrl?: Maybe<Scalars['String']['output']>;
+  worktreeThreadId?: Maybe<Scalars['String']['output']>;
+};
+
+export type DevboxRepositoryChanges = {
+  __typename?: 'DevboxRepositoryChanges';
+  additions?: Maybe<Scalars['Int']['output']>;
+  baseRef?: Maybe<Scalars['String']['output']>;
+  baseSha?: Maybe<Scalars['String']['output']>;
+  checkout?: Maybe<DevboxCheckout>;
+  deletions?: Maybe<Scalars['Int']['output']>;
+  files?: Maybe<Array<Maybe<DevboxFileChange>>>;
+};
+
+export type DevboxResourceContent = {
+  __typename?: 'DevboxResourceContent';
+  blob?: Maybe<Scalars['String']['output']>;
+  mimeType?: Maybe<Scalars['String']['output']>;
+  text?: Maybe<Scalars['String']['output']>;
+  type: DevboxContentBlockType;
+  uri?: Maybe<Scalars['String']['output']>;
+};
+
+export type DevboxResourceLinkContent = {
+  __typename?: 'DevboxResourceLinkContent';
+  description?: Maybe<Scalars['String']['output']>;
+  mimeType?: Maybe<Scalars['String']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  size?: Maybe<Scalars['Long']['output']>;
+  title?: Maybe<Scalars['String']['output']>;
+  type: DevboxContentBlockType;
+  uri?: Maybe<Scalars['String']['output']>;
+};
+
+export type DevboxSessionCapabilities = {
+  __typename?: 'DevboxSessionCapabilities';
+  close?: Maybe<Scalars['Boolean']['output']>;
+  delete?: Maybe<Scalars['Boolean']['output']>;
+  fork?: Maybe<Scalars['Boolean']['output']>;
+  list?: Maybe<Scalars['Boolean']['output']>;
+  load?: Maybe<Scalars['Boolean']['output']>;
+  resume?: Maybe<Scalars['Boolean']['output']>;
+};
+
+export type DevboxSessionCapabilitiesAttributes = {
+  close?: InputMaybe<Scalars['Boolean']['input']>;
+  delete?: InputMaybe<Scalars['Boolean']['input']>;
+  fork?: InputMaybe<Scalars['Boolean']['input']>;
+  list?: InputMaybe<Scalars['Boolean']['input']>;
+  load?: InputMaybe<Scalars['Boolean']['input']>;
+  resume?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+export type DevboxSessionMessageEntity = {
+  __typename?: 'DevboxSessionMessageEntity';
+  content?: Maybe<Array<Maybe<DevboxContentBlock>>>;
+  fromSessionId?: Maybe<Scalars['String']['output']>;
+  messageId?: Maybe<Scalars['String']['output']>;
+  meta?: Maybe<Scalars['Map']['output']>;
+  toSessionId?: Maybe<Scalars['String']['output']>;
+};
+
+export type DevboxSessionSummary = {
+  __typename?: 'DevboxSessionSummary';
+  agent?: Maybe<DevboxAgentType>;
+  foregroundState?: Maybe<DevboxForegroundState>;
+  kind?: Maybe<DevboxThreadKind>;
+  lastActivityAt?: Maybe<Scalars['DateTime']['output']>;
+  parentSessionId?: Maybe<Scalars['String']['output']>;
+  sessionId?: Maybe<Scalars['String']['output']>;
+  status?: Maybe<DevboxThreadStatus>;
+  threadId?: Maybe<Scalars['String']['output']>;
+  title?: Maybe<Scalars['String']['output']>;
+};
+
+export type DevboxSnapshot = {
+  __typename?: 'DevboxSnapshot';
+  devbox?: Maybe<Devbox>;
+  error?: Maybe<Scalars['String']['output']>;
+  fidelity?: Maybe<DevboxSnapshotFidelity>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  instance?: Maybe<DevboxInstance>;
+  name?: Maybe<Scalars['String']['output']>;
+  sizeBytes?: Maybe<Scalars['Long']['output']>;
+  status: DevboxSnapshotStatus;
+  templateRevision?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  user?: Maybe<User>;
+  workbench?: Maybe<Workbench>;
+};
+
+export type DevboxSnapshotAttributes = {
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type DevboxSnapshotConnection = {
+  __typename?: 'DevboxSnapshotConnection';
+  edges?: Maybe<Array<Maybe<DevboxSnapshotEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type DevboxSnapshotDelta = {
+  __typename?: 'DevboxSnapshotDelta';
+  delta?: Maybe<Delta>;
+  payload?: Maybe<DevboxSnapshot>;
+};
+
+export type DevboxSnapshotEdge = {
+  __typename?: 'DevboxSnapshotEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<DevboxSnapshot>;
+};
+
+export enum DevboxSnapshotFidelity {
+  Filesystem = 'FILESYSTEM',
+  Memory = 'MEMORY'
+}
+
+export enum DevboxSnapshotStatus {
+  Deleting = 'DELETING',
+  Failed = 'FAILED',
+  Pending = 'PENDING',
+  Ready = 'READY'
+}
+
+export enum DevboxSnippetFormat {
+  Cli = 'CLI',
+  Terraform = 'TERRAFORM'
+}
+
+export enum DevboxStatus {
+  Degraded = 'DEGRADED',
+  Failed = 'FAILED',
+  Pending = 'PENDING',
+  Ready = 'READY'
+}
+
+export type DevboxStream = {
+  __typename?: 'DevboxStream';
+  /** connect before this */
+  expiresAt?: Maybe<Scalars['DateTime']['output']>;
+  kind: DevboxStreamKind;
+  streamId: Scalars['String']['output'];
+  subprotocols?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  terminalId?: Maybe<Scalars['String']['output']>;
+  /** a short-lived bearer token for the websocket */
+  token: Scalars['String']['output'];
+  /** the websocket to connect to */
+  url: Scalars['String']['output'];
+};
+
+export enum DevboxStreamKind {
+  Preview = 'PREVIEW',
+  Terminal = 'TERMINAL',
+  Vnc = 'VNC'
+}
+
+export type DevboxTerminal = {
+  __typename?: 'DevboxTerminal';
+  args?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  command?: Maybe<Scalars['String']['output']>;
+  cwd?: Maybe<Scalars['String']['output']>;
+  exitCode?: Maybe<Scalars['Int']['output']>;
+  meta?: Maybe<Scalars['Map']['output']>;
+  output?: Maybe<Scalars['String']['output']>;
+  signal?: Maybe<Scalars['String']['output']>;
+  terminalId?: Maybe<Scalars['String']['output']>;
+  truncated?: Maybe<Scalars['Boolean']['output']>;
+};
+
+export type DevboxTextContent = {
+  __typename?: 'DevboxTextContent';
+  annotations?: Maybe<Scalars['Map']['output']>;
+  text?: Maybe<Scalars['String']['output']>;
+  type: DevboxContentBlockType;
+};
+
+/** A top-level ACP session console knows about, or (as a subagent) one spawned by it */
+export type DevboxThread = {
+  __typename?: 'DevboxThread';
+  agent?: Maybe<DevboxAgentType>;
+  /** the agent-owned title */
+  agentTitle?: Maybe<Scalars['String']['output']>;
+  availableCommands?: Maybe<Array<Maybe<DevboxCommand>>>;
+  backgroundWork?: Maybe<Scalars['Map']['output']>;
+  billing?: Maybe<Scalars['String']['output']>;
+  configOptions?: Maybe<Array<Maybe<DevboxConfigOption>>>;
+  cwd?: Maybe<Scalars['String']['output']>;
+  entityCount?: Maybe<Scalars['Int']['output']>;
+  error?: Maybe<Scalars['Map']['output']>;
+  foregroundState?: Maybe<DevboxForegroundState>;
+  id: Scalars['ID']['output'];
+  imported?: Maybe<Scalars['Boolean']['output']>;
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  instance?: Maybe<DevboxInstance>;
+  interactions?: Maybe<Array<Maybe<DevboxInteraction>>>;
+  kind: DevboxThreadKind;
+  lastActivityAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the current model-category config value */
+  model?: Maybe<Scalars['String']['output']>;
+  parent?: Maybe<DevboxThread>;
+  revision?: Maybe<Scalars['Int']['output']>;
+  /** the ACP session id, unset while a waiting thread hasn't started */
+  sessionId?: Maybe<Scalars['String']['output']>;
+  status: DevboxThreadStatus;
+  stopReason?: Maybe<Scalars['String']['output']>;
+  /** subagent sessions spawned by this one */
+  subagents?: Maybe<Array<Maybe<DevboxThread>>>;
+  title?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  usage?: Maybe<DevboxUsage>;
+  user?: Maybe<User>;
+  worktreeRepos?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+};
+
+export type DevboxThreadAttributes = {
+  /** defaults to the instance's agent */
+  agent?: InputMaybe<DevboxAgentType>;
+  configOptions?: InputMaybe<Array<InputMaybe<DevboxConfigValueAttributes>>>;
+  /** an optional first prompt, as content blocks */
+  content?: InputMaybe<Array<InputMaybe<DevboxPromptBlockAttributes>>>;
+  /** ~ or ~/<repository> */
+  cwd?: InputMaybe<Scalars['String']['input']>;
+  model?: InputMaybe<Scalars['String']['input']>;
+  /** an optional first prompt */
+  prompt?: InputMaybe<Scalars['String']['input']>;
+  title?: InputMaybe<Scalars['String']['input']>;
+  /** repositories to give the thread its own worktree of */
+  worktreeRepos?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+};
+
+export type DevboxThreadDelta = {
+  __typename?: 'DevboxThreadDelta';
+  delta?: Maybe<Delta>;
+  payload?: Maybe<DevboxThread>;
+};
+
+export enum DevboxThreadKind {
+  Subagent = 'SUBAGENT',
+  Thread = 'THREAD'
+}
+
+export enum DevboxThreadStatus {
+  Active = 'ACTIVE',
+  Closed = 'CLOSED',
+  Deleted = 'DELETED',
+  Waiting = 'WAITING'
+}
+
+/** A page of a session's transcript, served by the box: settled entities merged with in-flight state */
+export type DevboxTimeline = {
+  __typename?: 'DevboxTimeline';
+  /** apply live deltas with a greater offset on top of this page */
+  deltaOffset?: Maybe<Scalars['Long']['output']>;
+  entities?: Maybe<Array<Maybe<DevboxEntity>>>;
+  /** more entities lie in the paging direction (older ones, unless paging with after) */
+  hasMore?: Maybe<Scalars['Boolean']['output']>;
+};
+
+export type DevboxToolCall = {
+  __typename?: 'DevboxToolCall';
+  content?: Maybe<Array<Maybe<DevboxToolCallContent>>>;
+  /** read, edit, delete, move, search, execute, think, fetch, other, ... */
+  kind?: Maybe<Scalars['String']['output']>;
+  locations?: Maybe<Array<Maybe<DevboxToolCallLocation>>>;
+  meta?: Maybe<Scalars['Map']['output']>;
+  rawInput?: Maybe<Scalars['Map']['output']>;
+  rawOutput?: Maybe<Scalars['Map']['output']>;
+  /** pending, in_progress, completed or failed */
+  status?: Maybe<Scalars['String']['output']>;
+  title?: Maybe<Scalars['String']['output']>;
+  toolCallId?: Maybe<Scalars['String']['output']>;
+};
+
+export type DevboxToolCallBlock = {
+  __typename?: 'DevboxToolCallBlock';
+  content?: Maybe<DevboxContentBlock>;
+  type: DevboxToolCallContentType;
+};
+
+export type DevboxToolCallContent = DevboxToolCallBlock | DevboxToolCallDiff | DevboxToolCallTerminal | DevboxToolCallUnknown;
+
+export enum DevboxToolCallContentType {
+  Content = 'CONTENT',
+  Diff = 'DIFF',
+  Terminal = 'TERMINAL',
+  Unknown = 'UNKNOWN'
+}
+
+export type DevboxToolCallDiff = {
+  __typename?: 'DevboxToolCallDiff';
+  newText?: Maybe<Scalars['String']['output']>;
+  oldText?: Maybe<Scalars['String']['output']>;
+  path?: Maybe<Scalars['String']['output']>;
+  type: DevboxToolCallContentType;
+};
+
+export type DevboxToolCallLocation = {
+  __typename?: 'DevboxToolCallLocation';
+  line?: Maybe<Scalars['Int']['output']>;
+  path?: Maybe<Scalars['String']['output']>;
+};
+
+export type DevboxToolCallTerminal = {
+  __typename?: 'DevboxToolCallTerminal';
+  terminalId?: Maybe<Scalars['String']['output']>;
+  type: DevboxToolCallContentType;
+};
+
+export type DevboxToolCallUnknown = {
+  __typename?: 'DevboxToolCallUnknown';
+  raw?: Maybe<Scalars['Map']['output']>;
+  type: DevboxToolCallContentType;
+  variant?: Maybe<Scalars['String']['output']>;
+};
+
+export type DevboxTrustSnippet = {
+  __typename?: 'DevboxTrustSnippet';
+  content: Scalars['String']['output'];
+  format: DevboxSnippetFormat;
+  provider: DevboxCloudProvider;
+  title: Scalars['String']['output'];
+};
+
+export type DevboxUnknownContent = {
+  __typename?: 'DevboxUnknownContent';
+  raw?: Maybe<Scalars['Map']['output']>;
+  type: DevboxContentBlockType;
+  /** the unrecognized ACP type */
+  variant?: Maybe<Scalars['String']['output']>;
+};
+
+export type DevboxUsage = {
+  __typename?: 'DevboxUsage';
+  cachedTokens?: Maybe<Scalars['Int']['output']>;
+  contextSize?: Maybe<Scalars['Int']['output']>;
+  contextUsed?: Maybe<Scalars['Int']['output']>;
+  currency?: Maybe<Scalars['String']['output']>;
+  inputTokens?: Maybe<Scalars['Int']['output']>;
+  outputTokens?: Maybe<Scalars['Int']['output']>;
+  reasoningTokens?: Maybe<Scalars['Int']['output']>;
+  totalCost?: Maybe<Scalars['Float']['output']>;
+  totalTokens?: Maybe<Scalars['Int']['output']>;
+};
+
+export type DevboxWorkloadIdentity = {
+  __typename?: 'DevboxWorkloadIdentity';
+  /** audiences the box can mint tokens for */
+  audiences?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** the OIDC issuer cloud accounts federate with */
+  issuerUrl: Scalars['String']['output'];
+  snippets?: Maybe<Array<Maybe<DevboxTrustSnippet>>>;
+  /** the sub claim of every token from this box */
+  subject: Scalars['String']['output'];
+};
+
 /** Allows you to control whether a specific set of fields in a kubernetes object is drift detected */
 export type DiffNormalizer = {
   __typename?: 'DiffNormalizer';
@@ -5775,8 +7030,8 @@ export type InfrastructureStack = {
   /** reference w/in the repository where the IaC lives */
   git: GitRef;
   id?: Maybe<Scalars['ID']['output']>;
-  /** Infracost resource rows attached to this stack (newest first) */
-  infracostResources?: Maybe<Array<Maybe<StackInfracostResource>>>;
+  /** Infracost resource rows attached to this stack (newest first), only fetchable for a single stack */
+  infracostResources?: Maybe<StackInfracostResourceConnection>;
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** an insight explaining the state of this stack */
   insight?: Maybe<AiInsight>;
@@ -5833,7 +7088,11 @@ export type InfrastructureStackCustomStackRunsArgs = {
 
 
 export type InfrastructureStackInfracostResourcesArgs = {
-  limit?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  resourceScope?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -6742,6 +8001,7 @@ export type MetricsSettingsAttributes = {
 
 export type ModelDefault = {
   __typename?: 'ModelDefault';
+  decisionModel?: Maybe<Scalars['String']['output']>;
   embeddingModel?: Maybe<Scalars['String']['output']>;
   model?: Maybe<Scalars['String']['output']>;
   provider: AiProvider;
@@ -8027,6 +9287,8 @@ export type OpenaiSettings = {
   __typename?: 'OpenaiSettings';
   /** the base url to use when querying an OpenAI compatible API, leave blank for OpenAI */
   baseUrl?: Maybe<Scalars['String']['output']>;
+  /** a cheap, fast model for decision (classification) calls, like reviewing devbox agent tool calls. Models without native decision support are emulated */
+  decisionModel?: Maybe<Scalars['String']['output']>;
   /** the model to use for vector embeddings */
   embeddingModel?: Maybe<Scalars['String']['output']>;
   /** custom HTTP headers included in OpenAI-compatible API requests */
@@ -8048,6 +9310,8 @@ export type OpenaiSettings = {
 export type OpenaiSettingsAttributes = {
   accessToken?: InputMaybe<Scalars['String']['input']>;
   baseUrl?: InputMaybe<Scalars['String']['input']>;
+  /** a cheap, fast model for decision (classification) calls, like reviewing devbox agent tool calls. Models without native decision support are emulated */
+  decisionModel?: InputMaybe<Scalars['String']['input']>;
   /** the model to use for vector embeddings */
   embeddingModel?: InputMaybe<Scalars['String']['input']>;
   /** custom HTTP headers to include in OpenAI-compatible API requests */
@@ -8734,6 +9998,21 @@ export type PluralSubscription = {
   __typename?: 'PluralSubscription';
   id?: Maybe<Scalars['ID']['output']>;
   plan?: Maybe<Plan>;
+};
+
+export type PluralVectorConnectionAttributes = {
+  /** whether to let the vector db embed text with its own configured embedding model, rather than computing embeddings in the console */
+  deferEmbeddings?: InputMaybe<Scalars['Boolean']['input']>;
+  /** base url of the plural vector cluster api, including any configured path prefix */
+  host: Scalars['String']['input'];
+  /** the namespace to store vectors in, defaults to console */
+  namespace?: InputMaybe<Scalars['String']['input']>;
+  /** password to connect w/ for basic auth */
+  password?: InputMaybe<Scalars['String']['input']>;
+  /** a bearer token (jwt) to authenticate with, takes precedence over basic auth */
+  token?: InputMaybe<Scalars['String']['input']>;
+  /** user to connect w/ for basic auth */
+  user?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type Pod = {
@@ -9830,6 +11109,12 @@ export type PullRequest = {
   /** the cluster this pr is meant to modify */
   cluster?: Maybe<Cluster>;
   creator?: Maybe<Scalars['String']['output']>;
+  /** the devbox this pr was created from */
+  devbox?: Maybe<Devbox>;
+  /** the devbox instance this pr was created from */
+  devboxInstance?: Maybe<DevboxInstance>;
+  /** the devbox thread this pr was created from */
+  devboxThread?: Maybe<DevboxThread>;
   /** the estimated complexity of the pull request */
   difficulty?: Maybe<PullRequestDifficulty>;
   /** the flow this pr is meant to modify */
@@ -9837,11 +11122,15 @@ export type PullRequest = {
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   labels?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** devbox attribution details, e.g. the subagent session and tool call that created it */
+  metadata?: Maybe<Scalars['Map']['output']>;
   /** the patch for this pr, if it is a patch.  This is in place of generating a full pr */
   patch?: Maybe<Scalars['String']['output']>;
   ref?: Maybe<Scalars['String']['output']>;
   /** the service this pr is meant to modify */
   service?: Maybe<ServiceDeployment>;
+  /** how a devbox pr was recorded: through the devbox mcp, or observed at egress */
+  source?: Maybe<PullRequestSource>;
   status?: Maybe<PrStatus>;
   title?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -9896,6 +11185,11 @@ export type PullRequestEvidence = {
   title?: Maybe<Scalars['String']['output']>;
   url?: Maybe<Scalars['String']['output']>;
 };
+
+export enum PullRequestSource {
+  Egress = 'EGRESS',
+  Mcp = 'MCP'
+}
 
 /** attributes for a pull request pointer record */
 export type PullRequestUpdateAttributes = {
@@ -9982,6 +11276,12 @@ export type QueuedPromptConnection = {
   __typename?: 'QueuedPromptConnection';
   edges?: Maybe<Array<Maybe<QueuedPromptEdge>>>;
   pageInfo: PageInfo;
+};
+
+export type QueuedPromptDelta = {
+  __typename?: 'QueuedPromptDelta';
+  delta?: Maybe<Delta>;
+  payload?: Maybe<QueuedPrompt>;
 };
 
 export type QueuedPromptEdge = {
@@ -10238,6 +11538,7 @@ export type RootMutationType = {
   /** it will add additional context to the given chat from a source object */
   addChatContext?: Maybe<Array<Maybe<Chat>>>;
   addClusterAuditLog?: Maybe<Scalars['Boolean']['output']>;
+  addDevboxRepository?: Maybe<DevboxInstance>;
   addRunLogs?: Maybe<RunLogs>;
   agentMessageOutput?: Maybe<AgentMessageOutput>;
   agentPrReview?: Maybe<PullRequest>;
@@ -10250,9 +11551,13 @@ export type RootMutationType = {
   approveStackRun?: Maybe<StackRun>;
   /** Approves and invokes a pending workbench function activity. Requires read access to the job's workbench. */
   approveWorkbenchJobActivity?: Maybe<WorkbenchJobActivity>;
+  attachDevbox?: Maybe<Devbox>;
   cancelAgentRun?: Maybe<AgentRun>;
   /** Cancels a chat message, if the user has access to the thread, by just deleting the chat record */
   cancelChat?: Maybe<Chat>;
+  cancelDevboxInstance?: Maybe<DevboxInstance>;
+  cancelDevboxKeepAwake?: Maybe<DevboxInstance>;
+  cancelDevboxPrompt?: Maybe<DevboxThread>;
   /** Cancels a workbench job. Allowed for the job owner or users with write access to the workbench. */
   cancelWorkbenchJob?: Maybe<WorkbenchJob>;
   /** saves a set of messages and generates a new one transactionally */
@@ -10262,6 +11567,7 @@ export type RootMutationType = {
   /** clones the spec of the given service to be deployed either into a new namespace or new cluster */
   cloneService?: Maybe<ServiceDeployment>;
   cloneThread?: Maybe<ChatThread>;
+  closeDevboxThread?: Maybe<DevboxThread>;
   completeStackRun?: Maybe<StackRun>;
   configureBackups?: Maybe<Cluster>;
   /** Confirms a chat message and calls its MCP server, if the user has access to the thread */
@@ -10291,6 +11597,9 @@ export type RootMutationType = {
   createClusterUpgrade?: Maybe<ClusterUpgrade>;
   createCustomStackRun?: Maybe<CustomStackRun>;
   createDashboard?: Maybe<WorkbenchDashboard>;
+  createDevboxInstance?: Maybe<DevboxInstance>;
+  createDevboxSnapshot?: Maybe<DevboxSnapshot>;
+  createDevboxThread?: Maybe<DevboxThread>;
   createFederatedCredential?: Maybe<FederatedCredential>;
   createGitRepository?: Maybe<GitRepository>;
   createGlobalService?: Maybe<GlobalService>;
@@ -10350,6 +11659,7 @@ export type RootMutationType = {
   createWorkbenchTool?: Maybe<WorkbenchTool>;
   createWorkbenchWebhook?: Maybe<WorkbenchWebhook>;
   deleteAccessToken?: Maybe<AccessToken>;
+  deleteAgentCredential?: Maybe<AgentCredential>;
   deleteAgentRuntime?: Maybe<AgentRuntime>;
   deleteBindingPolicy?: Maybe<BindingPolicy>;
   deleteBootstrapToken?: Maybe<BootstrapToken>;
@@ -10366,6 +11676,9 @@ export type RootMutationType = {
   deleteCustomCompatibilityMatrix?: Maybe<CustomCompatibilityMatrix>;
   deleteCustomStackRun?: Maybe<CustomStackRun>;
   deleteDashboard?: Maybe<WorkbenchDashboard>;
+  deleteDevbox?: Maybe<Devbox>;
+  deleteDevboxSnapshot?: Maybe<DevboxSnapshot>;
+  deleteDevboxThread?: Maybe<DevboxThread>;
   deleteFederatedCredential?: Maybe<FederatedCredential>;
   deleteFlow?: Maybe<Flow>;
   deleteGitRepository?: Maybe<GitRepository>;
@@ -10436,6 +11749,7 @@ export type RootMutationType = {
   delinkBackups?: Maybe<Cluster>;
   /** soft deletes a cluster, by deregistering it in our system but not disturbing any kubernetes objects */
   detachCluster?: Maybe<Cluster>;
+  detachDevbox?: Maybe<Devbox>;
   /** removes a service from storage, but bypasses waiting for the agent to fully drain it from its hosting cluster */
   detachServiceDeployment?: Maybe<ServiceDeployment>;
   detachStack?: Maybe<InfrastructureStack>;
@@ -10446,33 +11760,47 @@ export type RootMutationType = {
   fixResearchDiagram?: Maybe<InfraResearch>;
   /** forces a pipeline gate to be in open state */
   forceGate?: Maybe<PipelineGate>;
+  forkDevboxThread?: Maybe<DevboxThread>;
   /** Fetches a workbench webhook by id. Requires read access to the workbench. */
   getWorkbenchWebhook?: Maybe<WorkbenchWebhook>;
+  heartbeatDevbox?: Maybe<Devbox>;
   /** Chat mutation that can also execute MCP servers in line with the overall completion */
   hybridChat?: Maybe<Array<Maybe<Chat>>>;
   impersonateServiceAccount?: Maybe<User>;
+  importDevboxThread?: Maybe<DevboxThread>;
   ingestClusterCost?: Maybe<Scalars['Boolean']['output']>;
   installAddOn?: Maybe<ServiceDeployment>;
+  /** Keeps an instance awake until a time, clamped to the box's maxDeferral and maxContinuousAwake */
+  keepDevboxInstanceAwake?: Maybe<DevboxInstance>;
   kickObserver?: Maybe<Observer>;
   kickService?: Maybe<ServiceDeployment>;
   /** refresh the source repo of this stack, and potentially create a fresh run */
   kickStack?: Maybe<StackRun>;
   /** refresh the source repo of this stack, and potentially create a fresh run for this pr */
   kickStackPullRequest?: Maybe<StackRun>;
+  leaveDevboxInstance?: Maybe<DevboxInstance>;
+  /** Links (or relinks) your coding agent subscription, verifying it once with the vendor */
+  linkAgentCredential?: Maybe<AgentCredential>;
   loginLink?: Maybe<User>;
   logout?: Maybe<User>;
   markRead?: Maybe<User>;
   /** merges configuration for a service */
   mergeService?: Maybe<ServiceDeployment>;
+  mintDevboxProbeToken?: Maybe<DevboxProbeToken>;
   moveWorkbenchFile?: Maybe<WorkbenchFile>;
   oauthCallback?: Maybe<User>;
   oauthConsent?: Maybe<OauthResponse>;
   /** Creates a custom run, with the given command list, to execute w/in the stack's environment */
   onDemandRun?: Maybe<StackRun>;
+  /** Opens a terminal, vnc or preview stream to an instance, returning its websocket url and a short-lived token */
+  openDevboxStream?: Maybe<DevboxStream>;
   /** a regular status ping to be sent by the deploy operator */
   pingCluster?: Maybe<Cluster>;
+  /** Marks you as viewing an instance (call about every 30s while its tab is visible), which keeps it awake and resumes it if suspended */
+  pingDevboxInstance?: Maybe<DevboxInstance>;
   /** marks a service as being able to proceed to the next stage of a canary rollout */
   proceed?: Maybe<ServiceDeployment>;
+  promptDevboxThread?: Maybe<DevboxThread>;
   readAppNotifications?: Maybe<Scalars['Int']['output']>;
   readNotifications?: Maybe<User>;
   reconfigureRenovate?: Maybe<ServiceDeployment>;
@@ -10483,10 +11811,15 @@ export type RootMutationType = {
   registerRuntimeServices?: Maybe<Scalars['Int']['output']>;
   /** Rejects a pending workbench activity. Requires read access to the job's workbench. */
   rejectWorkbenchJobActivity?: Maybe<WorkbenchJobActivity>;
+  renameDevboxThread?: Maybe<DevboxThread>;
   resetObserver?: Maybe<Observer>;
+  respondDevboxInteraction?: Maybe<DevboxInteraction>;
   restartStackRun?: Maybe<StackRun>;
+  restoreDevboxSnapshot?: Maybe<DevboxInstance>;
   /** un-deletes a stack and cancels the destroy run that was spawned to remove its managed infrastructure */
   restoreStack?: Maybe<InfrastructureStack>;
+  resumeDevboxInstance?: Maybe<DevboxInstance>;
+  resumeDevboxThread?: Maybe<DevboxThread>;
   /** rewires this service to use the given revision id */
   rollbackService?: Maybe<ServiceDeployment>;
   runSentinel?: Maybe<SentinelRun>;
@@ -10502,6 +11835,11 @@ export type RootMutationType = {
   selfManage?: Maybe<ServiceDeployment>;
   /** This deprecates the `createServiceAccountToken` field, allowing for more options, like refreshing the token. */
   serviceAccountAccessToken?: Maybe<AccessToken>;
+  /** Sets whether new instances bill a provider's agent to your subscription by default */
+  setDefaultAgentBilling?: Maybe<AgentCredential>;
+  /** Switches one agent of your instance between the AI proxy and your subscription */
+  setDevboxAgentBilling?: Maybe<DevboxInstance>;
+  setDevboxThreadConfigOption?: Maybe<DevboxThread>;
   /** creates the service to enable self-hosted renovate in one pass */
   setupRenovate?: Maybe<ServiceDeployment>;
   shareAgentRun?: Maybe<AgentRun>;
@@ -10511,6 +11849,7 @@ export type RootMutationType = {
   signIn?: Maybe<User>;
   signup?: Maybe<User>;
   suggestScalingRecommendation?: Maybe<Scalars['String']['output']>;
+  suspendDevboxInstance?: Maybe<DevboxInstance>;
   syncGlobalService?: Maybe<GlobalService>;
   /** Creates a pull request given the thread message history */
   threadPr?: Maybe<Chat>;
@@ -10591,6 +11930,7 @@ export type RootMutationType = {
   upsertCloudConnection?: Maybe<CloudConnection>;
   upsertComplianceReportGenerator?: Maybe<ComplianceReportGenerator>;
   upsertCustomCompatibilityMatrix?: Maybe<CustomCompatibilityMatrix>;
+  upsertDevbox?: Maybe<Devbox>;
   upsertFlow?: Maybe<Flow>;
   upsertHelmRepository?: Maybe<HelmRepository>;
   upsertMcpServer?: Maybe<McpServer>;
@@ -10611,6 +11951,7 @@ export type RootMutationType = {
   workbenchCron?: Maybe<WorkbenchCron>;
   workbenchEvalSkill?: Maybe<WorkbenchJob>;
   workbenchPrFollowup?: Maybe<WorkbenchJobActivity>;
+  writeDevboxFile?: Maybe<DevboxFileWrite>;
   writeWorkbenchFile?: Maybe<WorkbenchFile>;
 };
 
@@ -10630,6 +11971,12 @@ export type RootMutationTypeAddChatContextArgs = {
 export type RootMutationTypeAddClusterAuditLogArgs = {
   audit?: InputMaybe<ClusterAuditAttributes>;
   audits?: InputMaybe<Array<InputMaybe<ClusterAuditAttributes>>>;
+};
+
+
+export type RootMutationTypeAddDevboxRepositoryArgs = {
+  instanceId: Scalars['ID']['input'];
+  repository: Scalars['String']['input'];
 };
 
 
@@ -10687,12 +12034,33 @@ export type RootMutationTypeApproveWorkbenchJobActivityArgs = {
 };
 
 
+export type RootMutationTypeAttachDevboxArgs = {
+  devboxId: Scalars['ID']['input'];
+  workbenchId: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeCancelAgentRunArgs = {
   id: Scalars['ID']['input'];
 };
 
 
 export type RootMutationTypeCancelChatArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeCancelDevboxInstanceArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeCancelDevboxKeepAwakeArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeCancelDevboxPromptArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -10726,6 +12094,11 @@ export type RootMutationTypeCloneServiceArgs = {
 export type RootMutationTypeCloneThreadArgs = {
   id: Scalars['ID']['input'];
   seq?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type RootMutationTypeCloseDevboxThreadArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -10857,6 +12230,24 @@ export type RootMutationTypeCreateCustomStackRunArgs = {
 
 export type RootMutationTypeCreateDashboardArgs = {
   attributes: DashboardAttributes;
+};
+
+
+export type RootMutationTypeCreateDevboxInstanceArgs = {
+  attributes: DevboxInstanceAttributes;
+  workbenchId: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeCreateDevboxSnapshotArgs = {
+  attributes?: InputMaybe<DevboxSnapshotAttributes>;
+  instanceId: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeCreateDevboxThreadArgs = {
+  attributes?: InputMaybe<DevboxThreadAttributes>;
+  instanceId: Scalars['ID']['input'];
 };
 
 
@@ -11138,6 +12529,11 @@ export type RootMutationTypeDeleteAccessTokenArgs = {
 };
 
 
+export type RootMutationTypeDeleteAgentCredentialArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeDeleteAgentRuntimeArgs = {
   id: Scalars['ID']['input'];
 };
@@ -11209,6 +12605,21 @@ export type RootMutationTypeDeleteCustomStackRunArgs = {
 
 
 export type RootMutationTypeDeleteDashboardArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteDevboxArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteDevboxSnapshotArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteDevboxThreadArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -11510,6 +12921,12 @@ export type RootMutationTypeDetachClusterArgs = {
 };
 
 
+export type RootMutationTypeDetachDevboxArgs = {
+  devboxId: Scalars['ID']['input'];
+  workbenchId: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeDetachServiceDeploymentArgs = {
   id: Scalars['ID']['input'];
 };
@@ -11538,7 +12955,19 @@ export type RootMutationTypeForceGateArgs = {
 };
 
 
+export type RootMutationTypeForkDevboxThreadArgs = {
+  id: Scalars['ID']['input'];
+  title?: InputMaybe<Scalars['String']['input']>;
+};
+
+
 export type RootMutationTypeGetWorkbenchWebhookArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeHeartbeatDevboxArgs = {
+  attributes: DevboxHeartbeatAttributes;
   id: Scalars['ID']['input'];
 };
 
@@ -11554,6 +12983,12 @@ export type RootMutationTypeImpersonateServiceAccountArgs = {
 };
 
 
+export type RootMutationTypeImportDevboxThreadArgs = {
+  attributes: DevboxImportAttributes;
+  instanceId: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeIngestClusterCostArgs = {
   costs: CostIngestAttributes;
 };
@@ -11564,6 +12999,12 @@ export type RootMutationTypeInstallAddOnArgs = {
   configuration?: InputMaybe<Array<InputMaybe<ConfigAttributes>>>;
   global?: InputMaybe<GlobalServiceAttributes>;
   name: Scalars['String']['input'];
+};
+
+
+export type RootMutationTypeKeepDevboxInstanceAwakeArgs = {
+  id: Scalars['ID']['input'];
+  until: Scalars['DateTime']['input'];
 };
 
 
@@ -11589,6 +13030,16 @@ export type RootMutationTypeKickStackPullRequestArgs = {
 };
 
 
+export type RootMutationTypeLeaveDevboxInstanceArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeLinkAgentCredentialArgs = {
+  attributes: AgentCredentialAttributes;
+};
+
+
 export type RootMutationTypeLoginLinkArgs = {
   key: Scalars['String']['input'];
 };
@@ -11601,6 +13052,11 @@ export type RootMutationTypeMarkReadArgs = {
 
 export type RootMutationTypeMergeServiceArgs = {
   configuration?: InputMaybe<Array<InputMaybe<ConfigAttributes>>>;
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeMintDevboxProbeTokenArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -11633,8 +13089,22 @@ export type RootMutationTypeOnDemandRunArgs = {
 };
 
 
+export type RootMutationTypeOpenDevboxStreamArgs = {
+  instanceId: Scalars['ID']['input'];
+  kind: DevboxStreamKind;
+  port?: InputMaybe<Scalars['Int']['input']>;
+  terminalId?: InputMaybe<Scalars['String']['input']>;
+  url?: InputMaybe<Scalars['String']['input']>;
+};
+
+
 export type RootMutationTypePingClusterArgs = {
   attributes: ClusterPing;
+};
+
+
+export type RootMutationTypePingDevboxInstanceArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -11643,6 +13113,14 @@ export type RootMutationTypeProceedArgs = {
   id?: InputMaybe<Scalars['ID']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   promotion?: InputMaybe<ServicePromotion>;
+};
+
+
+export type RootMutationTypePromptDevboxThreadArgs = {
+  attachments?: InputMaybe<Array<InputMaybe<Scalars['Upload']['input']>>>;
+  content?: InputMaybe<Array<InputMaybe<DevboxPromptBlockAttributes>>>;
+  id: Scalars['ID']['input'];
+  prompt?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -11677,9 +13155,21 @@ export type RootMutationTypeRejectWorkbenchJobActivityArgs = {
 };
 
 
+export type RootMutationTypeRenameDevboxThreadArgs = {
+  id: Scalars['ID']['input'];
+  title: Scalars['String']['input'];
+};
+
+
 export type RootMutationTypeResetObserverArgs = {
   attributes: ObserverResetAttributes;
   id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeRespondDevboxInteractionArgs = {
+  id: Scalars['ID']['input'];
+  response: DevboxInteractionResponseAttributes;
 };
 
 
@@ -11688,7 +13178,23 @@ export type RootMutationTypeRestartStackRunArgs = {
 };
 
 
+export type RootMutationTypeRestoreDevboxSnapshotArgs = {
+  attributes?: InputMaybe<DevboxInstanceAttributes>;
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeRestoreStackArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeResumeDevboxInstanceArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeResumeDevboxThreadArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -11750,6 +13256,25 @@ export type RootMutationTypeServiceAccountAccessTokenArgs = {
 };
 
 
+export type RootMutationTypeSetDefaultAgentBillingArgs = {
+  enabled: Scalars['Boolean']['input'];
+  provider: AgentCredentialProvider;
+};
+
+
+export type RootMutationTypeSetDevboxAgentBillingArgs = {
+  attributes: DevboxAgentBillingAttributes;
+  instanceId: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeSetDevboxThreadConfigOptionArgs = {
+  configId: Scalars['String']['input'];
+  id: Scalars['ID']['input'];
+  value: Scalars['String']['input'];
+};
+
+
 export type RootMutationTypeSetupRenovateArgs = {
   connectionId: Scalars['ID']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
@@ -11788,6 +13313,11 @@ export type RootMutationTypeSignupArgs = {
 
 
 export type RootMutationTypeSuggestScalingRecommendationArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeSuspendDevboxInstanceArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -12193,6 +13723,11 @@ export type RootMutationTypeUpsertCustomCompatibilityMatrixArgs = {
 };
 
 
+export type RootMutationTypeUpsertDevboxArgs = {
+  attributes: DevboxAttributes;
+};
+
+
 export type RootMutationTypeUpsertFlowArgs = {
   attributes: FlowAttributes;
 };
@@ -12287,6 +13822,14 @@ export type RootMutationTypeWorkbenchPrFollowupArgs = {
 };
 
 
+export type RootMutationTypeWriteDevboxFileArgs = {
+  content: Scalars['String']['input'];
+  expectedSha256?: InputMaybe<Scalars['String']['input']>;
+  instanceId: Scalars['ID']['input'];
+  path: Scalars['String']['input'];
+};
+
+
 export type RootMutationTypeWriteWorkbenchFileArgs = {
   content?: InputMaybe<Scalars['String']['input']>;
   file?: InputMaybe<Scalars['Upload']['input']>;
@@ -12299,6 +13842,8 @@ export type RootQueryType = {
   accessToken?: Maybe<AccessToken>;
   accessTokens?: Maybe<AccessTokenConnection>;
   account?: Maybe<Account>;
+  /** Your linked coding agent subscriptions */
+  agentCredentials?: Maybe<Array<Maybe<AgentCredential>>>;
   agentRun?: Maybe<AgentRun>;
   agentRunRepositories?: Maybe<AgentRunRepositoryConnection>;
   agentRuns?: Maybe<AgentRunConnection>;
@@ -12385,6 +13930,22 @@ export type RootQueryType = {
   dependencyManagementServices?: Maybe<DependencyManagementServiceConnection>;
   deployment?: Maybe<Deployment>;
   deploymentSettings?: Maybe<DeploymentSettings>;
+  devbox?: Maybe<Devbox>;
+  devboxAgents?: Maybe<Array<Maybe<DevboxAgent>>>;
+  /** Uncommitted changes of an instance, grouped by repository */
+  devboxChanges?: Maybe<Array<Maybe<DevboxRepositoryChanges>>>;
+  devboxFile?: Maybe<DevboxFile>;
+  /** One directory level of an instance's workspace */
+  devboxFiles?: Maybe<Array<Maybe<DevboxFileEntry>>>;
+  devboxImportableSessions?: Maybe<Array<Maybe<DevboxImportableSession>>>;
+  devboxInstance?: Maybe<DevboxInstance>;
+  devboxInstanceCommands?: Maybe<Array<Maybe<DevboxCommand>>>;
+  devboxRepositories?: Maybe<Array<Maybe<DevboxRepository>>>;
+  devboxSessions?: Maybe<Array<Maybe<DevboxSessionSummary>>>;
+  devboxSnapshot?: Maybe<DevboxSnapshot>;
+  devboxThread?: Maybe<DevboxThread>;
+  devboxTimeline?: Maybe<DevboxTimeline>;
+  devboxes?: Maybe<DevboxConnection>;
   /** Evaluates a policy against the supplied tool input. */
   evaluatePolicy?: Maybe<Scalars['Map']['output']>;
   federatedCredential?: Maybe<FederatedCredential>;
@@ -13043,6 +14604,94 @@ export type RootQueryTypeDeploymentArgs = {
 };
 
 
+export type RootQueryTypeDevboxArgs = {
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeDevboxAgentsArgs = {
+  devboxId: Scalars['ID']['input'];
+  workbenchId: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeDevboxChangesArgs = {
+  includeDiff?: InputMaybe<Scalars['Boolean']['input']>;
+  instanceId: Scalars['ID']['input'];
+  repositories?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  threadId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootQueryTypeDevboxFileArgs = {
+  instanceId: Scalars['ID']['input'];
+  path: Scalars['String']['input'];
+};
+
+
+export type RootQueryTypeDevboxFilesArgs = {
+  instanceId: Scalars['ID']['input'];
+  path?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeDevboxImportableSessionsArgs = {
+  instanceId: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeDevboxInstanceArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeDevboxInstanceCommandsArgs = {
+  threadId: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeDevboxRepositoriesArgs = {
+  instanceId: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeDevboxSessionsArgs = {
+  instanceId: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeDevboxSnapshotArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeDevboxThreadArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeDevboxTimelineArgs = {
+  after?: InputMaybe<Scalars['Long']['input']>;
+  before?: InputMaybe<Scalars['Long']['input']>;
+  instanceId: Scalars['ID']['input'];
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  sessionId: Scalars['String']['input'];
+};
+
+
+export type RootQueryTypeDevboxesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
+  workbenchId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
 export type RootQueryTypeEvaluatePolicyArgs = {
   input: Scalars['Json']['input'];
   policy?: InputMaybe<Scalars['String']['input']>;
@@ -13674,6 +15323,9 @@ export type RootQueryTypePullRequestsArgs = {
   authorId?: InputMaybe<Scalars['ID']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   clusterId?: InputMaybe<Scalars['ID']['input']>;
+  devboxId?: InputMaybe<Scalars['ID']['input']>;
+  devboxInstanceId?: InputMaybe<Scalars['ID']['input']>;
+  devboxThreadId?: InputMaybe<Scalars['ID']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   open?: InputMaybe<Scalars['Boolean']['input']>;
@@ -14125,10 +15777,19 @@ export type RootSubscriptionType = {
   /** Changes to a single cluster, or any cluster the current user can read if no id is given */
   clusterDelta?: Maybe<ClusterDelta>;
   clusterUpgradeProgress?: Maybe<ClusterUpgradeProgress>;
+  /** Live transcript deltas (including settle), never stored */
+  devboxInstanceDelta?: Maybe<DevboxEntityChangeDelta>;
+  /** Thread and interaction index changes */
+  devboxInstanceIndexDelta?: Maybe<DevboxIndexChangeDelta>;
+  devboxInstanceStatusDelta?: Maybe<DevboxInstanceDelta>;
+  devboxSnapshotDelta?: Maybe<DevboxSnapshotDelta>;
+  devboxThreadDelta?: Maybe<DevboxThreadDelta>;
   /** Changes to any stack the current user can read, including status changes from its runs */
   infrastructureStackDelta?: Maybe<InfrastructureStackDelta>;
   notificationDelta?: Maybe<NotificationDelta>;
   podDelta?: Maybe<PodDelta>;
+  /** Queued prompts for a job as they're queued, consumed or deleted. Consumed and deleted prompts no longer belong in the job's queued prompts. */
+  queuedPromptDelta?: Maybe<QueuedPromptDelta>;
   runLogsDelta?: Maybe<RunLogsDelta>;
   /** Status changes to the steps of a run, its logs stream separately through runLogsDelta */
   runStepDelta?: Maybe<RunStepDelta>;
@@ -14145,7 +15806,6 @@ export type RootSubscriptionType = {
   workbenchJobProgress?: Maybe<WorkbenchJobProgress>;
   workbenchJobThoughtDelta?: Maybe<WorkbenchJobThoughtDelta>;
   workbenchMonitorDelta?: Maybe<MonitorDelta>;
-  workbenchTextStream?: Maybe<WorkbenchTextStream>;
 };
 
 
@@ -14179,6 +15839,37 @@ export type RootSubscriptionTypeClusterDeltaArgs = {
 
 export type RootSubscriptionTypeClusterUpgradeProgressArgs = {
   upgradeId: Scalars['ID']['input'];
+};
+
+
+export type RootSubscriptionTypeDevboxInstanceDeltaArgs = {
+  instanceId: Scalars['ID']['input'];
+};
+
+
+export type RootSubscriptionTypeDevboxInstanceIndexDeltaArgs = {
+  instanceId: Scalars['ID']['input'];
+};
+
+
+export type RootSubscriptionTypeDevboxInstanceStatusDeltaArgs = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+  workbenchId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootSubscriptionTypeDevboxSnapshotDeltaArgs = {
+  workbenchId: Scalars['ID']['input'];
+};
+
+
+export type RootSubscriptionTypeDevboxThreadDeltaArgs = {
+  instanceId: Scalars['ID']['input'];
+};
+
+
+export type RootSubscriptionTypeQueuedPromptDeltaArgs = {
+  jobId: Scalars['ID']['input'];
 };
 
 
@@ -14249,11 +15940,6 @@ export type RootSubscriptionTypeWorkbenchJobThoughtDeltaArgs = {
 export type RootSubscriptionTypeWorkbenchMonitorDeltaArgs = {
   id?: InputMaybe<Scalars['ID']['input']>;
   workbenchId?: InputMaybe<Scalars['ID']['input']>;
-};
-
-
-export type RootSubscriptionTypeWorkbenchTextStreamArgs = {
-  jobId: Scalars['ID']['input'];
 };
 
 export type RouterFilterAttributes = {
@@ -14993,6 +16679,8 @@ export type SentinelRunJob = {
   cluster?: Maybe<Cluster>;
   /** the time the job completed */
   completedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** a runtime or configuration error encountered while running the job */
+  error?: Maybe<Scalars['String']['output']>;
   /** the format of the job output */
   format: SentinelRunJobFormat;
   /** the git repository to use for this job */
@@ -15044,6 +16732,8 @@ export enum SentinelRunJobStatus {
 }
 
 export type SentinelRunJobUpdateAttributes = {
+  /** a runtime or configuration error encountered while running the job */
+  error?: InputMaybe<Scalars['String']['input']>;
   /** the output of the job */
   output?: InputMaybe<Scalars['String']['input']>;
   /** the reference to the job that was run */
@@ -16005,6 +17695,18 @@ export type StackInfracostResourceAttributes = {
   resourceType?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type StackInfracostResourceConnection = {
+  __typename?: 'StackInfracostResourceConnection';
+  edges?: Maybe<Array<Maybe<StackInfracostResourceEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type StackInfracostResourceEdge = {
+  __typename?: 'StackInfracostResourceEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<StackInfracostResource>;
+};
+
 export type StackOutput = {
   __typename?: 'StackOutput';
   name: Scalars['String']['output'];
@@ -16144,8 +17846,8 @@ export type StackRun = {
   /** reference w/in the repository where the IaC lives */
   git: GitRef;
   id: Scalars['ID']['output'];
-  /** Infracost resource rows attached to this run (newest first) */
-  infracostResources?: Maybe<Array<Maybe<StackInfracostResource>>>;
+  /** Infracost resource rows attached to this run (most expensive first), only fetchable for a single run */
+  infracostResources?: Maybe<StackInfracostResourceConnection>;
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** an insight explaining the state of this stack run */
   insight?: Maybe<AiInsight>;
@@ -16190,7 +17892,11 @@ export type StackRun = {
 
 
 export type StackRunInfracostResourcesArgs = {
-  limit?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  resourceScope?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type StackRunApprovalResult = {
@@ -16875,6 +18581,7 @@ export enum ValidationUniqScope {
 export enum VectorStore {
   Elastic = 'ELASTIC',
   Opensearch = 'OPENSEARCH',
+  Plural = 'PLURAL',
   Postgres = 'POSTGRES'
 }
 
@@ -16882,6 +18589,7 @@ export type VectorStoreAttributes = {
   elastic?: InputMaybe<ElasticsearchConnectionAttributes>;
   enabled?: InputMaybe<Scalars['Boolean']['input']>;
   opensearch?: InputMaybe<OpensearchConnectionAttributes>;
+  plural?: InputMaybe<PluralVectorConnectionAttributes>;
   store?: InputMaybe<VectorStore>;
 };
 
@@ -16905,6 +18613,8 @@ export type VersionReference = {
 };
 
 export type VertexAiAttributes = {
+  /** a cheap, fast model for decision (classification) calls, like reviewing devbox agent tool calls. Models without native decision support are emulated */
+  decisionModel?: InputMaybe<Scalars['String']['input']>;
   /** the model to use for vector embeddings */
   embeddingModel?: InputMaybe<Scalars['String']['input']>;
   /** custom vertexai endpoint if for dedicated customer deployments */
@@ -16928,6 +18638,8 @@ export type VertexAiAttributes = {
 /** Settings for usage of GCP VertexAI for LLMs */
 export type VertexAiSettings = {
   __typename?: 'VertexAiSettings';
+  /** a cheap, fast model for decision (classification) calls, like reviewing devbox agent tool calls. Models without native decision support are emulated */
+  decisionModel?: Maybe<Scalars['String']['output']>;
   /** the model to use for vector embeddings */
   embeddingModel?: Maybe<Scalars['String']['output']>;
   /** custom vertexai endpoint if for dedicated customer deployments */
@@ -17236,6 +18948,12 @@ export type Workbench = {
   crons?: Maybe<WorkbenchCronConnection>;
   /** the description of the workbench */
   description?: Maybe<Scalars['String']['output']>;
+  /** pending devbox permission requests and elicitations across this workbench's instances */
+  devboxInbox?: Maybe<Array<Maybe<DevboxInteraction>>>;
+  devboxInstances?: Maybe<DevboxInstanceConnection>;
+  devboxSnapshots?: Maybe<DevboxSnapshotConnection>;
+  /** the devboxes attached to this workbench */
+  devboxes?: Maybe<Array<Maybe<Devbox>>>;
   /** eval configuration for this workbench (at most one; null if none configured) */
   eval?: Maybe<WorkbenchEval>;
   evalResults?: Maybe<WorkbenchEvalResultConnection>;
@@ -17312,6 +19030,24 @@ export type WorkbenchChatbotsArgs = {
 
 
 export type WorkbenchCronsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type WorkbenchDevboxInstancesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  mine?: InputMaybe<Scalars['Boolean']['input']>;
+  statuses?: InputMaybe<Array<InputMaybe<DevboxInstanceStatus>>>;
+};
+
+
+export type WorkbenchDevboxSnapshotsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -17693,6 +19429,8 @@ export type WorkbenchConfiguration = {
   __typename?: 'WorkbenchConfiguration';
   /** coding capabilities */
   coding?: Maybe<WorkbenchCoding>;
+  /** limits for devbox instances */
+  devbox?: Maybe<WorkbenchDevboxConfig>;
   /** infrastructure capabilities */
   infrastructure?: Maybe<WorkbenchInfrastructure>;
   /** observability capabilities */
@@ -17702,6 +19440,8 @@ export type WorkbenchConfiguration = {
 export type WorkbenchConfigurationAttributes = {
   /** coding capabilities (mode, repositories, babysitting) */
   coding?: InputMaybe<WorkbenchCodingAttributes>;
+  /** limits for devbox instances started from this workbench */
+  devbox?: InputMaybe<WorkbenchDevboxConfigAttributes>;
   /** infrastructure capabilities (services, stacks, kubernetes) */
   infrastructure?: InputMaybe<WorkbenchInfrastructureAttributes>;
   /** observability capabilities (logs, metrics) */
@@ -17895,6 +19635,25 @@ export type WorkbenchDashboardInput = {
   required?: Maybe<Scalars['Boolean']['output']>;
   /** Input control type */
   type: DashboardInputType;
+};
+
+export type WorkbenchDevboxConfig = {
+  __typename?: 'WorkbenchDevboxConfig';
+  /** whether devbox agents may bill to their owner's linked subscription */
+  allowSubscriptionCredentials?: Maybe<Scalars['Boolean']['output']>;
+  /** the longest keep-awake deferral (in seconds) allowed from this workbench */
+  maxDeferral?: Maybe<Scalars['Int']['output']>;
+  /** the most ready snapshots kept for this workbench */
+  maxSnapshots?: Maybe<Scalars['Int']['output']>;
+};
+
+export type WorkbenchDevboxConfigAttributes = {
+  /** let users bill devbox agents to their own linked subscriptions instead of the AI proxy (default off) */
+  allowSubscriptionCredentials?: InputMaybe<Scalars['Boolean']['input']>;
+  /** lowers the boxes' maxDeferral (in seconds) for keep-awake requests */
+  maxDeferral?: InputMaybe<Scalars['Int']['input']>;
+  /** the most ready snapshots to keep, the oldest are deleted beyond it */
+  maxSnapshots?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type WorkbenchEdge = {
@@ -18214,6 +19973,8 @@ export type WorkbenchJobActivity = {
   status: WorkbenchJobActivityStatus;
   /** thoughts emitted during this activity */
   thoughts?: Maybe<Array<Maybe<WorkbenchJobThought>>>;
+  /** the orchestrator tool call that spawned this activity, if any */
+  toolCall?: Maybe<WorkbenchJobActivityToolCall>;
   /** the type of the activity */
   type?: Maybe<WorkbenchJobActivityType>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -18374,6 +20135,14 @@ export enum WorkbenchJobActivityStatus {
   Running = 'RUNNING',
   Successful = 'SUCCESSFUL'
 }
+
+export type WorkbenchJobActivityToolCall = {
+  __typename?: 'WorkbenchJobActivityToolCall';
+  /** the id of the tool call */
+  callId?: Maybe<Scalars['String']['output']>;
+  /** the name of the tool that was called, eg workbench_coding_agent for coding agent runs */
+  name?: Maybe<Scalars['String']['output']>;
+};
 
 export type WorkbenchJobActivityTrace = {
   __typename?: 'WorkbenchJobActivityTrace';
@@ -18978,12 +20747,6 @@ export enum WorkbenchSort {
   Name = 'NAME',
   UpdatedAt = 'UPDATED_AT'
 }
-
-export type WorkbenchTextStream = {
-  __typename?: 'WorkbenchTextStream';
-  activityId?: Maybe<Scalars['ID']['output']>;
-  text?: Maybe<Scalars['String']['output']>;
-};
 
 export type WorkbenchTool = {
   __typename?: 'WorkbenchTool';
@@ -20555,15 +22318,15 @@ export type SentinelCheckConfigurationFragment = { __typename?: 'SentinelCheckCo
 
 export type SentinelRunTinyFragment = { __typename?: 'SentinelRun', id: string, status: SentinelRunStatus, insertedAt?: string | null, completedAt?: string | null };
 
-export type SentinelRunFragment = { __typename?: 'SentinelRun', id: string, status: SentinelRunStatus, insertedAt?: string | null, completedAt?: string | null, results?: Array<{ __typename?: 'SentinelRunResult', name?: string | null, reason?: string | null, status: SentinelRunStatus, successfulCount?: number | null, failedCount?: number | null, jobCount?: number | null } | null> | null, checks?: Array<{ __typename?: 'SentinelCheck', name: string, type: SentinelCheckType, ruleFile?: string | null, configuration?: { __typename?: 'SentinelCheckConfiguration', log?: { __typename?: 'SentinelCheckLogConfiguration', namespaces?: Array<string | null> | null, query: string, clusterId?: string | null, duration: string, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null, kubernetes?: { __typename?: 'SentinelCheckKubernetesConfiguration', group?: string | null, version: string, kind: string, name: string, namespace?: string | null } | null, integrationTest?: { __typename?: 'SentinelCheckIntegrationTestConfiguration', distro?: ClusterDistro | null, format: SentinelRunJobFormat, tags?: Record<string, unknown> | null, cases?: Array<{ __typename?: 'SentinelCheckIntegrationTestCaseConfiguration', type: SentinelIntegrationTestCaseType, name: string, loadbalancer?: { __typename?: 'SentinelCheckIntegrationTestCaseLoadbalancerConfiguration', namePrefix: string, namespace: string, annotations?: Record<string, unknown> | null, dnsProbe?: { __typename?: 'SentinelCheckIntegrationTestCaseDnsProbeConfiguration', fqdn: string, delay?: string | null, retries?: number | null } | null } | null, pvc?: { __typename?: 'SentinelCheckIntegrationTestCasePvcConfiguration', namePrefix: string, storageClass: string, size: string } | null, coredns?: { __typename?: 'SentinelCheckIntegrationTestCaseCorednsConfiguration', dialFqdns?: Array<string | null> | null, delay?: string | null, retries?: number | null } | null } | null> | null, job?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null } | null } | null } | null> | null, sentinel?: { __typename?: 'Sentinel', id: string, name: string, description?: string | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null } | null } | null };
+export type SentinelRunFragment = { __typename?: 'SentinelRun', id: string, status: SentinelRunStatus, insertedAt?: string | null, completedAt?: string | null, results?: Array<{ __typename?: 'SentinelRunResult', name?: string | null, reason?: string | null, status: SentinelRunStatus, successfulCount?: number | null, failedCount?: number | null, jobCount?: number | null } | null> | null, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string } | null> | null, checks?: Array<{ __typename?: 'SentinelCheck', name: string, type: SentinelCheckType, ruleFile?: string | null, configuration?: { __typename?: 'SentinelCheckConfiguration', log?: { __typename?: 'SentinelCheckLogConfiguration', namespaces?: Array<string | null> | null, query: string, clusterId?: string | null, duration: string, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null, kubernetes?: { __typename?: 'SentinelCheckKubernetesConfiguration', group?: string | null, version: string, kind: string, name: string, namespace?: string | null } | null, integrationTest?: { __typename?: 'SentinelCheckIntegrationTestConfiguration', distro?: ClusterDistro | null, format: SentinelRunJobFormat, tags?: Record<string, unknown> | null, cases?: Array<{ __typename?: 'SentinelCheckIntegrationTestCaseConfiguration', type: SentinelIntegrationTestCaseType, name: string, loadbalancer?: { __typename?: 'SentinelCheckIntegrationTestCaseLoadbalancerConfiguration', namePrefix: string, namespace: string, annotations?: Record<string, unknown> | null, dnsProbe?: { __typename?: 'SentinelCheckIntegrationTestCaseDnsProbeConfiguration', fqdn: string, delay?: string | null, retries?: number | null } | null } | null, pvc?: { __typename?: 'SentinelCheckIntegrationTestCasePvcConfiguration', namePrefix: string, storageClass: string, size: string } | null, coredns?: { __typename?: 'SentinelCheckIntegrationTestCaseCorednsConfiguration', dialFqdns?: Array<string | null> | null, delay?: string | null, retries?: number | null } | null } | null> | null, job?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null } | null } | null } | null> | null, sentinel?: { __typename?: 'Sentinel', id: string, name: string, description?: string | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null } | null } | null };
 
 export type SentinelRunResultFragment = { __typename?: 'SentinelRunResult', name?: string | null, reason?: string | null, status: SentinelRunStatus, successfulCount?: number | null, failedCount?: number | null, jobCount?: number | null };
 
 export type SentinelStatisticFragment = { __typename?: 'SentinelStatistic', status: SentinelRunStatus, count: number };
 
-export type SentinelRunJobTinyFragment = { __typename?: 'SentinelRunJob', id: string, status: SentinelRunJobStatus, insertedAt?: string | null, completedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, reference?: { __typename?: 'JobReference', namespace: string, name: string } | null };
+export type SentinelRunJobTinyFragment = { __typename?: 'SentinelRunJob', id: string, status: SentinelRunJobStatus, check?: string | null, insertedAt?: string | null, completedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, reference?: { __typename?: 'JobReference', namespace: string, name: string } | null };
 
-export type SentinelRunJobFragment = { __typename?: 'SentinelRunJob', format: SentinelRunJobFormat, output?: string | null, id: string, status: SentinelRunJobStatus, insertedAt?: string | null, completedAt?: string | null, sentinelRun?: { __typename?: 'SentinelRun', id: string, sentinel?: { __typename?: 'Sentinel', id: string, name: string } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, reference?: { __typename?: 'JobReference', namespace: string, name: string } | null };
+export type SentinelRunJobFragment = { __typename?: 'SentinelRunJob', format: SentinelRunJobFormat, output?: string | null, error?: string | null, id: string, status: SentinelRunJobStatus, check?: string | null, insertedAt?: string | null, completedAt?: string | null, sentinelRun?: { __typename?: 'SentinelRun', id: string, sentinel?: { __typename?: 'Sentinel', id: string, name: string } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, reference?: { __typename?: 'JobReference', namespace: string, name: string } | null };
 
 export type SentinelsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -20598,7 +22361,7 @@ export type SentinelRunQueryVariables = Exact<{
 }>;
 
 
-export type SentinelRunQuery = { __typename?: 'RootQueryType', sentinelRun?: { __typename?: 'SentinelRun', id: string, status: SentinelRunStatus, insertedAt?: string | null, completedAt?: string | null, results?: Array<{ __typename?: 'SentinelRunResult', name?: string | null, reason?: string | null, status: SentinelRunStatus, successfulCount?: number | null, failedCount?: number | null, jobCount?: number | null } | null> | null, checks?: Array<{ __typename?: 'SentinelCheck', name: string, type: SentinelCheckType, ruleFile?: string | null, configuration?: { __typename?: 'SentinelCheckConfiguration', log?: { __typename?: 'SentinelCheckLogConfiguration', namespaces?: Array<string | null> | null, query: string, clusterId?: string | null, duration: string, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null, kubernetes?: { __typename?: 'SentinelCheckKubernetesConfiguration', group?: string | null, version: string, kind: string, name: string, namespace?: string | null } | null, integrationTest?: { __typename?: 'SentinelCheckIntegrationTestConfiguration', distro?: ClusterDistro | null, format: SentinelRunJobFormat, tags?: Record<string, unknown> | null, cases?: Array<{ __typename?: 'SentinelCheckIntegrationTestCaseConfiguration', type: SentinelIntegrationTestCaseType, name: string, loadbalancer?: { __typename?: 'SentinelCheckIntegrationTestCaseLoadbalancerConfiguration', namePrefix: string, namespace: string, annotations?: Record<string, unknown> | null, dnsProbe?: { __typename?: 'SentinelCheckIntegrationTestCaseDnsProbeConfiguration', fqdn: string, delay?: string | null, retries?: number | null } | null } | null, pvc?: { __typename?: 'SentinelCheckIntegrationTestCasePvcConfiguration', namePrefix: string, storageClass: string, size: string } | null, coredns?: { __typename?: 'SentinelCheckIntegrationTestCaseCorednsConfiguration', dialFqdns?: Array<string | null> | null, delay?: string | null, retries?: number | null } | null } | null> | null, job?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null } | null } | null } | null> | null, sentinel?: { __typename?: 'Sentinel', id: string, name: string, description?: string | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null } | null } | null } | null };
+export type SentinelRunQuery = { __typename?: 'RootQueryType', sentinelRun?: { __typename?: 'SentinelRun', id: string, status: SentinelRunStatus, insertedAt?: string | null, completedAt?: string | null, results?: Array<{ __typename?: 'SentinelRunResult', name?: string | null, reason?: string | null, status: SentinelRunStatus, successfulCount?: number | null, failedCount?: number | null, jobCount?: number | null } | null> | null, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string } | null> | null, checks?: Array<{ __typename?: 'SentinelCheck', name: string, type: SentinelCheckType, ruleFile?: string | null, configuration?: { __typename?: 'SentinelCheckConfiguration', log?: { __typename?: 'SentinelCheckLogConfiguration', namespaces?: Array<string | null> | null, query: string, clusterId?: string | null, duration: string, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null, kubernetes?: { __typename?: 'SentinelCheckKubernetesConfiguration', group?: string | null, version: string, kind: string, name: string, namespace?: string | null } | null, integrationTest?: { __typename?: 'SentinelCheckIntegrationTestConfiguration', distro?: ClusterDistro | null, format: SentinelRunJobFormat, tags?: Record<string, unknown> | null, cases?: Array<{ __typename?: 'SentinelCheckIntegrationTestCaseConfiguration', type: SentinelIntegrationTestCaseType, name: string, loadbalancer?: { __typename?: 'SentinelCheckIntegrationTestCaseLoadbalancerConfiguration', namePrefix: string, namespace: string, annotations?: Record<string, unknown> | null, dnsProbe?: { __typename?: 'SentinelCheckIntegrationTestCaseDnsProbeConfiguration', fqdn: string, delay?: string | null, retries?: number | null } | null } | null, pvc?: { __typename?: 'SentinelCheckIntegrationTestCasePvcConfiguration', namePrefix: string, storageClass: string, size: string } | null, coredns?: { __typename?: 'SentinelCheckIntegrationTestCaseCorednsConfiguration', dialFqdns?: Array<string | null> | null, delay?: string | null, retries?: number | null } | null } | null> | null, job?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null } | null } | null } | null> | null, sentinel?: { __typename?: 'Sentinel', id: string, name: string, description?: string | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null } | null } | null } | null };
 
 export type SentinelStatisticsQueryVariables = Exact<{
   q?: InputMaybe<Scalars['String']['input']>;
@@ -20616,14 +22379,14 @@ export type SentinelRunJobsQueryVariables = Exact<{
 }>;
 
 
-export type SentinelRunJobsQuery = { __typename?: 'RootQueryType', sentinelRun?: { __typename?: 'SentinelRun', id: string, jobs?: { __typename?: 'SentinelRunJobConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'SentinelRunJobEdge', node?: { __typename?: 'SentinelRunJob', id: string, status: SentinelRunJobStatus, insertedAt?: string | null, completedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, reference?: { __typename?: 'JobReference', namespace: string, name: string } | null } | null } | null> | null } | null } | null };
+export type SentinelRunJobsQuery = { __typename?: 'RootQueryType', sentinelRun?: { __typename?: 'SentinelRun', id: string, jobs?: { __typename?: 'SentinelRunJobConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'SentinelRunJobEdge', node?: { __typename?: 'SentinelRunJob', id: string, status: SentinelRunJobStatus, check?: string | null, insertedAt?: string | null, completedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, reference?: { __typename?: 'JobReference', namespace: string, name: string } | null } | null } | null> | null } | null } | null };
 
 export type SentinelRunJobQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type SentinelRunJobQuery = { __typename?: 'RootQueryType', sentinelRunJob?: { __typename?: 'SentinelRunJob', format: SentinelRunJobFormat, output?: string | null, id: string, status: SentinelRunJobStatus, insertedAt?: string | null, completedAt?: string | null, sentinelRun?: { __typename?: 'SentinelRun', id: string, sentinel?: { __typename?: 'Sentinel', id: string, name: string } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, reference?: { __typename?: 'JobReference', namespace: string, name: string } | null } | null };
+export type SentinelRunJobQuery = { __typename?: 'RootQueryType', sentinelRunJob?: { __typename?: 'SentinelRunJob', format: SentinelRunJobFormat, output?: string | null, error?: string | null, id: string, status: SentinelRunJobStatus, check?: string | null, insertedAt?: string | null, completedAt?: string | null, sentinelRun?: { __typename?: 'SentinelRun', id: string, sentinel?: { __typename?: 'Sentinel', id: string, name: string } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, reference?: { __typename?: 'JobReference', namespace: string, name: string } | null } | null };
 
 export type SentinelRunJobK8sJobQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -21368,6 +23131,18 @@ export type ClusterKubernetesMetricsQueryVariables = Exact<{
   start?: InputMaybe<Scalars['DateTime']['input']>;
   stop?: InputMaybe<Scalars['DateTime']['input']>;
   step?: InputMaybe<Scalars['String']['input']>;
+  cpu?: Scalars['Boolean']['input'];
+  mem?: Scalars['Boolean']['input'];
+  podCpu?: Scalars['Boolean']['input'];
+  podMem?: Scalars['Boolean']['input'];
+  cpuRequests?: Scalars['Boolean']['input'];
+  memRequests?: Scalars['Boolean']['input'];
+  cpuLimits?: Scalars['Boolean']['input'];
+  memLimits?: Scalars['Boolean']['input'];
+  podCpuRequests?: Scalars['Boolean']['input'];
+  podMemRequests?: Scalars['Boolean']['input'];
+  podCpuLimits?: Scalars['Boolean']['input'];
+  podMemLimits?: Scalars['Boolean']['input'];
 }>;
 
 
@@ -21435,6 +23210,18 @@ export type ServiceDeploymentComponentMetricsQueryVariables = Exact<{
   start?: InputMaybe<Scalars['DateTime']['input']>;
   stop?: InputMaybe<Scalars['DateTime']['input']>;
   step?: InputMaybe<Scalars['String']['input']>;
+  cpu?: Scalars['Boolean']['input'];
+  mem?: Scalars['Boolean']['input'];
+  podCpu?: Scalars['Boolean']['input'];
+  podMem?: Scalars['Boolean']['input'];
+  cpuRequests?: Scalars['Boolean']['input'];
+  memRequests?: Scalars['Boolean']['input'];
+  cpuLimits?: Scalars['Boolean']['input'];
+  memLimits?: Scalars['Boolean']['input'];
+  podCpuRequests?: Scalars['Boolean']['input'];
+  podMemRequests?: Scalars['Boolean']['input'];
+  podCpuLimits?: Scalars['Boolean']['input'];
+  podMemLimits?: Scalars['Boolean']['input'];
 }>;
 
 
@@ -21608,9 +23395,9 @@ export type HttpConnectionFragment = { __typename?: 'HttpConnection', host: stri
 
 export type SmtpSettingsFragment = { __typename?: 'SmtpSettings', server: string, port: number, sender: string, user: string, ssl: boolean };
 
-export type AiSettingsFragment = { __typename?: 'AiSettings', enabled?: boolean | null, toolsEnabled?: boolean | null, provider?: AiProvider | null, toolProvider?: AiProvider | null, embeddingProvider?: AiProvider | null, logAnalysis?: boolean | null, anthropic?: { __typename?: 'AnthropicSettings', baseUrl?: string | null, model?: string | null, toolModel?: string | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, openai?: { __typename?: 'OpenaiSettings', baseUrl?: string | null, model?: string | null, toolModel?: string | null, embeddingModel?: string | null, method?: OpenAiMethod | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, openaiCompatible?: { __typename?: 'OpenaiSettings', baseUrl?: string | null, model?: string | null, toolModel?: string | null, embeddingModel?: string | null, method?: OpenAiMethod | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, xai?: { __typename?: 'OpenaiSettings', baseUrl?: string | null, model?: string | null, toolModel?: string | null, embeddingModel?: string | null, method?: OpenAiMethod | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, azure?: { __typename?: 'AzureOpenaiSettings', apiVersion?: string | null, endpoint: string, model?: string | null, embeddingModel?: string | null, toolModel?: string | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, ollama?: { __typename?: 'OllamaSettings', model: string, toolModel?: string | null, url: string, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, vertex?: { __typename?: 'VertexAiSettings', model?: string | null, embeddingModel?: string | null, toolModel?: string | null, project: string, location: string, endpoint?: string | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, bedrock?: { __typename?: 'BedrockAiSettings', modelId?: string | null, toolModelId?: string | null, embeddingModel?: string | null, endpoint?: BedrockEndpoint | null, accessKeyId?: string | null, region?: string | null, modelSettings?: Array<{ __typename?: 'BedrockModelSettings', modelId?: string | null, inferenceProfileArn?: string | null } | null> | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, analysisRates?: { __typename?: 'AiAnalysisRates', fast?: number | null, slow?: number | null } | null, vectorStore?: { __typename?: 'VectorStoreSettings', enabled?: boolean | null, store?: VectorStore | null } | null };
+export type AiSettingsFragment = { __typename?: 'AiSettings', enabled?: boolean | null, toolsEnabled?: boolean | null, provider?: AiProvider | null, toolProvider?: AiProvider | null, embeddingProvider?: AiProvider | null, decisionProvider?: AiProvider | null, logAnalysis?: boolean | null, anthropic?: { __typename?: 'AnthropicSettings', baseUrl?: string | null, model?: string | null, toolModel?: string | null, decisionModel?: string | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, openai?: { __typename?: 'OpenaiSettings', baseUrl?: string | null, model?: string | null, toolModel?: string | null, decisionModel?: string | null, embeddingModel?: string | null, method?: OpenAiMethod | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, openaiCompatible?: { __typename?: 'OpenaiSettings', baseUrl?: string | null, model?: string | null, toolModel?: string | null, decisionModel?: string | null, embeddingModel?: string | null, method?: OpenAiMethod | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, xai?: { __typename?: 'OpenaiSettings', baseUrl?: string | null, model?: string | null, toolModel?: string | null, decisionModel?: string | null, embeddingModel?: string | null, method?: OpenAiMethod | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, azure?: { __typename?: 'AzureOpenaiSettings', apiVersion?: string | null, endpoint: string, model?: string | null, embeddingModel?: string | null, toolModel?: string | null, decisionModel?: string | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, ollama?: { __typename?: 'OllamaSettings', model: string, toolModel?: string | null, url: string, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, vertex?: { __typename?: 'VertexAiSettings', model?: string | null, embeddingModel?: string | null, toolModel?: string | null, decisionModel?: string | null, project: string, location: string, endpoint?: string | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, bedrock?: { __typename?: 'BedrockAiSettings', modelId?: string | null, toolModelId?: string | null, decisionModel?: string | null, embeddingModel?: string | null, endpoint?: BedrockEndpoint | null, accessKeyId?: string | null, region?: string | null, modelSettings?: Array<{ __typename?: 'BedrockModelSettings', modelId?: string | null, inferenceProfileArn?: string | null } | null> | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, analysisRates?: { __typename?: 'AiAnalysisRates', fast?: number | null, slow?: number | null } | null, vectorStore?: { __typename?: 'VectorStoreSettings', enabled?: boolean | null, store?: VectorStore | null } | null };
 
-export type DeploymentSettingsFragment = { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, onboarded?: boolean | null, agentHelmValues?: string | null, agentHelmValuesTemplateable?: boolean | null, latestK8sVsn: string, logging?: { __typename?: 'LoggingSettings', enabled?: boolean | null, driver?: LogDriver | null, levels?: boolean | null } | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null, recurseSubmodules?: boolean | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null, recurseSubmodules?: boolean | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, smtp?: { __typename?: 'SmtpSettings', server: string, port: number, sender: string, user: string, ssl: boolean } | null, ai?: { __typename?: 'AiSettings', enabled?: boolean | null, toolsEnabled?: boolean | null, provider?: AiProvider | null, toolProvider?: AiProvider | null, embeddingProvider?: AiProvider | null, logAnalysis?: boolean | null, anthropic?: { __typename?: 'AnthropicSettings', baseUrl?: string | null, model?: string | null, toolModel?: string | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, openai?: { __typename?: 'OpenaiSettings', baseUrl?: string | null, model?: string | null, toolModel?: string | null, embeddingModel?: string | null, method?: OpenAiMethod | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, openaiCompatible?: { __typename?: 'OpenaiSettings', baseUrl?: string | null, model?: string | null, toolModel?: string | null, embeddingModel?: string | null, method?: OpenAiMethod | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, xai?: { __typename?: 'OpenaiSettings', baseUrl?: string | null, model?: string | null, toolModel?: string | null, embeddingModel?: string | null, method?: OpenAiMethod | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, azure?: { __typename?: 'AzureOpenaiSettings', apiVersion?: string | null, endpoint: string, model?: string | null, embeddingModel?: string | null, toolModel?: string | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, ollama?: { __typename?: 'OllamaSettings', model: string, toolModel?: string | null, url: string, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, vertex?: { __typename?: 'VertexAiSettings', model?: string | null, embeddingModel?: string | null, toolModel?: string | null, project: string, location: string, endpoint?: string | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, bedrock?: { __typename?: 'BedrockAiSettings', modelId?: string | null, toolModelId?: string | null, embeddingModel?: string | null, endpoint?: BedrockEndpoint | null, accessKeyId?: string | null, region?: string | null, modelSettings?: Array<{ __typename?: 'BedrockModelSettings', modelId?: string | null, inferenceProfileArn?: string | null } | null> | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, analysisRates?: { __typename?: 'AiAnalysisRates', fast?: number | null, slow?: number | null } | null, vectorStore?: { __typename?: 'VectorStoreSettings', enabled?: boolean | null, store?: VectorStore | null } | null } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
+export type DeploymentSettingsFragment = { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, onboarded?: boolean | null, agentHelmValues?: string | null, agentHelmValuesTemplateable?: boolean | null, latestK8sVsn: string, logging?: { __typename?: 'LoggingSettings', enabled?: boolean | null, driver?: LogDriver | null, levels?: boolean | null } | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null, recurseSubmodules?: boolean | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null, recurseSubmodules?: boolean | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, smtp?: { __typename?: 'SmtpSettings', server: string, port: number, sender: string, user: string, ssl: boolean } | null, ai?: { __typename?: 'AiSettings', enabled?: boolean | null, toolsEnabled?: boolean | null, provider?: AiProvider | null, toolProvider?: AiProvider | null, embeddingProvider?: AiProvider | null, decisionProvider?: AiProvider | null, logAnalysis?: boolean | null, anthropic?: { __typename?: 'AnthropicSettings', baseUrl?: string | null, model?: string | null, toolModel?: string | null, decisionModel?: string | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, openai?: { __typename?: 'OpenaiSettings', baseUrl?: string | null, model?: string | null, toolModel?: string | null, decisionModel?: string | null, embeddingModel?: string | null, method?: OpenAiMethod | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, openaiCompatible?: { __typename?: 'OpenaiSettings', baseUrl?: string | null, model?: string | null, toolModel?: string | null, decisionModel?: string | null, embeddingModel?: string | null, method?: OpenAiMethod | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, xai?: { __typename?: 'OpenaiSettings', baseUrl?: string | null, model?: string | null, toolModel?: string | null, decisionModel?: string | null, embeddingModel?: string | null, method?: OpenAiMethod | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, azure?: { __typename?: 'AzureOpenaiSettings', apiVersion?: string | null, endpoint: string, model?: string | null, embeddingModel?: string | null, toolModel?: string | null, decisionModel?: string | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, ollama?: { __typename?: 'OllamaSettings', model: string, toolModel?: string | null, url: string, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, vertex?: { __typename?: 'VertexAiSettings', model?: string | null, embeddingModel?: string | null, toolModel?: string | null, decisionModel?: string | null, project: string, location: string, endpoint?: string | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, bedrock?: { __typename?: 'BedrockAiSettings', modelId?: string | null, toolModelId?: string | null, decisionModel?: string | null, embeddingModel?: string | null, endpoint?: BedrockEndpoint | null, accessKeyId?: string | null, region?: string | null, modelSettings?: Array<{ __typename?: 'BedrockModelSettings', modelId?: string | null, inferenceProfileArn?: string | null } | null> | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, analysisRates?: { __typename?: 'AiAnalysisRates', fast?: number | null, slow?: number | null } | null, vectorStore?: { __typename?: 'VectorStoreSettings', enabled?: boolean | null, store?: VectorStore | null } | null } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
 
 export type ObservabilityProviderFragment = { __typename?: 'ObservabilityProvider', id: string, name: string, type: ObservabilityProviderType, insertedAt?: string | null, updatedAt?: string | null };
 
@@ -21619,7 +23406,7 @@ export type ObservabilityWebhookFragment = { __typename?: 'ObservabilityWebhook'
 export type DeploymentSettingsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type DeploymentSettingsQuery = { __typename?: 'RootQueryType', deploymentSettings?: { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, onboarded?: boolean | null, agentHelmValues?: string | null, agentHelmValuesTemplateable?: boolean | null, latestK8sVsn: string, logging?: { __typename?: 'LoggingSettings', enabled?: boolean | null, driver?: LogDriver | null, levels?: boolean | null } | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null, recurseSubmodules?: boolean | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null, recurseSubmodules?: boolean | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, smtp?: { __typename?: 'SmtpSettings', server: string, port: number, sender: string, user: string, ssl: boolean } | null, ai?: { __typename?: 'AiSettings', enabled?: boolean | null, toolsEnabled?: boolean | null, provider?: AiProvider | null, toolProvider?: AiProvider | null, embeddingProvider?: AiProvider | null, logAnalysis?: boolean | null, anthropic?: { __typename?: 'AnthropicSettings', baseUrl?: string | null, model?: string | null, toolModel?: string | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, openai?: { __typename?: 'OpenaiSettings', baseUrl?: string | null, model?: string | null, toolModel?: string | null, embeddingModel?: string | null, method?: OpenAiMethod | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, openaiCompatible?: { __typename?: 'OpenaiSettings', baseUrl?: string | null, model?: string | null, toolModel?: string | null, embeddingModel?: string | null, method?: OpenAiMethod | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, xai?: { __typename?: 'OpenaiSettings', baseUrl?: string | null, model?: string | null, toolModel?: string | null, embeddingModel?: string | null, method?: OpenAiMethod | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, azure?: { __typename?: 'AzureOpenaiSettings', apiVersion?: string | null, endpoint: string, model?: string | null, embeddingModel?: string | null, toolModel?: string | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, ollama?: { __typename?: 'OllamaSettings', model: string, toolModel?: string | null, url: string, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, vertex?: { __typename?: 'VertexAiSettings', model?: string | null, embeddingModel?: string | null, toolModel?: string | null, project: string, location: string, endpoint?: string | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, bedrock?: { __typename?: 'BedrockAiSettings', modelId?: string | null, toolModelId?: string | null, embeddingModel?: string | null, endpoint?: BedrockEndpoint | null, accessKeyId?: string | null, region?: string | null, modelSettings?: Array<{ __typename?: 'BedrockModelSettings', modelId?: string | null, inferenceProfileArn?: string | null } | null> | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, analysisRates?: { __typename?: 'AiAnalysisRates', fast?: number | null, slow?: number | null } | null, vectorStore?: { __typename?: 'VectorStoreSettings', enabled?: boolean | null, store?: VectorStore | null } | null } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null, availableModels?: Array<{ __typename?: 'AvailableModel', provider: AiProvider, model: string } | null> | null, defaultModels?: Array<{ __typename?: 'ModelDefault', provider: AiProvider, model?: string | null, toolModel?: string | null, embeddingModel?: string | null } | null> | null };
+export type DeploymentSettingsQuery = { __typename?: 'RootQueryType', deploymentSettings?: { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, onboarded?: boolean | null, agentHelmValues?: string | null, agentHelmValuesTemplateable?: boolean | null, latestK8sVsn: string, logging?: { __typename?: 'LoggingSettings', enabled?: boolean | null, driver?: LogDriver | null, levels?: boolean | null } | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null, recurseSubmodules?: boolean | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null, recurseSubmodules?: boolean | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, smtp?: { __typename?: 'SmtpSettings', server: string, port: number, sender: string, user: string, ssl: boolean } | null, ai?: { __typename?: 'AiSettings', enabled?: boolean | null, toolsEnabled?: boolean | null, provider?: AiProvider | null, toolProvider?: AiProvider | null, embeddingProvider?: AiProvider | null, decisionProvider?: AiProvider | null, logAnalysis?: boolean | null, anthropic?: { __typename?: 'AnthropicSettings', baseUrl?: string | null, model?: string | null, toolModel?: string | null, decisionModel?: string | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, openai?: { __typename?: 'OpenaiSettings', baseUrl?: string | null, model?: string | null, toolModel?: string | null, decisionModel?: string | null, embeddingModel?: string | null, method?: OpenAiMethod | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, openaiCompatible?: { __typename?: 'OpenaiSettings', baseUrl?: string | null, model?: string | null, toolModel?: string | null, decisionModel?: string | null, embeddingModel?: string | null, method?: OpenAiMethod | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, xai?: { __typename?: 'OpenaiSettings', baseUrl?: string | null, model?: string | null, toolModel?: string | null, decisionModel?: string | null, embeddingModel?: string | null, method?: OpenAiMethod | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, azure?: { __typename?: 'AzureOpenaiSettings', apiVersion?: string | null, endpoint: string, model?: string | null, embeddingModel?: string | null, toolModel?: string | null, decisionModel?: string | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, ollama?: { __typename?: 'OllamaSettings', model: string, toolModel?: string | null, url: string, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, vertex?: { __typename?: 'VertexAiSettings', model?: string | null, embeddingModel?: string | null, toolModel?: string | null, decisionModel?: string | null, project: string, location: string, endpoint?: string | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, bedrock?: { __typename?: 'BedrockAiSettings', modelId?: string | null, toolModelId?: string | null, decisionModel?: string | null, embeddingModel?: string | null, endpoint?: BedrockEndpoint | null, accessKeyId?: string | null, region?: string | null, modelSettings?: Array<{ __typename?: 'BedrockModelSettings', modelId?: string | null, inferenceProfileArn?: string | null } | null> | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, analysisRates?: { __typename?: 'AiAnalysisRates', fast?: number | null, slow?: number | null } | null, vectorStore?: { __typename?: 'VectorStoreSettings', enabled?: boolean | null, store?: VectorStore | null } | null } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null, availableModels?: Array<{ __typename?: 'AvailableModel', provider: AiProvider, model: string } | null> | null, defaultModels?: Array<{ __typename?: 'ModelDefault', provider: AiProvider, model?: string | null, toolModel?: string | null, embeddingModel?: string | null, decisionModel?: string | null } | null> | null };
 
 export type ObservabilityProvidersQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -21650,7 +23437,7 @@ export type UpdateDeploymentSettingsMutationVariables = Exact<{
 }>;
 
 
-export type UpdateDeploymentSettingsMutation = { __typename?: 'RootMutationType', updateDeploymentSettings?: { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, onboarded?: boolean | null, agentHelmValues?: string | null, agentHelmValuesTemplateable?: boolean | null, latestK8sVsn: string, logging?: { __typename?: 'LoggingSettings', enabled?: boolean | null, driver?: LogDriver | null, levels?: boolean | null } | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null, recurseSubmodules?: boolean | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null, recurseSubmodules?: boolean | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, smtp?: { __typename?: 'SmtpSettings', server: string, port: number, sender: string, user: string, ssl: boolean } | null, ai?: { __typename?: 'AiSettings', enabled?: boolean | null, toolsEnabled?: boolean | null, provider?: AiProvider | null, toolProvider?: AiProvider | null, embeddingProvider?: AiProvider | null, logAnalysis?: boolean | null, anthropic?: { __typename?: 'AnthropicSettings', baseUrl?: string | null, model?: string | null, toolModel?: string | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, openai?: { __typename?: 'OpenaiSettings', baseUrl?: string | null, model?: string | null, toolModel?: string | null, embeddingModel?: string | null, method?: OpenAiMethod | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, openaiCompatible?: { __typename?: 'OpenaiSettings', baseUrl?: string | null, model?: string | null, toolModel?: string | null, embeddingModel?: string | null, method?: OpenAiMethod | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, xai?: { __typename?: 'OpenaiSettings', baseUrl?: string | null, model?: string | null, toolModel?: string | null, embeddingModel?: string | null, method?: OpenAiMethod | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, azure?: { __typename?: 'AzureOpenaiSettings', apiVersion?: string | null, endpoint: string, model?: string | null, embeddingModel?: string | null, toolModel?: string | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, ollama?: { __typename?: 'OllamaSettings', model: string, toolModel?: string | null, url: string, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, vertex?: { __typename?: 'VertexAiSettings', model?: string | null, embeddingModel?: string | null, toolModel?: string | null, project: string, location: string, endpoint?: string | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, bedrock?: { __typename?: 'BedrockAiSettings', modelId?: string | null, toolModelId?: string | null, embeddingModel?: string | null, endpoint?: BedrockEndpoint | null, accessKeyId?: string | null, region?: string | null, modelSettings?: Array<{ __typename?: 'BedrockModelSettings', modelId?: string | null, inferenceProfileArn?: string | null } | null> | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, analysisRates?: { __typename?: 'AiAnalysisRates', fast?: number | null, slow?: number | null } | null, vectorStore?: { __typename?: 'VectorStoreSettings', enabled?: boolean | null, store?: VectorStore | null } | null } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+export type UpdateDeploymentSettingsMutation = { __typename?: 'RootMutationType', updateDeploymentSettings?: { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, onboarded?: boolean | null, agentHelmValues?: string | null, agentHelmValuesTemplateable?: boolean | null, latestK8sVsn: string, logging?: { __typename?: 'LoggingSettings', enabled?: boolean | null, driver?: LogDriver | null, levels?: boolean | null } | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null, recurseSubmodules?: boolean | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null, recurseSubmodules?: boolean | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, smtp?: { __typename?: 'SmtpSettings', server: string, port: number, sender: string, user: string, ssl: boolean } | null, ai?: { __typename?: 'AiSettings', enabled?: boolean | null, toolsEnabled?: boolean | null, provider?: AiProvider | null, toolProvider?: AiProvider | null, embeddingProvider?: AiProvider | null, decisionProvider?: AiProvider | null, logAnalysis?: boolean | null, anthropic?: { __typename?: 'AnthropicSettings', baseUrl?: string | null, model?: string | null, toolModel?: string | null, decisionModel?: string | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, openai?: { __typename?: 'OpenaiSettings', baseUrl?: string | null, model?: string | null, toolModel?: string | null, decisionModel?: string | null, embeddingModel?: string | null, method?: OpenAiMethod | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, openaiCompatible?: { __typename?: 'OpenaiSettings', baseUrl?: string | null, model?: string | null, toolModel?: string | null, decisionModel?: string | null, embeddingModel?: string | null, method?: OpenAiMethod | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, xai?: { __typename?: 'OpenaiSettings', baseUrl?: string | null, model?: string | null, toolModel?: string | null, decisionModel?: string | null, embeddingModel?: string | null, method?: OpenAiMethod | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, azure?: { __typename?: 'AzureOpenaiSettings', apiVersion?: string | null, endpoint: string, model?: string | null, embeddingModel?: string | null, toolModel?: string | null, decisionModel?: string | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, ollama?: { __typename?: 'OllamaSettings', model: string, toolModel?: string | null, url: string, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, vertex?: { __typename?: 'VertexAiSettings', model?: string | null, embeddingModel?: string | null, toolModel?: string | null, decisionModel?: string | null, project: string, location: string, endpoint?: string | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, bedrock?: { __typename?: 'BedrockAiSettings', modelId?: string | null, toolModelId?: string | null, decisionModel?: string | null, embeddingModel?: string | null, endpoint?: BedrockEndpoint | null, accessKeyId?: string | null, region?: string | null, modelSettings?: Array<{ __typename?: 'BedrockModelSettings', modelId?: string | null, inferenceProfileArn?: string | null } | null> | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null, analysisRates?: { __typename?: 'AiAnalysisRates', fast?: number | null, slow?: number | null } | null, vectorStore?: { __typename?: 'VectorStoreSettings', enabled?: boolean | null, store?: VectorStore | null } | null } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
 
 export type UpsertObservabilityProviderMutationVariables = Exact<{
   attributes: ObservabilityProviderAttributes;
@@ -22239,6 +24026,656 @@ export type ApplyScalingRecommendationMutationVariables = Exact<{
 
 export type ApplyScalingRecommendationMutation = { __typename?: 'RootMutationType', applyScalingRecommendation?: { __typename?: 'PullRequest', labels?: Array<string | null> | null, patch?: string | null, id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null };
 
+export type DevboxModelFragment = { __typename?: 'DevboxModel', id: string, name?: string | null, description?: string | null };
+
+export type DevboxCommandFragment = { __typename?: 'DevboxCommand', name: string, description?: string | null, inputHint?: string | null };
+
+export type DevboxConfigOptionFragment = { __typename?: 'DevboxConfigOption', configId: string, name?: string | null, description?: string | null, category?: string | null, type?: string | null, currentValue?: string | null, options?: Array<{ __typename?: 'DevboxConfigOptionValue', value: string, name?: string | null, description?: string | null, group?: string | null } | null> | null };
+
+export type DevboxSessionCapabilitiesFragment = { __typename?: 'DevboxSessionCapabilities', list?: boolean | null, resume?: boolean | null, load?: boolean | null, close?: boolean | null, delete?: boolean | null, fork?: boolean | null };
+
+export type DevboxAgentFragment = { __typename?: 'DevboxAgent', type: DevboxAgentType, default?: boolean | null, adapterName?: string | null, adapterVersion?: string | null, protocolVersion?: number | null, acpV2?: boolean | null, modelSwitchable?: boolean | null, probeStatus?: DevboxProbeStatus | null, probeError?: string | null, defaultModel?: string | null, models?: Array<{ __typename?: 'DevboxModel', id: string, name?: string | null, description?: string | null } | null> | null, commands?: Array<{ __typename?: 'DevboxCommand', name: string, description?: string | null, inputHint?: string | null } | null> | null, configOptions?: Array<{ __typename?: 'DevboxConfigOption', configId: string, name?: string | null, description?: string | null, category?: string | null, type?: string | null, currentValue?: string | null, options?: Array<{ __typename?: 'DevboxConfigOptionValue', value: string, name?: string | null, description?: string | null, group?: string | null } | null> | null } | null> | null, sessionCapabilities?: { __typename?: 'DevboxSessionCapabilities', list?: boolean | null, resume?: boolean | null, load?: boolean | null, close?: boolean | null, delete?: boolean | null, fork?: boolean | null } | null };
+
+export type DevboxTinyFragment = { __typename?: 'Devbox', id: string, name: string, status?: DevboxStatus | null, image?: string | null, resolvedImage?: string | null, templateRevision?: string | null, browser?: boolean | null, maxInstances?: number | null, lastHeartbeatAt?: string | null, decisionReview?: boolean | null, autonomy: { __typename?: 'DevboxAutonomyPolicy', default: DevboxAutonomy, max: DevboxAutonomy }, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null, agents?: Array<{ __typename?: 'DevboxAgent', type: DevboxAgentType, default?: boolean | null, probeStatus?: DevboxProbeStatus | null } | null> | null };
+
+export type DevboxFragment = { __typename?: 'Devbox', resources?: Record<string, unknown> | null, allowedRepositories?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, id: string, name: string, status?: DevboxStatus | null, image?: string | null, resolvedImage?: string | null, templateRevision?: string | null, browser?: boolean | null, maxInstances?: number | null, lastHeartbeatAt?: string | null, decisionReview?: boolean | null, agents?: Array<{ __typename?: 'DevboxAgent', type: DevboxAgentType, default?: boolean | null, probeStatus?: DevboxProbeStatus | null, adapterName?: string | null, adapterVersion?: string | null, protocolVersion?: number | null, acpV2?: boolean | null, modelSwitchable?: boolean | null, probeError?: string | null, defaultModel?: string | null, models?: Array<{ __typename?: 'DevboxModel', id: string, name?: string | null, description?: string | null } | null> | null, commands?: Array<{ __typename?: 'DevboxCommand', name: string, description?: string | null, inputHint?: string | null } | null> | null, configOptions?: Array<{ __typename?: 'DevboxConfigOption', configId: string, name?: string | null, description?: string | null, category?: string | null, type?: string | null, currentValue?: string | null, options?: Array<{ __typename?: 'DevboxConfigOptionValue', value: string, name?: string | null, description?: string | null, group?: string | null } | null> | null } | null> | null, sessionCapabilities?: { __typename?: 'DevboxSessionCapabilities', list?: boolean | null, resume?: boolean | null, load?: boolean | null, close?: boolean | null, delete?: boolean | null, fork?: boolean | null } | null } | null> | null, httpAllowlist?: Array<{ __typename?: 'DevboxHttpAllow', host: string, port?: number | null, passthrough?: boolean | null } | null> | null, idlePolicy?: { __typename?: 'DevboxIdlePolicy', activityWindow?: number | null, cpuThreshold?: number | null, gracePeriod?: number | null, maxDeferral?: number | null, maxContinuousAwake?: number | null, completeAfter?: number | null } | null, conditions?: Array<{ __typename?: 'DevboxCondition', type: string, status: string, reason?: string | null, message?: string | null } | null> | null, scmConnections?: Array<{ __typename?: 'ScmConnection', id: string, name: string, type: ScmType } | null> | null, cloudIdentities?: Array<{ __typename?: 'DevboxCloudIdentity', name: string, provider: DevboxCloudProvider, default?: boolean | null, roleArn?: string | null, workloadIdentityProvider?: string | null, serviceAccount?: string | null, tenantId?: string | null, clientId?: string | null } | null> | null, workloadIdentity?: { __typename?: 'DevboxWorkloadIdentity', issuerUrl: string, subject: string, audiences?: Array<string | null> | null, snippets?: Array<{ __typename?: 'DevboxTrustSnippet', provider: DevboxCloudProvider, format: DevboxSnippetFormat, title: string, content: string } | null> | null } | null, autonomy: { __typename?: 'DevboxAutonomyPolicy', default: DevboxAutonomy, max: DevboxAutonomy }, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null };
+
+export type DevboxUsageFragment = { __typename?: 'DevboxUsage', inputTokens?: number | null, outputTokens?: number | null, cachedTokens?: number | null, reasoningTokens?: number | null, totalTokens?: number | null, contextSize?: number | null, contextUsed?: number | null, totalCost?: number | null, currency?: string | null };
+
+export type DevboxThreadFragment = { __typename?: 'DevboxThread', id: string, sessionId?: string | null, kind: DevboxThreadKind, agent?: DevboxAgentType | null, title?: string | null, agentTitle?: string | null, model?: string | null, cwd?: string | null, worktreeRepos?: Array<string | null> | null, status: DevboxThreadStatus, imported?: boolean | null, lastActivityAt?: string | null, entityCount?: number | null, foregroundState?: DevboxForegroundState | null, stopReason?: string | null, error?: Record<string, unknown> | null, backgroundWork?: Record<string, unknown> | null, billing?: string | null, revision?: number | null, insertedAt?: string | null, updatedAt?: string | null, configOptions?: Array<{ __typename?: 'DevboxConfigOption', configId: string, name?: string | null, description?: string | null, category?: string | null, type?: string | null, currentValue?: string | null, options?: Array<{ __typename?: 'DevboxConfigOptionValue', value: string, name?: string | null, description?: string | null, group?: string | null } | null> | null } | null> | null, availableCommands?: Array<{ __typename?: 'DevboxCommand', name: string, description?: string | null, inputHint?: string | null } | null> | null, usage?: { __typename?: 'DevboxUsage', inputTokens?: number | null, outputTokens?: number | null, cachedTokens?: number | null, reasoningTokens?: number | null, totalTokens?: number | null, contextSize?: number | null, contextUsed?: number | null, totalCost?: number | null, currency?: string | null } | null, parent?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null };
+
+export type DevboxInteractionFragment = { __typename?: 'DevboxInteraction', id: string, externalId: string, toolCallId?: string | null, kind: DevboxInteractionKind, state: DevboxInteractionState, title?: string | null, message?: string | null, requestedSchema?: Record<string, unknown> | null, url?: string | null, response?: Record<string, unknown> | null, answeredAt?: string | null, expiresAt?: string | null, answeredByPolicy?: string | null, insertedAt?: string | null, updatedAt?: string | null, options?: Array<{ __typename?: 'DevboxPermissionOption', optionId: string, name?: string | null, kind?: string | null } | null> | null, thread?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null, title?: string | null } | null, instance?: { __typename?: 'DevboxInstance', id: string, name?: string | null } | null, answeredBy?: { __typename?: 'User', id: string, name: string, email: string } | null, review?: { __typename?: 'DevboxInteractionReview', verdict?: string | null, confidence?: number | null, risk?: string | null, model?: string | null, escalation?: string | null } | null };
+
+export type DevboxSnapshotFragment = { __typename?: 'DevboxSnapshot', id: string, name?: string | null, status: DevboxSnapshotStatus, fidelity?: DevboxSnapshotFidelity | null, sizeBytes?: any | null, error?: string | null, templateRevision?: string | null, insertedAt?: string | null, updatedAt?: string | null, devbox?: { __typename?: 'Devbox', id: string, name: string, templateRevision?: string | null } | null, instance?: { __typename?: 'DevboxInstance', id: string, name?: string | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null };
+
+export type DevboxInstanceTinyFragment = { __typename?: 'DevboxInstance', id: string, name?: string | null, agent?: DevboxAgentType | null, requestedModel?: string | null, repositories?: Array<string | null> | null, status: DevboxInstanceStatus, statusReason?: string | null, foregroundState?: DevboxForegroundState | null, runningThreads?: number | null, waitingThreads?: number | null, keepAwakeUntil?: string | null, awakeSince?: string | null, startedAt?: string | null, suspendedAt?: string | null, lastActivityAt?: string | null, viewerCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, devbox?: { __typename?: 'Devbox', id: string, name: string, browser?: boolean | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null };
+
+export type DevboxInstanceFragment = { __typename?: 'DevboxInstance', configOptions?: Record<string, unknown> | null, maxRunningThreads?: number | null, templateRevision?: string | null, imageDigest?: string | null, restoreFidelity?: DevboxSnapshotFidelity | null, completedAt?: string | null, id: string, name?: string | null, agent?: DevboxAgentType | null, requestedModel?: string | null, repositories?: Array<string | null> | null, status: DevboxInstanceStatus, statusReason?: string | null, foregroundState?: DevboxForegroundState | null, runningThreads?: number | null, waitingThreads?: number | null, keepAwakeUntil?: string | null, awakeSince?: string | null, startedAt?: string | null, suspendedAt?: string | null, lastActivityAt?: string | null, viewerCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, agentConnections?: Array<{ __typename?: 'DevboxAgentConnection', agent?: DevboxAgentType | null, protocolVersion?: number | null, adapterName?: string | null, adapterVersion?: string | null, capabilities?: Record<string, unknown> | null, billing?: string | null } | null> | null, agentBilling?: Array<{ __typename?: 'DevboxAgentBilling', agent?: DevboxAgentType | null, billing?: DevboxBillingMode | null, credentialKind?: string | null, allowCollaborators?: boolean | null } | null> | null, checkouts?: Array<{ __typename?: 'DevboxCheckout', path?: string | null, name?: string | null, remoteUrl?: string | null, defaultBranch?: string | null, branch?: string | null, headSha?: string | null, dirty?: boolean | null, worktreeThreadId?: string | null, ahead?: number | null, behind?: number | null } | null> | null, idleState?: { __typename?: 'DevboxIdleState', idle?: boolean | null, idleSince?: string | null, suspendsAt?: string | null, busyReasons?: Array<Record<string, unknown> | null> | null, message?: string | null } | null, leases?: Array<{ __typename?: 'DevboxLease', kind: DevboxLeaseKind, expiresAt: string, holder?: { __typename?: 'User', id: string, name: string, email: string } | null } | null> | null, keepAwakeBy?: { __typename?: 'User', id: string, name: string, email: string } | null, workbench?: { __typename?: 'Workbench', id: string, name: string } | null, snapshot?: { __typename?: 'DevboxSnapshot', id: string, name?: string | null, fidelity?: DevboxSnapshotFidelity | null } | null, devbox?: { __typename?: 'Devbox', id: string, name: string, browser?: boolean | null, resources?: Record<string, unknown> | null, allowedRepositories?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, status?: DevboxStatus | null, image?: string | null, resolvedImage?: string | null, templateRevision?: string | null, maxInstances?: number | null, lastHeartbeatAt?: string | null, decisionReview?: boolean | null, agents?: Array<{ __typename?: 'DevboxAgent', type: DevboxAgentType, default?: boolean | null, probeStatus?: DevboxProbeStatus | null, adapterName?: string | null, adapterVersion?: string | null, protocolVersion?: number | null, acpV2?: boolean | null, modelSwitchable?: boolean | null, probeError?: string | null, defaultModel?: string | null, models?: Array<{ __typename?: 'DevboxModel', id: string, name?: string | null, description?: string | null } | null> | null, commands?: Array<{ __typename?: 'DevboxCommand', name: string, description?: string | null, inputHint?: string | null } | null> | null, configOptions?: Array<{ __typename?: 'DevboxConfigOption', configId: string, name?: string | null, description?: string | null, category?: string | null, type?: string | null, currentValue?: string | null, options?: Array<{ __typename?: 'DevboxConfigOptionValue', value: string, name?: string | null, description?: string | null, group?: string | null } | null> | null } | null> | null, sessionCapabilities?: { __typename?: 'DevboxSessionCapabilities', list?: boolean | null, resume?: boolean | null, load?: boolean | null, close?: boolean | null, delete?: boolean | null, fork?: boolean | null } | null } | null> | null, httpAllowlist?: Array<{ __typename?: 'DevboxHttpAllow', host: string, port?: number | null, passthrough?: boolean | null } | null> | null, idlePolicy?: { __typename?: 'DevboxIdlePolicy', activityWindow?: number | null, cpuThreshold?: number | null, gracePeriod?: number | null, maxDeferral?: number | null, maxContinuousAwake?: number | null, completeAfter?: number | null } | null, conditions?: Array<{ __typename?: 'DevboxCondition', type: string, status: string, reason?: string | null, message?: string | null } | null> | null, scmConnections?: Array<{ __typename?: 'ScmConnection', id: string, name: string, type: ScmType } | null> | null, cloudIdentities?: Array<{ __typename?: 'DevboxCloudIdentity', name: string, provider: DevboxCloudProvider, default?: boolean | null, roleArn?: string | null, workloadIdentityProvider?: string | null, serviceAccount?: string | null, tenantId?: string | null, clientId?: string | null } | null> | null, workloadIdentity?: { __typename?: 'DevboxWorkloadIdentity', issuerUrl: string, subject: string, audiences?: Array<string | null> | null, snippets?: Array<{ __typename?: 'DevboxTrustSnippet', provider: DevboxCloudProvider, format: DevboxSnippetFormat, title: string, content: string } | null> | null } | null, autonomy: { __typename?: 'DevboxAutonomyPolicy', default: DevboxAutonomy, max: DevboxAutonomy }, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null } | null, threads?: Array<{ __typename?: 'DevboxThread', id: string, sessionId?: string | null, kind: DevboxThreadKind, agent?: DevboxAgentType | null, title?: string | null, agentTitle?: string | null, model?: string | null, cwd?: string | null, worktreeRepos?: Array<string | null> | null, status: DevboxThreadStatus, imported?: boolean | null, lastActivityAt?: string | null, entityCount?: number | null, foregroundState?: DevboxForegroundState | null, stopReason?: string | null, error?: Record<string, unknown> | null, backgroundWork?: Record<string, unknown> | null, billing?: string | null, revision?: number | null, insertedAt?: string | null, updatedAt?: string | null, configOptions?: Array<{ __typename?: 'DevboxConfigOption', configId: string, name?: string | null, description?: string | null, category?: string | null, type?: string | null, currentValue?: string | null, options?: Array<{ __typename?: 'DevboxConfigOptionValue', value: string, name?: string | null, description?: string | null, group?: string | null } | null> | null } | null> | null, availableCommands?: Array<{ __typename?: 'DevboxCommand', name: string, description?: string | null, inputHint?: string | null } | null> | null, usage?: { __typename?: 'DevboxUsage', inputTokens?: number | null, outputTokens?: number | null, cachedTokens?: number | null, reasoningTokens?: number | null, totalTokens?: number | null, contextSize?: number | null, contextUsed?: number | null, totalCost?: number | null, currency?: string | null } | null, parent?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null> | null, interactions?: Array<{ __typename?: 'DevboxInteraction', id: string, externalId: string, toolCallId?: string | null, kind: DevboxInteractionKind, state: DevboxInteractionState, title?: string | null, message?: string | null, requestedSchema?: Record<string, unknown> | null, url?: string | null, response?: Record<string, unknown> | null, answeredAt?: string | null, expiresAt?: string | null, answeredByPolicy?: string | null, insertedAt?: string | null, updatedAt?: string | null, options?: Array<{ __typename?: 'DevboxPermissionOption', optionId: string, name?: string | null, kind?: string | null } | null> | null, thread?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null, title?: string | null } | null, instance?: { __typename?: 'DevboxInstance', id: string, name?: string | null } | null, answeredBy?: { __typename?: 'User', id: string, name: string, email: string } | null, review?: { __typename?: 'DevboxInteractionReview', verdict?: string | null, confidence?: number | null, risk?: string | null, model?: string | null, escalation?: string | null } | null } | null> | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null };
+
+export type DevboxAgentBillingFragment = { __typename?: 'DevboxAgentBilling', agent?: DevboxAgentType | null, billing?: DevboxBillingMode | null, credentialKind?: string | null, allowCollaborators?: boolean | null };
+
+export type DevboxFileEntryFragment = { __typename?: 'DevboxFileEntry', path: string, name?: string | null, type?: string | null, size?: any | null, modifiedAt?: string | null, symlinkTarget?: string | null, repository?: string | null, gitStatus?: string | null };
+
+export type DevboxFileFragment = { __typename?: 'DevboxFile', content?: string | null, sha256?: string | null, truncated?: boolean | null, mimeType?: string | null, binary?: boolean | null, entry?: { __typename?: 'DevboxFileEntry', path: string, name?: string | null, type?: string | null, size?: any | null, modifiedAt?: string | null, symlinkTarget?: string | null, repository?: string | null, gitStatus?: string | null } | null };
+
+export type DevboxFileChangeFragment = { __typename?: 'DevboxFileChange', path: string, oldPath?: string | null, status?: string | null, staged?: boolean | null, additions?: number | null, deletions?: number | null, binary?: boolean | null, diff?: string | null, diffTruncated?: boolean | null };
+
+export type DevboxRepositoryChangesFragment = { __typename?: 'DevboxRepositoryChanges', baseRef?: string | null, baseSha?: string | null, additions?: number | null, deletions?: number | null, checkout?: { __typename?: 'DevboxCheckout', path?: string | null, name?: string | null, remoteUrl?: string | null, defaultBranch?: string | null, branch?: string | null, headSha?: string | null, dirty?: boolean | null, worktreeThreadId?: string | null, ahead?: number | null, behind?: number | null } | null, files?: Array<{ __typename?: 'DevboxFileChange', path: string, oldPath?: string | null, status?: string | null, staged?: boolean | null, additions?: number | null, deletions?: number | null, binary?: boolean | null, diff?: string | null, diffTruncated?: boolean | null } | null> | null };
+
+export type DevboxStreamFragment = { __typename?: 'DevboxStream', streamId: string, kind: DevboxStreamKind, url: string, token: string, expiresAt?: string | null, subprotocols?: Array<string | null> | null, terminalId?: string | null };
+
+export type AgentCredentialFragment = { __typename?: 'AgentCredential', id: string, provider: AgentCredentialProvider, kind: AgentCredentialKind, label?: string | null, status: AgentCredentialStatus, version?: any | null, defaultBilling?: boolean | null, failureCount?: number | null, email?: string | null, plan?: string | null, linkedAt?: string | null, expiresAt?: string | null, lastRefreshedAt?: string | null, lastUsedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null };
+
+export type DevboxCheckoutFragment = { __typename?: 'DevboxCheckout', path?: string | null, name?: string | null, remoteUrl?: string | null, defaultBranch?: string | null, branch?: string | null, headSha?: string | null, dirty?: boolean | null, worktreeThreadId?: string | null, ahead?: number | null, behind?: number | null };
+
+export type DevboxRepositoryFragment = { __typename?: 'DevboxRepository', path?: string | null, name?: string | null, remoteUrl?: string | null, defaultBranch?: string | null, branch?: string | null, headSha?: string | null, dirty?: boolean | null, worktreeThreadId?: string | null, ahead?: number | null, behind?: number | null };
+
+type DevboxContentBlock_DevboxAudioContent_Fragment = { __typename?: 'DevboxAudioContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null };
+
+type DevboxContentBlock_DevboxImageContent_Fragment = { __typename?: 'DevboxImageContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null, uri?: string | null };
+
+type DevboxContentBlock_DevboxResourceContent_Fragment = { __typename?: 'DevboxResourceContent', type: DevboxContentBlockType, uri?: string | null, mimeType?: string | null, text?: string | null, blob?: string | null };
+
+type DevboxContentBlock_DevboxResourceLinkContent_Fragment = { __typename?: 'DevboxResourceLinkContent', type: DevboxContentBlockType, uri?: string | null, name?: string | null, title?: string | null, description?: string | null, mimeType?: string | null, size?: any | null };
+
+type DevboxContentBlock_DevboxTextContent_Fragment = { __typename?: 'DevboxTextContent', type: DevboxContentBlockType, text?: string | null, annotations?: Record<string, unknown> | null };
+
+type DevboxContentBlock_DevboxUnknownContent_Fragment = { __typename?: 'DevboxUnknownContent', type: DevboxContentBlockType, variant?: string | null, raw?: Record<string, unknown> | null };
+
+export type DevboxContentBlockFragment =
+  | DevboxContentBlock_DevboxAudioContent_Fragment
+  | DevboxContentBlock_DevboxImageContent_Fragment
+  | DevboxContentBlock_DevboxResourceContent_Fragment
+  | DevboxContentBlock_DevboxResourceLinkContent_Fragment
+  | DevboxContentBlock_DevboxTextContent_Fragment
+  | DevboxContentBlock_DevboxUnknownContent_Fragment
+;
+
+export type DevboxToolCallFragment = { __typename?: 'DevboxToolCall', toolCallId?: string | null, title?: string | null, kind?: string | null, status?: string | null, rawInput?: Record<string, unknown> | null, rawOutput?: Record<string, unknown> | null, meta?: Record<string, unknown> | null, locations?: Array<{ __typename?: 'DevboxToolCallLocation', path?: string | null, line?: number | null } | null> | null, content?: Array<
+    | { __typename?: 'DevboxToolCallBlock', type: DevboxToolCallContentType, content?:
+        | { __typename?: 'DevboxAudioContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null }
+        | { __typename?: 'DevboxImageContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null, uri?: string | null }
+        | { __typename?: 'DevboxResourceContent', type: DevboxContentBlockType, uri?: string | null, mimeType?: string | null, text?: string | null, blob?: string | null }
+        | { __typename?: 'DevboxResourceLinkContent', type: DevboxContentBlockType, uri?: string | null, name?: string | null, title?: string | null, description?: string | null, mimeType?: string | null, size?: any | null }
+        | { __typename?: 'DevboxTextContent', type: DevboxContentBlockType, text?: string | null, annotations?: Record<string, unknown> | null }
+        | { __typename?: 'DevboxUnknownContent', type: DevboxContentBlockType, variant?: string | null, raw?: Record<string, unknown> | null }
+       | null }
+    | { __typename?: 'DevboxToolCallDiff', type: DevboxToolCallContentType, path?: string | null, oldText?: string | null, newText?: string | null }
+    | { __typename?: 'DevboxToolCallTerminal', type: DevboxToolCallContentType, terminalId?: string | null }
+    | { __typename?: 'DevboxToolCallUnknown', type: DevboxToolCallContentType, variant?: string | null, raw?: Record<string, unknown> | null }
+   | null> | null };
+
+export type DevboxEntityFragment = { __typename?: 'DevboxEntity', id?: string | null, sessionId?: string | null, type: DevboxEntityType, position?: any | null, revision?: any | null, settled?: boolean | null, createdAt?: string | null, updatedAt?: string | null, raw?: Record<string, unknown> | null, message?: { __typename?: 'DevboxMessageEntity', messageId?: string | null, promptId?: string | null, sentById?: string | null, meta?: Record<string, unknown> | null, content?: Array<
+      | { __typename?: 'DevboxAudioContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null }
+      | { __typename?: 'DevboxImageContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null, uri?: string | null }
+      | { __typename?: 'DevboxResourceContent', type: DevboxContentBlockType, uri?: string | null, mimeType?: string | null, text?: string | null, blob?: string | null }
+      | { __typename?: 'DevboxResourceLinkContent', type: DevboxContentBlockType, uri?: string | null, name?: string | null, title?: string | null, description?: string | null, mimeType?: string | null, size?: any | null }
+      | { __typename?: 'DevboxTextContent', type: DevboxContentBlockType, text?: string | null, annotations?: Record<string, unknown> | null }
+      | { __typename?: 'DevboxUnknownContent', type: DevboxContentBlockType, variant?: string | null, raw?: Record<string, unknown> | null }
+     | null> | null } | null, sessionMessage?: { __typename?: 'DevboxSessionMessageEntity', messageId?: string | null, fromSessionId?: string | null, toSessionId?: string | null, meta?: Record<string, unknown> | null, content?: Array<
+      | { __typename?: 'DevboxAudioContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null }
+      | { __typename?: 'DevboxImageContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null, uri?: string | null }
+      | { __typename?: 'DevboxResourceContent', type: DevboxContentBlockType, uri?: string | null, mimeType?: string | null, text?: string | null, blob?: string | null }
+      | { __typename?: 'DevboxResourceLinkContent', type: DevboxContentBlockType, uri?: string | null, name?: string | null, title?: string | null, description?: string | null, mimeType?: string | null, size?: any | null }
+      | { __typename?: 'DevboxTextContent', type: DevboxContentBlockType, text?: string | null, annotations?: Record<string, unknown> | null }
+      | { __typename?: 'DevboxUnknownContent', type: DevboxContentBlockType, variant?: string | null, raw?: Record<string, unknown> | null }
+     | null> | null } | null, toolCall?: { __typename?: 'DevboxToolCall', toolCallId?: string | null, title?: string | null, kind?: string | null, status?: string | null, rawInput?: Record<string, unknown> | null, rawOutput?: Record<string, unknown> | null, meta?: Record<string, unknown> | null, locations?: Array<{ __typename?: 'DevboxToolCallLocation', path?: string | null, line?: number | null } | null> | null, content?: Array<
+      | { __typename?: 'DevboxToolCallBlock', type: DevboxToolCallContentType, content?:
+          | { __typename?: 'DevboxAudioContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null }
+          | { __typename?: 'DevboxImageContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null, uri?: string | null }
+          | { __typename?: 'DevboxResourceContent', type: DevboxContentBlockType, uri?: string | null, mimeType?: string | null, text?: string | null, blob?: string | null }
+          | { __typename?: 'DevboxResourceLinkContent', type: DevboxContentBlockType, uri?: string | null, name?: string | null, title?: string | null, description?: string | null, mimeType?: string | null, size?: any | null }
+          | { __typename?: 'DevboxTextContent', type: DevboxContentBlockType, text?: string | null, annotations?: Record<string, unknown> | null }
+          | { __typename?: 'DevboxUnknownContent', type: DevboxContentBlockType, variant?: string | null, raw?: Record<string, unknown> | null }
+         | null }
+      | { __typename?: 'DevboxToolCallDiff', type: DevboxToolCallContentType, path?: string | null, oldText?: string | null, newText?: string | null }
+      | { __typename?: 'DevboxToolCallTerminal', type: DevboxToolCallContentType, terminalId?: string | null }
+      | { __typename?: 'DevboxToolCallUnknown', type: DevboxToolCallContentType, variant?: string | null, raw?: Record<string, unknown> | null }
+     | null> | null } | null, plan?: { __typename?: 'DevboxPlan', planId?: string | null, meta?: Record<string, unknown> | null, entries?: Array<{ __typename?: 'DevboxPlanEntry', content?: string | null, priority?: string | null, status?: string | null } | null> | null } | null, terminal?: { __typename?: 'DevboxTerminal', terminalId?: string | null, command?: string | null, args?: Array<string | null> | null, cwd?: string | null, output?: string | null, truncated?: boolean | null, exitCode?: number | null, signal?: string | null, meta?: Record<string, unknown> | null } | null, compaction?: { __typename?: 'DevboxCompaction', compactionId?: string | null, status?: string | null, meta?: Record<string, unknown> | null, summary?: Array<
+      | { __typename?: 'DevboxAudioContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null }
+      | { __typename?: 'DevboxImageContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null, uri?: string | null }
+      | { __typename?: 'DevboxResourceContent', type: DevboxContentBlockType, uri?: string | null, mimeType?: string | null, text?: string | null, blob?: string | null }
+      | { __typename?: 'DevboxResourceLinkContent', type: DevboxContentBlockType, uri?: string | null, name?: string | null, title?: string | null, description?: string | null, mimeType?: string | null, size?: any | null }
+      | { __typename?: 'DevboxTextContent', type: DevboxContentBlockType, text?: string | null, annotations?: Record<string, unknown> | null }
+      | { __typename?: 'DevboxUnknownContent', type: DevboxContentBlockType, variant?: string | null, raw?: Record<string, unknown> | null }
+     | null> | null } | null };
+
+export type DevboxEntityChangeFragment = { __typename?: 'DevboxEntityChange', instanceId: string, sessionId?: string | null, threadId?: string | null, entityType?: DevboxEntityType | null, entityId?: string | null, position?: any | null, op: DevboxDeltaOp, stateKind?: string | null, payload?: Record<string, unknown> | null, offset?: any | null, emittedAt?: string | null, entity?: { __typename?: 'DevboxEntity', id?: string | null, sessionId?: string | null, type: DevboxEntityType, position?: any | null, revision?: any | null, settled?: boolean | null, createdAt?: string | null, updatedAt?: string | null, raw?: Record<string, unknown> | null, message?: { __typename?: 'DevboxMessageEntity', messageId?: string | null, promptId?: string | null, sentById?: string | null, meta?: Record<string, unknown> | null, content?: Array<
+        | { __typename?: 'DevboxAudioContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null }
+        | { __typename?: 'DevboxImageContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null, uri?: string | null }
+        | { __typename?: 'DevboxResourceContent', type: DevboxContentBlockType, uri?: string | null, mimeType?: string | null, text?: string | null, blob?: string | null }
+        | { __typename?: 'DevboxResourceLinkContent', type: DevboxContentBlockType, uri?: string | null, name?: string | null, title?: string | null, description?: string | null, mimeType?: string | null, size?: any | null }
+        | { __typename?: 'DevboxTextContent', type: DevboxContentBlockType, text?: string | null, annotations?: Record<string, unknown> | null }
+        | { __typename?: 'DevboxUnknownContent', type: DevboxContentBlockType, variant?: string | null, raw?: Record<string, unknown> | null }
+       | null> | null } | null, sessionMessage?: { __typename?: 'DevboxSessionMessageEntity', messageId?: string | null, fromSessionId?: string | null, toSessionId?: string | null, meta?: Record<string, unknown> | null, content?: Array<
+        | { __typename?: 'DevboxAudioContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null }
+        | { __typename?: 'DevboxImageContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null, uri?: string | null }
+        | { __typename?: 'DevboxResourceContent', type: DevboxContentBlockType, uri?: string | null, mimeType?: string | null, text?: string | null, blob?: string | null }
+        | { __typename?: 'DevboxResourceLinkContent', type: DevboxContentBlockType, uri?: string | null, name?: string | null, title?: string | null, description?: string | null, mimeType?: string | null, size?: any | null }
+        | { __typename?: 'DevboxTextContent', type: DevboxContentBlockType, text?: string | null, annotations?: Record<string, unknown> | null }
+        | { __typename?: 'DevboxUnknownContent', type: DevboxContentBlockType, variant?: string | null, raw?: Record<string, unknown> | null }
+       | null> | null } | null, toolCall?: { __typename?: 'DevboxToolCall', toolCallId?: string | null, title?: string | null, kind?: string | null, status?: string | null, rawInput?: Record<string, unknown> | null, rawOutput?: Record<string, unknown> | null, meta?: Record<string, unknown> | null, locations?: Array<{ __typename?: 'DevboxToolCallLocation', path?: string | null, line?: number | null } | null> | null, content?: Array<
+        | { __typename?: 'DevboxToolCallBlock', type: DevboxToolCallContentType, content?:
+            | { __typename?: 'DevboxAudioContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null }
+            | { __typename?: 'DevboxImageContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null, uri?: string | null }
+            | { __typename?: 'DevboxResourceContent', type: DevboxContentBlockType, uri?: string | null, mimeType?: string | null, text?: string | null, blob?: string | null }
+            | { __typename?: 'DevboxResourceLinkContent', type: DevboxContentBlockType, uri?: string | null, name?: string | null, title?: string | null, description?: string | null, mimeType?: string | null, size?: any | null }
+            | { __typename?: 'DevboxTextContent', type: DevboxContentBlockType, text?: string | null, annotations?: Record<string, unknown> | null }
+            | { __typename?: 'DevboxUnknownContent', type: DevboxContentBlockType, variant?: string | null, raw?: Record<string, unknown> | null }
+           | null }
+        | { __typename?: 'DevboxToolCallDiff', type: DevboxToolCallContentType, path?: string | null, oldText?: string | null, newText?: string | null }
+        | { __typename?: 'DevboxToolCallTerminal', type: DevboxToolCallContentType, terminalId?: string | null }
+        | { __typename?: 'DevboxToolCallUnknown', type: DevboxToolCallContentType, variant?: string | null, raw?: Record<string, unknown> | null }
+       | null> | null } | null, plan?: { __typename?: 'DevboxPlan', planId?: string | null, meta?: Record<string, unknown> | null, entries?: Array<{ __typename?: 'DevboxPlanEntry', content?: string | null, priority?: string | null, status?: string | null } | null> | null } | null, terminal?: { __typename?: 'DevboxTerminal', terminalId?: string | null, command?: string | null, args?: Array<string | null> | null, cwd?: string | null, output?: string | null, truncated?: boolean | null, exitCode?: number | null, signal?: string | null, meta?: Record<string, unknown> | null } | null, compaction?: { __typename?: 'DevboxCompaction', compactionId?: string | null, status?: string | null, meta?: Record<string, unknown> | null, summary?: Array<
+        | { __typename?: 'DevboxAudioContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null }
+        | { __typename?: 'DevboxImageContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null, uri?: string | null }
+        | { __typename?: 'DevboxResourceContent', type: DevboxContentBlockType, uri?: string | null, mimeType?: string | null, text?: string | null, blob?: string | null }
+        | { __typename?: 'DevboxResourceLinkContent', type: DevboxContentBlockType, uri?: string | null, name?: string | null, title?: string | null, description?: string | null, mimeType?: string | null, size?: any | null }
+        | { __typename?: 'DevboxTextContent', type: DevboxContentBlockType, text?: string | null, annotations?: Record<string, unknown> | null }
+        | { __typename?: 'DevboxUnknownContent', type: DevboxContentBlockType, variant?: string | null, raw?: Record<string, unknown> | null }
+       | null> | null } | null } | null };
+
+export type DevboxPullRequestFragment = { __typename?: 'PullRequest', source?: PullRequestSource | null, metadata?: Record<string, unknown> | null, id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, devbox?: { __typename?: 'Devbox', id: string, name: string } | null, devboxInstance?: { __typename?: 'DevboxInstance', id: string, name?: string | null, workbench?: { __typename?: 'Workbench', id: string } | null } | null, devboxThread?: { __typename?: 'DevboxThread', id: string, title?: string | null, agentTitle?: string | null, sessionId?: string | null } | null };
+
+export type WorkbenchDevboxesQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type WorkbenchDevboxesQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, configuration?: { __typename?: 'WorkbenchConfiguration', coding?: { __typename?: 'WorkbenchCoding', repositories?: Array<string | null> | null } | null, devbox?: { __typename?: 'WorkbenchDevboxConfig', maxSnapshots?: number | null, maxDeferral?: number | null, allowSubscriptionCredentials?: boolean | null } | null } | null, devboxes?: Array<{ __typename?: 'Devbox', allowedRepositories?: Array<string | null> | null, id: string, name: string, status?: DevboxStatus | null, image?: string | null, resolvedImage?: string | null, templateRevision?: string | null, browser?: boolean | null, maxInstances?: number | null, lastHeartbeatAt?: string | null, decisionReview?: boolean | null, agents?: Array<{ __typename?: 'DevboxAgent', type: DevboxAgentType, default?: boolean | null, probeStatus?: DevboxProbeStatus | null, adapterName?: string | null, adapterVersion?: string | null, protocolVersion?: number | null, acpV2?: boolean | null, modelSwitchable?: boolean | null, probeError?: string | null, defaultModel?: string | null, models?: Array<{ __typename?: 'DevboxModel', id: string, name?: string | null, description?: string | null } | null> | null, commands?: Array<{ __typename?: 'DevboxCommand', name: string, description?: string | null, inputHint?: string | null } | null> | null, configOptions?: Array<{ __typename?: 'DevboxConfigOption', configId: string, name?: string | null, description?: string | null, category?: string | null, type?: string | null, currentValue?: string | null, options?: Array<{ __typename?: 'DevboxConfigOptionValue', value: string, name?: string | null, description?: string | null, group?: string | null } | null> | null } | null> | null, sessionCapabilities?: { __typename?: 'DevboxSessionCapabilities', list?: boolean | null, resume?: boolean | null, load?: boolean | null, close?: boolean | null, delete?: boolean | null, fork?: boolean | null } | null } | null> | null, autonomy: { __typename?: 'DevboxAutonomyPolicy', default: DevboxAutonomy, max: DevboxAutonomy }, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null } | null> | null } | null };
+
+export type DevboxesQueryVariables = Exact<{
+  q?: InputMaybe<Scalars['String']['input']>;
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  workbenchId?: InputMaybe<Scalars['ID']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type DevboxesQuery = { __typename?: 'RootQueryType', devboxes?: { __typename?: 'DevboxConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'DevboxEdge', node?: { __typename?: 'Devbox', id: string, name: string, status?: DevboxStatus | null, image?: string | null, resolvedImage?: string | null, templateRevision?: string | null, browser?: boolean | null, maxInstances?: number | null, lastHeartbeatAt?: string | null, decisionReview?: boolean | null, autonomy: { __typename?: 'DevboxAutonomyPolicy', default: DevboxAutonomy, max: DevboxAutonomy }, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null, agents?: Array<{ __typename?: 'DevboxAgent', type: DevboxAgentType, default?: boolean | null, probeStatus?: DevboxProbeStatus | null } | null> | null } | null } | null> | null } | null };
+
+export type DevboxQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DevboxQuery = { __typename?: 'RootQueryType', devbox?: { __typename?: 'Devbox', resources?: Record<string, unknown> | null, allowedRepositories?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, id: string, name: string, status?: DevboxStatus | null, image?: string | null, resolvedImage?: string | null, templateRevision?: string | null, browser?: boolean | null, maxInstances?: number | null, lastHeartbeatAt?: string | null, decisionReview?: boolean | null, agents?: Array<{ __typename?: 'DevboxAgent', type: DevboxAgentType, default?: boolean | null, probeStatus?: DevboxProbeStatus | null, adapterName?: string | null, adapterVersion?: string | null, protocolVersion?: number | null, acpV2?: boolean | null, modelSwitchable?: boolean | null, probeError?: string | null, defaultModel?: string | null, models?: Array<{ __typename?: 'DevboxModel', id: string, name?: string | null, description?: string | null } | null> | null, commands?: Array<{ __typename?: 'DevboxCommand', name: string, description?: string | null, inputHint?: string | null } | null> | null, configOptions?: Array<{ __typename?: 'DevboxConfigOption', configId: string, name?: string | null, description?: string | null, category?: string | null, type?: string | null, currentValue?: string | null, options?: Array<{ __typename?: 'DevboxConfigOptionValue', value: string, name?: string | null, description?: string | null, group?: string | null } | null> | null } | null> | null, sessionCapabilities?: { __typename?: 'DevboxSessionCapabilities', list?: boolean | null, resume?: boolean | null, load?: boolean | null, close?: boolean | null, delete?: boolean | null, fork?: boolean | null } | null } | null> | null, httpAllowlist?: Array<{ __typename?: 'DevboxHttpAllow', host: string, port?: number | null, passthrough?: boolean | null } | null> | null, idlePolicy?: { __typename?: 'DevboxIdlePolicy', activityWindow?: number | null, cpuThreshold?: number | null, gracePeriod?: number | null, maxDeferral?: number | null, maxContinuousAwake?: number | null, completeAfter?: number | null } | null, conditions?: Array<{ __typename?: 'DevboxCondition', type: string, status: string, reason?: string | null, message?: string | null } | null> | null, scmConnections?: Array<{ __typename?: 'ScmConnection', id: string, name: string, type: ScmType } | null> | null, cloudIdentities?: Array<{ __typename?: 'DevboxCloudIdentity', name: string, provider: DevboxCloudProvider, default?: boolean | null, roleArn?: string | null, workloadIdentityProvider?: string | null, serviceAccount?: string | null, tenantId?: string | null, clientId?: string | null } | null> | null, workloadIdentity?: { __typename?: 'DevboxWorkloadIdentity', issuerUrl: string, subject: string, audiences?: Array<string | null> | null, snippets?: Array<{ __typename?: 'DevboxTrustSnippet', provider: DevboxCloudProvider, format: DevboxSnippetFormat, title: string, content: string } | null> | null } | null, autonomy: { __typename?: 'DevboxAutonomyPolicy', default: DevboxAutonomy, max: DevboxAutonomy }, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null } | null };
+
+export type DevboxAgentsQueryVariables = Exact<{
+  workbenchId: Scalars['ID']['input'];
+  devboxId: Scalars['ID']['input'];
+}>;
+
+
+export type DevboxAgentsQuery = { __typename?: 'RootQueryType', devboxAgents?: Array<{ __typename?: 'DevboxAgent', type: DevboxAgentType, default?: boolean | null, adapterName?: string | null, adapterVersion?: string | null, protocolVersion?: number | null, acpV2?: boolean | null, modelSwitchable?: boolean | null, probeStatus?: DevboxProbeStatus | null, probeError?: string | null, defaultModel?: string | null, models?: Array<{ __typename?: 'DevboxModel', id: string, name?: string | null, description?: string | null } | null> | null, commands?: Array<{ __typename?: 'DevboxCommand', name: string, description?: string | null, inputHint?: string | null } | null> | null, configOptions?: Array<{ __typename?: 'DevboxConfigOption', configId: string, name?: string | null, description?: string | null, category?: string | null, type?: string | null, currentValue?: string | null, options?: Array<{ __typename?: 'DevboxConfigOptionValue', value: string, name?: string | null, description?: string | null, group?: string | null } | null> | null } | null> | null, sessionCapabilities?: { __typename?: 'DevboxSessionCapabilities', list?: boolean | null, resume?: boolean | null, load?: boolean | null, close?: boolean | null, delete?: boolean | null, fork?: boolean | null } | null } | null> | null };
+
+export type WorkbenchDevboxInstancesQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  statuses?: InputMaybe<Array<InputMaybe<DevboxInstanceStatus>> | InputMaybe<DevboxInstanceStatus>>;
+  mine?: InputMaybe<Scalars['Boolean']['input']>;
+}>;
+
+
+export type WorkbenchDevboxInstancesQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, devboxInstances?: { __typename?: 'DevboxInstanceConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'DevboxInstanceEdge', node?: { __typename?: 'DevboxInstance', id: string, name?: string | null, agent?: DevboxAgentType | null, requestedModel?: string | null, repositories?: Array<string | null> | null, status: DevboxInstanceStatus, statusReason?: string | null, foregroundState?: DevboxForegroundState | null, runningThreads?: number | null, waitingThreads?: number | null, keepAwakeUntil?: string | null, awakeSince?: string | null, startedAt?: string | null, suspendedAt?: string | null, lastActivityAt?: string | null, viewerCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, devbox?: { __typename?: 'Devbox', id: string, name: string, browser?: boolean | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null } | null> | null } | null } | null };
+
+export type WorkbenchDevboxSnapshotsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type WorkbenchDevboxSnapshotsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, devboxSnapshots?: { __typename?: 'DevboxSnapshotConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'DevboxSnapshotEdge', node?: { __typename?: 'DevboxSnapshot', id: string, name?: string | null, status: DevboxSnapshotStatus, fidelity?: DevboxSnapshotFidelity | null, sizeBytes?: any | null, error?: string | null, templateRevision?: string | null, insertedAt?: string | null, updatedAt?: string | null, devbox?: { __typename?: 'Devbox', id: string, name: string, templateRevision?: string | null } | null, instance?: { __typename?: 'DevboxInstance', id: string, name?: string | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null } | null> | null } | null } | null };
+
+export type WorkbenchDevboxInboxQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type WorkbenchDevboxInboxQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, devboxInbox?: Array<{ __typename?: 'DevboxInteraction', id: string, externalId: string, toolCallId?: string | null, kind: DevboxInteractionKind, state: DevboxInteractionState, title?: string | null, message?: string | null, requestedSchema?: Record<string, unknown> | null, url?: string | null, response?: Record<string, unknown> | null, answeredAt?: string | null, expiresAt?: string | null, answeredByPolicy?: string | null, insertedAt?: string | null, updatedAt?: string | null, options?: Array<{ __typename?: 'DevboxPermissionOption', optionId: string, name?: string | null, kind?: string | null } | null> | null, thread?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null, title?: string | null } | null, instance?: { __typename?: 'DevboxInstance', id: string, name?: string | null } | null, answeredBy?: { __typename?: 'User', id: string, name: string, email: string } | null, review?: { __typename?: 'DevboxInteractionReview', verdict?: string | null, confidence?: number | null, risk?: string | null, model?: string | null, escalation?: string | null } | null } | null> | null } | null };
+
+export type DevboxInstanceQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DevboxInstanceQuery = { __typename?: 'RootQueryType', devboxInstance?: { __typename?: 'DevboxInstance', configOptions?: Record<string, unknown> | null, maxRunningThreads?: number | null, templateRevision?: string | null, imageDigest?: string | null, restoreFidelity?: DevboxSnapshotFidelity | null, completedAt?: string | null, id: string, name?: string | null, agent?: DevboxAgentType | null, requestedModel?: string | null, repositories?: Array<string | null> | null, status: DevboxInstanceStatus, statusReason?: string | null, foregroundState?: DevboxForegroundState | null, runningThreads?: number | null, waitingThreads?: number | null, keepAwakeUntil?: string | null, awakeSince?: string | null, startedAt?: string | null, suspendedAt?: string | null, lastActivityAt?: string | null, viewerCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, agentConnections?: Array<{ __typename?: 'DevboxAgentConnection', agent?: DevboxAgentType | null, protocolVersion?: number | null, adapterName?: string | null, adapterVersion?: string | null, capabilities?: Record<string, unknown> | null, billing?: string | null } | null> | null, agentBilling?: Array<{ __typename?: 'DevboxAgentBilling', agent?: DevboxAgentType | null, billing?: DevboxBillingMode | null, credentialKind?: string | null, allowCollaborators?: boolean | null } | null> | null, checkouts?: Array<{ __typename?: 'DevboxCheckout', path?: string | null, name?: string | null, remoteUrl?: string | null, defaultBranch?: string | null, branch?: string | null, headSha?: string | null, dirty?: boolean | null, worktreeThreadId?: string | null, ahead?: number | null, behind?: number | null } | null> | null, idleState?: { __typename?: 'DevboxIdleState', idle?: boolean | null, idleSince?: string | null, suspendsAt?: string | null, busyReasons?: Array<Record<string, unknown> | null> | null, message?: string | null } | null, leases?: Array<{ __typename?: 'DevboxLease', kind: DevboxLeaseKind, expiresAt: string, holder?: { __typename?: 'User', id: string, name: string, email: string } | null } | null> | null, keepAwakeBy?: { __typename?: 'User', id: string, name: string, email: string } | null, workbench?: { __typename?: 'Workbench', id: string, name: string } | null, snapshot?: { __typename?: 'DevboxSnapshot', id: string, name?: string | null, fidelity?: DevboxSnapshotFidelity | null } | null, devbox?: { __typename?: 'Devbox', id: string, name: string, browser?: boolean | null, resources?: Record<string, unknown> | null, allowedRepositories?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, status?: DevboxStatus | null, image?: string | null, resolvedImage?: string | null, templateRevision?: string | null, maxInstances?: number | null, lastHeartbeatAt?: string | null, decisionReview?: boolean | null, agents?: Array<{ __typename?: 'DevboxAgent', type: DevboxAgentType, default?: boolean | null, probeStatus?: DevboxProbeStatus | null, adapterName?: string | null, adapterVersion?: string | null, protocolVersion?: number | null, acpV2?: boolean | null, modelSwitchable?: boolean | null, probeError?: string | null, defaultModel?: string | null, models?: Array<{ __typename?: 'DevboxModel', id: string, name?: string | null, description?: string | null } | null> | null, commands?: Array<{ __typename?: 'DevboxCommand', name: string, description?: string | null, inputHint?: string | null } | null> | null, configOptions?: Array<{ __typename?: 'DevboxConfigOption', configId: string, name?: string | null, description?: string | null, category?: string | null, type?: string | null, currentValue?: string | null, options?: Array<{ __typename?: 'DevboxConfigOptionValue', value: string, name?: string | null, description?: string | null, group?: string | null } | null> | null } | null> | null, sessionCapabilities?: { __typename?: 'DevboxSessionCapabilities', list?: boolean | null, resume?: boolean | null, load?: boolean | null, close?: boolean | null, delete?: boolean | null, fork?: boolean | null } | null } | null> | null, httpAllowlist?: Array<{ __typename?: 'DevboxHttpAllow', host: string, port?: number | null, passthrough?: boolean | null } | null> | null, idlePolicy?: { __typename?: 'DevboxIdlePolicy', activityWindow?: number | null, cpuThreshold?: number | null, gracePeriod?: number | null, maxDeferral?: number | null, maxContinuousAwake?: number | null, completeAfter?: number | null } | null, conditions?: Array<{ __typename?: 'DevboxCondition', type: string, status: string, reason?: string | null, message?: string | null } | null> | null, scmConnections?: Array<{ __typename?: 'ScmConnection', id: string, name: string, type: ScmType } | null> | null, cloudIdentities?: Array<{ __typename?: 'DevboxCloudIdentity', name: string, provider: DevboxCloudProvider, default?: boolean | null, roleArn?: string | null, workloadIdentityProvider?: string | null, serviceAccount?: string | null, tenantId?: string | null, clientId?: string | null } | null> | null, workloadIdentity?: { __typename?: 'DevboxWorkloadIdentity', issuerUrl: string, subject: string, audiences?: Array<string | null> | null, snippets?: Array<{ __typename?: 'DevboxTrustSnippet', provider: DevboxCloudProvider, format: DevboxSnippetFormat, title: string, content: string } | null> | null } | null, autonomy: { __typename?: 'DevboxAutonomyPolicy', default: DevboxAutonomy, max: DevboxAutonomy }, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null } | null, threads?: Array<{ __typename?: 'DevboxThread', id: string, sessionId?: string | null, kind: DevboxThreadKind, agent?: DevboxAgentType | null, title?: string | null, agentTitle?: string | null, model?: string | null, cwd?: string | null, worktreeRepos?: Array<string | null> | null, status: DevboxThreadStatus, imported?: boolean | null, lastActivityAt?: string | null, entityCount?: number | null, foregroundState?: DevboxForegroundState | null, stopReason?: string | null, error?: Record<string, unknown> | null, backgroundWork?: Record<string, unknown> | null, billing?: string | null, revision?: number | null, insertedAt?: string | null, updatedAt?: string | null, configOptions?: Array<{ __typename?: 'DevboxConfigOption', configId: string, name?: string | null, description?: string | null, category?: string | null, type?: string | null, currentValue?: string | null, options?: Array<{ __typename?: 'DevboxConfigOptionValue', value: string, name?: string | null, description?: string | null, group?: string | null } | null> | null } | null> | null, availableCommands?: Array<{ __typename?: 'DevboxCommand', name: string, description?: string | null, inputHint?: string | null } | null> | null, usage?: { __typename?: 'DevboxUsage', inputTokens?: number | null, outputTokens?: number | null, cachedTokens?: number | null, reasoningTokens?: number | null, totalTokens?: number | null, contextSize?: number | null, contextUsed?: number | null, totalCost?: number | null, currency?: string | null } | null, parent?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null> | null, interactions?: Array<{ __typename?: 'DevboxInteraction', id: string, externalId: string, toolCallId?: string | null, kind: DevboxInteractionKind, state: DevboxInteractionState, title?: string | null, message?: string | null, requestedSchema?: Record<string, unknown> | null, url?: string | null, response?: Record<string, unknown> | null, answeredAt?: string | null, expiresAt?: string | null, answeredByPolicy?: string | null, insertedAt?: string | null, updatedAt?: string | null, options?: Array<{ __typename?: 'DevboxPermissionOption', optionId: string, name?: string | null, kind?: string | null } | null> | null, thread?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null, title?: string | null } | null, instance?: { __typename?: 'DevboxInstance', id: string, name?: string | null } | null, answeredBy?: { __typename?: 'User', id: string, name: string, email: string } | null, review?: { __typename?: 'DevboxInteractionReview', verdict?: string | null, confidence?: number | null, risk?: string | null, model?: string | null, escalation?: string | null } | null } | null> | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null };
+
+export type DevboxThreadQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DevboxThreadQuery = { __typename?: 'RootQueryType', devboxThread?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null, kind: DevboxThreadKind, agent?: DevboxAgentType | null, title?: string | null, agentTitle?: string | null, model?: string | null, cwd?: string | null, worktreeRepos?: Array<string | null> | null, status: DevboxThreadStatus, imported?: boolean | null, lastActivityAt?: string | null, entityCount?: number | null, foregroundState?: DevboxForegroundState | null, stopReason?: string | null, error?: Record<string, unknown> | null, backgroundWork?: Record<string, unknown> | null, billing?: string | null, revision?: number | null, insertedAt?: string | null, updatedAt?: string | null, subagents?: Array<{ __typename?: 'DevboxThread', id: string, sessionId?: string | null, kind: DevboxThreadKind, agent?: DevboxAgentType | null, title?: string | null, agentTitle?: string | null, model?: string | null, cwd?: string | null, worktreeRepos?: Array<string | null> | null, status: DevboxThreadStatus, imported?: boolean | null, lastActivityAt?: string | null, entityCount?: number | null, foregroundState?: DevboxForegroundState | null, stopReason?: string | null, error?: Record<string, unknown> | null, backgroundWork?: Record<string, unknown> | null, billing?: string | null, revision?: number | null, insertedAt?: string | null, updatedAt?: string | null, configOptions?: Array<{ __typename?: 'DevboxConfigOption', configId: string, name?: string | null, description?: string | null, category?: string | null, type?: string | null, currentValue?: string | null, options?: Array<{ __typename?: 'DevboxConfigOptionValue', value: string, name?: string | null, description?: string | null, group?: string | null } | null> | null } | null> | null, availableCommands?: Array<{ __typename?: 'DevboxCommand', name: string, description?: string | null, inputHint?: string | null } | null> | null, usage?: { __typename?: 'DevboxUsage', inputTokens?: number | null, outputTokens?: number | null, cachedTokens?: number | null, reasoningTokens?: number | null, totalTokens?: number | null, contextSize?: number | null, contextUsed?: number | null, totalCost?: number | null, currency?: string | null } | null, parent?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null> | null, interactions?: Array<{ __typename?: 'DevboxInteraction', id: string, externalId: string, toolCallId?: string | null, kind: DevboxInteractionKind, state: DevboxInteractionState, title?: string | null, message?: string | null, requestedSchema?: Record<string, unknown> | null, url?: string | null, response?: Record<string, unknown> | null, answeredAt?: string | null, expiresAt?: string | null, answeredByPolicy?: string | null, insertedAt?: string | null, updatedAt?: string | null, options?: Array<{ __typename?: 'DevboxPermissionOption', optionId: string, name?: string | null, kind?: string | null } | null> | null, thread?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null, title?: string | null } | null, instance?: { __typename?: 'DevboxInstance', id: string, name?: string | null } | null, answeredBy?: { __typename?: 'User', id: string, name: string, email: string } | null, review?: { __typename?: 'DevboxInteractionReview', verdict?: string | null, confidence?: number | null, risk?: string | null, model?: string | null, escalation?: string | null } | null } | null> | null, configOptions?: Array<{ __typename?: 'DevboxConfigOption', configId: string, name?: string | null, description?: string | null, category?: string | null, type?: string | null, currentValue?: string | null, options?: Array<{ __typename?: 'DevboxConfigOptionValue', value: string, name?: string | null, description?: string | null, group?: string | null } | null> | null } | null> | null, availableCommands?: Array<{ __typename?: 'DevboxCommand', name: string, description?: string | null, inputHint?: string | null } | null> | null, usage?: { __typename?: 'DevboxUsage', inputTokens?: number | null, outputTokens?: number | null, cachedTokens?: number | null, reasoningTokens?: number | null, totalTokens?: number | null, contextSize?: number | null, contextUsed?: number | null, totalCost?: number | null, currency?: string | null } | null, parent?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null };
+
+export type DevboxInstanceCommandsQueryVariables = Exact<{
+  threadId: Scalars['ID']['input'];
+}>;
+
+
+export type DevboxInstanceCommandsQuery = { __typename?: 'RootQueryType', devboxInstanceCommands?: Array<{ __typename?: 'DevboxCommand', name: string, description?: string | null, inputHint?: string | null } | null> | null };
+
+export type DevboxRepositoriesQueryVariables = Exact<{
+  instanceId: Scalars['ID']['input'];
+}>;
+
+
+export type DevboxRepositoriesQuery = { __typename?: 'RootQueryType', devboxRepositories?: Array<{ __typename?: 'DevboxRepository', path?: string | null, name?: string | null, remoteUrl?: string | null, defaultBranch?: string | null, branch?: string | null, headSha?: string | null, dirty?: boolean | null, worktreeThreadId?: string | null, ahead?: number | null, behind?: number | null } | null> | null };
+
+export type DevboxTimelineQueryVariables = Exact<{
+  instanceId: Scalars['ID']['input'];
+  sessionId: Scalars['String']['input'];
+  before?: InputMaybe<Scalars['Long']['input']>;
+  after?: InputMaybe<Scalars['Long']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type DevboxTimelineQuery = { __typename?: 'RootQueryType', devboxTimeline?: { __typename?: 'DevboxTimeline', deltaOffset?: any | null, hasMore?: boolean | null, entities?: Array<{ __typename?: 'DevboxEntity', id?: string | null, sessionId?: string | null, type: DevboxEntityType, position?: any | null, revision?: any | null, settled?: boolean | null, createdAt?: string | null, updatedAt?: string | null, raw?: Record<string, unknown> | null, message?: { __typename?: 'DevboxMessageEntity', messageId?: string | null, promptId?: string | null, sentById?: string | null, meta?: Record<string, unknown> | null, content?: Array<
+          | { __typename?: 'DevboxAudioContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null }
+          | { __typename?: 'DevboxImageContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null, uri?: string | null }
+          | { __typename?: 'DevboxResourceContent', type: DevboxContentBlockType, uri?: string | null, mimeType?: string | null, text?: string | null, blob?: string | null }
+          | { __typename?: 'DevboxResourceLinkContent', type: DevboxContentBlockType, uri?: string | null, name?: string | null, title?: string | null, description?: string | null, mimeType?: string | null, size?: any | null }
+          | { __typename?: 'DevboxTextContent', type: DevboxContentBlockType, text?: string | null, annotations?: Record<string, unknown> | null }
+          | { __typename?: 'DevboxUnknownContent', type: DevboxContentBlockType, variant?: string | null, raw?: Record<string, unknown> | null }
+         | null> | null } | null, sessionMessage?: { __typename?: 'DevboxSessionMessageEntity', messageId?: string | null, fromSessionId?: string | null, toSessionId?: string | null, meta?: Record<string, unknown> | null, content?: Array<
+          | { __typename?: 'DevboxAudioContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null }
+          | { __typename?: 'DevboxImageContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null, uri?: string | null }
+          | { __typename?: 'DevboxResourceContent', type: DevboxContentBlockType, uri?: string | null, mimeType?: string | null, text?: string | null, blob?: string | null }
+          | { __typename?: 'DevboxResourceLinkContent', type: DevboxContentBlockType, uri?: string | null, name?: string | null, title?: string | null, description?: string | null, mimeType?: string | null, size?: any | null }
+          | { __typename?: 'DevboxTextContent', type: DevboxContentBlockType, text?: string | null, annotations?: Record<string, unknown> | null }
+          | { __typename?: 'DevboxUnknownContent', type: DevboxContentBlockType, variant?: string | null, raw?: Record<string, unknown> | null }
+         | null> | null } | null, toolCall?: { __typename?: 'DevboxToolCall', toolCallId?: string | null, title?: string | null, kind?: string | null, status?: string | null, rawInput?: Record<string, unknown> | null, rawOutput?: Record<string, unknown> | null, meta?: Record<string, unknown> | null, locations?: Array<{ __typename?: 'DevboxToolCallLocation', path?: string | null, line?: number | null } | null> | null, content?: Array<
+          | { __typename?: 'DevboxToolCallBlock', type: DevboxToolCallContentType, content?:
+              | { __typename?: 'DevboxAudioContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null }
+              | { __typename?: 'DevboxImageContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null, uri?: string | null }
+              | { __typename?: 'DevboxResourceContent', type: DevboxContentBlockType, uri?: string | null, mimeType?: string | null, text?: string | null, blob?: string | null }
+              | { __typename?: 'DevboxResourceLinkContent', type: DevboxContentBlockType, uri?: string | null, name?: string | null, title?: string | null, description?: string | null, mimeType?: string | null, size?: any | null }
+              | { __typename?: 'DevboxTextContent', type: DevboxContentBlockType, text?: string | null, annotations?: Record<string, unknown> | null }
+              | { __typename?: 'DevboxUnknownContent', type: DevboxContentBlockType, variant?: string | null, raw?: Record<string, unknown> | null }
+             | null }
+          | { __typename?: 'DevboxToolCallDiff', type: DevboxToolCallContentType, path?: string | null, oldText?: string | null, newText?: string | null }
+          | { __typename?: 'DevboxToolCallTerminal', type: DevboxToolCallContentType, terminalId?: string | null }
+          | { __typename?: 'DevboxToolCallUnknown', type: DevboxToolCallContentType, variant?: string | null, raw?: Record<string, unknown> | null }
+         | null> | null } | null, plan?: { __typename?: 'DevboxPlan', planId?: string | null, meta?: Record<string, unknown> | null, entries?: Array<{ __typename?: 'DevboxPlanEntry', content?: string | null, priority?: string | null, status?: string | null } | null> | null } | null, terminal?: { __typename?: 'DevboxTerminal', terminalId?: string | null, command?: string | null, args?: Array<string | null> | null, cwd?: string | null, output?: string | null, truncated?: boolean | null, exitCode?: number | null, signal?: string | null, meta?: Record<string, unknown> | null } | null, compaction?: { __typename?: 'DevboxCompaction', compactionId?: string | null, status?: string | null, meta?: Record<string, unknown> | null, summary?: Array<
+          | { __typename?: 'DevboxAudioContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null }
+          | { __typename?: 'DevboxImageContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null, uri?: string | null }
+          | { __typename?: 'DevboxResourceContent', type: DevboxContentBlockType, uri?: string | null, mimeType?: string | null, text?: string | null, blob?: string | null }
+          | { __typename?: 'DevboxResourceLinkContent', type: DevboxContentBlockType, uri?: string | null, name?: string | null, title?: string | null, description?: string | null, mimeType?: string | null, size?: any | null }
+          | { __typename?: 'DevboxTextContent', type: DevboxContentBlockType, text?: string | null, annotations?: Record<string, unknown> | null }
+          | { __typename?: 'DevboxUnknownContent', type: DevboxContentBlockType, variant?: string | null, raw?: Record<string, unknown> | null }
+         | null> | null } | null } | null> | null } | null };
+
+export type DevboxSessionsQueryVariables = Exact<{
+  instanceId: Scalars['ID']['input'];
+}>;
+
+
+export type DevboxSessionsQuery = { __typename?: 'RootQueryType', devboxSessions?: Array<{ __typename?: 'DevboxSessionSummary', sessionId?: string | null, threadId?: string | null, kind?: DevboxThreadKind | null, parentSessionId?: string | null, agent?: DevboxAgentType | null, title?: string | null, status?: DevboxThreadStatus | null, foregroundState?: DevboxForegroundState | null, lastActivityAt?: string | null } | null> | null };
+
+export type DevboxImportableSessionsQueryVariables = Exact<{
+  instanceId: Scalars['ID']['input'];
+}>;
+
+
+export type DevboxImportableSessionsQuery = { __typename?: 'RootQueryType', devboxImportableSessions?: Array<{ __typename?: 'DevboxImportableSession', agent?: DevboxAgentType | null, sessionId: string, title?: string | null, cwd?: string | null, updatedAt?: string | null } | null> | null };
+
+export type DevboxPullRequestsQueryVariables = Exact<{
+  devboxId?: InputMaybe<Scalars['ID']['input']>;
+  devboxInstanceId?: InputMaybe<Scalars['ID']['input']>;
+  devboxThreadId?: InputMaybe<Scalars['ID']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type DevboxPullRequestsQuery = { __typename?: 'RootQueryType', pullRequests?: { __typename?: 'PullRequestConnection', edges?: Array<{ __typename?: 'PullRequestEdge', node?: { __typename?: 'PullRequest', source?: PullRequestSource | null, metadata?: Record<string, unknown> | null, id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, devbox?: { __typename?: 'Devbox', id: string, name: string } | null, devboxInstance?: { __typename?: 'DevboxInstance', id: string, name?: string | null, workbench?: { __typename?: 'Workbench', id: string } | null } | null, devboxThread?: { __typename?: 'DevboxThread', id: string, title?: string | null, agentTitle?: string | null, sessionId?: string | null } | null } | null } | null> | null } | null };
+
+export type DevboxFilesQueryVariables = Exact<{
+  instanceId: Scalars['ID']['input'];
+  path?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type DevboxFilesQuery = { __typename?: 'RootQueryType', devboxFiles?: Array<{ __typename?: 'DevboxFileEntry', path: string, name?: string | null, type?: string | null, size?: any | null, modifiedAt?: string | null, symlinkTarget?: string | null, repository?: string | null, gitStatus?: string | null } | null> | null };
+
+export type DevboxFileQueryVariables = Exact<{
+  instanceId: Scalars['ID']['input'];
+  path: Scalars['String']['input'];
+}>;
+
+
+export type DevboxFileQuery = { __typename?: 'RootQueryType', devboxFile?: { __typename?: 'DevboxFile', content?: string | null, sha256?: string | null, truncated?: boolean | null, mimeType?: string | null, binary?: boolean | null, entry?: { __typename?: 'DevboxFileEntry', path: string, name?: string | null, type?: string | null, size?: any | null, modifiedAt?: string | null, symlinkTarget?: string | null, repository?: string | null, gitStatus?: string | null } | null } | null };
+
+export type DevboxChangesQueryVariables = Exact<{
+  instanceId: Scalars['ID']['input'];
+  threadId?: InputMaybe<Scalars['ID']['input']>;
+  repositories?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
+  includeDiff?: InputMaybe<Scalars['Boolean']['input']>;
+}>;
+
+
+export type DevboxChangesQuery = { __typename?: 'RootQueryType', devboxChanges?: Array<{ __typename?: 'DevboxRepositoryChanges', baseRef?: string | null, baseSha?: string | null, additions?: number | null, deletions?: number | null, checkout?: { __typename?: 'DevboxCheckout', path?: string | null, name?: string | null, remoteUrl?: string | null, defaultBranch?: string | null, branch?: string | null, headSha?: string | null, dirty?: boolean | null, worktreeThreadId?: string | null, ahead?: number | null, behind?: number | null } | null, files?: Array<{ __typename?: 'DevboxFileChange', path: string, oldPath?: string | null, status?: string | null, staged?: boolean | null, additions?: number | null, deletions?: number | null, binary?: boolean | null, diff?: string | null, diffTruncated?: boolean | null } | null> | null } | null> | null };
+
+export type AgentCredentialsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AgentCredentialsQuery = { __typename?: 'RootQueryType', agentCredentials?: Array<{ __typename?: 'AgentCredential', id: string, provider: AgentCredentialProvider, kind: AgentCredentialKind, label?: string | null, status: AgentCredentialStatus, version?: any | null, defaultBilling?: boolean | null, failureCount?: number | null, email?: string | null, plan?: string | null, linkedAt?: string | null, expiresAt?: string | null, lastRefreshedAt?: string | null, lastUsedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null };
+
+export type OpenDevboxStreamMutationVariables = Exact<{
+  instanceId: Scalars['ID']['input'];
+  kind: DevboxStreamKind;
+  terminalId?: InputMaybe<Scalars['String']['input']>;
+  port?: InputMaybe<Scalars['Int']['input']>;
+  url?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type OpenDevboxStreamMutation = { __typename?: 'RootMutationType', openDevboxStream?: { __typename?: 'DevboxStream', streamId: string, kind: DevboxStreamKind, url: string, token: string, expiresAt?: string | null, subprotocols?: Array<string | null> | null, terminalId?: string | null } | null };
+
+export type WriteDevboxFileMutationVariables = Exact<{
+  instanceId: Scalars['ID']['input'];
+  path: Scalars['String']['input'];
+  content: Scalars['String']['input'];
+  expectedSha256?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type WriteDevboxFileMutation = { __typename?: 'RootMutationType', writeDevboxFile?: { __typename?: 'DevboxFileWrite', sha256?: string | null, entry?: { __typename?: 'DevboxFileEntry', path: string, name?: string | null, type?: string | null, size?: any | null, modifiedAt?: string | null, symlinkTarget?: string | null, repository?: string | null, gitStatus?: string | null } | null } | null };
+
+export type SetDevboxAgentBillingMutationVariables = Exact<{
+  instanceId: Scalars['ID']['input'];
+  attributes: DevboxAgentBillingAttributes;
+}>;
+
+
+export type SetDevboxAgentBillingMutation = { __typename?: 'RootMutationType', setDevboxAgentBilling?: { __typename?: 'DevboxInstance', id: string, agentBilling?: Array<{ __typename?: 'DevboxAgentBilling', agent?: DevboxAgentType | null, billing?: DevboxBillingMode | null, credentialKind?: string | null, allowCollaborators?: boolean | null } | null> | null, agentConnections?: Array<{ __typename?: 'DevboxAgentConnection', agent?: DevboxAgentType | null, billing?: string | null } | null> | null } | null };
+
+export type LinkAgentCredentialMutationVariables = Exact<{
+  attributes: AgentCredentialAttributes;
+}>;
+
+
+export type LinkAgentCredentialMutation = { __typename?: 'RootMutationType', linkAgentCredential?: { __typename?: 'AgentCredential', id: string, provider: AgentCredentialProvider, kind: AgentCredentialKind, label?: string | null, status: AgentCredentialStatus, version?: any | null, defaultBilling?: boolean | null, failureCount?: number | null, email?: string | null, plan?: string | null, linkedAt?: string | null, expiresAt?: string | null, lastRefreshedAt?: string | null, lastUsedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null };
+
+export type DeleteAgentCredentialMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteAgentCredentialMutation = { __typename?: 'RootMutationType', deleteAgentCredential?: { __typename?: 'AgentCredential', id: string, provider: AgentCredentialProvider, kind: AgentCredentialKind, label?: string | null, status: AgentCredentialStatus, version?: any | null, defaultBilling?: boolean | null, failureCount?: number | null, email?: string | null, plan?: string | null, linkedAt?: string | null, expiresAt?: string | null, lastRefreshedAt?: string | null, lastUsedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null };
+
+export type SetDefaultAgentBillingMutationVariables = Exact<{
+  provider: AgentCredentialProvider;
+  enabled: Scalars['Boolean']['input'];
+}>;
+
+
+export type SetDefaultAgentBillingMutation = { __typename?: 'RootMutationType', setDefaultAgentBilling?: { __typename?: 'AgentCredential', id: string, provider: AgentCredentialProvider, kind: AgentCredentialKind, label?: string | null, status: AgentCredentialStatus, version?: any | null, defaultBilling?: boolean | null, failureCount?: number | null, email?: string | null, plan?: string | null, linkedAt?: string | null, expiresAt?: string | null, lastRefreshedAt?: string | null, lastUsedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null };
+
+export type AttachDevboxMutationVariables = Exact<{
+  workbenchId: Scalars['ID']['input'];
+  devboxId: Scalars['ID']['input'];
+}>;
+
+
+export type AttachDevboxMutation = { __typename?: 'RootMutationType', attachDevbox?: { __typename?: 'Devbox', id: string, name: string, status?: DevboxStatus | null, image?: string | null, resolvedImage?: string | null, templateRevision?: string | null, browser?: boolean | null, maxInstances?: number | null, lastHeartbeatAt?: string | null, decisionReview?: boolean | null, autonomy: { __typename?: 'DevboxAutonomyPolicy', default: DevboxAutonomy, max: DevboxAutonomy }, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null, agents?: Array<{ __typename?: 'DevboxAgent', type: DevboxAgentType, default?: boolean | null, probeStatus?: DevboxProbeStatus | null } | null> | null } | null };
+
+export type DetachDevboxMutationVariables = Exact<{
+  workbenchId: Scalars['ID']['input'];
+  devboxId: Scalars['ID']['input'];
+}>;
+
+
+export type DetachDevboxMutation = { __typename?: 'RootMutationType', detachDevbox?: { __typename?: 'Devbox', id: string, name: string, status?: DevboxStatus | null, image?: string | null, resolvedImage?: string | null, templateRevision?: string | null, browser?: boolean | null, maxInstances?: number | null, lastHeartbeatAt?: string | null, decisionReview?: boolean | null, autonomy: { __typename?: 'DevboxAutonomyPolicy', default: DevboxAutonomy, max: DevboxAutonomy }, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null, agents?: Array<{ __typename?: 'DevboxAgent', type: DevboxAgentType, default?: boolean | null, probeStatus?: DevboxProbeStatus | null } | null> | null } | null };
+
+export type CreateDevboxInstanceMutationVariables = Exact<{
+  workbenchId: Scalars['ID']['input'];
+  attributes: DevboxInstanceAttributes;
+}>;
+
+
+export type CreateDevboxInstanceMutation = { __typename?: 'RootMutationType', createDevboxInstance?: { __typename?: 'DevboxInstance', id: string, name?: string | null, agent?: DevboxAgentType | null, requestedModel?: string | null, repositories?: Array<string | null> | null, status: DevboxInstanceStatus, statusReason?: string | null, foregroundState?: DevboxForegroundState | null, runningThreads?: number | null, waitingThreads?: number | null, keepAwakeUntil?: string | null, awakeSince?: string | null, startedAt?: string | null, suspendedAt?: string | null, lastActivityAt?: string | null, viewerCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, devbox?: { __typename?: 'Devbox', id: string, name: string, browser?: boolean | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null };
+
+export type RestoreDevboxSnapshotMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  attributes?: InputMaybe<DevboxInstanceAttributes>;
+}>;
+
+
+export type RestoreDevboxSnapshotMutation = { __typename?: 'RootMutationType', restoreDevboxSnapshot?: { __typename?: 'DevboxInstance', id: string, name?: string | null, agent?: DevboxAgentType | null, requestedModel?: string | null, repositories?: Array<string | null> | null, status: DevboxInstanceStatus, statusReason?: string | null, foregroundState?: DevboxForegroundState | null, runningThreads?: number | null, waitingThreads?: number | null, keepAwakeUntil?: string | null, awakeSince?: string | null, startedAt?: string | null, suspendedAt?: string | null, lastActivityAt?: string | null, viewerCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, devbox?: { __typename?: 'Devbox', id: string, name: string, browser?: boolean | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null };
+
+export type CancelDevboxInstanceMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type CancelDevboxInstanceMutation = { __typename?: 'RootMutationType', cancelDevboxInstance?: { __typename?: 'DevboxInstance', id: string, name?: string | null, agent?: DevboxAgentType | null, requestedModel?: string | null, repositories?: Array<string | null> | null, status: DevboxInstanceStatus, statusReason?: string | null, foregroundState?: DevboxForegroundState | null, runningThreads?: number | null, waitingThreads?: number | null, keepAwakeUntil?: string | null, awakeSince?: string | null, startedAt?: string | null, suspendedAt?: string | null, lastActivityAt?: string | null, viewerCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, devbox?: { __typename?: 'Devbox', id: string, name: string, browser?: boolean | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null };
+
+export type SuspendDevboxInstanceMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type SuspendDevboxInstanceMutation = { __typename?: 'RootMutationType', suspendDevboxInstance?: { __typename?: 'DevboxInstance', id: string, name?: string | null, agent?: DevboxAgentType | null, requestedModel?: string | null, repositories?: Array<string | null> | null, status: DevboxInstanceStatus, statusReason?: string | null, foregroundState?: DevboxForegroundState | null, runningThreads?: number | null, waitingThreads?: number | null, keepAwakeUntil?: string | null, awakeSince?: string | null, startedAt?: string | null, suspendedAt?: string | null, lastActivityAt?: string | null, viewerCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, devbox?: { __typename?: 'Devbox', id: string, name: string, browser?: boolean | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null };
+
+export type ResumeDevboxInstanceMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type ResumeDevboxInstanceMutation = { __typename?: 'RootMutationType', resumeDevboxInstance?: { __typename?: 'DevboxInstance', id: string, name?: string | null, agent?: DevboxAgentType | null, requestedModel?: string | null, repositories?: Array<string | null> | null, status: DevboxInstanceStatus, statusReason?: string | null, foregroundState?: DevboxForegroundState | null, runningThreads?: number | null, waitingThreads?: number | null, keepAwakeUntil?: string | null, awakeSince?: string | null, startedAt?: string | null, suspendedAt?: string | null, lastActivityAt?: string | null, viewerCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, devbox?: { __typename?: 'Devbox', id: string, name: string, browser?: boolean | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null };
+
+export type PingDevboxInstanceMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type PingDevboxInstanceMutation = { __typename?: 'RootMutationType', pingDevboxInstance?: { __typename?: 'DevboxInstance', id: string, viewerCount?: number | null } | null };
+
+export type LeaveDevboxInstanceMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type LeaveDevboxInstanceMutation = { __typename?: 'RootMutationType', leaveDevboxInstance?: { __typename?: 'DevboxInstance', id: string, viewerCount?: number | null } | null };
+
+export type KeepDevboxInstanceAwakeMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  until: Scalars['DateTime']['input'];
+}>;
+
+
+export type KeepDevboxInstanceAwakeMutation = { __typename?: 'RootMutationType', keepDevboxInstanceAwake?: { __typename?: 'DevboxInstance', id: string, keepAwakeUntil?: string | null, keepAwakeBy?: { __typename?: 'User', id: string, name: string, email: string } | null, leases?: Array<{ __typename?: 'DevboxLease', kind: DevboxLeaseKind, expiresAt: string, holder?: { __typename?: 'User', id: string, name: string, email: string } | null } | null> | null } | null };
+
+export type CancelDevboxKeepAwakeMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type CancelDevboxKeepAwakeMutation = { __typename?: 'RootMutationType', cancelDevboxKeepAwake?: { __typename?: 'DevboxInstance', id: string, keepAwakeUntil?: string | null, keepAwakeBy?: { __typename?: 'User', id: string, name: string, email: string } | null, leases?: Array<{ __typename?: 'DevboxLease', kind: DevboxLeaseKind, expiresAt: string, holder?: { __typename?: 'User', id: string, name: string, email: string } | null } | null> | null } | null };
+
+export type CreateDevboxSnapshotMutationVariables = Exact<{
+  instanceId: Scalars['ID']['input'];
+  attributes?: InputMaybe<DevboxSnapshotAttributes>;
+}>;
+
+
+export type CreateDevboxSnapshotMutation = { __typename?: 'RootMutationType', createDevboxSnapshot?: { __typename?: 'DevboxSnapshot', id: string, name?: string | null, status: DevboxSnapshotStatus, fidelity?: DevboxSnapshotFidelity | null, sizeBytes?: any | null, error?: string | null, templateRevision?: string | null, insertedAt?: string | null, updatedAt?: string | null, devbox?: { __typename?: 'Devbox', id: string, name: string, templateRevision?: string | null } | null, instance?: { __typename?: 'DevboxInstance', id: string, name?: string | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null };
+
+export type DeleteDevboxSnapshotMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteDevboxSnapshotMutation = { __typename?: 'RootMutationType', deleteDevboxSnapshot?: { __typename?: 'DevboxSnapshot', id: string, name?: string | null, status: DevboxSnapshotStatus, fidelity?: DevboxSnapshotFidelity | null, sizeBytes?: any | null, error?: string | null, templateRevision?: string | null, insertedAt?: string | null, updatedAt?: string | null, devbox?: { __typename?: 'Devbox', id: string, name: string, templateRevision?: string | null } | null, instance?: { __typename?: 'DevboxInstance', id: string, name?: string | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null };
+
+export type CreateDevboxThreadMutationVariables = Exact<{
+  instanceId: Scalars['ID']['input'];
+  attributes?: InputMaybe<DevboxThreadAttributes>;
+}>;
+
+
+export type CreateDevboxThreadMutation = { __typename?: 'RootMutationType', createDevboxThread?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null, kind: DevboxThreadKind, agent?: DevboxAgentType | null, title?: string | null, agentTitle?: string | null, model?: string | null, cwd?: string | null, worktreeRepos?: Array<string | null> | null, status: DevboxThreadStatus, imported?: boolean | null, lastActivityAt?: string | null, entityCount?: number | null, foregroundState?: DevboxForegroundState | null, stopReason?: string | null, error?: Record<string, unknown> | null, backgroundWork?: Record<string, unknown> | null, billing?: string | null, revision?: number | null, insertedAt?: string | null, updatedAt?: string | null, configOptions?: Array<{ __typename?: 'DevboxConfigOption', configId: string, name?: string | null, description?: string | null, category?: string | null, type?: string | null, currentValue?: string | null, options?: Array<{ __typename?: 'DevboxConfigOptionValue', value: string, name?: string | null, description?: string | null, group?: string | null } | null> | null } | null> | null, availableCommands?: Array<{ __typename?: 'DevboxCommand', name: string, description?: string | null, inputHint?: string | null } | null> | null, usage?: { __typename?: 'DevboxUsage', inputTokens?: number | null, outputTokens?: number | null, cachedTokens?: number | null, reasoningTokens?: number | null, totalTokens?: number | null, contextSize?: number | null, contextUsed?: number | null, totalCost?: number | null, currency?: string | null } | null, parent?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null };
+
+export type ImportDevboxThreadMutationVariables = Exact<{
+  instanceId: Scalars['ID']['input'];
+  attributes: DevboxImportAttributes;
+}>;
+
+
+export type ImportDevboxThreadMutation = { __typename?: 'RootMutationType', importDevboxThread?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null, kind: DevboxThreadKind, agent?: DevboxAgentType | null, title?: string | null, agentTitle?: string | null, model?: string | null, cwd?: string | null, worktreeRepos?: Array<string | null> | null, status: DevboxThreadStatus, imported?: boolean | null, lastActivityAt?: string | null, entityCount?: number | null, foregroundState?: DevboxForegroundState | null, stopReason?: string | null, error?: Record<string, unknown> | null, backgroundWork?: Record<string, unknown> | null, billing?: string | null, revision?: number | null, insertedAt?: string | null, updatedAt?: string | null, configOptions?: Array<{ __typename?: 'DevboxConfigOption', configId: string, name?: string | null, description?: string | null, category?: string | null, type?: string | null, currentValue?: string | null, options?: Array<{ __typename?: 'DevboxConfigOptionValue', value: string, name?: string | null, description?: string | null, group?: string | null } | null> | null } | null> | null, availableCommands?: Array<{ __typename?: 'DevboxCommand', name: string, description?: string | null, inputHint?: string | null } | null> | null, usage?: { __typename?: 'DevboxUsage', inputTokens?: number | null, outputTokens?: number | null, cachedTokens?: number | null, reasoningTokens?: number | null, totalTokens?: number | null, contextSize?: number | null, contextUsed?: number | null, totalCost?: number | null, currency?: string | null } | null, parent?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null };
+
+export type ResumeDevboxThreadMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type ResumeDevboxThreadMutation = { __typename?: 'RootMutationType', resumeDevboxThread?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null, kind: DevboxThreadKind, agent?: DevboxAgentType | null, title?: string | null, agentTitle?: string | null, model?: string | null, cwd?: string | null, worktreeRepos?: Array<string | null> | null, status: DevboxThreadStatus, imported?: boolean | null, lastActivityAt?: string | null, entityCount?: number | null, foregroundState?: DevboxForegroundState | null, stopReason?: string | null, error?: Record<string, unknown> | null, backgroundWork?: Record<string, unknown> | null, billing?: string | null, revision?: number | null, insertedAt?: string | null, updatedAt?: string | null, configOptions?: Array<{ __typename?: 'DevboxConfigOption', configId: string, name?: string | null, description?: string | null, category?: string | null, type?: string | null, currentValue?: string | null, options?: Array<{ __typename?: 'DevboxConfigOptionValue', value: string, name?: string | null, description?: string | null, group?: string | null } | null> | null } | null> | null, availableCommands?: Array<{ __typename?: 'DevboxCommand', name: string, description?: string | null, inputHint?: string | null } | null> | null, usage?: { __typename?: 'DevboxUsage', inputTokens?: number | null, outputTokens?: number | null, cachedTokens?: number | null, reasoningTokens?: number | null, totalTokens?: number | null, contextSize?: number | null, contextUsed?: number | null, totalCost?: number | null, currency?: string | null } | null, parent?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null };
+
+export type CloseDevboxThreadMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type CloseDevboxThreadMutation = { __typename?: 'RootMutationType', closeDevboxThread?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null, kind: DevboxThreadKind, agent?: DevboxAgentType | null, title?: string | null, agentTitle?: string | null, model?: string | null, cwd?: string | null, worktreeRepos?: Array<string | null> | null, status: DevboxThreadStatus, imported?: boolean | null, lastActivityAt?: string | null, entityCount?: number | null, foregroundState?: DevboxForegroundState | null, stopReason?: string | null, error?: Record<string, unknown> | null, backgroundWork?: Record<string, unknown> | null, billing?: string | null, revision?: number | null, insertedAt?: string | null, updatedAt?: string | null, configOptions?: Array<{ __typename?: 'DevboxConfigOption', configId: string, name?: string | null, description?: string | null, category?: string | null, type?: string | null, currentValue?: string | null, options?: Array<{ __typename?: 'DevboxConfigOptionValue', value: string, name?: string | null, description?: string | null, group?: string | null } | null> | null } | null> | null, availableCommands?: Array<{ __typename?: 'DevboxCommand', name: string, description?: string | null, inputHint?: string | null } | null> | null, usage?: { __typename?: 'DevboxUsage', inputTokens?: number | null, outputTokens?: number | null, cachedTokens?: number | null, reasoningTokens?: number | null, totalTokens?: number | null, contextSize?: number | null, contextUsed?: number | null, totalCost?: number | null, currency?: string | null } | null, parent?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null };
+
+export type DeleteDevboxThreadMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteDevboxThreadMutation = { __typename?: 'RootMutationType', deleteDevboxThread?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null, kind: DevboxThreadKind, agent?: DevboxAgentType | null, title?: string | null, agentTitle?: string | null, model?: string | null, cwd?: string | null, worktreeRepos?: Array<string | null> | null, status: DevboxThreadStatus, imported?: boolean | null, lastActivityAt?: string | null, entityCount?: number | null, foregroundState?: DevboxForegroundState | null, stopReason?: string | null, error?: Record<string, unknown> | null, backgroundWork?: Record<string, unknown> | null, billing?: string | null, revision?: number | null, insertedAt?: string | null, updatedAt?: string | null, configOptions?: Array<{ __typename?: 'DevboxConfigOption', configId: string, name?: string | null, description?: string | null, category?: string | null, type?: string | null, currentValue?: string | null, options?: Array<{ __typename?: 'DevboxConfigOptionValue', value: string, name?: string | null, description?: string | null, group?: string | null } | null> | null } | null> | null, availableCommands?: Array<{ __typename?: 'DevboxCommand', name: string, description?: string | null, inputHint?: string | null } | null> | null, usage?: { __typename?: 'DevboxUsage', inputTokens?: number | null, outputTokens?: number | null, cachedTokens?: number | null, reasoningTokens?: number | null, totalTokens?: number | null, contextSize?: number | null, contextUsed?: number | null, totalCost?: number | null, currency?: string | null } | null, parent?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null };
+
+export type ForkDevboxThreadMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  title?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type ForkDevboxThreadMutation = { __typename?: 'RootMutationType', forkDevboxThread?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null, kind: DevboxThreadKind, agent?: DevboxAgentType | null, title?: string | null, agentTitle?: string | null, model?: string | null, cwd?: string | null, worktreeRepos?: Array<string | null> | null, status: DevboxThreadStatus, imported?: boolean | null, lastActivityAt?: string | null, entityCount?: number | null, foregroundState?: DevboxForegroundState | null, stopReason?: string | null, error?: Record<string, unknown> | null, backgroundWork?: Record<string, unknown> | null, billing?: string | null, revision?: number | null, insertedAt?: string | null, updatedAt?: string | null, configOptions?: Array<{ __typename?: 'DevboxConfigOption', configId: string, name?: string | null, description?: string | null, category?: string | null, type?: string | null, currentValue?: string | null, options?: Array<{ __typename?: 'DevboxConfigOptionValue', value: string, name?: string | null, description?: string | null, group?: string | null } | null> | null } | null> | null, availableCommands?: Array<{ __typename?: 'DevboxCommand', name: string, description?: string | null, inputHint?: string | null } | null> | null, usage?: { __typename?: 'DevboxUsage', inputTokens?: number | null, outputTokens?: number | null, cachedTokens?: number | null, reasoningTokens?: number | null, totalTokens?: number | null, contextSize?: number | null, contextUsed?: number | null, totalCost?: number | null, currency?: string | null } | null, parent?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null };
+
+export type RenameDevboxThreadMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  title: Scalars['String']['input'];
+}>;
+
+
+export type RenameDevboxThreadMutation = { __typename?: 'RootMutationType', renameDevboxThread?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null, kind: DevboxThreadKind, agent?: DevboxAgentType | null, title?: string | null, agentTitle?: string | null, model?: string | null, cwd?: string | null, worktreeRepos?: Array<string | null> | null, status: DevboxThreadStatus, imported?: boolean | null, lastActivityAt?: string | null, entityCount?: number | null, foregroundState?: DevboxForegroundState | null, stopReason?: string | null, error?: Record<string, unknown> | null, backgroundWork?: Record<string, unknown> | null, billing?: string | null, revision?: number | null, insertedAt?: string | null, updatedAt?: string | null, configOptions?: Array<{ __typename?: 'DevboxConfigOption', configId: string, name?: string | null, description?: string | null, category?: string | null, type?: string | null, currentValue?: string | null, options?: Array<{ __typename?: 'DevboxConfigOptionValue', value: string, name?: string | null, description?: string | null, group?: string | null } | null> | null } | null> | null, availableCommands?: Array<{ __typename?: 'DevboxCommand', name: string, description?: string | null, inputHint?: string | null } | null> | null, usage?: { __typename?: 'DevboxUsage', inputTokens?: number | null, outputTokens?: number | null, cachedTokens?: number | null, reasoningTokens?: number | null, totalTokens?: number | null, contextSize?: number | null, contextUsed?: number | null, totalCost?: number | null, currency?: string | null } | null, parent?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null };
+
+export type PromptDevboxThreadMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  prompt?: InputMaybe<Scalars['String']['input']>;
+  content?: InputMaybe<Array<InputMaybe<DevboxPromptBlockAttributes>> | InputMaybe<DevboxPromptBlockAttributes>>;
+  attachments?: InputMaybe<Array<InputMaybe<Scalars['Upload']['input']>> | InputMaybe<Scalars['Upload']['input']>>;
+}>;
+
+
+export type PromptDevboxThreadMutation = { __typename?: 'RootMutationType', promptDevboxThread?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null, kind: DevboxThreadKind, agent?: DevboxAgentType | null, title?: string | null, agentTitle?: string | null, model?: string | null, cwd?: string | null, worktreeRepos?: Array<string | null> | null, status: DevboxThreadStatus, imported?: boolean | null, lastActivityAt?: string | null, entityCount?: number | null, foregroundState?: DevboxForegroundState | null, stopReason?: string | null, error?: Record<string, unknown> | null, backgroundWork?: Record<string, unknown> | null, billing?: string | null, revision?: number | null, insertedAt?: string | null, updatedAt?: string | null, configOptions?: Array<{ __typename?: 'DevboxConfigOption', configId: string, name?: string | null, description?: string | null, category?: string | null, type?: string | null, currentValue?: string | null, options?: Array<{ __typename?: 'DevboxConfigOptionValue', value: string, name?: string | null, description?: string | null, group?: string | null } | null> | null } | null> | null, availableCommands?: Array<{ __typename?: 'DevboxCommand', name: string, description?: string | null, inputHint?: string | null } | null> | null, usage?: { __typename?: 'DevboxUsage', inputTokens?: number | null, outputTokens?: number | null, cachedTokens?: number | null, reasoningTokens?: number | null, totalTokens?: number | null, contextSize?: number | null, contextUsed?: number | null, totalCost?: number | null, currency?: string | null } | null, parent?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null };
+
+export type CancelDevboxPromptMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type CancelDevboxPromptMutation = { __typename?: 'RootMutationType', cancelDevboxPrompt?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null, kind: DevboxThreadKind, agent?: DevboxAgentType | null, title?: string | null, agentTitle?: string | null, model?: string | null, cwd?: string | null, worktreeRepos?: Array<string | null> | null, status: DevboxThreadStatus, imported?: boolean | null, lastActivityAt?: string | null, entityCount?: number | null, foregroundState?: DevboxForegroundState | null, stopReason?: string | null, error?: Record<string, unknown> | null, backgroundWork?: Record<string, unknown> | null, billing?: string | null, revision?: number | null, insertedAt?: string | null, updatedAt?: string | null, configOptions?: Array<{ __typename?: 'DevboxConfigOption', configId: string, name?: string | null, description?: string | null, category?: string | null, type?: string | null, currentValue?: string | null, options?: Array<{ __typename?: 'DevboxConfigOptionValue', value: string, name?: string | null, description?: string | null, group?: string | null } | null> | null } | null> | null, availableCommands?: Array<{ __typename?: 'DevboxCommand', name: string, description?: string | null, inputHint?: string | null } | null> | null, usage?: { __typename?: 'DevboxUsage', inputTokens?: number | null, outputTokens?: number | null, cachedTokens?: number | null, reasoningTokens?: number | null, totalTokens?: number | null, contextSize?: number | null, contextUsed?: number | null, totalCost?: number | null, currency?: string | null } | null, parent?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null };
+
+export type SetDevboxThreadConfigOptionMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  configId: Scalars['String']['input'];
+  value: Scalars['String']['input'];
+}>;
+
+
+export type SetDevboxThreadConfigOptionMutation = { __typename?: 'RootMutationType', setDevboxThreadConfigOption?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null, kind: DevboxThreadKind, agent?: DevboxAgentType | null, title?: string | null, agentTitle?: string | null, model?: string | null, cwd?: string | null, worktreeRepos?: Array<string | null> | null, status: DevboxThreadStatus, imported?: boolean | null, lastActivityAt?: string | null, entityCount?: number | null, foregroundState?: DevboxForegroundState | null, stopReason?: string | null, error?: Record<string, unknown> | null, backgroundWork?: Record<string, unknown> | null, billing?: string | null, revision?: number | null, insertedAt?: string | null, updatedAt?: string | null, configOptions?: Array<{ __typename?: 'DevboxConfigOption', configId: string, name?: string | null, description?: string | null, category?: string | null, type?: string | null, currentValue?: string | null, options?: Array<{ __typename?: 'DevboxConfigOptionValue', value: string, name?: string | null, description?: string | null, group?: string | null } | null> | null } | null> | null, availableCommands?: Array<{ __typename?: 'DevboxCommand', name: string, description?: string | null, inputHint?: string | null } | null> | null, usage?: { __typename?: 'DevboxUsage', inputTokens?: number | null, outputTokens?: number | null, cachedTokens?: number | null, reasoningTokens?: number | null, totalTokens?: number | null, contextSize?: number | null, contextUsed?: number | null, totalCost?: number | null, currency?: string | null } | null, parent?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null };
+
+export type RespondDevboxInteractionMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  response: DevboxInteractionResponseAttributes;
+}>;
+
+
+export type RespondDevboxInteractionMutation = { __typename?: 'RootMutationType', respondDevboxInteraction?: { __typename?: 'DevboxInteraction', id: string, externalId: string, toolCallId?: string | null, kind: DevboxInteractionKind, state: DevboxInteractionState, title?: string | null, message?: string | null, requestedSchema?: Record<string, unknown> | null, url?: string | null, response?: Record<string, unknown> | null, answeredAt?: string | null, expiresAt?: string | null, answeredByPolicy?: string | null, insertedAt?: string | null, updatedAt?: string | null, options?: Array<{ __typename?: 'DevboxPermissionOption', optionId: string, name?: string | null, kind?: string | null } | null> | null, thread?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null, title?: string | null } | null, instance?: { __typename?: 'DevboxInstance', id: string, name?: string | null } | null, answeredBy?: { __typename?: 'User', id: string, name: string, email: string } | null, review?: { __typename?: 'DevboxInteractionReview', verdict?: string | null, confidence?: number | null, risk?: string | null, model?: string | null, escalation?: string | null } | null } | null };
+
+export type AddDevboxRepositoryMutationVariables = Exact<{
+  instanceId: Scalars['ID']['input'];
+  repository: Scalars['String']['input'];
+}>;
+
+
+export type AddDevboxRepositoryMutation = { __typename?: 'RootMutationType', addDevboxRepository?: { __typename?: 'DevboxInstance', id: string, repositories?: Array<string | null> | null, checkouts?: Array<{ __typename?: 'DevboxCheckout', path?: string | null, name?: string | null, remoteUrl?: string | null, defaultBranch?: string | null, branch?: string | null, headSha?: string | null, dirty?: boolean | null, worktreeThreadId?: string | null, ahead?: number | null, behind?: number | null } | null> | null } | null };
+
+export type DevboxInstanceStatusDeltaSubscriptionVariables = Exact<{
+  id?: InputMaybe<Scalars['ID']['input']>;
+  workbenchId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type DevboxInstanceStatusDeltaSubscription = { __typename?: 'RootSubscriptionType', devboxInstanceStatusDelta?: { __typename?: 'DevboxInstanceDelta', delta?: Delta | null, payload?: { __typename?: 'DevboxInstance', id: string, name?: string | null, agent?: DevboxAgentType | null, requestedModel?: string | null, repositories?: Array<string | null> | null, status: DevboxInstanceStatus, statusReason?: string | null, foregroundState?: DevboxForegroundState | null, runningThreads?: number | null, waitingThreads?: number | null, keepAwakeUntil?: string | null, awakeSince?: string | null, startedAt?: string | null, suspendedAt?: string | null, lastActivityAt?: string | null, viewerCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, idleState?: { __typename?: 'DevboxIdleState', idle?: boolean | null, idleSince?: string | null, suspendsAt?: string | null, busyReasons?: Array<Record<string, unknown> | null> | null, message?: string | null } | null, devbox?: { __typename?: 'Devbox', id: string, name: string, browser?: boolean | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null } | null };
+
+export type DevboxThreadDeltaSubscriptionVariables = Exact<{
+  instanceId: Scalars['ID']['input'];
+}>;
+
+
+export type DevboxThreadDeltaSubscription = { __typename?: 'RootSubscriptionType', devboxThreadDelta?: { __typename?: 'DevboxThreadDelta', delta?: Delta | null, payload?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null, kind: DevboxThreadKind, agent?: DevboxAgentType | null, title?: string | null, agentTitle?: string | null, model?: string | null, cwd?: string | null, worktreeRepos?: Array<string | null> | null, status: DevboxThreadStatus, imported?: boolean | null, lastActivityAt?: string | null, entityCount?: number | null, foregroundState?: DevboxForegroundState | null, stopReason?: string | null, error?: Record<string, unknown> | null, backgroundWork?: Record<string, unknown> | null, billing?: string | null, revision?: number | null, insertedAt?: string | null, updatedAt?: string | null, configOptions?: Array<{ __typename?: 'DevboxConfigOption', configId: string, name?: string | null, description?: string | null, category?: string | null, type?: string | null, currentValue?: string | null, options?: Array<{ __typename?: 'DevboxConfigOptionValue', value: string, name?: string | null, description?: string | null, group?: string | null } | null> | null } | null> | null, availableCommands?: Array<{ __typename?: 'DevboxCommand', name: string, description?: string | null, inputHint?: string | null } | null> | null, usage?: { __typename?: 'DevboxUsage', inputTokens?: number | null, outputTokens?: number | null, cachedTokens?: number | null, reasoningTokens?: number | null, totalTokens?: number | null, contextSize?: number | null, contextUsed?: number | null, totalCost?: number | null, currency?: string | null } | null, parent?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null } | null };
+
+export type DevboxSnapshotDeltaSubscriptionVariables = Exact<{
+  workbenchId: Scalars['ID']['input'];
+}>;
+
+
+export type DevboxSnapshotDeltaSubscription = { __typename?: 'RootSubscriptionType', devboxSnapshotDelta?: { __typename?: 'DevboxSnapshotDelta', delta?: Delta | null, payload?: { __typename?: 'DevboxSnapshot', id: string, name?: string | null, status: DevboxSnapshotStatus, fidelity?: DevboxSnapshotFidelity | null, sizeBytes?: any | null, error?: string | null, templateRevision?: string | null, insertedAt?: string | null, updatedAt?: string | null, devbox?: { __typename?: 'Devbox', id: string, name: string, templateRevision?: string | null } | null, instance?: { __typename?: 'DevboxInstance', id: string, name?: string | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null } | null };
+
+export type DevboxInstanceEntityDeltaSubscriptionVariables = Exact<{
+  instanceId: Scalars['ID']['input'];
+}>;
+
+
+export type DevboxInstanceEntityDeltaSubscription = { __typename?: 'RootSubscriptionType', devboxInstanceDelta?: { __typename?: 'DevboxEntityChangeDelta', delta?: Delta | null, payload?: { __typename?: 'DevboxEntityChange', instanceId: string, sessionId?: string | null, threadId?: string | null, entityType?: DevboxEntityType | null, entityId?: string | null, position?: any | null, op: DevboxDeltaOp, stateKind?: string | null, payload?: Record<string, unknown> | null, offset?: any | null, emittedAt?: string | null, entity?: { __typename?: 'DevboxEntity', id?: string | null, sessionId?: string | null, type: DevboxEntityType, position?: any | null, revision?: any | null, settled?: boolean | null, createdAt?: string | null, updatedAt?: string | null, raw?: Record<string, unknown> | null, message?: { __typename?: 'DevboxMessageEntity', messageId?: string | null, promptId?: string | null, sentById?: string | null, meta?: Record<string, unknown> | null, content?: Array<
+            | { __typename?: 'DevboxAudioContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null }
+            | { __typename?: 'DevboxImageContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null, uri?: string | null }
+            | { __typename?: 'DevboxResourceContent', type: DevboxContentBlockType, uri?: string | null, mimeType?: string | null, text?: string | null, blob?: string | null }
+            | { __typename?: 'DevboxResourceLinkContent', type: DevboxContentBlockType, uri?: string | null, name?: string | null, title?: string | null, description?: string | null, mimeType?: string | null, size?: any | null }
+            | { __typename?: 'DevboxTextContent', type: DevboxContentBlockType, text?: string | null, annotations?: Record<string, unknown> | null }
+            | { __typename?: 'DevboxUnknownContent', type: DevboxContentBlockType, variant?: string | null, raw?: Record<string, unknown> | null }
+           | null> | null } | null, sessionMessage?: { __typename?: 'DevboxSessionMessageEntity', messageId?: string | null, fromSessionId?: string | null, toSessionId?: string | null, meta?: Record<string, unknown> | null, content?: Array<
+            | { __typename?: 'DevboxAudioContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null }
+            | { __typename?: 'DevboxImageContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null, uri?: string | null }
+            | { __typename?: 'DevboxResourceContent', type: DevboxContentBlockType, uri?: string | null, mimeType?: string | null, text?: string | null, blob?: string | null }
+            | { __typename?: 'DevboxResourceLinkContent', type: DevboxContentBlockType, uri?: string | null, name?: string | null, title?: string | null, description?: string | null, mimeType?: string | null, size?: any | null }
+            | { __typename?: 'DevboxTextContent', type: DevboxContentBlockType, text?: string | null, annotations?: Record<string, unknown> | null }
+            | { __typename?: 'DevboxUnknownContent', type: DevboxContentBlockType, variant?: string | null, raw?: Record<string, unknown> | null }
+           | null> | null } | null, toolCall?: { __typename?: 'DevboxToolCall', toolCallId?: string | null, title?: string | null, kind?: string | null, status?: string | null, rawInput?: Record<string, unknown> | null, rawOutput?: Record<string, unknown> | null, meta?: Record<string, unknown> | null, locations?: Array<{ __typename?: 'DevboxToolCallLocation', path?: string | null, line?: number | null } | null> | null, content?: Array<
+            | { __typename?: 'DevboxToolCallBlock', type: DevboxToolCallContentType, content?:
+                | { __typename?: 'DevboxAudioContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null }
+                | { __typename?: 'DevboxImageContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null, uri?: string | null }
+                | { __typename?: 'DevboxResourceContent', type: DevboxContentBlockType, uri?: string | null, mimeType?: string | null, text?: string | null, blob?: string | null }
+                | { __typename?: 'DevboxResourceLinkContent', type: DevboxContentBlockType, uri?: string | null, name?: string | null, title?: string | null, description?: string | null, mimeType?: string | null, size?: any | null }
+                | { __typename?: 'DevboxTextContent', type: DevboxContentBlockType, text?: string | null, annotations?: Record<string, unknown> | null }
+                | { __typename?: 'DevboxUnknownContent', type: DevboxContentBlockType, variant?: string | null, raw?: Record<string, unknown> | null }
+               | null }
+            | { __typename?: 'DevboxToolCallDiff', type: DevboxToolCallContentType, path?: string | null, oldText?: string | null, newText?: string | null }
+            | { __typename?: 'DevboxToolCallTerminal', type: DevboxToolCallContentType, terminalId?: string | null }
+            | { __typename?: 'DevboxToolCallUnknown', type: DevboxToolCallContentType, variant?: string | null, raw?: Record<string, unknown> | null }
+           | null> | null } | null, plan?: { __typename?: 'DevboxPlan', planId?: string | null, meta?: Record<string, unknown> | null, entries?: Array<{ __typename?: 'DevboxPlanEntry', content?: string | null, priority?: string | null, status?: string | null } | null> | null } | null, terminal?: { __typename?: 'DevboxTerminal', terminalId?: string | null, command?: string | null, args?: Array<string | null> | null, cwd?: string | null, output?: string | null, truncated?: boolean | null, exitCode?: number | null, signal?: string | null, meta?: Record<string, unknown> | null } | null, compaction?: { __typename?: 'DevboxCompaction', compactionId?: string | null, status?: string | null, meta?: Record<string, unknown> | null, summary?: Array<
+            | { __typename?: 'DevboxAudioContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null }
+            | { __typename?: 'DevboxImageContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null, uri?: string | null }
+            | { __typename?: 'DevboxResourceContent', type: DevboxContentBlockType, uri?: string | null, mimeType?: string | null, text?: string | null, blob?: string | null }
+            | { __typename?: 'DevboxResourceLinkContent', type: DevboxContentBlockType, uri?: string | null, name?: string | null, title?: string | null, description?: string | null, mimeType?: string | null, size?: any | null }
+            | { __typename?: 'DevboxTextContent', type: DevboxContentBlockType, text?: string | null, annotations?: Record<string, unknown> | null }
+            | { __typename?: 'DevboxUnknownContent', type: DevboxContentBlockType, variant?: string | null, raw?: Record<string, unknown> | null }
+           | null> | null } | null } | null } | null } | null };
+
+export type DevboxInstanceIndexDeltaSubscriptionVariables = Exact<{
+  instanceId: Scalars['ID']['input'];
+}>;
+
+
+export type DevboxInstanceIndexDeltaSubscription = { __typename?: 'RootSubscriptionType', devboxInstanceIndexDelta?: { __typename?: 'DevboxIndexChangeDelta', delta?: Delta | null, payload?: { __typename?: 'DevboxIndexChange', instanceId: string, revision?: any | null, foregroundState?: DevboxForegroundState | null, threads?: Array<{ __typename?: 'DevboxThread', id: string, sessionId?: string | null, kind: DevboxThreadKind, agent?: DevboxAgentType | null, title?: string | null, agentTitle?: string | null, model?: string | null, cwd?: string | null, worktreeRepos?: Array<string | null> | null, status: DevboxThreadStatus, imported?: boolean | null, lastActivityAt?: string | null, entityCount?: number | null, foregroundState?: DevboxForegroundState | null, stopReason?: string | null, error?: Record<string, unknown> | null, backgroundWork?: Record<string, unknown> | null, billing?: string | null, revision?: number | null, insertedAt?: string | null, updatedAt?: string | null, configOptions?: Array<{ __typename?: 'DevboxConfigOption', configId: string, name?: string | null, description?: string | null, category?: string | null, type?: string | null, currentValue?: string | null, options?: Array<{ __typename?: 'DevboxConfigOptionValue', value: string, name?: string | null, description?: string | null, group?: string | null } | null> | null } | null> | null, availableCommands?: Array<{ __typename?: 'DevboxCommand', name: string, description?: string | null, inputHint?: string | null } | null> | null, usage?: { __typename?: 'DevboxUsage', inputTokens?: number | null, outputTokens?: number | null, cachedTokens?: number | null, reasoningTokens?: number | null, totalTokens?: number | null, contextSize?: number | null, contextUsed?: number | null, totalCost?: number | null, currency?: string | null } | null, parent?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null } | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null } | null> | null, interactions?: Array<{ __typename?: 'DevboxInteraction', id: string, externalId: string, toolCallId?: string | null, kind: DevboxInteractionKind, state: DevboxInteractionState, title?: string | null, message?: string | null, requestedSchema?: Record<string, unknown> | null, url?: string | null, response?: Record<string, unknown> | null, answeredAt?: string | null, expiresAt?: string | null, answeredByPolicy?: string | null, insertedAt?: string | null, updatedAt?: string | null, options?: Array<{ __typename?: 'DevboxPermissionOption', optionId: string, name?: string | null, kind?: string | null } | null> | null, thread?: { __typename?: 'DevboxThread', id: string, sessionId?: string | null, title?: string | null } | null, instance?: { __typename?: 'DevboxInstance', id: string, name?: string | null } | null, answeredBy?: { __typename?: 'User', id: string, name: string, email: string } | null, review?: { __typename?: 'DevboxInteractionReview', verdict?: string | null, confidence?: number | null, risk?: string | null, model?: string | null, escalation?: string | null } | null } | null> | null } | null } | null };
+
 export type ClusterRegistrationFragment = { __typename?: 'ClusterRegistration', id: string, insertedAt?: string | null, updatedAt?: string | null, machineId: string, name?: string | null, handle?: string | null, metadata?: Record<string, unknown> | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, creator?: { __typename?: 'User', name: string, email: string, profile?: string | null } | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null };
 
 export type TagFragment = { __typename?: 'Tag', name: string, value: string };
@@ -22768,6 +25205,23 @@ export type PodMetricsQueryVariables = Exact<{
   start?: InputMaybe<Scalars['DateTime']['input']>;
   stop?: InputMaybe<Scalars['DateTime']['input']>;
   step?: InputMaybe<Scalars['String']['input']>;
+  cpu?: Scalars['Boolean']['input'];
+  cpuRequests?: Scalars['Boolean']['input'];
+  cpuLimits?: Scalars['Boolean']['input'];
+  cpuThrottling?: Scalars['Boolean']['input'];
+  memory?: Scalars['Boolean']['input'];
+  memoryRequests?: Scalars['Boolean']['input'];
+  memoryLimits?: Scalars['Boolean']['input'];
+  ephemeralStorage?: Scalars['Boolean']['input'];
+  ephemeralStorageRequests?: Scalars['Boolean']['input'];
+  ephemeralStorageLimits?: Scalars['Boolean']['input'];
+  fsReads?: Scalars['Boolean']['input'];
+  fsWrites?: Scalars['Boolean']['input'];
+  networkReceive?: Scalars['Boolean']['input'];
+  networkTransmit?: Scalars['Boolean']['input'];
+  networkReceiveDropped?: Scalars['Boolean']['input'];
+  networkTransmitDropped?: Scalars['Boolean']['input'];
+  restarts?: Scalars['Boolean']['input'];
 }>;
 
 
@@ -23574,15 +26028,15 @@ export type StackMinimalFragment = { __typename?: 'InfrastructureStack', id?: st
 
 export type StackTinyFragment = { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, status: StackStatus, repository?: { __typename?: 'GitRepository', url: string, pulledAt?: string | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, parent?: { __typename?: 'ServiceDeployment', id: string } | null };
 
-export type StackFragment = { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, status: StackStatus, approval?: boolean | null, variables?: Record<string, unknown> | null, deleteRun?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, committer?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, infracostResources?: Array<{ __typename?: 'StackInfracostResource', id: string, resourceScope: string, projectName?: string | null, name: string, resourceType?: string | null, hourlyCost?: number | null, monthlyCost?: number | null, monthlyUsageCost?: number | null, rawResource?: Record<string, unknown> | null } | null> | null } | null, configuration: { __typename?: 'StackConfiguration', image?: string | null, version?: string | null, terraform?: { __typename?: 'TerraformConfiguration', parallelism?: number | null, refresh?: boolean | null } | null, terragrunt?: { __typename?: 'TerragruntConfiguration', parallelism?: number | null, refresh?: boolean | null } | null, pulumi?: { __typename?: 'PulumiConfiguration', parallel?: number | null, refresh?: boolean | null, stack?: string | null, backendUrl?: string | null } | null }, repository?: { __typename?: 'GitRepository', id: string, url: string, pulledAt?: string | null } | null, git: { __typename?: 'GitRef', ref: string, folder: string }, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', namespace: string, raw?: string | null, annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', image: string, args?: Array<string | null> | null, env?: Array<{ __typename?: 'ContainerEnv', value: string, name: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', secret: string, configMap: string } | null> | null } | null> | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, policyEngine?: { __typename?: 'PolicyEngine', type: PolicyEngineType, maxSeverity?: VulnSeverity | null } | null };
+export type StackFragment = { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, status: StackStatus, approval?: boolean | null, variables?: Record<string, unknown> | null, deleteRun?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, committer?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null, configuration: { __typename?: 'StackConfiguration', image?: string | null, version?: string | null, terraform?: { __typename?: 'TerraformConfiguration', parallelism?: number | null, refresh?: boolean | null } | null, terragrunt?: { __typename?: 'TerragruntConfiguration', parallelism?: number | null, refresh?: boolean | null } | null, pulumi?: { __typename?: 'PulumiConfiguration', parallel?: number | null, refresh?: boolean | null, stack?: string | null, backendUrl?: string | null } | null }, repository?: { __typename?: 'GitRepository', id: string, url: string, pulledAt?: string | null } | null, git: { __typename?: 'GitRef', ref: string, folder: string }, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', namespace: string, raw?: string | null, annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', image: string, args?: Array<string | null> | null, env?: Array<{ __typename?: 'ContainerEnv', value: string, name: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', secret: string, configMap: string } | null> | null } | null> | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, policyEngine?: { __typename?: 'PolicyEngine', type: PolicyEngineType, maxSeverity?: VulnSeverity | null } | null };
 
-export type StackRunFragment = { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, committer?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, infracostResources?: Array<{ __typename?: 'StackInfracostResource', id: string, resourceScope: string, projectName?: string | null, name: string, resourceType?: string | null, hourlyCost?: number | null, monthlyCost?: number | null, monthlyUsageCost?: number | null, rawResource?: Record<string, unknown> | null } | null> | null };
+export type StackRunFragment = { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, committer?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null };
 
 export type ObservableMetricFragment = { __typename?: 'ObservableMetric', identifier: string, provider?: { __typename?: 'ObservabilityProvider', name: string, type: ObservabilityProviderType } | null };
 
-export type StackRunDetailsFragment = { __typename?: 'StackRun', id: string, status: StackStatus, updatedAt?: string | null, insertedAt?: string | null, type: StackType, message?: string | null, committer?: string | null, approval?: boolean | null, approvedAt?: string | null, cancellationReason?: string | null, approver?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, homepage?: Homepage | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, role?: PersonaRole | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, flows?: { __typename?: 'PersonaFlows', permissions?: boolean | null, startWorkbenchJob?: boolean | null, pipelines?: boolean | null, previews?: boolean | null, workbenches?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, flows?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null, workbenches?: boolean | null, security?: boolean | null, cost?: boolean | null, cd?: boolean | null, ai?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, settings?: { __typename?: 'PersonaSettings', accessTokens?: boolean | null, ai?: boolean | null, audits?: boolean | null, chatbots?: boolean | null, cloudConnections?: boolean | null, global?: boolean | null, notifications?: boolean | null, projects?: boolean | null, userManagement?: boolean | null, webhooks?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null, approvalResult?: { __typename?: 'StackRunApprovalResult', reason?: string | null, result?: ApprovalResult | null } | null, stack?: { __typename?: 'InfrastructureStack', name: string, deleteRun?: { __typename?: 'StackRun', id: string } | null, observableMetrics?: Array<{ __typename?: 'ObservableMetric', identifier: string, provider?: { __typename?: 'ObservabilityProvider', name: string, type: ObservabilityProviderType } | null } | null> | null } | null, configuration: { __typename?: 'StackConfiguration', version?: string | null, image?: string | null, terraform?: { __typename?: 'TerraformConfiguration', parallelism?: number | null, refresh?: boolean | null } | null, terragrunt?: { __typename?: 'TerragruntConfiguration', parallelism?: number | null, refresh?: boolean | null } | null, pulumi?: { __typename?: 'PulumiConfiguration', parallel?: number | null, refresh?: boolean | null, stack?: string | null, backendUrl?: string | null } | null, aiApproval?: { __typename?: 'AiApprovalConfiguration', enabled: boolean, file: string, ignoreCancel?: boolean | null, git: { __typename?: 'GitRef', files?: Array<string> | null, folder: string, ref: string } } | null }, state?: { __typename?: 'StackState', id: string, plan?: string | null, planJson?: Record<string, unknown> | null, state?: Array<{ __typename?: 'StackStateResource', name: string, resource: string, identifier: string, links?: Array<string | null> | null, configuration?: Record<string, unknown> | null } | null> | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null, recurseSubmodules?: boolean | null } | null, git: { __typename?: 'GitRef', files?: Array<string> | null, ref: string, folder: string }, pullRequest?: { __typename?: 'PullRequest', labels?: Array<string | null> | null, patch?: string | null, id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, output?: Array<{ __typename?: 'StackOutput', name: string, value: string, secret?: boolean | null } | null> | null, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string, warning?: boolean | null } | null> | null, files?: Array<{ __typename?: 'StackFile', path: string, content: string } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null, steps?: Array<{ __typename?: 'RunStep', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, status: StepStatus, stage: StepStage, args?: Array<string> | null, cmd: string, index: number, logs?: Array<{ __typename?: 'RunLogs', id: string, updatedAt?: string | null, insertedAt?: string | null, logs: string } | null> | null } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, violations?: Array<{ __typename?: 'StackPolicyViolation', id: string, insertedAt?: string | null, resolution?: string | null, severity: VulnSeverity, policyUrl?: string | null, policyModule?: string | null, policyId: string, description?: string | null, title: string, causes?: Array<{ __typename?: 'StackViolationCause', filename?: string | null, resource: string, start: number, end: number, lines?: Array<{ __typename?: 'StackViolationCauseLine', line: number, content: string, first?: boolean | null, last?: boolean | null } | null> | null } | null> | null } | null> | null, policyEngine?: { __typename?: 'PolicyEngine', type: PolicyEngineType, maxSeverity?: VulnSeverity | null } | null, infracostResources?: Array<{ __typename?: 'StackInfracostResource', id: string, resourceScope: string, projectName?: string | null, name: string, resourceType?: string | null, hourlyCost?: number | null, monthlyCost?: number | null, monthlyUsageCost?: number | null, rawResource?: Record<string, unknown> | null } | null> | null };
+export type StackRunDetailsFragment = { __typename?: 'StackRun', id: string, status: StackStatus, updatedAt?: string | null, insertedAt?: string | null, type: StackType, message?: string | null, committer?: string | null, approval?: boolean | null, approvedAt?: string | null, cancellationReason?: string | null, approver?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, homepage?: Homepage | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, role?: PersonaRole | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, flows?: { __typename?: 'PersonaFlows', permissions?: boolean | null, startWorkbenchJob?: boolean | null, pipelines?: boolean | null, previews?: boolean | null, workbenches?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, flows?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null, workbenches?: boolean | null, security?: boolean | null, cost?: boolean | null, cd?: boolean | null, ai?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, settings?: { __typename?: 'PersonaSettings', accessTokens?: boolean | null, ai?: boolean | null, audits?: boolean | null, chatbots?: boolean | null, cloudConnections?: boolean | null, global?: boolean | null, notifications?: boolean | null, projects?: boolean | null, userManagement?: boolean | null, webhooks?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null, approvalResult?: { __typename?: 'StackRunApprovalResult', reason?: string | null, result?: ApprovalResult | null } | null, stack?: { __typename?: 'InfrastructureStack', name: string, deleteRun?: { __typename?: 'StackRun', id: string } | null, observableMetrics?: Array<{ __typename?: 'ObservableMetric', identifier: string, provider?: { __typename?: 'ObservabilityProvider', name: string, type: ObservabilityProviderType } | null } | null> | null } | null, configuration: { __typename?: 'StackConfiguration', version?: string | null, image?: string | null, terraform?: { __typename?: 'TerraformConfiguration', parallelism?: number | null, refresh?: boolean | null } | null, terragrunt?: { __typename?: 'TerragruntConfiguration', parallelism?: number | null, refresh?: boolean | null } | null, pulumi?: { __typename?: 'PulumiConfiguration', parallel?: number | null, refresh?: boolean | null, stack?: string | null, backendUrl?: string | null } | null, aiApproval?: { __typename?: 'AiApprovalConfiguration', enabled: boolean, file: string, ignoreCancel?: boolean | null, git: { __typename?: 'GitRef', files?: Array<string> | null, folder: string, ref: string } } | null }, state?: { __typename?: 'StackState', id: string, plan?: string | null, planJson?: Record<string, unknown> | null, state?: Array<{ __typename?: 'StackStateResource', name: string, resource: string, identifier: string, links?: Array<string | null> | null, configuration?: Record<string, unknown> | null } | null> | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null, recurseSubmodules?: boolean | null } | null, git: { __typename?: 'GitRef', files?: Array<string> | null, ref: string, folder: string }, pullRequest?: { __typename?: 'PullRequest', labels?: Array<string | null> | null, patch?: string | null, id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, output?: Array<{ __typename?: 'StackOutput', name: string, value: string, secret?: boolean | null } | null> | null, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string, warning?: boolean | null } | null> | null, files?: Array<{ __typename?: 'StackFile', path: string, content: string } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null, steps?: Array<{ __typename?: 'RunStep', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, status: StepStatus, stage: StepStage, args?: Array<string> | null, cmd: string, index: number, logs?: Array<{ __typename?: 'RunLogs', id: string, updatedAt?: string | null, insertedAt?: string | null, logs: string } | null> | null } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, violations?: Array<{ __typename?: 'StackPolicyViolation', id: string, insertedAt?: string | null, resolution?: string | null, severity: VulnSeverity, policyUrl?: string | null, policyModule?: string | null, policyId: string, description?: string | null, title: string, causes?: Array<{ __typename?: 'StackViolationCause', filename?: string | null, resource: string, start: number, end: number, lines?: Array<{ __typename?: 'StackViolationCauseLine', line: number, content: string, first?: boolean | null, last?: boolean | null } | null> | null } | null> | null } | null> | null, policyEngine?: { __typename?: 'PolicyEngine', type: PolicyEngineType, maxSeverity?: VulnSeverity | null } | null };
 
-export type StackInfracostResourceFragment = { __typename?: 'StackInfracostResource', id: string, resourceScope: string, projectName?: string | null, name: string, resourceType?: string | null, hourlyCost?: number | null, monthlyCost?: number | null, monthlyUsageCost?: number | null, rawResource?: Record<string, unknown> | null };
+export type StackInfracostResourceFragment = { __typename?: 'StackInfracostResource', id: string, resourceScope: string, projectName?: string | null, name: string, resourceType?: string | null, hourlyCost?: number | null, monthlyCost?: number | null, monthlyUsageCost?: number | null };
 
 export type CustomStackRunFragment = { __typename?: 'CustomStackRun', id: string, name: string, documentation?: string | null, commands?: Array<{ __typename?: 'StackCommand', args?: Array<string | null> | null, cmd: string } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, page?: number | null, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null };
 
@@ -23631,7 +26085,7 @@ export type StackQueryVariables = Exact<{
 }>;
 
 
-export type StackQuery = { __typename?: 'RootQueryType', infrastructureStack?: { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, status: StackStatus, approval?: boolean | null, variables?: Record<string, unknown> | null, deleteRun?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, committer?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, infracostResources?: Array<{ __typename?: 'StackInfracostResource', id: string, resourceScope: string, projectName?: string | null, name: string, resourceType?: string | null, hourlyCost?: number | null, monthlyCost?: number | null, monthlyUsageCost?: number | null, rawResource?: Record<string, unknown> | null } | null> | null } | null, configuration: { __typename?: 'StackConfiguration', image?: string | null, version?: string | null, terraform?: { __typename?: 'TerraformConfiguration', parallelism?: number | null, refresh?: boolean | null } | null, terragrunt?: { __typename?: 'TerragruntConfiguration', parallelism?: number | null, refresh?: boolean | null } | null, pulumi?: { __typename?: 'PulumiConfiguration', parallel?: number | null, refresh?: boolean | null, stack?: string | null, backendUrl?: string | null } | null }, repository?: { __typename?: 'GitRepository', id: string, url: string, pulledAt?: string | null } | null, git: { __typename?: 'GitRef', ref: string, folder: string }, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', namespace: string, raw?: string | null, annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', image: string, args?: Array<string | null> | null, env?: Array<{ __typename?: 'ContainerEnv', value: string, name: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', secret: string, configMap: string } | null> | null } | null> | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, policyEngine?: { __typename?: 'PolicyEngine', type: PolicyEngineType, maxSeverity?: VulnSeverity | null } | null } | null };
+export type StackQuery = { __typename?: 'RootQueryType', infrastructureStack?: { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, status: StackStatus, approval?: boolean | null, variables?: Record<string, unknown> | null, deleteRun?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, committer?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null, configuration: { __typename?: 'StackConfiguration', image?: string | null, version?: string | null, terraform?: { __typename?: 'TerraformConfiguration', parallelism?: number | null, refresh?: boolean | null } | null, terragrunt?: { __typename?: 'TerragruntConfiguration', parallelism?: number | null, refresh?: boolean | null } | null, pulumi?: { __typename?: 'PulumiConfiguration', parallel?: number | null, refresh?: boolean | null, stack?: string | null, backendUrl?: string | null } | null }, repository?: { __typename?: 'GitRepository', id: string, url: string, pulledAt?: string | null } | null, git: { __typename?: 'GitRef', ref: string, folder: string }, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', namespace: string, raw?: string | null, annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', image: string, args?: Array<string | null> | null, env?: Array<{ __typename?: 'ContainerEnv', value: string, name: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', secret: string, configMap: string } | null> | null } | null> | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, policyEngine?: { __typename?: 'PolicyEngine', type: PolicyEngineType, maxSeverity?: VulnSeverity | null } | null } | null };
 
 export type StackTinyQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -23678,14 +26132,24 @@ export type StackRunsQueryVariables = Exact<{
 }>;
 
 
-export type StackRunsQuery = { __typename?: 'RootQueryType', infrastructureStack?: { __typename?: 'InfrastructureStack', id?: string | null, runs?: { __typename?: 'StackRunConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'StackRunEdge', node?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, committer?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, infracostResources?: Array<{ __typename?: 'StackInfracostResource', id: string, resourceScope: string, projectName?: string | null, name: string, resourceType?: string | null, hourlyCost?: number | null, monthlyCost?: number | null, monthlyUsageCost?: number | null, rawResource?: Record<string, unknown> | null } | null> | null } | null } | null> | null } | null } | null };
+export type StackRunsQuery = { __typename?: 'RootQueryType', infrastructureStack?: { __typename?: 'InfrastructureStack', id?: string | null, runs?: { __typename?: 'StackRunConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'StackRunEdge', node?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, committer?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null } | null> | null } | null } | null };
 
 export type StackRunQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type StackRunQuery = { __typename?: 'RootQueryType', stackRun?: { __typename?: 'StackRun', id: string, status: StackStatus, updatedAt?: string | null, insertedAt?: string | null, type: StackType, message?: string | null, committer?: string | null, approval?: boolean | null, approvedAt?: string | null, cancellationReason?: string | null, approver?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, homepage?: Homepage | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, role?: PersonaRole | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, flows?: { __typename?: 'PersonaFlows', permissions?: boolean | null, startWorkbenchJob?: boolean | null, pipelines?: boolean | null, previews?: boolean | null, workbenches?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, flows?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null, workbenches?: boolean | null, security?: boolean | null, cost?: boolean | null, cd?: boolean | null, ai?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, settings?: { __typename?: 'PersonaSettings', accessTokens?: boolean | null, ai?: boolean | null, audits?: boolean | null, chatbots?: boolean | null, cloudConnections?: boolean | null, global?: boolean | null, notifications?: boolean | null, projects?: boolean | null, userManagement?: boolean | null, webhooks?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null, approvalResult?: { __typename?: 'StackRunApprovalResult', reason?: string | null, result?: ApprovalResult | null } | null, stack?: { __typename?: 'InfrastructureStack', name: string, deleteRun?: { __typename?: 'StackRun', id: string } | null, observableMetrics?: Array<{ __typename?: 'ObservableMetric', identifier: string, provider?: { __typename?: 'ObservabilityProvider', name: string, type: ObservabilityProviderType } | null } | null> | null } | null, configuration: { __typename?: 'StackConfiguration', version?: string | null, image?: string | null, terraform?: { __typename?: 'TerraformConfiguration', parallelism?: number | null, refresh?: boolean | null } | null, terragrunt?: { __typename?: 'TerragruntConfiguration', parallelism?: number | null, refresh?: boolean | null } | null, pulumi?: { __typename?: 'PulumiConfiguration', parallel?: number | null, refresh?: boolean | null, stack?: string | null, backendUrl?: string | null } | null, aiApproval?: { __typename?: 'AiApprovalConfiguration', enabled: boolean, file: string, ignoreCancel?: boolean | null, git: { __typename?: 'GitRef', files?: Array<string> | null, folder: string, ref: string } } | null }, state?: { __typename?: 'StackState', id: string, plan?: string | null, planJson?: Record<string, unknown> | null, state?: Array<{ __typename?: 'StackStateResource', name: string, resource: string, identifier: string, links?: Array<string | null> | null, configuration?: Record<string, unknown> | null } | null> | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null, recurseSubmodules?: boolean | null } | null, git: { __typename?: 'GitRef', files?: Array<string> | null, ref: string, folder: string }, pullRequest?: { __typename?: 'PullRequest', labels?: Array<string | null> | null, patch?: string | null, id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, output?: Array<{ __typename?: 'StackOutput', name: string, value: string, secret?: boolean | null } | null> | null, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string, warning?: boolean | null } | null> | null, files?: Array<{ __typename?: 'StackFile', path: string, content: string } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null, steps?: Array<{ __typename?: 'RunStep', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, status: StepStatus, stage: StepStage, args?: Array<string> | null, cmd: string, index: number, logs?: Array<{ __typename?: 'RunLogs', id: string, updatedAt?: string | null, insertedAt?: string | null, logs: string } | null> | null } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, violations?: Array<{ __typename?: 'StackPolicyViolation', id: string, insertedAt?: string | null, resolution?: string | null, severity: VulnSeverity, policyUrl?: string | null, policyModule?: string | null, policyId: string, description?: string | null, title: string, causes?: Array<{ __typename?: 'StackViolationCause', filename?: string | null, resource: string, start: number, end: number, lines?: Array<{ __typename?: 'StackViolationCauseLine', line: number, content: string, first?: boolean | null, last?: boolean | null } | null> | null } | null> | null } | null> | null, policyEngine?: { __typename?: 'PolicyEngine', type: PolicyEngineType, maxSeverity?: VulnSeverity | null } | null, infracostResources?: Array<{ __typename?: 'StackInfracostResource', id: string, resourceScope: string, projectName?: string | null, name: string, resourceType?: string | null, hourlyCost?: number | null, monthlyCost?: number | null, monthlyUsageCost?: number | null, rawResource?: Record<string, unknown> | null } | null> | null } | null };
+export type StackRunQuery = { __typename?: 'RootQueryType', stackRun?: { __typename?: 'StackRun', id: string, status: StackStatus, updatedAt?: string | null, insertedAt?: string | null, type: StackType, message?: string | null, committer?: string | null, approval?: boolean | null, approvedAt?: string | null, cancellationReason?: string | null, approver?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, homepage?: Homepage | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, role?: PersonaRole | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, flows?: { __typename?: 'PersonaFlows', permissions?: boolean | null, startWorkbenchJob?: boolean | null, pipelines?: boolean | null, previews?: boolean | null, workbenches?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, flows?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null, workbenches?: boolean | null, security?: boolean | null, cost?: boolean | null, cd?: boolean | null, ai?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, settings?: { __typename?: 'PersonaSettings', accessTokens?: boolean | null, ai?: boolean | null, audits?: boolean | null, chatbots?: boolean | null, cloudConnections?: boolean | null, global?: boolean | null, notifications?: boolean | null, projects?: boolean | null, userManagement?: boolean | null, webhooks?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null, approvalResult?: { __typename?: 'StackRunApprovalResult', reason?: string | null, result?: ApprovalResult | null } | null, stack?: { __typename?: 'InfrastructureStack', name: string, deleteRun?: { __typename?: 'StackRun', id: string } | null, observableMetrics?: Array<{ __typename?: 'ObservableMetric', identifier: string, provider?: { __typename?: 'ObservabilityProvider', name: string, type: ObservabilityProviderType } | null } | null> | null } | null, configuration: { __typename?: 'StackConfiguration', version?: string | null, image?: string | null, terraform?: { __typename?: 'TerraformConfiguration', parallelism?: number | null, refresh?: boolean | null } | null, terragrunt?: { __typename?: 'TerragruntConfiguration', parallelism?: number | null, refresh?: boolean | null } | null, pulumi?: { __typename?: 'PulumiConfiguration', parallel?: number | null, refresh?: boolean | null, stack?: string | null, backendUrl?: string | null } | null, aiApproval?: { __typename?: 'AiApprovalConfiguration', enabled: boolean, file: string, ignoreCancel?: boolean | null, git: { __typename?: 'GitRef', files?: Array<string> | null, folder: string, ref: string } } | null }, state?: { __typename?: 'StackState', id: string, plan?: string | null, planJson?: Record<string, unknown> | null, state?: Array<{ __typename?: 'StackStateResource', name: string, resource: string, identifier: string, links?: Array<string | null> | null, configuration?: Record<string, unknown> | null } | null> | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null, recurseSubmodules?: boolean | null } | null, git: { __typename?: 'GitRef', files?: Array<string> | null, ref: string, folder: string }, pullRequest?: { __typename?: 'PullRequest', labels?: Array<string | null> | null, patch?: string | null, id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, output?: Array<{ __typename?: 'StackOutput', name: string, value: string, secret?: boolean | null } | null> | null, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string, warning?: boolean | null } | null> | null, files?: Array<{ __typename?: 'StackFile', path: string, content: string } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null, steps?: Array<{ __typename?: 'RunStep', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, status: StepStatus, stage: StepStage, args?: Array<string> | null, cmd: string, index: number, logs?: Array<{ __typename?: 'RunLogs', id: string, updatedAt?: string | null, insertedAt?: string | null, logs: string } | null> | null } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, violations?: Array<{ __typename?: 'StackPolicyViolation', id: string, insertedAt?: string | null, resolution?: string | null, severity: VulnSeverity, policyUrl?: string | null, policyModule?: string | null, policyId: string, description?: string | null, title: string, causes?: Array<{ __typename?: 'StackViolationCause', filename?: string | null, resource: string, start: number, end: number, lines?: Array<{ __typename?: 'StackViolationCauseLine', line: number, content: string, first?: boolean | null, last?: boolean | null } | null> | null } | null> | null } | null> | null, policyEngine?: { __typename?: 'PolicyEngine', type: PolicyEngineType, maxSeverity?: VulnSeverity | null } | null } | null };
+
+export type StackRunInfracostResourcesQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  resourceScope?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type StackRunInfracostResourcesQuery = { __typename?: 'RootQueryType', stackRun?: { __typename?: 'StackRun', id: string, infracostResources?: { __typename?: 'StackInfracostResourceConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'StackInfracostResourceEdge', node?: { __typename?: 'StackInfracostResource', id: string, resourceScope: string, projectName?: string | null, name: string, resourceType?: string | null, hourlyCost?: number | null, monthlyCost?: number | null, monthlyUsageCost?: number | null } | null } | null> | null } | null } | null };
 
 export type StackRunJobQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -23729,7 +26193,7 @@ export type CreateOnDemandRunMutationVariables = Exact<{
 }>;
 
 
-export type CreateOnDemandRunMutation = { __typename?: 'RootMutationType', onDemandRun?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, committer?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, infracostResources?: Array<{ __typename?: 'StackInfracostResource', id: string, resourceScope: string, projectName?: string | null, name: string, resourceType?: string | null, hourlyCost?: number | null, monthlyCost?: number | null, monthlyUsageCost?: number | null, rawResource?: Record<string, unknown> | null } | null> | null } | null };
+export type CreateOnDemandRunMutation = { __typename?: 'RootMutationType', onDemandRun?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, committer?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null };
 
 export type UpdateStackMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -23758,14 +26222,14 @@ export type KickStackMutationVariables = Exact<{
 }>;
 
 
-export type KickStackMutation = { __typename?: 'RootMutationType', kickStack?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, committer?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, infracostResources?: Array<{ __typename?: 'StackInfracostResource', id: string, resourceScope: string, projectName?: string | null, name: string, resourceType?: string | null, hourlyCost?: number | null, monthlyCost?: number | null, monthlyUsageCost?: number | null, rawResource?: Record<string, unknown> | null } | null> | null } | null };
+export type KickStackMutation = { __typename?: 'RootMutationType', kickStack?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, committer?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null };
 
 export type KickStackPullRequestMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type KickStackPullRequestMutation = { __typename?: 'RootMutationType', kickStackPullRequest?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, committer?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, infracostResources?: Array<{ __typename?: 'StackInfracostResource', id: string, resourceScope: string, projectName?: string | null, name: string, resourceType?: string | null, hourlyCost?: number | null, monthlyCost?: number | null, monthlyUsageCost?: number | null, rawResource?: Record<string, unknown> | null } | null> | null } | null };
+export type KickStackPullRequestMutation = { __typename?: 'RootMutationType', kickStackPullRequest?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, committer?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null };
 
 export type UpdateStackRunMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -23773,7 +26237,7 @@ export type UpdateStackRunMutationVariables = Exact<{
 }>;
 
 
-export type UpdateStackRunMutation = { __typename?: 'RootMutationType', updateStackRun?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, committer?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, infracostResources?: Array<{ __typename?: 'StackInfracostResource', id: string, resourceScope: string, projectName?: string | null, name: string, resourceType?: string | null, hourlyCost?: number | null, monthlyCost?: number | null, monthlyUsageCost?: number | null, rawResource?: Record<string, unknown> | null } | null> | null } | null };
+export type UpdateStackRunMutation = { __typename?: 'RootMutationType', updateStackRun?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, committer?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null };
 
 export type CompleteStackRunMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -23781,21 +26245,21 @@ export type CompleteStackRunMutationVariables = Exact<{
 }>;
 
 
-export type CompleteStackRunMutation = { __typename?: 'RootMutationType', completeStackRun?: { __typename?: 'StackRun', id: string, status: StackStatus, updatedAt?: string | null, insertedAt?: string | null, type: StackType, message?: string | null, committer?: string | null, approval?: boolean | null, approvedAt?: string | null, cancellationReason?: string | null, approver?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, homepage?: Homepage | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, role?: PersonaRole | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, flows?: { __typename?: 'PersonaFlows', permissions?: boolean | null, startWorkbenchJob?: boolean | null, pipelines?: boolean | null, previews?: boolean | null, workbenches?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, flows?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null, workbenches?: boolean | null, security?: boolean | null, cost?: boolean | null, cd?: boolean | null, ai?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, settings?: { __typename?: 'PersonaSettings', accessTokens?: boolean | null, ai?: boolean | null, audits?: boolean | null, chatbots?: boolean | null, cloudConnections?: boolean | null, global?: boolean | null, notifications?: boolean | null, projects?: boolean | null, userManagement?: boolean | null, webhooks?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null, approvalResult?: { __typename?: 'StackRunApprovalResult', reason?: string | null, result?: ApprovalResult | null } | null, stack?: { __typename?: 'InfrastructureStack', name: string, deleteRun?: { __typename?: 'StackRun', id: string } | null, observableMetrics?: Array<{ __typename?: 'ObservableMetric', identifier: string, provider?: { __typename?: 'ObservabilityProvider', name: string, type: ObservabilityProviderType } | null } | null> | null } | null, configuration: { __typename?: 'StackConfiguration', version?: string | null, image?: string | null, terraform?: { __typename?: 'TerraformConfiguration', parallelism?: number | null, refresh?: boolean | null } | null, terragrunt?: { __typename?: 'TerragruntConfiguration', parallelism?: number | null, refresh?: boolean | null } | null, pulumi?: { __typename?: 'PulumiConfiguration', parallel?: number | null, refresh?: boolean | null, stack?: string | null, backendUrl?: string | null } | null, aiApproval?: { __typename?: 'AiApprovalConfiguration', enabled: boolean, file: string, ignoreCancel?: boolean | null, git: { __typename?: 'GitRef', files?: Array<string> | null, folder: string, ref: string } } | null }, state?: { __typename?: 'StackState', id: string, plan?: string | null, planJson?: Record<string, unknown> | null, state?: Array<{ __typename?: 'StackStateResource', name: string, resource: string, identifier: string, links?: Array<string | null> | null, configuration?: Record<string, unknown> | null } | null> | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null, recurseSubmodules?: boolean | null } | null, git: { __typename?: 'GitRef', files?: Array<string> | null, ref: string, folder: string }, pullRequest?: { __typename?: 'PullRequest', labels?: Array<string | null> | null, patch?: string | null, id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, output?: Array<{ __typename?: 'StackOutput', name: string, value: string, secret?: boolean | null } | null> | null, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string, warning?: boolean | null } | null> | null, files?: Array<{ __typename?: 'StackFile', path: string, content: string } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null, steps?: Array<{ __typename?: 'RunStep', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, status: StepStatus, stage: StepStage, args?: Array<string> | null, cmd: string, index: number, logs?: Array<{ __typename?: 'RunLogs', id: string, updatedAt?: string | null, insertedAt?: string | null, logs: string } | null> | null } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, violations?: Array<{ __typename?: 'StackPolicyViolation', id: string, insertedAt?: string | null, resolution?: string | null, severity: VulnSeverity, policyUrl?: string | null, policyModule?: string | null, policyId: string, description?: string | null, title: string, causes?: Array<{ __typename?: 'StackViolationCause', filename?: string | null, resource: string, start: number, end: number, lines?: Array<{ __typename?: 'StackViolationCauseLine', line: number, content: string, first?: boolean | null, last?: boolean | null } | null> | null } | null> | null } | null> | null, policyEngine?: { __typename?: 'PolicyEngine', type: PolicyEngineType, maxSeverity?: VulnSeverity | null } | null, infracostResources?: Array<{ __typename?: 'StackInfracostResource', id: string, resourceScope: string, projectName?: string | null, name: string, resourceType?: string | null, hourlyCost?: number | null, monthlyCost?: number | null, monthlyUsageCost?: number | null, rawResource?: Record<string, unknown> | null } | null> | null } | null };
+export type CompleteStackRunMutation = { __typename?: 'RootMutationType', completeStackRun?: { __typename?: 'StackRun', id: string, status: StackStatus, updatedAt?: string | null, insertedAt?: string | null, type: StackType, message?: string | null, committer?: string | null, approval?: boolean | null, approvedAt?: string | null, cancellationReason?: string | null, approver?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, homepage?: Homepage | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, role?: PersonaRole | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, flows?: { __typename?: 'PersonaFlows', permissions?: boolean | null, startWorkbenchJob?: boolean | null, pipelines?: boolean | null, previews?: boolean | null, workbenches?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, flows?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null, workbenches?: boolean | null, security?: boolean | null, cost?: boolean | null, cd?: boolean | null, ai?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, settings?: { __typename?: 'PersonaSettings', accessTokens?: boolean | null, ai?: boolean | null, audits?: boolean | null, chatbots?: boolean | null, cloudConnections?: boolean | null, global?: boolean | null, notifications?: boolean | null, projects?: boolean | null, userManagement?: boolean | null, webhooks?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null, approvalResult?: { __typename?: 'StackRunApprovalResult', reason?: string | null, result?: ApprovalResult | null } | null, stack?: { __typename?: 'InfrastructureStack', name: string, deleteRun?: { __typename?: 'StackRun', id: string } | null, observableMetrics?: Array<{ __typename?: 'ObservableMetric', identifier: string, provider?: { __typename?: 'ObservabilityProvider', name: string, type: ObservabilityProviderType } | null } | null> | null } | null, configuration: { __typename?: 'StackConfiguration', version?: string | null, image?: string | null, terraform?: { __typename?: 'TerraformConfiguration', parallelism?: number | null, refresh?: boolean | null } | null, terragrunt?: { __typename?: 'TerragruntConfiguration', parallelism?: number | null, refresh?: boolean | null } | null, pulumi?: { __typename?: 'PulumiConfiguration', parallel?: number | null, refresh?: boolean | null, stack?: string | null, backendUrl?: string | null } | null, aiApproval?: { __typename?: 'AiApprovalConfiguration', enabled: boolean, file: string, ignoreCancel?: boolean | null, git: { __typename?: 'GitRef', files?: Array<string> | null, folder: string, ref: string } } | null }, state?: { __typename?: 'StackState', id: string, plan?: string | null, planJson?: Record<string, unknown> | null, state?: Array<{ __typename?: 'StackStateResource', name: string, resource: string, identifier: string, links?: Array<string | null> | null, configuration?: Record<string, unknown> | null } | null> | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null, recurseSubmodules?: boolean | null } | null, git: { __typename?: 'GitRef', files?: Array<string> | null, ref: string, folder: string }, pullRequest?: { __typename?: 'PullRequest', labels?: Array<string | null> | null, patch?: string | null, id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, output?: Array<{ __typename?: 'StackOutput', name: string, value: string, secret?: boolean | null } | null> | null, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string, warning?: boolean | null } | null> | null, files?: Array<{ __typename?: 'StackFile', path: string, content: string } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null, steps?: Array<{ __typename?: 'RunStep', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, status: StepStatus, stage: StepStage, args?: Array<string> | null, cmd: string, index: number, logs?: Array<{ __typename?: 'RunLogs', id: string, updatedAt?: string | null, insertedAt?: string | null, logs: string } | null> | null } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, violations?: Array<{ __typename?: 'StackPolicyViolation', id: string, insertedAt?: string | null, resolution?: string | null, severity: VulnSeverity, policyUrl?: string | null, policyModule?: string | null, policyId: string, description?: string | null, title: string, causes?: Array<{ __typename?: 'StackViolationCause', filename?: string | null, resource: string, start: number, end: number, lines?: Array<{ __typename?: 'StackViolationCauseLine', line: number, content: string, first?: boolean | null, last?: boolean | null } | null> | null } | null> | null } | null> | null, policyEngine?: { __typename?: 'PolicyEngine', type: PolicyEngineType, maxSeverity?: VulnSeverity | null } | null } | null };
 
 export type ApproveStackRunMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type ApproveStackRunMutation = { __typename?: 'RootMutationType', approveStackRun?: { __typename?: 'StackRun', id: string, status: StackStatus, updatedAt?: string | null, insertedAt?: string | null, type: StackType, message?: string | null, committer?: string | null, approval?: boolean | null, approvedAt?: string | null, cancellationReason?: string | null, approver?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, homepage?: Homepage | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, role?: PersonaRole | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, flows?: { __typename?: 'PersonaFlows', permissions?: boolean | null, startWorkbenchJob?: boolean | null, pipelines?: boolean | null, previews?: boolean | null, workbenches?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, flows?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null, workbenches?: boolean | null, security?: boolean | null, cost?: boolean | null, cd?: boolean | null, ai?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, settings?: { __typename?: 'PersonaSettings', accessTokens?: boolean | null, ai?: boolean | null, audits?: boolean | null, chatbots?: boolean | null, cloudConnections?: boolean | null, global?: boolean | null, notifications?: boolean | null, projects?: boolean | null, userManagement?: boolean | null, webhooks?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null, approvalResult?: { __typename?: 'StackRunApprovalResult', reason?: string | null, result?: ApprovalResult | null } | null, stack?: { __typename?: 'InfrastructureStack', name: string, deleteRun?: { __typename?: 'StackRun', id: string } | null, observableMetrics?: Array<{ __typename?: 'ObservableMetric', identifier: string, provider?: { __typename?: 'ObservabilityProvider', name: string, type: ObservabilityProviderType } | null } | null> | null } | null, configuration: { __typename?: 'StackConfiguration', version?: string | null, image?: string | null, terraform?: { __typename?: 'TerraformConfiguration', parallelism?: number | null, refresh?: boolean | null } | null, terragrunt?: { __typename?: 'TerragruntConfiguration', parallelism?: number | null, refresh?: boolean | null } | null, pulumi?: { __typename?: 'PulumiConfiguration', parallel?: number | null, refresh?: boolean | null, stack?: string | null, backendUrl?: string | null } | null, aiApproval?: { __typename?: 'AiApprovalConfiguration', enabled: boolean, file: string, ignoreCancel?: boolean | null, git: { __typename?: 'GitRef', files?: Array<string> | null, folder: string, ref: string } } | null }, state?: { __typename?: 'StackState', id: string, plan?: string | null, planJson?: Record<string, unknown> | null, state?: Array<{ __typename?: 'StackStateResource', name: string, resource: string, identifier: string, links?: Array<string | null> | null, configuration?: Record<string, unknown> | null } | null> | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null, recurseSubmodules?: boolean | null } | null, git: { __typename?: 'GitRef', files?: Array<string> | null, ref: string, folder: string }, pullRequest?: { __typename?: 'PullRequest', labels?: Array<string | null> | null, patch?: string | null, id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, output?: Array<{ __typename?: 'StackOutput', name: string, value: string, secret?: boolean | null } | null> | null, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string, warning?: boolean | null } | null> | null, files?: Array<{ __typename?: 'StackFile', path: string, content: string } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null, steps?: Array<{ __typename?: 'RunStep', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, status: StepStatus, stage: StepStage, args?: Array<string> | null, cmd: string, index: number, logs?: Array<{ __typename?: 'RunLogs', id: string, updatedAt?: string | null, insertedAt?: string | null, logs: string } | null> | null } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, violations?: Array<{ __typename?: 'StackPolicyViolation', id: string, insertedAt?: string | null, resolution?: string | null, severity: VulnSeverity, policyUrl?: string | null, policyModule?: string | null, policyId: string, description?: string | null, title: string, causes?: Array<{ __typename?: 'StackViolationCause', filename?: string | null, resource: string, start: number, end: number, lines?: Array<{ __typename?: 'StackViolationCauseLine', line: number, content: string, first?: boolean | null, last?: boolean | null } | null> | null } | null> | null } | null> | null, policyEngine?: { __typename?: 'PolicyEngine', type: PolicyEngineType, maxSeverity?: VulnSeverity | null } | null, infracostResources?: Array<{ __typename?: 'StackInfracostResource', id: string, resourceScope: string, projectName?: string | null, name: string, resourceType?: string | null, hourlyCost?: number | null, monthlyCost?: number | null, monthlyUsageCost?: number | null, rawResource?: Record<string, unknown> | null } | null> | null } | null };
+export type ApproveStackRunMutation = { __typename?: 'RootMutationType', approveStackRun?: { __typename?: 'StackRun', id: string, status: StackStatus, updatedAt?: string | null, insertedAt?: string | null, type: StackType, message?: string | null, committer?: string | null, approval?: boolean | null, approvedAt?: string | null, cancellationReason?: string | null, approver?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, homepage?: Homepage | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, role?: PersonaRole | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, flows?: { __typename?: 'PersonaFlows', permissions?: boolean | null, startWorkbenchJob?: boolean | null, pipelines?: boolean | null, previews?: boolean | null, workbenches?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, flows?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null, workbenches?: boolean | null, security?: boolean | null, cost?: boolean | null, cd?: boolean | null, ai?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, settings?: { __typename?: 'PersonaSettings', accessTokens?: boolean | null, ai?: boolean | null, audits?: boolean | null, chatbots?: boolean | null, cloudConnections?: boolean | null, global?: boolean | null, notifications?: boolean | null, projects?: boolean | null, userManagement?: boolean | null, webhooks?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null, approvalResult?: { __typename?: 'StackRunApprovalResult', reason?: string | null, result?: ApprovalResult | null } | null, stack?: { __typename?: 'InfrastructureStack', name: string, deleteRun?: { __typename?: 'StackRun', id: string } | null, observableMetrics?: Array<{ __typename?: 'ObservableMetric', identifier: string, provider?: { __typename?: 'ObservabilityProvider', name: string, type: ObservabilityProviderType } | null } | null> | null } | null, configuration: { __typename?: 'StackConfiguration', version?: string | null, image?: string | null, terraform?: { __typename?: 'TerraformConfiguration', parallelism?: number | null, refresh?: boolean | null } | null, terragrunt?: { __typename?: 'TerragruntConfiguration', parallelism?: number | null, refresh?: boolean | null } | null, pulumi?: { __typename?: 'PulumiConfiguration', parallel?: number | null, refresh?: boolean | null, stack?: string | null, backendUrl?: string | null } | null, aiApproval?: { __typename?: 'AiApprovalConfiguration', enabled: boolean, file: string, ignoreCancel?: boolean | null, git: { __typename?: 'GitRef', files?: Array<string> | null, folder: string, ref: string } } | null }, state?: { __typename?: 'StackState', id: string, plan?: string | null, planJson?: Record<string, unknown> | null, state?: Array<{ __typename?: 'StackStateResource', name: string, resource: string, identifier: string, links?: Array<string | null> | null, configuration?: Record<string, unknown> | null } | null> | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null, recurseSubmodules?: boolean | null } | null, git: { __typename?: 'GitRef', files?: Array<string> | null, ref: string, folder: string }, pullRequest?: { __typename?: 'PullRequest', labels?: Array<string | null> | null, patch?: string | null, id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, output?: Array<{ __typename?: 'StackOutput', name: string, value: string, secret?: boolean | null } | null> | null, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string, warning?: boolean | null } | null> | null, files?: Array<{ __typename?: 'StackFile', path: string, content: string } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null, steps?: Array<{ __typename?: 'RunStep', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, status: StepStatus, stage: StepStage, args?: Array<string> | null, cmd: string, index: number, logs?: Array<{ __typename?: 'RunLogs', id: string, updatedAt?: string | null, insertedAt?: string | null, logs: string } | null> | null } | null> | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, violations?: Array<{ __typename?: 'StackPolicyViolation', id: string, insertedAt?: string | null, resolution?: string | null, severity: VulnSeverity, policyUrl?: string | null, policyModule?: string | null, policyId: string, description?: string | null, title: string, causes?: Array<{ __typename?: 'StackViolationCause', filename?: string | null, resource: string, start: number, end: number, lines?: Array<{ __typename?: 'StackViolationCauseLine', line: number, content: string, first?: boolean | null, last?: boolean | null } | null> | null } | null> | null } | null> | null, policyEngine?: { __typename?: 'PolicyEngine', type: PolicyEngineType, maxSeverity?: VulnSeverity | null } | null } | null };
 
 export type RestartStackRunMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type RestartStackRunMutation = { __typename?: 'RootMutationType', restartStackRun?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, committer?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, infracostResources?: Array<{ __typename?: 'StackInfracostResource', id: string, resourceScope: string, projectName?: string | null, name: string, resourceType?: string | null, hourlyCost?: number | null, monthlyCost?: number | null, monthlyUsageCost?: number | null, rawResource?: Record<string, unknown> | null } | null> | null } | null };
+export type RestartStackRunMutation = { __typename?: 'RootMutationType', restartStackRun?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, committer?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null };
 
 export type RestoreStackMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -23809,7 +26273,7 @@ export type TriggerStackRunMutationVariables = Exact<{
 }>;
 
 
-export type TriggerStackRunMutation = { __typename?: 'RootMutationType', triggerRun?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, committer?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, infracostResources?: Array<{ __typename?: 'StackInfracostResource', id: string, resourceScope: string, projectName?: string | null, name: string, resourceType?: string | null, hourlyCost?: number | null, monthlyCost?: number | null, monthlyUsageCost?: number | null, rawResource?: Record<string, unknown> | null } | null> | null } | null };
+export type TriggerStackRunMutation = { __typename?: 'RootMutationType', triggerRun?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, committer?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null };
 
 export type InfrastructureStackDeltaSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
@@ -23821,7 +26285,7 @@ export type StackRunDeltaSubscriptionVariables = Exact<{
 }>;
 
 
-export type StackRunDeltaSubscription = { __typename?: 'RootSubscriptionType', stackRunDelta?: { __typename?: 'StackRunDelta', delta?: Delta | null, payload?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, committer?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, pullRequest?: { __typename?: 'PullRequest', id: string } | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, infracostResources?: Array<{ __typename?: 'StackInfracostResource', id: string, resourceScope: string, projectName?: string | null, name: string, resourceType?: string | null, hourlyCost?: number | null, monthlyCost?: number | null, monthlyUsageCost?: number | null, rawResource?: Record<string, unknown> | null } | null> | null } | null } | null };
+export type StackRunDeltaSubscription = { __typename?: 'RootSubscriptionType', stackRunDelta?: { __typename?: 'StackRunDelta', delta?: Delta | null, payload?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, committer?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, pullRequest?: { __typename?: 'PullRequest', id: string } | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null } | null };
 
 export type StackListEntryQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -24004,7 +26468,7 @@ export type IssueWebhookTinyFragment = { __typename?: 'IssueWebhook', id: string
 
 export type WorkbenchWebhookTinyFragment = { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, priority?: number | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, type: ObservabilityWebhookType } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, provider: IssueWebhookProvider } | null };
 
-export type WorkbenchFragment = { __typename?: 'Workbench', systemPrompt?: string | null, filesystemEnabled?: boolean | null, id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, agentRuntime?: { __typename?: 'AgentRuntime', id: string, name: string, allowedRepositories?: Array<string | null> | null, type: AgentRuntimeType } | null, repository?: { __typename?: 'GitRepository', id: string } | null, configuration?: { __typename?: 'WorkbenchConfiguration', infrastructure?: { __typename?: 'WorkbenchInfrastructure', selfService?: boolean | null, services?: boolean | null, stacks?: boolean | null, kubernetes?: boolean | null, podLogs?: boolean | null, vulnerabilities?: boolean | null, sentinels?: boolean | null } | null, observability?: { __typename?: 'WorkbenchObservability', logs?: boolean | null, metrics?: boolean | null } | null, coding?: { __typename?: 'WorkbenchCoding', mode?: AgentRunMode | null, repositories?: Array<string | null> | null, enableBabysitting?: boolean | null } | null } | null, modes?: { __typename?: 'WorkbenchJobModes', plan?: boolean | null, verification?: boolean | null, model?: { __typename?: 'WorkbenchJobModel', provider?: AiProvider | null, model?: string | null } | null, coding?: { __typename?: 'WorkbenchJobCodingModes', approval?: boolean | null, babysit?: boolean | null, review?: boolean | null } | null, budget?: { __typename?: 'WorkbenchJobBudget', cost?: number | null, tokens?: number | null } | null, kubernetes?: { __typename?: 'WorkbenchJobKubernetesModes', update?: boolean | null, delete?: boolean | null, exec?: boolean | null, drain?: boolean | null, excludeNamespaces?: Array<string | null> | null, requireNamespaces?: Array<string | null> | null } | null } | null, budget?: { __typename?: 'WorkbenchBudget', enabled?: boolean | null, maximum?: number | null, minFree?: number | null, unit?: WorkbenchBudgetUnit | null, last?: number | null, lastUpdated?: string | null } | null, skills?: { __typename?: 'WorkbenchSkills', files?: Array<string | null> | null, ref?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, workbenchSkills?: { __typename?: 'WorkbenchSkillConnection', edges?: Array<{ __typename?: 'WorkbenchSkillEdge', node?: { __typename?: 'WorkbenchSkill', id: string, name?: string | null, description?: string | null, contents?: string | null, subagents?: Array<WorkbenchSkillSubagent | null> | null } | null } | null> | null } | null, workbenchKnowledge?: { __typename?: 'WorkbenchKnowledgeConnection', edges?: Array<{ __typename?: 'WorkbenchKnowledgeEdge', node?: { __typename?: 'WorkbenchKnowledge', id: string, name?: string | null, description?: string | null, knowledge?: string | null, labels?: Array<string | null> | null, usages?: number | null, lastUsedAt?: string | null } | null } | null> | null } | null, tools?: Array<{ __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, approval?: boolean | null, scmConnection?: { __typename?: 'ScmConnection', id: string, name: string, type: ScmType } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, oauth?: { __typename?: 'OauthTokenExchange', enabled?: boolean | null, type?: OauthTokenExchangeType | null, tokenUrl?: string | null, clientId?: string | null, keyId?: string | null, audience?: string | null, resource?: string | null, scopes?: Array<string | null> | null } | null, configuration?: { __typename?: 'WorkbenchToolConfiguration', http?: { __typename?: 'WorkbenchToolHttpConfiguration', url?: string | null, method?: string | null, body?: string | null, inputSchema?: Record<string, unknown> | null, headers?: Array<{ __typename?: 'WorkbenchToolHttpHeader', name?: string | null, value?: string | null } | null> | null } | null, datadog?: { __typename?: 'WorkbenchToolDatadogConnection', site?: string | null } | null, elastic?: { __typename?: 'WorkbenchToolElasticConnection', index: string, url: string, username: string } | null, opensearch?: { __typename?: 'WorkbenchToolOpensearchConnection', host: string, index: string, awsAccessKeyId?: string | null, awsRegion?: string | null, assumeRoleArn?: string | null, usePodIdentity?: boolean | null } | null, loki?: { __typename?: 'WorkbenchToolLokiConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, victoriaLogs?: { __typename?: 'WorkbenchToolVictoriaLogsConnection', url?: string | null, username?: string | null, accountId?: string | null, projectId?: string | null } | null, prometheus?: { __typename?: 'WorkbenchToolPrometheusConnection', url?: string | null, username?: string | null, tenantId?: string | null, awsSigv4?: boolean | null, awsAccessKeyId?: string | null, awsRegion?: string | null } | null, tempo?: { __typename?: 'WorkbenchToolTempoConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, jaeger?: { __typename?: 'WorkbenchToolJaegerConnection', url?: string | null, username?: string | null } | null, atlassian?: { __typename?: 'WorkbenchToolAtlassianConnection', email?: string | null, url: string } | null, jira?: { __typename?: 'WorkbenchToolJiraConnection', email: string, url: string } | null, jiraDatacenter?: { __typename?: 'WorkbenchToolJiraDatacenterConnection', url: string } | null, serviceNow?: { __typename?: 'WorkbenchToolServiceNowConnection', url: string, username?: string | null } | null, linear?: { __typename?: 'WorkbenchToolLinearConnection', url: string } | null, slack?: { __typename?: 'WorkbenchToolSlackConnection', url: string } | null, pagerduty?: { __typename?: 'WorkbenchToolPagerdutyConnection', url: string } | null, teams?: { __typename?: 'WorkbenchToolTeamsConnection', clientId?: string | null, tenantId?: string | null } | null, splunk?: { __typename?: 'WorkbenchToolSplunkConnection', url?: string | null, tokenType?: SplunkTokenType | null, username?: string | null } | null, cloudwatch?: { __typename?: 'WorkbenchToolCloudwatchConnection', logGroupNames?: Array<string | null> | null, region?: string | null, roleArn?: string | null, roleSessionName?: string | null } | null, azure?: { __typename?: 'WorkbenchToolAzureConnection', subscriptionId?: string | null, tenantId?: string | null, clientId?: string | null, prometheusUrl?: string | null } | null, dynatrace?: { __typename?: 'WorkbenchToolDynatraceConnection', url?: string | null } | null, sentry?: { __typename?: 'WorkbenchToolSentryConnection', url?: string | null } | null, github?: { __typename?: 'WorkbenchToolGithubConnection', url: string, toolset?: string | null, appId?: string | null, installationId?: string | null } | null, gitlab?: { __typename?: 'WorkbenchToolGitlabConnection', url?: string | null } | null, bitbucket?: { __typename?: 'WorkbenchToolBitbucketConnection', url?: string | null } | null, bitbucketDatacenter?: { __typename?: 'WorkbenchToolBitbucketDatacenterConnection', url?: string | null } | null, azureDevops?: { __typename?: 'WorkbenchToolAzureDevopsConnection', url?: string | null } | null, lambda?: { __typename?: 'WorkbenchToolLambdaConnection', lambdaArn?: string | null, description?: string | null, inputSchema?: Record<string, unknown> | null } | null, cloudRun?: { __typename?: 'WorkbenchToolCloudRunConnection', identifier?: string | null, description?: string | null, inputSchema?: Record<string, unknown> | null } | null, azureFunction?: { __typename?: 'WorkbenchToolAzureFunctionConnection', identifier?: string | null, description?: string | null, inputSchema?: Record<string, unknown> | null } | null, docker?: { __typename?: 'WorkbenchToolDockerConnection', url?: string | null, provider?: HelmAuthProvider | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null } | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, mcpServer?: { __typename?: 'McpServer', id: string, name: string, url: string } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, botUser?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null, webhooks?: { __typename?: 'WorkbenchWebhookConnection', edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, priority?: number | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, type: ObservabilityWebhookType } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, provider: IssueWebhookProvider } | null } | null } | null> | null } | null };
+export type WorkbenchFragment = { __typename?: 'Workbench', systemPrompt?: string | null, filesystemEnabled?: boolean | null, id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, agentRuntime?: { __typename?: 'AgentRuntime', id: string, name: string, allowedRepositories?: Array<string | null> | null, type: AgentRuntimeType } | null, repository?: { __typename?: 'GitRepository', id: string } | null, configuration?: { __typename?: 'WorkbenchConfiguration', infrastructure?: { __typename?: 'WorkbenchInfrastructure', selfService?: boolean | null, services?: boolean | null, stacks?: boolean | null, kubernetes?: boolean | null, podLogs?: boolean | null, vulnerabilities?: boolean | null, sentinels?: boolean | null } | null, observability?: { __typename?: 'WorkbenchObservability', logs?: boolean | null, metrics?: boolean | null } | null, coding?: { __typename?: 'WorkbenchCoding', mode?: AgentRunMode | null, repositories?: Array<string | null> | null, enableBabysitting?: boolean | null } | null, devbox?: { __typename?: 'WorkbenchDevboxConfig', maxSnapshots?: number | null, maxDeferral?: number | null, allowSubscriptionCredentials?: boolean | null } | null } | null, modes?: { __typename?: 'WorkbenchJobModes', plan?: boolean | null, verification?: boolean | null, model?: { __typename?: 'WorkbenchJobModel', provider?: AiProvider | null, model?: string | null } | null, coding?: { __typename?: 'WorkbenchJobCodingModes', approval?: boolean | null, babysit?: boolean | null, review?: boolean | null } | null, budget?: { __typename?: 'WorkbenchJobBudget', cost?: number | null, tokens?: number | null } | null, kubernetes?: { __typename?: 'WorkbenchJobKubernetesModes', update?: boolean | null, delete?: boolean | null, exec?: boolean | null, drain?: boolean | null, excludeNamespaces?: Array<string | null> | null, requireNamespaces?: Array<string | null> | null } | null } | null, budget?: { __typename?: 'WorkbenchBudget', enabled?: boolean | null, maximum?: number | null, minFree?: number | null, unit?: WorkbenchBudgetUnit | null, last?: number | null, lastUpdated?: string | null } | null, skills?: { __typename?: 'WorkbenchSkills', files?: Array<string | null> | null, ref?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, workbenchSkills?: { __typename?: 'WorkbenchSkillConnection', edges?: Array<{ __typename?: 'WorkbenchSkillEdge', node?: { __typename?: 'WorkbenchSkill', id: string, name?: string | null, description?: string | null, contents?: string | null, subagents?: Array<WorkbenchSkillSubagent | null> | null } | null } | null> | null } | null, workbenchKnowledge?: { __typename?: 'WorkbenchKnowledgeConnection', edges?: Array<{ __typename?: 'WorkbenchKnowledgeEdge', node?: { __typename?: 'WorkbenchKnowledge', id: string, name?: string | null, description?: string | null, knowledge?: string | null, labels?: Array<string | null> | null, usages?: number | null, lastUsedAt?: string | null } | null } | null> | null } | null, tools?: Array<{ __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, approval?: boolean | null, scmConnection?: { __typename?: 'ScmConnection', id: string, name: string, type: ScmType } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, oauth?: { __typename?: 'OauthTokenExchange', enabled?: boolean | null, type?: OauthTokenExchangeType | null, tokenUrl?: string | null, clientId?: string | null, keyId?: string | null, audience?: string | null, resource?: string | null, scopes?: Array<string | null> | null } | null, configuration?: { __typename?: 'WorkbenchToolConfiguration', http?: { __typename?: 'WorkbenchToolHttpConfiguration', url?: string | null, method?: string | null, body?: string | null, inputSchema?: Record<string, unknown> | null, headers?: Array<{ __typename?: 'WorkbenchToolHttpHeader', name?: string | null, value?: string | null } | null> | null } | null, datadog?: { __typename?: 'WorkbenchToolDatadogConnection', site?: string | null } | null, elastic?: { __typename?: 'WorkbenchToolElasticConnection', index: string, url: string, username: string } | null, opensearch?: { __typename?: 'WorkbenchToolOpensearchConnection', host: string, index: string, awsAccessKeyId?: string | null, awsRegion?: string | null, assumeRoleArn?: string | null, usePodIdentity?: boolean | null } | null, loki?: { __typename?: 'WorkbenchToolLokiConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, victoriaLogs?: { __typename?: 'WorkbenchToolVictoriaLogsConnection', url?: string | null, username?: string | null, accountId?: string | null, projectId?: string | null } | null, prometheus?: { __typename?: 'WorkbenchToolPrometheusConnection', url?: string | null, username?: string | null, tenantId?: string | null, awsSigv4?: boolean | null, awsAccessKeyId?: string | null, awsRegion?: string | null } | null, tempo?: { __typename?: 'WorkbenchToolTempoConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, jaeger?: { __typename?: 'WorkbenchToolJaegerConnection', url?: string | null, username?: string | null } | null, atlassian?: { __typename?: 'WorkbenchToolAtlassianConnection', email?: string | null, url: string } | null, jira?: { __typename?: 'WorkbenchToolJiraConnection', email: string, url: string } | null, jiraDatacenter?: { __typename?: 'WorkbenchToolJiraDatacenterConnection', url: string } | null, serviceNow?: { __typename?: 'WorkbenchToolServiceNowConnection', url: string, username?: string | null } | null, linear?: { __typename?: 'WorkbenchToolLinearConnection', url: string } | null, slack?: { __typename?: 'WorkbenchToolSlackConnection', url: string } | null, pagerduty?: { __typename?: 'WorkbenchToolPagerdutyConnection', url: string } | null, teams?: { __typename?: 'WorkbenchToolTeamsConnection', clientId?: string | null, tenantId?: string | null } | null, splunk?: { __typename?: 'WorkbenchToolSplunkConnection', url?: string | null, tokenType?: SplunkTokenType | null, username?: string | null } | null, cloudwatch?: { __typename?: 'WorkbenchToolCloudwatchConnection', logGroupNames?: Array<string | null> | null, region?: string | null, roleArn?: string | null, roleSessionName?: string | null } | null, azure?: { __typename?: 'WorkbenchToolAzureConnection', subscriptionId?: string | null, tenantId?: string | null, clientId?: string | null, prometheusUrl?: string | null } | null, dynatrace?: { __typename?: 'WorkbenchToolDynatraceConnection', url?: string | null } | null, sentry?: { __typename?: 'WorkbenchToolSentryConnection', url?: string | null } | null, github?: { __typename?: 'WorkbenchToolGithubConnection', url: string, toolset?: string | null, appId?: string | null, installationId?: string | null } | null, gitlab?: { __typename?: 'WorkbenchToolGitlabConnection', url?: string | null } | null, bitbucket?: { __typename?: 'WorkbenchToolBitbucketConnection', url?: string | null } | null, bitbucketDatacenter?: { __typename?: 'WorkbenchToolBitbucketDatacenterConnection', url?: string | null } | null, azureDevops?: { __typename?: 'WorkbenchToolAzureDevopsConnection', url?: string | null } | null, lambda?: { __typename?: 'WorkbenchToolLambdaConnection', lambdaArn?: string | null, description?: string | null, inputSchema?: Record<string, unknown> | null } | null, cloudRun?: { __typename?: 'WorkbenchToolCloudRunConnection', identifier?: string | null, description?: string | null, inputSchema?: Record<string, unknown> | null } | null, azureFunction?: { __typename?: 'WorkbenchToolAzureFunctionConnection', identifier?: string | null, description?: string | null, inputSchema?: Record<string, unknown> | null } | null, docker?: { __typename?: 'WorkbenchToolDockerConnection', url?: string | null, provider?: HelmAuthProvider | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null } | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, mcpServer?: { __typename?: 'McpServer', id: string, name: string, url: string } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, botUser?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null, webhooks?: { __typename?: 'WorkbenchWebhookConnection', edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, priority?: number | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, type: ObservabilityWebhookType } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, provider: IssueWebhookProvider } | null } | null } | null> | null } | null };
 
 export type WorkbenchToolTinyFragment = { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, approval?: boolean | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, mcpServer?: { __typename?: 'McpServer', id: string, name: string, url: string } | null };
 
@@ -24034,13 +26498,11 @@ export type WorkbenchJobResultFragment = { __typename?: 'WorkbenchJobResult', id
 
 export type WorkbenchJobActivityResultFragment = { __typename?: 'WorkbenchJobActivityResult', output?: string | null, error?: string | null, explanation?: string | null, functionCall?: { __typename?: 'WorkbenchJobActivityFunctionCall', name?: string | null, input?: Record<string, unknown> | null, toolId?: string | null, tool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, configuration?: { __typename?: 'WorkbenchToolConfiguration', lambda?: { __typename?: 'WorkbenchToolLambdaConnection', description?: string | null } | null, cloudRun?: { __typename?: 'WorkbenchToolCloudRunConnection', description?: string | null } | null, azureFunction?: { __typename?: 'WorkbenchToolAzureFunctionConnection', description?: string | null } | null } | null } | null } | null, kubeRequest?: { __typename?: 'WorkbenchJobActivityKubeRequest', handle?: string | null, method?: string | null, path?: string | null, queryParams?: Record<string, unknown> | null, contentType?: string | null } | null, kubeDrain?: { __typename?: 'WorkbenchJobActivityKubeDrain', handle?: string | null, node?: string | null, explanation?: string | null } | null, kubeExec?: { __typename?: 'WorkbenchJobActivityKubeExec', handle?: string | null, command?: string | null, namespace?: string | null, pod?: string | null, container?: string | null, explanation?: string | null } | null, jobUpdate?: { __typename?: 'WorkbenchJobActivityJobUpdate', diff?: string | null, workingTheory?: string | null, criticism?: string | null, conclusion?: string | null } | null, metricsQuery?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null, logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, traces?: Array<{ __typename?: 'WorkbenchJobActivityTrace', traceId?: string | null, spanId?: string | null, parentId?: string | null, name?: string | null, service?: string | null, start?: string | null, end?: string | null, tags?: Record<string, unknown> | null } | null> | null, tracesQuery?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null, canvas?: Array<{ __typename?: 'WorkbenchCanvasBlock', identifier?: string | null, type?: WorkbenchCanvasBlockType | null, title?: string | null, description?: string | null, sectionId?: string | null, collapsed?: boolean | null, layout?: { __typename?: 'WorkbenchCanvasBlockLayout', x?: number | null, y?: number | null, w?: number | null, h?: number | null } | null, content?: { __typename?: 'WorkbenchCanvasBlockContent', markdown?: string | null, metrics?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, logs?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, traces?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, pie?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null, bar?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null } | null } | null> | null };
 
-export type WorkbenchJobActivityFragment = { __typename?: 'WorkbenchJobActivity', id: string, type?: WorkbenchJobActivityType | null, status: WorkbenchJobActivityStatus, prompt?: string | null, insertedAt?: string | null, attachments?: Array<{ __typename?: 'Attachment', id: string, filename: string, filetype?: string | null, path: string, size?: number | null, downloadUrl?: string | null } | null> | null, user?: { __typename?: 'User', name: string, email: string, profile?: string | null } | null, result?: { __typename?: 'WorkbenchJobActivityResult', output?: string | null, error?: string | null, explanation?: string | null, functionCall?: { __typename?: 'WorkbenchJobActivityFunctionCall', name?: string | null, input?: Record<string, unknown> | null, toolId?: string | null, tool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, configuration?: { __typename?: 'WorkbenchToolConfiguration', lambda?: { __typename?: 'WorkbenchToolLambdaConnection', description?: string | null } | null, cloudRun?: { __typename?: 'WorkbenchToolCloudRunConnection', description?: string | null } | null, azureFunction?: { __typename?: 'WorkbenchToolAzureFunctionConnection', description?: string | null } | null } | null } | null } | null, kubeRequest?: { __typename?: 'WorkbenchJobActivityKubeRequest', handle?: string | null, method?: string | null, path?: string | null, queryParams?: Record<string, unknown> | null, contentType?: string | null } | null, kubeDrain?: { __typename?: 'WorkbenchJobActivityKubeDrain', handle?: string | null, node?: string | null, explanation?: string | null } | null, kubeExec?: { __typename?: 'WorkbenchJobActivityKubeExec', handle?: string | null, command?: string | null, namespace?: string | null, pod?: string | null, container?: string | null, explanation?: string | null } | null, jobUpdate?: { __typename?: 'WorkbenchJobActivityJobUpdate', diff?: string | null, workingTheory?: string | null, criticism?: string | null, conclusion?: string | null } | null, metricsQuery?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null, logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, traces?: Array<{ __typename?: 'WorkbenchJobActivityTrace', traceId?: string | null, spanId?: string | null, parentId?: string | null, name?: string | null, service?: string | null, start?: string | null, end?: string | null, tags?: Record<string, unknown> | null } | null> | null, tracesQuery?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null, canvas?: Array<{ __typename?: 'WorkbenchCanvasBlock', identifier?: string | null, type?: WorkbenchCanvasBlockType | null, title?: string | null, description?: string | null, sectionId?: string | null, collapsed?: boolean | null, layout?: { __typename?: 'WorkbenchCanvasBlockLayout', x?: number | null, y?: number | null, w?: number | null, h?: number | null } | null, content?: { __typename?: 'WorkbenchCanvasBlockContent', markdown?: string | null, metrics?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, logs?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, traces?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, pie?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null, bar?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null } | null } | null> | null } | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, babysit?: boolean | null, approval?: boolean | null, approvedAt?: string | null, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, headBranch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, usage?: { __typename?: 'AgentRunUsage', totalCost?: number | null, totalTokens?: number | null } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null, upload?: { __typename?: 'AgentRunUpload', id: string, session?: string | null, patch?: string | null } | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null } | null, agentRuns?: Array<{ __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, babysit?: boolean | null, approval?: boolean | null, approvedAt?: string | null, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, headBranch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, usage?: { __typename?: 'AgentRunUsage', totalCost?: number | null, totalTokens?: number | null } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null, upload?: { __typename?: 'AgentRunUpload', id: string, session?: string | null, patch?: string | null } | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null } | null> | null };
+export type WorkbenchJobActivityFragment = { __typename?: 'WorkbenchJobActivity', id: string, type?: WorkbenchJobActivityType | null, status: WorkbenchJobActivityStatus, prompt?: string | null, insertedAt?: string | null, attachments?: Array<{ __typename?: 'Attachment', id: string, filename: string, filetype?: string | null, path: string, size?: number | null, downloadUrl?: string | null } | null> | null, user?: { __typename?: 'User', name: string, email: string, profile?: string | null } | null, result?: { __typename?: 'WorkbenchJobActivityResult', output?: string | null, error?: string | null, explanation?: string | null, functionCall?: { __typename?: 'WorkbenchJobActivityFunctionCall', name?: string | null, input?: Record<string, unknown> | null, toolId?: string | null, tool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, configuration?: { __typename?: 'WorkbenchToolConfiguration', lambda?: { __typename?: 'WorkbenchToolLambdaConnection', description?: string | null } | null, cloudRun?: { __typename?: 'WorkbenchToolCloudRunConnection', description?: string | null } | null, azureFunction?: { __typename?: 'WorkbenchToolAzureFunctionConnection', description?: string | null } | null } | null } | null } | null, kubeRequest?: { __typename?: 'WorkbenchJobActivityKubeRequest', handle?: string | null, method?: string | null, path?: string | null, queryParams?: Record<string, unknown> | null, contentType?: string | null } | null, kubeDrain?: { __typename?: 'WorkbenchJobActivityKubeDrain', handle?: string | null, node?: string | null, explanation?: string | null } | null, kubeExec?: { __typename?: 'WorkbenchJobActivityKubeExec', handle?: string | null, command?: string | null, namespace?: string | null, pod?: string | null, container?: string | null, explanation?: string | null } | null, jobUpdate?: { __typename?: 'WorkbenchJobActivityJobUpdate', diff?: string | null, workingTheory?: string | null, criticism?: string | null, conclusion?: string | null } | null, metricsQuery?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null, logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, traces?: Array<{ __typename?: 'WorkbenchJobActivityTrace', traceId?: string | null, spanId?: string | null, parentId?: string | null, name?: string | null, service?: string | null, start?: string | null, end?: string | null, tags?: Record<string, unknown> | null } | null> | null, tracesQuery?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null, canvas?: Array<{ __typename?: 'WorkbenchCanvasBlock', identifier?: string | null, type?: WorkbenchCanvasBlockType | null, title?: string | null, description?: string | null, sectionId?: string | null, collapsed?: boolean | null, layout?: { __typename?: 'WorkbenchCanvasBlockLayout', x?: number | null, y?: number | null, w?: number | null, h?: number | null } | null, content?: { __typename?: 'WorkbenchCanvasBlockContent', markdown?: string | null, metrics?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, logs?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, traces?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, pie?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null, bar?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null } | null } | null> | null } | null, toolCall?: { __typename?: 'WorkbenchJobActivityToolCall', callId?: string | null, name?: string | null } | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, babysit?: boolean | null, approval?: boolean | null, approvedAt?: string | null, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, headBranch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, usage?: { __typename?: 'AgentRunUsage', totalCost?: number | null, totalTokens?: number | null } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null, upload?: { __typename?: 'AgentRunUpload', id: string, session?: string | null, patch?: string | null } | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null } | null, agentRuns?: Array<{ __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, babysit?: boolean | null, approval?: boolean | null, approvedAt?: string | null, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, headBranch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, usage?: { __typename?: 'AgentRunUsage', totalCost?: number | null, totalTokens?: number | null } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null, upload?: { __typename?: 'AgentRunUpload', id: string, session?: string | null, patch?: string | null } | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null } | null> | null };
 
-export type WorkbenchJobActivityWithThoughtsFragment = { __typename?: 'WorkbenchJobActivity', id: string, type?: WorkbenchJobActivityType | null, status: WorkbenchJobActivityStatus, prompt?: string | null, insertedAt?: string | null, thoughts?: Array<{ __typename?: 'WorkbenchJobThought', id: string, content?: string | null, toolName?: string | null, toolArgs?: Record<string, unknown> | null, tool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, approval?: boolean | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, mcpServer?: { __typename?: 'McpServer', id: string, name: string, url: string } | null } | null, activity?: { __typename?: 'WorkbenchJobActivity', id: string } | null, attributes?: { __typename?: 'WorkbenchJobThoughtAttributes', logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, series?: Array<{ __typename?: 'MetricResponse', name?: string | null, metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, traces?: Array<{ __typename?: 'WorkbenchJobActivityTrace', traceId?: string | null, spanId?: string | null, parentId?: string | null, name?: string | null, service?: string | null, start?: string | null, end?: string | null, tags?: Record<string, unknown> | null } | null> | null } | null } | null> | null, attachments?: Array<{ __typename?: 'Attachment', id: string, filename: string, filetype?: string | null, path: string, size?: number | null, downloadUrl?: string | null } | null> | null, user?: { __typename?: 'User', name: string, email: string, profile?: string | null } | null, result?: { __typename?: 'WorkbenchJobActivityResult', output?: string | null, error?: string | null, explanation?: string | null, functionCall?: { __typename?: 'WorkbenchJobActivityFunctionCall', name?: string | null, input?: Record<string, unknown> | null, toolId?: string | null, tool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, configuration?: { __typename?: 'WorkbenchToolConfiguration', lambda?: { __typename?: 'WorkbenchToolLambdaConnection', description?: string | null } | null, cloudRun?: { __typename?: 'WorkbenchToolCloudRunConnection', description?: string | null } | null, azureFunction?: { __typename?: 'WorkbenchToolAzureFunctionConnection', description?: string | null } | null } | null } | null } | null, kubeRequest?: { __typename?: 'WorkbenchJobActivityKubeRequest', handle?: string | null, method?: string | null, path?: string | null, queryParams?: Record<string, unknown> | null, contentType?: string | null } | null, kubeDrain?: { __typename?: 'WorkbenchJobActivityKubeDrain', handle?: string | null, node?: string | null, explanation?: string | null } | null, kubeExec?: { __typename?: 'WorkbenchJobActivityKubeExec', handle?: string | null, command?: string | null, namespace?: string | null, pod?: string | null, container?: string | null, explanation?: string | null } | null, jobUpdate?: { __typename?: 'WorkbenchJobActivityJobUpdate', diff?: string | null, workingTheory?: string | null, criticism?: string | null, conclusion?: string | null } | null, metricsQuery?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null, logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, traces?: Array<{ __typename?: 'WorkbenchJobActivityTrace', traceId?: string | null, spanId?: string | null, parentId?: string | null, name?: string | null, service?: string | null, start?: string | null, end?: string | null, tags?: Record<string, unknown> | null } | null> | null, tracesQuery?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null, canvas?: Array<{ __typename?: 'WorkbenchCanvasBlock', identifier?: string | null, type?: WorkbenchCanvasBlockType | null, title?: string | null, description?: string | null, sectionId?: string | null, collapsed?: boolean | null, layout?: { __typename?: 'WorkbenchCanvasBlockLayout', x?: number | null, y?: number | null, w?: number | null, h?: number | null } | null, content?: { __typename?: 'WorkbenchCanvasBlockContent', markdown?: string | null, metrics?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, logs?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, traces?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, pie?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null, bar?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null } | null } | null> | null } | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, babysit?: boolean | null, approval?: boolean | null, approvedAt?: string | null, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, headBranch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, usage?: { __typename?: 'AgentRunUsage', totalCost?: number | null, totalTokens?: number | null } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null, upload?: { __typename?: 'AgentRunUpload', id: string, session?: string | null, patch?: string | null } | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null } | null, agentRuns?: Array<{ __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, babysit?: boolean | null, approval?: boolean | null, approvedAt?: string | null, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, headBranch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, usage?: { __typename?: 'AgentRunUsage', totalCost?: number | null, totalTokens?: number | null } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null, upload?: { __typename?: 'AgentRunUpload', id: string, session?: string | null, patch?: string | null } | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null } | null> | null };
+export type WorkbenchJobActivityWithThoughtsFragment = { __typename?: 'WorkbenchJobActivity', id: string, type?: WorkbenchJobActivityType | null, status: WorkbenchJobActivityStatus, prompt?: string | null, insertedAt?: string | null, thoughts?: Array<{ __typename?: 'WorkbenchJobThought', id: string, content?: string | null, toolName?: string | null, toolArgs?: Record<string, unknown> | null, tool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, approval?: boolean | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, mcpServer?: { __typename?: 'McpServer', id: string, name: string, url: string } | null } | null, activity?: { __typename?: 'WorkbenchJobActivity', id: string } | null, attributes?: { __typename?: 'WorkbenchJobThoughtAttributes', logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, series?: Array<{ __typename?: 'MetricResponse', name?: string | null, metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, traces?: Array<{ __typename?: 'WorkbenchJobActivityTrace', traceId?: string | null, spanId?: string | null, parentId?: string | null, name?: string | null, service?: string | null, start?: string | null, end?: string | null, tags?: Record<string, unknown> | null } | null> | null } | null } | null> | null, attachments?: Array<{ __typename?: 'Attachment', id: string, filename: string, filetype?: string | null, path: string, size?: number | null, downloadUrl?: string | null } | null> | null, user?: { __typename?: 'User', name: string, email: string, profile?: string | null } | null, result?: { __typename?: 'WorkbenchJobActivityResult', output?: string | null, error?: string | null, explanation?: string | null, functionCall?: { __typename?: 'WorkbenchJobActivityFunctionCall', name?: string | null, input?: Record<string, unknown> | null, toolId?: string | null, tool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, configuration?: { __typename?: 'WorkbenchToolConfiguration', lambda?: { __typename?: 'WorkbenchToolLambdaConnection', description?: string | null } | null, cloudRun?: { __typename?: 'WorkbenchToolCloudRunConnection', description?: string | null } | null, azureFunction?: { __typename?: 'WorkbenchToolAzureFunctionConnection', description?: string | null } | null } | null } | null } | null, kubeRequest?: { __typename?: 'WorkbenchJobActivityKubeRequest', handle?: string | null, method?: string | null, path?: string | null, queryParams?: Record<string, unknown> | null, contentType?: string | null } | null, kubeDrain?: { __typename?: 'WorkbenchJobActivityKubeDrain', handle?: string | null, node?: string | null, explanation?: string | null } | null, kubeExec?: { __typename?: 'WorkbenchJobActivityKubeExec', handle?: string | null, command?: string | null, namespace?: string | null, pod?: string | null, container?: string | null, explanation?: string | null } | null, jobUpdate?: { __typename?: 'WorkbenchJobActivityJobUpdate', diff?: string | null, workingTheory?: string | null, criticism?: string | null, conclusion?: string | null } | null, metricsQuery?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null, logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, traces?: Array<{ __typename?: 'WorkbenchJobActivityTrace', traceId?: string | null, spanId?: string | null, parentId?: string | null, name?: string | null, service?: string | null, start?: string | null, end?: string | null, tags?: Record<string, unknown> | null } | null> | null, tracesQuery?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null, canvas?: Array<{ __typename?: 'WorkbenchCanvasBlock', identifier?: string | null, type?: WorkbenchCanvasBlockType | null, title?: string | null, description?: string | null, sectionId?: string | null, collapsed?: boolean | null, layout?: { __typename?: 'WorkbenchCanvasBlockLayout', x?: number | null, y?: number | null, w?: number | null, h?: number | null } | null, content?: { __typename?: 'WorkbenchCanvasBlockContent', markdown?: string | null, metrics?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, logs?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, traces?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, pie?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null, bar?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null } | null } | null> | null } | null, toolCall?: { __typename?: 'WorkbenchJobActivityToolCall', callId?: string | null, name?: string | null } | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, babysit?: boolean | null, approval?: boolean | null, approvedAt?: string | null, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, headBranch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, usage?: { __typename?: 'AgentRunUsage', totalCost?: number | null, totalTokens?: number | null } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null, upload?: { __typename?: 'AgentRunUpload', id: string, session?: string | null, patch?: string | null } | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null } | null, agentRuns?: Array<{ __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, babysit?: boolean | null, approval?: boolean | null, approvedAt?: string | null, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, headBranch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, usage?: { __typename?: 'AgentRunUsage', totalCost?: number | null, totalTokens?: number | null } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null, upload?: { __typename?: 'AgentRunUpload', id: string, session?: string | null, patch?: string | null } | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null } | null> | null };
 
 export type WorkbenchJobProgressFragment = { __typename?: 'WorkbenchJobProgress', activityId?: string | null, tool?: string | null, text?: string | null, arguments?: Record<string, unknown> | null };
-
-export type WorkbenchTextStreamFragment = { __typename?: 'WorkbenchTextStream', activityId?: string | null, text?: string | null };
 
 export type WorkbenchCronFragment = { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, userId?: string | null, lastRunAt?: string | null, nextRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, modes?: { __typename?: 'WorkbenchJobModes', plan?: boolean | null, verification?: boolean | null, model?: { __typename?: 'WorkbenchJobModel', provider?: AiProvider | null, model?: string | null } | null, coding?: { __typename?: 'WorkbenchJobCodingModes', approval?: boolean | null, babysit?: boolean | null, review?: boolean | null } | null, budget?: { __typename?: 'WorkbenchJobBudget', cost?: number | null, tokens?: number | null } | null, kubernetes?: { __typename?: 'WorkbenchJobKubernetesModes', update?: boolean | null, delete?: boolean | null, exec?: boolean | null, drain?: boolean | null, excludeNamespaces?: Array<string | null> | null, requireNamespaces?: Array<string | null> | null } | null } | null };
 
@@ -24146,7 +26608,7 @@ export type WorkbenchQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', systemPrompt?: string | null, filesystemEnabled?: boolean | null, id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, agentRuntime?: { __typename?: 'AgentRuntime', id: string, name: string, allowedRepositories?: Array<string | null> | null, type: AgentRuntimeType } | null, repository?: { __typename?: 'GitRepository', id: string } | null, configuration?: { __typename?: 'WorkbenchConfiguration', infrastructure?: { __typename?: 'WorkbenchInfrastructure', selfService?: boolean | null, services?: boolean | null, stacks?: boolean | null, kubernetes?: boolean | null, podLogs?: boolean | null, vulnerabilities?: boolean | null, sentinels?: boolean | null } | null, observability?: { __typename?: 'WorkbenchObservability', logs?: boolean | null, metrics?: boolean | null } | null, coding?: { __typename?: 'WorkbenchCoding', mode?: AgentRunMode | null, repositories?: Array<string | null> | null, enableBabysitting?: boolean | null } | null } | null, modes?: { __typename?: 'WorkbenchJobModes', plan?: boolean | null, verification?: boolean | null, model?: { __typename?: 'WorkbenchJobModel', provider?: AiProvider | null, model?: string | null } | null, coding?: { __typename?: 'WorkbenchJobCodingModes', approval?: boolean | null, babysit?: boolean | null, review?: boolean | null } | null, budget?: { __typename?: 'WorkbenchJobBudget', cost?: number | null, tokens?: number | null } | null, kubernetes?: { __typename?: 'WorkbenchJobKubernetesModes', update?: boolean | null, delete?: boolean | null, exec?: boolean | null, drain?: boolean | null, excludeNamespaces?: Array<string | null> | null, requireNamespaces?: Array<string | null> | null } | null } | null, budget?: { __typename?: 'WorkbenchBudget', enabled?: boolean | null, maximum?: number | null, minFree?: number | null, unit?: WorkbenchBudgetUnit | null, last?: number | null, lastUpdated?: string | null } | null, skills?: { __typename?: 'WorkbenchSkills', files?: Array<string | null> | null, ref?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, workbenchSkills?: { __typename?: 'WorkbenchSkillConnection', edges?: Array<{ __typename?: 'WorkbenchSkillEdge', node?: { __typename?: 'WorkbenchSkill', id: string, name?: string | null, description?: string | null, contents?: string | null, subagents?: Array<WorkbenchSkillSubagent | null> | null } | null } | null> | null } | null, workbenchKnowledge?: { __typename?: 'WorkbenchKnowledgeConnection', edges?: Array<{ __typename?: 'WorkbenchKnowledgeEdge', node?: { __typename?: 'WorkbenchKnowledge', id: string, name?: string | null, description?: string | null, knowledge?: string | null, labels?: Array<string | null> | null, usages?: number | null, lastUsedAt?: string | null } | null } | null> | null } | null, tools?: Array<{ __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, approval?: boolean | null, scmConnection?: { __typename?: 'ScmConnection', id: string, name: string, type: ScmType } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, oauth?: { __typename?: 'OauthTokenExchange', enabled?: boolean | null, type?: OauthTokenExchangeType | null, tokenUrl?: string | null, clientId?: string | null, keyId?: string | null, audience?: string | null, resource?: string | null, scopes?: Array<string | null> | null } | null, configuration?: { __typename?: 'WorkbenchToolConfiguration', http?: { __typename?: 'WorkbenchToolHttpConfiguration', url?: string | null, method?: string | null, body?: string | null, inputSchema?: Record<string, unknown> | null, headers?: Array<{ __typename?: 'WorkbenchToolHttpHeader', name?: string | null, value?: string | null } | null> | null } | null, datadog?: { __typename?: 'WorkbenchToolDatadogConnection', site?: string | null } | null, elastic?: { __typename?: 'WorkbenchToolElasticConnection', index: string, url: string, username: string } | null, opensearch?: { __typename?: 'WorkbenchToolOpensearchConnection', host: string, index: string, awsAccessKeyId?: string | null, awsRegion?: string | null, assumeRoleArn?: string | null, usePodIdentity?: boolean | null } | null, loki?: { __typename?: 'WorkbenchToolLokiConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, victoriaLogs?: { __typename?: 'WorkbenchToolVictoriaLogsConnection', url?: string | null, username?: string | null, accountId?: string | null, projectId?: string | null } | null, prometheus?: { __typename?: 'WorkbenchToolPrometheusConnection', url?: string | null, username?: string | null, tenantId?: string | null, awsSigv4?: boolean | null, awsAccessKeyId?: string | null, awsRegion?: string | null } | null, tempo?: { __typename?: 'WorkbenchToolTempoConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, jaeger?: { __typename?: 'WorkbenchToolJaegerConnection', url?: string | null, username?: string | null } | null, atlassian?: { __typename?: 'WorkbenchToolAtlassianConnection', email?: string | null, url: string } | null, jira?: { __typename?: 'WorkbenchToolJiraConnection', email: string, url: string } | null, jiraDatacenter?: { __typename?: 'WorkbenchToolJiraDatacenterConnection', url: string } | null, serviceNow?: { __typename?: 'WorkbenchToolServiceNowConnection', url: string, username?: string | null } | null, linear?: { __typename?: 'WorkbenchToolLinearConnection', url: string } | null, slack?: { __typename?: 'WorkbenchToolSlackConnection', url: string } | null, pagerduty?: { __typename?: 'WorkbenchToolPagerdutyConnection', url: string } | null, teams?: { __typename?: 'WorkbenchToolTeamsConnection', clientId?: string | null, tenantId?: string | null } | null, splunk?: { __typename?: 'WorkbenchToolSplunkConnection', url?: string | null, tokenType?: SplunkTokenType | null, username?: string | null } | null, cloudwatch?: { __typename?: 'WorkbenchToolCloudwatchConnection', logGroupNames?: Array<string | null> | null, region?: string | null, roleArn?: string | null, roleSessionName?: string | null } | null, azure?: { __typename?: 'WorkbenchToolAzureConnection', subscriptionId?: string | null, tenantId?: string | null, clientId?: string | null, prometheusUrl?: string | null } | null, dynatrace?: { __typename?: 'WorkbenchToolDynatraceConnection', url?: string | null } | null, sentry?: { __typename?: 'WorkbenchToolSentryConnection', url?: string | null } | null, github?: { __typename?: 'WorkbenchToolGithubConnection', url: string, toolset?: string | null, appId?: string | null, installationId?: string | null } | null, gitlab?: { __typename?: 'WorkbenchToolGitlabConnection', url?: string | null } | null, bitbucket?: { __typename?: 'WorkbenchToolBitbucketConnection', url?: string | null } | null, bitbucketDatacenter?: { __typename?: 'WorkbenchToolBitbucketDatacenterConnection', url?: string | null } | null, azureDevops?: { __typename?: 'WorkbenchToolAzureDevopsConnection', url?: string | null } | null, lambda?: { __typename?: 'WorkbenchToolLambdaConnection', lambdaArn?: string | null, description?: string | null, inputSchema?: Record<string, unknown> | null } | null, cloudRun?: { __typename?: 'WorkbenchToolCloudRunConnection', identifier?: string | null, description?: string | null, inputSchema?: Record<string, unknown> | null } | null, azureFunction?: { __typename?: 'WorkbenchToolAzureFunctionConnection', identifier?: string | null, description?: string | null, inputSchema?: Record<string, unknown> | null } | null, docker?: { __typename?: 'WorkbenchToolDockerConnection', url?: string | null, provider?: HelmAuthProvider | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null } | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, mcpServer?: { __typename?: 'McpServer', id: string, name: string, url: string } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, botUser?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null, webhooks?: { __typename?: 'WorkbenchWebhookConnection', edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, priority?: number | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, type: ObservabilityWebhookType } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, provider: IssueWebhookProvider } | null } | null } | null> | null } | null } | null };
+export type WorkbenchQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', systemPrompt?: string | null, filesystemEnabled?: boolean | null, id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, agentRuntime?: { __typename?: 'AgentRuntime', id: string, name: string, allowedRepositories?: Array<string | null> | null, type: AgentRuntimeType } | null, repository?: { __typename?: 'GitRepository', id: string } | null, configuration?: { __typename?: 'WorkbenchConfiguration', infrastructure?: { __typename?: 'WorkbenchInfrastructure', selfService?: boolean | null, services?: boolean | null, stacks?: boolean | null, kubernetes?: boolean | null, podLogs?: boolean | null, vulnerabilities?: boolean | null, sentinels?: boolean | null } | null, observability?: { __typename?: 'WorkbenchObservability', logs?: boolean | null, metrics?: boolean | null } | null, coding?: { __typename?: 'WorkbenchCoding', mode?: AgentRunMode | null, repositories?: Array<string | null> | null, enableBabysitting?: boolean | null } | null, devbox?: { __typename?: 'WorkbenchDevboxConfig', maxSnapshots?: number | null, maxDeferral?: number | null, allowSubscriptionCredentials?: boolean | null } | null } | null, modes?: { __typename?: 'WorkbenchJobModes', plan?: boolean | null, verification?: boolean | null, model?: { __typename?: 'WorkbenchJobModel', provider?: AiProvider | null, model?: string | null } | null, coding?: { __typename?: 'WorkbenchJobCodingModes', approval?: boolean | null, babysit?: boolean | null, review?: boolean | null } | null, budget?: { __typename?: 'WorkbenchJobBudget', cost?: number | null, tokens?: number | null } | null, kubernetes?: { __typename?: 'WorkbenchJobKubernetesModes', update?: boolean | null, delete?: boolean | null, exec?: boolean | null, drain?: boolean | null, excludeNamespaces?: Array<string | null> | null, requireNamespaces?: Array<string | null> | null } | null } | null, budget?: { __typename?: 'WorkbenchBudget', enabled?: boolean | null, maximum?: number | null, minFree?: number | null, unit?: WorkbenchBudgetUnit | null, last?: number | null, lastUpdated?: string | null } | null, skills?: { __typename?: 'WorkbenchSkills', files?: Array<string | null> | null, ref?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, workbenchSkills?: { __typename?: 'WorkbenchSkillConnection', edges?: Array<{ __typename?: 'WorkbenchSkillEdge', node?: { __typename?: 'WorkbenchSkill', id: string, name?: string | null, description?: string | null, contents?: string | null, subagents?: Array<WorkbenchSkillSubagent | null> | null } | null } | null> | null } | null, workbenchKnowledge?: { __typename?: 'WorkbenchKnowledgeConnection', edges?: Array<{ __typename?: 'WorkbenchKnowledgeEdge', node?: { __typename?: 'WorkbenchKnowledge', id: string, name?: string | null, description?: string | null, knowledge?: string | null, labels?: Array<string | null> | null, usages?: number | null, lastUsedAt?: string | null } | null } | null> | null } | null, tools?: Array<{ __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, approval?: boolean | null, scmConnection?: { __typename?: 'ScmConnection', id: string, name: string, type: ScmType } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, oauth?: { __typename?: 'OauthTokenExchange', enabled?: boolean | null, type?: OauthTokenExchangeType | null, tokenUrl?: string | null, clientId?: string | null, keyId?: string | null, audience?: string | null, resource?: string | null, scopes?: Array<string | null> | null } | null, configuration?: { __typename?: 'WorkbenchToolConfiguration', http?: { __typename?: 'WorkbenchToolHttpConfiguration', url?: string | null, method?: string | null, body?: string | null, inputSchema?: Record<string, unknown> | null, headers?: Array<{ __typename?: 'WorkbenchToolHttpHeader', name?: string | null, value?: string | null } | null> | null } | null, datadog?: { __typename?: 'WorkbenchToolDatadogConnection', site?: string | null } | null, elastic?: { __typename?: 'WorkbenchToolElasticConnection', index: string, url: string, username: string } | null, opensearch?: { __typename?: 'WorkbenchToolOpensearchConnection', host: string, index: string, awsAccessKeyId?: string | null, awsRegion?: string | null, assumeRoleArn?: string | null, usePodIdentity?: boolean | null } | null, loki?: { __typename?: 'WorkbenchToolLokiConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, victoriaLogs?: { __typename?: 'WorkbenchToolVictoriaLogsConnection', url?: string | null, username?: string | null, accountId?: string | null, projectId?: string | null } | null, prometheus?: { __typename?: 'WorkbenchToolPrometheusConnection', url?: string | null, username?: string | null, tenantId?: string | null, awsSigv4?: boolean | null, awsAccessKeyId?: string | null, awsRegion?: string | null } | null, tempo?: { __typename?: 'WorkbenchToolTempoConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, jaeger?: { __typename?: 'WorkbenchToolJaegerConnection', url?: string | null, username?: string | null } | null, atlassian?: { __typename?: 'WorkbenchToolAtlassianConnection', email?: string | null, url: string } | null, jira?: { __typename?: 'WorkbenchToolJiraConnection', email: string, url: string } | null, jiraDatacenter?: { __typename?: 'WorkbenchToolJiraDatacenterConnection', url: string } | null, serviceNow?: { __typename?: 'WorkbenchToolServiceNowConnection', url: string, username?: string | null } | null, linear?: { __typename?: 'WorkbenchToolLinearConnection', url: string } | null, slack?: { __typename?: 'WorkbenchToolSlackConnection', url: string } | null, pagerduty?: { __typename?: 'WorkbenchToolPagerdutyConnection', url: string } | null, teams?: { __typename?: 'WorkbenchToolTeamsConnection', clientId?: string | null, tenantId?: string | null } | null, splunk?: { __typename?: 'WorkbenchToolSplunkConnection', url?: string | null, tokenType?: SplunkTokenType | null, username?: string | null } | null, cloudwatch?: { __typename?: 'WorkbenchToolCloudwatchConnection', logGroupNames?: Array<string | null> | null, region?: string | null, roleArn?: string | null, roleSessionName?: string | null } | null, azure?: { __typename?: 'WorkbenchToolAzureConnection', subscriptionId?: string | null, tenantId?: string | null, clientId?: string | null, prometheusUrl?: string | null } | null, dynatrace?: { __typename?: 'WorkbenchToolDynatraceConnection', url?: string | null } | null, sentry?: { __typename?: 'WorkbenchToolSentryConnection', url?: string | null } | null, github?: { __typename?: 'WorkbenchToolGithubConnection', url: string, toolset?: string | null, appId?: string | null, installationId?: string | null } | null, gitlab?: { __typename?: 'WorkbenchToolGitlabConnection', url?: string | null } | null, bitbucket?: { __typename?: 'WorkbenchToolBitbucketConnection', url?: string | null } | null, bitbucketDatacenter?: { __typename?: 'WorkbenchToolBitbucketDatacenterConnection', url?: string | null } | null, azureDevops?: { __typename?: 'WorkbenchToolAzureDevopsConnection', url?: string | null } | null, lambda?: { __typename?: 'WorkbenchToolLambdaConnection', lambdaArn?: string | null, description?: string | null, inputSchema?: Record<string, unknown> | null } | null, cloudRun?: { __typename?: 'WorkbenchToolCloudRunConnection', identifier?: string | null, description?: string | null, inputSchema?: Record<string, unknown> | null } | null, azureFunction?: { __typename?: 'WorkbenchToolAzureFunctionConnection', identifier?: string | null, description?: string | null, inputSchema?: Record<string, unknown> | null } | null, docker?: { __typename?: 'WorkbenchToolDockerConnection', url?: string | null, provider?: HelmAuthProvider | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null } | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, mcpServer?: { __typename?: 'McpServer', id: string, name: string, url: string } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, botUser?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null, webhooks?: { __typename?: 'WorkbenchWebhookConnection', edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, priority?: number | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, type: ObservabilityWebhookType } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, provider: IssueWebhookProvider } | null } | null } | null> | null } | null } | null };
 
 export type WorkbenchAccessibleUserFragment = { __typename?: 'User', id: string, name: string, email: string, profile?: string | null };
 
@@ -24459,7 +26921,7 @@ export type WorkbenchJobActivitiesQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchJobActivitiesQuery = { __typename?: 'RootQueryType', workbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus, prompt?: string | null, insertedAt?: string | null, attachments?: Array<{ __typename?: 'Attachment', id: string, filename: string, filetype?: string | null, path: string, size?: number | null, downloadUrl?: string | null } | null> | null, modes?: { __typename?: 'WorkbenchJobModes', plan?: boolean | null, verification?: boolean | null, model?: { __typename?: 'WorkbenchJobModel', provider?: AiProvider | null, model?: string | null } | null, coding?: { __typename?: 'WorkbenchJobCodingModes', approval?: boolean | null, babysit?: boolean | null, review?: boolean | null } | null, budget?: { __typename?: 'WorkbenchJobBudget', cost?: number | null, tokens?: number | null } | null, kubernetes?: { __typename?: 'WorkbenchJobKubernetesModes', update?: boolean | null, delete?: boolean | null, exec?: boolean | null, drain?: boolean | null, excludeNamespaces?: Array<string | null> | null, requireNamespaces?: Array<string | null> | null } | null } | null, workbench?: { __typename?: 'Workbench', id: string, agentRuntime?: { __typename?: 'AgentRuntime', allowedRepositories?: Array<string | null> | null } | null, configuration?: { __typename?: 'WorkbenchConfiguration', coding?: { __typename?: 'WorkbenchCoding', repositories?: Array<string | null> | null } | null } | null } | null, referencedJob?: { __typename?: 'WorkbenchJob', id: string, prompt?: string | null, status: WorkbenchJobStatus, workbench?: { __typename?: 'Workbench', id: string } | null, evalResult?: { __typename?: 'WorkbenchEvalResult', id: string, grade?: number | null } | null } | null, activities?: { __typename?: 'WorkbenchJobActivityConnection', edges?: Array<{ __typename?: 'WorkbenchJobActivityEdge', node?: { __typename?: 'WorkbenchJobActivity', id: string, type?: WorkbenchJobActivityType | null, status: WorkbenchJobActivityStatus, prompt?: string | null, insertedAt?: string | null, attachments?: Array<{ __typename?: 'Attachment', id: string, filename: string, filetype?: string | null, path: string, size?: number | null, downloadUrl?: string | null } | null> | null, user?: { __typename?: 'User', name: string, email: string, profile?: string | null } | null, result?: { __typename?: 'WorkbenchJobActivityResult', output?: string | null, error?: string | null, explanation?: string | null, functionCall?: { __typename?: 'WorkbenchJobActivityFunctionCall', name?: string | null, input?: Record<string, unknown> | null, toolId?: string | null, tool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, configuration?: { __typename?: 'WorkbenchToolConfiguration', lambda?: { __typename?: 'WorkbenchToolLambdaConnection', description?: string | null } | null, cloudRun?: { __typename?: 'WorkbenchToolCloudRunConnection', description?: string | null } | null, azureFunction?: { __typename?: 'WorkbenchToolAzureFunctionConnection', description?: string | null } | null } | null } | null } | null, kubeRequest?: { __typename?: 'WorkbenchJobActivityKubeRequest', handle?: string | null, method?: string | null, path?: string | null, queryParams?: Record<string, unknown> | null, contentType?: string | null } | null, kubeDrain?: { __typename?: 'WorkbenchJobActivityKubeDrain', handle?: string | null, node?: string | null, explanation?: string | null } | null, kubeExec?: { __typename?: 'WorkbenchJobActivityKubeExec', handle?: string | null, command?: string | null, namespace?: string | null, pod?: string | null, container?: string | null, explanation?: string | null } | null, jobUpdate?: { __typename?: 'WorkbenchJobActivityJobUpdate', diff?: string | null, workingTheory?: string | null, criticism?: string | null, conclusion?: string | null } | null, metricsQuery?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null, logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, traces?: Array<{ __typename?: 'WorkbenchJobActivityTrace', traceId?: string | null, spanId?: string | null, parentId?: string | null, name?: string | null, service?: string | null, start?: string | null, end?: string | null, tags?: Record<string, unknown> | null } | null> | null, tracesQuery?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null, canvas?: Array<{ __typename?: 'WorkbenchCanvasBlock', identifier?: string | null, type?: WorkbenchCanvasBlockType | null, title?: string | null, description?: string | null, sectionId?: string | null, collapsed?: boolean | null, layout?: { __typename?: 'WorkbenchCanvasBlockLayout', x?: number | null, y?: number | null, w?: number | null, h?: number | null } | null, content?: { __typename?: 'WorkbenchCanvasBlockContent', markdown?: string | null, metrics?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, logs?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, traces?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, pie?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null, bar?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null } | null } | null> | null } | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, babysit?: boolean | null, approval?: boolean | null, approvedAt?: string | null, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, headBranch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, usage?: { __typename?: 'AgentRunUsage', totalCost?: number | null, totalTokens?: number | null } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null, upload?: { __typename?: 'AgentRunUpload', id: string, session?: string | null, patch?: string | null } | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null } | null, agentRuns?: Array<{ __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, babysit?: boolean | null, approval?: boolean | null, approvedAt?: string | null, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, headBranch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, usage?: { __typename?: 'AgentRunUsage', totalCost?: number | null, totalTokens?: number | null } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null, upload?: { __typename?: 'AgentRunUpload', id: string, session?: string | null, patch?: string | null } | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null } | null> | null } | null } | null> | null } | null, queuedPrompts?: { __typename?: 'QueuedPromptConnection', edges?: Array<{ __typename?: 'QueuedPromptEdge', node?: { __typename?: 'QueuedPrompt', id: string, prompt?: string | null, dequeableAt?: string | null, insertedAt?: string | null, user?: { __typename?: 'User', id: string, name: string } | null } | null } | null> | null } | null } | null };
+export type WorkbenchJobActivitiesQuery = { __typename?: 'RootQueryType', workbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus, prompt?: string | null, insertedAt?: string | null, attachments?: Array<{ __typename?: 'Attachment', id: string, filename: string, filetype?: string | null, path: string, size?: number | null, downloadUrl?: string | null } | null> | null, modes?: { __typename?: 'WorkbenchJobModes', plan?: boolean | null, verification?: boolean | null, model?: { __typename?: 'WorkbenchJobModel', provider?: AiProvider | null, model?: string | null } | null, coding?: { __typename?: 'WorkbenchJobCodingModes', approval?: boolean | null, babysit?: boolean | null, review?: boolean | null } | null, budget?: { __typename?: 'WorkbenchJobBudget', cost?: number | null, tokens?: number | null } | null, kubernetes?: { __typename?: 'WorkbenchJobKubernetesModes', update?: boolean | null, delete?: boolean | null, exec?: boolean | null, drain?: boolean | null, excludeNamespaces?: Array<string | null> | null, requireNamespaces?: Array<string | null> | null } | null } | null, workbench?: { __typename?: 'Workbench', id: string, agentRuntime?: { __typename?: 'AgentRuntime', allowedRepositories?: Array<string | null> | null } | null, configuration?: { __typename?: 'WorkbenchConfiguration', coding?: { __typename?: 'WorkbenchCoding', repositories?: Array<string | null> | null } | null } | null } | null, referencedJob?: { __typename?: 'WorkbenchJob', id: string, prompt?: string | null, status: WorkbenchJobStatus, workbench?: { __typename?: 'Workbench', id: string } | null, evalResult?: { __typename?: 'WorkbenchEvalResult', id: string, grade?: number | null } | null } | null, activities?: { __typename?: 'WorkbenchJobActivityConnection', edges?: Array<{ __typename?: 'WorkbenchJobActivityEdge', node?: { __typename?: 'WorkbenchJobActivity', id: string, type?: WorkbenchJobActivityType | null, status: WorkbenchJobActivityStatus, prompt?: string | null, insertedAt?: string | null, attachments?: Array<{ __typename?: 'Attachment', id: string, filename: string, filetype?: string | null, path: string, size?: number | null, downloadUrl?: string | null } | null> | null, user?: { __typename?: 'User', name: string, email: string, profile?: string | null } | null, result?: { __typename?: 'WorkbenchJobActivityResult', output?: string | null, error?: string | null, explanation?: string | null, functionCall?: { __typename?: 'WorkbenchJobActivityFunctionCall', name?: string | null, input?: Record<string, unknown> | null, toolId?: string | null, tool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, configuration?: { __typename?: 'WorkbenchToolConfiguration', lambda?: { __typename?: 'WorkbenchToolLambdaConnection', description?: string | null } | null, cloudRun?: { __typename?: 'WorkbenchToolCloudRunConnection', description?: string | null } | null, azureFunction?: { __typename?: 'WorkbenchToolAzureFunctionConnection', description?: string | null } | null } | null } | null } | null, kubeRequest?: { __typename?: 'WorkbenchJobActivityKubeRequest', handle?: string | null, method?: string | null, path?: string | null, queryParams?: Record<string, unknown> | null, contentType?: string | null } | null, kubeDrain?: { __typename?: 'WorkbenchJobActivityKubeDrain', handle?: string | null, node?: string | null, explanation?: string | null } | null, kubeExec?: { __typename?: 'WorkbenchJobActivityKubeExec', handle?: string | null, command?: string | null, namespace?: string | null, pod?: string | null, container?: string | null, explanation?: string | null } | null, jobUpdate?: { __typename?: 'WorkbenchJobActivityJobUpdate', diff?: string | null, workingTheory?: string | null, criticism?: string | null, conclusion?: string | null } | null, metricsQuery?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null, logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, traces?: Array<{ __typename?: 'WorkbenchJobActivityTrace', traceId?: string | null, spanId?: string | null, parentId?: string | null, name?: string | null, service?: string | null, start?: string | null, end?: string | null, tags?: Record<string, unknown> | null } | null> | null, tracesQuery?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null, canvas?: Array<{ __typename?: 'WorkbenchCanvasBlock', identifier?: string | null, type?: WorkbenchCanvasBlockType | null, title?: string | null, description?: string | null, sectionId?: string | null, collapsed?: boolean | null, layout?: { __typename?: 'WorkbenchCanvasBlockLayout', x?: number | null, y?: number | null, w?: number | null, h?: number | null } | null, content?: { __typename?: 'WorkbenchCanvasBlockContent', markdown?: string | null, metrics?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, logs?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, traces?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, pie?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null, bar?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null } | null } | null> | null } | null, toolCall?: { __typename?: 'WorkbenchJobActivityToolCall', callId?: string | null, name?: string | null } | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, babysit?: boolean | null, approval?: boolean | null, approvedAt?: string | null, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, headBranch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, usage?: { __typename?: 'AgentRunUsage', totalCost?: number | null, totalTokens?: number | null } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null, upload?: { __typename?: 'AgentRunUpload', id: string, session?: string | null, patch?: string | null } | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null } | null, agentRuns?: Array<{ __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, babysit?: boolean | null, approval?: boolean | null, approvedAt?: string | null, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, headBranch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, usage?: { __typename?: 'AgentRunUsage', totalCost?: number | null, totalTokens?: number | null } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null, upload?: { __typename?: 'AgentRunUpload', id: string, session?: string | null, patch?: string | null } | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null } | null> | null } | null } | null> | null } | null, queuedPrompts?: { __typename?: 'QueuedPromptConnection', edges?: Array<{ __typename?: 'QueuedPromptEdge', node?: { __typename?: 'QueuedPrompt', id: string, prompt?: string | null, dequeableAt?: string | null, insertedAt?: string | null, user?: { __typename?: 'User', id: string, name: string } | null } | null } | null> | null } | null } | null };
 
 export type WorkbenchJobActionSummaryQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -24512,7 +26974,7 @@ export type WorkbenchJobActivityQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchJobActivityQuery = { __typename?: 'RootQueryType', workbenchJobActivity?: { __typename?: 'WorkbenchJobActivity', id: string, type?: WorkbenchJobActivityType | null, status: WorkbenchJobActivityStatus, prompt?: string | null, insertedAt?: string | null, thoughts?: Array<{ __typename?: 'WorkbenchJobThought', id: string, content?: string | null, toolName?: string | null, toolArgs?: Record<string, unknown> | null, tool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, approval?: boolean | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, mcpServer?: { __typename?: 'McpServer', id: string, name: string, url: string } | null } | null, activity?: { __typename?: 'WorkbenchJobActivity', id: string } | null, attributes?: { __typename?: 'WorkbenchJobThoughtAttributes', logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, series?: Array<{ __typename?: 'MetricResponse', name?: string | null, metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, traces?: Array<{ __typename?: 'WorkbenchJobActivityTrace', traceId?: string | null, spanId?: string | null, parentId?: string | null, name?: string | null, service?: string | null, start?: string | null, end?: string | null, tags?: Record<string, unknown> | null } | null> | null } | null } | null> | null, attachments?: Array<{ __typename?: 'Attachment', id: string, filename: string, filetype?: string | null, path: string, size?: number | null, downloadUrl?: string | null } | null> | null, user?: { __typename?: 'User', name: string, email: string, profile?: string | null } | null, result?: { __typename?: 'WorkbenchJobActivityResult', output?: string | null, error?: string | null, explanation?: string | null, functionCall?: { __typename?: 'WorkbenchJobActivityFunctionCall', name?: string | null, input?: Record<string, unknown> | null, toolId?: string | null, tool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, configuration?: { __typename?: 'WorkbenchToolConfiguration', lambda?: { __typename?: 'WorkbenchToolLambdaConnection', description?: string | null } | null, cloudRun?: { __typename?: 'WorkbenchToolCloudRunConnection', description?: string | null } | null, azureFunction?: { __typename?: 'WorkbenchToolAzureFunctionConnection', description?: string | null } | null } | null } | null } | null, kubeRequest?: { __typename?: 'WorkbenchJobActivityKubeRequest', handle?: string | null, method?: string | null, path?: string | null, queryParams?: Record<string, unknown> | null, contentType?: string | null } | null, kubeDrain?: { __typename?: 'WorkbenchJobActivityKubeDrain', handle?: string | null, node?: string | null, explanation?: string | null } | null, kubeExec?: { __typename?: 'WorkbenchJobActivityKubeExec', handle?: string | null, command?: string | null, namespace?: string | null, pod?: string | null, container?: string | null, explanation?: string | null } | null, jobUpdate?: { __typename?: 'WorkbenchJobActivityJobUpdate', diff?: string | null, workingTheory?: string | null, criticism?: string | null, conclusion?: string | null } | null, metricsQuery?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null, logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, traces?: Array<{ __typename?: 'WorkbenchJobActivityTrace', traceId?: string | null, spanId?: string | null, parentId?: string | null, name?: string | null, service?: string | null, start?: string | null, end?: string | null, tags?: Record<string, unknown> | null } | null> | null, tracesQuery?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null, canvas?: Array<{ __typename?: 'WorkbenchCanvasBlock', identifier?: string | null, type?: WorkbenchCanvasBlockType | null, title?: string | null, description?: string | null, sectionId?: string | null, collapsed?: boolean | null, layout?: { __typename?: 'WorkbenchCanvasBlockLayout', x?: number | null, y?: number | null, w?: number | null, h?: number | null } | null, content?: { __typename?: 'WorkbenchCanvasBlockContent', markdown?: string | null, metrics?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, logs?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, traces?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, pie?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null, bar?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null } | null } | null> | null } | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, babysit?: boolean | null, approval?: boolean | null, approvedAt?: string | null, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, headBranch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, usage?: { __typename?: 'AgentRunUsage', totalCost?: number | null, totalTokens?: number | null } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null, upload?: { __typename?: 'AgentRunUpload', id: string, session?: string | null, patch?: string | null } | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null } | null, agentRuns?: Array<{ __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, babysit?: boolean | null, approval?: boolean | null, approvedAt?: string | null, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, headBranch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, usage?: { __typename?: 'AgentRunUsage', totalCost?: number | null, totalTokens?: number | null } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null, upload?: { __typename?: 'AgentRunUpload', id: string, session?: string | null, patch?: string | null } | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null } | null> | null } | null };
+export type WorkbenchJobActivityQuery = { __typename?: 'RootQueryType', workbenchJobActivity?: { __typename?: 'WorkbenchJobActivity', id: string, type?: WorkbenchJobActivityType | null, status: WorkbenchJobActivityStatus, prompt?: string | null, insertedAt?: string | null, thoughts?: Array<{ __typename?: 'WorkbenchJobThought', id: string, content?: string | null, toolName?: string | null, toolArgs?: Record<string, unknown> | null, tool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, approval?: boolean | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, mcpServer?: { __typename?: 'McpServer', id: string, name: string, url: string } | null } | null, activity?: { __typename?: 'WorkbenchJobActivity', id: string } | null, attributes?: { __typename?: 'WorkbenchJobThoughtAttributes', logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, series?: Array<{ __typename?: 'MetricResponse', name?: string | null, metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, traces?: Array<{ __typename?: 'WorkbenchJobActivityTrace', traceId?: string | null, spanId?: string | null, parentId?: string | null, name?: string | null, service?: string | null, start?: string | null, end?: string | null, tags?: Record<string, unknown> | null } | null> | null } | null } | null> | null, attachments?: Array<{ __typename?: 'Attachment', id: string, filename: string, filetype?: string | null, path: string, size?: number | null, downloadUrl?: string | null } | null> | null, user?: { __typename?: 'User', name: string, email: string, profile?: string | null } | null, result?: { __typename?: 'WorkbenchJobActivityResult', output?: string | null, error?: string | null, explanation?: string | null, functionCall?: { __typename?: 'WorkbenchJobActivityFunctionCall', name?: string | null, input?: Record<string, unknown> | null, toolId?: string | null, tool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, configuration?: { __typename?: 'WorkbenchToolConfiguration', lambda?: { __typename?: 'WorkbenchToolLambdaConnection', description?: string | null } | null, cloudRun?: { __typename?: 'WorkbenchToolCloudRunConnection', description?: string | null } | null, azureFunction?: { __typename?: 'WorkbenchToolAzureFunctionConnection', description?: string | null } | null } | null } | null } | null, kubeRequest?: { __typename?: 'WorkbenchJobActivityKubeRequest', handle?: string | null, method?: string | null, path?: string | null, queryParams?: Record<string, unknown> | null, contentType?: string | null } | null, kubeDrain?: { __typename?: 'WorkbenchJobActivityKubeDrain', handle?: string | null, node?: string | null, explanation?: string | null } | null, kubeExec?: { __typename?: 'WorkbenchJobActivityKubeExec', handle?: string | null, command?: string | null, namespace?: string | null, pod?: string | null, container?: string | null, explanation?: string | null } | null, jobUpdate?: { __typename?: 'WorkbenchJobActivityJobUpdate', diff?: string | null, workingTheory?: string | null, criticism?: string | null, conclusion?: string | null } | null, metricsQuery?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null, logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, traces?: Array<{ __typename?: 'WorkbenchJobActivityTrace', traceId?: string | null, spanId?: string | null, parentId?: string | null, name?: string | null, service?: string | null, start?: string | null, end?: string | null, tags?: Record<string, unknown> | null } | null> | null, tracesQuery?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null, canvas?: Array<{ __typename?: 'WorkbenchCanvasBlock', identifier?: string | null, type?: WorkbenchCanvasBlockType | null, title?: string | null, description?: string | null, sectionId?: string | null, collapsed?: boolean | null, layout?: { __typename?: 'WorkbenchCanvasBlockLayout', x?: number | null, y?: number | null, w?: number | null, h?: number | null } | null, content?: { __typename?: 'WorkbenchCanvasBlockContent', markdown?: string | null, metrics?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, logs?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, traces?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, pie?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null, bar?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null } | null } | null> | null } | null, toolCall?: { __typename?: 'WorkbenchJobActivityToolCall', callId?: string | null, name?: string | null } | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, babysit?: boolean | null, approval?: boolean | null, approvedAt?: string | null, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, headBranch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, usage?: { __typename?: 'AgentRunUsage', totalCost?: number | null, totalTokens?: number | null } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null, upload?: { __typename?: 'AgentRunUpload', id: string, session?: string | null, patch?: string | null } | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null } | null, agentRuns?: Array<{ __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, babysit?: boolean | null, approval?: boolean | null, approvedAt?: string | null, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, headBranch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, usage?: { __typename?: 'AgentRunUsage', totalCost?: number | null, totalTokens?: number | null } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null, upload?: { __typename?: 'AgentRunUpload', id: string, session?: string | null, patch?: string | null } | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null } | null> | null } | null };
 
 export type WorkbenchJobKubeRequestDiffQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -24543,7 +27005,7 @@ export type CreateWorkbenchMutationVariables = Exact<{
 }>;
 
 
-export type CreateWorkbenchMutation = { __typename?: 'RootMutationType', createWorkbench?: { __typename?: 'Workbench', systemPrompt?: string | null, filesystemEnabled?: boolean | null, id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, agentRuntime?: { __typename?: 'AgentRuntime', id: string, name: string, allowedRepositories?: Array<string | null> | null, type: AgentRuntimeType } | null, repository?: { __typename?: 'GitRepository', id: string } | null, configuration?: { __typename?: 'WorkbenchConfiguration', infrastructure?: { __typename?: 'WorkbenchInfrastructure', selfService?: boolean | null, services?: boolean | null, stacks?: boolean | null, kubernetes?: boolean | null, podLogs?: boolean | null, vulnerabilities?: boolean | null, sentinels?: boolean | null } | null, observability?: { __typename?: 'WorkbenchObservability', logs?: boolean | null, metrics?: boolean | null } | null, coding?: { __typename?: 'WorkbenchCoding', mode?: AgentRunMode | null, repositories?: Array<string | null> | null, enableBabysitting?: boolean | null } | null } | null, modes?: { __typename?: 'WorkbenchJobModes', plan?: boolean | null, verification?: boolean | null, model?: { __typename?: 'WorkbenchJobModel', provider?: AiProvider | null, model?: string | null } | null, coding?: { __typename?: 'WorkbenchJobCodingModes', approval?: boolean | null, babysit?: boolean | null, review?: boolean | null } | null, budget?: { __typename?: 'WorkbenchJobBudget', cost?: number | null, tokens?: number | null } | null, kubernetes?: { __typename?: 'WorkbenchJobKubernetesModes', update?: boolean | null, delete?: boolean | null, exec?: boolean | null, drain?: boolean | null, excludeNamespaces?: Array<string | null> | null, requireNamespaces?: Array<string | null> | null } | null } | null, budget?: { __typename?: 'WorkbenchBudget', enabled?: boolean | null, maximum?: number | null, minFree?: number | null, unit?: WorkbenchBudgetUnit | null, last?: number | null, lastUpdated?: string | null } | null, skills?: { __typename?: 'WorkbenchSkills', files?: Array<string | null> | null, ref?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, workbenchSkills?: { __typename?: 'WorkbenchSkillConnection', edges?: Array<{ __typename?: 'WorkbenchSkillEdge', node?: { __typename?: 'WorkbenchSkill', id: string, name?: string | null, description?: string | null, contents?: string | null, subagents?: Array<WorkbenchSkillSubagent | null> | null } | null } | null> | null } | null, workbenchKnowledge?: { __typename?: 'WorkbenchKnowledgeConnection', edges?: Array<{ __typename?: 'WorkbenchKnowledgeEdge', node?: { __typename?: 'WorkbenchKnowledge', id: string, name?: string | null, description?: string | null, knowledge?: string | null, labels?: Array<string | null> | null, usages?: number | null, lastUsedAt?: string | null } | null } | null> | null } | null, tools?: Array<{ __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, approval?: boolean | null, scmConnection?: { __typename?: 'ScmConnection', id: string, name: string, type: ScmType } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, oauth?: { __typename?: 'OauthTokenExchange', enabled?: boolean | null, type?: OauthTokenExchangeType | null, tokenUrl?: string | null, clientId?: string | null, keyId?: string | null, audience?: string | null, resource?: string | null, scopes?: Array<string | null> | null } | null, configuration?: { __typename?: 'WorkbenchToolConfiguration', http?: { __typename?: 'WorkbenchToolHttpConfiguration', url?: string | null, method?: string | null, body?: string | null, inputSchema?: Record<string, unknown> | null, headers?: Array<{ __typename?: 'WorkbenchToolHttpHeader', name?: string | null, value?: string | null } | null> | null } | null, datadog?: { __typename?: 'WorkbenchToolDatadogConnection', site?: string | null } | null, elastic?: { __typename?: 'WorkbenchToolElasticConnection', index: string, url: string, username: string } | null, opensearch?: { __typename?: 'WorkbenchToolOpensearchConnection', host: string, index: string, awsAccessKeyId?: string | null, awsRegion?: string | null, assumeRoleArn?: string | null, usePodIdentity?: boolean | null } | null, loki?: { __typename?: 'WorkbenchToolLokiConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, victoriaLogs?: { __typename?: 'WorkbenchToolVictoriaLogsConnection', url?: string | null, username?: string | null, accountId?: string | null, projectId?: string | null } | null, prometheus?: { __typename?: 'WorkbenchToolPrometheusConnection', url?: string | null, username?: string | null, tenantId?: string | null, awsSigv4?: boolean | null, awsAccessKeyId?: string | null, awsRegion?: string | null } | null, tempo?: { __typename?: 'WorkbenchToolTempoConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, jaeger?: { __typename?: 'WorkbenchToolJaegerConnection', url?: string | null, username?: string | null } | null, atlassian?: { __typename?: 'WorkbenchToolAtlassianConnection', email?: string | null, url: string } | null, jira?: { __typename?: 'WorkbenchToolJiraConnection', email: string, url: string } | null, jiraDatacenter?: { __typename?: 'WorkbenchToolJiraDatacenterConnection', url: string } | null, serviceNow?: { __typename?: 'WorkbenchToolServiceNowConnection', url: string, username?: string | null } | null, linear?: { __typename?: 'WorkbenchToolLinearConnection', url: string } | null, slack?: { __typename?: 'WorkbenchToolSlackConnection', url: string } | null, pagerduty?: { __typename?: 'WorkbenchToolPagerdutyConnection', url: string } | null, teams?: { __typename?: 'WorkbenchToolTeamsConnection', clientId?: string | null, tenantId?: string | null } | null, splunk?: { __typename?: 'WorkbenchToolSplunkConnection', url?: string | null, tokenType?: SplunkTokenType | null, username?: string | null } | null, cloudwatch?: { __typename?: 'WorkbenchToolCloudwatchConnection', logGroupNames?: Array<string | null> | null, region?: string | null, roleArn?: string | null, roleSessionName?: string | null } | null, azure?: { __typename?: 'WorkbenchToolAzureConnection', subscriptionId?: string | null, tenantId?: string | null, clientId?: string | null, prometheusUrl?: string | null } | null, dynatrace?: { __typename?: 'WorkbenchToolDynatraceConnection', url?: string | null } | null, sentry?: { __typename?: 'WorkbenchToolSentryConnection', url?: string | null } | null, github?: { __typename?: 'WorkbenchToolGithubConnection', url: string, toolset?: string | null, appId?: string | null, installationId?: string | null } | null, gitlab?: { __typename?: 'WorkbenchToolGitlabConnection', url?: string | null } | null, bitbucket?: { __typename?: 'WorkbenchToolBitbucketConnection', url?: string | null } | null, bitbucketDatacenter?: { __typename?: 'WorkbenchToolBitbucketDatacenterConnection', url?: string | null } | null, azureDevops?: { __typename?: 'WorkbenchToolAzureDevopsConnection', url?: string | null } | null, lambda?: { __typename?: 'WorkbenchToolLambdaConnection', lambdaArn?: string | null, description?: string | null, inputSchema?: Record<string, unknown> | null } | null, cloudRun?: { __typename?: 'WorkbenchToolCloudRunConnection', identifier?: string | null, description?: string | null, inputSchema?: Record<string, unknown> | null } | null, azureFunction?: { __typename?: 'WorkbenchToolAzureFunctionConnection', identifier?: string | null, description?: string | null, inputSchema?: Record<string, unknown> | null } | null, docker?: { __typename?: 'WorkbenchToolDockerConnection', url?: string | null, provider?: HelmAuthProvider | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null } | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, mcpServer?: { __typename?: 'McpServer', id: string, name: string, url: string } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, botUser?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null, webhooks?: { __typename?: 'WorkbenchWebhookConnection', edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, priority?: number | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, type: ObservabilityWebhookType } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, provider: IssueWebhookProvider } | null } | null } | null> | null } | null } | null };
+export type CreateWorkbenchMutation = { __typename?: 'RootMutationType', createWorkbench?: { __typename?: 'Workbench', systemPrompt?: string | null, filesystemEnabled?: boolean | null, id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, agentRuntime?: { __typename?: 'AgentRuntime', id: string, name: string, allowedRepositories?: Array<string | null> | null, type: AgentRuntimeType } | null, repository?: { __typename?: 'GitRepository', id: string } | null, configuration?: { __typename?: 'WorkbenchConfiguration', infrastructure?: { __typename?: 'WorkbenchInfrastructure', selfService?: boolean | null, services?: boolean | null, stacks?: boolean | null, kubernetes?: boolean | null, podLogs?: boolean | null, vulnerabilities?: boolean | null, sentinels?: boolean | null } | null, observability?: { __typename?: 'WorkbenchObservability', logs?: boolean | null, metrics?: boolean | null } | null, coding?: { __typename?: 'WorkbenchCoding', mode?: AgentRunMode | null, repositories?: Array<string | null> | null, enableBabysitting?: boolean | null } | null, devbox?: { __typename?: 'WorkbenchDevboxConfig', maxSnapshots?: number | null, maxDeferral?: number | null, allowSubscriptionCredentials?: boolean | null } | null } | null, modes?: { __typename?: 'WorkbenchJobModes', plan?: boolean | null, verification?: boolean | null, model?: { __typename?: 'WorkbenchJobModel', provider?: AiProvider | null, model?: string | null } | null, coding?: { __typename?: 'WorkbenchJobCodingModes', approval?: boolean | null, babysit?: boolean | null, review?: boolean | null } | null, budget?: { __typename?: 'WorkbenchJobBudget', cost?: number | null, tokens?: number | null } | null, kubernetes?: { __typename?: 'WorkbenchJobKubernetesModes', update?: boolean | null, delete?: boolean | null, exec?: boolean | null, drain?: boolean | null, excludeNamespaces?: Array<string | null> | null, requireNamespaces?: Array<string | null> | null } | null } | null, budget?: { __typename?: 'WorkbenchBudget', enabled?: boolean | null, maximum?: number | null, minFree?: number | null, unit?: WorkbenchBudgetUnit | null, last?: number | null, lastUpdated?: string | null } | null, skills?: { __typename?: 'WorkbenchSkills', files?: Array<string | null> | null, ref?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, workbenchSkills?: { __typename?: 'WorkbenchSkillConnection', edges?: Array<{ __typename?: 'WorkbenchSkillEdge', node?: { __typename?: 'WorkbenchSkill', id: string, name?: string | null, description?: string | null, contents?: string | null, subagents?: Array<WorkbenchSkillSubagent | null> | null } | null } | null> | null } | null, workbenchKnowledge?: { __typename?: 'WorkbenchKnowledgeConnection', edges?: Array<{ __typename?: 'WorkbenchKnowledgeEdge', node?: { __typename?: 'WorkbenchKnowledge', id: string, name?: string | null, description?: string | null, knowledge?: string | null, labels?: Array<string | null> | null, usages?: number | null, lastUsedAt?: string | null } | null } | null> | null } | null, tools?: Array<{ __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, approval?: boolean | null, scmConnection?: { __typename?: 'ScmConnection', id: string, name: string, type: ScmType } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, oauth?: { __typename?: 'OauthTokenExchange', enabled?: boolean | null, type?: OauthTokenExchangeType | null, tokenUrl?: string | null, clientId?: string | null, keyId?: string | null, audience?: string | null, resource?: string | null, scopes?: Array<string | null> | null } | null, configuration?: { __typename?: 'WorkbenchToolConfiguration', http?: { __typename?: 'WorkbenchToolHttpConfiguration', url?: string | null, method?: string | null, body?: string | null, inputSchema?: Record<string, unknown> | null, headers?: Array<{ __typename?: 'WorkbenchToolHttpHeader', name?: string | null, value?: string | null } | null> | null } | null, datadog?: { __typename?: 'WorkbenchToolDatadogConnection', site?: string | null } | null, elastic?: { __typename?: 'WorkbenchToolElasticConnection', index: string, url: string, username: string } | null, opensearch?: { __typename?: 'WorkbenchToolOpensearchConnection', host: string, index: string, awsAccessKeyId?: string | null, awsRegion?: string | null, assumeRoleArn?: string | null, usePodIdentity?: boolean | null } | null, loki?: { __typename?: 'WorkbenchToolLokiConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, victoriaLogs?: { __typename?: 'WorkbenchToolVictoriaLogsConnection', url?: string | null, username?: string | null, accountId?: string | null, projectId?: string | null } | null, prometheus?: { __typename?: 'WorkbenchToolPrometheusConnection', url?: string | null, username?: string | null, tenantId?: string | null, awsSigv4?: boolean | null, awsAccessKeyId?: string | null, awsRegion?: string | null } | null, tempo?: { __typename?: 'WorkbenchToolTempoConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, jaeger?: { __typename?: 'WorkbenchToolJaegerConnection', url?: string | null, username?: string | null } | null, atlassian?: { __typename?: 'WorkbenchToolAtlassianConnection', email?: string | null, url: string } | null, jira?: { __typename?: 'WorkbenchToolJiraConnection', email: string, url: string } | null, jiraDatacenter?: { __typename?: 'WorkbenchToolJiraDatacenterConnection', url: string } | null, serviceNow?: { __typename?: 'WorkbenchToolServiceNowConnection', url: string, username?: string | null } | null, linear?: { __typename?: 'WorkbenchToolLinearConnection', url: string } | null, slack?: { __typename?: 'WorkbenchToolSlackConnection', url: string } | null, pagerduty?: { __typename?: 'WorkbenchToolPagerdutyConnection', url: string } | null, teams?: { __typename?: 'WorkbenchToolTeamsConnection', clientId?: string | null, tenantId?: string | null } | null, splunk?: { __typename?: 'WorkbenchToolSplunkConnection', url?: string | null, tokenType?: SplunkTokenType | null, username?: string | null } | null, cloudwatch?: { __typename?: 'WorkbenchToolCloudwatchConnection', logGroupNames?: Array<string | null> | null, region?: string | null, roleArn?: string | null, roleSessionName?: string | null } | null, azure?: { __typename?: 'WorkbenchToolAzureConnection', subscriptionId?: string | null, tenantId?: string | null, clientId?: string | null, prometheusUrl?: string | null } | null, dynatrace?: { __typename?: 'WorkbenchToolDynatraceConnection', url?: string | null } | null, sentry?: { __typename?: 'WorkbenchToolSentryConnection', url?: string | null } | null, github?: { __typename?: 'WorkbenchToolGithubConnection', url: string, toolset?: string | null, appId?: string | null, installationId?: string | null } | null, gitlab?: { __typename?: 'WorkbenchToolGitlabConnection', url?: string | null } | null, bitbucket?: { __typename?: 'WorkbenchToolBitbucketConnection', url?: string | null } | null, bitbucketDatacenter?: { __typename?: 'WorkbenchToolBitbucketDatacenterConnection', url?: string | null } | null, azureDevops?: { __typename?: 'WorkbenchToolAzureDevopsConnection', url?: string | null } | null, lambda?: { __typename?: 'WorkbenchToolLambdaConnection', lambdaArn?: string | null, description?: string | null, inputSchema?: Record<string, unknown> | null } | null, cloudRun?: { __typename?: 'WorkbenchToolCloudRunConnection', identifier?: string | null, description?: string | null, inputSchema?: Record<string, unknown> | null } | null, azureFunction?: { __typename?: 'WorkbenchToolAzureFunctionConnection', identifier?: string | null, description?: string | null, inputSchema?: Record<string, unknown> | null } | null, docker?: { __typename?: 'WorkbenchToolDockerConnection', url?: string | null, provider?: HelmAuthProvider | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null } | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, mcpServer?: { __typename?: 'McpServer', id: string, name: string, url: string } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, botUser?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null, webhooks?: { __typename?: 'WorkbenchWebhookConnection', edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, priority?: number | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, type: ObservabilityWebhookType } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, provider: IssueWebhookProvider } | null } | null } | null> | null } | null } | null };
 
 export type UpdateWorkbenchMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -24551,7 +27013,7 @@ export type UpdateWorkbenchMutationVariables = Exact<{
 }>;
 
 
-export type UpdateWorkbenchMutation = { __typename?: 'RootMutationType', updateWorkbench?: { __typename?: 'Workbench', systemPrompt?: string | null, filesystemEnabled?: boolean | null, id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, agentRuntime?: { __typename?: 'AgentRuntime', id: string, name: string, allowedRepositories?: Array<string | null> | null, type: AgentRuntimeType } | null, repository?: { __typename?: 'GitRepository', id: string } | null, configuration?: { __typename?: 'WorkbenchConfiguration', infrastructure?: { __typename?: 'WorkbenchInfrastructure', selfService?: boolean | null, services?: boolean | null, stacks?: boolean | null, kubernetes?: boolean | null, podLogs?: boolean | null, vulnerabilities?: boolean | null, sentinels?: boolean | null } | null, observability?: { __typename?: 'WorkbenchObservability', logs?: boolean | null, metrics?: boolean | null } | null, coding?: { __typename?: 'WorkbenchCoding', mode?: AgentRunMode | null, repositories?: Array<string | null> | null, enableBabysitting?: boolean | null } | null } | null, modes?: { __typename?: 'WorkbenchJobModes', plan?: boolean | null, verification?: boolean | null, model?: { __typename?: 'WorkbenchJobModel', provider?: AiProvider | null, model?: string | null } | null, coding?: { __typename?: 'WorkbenchJobCodingModes', approval?: boolean | null, babysit?: boolean | null, review?: boolean | null } | null, budget?: { __typename?: 'WorkbenchJobBudget', cost?: number | null, tokens?: number | null } | null, kubernetes?: { __typename?: 'WorkbenchJobKubernetesModes', update?: boolean | null, delete?: boolean | null, exec?: boolean | null, drain?: boolean | null, excludeNamespaces?: Array<string | null> | null, requireNamespaces?: Array<string | null> | null } | null } | null, budget?: { __typename?: 'WorkbenchBudget', enabled?: boolean | null, maximum?: number | null, minFree?: number | null, unit?: WorkbenchBudgetUnit | null, last?: number | null, lastUpdated?: string | null } | null, skills?: { __typename?: 'WorkbenchSkills', files?: Array<string | null> | null, ref?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, workbenchSkills?: { __typename?: 'WorkbenchSkillConnection', edges?: Array<{ __typename?: 'WorkbenchSkillEdge', node?: { __typename?: 'WorkbenchSkill', id: string, name?: string | null, description?: string | null, contents?: string | null, subagents?: Array<WorkbenchSkillSubagent | null> | null } | null } | null> | null } | null, workbenchKnowledge?: { __typename?: 'WorkbenchKnowledgeConnection', edges?: Array<{ __typename?: 'WorkbenchKnowledgeEdge', node?: { __typename?: 'WorkbenchKnowledge', id: string, name?: string | null, description?: string | null, knowledge?: string | null, labels?: Array<string | null> | null, usages?: number | null, lastUsedAt?: string | null } | null } | null> | null } | null, tools?: Array<{ __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, approval?: boolean | null, scmConnection?: { __typename?: 'ScmConnection', id: string, name: string, type: ScmType } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, oauth?: { __typename?: 'OauthTokenExchange', enabled?: boolean | null, type?: OauthTokenExchangeType | null, tokenUrl?: string | null, clientId?: string | null, keyId?: string | null, audience?: string | null, resource?: string | null, scopes?: Array<string | null> | null } | null, configuration?: { __typename?: 'WorkbenchToolConfiguration', http?: { __typename?: 'WorkbenchToolHttpConfiguration', url?: string | null, method?: string | null, body?: string | null, inputSchema?: Record<string, unknown> | null, headers?: Array<{ __typename?: 'WorkbenchToolHttpHeader', name?: string | null, value?: string | null } | null> | null } | null, datadog?: { __typename?: 'WorkbenchToolDatadogConnection', site?: string | null } | null, elastic?: { __typename?: 'WorkbenchToolElasticConnection', index: string, url: string, username: string } | null, opensearch?: { __typename?: 'WorkbenchToolOpensearchConnection', host: string, index: string, awsAccessKeyId?: string | null, awsRegion?: string | null, assumeRoleArn?: string | null, usePodIdentity?: boolean | null } | null, loki?: { __typename?: 'WorkbenchToolLokiConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, victoriaLogs?: { __typename?: 'WorkbenchToolVictoriaLogsConnection', url?: string | null, username?: string | null, accountId?: string | null, projectId?: string | null } | null, prometheus?: { __typename?: 'WorkbenchToolPrometheusConnection', url?: string | null, username?: string | null, tenantId?: string | null, awsSigv4?: boolean | null, awsAccessKeyId?: string | null, awsRegion?: string | null } | null, tempo?: { __typename?: 'WorkbenchToolTempoConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, jaeger?: { __typename?: 'WorkbenchToolJaegerConnection', url?: string | null, username?: string | null } | null, atlassian?: { __typename?: 'WorkbenchToolAtlassianConnection', email?: string | null, url: string } | null, jira?: { __typename?: 'WorkbenchToolJiraConnection', email: string, url: string } | null, jiraDatacenter?: { __typename?: 'WorkbenchToolJiraDatacenterConnection', url: string } | null, serviceNow?: { __typename?: 'WorkbenchToolServiceNowConnection', url: string, username?: string | null } | null, linear?: { __typename?: 'WorkbenchToolLinearConnection', url: string } | null, slack?: { __typename?: 'WorkbenchToolSlackConnection', url: string } | null, pagerduty?: { __typename?: 'WorkbenchToolPagerdutyConnection', url: string } | null, teams?: { __typename?: 'WorkbenchToolTeamsConnection', clientId?: string | null, tenantId?: string | null } | null, splunk?: { __typename?: 'WorkbenchToolSplunkConnection', url?: string | null, tokenType?: SplunkTokenType | null, username?: string | null } | null, cloudwatch?: { __typename?: 'WorkbenchToolCloudwatchConnection', logGroupNames?: Array<string | null> | null, region?: string | null, roleArn?: string | null, roleSessionName?: string | null } | null, azure?: { __typename?: 'WorkbenchToolAzureConnection', subscriptionId?: string | null, tenantId?: string | null, clientId?: string | null, prometheusUrl?: string | null } | null, dynatrace?: { __typename?: 'WorkbenchToolDynatraceConnection', url?: string | null } | null, sentry?: { __typename?: 'WorkbenchToolSentryConnection', url?: string | null } | null, github?: { __typename?: 'WorkbenchToolGithubConnection', url: string, toolset?: string | null, appId?: string | null, installationId?: string | null } | null, gitlab?: { __typename?: 'WorkbenchToolGitlabConnection', url?: string | null } | null, bitbucket?: { __typename?: 'WorkbenchToolBitbucketConnection', url?: string | null } | null, bitbucketDatacenter?: { __typename?: 'WorkbenchToolBitbucketDatacenterConnection', url?: string | null } | null, azureDevops?: { __typename?: 'WorkbenchToolAzureDevopsConnection', url?: string | null } | null, lambda?: { __typename?: 'WorkbenchToolLambdaConnection', lambdaArn?: string | null, description?: string | null, inputSchema?: Record<string, unknown> | null } | null, cloudRun?: { __typename?: 'WorkbenchToolCloudRunConnection', identifier?: string | null, description?: string | null, inputSchema?: Record<string, unknown> | null } | null, azureFunction?: { __typename?: 'WorkbenchToolAzureFunctionConnection', identifier?: string | null, description?: string | null, inputSchema?: Record<string, unknown> | null } | null, docker?: { __typename?: 'WorkbenchToolDockerConnection', url?: string | null, provider?: HelmAuthProvider | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null } | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, mcpServer?: { __typename?: 'McpServer', id: string, name: string, url: string } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, botUser?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null, webhooks?: { __typename?: 'WorkbenchWebhookConnection', edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, priority?: number | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, type: ObservabilityWebhookType } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, provider: IssueWebhookProvider } | null } | null } | null> | null } | null } | null };
+export type UpdateWorkbenchMutation = { __typename?: 'RootMutationType', updateWorkbench?: { __typename?: 'Workbench', systemPrompt?: string | null, filesystemEnabled?: boolean | null, id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, agentRuntime?: { __typename?: 'AgentRuntime', id: string, name: string, allowedRepositories?: Array<string | null> | null, type: AgentRuntimeType } | null, repository?: { __typename?: 'GitRepository', id: string } | null, configuration?: { __typename?: 'WorkbenchConfiguration', infrastructure?: { __typename?: 'WorkbenchInfrastructure', selfService?: boolean | null, services?: boolean | null, stacks?: boolean | null, kubernetes?: boolean | null, podLogs?: boolean | null, vulnerabilities?: boolean | null, sentinels?: boolean | null } | null, observability?: { __typename?: 'WorkbenchObservability', logs?: boolean | null, metrics?: boolean | null } | null, coding?: { __typename?: 'WorkbenchCoding', mode?: AgentRunMode | null, repositories?: Array<string | null> | null, enableBabysitting?: boolean | null } | null, devbox?: { __typename?: 'WorkbenchDevboxConfig', maxSnapshots?: number | null, maxDeferral?: number | null, allowSubscriptionCredentials?: boolean | null } | null } | null, modes?: { __typename?: 'WorkbenchJobModes', plan?: boolean | null, verification?: boolean | null, model?: { __typename?: 'WorkbenchJobModel', provider?: AiProvider | null, model?: string | null } | null, coding?: { __typename?: 'WorkbenchJobCodingModes', approval?: boolean | null, babysit?: boolean | null, review?: boolean | null } | null, budget?: { __typename?: 'WorkbenchJobBudget', cost?: number | null, tokens?: number | null } | null, kubernetes?: { __typename?: 'WorkbenchJobKubernetesModes', update?: boolean | null, delete?: boolean | null, exec?: boolean | null, drain?: boolean | null, excludeNamespaces?: Array<string | null> | null, requireNamespaces?: Array<string | null> | null } | null } | null, budget?: { __typename?: 'WorkbenchBudget', enabled?: boolean | null, maximum?: number | null, minFree?: number | null, unit?: WorkbenchBudgetUnit | null, last?: number | null, lastUpdated?: string | null } | null, skills?: { __typename?: 'WorkbenchSkills', files?: Array<string | null> | null, ref?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, workbenchSkills?: { __typename?: 'WorkbenchSkillConnection', edges?: Array<{ __typename?: 'WorkbenchSkillEdge', node?: { __typename?: 'WorkbenchSkill', id: string, name?: string | null, description?: string | null, contents?: string | null, subagents?: Array<WorkbenchSkillSubagent | null> | null } | null } | null> | null } | null, workbenchKnowledge?: { __typename?: 'WorkbenchKnowledgeConnection', edges?: Array<{ __typename?: 'WorkbenchKnowledgeEdge', node?: { __typename?: 'WorkbenchKnowledge', id: string, name?: string | null, description?: string | null, knowledge?: string | null, labels?: Array<string | null> | null, usages?: number | null, lastUsedAt?: string | null } | null } | null> | null } | null, tools?: Array<{ __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, approval?: boolean | null, scmConnection?: { __typename?: 'ScmConnection', id: string, name: string, type: ScmType } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, oauth?: { __typename?: 'OauthTokenExchange', enabled?: boolean | null, type?: OauthTokenExchangeType | null, tokenUrl?: string | null, clientId?: string | null, keyId?: string | null, audience?: string | null, resource?: string | null, scopes?: Array<string | null> | null } | null, configuration?: { __typename?: 'WorkbenchToolConfiguration', http?: { __typename?: 'WorkbenchToolHttpConfiguration', url?: string | null, method?: string | null, body?: string | null, inputSchema?: Record<string, unknown> | null, headers?: Array<{ __typename?: 'WorkbenchToolHttpHeader', name?: string | null, value?: string | null } | null> | null } | null, datadog?: { __typename?: 'WorkbenchToolDatadogConnection', site?: string | null } | null, elastic?: { __typename?: 'WorkbenchToolElasticConnection', index: string, url: string, username: string } | null, opensearch?: { __typename?: 'WorkbenchToolOpensearchConnection', host: string, index: string, awsAccessKeyId?: string | null, awsRegion?: string | null, assumeRoleArn?: string | null, usePodIdentity?: boolean | null } | null, loki?: { __typename?: 'WorkbenchToolLokiConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, victoriaLogs?: { __typename?: 'WorkbenchToolVictoriaLogsConnection', url?: string | null, username?: string | null, accountId?: string | null, projectId?: string | null } | null, prometheus?: { __typename?: 'WorkbenchToolPrometheusConnection', url?: string | null, username?: string | null, tenantId?: string | null, awsSigv4?: boolean | null, awsAccessKeyId?: string | null, awsRegion?: string | null } | null, tempo?: { __typename?: 'WorkbenchToolTempoConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, jaeger?: { __typename?: 'WorkbenchToolJaegerConnection', url?: string | null, username?: string | null } | null, atlassian?: { __typename?: 'WorkbenchToolAtlassianConnection', email?: string | null, url: string } | null, jira?: { __typename?: 'WorkbenchToolJiraConnection', email: string, url: string } | null, jiraDatacenter?: { __typename?: 'WorkbenchToolJiraDatacenterConnection', url: string } | null, serviceNow?: { __typename?: 'WorkbenchToolServiceNowConnection', url: string, username?: string | null } | null, linear?: { __typename?: 'WorkbenchToolLinearConnection', url: string } | null, slack?: { __typename?: 'WorkbenchToolSlackConnection', url: string } | null, pagerduty?: { __typename?: 'WorkbenchToolPagerdutyConnection', url: string } | null, teams?: { __typename?: 'WorkbenchToolTeamsConnection', clientId?: string | null, tenantId?: string | null } | null, splunk?: { __typename?: 'WorkbenchToolSplunkConnection', url?: string | null, tokenType?: SplunkTokenType | null, username?: string | null } | null, cloudwatch?: { __typename?: 'WorkbenchToolCloudwatchConnection', logGroupNames?: Array<string | null> | null, region?: string | null, roleArn?: string | null, roleSessionName?: string | null } | null, azure?: { __typename?: 'WorkbenchToolAzureConnection', subscriptionId?: string | null, tenantId?: string | null, clientId?: string | null, prometheusUrl?: string | null } | null, dynatrace?: { __typename?: 'WorkbenchToolDynatraceConnection', url?: string | null } | null, sentry?: { __typename?: 'WorkbenchToolSentryConnection', url?: string | null } | null, github?: { __typename?: 'WorkbenchToolGithubConnection', url: string, toolset?: string | null, appId?: string | null, installationId?: string | null } | null, gitlab?: { __typename?: 'WorkbenchToolGitlabConnection', url?: string | null } | null, bitbucket?: { __typename?: 'WorkbenchToolBitbucketConnection', url?: string | null } | null, bitbucketDatacenter?: { __typename?: 'WorkbenchToolBitbucketDatacenterConnection', url?: string | null } | null, azureDevops?: { __typename?: 'WorkbenchToolAzureDevopsConnection', url?: string | null } | null, lambda?: { __typename?: 'WorkbenchToolLambdaConnection', lambdaArn?: string | null, description?: string | null, inputSchema?: Record<string, unknown> | null } | null, cloudRun?: { __typename?: 'WorkbenchToolCloudRunConnection', identifier?: string | null, description?: string | null, inputSchema?: Record<string, unknown> | null } | null, azureFunction?: { __typename?: 'WorkbenchToolAzureFunctionConnection', identifier?: string | null, description?: string | null, inputSchema?: Record<string, unknown> | null } | null, docker?: { __typename?: 'WorkbenchToolDockerConnection', url?: string | null, provider?: HelmAuthProvider | null, proxy?: { __typename?: 'HttpProxyConfiguration', enabled: boolean, url: string, noproxy?: string | null } | null } | null } | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, mcpServer?: { __typename?: 'McpServer', id: string, name: string, url: string } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, botUser?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null, webhooks?: { __typename?: 'WorkbenchWebhookConnection', edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, priority?: number | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, type: ObservabilityWebhookType } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, provider: IssueWebhookProvider } | null } | null } | null> | null } | null } | null };
 
 export type CreateWorkbenchSkillMutationVariables = Exact<{
   workbenchId: Scalars['ID']['input'];
@@ -24672,7 +27134,7 @@ export type CreateWorkbenchMessageMutationVariables = Exact<{
 }>;
 
 
-export type CreateWorkbenchMessageMutation = { __typename?: 'RootMutationType', createWorkbenchMessage?: { __typename?: 'WorkbenchJobActivity', id: string, type?: WorkbenchJobActivityType | null, status: WorkbenchJobActivityStatus, prompt?: string | null, insertedAt?: string | null, attachments?: Array<{ __typename?: 'Attachment', id: string, filename: string, filetype?: string | null, path: string, size?: number | null, downloadUrl?: string | null } | null> | null, user?: { __typename?: 'User', name: string, email: string, profile?: string | null } | null, result?: { __typename?: 'WorkbenchJobActivityResult', output?: string | null, error?: string | null, explanation?: string | null, functionCall?: { __typename?: 'WorkbenchJobActivityFunctionCall', name?: string | null, input?: Record<string, unknown> | null, toolId?: string | null, tool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, configuration?: { __typename?: 'WorkbenchToolConfiguration', lambda?: { __typename?: 'WorkbenchToolLambdaConnection', description?: string | null } | null, cloudRun?: { __typename?: 'WorkbenchToolCloudRunConnection', description?: string | null } | null, azureFunction?: { __typename?: 'WorkbenchToolAzureFunctionConnection', description?: string | null } | null } | null } | null } | null, kubeRequest?: { __typename?: 'WorkbenchJobActivityKubeRequest', handle?: string | null, method?: string | null, path?: string | null, queryParams?: Record<string, unknown> | null, contentType?: string | null } | null, kubeDrain?: { __typename?: 'WorkbenchJobActivityKubeDrain', handle?: string | null, node?: string | null, explanation?: string | null } | null, kubeExec?: { __typename?: 'WorkbenchJobActivityKubeExec', handle?: string | null, command?: string | null, namespace?: string | null, pod?: string | null, container?: string | null, explanation?: string | null } | null, jobUpdate?: { __typename?: 'WorkbenchJobActivityJobUpdate', diff?: string | null, workingTheory?: string | null, criticism?: string | null, conclusion?: string | null } | null, metricsQuery?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null, logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, traces?: Array<{ __typename?: 'WorkbenchJobActivityTrace', traceId?: string | null, spanId?: string | null, parentId?: string | null, name?: string | null, service?: string | null, start?: string | null, end?: string | null, tags?: Record<string, unknown> | null } | null> | null, tracesQuery?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null, canvas?: Array<{ __typename?: 'WorkbenchCanvasBlock', identifier?: string | null, type?: WorkbenchCanvasBlockType | null, title?: string | null, description?: string | null, sectionId?: string | null, collapsed?: boolean | null, layout?: { __typename?: 'WorkbenchCanvasBlockLayout', x?: number | null, y?: number | null, w?: number | null, h?: number | null } | null, content?: { __typename?: 'WorkbenchCanvasBlockContent', markdown?: string | null, metrics?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, logs?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, traces?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, pie?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null, bar?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null } | null } | null> | null } | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, babysit?: boolean | null, approval?: boolean | null, approvedAt?: string | null, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, headBranch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, usage?: { __typename?: 'AgentRunUsage', totalCost?: number | null, totalTokens?: number | null } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null, upload?: { __typename?: 'AgentRunUpload', id: string, session?: string | null, patch?: string | null } | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null } | null, agentRuns?: Array<{ __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, babysit?: boolean | null, approval?: boolean | null, approvedAt?: string | null, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, headBranch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, usage?: { __typename?: 'AgentRunUsage', totalCost?: number | null, totalTokens?: number | null } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null, upload?: { __typename?: 'AgentRunUpload', id: string, session?: string | null, patch?: string | null } | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null } | null> | null } | null };
+export type CreateWorkbenchMessageMutation = { __typename?: 'RootMutationType', createWorkbenchMessage?: { __typename?: 'WorkbenchJobActivity', id: string, type?: WorkbenchJobActivityType | null, status: WorkbenchJobActivityStatus, prompt?: string | null, insertedAt?: string | null, attachments?: Array<{ __typename?: 'Attachment', id: string, filename: string, filetype?: string | null, path: string, size?: number | null, downloadUrl?: string | null } | null> | null, user?: { __typename?: 'User', name: string, email: string, profile?: string | null } | null, result?: { __typename?: 'WorkbenchJobActivityResult', output?: string | null, error?: string | null, explanation?: string | null, functionCall?: { __typename?: 'WorkbenchJobActivityFunctionCall', name?: string | null, input?: Record<string, unknown> | null, toolId?: string | null, tool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, configuration?: { __typename?: 'WorkbenchToolConfiguration', lambda?: { __typename?: 'WorkbenchToolLambdaConnection', description?: string | null } | null, cloudRun?: { __typename?: 'WorkbenchToolCloudRunConnection', description?: string | null } | null, azureFunction?: { __typename?: 'WorkbenchToolAzureFunctionConnection', description?: string | null } | null } | null } | null } | null, kubeRequest?: { __typename?: 'WorkbenchJobActivityKubeRequest', handle?: string | null, method?: string | null, path?: string | null, queryParams?: Record<string, unknown> | null, contentType?: string | null } | null, kubeDrain?: { __typename?: 'WorkbenchJobActivityKubeDrain', handle?: string | null, node?: string | null, explanation?: string | null } | null, kubeExec?: { __typename?: 'WorkbenchJobActivityKubeExec', handle?: string | null, command?: string | null, namespace?: string | null, pod?: string | null, container?: string | null, explanation?: string | null } | null, jobUpdate?: { __typename?: 'WorkbenchJobActivityJobUpdate', diff?: string | null, workingTheory?: string | null, criticism?: string | null, conclusion?: string | null } | null, metricsQuery?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null, logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, traces?: Array<{ __typename?: 'WorkbenchJobActivityTrace', traceId?: string | null, spanId?: string | null, parentId?: string | null, name?: string | null, service?: string | null, start?: string | null, end?: string | null, tags?: Record<string, unknown> | null } | null> | null, tracesQuery?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null, canvas?: Array<{ __typename?: 'WorkbenchCanvasBlock', identifier?: string | null, type?: WorkbenchCanvasBlockType | null, title?: string | null, description?: string | null, sectionId?: string | null, collapsed?: boolean | null, layout?: { __typename?: 'WorkbenchCanvasBlockLayout', x?: number | null, y?: number | null, w?: number | null, h?: number | null } | null, content?: { __typename?: 'WorkbenchCanvasBlockContent', markdown?: string | null, metrics?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, logs?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, traces?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, pie?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null, bar?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null } | null } | null> | null } | null, toolCall?: { __typename?: 'WorkbenchJobActivityToolCall', callId?: string | null, name?: string | null } | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, babysit?: boolean | null, approval?: boolean | null, approvedAt?: string | null, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, headBranch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, usage?: { __typename?: 'AgentRunUsage', totalCost?: number | null, totalTokens?: number | null } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null, upload?: { __typename?: 'AgentRunUpload', id: string, session?: string | null, patch?: string | null } | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null } | null, agentRuns?: Array<{ __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, babysit?: boolean | null, approval?: boolean | null, approvedAt?: string | null, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, headBranch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, usage?: { __typename?: 'AgentRunUsage', totalCost?: number | null, totalTokens?: number | null } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null, upload?: { __typename?: 'AgentRunUpload', id: string, session?: string | null, patch?: string | null } | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null } | null> | null } | null };
 
 export type CreateQueuedPromptMutationVariables = Exact<{
   jobId: Scalars['ID']['input'];
@@ -24823,14 +27285,14 @@ export type WorkbenchJobDeltaSubscriptionVariables = Exact<{
 }>;
 
 
-export type WorkbenchJobDeltaSubscription = { __typename?: 'RootSubscriptionType', workbenchJobDelta?: { __typename?: 'WorkbenchJobDelta', delta?: Delta | null, payload?: { __typename?: 'WorkbenchJob', error?: string | null, id: string, prompt?: string | null, status: WorkbenchJobStatus, insertedAt?: string | null, queuedPromptCount: number, result?: { __typename?: 'WorkbenchJobResult', id: string, conclusion?: string | null, workingTheory?: string | null, criticism?: string | null, topology?: string | null, todos?: Array<{ __typename?: 'WorkbenchJobResultTodo', name?: string | null, description?: string | null, done?: boolean | null } | null> | null, canvas?: Array<{ __typename?: 'WorkbenchCanvasBlock', identifier?: string | null, type?: WorkbenchCanvasBlockType | null, title?: string | null, description?: string | null, sectionId?: string | null, collapsed?: boolean | null, layout?: { __typename?: 'WorkbenchCanvasBlockLayout', x?: number | null, y?: number | null, w?: number | null, h?: number | null } | null, content?: { __typename?: 'WorkbenchCanvasBlockContent', markdown?: string | null, metrics?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, logs?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, traces?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, pie?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null, bar?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null } | null } | null> | null } | null, queuedPromptSummary: { __typename?: 'QueuedPromptSummary', readyCount: number, pendingCount: number, nextAt?: string | null }, usage?: { __typename?: 'WorkbenchJobUsage', cachedTokens?: number | null, inputTokens?: number | null, outputTokens?: number | null, totalCost?: number | null, totalTokens?: number | null } | null, modes?: { __typename?: 'WorkbenchJobModes', budget?: { __typename?: 'WorkbenchJobBudget', cost?: number | null, tokens?: number | null } | null } | null, user?: { __typename?: 'User', id: string, name: string, profile?: string | null } | null, workbench?: { __typename?: 'Workbench', id: string, name: string } | null, alert?: { __typename?: 'Alert', id: string, state: AlertState, url?: string | null } | null, issue?: { __typename?: 'Issue', id: string, status: IssueStatus, url: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', patch?: string | null, id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, evalResult?: { __typename?: 'WorkbenchEvalResult', id: string, grade?: number | null } | null, chatbotMessage?: { __typename?: 'ChatbotMessage', id: string, channel?: string | null, message?: string | null, chatConnection?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType } | null } | null } | null } | null };
+export type WorkbenchJobDeltaSubscription = { __typename?: 'RootSubscriptionType', workbenchJobDelta?: { __typename?: 'WorkbenchJobDelta', delta?: Delta | null, payload?: { __typename?: 'WorkbenchJob', error?: string | null, id: string, prompt?: string | null, status: WorkbenchJobStatus, insertedAt?: string | null, queuedPromptCount: number, result?: { __typename?: 'WorkbenchJobResult', id: string, workingTheory?: string | null, criticism?: string | null, conclusion?: string | null, topology?: string | null, todos?: Array<{ __typename?: 'WorkbenchJobResultTodo', name?: string | null, description?: string | null, done?: boolean | null } | null> | null } | null, queuedPromptSummary: { __typename?: 'QueuedPromptSummary', readyCount: number, pendingCount: number, nextAt?: string | null }, usage?: { __typename?: 'WorkbenchJobUsage', cachedTokens?: number | null, inputTokens?: number | null, outputTokens?: number | null, totalCost?: number | null, totalTokens?: number | null } | null, modes?: { __typename?: 'WorkbenchJobModes', budget?: { __typename?: 'WorkbenchJobBudget', cost?: number | null, tokens?: number | null } | null } | null, user?: { __typename?: 'User', id: string, name: string, profile?: string | null } | null, workbench?: { __typename?: 'Workbench', id: string, name: string } | null, alert?: { __typename?: 'Alert', id: string, state: AlertState, url?: string | null } | null, issue?: { __typename?: 'Issue', id: string, status: IssueStatus, url: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', patch?: string | null, id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, evalResult?: { __typename?: 'WorkbenchEvalResult', id: string, grade?: number | null } | null, chatbotMessage?: { __typename?: 'ChatbotMessage', id: string, channel?: string | null, message?: string | null, chatConnection?: { __typename?: 'ChatProviderConnection', id: string, name: string, type: ChatProviderConnectionType } | null } | null } | null } | null };
 
 export type WorkbenchJobActivityDeltaSubscriptionVariables = Exact<{
   jobId: Scalars['ID']['input'];
 }>;
 
 
-export type WorkbenchJobActivityDeltaSubscription = { __typename?: 'RootSubscriptionType', workbenchJobActivityDelta?: { __typename?: 'WorkbenchJobActivityDelta', delta?: Delta | null, payload?: { __typename?: 'WorkbenchJobActivity', id: string, type?: WorkbenchJobActivityType | null, status: WorkbenchJobActivityStatus, prompt?: string | null, insertedAt?: string | null, attachments?: Array<{ __typename?: 'Attachment', id: string, filename: string, filetype?: string | null, path: string, size?: number | null, downloadUrl?: string | null } | null> | null, user?: { __typename?: 'User', name: string, email: string, profile?: string | null } | null, result?: { __typename?: 'WorkbenchJobActivityResult', output?: string | null, error?: string | null, explanation?: string | null, functionCall?: { __typename?: 'WorkbenchJobActivityFunctionCall', name?: string | null, input?: Record<string, unknown> | null, toolId?: string | null, tool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, configuration?: { __typename?: 'WorkbenchToolConfiguration', lambda?: { __typename?: 'WorkbenchToolLambdaConnection', description?: string | null } | null, cloudRun?: { __typename?: 'WorkbenchToolCloudRunConnection', description?: string | null } | null, azureFunction?: { __typename?: 'WorkbenchToolAzureFunctionConnection', description?: string | null } | null } | null } | null } | null, kubeRequest?: { __typename?: 'WorkbenchJobActivityKubeRequest', handle?: string | null, method?: string | null, path?: string | null, queryParams?: Record<string, unknown> | null, contentType?: string | null } | null, kubeDrain?: { __typename?: 'WorkbenchJobActivityKubeDrain', handle?: string | null, node?: string | null, explanation?: string | null } | null, kubeExec?: { __typename?: 'WorkbenchJobActivityKubeExec', handle?: string | null, command?: string | null, namespace?: string | null, pod?: string | null, container?: string | null, explanation?: string | null } | null, jobUpdate?: { __typename?: 'WorkbenchJobActivityJobUpdate', diff?: string | null, workingTheory?: string | null, criticism?: string | null, conclusion?: string | null } | null, metricsQuery?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null, logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, traces?: Array<{ __typename?: 'WorkbenchJobActivityTrace', traceId?: string | null, spanId?: string | null, parentId?: string | null, name?: string | null, service?: string | null, start?: string | null, end?: string | null, tags?: Record<string, unknown> | null } | null> | null, tracesQuery?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null, canvas?: Array<{ __typename?: 'WorkbenchCanvasBlock', identifier?: string | null, type?: WorkbenchCanvasBlockType | null, title?: string | null, description?: string | null, sectionId?: string | null, collapsed?: boolean | null, layout?: { __typename?: 'WorkbenchCanvasBlockLayout', x?: number | null, y?: number | null, w?: number | null, h?: number | null } | null, content?: { __typename?: 'WorkbenchCanvasBlockContent', markdown?: string | null, metrics?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, logs?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, traces?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, pie?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null, bar?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null } | null } | null> | null } | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, babysit?: boolean | null, approval?: boolean | null, approvedAt?: string | null, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, headBranch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, usage?: { __typename?: 'AgentRunUsage', totalCost?: number | null, totalTokens?: number | null } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null, upload?: { __typename?: 'AgentRunUpload', id: string, session?: string | null, patch?: string | null } | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null } | null, agentRuns?: Array<{ __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, babysit?: boolean | null, approval?: boolean | null, approvedAt?: string | null, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, headBranch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, usage?: { __typename?: 'AgentRunUsage', totalCost?: number | null, totalTokens?: number | null } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null, upload?: { __typename?: 'AgentRunUpload', id: string, session?: string | null, patch?: string | null } | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null } | null> | null } | null } | null };
+export type WorkbenchJobActivityDeltaSubscription = { __typename?: 'RootSubscriptionType', workbenchJobActivityDelta?: { __typename?: 'WorkbenchJobActivityDelta', delta?: Delta | null, payload?: { __typename?: 'WorkbenchJobActivity', id: string, type?: WorkbenchJobActivityType | null, status: WorkbenchJobActivityStatus, prompt?: string | null, insertedAt?: string | null, attachments?: Array<{ __typename?: 'Attachment', id: string, filename: string, filetype?: string | null, path: string, size?: number | null, downloadUrl?: string | null } | null> | null, user?: { __typename?: 'User', name: string, email: string, profile?: string | null } | null, result?: { __typename?: 'WorkbenchJobActivityResult', output?: string | null, error?: string | null, explanation?: string | null, functionCall?: { __typename?: 'WorkbenchJobActivityFunctionCall', name?: string | null, input?: Record<string, unknown> | null, toolId?: string | null, tool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, configuration?: { __typename?: 'WorkbenchToolConfiguration', lambda?: { __typename?: 'WorkbenchToolLambdaConnection', description?: string | null } | null, cloudRun?: { __typename?: 'WorkbenchToolCloudRunConnection', description?: string | null } | null, azureFunction?: { __typename?: 'WorkbenchToolAzureFunctionConnection', description?: string | null } | null } | null } | null } | null, kubeRequest?: { __typename?: 'WorkbenchJobActivityKubeRequest', handle?: string | null, method?: string | null, path?: string | null, queryParams?: Record<string, unknown> | null, contentType?: string | null } | null, kubeDrain?: { __typename?: 'WorkbenchJobActivityKubeDrain', handle?: string | null, node?: string | null, explanation?: string | null } | null, kubeExec?: { __typename?: 'WorkbenchJobActivityKubeExec', handle?: string | null, command?: string | null, namespace?: string | null, pod?: string | null, container?: string | null, explanation?: string | null } | null, jobUpdate?: { __typename?: 'WorkbenchJobActivityJobUpdate', diff?: string | null, workingTheory?: string | null, criticism?: string | null, conclusion?: string | null } | null, metricsQuery?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null, logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, traces?: Array<{ __typename?: 'WorkbenchJobActivityTrace', traceId?: string | null, spanId?: string | null, parentId?: string | null, name?: string | null, service?: string | null, start?: string | null, end?: string | null, tags?: Record<string, unknown> | null } | null> | null, tracesQuery?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null, canvas?: Array<{ __typename?: 'WorkbenchCanvasBlock', identifier?: string | null, type?: WorkbenchCanvasBlockType | null, title?: string | null, description?: string | null, sectionId?: string | null, collapsed?: boolean | null, layout?: { __typename?: 'WorkbenchCanvasBlockLayout', x?: number | null, y?: number | null, w?: number | null, h?: number | null } | null, content?: { __typename?: 'WorkbenchCanvasBlockContent', markdown?: string | null, metrics?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, logs?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, traces?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, pie?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null, bar?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null } | null } | null> | null } | null, toolCall?: { __typename?: 'WorkbenchJobActivityToolCall', callId?: string | null, name?: string | null } | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, babysit?: boolean | null, approval?: boolean | null, approvedAt?: string | null, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, headBranch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, usage?: { __typename?: 'AgentRunUsage', totalCost?: number | null, totalTokens?: number | null } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null, upload?: { __typename?: 'AgentRunUpload', id: string, session?: string | null, patch?: string | null } | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null } | null, agentRuns?: Array<{ __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, babysit?: boolean | null, approval?: boolean | null, approvedAt?: string | null, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, headBranch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, usage?: { __typename?: 'AgentRunUsage', totalCost?: number | null, totalTokens?: number | null } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null, upload?: { __typename?: 'AgentRunUpload', id: string, session?: string | null, patch?: string | null } | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null } | null> | null } | null } | null };
 
 export type WorkbenchJobThoughtDeltaSubscriptionVariables = Exact<{
   jobId: Scalars['ID']['input'];
@@ -24839,19 +27301,19 @@ export type WorkbenchJobThoughtDeltaSubscriptionVariables = Exact<{
 
 export type WorkbenchJobThoughtDeltaSubscription = { __typename?: 'RootSubscriptionType', workbenchJobThoughtDelta?: { __typename?: 'WorkbenchJobThoughtDelta', delta?: Delta | null, payload?: { __typename?: 'WorkbenchJobThought', id: string, content?: string | null, toolName?: string | null, toolArgs?: Record<string, unknown> | null, tool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, approval?: boolean | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, mcpServer?: { __typename?: 'McpServer', id: string, name: string, url: string } | null } | null, activity?: { __typename?: 'WorkbenchJobActivity', id: string } | null, attributes?: { __typename?: 'WorkbenchJobThoughtAttributes', logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, series?: Array<{ __typename?: 'MetricResponse', name?: string | null, metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, traces?: Array<{ __typename?: 'WorkbenchJobActivityTrace', traceId?: string | null, spanId?: string | null, parentId?: string | null, name?: string | null, service?: string | null, start?: string | null, end?: string | null, tags?: Record<string, unknown> | null } | null> | null } | null } | null } | null };
 
+export type QueuedPromptDeltaSubscriptionVariables = Exact<{
+  jobId: Scalars['ID']['input'];
+}>;
+
+
+export type QueuedPromptDeltaSubscription = { __typename?: 'RootSubscriptionType', queuedPromptDelta?: { __typename?: 'QueuedPromptDelta', delta?: Delta | null, payload?: { __typename?: 'QueuedPrompt', consumedAt?: string | null, id: string, prompt?: string | null, dequeableAt?: string | null, insertedAt?: string | null, user?: { __typename?: 'User', id: string, name: string } | null } | null } | null };
+
 export type WorkbenchJobProgressSubscriptionVariables = Exact<{
   jobId: Scalars['ID']['input'];
 }>;
 
 
 export type WorkbenchJobProgressSubscription = { __typename?: 'RootSubscriptionType', workbenchJobProgress?: { __typename?: 'WorkbenchJobProgress', activityId?: string | null, tool?: string | null, text?: string | null, arguments?: Record<string, unknown> | null } | null };
-
-export type WorkbenchTextStreamSubscriptionVariables = Exact<{
-  jobId: Scalars['ID']['input'];
-}>;
-
-
-export type WorkbenchTextStreamSubscription = { __typename?: 'RootSubscriptionType', workbenchTextStream?: { __typename?: 'WorkbenchTextStream', activityId?: string | null, text?: string | null } | null };
 
 export type WorkbenchCanvasStreamSubscriptionVariables = Exact<{
   jobId: Scalars['ID']['input'];
@@ -29470,6 +31932,18 @@ export type ClusterNetworkGraphQueryResult = Apollo.QueryResult<ClusterNetworkGr
  *      start: // value for 'start'
  *      stop: // value for 'stop'
  *      step: // value for 'step'
+ *      cpu: // value for 'cpu'
+ *      mem: // value for 'mem'
+ *      podCpu: // value for 'podCpu'
+ *      podMem: // value for 'podMem'
+ *      cpuRequests: // value for 'cpuRequests'
+ *      memRequests: // value for 'memRequests'
+ *      cpuLimits: // value for 'cpuLimits'
+ *      memLimits: // value for 'memLimits'
+ *      podCpuRequests: // value for 'podCpuRequests'
+ *      podMemRequests: // value for 'podMemRequests'
+ *      podCpuLimits: // value for 'podCpuLimits'
+ *      podMemLimits: // value for 'podMemLimits'
  *   },
  * });
  */
@@ -29607,6 +32081,18 @@ export type ClusterDeltaSubscriptionResult = Apollo.SubscriptionResult<ClusterDe
  *      start: // value for 'start'
  *      stop: // value for 'stop'
  *      step: // value for 'step'
+ *      cpu: // value for 'cpu'
+ *      mem: // value for 'mem'
+ *      podCpu: // value for 'podCpu'
+ *      podMem: // value for 'podMem'
+ *      cpuRequests: // value for 'cpuRequests'
+ *      memRequests: // value for 'memRequests'
+ *      cpuLimits: // value for 'cpuLimits'
+ *      memLimits: // value for 'memLimits'
+ *      podCpuRequests: // value for 'podCpuRequests'
+ *      podMemRequests: // value for 'podMemRequests'
+ *      podCpuLimits: // value for 'podCpuLimits'
+ *      podMemLimits: // value for 'podMemLimits'
  *   },
  * });
  */
@@ -32400,6 +34886,1660 @@ export type ApplyScalingRecommendationMutationResult = Apollo.MutationResult<App
 export type ApplyScalingRecommendationMutationOptions = Apollo.BaseMutationOptions<ApplyScalingRecommendationMutation, ApplyScalingRecommendationMutationVariables>;
 
 /**
+ * __useWorkbenchDevboxesQuery__
+ *
+ * To run a query within a React component, call `useWorkbenchDevboxesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchDevboxesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWorkbenchDevboxesQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useWorkbenchDevboxesQuery(baseOptions: Apollo.QueryHookOptions<WorkbenchDevboxesQuery, WorkbenchDevboxesQueryVariables> & ({ variables: WorkbenchDevboxesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<WorkbenchDevboxesQuery, WorkbenchDevboxesQueryVariables>(Operations.WorkbenchDevboxes, options);
+      }
+export function useWorkbenchDevboxesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<WorkbenchDevboxesQuery, WorkbenchDevboxesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<WorkbenchDevboxesQuery, WorkbenchDevboxesQueryVariables>(Operations.WorkbenchDevboxes, options);
+        }
+// @ts-ignore
+export function useWorkbenchDevboxesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<WorkbenchDevboxesQuery, WorkbenchDevboxesQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchDevboxesQuery, WorkbenchDevboxesQueryVariables>;
+export function useWorkbenchDevboxesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchDevboxesQuery, WorkbenchDevboxesQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchDevboxesQuery | undefined, WorkbenchDevboxesQueryVariables>;
+export function useWorkbenchDevboxesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchDevboxesQuery, WorkbenchDevboxesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<WorkbenchDevboxesQuery, WorkbenchDevboxesQueryVariables>(Operations.WorkbenchDevboxes, options);
+        }
+export type WorkbenchDevboxesQueryHookResult = ReturnType<typeof useWorkbenchDevboxesQuery>;
+export type WorkbenchDevboxesLazyQueryHookResult = ReturnType<typeof useWorkbenchDevboxesLazyQuery>;
+export type WorkbenchDevboxesSuspenseQueryHookResult = ReturnType<typeof useWorkbenchDevboxesSuspenseQuery>;
+export type WorkbenchDevboxesQueryResult = Apollo.QueryResult<WorkbenchDevboxesQuery, WorkbenchDevboxesQueryVariables>;
+
+/**
+ * __useDevboxesQuery__
+ *
+ * To run a query within a React component, call `useDevboxesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDevboxesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDevboxesQuery({
+ *   variables: {
+ *      q: // value for 'q'
+ *      clusterId: // value for 'clusterId'
+ *      workbenchId: // value for 'workbenchId'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *   },
+ * });
+ */
+export function useDevboxesQuery(baseOptions?: Apollo.QueryHookOptions<DevboxesQuery, DevboxesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<DevboxesQuery, DevboxesQueryVariables>(Operations.Devboxes, options);
+      }
+export function useDevboxesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DevboxesQuery, DevboxesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<DevboxesQuery, DevboxesQueryVariables>(Operations.Devboxes, options);
+        }
+// @ts-ignore
+export function useDevboxesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<DevboxesQuery, DevboxesQueryVariables>): Apollo.UseSuspenseQueryResult<DevboxesQuery, DevboxesQueryVariables>;
+export function useDevboxesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DevboxesQuery, DevboxesQueryVariables>): Apollo.UseSuspenseQueryResult<DevboxesQuery | undefined, DevboxesQueryVariables>;
+export function useDevboxesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DevboxesQuery, DevboxesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<DevboxesQuery, DevboxesQueryVariables>(Operations.Devboxes, options);
+        }
+export type DevboxesQueryHookResult = ReturnType<typeof useDevboxesQuery>;
+export type DevboxesLazyQueryHookResult = ReturnType<typeof useDevboxesLazyQuery>;
+export type DevboxesSuspenseQueryHookResult = ReturnType<typeof useDevboxesSuspenseQuery>;
+export type DevboxesQueryResult = Apollo.QueryResult<DevboxesQuery, DevboxesQueryVariables>;
+
+/**
+ * __useDevboxQuery__
+ *
+ * To run a query within a React component, call `useDevboxQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDevboxQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDevboxQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDevboxQuery(baseOptions: Apollo.QueryHookOptions<DevboxQuery, DevboxQueryVariables> & ({ variables: DevboxQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<DevboxQuery, DevboxQueryVariables>(Operations.Devbox, options);
+      }
+export function useDevboxLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DevboxQuery, DevboxQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<DevboxQuery, DevboxQueryVariables>(Operations.Devbox, options);
+        }
+// @ts-ignore
+export function useDevboxSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<DevboxQuery, DevboxQueryVariables>): Apollo.UseSuspenseQueryResult<DevboxQuery, DevboxQueryVariables>;
+export function useDevboxSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DevboxQuery, DevboxQueryVariables>): Apollo.UseSuspenseQueryResult<DevboxQuery | undefined, DevboxQueryVariables>;
+export function useDevboxSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DevboxQuery, DevboxQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<DevboxQuery, DevboxQueryVariables>(Operations.Devbox, options);
+        }
+export type DevboxQueryHookResult = ReturnType<typeof useDevboxQuery>;
+export type DevboxLazyQueryHookResult = ReturnType<typeof useDevboxLazyQuery>;
+export type DevboxSuspenseQueryHookResult = ReturnType<typeof useDevboxSuspenseQuery>;
+export type DevboxQueryResult = Apollo.QueryResult<DevboxQuery, DevboxQueryVariables>;
+
+/**
+ * __useDevboxAgentsQuery__
+ *
+ * To run a query within a React component, call `useDevboxAgentsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDevboxAgentsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDevboxAgentsQuery({
+ *   variables: {
+ *      workbenchId: // value for 'workbenchId'
+ *      devboxId: // value for 'devboxId'
+ *   },
+ * });
+ */
+export function useDevboxAgentsQuery(baseOptions: Apollo.QueryHookOptions<DevboxAgentsQuery, DevboxAgentsQueryVariables> & ({ variables: DevboxAgentsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<DevboxAgentsQuery, DevboxAgentsQueryVariables>(Operations.DevboxAgents, options);
+      }
+export function useDevboxAgentsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DevboxAgentsQuery, DevboxAgentsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<DevboxAgentsQuery, DevboxAgentsQueryVariables>(Operations.DevboxAgents, options);
+        }
+// @ts-ignore
+export function useDevboxAgentsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<DevboxAgentsQuery, DevboxAgentsQueryVariables>): Apollo.UseSuspenseQueryResult<DevboxAgentsQuery, DevboxAgentsQueryVariables>;
+export function useDevboxAgentsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DevboxAgentsQuery, DevboxAgentsQueryVariables>): Apollo.UseSuspenseQueryResult<DevboxAgentsQuery | undefined, DevboxAgentsQueryVariables>;
+export function useDevboxAgentsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DevboxAgentsQuery, DevboxAgentsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<DevboxAgentsQuery, DevboxAgentsQueryVariables>(Operations.DevboxAgents, options);
+        }
+export type DevboxAgentsQueryHookResult = ReturnType<typeof useDevboxAgentsQuery>;
+export type DevboxAgentsLazyQueryHookResult = ReturnType<typeof useDevboxAgentsLazyQuery>;
+export type DevboxAgentsSuspenseQueryHookResult = ReturnType<typeof useDevboxAgentsSuspenseQuery>;
+export type DevboxAgentsQueryResult = Apollo.QueryResult<DevboxAgentsQuery, DevboxAgentsQueryVariables>;
+
+/**
+ * __useWorkbenchDevboxInstancesQuery__
+ *
+ * To run a query within a React component, call `useWorkbenchDevboxInstancesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchDevboxInstancesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWorkbenchDevboxInstancesQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *      statuses: // value for 'statuses'
+ *      mine: // value for 'mine'
+ *   },
+ * });
+ */
+export function useWorkbenchDevboxInstancesQuery(baseOptions: Apollo.QueryHookOptions<WorkbenchDevboxInstancesQuery, WorkbenchDevboxInstancesQueryVariables> & ({ variables: WorkbenchDevboxInstancesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<WorkbenchDevboxInstancesQuery, WorkbenchDevboxInstancesQueryVariables>(Operations.WorkbenchDevboxInstances, options);
+      }
+export function useWorkbenchDevboxInstancesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<WorkbenchDevboxInstancesQuery, WorkbenchDevboxInstancesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<WorkbenchDevboxInstancesQuery, WorkbenchDevboxInstancesQueryVariables>(Operations.WorkbenchDevboxInstances, options);
+        }
+// @ts-ignore
+export function useWorkbenchDevboxInstancesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<WorkbenchDevboxInstancesQuery, WorkbenchDevboxInstancesQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchDevboxInstancesQuery, WorkbenchDevboxInstancesQueryVariables>;
+export function useWorkbenchDevboxInstancesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchDevboxInstancesQuery, WorkbenchDevboxInstancesQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchDevboxInstancesQuery | undefined, WorkbenchDevboxInstancesQueryVariables>;
+export function useWorkbenchDevboxInstancesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchDevboxInstancesQuery, WorkbenchDevboxInstancesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<WorkbenchDevboxInstancesQuery, WorkbenchDevboxInstancesQueryVariables>(Operations.WorkbenchDevboxInstances, options);
+        }
+export type WorkbenchDevboxInstancesQueryHookResult = ReturnType<typeof useWorkbenchDevboxInstancesQuery>;
+export type WorkbenchDevboxInstancesLazyQueryHookResult = ReturnType<typeof useWorkbenchDevboxInstancesLazyQuery>;
+export type WorkbenchDevboxInstancesSuspenseQueryHookResult = ReturnType<typeof useWorkbenchDevboxInstancesSuspenseQuery>;
+export type WorkbenchDevboxInstancesQueryResult = Apollo.QueryResult<WorkbenchDevboxInstancesQuery, WorkbenchDevboxInstancesQueryVariables>;
+
+/**
+ * __useWorkbenchDevboxSnapshotsQuery__
+ *
+ * To run a query within a React component, call `useWorkbenchDevboxSnapshotsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchDevboxSnapshotsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWorkbenchDevboxSnapshotsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *   },
+ * });
+ */
+export function useWorkbenchDevboxSnapshotsQuery(baseOptions: Apollo.QueryHookOptions<WorkbenchDevboxSnapshotsQuery, WorkbenchDevboxSnapshotsQueryVariables> & ({ variables: WorkbenchDevboxSnapshotsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<WorkbenchDevboxSnapshotsQuery, WorkbenchDevboxSnapshotsQueryVariables>(Operations.WorkbenchDevboxSnapshots, options);
+      }
+export function useWorkbenchDevboxSnapshotsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<WorkbenchDevboxSnapshotsQuery, WorkbenchDevboxSnapshotsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<WorkbenchDevboxSnapshotsQuery, WorkbenchDevboxSnapshotsQueryVariables>(Operations.WorkbenchDevboxSnapshots, options);
+        }
+// @ts-ignore
+export function useWorkbenchDevboxSnapshotsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<WorkbenchDevboxSnapshotsQuery, WorkbenchDevboxSnapshotsQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchDevboxSnapshotsQuery, WorkbenchDevboxSnapshotsQueryVariables>;
+export function useWorkbenchDevboxSnapshotsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchDevboxSnapshotsQuery, WorkbenchDevboxSnapshotsQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchDevboxSnapshotsQuery | undefined, WorkbenchDevboxSnapshotsQueryVariables>;
+export function useWorkbenchDevboxSnapshotsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchDevboxSnapshotsQuery, WorkbenchDevboxSnapshotsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<WorkbenchDevboxSnapshotsQuery, WorkbenchDevboxSnapshotsQueryVariables>(Operations.WorkbenchDevboxSnapshots, options);
+        }
+export type WorkbenchDevboxSnapshotsQueryHookResult = ReturnType<typeof useWorkbenchDevboxSnapshotsQuery>;
+export type WorkbenchDevboxSnapshotsLazyQueryHookResult = ReturnType<typeof useWorkbenchDevboxSnapshotsLazyQuery>;
+export type WorkbenchDevboxSnapshotsSuspenseQueryHookResult = ReturnType<typeof useWorkbenchDevboxSnapshotsSuspenseQuery>;
+export type WorkbenchDevboxSnapshotsQueryResult = Apollo.QueryResult<WorkbenchDevboxSnapshotsQuery, WorkbenchDevboxSnapshotsQueryVariables>;
+
+/**
+ * __useWorkbenchDevboxInboxQuery__
+ *
+ * To run a query within a React component, call `useWorkbenchDevboxInboxQuery` and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchDevboxInboxQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWorkbenchDevboxInboxQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useWorkbenchDevboxInboxQuery(baseOptions: Apollo.QueryHookOptions<WorkbenchDevboxInboxQuery, WorkbenchDevboxInboxQueryVariables> & ({ variables: WorkbenchDevboxInboxQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<WorkbenchDevboxInboxQuery, WorkbenchDevboxInboxQueryVariables>(Operations.WorkbenchDevboxInbox, options);
+      }
+export function useWorkbenchDevboxInboxLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<WorkbenchDevboxInboxQuery, WorkbenchDevboxInboxQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<WorkbenchDevboxInboxQuery, WorkbenchDevboxInboxQueryVariables>(Operations.WorkbenchDevboxInbox, options);
+        }
+// @ts-ignore
+export function useWorkbenchDevboxInboxSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<WorkbenchDevboxInboxQuery, WorkbenchDevboxInboxQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchDevboxInboxQuery, WorkbenchDevboxInboxQueryVariables>;
+export function useWorkbenchDevboxInboxSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchDevboxInboxQuery, WorkbenchDevboxInboxQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchDevboxInboxQuery | undefined, WorkbenchDevboxInboxQueryVariables>;
+export function useWorkbenchDevboxInboxSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchDevboxInboxQuery, WorkbenchDevboxInboxQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<WorkbenchDevboxInboxQuery, WorkbenchDevboxInboxQueryVariables>(Operations.WorkbenchDevboxInbox, options);
+        }
+export type WorkbenchDevboxInboxQueryHookResult = ReturnType<typeof useWorkbenchDevboxInboxQuery>;
+export type WorkbenchDevboxInboxLazyQueryHookResult = ReturnType<typeof useWorkbenchDevboxInboxLazyQuery>;
+export type WorkbenchDevboxInboxSuspenseQueryHookResult = ReturnType<typeof useWorkbenchDevboxInboxSuspenseQuery>;
+export type WorkbenchDevboxInboxQueryResult = Apollo.QueryResult<WorkbenchDevboxInboxQuery, WorkbenchDevboxInboxQueryVariables>;
+
+/**
+ * __useDevboxInstanceQuery__
+ *
+ * To run a query within a React component, call `useDevboxInstanceQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDevboxInstanceQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDevboxInstanceQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDevboxInstanceQuery(baseOptions: Apollo.QueryHookOptions<DevboxInstanceQuery, DevboxInstanceQueryVariables> & ({ variables: DevboxInstanceQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<DevboxInstanceQuery, DevboxInstanceQueryVariables>(Operations.DevboxInstance, options);
+      }
+export function useDevboxInstanceLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DevboxInstanceQuery, DevboxInstanceQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<DevboxInstanceQuery, DevboxInstanceQueryVariables>(Operations.DevboxInstance, options);
+        }
+// @ts-ignore
+export function useDevboxInstanceSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<DevboxInstanceQuery, DevboxInstanceQueryVariables>): Apollo.UseSuspenseQueryResult<DevboxInstanceQuery, DevboxInstanceQueryVariables>;
+export function useDevboxInstanceSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DevboxInstanceQuery, DevboxInstanceQueryVariables>): Apollo.UseSuspenseQueryResult<DevboxInstanceQuery | undefined, DevboxInstanceQueryVariables>;
+export function useDevboxInstanceSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DevboxInstanceQuery, DevboxInstanceQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<DevboxInstanceQuery, DevboxInstanceQueryVariables>(Operations.DevboxInstance, options);
+        }
+export type DevboxInstanceQueryHookResult = ReturnType<typeof useDevboxInstanceQuery>;
+export type DevboxInstanceLazyQueryHookResult = ReturnType<typeof useDevboxInstanceLazyQuery>;
+export type DevboxInstanceSuspenseQueryHookResult = ReturnType<typeof useDevboxInstanceSuspenseQuery>;
+export type DevboxInstanceQueryResult = Apollo.QueryResult<DevboxInstanceQuery, DevboxInstanceQueryVariables>;
+
+/**
+ * __useDevboxThreadQuery__
+ *
+ * To run a query within a React component, call `useDevboxThreadQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDevboxThreadQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDevboxThreadQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDevboxThreadQuery(baseOptions: Apollo.QueryHookOptions<DevboxThreadQuery, DevboxThreadQueryVariables> & ({ variables: DevboxThreadQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<DevboxThreadQuery, DevboxThreadQueryVariables>(Operations.DevboxThread, options);
+      }
+export function useDevboxThreadLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DevboxThreadQuery, DevboxThreadQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<DevboxThreadQuery, DevboxThreadQueryVariables>(Operations.DevboxThread, options);
+        }
+// @ts-ignore
+export function useDevboxThreadSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<DevboxThreadQuery, DevboxThreadQueryVariables>): Apollo.UseSuspenseQueryResult<DevboxThreadQuery, DevboxThreadQueryVariables>;
+export function useDevboxThreadSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DevboxThreadQuery, DevboxThreadQueryVariables>): Apollo.UseSuspenseQueryResult<DevboxThreadQuery | undefined, DevboxThreadQueryVariables>;
+export function useDevboxThreadSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DevboxThreadQuery, DevboxThreadQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<DevboxThreadQuery, DevboxThreadQueryVariables>(Operations.DevboxThread, options);
+        }
+export type DevboxThreadQueryHookResult = ReturnType<typeof useDevboxThreadQuery>;
+export type DevboxThreadLazyQueryHookResult = ReturnType<typeof useDevboxThreadLazyQuery>;
+export type DevboxThreadSuspenseQueryHookResult = ReturnType<typeof useDevboxThreadSuspenseQuery>;
+export type DevboxThreadQueryResult = Apollo.QueryResult<DevboxThreadQuery, DevboxThreadQueryVariables>;
+
+/**
+ * __useDevboxInstanceCommandsQuery__
+ *
+ * To run a query within a React component, call `useDevboxInstanceCommandsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDevboxInstanceCommandsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDevboxInstanceCommandsQuery({
+ *   variables: {
+ *      threadId: // value for 'threadId'
+ *   },
+ * });
+ */
+export function useDevboxInstanceCommandsQuery(baseOptions: Apollo.QueryHookOptions<DevboxInstanceCommandsQuery, DevboxInstanceCommandsQueryVariables> & ({ variables: DevboxInstanceCommandsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<DevboxInstanceCommandsQuery, DevboxInstanceCommandsQueryVariables>(Operations.DevboxInstanceCommands, options);
+      }
+export function useDevboxInstanceCommandsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DevboxInstanceCommandsQuery, DevboxInstanceCommandsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<DevboxInstanceCommandsQuery, DevboxInstanceCommandsQueryVariables>(Operations.DevboxInstanceCommands, options);
+        }
+// @ts-ignore
+export function useDevboxInstanceCommandsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<DevboxInstanceCommandsQuery, DevboxInstanceCommandsQueryVariables>): Apollo.UseSuspenseQueryResult<DevboxInstanceCommandsQuery, DevboxInstanceCommandsQueryVariables>;
+export function useDevboxInstanceCommandsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DevboxInstanceCommandsQuery, DevboxInstanceCommandsQueryVariables>): Apollo.UseSuspenseQueryResult<DevboxInstanceCommandsQuery | undefined, DevboxInstanceCommandsQueryVariables>;
+export function useDevboxInstanceCommandsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DevboxInstanceCommandsQuery, DevboxInstanceCommandsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<DevboxInstanceCommandsQuery, DevboxInstanceCommandsQueryVariables>(Operations.DevboxInstanceCommands, options);
+        }
+export type DevboxInstanceCommandsQueryHookResult = ReturnType<typeof useDevboxInstanceCommandsQuery>;
+export type DevboxInstanceCommandsLazyQueryHookResult = ReturnType<typeof useDevboxInstanceCommandsLazyQuery>;
+export type DevboxInstanceCommandsSuspenseQueryHookResult = ReturnType<typeof useDevboxInstanceCommandsSuspenseQuery>;
+export type DevboxInstanceCommandsQueryResult = Apollo.QueryResult<DevboxInstanceCommandsQuery, DevboxInstanceCommandsQueryVariables>;
+
+/**
+ * __useDevboxRepositoriesQuery__
+ *
+ * To run a query within a React component, call `useDevboxRepositoriesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDevboxRepositoriesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDevboxRepositoriesQuery({
+ *   variables: {
+ *      instanceId: // value for 'instanceId'
+ *   },
+ * });
+ */
+export function useDevboxRepositoriesQuery(baseOptions: Apollo.QueryHookOptions<DevboxRepositoriesQuery, DevboxRepositoriesQueryVariables> & ({ variables: DevboxRepositoriesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<DevboxRepositoriesQuery, DevboxRepositoriesQueryVariables>(Operations.DevboxRepositories, options);
+      }
+export function useDevboxRepositoriesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DevboxRepositoriesQuery, DevboxRepositoriesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<DevboxRepositoriesQuery, DevboxRepositoriesQueryVariables>(Operations.DevboxRepositories, options);
+        }
+// @ts-ignore
+export function useDevboxRepositoriesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<DevboxRepositoriesQuery, DevboxRepositoriesQueryVariables>): Apollo.UseSuspenseQueryResult<DevboxRepositoriesQuery, DevboxRepositoriesQueryVariables>;
+export function useDevboxRepositoriesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DevboxRepositoriesQuery, DevboxRepositoriesQueryVariables>): Apollo.UseSuspenseQueryResult<DevboxRepositoriesQuery | undefined, DevboxRepositoriesQueryVariables>;
+export function useDevboxRepositoriesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DevboxRepositoriesQuery, DevboxRepositoriesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<DevboxRepositoriesQuery, DevboxRepositoriesQueryVariables>(Operations.DevboxRepositories, options);
+        }
+export type DevboxRepositoriesQueryHookResult = ReturnType<typeof useDevboxRepositoriesQuery>;
+export type DevboxRepositoriesLazyQueryHookResult = ReturnType<typeof useDevboxRepositoriesLazyQuery>;
+export type DevboxRepositoriesSuspenseQueryHookResult = ReturnType<typeof useDevboxRepositoriesSuspenseQuery>;
+export type DevboxRepositoriesQueryResult = Apollo.QueryResult<DevboxRepositoriesQuery, DevboxRepositoriesQueryVariables>;
+
+/**
+ * __useDevboxTimelineQuery__
+ *
+ * To run a query within a React component, call `useDevboxTimelineQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDevboxTimelineQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDevboxTimelineQuery({
+ *   variables: {
+ *      instanceId: // value for 'instanceId'
+ *      sessionId: // value for 'sessionId'
+ *      before: // value for 'before'
+ *      after: // value for 'after'
+ *      limit: // value for 'limit'
+ *   },
+ * });
+ */
+export function useDevboxTimelineQuery(baseOptions: Apollo.QueryHookOptions<DevboxTimelineQuery, DevboxTimelineQueryVariables> & ({ variables: DevboxTimelineQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<DevboxTimelineQuery, DevboxTimelineQueryVariables>(Operations.DevboxTimeline, options);
+      }
+export function useDevboxTimelineLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DevboxTimelineQuery, DevboxTimelineQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<DevboxTimelineQuery, DevboxTimelineQueryVariables>(Operations.DevboxTimeline, options);
+        }
+// @ts-ignore
+export function useDevboxTimelineSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<DevboxTimelineQuery, DevboxTimelineQueryVariables>): Apollo.UseSuspenseQueryResult<DevboxTimelineQuery, DevboxTimelineQueryVariables>;
+export function useDevboxTimelineSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DevboxTimelineQuery, DevboxTimelineQueryVariables>): Apollo.UseSuspenseQueryResult<DevboxTimelineQuery | undefined, DevboxTimelineQueryVariables>;
+export function useDevboxTimelineSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DevboxTimelineQuery, DevboxTimelineQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<DevboxTimelineQuery, DevboxTimelineQueryVariables>(Operations.DevboxTimeline, options);
+        }
+export type DevboxTimelineQueryHookResult = ReturnType<typeof useDevboxTimelineQuery>;
+export type DevboxTimelineLazyQueryHookResult = ReturnType<typeof useDevboxTimelineLazyQuery>;
+export type DevboxTimelineSuspenseQueryHookResult = ReturnType<typeof useDevboxTimelineSuspenseQuery>;
+export type DevboxTimelineQueryResult = Apollo.QueryResult<DevboxTimelineQuery, DevboxTimelineQueryVariables>;
+
+/**
+ * __useDevboxSessionsQuery__
+ *
+ * To run a query within a React component, call `useDevboxSessionsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDevboxSessionsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDevboxSessionsQuery({
+ *   variables: {
+ *      instanceId: // value for 'instanceId'
+ *   },
+ * });
+ */
+export function useDevboxSessionsQuery(baseOptions: Apollo.QueryHookOptions<DevboxSessionsQuery, DevboxSessionsQueryVariables> & ({ variables: DevboxSessionsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<DevboxSessionsQuery, DevboxSessionsQueryVariables>(Operations.DevboxSessions, options);
+      }
+export function useDevboxSessionsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DevboxSessionsQuery, DevboxSessionsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<DevboxSessionsQuery, DevboxSessionsQueryVariables>(Operations.DevboxSessions, options);
+        }
+// @ts-ignore
+export function useDevboxSessionsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<DevboxSessionsQuery, DevboxSessionsQueryVariables>): Apollo.UseSuspenseQueryResult<DevboxSessionsQuery, DevboxSessionsQueryVariables>;
+export function useDevboxSessionsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DevboxSessionsQuery, DevboxSessionsQueryVariables>): Apollo.UseSuspenseQueryResult<DevboxSessionsQuery | undefined, DevboxSessionsQueryVariables>;
+export function useDevboxSessionsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DevboxSessionsQuery, DevboxSessionsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<DevboxSessionsQuery, DevboxSessionsQueryVariables>(Operations.DevboxSessions, options);
+        }
+export type DevboxSessionsQueryHookResult = ReturnType<typeof useDevboxSessionsQuery>;
+export type DevboxSessionsLazyQueryHookResult = ReturnType<typeof useDevboxSessionsLazyQuery>;
+export type DevboxSessionsSuspenseQueryHookResult = ReturnType<typeof useDevboxSessionsSuspenseQuery>;
+export type DevboxSessionsQueryResult = Apollo.QueryResult<DevboxSessionsQuery, DevboxSessionsQueryVariables>;
+
+/**
+ * __useDevboxImportableSessionsQuery__
+ *
+ * To run a query within a React component, call `useDevboxImportableSessionsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDevboxImportableSessionsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDevboxImportableSessionsQuery({
+ *   variables: {
+ *      instanceId: // value for 'instanceId'
+ *   },
+ * });
+ */
+export function useDevboxImportableSessionsQuery(baseOptions: Apollo.QueryHookOptions<DevboxImportableSessionsQuery, DevboxImportableSessionsQueryVariables> & ({ variables: DevboxImportableSessionsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<DevboxImportableSessionsQuery, DevboxImportableSessionsQueryVariables>(Operations.DevboxImportableSessions, options);
+      }
+export function useDevboxImportableSessionsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DevboxImportableSessionsQuery, DevboxImportableSessionsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<DevboxImportableSessionsQuery, DevboxImportableSessionsQueryVariables>(Operations.DevboxImportableSessions, options);
+        }
+// @ts-ignore
+export function useDevboxImportableSessionsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<DevboxImportableSessionsQuery, DevboxImportableSessionsQueryVariables>): Apollo.UseSuspenseQueryResult<DevboxImportableSessionsQuery, DevboxImportableSessionsQueryVariables>;
+export function useDevboxImportableSessionsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DevboxImportableSessionsQuery, DevboxImportableSessionsQueryVariables>): Apollo.UseSuspenseQueryResult<DevboxImportableSessionsQuery | undefined, DevboxImportableSessionsQueryVariables>;
+export function useDevboxImportableSessionsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DevboxImportableSessionsQuery, DevboxImportableSessionsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<DevboxImportableSessionsQuery, DevboxImportableSessionsQueryVariables>(Operations.DevboxImportableSessions, options);
+        }
+export type DevboxImportableSessionsQueryHookResult = ReturnType<typeof useDevboxImportableSessionsQuery>;
+export type DevboxImportableSessionsLazyQueryHookResult = ReturnType<typeof useDevboxImportableSessionsLazyQuery>;
+export type DevboxImportableSessionsSuspenseQueryHookResult = ReturnType<typeof useDevboxImportableSessionsSuspenseQuery>;
+export type DevboxImportableSessionsQueryResult = Apollo.QueryResult<DevboxImportableSessionsQuery, DevboxImportableSessionsQueryVariables>;
+
+/**
+ * __useDevboxPullRequestsQuery__
+ *
+ * To run a query within a React component, call `useDevboxPullRequestsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDevboxPullRequestsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDevboxPullRequestsQuery({
+ *   variables: {
+ *      devboxId: // value for 'devboxId'
+ *      devboxInstanceId: // value for 'devboxInstanceId'
+ *      devboxThreadId: // value for 'devboxThreadId'
+ *      first: // value for 'first'
+ *   },
+ * });
+ */
+export function useDevboxPullRequestsQuery(baseOptions?: Apollo.QueryHookOptions<DevboxPullRequestsQuery, DevboxPullRequestsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<DevboxPullRequestsQuery, DevboxPullRequestsQueryVariables>(Operations.DevboxPullRequests, options);
+      }
+export function useDevboxPullRequestsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DevboxPullRequestsQuery, DevboxPullRequestsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<DevboxPullRequestsQuery, DevboxPullRequestsQueryVariables>(Operations.DevboxPullRequests, options);
+        }
+// @ts-ignore
+export function useDevboxPullRequestsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<DevboxPullRequestsQuery, DevboxPullRequestsQueryVariables>): Apollo.UseSuspenseQueryResult<DevboxPullRequestsQuery, DevboxPullRequestsQueryVariables>;
+export function useDevboxPullRequestsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DevboxPullRequestsQuery, DevboxPullRequestsQueryVariables>): Apollo.UseSuspenseQueryResult<DevboxPullRequestsQuery | undefined, DevboxPullRequestsQueryVariables>;
+export function useDevboxPullRequestsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DevboxPullRequestsQuery, DevboxPullRequestsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<DevboxPullRequestsQuery, DevboxPullRequestsQueryVariables>(Operations.DevboxPullRequests, options);
+        }
+export type DevboxPullRequestsQueryHookResult = ReturnType<typeof useDevboxPullRequestsQuery>;
+export type DevboxPullRequestsLazyQueryHookResult = ReturnType<typeof useDevboxPullRequestsLazyQuery>;
+export type DevboxPullRequestsSuspenseQueryHookResult = ReturnType<typeof useDevboxPullRequestsSuspenseQuery>;
+export type DevboxPullRequestsQueryResult = Apollo.QueryResult<DevboxPullRequestsQuery, DevboxPullRequestsQueryVariables>;
+
+/**
+ * __useDevboxFilesQuery__
+ *
+ * To run a query within a React component, call `useDevboxFilesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDevboxFilesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDevboxFilesQuery({
+ *   variables: {
+ *      instanceId: // value for 'instanceId'
+ *      path: // value for 'path'
+ *   },
+ * });
+ */
+export function useDevboxFilesQuery(baseOptions: Apollo.QueryHookOptions<DevboxFilesQuery, DevboxFilesQueryVariables> & ({ variables: DevboxFilesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<DevboxFilesQuery, DevboxFilesQueryVariables>(Operations.DevboxFiles, options);
+      }
+export function useDevboxFilesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DevboxFilesQuery, DevboxFilesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<DevboxFilesQuery, DevboxFilesQueryVariables>(Operations.DevboxFiles, options);
+        }
+// @ts-ignore
+export function useDevboxFilesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<DevboxFilesQuery, DevboxFilesQueryVariables>): Apollo.UseSuspenseQueryResult<DevboxFilesQuery, DevboxFilesQueryVariables>;
+export function useDevboxFilesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DevboxFilesQuery, DevboxFilesQueryVariables>): Apollo.UseSuspenseQueryResult<DevboxFilesQuery | undefined, DevboxFilesQueryVariables>;
+export function useDevboxFilesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DevboxFilesQuery, DevboxFilesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<DevboxFilesQuery, DevboxFilesQueryVariables>(Operations.DevboxFiles, options);
+        }
+export type DevboxFilesQueryHookResult = ReturnType<typeof useDevboxFilesQuery>;
+export type DevboxFilesLazyQueryHookResult = ReturnType<typeof useDevboxFilesLazyQuery>;
+export type DevboxFilesSuspenseQueryHookResult = ReturnType<typeof useDevboxFilesSuspenseQuery>;
+export type DevboxFilesQueryResult = Apollo.QueryResult<DevboxFilesQuery, DevboxFilesQueryVariables>;
+
+/**
+ * __useDevboxFileQuery__
+ *
+ * To run a query within a React component, call `useDevboxFileQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDevboxFileQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDevboxFileQuery({
+ *   variables: {
+ *      instanceId: // value for 'instanceId'
+ *      path: // value for 'path'
+ *   },
+ * });
+ */
+export function useDevboxFileQuery(baseOptions: Apollo.QueryHookOptions<DevboxFileQuery, DevboxFileQueryVariables> & ({ variables: DevboxFileQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<DevboxFileQuery, DevboxFileQueryVariables>(Operations.DevboxFile, options);
+      }
+export function useDevboxFileLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DevboxFileQuery, DevboxFileQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<DevboxFileQuery, DevboxFileQueryVariables>(Operations.DevboxFile, options);
+        }
+// @ts-ignore
+export function useDevboxFileSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<DevboxFileQuery, DevboxFileQueryVariables>): Apollo.UseSuspenseQueryResult<DevboxFileQuery, DevboxFileQueryVariables>;
+export function useDevboxFileSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DevboxFileQuery, DevboxFileQueryVariables>): Apollo.UseSuspenseQueryResult<DevboxFileQuery | undefined, DevboxFileQueryVariables>;
+export function useDevboxFileSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DevboxFileQuery, DevboxFileQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<DevboxFileQuery, DevboxFileQueryVariables>(Operations.DevboxFile, options);
+        }
+export type DevboxFileQueryHookResult = ReturnType<typeof useDevboxFileQuery>;
+export type DevboxFileLazyQueryHookResult = ReturnType<typeof useDevboxFileLazyQuery>;
+export type DevboxFileSuspenseQueryHookResult = ReturnType<typeof useDevboxFileSuspenseQuery>;
+export type DevboxFileQueryResult = Apollo.QueryResult<DevboxFileQuery, DevboxFileQueryVariables>;
+
+/**
+ * __useDevboxChangesQuery__
+ *
+ * To run a query within a React component, call `useDevboxChangesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDevboxChangesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDevboxChangesQuery({
+ *   variables: {
+ *      instanceId: // value for 'instanceId'
+ *      threadId: // value for 'threadId'
+ *      repositories: // value for 'repositories'
+ *      includeDiff: // value for 'includeDiff'
+ *   },
+ * });
+ */
+export function useDevboxChangesQuery(baseOptions: Apollo.QueryHookOptions<DevboxChangesQuery, DevboxChangesQueryVariables> & ({ variables: DevboxChangesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<DevboxChangesQuery, DevboxChangesQueryVariables>(Operations.DevboxChanges, options);
+      }
+export function useDevboxChangesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DevboxChangesQuery, DevboxChangesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<DevboxChangesQuery, DevboxChangesQueryVariables>(Operations.DevboxChanges, options);
+        }
+// @ts-ignore
+export function useDevboxChangesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<DevboxChangesQuery, DevboxChangesQueryVariables>): Apollo.UseSuspenseQueryResult<DevboxChangesQuery, DevboxChangesQueryVariables>;
+export function useDevboxChangesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DevboxChangesQuery, DevboxChangesQueryVariables>): Apollo.UseSuspenseQueryResult<DevboxChangesQuery | undefined, DevboxChangesQueryVariables>;
+export function useDevboxChangesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DevboxChangesQuery, DevboxChangesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<DevboxChangesQuery, DevboxChangesQueryVariables>(Operations.DevboxChanges, options);
+        }
+export type DevboxChangesQueryHookResult = ReturnType<typeof useDevboxChangesQuery>;
+export type DevboxChangesLazyQueryHookResult = ReturnType<typeof useDevboxChangesLazyQuery>;
+export type DevboxChangesSuspenseQueryHookResult = ReturnType<typeof useDevboxChangesSuspenseQuery>;
+export type DevboxChangesQueryResult = Apollo.QueryResult<DevboxChangesQuery, DevboxChangesQueryVariables>;
+
+/**
+ * __useAgentCredentialsQuery__
+ *
+ * To run a query within a React component, call `useAgentCredentialsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAgentCredentialsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAgentCredentialsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useAgentCredentialsQuery(baseOptions?: Apollo.QueryHookOptions<AgentCredentialsQuery, AgentCredentialsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AgentCredentialsQuery, AgentCredentialsQueryVariables>(Operations.AgentCredentials, options);
+      }
+export function useAgentCredentialsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AgentCredentialsQuery, AgentCredentialsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AgentCredentialsQuery, AgentCredentialsQueryVariables>(Operations.AgentCredentials, options);
+        }
+// @ts-ignore
+export function useAgentCredentialsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AgentCredentialsQuery, AgentCredentialsQueryVariables>): Apollo.UseSuspenseQueryResult<AgentCredentialsQuery, AgentCredentialsQueryVariables>;
+export function useAgentCredentialsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<AgentCredentialsQuery, AgentCredentialsQueryVariables>): Apollo.UseSuspenseQueryResult<AgentCredentialsQuery | undefined, AgentCredentialsQueryVariables>;
+export function useAgentCredentialsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<AgentCredentialsQuery, AgentCredentialsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AgentCredentialsQuery, AgentCredentialsQueryVariables>(Operations.AgentCredentials, options);
+        }
+export type AgentCredentialsQueryHookResult = ReturnType<typeof useAgentCredentialsQuery>;
+export type AgentCredentialsLazyQueryHookResult = ReturnType<typeof useAgentCredentialsLazyQuery>;
+export type AgentCredentialsSuspenseQueryHookResult = ReturnType<typeof useAgentCredentialsSuspenseQuery>;
+export type AgentCredentialsQueryResult = Apollo.QueryResult<AgentCredentialsQuery, AgentCredentialsQueryVariables>;
+export type OpenDevboxStreamMutationFn = Apollo.MutationFunction<OpenDevboxStreamMutation, OpenDevboxStreamMutationVariables>;
+
+/**
+ * __useOpenDevboxStreamMutation__
+ *
+ * To run a mutation, you first call `useOpenDevboxStreamMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useOpenDevboxStreamMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [openDevboxStreamMutation, { data, loading, error }] = useOpenDevboxStreamMutation({
+ *   variables: {
+ *      instanceId: // value for 'instanceId'
+ *      kind: // value for 'kind'
+ *      terminalId: // value for 'terminalId'
+ *      port: // value for 'port'
+ *      url: // value for 'url'
+ *   },
+ * });
+ */
+export function useOpenDevboxStreamMutation(baseOptions?: Apollo.MutationHookOptions<OpenDevboxStreamMutation, OpenDevboxStreamMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<OpenDevboxStreamMutation, OpenDevboxStreamMutationVariables>(Operations.OpenDevboxStream, options);
+      }
+export type OpenDevboxStreamMutationHookResult = ReturnType<typeof useOpenDevboxStreamMutation>;
+export type OpenDevboxStreamMutationResult = Apollo.MutationResult<OpenDevboxStreamMutation>;
+export type OpenDevboxStreamMutationOptions = Apollo.BaseMutationOptions<OpenDevboxStreamMutation, OpenDevboxStreamMutationVariables>;
+export type WriteDevboxFileMutationFn = Apollo.MutationFunction<WriteDevboxFileMutation, WriteDevboxFileMutationVariables>;
+
+/**
+ * __useWriteDevboxFileMutation__
+ *
+ * To run a mutation, you first call `useWriteDevboxFileMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useWriteDevboxFileMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [writeDevboxFileMutation, { data, loading, error }] = useWriteDevboxFileMutation({
+ *   variables: {
+ *      instanceId: // value for 'instanceId'
+ *      path: // value for 'path'
+ *      content: // value for 'content'
+ *      expectedSha256: // value for 'expectedSha256'
+ *   },
+ * });
+ */
+export function useWriteDevboxFileMutation(baseOptions?: Apollo.MutationHookOptions<WriteDevboxFileMutation, WriteDevboxFileMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<WriteDevboxFileMutation, WriteDevboxFileMutationVariables>(Operations.WriteDevboxFile, options);
+      }
+export type WriteDevboxFileMutationHookResult = ReturnType<typeof useWriteDevboxFileMutation>;
+export type WriteDevboxFileMutationResult = Apollo.MutationResult<WriteDevboxFileMutation>;
+export type WriteDevboxFileMutationOptions = Apollo.BaseMutationOptions<WriteDevboxFileMutation, WriteDevboxFileMutationVariables>;
+export type SetDevboxAgentBillingMutationFn = Apollo.MutationFunction<SetDevboxAgentBillingMutation, SetDevboxAgentBillingMutationVariables>;
+
+/**
+ * __useSetDevboxAgentBillingMutation__
+ *
+ * To run a mutation, you first call `useSetDevboxAgentBillingMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSetDevboxAgentBillingMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [setDevboxAgentBillingMutation, { data, loading, error }] = useSetDevboxAgentBillingMutation({
+ *   variables: {
+ *      instanceId: // value for 'instanceId'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useSetDevboxAgentBillingMutation(baseOptions?: Apollo.MutationHookOptions<SetDevboxAgentBillingMutation, SetDevboxAgentBillingMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SetDevboxAgentBillingMutation, SetDevboxAgentBillingMutationVariables>(Operations.SetDevboxAgentBilling, options);
+      }
+export type SetDevboxAgentBillingMutationHookResult = ReturnType<typeof useSetDevboxAgentBillingMutation>;
+export type SetDevboxAgentBillingMutationResult = Apollo.MutationResult<SetDevboxAgentBillingMutation>;
+export type SetDevboxAgentBillingMutationOptions = Apollo.BaseMutationOptions<SetDevboxAgentBillingMutation, SetDevboxAgentBillingMutationVariables>;
+export type LinkAgentCredentialMutationFn = Apollo.MutationFunction<LinkAgentCredentialMutation, LinkAgentCredentialMutationVariables>;
+
+/**
+ * __useLinkAgentCredentialMutation__
+ *
+ * To run a mutation, you first call `useLinkAgentCredentialMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useLinkAgentCredentialMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [linkAgentCredentialMutation, { data, loading, error }] = useLinkAgentCredentialMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useLinkAgentCredentialMutation(baseOptions?: Apollo.MutationHookOptions<LinkAgentCredentialMutation, LinkAgentCredentialMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<LinkAgentCredentialMutation, LinkAgentCredentialMutationVariables>(Operations.LinkAgentCredential, options);
+      }
+export type LinkAgentCredentialMutationHookResult = ReturnType<typeof useLinkAgentCredentialMutation>;
+export type LinkAgentCredentialMutationResult = Apollo.MutationResult<LinkAgentCredentialMutation>;
+export type LinkAgentCredentialMutationOptions = Apollo.BaseMutationOptions<LinkAgentCredentialMutation, LinkAgentCredentialMutationVariables>;
+export type DeleteAgentCredentialMutationFn = Apollo.MutationFunction<DeleteAgentCredentialMutation, DeleteAgentCredentialMutationVariables>;
+
+/**
+ * __useDeleteAgentCredentialMutation__
+ *
+ * To run a mutation, you first call `useDeleteAgentCredentialMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteAgentCredentialMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteAgentCredentialMutation, { data, loading, error }] = useDeleteAgentCredentialMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteAgentCredentialMutation(baseOptions?: Apollo.MutationHookOptions<DeleteAgentCredentialMutation, DeleteAgentCredentialMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteAgentCredentialMutation, DeleteAgentCredentialMutationVariables>(Operations.DeleteAgentCredential, options);
+      }
+export type DeleteAgentCredentialMutationHookResult = ReturnType<typeof useDeleteAgentCredentialMutation>;
+export type DeleteAgentCredentialMutationResult = Apollo.MutationResult<DeleteAgentCredentialMutation>;
+export type DeleteAgentCredentialMutationOptions = Apollo.BaseMutationOptions<DeleteAgentCredentialMutation, DeleteAgentCredentialMutationVariables>;
+export type SetDefaultAgentBillingMutationFn = Apollo.MutationFunction<SetDefaultAgentBillingMutation, SetDefaultAgentBillingMutationVariables>;
+
+/**
+ * __useSetDefaultAgentBillingMutation__
+ *
+ * To run a mutation, you first call `useSetDefaultAgentBillingMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSetDefaultAgentBillingMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [setDefaultAgentBillingMutation, { data, loading, error }] = useSetDefaultAgentBillingMutation({
+ *   variables: {
+ *      provider: // value for 'provider'
+ *      enabled: // value for 'enabled'
+ *   },
+ * });
+ */
+export function useSetDefaultAgentBillingMutation(baseOptions?: Apollo.MutationHookOptions<SetDefaultAgentBillingMutation, SetDefaultAgentBillingMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SetDefaultAgentBillingMutation, SetDefaultAgentBillingMutationVariables>(Operations.SetDefaultAgentBilling, options);
+      }
+export type SetDefaultAgentBillingMutationHookResult = ReturnType<typeof useSetDefaultAgentBillingMutation>;
+export type SetDefaultAgentBillingMutationResult = Apollo.MutationResult<SetDefaultAgentBillingMutation>;
+export type SetDefaultAgentBillingMutationOptions = Apollo.BaseMutationOptions<SetDefaultAgentBillingMutation, SetDefaultAgentBillingMutationVariables>;
+export type AttachDevboxMutationFn = Apollo.MutationFunction<AttachDevboxMutation, AttachDevboxMutationVariables>;
+
+/**
+ * __useAttachDevboxMutation__
+ *
+ * To run a mutation, you first call `useAttachDevboxMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAttachDevboxMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [attachDevboxMutation, { data, loading, error }] = useAttachDevboxMutation({
+ *   variables: {
+ *      workbenchId: // value for 'workbenchId'
+ *      devboxId: // value for 'devboxId'
+ *   },
+ * });
+ */
+export function useAttachDevboxMutation(baseOptions?: Apollo.MutationHookOptions<AttachDevboxMutation, AttachDevboxMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AttachDevboxMutation, AttachDevboxMutationVariables>(Operations.AttachDevbox, options);
+      }
+export type AttachDevboxMutationHookResult = ReturnType<typeof useAttachDevboxMutation>;
+export type AttachDevboxMutationResult = Apollo.MutationResult<AttachDevboxMutation>;
+export type AttachDevboxMutationOptions = Apollo.BaseMutationOptions<AttachDevboxMutation, AttachDevboxMutationVariables>;
+export type DetachDevboxMutationFn = Apollo.MutationFunction<DetachDevboxMutation, DetachDevboxMutationVariables>;
+
+/**
+ * __useDetachDevboxMutation__
+ *
+ * To run a mutation, you first call `useDetachDevboxMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDetachDevboxMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [detachDevboxMutation, { data, loading, error }] = useDetachDevboxMutation({
+ *   variables: {
+ *      workbenchId: // value for 'workbenchId'
+ *      devboxId: // value for 'devboxId'
+ *   },
+ * });
+ */
+export function useDetachDevboxMutation(baseOptions?: Apollo.MutationHookOptions<DetachDevboxMutation, DetachDevboxMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DetachDevboxMutation, DetachDevboxMutationVariables>(Operations.DetachDevbox, options);
+      }
+export type DetachDevboxMutationHookResult = ReturnType<typeof useDetachDevboxMutation>;
+export type DetachDevboxMutationResult = Apollo.MutationResult<DetachDevboxMutation>;
+export type DetachDevboxMutationOptions = Apollo.BaseMutationOptions<DetachDevboxMutation, DetachDevboxMutationVariables>;
+export type CreateDevboxInstanceMutationFn = Apollo.MutationFunction<CreateDevboxInstanceMutation, CreateDevboxInstanceMutationVariables>;
+
+/**
+ * __useCreateDevboxInstanceMutation__
+ *
+ * To run a mutation, you first call `useCreateDevboxInstanceMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateDevboxInstanceMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createDevboxInstanceMutation, { data, loading, error }] = useCreateDevboxInstanceMutation({
+ *   variables: {
+ *      workbenchId: // value for 'workbenchId'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCreateDevboxInstanceMutation(baseOptions?: Apollo.MutationHookOptions<CreateDevboxInstanceMutation, CreateDevboxInstanceMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateDevboxInstanceMutation, CreateDevboxInstanceMutationVariables>(Operations.CreateDevboxInstance, options);
+      }
+export type CreateDevboxInstanceMutationHookResult = ReturnType<typeof useCreateDevboxInstanceMutation>;
+export type CreateDevboxInstanceMutationResult = Apollo.MutationResult<CreateDevboxInstanceMutation>;
+export type CreateDevboxInstanceMutationOptions = Apollo.BaseMutationOptions<CreateDevboxInstanceMutation, CreateDevboxInstanceMutationVariables>;
+export type RestoreDevboxSnapshotMutationFn = Apollo.MutationFunction<RestoreDevboxSnapshotMutation, RestoreDevboxSnapshotMutationVariables>;
+
+/**
+ * __useRestoreDevboxSnapshotMutation__
+ *
+ * To run a mutation, you first call `useRestoreDevboxSnapshotMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRestoreDevboxSnapshotMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [restoreDevboxSnapshotMutation, { data, loading, error }] = useRestoreDevboxSnapshotMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useRestoreDevboxSnapshotMutation(baseOptions?: Apollo.MutationHookOptions<RestoreDevboxSnapshotMutation, RestoreDevboxSnapshotMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<RestoreDevboxSnapshotMutation, RestoreDevboxSnapshotMutationVariables>(Operations.RestoreDevboxSnapshot, options);
+      }
+export type RestoreDevboxSnapshotMutationHookResult = ReturnType<typeof useRestoreDevboxSnapshotMutation>;
+export type RestoreDevboxSnapshotMutationResult = Apollo.MutationResult<RestoreDevboxSnapshotMutation>;
+export type RestoreDevboxSnapshotMutationOptions = Apollo.BaseMutationOptions<RestoreDevboxSnapshotMutation, RestoreDevboxSnapshotMutationVariables>;
+export type CancelDevboxInstanceMutationFn = Apollo.MutationFunction<CancelDevboxInstanceMutation, CancelDevboxInstanceMutationVariables>;
+
+/**
+ * __useCancelDevboxInstanceMutation__
+ *
+ * To run a mutation, you first call `useCancelDevboxInstanceMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCancelDevboxInstanceMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [cancelDevboxInstanceMutation, { data, loading, error }] = useCancelDevboxInstanceMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useCancelDevboxInstanceMutation(baseOptions?: Apollo.MutationHookOptions<CancelDevboxInstanceMutation, CancelDevboxInstanceMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CancelDevboxInstanceMutation, CancelDevboxInstanceMutationVariables>(Operations.CancelDevboxInstance, options);
+      }
+export type CancelDevboxInstanceMutationHookResult = ReturnType<typeof useCancelDevboxInstanceMutation>;
+export type CancelDevboxInstanceMutationResult = Apollo.MutationResult<CancelDevboxInstanceMutation>;
+export type CancelDevboxInstanceMutationOptions = Apollo.BaseMutationOptions<CancelDevboxInstanceMutation, CancelDevboxInstanceMutationVariables>;
+export type SuspendDevboxInstanceMutationFn = Apollo.MutationFunction<SuspendDevboxInstanceMutation, SuspendDevboxInstanceMutationVariables>;
+
+/**
+ * __useSuspendDevboxInstanceMutation__
+ *
+ * To run a mutation, you first call `useSuspendDevboxInstanceMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSuspendDevboxInstanceMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [suspendDevboxInstanceMutation, { data, loading, error }] = useSuspendDevboxInstanceMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useSuspendDevboxInstanceMutation(baseOptions?: Apollo.MutationHookOptions<SuspendDevboxInstanceMutation, SuspendDevboxInstanceMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SuspendDevboxInstanceMutation, SuspendDevboxInstanceMutationVariables>(Operations.SuspendDevboxInstance, options);
+      }
+export type SuspendDevboxInstanceMutationHookResult = ReturnType<typeof useSuspendDevboxInstanceMutation>;
+export type SuspendDevboxInstanceMutationResult = Apollo.MutationResult<SuspendDevboxInstanceMutation>;
+export type SuspendDevboxInstanceMutationOptions = Apollo.BaseMutationOptions<SuspendDevboxInstanceMutation, SuspendDevboxInstanceMutationVariables>;
+export type ResumeDevboxInstanceMutationFn = Apollo.MutationFunction<ResumeDevboxInstanceMutation, ResumeDevboxInstanceMutationVariables>;
+
+/**
+ * __useResumeDevboxInstanceMutation__
+ *
+ * To run a mutation, you first call `useResumeDevboxInstanceMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useResumeDevboxInstanceMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [resumeDevboxInstanceMutation, { data, loading, error }] = useResumeDevboxInstanceMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useResumeDevboxInstanceMutation(baseOptions?: Apollo.MutationHookOptions<ResumeDevboxInstanceMutation, ResumeDevboxInstanceMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ResumeDevboxInstanceMutation, ResumeDevboxInstanceMutationVariables>(Operations.ResumeDevboxInstance, options);
+      }
+export type ResumeDevboxInstanceMutationHookResult = ReturnType<typeof useResumeDevboxInstanceMutation>;
+export type ResumeDevboxInstanceMutationResult = Apollo.MutationResult<ResumeDevboxInstanceMutation>;
+export type ResumeDevboxInstanceMutationOptions = Apollo.BaseMutationOptions<ResumeDevboxInstanceMutation, ResumeDevboxInstanceMutationVariables>;
+export type PingDevboxInstanceMutationFn = Apollo.MutationFunction<PingDevboxInstanceMutation, PingDevboxInstanceMutationVariables>;
+
+/**
+ * __usePingDevboxInstanceMutation__
+ *
+ * To run a mutation, you first call `usePingDevboxInstanceMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `usePingDevboxInstanceMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [pingDevboxInstanceMutation, { data, loading, error }] = usePingDevboxInstanceMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function usePingDevboxInstanceMutation(baseOptions?: Apollo.MutationHookOptions<PingDevboxInstanceMutation, PingDevboxInstanceMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<PingDevboxInstanceMutation, PingDevboxInstanceMutationVariables>(Operations.PingDevboxInstance, options);
+      }
+export type PingDevboxInstanceMutationHookResult = ReturnType<typeof usePingDevboxInstanceMutation>;
+export type PingDevboxInstanceMutationResult = Apollo.MutationResult<PingDevboxInstanceMutation>;
+export type PingDevboxInstanceMutationOptions = Apollo.BaseMutationOptions<PingDevboxInstanceMutation, PingDevboxInstanceMutationVariables>;
+export type LeaveDevboxInstanceMutationFn = Apollo.MutationFunction<LeaveDevboxInstanceMutation, LeaveDevboxInstanceMutationVariables>;
+
+/**
+ * __useLeaveDevboxInstanceMutation__
+ *
+ * To run a mutation, you first call `useLeaveDevboxInstanceMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useLeaveDevboxInstanceMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [leaveDevboxInstanceMutation, { data, loading, error }] = useLeaveDevboxInstanceMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useLeaveDevboxInstanceMutation(baseOptions?: Apollo.MutationHookOptions<LeaveDevboxInstanceMutation, LeaveDevboxInstanceMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<LeaveDevboxInstanceMutation, LeaveDevboxInstanceMutationVariables>(Operations.LeaveDevboxInstance, options);
+      }
+export type LeaveDevboxInstanceMutationHookResult = ReturnType<typeof useLeaveDevboxInstanceMutation>;
+export type LeaveDevboxInstanceMutationResult = Apollo.MutationResult<LeaveDevboxInstanceMutation>;
+export type LeaveDevboxInstanceMutationOptions = Apollo.BaseMutationOptions<LeaveDevboxInstanceMutation, LeaveDevboxInstanceMutationVariables>;
+export type KeepDevboxInstanceAwakeMutationFn = Apollo.MutationFunction<KeepDevboxInstanceAwakeMutation, KeepDevboxInstanceAwakeMutationVariables>;
+
+/**
+ * __useKeepDevboxInstanceAwakeMutation__
+ *
+ * To run a mutation, you first call `useKeepDevboxInstanceAwakeMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useKeepDevboxInstanceAwakeMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [keepDevboxInstanceAwakeMutation, { data, loading, error }] = useKeepDevboxInstanceAwakeMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      until: // value for 'until'
+ *   },
+ * });
+ */
+export function useKeepDevboxInstanceAwakeMutation(baseOptions?: Apollo.MutationHookOptions<KeepDevboxInstanceAwakeMutation, KeepDevboxInstanceAwakeMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<KeepDevboxInstanceAwakeMutation, KeepDevboxInstanceAwakeMutationVariables>(Operations.KeepDevboxInstanceAwake, options);
+      }
+export type KeepDevboxInstanceAwakeMutationHookResult = ReturnType<typeof useKeepDevboxInstanceAwakeMutation>;
+export type KeepDevboxInstanceAwakeMutationResult = Apollo.MutationResult<KeepDevboxInstanceAwakeMutation>;
+export type KeepDevboxInstanceAwakeMutationOptions = Apollo.BaseMutationOptions<KeepDevboxInstanceAwakeMutation, KeepDevboxInstanceAwakeMutationVariables>;
+export type CancelDevboxKeepAwakeMutationFn = Apollo.MutationFunction<CancelDevboxKeepAwakeMutation, CancelDevboxKeepAwakeMutationVariables>;
+
+/**
+ * __useCancelDevboxKeepAwakeMutation__
+ *
+ * To run a mutation, you first call `useCancelDevboxKeepAwakeMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCancelDevboxKeepAwakeMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [cancelDevboxKeepAwakeMutation, { data, loading, error }] = useCancelDevboxKeepAwakeMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useCancelDevboxKeepAwakeMutation(baseOptions?: Apollo.MutationHookOptions<CancelDevboxKeepAwakeMutation, CancelDevboxKeepAwakeMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CancelDevboxKeepAwakeMutation, CancelDevboxKeepAwakeMutationVariables>(Operations.CancelDevboxKeepAwake, options);
+      }
+export type CancelDevboxKeepAwakeMutationHookResult = ReturnType<typeof useCancelDevboxKeepAwakeMutation>;
+export type CancelDevboxKeepAwakeMutationResult = Apollo.MutationResult<CancelDevboxKeepAwakeMutation>;
+export type CancelDevboxKeepAwakeMutationOptions = Apollo.BaseMutationOptions<CancelDevboxKeepAwakeMutation, CancelDevboxKeepAwakeMutationVariables>;
+export type CreateDevboxSnapshotMutationFn = Apollo.MutationFunction<CreateDevboxSnapshotMutation, CreateDevboxSnapshotMutationVariables>;
+
+/**
+ * __useCreateDevboxSnapshotMutation__
+ *
+ * To run a mutation, you first call `useCreateDevboxSnapshotMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateDevboxSnapshotMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createDevboxSnapshotMutation, { data, loading, error }] = useCreateDevboxSnapshotMutation({
+ *   variables: {
+ *      instanceId: // value for 'instanceId'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCreateDevboxSnapshotMutation(baseOptions?: Apollo.MutationHookOptions<CreateDevboxSnapshotMutation, CreateDevboxSnapshotMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateDevboxSnapshotMutation, CreateDevboxSnapshotMutationVariables>(Operations.CreateDevboxSnapshot, options);
+      }
+export type CreateDevboxSnapshotMutationHookResult = ReturnType<typeof useCreateDevboxSnapshotMutation>;
+export type CreateDevboxSnapshotMutationResult = Apollo.MutationResult<CreateDevboxSnapshotMutation>;
+export type CreateDevboxSnapshotMutationOptions = Apollo.BaseMutationOptions<CreateDevboxSnapshotMutation, CreateDevboxSnapshotMutationVariables>;
+export type DeleteDevboxSnapshotMutationFn = Apollo.MutationFunction<DeleteDevboxSnapshotMutation, DeleteDevboxSnapshotMutationVariables>;
+
+/**
+ * __useDeleteDevboxSnapshotMutation__
+ *
+ * To run a mutation, you first call `useDeleteDevboxSnapshotMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteDevboxSnapshotMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteDevboxSnapshotMutation, { data, loading, error }] = useDeleteDevboxSnapshotMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteDevboxSnapshotMutation(baseOptions?: Apollo.MutationHookOptions<DeleteDevboxSnapshotMutation, DeleteDevboxSnapshotMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteDevboxSnapshotMutation, DeleteDevboxSnapshotMutationVariables>(Operations.DeleteDevboxSnapshot, options);
+      }
+export type DeleteDevboxSnapshotMutationHookResult = ReturnType<typeof useDeleteDevboxSnapshotMutation>;
+export type DeleteDevboxSnapshotMutationResult = Apollo.MutationResult<DeleteDevboxSnapshotMutation>;
+export type DeleteDevboxSnapshotMutationOptions = Apollo.BaseMutationOptions<DeleteDevboxSnapshotMutation, DeleteDevboxSnapshotMutationVariables>;
+export type CreateDevboxThreadMutationFn = Apollo.MutationFunction<CreateDevboxThreadMutation, CreateDevboxThreadMutationVariables>;
+
+/**
+ * __useCreateDevboxThreadMutation__
+ *
+ * To run a mutation, you first call `useCreateDevboxThreadMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateDevboxThreadMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createDevboxThreadMutation, { data, loading, error }] = useCreateDevboxThreadMutation({
+ *   variables: {
+ *      instanceId: // value for 'instanceId'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCreateDevboxThreadMutation(baseOptions?: Apollo.MutationHookOptions<CreateDevboxThreadMutation, CreateDevboxThreadMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateDevboxThreadMutation, CreateDevboxThreadMutationVariables>(Operations.CreateDevboxThread, options);
+      }
+export type CreateDevboxThreadMutationHookResult = ReturnType<typeof useCreateDevboxThreadMutation>;
+export type CreateDevboxThreadMutationResult = Apollo.MutationResult<CreateDevboxThreadMutation>;
+export type CreateDevboxThreadMutationOptions = Apollo.BaseMutationOptions<CreateDevboxThreadMutation, CreateDevboxThreadMutationVariables>;
+export type ImportDevboxThreadMutationFn = Apollo.MutationFunction<ImportDevboxThreadMutation, ImportDevboxThreadMutationVariables>;
+
+/**
+ * __useImportDevboxThreadMutation__
+ *
+ * To run a mutation, you first call `useImportDevboxThreadMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useImportDevboxThreadMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [importDevboxThreadMutation, { data, loading, error }] = useImportDevboxThreadMutation({
+ *   variables: {
+ *      instanceId: // value for 'instanceId'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useImportDevboxThreadMutation(baseOptions?: Apollo.MutationHookOptions<ImportDevboxThreadMutation, ImportDevboxThreadMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ImportDevboxThreadMutation, ImportDevboxThreadMutationVariables>(Operations.ImportDevboxThread, options);
+      }
+export type ImportDevboxThreadMutationHookResult = ReturnType<typeof useImportDevboxThreadMutation>;
+export type ImportDevboxThreadMutationResult = Apollo.MutationResult<ImportDevboxThreadMutation>;
+export type ImportDevboxThreadMutationOptions = Apollo.BaseMutationOptions<ImportDevboxThreadMutation, ImportDevboxThreadMutationVariables>;
+export type ResumeDevboxThreadMutationFn = Apollo.MutationFunction<ResumeDevboxThreadMutation, ResumeDevboxThreadMutationVariables>;
+
+/**
+ * __useResumeDevboxThreadMutation__
+ *
+ * To run a mutation, you first call `useResumeDevboxThreadMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useResumeDevboxThreadMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [resumeDevboxThreadMutation, { data, loading, error }] = useResumeDevboxThreadMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useResumeDevboxThreadMutation(baseOptions?: Apollo.MutationHookOptions<ResumeDevboxThreadMutation, ResumeDevboxThreadMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ResumeDevboxThreadMutation, ResumeDevboxThreadMutationVariables>(Operations.ResumeDevboxThread, options);
+      }
+export type ResumeDevboxThreadMutationHookResult = ReturnType<typeof useResumeDevboxThreadMutation>;
+export type ResumeDevboxThreadMutationResult = Apollo.MutationResult<ResumeDevboxThreadMutation>;
+export type ResumeDevboxThreadMutationOptions = Apollo.BaseMutationOptions<ResumeDevboxThreadMutation, ResumeDevboxThreadMutationVariables>;
+export type CloseDevboxThreadMutationFn = Apollo.MutationFunction<CloseDevboxThreadMutation, CloseDevboxThreadMutationVariables>;
+
+/**
+ * __useCloseDevboxThreadMutation__
+ *
+ * To run a mutation, you first call `useCloseDevboxThreadMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCloseDevboxThreadMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [closeDevboxThreadMutation, { data, loading, error }] = useCloseDevboxThreadMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useCloseDevboxThreadMutation(baseOptions?: Apollo.MutationHookOptions<CloseDevboxThreadMutation, CloseDevboxThreadMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CloseDevboxThreadMutation, CloseDevboxThreadMutationVariables>(Operations.CloseDevboxThread, options);
+      }
+export type CloseDevboxThreadMutationHookResult = ReturnType<typeof useCloseDevboxThreadMutation>;
+export type CloseDevboxThreadMutationResult = Apollo.MutationResult<CloseDevboxThreadMutation>;
+export type CloseDevboxThreadMutationOptions = Apollo.BaseMutationOptions<CloseDevboxThreadMutation, CloseDevboxThreadMutationVariables>;
+export type DeleteDevboxThreadMutationFn = Apollo.MutationFunction<DeleteDevboxThreadMutation, DeleteDevboxThreadMutationVariables>;
+
+/**
+ * __useDeleteDevboxThreadMutation__
+ *
+ * To run a mutation, you first call `useDeleteDevboxThreadMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteDevboxThreadMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteDevboxThreadMutation, { data, loading, error }] = useDeleteDevboxThreadMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteDevboxThreadMutation(baseOptions?: Apollo.MutationHookOptions<DeleteDevboxThreadMutation, DeleteDevboxThreadMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteDevboxThreadMutation, DeleteDevboxThreadMutationVariables>(Operations.DeleteDevboxThread, options);
+      }
+export type DeleteDevboxThreadMutationHookResult = ReturnType<typeof useDeleteDevboxThreadMutation>;
+export type DeleteDevboxThreadMutationResult = Apollo.MutationResult<DeleteDevboxThreadMutation>;
+export type DeleteDevboxThreadMutationOptions = Apollo.BaseMutationOptions<DeleteDevboxThreadMutation, DeleteDevboxThreadMutationVariables>;
+export type ForkDevboxThreadMutationFn = Apollo.MutationFunction<ForkDevboxThreadMutation, ForkDevboxThreadMutationVariables>;
+
+/**
+ * __useForkDevboxThreadMutation__
+ *
+ * To run a mutation, you first call `useForkDevboxThreadMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useForkDevboxThreadMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [forkDevboxThreadMutation, { data, loading, error }] = useForkDevboxThreadMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      title: // value for 'title'
+ *   },
+ * });
+ */
+export function useForkDevboxThreadMutation(baseOptions?: Apollo.MutationHookOptions<ForkDevboxThreadMutation, ForkDevboxThreadMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ForkDevboxThreadMutation, ForkDevboxThreadMutationVariables>(Operations.ForkDevboxThread, options);
+      }
+export type ForkDevboxThreadMutationHookResult = ReturnType<typeof useForkDevboxThreadMutation>;
+export type ForkDevboxThreadMutationResult = Apollo.MutationResult<ForkDevboxThreadMutation>;
+export type ForkDevboxThreadMutationOptions = Apollo.BaseMutationOptions<ForkDevboxThreadMutation, ForkDevboxThreadMutationVariables>;
+export type RenameDevboxThreadMutationFn = Apollo.MutationFunction<RenameDevboxThreadMutation, RenameDevboxThreadMutationVariables>;
+
+/**
+ * __useRenameDevboxThreadMutation__
+ *
+ * To run a mutation, you first call `useRenameDevboxThreadMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRenameDevboxThreadMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [renameDevboxThreadMutation, { data, loading, error }] = useRenameDevboxThreadMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      title: // value for 'title'
+ *   },
+ * });
+ */
+export function useRenameDevboxThreadMutation(baseOptions?: Apollo.MutationHookOptions<RenameDevboxThreadMutation, RenameDevboxThreadMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<RenameDevboxThreadMutation, RenameDevboxThreadMutationVariables>(Operations.RenameDevboxThread, options);
+      }
+export type RenameDevboxThreadMutationHookResult = ReturnType<typeof useRenameDevboxThreadMutation>;
+export type RenameDevboxThreadMutationResult = Apollo.MutationResult<RenameDevboxThreadMutation>;
+export type RenameDevboxThreadMutationOptions = Apollo.BaseMutationOptions<RenameDevboxThreadMutation, RenameDevboxThreadMutationVariables>;
+export type PromptDevboxThreadMutationFn = Apollo.MutationFunction<PromptDevboxThreadMutation, PromptDevboxThreadMutationVariables>;
+
+/**
+ * __usePromptDevboxThreadMutation__
+ *
+ * To run a mutation, you first call `usePromptDevboxThreadMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `usePromptDevboxThreadMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [promptDevboxThreadMutation, { data, loading, error }] = usePromptDevboxThreadMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      prompt: // value for 'prompt'
+ *      content: // value for 'content'
+ *      attachments: // value for 'attachments'
+ *   },
+ * });
+ */
+export function usePromptDevboxThreadMutation(baseOptions?: Apollo.MutationHookOptions<PromptDevboxThreadMutation, PromptDevboxThreadMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<PromptDevboxThreadMutation, PromptDevboxThreadMutationVariables>(Operations.PromptDevboxThread, options);
+      }
+export type PromptDevboxThreadMutationHookResult = ReturnType<typeof usePromptDevboxThreadMutation>;
+export type PromptDevboxThreadMutationResult = Apollo.MutationResult<PromptDevboxThreadMutation>;
+export type PromptDevboxThreadMutationOptions = Apollo.BaseMutationOptions<PromptDevboxThreadMutation, PromptDevboxThreadMutationVariables>;
+export type CancelDevboxPromptMutationFn = Apollo.MutationFunction<CancelDevboxPromptMutation, CancelDevboxPromptMutationVariables>;
+
+/**
+ * __useCancelDevboxPromptMutation__
+ *
+ * To run a mutation, you first call `useCancelDevboxPromptMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCancelDevboxPromptMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [cancelDevboxPromptMutation, { data, loading, error }] = useCancelDevboxPromptMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useCancelDevboxPromptMutation(baseOptions?: Apollo.MutationHookOptions<CancelDevboxPromptMutation, CancelDevboxPromptMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CancelDevboxPromptMutation, CancelDevboxPromptMutationVariables>(Operations.CancelDevboxPrompt, options);
+      }
+export type CancelDevboxPromptMutationHookResult = ReturnType<typeof useCancelDevboxPromptMutation>;
+export type CancelDevboxPromptMutationResult = Apollo.MutationResult<CancelDevboxPromptMutation>;
+export type CancelDevboxPromptMutationOptions = Apollo.BaseMutationOptions<CancelDevboxPromptMutation, CancelDevboxPromptMutationVariables>;
+export type SetDevboxThreadConfigOptionMutationFn = Apollo.MutationFunction<SetDevboxThreadConfigOptionMutation, SetDevboxThreadConfigOptionMutationVariables>;
+
+/**
+ * __useSetDevboxThreadConfigOptionMutation__
+ *
+ * To run a mutation, you first call `useSetDevboxThreadConfigOptionMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSetDevboxThreadConfigOptionMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [setDevboxThreadConfigOptionMutation, { data, loading, error }] = useSetDevboxThreadConfigOptionMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      configId: // value for 'configId'
+ *      value: // value for 'value'
+ *   },
+ * });
+ */
+export function useSetDevboxThreadConfigOptionMutation(baseOptions?: Apollo.MutationHookOptions<SetDevboxThreadConfigOptionMutation, SetDevboxThreadConfigOptionMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SetDevboxThreadConfigOptionMutation, SetDevboxThreadConfigOptionMutationVariables>(Operations.SetDevboxThreadConfigOption, options);
+      }
+export type SetDevboxThreadConfigOptionMutationHookResult = ReturnType<typeof useSetDevboxThreadConfigOptionMutation>;
+export type SetDevboxThreadConfigOptionMutationResult = Apollo.MutationResult<SetDevboxThreadConfigOptionMutation>;
+export type SetDevboxThreadConfigOptionMutationOptions = Apollo.BaseMutationOptions<SetDevboxThreadConfigOptionMutation, SetDevboxThreadConfigOptionMutationVariables>;
+export type RespondDevboxInteractionMutationFn = Apollo.MutationFunction<RespondDevboxInteractionMutation, RespondDevboxInteractionMutationVariables>;
+
+/**
+ * __useRespondDevboxInteractionMutation__
+ *
+ * To run a mutation, you first call `useRespondDevboxInteractionMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRespondDevboxInteractionMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [respondDevboxInteractionMutation, { data, loading, error }] = useRespondDevboxInteractionMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      response: // value for 'response'
+ *   },
+ * });
+ */
+export function useRespondDevboxInteractionMutation(baseOptions?: Apollo.MutationHookOptions<RespondDevboxInteractionMutation, RespondDevboxInteractionMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<RespondDevboxInteractionMutation, RespondDevboxInteractionMutationVariables>(Operations.RespondDevboxInteraction, options);
+      }
+export type RespondDevboxInteractionMutationHookResult = ReturnType<typeof useRespondDevboxInteractionMutation>;
+export type RespondDevboxInteractionMutationResult = Apollo.MutationResult<RespondDevboxInteractionMutation>;
+export type RespondDevboxInteractionMutationOptions = Apollo.BaseMutationOptions<RespondDevboxInteractionMutation, RespondDevboxInteractionMutationVariables>;
+export type AddDevboxRepositoryMutationFn = Apollo.MutationFunction<AddDevboxRepositoryMutation, AddDevboxRepositoryMutationVariables>;
+
+/**
+ * __useAddDevboxRepositoryMutation__
+ *
+ * To run a mutation, you first call `useAddDevboxRepositoryMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddDevboxRepositoryMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [addDevboxRepositoryMutation, { data, loading, error }] = useAddDevboxRepositoryMutation({
+ *   variables: {
+ *      instanceId: // value for 'instanceId'
+ *      repository: // value for 'repository'
+ *   },
+ * });
+ */
+export function useAddDevboxRepositoryMutation(baseOptions?: Apollo.MutationHookOptions<AddDevboxRepositoryMutation, AddDevboxRepositoryMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AddDevboxRepositoryMutation, AddDevboxRepositoryMutationVariables>(Operations.AddDevboxRepository, options);
+      }
+export type AddDevboxRepositoryMutationHookResult = ReturnType<typeof useAddDevboxRepositoryMutation>;
+export type AddDevboxRepositoryMutationResult = Apollo.MutationResult<AddDevboxRepositoryMutation>;
+export type AddDevboxRepositoryMutationOptions = Apollo.BaseMutationOptions<AddDevboxRepositoryMutation, AddDevboxRepositoryMutationVariables>;
+
+/**
+ * __useDevboxInstanceStatusDeltaSubscription__
+ *
+ * To run a query within a React component, call `useDevboxInstanceStatusDeltaSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useDevboxInstanceStatusDeltaSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDevboxInstanceStatusDeltaSubscription({
+ *   variables: {
+ *      id: // value for 'id'
+ *      workbenchId: // value for 'workbenchId'
+ *   },
+ * });
+ */
+export function useDevboxInstanceStatusDeltaSubscription(baseOptions?: Apollo.SubscriptionHookOptions<DevboxInstanceStatusDeltaSubscription, DevboxInstanceStatusDeltaSubscriptionVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<DevboxInstanceStatusDeltaSubscription, DevboxInstanceStatusDeltaSubscriptionVariables>(Operations.DevboxInstanceStatusDelta, options);
+      }
+export type DevboxInstanceStatusDeltaSubscriptionHookResult = ReturnType<typeof useDevboxInstanceStatusDeltaSubscription>;
+export type DevboxInstanceStatusDeltaSubscriptionResult = Apollo.SubscriptionResult<DevboxInstanceStatusDeltaSubscription>;
+
+/**
+ * __useDevboxThreadDeltaSubscription__
+ *
+ * To run a query within a React component, call `useDevboxThreadDeltaSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useDevboxThreadDeltaSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDevboxThreadDeltaSubscription({
+ *   variables: {
+ *      instanceId: // value for 'instanceId'
+ *   },
+ * });
+ */
+export function useDevboxThreadDeltaSubscription(baseOptions: Apollo.SubscriptionHookOptions<DevboxThreadDeltaSubscription, DevboxThreadDeltaSubscriptionVariables> & ({ variables: DevboxThreadDeltaSubscriptionVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<DevboxThreadDeltaSubscription, DevboxThreadDeltaSubscriptionVariables>(Operations.DevboxThreadDelta, options);
+      }
+export type DevboxThreadDeltaSubscriptionHookResult = ReturnType<typeof useDevboxThreadDeltaSubscription>;
+export type DevboxThreadDeltaSubscriptionResult = Apollo.SubscriptionResult<DevboxThreadDeltaSubscription>;
+
+/**
+ * __useDevboxSnapshotDeltaSubscription__
+ *
+ * To run a query within a React component, call `useDevboxSnapshotDeltaSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useDevboxSnapshotDeltaSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDevboxSnapshotDeltaSubscription({
+ *   variables: {
+ *      workbenchId: // value for 'workbenchId'
+ *   },
+ * });
+ */
+export function useDevboxSnapshotDeltaSubscription(baseOptions: Apollo.SubscriptionHookOptions<DevboxSnapshotDeltaSubscription, DevboxSnapshotDeltaSubscriptionVariables> & ({ variables: DevboxSnapshotDeltaSubscriptionVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<DevboxSnapshotDeltaSubscription, DevboxSnapshotDeltaSubscriptionVariables>(Operations.DevboxSnapshotDelta, options);
+      }
+export type DevboxSnapshotDeltaSubscriptionHookResult = ReturnType<typeof useDevboxSnapshotDeltaSubscription>;
+export type DevboxSnapshotDeltaSubscriptionResult = Apollo.SubscriptionResult<DevboxSnapshotDeltaSubscription>;
+
+/**
+ * __useDevboxInstanceEntityDeltaSubscription__
+ *
+ * To run a query within a React component, call `useDevboxInstanceEntityDeltaSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useDevboxInstanceEntityDeltaSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDevboxInstanceEntityDeltaSubscription({
+ *   variables: {
+ *      instanceId: // value for 'instanceId'
+ *   },
+ * });
+ */
+export function useDevboxInstanceEntityDeltaSubscription(baseOptions: Apollo.SubscriptionHookOptions<DevboxInstanceEntityDeltaSubscription, DevboxInstanceEntityDeltaSubscriptionVariables> & ({ variables: DevboxInstanceEntityDeltaSubscriptionVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<DevboxInstanceEntityDeltaSubscription, DevboxInstanceEntityDeltaSubscriptionVariables>(Operations.DevboxInstanceEntityDelta, options);
+      }
+export type DevboxInstanceEntityDeltaSubscriptionHookResult = ReturnType<typeof useDevboxInstanceEntityDeltaSubscription>;
+export type DevboxInstanceEntityDeltaSubscriptionResult = Apollo.SubscriptionResult<DevboxInstanceEntityDeltaSubscription>;
+
+/**
+ * __useDevboxInstanceIndexDeltaSubscription__
+ *
+ * To run a query within a React component, call `useDevboxInstanceIndexDeltaSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useDevboxInstanceIndexDeltaSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDevboxInstanceIndexDeltaSubscription({
+ *   variables: {
+ *      instanceId: // value for 'instanceId'
+ *   },
+ * });
+ */
+export function useDevboxInstanceIndexDeltaSubscription(baseOptions: Apollo.SubscriptionHookOptions<DevboxInstanceIndexDeltaSubscription, DevboxInstanceIndexDeltaSubscriptionVariables> & ({ variables: DevboxInstanceIndexDeltaSubscriptionVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<DevboxInstanceIndexDeltaSubscription, DevboxInstanceIndexDeltaSubscriptionVariables>(Operations.DevboxInstanceIndexDelta, options);
+      }
+export type DevboxInstanceIndexDeltaSubscriptionHookResult = ReturnType<typeof useDevboxInstanceIndexDeltaSubscription>;
+export type DevboxInstanceIndexDeltaSubscriptionResult = Apollo.SubscriptionResult<DevboxInstanceIndexDeltaSubscription>;
+
+/**
  * __useClusterRegistrationQuery__
  *
  * To run a query within a React component, call `useClusterRegistrationQuery` and pass it any options that fit your needs.
@@ -34033,6 +38173,23 @@ export type PodLogsQueryResult = Apollo.QueryResult<PodLogsQuery, PodLogsQueryVa
  *      start: // value for 'start'
  *      stop: // value for 'stop'
  *      step: // value for 'step'
+ *      cpu: // value for 'cpu'
+ *      cpuRequests: // value for 'cpuRequests'
+ *      cpuLimits: // value for 'cpuLimits'
+ *      cpuThrottling: // value for 'cpuThrottling'
+ *      memory: // value for 'memory'
+ *      memoryRequests: // value for 'memoryRequests'
+ *      memoryLimits: // value for 'memoryLimits'
+ *      ephemeralStorage: // value for 'ephemeralStorage'
+ *      ephemeralStorageRequests: // value for 'ephemeralStorageRequests'
+ *      ephemeralStorageLimits: // value for 'ephemeralStorageLimits'
+ *      fsReads: // value for 'fsReads'
+ *      fsWrites: // value for 'fsWrites'
+ *      networkReceive: // value for 'networkReceive'
+ *      networkTransmit: // value for 'networkTransmit'
+ *      networkReceiveDropped: // value for 'networkReceiveDropped'
+ *      networkTransmitDropped: // value for 'networkTransmitDropped'
+ *      restarts: // value for 'restarts'
  *   },
  * });
  */
@@ -37270,6 +41427,45 @@ export type StackRunQueryHookResult = ReturnType<typeof useStackRunQuery>;
 export type StackRunLazyQueryHookResult = ReturnType<typeof useStackRunLazyQuery>;
 export type StackRunSuspenseQueryHookResult = ReturnType<typeof useStackRunSuspenseQuery>;
 export type StackRunQueryResult = Apollo.QueryResult<StackRunQuery, StackRunQueryVariables>;
+
+/**
+ * __useStackRunInfracostResourcesQuery__
+ *
+ * To run a query within a React component, call `useStackRunInfracostResourcesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useStackRunInfracostResourcesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useStackRunInfracostResourcesQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *      resourceScope: // value for 'resourceScope'
+ *   },
+ * });
+ */
+export function useStackRunInfracostResourcesQuery(baseOptions: Apollo.QueryHookOptions<StackRunInfracostResourcesQuery, StackRunInfracostResourcesQueryVariables> & ({ variables: StackRunInfracostResourcesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<StackRunInfracostResourcesQuery, StackRunInfracostResourcesQueryVariables>(Operations.StackRunInfracostResources, options);
+      }
+export function useStackRunInfracostResourcesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<StackRunInfracostResourcesQuery, StackRunInfracostResourcesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<StackRunInfracostResourcesQuery, StackRunInfracostResourcesQueryVariables>(Operations.StackRunInfracostResources, options);
+        }
+// @ts-ignore
+export function useStackRunInfracostResourcesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<StackRunInfracostResourcesQuery, StackRunInfracostResourcesQueryVariables>): Apollo.UseSuspenseQueryResult<StackRunInfracostResourcesQuery, StackRunInfracostResourcesQueryVariables>;
+export function useStackRunInfracostResourcesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<StackRunInfracostResourcesQuery, StackRunInfracostResourcesQueryVariables>): Apollo.UseSuspenseQueryResult<StackRunInfracostResourcesQuery | undefined, StackRunInfracostResourcesQueryVariables>;
+export function useStackRunInfracostResourcesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<StackRunInfracostResourcesQuery, StackRunInfracostResourcesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<StackRunInfracostResourcesQuery, StackRunInfracostResourcesQueryVariables>(Operations.StackRunInfracostResources, options);
+        }
+export type StackRunInfracostResourcesQueryHookResult = ReturnType<typeof useStackRunInfracostResourcesQuery>;
+export type StackRunInfracostResourcesLazyQueryHookResult = ReturnType<typeof useStackRunInfracostResourcesLazyQuery>;
+export type StackRunInfracostResourcesSuspenseQueryHookResult = ReturnType<typeof useStackRunInfracostResourcesSuspenseQuery>;
+export type StackRunInfracostResourcesQueryResult = Apollo.QueryResult<StackRunInfracostResourcesQuery, StackRunInfracostResourcesQueryVariables>;
 
 /**
  * __useStackRunJobQuery__
@@ -41378,6 +45574,29 @@ export type WorkbenchJobThoughtDeltaSubscriptionHookResult = ReturnType<typeof u
 export type WorkbenchJobThoughtDeltaSubscriptionResult = Apollo.SubscriptionResult<WorkbenchJobThoughtDeltaSubscription>;
 
 /**
+ * __useQueuedPromptDeltaSubscription__
+ *
+ * To run a query within a React component, call `useQueuedPromptDeltaSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useQueuedPromptDeltaSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useQueuedPromptDeltaSubscription({
+ *   variables: {
+ *      jobId: // value for 'jobId'
+ *   },
+ * });
+ */
+export function useQueuedPromptDeltaSubscription(baseOptions: Apollo.SubscriptionHookOptions<QueuedPromptDeltaSubscription, QueuedPromptDeltaSubscriptionVariables> & ({ variables: QueuedPromptDeltaSubscriptionVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<QueuedPromptDeltaSubscription, QueuedPromptDeltaSubscriptionVariables>(Operations.QueuedPromptDelta, options);
+      }
+export type QueuedPromptDeltaSubscriptionHookResult = ReturnType<typeof useQueuedPromptDeltaSubscription>;
+export type QueuedPromptDeltaSubscriptionResult = Apollo.SubscriptionResult<QueuedPromptDeltaSubscription>;
+
+/**
  * __useWorkbenchJobProgressSubscription__
  *
  * To run a query within a React component, call `useWorkbenchJobProgressSubscription` and pass it any options that fit your needs.
@@ -41399,29 +45618,6 @@ export function useWorkbenchJobProgressSubscription(baseOptions: Apollo.Subscrip
       }
 export type WorkbenchJobProgressSubscriptionHookResult = ReturnType<typeof useWorkbenchJobProgressSubscription>;
 export type WorkbenchJobProgressSubscriptionResult = Apollo.SubscriptionResult<WorkbenchJobProgressSubscription>;
-
-/**
- * __useWorkbenchTextStreamSubscription__
- *
- * To run a query within a React component, call `useWorkbenchTextStreamSubscription` and pass it any options that fit your needs.
- * When your component renders, `useWorkbenchTextStreamSubscription` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useWorkbenchTextStreamSubscription({
- *   variables: {
- *      jobId: // value for 'jobId'
- *   },
- * });
- */
-export function useWorkbenchTextStreamSubscription(baseOptions: Apollo.SubscriptionHookOptions<WorkbenchTextStreamSubscription, WorkbenchTextStreamSubscriptionVariables> & ({ variables: WorkbenchTextStreamSubscriptionVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useSubscription<WorkbenchTextStreamSubscription, WorkbenchTextStreamSubscriptionVariables>(Operations.WorkbenchTextStream, options);
-      }
-export type WorkbenchTextStreamSubscriptionHookResult = ReturnType<typeof useWorkbenchTextStreamSubscription>;
-export type WorkbenchTextStreamSubscriptionResult = Apollo.SubscriptionResult<WorkbenchTextStreamSubscription>;
 
 /**
  * __useWorkbenchCanvasStreamSubscription__
@@ -42237,6 +46433,25 @@ export const namedOperations = {
     ClusterUsageNamespaces: 'ClusterUsageNamespaces',
     ClusterUsageScalingRecommendations: 'ClusterUsageScalingRecommendations',
     ProjectUsageHistory: 'ProjectUsageHistory',
+    WorkbenchDevboxes: 'WorkbenchDevboxes',
+    Devboxes: 'Devboxes',
+    Devbox: 'Devbox',
+    DevboxAgents: 'DevboxAgents',
+    WorkbenchDevboxInstances: 'WorkbenchDevboxInstances',
+    WorkbenchDevboxSnapshots: 'WorkbenchDevboxSnapshots',
+    WorkbenchDevboxInbox: 'WorkbenchDevboxInbox',
+    DevboxInstance: 'DevboxInstance',
+    DevboxThread: 'DevboxThread',
+    DevboxInstanceCommands: 'DevboxInstanceCommands',
+    DevboxRepositories: 'DevboxRepositories',
+    DevboxTimeline: 'DevboxTimeline',
+    DevboxSessions: 'DevboxSessions',
+    DevboxImportableSessions: 'DevboxImportableSessions',
+    DevboxPullRequests: 'DevboxPullRequests',
+    DevboxFiles: 'DevboxFiles',
+    DevboxFile: 'DevboxFile',
+    DevboxChanges: 'DevboxChanges',
+    AgentCredentials: 'AgentCredentials',
     ClusterRegistration: 'ClusterRegistration',
     ClusterRegistrations: 'ClusterRegistrations',
     ClusterISOImages: 'ClusterISOImages',
@@ -42330,6 +46545,7 @@ export const namedOperations = {
     StackBindings: 'StackBindings',
     StackRuns: 'StackRuns',
     StackRun: 'StackRun',
+    StackRunInfracostResources: 'StackRunInfracostResources',
     StackRunJob: 'StackRunJob',
     StackRunJobLogs: 'StackRunJobLogs',
     CustomStackRuns: 'CustomStackRuns',
@@ -42498,6 +46714,37 @@ export const namedOperations = {
     KickService: 'KickService',
     SuggestScalingRecommendation: 'SuggestScalingRecommendation',
     ApplyScalingRecommendation: 'ApplyScalingRecommendation',
+    OpenDevboxStream: 'OpenDevboxStream',
+    WriteDevboxFile: 'WriteDevboxFile',
+    SetDevboxAgentBilling: 'SetDevboxAgentBilling',
+    LinkAgentCredential: 'LinkAgentCredential',
+    DeleteAgentCredential: 'DeleteAgentCredential',
+    SetDefaultAgentBilling: 'SetDefaultAgentBilling',
+    AttachDevbox: 'AttachDevbox',
+    DetachDevbox: 'DetachDevbox',
+    CreateDevboxInstance: 'CreateDevboxInstance',
+    RestoreDevboxSnapshot: 'RestoreDevboxSnapshot',
+    CancelDevboxInstance: 'CancelDevboxInstance',
+    SuspendDevboxInstance: 'SuspendDevboxInstance',
+    ResumeDevboxInstance: 'ResumeDevboxInstance',
+    PingDevboxInstance: 'PingDevboxInstance',
+    LeaveDevboxInstance: 'LeaveDevboxInstance',
+    KeepDevboxInstanceAwake: 'KeepDevboxInstanceAwake',
+    CancelDevboxKeepAwake: 'CancelDevboxKeepAwake',
+    CreateDevboxSnapshot: 'CreateDevboxSnapshot',
+    DeleteDevboxSnapshot: 'DeleteDevboxSnapshot',
+    CreateDevboxThread: 'CreateDevboxThread',
+    ImportDevboxThread: 'ImportDevboxThread',
+    ResumeDevboxThread: 'ResumeDevboxThread',
+    CloseDevboxThread: 'CloseDevboxThread',
+    DeleteDevboxThread: 'DeleteDevboxThread',
+    ForkDevboxThread: 'ForkDevboxThread',
+    RenameDevboxThread: 'RenameDevboxThread',
+    PromptDevboxThread: 'PromptDevboxThread',
+    CancelDevboxPrompt: 'CancelDevboxPrompt',
+    SetDevboxThreadConfigOption: 'SetDevboxThreadConfigOption',
+    RespondDevboxInteraction: 'RespondDevboxInteraction',
+    AddDevboxRepository: 'AddDevboxRepository',
     CreateClusterRegistration: 'CreateClusterRegistration',
     UpdateClusterRegistration: 'UpdateClusterRegistration',
     DeleteClusterRegistration: 'DeleteClusterRegistration',
@@ -42621,6 +46868,11 @@ export const namedOperations = {
     AIChatStream: 'AIChatStream',
     ClusterDelta: 'ClusterDelta',
     ServiceDeploymentDelta: 'ServiceDeploymentDelta',
+    DevboxInstanceStatusDelta: 'DevboxInstanceStatusDelta',
+    DevboxThreadDelta: 'DevboxThreadDelta',
+    DevboxSnapshotDelta: 'DevboxSnapshotDelta',
+    DevboxInstanceEntityDelta: 'DevboxInstanceEntityDelta',
+    DevboxInstanceIndexDelta: 'DevboxInstanceIndexDelta',
     InfrastructureStackDelta: 'InfrastructureStackDelta',
     StackRunDelta: 'StackRunDelta',
     RunStepDelta: 'RunStepDelta',
@@ -42628,8 +46880,8 @@ export const namedOperations = {
     WorkbenchJobDelta: 'WorkbenchJobDelta',
     WorkbenchJobActivityDelta: 'WorkbenchJobActivityDelta',
     WorkbenchJobThoughtDelta: 'WorkbenchJobThoughtDelta',
+    QueuedPromptDelta: 'QueuedPromptDelta',
     WorkbenchJobProgress: 'WorkbenchJobProgress',
-    WorkbenchTextStream: 'WorkbenchTextStream',
     WorkbenchCanvasStream: 'WorkbenchCanvasStream',
     WorkbenchExecStream: 'WorkbenchExecStream',
     WorkbenchDashboardDelta: 'WorkbenchDashboardDelta',
@@ -42801,6 +47053,33 @@ export const namedOperations = {
     ProjectUsageHistory: 'ProjectUsageHistory',
     ClusterNamespaceUsage: 'ClusterNamespaceUsage',
     ClusterScalingRecommendation: 'ClusterScalingRecommendation',
+    DevboxModel: 'DevboxModel',
+    DevboxCommand: 'DevboxCommand',
+    DevboxConfigOption: 'DevboxConfigOption',
+    DevboxSessionCapabilities: 'DevboxSessionCapabilities',
+    DevboxAgent: 'DevboxAgent',
+    DevboxTiny: 'DevboxTiny',
+    Devbox: 'Devbox',
+    DevboxUsage: 'DevboxUsage',
+    DevboxThread: 'DevboxThread',
+    DevboxInteraction: 'DevboxInteraction',
+    DevboxSnapshot: 'DevboxSnapshot',
+    DevboxInstanceTiny: 'DevboxInstanceTiny',
+    DevboxInstance: 'DevboxInstance',
+    DevboxAgentBilling: 'DevboxAgentBilling',
+    DevboxFileEntry: 'DevboxFileEntry',
+    DevboxFile: 'DevboxFile',
+    DevboxFileChange: 'DevboxFileChange',
+    DevboxRepositoryChanges: 'DevboxRepositoryChanges',
+    DevboxStream: 'DevboxStream',
+    AgentCredential: 'AgentCredential',
+    DevboxCheckout: 'DevboxCheckout',
+    DevboxRepository: 'DevboxRepository',
+    DevboxContentBlock: 'DevboxContentBlock',
+    DevboxToolCall: 'DevboxToolCall',
+    DevboxEntity: 'DevboxEntity',
+    DevboxEntityChange: 'DevboxEntityChange',
+    DevboxPullRequest: 'DevboxPullRequest',
     ClusterRegistration: 'ClusterRegistration',
     Tag: 'Tag',
     IsoImage: 'IsoImage',
@@ -42957,7 +47236,6 @@ export const namedOperations = {
     WorkbenchJobActivity: 'WorkbenchJobActivity',
     WorkbenchJobActivityWithThoughts: 'WorkbenchJobActivityWithThoughts',
     WorkbenchJobProgress: 'WorkbenchJobProgress',
-    WorkbenchTextStream: 'WorkbenchTextStream',
     WorkbenchCron: 'WorkbenchCron',
     WorkbenchPrompt: 'WorkbenchPrompt',
     WorkbenchWebhook: 'WorkbenchWebhook',

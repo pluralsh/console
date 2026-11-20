@@ -46,12 +46,12 @@ export function DeleteWorkbenchFileModal({
       loading={loading}
       error={error}
       label="Delete"
-      title={`Delete ${isDirectory ? 'directory' : 'file'}`}
+      title={`Delete ${isDirectory ? 'folder' : 'file'}`}
       text={
         file &&
         (isDirectory
-          ? `Delete ${file.sandboxPath ?? file.path} and everything in it? Agents in this workbench will no longer be able to read these files.`
-          : `Delete ${file.sandboxPath ?? file.path}? Agents in this workbench will no longer be able to read it.`)
+          ? `Delete ${file.sandboxPath ?? file.path} and everything inside it? Agents in this workbench won’t be able to read these files anymore.`
+          : `Delete ${file.sandboxPath ?? file.path}? Agents in this workbench won’t be able to read it anymore.`)
       }
       submit={() =>
         file && mutation({ variables: { workbenchId, path: file.path } })

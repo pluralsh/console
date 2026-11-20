@@ -5,6 +5,7 @@ import (
 
 	"github.com/pluralsh/console/go/kubernetes-agent/pkg/kascfg"
 	agent_configuration_server "github.com/pluralsh/console/go/kubernetes-agent/pkg/module/agent_configuration/server"
+	devbox_server "github.com/pluralsh/console/go/kubernetes-agent/pkg/module/devbox/server"
 	kubernetes_api_server "github.com/pluralsh/console/go/kubernetes-agent/pkg/module/kubernetes_api/server"
 	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modserver"
 	observability_server "github.com/pluralsh/console/go/kubernetes-agent/pkg/module/observability/server"
@@ -47,6 +48,7 @@ var (
 		agent_configuration_server.ApplyDefaults,
 		usage_metrics_server.ApplyDefaults,
 		kubernetes_api_server.ApplyDefaults,
+		devbox_server.ApplyDefaults,
 	}
 )
 

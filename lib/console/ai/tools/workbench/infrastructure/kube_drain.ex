@@ -34,6 +34,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.KubeDrain do
   end
 
   def implement(%__MODULE__{
+        id: id,
         cluster: handle,
         node: node,
         explanation: explanation,
@@ -42,6 +43,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.KubeDrain do
     case Clusters.get_cluster_by_handle(handle) do
       %Cluster{} ->
         KubeDrainRequest.new(
+          id: id,
           handle: handle,
           node: node,
           explanation: explanation,

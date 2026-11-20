@@ -1,0 +1,19 @@
+{{- /*
+Custom resources whose CRDs this release may install itself. Helm can't map a
+kind whose CRD isn't served yet, so when the CRD is missing at render time
+(the first install) they go to the bootstrap Job instead (bootstrap-job.yaml),
+which applies them with ownership metadata that later upgrades adopt.
+*/ -}}
+{{- if include "substrate.sandboxConfigCRDServed" . }}
+{{- range include "substrate.sandboxConfigs" . | fromYamlArray }}
+{{- $_ := set .metadata "labels" (merge (.metadata.labels | default dict) (include "substrate.labels" $ | fromYaml)) }}
+---
+{{ toYaml . }}
+{{- end }}
+{{- end }}
+{{- if and (eq .Values.postgres.mode "cnpg") (include "substrate.cnpgCRDServed" .) }}
+{{- range include "substrate.cnpg.objects" . | fromYamlArray }}
+---
+{{ toYaml . }}
+{{- end }}
+{{- end }}

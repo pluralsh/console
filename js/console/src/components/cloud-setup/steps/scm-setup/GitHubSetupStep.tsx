@@ -15,13 +15,9 @@ import {
   useScmConnectionSuspenseQuery,
 } from 'generated/graphql'
 import { ScmConnectionDocument } from 'generated/graphql-documents'
-import { use, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
-import {
-  CloudWelcomeCtx,
-  CloudWelcomeStep,
-} from '../../CloudConsoleWelcomeModal'
 import { GitHubAppSetup } from './GitHubAppSetup'
 import { ManualSetup } from './ManualGitSetup'
 
@@ -29,11 +25,10 @@ enum SetupType {
   GhApp = 'ghApp',
   Manual = 'manual',
 }
-const INSTALLATION_ID_PARAM = 'installation_id'
+export const INSTALLATION_ID_PARAM = 'installation_id'
 
 export function GitHubSetupStep() {
   const { colors } = useTheme()
-  const { setModalActions, setStep } = use(CloudWelcomeCtx)
   const [setupType, setSetupType] = useState<SetupType>(SetupType.GhApp)
   const tabStateRef = useRef<any>(null)
   const [params, setParams] = useSearchParams()
@@ -68,14 +63,10 @@ export function GitHubSetupStep() {
     onCompleted: () => setShowWebhookSetup(true),
   })
 
-  useLayoutEffect(() => {
-    setModalActions(null)
-    if (!!data.scmConnection) {
-      // if the user installed manually, then there will be no installationId in the search params and this moves forward
-      // when installing with our gh app, user needs to also create a webhook first which then clears the installationId
-      if (!installationId) setStep(CloudWelcomeStep.Authenticate)
-    } else if (installationId) registerGhApp()
-  }, [data, installationId, registerGhApp, setModalActions, setStep, setupType])
+  // returning from the GitHub app install: register it once, then ask for a webhook owner
+  useEffect(() => {
+    if (!data.scmConnection && installationId) registerGhApp()
+  }, [data.scmConnection, installationId, registerGhApp])
 
   const showWebhookSetup =
     webhookSetupRequested || (!!data.scmConnection && !!installationId)

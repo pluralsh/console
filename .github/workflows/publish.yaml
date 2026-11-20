@@ -106,6 +106,7 @@ jobs:
       #   env:
       #     JWT_PUBLIC_KEY: ${{ secrets.JWT_PUBLIC_KEY }}
       - name: Build and push
+        id: build
         uses: docker/build-push-action@v7
         with:
           context: "."
@@ -121,6 +122,15 @@ jobs:
             VITE_PROD_SECRET_KEY=${{ secrets.VITE_PROD_SECRET_KEY }}
             VITE_SENTRY_DSN=${{ secrets.VITE_SENTRY_DSN }}
             SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
+      - name: Cosign sign
+        uses: ./.github/actions/cosign-sign
+        with:
+          digest: ${{ steps.build.outputs.digest }}
+          images: |
+            dkr.plural.sh/console/console
+            ghcr.io/pluralsh/console
+            gcr.io/pluralsh/console
+            docker.io/pluralsh/console
       - name: slack webhook
         uses: 8398a7/action-slack@v3
         with:

@@ -111,8 +111,13 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: 'read'
+      id-token: 'write'
       packages: 'write'
     steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
       - name: Download digests
         uses: actions/download-artifact@v8
         with:
@@ -148,6 +153,18 @@ jobs:
         run: |
           docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
             $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
+      - name: Resolve digest
+        id: inspect
+        run: |
+          digest=$(docker buildx imagetools inspect ghcr.io/pluralsh/agentk:${{ steps.meta.outputs.version }} --format '{{.Manifest.Digest}}')
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+      - name: Cosign sign
+        uses: ./.github/actions/cosign-sign
+        with:
+          digest: ${{ steps.inspect.outputs.digest }}
+          images: |
+            ghcr.io/pluralsh/agentk
+            docker.io/pluralsh/agentk
       - name: slack webhook
         uses: 8398a7/action-slack@v3
         with:

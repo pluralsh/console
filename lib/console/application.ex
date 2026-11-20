@@ -54,7 +54,7 @@ defmodule Console.Application do
       Console.Deployments.Pipelines.Supervisor,
       Console.Deployments.Helm.Supervisor,
       Console.Deployments.Local.Server,
-    ] ++ cloud_query_client(@env) ++ pseudofs_client(@env) ++ [
+    ] ++ cloud_query_client(@env) ++ pseudofs_client(@env) ++ devbox_control_client(@env) ++ [
       {GRPC.Server.Supervisor,
         endpoint: Console.GRPC.Endpoint,
         port: 50051,
@@ -65,6 +65,7 @@ defmodule Console.Application do
       Console.Cron.Scheduler,
       Console.Buffers.ClusterAudit,
       Console.Buffers.PolicyEvaluation,
+      Console.AI.Vector.Buffer,
       Console.Prom.Meter,
       Console.AI.Agents.Supervisor,
       Console.AI.MCP.Supervisor,
@@ -125,6 +126,11 @@ defmodule Console.Application do
     ]
   end
   def pseudofs_client(_, _), do: []
+
+  @doc false
+  def devbox_control_client(env, target \\ Console.conf(:kas_devbox_grpc_addr))
+  def devbox_control_client(:test, _), do: []
+  def devbox_control_client(_, target), do: Console.Devboxes.Control.Grpc.child_specs(target)
 
   defp consumers(), do: Console.conf(:consumers) || []
 

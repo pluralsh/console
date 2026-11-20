@@ -151,6 +151,7 @@ defmodule Console.OpenAPI.AI.SentinelRunJob do
       status: ecto_enum(Console.Schema.SentinelRunJob.Status, description: "Current status of the job (pending, running, success, failed)"),
       format: ecto_enum(Console.Schema.SentinelRunJob.Format, description: "Output format of the job (plaintext, junit)"),
       output: string(description: "Output produced by the job"),
+      error: string(description: "Runtime or configuration error encountered while running the job"),
       completed_at: datetime(description: "Timestamp when the job completed"),
       cluster_id: string(description: "ID of the cluster this job ran on"),
       sentinel_run_id: string(description: "ID of the sentinel run this job belongs to"),

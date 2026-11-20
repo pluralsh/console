@@ -19,13 +19,15 @@ func openAIAllowedRequests(cfg *pb.OpenAiConfig) *schemas.AllowedRequests {
 			ChatCompletion:       true,
 			ChatCompletionStream: true,
 			Embedding:            true,
+			Decision:             true,
 		}
 	case pb.OpenAiMethod_RESPONSES:
 		return &schemas.AllowedRequests{
-			ListModels:        true,
-			Responses:         true,
-			ResponsesStream:   true,
-			Embedding:         true,
+			ListModels:      true,
+			Responses:       true,
+			ResponsesStream: true,
+			Embedding:       true,
+			Decision:        true,
 		}
 	default:
 		return nil

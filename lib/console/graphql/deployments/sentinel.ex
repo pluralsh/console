@@ -84,6 +84,7 @@ defmodule Console.GraphQl.Deployments.Sentinel do
     field :status,    :sentinel_run_job_status, description: "the status of the job"
     field :reference, :namespaced_name, description: "the reference to the job that was run"
     field :output,    :string, description: "the output of the job"
+    field :error,     :string, description: "a runtime or configuration error encountered while running the job"
   end
 
   input_object :sentinel_check_gotestsum_attributes do
@@ -295,6 +296,7 @@ defmodule Console.GraphQl.Deployments.Sentinel do
     field :format,        non_null(:sentinel_run_job_format), description: "the format of the job output"
     field :check,         :string, description: "the check that was run"
     field :output,        :string, description: "the output of the job"
+    field :error,         :string, description: "a runtime or configuration error encountered while running the job"
     field :completed_at,  :datetime, description: "the time the job completed"
     field :git,           :git_ref, description: "the git repository to use for this job"
     field :uses_git,      :boolean, description: "whether this job uses test code defined in git", resolve: fn

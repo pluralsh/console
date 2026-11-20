@@ -5,6 +5,228 @@ readme_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/m
 helm_repository_url: https://prometheus-community.github.io/helm-charts
 chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
 versions:
+- version: 93.4.1
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['CI only: GitHub Action `actions/create-github-app-token` bumped
+        to v3.4.0 (no runtime impact).', 'Dependency bump: `prometheus-community/postgres_exporter`
+        updated to v0.21.1 for the `prometheus-postgres-exporter` subchart/component.',
+      'Prometheus rule/recording/alerting change: removed fine-grained histogram buckets
+        for `apiserver_watch_events_dispatch_duration_seconds` in kube-prometheus-stack.']
+    features: [Updated the bundled postgres exporter to v0.21.1 via the `prometheus-postgres-exporter`
+        dependency.]
+    breaking_changes: ['The chart drops fine-grained buckets for `apiserver_watch_events_dispatch_duration_seconds`,
+        which can change the time series emitted (bucket labels/series count). Dashboards/alerts
+        recording rules that expect the old bucket boundaries may need updates and
+        historical comparisons may show discontinuities.']
+  chart_version: 93.4.1
+  images: ['docker.io/bats/bats:1.14.0', 'docker.io/grafana/grafana:13.3.1-distroless',
+    'ghcr.io/jkroepke/kube-webhook-certgen:1.11.1', 'quay.io/kiwigrid/k8s-sidecar:2.14.3',
+    'quay.io/prometheus-operator/prometheus-operator:v0.95.2', 'quay.io/prometheus/alertmanager:v0.35.0',
+    'quay.io/prometheus/node-exporter:v1.12.1-distroless', 'quay.io/prometheus/prometheus:v3.16.0-distroless',
+    'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
+- version: 93.4.0
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['prometheus-sql-exporter: switched PodDisruptionBudget to the
+        stable API version (policy/v1).', 'kube-prometheus-stack: bumped bundled Grafana
+        image tag to v14.5.0.']
+    features: [Grafana version bump to 14.5.0 (may include new dashboards/features/fixes
+        from Grafana upstream)., 'prometheus-sql-exporter now uses the stable PodDisruptionBudget
+        API, improving compatibility on clusters where older beta APIs are removed.']
+    breaking_changes: [Potential compatibility issue if you run very old Kubernetes
+        versions that don't support policy/v1 PodDisruptionBudget; otherwise this
+        is generally non-breaking.]
+  chart_version: 93.4.0
+  images: ['docker.io/bats/bats:1.14.0', 'docker.io/grafana/grafana:13.3.1-distroless',
+    'ghcr.io/jkroepke/kube-webhook-certgen:1.11.1', 'quay.io/kiwigrid/k8s-sidecar:2.14.3',
+    'quay.io/prometheus-operator/prometheus-operator:v0.95.2', 'quay.io/prometheus/alertmanager:v0.35.0',
+    'quay.io/prometheus/node-exporter:v1.12.1-distroless', 'quay.io/prometheus/prometheus:v3.16.0-distroless',
+    'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
+- version: 93.3.0
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: '- No user-facing Helm values changes are called out in the provided
+      notes for `kube-prometheus-stack` 93.3.0.
+
+      - Expect no action required unless you rely on chart defaults affected indirectly
+      by bundled subcharts/mixins; still run a `helm diff upgrade` to confirm rendered
+      manifest changes.'
+    chart_updates: [Updated kubernetes-mixin (dashboards/rules) digest to `bacbfe0`
+        (will change some generated PrometheusRule and Grafana dashboard content).,
+      "Subchart/embedded component maintenance fixes:\n  - prometheus-blackbox-exporter:\
+        \ documentation link fixes in `values.yaml`.\n  - prometheus-adapter: preserve\
+        \ zero disruption budget constraints.\n  - prom-label-proxy: fix `kubeRBACProxy.resources`\
+        \ indentation.\n  - prometheus-sql-exporter: roll pods when config changes.\n\
+        \  - CI workflow dependency update (no runtime impact)."]
+    features: ['Prometheus SQL Exporter now triggers a pod rollout when its configuration
+        changes, reducing the risk of stale config running in existing pods.']
+    breaking_changes: []
+  chart_version: 93.3.0
+  images: ['docker.io/bats/bats:1.14.0', 'docker.io/grafana/grafana:13.3.1-distroless',
+    'ghcr.io/jkroepke/kube-webhook-certgen:1.11.1', 'quay.io/kiwigrid/k8s-sidecar:2.14.3',
+    'quay.io/prometheus-operator/prometheus-operator:v0.95.2', 'quay.io/prometheus/alertmanager:v0.35.0',
+    'quay.io/prometheus/node-exporter:v1.12.1-distroless', 'quay.io/prometheus/prometheus:v3.16.0-distroless',
+    'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
+- version: 93.2.2
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "- No explicit `values.yaml` migration notes were included in the\
+      \ provided release notes between `93.1.0` and `93.2.2`.\n- **Ingress defaulting\
+      \ change**: `93.2.2` sets a default `pathType` for **Thanos** and **per-replica\
+      \ ingresses**. If you previously omitted `pathType`, behavior may change depending\
+      \ on your cluster\u2019s Ingress controller/Kubernetes version. If you need\
+      \ a specific behavior, explicitly set `pathType` in the relevant ingress values.\n\
+      - From `93.1.0` (already in your starting version):\n  - New values exposed:\
+      \ `kube-prometheus-stack.extraScrapeMetrics` and `alertmanagerConfigFileSystemMode`\
+      \ (only relevant if you want to use them; no action required otherwise)."
+    chart_updates: ['`93.2.2`: Adds a default `pathType` on Thanos and per-replica
+        ingresses (PR #7594).', '`93.1.0`: Prometheus Pushgateway web config volume
+        handling with extra volumes; Pushgateway image tag updated to `v3.11.2`; exposes
+        `extraScrapeMetrics` and `alertmanagerConfigFileSystemMode` (PRs #7484, #7559,
+        #7557).']
+    features: ['Default `pathType` is now applied for Thanos and per-replica ingresses,
+        reducing the need to specify it manually on newer Kubernetes versions.', New
+        chart values are available to expose extra scrape metrics and to control Alertmanager
+        config file permissions (`alertmanagerConfigFileSystemMode`).]
+    breaking_changes: ['Potential behavior change for users who rely on implicit/unspecified
+        Ingress `pathType` for Thanos or per-replica ingresses; after upgrade, the
+        rendered Ingress manifests will include a default `pathType`, which may affect
+        routing on some ingress controllers.']
+  chart_version: 93.2.2
+  images: ['docker.io/bats/bats:1.14.0', 'docker.io/grafana/grafana:13.3.1-distroless',
+    'ghcr.io/jkroepke/kube-webhook-certgen:1.11.1', 'quay.io/kiwigrid/k8s-sidecar:2.14.3',
+    'quay.io/prometheus-operator/prometheus-operator:v0.95.2', 'quay.io/prometheus/alertmanager:v0.35.0',
+    'quay.io/prometheus/node-exporter:v1.12.1-distroless', 'quay.io/prometheus/prometheus:v3.16.0-distroless',
+    'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
+- version: 93.1.0
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "- **New values exposed** (no renames noted in the provided notes):\n\
+      \  - `kube-prometheus-stack.extraScrapeMetrics`\n  - `kube-prometheus-stack.alertmanagerConfigFileSystemMode`\n\
+      - **Alertmanager**: `volumeAttributesClassName` support was added (check your\
+      \ values for any CSI/storage-class-specific attributes if you want to use it)."
+    chart_updates: ['Prometheus Pushgateway: ensure the web config volume is preserved
+        when using `extraVolumes`/additional volumes (fixes a volume merge/override
+        behavior).', 'Docker image updates: Prometheus Pushgateway bumped to `v3.11.2`;
+        Alertmanager Docker tag updated to `v2.3.0` (as referenced in the Prometheus
+        chart dependency notes).', 'Security hardening: prometheus-node-exporter now
+        defaults to `RuntimeDefault` seccomp, drops all Linux capabilities, and disallows
+        privilege escalation.', 'Labeling changes: several exporter charts stop including
+        the chart version in pod labels (reduces churn on upgrades).', 'Misc fixes:
+        rabbitmq-exporter service.labels rendering, memcached-exporter port alignment,
+        nats-exporter supports `extraContainers`, mongodb-exporter README corrections.']
+    features: [You can now control Alertmanager config file permissions via `alertmanagerConfigFileSystemMode`
+        (useful for restrictive security contexts)., You can expose/configure `extraScrapeMetrics`
+        to add additional scrape targets/metrics without patching templates., 'Alertmanager
+        can now set `volumeAttributesClassName` on volumes, enabling certain CSI drivers/features.']
+    breaking_changes: ['Node-exporter security context is more restrictive by default
+        (seccomp RuntimeDefault, no privilege escalation, dropped capabilities); custom
+        init/sidecar behaviors that relied on elevated privileges may fail and require
+        explicit overrides.', 'Pod label set changed for some exporters (chart version
+        removed from pod labels), which can affect label-based selectors, network
+        policies, or dashboards/alerts if they referenced that label.']
+  chart_version: 93.1.0
+  images: ['docker.io/bats/bats:1.14.0', 'docker.io/grafana/grafana:13.3.0-distroless',
+    'ghcr.io/jkroepke/kube-webhook-certgen:1.11.1', 'quay.io/kiwigrid/k8s-sidecar:2.14.3',
+    'quay.io/prometheus-operator/prometheus-operator:v0.95.1', 'quay.io/prometheus/alertmanager:v0.34.2',
+    'quay.io/prometheus/node-exporter:v1.12.1-distroless', 'quay.io/prometheus/prometheus:v3.16.0-distroless',
+    'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
+- version: 92.22.0
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: '- **Alertmanager PVC**: New support for `volumeAttributesClassName`
+      (see PR #7475). If you use Alertmanager persistence with CSI volume attributes
+      classes, you can now set the corresponding Helm value (look for an Alertmanager
+      persistence/storage section exposing `volumeAttributesClassName`). Otherwise
+      no action needed.
+
+      - **prometheus-rabbitmq-exporter**: Service label rendering was fixed (#7544).
+      If you set `service.labels`, verify the rendered Service manifest matches your
+      expectations after upgrade.
+
+      - **prometheus-memcached-exporter**: Exporter and ServiceMonitor ports were
+      synchronized (#7357). If you override ports, re-check that the Service and ServiceMonitor
+      still align.
+
+      - **prometheus-nats-exporter**: `extraContainers` is now rendered in the Deployment
+      (#7526). If you configured `extraContainers` previously and it was ignored,
+      it will start taking effect after upgrade.
+
+      - **prometheus-node-exporter**: Security hardening defaults changed (#7451)
+      and image tag updated to `v5` (#7551). If you relied on privileged settings/capabilities,
+      you may need to explicitly relax the securityContext.
+
+      - **prometheus**: Alertmanager Docker tag updated to `v2.3.0` (#7550). Validate
+      compatibility with your Alertmanager configuration and any sidecars/automation
+      that depends on image/tag behavior.'
+    chart_updates: [Fixed `service.labels` templating for `prometheus-rabbitmq-exporter`
+        (#7544)., Alertmanager templates support `volumeAttributesClassName` for storage
+        volumes (#7475)., Prometheus chart updated Alertmanager image tag to `v2.3.0`
+        (#7550)., Memcached exporter chart syncs exporter and ServiceMonitor ports
+        (#7357)., SNMP exporter chart removes chart version from pod labels (#7541).,
+      NATS exporter chart now renders `extraContainers` in Deployment (#7526)., NGINX
+        exporter chart removes chart version from pod labels (#7539)., MongoDB exporter
+        README examples corrected (#7479)., 'Node exporter chart defaults hardened:
+        RuntimeDefault seccomp, drop all capabilities, disallow privilege escalation
+        (#7451).', kube-prometheus-stack updates node-exporter image tag to `v5` (#7551).]
+    features: ['Alertmanager can now set `volumeAttributesClassName` on volumes/PVC-related
+        resources, enabling CSI volume attribute class usage without extra templating.',
+      NATS exporter now supports adding sidecars via `extraContainers` in its Deployment
+        (previously values may have been ignored).]
+    breaking_changes: ['Node exporter securityContext defaults are more restrictive
+        (RuntimeDefault seccomp, drop all Linux capabilities, no privilege escalation).
+        This can break environments that require elevated privileges or custom capabilities
+        unless you override the security settings explicitly.', 'Exporter pod labels
+        for SNMP and NGINX exporters no longer include the chart version; if you have
+        label selectors, dashboards, or policies matching the old label, update them.']
+  chart_version: 92.22.0
+  images: ['docker.io/bats/bats:1.14.0', 'docker.io/grafana/grafana:13.3.0-distroless',
+    'ghcr.io/jkroepke/kube-webhook-certgen:1.11.1', 'quay.io/kiwigrid/k8s-sidecar:2.14.3',
+    'quay.io/prometheus-operator/prometheus-operator:v0.94.2', 'quay.io/prometheus/alertmanager:v0.34.2',
+    'quay.io/prometheus/node-exporter:v1.12.1-distroless', 'quay.io/prometheus/prometheus:v3.16.0-distroless',
+    'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
+- version: 92.21.1
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [Grafana image tag updated to `v14.3.0` (from 92.17.0 notes).,
+      Dependencies bumped to Prometheus Operator `v0.95.1` for both `prometheus-operator-crds`
+        and `prometheus-operator-admission-webhook` components (92.21.1)., Misc non-major
+        dependency updates in kube-prometheus-stack (92.21.1).]
+    features: [Updated bundled Grafana version to 14.3.0., Prometheus Operator and
+        related webhook/CRDs updated to v0.95.1 (may include fixes/improvements from
+        upstream).]
+    breaking_changes: []
+  chart_version: 92.21.1
+  images: ['docker.io/bats/bats:1.14.0', 'docker.io/grafana/grafana:13.3.0-distroless',
+    'ghcr.io/jkroepke/kube-webhook-certgen:1.11.0', 'quay.io/kiwigrid/k8s-sidecar:2.14.3',
+    'quay.io/prometheus-operator/prometheus-operator:v0.94.2', 'quay.io/prometheus/alertmanager:v0.34.2',
+    'quay.io/prometheus/node-exporter:v1.12.1-distroless', 'quay.io/prometheus/prometheus:v3.16.0-distroless',
+    'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
 - version: 92.17.0
   kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
     '1.27', '1.26', '1.25']

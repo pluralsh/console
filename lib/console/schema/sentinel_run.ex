@@ -42,6 +42,10 @@ defmodule Console.Schema.SentinelRun do
     from(s in query, where: s.sentinel_id == ^sentinel_id)
   end
 
+  def for_status(query \\ __MODULE__, status) do
+    from(s in query, where: s.status == ^status)
+  end
+
   def expired(query \\ __MODULE__) do
     expiry = Timex.now() |> Timex.shift(days: -14)
     from(s in query, where: s.inserted_at < ^expiry)

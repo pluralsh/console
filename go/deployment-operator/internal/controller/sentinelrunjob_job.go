@@ -73,7 +73,7 @@ func (r *SentinelRunJobReconciler) reconcileRunJob(ctx context.Context, srj *v1a
 		jobSpec := common.GetRunJobSpec(srj.Name, run.JobSpec)
 		job, err := r.GenerateRunJob(run, jobSpec, srj.Name, srj.Namespace)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("%w: %w", errInvalidSentinelJobSpec, err)
 		}
 		if err := r.Create(ctx, job); err != nil {
 			return nil, err

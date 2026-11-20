@@ -25,7 +25,12 @@ defmodule Console.AI.Workbench.Subagents.Canvas do
   @spec run(WorkbenchJobActivity.t(), WorkbenchJob.t(), Environment.t()) :: binary
   def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{}, %Environment{} = environment) do
     tools(environment)
-    |> MemoryEngine.new(20, engine_opts(environment) ++ [system_prompt: String.trim(system_prompt()), acc: %{}, callback: &callback(activity, environment, &1)])
+    |> MemoryEngine.new(20, engine_opts(environment) ++ [
+      system_prompt: String.trim(system_prompt()),
+      acc: %{},
+      callback: &callback(activity, environment, &1),
+      continue_msg: cont_msg()
+    ])
     |> MemoryEngine.reduce([{:user, prompt}], &reducer/2)
     |> case do
       {:ok, output} -> output
@@ -42,7 +47,7 @@ defmodule Console.AI.Workbench.Subagents.Canvas do
 
   defp tools(%Environment{skills: skills, job: job, activities: activities} = env) do
     skills = Environment.subagent_skills(skills, :canvas)
-    skill_knowledge_tools(job, skills) ++ [
+    skill_knowledge_tools(job, skills) ++ search_tools(env, :canvas) ++ [
       Scratchpad,
       Result,
       Canvas,

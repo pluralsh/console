@@ -26,10 +26,14 @@ func (r *router) RouteToAgentStreamHandler(srv interface{}, stream grpc.ServerSt
 	sts := grpc.ServerTransportStreamFromContext(ctx)
 	service, method := grpctool.SplitGrpcMethod(sts.Method())
 	// Overwrite incoming MD with sanitized MD
+	tunnelMD := removeHopMeta(md)
+	if r.sanitizeTunnelMeta != nil {
+		tunnelMD = r.sanitizeTunnelMeta(tunnelMD)
+	}
 	wrappedStream := grpc_middleware.WrapServerStream(stream)
 	wrappedStream.WrappedContext = metadata.NewIncomingContext(
 		wrappedStream.WrappedContext,
-		removeHopMeta(md),
+		tunnelMD,
 	)
 	ctx = wrappedStream.WrappedContext
 	stream = wrappedStream

@@ -6,7 +6,6 @@ import {
 } from '@pluralsh/design-system'
 import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import { RunStatusIcon } from 'components/ai/agent-runs/AgentRunInfoDisplays'
-import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { useSidePanelWidth } from 'components/layout/TopLevelSidePanel'
 import { GqlError } from 'components/utils/Alert'
 import { prettifyPrompt } from 'components/utils/contentEditableChips'
@@ -24,6 +23,7 @@ import {
 } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { SaveWorkbenchPromptButton } from '../SaveWorkbenchPromptButton'
+import { usePollWhileRunning } from './usePollWhileRunning'
 import { WorkbenchJobActivities } from './WorkbenchJobActivities'
 import { WorkbenchJobMeta } from './WorkbenchJobMeta'
 import { isJobRunning } from './WorkbenchJobActivity'
@@ -36,18 +36,15 @@ import {
 export function WorkbenchJob() {
   const theme = useTheme()
   const jobId = useParams()[WORKBENCH_JOBS_PARAM_JOB] ?? ''
-  const {
-    data,
-    loading,
-    error: queryError,
-  } = useWorkbenchJobQuery({
+  const query = useWorkbenchJobQuery({
     skip: !jobId,
     variables: { id: jobId },
     fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
   })
+  const { data, loading, error: queryError } = query
 
   const job = data?.workbenchJob
+  usePollWhileRunning(query, isJobRunning(job?.status))
   const isLoading = loading && !job
   const panelData = useWorkbenchJobTabsData(jobId)
   const hasPanelContent = !!job?.id && hasWorkbenchJobPanelTabs(panelData)

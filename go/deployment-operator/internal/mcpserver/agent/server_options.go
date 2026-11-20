@@ -98,16 +98,18 @@ const (
 	consoleExtAgentRunHeader = "Plural-Agent-Run"
 )
 
-// WithRunEvents subscribes to the cluster's deploy agent notifications with the deploy token and
-// serves this agent run's ones to the harness as a local long-poll.
+// WithRunEvents subscribes to this agent run's status deltas with the deploy token and serves
+// them to the harness as a local long-poll.
 func WithRunEvents(consoleURL string, token func() string, agentRunID string) Option {
 	return func(s *Server) {
-		socket, err := websocket.NewClosed(agentRunID, consoleURL, token())
+		runEvents := newRunEvents()
+		socket, err := websocket.NewAgentRunStatus(agentRunID, consoleURL, token(), runEvents.publish)
 		if err != nil {
 			klog.ErrorS(err, "could not configure console websocket, the harness will only poll for agent run changes")
 			return
 		}
-		s.runEvents = newRunEvents(agentRunID, socket)
+		runEvents.socket = socket
+		s.runEvents = runEvents
 	}
 }
 

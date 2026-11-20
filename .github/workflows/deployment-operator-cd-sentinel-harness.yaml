@@ -118,6 +118,10 @@ jobs:
     outputs:
       version: ${{ steps.meta.outputs.version }}
     steps:
+    - name: Checkout
+      uses: actions/checkout@v7
+      with:
+        fetch-depth: 1
     - name: Download digests
       uses: actions/download-artifact@v8
       with:
@@ -154,6 +158,18 @@ jobs:
       run: |
         docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
           $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
+    - name: Resolve digest
+      id: inspect
+      run: |
+        digest=$(docker buildx imagetools inspect ghcr.io/pluralsh/sentinel-harness-base:${{ steps.meta.outputs.version }} --format '{{.Manifest.Digest}}')
+        echo "digest=$digest" >> "$GITHUB_OUTPUT"
+    - name: Cosign sign
+      uses: ./.github/actions/cosign-sign
+      with:
+        digest: ${{ steps.inspect.outputs.digest }}
+        images: |
+          ghcr.io/pluralsh/sentinel-harness-base
+          docker.io/pluralsh/sentinel-harness-base
 
   publish-sentinel-harness:
     name: Build and push sentinel harness container
@@ -166,6 +182,7 @@ jobs:
       discussions: write
       pull-requests: write
       packages: write
+      id-token: write
     steps:
     - name: Checkout
       uses: actions/checkout@v7
@@ -200,6 +217,7 @@ jobs:
         username: mjgpluralsh
         password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
     - name: Build and push
+      id: build
       uses: docker/build-push-action@v7
       with:
         context: "./go"
@@ -214,3 +232,10 @@ jobs:
           GO_VERSION=1.27.2
           SENTINEL_HARNESS_BASE_IMAGE_REPO=ghcr.io/pluralsh/sentinel-harness-base
           SENTINEL_HARNESS_BASE_IMAGE_TAG=${{ needs.publish-base-image.outputs.version }}
+    - name: Cosign sign
+      uses: ./.github/actions/cosign-sign
+      with:
+        digest: ${{ steps.build.outputs.digest }}
+        images: |
+          ghcr.io/pluralsh/sentinel-harness
+          docker.io/pluralsh/sentinel-harness

@@ -799,6 +799,46 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 			Expect(pe.Git.Folder).To(Equal("policies"))
 		})
 
+		It("should send tags in a stable order so the attributes hash doesn't churn", func() {
+			Expect(common.MaybePatchObject(k8sClient, &v1alpha1.InfrastructureStack{
+				ObjectMeta: metav1.ObjectMeta{Name: policyEngineStackNamespacedName.Name, Namespace: policyEngineStackNamespacedName.Namespace},
+			}, func(s *v1alpha1.InfrastructureStack) {
+				s.Spec.Tags = map[string]string{"zeta": "1", "alpha": "2", "mid": "3", "beta": "4"}
+			})).To(Succeed())
+			DeferCleanup(func() {
+				Expect(common.MaybePatchObject(k8sClient, &v1alpha1.InfrastructureStack{
+					ObjectMeta: metav1.ObjectMeta{Name: policyEngineStackNamespacedName.Name, Namespace: policyEngineStackNamespacedName.Namespace},
+				}, func(s *v1alpha1.InfrastructureStack) {
+					s.Spec.Tags = nil
+				})).To(Succeed())
+			})
+
+			var captured []gqlclient.StackAttributes
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			fakeConsoleClient.On("GetStackByName", mock.Anything, mock.Anything).Return(nil, nil)
+			fakeConsoleClient.On("CreateStack", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
+				captured = append(captured, args.Get(1).(gqlclient.StackAttributes))
+			}).Return(&gqlclient.InfrastructureStackFragment{ID: lo.ToPtr(id)}, nil)
+
+			reconciler := &controller.InfrastructureStackReconciler{
+				Client:        k8sClient,
+				Scheme:        k8sClient.Scheme(),
+				ConsoleClient: fakeConsoleClient,
+			}
+
+			for range 5 {
+				_, err := reconciler.Process(ctx, reconcile.Request{NamespacedName: policyEngineStackNamespacedName})
+				Expect(err).NotTo(HaveOccurred())
+			}
+
+			Expect(captured).To(HaveLen(5))
+			for _, attrs := range captured {
+				names := lo.Map(attrs.Tags, func(t *gqlclient.TagAttributes, _ int) string { return t.Name })
+				Expect(names).To(Equal([]string{"alpha", "beta", "mid", "zeta"}))
+			}
+		})
+
 		It("should detect invalid repo ref and set conditions accordingly", func() {
 			By("create stack")
 			test := struct {

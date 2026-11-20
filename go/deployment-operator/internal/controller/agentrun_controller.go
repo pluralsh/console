@@ -166,7 +166,7 @@ func (r *AgentRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 		return ctrl.Result{}, err
 	}
 
-	apiAgentRun, err := r.ConsoleClient.GetAgentRun(ctx, run.GetAgentRunID())
+	apiAgentRun, err := r.ConsoleClient.GetAgentRunStatus(ctx, run.GetAgentRunID())
 	if err != nil {
 		// If the error is different from not found, return it.
 		if !errors.IsNotFound(err) {
@@ -698,7 +698,7 @@ func (r *AgentRunReconciler) getSecretData(run *v1alpha1.AgentRun, config *v1alp
 			result[EnvOpenCodeMethod] = config.OpenCode.Method.String()
 		}
 		if config.OpenCode.OpenAICompatible {
-			result[EnvOpenCodeOpenAICompatible] = "true"
+			result[EnvOpenCodeOpenAICompatible] = stringTrue
 		}
 		if config.OpenCode.Timeout != nil {
 			result[EnvExecTimeout] = config.OpenCode.Timeout.Duration.String()

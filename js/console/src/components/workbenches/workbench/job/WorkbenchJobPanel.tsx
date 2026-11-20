@@ -10,9 +10,7 @@ import {
   PrIcon,
   SubTab,
   TabList,
-  usePrevious,
 } from '@pluralsh/design-system'
-import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { WorkbenchFileContext } from 'components/ai/chatbot/PlrlFileChip'
 import {
   PanelHeaderSC,
@@ -62,6 +60,8 @@ import {
 import { hasWorkbenchJobResultContent } from './workbenchJobResultUtils'
 import { WorkbenchJobUsage } from './WorkbenchJobUsage'
 import { useWorkbenchJobActionSummary } from './useWorkbenchJobActionSummary'
+import { usePollWhileRunning } from './usePollWhileRunning'
+import { useWorkbenchJobActivityDeltas } from './useWorkbenchJobStreams'
 
 const SIDE_PANEL_TYPE: SidePanel = 'workbench-job'
 type JobPanelTab =
@@ -193,42 +193,23 @@ export function useWorkbenchJobTabsData(
   const job = data?.workbenchJob
   const isLoading = loading && !job
   const running = isJobRunning(job?.status)
-  const {
-    data: activitiesData,
-    startPolling,
-    stopPolling,
-    refetch: refetchActivities,
-  } = useWorkbenchJobActivitiesQuery({
+  const activitiesQuery = useWorkbenchJobActivitiesQuery({
     skip: !jobId,
     variables: { id: jobId },
     fetchPolicy: inDetailsView ? 'cache-and-network' : 'cache-first',
   })
+  const activitiesData = activitiesQuery.data
+  // the job page's activity list already follows activities, so only the
+  // details view subscribes here; either way polling is only a fallback
+  useWorkbenchJobActivityDeltas(jobId, { skip: !inDetailsView || !running })
+  usePollWhileRunning(activitiesQuery, inDetailsView && running)
+
+  // actions are refetched on action activity deltas
   const {
     hasActions,
     hasActionsAwaitingApproval,
     isLoading: areActionsLoading,
-    refetch: refetchActions,
-  } = useWorkbenchJobActionSummary(jobId, { poll: !inDetailsView || running })
-  const pollingActivities = inDetailsView && running
-  const wasPollingActivities = usePrevious(pollingActivities)
-
-  useEffect(() => {
-    if (!pollingActivities) return
-    startPolling(POLL_INTERVAL)
-    return () => stopPolling()
-  }, [pollingActivities, startPolling, stopPolling])
-
-  // the last poll may predate the job's final activities and actions
-  useEffect(() => {
-    if (!wasPollingActivities || pollingActivities) return
-    refetchActivities()
-    refetchActions()
-  }, [
-    pollingActivities,
-    refetchActions,
-    refetchActivities,
-    wasPollingActivities,
-  ])
+  } = useWorkbenchJobActionSummary(jobId, { running })
 
   const activities = useMemo(
     () =>
@@ -348,7 +329,12 @@ export function WorkbenchJobCommonTabContent({
     case 'Eval':
       return job.evalResult ? <WorkbenchJobEval job={job} /> : null
     case 'Actions':
-      return <WorkbenchJobActions jobId={job.id} />
+      return (
+        <WorkbenchJobActions
+          jobId={job.id}
+          running={isJobRunning(job.status)}
+        />
+      )
     default:
       return null
   }

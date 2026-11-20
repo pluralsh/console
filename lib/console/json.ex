@@ -13,6 +13,8 @@ defmodule Console.JSON do
     defexception [:message]
   end
 
+  def encode(term, opts \\ []), do: Torque.encode(term, Keyword.put(opts, :dirty, true))
+
   def encode!(term, opts \\ []), do: Torque.encode!(term, Keyword.put(opts, :dirty, true))
 
   def encode_to_iodata!(term, opts \\ []), do: Torque.encode_to_iodata!(term, Keyword.put(opts, :dirty, true))
@@ -48,4 +50,8 @@ end
 
 defimpl Torque.Encoder, for: Decimal do
   def encode(decimal), do: Decimal.to_string(decimal)
+end
+
+defimpl Torque.Encoder, for: Jason.OrderedObject do
+  def encode(%{values: values}), do: {values}
 end

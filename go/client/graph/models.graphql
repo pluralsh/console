@@ -101,6 +101,23 @@ fragment ServiceDeploymentFragment on ServiceDeployment {
     }
 }
 
+# what the service reconciler mirrors into the CR status, without the manifests and specs it never reads
+fragment ServiceDeploymentStatusFragment on ServiceDeployment {
+    id
+    deletedAt
+    errors { ...ErrorFragment }
+    components {
+        id
+        name
+        group
+        kind
+        namespace
+        state
+        synced
+        version
+    }
+}
+
 fragment ServiceDeploymentExtended on ServiceDeployment {
     cluster { ...BaseClusterFragment }
     errors { ...ErrorFragment }

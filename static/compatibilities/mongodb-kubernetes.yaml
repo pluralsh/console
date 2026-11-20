@@ -3,6 +3,47 @@ git_url: https://github.com/mongodb/mongodb-kubernetes
 release_url: https://github.com/mongodb/mongodb-kubernetes/releases/tag/{vsn}
 helm_repository_url: https://mongodb.github.io/helm-charts
 versions:
+- version: 1.15.0
+  kube: ['1.37', '1.36', '1.35']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "## Helm values / configuration changes to review\n- **New/expanded\
+      \ image type selection**: You can now choose the default MongoDB Enterprise\
+      \ Server image base OS (UBI) **operator-wide** via:\n  - `operator.mdbDefaultImageType`\
+      \ (env var `MDB_DEFAULT_IMAGE_TYPE`)\n  - Supported: `ubi8`, `ubi9`, `ubi9-slim`\n\
+      \  - If unset, behavior is backwards-compatible: **static** architectures default\
+      \ to `ubi9`, non-static Ops Manager AppDB defaults to `ubi8`.\n  - Invalid values\
+      \ fall back to defaults with a warning.\n- **MongoDBSearch container pull policy\
+      \ alignment**: Envoy and metrics-forwarder containers now respect the Helm `registry.pullPolicy`\
+      \ (previously only `mongot` did). Ensure your desired pull policy is set.\n\
+      - **MongoDBSearch image defaults changed**:\n  - Default `search.metricsForwarderImage`\
+      \ updated to `otel/opentelemetry-collector-contrib:0.163.2`.\n  - Default managed\
+      \ load balancer image pinned to `envoyproxy/envoy:v1.37.11`.\n  - If overriding\
+      \ `search.metricsForwarderImage`, use **OpenTelemetry Collector Contrib >= 0.157.0**."
+    chart_updates: [Adds/extends support for selecting MongoDB Enterprise UBI 9 Slim
+        images (`ubi9-slim`) for static architecture deployments and Ops Manager Application
+        Database (both architectures)., 'MongoDBOpsManager external Application Database
+        feature now supports multi-cluster references (can reference a `MongoDBMultiCluster`
+        with `spec.role: AppDB`).', 'MongoDBSearch Services created by the operator
+        can now be labeled/annotated via `spec.clusters[].service.metadata.{labels,annotations}`,
+        with per-shard overrides; operator-managed label keys are rejected.', 'Fixes
+        multiple reconciliation/behavior bugs across Ops Manager, Community operator
+        secret ownership, sharded cluster shard removal, Vault secret path handling,
+        and multicluster hostname overrides.', Fixes StatefulSet override handling
+        for `volumeAttributesClassName` and ensures immutable field changes are detected.,
+      Deprecates MongoDB `Standalone` architecture (removal planned for next major).]
+    features: ['Support for MongoDB Enterprise Server UBI 9 Slim images (`ubi9-slim`)
+        selectable operator-wide or per resource via annotation, with safe defaults
+        if unset.', 'Ops Manager external Application Database can now be a `MongoDBMultiCluster`
+        (role `AppDB`), supporting forward/back migration between internal and external
+        AppDB per member cluster.', 'MongoDBSearch now allows setting labels/annotations
+        on operator-created Services, with shard-level overrides.']
+    breaking_changes: ['No explicit breaking changes in 1.15.0, but **MongoDB Standalone
+        architecture is deprecated** and will be removed in the next major; plan migration
+        to 1-member ReplicaSet.']
+  chart_version: 1.15.0
+  images: ['quay.io/mongodb/mongodb-kubernetes:1.15.0']
 - version: 1.14.0
   kube: ['1.37', '1.36', '1.35']
   requirements: []

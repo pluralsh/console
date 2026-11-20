@@ -70,3 +70,24 @@ func TestBuildBabysitPromptInstructsNotToPushCIFlakes(t *testing.T) {
 
 	require.NotContains(t, prompt, "you MUST fix these")
 }
+
+func TestBuildBabysitPromptLeavesMonitoringToHarness(t *testing.T) {
+	t.Parallel()
+
+	prompt := buildBabysitPrompt("feature/review", "", []toolv1.EnrichedPR{{
+		URL:   "https://github.com/o/r/pull/1",
+		Title: "Pending CI",
+		Details: &scm.PRDetails{
+			CIChecks: []scm.CICheck{{Name: "build", Status: "in_progress"}},
+		},
+	}}, time.Time{})
+
+	for _, expected := range []string{
+		"CI checks still running",
+		"Do not wait for or poll these checks",
+		"PR monitoring runs outside your session",
+		"end this turn",
+	} {
+		require.Contains(t, prompt, expected)
+	}
+}

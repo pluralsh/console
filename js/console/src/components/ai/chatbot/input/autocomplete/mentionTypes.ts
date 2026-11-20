@@ -8,6 +8,8 @@ export enum MentionKind {
   Vulnerability = 'plrl-vulnerability',
   Repository = 'plrl-repository',
   Monitoring = 'plrl-monitoring',
+  SentinelRun = 'plrl-sentinel-run',
+  SentinelRunJob = 'plrl-sentinel-run-job',
 }
 
 export const PLRL_CHIP_TAG_NAMES: readonly MentionKind[] =
@@ -21,6 +23,8 @@ export const KIND_LABELS: Record<MentionKind, string> = {
   [MentionKind.Vulnerability]: 'vulnerability',
   [MentionKind.Repository]: 'repository',
   [MentionKind.Monitoring]: 'monitoring',
+  [MentionKind.SentinelRun]: 'sentinel run',
+  [MentionKind.SentinelRunJob]: 'sentinel run job',
 }
 
 export type MonitoringResourceType = 'dashboard' | 'monitor'
@@ -92,6 +96,33 @@ export type MonitoringChipAttrs = BaseChipAttrs<MentionKind.Monitoring> & {
   'workbench-id': string
 }
 
+export type SentinelRunChipAttrs = BaseChipAttrs<MentionKind.SentinelRun> & {
+  status?: Nullable<string>
+  'sentinel-id'?: string
+  'sentinel-name'?: string
+  description?: Nullable<string>
+  /** One line per check: `name: STATUS (failed/total failed) reason` */
+  results?: string
+  errors?: string
+}
+
+export type SentinelRunJobChipAttrs =
+  BaseChipAttrs<MentionKind.SentinelRunJob> & {
+    status?: Nullable<string>
+    check?: Nullable<string>
+    format?: Nullable<string>
+    'sentinel-id'?: string
+    'sentinel-name'?: string
+    'run-id'?: string
+    'cluster-id'?: string
+    'cluster-handle'?: Nullable<string>
+    'job-namespace'?: Nullable<string>
+    'job-name'?: Nullable<string>
+    error?: Nullable<string>
+    /** Failing test cases, or the tail of plaintext output */
+    output?: string
+  }
+
 export type ChipAttrsByKind = {
   [MentionKind.Cluster]: ClusterChipAttrs
   [MentionKind.Service]: ServiceChipAttrs
@@ -100,6 +131,8 @@ export type ChipAttrsByKind = {
   [MentionKind.Vulnerability]: VulnerabilityChipAttrs
   [MentionKind.Repository]: RepositoryChipAttrs
   [MentionKind.Monitoring]: MonitoringChipAttrs
+  [MentionKind.SentinelRun]: SentinelRunChipAttrs
+  [MentionKind.SentinelRunJob]: SentinelRunJobChipAttrs
 }
 
 export type ChipAttrs = ChipAttrsByKind[MentionKind]
@@ -155,6 +188,32 @@ export const CHIP_ATTRIBUTE_SCHEMA: {
     'resource-type',
     'workbench-id',
   ],
+  [MentionKind.SentinelRun]: [
+    'item-id',
+    'item-name',
+    'status',
+    'sentinel-id',
+    'sentinel-name',
+    'description',
+    'results',
+    'errors',
+  ],
+  [MentionKind.SentinelRunJob]: [
+    'item-id',
+    'item-name',
+    'status',
+    'check',
+    'format',
+    'sentinel-id',
+    'sentinel-name',
+    'run-id',
+    'cluster-id',
+    'cluster-handle',
+    'job-namespace',
+    'job-name',
+    'error',
+    'output',
+  ],
 }
 
 type ChipAttrRecord = Record<string, string | null | undefined>
@@ -183,6 +242,12 @@ export function chipDisplayText(
       if (severity && name) return `${name} (${severity})`
       return name
     }
+    case MentionKind.SentinelRunJob: {
+      const handle = attrs['cluster-handle']
+      if (handle && name) return `${name} (${handle})`
+      return name
+    }
+    case MentionKind.SentinelRun:
     case MentionKind.Repository:
     case MentionKind.Stack:
     case MentionKind.Monitoring:

@@ -107,6 +107,7 @@ To set it up, you need to configure a few env vars as well, in particular:
 - `OIDC_CLIENT_SECRET`: client secret for your OIDC connection
 - `OIDC_DISCOVERY_URL`: the discovery URL for your OIDC provider, usually something like `https://{your-idp-domain}/.well-known/openid-configuration`
 - `OIDC_SCOPES` (optional): the scopes to fetch when issuing the OIDC userinfo request (defaults to `openid email`). You want to at least make sure the email is fetchable for a user, and if you add groups to the scopes we'll auto-sync them into your instance as well.
+- `OIDC_USERINFO=true` loads groups from userinfo, which GitLab requires. Default remains the ID token.
 
 To simplify permission management, you can also configure specific emails to automatically be made admins via another env var: `CONSOLE_ADMIN_EMAILS`. It should be a comma-separated list, and on login we'll provision that user to be an admin within your Plural Console instance. We'd recommend only setting this for a small set of users, then using group bindings for permissions from then on.
 

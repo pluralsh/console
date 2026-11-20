@@ -1,0 +1,1242 @@
+fragment DevboxModel on DevboxModel {
+  id
+  name
+  description
+}
+
+fragment DevboxCommand on DevboxCommand {
+  name
+  description
+  inputHint
+}
+
+fragment DevboxConfigOption on DevboxConfigOption {
+  configId
+  name
+  description
+  category
+  type
+  currentValue
+  options {
+    value
+    name
+    description
+    group
+  }
+}
+
+fragment DevboxSessionCapabilities on DevboxSessionCapabilities {
+  list
+  resume
+  load
+  close
+  delete
+  fork
+}
+
+fragment DevboxAgent on DevboxAgent {
+  type
+  default
+  adapterName
+  adapterVersion
+  protocolVersion
+  acpV2
+  modelSwitchable
+  probeStatus
+  probeError
+  defaultModel
+  models {
+    ...DevboxModel
+  }
+  commands {
+    ...DevboxCommand
+  }
+  configOptions {
+    ...DevboxConfigOption
+  }
+  sessionCapabilities {
+    ...DevboxSessionCapabilities
+  }
+}
+
+fragment DevboxTiny on Devbox {
+  id
+  name
+  status
+  image
+  resolvedImage
+  templateRevision
+  browser
+  maxInstances
+  lastHeartbeatAt
+  autonomy {
+    default
+    max
+  }
+  decisionReview
+  cluster {
+    id
+    name
+    handle
+  }
+  agents {
+    type
+    default
+    probeStatus
+  }
+}
+
+fragment Devbox on Devbox {
+  ...DevboxTiny
+  resources
+  allowedRepositories
+  insertedAt
+  updatedAt
+  agents {
+    ...DevboxAgent
+  }
+  httpAllowlist {
+    host
+    port
+    passthrough
+  }
+  idlePolicy {
+    activityWindow
+    cpuThreshold
+    gracePeriod
+    maxDeferral
+    maxContinuousAwake
+    completeAfter
+  }
+  conditions {
+    type
+    status
+    reason
+    message
+  }
+  scmConnections {
+    id
+    name
+    type
+  }
+  cloudIdentities {
+    name
+    provider
+    default
+    roleArn
+    workloadIdentityProvider
+    serviceAccount
+    tenantId
+    clientId
+  }
+  workloadIdentity {
+    issuerUrl
+    subject
+    audiences
+    snippets {
+      provider
+      format
+      title
+      content
+    }
+  }
+}
+
+fragment DevboxUsage on DevboxUsage {
+  inputTokens
+  outputTokens
+  cachedTokens
+  reasoningTokens
+  totalTokens
+  contextSize
+  contextUsed
+  totalCost
+  currency
+}
+
+fragment DevboxThread on DevboxThread {
+  id
+  sessionId
+  kind
+  agent
+  title
+  agentTitle
+  model
+  cwd
+  worktreeRepos
+  status
+  imported
+  lastActivityAt
+  entityCount
+  foregroundState
+  stopReason
+  error
+  backgroundWork
+  billing
+  revision
+  configOptions {
+    ...DevboxConfigOption
+  }
+  availableCommands {
+    ...DevboxCommand
+  }
+  usage {
+    ...DevboxUsage
+  }
+  parent {
+    id
+    sessionId
+  }
+  user {
+    id
+    name
+    email
+  }
+  insertedAt
+  updatedAt
+}
+
+fragment DevboxInteraction on DevboxInteraction {
+  id
+  externalId
+  toolCallId
+  kind
+  state
+  title
+  message
+  requestedSchema
+  url
+  options {
+    optionId
+    name
+    kind
+  }
+  response
+  answeredAt
+  expiresAt
+  thread {
+    id
+    sessionId
+    title
+  }
+  instance {
+    id
+    name
+  }
+  answeredBy {
+    id
+    name
+    email
+  }
+  answeredByPolicy
+  review {
+    verdict
+    confidence
+    risk
+    model
+    escalation
+  }
+  insertedAt
+  updatedAt
+}
+
+fragment DevboxSnapshot on DevboxSnapshot {
+  id
+  name
+  status
+  fidelity
+  sizeBytes
+  error
+  templateRevision
+  devbox {
+    id
+    name
+    templateRevision
+  }
+  instance {
+    id
+    name
+  }
+  user {
+    id
+    name
+    email
+  }
+  insertedAt
+  updatedAt
+}
+
+fragment DevboxInstanceTiny on DevboxInstance {
+  id
+  name
+  agent
+  requestedModel
+  repositories
+  status
+  statusReason
+  foregroundState
+  runningThreads
+  waitingThreads
+  keepAwakeUntil
+  awakeSince
+  startedAt
+  suspendedAt
+  lastActivityAt
+  viewerCount
+  devbox {
+    id
+    name
+    browser
+  }
+  user {
+    id
+    name
+    email
+  }
+  insertedAt
+  updatedAt
+}
+
+fragment DevboxInstance on DevboxInstance {
+  ...DevboxInstanceTiny
+  configOptions
+  maxRunningThreads
+  templateRevision
+  imageDigest
+  restoreFidelity
+  completedAt
+  agentConnections {
+    agent
+    protocolVersion
+    adapterName
+    adapterVersion
+    capabilities
+    billing
+  }
+  agentBilling {
+    ...DevboxAgentBilling
+  }
+  checkouts {
+    ...DevboxCheckout
+  }
+  idleState {
+    idle
+    idleSince
+    suspendsAt
+    busyReasons
+    message
+  }
+  leases {
+    kind
+    expiresAt
+    holder {
+      id
+      name
+      email
+    }
+  }
+  keepAwakeBy {
+    id
+    name
+    email
+  }
+  workbench {
+    id
+    name
+  }
+  snapshot {
+    id
+    name
+    fidelity
+  }
+  devbox {
+    ...Devbox
+  }
+  threads {
+    ...DevboxThread
+  }
+  interactions(pending: true) {
+    ...DevboxInteraction
+  }
+}
+
+fragment DevboxAgentBilling on DevboxAgentBilling {
+  agent
+  billing
+  credentialKind
+  allowCollaborators
+}
+
+fragment DevboxFileEntry on DevboxFileEntry {
+  path
+  name
+  type
+  size
+  modifiedAt
+  symlinkTarget
+  repository
+  gitStatus
+}
+
+fragment DevboxFile on DevboxFile {
+  entry {
+    ...DevboxFileEntry
+  }
+  content
+  sha256
+  truncated
+  mimeType
+  binary
+}
+
+fragment DevboxFileChange on DevboxFileChange {
+  path
+  oldPath
+  status
+  staged
+  additions
+  deletions
+  binary
+  diff
+  diffTruncated
+}
+
+fragment DevboxRepositoryChanges on DevboxRepositoryChanges {
+  checkout {
+    ...DevboxCheckout
+  }
+  baseRef
+  baseSha
+  additions
+  deletions
+  files {
+    ...DevboxFileChange
+  }
+}
+
+fragment DevboxStream on DevboxStream {
+  streamId
+  kind
+  url
+  token
+  expiresAt
+  subprotocols
+  terminalId
+}
+
+fragment AgentCredential on AgentCredential {
+  id
+  provider
+  kind
+  label
+  status
+  version
+  defaultBilling
+  failureCount
+  email
+  plan
+  linkedAt
+  expiresAt
+  lastRefreshedAt
+  lastUsedAt
+  insertedAt
+  updatedAt
+}
+
+fragment DevboxCheckout on DevboxCheckout {
+  path
+  name
+  remoteUrl
+  defaultBranch
+  branch
+  headSha
+  dirty
+  worktreeThreadId
+  ahead
+  behind
+}
+
+fragment DevboxRepository on DevboxRepository {
+  path
+  name
+  remoteUrl
+  defaultBranch
+  branch
+  headSha
+  dirty
+  worktreeThreadId
+  ahead
+  behind
+}
+
+fragment DevboxContentBlock on DevboxContentBlock {
+  ... on DevboxTextContent {
+    type
+    text
+    annotations
+  }
+  ... on DevboxImageContent {
+    type
+    data
+    mimeType
+    uri
+  }
+  ... on DevboxAudioContent {
+    type
+    data
+    mimeType
+  }
+  ... on DevboxResourceContent {
+    type
+    uri
+    mimeType
+    text
+    blob
+  }
+  ... on DevboxResourceLinkContent {
+    type
+    uri
+    name
+    title
+    description
+    mimeType
+    size
+  }
+  ... on DevboxUnknownContent {
+    type
+    variant
+    raw
+  }
+}
+
+fragment DevboxToolCall on DevboxToolCall {
+  toolCallId
+  title
+  kind
+  status
+  rawInput
+  rawOutput
+  meta
+  locations {
+    path
+    line
+  }
+  content {
+    ... on DevboxToolCallBlock {
+      type
+      content {
+        ...DevboxContentBlock
+      }
+    }
+    ... on DevboxToolCallDiff {
+      type
+      path
+      oldText
+      newText
+    }
+    ... on DevboxToolCallTerminal {
+      type
+      terminalId
+    }
+    ... on DevboxToolCallUnknown {
+      type
+      variant
+      raw
+    }
+  }
+}
+
+fragment DevboxEntity on DevboxEntity {
+  id
+  sessionId
+  type
+  position
+  revision
+  settled
+  createdAt
+  updatedAt
+  raw
+  message {
+    messageId
+    promptId
+    sentById
+    meta
+    content {
+      ...DevboxContentBlock
+    }
+  }
+  sessionMessage {
+    messageId
+    fromSessionId
+    toSessionId
+    meta
+    content {
+      ...DevboxContentBlock
+    }
+  }
+  toolCall {
+    ...DevboxToolCall
+  }
+  plan {
+    planId
+    meta
+    entries {
+      content
+      priority
+      status
+    }
+  }
+  terminal {
+    terminalId
+    command
+    args
+    cwd
+    output
+    truncated
+    exitCode
+    signal
+    meta
+  }
+  compaction {
+    compactionId
+    status
+    meta
+    summary {
+      ...DevboxContentBlock
+    }
+  }
+}
+
+fragment DevboxEntityChange on DevboxEntityChange {
+  instanceId
+  sessionId
+  threadId
+  entityType
+  entityId
+  position
+  op
+  stateKind
+  payload
+  offset
+  emittedAt
+  entity {
+    ...DevboxEntity
+  }
+}
+
+fragment DevboxPullRequest on PullRequest {
+  ...PullRequestBasic
+  source
+  metadata
+  devbox {
+    id
+    name
+  }
+  devboxInstance {
+    id
+    name
+    workbench {
+      id
+    }
+  }
+  devboxThread {
+    id
+    title
+    agentTitle
+    sessionId
+  }
+}
+
+query WorkbenchDevboxes($id: ID!) {
+  workbench(id: $id) {
+    id
+    configuration {
+      coding {
+        repositories
+      }
+      devbox {
+        maxSnapshots
+        maxDeferral
+        allowSubscriptionCredentials
+      }
+    }
+    devboxes {
+      ...DevboxTiny
+      allowedRepositories
+      agents {
+        ...DevboxAgent
+      }
+    }
+  }
+}
+
+query Devboxes(
+  $q: String
+  $clusterId: ID
+  $workbenchId: ID
+  $first: Int = 100
+  $after: String
+) {
+  devboxes(
+    q: $q
+    clusterId: $clusterId
+    workbenchId: $workbenchId
+    first: $first
+    after: $after
+  ) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...DevboxTiny
+      }
+    }
+  }
+}
+
+query Devbox($id: ID!) {
+  devbox(id: $id) {
+    ...Devbox
+  }
+}
+
+query DevboxAgents($workbenchId: ID!, $devboxId: ID!) {
+  devboxAgents(workbenchId: $workbenchId, devboxId: $devboxId) {
+    ...DevboxAgent
+  }
+}
+
+query WorkbenchDevboxInstances(
+  $id: ID!
+  $first: Int = 50
+  $after: String
+  $statuses: [DevboxInstanceStatus]
+  $mine: Boolean
+) {
+  workbench(id: $id) {
+    id
+    devboxInstances(
+      first: $first
+      after: $after
+      statuses: $statuses
+      mine: $mine
+    ) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...DevboxInstanceTiny
+        }
+      }
+    }
+  }
+}
+
+query WorkbenchDevboxSnapshots($id: ID!, $first: Int = 50, $after: String) {
+  workbench(id: $id) {
+    id
+    devboxSnapshots(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...DevboxSnapshot
+        }
+      }
+    }
+  }
+}
+
+query WorkbenchDevboxInbox($id: ID!) {
+  workbench(id: $id) {
+    id
+    devboxInbox {
+      ...DevboxInteraction
+    }
+  }
+}
+
+query DevboxInstance($id: ID!) {
+  devboxInstance(id: $id) {
+    ...DevboxInstance
+  }
+}
+
+query DevboxThread($id: ID!) {
+  devboxThread(id: $id) {
+    ...DevboxThread
+    subagents {
+      ...DevboxThread
+    }
+    interactions {
+      ...DevboxInteraction
+    }
+  }
+}
+
+query DevboxInstanceCommands($threadId: ID!) {
+  devboxInstanceCommands(threadId: $threadId) {
+    ...DevboxCommand
+  }
+}
+
+query DevboxRepositories($instanceId: ID!) {
+  devboxRepositories(instanceId: $instanceId) {
+    ...DevboxRepository
+  }
+}
+
+query DevboxTimeline(
+  $instanceId: ID!
+  $sessionId: String!
+  $before: Long
+  $after: Long
+  $limit: Int
+) {
+  devboxTimeline(
+    instanceId: $instanceId
+    sessionId: $sessionId
+    before: $before
+    after: $after
+    limit: $limit
+  ) {
+    deltaOffset
+    hasMore
+    entities {
+      ...DevboxEntity
+    }
+  }
+}
+
+query DevboxSessions($instanceId: ID!) {
+  devboxSessions(instanceId: $instanceId) {
+    sessionId
+    threadId
+    kind
+    parentSessionId
+    agent
+    title
+    status
+    foregroundState
+    lastActivityAt
+  }
+}
+
+query DevboxImportableSessions($instanceId: ID!) {
+  devboxImportableSessions(instanceId: $instanceId) {
+    agent
+    sessionId
+    title
+    cwd
+    updatedAt
+  }
+}
+
+query DevboxPullRequests(
+  $devboxId: ID
+  $devboxInstanceId: ID
+  $devboxThreadId: ID
+  $first: Int = 50
+) {
+  pullRequests(
+    devboxId: $devboxId
+    devboxInstanceId: $devboxInstanceId
+    devboxThreadId: $devboxThreadId
+    first: $first
+  ) {
+    edges {
+      node {
+        ...DevboxPullRequest
+      }
+    }
+  }
+}
+
+query DevboxFiles($instanceId: ID!, $path: String) {
+  devboxFiles(instanceId: $instanceId, path: $path) {
+    ...DevboxFileEntry
+  }
+}
+
+query DevboxFile($instanceId: ID!, $path: String!) {
+  devboxFile(instanceId: $instanceId, path: $path) {
+    ...DevboxFile
+  }
+}
+
+query DevboxChanges(
+  $instanceId: ID!
+  $threadId: ID
+  $repositories: [String]
+  $includeDiff: Boolean = true
+) {
+  devboxChanges(
+    instanceId: $instanceId
+    threadId: $threadId
+    repositories: $repositories
+    includeDiff: $includeDiff
+  ) {
+    ...DevboxRepositoryChanges
+  }
+}
+
+query AgentCredentials {
+  agentCredentials {
+    ...AgentCredential
+  }
+}
+
+mutation OpenDevboxStream(
+  $instanceId: ID!
+  $kind: DevboxStreamKind!
+  $terminalId: String
+  $port: Int
+  $url: String
+) {
+  openDevboxStream(
+    instanceId: $instanceId
+    kind: $kind
+    terminalId: $terminalId
+    port: $port
+    url: $url
+  ) {
+    ...DevboxStream
+  }
+}
+
+mutation WriteDevboxFile(
+  $instanceId: ID!
+  $path: String!
+  $content: String!
+  $expectedSha256: String
+) {
+  writeDevboxFile(
+    instanceId: $instanceId
+    path: $path
+    content: $content
+    expectedSha256: $expectedSha256
+  ) {
+    entry {
+      ...DevboxFileEntry
+    }
+    sha256
+  }
+}
+
+mutation SetDevboxAgentBilling(
+  $instanceId: ID!
+  $attributes: DevboxAgentBillingAttributes!
+) {
+  setDevboxAgentBilling(instanceId: $instanceId, attributes: $attributes) {
+    id
+    agentBilling {
+      ...DevboxAgentBilling
+    }
+    agentConnections {
+      agent
+      billing
+    }
+  }
+}
+
+mutation LinkAgentCredential($attributes: AgentCredentialAttributes!) {
+  linkAgentCredential(attributes: $attributes) {
+    ...AgentCredential
+  }
+}
+
+mutation DeleteAgentCredential($id: ID!) {
+  deleteAgentCredential(id: $id) {
+    ...AgentCredential
+  }
+}
+
+mutation SetDefaultAgentBilling(
+  $provider: AgentCredentialProvider!
+  $enabled: Boolean!
+) {
+  setDefaultAgentBilling(provider: $provider, enabled: $enabled) {
+    ...AgentCredential
+  }
+}
+
+mutation AttachDevbox($workbenchId: ID!, $devboxId: ID!) {
+  attachDevbox(workbenchId: $workbenchId, devboxId: $devboxId) {
+    ...DevboxTiny
+  }
+}
+
+mutation DetachDevbox($workbenchId: ID!, $devboxId: ID!) {
+  detachDevbox(workbenchId: $workbenchId, devboxId: $devboxId) {
+    ...DevboxTiny
+  }
+}
+
+mutation CreateDevboxInstance(
+  $workbenchId: ID!
+  $attributes: DevboxInstanceAttributes!
+) {
+  createDevboxInstance(workbenchId: $workbenchId, attributes: $attributes) {
+    ...DevboxInstanceTiny
+  }
+}
+
+mutation RestoreDevboxSnapshot(
+  $id: ID!
+  $attributes: DevboxInstanceAttributes
+) {
+  restoreDevboxSnapshot(id: $id, attributes: $attributes) {
+    ...DevboxInstanceTiny
+  }
+}
+
+mutation CancelDevboxInstance($id: ID!) {
+  cancelDevboxInstance(id: $id) {
+    ...DevboxInstanceTiny
+  }
+}
+
+mutation SuspendDevboxInstance($id: ID!) {
+  suspendDevboxInstance(id: $id) {
+    ...DevboxInstanceTiny
+  }
+}
+
+mutation ResumeDevboxInstance($id: ID!) {
+  resumeDevboxInstance(id: $id) {
+    ...DevboxInstanceTiny
+  }
+}
+
+mutation PingDevboxInstance($id: ID!) {
+  pingDevboxInstance(id: $id) {
+    id
+    viewerCount
+  }
+}
+
+mutation LeaveDevboxInstance($id: ID!) {
+  leaveDevboxInstance(id: $id) {
+    id
+    viewerCount
+  }
+}
+
+mutation KeepDevboxInstanceAwake($id: ID!, $until: DateTime!) {
+  keepDevboxInstanceAwake(id: $id, until: $until) {
+    id
+    keepAwakeUntil
+    keepAwakeBy {
+      id
+      name
+      email
+    }
+    leases {
+      kind
+      expiresAt
+      holder {
+        id
+        name
+        email
+      }
+    }
+  }
+}
+
+mutation CancelDevboxKeepAwake($id: ID!) {
+  cancelDevboxKeepAwake(id: $id) {
+    id
+    keepAwakeUntil
+    keepAwakeBy {
+      id
+      name
+      email
+    }
+    leases {
+      kind
+      expiresAt
+      holder {
+        id
+        name
+        email
+      }
+    }
+  }
+}
+
+mutation CreateDevboxSnapshot(
+  $instanceId: ID!
+  $attributes: DevboxSnapshotAttributes
+) {
+  createDevboxSnapshot(instanceId: $instanceId, attributes: $attributes) {
+    ...DevboxSnapshot
+  }
+}
+
+mutation DeleteDevboxSnapshot($id: ID!) {
+  deleteDevboxSnapshot(id: $id) {
+    ...DevboxSnapshot
+  }
+}
+
+mutation CreateDevboxThread(
+  $instanceId: ID!
+  $attributes: DevboxThreadAttributes
+) {
+  createDevboxThread(instanceId: $instanceId, attributes: $attributes) {
+    ...DevboxThread
+  }
+}
+
+mutation ImportDevboxThread(
+  $instanceId: ID!
+  $attributes: DevboxImportAttributes!
+) {
+  importDevboxThread(instanceId: $instanceId, attributes: $attributes) {
+    ...DevboxThread
+  }
+}
+
+mutation ResumeDevboxThread($id: ID!) {
+  resumeDevboxThread(id: $id) {
+    ...DevboxThread
+  }
+}
+
+mutation CloseDevboxThread($id: ID!) {
+  closeDevboxThread(id: $id) {
+    ...DevboxThread
+  }
+}
+
+mutation DeleteDevboxThread($id: ID!) {
+  deleteDevboxThread(id: $id) {
+    ...DevboxThread
+  }
+}
+
+mutation ForkDevboxThread($id: ID!, $title: String) {
+  forkDevboxThread(id: $id, title: $title) {
+    ...DevboxThread
+  }
+}
+
+mutation RenameDevboxThread($id: ID!, $title: String!) {
+  renameDevboxThread(id: $id, title: $title) {
+    ...DevboxThread
+  }
+}
+
+mutation PromptDevboxThread(
+  $id: ID!
+  $prompt: String
+  $content: [DevboxPromptBlockAttributes]
+  $attachments: [Upload]
+) {
+  promptDevboxThread(
+    id: $id
+    prompt: $prompt
+    content: $content
+    attachments: $attachments
+  ) {
+    ...DevboxThread
+  }
+}
+
+mutation CancelDevboxPrompt($id: ID!) {
+  cancelDevboxPrompt(id: $id) {
+    ...DevboxThread
+  }
+}
+
+mutation SetDevboxThreadConfigOption(
+  $id: ID!
+  $configId: String!
+  $value: String!
+) {
+  setDevboxThreadConfigOption(id: $id, configId: $configId, value: $value) {
+    ...DevboxThread
+  }
+}
+
+mutation RespondDevboxInteraction(
+  $id: ID!
+  $response: DevboxInteractionResponseAttributes!
+) {
+  respondDevboxInteraction(id: $id, response: $response) {
+    ...DevboxInteraction
+  }
+}
+
+mutation AddDevboxRepository($instanceId: ID!, $repository: String!) {
+  addDevboxRepository(instanceId: $instanceId, repository: $repository) {
+    id
+    repositories
+    checkouts {
+      ...DevboxCheckout
+    }
+  }
+}
+
+subscription DevboxInstanceStatusDelta($id: ID, $workbenchId: ID) {
+  devboxInstanceStatusDelta(id: $id, workbenchId: $workbenchId) {
+    delta
+    payload {
+      ...DevboxInstanceTiny
+      idleState {
+        idle
+        idleSince
+        suspendsAt
+        busyReasons
+        message
+      }
+    }
+  }
+}
+
+subscription DevboxThreadDelta($instanceId: ID!) {
+  devboxThreadDelta(instanceId: $instanceId) {
+    delta
+    payload {
+      ...DevboxThread
+    }
+  }
+}
+
+subscription DevboxSnapshotDelta($workbenchId: ID!) {
+  devboxSnapshotDelta(workbenchId: $workbenchId) {
+    delta
+    payload {
+      ...DevboxSnapshot
+    }
+  }
+}
+
+subscription DevboxInstanceEntityDelta($instanceId: ID!) {
+  devboxInstanceDelta(instanceId: $instanceId) {
+    delta
+    payload {
+      ...DevboxEntityChange
+    }
+  }
+}
+
+subscription DevboxInstanceIndexDelta($instanceId: ID!) {
+  devboxInstanceIndexDelta(instanceId: $instanceId) {
+    delta
+    payload {
+      instanceId
+      revision
+      foregroundState
+      threads {
+        ...DevboxThread
+      }
+      interactions {
+        ...DevboxInteraction
+      }
+    }
+  }
+}

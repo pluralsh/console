@@ -330,6 +330,70 @@ message PrivateApiCF {
   ListenPrivateApiCF listen = 1 [json_name = "listen", (validate.rules).message.required = true];
 }
 
+message ListenDevboxCF {
+  // Network type to listen on. Supported values: tcp, tcp4, tcp6, unix.
+  optional string network = 1 [json_name = "network", (validate.rules).string = {in: ["tcp", "tcp4", "tcp6", "unix"]}];
+  // Address to listen on.
+  string address = 2 [json_name = "address"];
+  // X.509 certificate for TLS in PEM format.
+  // TLS is enabled iff both certificate_file and key_file are provided.
+  string certificate_file = 3 [json_name = "certificate_file"];
+  // X.509 key file for TLS in PEM format.
+  // TLS is enabled iff both certificate_file and key_file are provided.
+  string key_file = 4 [json_name = "key_file"];
+  // Maximum number of gRPC calls (tunnels and Ingest calls) to allow per deploy token per minute.
+  uint32 connections_per_token_per_minute = 5 [json_name = "connections_per_token_per_minute"];
+  // Max age of a connection. Connection is closed gracefully once it's
+  // too old and there is no streaming happening.
+  google.protobuf.Duration max_connection_age = 6 [json_name = "max_connection_age", (validate.rules).duration = {gt: {}}];
+  // How much time to wait before stopping accepting new connections on shutdown.
+  google.protobuf.Duration listen_grace_period = 7 [json_name = "listen_grace_period", (validate.rules).duration = {gt: {}}];
+  // Maximum size of a gRPC message or WebSocket frame on this listener, in bytes.
+  uint32 max_message_size = 8 [json_name = "max_message_size"];
+}
+
+message DevboxConsoleCF {
+  // host:port of console's gRPC server (devbox.v1.Ingest), e.g. console.plrl-console:50051.
+  string address = 1 [json_name = "address", (validate.rules).string.min_bytes = 1];
+  // Secret (base64, like api.listen.authentication_secret_file) used to sign the short-lived
+  // `aud: plural-console` JWT KAS sends with every forwarded Ingest call.
+  // Defaults to api.listen.authentication_secret_file.
+  string authentication_secret_file = 2 [json_name = "authentication_secret_file"];
+  // Dial console with TLS.
+  bool tls = 3 [json_name = "tls"];
+  // Optional X.509 CA certificate in PEM format to verify console's certificate when tls is set.
+  string ca_certificate_file = 4 [json_name = "ca_certificate_file"];
+  // Timeout for a forwarded Ingest call if the gateway set no deadline.
+  google.protobuf.Duration timeout = 5 [json_name = "timeout", (validate.rules).duration = {gt: {}}];
+}
+
+message DevboxStreamsCF {
+  // File holding the HS256 key console signs stream tokens with (the raw bytes of console's
+  // DEVBOX_STREAM_TOKEN_KEY; surrounding whitespace is trimmed). Streams are disabled when unset.
+  string token_secret_file = 1 [json_name = "token_secret_file"];
+  // Expected `aud` claim of stream tokens.
+  string token_audience = 2 [json_name = "token_audience"];
+  // Allowed clock skew when checking `exp` and `nbf`.
+  google.protobuf.Duration token_leeway = 3 [json_name = "token_leeway", (validate.rules).duration = {gte: {}}];
+}
+
+message DevboxCF {
+  // Listener for devbox-gateway connections (gRPC over WebSocket) and browser stream WebSockets.
+  ListenDevboxCF listen = 1 [json_name = "listen"];
+  // URL path prefix of the listener. Gateways connect to <prefix> and browsers to <prefix>/streams/<stream_id>.
+  string url_path_prefix = 2 [json_name = "url_path_prefix"];
+  // Console's gRPC server, where gateways' devbox.v1.Ingest calls are forwarded.
+  DevboxConsoleCF console = 3 [json_name = "console", (validate.rules).message.required = true];
+  // Browser stream (terminal, VNC, preview) proxying.
+  DevboxStreamsCF streams = 4 [json_name = "streams"];
+  // How long a devbox.v1.Control call waits for a gateway tunnel before failing with CLUSTER_OFFLINE.
+  // Must be shorter than console's Control call timeout (30s).
+  google.protobuf.Duration routing_timeout = 5 [json_name = "routing_timeout", (validate.rules).duration = {gt: {}}];
+  // TTL and refresh period of the Redis records saying which KAS replica holds a cluster's gateway tunnels.
+  google.protobuf.Duration redis_conn_info_ttl = 6 [json_name = "redis_conn_info_ttl", (validate.rules).duration = {gt: {}}];
+  google.protobuf.Duration redis_conn_info_refresh = 7 [json_name = "redis_conn_info_refresh", (validate.rules).duration = {gt: {}}];
+}
+
 // ConfigurationFile represents kas configuration file.
 message ConfigurationFile {
   // Configuration related to the agent. Generally all configuration for
@@ -348,4 +412,6 @@ message ConfigurationFile {
   string plural_url = 6 [json_name = "plural_url"];
   // Skip TLS certificate verification when connecting to Plural Console.
   bool plural_insecure_skip_tls_verify = 7 [json_name = "plural_insecure_skip_tls_verify"];
+  // DevBoxes: gateway tunnels, Control routing, Ingest forwarding and stream proxying. Disabled when unset.
+  DevboxCF devbox = 8 [json_name = "devbox"];
 }

@@ -56,6 +56,8 @@ import { ComponentIcon } from './component/misc.tsx'
 import { AiInsightSummaryIcon } from '../../../utils/AiInsights.tsx'
 import { InsightDisplay } from '../../../ai/insights/InsightDisplay.tsx'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders.tsx'
+import { SERVICE_DETAILS_FALLBACK_POLL_INTERVAL } from '../useServiceDeltas.tsx'
+import { useServiceContext } from './ServiceDetailsContext.tsx'
 
 type ServiceComponentNodeType = Node<
   ServiceComponent,
@@ -103,13 +105,19 @@ export function ComponentsTreeView({
   searchQuery: string
 }) {
   const { serviceId } = useParams()
+  const { componentsVersion } = useServiceContext()
 
-  const { data, loading, error } =
+  const { data, loading, error, refetch } =
     useServiceDeploymentComponentsWithChildrenQuery({
       variables: { id: serviceId || '' },
-      pollInterval: 15_000, // 15 seconds
+      pollInterval: SERVICE_DETAILS_FALLBACK_POLL_INTERVAL,
       fetchPolicy: 'cache-and-network',
     })
+
+  // the service details query doesn't fetch children, so follow its component refetches
+  useEffect(() => {
+    if (componentsVersion) refetch()
+  }, [componentsVersion, refetch])
 
   const components = useMemo(() => {
     const unfilteredComponents =

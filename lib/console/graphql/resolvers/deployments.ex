@@ -257,6 +257,13 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(Dashboard, _), do: Dashboard.ordered()
   def query(Console.Schema.Attachment, _), do: Console.Schema.Attachment.ordered()
   def query(Cluster, %{readable: true} = params), do: Cluster.for_user(params[:current_user])
+  def query(Console.Schema.Devbox, _), do: Console.Schema.Devbox
+  def query(Console.Schema.WorkbenchDevbox, _), do: Console.Schema.WorkbenchDevbox
+  def query(Console.Schema.DevboxScmConnection, _), do: Console.Schema.DevboxScmConnection
+  def query(Console.Schema.DevboxInstance, _), do: Console.Schema.DevboxInstance
+  def query(Console.Schema.DevboxSnapshot, _), do: Console.Schema.DevboxSnapshot
+  def query(Console.Schema.DevboxInstanceSession, _), do: Console.Schema.DevboxInstanceSession.ordered()
+  def query(Console.Schema.DevboxInstanceInteraction, _), do: Console.Schema.DevboxInstanceInteraction.ordered()
   def query(_, _), do: Cluster
 
   delegates Console.GraphQl.Resolvers.Deployments.Git
@@ -276,6 +283,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   delegates Console.GraphQl.Resolvers.Deployments.Workbench
   delegates Console.GraphQl.Resolvers.Deployments.Agent
   delegates Console.GraphQl.Resolvers.Deployments.Integration
+  delegates Console.GraphQl.Resolvers.Deployments.Devbox
 
   def list_addons(_, _), do: AddOns.addons()
 

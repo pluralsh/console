@@ -187,17 +187,18 @@ func init() {
 }
 
 func buildAgentRunPod(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime) *corev1.Pod {
-	if runtime.Spec.Template == nil {
-		runtime.Spec.Template = &corev1.PodTemplateSpec{}
+	template := &corev1.PodTemplateSpec{}
+	if runtime.Spec.Template != nil {
+		template = runtime.Spec.Template.DeepCopy()
 	}
 	pod := &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        run.Name,
 			Namespace:   run.Namespace,
-			Labels:      ensureDefaultLabels(runtime.Spec.Template.Labels, run),
-			Annotations: ensureAnnotations(runtime.Spec.Template.Annotations),
+			Labels:      ensureDefaultLabels(template.Labels, run),
+			Annotations: ensureAnnotations(template.Annotations),
 		},
-		Spec: runtime.Spec.Template.Spec,
+		Spec: template.Spec,
 	}
 
 	pod.Spec.Containers = ensureDefaultContainer(pod.Spec.Containers, run, runtime)

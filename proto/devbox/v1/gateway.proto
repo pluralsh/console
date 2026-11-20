@@ -1,0 +1,226 @@
+syntax = "proto3";
+
+// The gateway <-> KAS surface (section 4.6).
+//
+//   1. devbox-gateway dials KAS's devbox listener at wss://<kas>/ext/devbox, authenticating every call with
+//      `authorization: Bearer <cluster deploy token>` over the `ws-tunnel` WebSocket subprotocol (KAS verifies
+//      the token with console's GraphQL `MyCluster` query, as it does for agentk).
+//   2. It calls Ingest.RegisterGateway, then opens one or more Tunnel.Connect streams. The first frame is a
+//      TunnelDescriptor listing the devbox.v1.Gateway methods it serves.
+//   3. KAS registers the tunnel in the reverse_tunnel registry under the verified cluster, tracked in Redis so
+//      any KAS replica can route to it.
+//   4. KAS turns each devbox.v1.Control call (and each /ext/devbox/streams WebSocket) into a Gateway call sent
+//      down the tunnel; the gateway serves it with an ordinary grpc.Server bound to the tunnel.
+//   5. Ingest calls go upward over ordinary gRPC on the same listener.
+//
+// Tunnel frames are wire-compatible with KAS's plural.agent.reverse_tunnel.rpc ConnectRequest/ConnectResponse,
+// and HttpRequest/HttpResponse with plural.agent.grpctool.HttpRequest/HttpResponse, so KAS reuses its tunnel and
+// HTTP-over-gRPC plumbing unchanged by registering the existing handlers under the devbox.v1 service names.
+// Never renumber or retype these fields.
+package devbox.v1;
+
+option go_package = "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1;devboxv1";
+
+import "google/protobuf/any.proto";
+import "devbox/v1/control.proto";
+import "devbox/v1/workspace.proto";
+
+// Gateway is served by devbox-gateway, only through the reverse tunnel. Its methods are Control's (same names
+// and messages, so KAS forwards by rewriting the method path), plus ProxyStream for interactive byte streams.
+service Gateway {
+  rpc CreateInstance(CreateInstanceRequest) returns (CreateInstanceResponse);
+  rpc StartFromSnapshot(StartFromSnapshotRequest) returns (CreateInstanceResponse);
+  rpc CancelInstance(InstanceActionRequest) returns (InstanceActionResponse);
+  rpc SuspendInstance(InstanceActionRequest) returns (InstanceActionResponse);
+  rpc ResumeInstance(InstanceActionRequest) returns (InstanceActionResponse);
+  rpc SnapshotInstance(SnapshotInstanceRequest) returns (SnapshotInstanceResponse);
+  rpc DeleteSnapshot(DeleteSnapshotRequest) returns (DeleteSnapshotResponse);
+  rpc SetAgentBilling(SetAgentBillingRequest) returns (SetAgentBillingResponse);
+
+  rpc CreateThread(CreateThreadRequest) returns (ThreadResponse);
+  rpc ListThreads(ListThreadsRequest) returns (ListThreadsResponse);
+  rpc ImportThread(ImportThreadRequest) returns (ThreadResponse);
+  rpc ResumeThread(ResumeThreadRequest) returns (ThreadResponse);
+  rpc CloseThread(ThreadActionRequest) returns (ThreadResponse);
+  rpc DeleteThread(ThreadActionRequest) returns (DeleteThreadResponse);
+  rpc ForkThread(ForkThreadRequest) returns (ThreadResponse);
+
+  rpc Prompt(PromptRequest) returns (PromptResponse);
+  rpc CancelPrompt(CancelPromptRequest) returns (CancelPromptResponse);
+  rpc SetThreadConfigOption(SetThreadConfigOptionRequest) returns (SetThreadConfigOptionResponse);
+  rpc RespondInteraction(RespondInteractionRequest) returns (RespondInteractionResponse);
+  rpc ListCommands(ListCommandsRequest) returns (ListCommandsResponse);
+
+  rpc GetTimeline(GetTimelineRequest) returns (GetTimelineResponse);
+  rpc GetSessions(GetSessionsRequest) returns (GetSessionsResponse);
+
+  rpc SetInstanceLeases(SetInstanceLeasesRequest) returns (SetInstanceLeasesResponse);
+
+  rpc AddRepository(AddRepositoryRequest) returns (AddRepositoryResponse);
+  rpc ListRepositories(ListRepositoriesRequest) returns (ListRepositoriesResponse);
+  rpc ListFiles(ListFilesRequest) returns (ListFilesResponse);
+  rpc ReadFile(ReadFileRequest) returns (ReadFileResponse);
+  rpc WriteFile(WriteFileRequest) returns (WriteFileResponse);
+  rpc GetChanges(GetChangesRequest) returns (GetChangesResponse);
+
+  rpc OpenStream(OpenStreamRequest) returns (OpenStreamResponse);
+
+  rpc InvalidateAllowlist(InvalidateAllowlistRequest) returns (InvalidateAllowlistResponse);
+
+  // ProxyStream carries one browser WebSocket (terminal, VNC or preview) from KAS to the sandbox, as
+  // HTTP-over-gRPC with upgrade support. Metadata: `devbox-instance-id` and `devbox-stream-id` (from the
+  // validated stream token). The gateway resolves the stream ID registered by OpenStream and forwards to the
+  // daemon's `daemon_path` through atenet-router; the request's own url_path is only used as a suffix for
+  // PREVIEW streams.
+  rpc ProxyStream(stream HttpRequest) returns (stream HttpResponse);
+}
+
+// Tunnel is served by KAS on the devbox listener.
+service Tunnel {
+  // Connect establishes one reverse tunnel. Frames follow the reverse_tunnel automaton: the gateway sends
+  // `descriptor` first; KAS then sends `request_info`, `message`* and optionally `close_send` for one call, and
+  // the gateway answers with `header`, `message`*, `trailer` or `error`. One tunnel carries one call at a time;
+  // the gateway keeps a pool of idle tunnels open.
+  rpc Connect(stream TunnelConnectRequest) returns (stream TunnelConnectResponse);
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Tunnel frames (wire-compatible with plural.agent.reverse_tunnel.rpc)
+// ---------------------------------------------------------------------------------------------------------------
+
+message MetadataValues {
+  repeated string value = 1;
+}
+
+message TunnelMethod {
+  string name = 1;
+}
+
+message TunnelService {
+  // Fully qualified, i.e. "devbox.v1.Gateway".
+  string name = 1;
+  repeated TunnelMethod methods = 2;
+}
+
+message TunnelAgentDescriptor {
+  repeated TunnelService services = 1;
+}
+
+message TunnelDescriptor {
+  TunnelAgentDescriptor agent_descriptor = 1;
+}
+
+message TunnelHeader {
+  map<string, MetadataValues> meta = 1;
+}
+
+message TunnelMessage {
+  bytes data = 1;
+}
+
+message TunnelTrailer {
+  map<string, MetadataValues> meta = 1;
+}
+
+// TunnelStatus is wire-compatible with google.rpc.Status.
+message TunnelStatus {
+  int32 code = 1;
+  string message = 2;
+  repeated google.protobuf.Any details = 3;
+}
+
+message TunnelError {
+  TunnelStatus status = 1;
+}
+
+message TunnelConnectRequest {
+  oneof msg {
+    TunnelDescriptor descriptor = 1;
+    TunnelHeader header = 2;
+    TunnelMessage message = 3;
+    TunnelTrailer trailer = 4;
+    TunnelError error = 5;
+  }
+}
+
+message TunnelRequestInfo {
+  // Full method, e.g. "/devbox.v1.Gateway/GetTimeline".
+  string method_name = 1;
+  map<string, MetadataValues> meta = 2;
+}
+
+message TunnelCloseSend {
+}
+
+message TunnelConnectResponse {
+  oneof msg {
+    TunnelRequestInfo request_info = 1;
+    TunnelMessage message = 2;
+    TunnelCloseSend close_send = 3;
+  }
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// HTTP-over-gRPC frames (wire-compatible with plural.agent.grpctool)
+// ---------------------------------------------------------------------------------------------------------------
+
+message HttpRequestLine {
+  string method = 1;
+  map<string, MetadataValues> header = 2;
+  // Should start with a slash.
+  string url_path = 3;
+  // Query without the leading '?', parsed.
+  map<string, MetadataValues> query = 4;
+}
+
+message HttpResponseLine {
+  int32 status_code = 1;
+  string status = 2;
+  map<string, MetadataValues> header = 3;
+}
+
+message HttpRequest {
+  message Header {
+    HttpRequestLine request = 1;
+    google.protobuf.Any extra = 2;
+    // -1 unknown (chunked), 0 no body, > 0 body size.
+    optional int64 content_length = 3;
+  }
+  message Data {
+    bytes data = 1;
+  }
+  message Trailer {
+  }
+  // Data on the upgraded (WebSocket) connection, after the response header.
+  message UpgradeData {
+    bytes data = 1;
+  }
+  // Order: header, data*, trailer, upgrade_data*.
+  oneof message {
+    Header header = 1;
+    Data data = 2;
+    Trailer trailer = 3;
+    UpgradeData upgrade_data = 4;
+  }
+}
+
+message HttpResponse {
+  message Header {
+    HttpResponseLine response = 1;
+  }
+  message Data {
+    bytes data = 1;
+  }
+  message Trailer {
+  }
+  message UpgradeData {
+    bytes data = 1;
+  }
+  // Order: header, data*, trailer, upgrade_data*.
+  oneof message {
+    Header header = 1;
+    Data data = 2;
+    Trailer trailer = 3;
+    UpgradeData upgrade_data = 4;
+  }
+}

@@ -1,8 +1,7 @@
 defmodule Console.AI.Workbench.Subagents.Base do
-  import Console.AI.Agents.Base, only: [publish_absinthe: 2]
   alias Console.Repo
-  alias Console.AI.{Stream, VectorStore}
-  alias Console.AI.Workbench.{Activity, Environment, Tools}
+  alias Console.AI.VectorStore
+  alias Console.AI.Workbench.{Activity, Environment, MCP, Tools}
   alias Console.Deployments.Workbenches
   alias Console.Schema.{AgentRun, WorkbenchJobThought, WorkbenchJob, WorkbenchJobActivity, WorkbenchTool}
   alias Console.AI.Tools.Workbench.{Context, Skills, Skill, ListKnowledge, Knowledge, KnowledgeUsed}
@@ -26,7 +25,22 @@ defmodule Console.AI.Workbench.Subagents.Base do
     |> Map.new()
   end
 
-  def cont_msg(), do: "looks like we aren't done, let's continue and if you're done just call subagent_result to wrap up"
+  @doc """
+  User turn sent after a text-only reply. Kept neutral so it doesn't push the subagent to keep
+  working when it should hand back its result.
+  """
+  def cont_msg(result_tools \\ Console.AI.Tools.Workbench.Result.name()) do
+    "Decide the next step based on the work so far. If the delegated task is done, or further work " <>
+      "wouldn't meaningfully change the result, call #{tool_list(result_tools)} now. Otherwise, call the tool " <>
+      "for the next step that's still needed. Don't repeat work that has already been done."
+  end
+
+  defp tool_list(tool) when is_binary(tool), do: "`#{tool}`"
+  defp tool_list([tool]), do: tool_list(tool)
+  defp tool_list([_ | _] = tools) do
+    {rest, [last]} = tools |> Enum.map(&tool_list/1) |> Enum.split(-1)
+    Enum.join(rest, ", ") <> " or " <> last
+  end
 
   def if_vector_store_enabled(tools) when is_list(tools) do
     case VectorStore.enabled?() do
@@ -36,33 +50,9 @@ defmodule Console.AI.Workbench.Subagents.Base do
   end
   def if_vector_store_enabled(tool), do: if_vector_store_enabled([tool])
 
-  def stream_callbacks(%WorkbenchJob{id: id}) do
-    Stream.stream_callbacks(
-      on_result: &publish_absinthe(%{text: &1}, workbench_text_stream: "workbench_jobs:#{id}:text_stream"),
-      on_thinking: &publish_absinthe(%{text: &1}, workbench_text_stream: "workbench_jobs:#{id}:text_stream")
-    )
-  end
-
-  def stream_callbacks(%WorkbenchJobActivity{workbench_job_id: jid, id: id}) do
-    Stream.stream_callbacks(
-      on_result: &publish_absinthe(%{text: &1, activity_id: id}, workbench_text_stream: "workbench_jobs:#{jid}:text_stream"),
-      on_thinking: &publish_absinthe(%{text: &1, activity_id: id}, workbench_text_stream: "workbench_jobs:#{jid}:text_stream")
-    )
-  end
-
-  def callback(%WorkbenchJobActivity{id: id, workbench_job_id: job_id}, _, {kind, content})
-    when kind in [:content, :assistant] and is_binary(content),
-    do: publish_absinthe(%{activity_id: id, text: content}, workbench_job_progress: "workbench_jobs:#{job_id}:progress")
-  def callback(%WorkbenchJobActivity{id: id, workbench_job_id: job_id} = activity, %Environment{} = environment, {:tool, content, %{name: name, arguments: args} = tool})
-    when is_binary(content) do
-    save_thought(activity, environment, content, tool)
-    publish_absinthe(%{
-      activity_id: id,
-      tool: name,
-      arguments: args,
-      text: content
-    }, workbench_job_progress: "workbench_jobs:#{job_id}:progress")
-  end
+  def callback(%WorkbenchJobActivity{} = activity, %Environment{} = environment, {:tool, content, %{} = tool})
+    when is_binary(content),
+    do: save_thought(activity, environment, content, tool)
   def callback(_, _, _), do: :ok
 
   def last_message(messages, mapper) when is_function(mapper, 1) do
@@ -124,6 +114,19 @@ defmodule Console.AI.Workbench.Subagents.Base do
       | knowledge_tools([%ListKnowledge{job: job}, %Knowledge{job: job}, %KnowledgeUsed{job: job}])
     ]
   end
+
+  @doc """
+  MCP tools from workbench tools in the `:search` category (eg web search), wired into the orchestrator and
+  every subagent. Tools `agent` already receives through its own category routing are skipped to avoid
+  duplicate tool names.
+  """
+  def search_tools(%Environment{tools: tools, job: %WorkbenchJob{} = job}, agent)
+      when is_map(tools) or is_list(tools) do
+    Environment.subagent_tools(tools, :search)
+    |> Enum.reject(&Environment.subagent_tool?(&1, agent))
+    |> MCP.expand_tools(job)
+  end
+  def search_tools(_, _), do: []
 
   def skill_knowledge_pre_enable do
     [%Context{}, %Skills{}, %Skill{} | knowledge_tools([%ListKnowledge{}, %Knowledge{}, %KnowledgeUsed{}])]

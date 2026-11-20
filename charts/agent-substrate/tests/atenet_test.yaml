@@ -1,0 +1,170 @@
+suite: atenet router and egress
+release:
+  name: ate
+  namespace: ate-system
+capabilities:
+  majorVersion: 1
+  minorVersion: 34
+templates:
+  - templates/*.yaml
+set:
+  objectStore.snapshotLocation: s3://snapshots/ate/
+tests:
+  - it: egress keeps the MITM markers inert without an additional ext_proc
+    template: templates/atenet-egress.yaml
+    documentSelector:
+      path: kind
+      value: ConfigMap
+    asserts:
+      - matchRegex:
+          path: data["envoy.yaml"]
+          pattern: "#ATE_MITM_EXTPROC_CLUSTER"
+      - notMatchRegex:
+          path: data["envoy.yaml"]
+          pattern: additional_egress_ext_proc
+
+  - it: additionalExtprocService splices the filter and cluster at the markers
+    template: templates/atenet-egress.yaml
+    documentSelector:
+      path: kind
+      value: ConfigMap
+    set:
+      atenet.egress.additionalExtprocService: plrl-deploy-operator/devbox-egress-authz:50053
+    asserts:
+      - notMatchRegex:
+          path: data["envoy.yaml"]
+          pattern: "(?m)^\\s*#ATE_MITM_EXTPROC_(FILTER|CLUSTER) --"
+      - matchRegex:
+          path: data["envoy.yaml"]
+          pattern: "cluster_name: additional_egress_ext_proc"
+      - matchRegex:
+          path: data["envoy.yaml"]
+          pattern: "sni: devbox-egress-authz.plrl-deploy-operator.svc\n"
+      - matchRegex:
+          path: data["envoy.yaml"]
+          pattern: "address: devbox-egress-authz.plrl-deploy-operator.svc.cluster.local\n\\s+port_value: 50053"
+
+  - it: rejects a malformed additionalExtprocService
+    template: templates/validate.yaml
+    set:
+      atenet.egress.additionalExtprocService: devbox-egress-authz:50053
+    asserts:
+      - failedTemplate:
+          errorPattern: additionalExtprocService
+
+  - it: the egress config checksum rolls the Deployment
+    template: templates/atenet-egress.yaml
+    documentSelector:
+      path: kind
+      value: Deployment
+    asserts:
+      - exists:
+          path: spec.template.metadata.annotations["checksum/envoy-config"]
+
+  - it: router takes routeTimeout, ingress SPIFFE IDs, log level and preview gates
+    template: templates/atenet-router.yaml
+    documentSelector:
+      path: kind
+      value: Deployment
+    set:
+      logLevel: debug
+      previewGates: [PerTemplateSnapshotLocation, Foo]
+      atenet.router.routeTimeout: 24h
+      atenet.router.ingressAllowedSPIFFEIDs:
+        - spiffe://cluster.local/ns/plrl-deploy-operator/sa/devbox-gateway
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --route-timeout=24h
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --ingress-allowed-spiffe-ids=spiffe://cluster.local/ns/plrl-deploy-operator/sa/devbox-gateway
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --log-level=debug
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --preview=PerTemplateSnapshotLocation,Foo
+
+  - it: extra egress-gateway SPIFFE IDs reach ate-api-server after atenet-egress
+    template: templates/api-server.yaml
+    documentSelector:
+      path: kind
+      value: Deployment
+    set:
+      auth.egressGatewayExtraSPIFFEIDs:
+        - spiffe://cluster.local/ns/plrl-deploy-operator/sa/devbox-gateway
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --egress-gateway-spiffe-id=spiffe://cluster.local/ns/ate-system/sa/atenet-egress
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --egress-gateway-spiffe-id=spiffe://cluster.local/ns/plrl-deploy-operator/sa/devbox-gateway
+
+  - it: the PodMonitoring renders only where GMP is served
+    template: templates/atenet-router.yaml
+    capabilities:
+      apiVersions:
+        - monitoring.googleapis.com/v1/PodMonitoring
+    asserts:
+      - containsDocument:
+          kind: PodMonitoring
+          apiVersion: monitoring.googleapis.com/v1
+          name: atenet-router-envoy
+          any: true
+
+  - it: the PodMonitoring is skipped without GMP
+    template: templates/atenet-router.yaml
+    asserts:
+      - containsDocument:
+          kind: PodMonitoring
+          apiVersion: monitoring.googleapis.com/v1
+          name: atenet-router-envoy
+          any: true
+        not: true
+
+  - it: cordoned system infra gets the dedicated-pool scheduling
+    template: templates/idp-server.yaml
+    documentSelector:
+      path: kind
+      value: Deployment
+    set:
+      systemInfra.cordon: true
+    asserts:
+      - equal:
+          path: spec.template.metadata.labels["ate.dev/workloadType"]
+          value: ate-system-infra
+      - equal:
+          path: spec.template.spec.nodeSelector["ate.dev/workloadType"]
+          value: ate-system-infra
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            key: ate.dev/workloadType
+            operator: Equal
+            value: ate-system-infra
+            effect: NoSchedule
+
+  - it: no OTLP endpoint disables every exporter
+    template: templates/otel-config.yaml
+    asserts:
+      - equal:
+          path: data.OTEL_TRACES_EXPORTER
+          value: none
+      - equal:
+          path: data.ATE_WORKER_OTEL_LOGS_EXPORTER
+          value: none
+      - notExists:
+          path: data.OTEL_EXPORTER_OTLP_ENDPOINT
+
+  - it: an OTLP endpoint is exported to every component
+    template: templates/otel-config.yaml
+    set:
+      otel.endpoint: http://collector:4317
+    asserts:
+      - equal:
+          path: data.OTEL_EXPORTER_OTLP_ENDPOINT
+          value: http://collector:4317
+      - notExists:
+          path: data.OTEL_TRACES_EXPORTER

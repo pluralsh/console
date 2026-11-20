@@ -8,6 +8,7 @@ go.work.sum
 
 # Binaries for programs and plugins
 bin/
+!dockerfiles/devbox/rootfs/*/usr/local/bin/
 /agent
 *.exe
 *.exe~

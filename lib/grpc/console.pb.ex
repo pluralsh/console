@@ -48,6 +48,8 @@ defmodule Plrl.AiConfig do
   field :azure, 6, type: Plrl.AzureOpenAiConfig
   field :openaiCompatible, 7, type: Plrl.OpenAiConfig
   field :xai, 8, type: Plrl.OpenAiConfig
+  field :provider, 9, proto3_optional: true, type: :string
+  field :decisionProvider, 10, proto3_optional: true, type: :string
 end
 
 defmodule Plrl.HttpProxyConfig do
@@ -94,6 +96,7 @@ defmodule Plrl.OpenAiConfig do
   field :tokenExchange, 7, proto3_optional: true, type: Plrl.OpenAiTokenExchange
   field :method, 8, proto3_optional: true, type: Plrl.OpenAiMethod, enum: true
   field :proxy, 9, proto3_optional: true, type: Plrl.HttpProxyConfig
+  field :decisionModel, 10, proto3_optional: true, type: :string
 end
 
 defmodule Plrl.AnthropicConfig do
@@ -111,6 +114,7 @@ defmodule Plrl.AnthropicConfig do
   field :toolModel, 5, proto3_optional: true, type: :string
   field :proxyModels, 6, repeated: true, type: :string
   field :proxy, 7, proto3_optional: true, type: Plrl.HttpProxyConfig
+  field :decisionModel, 8, proto3_optional: true, type: :string
 end
 
 defmodule Plrl.VertexAiConfig do
@@ -131,6 +135,7 @@ defmodule Plrl.VertexAiConfig do
   field :location, 8, proto3_optional: true, type: :string
   field :proxyModels, 9, repeated: true, type: :string
   field :proxy, 10, proto3_optional: true, type: Plrl.HttpProxyConfig
+  field :decisionModel, 11, proto3_optional: true, type: :string
 end
 
 defmodule Plrl.BedrockModelSettings do
@@ -178,6 +183,7 @@ defmodule Plrl.BedrockConfig do
   field :endpoint, 10, proto3_optional: true, type: Plrl.BedrockEndpoint, enum: true
   field :modelSettings, 11, repeated: true, type: Plrl.BedrockModelSettings
   field :proxy, 12, proto3_optional: true, type: Plrl.HttpProxyConfig
+  field :decisionModelId, 13, proto3_optional: true, type: :string
 end
 
 defmodule Plrl.AzureOpenAiConfig.DeploymentsEntry do
@@ -210,6 +216,7 @@ defmodule Plrl.AzureOpenAiConfig do
   field :proxyModels, 8, repeated: true, type: :string
   field :deployments, 9, repeated: true, type: Plrl.AzureOpenAiConfig.DeploymentsEntry, map: true
   field :proxy, 10, proto3_optional: true, type: Plrl.HttpProxyConfig
+  field :decisionModel, 11, proto3_optional: true, type: :string
 end
 
 defmodule Plrl.ProxyAuthenticationRequest do

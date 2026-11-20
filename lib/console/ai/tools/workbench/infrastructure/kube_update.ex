@@ -88,7 +88,8 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.KubeUpdate do
     with {:cluster, %Cluster{} = cluster} <- {:cluster, Clusters.get_cluster_by_handle(handle)},
          {:kind, kind} <- {:kind, get_kind(cluster, g, v, k)},
          path <- Kube.Client.Base.path(g, v, kind, comp.namespace, comp.name) do
-      build_request(op, handle, path, json, explanation, approval)
+      with {:ok, request} <- build_request(op, handle, path, json, explanation, approval),
+        do: {:ok, %{request | id: comp.id}}
     else
       {:kind, _} -> {:ok, "I cannot fetch the details of secrets for you"}
       {:cluster, _} -> {:ok, "No cluster found matching handle=#{handle}"}

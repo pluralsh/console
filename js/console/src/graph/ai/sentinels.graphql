@@ -95,6 +95,10 @@ fragment SentinelRun on SentinelRun {
   results {
     ...SentinelRunResult
   }
+  errors {
+    source
+    message
+  }
   checks {
     ...SentinelCheck
   }
@@ -125,6 +129,7 @@ fragment SentinelStatistic on SentinelStatistic {
 fragment SentinelRunJobTiny on SentinelRunJob {
   id
   status
+  check
   cluster {
     ...ClusterMinimal
   }
@@ -140,6 +145,7 @@ fragment SentinelRunJob on SentinelRunJob {
   ...SentinelRunJobTiny
   format
   output
+  error
   sentinelRun {
     id
     sentinel {

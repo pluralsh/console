@@ -81,6 +81,14 @@ defimpl Console.PubSub.Rtc, for: Console.PubSub.AgentRunUpdated do
   def deliver(%{item: run}), do: {run, :update}
 end
 
+# a queued prompt changes the run's prompts, which the harness follows through agent_run_delta
+defimpl Console.PubSub.Rtc, for: Console.PubSub.AgentPromptCreated do
+  def deliver(%{item: prompt}) do
+    %{agent_run: run} = Console.Repo.preload(prompt, :agent_run)
+    {run, :update}
+  end
+end
+
 defimpl Console.PubSub.Rtc, for: Console.PubSub.WorkbenchJobCreated do
   def deliver(%{item: job}), do: {job, :create}
 end
@@ -99,6 +107,18 @@ end
 
 defimpl Console.PubSub.Rtc, for: Console.PubSub.WorkbenchJobThoughtCreated do
   def deliver(%{item: thought}), do: {thought, :create}
+end
+
+defimpl Console.PubSub.Rtc, for: Console.PubSub.WorkbenchQueuedPromptCreated do
+  def deliver(%{item: prompt}), do: {prompt, :create}
+end
+
+defimpl Console.PubSub.Rtc, for: Console.PubSub.WorkbenchQueuedPromptUpdated do
+  def deliver(%{item: prompt}), do: {prompt, :update}
+end
+
+defimpl Console.PubSub.Rtc, for: Console.PubSub.WorkbenchQueuedPromptDeleted do
+  def deliver(%{item: prompt}), do: {prompt, :delete}
 end
 
 defimpl Console.PubSub.Rtc, for: [

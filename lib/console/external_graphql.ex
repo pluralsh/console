@@ -117,6 +117,7 @@ defmodule Console.ExternalGraphQl do
     import_fields :public_stack_queries
     import_fields :public_agent_queries
     import_fields :public_sentinel_queries
+    import_fields :public_devbox_queries
   end
 
   mutation do
@@ -128,10 +129,12 @@ defmodule Console.ExternalGraphQl do
     import_fields :public_stack_mutations
     import_fields :public_agent_mutations
     import_fields :public_sentinel_mutations
+    import_fields :public_devbox_mutations
   end
 
   subscription do
     import_fields :public_deployment_subscriptions
+    import_fields :public_agent_subscriptions
   end
 
   defp make_labels(nil), do: []

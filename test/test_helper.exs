@@ -53,6 +53,7 @@ Mimic.copy(Console.PseudoFS)
 Mimic.copy(Console.AI.Graph.Indexer.Sink)
 Mimic.copy(Req)
 Mimic.copy(Console.Chat.Teams.Token)
+Mimic.copy(Oidcc)
 Mimic.copy(Oidcc.Token)
 Mimic.copy(Console.OIDC.ProviderConfiguration)
 Mimic.copy(Kazan.Client.Imp)
@@ -77,6 +78,14 @@ Mimic.copy(Console.Cache)
 Mimic.copy(ReqLLM)
 Mimic.copy(Console.ClusterRing)
 Mimic.copy(Console.Uploads)
+Mimic.copy(Console.Devboxes.Control.Test)
+
+Mimic.copy(Console.Devboxes.AgentCredentials.Verifier.Test)
+
+Application.put_env(:console, :devbox_control, Console.Devboxes.Control.Test)
+Application.put_env(:console, :agent_credential_verifier, Console.Devboxes.AgentCredentials.Verifier.Test)
+Application.put_env(:console, :kas_devbox_secret, Base.encode64("kas-devbox-test-secret-0123456789abcdef"))
+Application.put_env(:console, :devbox_stream_token_key, "devbox-stream-test-key-0123456789abcdef")
 
 # :external tests depend on live third-party services or continuously updated remote data and
 # flake on rate limits/timeouts; run them explicitly with `mix test --include external`

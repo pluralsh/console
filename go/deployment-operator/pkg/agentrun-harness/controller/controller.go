@@ -155,7 +155,7 @@ func (in *agentRunController) completeAgentRun(status gqlclient.AgentRunStatus, 
 	return err
 }
 
-func (in *agentRunController) updateAgentRun(ctx context.Context, attrs gqlclient.AgentRunStatusAttributes) (*gqlclient.AgentRunFragment, error) {
+func (in *agentRunController) updateAgentRun(ctx context.Context, attrs gqlclient.AgentRunStatusAttributes) (*gqlclient.AgentRunUpdateFragment, error) {
 	if in.usage != nil {
 		attrs.Usage = in.usage.Attributes()
 	}
@@ -201,7 +201,7 @@ func (in *agentRunController) init() (Controller, error) {
 //
 //  1. Analysis persistence (if configured)
 //  2. Post-run poll (approval mode): queued user prompts or approval → PR prompt
-//  3. Babysit loop (if enabled): user prompts every promptPollInterval (5s, 30s when kicked),
+//  3. Babysit loop (if enabled): user prompts on every pushed status, or every promptPollInterval,
 //     PR/SCM checks every babysitInterval (default 60s)
 //
 // When both approval and babysit are enabled, approval follow-up creates the PR
@@ -234,7 +234,7 @@ func (in *agentRunController) babysitLoop(ctx context.Context, callback func(ctx
 	}
 
 	for {
-		agentRun, err := in.consoleClient.GetAgentRunStatus(ctx, in.agentRunID)
+		agentRun, err := in.runStatus(ctx)
 		if err != nil {
 			klog.ErrorS(err, "could not poll agent run during babysit", "id", in.agentRunID)
 			if in.waitForPoll(ctx) {
@@ -337,7 +337,7 @@ func (in *agentRunController) babysitSCMClient() (scm.GRPCClient, error) {
 // resolveBabysitPRURLs returns the PR URLs the babysit loop should poll via SCM.
 // Created PR URLs take precedence; followupPrUrl is used when the run has no
 // associated PRs (the follow-up path).
-func (in *agentRunController) resolveBabysitPRURLs(agentRun *gqlclient.AgentRunFragment) []string {
+func (in *agentRunController) resolveBabysitPRURLs(agentRun *gqlclient.AgentRunUpdateFragment) []string {
 	if urls := createdPRURLs(agentRun); len(urls) > 0 {
 		in.babysitPRURLs = urls
 		return urls
@@ -349,7 +349,7 @@ func (in *agentRunController) resolveBabysitPRURLs(agentRun *gqlclient.AgentRunF
 	return in.babysitPRURLs
 }
 
-func createdPRURLs(agentRun *gqlclient.AgentRunFragment) []string {
+func createdPRURLs(agentRun *gqlclient.AgentRunUpdateFragment) []string {
 	if agentRun == nil {
 		return nil
 	}
@@ -372,7 +372,7 @@ func createdPRURLs(agentRun *gqlclient.AgentRunFragment) []string {
 	return urls
 }
 
-func followupPRURL(agentRun *gqlclient.AgentRunFragment, harnessRun *agentrunv1.AgentRun) string {
+func followupPRURL(agentRun *gqlclient.AgentRunUpdateFragment, harnessRun *agentrunv1.AgentRun) string {
 	if agentRun != nil && agentRun.FollowupPrURL != nil {
 		if u := strings.TrimSpace(*agentRun.FollowupPrURL); u != "" {
 			return u
@@ -540,6 +540,7 @@ func buildBabysitPrompt(branch, _ string, prs []toolv1.EnrichedPR, lastChecked t
 		}
 		if len(pending) > 0 {
 			sb.WriteString("### CI checks still running\n\n")
+			sb.WriteString("Do not wait for or poll these checks. The harness keeps monitoring the PR and will reprompt you if they fail.\n\n")
 			for _, ci := range pending {
 				_, _ = fmt.Fprintf(&sb, "- **%s**: %s\n", ci.Name, ci.Status)
 			}
@@ -549,6 +550,9 @@ func buildBabysitPrompt(branch, _ string, prs []toolv1.EnrichedPR, lastChecked t
 			sb.WriteString("All CI checks passed.\n\n")
 		}
 	}
+	sb.WriteString("Handle only the activity above, then end this turn. PR monitoring runs outside your session: " +
+		"the harness polls CI and comments itself and starts a new turn when there is more to act on, " +
+		"so do not loop, sleep, or repeatedly call `getPRState` waiting for changes.\n")
 	return sb.String()
 }
 

@@ -133,7 +133,7 @@ function StackPrsExpandedRow({
         pollInterval: STACK_DELTA_FALLBACK_POLL_INTERVAL,
         fetchPolicy: 'cache-and-network',
       }}
-      height={400}
+      maxHeight={400}
       borderRadius={0}
       paddingLeft={24}
     />

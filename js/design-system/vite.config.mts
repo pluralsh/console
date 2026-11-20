@@ -12,13 +12,16 @@ export default defineConfig({
       fileName: (format) => `index.${format}.js`,
     },
     rollupOptions: {
+      // Regexes so subpath imports (react/jsx-runtime, react/compiler-runtime,
+      // react-dom/client) stay external too; bundling their CJS builds leaves
+      // require('react') calls in the ESM output, which browsers can't run.
       external: [
-        'react',
-        'react-dom',
-        'styled-components',
-        '@emotion/react',
-        '@emotion/styled',
-        'react-transition-group',
+        /^react(\/.*)?$/,
+        /^react-dom(\/.*)?$/,
+        /^styled-components(\/.*)?$/,
+        /^@emotion\/react(\/.*)?$/,
+        /^@emotion\/styled(\/.*)?$/,
+        /^react-transition-group(\/.*)?$/,
       ],
       output: {
         manualChunks(id: string) {

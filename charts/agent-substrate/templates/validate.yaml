@@ -1,0 +1,125 @@
+{{- /* Render-time checks. This file renders nothing. */ -}}
+{{- $ns := include "substrate.namespace" . -}}
+{{- if ne $ns "ate-system" -}}
+{{- fail (printf "agent-substrate must be installed into the ate-system namespace (got %q): Substrate's binaries default their in-cluster addresses and SPIFFE IDs to it. Use --namespace ate-system --create-namespace." $ns) -}}
+{{- end -}}
+
+{{- if not (has .Values.clusterSize (list "size0" "size10")) -}}
+{{- fail (printf "clusterSize must be size0 or size10, got %q" .Values.clusterSize) -}}
+{{- end -}}
+
+{{- if ne .Values.atenet.dataplane "envoy" -}}
+{{- fail (printf "atenet.dataplane=%q is not supported by this chart yet; only envoy is (the devbox egress authz ext_proc needs envoy)." .Values.atenet.dataplane) -}}
+{{- end -}}
+
+{{- if not (hasPrefix "https://" (include "substrate.actorJWTIssuer" .)) -}}
+{{- fail "auth.actorJWTIssuer must be an https:// URL" -}}
+{{- end -}}
+
+{{- if not (has .Values.auth.actorJWTAlgorithm (list "ES256" "RS256")) -}}
+{{- fail "auth.actorJWTAlgorithm must be ES256 or RS256" -}}
+{{- end -}}
+
+{{- /* Postgres */ -}}
+{{- $pg := .Values.postgres -}}
+{{- if eq $pg.mode "cnpg" -}}
+{{- if and (not (index .Values "cloudnative-pg").enabled) (not (include "substrate.cnpgCRDServed" .)) -}}
+{{- fail "postgres.mode=cnpg needs the CloudNativePG operator, but the clusters.postgresql.cnpg.io CRD is not installed and the bundled operator is disabled. Set cloudnative-pg.enabled=true, install the operator first, or use postgres.mode=external. (With `helm template`, pass --api-versions postgresql.cnpg.io/v1/Cluster.)" -}}
+{{- end -}}
+{{- if and $pg.cnpg.backup.enabled (not $pg.cnpg.backup.destinationPath) -}}
+{{- fail "postgres.cnpg.backup.enabled needs postgres.cnpg.backup.destinationPath" -}}
+{{- end -}}
+{{- else if eq $pg.mode "external" -}}
+{{- if not $pg.external.readWrite.secretName -}}
+{{- fail "postgres.mode=external needs postgres.external.readWrite.secretName (a secret holding the read-write DSN)" -}}
+{{- end -}}
+{{- else -}}
+{{- fail (printf "postgres.mode must be cnpg or external, got %q" $pg.mode) -}}
+{{- end -}}
+
+{{- /* Object storage */ -}}
+{{- $os := .Values.objectStore -}}
+{{- $schemes := dict "s3" "s3://" "gcs" "gs://" "azureBlob" "azblob://" -}}
+{{- if not (hasKey $schemes $os.backend) -}}
+{{- fail (printf "objectStore.backend must be s3, gcs or azureBlob, got %q" $os.backend) -}}
+{{- end -}}
+{{- if and .Values.rustfs.enabled (ne $os.backend "s3") -}}
+{{- fail "rustfs.enabled needs objectStore.backend=s3" -}}
+{{- end -}}
+{{- $loc := include "substrate.snapshotLocation" . -}}
+{{- if $loc -}}
+{{- if not (hasPrefix (get $schemes $os.backend) $loc) -}}
+{{- fail (printf "objectStore.snapshotLocation %q must start with %s for backend %s" $loc (get $schemes $os.backend) $os.backend) -}}
+{{- end -}}
+{{- else if not (or (has "PerTemplateSnapshotLocation" .Values.previewGates) (has "ALL" .Values.previewGates)) -}}
+{{- fail "objectStore.snapshotLocation is required (unless the PerTemplateSnapshotLocation preview gate is enabled)" -}}
+{{- end -}}
+{{- if eq $os.backend "azureBlob" -}}
+{{- $az := $os.azureBlob -}}
+{{- if ne (include "substrate.objectstoreV1" .) "true" -}}
+{{- fail (printf "objectStore.backend=azureBlob needs a Substrate that serves substrate.objectstore.v1 (agent-substrate/substrate@48f5744, first released in v1.0.0); substrateVersion is %q. Upgrade, or set objectstoreV1Support=true for a build that has it." (include "substrate.version" .)) -}}
+{{- end -}}
+{{- if not (hasPrefix "https://" ($az.accountUrl | default "")) -}}
+{{- fail "objectStore.azureBlob.accountUrl must be an https:// URL (https://<account>.blob.core.windows.net)" -}}
+{{- end -}}
+{{- if not $az.containers -}}
+{{- fail "objectStore.azureBlob.containers must list at least one blob container" -}}
+{{- end -}}
+{{- if not (and $az.tenantId $az.nodeClientId $az.controlClientId) -}}
+{{- fail "objectStore.azureBlob needs tenantId, nodeClientId (atelet) and controlClientId (ate-api-server): the plugin authenticates only through Entra workload identity" -}}
+{{- end -}}
+{{- if not (or $az.image.digest $az.image.tag) -}}
+{{- fail "objectStore.azureBlob.image.digest (or tag) is required: the plugin publishes no default image" -}}
+{{- end -}}
+{{- end -}}
+
+{{- /* atenet */ -}}
+{{- $dbx := include "substrate.devboxes" . | fromJson -}}
+{{- if .Values.devboxes.enabled -}}
+{{- if not (regexMatch "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$" (.Values.devboxes.gatewayNamespace | default "")) -}}
+{{- fail (printf "devboxes.gatewayNamespace must be a namespace name, got %q" (.Values.devboxes.gatewayNamespace | default "")) -}}
+{{- end -}}
+{{- with .Values.devboxes.operatorServiceAccount -}}
+{{- if not (regexMatch "^[a-z0-9]([-a-z0-9]*[a-z0-9])?/[a-z0-9]([-.a-z0-9]*[a-z0-9])?$" .) -}}
+{{- fail (printf "devboxes.operatorServiceAccount must be NAMESPACE/NAME, got %q" .) -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- with $dbx.additionalExtprocService -}}
+{{- if not (regexMatch "^[a-z0-9]([-a-z0-9]*[a-z0-9])?/[a-z0-9]([-a-z0-9]*[a-z0-9])?:[0-9]+$" .) -}}
+{{- fail (printf "atenet.egress.additionalExtprocService must be NS/SVC:PORT, got %q" .) -}}
+{{- end -}}
+{{- end -}}
+{{- if not $dbx.credentialProviders -}}
+{{- fail "atenet.egress.credentialProviders must name at least one provider (e.g. [{name: k8s.io}])" -}}
+{{- end -}}
+{{- $seen := dict -}}
+{{- range $dbx.credentialProviders -}}
+{{- if not (regexMatch "^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$" (.name | default "")) -}}
+{{- fail (printf "credential provider name %q must be a DNS-1123 subdomain" (.name | default "")) -}}
+{{- end -}}
+{{- if hasKey $seen .name -}}
+{{- fail (printf "credential provider %q is listed twice" .name) -}}
+{{- end -}}
+{{- $_ := set $seen .name true -}}
+{{- if and (ne .name "k8s.io") (not .address) -}}
+{{- fail (printf "credential provider %q needs an address (host:port)" .name) -}}
+{{- end -}}
+{{- end -}}
+
+{{- /* atelet image credential providers */ -}}
+{{- $icp := .Values.atelet.imageCredentialProvider -}}
+{{- if $icp.enabled -}}
+{{- if not (has $icp.preset (list "ecr" "gar" "acr" "custom")) -}}
+{{- fail (printf "atelet.imageCredentialProvider.preset must be ecr, gar, acr or custom, got %q" $icp.preset) -}}
+{{- end -}}
+{{- if and (eq $icp.preset "custom") (not (and $icp.providers $icp.binDir)) -}}
+{{- fail "atelet.imageCredentialProvider.preset=custom needs providers and binDir" -}}
+{{- end -}}
+{{- end -}}
+
+{{- if .Values.sandboxConfigs.microvm.enabled -}}
+{{- if not (and .Values.sandboxConfigs.microvm.assetScheme .Values.sandboxConfigs.microvm.assetBucket) -}}
+{{- fail "sandboxConfigs.microvm needs assetScheme (s3, gs or https) and assetBucket, where the microVM assets are staged" -}}
+{{- end -}}
+{{- end -}}

@@ -261,6 +261,19 @@ export function WorkbenchSetupStep({
                   })
                 }
               />
+              <CapabilityCheckbox
+                label="Sentinels"
+                checked={infra?.sentinels ?? false}
+                tooltip="Expose tools to list sentinels and inspect their runs, run jobs, errors and integration test output."
+                onCheckedChange={(checked) =>
+                  update((d) => {
+                    d.configuration = d.configuration ?? {}
+                    d.configuration.infrastructure =
+                      d.configuration.infrastructure ?? {}
+                    d.configuration.infrastructure.sentinels = checked
+                  })
+                }
+              />
             </Flex>
           </Flex>
         </FormField>
@@ -303,6 +316,33 @@ export function WorkbenchSetupStep({
                 }
               />
             </Flex>
+          </Flex>
+        </FormField>
+        <FormField label="Devboxes">
+          <Flex
+            direction="column"
+            gap="small"
+          >
+            <Switch
+              checked={
+                formState.configuration?.devbox?.allowSubscriptionCredentials ??
+                false
+              }
+              onChange={(checked) =>
+                update((d) => {
+                  d.configuration = d.configuration ?? {}
+                  d.configuration.devbox = d.configuration.devbox ?? {}
+                  d.configuration.devbox.allowSubscriptionCredentials = checked
+                })
+              }
+            >
+              Allow personal AI subscriptions
+            </Switch>
+            <CaptionP $color="text-light">
+              Lets members bill devbox agents to their own Claude or ChatGPT
+              plan. That traffic goes straight to Anthropic or OpenAI, bypassing
+              the Plural AI proxy&apos;s audit, budgets and model policy.
+            </CaptionP>
           </Flex>
         </FormField>
       </Flex>

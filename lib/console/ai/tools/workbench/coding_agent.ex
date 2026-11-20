@@ -2,12 +2,13 @@ defmodule Console.AI.Tools.Workbench.CodingAgent do
   use Console.AI.Tools.Workbench.Base
   import Console.Deployments.Pr.Git, only: [to_http: 2]
   alias Console.AI.Tool
-  alias Console.Schema.{User, AgentRuntime, AgentRun, Workbench, WorkbenchJob}
-  alias Console.Deployments.Agents
+  alias Console.Schema.{User, AgentRuntime, AgentRun, Workbench, WorkbenchJob, WorkbenchJobActivity}
+  alias Console.Deployments.{Agents, Workbenches}
   alias Console.PseudoFS
 
   embedded_schema do
     field :activity,        :map, virtual: true
+    field :created_activity, :boolean, virtual: true, default: false
     field :workbench,       :map, virtual: true
     field :job,             :map, virtual: true
     field :skills,          :map, virtual: true
@@ -127,14 +128,57 @@ defmodule Console.AI.Tools.Workbench.CodingAgent do
   def implement(%__MODULE__{id: tool} = args) do
     with {:user, %User{} = user} <- {:user, Tool.actor()},
          {:runtime, %AgentRuntime{} = runtime} <- {:runtime, Tool.agent_runtime()},
-         {:ok, run} <- Agents.create_agent_run(run_args(args), runtime.id, user) do
-      {:ok, %{run | tool: tool}}
+         {:ok, args} <- ensure_activity(args) do
+      case Agents.create_agent_run(run_args(args), runtime.id, user) do
+        {:ok, run} ->
+          republish_activity(args)
+          {:ok, %{run | tool: tool}}
+        err -> fail_activity(args, err)
+      end
     else
       {:user, _} -> {:error, "no actor found for this session"}
       {:runtime, _} -> {:error, "no runtime found, you need to manually specify this in the chat context menu"}
       err -> err
     end
   end
+
+  # runs spawned by the engine get their own activity, which must exist before the run so the run is
+  # linked to the workbench job (attachments and pr bookkeeping resolve the job through it)
+  defp ensure_activity(%__MODULE__{activity: %WorkbenchJobActivity{}} = args), do: {:ok, args}
+  defp ensure_activity(%__MODULE__{job: %WorkbenchJob{id: id} = job, prompt: prompt, id: tool} = args) when is_binary(id) do
+    %{type: :coding, status: :pending, prompt: prompt, tool_call: tool_call(tool)}
+    |> Workbenches.create_job_activity(job)
+    |> case do
+      {:ok, activity} -> {:ok, %{args | activity: activity, created_activity: true}}
+      err -> err
+    end
+  end
+  defp ensure_activity(args), do: {:ok, args}
+
+  # the association is broadcast from within create_agent_run's transaction, before the run is visible to
+  # subscription resolvers, so rebroadcast once committed for the ui to pick up the run
+  defp republish_activity(%__MODULE__{activity: %WorkbenchJobActivity{id: id}, created_activity: true}) do
+    case Workbenches.get_workbench_job_activity(id) do
+      %WorkbenchJobActivity{} = activity -> Workbenches.notify({:ok, activity}, :update)
+      _ -> :ok
+    end
+  end
+  defp republish_activity(_), do: :ok
+
+  defp fail_activity(%__MODULE__{activity: %WorkbenchJobActivity{} = activity, created_activity: true}, err) do
+    Workbenches.update_job_activity(%{status: :failed, result: %{error: "failed to create agent run: #{format_error(err)}"}}, activity)
+    err
+  end
+  defp fail_activity(_, err), do: err
+
+  defp tool_call(%Tool{id: id, name: name, arguments: args}) when is_binary(id),
+    do: %{call_id: id, name: name, arguments: args}
+  defp tool_call(_), do: %{name: name(nil)}
+
+  defp format_error({:error, %Ecto.Changeset{} = cs}),
+    do: Enum.join(Console.GraphQl.Helpers.resolve_changeset(cs), ", ")
+  defp format_error({:error, msg}) when is_binary(msg), do: msg
+  defp format_error(err), do: inspect(err)
 
   defp run_args(tool) do
     Map.take(tool, @run_attrs)

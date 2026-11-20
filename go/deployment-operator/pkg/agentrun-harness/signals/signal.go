@@ -8,7 +8,7 @@ import (
 	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/environment"
-	console "github.com/pluralsh/console/go/deployment-operator/pkg/client"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/events"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/errors"
 	types "github.com/pluralsh/console/go/deployment-operator/pkg/harness/signals"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
@@ -16,12 +16,12 @@ import (
 
 const (
 	resyncPeriod = 5 * time.Second
-	// kickedResyncPeriod only covers missed kicks, so it can be much longer.
+	// kickedResyncPeriod applies while the sidecar is configured but its websocket is down.
 	kickedResyncPeriod = 30 * time.Second
 )
 
 type consoleSignal struct {
-	client console.Client
+	status *events.Status
 	id     string
 	kicks  <-chan struct{}
 	dev    bool
@@ -30,14 +30,9 @@ type consoleSignal struct {
 func (in *consoleSignal) Listen(cancelFunc context.CancelCauseFunc) {
 	klog.V(log.LogLevelDebug).InfoS("starting console signal listener")
 
-	period := resyncPeriod
-	if in.kicks != nil {
-		period = kickedResyncPeriod
-	}
-
 	go func() {
 		ctx := context.Background()
-		timer := time.NewTimer(period)
+		timer := time.NewTimer(in.period())
 		defer timer.Stop()
 
 		for {
@@ -56,13 +51,17 @@ func (in *consoleSignal) Listen(cancelFunc context.CancelCauseFunc) {
 				cancelFunc(errors.ErrRemoteCancel)
 				return
 			}
-			timer.Reset(period)
+			timer.Reset(in.period())
 		}
 	}()
 }
 
+func (in *consoleSignal) period() time.Duration {
+	return in.status.PollInterval(resyncPeriod, kickedResyncPeriod)
+}
+
 func (in *consoleSignal) cancelled(ctx context.Context) bool {
-	agentRun, err := in.client.GetAgentRunStatus(ctx, in.id)
+	agentRun, err := in.status.Get(ctx)
 	if err != nil {
 		klog.ErrorS(err, "could not resync agent run", "id", in.id)
 		return false
@@ -73,13 +72,13 @@ func (in *consoleSignal) cancelled(ctx context.Context) bool {
 	return agentRun.Status == gqlclient.AgentRunStatusCancelled && !in.dev
 }
 
-// NewConsoleSignal polls the run's status for remote cancellation. kicks, when set, triggers an
-// immediate check and lets the poll back off, see events.Watcher.
-func NewConsoleSignal(client console.Client, id string, kicks <-chan struct{}) types.Signal {
+// NewConsoleSignal watches the run's status for remote cancellation, checking on every push and
+// polling only as often as status.PollInterval allows.
+func NewConsoleSignal(status *events.Status, id string) types.Signal {
 	return &consoleSignal{
-		client: client,
+		status: status,
 		id:     id,
-		kicks:  kicks,
+		kicks:  status.Subscribe(),
 		dev:    environment.IsDev(),
 	}
 }

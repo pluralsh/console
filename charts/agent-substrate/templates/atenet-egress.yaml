@@ -1,0 +1,259 @@
+{{- $ns := include "substrate.namespace" . -}}
+{{- $v := .Values.atenet.egress -}}
+{{- $envoyConfig := include "substrate.egress.envoyConfig" . -}}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: atenet-egress
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: atenet-egress
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+data:
+  envoy.yaml: |
+    {{- $envoyConfig | nindent 4 }}
+  {{- range $key := list "sds-servicedns-cert.yaml" "sds-actor-identity-validation.yaml" "sds-podidentity-cert.yaml" "sds-servicedns-validation.yaml" }}
+  {{ $key }}: |
+    {{- $.Files.Get (printf "files/envoy/%s" $key) | nindent 4 }}
+  {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: atenet-egress
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+spec:
+  selector:
+    app: atenet-egress
+  ports:
+    - name: https
+      port: 443
+      targetPort: https
+      protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: atenet-egress
+  namespace: {{ $ns }}
+  labels:
+    app: atenet-egress
+    {{- include "substrate.labels" . | nindent 4 }}
+spec:
+  replicas: {{ $v.replicas }}
+  selector:
+    matchLabels:
+      app: atenet-egress
+  template:
+    metadata:
+      labels:
+        app: atenet-egress
+        {{- include "substrate.systemInfraPodLabels" . | nindent 8 }}
+      annotations:
+        checksum/envoy-config: {{ $envoyConfig | sha256sum }}
+        checksum/credential-providers: {{ include "substrate.credentialProviders" . | sha256sum }}
+        checksum/otel-config: {{ include "substrate.checksum" (list . "otel-config.yaml") }}
+    spec:
+      serviceAccountName: atenet-egress
+      securityContext:
+        runAsUser: 65532
+        runAsGroup: 65532
+        runAsNonRoot: true
+        fsGroup: 65532
+        sysctls:
+          - name: net.ipv4.ip_unprivileged_port_start
+            value: "0"
+      terminationGracePeriodSeconds: 60
+      {{- include "substrate.imagePullSecrets" . | nindent 6 }}
+      {{- include "substrate.systemInfraScheduling" . | nindent 6 }}
+      initContainers:
+        - name: sdsmint
+          image: {{ include "substrate.image" (dict "ctx" . "key" "atenet" "name" "atenet") }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          restartPolicy: Always
+          args:
+            - sdsmint
+            - --uds-path=/var/run/sdsmint/sdsmint.sock
+            - --ca-pool-path=/run/ca-state/mitm-pool.json
+            - --leaf-cert-ttl=15m
+            - --log-level={{ include "substrate.logLevel" (list . $v.logLevel) }}
+            - {{ include "substrate.previewArg" . }}
+          env:
+            - name: GOMEMLIMIT
+              value: "640MiB"
+          {{- with $v.sdsmintResources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: sdsmint-sock
+              mountPath: /var/run/sdsmint
+            - name: ca-state
+              mountPath: /run/ca-state
+              readOnly: true
+      containers:
+        - name: envoy
+          image: {{ include "substrate.image" (dict "ctx" . "key" "envoyDataplane" "name" "envoy-dataplane") }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: true
+            runAsUser: 65532
+          args:
+            - -c
+            - /etc/envoy/envoy.yaml
+            - --service-node
+            - atenet-egress
+            - --service-cluster
+            - atenet-egress
+            {{- if $v.envoyConcurrency }}
+            - --concurrency
+            - {{ $v.envoyConcurrency | quote }}
+            {{- end }}
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sh", "-c", "while [ ! -f /var/run/atenet/drain-complete ]; do sleep 0.5; done"]
+          {{- with $v.envoyResources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: https
+              containerPort: 443
+            - name: envoy-metrics
+              containerPort: 15090
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: envoy-metrics
+            periodSeconds: 10
+          startupProbe:
+            failureThreshold: 60
+            httpGet:
+              path: /ready
+              port: envoy-metrics
+            periodSeconds: 1
+          volumeMounts:
+            - name: config
+              mountPath: /etc/envoy
+              readOnly: true
+            - name: servicedns
+              mountPath: /run/servicedns.podcert.ate.dev
+              readOnly: true
+            - name: podidentity
+              mountPath: /run/podidentity.podcert.ate.dev
+              readOnly: true
+            - name: actor-id-ca-certs
+              mountPath: /run/actor-id-ca-certs
+              readOnly: true
+            - name: drain-signal
+              mountPath: /var/run/atenet
+              readOnly: true
+            - name: sdsmint-sock
+              mountPath: /var/run/sdsmint
+        - name: ext-proc
+          image: {{ include "substrate.image" (dict "ctx" . "key" "atenet" "name" "atenet") }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - router
+            - --mode=egress
+            - --namespace={{ $ns }}
+            - --port-extproc=50051
+            - --extproc-address=127.0.0.1
+            - --ateapi-address=dns:///api.{{ $ns }}.svc:443
+            - --ateapi-ca-file=/run/servicedns.podcert.ate.dev/trust-bundle.pem
+            - --ateapi-client-cert=/run/podidentity.podcert.ate.dev/credential-bundle.pem
+            - --actor-identity-ca-file=/run/actor-id-ca-certs/ca.crt
+            - --otlp-collector-address=
+            - --envoy-admin-address=127.0.0.1:15000
+            {{- range include "substrate.credentialProviders" . | fromJsonArray }}
+            - --credential-provider-name={{ .name }}
+            - --credential-provider-address={{ .address }}
+            - --credential-provider-server-name={{ .serverName }}
+            {{- end }}
+            - --credential-provider-ca-file=/run/servicedns.podcert.ate.dev/trust-bundle.pem
+            - --credential-provider-client-cert=/run/podidentity.podcert.ate.dev/credential-bundle.pem
+            - --log-level={{ include "substrate.logLevel" (list . $v.logLevel) }}
+            - {{ include "substrate.previewArg" . }}
+            {{- with $v.extraArgs }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          env:
+            {{- include "substrate.podEnv" . | nindent 12 }}
+          envFrom:
+            - configMapRef:
+                name: ate-otel-config
+          {{- with $v.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: extproc
+              containerPort: 50051
+            - name: metrics
+              containerPort: 9090
+            - name: health
+              containerPort: 9091
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: health
+            initialDelaySeconds: 5
+            periodSeconds: 2
+            failureThreshold: 3
+          volumeMounts:
+            - name: servicedns
+              mountPath: /run/servicedns.podcert.ate.dev
+              readOnly: true
+            - name: podidentity
+              mountPath: /run/podidentity.podcert.ate.dev
+              readOnly: true
+            - name: actor-id-ca-certs
+              mountPath: /run/actor-id-ca-certs
+              readOnly: true
+            - name: drain-signal
+              mountPath: /var/run/atenet
+      volumes:
+        - name: config
+          configMap:
+            name: atenet-egress
+        - name: drain-signal
+          emptyDir: {}
+        - name: sdsmint-sock
+          emptyDir: {}
+        {{- include "substrate.podCertVolume" (dict "name" "servicedns" "signer" "servicedns" "ca" true) | nindent 8 }}
+        {{- include "substrate.podCertVolume" (dict "name" "podidentity" "signer" "podidentity" "ca" true) | nindent 8 }}
+        - name: actor-id-ca-certs
+          secret:
+            secretName: actor-id-ca-certs
+        - name: ca-state
+          projected:
+            sources:
+              - secret:
+                  name: egress-mitm-ca-pool
+                  items:
+                    - key: pool
+                      path: mitm-pool.json

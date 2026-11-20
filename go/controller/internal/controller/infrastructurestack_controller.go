@@ -19,6 +19,8 @@ package controller
 import (
 	"context"
 	"fmt"
+	"maps"
+	"slices"
 	"time"
 
 	"github.com/pluralsh/console/go/controller/internal/common"
@@ -28,6 +30,7 @@ import (
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/meta"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -103,7 +106,11 @@ func (r *InfrastructureStackReconciler) Process(ctx context.Context, req ctrl.Re
 		}
 	}()
 
-	utils.MarkCondition(stack.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
+	// Ready mirrors the console stack's status and is only updated by setReadyCondition, so sync errors
+	// (reported through Synchronized) and spec updates don't flip a stack that is still healthy.
+	if meta.FindStatusCondition(stack.Status.Conditions, v1alpha1.ReadyConditionType.String()) == nil {
+		utils.MarkCondition(stack.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
+	}
 
 	// Switch to namespace credentials if configured. This has to be done before sending any request to the console.
 	nc, err := r.ConsoleClient.UseCredentials(req.Namespace, r.CredentialsCache)
@@ -184,7 +191,7 @@ func (r *InfrastructureStackReconciler) Process(ctx context.Context, req ctrl.Re
 	}
 	utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
-	return ctrl.Result{RequeueAfter: requeueAfterInfrastructureStack}, nil
+	return ctrl.Result{RequeueAfter: v1alpha1.Jitter(requeueAfterInfrastructureStack)}, nil
 }
 
 func (r *InfrastructureStackReconciler) getDynamicAttributes(ctx context.Context, stack *v1alpha1.InfrastructureStack) (*dynamicAttributes, *ctrl.Result, error) {
@@ -237,29 +244,37 @@ func (r *InfrastructureStackReconciler) handleExistingResource(ctx context.Conte
 	}
 
 	utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
-	return ctrl.Result{RequeueAfter: requeueAfterInfrastructureStack}, nil
+	return ctrl.Result{RequeueAfter: v1alpha1.Jitter(requeueAfterInfrastructureStack)}, nil
 }
 
 func (r *InfrastructureStackReconciler) setReadyCondition(ctx context.Context, stack *v1alpha1.InfrastructureStack, exists, changed bool) (*ctrl.Result, error) {
 	if !exists {
+		utils.MarkCondition(stack.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 		return lo.ToPtr(common.WaitForResources()), nil
 	}
 
-	// wait a little bit before marking the stack as ready to give the console some time to process the updated stack
+	// give the console a moment to process the update; Ready is left as is until the status it produces is read
 	if changed {
 		return lo.ToPtr(ctrl.Result{RequeueAfter: v1alpha1.Jitter(5 * time.Second)}), nil
 	}
-	utils.MarkCondition(stack.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
+
 	status, err := r.ConsoleClient.GetStackStatus(ctx, *stack.Status.ID)
 	if err != nil {
 		return nil, err
 	}
-	if status.Status == console.StackStatusSuccessful {
+
+	switch status.Status {
+	case console.StackStatusSuccessful:
 		utils.MarkCondition(stack.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 		return nil, nil
+	case console.StackStatusFailed, console.StackStatusCancelled, console.StackStatusPendingApproval:
+		// unchanged until a new run starts or someone approves, so there's nothing to watch closely
+		utils.MarkCondition(stack.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, fmt.Sprintf("stack status is %s", status.Status))
+		return nil, nil
+	default:
+		utils.MarkCondition(stack.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, fmt.Sprintf("stack status is %s", status.Status))
+		return lo.ToPtr(common.WaitForResources()), nil
 	}
-
-	return lo.ToPtr(common.WaitForResources()), nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -394,10 +409,11 @@ func (r *InfrastructureStackReconciler) getStackAttributes(
 		if err := r.Get(ctx, name, secret); err != nil {
 			return nil, err
 		}
-		for k, v := range secret.Data {
+		// sorted so the attributes hash, and the stack's files, don't depend on map order
+		for _, k := range slices.Sorted(maps.Keys(secret.Data)) {
 			attr.Files = append(attr.Files, &console.StackFileAttributes{
 				Path:    fmt.Sprintf("%s/%s", file.MountPath, k),
-				Content: string(v),
+				Content: string(secret.Data[k]),
 			})
 		}
 	}
@@ -474,9 +490,9 @@ func (r *InfrastructureStackReconciler) getStackAttributes(
 	}
 
 	if stack.Spec.Tags != nil {
-		tags := make([]*console.TagAttributes, 0)
-		for name, value := range stack.Spec.Tags {
-			tags = append(tags, &console.TagAttributes{Name: name, Value: value})
+		tags := make([]*console.TagAttributes, 0, len(stack.Spec.Tags))
+		for _, name := range slices.Sorted(maps.Keys(stack.Spec.Tags)) {
+			tags = append(tags, &console.TagAttributes{Name: name, Value: stack.Spec.Tags[name]})
 		}
 		attr.Tags = tags
 	}

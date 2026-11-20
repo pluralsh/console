@@ -19,7 +19,7 @@ func TestMarkAgentRunFailed(t *testing.T) {
 		return attrs.Status == gqlclient.AgentRunStatusFailed &&
 			attrs.Error != nil &&
 			*attrs.Error == "bootstrap exploded"
-	})).Return(&gqlclient.AgentRunFragment{ID: "run-1"}, nil).Once()
+	})).Return(&gqlclient.AgentRunUpdateFragment{ID: "run-1"}, nil).Once()
 
 	markAgentRunFailed(m, "run-1", "bootstrap exploded")
 }
@@ -29,7 +29,7 @@ func TestMarkAgentRunFailedLogsUpdateError(t *testing.T) {
 
 	m := mocks.NewClientMock(t)
 	m.On("UpdateAgentRun", mock.Anything, "run-1", mock.Anything).
-		Return((*gqlclient.AgentRunFragment)(nil), errors.New("console unavailable")).
+		Return((*gqlclient.AgentRunUpdateFragment)(nil), errors.New("console unavailable")).
 		Once()
 
 	// Should not panic when Console rejects the update.

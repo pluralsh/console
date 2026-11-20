@@ -51,6 +51,7 @@ jobs:
         helm repo add radar https://radar-base.github.io/radar-helm-charts
         helm repo add fluxcd-community https://fluxcd-community.github.io/helm-charts
         helm repo add dexidp https://charts.dexidp.io
+        helm repo add cnpg https://cloudnative-pg.github.io/charts
 
     - name: Push chart (0.0.0+pr-<number>)
       if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
@@ -78,6 +79,9 @@ jobs:
         - name: controller
           dir: charts/controller
           repository: pluralsh/controller-chart
+        - name: agent-substrate
+          dir: charts/agent-substrate
+          repository: pluralsh/agent-substrate-chart
     steps:
     - name: Checkout
       uses: actions/checkout@v7
@@ -92,6 +96,7 @@ jobs:
         helm repo add radar https://radar-base.github.io/radar-helm-charts
         helm repo add fluxcd-community https://fluxcd-community.github.io/helm-charts
         helm repo add dexidp https://charts.dexidp.io
+        helm repo add cnpg https://cloudnative-pg.github.io/charts
 
     - name: PR tag values
       if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}

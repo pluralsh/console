@@ -1,0 +1,197 @@
+{{- $ns := include "substrate.namespace" . -}}
+{{- $v := .Values.controller -}}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ate-client
+  namespace: {{ $ns }}
+  labels:
+    apps: ate-client
+    {{- include "substrate.labels" . | nindent 4 }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ate-controller
+  namespace: {{ $ns }}
+  labels:
+    apps: ate-controller
+    {{- include "substrate.labels" . | nindent 4 }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: ate-controller
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["delete", "get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["serviceaccounts"]
+    verbs: ["create", "patch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["replicasets"]
+    verbs: ["get"]
+  - apiGroups: ["ate.dev"]
+    resources: ["sandboxconfigs"]
+    verbs: ["get", "list", "patch", "watch"]
+  - apiGroups: ["ate.dev"]
+    resources: ["workerpools"]
+    verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
+  - apiGroups: ["ate.dev"]
+    resources: ["workerpools/finalizers"]
+    verbs: ["update"]
+  - apiGroups: ["ate.dev"]
+    resources: ["workerpools/status"]
+    verbs: ["get", "patch", "update"]
+  - apiGroups: ["certificates.k8s.io"]
+    resources: ["clustertrustbundles"]
+    verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
+  - apiGroups: ["certificates.k8s.io"]
+    resources: ["signers"]
+    resourceNames: ["egress-mitm.ate.dev/*"]
+    verbs: ["attest"]
+  - apiGroups: ["events.k8s.io"]
+    resources: ["events"]
+    verbs: ["create", "patch"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["networkpolicies"]
+    verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: ate-controller
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames: ["egress-mitm-ca-pool"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["discovery.k8s.io"]
+    resources: ["endpointslices"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ate-controller
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+subjects:
+  - kind: ServiceAccount
+    name: ate-controller
+    namespace: {{ $ns }}
+roleRef:
+  kind: ClusterRole
+  name: ate-controller
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: ate-controller
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+subjects:
+  - kind: ServiceAccount
+    name: ate-controller
+    namespace: {{ $ns }}
+roleRef:
+  kind: Role
+  name: ate-controller
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ate-controller
+  namespace: {{ $ns }}
+  labels:
+    app: ate-controller
+    {{- include "substrate.labels" . | nindent 4 }}
+spec:
+  selector:
+    app: ate-controller
+  ports:
+    - name: metrics
+      port: 8080
+      targetPort: metrics
+      protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ate-controller
+  namespace: {{ $ns }}
+  labels:
+    app: ate-controller
+    {{- include "substrate.labels" . | nindent 4 }}
+spec:
+  replicas: {{ $v.replicas }}
+  selector:
+    matchLabels:
+      app: ate-controller
+  template:
+    metadata:
+      labels:
+        app: ate-controller
+        {{- include "substrate.systemInfraPodLabels" . | nindent 8 }}
+      annotations:
+        checksum/otel-config: {{ include "substrate.checksum" (list . "otel-config.yaml") }}
+    spec:
+      serviceAccountName: ate-controller
+      {{- include "substrate.imagePullSecrets" . | nindent 6 }}
+      {{- include "substrate.systemInfraScheduling" . | nindent 6 }}
+      containers:
+        - name: ate-controller
+          image: {{ include "substrate.image" (dict "ctx" . "key" "atecontroller" "name" "atecontroller") }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - --ateapi-ca-file=/run/servicedns-ca/trust-bundle.pem
+            - --ateapi-client-cert=/run/podidentity.podcert.ate.dev/credential-bundle.pem
+            - --dns-egress-policy={{ $v.dnsEgressPolicy }}
+            - --log-level={{ include "substrate.logLevel" (list . $v.logLevel) }}
+            - {{ include "substrate.previewArg" . }}
+            {{- with $v.extraArgs }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            capabilities:
+              drop:
+                - ALL
+          env:
+            {{- include "substrate.podEnv" . | nindent 12 }}
+          envFrom:
+            - configMapRef:
+                name: ate-otel-config
+          {{- with $v.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: metrics
+              containerPort: 8080
+              protocol: TCP
+            - name: healthz
+              containerPort: 8081
+              protocol: TCP
+          volumeMounts:
+            - name: podidentity
+              mountPath: /run/podidentity.podcert.ate.dev
+            - name: servicedns-ca
+              mountPath: /run/servicedns-ca
+      volumes:
+        {{- include "substrate.podCertVolume" (dict "name" "podidentity" "signer" "podidentity") | nindent 8 }}
+        {{- include "substrate.podCertVolume" (dict "name" "servicedns-ca" "signer" "servicedns" "caOnly" true) | nindent 8 }}

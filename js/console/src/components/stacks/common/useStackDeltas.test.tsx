@@ -44,7 +44,6 @@ function run(id: string, pullRequestId?: string) {
     approvedAt: null,
     approver: null,
     insight: null,
-    infracostResources: [],
     pullRequest: pullRequestId
       ? { __typename: 'PullRequest' as const, id: pullRequestId }
       : null,

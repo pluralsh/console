@@ -69,6 +69,7 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push
+        id: build
         uses: docker/build-push-action@v7
         with:
           context: .
@@ -82,3 +83,9 @@ jobs:
           build-args: |
             NEXT_PUBLIC_ROOT_URL="https://docs.plural.sh"
             NEXT_PUBLIC_GA_ID=${{ vars.NEXT_PUBLIC_GA_ID }}
+      - name: Cosign sign
+        uses: ./.github/actions/cosign-sign
+        with:
+          digest: ${{ steps.build.outputs.digest }}
+          images: |
+            ghcr.io/pluralsh/documentation

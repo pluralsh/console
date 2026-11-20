@@ -3,9 +3,14 @@ defmodule Console.AI.PubSub.Vector.Consumer do
     broadcaster: Console.PubSub.Broadcaster,
     max_demand: 200,
     protocol: Console.AI.PubSub.Vectorizable
+  import Console.Schema.WorkbenchJob, only: [is_terminal: 1]
   alias Console.AI.PubSub.{Vectorizable, Vector.Indexable}
   alias Console.AI.VectorStore
+  alias Console.Schema.WorkbenchJob
   require Logger
+
+  def select?(%Console.PubSub.WorkbenchJobUpdated{item: %WorkbenchJob{status: s}}) when not is_terminal(s), do: false
+  def select?(event), do: super(event)
 
   def handle_event(event) do
     case VectorStore.enabled?() do

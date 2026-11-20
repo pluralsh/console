@@ -24,10 +24,13 @@ defmodule Console.Schema.WorkbenchWebhook do
     timestamps()
   end
 
-  def matches?(%__MODULE__{matches: %{regex: regex, case_insensitive: caseless}}, body) when is_binary(body) and is_binary(regex) do
-    Regex.compile!(regex, caseless: caseless)
-    |> Regex.match?(body)
-  end
+  def matches?(%__MODULE__{matches: %{regex: regex, case_insensitive: true}}, body) when is_binary(body) and is_binary(regex),
+    do: matches_regex(regex, body, [:caseless])
+  def matches?(%__MODULE__{matches: %{regex: regex, case_insensitive: false}}, body) when is_binary(body) and is_binary(regex),
+    do: matches_regex(regex, body)
+  def matches?(%__MODULE__{matches: %{regex: regex, case_insensitive: nil}}, body) when is_binary(body) and is_binary(regex),
+    do: matches_regex(regex, body)
+  def matches?(%__MODULE__{matches: %{regex: regex}}, body) when is_binary(body) and is_binary(regex), do: false
   def matches?(%__MODULE__{matches: %{substring: substring, case_insensitive: true}}, body) when is_binary(body) and is_binary(substring) do
     String.downcase(body)
     |> String.contains?(String.downcase(substring))
@@ -92,5 +95,12 @@ defmodule Console.Schema.WorkbenchWebhook do
         end
       _, _ -> []
     end)
+  end
+
+  defp matches_regex(regex, body, opts \\ []) do
+    case Regex.compile(regex, opts) do
+      {:ok, regex} -> Regex.match?(regex, body)
+      {:error, _} -> false
+    end
   end
 end

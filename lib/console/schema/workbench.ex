@@ -21,7 +21,9 @@ defmodule Console.Schema.Workbench do
     FlowWorkbench,
     User,
     AgentRun,
-    Alert
+    Alert,
+    WorkbenchDevbox,
+    DevboxInstance
   }
   alias Console.Deployments.Policies.Rbac
   alias Console.Uploads.Type
@@ -110,12 +112,12 @@ defmodule Console.Schema.Workbench do
     embeds_one :configuration, Configuration, on_replace: :update do
       embeds_one :infrastructure, Infrastructure, on_replace: :update do
         field :self_service,    :boolean, default: false
-        field :services,        :boolean
-        field :stacks,          :boolean
-        field :kubernetes,      :boolean
+        field :services,        :boolean, default: true
+        field :stacks,          :boolean, default: true
+        field :kubernetes,      :boolean, default: true
         field :pod_logs,        :boolean
         field :vulnerabilities, :boolean
-        field :sentinels,       :boolean
+        field :sentinels,       :boolean, default: true
       end
 
       embeds_one :observability, Observability, on_replace: :update do
@@ -127,6 +129,12 @@ defmodule Console.Schema.Workbench do
         field :mode,               AgentRun.Mode
         field :enable_babysitting, :boolean
         field :repositories,       {:array, :string}
+      end
+
+      embeds_one :devbox, Devbox, on_replace: :update do
+        field :max_snapshots, :integer
+        field :max_deferral,  :integer
+        field :allow_subscription_credentials, :boolean, default: false
       end
     end
 
@@ -167,11 +175,14 @@ defmodule Console.Schema.Workbench do
     has_many :workbench_policies,  WorkbenchPolicy,          on_replace: :delete
     has_many :dashboards,          Dashboard,                on_replace: :delete
     has_many :alerts,              Alert
+    has_many :workbench_devboxes,  WorkbenchDevbox
+    has_many :devbox_instances,    DevboxInstance
 
     has_one :eval,                 WorkbenchEval
 
     has_many :tools, through: [:tool_associations, :tool]
     has_many :policies, through: [:workbench_policies, :policy]
+    has_many :devboxes, through: [:workbench_devboxes, :devbox]
 
     timestamps()
   end
@@ -247,6 +258,7 @@ defmodule Console.Schema.Workbench do
     |> cast_embed(:modes)
     |> cast_embed(:skills, with: &skills_changeset/2)
     |> cast_embed(:configuration, with: &configuration_changeset/2)
+    |> default_infrastructure()
     |> cast_embed(:budget)
     |> unique_constraint(:name)
     |> foreign_key_constraint(:project_id)
@@ -257,6 +269,18 @@ defmodule Console.Schema.Workbench do
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> validate_required([:name])
   end
+
+  # only new workbenches get the default infrastructure tools, so existing ones aren't silently granted them
+  defp default_infrastructure(%Ecto.Changeset{data: %__MODULE__{id: nil}} = cs) do
+    case get_field(cs, :configuration) do
+      nil ->
+        put_embed(cs, :configuration, %__MODULE__.Configuration{infrastructure: %__MODULE__.Configuration.Infrastructure{}})
+      %{infrastructure: nil} = conf ->
+        put_embed(cs, :configuration, %{conf | infrastructure: %__MODULE__.Configuration.Infrastructure{}})
+      _ -> cs
+    end
+  end
+  defp default_infrastructure(cs), do: cs
 
   def rbac_changeset(model, attrs \\ %{}) do
     model
@@ -278,6 +302,14 @@ defmodule Console.Schema.Workbench do
     |> cast_embed(:infrastructure, with: &infrastructure_changeset/2)
     |> cast_embed(:coding, with: &coding_changeset/2)
     |> cast_embed(:observability, with: &observability_changeset/2)
+    |> cast_embed(:devbox, with: &devbox_changeset/2)
+  end
+
+  def devbox_changeset(model, attrs \\ %{}) do
+    model
+    |> cast(attrs, ~w(max_snapshots max_deferral allow_subscription_credentials)a)
+    |> validate_number(:max_snapshots, greater_than: 0)
+    |> validate_number(:max_deferral, greater_than: 0)
   end
 
   def infrastructure_changeset(model, attrs \\ %{}) do

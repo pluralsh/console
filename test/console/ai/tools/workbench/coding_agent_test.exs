@@ -3,7 +3,7 @@ defmodule Console.AI.Tools.Workbench.CodingAgentTest do
 
   alias Console.AI.Tool
   alias Console.AI.Tools.Workbench.CodingAgent
-  alias Console.Schema.{AgentRun, Workbench, WorkbenchJob}
+  alias Console.Schema.{AgentRun, Workbench, WorkbenchJob, WorkbenchJobActivity}
 
   describe "changeset/2" do
     test "only exposes review mode when enabled for the job" do
@@ -204,26 +204,41 @@ defmodule Console.AI.Tools.Workbench.CodingAgentTest do
     end
   end
 
-  describe "coding subagent prompt" do
+  describe "orchestrator coding prompt" do
     test "explains review only when enabled" do
-      path = Console.priv_filename(["prompts", "workbench", "coding.md.eex"])
-
-      enabled = EEx.eval_file(path, assigns: [prompt: "review the pr", review: true, filesystem: false])
-      assert enabled =~ "Review mode is enabled for this job"
+      enabled = job_prompt(review: true)
+      assert enabled =~ "`review`: review an existing pull request"
       assert enabled =~ "mode=review"
-      assert enabled =~ "head"
+      assert enabled =~ "**head** branch"
 
-      disabled = EEx.eval_file(path, assigns: [prompt: "update the readme", review: false, filesystem: false])
-      refute disabled =~ "Review mode is enabled"
+      disabled = job_prompt(review: false)
+      refute disabled =~ "`review`: review an existing pull request"
       refute disabled =~ "mode=review"
     end
 
     test "only explains attachments when the workbench filesystem is enabled" do
-      path = Console.priv_filename(["prompts", "workbench", "coding.md.eex"])
-
-      assert EEx.eval_file(path, assigns: [prompt: "fix it", review: false, filesystem: true]) =~ "`attachments` param"
-      refute EEx.eval_file(path, assigns: [prompt: "fix it", review: false, filesystem: false]) =~ "`attachments` param"
+      assert job_prompt(filesystem: true) =~ "`attachments` param"
+      refute job_prompt(filesystem: false) =~ "`attachments` param"
     end
+
+    test "only explains running the coding agent when it's available" do
+      assert job_prompt(coding: true) =~ "### Running the coding agent"
+      refute job_prompt(coding: false) =~ "### Running the coding agent"
+    end
+  end
+
+  defp job_prompt(assigns) do
+    assigns = Keyword.merge([
+      job: %WorkbenchJob{result: nil},
+      engine: %{iteration: 0, max_iterations: 50},
+      actions: %{functions: false, kubernetes: false},
+      coding: true,
+      review: false,
+      self_service: false,
+      filesystem: false
+    ], assigns)
+
+    EEx.eval_file(Console.priv_filename(["prompts", "workbench", "job.md.eex"]), assigns: assigns)
   end
 
   describe "implement/1" do
@@ -244,6 +259,56 @@ defmodule Console.AI.Tools.Workbench.CodingAgentTest do
 
       assert pr_url == "https://github.com/pluralsh/console/pull/1"
       assert %AgentRun{mode: :review, branch: "agent/review", followup_pr_url: ^pr_url} = Repo.get!(AgentRun, run_id)
+    end
+
+    test "creates a coding activity for the run when spawned by a workbench job" do
+      user = insert(:user)
+      runtime = insert(:agent_runtime, create_bindings: [%{user_id: user.id}])
+      job = insert(:workbench_job)
+      Tool.context(user: user, runtime: runtime)
+
+      {:ok, %AgentRun{id: run_id, tool: %Tool{id: "call-1"}}} =
+        CodingAgent.implement(%CodingAgent{
+          id: %Tool{id: "call-1", name: "workbench_coding_agent", arguments: %{"prompt" => "update the readme"}},
+          job: job,
+          mode: :write,
+          repository: "https://github.com/pluralsh/console.git",
+          prompt: "update the readme",
+          approval: false
+        })
+
+      [activity] = Repo.all(WorkbenchJobActivity.for_workbench_job(job.id))
+      assert activity.type == :coding
+      assert activity.status == :running
+      assert activity.prompt == "update the readme"
+      assert activity.agent_run_id == run_id
+      assert activity.tool_call.call_id == "call-1"
+      assert activity.tool_call.name == "workbench_coding_agent"
+
+      %AgentRun{workbench_job: %{id: job_id}} = Repo.preload(Repo.get!(AgentRun, run_id), :workbench_job)
+      assert job_id == job.id
+    end
+
+    test "fails the coding activity if the run can't be created" do
+      user = insert(:user)
+      runtime = insert(:agent_runtime)
+      job = insert(:workbench_job)
+      Tool.context(user: user, runtime: runtime)
+
+      {:error, _} =
+        CodingAgent.implement(%CodingAgent{
+          id: %Tool{id: "call-1", name: "workbench_coding_agent", arguments: %{}},
+          job: job,
+          mode: :write,
+          repository: "https://github.com/pluralsh/console.git",
+          prompt: "update the readme",
+          approval: false
+        })
+
+      [activity] = Repo.all(WorkbenchJobActivity.for_workbench_job(job.id))
+      assert activity.status == :failed
+      assert activity.result.error =~ "failed to create agent run"
+      refute activity.agent_run_id
     end
 
     test "links workbench files passed as attachments to the agent run" do

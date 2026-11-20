@@ -436,26 +436,30 @@ defmodule Console.Deployments.Observability do
   end
 
   @doc """
-  Queries opinionated metrics for a set of different, relevant scopes
+  Queries opinionated metrics for a set of different, relevant scopes.  Each metric is its own
+  prometheus range query, so `keys` limits it to the metrics the caller will render.
   """
   @spec query(
     Cluster.t | {Cluster.t, binary} | {:usage, Cluster.t, :cluster | :namespace | :node, [atom]} |
       {:usage, Service.t, :service | :pod, [atom]} | {:node_usage, Cluster.t, binary, :node | :namespace | :pod, [atom]} |
       {:pod, Cluster.t, binary, binary} | Service.t | ServiceComponent.t,
-    binary, binary, binary
+    binary, binary, binary, [atom] | :all
   ) :: {:ok, map} | error
-  def query(%Cluster{handle: cluster}, start, stop, step) do
+  def query(scope, start, stop, step, keys \\ :all)
+
+  def query(%Cluster{handle: cluster}, start, stop, step, keys) do
     queries(:cluster)
+    |> only_keys(keys)
     |> bulk_range_query(%{cluster: cluster, rate: rate_window(step)}, start, stop, step)
   end
 
-  def query({:usage, %Cluster{handle: cluster}, grouping, keys}, start, stop, step) do
+  def query({:usage, %Cluster{handle: cluster}, grouping, keys}, start, stop, step, _) do
     queries(:cluster_usage, grouping)
     |> Keyword.take(keys)
     |> bulk_range_query(%{cluster: cluster, rate: rate_window(step)}, start, stop, step)
   end
 
-  def query({:usage, %Service{namespace: ns} = service, grouping, keys}, start, stop, step) do
+  def query({:usage, %Service{namespace: ns} = service, grouping, keys}, start, stop, step, _) do
     %{cluster: %Cluster{handle: cluster}} = Repo.preload(service, [:cluster])
 
     queries(:service_usage, grouping)
@@ -463,21 +467,22 @@ defmodule Console.Deployments.Observability do
     |> bulk_range_query(%{cluster: cluster, namespace: ns, rate: rate_window(step)}, start, stop, step)
   end
 
-  def query({:node_usage, %Cluster{handle: cluster}, node, grouping, keys}, start, stop, step) do
+  def query({:node_usage, %Cluster{handle: cluster}, node, grouping, keys}, start, stop, step, _) do
     queries(:node_usage, grouping)
     |> Keyword.take(keys)
     |> bulk_range_query(%{cluster: cluster, node: node, rate: rate_window(step)}, start, stop, step)
   end
 
-  def query({%Cluster{handle: cluster}, node}, start, stop, step) do
+  def query({%Cluster{handle: cluster}, node}, start, stop, step, keys) do
     queries(:node)
+    |> only_keys(keys)
     |> bulk_range_query(%{cluster: cluster, instance: node, rate: rate_window(step)}, start, stop, step)
   end
 
-  def query(%Service{namespace: ns} = service, start, stop, step) do
+  def query(%Service{namespace: ns} = service, start, stop, step, keys) do
     service = Repo.preload(service, [:cluster])
     bulk_range_query(
-      queries(:service),
+      only_keys(queries(:service), keys),
       [cluster: service.cluster.handle, namespace: ns, rate: rate_window(step)],
       start,
       stop,
@@ -485,8 +490,9 @@ defmodule Console.Deployments.Observability do
     )
   end
 
-  def query({:pod, %Cluster{handle: cluster}, namespace, name}, start, stop, step) do
+  def query({:pod, %Cluster{handle: cluster}, namespace, name}, start, stop, step, keys) do
     queries(:pod)
+    |> only_keys(keys)
     |> bulk_range_query(
       [cluster: cluster, namespace: namespace, name: name, rate: rate_window(step)],
       start,
@@ -495,13 +501,17 @@ defmodule Console.Deployments.Observability do
     )
   end
 
-  def query(%ServiceComponent{} = component, start, stop, step) do
+  def query(%ServiceComponent{} = component, start, stop, step, keys) do
     component = Repo.preload(component, [service: :cluster])
     with {:ok, args} <- component_args(component) do
       queries(:component)
+      |> only_keys(keys)
       |> bulk_range_query(Keyword.put(args, :rate, rate_window(step)), start, stop, step)
     end
   end
+
+  defp only_keys(queries, :all), do: queries
+  defp only_keys(queries, keys) when is_list(keys), do: Keyword.take(queries, keys)
 
   defp component_args(%ServiceComponent{group: "apps", version: "v1", kind: kind, name: name, namespace: ns} = comp)
     when kind in ~w(DaemonSet daemonsets),

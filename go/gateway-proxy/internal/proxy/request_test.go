@@ -60,16 +60,28 @@ func TestPrepareRequestMergesBetas(t *testing.T) {
 	prep, err := PrepareRequest([]byte(body), header, RequestOptions{})
 	require.Nil(t, err)
 	assert.Equal(t,
-		[]any{"computer-use-2024-10-22", "context-1m-2025-08-07", "interleaved-thinking-2025-05-14", "claude-code-20250219"},
+		[]any{"computer-use-2024-10-22", "context-1m-2025-08-07", "interleaved-thinking-2025-05-14"},
 		decodeJSON(t, prep.Body)["anthropic_beta"])
+	assert.Equal(t, []string{"claude-code-20250219"}, prep.DroppedBetas)
 
-	prep, err = PrepareRequest([]byte(body), header, RequestOptions{BetaAllowlist: []string{"interleaved-thinking-2025-05-14"}})
+	prep, err = PrepareRequest([]byte(body), header, RequestOptions{BetaAllowlist: []string{"interleaved-thinking-2025-05-14", "claude-code-20250219"}})
 	require.Nil(t, err)
-	assert.Equal(t, []any{"interleaved-thinking-2025-05-14"}, decodeJSON(t, prep.Body)["anthropic_beta"])
+	assert.Equal(t, []any{"interleaved-thinking-2025-05-14", "claude-code-20250219"}, decodeJSON(t, prep.Body)["anthropic_beta"])
 
 	prep, err = PrepareRequest([]byte(body), header, RequestOptions{BetaAllowlist: []string{"nothing-matches"}})
 	require.Nil(t, err)
 	assert.NotContains(t, decodeJSON(t, prep.Body), "anthropic_beta")
+}
+
+func TestPrepareRequestDropsAnthropicOnlyBetas(t *testing.T) {
+	header := http.Header{}
+	header.Add("anthropic-beta", "tools-2024-05-16,prompt-caching-2024-07-31,files-api-2025-04-14")
+
+	prep, err := PrepareRequest([]byte(`{"model":"m","max_tokens":1,"messages":[]}`), header, RequestOptions{})
+	require.Nil(t, err)
+	assert.NotContains(t, decodeJSON(t, prep.Body), "anthropic_beta")
+	assert.Empty(t, prep.Betas)
+	assert.Equal(t, []string{"tools-2024-05-16", "prompt-caching-2024-07-31", "files-api-2025-04-14"}, prep.DroppedBetas)
 }
 
 func TestPrepareRequestStripsCacheControl(t *testing.T) {

@@ -96,6 +96,23 @@ You also have Docker/OCI registry tools for searching image tags and fetching ma
 Prefer these over guessing at image references from kubernetes or terraform alone when you need authoritative registry metadata.
 <% end %>
 
+<%= if @sentinel_tools do %>
+## Sentinel Guidance
+
+Sentinels are Plural's integration test suites for infrastructure and kubernetes.  A sentinel run executes each of its checks, and integration test checks fan out into one run job per matching cluster, each running as a kubernetes job on that cluster.
+
+The prompt may describe a run or run job with a `<plrl-sentinel-run>` or `<plrl-sentinel-run-job>` tag.  Their attributes (ids, status, cluster handle, error, output summary) are a snapshot from when the prompt was written; the ids are what you pass to the sentinel tools for current, complete data.
+
+* `plrl_list_sentinels` and `plrl_sentinel_runs` find a sentinel and its run history, which is useful for figuring out when it started failing and what changed since the last passing run.
+* `plrl_sentinel_run` gives a run's per-check results, and `plrl_sentinel_run_jobs` lists its jobs, filterable by status, check or cluster handle, so use `status: failed` to triage a large run.
+* `plrl_sentinel_run_job` returns a job's full test output.
+
+When investigating a failed job, distinguish between two failure modes:
+
+1. **A runtime or configuration error**, reported in the job's `error`.  These are failures to provision or run the test job itself, like image pull failures, unschedulable or OOMKilled pods, test code that doesn't compile, or a broken postrun script.  Investigate these on the job's cluster with kubernetes tools, using the namespace and name of the job reference.
+2. **Failing test cases**, reported in the job's output.  Here the tests ran, and the failures describe real infrastructure problems on that cluster (DNS, load balancers, storage, etc), which you should trace back to the owning Plural services and stacks.
+<% end %>
+
 <%= if @cloud_tools do %>
 We also have added a set of tools to query live cloud infrastructure configuration using sql.  These are meant to be used within the following constraints:
 

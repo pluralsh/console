@@ -61,6 +61,9 @@ migrator:
 
 # console is used to configure the layout of the main Console containers, hosting the core console api and webserver.
 console:
+  # beamSchedulers pins the Erlang VM's scheduler count. Without a CPU limit the VM starts one
+  # scheduler per node core, so set this near the CPU request on large nodes. Unset uses the VM default.
+  beamSchedulers: ""
   # tls configures the console web server to terminate TLS in the pod.
   tls:
     enabled: false
@@ -196,6 +199,8 @@ console:
     discoveryUrl: ~
     # scopes is used to configure the scopes for the custom oidc authentication. (defaults to "openid email")
     scopes: "openid email"
+    # userinfo loads groups from the OIDC userinfo endpoint. GitLab omits groups from the ID token and requires this.
+    userinfo: false
 
   additionalContainers: ~
   containerSecurityContext:
@@ -1043,6 +1048,7 @@ kas:
     kubernetesApiPort: 8154
     privateApiPort: 8155
     observabilityPort: 8151
+    devboxPort: 8156
     type: ClusterIP
   serviceAccount:
     create: true
@@ -1076,6 +1082,22 @@ kas:
     redis: ""
   agent:
     path: /ext/kas
+  # devbox enables the DevBoxes listener, routed at <path> on both the console and KAS hosts: devbox-gateway
+  # tunnels (wss://<console_dns><path> by default), console's
+  # devbox.v1.Control calls (on the internal api port) and browser streams (<path>/streams/<stream_id>).
+  devbox:
+    enabled: false
+    path: /ext/devbox
+    # consoleGrpcAddress is console's gRPC server, where gateways' devbox.v1.Ingest calls are forwarded.
+    # Defaults to console.<namespace>:50051.
+    consoleGrpcAddress: ""
+    # streamTokenSecret holds console's DEVBOX_STREAM_TOKEN_KEY (console reads the same key from console-env);
+    # it must exist when devbox is enabled.
+    streamTokenSecret:
+      name: console-env
+      key: DEVBOX_STREAM_TOKEN_KEY
+    # connectionsPerTokenPerMinute limits gateway gRPC calls per deploy token; 0 disables the limit.
+    connectionsPerTokenPerMinute: 0
   api:
     path: /api
     port: 8000
@@ -1088,6 +1110,9 @@ kas:
     annotations:
       kubernetes.io/tls-acme: "true"
       cert-manager.io/cluster-issuer: letsencrypt-prod
+      # devbox tunnels and terminal streams are long-lived WebSockets
+      nginx.ingress.kubernetes.io/proxy-read-timeout: '3600'
+      nginx.ingress.kubernetes.io/proxy-send-timeout: '3600'
   redis:
     # Simplified Redis deployment using standalone mode, without sentinel support and other unused features.
     #
