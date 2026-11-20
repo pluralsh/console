@@ -258,17 +258,7 @@ func Changes(ctx context.Context, dir string, opts ChangesOptions) (*devboxv1.Re
 			return nil, err
 		}
 		co.Dirty = len(entries) > 0
-		for _, e := range entries {
-			if e.XY == "??" {
-				if opts.Path == "" || e.Path == opts.Path || strings.HasPrefix(e.Path, strings.TrimSuffix(opts.Path, "/")+"/") {
-					untracked = append(untracked, e.Path)
-				}
-				continue
-			}
-			if e.XY[0] != ' ' && e.XY[0] != '?' {
-				staged[e.Path] = true
-			}
-		}
+		staged, untracked = splitStatus(entries, opts.Path)
 	}
 	tracked := parseNameStatus(nameStatus)
 	var patches [][]byte
@@ -286,28 +276,51 @@ func Changes(ctx context.Context, dir string, opts ChangesOptions) (*devboxv1.Re
 		rc.Files = append(rc.Files, fc)
 	}
 	for _, p := range untracked {
-		fc := &devboxv1.FileChange{Path: p, Status: devboxv1.ChangeStatus_CHANGE_STATUS_UNTRACKED}
-		full := filepath.Join(dir, p)
-		if data, err := os.ReadFile(full); err == nil {
-			if bytes.IndexByte(data[:min(len(data), 8000)], 0) >= 0 {
-				fc.Binary = true
-			} else {
-				fc.Additions = int32(bytes.Count(data, []byte("\n")))
-				if len(data) > 0 && data[len(data)-1] != '\n' {
-					fc.Additions++
-				}
-			}
-			if opts.IncludeDiff {
-				fc.Diff, fc.DiffTruncated = capDiff(untrackedPatch(p, data, fc.Binary), opts.MaxDiffBytes)
-			}
-		}
-		rc.Files = append(rc.Files, fc)
+		rc.Files = append(rc.Files, untrackedChange(dir, p, opts))
 	}
 	for _, f := range rc.Files {
 		rc.Additions += f.GetAdditions()
 		rc.Deletions += f.GetDeletions()
 	}
 	return rc, nil
+}
+
+// splitStatus picks the staged paths and the untracked paths under path (all of them when path is empty).
+func splitStatus(entries []StatusEntry, path string) (staged map[string]bool, untracked []string) {
+	staged = map[string]bool{}
+	for _, e := range entries {
+		if e.XY == "??" {
+			if path == "" || e.Path == path || strings.HasPrefix(e.Path, strings.TrimSuffix(path, "/")+"/") {
+				untracked = append(untracked, e.Path)
+			}
+			continue
+		}
+		if e.XY[0] != ' ' && e.XY[0] != '?' {
+			staged[e.Path] = true
+		}
+	}
+	return staged, untracked
+}
+
+// untrackedChange describes an untracked file, counting its lines as additions.
+func untrackedChange(dir, p string, opts ChangesOptions) *devboxv1.FileChange {
+	fc := &devboxv1.FileChange{Path: p, Status: devboxv1.ChangeStatus_CHANGE_STATUS_UNTRACKED}
+	data, err := os.ReadFile(filepath.Join(dir, p))
+	if err != nil {
+		return fc
+	}
+	if bytes.IndexByte(data[:min(len(data), 8000)], 0) >= 0 {
+		fc.Binary = true
+	} else {
+		fc.Additions = int32(bytes.Count(data, []byte("\n")))
+		if len(data) > 0 && data[len(data)-1] != '\n' {
+			fc.Additions++
+		}
+	}
+	if opts.IncludeDiff {
+		fc.Diff, fc.DiffTruncated = capDiff(untrackedPatch(p, data, fc.Binary), opts.MaxDiffBytes)
+	}
+	return fc
 }
 
 // filePatches diffs every tracked change in one git call and splits the patch per file. git emits file
