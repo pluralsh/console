@@ -227,6 +227,9 @@ defmodule Console.GraphQl.AI do
     field :text,      :string, description: "the text of this insight"
     field :summary,   :string, description: "a shortish summary of this insight"
     field :error,     list_of(:service_error), description: "any errors generated when compiling this insight"
+    field :remediated_sha, :string, description: "sha of this insight when auto-remediation last started a job for it"
+    field :remediated_at,  :datetime, description: "when auto-remediation last started a job for this insight"
+    field :remediation_job, :workbench_job, resolve: dataloader(Deployments), description: "the workbench job auto-remediation last started for this insight"
 
     field :freshness, :insight_freshness, resolve: fn insight, _, _ ->
       {:ok, Console.Schema.AiInsight.freshness(insight)}
