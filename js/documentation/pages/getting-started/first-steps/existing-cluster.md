@@ -10,11 +10,11 @@ If you want to use only our CD capabilities and keep full control of your Kubern
 - You'll need to create a Postgres database for state storage, and have a JDBC connection string for it ready of the form: `postgres://<user>:<password>@<host>:5432/<db>`
 - You'll need to have your network setup in place so that all clusters you want to deploy to can make outbound network connections to the ingress you configure for Plural CD. In general, this means setting up:
 
-* ingress-nginx - the ingress controller we've configured by default in the chart
+* an ingress controller serving the `nginx` ingress class, which the chart uses by default. `plural up` installs Traefik with its ingress-nginx compatible provider for this, but ingress-nginx works too
 * cert-manager - the chart assumes cert-manager handles cert generation by default, but this can be disabled if you use a load-balancer-bound cloud cert manager
 * externaldns - to bind DNS entries to the hosts defined in the console's ingress
 
-You are free to customize these at your own risk; usually it's not that challenging. The most likely potential gotcha is ensuring the connection stickiness configuration handles a migration to a different ingress controller from ingress-nginx.
+You are free to customize these at your own risk; usually it's not that challenging. The most likely potential gotcha is ensuring the connection stickiness configuration handles a migration to a different ingress controller. If you're moving an existing `plural up` install from ingress-nginx to Traefik, follow [Migrating from ingress-nginx to Traefik](/getting-started/advanced-config/ingress-migration).
 
 {% callout severity="info" %}
 If you're unfamiliar with how to set up these components for your cloud, we have several useful example Terraform setups at https://github.com/pluralsh/bootstrap/tree/main/existing.
