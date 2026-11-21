@@ -4121,6 +4121,8 @@ export const DevboxEntityChangeFragmentDoc = /*#__PURE__*/ gql`
   stateKind
   payload
   offset
+  seq
+  stream
   emittedAt
   entity {
     ...DevboxEntity
@@ -9858,6 +9860,8 @@ export const DevboxTimelineDocument = /*#__PURE__*/ gql`
     limit: $limit
   ) {
     deltaOffset
+    seq
+    stream
     hasMore
     entities {
       ...DevboxEntity

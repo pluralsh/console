@@ -8,6 +8,7 @@ import { describe, expect, it } from 'vitest'
 import {
   buildThreadTree,
   groupThreadsByStage,
+  rootThread,
   threadTitle,
 } from './devboxThreads'
 
@@ -58,5 +59,29 @@ describe('groupThreadsByStage', () => {
       DevboxThreadStage.Completed,
     ])
     expect(groups[1].threads[0].children.map((c) => c.id)).toEqual(['sub'])
+  })
+})
+
+describe('rootThread', () => {
+  it('walks a subagent up to the thread it works for', () => {
+    const top = thread('top', DevboxThreadStage.Running)
+    const sub = thread('sub', DevboxThreadStage.Running, {
+      kind: DevboxThreadKind.Subagent,
+      parent: { id: 'top' },
+    })
+    const nested = thread('nested', DevboxThreadStage.Running, {
+      kind: DevboxThreadKind.Subagent,
+      parent: { id: 'sub' },
+    })
+    const orphan = thread('orphan', DevboxThreadStage.Running, {
+      kind: DevboxThreadKind.Subagent,
+      parent: { id: 'gone' },
+    })
+    const threads = [top, sub, nested, orphan]
+
+    expect(rootThread(threads, nested)?.id).toBe('top')
+    expect(rootThread(threads, top)?.id).toBe('top')
+    expect(rootThread(threads, orphan)?.id).toBe('orphan')
+    expect(rootThread(threads, undefined)).toBeUndefined()
   })
 })

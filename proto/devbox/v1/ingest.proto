@@ -171,6 +171,12 @@ message Delta {
   // Daemon event-log offset; clients apply deltas with offset > the timeline page's delta_offset.
   uint64 offset = 10;
   google.protobuf.Timestamp emitted_at = 11;
+  // Dense per-session sequence (1, 2, ...) of the deltas that change a session's timeline (APPEND, PATCH, SETTLE,
+  // STATE), within `stream`. Delivery isn't ordered, so clients apply a session's deltas in seq order, starting
+  // after the timeline page's seq, and reload the page when a gap doesn't fill. 0 for NOTICE and console-made deltas.
+  uint64 seq = 12;
+  // Identifies the daemon run that numbered `seq`; a new run restarts it, so a client seeing a new stream reloads.
+  string stream = 13;
 }
 
 message PushInstanceDeltasRequest {

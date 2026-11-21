@@ -634,6 +634,8 @@ fragment DevboxEntityChange on DevboxEntityChange {
   stateKind
   payload
   offset
+  seq
+  stream
   emittedAt
   entity {
     ...DevboxEntity
@@ -822,6 +824,8 @@ query DevboxTimeline(
     limit: $limit
   ) {
     deltaOffset
+    seq
+    stream
     hasMore
     entities {
       ...DevboxEntity

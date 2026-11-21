@@ -333,6 +333,51 @@ describe('DevboxTranscript', () => {
     expect(screen.getByText('card thread-child')).toBeTruthy()
   })
 
+  it('puts every subagent a tool call spawned in its place', () => {
+    const { container } = renderTranscript(
+      <DevboxTranscript
+        entities={[
+          entity({
+            type: DevboxEntityType.ToolCall,
+            position: 1,
+            toolCall: {
+              toolCallId: 'call-1',
+              title: 'subagent',
+              kind: 'other',
+              status: 'in_progress',
+              content: [],
+            },
+          }),
+          entity({
+            type: DevboxEntityType.AgentMessage,
+            position: 2,
+            message: { content: [text('done')] },
+          }),
+        ]}
+        subagents={[
+          {
+            id: 'a',
+            sessionId: 'p/subagent/call-1/0',
+            parentToolCallId: 'call-1',
+          } as never,
+          {
+            id: 'b',
+            sessionId: 'p/subagent/call-1/1',
+            parentToolCallId: 'call-1',
+          } as never,
+        ]}
+        renderSubagent={(s) => <span>card {s.id}</span>}
+      />
+    )
+    expect(kindsOf(container)).toEqual([
+      'subagent',
+      'subagent',
+      'agent-message',
+    ])
+    expect(screen.getByText('card a')).toBeTruthy()
+    expect(screen.getByText('card b')).toBeTruthy()
+  })
+
   it('puts a subagent in place of the session message that starts it', () => {
     const { container } = renderTranscript(
       <DevboxTranscript

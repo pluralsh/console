@@ -43,6 +43,24 @@ defmodule Console.Devboxes.IngestTest do
       assert %{idle: false, suspends_at: nil, message: "agent working"} = refetch(inst).idle_state
     end
 
+    test "idleness held over from an earlier run is ignored" do
+      woke = Timex.now() |> Timex.shift(seconds: -5)
+      inst = insert(:devbox_instance, status: :running, awake_since: woke)
+      suspended = insert(:devbox_instance, devbox: inst.devbox, status: :suspended)
+      held_over = %{idle: true, idle_since: Timex.shift(woke, minutes: -6), suspend_at: Timex.shift(woke, seconds: -20)}
+
+      Ingest.heartbeat(%{instances: [
+        %{instance_id: inst.id, idle: held_over},
+        %{instance_id: suspended.id, idle: held_over}
+      ]}, inst.devbox.cluster)
+
+      refute refetch(inst).idle_state
+      refute refetch(suspended).idle_state
+
+      Ingest.heartbeat(%{instances: [%{instance_id: inst.id, idle: %{held_over | suspend_at: Timex.shift(woke, minutes: 5)}}]}, inst.devbox.cluster)
+      assert refetch(inst).idle_state.idle
+    end
+
     test "busy reasons keep their kind" do
       inst = insert(:devbox_instance)
 
@@ -82,6 +100,21 @@ defmodule Console.Devboxes.IngestTest do
 
       assert updated.status == :running
       assert %{idle: false, idle_since: nil, suspends_at: nil} = updated.idle_state
+    end
+
+    test "a resume carrying the suspended run's idleness still clears it" do
+      past = Timex.now() |> Timex.shift(seconds: -20)
+      inst = insert(:devbox_instance, status: :suspended)
+
+      {:ok, updated} = Ingest.report_instance_status(%{
+        instance_id: inst.id,
+        status: :INSTANCE_STATUS_RUNNING,
+        generation: 1,
+        idle: %{idle: true, idle_since: past, suspend_at: past}
+      }, inst.devbox.cluster)
+
+      assert updated.status == :running
+      assert %{idle: false, suspends_at: nil} = updated.idle_state
     end
 
     test "it ignores stale generations" do
@@ -347,7 +380,7 @@ defmodule Console.Devboxes.IngestTest do
       other = insert(:devbox_instance)
 
       :ok = Ingest.publish_instance_deltas([
-        %{instance_id: inst.id, session_id: "s", entity_id: "e1", op: :DELTA_OP_APPEND, payload_json: ~s({"text": "hi"})},
+        %{instance_id: inst.id, session_id: "s", entity_id: "e1", op: :DELTA_OP_APPEND, payload_json: ~s({"text": "hi"}), seq: 3, stream: "run-1"},
         %{instance_id: other.id, op: :append}
       ], inst.devbox.cluster)
 
@@ -355,6 +388,8 @@ defmodule Console.Devboxes.IngestTest do
       assert delta.instance_id == inst.id
       assert delta.op == :append
       assert delta.payload == %{"text" => "hi"}
+      assert delta.seq == 3
+      assert delta.stream == "run-1"
       refute_receive {:event, %PubSub.DevboxInstanceDeltaCreated{}}
     end
   end

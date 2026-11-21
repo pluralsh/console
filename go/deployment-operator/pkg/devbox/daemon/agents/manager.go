@@ -14,6 +14,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/google/uuid"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
@@ -123,6 +124,9 @@ type Manager struct {
 	dirty          bool
 	// unwritten are settled revisions not yet in the transcript; timelines merge them in until the next flush.
 	unwritten map[entityRef]*devboxv1.AcpEntity
+	// stream names this run's numbering of seqs, each session's last Delta.seq.
+	stream string
+	seqs   map[string]uint64
 
 	termMu sync.Mutex
 	terms  map[string]*clientTerminal
@@ -160,6 +164,7 @@ func New(opts Options) *Manager {
 		launches: map[devboxv1.AgentType]*devboxv1.AgentLaunch{}, conns: map[devboxv1.AgentType]*agentConn{},
 		starting: map[devboxv1.AgentType]chan struct{}{}, threads: map[string]*thread{}, sessions: map[string]*session{},
 		interactions: map[string]*interaction{}, unwritten: map[entityRef]*devboxv1.AcpEntity{},
+		stream: uuid.NewString(), seqs: map[string]uint64{},
 	}
 }
 
@@ -241,8 +246,13 @@ func (m *Manager) emitLocked(ev *devboxv1.DaemonEvent) {
 	}
 }
 
+// emitDeltaLocked numbers a delta in its session's sequence (notices are live-only and stay unnumbered) and emits it.
 func (m *Manager) emitDeltaLocked(d *devboxv1.Delta) {
 	d.InstanceId = m.instanceID
+	if d.GetSessionId() != "" && d.GetOp() != devboxv1.DeltaOp_DELTA_OP_NOTICE {
+		m.seqs[d.GetSessionId()]++
+		d.Seq, d.Stream = m.seqs[d.GetSessionId()], m.stream
+	}
 	m.emitLocked(&devboxv1.DaemonEvent{Event: &devboxv1.DaemonEvent_Delta{Delta: d}})
 }
 

@@ -5119,9 +5119,12 @@ export type DevboxEntityChange = {
   /** the verbatim ACP chunk, patch, notice or state update */
   payload?: Maybe<Scalars['Map']['output']>;
   position?: Maybe<Scalars['Long']['output']>;
+  /** dense per-session order within stream; unset for notices and console-made deltas */
+  seq?: Maybe<Scalars['Long']['output']>;
   sessionId?: Maybe<Scalars['String']['output']>;
   /** for state deltas, which ACP update this is */
   stateKind?: Maybe<Scalars['String']['output']>;
+  stream?: Maybe<Scalars['String']['output']>;
   threadId?: Maybe<Scalars['String']['output']>;
 };
 
@@ -5325,6 +5328,7 @@ export type DevboxInstance = {
   statusReason?: Maybe<Scalars['String']['output']>;
   suspendedAt?: Maybe<Scalars['DateTime']['output']>;
   templateRevision?: Maybe<Scalars['String']['output']>;
+  /** the instance's threads and their subagents (kind SUBAGENT, under their parent) */
   threads?: Maybe<Array<Maybe<DevboxThread>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   user?: Maybe<User>;
@@ -5876,6 +5880,10 @@ export type DevboxTimeline = {
   entities?: Maybe<Array<Maybe<DevboxEntity>>>;
   /** more entities lie in the paging direction (older ones, unless paging with after) */
   hasMore?: Maybe<Scalars['Boolean']['output']>;
+  /** the session's last delta seq this page reflects: apply its deltas from seq + 1, in order */
+  seq?: Maybe<Scalars['Long']['output']>;
+  /** the daemon run numbering seq; deltas from another stream need a reload */
+  stream?: Maybe<Scalars['String']['output']>;
 };
 
 export type DevboxToolCall = {
@@ -24221,7 +24229,7 @@ export type DevboxEntityFragment = { __typename?: 'DevboxEntity', id?: string | 
       | { __typename?: 'DevboxUnknownContent', type: DevboxContentBlockType, variant?: string | null, raw?: Record<string, unknown> | null }
      | null> | null } | null };
 
-export type DevboxEntityChangeFragment = { __typename?: 'DevboxEntityChange', instanceId: string, sessionId?: string | null, threadId?: string | null, entityType?: DevboxEntityType | null, entityId?: string | null, position?: any | null, op: DevboxDeltaOp, stateKind?: string | null, payload?: Record<string, unknown> | null, offset?: any | null, emittedAt?: string | null, entity?: { __typename?: 'DevboxEntity', id?: string | null, sessionId?: string | null, type: DevboxEntityType, position?: any | null, revision?: any | null, settled?: boolean | null, createdAt?: string | null, updatedAt?: string | null, raw?: Record<string, unknown> | null, message?: { __typename?: 'DevboxMessageEntity', messageId?: string | null, promptId?: string | null, sentById?: string | null, meta?: Record<string, unknown> | null, content?: Array<
+export type DevboxEntityChangeFragment = { __typename?: 'DevboxEntityChange', instanceId: string, sessionId?: string | null, threadId?: string | null, entityType?: DevboxEntityType | null, entityId?: string | null, position?: any | null, op: DevboxDeltaOp, stateKind?: string | null, payload?: Record<string, unknown> | null, offset?: any | null, seq?: any | null, stream?: string | null, emittedAt?: string | null, entity?: { __typename?: 'DevboxEntity', id?: string | null, sessionId?: string | null, type: DevboxEntityType, position?: any | null, revision?: any | null, settled?: boolean | null, createdAt?: string | null, updatedAt?: string | null, raw?: Record<string, unknown> | null, message?: { __typename?: 'DevboxMessageEntity', messageId?: string | null, promptId?: string | null, sentById?: string | null, meta?: Record<string, unknown> | null, content?: Array<
         | { __typename?: 'DevboxAudioContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null }
         | { __typename?: 'DevboxImageContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null, uri?: string | null }
         | { __typename?: 'DevboxResourceContent', type: DevboxContentBlockType, uri?: string | null, mimeType?: string | null, text?: string | null, blob?: string | null }
@@ -24392,7 +24400,7 @@ export type DevboxTimelineQueryVariables = Exact<{
 }>;
 
 
-export type DevboxTimelineQuery = { __typename?: 'RootQueryType', devboxTimeline?: { __typename?: 'DevboxTimeline', deltaOffset?: any | null, hasMore?: boolean | null, entities?: Array<{ __typename?: 'DevboxEntity', id?: string | null, sessionId?: string | null, type: DevboxEntityType, position?: any | null, revision?: any | null, settled?: boolean | null, createdAt?: string | null, updatedAt?: string | null, raw?: Record<string, unknown> | null, message?: { __typename?: 'DevboxMessageEntity', messageId?: string | null, promptId?: string | null, sentById?: string | null, meta?: Record<string, unknown> | null, content?: Array<
+export type DevboxTimelineQuery = { __typename?: 'RootQueryType', devboxTimeline?: { __typename?: 'DevboxTimeline', deltaOffset?: any | null, seq?: any | null, stream?: string | null, hasMore?: boolean | null, entities?: Array<{ __typename?: 'DevboxEntity', id?: string | null, sessionId?: string | null, type: DevboxEntityType, position?: any | null, revision?: any | null, settled?: boolean | null, createdAt?: string | null, updatedAt?: string | null, raw?: Record<string, unknown> | null, message?: { __typename?: 'DevboxMessageEntity', messageId?: string | null, promptId?: string | null, sentById?: string | null, meta?: Record<string, unknown> | null, content?: Array<
           | { __typename?: 'DevboxAudioContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null }
           | { __typename?: 'DevboxImageContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null, uri?: string | null }
           | { __typename?: 'DevboxResourceContent', type: DevboxContentBlockType, uri?: string | null, mimeType?: string | null, text?: string | null, blob?: string | null }
@@ -24774,7 +24782,7 @@ export type DevboxInstanceEntityDeltaSubscriptionVariables = Exact<{
 }>;
 
 
-export type DevboxInstanceEntityDeltaSubscription = { __typename?: 'RootSubscriptionType', devboxInstanceDelta?: { __typename?: 'DevboxEntityChangeDelta', delta?: Delta | null, payload?: { __typename?: 'DevboxEntityChange', instanceId: string, sessionId?: string | null, threadId?: string | null, entityType?: DevboxEntityType | null, entityId?: string | null, position?: any | null, op: DevboxDeltaOp, stateKind?: string | null, payload?: Record<string, unknown> | null, offset?: any | null, emittedAt?: string | null, entity?: { __typename?: 'DevboxEntity', id?: string | null, sessionId?: string | null, type: DevboxEntityType, position?: any | null, revision?: any | null, settled?: boolean | null, createdAt?: string | null, updatedAt?: string | null, raw?: Record<string, unknown> | null, message?: { __typename?: 'DevboxMessageEntity', messageId?: string | null, promptId?: string | null, sentById?: string | null, meta?: Record<string, unknown> | null, content?: Array<
+export type DevboxInstanceEntityDeltaSubscription = { __typename?: 'RootSubscriptionType', devboxInstanceDelta?: { __typename?: 'DevboxEntityChangeDelta', delta?: Delta | null, payload?: { __typename?: 'DevboxEntityChange', instanceId: string, sessionId?: string | null, threadId?: string | null, entityType?: DevboxEntityType | null, entityId?: string | null, position?: any | null, op: DevboxDeltaOp, stateKind?: string | null, payload?: Record<string, unknown> | null, offset?: any | null, seq?: any | null, stream?: string | null, emittedAt?: string | null, entity?: { __typename?: 'DevboxEntity', id?: string | null, sessionId?: string | null, type: DevboxEntityType, position?: any | null, revision?: any | null, settled?: boolean | null, createdAt?: string | null, updatedAt?: string | null, raw?: Record<string, unknown> | null, message?: { __typename?: 'DevboxMessageEntity', messageId?: string | null, promptId?: string | null, sentById?: string | null, meta?: Record<string, unknown> | null, content?: Array<
             | { __typename?: 'DevboxAudioContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null }
             | { __typename?: 'DevboxImageContent', type: DevboxContentBlockType, data?: string | null, mimeType?: string | null, uri?: string | null }
             | { __typename?: 'DevboxResourceContent', type: DevboxContentBlockType, uri?: string | null, mimeType?: string | null, text?: string | null, blob?: string | null }

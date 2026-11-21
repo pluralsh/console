@@ -104,6 +104,13 @@ fileExistenceTests:
   - name: pi MCP adapter
     path: /opt/pi-mcp-adapter/node_modules/pi-mcp-adapter/package.json
     shouldExist: true
+  # the daemon loads pi's bundled subagent extension and seeds its agents from here
+  - name: pi subagent extension
+    path: /usr/local/lib/node_modules/@earendil-works/pi-coding-agent/examples/extensions/subagent/index.ts
+    shouldExist: true
+  - name: pi subagent agents
+    path: /usr/local/lib/node_modules/@earendil-works/pi-coding-agent/examples/extensions/subagent/agents/scout.md
+    shouldExist: true
   - name: no agent-harness binary
     path: /agent-harness
     shouldExist: false

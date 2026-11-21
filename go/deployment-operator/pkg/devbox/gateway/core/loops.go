@@ -143,7 +143,7 @@ func (g *Gateway) reconcile(ctx context.Context, summaries []*devboxv1.InstanceS
 		}
 		if rec == nil || rec.Actor == "" {
 			if s.GetStatus() == devboxv1.InstanceStatus_INSTANCE_STATUS_PENDING {
-				continue // CreateInstance hasn't reached us yet; console retries it.
+				continue // CreateInstance hasn't reached us yet; console fails it if it never does.
 			}
 			g.report(ctx, &devboxv1.ReportInstanceStatusRequest{
 				InstanceId: s.GetInstanceId(),

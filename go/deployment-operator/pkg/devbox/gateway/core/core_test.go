@@ -253,6 +253,31 @@ func TestForwardingAndResumeIfSuspended(t *testing.T) {
 	}
 }
 
+func TestIdlenessDoesNotOutliveASuspend(t *testing.T) {
+	h := newHarness(t, nil)
+	h.running("inst-1")
+	inst := h.g.get("inst-1")
+	inst.mu.Lock()
+	inst.idle = &devboxv1.IdleState{Idle: true, SuspendAt: timestamppb.Now()}
+	inst.mu.Unlock()
+
+	if _, err := h.g.SuspendInstance(context.Background(), &devboxv1.InstanceActionRequest{InstanceId: "inst-1"}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := h.g.ResumeInstance(context.Background(), &devboxv1.InstanceActionRequest{InstanceId: "inst-1"}); err != nil {
+		t.Fatal(err)
+	}
+	if last := h.ingest.lastStatus(); last.GetStatus() != devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING || last.GetIdle() != nil {
+		t.Fatalf("resume reported the suspended run's idleness: %v", last)
+	}
+	inst.mu.Lock()
+	idle := inst.idle
+	inst.mu.Unlock()
+	if idle != nil {
+		t.Fatalf("heartbeats would still carry the suspended run's idleness: %v", idle)
+	}
+}
+
 func TestEventForwardingAckOrdering(t *testing.T) {
 	h := newHarness(t, nil)
 	h.daemon.mu.Lock()

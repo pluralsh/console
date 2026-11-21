@@ -31,4 +31,17 @@ describe('getDevboxAwakeStatus', () => {
     expect(status.suspendingSoon).toBe(false)
     expect(status.label).toBe('Awake')
   })
+
+  it('ignores a just-passed deadline from the run before this one', () => {
+    const status = getDevboxAwakeStatus(
+      {
+        status: DevboxInstanceStatus.Running,
+        awakeSince: at(-5),
+        idleState: { idle: true, suspendsAt: at(-20) },
+      },
+      { now }
+    )
+    expect(status.suspendingSoon).toBe(false)
+    expect(status.label).toBe('Awake')
+  })
 })

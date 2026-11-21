@@ -82,12 +82,27 @@ defmodule Console.Devboxes.Ingest do
   end
   def heartbeat(_, _), do: {:ok, %{unknown_instance_ids: []}}
 
-  defp heartbeat_instance(%DevboxInstance{} = inst, %{idle: %{} = idle}) do
-    inst
-    |> DevboxInstance.changeset(%{idle_state: idle_state(idle)})
-    |> Repo.update()
+  defp heartbeat_instance(%DevboxInstance{status: status} = inst, %{idle: %{} = idle}) do
+    case awake?(status) and this_run?(inst, idle) do
+      true ->
+        inst
+        |> DevboxInstance.changeset(%{idle_state: idle_state(idle)})
+        |> Repo.update()
+      false -> :ok
+    end
   end
   defp heartbeat_instance(_, _), do: :ok
+
+  defp awake?(status), do: status in ~w(running snapshotting)a
+
+  # a suspend deadline from before the instance last woke is an earlier run's, held over by the gateway
+  defp this_run?(%DevboxInstance{awake_since: %DateTime{} = since}, idle) do
+    case Acp.timestamp(Acp.get(idle, :suspend_at)) do
+      %DateTime{} = at -> DateTime.compare(at, since) != :lt
+      _ -> true
+    end
+  end
+  defp this_run?(_, _), do: true
 
   @doc """
   `Ingest.ReportInstanceStatus`: applies a state machine transition reported by the gateway.  Reports with an older
@@ -119,13 +134,14 @@ defmodule Console.Devboxes.Ingest do
       actor_ref: blank(attrs[:actor_id]),
       image_digest: blank(attrs[:image_digest]),
       template_revision: attrs[:template_revision] && to_string(attrs[:template_revision]),
-      idle_state: attrs[:idle] && idle_state(attrs[:idle])
+      idle_state: attrs[:idle] && this_run?(inst, attrs[:idle]) && idle_state(attrs[:idle]) || nil
     })
 
     case status && DevboxInstance.can_transition?(inst.status, status) do
       true ->
-        # idleness from before a suspend or resume no longer holds; the next heartbeat reports it afresh
-        base = if status != inst.status, do: Map.put_new(base, :idle_state, idle_state(%{})), else: base
+        # idleness belongs to one awake run: what's reported with a suspend or a resume is the last run's, and
+        # the resumed daemon reports its own
+        base = if awake?(inst.status) and awake?(status), do: base, else: Map.put(base, :idle_state, idle_state(%{}))
         inst
         |> DevboxInstance.changeset(Map.merge(base, %{status: status, status_reason: status_reason(attrs)}))
         |> Repo.update()
@@ -562,8 +578,8 @@ defmodule Console.Devboxes.Ingest do
 
   @doc """
   `Ingest.PushInstanceDeltas`: wraps each live delta in a `DevboxInstance.Delta` and broadcasts it on
-  `devbox_instances:<id>:deltas`, in the order given, since clients drop a delta at or below the highest offset
-  they've applied.  Nothing is stored.  Deltas for instances outside the cluster are dropped.
+  `devbox_instances:<id>:deltas`, in the order given.  Delivery across nodes isn't ordered, so clients reorder each
+  session's deltas by `seq`.  Nothing is stored.  Deltas for instances outside the cluster are dropped.
   """
   @spec publish_instance_deltas([map], Cluster.t) :: :ok
   def publish_instance_deltas(deltas, %Cluster{} = cluster) do
@@ -589,6 +605,8 @@ defmodule Console.Devboxes.Ingest do
       payload: Acp.as_map(Acp.decode(delta[:payload_json] || delta[:payload])),
       entity: Acp.entity(delta[:entity]),
       offset: delta[:offset],
+      seq: delta[:seq],
+      stream: blank(delta[:stream]),
       emitted_at: Acp.timestamp(delta[:emitted_at])
     }
     |> DevboxInstance.Delta.new(cluster)
@@ -790,7 +808,8 @@ defmodule Console.Devboxes.Ingest do
   @decorate cacheable(
               cache: @multilevel_adapter,
               key: {:devbox_instance_cluster, instance_id},
-              opts: [ttl: :timer.hours(1)]
+              opts: [ttl: :timer.hours(1)],
+              match: &is_binary/1
             )
   defp instance_cluster_id(instance_id) do
     case Ecto.UUID.cast(instance_id) do

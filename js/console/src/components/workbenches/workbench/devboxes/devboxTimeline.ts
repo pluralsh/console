@@ -32,8 +32,17 @@ export type DevboxTimelinePullRequest = {
 
 export type DevboxSessionTimeline = {
   loaded: boolean
-  // live deltas at or below this offset are already in the loaded entities
+  // unnumbered live deltas at or below this offset are already in the loaded entities
   deltaOffset: Nullable<number>
+  // the daemon run numbering this session's deltas, and the last seq applied:
+  // numbered deltas apply strictly in seq order, since delivery isn't ordered
+  stream: Nullable<string>
+  seq: Nullable<number>
+  // numbered deltas past a gap, held (by seq) until it fills
+  pending: Record<number, DevboxEntityChangeFragment>
+  // a delta arrived that can't be ordered against the loaded page (another
+  // stream, or too many held): the page needs reloading
+  stale: boolean
   hasMore: boolean
   entities: Record<string, DevboxEntityFragment>
   // deltas received before the first page loaded, replayed on top of it
@@ -51,6 +60,8 @@ export type DevboxTimelineStore = {
 export type DevboxTimelinePage = {
   entities?: Nullable<Nullable<DevboxEntityFragment>[]>
   deltaOffset?: Nullable<number | string>
+  seq?: Nullable<number | string>
+  stream?: Nullable<string>
   hasMore?: Nullable<boolean>
 }
 
@@ -77,6 +88,10 @@ export const EMPTY_DEVBOX_TIMELINE: DevboxTimelineStore = {
 export const emptySessionTimeline = (): DevboxSessionTimeline => ({
   loaded: false,
   deltaOffset: null,
+  stream: null,
+  seq: null,
+  pending: {},
+  stale: false,
   hasMore: false,
   entities: {},
   buffered: [],
@@ -146,10 +161,51 @@ function applyPage(
     deltaOffset,
     buffered: [],
   }
-
-  for (const change of prev.buffered) session = applyToSession(session, change)
+  // the newest page is where the session's numbered deltas resume; whatever
+  // was held or buffered is replayed against it
+  if (!older) {
+    const held = [...prev.buffered, ...Object.values(prev.pending)]
+    session = {
+      ...session,
+      stream: page.stream || null,
+      seq: toNumber(page.seq) ?? 0,
+      pending: {},
+      stale: false,
+    }
+    for (const change of held) session = receive(session, change, true)
+  }
 
   return { ...store, sessions: { ...store.sessions, [sessionId]: session } }
+}
+
+// orders a session's numbered deltas: applies the next one in seq, holds any
+// past a gap and drains what it unblocks. `replay` drops what can't be ordered
+// against the page instead of asking for another
+function receive(
+  session: DevboxSessionTimeline,
+  change: DevboxEntityChangeFragment,
+  replay = false
+): DevboxSessionTimeline {
+  const seq = toNumber(change.seq)
+  if (!seq) return applyToSession(session, change, false)
+  if (change.stream !== session.stream)
+    return replay || session.stale ? session : { ...session, stale: true }
+  const last = session.seq ?? 0
+  if (seq <= last) return session
+  if (seq > last + 1) {
+    if (Object.keys(session.pending).length >= BUFFER_LIMIT)
+      return { ...session, stale: true }
+    return { ...session, pending: { ...session.pending, [seq]: change } }
+  }
+
+  let next = { ...applyToSession(session, change, true), seq }
+  if (!Object.keys(next.pending).length) return next
+  const pending = { ...next.pending }
+  for (let s = seq + 1; pending[s]; s++) {
+    next = { ...applyToSession(next, pending[s], true), seq: s }
+    delete pending[s]
+  }
+  return { ...next, pending }
 }
 
 function applyDelta(
@@ -205,17 +261,22 @@ function applyDelta(
     }
   }
 
-  const next = applyToSession(prev, change)
+  const next = receive(prev, change)
   if (next === prev) return store
   return { ...store, sessions: { ...store.sessions, [sessionId]: next } }
 }
 
+// applies one delta; `ordered` ones come in seq order, so the offset check
+// that guards unnumbered ones would only drop deltas that arrived late
 function applyToSession(
   session: DevboxSessionTimeline,
-  change: DevboxEntityChangeFragment
+  change: DevboxEntityChangeFragment,
+  ordered: boolean
 ): DevboxSessionTimeline {
   const offset = toNumber(change.offset)
-  const deltaOffset = maxNullable(session.deltaOffset, offset)
+  const deltaOffset = ordered
+    ? session.deltaOffset
+    : maxNullable(session.deltaOffset, offset)
 
   // a settle carries the whole entity and is ordered by its revision, so it still repairs an entity whose chunks
   // were missed even when it arrives behind a later delta
@@ -233,6 +294,7 @@ function applyToSession(
   }
 
   if (
+    !ordered &&
     offset != null &&
     session.deltaOffset != null &&
     offset <= session.deltaOffset

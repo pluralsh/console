@@ -94,16 +94,17 @@ defmodule ConsoleWeb.GraphQl.DevboxSubscriptionsTest do
       {:ok, socket} = establish_socket(user)
 
       ref = push_doc(socket, """
-        subscription Deltas($id: ID!) { devboxInstanceDelta(instanceId: $id) { payload { offset } } }
+        subscription Deltas($id: ID!) { devboxInstanceDelta(instanceId: $id) { payload { offset seq stream } } }
       """, variables: %{"id" => inst.id})
       assert_reply(ref, :ok, %{subscriptionId: _})
 
       offsets = Enum.to_list(1..50)
-      deltas = Enum.map(offsets, &%{instance_id: inst.id, session_id: "s", entity_id: "e", op: :DELTA_OP_APPEND, offset: &1})
+      deltas = Enum.map(offsets, &%{instance_id: inst.id, session_id: "s", entity_id: "e", op: :DELTA_OP_APPEND, offset: &1, seq: &1, stream: "run-1"})
       :ok = Console.Devboxes.Ingest.publish_instance_deltas(deltas, inst.devbox.cluster)
 
       received = for _ <- offsets do
-        assert_push("subscription:data", %{result: %{data: %{"devboxInstanceDelta" => %{"payload" => %{"offset" => o}}}}})
+        assert_push("subscription:data", %{result: %{data: %{"devboxInstanceDelta" => %{"payload" => %{"offset" => o, "seq" => s, "stream" => "run-1"}}}}})
+        assert s == o
         String.to_integer(o)
       end
       assert received == offsets

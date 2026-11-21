@@ -44,6 +44,29 @@ export function selectedThread(
   )
 }
 
+// the top-level thread a subagent (at any depth) works for
+export function rootThread(
+  threads: Nullable<Nullable<DevboxThreadFragment>[]>,
+  thread: Nullable<DevboxThreadFragment>
+) {
+  const byId = new Map(
+    (threads ?? []).filter(isNonNullable).map((t) => [t.id, t])
+  )
+  const seen = new Set<string>()
+  let root = thread
+  while (
+    root?.kind === DevboxThreadKind.Subagent &&
+    root.parent?.id &&
+    !seen.has(root.id)
+  ) {
+    seen.add(root.id)
+    const parent = byId.get(root.parent.id)
+    if (!parent) break
+    root = parent
+  }
+  return root ?? undefined
+}
+
 export function threadState(
   thread: Pick<DevboxThreadFragment, 'status' | 'foregroundState'>
 ): DevboxThreadState {

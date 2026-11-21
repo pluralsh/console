@@ -309,6 +309,10 @@ type statusUpdate struct {
 func (g *Gateway) setStatus(ctx context.Context, inst *Instance, u statusUpdate) {
 	now := g.now()
 	inst.mu.Lock()
+	// idleness is the awake daemon's: it doesn't outlive a suspend, and a resumed daemon reports its own
+	if !awake(inst.rec.status()) || !awake(u.status) {
+		inst.idle = nil
+	}
 	inst.rec.Status = u.status.String()
 	inst.rec.SuspendReason = ""
 	if u.status == devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED {

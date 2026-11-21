@@ -35,6 +35,9 @@ const (
 	StateCurrentModeUpdate = "current_mode_update"
 )
 
+// NewToolCall is the v1 update that introduces a tool call.
+const NewToolCall = "tool_call"
+
 // Terminal statuses shared by tool calls and native subagents.
 const (
 	StatusCompleted = "completed"
@@ -110,8 +113,14 @@ type Normalizer interface {
 }
 
 // NewNormalizer returns the normalizer for a negotiated protocol version.
-func NewNormalizer(version int, lineage LineageExtractor) Normalizer {
-	base := &v1Normalizer{lineage: lineage, runs: map[string]*run{}, plans: map[string]string{}, native: map[string]bool{}}
+func NewNormalizer(version int, lineage LineageExtractor, opts ...Option) Normalizer {
+	base := &v1Normalizer{
+		lineage: lineage, runs: map[string]*run{}, plans: map[string]string{}, native: map[string]bool{}, calls: map[string]bool{},
+		transcriptCalls: map[string]bool{}, transcripts: map[string]*transcriptChild{},
+	}
+	for _, o := range opts {
+		o(base)
+	}
 	if version >= 2 {
 		return &v2Normalizer{v1: base}
 	}
@@ -131,6 +140,14 @@ type v1Normalizer struct {
 	// native holds the child sessions the agent announced with subagent_spawned. Their updates arrive on the
 	// child's own session ID, so lineage tags on them must not nest another child.
 	native map[string]bool
+	// calls holds the tool calls (keyed session NUL tool call ID) the agent introduced with tool_call, so updates
+	// for calls it hides (HiddenCalls) can be told apart.
+	calls map[string]bool
+	// transcriptTool, transcriptCalls and transcripts follow the transcript tool's calls and the subagents they
+	// stream (TranscriptTool).
+	transcriptTool  string
+	transcriptCalls map[string]bool
+	transcripts     map[string]*transcriptChild
 }
 
 func (n *v1Normalizer) ProtocolVersion() int { return 1 }
@@ -178,17 +195,28 @@ func (n *v1Normalizer) Normalize(sessionID string, update Object) []Change {
 	// Any non-chunk update ends the current contiguous chunk run.
 	delete(n.runs, target)
 	switch kind {
-	case "tool_call", "tool_call_update":
-		patch := withoutDiscriminator(update)
+	case NewToolCall, "tool_call_update":
 		id := Str(update, "toolCallId")
+		key := target + "\x00" + id
+		if kind == NewToolCall {
+			n.calls[key] = true
+		} else if h, ok := n.lineage.(HiddenCalls); ok && !n.calls[key] && h.Hidden(update) {
+			return nil
+		}
+		patch := withoutDiscriminator(update)
+		var children []Change
+		if n.transcriptCall(target, update) {
+			children = n.transcriptChildren(target, patch)
+		}
 		payload := copyObject(patch)
 		payload["sessionUpdate"] = "tool_call_update"
 		status := Str(update, "status")
-		return []Change{{
+		// children first: the call completing idles them, so they must exist by then
+		return append(children, Change{
 			Kind: ChangePatch, SessionID: target, Subagent: lineage,
 			EntityType: devboxv1.EntityType_ENTITY_TYPE_TOOL_CALL, EntityID: id, Patch: patch, Payload: payload,
 			Complete: status == StatusCompleted || status == StatusFailed,
-		}}
+		})
 	case "plan", "plan_update", "plan_removed":
 		patch := withoutDiscriminator(update)
 		id := Str(update, "planId")

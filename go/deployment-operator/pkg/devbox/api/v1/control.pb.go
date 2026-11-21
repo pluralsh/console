@@ -2659,7 +2659,10 @@ type GetTimelineResponse struct {
 	// More entities exist in the paging direction.
 	HasMore bool `protobuf:"varint,3,opt,name=has_more,json=hasMore,proto3" json:"has_more,omitempty"`
 	// Apply live deltas with offset > delta_offset on top of this page.
-	DeltaOffset   uint64 `protobuf:"varint,4,opt,name=delta_offset,json=deltaOffset,proto3" json:"delta_offset,omitempty"`
+	DeltaOffset uint64 `protobuf:"varint,4,opt,name=delta_offset,json=deltaOffset,proto3" json:"delta_offset,omitempty"`
+	// The session's last Delta.seq (and its stream) this page reflects: apply live deltas from seq + 1, in order.
+	Seq           uint64 `protobuf:"varint,6,opt,name=seq,proto3" json:"seq,omitempty"`
+	Stream        string `protobuf:"bytes,7,opt,name=stream,proto3" json:"stream,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2720,6 +2723,20 @@ func (x *GetTimelineResponse) GetDeltaOffset() uint64 {
 		return x.DeltaOffset
 	}
 	return 0
+}
+
+func (x *GetTimelineResponse) GetSeq() uint64 {
+	if x != nil {
+		return x.Seq
+	}
+	return 0
+}
+
+func (x *GetTimelineResponse) GetStream() string {
+	if x != nil {
+		return x.Stream
+	}
+	return ""
 }
 
 type GetSessionsRequest struct {
@@ -3457,12 +3474,14 @@ const file_devbox_v1_control_proto_rawDesc = "" +
 	"\x0fbefore_position\x18\x06 \x01(\x04H\x00R\x0ebeforePosition\x12\x14\n" +
 	"\x05limit\x18\x04 \x01(\x05R\x05limit\x12.\n" +
 	"\x13resume_if_suspended\x18\x05 \x01(\bR\x11resumeIfSuspendedB\b\n" +
-	"\x06cursor\"\xc2\x01\n" +
+	"\x06cursor\"\xec\x01\n" +
 	"\x13GetTimelineResponse\x120\n" +
 	"\bentities\x18\x01 \x03(\v2\x14.devbox.v1.AcpEntityR\bentities\x12#\n" +
 	"\rnext_position\x18\x02 \x01(\x04R\fnextPosition\x12\x19\n" +
 	"\bhas_more\x18\x03 \x01(\bR\ahasMore\x12!\n" +
-	"\fdelta_offset\x18\x04 \x01(\x04R\vdeltaOffsetJ\x04\b\x05\x10\x06R\x10archive_degraded\"5\n" +
+	"\fdelta_offset\x18\x04 \x01(\x04R\vdeltaOffset\x12\x10\n" +
+	"\x03seq\x18\x06 \x01(\x04R\x03seq\x12\x16\n" +
+	"\x06stream\x18\a \x01(\tR\x06streamJ\x04\b\x05\x10\x06R\x10archive_degraded\"5\n" +
 	"\x12GetSessionsRequest\x12\x1f\n" +
 	"\vinstance_id\x18\x01 \x01(\tR\n" +
 	"instanceId\"\x83\x01\n" +

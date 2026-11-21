@@ -171,6 +171,8 @@ defmodule Devbox.V1.Delta do
   field :entity, 9, type: Devbox.V1.AcpEntity
   field :offset, 10, type: :uint64
   field :emitted_at, 11, type: Google.Protobuf.Timestamp, json_name: "emittedAt"
+  field :seq, 12, type: :uint64
+  field :stream, 13, type: :string
 end
 
 defmodule Devbox.V1.PushInstanceDeltasRequest do

@@ -787,8 +787,14 @@ type Delta struct {
 	// SETTLE only.
 	Entity *AcpEntity `protobuf:"bytes,9,opt,name=entity,proto3" json:"entity,omitempty"`
 	// Daemon event-log offset; clients apply deltas with offset > the timeline page's delta_offset.
-	Offset        uint64                 `protobuf:"varint,10,opt,name=offset,proto3" json:"offset,omitempty"`
-	EmittedAt     *timestamppb.Timestamp `protobuf:"bytes,11,opt,name=emitted_at,json=emittedAt,proto3" json:"emitted_at,omitempty"`
+	Offset    uint64                 `protobuf:"varint,10,opt,name=offset,proto3" json:"offset,omitempty"`
+	EmittedAt *timestamppb.Timestamp `protobuf:"bytes,11,opt,name=emitted_at,json=emittedAt,proto3" json:"emitted_at,omitempty"`
+	// Dense per-session sequence (1, 2, ...) of the deltas that change a session's timeline (APPEND, PATCH, SETTLE,
+	// STATE), within `stream`. Delivery isn't ordered, so clients apply a session's deltas in seq order, starting
+	// after the timeline page's seq, and reload the page when a gap doesn't fill. 0 for NOTICE and console-made deltas.
+	Seq uint64 `protobuf:"varint,12,opt,name=seq,proto3" json:"seq,omitempty"`
+	// Identifies the daemon run that numbered `seq`; a new run restarts it, so a client seeing a new stream reloads.
+	Stream        string `protobuf:"bytes,13,opt,name=stream,proto3" json:"stream,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -898,6 +904,20 @@ func (x *Delta) GetEmittedAt() *timestamppb.Timestamp {
 		return x.EmittedAt
 	}
 	return nil
+}
+
+func (x *Delta) GetSeq() uint64 {
+	if x != nil {
+		return x.Seq
+	}
+	return 0
+}
+
+func (x *Delta) GetStream() string {
+	if x != nil {
+		return x.Stream
+	}
+	return ""
 }
 
 type PushInstanceDeltasRequest struct {
@@ -2107,7 +2127,7 @@ const file_devbox_v1_ingest_proto_rawDesc = "" +
 	"\x06offset\x18\x05 \x01(\x04R\x06offset\"{\n" +
 	"\x1bUpsertInstanceIndexResponse\x12)\n" +
 	"\x10sessions_applied\x18\x01 \x01(\x05R\x0fsessionsApplied\x121\n" +
-	"\x14interactions_applied\x18\x02 \x01(\x05R\x13interactionsApplied\"\x9f\x03\n" +
+	"\x14interactions_applied\x18\x02 \x01(\x05R\x13interactionsApplied\"\xc9\x03\n" +
 	"\x05Delta\x12\x1f\n" +
 	"\vinstance_id\x18\x01 \x01(\tR\n" +
 	"instanceId\x12\x1d\n" +
@@ -2125,7 +2145,9 @@ const file_devbox_v1_ingest_proto_rawDesc = "" +
 	"\x06offset\x18\n" +
 	" \x01(\x04R\x06offset\x129\n" +
 	"\n" +
-	"emitted_at\x18\v \x01(\v2\x1a.google.protobuf.TimestampR\temittedAt\"E\n" +
+	"emitted_at\x18\v \x01(\v2\x1a.google.protobuf.TimestampR\temittedAt\x12\x10\n" +
+	"\x03seq\x18\f \x01(\x04R\x03seq\x12\x16\n" +
+	"\x06stream\x18\r \x01(\tR\x06stream\"E\n" +
 	"\x19PushInstanceDeltasRequest\x12(\n" +
 	"\x06deltas\x18\x01 \x03(\v2\x10.devbox.v1.DeltaR\x06deltas\"\x1c\n" +
 	"\x1aPushInstanceDeltasResponse\"\xec\x03\n" +

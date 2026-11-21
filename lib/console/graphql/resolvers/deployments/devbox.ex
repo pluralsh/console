@@ -127,7 +127,6 @@ defmodule Console.GraphQl.Resolvers.Deployments.Devbox do
 
   def devbox_instance_threads(%DevboxInstance{id: id}, args, _) do
     DevboxInstanceSession.for_instance(id)
-    |> DevboxInstanceSession.for_kind(:thread)
     |> thread_filters(args)
     |> DevboxInstanceSession.ordered(desc: :inserted_at)
     |> Console.Repo.all()

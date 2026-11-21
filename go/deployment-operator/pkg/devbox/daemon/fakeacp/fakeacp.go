@@ -9,6 +9,10 @@
 //	subagent-permission  a subagent's tool call, then a permission request for it on the parent session
 //	native-subagent  claude-agent-acp's native subagent session: subagent_spawned, the child's own updates and a
 //	            permission request on the child's session ID, then subagent_state_update
+//	opencode-subagent  an OpenCode task: the child session is named only on the $OpenCodeEnv event stream and
+//	            streams (and asks for permission) once the client opens it with session/resume
+//	replay:<path>  send each session update in a JSON array file, as captured from a real adapter, on the prompted
+//	            session, or on another as {"sessionId": ..., "update": ...}
 //	unknown     an unknown content block and an unknown session update kind
 //	authfail    fail the turn with -32000 "Authentication required"
 //	mode:<id>   switch the session's mode itself (current_mode_update), like leaving plan mode
@@ -51,12 +55,14 @@ func Main() {
 	if p := os.Getenv(LogEnv); p != "" {
 		f.log, _ = os.OpenFile(p, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o600)
 	}
+	f.opencode = startOpenCodeServer()
 	f.conn = acp.NewConn(os.Stdout, os.Stdin, f, nil)
 	<-f.conn.Done()
 }
 
 type fakeAgent struct {
-	conn *acp.Conn
+	conn     *acp.Conn
+	opencode *openCodeServer
 
 	mu       sync.Mutex
 	n        int
@@ -163,6 +169,9 @@ func (f *fakeAgent) HandleRequest(ctx context.Context, method string, raw json.R
 			cur = fastModel
 		}
 		f.replayNativeHistory(sid)
+		if f.opencode != nil {
+			f.opencode.open(sid)
+		}
 		// Like claude-agent-acp, a reopened session starts in the default mode.
 		return map[string]any{"configOptions": f.modelOptions(cur), "modes": modes("default")}, nil
 	case acp.MethodSetMode:
@@ -317,6 +326,27 @@ func (f *fakeAgent) prompt(sid string, params acp.Object) (any, *acp.RequestErro
 		msg(fmt.Sprintf("outcome:%s:%s", acp.Str(out, "outcome"), acp.Str(out, "optionId")))
 		if p := os.Getenv(LogEnv); p != "" {
 			_ = os.WriteFile(p+nativeHistorySuffix, []byte(sid), 0o600)
+		}
+	case strings.HasPrefix(text, "replay:"):
+		data, err := os.ReadFile(strings.TrimPrefix(text, "replay:"))
+		var updates []map[string]any
+		if err == nil {
+			err = json.Unmarshal(data, &updates)
+		}
+		if err != nil {
+			return nil, &acp.RequestError{Code: -32603, Message: err.Error()}
+		}
+		for _, u := range updates {
+			if child, ok := u["sessionId"].(string); ok {
+				f.update(child, u["update"].(map[string]any))
+				continue
+			}
+			f.update(sid, u)
+		}
+		msg("replayed")
+	case text == "opencode-subagent":
+		if err := f.openCodeSubagent(sid, msg); err != nil {
+			return nil, err
 		}
 	case text == "unknown":
 		f.update(sid, map[string]any{"sessionUpdate": "agent_message_chunk", "content": map[string]any{"type": "hologram", "shape": "cube", "size": 3}})

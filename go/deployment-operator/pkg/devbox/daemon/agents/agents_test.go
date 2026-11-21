@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"io"
 	"log/slog"
+	"net"
 	"os"
 	"path/filepath"
 	"slices"
@@ -513,12 +514,131 @@ func TestSubagentPermissionBelongsToTheSubagent(t *testing.T) {
 	eventually(t, "outcome", func() bool { return contains(h.agentText(s.GetSessionId()), "outcome:selected:allow") })
 }
 
+// specLauncher adjusts the fake agent's launch.
+type specLauncher struct {
+	testLauncher
+	adjust func(*harness.Spec)
+}
+
+func (l specLauncher) Spec(launch *devboxv1.AgentLaunch, endpoints *devboxv1.HarnessEndpoints, model string) (*harness.Spec, error) {
+	spec, err := l.testLauncher.Spec(launch, endpoints, model)
+	if err != nil {
+		return nil, err
+	}
+	l.adjust(spec)
+	return spec, nil
+}
+
+func newManagerAdjusting(t *testing.T, adjust func(*harness.Spec)) *harnessT {
+	t.Helper()
+	return newManagerWith(t, 4, devboxv1.BillingMode_BILLING_MODE_PROXY, func(o *Options) {
+		o.Launcher = specLauncher{testLauncher: o.Launcher.(testLauncher), adjust: adjust}
+	})
+}
+
+func TestPiTranscriptSubagents(t *testing.T) {
+	fixture, err := filepath.Abs("../acp/testdata/pi-subagent-parallel.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	h := newManagerAdjusting(t, func(s *harness.Spec) { s.TranscriptTool = "subagent" })
+	s := h.create(t, "t1")
+	h.prompt(t, s, "p1", "replay:"+fixture)
+	eventually(t, "replayed", func() bool { return contains(h.agentText(s.GetSessionId()), "replayed") })
+	h.m.Flush()
+	rows := map[string]*devboxv1.Session{}
+	for _, ev := range h.rec.snapshot() {
+		if r := ev.GetSession(); r != nil && r.GetKind() == devboxv1.SessionKind_SESSION_KIND_SUBAGENT {
+			rows[r.GetSessionId()] = r
+		}
+	}
+	if len(rows) != 2 {
+		t.Fatalf("subagent sessions %v", rows)
+	}
+	for id, r := range rows {
+		if r.GetParentSessionId() != s.GetSessionId() || r.GetParentToolCallId() != "call_subagent_1" ||
+			r.GetForeground().GetState() != devboxv1.ForegroundStateKind_FOREGROUND_STATE_KIND_IDLE {
+			t.Fatalf("subagent %s: %v", id, r)
+		}
+		if !contains(h.agentText(id), "child done") {
+			t.Fatalf("subagent %s text %v", id, h.agentText(id))
+		}
+	}
+}
+
+func TestOpenCodeTaskSubagent(t *testing.T) {
+	l, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	addr := l.Addr().String()
+	_ = l.Close()
+	h := newManagerAdjusting(t, func(s *harness.Spec) {
+		s.Env = append(s.Env, fakeacp.OpenCodeEnv+"="+addr, "OPENCODE_SERVER_PASSWORD=pw")
+		s.OpenCodeServer = &harness.OpenCodeServer{URL: "http://" + addr, Username: "opencode", Password: "pw"}
+	})
+	s := h.create(t, "t1")
+	h.prompt(t, s, "p1", "opencode-subagent")
+	child := fakeacp.OpenCodeChild
+	var in *devboxv1.Interaction
+	eventually(t, "the subagent's permission request", func() bool {
+		for _, i := range h.m.Interactions() {
+			in = i
+			return true
+		}
+		return contains(h.agentText(s.GetSessionId()), "child never opened")
+	})
+	if in == nil {
+		t.Fatalf("the child was never opened: %v", h.agentText(s.GetSessionId()))
+	}
+	if in.GetSessionId() != child || in.GetThreadId() != "t1" {
+		t.Fatalf("subagent's permission filed under session %q, thread %q", in.GetSessionId(), in.GetThreadId())
+	}
+	resp := &devboxv1.InteractionResponse{Response: &devboxv1.InteractionResponse_Permission{
+		Permission: &devboxv1.PermissionOutcome{Outcome: &devboxv1.PermissionOutcome_SelectedOptionId{SelectedOptionId: "once"}}}}
+	if _, err := h.m.RespondInteraction(&devboxv1.RespondInteractionRequest{InteractionId: in.GetInteractionId(), Response: resp}); err != nil {
+		t.Fatal(err)
+	}
+	eventually(t, "outcome", func() bool { return contains(h.agentText(s.GetSessionId()), "outcome:selected:once") })
+
+	if !contains(h.agentText(child), "child says hi") {
+		t.Fatalf("child text %v", h.agentText(child))
+	}
+	if task := h.entities(child)["ENTITY_TYPE_USER_MESSAGE/task-"+child]; task.GetMessage().GetContent()[0].GetText().GetText() != "Find the entrypoints" {
+		t.Fatalf("child doesn't open with its task: %v", task)
+	}
+	for _, r := range h.calls(t, acp.MethodSessionResume) {
+		if acp.Str(r, "sessionId") == child && len(acp.Arr(r, "mcpServers")) != 0 {
+			t.Fatalf("child opened with the thread's MCP servers: %v", r)
+		}
+	}
+	h.m.Flush()
+	var row *devboxv1.Session
+	for _, ev := range h.rec.snapshot() {
+		if r := ev.GetSession(); r != nil && r.GetSessionId() == child {
+			row = r
+		}
+	}
+	if row == nil || row.GetKind() != devboxv1.SessionKind_SESSION_KIND_SUBAGENT || row.GetParentSessionId() != s.GetSessionId() ||
+		row.GetParentToolCallId() != "call-task" || row.GetTitle() != "Explore the repo" {
+		t.Fatalf("subagent session row %v", row)
+	}
+	if row.GetForeground().GetState() != devboxv1.ForegroundStateKind_FOREGROUND_STATE_KIND_IDLE {
+		t.Fatalf("the finished task didn't idle its child: %v", row.GetForeground())
+	}
+}
+
 func TestNativeSubagentSession(t *testing.T) {
 	h := newManager(t, 4)
 	s := h.create(t, "t1")
 	init := h.calls(t, acp.MethodInitialize)
-	if len(init) == 0 || acp.Obj(acp.Obj(init[0], "clientCapabilities"), "subagents") == nil {
-		t.Fatalf("initialize didn't advertise native subagents: %v", init)
+	if len(init) == 0 {
+		t.Fatal("no initialize")
+	}
+	caps := acp.Obj(init[0], "clientCapabilities")
+	air := acp.Obj(acp.Obj(acp.Obj(caps, "_meta"), "jetbrains"), "air")
+	if acp.Obj(caps, "subagents") == nil || !slices.Contains(acp.Arr(air, "capabilities"), any("nativeSubagentSessions")) {
+		t.Fatalf("initialize didn't advertise native subagents both ways: %v", caps)
 	}
 	h.prompt(t, s, "p1", "native-subagent")
 	const child = "task-native"
@@ -586,6 +706,99 @@ func TestNativeSubagentSession(t *testing.T) {
 	h.m.mu.Unlock()
 	if unseen != nil {
 		t.Fatal("replay created a child the transcript never had")
+	}
+}
+
+func TestDeltasAreNumberedPerSession(t *testing.T) {
+	fixture, err := filepath.Abs("../acp/testdata/claude-native-subagent.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	h := newManager(t, 4)
+	s := h.create(t, "t1")
+	h.prompt(t, s, "p1", "replay:"+fixture)
+	eventually(t, "replayed", func() bool { return contains(h.agentText(s.GetSessionId()), "replayed") })
+	h.m.Flush()
+
+	last := map[string]uint64{}
+	var stream string
+	for _, ev := range h.rec.snapshot() {
+		d := ev.GetDelta()
+		if d == nil {
+			continue
+		}
+		if d.GetOp() == devboxv1.DeltaOp_DELTA_OP_NOTICE {
+			if d.GetSeq() != 0 {
+				t.Fatalf("notice numbered: %v", d)
+			}
+			continue
+		}
+		if stream == "" {
+			stream = d.GetStream()
+		}
+		if d.GetStream() == "" || d.GetStream() != stream {
+			t.Fatalf("delta stream %q, want %q", d.GetStream(), stream)
+		}
+		if d.GetSeq() != last[d.GetSessionId()]+1 {
+			t.Fatalf("session %s: seq %d after %d", d.GetSessionId(), d.GetSeq(), last[d.GetSessionId()])
+		}
+		last[d.GetSessionId()] = d.GetSeq()
+	}
+	if len(last) < 2 {
+		t.Fatalf("expected deltas for the thread and its subagent: %v", last)
+	}
+	for session, seq := range last {
+		page, err := h.m.Timeline(context.Background(), &devboxv1.GetTimelineRequest{SessionId: session})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if page.GetSeq() != seq || page.GetStream() != stream {
+			t.Fatalf("session %s timeline at seq %d/%s, its deltas at %d/%s", session, page.GetSeq(), page.GetStream(), seq, stream)
+		}
+	}
+}
+
+// TestClaudeNativeSubagentCapture replays claude-agent-acp 0.75.1 running an async Agent subagent in native mode.
+func TestClaudeNativeSubagentCapture(t *testing.T) {
+	fixture, err := filepath.Abs("../acp/testdata/claude-native-subagent.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	h := newManager(t, 4)
+	s := h.create(t, "t1")
+	h.prompt(t, s, "p1", "replay:"+fixture)
+	eventually(t, "replayed", func() bool { return contains(h.agentText(s.GetSessionId()), "replayed") })
+	const child = "a0aa9e5d37e932105"
+	if !contains(h.agentText(child), "child done") || contains(h.agentText(s.GetSessionId()), "child done") {
+		t.Fatalf("child text: child %v, parent %v", h.agentText(child), h.agentText(s.GetSessionId()))
+	}
+	parent := h.entities(s.GetSessionId())
+	if _, ok := parent["ENTITY_TYPE_TOOL_CALL/toolu_parent_2"]; ok {
+		t.Fatal("the hidden Agent call's update surfaced in the parent as a bare tool call")
+	}
+	if _, ok := parent["ENTITY_TYPE_SESSION_MESSAGE/"+acp.SubagentSpawnPrefix+child]; !ok {
+		t.Fatalf("parent has no anchor for the subagent: %v", parent)
+	}
+	if _, ok := h.entities(child)["ENTITY_TYPE_TOOL_CALL/toolu_child_4"]; !ok {
+		t.Fatalf("the child's own tool call is missing: %v", h.entities(child))
+	}
+	h.m.Flush()
+	var row *devboxv1.Session
+	for _, ev := range h.rec.snapshot() {
+		if r := ev.GetSession(); r != nil {
+			if strings.Contains(r.GetSessionId(), acp.SubagentSeparator) {
+				t.Fatalf("lineage tags nested another session: %s", r.GetSessionId())
+			}
+			if r.GetSessionId() == child {
+				row = r
+			}
+		}
+	}
+	if row == nil || row.GetKind() != devboxv1.SessionKind_SESSION_KIND_SUBAGENT || row.GetParentSessionId() != s.GetSessionId() || row.GetTitle() != "Explore files" {
+		t.Fatalf("subagent session row %v", row)
+	}
+	if row.GetForeground().GetState() != devboxv1.ForegroundStateKind_FOREGROUND_STATE_KIND_IDLE {
+		t.Fatalf("the completed subagent is still %v", row.GetForeground())
 	}
 }
 

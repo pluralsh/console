@@ -574,6 +574,8 @@ defmodule Devbox.V1.GetTimelineResponse do
   field :next_position, 2, type: :uint64, json_name: "nextPosition"
   field :has_more, 3, type: :bool, json_name: "hasMore"
   field :delta_offset, 4, type: :uint64, json_name: "deltaOffset"
+  field :seq, 6, type: :uint64
+  field :stream, 7, type: :string
 end
 
 defmodule Devbox.V1.GetSessionsRequest do

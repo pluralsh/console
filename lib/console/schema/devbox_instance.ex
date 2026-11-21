@@ -55,6 +55,8 @@ defmodule Console.Schema.DevboxInstance do
       payload: map | nil,
       entity: map | nil,
       offset: integer | nil,
+      seq: integer | nil,
+      stream: binary | nil,
       emitted_at: DateTime.t | nil,
       cluster: Console.Schema.Cluster.t | nil
     }
@@ -70,6 +72,8 @@ defmodule Console.Schema.DevboxInstance do
       :payload,
       :entity,
       :offset,
+      :seq,
+      :stream,
       :emitted_at,
       :cluster
     ]
@@ -213,6 +217,10 @@ defmodule Console.Schema.DevboxInstance do
 
   def names(query \\ __MODULE__) do
     from(i in query, select: i.name)
+  end
+
+  def pending_before(query \\ __MODULE__, ts) do
+    from(i in query, where: i.status == ^:pending and i.inserted_at < ^ts)
   end
 
   def suspended_before(query \\ __MODULE__, ts) do

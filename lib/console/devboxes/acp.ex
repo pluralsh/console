@@ -37,6 +37,8 @@ defmodule Console.Devboxes.Acp do
     %{
       entities: Enum.map(get(page, :entities) || [], &entity/1),
       delta_offset: get(page, :delta_offset) || 0,
+      seq: get(page, :seq) || 0,
+      stream: get(page, :stream),
       has_more: !!get(page, :has_more)
     }
   end

@@ -209,17 +209,39 @@ defmodule Console.Devboxes do
       |> allow(user, :create)
       |> when_ok(:insert)
     end)
-    |> add_operation(:control, fn %{instance: inst, snapshot: snapshot, devbox: devbox} ->
-      Control.create_instance(inst, %{
-        snapshot: snapshot,
-        devbox: devbox,
-        idle_policy: idle_policy(devbox, Repo.preload(inst, :workbench).workbench)
-      })
-      |> control_result(inst)
-    end)
-    |> execute(extract: :instance)
-    |> notify(:create)
+    |> execute()
+    |> case do
+      {:ok, %{instance: inst} = res} ->
+        notify({:ok, inst}, :create)
+        start_instance(inst, res)
+      err -> err
+    end
   end
+
+  # The gateway reports on (and garbage-collects) an instance as soon as it hears of it, so it may only hear of
+  # committed ones: an instance invisible to ingest is "unknown" and gets its actor deleted.
+  defp start_instance(%DevboxInstance{} = inst, %{snapshot: snapshot, devbox: devbox, workbench: wb}) do
+    Control.create_instance(inst, %{snapshot: snapshot, devbox: devbox, idle_policy: idle_policy(devbox, wb)})
+    |> control_result(inst)
+    |> case do
+      {:ok, inst} -> {:ok, inst}
+      err ->
+        fail_start(inst, "could not start on the cluster: #{error_message(err)}", ~w(pending provisioning)a)
+        err
+    end
+  end
+
+  defp fail_start(%DevboxInstance{id: id}, reason, statuses) do
+    start_transaction()
+    |> add_operation(:instance, fn _ -> DevboxInstance.with_lock() |> Repo.get!(id) |> ensure_status(statuses) end)
+    |> add_operation(:update, fn %{instance: inst} -> end_instance(inst, :failed, reason) end)
+    |> execute(extract: :update)
+    |> notify(:end)
+  end
+
+  defp error_message({:error, %{message: msg}}) when is_binary(msg), do: msg
+  defp error_message({:error, msg}) when is_binary(msg), do: msg
+  defp error_message(err), do: inspect(err)
 
   defp instance_name(name, _) when is_binary(name) and byte_size(name) > 0, do: name
   defp instance_name(_, workbench_id) do
@@ -537,6 +559,21 @@ defmodule Console.Devboxes do
     |> notify(:end)
   end
 
+  @doc """
+  Fails instances still pending well after they were created: the gateway reports `provisioning` before
+  CreateInstance returns, so these never reached it (console went down before asking).
+  """
+  @spec fail_unstarted_instances() :: [DevboxInstance.t]
+  def fail_unstarted_instances() do
+    DevboxInstance.pending_before(Timex.now() |> Timex.shift(minutes: -10))
+    |> Repo.all()
+    |> Enum.map(&fail_start(&1, "never reached its cluster", [:pending]))
+    |> Enum.flat_map(fn
+      {:ok, inst} -> [inst]
+      _ -> []
+    end)
+  end
+
   defp stale?(%DevboxInstance{suspended_at: %DateTime{} = at, devbox: devbox}) do
     %{complete_after: secs} = Devbox.idle_policy(devbox)
     DateTime.diff(DateTime.utc_now(), at, :second) > secs
@@ -563,12 +600,28 @@ defmodule Console.Devboxes do
       |> allow(user, :create)
       |> when_ok(:insert)
     end)
-    |> add_operation(:control, fn %{instance: inst, snapshot: snapshot} ->
-      Control.snapshot_instance(inst, snapshot)
-      |> control_result(snapshot)
-    end)
-    |> execute(extract: :snapshot)
-    |> notify(:update)
+    |> execute()
+    |> case do
+      {:ok, %{instance: inst, snapshot: snapshot}} ->
+        notify({:ok, snapshot}, :update)
+        take_snapshot(inst, snapshot)
+      err -> err
+    end
+  end
+
+  # like `start_instance/2`, the gateway reports the snapshot by id, so it must be committed first
+  defp take_snapshot(%DevboxInstance{} = inst, %DevboxSnapshot{} = snapshot) do
+    case Control.snapshot_instance(inst, snapshot) |> control_result(snapshot) do
+      {:ok, snapshot} -> {:ok, snapshot}
+      err ->
+        with %DevboxSnapshot{status: :pending} = snapshot <- Repo.get(DevboxSnapshot, snapshot.id) do
+          snapshot
+          |> DevboxSnapshot.changeset(%{status: :failed, error: error_message(err)})
+          |> Repo.update()
+          |> notify(:update)
+        end
+        err
+    end
   end
 
   @doc """

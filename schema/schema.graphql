@@ -3050,6 +3050,7 @@ type DevboxInstance {
 
   keepAwakeBy: User
 
+  "the instance's threads and their subagents (kind SUBAGENT, under their parent)"
   threads(
     includeDeleted: Boolean
 
@@ -3459,6 +3460,12 @@ type DevboxTimeline {
   "apply live deltas with a greater offset on top of this page"
   deltaOffset: Long
 
+  "the session's last delta seq this page reflects: apply its deltas from seq + 1, in order"
+  seq: Long
+
+  "the daemon run numbering seq; deltas from another stream need a reload"
+  stream: String
+
   "more entities lie in the paging direction (older ones, unless paging with after)"
   hasMore: Boolean
 }
@@ -3675,6 +3682,11 @@ type DevboxEntityChange {
   entity: DevboxEntity
 
   offset: Long
+
+  "dense per-session order within stream; unset for notices and console-made deltas"
+  seq: Long
+
+  stream: String
 
   emittedAt: DateTime
 }

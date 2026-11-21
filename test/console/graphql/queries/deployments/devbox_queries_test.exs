@@ -80,6 +80,25 @@ defmodule Console.GraphQl.Deployments.DevboxQueriesTest do
       assert iid == interaction.id
     end
 
+    test "it lists subagents with the threads that spawned them" do
+      user = insert(:user)
+      inst = insert(:devbox_instance, workbench: insert(:workbench, read_bindings: [%{user_id: user.id}]))
+      thread = insert(:devbox_instance_session, instance: inst)
+      sub = insert(:devbox_instance_session, instance: inst, kind: :subagent, parent: thread, parent_tool_call_id: "toolu_1")
+
+      {:ok, %{data: %{"devboxInstance" => %{"threads" => threads}}}} = run_query("""
+        query Instance($id: ID!) {
+          devboxInstance(id: $id) { threads { id kind parent { id } parentToolCallId } }
+        }
+      """, %{"id" => inst.id}, %{current_user: user})
+
+      by_id = Map.new(threads, &{&1["id"], &1})
+      assert by_id[thread.id]["kind"] == "THREAD"
+      assert by_id[sub.id]["kind"] == "SUBAGENT"
+      assert by_id[sub.id]["parent"]["id"] == thread.id
+      assert by_id[sub.id]["parentToolCallId"] == "toolu_1"
+    end
+
     test "it stages threads and filters them by stage" do
       user = insert(:user)
       inst = insert(:devbox_instance, workbench: insert(:workbench, read_bindings: [%{user_id: user.id}]))
@@ -187,6 +206,8 @@ defmodule Console.GraphQl.Deployments.DevboxQueriesTest do
       expect(Control.Test, :get_timeline, fn _, "sess-1", %{limit: 10} ->
         {:ok, %{
           delta_offset: 42,
+          seq: 7,
+          stream: "run-1",
           has_more: true,
           entities: [
             %{
@@ -220,6 +241,8 @@ defmodule Console.GraphQl.Deployments.DevboxQueriesTest do
         query Timeline($id: ID!) {
           devboxTimeline(instanceId: $id, sessionId: "sess-1", limit: 10) {
             deltaOffset
+            seq
+            stream
             hasMore
             entities {
               id
@@ -240,6 +263,8 @@ defmodule Console.GraphQl.Deployments.DevboxQueriesTest do
       """, %{"id" => inst.id}, %{current_user: user})
 
       assert timeline["deltaOffset"] == "42"
+      assert timeline["seq"] == "7"
+      assert timeline["stream"] == "run-1"
       assert timeline["hasMore"]
       [msg, tool, term] = timeline["entities"]
       assert msg["type"] == "AGENT_MESSAGE"

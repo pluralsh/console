@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
+	"path/filepath"
 	"slices"
 	"strings"
 	"testing"
@@ -187,6 +188,61 @@ func codexConfig(t *testing.T, c *Config) map[string]any {
 }
 
 // codex-acp starts `codex app-server` itself and drops flags, so the proxy setup has to live in config.toml
+func TestPiSubagents(t *testing.T) {
+	c := testConfig(t)
+	c.PiSubagentExtension = filepath.Join(t.TempDir(), "subagent")
+	files := map[string]string{
+		"index.ts":         "export default function () {}\n",
+		"agents/scout.md":  "---\nname: scout\ndescription: Fast recon\ntools: read, bash\nmodel: claude-haiku-4-5\n---\n\nmodel: stays in the body\n",
+		"agents/worker.md": "---\nname: worker\nmodel: claude-sonnet-4-5\n---\nWork.\n",
+	}
+	for name, body := range files {
+		p := filepath.Join(c.PiSubagentExtension, name)
+		if err := os.MkdirAll(filepath.Dir(p), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(p, []byte(body), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	agentDir := filepath.Join(c.Home, ".pi", "agent")
+	if err := os.MkdirAll(filepath.Join(agentDir, "agents"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(agentDir, "agents", "worker.md"), []byte("mine"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(agentDir, "settings.json"), []byte(`{"defaultModel":"m1","extensions":["/x/ext.ts"]}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	launch := &devboxv1.AgentLaunch{Agent: devboxv1.AgentType_AGENT_TYPE_PI}
+	for range 2 {
+		spec, err := c.Spec(launch, proxyEndpoints, "")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if spec.TranscriptTool != "subagent" {
+			t.Fatalf("transcript tool %q", spec.TranscriptTool)
+		}
+	}
+	var settings map[string]any
+	data, _ := os.ReadFile(filepath.Join(agentDir, "settings.json"))
+	if err := json.Unmarshal(data, &settings); err != nil {
+		t.Fatal(err)
+	}
+	exts, _ := settings["extensions"].([]any)
+	if settings["defaultModel"] != "m1" || len(exts) != 2 || exts[0] != "/x/ext.ts" || exts[1] != filepath.Join(c.PiSubagentExtension, "index.ts") {
+		t.Fatalf("settings %v", settings)
+	}
+	scout, _ := os.ReadFile(filepath.Join(agentDir, "agents", "scout.md"))
+	if want := "---\nname: scout\ndescription: Fast recon\ntools: read, bash\n---\n\nmodel: stays in the body\n"; string(scout) != want {
+		t.Fatalf("scout.md:\n%s", scout)
+	}
+	if worker, _ := os.ReadFile(filepath.Join(agentDir, "agents", "worker.md")); string(worker) != "mine" {
+		t.Fatalf("the user's worker.md was replaced: %s", worker)
+	}
+}
+
 func TestNativeSubagentAdapters(t *testing.T) {
 	c := testConfig(t)
 	for agent, want := range map[devboxv1.AgentType]bool{

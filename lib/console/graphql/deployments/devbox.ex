@@ -502,7 +502,7 @@ defmodule Console.GraphQl.Deployments.Devbox do
     field :user,          :user, resolve: dataloader(User)
     field :keep_awake_by, :user, resolve: dataloader(User)
 
-    field :threads, list_of(:devbox_thread) do
+    field :threads, list_of(:devbox_thread), description: "the instance's threads and their subagents (kind SUBAGENT, under their parent)" do
       arg :include_deleted, :boolean
       arg :stages,          list_of(:devbox_thread_stage), description: "only threads in these stages"
       resolve &Deployments.devbox_instance_threads/3
@@ -799,6 +799,8 @@ defmodule Console.GraphQl.Deployments.Devbox do
   object :devbox_timeline do
     field :entities,     list_of(:devbox_entity)
     field :delta_offset, :long, description: "apply live deltas with a greater offset on top of this page"
+    field :seq,          :long, description: "the session's last delta seq this page reflects: apply its deltas from seq + 1, in order"
+    field :stream,       :string, description: "the daemon run numbering seq; deltas from another stream need a reload"
     field :has_more,     :boolean, description: "more entities lie in the paging direction (older ones, unless paging with after)"
   end
 
@@ -995,6 +997,8 @@ defmodule Console.GraphQl.Deployments.Devbox do
     field :payload,     :map, description: "the verbatim ACP chunk, patch, notice or state update"
     field :entity,      :devbox_entity, description: "for settle deltas, the final entity"
     field :offset,      :long
+    field :seq,         :long, description: "dense per-session order within stream; unset for notices and console-made deltas"
+    field :stream,      :string
     field :emitted_at,  :datetime
   end
 

@@ -80,13 +80,16 @@ export function latestActivity(
   return undefined
 }
 
-// subagents keyed by the parent's tool call that spawned them
+// subagents grouped by the parent's tool call that spawned them; one call can run several (pi's parallel mode)
 export function subagentsBySpawner<
   S extends Pick<DevboxThreadFragment, 'parentToolCallId'>,
->(subagents: S[]): Map<string, S> {
-  return new Map(
-    subagents.flatMap((s) =>
-      s.parentToolCallId ? [[s.parentToolCallId, s] as const] : []
-    )
-  )
+>(subagents: S[]): Map<string, S[]> {
+  const out = new Map<string, S[]>()
+  for (const s of subagents) {
+    if (!s.parentToolCallId) continue
+    const group = out.get(s.parentToolCallId)
+    if (group) group.push(s)
+    else out.set(s.parentToolCallId, [s])
+  }
+  return out
 }

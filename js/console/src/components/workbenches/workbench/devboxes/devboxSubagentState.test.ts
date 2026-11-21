@@ -88,15 +88,19 @@ describe('latestActivity', () => {
 })
 
 describe('subagentsBySpawner', () => {
-  it('keys subagents by the tool call that spawned them', () => {
-    const s = subagent('s1', DevboxForegroundState.Running, {
+  it('groups subagents by the tool call that spawned them', () => {
+    const s1 = subagent('s1', DevboxForegroundState.Running, {
+      parentToolCallId: 'task-1',
+    })
+    const s3 = subagent('s3', DevboxForegroundState.Running, {
       parentToolCallId: 'task-1',
     })
     const map = subagentsBySpawner([
-      s,
+      s1,
       subagent('s2', DevboxForegroundState.Running),
+      s3,
     ])
     expect([...map.keys()]).toEqual(['task-1'])
-    expect(map.get('task-1')).toBe(s)
+    expect(map.get('task-1')).toEqual([s1, s3])
   })
 })

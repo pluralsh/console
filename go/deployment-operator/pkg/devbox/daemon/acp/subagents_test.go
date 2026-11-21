@@ -20,6 +20,22 @@ func TestSubagentTerminalStates(t *testing.T) {
 	}
 }
 
+func TestHiddenAgentCalls(t *testing.T) {
+	n := NewNormalizer(1, ClaudeLineage)
+	agent := map[string]any{"claudeCode": map[string]any{"toolName": "Agent"}}
+	if got := n.Normalize("parent", Object{"sessionUpdate": "tool_call_update", "toolCallId": "hidden", "_meta": agent}); len(got) != 0 {
+		t.Fatalf("an update for the Agent call native mode hides surfaced: %+v", got)
+	}
+	// without native mode (or when the spawn fails) the adapter shows the Agent call itself
+	n.Normalize("parent", Object{"sessionUpdate": "tool_call", "toolCallId": "shown", "title": "Task", "_meta": agent})
+	if got := n.Normalize("parent", Object{"sessionUpdate": "tool_call_update", "toolCallId": "shown", "status": "completed", "_meta": agent}); len(got) != 1 {
+		t.Fatalf("an update for a shown Agent call was dropped: %+v", got)
+	}
+	if got := NewNormalizer(1, NoLineage{}).Normalize("parent", Object{"sessionUpdate": "tool_call_update", "toolCallId": "x", "_meta": agent}); len(got) != 1 {
+		t.Fatalf("other adapters' updates were dropped: %+v", got)
+	}
+}
+
 func TestNativeChildUpdatesIgnoreLineageTags(t *testing.T) {
 	n := NewNormalizer(1, ClaudeLineage)
 	tagged := Object{"sessionUpdate": "agent_message_chunk", "content": map[string]any{"type": "text", "text": "hi"},

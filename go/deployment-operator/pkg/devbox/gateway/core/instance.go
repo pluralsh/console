@@ -47,6 +47,11 @@ func (r *Record) status() devboxv1.InstanceStatus {
 	return devboxv1.InstanceStatus(devboxv1.InstanceStatus_value[r.Status])
 }
 
+// awake is whether an instance in this status has its daemon up.
+func awake(s devboxv1.InstanceStatus) bool {
+	return s == devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING || s == devboxv1.InstanceStatus_INSTANCE_STATUS_SNAPSHOTTING
+}
+
 func (r *Record) request() *devboxv1.CreateInstanceRequest {
 	req := &devboxv1.CreateInstanceRequest{}
 	_ = protojson.UnmarshalOptions{DiscardUnknown: true}.Unmarshal(r.Request, req)

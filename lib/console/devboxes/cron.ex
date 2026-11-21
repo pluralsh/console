@@ -10,6 +10,8 @@ defmodule Console.Devboxes.Cron do
   def complete_stale_instances() do
     completed = Devboxes.complete_stale_instances()
     Logger.info("completed #{length(completed)} stale devbox instances")
+    failed = Devboxes.fail_unstarted_instances()
+    Logger.info("failed #{length(failed)} devbox instances that never reached their cluster")
   end
 
   @doc "Runs a scheduled key rotation step for every enabled workload identity issuer"

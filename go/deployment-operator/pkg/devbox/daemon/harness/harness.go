@@ -6,14 +6,18 @@
 package harness
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io/fs"
+	"net"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"slices"
+	"strconv"
 	"strings"
 
 	"github.com/pelletier/go-toml/v2"
@@ -105,6 +109,8 @@ type agentDefaults struct {
 	// the client capability, claude-agent-acp drops subagent messages and only tags their tool calls, and codex-acp
 	// folds every child thread's events (and approvals) into the root session unmarked.
 	nativeSubagents bool
+	// transcriptTool is a tool whose output streams its subagents' transcripts (acp.TranscriptTool).
+	transcriptTool string
 }
 
 var defaults = map[devboxv1.AgentType]agentDefaults{
@@ -112,7 +118,7 @@ var defaults = map[devboxv1.AgentType]agentDefaults{
 	devboxv1.AgentType_AGENT_TYPE_CODEX:    {command: "codex-acp", binary: "codex", proxyProvider: "openai", lineage: acp.NoLineage{}, v2: true, nativeSubagents: true},
 	devboxv1.AgentType_AGENT_TYPE_OPENCODE: {command: "opencode", args: []string{"acp"}, binary: "opencode", proxyProvider: "openai", lineage: acp.NoLineage{}},
 	devboxv1.AgentType_AGENT_TYPE_GEMINI:   {command: "gemini", args: []string{"--experimental-acp"}, binary: "gemini", modelArg: "--model", proxyProvider: "vertex", lineage: acp.NoLineage{}},
-	devboxv1.AgentType_AGENT_TYPE_PI:       {command: "pi-acp", binary: "pi", proxyProvider: "openai", lineage: acp.NoLineage{}},
+	devboxv1.AgentType_AGENT_TYPE_PI:       {command: "pi-acp", binary: "pi", proxyProvider: "openai", lineage: acp.NoLineage{}, transcriptTool: piSubagentTool},
 }
 
 // Command overrides an agent's ACP command (tests and custom images).
@@ -136,6 +142,8 @@ type Config struct {
 	Overrides map[devboxv1.AgentType]Command
 	// CodexBundledModels returns Codex's bundled model catalog; it defaults to `codex debug models --bundled`.
 	CodexBundledModels func() ([]byte, error)
+	// PiSubagentExtension overrides where pi's subagent extension is (PiSubagentDir).
+	PiSubagentExtension string
 }
 
 // Spec is everything needed to start one agent's ACP process.
@@ -150,11 +158,23 @@ type Spec struct {
 	RequestV2 bool
 	// NativeSubagents advertises the subagents client capability at initialize.
 	NativeSubagents bool
+	// TranscriptTool is a tool whose output streams its subagents' transcripts (acp.TranscriptTool).
+	TranscriptTool string
 	// BootModel is the model passed through flags/env, for adapters without ACP model control.
 	BootModel string
 	Billing   devboxv1.BillingMode
 	// AuthMethodID, when set, is sent with `authenticate` after initialize.
 	AuthMethodID string
+	// OpenCodeServer is the HTTP server `opencode acp` runs its sessions on, whose event stream names the child
+	// sessions of `task` subagents.
+	OpenCodeServer *OpenCodeServer
+}
+
+// OpenCodeServer is where `opencode acp` serves OpenCode's own API, and its basic-auth credentials.
+type OpenCodeServer struct {
+	URL      string
+	Username string
+	Password string
 }
 
 // Binary returns the harness CLI for an agent (claude, codex, ...).
@@ -251,7 +271,8 @@ func (c *Config) Spec(launch *devboxv1.AgentLaunch, endpoints *devboxv1.HarnessE
 	}
 	spec := &Spec{
 		Agent: t, Path: path, Args: append([]string(nil), args...), Dir: c.Home, Lineage: d.lineage,
-		RequestV2: launch.GetAcpV2() && d.v2, NativeSubagents: d.nativeSubagents, BootModel: bootModel, Billing: billing,
+		RequestV2: launch.GetAcpV2() && d.v2, NativeSubagents: d.nativeSubagents, TranscriptTool: d.transcriptTool,
+		BootModel: bootModel, Billing: billing,
 	}
 	env := c.baseEnv()
 	aiProxy := strings.TrimSuffix(endpoints.GetAiProxyUrl(), "/")
@@ -287,6 +308,16 @@ func (c *Config) Spec(launch *devboxv1.AgentLaunch, endpoints *devboxv1.HarnessE
 			return nil, err
 		}
 		set("OPENCODE_CONFIG", cfg)
+		if _, overridden := c.Overrides[t]; !overridden {
+			srv, port, err := openCodeServer()
+			if err != nil {
+				return nil, err
+			}
+			env = unsetEnv(env, "OPENCODE_SERVER_USERNAME")
+			set("OPENCODE_SERVER_PASSWORD", srv.Password)
+			spec.Args = append(spec.Args, "--hostname", "127.0.0.1", "--port", strconv.Itoa(port))
+			spec.OpenCodeServer = srv
+		}
 	case devboxv1.AgentType_AGENT_TYPE_GEMINI:
 		set("GEMINI_CLI_TRUST_WORKSPACE", "true")
 		if aiProxy != "" {
@@ -299,6 +330,9 @@ func (c *Config) Spec(launch *devboxv1.AgentLaunch, endpoints *devboxv1.HarnessE
 	case devboxv1.AgentType_AGENT_TYPE_PI:
 		// Pi reads custom endpoints from models.json, not the environment; the model is set over ACP
 		if err := c.syncPiProvider(aiProxy, proxyModels.GetModels()); err != nil {
+			return nil, err
+		}
+		if err := c.syncPiSubagents(); err != nil {
 			return nil, err
 		}
 	}
@@ -404,6 +438,24 @@ var claudeTiers = map[string]string{
 
 var claudeTierEnv = []string{
 	"ANTHROPIC_DEFAULT_OPUS_MODEL", "ANTHROPIC_DEFAULT_SONNET_MODEL", "ANTHROPIC_DEFAULT_HAIKU_MODEL", "ANTHROPIC_SMALL_FAST_MODEL",
+}
+
+// openCodeServer picks a loopback port and a password for the server `opencode acp` starts, which otherwise
+// listens on a random port without auth. The port is free when picked; OpenCode exits if it's taken by the time
+// it binds, and the connection fails like any other harness that won't start.
+func openCodeServer() (*OpenCodeServer, int, error) {
+	l, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		return nil, 0, fmt.Errorf("pick opencode server port: %w", err)
+	}
+	port := l.Addr().(*net.TCPAddr).Port
+	_ = l.Close()
+	secret := make([]byte, 24)
+	if _, err := rand.Read(secret); err != nil {
+		return nil, 0, err
+	}
+	srv := &OpenCodeServer{URL: fmt.Sprintf("http://127.0.0.1:%d", port), Username: "opencode", Password: hex.EncodeToString(secret)}
+	return srv, port, nil
 }
 
 // writeOpenCodeConfig writes the daemon-managed OpenCode config (OPENCODE_CONFIG merges with the user's own).
@@ -737,6 +789,87 @@ func (c *Config) syncPiProvider(aiProxy string, models []string) error {
 	}
 	cfg["providers"] = providers
 	return fsutil.WriteJSON(path, cfg, 0o644)
+}
+
+// piSubagentTool is the tool pi's subagent extension registers.
+const piSubagentTool = "subagent"
+
+// piSubagentExtension is where pi's npm package ships its subagent extension.
+const piSubagentExtension = "@earendil-works/pi-coding-agent/examples/extensions/subagent"
+
+// PiSubagentDir is the image's copy of pi's subagent extension, under the global node_modules.
+func (c *Config) PiSubagentDir() string {
+	if c.PiSubagentExtension != "" {
+		return c.PiSubagentExtension
+	}
+	root := "/usr/local/lib/node_modules"
+	if p, ok := EnvValue(c.baseEnv(), "NODE_PATH"); ok && p != "" {
+		root = filepath.SplitList(p)[0]
+	}
+	return filepath.Join(root, piSubagentExtension)
+}
+
+// syncPiSubagents gives Pi subagents: its bundled subagent extension in ~/.pi/agent/settings.json, and the
+// extension's agents in ~/.pi/agent/agents, minus the Anthropic model each pins, so subagents run on the model
+// the thread picked (Pi keeps it as its default) and through the proxy. Agent files that exist are the user's.
+func (c *Config) syncPiSubagents() error {
+	ext := c.PiSubagentDir()
+	index := filepath.Join(ext, "index.ts")
+	if _, err := os.Stat(index); err != nil {
+		return nil
+	}
+	agentDir := filepath.Join(c.Home, ".pi", "agent")
+	path := filepath.Join(agentDir, "settings.json")
+	settings := map[string]any{}
+	if _, err := fsutil.ReadJSON(path, &settings); err != nil {
+		return err
+	}
+	exts, _ := settings["extensions"].([]any)
+	if !slices.Contains(exts, any(index)) {
+		settings["extensions"] = append(exts, index)
+		if err := fsutil.WriteJSON(path, settings, 0o644); err != nil {
+			return err
+		}
+	}
+	agents, err := filepath.Glob(filepath.Join(ext, "agents", "*.md"))
+	if err != nil {
+		return err
+	}
+	for _, src := range agents {
+		dst := filepath.Join(agentDir, "agents", filepath.Base(src))
+		if _, err := os.Lstat(dst); err == nil {
+			continue
+		}
+		data, err := os.ReadFile(src)
+		if err != nil {
+			return err
+		}
+		if err := os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
+			return err
+		}
+		if err := fsutil.WriteFileAtomic(dst, withoutFrontmatterKey(data, "model"), 0o644); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// withoutFrontmatterKey drops one key from a markdown file's YAML frontmatter.
+func withoutFrontmatterKey(data []byte, key string) []byte {
+	lines := strings.SplitAfter(string(data), "\n")
+	if len(lines) == 0 || strings.TrimSpace(lines[0]) != "---" {
+		return data
+	}
+	out := []string{lines[0]}
+	for i := 1; i < len(lines); i++ {
+		if strings.TrimSpace(lines[i]) == "---" {
+			return []byte(strings.Join(append(out, lines[i:]...), ""))
+		}
+		if !strings.HasPrefix(lines[i], key+":") {
+			out = append(out, lines[i])
+		}
+	}
+	return data
 }
 
 // InstructionLinks are each harness's global instruction file, symlinked to ~/AGENTS.md so the devbox

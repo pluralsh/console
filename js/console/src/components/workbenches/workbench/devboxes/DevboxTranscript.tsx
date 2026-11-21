@@ -92,10 +92,14 @@ export function DevboxTranscript({
     )
       continue
     const toolCallId = entity.toolCall?.toolCallId
-    const spawned = toolCallId ? bySpawner.get(toolCallId) : undefined
-    if (spawned && renderSubagent && !placed.has(spawned.id)) {
-      placed.add(spawned.id)
-      rows.push({ kind: 'subagent', subagent: spawned })
+    const spawned = (
+      toolCallId ? bySpawner.get(toolCallId) : undefined
+    )?.filter((s) => !placed.has(s.id))
+    if (spawned?.length && renderSubagent) {
+      for (const subagent of spawned) {
+        placed.add(subagent.id)
+        rows.push({ kind: 'subagent', subagent })
+      }
       continue
     }
     if (toolCallId && hiddenToolCalls?.has(toolCallId)) continue

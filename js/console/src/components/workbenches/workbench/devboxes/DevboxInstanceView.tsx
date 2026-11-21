@@ -25,6 +25,7 @@ import { DevboxPanelRail, useDevboxPanel } from './DevboxControlPanel'
 import { isClusterOfflineError } from './devboxErrors'
 import { useDevboxPullRequests } from './devboxPullRequests'
 import { mergePendingInteractions } from './devboxInteractions'
+import { mergeNewThreads } from './devboxThreadsCache'
 import { DevboxChangesViewer } from './DevboxChangesViewer'
 import { DevboxFileViewer } from './DevboxFileViewer'
 import {
@@ -80,18 +81,24 @@ export function DevboxInstanceView({ instanceId }: { instanceId: string }) {
     },
   })
 
-  // approvals and questions the agent is blocked on arrive here, not as thread deltas
+  // approvals and questions the agent is blocked on arrive here, not as thread
+  // deltas, as do the threads and subagents the agent starts itself
   useDevboxInstanceIndexDeltaSubscription({
     variables: { instanceId },
     skip: !instanceId,
-    onData: ({ client, data: { data } }) =>
+    onData: ({ client, data: { data } }) => {
+      const payload = data?.devboxInstanceIndexDelta?.payload
       mergePendingInteractions(
         client.cache,
         instanceId,
-        (data?.devboxInstanceIndexDelta?.payload?.interactions ?? []).filter(
-          isNonNullable
-        )
-      ),
+        (payload?.interactions ?? []).filter(isNonNullable)
+      )
+      mergeNewThreads(
+        client.cache,
+        instanceId,
+        (payload?.threads ?? []).filter(isNonNullable)
+      )
+    },
   })
 
   const timeline = useDevboxTimelineStore(instanceId)

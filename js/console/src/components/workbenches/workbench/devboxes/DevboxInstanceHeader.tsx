@@ -44,7 +44,7 @@ import { useDevboxPanel } from './DevboxControlPanel'
 import { DevboxCreatePrButton } from './DevboxCreatePrButton'
 import { DevboxDiffStat, diffStatLabel } from './DevboxDiffStat'
 import { useDevboxPullRequests } from './devboxPullRequests'
-import { selectedThread } from './devboxThreads'
+import { rootThread, selectedThread } from './devboxThreads'
 import { isInstanceLive, isInstanceTerminal } from './devboxIdle'
 import { devboxSizing } from './devboxSizing'
 import { useKeepAwakeActions } from './DevboxKeepAwakeMenu'
@@ -411,13 +411,17 @@ function ChangesButton({ instanceId }: { instanceId: string }) {
   )
 }
 
-// the pr is credited to the thread in view, so its row shows the open-pr icon
+// the pr is credited to the thread in view (a subagent's to the thread it
+// works for), so its row shows the open-pr icon
 function CreatePrButton({ instance }: { instance: DevboxInstanceFragment }) {
   const [params] = useSearchParams()
   const { refetch } = useDevboxPullRequests(instance.id)
-  const thread = selectedThread(
+  const thread = rootThread(
     instance.threads,
-    params.get(WORKBENCH_DEVBOX_THREAD_QUERY_PARAM)
+    selectedThread(
+      instance.threads,
+      params.get(WORKBENCH_DEVBOX_THREAD_QUERY_PARAM)
+    )
   )
   return (
     <DevboxCreatePrButton

@@ -452,6 +452,9 @@ message GetTimelineResponse {
   uint64 delta_offset = 4;
   reserved 5;
   reserved "archive_degraded";
+  // The session's last Delta.seq (and its stream) this page reflects: apply live deltas from seq + 1, in order.
+  uint64 seq = 6;
+  string stream = 7;
 }
 
 message GetSessionsRequest {

@@ -445,8 +445,8 @@ defmodule Console.Devboxes.Threads do
   @doc """
   A page of a session's transcript, served by the box (resuming it when suspended): settled entities merged with
   in-flight state, in position order.  Without a cursor it's the newest page; `:before` pages backwards and
-  `:after` forwards, with `has_more` saying more entities lie in that direction.  Apply live deltas with an offset
-  above `delta_offset` on top.
+  `:after` forwards, with `has_more` saying more entities lie in that direction.  Apply the session's live deltas
+  from `seq` + 1 (within `stream`) on top, in seq order.
   """
   @spec timeline(binary, binary, map, User.t) :: {:ok, map} | error
   def timeline(_, _, %{before: b, after: a}, _) when is_integer(b) and is_integer(a),

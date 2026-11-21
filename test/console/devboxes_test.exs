@@ -193,6 +193,7 @@ defmodule Console.DevboxesTest do
       expect(Control.Test, :create_instance, fn %DevboxInstance{}, %{devbox: %{id: id}, idle_policy: policy} ->
         assert id == devbox.id
         assert policy.max_deferral == 3_600
+        refute Console.Repo.in_transaction?()
         :ok
       end)
 
@@ -280,11 +281,23 @@ defmodule Console.DevboxesTest do
       {:error, "forbidden"} = Devboxes.create_instance(%{devbox_id: devbox.id}, wb.id, reader)
     end
 
-    test "it returns a typed error when the cluster is offline", %{user: user, workbench: wb, devbox: devbox} do
+    test "it returns a typed error when the cluster is offline, failing the instance", %{user: user, workbench: wb, devbox: devbox} do
       expect(Control.Test, :create_instance, fn _, _ -> {:error, :not_connected} end)
 
       {:error, %{extensions: %{code: "CLUSTER_OFFLINE"}}} = Devboxes.create_instance(%{devbox_id: devbox.id}, wb.id, user)
-      refute Console.Repo.exists?(DevboxInstance)
+
+      [inst] = Console.Repo.all(DevboxInstance)
+      assert inst.status == :failed
+      assert inst.status_reason =~ "could not start on the cluster"
+      assert inst.credentials_revoked_at
+      assert_receive {:event, %PubSub.DevboxInstanceEnded{item: %{id: id}}}
+      assert id == inst.id
+    end
+
+    test "a failed start doesn't count against max instances", %{user: user, workbench: wb, devbox: devbox} do
+      expect(Control.Test, :create_instance, 3, fn _, _ -> {:error, "boom"} end)
+
+      for _ <- 1..3, do: {:error, "boom"} = Devboxes.create_instance(%{devbox_id: devbox.id}, wb.id, user)
     end
 
     test "it restores snapshots, falling back to filesystem fidelity on a new template", %{user: user, workbench: wb, devbox: devbox} do
@@ -392,11 +405,28 @@ defmodule Console.DevboxesTest do
     end
   end
 
+  describe "#fail_unstarted_instances/0" do
+    test "it fails instances that stayed pending, as they never reached their cluster" do
+      stuck = insert(:devbox_instance, status: :pending, inserted_at: Timex.now() |> Timex.shift(minutes: -15))
+      fresh = insert(:devbox_instance, status: :pending)
+      started = insert(:devbox_instance, status: :provisioning, inserted_at: Timex.now() |> Timex.shift(minutes: -15))
+
+      [failed] = Devboxes.fail_unstarted_instances()
+
+      assert failed.id == stuck.id
+      assert failed.status == :failed
+      assert failed.status_reason == "never reached its cluster"
+      assert refetch(fresh).status == :pending
+      assert refetch(started).status == :provisioning
+    end
+  end
+
   describe "#create_snapshot/3" do
     test "it creates a pending snapshot and asks the gateway" do
       inst = owned_instance()
       expect(Control.Test, :snapshot_instance, fn %{id: id}, %DevboxSnapshot{status: :pending} ->
         assert id == inst.id
+        refute Console.Repo.in_transaction?()
         :ok
       end)
 
@@ -406,6 +436,17 @@ defmodule Console.DevboxesTest do
       assert snapshot.workbench_id == inst.workbench_id
       assert snapshot.devbox_id == inst.devbox_id
       assert snapshot.name == "before upgrade"
+    end
+
+    test "a snapshot the gateway refuses is failed" do
+      inst = owned_instance()
+      expect(Control.Test, :snapshot_instance, fn _, _ -> {:error, :not_connected} end)
+
+      {:error, %{extensions: %{code: "CLUSTER_OFFLINE"}}} = Devboxes.create_snapshot(%{}, inst.id, inst.user)
+
+      [snapshot] = Console.Repo.all(DevboxSnapshot)
+      assert snapshot.status == :failed
+      assert snapshot.error
     end
   end
 

@@ -110,10 +110,11 @@ export type DevboxAwakeStatus = {
 type AwakeInput = Pick<
   DevboxInstanceTinyFragment,
   'status' | 'keepAwakeUntil' | 'foregroundState' | 'statusReason'
-> & {
-  idleState?: DevboxInstanceFragment['idleState']
-  keepAwakeBy?: DevboxInstanceFragment['keepAwakeBy']
-}
+> &
+  Partial<Pick<DevboxInstanceTinyFragment, 'awakeSince'>> & {
+    idleState?: DevboxInstanceFragment['idleState']
+    keepAwakeBy?: DevboxInstanceFragment['keepAwakeBy']
+  }
 
 export function getDevboxAwakeStatus(
   instance: AwakeInput,
@@ -159,10 +160,13 @@ export function getDevboxAwakeStatus(
   }
 
   const idle = instance.idleState
-  // a deadline long past belongs to an earlier suspend, not to this running instance
+  // a deadline from before the instance woke, or long past, belongs to an
+  // earlier suspend, not to this run
   const stale =
     !!idle?.suspendsAt &&
-    dayjs(now).diff(idle.suspendsAt, 'second') > SUSPENDING_SOON_SECONDS
+    ((!!instance.awakeSince &&
+      dayjs(idle.suspendsAt).isBefore(instance.awakeSince)) ||
+      dayjs(now).diff(idle.suspendsAt, 'second') > SUSPENDING_SOON_SECONDS)
   if (idle?.idle && idle.suspendsAt && !stale) {
     const seconds = Math.max(0, dayjs(idle.suspendsAt).diff(now, 'second'))
     const mins = Math.ceil(seconds / 60)
