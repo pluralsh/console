@@ -436,6 +436,52 @@ spec:
               name:
                 description: Name of the Devbox in console. Defaults to metadata.name.
                 type: string
+              ociRegistries:
+                default: {}
+                description: |-
+                  OCIRegistries opens egress to public container registries, for pulling images with podman, docker,
+                  crane or helm. Docker Hub and GitHub Container Registry are on unless set to false.
+                properties:
+                  dockerHub:
+                    default: true
+                    description: 'DockerHub: docker.io, its auth service and its Cloudflare
+                      blob CDN. Unqualified image names resolve here.'
+                    type: boolean
+                  ecr:
+                    description: ECR opens private Amazon ECR registries, for any
+                      account, in the listed regions.
+                    properties:
+                      regions:
+                        description: |-
+                          Regions opens, per region, the registry API (<account>.dkr.ecr.<region>.amazonaws.com), the ECR API
+                          that issues login tokens, and the S3 bucket image layers download from.
+                        items:
+                          pattern: ^[a-z]{2}(-[a-z]+)+-[0-9]+$
+                          type: string
+                        maxItems: 32
+                        type: array
+                    type: object
+                  github:
+                    default: true
+                    description: 'GitHub: ghcr.io and its blob host.'
+                    type: boolean
+                  google:
+                    description: 'Google: Container Registry (gcr.io and its regional
+                      hosts) and Artifact Registry (*.pkg.dev).'
+                    type: boolean
+                  kubernetes:
+                    description: |-
+                      Kubernetes: registry.k8s.io and the Artifact Registry mirrors it redirects to. From AWS addresses it
+                      redirects to regional S3 buckets instead, which need httpAllowlist entries.
+                    type: boolean
+                  microsoft:
+                    description: 'Microsoft: the Microsoft Artifact Registry, mcr.microsoft.com,
+                      and its regional data endpoints.'
+                    type: boolean
+                  quay:
+                    description: 'Quay: quay.io, its CDN and its S3 blob bucket.'
+                    type: boolean
+                type: object
               packageServers:
                 default: {}
                 description: |-

@@ -29,6 +29,7 @@ import {
   WorkbenchPromptSubmitButton,
 } from '../WorkbenchPromptControls'
 import {
+  AUTONOMY_CATEGORY,
   autonomyChoices,
   DevboxAutonomyPolicy,
   isAutonomyOption,
@@ -55,6 +56,26 @@ import {
 } from './devboxSlashCommands'
 import { DevboxModelLabel, DevboxModelProviderIcon } from './DevboxChips'
 import { MODEL_CATEGORY, proxyModelOf } from './devboxStartForm'
+
+// the pickers worth a slot in the composer; agents' extras (Codex's collaboration and fast modes) stay at their defaults
+const COMPOSER_CATEGORIES = [MODEL_CATEGORY, 'thought_level', AUTONOMY_CATEGORY]
+
+// the agent's own mode picker only shows when there's no autonomy setting to stand in for it; autonomy goes last
+export function composerOptions(
+  configOptions: Nullable<Nullable<DevboxConfigOptionFragment>[]>
+) {
+  const offered = (configOptions ?? [])
+    .filter(isNonNullable)
+    .filter((o) => o.options?.length)
+  const hasAutonomy = offered.some(isAutonomyOption)
+  return offered
+    .filter(
+      (o) =>
+        COMPOSER_CATEGORIES.includes(o.category ?? '') ||
+        (!hasAutonomy && o.category === MODE_CATEGORY)
+    )
+    .sort((a, b) => Number(isAutonomyOption(a)) - Number(isAutonomyOption(b)))
+}
 import { DevboxSuggestion, DevboxSuggestionMenu } from './DevboxSuggestionMenu'
 import { DevboxFileEntry, isDirectory } from './devboxWorkspaceApi'
 
@@ -334,13 +355,7 @@ export function DevboxComposer({
     }
   }
 
-  const offered = (configOptions ?? [])
-    .filter(isNonNullable)
-    .filter((o) => o.options?.length)
-  const hasAutonomy = offered.some(isAutonomyOption)
-  const options = offered
-    .filter((o) => !(hasAutonomy && o.category === MODE_CATEGORY))
-    .sort((a, b) => Number(isAutonomyOption(a)) - Number(isAutonomyOption(b)))
+  const options = composerOptions(configOptions)
 
   return (
     <ComposerSC {...getRootProps()}>

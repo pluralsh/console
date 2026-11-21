@@ -205,6 +205,14 @@ func (g *Gateway) CancelPrompt(ctx context.Context, req *devboxv1.CancelPromptRe
 	return d.CancelPrompt(ctx, req)
 }
 
+func (g *Gateway) UpdateQueuedPrompt(ctx context.Context, req *devboxv1.UpdateQueuedPromptRequest) (*devboxv1.UpdateQueuedPromptResponse, error) {
+	_, d, err := g.running(ctx, req.GetThread().GetInstanceId(), false)
+	if err != nil {
+		return nil, err
+	}
+	return d.UpdateQueuedPrompt(ctx, req)
+}
+
 func (g *Gateway) SetThreadConfigOption(ctx context.Context, req *devboxv1.SetThreadConfigOptionRequest) (*devboxv1.SetThreadConfigOptionResponse, error) {
 	_, d, err := g.running(ctx, req.GetThread().GetInstanceId(), req.GetResumeIfSuspended())
 	if err != nil {

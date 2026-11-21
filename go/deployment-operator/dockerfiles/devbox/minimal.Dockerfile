@@ -60,7 +60,9 @@ COPY deployment-operator/pkg ./pkg
 COPY deployment-operator/internal ./internal
 COPY deployment-operator/api ./api
 
-RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
+# The build cache stays out of the layer, which the registry cache would otherwise export.
+RUN --mount=type=cache,target=/root/.cache/go-build,id=devbox-daemon-${TARGETARCH} \
+    GOCACHE=/root/.cache/go-build CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
     go build -trimpath \
       -ldflags="-s -w -X main.version=${VERSION}" \
       -o /out/devbox-daemon \

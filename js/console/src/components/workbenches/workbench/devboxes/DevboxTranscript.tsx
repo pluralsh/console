@@ -23,7 +23,6 @@ import {
   resolveToolCallKind,
   toolCallGroupHeader,
 } from 'components/ai/chatbot/toolCallDisplay'
-import { ToolCallKindIcon } from 'components/ai/chatbot/toolCallIcons'
 import { useQuietToolCodeCss } from 'components/ai/chatbot/ToolCallContent'
 import { EaseIn } from 'components/utils/EaseIn'
 import { Body2P } from 'components/utils/typography/Text'
@@ -40,7 +39,7 @@ import { isNonNullable } from 'utils/isNonNullable'
 import { isFileEditToolCall, toolCallDiffs } from './devboxApprovals'
 import { DevboxFileDiff } from './DevboxFileDiff'
 import { DevboxContentBlock, DevboxToolCallContent } from './devboxTimeline'
-import { threadTitle } from './devboxThreads'
+import { subagentsBySpawner } from './devboxSubagentState'
 
 type TerminalLookup = (
   terminalId: Nullable<string>
@@ -49,14 +48,14 @@ type TerminalLookup = (
 type TranscriptRow =
   | { kind: 'entity'; entity: DevboxEntityFragment }
   | { kind: 'tools'; entities: DevboxEntityFragment[] }
-  | { kind: 'lane'; subagent: DevboxThreadFragment }
+  | { kind: 'subagent'; subagent: DevboxThreadFragment }
 
 export function DevboxTranscript({
   entities,
   terminal = () => null,
   hiddenToolCalls,
   subagents = [],
-  renderSubagentLane,
+  renderSubagent,
   empty,
 }: {
   entities: DevboxEntityFragment[]
@@ -64,7 +63,8 @@ export function DevboxTranscript({
   // calls shown elsewhere, e.g. in the approval card awaiting an answer for them
   hiddenToolCalls?: ReadonlySet<string>
   subagents?: DevboxThreadFragment[]
-  renderSubagentLane?: (subagent: DevboxThreadFragment) => ReactNode
+  // a subagent's card, in place of the tool call that spawned it
+  renderSubagent?: (subagent: DevboxThreadFragment) => ReactNode
   empty?: ReactNode
 }) {
   const embeddedTerminals = new Set(
@@ -79,6 +79,7 @@ export function DevboxTranscript({
     )
   )
   const bySession = new Map(subagents.map((s) => [s.sessionId, s]))
+  const bySpawner = subagentsBySpawner(subagents)
   const placed = new Set<string>()
 
   // consecutive tool calls collapse into one group, as in agent run transcripts
@@ -91,6 +92,12 @@ export function DevboxTranscript({
     )
       continue
     const toolCallId = entity.toolCall?.toolCallId
+    const spawned = toolCallId ? bySpawner.get(toolCallId) : undefined
+    if (spawned && renderSubagent && !placed.has(spawned.id)) {
+      placed.add(spawned.id)
+      rows.push({ kind: 'subagent', subagent: spawned })
+      continue
+    }
     if (toolCallId && hiddenToolCalls?.has(toolCallId)) continue
     const last = rows.at(-1)
     if (isGroupableToolCall(entity)) {
@@ -107,28 +114,28 @@ export function DevboxTranscript({
             .map((id) => (id ? bySession.get(id) : undefined))
             .find((s) => s && !placed.has(s.id))
         : undefined
-    if (linked && renderSubagentLane) {
+    if (linked && renderSubagent) {
       placed.add(linked.id)
-      rows.push({ kind: 'lane', subagent: linked })
+      rows.push({ kind: 'subagent', subagent: linked })
     }
   }
-  if (renderSubagentLane)
+  if (renderSubagent)
     for (const subagent of subagents)
-      if (!placed.has(subagent.id)) rows.push({ kind: 'lane', subagent })
+      if (!placed.has(subagent.id)) rows.push({ kind: 'subagent', subagent })
 
   if (!rows.length) return <>{empty}</>
   return (
     <TranscriptSC>
       {rows.map((row) => {
         switch (row.kind) {
-          case 'lane':
+          case 'subagent':
             return (
-              <SubagentLane
-                key={`lane:${row.subagent.id}`}
-                subagent={row.subagent}
+              <div
+                key={`subagent:${row.subagent.id}`}
+                data-entity="subagent"
               >
-                {renderSubagentLane?.(row.subagent)}
-              </SubagentLane>
+                {renderSubagent?.(row.subagent)}
+              </div>
             )
           case 'tools': {
             const [first] = row.entities
@@ -701,38 +708,6 @@ function PlanView({
   )
 }
 
-function SubagentLane({
-  subagent,
-  children,
-}: {
-  subagent: DevboxThreadFragment
-  children: ReactNode
-}) {
-  return (
-    <div data-entity="subagent-lane">
-      <SimpleAccordion
-        hoverCaret
-        label={
-          <Flex
-            gap="xsmall"
-            align="center"
-          >
-            <ToolCallKindIcon kind="subagent" />
-            <Body2P
-              as="span"
-              $color="text-xlight"
-            >
-              Subagent · {threadTitle(subagent)}
-            </Body2P>
-          </Flex>
-        }
-      >
-        <LaneBodySC>{children}</LaneBodySC>
-      </SimpleAccordion>
-    </div>
-  )
-}
-
 function AccordionSection({
   label,
   defaultOpen,
@@ -810,12 +785,6 @@ const TranscriptSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.small,
-}))
-
-const LaneBodySC = styled.div(({ theme }) => ({
-  marginTop: theme.spacing.xsmall,
-  paddingLeft: theme.spacing.medium,
-  borderLeft: theme.borders.default,
 }))
 
 const ImageSC = styled.img(({ theme }) => ({

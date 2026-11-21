@@ -383,6 +383,7 @@ func (m *Manager) threadRowLocked(t *thread) *devboxv1.Session {
 		Imported:      t.imported,
 		Revision:      t.rev,
 		Title:         t.title,
+		QueuedPrompts: t.queuedProtos(),
 	}
 	if s := t.session; s != nil {
 		fillSessionRow(row, s)
@@ -392,13 +393,14 @@ func (m *Manager) threadRowLocked(t *thread) *devboxv1.Session {
 
 func (m *Manager) subagentRowLocked(s *session) *devboxv1.Session {
 	row := &devboxv1.Session{
-		Kind:            devboxv1.SessionKind_SESSION_KIND_SUBAGENT,
-		ParentSessionId: s.parent,
-		Agent:           s.agent,
-		Cwd:             s.cwd,
-		Status:          devboxv1.ThreadStatus_THREAD_STATUS_ACTIVE,
-		CreatedAt:       timestamppb.New(s.createdAt),
-		Revision:        s.rev,
+		Kind:             devboxv1.SessionKind_SESSION_KIND_SUBAGENT,
+		ParentSessionId:  s.parent,
+		ParentToolCallId: s.parentToolCall,
+		Agent:            s.agent,
+		Cwd:              s.cwd,
+		Status:           devboxv1.ThreadStatus_THREAD_STATUS_ACTIVE,
+		CreatedAt:        timestamppb.New(s.createdAt),
+		Revision:         s.rev,
 	}
 	fillSessionRow(row, s)
 	return row

@@ -109,9 +109,6 @@ fileExistenceTests:
   - name: no agent-run prompt templates
     path: /plural/system
     shouldExist: false
-  - name: no podman store
-    path: /etc/containers
-    shouldExist: false
 
 # container-structure-test expands $VAR in arguments with the image environment
 # before the command runs, so these scripts avoid shell variables. Go regexps
@@ -255,6 +252,6 @@ commandTests:
   # Left out on purpose (DBX-49).
   - name: excluded tools are absent
     command: sh
-    args: ["-c", "which agent-harness agent-mcpserver agent-bootstrap codebase-memory-mcp podman docker dockerd containerd fuse-overlayfs newuidmap newgidmap; true"]
+    args: ["-c", "which agent-harness agent-mcpserver agent-bootstrap codebase-memory-mcp dockerd containerd; true"]
     excludedOutput: [".+"]
 

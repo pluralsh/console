@@ -32,6 +32,15 @@ export function useDevboxPullRequests(
 export const openPullRequests = (prs: DevboxPullRequestFragment[]) =>
   prs.filter((pr) => pr.status === PrStatus.Open)
 
+// the state the pull requests tab's icon shows: open while any is, then merged, then closed
+export function pullRequestsStatus(
+  prs: Pick<DevboxPullRequestFragment, 'status'>[]
+): Nullable<PrStatus> {
+  return [PrStatus.Open, PrStatus.Merged, PrStatus.Closed].find((s) =>
+    prs.some((pr) => pr.status === s)
+  )
+}
+
 // open pull requests by the thread they were opened from
 export function openPullRequestsByThread(prs: DevboxPullRequestFragment[]) {
   const byThread = new Map<string, DevboxPullRequestFragment[]>()

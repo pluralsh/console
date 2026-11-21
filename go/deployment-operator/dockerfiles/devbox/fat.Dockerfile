@@ -230,6 +230,49 @@ RUN set -eux; \
     cd /; rm -rf "${tmp}" /root/.config /root/.cache; \
     aws --version; gcloud --version > /dev/null; az version --output none
 
+# Containers: rootless Podman as dev, with `docker`, `docker compose` and
+# `docker-compose` mapped onto it. The sandbox (gVisor by default) gives no overlay mounts in a user
+# namespace, FUSE or cgroup delegation, so images use the vfs driver and
+# containers run without cgroups. Containers share the box's network unless
+# given one (compose projects get theirs via pasta, with aardvark-dns resolving
+# service names); either way traffic leaves through the box's egress policy.
+# Images live under /home/dev/.local/share/containers, cached across snapshots.
+# hadolint ignore=DL3008
+RUN set -eux; \
+    apt-get update; \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+      podman podman-docker podman-compose uidmap crun catatonit \
+      netavark aardvark-dns passt nftables; \
+    rm -rf /var/lib/apt/lists/*; \
+    echo "dev:100000:65536" > /etc/subuid; \
+    echo "dev:100000:65536" > /etc/subgid; \
+    touch /etc/containers/nodocker; \
+    ln -s /usr/bin/podman-compose /usr/local/bin/docker-compose; \
+    printf '%s\n' \
+      '[storage]' \
+      'driver = "vfs"' \
+      'runroot = "/run/containers/storage"' \
+      'graphroot = "/var/lib/containers/storage"' \
+      'rootless_storage_path = "/home/dev/.local/share/containers/storage"' \
+      > /etc/containers/storage.conf; \
+    mkdir -p /etc/containers/containers.conf.d; \
+    printf '%s\n' \
+      '[containers]' \
+      'netns = "host"' \
+      'cgroups = "disabled"' \
+      'log_driver = "k8s-file"' \
+      '' \
+      '[engine]' \
+      'compose_warning_logs = false' \
+      'cgroup_manager = "cgroupfs"' \
+      'events_logger = "file"' \
+      'runtime = "crun"' \
+      '' \
+      '[engine.runtimes]' \
+      'crun = ["/usr/bin/crun"]' \
+      > /etc/containers/containers.conf.d/devbox.conf; \
+    podman --version; docker --version; podman-compose --version
+
 RUN jq --arg flavor fat \
       --arg go "${GO_VERSION}" --arg rust "${RUST_VERSION}" --arg java "${TEMURIN_TAG}" \
       --arg dotnet "${DOTNET_SDK_TAG}" --arg typescript "${TYPESCRIPT_VERSION}" --arg uv "${UV_VERSION}" \

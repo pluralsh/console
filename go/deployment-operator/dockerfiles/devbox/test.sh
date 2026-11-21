@@ -13,6 +13,9 @@
 #                   --load), so their cache can be dropped with the builder. fat and
 #                   example build FROM a local image and always use the default builder.
 #   KEEP_IMAGES=1   keep the built images instead of removing them at exit
+#   MINIMAL_IMAGE, FAT_IMAGE, GATEWAY_IMAGE
+#                   test these published images (pulled if missing) instead of
+#                   building them; CD sets them to the digests it pushed
 set -euo pipefail
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -25,9 +28,9 @@ KEEP_IMAGES="${KEEP_IMAGES:-0}"
 CST_VERSION="${CST_VERSION:-1.22.1}"
 HADOLINT_IMAGE="${HADOLINT_IMAGE:-hadolint/hadolint:v2.14.0}"
 
-minimal_image="devbox-minimal:${TAG}"
-fat_image="devbox-fat:${TAG}"
-gateway_image="devbox-gateway:${TAG}"
+minimal_image="${MINIMAL_IMAGE:-devbox-minimal:${TAG}}"
+fat_image="${FAT_IMAGE:-devbox-fat:${TAG}}"
+gateway_image="${GATEWAY_IMAGE:-devbox-gateway:${TAG}}"
 example_image="devbox-example:${TAG}"
 built=()
 
@@ -68,6 +71,13 @@ build_isolated() {
   docker buildx build --builder "${BUILDER}" --load ${platform_args[@]+"${platform_args[@]}"} \
     -f "${here}/${dockerfile}" -t "${image}" "$@" "${go_dir}"
   built+=("${image}")
+}
+
+# Use a published image instead of building one.
+pull() {
+  docker image inspect "$1" >/dev/null 2>&1 && return
+  log "Pulling $1"
+  docker pull ${platform_args[@]+"${platform_args[@]}"} -q "$1" >/dev/null
 }
 
 # container-structure-test from PATH, or a pinned, checksum-verified download.
@@ -163,25 +173,38 @@ step_lint() {
 }
 
 step_minimal() {
-  build_isolated "${minimal_image}" minimal.Dockerfile \
-    --build-arg DAEMON_SOURCE="${DAEMON_SOURCE}" --build-arg VERSION="0.0.0-${TAG}"
+  if [ -n "${MINIMAL_IMAGE:-}" ]; then
+    pull "${minimal_image}"
+  else
+    build_isolated "${minimal_image}" minimal.Dockerfile \
+      --build-arg DAEMON_SOURCE="${DAEMON_SOURCE}" --build-arg VERSION="0.0.0-${TAG}"
+  fi
   structure_test "${minimal_image}" common.yaml minimal.yaml
   runtime_test "${minimal_image}"
 }
 
 step_gateway() {
-  build_isolated "${gateway_image}" gateway.Dockerfile \
-    --build-arg GATEWAY_SOURCE="${GATEWAY_SOURCE}" --build-arg VERSION="0.0.0-${TAG}"
+  if [ -n "${GATEWAY_IMAGE:-}" ]; then
+    pull "${gateway_image}"
+  else
+    build_isolated "${gateway_image}" gateway.Dockerfile \
+      --build-arg GATEWAY_SOURCE="${GATEWAY_SOURCE}" --build-arg VERSION="0.0.0-${TAG}"
+  fi
   structure_test "${gateway_image}" gateway.yaml
 }
 
 ensure_minimal() {
+  if [ -n "${MINIMAL_IMAGE:-}" ]; then pull "${minimal_image}"; return; fi
   docker image inspect "${minimal_image}" >/dev/null 2>&1 || step_minimal
 }
 
 step_fat() {
-  ensure_minimal
-  build "${fat_image}" fat.Dockerfile --build-arg BASE_IMAGE="${minimal_image}"
+  if [ -n "${FAT_IMAGE:-}" ]; then
+    pull "${fat_image}"
+  else
+    ensure_minimal
+    build "${fat_image}" fat.Dockerfile --build-arg BASE_IMAGE="${minimal_image}"
+  fi
   structure_test "${fat_image}" common.yaml fat.yaml
   runtime_test "${fat_image}"
 }
@@ -193,6 +216,8 @@ step_fat_check() {
   docker buildx build ${BUILDER:+--builder "${BUILDER}"} --check \
     --build-arg BASE_IMAGE="${FAT_CHECK_BASE_IMAGE:-debian:trixie-20261104-slim}" \
     -f "${here}/fat.Dockerfile" "${go_dir}"
+  log "docker buildx bake --print (docker-bake.hcl)"
+  (cd "${go_dir}" && docker buildx bake -f "${rel}/docker-bake.hcl" --print >/dev/null)
 }
 
 step_example() {

@@ -356,6 +356,10 @@ func (d *Daemon) CancelPrompt(ctx context.Context, req *devboxv1.CancelPromptReq
 	return &devboxv1.CancelPromptResponse{Cancelled: ok}, err
 }
 
+func (d *Daemon) UpdateQueuedPrompt(ctx context.Context, req *devboxv1.UpdateQueuedPromptRequest) (*devboxv1.UpdateQueuedPromptResponse, error) {
+	return d.agents.UpdateQueuedPrompt(ctx, req)
+}
+
 func (d *Daemon) SetThreadConfigOption(ctx context.Context, req *devboxv1.SetThreadConfigOptionRequest) (*devboxv1.SetThreadConfigOptionResponse, error) {
 	opts, err := d.agents.SetThreadConfigOption(ctx, req.GetThread(), req.GetOption())
 	return &devboxv1.SetThreadConfigOptionResponse{ConfigOptions: opts}, err

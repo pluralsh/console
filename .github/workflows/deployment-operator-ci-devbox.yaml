@@ -1,5 +1,7 @@
 name: CI / Devbox images
 
+# Static checks only. The images are built, tested and pushed once, by deployment-operator-cd-devbox.yaml,
+# which runs dockerfiles/devbox/test.sh against the digests it pushes.
 on:
   pull_request:
     branches:
@@ -9,16 +11,7 @@ on:
     - ".github/workflows/deployment-operator-cd-devbox.yaml"
     - "go/deployment-operator/dockerfiles/devbox/**"
     - "go/deployment-operator/dockerfiles/agent-harness/**"
-    - "go/deployment-operator/cmd/devbox-daemon/**"
-    - "go/deployment-operator/cmd/devbox-gateway/**"
-    - "go/deployment-operator/pkg/devbox/**"
-    - "go/deployment-operator/internal/devbox/**"
   workflow_dispatch:
-    inputs:
-      fat:
-        description: 'Also build and test devbox-fat'
-        type: boolean
-        default: true
 
 permissions:
   contents: read
@@ -51,49 +44,3 @@ jobs:
         run: ./test.sh lint
       - name: Build checks
         run: ./test.sh fat-check
-
-  images:
-    name: Build and test (${{ matrix.platforms.platform }})
-    needs: [vouch]
-    strategy:
-      fail-fast: false
-      matrix:
-        platforms:
-          - platform: linux/amd64
-            runner: ubuntu-24.04
-          - platform: linux/arm64
-            runner: ubuntu-24.04-arm
-    runs-on: ${{ matrix.platforms.runner }}
-    steps:
-      - name: Free disk space
-        working-directory: /
-        run: |
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
-          df -h /
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-      - name: Decide whether to build devbox-fat
-        id: fat
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          DISPATCH_FAT: ${{ inputs.fat }}
-        run: |
-          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
-            echo "build=${DISPATCH_FAT}" >> "$GITHUB_OUTPUT"
-          elif git diff --name-only "${BASE_SHA}...HEAD" | grep -qE '^go/deployment-operator/dockerfiles/devbox/(fat\.Dockerfile|rootfs/fat/|tests/(common|fat)\.yaml|minimal\.Dockerfile)'; then
-            echo "build=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "build=false" >> "$GITHUB_OUTPUT"
-          fi
-      - name: Login to Docker Hardened Images
-        uses: docker/login-action@v4
-        with:
-          registry: dhi.io
-          username: mjgpluralsh
-          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
-      - name: devbox-minimal, devbox-gateway and the example image
-        run: KEEP_IMAGES=1 ./test.sh minimal gateway example
-      - name: devbox-fat
-        if: steps.fat.outputs.build == 'true'
-        run: ./test.sh fat

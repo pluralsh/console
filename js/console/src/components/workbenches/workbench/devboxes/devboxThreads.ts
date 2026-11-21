@@ -63,13 +63,16 @@ export function threadState(
 const FILE_MENTION_TAG =
   /<plrl-devbox-file\s+path="([^"]*)"\s*(?:\/>|><\/plrl-devbox-file>)/g
 
-export const threadTitle = (
-  thread: Pick<DevboxThreadFragment, 'title' | 'agentTitle' | 'id'>
-) =>
-  (thread.title || thread.agentTitle || 'Untitled thread').replace(
+// prompt text with file mention tags shown as @name
+export const promptPreview = (text: string) =>
+  text.replace(
     FILE_MENTION_TAG,
     (_, path: string) => `@${path.replace(/\/$/, '').split('/').pop() || path}`
   )
+
+export const threadTitle = (
+  thread: Pick<DevboxThreadFragment, 'title' | 'agentTitle' | 'id'>
+) => promptPreview(thread.title || thread.agentTitle || 'Untitled thread')
 
 export function capabilitiesFor(
   agents: Nullable<Nullable<DevboxAgentFragment>[]>,

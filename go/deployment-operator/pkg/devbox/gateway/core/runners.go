@@ -178,7 +178,7 @@ func RunnerFromCRD(obj *v1alpha1.DevboxRunner) *Runner {
 		}
 		r.HTTPAllowlist = append(r.HTTPAllowlist, entry)
 	}
-	for _, h := range append(obj.Spec.PackageServerHosts(), obj.Spec.CloudProviderHosts()...) {
+	for _, h := range obj.Spec.EgressPresetHosts() {
 		r.HTTPAllowlist = append(r.HTTPAllowlist, egress.AllowEntry{Host: h, Port: 443})
 	}
 	for _, ci := range obj.Spec.CloudIdentities {

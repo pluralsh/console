@@ -1929,6 +1929,18 @@ type RootMutationType {
 
   cancelDevboxPrompt(id: ID!): DevboxThread
 
+  updateDevboxQueuedPrompt(
+    "the thread id"
+    id: ID!
+
+    promptId: String!
+
+    action: DevboxQueuedPromptAction!
+
+    "the new text, for edit"
+    text: String
+  ): DevboxThread
+
   setDevboxThreadConfigOption(id: ID!, configId: String!, value: String!): DevboxThread
 
   respondDevboxInteraction(id: ID!, response: DevboxInteractionResponseAttributes!): DevboxInteraction
@@ -2348,6 +2360,17 @@ enum DevboxThreadStage {
 
   "the last turn finished or failed, or the thread was closed"
   COMPLETED
+}
+
+enum DevboxQueuedPromptAction {
+  "replace the prompt's text"
+  EDIT
+
+  "drop the prompt from the queue"
+  CANCEL
+
+  "run the prompt next, stopping the current turn"
+  SEND_NOW
 }
 
 enum DevboxStreamKind {
@@ -3271,6 +3294,12 @@ type DevboxThread {
 
   usage: DevboxUsage
 
+  "prompts held until the running turn ends, in the order they'll run"
+  queuedPrompts: [DevboxQueuedPrompt]
+
+  "for subagents, the parent's tool call that spawned it"
+  parentToolCallId: String
+
   instance: DevboxInstance
 
   parent: DevboxThread
@@ -3285,6 +3314,18 @@ type DevboxThread {
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+"A prompt sent while the thread was busy, waiting for its turn"
+type DevboxQueuedPrompt {
+  promptId: String!
+
+  text: String
+
+  "names of the files attached to the prompt"
+  attachments: [String]
+
+  queuedAt: DateTime
 }
 
 type DevboxUsage {

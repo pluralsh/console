@@ -189,6 +189,13 @@ fragment DevboxThread on DevboxThread {
   usage {
     ...DevboxUsage
   }
+  queuedPrompts {
+    promptId
+    text
+    attachments
+    queuedAt
+  }
+  parentToolCallId
   parent {
     id
     sessionId
@@ -1156,6 +1163,22 @@ mutation PromptDevboxThread(
 
 mutation CancelDevboxPrompt($id: ID!) {
   cancelDevboxPrompt(id: $id) {
+    ...DevboxThread
+  }
+}
+
+mutation UpdateDevboxQueuedPrompt(
+  $id: ID!
+  $promptId: String!
+  $action: DevboxQueuedPromptAction!
+  $text: String
+) {
+  updateDevboxQueuedPrompt(
+    id: $id
+    promptId: $promptId
+    action: $action
+    text: $text
+  ) {
     ...DevboxThread
   }
 }

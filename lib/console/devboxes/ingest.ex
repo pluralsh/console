@@ -320,6 +320,8 @@ defmodule Console.Devboxes.Ingest do
       revision: attrs[:revision],
       config_options: attrs[:config_options] && Enum.map(attrs[:config_options], &config_option/1),
       available_commands: attrs[:available_commands] && Enum.map(attrs[:available_commands], &command/1),
+      queued_prompts: attrs[:queued_prompts] && Enum.map(attrs[:queued_prompts], &queued_prompt/1),
+      parent_tool_call_id: blank(attrs[:parent_tool_call_id]),
       usage: usage && usage_attrs(usage)
     })
     |> clear_foreground(attrs[:foreground])
@@ -353,6 +355,17 @@ defmodule Console.Devboxes.Ingest do
       type: Acp.get(opt, :type),
       current_value: Acp.get(opt, :current_value),
       options: Enum.map(Acp.get(opt, :options) || [], &Map.take(mapify(&1), ~w(value name description group)a))
+    }
+  end
+
+  @doc false
+  def queued_prompt(qp) do
+    blocks = Acp.blocks(Acp.get(qp, :content))
+    %{
+      prompt_id: Acp.get(qp, :prompt_id),
+      text: blocks |> Enum.filter(&(&1.type == :text)) |> Enum.map_join("\n\n", &(&1.text || "")),
+      attachments: for(%{type: :resource_link} = b <- blocks, do: b.name || b.uri),
+      queued_at: Acp.timestamp(Acp.get(qp, :queued_at))
     }
   end
 

@@ -379,6 +379,10 @@ defmodule Devbox.V1.Daemon.Service do
 
   rpc :CancelPrompt, Devbox.V1.CancelPromptRequest, Devbox.V1.CancelPromptResponse
 
+  rpc :UpdateQueuedPrompt,
+      Devbox.V1.UpdateQueuedPromptRequest,
+      Devbox.V1.UpdateQueuedPromptResponse
+
   rpc :SetThreadConfigOption,
       Devbox.V1.SetThreadConfigOptionRequest,
       Devbox.V1.SetThreadConfigOptionResponse

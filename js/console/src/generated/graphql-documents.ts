@@ -3731,6 +3731,13 @@ export const DevboxThreadFragmentDoc = /*#__PURE__*/ gql`
   usage {
     ...DevboxUsage
   }
+  queuedPrompts {
+    promptId
+    text
+    attachments
+    queuedAt
+  }
+  parentToolCallId
   parent {
     id
     sessionId
@@ -10184,6 +10191,18 @@ export const CancelDevboxPromptDocument = /*#__PURE__*/ gql`
   }
 }
     ${DevboxThreadFragmentDoc}` as unknown as DocumentNode<Types.CancelDevboxPromptMutation, Types.CancelDevboxPromptMutationVariables>;
+export const UpdateDevboxQueuedPromptDocument = /*#__PURE__*/ gql`
+    mutation UpdateDevboxQueuedPrompt($id: ID!, $promptId: String!, $action: DevboxQueuedPromptAction!, $text: String) {
+  updateDevboxQueuedPrompt(
+    id: $id
+    promptId: $promptId
+    action: $action
+    text: $text
+  ) {
+    ...DevboxThread
+  }
+}
+    ${DevboxThreadFragmentDoc}` as unknown as DocumentNode<Types.UpdateDevboxQueuedPromptMutation, Types.UpdateDevboxQueuedPromptMutationVariables>;
 export const SetDevboxThreadConfigOptionDocument = /*#__PURE__*/ gql`
     mutation SetDevboxThreadConfigOption($id: ID!, $configId: String!, $value: String!) {
   setDevboxThreadConfigOption(id: $id, configId: $configId, value: $value) {

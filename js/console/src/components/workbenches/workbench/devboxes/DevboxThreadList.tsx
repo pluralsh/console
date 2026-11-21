@@ -217,6 +217,7 @@ export function DevboxThreadList({
           actions={
             actions.length && !disabled ? (
               <MoreMenu
+                triggerProps={{ size: 'small' }}
                 onSelectionChange={(key) =>
                   run(thread, key as DevboxThreadAction)
                 }

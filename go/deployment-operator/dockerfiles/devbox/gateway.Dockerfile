@@ -37,12 +37,14 @@ COPY deployment-operator/pkg ./pkg
 COPY deployment-operator/internal ./internal
 COPY deployment-operator/api ./api
 
-RUN case "${TARGETARCH}" in \
+# The build cache stays out of the layer, which the registry cache would otherwise export.
+RUN --mount=type=cache,target=/root/.cache/go-build,id=devbox-gateway-${TARGETARCH} \
+    case "${TARGETARCH}" in \
       amd64) ldso=/lib/ld-musl-x86_64.so.1 ;; \
       arm64) ldso=/lib/ld-musl-aarch64.so.1 ;; \
       *) echo "unsupported TARGETARCH ${TARGETARCH}" >&2; exit 1 ;; \
     esac && \
-    CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
+    GOCACHE=/root/.cache/go-build CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
     go build -trimpath -tags musl \
       -ldflags="-s -w -I ${ldso} -X main.version=${VERSION}" \
       -o /out/devbox-gateway \
