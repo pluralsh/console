@@ -289,7 +289,51 @@ describe('DevboxTranscript', () => {
     expect(screen.queryByText('think')).toBeNull()
   })
 
-  it('places subagent lanes after the session message that links them', () => {
+  it('puts a subagent in place of the tool call that spawned it', () => {
+    const { container } = renderTranscript(
+      <DevboxTranscript
+        entities={[
+          entity({
+            type: DevboxEntityType.AgentMessage,
+            position: 1,
+            message: { content: [text('delegating')] },
+          }),
+          entity({
+            type: DevboxEntityType.ToolCall,
+            position: 2,
+            toolCall: {
+              toolCallId: 'task-1',
+              title: 'Explore the repo',
+              kind: 'think',
+              status: 'in_progress',
+              content: [],
+            },
+          }),
+          entity({
+            type: DevboxEntityType.AgentMessage,
+            position: 3,
+            message: { content: [text('done')] },
+          }),
+        ]}
+        subagents={[
+          {
+            id: 'thread-child',
+            sessionId: 'parent/subagent/task-1',
+            parentToolCallId: 'task-1',
+          } as never,
+        ]}
+        renderSubagent={(s) => <span>card {s.id}</span>}
+      />
+    )
+    expect(kindsOf(container)).toEqual([
+      'agent-message',
+      'subagent',
+      'agent-message',
+    ])
+    expect(screen.getByText('card thread-child')).toBeTruthy()
+  })
+
+  it('places subagents after the session message that links them', () => {
     const { container } = renderTranscript(
       <DevboxTranscript
         entities={[
@@ -311,14 +355,14 @@ describe('DevboxTranscript', () => {
             title: 'Researcher',
           } as never,
         ]}
-        renderSubagentLane={(s) => <span>lane {s.id}</span>}
+        renderSubagent={(s) => <span>card {s.id}</span>}
       />
     )
     expect(kindsOf(container)).toEqual([
       'session-message',
-      'subagent-lane',
+      'subagent',
       'agent-message',
     ])
-    expect(screen.getByText('Subagent · Researcher')).toBeTruthy()
+    expect(screen.getByText('card thread-child')).toBeTruthy()
   })
 })

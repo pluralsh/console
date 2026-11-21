@@ -185,9 +185,14 @@ defmodule Console.Devboxes.IngestTest do
             cwd: "/home/agent/console",
             foreground: %{state: :FOREGROUND_STATE_KIND_RUNNING},
             config_options: [%{id: "mode", name: "Mode", current_value: "code", options: [%{value: "code"}]}],
-            available_commands: [%{name: "review", input: %{hint: "a branch"}}]
+            available_commands: [%{name: "review", input: %{hint: "a branch"}}],
+            queued_prompts: [%{
+              prompt_id: "p2",
+              content: [%{text: %{text: "and then this"}}, %{resource_link: %{name: "a.png", uri: "file:///a.png"}}],
+              queued_at: %{seconds: 1_700_000_000, nanos: 0}
+            }]
           },
-          %{session_id: "child", kind: :SESSION_KIND_SUBAGENT, parent_session_id: "parent", agent: :claude, status: :active, revision: 1}
+          %{session_id: "child", kind: :SESSION_KIND_SUBAGENT, parent_session_id: "parent", parent_tool_call_id: "task-1", agent: :claude, status: :active, revision: 1}
         ],
         interactions: [
           %{
@@ -210,10 +215,12 @@ defmodule Console.Devboxes.IngestTest do
       assert updated.foreground_state == :running
       assert [%{config_id: "mode", current_value: "code"}] = updated.config_options
       assert [%{name: "review", input_hint: "a branch"}] = updated.available_commands
+      assert [%{prompt_id: "p2", text: "and then this", attachments: ["a.png"], queued_at: %DateTime{}}] = updated.queued_prompts
 
       child = Console.Repo.get_by!(DevboxInstanceSession, acp_session_id: "child")
       assert child.kind == :subagent
       assert child.parent_id == thread.id
+      assert child.parent_tool_call_id == "task-1"
 
       interaction = Console.Repo.get_by!(DevboxInstanceInteraction, external_id: "int-1")
       assert interaction.session_id == thread.id

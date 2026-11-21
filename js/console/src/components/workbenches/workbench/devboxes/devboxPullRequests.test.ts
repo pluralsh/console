@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
   openPullRequests,
   openPullRequestsByThread,
+  pullRequestsStatus,
 } from './devboxPullRequests'
 
 const pr = (
@@ -29,6 +30,15 @@ describe('open pull requests', () => {
 
   it('counts only open ones', () => {
     expect(openPullRequests(prs).map((p) => p.id)).toEqual(['1', '3', '5'])
+  })
+
+  it('summarizes as open while any is, then merged, then closed', () => {
+    expect(pullRequestsStatus(prs)).toBe(PrStatus.Open)
+    expect(
+      pullRequestsStatus(prs.filter((p) => p.status !== PrStatus.Open))
+    ).toBe(PrStatus.Merged)
+    expect(pullRequestsStatus([pr('4', PrStatus.Closed)])).toBe(PrStatus.Closed)
+    expect(pullRequestsStatus([])).toBeUndefined()
   })
 
   it('groups open ones by the thread that opened them', () => {

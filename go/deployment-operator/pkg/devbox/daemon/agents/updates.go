@@ -92,6 +92,9 @@ func (m *Manager) applyUpdateLocked(c *agentConn, sid string, update acp.Object)
 			if m.applyEntityLocked(s, ch) {
 				m.markDirtyLocked(s)
 			}
+			if ch.EntityType == devboxv1.EntityType_ENTITY_TYPE_TOOL_CALL && ch.Complete {
+				m.spawnerDoneLocked(s, ch.EntityID)
+			}
 		case acp.ChangeState:
 			m.markDirtyLocked(s)
 			m.applyStateLocked(s, ch)
@@ -115,9 +118,15 @@ func (m *Manager) subagentLocked(c *agentConn, l *acp.Lineage) *session {
 		return nil
 	}
 	now := m.clock.Now()
+	title := l.Title
+	if title == "" && l.ParentToolCallID != "" {
+		if tc := parent.store.Get(devboxv1.EntityType_ENTITY_TYPE_TOOL_CALL, l.ParentToolCallID); tc != nil {
+			title = acp.Str(tc.Body, "title")
+		}
+	}
 	s := &session{
 		id: l.ChildSessionID, kind: devboxv1.SessionKind_SESSION_KIND_SUBAGENT, parent: parent.id, agent: parent.agent,
-		thread: parent.thread, cwd: parent.cwd, title: l.Title, store: acp.NewStore(l.ChildSessionID, 0),
+		thread: parent.thread, cwd: parent.cwd, title: title, parentToolCall: l.ParentToolCallID, store: acp.NewStore(l.ChildSessionID, 0),
 		foreground: &devboxv1.ForegroundState{State: devboxv1.ForegroundStateKind_FOREGROUND_STATE_KIND_RUNNING, UpdatedAt: timestamppb.New(now)},
 		createdAt:  now, lastActivity: now, attached: parent.attached, dirty: true,
 	}
@@ -134,6 +143,15 @@ func (m *Manager) subagentLocked(c *agentConn, l *acp.Lineage) *session {
 	m.registerSessionLocked(s)
 	m.dirty = true
 	return s
+}
+
+// spawnerDoneLocked idles the subagents a finished tool call spawned: the agent reports no end of its own for them.
+func (m *Manager) spawnerDoneLocked(parent *session, toolCallID string) {
+	for _, child := range m.childrenLocked(parent.id) {
+		if child.parentToolCall == toolCallID && child.foreground.GetState() != devboxv1.ForegroundStateKind_FOREGROUND_STATE_KIND_IDLE {
+			m.setForegroundLocked(child, &devboxv1.ForegroundState{State: devboxv1.ForegroundStateKind_FOREGROUND_STATE_KIND_IDLE, UpdatedAt: timestamppb.New(m.clock.Now())})
+		}
+	}
 }
 
 // markDirtyLocked queues a session's index row (and its thread's) for the next flush.

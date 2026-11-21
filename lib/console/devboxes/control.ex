@@ -40,6 +40,8 @@ defmodule Console.Devboxes.Control do
   @doc "`session/prompt`; `attachments` are `%{name, mime_type, data}` files the daemon writes into the box"
   @callback send_prompt(instance, thread, prompt :: [map], attachments :: [map]) :: result
   @callback cancel_prompt(instance, thread) :: result
+  @doc "Edits (`:edit`, with `text`), drops (`:cancel`) or promotes (`:send_now`) a held prompt; resolves to `{:ok, %{updated, queued_prompts}}`"
+  @callback update_queued_prompt(instance, thread, prompt_id :: binary, action :: :edit | :cancel | :send_now, text :: binary | nil) :: result
   @callback set_config_option(instance, thread, config_id :: binary, value :: binary) :: result
   @callback respond(instance, DevboxInstanceInteraction.t, response :: map) :: result
   @doc "Live slash commands for a running thread; resolves to `{:ok, [%{name, description, input_hint}]}`"
@@ -94,6 +96,7 @@ defmodule Console.Devboxes.Control do
     fork_thread: 3,
     send_prompt: 4,
     cancel_prompt: 2,
+    update_queued_prompt: 5,
     set_config_option: 4,
     respond: 3,
     list_commands: 2,

@@ -13,6 +13,21 @@ defmodule Devbox.V1.PromptDisposition do
   field :PROMPT_DISPOSITION_DUPLICATE, 3
 end
 
+defmodule Devbox.V1.QueuedPromptAction do
+  @moduledoc false
+
+  use Protobuf,
+    enum: true,
+    full_name: "devbox.v1.QueuedPromptAction",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :QUEUED_PROMPT_ACTION_UNSPECIFIED, 0
+  field :QUEUED_PROMPT_ACTION_EDIT, 1
+  field :QUEUED_PROMPT_ACTION_CANCEL, 2
+  field :QUEUED_PROMPT_ACTION_SEND_NOW, 3
+end
+
 defmodule Devbox.V1.StreamKind do
   @moduledoc false
 
@@ -420,6 +435,37 @@ defmodule Devbox.V1.CancelPromptResponse do
   field :cancelled, 1, type: :bool
 end
 
+defmodule Devbox.V1.UpdateQueuedPromptRequest do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "devbox.v1.UpdateQueuedPromptRequest",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :thread, 1, type: Devbox.V1.ThreadRef
+  field :prompt_id, 2, type: :string, json_name: "promptId"
+  field :action, 3, type: Devbox.V1.QueuedPromptAction, enum: true
+  field :text, 4, type: :string
+  field :requested_by, 5, type: Devbox.V1.Principal, json_name: "requestedBy"
+end
+
+defmodule Devbox.V1.UpdateQueuedPromptResponse do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "devbox.v1.UpdateQueuedPromptResponse",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :updated, 1, type: :bool
+
+  field :queued_prompts, 2,
+    repeated: true,
+    type: Devbox.V1.QueuedPrompt,
+    json_name: "queuedPrompts"
+end
+
 defmodule Devbox.V1.SetThreadConfigOptionRequest do
   @moduledoc false
 
@@ -676,6 +722,10 @@ defmodule Devbox.V1.Control.Service do
   rpc :Prompt, Devbox.V1.PromptRequest, Devbox.V1.PromptResponse
 
   rpc :CancelPrompt, Devbox.V1.CancelPromptRequest, Devbox.V1.CancelPromptResponse
+
+  rpc :UpdateQueuedPrompt,
+      Devbox.V1.UpdateQueuedPromptRequest,
+      Devbox.V1.UpdateQueuedPromptResponse
 
   rpc :SetThreadConfigOption,
       Devbox.V1.SetThreadConfigOptionRequest,

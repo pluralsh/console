@@ -488,7 +488,7 @@ func (r *DevboxRunnerReconciler) buildActorTemplate(runner *v1alpha1.DevboxRunne
 }
 
 // devboxGoldenEgressPolicy lets the golden boot reach what the bootstrap script and mise need: the runner's
-// package servers and HTTP allowlist plus mise's own download hosts. Without customization the golden boot needs
+// package servers, OCI registries and HTTP allowlist plus mise's own download hosts. Without customization the golden boot needs
 // no egress.
 func devboxGoldenEgressPolicy(runner *v1alpha1.DevboxRunner) *ateapi.EgressPolicyTemplate {
 	hasMise := runner.Spec.Mise != nil && lo.FromPtr(runner.Spec.Mise.Config) != ""
@@ -502,6 +502,7 @@ func devboxGoldenEgressPolicy(runner *v1alpha1.DevboxRunner) *ateapi.EgressPolic
 		https[443] = append(https[443], "mise.jdx.dev", "github.com", "*.github.com", "*.githubusercontent.com")
 	}
 	https[443] = append(https[443], runner.Spec.PackageServerHosts()...)
+	https[443] = append(https[443], runner.Spec.OCIRegistryHosts()...)
 	for _, entry := range runner.Spec.HTTPAllowlist {
 		port := lo.FromPtrOr(entry.Port, 443)
 		if lo.FromPtr(entry.Passthrough) {

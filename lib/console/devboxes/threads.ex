@@ -9,7 +9,7 @@ defmodule Console.Devboxes.Threads do
   import Console.Devboxes, only: [control_result: 2, ensure_live: 1, resolve_config_options: 2]
   alias Console.PubSub
   alias Console.Devboxes
-  alias Console.Devboxes.{Billing, Control, Error, Acp}
+  alias Console.Devboxes.{Billing, Control, Error, Acp, Ingest}
   alias Console.Schema.{
     Devbox,
     DevboxInstance,
@@ -274,6 +274,38 @@ defmodule Console.Devboxes.Threads do
          {:ok, inst} <- live_instance(thread.instance_id),
       do: Control.cancel_prompt(inst, thread) |> control_result(thread)
   end
+
+  @doc """
+  Edits, drops or promotes (`:send_now`, which interrupts the running turn) a prompt held in a thread's queue.  The
+  thread comes back with the queue as the box reports it; a prompt that already started is left alone.
+  """
+  @spec update_queued_prompt(binary, binary, :edit | :cancel | :send_now, binary | nil, User.t) :: thread_resp
+  def update_queued_prompt(id, prompt_id, action, text, %User{} = user) do
+    with {:ok, thread} <- allow(get_thread!(id), user, :prompt),
+         :ok <- queued_text(action, text),
+         {:ok, inst} <- live_instance(thread.instance_id) do
+      case Control.update_queued_prompt(inst, thread, prompt_id, action, text) do
+        {:ok, %{queued_prompts: queued}} -> store_queue(thread, queued)
+        res -> control_result(res, thread)
+      end
+    end
+  end
+
+  defp queued_text(:edit, text) when is_binary(text) do
+    case String.trim(text) do
+      "" -> {:error, "a queued prompt needs text"}
+      _ -> :ok
+    end
+  end
+  defp queued_text(:edit, _), do: {:error, "a queued prompt needs text"}
+  defp queued_text(_, _), do: :ok
+
+  defp store_queue(thread, queued) when is_list(queued) do
+    thread
+    |> DevboxInstanceSession.changeset(%{queued_prompts: Enum.map(queued, &Ingest.queued_prompt/1)})
+    |> Repo.update()
+  end
+  defp store_queue(thread, _), do: {:ok, thread}
 
   @doc """
   Sets a session config option (model, mode, thought level, ...), validated against the thread's current options

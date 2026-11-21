@@ -1,7 +1,8 @@
 // Package harness builds the launch configuration for each agent harness (DBX-46, DBX-57): the ACP command,
 // environment pointing model traffic at the console AI proxy with a placeholder key (or at the owner's plan),
 // CA trust, home instruction files and the per-harness model boot flags used when an adapter has no ACP model
-// control. It never writes model choices into config files; models are set over ACP.
+// control. Models are set over ACP; config files only get the defaults and model lists harnesses can't take any
+// other way (Claude's availableModels, Codex's provider, catalog and default model).
 package harness
 
 import (
@@ -14,6 +15,8 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+
+	"github.com/pelletier/go-toml/v2"
 
 	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/acp"
@@ -102,7 +105,7 @@ type agentDefaults struct {
 
 var defaults = map[devboxv1.AgentType]agentDefaults{
 	devboxv1.AgentType_AGENT_TYPE_CLAUDE:   {command: "claude-agent-acp", binary: "claude", modelEnv: "ANTHROPIC_MODEL", proxyProvider: "anthropic", lineage: acp.ClaudeLineage, v2: true},
-	devboxv1.AgentType_AGENT_TYPE_CODEX:    {command: "codex-acp", binary: "codex", modelArg: "-c", proxyProvider: "openai", lineage: acp.NoLineage{}, v2: true},
+	devboxv1.AgentType_AGENT_TYPE_CODEX:    {command: "codex-acp", binary: "codex", proxyProvider: "openai", lineage: acp.NoLineage{}, v2: true},
 	devboxv1.AgentType_AGENT_TYPE_OPENCODE: {command: "opencode", args: []string{"acp"}, binary: "opencode", proxyProvider: "openai", lineage: acp.NoLineage{}},
 	devboxv1.AgentType_AGENT_TYPE_GEMINI:   {command: "gemini", args: []string{"--experimental-acp"}, binary: "gemini", modelArg: "--model", proxyProvider: "vertex", lineage: acp.NoLineage{}},
 	devboxv1.AgentType_AGENT_TYPE_PI:       {command: "pi-acp", binary: "pi", proxyProvider: "openai", lineage: acp.NoLineage{}},
@@ -264,54 +267,13 @@ func (c *Config) Spec(launch *devboxv1.AgentLaunch, endpoints *devboxv1.HarnessE
 	switch t {
 	case devboxv1.AgentType_AGENT_TYPE_CLAUDE:
 		env = unsetEnv(env, append([]string{"ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_BASE_URL", "CLAUDE_CODE_OAUTH_TOKEN"}, claudeTierEnv...)...)
-		set("CLAUDE_CONFIG_DIR", filepath.Join(c.Home, ".claude"), "DISABLE_AUTOUPDATER", "1")
-		if subscription {
-			set("CLAUDE_CODE_OAUTH_TOKEN", ClaudeOAuthPlaceholder)
-		} else if aiProxy != "" {
-			set("ANTHROPIC_BASE_URL", aiProxy+"/anthropic", "ANTHROPIC_AUTH_TOKEN", PlaceholderKey)
-		}
-		// Claude Code picks models by tier alias (including for background work), so each tier is pinned to a
-		// proxy model; ANTHROPIC_MODEL stays the box's choice so the session's model picker keeps working.
-		aliases := proxyModels.GetAliases()
-		for tier, key := range claudeTiers {
-			if m := aliases[tier]; m != "" {
-				set(key, m)
-			}
-		}
-		if m := aliases["haiku"]; m != "" {
-			set("ANTHROPIC_SMALL_FAST_MODEL", m)
-		}
-		if bootModel != "" {
-			set(d.modelEnv, bootModel)
-		}
-		if err := c.syncClaudeAvailableModels(proxyModels.GetModels()); err != nil {
+		if err := c.claudeSpec(set, d, subscription, aiProxy, bootModel, proxyModels); err != nil {
 			return nil, err
 		}
 	case devboxv1.AgentType_AGENT_TYPE_CODEX:
-		env = unsetEnv(env, "OPENAI_API_KEY", "CODEX_API_KEY", "DEFAULT_AUTH_REQUEST")
-		set("CODEX_HOME", c.CodexHome(), "NO_BROWSER", "1")
-		if subscription {
-			// auth.json is a symlink into the tmpfs; keep Codex off the OS keyring so it reads and rewrites it.
-			spec.Args = append(spec.Args, "-c", `cli_auth_credentials_store="file"`)
-		} else if aiProxy != "" {
-			set("CODEX_API_KEY", PlaceholderKey, "DEFAULT_AUTH_REQUEST", `{"methodId":"api-key"}`)
-			spec.Args = append(spec.Args,
-				"-c", `model_provider="plural"`,
-				"-c", `model_providers.plural.name="plural"`,
-				"-c", fmt.Sprintf("model_providers.plural.base_url=%q", aiProxy+"/v1"),
-				"-c", `model_providers.plural.env_key="CODEX_API_KEY"`,
-				"-c", `model_providers.plural.wire_api="responses"`,
-			)
-			catalog, err := c.writeCodexCatalog(proxyModels.GetModels())
-			if err != nil {
-				return nil, err
-			}
-			if catalog != "" {
-				spec.Args = append(spec.Args, "-c", fmt.Sprintf("model_catalog_json=%q", catalog))
-			}
-		}
-		if model != "" {
-			spec.Args = append(spec.Args, "-c", fmt.Sprintf("model=%q", model))
+		env = unsetEnv(env, "OPENAI_API_KEY", "CODEX_API_KEY", "DEFAULT_AUTH_REQUEST", "CODEX_CONFIG", "MODEL_PROVIDER")
+		if err := c.codexSpec(set, d, subscription, aiProxy, model, proxyModels); err != nil {
+			return nil, err
 		}
 	case devboxv1.AgentType_AGENT_TYPE_OPENCODE:
 		cfg, err := c.writeOpenCodeConfig(aiProxy, model, proxyModels.GetModels())
@@ -339,6 +301,63 @@ func (c *Config) Spec(launch *devboxv1.AgentLaunch, endpoints *devboxv1.HarnessE
 	}
 	spec.Env = env
 	return spec, nil
+}
+
+// claudeSpec sets Claude Code's environment and syncs its model list.
+func (c *Config) claudeSpec(set func(kv ...string), d agentDefaults, subscription bool, aiProxy, bootModel string, proxyModels *devboxv1.ProxyModels) error {
+	set("CLAUDE_CONFIG_DIR", filepath.Join(c.Home, ".claude"), "DISABLE_AUTOUPDATER", "1")
+	if subscription {
+		set("CLAUDE_CODE_OAUTH_TOKEN", ClaudeOAuthPlaceholder)
+	} else if aiProxy != "" {
+		set("ANTHROPIC_BASE_URL", aiProxy+"/anthropic", "ANTHROPIC_AUTH_TOKEN", PlaceholderKey)
+	}
+	// Claude Code picks models by tier alias (including for background work), so each tier is pinned to a
+	// proxy model; ANTHROPIC_MODEL stays the box's choice so the session's model picker keeps working.
+	aliases := proxyModels.GetAliases()
+	for tier, key := range claudeTiers {
+		if m := aliases[tier]; m != "" {
+			set(key, m)
+		}
+	}
+	if m := aliases["haiku"]; m != "" {
+		set("ANTHROPIC_SMALL_FAST_MODEL", m)
+	}
+	if bootModel != "" {
+		set(d.modelEnv, bootModel)
+	}
+	return c.syncClaudeAvailableModels(proxyModels.GetModels())
+}
+
+// codexSpec sets Codex's environment and syncs its config.toml.
+func (c *Config) codexSpec(set func(kv ...string), d agentDefaults, subscription bool, aiProxy, model string, proxyModels *devboxv1.ProxyModels) error {
+	set("CODEX_HOME", c.CodexHome(), "NO_BROWSER", "1")
+	// codex-acp otherwise runs the Codex bundled with it, whose models needn't match the image's catalog
+	if path, err := exec.LookPath(d.binary); err == nil {
+		set("CODEX_PATH", path)
+	}
+	want := map[string]any{}
+	if subscription {
+		// auth.json is a symlink into the tmpfs; keep Codex off the OS keyring so it reads and rewrites it.
+		want["cli_auth_credentials_store"] = "file"
+	} else if aiProxy != "" {
+		set("CODEX_API_KEY", PlaceholderKey, "DEFAULT_AUTH_REQUEST", `{"methodId":"api-key"}`)
+		want["model_provider"] = codexProvider
+		want["model_providers."+codexProvider] = map[string]any{
+			"name": codexProvider, "base_url": aiProxy + "/v1", "env_key": "CODEX_API_KEY", "wire_api": "responses",
+			"supports_websockets": false,
+		}
+		catalog, err := c.writeCodexCatalog(proxyModels.GetModels())
+		if err != nil {
+			return err
+		}
+		if catalog != "" {
+			want["model_catalog_json"] = catalog
+		}
+	}
+	if model != "" {
+		want["model"] = model
+	}
+	return c.syncCodexConfig(want)
 }
 
 // Headless is the command line for a one-off, non-interactive prompt to a subscription agent's CLI, run with the
@@ -491,6 +510,126 @@ func (c *Config) writeCodexCatalog(models []string) (string, error) {
 		return "", err
 	}
 	return path, nil
+}
+
+const codexProvider = "plural"
+
+// codexKeys are the config.toml settings the daemon manages, dotted for nested tables. Codex is configured
+// through its config file rather than `-c` flags because ACP adapters start `codex app-server` themselves and
+// don't pass flags on; every Codex in the box (the adapter's, a terminal's) reads the file. Codex's `model` is
+// only a default: one the user changed since the daemon wrote it is theirs.
+var codexKeys = []struct {
+	key  string
+	soft bool
+}{
+	{key: "model_provider"}, {key: "model_providers." + codexProvider}, {key: "model_catalog_json"},
+	{key: "cli_auth_credentials_store"}, {key: "model", soft: true},
+}
+
+// syncCodexConfig sets the managed keys in want and removes the others it wrote, leaving the rest of the file
+// alone. What it last wrote is kept beside its other harness config.
+func (c *Config) syncCodexConfig(want map[string]any) error {
+	path := filepath.Join(c.CodexHome(), "config.toml")
+	statePath := filepath.Join(c.StateDir, "harness", "codex-config.json")
+
+	cfg := map[string]any{}
+	data, err := os.ReadFile(path)
+	if err != nil && !errors.Is(err, fs.ErrNotExist) {
+		return err
+	}
+	if err := toml.Unmarshal(data, &cfg); err != nil {
+		return fmt.Errorf("decode %s: %w", path, err)
+	}
+	written := map[string]any{}
+	if _, err := fsutil.ReadJSON(statePath, &written); err != nil {
+		return err
+	}
+
+	changed := false
+	for _, k := range codexKeys {
+		cur, present := tomlGet(cfg, k.key)
+		prev, wrote := written[k.key]
+		ours := !present || (wrote && sameValue(cur, prev))
+		v, wanted := want[k.key]
+		switch {
+		case wanted && (ours || !k.soft):
+			if !present || !sameValue(cur, v) {
+				tomlSet(cfg, k.key, v)
+				changed = true
+			}
+			written[k.key] = v
+		case !wanted && present && ours:
+			tomlDelete(cfg, k.key)
+			delete(written, k.key)
+			changed = true
+		default:
+			delete(written, k.key)
+		}
+	}
+	if changed {
+		out, err := toml.Marshal(cfg)
+		if err != nil {
+			return err
+		}
+		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+			return err
+		}
+		if err := fsutil.WriteFileAtomic(path, out, 0o600); err != nil {
+			return err
+		}
+	}
+	return fsutil.WriteJSON(statePath, written, 0o644)
+}
+
+func tomlGet(cfg map[string]any, key string) (any, bool) {
+	table, leaf := tomlTable(cfg, key, false)
+	if table == nil {
+		return nil, false
+	}
+	v, ok := table[leaf]
+	return v, ok
+}
+
+func tomlSet(cfg map[string]any, key string, v any) {
+	table, leaf := tomlTable(cfg, key, true)
+	table[leaf] = v
+}
+
+// tomlDelete removes a key, and its table once that's empty (an empty [model_providers] after the proxy's goes).
+func tomlDelete(cfg map[string]any, key string) {
+	table, leaf := tomlTable(cfg, key, false)
+	if table == nil {
+		return
+	}
+	delete(table, leaf)
+	if parent, _, nested := strings.Cut(key, "."); nested && len(table) == 0 {
+		tomlDelete(cfg, parent)
+	}
+}
+
+// tomlTable walks to the table holding a dotted key's last segment, creating tables on the way when asked.
+func tomlTable(cfg map[string]any, key string, create bool) (map[string]any, string) {
+	parts := strings.Split(key, ".")
+	table := cfg
+	for _, p := range parts[:len(parts)-1] {
+		next, ok := table[p].(map[string]any)
+		if !ok {
+			if !create {
+				return nil, ""
+			}
+			next = map[string]any{}
+			table[p] = next
+		}
+		table = next
+	}
+	return table, parts[len(parts)-1]
+}
+
+// sameValue compares TOML and JSON decodings of the strings, booleans and tables the daemon writes.
+func sameValue(a, b any) bool {
+	ja, errA := json.Marshal(a)
+	jb, errB := json.Marshal(b)
+	return errA == nil && errB == nil && string(ja) == string(jb)
 }
 
 func (c *Config) codexBundledModels() ([]byte, error) {

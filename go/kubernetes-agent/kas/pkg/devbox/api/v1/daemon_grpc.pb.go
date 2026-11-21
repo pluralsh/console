@@ -53,6 +53,7 @@ const (
 	Daemon_ForkThread_FullMethodName            = "/devbox.v1.Daemon/ForkThread"
 	Daemon_Prompt_FullMethodName                = "/devbox.v1.Daemon/Prompt"
 	Daemon_CancelPrompt_FullMethodName          = "/devbox.v1.Daemon/CancelPrompt"
+	Daemon_UpdateQueuedPrompt_FullMethodName    = "/devbox.v1.Daemon/UpdateQueuedPrompt"
 	Daemon_SetThreadConfigOption_FullMethodName = "/devbox.v1.Daemon/SetThreadConfigOption"
 	Daemon_RespondInteraction_FullMethodName    = "/devbox.v1.Daemon/RespondInteraction"
 	Daemon_ListCommands_FullMethodName          = "/devbox.v1.Daemon/ListCommands"
@@ -117,6 +118,7 @@ type DaemonClient interface {
 	ForkThread(ctx context.Context, in *ForkThreadRequest, opts ...grpc.CallOption) (*ThreadResponse, error)
 	Prompt(ctx context.Context, in *PromptRequest, opts ...grpc.CallOption) (*PromptResponse, error)
 	CancelPrompt(ctx context.Context, in *CancelPromptRequest, opts ...grpc.CallOption) (*CancelPromptResponse, error)
+	UpdateQueuedPrompt(ctx context.Context, in *UpdateQueuedPromptRequest, opts ...grpc.CallOption) (*UpdateQueuedPromptResponse, error)
 	SetThreadConfigOption(ctx context.Context, in *SetThreadConfigOptionRequest, opts ...grpc.CallOption) (*SetThreadConfigOptionResponse, error)
 	RespondInteraction(ctx context.Context, in *RespondInteractionRequest, opts ...grpc.CallOption) (*RespondInteractionResponse, error)
 	ListCommands(ctx context.Context, in *ListCommandsRequest, opts ...grpc.CallOption) (*ListCommandsResponse, error)
@@ -342,6 +344,16 @@ func (c *daemonClient) CancelPrompt(ctx context.Context, in *CancelPromptRequest
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(CancelPromptResponse)
 	err := c.cc.Invoke(ctx, Daemon_CancelPrompt_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *daemonClient) UpdateQueuedPrompt(ctx context.Context, in *UpdateQueuedPromptRequest, opts ...grpc.CallOption) (*UpdateQueuedPromptResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateQueuedPromptResponse)
+	err := c.cc.Invoke(ctx, Daemon_UpdateQueuedPrompt_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -647,6 +659,7 @@ type DaemonServer interface {
 	ForkThread(context.Context, *ForkThreadRequest) (*ThreadResponse, error)
 	Prompt(context.Context, *PromptRequest) (*PromptResponse, error)
 	CancelPrompt(context.Context, *CancelPromptRequest) (*CancelPromptResponse, error)
+	UpdateQueuedPrompt(context.Context, *UpdateQueuedPromptRequest) (*UpdateQueuedPromptResponse, error)
 	SetThreadConfigOption(context.Context, *SetThreadConfigOptionRequest) (*SetThreadConfigOptionResponse, error)
 	RespondInteraction(context.Context, *RespondInteractionRequest) (*RespondInteractionResponse, error)
 	ListCommands(context.Context, *ListCommandsRequest) (*ListCommandsResponse, error)
@@ -742,6 +755,9 @@ func (UnimplementedDaemonServer) Prompt(context.Context, *PromptRequest) (*Promp
 }
 func (UnimplementedDaemonServer) CancelPrompt(context.Context, *CancelPromptRequest) (*CancelPromptResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CancelPrompt not implemented")
+}
+func (UnimplementedDaemonServer) UpdateQueuedPrompt(context.Context, *UpdateQueuedPromptRequest) (*UpdateQueuedPromptResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateQueuedPrompt not implemented")
 }
 func (UnimplementedDaemonServer) SetThreadConfigOption(context.Context, *SetThreadConfigOptionRequest) (*SetThreadConfigOptionResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method SetThreadConfigOption not implemented")
@@ -1152,6 +1168,24 @@ func _Daemon_CancelPrompt_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(DaemonServer).CancelPrompt(ctx, req.(*CancelPromptRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Daemon_UpdateQueuedPrompt_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateQueuedPromptRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DaemonServer).UpdateQueuedPrompt(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Daemon_UpdateQueuedPrompt_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DaemonServer).UpdateQueuedPrompt(ctx, req.(*UpdateQueuedPromptRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1662,6 +1696,10 @@ var Daemon_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CancelPrompt",
 			Handler:    _Daemon_CancelPrompt_Handler,
+		},
+		{
+			MethodName: "UpdateQueuedPrompt",
+			Handler:    _Daemon_UpdateQueuedPrompt_Handler,
 		},
 		{
 			MethodName: "SetThreadConfigOption",

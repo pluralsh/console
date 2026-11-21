@@ -72,14 +72,19 @@ type Conn struct {
 
 // NewConn starts serving JSON-RPC over the harness's stdin (w) and stdout (r).
 func NewConn(w io.Writer, r io.Reader, h Handler, log *slog.Logger) *Conn {
+	order := newInboundOrder()
 	handler := func(ctx context.Context, method string, params json.RawMessage) (any, *acpsdk.RequestError) {
 		if notificationMethods[method] {
+			defer order.handledOne()
 			h.HandleNotification(ctx, method, params)
 			return nil, nil
 		}
+		if orderedRequests[method] {
+			order.catchUp(ctx)
+		}
 		return h.HandleRequest(ctx, method, params)
 	}
-	c := acpsdk.NewConnection(handler, w, r)
+	c := acpsdk.NewConnection(handler, w, &orderedReader{r: r, o: order})
 	if log != nil {
 		c.SetLogger(log)
 	}

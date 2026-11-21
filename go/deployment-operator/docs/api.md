@@ -864,6 +864,23 @@ _Appears in:_
 | `azure` _boolean_ | Azure: Resource Manager, Entra ID sign-in, Microsoft Graph, Key Vault and Storage. |  | Optional: \{\} <br /> |
 
 
+#### DevboxECRRegistries
+
+
+
+DevboxECRRegistries enables egress to private Amazon ECR registries. ECR hosts are regional, so each region
+is listed. Pulling still needs credentials, such as an AWS cloud identity and `aws ecr get-login-password`.
+
+
+
+_Appears in:_
+- [DevboxOCIRegistries](#devboxociregistries)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `regions` _string array_ | Regions opens, per region, the registry API (<account>.dkr.ecr.<region>.amazonaws.com), the ECR API<br />that issues login tokens, and the S3 bucket image layers download from. |  | MaxItems: 32 <br />Optional: \{\} <br />items:Pattern: ^[a-z]\{2\}(-[a-z]+)+-[0-9]+$ <br /> |
+
+
 #### DevboxEnvVar
 
 
@@ -987,6 +1004,28 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `mode` _[DevboxImageUpdateMode](#devboximageupdatemode)_ | Mode is pinned or poll. |  | Enum: [pinned poll] <br />Optional: \{\} <br /> |
 | `interval` _[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#duration-v1-meta)_ | Interval between re-resolutions in poll mode. Defaults to 1h. |  | Optional: \{\} <br /> |
+
+
+#### DevboxOCIRegistries
+
+
+
+DevboxOCIRegistries enables egress to each container registry's API and blob hosts (see OCIRegistryHosts).
+
+
+
+_Appears in:_
+- [DevboxRunnerSpec](#devboxrunnerspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `dockerHub` _boolean_ | DockerHub: docker.io, its auth service and its Cloudflare blob CDN. Unqualified image names resolve here. | true | Optional: \{\} <br /> |
+| `github` _boolean_ | GitHub: ghcr.io and its blob host. | true | Optional: \{\} <br /> |
+| `quay` _boolean_ | Quay: quay.io, its CDN and its S3 blob bucket. |  | Optional: \{\} <br /> |
+| `google` _boolean_ | Google: Container Registry (gcr.io and its regional hosts) and Artifact Registry (*.pkg.dev). |  | Optional: \{\} <br /> |
+| `microsoft` _boolean_ | Microsoft: the Microsoft Artifact Registry, mcr.microsoft.com, and its regional data endpoints. |  | Optional: \{\} <br /> |
+| `kubernetes` _boolean_ | Kubernetes: registry.k8s.io and the Artifact Registry mirrors it redirects to. From AWS addresses it<br />redirects to regional S3 buckets instead, which need httpAllowlist entries. |  | Optional: \{\} <br /> |
+| `ecr` _[DevboxECRRegistries](#devboxecrregistries)_ | ECR opens private Amazon ECR registries, for any account, in the listed regions. |  | Optional: \{\} <br /> |
 
 
 #### DevboxPackageServers
@@ -1135,6 +1174,7 @@ _Appears in:_
 | `httpAllowlist` _[DevboxHTTPAllowlistEntry](#devboxhttpallowlistentry) array_ | HTTPAllowlist are extra hosts instances may reach, on top of the built-in ones. |  | MaxItems: 256 <br />Optional: \{\} <br /> |
 | `packageServers` _[DevboxPackageServers](#devboxpackageservers)_ | PackageServers opens egress to public package registries by ecosystem. Go, Rust, JavaScript, Java, Elixir<br />and Python are on unless set to false. | \{  \} | Optional: \{\} <br /> |
 | `cloudProviders` _[DevboxCloudProviders](#devboxcloudproviders)_ | CloudProviders opens egress to cloud providers' API endpoints. A provider is on when the runner has a cloud<br />identity for it, unless set to false. | \{  \} | Optional: \{\} <br /> |
+| `ociRegistries` _[DevboxOCIRegistries](#devboxociregistries)_ | OCIRegistries opens egress to public container registries, for pulling images with podman, docker,<br />crane or helm. Docker Hub and GitHub Container Registry are on unless set to false. | \{  \} | Optional: \{\} <br /> |
 | `env` _[DevboxEnvVar](#devboxenvvar) array_ | Env are environment variables for every process the box starts: agents, terminals and git. Plain values<br />are part of the template, so changing them rolls a new revision. Secret values are read when an instance<br />wakes and are never baked into the template, the golden snapshot or the workspace volume. |  | MaxItems: 128 <br />Optional: \{\} <br /> |
 | `browser` _[DevboxBrowser](#devboxbrowser)_ | Browser enables the in-box headless browser. |  | Optional: \{\} <br /> |
 | `bootstrapScript` _string_ | BootstrapScript runs once during the golden boot, so its results are baked into the snapshot. |  | Optional: \{\} <br /> |

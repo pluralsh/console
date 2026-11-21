@@ -41,6 +41,23 @@ defmodule Console.Schema.DevboxInstanceSession do
     def values(%__MODULE__{options: options}), do: Enum.map(options || [], & &1.value)
   end
 
+  defmodule QueuedPrompt do
+    use Console.Schema.Base
+
+    embedded_schema do
+      field :prompt_id,    :string
+      field :text,         :string
+      field :attachments,  {:array, :string}
+      field :queued_at,    :utc_datetime_usec
+    end
+
+    def changeset(model, attrs \\ %{}) do
+      model
+      |> cast(attrs, ~w(prompt_id text attachments queued_at)a)
+      |> validate_required([:prompt_id])
+    end
+  end
+
   defmodule Command do
     use Console.Schema.Base
 
@@ -77,9 +94,11 @@ defmodule Console.Schema.DevboxInstanceSession do
     field :background_work,       :map
     field :billing,               :string
     field :revision,              :integer, default: 0
+    field :parent_tool_call_id,   :string
 
     embeds_many :config_options,     ConfigOption, on_replace: :delete
     embeds_many :available_commands, Command, on_replace: :delete
+    embeds_many :queued_prompts,     QueuedPrompt, on_replace: :delete
 
     embeds_one :usage, Usage, on_replace: :update do
       field :input_tokens,     :integer
@@ -184,13 +203,14 @@ defmodule Console.Schema.DevboxInstanceSession do
 
   @valid ~w(instance_id acp_session_id kind parent_id parent_acp_session_id agent title user_title cwd worktree_repos
             worktree_path status imported user_id last_activity_at entity_count foreground_state stop_reason error
-            background_work billing revision)a
+            background_work billing revision parent_tool_call_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
     |> cast_embed(:config_options)
     |> cast_embed(:available_commands)
+    |> cast_embed(:queued_prompts)
     |> cast_embed(:usage, with: &usage_changeset/2)
     |> foreign_key_constraint(:instance_id)
     |> foreign_key_constraint(:parent_id)

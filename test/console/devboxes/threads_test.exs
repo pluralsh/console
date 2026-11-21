@@ -162,6 +162,31 @@ defmodule Console.Devboxes.ThreadsTest do
     end
   end
 
+  describe "#update_queued_prompt/5" do
+    test "it stores the queue the box reports back" do
+      thread = owned_thread()
+      expect(Control.Test, :update_queued_prompt, fn _, %{id: id}, "p2", :edit, "rewritten" ->
+        assert id == thread.id
+        {:ok, %{updated: true, queued_prompts: [%{prompt_id: "p2", content: [%{text: %{text: "rewritten"}}]}]}}
+      end)
+
+      {:ok, updated} = Threads.update_queued_prompt(thread.id, "p2", :edit, "rewritten", thread.user)
+      assert [%{prompt_id: "p2", text: "rewritten"}] = updated.queued_prompts
+    end
+
+    test "an edit needs text" do
+      thread = owned_thread()
+
+      {:error, "a queued prompt needs text"} = Threads.update_queued_prompt(thread.id, "p2", :edit, "  ", thread.user)
+    end
+
+    test "only those who can prompt the thread can change its queue" do
+      thread = owned_thread()
+
+      {:error, _} = Threads.update_queued_prompt(thread.id, "p2", :cancel, nil, insert(:user))
+    end
+  end
+
   describe "#set_config_option/4" do
     test "it validates against the thread's reported options" do
       thread = owned_thread(config_options: [

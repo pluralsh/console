@@ -6,7 +6,6 @@ import {
   Flex,
   Modal,
   prettifyRepoUrl,
-  PrIcon,
   PrOpenIcon,
   WarningOutlineIcon,
 } from '@pluralsh/design-system'
@@ -171,16 +170,7 @@ export function WorkbenchJobPrs({
       gap="xlarge"
     >
       {!isEmpty(generatedPrs) && (
-        <Flex
-          direction="column"
-          gap="medium"
-        >
-          <StackedText
-            icon={<PrIcon />}
-            first={<Body2BoldP>Generated pull requests</Body2BoldP>}
-          />
-          <PullRequestList pullRequests={generatedPrs} />
-        </Flex>
+        <PullRequestList pullRequests={generatedPrs} />
       )}
       {!isEmpty(draftPrs) && (
         <Flex

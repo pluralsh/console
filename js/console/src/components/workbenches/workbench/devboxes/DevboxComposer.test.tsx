@@ -11,6 +11,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 import {
   attachmentError,
+  composerOptions,
   DevboxComposer,
   MAX_ATTACHMENTS,
   proxyModelValues,
@@ -278,6 +279,38 @@ describe('DevboxComposer attachments', () => {
       )
     ).toMatch(/At most 10/)
     expect(attachmentError([file('ok')])).toBeNull()
+  })
+})
+
+describe('composerOptions', () => {
+  const option = (configId: string, category: string) => ({
+    configId,
+    category,
+    options: [{ value: 'a', name: 'A' }],
+  })
+
+  it('keeps the model, reasoning effort and autonomy, dropping agent extras', () => {
+    const codex = [
+      option('autonomy', 'autonomy'),
+      option('mode', 'mode'),
+      option('collaboration_mode', '_collaboration_mode'),
+      option('model', 'model'),
+      option('reasoning_effort', 'thought_level'),
+      option('fast_mode', '_fast_mode'),
+    ]
+    expect(composerOptions(codex).map((o) => o.configId)).toEqual([
+      'model',
+      'reasoning_effort',
+      'autonomy',
+    ])
+  })
+
+  it("shows the agent's mode when there's no autonomy setting", () => {
+    expect(
+      composerOptions([option('model', 'model'), option('mode', 'mode')]).map(
+        (o) => o.configId
+      )
+    ).toEqual(['model', 'mode'])
   })
 })
 

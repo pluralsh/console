@@ -8,7 +8,7 @@ import {
   TerminalIcon,
   Tooltip,
 } from '@pluralsh/design-system'
-import { CountBadge } from 'components/utils/CountBadge'
+import { PrStatusIcon } from 'components/workbenches/common/WorkbenchJobPrIcon'
 import {
   PanelHeaderSC,
   SidePanelContent,
@@ -20,9 +20,16 @@ import {
 } from 'components/layout/TopLevelSidePanelState'
 import {
   DevboxInstanceFragment,
+  DevboxPullRequestFragment,
   useDevboxInstanceQuery,
 } from 'generated/graphql'
-import { ReactElement, useCallback, useEffect, useState } from 'react'
+import {
+  ReactElement,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react'
 import { matchPath, useLocation, useSearchParams } from 'react-router-dom'
 import {
   WORKBENCH_DEVBOX_CHANGE_QUERY_PARAM,
@@ -42,7 +49,7 @@ import {
 import { DevboxDiffTab } from './DevboxDiffTab'
 import { DevboxFilesTab } from './DevboxFilesTab'
 import { isInstanceLive } from './devboxIdle'
-import { useDevboxPullRequests } from './devboxPullRequests'
+import { pullRequestsStatus, useDevboxPullRequests } from './devboxPullRequests'
 import { DevboxPullRequestsTab } from './DevboxPullRequestsTab'
 import { DevboxTerminalTab } from './DevboxTerminalTab'
 import { useDevboxWorkspaceApi } from './devboxWorkspaceApi'
@@ -76,6 +83,22 @@ const panelTabsFor = (instance: Nullable<DevboxInstanceFragment>) =>
   PANEL_TABS.filter((t) => t.key !== 'browser' || instance?.devbox?.browser)
 
 const readOpen = () => localStorage.getItem(OPEN_KEY) !== 'false'
+
+// the pull requests tab wears the state its pull requests are in, like their rows do
+function prTabIcon(
+  prs: Pick<DevboxPullRequestFragment, 'status'>[],
+  fallback: ReactNode
+) {
+  const status = pullRequestsStatus(prs)
+  return status ? (
+    <PrStatusIcon
+      status={status}
+      size={14}
+    />
+  ) : (
+    fallback
+  )
+}
 
 // the panel lives in the app's top-level side panel, beside the header, and
 // remembers whether it was left open across instances
@@ -163,7 +186,7 @@ export function DevboxPanelRail({
     isOpen ? null : instance.id,
     isInstanceLive(instance.status)
   )
-  const { open } = useDevboxPullRequests(instance.id)
+  const { pullRequests, open } = useDevboxPullRequests(instance.id)
   if (isOpen) return null
   return (
     <PanelRail
@@ -174,11 +197,11 @@ export function DevboxPanelRail({
             label: `${t.label}: ${diffStatLabel(changes)}`,
             badge: <DevboxDiffBlock stat={changes} />,
           }
-        if (t.key === 'prs' && open.length)
+        if (t.key === 'prs')
           return {
             ...t,
-            label: `${t.label}: ${open.length} open`,
-            count: open.length,
+            label: open.length ? `${t.label}: ${open.length} open` : t.label,
+            icon: prTabIcon(pullRequests, t.icon),
           }
         return t
       })}
@@ -219,7 +242,7 @@ export function DevboxPanelContent() {
     useState<Nullable<HTMLDivElement>>(null)
 
   const changes = useDevboxChangeStat(instanceId || null, live)
-  const { open: openPrs } = useDevboxPullRequests(instanceId || null)
+  const { pullRequests } = useDevboxPullRequests(instanceId || null)
   const tabs = panelTabsFor(instance)
   const active = tabs.find((t) => t.key === tab) ?? tabs[0]
 
@@ -239,16 +262,9 @@ export function DevboxPanelContent() {
                 $selected={selected}
                 onClick={() => setTab(t.key)}
               >
-                {t.icon}
+                {t.key === 'prs' ? prTabIcon(pullRequests, t.icon) : t.icon}
                 {selected && <span>{t.label}</span>}
                 {t.key === 'changes' && <DevboxDiffStat stat={changes} />}
-                {t.key === 'prs' && (
-                  <CountBadge
-                    count={openPrs.length}
-                    size="small"
-                    variant="warning"
-                  />
-                )}
               </TabSC>
             )
             return selected ? (

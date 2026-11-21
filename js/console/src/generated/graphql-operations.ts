@@ -267,6 +267,7 @@ export { ForkDevboxThreadDocument as ForkDevboxThread } from './graphql-document
 export { RenameDevboxThreadDocument as RenameDevboxThread } from './graphql-documents'
 export { PromptDevboxThreadDocument as PromptDevboxThread } from './graphql-documents'
 export { CancelDevboxPromptDocument as CancelDevboxPrompt } from './graphql-documents'
+export { UpdateDevboxQueuedPromptDocument as UpdateDevboxQueuedPrompt } from './graphql-documents'
 export { SetDevboxThreadConfigOptionDocument as SetDevboxThreadConfigOption } from './graphql-documents'
 export { RespondDevboxInteractionDocument as RespondDevboxInteraction } from './graphql-documents'
 export { AddDevboxRepositoryDocument as AddDevboxRepository } from './graphql-documents'

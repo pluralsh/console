@@ -3,11 +3,12 @@ package harness
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"os"
 	"slices"
 	"strings"
 	"testing"
+
+	"github.com/pelletier/go-toml/v2"
 
 	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
 )
@@ -158,19 +159,108 @@ func TestCodexDefaultsToProxyModel(t *testing.T) {
 		ProxyModels: &devboxv1.ProxyModels{DefaultModel: "openai/gpt-5", Models: []string{"openai/gpt-5"}},
 	}
 	c := testConfig(t)
+	if _, err := c.Spec(launch, proxyEndpoints, ""); err != nil {
+		t.Fatal(err)
+	}
+	if got := codexConfig(t, c)["model"]; got != "openai/gpt-5" {
+		t.Errorf("model = %v, want the proxy's default", got)
+	}
+	if _, err := c.Spec(launch, proxyEndpoints, "openai/gpt-5-mini"); err != nil {
+		t.Fatal(err)
+	}
+	if got := codexConfig(t, c)["model"]; got != "openai/gpt-5-mini" {
+		t.Errorf("model = %v, want the box's model", got)
+	}
+}
+
+func codexConfig(t *testing.T, c *Config) map[string]any {
+	t.Helper()
+	cfg := map[string]any{}
+	data, err := os.ReadFile(c.CodexHome() + "/config.toml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := toml.Unmarshal(data, &cfg); err != nil {
+		t.Fatal(err)
+	}
+	return cfg
+}
+
+// codex-acp starts `codex app-server` itself and drops flags, so the proxy setup has to live in config.toml
+func TestCodexProxyLivesInConfig(t *testing.T) {
+	c := testConfig(t)
+	if err := os.MkdirAll(c.CodexHome(), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	user := "approval_policy = \"never\"\n\n[mcp_servers.docs]\ncommand = \"docs-mcp\"\n"
+	if err := os.WriteFile(c.CodexHome()+"/config.toml", []byte(user), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	launch := &devboxv1.AgentLaunch{
+		Agent:       devboxv1.AgentType_AGENT_TYPE_CODEX,
+		ProxyModels: &devboxv1.ProxyModels{DefaultModel: "openai/gpt-5", Models: []string{"openai/gpt-5"}},
+	}
 	spec, err := c.Spec(launch, proxyEndpoints, "")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !slices.Contains(spec.Args, `model="openai/gpt-5"`) {
-		t.Errorf("args %v don't default the model", spec.Args)
+	if slices.Contains(spec.Args, "-c") {
+		t.Errorf("args %v: the adapter doesn't pass -c on", spec.Args)
 	}
-	spec, err = c.Spec(launch, proxyEndpoints, "openai/gpt-5-mini")
-	if err != nil {
+	envIs(t, spec.Env, "CODEX_API_KEY", PlaceholderKey)
+
+	cfg := codexConfig(t, c)
+	provider, _ := cfg["model_providers"].(map[string]any)["plural"].(map[string]any)
+	if cfg["model_provider"] != "plural" || provider["base_url"] != "https://console.example.com/ext/ai/v1" ||
+		provider["env_key"] != "CODEX_API_KEY" || provider["wire_api"] != "responses" || provider["supports_websockets"] != false {
+		t.Fatalf("proxy provider not configured: %v", cfg)
+	}
+	if cfg["approval_policy"] != "never" || cfg["mcp_servers"] == nil {
+		t.Errorf("user settings dropped: %v", cfg)
+	}
+
+	// the owner's plan takes the provider back out, keeping the user's settings
+	launch.Billing = devboxv1.BillingMode_BILLING_MODE_SUBSCRIPTION
+	if _, err := c.Spec(launch, proxyEndpoints, ""); err != nil {
 		t.Fatal(err)
 	}
-	if !slices.Contains(spec.Args, `model="openai/gpt-5-mini"`) || slices.Contains(spec.Args, `model="openai/gpt-5"`) {
-		t.Errorf("args %v don't prefer the box's model", spec.Args)
+	cfg = codexConfig(t, c)
+	if _, ok := cfg["model_provider"]; ok || cfg["cli_auth_credentials_store"] != "file" {
+		t.Errorf("subscription config = %v", cfg)
+	}
+	if providers, ok := cfg["model_providers"]; ok {
+		t.Errorf("proxy provider left behind: %v", providers)
+	}
+	if cfg["approval_policy"] != "never" {
+		t.Errorf("user settings dropped: %v", cfg)
+	}
+}
+
+func TestCodexKeepsAModelTheUserPicked(t *testing.T) {
+	c := testConfig(t)
+	launch := &devboxv1.AgentLaunch{
+		Agent:       devboxv1.AgentType_AGENT_TYPE_CODEX,
+		ProxyModels: &devboxv1.ProxyModels{DefaultModel: "openai/gpt-5", Models: []string{"openai/gpt-5", "openai/gpt-5-mini"}},
+	}
+	if _, err := c.Spec(launch, proxyEndpoints, ""); err != nil {
+		t.Fatal(err)
+	}
+	cfg := codexConfig(t, c)
+	cfg["model"] = "openai/gpt-5-mini"
+	cfg["model_provider"] = "openai"
+	out, _ := toml.Marshal(cfg)
+	if err := os.WriteFile(c.CodexHome()+"/config.toml", out, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := c.Spec(launch, proxyEndpoints, ""); err != nil {
+		t.Fatal(err)
+	}
+	cfg = codexConfig(t, c)
+	if cfg["model"] != "openai/gpt-5-mini" {
+		t.Errorf("model = %v, want the user's pick kept", cfg["model"])
+	}
+	if cfg["model_provider"] != "plural" {
+		t.Errorf("model_provider = %v, want the proxy enforced while it bills", cfg["model_provider"])
 	}
 }
 
@@ -187,13 +277,12 @@ func TestCodexCatalogListsProxyModels(t *testing.T) {
 		Agent:       devboxv1.AgentType_AGENT_TYPE_CODEX,
 		ProxyModels: &devboxv1.ProxyModels{DefaultModel: "openai/gpt-5.4", Models: []string{"openai/gpt-5.4", "anthropic/claude-sonnet-4-5"}},
 	}
-	spec, err := c.Spec(launch, proxyEndpoints, "")
-	if err != nil {
+	if _, err := c.Spec(launch, proxyEndpoints, ""); err != nil {
 		t.Fatal(err)
 	}
 	path := c.StateDir + "/harness/codex-models.json"
-	if !slices.Contains(spec.Args, fmt.Sprintf("model_catalog_json=%q", path)) {
-		t.Fatalf("args %v don't point Codex at the catalog", spec.Args)
+	if got := codexConfig(t, c)["model_catalog_json"]; got != path {
+		t.Fatalf("model_catalog_json = %v, want %s", got, path)
 	}
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -224,14 +313,11 @@ func TestCodexKeepsItsListWithoutABundledCatalog(t *testing.T) {
 		Agent:       devboxv1.AgentType_AGENT_TYPE_CODEX,
 		ProxyModels: &devboxv1.ProxyModels{DefaultModel: "openai/gpt-5", Models: []string{"openai/gpt-5"}},
 	}
-	spec, err := c.Spec(launch, proxyEndpoints, "")
-	if err != nil {
+	if _, err := c.Spec(launch, proxyEndpoints, ""); err != nil {
 		t.Fatal(err)
 	}
-	for _, a := range spec.Args {
-		if strings.HasPrefix(a, "model_catalog_json=") {
-			t.Errorf("unexpected catalog arg %q", a)
-		}
+	if got, ok := codexConfig(t, c)["model_catalog_json"]; ok {
+		t.Errorf("unexpected catalog %v", got)
 	}
 }
 

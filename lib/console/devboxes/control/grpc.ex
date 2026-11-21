@@ -209,6 +209,19 @@ defmodule Console.Devboxes.Control.Grpc do
   def cancel_prompt(inst, thread),
     do: call(cluster_id(inst), :cancel_prompt, %V1.CancelPromptRequest{thread: thread_ref(inst, thread)}) |> to_map()
 
+  @queued_actions %{edit: :QUEUED_PROMPT_ACTION_EDIT, cancel: :QUEUED_PROMPT_ACTION_CANCEL, send_now: :QUEUED_PROMPT_ACTION_SEND_NOW}
+
+  @impl true
+  def update_queued_prompt(inst, thread, prompt_id, action, text) do
+    req = %V1.UpdateQueuedPromptRequest{
+      thread: thread_ref(inst, thread),
+      prompt_id: prompt_id,
+      action: Map.fetch!(@queued_actions, action),
+      text: text || ""
+    }
+    call(cluster_id(inst), :update_queued_prompt, req) |> to_map()
+  end
+
   @impl true
   def set_config_option(inst, thread, config_id, value) do
     req = %V1.SetThreadConfigOptionRequest{

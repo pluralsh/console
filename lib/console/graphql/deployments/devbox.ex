@@ -40,6 +40,12 @@ defmodule Console.GraphQl.Deployments.Devbox do
     value :completed,    description: "the last turn finished or failed, or the thread was closed"
   end
 
+  enum :devbox_queued_prompt_action do
+    value :edit,     description: "replace the prompt's text"
+    value :cancel,   description: "drop the prompt from the queue"
+    value :send_now, description: "run the prompt next, stopping the current turn"
+  end
+
   enum :devbox_stream_kind do
     value :terminal
     value :vnc
@@ -677,6 +683,8 @@ defmodule Console.GraphQl.Deployments.Devbox do
     field :config_options,    list_of(:devbox_config_option)
     field :available_commands, list_of(:devbox_command)
     field :usage,             :devbox_usage
+    field :queued_prompts,    list_of(:devbox_queued_prompt), description: "prompts held until the running turn ends, in the order they'll run"
+    field :parent_tool_call_id, :string, description: "for subagents, the parent's tool call that spawned it"
 
     field :instance,     :devbox_instance, resolve: dataloader(Deployments)
     field :parent,       :devbox_thread, resolve: dataloader(Deployments)
@@ -686,6 +694,14 @@ defmodule Console.GraphQl.Deployments.Devbox do
     field :interactions, list_of(:devbox_interaction), resolve: dataloader(Deployments)
 
     timestamps()
+  end
+
+  @desc "A prompt sent while the thread was busy, waiting for its turn"
+  object :devbox_queued_prompt do
+    field :prompt_id,   non_null(:string)
+    field :text,        :string
+    field :attachments, list_of(:string), description: "names of the files attached to the prompt"
+    field :queued_at,   :datetime
   end
 
   object :devbox_usage do
@@ -1385,6 +1401,17 @@ defmodule Console.GraphQl.Deployments.Devbox do
       arg :id, non_null(:id)
 
       resolve &Deployments.cancel_devbox_prompt/2
+    end
+
+    field :update_devbox_queued_prompt, :devbox_thread do
+      middleware Authenticated
+      middleware Scope, resource: :workbench, action: :write
+      arg :id,        non_null(:id), description: "the thread id"
+      arg :prompt_id, non_null(:string)
+      arg :action,    non_null(:devbox_queued_prompt_action)
+      arg :text,      :string, description: "the new text, for edit"
+
+      resolve &Deployments.update_devbox_queued_prompt/2
     end
 
     field :set_devbox_thread_config_option, :devbox_thread do

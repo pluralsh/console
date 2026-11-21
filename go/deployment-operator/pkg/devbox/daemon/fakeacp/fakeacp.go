@@ -6,6 +6,7 @@
 //	block       wait for session/cancel, then stop with "cancelled"
 //	permission  ask session/request_permission and echo the outcome
 //	subagent    a Task tool call and a child update tagged with claude-agent-acp's parentToolUseId
+//	subagent-permission  a subagent's tool call, then a permission request for it on the parent session
 //	unknown     an unknown content block and an unknown session update kind
 //	authfail    fail the turn with -32000 "Authentication required"
 //	mode:<id>   switch the session's mode itself (current_mode_update), like leaving plan mode
@@ -253,6 +254,23 @@ func (f *fakeAgent) prompt(sid string, params acp.Object) (any, *acp.RequestErro
 			"_meta": map[string]any{"claudeCode": map[string]any{"parentToolUseId": "task-1"}}})
 		f.update(sid, map[string]any{"sessionUpdate": "tool_call_update", "toolCallId": "task-1", "status": "completed"})
 		msg("parent done")
+	case text == "subagent-permission":
+		child := map[string]any{"claudeCode": map[string]any{"parentToolUseId": "task-1"}}
+		f.update(sid, map[string]any{"sessionUpdate": "tool_call", "toolCallId": "task-1", "title": "Explore the repo",
+			"kind": "think", "status": "in_progress"})
+		f.update(sid, map[string]any{"sessionUpdate": "tool_call", "toolCallId": "tc-child", "title": "rm -rf build",
+			"kind": "execute", "status": "pending", "_meta": child})
+		// like claude-agent-acp, the request names the parent session and carries no lineage
+		res, err := f.conn.Call(context.Background(), acp.MethodRequestPermission, map[string]any{
+			"sessionId": sid,
+			"toolCall":  map[string]any{"toolCallId": "tc-child", "title": "rm -rf build"},
+			"options":   []any{map[string]any{"optionId": "allow", "name": "Allow once", "kind": "allow_once"}},
+		})
+		if err != nil {
+			return nil, &acp.RequestError{Code: -32603, Message: err.Error()}
+		}
+		out := acp.Obj(acp.RawObject(res), "outcome")
+		msg(fmt.Sprintf("outcome:%s:%s", acp.Str(out, "outcome"), acp.Str(out, "optionId")))
 	case text == "unknown":
 		f.update(sid, map[string]any{"sessionUpdate": "agent_message_chunk", "content": map[string]any{"type": "hologram", "shape": "cube", "size": 3}})
 		f.update(sid, map[string]any{"sessionUpdate": "future_widget", "widgetId": "w1", "payload": map[string]any{"a": 1, "nested": []any{"x"}}})

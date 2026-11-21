@@ -411,7 +411,7 @@ func (r *DevboxRunnerReconciler) devboxAttributes(runner *v1alpha1.DevboxRunner,
 		Agents:              devboxAgentAttributes(runner, catalog),
 		HTTPAllowlist: append(lo.Map(runner.Spec.HTTPAllowlist, func(e v1alpha1.DevboxHTTPAllowlistEntry, _ int) *console.DevboxHTTPAllowAttributes {
 			return &console.DevboxHTTPAllowAttributes{Host: e.Host, Port: lo.ToPtr(int64(lo.FromPtrOr(e.Port, 443))), Passthrough: e.Passthrough}
-		}), lo.Map(append(runner.Spec.PackageServerHosts(), runner.Spec.CloudProviderHosts()...), func(h string, _ int) *console.DevboxHTTPAllowAttributes {
+		}), lo.Map(runner.Spec.EgressPresetHosts(), func(h string, _ int) *console.DevboxHTTPAllowAttributes {
 			return &console.DevboxHTTPAllowAttributes{Host: h, Port: lo.ToPtr(int64(443))}
 		})...),
 		IdlePolicy: devboxIdlePolicyAttributes(runner.Spec.IdlePolicy),

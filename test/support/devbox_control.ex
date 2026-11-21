@@ -39,6 +39,8 @@ defmodule Console.Devboxes.Control.Test do
   @impl true
   def cancel_prompt(_, _), do: :ok
   @impl true
+  def update_queued_prompt(_, _, _, _, _), do: {:ok, %{updated: true, queued_prompts: []}}
+  @impl true
   def set_config_option(_, _, _, _), do: :ok
   @impl true
   def respond(_, _, _), do: :ok

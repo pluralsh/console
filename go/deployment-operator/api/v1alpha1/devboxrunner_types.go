@@ -177,6 +177,12 @@ type DevboxRunnerSpec struct {
 	// +kubebuilder:default={}
 	CloudProviders *DevboxCloudProviders `json:"cloudProviders,omitempty"`
 
+	// OCIRegistries opens egress to public container registries, for pulling images with podman, docker,
+	// crane or helm. Docker Hub and GitHub Container Registry are on unless set to false.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default={}
+	OCIRegistries *DevboxOCIRegistries `json:"ociRegistries,omitempty"`
+
 	// Env are environment variables for every process the box starts: agents, terminals and git. Plain values
 	// are part of the template, so changing them rolls a new revision. Secret values are read when an instance
 	// wakes and are never baked into the template, the golden snapshot or the workspace volume.
@@ -495,6 +501,51 @@ type DevboxCloudProviders struct {
 	// Azure: Resource Manager, Entra ID sign-in, Microsoft Graph, Key Vault and Storage.
 	// +kubebuilder:validation:Optional
 	Azure *bool `json:"azure,omitempty"`
+}
+
+// DevboxOCIRegistries enables egress to each container registry's API and blob hosts (see OCIRegistryHosts).
+type DevboxOCIRegistries struct {
+	// DockerHub: docker.io, its auth service and its Cloudflare blob CDN. Unqualified image names resolve here.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=true
+	DockerHub *bool `json:"dockerHub,omitempty"`
+
+	// GitHub: ghcr.io and its blob host.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=true
+	GitHub *bool `json:"github,omitempty"`
+
+	// Quay: quay.io, its CDN and its S3 blob bucket.
+	// +kubebuilder:validation:Optional
+	Quay *bool `json:"quay,omitempty"`
+
+	// Google: Container Registry (gcr.io and its regional hosts) and Artifact Registry (*.pkg.dev).
+	// +kubebuilder:validation:Optional
+	Google *bool `json:"google,omitempty"`
+
+	// Microsoft: the Microsoft Artifact Registry, mcr.microsoft.com, and its regional data endpoints.
+	// +kubebuilder:validation:Optional
+	Microsoft *bool `json:"microsoft,omitempty"`
+
+	// Kubernetes: registry.k8s.io and the Artifact Registry mirrors it redirects to. From AWS addresses it
+	// redirects to regional S3 buckets instead, which need httpAllowlist entries.
+	// +kubebuilder:validation:Optional
+	Kubernetes *bool `json:"kubernetes,omitempty"`
+
+	// ECR opens private Amazon ECR registries, for any account, in the listed regions.
+	// +kubebuilder:validation:Optional
+	ECR *DevboxECRRegistries `json:"ecr,omitempty"`
+}
+
+// DevboxECRRegistries enables egress to private Amazon ECR registries. ECR hosts are regional, so each region
+// is listed. Pulling still needs credentials, such as an AWS cloud identity and `aws ecr get-login-password`.
+type DevboxECRRegistries struct {
+	// Regions opens, per region, the registry API (<account>.dkr.ecr.<region>.amazonaws.com), the ECR API
+	// that issues login tokens, and the S3 bucket image layers download from.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:MaxItems=32
+	// +kubebuilder:validation:items:Pattern=`^[a-z]{2}(-[a-z]+)+-[0-9]+$`
+	Regions []string `json:"regions,omitempty"`
 }
 
 // DevboxPackageServers enables egress to each ecosystem's public registries (see PackageServerHosts).
@@ -983,6 +1034,79 @@ func (in *DevboxRunnerSpec) CloudProviderHosts() []string {
 		}
 	}
 	return out
+}
+
+// EgressPresetHosts are every host the runner's presets open on 443: package servers, cloud providers and OCI
+// registries.
+func (in *DevboxRunnerSpec) EgressPresetHosts() []string {
+	return append(append(in.PackageServerHosts(), in.CloudProviderHosts()...), in.OCIRegistryHosts()...)
+}
+
+// ociRegistryHosts are the API and blob hosts each registry's pulls touch, all on 443. Substrate wildcards
+// cover exactly one label.
+var ociRegistryHosts = map[string][]string{
+	"dockerHub":  {"docker.io", "index.docker.io", "registry-1.docker.io", "auth.docker.io", "production.cloudflare.docker.com"},
+	"github":     {"ghcr.io", "pkg-containers.githubusercontent.com"},
+	"quay":       {"quay.io", "cdn.quay.io", "cdn01.quay.io", "cdn02.quay.io", "cdn03.quay.io", "quayio-production-s3.s3.amazonaws.com"},
+	"google":     {"gcr.io", "*.gcr.io", "*.pkg.dev"},
+	"microsoft":  {"mcr.microsoft.com", "*.data.mcr.microsoft.com"},
+	"kubernetes": {"registry.k8s.io", "*.pkg.dev"},
+}
+
+// OCIRegistryHosts returns the hosts the enabled container registries need, in a stable order without
+// duplicates. Unset fields take the CRD defaults, so runners stored before the field existed behave the same.
+func (in *DevboxRunnerSpec) OCIRegistryHosts() []string {
+	oci := in.OCIRegistries
+	if oci == nil {
+		oci = &DevboxOCIRegistries{}
+	}
+	on := func(v *bool, def bool) bool {
+		if v == nil {
+			return def
+		}
+		return *v
+	}
+	var hosts, out []string
+	seen := map[string]bool{}
+	for _, registry := range []struct {
+		name    string
+		enabled bool
+	}{
+		{"dockerHub", on(oci.DockerHub, true)},
+		{"github", on(oci.GitHub, true)},
+		{"quay", on(oci.Quay, false)},
+		{"google", on(oci.Google, false)},
+		{"microsoft", on(oci.Microsoft, false)},
+		{"kubernetes", on(oci.Kubernetes, false)},
+	} {
+		if registry.enabled {
+			hosts = append(hosts, ociRegistryHosts[registry.name]...)
+		}
+	}
+	if oci.ECR != nil {
+		for _, region := range oci.ECR.Regions {
+			hosts = append(hosts, ecrHosts(region)...)
+		}
+	}
+	for _, h := range hosts {
+		if !seen[h] {
+			seen[h] = true
+			out = append(out, h)
+		}
+	}
+	return out
+}
+
+// ecrHosts are the hosts a private ECR pull in region touches: the registry API under any account, the ECR API
+// for login tokens, and the layer bucket in both S3 addressing styles.
+func ecrHosts(region string) []string {
+	bucket := "prod-" + region + "-starport-layer-bucket"
+	return []string{
+		"*.dkr.ecr." + region + ".amazonaws.com",
+		"api.ecr." + region + ".amazonaws.com",
+		bucket + ".s3." + region + ".amazonaws.com",
+		bucket + ".s3.amazonaws.com",
+	}
 }
 
 // DevboxRunnerEnvSecret, in the operator namespace, holds every runner's resolved secretKeyRef env vars as one JSON

@@ -241,6 +241,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Devbox do
 
   def cancel_devbox_prompt(%{id: id}, %{context: %{current_user: user}}), do: Threads.cancel_prompt(id, user)
 
+  def update_devbox_queued_prompt(%{id: id, prompt_id: prompt_id, action: action} = args, %{context: %{current_user: user}}),
+    do: Threads.update_queued_prompt(id, prompt_id, action, args[:text], user)
+
   def set_devbox_thread_config_option(%{id: id, config_id: cid, value: v}, %{context: %{current_user: user}}),
     do: Threads.set_config_option(id, cid, v, user)
 

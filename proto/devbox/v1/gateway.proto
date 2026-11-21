@@ -47,6 +47,7 @@ service Gateway {
 
   rpc Prompt(PromptRequest) returns (PromptResponse);
   rpc CancelPrompt(CancelPromptRequest) returns (CancelPromptResponse);
+  rpc UpdateQueuedPrompt(UpdateQueuedPromptRequest) returns (UpdateQueuedPromptResponse);
   rpc SetThreadConfigOption(SetThreadConfigOptionRequest) returns (SetThreadConfigOptionResponse);
   rpc RespondInteraction(RespondInteractionRequest) returns (RespondInteractionResponse);
   rpc ListCommands(ListCommandsRequest) returns (ListCommandsResponse);

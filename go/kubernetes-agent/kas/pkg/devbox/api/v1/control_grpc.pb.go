@@ -51,6 +51,7 @@ const (
 	Control_ForkThread_FullMethodName            = "/devbox.v1.Control/ForkThread"
 	Control_Prompt_FullMethodName                = "/devbox.v1.Control/Prompt"
 	Control_CancelPrompt_FullMethodName          = "/devbox.v1.Control/CancelPrompt"
+	Control_UpdateQueuedPrompt_FullMethodName    = "/devbox.v1.Control/UpdateQueuedPrompt"
 	Control_SetThreadConfigOption_FullMethodName = "/devbox.v1.Control/SetThreadConfigOption"
 	Control_RespondInteraction_FullMethodName    = "/devbox.v1.Control/RespondInteraction"
 	Control_ListCommands_FullMethodName          = "/devbox.v1.Control/ListCommands"
@@ -112,6 +113,8 @@ type ControlClient interface {
 	Prompt(ctx context.Context, in *PromptRequest, opts ...grpc.CallOption) (*PromptResponse, error)
 	// CancelPrompt sends `session/cancel` for the thread's current turn.
 	CancelPrompt(ctx context.Context, in *CancelPromptRequest, opts ...grpc.CallOption) (*CancelPromptResponse, error)
+	// UpdateQueuedPrompt edits, drops or promotes a prompt still held in the thread's queue.
+	UpdateQueuedPrompt(ctx context.Context, in *UpdateQueuedPromptRequest, opts ...grpc.CallOption) (*UpdateQueuedPromptResponse, error)
 	// SetThreadConfigOption: `session/set_config_option`. Returns the agent's reported options.
 	SetThreadConfigOption(ctx context.Context, in *SetThreadConfigOptionRequest, opts ...grpc.CallOption) (*SetThreadConfigOptionResponse, error)
 	// RespondInteraction answers a pending permission request or elicitation.
@@ -318,6 +321,16 @@ func (c *controlClient) CancelPrompt(ctx context.Context, in *CancelPromptReques
 	return out, nil
 }
 
+func (c *controlClient) UpdateQueuedPrompt(ctx context.Context, in *UpdateQueuedPromptRequest, opts ...grpc.CallOption) (*UpdateQueuedPromptResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateQueuedPromptResponse)
+	err := c.cc.Invoke(ctx, Control_UpdateQueuedPrompt_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *controlClient) SetThreadConfigOption(ctx context.Context, in *SetThreadConfigOptionRequest, opts ...grpc.CallOption) (*SetThreadConfigOptionResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(SetThreadConfigOptionResponse)
@@ -512,6 +525,8 @@ type ControlServer interface {
 	Prompt(context.Context, *PromptRequest) (*PromptResponse, error)
 	// CancelPrompt sends `session/cancel` for the thread's current turn.
 	CancelPrompt(context.Context, *CancelPromptRequest) (*CancelPromptResponse, error)
+	// UpdateQueuedPrompt edits, drops or promotes a prompt still held in the thread's queue.
+	UpdateQueuedPrompt(context.Context, *UpdateQueuedPromptRequest) (*UpdateQueuedPromptResponse, error)
 	// SetThreadConfigOption: `session/set_config_option`. Returns the agent's reported options.
 	SetThreadConfigOption(context.Context, *SetThreadConfigOptionRequest) (*SetThreadConfigOptionResponse, error)
 	// RespondInteraction answers a pending permission request or elicitation.
@@ -598,6 +613,9 @@ func (UnimplementedControlServer) Prompt(context.Context, *PromptRequest) (*Prom
 }
 func (UnimplementedControlServer) CancelPrompt(context.Context, *CancelPromptRequest) (*CancelPromptResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CancelPrompt not implemented")
+}
+func (UnimplementedControlServer) UpdateQueuedPrompt(context.Context, *UpdateQueuedPromptRequest) (*UpdateQueuedPromptResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateQueuedPrompt not implemented")
 }
 func (UnimplementedControlServer) SetThreadConfigOption(context.Context, *SetThreadConfigOptionRequest) (*SetThreadConfigOptionResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method SetThreadConfigOption not implemented")
@@ -971,6 +989,24 @@ func _Control_CancelPrompt_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Control_UpdateQueuedPrompt_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateQueuedPromptRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControlServer).UpdateQueuedPrompt(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Control_UpdateQueuedPrompt_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControlServer).UpdateQueuedPrompt(ctx, req.(*UpdateQueuedPromptRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Control_SetThreadConfigOption_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SetThreadConfigOptionRequest)
 	if err := dec(in); err != nil {
@@ -1315,6 +1351,10 @@ var Control_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CancelPrompt",
 			Handler:    _Control_CancelPrompt_Handler,
+		},
+		{
+			MethodName: "UpdateQueuedPrompt",
+			Handler:    _Control_UpdateQueuedPrompt_Handler,
 		},
 		{
 			MethodName: "SetThreadConfigOption",
