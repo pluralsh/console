@@ -1,5 +1,5 @@
 # Build stage
-FROM golang:1.27.2-alpine AS builder
+FROM golang:1.27.4-alpine AS builder
 
 WORKDIR /build
 
@@ -27,6 +27,16 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
     ./cmd/main.go
 
 # Runtime stage
+# Refresh Debian security data in the distroless runtime image.
+FROM debian:12-slim AS runtime-security
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      ca-certificates=20250419~deb12u2 \
+      tzdata=2026f-0+deb12u1 && \
+    mkdir -p /out/var/lib/dpkg/status.d && \
+    dpkg-query -s ca-certificates > /out/var/lib/dpkg/status.d/ca-certificates && \
+    dpkg-query -s tzdata > /out/var/lib/dpkg/status.d/tzdata && \
+    rm -rf /var/lib/apt/lists/*
+
 FROM gcr.io/distroless/static-debian12:nonroot
 
 ARG BUILD_TIME=1970-01-01T00:00:00Z
@@ -47,6 +57,13 @@ LABEL org.opencontainers.image.created="${BUILD_TIME}" \
       org.opencontainers.image.description="AI proxy service for Plural Console" \
       org.opencontainers.image.base.name="gcr.io/distroless/static-debian12:nonroot" \
       org.opencontainers.image.rebuild-trigger="2026-06-26-nexus"
+
+# Override stale distroless Debian 12 certificate and timezone data.
+COPY --from=runtime-security /etc/ca-certificates.conf /etc/ca-certificates.conf
+COPY --from=runtime-security /etc/ssl/certs /etc/ssl/certs
+COPY --from=runtime-security /usr/share/ca-certificates /usr/share/ca-certificates
+COPY --from=runtime-security /usr/share/zoneinfo /usr/share/zoneinfo
+COPY --from=runtime-security /out/var/lib/dpkg/status.d/ /var/lib/dpkg/status.d/
 
 WORKDIR /app
 
