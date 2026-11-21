@@ -5,29 +5,28 @@ readme_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/m
 helm_repository_url: https://prometheus-community.github.io/helm-charts
 chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
 versions:
-- version: 93.4.1
+- version: 93.6.0
   kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
     '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
-    chart_updates: ['CI only: GitHub Action `actions/create-github-app-token` bumped
-        to v3.4.0 (no runtime impact).', 'Dependency bump: `prometheus-community/postgres_exporter`
-        updated to v0.21.1 for the `prometheus-postgres-exporter` subchart/component.',
-      'Prometheus rule/recording/alerting change: removed fine-grained histogram buckets
-        for `apiserver_watch_events_dispatch_duration_seconds` in kube-prometheus-stack.']
-    features: [Updated the bundled postgres exporter to v0.21.1 via the `prometheus-postgres-exporter`
-        dependency.]
-    breaking_changes: ['The chart drops fine-grained buckets for `apiserver_watch_events_dispatch_duration_seconds`,
-        which can change the time series emitted (bucket labels/series count). Dashboards/alerts
-        recording rules that expect the old bucket boundaries may need updates and
-        historical comparisons may show discontinuities.']
-  chart_version: 93.4.1
+    chart_updates: [Bump grafana image tag to v14.5.0 (in 93.4.0)., 'prometheus-sql-exporter:
+        switch PodDisruptionBudget to stable policy/v1 API (in 93.4.0).', prometheus-node-exporter
+        dependency updated to prometheus/node_exporter v1.13.1 (in 93.6.0)., 'Update
+        prometheus-node-exporter Docker tag to v5.2.0 (in 93.6.0, referenced in both
+        prometheus and kube-prometheus-stack charts).']
+    features: [No new end-user features called out; changes are primarily dependency/image
+        tag bumps and a Kubernetes API stability update for PDBs.]
+    breaking_changes: ['Potential compatibility consideration: PodDisruptionBudget
+        API change to policy/v1 may break installs on Kubernetes versions that do
+        not support policy/v1 PDBs (very old clusters).']
+  chart_version: 93.6.0
   images: ['docker.io/bats/bats:1.14.0', 'docker.io/grafana/grafana:13.3.1-distroless',
     'ghcr.io/jkroepke/kube-webhook-certgen:1.11.1', 'quay.io/kiwigrid/k8s-sidecar:2.14.3',
     'quay.io/prometheus-operator/prometheus-operator:v0.95.2', 'quay.io/prometheus/alertmanager:v0.35.0',
-    'quay.io/prometheus/node-exporter:v1.12.1-distroless', 'quay.io/prometheus/prometheus:v3.16.0-distroless',
+    'quay.io/prometheus/node-exporter:v1.13.1-distroless', 'quay.io/prometheus/prometheus:v3.16.0-distroless',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
 - version: 93.4.0
   kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
