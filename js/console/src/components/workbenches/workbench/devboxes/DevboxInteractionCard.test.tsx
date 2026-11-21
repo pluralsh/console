@@ -66,6 +66,21 @@ describe('DevboxInteractionCard', () => {
     expect(screen.getByText('in /home/dev/console')).toBeTruthy()
   })
 
+  it('drops the preview once answered, leaving it to the transcript', () => {
+    renderCard(
+      interaction({
+        title: 'Run command',
+        state: DevboxInteractionState.Answered,
+      }),
+      {
+        toolCallId: 'tc-1',
+        kind: 'execute',
+        rawInput: { command: 'git push --force' },
+      } as DevboxToolCallFragment
+    )
+    expect(document.querySelector('[data-preview="command"]')).toBeNull()
+  })
+
   it('answers a permission request with the chosen option or cancel', () => {
     const onRespond = renderCard(
       interaction({

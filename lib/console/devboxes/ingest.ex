@@ -782,6 +782,16 @@ defmodule Console.Devboxes.Ingest do
   end
   def enum(_, _), do: nil
 
+  # an enum's name without its prefix, kept as a string: `enum/2` drops values whose atom doesn't exist yet
+  defp enum_name(val, prefix) when is_atom(val) and not is_nil(val), do: enum_name(Atom.to_string(val), prefix)
+  defp enum_name(val, prefix) when is_binary(val) do
+    case val |> String.downcase() |> String.replace_prefix(prefix, "") do
+      v when v in ["", "unspecified"] -> nil
+      v -> v
+    end
+  end
+  defp enum_name(_, _), do: nil
+
   # every field is set, nil included, so a report replaces the previous idle state rather than merging into it
   defp idle_state(idle) do
     %{
@@ -795,7 +805,7 @@ defmodule Console.Devboxes.Ingest do
 
   defp busy_reason(reason) do
     drop_nils(%{
-      "kind" => Acp.get(reason, :kind) |> enum("busy_reason_kind_") |> then(&(&1 && to_string(&1))),
+      "kind" => enum_name(Acp.get(reason, :kind), "busy_reason_kind_"),
       "detail" => blank(Acp.get(reason, :detail)),
       "until" => Acp.timestamp(Acp.get(reason, :until)),
       "thread_id" => blank(Acp.get(reason, :thread_id)),

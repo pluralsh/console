@@ -4,7 +4,8 @@ defmodule Console.Deployments.AvailableModels do
   alias Console.Schema.DeploymentSettings.AI
 
   defmodule Model do
-    defstruct [:provider, :model]
+    @moduledoc "`tool` marks the provider's configured tool model"
+    defstruct [:provider, :model, tool: false]
   end
 
   @providers [:openai, :openai_compatible, :xai, :anthropic, :vertex, :bedrock, :azure]
@@ -19,10 +20,12 @@ defmodule Console.Deployments.AvailableModels do
   defp models(%AI{} = ai, provider) do
     case Map.get(ai, provider) do
       %{} = config ->
+        tool = tool_model(provider, config)
+
         provider
         |> configured_models(config)
         |> normalize()
-        |> Enum.map(&%Model{provider: provider, model: &1})
+        |> Enum.map(&%Model{provider: provider, model: &1, tool: &1 == tool})
 
       _ ->
         []
@@ -82,6 +85,10 @@ defmodule Console.Deployments.AvailableModels do
       | proxy_models(config, defaults)
     ]
   end
+
+  defp tool_model(:bedrock, config), do: Map.get(config, :tool_model_id) || Provider.defaults(:bedrock)[:tool_model]
+  defp tool_model(:openai_compatible, config), do: tool_model(:openai, config)
+  defp tool_model(provider, config), do: Map.get(config, :tool_model) || Provider.defaults(provider)[:tool_model]
 
   defp proxy_models(config, defaults)
   defp proxy_models(%{proxy_models: models}, defaults) when is_list(models) do

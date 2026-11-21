@@ -42,6 +42,18 @@ defmodule Console.Devboxes.IngestTest do
 
       assert %{idle: false, suspends_at: nil, message: "agent working"} = refetch(inst).idle_state
     end
+
+    test "busy reasons keep their kind" do
+      inst = insert(:devbox_instance)
+
+      Ingest.heartbeat(%{instances: [%{instance_id: inst.id, idle: %{idle: false, busy_reasons: [
+        %{kind: :BUSY_REASON_KIND_AGENT_TURN, detail: "6bb88f0c", thread_id: "6bb88f0c"},
+        %{kind: "BUSY_REASON_KIND_TOTALLY_NEW_KIND_#{System.unique_integer([:positive])}", detail: "x"}
+      ]}}]}, inst.devbox.cluster)
+
+      assert [%{"kind" => "agent_turn", "thread_id" => "6bb88f0c"}, %{"kind" => "totally_new_kind_" <> _}] =
+               refetch(inst).idle_state.busy_reasons
+    end
   end
 
   describe "#report_instance_status/2" do

@@ -5,6 +5,7 @@ import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { CaptionP } from 'components/utils/typography/Text'
 import {
   DevboxInstanceFragment,
+  DevboxInteractionState,
   DevboxThreadFragment,
   DevboxThreadKind,
   DevboxThreadStatus,
@@ -79,6 +80,14 @@ export function DevboxThreadPane({
   const interactions = (instance.interactions ?? [])
     .filter(isNonNullable)
     .filter((i) => i.thread?.id && threadIds.has(i.thread.id))
+  // a pending approval card previews its tool call, so the transcript leaves that call out until it's answered
+  const awaitingToolCalls = new Set(
+    interactions.flatMap((i) =>
+      i.state === DevboxInteractionState.Pending && i.toolCallId
+        ? [i.toolCallId]
+        : []
+    )
+  )
 
   useEffect(() => {
     const el = scrollRef.current
@@ -135,12 +144,14 @@ export function DevboxThreadPane({
             <DevboxTranscript
               entities={entities}
               terminal={(id) => selectTerminalOutput(session, id)}
+              hiddenToolCalls={awaitingToolCalls}
               subagents={subagents}
               renderSubagentLane={(s) => (
                 <SubagentTranscript
                   subagent={s}
                   timeline={timeline}
                   ended={ended}
+                  hiddenToolCalls={awaitingToolCalls}
                 />
               )}
               empty={
@@ -235,10 +246,12 @@ function SubagentTranscript({
   subagent,
   timeline,
   ended,
+  hiddenToolCalls,
 }: {
   subagent: DevboxThreadFragment
   timeline: DevboxTimelineStoreApi
   ended: boolean
+  hiddenToolCalls: ReadonlySet<string>
 }) {
   const session = subagent.sessionId
     ? timeline.store.sessions[subagent.sessionId]
@@ -251,6 +264,7 @@ function SubagentTranscript({
     <DevboxTranscript
       entities={selectOrderedEntities(session)}
       terminal={(id) => selectTerminalOutput(session, id)}
+      hiddenToolCalls={hiddenToolCalls}
       empty={
         <CaptionP $color="text-xlight">
           {ended

@@ -129,13 +129,20 @@ func TestEgressPolicyUsesBoxSCMHostsAndH2CGatewayRule(t *testing.T) {
 
 	var https []string
 	var gw *ateapi.HttpRule
+	var gwHosts []string
 	for _, r := range h.ate.Policy(testAtespace, "dbx-inst-1").GetRules() {
 		if r.GetHttps() != nil {
 			https = append(https, r.GetHttps().GetHostnames()...)
 		}
 		if r.GetHttp() != nil {
-			gw = r.GetHttp()
+			if gw == nil {
+				gw = r.GetHttp()
+			}
+			gwHosts = append(gwHosts, r.GetHttp().GetHostnames()...)
 		}
+	}
+	if !slices.Contains(gwHosts, "devbox-gateway.ns.svc.cluster.local") {
+		t.Errorf("gateway hosts %v lack the name sandbox DNS resolves", gwHosts)
 	}
 	for _, want := range []string{"gitlab.example.com", "ghe.example.com", "github.com"} {
 		if !slices.Contains(https, want) {

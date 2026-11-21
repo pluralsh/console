@@ -185,6 +185,35 @@ describe('DevboxTranscript', () => {
     ).toContain('c.ts')
   })
 
+  it('leaves out tool calls shown elsewhere', () => {
+    const edit = (toolCallId: string, position: number) =>
+      entity({
+        type: DevboxEntityType.ToolCall,
+        position,
+        toolCall: {
+          toolCallId,
+          kind: 'edit',
+          status: 'pending',
+          rawInput: {
+            file_path: `${toolCallId}.ts`,
+            old_string: 'a',
+            new_string: 'b',
+          },
+          content: [],
+        },
+      })
+    const { container } = renderTranscript(
+      <DevboxTranscript
+        entities={[edit('shown', 1), edit('awaiting', 2)]}
+        hiddenToolCalls={new Set(['awaiting'])}
+      />
+    )
+    const diffs = [...container.querySelectorAll('[data-content="diff"]')]
+    expect(diffs.map((d) => d.textContent?.includes('shown.ts'))).toEqual([
+      true,
+    ])
+  })
+
   it('renders unknown entity, content and tool content variants generically', () => {
     const { container } = renderTranscript(
       <DevboxTranscript

@@ -61,7 +61,7 @@ defmodule Console.Devboxes.Control.GrpcTest do
     deployment_settings(ai: %{
       enabled: true,
       provider: :anthropic,
-      anthropic: %{access_token: "key", model: "claude-sonnet-4-5", tool_model: "claude-haiku-4-5", proxy_models: ["claude-sonnet-4-5"]}
+      anthropic: %{access_token: "key", model: "claude-haiku-4-5", tool_model: "claude-sonnet-4-5", proxy_models: ["claude-sonnet-4-5"]}
     })
     codex = %Console.Schema.Devbox.Agent{type: :codex}
     devbox = %{inst.devbox | agents: inst.devbox.agents ++ [codex]}

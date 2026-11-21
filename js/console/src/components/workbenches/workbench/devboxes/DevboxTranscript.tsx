@@ -54,12 +54,15 @@ type TranscriptRow =
 export function DevboxTranscript({
   entities,
   terminal = () => null,
+  hiddenToolCalls,
   subagents = [],
   renderSubagentLane,
   empty,
 }: {
   entities: DevboxEntityFragment[]
   terminal?: TerminalLookup
+  // calls shown elsewhere, e.g. in the approval card awaiting an answer for them
+  hiddenToolCalls?: ReadonlySet<string>
   subagents?: DevboxThreadFragment[]
   renderSubagentLane?: (subagent: DevboxThreadFragment) => ReactNode
   empty?: ReactNode
@@ -87,6 +90,8 @@ export function DevboxTranscript({
       embeddedTerminals.has(entity.terminal.terminalId)
     )
       continue
+    const toolCallId = entity.toolCall?.toolCallId
+    if (toolCallId && hiddenToolCalls?.has(toolCallId)) continue
     const last = rows.at(-1)
     if (isGroupableToolCall(entity)) {
       if (last?.kind === 'tools') last.entities.push(entity)

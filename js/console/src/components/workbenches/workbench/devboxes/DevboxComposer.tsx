@@ -32,6 +32,7 @@ import {
   autonomyChoices,
   DevboxAutonomyPolicy,
   isAutonomyOption,
+  MODE_CATEGORY,
 } from './devboxAutonomy'
 import {
   caretOffset,
@@ -333,9 +334,12 @@ export function DevboxComposer({
     }
   }
 
-  const options = (configOptions ?? [])
+  const offered = (configOptions ?? [])
     .filter(isNonNullable)
     .filter((o) => o.options?.length)
+  const hasAutonomy = offered.some(isAutonomyOption)
+  const options = offered
+    .filter((o) => !(hasAutonomy && o.category === MODE_CATEGORY))
     .sort((a, b) => Number(isAutonomyOption(a)) - Number(isAutonomyOption(b)))
 
   return (

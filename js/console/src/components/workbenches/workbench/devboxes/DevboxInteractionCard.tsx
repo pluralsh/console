@@ -44,8 +44,9 @@ export function DevboxInteractionCard({
   error?: ReactNode
 }) {
   const pending = interaction.state === DevboxInteractionState.Pending
+  // once answered, the transcript's own tool call shows what ran
   const preview =
-    interaction.kind === DevboxInteractionKind.Permission
+    pending && interaction.kind === DevboxInteractionKind.Permission
       ? approvalPreview(toolCall)
       : null
   return (

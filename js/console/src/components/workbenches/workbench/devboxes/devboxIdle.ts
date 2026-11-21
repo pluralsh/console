@@ -81,12 +81,14 @@ const BUSY_REASON_LABELS: Record<string, string> = {
   pending_interaction: 'waiting on you',
 }
 
+// a reason's detail can be a bare thread id, so it's only the last resort
 export function busyReasonLabel(reason: Record<string, unknown>) {
   const kind = `${reason.kind ?? ''}`.toLowerCase()
   return (
     BUSY_REASON_LABELS[kind] ||
-    (reason.detail as string) ||
+    (reason.thread_id ? BUSY_REASON_LABELS.agent_turn : '') ||
     kind.replace(/_/g, ' ') ||
+    (reason.detail as string) ||
     'busy'
   )
 }

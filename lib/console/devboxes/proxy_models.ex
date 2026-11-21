@@ -2,7 +2,8 @@ defmodule Console.Devboxes.ProxyModels do
   @moduledoc """
   The console AI proxy models each devbox agent may use, derived from the deployment settings' AI providers (the
   same list the proxy allows).  IDs are `provider/model`, which the proxy routes on.  The primary provider's
-  models come first, so its configured model is each agent's default.
+  models come first, and within a provider its tool model leads (it's tuned for the agentic, tool-calling work
+  devboxes do), so the primary provider's tool model is each agent's default.
 
   Claude Code picks models by tier alias (`opus`, `sonnet`, `haiku`) for its Default and background work, so Claude
   also gets those aliases resolved to proxy models, falling back to the nearest tier the proxy serves.  Its picker
@@ -95,7 +96,7 @@ defmodule Console.Devboxes.ProxyModels do
     |> AvailableModels.list()
     |> Enum.filter(&(allowed == :all || &1.provider in allowed))
     |> Enum.filter(&(family == nil || String.contains?(String.downcase(&1.model), family)))
-    |> Enum.sort_by(&{preferred != nil && !String.contains?(String.downcase(&1.model), preferred), &1.provider != primary})
+    |> Enum.sort_by(&{preferred != nil && !String.contains?(String.downcase(&1.model), preferred), &1.provider != primary, !&1.tool})
     |> Enum.map(&"#{@prefixes[&1.provider]}/#{&1.model}")
     |> Enum.uniq()
   end

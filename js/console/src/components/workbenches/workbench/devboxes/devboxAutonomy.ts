@@ -4,6 +4,9 @@ import { isNonNullable } from 'utils/isNonNullable'
 // the daemon's synthetic config option for a thread's autonomy
 export const AUTONOMY_CATEGORY = 'autonomy'
 
+// an agent's own permission modes, which autonomy drives when it's offered
+export const MODE_CATEGORY = 'mode'
+
 export const AUTONOMY_LEVELS = [
   {
     value: 'manual',

@@ -300,36 +300,13 @@ func (m *Manager) syncAutonomyLocked(s *session) {
 	m.markDirtyLocked(s)
 }
 
-// modeViewLocked is how a native agent's mode option is shown next to autonomy: hidden when every mode is an
-// autonomy level (Codex), otherwise without the modes above the cap (Claude keeps acceptEdits and plan).
+// modeViewLocked hides a native agent's mode option: autonomy is the one permission control and the daemon drives
+// the mode from it, so a separate mode picker would only fight it (Claude's acceptEdits and plan included).
 func (m *Manager) modeViewLocked(agent devboxv1.AgentType, s *session) acp.Object {
-	mo := modeOption(s)
-	if mo == nil || nativeModes[agent] == nil {
+	if modeOption(s) == nil || nativeModes[agent] == nil {
 		return nil
 	}
-	native := map[string]bool{}
-	for _, id := range nativeModes[agent] {
-		native[id] = true
-	}
-	covered := true
-	var kept []any
-	for _, v := range acp.Arr(mo.raw, "options") {
-		vo, ok := v.(map[string]any)
-		if !ok {
-			continue
-		}
-		id := acp.Str(vo, "value")
-		covered = covered && native[id]
-		if m.modeAllowedLocked(agent, s, id) == nil {
-			kept = append(kept, v)
-		}
-	}
-	if covered {
-		return acp.Object{}
-	}
-	view := acp.CloneJSON(mo.raw).(map[string]any)
-	view["options"] = kept
-	return view
+	return acp.Object{}
 }
 
 // applyAutonomy moves a thread to a level: the native session mode when there is one, then the daemon's own

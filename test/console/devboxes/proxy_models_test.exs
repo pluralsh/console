@@ -23,8 +23,8 @@ defmodule Console.Devboxes.ProxyModelsTest do
 
       assert Enum.take(models, 4) == [
                "bedrock/us.anthropic.claude-sonnet-4-5-v1:0",
-               "anthropic/claude-opus-4-1",
                "anthropic/claude-haiku-4-5",
+               "anthropic/claude-opus-4-1",
                "anthropic/claude-sonnet-4-5"
              ]
       assert "openai/gpt-5" in models
@@ -35,6 +35,16 @@ defmodule Console.Devboxes.ProxyModelsTest do
                "sonnet" => "bedrock/us.anthropic.claude-sonnet-4-5-v1:0",
                "haiku" => "anthropic/claude-haiku-4-5"
              }
+    end
+
+    test "within a provider the tool model leads, so it's the default" do
+      s = settings(%{
+        provider: :openai,
+        openai: %{access_token: "key", model: "gpt-5", tool_model: "gpt-5-codex", proxy_models: ["gpt-5-mini"]}
+      })
+
+      assert %{default_model: "openai/gpt-5-codex", models: ["openai/gpt-5-codex", "openai/gpt-5", "openai/gpt-5-mini"]} =
+               ProxyModels.for_agent(:codex, s)
     end
 
     test "missing claude tiers fall back to the nearest one served" do
