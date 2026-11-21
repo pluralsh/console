@@ -16,6 +16,8 @@ The Plural Console is the core control plane of the Plural fleet-management plat
 
 It provides a low-maintenance, all-in-one solution for virtually any devops task that might be associated w/ managing Kubernetes infrastructure, in a package that can be hosted naturally anywhere, whether it be in your own cloud, or on our own infrastructure using Plural Cloud.
 
+<!-- dummy edit: this line is a placeholder and can be safely removed -->
+
 ## Contributor Program
 
 We are currently trying to aggregate compatibility and dependency information for many CNCF add-ons within the kubernetes ecosystem.  You can see some early examples in `static/compatibilities` and are hoping to get community support getting these built out and keeping them up-to-date.  We are focused on properly compensating any contributions to the Plural platform, which includes a bounty for either adding the compatibility info for a net-new application, or updating the information alongside a new version that has been released.  Currently the rewards are:
