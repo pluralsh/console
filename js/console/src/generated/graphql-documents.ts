@@ -3753,6 +3753,85 @@ export const DevboxThreadFragmentDoc = /*#__PURE__*/ gql`
     ${DevboxConfigOptionFragmentDoc}
 ${DevboxCommandFragmentDoc}
 ${DevboxUsageFragmentDoc}` as unknown as DocumentNode<Types.DevboxThreadFragment, unknown>;
+export const DevboxContentBlockFragmentDoc = /*#__PURE__*/ gql`
+    fragment DevboxContentBlock on DevboxContentBlock {
+  ... on DevboxTextContent {
+    type
+    text
+    annotations
+  }
+  ... on DevboxImageContent {
+    type
+    data
+    mimeType
+    uri
+  }
+  ... on DevboxAudioContent {
+    type
+    data
+    mimeType
+  }
+  ... on DevboxResourceContent {
+    type
+    uri
+    mimeType
+    text
+    blob
+  }
+  ... on DevboxResourceLinkContent {
+    type
+    uri
+    name
+    title
+    description
+    mimeType
+    size
+  }
+  ... on DevboxUnknownContent {
+    type
+    variant
+    raw
+  }
+}
+    ` as unknown as DocumentNode<Types.DevboxContentBlockFragment, unknown>;
+export const DevboxToolCallFragmentDoc = /*#__PURE__*/ gql`
+    fragment DevboxToolCall on DevboxToolCall {
+  toolCallId
+  title
+  kind
+  status
+  rawInput
+  rawOutput
+  meta
+  locations {
+    path
+    line
+  }
+  content {
+    ... on DevboxToolCallBlock {
+      type
+      content {
+        ...DevboxContentBlock
+      }
+    }
+    ... on DevboxToolCallDiff {
+      type
+      path
+      oldText
+      newText
+    }
+    ... on DevboxToolCallTerminal {
+      type
+      terminalId
+    }
+    ... on DevboxToolCallUnknown {
+      type
+      variant
+      raw
+    }
+  }
+}
+    ${DevboxContentBlockFragmentDoc}` as unknown as DocumentNode<Types.DevboxToolCallFragment, unknown>;
 export const DevboxInteractionFragmentDoc = /*#__PURE__*/ gql`
     fragment DevboxInteraction on DevboxInteraction {
   id
@@ -3768,6 +3847,9 @@ export const DevboxInteractionFragmentDoc = /*#__PURE__*/ gql`
     optionId
     name
     kind
+  }
+  toolCall {
+    ...DevboxToolCall
   }
   response
   answeredAt
@@ -3797,7 +3879,7 @@ export const DevboxInteractionFragmentDoc = /*#__PURE__*/ gql`
   insertedAt
   updatedAt
 }
-    ` as unknown as DocumentNode<Types.DevboxInteractionFragment, unknown>;
+    ${DevboxToolCallFragmentDoc}` as unknown as DocumentNode<Types.DevboxInteractionFragment, unknown>;
 export const DevboxInstanceFragmentDoc = /*#__PURE__*/ gql`
     fragment DevboxInstance on DevboxInstance {
   ...DevboxInstanceTiny
@@ -3964,85 +4046,6 @@ export const DevboxRepositoryFragmentDoc = /*#__PURE__*/ gql`
   behind
 }
     ` as unknown as DocumentNode<Types.DevboxRepositoryFragment, unknown>;
-export const DevboxContentBlockFragmentDoc = /*#__PURE__*/ gql`
-    fragment DevboxContentBlock on DevboxContentBlock {
-  ... on DevboxTextContent {
-    type
-    text
-    annotations
-  }
-  ... on DevboxImageContent {
-    type
-    data
-    mimeType
-    uri
-  }
-  ... on DevboxAudioContent {
-    type
-    data
-    mimeType
-  }
-  ... on DevboxResourceContent {
-    type
-    uri
-    mimeType
-    text
-    blob
-  }
-  ... on DevboxResourceLinkContent {
-    type
-    uri
-    name
-    title
-    description
-    mimeType
-    size
-  }
-  ... on DevboxUnknownContent {
-    type
-    variant
-    raw
-  }
-}
-    ` as unknown as DocumentNode<Types.DevboxContentBlockFragment, unknown>;
-export const DevboxToolCallFragmentDoc = /*#__PURE__*/ gql`
-    fragment DevboxToolCall on DevboxToolCall {
-  toolCallId
-  title
-  kind
-  status
-  rawInput
-  rawOutput
-  meta
-  locations {
-    path
-    line
-  }
-  content {
-    ... on DevboxToolCallBlock {
-      type
-      content {
-        ...DevboxContentBlock
-      }
-    }
-    ... on DevboxToolCallDiff {
-      type
-      path
-      oldText
-      newText
-    }
-    ... on DevboxToolCallTerminal {
-      type
-      terminalId
-    }
-    ... on DevboxToolCallUnknown {
-      type
-      variant
-      raw
-    }
-  }
-}
-    ${DevboxContentBlockFragmentDoc}` as unknown as DocumentNode<Types.DevboxToolCallFragment, unknown>;
 export const DevboxEntityFragmentDoc = /*#__PURE__*/ gql`
     fragment DevboxEntity on DevboxEntity {
   id

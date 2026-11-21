@@ -728,6 +728,12 @@ defmodule Console.GraphQl.Deployments.Devbox do
     field :requested_schema, :map, description: "json schema for a form elicitation"
     field :url,              :string, description: "the url of a url elicitation"
     field :options,          list_of(:devbox_permission_option)
+    field :tool_call,        :devbox_tool_call,
+      description: "the tool call a permission request asks about, for when its session's transcript isn't loaded",
+      resolve: fn
+        %{tool_call: %{} = tc}, _, _ -> {:ok, Console.Devboxes.Acp.tool_call(tc)}
+        _, _, _ -> {:ok, nil}
+      end
     field :response,         :map
     field :answered_at,      :datetime
     field :expires_at,       :datetime

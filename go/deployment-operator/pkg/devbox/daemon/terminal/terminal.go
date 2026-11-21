@@ -38,7 +38,7 @@ const exitedRetention = 10 * time.Minute
 // Options configure a Manager.
 type Options struct {
 	Home string
-	// Shell is the login shell (default $SHELL, then /bin/bash).
+	// Shell is the login shell (default $SHELL; /bin/bash when unset or missing).
 	Shell string
 	// Env returns the base environment of new terminals.
 	Env         func() []string
@@ -59,7 +59,7 @@ func New(opts Options) *Manager {
 	if opts.Shell == "" {
 		opts.Shell = os.Getenv("SHELL")
 	}
-	if opts.Shell == "" {
+	if _, err := os.Stat(opts.Shell); opts.Shell == "" || err != nil {
 		opts.Shell = "/bin/bash"
 	}
 	if opts.ReplayBytes <= 0 {
@@ -123,7 +123,8 @@ func (m *Manager) Create(req *devboxv1.CreateTerminalRequest) (*devboxv1.Termina
 	}
 	cmd := exec.Command(command, args...)
 	cmd.Dir = cwd
-	cmd.Env = append(m.opts.Env(), "TERM=xterm-256color", "COLORTERM=truecolor", "DEVBOX_TERMINAL_ID="+id)
+	// SHELL names the terminal's shell, which may differ from the agents' (tmux and `exec $SHELL` follow it)
+	cmd.Env = append(m.opts.Env(), "SHELL="+m.opts.Shell, "TERM=xterm-256color", "COLORTERM=truecolor", "DEVBOX_TERMINAL_ID="+id)
 	keys := make([]string, 0, len(req.GetEnv()))
 	for k := range req.GetEnv() {
 		keys = append(keys, k)

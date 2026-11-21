@@ -377,18 +377,6 @@ function ThreadRow({
           {nested && <BotIcon size={10} />}
           {unread && <UnreadDotSC aria-label="unread" />}
           <ThreadTitleSC $unread={unread}>{threadTitle(thread)}</ThreadTitleSC>
-          {!!openPrs?.length && (
-            <Tooltip
-              label={`Open ${openPrs.length === 1 ? 'pull request' : 'pull requests'}: ${openPrs.map((pr) => pr.title).join(', ')}`}
-            >
-              <PrBadgeSC aria-label={`${openPrs.length} open pull requests`}>
-                <PrStatusIcon
-                  status={PrStatus.Open}
-                  size={12}
-                />
-              </PrBadgeSC>
-            </Tooltip>
-          )}
           {STATE_SEVERITY[state] && (
             <Chip
               size="small"
@@ -403,6 +391,18 @@ function ThreadRow({
           {thread.lastActivityAt ? ` · ${fromNow(thread.lastActivityAt)}` : ''}
         </ThreadMetaSC>
       </ThreadButtonSC>
+      {!!openPrs?.length && (
+        <Tooltip
+          label={`Open ${openPrs.length === 1 ? 'pull request' : 'pull requests'}: ${openPrs.map((pr) => pr.title).join(', ')}`}
+        >
+          <PrBadgeSC aria-label={`${openPrs.length} open pull requests`}>
+            <PrStatusIcon
+              status={PrStatus.Open}
+              size={12}
+            />
+          </PrBadgeSC>
+        </Tooltip>
+      )}
       {actions}
     </ThreadRowSC>
   )

@@ -101,11 +101,15 @@ type agentDefaults struct {
 	lineage       acp.LineageExtractor
 	// v2 is whether the pinned adapter can negotiate ACP v2 (section 4.6a); only used with the box's acpV2 flag.
 	v2 bool
+	// nativeSubagents is whether the adapter streams each subagent as its own session (subagent_spawned). Without
+	// the client capability, claude-agent-acp drops subagent messages and only tags their tool calls, and codex-acp
+	// folds every child thread's events (and approvals) into the root session unmarked.
+	nativeSubagents bool
 }
 
 var defaults = map[devboxv1.AgentType]agentDefaults{
-	devboxv1.AgentType_AGENT_TYPE_CLAUDE:   {command: "claude-agent-acp", binary: "claude", modelEnv: "ANTHROPIC_MODEL", proxyProvider: "anthropic", lineage: acp.ClaudeLineage, v2: true},
-	devboxv1.AgentType_AGENT_TYPE_CODEX:    {command: "codex-acp", binary: "codex", proxyProvider: "openai", lineage: acp.NoLineage{}, v2: true},
+	devboxv1.AgentType_AGENT_TYPE_CLAUDE:   {command: "claude-agent-acp", binary: "claude", modelEnv: "ANTHROPIC_MODEL", proxyProvider: "anthropic", lineage: acp.ClaudeLineage, v2: true, nativeSubagents: true},
+	devboxv1.AgentType_AGENT_TYPE_CODEX:    {command: "codex-acp", binary: "codex", proxyProvider: "openai", lineage: acp.NoLineage{}, v2: true, nativeSubagents: true},
 	devboxv1.AgentType_AGENT_TYPE_OPENCODE: {command: "opencode", args: []string{"acp"}, binary: "opencode", proxyProvider: "openai", lineage: acp.NoLineage{}},
 	devboxv1.AgentType_AGENT_TYPE_GEMINI:   {command: "gemini", args: []string{"--experimental-acp"}, binary: "gemini", modelArg: "--model", proxyProvider: "vertex", lineage: acp.NoLineage{}},
 	devboxv1.AgentType_AGENT_TYPE_PI:       {command: "pi-acp", binary: "pi", proxyProvider: "openai", lineage: acp.NoLineage{}},
@@ -144,6 +148,8 @@ type Spec struct {
 	Lineage acp.LineageExtractor
 	// RequestV2 asks for protocol version 2 at initialize (acpV2 flag and adapter support).
 	RequestV2 bool
+	// NativeSubagents advertises the subagents client capability at initialize.
+	NativeSubagents bool
 	// BootModel is the model passed through flags/env, for adapters without ACP model control.
 	BootModel string
 	Billing   devboxv1.BillingMode
@@ -245,7 +251,7 @@ func (c *Config) Spec(launch *devboxv1.AgentLaunch, endpoints *devboxv1.HarnessE
 	}
 	spec := &Spec{
 		Agent: t, Path: path, Args: append([]string(nil), args...), Dir: c.Home, Lineage: d.lineage,
-		RequestV2: launch.GetAcpV2() && d.v2, BootModel: bootModel, Billing: billing,
+		RequestV2: launch.GetAcpV2() && d.v2, NativeSubagents: d.nativeSubagents, BootModel: bootModel, Billing: billing,
 	}
 	env := c.baseEnv()
 	aiProxy := strings.TrimSuffix(endpoints.GetAiProxyUrl(), "/")

@@ -82,7 +82,7 @@ type testLauncher struct{ log string }
 func (l testLauncher) Spec(launch *devboxv1.AgentLaunch, _ *devboxv1.HarnessEndpoints, _ string) (*harness.Spec, error) {
 	return &harness.Spec{Agent: launch.GetAgent(), Path: os.Args[0], Args: []string{"-test.run=^$"},
 		Env: append(os.Environ(), fakeacp.EnvVar+"=1", fakeacp.LogEnv+"="+l.log), Lineage: acp.ClaudeLineage,
-		Billing: launch.GetBilling()}, nil
+		NativeSubagents: true, Billing: launch.GetBilling()}, nil
 }
 
 type harnessT struct {
@@ -511,6 +511,82 @@ func TestSubagentPermissionBelongsToTheSubagent(t *testing.T) {
 		t.Fatal(err)
 	}
 	eventually(t, "outcome", func() bool { return contains(h.agentText(s.GetSessionId()), "outcome:selected:allow") })
+}
+
+func TestNativeSubagentSession(t *testing.T) {
+	h := newManager(t, 4)
+	s := h.create(t, "t1")
+	init := h.calls(t, acp.MethodInitialize)
+	if len(init) == 0 || acp.Obj(acp.Obj(init[0], "clientCapabilities"), "subagents") == nil {
+		t.Fatalf("initialize didn't advertise native subagents: %v", init)
+	}
+	h.prompt(t, s, "p1", "native-subagent")
+	const child = "task-native"
+	var in *devboxv1.Interaction
+	eventually(t, "pending interaction", func() bool {
+		for _, i := range h.m.Interactions() {
+			in = i
+			return true
+		}
+		return false
+	})
+	if in.GetSessionId() != child || in.GetThreadId() != "t1" {
+		t.Fatalf("subagent's permission filed under session %q, thread %q", in.GetSessionId(), in.GetThreadId())
+	}
+	if cmd := in.GetPermission().GetToolCall().GetRawInput().GetStructValue().GetFields()["command"].GetStringValue(); cmd != "ls -la" {
+		t.Fatalf("permission request lost the command from the earlier tool_call: %v", in.GetPermission().GetToolCall())
+	}
+	resp := &devboxv1.InteractionResponse{Response: &devboxv1.InteractionResponse_Permission{
+		Permission: &devboxv1.PermissionOutcome{Outcome: &devboxv1.PermissionOutcome_SelectedOptionId{SelectedOptionId: "allow"}}}}
+	if _, err := h.m.RespondInteraction(&devboxv1.RespondInteractionRequest{InteractionId: in.GetInteractionId(), Response: resp}); err != nil {
+		t.Fatal(err)
+	}
+	eventually(t, "outcome", func() bool { return contains(h.agentText(s.GetSessionId()), "outcome:selected:allow") })
+
+	if !contains(h.agentText(child), "child says hi") || contains(h.agentText(s.GetSessionId()), "child says hi") {
+		t.Fatalf("child text: child %v, parent %v", h.agentText(child), h.agentText(s.GetSessionId()))
+	}
+	task := h.entities(child)["ENTITY_TYPE_USER_MESSAGE/task-"+child]
+	if task.GetMessage().GetContent()[0].GetText().GetText() != "Find the entrypoints" {
+		t.Fatalf("child doesn't open with its task: %v", task)
+	}
+	anchor := h.entities(s.GetSessionId())["ENTITY_TYPE_SESSION_MESSAGE/"+acp.SubagentSpawnPrefix+child]
+	if anchor.GetSessionMessage().GetToSessionId() != child || anchor.GetSessionMessage().GetFromSessionId() != s.GetSessionId() {
+		t.Fatalf("parent has no anchor for the subagent: %v", anchor)
+	}
+	h.m.Flush()
+	var row *devboxv1.Session
+	for _, ev := range h.rec.snapshot() {
+		if r := ev.GetSession(); r != nil {
+			if strings.Contains(r.GetSessionId(), acp.SubagentSeparator) {
+				t.Fatalf("lineage tags on the child's own updates nested another session: %s", r.GetSessionId())
+			}
+			if r.GetSessionId() == child {
+				row = r
+			}
+		}
+	}
+	if row == nil || row.GetKind() != devboxv1.SessionKind_SESSION_KIND_SUBAGENT || row.GetParentSessionId() != s.GetSessionId() || row.GetTitle() != "Explore the repo" {
+		t.Fatalf("subagent session row %v", row)
+	}
+	if row.GetForeground().GetState() != devboxv1.ForegroundStateKind_FOREGROUND_STATE_KIND_IDLE || row.GetForeground().GetStopReason() != "end_turn" {
+		t.Fatalf("subagent_state_update didn't finish the child: %v", row.GetForeground())
+	}
+
+	// Reattaching replays every child's history onto its own session; the transcript already has it.
+	h.m.StopAgents(func(devboxv1.AgentType, devboxv1.BillingMode) bool { return true })
+	if _, err := h.m.ResumeThread(context.Background(), &devboxv1.ThreadRef{InstanceId: instance, ThreadId: "t1"}, false); err != nil {
+		t.Fatal(err)
+	}
+	if got := h.agentText(child); strings.Count(strings.Join(got, ""), "child says hi") != 1 {
+		t.Fatalf("replay re-appended the child's history: %v", got)
+	}
+	h.m.mu.Lock()
+	unseen := h.m.sessions["task-unseen"]
+	h.m.mu.Unlock()
+	if unseen != nil {
+		t.Fatal("replay created a child the transcript never had")
+	}
 }
 
 func TestQueuedPromptsSurviveARestart(t *testing.T) {

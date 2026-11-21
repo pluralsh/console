@@ -67,7 +67,8 @@ var notificationMethods = map[string]bool{
 
 // Conn is one JSON-RPC connection to a harness process.
 type Conn struct {
-	c *acpsdk.Connection
+	c     *acpsdk.Connection
+	order *inboundOrder
 }
 
 // NewConn starts serving JSON-RPC over the harness's stdin (w) and stdout (r).
@@ -88,12 +89,15 @@ func NewConn(w io.Writer, r io.Reader, h Handler, log *slog.Logger) *Conn {
 	if log != nil {
 		c.SetLogger(log)
 	}
-	return &Conn{c: c}
+	return &Conn{c: c, order: order}
 }
 
 // Call sends a request and returns the raw result.
 func (c *Conn) Call(ctx context.Context, method string, params any) (json.RawMessage, error) {
 	res, err := acpsdk.SendRequest[json.RawMessage](c.c, ctx, method, params)
+	if orderedResponses[method] {
+		c.order.catchUp(ctx)
+	}
 	if err != nil {
 		return nil, err
 	}

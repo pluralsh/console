@@ -35,6 +35,12 @@ const (
 	StateCurrentModeUpdate = "current_mode_update"
 )
 
+// Terminal statuses shared by tool calls and native subagents.
+const (
+	StatusCompleted = "completed"
+	StatusFailed    = "failed"
+)
+
 // Change is one normalized, v2-shaped change to a session.
 type Change struct {
 	Kind ChangeKind
@@ -105,7 +111,7 @@ type Normalizer interface {
 
 // NewNormalizer returns the normalizer for a negotiated protocol version.
 func NewNormalizer(version int, lineage LineageExtractor) Normalizer {
-	base := &v1Normalizer{lineage: lineage, runs: map[string]*run{}, plans: map[string]string{}}
+	base := &v1Normalizer{lineage: lineage, runs: map[string]*run{}, plans: map[string]string{}, native: map[string]bool{}}
 	if version >= 2 {
 		return &v2Normalizer{v1: base}
 	}
@@ -122,6 +128,9 @@ type v1Normalizer struct {
 	mu      sync.Mutex
 	runs    map[string]*run
 	plans   map[string]string
+	// native holds the child sessions the agent announced with subagent_spawned. Their updates arrive on the
+	// child's own session ID, so lineage tags on them must not nest another child.
+	native map[string]bool
 }
 
 func (n *v1Normalizer) ProtocolVersion() int { return 1 }
@@ -148,7 +157,7 @@ func SyntheticID(prefix string) string {
 }
 
 func (n *v1Normalizer) route(sessionID string, update Object) (string, *Lineage) {
-	if n.lineage == nil {
+	if n.lineage == nil || n.native[sessionID] {
 		return sessionID, nil
 	}
 	l := n.lineage.Extract(sessionID, update)
@@ -178,7 +187,7 @@ func (n *v1Normalizer) Normalize(sessionID string, update Object) []Change {
 		return []Change{{
 			Kind: ChangePatch, SessionID: target, Subagent: lineage,
 			EntityType: devboxv1.EntityType_ENTITY_TYPE_TOOL_CALL, EntityID: id, Patch: patch, Payload: payload,
-			Complete: status == "completed" || status == "failed",
+			Complete: status == StatusCompleted || status == StatusFailed,
 		}}
 	case "plan", "plan_update", "plan_removed":
 		patch := withoutDiscriminator(update)
@@ -212,6 +221,13 @@ func (n *v1Normalizer) Normalize(sessionID string, update Object) []Change {
 		return []Change{{Kind: ChangeState, SessionID: target, Subagent: lineage, StateKind: kind, Payload: payload}}
 	case StateConfigOptionUpdate, StateSessionInfoUpdate, StateUsageUpdate, StateCurrentModeUpdate:
 		return []Change{{Kind: ChangeState, SessionID: target, Subagent: lineage, StateKind: kind, Payload: copyObject(update)}}
+	case SubagentSpawned:
+		if changes := n.subagentSpawned(sessionID, update); changes != nil {
+			return changes
+		}
+		return []Change{unknownChange(target, lineage, update)}
+	case SubagentStateUpdate:
+		return n.subagentFinished(update)
 	default:
 		return []Change{unknownChange(target, lineage, update)}
 	}

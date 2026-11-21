@@ -429,6 +429,7 @@ defmodule Console.Devboxes.Ingest do
       requested_schema: mapify(Acp.get(elicitation, :requested_schema)),
       url: blank(Acp.get(elicitation, :url)),
       options: Acp.get(permission, :options) && Enum.map(Acp.get(permission, :options), &permission_option/1),
+      tool_call: mapify(Acp.get(permission, :tool_call)),
       response: mapify(attrs[:response]),
       answered_by_id: answered_by && Repo.get(User, answered_by) && answered_by,
       answered_by_policy: attrs[:answered_by] && blank(Acp.get(attrs[:answered_by], :policy)),

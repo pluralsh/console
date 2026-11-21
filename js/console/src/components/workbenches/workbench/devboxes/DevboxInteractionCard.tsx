@@ -75,8 +75,8 @@ export function DevboxInteractionCard({
   const pending = interaction.state === DevboxInteractionState.Pending
   // once answered, the transcript's own tool call shows what ran
   const preview =
-    pending && !compact && interaction.kind === DevboxInteractionKind.Permission
-      ? approvalPreview(toolCall)
+    pending && interaction.kind === DevboxInteractionKind.Permission
+      ? approvalPreview(toolCall ?? interaction.toolCall)
       : null
   return (
     <InteractionSC
@@ -113,7 +113,11 @@ export function DevboxInteractionCard({
       {interaction.message && !compact && (
         <CaptionP $color="text-light">{interaction.message}</CaptionP>
       )}
-      {preview && <DevboxApprovalPreview preview={preview} />}
+      {preview && (
+        <PreviewSC $compact={compact}>
+          <DevboxApprovalPreview preview={preview} />
+        </PreviewSC>
+      )}
       {interaction.review && !compact && (
         <CaptionP $color="text-xlight">
           {reviewSummary(interaction.review)}
@@ -516,6 +520,12 @@ const InteractionSC = styled.div<{ $pending: boolean; $compact: boolean }>(
     backgroundColor: theme.colors['fill-one'],
   })
 )
+
+// shelves stack several cards above the composer, so a long diff scrolls instead of pushing them out
+const PreviewSC = styled.div<{ $compact: boolean }>(({ $compact }) => ({
+  minWidth: 0,
+  ...($compact && { maxHeight: 200, overflow: 'auto' }),
+}))
 
 const UrlSC = styled.code(({ theme }) => ({
   ...theme.partials.text.code,

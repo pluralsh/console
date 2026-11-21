@@ -21,6 +21,10 @@ metadataTest:
       value: v1
     - key: DEVBOX_SKEL_DIR
       value: /etc/devbox/skel
+    - key: DEVBOX_SHELL
+      value: /bin/zsh
+    - key: SHELL
+      value: /bin/bash
     - key: DEVBOX_TRUST_DIR
       value: /var/lib/devbox/trust
     - key: DEVBOX_IDENTITY_DIR
@@ -150,6 +154,15 @@ commandTests:
     expectedOutput:
       - "(?m)^DEVBOX_TEST_ROLE=arn:aws:iam::1:role/x$"
       - "(?m)^CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE=/run/plural/identity/gcp/config.json$"
+  - name: the skel .zshrc loads oh-my-zsh in a fresh home
+    command: sh
+    # no $ here: container-structure-test expands variables in args itself
+    args: ["-c", "mkdir -p /tmp/zhome && cp /etc/devbox/skel/.zshrc /tmp/zhome/ && env HOME=/tmp/zhome zsh -i -c 'typeset ZSH ZSH_THEME; whence git_prompt_info >/dev/null && echo plugins-ok' 2>&1"]
+    expectedOutput:
+      - "(?m)^(export )?ZSH=/usr/share/oh-my-zsh$"
+      - "(?m)^ZSH_THEME=robbyrussell$"
+      - "(?m)^plugins-ok$"
+    excludedOutput: ["(?i)error|not found|insecure|permission denied"]
   - name: manifest declares contract v1
     command: jq
     args: ["-r", ".contract", "/etc/devbox/image.json"]

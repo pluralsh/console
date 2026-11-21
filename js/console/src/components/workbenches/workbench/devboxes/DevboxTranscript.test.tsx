@@ -333,7 +333,7 @@ describe('DevboxTranscript', () => {
     expect(screen.getByText('card thread-child')).toBeTruthy()
   })
 
-  it('places subagents after the session message that links them', () => {
+  it('puts a subagent in place of the session message that starts it', () => {
     const { container } = renderTranscript(
       <DevboxTranscript
         entities={[
@@ -347,6 +347,11 @@ describe('DevboxTranscript', () => {
             position: 2,
             message: { content: [text('done')] },
           }),
+          entity({
+            type: DevboxEntityType.SessionMessage,
+            position: 3,
+            sessionMessage: { toSessionId: 'child', content: [text('more')] },
+          }),
         ]}
         subagents={[
           {
@@ -359,9 +364,9 @@ describe('DevboxTranscript', () => {
       />
     )
     expect(kindsOf(container)).toEqual([
-      'session-message',
       'subagent',
       'agent-message',
+      'session-message',
     ])
     expect(screen.getByText('card thread-child')).toBeTruthy()
   })

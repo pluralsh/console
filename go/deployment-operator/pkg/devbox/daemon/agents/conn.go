@@ -246,16 +246,20 @@ func (m *Manager) startConn(ctx context.Context, launch *devboxv1.AgentLaunch, b
 	if spec.RequestV2 {
 		version = 2
 	}
+	clientCaps := map[string]any{
+		"fs":          map[string]any{"readTextFile": true, "writeTextFile": true},
+		"terminal":    true,
+		"elicitation": map[string]any{"form": map[string]any{}, "url": map[string]any{}},
+	}
+	if spec.NativeSubagents {
+		clientCaps["subagents"] = map[string]any{}
+	}
 	ictx, cancel := context.WithTimeout(ctx, initializeTimeout)
 	defer cancel()
 	res, err := c.call(ictx, acp.MethodInitialize, map[string]any{
-		"protocolVersion": version,
-		"clientCapabilities": map[string]any{
-			"fs":          map[string]any{"readTextFile": true, "writeTextFile": true},
-			"terminal":    true,
-			"elicitation": map[string]any{"form": map[string]any{}, "url": map[string]any{}},
-		},
-		"clientInfo": map[string]any{"name": "devbox-daemon", "title": "Plural DevBox", "version": Version},
+		"protocolVersion":    version,
+		"clientCapabilities": clientCaps,
+		"clientInfo":         map[string]any{"name": "devbox-daemon", "title": "Plural DevBox", "version": Version},
 	})
 	if err != nil {
 		c.stop(time.Second)

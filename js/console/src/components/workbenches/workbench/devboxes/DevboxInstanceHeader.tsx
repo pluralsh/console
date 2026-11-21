@@ -33,13 +33,18 @@ import {
   useSuspendDevboxInstanceMutation,
 } from 'generated/graphql'
 import { ReactNode, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import { WORKBENCH_DEVBOX_THREAD_QUERY_PARAM } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
 import { formatDateTime, fromNow } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
 import { billingBadgeLabel, toBillingMode } from './devboxCredentials'
 import { useDevboxChangeStat } from './devboxChanges'
 import { useDevboxPanel } from './DevboxControlPanel'
+import { DevboxCreatePrButton } from './DevboxCreatePrButton'
 import { DevboxDiffStat, diffStatLabel } from './DevboxDiffStat'
+import { useDevboxPullRequests } from './devboxPullRequests'
+import { selectedThread } from './devboxThreads'
 import { isInstanceLive, isInstanceTerminal } from './devboxIdle'
 import { devboxSizing } from './devboxSizing'
 import { useKeepAwakeActions } from './DevboxKeepAwakeMenu'
@@ -266,6 +271,7 @@ export function DevboxInstanceHeader({
           css={{ flexShrink: 0 }}
         >
           {live && <ChangesButton instanceId={instance.id} />}
+          {live && <CreatePrButton instance={instance} />}
           {suspended && (
             <Button
               small
@@ -402,6 +408,24 @@ function ChangesButton({ instanceId }: { instanceId: string }) {
         <DevboxDiffStat stat={stat} />
       </Flex>
     </Button>
+  )
+}
+
+// the pr is credited to the thread in view, so its row shows the open-pr icon
+function CreatePrButton({ instance }: { instance: DevboxInstanceFragment }) {
+  const [params] = useSearchParams()
+  const { refetch } = useDevboxPullRequests(instance.id)
+  const thread = selectedThread(
+    instance.threads,
+    params.get(WORKBENCH_DEVBOX_THREAD_QUERY_PARAM)
+  )
+  return (
+    <DevboxCreatePrButton
+      instanceId={instance.id}
+      threadId={thread?.id}
+      agentsRunning={(instance.runningThreads ?? 0) > 0}
+      onCreated={() => refetch()}
+    />
   )
 }
 

@@ -66,6 +66,28 @@ describe('DevboxInteractionCard', () => {
     expect(screen.getByText('in /home/dev/console')).toBeTruthy()
   })
 
+  it("shows a subagent's command in a shelf, from the interaction when its transcript isn't loaded", () => {
+    render(
+      <ThemeProvider theme={styledThemeDark}>
+        <DevboxInteractionCard
+          compact
+          interaction={interaction({
+            title: 'Bash',
+            toolCall: {
+              toolCallId: 'tc-1',
+              kind: 'execute',
+              rawInput: { command: 'ls -la' },
+            } as DevboxToolCallFragment,
+          })}
+          onRespond={vi.fn()}
+        />
+      </ThemeProvider>
+    )
+    expect(
+      document.querySelector('[data-preview="command"]')?.textContent
+    ).toContain('ls -la')
+  })
+
   it('drops the preview once answered, leaving it to the transcript', () => {
     renderCard(
       interaction({

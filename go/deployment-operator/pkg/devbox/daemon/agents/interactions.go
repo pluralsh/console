@@ -102,7 +102,8 @@ func (m *Manager) onPermissionRequest(ctx context.Context, c *agentConn, params 
 		return permissionCancelled, nil
 	}
 	// A subagent's request arrives on its parent's session: it belongs to whichever session has the call.
-	s = m.toolCallOwnerLocked(s, acp.Str(tc, "toolCallId"))
+	tcID := acp.Str(tc, "toolCallId")
+	s = m.toolCallOwnerLocked(s, tcID)
 	// The request carries a tool call update; apply it like any other so the timeline shows the pending call.
 	if tc != nil {
 		upd := acp.CloneJSON(tc).(map[string]any)
@@ -112,8 +113,15 @@ func (m *Manager) onPermissionRequest(ctx context.Context, c *agentConn, params 
 			delete(upd, "_meta")
 		}
 		m.applyUpdateLocked(c, s.id, upd)
+		// a first sighting may have been routed into a subagent just now
+		s = m.toolCallOwnerLocked(s, tcID)
 	}
-	pr := &devboxv1.PermissionRequest{ToolCall: acp.ToolCallOf(tc), Meta: acp.MetaStruct(p)}
+	// The request's tool call is only a delta: the command or path may have come with the earlier tool_call.
+	call := tc
+	if e := s.store.Get(devboxv1.EntityType_ENTITY_TYPE_TOOL_CALL, tcID); tcID != "" && e != nil {
+		call = e.Body
+	}
+	pr := &devboxv1.PermissionRequest{ToolCall: acp.ToolCallOf(call), Meta: acp.MetaStruct(p)}
 	for _, o := range acp.Arr(p, "options") {
 		if oo, ok := o.(map[string]any); ok {
 			pr.Options = append(pr.Options, &devboxv1.PermissionOption{
@@ -121,11 +129,11 @@ func (m *Manager) onPermissionRequest(ctx context.Context, c *agentConn, params 
 			})
 		}
 	}
-	title := acp.Str(tc, "title")
+	title := acp.Str(call, "title")
 	if title == "" {
 		title = "Permission requested"
 	}
-	in := m.newInteractionLocked(s, devboxv1.InteractionKind_INTERACTION_KIND_PERMISSION, title, acp.Str(tc, "toolCallId"), params)
+	in := m.newInteractionLocked(s, devboxv1.InteractionKind_INTERACTION_KIND_PERMISSION, title, tcID, params)
 	in.proto.Request = &devboxv1.Interaction_Permission{Permission: pr}
 	if id := m.autoApproveLocked(s, pr); id != "" {
 		in.proto.AnsweredAt = in.proto.GetCreatedAt()
@@ -133,7 +141,7 @@ func (m *Manager) onPermissionRequest(ctx context.Context, c *agentConn, params 
 	}
 	if m.reviewingLocked(s.thread) && allowOption(pr) != "" {
 		in.reviewing = true
-		rr := m.reviewRequestLocked(s, tc)
+		rr := m.reviewRequestLocked(s, call)
 		m.mu.Unlock()
 		review := m.review(ctx, rr)
 		m.mu.Lock()

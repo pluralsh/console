@@ -201,7 +201,7 @@ defmodule Console.Devboxes.Acp do
   @spec tool_call_content(map) :: map
   def tool_call_content(c) do
     case content_type(c) do
-      "content" -> %{type: :content, content: block(get(c, :content) || %{})}
+      "content" -> %{type: :content, content: block(get(c, :content) || get(c, :block) || %{})}
       "diff" ->
         d = inner(c, :diff)
         %{type: :diff, path: get(d, :path), old_text: get(d, :old_text), new_text: get(d, :new_text)}
@@ -213,7 +213,11 @@ defmodule Console.Devboxes.Acp do
   defp content_type(c) do
     case get(c, :type) do
       t when is_binary(t) -> t
-      _ -> Enum.find(~w(content diff terminal), &(get(c, String.to_atom(&1)) != nil))
+      _ ->
+        # a decoded proto names the content variant `block`
+        if get(c, :block) != nil,
+          do: "content",
+          else: Enum.find(~w(content diff terminal), &(get(c, String.to_atom(&1)) != nil))
     end
   end
 

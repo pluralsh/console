@@ -1,11 +1,11 @@
 import {
+  CliIcon,
   MonitorIcon,
   CloseIcon,
   GitCompareIcon,
   FolderIcon,
   IconFrame,
   PrIcon,
-  TerminalIcon,
   Tooltip,
 } from '@pluralsh/design-system'
 import { PrStatusIcon } from 'components/workbenches/common/WorkbenchJobPrIcon'
@@ -72,7 +72,7 @@ const PANEL_TABS: {
   { key: 'files', label: 'Files', icon: <FolderIcon size={14} /> },
   { key: 'changes', label: 'Changes', icon: <GitCompareIcon size={14} /> },
   { key: 'prs', label: 'Pull requests', icon: <PrIcon size={14} /> },
-  { key: 'terminal', label: 'Terminal', icon: <TerminalIcon size={14} /> },
+  { key: 'terminal', label: 'Terminal', icon: <CliIcon size={14} /> },
   { key: 'browser', label: 'Browser', icon: <MonitorIcon size={14} /> },
 ]
 
@@ -311,11 +311,7 @@ export function DevboxPanelContent() {
             />
           )}
           {active.key === 'prs' && (
-            <DevboxPullRequestsTab
-              instance={instance}
-              live={live}
-              headerActions={headerActions}
-            />
+            <DevboxPullRequestsTab instance={instance} />
           )}
           {active.key === 'terminal' && (
             <DevboxTerminalTab

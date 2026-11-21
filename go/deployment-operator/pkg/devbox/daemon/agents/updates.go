@@ -67,16 +67,16 @@ func (m *Manager) applyUpdateLocked(c *agentConn, sid string, update acp.Object)
 	now := m.clock.Now()
 	for _, ch := range c.norm.Normalize(sid, update) {
 		s := m.sessions[ch.SessionID]
-		if s == nil && ch.Subagent != nil {
-			s = m.subagentLocked(c, ch.Subagent)
-		}
-		if s == nil {
-			s = m.sessions[sid]
+		if s == nil && ch.Subagent != nil && !m.replayingLocked(m.sessions[ch.Subagent.ParentSessionID]) {
+			if s = m.subagentLocked(c, ch.Subagent); s == nil {
+				s = m.sessions[sid]
+			}
 		}
 		if s == nil {
 			continue
 		}
-		if ch.SubagentAnnouncement != nil {
+		replaying := m.replayingLocked(s)
+		if ch.SubagentAnnouncement != nil && !replaying {
 			child := m.subagentLocked(c, ch.SubagentAnnouncement)
 			if child != nil && ch.SubagentAnnouncement.Title != "" {
 				child.title = ch.SubagentAnnouncement.Title
@@ -86,7 +86,7 @@ func (m *Manager) applyUpdateLocked(c *agentConn, sid string, update acp.Object)
 		s.lastActivity = now
 		switch ch.Kind {
 		case acp.ChangeAppend, acp.ChangePatch:
-			if s.replaying {
+			if replaying {
 				continue
 			}
 			if m.applyEntityLocked(s, ch) {
@@ -102,6 +102,18 @@ func (m *Manager) applyUpdateLocked(c *agentConn, sid string, update acp.Object)
 			m.emitDeltaLocked(&devboxv1.Delta{SessionId: s.id, Op: devboxv1.DeltaOp_DELTA_OP_NOTICE, PayloadJson: acp.MustJSON(ch.Payload)})
 		}
 	}
+}
+
+// replayingLocked is whether s or any ancestor is mid session/load replay: agents replay subagent history onto the
+// child sessions too, which the transcript already has (or never had, for threads recorded before native subagents).
+func (m *Manager) replayingLocked(s *session) bool {
+	for seen := 0; s != nil && seen <= len(m.sessions); seen++ {
+		if s.replaying {
+			return true
+		}
+		s = m.sessions[s.parent]
+	}
+	return false
 }
 
 // subagentLocked returns (creating if needed) the child session described by a lineage record. It never invents

@@ -187,6 +187,27 @@ func codexConfig(t *testing.T, c *Config) map[string]any {
 }
 
 // codex-acp starts `codex app-server` itself and drops flags, so the proxy setup has to live in config.toml
+func TestNativeSubagentAdapters(t *testing.T) {
+	c := testConfig(t)
+	for agent, want := range map[devboxv1.AgentType]bool{
+		devboxv1.AgentType_AGENT_TYPE_CLAUDE: true,
+		devboxv1.AgentType_AGENT_TYPE_CODEX:  true,
+		devboxv1.AgentType_AGENT_TYPE_GEMINI: false,
+	} {
+		launch := &devboxv1.AgentLaunch{
+			Agent:       agent,
+			ProxyModels: &devboxv1.ProxyModels{DefaultModel: "openai/gpt-5", Models: []string{"openai/gpt-5"}},
+		}
+		spec, err := c.Spec(launch, proxyEndpoints, "")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if spec.NativeSubagents != want {
+			t.Errorf("%s: native subagents %v, want %v", agent, spec.NativeSubagents, want)
+		}
+	}
+}
+
 func TestCodexProxyLivesInConfig(t *testing.T) {
 	c := testConfig(t)
 	if err := os.MkdirAll(c.CodexHome(), 0o755); err != nil {

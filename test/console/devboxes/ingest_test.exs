@@ -201,7 +201,16 @@ defmodule Console.Devboxes.IngestTest do
             kind: :INTERACTION_KIND_PERMISSION,
             state: :INTERACTION_STATE_PENDING,
             title: "run rm -rf",
-            permission: %{options: [%{option_id: "allow", name: "Allow", kind: "allow_once"}]},
+            permission: %{
+              options: [%{option_id: "allow", name: "Allow", kind: "allow_once"}],
+              tool_call: %{
+                tool_call_id: "tc-1",
+                title: "Bash",
+                kind: "execute",
+                raw_input: %{"command" => "rm -rf build"},
+                content: [%{block: %{text: %{text: "Deletes the build dir"}}}]
+              }
+            },
             review: %{verdict: "ask", confidence: 0.9, risk: "destructive", model: "openai/gpt-6-luna", escalation: "the reviewer wants you to decide"},
             revision: 1
           }
@@ -226,6 +235,12 @@ defmodule Console.Devboxes.IngestTest do
       assert interaction.session_id == thread.id
       assert interaction.kind == :permission
       assert [%{option_id: "allow"}] = interaction.options
+      assert %{
+        tool_call_id: "tc-1",
+        kind: "execute",
+        raw_input: %{"command" => "rm -rf build"},
+        content: [%{type: :content, content: %{type: :text, text: "Deletes the build dir"}}]
+      } = Console.Devboxes.Acp.tool_call(interaction.tool_call)
       assert %{verdict: "ask", risk: "destructive", escalation: "the reviewer wants you to decide"} = interaction.review
 
       inst = refetch(inst)

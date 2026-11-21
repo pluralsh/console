@@ -25,7 +25,13 @@ import {
   WorkbenchOutletContext,
   WorkbenchPageLayout,
 } from '../Workbench'
-import { useDevboxPanelAutoOpen } from './DevboxControlPanel'
+import {
+  DevboxPanelTab,
+  useDevboxPanel,
+  useDevboxPanelAutoOpen,
+} from './DevboxControlPanel'
+
+const WIDE_PANEL_TABS = new Set<DevboxPanelTab>(['terminal', 'browser'])
 import { isInstanceTerminal } from './devboxIdle'
 import { DevboxInstanceView } from './DevboxInstanceView'
 import { DevboxNewInstance } from './DevboxNewInstance'
@@ -97,7 +103,13 @@ export function DevboxInstancePage() {
       [workbench, workbenchId, instanceId, instanceName]
     )
   )
-  useSidePanelWidth({ minWidth: 360, maxWidthVw: 70, initialWidthVw: 40 })
+  const { tab } = useDevboxPanel()
+  // the trees open what's picked in the main view, so they take the usual side panel width
+  useSidePanelWidth(
+    WIDE_PANEL_TABS.has(tab)
+      ? { minWidth: 360, maxWidthVw: 70, initialWidthVw: 40 }
+      : null
+  )
   useDevboxPanelAutoOpen(instanceId)
 
   return (

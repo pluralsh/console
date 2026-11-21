@@ -7,6 +7,8 @@
 //	permission  ask session/request_permission and echo the outcome
 //	subagent    a Task tool call and a child update tagged with claude-agent-acp's parentToolUseId
 //	subagent-permission  a subagent's tool call, then a permission request for it on the parent session
+//	native-subagent  claude-agent-acp's native subagent session: subagent_spawned, the child's own updates and a
+//	            permission request on the child's session ID, then subagent_state_update
 //	unknown     an unknown content block and an unknown session update kind
 //	authfail    fail the turn with -32000 "Authentication required"
 //	mode:<id>   switch the session's mode itself (current_mode_update), like leaving plan mode
@@ -99,6 +101,25 @@ func modes(current string) map[string]any {
 	return map[string]any{"currentModeId": current, "availableModes": avail}
 }
 
+// nativeHistorySuffix marks (next to the request log, so it outlives the process) the session that ran the
+// native-subagent scenario.
+const nativeHistorySuffix = ".native"
+
+// replayNativeHistory replays a native-subagent session's history the way codex-acp does on session/load: each
+// child is re-announced and its own history streamed onto its session, including children the client never saw.
+func (f *fakeAgent) replayNativeHistory(sid string) {
+	p := os.Getenv(LogEnv)
+	if b, err := os.ReadFile(p + nativeHistorySuffix); p == "" || err != nil || string(b) != sid {
+		return
+	}
+	for _, child := range []string{"task-native", "task-unseen"} {
+		f.update(sid, map[string]any{"sessionUpdate": "subagent_spawned", "subagentSessionId": child, "name": child,
+			"task": "Delegated task for " + child, "capabilities": map[string]any{}})
+		f.update(child, map[string]any{"sessionUpdate": "agent_message_chunk", "content": map[string]any{"type": "text", "text": "child says hi"}})
+		f.update(sid, map[string]any{"sessionUpdate": "subagent_state_update", "subagentSessionId": child, "state": "completed"})
+	}
+}
+
 func (f *fakeAgent) update(sid string, u map[string]any) {
 	_ = f.conn.Notify(context.Background(), acp.MethodSessionUpdate, map[string]any{"sessionId": sid, "update": u})
 }
@@ -141,6 +162,7 @@ func (f *fakeAgent) HandleRequest(ctx context.Context, method string, raw json.R
 		if cur == "" {
 			cur = fastModel
 		}
+		f.replayNativeHistory(sid)
 		// Like claude-agent-acp, a reopened session starts in the default mode.
 		return map[string]any{"configOptions": f.modelOptions(cur), "modes": modes("default")}, nil
 	case acp.MethodSetMode:
@@ -271,6 +293,31 @@ func (f *fakeAgent) prompt(sid string, params acp.Object) (any, *acp.RequestErro
 		}
 		out := acp.Obj(acp.RawObject(res), "outcome")
 		msg(fmt.Sprintf("outcome:%s:%s", acp.Str(out, "outcome"), acp.Str(out, "optionId")))
+	case text == "native-subagent":
+		const child = "task-native"
+		// the adapter still stamps the spawning Agent call on routed updates
+		lineage := map[string]any{"claudeCode": map[string]any{"parentToolUseId": "toolu-agent"}}
+		f.update(sid, map[string]any{"sessionUpdate": "subagent_spawned", "subagentSessionId": child, "name": "Explore the repo",
+			"task": "Find the entrypoints", "capabilities": map[string]any{}})
+		f.update(child, map[string]any{"sessionUpdate": "agent_message_chunk", "content": map[string]any{"type": "text", "text": "child says hi"}, "_meta": lineage})
+		f.update(child, map[string]any{"sessionUpdate": "tool_call", "toolCallId": "tc-child", "title": "Bash", "kind": "execute",
+			"status": "pending", "rawInput": map[string]any{"command": "ls -la"}, "_meta": lineage})
+		// the request's tool call is a delta: the command came with the tool_call above
+		res, err := f.conn.Call(context.Background(), acp.MethodRequestPermission, map[string]any{
+			"sessionId": child,
+			"toolCall":  map[string]any{"toolCallId": "tc-child", "title": "Bash"},
+			"options":   []any{map[string]any{"optionId": "allow", "name": "Allow once", "kind": "allow_once"}},
+		})
+		if err != nil {
+			return nil, &acp.RequestError{Code: -32603, Message: err.Error()}
+		}
+		out := acp.Obj(acp.RawObject(res), "outcome")
+		f.update(child, map[string]any{"sessionUpdate": "tool_call_update", "toolCallId": "tc-child", "status": "completed", "_meta": lineage})
+		f.update(sid, map[string]any{"sessionUpdate": "subagent_state_update", "subagentSessionId": child, "state": "completed"})
+		msg(fmt.Sprintf("outcome:%s:%s", acp.Str(out, "outcome"), acp.Str(out, "optionId")))
+		if p := os.Getenv(LogEnv); p != "" {
+			_ = os.WriteFile(p+nativeHistorySuffix, []byte(sid), 0o600)
+		}
 	case text == "unknown":
 		f.update(sid, map[string]any{"sessionUpdate": "agent_message_chunk", "content": map[string]any{"type": "hologram", "shape": "cube", "size": 3}})
 		f.update(sid, map[string]any{"sessionUpdate": "future_widget", "widgetId": "w1", "payload": map[string]any{"a": 1, "nested": []any{"x"}}})

@@ -163,6 +163,8 @@ ARG GH_VERSION=2.104.0
 ARG GLAB_VERSION=1.130.0
 # renovate: datasource=github-releases depName=jdx/mise
 ARG MISE_VERSION=2026.11.8
+# oh-my-zsh has no releases; pinned by hand to a master commit of github.com/ohmyzsh/ohmyzsh.
+ARG OH_MY_ZSH_COMMIT=c0140703a53eb0d22be44f7bac318d0baacc927c
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
@@ -199,6 +201,15 @@ RUN set -eux; \
     install -m 0755 "${mise}" /usr/local/bin/mise; \
     cd /; rm -rf "${tmp}"; \
     gh --version; glab --version; mise --version
+
+# oh-my-zsh for the terminals, system-wide since the home is the workspace volume. Fetching by commit makes git
+# verify the content; the skel .zshrc loads it with updates off and its cache under the home.
+RUN set -eux; \
+    git init --quiet /usr/share/oh-my-zsh; \
+    git -C /usr/share/oh-my-zsh fetch --quiet --depth 1 https://github.com/ohmyzsh/ohmyzsh.git "${OH_MY_ZSH_COMMIT}"; \
+    git -C /usr/share/oh-my-zsh checkout --quiet FETCH_HEAD; \
+    rm -rf /usr/share/oh-my-zsh/.git; \
+    chmod -R a+rX,go-w /usr/share/oh-my-zsh
 
 COPY --from=harnesses /usr/local/ /usr/local/
 COPY --from=harnesses /opt/pi-mcp-adapter /opt/pi-mcp-adapter
@@ -241,6 +252,7 @@ LABEL sh.plural.devbox/contract="v1" \
 ENV HOME=/home/dev \
     USER=dev \
     SHELL=/bin/bash \
+    DEVBOX_SHELL=/bin/zsh \
     LANG=C.UTF-8 \
     LC_ALL=C.UTF-8 \
     PATH=/home/dev/.local/share/mise/shims:/home/dev/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \

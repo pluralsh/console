@@ -3366,6 +3366,9 @@ type DevboxInteraction {
 
   options: [DevboxPermissionOption]
 
+  "the tool call a permission request asks about, for when its session's transcript isn't loaded"
+  toolCall: DevboxToolCall
+
   response: Map
 
   answeredAt: DateTime

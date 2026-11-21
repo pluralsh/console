@@ -15,6 +15,14 @@ var orderedRequests = map[string]bool{
 	MethodElicitationCreate: true,
 }
 
+// orderedResponses are the requests whose response must not overtake the notifications the agent sent before it:
+// session/load and session/resume replay history as updates ahead of their response, and the daemon stops
+// suppressing that replay once the response is back.
+var orderedResponses = map[string]bool{
+	MethodSessionLoad:   true,
+	MethodSessionResume: true,
+}
+
 // requestOrderWait caps how long an agent's request waits for the notifications sent before it.
 const requestOrderWait = 2 * time.Second
 

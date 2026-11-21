@@ -99,12 +99,9 @@ export function DevboxTranscript({
       continue
     }
     if (toolCallId && hiddenToolCalls?.has(toolCallId)) continue
-    const last = rows.at(-1)
-    if (isGroupableToolCall(entity)) {
-      if (last?.kind === 'tools') last.entities.push(entity)
-      else rows.push({ kind: 'tools', entities: [entity] })
-    } else rows.push({ kind: 'entity', entity })
 
+    // the first message to or from a subagent is where it starts: its card stands in for it, and the subagent's
+    // own transcript opens with the task
     const linked =
       entity.type === DevboxEntityType.SessionMessage
         ? [
@@ -117,7 +114,14 @@ export function DevboxTranscript({
     if (linked && renderSubagent) {
       placed.add(linked.id)
       rows.push({ kind: 'subagent', subagent: linked })
+      continue
     }
+
+    const last = rows.at(-1)
+    if (isGroupableToolCall(entity)) {
+      if (last?.kind === 'tools') last.entities.push(entity)
+      else rows.push({ kind: 'tools', entities: [entity] })
+    } else rows.push({ kind: 'entity', entity })
   }
   if (renderSubagent)
     for (const subagent of subagents)
