@@ -11,8 +11,10 @@ import {
   ListBoxItem,
   Modal,
   PlayIcon,
+  Tooltip,
   TrashCanIcon,
 } from '@pluralsh/design-system'
+import { PrStatusIcon } from 'components/workbenches/common/WorkbenchJobPrIcon'
 import { ApolloError } from '@apollo/client'
 import usePersistedState from 'components/hooks/usePersistedState'
 import { ProgressRingGlyph } from 'components/workbenches/common/IssueStatusGlyph'
@@ -29,8 +31,10 @@ import { CaptionP } from 'components/utils/typography/Text'
 import {
   DevboxAgentType,
   DevboxInstanceFragment,
+  DevboxPullRequestFragment,
   DevboxThreadFragment,
   DevboxThreadStage,
+  PrStatus,
   useCloseDevboxThreadMutation,
   useDeleteDevboxThreadMutation,
   useDevboxImportableSessionsQuery,
@@ -40,12 +44,16 @@ import {
   useResumeDevboxThreadMutation,
   WorkbenchJobStatus,
 } from 'generated/graphql'
-import { ReactNode, useState } from 'react'
+import { ReactNode, useMemo, useState } from 'react'
 import { JOB_STATUS_COLORS, JobStatusIcon } from '../WorkbenchJobsGroupedList'
 import styled from 'styled-components'
 import { fromNow } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
 import { isUnsupportedError } from './devboxErrors'
+import {
+  openPullRequestsByThread,
+  useDevboxPullRequests,
+} from './devboxPullRequests'
 import { agentLabel } from './devboxStartForm'
 import {
   availableThreadActions,
@@ -130,6 +138,11 @@ export function DevboxThreadList({
     (instance.threads ?? []).filter(isNonNullable),
     selectedThreadId
   )
+  const { pullRequests } = useDevboxPullRequests(instance.id)
+  const openPrs = useMemo(
+    () => openPullRequestsByThread(pullRequests),
+    [pullRequests]
+  )
   const [renaming, setRenaming] = useState<Nullable<DevboxThreadFragment>>(null)
   const [deleting, setDeleting] = useState<Nullable<DevboxThreadFragment>>(null)
   const [collapsed, setCollapsed] = usePersistedState<DevboxThreadStage[]>(
@@ -199,6 +212,7 @@ export function DevboxThreadList({
           thread={thread}
           selected={thread.id === selectedThreadId}
           unread={unread.has(thread.id)}
+          openPrs={openPrs.get(thread.id)}
           onSelect={() => onSelect(thread.id)}
           actions={
             actions.length && !disabled ? (
@@ -226,6 +240,7 @@ export function DevboxThreadList({
             thread={child}
             selected={child.id === selectedThreadId}
             unread={unread.has(child.id)}
+            openPrs={openPrs.get(child.id)}
             onSelect={() => onSelect(child.id)}
           />
         ))}
@@ -330,6 +345,7 @@ function ThreadRow({
   selected,
   unread,
   nested = false,
+  openPrs,
   onSelect,
   actions,
 }: {
@@ -337,6 +353,7 @@ function ThreadRow({
   selected: boolean
   unread: boolean
   nested?: boolean
+  openPrs?: DevboxPullRequestFragment[]
   onSelect: () => void
   actions?: React.ReactNode
 }) {
@@ -359,6 +376,18 @@ function ThreadRow({
           {nested && <BotIcon size={10} />}
           {unread && <UnreadDotSC aria-label="unread" />}
           <ThreadTitleSC $unread={unread}>{threadTitle(thread)}</ThreadTitleSC>
+          {!!openPrs?.length && (
+            <Tooltip
+              label={`Open ${openPrs.length === 1 ? 'pull request' : 'pull requests'}: ${openPrs.map((pr) => pr.title).join(', ')}`}
+            >
+              <PrBadgeSC aria-label={`${openPrs.length} open pull requests`}>
+                <PrStatusIcon
+                  status={PrStatus.Open}
+                  size={12}
+                />
+              </PrBadgeSC>
+            </Tooltip>
+          )}
           {STATE_SEVERITY[state] && (
             <Chip
               size="small"
@@ -564,6 +593,8 @@ const ThreadMetaSC = styled.span(({ theme }) => ({
   ...theme.partials.text.caption,
   color: theme.colors['text-xlight'],
 }))
+
+const PrBadgeSC = styled.span({ display: 'flex', flexShrink: 0 })
 
 const UnreadDotSC = styled.span(({ theme }) => ({
   width: 6,

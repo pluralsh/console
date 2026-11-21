@@ -99,6 +99,44 @@ defmodule Console.Devboxes.PullRequestsTest do
     end
   end
 
+  describe "#pr_review/1" do
+    test "it comments with links to the instance and the session that opened the pr" do
+      insert(:scm_connection, default: true)
+      inst = insert(:devbox_instance)
+      thread = insert(:devbox_instance_session, instance: inst, title: "Fix the | health check")
+      pr = insert(:pull_request,
+        url: "https://github.com/pluralsh/console/pull/1",
+        devbox_instance: inst,
+        devbox_instance_session: thread,
+        metadata: %{"position" => 12}
+      )
+
+      expect(Console.Deployments.Pr.Dispatcher, :review, fn _, %{id: id}, body ->
+        assert id == pr.id
+        assert body =~ inst.devbox.name
+        assert body =~ "[Fix the \\| health check](#{Console.url("/workbenches/#{inst.workbench_id}/devboxes/instances/#{inst.id}?position=12&thread=#{thread.id}")})"
+        assert body =~ "[#{inst.name}](#{Console.url("/workbenches/#{inst.workbench_id}/devboxes/instances/#{inst.id}")})"
+        {:ok, "comment-id"}
+      end)
+
+      {:ok, "comment-id"} = PullRequests.pr_review(pr)
+    end
+
+    test "without a session it links the instance alone" do
+      insert(:scm_connection, default: true)
+      inst = insert(:devbox_instance)
+      pr = insert(:pull_request, url: "https://github.com/pluralsh/console/pull/2", devbox_instance: inst)
+
+      expect(Console.Deployments.Pr.Dispatcher, :review, fn _, _, body ->
+        refute body =~ "Session"
+        assert body =~ "Open the instance"
+        {:ok, "comment-id"}
+      end)
+
+      {:ok, _} = PullRequests.pr_review(pr)
+    end
+  end
+
   defp readable_instance(attrs \\ []) do
     user = insert(:user)
     wb = insert(:workbench, read_bindings: [%{user_id: user.id}])

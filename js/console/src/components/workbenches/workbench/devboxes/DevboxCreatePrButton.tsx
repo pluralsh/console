@@ -31,10 +31,12 @@ export function displayRemoteUrl(url: string) {
 // one click per repo: the box writes the title, body and commit message, commits, pushes, and console opens the pr
 export function DevboxCreatePrButton({
   instanceId,
+  threadId,
   agentsRunning,
   onCreated,
 }: {
   instanceId: string
+  threadId?: Nullable<string>
   agentsRunning: boolean
   onCreated: () => void
 }) {
@@ -120,7 +122,8 @@ export function DevboxCreatePrButton({
       width="400px"
       selectedKey={null}
       onSelectionChange={(key) =>
-        key && create({ variables: { instanceId, repository: `${key}` } })
+        key &&
+        create({ variables: { instanceId, repository: `${key}`, threadId } })
       }
       triggerButton={button}
     >

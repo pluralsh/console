@@ -4,7 +4,6 @@ import {
   Card,
   Code,
   Flex,
-  IconFrame,
   Modal,
   prettifyRepoUrl,
   PrIcon,
@@ -18,7 +17,7 @@ import { StackedText } from 'components/utils/table/StackedText'
 import { Body2BoldP, Subtitle2H1 } from 'components/utils/typography/Text'
 import { WorkbenchEvalGradeBadge } from 'components/workbenches/common/WorkbenchEvalGradeBadge'
 import { WorkbenchEvalSkillButton } from 'components/workbenches/common/WorkbenchEvalSkillButton'
-import { WorkbenchPrStatusChip } from 'components/workbenches/common/WorkbenchJobPrIcon'
+import { PullRequestList } from 'components/workbenches/common/PullRequestList'
 import {
   AgentRunTinyFragment,
   PrStatus,
@@ -180,37 +179,7 @@ export function WorkbenchJobPrs({
             icon={<PrIcon />}
             first={<Body2BoldP>Generated pull requests</Body2BoldP>}
           />
-          {generatedPrs.map((pr) => (
-            <WrapperCardSC
-              key={pr.id}
-              fillLevel={0}
-              clickable
-              forwardedAs="a"
-              href={pr.url}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <StackedText
-                truncate
-                first={
-                  <span id={`link-${pr.id}`}>
-                    {prettifyRepoUrl(pr.url, true)}
-                  </span>
-                }
-                firstPartialType="body2"
-                firstColor="text"
-                second={pr.title}
-              />
-              <RightActionsSC>
-                <WorkbenchPrStatusChip status={pr.status} />
-                <IconFrame
-                  size="small"
-                  tooltip="View PR"
-                  icon={<ArrowTopRightIcon color="icon-light" />}
-                />
-              </RightActionsSC>
-            </WrapperCardSC>
-          ))}
+          <PullRequestList pullRequests={generatedPrs} />
         </Flex>
       )}
       {!isEmpty(draftPrs) && (
@@ -432,15 +401,6 @@ function EvalSection({
     </Flex>
   )
 }
-
-const WrapperCardSC = styled(Card)(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  gap: theme.spacing.large,
-  padding: theme.spacing.medium,
-  textDecoration: 'none',
-  '&:hover span[id^="link-"]': { textDecoration: 'underline' },
-}))
 
 const DraftCardSC = styled(Card)(({ theme }) => ({
   display: 'flex',

@@ -226,7 +226,16 @@ const sumStats = (files: DevboxChangedFile[]) =>
     { additions: 0, deletions: 0 }
   )
 
-// GitHub's counts plus five boxes split by the share of added lines
+// GitHub's boxes: one per line under five lines, otherwise each side's floored share, the rest neutral
+export function diffStatBoxes(additions: number, deletions: number) {
+  const total = additions + deletions
+  if (total < DIFFSTAT_BOXES) return { added: additions, deleted: deletions }
+  return {
+    added: Math.floor((additions / total) * DIFFSTAT_BOXES),
+    deleted: Math.floor((deletions / total) * DIFFSTAT_BOXES),
+  }
+}
+
 export function DiffStat({
   additions,
   deletions,
@@ -234,9 +243,7 @@ export function DiffStat({
   additions: number
   deletions: number
 }) {
-  const total = additions + deletions
-  const added = total ? Math.round((additions / total) * DIFFSTAT_BOXES) : 0
-  const deleted = total ? DIFFSTAT_BOXES - added : 0
+  const { added, deleted } = diffStatBoxes(additions, deletions)
   return (
     <DiffStatSC>
       <AdditionsSC>+{additions}</AdditionsSC>

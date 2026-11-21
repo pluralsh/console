@@ -10,12 +10,14 @@ defmodule Console.Devboxes.PullRequests do
   """
   import Console.Deployments.Policies
   import Console.Services.Base, only: [handle_notify: 2]
+  import Console.Deployments.Pr.Git, only: [backfill_token: 1]
+  require EEx
   alias Console.PubSub
   alias Console.Repo
-  alias Console.Deployments.Pr.Git
+  alias Console.Deployments.Pr.{Dispatcher, Git}
   alias Console.Devboxes
-  alias Console.Devboxes.{Billing, Control, Error, Ingest, ProxyModels}
-  alias Console.Schema.{DevboxInstance, DevboxInstanceSession, User}
+  alias Console.Devboxes.{Billing, Control, Credentials, Error, Ingest, ProxyModels}
+  alias Console.Schema.{DevboxInstance, DevboxInstanceSession, PullRequest, ScmConnection, User}
 
   defmodule Job do
     @moduledoc "A pull request being prepared for one checkout.  Never stored."
@@ -97,6 +99,49 @@ defmodule Console.Devboxes.PullRequests do
     end
   end
   defp message(_), do: "couldn't create the pull request"
+
+  @doc """
+  Comments on a fresh devbox pull request with links back to the instance and session that opened it, so reviewers can
+  see the prompting behind it and pick the work back up, like `Agents.pr_review/1` does for agent runs.
+  """
+  @spec pr_review(PullRequest.t) :: {:ok, binary} | Console.error
+  def pr_review(%PullRequest{devbox_instance_id: id} = pr) when is_binary(id) do
+    pr = Repo.preload(pr, [devbox_instance: :devbox, devbox_instance_session: []])
+    with %DevboxInstance{devbox: devbox} = inst <- pr.devbox_instance,
+         %ScmConnection{} = conn <- Credentials.scm_connection(devbox, pr.url),
+         {:ok, conn} <- backfill_token(conn) do
+      Dispatcher.review(conn, pr, String.trim(review_blob(review_assigns(pr, inst))))
+    else
+      nil -> {:error, "no scm connection found for this pull request"}
+      err -> err
+    end
+  end
+  def pr_review(_), do: {:error, "not a devbox pull request"}
+
+  defp review_assigns(%PullRequest{devbox_instance_session: thread} = pr, %DevboxInstance{} = inst) do
+    [
+      devbox: cell(inst.devbox.name),
+      instance: cell(inst.name),
+      instance_url: instance_url(inst, %{}),
+      session: thread && cell(thread.user_title || thread.title || "Untitled session"),
+      session_url: thread && instance_url(inst, drop_nils(%{thread: thread.id, position: position(pr.metadata)}))
+    ]
+  end
+
+  defp instance_url(%DevboxInstance{} = inst, params) do
+    query = if params == %{}, do: "", else: "?" <> URI.encode_query(params)
+    Console.url("/workbenches/#{inst.workbench_id}/devboxes/instances/#{inst.id}#{query}")
+  end
+
+  defp position(%{} = metadata), do: metadata[:position] || metadata["position"]
+  defp position(_), do: nil
+
+  defp drop_nils(map), do: Map.reject(map, fn {_, v} -> is_nil(v) end)
+
+  # a pipe or newline in a title would break the table
+  defp cell(text), do: text |> String.replace("|", "\\|") |> String.replace(~r/\s+/, " ")
+
+  EEx.function_from_file(:defp, :review_blob, Path.join([:code.priv_dir(:console), "pr", "devbox_review.md.eex"]), [:assigns])
 
   defp publish(%Job{} = job), do: handle_notify(PubSub.DevboxPullRequestJobUpdated, job)
 end

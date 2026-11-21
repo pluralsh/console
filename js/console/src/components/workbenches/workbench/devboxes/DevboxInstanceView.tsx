@@ -8,7 +8,6 @@ import {
   useDevboxInstanceIndexDeltaSubscription,
   useDevboxInstanceQuery,
   useDevboxInstanceStatusDeltaSubscription,
-  useDevboxPullRequestsQuery,
   useDevboxThreadDeltaSubscription,
   useResumeDevboxInstanceMutation,
   useWorkbenchDevboxesQuery,
@@ -20,11 +19,11 @@ import {
   WORKBENCH_DEVBOX_THREAD_QUERY_PARAM,
 } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
-import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import { WorkbenchEmptyState } from '../../common/WorkbenchEmptyState'
 import { DevboxPanelRail, useDevboxPanel } from './DevboxControlPanel'
 import { isClusterOfflineError } from './devboxErrors'
+import { useDevboxPullRequests } from './devboxPullRequests'
 import { mergePendingInteractions } from './devboxInteractions'
 import { DevboxChangesViewer } from './DevboxChangesViewer'
 import { DevboxFileViewer } from './DevboxFileViewer'
@@ -64,13 +63,9 @@ export function DevboxInstanceView({ instanceId }: { instanceId: string }) {
     variables: { id: workbenchId },
     skip: !workbenchId,
   })
-  const { data: prData, refetch: refetchPullRequests } =
-    useDevboxPullRequestsQuery({
-      variables: { devboxInstanceId: instanceId },
-      skip: !instanceId,
-      fetchPolicy: 'cache-and-network',
-    })
-  const pullRequests = mapExistingNodes(prData?.pullRequests)
+  const { refetch: refetchPullRequests } = useDevboxPullRequests(instanceId, {
+    poll: true,
+  })
 
   const { error: statusError } = useDevboxInstanceStatusDeltaSubscription({
     variables: { id: instanceId },
@@ -151,6 +146,12 @@ export function DevboxInstanceView({ instanceId }: { instanceId: string }) {
     }
   }, [notices, popToast, timelineDispatch])
 
+  // a pull request an agent opened mid-turn arrives as a live delta
+  const announcedPrs = timeline.store.pullRequests.length
+  useEffect(() => {
+    if (announcedPrs) refetchPullRequests()
+  }, [announcedPrs, refetchPullRequests])
+
   const setParam = (key: string, value: Nullable<string>) =>
     setParams(
       (prev) => {
@@ -211,8 +212,6 @@ export function DevboxInstanceView({ instanceId }: { instanceId: string }) {
             instance={instance}
             maxDeferralSeconds={maxDeferral}
             now={now}
-            pullRequests={pullRequests}
-            onPullRequestCreated={() => refetchPullRequests()}
             resuming={resuming}
             onResume={() => resume({ variables: { id: instance.id } })}
             onImportSession={() => setImportOpen(true)}

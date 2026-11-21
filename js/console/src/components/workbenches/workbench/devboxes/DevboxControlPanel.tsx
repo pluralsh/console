@@ -4,9 +4,11 @@ import {
   GitCompareIcon,
   FolderIcon,
   IconFrame,
+  PrIcon,
   TerminalIcon,
   Tooltip,
 } from '@pluralsh/design-system'
+import { CountBadge } from 'components/utils/CountBadge'
 import {
   PanelHeaderSC,
   SidePanelContent,
@@ -40,13 +42,20 @@ import {
 import { DevboxDiffTab } from './DevboxDiffTab'
 import { DevboxFilesTab } from './DevboxFilesTab'
 import { isInstanceLive } from './devboxIdle'
+import { useDevboxPullRequests } from './devboxPullRequests'
+import { DevboxPullRequestsTab } from './DevboxPullRequestsTab'
 import { DevboxTerminalTab } from './DevboxTerminalTab'
 import { useDevboxWorkspaceApi } from './devboxWorkspaceApi'
 
 const SIDE_PANEL_TYPE: SidePanel = 'devbox'
 const OPEN_KEY = 'plural-devbox-panel-open'
 
-export type DevboxPanelTab = 'files' | 'changes' | 'terminal' | 'browser'
+export type DevboxPanelTab =
+  | 'files'
+  | 'changes'
+  | 'prs'
+  | 'terminal'
+  | 'browser'
 
 const PANEL_TABS: {
   key: DevboxPanelTab
@@ -55,6 +64,7 @@ const PANEL_TABS: {
 }[] = [
   { key: 'files', label: 'Files', icon: <FolderIcon size={14} /> },
   { key: 'changes', label: 'Changes', icon: <GitCompareIcon size={14} /> },
+  { key: 'prs', label: 'Pull requests', icon: <PrIcon size={14} /> },
   { key: 'terminal', label: 'Terminal', icon: <TerminalIcon size={14} /> },
   { key: 'browser', label: 'Browser', icon: <MonitorIcon size={14} /> },
 ]
@@ -153,18 +163,25 @@ export function DevboxPanelRail({
     isOpen ? null : instance.id,
     isInstanceLive(instance.status)
   )
+  const { open } = useDevboxPullRequests(instance.id)
   if (isOpen) return null
   return (
     <PanelRail
-      tabs={panelTabsFor(instance).map((t) =>
-        t.key === 'changes' && changes.files
-          ? {
-              ...t,
-              label: `${t.label}: ${diffStatLabel(changes)}`,
-              badge: <DevboxDiffBlock stat={changes} />,
-            }
-          : t
-      )}
+      tabs={panelTabsFor(instance).map((t) => {
+        if (t.key === 'changes' && changes.files)
+          return {
+            ...t,
+            label: `${t.label}: ${diffStatLabel(changes)}`,
+            badge: <DevboxDiffBlock stat={changes} />,
+          }
+        if (t.key === 'prs' && open.length)
+          return {
+            ...t,
+            label: `${t.label}: ${open.length} open`,
+            count: open.length,
+          }
+        return t
+      })}
       onOpen={(tab) => {
         setTab(tab)
         setOpen(true)
@@ -202,6 +219,7 @@ export function DevboxPanelContent() {
     useState<Nullable<HTMLDivElement>>(null)
 
   const changes = useDevboxChangeStat(instanceId || null, live)
+  const { open: openPrs } = useDevboxPullRequests(instanceId || null)
   const tabs = panelTabsFor(instance)
   const active = tabs.find((t) => t.key === tab) ?? tabs[0]
 
@@ -224,6 +242,13 @@ export function DevboxPanelContent() {
                 {t.icon}
                 {selected && <span>{t.label}</span>}
                 {t.key === 'changes' && <DevboxDiffStat stat={changes} />}
+                {t.key === 'prs' && (
+                  <CountBadge
+                    count={openPrs.length}
+                    size="small"
+                    variant="warning"
+                  />
+                )}
               </TabSC>
             )
             return selected ? (
@@ -266,6 +291,13 @@ export function DevboxPanelContent() {
               live={live}
               selected={change}
               onSelect={selectChange}
+              headerActions={headerActions}
+            />
+          )}
+          {active.key === 'prs' && (
+            <DevboxPullRequestsTab
+              instance={instance}
+              live={live}
               headerActions={headerActions}
             />
           )}

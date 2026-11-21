@@ -26,7 +26,6 @@ import { StackedText } from 'components/utils/table/StackedText'
 import {
   DevboxInstanceFragment,
   DevboxInstanceStatus,
-  DevboxPullRequestFragment,
   useCancelDevboxInstanceMutation,
   useCancelDevboxKeepAwakeMutation,
   useCreateDevboxSnapshotMutation,
@@ -38,8 +37,6 @@ import styled from 'styled-components'
 import { formatDateTime, fromNow } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
 import { billingBadgeLabel, toBillingMode } from './devboxCredentials'
-import { DevboxPrChips } from './DevboxChips'
-import { DevboxCreatePrButton } from './DevboxCreatePrButton'
 import { useDevboxChangeStat } from './devboxChanges'
 import { useDevboxPanel } from './DevboxControlPanel'
 import { DevboxDiffStat, diffStatLabel } from './DevboxDiffStat'
@@ -138,20 +135,16 @@ export function DevboxInstanceHeader({
   instance,
   maxDeferralSeconds,
   now,
-  pullRequests,
   onResume,
   resuming,
   onImportSession,
-  onPullRequestCreated,
 }: {
   instance: DevboxInstanceFragment
   maxDeferralSeconds: number
   now: Date
-  pullRequests: DevboxPullRequestFragment[]
   onResume: () => void
   resuming: boolean
   onImportSession?: () => void
-  onPullRequestCreated?: () => void
 }) {
   const { popToast } = useSimpleToast()
   const [stopOpen, setStopOpen] = useState(false)
@@ -273,13 +266,6 @@ export function DevboxInstanceHeader({
           css={{ flexShrink: 0 }}
         >
           {live && <ChangesButton instanceId={instance.id} />}
-          {live && (
-            <DevboxCreatePrButton
-              instanceId={instance.id}
-              agentsRunning={(instance.runningThreads ?? 0) > 0}
-              onCreated={() => onPullRequestCreated?.()}
-            />
-          )}
           {suspended && (
             <Button
               small
@@ -351,7 +337,7 @@ export function DevboxInstanceHeader({
           })}
         </DetailsSC>
       )}
-      {(!!badges.length || !!pullRequests.length) && (
+      {!!badges.length && (
         <Flex
           gap="xsmall"
           align="center"
@@ -366,7 +352,6 @@ export function DevboxInstanceHeader({
               {badge}
             </Chip>
           ))}
-          <DevboxPrChips pullRequests={pullRequests} />
         </Flex>
       )}
       <Confirm
