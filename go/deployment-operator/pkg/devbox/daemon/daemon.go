@@ -390,9 +390,15 @@ func (d *Daemon) sandboxCredentials() devboxv1.SandboxCredentialsClient {
 func (d *Daemon) baseEnv() []string {
 	d.mu.Lock()
 	set := maps.Clone(d.req.GetEnv())
+	owner := d.req.GetOwner()
 	d.mu.Unlock()
 	if set == nil {
 		set = map[string]string{}
+	}
+	for k, v := range gitIdentityEnv(owner, filepath.Join(d.cfg.Home, ".gitconfig")) {
+		if _, ok := set[k]; !ok {
+			set[k] = v
+		}
 	}
 	set["HOME"], set["DISPLAY"] = d.cfg.Home, d.cfg.Display
 	for _, k := range scmTokenEnv {

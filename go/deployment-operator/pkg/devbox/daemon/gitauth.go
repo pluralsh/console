@@ -149,12 +149,9 @@ func (d *Daemon) writeGitAuth(extra ...string) {
 // `git config --global` (how agents check for an identity) doesn't follow includes; fields the user (or the image
 // skeleton) already set are left alone.
 func ensureGitIdentity(owner *devboxv1.Principal, gitconfig string) error {
-	fields := []struct{ key, value string }{{"name", owner.GetName()}, {"email", owner.GetEmail()}}
-	if fields[0].value == "" {
-		fields[0].value, _, _ = strings.Cut(fields[1].value, "@")
-	}
-	for _, f := range fields {
-		value := strings.NewReplacer("\n", " ", "\r", " ").Replace(f.value)
+	name, email := ownerIdentity(owner)
+	for _, f := range []struct{ key, value string }{{"name", name}, {"email", email}} {
+		value := f.value
 		if value == "" || gitConfigSet(gitconfig, "user."+f.key) {
 			continue
 		}
@@ -165,13 +162,45 @@ func ensureGitIdentity(owner *devboxv1.Principal, gitconfig string) error {
 	return nil
 }
 
-func gitConfigSet(gitconfig, key string) bool {
-	if _, err := os.Stat(gitconfig); err != nil {
-		return false
+// ownerIdentity is the name and email the instance owner commits as; the name falls back to the email's local part.
+func ownerIdentity(owner *devboxv1.Principal) (name, email string) {
+	clean := strings.NewReplacer("\n", " ", "\r", " ")
+	name, email = clean.Replace(owner.GetName()), clean.Replace(owner.GetEmail())
+	if name == "" {
+		name, _, _ = strings.Cut(email, "@")
 	}
-	out, err := exec.Command("git", "config", "--file", gitconfig, "--get", key).Output()
-	return err == nil && strings.TrimSpace(string(out)) != ""
+	return name, email
 }
+
+// gitIdentityEnv is the owner's identity as git's author/committer variables, so every child commits as them even
+// where git config isn't read (a sandboxed agent, a stale or missing ~/.gitconfig). An identity the user set in
+// ~/.gitconfig themselves wins: then nothing is exported.
+func gitIdentityEnv(owner *devboxv1.Principal, gitconfig string) map[string]string {
+	name, email := ownerIdentity(owner)
+	if email == "" {
+		return nil
+	}
+	if cur := gitConfigGet(gitconfig, "user.email"); cur != "" && cur != email {
+		return nil
+	}
+	if cur := gitConfigGet(gitconfig, "user.name"); cur != "" {
+		name = cur
+	}
+	return map[string]string{
+		"GIT_AUTHOR_NAME": name, "GIT_AUTHOR_EMAIL": email,
+		"GIT_COMMITTER_NAME": name, "GIT_COMMITTER_EMAIL": email,
+	}
+}
+
+func gitConfigGet(gitconfig, key string) string {
+	if _, err := os.Stat(gitconfig); err != nil {
+		return ""
+	}
+	out, _ := exec.Command("git", "config", "--file", gitconfig, "--get", key).Output()
+	return strings.TrimSpace(string(out))
+}
+
+func gitConfigSet(gitconfig, key string) bool { return gitConfigGet(gitconfig, key) != "" }
 
 // ensureGitInclude appends `[include] path = .plural/gitconfig` to ~/.gitconfig unless it is already there.
 func ensureGitInclude(gitconfig string) error {

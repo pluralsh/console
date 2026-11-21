@@ -1,6 +1,7 @@
 package daemon
 
 import (
+	"maps"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -138,5 +139,35 @@ func TestGitIdentity(t *testing.T) {
 	}
 	if _, err := os.Stat(none); !os.IsNotExist(err) {
 		t.Fatalf("no owner should write nothing: %v", err)
+	}
+}
+
+func TestGitIdentityEnv(t *testing.T) {
+	if _, err := exec.LookPath("git"); err != nil {
+		t.Skip("git not installed")
+	}
+	owner := &devboxv1.Principal{Name: "Jane Doe", Email: "jane@example.com"}
+	gitconfig := filepath.Join(t.TempDir(), ".gitconfig")
+	want := map[string]string{
+		"GIT_AUTHOR_NAME": "Jane Doe", "GIT_AUTHOR_EMAIL": "jane@example.com",
+		"GIT_COMMITTER_NAME": "Jane Doe", "GIT_COMMITTER_EMAIL": "jane@example.com",
+	}
+	if got := gitIdentityEnv(owner, gitconfig); !maps.Equal(got, want) {
+		t.Fatalf("without a gitconfig: %v", got)
+	}
+	if err := ensureGitIdentity(owner, gitconfig); err != nil {
+		t.Fatal(err)
+	}
+	if got := gitIdentityEnv(owner, gitconfig); !maps.Equal(got, want) {
+		t.Fatalf("with the owner's identity seeded: %v", got)
+	}
+	if out, err := exec.Command("git", "config", "--file", gitconfig, "user.email", "me@personal.dev").CombinedOutput(); err != nil {
+		t.Fatalf("%v: %s", err, out)
+	}
+	if got := gitIdentityEnv(owner, gitconfig); got != nil {
+		t.Fatalf("an identity the user set should win: %v", got)
+	}
+	if got := gitIdentityEnv(nil, filepath.Join(t.TempDir(), ".gitconfig")); got != nil {
+		t.Fatalf("no owner: %v", got)
 	}
 }
