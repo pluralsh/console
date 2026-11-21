@@ -200,6 +200,43 @@ describe('devboxTimelineReducer', () => {
     expect(store.sessions[SESSION].deltaOffset).toBe(12)
   })
 
+  it('repairs an entity whose chunks were missed with a settle that arrives late', () => {
+    const append = (offset: number, text: string) =>
+      ({
+        type: 'delta',
+        change: change({
+          op: DevboxDeltaOp.Append,
+          entityType: DevboxEntityType.AgentMessage,
+          entityId: 'a',
+          offset,
+          payload: { content: { type: 'text', text } },
+        }),
+      }) as const
+    const store = reduce([
+      page([]),
+      append(12, '.'),
+      append(11, 'I added a comment'),
+      {
+        type: 'delta',
+        change: change({
+          op: DevboxDeltaOp.State,
+          stateKind: 'state_update',
+          offset: 14,
+        }),
+      },
+      {
+        type: 'delta',
+        change: change({
+          op: DevboxDeltaOp.Settle,
+          offset: 13,
+          entity: agentMessage('a', 'I added a comment.', { revision: 1 }),
+        }),
+      },
+    ])
+    expect(textOf(store, 'a')).toBe('I added a comment.')
+    expect(store.sessions[SESSION].deltaOffset).toBe(14)
+  })
+
   it('keeps a newer live revision over an older settle or page', () => {
     const store = reduce([
       page([agentMessage('a', 'newer', { revision: 5 })]),

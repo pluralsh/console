@@ -66,6 +66,7 @@ const (
 	Gateway_ReadFile_FullMethodName              = "/devbox.v1.Gateway/ReadFile"
 	Gateway_WriteFile_FullMethodName             = "/devbox.v1.Gateway/WriteFile"
 	Gateway_GetChanges_FullMethodName            = "/devbox.v1.Gateway/GetChanges"
+	Gateway_PreparePullRequest_FullMethodName    = "/devbox.v1.Gateway/PreparePullRequest"
 	Gateway_OpenStream_FullMethodName            = "/devbox.v1.Gateway/OpenStream"
 	Gateway_InvalidateAllowlist_FullMethodName   = "/devbox.v1.Gateway/InvalidateAllowlist"
 	Gateway_ProxyStream_FullMethodName           = "/devbox.v1.Gateway/ProxyStream"
@@ -107,6 +108,7 @@ type GatewayClient interface {
 	ReadFile(ctx context.Context, in *ReadFileRequest, opts ...grpc.CallOption) (*ReadFileResponse, error)
 	WriteFile(ctx context.Context, in *WriteFileRequest, opts ...grpc.CallOption) (*WriteFileResponse, error)
 	GetChanges(ctx context.Context, in *GetChangesRequest, opts ...grpc.CallOption) (*GetChangesResponse, error)
+	PreparePullRequest(ctx context.Context, in *PreparePullRequestRequest, opts ...grpc.CallOption) (*PreparePullRequestResponse, error)
 	OpenStream(ctx context.Context, in *OpenStreamRequest, opts ...grpc.CallOption) (*OpenStreamResponse, error)
 	InvalidateAllowlist(ctx context.Context, in *InvalidateAllowlistRequest, opts ...grpc.CallOption) (*InvalidateAllowlistResponse, error)
 	// ProxyStream carries one browser WebSocket (terminal, VNC or preview) from KAS to the sandbox, as
@@ -415,6 +417,16 @@ func (c *gatewayClient) GetChanges(ctx context.Context, in *GetChangesRequest, o
 	return out, nil
 }
 
+func (c *gatewayClient) PreparePullRequest(ctx context.Context, in *PreparePullRequestRequest, opts ...grpc.CallOption) (*PreparePullRequestResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PreparePullRequestResponse)
+	err := c.cc.Invoke(ctx, Gateway_PreparePullRequest_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *gatewayClient) OpenStream(ctx context.Context, in *OpenStreamRequest, opts ...grpc.CallOption) (*OpenStreamResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(OpenStreamResponse)
@@ -484,6 +496,7 @@ type GatewayServer interface {
 	ReadFile(context.Context, *ReadFileRequest) (*ReadFileResponse, error)
 	WriteFile(context.Context, *WriteFileRequest) (*WriteFileResponse, error)
 	GetChanges(context.Context, *GetChangesRequest) (*GetChangesResponse, error)
+	PreparePullRequest(context.Context, *PreparePullRequestRequest) (*PreparePullRequestResponse, error)
 	OpenStream(context.Context, *OpenStreamRequest) (*OpenStreamResponse, error)
 	InvalidateAllowlist(context.Context, *InvalidateAllowlistRequest) (*InvalidateAllowlistResponse, error)
 	// ProxyStream carries one browser WebSocket (terminal, VNC or preview) from KAS to the sandbox, as
@@ -588,6 +601,9 @@ func (UnimplementedGatewayServer) WriteFile(context.Context, *WriteFileRequest) 
 }
 func (UnimplementedGatewayServer) GetChanges(context.Context, *GetChangesRequest) (*GetChangesResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetChanges not implemented")
+}
+func (UnimplementedGatewayServer) PreparePullRequest(context.Context, *PreparePullRequestRequest) (*PreparePullRequestResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method PreparePullRequest not implemented")
 }
 func (UnimplementedGatewayServer) OpenStream(context.Context, *OpenStreamRequest) (*OpenStreamResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method OpenStream not implemented")
@@ -1141,6 +1157,24 @@ func _Gateway_GetChanges_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Gateway_PreparePullRequest_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PreparePullRequestRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GatewayServer).PreparePullRequest(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Gateway_PreparePullRequest_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GatewayServer).PreparePullRequest(ctx, req.(*PreparePullRequestRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Gateway_OpenStream_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(OpenStreamRequest)
 	if err := dec(in); err != nil {
@@ -1306,6 +1340,10 @@ var Gateway_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetChanges",
 			Handler:    _Gateway_GetChanges_Handler,
+		},
+		{
+			MethodName: "PreparePullRequest",
+			Handler:    _Gateway_PreparePullRequest_Handler,
 		},
 		{
 			MethodName: "OpenStream",

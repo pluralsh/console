@@ -62,6 +62,11 @@ function plrl::protoc::generate_devbox() {
     "${protoDir}"/devbox/v1/*.proto
 }
 
+if [[ "${1:-}" == "devbox" ]]; then
+  plrl::protoc::generate_devbox
+  exit 0
+fi
+
 plrl::protoc::generate "${KAS_DIR}/cmd"
 plrl::protoc::generate "${KAS_DIR}/pkg"
 plrl::protoc::generate_devbox

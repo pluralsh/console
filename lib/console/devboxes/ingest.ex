@@ -548,13 +548,15 @@ defmodule Console.Devboxes.Ingest do
 
   @doc """
   `Ingest.PushInstanceDeltas`: wraps each live delta in a `DevboxInstance.Delta` and broadcasts it on
-  `devbox_instances:<id>:deltas`.  Nothing is stored.  Deltas for instances outside the cluster are dropped.
+  `devbox_instances:<id>:deltas`, in the order given, since clients drop a delta at or below the highest offset
+  they've applied.  Nothing is stored.  Deltas for instances outside the cluster are dropped.
   """
   @spec publish_instance_deltas([map], Cluster.t) :: :ok
   def publish_instance_deltas(deltas, %Cluster{} = cluster) do
+    owned = deltas |> Enum.map(& &1.instance_id) |> Enum.uniq() |> Map.new(&{&1, match?({:ok, _}, owned(&1, cluster))})
     Enum.each(deltas, fn %{instance_id: id} = delta ->
-      case owned(id, cluster) do
-        {:ok, _} -> publish_delta(delta, cluster)
+      case owned do
+        %{^id => true} -> publish_delta(delta, cluster)
         _ -> Logger.info("dropping devbox delta for instance #{id} not owned by cluster #{cluster.id}")
       end
     end)
@@ -576,7 +578,10 @@ defmodule Console.Devboxes.Ingest do
       emitted_at: Acp.timestamp(delta[:emitted_at])
     }
     |> DevboxInstance.Delta.new(cluster)
-    |> then(&handle_notify(PubSub.DevboxInstanceDeltaCreated, &1))
+    |> then(fn delta ->
+      Console.PubSub.Consumers.Rtc.handle_event(%PubSub.DevboxInstanceDeltaCreated{item: delta})
+      handle_notify(PubSub.DevboxInstanceDeltaCreated, delta)
+    end)
   end
 
   @doc """

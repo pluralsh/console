@@ -3374,7 +3374,9 @@ type Interaction struct {
 	// Monotonic per interaction.
 	Revision uint64 `protobuf:"varint,16,opt,name=revision,proto3" json:"revision,omitempty"`
 	// Verbatim JSON-RPC request params.
-	RawJson       []byte `protobuf:"bytes,17,opt,name=raw_json,json=rawJson,proto3" json:"raw_json,omitempty"`
+	RawJson []byte `protobuf:"bytes,17,opt,name=raw_json,json=rawJson,proto3" json:"raw_json,omitempty"`
+	// Set when the daemon's reviewer judged a permission request at AUTO, whether it approved it or passed it on.
+	Review        *Review `protobuf:"bytes,18,opt,name=review,proto3" json:"review,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -3532,6 +3534,13 @@ func (x *Interaction) GetRawJson() []byte {
 	return nil
 }
 
+func (x *Interaction) GetReview() *Review {
+	if x != nil {
+		return x.Review
+	}
+	return nil
+}
+
 type isInteraction_Request interface {
 	isInteraction_Request()
 }
@@ -3548,6 +3557,88 @@ func (*Interaction_Permission) isInteraction_Request() {}
 
 func (*Interaction_Elicitation) isInteraction_Request() {}
 
+// Review is the daemon reviewer's verdict on a permission request.
+type Review struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// allow, deny or ask.
+	Verdict string `protobuf:"bytes,1,opt,name=verdict,proto3" json:"verdict,omitempty"`
+	// The verdict's probability, 0 to 1.
+	Confidence float64 `protobuf:"fixed64,2,opt,name=confidence,proto3" json:"confidence,omitempty"`
+	// The most likely risk: none, destructive, exfiltration, credentials, out_of_scope or external.
+	Risk string `protobuf:"bytes,3,opt,name=risk,proto3" json:"risk,omitempty"`
+	// The decision model that answered.
+	Model string `protobuf:"bytes,4,opt,name=model,proto3" json:"model,omitempty"`
+	// Why the request still went to a human: low confidence, a deny verdict, or the reviewer failing.
+	Escalation    string `protobuf:"bytes,5,opt,name=escalation,proto3" json:"escalation,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Review) Reset() {
+	*x = Review{}
+	mi := &file_devbox_v1_acp_proto_msgTypes[35]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Review) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Review) ProtoMessage() {}
+
+func (x *Review) ProtoReflect() protoreflect.Message {
+	mi := &file_devbox_v1_acp_proto_msgTypes[35]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Review.ProtoReflect.Descriptor instead.
+func (*Review) Descriptor() ([]byte, []int) {
+	return file_devbox_v1_acp_proto_rawDescGZIP(), []int{35}
+}
+
+func (x *Review) GetVerdict() string {
+	if x != nil {
+		return x.Verdict
+	}
+	return ""
+}
+
+func (x *Review) GetConfidence() float64 {
+	if x != nil {
+		return x.Confidence
+	}
+	return 0
+}
+
+func (x *Review) GetRisk() string {
+	if x != nil {
+		return x.Risk
+	}
+	return ""
+}
+
+func (x *Review) GetModel() string {
+	if x != nil {
+		return x.Model
+	}
+	return ""
+}
+
+func (x *Review) GetEscalation() string {
+	if x != nil {
+		return x.Escalation
+	}
+	return ""
+}
+
 type PermissionRequest struct {
 	state   protoimpl.MessageState `protogen:"open.v1"`
 	Options []*PermissionOption    `protobuf:"bytes,1,rep,name=options,proto3" json:"options,omitempty"`
@@ -3560,7 +3651,7 @@ type PermissionRequest struct {
 
 func (x *PermissionRequest) Reset() {
 	*x = PermissionRequest{}
-	mi := &file_devbox_v1_acp_proto_msgTypes[35]
+	mi := &file_devbox_v1_acp_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3572,7 +3663,7 @@ func (x *PermissionRequest) String() string {
 func (*PermissionRequest) ProtoMessage() {}
 
 func (x *PermissionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_acp_proto_msgTypes[35]
+	mi := &file_devbox_v1_acp_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3585,7 +3676,7 @@ func (x *PermissionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PermissionRequest.ProtoReflect.Descriptor instead.
 func (*PermissionRequest) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_acp_proto_rawDescGZIP(), []int{35}
+	return file_devbox_v1_acp_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *PermissionRequest) GetOptions() []*PermissionOption {
@@ -3622,7 +3713,7 @@ type PermissionOption struct {
 
 func (x *PermissionOption) Reset() {
 	*x = PermissionOption{}
-	mi := &file_devbox_v1_acp_proto_msgTypes[36]
+	mi := &file_devbox_v1_acp_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3634,7 +3725,7 @@ func (x *PermissionOption) String() string {
 func (*PermissionOption) ProtoMessage() {}
 
 func (x *PermissionOption) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_acp_proto_msgTypes[36]
+	mi := &file_devbox_v1_acp_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3647,7 +3738,7 @@ func (x *PermissionOption) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PermissionOption.ProtoReflect.Descriptor instead.
 func (*PermissionOption) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_acp_proto_rawDescGZIP(), []int{36}
+	return file_devbox_v1_acp_proto_rawDescGZIP(), []int{37}
 }
 
 func (x *PermissionOption) GetOptionId() string {
@@ -3694,7 +3785,7 @@ type ElicitationRequest struct {
 
 func (x *ElicitationRequest) Reset() {
 	*x = ElicitationRequest{}
-	mi := &file_devbox_v1_acp_proto_msgTypes[37]
+	mi := &file_devbox_v1_acp_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3706,7 +3797,7 @@ func (x *ElicitationRequest) String() string {
 func (*ElicitationRequest) ProtoMessage() {}
 
 func (x *ElicitationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_acp_proto_msgTypes[37]
+	mi := &file_devbox_v1_acp_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3719,7 +3810,7 @@ func (x *ElicitationRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ElicitationRequest.ProtoReflect.Descriptor instead.
 func (*ElicitationRequest) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_acp_proto_rawDescGZIP(), []int{37}
+	return file_devbox_v1_acp_proto_rawDescGZIP(), []int{38}
 }
 
 func (x *ElicitationRequest) GetMessage() string {
@@ -3770,7 +3861,7 @@ type InteractionResponse struct {
 
 func (x *InteractionResponse) Reset() {
 	*x = InteractionResponse{}
-	mi := &file_devbox_v1_acp_proto_msgTypes[38]
+	mi := &file_devbox_v1_acp_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3782,7 +3873,7 @@ func (x *InteractionResponse) String() string {
 func (*InteractionResponse) ProtoMessage() {}
 
 func (x *InteractionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_acp_proto_msgTypes[38]
+	mi := &file_devbox_v1_acp_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3795,7 +3886,7 @@ func (x *InteractionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use InteractionResponse.ProtoReflect.Descriptor instead.
 func (*InteractionResponse) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_acp_proto_rawDescGZIP(), []int{38}
+	return file_devbox_v1_acp_proto_rawDescGZIP(), []int{39}
 }
 
 func (x *InteractionResponse) GetResponse() isInteractionResponse_Response {
@@ -3852,7 +3943,7 @@ type PermissionOutcome struct {
 
 func (x *PermissionOutcome) Reset() {
 	*x = PermissionOutcome{}
-	mi := &file_devbox_v1_acp_proto_msgTypes[39]
+	mi := &file_devbox_v1_acp_proto_msgTypes[40]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3864,7 +3955,7 @@ func (x *PermissionOutcome) String() string {
 func (*PermissionOutcome) ProtoMessage() {}
 
 func (x *PermissionOutcome) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_acp_proto_msgTypes[39]
+	mi := &file_devbox_v1_acp_proto_msgTypes[40]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3877,7 +3968,7 @@ func (x *PermissionOutcome) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PermissionOutcome.ProtoReflect.Descriptor instead.
 func (*PermissionOutcome) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_acp_proto_rawDescGZIP(), []int{39}
+	return file_devbox_v1_acp_proto_rawDescGZIP(), []int{40}
 }
 
 func (x *PermissionOutcome) GetOutcome() isPermissionOutcome_Outcome {
@@ -3934,7 +4025,7 @@ type ElicitationResponse struct {
 
 func (x *ElicitationResponse) Reset() {
 	*x = ElicitationResponse{}
-	mi := &file_devbox_v1_acp_proto_msgTypes[40]
+	mi := &file_devbox_v1_acp_proto_msgTypes[41]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3946,7 +4037,7 @@ func (x *ElicitationResponse) String() string {
 func (*ElicitationResponse) ProtoMessage() {}
 
 func (x *ElicitationResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_acp_proto_msgTypes[40]
+	mi := &file_devbox_v1_acp_proto_msgTypes[41]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3959,7 +4050,7 @@ func (x *ElicitationResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ElicitationResponse.ProtoReflect.Descriptor instead.
 func (*ElicitationResponse) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_acp_proto_rawDescGZIP(), []int{40}
+	return file_devbox_v1_acp_proto_rawDescGZIP(), []int{41}
 }
 
 func (x *ElicitationResponse) GetAction() string {
@@ -3994,7 +4085,7 @@ type LifecycleSupport struct {
 
 func (x *LifecycleSupport) Reset() {
 	*x = LifecycleSupport{}
-	mi := &file_devbox_v1_acp_proto_msgTypes[41]
+	mi := &file_devbox_v1_acp_proto_msgTypes[42]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4006,7 +4097,7 @@ func (x *LifecycleSupport) String() string {
 func (*LifecycleSupport) ProtoMessage() {}
 
 func (x *LifecycleSupport) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_acp_proto_msgTypes[41]
+	mi := &file_devbox_v1_acp_proto_msgTypes[42]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4019,7 +4110,7 @@ func (x *LifecycleSupport) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LifecycleSupport.ProtoReflect.Descriptor instead.
 func (*LifecycleSupport) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_acp_proto_rawDescGZIP(), []int{41}
+	return file_devbox_v1_acp_proto_rawDescGZIP(), []int{42}
 }
 
 func (x *LifecycleSupport) GetList() bool {
@@ -4088,7 +4179,7 @@ type AgentCapabilities struct {
 
 func (x *AgentCapabilities) Reset() {
 	*x = AgentCapabilities{}
-	mi := &file_devbox_v1_acp_proto_msgTypes[42]
+	mi := &file_devbox_v1_acp_proto_msgTypes[43]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4100,7 +4191,7 @@ func (x *AgentCapabilities) String() string {
 func (*AgentCapabilities) ProtoMessage() {}
 
 func (x *AgentCapabilities) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_acp_proto_msgTypes[42]
+	mi := &file_devbox_v1_acp_proto_msgTypes[43]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4113,7 +4204,7 @@ func (x *AgentCapabilities) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AgentCapabilities.ProtoReflect.Descriptor instead.
 func (*AgentCapabilities) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_acp_proto_rawDescGZIP(), []int{42}
+	return file_devbox_v1_acp_proto_rawDescGZIP(), []int{43}
 }
 
 func (x *AgentCapabilities) GetLifecycle() *LifecycleSupport {
@@ -4202,7 +4293,7 @@ type AgentCatalogEntry struct {
 
 func (x *AgentCatalogEntry) Reset() {
 	*x = AgentCatalogEntry{}
-	mi := &file_devbox_v1_acp_proto_msgTypes[43]
+	mi := &file_devbox_v1_acp_proto_msgTypes[44]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4214,7 +4305,7 @@ func (x *AgentCatalogEntry) String() string {
 func (*AgentCatalogEntry) ProtoMessage() {}
 
 func (x *AgentCatalogEntry) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_acp_proto_msgTypes[43]
+	mi := &file_devbox_v1_acp_proto_msgTypes[44]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4227,7 +4318,7 @@ func (x *AgentCatalogEntry) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AgentCatalogEntry.ProtoReflect.Descriptor instead.
 func (*AgentCatalogEntry) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_acp_proto_rawDescGZIP(), []int{43}
+	return file_devbox_v1_acp_proto_rawDescGZIP(), []int{44}
 }
 
 func (x *AgentCatalogEntry) GetType() AgentType {
@@ -4360,7 +4451,7 @@ type AgentConnection struct {
 
 func (x *AgentConnection) Reset() {
 	*x = AgentConnection{}
-	mi := &file_devbox_v1_acp_proto_msgTypes[44]
+	mi := &file_devbox_v1_acp_proto_msgTypes[45]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4372,7 +4463,7 @@ func (x *AgentConnection) String() string {
 func (*AgentConnection) ProtoMessage() {}
 
 func (x *AgentConnection) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_acp_proto_msgTypes[44]
+	mi := &file_devbox_v1_acp_proto_msgTypes[45]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4385,7 +4476,7 @@ func (x *AgentConnection) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AgentConnection.ProtoReflect.Descriptor instead.
 func (*AgentConnection) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_acp_proto_rawDescGZIP(), []int{44}
+	return file_devbox_v1_acp_proto_rawDescGZIP(), []int{45}
 }
 
 func (x *AgentConnection) GetAgent() AgentType {
@@ -4696,7 +4787,7 @@ const file_devbox_v1_acp_proto_rawDesc = "" +
 	"\x03cwd\x18\x04 \x01(\tR\x03cwd\x129\n" +
 	"\n" +
 	"updated_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12+\n" +
-	"\x04meta\x18\x06 \x01(\v2\x17.google.protobuf.StructR\x04meta\"\xda\x05\n" +
+	"\x04meta\x18\x06 \x01(\v2\x17.google.protobuf.StructR\x04meta\"\x85\x06\n" +
 	"\vInteraction\x12%\n" +
 	"\x0einteraction_id\x18\x01 \x01(\tR\rinteractionId\x12\x1d\n" +
 	"\n" +
@@ -4722,8 +4813,19 @@ const file_devbox_v1_acp_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\x0f \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x12\x1a\n" +
 	"\brevision\x18\x10 \x01(\x04R\brevision\x12\x19\n" +
-	"\braw_json\x18\x11 \x01(\fR\arawJsonB\t\n" +
-	"\arequest\"\xa9\x01\n" +
+	"\braw_json\x18\x11 \x01(\fR\arawJson\x12)\n" +
+	"\x06review\x18\x12 \x01(\v2\x11.devbox.v1.ReviewR\x06reviewB\t\n" +
+	"\arequest\"\x8c\x01\n" +
+	"\x06Review\x12\x18\n" +
+	"\averdict\x18\x01 \x01(\tR\averdict\x12\x1e\n" +
+	"\n" +
+	"confidence\x18\x02 \x01(\x01R\n" +
+	"confidence\x12\x12\n" +
+	"\x04risk\x18\x03 \x01(\tR\x04risk\x12\x14\n" +
+	"\x05model\x18\x04 \x01(\tR\x05model\x12\x1e\n" +
+	"\n" +
+	"escalation\x18\x05 \x01(\tR\n" +
+	"escalation\"\xa9\x01\n" +
 	"\x11PermissionRequest\x125\n" +
 	"\aoptions\x18\x01 \x03(\v2\x1b.devbox.v1.PermissionOptionR\aoptions\x120\n" +
 	"\ttool_call\x18\x02 \x01(\v2\x13.devbox.v1.ToolCallR\btoolCall\x12+\n" +
@@ -4856,7 +4958,7 @@ func file_devbox_v1_acp_proto_rawDescGZIP() []byte {
 }
 
 var file_devbox_v1_acp_proto_enumTypes = make([]protoimpl.EnumInfo, 7)
-var file_devbox_v1_acp_proto_msgTypes = make([]protoimpl.MessageInfo, 45)
+var file_devbox_v1_acp_proto_msgTypes = make([]protoimpl.MessageInfo, 46)
 var file_devbox_v1_acp_proto_goTypes = []any{
 	(EntityType)(0),               // 0: devbox.v1.EntityType
 	(ForegroundStateKind)(0),      // 1: devbox.v1.ForegroundStateKind
@@ -4900,26 +5002,27 @@ var file_devbox_v1_acp_proto_goTypes = []any{
 	(*Session)(nil),               // 39: devbox.v1.Session
 	(*ImportableSession)(nil),     // 40: devbox.v1.ImportableSession
 	(*Interaction)(nil),           // 41: devbox.v1.Interaction
-	(*PermissionRequest)(nil),     // 42: devbox.v1.PermissionRequest
-	(*PermissionOption)(nil),      // 43: devbox.v1.PermissionOption
-	(*ElicitationRequest)(nil),    // 44: devbox.v1.ElicitationRequest
-	(*InteractionResponse)(nil),   // 45: devbox.v1.InteractionResponse
-	(*PermissionOutcome)(nil),     // 46: devbox.v1.PermissionOutcome
-	(*ElicitationResponse)(nil),   // 47: devbox.v1.ElicitationResponse
-	(*LifecycleSupport)(nil),      // 48: devbox.v1.LifecycleSupport
-	(*AgentCapabilities)(nil),     // 49: devbox.v1.AgentCapabilities
-	(*AgentCatalogEntry)(nil),     // 50: devbox.v1.AgentCatalogEntry
-	(*AgentConnection)(nil),       // 51: devbox.v1.AgentConnection
-	(*structpb.Struct)(nil),       // 52: google.protobuf.Struct
-	(*structpb.Value)(nil),        // 53: google.protobuf.Value
-	(*timestamppb.Timestamp)(nil), // 54: google.protobuf.Timestamp
-	(*Principal)(nil),             // 55: devbox.v1.Principal
-	(*ErrorDetail)(nil),           // 56: devbox.v1.ErrorDetail
-	(BillingMode)(0),              // 57: devbox.v1.BillingMode
-	(AgentType)(0),                // 58: devbox.v1.AgentType
+	(*Review)(nil),                // 42: devbox.v1.Review
+	(*PermissionRequest)(nil),     // 43: devbox.v1.PermissionRequest
+	(*PermissionOption)(nil),      // 44: devbox.v1.PermissionOption
+	(*ElicitationRequest)(nil),    // 45: devbox.v1.ElicitationRequest
+	(*InteractionResponse)(nil),   // 46: devbox.v1.InteractionResponse
+	(*PermissionOutcome)(nil),     // 47: devbox.v1.PermissionOutcome
+	(*ElicitationResponse)(nil),   // 48: devbox.v1.ElicitationResponse
+	(*LifecycleSupport)(nil),      // 49: devbox.v1.LifecycleSupport
+	(*AgentCapabilities)(nil),     // 50: devbox.v1.AgentCapabilities
+	(*AgentCatalogEntry)(nil),     // 51: devbox.v1.AgentCatalogEntry
+	(*AgentConnection)(nil),       // 52: devbox.v1.AgentConnection
+	(*structpb.Struct)(nil),       // 53: google.protobuf.Struct
+	(*structpb.Value)(nil),        // 54: google.protobuf.Value
+	(*timestamppb.Timestamp)(nil), // 55: google.protobuf.Timestamp
+	(*Principal)(nil),             // 56: devbox.v1.Principal
+	(*ErrorDetail)(nil),           // 57: devbox.v1.ErrorDetail
+	(BillingMode)(0),              // 58: devbox.v1.BillingMode
+	(AgentType)(0),                // 59: devbox.v1.AgentType
 }
 var file_devbox_v1_acp_proto_depIdxs = []int32{
-	52,  // 0: devbox.v1.Annotations.meta:type_name -> google.protobuf.Struct
+	53,  // 0: devbox.v1.Annotations.meta:type_name -> google.protobuf.Struct
 	9,   // 1: devbox.v1.ContentBlock.text:type_name -> devbox.v1.TextContent
 	10,  // 2: devbox.v1.ContentBlock.image:type_name -> devbox.v1.ImageContent
 	11,  // 3: devbox.v1.ContentBlock.audio:type_name -> devbox.v1.AudioContent
@@ -4927,36 +5030,36 @@ var file_devbox_v1_acp_proto_depIdxs = []int32{
 	12,  // 5: devbox.v1.ContentBlock.resource_link:type_name -> devbox.v1.ResourceLink
 	16,  // 6: devbox.v1.ContentBlock.unknown:type_name -> devbox.v1.UnknownVariant
 	7,   // 7: devbox.v1.TextContent.annotations:type_name -> devbox.v1.Annotations
-	52,  // 8: devbox.v1.TextContent.meta:type_name -> google.protobuf.Struct
+	53,  // 8: devbox.v1.TextContent.meta:type_name -> google.protobuf.Struct
 	7,   // 9: devbox.v1.ImageContent.annotations:type_name -> devbox.v1.Annotations
-	52,  // 10: devbox.v1.ImageContent.meta:type_name -> google.protobuf.Struct
+	53,  // 10: devbox.v1.ImageContent.meta:type_name -> google.protobuf.Struct
 	7,   // 11: devbox.v1.AudioContent.annotations:type_name -> devbox.v1.Annotations
-	52,  // 12: devbox.v1.AudioContent.meta:type_name -> google.protobuf.Struct
+	53,  // 12: devbox.v1.AudioContent.meta:type_name -> google.protobuf.Struct
 	7,   // 13: devbox.v1.ResourceLink.annotations:type_name -> devbox.v1.Annotations
-	52,  // 14: devbox.v1.ResourceLink.meta:type_name -> google.protobuf.Struct
+	53,  // 14: devbox.v1.ResourceLink.meta:type_name -> google.protobuf.Struct
 	14,  // 15: devbox.v1.EmbeddedResource.text:type_name -> devbox.v1.TextResourceContents
 	15,  // 16: devbox.v1.EmbeddedResource.blob:type_name -> devbox.v1.BlobResourceContents
 	16,  // 17: devbox.v1.EmbeddedResource.unknown:type_name -> devbox.v1.UnknownVariant
 	7,   // 18: devbox.v1.EmbeddedResource.annotations:type_name -> devbox.v1.Annotations
-	52,  // 19: devbox.v1.EmbeddedResource.meta:type_name -> google.protobuf.Struct
-	52,  // 20: devbox.v1.TextResourceContents.meta:type_name -> google.protobuf.Struct
-	52,  // 21: devbox.v1.BlobResourceContents.meta:type_name -> google.protobuf.Struct
+	53,  // 19: devbox.v1.EmbeddedResource.meta:type_name -> google.protobuf.Struct
+	53,  // 20: devbox.v1.TextResourceContents.meta:type_name -> google.protobuf.Struct
+	53,  // 21: devbox.v1.BlobResourceContents.meta:type_name -> google.protobuf.Struct
 	18,  // 22: devbox.v1.ToolCall.content:type_name -> devbox.v1.ToolCallContent
 	21,  // 23: devbox.v1.ToolCall.locations:type_name -> devbox.v1.ToolCallLocation
-	53,  // 24: devbox.v1.ToolCall.raw_input:type_name -> google.protobuf.Value
-	53,  // 25: devbox.v1.ToolCall.raw_output:type_name -> google.protobuf.Value
-	52,  // 26: devbox.v1.ToolCall.meta:type_name -> google.protobuf.Struct
+	54,  // 24: devbox.v1.ToolCall.raw_input:type_name -> google.protobuf.Value
+	54,  // 25: devbox.v1.ToolCall.raw_output:type_name -> google.protobuf.Value
+	53,  // 26: devbox.v1.ToolCall.meta:type_name -> google.protobuf.Struct
 	8,   // 27: devbox.v1.ToolCallContent.block:type_name -> devbox.v1.ContentBlock
 	19,  // 28: devbox.v1.ToolCallContent.diff:type_name -> devbox.v1.Diff
 	20,  // 29: devbox.v1.ToolCallContent.terminal:type_name -> devbox.v1.TerminalRef
 	16,  // 30: devbox.v1.ToolCallContent.unknown:type_name -> devbox.v1.UnknownVariant
-	52,  // 31: devbox.v1.Diff.meta:type_name -> google.protobuf.Struct
-	52,  // 32: devbox.v1.TerminalRef.meta:type_name -> google.protobuf.Struct
-	52,  // 33: devbox.v1.ToolCallLocation.meta:type_name -> google.protobuf.Struct
+	53,  // 31: devbox.v1.Diff.meta:type_name -> google.protobuf.Struct
+	53,  // 32: devbox.v1.TerminalRef.meta:type_name -> google.protobuf.Struct
+	53,  // 33: devbox.v1.ToolCallLocation.meta:type_name -> google.protobuf.Struct
 	0,   // 34: devbox.v1.EntityKey.type:type_name -> devbox.v1.EntityType
 	22,  // 35: devbox.v1.AcpEntity.key:type_name -> devbox.v1.EntityKey
-	54,  // 36: devbox.v1.AcpEntity.created_at:type_name -> google.protobuf.Timestamp
-	54,  // 37: devbox.v1.AcpEntity.updated_at:type_name -> google.protobuf.Timestamp
+	55,  // 36: devbox.v1.AcpEntity.created_at:type_name -> google.protobuf.Timestamp
+	55,  // 37: devbox.v1.AcpEntity.updated_at:type_name -> google.protobuf.Timestamp
 	24,  // 38: devbox.v1.AcpEntity.message:type_name -> devbox.v1.MessageEntity
 	25,  // 39: devbox.v1.AcpEntity.session_message:type_name -> devbox.v1.SessionMessageEntity
 	17,  // 40: devbox.v1.AcpEntity.tool_call:type_name -> devbox.v1.ToolCall
@@ -4965,81 +5068,82 @@ var file_devbox_v1_acp_proto_depIdxs = []int32{
 	30,  // 43: devbox.v1.AcpEntity.compaction:type_name -> devbox.v1.CompactionEntity
 	16,  // 44: devbox.v1.AcpEntity.unknown:type_name -> devbox.v1.UnknownVariant
 	8,   // 45: devbox.v1.MessageEntity.content:type_name -> devbox.v1.ContentBlock
-	55,  // 46: devbox.v1.MessageEntity.sent_by:type_name -> devbox.v1.Principal
-	52,  // 47: devbox.v1.MessageEntity.meta:type_name -> google.protobuf.Struct
+	56,  // 46: devbox.v1.MessageEntity.sent_by:type_name -> devbox.v1.Principal
+	53,  // 47: devbox.v1.MessageEntity.meta:type_name -> google.protobuf.Struct
 	8,   // 48: devbox.v1.SessionMessageEntity.content:type_name -> devbox.v1.ContentBlock
-	52,  // 49: devbox.v1.SessionMessageEntity.meta:type_name -> google.protobuf.Struct
+	53,  // 49: devbox.v1.SessionMessageEntity.meta:type_name -> google.protobuf.Struct
 	27,  // 50: devbox.v1.PlanEntity.entries:type_name -> devbox.v1.PlanEntry
-	52,  // 51: devbox.v1.PlanEntity.meta:type_name -> google.protobuf.Struct
-	52,  // 52: devbox.v1.PlanEntry.meta:type_name -> google.protobuf.Struct
+	53,  // 51: devbox.v1.PlanEntity.meta:type_name -> google.protobuf.Struct
+	53,  // 52: devbox.v1.PlanEntry.meta:type_name -> google.protobuf.Struct
 	29,  // 53: devbox.v1.TerminalEntity.exit_status:type_name -> devbox.v1.TerminalExitStatus
-	52,  // 54: devbox.v1.TerminalEntity.meta:type_name -> google.protobuf.Struct
+	53,  // 54: devbox.v1.TerminalEntity.meta:type_name -> google.protobuf.Struct
 	8,   // 55: devbox.v1.CompactionEntity.summary:type_name -> devbox.v1.ContentBlock
-	52,  // 56: devbox.v1.CompactionEntity.meta:type_name -> google.protobuf.Struct
+	53,  // 56: devbox.v1.CompactionEntity.meta:type_name -> google.protobuf.Struct
 	1,   // 57: devbox.v1.ForegroundState.state:type_name -> devbox.v1.ForegroundStateKind
 	32,  // 58: devbox.v1.ForegroundState.error:type_name -> devbox.v1.AgentError
-	53,  // 59: devbox.v1.ForegroundState.background_work:type_name -> google.protobuf.Value
-	54,  // 60: devbox.v1.ForegroundState.updated_at:type_name -> google.protobuf.Timestamp
-	52,  // 61: devbox.v1.ForegroundState.meta:type_name -> google.protobuf.Struct
-	56,  // 62: devbox.v1.AgentError.detail:type_name -> devbox.v1.ErrorDetail
-	53,  // 63: devbox.v1.AgentError.data:type_name -> google.protobuf.Value
+	54,  // 59: devbox.v1.ForegroundState.background_work:type_name -> google.protobuf.Value
+	55,  // 60: devbox.v1.ForegroundState.updated_at:type_name -> google.protobuf.Timestamp
+	53,  // 61: devbox.v1.ForegroundState.meta:type_name -> google.protobuf.Struct
+	57,  // 62: devbox.v1.AgentError.detail:type_name -> devbox.v1.ErrorDetail
+	54,  // 63: devbox.v1.AgentError.data:type_name -> google.protobuf.Value
 	34,  // 64: devbox.v1.ConfigOption.options:type_name -> devbox.v1.ConfigOptionValue
-	52,  // 65: devbox.v1.ConfigOption.meta:type_name -> google.protobuf.Struct
-	52,  // 66: devbox.v1.ConfigOptionValue.meta:type_name -> google.protobuf.Struct
+	53,  // 65: devbox.v1.ConfigOption.meta:type_name -> google.protobuf.Struct
+	53,  // 66: devbox.v1.ConfigOptionValue.meta:type_name -> google.protobuf.Struct
 	36,  // 67: devbox.v1.AvailableCommand.input:type_name -> devbox.v1.CommandInput
-	52,  // 68: devbox.v1.AvailableCommand.meta:type_name -> google.protobuf.Struct
+	53,  // 68: devbox.v1.AvailableCommand.meta:type_name -> google.protobuf.Struct
 	38,  // 69: devbox.v1.Usage.cost:type_name -> devbox.v1.Cost
-	57,  // 70: devbox.v1.Usage.billing:type_name -> devbox.v1.BillingMode
-	52,  // 71: devbox.v1.Usage.meta:type_name -> google.protobuf.Struct
+	58,  // 70: devbox.v1.Usage.billing:type_name -> devbox.v1.BillingMode
+	53,  // 71: devbox.v1.Usage.meta:type_name -> google.protobuf.Struct
 	2,   // 72: devbox.v1.Session.kind:type_name -> devbox.v1.SessionKind
-	58,  // 73: devbox.v1.Session.agent:type_name -> devbox.v1.AgentType
+	59,  // 73: devbox.v1.Session.agent:type_name -> devbox.v1.AgentType
 	3,   // 74: devbox.v1.Session.status:type_name -> devbox.v1.ThreadStatus
-	55,  // 75: devbox.v1.Session.created_by:type_name -> devbox.v1.Principal
-	54,  // 76: devbox.v1.Session.created_at:type_name -> google.protobuf.Timestamp
-	54,  // 77: devbox.v1.Session.last_activity_at:type_name -> google.protobuf.Timestamp
+	56,  // 75: devbox.v1.Session.created_by:type_name -> devbox.v1.Principal
+	55,  // 76: devbox.v1.Session.created_at:type_name -> google.protobuf.Timestamp
+	55,  // 77: devbox.v1.Session.last_activity_at:type_name -> google.protobuf.Timestamp
 	31,  // 78: devbox.v1.Session.foreground:type_name -> devbox.v1.ForegroundState
 	33,  // 79: devbox.v1.Session.config_options:type_name -> devbox.v1.ConfigOption
 	35,  // 80: devbox.v1.Session.available_commands:type_name -> devbox.v1.AvailableCommand
 	37,  // 81: devbox.v1.Session.usage:type_name -> devbox.v1.Usage
-	52,  // 82: devbox.v1.Session.meta:type_name -> google.protobuf.Struct
-	58,  // 83: devbox.v1.ImportableSession.agent:type_name -> devbox.v1.AgentType
-	54,  // 84: devbox.v1.ImportableSession.updated_at:type_name -> google.protobuf.Timestamp
-	52,  // 85: devbox.v1.ImportableSession.meta:type_name -> google.protobuf.Struct
+	53,  // 82: devbox.v1.Session.meta:type_name -> google.protobuf.Struct
+	59,  // 83: devbox.v1.ImportableSession.agent:type_name -> devbox.v1.AgentType
+	55,  // 84: devbox.v1.ImportableSession.updated_at:type_name -> google.protobuf.Timestamp
+	53,  // 85: devbox.v1.ImportableSession.meta:type_name -> google.protobuf.Struct
 	4,   // 86: devbox.v1.Interaction.kind:type_name -> devbox.v1.InteractionKind
 	5,   // 87: devbox.v1.Interaction.state:type_name -> devbox.v1.InteractionState
-	42,  // 88: devbox.v1.Interaction.permission:type_name -> devbox.v1.PermissionRequest
-	44,  // 89: devbox.v1.Interaction.elicitation:type_name -> devbox.v1.ElicitationRequest
-	45,  // 90: devbox.v1.Interaction.response:type_name -> devbox.v1.InteractionResponse
-	55,  // 91: devbox.v1.Interaction.answered_by:type_name -> devbox.v1.Principal
-	54,  // 92: devbox.v1.Interaction.answered_at:type_name -> google.protobuf.Timestamp
-	54,  // 93: devbox.v1.Interaction.created_at:type_name -> google.protobuf.Timestamp
-	43,  // 94: devbox.v1.PermissionRequest.options:type_name -> devbox.v1.PermissionOption
-	17,  // 95: devbox.v1.PermissionRequest.tool_call:type_name -> devbox.v1.ToolCall
-	52,  // 96: devbox.v1.PermissionRequest.meta:type_name -> google.protobuf.Struct
-	52,  // 97: devbox.v1.PermissionOption.meta:type_name -> google.protobuf.Struct
-	52,  // 98: devbox.v1.ElicitationRequest.requested_schema:type_name -> google.protobuf.Struct
-	52,  // 99: devbox.v1.ElicitationRequest.meta:type_name -> google.protobuf.Struct
-	46,  // 100: devbox.v1.InteractionResponse.permission:type_name -> devbox.v1.PermissionOutcome
-	47,  // 101: devbox.v1.InteractionResponse.elicitation:type_name -> devbox.v1.ElicitationResponse
-	52,  // 102: devbox.v1.ElicitationResponse.content:type_name -> google.protobuf.Struct
-	48,  // 103: devbox.v1.AgentCapabilities.lifecycle:type_name -> devbox.v1.LifecycleSupport
-	52,  // 104: devbox.v1.AgentCapabilities.raw:type_name -> google.protobuf.Struct
-	58,  // 105: devbox.v1.AgentCatalogEntry.type:type_name -> devbox.v1.AgentType
-	49,  // 106: devbox.v1.AgentCatalogEntry.capabilities:type_name -> devbox.v1.AgentCapabilities
-	34,  // 107: devbox.v1.AgentCatalogEntry.models:type_name -> devbox.v1.ConfigOptionValue
-	33,  // 108: devbox.v1.AgentCatalogEntry.config_options:type_name -> devbox.v1.ConfigOption
-	35,  // 109: devbox.v1.AgentCatalogEntry.initial_commands:type_name -> devbox.v1.AvailableCommand
-	6,   // 110: devbox.v1.AgentCatalogEntry.probe_status:type_name -> devbox.v1.ProbeStatus
-	54,  // 111: devbox.v1.AgentCatalogEntry.probed_at:type_name -> google.protobuf.Timestamp
-	58,  // 112: devbox.v1.AgentConnection.agent:type_name -> devbox.v1.AgentType
-	49,  // 113: devbox.v1.AgentConnection.capabilities:type_name -> devbox.v1.AgentCapabilities
-	57,  // 114: devbox.v1.AgentConnection.billing:type_name -> devbox.v1.BillingMode
-	32,  // 115: devbox.v1.AgentConnection.error:type_name -> devbox.v1.AgentError
-	116, // [116:116] is the sub-list for method output_type
-	116, // [116:116] is the sub-list for method input_type
-	116, // [116:116] is the sub-list for extension type_name
-	116, // [116:116] is the sub-list for extension extendee
-	0,   // [0:116] is the sub-list for field type_name
+	43,  // 88: devbox.v1.Interaction.permission:type_name -> devbox.v1.PermissionRequest
+	45,  // 89: devbox.v1.Interaction.elicitation:type_name -> devbox.v1.ElicitationRequest
+	46,  // 90: devbox.v1.Interaction.response:type_name -> devbox.v1.InteractionResponse
+	56,  // 91: devbox.v1.Interaction.answered_by:type_name -> devbox.v1.Principal
+	55,  // 92: devbox.v1.Interaction.answered_at:type_name -> google.protobuf.Timestamp
+	55,  // 93: devbox.v1.Interaction.created_at:type_name -> google.protobuf.Timestamp
+	42,  // 94: devbox.v1.Interaction.review:type_name -> devbox.v1.Review
+	44,  // 95: devbox.v1.PermissionRequest.options:type_name -> devbox.v1.PermissionOption
+	17,  // 96: devbox.v1.PermissionRequest.tool_call:type_name -> devbox.v1.ToolCall
+	53,  // 97: devbox.v1.PermissionRequest.meta:type_name -> google.protobuf.Struct
+	53,  // 98: devbox.v1.PermissionOption.meta:type_name -> google.protobuf.Struct
+	53,  // 99: devbox.v1.ElicitationRequest.requested_schema:type_name -> google.protobuf.Struct
+	53,  // 100: devbox.v1.ElicitationRequest.meta:type_name -> google.protobuf.Struct
+	47,  // 101: devbox.v1.InteractionResponse.permission:type_name -> devbox.v1.PermissionOutcome
+	48,  // 102: devbox.v1.InteractionResponse.elicitation:type_name -> devbox.v1.ElicitationResponse
+	53,  // 103: devbox.v1.ElicitationResponse.content:type_name -> google.protobuf.Struct
+	49,  // 104: devbox.v1.AgentCapabilities.lifecycle:type_name -> devbox.v1.LifecycleSupport
+	53,  // 105: devbox.v1.AgentCapabilities.raw:type_name -> google.protobuf.Struct
+	59,  // 106: devbox.v1.AgentCatalogEntry.type:type_name -> devbox.v1.AgentType
+	50,  // 107: devbox.v1.AgentCatalogEntry.capabilities:type_name -> devbox.v1.AgentCapabilities
+	34,  // 108: devbox.v1.AgentCatalogEntry.models:type_name -> devbox.v1.ConfigOptionValue
+	33,  // 109: devbox.v1.AgentCatalogEntry.config_options:type_name -> devbox.v1.ConfigOption
+	35,  // 110: devbox.v1.AgentCatalogEntry.initial_commands:type_name -> devbox.v1.AvailableCommand
+	6,   // 111: devbox.v1.AgentCatalogEntry.probe_status:type_name -> devbox.v1.ProbeStatus
+	55,  // 112: devbox.v1.AgentCatalogEntry.probed_at:type_name -> google.protobuf.Timestamp
+	59,  // 113: devbox.v1.AgentConnection.agent:type_name -> devbox.v1.AgentType
+	50,  // 114: devbox.v1.AgentConnection.capabilities:type_name -> devbox.v1.AgentCapabilities
+	58,  // 115: devbox.v1.AgentConnection.billing:type_name -> devbox.v1.BillingMode
+	32,  // 116: devbox.v1.AgentConnection.error:type_name -> devbox.v1.AgentError
+	117, // [117:117] is the sub-list for method output_type
+	117, // [117:117] is the sub-list for method input_type
+	117, // [117:117] is the sub-list for extension type_name
+	117, // [117:117] is the sub-list for extension extendee
+	0,   // [0:117] is the sub-list for field type_name
 }
 
 func init() { file_devbox_v1_acp_proto_init() }
@@ -5085,11 +5189,11 @@ func file_devbox_v1_acp_proto_init() {
 		(*Interaction_Permission)(nil),
 		(*Interaction_Elicitation)(nil),
 	}
-	file_devbox_v1_acp_proto_msgTypes[38].OneofWrappers = []any{
+	file_devbox_v1_acp_proto_msgTypes[39].OneofWrappers = []any{
 		(*InteractionResponse_Permission)(nil),
 		(*InteractionResponse_Elicitation)(nil),
 	}
-	file_devbox_v1_acp_proto_msgTypes[39].OneofWrappers = []any{
+	file_devbox_v1_acp_proto_msgTypes[40].OneofWrappers = []any{
 		(*PermissionOutcome_SelectedOptionId)(nil),
 		(*PermissionOutcome_Cancelled)(nil),
 	}
@@ -5099,7 +5203,7 @@ func file_devbox_v1_acp_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_devbox_v1_acp_proto_rawDesc), len(file_devbox_v1_acp_proto_rawDesc)),
 			NumEnums:      7,
-			NumMessages:   45,
+			NumMessages:   46,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

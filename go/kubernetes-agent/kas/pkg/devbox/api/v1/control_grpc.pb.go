@@ -63,6 +63,7 @@ const (
 	Control_ReadFile_FullMethodName              = "/devbox.v1.Control/ReadFile"
 	Control_WriteFile_FullMethodName             = "/devbox.v1.Control/WriteFile"
 	Control_GetChanges_FullMethodName            = "/devbox.v1.Control/GetChanges"
+	Control_PreparePullRequest_FullMethodName    = "/devbox.v1.Control/PreparePullRequest"
 	Control_OpenStream_FullMethodName            = "/devbox.v1.Control/OpenStream"
 	Control_InvalidateAllowlist_FullMethodName   = "/devbox.v1.Control/InvalidateAllowlist"
 )
@@ -129,6 +130,8 @@ type ControlClient interface {
 	ReadFile(ctx context.Context, in *ReadFileRequest, opts ...grpc.CallOption) (*ReadFileResponse, error)
 	WriteFile(ctx context.Context, in *WriteFileRequest, opts ...grpc.CallOption) (*WriteFileResponse, error)
 	GetChanges(ctx context.Context, in *GetChangesRequest, opts ...grpc.CallOption) (*GetChangesResponse, error)
+	// PreparePullRequest readies a checkout for a pull request in the box (see PreparePullRequestRequest).
+	PreparePullRequest(ctx context.Context, in *PreparePullRequestRequest, opts ...grpc.CallOption) (*PreparePullRequestResponse, error)
 	// OpenStream prepares a terminal, VNC or preview target and returns a short-lived descriptor. Console mints
 	// the stream token around it; the browser then connects to KAS at /ext/devbox/streams/... (section 4.6).
 	OpenStream(ctx context.Context, in *OpenStreamRequest, opts ...grpc.CallOption) (*OpenStreamResponse, error)
@@ -435,6 +438,16 @@ func (c *controlClient) GetChanges(ctx context.Context, in *GetChangesRequest, o
 	return out, nil
 }
 
+func (c *controlClient) PreparePullRequest(ctx context.Context, in *PreparePullRequestRequest, opts ...grpc.CallOption) (*PreparePullRequestResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PreparePullRequestResponse)
+	err := c.cc.Invoke(ctx, Control_PreparePullRequest_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *controlClient) OpenStream(ctx context.Context, in *OpenStreamRequest, opts ...grpc.CallOption) (*OpenStreamResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(OpenStreamResponse)
@@ -517,6 +530,8 @@ type ControlServer interface {
 	ReadFile(context.Context, *ReadFileRequest) (*ReadFileResponse, error)
 	WriteFile(context.Context, *WriteFileRequest) (*WriteFileResponse, error)
 	GetChanges(context.Context, *GetChangesRequest) (*GetChangesResponse, error)
+	// PreparePullRequest readies a checkout for a pull request in the box (see PreparePullRequestRequest).
+	PreparePullRequest(context.Context, *PreparePullRequestRequest) (*PreparePullRequestResponse, error)
 	// OpenStream prepares a terminal, VNC or preview target and returns a short-lived descriptor. Console mints
 	// the stream token around it; the browser then connects to KAS at /ext/devbox/streams/... (section 4.6).
 	OpenStream(context.Context, *OpenStreamRequest) (*OpenStreamResponse, error)
@@ -619,6 +634,9 @@ func (UnimplementedControlServer) WriteFile(context.Context, *WriteFileRequest) 
 }
 func (UnimplementedControlServer) GetChanges(context.Context, *GetChangesRequest) (*GetChangesResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetChanges not implemented")
+}
+func (UnimplementedControlServer) PreparePullRequest(context.Context, *PreparePullRequestRequest) (*PreparePullRequestResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method PreparePullRequest not implemented")
 }
 func (UnimplementedControlServer) OpenStream(context.Context, *OpenStreamRequest) (*OpenStreamResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method OpenStream not implemented")
@@ -1169,6 +1187,24 @@ func _Control_GetChanges_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Control_PreparePullRequest_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PreparePullRequestRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControlServer).PreparePullRequest(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Control_PreparePullRequest_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControlServer).PreparePullRequest(ctx, req.(*PreparePullRequestRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Control_OpenStream_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(OpenStreamRequest)
 	if err := dec(in); err != nil {
@@ -1327,6 +1363,10 @@ var Control_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetChanges",
 			Handler:    _Control_GetChanges_Handler,
+		},
+		{
+			MethodName: "PreparePullRequest",
+			Handler:    _Control_PreparePullRequest_Handler,
 		},
 		{
 			MethodName: "OpenStream",

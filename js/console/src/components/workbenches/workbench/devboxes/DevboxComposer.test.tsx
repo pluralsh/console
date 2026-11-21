@@ -106,6 +106,15 @@ describe('DevboxComposer slash autocomplete', () => {
     expect(valueOf(prompt)).toBe('')
   })
 
+  it('completes the highlighted command with tab', () => {
+    const { prompt, onSubmit } = renderComposer()
+    type(prompt, '/c')
+    const tab = fireEvent.keyDown(prompt, { key: 'Tab' })
+    expect(tab).toBe(false)
+    expect(valueOf(prompt)).toBe('/compact ')
+    expect(onSubmit).not.toHaveBeenCalled()
+  })
+
   it('navigates with arrows, picks with the mouse and dismisses with escape', () => {
     const { prompt } = renderComposer()
     type(prompt, '/')
