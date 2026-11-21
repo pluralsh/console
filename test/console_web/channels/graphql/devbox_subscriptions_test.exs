@@ -86,6 +86,28 @@ defmodule ConsoleWeb.GraphQl.DevboxSubscriptionsTest do
       assert delta["payload"]["payload"] == %{"text" => "hi"}
       assert delta["payload"]["offset"] == "7"
     end
+
+    test "a pushed batch reaches subscribers in order" do
+      user = insert(:user)
+      inst = insert(:devbox_instance, workbench: insert(:workbench, read_bindings: [%{user_id: user.id}]))
+
+      {:ok, socket} = establish_socket(user)
+
+      ref = push_doc(socket, """
+        subscription Deltas($id: ID!) { devboxInstanceDelta(instanceId: $id) { payload { offset } } }
+      """, variables: %{"id" => inst.id})
+      assert_reply(ref, :ok, %{subscriptionId: _})
+
+      offsets = Enum.to_list(1..50)
+      deltas = Enum.map(offsets, &%{instance_id: inst.id, session_id: "s", entity_id: "e", op: :DELTA_OP_APPEND, offset: &1})
+      :ok = Console.Devboxes.Ingest.publish_instance_deltas(deltas, inst.devbox.cluster)
+
+      received = for _ <- offsets do
+        assert_push("subscription:data", %{result: %{data: %{"devboxInstanceDelta" => %{"payload" => %{"offset" => o}}}}})
+        String.to_integer(o)
+      end
+      assert received == offsets
+    end
   end
 
   describe "devboxInstanceIndexDelta" do

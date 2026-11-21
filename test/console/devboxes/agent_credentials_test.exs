@@ -218,7 +218,7 @@ defmodule Console.Devboxes.AgentCredentialsTest do
   describe "billing" do
     test "subscription billing needs the workbench policy and a linked credential" do
       user = insert(:user)
-      devbox = insert(:devbox)
+      devbox = insert(:devbox, create_bindings: [%{user_id: user.id}])
       closed = insert(:workbench, read_bindings: [%{user_id: user.id}])
       open = insert(:workbench, read_bindings: [%{user_id: user.id}], configuration: %Console.Schema.Workbench.Configuration{devbox: %Console.Schema.Workbench.Configuration.Devbox{allow_subscription_credentials: true}})
       for wb <- [closed, open], do: insert(:workbench_devbox, workbench: wb, devbox: devbox)
@@ -236,7 +236,7 @@ defmodule Console.Devboxes.AgentCredentialsTest do
 
     test "default-billing credentials apply when the workbench allows it" do
       user = insert(:user)
-      devbox = insert(:devbox)
+      devbox = insert(:devbox, create_bindings: [%{user_id: user.id}])
       wb = insert(:workbench, read_bindings: [%{user_id: user.id}], configuration: %Console.Schema.Workbench.Configuration{devbox: %Console.Schema.Workbench.Configuration.Devbox{allow_subscription_credentials: true}})
       insert(:workbench_devbox, workbench: wb, devbox: devbox)
       insert(:agent_credential, user: user, default_billing: true)

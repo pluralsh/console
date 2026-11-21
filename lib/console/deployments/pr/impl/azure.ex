@@ -44,6 +44,7 @@ defmodule Console.Deployments.Pr.Impl.Azure do
                         targetRefName: "refs/heads/#{pra.branch || "main"}",
                         title: title,
                         description: body,
+                        isDraft: !!pra.draft,
                       }),
           {:ok, url} <- web_url(pr) do
       {:ok, %{title: title, ref: branch, body: body, url: url, base: pra.branch || "main", owner: owner(pr)}}

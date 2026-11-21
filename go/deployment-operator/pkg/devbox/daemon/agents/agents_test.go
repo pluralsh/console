@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"sync"
 	"testing"
@@ -405,6 +406,23 @@ func TestPermissionInteraction(t *testing.T) {
 	}
 }
 
+func TestResolvingAfterTheTurnEndedLeavesTheThreadIdle(t *testing.T) {
+	h := newManager(t, 4)
+	s := h.create(t, "t1")
+	h.prompt(t, s, "p1", "permission")
+	eventually(t, "pending interaction", func() bool { return len(h.m.Interactions()) > 0 })
+
+	h.m.mu.Lock()
+	for _, in := range h.m.interactions {
+		in.session.thread.running = false
+		h.m.resolveInteractionLocked(in, devboxv1.InteractionState_INTERACTION_STATE_CANCELLED, nil, nil)
+	}
+	h.m.mu.Unlock()
+	if st := h.thread("t1").GetForeground().GetState(); st != devboxv1.ForegroundStateKind_FOREGROUND_STATE_KIND_IDLE {
+		t.Fatalf("foreground after the last interaction resolved on an ended turn: %v", st)
+	}
+}
+
 func TestActivityAloneReemitsTheRowOnlyEveryInterval(t *testing.T) {
 	h := newManager(t, 4)
 	s := h.create(t, "t1")
@@ -459,6 +477,113 @@ func TestSubagentLineage(t *testing.T) {
 	}
 	if row == nil || row.GetKind() != devboxv1.SessionKind_SESSION_KIND_SUBAGENT || row.GetParentSessionId() != s.GetSessionId() || row.GetThreadId() != "" {
 		t.Fatalf("subagent session row %v", row)
+	}
+	if row.GetParentToolCallId() != "task-1" || row.GetTitle() != "Explore the repo" {
+		t.Fatalf("subagent not tied to its spawning call: tool call %q, title %q", row.GetParentToolCallId(), row.GetTitle())
+	}
+	if row.GetForeground().GetState() != devboxv1.ForegroundStateKind_FOREGROUND_STATE_KIND_IDLE {
+		t.Fatalf("subagent still %v after its spawning call completed", row.GetForeground().GetState())
+	}
+}
+
+func TestSubagentPermissionBelongsToTheSubagent(t *testing.T) {
+	h := newManager(t, 4)
+	s := h.create(t, "t1")
+	h.prompt(t, s, "p1", "subagent-permission")
+	child := s.GetSessionId() + acp.SubagentSeparator + "task-1"
+	var in *devboxv1.Interaction
+	eventually(t, "pending interaction", func() bool {
+		for _, i := range h.m.Interactions() {
+			in = i
+			return true
+		}
+		return false
+	})
+	if in.GetSessionId() != child || in.GetThreadId() != "t1" {
+		t.Fatalf("subagent's permission filed under session %q, thread %q", in.GetSessionId(), in.GetThreadId())
+	}
+	if _, ok := h.entities(s.GetSessionId())["ENTITY_TYPE_TOOL_CALL/tc-child"]; ok {
+		t.Fatal("the subagent's call leaked into the parent transcript")
+	}
+	resp := &devboxv1.InteractionResponse{Response: &devboxv1.InteractionResponse_Permission{
+		Permission: &devboxv1.PermissionOutcome{Outcome: &devboxv1.PermissionOutcome_SelectedOptionId{SelectedOptionId: "allow"}}}}
+	if _, err := h.m.RespondInteraction(&devboxv1.RespondInteractionRequest{InteractionId: in.GetInteractionId(), Response: resp}); err != nil {
+		t.Fatal(err)
+	}
+	eventually(t, "outcome", func() bool { return contains(h.agentText(s.GetSessionId()), "outcome:selected:allow") })
+}
+
+func TestQueuedPromptsSurviveARestart(t *testing.T) {
+	qp := &queuedPrompt{
+		promptID: "p1", messageID: promptMessageID("p1"), queuedAt: time.Unix(100, 0).UTC(),
+		sentBy: &devboxv1.Principal{UserId: "u1"},
+		content: []*devboxv1.ContentBlock{
+			{Block: &devboxv1.ContentBlock_Text{Text: &devboxv1.TextContent{Text: "hi"}}},
+			{Block: &devboxv1.ContentBlock_ResourceLink{ResourceLink: &devboxv1.ResourceLink{Uri: "file:///a.png", Name: "a.png"}}},
+		},
+	}
+	got := restorePrompt(persistPrompt(qp))
+	if !proto.Equal(got.proto(), qp.proto()) || got.messageID != qp.messageID {
+		t.Fatalf("restored %v, want %v", got.proto(), qp.proto())
+	}
+}
+
+func TestQueuedPromptsAreShownAndEditable(t *testing.T) {
+	h := newManager(t, 4)
+	s := h.create(t, "t1")
+	ref := &devboxv1.ThreadRef{InstanceId: instance, ThreadId: "t1"}
+	h.prompt(t, s, "p1", "block")
+	eventually(t, "running", func() bool {
+		return h.thread("t1").GetForeground().GetState() == devboxv1.ForegroundStateKind_FOREGROUND_STATE_KIND_RUNNING
+	})
+	h.prompt(t, s, "p2", "second")
+	h.prompt(t, s, "p3", "third")
+	h.prompt(t, s, "p4", "fourth")
+	queued := func() []string {
+		h.m.Flush()
+		var ids []string
+		for _, qp := range h.thread("t1").GetQueuedPrompts() {
+			ids = append(ids, qp.GetPromptId()+":"+qp.GetContent()[0].GetText().GetText())
+		}
+		return ids
+	}
+	if got := queued(); !slices.Equal(got, []string{"p2:second", "p3:third", "p4:fourth"}) {
+		t.Fatalf("queued prompts on the row: %v", got)
+	}
+
+	update := func(id string, action devboxv1.QueuedPromptAction, text string) *devboxv1.UpdateQueuedPromptResponse {
+		resp, err := h.m.UpdateQueuedPrompt(context.Background(), &devboxv1.UpdateQueuedPromptRequest{Thread: ref, PromptId: id, Action: action, Text: text})
+		if err != nil {
+			t.Fatal(err)
+		}
+		return resp
+	}
+	update("p2", devboxv1.QueuedPromptAction_QUEUED_PROMPT_ACTION_EDIT, "edited")
+	update("p4", devboxv1.QueuedPromptAction_QUEUED_PROMPT_ACTION_CANCEL, "")
+	if got := queued(); !slices.Equal(got, []string{"p2:edited", "p3:third"}) {
+		t.Fatalf("after edit and cancel: %v", got)
+	}
+	if _, err := h.m.UpdateQueuedPrompt(context.Background(), &devboxv1.UpdateQueuedPromptRequest{
+		Thread: ref, PromptId: "p2", Action: devboxv1.QueuedPromptAction_QUEUED_PROMPT_ACTION_EDIT, Text: "  ",
+	}); err == nil {
+		t.Fatal("emptied a queued prompt")
+	}
+
+	// Send now jumps the queue and interrupts the running turn.
+	update("p3", devboxv1.QueuedPromptAction_QUEUED_PROMPT_ACTION_SEND_NOW, "")
+	eventually(t, "promoted prompt to run", func() bool { return contains(h.agentText(s.GetSessionId()), "echo:third") })
+	if len(h.calls(t, acp.MethodSessionCancel)) == 0 {
+		t.Fatal("send now didn't cancel the running turn")
+	}
+	eventually(t, "rest of the queue", func() bool { return contains(h.agentText(s.GetSessionId()), "echo:edited") })
+	if contains(h.agentText(s.GetSessionId()), "echo:fourth") {
+		t.Fatal("cancelled prompt ran")
+	}
+	if got := queued(); len(got) != 0 {
+		t.Fatalf("queue after it drained: %v", got)
+	}
+	if resp := update("p2", devboxv1.QueuedPromptAction_QUEUED_PROMPT_ACTION_CANCEL, ""); resp.GetUpdated() {
+		t.Fatal("updated a prompt that already ran")
 	}
 }
 

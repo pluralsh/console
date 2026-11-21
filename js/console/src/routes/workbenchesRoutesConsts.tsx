@@ -284,28 +284,20 @@ export const getWorkbenchFilesAbsPath = (
   }`
 
 export const WORKBENCH_DEVBOXES_REL_PATH = 'devboxes'
-export const WORKBENCH_DEVBOX_BOXES_REL_PATH = 'boxes'
 export const WORKBENCH_DEVBOX_INSTANCES_REL_PATH = 'instances'
-export const WORKBENCH_DEVBOX_START_REL_PATH = 'new'
-export const WORKBENCH_DEVBOX_PARAM_ID = 'devboxId'
 export const WORKBENCH_DEVBOX_INSTANCE_PARAM_ID = 'devboxInstanceId'
 export const WORKBENCH_DEVBOX_START_BOX_QUERY_PARAM = 'devbox'
 export const WORKBENCH_DEVBOX_START_SNAPSHOT_QUERY_PARAM = 'snapshot'
 export const WORKBENCH_DEVBOX_THREAD_QUERY_PARAM = 'thread'
 export const WORKBENCH_DEVBOX_TAB_QUERY_PARAM = 'tab'
+export const WORKBENCH_DEVBOX_FILE_QUERY_PARAM = 'file'
+export const WORKBENCH_DEVBOX_CHANGE_QUERY_PARAM = 'change'
 export const WORKBENCH_DEVBOX_POSITION_QUERY_PARAM = 'position'
+// the devboxes root opens the latest live instance unless this asks to create one
+export const WORKBENCH_DEVBOX_NEW_QUERY_PARAM = 'new'
 
 export const getWorkbenchDevboxesAbsPath = (workbenchId: Nullable<string>) =>
   `${getWorkbenchAbsPath(workbenchId)}/${WORKBENCH_DEVBOXES_REL_PATH}`
-
-export const getWorkbenchDevboxAbsPath = ({
-  workbenchId,
-  devboxId,
-}: {
-  workbenchId: Nullable<string>
-  devboxId: Nullable<string>
-}) =>
-  `${getWorkbenchDevboxesAbsPath(workbenchId)}/${WORKBENCH_DEVBOX_BOXES_REL_PATH}/${devboxId ?? ''}`
 
 export const getWorkbenchDevboxStartAbsPath = ({
   workbenchId,
@@ -316,12 +308,13 @@ export const getWorkbenchDevboxStartAbsPath = ({
   devboxId?: Nullable<string>
   snapshotId?: Nullable<string>
 }) => {
-  const params = new URLSearchParams()
+  const params = new URLSearchParams({
+    [WORKBENCH_DEVBOX_NEW_QUERY_PARAM]: '1',
+  })
   if (devboxId) params.set(WORKBENCH_DEVBOX_START_BOX_QUERY_PARAM, devboxId)
   if (snapshotId)
     params.set(WORKBENCH_DEVBOX_START_SNAPSHOT_QUERY_PARAM, snapshotId)
-  const query = params.toString()
-  return `${getWorkbenchDevboxesAbsPath(workbenchId)}/${WORKBENCH_DEVBOX_START_REL_PATH}${query ? `?${query}` : ''}`
+  return `${getWorkbenchDevboxesAbsPath(workbenchId)}?${params}`
 }
 
 export const getWorkbenchDevboxInstanceAbsPath = ({
@@ -345,3 +338,6 @@ export const getWorkbenchDevboxInstanceAbsPath = ({
   const query = params.toString()
   return `${getWorkbenchDevboxesAbsPath(workbenchId)}/${WORKBENCH_DEVBOX_INSTANCES_REL_PATH}/${instanceId ?? ''}${query ? `?${query}` : ''}`
 }
+
+export const WORKBENCH_DEVBOX_INSTANCE_REL_PATH = `${WORKBENCH_DEVBOXES_REL_PATH}/${WORKBENCH_DEVBOX_INSTANCES_REL_PATH}/:${WORKBENCH_DEVBOX_INSTANCE_PARAM_ID}`
+export const WORKBENCH_DEVBOX_INSTANCE_ABS_PATH = `${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCH_DEVBOX_INSTANCE_REL_PATH}`

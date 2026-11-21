@@ -3883,6 +3883,8 @@ type Devbox struct {
 	CloudIdentities []*DevboxCloudIdentity `json:"cloudIdentities,omitempty"`
 	Cluster         *Cluster               `json:"cluster,omitempty"`
 	ScmConnections  []*ScmConnection       `json:"scmConnections,omitempty"`
+	// who may attach this box to a workbench and start instances on it
+	CreateBindings []*PolicyBinding `json:"createBindings,omitempty"`
 	// the box's workload identity issuer and how to trust it from cloud accounts
 	WorkloadIdentity *DevboxWorkloadIdentity `json:"workloadIdentity,omitempty"`
 	InsertedAt       *string                 `json:"insertedAt,omitempty"`
@@ -3993,6 +3995,8 @@ type DevboxAttributes struct {
 	Conditions    []*DevboxConditionAttributes `json:"conditions,omitempty"`
 	// cloud identities instances get workload identity tokens for
 	CloudIdentities []*DevboxCloudIdentityAttributes `json:"cloudIdentities,omitempty"`
+	// who may attach this box to a workbench and start instances on it, falling back to the global create policy if empty
+	CreateBindings []*AgentBindingAttributes `json:"createBindings,omitempty"`
 }
 
 type DevboxAudioContent struct {

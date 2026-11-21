@@ -33,6 +33,27 @@ create_secret() {
   fi
 }
 
+# Every Substrate workload certificate is a pod certificate, so without these
+# APIs every component crash-loops on missing credential bundles. Fail here,
+# before anything is created, instead.
+served() {
+  for version in v1 v1beta1; do
+    kubectl get --raw "/apis/certificates.k8s.io/$version" 2>/dev/null | grep -q "\"name\":\"$1\"" && return 0
+  done
+  return 1
+}
+missing=""
+for resource in podcertificaterequests clustertrustbundles; do
+  served "$resource" || missing="$missing $resource"
+done
+if [ -n "$missing" ]; then
+  echo "agent-substrate needs pod certificates, but certificates.k8s.io (v1 or v1beta1) doesn't serve:$missing." >&2
+  echo "They are on by default from Kubernetes 1.37; on 1.34-1.36 enable the PodCertificateRequest, ClusterTrustBundle" >&2
+  echo "and ClusterTrustBundleProjection feature gates and the certificates.k8s.io/v1beta1 API. Managed clusters" >&2
+  echo "(EKS, GKE, AKS) can't enable them, so they need 1.37+." >&2
+  exit 1
+fi
+
 # The pod-certificate controller's namespace must exist before its CA pools.
 # It isn't a Helm release resource (Helm can't adopt what a hook created
 # mid-install), so it outlives uninstall with the pools.

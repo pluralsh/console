@@ -43,9 +43,17 @@ export function MoreMenu({
   disabled = false,
   triggerProps,
   loading,
+  keepOpenOn,
+  onOpenChange,
   ...props
-}: Omit<SelectPropsSingle, 'onSelectionChange' | 'children'> & {
+}: Omit<
+  SelectPropsSingle,
+  'onSelectionChange' | 'onOpenChange' | 'children'
+> & {
   onSelectionChange?: (selectedKey: any) => void
+  // keys that swap the menu's items (eg into a submenu) instead of closing it
+  keepOpenOn?: (selectedKey: any) => boolean
+  onOpenChange?: (open: boolean) => void
   disabled?: boolean
   children?: ReactNode
   triggerProps?: Omit<ComponentPropsWithRef<typeof MoreMenuTrigger>, 'disabled'>
@@ -63,12 +71,19 @@ export function MoreMenu({
       onOpenChange={(newOpen) => {
         // if blockClose is true and trying to close, unblock but don't close yet (allows manual close on next attempt)
         if (!newOpen && blockClose.current) blockClose.current = false
-        else setIsOpen(newOpen)
+        else {
+          setIsOpen(newOpen)
+          onOpenChange?.(newOpen)
+        }
       }}
       isDisabled={disabled}
       onSelectionChange={(selectedKey) => {
-        if (!isNil(loading)) blockClose.current = true
-        else setIsOpen(false)
+        if (keepOpenOn?.(selectedKey)) blockClose.current = true
+        else if (!isNil(loading)) blockClose.current = true
+        else {
+          setIsOpen(false)
+          onOpenChange?.(false)
+        }
         onSelectionChange?.(selectedKey)
       }}
       selectedKey={null}

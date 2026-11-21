@@ -84,7 +84,7 @@ defmodule Console.Deployments.Pr.Dispatcher do
       do: impl.create(%{pr | branch: conn.branch, connection: conn}, branch, ctx, pr.labels || [])
   end
 
-  def pr(%ScmConnection{} = conn, title, body, url, base, head) do
+  def pr(%ScmConnection{} = conn, title, body, url, base, head, opts \\ []) do
     impl = dispatcher(conn)
     with {:ok, slug} <- impl.slug(url) do
       impl.create(%PrAutomation{
@@ -94,8 +94,9 @@ defmodule Console.Deployments.Pr.Dispatcher do
         connection: conn,
         message: body,
         branch: base,
-        identifier: slug
-      }, head, %{})
+        identifier: slug,
+        draft: Keyword.get(opts, :draft, false)
+      }, head, %{}, Keyword.get(opts, :labels) || [])
     end
   end
 

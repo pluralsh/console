@@ -34,6 +34,26 @@ defmodule Console.Devboxes.IngestTest do
       assert Enum.sort(ids) == Enum.sort([ended.id, unknown])
       assert refetch(inst).idle_state.idle
     end
+
+    test "a heartbeat replaces the previous idle state" do
+      inst = insert(:devbox_instance, idle_state: %{idle: true, suspends_at: Timex.now(), message: "idle"})
+
+      Ingest.heartbeat(%{instances: [%{instance_id: inst.id, idle: %{idle: false, message: "agent working"}}]}, inst.devbox.cluster)
+
+      assert %{idle: false, suspends_at: nil, message: "agent working"} = refetch(inst).idle_state
+    end
+
+    test "busy reasons keep their kind" do
+      inst = insert(:devbox_instance)
+
+      Ingest.heartbeat(%{instances: [%{instance_id: inst.id, idle: %{idle: false, busy_reasons: [
+        %{kind: :BUSY_REASON_KIND_AGENT_TURN, detail: "6bb88f0c", thread_id: "6bb88f0c"},
+        %{kind: "BUSY_REASON_KIND_TOTALLY_NEW_KIND_#{System.unique_integer([:positive])}", detail: "x"}
+      ]}}]}, inst.devbox.cluster)
+
+      assert [%{"kind" => "agent_turn", "thread_id" => "6bb88f0c"}, %{"kind" => "totally_new_kind_" <> _}] =
+               refetch(inst).idle_state.busy_reasons
+    end
   end
 
   describe "#report_instance_status/2" do
@@ -52,6 +72,16 @@ defmodule Console.Devboxes.IngestTest do
       assert updated.actor_ref == "actor-1"
       assert updated.started_at
       assert_receive {:event, %PubSub.DevboxInstanceUpdated{}}
+    end
+
+    test "resuming clears the idle state from before the suspend" do
+      past = Timex.now() |> Timex.shift(minutes: -5)
+      inst = insert(:devbox_instance, status: :suspended, idle_state: %{idle: true, idle_since: past, suspends_at: past})
+
+      {:ok, updated} = Ingest.report_instance_status(%{instance_id: inst.id, status: :INSTANCE_STATUS_RUNNING, generation: 1}, inst.devbox.cluster)
+
+      assert updated.status == :running
+      assert %{idle: false, idle_since: nil, suspends_at: nil} = updated.idle_state
     end
 
     test "it ignores stale generations" do
@@ -113,6 +143,33 @@ defmodule Console.Devboxes.IngestTest do
   end
 
   describe "#upsert_instance_index/2" do
+    test "a later turn without an error clears the last one" do
+      inst = insert(:devbox_instance)
+      thread = insert(:devbox_instance_session,
+        instance: inst,
+        acp_session_id: "s1",
+        stop_reason: "error",
+        error: %{"message" => "API Error: 400"}
+      )
+
+      {:ok, _} = Ingest.upsert_instance_index(%{
+        instance_id: inst.id,
+        sessions: [%{thread_id: thread.id, session_id: "s1", revision: 2, foreground: %{state: :FOREGROUND_STATE_KIND_RUNNING}}]
+      }, inst.devbox.cluster)
+
+      updated = refetch(thread)
+      assert updated.foreground_state == :running
+      refute updated.error
+      refute updated.stop_reason
+
+      {:ok, _} = Ingest.upsert_instance_index(%{
+        instance_id: inst.id,
+        sessions: [%{thread_id: thread.id, session_id: "s1", revision: 3, title: "renamed"}]
+      }, inst.devbox.cluster)
+
+      assert refetch(thread).title == "renamed"
+    end
+
     test "it upserts sessions and interactions and links subagents" do
       inst = insert(:devbox_instance)
       thread = insert(:devbox_instance_session, instance: inst, acp_session_id: "parent")
@@ -128,9 +185,14 @@ defmodule Console.Devboxes.IngestTest do
             cwd: "/home/agent/console",
             foreground: %{state: :FOREGROUND_STATE_KIND_RUNNING},
             config_options: [%{id: "mode", name: "Mode", current_value: "code", options: [%{value: "code"}]}],
-            available_commands: [%{name: "review", input: %{hint: "a branch"}}]
+            available_commands: [%{name: "review", input: %{hint: "a branch"}}],
+            queued_prompts: [%{
+              prompt_id: "p2",
+              content: [%{text: %{text: "and then this"}}, %{resource_link: %{name: "a.png", uri: "file:///a.png"}}],
+              queued_at: %{seconds: 1_700_000_000, nanos: 0}
+            }]
           },
-          %{session_id: "child", kind: :SESSION_KIND_SUBAGENT, parent_session_id: "parent", agent: :claude, status: :active, revision: 1}
+          %{session_id: "child", kind: :SESSION_KIND_SUBAGENT, parent_session_id: "parent", parent_tool_call_id: "task-1", agent: :claude, status: :active, revision: 1}
         ],
         interactions: [
           %{
@@ -153,10 +215,12 @@ defmodule Console.Devboxes.IngestTest do
       assert updated.foreground_state == :running
       assert [%{config_id: "mode", current_value: "code"}] = updated.config_options
       assert [%{name: "review", input_hint: "a branch"}] = updated.available_commands
+      assert [%{prompt_id: "p2", text: "and then this", attachments: ["a.png"], queued_at: %DateTime{}}] = updated.queued_prompts
 
       child = Console.Repo.get_by!(DevboxInstanceSession, acp_session_id: "child")
       assert child.kind == :subagent
       assert child.parent_id == thread.id
+      assert child.parent_tool_call_id == "task-1"
 
       interaction = Console.Repo.get_by!(DevboxInstanceInteraction, external_id: "int-1")
       assert interaction.session_id == thread.id
@@ -323,7 +387,10 @@ defmodule Console.Devboxes.IngestTest do
       thread = insert(:devbox_instance_session, instance: inst)
       subagent = insert(:devbox_instance_session, instance: inst, kind: :subagent, parent: thread)
 
-      expect(Console.Deployments.Pr.Dispatcher, :pr, fn _, "a pr", "a body", "https://github.com/pluralsh/console.git", "main", "devbox/branch" ->
+      expect(Console.Deployments.Pr.Dispatcher, :pr, fn conn, "a pr", "a body", "https://github.com/pluralsh/console.git", "main", "devbox/branch", opts ->
+        assert conn.commit_shas == %{"devbox/branch" => "head-sha", "main" => "base-sha"}
+        assert opts[:draft]
+        assert opts[:labels] == ["devbox"]
         {:ok, %{url: "https://github.com/pluralsh/console/pull/1", title: "a pr"}}
       end)
 
@@ -333,7 +400,11 @@ defmodule Console.Devboxes.IngestTest do
           title: "a pr",
           body: "a body",
           base_branch: "main",
-          head_branch: "devbox/branch"
+          head_branch: "devbox/branch",
+          draft: true,
+          labels: ["devbox"],
+          difficulty: %{change_type: "GITOPS", lines: 42},
+          commit_shas: [%{branch: "devbox/branch", sha: "head-sha"}, %{branch: "main", sha: "base-sha"}]
         },
         tool_call_id: "tc-1"
       }, inst.id, subagent.id, inst.devbox.cluster)
@@ -343,6 +414,9 @@ defmodule Console.Devboxes.IngestTest do
       assert pr.devbox_instance_id == inst.id
       assert pr.devbox_instance_session_id == thread.id
       assert pr.workbench_id == inst.workbench_id
+      assert pr.difficulty.type == :gitops
+      assert pr.difficulty.lines == 42
+      assert pr.labels == ["devbox"]
       assert pr.metadata["tool_call_id"] || pr.metadata[:tool_call_id]
       assert_receive {:event, %PubSub.PullRequestCreated{}}
       assert_receive {:event, %PubSub.DevboxInstanceDeltaCreated{item: %{op: :pull_request}}}

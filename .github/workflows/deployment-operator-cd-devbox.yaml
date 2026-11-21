@@ -1,6 +1,21 @@
 name: CD / Devbox images
 
+# Images are tagged like the deployment operator's (sha-<head sha> and pr-<number> on pull requests, the
+# release version on tags), since the operator defaults devbox-fat and devbox-gateway to its own IMAGE_TAG.
+# Each image is tested (dockerfiles/devbox/test.sh) by the digest it was pushed as; devbox-minimal and
+# devbox-fat are only tagged once both platforms pass.
+#
+# Layer caches live in ghcr.io/pluralsh/console-cache, readable by every branch and pull request. Nothing
+# builds these images on master, so pull requests and releases both write them.
 on:
+  pull_request:
+    branches:
+    - "master"
+    paths:
+    - ".github/workflows/deployment-operator-cd-devbox.yaml"
+    - "go/deployment-operator/**"
+    - "go/polly/**"
+    - "go/client/**"
   push:
     tags:
     - 'go/deployment-operator/v*.*.*'
@@ -14,31 +29,55 @@ on:
 permissions:
   contents: read
 
+env:
+  DOCKER_METADATA_PR_HEAD_SHA: 'true'
+  IMAGE_TAGS: |
+    type=semver,pattern={{version}},value=${{ inputs.version }},enable=${{ inputs.version != '' }},priority=1100
+    type=semver,pattern={{major}}.{{minor}},value=${{ inputs.version }},enable=${{ inputs.version != '' }}
+    type=semver,pattern={{version}},value=${{ github.ref_name }},match=go/deployment-operator/v(\d+\.\d+\.\d+)$,priority=1000
+    type=semver,pattern={{major}}.{{minor}},value=${{ github.ref_name }},match=go/deployment-operator/v(\d+\.\d+\.\d+)$
+    type=sha,priority=800
+    type=ref,event=pr,priority=600
+  CACHE: ghcr.io/pluralsh/console-cache
+
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}-${{ inputs.version }}
-  cancel-in-progress: false
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-${{ inputs.version }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  vouch:
+    name: Vouch
+    uses: ./.github/workflows/vouch-gate.yml
+    permissions:
+      contents: read
+
   version:
     name: Resolve version
+    needs: [vouch]
     runs-on: ubuntu-latest
     outputs:
-      version: ${{ steps.version.outputs.version }}
+      version: ${{ steps.meta.outputs.version }}
     steps:
-      - id: version
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ghcr.io/pluralsh/devbox-minimal
+          tags: ${{ env.IMAGE_TAGS }}
+      - name: Check release version
+        if: github.event_name != 'pull_request'
         env:
-          INPUT_VERSION: ${{ inputs.version }}
+          VERSION: ${{ steps.meta.outputs.version }}
         run: |
-          version="${INPUT_VERSION:-${GITHUB_REF_NAME#go/deployment-operator/v}}"
-          version="${version#v}"
-          if ! [[ "${version}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "Invalid version: ${version}" >&2
+          if ! [[ "${VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid version: ${VERSION}" >&2
             exit 1
           fi
-          echo "version=${version}" >> "$GITHUB_OUTPUT"
 
-  build-minimal:
-    name: Build devbox-minimal (${{ matrix.platforms.platform }})
+  # devbox-minimal and devbox-fat build as one bake (dockerfiles/devbox/docker-bake.hcl): fat's own stages run
+  # alongside minimal, and its final stage builds FROM minimal's graph as soon as minimal's layers exist.
+  build:
+    name: Build and test devbox-minimal and devbox-fat (${{ matrix.platforms.platform }})
     needs: [version]
     permissions:
       contents: read
@@ -52,18 +91,32 @@ jobs:
           - platform: linux/arm64
             runner: ubuntu-24.04-arm
     runs-on: ${{ matrix.platforms.runner }}
+    defaults:
+      run:
+        working-directory: go/deployment-operator/dockerfiles/devbox
     steps:
+      # devbox-fat needs the space; deleting takes over a minute on amd64, so it overlaps the setup steps.
+      - name: Free disk space in the background
+        working-directory: /
+        run: nohup sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL >/dev/null 2>&1 &
       - name: Checkout
         uses: actions/checkout@v7
       - name: Prepare
         run: |
           platform=${{ matrix.platforms.platform }}
           echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
-      - name: Docker meta
-        id: meta
+      - name: Docker meta (devbox-minimal)
+        id: meta-minimal
         uses: docker/metadata-action@v6
         with:
           images: ghcr.io/pluralsh/devbox-minimal
+          bake-target: minimal-meta
+      - name: Docker meta (devbox-fat)
+        id: meta-fat
+        uses: docker/metadata-action@v6
+        with:
+          images: ghcr.io/pluralsh/devbox-fat
+          bake-target: fat-meta
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
       - name: Login to GHCR
@@ -72,162 +125,84 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push by digest
-        id: build
-        uses: docker/build-push-action@v7
-        with:
-          context: "./go"
-          file: "./go/deployment-operator/dockerfiles/devbox/minimal.Dockerfile"
-          tags: ghcr.io/pluralsh/devbox-minimal
-          labels: ${{ steps.meta.outputs.labels }}
-          platforms: ${{ matrix.platforms.platform }}
-          outputs: type=image,push-by-digest=true,name-canonical=true,push=true
-          cache-from: type=gha,scope=devbox-minimal-${{ env.PLATFORM_PAIR }}
-          cache-to: type=gha,mode=max,scope=devbox-minimal-${{ env.PLATFORM_PAIR }}
-          build-args: |
-            VERSION=${{ needs.version.outputs.version }}
-            DAEMON_SOURCE=build
-      - name: Export digest
+      - name: Wait for free disk space
         run: |
-          mkdir -p ${{ runner.temp }}/digests
-          digest="${{ steps.build.outputs.digest }}"
-          touch "${{ runner.temp }}/digests/${digest#sha256:}"
-      - name: Upload digest
+          while pgrep -x rm >/dev/null; do sleep 2; done
+          df -h /
+      - name: Build and push devbox-minimal and devbox-fat by digest
+        id: bake
+        uses: docker/bake-action@v7
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+          DAEMON_SOURCE: build
+        with:
+          source: .
+          workdir: go
+          files: |
+            ./deployment-operator/dockerfiles/devbox/docker-bake.hcl
+            cwd://${{ steps.meta-minimal.outputs.bake-file-labels }}
+            cwd://${{ steps.meta-fat.outputs.bake-file-labels }}
+          set: |
+            *.platform=${{ matrix.platforms.platform }}
+            minimal.output=type=image,name=ghcr.io/pluralsh/devbox-minimal,push-by-digest=true,name-canonical=true,push=true
+            fat.output=type=image,name=ghcr.io/pluralsh/devbox-fat,push-by-digest=true,name-canonical=true,push=true
+            minimal.cache-from=type=registry,ref=${{ env.CACHE }}:devbox-minimal-${{ env.PLATFORM_PAIR }}
+            minimal.cache-to=type=registry,ref=${{ env.CACHE }}:devbox-minimal-${{ env.PLATFORM_PAIR }},mode=max,ignore-error=true
+            fat.cache-from=type=registry,ref=${{ env.CACHE }}:devbox-fat-${{ env.PLATFORM_PAIR }}
+            fat.cache-to=type=registry,ref=${{ env.CACHE }}:devbox-fat-${{ env.PLATFORM_PAIR }},mode=max,ignore-error=true
+      - name: Resolve digests
+        id: digests
+        env:
+          METADATA: ${{ steps.bake.outputs.metadata }}
+        run: |
+          echo "minimal=$(jq -er '.minimal["containerimage.digest"]' <<< "${METADATA}")" >> "$GITHUB_OUTPUT"
+          echo "fat=$(jq -er '.fat["containerimage.digest"]' <<< "${METADATA}")" >> "$GITHUB_OUTPUT"
+      - name: Test devbox-minimal and the example image
+        run: ./test.sh minimal example
+        env:
+          MINIMAL_IMAGE: ghcr.io/pluralsh/devbox-minimal@${{ steps.digests.outputs.minimal }}
+      - name: Test devbox-fat
+        run: ./test.sh fat
+        env:
+          FAT_IMAGE: ghcr.io/pluralsh/devbox-fat@${{ steps.digests.outputs.fat }}
+      - name: Export digests
+        env:
+          MINIMAL_DIGEST: ${{ steps.digests.outputs.minimal }}
+          FAT_DIGEST: ${{ steps.digests.outputs.fat }}
+        run: |
+          mkdir -p ${{ runner.temp }}/digests/minimal ${{ runner.temp }}/digests/fat
+          touch "${{ runner.temp }}/digests/minimal/${MINIMAL_DIGEST#sha256:}"
+          touch "${{ runner.temp }}/digests/fat/${FAT_DIGEST#sha256:}"
+      - name: Upload devbox-minimal digest
         uses: actions/upload-artifact@v7
         with:
           name: digests-minimal-${{ env.PLATFORM_PAIR }}
-          path: ${{ runner.temp }}/digests/*
+          path: ${{ runner.temp }}/digests/minimal/*
+          if-no-files-found: error
+          retention-days: 1
+      - name: Upload devbox-fat digest
+        uses: actions/upload-artifact@v7
+        with:
+          name: digests-fat-${{ env.PLATFORM_PAIR }}
+          path: ${{ runner.temp }}/digests/fat/*
           if-no-files-found: error
           retention-days: 1
 
-  publish-minimal:
-    name: Publish devbox-minimal
-    needs: [version, build-minimal]
+  publish:
+    name: Publish ${{ matrix.image }}
+    needs: [version, build]
     permissions:
       contents: read
       id-token: write
-      packages: write
-    runs-on: ubuntu-latest
-    outputs:
-      digest: ${{ steps.inspect.outputs.digest }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-        with:
-          fetch-depth: 1
-      - name: Download digests
-        uses: actions/download-artifact@v8
-        with:
-          path: ${{ runner.temp }}/digests
-          pattern: digests-minimal-*
-          merge-multiple: true
-      - name: Login to GHCR
-        uses: docker/login-action@v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@v6
-        with:
-          images: ghcr.io/pluralsh/devbox-minimal
-          tags: |
-            type=semver,pattern={{version}},value=${{ needs.version.outputs.version }}
-            type=semver,pattern={{major}}.{{minor}},value=${{ needs.version.outputs.version }}
-            type=sha
-      - name: Create manifest list and push
-        working-directory: ${{ runner.temp }}/digests
-        run: |
-          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
-            $(printf 'ghcr.io/pluralsh/devbox-minimal@sha256:%s ' *)
-      - name: Resolve digest
-        id: inspect
-        run: |
-          digest=$(docker buildx imagetools inspect ghcr.io/pluralsh/devbox-minimal:${{ needs.version.outputs.version }} --format '{{.Manifest.Digest}}')
-          echo "digest=$digest" >> "$GITHUB_OUTPUT"
-          echo "ghcr.io/pluralsh/devbox-minimal@${digest}" >> "$GITHUB_STEP_SUMMARY"
-      - name: Cosign sign
-        uses: ./.github/actions/cosign-sign
-        with:
-          digest: ${{ steps.inspect.outputs.digest }}
-          images: ghcr.io/pluralsh/devbox-minimal
-
-  build-fat:
-    name: Build devbox-fat (${{ matrix.platforms.platform }})
-    needs: [version, publish-minimal]
-    permissions:
-      contents: read
       packages: write
     strategy:
       fail-fast: false
       matrix:
-        platforms:
-          - platform: linux/amd64
-            runner: ubuntu-24.04
-          - platform: linux/arm64
-            runner: ubuntu-24.04-arm
-    runs-on: ${{ matrix.platforms.runner }}
-    steps:
-      - name: Free disk space
-        run: |
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
-          df -h /
-      - name: Checkout
-        uses: actions/checkout@v7
-      - name: Prepare
-        run: |
-          platform=${{ matrix.platforms.platform }}
-          echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@v6
-        with:
-          images: ghcr.io/pluralsh/devbox-fat
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-      - name: Login to GHCR
-        uses: docker/login-action@v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push by digest
-        id: build
-        uses: docker/build-push-action@v7
-        with:
-          context: "./go"
-          file: "./go/deployment-operator/dockerfiles/devbox/fat.Dockerfile"
-          tags: ghcr.io/pluralsh/devbox-fat
-          labels: ${{ steps.meta.outputs.labels }}
-          platforms: ${{ matrix.platforms.platform }}
-          outputs: type=image,push-by-digest=true,name-canonical=true,push=true
-          cache-from: type=gha,scope=devbox-fat-${{ env.PLATFORM_PAIR }}
-          cache-to: type=gha,mode=min,scope=devbox-fat-${{ env.PLATFORM_PAIR }}
-          build-args: |
-            BASE_IMAGE=ghcr.io/pluralsh/devbox-minimal@${{ needs.publish-minimal.outputs.digest }}
-      - name: Export digest
-        run: |
-          mkdir -p ${{ runner.temp }}/digests
-          digest="${{ steps.build.outputs.digest }}"
-          touch "${{ runner.temp }}/digests/${digest#sha256:}"
-      - name: Upload digest
-        uses: actions/upload-artifact@v7
-        with:
-          name: digests-fat-${{ env.PLATFORM_PAIR }}
-          path: ${{ runner.temp }}/digests/*
-          if-no-files-found: error
-          retention-days: 1
-
-  publish-fat:
-    name: Publish devbox-fat
-    needs: [version, build-fat]
-    permissions:
-      contents: read
-      id-token: write
-      packages: write
+        include:
+          - image: devbox-minimal
+            digests: minimal
+          - image: devbox-fat
+            digests: fat
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -238,7 +213,7 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           path: ${{ runner.temp }}/digests
-          pattern: digests-fat-*
+          pattern: digests-${{ matrix.digests }}-*
           merge-multiple: true
       - name: Login to GHCR
         uses: docker/login-action@v4
@@ -252,30 +227,27 @@ jobs:
         id: meta
         uses: docker/metadata-action@v6
         with:
-          images: ghcr.io/pluralsh/devbox-fat
-          tags: |
-            type=semver,pattern={{version}},value=${{ needs.version.outputs.version }}
-            type=semver,pattern={{major}}.{{minor}},value=${{ needs.version.outputs.version }}
-            type=sha
+          images: ghcr.io/pluralsh/${{ matrix.image }}
+          tags: ${{ env.IMAGE_TAGS }}
       - name: Create manifest list and push
         working-directory: ${{ runner.temp }}/digests
         run: |
           docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
-            $(printf 'ghcr.io/pluralsh/devbox-fat@sha256:%s ' *)
+            $(printf 'ghcr.io/pluralsh/${{ matrix.image }}@sha256:%s ' *)
       - name: Resolve digest
         id: inspect
         run: |
-          digest=$(docker buildx imagetools inspect ghcr.io/pluralsh/devbox-fat:${{ needs.version.outputs.version }} --format '{{.Manifest.Digest}}')
+          digest=$(docker buildx imagetools inspect ghcr.io/pluralsh/${{ matrix.image }}:${{ needs.version.outputs.version }} --format '{{.Manifest.Digest}}')
           echo "digest=$digest" >> "$GITHUB_OUTPUT"
-          echo "ghcr.io/pluralsh/devbox-fat@${digest}" >> "$GITHUB_STEP_SUMMARY"
+          echo "ghcr.io/pluralsh/${{ matrix.image }}@${digest}" >> "$GITHUB_STEP_SUMMARY"
       - name: Cosign sign
         uses: ./.github/actions/cosign-sign
         with:
           digest: ${{ steps.inspect.outputs.digest }}
-          images: ghcr.io/pluralsh/devbox-fat
+          images: ghcr.io/pluralsh/${{ matrix.image }}
 
   publish-gateway:
-    name: Build and publish devbox-gateway
+    name: Build, test and publish devbox-gateway
     needs: [version]
     permissions:
       contents: read
@@ -290,10 +262,7 @@ jobs:
         uses: docker/metadata-action@v6
         with:
           images: ghcr.io/pluralsh/devbox-gateway
-          tags: |
-            type=semver,pattern={{version}},value=${{ needs.version.outputs.version }}
-            type=semver,pattern={{major}}.{{minor}},value=${{ needs.version.outputs.version }}
-            type=sha
+          tags: ${{ env.IMAGE_TAGS }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
       - name: Login to GHCR
@@ -302,6 +271,12 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to Docker Hardened Images
+        uses: docker/login-action@v4
+        with:
+          registry: dhi.io
+          username: mjgpluralsh
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
       # The Go build cross-compiles on the build platform, so no QEMU is needed.
       - name: Build and push
         id: build
@@ -313,11 +288,18 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64,linux/arm64
-          cache-from: type=gha,scope=devbox-gateway
-          cache-to: type=gha,mode=max,scope=devbox-gateway
+          cache-from: type=registry,ref=${{ env.CACHE }}:devbox-gateway
+          cache-to: type=registry,ref=${{ env.CACHE }}:devbox-gateway,mode=max,ignore-error=true
           build-args: |
             VERSION=${{ needs.version.outputs.version }}
             GATEWAY_SOURCE=build
+      - name: Test
+        working-directory: go/deployment-operator/dockerfiles/devbox
+        run: |
+          docker run --rm --platform linux/amd64 "${GATEWAY_IMAGE}" -version
+          ./test.sh gateway
+        env:
+          GATEWAY_IMAGE: ghcr.io/pluralsh/devbox-gateway@${{ steps.build.outputs.digest }}
       - name: Cosign sign
         uses: ./.github/actions/cosign-sign
         with:

@@ -439,6 +439,8 @@ defmodule Console.Deployments.Policies.Rbac do
     do: Repo.preload(webhook, [workbench: [:read_bindings, :write_bindings, project: @bindings]])
   def preload(%WorkbenchChatbot{} = chatbot),
     do: Repo.preload(chatbot, [workbench: [:read_bindings, :write_bindings, project: @bindings]])
+  def preload(%Devbox{} = devbox),
+    do: Repo.preload(devbox, [:create_bindings])
   def preload(%WorkbenchDevbox{} = wd),
     do: Repo.preload(wd, [workbench: [:read_bindings, :write_bindings, project: @bindings]])
   def preload(%DevboxInstance{} = inst),

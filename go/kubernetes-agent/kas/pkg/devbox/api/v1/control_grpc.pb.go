@@ -51,6 +51,7 @@ const (
 	Control_ForkThread_FullMethodName            = "/devbox.v1.Control/ForkThread"
 	Control_Prompt_FullMethodName                = "/devbox.v1.Control/Prompt"
 	Control_CancelPrompt_FullMethodName          = "/devbox.v1.Control/CancelPrompt"
+	Control_UpdateQueuedPrompt_FullMethodName    = "/devbox.v1.Control/UpdateQueuedPrompt"
 	Control_SetThreadConfigOption_FullMethodName = "/devbox.v1.Control/SetThreadConfigOption"
 	Control_RespondInteraction_FullMethodName    = "/devbox.v1.Control/RespondInteraction"
 	Control_ListCommands_FullMethodName          = "/devbox.v1.Control/ListCommands"
@@ -63,6 +64,7 @@ const (
 	Control_ReadFile_FullMethodName              = "/devbox.v1.Control/ReadFile"
 	Control_WriteFile_FullMethodName             = "/devbox.v1.Control/WriteFile"
 	Control_GetChanges_FullMethodName            = "/devbox.v1.Control/GetChanges"
+	Control_PreparePullRequest_FullMethodName    = "/devbox.v1.Control/PreparePullRequest"
 	Control_OpenStream_FullMethodName            = "/devbox.v1.Control/OpenStream"
 	Control_InvalidateAllowlist_FullMethodName   = "/devbox.v1.Control/InvalidateAllowlist"
 )
@@ -111,6 +113,8 @@ type ControlClient interface {
 	Prompt(ctx context.Context, in *PromptRequest, opts ...grpc.CallOption) (*PromptResponse, error)
 	// CancelPrompt sends `session/cancel` for the thread's current turn.
 	CancelPrompt(ctx context.Context, in *CancelPromptRequest, opts ...grpc.CallOption) (*CancelPromptResponse, error)
+	// UpdateQueuedPrompt edits, drops or promotes a prompt still held in the thread's queue.
+	UpdateQueuedPrompt(ctx context.Context, in *UpdateQueuedPromptRequest, opts ...grpc.CallOption) (*UpdateQueuedPromptResponse, error)
 	// SetThreadConfigOption: `session/set_config_option`. Returns the agent's reported options.
 	SetThreadConfigOption(ctx context.Context, in *SetThreadConfigOptionRequest, opts ...grpc.CallOption) (*SetThreadConfigOptionResponse, error)
 	// RespondInteraction answers a pending permission request or elicitation.
@@ -129,6 +133,8 @@ type ControlClient interface {
 	ReadFile(ctx context.Context, in *ReadFileRequest, opts ...grpc.CallOption) (*ReadFileResponse, error)
 	WriteFile(ctx context.Context, in *WriteFileRequest, opts ...grpc.CallOption) (*WriteFileResponse, error)
 	GetChanges(ctx context.Context, in *GetChangesRequest, opts ...grpc.CallOption) (*GetChangesResponse, error)
+	// PreparePullRequest readies a checkout for a pull request in the box (see PreparePullRequestRequest).
+	PreparePullRequest(ctx context.Context, in *PreparePullRequestRequest, opts ...grpc.CallOption) (*PreparePullRequestResponse, error)
 	// OpenStream prepares a terminal, VNC or preview target and returns a short-lived descriptor. Console mints
 	// the stream token around it; the browser then connects to KAS at /ext/devbox/streams/... (section 4.6).
 	OpenStream(ctx context.Context, in *OpenStreamRequest, opts ...grpc.CallOption) (*OpenStreamResponse, error)
@@ -315,6 +321,16 @@ func (c *controlClient) CancelPrompt(ctx context.Context, in *CancelPromptReques
 	return out, nil
 }
 
+func (c *controlClient) UpdateQueuedPrompt(ctx context.Context, in *UpdateQueuedPromptRequest, opts ...grpc.CallOption) (*UpdateQueuedPromptResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateQueuedPromptResponse)
+	err := c.cc.Invoke(ctx, Control_UpdateQueuedPrompt_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *controlClient) SetThreadConfigOption(ctx context.Context, in *SetThreadConfigOptionRequest, opts ...grpc.CallOption) (*SetThreadConfigOptionResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(SetThreadConfigOptionResponse)
@@ -435,6 +451,16 @@ func (c *controlClient) GetChanges(ctx context.Context, in *GetChangesRequest, o
 	return out, nil
 }
 
+func (c *controlClient) PreparePullRequest(ctx context.Context, in *PreparePullRequestRequest, opts ...grpc.CallOption) (*PreparePullRequestResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PreparePullRequestResponse)
+	err := c.cc.Invoke(ctx, Control_PreparePullRequest_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *controlClient) OpenStream(ctx context.Context, in *OpenStreamRequest, opts ...grpc.CallOption) (*OpenStreamResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(OpenStreamResponse)
@@ -499,6 +525,8 @@ type ControlServer interface {
 	Prompt(context.Context, *PromptRequest) (*PromptResponse, error)
 	// CancelPrompt sends `session/cancel` for the thread's current turn.
 	CancelPrompt(context.Context, *CancelPromptRequest) (*CancelPromptResponse, error)
+	// UpdateQueuedPrompt edits, drops or promotes a prompt still held in the thread's queue.
+	UpdateQueuedPrompt(context.Context, *UpdateQueuedPromptRequest) (*UpdateQueuedPromptResponse, error)
 	// SetThreadConfigOption: `session/set_config_option`. Returns the agent's reported options.
 	SetThreadConfigOption(context.Context, *SetThreadConfigOptionRequest) (*SetThreadConfigOptionResponse, error)
 	// RespondInteraction answers a pending permission request or elicitation.
@@ -517,6 +545,8 @@ type ControlServer interface {
 	ReadFile(context.Context, *ReadFileRequest) (*ReadFileResponse, error)
 	WriteFile(context.Context, *WriteFileRequest) (*WriteFileResponse, error)
 	GetChanges(context.Context, *GetChangesRequest) (*GetChangesResponse, error)
+	// PreparePullRequest readies a checkout for a pull request in the box (see PreparePullRequestRequest).
+	PreparePullRequest(context.Context, *PreparePullRequestRequest) (*PreparePullRequestResponse, error)
 	// OpenStream prepares a terminal, VNC or preview target and returns a short-lived descriptor. Console mints
 	// the stream token around it; the browser then connects to KAS at /ext/devbox/streams/... (section 4.6).
 	OpenStream(context.Context, *OpenStreamRequest) (*OpenStreamResponse, error)
@@ -584,6 +614,9 @@ func (UnimplementedControlServer) Prompt(context.Context, *PromptRequest) (*Prom
 func (UnimplementedControlServer) CancelPrompt(context.Context, *CancelPromptRequest) (*CancelPromptResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CancelPrompt not implemented")
 }
+func (UnimplementedControlServer) UpdateQueuedPrompt(context.Context, *UpdateQueuedPromptRequest) (*UpdateQueuedPromptResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateQueuedPrompt not implemented")
+}
 func (UnimplementedControlServer) SetThreadConfigOption(context.Context, *SetThreadConfigOptionRequest) (*SetThreadConfigOptionResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method SetThreadConfigOption not implemented")
 }
@@ -619,6 +652,9 @@ func (UnimplementedControlServer) WriteFile(context.Context, *WriteFileRequest) 
 }
 func (UnimplementedControlServer) GetChanges(context.Context, *GetChangesRequest) (*GetChangesResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetChanges not implemented")
+}
+func (UnimplementedControlServer) PreparePullRequest(context.Context, *PreparePullRequestRequest) (*PreparePullRequestResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method PreparePullRequest not implemented")
 }
 func (UnimplementedControlServer) OpenStream(context.Context, *OpenStreamRequest) (*OpenStreamResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method OpenStream not implemented")
@@ -953,6 +989,24 @@ func _Control_CancelPrompt_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Control_UpdateQueuedPrompt_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateQueuedPromptRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControlServer).UpdateQueuedPrompt(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Control_UpdateQueuedPrompt_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControlServer).UpdateQueuedPrompt(ctx, req.(*UpdateQueuedPromptRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Control_SetThreadConfigOption_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SetThreadConfigOptionRequest)
 	if err := dec(in); err != nil {
@@ -1169,6 +1223,24 @@ func _Control_GetChanges_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Control_PreparePullRequest_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PreparePullRequestRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControlServer).PreparePullRequest(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Control_PreparePullRequest_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControlServer).PreparePullRequest(ctx, req.(*PreparePullRequestRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Control_OpenStream_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(OpenStreamRequest)
 	if err := dec(in); err != nil {
@@ -1281,6 +1353,10 @@ var Control_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Control_CancelPrompt_Handler,
 		},
 		{
+			MethodName: "UpdateQueuedPrompt",
+			Handler:    _Control_UpdateQueuedPrompt_Handler,
+		},
+		{
 			MethodName: "SetThreadConfigOption",
 			Handler:    _Control_SetThreadConfigOption_Handler,
 		},
@@ -1327,6 +1403,10 @@ var Control_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetChanges",
 			Handler:    _Control_GetChanges_Handler,
+		},
+		{
+			MethodName: "PreparePullRequest",
+			Handler:    _Control_PreparePullRequest_Handler,
 		},
 		{
 			MethodName: "OpenStream",

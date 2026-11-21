@@ -1,10 +1,11 @@
 import { Avatar } from '@pluralsh/design-system'
 
-import { useState } from 'react'
+import { use, useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import styled from 'styled-components'
 
 import { useLogin } from 'components/contexts'
+import { FeatureFlagContext } from 'components/flows/FeatureFlagContext'
 import {
   PageContentSC,
   PageSidebarHeaderSC,
@@ -29,6 +30,10 @@ const directory: Directory = [
   { path: 'security', label: 'Security' },
   { path: 'groups', label: 'Groups' },
   { path: 'access-tokens', label: 'Access tokens' },
+]
+
+const devboxesDirectory: Directory = [
+  ...directory,
   { path: 'ai-subscriptions', label: 'AI subscriptions' },
 ]
 
@@ -37,6 +42,7 @@ export const PROFILE_BREADCRUMBS = [{ label: 'profile', url: PROFILE_ABS_PATH }]
 export default function MyProfile() {
   const { me } = useLogin()
   const [toolbarSlot, setToolbarSlot] = useState<HTMLDivElement | null>(null)
+  const { featureFlags } = use(FeatureFlagContext)
 
   if (!me) return null
 
@@ -48,7 +54,7 @@ export default function MyProfile() {
             <Body2BoldP>Profile</Body2BoldP>
           </PageSidebarHeaderSC>
           <PageSidebarNav
-            directory={directory}
+            directory={featureFlags.Devboxes ? devboxesDirectory : directory}
             pathPrefix={PROFILE_ABS_PATH}
           />
           <SidebarFooterSC>

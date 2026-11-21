@@ -143,6 +143,38 @@ commandTests:
     command: yq
     args: ["--version"]
     expectedOutput: ["4\\.54\\.3"]
+  - name: podman
+    command: podman
+    args: ["--version"]
+    expectedOutput: ["podman version 5\\."]
+  - name: docker maps onto podman
+    command: docker
+    args: ["--version"]
+    expectedOutput: ["podman version"]
+  - name: podman-compose
+    command: podman-compose
+    args: ["--version"]
+    expectedOutput: ["podman-compose version"]
+  - name: rootless container networks (pasta, netavark, aardvark-dns, nft)
+    command: sh
+    args: ["-c", "command -v pasta && command -v nft && ls /usr/lib/podman/netavark /usr/lib/podman/aardvark-dns"]
+    expectedOutput: ["pasta", "nft", "netavark", "aardvark-dns"]
+  - name: docker-compose is podman-compose
+    command: docker-compose
+    args: ["--version"]
+    expectedOutput: ["podman-compose version"]
+  - name: docker compose runs podman-compose without the provider banner
+    command: cat
+    args: ["/etc/containers/containers.conf.d/devbox.conf"]
+    expectedOutput: ["compose_warning_logs = false"]
+  - name: rootless podman stores images with vfs in the home directory
+    command: cat
+    args: ["/etc/containers/storage.conf"]
+    expectedOutput: ['driver = "vfs"', 'rootless_storage_path = "/home/dev/.local/share/containers/storage"']
+  - name: dev has subordinate ids for rootless containers
+    command: grep
+    args: ["^dev:", "/etc/subuid", "/etc/subgid"]
+    expectedOutput: ["/etc/subuid:dev:100000:65536", "/etc/subgid:dev:100000:65536"]
   - name: crane
     command: crane
     args: ["version"]

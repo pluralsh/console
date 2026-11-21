@@ -87,7 +87,7 @@ defmodule Console.GraphQl.Deployments.DevboxMutationsTest do
     test "workbench writers can attach and detach devboxes" do
       user = insert(:user)
       wb = insert(:workbench, write_bindings: [%{user_id: user.id}])
-      devbox = insert(:devbox)
+      devbox = insert(:devbox, create_bindings: [%{user_id: user.id}])
 
       {:ok, %{data: %{"attachDevbox" => %{"id" => id}}}} = run_query("""
         mutation Attach($wid: ID!, $id: ID!) { attachDevbox(workbenchId: $wid, devboxId: $id) { id } }
@@ -104,7 +104,7 @@ defmodule Console.GraphQl.Deployments.DevboxMutationsTest do
     test "workbench readers can start an instance" do
       user = insert(:user)
       wb = insert(:workbench, read_bindings: [%{user_id: user.id}])
-      devbox = insert(:devbox)
+      devbox = insert(:devbox, create_bindings: [%{user_id: user.id}])
       insert(:workbench_devbox, workbench: wb, devbox: devbox)
 
       {:ok, %{data: %{"createDevboxInstance" => inst}}} = run_query("""
@@ -122,7 +122,7 @@ defmodule Console.GraphQl.Deployments.DevboxMutationsTest do
     test "it surfaces offline clusters as a typed error" do
       user = insert(:user)
       wb = insert(:workbench, read_bindings: [%{user_id: user.id}])
-      devbox = insert(:devbox)
+      devbox = insert(:devbox, create_bindings: [%{user_id: user.id}])
       insert(:workbench_devbox, workbench: wb, devbox: devbox)
       expect(Control.Test, :create_instance, fn _, _ -> {:error, :not_connected} end)
 
@@ -161,6 +161,24 @@ defmodule Console.GraphQl.Deployments.DevboxMutationsTest do
       assert kept["keepAwakeBy"]["id"] == inst.user_id
       assert [%{"kind" => "DEFERRAL", "holder" => %{"id" => uid}}] = kept["leases"]
       assert uid == inst.user_id
+    end
+  end
+
+  describe "createDevboxPullRequest" do
+    test "it starts preparing a pull request for a checkout" do
+      inst = owned_instance()
+      expect(Console.Devboxes.PullRequests, :spawn_job, fn _ -> {:ok, self()} end)
+
+      {:ok, %{data: %{"createDevboxPullRequest" => job}}} = run_query("""
+        mutation Create($id: ID!) {
+          createDevboxPullRequest(instanceId: $id, repository: "console") { id instanceId repository status }
+        }
+      """, %{"id" => inst.id}, %{current_user: inst.user})
+
+      assert job["id"]
+      assert job["instanceId"] == inst.id
+      assert job["repository"] == "console"
+      assert job["status"] == "RUNNING"
     end
   end
 

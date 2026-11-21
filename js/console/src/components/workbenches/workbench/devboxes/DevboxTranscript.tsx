@@ -1,47 +1,70 @@
 import {
-  BotIcon,
-  CaretDownIcon,
-  CaretRightIcon,
-  CheckIcon,
   Chip,
-  ChipSeverity,
   Code,
-  DiffViewer,
+  FailedFilledIcon,
   Flex,
   LinkoutIcon,
-  StatusIpIcon,
-  TerminalIcon,
-  ToolIcon,
 } from '@pluralsh/design-system'
-import { ChatMarkdown } from 'components/ai/chatbot/ChatMarkdown'
-import { CaptionP } from 'components/utils/typography/Text'
 import {
+  agentRunUserMsgStyle,
+  chatMessagePropsShared,
+} from 'components/ai/agent-runs/details/AIAgentRunMessages'
+import { AgentTodosTimeline } from 'components/ai/common/AgentTodosTimeline'
+import { ChatMarkdown } from 'components/ai/chatbot/ChatMarkdown'
+import { withSlashCommandChip } from 'components/ai/chatbot/DevboxFileChip'
+import { ChatMessage } from 'components/ai/chatbot/ChatMessage'
+import {
+  SimpleAccordion,
+  SimpleToolCall,
+  SimplifiedMarkdown,
+} from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
+import {
+  isCmdToolKind,
+  resolveToolCallKind,
+  toolCallGroupHeader,
+} from 'components/ai/chatbot/toolCallDisplay'
+import { useQuietToolCodeCss } from 'components/ai/chatbot/ToolCallContent'
+import { EaseIn } from 'components/utils/EaseIn'
+import { Body2P } from 'components/utils/typography/Text'
+import {
+  AiRole,
   DevboxEntityFragment,
   DevboxEntityType,
   DevboxThreadFragment,
   DevboxToolCallFragment,
 } from 'generated/graphql'
 import { ReactNode, useState } from 'react'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
+import { isFileEditToolCall, toolCallDiffs } from './devboxApprovals'
+import { DevboxFileDiff } from './DevboxFileDiff'
 import { DevboxContentBlock, DevboxToolCallContent } from './devboxTimeline'
-import { threadTitle } from './devboxThreads'
+import { subagentsBySpawner } from './devboxSubagentState'
 
 type TerminalLookup = (
   terminalId: Nullable<string>
 ) => Nullable<DevboxEntityFragment['terminal']>
 
+type TranscriptRow =
+  | { kind: 'entity'; entity: DevboxEntityFragment }
+  | { kind: 'tools'; entities: DevboxEntityFragment[] }
+  | { kind: 'subagent'; subagent: DevboxThreadFragment }
+
 export function DevboxTranscript({
   entities,
   terminal = () => null,
+  hiddenToolCalls,
   subagents = [],
-  renderSubagentLane,
+  renderSubagent,
   empty,
 }: {
   entities: DevboxEntityFragment[]
   terminal?: TerminalLookup
+  // calls shown elsewhere, e.g. in the approval card awaiting an answer for them
+  hiddenToolCalls?: ReadonlySet<string>
   subagents?: DevboxThreadFragment[]
-  renderSubagentLane?: (subagent: DevboxThreadFragment) => ReactNode
+  // a subagent's card, in place of the tool call that spawned it
+  renderSubagent?: (subagent: DevboxThreadFragment) => ReactNode
   empty?: ReactNode
 }) {
   const embeddedTerminals = new Set(
@@ -56,9 +79,11 @@ export function DevboxTranscript({
     )
   )
   const bySession = new Map(subagents.map((s) => [s.sessionId, s]))
+  const bySpawner = subagentsBySpawner(subagents)
   const placed = new Set<string>()
 
-  const items: ReactNode[] = []
+  // consecutive tool calls collapse into one group, as in agent run transcripts
+  const rows: TranscriptRow[] = []
   for (const entity of entities) {
     if (
       entity.type === DevboxEntityType.Terminal &&
@@ -66,17 +91,20 @@ export function DevboxTranscript({
       embeddedTerminals.has(entity.terminal.terminalId)
     )
       continue
-    items.push(
-      <div
-        key={`${entity.type}:${entity.id}`}
-        data-position={entity.position ?? undefined}
-      >
-        <DevboxEntityView
-          entity={entity}
-          terminal={terminal}
-        />
-      </div>
-    )
+    const toolCallId = entity.toolCall?.toolCallId
+    const spawned = toolCallId ? bySpawner.get(toolCallId) : undefined
+    if (spawned && renderSubagent && !placed.has(spawned.id)) {
+      placed.add(spawned.id)
+      rows.push({ kind: 'subagent', subagent: spawned })
+      continue
+    }
+    if (toolCallId && hiddenToolCalls?.has(toolCallId)) continue
+    const last = rows.at(-1)
+    if (isGroupableToolCall(entity)) {
+      if (last?.kind === 'tools') last.entities.push(entity)
+      else rows.push({ kind: 'tools', entities: [entity] })
+    } else rows.push({ kind: 'entity', entity })
+
     const linked =
       entity.type === DevboxEntityType.SessionMessage
         ? [
@@ -86,32 +114,66 @@ export function DevboxTranscript({
             .map((id) => (id ? bySession.get(id) : undefined))
             .find((s) => s && !placed.has(s.id))
         : undefined
-    if (linked && renderSubagentLane) {
+    if (linked && renderSubagent) {
       placed.add(linked.id)
-      items.push(
-        <SubagentLane
-          key={`lane:${linked.id}`}
-          subagent={linked}
-        >
-          {renderSubagentLane(linked)}
-        </SubagentLane>
-      )
+      rows.push({ kind: 'subagent', subagent: linked })
     }
   }
-  for (const subagent of subagents) {
-    if (placed.has(subagent.id) || !renderSubagentLane) continue
-    items.push(
-      <SubagentLane
-        key={`lane:${subagent.id}`}
-        subagent={subagent}
-      >
-        {renderSubagentLane(subagent)}
-      </SubagentLane>
-    )
-  }
+  if (renderSubagent)
+    for (const subagent of subagents)
+      if (!placed.has(subagent.id)) rows.push({ kind: 'subagent', subagent })
 
-  if (!items.length) return <>{empty}</>
-  return <TranscriptSC>{items}</TranscriptSC>
+  if (!rows.length) return <>{empty}</>
+  return (
+    <TranscriptSC>
+      {rows.map((row) => {
+        switch (row.kind) {
+          case 'subagent':
+            return (
+              <div
+                key={`subagent:${row.subagent.id}`}
+                data-entity="subagent"
+              >
+                {renderSubagent?.(row.subagent)}
+              </div>
+            )
+          case 'tools': {
+            const [first] = row.entities
+            return (
+              <div
+                key={`tools:${first.id}`}
+                data-position={first.position ?? undefined}
+              >
+                {row.entities.length === 1 ? (
+                  <ToolCallView
+                    entity={first}
+                    terminal={terminal}
+                  />
+                ) : (
+                  <ToolCallGroup
+                    entities={row.entities}
+                    terminal={terminal}
+                  />
+                )}
+              </div>
+            )
+          }
+          default:
+            return (
+              <div
+                key={`${row.entity.type}:${row.entity.id}`}
+                data-position={row.entity.position ?? undefined}
+              >
+                <DevboxEntityView
+                  entity={row.entity}
+                  terminal={terminal}
+                />
+              </div>
+            )
+        }
+      })}
+    </TranscriptSC>
+  )
 }
 
 export function DevboxEntityView({
@@ -125,35 +187,38 @@ export function DevboxEntityView({
     case DevboxEntityType.UserMessage:
       if (!entity.message) break
       return (
-        <UserMessageSC data-entity="user-message">
-          <ContentBlocks blocks={entity.message.content} />
-        </UserMessageSC>
+        <MessageView
+          role={AiRole.User}
+          blocks={entity.message.content}
+          data-entity="user-message"
+        />
       )
     case DevboxEntityType.AgentMessage:
       if (!entity.message) break
       return (
-        <div data-entity="agent-message">
-          <ContentBlocks blocks={entity.message.content} />
-        </div>
+        <MessageView
+          role={AiRole.Assistant}
+          blocks={entity.message.content}
+          data-entity="agent-message"
+        />
       )
     case DevboxEntityType.AgentThought:
       if (!entity.message) break
       return (
-        <Collapsible
-          data-entity="agent-thought"
-          title={<CaptionP $color="text-xlight">Thinking</CaptionP>}
-        >
-          <ThoughtSC>
-            <ContentBlocks blocks={entity.message.content} />
-          </ThoughtSC>
-        </Collapsible>
+        <div data-entity="agent-thought">
+          <AccordionSection label="Thinking">
+            <SimplifiedMarkdown
+              text={blocksText(entity.message.content)}
+              tone="thought"
+            />
+          </AccordionSection>
+        </div>
       )
     case DevboxEntityType.ToolCall:
       if (!entity.toolCall) break
       return (
         <ToolCallView
-          toolCall={entity.toolCall}
-          settled={!!entity.settled}
+          entity={entity}
           terminal={terminal}
         />
       )
@@ -166,25 +231,28 @@ export function DevboxEntityView({
     case DevboxEntityType.Compaction:
       if (!entity.compaction) break
       return (
-        <Collapsible
-          data-entity="compaction"
-          title={
-            <CaptionP $color="text-xlight">
-              Context compacted
-              {entity.compaction.status ? ` · ${entity.compaction.status}` : ''}
-            </CaptionP>
-          }
-        >
-          <ContentBlocks blocks={entity.compaction.summary} />
-        </Collapsible>
+        <div data-entity="compaction">
+          <AccordionSection
+            label={`Context compacted${entity.compaction.status ? ` · ${entity.compaction.status}` : ''}`}
+          >
+            <SimplifiedMarkdown
+              text={blocksText(entity.compaction.summary)}
+              tone="meta"
+            />
+          </AccordionSection>
+        </div>
       )
     case DevboxEntityType.SessionMessage:
       if (!entity.sessionMessage) break
       return (
-        <SessionMessageSC data-entity="session-message">
-          <CaptionP $color="text-xlight">Message between sessions</CaptionP>
-          <ContentBlocks blocks={entity.sessionMessage.content} />
-        </SessionMessageSC>
+        <div data-entity="session-message">
+          <AccordionSection label="Message between sessions">
+            <SimplifiedMarkdown
+              text={blocksText(entity.sessionMessage.content)}
+              tone="thought"
+            />
+          </AccordionSection>
+        </div>
       )
     default:
       break
@@ -197,18 +265,36 @@ export function DevboxEntityView({
   )
 }
 
-export function ContentBlocks({
+function MessageView({
+  role,
   blocks,
+  'data-entity': dataEntity,
 }: {
+  role: AiRole
   blocks: Nullable<Nullable<DevboxContentBlock>[]>
+  'data-entity': string
 }) {
+  const theme = useTheme()
   const list = (blocks ?? []).filter(isNonNullable)
+  const raw = blocksText(list)
+  const text = role === AiRole.User ? withSlashCommandChip(raw) : raw
+  const rich = list.filter((b) => b.__typename !== 'DevboxTextContent')
   return (
     <Flex
       direction="column"
       gap="small"
+      align={role === AiRole.User ? 'flex-end' : 'flex-start'}
+      data-entity={dataEntity}
     >
-      {list.map((block, i) => (
+      {text && (
+        <ChatMessage
+          role={role}
+          content={text}
+          {...chatMessagePropsShared}
+          userMsgWrapperStyle={agentRunUserMsgStyle(theme)}
+        />
+      )}
+      {rich.map((block, i) => (
         <ContentBlockView
           key={i}
           block={block}
@@ -287,13 +373,6 @@ export function ContentBlockView({ block }: { block: DevboxContentBlock }) {
   )
 }
 
-const TOOL_STATUS_SEVERITY: Record<string, ChipSeverity> = {
-  pending: 'neutral',
-  in_progress: 'info',
-  completed: 'success',
-  failed: 'danger',
-}
-
 // Codex's guardian reports each auto-review as a tool call with this id prefix; its status is the verdict.
 const GUARDIAN_REVIEW_PREFIX = 'guardian_assessment:'
 
@@ -304,107 +383,247 @@ const GUARDIAN_REVIEW_TITLE: Record<string, string> = {
   failed: 'Not approved by Codex reviewer',
 }
 
-const GUARDIAN_REVIEW_STATUS: Record<string, string> = {
-  completed: 'approved',
-  failed: 'not approved',
+// ACP tool kinds, as the tool names the shared tool call display understands
+const ACP_TOOL_NAMES: Record<string, string> = {
+  execute: 'bash',
+  read: 'read',
+  edit: 'edit',
+  delete: 'edit',
+  move: 'edit',
+  search: 'grep',
+  fetch: 'web_fetch',
+  think: 'think',
 }
 
-function ToolCallView({
-  toolCall,
-  settled,
+function toolStatus(entity: DevboxEntityFragment) {
+  return `${entity.toolCall?.status ?? (entity.settled ? 'completed' : 'pending')}`
+}
+
+const isPendingStatus = (status: string) =>
+  status === 'pending' || status === 'in_progress'
+
+function toolIdentity(toolCall: DevboxToolCallFragment) {
+  const raw = toolCall.rawInput
+  const input: Record<string, unknown> =
+    raw && typeof raw === 'object' && !Array.isArray(raw)
+      ? { ...(raw as Record<string, unknown>) }
+      : {}
+  const kind = `${toolCall.kind ?? ''}`
+  const name = ACP_TOOL_NAMES[kind] || toolCall.title || kind || 'tool'
+  if (kind === 'execute' && typeof input.command !== 'string')
+    input.command = Array.isArray(input.command)
+      ? input.command.join(' ')
+      : (toolCall.title ?? '').replace(/^`|`$/g, '')
+  const location = toolCall.locations?.find(isNonNullable)?.path
+  const path = input.file_path ?? input.notebook_path ?? location
+  if (input.path == null && typeof path === 'string') input.path = path
+  return { name, arguments: input }
+}
+
+function isGroupableToolCall(entity: DevboxEntityFragment) {
+  if (
+    entity.type !== DevboxEntityType.ToolCall ||
+    !entity.toolCall ||
+    entity.toolCall.toolCallId?.startsWith(GUARDIAN_REVIEW_PREFIX)
+  )
+    return false
+  // edits stay in the stream so their diffs can be read without expanding a rollup
+  if (isFileEditToolCall(entity.toolCall)) return false
+  const { name, arguments: args } = toolIdentity(entity.toolCall)
+  return !isCmdToolKind(resolveToolCallKind(name, args))
+}
+
+function toolOutput(
+  toolCall: DevboxToolCallFragment,
+  content: DevboxToolCallContent[],
+  terminal: TerminalLookup
+) {
+  const parts = content.flatMap((c) => {
+    if (c.__typename === 'DevboxToolCallTerminal')
+      return [terminal(c.terminalId)?.output ?? '']
+    if (
+      c.__typename === 'DevboxToolCallBlock' &&
+      c.content?.__typename === 'DevboxTextContent'
+    )
+      return [c.content.text ?? '']
+    return []
+  })
+  const text = parts.filter(Boolean).join('\n')
+  if (text || toolCall.rawOutput == null) return text
+  return typeof toolCall.rawOutput === 'string'
+    ? toolCall.rawOutput
+    : safeJson(toolCall.rawOutput)
+}
+
+function ToolCallGroup({
+  entities,
   terminal,
 }: {
-  toolCall: DevboxToolCallFragment
-  settled: boolean
+  entities: DevboxEntityFragment[]
   terminal: TerminalLookup
 }) {
-  const content = (toolCall.content ?? []).filter(isNonNullable)
-  const status = `${toolCall.status ?? (settled ? 'completed' : 'pending')}`
-  const hasDiff = content.some((c) => c.__typename === 'DevboxToolCallDiff')
-  const locations = (toolCall.locations ?? []).filter(isNonNullable)
-  const review = toolCall.toolCallId?.startsWith(GUARDIAN_REVIEW_PREFIX)
+  const { spacing } = useTheme()
+  const [isOpen, setIsOpen] = useState(false)
+  const last = entities.at(-1)
+  const header = toolCallGroupHeader(
+    entities.flatMap((e) => (e.toolCall ? [toolIdentity(e.toolCall)] : []))
+  )
   return (
-    <ToolCallSC data-entity="tool-call">
-      <Collapsible
-        defaultOpen={hasDiff || status === 'failed'}
-        title={
-          <Flex
-            gap="small"
-            align="center"
-            css={{ minWidth: 0 }}
-          >
-            {status === 'in_progress' ? (
-              <StatusIpIcon size={12} />
-            ) : status === 'completed' ? (
-              <CheckIcon
-                size={12}
-                color="icon-success"
-              />
-            ) : (
-              <ToolIcon size={12} />
-            )}
-            <ToolTitleSC>
-              {(review && GUARDIAN_REVIEW_TITLE[status]) ||
-                toolCall.title ||
-                toolCall.kind ||
-                'Tool call'}
-            </ToolTitleSC>
-            {toolCall.kind && !review && (
-              <Chip size="small">{toolCall.kind}</Chip>
-            )}
-            <Chip
-              size="small"
-              severity={TOOL_STATUS_SEVERITY[status] ?? 'neutral'}
-            >
-              {(review && GUARDIAN_REVIEW_STATUS[status]) ||
-                status.replace(/_/g, ' ')}
-            </Chip>
-          </Flex>
-        }
+    <>
+      <SimpleAccordion
+        label={header}
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+        hoverCaret
       >
         <Flex
           direction="column"
           gap="small"
+          marginTop={spacing.xsmall}
         >
-          {!!locations.length && (
-            <CaptionP $color="text-xlight">
-              {locations
-                .map((l) => (l.line ? `${l.path}:${l.line}` : l.path))
-                .join(', ')}
-            </CaptionP>
-          )}
-          {content.map((c, i) => (
-            <ToolCallContentView
-              key={i}
-              content={c}
+          {entities.map((entity) => (
+            <ToolCallView
+              key={entity.id}
+              entity={entity}
               terminal={terminal}
             />
           ))}
-          {toolCall.rawInput != null && !content.length && (
-            <JsonBlock
-              title="Input"
-              value={toolCall.rawInput}
-            />
-          )}
-          {toolCall.rawOutput != null && (
-            <JsonBlock
-              title="Output"
-              value={toolCall.rawOutput}
-            />
-          )}
         </Flex>
-      </Collapsible>
-    </ToolCallSC>
+      </SimpleAccordion>
+      {!isOpen && last && isPendingStatus(toolStatus(last)) && (
+        <EaseIn currentKey={last.id ?? ''}>
+          <ToolCallView
+            entity={last}
+            terminal={terminal}
+          />
+        </EaseIn>
+      )}
+    </>
   )
 }
 
-function ToolCallContentView({
-  content,
+function ToolCallView({
+  entity,
   terminal,
 }: {
-  content: DevboxToolCallContent
+  entity: DevboxEntityFragment
   terminal: TerminalLookup
 }) {
+  const { spacing } = useTheme()
+  const toolCall = entity.toolCall
+  if (!toolCall) return null
+  const content = (toolCall.content ?? []).filter(isNonNullable)
+  const status = toolStatus(entity)
+  const review = toolCall.toolCallId?.startsWith(GUARDIAN_REVIEW_PREFIX)
+  const identity = toolIdentity(toolCall)
+  const kind = resolveToolCallKind(identity.name, identity.arguments)
+  const output = toolOutput(toolCall, content, terminal)
+  const rich = content.filter(
+    (c) =>
+      c.__typename !== 'DevboxToolCallTerminal' &&
+      !(
+        c.__typename === 'DevboxToolCallBlock' &&
+        c.content?.__typename === 'DevboxTextContent'
+      )
+  )
+  const diffs =
+    !review && isFileEditToolCall(toolCall) ? toolCallDiffs(toolCall) : []
+  if (diffs.length)
+    return (
+      <Flex
+        direction="column"
+        gap="xsmall"
+        data-entity="tool-call"
+      >
+        {diffs.map((diff, i) => (
+          <DevboxFileDiff
+            key={i}
+            diff={diff}
+            status={<EditStatus status={status} />}
+          />
+        ))}
+        {status === 'failed' && output && (
+          <SimplifiedMarkdown
+            text={output}
+            tone="meta"
+          />
+        )}
+      </Flex>
+    )
+  // edit rows use their content as the subtitle; keep it to the path
+  const edit = kind === 'edit'
+  return (
+    <div data-entity="tool-call">
+      <SimpleToolCall
+        content={edit ? '' : output}
+        attributes={{ tool: identity }}
+        isPending={isPendingStatus(status)}
+        standaloneCommand={isCmdToolKind(kind)}
+        customTitle={
+          review
+            ? GUARDIAN_REVIEW_TITLE[status]
+            : kind === 'generic'
+              ? (toolCall.title ?? undefined)
+              : undefined
+        }
+        leadingIcon={
+          status === 'failed' ? (
+            <FailedFilledIcon
+              size={12}
+              color="icon-danger"
+            />
+          ) : undefined
+        }
+        customResultBody={
+          rich.length || (edit && output) ? (
+            <Flex
+              direction="column"
+              gap="small"
+              marginTop={spacing.xsmall}
+            >
+              {output && (
+                <SimplifiedMarkdown
+                  text={output}
+                  tone="meta"
+                />
+              )}
+              {rich.map((c, i) => (
+                <ToolCallContentView
+                  key={i}
+                  content={c}
+                />
+              ))}
+            </Flex>
+          ) : undefined
+        }
+      />
+    </div>
+  )
+}
+
+function EditStatus({ status }: { status: string }) {
+  if (status === 'failed')
+    return (
+      <Chip
+        size="small"
+        severity="danger"
+      >
+        Failed
+      </Chip>
+    )
+  if (isPendingStatus(status))
+    return (
+      <Chip
+        size="small"
+        loading
+      >
+        Editing
+      </Chip>
+    )
+  return null
+}
+
+function ToolCallContentView({ content }: { content: DevboxToolCallContent }) {
   switch (content.__typename) {
     case 'DevboxToolCallBlock':
       return content.content ? (
@@ -412,27 +631,14 @@ function ToolCallContentView({
       ) : null
     case 'DevboxToolCallDiff':
       return (
-        <Flex
-          direction="column"
-          gap="xxsmall"
-          data-content="diff"
-        >
-          <CaptionP $color="text-light">{content.path}</CaptionP>
-          <DiffViewer
-            oldValue={content.oldText ?? ''}
-            newValue={content.newText ?? ''}
-            splitView={false}
-          />
-        </Flex>
+        <DevboxFileDiff
+          diff={{
+            path: content.path ?? '',
+            oldText: content.oldText ?? '',
+            newText: content.newText ?? '',
+          }}
+        />
       )
-    case 'DevboxToolCallTerminal': {
-      const t = terminal(content.terminalId)
-      return t ? (
-        <TerminalView terminal={t} />
-      ) : (
-        <CaptionP $color="text-xlight">Terminal {content.terminalId}</CaptionP>
-      )
-    }
     case 'DevboxToolCallUnknown':
       return (
         <GenericCard
@@ -461,42 +667,20 @@ function TerminalView({
     .join(' ')
   const exited = terminal.exitCode != null || terminal.signal != null
   return (
-    <TerminalSC data-entity="terminal">
-      <Flex
-        gap="small"
-        align="center"
-      >
-        <TerminalIcon size={12} />
-        <TerminalCommandSC>{command || terminal.terminalId}</TerminalCommandSC>
-        {exited && (
-          <Chip
-            size="small"
-            severity={terminal.exitCode === 0 ? 'success' : 'danger'}
-          >
-            {terminal.signal
-              ? `signal ${terminal.signal}`
-              : `exit ${terminal.exitCode}`}
-          </Chip>
-        )}
-      </Flex>
-      {terminal.output && (
-        <TerminalOutputSC>
-          {terminal.truncated ? '…\n' : ''}
-          {terminal.output}
-        </TerminalOutputSC>
-      )}
-    </TerminalSC>
+    <div data-entity="terminal">
+      <SimpleToolCall
+        content={`${terminal.truncated ? '…\n' : ''}${terminal.output ?? ''}`}
+        attributes={{
+          tool: {
+            name: 'bash',
+            arguments: { command: command || terminal.terminalId },
+          },
+        }}
+        isPending={!exited}
+        standaloneCommand
+      />
+    </div>
   )
-}
-
-const PLAN_STATUS_ICON: Record<string, ReactNode> = {
-  completed: (
-    <CheckIcon
-      size={12}
-      color="icon-success"
-    />
-  ),
-  in_progress: <StatusIpIcon size={12} />,
 }
 
 function PlanView({
@@ -507,110 +691,80 @@ function PlanView({
   const entries = (plan.entries ?? []).filter(isNonNullable)
   const done = entries.filter((e) => e.status === 'completed').length
   return (
-    <PlanSC data-entity="plan">
-      <CaptionP $color="text-light">
-        Plan · {done}/{entries.length}
-      </CaptionP>
-      {entries.map((entry, i) => (
-        <Flex
-          key={i}
-          gap="small"
-          align="center"
-        >
-          {PLAN_STATUS_ICON[`${entry.status}`] ?? <PlanDotSC />}
-          <PlanEntrySC $done={entry.status === 'completed'}>
-            {entry.content}
-          </PlanEntrySC>
-          {entry.priority === 'high' && (
-            <Chip
-              size="small"
-              severity="warning"
-            >
-              high
-            </Chip>
-          )}
-        </Flex>
-      ))}
-    </PlanSC>
+    <div data-entity="plan">
+      <AccordionSection
+        label={`Plan · ${done}/${entries.length}`}
+        defaultOpen
+      >
+        <AgentTodosTimeline
+          todos={entries.map((entry) => ({
+            title: entry.content ?? '',
+            description: '',
+            done: entry.status === 'completed',
+          }))}
+        />
+      </AccordionSection>
+    </div>
   )
 }
 
-function SubagentLane({
-  subagent,
+function AccordionSection({
+  label,
+  defaultOpen,
   children,
 }: {
-  subagent: DevboxThreadFragment
+  label: string
+  defaultOpen?: boolean
   children: ReactNode
 }) {
+  const { spacing } = useTheme()
   return (
-    <LaneSC data-entity="subagent-lane">
-      <Collapsible
-        title={
-          <Flex
-            gap="small"
-            align="center"
-          >
-            <BotIcon size={12} />
-            <CaptionP $color="text-light">
-              Subagent · {threadTitle(subagent)}
-            </CaptionP>
-          </Flex>
-        }
+    <SimpleAccordion
+      label={label}
+      defaultOpen={defaultOpen}
+      hoverCaret
+    >
+      <Flex
+        direction="column"
+        marginTop={spacing.xsmall}
+        minWidth={0}
       >
         {children}
-      </Collapsible>
-    </LaneSC>
+      </Flex>
+    </SimpleAccordion>
   )
 }
 
 export function GenericCard({ label, raw }: { label: string; raw: unknown }) {
-  return (
-    <GenericSC data-entity="generic">
-      <CaptionP $color="text-xlight">{label}</CaptionP>
-      {raw != null && <JsonPreSC>{safeJson(raw)}</JsonPreSC>}
-    </GenericSC>
-  )
-}
-
-function JsonBlock({ title, value }: { title: string; value: unknown }) {
+  const quietCodeCss = useQuietToolCodeCss()
   return (
     <Flex
       direction="column"
       gap="xxsmall"
+      data-entity="generic"
     >
-      <CaptionP $color="text-xlight">{title}</CaptionP>
-      <JsonPreSC>
-        {typeof value === 'string' ? value : safeJson(value)}
-      </JsonPreSC>
+      <Body2P $color="text-xlight">{label}</Body2P>
+      {raw != null && (
+        <Code
+          language="json"
+          showHeader={false}
+          fillLevel={0}
+          css={quietCodeCss}
+        >
+          {safeJson(raw)}
+        </Code>
+      )}
     </Flex>
   )
 }
 
-function Collapsible({
-  title,
-  children,
-  defaultOpen = false,
-  ...props
-}: {
-  title: ReactNode
-  children: ReactNode
-  defaultOpen?: boolean
-  'data-entity'?: string
-}) {
-  const [open, setOpen] = useState(defaultOpen)
-  return (
-    <div {...props}>
-      <CollapseButtonSC
-        type="button"
-        aria-expanded={open}
-        onClick={() => setOpen((o) => !o)}
-      >
-        {open ? <CaretDownIcon size={10} /> : <CaretRightIcon size={10} />}
-        {title}
-      </CollapseButtonSC>
-      {open && <CollapseBodySC>{children}</CollapseBodySC>}
-    </div>
-  )
+function blocksText(blocks: Nullable<Nullable<DevboxContentBlock>[]>) {
+  return (blocks ?? [])
+    .filter(isNonNullable)
+    .flatMap((b) =>
+      b.__typename === 'DevboxTextContent' && b.text ? [b.text] : []
+    )
+    .join('\n\n')
 }
 
 function safeJson(value: unknown) {
@@ -630,132 +784,10 @@ function languageFor(uri: Nullable<string>, mimeType: Nullable<string>) {
 const TranscriptSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing.medium,
+  gap: theme.spacing.small,
 }))
 
-const UserMessageSC = styled.div(({ theme }) => ({
-  alignSelf: 'flex-end',
-  maxWidth: '85%',
-  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
-  borderRadius: theme.borderRadiuses.large,
-  backgroundColor: theme.colors['fill-two'],
-  border: theme.borders['fill-two'],
-}))
-
-const ThoughtSC = styled.div(({ theme }) => ({
-  color: theme.colors['text-light'],
-  borderLeft: theme.borders.default,
-  paddingLeft: theme.spacing.medium,
-}))
-
-const SessionMessageSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.xsmall,
-  padding: theme.spacing.small,
+const ImageSC = styled.img(({ theme }) => ({
+  maxWidth: '100%',
   borderRadius: theme.borderRadiuses.medium,
-  border: theme.borders.default,
-}))
-
-const ToolCallSC = styled.div(({ theme }) => ({
-  padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
-  borderRadius: theme.borderRadiuses.medium,
-  border: theme.borders.default,
-  backgroundColor: theme.colors['fill-zero'],
-}))
-
-const ToolTitleSC = styled.span(({ theme }) => ({
-  ...theme.partials.text.body2Bold,
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-}))
-
-const TerminalSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.xsmall,
-  padding: theme.spacing.small,
-  borderRadius: theme.borderRadiuses.medium,
-  backgroundColor: theme.colors['fill-zero-selected'],
-}))
-
-const TerminalCommandSC = styled.code(({ theme }) => ({
-  ...theme.partials.text.code,
-  color: theme.colors['text-light'],
-}))
-
-const TerminalOutputSC = styled.pre(({ theme }) => ({
-  ...theme.partials.text.code,
-  margin: 0,
-  maxHeight: 320,
-  overflow: 'auto',
-  whiteSpace: 'pre-wrap',
-  color: theme.colors.text,
-}))
-
-const PlanSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.xsmall,
-  padding: theme.spacing.small,
-  borderRadius: theme.borderRadiuses.medium,
-  border: theme.borders.default,
-}))
-
-const PlanDotSC = styled.span(({ theme }) => ({
-  width: 12,
-  height: 12,
-  borderRadius: '50%',
-  border: theme.borders.input,
-  flexShrink: 0,
-}))
-
-const PlanEntrySC = styled.span<{ $done: boolean }>(({ theme, $done }) => ({
-  ...theme.partials.text.body2,
-  color: $done ? theme.colors['text-xlight'] : theme.colors.text,
-  textDecoration: $done ? 'line-through' : 'none',
-}))
-
-const LaneSC = styled.div(({ theme }) => ({
-  marginLeft: theme.spacing.medium,
-  paddingLeft: theme.spacing.medium,
-  borderLeft: `2px solid ${theme.colors['border-fill-two']}`,
-}))
-
-const GenericSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.xxsmall,
-  padding: theme.spacing.small,
-  borderRadius: theme.borderRadiuses.medium,
-  border: `1px dashed ${theme.colors.border}`,
-}))
-
-const JsonPreSC = styled.pre(({ theme }) => ({
-  ...theme.partials.text.code,
-  margin: 0,
-  maxHeight: 240,
-  overflow: 'auto',
-  whiteSpace: 'pre-wrap',
-  color: theme.colors['text-light'],
-}))
-
-const ImageSC = styled.img({ maxWidth: '100%', borderRadius: 4 })
-
-const CollapseButtonSC = styled.button(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  gap: theme.spacing.xsmall,
-  width: '100%',
-  padding: 0,
-  background: 'none',
-  border: 'none',
-  cursor: 'pointer',
-  color: theme.colors.text,
-  textAlign: 'left',
-}))
-
-const CollapseBodySC = styled.div(({ theme }) => ({
-  paddingTop: theme.spacing.small,
 }))

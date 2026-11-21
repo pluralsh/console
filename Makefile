@@ -200,7 +200,8 @@ proto: .PHONY ## generates protobufs schemas for elixir
 	cd proto && pwd && protoc --elixir_out=plugins=grpc:./../lib/grpc console.proto
 	cd proto && protoc --elixir_out=plugins=grpc:./../lib/grpc pseudofs.proto
 
-devbox-proto: .PHONY ## generates the devbox.v1 gRPC contract for elixir (lib/grpc/devbox) and go (deployment-operator)
+devbox-proto: .PHONY ## generates the devbox.v1 gRPC contract for elixir (lib/grpc/devbox) and go (deployment-operator, kas)
 	rm -f lib/grpc/devbox/v1/*.pb.ex
 	cd proto && protoc --elixir_out=plugins=grpc:./../lib/grpc devbox/v1/*.proto
 	$(MAKE) -C go/deployment-operator devbox-proto
+	go/kubernetes-agent/kas/build/protoc.sh devbox

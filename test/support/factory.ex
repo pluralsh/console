@@ -1519,6 +1519,7 @@ defmodule Console.Factory do
       image: "ghcr.io/pluralsh/devbox:latest",
       template_revision: "rev-1",
       status: :ready,
+      create_policy_id: Ecto.UUID.generate(),
       cluster: build(:cluster),
       agents: [
         %Schema.Devbox.Agent{

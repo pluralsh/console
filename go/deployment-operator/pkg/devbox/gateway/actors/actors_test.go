@@ -170,3 +170,19 @@ func TestParseRef(t *testing.T) {
 		t.Fatal(r)
 	}
 }
+
+func TestEgressRulesDefaultPorts(t *testing.T) {
+	rules := actors.EgressRules(egress.Policy{Rules: []egress.Rule{
+		{Host: "ai.example.com", Scheme: egress.SchemeHTTPS},
+		{Host: "plain.example.com", Scheme: egress.SchemeHTTP},
+		{Host: "db.example.com", Scheme: egress.SchemeTLSPassthrough},
+	}})
+	got := []int32{
+		rules[0].GetHttps().GetPorts().GetNumbers()[0],
+		rules[1].GetHttp().GetPorts().GetNumbers()[0],
+		rules[2].GetTlsPassthrough().GetPorts().GetNumbers()[0],
+	}
+	if want := []int32{443, 80, 443}; !slices.Equal(got, want) {
+		t.Fatalf("ports = %v, want %v", got, want)
+	}
+}

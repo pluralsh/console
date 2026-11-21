@@ -3,6 +3,7 @@ package egress
 import (
 	"fmt"
 	"net"
+	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -155,7 +156,7 @@ func BuildPolicy(info InstanceInfo) Policy {
 		if exp == 0 {
 			exp = defaultActorJWTExpiration
 		}
-		b.add(Rule{
+		gateway := Rule{
 			Host:                      host,
 			Port:                      ep.Port,
 			Scheme:                    scheme,
@@ -164,7 +165,14 @@ func BuildPolicy(info InstanceInfo) Policy {
 			ActorJWT:                  true,
 			ActorJWTAudiences:         []string{ep.JWTAudience()},
 			ActorJWTExpirationSeconds: exp,
-		})
+		}
+		b.add(gateway)
+		// Substrate's sandbox DNS only forwards names the policy allows, exactly. Cluster DNS answers a Service
+		// only by its full name, which resolvers reach through the search list, so that name needs a rule too.
+		if fqdn := serviceFQDN(host); fqdn != "" {
+			gateway.Host = fqdn
+			b.add(gateway)
+		}
 	}
 
 	if subscriptionBilling(info.AgentBilling, "claude") {
@@ -199,12 +207,7 @@ func (b *policyBuilder) add(r Rule) {
 	if r.Host == "" {
 		return
 	}
-	if r.Port == 0 {
-		r.Port = 443
-		if r.Scheme == SchemeHTTP {
-			r.Port = 80
-		}
-	}
+	r.Port = r.EffectivePort()
 	key := fmt.Sprintf("%s:%d", r.Host, r.Port)
 	if b.seen[key] {
 		return
@@ -238,6 +241,36 @@ func normalizeAgent(s string) string {
 func normalizeBilling(s string) string {
 	s = strings.ToLower(strings.TrimSpace(s))
 	return strings.TrimPrefix(s, "billing_mode_")
+}
+
+// serviceFQDN is a `<svc>.<ns>.svc` host's fully qualified name in the cluster's DNS domain, or "".
+func serviceFQDN(host string) string {
+	if !strings.HasSuffix(host, ".svc") {
+		return ""
+	}
+	return host + "." + clusterDomain()
+}
+
+// clusterDomain is the cluster's DNS domain, read from the `svc.<domain>` entry of the pod's resolv.conf search
+// list.
+var clusterDomain = sync.OnceValue(func() string {
+	data, _ := os.ReadFile("/etc/resolv.conf")
+	return clusterDomainOf(string(data))
+})
+
+func clusterDomainOf(resolvConf string) string {
+	for _, line := range strings.Split(resolvConf, "\n") {
+		fields := strings.Fields(line)
+		if len(fields) == 0 || fields[0] != "search" {
+			continue
+		}
+		for _, d := range fields[1:] {
+			if domain, ok := strings.CutPrefix(strings.TrimSuffix(d, "."), "svc."); ok && domain != "" {
+				return domain
+			}
+		}
+	}
+	return "cluster.local"
 }
 
 // normalizeHost lowercases a host and strips any scheme, path, port and trailing dot.

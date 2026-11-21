@@ -1,4 +1,5 @@
 import {
+  AiProvider,
   DevboxAgentFragment,
   DevboxAgentType,
   DevboxBillingMode,
@@ -13,6 +14,9 @@ import {
   defaultStartValues,
   dropProxyAuto,
   hasStartErrors,
+  modelDisplayName,
+  modelsOf,
+  proxyModelOf,
   reconcileStartValues,
   toInstanceAttributes,
   validateStartValues,
@@ -84,6 +88,35 @@ describe('devbox start form', () => {
         { [DevboxAgentType.Claude]: 'subscription' }
       )
     ).toBe(false)
+  })
+
+  it('offers the proxy models, or the probed ones on a subscription', () => {
+    const proxied = {
+      ...claude,
+      defaultModel: 'anthropic/claude-sonnet-4-5',
+      models: [{ id: 'anthropic/claude-sonnet-4-5' }, { id: 'openai/gpt-5' }],
+      subscriptionDefaultModel: 'sonnet',
+      subscriptionModels: claude.models,
+    } as DevboxAgentFragment
+    const proxyBox = { ...box, agents: [proxied] }
+    expect(modelsOf(proxied).map((m) => m.id)).toEqual([
+      'anthropic/claude-sonnet-4-5',
+      'openai/gpt-5',
+    ])
+    expect(defaultStartValues(proxyBox, []).model).toBe(
+      'anthropic/claude-sonnet-4-5'
+    )
+    const subscribed = defaultStartValues(proxyBox, [], {
+      [DevboxAgentType.Claude]: 'subscription',
+    })
+    expect(subscribed.model).toBe('sonnet')
+    expect(hasStartErrors(validateStartValues(subscribed, proxyBox))).toBe(
+      false
+    )
+    expect(
+      validateStartValues({ ...subscribed, model: 'openai/gpt-5' }, proxyBox)
+        .model
+    ).toMatch(/isn't in the agent's catalog/)
   })
 
   it('requires a box unless restoring a snapshot', () => {
@@ -163,5 +196,75 @@ describe('devbox start form', () => {
         { agent: DevboxAgentType.Codex, billing: DevboxBillingMode.Proxy },
       ],
     })
+  })
+})
+
+describe('modelDisplayName', () => {
+  it('resolves an alias to the model it points at', () => {
+    expect(
+      modelDisplayName({
+        id: 'default',
+        name: 'Default (recommended)',
+        description: 'Opus 4.5 · Most capable for complex work',
+      })
+    ).toBe('Opus 4.5')
+    expect(
+      modelDisplayName({
+        id: 'default',
+        name: 'Default (recommended)',
+        description: 'Use the default model (currently Sonnet 4.5) · $3/$15',
+      })
+    ).toBe('Sonnet 4.5')
+  })
+
+  it('adds the version a named model describes', () => {
+    expect(
+      modelDisplayName({
+        id: 'sonnet',
+        name: 'Sonnet',
+        description: 'Sonnet 4.5 · Best for everyday tasks',
+      })
+    ).toBe('Sonnet 4.5')
+  })
+
+  it('keeps names it cannot resolve', () => {
+    expect(modelDisplayName({ id: 'gpt-5', name: 'GPT-5' })).toBe('GPT-5')
+    expect(modelDisplayName({ id: 'default', name: 'Default' })).toBe('Default')
+    expect(
+      modelDisplayName({
+        id: 'opus',
+        name: 'Opus',
+        description: 'For the hardest problems',
+      })
+    ).toBe('Opus')
+  })
+
+  it('shows a proxy model by its slug, not the alias it matched', () => {
+    expect(
+      modelDisplayName({
+        id: 'bedrock/us.anthropic.claude-opus-4-5-v1:0',
+        name: 'Opus',
+        description: 'Opus 4.5 · Most capable',
+      })
+    ).toBe('us.anthropic.claude-opus-4-5-v1:0')
+  })
+})
+
+describe('proxyModelOf', () => {
+  it('splits an AI proxy id into provider and slug', () => {
+    expect(proxyModelOf('openai/gpt-5')).toEqual({
+      provider: AiProvider.Openai,
+      slug: 'gpt-5',
+    })
+    expect(proxyModelOf('plural/anthropic/claude-sonnet-4-5')).toEqual({
+      provider: AiProvider.Anthropic,
+      slug: 'claude-sonnet-4-5',
+    })
+  })
+
+  it('ignores agent aliases and unknown prefixes', () => {
+    expect(proxyModelOf('opus')).toBeNull()
+    expect(proxyModelOf('acme/model')).toBeNull()
+    expect(proxyModelOf(null)).toBeNull()
   })
 })

@@ -6,13 +6,15 @@ Dockerfiles for the devbox sandbox and gateway images (DBX-49). All builds use
 | Image | Dockerfile | Contents |
 |---|---|---|
 | `ghcr.io/pluralsh/devbox-minimal` | `minimal.Dockerfile` | `devbox-daemon` (PID 1), every harness and ACP adapter, Node, Chromium, Xvfb, x11vnc, Playwright MCP, shell tools, `mise` |
-| `ghcr.io/pluralsh/devbox-fat` | `fat.Dockerfile` | `devbox-minimal` plus language toolchains, DevOps tools and cloud CLIs |
+| `ghcr.io/pluralsh/devbox-fat` | `fat.Dockerfile` | `devbox-minimal` plus language toolchains, DevOps tools, cloud CLIs and rootless Podman (`docker` and `docker compose` map onto it) |
 | `ghcr.io/pluralsh/devbox-gateway` | `gateway.Dockerfile` | `devbox-gateway` on distroless |
 
 Published by `.github/workflows/deployment-operator-cd-devbox.yaml` on
 `go/deployment-operator/v*` tags, with `X.Y.Z` and `X.Y` tags, cosign-signed by
-digest. `.github/workflows/deployment-operator-ci-devbox.yaml` builds and tests
-them on pull requests.
+digest. The same workflow builds pull requests (`pr-<number>` and `sha-<sha>`
+tags), runs `test.sh` against each pushed digest (`MINIMAL_IMAGE`, `FAT_IMAGE`,
+`GATEWAY_IMAGE`) and caches layers in `ghcr.io/pluralsh/console-cache`.
+`.github/workflows/deployment-operator-ci-devbox.yaml` runs the static checks.
 
 ## Layout
 

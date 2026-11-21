@@ -1885,6 +1885,17 @@ type RootMutationType {
   "Keeps an instance awake until a time, clamped to the box's maxDeferral and maxContinuousAwake"
   keepDevboxInstanceAwake(id: ID!, until: DateTime!): DevboxInstance
 
+  "Starts a pull request for a checkout: the box writes the title, body and commit message, commits and pushes"
+  createDevboxPullRequest(
+    instanceId: ID!
+
+    "a checkout's name or path; a thread worktree's path picks that worktree"
+    repository: String!
+
+    "a thread whose recent prompts explain the change"
+    threadId: ID
+  ): DevboxPullRequestJob
+
   cancelDevboxKeepAwake(id: ID!): DevboxInstance
 
   createDevboxSnapshot(instanceId: ID!, attributes: DevboxSnapshotAttributes): DevboxSnapshot
@@ -1917,6 +1928,18 @@ type RootMutationType {
   ): DevboxThread
 
   cancelDevboxPrompt(id: ID!): DevboxThread
+
+  updateDevboxQueuedPrompt(
+    "the thread id"
+    id: ID!
+
+    promptId: String!
+
+    action: DevboxQueuedPromptAction!
+
+    "the new text, for edit"
+    text: String
+  ): DevboxThread
 
   setDevboxThreadConfigOption(id: ID!, configId: String!, value: String!): DevboxThread
 
@@ -2135,6 +2158,9 @@ type RootSubscriptionType {
   "Live transcript deltas (including settle), never stored"
   devboxInstanceDelta(instanceId: ID!): DevboxEntityChangeDelta
 
+  "Pull requests the instance is preparing"
+  devboxPullRequestJobDelta(instanceId: ID!): DevboxPullRequestJobDelta
+
   "Thread and interaction index changes"
   devboxInstanceIndexDelta(instanceId: ID!): DevboxIndexChangeDelta
 
@@ -2285,6 +2311,7 @@ enum DevboxSnapshotStatus {
 enum PullRequestSource {
   MCP
   EGRESS
+  DEVBOX
 }
 
 enum DevboxCloudProvider {
@@ -2322,6 +2349,28 @@ enum DevboxBillingMode {
 
   "billed to the instance owner's linked subscription"
   SUBSCRIPTION
+}
+
+enum DevboxThreadStage {
+  "a turn is in flight or queued"
+  RUNNING
+
+  "the agent is waiting on a person to answer a permission request or question"
+  NEEDS_REVIEW
+
+  "the last turn finished or failed, or the thread was closed"
+  COMPLETED
+}
+
+enum DevboxQueuedPromptAction {
+  "replace the prompt's text"
+  EDIT
+
+  "drop the prompt from the queue"
+  CANCEL
+
+  "run the prompt next, stopping the current turn"
+  SEND_NOW
 }
 
 enum DevboxStreamKind {
@@ -2441,6 +2490,9 @@ input DevboxAttributes {
 
   "cloud identities instances get workload identity tokens for"
   cloudIdentities: [DevboxCloudIdentityAttributes]
+
+  "who may attach this box to a workbench and start instances on it, falling back to the global create policy if empty"
+  createBindings: [AgentBindingAttributes]
 }
 
 input DevboxCloudIdentityAttributes {
@@ -2771,6 +2823,9 @@ type Devbox {
 
   scmConnections: [ScmConnection]
 
+  "who may attach this box to a workbench and start instances on it"
+  createBindings: [PolicyBinding]
+
   "the box's workload identity issuer and how to trust it from cloud accounts"
   workloadIdentity: DevboxWorkloadIdentity
 
@@ -2839,11 +2894,11 @@ type DevboxAgent {
 
   sessionCapabilities: DevboxSessionCapabilities
 
-  "the models offered: probed values narrowed by the box's allowlist"
-  models: [DevboxModel]
+  "the models offered under a billing mode (proxy by default): the AI proxy's models, or on a subscription the probed values narrowed by the box's allowlist"
+  models(billing: DevboxBillingMode): [DevboxModel]
 
-  "the model preselected when starting an instance"
-  defaultModel: String
+  "the model preselected when starting an instance under a billing mode (proxy by default)"
+  defaultModel(billing: DevboxBillingMode): String
 }
 
 type DevboxModel {
@@ -2995,7 +3050,12 @@ type DevboxInstance {
 
   keepAwakeBy: User
 
-  threads(includeDeleted: Boolean): [DevboxThread]
+  threads(
+    includeDeleted: Boolean
+
+    "only threads in these stages"
+    stages: [DevboxThreadStage]
+  ): [DevboxThread]
 
   interactions(pending: Boolean): [DevboxInteraction]
 
@@ -3207,6 +3267,9 @@ type DevboxThread {
 
   status: DevboxThreadStatus!
 
+  "where the thread sits in its lifecycle, for grouping"
+  stage: DevboxThreadStage!
+
   imported: Boolean
 
   lastActivityAt: DateTime
@@ -3231,6 +3294,12 @@ type DevboxThread {
 
   usage: DevboxUsage
 
+  "prompts held until the running turn ends, in the order they'll run"
+  queuedPrompts: [DevboxQueuedPrompt]
+
+  "for subagents, the parent's tool call that spawned it"
+  parentToolCallId: String
+
   instance: DevboxInstance
 
   parent: DevboxThread
@@ -3245,6 +3314,18 @@ type DevboxThread {
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+"A prompt sent while the thread was busy, waiting for its turn"
+type DevboxQueuedPrompt {
+  promptId: String!
+
+  text: String
+
+  "names of the files attached to the prompt"
+  attachments: [String]
+
+  queuedAt: DateTime
 }
 
 type DevboxUsage {
@@ -3596,6 +3677,34 @@ type DevboxEntityChange {
 }
 
 "The index rows an UpsertInstanceIndex call changed (revision and foreground state only when the instance aggregate changed)"
+enum DevboxPullRequestJobStatus {
+  RUNNING
+  SUCCEEDED
+  FAILED
+}
+
+"A pull request a devbox instance is preparing for one of its checkouts (never stored)"
+type DevboxPullRequestJob {
+  id: ID!
+
+  instanceId: ID!
+
+  "the checkout's name or path"
+  repository: String!
+
+  status: DevboxPullRequestJobStatus!
+
+  "the pull request, once created"
+  url: String
+
+  title: String
+
+  error: String
+
+  "who wrote the text: ai_proxy, claude, codex or template"
+  writer: String
+}
+
 type DevboxIndexChange {
   instanceId: ID!
   revision: Long
@@ -3642,6 +3751,11 @@ type DevboxEntityChangeDelta {
 type DevboxIndexChangeDelta {
   delta: Delta
   payload: DevboxIndexChange
+}
+
+type DevboxPullRequestJobDelta {
+  delta: Delta
+  payload: DevboxPullRequestJob
 }
 
 enum ChatProviderConnectionType {
@@ -6111,11 +6225,14 @@ type Workbench {
 
     last: Int
 
-    "filter instances by status"
+    "filter instances by status (overrides include_ended)"
     statuses: [DevboxInstanceStatus]
 
     "only show instances you started"
     mine: Boolean
+
+    "also list completed, failed and cancelled instances"
+    includeEnded: Boolean
   ): DevboxInstanceConnection
 
   devboxSnapshots(after: String, first: Int, before: String, last: Int): DevboxSnapshotConnection
@@ -18612,7 +18729,7 @@ type PullRequest {
   "the service this pr is meant to modify"
   service: ServiceDeployment
 
-  "how a devbox pr was recorded: through the devbox mcp, or observed at egress"
+  "how a devbox pr was recorded: through the devbox mcp, the create pr button, or observed at egress"
   source: PullRequestSource
 
   "devbox attribution details, e.g. the subagent session and tool call that created it"

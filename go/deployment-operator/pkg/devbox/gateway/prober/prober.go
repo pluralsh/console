@@ -397,7 +397,7 @@ func (p *Prober) attempt(ctx context.Context, name string, req *probe.Request) (
 		return nil, fmt.Errorf("waiting for probe actor %s: %w", ref, err)
 	}
 	daemon := p.deps.Daemons.Daemon(ref.String())
-	if err := waitHealthy(ctx, daemon); err != nil {
+	if err := waitServing(ctx, daemon); err != nil {
 		return nil, fmt.Errorf("waiting for the probe daemon: %w", err)
 	}
 	resp, err := daemon.ProbeAgents(ctx, spec)
@@ -465,25 +465,21 @@ func (p *Prober) finish(ctx context.Context, name string, resp *devboxv1.ProbeAg
 	}
 }
 
-func waitHealthy(ctx context.Context, d devboxv1.DaemonClient) error {
+// waitServing waits for the daemon to answer Health. It doesn't wait for Ready: the probe never initializes the
+// daemon, and an uninitialized daemon stays "booting".
+func waitServing(ctx context.Context, d devboxv1.DaemonClient) error {
 	t := time.NewTicker(healthPollInterval)
 	defer t.Stop()
-	var last error
 	for {
 		hctx, cancel := context.WithTimeout(ctx, 5*time.Second)
-		resp, err := d.Health(hctx, &devboxv1.HealthRequest{})
+		_, err := d.Health(hctx, &devboxv1.HealthRequest{})
 		cancel()
-		if err == nil && resp.GetReady() {
+		if err == nil {
 			return nil
-		}
-		if err != nil {
-			last = err
-		} else {
-			last = fmt.Errorf("daemon not ready: %s", resp.GetStatus())
 		}
 		select {
 		case <-ctx.Done():
-			return errors.Join(ctx.Err(), last)
+			return errors.Join(ctx.Err(), err)
 		case <-t.C:
 		}
 	}

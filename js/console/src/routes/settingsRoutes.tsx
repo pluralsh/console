@@ -42,6 +42,8 @@ import { RequireCdEnabled } from './cdRoutes'
 import {
   ACCESS_TOKENS_REL_PATH,
   AI_SETTINGS_AGENT_RUNTIMES_REL_PATH,
+  AI_SETTINGS_DEVBOX_PARAM_ID,
+  AI_SETTINGS_DEVBOXES_REL_PATH,
   AI_SETTINGS_AI_INSIGHTS_REL_PATH,
   AI_SETTINGS_AI_PROVIDER_REL_PATH,
   AI_SETTINGS_MCP_SERVERS_REL_PATH,
@@ -72,6 +74,9 @@ import { AISettings } from 'components/settings/ai/AISettings'
 import { McpServers } from 'components/settings/ai/mcp/McpServers'
 import { McpServerEditSettings } from 'components/settings/ai/mcp/McpServerEditSettings'
 import { AIAgentRuntimes } from 'components/settings/ai/agent-runtimes/AIAgentRuntimes'
+import { AIDevboxes } from 'components/settings/ai/devboxes/AIDevboxes'
+import { AIDevboxDetail } from 'components/settings/ai/devboxes/AIDevboxDetail'
+import { FeatureFlagGate } from 'components/flows/FeatureFlagContext'
 import WebhooksSettings from '../components/settings/webhooks/WebhooksSettings'
 import ChatbotsSettings from '../components/settings/chatbots/ChatbotsSettings'
 import { WebhookCreateSettings } from 'components/settings/webhooks/WebhookCreateSettings'
@@ -215,10 +220,26 @@ const aiSettingsRoutes = (
         element={<AIAgentRuntimes />}
       />
       <Route
+        path={AI_SETTINGS_DEVBOXES_REL_PATH}
+        element={
+          <FeatureFlagGate flag="Devboxes">
+            <AIDevboxes />
+          </FeatureFlagGate>
+        }
+      />
+      <Route
         path={AI_SETTINGS_MCP_SERVERS_REL_PATH}
         element={<McpServers />}
       />
     </Route>
+    <Route
+      path={`${AI_SETTINGS_REL_PATH}/${AI_SETTINGS_DEVBOXES_REL_PATH}/:${AI_SETTINGS_DEVBOX_PARAM_ID}`}
+      element={
+        <FeatureFlagGate flag="Devboxes">
+          <AIDevboxDetail />
+        </FeatureFlagGate>
+      }
+    />
     <Route
       path={`${AI_SETTINGS_REL_PATH}/${AI_SETTINGS_MCP_SERVERS_REL_PATH}/${AI_SETTINGS_MCP_SERVERS_EDIT_REL_PATH}`}
       element={<McpServerEditSettings />}

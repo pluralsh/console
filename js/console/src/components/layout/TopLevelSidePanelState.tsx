@@ -21,6 +21,7 @@ import {
 import { AI_AGENT_RUNS_PATH_MATCHER_ABS } from 'routes/aiRoutesConsts'
 import {
   WORKBENCH_CHATBOTS_PATH_MATCHER_ABS,
+  WORKBENCH_DEVBOX_INSTANCE_ABS_PATH,
   WORKBENCH_JOBS_PATH_MATCHER_ABS,
   WORKBENCH_TOOLS_ADD_PATH_MATCHER_ABS,
   WORKBENCH_TOOLS_YOUR_PATH_MATCHER_ABS,
@@ -32,6 +33,7 @@ export type SidePanel =
   | 'ai-chat'
   | 'webhook-setup-guide'
   | 'workbench-job'
+  | 'devbox'
 
 export type SidePanelWidthOverride = {
   minWidth?: number
@@ -56,6 +58,7 @@ const ALLOWED_ROUTES: Record<Exclude<SidePanel, 'ai-chat'>, string[]> = {
     AI_SETTINGS_MCP_SERVERS_EDIT_PATH_MATCHER_ABS,
   ],
   'workbench-job': [WORKBENCH_JOBS_PATH_MATCHER_ABS],
+  devbox: [WORKBENCH_DEVBOX_INSTANCE_ABS_PATH],
   'agent-run': [AI_AGENT_RUNS_PATH_MATCHER_ABS],
 }
 
@@ -77,7 +80,13 @@ type TopLevelSidePanelContextT = {
   closeSidePanel: (panel: SidePanel) => void
   widthOverride: SidePanelWidthOverride | null
   setWidthOverride: (override: SidePanelWidthOverride | null) => void
+  // the tab a panel shows, set from the page too (e.g. its collapsed rail),
+  // as panels render outside the page's tree. `key` scopes it to an entity
+  panelTabs: Partial<Record<SidePanel, SidePanelTab>>
+  setPanelTab: (panel: SidePanel, tab: SidePanelTab) => void
 }
+
+export type SidePanelTab = { tab: string; key?: Nullable<string> }
 
 const TopLevelSidePanelContext = createContext<TopLevelSidePanelContextT>({
   sidePanel: null,
@@ -85,6 +94,8 @@ const TopLevelSidePanelContext = createContext<TopLevelSidePanelContextT>({
   closeSidePanel: () => {},
   widthOverride: null,
   setWidthOverride: () => {},
+  panelTabs: {},
+  setPanelTab: () => {},
 })
 
 export function useTopLevelSidePanel() {
@@ -170,6 +181,15 @@ export function TopLevelSidePanelProvider({
     []
   )
 
+  const [panelTabs, setPanelTabs] = useState<
+    Partial<Record<SidePanel, SidePanelTab>>
+  >({})
+  const setPanelTab = useCallback(
+    (panel: SidePanel, tab: SidePanelTab) =>
+      setPanelTabs((tabs) => ({ ...tabs, [panel]: tab })),
+    []
+  )
+
   const ctx = useMemo(
     () => ({
       sidePanel,
@@ -177,8 +197,10 @@ export function TopLevelSidePanelProvider({
       closeSidePanel,
       widthOverride,
       setWidthOverride,
+      panelTabs,
+      setPanelTab,
     }),
-    [sidePanel, closeSidePanel, widthOverride]
+    [sidePanel, closeSidePanel, widthOverride, panelTabs, setPanelTab]
   )
 
   return (

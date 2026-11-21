@@ -3536,6 +3536,7 @@ export const DevboxTinyFragmentDoc = /*#__PURE__*/ gql`
   resolvedImage
   templateRevision
   browser
+  resources
   maxInstances
   lastHeartbeatAt
   autonomy {
@@ -3608,6 +3609,10 @@ export const DevboxAgentFragmentDoc = /*#__PURE__*/ gql`
   probeError
   defaultModel
   models {
+    ...DevboxModel
+  }
+  subscriptionDefaultModel: defaultModel(billing: SUBSCRIPTION)
+  subscriptionModels: models(billing: SUBSCRIPTION) {
     ...DevboxModel
   }
   commands {
@@ -3707,6 +3712,7 @@ export const DevboxThreadFragmentDoc = /*#__PURE__*/ gql`
   cwd
   worktreeRepos
   status
+  stage
   imported
   lastActivityAt
   entityCount
@@ -3725,6 +3731,13 @@ export const DevboxThreadFragmentDoc = /*#__PURE__*/ gql`
   usage {
     ...DevboxUsage
   }
+  queuedPrompts {
+    promptId
+    text
+    attachments
+    queuedAt
+  }
+  parentToolCallId
   parent {
     id
     sessionId
@@ -4135,6 +4148,18 @@ export const DevboxPullRequestFragmentDoc = /*#__PURE__*/ gql`
   }
 }
     ${PullRequestBasicFragmentDoc}` as unknown as DocumentNode<Types.DevboxPullRequestFragment, unknown>;
+export const DevboxPullRequestJobFragmentDoc = /*#__PURE__*/ gql`
+    fragment DevboxPullRequestJob on DevboxPullRequestJob {
+  id
+  instanceId
+  repository
+  status
+  url
+  title
+  error
+  writer
+}
+    ` as unknown as DocumentNode<Types.DevboxPullRequestJobFragment, unknown>;
 export const TagFragmentDoc = /*#__PURE__*/ gql`
     fragment Tag on Tag {
   name
@@ -9734,10 +9759,16 @@ export const DevboxAgentsDocument = /*#__PURE__*/ gql`
 }
     ${DevboxAgentFragmentDoc}` as unknown as DocumentNode<Types.DevboxAgentsQuery, Types.DevboxAgentsQueryVariables>;
 export const WorkbenchDevboxInstancesDocument = /*#__PURE__*/ gql`
-    query WorkbenchDevboxInstances($id: ID!, $first: Int = 50, $after: String, $statuses: [DevboxInstanceStatus], $mine: Boolean) {
+    query WorkbenchDevboxInstances($id: ID!, $first: Int = 50, $after: String, $statuses: [DevboxInstanceStatus], $mine: Boolean, $includeEnded: Boolean) {
   workbench(id: $id) {
     id
-    devboxInstances(first: $first, after: $after, statuses: $statuses, mine: $mine) {
+    devboxInstances(
+      first: $first
+      after: $after
+      statuses: $statuses
+      mine: $mine
+      includeEnded: $includeEnded
+    ) {
       pageInfo {
         ...PageInfo
       }
@@ -10160,6 +10191,18 @@ export const CancelDevboxPromptDocument = /*#__PURE__*/ gql`
   }
 }
     ${DevboxThreadFragmentDoc}` as unknown as DocumentNode<Types.CancelDevboxPromptMutation, Types.CancelDevboxPromptMutationVariables>;
+export const UpdateDevboxQueuedPromptDocument = /*#__PURE__*/ gql`
+    mutation UpdateDevboxQueuedPrompt($id: ID!, $promptId: String!, $action: DevboxQueuedPromptAction!, $text: String) {
+  updateDevboxQueuedPrompt(
+    id: $id
+    promptId: $promptId
+    action: $action
+    text: $text
+  ) {
+    ...DevboxThread
+  }
+}
+    ${DevboxThreadFragmentDoc}` as unknown as DocumentNode<Types.UpdateDevboxQueuedPromptMutation, Types.UpdateDevboxQueuedPromptMutationVariables>;
 export const SetDevboxThreadConfigOptionDocument = /*#__PURE__*/ gql`
     mutation SetDevboxThreadConfigOption($id: ID!, $configId: String!, $value: String!) {
   setDevboxThreadConfigOption(id: $id, configId: $configId, value: $value) {
@@ -10232,6 +10275,27 @@ export const DevboxInstanceEntityDeltaDocument = /*#__PURE__*/ gql`
   }
 }
     ${DevboxEntityChangeFragmentDoc}` as unknown as DocumentNode<Types.DevboxInstanceEntityDeltaSubscription, Types.DevboxInstanceEntityDeltaSubscriptionVariables>;
+export const CreateDevboxPullRequestDocument = /*#__PURE__*/ gql`
+    mutation CreateDevboxPullRequest($instanceId: ID!, $repository: String!, $threadId: ID) {
+  createDevboxPullRequest(
+    instanceId: $instanceId
+    repository: $repository
+    threadId: $threadId
+  ) {
+    ...DevboxPullRequestJob
+  }
+}
+    ${DevboxPullRequestJobFragmentDoc}` as unknown as DocumentNode<Types.CreateDevboxPullRequestMutation, Types.CreateDevboxPullRequestMutationVariables>;
+export const DevboxPullRequestJobDeltaDocument = /*#__PURE__*/ gql`
+    subscription DevboxPullRequestJobDelta($instanceId: ID!) {
+  devboxPullRequestJobDelta(instanceId: $instanceId) {
+    delta
+    payload {
+      ...DevboxPullRequestJob
+    }
+  }
+}
+    ${DevboxPullRequestJobFragmentDoc}` as unknown as DocumentNode<Types.DevboxPullRequestJobDeltaSubscription, Types.DevboxPullRequestJobDeltaSubscriptionVariables>;
 export const DevboxInstanceIndexDeltaDocument = /*#__PURE__*/ gql`
     subscription DevboxInstanceIndexDelta($instanceId: ID!) {
   devboxInstanceIndexDelta(instanceId: $instanceId) {

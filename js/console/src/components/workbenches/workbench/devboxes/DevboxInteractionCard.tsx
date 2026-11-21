@@ -9,6 +9,7 @@ import {
   ListBoxItem,
   Select,
 } from '@pluralsh/design-system'
+import { GqlError } from 'components/utils/Alert'
 import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
 import {
   DevboxElicitationAction,
@@ -16,31 +17,71 @@ import {
   DevboxInteractionKind,
   DevboxInteractionResponseAttributes,
   DevboxInteractionState,
+  DevboxToolCallFragment,
+  useRespondDevboxInteractionMutation,
 } from 'generated/graphql'
 import { FormEvent, ReactNode, useState } from 'react'
 import styled from 'styled-components'
 import { fromNow } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
+import { DevboxApprovalPreview } from './DevboxApprovalPreview'
+import { approvalPreview } from './devboxApprovals'
 
 export type DevboxRespond = (
   response: DevboxInteractionResponseAttributes
 ) => void
 
+export function DevboxInteraction({
+  interaction,
+  toolCall,
+  compact,
+}: {
+  interaction: DevboxInteractionFragment
+  toolCall?: Nullable<DevboxToolCallFragment>
+  compact?: boolean
+}) {
+  const [respond, { loading, error }] = useRespondDevboxInteractionMutation()
+  return (
+    <DevboxInteractionCard
+      interaction={interaction}
+      toolCall={toolCall}
+      compact={compact}
+      loading={loading}
+      error={error && <GqlError error={error} />}
+      onRespond={(response) =>
+        respond({ variables: { id: interaction.id, response } })
+      }
+    />
+  )
+}
+
 export function DevboxInteractionCard({
   interaction,
+  toolCall,
   onRespond,
   loading = false,
   error,
+  compact = false,
 }: {
   interaction: DevboxInteractionFragment
+  // the call a permission request was raised for, to show what it would do
+  toolCall?: Nullable<DevboxToolCallFragment>
   onRespond: DevboxRespond
   loading?: boolean
   error?: ReactNode
+  // just the question and its answers, for shelves
+  compact?: boolean
 }) {
   const pending = interaction.state === DevboxInteractionState.Pending
+  // once answered, the transcript's own tool call shows what ran
+  const preview =
+    pending && !compact && interaction.kind === DevboxInteractionKind.Permission
+      ? approvalPreview(toolCall)
+      : null
   return (
     <InteractionSC
       $pending={pending}
+      $compact={compact}
       data-interaction={interaction.kind}
     >
       <Flex
@@ -69,10 +110,11 @@ export function DevboxInteractionCard({
           </Chip>
         )}
       </Flex>
-      {interaction.message && (
+      {interaction.message && !compact && (
         <CaptionP $color="text-light">{interaction.message}</CaptionP>
       )}
-      {interaction.review && (
+      {preview && <DevboxApprovalPreview preview={preview} />}
+      {interaction.review && !compact && (
         <CaptionP $color="text-xlight">
           {reviewSummary(interaction.review)}
         </CaptionP>
@@ -102,7 +144,7 @@ export function DevboxInteractionCard({
             loading={loading}
           />
         ))}
-      {pending && interaction.expiresAt && (
+      {pending && !compact && interaction.expiresAt && (
         <CaptionP $color="text-xlight">
           Expires {fromNow(interaction.expiresAt)}
         </CaptionP>
@@ -461,12 +503,12 @@ function ElicitationActions({
   )
 }
 
-const InteractionSC = styled.div<{ $pending: boolean }>(
-  ({ theme, $pending }) => ({
+const InteractionSC = styled.div<{ $pending: boolean; $compact: boolean }>(
+  ({ theme, $pending, $compact }) => ({
     display: 'flex',
     flexDirection: 'column',
-    gap: theme.spacing.small,
-    padding: theme.spacing.medium,
+    gap: $compact ? theme.spacing.xsmall : theme.spacing.small,
+    padding: $compact ? theme.spacing.small : theme.spacing.medium,
     borderRadius: theme.borderRadiuses.large,
     border: `1px solid ${
       $pending ? theme.colors['border-warning'] : theme.colors.border

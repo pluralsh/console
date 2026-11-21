@@ -10,6 +10,7 @@ defmodule Console.Deployments.Agents do
   alias Console.Deployments.{Clusters, Pr.Dispatcher, Git, Workbenches, Attachments}
   alias Console.AI.Tool
   alias Console.PubSub
+  alias Console.Prom.Tokens
   alias Kazan.Apis.Core.V1, as: CoreV1
   alias Console.Schema.{
     AgentRuntime,
@@ -18,7 +19,6 @@ defmodule Console.Deployments.Agents do
     AgentPromptHistory,
     Cluster,
     User,
-    Group,
     ScmConnection,
     PullRequest,
     AgentMessage,
@@ -121,23 +121,7 @@ defmodule Console.Deployments.Agents do
   defp resolve_scm_connection(attrs), do: {:ok, attrs}
 
   defp stabilize(%{create_bindings: [_ | _] = bindings} = attrs, %AgentRuntime{create_bindings: old_bindings}) do
-    by_name = Map.new(old_bindings || [], & {&1.group_id || &1.user_id, &1.id})
-    emails  = Enum.map(bindings, & &1[:user_email]) |> Enum.filter(& &1)
-    groups  = Enum.map(bindings, & &1[:group_name]) |> Enum.filter(& &1)
-    users_groups = Users.user_by_emails(emails)
-                   |> Map.new(& {&1.email, &1})
-    users_groups = Users.group_by_names(groups)
-                   |> Enum.map(& {&1.name, &1})
-                   |> Enum.into(users_groups)
-
-    Enum.map(bindings, fn binding ->
-      case Map.get(users_groups, binding[:user_email] || binding[:group_name]) do
-        %User{id: id} -> %{user_id: id, id: by_name[id]}
-        %Group{id: id} -> %{group_id: id, id: by_name[id]}
-        _ -> nil
-      end
-    end)
-    |> Enum.filter(& &1)
+    Users.stabilize_bindings(bindings, old_bindings)
     |> update_map(:create_bindings, attrs)
   end
   defp stabilize(attrs, _), do: attrs
@@ -216,7 +200,13 @@ defmodule Console.Deployments.Agents do
       AgentRun.changeset(run, attrs)
       |> Repo.update()
     end)
-    |> execute(extract: :update)
+    |> execute()
+    |> case do
+      {:ok, %{run: prior, update: run}} ->
+        Tokens.record_delta(run.usage, prior.usage, %{source: "agent_run", agent: prior.runtime.type})
+        {:ok, run}
+      err -> err
+    end
     |> notify(:update)
   end
 

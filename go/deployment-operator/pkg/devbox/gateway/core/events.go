@@ -394,7 +394,7 @@ func (f *forwarder) pushDeltas() {
 		}
 		ctx, cancel := context.WithTimeout(f.ctx, 5*time.Second)
 		if _, err := f.g.deps.Ingest.PushInstanceDeltas(ctx, &devboxv1.PushInstanceDeltasRequest{Deltas: batch}); err != nil && f.ctx.Err() == nil {
-			f.g.log.V(1).Info("dropping deltas", "instance", f.inst.ID, "count", len(batch), "error", err.Error())
+			f.g.log.Info("dropping deltas", "instance", f.inst.ID, "count", len(batch), "error", err.Error())
 		}
 		cancel()
 		batch = nil

@@ -409,6 +409,19 @@ message Session {
   // Monotonic per (instance, session); UpsertInstanceIndex applies a row only when newer than the stored one.
   uint64 revision = 19;
   google.protobuf.Struct meta = 20;
+  // Prompts held for the thread, in the order they'll run. Threads only.
+  repeated QueuedPrompt queued_prompts = 21;
+  // For subagents, the parent's tool call that spawned it, when the agent says which.
+  string parent_tool_call_id = 22;
+}
+
+// QueuedPrompt is a prompt accepted for a busy thread that hasn't started yet; it becomes a user_message entity
+// when its turn starts.
+message QueuedPrompt {
+  string prompt_id = 1;
+  repeated ContentBlock content = 2;
+  Principal sent_by = 3;
+  google.protobuf.Timestamp queued_at = 4;
 }
 
 // ImportableSession is a session the agent lists (`session/list`) that console doesn't have a thread for.

@@ -215,26 +215,10 @@ function applyToSession(
   change: DevboxEntityChangeFragment
 ): DevboxSessionTimeline {
   const offset = toNumber(change.offset)
-  if (
-    offset != null &&
-    session.deltaOffset != null &&
-    offset <= session.deltaOffset
-  )
-    return session
-
   const deltaOffset = maxNullable(session.deltaOffset, offset)
 
-  if (change.op === DevboxDeltaOp.State) {
-    return {
-      ...session,
-      deltaOffset,
-      state: {
-        ...session.state,
-        [change.stateKind ?? 'unknown']: change.payload ?? {},
-      },
-    }
-  }
-
+  // a settle carries the whole entity and is ordered by its revision, so it still repairs an entity whose chunks
+  // were missed even when it arrives behind a later delta
   if (change.op === DevboxDeltaOp.Settle) {
     const entity = change.entity
     if (!entity) return { ...session, deltaOffset }
@@ -245,6 +229,24 @@ function applyToSession(
       ...session,
       deltaOffset,
       entities: { ...session.entities, [key]: { ...entity, settled: true } },
+    }
+  }
+
+  if (
+    offset != null &&
+    session.deltaOffset != null &&
+    offset <= session.deltaOffset
+  )
+    return session
+
+  if (change.op === DevboxDeltaOp.State) {
+    return {
+      ...session,
+      deltaOffset,
+      state: {
+        ...session.state,
+        [change.stateKind ?? 'unknown']: change.payload ?? {},
+      },
     }
   }
 

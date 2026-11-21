@@ -138,8 +138,8 @@ func register(fs *flag.FlagSet) *options {
 	fs.StringVar(&o.gatewayHost, "gateway-host", env("DEVBOX_GATEWAY_HOST", ""), "Service host sandboxes reach the gateway at (DEVBOX_GATEWAY_HOST; default devbox-gateway.<namespace>.svc)")
 	fs.StringVar(&o.gatewayURL, "gateway-url", env("DEVBOX_GATEWAY_URL", ""), "override the MCP/SandboxCredentials URL handed to daemons (DEVBOX_GATEWAY_URL)")
 	fs.StringVar(&o.jwksFile, "request-token-jwks-file", env("DEVBOX_REQUEST_TOKEN_JWKS_FILE", ""), "JWKS daemons validate devbox-request-token with (DEVBOX_REQUEST_TOKEN_JWKS_FILE; empty disables)")
-	fs.StringVar(&o.aiProxyURL, "ai-proxy-url", env("DEVBOX_AI_PROXY_URL", ""), "AI proxy base URL (DEVBOX_AI_PROXY_URL; default <console>/ext/v1/ai)")
-	fs.StringVar(&o.workbenchMCP, "workbench-mcp-url", env("DEVBOX_WORKBENCH_MCP_URL", ""), "workbench MCP URL (DEVBOX_WORKBENCH_MCP_URL; default <console>/mcp/workbench)")
+	fs.StringVar(&o.aiProxyURL, "ai-proxy-url", env("DEVBOX_AI_PROXY_URL", ""), "AI proxy base URL (DEVBOX_AI_PROXY_URL; default <console>/ext/ai)")
+	fs.StringVar(&o.workbenchMCP, "workbench-mcp-url", env("DEVBOX_WORKBENCH_MCP_URL", ""), "workbench MCP base URL, each instance gets <base>/<workbench-id> (DEVBOX_WORKBENCH_MCP_URL; default <console>/mcp/workbench)")
 	fs.IntVar(&o.minIdle, "min-idle-tunnels", envInt("DEVBOX_MIN_IDLE_TUNNELS", tunnel.DefaultMinIdle), "idle KAS tunnels to keep open (DEVBOX_MIN_IDLE_TUNNELS)")
 	fs.StringVar(&o.logLevel, "log-level", env("DEVBOX_LOG_LEVEL", "info"), "debug, info, warn or error (DEVBOX_LOG_LEVEL)")
 	fs.BoolVar(&o.insecureEgress, "insecure-egress-listeners", envBool("DEVBOX_INSECURE_EGRESS_LISTENERS"), "serve the credential provider and ext_proc without mTLS; local development only")
@@ -170,7 +170,10 @@ func main() {
 }
 
 func (o *options) resolve() error {
+	// The operator hands out its GraphQL endpoint (…/ext/gql); everything derived here hangs off the console base.
 	o.consoleURL = strings.TrimSuffix(o.consoleURL, "/")
+	o.consoleURL = strings.TrimSuffix(o.consoleURL, "/ext/gql")
+	o.consoleURL = strings.TrimSuffix(o.consoleURL, "/gql")
 	if o.kasURL == "" && o.consoleURL != "" {
 		// The console chart routes KAS's devbox listener on the console host, as it does agentk's.
 		if u, err := url.Parse(o.consoleURL); err == nil && u.Host != "" {
@@ -191,7 +194,7 @@ func (o *options) resolve() error {
 		return fmt.Errorf("missing required configuration: %s", strings.Join(missing, ", "))
 	}
 	if o.aiProxyURL == "" && o.consoleURL != "" {
-		o.aiProxyURL = o.consoleURL + "/ext/v1/ai"
+		o.aiProxyURL = o.consoleURL + "/ext/ai"
 	}
 	if o.workbenchMCP == "" && o.consoleURL != "" {
 		o.workbenchMCP = o.consoleURL + "/mcp/workbench"
@@ -327,7 +330,7 @@ func run(ctx context.Context, o *options, log logr.Logger) error {
 		ActorJWTIssuer:         o.actorIssuer,
 		ActorJWTIssuerCAFile:   o.actorIssuerCA,
 	}
-	egressSvc, err := egress.New(egressCfg, egress.Deps{Ingest: ingest, Actors: resolver, Logger: log.WithName("egress")})
+	egressSvc, err := egress.New(egressCfg, egress.Deps{Ingest: ingest, Actors: resolver, Diffs: gw, Logger: log.WithName("egress")})
 	if err != nil {
 		return fmt.Errorf("configuring egress: %w", err)
 	}

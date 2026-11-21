@@ -74,6 +74,7 @@ func startDevboxEnv(t *testing.T) *devboxEnv {
 	testEnv.ControlPlane.GetAPIServer().Configure().Set("advertise-address", "127.0.0.1")
 	// Substrate needs pod certificates; without the gate the API server drops the gateway's podCertificate volumes.
 	testEnv.ControlPlane.GetAPIServer().Configure().Set("feature-gates", "PodCertificateRequest=true,ClusterTrustBundle=true,ClusterTrustBundleProjection=true")
+	testEnv.ControlPlane.GetAPIServer().Configure().Set("runtime-config", "certificates.k8s.io/v1beta1=true")
 	cfg, err := testEnv.Start()
 	if err != nil {
 		t.Fatalf("starting envtest: %v", err)
@@ -411,11 +412,22 @@ func TestDevboxRunnerController(t *testing.T) {
 		g.Expect(classes).To(ConsistOf(HaveKeyWithValue("name", "gvisor")))
 		workerImage, _, _ := unstructured.NestedString(pool.Object, "spec", "workerImage")
 		g.Expect(workerImage).To(Equal("ghcr.io/example/ateworker-gvisor@sha256:abc"))
+		g.Expect(condition(runner, v1alpha1.DevboxWorkerPoolReadyConditionType).Status).To(Equal(metav1.ConditionFalse))
+
+		g.Expect(unstructured.SetNestedField(pool.Object, map[string]any{"replicas": int64(1), "readyReplicas": int64(1)}, "status")).To(Succeed())
+		g.Expect(env.client.Status().Update(ctx, pool)).To(Succeed())
+		runner = env.reconcile(t, "platform", 2)
+		g.Expect(condition(runner, v1alpha1.DevboxWorkerPoolReadyConditionType)).To(HaveField("Status", metav1.ConditionTrue),
+			"an unchanged WorkerPool still reports its ready workers")
 
 		deployment := &appsv1.Deployment{}
 		g.Expect(env.client.Get(ctx, client.ObjectKey{Name: devboxGatewayName, Namespace: devboxTestNamespace}, deployment)).To(Succeed())
 		g.Expect(deployment.Spec.Template.Spec.Containers[0].Image).To(Equal("ghcr.io/pluralsh/devbox-gateway:" + devboxTestVersion))
 		g.Expect(deployment.Spec.Template.Spec.ServiceAccountName).To(Equal(devboxGatewayName))
+		platform := env.get(t, "platform")
+		g.Expect(deployment.GetOwnerReferences()).To(ContainElement(SatisfyAll(
+			HaveField("UID", platform.UID), HaveField("Kind", "DevboxRunner"), HaveField("Controller", BeNil()),
+		)), "the shared gateway is owned by, but not controlled by, each runner")
 		g.Expect(deployment.Spec.Template.Spec.Containers[0].Env).To(ContainElements(
 			corev1.EnvVar{Name: "CONSOLE_URL", Value: "https://console.example.com/ext/gql"},
 			corev1.EnvVar{Name: "CLUSTER_ID", Value: "cluster-id"},
@@ -465,7 +477,7 @@ func TestDevboxRunnerController(t *testing.T) {
 		atespace := *runner.Status.Atespace
 		g.Expect(atespace).To(HavePrefix("devbox-platform-"))
 		g.Expect(env.substrate.hasAtespace(atespace)).To(BeTrue())
-		g.Expect(env.substrate.policies[atespace]["editor"]).To(ContainElement("system:serviceaccount:" + devboxTestNamespace + ":devbox-gateway"))
+		g.Expect(env.substrate.policies[atespace]["editor"]).To(ContainElement("user:system:serviceaccount:" + devboxTestNamespace + ":devbox-gateway"))
 
 		g.Expect(runner.Status.Revisions).To(HaveLen(1))
 		g.Expect(runner.Status.Revisions[0].Phase).To(Equal(v1alpha1.DevboxRevisionBuilding))
@@ -595,6 +607,7 @@ func TestDevboxRunnerController(t *testing.T) {
 		g.Expect(runner.Status.Revisions).To(HaveLen(2))
 
 		env.substrate.addActor(atespace, "instance-1", "platform-r1", ateapi.ActorState_ACTOR_STATE_SUSPENDED)
+		env.substrate.addActor(atespace, env.substrate.template(atespace, "platform-r1").GetMetadata().GetUid(), "platform-r1", ateapi.ActorState_ACTOR_STATE_RESUMING)
 		runner = env.buildRevision(t, "platform", 2, claudeOK())
 		g.Expect(*runner.Status.TemplateRevision).To(Equal(int64(2)))
 		g.Expect(runner.RevisionByNumber(1).Phase).To(Equal(v1alpha1.DevboxRevisionRetired))
@@ -602,7 +615,7 @@ func TestDevboxRunnerController(t *testing.T) {
 
 		g.Expect(env.substrate.DeleteActor(ctx, atespace, "instance-1")).To(Succeed())
 		runner = env.reconcile(t, "platform", 1)
-		g.Expect(runner.RevisionByNumber(1)).To(BeNil())
+		g.Expect(runner.RevisionByNumber(1)).To(BeNil(), "r1's own golden actor is no reference")
 		g.Expect(env.substrate.template(atespace, "platform-r1")).To(BeNil())
 		err := env.client.Get(ctx, client.ObjectKey{Name: DevboxProbeConfigMapName("platform", 1), Namespace: devboxTestNamespace}, &corev1.ConfigMap{})
 		g.Expect(apierrors.IsNotFound(err)).To(BeTrue())
@@ -649,6 +662,28 @@ func TestDevboxRunnerController(t *testing.T) {
 		g.Expect(probeCondition.Message).To(ContainSubstring("agent codex is not installed"))
 		template := condition(runner, v1alpha1.DevboxTemplateReadyConditionType)
 		g.Expect(template.Status).To(Equal(metav1.ConditionFalse))
+	})
+
+	t.Run("a golden boot that lost its worker is rebuilt, one that crashed fails", func(t *testing.T) {
+		g := NewWithT(t)
+		env.push(t, "devbox:v1")
+		env.newRunner(t, "rebuild", "devbox:v1")
+		runner := env.reconcile(t, "rebuild", 2)
+		g.Expect(runner.LatestRevision()).To(HaveField("Phase", v1alpha1.DevboxRevisionBuilding))
+
+		first := *runner.LatestRevision()
+		env.substrate.failGoldenBoot(*runner.Status.Atespace, first.Name,
+			"GoldenActorCrashed: golden actor crashed before its snapshot was taken: resume failed: worker pod went away while hosting the actor")
+		runner = env.reconcile(t, "rebuild", 2)
+		g.Expect(runner.RevisionByNumber(1)).To(BeNil(), "the retired r1 was collected")
+		latest := runner.LatestRevision()
+		g.Expect(latest.Revision).To(Equal(int64(2)))
+		g.Expect(latest.Hash).To(Equal(first.Hash), "the same template is rebuilt")
+		g.Expect(latest.Phase).To(Equal(v1alpha1.DevboxRevisionBuilding))
+
+		env.substrate.failGoldenBoot(*runner.Status.Atespace, latest.Name, "GoldenActorCrashed: golden actor crashed before its snapshot was taken: exited with code 1")
+		runner = env.reconcile(t, "rebuild", 2)
+		g.Expect(runner.LatestRevision()).To(SatisfyAll(HaveField("Revision", int64(2)), HaveField("Phase", v1alpha1.DevboxRevisionFailed)))
 	})
 
 	t.Run("an image that overrides ENTRYPOINT fails the contract", func(t *testing.T) {
@@ -886,13 +921,27 @@ func TestDevboxRunnerController(t *testing.T) {
 		pool.SetGroupVersionKind(workerPoolGVK)
 		err = env.client.Get(ctx, client.ObjectKey{Name: "devbox-platform", Namespace: devboxTestNamespace}, pool)
 		g.Expect(apierrors.IsNotFound(err)).To(BeTrue())
-		g.Expect(env.client.Get(ctx, client.ObjectKey{Name: devboxGatewayName, Namespace: devboxTestNamespace}, &appsv1.Deployment{})).
+		gateway := &appsv1.Deployment{}
+		g.Expect(env.client.Get(ctx, client.ObjectKey{Name: devboxGatewayName, Namespace: devboxTestNamespace}, gateway)).
 			To(Succeed(), "other runners still need the gateway")
+		g.Expect(lo.Map(gateway.GetOwnerReferences(), func(ref metav1.OwnerReference, _ int) string { return ref.Name })).
+			To(ContainElements("custom", "old", "scheduled", "elastic"), "every runner sharing the gateway owns it")
+		for name, obj := range map[string]client.Object{
+			devboxGatewayName:       &corev1.ServiceAccount{},
+			devboxGatewaySecretName: &corev1.Secret{},
+			devboxEgressAuthzName:   &corev1.Service{},
+		} {
+			g.Expect(env.client.Get(ctx, client.ObjectKey{Name: name, Namespace: devboxTestNamespace}, obj)).To(Succeed())
+			g.Expect(obj.GetOwnerReferences()).To(HaveLen(len(gateway.GetOwnerReferences())), "%T %s has the gateway's owners", obj, name)
+		}
+		policy := &networkingv1.NetworkPolicy{}
+		g.Expect(env.client.Get(ctx, client.ObjectKey{Name: devboxGatewayName, Namespace: devboxTestNamespace}, policy)).To(Succeed())
+		g.Expect(policy.GetOwnerReferences()).To(HaveLen(len(gateway.GetOwnerReferences())))
 	})
 
 	t.Run("deleting the last runner removes the gateway", func(t *testing.T) {
 		g := NewWithT(t)
-		for _, name := range []string{"custom", "old", "scheduled", "elastic"} {
+		for _, name := range []string{"custom", "old", "scheduled", "elastic", "rebuild"} {
 			g.Expect(env.client.Delete(ctx, env.get(t, name))).To(Succeed())
 			_, err := env.r.Reconcile(ctx, ctrl.Request{NamespacedName: client.ObjectKey{Name: name}})
 			g.Expect(err).NotTo(HaveOccurred())

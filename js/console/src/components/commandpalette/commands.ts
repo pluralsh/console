@@ -189,6 +189,25 @@ export function useCommands({
                   deps: [setFeatureFlag],
                 },
               ]),
+          ...(!featureFlags.Devboxes
+            ? [
+                {
+                  id: 'enable-devboxes',
+                  label: 'Enable Devboxes',
+                  icon: WorkbenchIcon,
+                  callback: () => setFeatureFlag('Devboxes', true),
+                  deps: [setFeatureFlag],
+                },
+              ]
+            : [
+                {
+                  id: 'disable-devboxes',
+                  label: 'Disable Devboxes',
+                  icon: WorkbenchIcon,
+                  callback: () => setFeatureFlag('Devboxes', false),
+                  deps: [setFeatureFlag],
+                },
+              ]),
           ...(openServiceAccountImpersonation
             ? [
                 {
@@ -203,7 +222,12 @@ export function useCommands({
         ],
       },
     ],
-    [featureFlags.Edge, openServiceAccountImpersonation, setFeatureFlag]
+    [
+      featureFlags.Edge,
+      featureFlags.Devboxes,
+      openServiceAccountImpersonation,
+      setFeatureFlag,
+    ]
   )
 
   const commands = useMemo(

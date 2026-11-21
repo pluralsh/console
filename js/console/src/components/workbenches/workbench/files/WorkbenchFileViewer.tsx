@@ -219,7 +219,7 @@ function DownloadButton({ href }: { href: string }) {
 
 // the sandbox path doubles as the header: folders lead to the bolded file name,
 // and the whole breadcrumb copies the path agents use to reference the file
-function PathBreadcrumb({ path }: { path: string }) {
+export function PathBreadcrumb({ path }: { path: string }) {
   const { copied, handleCopy } = useCopyText(path, 2000)
   const segments = path.split('/').filter(Boolean)
   const fileName = segments.pop()

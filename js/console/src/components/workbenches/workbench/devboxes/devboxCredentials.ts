@@ -17,8 +17,6 @@ import { AgentCredentialsDocument } from 'generated/graphql-documents'
 import dayjs from 'dayjs'
 import { useCallback } from 'react'
 import { isNonNullable } from 'utils/isNonNullable'
-import { agentLabel } from './devboxStartForm'
-
 export const AI_SUBSCRIPTIONS_REL_PATH = 'ai-subscriptions'
 export const AI_SUBSCRIPTIONS_ABS_PATH = `/profile/${AI_SUBSCRIPTIONS_REL_PATH}`
 
@@ -143,12 +141,10 @@ export function billingBadgeLabel(
   billing: Pick<DevboxAgentBillingFragment, 'agent' | 'billing'>,
   ownerName?: Nullable<string>
 ) {
-  const { agent } = billing
-  if (!agent || !billing.billing) return null
-  const provider = AGENT_PROVIDER[agent]
-  if (billing.billing === DevboxBillingMode.Subscription && provider)
-    return `${agentLabel(agent)} on ${ownerName ? `${ownerName}'s` : 'a'} ${PROVIDER_PLAN[provider]}`
-  return `${agentLabel(agent)} via Plural AI proxy`
+  const provider = billing.agent && AGENT_PROVIDER[billing.agent]
+  if (billing.billing !== DevboxBillingMode.Subscription || !provider)
+    return null
+  return `On ${ownerName ? `${ownerName}'s` : 'a'} ${PROVIDER_PLAN[provider]}`
 }
 
 // agentConnections[].billing is a string ("proxy" or "subscription")

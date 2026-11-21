@@ -16,6 +16,7 @@ defmodule Console.Prom.Plugin do
   def metric_scope(:persisted_query_miss), do: ~w(console persisted query miss)a
   def metric_scope(:sentinel_run), do: ~w(console sentinel run)a
   def metric_scope(:sentinel_run_job), do: ~w(console sentinel run job)a
+  def metric_scope(:ai_tokens), do: ~w(console ai tokens)a
 
   def plural_metric(name), do: [:plrl | name]
 
@@ -56,6 +57,13 @@ defmodule Console.Prom.Plugin do
           measurement: :count,
           description: "The number of sentinel run jobs that have transitioned into each status, per cluster.",
           tags: [:status, :cluster]
+        ),
+        sum(
+          plural_metric(~w(ai tokens total)a),
+          event_name: metric_scope(:ai_tokens),
+          measurement: :count,
+          description: "LLM tokens processed through Plural; rate() over it gives token throughput.",
+          tags: [:source, :agent, :model, :type]
         )
       ]
     )

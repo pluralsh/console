@@ -44,6 +44,12 @@ rules:
   - list
   - patch
 - apiGroups:
+  - ""
+  resources:
+  - serviceaccounts/token
+  verbs:
+  - create
+- apiGroups:
   - apps
   resources:
   - daemonsets
@@ -81,6 +87,13 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - certificates.k8s.io
+  resources:
+  - clustertrustbundles
+  verbs:
+  - get
+  - list
 - apiGroups:
   - deployments.plural.sh
   resources:

@@ -6,6 +6,7 @@ import {
   Code,
   Flex,
   Table,
+  useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert'
@@ -26,26 +27,32 @@ import {
   useDevboxQuery,
 } from 'generated/graphql'
 import { ReactNode, useMemo } from 'react'
-import { Link, useOutletContext, useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import {
-  getWorkbenchDevboxesAbsPath,
-  getWorkbenchDevboxStartAbsPath,
-  WORKBENCH_DEVBOX_PARAM_ID,
-} from 'routes/workbenchesRoutesConsts'
+  AI_SETTINGS_ABS_PATH,
+  AI_SETTINGS_DEVBOX_PARAM_ID,
+  AI_SETTINGS_DEVBOXES_ABS_PATH,
+  getAiSettingsDevboxAbsPath,
+} from 'routes/settingsRoutesConst'
 import styled from 'styled-components'
 import { fromNow } from 'utils/datetime'
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
-import { WorkbenchOutletContext, WorkbenchPageLayout } from '../Workbench'
 import {
+  DevboxAgentLabel,
   DevboxPrChips,
   DevboxProbeChip,
   DevboxStatusChip,
   prProvenance,
   shortDigest,
-} from './DevboxChips'
-import { DevboxIssuer, devboxTrustSnippets } from './devboxCloudTrust'
-import { agentLabel, modelsOf } from './devboxStartForm'
+} from 'components/workbenches/workbench/devboxes/DevboxChips'
+import {
+  DevboxIssuer,
+  devboxTrustSnippets,
+} from 'components/workbenches/workbench/devboxes/devboxCloudTrust'
+import { devboxSizing } from 'components/workbenches/workbench/devboxes/devboxSizing'
+import { modelsOf } from 'components/workbenches/workbench/devboxes/devboxStartForm'
+import { SETTINGS_BREADCRUMBS } from '../../Settings'
 
 export function devboxIssuerOf(
   box: Nullable<Pick<DevboxFragment, 'workloadIdentity'>>
@@ -60,9 +67,8 @@ export function devboxIssuerOf(
   }
 }
 
-export function DevboxDetail() {
-  const { workbenchId } = useOutletContext<WorkbenchOutletContext>()
-  const devboxId = useParams()[WORKBENCH_DEVBOX_PARAM_ID] ?? ''
+export function AIDevboxDetail() {
+  const devboxId = useParams()[AI_SETTINGS_DEVBOX_PARAM_ID] ?? ''
   const { data, loading, error } = useDevboxQuery({
     variables: { id: devboxId },
     skip: !devboxId,
@@ -77,35 +83,37 @@ export function DevboxDetail() {
   const issuer = devboxIssuerOf(box)
   const prs = mapExistingNodes(prsQuery.data?.pullRequests)
 
+  useSetBreadcrumbs(
+    useMemo(
+      () => [
+        ...SETTINGS_BREADCRUMBS,
+        { label: 'ai', url: AI_SETTINGS_ABS_PATH },
+        { label: 'devboxes', url: AI_SETTINGS_DEVBOXES_ABS_PATH },
+        {
+          label: box?.name ?? devboxId,
+          url: getAiSettingsDevboxAbsPath(devboxId),
+        },
+      ],
+      [box?.name, devboxId]
+    )
+  )
+
   return (
-    <WorkbenchPageLayout
-      showEditWorkbenchButton={false}
-      headerActions={
-        <>
+    <ScrollSC>
+      <Flex
+        direction="column"
+        gap="large"
+      >
+        <Flex>
           <Button
             small
             secondary
             as={Link}
-            to={getWorkbenchDevboxesAbsPath(workbenchId)}
+            to={AI_SETTINGS_DEVBOXES_ABS_PATH}
           >
-            All boxes
+            All devboxes
           </Button>
-          <Button
-            small
-            as={Link}
-            to={getWorkbenchDevboxStartAbsPath({ workbenchId, devboxId })}
-            disabled={!box}
-          >
-            Start instance
-          </Button>
-        </>
-      }
-    >
-      <Flex
-        direction="column"
-        gap="large"
-        padding="large"
-      >
+        </Flex>
         {error && <GqlError error={error} />}
         {!box && loading ? (
           <RectangleSkeleton
@@ -158,9 +166,15 @@ export function DevboxDetail() {
           </>
         ) : null}
       </Flex>
-    </WorkbenchPageLayout>
+    </ScrollSC>
   )
 }
+
+const ScrollSC = styled.div(({ theme }) => ({
+  height: '100%',
+  overflowY: 'auto',
+  padding: theme.spacing.large,
+}))
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -203,11 +217,7 @@ function DevboxSummary({ box }: { box: DevboxFragment }) {
             {box.lastHeartbeatAt ? fromNow(box.lastHeartbeatAt) : 'never'}
           </Prop>
           <Prop label="Resources">
-            {box.resources ? (
-              <code>{JSON.stringify(box.resources)}</code>
-            ) : (
-              'default'
-            )}
+            {devboxSizing(box.resources) ?? 'default'}
           </Prop>
         </PropsGridSC>
       </Flex>
@@ -266,7 +276,7 @@ export function DevboxAgentCatalog({
             gap="xsmall"
             align="center"
           >
-            <span>{agentLabel(a.type)}</span>
+            <DevboxAgentLabel agent={a.type} />
             {a.default && (
               <Chip
                 size="small"

@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 	"slices"
+	"strings"
 	"testing"
 	"time"
 
@@ -66,7 +67,7 @@ func TestCreateInstanceProvisionsAndInitializes(t *testing.T) {
 	init := h.daemon.initialized[0]
 	h.daemon.mu.Unlock()
 	if init.GetInstanceId() != "inst-1" || init.GetEndpoints().GetDevboxMcpUrl() != "http://devbox-gateway.ns.svc:8080/mcp" ||
-		init.GetEndpoints().GetAiProxyUrl() != "https://console.example.com/ext/v1/ai" {
+		init.GetEndpoints().GetAiProxyUrl() != "https://console.example.com/ext/ai" {
 		t.Fatalf("unexpected Initialize: %v", init)
 	}
 	if got := h.ingest.statusList(); !slices.Equal(got, []string{"PROVISIONING", "RUNNING"}) {
@@ -89,6 +90,31 @@ func TestCreateInstanceProvisionsAndInitializes(t *testing.T) {
 	}
 }
 
+// A restore routed to a worker that just went away fails Unavailable; provisioning retries instead of failing the
+// instance.
+func TestProvisionRetriesUnavailableResume(t *testing.T) {
+	prev := resumeBackoff
+	resumeBackoff = 5 * time.Millisecond
+	t.Cleanup(func() { resumeBackoff = prev })
+	h := newHarness(t, nil)
+	h.ate.FailResume = status.Error(codes.Unavailable, "dial unix /var/lib/ate/workers/w/worker.sock: connect: no such file or directory")
+	h.ate.FailResumeTimes = 2
+	h.running("inst-1")
+
+	resumes := 0
+	for _, c := range h.ate.CallsSnapshot() {
+		if strings.HasPrefix(c, "ResumeActor") {
+			resumes++
+		}
+	}
+	if resumes != 3 {
+		t.Fatalf("want 3 resume attempts, got %d", resumes)
+	}
+	if got := h.ingest.statusList(); !slices.Equal(got, []string{"PROVISIONING", "RUNNING"}) {
+		t.Fatalf("status reports = %v", got)
+	}
+}
+
 // SCM connection hosts come from console, so egress allows and injects for a self-hosted SCM before any repository
 // on it is named; the devbox MCP / SandboxCredentials rule stays a cleartext http rule, which Substrate serves as
 // HTTP/1.1 and h2c (gRPC).
@@ -103,13 +129,20 @@ func TestEgressPolicyUsesBoxSCMHostsAndH2CGatewayRule(t *testing.T) {
 
 	var https []string
 	var gw *ateapi.HttpRule
+	var gwHosts []string
 	for _, r := range h.ate.Policy(testAtespace, "dbx-inst-1").GetRules() {
 		if r.GetHttps() != nil {
 			https = append(https, r.GetHttps().GetHostnames()...)
 		}
 		if r.GetHttp() != nil {
-			gw = r.GetHttp()
+			if gw == nil {
+				gw = r.GetHttp()
+			}
+			gwHosts = append(gwHosts, r.GetHttp().GetHostnames()...)
 		}
+	}
+	if !slices.Contains(gwHosts, "devbox-gateway.ns.svc.cluster.local") {
+		t.Errorf("gateway hosts %v lack the name sandbox DNS resolves", gwHosts)
 	}
 	for _, want := range []string{"gitlab.example.com", "ghe.example.com", "github.com"} {
 		if !slices.Contains(https, want) {
@@ -686,4 +719,47 @@ func TestRegistrationReconcilesAndHeartbeats(t *testing.T) {
 		}
 		return false
 	})
+}
+
+func TestEndpointsScopeWorkbenchMCPToTheInstance(t *testing.T) {
+	g := &Gateway{cfg: Config{WorkbenchMCPURL: "https://console.example.com/mcp/workbench/"}}
+	if got := g.endpoints("wb-1").GetWorkbenchMcpUrl(); got != "https://console.example.com/mcp/workbench/wb-1" {
+		t.Fatalf("workbench mcp = %q", got)
+	}
+	if got := g.endpoints("").GetWorkbenchMcpUrl(); got != "" {
+		t.Fatalf("workbench mcp without a workbench = %q", got)
+	}
+}
+
+func TestResumeOutlivesTheCallersDeadline(t *testing.T) {
+	prev := resumeBackoff
+	resumeBackoff = 100 * time.Millisecond
+	t.Cleanup(func() { resumeBackoff = prev })
+	h := newHarness(t, nil)
+	h.running("inst-1")
+	if _, err := h.g.SuspendInstance(context.Background(), &devboxv1.InstanceActionRequest{InstanceId: "inst-1"}); err != nil {
+		t.Fatal(err)
+	}
+	// a slow restore: substrate is unavailable for the first two attempts
+	h.ate.FailResume = status.Error(codes.Unavailable, "worker gone")
+	h.ate.FailResumeTimes = 2
+
+	req := &devboxv1.InstanceActionRequest{InstanceId: "inst-1"}
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Millisecond)
+	defer cancel()
+	_, err := h.g.ResumeInstance(ctx, req)
+	if status.Code(err) != codes.Unavailable || reasonOf(err) != devboxv1.ErrorReason_ERROR_REASON_INSTANCE_STARTING {
+		t.Fatalf("an impatient resume = %v", err)
+	}
+	// a second caller joins the wake in flight rather than starting another
+	resp, err := h.g.ResumeInstance(context.Background(), req)
+	if err != nil || resp.GetStatus() != devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING {
+		t.Fatalf("joined resume = %v, %v", resp, err)
+	}
+	if got := h.ate.State(testAtespace, "dbx-inst-1"); got != ateapi.ActorState_ACTOR_STATE_RUNNING {
+		t.Fatalf("actor state = %s", got)
+	}
+	if inits, _, _, _ := h.daemon.snapshot(); inits != 2 {
+		t.Fatalf("the daemon should be initialized once per wake, got %d inits", inits)
+	}
 }

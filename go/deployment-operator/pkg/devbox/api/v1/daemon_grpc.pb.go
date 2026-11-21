@@ -53,6 +53,7 @@ const (
 	Daemon_ForkThread_FullMethodName            = "/devbox.v1.Daemon/ForkThread"
 	Daemon_Prompt_FullMethodName                = "/devbox.v1.Daemon/Prompt"
 	Daemon_CancelPrompt_FullMethodName          = "/devbox.v1.Daemon/CancelPrompt"
+	Daemon_UpdateQueuedPrompt_FullMethodName    = "/devbox.v1.Daemon/UpdateQueuedPrompt"
 	Daemon_SetThreadConfigOption_FullMethodName = "/devbox.v1.Daemon/SetThreadConfigOption"
 	Daemon_RespondInteraction_FullMethodName    = "/devbox.v1.Daemon/RespondInteraction"
 	Daemon_ListCommands_FullMethodName          = "/devbox.v1.Daemon/ListCommands"
@@ -68,6 +69,8 @@ const (
 	Daemon_WriteFile_FullMethodName             = "/devbox.v1.Daemon/WriteFile"
 	Daemon_WatchFiles_FullMethodName            = "/devbox.v1.Daemon/WatchFiles"
 	Daemon_GetChanges_FullMethodName            = "/devbox.v1.Daemon/GetChanges"
+	Daemon_GetBranchDiffStat_FullMethodName     = "/devbox.v1.Daemon/GetBranchDiffStat"
+	Daemon_PreparePullRequest_FullMethodName    = "/devbox.v1.Daemon/PreparePullRequest"
 	Daemon_AddRepository_FullMethodName         = "/devbox.v1.Daemon/AddRepository"
 	Daemon_ListRepositories_FullMethodName      = "/devbox.v1.Daemon/ListRepositories"
 	Daemon_StartBrowser_FullMethodName          = "/devbox.v1.Daemon/StartBrowser"
@@ -115,6 +118,7 @@ type DaemonClient interface {
 	ForkThread(ctx context.Context, in *ForkThreadRequest, opts ...grpc.CallOption) (*ThreadResponse, error)
 	Prompt(ctx context.Context, in *PromptRequest, opts ...grpc.CallOption) (*PromptResponse, error)
 	CancelPrompt(ctx context.Context, in *CancelPromptRequest, opts ...grpc.CallOption) (*CancelPromptResponse, error)
+	UpdateQueuedPrompt(ctx context.Context, in *UpdateQueuedPromptRequest, opts ...grpc.CallOption) (*UpdateQueuedPromptResponse, error)
 	SetThreadConfigOption(ctx context.Context, in *SetThreadConfigOptionRequest, opts ...grpc.CallOption) (*SetThreadConfigOptionResponse, error)
 	RespondInteraction(ctx context.Context, in *RespondInteractionRequest, opts ...grpc.CallOption) (*RespondInteractionResponse, error)
 	ListCommands(ctx context.Context, in *ListCommandsRequest, opts ...grpc.CallOption) (*ListCommandsResponse, error)
@@ -131,6 +135,10 @@ type DaemonClient interface {
 	WriteFile(ctx context.Context, in *WriteFileRequest, opts ...grpc.CallOption) (*WriteFileResponse, error)
 	WatchFiles(ctx context.Context, in *WatchFilesRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[FileEvent], error)
 	GetChanges(ctx context.Context, in *GetChangesRequest, opts ...grpc.CallOption) (*GetChangesResponse, error)
+	// GetBranchDiffStat sizes a pull request: head against its merge base with base, for the devbox MCP.
+	GetBranchDiffStat(ctx context.Context, in *BranchDiffStatRequest, opts ...grpc.CallOption) (*BranchDiffStatResponse, error)
+	// PreparePullRequest writes, commits and pushes a checkout's changes for a pull request. It can take minutes.
+	PreparePullRequest(ctx context.Context, in *PreparePullRequestRequest, opts ...grpc.CallOption) (*PreparePullRequestResponse, error)
 	// AddRepository clones through egress into ~/<repo> and registers it in Project.md's managed table.
 	AddRepository(ctx context.Context, in *AddRepositoryRequest, opts ...grpc.CallOption) (*AddRepositoryResponse, error)
 	ListRepositories(ctx context.Context, in *ListRepositoriesRequest, opts ...grpc.CallOption) (*ListRepositoriesResponse, error)
@@ -342,6 +350,16 @@ func (c *daemonClient) CancelPrompt(ctx context.Context, in *CancelPromptRequest
 	return out, nil
 }
 
+func (c *daemonClient) UpdateQueuedPrompt(ctx context.Context, in *UpdateQueuedPromptRequest, opts ...grpc.CallOption) (*UpdateQueuedPromptResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateQueuedPromptResponse)
+	err := c.cc.Invoke(ctx, Daemon_UpdateQueuedPrompt_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *daemonClient) SetThreadConfigOption(ctx context.Context, in *SetThreadConfigOptionRequest, opts ...grpc.CallOption) (*SetThreadConfigOptionResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(SetThreadConfigOptionResponse)
@@ -504,6 +522,26 @@ func (c *daemonClient) GetChanges(ctx context.Context, in *GetChangesRequest, op
 	return out, nil
 }
 
+func (c *daemonClient) GetBranchDiffStat(ctx context.Context, in *BranchDiffStatRequest, opts ...grpc.CallOption) (*BranchDiffStatResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(BranchDiffStatResponse)
+	err := c.cc.Invoke(ctx, Daemon_GetBranchDiffStat_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *daemonClient) PreparePullRequest(ctx context.Context, in *PreparePullRequestRequest, opts ...grpc.CallOption) (*PreparePullRequestResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PreparePullRequestResponse)
+	err := c.cc.Invoke(ctx, Daemon_PreparePullRequest_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *daemonClient) AddRepository(ctx context.Context, in *AddRepositoryRequest, opts ...grpc.CallOption) (*AddRepositoryResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(AddRepositoryResponse)
@@ -621,6 +659,7 @@ type DaemonServer interface {
 	ForkThread(context.Context, *ForkThreadRequest) (*ThreadResponse, error)
 	Prompt(context.Context, *PromptRequest) (*PromptResponse, error)
 	CancelPrompt(context.Context, *CancelPromptRequest) (*CancelPromptResponse, error)
+	UpdateQueuedPrompt(context.Context, *UpdateQueuedPromptRequest) (*UpdateQueuedPromptResponse, error)
 	SetThreadConfigOption(context.Context, *SetThreadConfigOptionRequest) (*SetThreadConfigOptionResponse, error)
 	RespondInteraction(context.Context, *RespondInteractionRequest) (*RespondInteractionResponse, error)
 	ListCommands(context.Context, *ListCommandsRequest) (*ListCommandsResponse, error)
@@ -637,6 +676,10 @@ type DaemonServer interface {
 	WriteFile(context.Context, *WriteFileRequest) (*WriteFileResponse, error)
 	WatchFiles(*WatchFilesRequest, grpc.ServerStreamingServer[FileEvent]) error
 	GetChanges(context.Context, *GetChangesRequest) (*GetChangesResponse, error)
+	// GetBranchDiffStat sizes a pull request: head against its merge base with base, for the devbox MCP.
+	GetBranchDiffStat(context.Context, *BranchDiffStatRequest) (*BranchDiffStatResponse, error)
+	// PreparePullRequest writes, commits and pushes a checkout's changes for a pull request. It can take minutes.
+	PreparePullRequest(context.Context, *PreparePullRequestRequest) (*PreparePullRequestResponse, error)
 	// AddRepository clones through egress into ~/<repo> and registers it in Project.md's managed table.
 	AddRepository(context.Context, *AddRepositoryRequest) (*AddRepositoryResponse, error)
 	ListRepositories(context.Context, *ListRepositoriesRequest) (*ListRepositoriesResponse, error)
@@ -713,6 +756,9 @@ func (UnimplementedDaemonServer) Prompt(context.Context, *PromptRequest) (*Promp
 func (UnimplementedDaemonServer) CancelPrompt(context.Context, *CancelPromptRequest) (*CancelPromptResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CancelPrompt not implemented")
 }
+func (UnimplementedDaemonServer) UpdateQueuedPrompt(context.Context, *UpdateQueuedPromptRequest) (*UpdateQueuedPromptResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateQueuedPrompt not implemented")
+}
 func (UnimplementedDaemonServer) SetThreadConfigOption(context.Context, *SetThreadConfigOptionRequest) (*SetThreadConfigOptionResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method SetThreadConfigOption not implemented")
 }
@@ -757,6 +803,12 @@ func (UnimplementedDaemonServer) WatchFiles(*WatchFilesRequest, grpc.ServerStrea
 }
 func (UnimplementedDaemonServer) GetChanges(context.Context, *GetChangesRequest) (*GetChangesResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetChanges not implemented")
+}
+func (UnimplementedDaemonServer) GetBranchDiffStat(context.Context, *BranchDiffStatRequest) (*BranchDiffStatResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetBranchDiffStat not implemented")
+}
+func (UnimplementedDaemonServer) PreparePullRequest(context.Context, *PreparePullRequestRequest) (*PreparePullRequestResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method PreparePullRequest not implemented")
 }
 func (UnimplementedDaemonServer) AddRepository(context.Context, *AddRepositoryRequest) (*AddRepositoryResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method AddRepository not implemented")
@@ -1120,6 +1172,24 @@ func _Daemon_CancelPrompt_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Daemon_UpdateQueuedPrompt_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateQueuedPromptRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DaemonServer).UpdateQueuedPrompt(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Daemon_UpdateQueuedPrompt_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DaemonServer).UpdateQueuedPrompt(ctx, req.(*UpdateQueuedPromptRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Daemon_SetThreadConfigOption_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SetThreadConfigOptionRequest)
 	if err := dec(in); err != nil {
@@ -1372,6 +1442,42 @@ func _Daemon_GetChanges_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Daemon_GetBranchDiffStat_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(BranchDiffStatRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DaemonServer).GetBranchDiffStat(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Daemon_GetBranchDiffStat_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DaemonServer).GetBranchDiffStat(ctx, req.(*BranchDiffStatRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Daemon_PreparePullRequest_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PreparePullRequestRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DaemonServer).PreparePullRequest(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Daemon_PreparePullRequest_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DaemonServer).PreparePullRequest(ctx, req.(*PreparePullRequestRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Daemon_AddRepository_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(AddRepositoryRequest)
 	if err := dec(in); err != nil {
@@ -1592,6 +1698,10 @@ var Daemon_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Daemon_CancelPrompt_Handler,
 		},
 		{
+			MethodName: "UpdateQueuedPrompt",
+			Handler:    _Daemon_UpdateQueuedPrompt_Handler,
+		},
+		{
 			MethodName: "SetThreadConfigOption",
 			Handler:    _Daemon_SetThreadConfigOption_Handler,
 		},
@@ -1642,6 +1752,14 @@ var Daemon_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetChanges",
 			Handler:    _Daemon_GetChanges_Handler,
+		},
+		{
+			MethodName: "GetBranchDiffStat",
+			Handler:    _Daemon_GetBranchDiffStat_Handler,
+		},
+		{
+			MethodName: "PreparePullRequest",
+			Handler:    _Daemon_PreparePullRequest_Handler,
 		},
 		{
 			MethodName: "AddRepository",

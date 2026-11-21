@@ -9,7 +9,7 @@ defmodule Console.Devboxes.Threads do
   import Console.Devboxes, only: [control_result: 2, ensure_live: 1, resolve_config_options: 2]
   alias Console.PubSub
   alias Console.Devboxes
-  alias Console.Devboxes.{Billing, Control, Error, Acp}
+  alias Console.Devboxes.{Billing, Control, Error, Acp, Ingest}
   alias Console.Schema.{
     Devbox,
     DevboxInstance,
@@ -17,6 +17,7 @@ defmodule Console.Devboxes.Threads do
     DevboxInstanceInteraction,
     User
   }
+  alias Console.Schema.DevboxInstanceSession.ConfigOption
 
   @type error :: Console.error
   @type thread_resp :: {:ok, DevboxInstanceSession.t} | error
@@ -43,7 +44,7 @@ defmodule Console.Devboxes.Threads do
     start_transaction()
     |> add_operation(:instance, fn _ -> live_instance(instance_id) end)
     |> add_operation(:catalog, fn %{instance: inst} ->
-      Devboxes.resolve_catalog(inst.devbox, Map.put_new(attrs, :agent, inst.agent))
+      Devboxes.resolve_catalog(inst.devbox, Map.put_new(attrs, :agent, inst.agent), inst.agent_billing)
     end)
     |> add_operation(:autonomy, fn %{instance: inst, catalog: catalog} ->
       Devboxes.check_proxy_auto(inst, catalog.agent, catalog.config_options)
@@ -275,6 +276,38 @@ defmodule Console.Devboxes.Threads do
   end
 
   @doc """
+  Edits, drops or promotes (`:send_now`, which interrupts the running turn) a prompt held in a thread's queue.  The
+  thread comes back with the queue as the box reports it; a prompt that already started is left alone.
+  """
+  @spec update_queued_prompt(binary, binary, :edit | :cancel | :send_now, binary | nil, User.t) :: thread_resp
+  def update_queued_prompt(id, prompt_id, action, text, %User{} = user) do
+    with {:ok, thread} <- allow(get_thread!(id), user, :prompt),
+         :ok <- queued_text(action, text),
+         {:ok, inst} <- live_instance(thread.instance_id) do
+      case Control.update_queued_prompt(inst, thread, prompt_id, action, text) do
+        {:ok, %{queued_prompts: queued}} -> store_queue(thread, queued)
+        res -> control_result(res, thread)
+      end
+    end
+  end
+
+  defp queued_text(:edit, text) when is_binary(text) do
+    case String.trim(text) do
+      "" -> {:error, "a queued prompt needs text"}
+      _ -> :ok
+    end
+  end
+  defp queued_text(:edit, _), do: {:error, "a queued prompt needs text"}
+  defp queued_text(_, _), do: :ok
+
+  defp store_queue(thread, queued) when is_list(queued) do
+    thread
+    |> DevboxInstanceSession.changeset(%{queued_prompts: Enum.map(queued, &Ingest.queued_prompt/1)})
+    |> Repo.update()
+  end
+  defp store_queue(thread, _), do: {:ok, thread}
+
+  @doc """
   Sets a session config option (model, mode, thought level, ...), validated against the thread's current options
   as reported by the agent, or the box's catalog before the agent has reported any.
   """
@@ -282,11 +315,30 @@ defmodule Console.Devboxes.Threads do
   def set_config_option(id, config_id, value, %User{} = user) do
     with {:ok, thread} <- allow(get_thread!(id), user, :prompt),
          {:ok, inst} <- live_instance(thread.instance_id),
-         {:ok, opts} <- resolve_config_options(config_options(thread, inst), [%{config_id: config_id, value: value}]),
+         {:ok, opts} <- resolve_config_options(offered_config_options(thread, inst), [%{config_id: config_id, value: value}]),
          {:ok, _} <- Devboxes.check_autonomy(inst.devbox, opts),
          {:ok, _} <- Devboxes.check_proxy_auto(inst, thread.agent || inst.agent, opts),
       do: Control.set_config_option(inst, thread, config_id, value) |> control_result(thread)
   end
+
+  # a proxy-billed agent's model picker offers the AI proxy's models, whatever the agent itself lists
+  defp offered_config_options(%DevboxInstanceSession{} = thread, %DevboxInstance{} = inst) do
+    agent = thread.agent || inst.agent
+    opts = config_options(thread, inst)
+    with false <- Billing.subscription?(inst, agent),
+         %Devbox.Agent{} = box_agent <- Devbox.agent(inst.devbox, agent),
+         [_ | _] = models <- Devboxes.offered_models(box_agent, :proxy) do
+      Enum.map(opts, &with_proxy_models(&1, models))
+    else
+      _ -> opts
+    end
+  end
+
+  defp with_proxy_models(%ConfigOption{category: "model", options: values} = opt, models) do
+    known = MapSet.new(values || [], & &1.value)
+    %{opt | options: (values || []) ++ for(m <- models, !MapSet.member?(known, m), do: %ConfigOption.Value{value: m})}
+  end
+  defp with_proxy_models(opt, _), do: opt
 
   defp config_options(%DevboxInstanceSession{config_options: [_ | _] = opts}, _), do: opts
   defp config_options(%DevboxInstanceSession{agent: agent}, %DevboxInstance{devbox: devbox}) do
@@ -305,7 +357,7 @@ defmodule Console.Devboxes.Threads do
          {:ok, inst} <- live_instance(thread.instance_id) do
       case Control.list_commands(inst, thread) do
         {:ok, commands} -> {:ok, commands}
-        {:error, :not_connected} -> {:ok, thread.available_commands || []}
+        {:error, reason} when reason in [:not_connected, :starting] -> {:ok, thread.available_commands || []}
         err -> Error.control(err)
       end
     end
@@ -384,7 +436,7 @@ defmodule Console.Devboxes.Threads do
     with {:ok, inst} <- read_instance(instance_id, user) do
       case Control.list_repositories(inst) do
         {:ok, repos} -> {:ok, repos}
-        {:error, :not_connected} -> {:ok, Enum.map(inst.checkouts || [], &Map.from_struct/1)}
+        {:error, reason} when reason in [:not_connected, :starting] -> {:ok, Enum.map(inst.checkouts || [], &Map.from_struct/1)}
         err -> Error.control(err)
       end
     end
@@ -413,7 +465,7 @@ defmodule Console.Devboxes.Threads do
     with {:ok, inst} <- read_instance(instance_id, user) do
       case Control.get_sessions(inst) do
         {:ok, sessions} -> {:ok, sessions}
-        {:error, reason} when reason in [:not_connected, :suspended] ->
+        {:error, reason} when reason in [:not_connected, :suspended, :starting] ->
           {:ok, DevboxInstanceSession.for_instance(inst.id) |> DevboxInstanceSession.visible() |> Repo.all()}
         err -> Error.control(err)
       end

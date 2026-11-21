@@ -62,9 +62,10 @@ func (m *Manager) resolveInteractionLocked(in *interaction, state devboxv1.Inter
 	default:
 	}
 	m.dirty = true
-	// Back to running once the thread has nothing else pending.
+	// Once the thread has nothing else pending it is back to running, or idle if its turn already ended, so it
+	// doesn't keep reading as needing review.
 	t := in.session.thread
-	if t == nil || !t.running || t.session == nil {
+	if t == nil || t.session == nil {
 		return
 	}
 	for _, other := range m.interactions {
@@ -72,10 +73,16 @@ func (m *Manager) resolveInteractionLocked(in *interaction, state devboxv1.Inter
 			return
 		}
 	}
+	next := devboxv1.ForegroundStateKind_FOREGROUND_STATE_KIND_RUNNING
+	if !t.running {
+		next = devboxv1.ForegroundStateKind_FOREGROUND_STATE_KIND_IDLE
+	}
 	now := timestamppb.New(m.clock.Now())
-	m.setForegroundLocked(t.session, &devboxv1.ForegroundState{State: devboxv1.ForegroundStateKind_FOREGROUND_STATE_KIND_RUNNING, UpdatedAt: now})
-	if in.session != t.session {
-		m.setForegroundLocked(in.session, &devboxv1.ForegroundState{State: devboxv1.ForegroundStateKind_FOREGROUND_STATE_KIND_RUNNING, UpdatedAt: now})
+	if t.running || t.session.foreground.GetState() == devboxv1.ForegroundStateKind_FOREGROUND_STATE_KIND_REQUIRES_ACTION {
+		m.setForegroundLocked(t.session, &devboxv1.ForegroundState{State: next, UpdatedAt: now})
+	}
+	if in.session != t.session && (t.running || in.session.foreground.GetState() == devboxv1.ForegroundStateKind_FOREGROUND_STATE_KIND_REQUIRES_ACTION) {
+		m.setForegroundLocked(in.session, &devboxv1.ForegroundState{State: next, UpdatedAt: now})
 	}
 }
 
@@ -94,11 +101,17 @@ func (m *Manager) onPermissionRequest(ctx context.Context, c *agentConn, params 
 		m.mu.Unlock()
 		return permissionCancelled, nil
 	}
+	// A subagent's request arrives on its parent's session: it belongs to whichever session has the call.
+	s = m.toolCallOwnerLocked(s, acp.Str(tc, "toolCallId"))
 	// The request carries a tool call update; apply it like any other so the timeline shows the pending call.
 	if tc != nil {
 		upd := acp.CloneJSON(tc).(map[string]any)
 		upd["sessionUpdate"] = "tool_call_update"
-		m.applyUpdateLocked(c, sid, upd)
+		if s.id != sid {
+			// already routed: lineage hints would nest it under the subagent again
+			delete(upd, "_meta")
+		}
+		m.applyUpdateLocked(c, s.id, upd)
 	}
 	pr := &devboxv1.PermissionRequest{ToolCall: acp.ToolCallOf(tc), Meta: acp.MetaStruct(p)}
 	for _, o := range acp.Arr(p, "options") {
@@ -165,6 +178,20 @@ func (m *Manager) answerByPolicyLocked(in *interaction, optionID string, by *dev
 	return map[string]any{"outcome": map[string]any{"outcome": "selected", "optionId": optionID}}
 }
 
+// toolCallOwnerLocked is the session holding a tool call: s itself, or one of its subagents when the call was
+// routed there by lineage. Calls nobody has seen yet stay with s.
+func (m *Manager) toolCallOwnerLocked(s *session, toolCallID string) *session {
+	if toolCallID == "" || s.store.Get(devboxv1.EntityType_ENTITY_TYPE_TOOL_CALL, toolCallID) != nil {
+		return s
+	}
+	for _, child := range m.childrenLocked(s.id) {
+		if child.store.Get(devboxv1.EntityType_ENTITY_TYPE_TOOL_CALL, toolCallID) != nil {
+			return child
+		}
+	}
+	return s
+}
+
 // onElicitation serves `elicitation/create` (form and URL modes).
 func (m *Manager) onElicitation(ctx context.Context, c *agentConn, params json.RawMessage) (any, *acp.RequestError) {
 	p, err := acp.DecodeObject(params)
@@ -198,6 +225,7 @@ func (m *Manager) onElicitation(ctx context.Context, c *agentConn, params json.R
 	if title == "" {
 		title = "Input requested"
 	}
+	s = m.toolCallOwnerLocked(s, acp.Str(p, "toolCallId"))
 	in := m.newInteractionLocked(s, kind, title, acp.Str(p, "toolCallId"), params)
 	in.proto.Request = &devboxv1.Interaction_Elicitation{Elicitation: er}
 	m.publishInteractionLocked(in)

@@ -56,8 +56,8 @@ func TestAutonomyDefaultsToAutoWithinCap(t *testing.T) {
 	if got := h.modesSet(t); len(got) != 1 || got[0] != "auto" {
 		t.Fatalf("set_mode calls %v", got)
 	}
-	if got := values(h.option("t1", "mode")); len(got) != 4 || contains(got, "bypassPermissions") {
-		t.Fatalf("reported modes %v", got)
+	if o := h.option("t1", "mode"); o != nil {
+		t.Fatalf("the mode option is reported next to autonomy: %v", o)
 	}
 	if err := h.setOption("t1", autonomyCategory, "full"); err == nil {
 		t.Fatal("full above the runner's cap was accepted")
@@ -164,8 +164,11 @@ func TestAutonomyAutoUnavailableAfterModeFallback(t *testing.T) {
 		t.Fatal(err)
 	}
 	o := h.option("t1", autonomyCategory)
-	if o.GetCurrentValue() != "manual" || contains(values(o), "auto") || h.option("t1", "mode").GetCurrentValue() != "acceptEdits" {
-		t.Fatalf("after the agent fell back from auto: autonomy %v, mode %v", o, h.option("t1", "mode"))
+	h.m.mu.Lock()
+	mode := acp.Str(modeOption(h.m.threads["t1"].session).raw, "currentValue")
+	h.m.mu.Unlock()
+	if o.GetCurrentValue() != "manual" || contains(values(o), "auto") || mode != "acceptEdits" {
+		t.Fatalf("after the agent fell back from auto: autonomy %v, mode %v", o, mode)
 	}
 }
 
@@ -204,6 +207,17 @@ func TestAutonomyHidesModesItCovers(t *testing.T) {
 	s.modeView = acp.Object{}
 	if len(s.configProtos()) != 0 {
 		t.Fatalf("hidden mode option reported: %v", s.configProtos())
+	}
+
+	claude := &session{options: []*cfgOption{{synthetic: "mode", raw: acp.Object{"id": "mode", "category": "mode", "options": []any{
+		map[string]any{"value": "default"}, map[string]any{"value": "acceptEdits"}, map[string]any{"value": "plan"},
+		map[string]any{"value": "auto"}, map[string]any{"value": "bypassPermissions"},
+	}}}}}
+	if view := m.modeViewLocked(devboxv1.AgentType_AGENT_TYPE_CLAUDE, claude); view == nil || len(view) != 0 {
+		t.Fatalf("claude's modes outside the autonomy levels should be hidden too: %v", view)
+	}
+	if view := m.modeViewLocked(devboxv1.AgentType_AGENT_TYPE_OPENCODE, claude); view != nil {
+		t.Fatalf("agents without native modes keep their mode option: %v", view)
 	}
 }
 

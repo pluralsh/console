@@ -319,13 +319,6 @@ networkPolicies:
     matchLabels:
       ate.dev/api-access: "true"
 
-crds:
-  # -- Render the ate.dev CRDs.
-  install: true
-  # -- Annotate the CRDs with helm.sh/resource-policy: keep so uninstall keeps
-  # them (and every WorkerPool/SandboxConfig).
-  keep: true
-
 postgres:
   # -- cnpg (CloudNativePG Cluster, the default) or external.
   mode: cnpg

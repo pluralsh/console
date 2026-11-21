@@ -204,6 +204,16 @@ func (m *Manager) review(ctx context.Context, rr reviewRequest) *devboxv1.Review
 	return out
 }
 
+// RecentPrompts are the text of a thread's last few prompts, oldest first.
+func (m *Manager) RecentPrompts(threadID string) []string {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if t := m.threads[threadID]; t != nil {
+		return append([]string(nil), t.recentPrompts...)
+	}
+	return nil
+}
+
 // notePromptText keeps a prompt's text for the reviewer.
 func (t *thread) notePromptText(content []*devboxv1.ContentBlock) {
 	var parts []string

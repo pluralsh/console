@@ -318,11 +318,11 @@ func (c *Client) DeleteEgressPolicy(ctx context.Context, ref Ref) error {
 	return ignoreNotFound(err)
 }
 
-// EgressRules converts egress.BuildPolicy output to Substrate rules.
+// EgressRules converts an egress policy to Substrate rules.
 func EgressRules(p egress.Policy) []*ateapi.EgressRule {
 	out := make([]*ateapi.EgressRule, 0, len(p.Rules))
 	for _, r := range p.Rules {
-		ports := &ateapi.Ports{Numbers: []int32{r.Port}}
+		ports := &ateapi.Ports{Numbers: []int32{r.EffectivePort()}}
 		var effects *ateapi.HttpRuleEffects
 		if r.InjectHeader != "" && (r.SecretURI != "" || r.ActorJWT) {
 			h := &ateapi.CredentialHeader{Header: r.InjectHeader, Prefix: r.Prefix}

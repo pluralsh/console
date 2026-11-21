@@ -4,9 +4,11 @@ import (
 	"testing"
 
 	. "github.com/onsi/gomega"
+	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 
 	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 )
 
 func devboxImage() *ResolvedDevboxImage {
@@ -82,11 +84,25 @@ func TestDevboxConfigDefaults(t *testing.T) {
 	cfg := LoadDevboxConfig("plrl-deploy-operator", "https://console.example.com/ext/gql", "token", "cid")
 
 	g.Expect(cfg.Enabled).To(BeTrue())
-	g.Expect(cfg.DefaultImage).To(Equal("ghcr.io/pluralsh/devbox-fat:0.12.0"))
-	g.Expect(cfg.GatewayImage).To(Equal("ghcr.io/pluralsh/devbox-gateway:0.12.0"))
+	g.Expect(cfg.DevboxImage()).To(Equal("ghcr.io/pluralsh/devbox-fat:0.12.0"))
+	g.Expect(cfg.GatewayImageRef()).To(Equal("ghcr.io/pluralsh/devbox-gateway:0.12.0"))
 	g.Expect(cfg.KasURL).To(Equal("wss://console.example.com/ext/devbox"))
 	g.Expect(cfg.GatewayServiceAccountAnnotations).To(HaveKeyWithValue("eks.amazonaws.com/role-arn", "arn:aws:iam::1:role/gw"))
 	g.Expect(cfg.GatewayServiceAccountAnnotations).To(HaveKeyWithValue("iam.gke.io/gcp-service-account", "gw@p.iam.gserviceaccount.com"))
 	g.Expect(cfg.GatewaySpiffeID()).To(Equal("spiffe://cluster.local/ns/plrl-deploy-operator/sa/devbox-gateway"))
 	g.Expect(cfg.WorkerPoolNamespace).To(Equal("plrl-deploy-operator"))
+}
+
+func TestDevboxConfigBaseRegistry(t *testing.T) {
+	g := NewWithT(t)
+	g.Expect(common.GetConfigurationManager().SetDefaults(v1alpha1.AgentConfigurationSpec{BaseRegistryURL: lo.ToPtr("mirror.example.com/plural")})).To(Succeed())
+	t.Cleanup(func() { _ = common.GetConfigurationManager().SetDefaults(v1alpha1.AgentConfigurationSpec{}) })
+
+	cfg := DevboxConfig{OperatorVersion: "0.12.0"}
+	g.Expect(cfg.DevboxImage()).To(Equal("mirror.example.com/plural/pluralsh/devbox-fat:0.12.0"))
+	g.Expect(cfg.GatewayImageRef()).To(Equal("mirror.example.com/plural/pluralsh/devbox-gateway:0.12.0"))
+
+	cfg.DefaultImage, cfg.GatewayImage = "registry.internal/devbox:1", "registry.internal/gateway:1"
+	g.Expect(cfg.DevboxImage()).To(Equal("registry.internal/devbox:1"))
+	g.Expect(cfg.GatewayImageRef()).To(Equal("registry.internal/gateway:1"))
 }

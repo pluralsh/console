@@ -251,6 +251,42 @@ func TestAccountBedrockRuntimeEndpointIsDefault(t *testing.T) {
 	require.Empty(t, keys[0].BedrockKeyConfig.SecretKey.GetValue())
 }
 
+func TestAccountBedrockModelsKeepDottedModelIDs(t *testing.T) {
+	cfg := &pb.AiConfig{
+		Enabled: true,
+		Bedrock: &pb.BedrockConfig{
+			ModelId:     lo.ToPtr("openai.gpt-5.6-terra"),
+			ProxyModels: []string{"us.anthropic.claude-sonnet-4-6", "global.anthropic.claude-haiku-4-5-20251001-v1:0"},
+			Region:      lo.ToPtr("us-east-1"),
+		},
+	}
+	acct := &Account{
+		consoleClient: &mockConsoleClient{cfg: cfg},
+		tokenCache:    tokenexchange.NewCache(),
+		logger:        zap.NewNop(),
+	}
+
+	keys, err := acct.GetKeysForProvider(context.Background(), schemas.Bedrock)
+	require.NoError(t, err)
+	require.Len(t, keys, 1)
+	require.ElementsMatch(t, []string{
+		"openai.gpt-5.6-terra",
+		"anthropic.claude-sonnet-4-6",
+		"us.anthropic.claude-sonnet-4-6",
+		"anthropic.claude-haiku-4-5-20251001-v1:0",
+		"global.anthropic.claude-haiku-4-5-20251001-v1:0",
+	}, keys[0].Models)
+	require.Equal(t, "us.anthropic.claude-sonnet-4-6", keys[0].Aliases["anthropic.claude-sonnet-4-6"].ModelID)
+	require.Equal(t, "openai.gpt-5.6-terra", keys[0].Aliases["openai.gpt-5.6-terra"].ModelID)
+}
+
+func TestBedrockModelName(t *testing.T) {
+	require.Equal(t, "openai.gpt-5.6-terra", bedrockModelName("openai.gpt-5.6-terra"))
+	require.Equal(t, "anthropic.claude-sonnet-4-6", bedrockModelName("us.anthropic.claude-sonnet-4-6"))
+	require.Equal(t, "anthropic.claude-haiku-4-5-20251001-v1:0", bedrockModelName("global.anthropic.claude-haiku-4-5-20251001-v1:0"))
+	require.Equal(t, "openai.gpt-5.6", bedrockModelName("eu.openai.gpt-5.6"))
+}
+
 func TestAccountBedrockModelSettingsUseApplicationInferenceProfile(t *testing.T) {
 	modelID := "anthropic.claude-sonnet-4-6"
 	inferenceProfileARN := "arn:aws:bedrock:us-east-1:123456789012:application-inference-profile/abcdef123456"

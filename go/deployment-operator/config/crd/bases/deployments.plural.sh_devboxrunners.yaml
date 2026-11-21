@@ -144,6 +144,30 @@ spec:
                 - message: default must not be above max
                   rule: '!has(self.default) || !has(self.max) || (self.default ==
                     ''manual'' || self.max == ''full'' || self.default == self.max)'
+              bindings:
+                description: Bindings control who can use this devbox in console.
+                properties:
+                  create:
+                    description: |-
+                      Create bindings control who can attach this devbox to a workbench and start instances on it.
+                      Only users and groups resolvable by userEmail or groupName apply. If none are set, console falls
+                      back to its global create policy, which admins always pass.
+                    items:
+                      description: Binding ...
+                      properties:
+                        UserID:
+                          type: string
+                        groupID:
+                          type: string
+                        groupName:
+                          type: string
+                        id:
+                          type: string
+                        userEmail:
+                          type: string
+                      type: object
+                    type: array
+                type: object
               bootstrapScript:
                 description: BootstrapScript runs once during the golden boot, so
                   its results are baked into the snapshot.
@@ -412,6 +436,52 @@ spec:
               name:
                 description: Name of the Devbox in console. Defaults to metadata.name.
                 type: string
+              ociRegistries:
+                default: {}
+                description: |-
+                  OCIRegistries opens egress to public container registries, for pulling images with podman, docker,
+                  crane or helm. Docker Hub and GitHub Container Registry are on unless set to false.
+                properties:
+                  dockerHub:
+                    default: true
+                    description: 'DockerHub: docker.io, its auth service and its Cloudflare
+                      blob CDN. Unqualified image names resolve here.'
+                    type: boolean
+                  ecr:
+                    description: ECR opens private Amazon ECR registries, for any
+                      account, in the listed regions.
+                    properties:
+                      regions:
+                        description: |-
+                          Regions opens, per region, the registry API (<account>.dkr.ecr.<region>.amazonaws.com), the ECR API
+                          that issues login tokens, and the S3 bucket image layers download from.
+                        items:
+                          pattern: ^[a-z]{2}(-[a-z]+)+-[0-9]+$
+                          type: string
+                        maxItems: 32
+                        type: array
+                    type: object
+                  github:
+                    default: true
+                    description: 'GitHub: ghcr.io and its blob host.'
+                    type: boolean
+                  google:
+                    description: 'Google: Container Registry (gcr.io and its regional
+                      hosts) and Artifact Registry (*.pkg.dev).'
+                    type: boolean
+                  kubernetes:
+                    description: |-
+                      Kubernetes: registry.k8s.io and the Artifact Registry mirrors it redirects to. From AWS addresses it
+                      redirects to regional S3 buckets instead, which need httpAllowlist entries.
+                    type: boolean
+                  microsoft:
+                    description: 'Microsoft: the Microsoft Artifact Registry, mcr.microsoft.com,
+                      and its regional data endpoints.'
+                    type: boolean
+                  quay:
+                    description: 'Quay: quay.io, its CDN and its S3 blob bucket.'
+                    type: boolean
+                type: object
               packageServers:
                 default: {}
                 description: |-
@@ -492,6 +562,28 @@ spec:
                 items:
                   type: string
                 type: array
+              substrate:
+                description: |-
+                  Substrate overrides where the operator reaches the Substrate API and the identity it calls it as. The
+                  operator mints the token and reads the CA bundle from the cluster when it reconciles the runner, so
+                  nothing is mounted into the operator.
+                properties:
+                  address:
+                    description: Address of ate-api-server. Defaults to the deployment-operator
+                      chart's devboxes.substrate.apiAddress.
+                    type: string
+                  caSignerName:
+                    description: |-
+                      CASignerName is the signer of the ClusterTrustBundles that verify ate-api-server's serving certificate.
+                      Defaults to servicedns.podcert.ate.dev/identity.
+                    type: string
+                  serviceAccountName:
+                    description: |-
+                      ServiceAccountName is a ServiceAccount in the operator's namespace that the operator mints Substrate API
+                      tokens for. It must be a Substrate global owner, since it creates atespaces and drains workers. Defaults
+                      to the operator's own ServiceAccount.
+                    type: string
+                type: object
               workerPool:
                 description: WorkerPool sizes the Substrate WorkerPool backing this
                   runner.

@@ -39,7 +39,7 @@ type fakeDaemon struct {
 }
 
 func (d fakeDaemon) Health(context.Context, *devboxv1.HealthRequest, ...grpc.CallOption) (*devboxv1.HealthResponse, error) {
-	return &devboxv1.HealthResponse{Ready: true}, nil
+	return &devboxv1.HealthResponse{Status: "booting"}, nil
 }
 
 func (d fakeDaemon) ProbeAgents(ctx context.Context, in *devboxv1.ProbeAgentsRequest, _ ...grpc.CallOption) (*devboxv1.ProbeAgentsResponse, error) {
@@ -103,7 +103,7 @@ func newProbeFixture(t *testing.T, holder string, objs ...client.Object) *probeF
 		Namespace:  ns,
 		Holder:     holder,
 		ConsoleURL: "https://console.example.com",
-		AIProxyURL: "https://console.example.com/ext/v1/ai",
+		AIProxyURL: "https://console.example.com/ext/ai",
 		RetryDelay: time.Millisecond,
 		Resync:     50 * time.Millisecond,
 	}, Deps{
@@ -199,7 +199,7 @@ func TestProberRunsRequestAndWritesResult(t *testing.T) {
 	f.mu.Lock()
 	reqs := f.probeReqs
 	f.mu.Unlock()
-	if len(reqs) != 1 || reqs[0].GetEndpoints().GetAiProxyUrl() != "https://console.example.com/ext/v1/ai" || len(reqs[0].GetAgents()) != 1 {
+	if len(reqs) != 1 || reqs[0].GetEndpoints().GetAiProxyUrl() != "https://console.example.com/ext/ai" || len(reqs[0].GetAgents()) != 1 {
 		t.Fatalf("ProbeAgents requests: %v", reqs)
 	}
 	id := InstanceID(f.cmName)

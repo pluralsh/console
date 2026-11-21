@@ -257,7 +257,7 @@ defmodule Console.GRPC.DevboxIngestTest do
 
     test "it attributes the pull request to the X-Devbox-Thread thread", %{cluster: cluster, inst: inst, thread: thread} do
       subagent = insert(:devbox_instance_session, instance: inst, kind: :subagent, parent: thread)
-      expect(Console.Deployments.Pr.Dispatcher, :pr, fn _, "a pr", "a body", _, "main", "devbox/branch" ->
+      expect(Console.Deployments.Pr.Dispatcher, :pr, fn _, "a pr", "a body", _, "main", "devbox/branch", _ ->
         {:ok, %{url: "https://github.com/pluralsh/console/pull/12", title: "a pr"}}
       end)
 

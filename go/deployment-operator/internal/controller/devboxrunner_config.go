@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate"
 )
 
@@ -15,8 +16,6 @@ const (
 	defaultDevboxImageRepository  = "ghcr.io/pluralsh/devbox-fat"
 	defaultGatewayImageRepository = "ghcr.io/pluralsh/devbox-gateway"
 	defaultSubstrateNamespace     = "ate-system"
-	defaultSubstrateTokenFile     = "/var/run/secrets/ate.dev/api/token"
-	defaultSubstrateCAFile        = "/var/run/secrets/ate.dev/api/ca.crt"
 	defaultPollInterval           = time.Hour
 	defaultDrainTimeout           = 30 * time.Minute
 	defaultHeartbeatInterval      = 2 * time.Minute
@@ -34,9 +33,10 @@ type DevboxConfig struct {
 	// OperatorServiceAccount is the operator's own ServiceAccount, granted owner on each atespace.
 	OperatorServiceAccount string
 
-	// DefaultImage is DEVBOX_DEFAULT_IMAGE, the image for runners without spec.image.
+	// DefaultImage is DEVBOX_DEFAULT_IMAGE, the image for runners without spec.image. When unset, DevboxImage
+	// falls back to devbox-fat at OperatorVersion on the agent's base registry.
 	DefaultImage string
-	// GatewayImage is DEVBOX_GATEWAY_IMAGE.
+	// GatewayImage is DEVBOX_GATEWAY_IMAGE. When unset, GatewayImageRef falls back like DefaultImage.
 	GatewayImage string
 	// GatewayReplicas is DEVBOX_GATEWAY_REPLICAS.
 	GatewayReplicas int32
@@ -50,7 +50,8 @@ type DevboxConfig struct {
 
 	// SubstrateNamespace is SUBSTRATE_NAMESPACE, where atenet-egress and atenet-router run.
 	SubstrateNamespace string
-	Substrate          substrate.Config
+	// SubstrateAddress is ATE_API_ADDRESS, ate-api-server's address for runners without spec.substrate.address.
+	SubstrateAddress string
 	// RouterAddress is DEVBOX_ROUTER_ADDRESS, atenet-router's gRPC address; defaults to atenet-router.<SubstrateNamespace>.svc:443.
 	RouterAddress string
 	// ActorJWTIssuer is DEVBOX_ACTOR_JWT_ISSUER, Substrate's actor JWT issuer; defaults to the agent-substrate chart's https://idp.<SubstrateNamespace>.svc.
@@ -74,8 +75,8 @@ func LoadDevboxConfig(operatorNamespace, consoleURL, deployToken, clusterID stri
 		OperatorVersion:                  version,
 		OperatorNamespace:                operatorNamespace,
 		OperatorServiceAccount:           envOr("DEVBOX_OPERATOR_SERVICE_ACCOUNT", "deployment-operator"),
-		DefaultImage:                     envOr("DEVBOX_DEFAULT_IMAGE", imageAtVersion(defaultDevboxImageRepository, version)),
-		GatewayImage:                     envOr("DEVBOX_GATEWAY_IMAGE", imageAtVersion(defaultGatewayImageRepository, version)),
+		DefaultImage:                     os.Getenv("DEVBOX_DEFAULT_IMAGE"),
+		GatewayImage:                     os.Getenv("DEVBOX_GATEWAY_IMAGE"),
 		GatewayReplicas:                  int32(envInt("DEVBOX_GATEWAY_REPLICAS", 1)),
 		GatewayServiceAccountAnnotations: parseKeyValues(os.Getenv("DEVBOX_GATEWAY_SA_ANNOTATIONS")),
 		WorkerImages: map[v1alpha1.DevboxSandboxClass]string{
@@ -84,17 +85,13 @@ func LoadDevboxConfig(operatorNamespace, consoleURL, deployToken, clusterID stri
 		},
 		WorkerPoolNamespace: envOr("DEVBOX_WORKERPOOL_NAMESPACE", operatorNamespace),
 		SubstrateNamespace:  envOr("SUBSTRATE_NAMESPACE", defaultSubstrateNamespace),
-		Substrate: substrate.Config{
-			Address:   envOr("ATE_API_ADDRESS", substrate.DefaultAddress),
-			TokenFile: envOr("ATE_API_TOKEN_FILE", defaultSubstrateTokenFile),
-			CAFile:    envOr("ATE_API_CA_FILE", defaultSubstrateCAFile),
-		},
-		ConsoleURL:        consoleURL,
-		DeployToken:       deployToken,
-		KasURL:            envOr("DEVBOX_KAS_URL", kasDevboxURL(consoleURL)),
-		ClusterID:         clusterID,
-		DrainTimeout:      envDuration("DEVBOX_DRAIN_TIMEOUT", defaultDrainTimeout),
-		HeartbeatInterval: envDuration("DEVBOX_HEARTBEAT_INTERVAL", defaultHeartbeatInterval),
+		SubstrateAddress:    envOr("ATE_API_ADDRESS", substrate.DefaultAddress),
+		ConsoleURL:          consoleURL,
+		DeployToken:         deployToken,
+		KasURL:              envOr("DEVBOX_KAS_URL", kasDevboxURL(consoleURL)),
+		ClusterID:           clusterID,
+		DrainTimeout:        envDuration("DEVBOX_DRAIN_TIMEOUT", defaultDrainTimeout),
+		HeartbeatInterval:   envDuration("DEVBOX_HEARTBEAT_INTERVAL", defaultHeartbeatInterval),
 	}
 	cfg.RouterAddress = envOr("DEVBOX_ROUTER_ADDRESS", "atenet-router."+cfg.SubstrateNamespace+".svc:443")
 	cfg.ActorJWTIssuer = envOr("DEVBOX_ACTOR_JWT_ISSUER", "https://idp."+cfg.SubstrateNamespace+".svc")
@@ -106,13 +103,30 @@ func (c DevboxConfig) GatewaySpiffeID() string {
 	return "spiffe://cluster.local/ns/" + c.OperatorNamespace + "/sa/" + devboxGatewayName
 }
 
-// GatewayPrincipal is the gateway's Substrate API principal.
+// GatewayPrincipal is the gateway's Substrate API principal, as an access policy member ("user:<id>").
 func (c DevboxConfig) GatewayPrincipal() string {
-	return "system:serviceaccount:" + c.OperatorNamespace + ":" + devboxGatewayName
+	return "user:system:serviceaccount:" + c.OperatorNamespace + ":" + devboxGatewayName
 }
 
 func (c DevboxConfig) OperatorPrincipal() string {
-	return "system:serviceaccount:" + c.OperatorNamespace + ":" + c.OperatorServiceAccount
+	return "user:system:serviceaccount:" + c.OperatorNamespace + ":" + c.OperatorServiceAccount
+}
+
+// DevboxImage is the image for runners without spec.image. The base registry is read on every call since the
+// agent configuration can change it at runtime.
+func (c DevboxConfig) DevboxImage() string {
+	return c.imageOrDefault(c.DefaultImage, defaultDevboxImageRepository)
+}
+
+func (c DevboxConfig) GatewayImageRef() string {
+	return c.imageOrDefault(c.GatewayImage, defaultGatewayImageRepository)
+}
+
+func (c DevboxConfig) imageOrDefault(image, repository string) string {
+	if image != "" {
+		return image
+	}
+	return common.GetConfigurationManager().SwapBaseRegistry(imageAtVersion(repository, c.OperatorVersion))
 }
 
 func imageAtVersion(repository, version string) string {

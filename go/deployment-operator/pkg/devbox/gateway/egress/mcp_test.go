@@ -8,6 +8,7 @@ import (
 	"crypto/elliptic"
 	"crypto/rand"
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -353,7 +354,7 @@ func TestMCPListsTools(t *testing.T) {
 func TestMCPCreatePullRequestAttribution(t *testing.T) {
 	f := newMCPFixture(t, nil)
 	res := f.call(t, f.box1Token(t), "thread-7", CreatePullRequestTool, map[string]any{
-		"repository": "/workspace/console", "title": "Fix", "body": "Body", "head": "feat/fix", "labels": []string{"devbox"},
+		"repository": "/workspace/console", "title": "Fix", "body": "Body", "head": "feat/fix", "changeType": "APPLICATION", "labels": []string{"devbox"},
 	}, map[string]any{"claudecode/toolUseId": "toolu_1"})
 	if res.IsError {
 		t.Fatalf("create failed: %s", res.text())
@@ -376,12 +377,12 @@ func TestMCPCreatePullRequestAttribution(t *testing.T) {
 func TestMCPCreatePullRequestRejections(t *testing.T) {
 	f := newMCPFixture(t, nil)
 	cases := map[string]map[string]any{
-		"off allowlist":       {"repository": "https://github.com/pluralsh/secret", "title": "t", "body": "b", "head": "h"},
-		"not an SCM host":     {"repository": "https://gitlab.com/pluralsh/console", "title": "t", "body": "b", "head": "h"},
-		"not a repository":    {"repository": "scratch", "title": "t", "body": "b", "head": "h"},
+		"off allowlist":       {"repository": "https://github.com/pluralsh/secret", "title": "t", "body": "b", "head": "h", "changeType": "APPLICATION"},
+		"not an SCM host":     {"repository": "https://gitlab.com/pluralsh/console", "title": "t", "body": "b", "head": "h", "changeType": "APPLICATION"},
+		"not a repository":    {"repository": "scratch", "title": "t", "body": "b", "head": "h", "changeType": "APPLICATION"},
 		"missing head":        {"repository": "https://github.com/pluralsh/console", "title": "t", "body": "b"},
-		"unknown checkout":    {"repository": "/workspace/other", "title": "t", "body": "b", "head": "h"},
-		"allowlist lookalike": {"repository": "https://github.com/pluralsh/console-fork", "title": "t", "body": "b", "head": "h"},
+		"unknown checkout":    {"repository": "/workspace/other", "title": "t", "body": "b", "head": "h", "changeType": "APPLICATION"},
+		"allowlist lookalike": {"repository": "https://github.com/pluralsh/console-fork", "title": "t", "body": "b", "head": "h", "changeType": "APPLICATION"},
 	}
 	for name, args := range cases {
 		t.Run(name, func(t *testing.T) {
@@ -399,8 +400,8 @@ func TestMCPLinkedPullRequests(t *testing.T) {
 	f := newMCPFixture(t, nil)
 	res := f.call(t, f.box1Token(t), "thread-1", CreateLinkedPullRequestTool, map[string]any{
 		"pullRequests": []map[string]any{
-			{"repository": "console", "title": "A", "body": "a", "head": "feat/x"},
-			{"repository": "https://github.com/pluralsh/deployment-operator.git", "title": "B", "body": "b", "head": "feat/x", "base": "main"},
+			{"repository": "console", "title": "A", "body": "a", "head": "feat/x", "changeType": "APPLICATION"},
+			{"repository": "https://github.com/pluralsh/deployment-operator.git", "title": "B", "body": "b", "head": "feat/x", "changeType": "APPLICATION", "base": "main"},
 		},
 	}, nil)
 	if res.IsError {
@@ -428,8 +429,8 @@ func TestMCPLinkedPullRequestsPartialFailure(t *testing.T) {
 	f := newMCPFixture(t, nil)
 	res := f.call(t, f.box1Token(t), "thread-1", CreateLinkedPullRequestTool, map[string]any{
 		"pullRequests": []map[string]any{
-			{"repository": "console", "title": "A", "body": "a", "head": "feat/x"},
-			{"repository": "https://github.com/pluralsh/secret", "title": "B", "body": "b", "head": "feat/x"},
+			{"repository": "console", "title": "A", "body": "a", "head": "feat/x", "changeType": "APPLICATION"},
+			{"repository": "https://github.com/pluralsh/secret", "title": "B", "body": "b", "head": "feat/x", "changeType": "APPLICATION"},
 		},
 	}, nil)
 	if !res.IsError || len(f.ingest.prs) != 1 || !strings.Contains(res.text(), "allowlist") {
@@ -441,7 +442,7 @@ func TestMCPSCMClientGetsRawTokenFromBasicCredential(t *testing.T) {
 	f := newMCPFixture(t, nil)
 	f.ingest.setCreds(basicSCMCreds("x-access-token", tokenCreds(time.Now, time.Hour)))
 	if res := f.call(t, f.box1Token(t), "", CreatePullRequestTool, map[string]any{
-		"repository": "console", "title": "t", "body": "b", "head": "box1",
+		"repository": "console", "title": "t", "body": "b", "head": "box1", "changeType": "APPLICATION",
 	}, nil); res.IsError {
 		t.Fatal(res.text())
 	}
@@ -459,12 +460,12 @@ func TestMCPPullRequestToolsAreScopedToTheCallersBox(t *testing.T) {
 
 	// box-2 opens a PR; box-1 opens another.
 	if res := f.call(t, f.box2Token(t), "", CreatePullRequestTool, map[string]any{
-		"repository": "https://github.com/pluralsh/console", "title": "t", "body": "b", "head": "box2",
+		"repository": "https://github.com/pluralsh/console", "title": "t", "body": "b", "head": "box2", "changeType": "APPLICATION",
 	}, nil); res.IsError {
 		t.Fatal(res.text())
 	}
 	if res := f.call(t, f.box1Token(t), "", CreatePullRequestTool, map[string]any{
-		"repository": "console", "title": "t", "body": "b", "head": "box1",
+		"repository": "console", "title": "t", "body": "b", "head": "box1", "changeType": "APPLICATION",
 	}, nil); res.IsError {
 		t.Fatal(res.text())
 	}
@@ -503,5 +504,59 @@ func TestMCPPullRequestToolsAreScopedToTheCallersBox(t *testing.T) {
 	}
 	if len(f.scmToks) != 2 {
 		t.Fatalf("only authorized calls should reach the SCM, got %d", len(f.scmToks))
+	}
+}
+
+type fakeDiffs struct {
+	reqs []*devboxv1.BranchDiffStatRequest
+	err  error
+}
+
+func (d *fakeDiffs) GetBranchDiffStat(_ context.Context, req *devboxv1.BranchDiffStatRequest) (*devboxv1.BranchDiffStatResponse, error) {
+	d.reqs = append(d.reqs, req)
+	if d.err != nil {
+		return nil, d.err
+	}
+	return &devboxv1.BranchDiffStatResponse{Additions: 40, Deletions: 2, Files: 3, BaseSha: "base-sha", HeadSha: "head-sha"}, nil
+}
+
+func TestMCPCreatePullRequestCarriesDifficultyAndCommitShas(t *testing.T) {
+	f := newMCPFixture(t, nil)
+	diffs := &fakeDiffs{}
+	f.mcp.diffs = diffs
+	res := f.call(t, f.box1Token(t), "thread-7", CreatePullRequestTool, map[string]any{
+		"repository": "/workspace/console", "title": "Fix", "body": "Body", "head": "feat/fix", "changeType": "GITOPS",
+	}, nil)
+	if res.IsError {
+		t.Fatalf("create failed: %s", res.text())
+	}
+	if len(diffs.reqs) != 1 || diffs.reqs[0].GetInstanceId() != "i1" || diffs.reqs[0].GetBase() != "master" || diffs.reqs[0].GetHead() != "feat/fix" {
+		t.Fatalf("unexpected diff stat requests %v", diffs.reqs)
+	}
+	a := f.ingest.prs[0].GetAttributes()
+	if a.GetDifficulty().GetChangeType() != "GITOPS" || a.GetDifficulty().GetLines() != 42 {
+		t.Fatalf("difficulty = %v", a.GetDifficulty())
+	}
+	if len(a.GetCommitShas()) != 2 || a.GetCommitShas()[0].GetSha() != "head-sha" || a.GetCommitShas()[1].GetBranch() != "master" {
+		t.Fatalf("commit shas = %v", a.GetCommitShas())
+	}
+
+	// sizing is best effort: the PR still opens, classified but without lines
+	diffs.err = errors.New("daemon unreachable")
+	res = f.call(t, f.box1Token(t), "thread-7", CreatePullRequestTool, map[string]any{
+		"repository": "/workspace/console", "title": "Fix", "body": "Body", "head": "feat/other", "changeType": "APPLICATION",
+	}, nil)
+	if res.IsError {
+		t.Fatalf("create failed: %s", res.text())
+	}
+	if a := f.ingest.prs[1].GetAttributes(); a.GetDifficulty().GetChangeType() != "APPLICATION" || a.GetDifficulty().GetLines() != 0 || len(a.GetCommitShas()) != 0 {
+		t.Fatalf("unsized attributes = %v", a)
+	}
+
+	res = f.call(t, f.box1Token(t), "thread-7", CreatePullRequestTool, map[string]any{
+		"repository": "/workspace/console", "title": "Fix", "body": "Body", "head": "feat/x", "changeType": "REFACTOR",
+	}, nil)
+	if !res.IsError || !strings.Contains(res.text(), "changeType must be one of") {
+		t.Fatalf("an unknown changeType should be rejected: %s", res.text())
 	}
 }

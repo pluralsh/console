@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/samber/lo"
+	appsv1 "k8s.io/api/apps/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -135,7 +136,7 @@ func (r *DevboxRunnerReconciler) sandboxClass(runner *v1alpha1.DevboxRunner) v1a
 // reconcileWorkerPool creates or updates the runner's WorkerPool and labels its AdditionalPools. The
 // ActorTemplate worker_selector matches WorkerPool metadata labels, so every pool carries the runner's worker
 // selector.
-func (r *DevboxRunnerReconciler) reconcileWorkerPool(ctx context.Context, runner *v1alpha1.DevboxRunner) error {
+func (r *DevboxRunnerReconciler) reconcileWorkerPool(ctx context.Context, api substrate.API, runner *v1alpha1.DevboxRunner) error {
 	class := r.sandboxClass(runner)
 	wp := lo.FromPtr(runner.Spec.WorkerPool)
 
@@ -158,7 +159,13 @@ func (r *DevboxRunnerReconciler) reconcileWorkerPool(ctx context.Context, runner
 		image = r.Config.WorkerImages[class]
 	}
 	if image == "" {
-		return fmt.Errorf("no Substrate worker image configured for sandbox class %s, set devboxes.workerImages.%s in the deployment-operator chart or spec.workerPool.workerImage", class, class)
+		if image, err = r.installedWorkerImage(ctx, class); err != nil {
+			return err
+		}
+	}
+	if image == "" {
+		return fmt.Errorf("no Substrate worker image configured for sandbox class %s and none derivable from %s/%s, set devboxes.workerImages.%s in the deployment-operator chart or spec.workerPool.workerImage",
+			class, r.Config.SubstrateNamespace, ateControllerName, class)
 	}
 
 	sandboxClass := map[string]any{"name": string(class)}
@@ -206,11 +213,13 @@ func (r *DevboxRunnerReconciler) reconcileWorkerPool(ctx context.Context, runner
 	pool.SetGroupVersionKind(workerPoolGVK)
 	pool.SetName(devboxWorkerPoolName(runner))
 	pool.SetNamespace(r.Config.WorkerPoolNamespace)
+	// Read before CreateOrPatch, which strips status from an unstructured object it doesn't patch.
+	ready, _, _ := unstructured.NestedInt64(pool.Object, "status", "readyReplicas")
 
 	replicas := int64(lo.FromPtrOr(wp.Replicas, 1))
 	var autoscaleErr error
 	if wp.Autoscaling != nil {
-		replicas, autoscaleErr = r.autoscaleWorkerPool(ctx, runner, pool, class, capacity)
+		replicas, autoscaleErr = r.autoscaleWorkerPool(ctx, api, runner, pool, class, capacity)
 	}
 
 	_, err = controllerutil.CreateOrPatch(ctx, r.Client, pool, func() error {
@@ -246,7 +255,6 @@ func (r *DevboxRunnerReconciler) reconcileWorkerPool(ctx context.Context, runner
 		utils.MarkCondition(runner.SetCondition, v1alpha1.DevboxWorkerPoolReadyConditionType, metav1.ConditionFalse, v1alpha1.ErrorConditionReason, err.Error())
 		return nil
 	}
-	ready, _, _ := unstructured.NestedInt64(pool.Object, "status", "readyReplicas")
 	if replicas > 0 && ready == 0 {
 		utils.MarkCondition(runner.SetCondition, v1alpha1.DevboxWorkerPoolReadyConditionType, metav1.ConditionFalse, v1alpha1.DevboxPendingReason,
 			fmt.Sprintf("WorkerPool %s has no ready workers yet", pool.GetName()))
@@ -266,6 +274,32 @@ func devboxWorkerPoolRefs(runner *v1alpha1.DevboxRunner, defaultNamespace string
 
 // reconcileAdditionalPools puts the runner's worker selector on its AdditionalPools and takes it off pools that
 // left the list. Status keeps the pools labeled, so a missing pool is retried and a removed one cleaned up.
+// installedWorkerImage derives a sandbox class's worker image from the installed ate-controller's, so workers
+// match the Substrate release and registry: <registry>/atecontroller:<tag> becomes <registry>/ateworker-<class>:<tag>.
+// It returns "" when ate-controller is missing or its image isn't a tagged atecontroller reference.
+func (r *DevboxRunnerReconciler) installedWorkerImage(ctx context.Context, class v1alpha1.DevboxSandboxClass) (string, error) {
+	controller := &appsv1.Deployment{}
+	if err := r.Get(ctx, client.ObjectKey{Name: ateControllerName, Namespace: r.Config.SubstrateNamespace}, controller); err != nil {
+		return "", client.IgnoreNotFound(err)
+	}
+	for _, c := range controller.Spec.Template.Spec.Containers {
+		if image := workerImageFor(c.Image, class); image != "" {
+			return image, nil
+		}
+	}
+	return "", nil
+}
+
+func workerImageFor(controllerImage string, class v1alpha1.DevboxSandboxClass) string {
+	ref, _, _ := strings.Cut(controllerImage, "@")
+	slash := strings.LastIndex(ref, "/")
+	name, tag, ok := strings.Cut(ref[slash+1:], ":")
+	if !ok || tag == "" || name != "atecontroller" {
+		return ""
+	}
+	return ref[:slash+1] + "ateworker-" + string(class) + ":" + tag
+}
+
 func (r *DevboxRunnerReconciler) reconcileAdditionalPools(ctx context.Context, runner *v1alpha1.DevboxRunner) error {
 	desired := devboxWorkerPoolRefs(runner, r.Config.WorkerPoolNamespace)
 	var errs []error
@@ -365,15 +399,15 @@ func toUnstructured(v any) (any, error) {
 // ensureAtespace creates the runner's atespace and grants the gateway editor on it, so the gateway can create
 // instance actors, tags and egress policies. The operator itself creates atespaces as a global owner, a
 // Substrate install setting (DBX-23).
-func (r *DevboxRunnerReconciler) ensureAtespace(ctx context.Context, runner *v1alpha1.DevboxRunner) (string, error) {
+func (r *DevboxRunnerReconciler) ensureAtespace(ctx context.Context, api substrate.API, runner *v1alpha1.DevboxRunner) (string, error) {
 	atespace := lo.FromPtr(runner.Status.Atespace)
 	if atespace == "" {
 		atespace = devboxAtespaceName(runner)
 	}
-	if err := r.Substrate.EnsureAtespace(ctx, atespace); err != nil {
+	if err := api.EnsureAtespace(ctx, atespace); err != nil {
 		return "", fmt.Errorf("ensuring atespace %s: %w", atespace, err)
 	}
-	if err := r.Substrate.EnsureAtespaceAccessPolicy(ctx, atespace, substrate.RoleEditor, r.Config.GatewayPrincipal()); err != nil {
+	if err := api.EnsureAtespaceAccessPolicy(ctx, atespace, substrate.RoleEditor, r.Config.GatewayPrincipal()); err != nil {
 		return "", fmt.Errorf("granting the gateway editor on atespace %s: %w", atespace, err)
 	}
 	runner.Status.Atespace = &atespace
@@ -454,7 +488,7 @@ func (r *DevboxRunnerReconciler) buildActorTemplate(runner *v1alpha1.DevboxRunne
 }
 
 // devboxGoldenEgressPolicy lets the golden boot reach what the bootstrap script and mise need: the runner's
-// package servers and HTTP allowlist plus mise's own download hosts. Without customization the golden boot needs
+// package servers, OCI registries and HTTP allowlist plus mise's own download hosts. Without customization the golden boot needs
 // no egress.
 func devboxGoldenEgressPolicy(runner *v1alpha1.DevboxRunner) *ateapi.EgressPolicyTemplate {
 	hasMise := runner.Spec.Mise != nil && lo.FromPtr(runner.Spec.Mise.Config) != ""
@@ -468,6 +502,7 @@ func devboxGoldenEgressPolicy(runner *v1alpha1.DevboxRunner) *ateapi.EgressPolic
 		https[443] = append(https[443], "mise.jdx.dev", "github.com", "*.github.com", "*.githubusercontent.com")
 	}
 	https[443] = append(https[443], runner.Spec.PackageServerHosts()...)
+	https[443] = append(https[443], runner.Spec.OCIRegistryHosts()...)
 	for _, entry := range runner.Spec.HTTPAllowlist {
 		port := lo.FromPtrOr(entry.Port, 443)
 		if lo.FromPtr(entry.Passthrough) {
@@ -498,7 +533,7 @@ func devboxGoldenEgressPolicy(runner *v1alpha1.DevboxRunner) *ateapi.EgressPolic
 // in-flight revision: Building (waiting for the golden tag), Probing (waiting for the gateway's agent probe),
 // and finally Ready or Failed. The newest Ready revision is the one new instances start from; older Ready
 // revisions are Retired and kept until garbage collection finds nothing references them.
-func (r *DevboxRunnerReconciler) reconcileRevisions(ctx context.Context, runner *v1alpha1.DevboxRunner, atespace, image string) error {
+func (r *DevboxRunnerReconciler) reconcileRevisions(ctx context.Context, api substrate.API, runner *v1alpha1.DevboxRunner, atespace, image string) error {
 	template, hash, err := r.buildActorTemplate(runner, atespace, image)
 	if err != nil {
 		utils.MarkCondition(runner.SetCondition, v1alpha1.DevboxTemplateReadyConditionType, metav1.ConditionFalse, v1alpha1.DevboxMisconfiguredReason, err.Error())
@@ -506,14 +541,15 @@ func (r *DevboxRunnerReconciler) reconcileRevisions(ctx context.Context, runner 
 	}
 
 	latest := runner.LatestRevision()
-	if latest == nil || latest.Hash != hash {
+	// The latest revision is only Retired without a newer one when its golden boot lost its worker.
+	if latest == nil || latest.Hash != hash || latest.Phase == v1alpha1.DevboxRevisionRetired {
 		next := int64(1)
 		if latest != nil {
 			next = latest.Revision + 1
 		}
 		name := devboxTemplateName(runner, next)
 		template.Metadata.Name = name
-		if _, err := r.Substrate.CreateActorTemplate(ctx, template, template.GoldenEgressPolicy != nil); err != nil {
+		if _, err := api.CreateActorTemplate(ctx, template, template.GoldenEgressPolicy != nil); err != nil {
 			utils.MarkCondition(runner.SetCondition, v1alpha1.DevboxTemplateReadyConditionType, metav1.ConditionFalse, v1alpha1.DevboxFailedReason,
 				fmt.Sprintf("creating ActorTemplate %s: %s", name, err))
 			return err
@@ -543,7 +579,7 @@ func (r *DevboxRunnerReconciler) reconcileRevisions(ctx context.Context, runner 
 		rev := &runner.Status.Revisions[i]
 		switch rev.Phase {
 		case v1alpha1.DevboxRevisionBuilding:
-			if err := r.advanceBuilding(ctx, runner, atespace, rev); err != nil {
+			if err := r.advanceBuilding(ctx, api, runner, atespace, rev); err != nil {
 				return err
 			}
 		case v1alpha1.DevboxRevisionProbing:
@@ -557,8 +593,8 @@ func (r *DevboxRunnerReconciler) reconcileRevisions(ctx context.Context, runner 
 	return nil
 }
 
-func (r *DevboxRunnerReconciler) advanceBuilding(ctx context.Context, runner *v1alpha1.DevboxRunner, atespace string, rev *v1alpha1.DevboxRevision) error {
-	tmpl, err := r.Substrate.GetActorTemplate(ctx, atespace, rev.Name)
+func (r *DevboxRunnerReconciler) advanceBuilding(ctx context.Context, api substrate.API, runner *v1alpha1.DevboxRunner, atespace string, rev *v1alpha1.DevboxRevision) error {
+	tmpl, err := api.GetActorTemplate(ctx, atespace, rev.Name)
 	if substrate.IsNotFound(err) {
 		rev.Phase = v1alpha1.DevboxRevisionFailed
 		rev.Message = lo.ToPtr("ActorTemplate no longer exists in Substrate")
@@ -570,6 +606,11 @@ func (r *DevboxRunnerReconciler) advanceBuilding(ctx context.Context, runner *v1
 
 	golden := tmpl.GetStatus().GetGoldenSnapshotStatus()
 	if msg := golden.GetErrorMessage(); msg != "" {
+		if goldenLostWorker(msg) {
+			rev.Phase = v1alpha1.DevboxRevisionRetired
+			rev.Message = lo.ToPtr("golden boot lost its worker, rebuilding: " + msg)
+			return nil
+		}
 		rev.Phase = v1alpha1.DevboxRevisionFailed
 		rev.Message = lo.ToPtr("golden boot failed: " + msg)
 		return nil
@@ -582,6 +623,20 @@ func (r *DevboxRunnerReconciler) advanceBuilding(ctx context.Context, runner *v1
 	rev.GoldenTag = &tag
 	rev.Phase = v1alpha1.DevboxRevisionProbing
 	return r.Probe.Request(ctx, probeRequest(runner, atespace, rev))
+}
+
+// goldenWorkerLossCrashes are Substrate's fixed actor crash messages for losing the worker or node, not a fault of
+// the image, so a golden boot that failed with one is rebuilt rather than failing the revision.
+var goldenWorkerLossCrashes = []string{
+	"worker pod went away while hosting the actor",
+	"worker restarted while hosting the actor",
+	"assigned worker is draining",
+	"assigned worker no longer satisfies the actor's placement constraints",
+	"node holding the actor's latest snapshot no longer exists",
+}
+
+func goldenLostWorker(msg string) bool {
+	return lo.SomeBy(goldenWorkerLossCrashes, func(crash string) bool { return strings.Contains(msg, crash) })
 }
 
 func probeRequest(runner *v1alpha1.DevboxRunner, atespace string, rev *v1alpha1.DevboxRevision) DevboxProbeRequest {
@@ -678,7 +733,7 @@ func (r *DevboxRunnerReconciler) promoteCurrentRevision(runner *v1alpha1.DevboxR
 // truth for references: each instance is an actor of a template, and each snapshot is a tag whose status
 // records the template UID. A revision's own golden tag does not count, and is deleted with it. The newest
 // revision is always kept, since its hash is what stops a failed spec from being rebuilt on every reconcile.
-func (r *DevboxRunnerReconciler) gcRevisions(ctx context.Context, runner *v1alpha1.DevboxRunner, atespace string) error {
+func (r *DevboxRunnerReconciler) gcRevisions(ctx context.Context, api substrate.API, runner *v1alpha1.DevboxRunner, atespace string) error {
 	latest := runner.LatestRevision()
 	collectable := lo.Filter(runner.Status.Revisions, func(rev v1alpha1.DevboxRevision, _ int) bool {
 		if latest != nil && rev.Revision == latest.Revision {
@@ -690,7 +745,7 @@ func (r *DevboxRunnerReconciler) gcRevisions(ctx context.Context, runner *v1alph
 		return nil
 	}
 
-	referenced, err := r.referencedTemplates(ctx, atespace, runner)
+	referenced, err := r.referencedTemplates(ctx, api, atespace, runner)
 	if err != nil {
 		return err
 	}
@@ -701,11 +756,11 @@ func (r *DevboxRunnerReconciler) gcRevisions(ctx context.Context, runner *v1alph
 			continue
 		}
 		if rev.GoldenTag != nil {
-			if err := r.Substrate.DeleteTag(ctx, atespace, *rev.GoldenTag); err != nil {
+			if err := api.DeleteTag(ctx, atespace, *rev.GoldenTag); err != nil {
 				return fmt.Errorf("deleting golden tag %s: %w", *rev.GoldenTag, err)
 			}
 		}
-		if err := r.Substrate.DeleteActorTemplate(ctx, atespace, rev.Name); err != nil {
+		if err := api.DeleteActorTemplate(ctx, atespace, rev.Name); err != nil {
 			return fmt.Errorf("deleting ActorTemplate %s: %w", rev.Name, err)
 		}
 		if err := r.Probe.Cleanup(ctx, runner.Name, rev.Revision); err != nil {
@@ -720,18 +775,10 @@ func (r *DevboxRunnerReconciler) gcRevisions(ctx context.Context, runner *v1alph
 	return nil
 }
 
-func (r *DevboxRunnerReconciler) referencedTemplates(ctx context.Context, atespace string, runner *v1alpha1.DevboxRunner) (map[string]bool, error) {
+func (r *DevboxRunnerReconciler) referencedTemplates(ctx context.Context, api substrate.API, atespace string, runner *v1alpha1.DevboxRunner) (map[string]bool, error) {
 	referenced := map[string]bool{}
 
-	actors, err := r.Substrate.ListActors(ctx, atespace)
-	if err != nil {
-		return nil, fmt.Errorf("listing actors: %w", err)
-	}
-	for _, actor := range actors {
-		referenced[actor.GetActorTemplate().GetName()] = true
-	}
-
-	templates, err := r.Substrate.ListActorTemplates(ctx, atespace)
+	templates, err := api.ListActorTemplates(ctx, atespace)
 	if err != nil {
 		return nil, fmt.Errorf("listing ActorTemplates: %w", err)
 	}
@@ -740,13 +787,26 @@ func (r *DevboxRunnerReconciler) referencedTemplates(ctx context.Context, atespa
 		nameByUID[t.GetMetadata().GetUid()] = t.GetMetadata().GetName()
 	}
 
+	actors, err := api.ListActors(ctx, atespace)
+	if err != nil {
+		return nil, fmt.Errorf("listing actors: %w", err)
+	}
+	for _, actor := range actors {
+		// Substrate names a template's golden actor after the template's UID and deletes it with the template, so
+		// it is no reference: counting it would keep a stuck golden boot holding a worker slot forever.
+		if nameByUID[actor.GetMetadata().GetName()] == actor.GetActorTemplate().GetName() {
+			continue
+		}
+		referenced[actor.GetActorTemplate().GetName()] = true
+	}
+
 	goldenTags := map[string]bool{}
 	for _, rev := range runner.Status.Revisions {
 		if rev.GoldenTag != nil {
 			goldenTags[*rev.GoldenTag] = true
 		}
 	}
-	tags, err := r.Substrate.ListTags(ctx, atespace)
+	tags, err := api.ListTags(ctx, atespace)
 	if err != nil {
 		return nil, fmt.Errorf("listing tags: %w", err)
 	}

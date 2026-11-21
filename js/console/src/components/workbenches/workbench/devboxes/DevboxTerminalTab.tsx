@@ -1,18 +1,13 @@
 import '@xterm/xterm/css/xterm.css'
 
-import {
-  Button,
-  Chip,
-  Flex,
-  PlusIcon,
-  ReloadIcon,
-} from '@pluralsh/design-system'
+import { Chip, IconFrame, ReloadIcon } from '@pluralsh/design-system'
 import { FitAddon } from '@xterm/addon-fit'
 import { Terminal } from '@xterm/xterm'
 import TerminalThemeContext from 'components/terminal/TerminalThemeContext'
 import { normalizedThemes } from 'components/terminal/themes'
 import { debounce } from 'lodash'
 import { use, useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import styled from 'styled-components'
 import { DevboxUnavailable } from './DevboxUnavailable'
 import {
@@ -30,14 +25,16 @@ type ConnectionState =
 
 const MAX_BACKOFF_MS = 15_000
 
+// headerActions is the panel header slot the connection status renders into
 export function DevboxTerminalTab({
   api,
   live,
+  headerActions,
 }: {
   api: DevboxWorkspaceApi
   live: boolean
+  headerActions: Nullable<HTMLElement>
 }) {
-  const [session, setSession] = useState(0)
   if (!api.openStream)
     return (
       <DevboxUnavailable
@@ -54,19 +51,18 @@ export function DevboxTerminalTab({
     )
   return (
     <DevboxTerminal
-      key={session}
       openStream={api.openStream}
-      onNewTerminal={() => setSession((s) => s + 1)}
+      headerActions={headerActions}
     />
   )
 }
 
 function DevboxTerminal({
   openStream,
-  onNewTerminal,
+  headerActions,
 }: {
   openStream: NonNullable<DevboxWorkspaceApi['openStream']>
-  onNewTerminal: () => void
+  headerActions: Nullable<HTMLElement>
 }) {
   const [terminalTheme] = use(TerminalThemeContext)
   const elRef = useRef<HTMLDivElement>(null)
@@ -86,55 +82,41 @@ function DevboxTerminal({
   }, [openStream, terminalTheme, attempt])
 
   return (
-    <Flex
-      direction="column"
-      gap="small"
-      height="100%"
-    >
-      <Flex
-        justify="space-between"
-        align="center"
-      >
-        <Chip
-          size="small"
-          severity={
-            state === 'connected'
-              ? 'success'
-              : state === 'exited' || state === 'error'
-                ? 'neutral'
-                : 'warning'
-          }
-        >
-          {state === 'exited' ? `Exited · ${exit}` : state}
-        </Chip>
-        <Flex gap="xsmall">
-          {state !== 'connected' && (
-            <Button
-              small
-              tertiary
-              startIcon={<ReloadIcon />}
-              onClick={() => setAttempt((a) => a + 1)}
+    <>
+      {headerActions &&
+        createPortal(
+          <>
+            <Chip
+              size="small"
+              severity={
+                state === 'connected'
+                  ? 'success'
+                  : state === 'exited' || state === 'error'
+                    ? 'neutral'
+                    : 'warning'
+              }
             >
-              Reconnect
-            </Button>
-          )}
-          <Button
-            small
-            secondary
-            startIcon={<PlusIcon />}
-            onClick={onNewTerminal}
-          >
-            New terminal
-          </Button>
-        </Flex>
-      </Flex>
+              {state === 'exited' ? `Exited · ${exit}` : state}
+            </Chip>
+            {state !== 'connected' && (
+              <IconFrame
+                clickable
+                size="small"
+                icon={<ReloadIcon />}
+                tooltip="Reconnect"
+                onClick={() => setAttempt((a) => a + 1)}
+              />
+            )}
+          </>,
+          headerActions
+        )}
       <TerminalSC $background={normalizedThemes[terminalTheme].background}>
         <div
           ref={elRef}
           className="terminal"
         />
       </TerminalSC>
-    </Flex>
+    </>
   )
 }
 

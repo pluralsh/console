@@ -379,6 +379,10 @@ defmodule Devbox.V1.Daemon.Service do
 
   rpc :CancelPrompt, Devbox.V1.CancelPromptRequest, Devbox.V1.CancelPromptResponse
 
+  rpc :UpdateQueuedPrompt,
+      Devbox.V1.UpdateQueuedPromptRequest,
+      Devbox.V1.UpdateQueuedPromptResponse
+
   rpc :SetThreadConfigOption,
       Devbox.V1.SetThreadConfigOptionRequest,
       Devbox.V1.SetThreadConfigOptionResponse
@@ -412,6 +416,12 @@ defmodule Devbox.V1.Daemon.Service do
   rpc :WatchFiles, Devbox.V1.WatchFilesRequest, stream(Devbox.V1.FileEvent)
 
   rpc :GetChanges, Devbox.V1.GetChangesRequest, Devbox.V1.GetChangesResponse
+
+  rpc :GetBranchDiffStat, Devbox.V1.BranchDiffStatRequest, Devbox.V1.BranchDiffStatResponse
+
+  rpc :PreparePullRequest,
+      Devbox.V1.PreparePullRequestRequest,
+      Devbox.V1.PreparePullRequestResponse
 
   rpc :AddRepository, Devbox.V1.AddRepositoryRequest, Devbox.V1.AddRepositoryResponse
 

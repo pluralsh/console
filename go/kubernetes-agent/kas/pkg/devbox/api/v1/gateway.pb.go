@@ -1644,7 +1644,7 @@ const file_devbox_v1_gateway_proto_rawDesc = "" +
 	"\aTrailer\x1a!\n" +
 	"\vUpgradeData\x12\x12\n" +
 	"\x04data\x18\x01 \x01(\fR\x04dataB\t\n" +
-	"\amessage2\xd4\x14\n" +
+	"\amessage2\x9a\x16\n" +
 	"\aGateway\x12U\n" +
 	"\x0eCreateInstance\x12 .devbox.v1.CreateInstanceRequest\x1a!.devbox.v1.CreateInstanceResponse\x12[\n" +
 	"\x11StartFromSnapshot\x12#.devbox.v1.StartFromSnapshotRequest\x1a!.devbox.v1.CreateInstanceResponse\x12U\n" +
@@ -1663,7 +1663,8 @@ const file_devbox_v1_gateway_proto_rawDesc = "" +
 	"\n" +
 	"ForkThread\x12\x1c.devbox.v1.ForkThreadRequest\x1a\x19.devbox.v1.ThreadResponse\x12=\n" +
 	"\x06Prompt\x12\x18.devbox.v1.PromptRequest\x1a\x19.devbox.v1.PromptResponse\x12O\n" +
-	"\fCancelPrompt\x12\x1e.devbox.v1.CancelPromptRequest\x1a\x1f.devbox.v1.CancelPromptResponse\x12j\n" +
+	"\fCancelPrompt\x12\x1e.devbox.v1.CancelPromptRequest\x1a\x1f.devbox.v1.CancelPromptResponse\x12a\n" +
+	"\x12UpdateQueuedPrompt\x12$.devbox.v1.UpdateQueuedPromptRequest\x1a%.devbox.v1.UpdateQueuedPromptResponse\x12j\n" +
 	"\x15SetThreadConfigOption\x12'.devbox.v1.SetThreadConfigOptionRequest\x1a(.devbox.v1.SetThreadConfigOptionResponse\x12a\n" +
 	"\x12RespondInteraction\x12$.devbox.v1.RespondInteractionRequest\x1a%.devbox.v1.RespondInteractionResponse\x12O\n" +
 	"\fListCommands\x12\x1e.devbox.v1.ListCommandsRequest\x1a\x1f.devbox.v1.ListCommandsResponse\x12L\n" +
@@ -1676,7 +1677,8 @@ const file_devbox_v1_gateway_proto_rawDesc = "" +
 	"\bReadFile\x12\x1a.devbox.v1.ReadFileRequest\x1a\x1b.devbox.v1.ReadFileResponse\x12F\n" +
 	"\tWriteFile\x12\x1b.devbox.v1.WriteFileRequest\x1a\x1c.devbox.v1.WriteFileResponse\x12I\n" +
 	"\n" +
-	"GetChanges\x12\x1c.devbox.v1.GetChangesRequest\x1a\x1d.devbox.v1.GetChangesResponse\x12I\n" +
+	"GetChanges\x12\x1c.devbox.v1.GetChangesRequest\x1a\x1d.devbox.v1.GetChangesResponse\x12a\n" +
+	"\x12PreparePullRequest\x12$.devbox.v1.PreparePullRequestRequest\x1a%.devbox.v1.PreparePullRequestResponse\x12I\n" +
 	"\n" +
 	"OpenStream\x12\x1c.devbox.v1.OpenStreamRequest\x1a\x1d.devbox.v1.OpenStreamResponse\x12d\n" +
 	"\x13InvalidateAllowlist\x12%.devbox.v1.InvalidateAllowlistRequest\x1a&.devbox.v1.InvalidateAllowlistResponse\x12B\n" +
@@ -1745,44 +1747,48 @@ var file_devbox_v1_gateway_proto_goTypes = []any{
 	(*ForkThreadRequest)(nil),             // 44: devbox.v1.ForkThreadRequest
 	(*PromptRequest)(nil),                 // 45: devbox.v1.PromptRequest
 	(*CancelPromptRequest)(nil),           // 46: devbox.v1.CancelPromptRequest
-	(*SetThreadConfigOptionRequest)(nil),  // 47: devbox.v1.SetThreadConfigOptionRequest
-	(*RespondInteractionRequest)(nil),     // 48: devbox.v1.RespondInteractionRequest
-	(*ListCommandsRequest)(nil),           // 49: devbox.v1.ListCommandsRequest
-	(*GetTimelineRequest)(nil),            // 50: devbox.v1.GetTimelineRequest
-	(*GetSessionsRequest)(nil),            // 51: devbox.v1.GetSessionsRequest
-	(*SetInstanceLeasesRequest)(nil),      // 52: devbox.v1.SetInstanceLeasesRequest
-	(*AddRepositoryRequest)(nil),          // 53: devbox.v1.AddRepositoryRequest
-	(*ListRepositoriesRequest)(nil),       // 54: devbox.v1.ListRepositoriesRequest
-	(*ListFilesRequest)(nil),              // 55: devbox.v1.ListFilesRequest
-	(*ReadFileRequest)(nil),               // 56: devbox.v1.ReadFileRequest
-	(*WriteFileRequest)(nil),              // 57: devbox.v1.WriteFileRequest
-	(*GetChangesRequest)(nil),             // 58: devbox.v1.GetChangesRequest
-	(*OpenStreamRequest)(nil),             // 59: devbox.v1.OpenStreamRequest
-	(*InvalidateAllowlistRequest)(nil),    // 60: devbox.v1.InvalidateAllowlistRequest
-	(*CreateInstanceResponse)(nil),        // 61: devbox.v1.CreateInstanceResponse
-	(*InstanceActionResponse)(nil),        // 62: devbox.v1.InstanceActionResponse
-	(*SnapshotInstanceResponse)(nil),      // 63: devbox.v1.SnapshotInstanceResponse
-	(*DeleteSnapshotResponse)(nil),        // 64: devbox.v1.DeleteSnapshotResponse
-	(*SetAgentBillingResponse)(nil),       // 65: devbox.v1.SetAgentBillingResponse
-	(*ThreadResponse)(nil),                // 66: devbox.v1.ThreadResponse
-	(*ListThreadsResponse)(nil),           // 67: devbox.v1.ListThreadsResponse
-	(*DeleteThreadResponse)(nil),          // 68: devbox.v1.DeleteThreadResponse
-	(*PromptResponse)(nil),                // 69: devbox.v1.PromptResponse
-	(*CancelPromptResponse)(nil),          // 70: devbox.v1.CancelPromptResponse
-	(*SetThreadConfigOptionResponse)(nil), // 71: devbox.v1.SetThreadConfigOptionResponse
-	(*RespondInteractionResponse)(nil),    // 72: devbox.v1.RespondInteractionResponse
-	(*ListCommandsResponse)(nil),          // 73: devbox.v1.ListCommandsResponse
-	(*GetTimelineResponse)(nil),           // 74: devbox.v1.GetTimelineResponse
-	(*GetSessionsResponse)(nil),           // 75: devbox.v1.GetSessionsResponse
-	(*SetInstanceLeasesResponse)(nil),     // 76: devbox.v1.SetInstanceLeasesResponse
-	(*AddRepositoryResponse)(nil),         // 77: devbox.v1.AddRepositoryResponse
-	(*ListRepositoriesResponse)(nil),      // 78: devbox.v1.ListRepositoriesResponse
-	(*ListFilesResponse)(nil),             // 79: devbox.v1.ListFilesResponse
-	(*ReadFileResponse)(nil),              // 80: devbox.v1.ReadFileResponse
-	(*WriteFileResponse)(nil),             // 81: devbox.v1.WriteFileResponse
-	(*GetChangesResponse)(nil),            // 82: devbox.v1.GetChangesResponse
-	(*OpenStreamResponse)(nil),            // 83: devbox.v1.OpenStreamResponse
-	(*InvalidateAllowlistResponse)(nil),   // 84: devbox.v1.InvalidateAllowlistResponse
+	(*UpdateQueuedPromptRequest)(nil),     // 47: devbox.v1.UpdateQueuedPromptRequest
+	(*SetThreadConfigOptionRequest)(nil),  // 48: devbox.v1.SetThreadConfigOptionRequest
+	(*RespondInteractionRequest)(nil),     // 49: devbox.v1.RespondInteractionRequest
+	(*ListCommandsRequest)(nil),           // 50: devbox.v1.ListCommandsRequest
+	(*GetTimelineRequest)(nil),            // 51: devbox.v1.GetTimelineRequest
+	(*GetSessionsRequest)(nil),            // 52: devbox.v1.GetSessionsRequest
+	(*SetInstanceLeasesRequest)(nil),      // 53: devbox.v1.SetInstanceLeasesRequest
+	(*AddRepositoryRequest)(nil),          // 54: devbox.v1.AddRepositoryRequest
+	(*ListRepositoriesRequest)(nil),       // 55: devbox.v1.ListRepositoriesRequest
+	(*ListFilesRequest)(nil),              // 56: devbox.v1.ListFilesRequest
+	(*ReadFileRequest)(nil),               // 57: devbox.v1.ReadFileRequest
+	(*WriteFileRequest)(nil),              // 58: devbox.v1.WriteFileRequest
+	(*GetChangesRequest)(nil),             // 59: devbox.v1.GetChangesRequest
+	(*PreparePullRequestRequest)(nil),     // 60: devbox.v1.PreparePullRequestRequest
+	(*OpenStreamRequest)(nil),             // 61: devbox.v1.OpenStreamRequest
+	(*InvalidateAllowlistRequest)(nil),    // 62: devbox.v1.InvalidateAllowlistRequest
+	(*CreateInstanceResponse)(nil),        // 63: devbox.v1.CreateInstanceResponse
+	(*InstanceActionResponse)(nil),        // 64: devbox.v1.InstanceActionResponse
+	(*SnapshotInstanceResponse)(nil),      // 65: devbox.v1.SnapshotInstanceResponse
+	(*DeleteSnapshotResponse)(nil),        // 66: devbox.v1.DeleteSnapshotResponse
+	(*SetAgentBillingResponse)(nil),       // 67: devbox.v1.SetAgentBillingResponse
+	(*ThreadResponse)(nil),                // 68: devbox.v1.ThreadResponse
+	(*ListThreadsResponse)(nil),           // 69: devbox.v1.ListThreadsResponse
+	(*DeleteThreadResponse)(nil),          // 70: devbox.v1.DeleteThreadResponse
+	(*PromptResponse)(nil),                // 71: devbox.v1.PromptResponse
+	(*CancelPromptResponse)(nil),          // 72: devbox.v1.CancelPromptResponse
+	(*UpdateQueuedPromptResponse)(nil),    // 73: devbox.v1.UpdateQueuedPromptResponse
+	(*SetThreadConfigOptionResponse)(nil), // 74: devbox.v1.SetThreadConfigOptionResponse
+	(*RespondInteractionResponse)(nil),    // 75: devbox.v1.RespondInteractionResponse
+	(*ListCommandsResponse)(nil),          // 76: devbox.v1.ListCommandsResponse
+	(*GetTimelineResponse)(nil),           // 77: devbox.v1.GetTimelineResponse
+	(*GetSessionsResponse)(nil),           // 78: devbox.v1.GetSessionsResponse
+	(*SetInstanceLeasesResponse)(nil),     // 79: devbox.v1.SetInstanceLeasesResponse
+	(*AddRepositoryResponse)(nil),         // 80: devbox.v1.AddRepositoryResponse
+	(*ListRepositoriesResponse)(nil),      // 81: devbox.v1.ListRepositoriesResponse
+	(*ListFilesResponse)(nil),             // 82: devbox.v1.ListFilesResponse
+	(*ReadFileResponse)(nil),              // 83: devbox.v1.ReadFileResponse
+	(*WriteFileResponse)(nil),             // 84: devbox.v1.WriteFileResponse
+	(*GetChangesResponse)(nil),            // 85: devbox.v1.GetChangesResponse
+	(*PreparePullRequestResponse)(nil),    // 86: devbox.v1.PreparePullRequestResponse
+	(*OpenStreamResponse)(nil),            // 87: devbox.v1.OpenStreamResponse
+	(*InvalidateAllowlistResponse)(nil),   // 88: devbox.v1.InvalidateAllowlistResponse
 }
 var file_devbox_v1_gateway_proto_depIdxs = []int32{
 	1,  // 0: devbox.v1.TunnelService.methods:type_name -> devbox.v1.TunnelMethod
@@ -1838,57 +1844,61 @@ var file_devbox_v1_gateway_proto_depIdxs = []int32{
 	44, // 50: devbox.v1.Gateway.ForkThread:input_type -> devbox.v1.ForkThreadRequest
 	45, // 51: devbox.v1.Gateway.Prompt:input_type -> devbox.v1.PromptRequest
 	46, // 52: devbox.v1.Gateway.CancelPrompt:input_type -> devbox.v1.CancelPromptRequest
-	47, // 53: devbox.v1.Gateway.SetThreadConfigOption:input_type -> devbox.v1.SetThreadConfigOptionRequest
-	48, // 54: devbox.v1.Gateway.RespondInteraction:input_type -> devbox.v1.RespondInteractionRequest
-	49, // 55: devbox.v1.Gateway.ListCommands:input_type -> devbox.v1.ListCommandsRequest
-	50, // 56: devbox.v1.Gateway.GetTimeline:input_type -> devbox.v1.GetTimelineRequest
-	51, // 57: devbox.v1.Gateway.GetSessions:input_type -> devbox.v1.GetSessionsRequest
-	52, // 58: devbox.v1.Gateway.SetInstanceLeases:input_type -> devbox.v1.SetInstanceLeasesRequest
-	53, // 59: devbox.v1.Gateway.AddRepository:input_type -> devbox.v1.AddRepositoryRequest
-	54, // 60: devbox.v1.Gateway.ListRepositories:input_type -> devbox.v1.ListRepositoriesRequest
-	55, // 61: devbox.v1.Gateway.ListFiles:input_type -> devbox.v1.ListFilesRequest
-	56, // 62: devbox.v1.Gateway.ReadFile:input_type -> devbox.v1.ReadFileRequest
-	57, // 63: devbox.v1.Gateway.WriteFile:input_type -> devbox.v1.WriteFileRequest
-	58, // 64: devbox.v1.Gateway.GetChanges:input_type -> devbox.v1.GetChangesRequest
-	59, // 65: devbox.v1.Gateway.OpenStream:input_type -> devbox.v1.OpenStreamRequest
-	60, // 66: devbox.v1.Gateway.InvalidateAllowlist:input_type -> devbox.v1.InvalidateAllowlistRequest
-	16, // 67: devbox.v1.Gateway.ProxyStream:input_type -> devbox.v1.HttpRequest
-	10, // 68: devbox.v1.Tunnel.Connect:input_type -> devbox.v1.TunnelConnectRequest
-	61, // 69: devbox.v1.Gateway.CreateInstance:output_type -> devbox.v1.CreateInstanceResponse
-	61, // 70: devbox.v1.Gateway.StartFromSnapshot:output_type -> devbox.v1.CreateInstanceResponse
-	62, // 71: devbox.v1.Gateway.CancelInstance:output_type -> devbox.v1.InstanceActionResponse
-	62, // 72: devbox.v1.Gateway.SuspendInstance:output_type -> devbox.v1.InstanceActionResponse
-	62, // 73: devbox.v1.Gateway.ResumeInstance:output_type -> devbox.v1.InstanceActionResponse
-	63, // 74: devbox.v1.Gateway.SnapshotInstance:output_type -> devbox.v1.SnapshotInstanceResponse
-	64, // 75: devbox.v1.Gateway.DeleteSnapshot:output_type -> devbox.v1.DeleteSnapshotResponse
-	65, // 76: devbox.v1.Gateway.SetAgentBilling:output_type -> devbox.v1.SetAgentBillingResponse
-	66, // 77: devbox.v1.Gateway.CreateThread:output_type -> devbox.v1.ThreadResponse
-	67, // 78: devbox.v1.Gateway.ListThreads:output_type -> devbox.v1.ListThreadsResponse
-	66, // 79: devbox.v1.Gateway.ImportThread:output_type -> devbox.v1.ThreadResponse
-	66, // 80: devbox.v1.Gateway.ResumeThread:output_type -> devbox.v1.ThreadResponse
-	66, // 81: devbox.v1.Gateway.CloseThread:output_type -> devbox.v1.ThreadResponse
-	68, // 82: devbox.v1.Gateway.DeleteThread:output_type -> devbox.v1.DeleteThreadResponse
-	66, // 83: devbox.v1.Gateway.ForkThread:output_type -> devbox.v1.ThreadResponse
-	69, // 84: devbox.v1.Gateway.Prompt:output_type -> devbox.v1.PromptResponse
-	70, // 85: devbox.v1.Gateway.CancelPrompt:output_type -> devbox.v1.CancelPromptResponse
-	71, // 86: devbox.v1.Gateway.SetThreadConfigOption:output_type -> devbox.v1.SetThreadConfigOptionResponse
-	72, // 87: devbox.v1.Gateway.RespondInteraction:output_type -> devbox.v1.RespondInteractionResponse
-	73, // 88: devbox.v1.Gateway.ListCommands:output_type -> devbox.v1.ListCommandsResponse
-	74, // 89: devbox.v1.Gateway.GetTimeline:output_type -> devbox.v1.GetTimelineResponse
-	75, // 90: devbox.v1.Gateway.GetSessions:output_type -> devbox.v1.GetSessionsResponse
-	76, // 91: devbox.v1.Gateway.SetInstanceLeases:output_type -> devbox.v1.SetInstanceLeasesResponse
-	77, // 92: devbox.v1.Gateway.AddRepository:output_type -> devbox.v1.AddRepositoryResponse
-	78, // 93: devbox.v1.Gateway.ListRepositories:output_type -> devbox.v1.ListRepositoriesResponse
-	79, // 94: devbox.v1.Gateway.ListFiles:output_type -> devbox.v1.ListFilesResponse
-	80, // 95: devbox.v1.Gateway.ReadFile:output_type -> devbox.v1.ReadFileResponse
-	81, // 96: devbox.v1.Gateway.WriteFile:output_type -> devbox.v1.WriteFileResponse
-	82, // 97: devbox.v1.Gateway.GetChanges:output_type -> devbox.v1.GetChangesResponse
-	83, // 98: devbox.v1.Gateway.OpenStream:output_type -> devbox.v1.OpenStreamResponse
-	84, // 99: devbox.v1.Gateway.InvalidateAllowlist:output_type -> devbox.v1.InvalidateAllowlistResponse
-	17, // 100: devbox.v1.Gateway.ProxyStream:output_type -> devbox.v1.HttpResponse
-	13, // 101: devbox.v1.Tunnel.Connect:output_type -> devbox.v1.TunnelConnectResponse
-	69, // [69:102] is the sub-list for method output_type
-	36, // [36:69] is the sub-list for method input_type
+	47, // 53: devbox.v1.Gateway.UpdateQueuedPrompt:input_type -> devbox.v1.UpdateQueuedPromptRequest
+	48, // 54: devbox.v1.Gateway.SetThreadConfigOption:input_type -> devbox.v1.SetThreadConfigOptionRequest
+	49, // 55: devbox.v1.Gateway.RespondInteraction:input_type -> devbox.v1.RespondInteractionRequest
+	50, // 56: devbox.v1.Gateway.ListCommands:input_type -> devbox.v1.ListCommandsRequest
+	51, // 57: devbox.v1.Gateway.GetTimeline:input_type -> devbox.v1.GetTimelineRequest
+	52, // 58: devbox.v1.Gateway.GetSessions:input_type -> devbox.v1.GetSessionsRequest
+	53, // 59: devbox.v1.Gateway.SetInstanceLeases:input_type -> devbox.v1.SetInstanceLeasesRequest
+	54, // 60: devbox.v1.Gateway.AddRepository:input_type -> devbox.v1.AddRepositoryRequest
+	55, // 61: devbox.v1.Gateway.ListRepositories:input_type -> devbox.v1.ListRepositoriesRequest
+	56, // 62: devbox.v1.Gateway.ListFiles:input_type -> devbox.v1.ListFilesRequest
+	57, // 63: devbox.v1.Gateway.ReadFile:input_type -> devbox.v1.ReadFileRequest
+	58, // 64: devbox.v1.Gateway.WriteFile:input_type -> devbox.v1.WriteFileRequest
+	59, // 65: devbox.v1.Gateway.GetChanges:input_type -> devbox.v1.GetChangesRequest
+	60, // 66: devbox.v1.Gateway.PreparePullRequest:input_type -> devbox.v1.PreparePullRequestRequest
+	61, // 67: devbox.v1.Gateway.OpenStream:input_type -> devbox.v1.OpenStreamRequest
+	62, // 68: devbox.v1.Gateway.InvalidateAllowlist:input_type -> devbox.v1.InvalidateAllowlistRequest
+	16, // 69: devbox.v1.Gateway.ProxyStream:input_type -> devbox.v1.HttpRequest
+	10, // 70: devbox.v1.Tunnel.Connect:input_type -> devbox.v1.TunnelConnectRequest
+	63, // 71: devbox.v1.Gateway.CreateInstance:output_type -> devbox.v1.CreateInstanceResponse
+	63, // 72: devbox.v1.Gateway.StartFromSnapshot:output_type -> devbox.v1.CreateInstanceResponse
+	64, // 73: devbox.v1.Gateway.CancelInstance:output_type -> devbox.v1.InstanceActionResponse
+	64, // 74: devbox.v1.Gateway.SuspendInstance:output_type -> devbox.v1.InstanceActionResponse
+	64, // 75: devbox.v1.Gateway.ResumeInstance:output_type -> devbox.v1.InstanceActionResponse
+	65, // 76: devbox.v1.Gateway.SnapshotInstance:output_type -> devbox.v1.SnapshotInstanceResponse
+	66, // 77: devbox.v1.Gateway.DeleteSnapshot:output_type -> devbox.v1.DeleteSnapshotResponse
+	67, // 78: devbox.v1.Gateway.SetAgentBilling:output_type -> devbox.v1.SetAgentBillingResponse
+	68, // 79: devbox.v1.Gateway.CreateThread:output_type -> devbox.v1.ThreadResponse
+	69, // 80: devbox.v1.Gateway.ListThreads:output_type -> devbox.v1.ListThreadsResponse
+	68, // 81: devbox.v1.Gateway.ImportThread:output_type -> devbox.v1.ThreadResponse
+	68, // 82: devbox.v1.Gateway.ResumeThread:output_type -> devbox.v1.ThreadResponse
+	68, // 83: devbox.v1.Gateway.CloseThread:output_type -> devbox.v1.ThreadResponse
+	70, // 84: devbox.v1.Gateway.DeleteThread:output_type -> devbox.v1.DeleteThreadResponse
+	68, // 85: devbox.v1.Gateway.ForkThread:output_type -> devbox.v1.ThreadResponse
+	71, // 86: devbox.v1.Gateway.Prompt:output_type -> devbox.v1.PromptResponse
+	72, // 87: devbox.v1.Gateway.CancelPrompt:output_type -> devbox.v1.CancelPromptResponse
+	73, // 88: devbox.v1.Gateway.UpdateQueuedPrompt:output_type -> devbox.v1.UpdateQueuedPromptResponse
+	74, // 89: devbox.v1.Gateway.SetThreadConfigOption:output_type -> devbox.v1.SetThreadConfigOptionResponse
+	75, // 90: devbox.v1.Gateway.RespondInteraction:output_type -> devbox.v1.RespondInteractionResponse
+	76, // 91: devbox.v1.Gateway.ListCommands:output_type -> devbox.v1.ListCommandsResponse
+	77, // 92: devbox.v1.Gateway.GetTimeline:output_type -> devbox.v1.GetTimelineResponse
+	78, // 93: devbox.v1.Gateway.GetSessions:output_type -> devbox.v1.GetSessionsResponse
+	79, // 94: devbox.v1.Gateway.SetInstanceLeases:output_type -> devbox.v1.SetInstanceLeasesResponse
+	80, // 95: devbox.v1.Gateway.AddRepository:output_type -> devbox.v1.AddRepositoryResponse
+	81, // 96: devbox.v1.Gateway.ListRepositories:output_type -> devbox.v1.ListRepositoriesResponse
+	82, // 97: devbox.v1.Gateway.ListFiles:output_type -> devbox.v1.ListFilesResponse
+	83, // 98: devbox.v1.Gateway.ReadFile:output_type -> devbox.v1.ReadFileResponse
+	84, // 99: devbox.v1.Gateway.WriteFile:output_type -> devbox.v1.WriteFileResponse
+	85, // 100: devbox.v1.Gateway.GetChanges:output_type -> devbox.v1.GetChangesResponse
+	86, // 101: devbox.v1.Gateway.PreparePullRequest:output_type -> devbox.v1.PreparePullRequestResponse
+	87, // 102: devbox.v1.Gateway.OpenStream:output_type -> devbox.v1.OpenStreamResponse
+	88, // 103: devbox.v1.Gateway.InvalidateAllowlist:output_type -> devbox.v1.InvalidateAllowlistResponse
+	17, // 104: devbox.v1.Gateway.ProxyStream:output_type -> devbox.v1.HttpResponse
+	13, // 105: devbox.v1.Tunnel.Connect:output_type -> devbox.v1.TunnelConnectResponse
+	71, // [71:106] is the sub-list for method output_type
+	36, // [36:71] is the sub-list for method input_type
 	36, // [36:36] is the sub-list for extension type_name
 	36, // [36:36] is the sub-list for extension extendee
 	0,  // [0:36] is the sub-list for field type_name
