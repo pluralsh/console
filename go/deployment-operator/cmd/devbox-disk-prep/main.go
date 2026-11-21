@@ -52,6 +52,7 @@ func main() {
 		nodes:     clientset.CoreV1().Nodes(),
 		pods:      clientset.CoreV1(),
 		mountinfo: "/proc/self/mountinfo",
+		birthTime: fsBirthTime,
 	}
 	p.loop(ctx)
 }

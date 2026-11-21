@@ -24,7 +24,7 @@ defmodule Console.Schema.PullRequest do
 
   defenum Status, open: 0, merged: 1, closed: 2
   defenum ChangeType, gitops: 0, application: 1, configuration: 2
-  defenum Source, mcp: 0, egress: 1
+  defenum Source, mcp: 0, egress: 1, devbox: 2
 
   schema "pull_requests" do
     field :url,                :string

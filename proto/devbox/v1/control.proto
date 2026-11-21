@@ -99,6 +99,8 @@ service Control {
   rpc ReadFile(ReadFileRequest) returns (ReadFileResponse);
   rpc WriteFile(WriteFileRequest) returns (WriteFileResponse);
   rpc GetChanges(GetChangesRequest) returns (GetChangesResponse);
+  // PreparePullRequest readies a checkout for a pull request in the box (see PreparePullRequestRequest).
+  rpc PreparePullRequest(PreparePullRequestRequest) returns (PreparePullRequestResponse);
 
   // ---- Interactive streams ----
 

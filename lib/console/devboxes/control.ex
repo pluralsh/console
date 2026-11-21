@@ -64,6 +64,13 @@ defmodule Console.Devboxes.Control do
   @doc "Uncommitted changes per checkout; resolves to `{:ok, [%{checkout, base_ref, base_sha, files, additions, deletions}]}`"
   @callback get_changes(instance, opts :: map) :: result
   @doc """
+  Writes, commits and pushes a checkout's changes for a pull request in the box, which can take minutes; resolves to
+  `{:ok, %{remote_url, checkout_path, head_branch, base_branch, title, body, base_sha, head_sha, additions, deletions,
+  committed, writer}}`.  `opts`: `repository` (a checkout name or path), and `model` (an AI proxy model) or `agent`
+  (a subscription agent whose CLI writes the text), plus an optional `thread_id` for context.
+  """
+  @callback prepare_pull_request(instance, opts :: map) :: result
+  @doc """
   Opens a terminal, vnc or preview stream on the daemon; resolves to
   `{:ok, %{stream_id, kind, daemon_path, expires_at, subprotocols, terminal}}`.  Console mints the stream token.
   """
@@ -99,6 +106,7 @@ defmodule Console.Devboxes.Control do
     read_file: 3,
     write_file: 4,
     get_changes: 2,
+    prepare_pull_request: 2,
     open_stream: 3
   ]
 

@@ -7,6 +7,7 @@ import {
   Chip,
   DownloadIcon,
   Flex,
+  GitCompareIcon,
   ICON_FRAME_ICON_SIZE,
   Input,
   ListBoxItem,
@@ -38,13 +39,13 @@ import { formatDateTime, fromNow } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
 import { billingBadgeLabel, toBillingMode } from './devboxCredentials'
 import { DevboxPrChips } from './DevboxChips'
-import {
-  DevboxAwakeStatus,
-  isInstanceLive,
-  isInstanceTerminal,
-} from './devboxIdle'
+import { DevboxCreatePrButton } from './DevboxCreatePrButton'
+import { useDevboxChangeStat } from './devboxChanges'
+import { useDevboxPanel } from './DevboxControlPanel'
+import { DevboxDiffStat, diffStatLabel } from './DevboxDiffStat'
+import { isInstanceLive, isInstanceTerminal } from './devboxIdle'
 import { devboxSizing } from './devboxSizing'
-import { DevboxAwakePill, useKeepAwakeActions } from './DevboxKeepAwakeMenu'
+import { useKeepAwakeActions } from './DevboxKeepAwakeMenu'
 
 type InstanceDetail = { label: string; value: string; tooltip?: string }
 
@@ -135,22 +136,22 @@ const repoName = (url: string) =>
 
 export function DevboxInstanceHeader({
   instance,
-  awake,
   maxDeferralSeconds,
   now,
   pullRequests,
   onResume,
   resuming,
   onImportSession,
+  onPullRequestCreated,
 }: {
   instance: DevboxInstanceFragment
-  awake: Nullable<DevboxAwakeStatus>
   maxDeferralSeconds: number
   now: Date
   pullRequests: DevboxPullRequestFragment[]
   onResume: () => void
   resuming: boolean
   onImportSession?: () => void
+  onPullRequestCreated?: () => void
 }) {
   const { popToast } = useSimpleToast()
   const [stopOpen, setStopOpen] = useState(false)
@@ -271,7 +272,14 @@ export function DevboxInstanceHeader({
           align="center"
           css={{ flexShrink: 0 }}
         >
-          {awake && <DevboxAwakePill status={awake} />}
+          {live && <ChangesButton instanceId={instance.id} />}
+          {live && (
+            <DevboxCreatePrButton
+              instanceId={instance.id}
+              agentsRunning={(instance.runningThreads ?? 0) > 0}
+              onCreated={() => onPullRequestCreated?.()}
+            />
+          )}
           {suspended && (
             <Button
               small
@@ -380,6 +388,35 @@ export function DevboxInstanceHeader({
         />
       )}
     </Flex>
+  )
+}
+
+// the instance's outstanding changes, opening them in the panel
+function ChangesButton({ instanceId }: { instanceId: string }) {
+  const stat = useDevboxChangeStat(instanceId, true)
+  const { setOpen, setTab } = useDevboxPanel()
+  if (!stat.files) return null
+  return (
+    <Button
+      small
+      secondary
+      startIcon={<GitCompareIcon />}
+      aria-label={`View changes: ${diffStatLabel(stat)}`}
+      onClick={() => {
+        setTab('changes')
+        setOpen(true)
+      }}
+    >
+      <Flex
+        gap="xsmall"
+        align="center"
+      >
+        <span>
+          {stat.files} {stat.files === 1 ? 'file' : 'files'}
+        </span>
+        <DevboxDiffStat stat={stat} />
+      </Flex>
+    </Button>
   )
 }
 

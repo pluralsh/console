@@ -125,25 +125,23 @@ function DirectoryEntries({
   expanded: string[]
   selected: Nullable<string>
 }) {
-  const [entries, setEntries] = useState<Nullable<DevboxFileEntry[]>>(null)
+  const [entries, setEntries] = useState<Nullable<DevboxFileEntry[]>>(() =>
+    sortEntries(api.cachedFiles?.(path))
+  )
   const [error, setError] = useState<Nullable<Error>>(null)
 
   useEffect(() => {
+    let current = true
     api
       .listFiles?.(path)
-      .then((list) =>
-        setEntries(
-          list.toSorted(
-            (a, b) =>
-              Number(isDirectory(b)) - Number(isDirectory(a)) ||
-              a.name.localeCompare(b.name)
-          )
-        )
-      )
-      .catch(setError)
+      .then((list) => current && setEntries(sortEntries(list)))
+      .catch((e) => current && setError(e))
+    return () => {
+      current = false
+    }
   }, [api, path])
 
-  if (error)
+  if (error && !entries)
     return (
       <StatusItem
         path={path}
@@ -225,6 +223,16 @@ function DirectoryEntries({
       </TreeItem>
     )
   })
+}
+
+function sortEntries(list: Nullable<DevboxFileEntry[]>) {
+  return (
+    list?.toSorted(
+      (a, b) =>
+        Number(isDirectory(b)) - Number(isDirectory(a)) ||
+        a.name.localeCompare(b.name)
+    ) ?? null
+  )
 }
 
 function EntryLabel({ name, icon }: { name: string; icon: ReactNode }) {

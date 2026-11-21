@@ -69,6 +69,7 @@ const (
 	Daemon_WatchFiles_FullMethodName            = "/devbox.v1.Daemon/WatchFiles"
 	Daemon_GetChanges_FullMethodName            = "/devbox.v1.Daemon/GetChanges"
 	Daemon_GetBranchDiffStat_FullMethodName     = "/devbox.v1.Daemon/GetBranchDiffStat"
+	Daemon_PreparePullRequest_FullMethodName    = "/devbox.v1.Daemon/PreparePullRequest"
 	Daemon_AddRepository_FullMethodName         = "/devbox.v1.Daemon/AddRepository"
 	Daemon_ListRepositories_FullMethodName      = "/devbox.v1.Daemon/ListRepositories"
 	Daemon_StartBrowser_FullMethodName          = "/devbox.v1.Daemon/StartBrowser"
@@ -134,6 +135,8 @@ type DaemonClient interface {
 	GetChanges(ctx context.Context, in *GetChangesRequest, opts ...grpc.CallOption) (*GetChangesResponse, error)
 	// GetBranchDiffStat sizes a pull request: head against its merge base with base, for the devbox MCP.
 	GetBranchDiffStat(ctx context.Context, in *BranchDiffStatRequest, opts ...grpc.CallOption) (*BranchDiffStatResponse, error)
+	// PreparePullRequest writes, commits and pushes a checkout's changes for a pull request. It can take minutes.
+	PreparePullRequest(ctx context.Context, in *PreparePullRequestRequest, opts ...grpc.CallOption) (*PreparePullRequestResponse, error)
 	// AddRepository clones through egress into ~/<repo> and registers it in Project.md's managed table.
 	AddRepository(ctx context.Context, in *AddRepositoryRequest, opts ...grpc.CallOption) (*AddRepositoryResponse, error)
 	ListRepositories(ctx context.Context, in *ListRepositoriesRequest, opts ...grpc.CallOption) (*ListRepositoriesResponse, error)
@@ -517,6 +520,16 @@ func (c *daemonClient) GetBranchDiffStat(ctx context.Context, in *BranchDiffStat
 	return out, nil
 }
 
+func (c *daemonClient) PreparePullRequest(ctx context.Context, in *PreparePullRequestRequest, opts ...grpc.CallOption) (*PreparePullRequestResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PreparePullRequestResponse)
+	err := c.cc.Invoke(ctx, Daemon_PreparePullRequest_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *daemonClient) AddRepository(ctx context.Context, in *AddRepositoryRequest, opts ...grpc.CallOption) (*AddRepositoryResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(AddRepositoryResponse)
@@ -652,6 +665,8 @@ type DaemonServer interface {
 	GetChanges(context.Context, *GetChangesRequest) (*GetChangesResponse, error)
 	// GetBranchDiffStat sizes a pull request: head against its merge base with base, for the devbox MCP.
 	GetBranchDiffStat(context.Context, *BranchDiffStatRequest) (*BranchDiffStatResponse, error)
+	// PreparePullRequest writes, commits and pushes a checkout's changes for a pull request. It can take minutes.
+	PreparePullRequest(context.Context, *PreparePullRequestRequest) (*PreparePullRequestResponse, error)
 	// AddRepository clones through egress into ~/<repo> and registers it in Project.md's managed table.
 	AddRepository(context.Context, *AddRepositoryRequest) (*AddRepositoryResponse, error)
 	ListRepositories(context.Context, *ListRepositoriesRequest) (*ListRepositoriesResponse, error)
@@ -775,6 +790,9 @@ func (UnimplementedDaemonServer) GetChanges(context.Context, *GetChangesRequest)
 }
 func (UnimplementedDaemonServer) GetBranchDiffStat(context.Context, *BranchDiffStatRequest) (*BranchDiffStatResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetBranchDiffStat not implemented")
+}
+func (UnimplementedDaemonServer) PreparePullRequest(context.Context, *PreparePullRequestRequest) (*PreparePullRequestResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method PreparePullRequest not implemented")
 }
 func (UnimplementedDaemonServer) AddRepository(context.Context, *AddRepositoryRequest) (*AddRepositoryResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method AddRepository not implemented")
@@ -1408,6 +1426,24 @@ func _Daemon_GetBranchDiffStat_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Daemon_PreparePullRequest_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PreparePullRequestRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DaemonServer).PreparePullRequest(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Daemon_PreparePullRequest_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DaemonServer).PreparePullRequest(ctx, req.(*PreparePullRequestRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Daemon_AddRepository_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(AddRepositoryRequest)
 	if err := dec(in); err != nil {
@@ -1682,6 +1718,10 @@ var Daemon_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetBranchDiffStat",
 			Handler:    _Daemon_GetBranchDiffStat_Handler,
+		},
+		{
+			MethodName: "PreparePullRequest",
+			Handler:    _Daemon_PreparePullRequest_Handler,
 		},
 		{
 			MethodName: "AddRepository",

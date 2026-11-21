@@ -1232,6 +1232,40 @@ subscription DevboxInstanceEntityDelta($instanceId: ID!) {
   }
 }
 
+fragment DevboxPullRequestJob on DevboxPullRequestJob {
+  id
+  instanceId
+  repository
+  status
+  url
+  title
+  error
+  writer
+}
+
+mutation CreateDevboxPullRequest(
+  $instanceId: ID!
+  $repository: String!
+  $threadId: ID
+) {
+  createDevboxPullRequest(
+    instanceId: $instanceId
+    repository: $repository
+    threadId: $threadId
+  ) {
+    ...DevboxPullRequestJob
+  }
+}
+
+subscription DevboxPullRequestJobDelta($instanceId: ID!) {
+  devboxPullRequestJobDelta(instanceId: $instanceId) {
+    delta
+    payload {
+      ...DevboxPullRequestJob
+    }
+  }
+}
+
 subscription DevboxInstanceIndexDelta($instanceId: ID!) {
   devboxInstanceIndexDelta(instanceId: $instanceId) {
     delta

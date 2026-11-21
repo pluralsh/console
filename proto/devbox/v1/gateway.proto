@@ -62,6 +62,7 @@ service Gateway {
   rpc ReadFile(ReadFileRequest) returns (ReadFileResponse);
   rpc WriteFile(WriteFileRequest) returns (WriteFileResponse);
   rpc GetChanges(GetChangesRequest) returns (GetChangesResponse);
+  rpc PreparePullRequest(PreparePullRequestRequest) returns (PreparePullRequestResponse);
 
   rpc OpenStream(OpenStreamRequest) returns (OpenStreamResponse);
 

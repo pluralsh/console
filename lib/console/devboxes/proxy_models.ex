@@ -60,6 +60,20 @@ defmodule Console.Devboxes.ProxyModels do
   end
 
   @doc """
+  The model a devbox writes pull requests with through the proxy: the primary provider's tool model, or nil when
+  console AI is off.
+  """
+  @spec writer_model(DeploymentSettings.t | nil | :fetch) :: binary | nil
+  def writer_model(settings \\ :fetch)
+  def writer_model(:fetch), do: writer_model(Settings.fetch())
+  def writer_model(settings) do
+    case models(:pi, settings) do
+      [model | _] -> model
+      [] -> nil
+    end
+  end
+
+  @doc """
   The models a proxy-billed agent offers.  The proxy models are the source of truth for every agent the daemon
   registers them with (Claude's `availableModels`, Codex's model catalog, OpenCode's and Pi's `plural` provider):
   the box's probe ran without them, so its catalog only holds each harness's built-in models.  A runner allowlist

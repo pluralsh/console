@@ -341,6 +341,28 @@ func (c *Config) Spec(launch *devboxv1.AgentLaunch, endpoints *devboxv1.HarnessE
 	return spec, nil
 }
 
+// Headless is the command line for a one-off, non-interactive prompt to a subscription agent's CLI, run with the
+// credentials its ACP process gets. The CLI may read the working directory but not change it. lastMessage is a
+// file Codex writes its final answer to; Claude prints a JSON result instead.
+func (c *Config) Headless(t devboxv1.AgentType, prompt, lastMessage string) (path string, args, env []string, err error) {
+	env = c.baseEnv()
+	switch t {
+	case devboxv1.AgentType_AGENT_TYPE_CLAUDE:
+		env = unsetEnv(env, append([]string{"ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_BASE_URL"}, claudeTierEnv...)...)
+		env = setEnv(env, "CLAUDE_CONFIG_DIR", filepath.Join(c.Home, ".claude"))
+		env = setEnv(env, "DISABLE_AUTOUPDATER", "1")
+		env = setEnv(env, "CLAUDE_CODE_OAUTH_TOKEN", ClaudeOAuthPlaceholder)
+		return Binary(t), []string{"-p", prompt, "--output-format", "json", "--allowedTools", "Read,Grep,Glob", "--max-turns", "8"}, env, nil
+	case devboxv1.AgentType_AGENT_TYPE_CODEX:
+		env = unsetEnv(env, "OPENAI_API_KEY", "CODEX_API_KEY", "DEFAULT_AUTH_REQUEST")
+		env = setEnv(env, "CODEX_HOME", c.CodexHome())
+		env = setEnv(env, "NO_BROWSER", "1")
+		return Binary(t), []string{"exec", "--sandbox", "read-only", "--skip-git-repo-check",
+			"-c", `cli_auth_credentials_store="file"`, "--output-last-message", lastMessage, prompt}, env, nil
+	}
+	return "", nil, nil, fmt.Errorf("%s has no headless mode", AgentName(t))
+}
+
 func (c *Config) baseEnv() []string {
 	if c.BaseEnv != nil {
 		return c.BaseEnv()

@@ -3326,7 +3326,7 @@ const file_devbox_v1_control_proto_rawDesc = "" +
 	"\x17STREAM_KIND_UNSPECIFIED\x10\x00\x12\x18\n" +
 	"\x14STREAM_KIND_TERMINAL\x10\x01\x12\x13\n" +
 	"\x0fSTREAM_KIND_VNC\x10\x02\x12\x17\n" +
-	"\x13STREAM_KIND_PREVIEW\x10\x032\x90\x14\n" +
+	"\x13STREAM_KIND_PREVIEW\x10\x032\xf3\x14\n" +
 	"\aControl\x12U\n" +
 	"\x0eCreateInstance\x12 .devbox.v1.CreateInstanceRequest\x1a!.devbox.v1.CreateInstanceResponse\x12[\n" +
 	"\x11StartFromSnapshot\x12#.devbox.v1.StartFromSnapshotRequest\x1a!.devbox.v1.CreateInstanceResponse\x12U\n" +
@@ -3358,7 +3358,8 @@ const file_devbox_v1_control_proto_rawDesc = "" +
 	"\bReadFile\x12\x1a.devbox.v1.ReadFileRequest\x1a\x1b.devbox.v1.ReadFileResponse\x12F\n" +
 	"\tWriteFile\x12\x1b.devbox.v1.WriteFileRequest\x1a\x1c.devbox.v1.WriteFileResponse\x12I\n" +
 	"\n" +
-	"GetChanges\x12\x1c.devbox.v1.GetChangesRequest\x1a\x1d.devbox.v1.GetChangesResponse\x12I\n" +
+	"GetChanges\x12\x1c.devbox.v1.GetChangesRequest\x1a\x1d.devbox.v1.GetChangesResponse\x12a\n" +
+	"\x12PreparePullRequest\x12$.devbox.v1.PreparePullRequestRequest\x1a%.devbox.v1.PreparePullRequestResponse\x12I\n" +
 	"\n" +
 	"OpenStream\x12\x1c.devbox.v1.OpenStreamRequest\x1a\x1d.devbox.v1.OpenStreamResponse\x12d\n" +
 	"\x13InvalidateAllowlist\x12%.devbox.v1.InvalidateAllowlistRequest\x1a&.devbox.v1.InvalidateAllowlistResponseBOZMgithub.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1;devboxv1b\x06proto3"
@@ -3454,12 +3455,14 @@ var file_devbox_v1_control_proto_goTypes = []any{
 	(*ReadFileRequest)(nil),               // 73: devbox.v1.ReadFileRequest
 	(*WriteFileRequest)(nil),              // 74: devbox.v1.WriteFileRequest
 	(*GetChangesRequest)(nil),             // 75: devbox.v1.GetChangesRequest
-	(*AddRepositoryResponse)(nil),         // 76: devbox.v1.AddRepositoryResponse
-	(*ListRepositoriesResponse)(nil),      // 77: devbox.v1.ListRepositoriesResponse
-	(*ListFilesResponse)(nil),             // 78: devbox.v1.ListFilesResponse
-	(*ReadFileResponse)(nil),              // 79: devbox.v1.ReadFileResponse
-	(*WriteFileResponse)(nil),             // 80: devbox.v1.WriteFileResponse
-	(*GetChangesResponse)(nil),            // 81: devbox.v1.GetChangesResponse
+	(*PreparePullRequestRequest)(nil),     // 76: devbox.v1.PreparePullRequestRequest
+	(*AddRepositoryResponse)(nil),         // 77: devbox.v1.AddRepositoryResponse
+	(*ListRepositoriesResponse)(nil),      // 78: devbox.v1.ListRepositoriesResponse
+	(*ListFilesResponse)(nil),             // 79: devbox.v1.ListFilesResponse
+	(*ReadFileResponse)(nil),              // 80: devbox.v1.ReadFileResponse
+	(*WriteFileResponse)(nil),             // 81: devbox.v1.WriteFileResponse
+	(*GetChangesResponse)(nil),            // 82: devbox.v1.GetChangesResponse
+	(*PreparePullRequestResponse)(nil),    // 83: devbox.v1.PreparePullRequestResponse
 }
 var file_devbox_v1_control_proto_depIdxs = []int32{
 	45, // 0: devbox.v1.CreateInstanceRequest.owner:type_name -> devbox.v1.Principal
@@ -3557,41 +3560,43 @@ var file_devbox_v1_control_proto_depIdxs = []int32{
 	73, // 92: devbox.v1.Control.ReadFile:input_type -> devbox.v1.ReadFileRequest
 	74, // 93: devbox.v1.Control.WriteFile:input_type -> devbox.v1.WriteFileRequest
 	75, // 94: devbox.v1.Control.GetChanges:input_type -> devbox.v1.GetChangesRequest
-	41, // 95: devbox.v1.Control.OpenStream:input_type -> devbox.v1.OpenStreamRequest
-	43, // 96: devbox.v1.Control.InvalidateAllowlist:input_type -> devbox.v1.InvalidateAllowlistRequest
-	3,  // 97: devbox.v1.Control.CreateInstance:output_type -> devbox.v1.CreateInstanceResponse
-	3,  // 98: devbox.v1.Control.StartFromSnapshot:output_type -> devbox.v1.CreateInstanceResponse
-	7,  // 99: devbox.v1.Control.CancelInstance:output_type -> devbox.v1.InstanceActionResponse
-	7,  // 100: devbox.v1.Control.SuspendInstance:output_type -> devbox.v1.InstanceActionResponse
-	7,  // 101: devbox.v1.Control.ResumeInstance:output_type -> devbox.v1.InstanceActionResponse
-	9,  // 102: devbox.v1.Control.SnapshotInstance:output_type -> devbox.v1.SnapshotInstanceResponse
-	11, // 103: devbox.v1.Control.DeleteSnapshot:output_type -> devbox.v1.DeleteSnapshotResponse
-	13, // 104: devbox.v1.Control.SetAgentBilling:output_type -> devbox.v1.SetAgentBillingResponse
-	16, // 105: devbox.v1.Control.CreateThread:output_type -> devbox.v1.ThreadResponse
-	18, // 106: devbox.v1.Control.ListThreads:output_type -> devbox.v1.ListThreadsResponse
-	16, // 107: devbox.v1.Control.ImportThread:output_type -> devbox.v1.ThreadResponse
-	16, // 108: devbox.v1.Control.ResumeThread:output_type -> devbox.v1.ThreadResponse
-	16, // 109: devbox.v1.Control.CloseThread:output_type -> devbox.v1.ThreadResponse
-	22, // 110: devbox.v1.Control.DeleteThread:output_type -> devbox.v1.DeleteThreadResponse
-	16, // 111: devbox.v1.Control.ForkThread:output_type -> devbox.v1.ThreadResponse
-	26, // 112: devbox.v1.Control.Prompt:output_type -> devbox.v1.PromptResponse
-	28, // 113: devbox.v1.Control.CancelPrompt:output_type -> devbox.v1.CancelPromptResponse
-	30, // 114: devbox.v1.Control.SetThreadConfigOption:output_type -> devbox.v1.SetThreadConfigOptionResponse
-	32, // 115: devbox.v1.Control.RespondInteraction:output_type -> devbox.v1.RespondInteractionResponse
-	34, // 116: devbox.v1.Control.ListCommands:output_type -> devbox.v1.ListCommandsResponse
-	36, // 117: devbox.v1.Control.GetTimeline:output_type -> devbox.v1.GetTimelineResponse
-	38, // 118: devbox.v1.Control.GetSessions:output_type -> devbox.v1.GetSessionsResponse
-	40, // 119: devbox.v1.Control.SetInstanceLeases:output_type -> devbox.v1.SetInstanceLeasesResponse
-	76, // 120: devbox.v1.Control.AddRepository:output_type -> devbox.v1.AddRepositoryResponse
-	77, // 121: devbox.v1.Control.ListRepositories:output_type -> devbox.v1.ListRepositoriesResponse
-	78, // 122: devbox.v1.Control.ListFiles:output_type -> devbox.v1.ListFilesResponse
-	79, // 123: devbox.v1.Control.ReadFile:output_type -> devbox.v1.ReadFileResponse
-	80, // 124: devbox.v1.Control.WriteFile:output_type -> devbox.v1.WriteFileResponse
-	81, // 125: devbox.v1.Control.GetChanges:output_type -> devbox.v1.GetChangesResponse
-	42, // 126: devbox.v1.Control.OpenStream:output_type -> devbox.v1.OpenStreamResponse
-	44, // 127: devbox.v1.Control.InvalidateAllowlist:output_type -> devbox.v1.InvalidateAllowlistResponse
-	97, // [97:128] is the sub-list for method output_type
-	66, // [66:97] is the sub-list for method input_type
+	76, // 95: devbox.v1.Control.PreparePullRequest:input_type -> devbox.v1.PreparePullRequestRequest
+	41, // 96: devbox.v1.Control.OpenStream:input_type -> devbox.v1.OpenStreamRequest
+	43, // 97: devbox.v1.Control.InvalidateAllowlist:input_type -> devbox.v1.InvalidateAllowlistRequest
+	3,  // 98: devbox.v1.Control.CreateInstance:output_type -> devbox.v1.CreateInstanceResponse
+	3,  // 99: devbox.v1.Control.StartFromSnapshot:output_type -> devbox.v1.CreateInstanceResponse
+	7,  // 100: devbox.v1.Control.CancelInstance:output_type -> devbox.v1.InstanceActionResponse
+	7,  // 101: devbox.v1.Control.SuspendInstance:output_type -> devbox.v1.InstanceActionResponse
+	7,  // 102: devbox.v1.Control.ResumeInstance:output_type -> devbox.v1.InstanceActionResponse
+	9,  // 103: devbox.v1.Control.SnapshotInstance:output_type -> devbox.v1.SnapshotInstanceResponse
+	11, // 104: devbox.v1.Control.DeleteSnapshot:output_type -> devbox.v1.DeleteSnapshotResponse
+	13, // 105: devbox.v1.Control.SetAgentBilling:output_type -> devbox.v1.SetAgentBillingResponse
+	16, // 106: devbox.v1.Control.CreateThread:output_type -> devbox.v1.ThreadResponse
+	18, // 107: devbox.v1.Control.ListThreads:output_type -> devbox.v1.ListThreadsResponse
+	16, // 108: devbox.v1.Control.ImportThread:output_type -> devbox.v1.ThreadResponse
+	16, // 109: devbox.v1.Control.ResumeThread:output_type -> devbox.v1.ThreadResponse
+	16, // 110: devbox.v1.Control.CloseThread:output_type -> devbox.v1.ThreadResponse
+	22, // 111: devbox.v1.Control.DeleteThread:output_type -> devbox.v1.DeleteThreadResponse
+	16, // 112: devbox.v1.Control.ForkThread:output_type -> devbox.v1.ThreadResponse
+	26, // 113: devbox.v1.Control.Prompt:output_type -> devbox.v1.PromptResponse
+	28, // 114: devbox.v1.Control.CancelPrompt:output_type -> devbox.v1.CancelPromptResponse
+	30, // 115: devbox.v1.Control.SetThreadConfigOption:output_type -> devbox.v1.SetThreadConfigOptionResponse
+	32, // 116: devbox.v1.Control.RespondInteraction:output_type -> devbox.v1.RespondInteractionResponse
+	34, // 117: devbox.v1.Control.ListCommands:output_type -> devbox.v1.ListCommandsResponse
+	36, // 118: devbox.v1.Control.GetTimeline:output_type -> devbox.v1.GetTimelineResponse
+	38, // 119: devbox.v1.Control.GetSessions:output_type -> devbox.v1.GetSessionsResponse
+	40, // 120: devbox.v1.Control.SetInstanceLeases:output_type -> devbox.v1.SetInstanceLeasesResponse
+	77, // 121: devbox.v1.Control.AddRepository:output_type -> devbox.v1.AddRepositoryResponse
+	78, // 122: devbox.v1.Control.ListRepositories:output_type -> devbox.v1.ListRepositoriesResponse
+	79, // 123: devbox.v1.Control.ListFiles:output_type -> devbox.v1.ListFilesResponse
+	80, // 124: devbox.v1.Control.ReadFile:output_type -> devbox.v1.ReadFileResponse
+	81, // 125: devbox.v1.Control.WriteFile:output_type -> devbox.v1.WriteFileResponse
+	82, // 126: devbox.v1.Control.GetChanges:output_type -> devbox.v1.GetChangesResponse
+	83, // 127: devbox.v1.Control.PreparePullRequest:output_type -> devbox.v1.PreparePullRequestResponse
+	42, // 128: devbox.v1.Control.OpenStream:output_type -> devbox.v1.OpenStreamResponse
+	44, // 129: devbox.v1.Control.InvalidateAllowlist:output_type -> devbox.v1.InvalidateAllowlistResponse
+	98, // [98:130] is the sub-list for method output_type
+	66, // [66:98] is the sub-list for method input_type
 	66, // [66:66] is the sub-list for extension type_name
 	66, // [66:66] is the sub-list for extension extendee
 	0,  // [0:66] is the sub-list for field type_name

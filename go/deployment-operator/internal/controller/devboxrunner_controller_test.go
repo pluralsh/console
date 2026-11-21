@@ -607,6 +607,7 @@ func TestDevboxRunnerController(t *testing.T) {
 		g.Expect(runner.Status.Revisions).To(HaveLen(2))
 
 		env.substrate.addActor(atespace, "instance-1", "platform-r1", ateapi.ActorState_ACTOR_STATE_SUSPENDED)
+		env.substrate.addActor(atespace, env.substrate.template(atespace, "platform-r1").GetMetadata().GetUid(), "platform-r1", ateapi.ActorState_ACTOR_STATE_RESUMING)
 		runner = env.buildRevision(t, "platform", 2, claudeOK())
 		g.Expect(*runner.Status.TemplateRevision).To(Equal(int64(2)))
 		g.Expect(runner.RevisionByNumber(1).Phase).To(Equal(v1alpha1.DevboxRevisionRetired))
@@ -614,7 +615,7 @@ func TestDevboxRunnerController(t *testing.T) {
 
 		g.Expect(env.substrate.DeleteActor(ctx, atespace, "instance-1")).To(Succeed())
 		runner = env.reconcile(t, "platform", 1)
-		g.Expect(runner.RevisionByNumber(1)).To(BeNil())
+		g.Expect(runner.RevisionByNumber(1)).To(BeNil(), "r1's own golden actor is no reference")
 		g.Expect(env.substrate.template(atespace, "platform-r1")).To(BeNil())
 		err := env.client.Get(ctx, client.ObjectKey{Name: DevboxProbeConfigMapName("platform", 1), Namespace: devboxTestNamespace}, &corev1.ConfigMap{})
 		g.Expect(apierrors.IsNotFound(err)).To(BeTrue())

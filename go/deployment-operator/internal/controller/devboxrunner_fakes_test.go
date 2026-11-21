@@ -142,6 +142,9 @@ func (f *fakeSubstrate) ListActorTemplates(_ context.Context, atespace string) (
 func (f *fakeSubstrate) DeleteActorTemplate(_ context.Context, atespace, name string) error {
 	f.mu.Lock()
 	defer f.mu.Unlock()
+	if t, ok := f.templates[atespace][name]; ok {
+		delete(f.actors[atespace], t.GetMetadata().GetUid())
+	}
 	delete(f.templates[atespace], name)
 	return nil
 }

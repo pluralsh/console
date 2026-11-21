@@ -82,6 +82,8 @@ Mimic.copy(ReqLLM)
 Mimic.copy(Console.ClusterRing)
 Mimic.copy(Console.Uploads)
 Mimic.copy(Console.Devboxes.Control.Test)
+Mimic.copy(Console.Devboxes.PullRequests)
+Mimic.copy(Console.Devboxes.ProxyModels)
 
 Mimic.copy(Console.Devboxes.AgentCredentials.Verifier.Test)
 

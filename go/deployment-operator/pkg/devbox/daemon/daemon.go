@@ -38,6 +38,7 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/idle"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/internal/fsutil"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/proc"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/prs"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/terminal"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/transcript"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/trust"
@@ -87,6 +88,7 @@ type Daemon struct {
 	terms      *terminal.Manager
 	files      *files.Service
 	ws         *workspace.Manager
+	prs        *prs.Preparer
 	browser    *browser.Browser
 	idle       *idle.Detector
 	creds      *creds.Manager
@@ -195,6 +197,10 @@ func New(cfg Config) (*Daemon, error) {
 		Head: d.events.Head, Transcript: d.transcript, Launcher: launcher{d}, Supervisor: d.sup, Clock: cfg.Clock, Log: d.log.With("component", "agents"),
 		MaxRunning: cfg.MaxRunningThreads, Endpoints: d.endpoints, Worktrees: d.ws.Worktrees,
 		Checkouts: d.ws.CheckoutInfo, ExtraMCPServers: d.extraMCPServers, ReviewClient: d.reviewClient()})
+	d.prs = prs.New(prs.Options{
+		Checkouts: func(ctx context.Context) []*devboxv1.Checkout { return d.ws.List(ctx, true).GetCheckouts() },
+		Env:       d.baseEnv, Endpoints: d.endpoints, Client: d.reviewClient(), Harness: d.harness,
+		RecentPrompts: d.agents.RecentPrompts, Log: d.log.With("component", "prs")})
 
 	sampler := &cpuSampler{d: d, inner: &idle.ProcSampler{Root: "/proc"}}
 	d.idle = idle.New(cfg.Clock, idle.PolicyOf(nil), idle.Sources{

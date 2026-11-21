@@ -16,10 +16,15 @@ const tree: Record<string, { path: string; name: string; type: string }[]> = {
   ],
 }
 
-function renderTab(selected: Nullable<string>, onSelect = vi.fn()) {
+function renderTab(
+  selected: Nullable<string>,
+  onSelect = vi.fn(),
+  overrides: Partial<DevboxWorkspaceApi> = {}
+) {
   const api = {
     listFiles: vi.fn(async (path: string) => tree[path] ?? []),
     readFile: vi.fn(async (path: string) => ({ path, content: 'a: 1' })),
+    ...overrides,
   } as unknown as DevboxWorkspaceApi
   render(
     <ThemeProvider theme={styledThemeDark}>
@@ -48,6 +53,15 @@ describe('DevboxFilesTab', () => {
     renderTab('/home/devbox/src/values.yaml')
     expect(await screen.findByText('values.yaml')).toBeTruthy()
     expect(screen.getByAltText('yaml')).toBeTruthy()
+  })
+
+  it('shows the last listing at once while it refreshes', () => {
+    renderTab(null, vi.fn(), {
+      listFiles: () => new Promise(() => {}),
+      cachedFiles: (path) => tree[path],
+    })
+    expect(screen.getByText('README.md')).toBeTruthy()
+    expect(screen.queryByText('Loading…')).toBeNull()
   })
 
   it('only shows the tree, leaving the file to the main view', async () => {

@@ -5275,7 +5275,6 @@ export type DevboxImportableSession = {
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
-/** The index rows an UpsertInstanceIndex call changed (revision and foreground state only when the instance aggregate changed) */
 export type DevboxIndexChange = {
   __typename?: 'DevboxIndexChange';
   foregroundState?: Maybe<DevboxForegroundState>;
@@ -5543,6 +5542,35 @@ export type DevboxPromptBlockAttributes = {
   type: DevboxContentBlockType;
   uri?: InputMaybe<Scalars['String']['input']>;
 };
+
+/** A pull request a devbox instance is preparing for one of its checkouts (never stored) */
+export type DevboxPullRequestJob = {
+  __typename?: 'DevboxPullRequestJob';
+  error?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  instanceId: Scalars['ID']['output'];
+  /** the checkout's name or path */
+  repository: Scalars['String']['output'];
+  status: DevboxPullRequestJobStatus;
+  title?: Maybe<Scalars['String']['output']>;
+  /** the pull request, once created */
+  url?: Maybe<Scalars['String']['output']>;
+  /** who wrote the text: ai_proxy, claude, codex or template */
+  writer?: Maybe<Scalars['String']['output']>;
+};
+
+export type DevboxPullRequestJobDelta = {
+  __typename?: 'DevboxPullRequestJobDelta';
+  delta?: Maybe<Delta>;
+  payload?: Maybe<DevboxPullRequestJob>;
+};
+
+/** The index rows an UpsertInstanceIndex call changed (revision and foreground state only when the instance aggregate changed) */
+export enum DevboxPullRequestJobStatus {
+  Failed = 'FAILED',
+  Running = 'RUNNING',
+  Succeeded = 'SUCCEEDED'
+}
 
 export type DevboxRepository = {
   __typename?: 'DevboxRepository';
@@ -11108,7 +11136,7 @@ export type PullRequest = {
   ref?: Maybe<Scalars['String']['output']>;
   /** the service this pr is meant to modify */
   service?: Maybe<ServiceDeployment>;
-  /** how a devbox pr was recorded: through the devbox mcp, or observed at egress */
+  /** how a devbox pr was recorded: through the devbox mcp, the create pr button, or observed at egress */
   source?: Maybe<PullRequestSource>;
   status?: Maybe<PrStatus>;
   title?: Maybe<Scalars['String']['output']>;
@@ -11166,6 +11194,7 @@ export type PullRequestEvidence = {
 };
 
 export enum PullRequestSource {
+  Devbox = 'DEVBOX',
   Egress = 'EGRESS',
   Mcp = 'MCP'
 }
@@ -11577,6 +11606,8 @@ export type RootMutationType = {
   createCustomStackRun?: Maybe<CustomStackRun>;
   createDashboard?: Maybe<WorkbenchDashboard>;
   createDevboxInstance?: Maybe<DevboxInstance>;
+  /** Starts a pull request for a checkout: the box writes the title, body and commit message, commits and pushes */
+  createDevboxPullRequest?: Maybe<DevboxPullRequestJob>;
   createDevboxSnapshot?: Maybe<DevboxSnapshot>;
   createDevboxThread?: Maybe<DevboxThread>;
   createFederatedCredential?: Maybe<FederatedCredential>;
@@ -12215,6 +12246,13 @@ export type RootMutationTypeCreateDashboardArgs = {
 export type RootMutationTypeCreateDevboxInstanceArgs = {
   attributes: DevboxInstanceAttributes;
   workbenchId: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeCreateDevboxPullRequestArgs = {
+  instanceId: Scalars['ID']['input'];
+  repository: Scalars['String']['input'];
+  threadId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -15761,6 +15799,8 @@ export type RootSubscriptionType = {
   /** Thread and interaction index changes */
   devboxInstanceIndexDelta?: Maybe<DevboxIndexChangeDelta>;
   devboxInstanceStatusDelta?: Maybe<DevboxInstanceDelta>;
+  /** Pull requests the instance is preparing */
+  devboxPullRequestJobDelta?: Maybe<DevboxPullRequestJobDelta>;
   devboxSnapshotDelta?: Maybe<DevboxSnapshotDelta>;
   devboxThreadDelta?: Maybe<DevboxThreadDelta>;
   /** Changes to any stack the current user can read, including status changes from its runs */
@@ -15834,6 +15874,11 @@ export type RootSubscriptionTypeDevboxInstanceIndexDeltaArgs = {
 export type RootSubscriptionTypeDevboxInstanceStatusDeltaArgs = {
   id?: InputMaybe<Scalars['ID']['input']>;
   workbenchId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootSubscriptionTypeDevboxPullRequestJobDeltaArgs = {
+  instanceId: Scalars['ID']['input'];
 };
 
 
@@ -24647,6 +24692,24 @@ export type DevboxInstanceEntityDeltaSubscription = { __typename?: 'RootSubscrip
             | { __typename?: 'DevboxTextContent', type: DevboxContentBlockType, text?: string | null, annotations?: Record<string, unknown> | null }
             | { __typename?: 'DevboxUnknownContent', type: DevboxContentBlockType, variant?: string | null, raw?: Record<string, unknown> | null }
            | null> | null } | null } | null } | null } | null };
+
+export type DevboxPullRequestJobFragment = { __typename?: 'DevboxPullRequestJob', id: string, instanceId: string, repository: string, status: DevboxPullRequestJobStatus, url?: string | null, title?: string | null, error?: string | null, writer?: string | null };
+
+export type CreateDevboxPullRequestMutationVariables = Exact<{
+  instanceId: Scalars['ID']['input'];
+  repository: Scalars['String']['input'];
+  threadId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type CreateDevboxPullRequestMutation = { __typename?: 'RootMutationType', createDevboxPullRequest?: { __typename?: 'DevboxPullRequestJob', id: string, instanceId: string, repository: string, status: DevboxPullRequestJobStatus, url?: string | null, title?: string | null, error?: string | null, writer?: string | null } | null };
+
+export type DevboxPullRequestJobDeltaSubscriptionVariables = Exact<{
+  instanceId: Scalars['ID']['input'];
+}>;
+
+
+export type DevboxPullRequestJobDeltaSubscription = { __typename?: 'RootSubscriptionType', devboxPullRequestJobDelta?: { __typename?: 'DevboxPullRequestJobDelta', delta?: Delta | null, payload?: { __typename?: 'DevboxPullRequestJob', id: string, instanceId: string, repository: string, status: DevboxPullRequestJobStatus, url?: string | null, title?: string | null, error?: string | null, writer?: string | null } | null } | null };
 
 export type DevboxInstanceIndexDeltaSubscriptionVariables = Exact<{
   instanceId: Scalars['ID']['input'];
@@ -36484,6 +36547,57 @@ export function useDevboxInstanceEntityDeltaSubscription(baseOptions: Apollo.Sub
       }
 export type DevboxInstanceEntityDeltaSubscriptionHookResult = ReturnType<typeof useDevboxInstanceEntityDeltaSubscription>;
 export type DevboxInstanceEntityDeltaSubscriptionResult = Apollo.SubscriptionResult<DevboxInstanceEntityDeltaSubscription>;
+export type CreateDevboxPullRequestMutationFn = Apollo.MutationFunction<CreateDevboxPullRequestMutation, CreateDevboxPullRequestMutationVariables>;
+
+/**
+ * __useCreateDevboxPullRequestMutation__
+ *
+ * To run a mutation, you first call `useCreateDevboxPullRequestMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateDevboxPullRequestMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createDevboxPullRequestMutation, { data, loading, error }] = useCreateDevboxPullRequestMutation({
+ *   variables: {
+ *      instanceId: // value for 'instanceId'
+ *      repository: // value for 'repository'
+ *      threadId: // value for 'threadId'
+ *   },
+ * });
+ */
+export function useCreateDevboxPullRequestMutation(baseOptions?: Apollo.MutationHookOptions<CreateDevboxPullRequestMutation, CreateDevboxPullRequestMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateDevboxPullRequestMutation, CreateDevboxPullRequestMutationVariables>(Operations.CreateDevboxPullRequest, options);
+      }
+export type CreateDevboxPullRequestMutationHookResult = ReturnType<typeof useCreateDevboxPullRequestMutation>;
+export type CreateDevboxPullRequestMutationResult = Apollo.MutationResult<CreateDevboxPullRequestMutation>;
+export type CreateDevboxPullRequestMutationOptions = Apollo.BaseMutationOptions<CreateDevboxPullRequestMutation, CreateDevboxPullRequestMutationVariables>;
+
+/**
+ * __useDevboxPullRequestJobDeltaSubscription__
+ *
+ * To run a query within a React component, call `useDevboxPullRequestJobDeltaSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useDevboxPullRequestJobDeltaSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDevboxPullRequestJobDeltaSubscription({
+ *   variables: {
+ *      instanceId: // value for 'instanceId'
+ *   },
+ * });
+ */
+export function useDevboxPullRequestJobDeltaSubscription(baseOptions: Apollo.SubscriptionHookOptions<DevboxPullRequestJobDeltaSubscription, DevboxPullRequestJobDeltaSubscriptionVariables> & ({ variables: DevboxPullRequestJobDeltaSubscriptionVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<DevboxPullRequestJobDeltaSubscription, DevboxPullRequestJobDeltaSubscriptionVariables>(Operations.DevboxPullRequestJobDelta, options);
+      }
+export type DevboxPullRequestJobDeltaSubscriptionHookResult = ReturnType<typeof useDevboxPullRequestJobDeltaSubscription>;
+export type DevboxPullRequestJobDeltaSubscriptionResult = Apollo.SubscriptionResult<DevboxPullRequestJobDeltaSubscription>;
 
 /**
  * __useDevboxInstanceIndexDeltaSubscription__
@@ -46673,6 +46787,7 @@ export const namedOperations = {
     SetDevboxThreadConfigOption: 'SetDevboxThreadConfigOption',
     RespondDevboxInteraction: 'RespondDevboxInteraction',
     AddDevboxRepository: 'AddDevboxRepository',
+    CreateDevboxPullRequest: 'CreateDevboxPullRequest',
     CreateClusterRegistration: 'CreateClusterRegistration',
     UpdateClusterRegistration: 'UpdateClusterRegistration',
     DeleteClusterRegistration: 'DeleteClusterRegistration',
@@ -46800,6 +46915,7 @@ export const namedOperations = {
     DevboxThreadDelta: 'DevboxThreadDelta',
     DevboxSnapshotDelta: 'DevboxSnapshotDelta',
     DevboxInstanceEntityDelta: 'DevboxInstanceEntityDelta',
+    DevboxPullRequestJobDelta: 'DevboxPullRequestJobDelta',
     DevboxInstanceIndexDelta: 'DevboxInstanceIndexDelta',
     InfrastructureStackDelta: 'InfrastructureStackDelta',
     StackRunDelta: 'StackRunDelta',
@@ -47008,6 +47124,7 @@ export const namedOperations = {
     DevboxEntity: 'DevboxEntity',
     DevboxEntityChange: 'DevboxEntityChange',
     DevboxPullRequest: 'DevboxPullRequest',
+    DevboxPullRequestJob: 'DevboxPullRequestJob',
     ClusterRegistration: 'ClusterRegistration',
     Tag: 'Tag',
     IsoImage: 'IsoImage',

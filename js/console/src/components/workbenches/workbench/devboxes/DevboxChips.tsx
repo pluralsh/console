@@ -13,7 +13,6 @@ import { aiProviderToIcon } from 'components/settings/ai/AISettingsConfiguredPro
 import { runtimeToIcon } from 'components/settings/ai/agent-runtimes/AIAgentRuntimeIcon'
 import { Link } from 'react-router-dom'
 import { getWorkbenchDevboxInstanceAbsPath } from 'routes/workbenchesRoutesConsts'
-import { DevboxAwakeTone } from './devboxIdle'
 import { agentLabel, proxyModelOf } from './devboxStartForm'
 import { threadTitle } from './devboxThreads'
 
@@ -194,14 +193,6 @@ export function DevboxSnapshotStatusChip({
       {status.toLowerCase()}
     </Chip>
   )
-}
-
-export const awakeToneSeverity: Record<DevboxAwakeTone, ChipSeverity> = {
-  success: 'success',
-  warning: 'warning',
-  info: 'info',
-  neutral: 'neutral',
-  danger: 'danger',
 }
 
 export function shortDigest(digest: Nullable<string>) {

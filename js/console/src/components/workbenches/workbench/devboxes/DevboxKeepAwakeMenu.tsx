@@ -1,6 +1,5 @@
 import {
   Button,
-  Chip,
   ClockIcon,
   Flex,
   FormField,
@@ -11,27 +10,12 @@ import {
 } from '@pluralsh/design-system'
 import dayjs from 'dayjs'
 import { ReactNode, useState } from 'react'
-import { awakeToneSeverity } from './DevboxChips'
 import {
   clampCustomKeepAwake,
-  DevboxAwakeStatus,
   isKeptAwake,
   KEEP_AWAKE_PRESETS,
   keepAwakeUntil,
 } from './devboxIdle'
-
-export function DevboxAwakePill({ status }: { status: DevboxAwakeStatus }) {
-  return (
-    <Chip
-      size="small"
-      severity={awakeToneSeverity[status.tone]}
-      icon={status.tone === 'neutral' ? <MoonIcon /> : undefined}
-      data-testid="devbox-awake-pill"
-    >
-      {status.label}
-    </Chip>
-  )
-}
 
 const DATETIME_LOCAL = 'YYYY-MM-DDTHH:mm'
 const CUSTOM = 'custom'

@@ -623,8 +623,29 @@ defmodule Console.Devboxes.Ingest do
     with {:ok, _} <- owned(instance_id, cluster),
          {:ok, inst} <- Devboxes.ensure_live(Devboxes.get_instance!(instance_id) |> Repo.preload([:devbox])),
          {:ok, thread} <- pr_thread(inst, thread_id),
-         %{repository: repo, title: title, head_branch: head, base_branch: base} = pr <- attrs[:attributes] || attrs,
-         true <- Devbox.allowed_repository?(inst.devbox, repo) || {:error, "repository #{repo} is not allowed on this devbox"},
+         %{repository: _, title: _, head_branch: _, base_branch: _} = pr <- attrs[:attributes] || attrs do
+      create_devbox_pr(inst, thread, pr, %{
+        source: :mcp,
+        metadata: %{
+          subagent_session_id: blank(attrs[:subagent_session_id]),
+          tool_call_id: blank(attrs[:tool_call_id]),
+          position: attrs[:position]
+        }
+      })
+    else
+      %{} -> {:error, "pull request attributes require a repository, title, head and base branch"}
+      err -> err
+    end
+  end
+
+  @doc """
+  Opens a pull request for a devbox instance's branch through the repository's SCM connection, attributed to the
+  instance and thread.  `extra` holds the record's `source` and any `metadata`.
+  """
+  @spec create_devbox_pr(DevboxInstance.t, DevboxInstanceSession.t | nil, map, map) :: {:ok, PullRequest.t} | error
+  def create_devbox_pr(%DevboxInstance{} = inst, thread, %{repository: repo, title: title, head_branch: head, base_branch: base} = pr, extra) do
+    inst = Repo.preload(inst, [:devbox])
+    with true <- Devbox.allowed_repository?(inst.devbox, repo) || {:error, "repository #{repo} is not allowed on this devbox"},
          %ScmConnection{} = conn <- Credentials.scm_connection(inst.devbox, repo),
          {:ok, conn} <- backfill_token(conn),
          conn = %{conn | commit_shas: commit_shas(pr[:commit_shas])},
@@ -636,20 +657,14 @@ defmodule Console.Devboxes.Ingest do
         |> Map.merge(attribution(inst, thread))
         |> Map.merge(drop_nils(%{labels: blank_list(pr[:labels]), difficulty: difficulty(pr[:difficulty])}))
         |> Map.merge(%{
-          source: :mcp,
-          metadata: drop_nils(%{
-            subagent_session_id: blank(attrs[:subagent_session_id]),
-            tool_call_id: blank(attrs[:tool_call_id]),
-            position: attrs[:position],
-            related_urls: pr[:related_urls]
-          })
+          source: extra[:source],
+          metadata: drop_nils(Map.merge(extra[:metadata] || %{}, %{related_urls: pr[:related_urls]}))
         })
       )
       |> Repo.insert()
       |> notify_pr()
     else
       nil -> {:error, "no scm connection found for this repository"}
-      %{} -> {:error, "pull request attributes require a repository, title, head and base branch"}
       err -> err
     end
   end

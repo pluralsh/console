@@ -808,7 +808,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :service, :service_deployment, description: "the service this pr is meant to modify",
       resolve: dataloader(Deployments)
 
-    field :source,   :pull_request_source, description: "how a devbox pr was recorded: through the devbox mcp, or observed at egress"
+    field :source,   :pull_request_source, description: "how a devbox pr was recorded: through the devbox mcp, the create pr button, or observed at egress"
     field :metadata, :map, description: "devbox attribution details, e.g. the subagent session and tool call that created it"
     field :devbox,   :devbox, description: "the devbox this pr was created from",
       resolve: dataloader(Deployments)

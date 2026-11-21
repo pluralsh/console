@@ -777,14 +777,6 @@ func (r *DevboxRunnerReconciler) gcRevisions(ctx context.Context, api substrate.
 func (r *DevboxRunnerReconciler) referencedTemplates(ctx context.Context, api substrate.API, atespace string, runner *v1alpha1.DevboxRunner) (map[string]bool, error) {
 	referenced := map[string]bool{}
 
-	actors, err := api.ListActors(ctx, atespace)
-	if err != nil {
-		return nil, fmt.Errorf("listing actors: %w", err)
-	}
-	for _, actor := range actors {
-		referenced[actor.GetActorTemplate().GetName()] = true
-	}
-
 	templates, err := api.ListActorTemplates(ctx, atespace)
 	if err != nil {
 		return nil, fmt.Errorf("listing ActorTemplates: %w", err)
@@ -792,6 +784,19 @@ func (r *DevboxRunnerReconciler) referencedTemplates(ctx context.Context, api su
 	nameByUID := map[string]string{}
 	for _, t := range templates {
 		nameByUID[t.GetMetadata().GetUid()] = t.GetMetadata().GetName()
+	}
+
+	actors, err := api.ListActors(ctx, atespace)
+	if err != nil {
+		return nil, fmt.Errorf("listing actors: %w", err)
+	}
+	for _, actor := range actors {
+		// Substrate names a template's golden actor after the template's UID and deletes it with the template, so
+		// it is no reference: counting it would keep a stuck golden boot holding a worker slot forever.
+		if nameByUID[actor.GetMetadata().GetName()] == actor.GetActorTemplate().GetName() {
+			continue
+		}
+		referenced[actor.GetActorTemplate().GetName()] = true
 	}
 
 	goldenTags := map[string]bool{}

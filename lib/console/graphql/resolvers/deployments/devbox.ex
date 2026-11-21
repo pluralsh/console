@@ -191,6 +191,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Devbox do
   def keep_devbox_instance_awake(%{id: id, until: until}, %{context: %{current_user: user}}),
     do: Devboxes.keep_awake(id, until, user)
 
+  def create_devbox_pull_request(%{instance_id: id} = args, %{context: %{current_user: user}}),
+    do: Console.Devboxes.PullRequests.create(id, args, user)
+
   def cancel_devbox_keep_awake(%{id: id}, %{context: %{current_user: user}}),
     do: Devboxes.cancel_keep_awake(id, user)
 

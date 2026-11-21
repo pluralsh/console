@@ -27,6 +27,8 @@ defmodule Console.Devboxes.Control.Grpc do
   alias :"Elixir.Devbox.V1.Control.Stub", as: Stub
 
   @timeout :timer.seconds(30)
+  # the box writes, commits and pushes, and the writer may be an agent CLI
+  @prepare_timeout :timer.minutes(6)
   @unavailable GRPC.Status.unavailable()
   @unimplemented GRPC.Status.unimplemented()
 
@@ -348,6 +350,19 @@ defmodule Console.Devboxes.Control.Grpc do
     end
   end
 
+  @impl true
+  def prepare_pull_request(inst, opts) do
+    req = %V1.PreparePullRequestRequest{
+      instance_id: inst.id,
+      repository: opts[:repository],
+      model: Proto.str(opts[:model]),
+      agent: opts[:agent] && Proto.enum(opts[:agent], V1.AgentType) || :AGENT_TYPE_UNSPECIFIED,
+      thread_id: Proto.str(opts[:thread_id])
+    }
+    with {:ok, %V1.PreparePullRequestResponse{} = resp} <- call(cluster_id(inst), :prepare_pull_request, req, @prepare_timeout),
+      do: {:ok, Proto.to_map(resp)}
+  end
+
   ## streams
 
   @impl true
@@ -379,10 +394,10 @@ defmodule Console.Devboxes.Control.Grpc do
   ## transport
 
   @doc false
-  def call(cluster_id, rpc, req) do
+  def call(cluster_id, rpc, req, timeout \\ @timeout) do
     with {:ok, channel} <- connect(),
          {:ok, metadata} <- Auth.control_metadata(cluster_id) do
-      apply(Stub, rpc, [channel, req, [metadata: metadata, timeout: @timeout]])
+      apply(Stub, rpc, [channel, req, [metadata: metadata, timeout: timeout]])
       |> result()
     end
   end

@@ -64,11 +64,12 @@ export function DevboxInstanceView({ instanceId }: { instanceId: string }) {
     variables: { id: workbenchId },
     skip: !workbenchId,
   })
-  const { data: prData } = useDevboxPullRequestsQuery({
-    variables: { devboxInstanceId: instanceId },
-    skip: !instanceId,
-    fetchPolicy: 'cache-and-network',
-  })
+  const { data: prData, refetch: refetchPullRequests } =
+    useDevboxPullRequestsQuery({
+      variables: { devboxInstanceId: instanceId },
+      skip: !instanceId,
+      fetchPolicy: 'cache-and-network',
+    })
   const pullRequests = mapExistingNodes(prData?.pullRequests)
 
   const { error: statusError } = useDevboxInstanceStatusDeltaSubscription({
@@ -208,10 +209,10 @@ export function DevboxInstanceView({ instanceId }: { instanceId: string }) {
         <HeaderBarSC>
           <DevboxInstanceHeader
             instance={instance}
-            awake={awake}
             maxDeferralSeconds={maxDeferral}
             now={now}
             pullRequests={pullRequests}
+            onPullRequestCreated={() => refetchPullRequests()}
             resuming={resuming}
             onResume={() => resume({ variables: { id: instance.id } })}
             onImportSession={() => setImportOpen(true)}

@@ -977,6 +977,24 @@ defmodule Console.GraphQl.Deployments.Devbox do
   end
 
   @desc "The index rows an UpsertInstanceIndex call changed (revision and foreground state only when the instance aggregate changed)"
+  enum :devbox_pull_request_job_status do
+    value :running
+    value :succeeded
+    value :failed
+  end
+
+  @desc "A pull request a devbox instance is preparing for one of its checkouts (never stored)"
+  object :devbox_pull_request_job do
+    field :id,          non_null(:id)
+    field :instance_id, non_null(:id)
+    field :repository,  non_null(:string), description: "the checkout's name or path"
+    field :status,      non_null(:devbox_pull_request_job_status)
+    field :url,         :string, description: "the pull request, once created"
+    field :title,       :string
+    field :error,       :string
+    field :writer,      :string, description: "who wrote the text: ai_proxy, claude, codex or template"
+  end
+
   object :devbox_index_change do
     field :instance_id,      non_null(:id)
     field :revision,         :long
@@ -994,6 +1012,7 @@ defmodule Console.GraphQl.Deployments.Devbox do
   delta :devbox_snapshot
   delta :devbox_entity_change
   delta :devbox_index_change
+  delta :devbox_pull_request_job
 
   object :public_devbox_queries do
     field :devbox, :devbox do
@@ -1252,6 +1271,17 @@ defmodule Console.GraphQl.Deployments.Devbox do
       resolve &Deployments.keep_devbox_instance_awake/2
     end
 
+    @desc "Starts a pull request for a checkout: the box writes the title, body and commit message, commits and pushes"
+    field :create_devbox_pull_request, :devbox_pull_request_job do
+      middleware Authenticated
+      middleware Scope, resource: :workbench, action: :write
+      arg :instance_id, non_null(:id)
+      arg :repository,  non_null(:string), description: "a checkout's name or path; a thread worktree's path picks that worktree"
+      arg :thread_id,   :id, description: "a thread whose recent prompts explain the change"
+
+      resolve &Deployments.create_devbox_pull_request/2
+    end
+
     field :cancel_devbox_keep_awake, :devbox_instance do
       middleware Authenticated
       middleware Scope, resource: :workbench, action: :write
@@ -1488,6 +1518,16 @@ defmodule Console.GraphQl.Deployments.Devbox do
       config fn %{instance_id: id}, ctx ->
         with {:ok, inst} <- Deployments.devbox_instance(%{id: id}, ctx),
           do: {:ok, topic: "devbox_instances:#{inst.id}:deltas"}
+      end
+    end
+
+    @desc "Pull requests the instance is preparing"
+    field :devbox_pull_request_job_delta, :devbox_pull_request_job_delta do
+      arg :instance_id, non_null(:id)
+
+      config fn %{instance_id: id}, ctx ->
+        with {:ok, inst} <- Deployments.devbox_instance(%{id: id}, ctx),
+          do: {:ok, topic: "devbox_instances:#{inst.id}:pull_request_jobs"}
       end
     end
 

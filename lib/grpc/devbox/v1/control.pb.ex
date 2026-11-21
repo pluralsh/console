@@ -705,6 +705,10 @@ defmodule Devbox.V1.Control.Service do
 
   rpc :GetChanges, Devbox.V1.GetChangesRequest, Devbox.V1.GetChangesResponse
 
+  rpc :PreparePullRequest,
+      Devbox.V1.PreparePullRequestRequest,
+      Devbox.V1.PreparePullRequestResponse
+
   rpc :OpenStream, Devbox.V1.OpenStreamRequest, Devbox.V1.OpenStreamResponse
 
   rpc :InvalidateAllowlist,

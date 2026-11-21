@@ -4141,6 +4141,18 @@ export const DevboxPullRequestFragmentDoc = /*#__PURE__*/ gql`
   }
 }
     ${PullRequestBasicFragmentDoc}` as unknown as DocumentNode<Types.DevboxPullRequestFragment, unknown>;
+export const DevboxPullRequestJobFragmentDoc = /*#__PURE__*/ gql`
+    fragment DevboxPullRequestJob on DevboxPullRequestJob {
+  id
+  instanceId
+  repository
+  status
+  url
+  title
+  error
+  writer
+}
+    ` as unknown as DocumentNode<Types.DevboxPullRequestJobFragment, unknown>;
 export const TagFragmentDoc = /*#__PURE__*/ gql`
     fragment Tag on Tag {
   name
@@ -10244,6 +10256,27 @@ export const DevboxInstanceEntityDeltaDocument = /*#__PURE__*/ gql`
   }
 }
     ${DevboxEntityChangeFragmentDoc}` as unknown as DocumentNode<Types.DevboxInstanceEntityDeltaSubscription, Types.DevboxInstanceEntityDeltaSubscriptionVariables>;
+export const CreateDevboxPullRequestDocument = /*#__PURE__*/ gql`
+    mutation CreateDevboxPullRequest($instanceId: ID!, $repository: String!, $threadId: ID) {
+  createDevboxPullRequest(
+    instanceId: $instanceId
+    repository: $repository
+    threadId: $threadId
+  ) {
+    ...DevboxPullRequestJob
+  }
+}
+    ${DevboxPullRequestJobFragmentDoc}` as unknown as DocumentNode<Types.CreateDevboxPullRequestMutation, Types.CreateDevboxPullRequestMutationVariables>;
+export const DevboxPullRequestJobDeltaDocument = /*#__PURE__*/ gql`
+    subscription DevboxPullRequestJobDelta($instanceId: ID!) {
+  devboxPullRequestJobDelta(instanceId: $instanceId) {
+    delta
+    payload {
+      ...DevboxPullRequestJob
+    }
+  }
+}
+    ${DevboxPullRequestJobFragmentDoc}` as unknown as DocumentNode<Types.DevboxPullRequestJobDeltaSubscription, Types.DevboxPullRequestJobDeltaSubscriptionVariables>;
 export const DevboxInstanceIndexDeltaDocument = /*#__PURE__*/ gql`
     subscription DevboxInstanceIndexDelta($instanceId: ID!) {
   devboxInstanceIndexDelta(instanceId: $instanceId) {

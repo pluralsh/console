@@ -96,6 +96,8 @@ service Daemon {
   rpc GetChanges(GetChangesRequest) returns (GetChangesResponse);
   // GetBranchDiffStat sizes a pull request: head against its merge base with base, for the devbox MCP.
   rpc GetBranchDiffStat(BranchDiffStatRequest) returns (BranchDiffStatResponse);
+  // PreparePullRequest writes, commits and pushes a checkout's changes for a pull request. It can take minutes.
+  rpc PreparePullRequest(PreparePullRequestRequest) returns (PreparePullRequestResponse);
 
   // ---- Workspace ----
 

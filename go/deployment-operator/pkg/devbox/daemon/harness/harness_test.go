@@ -350,3 +350,34 @@ func TestModelIDsMatchEachPicker(t *testing.T) {
 		}
 	}
 }
+
+func TestHeadlessUsesSubscriptionCredentials(t *testing.T) {
+	c := &Config{Home: "/home/dev", BaseEnv: func() []string {
+		return []string{"ANTHROPIC_BASE_URL=https://proxy", "OPENAI_API_KEY=x", "PATH=/bin"}
+	}}
+	path, args, env, err := c.Headless(devboxv1.AgentType_AGENT_TYPE_CLAUDE, "write it", "/tmp/out")
+	if err != nil || path != "claude" || args[0] != "-p" || args[1] != "write it" {
+		t.Fatalf("claude headless = %s %v, %v", path, args, err)
+	}
+	if v, _ := EnvValue(env, "CLAUDE_CODE_OAUTH_TOKEN"); v != ClaudeOAuthPlaceholder {
+		t.Fatalf("claude env lacks the OAuth placeholder: %v", env)
+	}
+	if _, ok := EnvValue(env, "ANTHROPIC_BASE_URL"); ok {
+		t.Fatalf("claude headless must not use the proxy: %v", env)
+	}
+
+	path, args, env, err = c.Headless(devboxv1.AgentType_AGENT_TYPE_CODEX, "write it", "/tmp/out")
+	if err != nil || path != "codex" || args[0] != "exec" || !slices.Contains(args, "/tmp/out") || args[len(args)-1] != "write it" {
+		t.Fatalf("codex headless = %s %v, %v", path, args, err)
+	}
+	if v, _ := EnvValue(env, "CODEX_HOME"); v != "/home/dev/.codex" {
+		t.Fatalf("codex env %v", env)
+	}
+	if _, ok := EnvValue(env, "OPENAI_API_KEY"); ok {
+		t.Fatalf("codex headless must not use an API key: %v", env)
+	}
+
+	if _, _, _, err := c.Headless(devboxv1.AgentType_AGENT_TYPE_GEMINI, "x", ""); err == nil {
+		t.Fatal("gemini has no headless mode")
+	}
+}

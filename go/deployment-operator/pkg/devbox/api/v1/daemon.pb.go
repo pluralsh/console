@@ -1735,7 +1735,7 @@ const file_devbox_v1_daemon_proto_rawDesc = "" +
 	"credential\x18\x01 \x01(\v2\x1d.devbox.v1.InstanceCredentialR\n" +
 	"credential\"2\n" +
 	"\x16PushCredentialResponse\x12\x18\n" +
-	"\aapplied\x18\x01 \x01(\bR\aapplied2\xc2\x19\n" +
+	"\aapplied\x18\x01 \x01(\bR\aapplied2\xa5\x1a\n" +
 	"\x06Daemon\x12=\n" +
 	"\x06Health\x12\x18.devbox.v1.HealthRequest\x1a\x19.devbox.v1.HealthResponse\x12I\n" +
 	"\n" +
@@ -1774,7 +1774,8 @@ const file_devbox_v1_daemon_proto_rawDesc = "" +
 	"WatchFiles\x12\x1c.devbox.v1.WatchFilesRequest\x1a\x14.devbox.v1.FileEvent0\x01\x12I\n" +
 	"\n" +
 	"GetChanges\x12\x1c.devbox.v1.GetChangesRequest\x1a\x1d.devbox.v1.GetChangesResponse\x12X\n" +
-	"\x11GetBranchDiffStat\x12 .devbox.v1.BranchDiffStatRequest\x1a!.devbox.v1.BranchDiffStatResponse\x12R\n" +
+	"\x11GetBranchDiffStat\x12 .devbox.v1.BranchDiffStatRequest\x1a!.devbox.v1.BranchDiffStatResponse\x12a\n" +
+	"\x12PreparePullRequest\x12$.devbox.v1.PreparePullRequestRequest\x1a%.devbox.v1.PreparePullRequestResponse\x12R\n" +
 	"\rAddRepository\x12\x1f.devbox.v1.AddRepositoryRequest\x1a .devbox.v1.AddRepositoryResponse\x12[\n" +
 	"\x10ListRepositories\x12\".devbox.v1.ListRepositoriesRequest\x1a#.devbox.v1.ListRepositoriesResponse\x12F\n" +
 	"\fStartBrowser\x12\x1e.devbox.v1.StartBrowserRequest\x1a\x16.devbox.v1.BrowserInfo\x12D\n" +
@@ -1869,37 +1870,39 @@ var file_devbox_v1_daemon_proto_goTypes = []any{
 	(*WatchFilesRequest)(nil),             // 67: devbox.v1.WatchFilesRequest
 	(*GetChangesRequest)(nil),             // 68: devbox.v1.GetChangesRequest
 	(*BranchDiffStatRequest)(nil),         // 69: devbox.v1.BranchDiffStatRequest
-	(*AddRepositoryRequest)(nil),          // 70: devbox.v1.AddRepositoryRequest
-	(*ListRepositoriesRequest)(nil),       // 71: devbox.v1.ListRepositoriesRequest
-	(*StartBrowserRequest)(nil),           // 72: devbox.v1.StartBrowserRequest
-	(*StopBrowserRequest)(nil),            // 73: devbox.v1.StopBrowserRequest
-	(*GetBrowserRequest)(nil),             // 74: devbox.v1.GetBrowserRequest
-	(*SetInstanceLeasesRequest)(nil),      // 75: devbox.v1.SetInstanceLeasesRequest
-	(*GetTimelineResponse)(nil),           // 76: devbox.v1.GetTimelineResponse
-	(*GetSessionsResponse)(nil),           // 77: devbox.v1.GetSessionsResponse
-	(*ThreadResponse)(nil),                // 78: devbox.v1.ThreadResponse
-	(*ListThreadsResponse)(nil),           // 79: devbox.v1.ListThreadsResponse
-	(*DeleteThreadResponse)(nil),          // 80: devbox.v1.DeleteThreadResponse
-	(*PromptResponse)(nil),                // 81: devbox.v1.PromptResponse
-	(*CancelPromptResponse)(nil),          // 82: devbox.v1.CancelPromptResponse
-	(*SetThreadConfigOptionResponse)(nil), // 83: devbox.v1.SetThreadConfigOptionResponse
-	(*RespondInteractionResponse)(nil),    // 84: devbox.v1.RespondInteractionResponse
-	(*ListCommandsResponse)(nil),          // 85: devbox.v1.ListCommandsResponse
-	(*SetAgentBillingResponse)(nil),       // 86: devbox.v1.SetAgentBillingResponse
-	(*TerminalInfo)(nil),                  // 87: devbox.v1.TerminalInfo
-	(*ListTerminalsResponse)(nil),         // 88: devbox.v1.ListTerminalsResponse
-	(*TerminalOutput)(nil),                // 89: devbox.v1.TerminalOutput
-	(*ListFilesResponse)(nil),             // 90: devbox.v1.ListFilesResponse
-	(*StatFileResponse)(nil),              // 91: devbox.v1.StatFileResponse
-	(*ReadFileResponse)(nil),              // 92: devbox.v1.ReadFileResponse
-	(*WriteFileResponse)(nil),             // 93: devbox.v1.WriteFileResponse
-	(*FileEvent)(nil),                     // 94: devbox.v1.FileEvent
-	(*GetChangesResponse)(nil),            // 95: devbox.v1.GetChangesResponse
-	(*BranchDiffStatResponse)(nil),        // 96: devbox.v1.BranchDiffStatResponse
-	(*AddRepositoryResponse)(nil),         // 97: devbox.v1.AddRepositoryResponse
-	(*ListRepositoriesResponse)(nil),      // 98: devbox.v1.ListRepositoriesResponse
-	(*BrowserInfo)(nil),                   // 99: devbox.v1.BrowserInfo
-	(*SetInstanceLeasesResponse)(nil),     // 100: devbox.v1.SetInstanceLeasesResponse
+	(*PreparePullRequestRequest)(nil),     // 70: devbox.v1.PreparePullRequestRequest
+	(*AddRepositoryRequest)(nil),          // 71: devbox.v1.AddRepositoryRequest
+	(*ListRepositoriesRequest)(nil),       // 72: devbox.v1.ListRepositoriesRequest
+	(*StartBrowserRequest)(nil),           // 73: devbox.v1.StartBrowserRequest
+	(*StopBrowserRequest)(nil),            // 74: devbox.v1.StopBrowserRequest
+	(*GetBrowserRequest)(nil),             // 75: devbox.v1.GetBrowserRequest
+	(*SetInstanceLeasesRequest)(nil),      // 76: devbox.v1.SetInstanceLeasesRequest
+	(*GetTimelineResponse)(nil),           // 77: devbox.v1.GetTimelineResponse
+	(*GetSessionsResponse)(nil),           // 78: devbox.v1.GetSessionsResponse
+	(*ThreadResponse)(nil),                // 79: devbox.v1.ThreadResponse
+	(*ListThreadsResponse)(nil),           // 80: devbox.v1.ListThreadsResponse
+	(*DeleteThreadResponse)(nil),          // 81: devbox.v1.DeleteThreadResponse
+	(*PromptResponse)(nil),                // 82: devbox.v1.PromptResponse
+	(*CancelPromptResponse)(nil),          // 83: devbox.v1.CancelPromptResponse
+	(*SetThreadConfigOptionResponse)(nil), // 84: devbox.v1.SetThreadConfigOptionResponse
+	(*RespondInteractionResponse)(nil),    // 85: devbox.v1.RespondInteractionResponse
+	(*ListCommandsResponse)(nil),          // 86: devbox.v1.ListCommandsResponse
+	(*SetAgentBillingResponse)(nil),       // 87: devbox.v1.SetAgentBillingResponse
+	(*TerminalInfo)(nil),                  // 88: devbox.v1.TerminalInfo
+	(*ListTerminalsResponse)(nil),         // 89: devbox.v1.ListTerminalsResponse
+	(*TerminalOutput)(nil),                // 90: devbox.v1.TerminalOutput
+	(*ListFilesResponse)(nil),             // 91: devbox.v1.ListFilesResponse
+	(*StatFileResponse)(nil),              // 92: devbox.v1.StatFileResponse
+	(*ReadFileResponse)(nil),              // 93: devbox.v1.ReadFileResponse
+	(*WriteFileResponse)(nil),             // 94: devbox.v1.WriteFileResponse
+	(*FileEvent)(nil),                     // 95: devbox.v1.FileEvent
+	(*GetChangesResponse)(nil),            // 96: devbox.v1.GetChangesResponse
+	(*BranchDiffStatResponse)(nil),        // 97: devbox.v1.BranchDiffStatResponse
+	(*PreparePullRequestResponse)(nil),    // 98: devbox.v1.PreparePullRequestResponse
+	(*AddRepositoryResponse)(nil),         // 99: devbox.v1.AddRepositoryResponse
+	(*ListRepositoriesResponse)(nil),      // 100: devbox.v1.ListRepositoriesResponse
+	(*BrowserInfo)(nil),                   // 101: devbox.v1.BrowserInfo
+	(*SetInstanceLeasesResponse)(nil),     // 102: devbox.v1.SetInstanceLeasesResponse
 }
 var file_devbox_v1_daemon_proto_depIdxs = []int32{
 	23,  // 0: devbox.v1.InitializeRequest.owner:type_name -> devbox.v1.Principal
@@ -1972,58 +1975,60 @@ var file_devbox_v1_daemon_proto_depIdxs = []int32{
 	67,  // 67: devbox.v1.Daemon.WatchFiles:input_type -> devbox.v1.WatchFilesRequest
 	68,  // 68: devbox.v1.Daemon.GetChanges:input_type -> devbox.v1.GetChangesRequest
 	69,  // 69: devbox.v1.Daemon.GetBranchDiffStat:input_type -> devbox.v1.BranchDiffStatRequest
-	70,  // 70: devbox.v1.Daemon.AddRepository:input_type -> devbox.v1.AddRepositoryRequest
-	71,  // 71: devbox.v1.Daemon.ListRepositories:input_type -> devbox.v1.ListRepositoriesRequest
-	72,  // 72: devbox.v1.Daemon.StartBrowser:input_type -> devbox.v1.StartBrowserRequest
-	73,  // 73: devbox.v1.Daemon.StopBrowser:input_type -> devbox.v1.StopBrowserRequest
-	74,  // 74: devbox.v1.Daemon.GetBrowser:input_type -> devbox.v1.GetBrowserRequest
-	75,  // 75: devbox.v1.Daemon.SetLeases:input_type -> devbox.v1.SetInstanceLeasesRequest
-	19,  // 76: devbox.v1.Daemon.GetIdleState:input_type -> devbox.v1.GetIdleStateRequest
-	20,  // 77: devbox.v1.Daemon.PushCredential:input_type -> devbox.v1.PushCredentialRequest
-	1,   // 78: devbox.v1.Daemon.Health:output_type -> devbox.v1.HealthResponse
-	4,   // 79: devbox.v1.Daemon.Initialize:output_type -> devbox.v1.InitializeResponse
-	6,   // 80: devbox.v1.Daemon.GetInfo:output_type -> devbox.v1.DaemonInfo
-	9,   // 81: devbox.v1.Daemon.ProbeAgents:output_type -> devbox.v1.ProbeAgentsResponse
-	11,  // 82: devbox.v1.Daemon.PrepareSuspend:output_type -> devbox.v1.PrepareSuspendResponse
-	13,  // 83: devbox.v1.Daemon.SubscribeEvents:output_type -> devbox.v1.DaemonEvent
-	18,  // 84: devbox.v1.Daemon.AckEvents:output_type -> devbox.v1.AckEventsResponse
-	76,  // 85: devbox.v1.Daemon.GetTimeline:output_type -> devbox.v1.GetTimelineResponse
-	77,  // 86: devbox.v1.Daemon.GetSessions:output_type -> devbox.v1.GetSessionsResponse
-	78,  // 87: devbox.v1.Daemon.CreateThread:output_type -> devbox.v1.ThreadResponse
-	79,  // 88: devbox.v1.Daemon.ListThreads:output_type -> devbox.v1.ListThreadsResponse
-	78,  // 89: devbox.v1.Daemon.ImportThread:output_type -> devbox.v1.ThreadResponse
-	78,  // 90: devbox.v1.Daemon.ResumeThread:output_type -> devbox.v1.ThreadResponse
-	78,  // 91: devbox.v1.Daemon.CloseThread:output_type -> devbox.v1.ThreadResponse
-	80,  // 92: devbox.v1.Daemon.DeleteThread:output_type -> devbox.v1.DeleteThreadResponse
-	78,  // 93: devbox.v1.Daemon.ForkThread:output_type -> devbox.v1.ThreadResponse
-	81,  // 94: devbox.v1.Daemon.Prompt:output_type -> devbox.v1.PromptResponse
-	82,  // 95: devbox.v1.Daemon.CancelPrompt:output_type -> devbox.v1.CancelPromptResponse
-	83,  // 96: devbox.v1.Daemon.SetThreadConfigOption:output_type -> devbox.v1.SetThreadConfigOptionResponse
-	84,  // 97: devbox.v1.Daemon.RespondInteraction:output_type -> devbox.v1.RespondInteractionResponse
-	85,  // 98: devbox.v1.Daemon.ListCommands:output_type -> devbox.v1.ListCommandsResponse
-	86,  // 99: devbox.v1.Daemon.SetAgentBilling:output_type -> devbox.v1.SetAgentBillingResponse
-	87,  // 100: devbox.v1.Daemon.CreateTerminal:output_type -> devbox.v1.TerminalInfo
-	88,  // 101: devbox.v1.Daemon.ListTerminals:output_type -> devbox.v1.ListTerminalsResponse
-	87,  // 102: devbox.v1.Daemon.ResizeTerminal:output_type -> devbox.v1.TerminalInfo
-	87,  // 103: devbox.v1.Daemon.CloseTerminal:output_type -> devbox.v1.TerminalInfo
-	89,  // 104: devbox.v1.Daemon.AttachTerminal:output_type -> devbox.v1.TerminalOutput
-	90,  // 105: devbox.v1.Daemon.ListFiles:output_type -> devbox.v1.ListFilesResponse
-	91,  // 106: devbox.v1.Daemon.StatFile:output_type -> devbox.v1.StatFileResponse
-	92,  // 107: devbox.v1.Daemon.ReadFile:output_type -> devbox.v1.ReadFileResponse
-	93,  // 108: devbox.v1.Daemon.WriteFile:output_type -> devbox.v1.WriteFileResponse
-	94,  // 109: devbox.v1.Daemon.WatchFiles:output_type -> devbox.v1.FileEvent
-	95,  // 110: devbox.v1.Daemon.GetChanges:output_type -> devbox.v1.GetChangesResponse
-	96,  // 111: devbox.v1.Daemon.GetBranchDiffStat:output_type -> devbox.v1.BranchDiffStatResponse
-	97,  // 112: devbox.v1.Daemon.AddRepository:output_type -> devbox.v1.AddRepositoryResponse
-	98,  // 113: devbox.v1.Daemon.ListRepositories:output_type -> devbox.v1.ListRepositoriesResponse
-	99,  // 114: devbox.v1.Daemon.StartBrowser:output_type -> devbox.v1.BrowserInfo
-	99,  // 115: devbox.v1.Daemon.StopBrowser:output_type -> devbox.v1.BrowserInfo
-	99,  // 116: devbox.v1.Daemon.GetBrowser:output_type -> devbox.v1.BrowserInfo
-	100, // 117: devbox.v1.Daemon.SetLeases:output_type -> devbox.v1.SetInstanceLeasesResponse
-	41,  // 118: devbox.v1.Daemon.GetIdleState:output_type -> devbox.v1.IdleState
-	21,  // 119: devbox.v1.Daemon.PushCredential:output_type -> devbox.v1.PushCredentialResponse
-	78,  // [78:120] is the sub-list for method output_type
-	36,  // [36:78] is the sub-list for method input_type
+	70,  // 70: devbox.v1.Daemon.PreparePullRequest:input_type -> devbox.v1.PreparePullRequestRequest
+	71,  // 71: devbox.v1.Daemon.AddRepository:input_type -> devbox.v1.AddRepositoryRequest
+	72,  // 72: devbox.v1.Daemon.ListRepositories:input_type -> devbox.v1.ListRepositoriesRequest
+	73,  // 73: devbox.v1.Daemon.StartBrowser:input_type -> devbox.v1.StartBrowserRequest
+	74,  // 74: devbox.v1.Daemon.StopBrowser:input_type -> devbox.v1.StopBrowserRequest
+	75,  // 75: devbox.v1.Daemon.GetBrowser:input_type -> devbox.v1.GetBrowserRequest
+	76,  // 76: devbox.v1.Daemon.SetLeases:input_type -> devbox.v1.SetInstanceLeasesRequest
+	19,  // 77: devbox.v1.Daemon.GetIdleState:input_type -> devbox.v1.GetIdleStateRequest
+	20,  // 78: devbox.v1.Daemon.PushCredential:input_type -> devbox.v1.PushCredentialRequest
+	1,   // 79: devbox.v1.Daemon.Health:output_type -> devbox.v1.HealthResponse
+	4,   // 80: devbox.v1.Daemon.Initialize:output_type -> devbox.v1.InitializeResponse
+	6,   // 81: devbox.v1.Daemon.GetInfo:output_type -> devbox.v1.DaemonInfo
+	9,   // 82: devbox.v1.Daemon.ProbeAgents:output_type -> devbox.v1.ProbeAgentsResponse
+	11,  // 83: devbox.v1.Daemon.PrepareSuspend:output_type -> devbox.v1.PrepareSuspendResponse
+	13,  // 84: devbox.v1.Daemon.SubscribeEvents:output_type -> devbox.v1.DaemonEvent
+	18,  // 85: devbox.v1.Daemon.AckEvents:output_type -> devbox.v1.AckEventsResponse
+	77,  // 86: devbox.v1.Daemon.GetTimeline:output_type -> devbox.v1.GetTimelineResponse
+	78,  // 87: devbox.v1.Daemon.GetSessions:output_type -> devbox.v1.GetSessionsResponse
+	79,  // 88: devbox.v1.Daemon.CreateThread:output_type -> devbox.v1.ThreadResponse
+	80,  // 89: devbox.v1.Daemon.ListThreads:output_type -> devbox.v1.ListThreadsResponse
+	79,  // 90: devbox.v1.Daemon.ImportThread:output_type -> devbox.v1.ThreadResponse
+	79,  // 91: devbox.v1.Daemon.ResumeThread:output_type -> devbox.v1.ThreadResponse
+	79,  // 92: devbox.v1.Daemon.CloseThread:output_type -> devbox.v1.ThreadResponse
+	81,  // 93: devbox.v1.Daemon.DeleteThread:output_type -> devbox.v1.DeleteThreadResponse
+	79,  // 94: devbox.v1.Daemon.ForkThread:output_type -> devbox.v1.ThreadResponse
+	82,  // 95: devbox.v1.Daemon.Prompt:output_type -> devbox.v1.PromptResponse
+	83,  // 96: devbox.v1.Daemon.CancelPrompt:output_type -> devbox.v1.CancelPromptResponse
+	84,  // 97: devbox.v1.Daemon.SetThreadConfigOption:output_type -> devbox.v1.SetThreadConfigOptionResponse
+	85,  // 98: devbox.v1.Daemon.RespondInteraction:output_type -> devbox.v1.RespondInteractionResponse
+	86,  // 99: devbox.v1.Daemon.ListCommands:output_type -> devbox.v1.ListCommandsResponse
+	87,  // 100: devbox.v1.Daemon.SetAgentBilling:output_type -> devbox.v1.SetAgentBillingResponse
+	88,  // 101: devbox.v1.Daemon.CreateTerminal:output_type -> devbox.v1.TerminalInfo
+	89,  // 102: devbox.v1.Daemon.ListTerminals:output_type -> devbox.v1.ListTerminalsResponse
+	88,  // 103: devbox.v1.Daemon.ResizeTerminal:output_type -> devbox.v1.TerminalInfo
+	88,  // 104: devbox.v1.Daemon.CloseTerminal:output_type -> devbox.v1.TerminalInfo
+	90,  // 105: devbox.v1.Daemon.AttachTerminal:output_type -> devbox.v1.TerminalOutput
+	91,  // 106: devbox.v1.Daemon.ListFiles:output_type -> devbox.v1.ListFilesResponse
+	92,  // 107: devbox.v1.Daemon.StatFile:output_type -> devbox.v1.StatFileResponse
+	93,  // 108: devbox.v1.Daemon.ReadFile:output_type -> devbox.v1.ReadFileResponse
+	94,  // 109: devbox.v1.Daemon.WriteFile:output_type -> devbox.v1.WriteFileResponse
+	95,  // 110: devbox.v1.Daemon.WatchFiles:output_type -> devbox.v1.FileEvent
+	96,  // 111: devbox.v1.Daemon.GetChanges:output_type -> devbox.v1.GetChangesResponse
+	97,  // 112: devbox.v1.Daemon.GetBranchDiffStat:output_type -> devbox.v1.BranchDiffStatResponse
+	98,  // 113: devbox.v1.Daemon.PreparePullRequest:output_type -> devbox.v1.PreparePullRequestResponse
+	99,  // 114: devbox.v1.Daemon.AddRepository:output_type -> devbox.v1.AddRepositoryResponse
+	100, // 115: devbox.v1.Daemon.ListRepositories:output_type -> devbox.v1.ListRepositoriesResponse
+	101, // 116: devbox.v1.Daemon.StartBrowser:output_type -> devbox.v1.BrowserInfo
+	101, // 117: devbox.v1.Daemon.StopBrowser:output_type -> devbox.v1.BrowserInfo
+	101, // 118: devbox.v1.Daemon.GetBrowser:output_type -> devbox.v1.BrowserInfo
+	102, // 119: devbox.v1.Daemon.SetLeases:output_type -> devbox.v1.SetInstanceLeasesResponse
+	41,  // 120: devbox.v1.Daemon.GetIdleState:output_type -> devbox.v1.IdleState
+	21,  // 121: devbox.v1.Daemon.PushCredential:output_type -> devbox.v1.PushCredentialResponse
+	79,  // [79:122] is the sub-list for method output_type
+	36,  // [36:79] is the sub-list for method input_type
 	36,  // [36:36] is the sub-list for extension type_name
 	36,  // [36:36] is the sub-list for extension extendee
 	0,   // [0:36] is the sub-list for field type_name

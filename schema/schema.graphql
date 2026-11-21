@@ -1885,6 +1885,17 @@ type RootMutationType {
   "Keeps an instance awake until a time, clamped to the box's maxDeferral and maxContinuousAwake"
   keepDevboxInstanceAwake(id: ID!, until: DateTime!): DevboxInstance
 
+  "Starts a pull request for a checkout: the box writes the title, body and commit message, commits and pushes"
+  createDevboxPullRequest(
+    instanceId: ID!
+
+    "a checkout's name or path; a thread worktree's path picks that worktree"
+    repository: String!
+
+    "a thread whose recent prompts explain the change"
+    threadId: ID
+  ): DevboxPullRequestJob
+
   cancelDevboxKeepAwake(id: ID!): DevboxInstance
 
   createDevboxSnapshot(instanceId: ID!, attributes: DevboxSnapshotAttributes): DevboxSnapshot
@@ -2135,6 +2146,9 @@ type RootSubscriptionType {
   "Live transcript deltas (including settle), never stored"
   devboxInstanceDelta(instanceId: ID!): DevboxEntityChangeDelta
 
+  "Pull requests the instance is preparing"
+  devboxPullRequestJobDelta(instanceId: ID!): DevboxPullRequestJobDelta
+
   "Thread and interaction index changes"
   devboxInstanceIndexDelta(instanceId: ID!): DevboxIndexChangeDelta
 
@@ -2285,6 +2299,7 @@ enum DevboxSnapshotStatus {
 enum PullRequestSource {
   MCP
   EGRESS
+  DEVBOX
 }
 
 enum DevboxCloudProvider {
@@ -3621,6 +3636,34 @@ type DevboxEntityChange {
 }
 
 "The index rows an UpsertInstanceIndex call changed (revision and foreground state only when the instance aggregate changed)"
+enum DevboxPullRequestJobStatus {
+  RUNNING
+  SUCCEEDED
+  FAILED
+}
+
+"A pull request a devbox instance is preparing for one of its checkouts (never stored)"
+type DevboxPullRequestJob {
+  id: ID!
+
+  instanceId: ID!
+
+  "the checkout's name or path"
+  repository: String!
+
+  status: DevboxPullRequestJobStatus!
+
+  "the pull request, once created"
+  url: String
+
+  title: String
+
+  error: String
+
+  "who wrote the text: ai_proxy, claude, codex or template"
+  writer: String
+}
+
 type DevboxIndexChange {
   instanceId: ID!
   revision: Long
@@ -3667,6 +3710,11 @@ type DevboxEntityChangeDelta {
 type DevboxIndexChangeDelta {
   delta: Delta
   payload: DevboxIndexChange
+}
+
+type DevboxPullRequestJobDelta {
+  delta: Delta
+  payload: DevboxPullRequestJob
 }
 
 enum ChatProviderConnectionType {
@@ -18640,7 +18688,7 @@ type PullRequest {
   "the service this pr is meant to modify"
   service: ServiceDeployment
 
-  "how a devbox pr was recorded: through the devbox mcp, or observed at egress"
+  "how a devbox pr was recorded: through the devbox mcp, the create pr button, or observed at egress"
   source: PullRequestSource
 
   "devbox attribution details, e.g. the subagent session and tool call that created it"

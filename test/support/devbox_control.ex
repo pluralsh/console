@@ -64,6 +64,8 @@ defmodule Console.Devboxes.Control.Test do
   @impl true
   def get_changes(_, _), do: {:ok, []}
   @impl true
+  def prepare_pull_request(_, _), do: {:error, "not stubbed"}
+  @impl true
   def open_stream(_, kind, opts) do
     {:ok, %{
       stream_id: "stream-#{Console.rand_alphanum(8)}",

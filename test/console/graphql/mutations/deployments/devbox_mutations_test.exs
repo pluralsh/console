@@ -164,6 +164,24 @@ defmodule Console.GraphQl.Deployments.DevboxMutationsTest do
     end
   end
 
+  describe "createDevboxPullRequest" do
+    test "it starts preparing a pull request for a checkout" do
+      inst = owned_instance()
+      expect(Console.Devboxes.PullRequests, :spawn_job, fn _ -> {:ok, self()} end)
+
+      {:ok, %{data: %{"createDevboxPullRequest" => job}}} = run_query("""
+        mutation Create($id: ID!) {
+          createDevboxPullRequest(instanceId: $id, repository: "console") { id instanceId repository status }
+        }
+      """, %{"id" => inst.id}, %{current_user: inst.user})
+
+      assert job["id"]
+      assert job["instanceId"] == inst.id
+      assert job["repository"] == "console"
+      assert job["status"] == "RUNNING"
+    end
+  end
+
   describe "pingDevboxInstance" do
     test "it registers a viewer" do
       inst = owned_instance()

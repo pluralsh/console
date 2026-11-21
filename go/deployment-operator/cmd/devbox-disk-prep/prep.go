@@ -65,6 +65,8 @@ type prep struct {
 	nodes     typedcorev1.NodeInterface
 	pods      typedcorev1.PodsGetter
 	mountinfo string
+	// birthTime is when a path's file was created; for a mount's root, when its filesystem was made.
+	birthTime func(path string) (time.Time, error)
 }
 
 func (p *prep) loop(ctx context.Context) {
@@ -117,8 +119,11 @@ func (p *prep) ensureMounted(ctx context.Context) error {
 		return err
 	}
 	mounted, err := isMountPoint(p.mountinfo, target)
-	if err != nil || mounted {
+	if err != nil {
 		return err
+	}
+	if mounted {
+		return p.backfillMountedMarker(target)
 	}
 
 	// Reassembles the RAID0 after a reboot; nothing to assemble is not an error.
@@ -149,6 +154,25 @@ func (p *prep) ensureMounted(ctx context.Context) error {
 	}
 	klog.InfoS("mounted data disk", "device", dev, "path", p.mountPath)
 	return os.WriteFile(p.mountedMarker(), nil, 0o644)
+}
+
+// backfillMountedMarker dates the mounted marker of a disk mounted by a version that didn't write one to when its
+// filesystem was made, just before that first mount, so the pods it hid from atelet are restarted too. Without a
+// birth time it writes none: dating it now would restart every healthy pod on the node.
+func (p *prep) backfillMountedMarker(target string) error {
+	if _, err := os.Stat(p.mountedMarker()); !errors.Is(err, os.ErrNotExist) {
+		return err
+	}
+	madeAt, err := p.birthTime(target)
+	if err != nil {
+		klog.ErrorS(err, "dating the data disk mount, pods started before it are left alone", "path", p.mountPath)
+		return nil
+	}
+	if err := os.WriteFile(p.mountedMarker(), nil, 0o644); err != nil {
+		return err
+	}
+	klog.InfoS("dated the data disk mount from its filesystem", "path", p.mountPath, "mountedAt", madeAt)
+	return os.Chtimes(p.mountedMarker(), madeAt, madeAt)
 }
 
 // restartStalePods deletes this node's pods that mount the data disk's path from the host but started before it was
