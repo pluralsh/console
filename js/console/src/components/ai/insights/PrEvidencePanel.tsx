@@ -1,7 +1,6 @@
 import {
   ArrowTopRightIcon,
-  DocumentIcon,
-  GitHubLogoIcon,
+  DiffColumnIcon,
   IconFrame,
 } from '@pluralsh/design-system'
 import { StackedText } from 'components/utils/table/StackedText'
@@ -27,12 +26,6 @@ export function PrEvidencePanel({
     <EvidenceWrapperSC>
       {prs.map((pr, i) => (
         <PrEvidenceLineSC key={i}>
-          <IconFrame
-            type="floating"
-            background="fill-three"
-            css={{ flexShrink: 0 }}
-            icon={<GitHubLogoIcon color="icon-light" />}
-          />
           <StackedText
             truncate
             first={getURLPath(pr.url)}
@@ -54,7 +47,7 @@ export function PrEvidencePanel({
             clickable
             tooltip="View file diffs"
             style={{ flexShrink: 0 }}
-            icon={<DocumentIcon css={{ '& svg': { width: 20 } }} />}
+            icon={<DiffColumnIcon css={{ '& svg': { width: 20 } }} />}
             onClick={() => setSelectedPr(pr)}
           />
         </PrEvidenceLineSC>
