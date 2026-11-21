@@ -125,7 +125,7 @@ WORKDIR /opt/app
 RUN [ "$OS_VARIANT" = "alpine" ] && apk update && apk upgrade --no-cache libexpat zlib=1.3.2-r1 musl musl-utils || true
 
 COPY bin/setup/${OS_VARIANT}.sh /opt/app/bin/setup.sh
-RUN /bin/sh /opt/app/bin/setup.sh && rm /opt/app/bin/setup.sh
+RUN /bin/sh /opt/app/bin/setup.sh && apk upgrade --no-cache && rm /opt/app/bin/setup.sh
 
 ARG APP_NAME=console
 ARG GIT_COMMIT
