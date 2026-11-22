@@ -66,11 +66,10 @@ describe('DevboxInteractionCard', () => {
     expect(screen.getByText('in /home/dev/console')).toBeTruthy()
   })
 
-  it("shows a subagent's command in a shelf, from the interaction when its transcript isn't loaded", () => {
+  it("shows a subagent's command from the interaction when its transcript isn't loaded", () => {
     render(
       <ThemeProvider theme={styledThemeDark}>
         <DevboxInteractionCard
-          compact
           interaction={interaction({
             title: 'Bash',
             toolCall: {

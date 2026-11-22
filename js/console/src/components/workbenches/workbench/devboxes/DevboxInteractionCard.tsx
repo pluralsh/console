@@ -34,18 +34,15 @@ export type DevboxRespond = (
 export function DevboxInteraction({
   interaction,
   toolCall,
-  compact,
 }: {
   interaction: DevboxInteractionFragment
   toolCall?: Nullable<DevboxToolCallFragment>
-  compact?: boolean
 }) {
   const [respond, { loading, error }] = useRespondDevboxInteractionMutation()
   return (
     <DevboxInteractionCard
       interaction={interaction}
       toolCall={toolCall}
-      compact={compact}
       loading={loading}
       error={error && <GqlError error={error} />}
       onRespond={(response) =>
@@ -61,7 +58,6 @@ export function DevboxInteractionCard({
   onRespond,
   loading = false,
   error,
-  compact = false,
 }: {
   interaction: DevboxInteractionFragment
   // the call a permission request was raised for, to show what it would do
@@ -69,8 +65,6 @@ export function DevboxInteractionCard({
   onRespond: DevboxRespond
   loading?: boolean
   error?: ReactNode
-  // just the question and its answers, for shelves
-  compact?: boolean
 }) {
   const pending = interaction.state === DevboxInteractionState.Pending
   // once answered, the transcript's own tool call shows what ran
@@ -81,7 +75,6 @@ export function DevboxInteractionCard({
   return (
     <InteractionSC
       $pending={pending}
-      $compact={compact}
       data-interaction={interaction.kind}
     >
       <Flex
@@ -110,15 +103,15 @@ export function DevboxInteractionCard({
           </Chip>
         )}
       </Flex>
-      {interaction.message && !compact && (
+      {interaction.message && (
         <CaptionP $color="text-light">{interaction.message}</CaptionP>
       )}
       {preview && (
-        <PreviewSC $compact={compact}>
+        <PreviewSC>
           <DevboxApprovalPreview preview={preview} />
         </PreviewSC>
       )}
-      {interaction.review && !compact && (
+      {interaction.review && (
         <CaptionP $color="text-xlight">
           {reviewSummary(interaction.review)}
         </CaptionP>
@@ -148,7 +141,7 @@ export function DevboxInteractionCard({
             loading={loading}
           />
         ))}
-      {pending && !compact && interaction.expiresAt && (
+      {pending && interaction.expiresAt && (
         <CaptionP $color="text-xlight">
           Expires {fromNow(interaction.expiresAt)}
         </CaptionP>
@@ -507,12 +500,12 @@ function ElicitationActions({
   )
 }
 
-const InteractionSC = styled.div<{ $pending: boolean; $compact: boolean }>(
-  ({ theme, $pending, $compact }) => ({
+const InteractionSC = styled.div<{ $pending: boolean }>(
+  ({ theme, $pending }) => ({
     display: 'flex',
     flexDirection: 'column',
-    gap: $compact ? theme.spacing.xsmall : theme.spacing.small,
-    padding: $compact ? theme.spacing.small : theme.spacing.medium,
+    gap: theme.spacing.small,
+    padding: theme.spacing.medium,
     borderRadius: theme.borderRadiuses.large,
     border: `1px solid ${
       $pending ? theme.colors['border-warning'] : theme.colors.border
@@ -521,11 +514,7 @@ const InteractionSC = styled.div<{ $pending: boolean; $compact: boolean }>(
   })
 )
 
-// shelves stack several cards above the composer, so a long diff scrolls instead of pushing them out
-const PreviewSC = styled.div<{ $compact: boolean }>(({ $compact }) => ({
-  minWidth: 0,
-  ...($compact && { maxHeight: 200, overflow: 'auto' }),
-}))
+const PreviewSC = styled.div({ minWidth: 0 })
 
 const UrlSC = styled.code(({ theme }) => ({
   ...theme.partials.text.code,

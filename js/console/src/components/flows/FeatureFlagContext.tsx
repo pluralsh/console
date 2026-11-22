@@ -21,16 +21,19 @@ const defaultDocsUrl = 'https://docs.plural.sh/'
 export type FeatureFlags = {
   Edge: boolean
   Devboxes: boolean
+  DevboxBrowser: boolean
 }
 
 const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
   Edge: false,
   Devboxes: false,
+  DevboxBrowser: false,
 }
 
 const FEATURE_FLAG_LABELS: Record<keyof FeatureFlags, string> = {
   Edge: 'Edge',
   Devboxes: 'Devboxes',
+  DevboxBrowser: 'Devbox browser',
 }
 
 export const FeatureFlagContext = createContext<{
@@ -80,6 +83,7 @@ export const FeatureFlagProvider = ({ children }: { children: ReactNode }) => {
       >
         {curType === 'Edge' && <EdgeBodyContent />}
         {curType === 'Devboxes' && <DevboxesBodyContent />}
+        {curType === 'DevboxBrowser' && <DevboxBrowserBodyContent />}
       </FeatureFlagConfirmationModal>
       <Toast
         show={showToast}
@@ -179,6 +183,16 @@ function DevboxesBodyContent() {
       agents persistent, interactive development environments. It needs a
       DevboxRunner and Agent Substrate installed on a cluster, and may change
       between releases.
+    </span>
+  )
+}
+
+function DevboxBrowserBodyContent() {
+  return (
+    <span>
+      <strong>Devbox browser</strong> shows the instance's browser in the devbox
+      side panel, for boxes with a browser enabled. It's unfinished and may not
+      work.
     </span>
   )
 }

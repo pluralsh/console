@@ -11,6 +11,7 @@ import { GqlError } from 'components/utils/Alert'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { CaptionP } from 'components/utils/typography/Text'
 import {
+  DevboxEntityFragment,
   DevboxInstanceFragment,
   DevboxInteractionFragment,
   DevboxInteractionState,
@@ -46,8 +47,12 @@ import { isInstanceLive, isInstanceTerminal } from './devboxIdle'
 import { DevboxInteraction } from './DevboxInteractionCard'
 import { PillSelect } from './DevboxPromptPills'
 import { DevboxQueuedPrompts } from './DevboxQueuedPrompts'
-import { DevboxSubagentCard, DevboxSubagentShelf } from './DevboxSubagents'
-import { activeSubagents, latestActivity } from './devboxSubagentState'
+import { DevboxSubagentActivity } from './DevboxSubagents'
+import {
+  latestToolCall,
+  subagentState,
+  subagentSummary,
+} from './devboxSubagentState'
 import { threadTitle } from './devboxThreads'
 import { agentLabel, findAgent, isProxyBilled } from './devboxStartForm'
 import { selectOrderedEntities, selectTerminalOutput } from './devboxTimeline'
@@ -97,7 +102,7 @@ export function DevboxThreadPane({
   const interactions = (instance.interactions ?? [])
     .filter(isNonNullable)
     .filter((i) => i.thread?.id && threadIds.has(i.thread.id))
-  // a subagent's questions are asked on its card and in the shelf
+  // a subagent's questions are asked under its row in the transcript
   const ownInteractions = interactions.filter((i) => i.thread?.id === thread.id)
   const toolCall = (id: Nullable<string>) => findToolCall(timeline.store, id)
   const [, setParams] = useSearchParams()
@@ -194,9 +199,10 @@ export function DevboxThreadPane({
               terminal={(id) => selectTerminalOutput(session, id)}
               hiddenToolCalls={awaitingToolCalls}
               subagents={subagents}
-              renderSubagent={(s) => (
+              renderSubagent={(s, spawner) => (
                 <SubagentCard
                   subagent={s}
+                  spawner={spawner}
                   timeline={timeline}
                   ended={ended}
                   interactions={interactions}
@@ -229,14 +235,6 @@ export function DevboxThreadPane({
         instance={instance}
       />
       {promptState.error && <GqlError error={promptState.error} />}
-      {!subagent && (
-        <DevboxSubagentShelf
-          subagents={activeSubagents(subagents, interactions)}
-          interactions={interactions}
-          toolCall={toolCall}
-          onOpen={(s) => openThread(s.id)}
-        />
-      )}
       {!subagent && (
         <ComposerStackSC>
           <DevboxQueuedPrompts
@@ -309,6 +307,7 @@ export function DevboxThreadPane({
 // loads the subagent's own session, so its card can say what it's doing
 function SubagentCard({
   subagent,
+  spawner,
   timeline,
   ended,
   interactions,
@@ -316,6 +315,7 @@ function SubagentCard({
   onOpen,
 }: {
   subagent: DevboxThreadFragment
+  spawner?: DevboxEntityFragment
   timeline: DevboxTimelineStoreApi
   ended: boolean
   interactions: DevboxInteractionFragment[]
@@ -329,11 +329,19 @@ function SubagentCard({
   useEffect(() => {
     if (!ended) ensureSession(subagent.sessionId)
   }, [ended, ensureSession, subagent.sessionId])
+  const entities = selectOrderedEntities(session)
+  // its transcript still streaming counts too: async subagents work past the
+  // turn that spawned them
+  const streaming = entities.some((e) => !e.settled)
+  const state = subagentState(subagent, interactions)
+  const running = state === 'running' || (state === 'done' && streaming)
   return (
-    <DevboxSubagentCard
+    <DevboxSubagentActivity
       subagent={subagent}
+      running={running}
       interactions={interactions}
-      activity={latestActivity(selectOrderedEntities(session))}
+      summary={subagentSummary(entities, running, spawner)}
+      latestTool={running ? latestToolCall(entities) : null}
       toolCall={toolCall}
       onOpen={onOpen}
     />

@@ -5,6 +5,7 @@ import {
   DevboxInteractionFragment,
   DevboxInteractionState,
   DevboxThreadFragment,
+  DevboxToolCallFragment,
 } from 'generated/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 
@@ -42,42 +43,66 @@ export function subagentState(
   return 'done'
 }
 
-// subagents still working or waiting on a person, needing you first
-export function activeSubagents<
-  S extends Pick<
-    DevboxThreadFragment,
-    'id' | 'foregroundState' | 'stopReason' | 'error'
-  >,
->(subagents: S[], interactions: Interaction[]): S[] {
-  const rank = (s: S) =>
-    subagentState(s, interactions) === 'needs you' ? 0 : 1
-  return subagents
-    .filter((s) => {
-      const state = subagentState(s, interactions)
-      return state === 'needs you' || state === 'running'
-    })
-    .toSorted((a, b) => rank(a) - rank(b))
+function entityText(entity: DevboxEntityFragment): string {
+  return (entity.message?.content ?? entity.sessionMessage?.content ?? [])
+    .filter(isNonNullable)
+    .flatMap((b) =>
+      b.__typename === 'DevboxTextContent' && b.text ? [b.text] : []
+    )
+    .join(' ')
+    .replace(/\s+/g, ' ')
+    .trim()
 }
 
-// the newest thing a subagent said or did, for a one-line preview
-export function latestActivity(
-  entities: DevboxEntityFragment[]
+const TASK_TYPES = [
+  DevboxEntityType.UserMessage,
+  DevboxEntityType.SessionMessage,
+]
+
+const TASK_INPUTS = ['prompt', 'task', 'message', 'description']
+
+// the task a subagent was given, from what spawned it in the parent: the spawn
+// message, or the spawning tool call's input
+export function spawnTask(
+  spawner: Nullable<DevboxEntityFragment>
 ): string | undefined {
-  for (const entity of entities.toReversed()) {
-    if (entity.type === DevboxEntityType.ToolCall && entity.toolCall?.title)
-      return entity.toolCall.title
-    if (entity.type !== DevboxEntityType.AgentMessage) continue
-    const text = (entity.message?.content ?? [])
-      .filter(isNonNullable)
-      .flatMap((b) =>
-        b.__typename === 'DevboxTextContent' && b.text ? [b.text] : []
-      )
-      .join(' ')
-      .replace(/\s+/g, ' ')
-      .trim()
-    if (text) return text
-  }
-  return undefined
+  if (!spawner) return undefined
+  const raw = spawner.toolCall?.rawInput
+  const input =
+    raw && typeof raw === 'object' && !Array.isArray(raw)
+      ? (raw as Record<string, unknown>)
+      : {}
+  const fromInput = TASK_INPUTS.map((k) => input[k]).find(
+    (v): v is string => typeof v === 'string' && !!v.trim()
+  )
+  return (
+    (fromInput ?? entityText(spawner)).replace(/\s+/g, ' ').trim() || undefined
+  )
+}
+
+// a subagent's one-line summary, as a workbench activity's: its task while it
+// works, and its answer once it's done
+export function subagentSummary(
+  entities: DevboxEntityFragment[],
+  running: boolean,
+  spawner?: Nullable<DevboxEntityFragment>
+): string | undefined {
+  const text = (types: DevboxEntityType[], newest: boolean) =>
+    (newest ? entities.toReversed() : entities)
+      .filter((e) => types.includes(e.type))
+      .map(entityText)
+      .find(Boolean)
+  const task = spawnTask(spawner) || text(TASK_TYPES, false)
+  const answer = text([DevboxEntityType.AgentMessage], true)
+  return (running ? task || answer : answer || task) || undefined
+}
+
+// the tool call a subagent is on, shown beside its title while it runs
+export function latestToolCall(
+  entities: DevboxEntityFragment[]
+): Nullable<DevboxToolCallFragment> {
+  return entities.findLast((e) => e.type === DevboxEntityType.ToolCall)
+    ?.toolCall
 }
 
 // subagents grouped by the parent's tool call that spawned them; one call can run several (pi's parallel mode)

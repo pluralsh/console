@@ -48,7 +48,11 @@ type TerminalLookup = (
 type TranscriptRow =
   | { kind: 'entity'; entity: DevboxEntityFragment }
   | { kind: 'tools'; entities: DevboxEntityFragment[] }
-  | { kind: 'subagent'; subagent: DevboxThreadFragment }
+  | {
+      kind: 'subagent'
+      subagent: DevboxThreadFragment
+      spawner?: DevboxEntityFragment
+    }
 
 export function DevboxTranscript({
   entities,
@@ -63,8 +67,11 @@ export function DevboxTranscript({
   // calls shown elsewhere, e.g. in the approval card awaiting an answer for them
   hiddenToolCalls?: ReadonlySet<string>
   subagents?: DevboxThreadFragment[]
-  // a subagent's card, in place of the tool call that spawned it
-  renderSubagent?: (subagent: DevboxThreadFragment) => ReactNode
+  // a subagent's row, in place of the tool call or message that spawned it
+  renderSubagent?: (
+    subagent: DevboxThreadFragment,
+    spawner?: DevboxEntityFragment
+  ) => ReactNode
   empty?: ReactNode
 }) {
   const embeddedTerminals = new Set(
@@ -98,7 +105,7 @@ export function DevboxTranscript({
     if (spawned?.length && renderSubagent) {
       for (const subagent of spawned) {
         placed.add(subagent.id)
-        rows.push({ kind: 'subagent', subagent })
+        rows.push({ kind: 'subagent', subagent, spawner: entity })
       }
       continue
     }
@@ -117,7 +124,7 @@ export function DevboxTranscript({
         : undefined
     if (linked && renderSubagent) {
       placed.add(linked.id)
-      rows.push({ kind: 'subagent', subagent: linked })
+      rows.push({ kind: 'subagent', subagent: linked, spawner: entity })
       continue
     }
 
@@ -142,7 +149,7 @@ export function DevboxTranscript({
                 key={`subagent:${row.subagent.id}`}
                 data-entity="subagent"
               >
-                {renderSubagent?.(row.subagent)}
+                {renderSubagent?.(row.subagent, row.spawner)}
               </div>
             )
           case 'tools': {
@@ -410,7 +417,7 @@ function toolStatus(entity: DevboxEntityFragment) {
 const isPendingStatus = (status: string) =>
   status === 'pending' || status === 'in_progress'
 
-function toolIdentity(toolCall: DevboxToolCallFragment) {
+export function toolIdentity(toolCall: DevboxToolCallFragment) {
   const raw = toolCall.rawInput
   const input: Record<string, unknown> =
     raw && typeof raw === 'object' && !Array.isArray(raw)

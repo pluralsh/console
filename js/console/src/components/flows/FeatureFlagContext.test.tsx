@@ -38,12 +38,12 @@ function renderGated(featureFlags: FeatureFlags) {
 
 describe('FeatureFlagGate', () => {
   it('renders the page when the flag is on', () => {
-    renderGated({ Edge: false, Devboxes: true })
+    renderGated({ Edge: false, Devboxes: true, DevboxBrowser: false })
     expect(screen.getByText('devboxes')).toBeTruthy()
   })
 
   it('redirects to the parent route when the flag is off', () => {
-    renderGated({ Edge: false, Devboxes: false })
+    renderGated({ Edge: false, Devboxes: false, DevboxBrowser: false })
     expect(screen.queryByText('devboxes')).toBeNull()
     expect(screen.getByText('workbench')).toBeTruthy()
   })

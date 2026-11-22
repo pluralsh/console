@@ -14,6 +14,7 @@ import {
   IconProps,
   KeyIcon,
   KubernetesAltIcon,
+  MonitorIcon,
   PeopleIcon,
   PodContainerIcon,
   PrOpenIcon,
@@ -208,6 +209,25 @@ export function useCommands({
                   deps: [setFeatureFlag],
                 },
               ]),
+          ...(!featureFlags.DevboxBrowser
+            ? [
+                {
+                  id: 'enable-devbox-browser',
+                  label: 'Enable Devbox browser',
+                  icon: MonitorIcon,
+                  callback: () => setFeatureFlag('DevboxBrowser', true),
+                  deps: [setFeatureFlag],
+                },
+              ]
+            : [
+                {
+                  id: 'disable-devbox-browser',
+                  label: 'Disable Devbox browser',
+                  icon: MonitorIcon,
+                  callback: () => setFeatureFlag('DevboxBrowser', false),
+                  deps: [setFeatureFlag],
+                },
+              ]),
           ...(openServiceAccountImpersonation
             ? [
                 {
@@ -225,6 +245,7 @@ export function useCommands({
     [
       featureFlags.Edge,
       featureFlags.Devboxes,
+      featureFlags.DevboxBrowser,
       openServiceAccountImpersonation,
       setFeatureFlag,
     ]

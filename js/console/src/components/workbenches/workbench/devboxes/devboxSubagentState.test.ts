@@ -6,10 +6,11 @@ import {
 } from 'generated/graphql'
 import { describe, expect, it } from 'vitest'
 import {
-  activeSubagents,
-  latestActivity,
+  latestToolCall,
+  spawnTask,
   subagentState,
   subagentsBySpawner,
+  subagentSummary,
 } from './devboxSubagentState'
 
 const subagent = (
@@ -51,39 +52,79 @@ describe('subagentState', () => {
   })
 })
 
-describe('activeSubagents', () => {
-  it('keeps working subagents, the ones needing you first', () => {
-    const running = subagent('run', DevboxForegroundState.Running)
-    const done = subagent('done', DevboxForegroundState.Idle)
-    const asking = subagent('ask', DevboxForegroundState.Running)
-    expect(
-      activeSubagents([running, done, asking], [pending('ask')]).map(
-        (s) => s.id
-      )
-    ).toEqual(['ask', 'run'])
+const text = (type: DevboxEntityType, value: string) =>
+  ({
+    type,
+    message: { content: [{ __typename: 'DevboxTextContent', text: value }] },
+  }) as unknown as DevboxEntityFragment
+const tool = (title: string) =>
+  ({
+    type: DevboxEntityType.ToolCall,
+    toolCall: { title },
+  }) as unknown as DevboxEntityFragment
+
+describe('subagentSummary', () => {
+  const entities = [
+    text(DevboxEntityType.UserMessage, 'explore the\n api'),
+    text(DevboxEntityType.AgentMessage, 'looking'),
+    tool('Read file.ts'),
+    text(DevboxEntityType.AgentMessage, 'found it'),
+  ]
+
+  it('is the task while running and the answer once done', () => {
+    expect(subagentSummary(entities, true)).toBe('explore the api')
+    expect(subagentSummary(entities, false)).toBe('found it')
+  })
+
+  it('falls back to whichever it has', () => {
+    expect(subagentSummary(entities.slice(1), true)).toBe('found it')
+    expect(subagentSummary(entities.slice(0, 1), false)).toBe('explore the api')
+    expect(subagentSummary([], true)).toBeUndefined()
   })
 })
 
-describe('latestActivity', () => {
-  const message = (text: string) =>
-    ({
-      type: DevboxEntityType.AgentMessage,
-      message: { content: [{ __typename: 'DevboxTextContent', text }] },
-    }) as unknown as DevboxEntityFragment
-  const tool = (title: string) =>
-    ({
+describe('spawnTask', () => {
+  it("reads the task off the spawning tool call's input or spawn message", () => {
+    const agentCall = {
       type: DevboxEntityType.ToolCall,
-      toolCall: { title },
-    }) as unknown as DevboxEntityFragment
+      toolCall: {
+        rawInput: { description: 'Explore apps', prompt: 'look at\n apps/' },
+      },
+    } as unknown as DevboxEntityFragment
+    expect(spawnTask(agentCall)).toBe('look at apps/')
+    const spawn = {
+      type: DevboxEntityType.SessionMessage,
+      sessionMessage: {
+        content: [{ __typename: 'DevboxTextContent', text: 'list files' }],
+      },
+    } as unknown as DevboxEntityFragment
+    expect(spawnTask(spawn)).toBe('list files')
+    expect(spawnTask(undefined)).toBeUndefined()
+  })
 
-  it('is the newest message or tool call', () => {
-    expect(latestActivity([message('looking'), tool('Read  file.ts')])).toBe(
-      'Read  file.ts'
-    )
-    expect(latestActivity([tool('Grep'), message('found\n it')])).toBe(
-      'found it'
-    )
-    expect(latestActivity([])).toBeUndefined()
+  it('is the summary until the subagent answers', () => {
+    const agentCall = {
+      type: DevboxEntityType.ToolCall,
+      toolCall: { rawInput: { prompt: 'explore' } },
+    } as unknown as DevboxEntityFragment
+    expect(subagentSummary([tool('ls')], false, agentCall)).toBe('explore')
+    expect(
+      subagentSummary(
+        [text(DevboxEntityType.AgentMessage, 'done')],
+        false,
+        agentCall
+      )
+    ).toBe('done')
+  })
+})
+
+describe('latestToolCall', () => {
+  it('is the newest tool call', () => {
+    expect(
+      latestToolCall([tool('Grep'), text(DevboxEntityType.AgentMessage, 'x')])
+        ?.title
+    ).toBe('Grep')
+    expect(latestToolCall([])).toBeUndefined()
   })
 })
 

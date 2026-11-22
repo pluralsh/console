@@ -1,110 +1,97 @@
-import { CaretRightIcon, Chip, Flex } from '@pluralsh/design-system'
-import { ToolCallKindIcon } from 'components/ai/chatbot/toolCallIcons'
-import { ProgressRingGlyph } from 'components/workbenches/common/IssueStatusGlyph'
+import { AgentLoadingIcon, CaretDownIcon } from '@pluralsh/design-system'
 import {
-  Body2BoldP,
-  CaptionP,
-  OverlineH3,
-} from 'components/utils/typography/Text'
+  resolveToolCallKind,
+  toolCallTitle,
+} from 'components/ai/chatbot/toolCallDisplay'
+import { ToolCallKindIcon } from 'components/ai/chatbot/toolCallIcons'
+import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
 import {
   DevboxInteractionFragment,
   DevboxThreadFragment,
   DevboxToolCallFragment,
-  WorkbenchJobStatus,
 } from 'generated/graphql'
 import styled from 'styled-components'
-import { fromNow } from 'utils/datetime'
-import { JobStatusIcon } from '../WorkbenchJobsGroupedList'
 import { DevboxInteraction } from './DevboxInteractionCard'
+import { pendingInteractionsFor, subagentState } from './devboxSubagentState'
 import { threadTitle } from './devboxThreads'
-import {
-  pendingInteractionsFor,
-  SubagentState,
-  subagentState,
-} from './devboxSubagentState'
+import { toolIdentity } from './DevboxTranscript'
 
 type ToolCallLookup = (
   toolCallId: Nullable<string>
 ) => Nullable<DevboxToolCallFragment>
 
-const STATE_LABELS: Record<SubagentState, string> = {
-  'needs you': 'Needs you',
-  running: 'Running',
-  failed: 'Failed',
-  done: 'Done',
-}
+const STATUS_ICON_SIZE = 10
 
-function SubagentStateIcon({ state }: { state: SubagentState }) {
-  switch (state) {
-    case 'needs you':
-      return (
-        <ProgressRingGlyph
-          progress={0.75}
-          color="icon-warning"
-        />
-      )
-    case 'running':
-      return <JobStatusIcon status={WorkbenchJobStatus.Running} />
-    case 'failed':
-      return <JobStatusIcon status={WorkbenchJobStatus.Failed} />
-    default:
-      return <JobStatusIcon status={WorkbenchJobStatus.Successful} />
-  }
-}
-
-// a subagent in its parent's transcript: what it's doing, anything it needs
-// answered, and a way into its own transcript
-export function DevboxSubagentCard({
+// a subagent in its parent's transcript, presented as a workbench job activity:
+// its title and current tool, its task or answer, and anything it needs
+// answered; the row opens its own transcript
+export function DevboxSubagentActivity({
   subagent,
+  running,
   interactions,
-  activity,
+  summary,
+  latestTool,
   toolCall,
   onOpen,
 }: {
   subagent: DevboxThreadFragment
+  running: boolean
   interactions: DevboxInteractionFragment[]
-  activity: Nullable<string>
+  summary: Nullable<string>
+  latestTool: Nullable<DevboxToolCallFragment>
   toolCall: ToolCallLookup
   onOpen: () => void
 }) {
   const state = subagentState(subagent, interactions)
   const pending = pendingInteractionsFor(subagent, interactions)
+  const ended = !running && (state === 'done' || state === 'failed')
   return (
-    <CardSC $attention={state === 'needs you'}>
-      <OpenSC
+    <RowSC>
+      <HeaderSC
         type="button"
         onClick={onOpen}
         aria-label={`Open subagent ${threadTitle(subagent)}`}
+        $indent={running || ended}
       >
-        <ToolCallKindIcon kind="subagent" />
-        <Flex
-          direction="column"
-          flex={1}
-          minWidth={0}
-        >
-          <Flex
-            gap="xsmall"
-            align="center"
-          >
-            <TitleSC>{threadTitle(subagent)}</TitleSC>
-            <Chip
-              size="small"
-              severity={state === 'needs you' ? 'warning' : 'neutral'}
-              icon={<SubagentStateIcon state={state} />}
+        <TitleRowSC>
+          {running && (
+            <StatusIconSC>
+              <AgentLoadingIcon
+                size={STATUS_ICON_SIZE}
+                variant="cursorEq"
+              />
+            </StatusIconSC>
+          )}
+          {ended && (
+            <StatusIconSC
+              role="img"
+              aria-label={state === 'failed' ? 'Failed' : 'Completed'}
             >
-              {STATE_LABELS[state]}
-            </Chip>
-          </Flex>
-          <PreviewSC $color="text-xlight">
-            {activity ||
-              (state === 'running' ? 'Starting…' : 'Subagent session')}
-          </PreviewSC>
-        </Flex>
-        <CaretRightIcon
-          size={12}
-          color="icon-xlight"
-        />
-      </OpenSC>
+              <StatusDotSC $failed={state === 'failed'} />
+            </StatusIconSC>
+          )}
+          <Body2BoldP
+            as="span"
+            className="title"
+            $color="text-xlight"
+            $shimmer={running}
+          >
+            {threadTitle(subagent)}
+          </Body2BoldP>
+          {running && latestTool && <LatestTool toolCall={latestTool} />}
+          <CaretSC size={10} />
+        </TitleRowSC>
+        {summary && (
+          <Body2P
+            as="span"
+            className="summary"
+            $color={running ? 'text-xlight' : 'text-disabled'}
+            $shimmer={running}
+          >
+            {summary}
+          </Body2P>
+        )}
+      </HeaderSC>
       {pending.map((interaction) => (
         <DevboxInteraction
           key={interaction.id}
@@ -112,133 +99,104 @@ export function DevboxSubagentCard({
           toolCall={toolCall(interaction.toolCallId)}
         />
       ))}
-    </CardSC>
+    </RowSC>
   )
 }
 
-// active subagents above the composer, with their questions answerable in place
-export function DevboxSubagentShelf({
-  subagents,
-  interactions,
-  toolCall,
-  onOpen,
-}: {
-  subagents: DevboxThreadFragment[]
-  interactions: DevboxInteractionFragment[]
-  toolCall: ToolCallLookup
-  onOpen: (subagent: DevboxThreadFragment) => void
-}) {
-  if (!subagents.length) return null
+function LatestTool({ toolCall }: { toolCall: DevboxToolCallFragment }) {
+  const { name, arguments: args } = toolIdentity(toolCall)
+  const kind = resolveToolCallKind(name, args)
+  const title = toolCall.title || toolCallTitle({ name, kind, args })
   return (
-    <ShelfSC aria-label="Active subagents">
-      <OverlineH3 $color="text-xlight">
-        Subagents · {subagents.length} active
-      </OverlineH3>
-      {subagents.map((subagent) => {
-        const state = subagentState(subagent, interactions)
-        return (
-          <Flex
-            key={subagent.id}
-            direction="column"
-            gap="xsmall"
-          >
-            <ShelfRowSC
-              type="button"
-              onClick={() => onOpen(subagent)}
-            >
-              <SubagentStateIcon state={state} />
-              <TitleSC>{threadTitle(subagent)}</TitleSC>
-              <CaptionP $color="text-xlight">
-                {STATE_LABELS[state]}
-                {subagent.lastActivityAt
-                  ? ` · ${fromNow(subagent.lastActivityAt)}`
-                  : ''}
-              </CaptionP>
-              <CaretRightIcon
-                size={12}
-                color="icon-xlight"
-              />
-            </ShelfRowSC>
-            {pendingInteractionsFor(subagent, interactions).map(
-              (interaction) => (
-                <DevboxInteraction
-                  key={interaction.id}
-                  interaction={interaction}
-                  toolCall={toolCall(interaction.toolCallId)}
-                  compact
-                />
-              )
-            )}
-          </Flex>
-        )
-      })}
-    </ShelfSC>
+    <LatestToolSC title={title}>
+      <ToolCallKindIcon kind={kind} />
+      <Body2P
+        as="span"
+        $color="text-disabled"
+        css={{
+          minWidth: 0,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {title}
+      </Body2P>
+    </LatestToolSC>
   )
 }
 
-const CardSC = styled.div<{ $attention: boolean }>(({ theme, $attention }) => ({
+const RowSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.small,
-  padding: theme.spacing.small,
-  borderRadius: theme.borderRadiuses.large,
-  border: `1px solid ${
-    $attention ? theme.colors['border-warning'] : theme.colors.border
-  }`,
-  backgroundColor: theme.colors['fill-one'],
+  minWidth: 0,
 }))
 
-const OpenSC = styled.button(({ theme }) => ({
+const CaretSC = styled(CaretDownIcon)(({ theme }) => ({
+  color: theme.colors['icon-xlight'],
+  flexShrink: 0,
+  opacity: 0,
+  rotate: '-90deg',
+  transition: 'opacity 0.15s ease',
+}))
+
+const HeaderSC = styled.button<{ $indent: boolean }>(({ theme, $indent }) => ({
   ...theme.partials.reset.button,
   display: 'flex',
-  alignItems: 'center',
+  flexDirection: 'column',
   gap: theme.spacing.small,
-  width: '100%',
+  width: 'fit-content',
+  maxWidth: '100%',
   minWidth: 0,
-  padding: theme.spacing.xxsmall,
-  borderRadius: theme.borderRadiuses.medium,
   textAlign: 'left',
   cursor: 'pointer',
-  '&:hover': { backgroundColor: theme.colors['fill-one-hover'] },
+  [`&:hover ${CaretSC}, &:focus-visible ${CaretSC}`]: { opacity: 1 },
   '&:focus-visible': { outline: theme.borders['outline-focused'] },
+  '.title': { flexShrink: 0 },
+  '.summary': {
+    display: 'block',
+    minWidth: 0,
+    maxWidth: '64ch',
+    overflowX: 'clip',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    ...($indent && {
+      paddingLeft: `calc(${STATUS_ICON_SIZE}px + ${theme.spacing.xsmall})`,
+    }),
+  },
 }))
 
-const TitleSC = styled(Body2BoldP)({
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-  minWidth: 0,
-})
-
-const PreviewSC = styled(CaptionP)({
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-})
-
-const ShelfSC = styled.div(({ theme }) => ({
+const TitleRowSC = styled.span(({ theme }) => ({
   display: 'flex',
-  flexDirection: 'column',
+  alignItems: 'center',
   gap: theme.spacing.xsmall,
-  padding: theme.spacing.small,
-  borderRadius: theme.borderRadiuses.large,
-  border: theme.borders.default,
-  backgroundColor: theme.colors['fill-one'],
-  maxHeight: 280,
-  overflowY: 'auto',
+  minWidth: 0,
+  maxWidth: '100%',
+  overflowX: 'clip',
 }))
 
-const ShelfRowSC = styled.button(({ theme }) => ({
-  ...theme.partials.reset.button,
+const StatusIconSC = styled.span({
   display: 'flex',
   alignItems: 'center',
-  gap: theme.spacing.small,
+  justifyContent: 'center',
+  flexShrink: 0,
+  width: STATUS_ICON_SIZE,
+  height: STATUS_ICON_SIZE,
+})
+
+const StatusDotSC = styled.span<{ $failed: boolean }>(({ theme, $failed }) => ({
+  width: 6,
+  height: 6,
+  borderRadius: '50%',
+  backgroundColor: theme.colors[$failed ? 'icon-danger' : 'icon-success'],
+}))
+
+const LatestToolSC = styled.span(({ theme }) => ({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: theme.spacing.xxsmall,
   minWidth: 0,
-  padding: `${theme.spacing.xxsmall} ${theme.spacing.xsmall}`,
-  borderRadius: theme.borderRadiuses.medium,
-  textAlign: 'left',
-  cursor: 'pointer',
-  '&:hover': { backgroundColor: theme.colors['fill-one-hover'] },
-  '&:focus-visible': { outline: theme.borders['outline-focused'] },
-  '& > :nth-child(2)': { flex: 1 },
+  maxWidth: '40ch',
+  flex: '0 1 auto',
 }))

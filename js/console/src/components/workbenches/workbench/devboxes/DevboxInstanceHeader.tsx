@@ -244,122 +244,116 @@ export function DevboxInstanceHeader({
 
   return (
     <Flex
-      direction="column"
-      gap="xsmall"
+      justify="space-between"
+      align="center"
+      gap="medium"
       css={{ minWidth: 0 }}
     >
       <Flex
-        justify="space-between"
-        align="center"
-        gap="medium"
+        direction="column"
+        gap="xsmall"
+        css={{ minWidth: 0 }}
       >
-        <Flex
-          gap="small"
-          align="center"
-          css={{ minWidth: 0 }}
-        >
-          <StackedText
-            truncate
-            first={<span>{instance.name || instance.id.slice(0, 8)}</span>}
-            firstPartialType="body2Bold"
-            firstColor="text"
-          />
-        </Flex>
-        <Flex
-          gap="xsmall"
-          align="center"
-          css={{ flexShrink: 0 }}
-        >
-          {live && <ChangesButton instanceId={instance.id} />}
-          {live && <CreatePrButton instance={instance} />}
-          {suspended && (
-            <Button
-              small
-              startIcon={<PlayIcon />}
-              loading={resuming}
-              onClick={onResume}
-            >
-              Resume
-            </Button>
-          )}
-          {!!actions.length && (
-            <MoreMenu
-              disabled={
-                suspendState.loading ||
-                keepAwakeState.loading ||
-                cancelKeepAwakeState.loading
-              }
-              keepOpenOn={(key) =>
-                key === AWAKE_MENU_KEY || key === AWAKE_BACK_KEY
-              }
-              onOpenChange={(open) => !open && setSubmenu(false)}
-              onSelectionChange={(key) => {
-                if (key === AWAKE_MENU_KEY) return setSubmenu(true)
-                if (key === AWAKE_BACK_KEY) return setSubmenu(false)
-                setSubmenu(false)
-                if (keepAwakeActions.onSelect(`${key}`)) return
-                if (key === 'snapshot') setSnapshotOpen(true)
-                if (key === 'import') onImportSession?.()
-                if (key === 'suspend')
-                  suspend({ variables: { id: instance.id } })
-                if (key === 'stop') setStopOpen(true)
-              }}
-            >
-              {actions.map((a) => (
-                <ListBoxItem
-                  key={a.key}
-                  label={a.label}
-                  description={a.description}
-                  leftContent={a.icon}
-                  rightContent={a.right}
-                  disabled={a.disabled}
-                  destructive={a.destructive}
-                />
-              ))}
-            </MoreMenu>
-          )}
-        </Flex>
-      </Flex>
-      {!!details.length && (
-        <DetailsSC>
-          {details.map(({ label, value, tooltip }) => {
-            const item = (
-              <DetailSC key={label}>
-                <DetailLabelSC>{label}</DetailLabelSC>
-                <span>{value}</span>
-              </DetailSC>
-            )
-            return tooltip ? (
-              <Tooltip
-                key={label}
-                label={tooltip}
-                placement="bottom"
+        <StackedText
+          truncate
+          first={<span>{instance.name || instance.id.slice(0, 8)}</span>}
+          firstPartialType="body2Bold"
+          firstColor="text"
+        />
+        {!!details.length && (
+          <DetailsSC>
+            {details.map(({ label, value, tooltip }) => {
+              const item = (
+                <DetailSC key={label}>
+                  <DetailLabelSC>{label}</DetailLabelSC>
+                  <span>{value}</span>
+                </DetailSC>
+              )
+              return tooltip ? (
+                <Tooltip
+                  key={label}
+                  label={tooltip}
+                  placement="bottom"
+                >
+                  {item}
+                </Tooltip>
+              ) : (
+                item
+              )
+            })}
+          </DetailsSC>
+        )}
+        {!!badges.length && (
+          <Flex
+            gap="xsmall"
+            align="center"
+            wrap="wrap"
+          >
+            {badges.map((badge) => (
+              <Chip
+                key={badge}
+                size="small"
+                severity="info"
               >
-                {item}
-              </Tooltip>
-            ) : (
-              item
-            )
-          })}
-        </DetailsSC>
-      )}
-      {!!badges.length && (
-        <Flex
-          gap="xsmall"
-          align="center"
-          wrap="wrap"
-        >
-          {badges.map((badge) => (
-            <Chip
-              key={badge}
-              size="small"
-              severity="info"
-            >
-              {badge}
-            </Chip>
-          ))}
-        </Flex>
-      )}
+                {badge}
+              </Chip>
+            ))}
+          </Flex>
+        )}
+      </Flex>
+      <Flex
+        gap="xsmall"
+        align="center"
+        css={{ flexShrink: 0 }}
+      >
+        {live && <ChangesButton instanceId={instance.id} />}
+        {live && <CreatePrButton instance={instance} />}
+        {suspended && (
+          <Button
+            small
+            startIcon={<PlayIcon />}
+            loading={resuming}
+            onClick={onResume}
+          >
+            Resume
+          </Button>
+        )}
+        {!!actions.length && (
+          <MoreMenu
+            disabled={
+              suspendState.loading ||
+              keepAwakeState.loading ||
+              cancelKeepAwakeState.loading
+            }
+            keepOpenOn={(key) =>
+              key === AWAKE_MENU_KEY || key === AWAKE_BACK_KEY
+            }
+            onOpenChange={(open) => !open && setSubmenu(false)}
+            onSelectionChange={(key) => {
+              if (key === AWAKE_MENU_KEY) return setSubmenu(true)
+              if (key === AWAKE_BACK_KEY) return setSubmenu(false)
+              setSubmenu(false)
+              if (keepAwakeActions.onSelect(`${key}`)) return
+              if (key === 'snapshot') setSnapshotOpen(true)
+              if (key === 'import') onImportSession?.()
+              if (key === 'suspend') suspend({ variables: { id: instance.id } })
+              if (key === 'stop') setStopOpen(true)
+            }}
+          >
+            {actions.map((a) => (
+              <ListBoxItem
+                key={a.key}
+                label={a.label}
+                description={a.description}
+                leftContent={a.icon}
+                rightContent={a.right}
+                disabled={a.disabled}
+                destructive={a.destructive}
+              />
+            ))}
+          </MoreMenu>
+        )}
+      </Flex>
       <Confirm
         open={stopOpen}
         close={() => setStopOpen(false)}

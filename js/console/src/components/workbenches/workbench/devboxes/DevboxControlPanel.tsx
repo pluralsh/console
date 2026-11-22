@@ -23,9 +23,11 @@ import {
   DevboxPullRequestFragment,
   useDevboxInstanceQuery,
 } from 'generated/graphql'
+import { FeatureFlagContext } from 'components/flows/FeatureFlagContext'
 import {
   ReactElement,
   ReactNode,
+  use,
   useCallback,
   useEffect,
   useState,
@@ -79,8 +81,15 @@ const PANEL_TABS: {
 export const isPanelTab = (tab: Nullable<string>): tab is DevboxPanelTab =>
   PANEL_TABS.some((t) => t.key === tab)
 
-const panelTabsFor = (instance: Nullable<DevboxInstanceFragment>) =>
-  PANEL_TABS.filter((t) => t.key !== 'browser' || instance?.devbox?.browser)
+// the browser tab stays behind its feature flag until it works
+function usePanelTabs(instance: Nullable<DevboxInstanceFragment>) {
+  const { featureFlags } = use(FeatureFlagContext)
+  return PANEL_TABS.filter(
+    (t) =>
+      t.key !== 'browser' ||
+      (featureFlags.DevboxBrowser && instance?.devbox?.browser)
+  )
+}
 
 const readOpen = () => localStorage.getItem(OPEN_KEY) !== 'false'
 
@@ -187,10 +196,11 @@ export function DevboxPanelRail({
     isInstanceLive(instance.status)
   )
   const { pullRequests, open } = useDevboxPullRequests(instance.id)
+  const tabs = usePanelTabs(instance)
   if (isOpen) return null
   return (
     <PanelRail
-      tabs={panelTabsFor(instance).map((t) => {
+      tabs={tabs.map((t) => {
         if (t.key === 'changes' && changes.files)
           return {
             ...t,
@@ -243,7 +253,7 @@ export function DevboxPanelContent() {
 
   const changes = useDevboxChangeStat(instanceId || null, live)
   const { pullRequests } = useDevboxPullRequests(instanceId || null)
-  const tabs = panelTabsFor(instance)
+  const tabs = usePanelTabs(instance)
   const active = tabs.find((t) => t.key === tab) ?? tabs[0]
 
   return (
