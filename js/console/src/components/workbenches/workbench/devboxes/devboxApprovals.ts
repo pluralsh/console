@@ -1,4 +1,8 @@
-import { DevboxEntityType, DevboxToolCallFragment } from 'generated/graphql'
+import {
+  DevboxEntityType,
+  DevboxThreadFragment,
+  DevboxToolCallFragment,
+} from 'generated/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import { DevboxTimelineStore, selectOrderedEntities } from './devboxTimeline'
 
@@ -130,6 +134,44 @@ function inputDiffs(
 }
 
 // the tool call an interaction was raised for, in whichever loaded session holds it
+type OwnedInteraction = {
+  toolCallId?: Nullable<string>
+  thread?: Nullable<{ id: string; sessionId?: Nullable<string> }>
+}
+
+// the thread an interaction is for is the one whose transcript holds its tool
+// call: agents raise a subagent's permission requests on the parent's session,
+// so the recorded thread alone files them under the parent
+export function attributeInteractions<T extends OwnedInteraction>(
+  interactions: T[],
+  threads: Pick<DevboxThreadFragment, 'id' | 'sessionId' | 'title'>[],
+  store: Nullable<DevboxTimelineStore>
+): T[] {
+  if (!store) return interactions
+  const sessionsByCall = new Map<string, Set<string>>()
+  for (const [sessionId, session] of Object.entries(store.sessions))
+    for (const e of selectOrderedEntities(session)) {
+      const id = e.type === DevboxEntityType.ToolCall && e.toolCall?.toolCallId
+      if (id)
+        sessionsByCall.set(
+          id,
+          (sessionsByCall.get(id) ?? new Set()).add(sessionId)
+        )
+    }
+  const bySession = new Map(
+    threads.flatMap((t) => (t.sessionId ? [[t.sessionId, t] as const] : []))
+  )
+  return interactions.map((i) => {
+    const sessions = i.toolCallId ? sessionsByCall.get(i.toolCallId) : undefined
+    if (!sessions?.size) return i
+    if (i.thread?.sessionId && sessions.has(i.thread.sessionId)) return i
+    const owner = [...sessions].map((s) => bySession.get(s)).find(isNonNullable)
+    if (!owner || owner.id === i.thread?.id) return i
+    const { id, sessionId, title } = owner
+    return { ...i, thread: { ...i.thread, id, sessionId, title } }
+  })
+}
+
 export function findToolCall(
   store: DevboxTimelineStore,
   toolCallId: Nullable<string>

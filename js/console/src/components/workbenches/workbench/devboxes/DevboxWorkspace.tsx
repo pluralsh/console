@@ -35,6 +35,7 @@ const WIDE_PANEL_TABS = new Set<DevboxPanelTab>(['terminal', 'browser'])
 import { isInstanceTerminal } from './devboxIdle'
 import { DevboxInstanceView } from './DevboxInstanceView'
 import { DevboxNewInstance } from './DevboxNewInstance'
+import { useDevboxTimelineStore } from './useDevboxTimeline'
 import {
   DEVBOX_SESSIONS_SIDEBAR_WIDTH,
   DEVBOX_SWITCHER_PAGE_SIZE,
@@ -111,16 +112,20 @@ export function DevboxInstancePage() {
       : null
   )
   useDevboxPanelAutoOpen(instanceId)
+  // shared so the sidebar files each approval under the thread it's for
+  const timeline = useDevboxTimelineStore(instanceId)
 
   return (
     <PageSC>
       <DevboxSessionsSidebar
         workbenchId={workbenchId}
         instanceId={instanceId}
+        timeline={timeline}
       />
       <DevboxInstanceView
         key={instanceId}
         instanceId={instanceId}
+        timeline={timeline}
       />
     </PageSC>
   )

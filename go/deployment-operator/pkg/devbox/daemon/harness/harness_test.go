@@ -195,6 +195,7 @@ func TestPiSubagents(t *testing.T) {
 		"index.ts":         "export default function () {}\n",
 		"agents/scout.md":  "---\nname: scout\ndescription: Fast recon\ntools: read, bash\nmodel: claude-haiku-4-5\n---\n\nmodel: stays in the body\n",
 		"agents/worker.md": "---\nname: worker\nmodel: claude-sonnet-4-5\n---\nWork.\n",
+		"agents/helper.md": "---\nname: helper\nmodel: claude-sonnet-4-5\n---\nHelp.\n",
 	}
 	for name, body := range files {
 		p := filepath.Join(c.PiSubagentExtension, name)
@@ -237,6 +238,11 @@ func TestPiSubagents(t *testing.T) {
 	scout, _ := os.ReadFile(filepath.Join(agentDir, "agents", "scout.md"))
 	if want := "---\nname: scout\ndescription: Fast recon\ntools: read, bash\n---\n\nmodel: stays in the body\n"; string(scout) != want {
 		t.Fatalf("scout.md:\n%s", scout)
+	}
+	// a subagent with every tool would get the subagent tool too, and could spawn its own
+	helper, _ := os.ReadFile(filepath.Join(agentDir, "agents", "helper.md"))
+	if want := "---\nname: helper\ntools: read, bash, edit, write, grep, find, ls\n---\nHelp.\n"; string(helper) != want {
+		t.Fatalf("helper.md:\n%s", helper)
 	}
 	if worker, _ := os.ReadFile(filepath.Join(agentDir, "agents", "worker.md")); string(worker) != "mine" {
 		t.Fatalf("the user's worker.md was replaced: %s", worker)

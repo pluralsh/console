@@ -1,10 +1,69 @@
 import {
+  DevboxEntityType,
   DevboxToolCallContentType,
   DevboxToolCallFragment,
 } from 'generated/graphql'
 import { describe, expect, it } from 'vitest'
 
-import { approvalPreview } from './devboxApprovals'
+import { approvalPreview, attributeInteractions } from './devboxApprovals'
+import {
+  DevboxTimelineAction,
+  devboxTimelineReducer,
+  EMPTY_DEVBOX_TIMELINE,
+} from './devboxTimeline'
+
+describe('attributeInteractions', () => {
+  const toolCallPage = (
+    sessionId: string,
+    toolCallId: string
+  ): DevboxTimelineAction => ({
+    type: 'page',
+    sessionId,
+    page: {
+      entities: [
+        {
+          id: toolCallId,
+          sessionId,
+          type: DevboxEntityType.ToolCall,
+          position: 1,
+          revision: 1,
+          settled: false,
+          toolCall: { toolCallId },
+        },
+      ],
+      deltaOffset: 10,
+      hasMore: false,
+    },
+  })
+  const store = [
+    toolCallPage('parent-sess', 'parent-call'),
+    toolCallPage('sub-sess', 'sub-call'),
+  ].reduce(devboxTimelineReducer, EMPTY_DEVBOX_TIMELINE)
+  const threads = [
+    { id: 'parent', sessionId: 'parent-sess', title: 'Parent' },
+    { id: 'sub', sessionId: 'sub-sess', title: 'Explore' },
+  ]
+  const onParent = (toolCallId: string) => ({
+    toolCallId,
+    thread: { id: 'parent', sessionId: 'parent-sess' },
+  })
+
+  it("files a request raised on the parent under the subagent whose call it's for", () => {
+    expect(
+      attributeInteractions([onParent('sub-call')], threads, store)[0].thread
+    ).toMatchObject({ id: 'sub', sessionId: 'sub-sess' })
+  })
+
+  it('keeps the recorded thread when its own transcript holds the call, or none does', () => {
+    expect(
+      attributeInteractions(
+        [onParent('parent-call'), onParent('unloaded')],
+        threads,
+        store
+      ).map((i) => i.thread.id)
+    ).toEqual(['parent', 'parent'])
+  })
+})
 
 const call = (attrs: Partial<DevboxToolCallFragment>) =>
   ({ toolCallId: 'tc-1', ...attrs }) as DevboxToolCallFragment

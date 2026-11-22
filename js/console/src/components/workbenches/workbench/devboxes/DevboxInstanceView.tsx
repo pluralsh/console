@@ -40,10 +40,16 @@ import { DevboxThreadPane } from './DevboxThreadPane'
 import { ImportThreadModal } from './DevboxThreadList'
 import { selectedThread } from './devboxThreads'
 import { useDevboxPresence } from './useDevboxPresence'
-import { useDevboxTimelineStore } from './useDevboxTimeline'
+import { DevboxTimelineStoreApi } from './useDevboxTimeline'
 import { useDevboxWorkspaceApi } from './devboxWorkspaceApi'
 
-export function DevboxInstanceView({ instanceId }: { instanceId: string }) {
+export function DevboxInstanceView({
+  instanceId,
+  timeline,
+}: {
+  instanceId: string
+  timeline: DevboxTimelineStoreApi
+}) {
   const [params, setParams] = useSearchParams()
   const { popToast } = useSimpleToast()
   const threadParam = params.get(WORKBENCH_DEVBOX_THREAD_QUERY_PARAM)
@@ -101,7 +107,6 @@ export function DevboxInstanceView({ instanceId }: { instanceId: string }) {
     },
   })
 
-  const timeline = useDevboxTimelineStore(instanceId)
   const live = isInstanceLive(instance?.status)
   const { viewedFile, selectFile, change, selectChange, openFile } =
     useDevboxPanel()

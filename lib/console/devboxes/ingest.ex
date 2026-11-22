@@ -468,8 +468,10 @@ defmodule Console.Devboxes.Ingest do
 
   defp permission_option(opt), do: %{option_id: Acp.get(opt, :option_id), name: Acp.get(opt, :name), kind: Acp.get(opt, :kind)}
 
+  # an interaction's session is the one asking (a subagent's, for its requests); its thread is the top-level
+  # thread that session belongs to, so it's only the fallback
   defp interaction_session(instance_id, attrs) do
-    case find_session(instance_id, attrs) do
+    case find_session(instance_id, Map.delete(attrs, :thread_id)) || find_session(instance_id, attrs) do
       %DevboxInstanceSession{id: id} -> id
       _ -> nil
     end

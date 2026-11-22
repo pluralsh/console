@@ -809,9 +809,14 @@ func (c *Config) PiSubagentDir() string {
 	return filepath.Join(root, piSubagentExtension)
 }
 
+// piSubagentTools is every built-in tool but not the extension's subagent tool: a subagent runs pi with the
+// global extensions, so one with all tools could spawn its own, and subagents nest one level deep.
+const piSubagentTools = "read, bash, edit, write, grep, find, ls"
+
 // syncPiSubagents gives Pi subagents: its bundled subagent extension in ~/.pi/agent/settings.json, and the
 // extension's agents in ~/.pi/agent/agents, minus the Anthropic model each pins, so subagents run on the model
-// the thread picked (Pi keeps it as its default) and through the proxy. Agent files that exist are the user's.
+// the thread picked (Pi keeps it as its default) and through the proxy, and limited to piSubagentTools where
+// they don't list their own. Agent files that exist are the user's.
 func (c *Config) syncPiSubagents() error {
 	ext := c.PiSubagentDir()
 	index := filepath.Join(ext, "index.ts")
@@ -847,7 +852,8 @@ func (c *Config) syncPiSubagents() error {
 		if err := os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
 			return err
 		}
-		if err := fsutil.WriteFileAtomic(dst, withoutFrontmatterKey(data, "model"), 0o644); err != nil {
+		data = withFrontmatterDefault(withoutFrontmatterKey(data, "model"), "tools", piSubagentTools)
+		if err := fsutil.WriteFileAtomic(dst, data, 0o644); err != nil {
 			return err
 		}
 	}
@@ -855,18 +861,38 @@ func (c *Config) syncPiSubagents() error {
 }
 
 // withoutFrontmatterKey drops one key from a markdown file's YAML frontmatter.
+const frontmatterFence = "---"
+
 func withoutFrontmatterKey(data []byte, key string) []byte {
 	lines := strings.SplitAfter(string(data), "\n")
-	if len(lines) == 0 || strings.TrimSpace(lines[0]) != "---" {
+	if len(lines) == 0 || strings.TrimSpace(lines[0]) != frontmatterFence {
 		return data
 	}
 	out := []string{lines[0]}
 	for i := 1; i < len(lines); i++ {
-		if strings.TrimSpace(lines[i]) == "---" {
+		if strings.TrimSpace(lines[i]) == frontmatterFence {
 			return []byte(strings.Join(append(out, lines[i:]...), ""))
 		}
 		if !strings.HasPrefix(lines[i], key+":") {
 			out = append(out, lines[i])
+		}
+	}
+	return data
+}
+
+// withFrontmatterDefault sets a frontmatter key that isn't set yet.
+func withFrontmatterDefault(data []byte, key, value string) []byte {
+	lines := strings.SplitAfter(string(data), "\n")
+	if len(lines) == 0 || strings.TrimSpace(lines[0]) != frontmatterFence {
+		return data
+	}
+	for i := 1; i < len(lines); i++ {
+		if strings.HasPrefix(lines[i], key+":") {
+			return data
+		}
+		if strings.TrimSpace(lines[i]) == frontmatterFence {
+			out := append(append(slices.Clone(lines[:i]), key+": "+value+"\n"), lines[i:]...)
+			return []byte(strings.Join(out, ""))
 		}
 	}
 	return data

@@ -39,7 +39,7 @@ import {
   AI_SUBSCRIPTIONS_ABS_PATH,
   useSwitchToProxy,
 } from './devboxCredentials'
-import { findToolCall } from './devboxApprovals'
+import { attributeInteractions, findToolCall } from './devboxApprovals'
 import { useFollowBottom } from './useFollowBottom'
 import { DevboxAgentIcon, DevboxAgentLabel } from './DevboxChips'
 import { DevboxComposer } from './DevboxComposer'
@@ -105,9 +105,11 @@ export function DevboxThreadPane({
     ? threads.find((t) => t.id === thread.parent?.id)
     : undefined
   const threadIds = new Set([thread.id, ...subagents.map((s) => s.id)])
-  const interactions = (instance.interactions ?? [])
-    .filter(isNonNullable)
-    .filter((i) => i.thread?.id && threadIds.has(i.thread.id))
+  const interactions = attributeInteractions(
+    (instance.interactions ?? []).filter(isNonNullable),
+    threads,
+    timeline.store
+  ).filter((i) => i.thread?.id && threadIds.has(i.thread.id))
   // a permission request is answered under its tool call, and a subagent's
   // under its row; a card is left for questions (forms, links) and for requests
   // whose call isn't in the loaded transcript

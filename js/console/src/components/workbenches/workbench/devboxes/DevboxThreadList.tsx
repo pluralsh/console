@@ -55,7 +55,9 @@ import {
   openPullRequestsByThread,
   useDevboxPullRequests,
 } from './devboxPullRequests'
+import { attributeInteractions } from './devboxApprovals'
 import { agentLabel } from './devboxStartForm'
+import { DevboxTimelineStore } from './devboxTimeline'
 import { pendingInteractionsFor } from './devboxSubagentState'
 import {
   availableThreadActions,
@@ -131,11 +133,13 @@ const ACTION_ICONS: Record<DevboxThreadAction, ReactNode> = {
 
 export function DevboxThreadList({
   instance,
+  timeline,
   selectedThreadId,
   onSelect,
   disabled,
 }: {
   instance: DevboxInstanceFragment
+  timeline?: DevboxTimelineStore
   selectedThreadId: Nullable<string>
   onSelect: (threadId: string) => void
   disabled?: boolean
@@ -143,7 +147,11 @@ export function DevboxThreadList({
   const { popToast } = useSimpleToast()
   const agents = instance.devbox?.agents
   const tree = buildThreadTree(instance.threads)
-  const interactions = (instance.interactions ?? []).filter(isNonNullable)
+  const interactions = attributeInteractions(
+    (instance.interactions ?? []).filter(isNonNullable),
+    (instance.threads ?? []).filter(isNonNullable),
+    timeline
+  )
   const stateOf = (thread: DevboxThreadFragment) =>
     threadState(thread, pendingInteractionsFor(thread, interactions))
   const unread = useUnreadThreads(

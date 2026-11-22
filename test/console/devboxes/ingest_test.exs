@@ -285,6 +285,30 @@ defmodule Console.Devboxes.IngestTest do
       assert_receive {:event, %PubSub.DevboxThreadUpdated{}}
     end
 
+    test "it files a subagent's interaction under the subagent, not its top-level thread" do
+      inst = insert(:devbox_instance)
+      thread = insert(:devbox_instance_session, instance: inst, acp_session_id: "parent")
+
+      {:ok, %{interactions_applied: 1}} = Ingest.upsert_instance_index(%{
+        instance_id: inst.id,
+        sessions: [
+          %{session_id: "child", kind: :SESSION_KIND_SUBAGENT, parent_session_id: "parent", agent: :claude, status: :active, revision: 1}
+        ],
+        interactions: [%{
+          interaction_id: "int-sub",
+          thread_id: thread.id,
+          session_id: "child",
+          kind: :INTERACTION_KIND_PERMISSION,
+          state: :INTERACTION_STATE_PENDING,
+          tool_call_id: "tc-sub",
+          revision: 1
+        }]
+      }, inst.devbox.cluster)
+
+      child = Console.Repo.get_by!(DevboxInstanceSession, acp_session_id: "child")
+      assert Console.Repo.get_by!(DevboxInstanceInteraction, external_id: "int-sub").session_id == child.id
+    end
+
     test "it links a subagent indexed before its parent, in the same batch or a later one" do
       inst = insert(:devbox_instance)
       cluster = inst.devbox.cluster

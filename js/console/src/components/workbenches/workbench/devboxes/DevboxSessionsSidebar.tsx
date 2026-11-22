@@ -29,6 +29,7 @@ import { mapExistingNodes } from 'utils/graphql'
 import { isInstanceLive, isInstanceTerminal } from './devboxIdle'
 import { DevboxThreadList } from './DevboxThreadList'
 import { buildThreadTree, NEW_SESSION, selectedThread } from './devboxThreads'
+import { DevboxTimelineStoreApi } from './useDevboxTimeline'
 import { useDevboxWorkbenchDeltas } from './useDevboxWorkbenchDeltas'
 
 export const DEVBOX_SESSIONS_SIDEBAR_WIDTH = 280
@@ -51,9 +52,11 @@ export const sortInstances = (instances: DevboxInstanceTinyFragment[]) =>
 export function DevboxSessionsSidebar({
   workbenchId,
   instanceId,
+  timeline,
 }: {
   workbenchId: string
   instanceId: Nullable<string>
+  timeline?: DevboxTimelineStoreApi
 }) {
   return (
     <WrapperSC>
@@ -64,7 +67,10 @@ export function DevboxSessionsSidebar({
         />
       </HeaderSC>
       {instanceId ? (
-        <InstanceSessions instanceId={instanceId} />
+        <InstanceSessions
+          instanceId={instanceId}
+          timeline={timeline}
+        />
       ) : (
         <HintSC>
           Pick a devbox to start an instance, then open sessions in it.
@@ -156,7 +162,13 @@ function InstanceSwitcher({
   )
 }
 
-function InstanceSessions({ instanceId }: { instanceId: string }) {
+function InstanceSessions({
+  instanceId,
+  timeline,
+}: {
+  instanceId: string
+  timeline?: DevboxTimelineStoreApi
+}) {
   const [params, setParams] = useSearchParams()
   const threadId = params.get(WORKBENCH_DEVBOX_THREAD_QUERY_PARAM)
   // shares the instance view's query, so this costs no extra request
@@ -208,6 +220,7 @@ function InstanceSessions({ instanceId }: { instanceId: string }) {
       <ScrollSC>
         <DevboxThreadList
           instance={instance}
+          timeline={timeline?.store}
           selectedThreadId={selectedThread(instance.threads, threadId)?.id}
           onSelect={select}
           disabled={!live}
