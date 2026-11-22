@@ -13,6 +13,7 @@ import {
   PlayIcon,
   Tooltip,
   TrashCanIcon,
+  WarningIcon,
 } from '@pluralsh/design-system'
 import { PrStatusIcon } from 'components/workbenches/common/WorkbenchJobPrIcon'
 import { ApolloError } from '@apollo/client'
@@ -55,6 +56,7 @@ import {
   useDevboxPullRequests,
 } from './devboxPullRequests'
 import { agentLabel } from './devboxStartForm'
+import { pendingInteractionsFor } from './devboxSubagentState'
 import {
   availableThreadActions,
   buildThreadTree,
@@ -97,7 +99,14 @@ const STAGE_STYLES: Record<
 // the group already says running, idle or closed; only these add anything
 const STATE_SEVERITY: Partial<
   Record<DevboxThreadState, 'warning' | 'neutral'>
-> = { 'needs you': 'warning', waiting: 'neutral' }
+> = {
+  'awaiting approval': 'warning',
+  'needs you': 'warning',
+  waiting: 'neutral',
+}
+
+const needsAttention = (state: DevboxThreadState) =>
+  state === 'awaiting approval' || state === 'needs you'
 
 const ACTION_LABELS: Record<DevboxThreadAction, string> = {
   rename: 'Rename',
@@ -134,6 +143,9 @@ export function DevboxThreadList({
   const { popToast } = useSimpleToast()
   const agents = instance.devbox?.agents
   const tree = buildThreadTree(instance.threads)
+  const interactions = (instance.interactions ?? []).filter(isNonNullable)
+  const stateOf = (thread: DevboxThreadFragment) =>
+    threadState(thread, pendingInteractionsFor(thread, interactions))
   const unread = useUnreadThreads(
     (instance.threads ?? []).filter(isNonNullable),
     selectedThreadId
@@ -210,6 +222,7 @@ export function DevboxThreadList({
       <div key={thread.id}>
         <ThreadRow
           thread={thread}
+          state={stateOf(thread)}
           selected={thread.id === selectedThreadId}
           unread={unread.has(thread.id)}
           openPrs={openPrs.get(thread.id)}
@@ -239,6 +252,7 @@ export function DevboxThreadList({
             key={child.id}
             nested
             thread={child}
+            state={stateOf(child)}
             selected={child.id === selectedThreadId}
             unread={unread.has(child.id)}
             openPrs={openPrs.get(child.id)}
@@ -257,7 +271,12 @@ export function DevboxThreadList({
             t.id === selectedThreadId ||
             t.children.some((c) => c.id === selectedThreadId)
         )
-        const open = holdsSelected || !collapsed.includes(group.stage)
+        // a thread waiting on the user is never folded out of sight
+        const holdsAttention = group.threads.some((t) =>
+          [t, ...t.children].some((c) => needsAttention(stateOf(c)))
+        )
+        const open =
+          holdsSelected || holdsAttention || !collapsed.includes(group.stage)
         return (
           <div key={group.stage}>
             <GroupHeaderWrapSC>
@@ -343,6 +362,7 @@ function useUnreadThreads(
 
 function ThreadRow({
   thread,
+  state,
   selected,
   unread,
   nested = false,
@@ -351,6 +371,7 @@ function ThreadRow({
   actions,
 }: {
   thread: DevboxThreadFragment
+  state: DevboxThreadState
   selected: boolean
   unread: boolean
   nested?: boolean
@@ -358,7 +379,6 @@ function ThreadRow({
   onSelect: () => void
   actions?: React.ReactNode
 }) {
-  const state = threadState(thread)
   return (
     <ThreadRowSC
       $selected={selected}
@@ -381,6 +401,8 @@ function ThreadRow({
             <Chip
               size="small"
               severity={STATE_SEVERITY[state]}
+              icon={needsAttention(state) ? <WarningIcon /> : undefined}
+              css={{ flexShrink: 0 }}
             >
               {state}
             </Chip>

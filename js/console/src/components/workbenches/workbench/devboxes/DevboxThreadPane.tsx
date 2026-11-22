@@ -12,8 +12,10 @@ import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { CaptionP } from 'components/utils/typography/Text'
 import {
   DevboxEntityFragment,
+  DevboxEntityType,
   DevboxInstanceFragment,
   DevboxInteractionFragment,
+  DevboxInteractionKind,
   DevboxInteractionState,
   DevboxThreadFragment,
   DevboxThreadKind,
@@ -44,7 +46,11 @@ import { DevboxComposer } from './DevboxComposer'
 import { useDevboxPanel } from './DevboxControlPanel'
 import { describeThreadError } from './devboxErrors'
 import { isInstanceLive, isInstanceTerminal } from './devboxIdle'
-import { DevboxInteraction } from './DevboxInteractionCard'
+import {
+  DevboxInlineApproval,
+  DevboxInteraction,
+  isInlineApproval,
+} from './DevboxInteractionCard'
 import { PillSelect } from './DevboxPromptPills'
 import { DevboxQueuedPrompts } from './DevboxQueuedPrompts'
 import { DevboxSubagentActivity } from './DevboxSubagents'
@@ -102,8 +108,34 @@ export function DevboxThreadPane({
   const interactions = (instance.interactions ?? [])
     .filter(isNonNullable)
     .filter((i) => i.thread?.id && threadIds.has(i.thread.id))
-  // a subagent's questions are asked under its row in the transcript
-  const ownInteractions = interactions.filter((i) => i.thread?.id === thread.id)
+  // a permission request is answered under its tool call, and a subagent's
+  // under its row; a card is left for questions (forms, links) and for requests
+  // whose call isn't in the loaded transcript
+  const transcriptCalls = new Set(
+    entities.flatMap((e) =>
+      e.type === DevboxEntityType.ToolCall && e.toolCall?.toolCallId
+        ? [e.toolCall.toolCallId]
+        : []
+    )
+  )
+  const inlineApprovals = new Map(
+    interactions
+      .filter(
+        (i) =>
+          i.thread?.id === thread.id &&
+          isInlineApproval(i) &&
+          !!i.toolCallId &&
+          transcriptCalls.has(i.toolCallId)
+      )
+      .map((i) => [i.toolCallId ?? '', i])
+  )
+  const ownInteractions = interactions.filter(
+    (i) =>
+      i.thread?.id === thread.id &&
+      !(i.toolCallId && inlineApprovals.has(i.toolCallId)) &&
+      (i.kind !== DevboxInteractionKind.Permission ||
+        i.state === DevboxInteractionState.Pending)
+  )
   const toolCall = (id: Nullable<string>) => findToolCall(timeline.store, id)
   const [, setParams] = useSearchParams()
   const openThread = (id: string) =>
@@ -116,15 +148,6 @@ export function DevboxThreadPane({
       },
       { replace: true }
     )
-  // a pending approval card previews its tool call, so the transcript leaves that call out until it's answered
-  const awaitingToolCalls = new Set(
-    interactions.flatMap((i) =>
-      i.state === DevboxInteractionState.Pending && i.toolCallId
-        ? [i.toolCallId]
-        : []
-    )
-  )
-
   useEffect(() => {
     const el = scrollRef.current
     if (!el || !session?.loaded || position == null || scrolledTo === position)
@@ -197,7 +220,12 @@ export function DevboxThreadPane({
             <DevboxTranscript
               entities={entities}
               terminal={(id) => selectTerminalOutput(session, id)}
-              hiddenToolCalls={awaitingToolCalls}
+              approvalFor={(id) => {
+                const interaction = inlineApprovals.get(id)
+                return interaction ? (
+                  <DevboxInlineApproval interaction={interaction} />
+                ) : null
+              }}
               subagents={subagents}
               renderSubagent={(s, spawner) => (
                 <SubagentCard

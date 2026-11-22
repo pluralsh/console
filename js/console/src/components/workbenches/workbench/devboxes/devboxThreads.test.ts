@@ -1,4 +1,6 @@
 import {
+  DevboxForegroundState,
+  DevboxInteractionKind,
   DevboxThreadFragment,
   DevboxThreadKind,
   DevboxThreadStage,
@@ -9,6 +11,7 @@ import {
   buildThreadTree,
   groupThreadsByStage,
   rootThread,
+  threadState,
   threadTitle,
 } from './devboxThreads'
 
@@ -34,6 +37,40 @@ const thread = (
   kind: DevboxThreadKind.Thread,
   status: DevboxThreadStatus.Active,
   ...extra,
+})
+
+describe('threadState', () => {
+  const idle = {
+    status: DevboxThreadStatus.Active,
+    foregroundState: DevboxForegroundState.Idle,
+  }
+
+  it('awaits approval while a permission request is pending, even once idled', () => {
+    expect(
+      threadState(idle, [{ kind: DevboxInteractionKind.Permission }])
+    ).toBe('awaiting approval')
+  })
+
+  it('needs you for other pending questions or a blocked foreground', () => {
+    expect(
+      threadState(idle, [{ kind: DevboxInteractionKind.FormElicitation }])
+    ).toBe('needs you')
+    expect(
+      threadState({
+        ...idle,
+        foregroundState: DevboxForegroundState.RequiresAction,
+      })
+    ).toBe('needs you')
+    expect(threadState(idle)).toBe('idle')
+  })
+
+  it('keeps closed threads closed', () => {
+    expect(
+      threadState({ ...idle, status: DevboxThreadStatus.Closed }, [
+        { kind: DevboxInteractionKind.Permission },
+      ])
+    ).toBe('closed')
+  })
 })
 
 describe('groupThreadsByStage', () => {

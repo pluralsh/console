@@ -11,7 +11,11 @@ import {
   DevboxToolCallFragment,
 } from 'generated/graphql'
 import styled from 'styled-components'
-import { DevboxInteraction } from './DevboxInteractionCard'
+import {
+  DevboxInlineApproval,
+  DevboxInteraction,
+  isInlineApproval,
+} from './DevboxInteractionCard'
 import { pendingInteractionsFor, subagentState } from './devboxSubagentState'
 import { threadTitle } from './devboxThreads'
 import { toolIdentity } from './DevboxTranscript'
@@ -92,13 +96,37 @@ export function DevboxSubagentActivity({
           </Body2P>
         )}
       </HeaderSC>
-      {pending.map((interaction) => (
-        <DevboxInteraction
-          key={interaction.id}
-          interaction={interaction}
-          toolCall={toolCall(interaction.toolCallId)}
-        />
-      ))}
+      {pending.map((interaction) => {
+        const call = toolCall(interaction.toolCallId) ?? interaction.toolCall
+        return isInlineApproval(interaction) ? (
+          <ApprovalSC
+            key={interaction.id}
+            $indent={running || ended}
+          >
+            <DevboxInlineApproval
+              interaction={interaction}
+              subject={
+                call ? (
+                  <LatestTool toolCall={call} />
+                ) : (
+                  <Body2P
+                    as="span"
+                    $color="text-light"
+                  >
+                    {interaction.title || 'Approve tool call'}
+                  </Body2P>
+                )
+              }
+            />
+          </ApprovalSC>
+        ) : (
+          <DevboxInteraction
+            key={interaction.id}
+            interaction={interaction}
+            toolCall={call}
+          />
+        )
+      })}
     </RowSC>
   )
 }
@@ -189,7 +217,14 @@ const StatusDotSC = styled.span<{ $failed: boolean }>(({ theme, $failed }) => ({
   width: 6,
   height: 6,
   borderRadius: '50%',
-  backgroundColor: theme.colors[$failed ? 'icon-danger' : 'icon-success'],
+  backgroundColor: theme.colors[$failed ? 'icon-danger' : 'icon-xlight'],
+}))
+
+const ApprovalSC = styled.div<{ $indent: boolean }>(({ theme, $indent }) => ({
+  minWidth: 0,
+  ...($indent && {
+    paddingLeft: `calc(${STATUS_ICON_SIZE}px + ${theme.spacing.xsmall})`,
+  }),
 }))
 
 const LatestToolSC = styled.span(({ theme }) => ({

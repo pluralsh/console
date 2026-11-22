@@ -48,6 +48,7 @@ type TerminalLookup = (
 type TranscriptRow =
   | { kind: 'entity'; entity: DevboxEntityFragment }
   | { kind: 'tools'; entities: DevboxEntityFragment[] }
+  | { kind: 'approval'; entity: DevboxEntityFragment; approval: ReactNode }
   | {
       kind: 'subagent'
       subagent: DevboxThreadFragment
@@ -57,15 +58,16 @@ type TranscriptRow =
 export function DevboxTranscript({
   entities,
   terminal = () => null,
-  hiddenToolCalls,
+  approvalFor,
   subagents = [],
   renderSubagent,
   empty,
 }: {
   entities: DevboxEntityFragment[]
   terminal?: TerminalLookup
-  // calls shown elsewhere, e.g. in the approval card awaiting an answer for them
-  hiddenToolCalls?: ReadonlySet<string>
+  // the approval a tool call awaits, answered under it; such a call stays out
+  // of tool groups so it can't be collapsed away
+  approvalFor?: (toolCallId: string) => ReactNode
   subagents?: DevboxThreadFragment[]
   // a subagent's row, in place of the tool call or message that spawned it
   renderSubagent?: (
@@ -109,7 +111,14 @@ export function DevboxTranscript({
       }
       continue
     }
-    if (toolCallId && hiddenToolCalls?.has(toolCallId)) continue
+    const approval =
+      entity.type === DevboxEntityType.ToolCall && toolCallId
+        ? approvalFor?.(toolCallId)
+        : null
+    if (approval) {
+      rows.push({ kind: 'approval', entity, approval })
+      continue
+    }
 
     // the first message to or from a subagent is where it starts: its card stands in for it, and the subagent's
     // own transcript opens with the task
@@ -151,6 +160,21 @@ export function DevboxTranscript({
               >
                 {renderSubagent?.(row.subagent, row.spawner)}
               </div>
+            )
+          case 'approval':
+            return (
+              <Flex
+                key={`approval:${row.entity.id}`}
+                direction="column"
+                gap="small"
+                data-position={row.entity.position ?? undefined}
+              >
+                <ToolCallView
+                  entity={row.entity}
+                  terminal={terminal}
+                />
+                {row.approval}
+              </Flex>
             )
           case 'tools': {
             const [first] = row.entities

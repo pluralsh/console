@@ -2,6 +2,8 @@ import {
   DevboxAgentFragment,
   DevboxAgentType,
   DevboxForegroundState,
+  DevboxInteractionFragment,
+  DevboxInteractionKind,
   DevboxSessionCapabilitiesFragment,
   DevboxThreadFragment,
   DevboxThreadKind,
@@ -19,6 +21,7 @@ export type DevboxThreadAction =
 
 export type DevboxThreadState =
   | 'running'
+  | 'awaiting approval'
   | 'needs you'
   | 'waiting'
   | 'idle'
@@ -67,15 +70,23 @@ export function rootThread(
   return root ?? undefined
 }
 
+// a thread's pending interactions count over its foreground state, which a
+// subagent idled by its parent no longer reports
 export function threadState(
-  thread: Pick<DevboxThreadFragment, 'status' | 'foregroundState'>
+  thread: Pick<DevboxThreadFragment, 'status' | 'foregroundState'>,
+  pending: Pick<DevboxInteractionFragment, 'kind'>[] = []
 ): DevboxThreadState {
   if (
     thread.status === DevboxThreadStatus.Closed ||
     thread.status === DevboxThreadStatus.Deleted
   )
     return 'closed'
-  if (thread.foregroundState === DevboxForegroundState.RequiresAction)
+  if (pending.some((i) => i.kind === DevboxInteractionKind.Permission))
+    return 'awaiting approval'
+  if (
+    pending.length ||
+    thread.foregroundState === DevboxForegroundState.RequiresAction
+  )
     return 'needs you'
   if (thread.status === DevboxThreadStatus.Waiting) return 'waiting'
   if (thread.foregroundState === DevboxForegroundState.Running) return 'running'

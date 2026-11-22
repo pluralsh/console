@@ -151,6 +151,51 @@ export function DevboxInteractionCard({
   )
 }
 
+export const isInlineApproval = (interaction: DevboxInteractionFragment) =>
+  interaction.state === DevboxInteractionState.Pending &&
+  interaction.kind === DevboxInteractionKind.Permission
+
+// a permission request answered in place, under the tool call it's for (or the
+// subagent asking), rather than as a card of its own
+export function DevboxInlineApproval({
+  interaction,
+  subject,
+}: {
+  interaction: DevboxInteractionFragment
+  // what's being approved, when the tool call isn't already shown above
+  subject?: ReactNode
+}) {
+  const [respond, { loading, error }] = useRespondDevboxInteractionMutation()
+  return (
+    <Flex
+      direction="column"
+      gap="xsmall"
+      data-interaction={interaction.kind}
+    >
+      <Flex
+        gap="small"
+        align="center"
+        wrap="wrap"
+      >
+        {subject}
+        <PermissionForm
+          interaction={interaction}
+          loading={loading}
+          onRespond={(response) =>
+            respond({ variables: { id: interaction.id, response } })
+          }
+        />
+      </Flex>
+      {interaction.review && (
+        <CaptionP $color="text-xlight">
+          {reviewSummary(interaction.review)}
+        </CaptionP>
+      )}
+      {error && <GqlError error={error} />}
+    </Flex>
+  )
+}
+
 // the devbox reviewer's verdict at autonomy auto, and why it still asked a human if it did
 export function reviewSummary(
   review: NonNullable<DevboxInteractionFragment['review']>

@@ -185,33 +185,33 @@ describe('DevboxTranscript', () => {
     ).toContain('c.ts')
   })
 
-  it('leaves out tool calls shown elsewhere', () => {
-    const edit = (toolCallId: string, position: number) =>
+  it('answers an approval under its tool call, outside any tool group', () => {
+    const read = (toolCallId: string, position: number) =>
       entity({
         type: DevboxEntityType.ToolCall,
         position,
         toolCall: {
           toolCallId,
-          kind: 'edit',
+          kind: 'read',
           status: 'pending',
-          rawInput: {
-            file_path: `${toolCallId}.ts`,
-            old_string: 'a',
-            new_string: 'b',
-          },
+          rawInput: { file_path: `${toolCallId}.ts` },
           content: [],
         },
       })
     const { container } = renderTranscript(
       <DevboxTranscript
-        entities={[edit('shown', 1), edit('awaiting', 2)]}
-        hiddenToolCalls={new Set(['awaiting'])}
+        entities={[read('a', 1), read('b', 2), read('awaiting', 3)]}
+        approvalFor={(id) =>
+          id === 'awaiting' ? <button type="button">Allow</button> : null
+        }
       />
     )
-    const diffs = [...container.querySelectorAll('[data-content="diff"]')]
-    expect(diffs.map((d) => d.textContent?.includes('shown.ts'))).toEqual([
-      true,
-    ])
+    const row = container.querySelector('[data-position="3"]')
+    expect(row?.textContent).toContain('awaiting.ts')
+    expect(row?.contains(screen.getByRole('button', { name: 'Allow' }))).toBe(
+      true
+    )
+    expect(screen.getByText('2 reads')).toBeTruthy()
   })
 
   it('renders unknown entity, content and tool content variants generically', () => {
