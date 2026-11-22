@@ -12,6 +12,7 @@ defmodule Console.Devboxes.Ingest do
   import Console.Deployments.Pr.Git, only: [backfill_token: 1, to_http: 2]
   alias Console.PubSub
   alias Console.Devboxes
+  alias Console.Prom.Tokens
   alias Console.Devboxes.{Acp, AgentCredentials, Credentials}
   alias Console.Deployments.Pr.Dispatcher
   alias Console.Deployments.Workbenches
@@ -81,12 +82,27 @@ defmodule Console.Devboxes.Ingest do
   end
   def heartbeat(_, _), do: {:ok, %{unknown_instance_ids: []}}
 
-  defp heartbeat_instance(%DevboxInstance{} = inst, %{idle: %{} = idle}) do
-    inst
-    |> DevboxInstance.changeset(%{idle_state: idle_state(idle)})
-    |> Repo.update()
+  defp heartbeat_instance(%DevboxInstance{status: status} = inst, %{idle: %{} = idle}) do
+    case awake?(status) and this_run?(inst, idle) do
+      true ->
+        inst
+        |> DevboxInstance.changeset(%{idle_state: idle_state(idle)})
+        |> Repo.update()
+      false -> :ok
+    end
   end
   defp heartbeat_instance(_, _), do: :ok
+
+  defp awake?(status), do: status in ~w(running snapshotting)a
+
+  # a suspend deadline from before the instance last woke is an earlier run's, held over by the gateway
+  defp this_run?(%DevboxInstance{awake_since: %DateTime{} = since}, idle) do
+    case Acp.timestamp(Acp.get(idle, :suspend_at)) do
+      %DateTime{} = at -> DateTime.compare(at, since) != :lt
+      _ -> true
+    end
+  end
+  defp this_run?(_, _), do: true
 
   @doc """
   `Ingest.ReportInstanceStatus`: applies a state machine transition reported by the gateway.  Reports with an older
@@ -118,11 +134,14 @@ defmodule Console.Devboxes.Ingest do
       actor_ref: blank(attrs[:actor_id]),
       image_digest: blank(attrs[:image_digest]),
       template_revision: attrs[:template_revision] && to_string(attrs[:template_revision]),
-      idle_state: attrs[:idle] && idle_state(attrs[:idle])
+      idle_state: attrs[:idle] && this_run?(inst, attrs[:idle]) && idle_state(attrs[:idle]) || nil
     })
 
     case status && DevboxInstance.can_transition?(inst.status, status) do
       true ->
+        # idleness belongs to one awake run: what's reported with a suspend or a resume is the last run's, and
+        # the resumed daemon reports its own
+        base = if awake?(inst.status) and awake?(status), do: base, else: Map.put(base, :idle_state, idle_state(%{}))
         inst
         |> DevboxInstance.changeset(Map.merge(base, %{status: status, status_reason: status_reason(attrs)}))
         |> Repo.update()
@@ -209,6 +228,10 @@ defmodule Console.Devboxes.Ingest do
     |> execute()
     |> case do
       {:ok, %{sessions: sessions, interactions: interactions, aggregate: inst}} ->
+        Enum.each(sessions, fn
+          {%DevboxInstanceSession{imported: true}, _} -> :ok
+          {session, prior} -> Tokens.record_delta(session.usage, prior, %{source: "devbox", agent: session.agent})
+        end)
         sessions = Enum.map(sessions, &elem(&1, 0))
         Enum.each(sessions, &handle_notify(PubSub.DevboxThreadUpdated, &1))
         track_agent_auth(inst, attrs[:aggregate][:connections])
@@ -313,9 +336,20 @@ defmodule Console.Devboxes.Ingest do
       revision: attrs[:revision],
       config_options: attrs[:config_options] && Enum.map(attrs[:config_options], &config_option/1),
       available_commands: attrs[:available_commands] && Enum.map(attrs[:available_commands], &command/1),
+      queued_prompts: attrs[:queued_prompts] && Enum.map(attrs[:queued_prompts], &queued_prompt/1),
+      parent_tool_call_id: blank(attrs[:parent_tool_call_id]),
       usage: usage && usage_attrs(usage)
     })
+    |> clear_foreground(attrs[:foreground])
   end
+
+  # a reported foreground replaces the last one whole, so a later turn without an error clears it
+  defp clear_foreground(session, %{} = _foreground) do
+    session
+    |> Map.put_new(:error, nil)
+    |> Map.put_new(:stop_reason, nil)
+  end
+  defp clear_foreground(session, _), do: session
 
   # the daemon reports absolute paths under the home directory, threads store ~-relative ones
   defp relative_cwd(nil), do: nil
@@ -340,6 +374,17 @@ defmodule Console.Devboxes.Ingest do
     }
   end
 
+  @doc false
+  def queued_prompt(qp) do
+    blocks = Acp.blocks(Acp.get(qp, :content))
+    %{
+      prompt_id: Acp.get(qp, :prompt_id),
+      text: blocks |> Enum.filter(&(&1.type == :text)) |> Enum.map_join("\n\n", &(&1.text || "")),
+      attachments: for(%{type: :resource_link} = b <- blocks, do: b.name || b.uri),
+      queued_at: Acp.timestamp(Acp.get(qp, :queued_at))
+    }
+  end
+
   defp command(cmd) do
     input = Acp.get(cmd, :input) || %{}
     %{name: Acp.get(cmd, :name), description: Acp.get(cmd, :description), input_hint: Acp.get(input, :hint)}
@@ -360,7 +405,10 @@ defmodule Console.Devboxes.Ingest do
     })
   end
 
-  defp session_cost(%DevboxInstanceSession{usage: %{total_cost: c, total_tokens: t}}), do: %{total_cost: c || 0, total_tokens: t || 0}
+  defp session_cost(%DevboxInstanceSession{usage: %{total_cost: c, total_tokens: t} = usage}) do
+    Map.take(usage, ~w(input_tokens output_tokens cached_tokens reasoning_tokens)a)
+    |> Map.merge(%{total_cost: c || 0, total_tokens: t || 0})
+  end
   defp session_cost(_), do: %{total_cost: 0, total_tokens: 0}
 
   defp upsert_interaction(instance_id, %{interaction_id: ext_id} = attrs) when is_binary(ext_id) and byte_size(ext_id) > 0 do
@@ -397,6 +445,7 @@ defmodule Console.Devboxes.Ingest do
       requested_schema: mapify(Acp.get(elicitation, :requested_schema)),
       url: blank(Acp.get(elicitation, :url)),
       options: Acp.get(permission, :options) && Enum.map(Acp.get(permission, :options), &permission_option/1),
+      tool_call: mapify(Acp.get(permission, :tool_call)),
       response: mapify(attrs[:response]),
       answered_by_id: answered_by && Repo.get(User, answered_by) && answered_by,
       answered_by_policy: attrs[:answered_by] && blank(Acp.get(attrs[:answered_by], :policy)),
@@ -419,8 +468,10 @@ defmodule Console.Devboxes.Ingest do
 
   defp permission_option(opt), do: %{option_id: Acp.get(opt, :option_id), name: Acp.get(opt, :name), kind: Acp.get(opt, :kind)}
 
+  # an interaction's session is the one asking (a subagent's, for its requests); its thread is the top-level
+  # thread that session belongs to, so it's only the fallback
   defp interaction_session(instance_id, attrs) do
-    case find_session(instance_id, attrs) do
+    case find_session(instance_id, Map.delete(attrs, :thread_id)) || find_session(instance_id, attrs) do
       %DevboxInstanceSession{id: id} -> id
       _ -> nil
     end
@@ -529,13 +580,15 @@ defmodule Console.Devboxes.Ingest do
 
   @doc """
   `Ingest.PushInstanceDeltas`: wraps each live delta in a `DevboxInstance.Delta` and broadcasts it on
-  `devbox_instances:<id>:deltas`.  Nothing is stored.  Deltas for instances outside the cluster are dropped.
+  `devbox_instances:<id>:deltas`, in the order given.  Delivery across nodes isn't ordered, so clients reorder each
+  session's deltas by `seq`.  Nothing is stored.  Deltas for instances outside the cluster are dropped.
   """
   @spec publish_instance_deltas([map], Cluster.t) :: :ok
   def publish_instance_deltas(deltas, %Cluster{} = cluster) do
+    owned = deltas |> Enum.map(& &1.instance_id) |> Enum.uniq() |> Map.new(&{&1, match?({:ok, _}, owned(&1, cluster))})
     Enum.each(deltas, fn %{instance_id: id} = delta ->
-      case owned(id, cluster) do
-        {:ok, _} -> publish_delta(delta, cluster)
+      case owned do
+        %{^id => true} -> publish_delta(delta, cluster)
         _ -> Logger.info("dropping devbox delta for instance #{id} not owned by cluster #{cluster.id}")
       end
     end)
@@ -554,10 +607,15 @@ defmodule Console.Devboxes.Ingest do
       payload: Acp.as_map(Acp.decode(delta[:payload_json] || delta[:payload])),
       entity: Acp.entity(delta[:entity]),
       offset: delta[:offset],
+      seq: delta[:seq],
+      stream: blank(delta[:stream]),
       emitted_at: Acp.timestamp(delta[:emitted_at])
     }
     |> DevboxInstance.Delta.new(cluster)
-    |> then(&handle_notify(PubSub.DevboxInstanceDeltaCreated, &1))
+    |> then(fn delta ->
+      Console.PubSub.Consumers.Rtc.handle_event(%PubSub.DevboxInstanceDeltaCreated{item: delta})
+      handle_notify(PubSub.DevboxInstanceDeltaCreated, delta)
+    end)
   end
 
   @doc """
@@ -604,33 +662,66 @@ defmodule Console.Devboxes.Ingest do
     with {:ok, _} <- owned(instance_id, cluster),
          {:ok, inst} <- Devboxes.ensure_live(Devboxes.get_instance!(instance_id) |> Repo.preload([:devbox])),
          {:ok, thread} <- pr_thread(inst, thread_id),
-         %{repository: repo, title: title, head_branch: head, base_branch: base} = pr <- attrs[:attributes] || attrs,
-         true <- Devbox.allowed_repository?(inst.devbox, repo) || {:error, "repository #{repo} is not allowed on this devbox"},
+         %{repository: _, title: _, head_branch: _, base_branch: _} = pr <- attrs[:attributes] || attrs do
+      create_devbox_pr(inst, thread, pr, %{
+        source: :mcp,
+        metadata: %{
+          subagent_session_id: blank(attrs[:subagent_session_id]),
+          tool_call_id: blank(attrs[:tool_call_id]),
+          position: attrs[:position]
+        }
+      })
+    else
+      %{} -> {:error, "pull request attributes require a repository, title, head and base branch"}
+      err -> err
+    end
+  end
+
+  @doc """
+  Opens a pull request for a devbox instance's branch through the repository's SCM connection, attributed to the
+  instance and thread.  `extra` holds the record's `source` and any `metadata`.
+  """
+  @spec create_devbox_pr(DevboxInstance.t, DevboxInstanceSession.t | nil, map, map) :: {:ok, PullRequest.t} | error
+  def create_devbox_pr(%DevboxInstance{} = inst, thread, %{repository: repo, title: title, head_branch: head, base_branch: base} = pr, extra) do
+    inst = Repo.preload(inst, [:devbox])
+    with true <- Devbox.allowed_repository?(inst.devbox, repo) || {:error, "repository #{repo} is not allowed on this devbox"},
          %ScmConnection{} = conn <- Credentials.scm_connection(inst.devbox, repo),
          {:ok, conn} <- backfill_token(conn),
-         {:ok, pr_info} <- Dispatcher.pr(conn, title, pr[:body] || "", to_http(conn, repo), base, head) do
+         conn = %{conn | commit_shas: commit_shas(pr[:commit_shas])},
+         {:ok, pr_info} <- Dispatcher.pr(conn, title, pr[:body] || "", to_http(conn, repo), base, head,
+                                         draft: !!pr[:draft], labels: pr[:labels] || []) do
       %PullRequest{fresh: true}
       |> PullRequest.changeset(
         pr_info
         |> Map.merge(attribution(inst, thread))
+        |> Map.merge(drop_nils(%{labels: blank_list(pr[:labels]), difficulty: difficulty(pr[:difficulty])}))
         |> Map.merge(%{
-          source: :mcp,
-          metadata: drop_nils(%{
-            subagent_session_id: blank(attrs[:subagent_session_id]),
-            tool_call_id: blank(attrs[:tool_call_id]),
-            position: attrs[:position],
-            related_urls: pr[:related_urls]
-          })
+          source: extra[:source],
+          metadata: drop_nils(Map.merge(extra[:metadata] || %{}, %{related_urls: pr[:related_urls]}))
         })
       )
       |> Repo.insert()
       |> notify_pr()
     else
       nil -> {:error, "no scm connection found for this repository"}
-      %{} -> {:error, "pull request attributes require a repository, title, head and base branch"}
       err -> err
     end
   end
+
+  defp commit_shas(shas) when is_list(shas),
+    do: Map.new(Enum.filter(shas, & &1[:branch] && &1[:sha]), & {&1.branch, &1.sha})
+  defp commit_shas(_), do: %{}
+
+  defp difficulty(%{change_type: type} = d) when is_binary(type) do
+    case Ecto.Type.cast(PullRequest.ChangeType, String.downcase(type)) do
+      {:ok, type} -> %{type: type, lines: d[:lines] || 0}
+      _ -> nil
+    end
+  end
+  defp difficulty(_), do: nil
+
+  defp blank_list([_ | _] = l), do: l
+  defp blank_list(_), do: nil
 
   defp pr_thread(_, empty) when empty in [nil, ""], do: {:ok, nil}
   defp pr_thread(%DevboxInstance{id: id}, thread_id) do
@@ -719,7 +810,8 @@ defmodule Console.Devboxes.Ingest do
   @decorate cacheable(
               cache: @multilevel_adapter,
               key: {:devbox_instance_cluster, instance_id},
-              opts: [ttl: :timer.hours(1)]
+              opts: [ttl: :timer.hours(1)],
+              match: &is_binary/1
             )
   defp instance_cluster_id(instance_id) do
     case Ecto.UUID.cast(instance_id) do
@@ -745,19 +837,30 @@ defmodule Console.Devboxes.Ingest do
   end
   def enum(_, _), do: nil
 
+  # an enum's name without its prefix, kept as a string: `enum/2` drops values whose atom doesn't exist yet
+  defp enum_name(val, prefix) when is_atom(val) and not is_nil(val), do: enum_name(Atom.to_string(val), prefix)
+  defp enum_name(val, prefix) when is_binary(val) do
+    case val |> String.downcase() |> String.replace_prefix(prefix, "") do
+      v when v in ["", "unspecified"] -> nil
+      v -> v
+    end
+  end
+  defp enum_name(_, _), do: nil
+
+  # every field is set, nil included, so a report replaces the previous idle state rather than merging into it
   defp idle_state(idle) do
-    drop_nils(%{
-      idle: Acp.get(idle, :idle),
+    %{
+      idle: Acp.get(idle, :idle) == true,
       idle_since: Acp.timestamp(Acp.get(idle, :idle_since)),
       suspends_at: Acp.timestamp(Acp.get(idle, :suspend_at)),
-      busy_reasons: Acp.get(idle, :busy_reasons) && Enum.map(Acp.get(idle, :busy_reasons), &busy_reason/1),
+      busy_reasons: Enum.map(Acp.get(idle, :busy_reasons) || [], &busy_reason/1),
       message: Acp.get(idle, :message)
-    })
+    }
   end
 
   defp busy_reason(reason) do
     drop_nils(%{
-      "kind" => Acp.get(reason, :kind) |> enum("busy_reason_kind_") |> then(&(&1 && to_string(&1))),
+      "kind" => enum_name(Acp.get(reason, :kind), "busy_reason_kind_"),
       "detail" => blank(Acp.get(reason, :detail)),
       "until" => Acp.timestamp(Acp.get(reason, :until)),
       "thread_id" => blank(Acp.get(reason, :thread_id)),

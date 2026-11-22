@@ -317,10 +317,6 @@
         "apiAccessNamespaceSelector": { "type": "object" }
       }
     },
-    "crds": {
-      "type": "object",
-      "properties": { "install": { "type": "boolean" }, "keep": { "type": "boolean" } }
-    },
     "postgres": {
       "type": "object",
       "properties": {

@@ -27,6 +27,7 @@ defmodule Console.Application do
       {DNSCluster, query: Application.get_env(:console, :dns_cluster_query) || :ignore},
       {Task.Supervisor, name: Console.AI.TaskSupervisor},
       {Task.Supervisor, name: Console.Cron.TaskSupervisor},
+      {Task.Supervisor, name: Console.Devboxes.TaskSupervisor},
       Console.AI.Workbench.SandboxPool,
       {Registry, [keys: :unique, name: Console.Buffer.Base.registry()]},
       {Registry, [keys: :unique, name: Console.Deployments.Git.Agent.registry()]},
@@ -143,7 +144,7 @@ defmodule Console.Application do
             %{
               issuer: iss,
               name: OAuth.name(),
-              provider_configuration_opts: %{quirks: %{allow_issuer_mismatch: true}},
+              provider_configuration_opts: %{quirks: OAuth.provider_quirks()},
               backoff_type: :exponential
             }
           }

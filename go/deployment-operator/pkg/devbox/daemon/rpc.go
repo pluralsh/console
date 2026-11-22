@@ -356,6 +356,10 @@ func (d *Daemon) CancelPrompt(ctx context.Context, req *devboxv1.CancelPromptReq
 	return &devboxv1.CancelPromptResponse{Cancelled: ok}, err
 }
 
+func (d *Daemon) UpdateQueuedPrompt(ctx context.Context, req *devboxv1.UpdateQueuedPromptRequest) (*devboxv1.UpdateQueuedPromptResponse, error) {
+	return d.agents.UpdateQueuedPrompt(ctx, req)
+}
+
 func (d *Daemon) SetThreadConfigOption(ctx context.Context, req *devboxv1.SetThreadConfigOptionRequest) (*devboxv1.SetThreadConfigOptionResponse, error) {
 	opts, err := d.agents.SetThreadConfigOption(ctx, req.GetThread(), req.GetOption())
 	return &devboxv1.SetThreadConfigOptionResponse{ConfigOptions: opts}, err
@@ -460,6 +464,14 @@ func (d *Daemon) WatchFiles(req *devboxv1.WatchFilesRequest, stream grpc.ServerS
 
 func (d *Daemon) GetChanges(ctx context.Context, req *devboxv1.GetChangesRequest) (*devboxv1.GetChangesResponse, error) {
 	return d.files.Changes(ctx, req)
+}
+
+func (d *Daemon) GetBranchDiffStat(ctx context.Context, req *devboxv1.BranchDiffStatRequest) (*devboxv1.BranchDiffStatResponse, error) {
+	return d.files.BranchDiffStat(ctx, req)
+}
+
+func (d *Daemon) PreparePullRequest(ctx context.Context, req *devboxv1.PreparePullRequestRequest) (*devboxv1.PreparePullRequestResponse, error) {
+	return d.prs.Prepare(ctx, req)
 }
 
 // ---- workspace ----

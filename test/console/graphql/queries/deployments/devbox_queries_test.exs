@@ -80,6 +80,59 @@ defmodule Console.GraphQl.Deployments.DevboxQueriesTest do
       assert iid == interaction.id
     end
 
+    test "it lists subagents with the threads that spawned them" do
+      user = insert(:user)
+      inst = insert(:devbox_instance, workbench: insert(:workbench, read_bindings: [%{user_id: user.id}]))
+      thread = insert(:devbox_instance_session, instance: inst)
+      sub = insert(:devbox_instance_session, instance: inst, kind: :subagent, parent: thread, parent_tool_call_id: "toolu_1")
+
+      {:ok, %{data: %{"devboxInstance" => %{"threads" => threads}}}} = run_query("""
+        query Instance($id: ID!) {
+          devboxInstance(id: $id) { threads { id kind parent { id } parentToolCallId } }
+        }
+      """, %{"id" => inst.id}, %{current_user: user})
+
+      by_id = Map.new(threads, &{&1["id"], &1})
+      assert by_id[thread.id]["kind"] == "THREAD"
+      assert by_id[sub.id]["kind"] == "SUBAGENT"
+      assert by_id[sub.id]["parent"]["id"] == thread.id
+      assert by_id[sub.id]["parentToolCallId"] == "toolu_1"
+    end
+
+    test "it stages threads and filters them by stage" do
+      user = insert(:user)
+      inst = insert(:devbox_instance, workbench: insert(:workbench, read_bindings: [%{user_id: user.id}]))
+      running = insert(:devbox_instance_session, instance: inst, foreground_state: :running)
+      queued = insert(:devbox_instance_session, instance: inst, status: :waiting)
+      asking = insert(:devbox_instance_session, instance: inst, foreground_state: :requires_action)
+      finished = insert(:devbox_instance_session, instance: inst, stop_reason: "end_turn")
+      closed = insert(:devbox_instance_session, instance: inst, status: :closed)
+
+      query = """
+        query Instance($id: ID!, $stages: [DevboxThreadStage]) {
+          devboxInstance(id: $id) { threads(stages: $stages) { id stage } }
+        }
+      """
+
+      {:ok, %{data: %{"devboxInstance" => %{"threads" => threads}}}} =
+        run_query(query, %{"id" => inst.id}, %{current_user: user})
+
+      assert Map.new(threads, &{&1["id"], &1["stage"]}) == %{
+        running.id => "RUNNING",
+        queued.id => "RUNNING",
+        asking.id => "NEEDS_REVIEW",
+        finished.id => "COMPLETED",
+        closed.id => "COMPLETED"
+      }
+
+      for {stage, expected} <- [{"RUNNING", [running, queued]}, {"NEEDS_REVIEW", [asking]}, {"COMPLETED", [finished, closed]}] do
+        {:ok, %{data: %{"devboxInstance" => %{"threads" => threads}}}} =
+          run_query(query, %{"id" => inst.id, "stages" => [stage]}, %{current_user: user})
+
+        assert ids_equal(threads, expected)
+      end
+    end
+
     test "users without workbench access cannot read instances" do
       inst = insert(:devbox_instance)
 
@@ -120,6 +173,29 @@ defmodule Console.GraphQl.Deployments.DevboxQueriesTest do
       assert [%{"id" => pid}] = found["devboxInbox"]
       assert pid == pending.id
     end
+
+    test "it hides ended instances unless asked for them" do
+      user = insert(:user)
+      wb = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      running = insert(:devbox_instance, workbench: wb)
+      suspended = insert(:devbox_instance, workbench: wb, status: :suspended)
+      cancelled = insert(:devbox_instance, workbench: wb, status: :cancelled)
+      failed = insert(:devbox_instance, workbench: wb, status: :failed)
+
+      {:ok, %{data: %{"workbench" => found}}} = run_query("""
+        query Workbench($id: ID!) {
+          workbench(id: $id) {
+            live: devboxInstances(first: 10) { edges { node { id } } }
+            all: devboxInstances(first: 10, includeEnded: true) { edges { node { id } } }
+            cancelled: devboxInstances(first: 10, statuses: [CANCELLED]) { edges { node { id } } }
+          }
+        }
+      """, %{"id" => wb.id}, %{current_user: user})
+
+      assert from_connection(found["live"]) |> ids_equal([running, suspended])
+      assert from_connection(found["all"]) |> ids_equal([running, suspended, cancelled, failed])
+      assert from_connection(found["cancelled"]) |> ids_equal([cancelled])
+    end
   end
 
   describe "devboxTimeline" do
@@ -130,6 +206,8 @@ defmodule Console.GraphQl.Deployments.DevboxQueriesTest do
       expect(Control.Test, :get_timeline, fn _, "sess-1", %{limit: 10} ->
         {:ok, %{
           delta_offset: 42,
+          seq: 7,
+          stream: "run-1",
           has_more: true,
           entities: [
             %{
@@ -163,6 +241,8 @@ defmodule Console.GraphQl.Deployments.DevboxQueriesTest do
         query Timeline($id: ID!) {
           devboxTimeline(instanceId: $id, sessionId: "sess-1", limit: 10) {
             deltaOffset
+            seq
+            stream
             hasMore
             entities {
               id
@@ -183,6 +263,8 @@ defmodule Console.GraphQl.Deployments.DevboxQueriesTest do
       """, %{"id" => inst.id}, %{current_user: user})
 
       assert timeline["deltaOffset"] == "42"
+      assert timeline["seq"] == "7"
+      assert timeline["stream"] == "run-1"
       assert timeline["hasMore"]
       [msg, tool, term] = timeline["entities"]
       assert msg["type"] == "AGENT_MESSAGE"

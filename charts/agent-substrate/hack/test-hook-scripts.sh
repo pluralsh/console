@@ -130,6 +130,16 @@ run_hook
 grep -q '  issuer: https://kubernetes.default.svc$' "$auth" || fail "no discovery doesn't fall back to the in-cluster issuer"
 pass "authentication config follows the issuer"
 
+# 7. Pod certificates are required, from certificates.k8s.io v1 or v1beta1.
+(export FAKE_PODCERT_VERSION=v1beta1 && run_hook) || fail "v1beta1 pod certificates rejected"
+rm -rf "$FAKE_STATE" && mkdir -p "$FAKE_STATE"
+if (export FAKE_PODCERT_VERSION= && run_hook) >/dev/null; then
+  fail "install proceeded without pod certificates"
+fi
+grep -q "doesn't serve: podcertificaterequests clustertrustbundles" "$TMP/apply.log" || fail "missing APIs not reported"
+[ ! -d "$FAKE_STATE/secret" ] || fail "secrets created without pod certificates"
+pass "pod certificate APIs are required"
+
 if [ "$failures" -gt 0 ]; then
   echo "$failures failure(s)"
   exit 1

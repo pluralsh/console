@@ -230,6 +230,20 @@
       "ExtraHeaders": null
     },
     {
+      "Host": "devbox-gateway.plrl.svc.cluster.local",
+      "Port": 443,
+      "Scheme": "https",
+      "InjectHeader": "Authorization",
+      "SecretURI": "",
+      "ActorJWT": true,
+      "Prefix": "Bearer ",
+      "ActorJWTAudiences": [
+        "devbox-mcp"
+      ],
+      "ActorJWTExpirationSeconds": 600,
+      "ExtraHeaders": null
+    },
+    {
       "Host": "api.anthropic.com",
       "Port": 443,
       "Scheme": "https",

@@ -65,7 +65,7 @@ const DEFAULT_COLLAPSED: Partial<Record<WorkbenchJobStatus, boolean>> = {
   [WorkbenchJobStatus.Cancelled]: true,
 }
 
-const JOB_STATUS_COLORS: Record<
+export const JOB_STATUS_COLORS: Record<
   WorkbenchJobStatus,
   ListGroup<WorkbenchJobStatus>['color']
 > = {
@@ -89,7 +89,7 @@ const JOB_STATUS_ICONS: Record<
   [WorkbenchJobStatus.Cancelled]: (props) => <CancelledFilledIcon {...props} />,
 }
 
-function JobStatusIcon({ status }: { status: WorkbenchJobStatus }) {
+export function JobStatusIcon({ status }: { status: WorkbenchJobStatus }) {
   const Icon = JOB_STATUS_ICONS[status]
 
   return (

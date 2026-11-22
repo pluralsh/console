@@ -50,6 +50,24 @@ defmodule Console.DevboxesTest do
       {:error, _} = Devboxes.upsert_devbox(Map.put(@catalog, :scm_connections, ["missing"]), cluster)
     end
 
+    test "it resolves create bindings by email and group name, keeping them stable across upserts" do
+      cluster = insert(:cluster)
+      user = insert(:user)
+      group = insert(:group)
+      bindings = [%{user_email: user.email}, %{group_name: group.name}, %{user_email: "nobody@example.com"}]
+
+      {:ok, devbox} = Devboxes.upsert_devbox(Map.put(@catalog, :create_bindings, bindings), cluster)
+      %{create_bindings: created} = Console.Repo.preload(devbox, :create_bindings)
+      assert Enum.sort(Enum.map(created, & &1.user_id || &1.group_id)) == Enum.sort([user.id, group.id])
+
+      {:ok, devbox} = Devboxes.upsert_devbox(Map.put(@catalog, :create_bindings, bindings), cluster)
+      %{create_bindings: again} = Console.Repo.preload(devbox, :create_bindings)
+      assert Enum.sort(Enum.map(again, & &1.id)) == Enum.sort(Enum.map(created, & &1.id))
+
+      {:ok, devbox} = Devboxes.upsert_devbox(@catalog, cluster)
+      assert Console.Repo.preload(devbox, :create_bindings).create_bindings == []
+    end
+
     test "it stores the runner's autonomy policy, defaulting to auto" do
       cluster = insert(:cluster)
 
@@ -121,21 +139,50 @@ defmodule Console.DevboxesTest do
   end
 
   describe "#attach_devbox/3" do
-    test "workbench writers can attach and detach a devbox" do
+    test "workbench writers with create access to the devbox can attach and detach it" do
       user = insert(:user)
       workbench = insert(:workbench, write_bindings: [%{user_id: user.id}])
-      devbox = insert(:devbox)
+      devbox = insert(:devbox, create_bindings: [%{user_id: user.id}])
 
       {:ok, %WorkbenchDevbox{}} = Devboxes.attach_devbox(workbench.id, devbox.id, user)
       {:ok, _} = Devboxes.detach_devbox(workbench.id, devbox.id, user)
       {:error, _} = Devboxes.detach_devbox(workbench.id, devbox.id, user)
     end
 
+    test "group create bindings grant attach" do
+      user = insert(:user)
+      group = insert(:group)
+      insert(:group_member, user: user, group: group)
+      workbench = insert(:workbench, write_bindings: [%{user_id: user.id}])
+      devbox = insert(:devbox, create_bindings: [%{group_id: group.id}])
+
+      {:ok, %WorkbenchDevbox{}} = Devboxes.attach_devbox(workbench.id, devbox.id, Console.Repo.preload(user, [:groups]))
+    end
+
+    test "without devbox bindings it falls back to the global create policy" do
+      user = insert(:user)
+      workbench = insert(:workbench, write_bindings: [%{user_id: user.id}])
+      devbox = insert(:devbox)
+
+      {:error, "forbidden"} = Devboxes.attach_devbox(workbench.id, devbox.id, user)
+
+      deployment_settings(create_bindings: [%{user_id: user.id}])
+      {:ok, %WorkbenchDevbox{}} = Devboxes.attach_devbox(workbench.id, devbox.id, user)
+    end
+
+    test "workbench writers without create access to the devbox cannot attach it" do
+      user = insert(:user)
+      workbench = insert(:workbench, write_bindings: [%{user_id: user.id}])
+      devbox = insert(:devbox, create_bindings: [%{user_id: insert(:user).id}])
+
+      {:error, "forbidden"} = Devboxes.attach_devbox(workbench.id, devbox.id, user)
+    end
+
     test "readers cannot attach a devbox" do
       user = insert(:user)
       workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
 
-      {:error, _} = Devboxes.attach_devbox(workbench.id, insert(:devbox).id, user)
+      {:error, _} = Devboxes.attach_devbox(workbench.id, insert(:devbox, create_bindings: [%{user_id: user.id}]).id, user)
     end
   end
 
@@ -146,6 +193,7 @@ defmodule Console.DevboxesTest do
       expect(Control.Test, :create_instance, fn %DevboxInstance{}, %{devbox: %{id: id}, idle_policy: policy} ->
         assert id == devbox.id
         assert policy.max_deferral == 3_600
+        refute Console.Repo.in_transaction?()
         :ok
       end)
 
@@ -156,8 +204,17 @@ defmodule Console.DevboxesTest do
       assert inst.requested_model == "sonnet"
       assert inst.user_id == user.id
       assert inst.template_revision == devbox.template_revision
+      assert inst.name =~ ~r/^[a-z]+-[a-z]+$/
       assert_receive {:event, %Console.PubSub.DevboxInstanceCreated{item: %{id: id}}}
       assert id == inst.id
+    end
+
+    test "it keeps a name the user gives", %{user: user, workbench: wb, devbox: devbox} do
+      expect(Control.Test, :create_instance, fn _, _ -> :ok end)
+
+      {:ok, inst} = Devboxes.create_instance(%{devbox_id: devbox.id, name: "my-box"}, wb.id, user)
+
+      assert inst.name == "my-box"
     end
 
     test "it validates the agent, model and config options", %{user: user, workbench: wb, devbox: devbox} do
@@ -216,11 +273,31 @@ defmodule Console.DevboxesTest do
       {:error, _} = Devboxes.create_instance(%{devbox_id: devbox.id}, wb.id, insert(:user))
     end
 
-    test "it returns a typed error when the cluster is offline", %{user: user, workbench: wb, devbox: devbox} do
+    test "workbench readers outside the devbox's create bindings cannot start instances", %{devbox: devbox} do
+      reader = insert(:user)
+      wb = insert(:workbench, read_bindings: [%{user_id: reader.id}])
+      insert(:workbench_devbox, workbench: wb, devbox: devbox)
+
+      {:error, "forbidden"} = Devboxes.create_instance(%{devbox_id: devbox.id}, wb.id, reader)
+    end
+
+    test "it returns a typed error when the cluster is offline, failing the instance", %{user: user, workbench: wb, devbox: devbox} do
       expect(Control.Test, :create_instance, fn _, _ -> {:error, :not_connected} end)
 
       {:error, %{extensions: %{code: "CLUSTER_OFFLINE"}}} = Devboxes.create_instance(%{devbox_id: devbox.id}, wb.id, user)
-      refute Console.Repo.exists?(DevboxInstance)
+
+      [inst] = Console.Repo.all(DevboxInstance)
+      assert inst.status == :failed
+      assert inst.status_reason =~ "could not start on the cluster"
+      assert inst.credentials_revoked_at
+      assert_receive {:event, %PubSub.DevboxInstanceEnded{item: %{id: id}}}
+      assert id == inst.id
+    end
+
+    test "a failed start doesn't count against max instances", %{user: user, workbench: wb, devbox: devbox} do
+      expect(Control.Test, :create_instance, 3, fn _, _ -> {:error, "boom"} end)
+
+      for _ <- 1..3, do: {:error, "boom"} = Devboxes.create_instance(%{devbox_id: devbox.id}, wb.id, user)
     end
 
     test "it restores snapshots, falling back to filesystem fidelity on a new template", %{user: user, workbench: wb, devbox: devbox} do
@@ -300,6 +377,15 @@ defmodule Console.DevboxesTest do
       assert Devboxes.complete_stale_instances() == []
       assert refetch(inst).status == :suspended
     end
+
+    test "a wake that outlasts the call is accepted, while failures stay errors" do
+      inst = owned_instance(status: :suspended)
+      expect(Control.Test, :resume_instance, fn _ -> {:error, :starting} end)
+      {:ok, _} = Devboxes.resume_instance(inst.id, inst.user)
+
+      expect(Control.Test, :resume_instance, fn _ -> {:error, "resuming instance: actor crashed"} end)
+      {:error, "resuming instance: actor crashed"} = Devboxes.resume_instance(inst.id, inst.user)
+    end
   end
 
   describe "#complete_stale_instances/0" do
@@ -319,11 +405,28 @@ defmodule Console.DevboxesTest do
     end
   end
 
+  describe "#fail_unstarted_instances/0" do
+    test "it fails instances that stayed pending, as they never reached their cluster" do
+      stuck = insert(:devbox_instance, status: :pending, inserted_at: Timex.now() |> Timex.shift(minutes: -15))
+      fresh = insert(:devbox_instance, status: :pending)
+      started = insert(:devbox_instance, status: :provisioning, inserted_at: Timex.now() |> Timex.shift(minutes: -15))
+
+      [failed] = Devboxes.fail_unstarted_instances()
+
+      assert failed.id == stuck.id
+      assert failed.status == :failed
+      assert failed.status_reason == "never reached its cluster"
+      assert refetch(fresh).status == :pending
+      assert refetch(started).status == :provisioning
+    end
+  end
+
   describe "#create_snapshot/3" do
     test "it creates a pending snapshot and asks the gateway" do
       inst = owned_instance()
       expect(Control.Test, :snapshot_instance, fn %{id: id}, %DevboxSnapshot{status: :pending} ->
         assert id == inst.id
+        refute Console.Repo.in_transaction?()
         :ok
       end)
 
@@ -333,6 +436,17 @@ defmodule Console.DevboxesTest do
       assert snapshot.workbench_id == inst.workbench_id
       assert snapshot.devbox_id == inst.devbox_id
       assert snapshot.name == "before upgrade"
+    end
+
+    test "a snapshot the gateway refuses is failed" do
+      inst = owned_instance()
+      expect(Control.Test, :snapshot_instance, fn _, _ -> {:error, :not_connected} end)
+
+      {:error, %{extensions: %{code: "CLUSTER_OFFLINE"}}} = Devboxes.create_snapshot(%{}, inst.id, inst.user)
+
+      [snapshot] = Console.Repo.all(DevboxSnapshot)
+      assert snapshot.status == :failed
+      assert snapshot.error
     end
   end
 
@@ -424,6 +538,7 @@ defmodule Console.DevboxesTest do
     user = insert(:user)
     wb = insert(:workbench, read_bindings: [%{user_id: user.id}], configuration: devbox_config(max_deferral: 3_600))
     devbox = insert(:devbox,
+      create_bindings: [%{user_id: user.id}],
       max_instances: 2,
       allowed_repositories: ["https://github.com/pluralsh/console"],
       agents: [

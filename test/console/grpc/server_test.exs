@@ -5,6 +5,26 @@ defmodule Console.GRPC.ServerTest do
   alias Console.AI.Provider
   alias Console.GRPC.Server
 
+  describe "proxy_authentication/2" do
+    test "it accepts the ai proxy and console tokens of live devbox instances" do
+      inst = insert(:devbox_instance)
+      {:ok, proxy, _} = Console.Devboxes.Credentials.mint_ai_proxy_token(inst)
+      {:ok, console, _} = Console.Devboxes.Credentials.console_token(inst)
+
+      for token <- [proxy, console] do
+        assert Server.proxy_authentication(%Plrl.ProxyAuthenticationRequest{token: token}, nil).authenticated
+      end
+    end
+
+    test "it rejects tokens of revoked devbox instances" do
+      inst = insert(:devbox_instance)
+      {:ok, token, _} = Console.Devboxes.Credentials.mint_ai_proxy_token(inst)
+      {:ok, _} = Console.Devboxes.Credentials.revoke(inst)
+
+      refute Server.proxy_authentication(%Plrl.ProxyAuthenticationRequest{token: token}, nil).authenticated
+    end
+  end
+
   describe "get_ai_config/2" do
     test "uses a dummy OpenAI-compatible api key when no token is configured" do
       deployment_settings(

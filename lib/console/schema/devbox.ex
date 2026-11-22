@@ -1,6 +1,6 @@
 defmodule Console.Schema.Devbox do
   use Console.Schema.Base
-  alias Console.Schema.{Cluster, DevboxScmConnection, WorkbenchDevbox, DevboxInstance, DevboxSnapshot, PullRequest}
+  alias Console.Schema.{Cluster, DevboxScmConnection, WorkbenchDevbox, DevboxInstance, DevboxSnapshot, PullRequest, PolicyBinding}
   alias Console.Deployments.Pr.Git
 
   defenum Status, pending: 0, ready: 1, degraded: 2, failed: 3
@@ -126,6 +126,7 @@ defmodule Console.Schema.Devbox do
     field :max_instances,        :integer
     field :browser,              :boolean, default: false
     field :last_heartbeat_at,    :utc_datetime_usec
+    field :create_policy_id,     :binary_id
 
     embeds_many :agents, Agent, on_replace: :delete
 
@@ -178,6 +179,11 @@ defmodule Console.Schema.Devbox do
     has_many :instances, DevboxInstance
     has_many :snapshots, DevboxSnapshot
     has_many :pull_requests, PullRequest
+
+    has_many :create_bindings, PolicyBinding,
+      on_replace: :delete,
+      foreign_key: :policy_id,
+      references: :create_policy_id
 
     timestamps()
   end
@@ -267,6 +273,8 @@ defmodule Console.Schema.Devbox do
     |> validate_length(:name, max: 255)
     |> validate_required([:name, :cluster_id])
     |> validate_agents()
+    |> put_new_change(:create_policy_id, &Ecto.UUID.generate/0)
+    |> cast_assoc(:create_bindings)
   end
 
   def heartbeat_changeset(model, attrs \\ %{}) do

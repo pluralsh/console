@@ -39,6 +39,8 @@ defmodule Console.Devboxes.Control.Test do
   @impl true
   def cancel_prompt(_, _), do: :ok
   @impl true
+  def update_queued_prompt(_, _, _, _, _), do: {:ok, %{updated: true, queued_prompts: []}}
+  @impl true
   def set_config_option(_, _, _, _), do: :ok
   @impl true
   def respond(_, _, _), do: :ok
@@ -63,6 +65,8 @@ defmodule Console.Devboxes.Control.Test do
     do: {:ok, %{entry: %{path: path, name: Path.basename(path), type: :file}, sha256: Base.encode16(:crypto.hash(:sha256, content), case: :lower)}}
   @impl true
   def get_changes(_, _), do: {:ok, []}
+  @impl true
+  def prepare_pull_request(_, _), do: {:error, "not stubbed"}
   @impl true
   def open_stream(_, kind, opts) do
     {:ok, %{

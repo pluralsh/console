@@ -11,8 +11,8 @@ spec:
   agents:
     - type: claude
       default: true
-      models: [claude-sonnet-4-5, claude-opus-4-1]
-      defaultModel: claude-sonnet-4-5
+      models: [claude-sonnet-5-5, claude-opus-5-5]
+      defaultModel: claude-sonnet-5-5
     - type: codex
       acpV2: true
   resources:

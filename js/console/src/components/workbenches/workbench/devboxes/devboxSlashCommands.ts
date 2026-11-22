@@ -70,6 +70,18 @@ export function groupSlashCommands(commands: DevboxCommandFragment[]) {
   return [...groups.entries()].map(([label, items]) => ({ label, items }))
 }
 
+export const SLASH_COMMAND_ATTR = 'data-slash-command'
+
+// styled in the composer, but not a serialized chip: it contributes its plain
+// `/name` text, which is how agents recognize a command
+export function slashCommandChip(name: string): HTMLElement {
+  const chip = document.createElement('span')
+  chip.setAttribute(SLASH_COMMAND_ATTR, 'true')
+  chip.setAttribute('contenteditable', 'false')
+  chip.textContent = `/${name}`
+  return chip
+}
+
 export function applySlashCommand(
   text: string,
   command: DevboxCommandFragment

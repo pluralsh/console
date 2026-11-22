@@ -88,8 +88,8 @@ func TestBuildPolicyDefaultGateway(t *testing.T) {
 
 	SetGatewayEndpoint(GatewayEndpoint{Host: "gw.ns.svc", Port: 8080})
 	p := BuildPolicy(InstanceInfo{InstanceID: "i"})
-	if len(p.Rules) != 1 {
-		t.Fatalf("want 1 rule, got %+v", p.Rules)
+	if len(p.Rules) != 2 || p.Rules[1].Host != "gw.ns.svc."+clusterDomain() || !p.Rules[1].ActorJWT {
+		t.Fatalf("want the gateway rule under its short and full names, got %+v", p.Rules)
 	}
 	r := p.Rules[0]
 	if !r.ActorJWT || r.Scheme != SchemeHTTP || r.Port != 8080 || r.Prefix != "Bearer " ||
@@ -105,5 +105,18 @@ func TestSubscriptionOnlyAddsAnthropicForClaude(t *testing.T) {
 		if r.Host == "api.anthropic.com" {
 			t.Fatalf("codex subscription must not inject claude oauth: %+v", r)
 		}
+	}
+}
+
+func TestClusterDomainOf(t *testing.T) {
+	conf := "search plrl-deploy-operator.svc.corp.internal svc.corp.internal corp.internal us-east-2.compute.internal\nnameserver 172.20.0.10\noptions ndots:5\n"
+	if got := clusterDomainOf(conf); got != "corp.internal" {
+		t.Fatalf("cluster domain %q", got)
+	}
+	if got := clusterDomainOf("nameserver 8.8.8.8\n"); got != "cluster.local" {
+		t.Fatalf("default cluster domain %q", got)
+	}
+	if got := serviceFQDN("console.example.com"); got != "" {
+		t.Fatalf("non-service host got a fqdn: %q", got)
 	}
 }

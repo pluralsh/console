@@ -46,6 +46,13 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
-	p := &prep{config: cfg, exec: osExec{}, nodes: clientset.CoreV1().Nodes(), mountinfo: "/proc/self/mountinfo"}
+	p := &prep{
+		config:    cfg,
+		exec:      osExec{},
+		nodes:     clientset.CoreV1().Nodes(),
+		pods:      clientset.CoreV1(),
+		mountinfo: "/proc/self/mountinfo",
+		birthTime: fsBirthTime,
+	}
 	p.loop(ctx)
 }

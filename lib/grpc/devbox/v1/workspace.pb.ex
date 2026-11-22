@@ -287,6 +287,72 @@ defmodule Devbox.V1.GetChangesRequest do
   field :path, 7, type: :string
 end
 
+defmodule Devbox.V1.BranchDiffStatRequest do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "devbox.v1.BranchDiffStatRequest",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :instance_id, 1, type: :string, json_name: "instanceId"
+  field :repository, 2, type: :string
+  field :base, 3, type: :string
+  field :head, 4, type: :string
+end
+
+defmodule Devbox.V1.BranchDiffStatResponse do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "devbox.v1.BranchDiffStatResponse",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :additions, 1, type: :int32
+  field :deletions, 2, type: :int32
+  field :files, 3, type: :int32
+  field :base_sha, 4, type: :string, json_name: "baseSha"
+  field :head_sha, 5, type: :string, json_name: "headSha"
+end
+
+defmodule Devbox.V1.PreparePullRequestRequest do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "devbox.v1.PreparePullRequestRequest",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :instance_id, 1, type: :string, json_name: "instanceId"
+  field :repository, 2, type: :string
+  field :model, 3, type: :string
+  field :agent, 4, type: Devbox.V1.AgentType, enum: true
+  field :thread_id, 5, type: :string, json_name: "threadId"
+end
+
+defmodule Devbox.V1.PreparePullRequestResponse do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "devbox.v1.PreparePullRequestResponse",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :remote_url, 1, type: :string, json_name: "remoteUrl"
+  field :checkout_path, 2, type: :string, json_name: "checkoutPath"
+  field :head_branch, 3, type: :string, json_name: "headBranch"
+  field :base_branch, 4, type: :string, json_name: "baseBranch"
+  field :title, 5, type: :string
+  field :body, 6, type: :string
+  field :base_sha, 7, type: :string, json_name: "baseSha"
+  field :head_sha, 8, type: :string, json_name: "headSha"
+  field :additions, 9, type: :int32
+  field :deletions, 10, type: :int32
+  field :committed, 11, type: :bool
+  field :writer, 12, type: :string
+end
+
 defmodule Devbox.V1.GetChangesResponse do
   @moduledoc false
 

@@ -13,6 +13,7 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 
+	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/probe"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate/ateapi"
@@ -33,6 +34,11 @@ type fakeSubstrate struct {
 }
 
 var _ substrate.API = &fakeSubstrate{}
+
+// For makes the fake its own SubstrateClients, handing every runner the same API.
+func (f *fakeSubstrate) For(context.Context, *v1alpha1.DevboxRunner) (substrate.API, error) {
+	return f, nil
+}
 
 func newFakeSubstrate() *fakeSubstrate {
 	return &fakeSubstrate{
@@ -136,6 +142,9 @@ func (f *fakeSubstrate) ListActorTemplates(_ context.Context, atespace string) (
 func (f *fakeSubstrate) DeleteActorTemplate(_ context.Context, atespace, name string) error {
 	f.mu.Lock()
 	defer f.mu.Unlock()
+	if t, ok := f.templates[atespace][name]; ok {
+		delete(f.actors[atespace], t.GetMetadata().GetUid())
+	}
 	delete(f.templates[atespace], name)
 	return nil
 }
@@ -175,6 +184,12 @@ func (f *fakeSubstrate) DeleteTag(_ context.Context, atespace, name string) erro
 }
 
 // finishGoldenBoot plays Substrate's template controller: it records the golden tag on the template.
+func (f *fakeSubstrate) failGoldenBoot(atespace, template, msg string) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.templates[atespace][template].Status = &ateapi.ActorTemplateStatus{GoldenSnapshotStatus: &ateapi.GoldenSnapshotStatus{ErrorMessage: msg}}
+}
+
 func (f *fakeSubstrate) finishGoldenBoot(atespace, template string) string {
 	f.mu.Lock()
 	defer f.mu.Unlock()

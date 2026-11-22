@@ -47,6 +47,7 @@ service Gateway {
 
   rpc Prompt(PromptRequest) returns (PromptResponse);
   rpc CancelPrompt(CancelPromptRequest) returns (CancelPromptResponse);
+  rpc UpdateQueuedPrompt(UpdateQueuedPromptRequest) returns (UpdateQueuedPromptResponse);
   rpc SetThreadConfigOption(SetThreadConfigOptionRequest) returns (SetThreadConfigOptionResponse);
   rpc RespondInteraction(RespondInteractionRequest) returns (RespondInteractionResponse);
   rpc ListCommands(ListCommandsRequest) returns (ListCommandsResponse);
@@ -62,6 +63,7 @@ service Gateway {
   rpc ReadFile(ReadFileRequest) returns (ReadFileResponse);
   rpc WriteFile(WriteFileRequest) returns (WriteFileResponse);
   rpc GetChanges(GetChangesRequest) returns (GetChangesResponse);
+  rpc PreparePullRequest(PreparePullRequestRequest) returns (PreparePullRequestResponse);
 
   rpc OpenStream(OpenStreamRequest) returns (OpenStreamResponse);
 

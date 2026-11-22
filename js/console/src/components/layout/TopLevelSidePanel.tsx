@@ -7,6 +7,7 @@ import {
   AgentRunPanelContent,
   AgentRunPanelProvider,
 } from 'components/ai/agent-runs/details/AgentRunPanel'
+import { DevboxPanelContent } from 'components/workbenches/workbench/devboxes/DevboxControlPanel'
 import { WorkbenchJobPanelContent } from 'components/workbenches/workbench/job/WorkbenchJobPanel'
 import {
   WebhookSetupGuidePanelContent,
@@ -98,6 +99,8 @@ function TopLevelSidePanelContent({
       return <WebhookSetupGuidePanelContent />
     case 'workbench-job':
       return <WorkbenchJobPanelContent />
+    case 'devbox':
+      return <DevboxPanelContent />
     case 'agent-run':
       return <AgentRunPanelContent />
     case 'ai-chat':

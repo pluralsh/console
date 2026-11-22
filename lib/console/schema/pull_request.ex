@@ -24,7 +24,7 @@ defmodule Console.Schema.PullRequest do
 
   defenum Status, open: 0, merged: 1, closed: 2
   defenum ChangeType, gitops: 0, application: 1, configuration: 2
-  defenum Source, mcp: 0, egress: 1
+  defenum Source, mcp: 0, egress: 1, devbox: 2
 
   schema "pull_requests" do
     field :url,                :string
@@ -233,11 +233,13 @@ defmodule Console.Schema.PullRequest do
     from(pr in query, where: not is_nil(pr.workbench_job_id))
   end
 
+  # devbox PRs carry only workbench_id, workbench job PRs may only be linked through their job
   def for_workbenches(query \\ __MODULE__, workbench_query) do
+    ids = Workbench.ids(workbench_query)
     from(pr in query,
-      join: j in WorkbenchJob,
+      left_join: j in WorkbenchJob,
         on: j.id == pr.workbench_job_id,
-      where: j.workbench_id in subquery(Workbench.ids(workbench_query))
+      where: j.workbench_id in subquery(ids) or pr.workbench_id in subquery(ids)
     )
   end
 

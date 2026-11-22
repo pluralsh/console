@@ -1,5 +1,38 @@
+import {
+  ApolloClient,
+  ApolloLink,
+  InMemoryCache,
+  Observable,
+} from '@apollo/client'
 import { describe, expect, it } from 'vitest'
-import { devboxBrowserUrl } from './devboxWorkspaceApi'
+import { createWorkspaceApi, devboxBrowserUrl } from './devboxWorkspaceApi'
+
+describe('cachedFiles', () => {
+  it("returns a directory's last listing, keyed by path", async () => {
+    const entry = {
+      __typename: 'DevboxFileEntry',
+      path: '/home/dev/a.ts',
+      name: 'a.ts',
+      type: 'file',
+      size: 1,
+      modifiedAt: null,
+      symlinkTarget: null,
+      repository: null,
+      gitStatus: null,
+    }
+    const client = new ApolloClient({
+      cache: new InMemoryCache(),
+      link: new ApolloLink(() =>
+        Observable.of({ data: { devboxFiles: [entry] } })
+      ),
+    })
+    const api = createWorkspaceApi(client, 'i1')
+    expect(api.cachedFiles?.('~')).toBeNull()
+    await api.listFiles?.('~')
+    expect(api.cachedFiles?.('~')?.map((e) => e.name)).toEqual(['a.ts'])
+    expect(api.cachedFiles?.('/home/dev/src')).toBeNull()
+  })
+})
 
 describe('devboxBrowserUrl', () => {
   it('treats a bare port as localhost', () => {

@@ -41,6 +41,23 @@ defmodule Console.Schema.DevboxInstanceSession do
     def values(%__MODULE__{options: options}), do: Enum.map(options || [], & &1.value)
   end
 
+  defmodule QueuedPrompt do
+    use Console.Schema.Base
+
+    embedded_schema do
+      field :prompt_id,    :string
+      field :text,         :string
+      field :attachments,  {:array, :string}
+      field :queued_at,    :utc_datetime_usec
+    end
+
+    def changeset(model, attrs \\ %{}) do
+      model
+      |> cast(attrs, ~w(prompt_id text attachments queued_at)a)
+      |> validate_required([:prompt_id])
+    end
+  end
+
   defmodule Command do
     use Console.Schema.Base
 
@@ -77,9 +94,11 @@ defmodule Console.Schema.DevboxInstanceSession do
     field :background_work,       :map
     field :billing,               :string
     field :revision,              :integer, default: 0
+    field :parent_tool_call_id,   :string
 
     embeds_many :config_options,     ConfigOption, on_replace: :delete
     embeds_many :available_commands, Command, on_replace: :delete
+    embeds_many :queued_prompts,     QueuedPrompt, on_replace: :delete
 
     embeds_one :usage, Usage, on_replace: :update do
       field :input_tokens,     :integer
@@ -123,6 +142,33 @@ defmodule Console.Schema.DevboxInstanceSession do
   end
   def model(_), do: nil
 
+  @doc """
+  Where a thread sits in its lifecycle: `:needs_review` only while an interaction (a permission or question) is
+  pending, `:running` while a turn is in flight or queued, otherwise `:completed` (its last turn finished or
+  failed, or it was closed).  `for_stages/2` is the same rule as a query.
+  """
+  @spec stage(map) :: :running | :needs_review | :completed
+  def stage(%{status: s}) when s in [:closed, :deleted], do: :completed
+  def stage(%{foreground_state: :requires_action}), do: :needs_review
+  def stage(%{status: :waiting}), do: :running
+  def stage(%{foreground_state: :running}), do: :running
+  def stage(_), do: :completed
+
+  def for_stages(query \\ __MODULE__, stages) do
+    conditions = Enum.reduce(stages, dynamic(false), fn
+      :completed, acc ->
+        dynamic([s], ^acc or s.status in ^[:closed, :deleted] or
+                              (s.foreground_state not in ^[:requires_action, :running] and s.status != ^:waiting))
+      :running, acc ->
+        dynamic([s], ^acc or (s.status not in ^[:closed, :deleted] and s.foreground_state != ^:requires_action and
+                              (s.status == ^:waiting or s.foreground_state == ^:running)))
+      :needs_review, acc ->
+        dynamic([s], ^acc or (s.status not in ^[:closed, :deleted] and s.foreground_state == ^:requires_action))
+      _, acc -> acc
+    end)
+    from(s in query, where: ^conditions)
+  end
+
   def for_instance(query \\ __MODULE__, instance_id) do
     from(s in query, where: s.instance_id == ^instance_id)
   end
@@ -157,13 +203,14 @@ defmodule Console.Schema.DevboxInstanceSession do
 
   @valid ~w(instance_id acp_session_id kind parent_id parent_acp_session_id agent title user_title cwd worktree_repos
             worktree_path status imported user_id last_activity_at entity_count foreground_state stop_reason error
-            background_work billing revision)a
+            background_work billing revision parent_tool_call_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
     |> cast_embed(:config_options)
     |> cast_embed(:available_commands)
+    |> cast_embed(:queued_prompts)
     |> cast_embed(:usage, with: &usage_changeset/2)
     |> foreign_key_constraint(:instance_id)
     |> foreign_key_constraint(:parent_id)

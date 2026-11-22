@@ -184,3 +184,51 @@ func TestWorktrees(t *testing.T) {
 		t.Fatalf("single-repo worktree cwd %s %v", single, err)
 	}
 }
+
+// A box restored from a snapshot can hydrate before its network is back: clones that couldn't reach the remote
+// aren't recorded as done, so the next boot retries them and clears the condition.
+func TestHydrationRetriesUnreachableClones(t *testing.T) {
+	t.Setenv("GIT_CONFIG_GLOBAL", "/dev/null")
+	home := t.TempDir()
+	remote := filepath.Join(t.TempDir(), "acme", "api")
+	type cond struct {
+		msg    string
+		active bool
+	}
+	var conds []cond
+	open := func() *Manager {
+		m, err := New(Options{Home: home, StateDir: filepath.Join(home, ".plural"), CloneRetry: -1,
+			Log:       slog.New(slog.NewTextHandler(io.Discard, nil)),
+			Condition: func(_, _, msg string, active bool) { conds = append(conds, cond{msg, active}) }})
+		if err != nil {
+			t.Fatal(err)
+		}
+		return m
+	}
+	repos := []*devboxv1.RepositorySpec{{Url: remote}}
+
+	if err := open().Hydrate(context.Background(), repos); err == nil {
+		t.Fatal("hydrating from a missing remote should fail")
+	}
+	if len(conds) != 1 || !conds[0].active {
+		t.Fatalf("conditions = %v, want one active failure", conds)
+	}
+	m := open()
+	if m.Hydrated() {
+		t.Fatal("a failed clone was recorded as hydrated")
+	}
+
+	gittest.Repo(t, remote, map[string]string{"main.go": "package main\n"})
+	if err := m.Hydrate(context.Background(), repos); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(filepath.Join(home, "api", "main.go")); err != nil {
+		t.Fatalf("not cloned on the next boot: %v", err)
+	}
+	if last := conds[len(conds)-1]; last.active {
+		t.Errorf("conditions = %v, want the failure cleared", conds)
+	}
+	if !open().Hydrated() {
+		t.Error("a finished hydration wasn't recorded")
+	}
+}

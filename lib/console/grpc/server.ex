@@ -2,6 +2,7 @@ defmodule Console.GRPC.Server do
   use GRPC.Server, service: Plrl.PluralServer.Service
   alias Console.AI.Provider
   alias Console.Deployments.{Settings, Agents, Clusters}
+  alias Console.Devboxes.Credentials
   alias Console.Schema.{DeploymentSettings, User, Cluster}
 
   @dummy_key "ignore"
@@ -25,6 +26,12 @@ defmodule Console.GRPC.Server do
   end
 
   def proxy_authentication(%Plrl.ProxyAuthenticationRequest{token: token}, _) do
+    if Credentials.devbox_token?(token),
+      do: %Plrl.ProxyAuthenticationResponse{authenticated: match?({:ok, _}, Credentials.verify_ai_proxy(token))},
+      else: user_authentication(token)
+  end
+
+  defp user_authentication(token) do
     case Console.authed_user(token) do
       %User{} ->
         %Plrl.ProxyAuthenticationResponse{authenticated: true}

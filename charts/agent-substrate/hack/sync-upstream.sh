@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Copies the files this chart embeds verbatim from a Substrate checkout into
-# files/, at a given git ref (default: the chart's appVersion).
+# files/ and the CRDs into crds/, at a given git ref (default: the chart's appVersion).
 #
 #   hack/sync-upstream.sh [SUBSTRATE_DIR] [REF]
 #
@@ -23,16 +23,18 @@ command -v yq >/dev/null || { echo "yq (mikefarah/yq v4) is required" >&2; exit 
 [[ -d "$SUBSTRATE_DIR/.git" ]] || { echo "no Substrate checkout at $SUBSTRATE_DIR" >&2; exit 1; }
 
 OUT="$CHART_DIR/files"
+CRDS="$CHART_DIR/crds"
 if $CHECK; then
   OUT="$(mktemp -d)"
+  CRDS="$OUT/crds"
   trap 'rm -rf "$OUT"' EXIT
 fi
-mkdir -p "$OUT/crds" "$OUT/envoy" "$OUT/sandboxconfig"
+mkdir -p "$CRDS" "$OUT/envoy" "$OUT/sandboxconfig"
 
 show() { git -C "$SUBSTRATE_DIR" show "$REF:$1"; }
 
 for crd in csidriverconfigs sandboxconfigs workerpools; do
-  show "manifests/ate-install/generated/ate.dev_${crd}.yaml" >"$OUT/crds/ate.dev_${crd}.yaml"
+  show "manifests/ate-install/generated/ate.dev_${crd}.yaml" >"$CRDS/ate.dev_${crd}.yaml"
 done
 
 show manifests/ate-install/atenet-router.yaml |
@@ -57,9 +59,9 @@ commit="$(git -C "$SUBSTRATE_DIR" rev-parse "$REF^{commit}")"
 printf 'ref: %s\ncommit: %s\n' "$REF" "$commit" >"$OUT/UPSTREAM"
 
 if $CHECK; then
-  if ! diff -ru "$CHART_DIR/files" "$OUT" -x scripts; then
-    echo "files/ is out of date with Substrate $REF; run hack/sync-upstream.sh" >&2
+  if ! diff -ru "$CHART_DIR/files" "$OUT" -x scripts -x crds || ! diff -ru "$CHART_DIR/crds" "$CRDS"; then
+    echo "files/ or crds/ is out of date with Substrate $REF; run hack/sync-upstream.sh" >&2
     exit 1
   fi
-  echo "files/ matches Substrate $REF ($commit)"
+  echo "files/ and crds/ match Substrate $REF ($commit)"
 fi

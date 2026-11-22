@@ -246,16 +246,20 @@ func (m *Manager) startConn(ctx context.Context, launch *devboxv1.AgentLaunch, b
 	if spec.RequestV2 {
 		version = 2
 	}
+	clientCaps := map[string]any{
+		"fs":          map[string]any{"readTextFile": true, "writeTextFile": true},
+		"terminal":    true,
+		"elicitation": map[string]any{"form": map[string]any{}, "url": map[string]any{}},
+	}
+	if spec.NativeSubagents {
+		acp.AdvertiseNativeSubagents(clientCaps)
+	}
 	ictx, cancel := context.WithTimeout(ctx, initializeTimeout)
 	defer cancel()
 	res, err := c.call(ictx, acp.MethodInitialize, map[string]any{
-		"protocolVersion": version,
-		"clientCapabilities": map[string]any{
-			"fs":          map[string]any{"readTextFile": true, "writeTextFile": true},
-			"terminal":    true,
-			"elicitation": map[string]any{"form": map[string]any{}, "url": map[string]any{}},
-		},
-		"clientInfo": map[string]any{"name": "devbox-daemon", "title": "Plural DevBox", "version": Version},
+		"protocolVersion":    version,
+		"clientCapabilities": clientCaps,
+		"clientInfo":         map[string]any{"name": "devbox-daemon", "title": "Plural DevBox", "version": Version},
 	})
 	if err != nil {
 		c.stop(time.Second)
@@ -265,7 +269,11 @@ func (m *Manager) startConn(ctx context.Context, launch *devboxv1.AgentLaunch, b
 	if c.caps.protocolVersion == 0 {
 		c.caps.protocolVersion = version
 	}
-	c.norm = acp.NewNormalizer(c.caps.protocolVersion, spec.Lineage)
+	var opts []acp.Option
+	if spec.TranscriptTool != "" {
+		opts = append(opts, acp.TranscriptTool(spec.TranscriptTool))
+	}
+	c.norm = acp.NewNormalizer(c.caps.protocolVersion, spec.Lineage, opts...)
 	if id := spec.AuthMethodID; id != "" && hasAuthMethod(c.caps.authMethods, id) {
 		if _, err := c.call(ictx, acp.MethodAuthenticate, map[string]any{"methodId": id}); err != nil {
 			c.stop(time.Second)
@@ -275,6 +283,9 @@ func (m *Manager) startConn(ctx context.Context, launch *devboxv1.AgentLaunch, b
 	c.mu.Lock()
 	c.state = stateRunning
 	c.mu.Unlock()
+	if spec.OpenCodeServer != nil {
+		go c.watchOpenCodeSubagents(spec.OpenCodeServer)
+	}
 	m.log.Info("agent connected", "agent", harness.AgentName(c.agent), "protocol", c.caps.protocolVersion,
 		"adapter", c.caps.agentName, "adapterVersion", c.caps.agentVersion, "billing", spec.Billing.String())
 	return c, nil

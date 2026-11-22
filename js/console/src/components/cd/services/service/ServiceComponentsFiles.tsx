@@ -4,6 +4,8 @@ import { Code, EmptyState, FolderIcon, Tooltip } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import {
+  FILE_TREE_GLYPH_SIZE,
+  FILE_TREE_ICON_SIZE,
   FileTypeIcon,
   fileTreeMuiTheme,
   StyledTreeView,
@@ -233,9 +235,12 @@ export function ComponentsFilesView() {
               >
                 <TreeItemIcon>
                   {node.isFile ? (
-                    <FileTypeIcon fileName={node.name} />
+                    <FileTypeIcon
+                      fileName={node.name}
+                      size={FILE_TREE_ICON_SIZE}
+                    />
                   ) : (
-                    <FolderIcon size={14} />
+                    <FolderIcon size={FILE_TREE_GLYPH_SIZE} />
                   )}
                 </TreeItemIcon>
                 <TreeItemText>{node.name}</TreeItemText>

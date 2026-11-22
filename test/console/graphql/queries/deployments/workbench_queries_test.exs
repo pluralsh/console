@@ -3219,6 +3219,8 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       insert(:pull_request, workbench_job: job, status: :merged, difficulty: difficulty.(:configuration, 4))
       insert(:pull_request, workbench_job: job, status: :merged)
       insert(:pull_request, workbench_job: job, status: :closed, difficulty: difficulty.(:application, 1000))
+      # a devbox PR, linked only by workbench
+      insert(:pull_request, workbench: wb, status: :merged, difficulty: difficulty.(:gitops, 150))
 
       other = insert(:workbench_job, usage: %{total_tokens: 1000})
       insert(:pull_request, workbench_job: other, status: :merged, difficulty: difficulty.(:application, 1000))
@@ -3233,8 +3235,8 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
         }
       """, %{"projectId" => project.id}, %{current_user: admin_user()})
 
-      assert agg["pullRequests"] == 4
-      assert agg["hoursSaved"] == 4.25
+      assert agg["pullRequests"] == 5
+      assert agg["hoursSaved"] == 5.25
       assert agg["totalTokens"] == 165
     end
 

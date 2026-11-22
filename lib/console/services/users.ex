@@ -15,7 +15,8 @@ defmodule Console.Services.Users do
     BootstrapToken,
     Persona,
     RefreshToken,
-    ChatSequence
+    ChatSequence,
+    PolicyBinding
   }
   alias Console.Repo
 
@@ -115,6 +116,31 @@ defmodule Console.Services.Users do
   def group_by_names(names) do
     Group.with_names(names)
     |> Repo.all()
+  end
+
+  @doc """
+  Resolves `user_email`/`group_name` binding attributes to policy bindings, reusing the ids of `existing` bindings
+  for the same user or group so they update in place.  Unknown users and groups are dropped.
+  """
+  @spec stabilize_bindings([map], [PolicyBinding.t] | nil) :: [map]
+  def stabilize_bindings(bindings, existing) do
+    by_name = Map.new(existing || [], & {&1.group_id || &1.user_id, &1.id})
+    emails  = Enum.map(bindings, & &1[:user_email]) |> Enum.filter(& &1)
+    groups  = Enum.map(bindings, & &1[:group_name]) |> Enum.filter(& &1)
+    users_groups = user_by_emails(emails)
+                   |> Map.new(& {&1.email, &1})
+    users_groups = group_by_names(groups)
+                   |> Enum.map(& {&1.name, &1})
+                   |> Enum.into(users_groups)
+
+    Enum.map(bindings, fn binding ->
+      case Map.get(users_groups, binding[:user_email] || binding[:group_name]) do
+        %User{id: id} -> %{user_id: id, id: by_name[id]}
+        %Group{id: id} -> %{group_id: id, id: by_name[id]}
+        _ -> nil
+      end
+    end)
+    |> Enum.filter(& &1)
   end
 
   @spec unread_notifications(User.t) :: integer

@@ -40,6 +40,13 @@ export const authlessCacheConfig: InMemoryCacheConfig = {
 export const authenticatedCacheConfig: InMemoryCacheConfig = {
   possibleTypes: fragments.possibleTypes,
   typePolicies: {
+    // un-normalized and fetched piecemeal, e.g. the devbox tab only asks for
+    // its own limits, so replacing would evict the rest of the workbench
+    WorkbenchConfiguration: { merge: true },
+    WorkbenchCoding: { merge: true },
+    WorkbenchDevboxConfig: { merge: true },
+    WorkbenchInfrastructure: { merge: true },
+    WorkbenchObservability: { merge: true },
     Command: {
       fields: {
         exitCode: {

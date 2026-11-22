@@ -1,9 +1,5 @@
-import {
-  Button,
-  Flex,
-  SidePanelOpenIcon,
-  useSetBreadcrumbs,
-} from '@pluralsh/design-system'
+import { Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { PanelRail } from 'components/layout/PanelRail'
 import { WorkbenchEmptyState } from 'components/workbenches/common/WorkbenchEmptyState'
 import { RunStatusIcon } from 'components/ai/agent-runs/AgentRunInfoDisplays'
 import { useSidePanelWidth } from 'components/layout/TopLevelSidePanel'
@@ -28,7 +24,9 @@ import { WorkbenchJobActivities } from './WorkbenchJobActivities'
 import { WorkbenchJobMeta } from './WorkbenchJobMeta'
 import { isJobRunning } from './WorkbenchJobActivity'
 import {
+  getWorkbenchJobPanelTabs,
   hasWorkbenchJobPanelTabs,
+  jobPanelTabLabel,
   useWorkbenchJobPanel,
   useWorkbenchJobTabsData,
 } from './WorkbenchJobPanel'
@@ -49,7 +47,7 @@ export function WorkbenchJob() {
   const panelData = useWorkbenchJobTabsData(jobId)
   const hasPanelContent = !!job?.id && hasWorkbenchJobPanelTabs(panelData)
 
-  const { isOpen, setOpen } = useWorkbenchJobPanel({
+  const { isOpen, setOpen, setPanelTab } = useWorkbenchJobPanel({
     hasContent: hasPanelContent,
     loading: isLoading || panelData.isLoading || panelData.areActionsLoading,
     key: jobId,
@@ -155,22 +153,24 @@ export function WorkbenchJob() {
         </WrapperSC>
       </MainColumnSC>
       {hasPanelContent && !isOpen && (
-        <PanelOpenBtnSC
-          tertiary
-          onClick={() => setOpen(true)}
-        >
-          <SidePanelOpenIcon />
-        </PanelOpenBtnSC>
+        <PanelRail
+          tabs={getWorkbenchJobPanelTabs(panelData, 16).map(
+            ({ label, icon, showDot }) => ({
+              key: label,
+              label: jobPanelTabLabel(label, job),
+              icon,
+              showDot,
+            })
+          )}
+          onOpen={(tab) => {
+            setPanelTab({ tab, key: jobId })
+            setOpen(true)
+          }}
+        />
       )}
     </StretchedFlex>
   )
 }
-
-const PanelOpenBtnSC = styled(Button)(({ theme }) => ({
-  height: '100%',
-  borderLeft: theme.borders.default,
-  flexShrink: 0,
-}))
 
 const MainColumnSC = styled.div({
   flex: 1,

@@ -11,8 +11,8 @@ import {
 } from '@pluralsh/design-system'
 import usePersistedState from 'components/hooks/usePersistedState'
 import { InlineLink } from 'components/utils/typography/InlineLink'
-import { createContext, ReactNode, useCallback, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { createContext, ReactNode, use, useCallback, useState } from 'react'
+import { Link, Navigate } from 'react-router-dom'
 import { EDGE_ABS_PATH } from 'routes/edgeRoutes'
 
 const FEATURE_FLAG_STORAGE_KEY = 'feature-flags'
@@ -20,14 +20,20 @@ const defaultDocsUrl = 'https://docs.plural.sh/'
 
 export type FeatureFlags = {
   Edge: boolean
+  Devboxes: boolean
+  DevboxBrowser: boolean
 }
 
 const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
   Edge: false,
+  Devboxes: false,
+  DevboxBrowser: false,
 }
 
 const FEATURE_FLAG_LABELS: Record<keyof FeatureFlags, string> = {
   Edge: 'Edge',
+  Devboxes: 'Devboxes',
+  DevboxBrowser: 'Devbox browser',
 }
 
 export const FeatureFlagContext = createContext<{
@@ -76,6 +82,8 @@ export const FeatureFlagProvider = ({ children }: { children: ReactNode }) => {
         }}
       >
         {curType === 'Edge' && <EdgeBodyContent />}
+        {curType === 'Devboxes' && <DevboxesBodyContent />}
+        {curType === 'DevboxBrowser' && <DevboxBrowserBodyContent />}
       </FeatureFlagConfirmationModal>
       <Toast
         show={showToast}
@@ -165,6 +173,48 @@ function EdgeBodyContent() {
       <strong>Edge</strong> is an experimental feature that allows you to deploy
       and manage your own edge compute resources on Plural.
     </span>
+  )
+}
+
+function DevboxesBodyContent() {
+  return (
+    <span>
+      <strong>Devboxes</strong> is an experimental feature that gives workbench
+      agents persistent, interactive development environments. It needs a
+      DevboxRunner and Agent Substrate installed on a cluster, and may change
+      between releases.
+    </span>
+  )
+}
+
+function DevboxBrowserBodyContent() {
+  return (
+    <span>
+      <strong>Devbox browser</strong> shows the instance's browser in the devbox
+      side panel, for boxes with a browser enabled. It's unfinished and may not
+      work.
+    </span>
+  )
+}
+
+// redirects to the parent route when the flag is off, so deep links into a
+// flagged page don't render it
+export function FeatureFlagGate({
+  flag,
+  children,
+}: {
+  flag: keyof FeatureFlags
+  children: ReactNode
+}) {
+  const { featureFlags } = use(FeatureFlagContext)
+
+  return featureFlags[flag] ? (
+    children
+  ) : (
+    <Navigate
+      to=".."
+      replace
+    />
   )
 }
 

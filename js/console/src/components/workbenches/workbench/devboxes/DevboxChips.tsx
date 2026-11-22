@@ -1,5 +1,7 @@
 import { Chip, ChipSeverity, Flex, PrOpenIcon } from '@pluralsh/design-system'
 import {
+  AgentRuntimeType,
+  DevboxAgentType,
   DevboxInstanceStatus,
   DevboxProbeStatus,
   DevboxPullRequestFragment,
@@ -7,10 +9,92 @@ import {
   DevboxStatus,
   PullRequestSource,
 } from 'generated/graphql'
+import { aiProviderToIcon } from 'components/settings/ai/AISettingsConfiguredProviders'
+import { runtimeToIcon } from 'components/settings/ai/agent-runtimes/AIAgentRuntimeIcon'
 import { Link } from 'react-router-dom'
 import { getWorkbenchDevboxInstanceAbsPath } from 'routes/workbenchesRoutesConsts'
-import { DevboxAwakeTone } from './devboxIdle'
+import { agentLabel, proxyModelOf } from './devboxStartForm'
 import { threadTitle } from './devboxThreads'
+
+const AGENT_RUNTIME: Record<DevboxAgentType, AgentRuntimeType> = {
+  [DevboxAgentType.Claude]: AgentRuntimeType.Claude,
+  [DevboxAgentType.Codex]: AgentRuntimeType.Codex,
+  [DevboxAgentType.Gemini]: AgentRuntimeType.Gemini,
+  [DevboxAgentType.Opencode]: AgentRuntimeType.Opencode,
+  [DevboxAgentType.Pi]: AgentRuntimeType.Pi,
+}
+
+export function DevboxAgentIcon({
+  agent,
+  size = 14,
+}: {
+  agent: Nullable<DevboxAgentType>
+  size?: number
+}) {
+  const Icon =
+    runtimeToIcon[(agent && AGENT_RUNTIME[agent]) || AgentRuntimeType.Custom]
+  return (
+    <Icon
+      size={size}
+      fullColor
+    />
+  )
+}
+
+export function DevboxAgentLabel({
+  agent,
+}: {
+  agent: Nullable<DevboxAgentType>
+}) {
+  return (
+    <Flex
+      gap="xsmall"
+      align="center"
+      as="span"
+    >
+      <DevboxAgentIcon agent={agent} />
+      {agentLabel(agent)}
+    </Flex>
+  )
+}
+
+// the AI provider an AI proxy model routes to, nothing for an agent's own aliases
+export function DevboxModelProviderIcon({
+  model,
+  size = 14,
+}: {
+  model: Nullable<string>
+  size?: number
+}) {
+  const proxy = proxyModelOf(model)
+  if (!proxy) return null
+  const Icon = aiProviderToIcon[proxy.provider]
+  return (
+    <Icon
+      size={size}
+      fullColor
+    />
+  )
+}
+
+export function DevboxModelLabel({
+  model,
+  label,
+}: {
+  model: Nullable<string>
+  label: Nullable<string>
+}) {
+  return (
+    <Flex
+      gap="xsmall"
+      align="center"
+      as="span"
+    >
+      <DevboxModelProviderIcon model={model} />
+      {label}
+    </Flex>
+  )
+}
 
 const BOX_STATUS: Record<DevboxStatus, ChipSeverity> = {
   [DevboxStatus.Pending]: 'info',
@@ -109,14 +193,6 @@ export function DevboxSnapshotStatusChip({
       {status.toLowerCase()}
     </Chip>
   )
-}
-
-export const awakeToneSeverity: Record<DevboxAwakeTone, ChipSeverity> = {
-  success: 'success',
-  warning: 'warning',
-  info: 'info',
-  neutral: 'neutral',
-  danger: 'danger',
 }
 
 export function shortDigest(digest: Nullable<string>) {

@@ -434,6 +434,10 @@ defmodule Devbox.V1.Gateway.Service do
 
   rpc :CancelPrompt, Devbox.V1.CancelPromptRequest, Devbox.V1.CancelPromptResponse
 
+  rpc :UpdateQueuedPrompt,
+      Devbox.V1.UpdateQueuedPromptRequest,
+      Devbox.V1.UpdateQueuedPromptResponse
+
   rpc :SetThreadConfigOption,
       Devbox.V1.SetThreadConfigOptionRequest,
       Devbox.V1.SetThreadConfigOptionResponse
@@ -461,6 +465,10 @@ defmodule Devbox.V1.Gateway.Service do
   rpc :WriteFile, Devbox.V1.WriteFileRequest, Devbox.V1.WriteFileResponse
 
   rpc :GetChanges, Devbox.V1.GetChangesRequest, Devbox.V1.GetChangesResponse
+
+  rpc :PreparePullRequest,
+      Devbox.V1.PreparePullRequestRequest,
+      Devbox.V1.PreparePullRequestResponse
 
   rpc :OpenStream, Devbox.V1.OpenStreamRequest, Devbox.V1.OpenStreamResponse
 

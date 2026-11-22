@@ -28,7 +28,7 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
         destination: %{branch: %{name: pr.branch || "master"}},
         title: title,
         summary: %{raw: body},
-      })
+      } |> Map.merge(if(pr.draft, do: %{draft: true}, else: %{})))
       |> case do
         {:ok, %{"links" => %{"html" => %{"href" => url}}} = mr} ->
           base = pr.branch || "master"

@@ -9,8 +9,9 @@ defmodule Console.Devboxes do
   require Logger
   alias Console.PubSub
   alias Console.Deployments.{Git, Workbenches}
-  alias Console.Devboxes.{Billing, Control, Credentials, Error}
+  alias Console.Devboxes.{Billing, Control, Credentials, Error, Names, ProxyModels}
   alias Console.WorkloadIdentity
+  alias Console.Services.Users
   alias Console.WorkloadIdentity.Scopes.Devboxes, as: DevboxScope
   alias Console.Schema.{
     Cluster,
@@ -48,15 +49,17 @@ defmodule Console.Devboxes do
 
   @doc """
   Upserts a devbox, keyed by name and cluster.  Performed by the deployment operator reconciling a `DevboxRunner`,
-  with its probed agent catalog.  `scm_connections` names the scm connections the box may use.
+  with its probed agent catalog.  `scm_connections` names the scm connections the box may use.  `create_bindings`
+  is the runner's full binding list, so omitting it clears them and falls back to the global create policy.
   """
   @spec upsert_devbox(map, Cluster.t, User.t | Cluster.t) :: devbox_resp
   def upsert_devbox(attrs, cluster, actor \\ nil)
   def upsert_devbox(%{name: name} = attrs, %Cluster{id: cid} = cluster, actor) do
-    devbox = get_devbox_by_name(cid, name) |> Repo.preload([:scm_connection_associations])
+    devbox = get_devbox_by_name(cid, name) |> Repo.preload([:scm_connection_associations, :create_bindings])
 
     with {:ok, _} <- allow(devbox || %Devbox{cluster_id: cid}, actor || cluster, :write),
          {:ok, attrs} <- resolve_scm_connections(attrs, devbox) do
+      attrs = stabilize_bindings(Map.put_new(attrs, :create_bindings, []), devbox)
       start_transaction()
       |> add_operation(:devbox, fn _ ->
         (devbox || %Devbox{cluster_id: cid})
@@ -85,6 +88,10 @@ defmodule Console.Devboxes do
   defp resolve_scm_connections(%{scm_connections: []} = attrs, _),
     do: {:ok, Map.delete(attrs, :scm_connections) |> Map.put(:scm_connection_associations, [])}
   defp resolve_scm_connections(attrs, _), do: {:ok, attrs}
+
+  defp stabilize_bindings(%{create_bindings: bindings} = attrs, devbox) when is_list(bindings),
+    do: Map.put(attrs, :create_bindings, Users.stabilize_bindings(bindings, devbox && devbox.create_bindings))
+  defp stabilize_bindings(attrs, _), do: attrs
 
   @doc """
   Records an operator heartbeat for a box: status, conditions and the resolved image digest and template revision.
@@ -126,14 +133,16 @@ defmodule Console.Devboxes do
   end
 
   @doc """
-  Attaches a box to a workbench, requires write access to the workbench.
+  Attaches a box to a workbench, requires write access to the workbench and create access to the box.
   """
   @spec attach_devbox(binary, binary, User.t) :: {:ok, WorkbenchDevbox.t} | error
   def attach_devbox(workbench_id, devbox_id, %User{} = user) do
-    %WorkbenchDevbox{}
-    |> WorkbenchDevbox.changeset(%{workbench_id: workbench_id, devbox_id: devbox_id})
-    |> allow(user, :write)
-    |> when_ok(:insert)
+    with {:ok, _} <- allow(get_devbox!(devbox_id), user, :create) do
+      %WorkbenchDevbox{}
+      |> WorkbenchDevbox.changeset(%{workbench_id: workbench_id, devbox_id: devbox_id})
+      |> allow(user, :write)
+      |> when_ok(:insert)
+    end
   end
 
   @doc """
@@ -156,8 +165,9 @@ defmodule Console.Devboxes do
   def fetch_instance(id, actor), do: get_instance!(id) |> allow(actor, :read)
 
   @doc """
-  Starts an instance of an attached box (or restores one from a snapshot).  Validates the agent, model, config
-  options and repositories against the box's catalog and allowlist, and the box's `maxInstances`.
+  Starts an instance of an attached box (or restores one from a snapshot), requiring create access to the box.
+  Validates the agent, model, config options and repositories against the box's catalog and allowlist, and the
+  box's `maxInstances`.
   """
   @spec create_instance(map, binary, User.t) :: instance_resp
   def create_instance(attrs, workbench_id, %User{id: user_id} = user) do
@@ -170,19 +180,20 @@ defmodule Console.Devboxes do
     |> add_operation(:devbox, fn %{snapshot: snapshot} ->
       attached_devbox(workbench_id, attrs[:devbox_id] || (snapshot && snapshot.devbox_id))
     end)
+    |> add_operation(:access, fn %{devbox: devbox} -> allow(devbox, user, :create) end)
     |> add_operation(:capacity, fn %{devbox: devbox} -> check_capacity(devbox) end)
-    |> add_operation(:catalog, fn %{devbox: devbox} -> resolve_catalog(devbox, attrs) end)
+    |> add_operation(:billing, fn %{devbox: devbox, workbench: wb} -> Billing.resolve(devbox, wb, user, attrs[:agent_billing]) end)
+    |> add_operation(:catalog, fn %{devbox: devbox, billing: billing} -> resolve_catalog(devbox, attrs, billing) end)
     |> add_operation(:repositories, fn %{devbox: devbox, workbench: wb} ->
       resolve_repositories(devbox, wb, attrs[:repositories])
     end)
-    |> add_operation(:billing, fn %{devbox: devbox, workbench: wb} -> Billing.resolve(devbox, wb, user, attrs[:agent_billing]) end)
     |> add_operation(:autonomy, fn %{catalog: catalog, billing: billing} ->
       check_proxy_auto(%DevboxInstance{agent_billing: billing}, catalog.agent, catalog.config_options)
     end)
     |> add_operation(:instance, fn %{devbox: devbox, snapshot: snapshot, catalog: catalog, repositories: repos, billing: billing} ->
       %DevboxInstance{workbench_id: workbench_id, devbox_id: devbox.id, user_id: user_id}
       |> DevboxInstance.changeset(%{
-        name: attrs[:name],
+        name: instance_name(attrs[:name], workbench_id),
         agent: catalog.agent,
         requested_model: catalog.model,
         config_options: catalog.config_options,
@@ -198,16 +209,47 @@ defmodule Console.Devboxes do
       |> allow(user, :create)
       |> when_ok(:insert)
     end)
-    |> add_operation(:control, fn %{instance: inst, snapshot: snapshot, devbox: devbox} ->
-      Control.create_instance(inst, %{
-        snapshot: snapshot,
-        devbox: devbox,
-        idle_policy: idle_policy(devbox, Repo.preload(inst, :workbench).workbench)
-      })
-      |> control_result(inst)
-    end)
-    |> execute(extract: :instance)
-    |> notify(:create)
+    |> execute()
+    |> case do
+      {:ok, %{instance: inst} = res} ->
+        notify({:ok, inst}, :create)
+        start_instance(inst, res)
+      err -> err
+    end
+  end
+
+  # The gateway reports on (and garbage-collects) an instance as soon as it hears of it, so it may only hear of
+  # committed ones: an instance invisible to ingest is "unknown" and gets its actor deleted.
+  defp start_instance(%DevboxInstance{} = inst, %{snapshot: snapshot, devbox: devbox, workbench: wb}) do
+    Control.create_instance(inst, %{snapshot: snapshot, devbox: devbox, idle_policy: idle_policy(devbox, wb)})
+    |> control_result(inst)
+    |> case do
+      {:ok, inst} -> {:ok, inst}
+      err ->
+        fail_start(inst, "could not start on the cluster: #{error_message(err)}", ~w(pending provisioning)a)
+        err
+    end
+  end
+
+  defp fail_start(%DevboxInstance{id: id}, reason, statuses) do
+    start_transaction()
+    |> add_operation(:instance, fn _ -> DevboxInstance.with_lock() |> Repo.get!(id) |> ensure_status(statuses) end)
+    |> add_operation(:update, fn %{instance: inst} -> end_instance(inst, :failed, reason) end)
+    |> execute(extract: :update)
+    |> notify(:end)
+  end
+
+  defp error_message({:error, %{message: msg}}) when is_binary(msg), do: msg
+  defp error_message({:error, msg}) when is_binary(msg), do: msg
+  defp error_message(err), do: inspect(err)
+
+  defp instance_name(name, _) when is_binary(name) and byte_size(name) > 0, do: name
+  defp instance_name(_, workbench_id) do
+    DevboxInstance.for_workbench(workbench_id)
+    |> DevboxInstance.live()
+    |> DevboxInstance.names()
+    |> Repo.all()
+    |> Names.generate()
   end
 
   defp instance_snapshot(nil, _), do: {:ok, nil}
@@ -241,12 +283,14 @@ defmodule Console.Devboxes do
   defp check_capacity(_), do: {:ok, 0}
 
   @doc """
-  Validates an agent, model and config options against a box's probed catalog, filling in the defaults.
+  Validates an agent, model and config options against a box's catalog, filling in the defaults.  The model is
+  checked against what the agent offers under its billing in `agent_billing` (the AI proxy when unlisted).
   """
-  @spec resolve_catalog(Devbox.t, map) :: {:ok, %{agent: atom, model: binary | nil, config_options: map}} | error
-  def resolve_catalog(%Devbox{} = devbox, attrs) do
+  @spec resolve_catalog(Devbox.t, map, map | nil) :: {:ok, %{agent: atom, model: binary | nil, config_options: map}} | error
+  def resolve_catalog(%Devbox{} = devbox, attrs, agent_billing \\ nil) do
     with %Devbox.Agent{} = agent <- Devbox.agent(devbox, attrs[:agent]),
-         {:ok, model} <- resolve_model(agent, attrs[:model]),
+         billing = Billing.for_agent(%DevboxInstance{agent_billing: agent_billing}, agent.type).billing,
+         {:ok, model} <- resolve_model(agent, attrs[:model], billing),
          {:ok, opts} <- resolve_config_options(agent.config_options, attrs[:config_options]),
          {:ok, opts} <- check_autonomy(devbox, opts) do
       {:ok, %{agent: agent.type, model: model, config_options: opts}}
@@ -256,17 +300,37 @@ defmodule Console.Devboxes do
     end
   end
 
-  defp resolve_model(agent, nil), do: {:ok, Devbox.Agent.default_model(agent)}
-  defp resolve_model(%Devbox.Agent{model_switchable: false} = agent, model) do
-    case Devbox.Agent.default_model(agent) do
-      ^model -> {:ok, model}
-      _ -> {:error, "the #{agent.type} agent on this devbox doesn't allow choosing a model"}
+  defp resolve_model(agent, nil, billing), do: {:ok, default_model(agent, billing)}
+  defp resolve_model(%Devbox.Agent{model_switchable: false} = agent, model, billing) do
+    case {default_model(agent, billing), offered_models(agent, billing)} do
+      {^model, _} -> {:ok, model}
+      {_, offered} -> if model in offered, do: {:ok, model}, else: {:error, "the #{agent.type} agent on this devbox doesn't allow choosing a model"}
     end
   end
-  defp resolve_model(agent, model) do
-    case Enum.member?(Devbox.Agent.offered_models(agent), model) do
+  defp resolve_model(agent, model, billing) do
+    offered = offered_models(agent, billing)
+    case model in offered do
       true -> {:ok, model}
-      false -> {:error, "model #{model} is not offered for the #{agent.type} agent, available models: #{Enum.join(Devbox.Agent.offered_models(agent), ", ")}"}
+      false -> {:error, "model #{model} is not offered for the #{agent.type} agent, available models: #{Enum.join(offered, ", ")}"}
+    end
+  end
+
+  @doc """
+  The models offered for a box's agent under a billing mode.  On the AI proxy these are the proxy's models (see
+  `ProxyModels.narrow/3`); on a subscription, the probed catalog narrowed by the runner's allowlist.
+  """
+  @spec offered_models(Devbox.Agent.t, :proxy | :subscription) :: [binary]
+  def offered_models(agent, billing \\ :proxy)
+  def offered_models(%Devbox.Agent{} = agent, :subscription), do: Devbox.Agent.offered_models(agent)
+  def offered_models(%Devbox.Agent{} = agent, _),
+    do: ProxyModels.narrow(agent, Devbox.Agent.offered_models(agent), ProxyModels.for_agent(agent.type))
+
+  @doc "The model preselected for a box's agent, kept within `offered_models/2`"
+  @spec default_model(Devbox.Agent.t, :proxy | :subscription) :: binary | nil
+  def default_model(%Devbox.Agent{} = agent, billing \\ :proxy) do
+    case {Devbox.Agent.default_model(agent), offered_models(agent, billing)} do
+      {m, []} -> m
+      {m, offered} -> if m in offered, do: m, else: hd(offered)
     end
   end
 
@@ -430,8 +494,13 @@ defmodule Console.Devboxes do
   @spec resume_instance(binary, User.t) :: instance_resp
   def resume_instance(id, %User{} = user) do
     with {:ok, inst} <- allow(get_instance!(id), user, :keep_awake),
-         {:ok, inst} <- claim_resume(inst.id),
-      do: Control.resume_instance(inst) |> control_result(inst)
+         {:ok, inst} <- claim_resume(inst.id) do
+      case Control.resume_instance(inst) do
+        # the gateway keeps waking it and reports running when it's up
+        {:error, :starting} -> {:ok, inst}
+        res -> control_result(res, inst)
+      end
+    end
   end
 
   # Restarts a suspended instance's completeAfter clock under its lock, so `complete_stale_instances` can't end it
@@ -490,6 +559,21 @@ defmodule Console.Devboxes do
     |> notify(:end)
   end
 
+  @doc """
+  Fails instances still pending well after they were created: the gateway reports `provisioning` before
+  CreateInstance returns, so these never reached it (console went down before asking).
+  """
+  @spec fail_unstarted_instances() :: [DevboxInstance.t]
+  def fail_unstarted_instances() do
+    DevboxInstance.pending_before(Timex.now() |> Timex.shift(minutes: -10))
+    |> Repo.all()
+    |> Enum.map(&fail_start(&1, "never reached its cluster", [:pending]))
+    |> Enum.flat_map(fn
+      {:ok, inst} -> [inst]
+      _ -> []
+    end)
+  end
+
   defp stale?(%DevboxInstance{suspended_at: %DateTime{} = at, devbox: devbox}) do
     %{complete_after: secs} = Devbox.idle_policy(devbox)
     DateTime.diff(DateTime.utc_now(), at, :second) > secs
@@ -516,12 +600,28 @@ defmodule Console.Devboxes do
       |> allow(user, :create)
       |> when_ok(:insert)
     end)
-    |> add_operation(:control, fn %{instance: inst, snapshot: snapshot} ->
-      Control.snapshot_instance(inst, snapshot)
-      |> control_result(snapshot)
-    end)
-    |> execute(extract: :snapshot)
-    |> notify(:update)
+    |> execute()
+    |> case do
+      {:ok, %{instance: inst, snapshot: snapshot}} ->
+        notify({:ok, snapshot}, :update)
+        take_snapshot(inst, snapshot)
+      err -> err
+    end
+  end
+
+  # like `start_instance/2`, the gateway reports the snapshot by id, so it must be committed first
+  defp take_snapshot(%DevboxInstance{} = inst, %DevboxSnapshot{} = snapshot) do
+    case Control.snapshot_instance(inst, snapshot) |> control_result(snapshot) do
+      {:ok, snapshot} -> {:ok, snapshot}
+      err ->
+        with %DevboxSnapshot{status: :pending} = snapshot <- Repo.get(DevboxSnapshot, snapshot.id) do
+          snapshot
+          |> DevboxSnapshot.changeset(%{status: :failed, error: error_message(err)})
+          |> Repo.update()
+          |> notify(:update)
+        end
+        err
+    end
   end
 
   @doc """

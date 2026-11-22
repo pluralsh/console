@@ -5,13 +5,13 @@ import {
   CircleDashIcon,
   Flex,
   IconFrame,
-  SidePanelOpenIcon,
   SpinnerAlt,
   Toast,
   TrashCanIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { SimpleAccordion } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
+import { PanelRail } from 'components/layout/PanelRail'
 import { GqlError } from 'components/utils/Alert'
 import { prettifyPrompt } from 'components/utils/contentEditableChips'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders.tsx'
@@ -50,7 +50,11 @@ import { AIAgentRunLocalButton } from './AIAgentRunLocalButton.tsx'
 import { AIAgentRunMessages } from './AIAgentRunMessages.tsx'
 import { AIAgentRunShareButton } from './AIAgentRunShareButton.tsx'
 import { AgentRunMetadata } from './AIAgentRunSidecar.tsx'
-import { useAgentRunPanel } from './AgentRunPanel.tsx'
+import {
+  AGENT_RUN_PANEL_TAB_ICONS,
+  getAgentRunPanelTabs,
+  useAgentRunPanel,
+} from './AgentRunPanel.tsx'
 import { hasAgentRunPanelContent } from './agentRunPanelUtils.ts'
 
 const TERMINAL_AGENT_RUN_STATUSES = new Set<AgentRunStatus>([
@@ -164,90 +168,95 @@ export function AIAgentRun() {
       <StretchedFlex
         gap="small"
         height="100%"
+        align="stretch"
       >
-        <WrapperSC>
-          <Flex
-            direction="column"
-            flex={1}
-            minWidth={0}
-            height="100%"
-            overflow="auto"
-          >
-            <StretchedFlex
-              gap="medium"
-              alignItems="start"
-              css={{ paddingBottom: theme.spacing.medium }}
+        <MainColumnSC>
+          <WrapperSC>
+            <Flex
+              direction="column"
+              flex={1}
+              minWidth={0}
+              height="100%"
+              overflow="auto"
             >
-              <StackedText
-                truncate
-                loading={runLoading}
-                first={run?.prompt}
-                firstPartialType="subtitle2"
-                firstColor="text"
-                second={run && <AgentRunMetadata run={run} />}
-                css={{ flex: 1, minWidth: 0 }}
-              />
-              <Flex
-                gap="small"
-                css={{ flexShrink: 0 }}
+              <StretchedFlex
+                gap="medium"
+                alignItems="start"
+                css={{ paddingBottom: theme.spacing.medium }}
               >
-                {isCancellable && (
-                  <Button
-                    small
-                    secondary
-                    onClick={() => cancelAgentRun()}
-                    startIcon={<SpinnerAlt />}
-                    loading={cancelling}
-                  >
-                    Cancel
-                  </Button>
-                )}
-                {run?.upload?.session && (
-                  <AIAgentRunLocalButton
-                    runId={run.id}
-                    repository={run.repository}
-                  />
-                )}
-                {run && <AIAgentRunShareButton runId={run?.id} />}
-              </Flex>
-            </StretchedFlex>
+                <StackedText
+                  truncate
+                  loading={runLoading}
+                  first={run?.prompt}
+                  firstPartialType="subtitle2"
+                  firstColor="text"
+                  second={run && <AgentRunMetadata run={run} />}
+                  css={{ flex: 1, minWidth: 0 }}
+                />
+                <Flex
+                  gap="small"
+                  css={{ flexShrink: 0 }}
+                >
+                  {isCancellable && (
+                    <Button
+                      small
+                      secondary
+                      onClick={() => cancelAgentRun()}
+                      startIcon={<SpinnerAlt />}
+                      loading={cancelling}
+                    >
+                      Cancel
+                    </Button>
+                  )}
+                  {run?.upload?.session && (
+                    <AIAgentRunLocalButton
+                      runId={run.id}
+                      repository={run.repository}
+                    />
+                  )}
+                  {run && <AIAgentRunShareButton runId={run?.id} />}
+                </Flex>
+              </StretchedFlex>
 
-            {run?.error && (
-              <GqlError
-                header="There was an error during this run."
-                error={run.error}
-                action={
-                  <Button
-                    as={Link}
-                    to={AI_AGENT_RUNS_ABS_PATH}
-                    endIcon={<ArrowTopRightIcon />}
-                  >
-                    Return to agent runs
-                  </Button>
-                }
-              />
-            )}
-            {!!run ? (
-              <AIAgentRunMessages
-                key={run.id}
-                run={run}
-              />
-            ) : runLoading ? (
-              <RectangleSkeleton
-                $width="100%"
-                $height={400}
-              />
-            ) : null}
-            {run && canReprompt && <AgentRunRepromptInput run={run} />}
-          </Flex>
-        </WrapperSC>
+              {run?.error && (
+                <GqlError
+                  header="There was an error during this run."
+                  error={run.error}
+                  action={
+                    <Button
+                      as={Link}
+                      to={AI_AGENT_RUNS_ABS_PATH}
+                      endIcon={<ArrowTopRightIcon />}
+                    >
+                      Return to agent runs
+                    </Button>
+                  }
+                />
+              )}
+              {!!run ? (
+                <AIAgentRunMessages
+                  key={run.id}
+                  run={run}
+                />
+              ) : runLoading ? (
+                <RectangleSkeleton
+                  $width="100%"
+                  $height={400}
+                />
+              ) : null}
+              {run && canReprompt && <AgentRunRepromptInput run={run} />}
+            </Flex>
+          </WrapperSC>
+        </MainColumnSC>
         {showSidePanel && !isOpen && (
-          <PanelOpenBtnSC
-            tertiary
-            onClick={() => setOpen(true)}
-          >
-            <SidePanelOpenIcon />
-          </PanelOpenBtnSC>
+          <PanelRail
+            tabs={getAgentRunPanelTabs(run).map((tab) => ({
+              key: tab,
+              label: tab,
+              icon: AGENT_RUN_PANEL_TAB_ICONS[tab](16),
+            }))}
+            onOpen={(tab) => setOpen(true, tab)}
+          />
         )}
       </StretchedFlex>
       <Toast
@@ -443,11 +452,6 @@ function agentRunRepromptPlaceholder(status: AgentRunStatus) {
   }
 }
 
-const PanelOpenBtnSC = styled(Button)(({ theme }) => ({
-  height: '100%',
-  borderLeft: theme.borders.default,
-}))
-
 const RepromptInputWrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
@@ -478,12 +482,19 @@ const QueueCardSC = styled(Card)(({ theme }) => ({
   padding: `${theme.spacing.small} ${theme.spacing.medium}`,
 }))
 
+const MainColumnSC = styled.div({
+  display: 'flex',
+  justifyContent: 'center',
+  flex: 1,
+  minWidth: 0,
+  height: '100%',
+})
+
 const WrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   padding: theme.spacing.large,
   maxWidth: theme.breakpoints.desktopLarge,
-  alignSelf: 'center',
   width: '100%',
   height: '100%',
   minHeight: 0,

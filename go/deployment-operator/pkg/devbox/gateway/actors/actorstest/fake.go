@@ -35,6 +35,8 @@ type Server struct {
 	TagFidelity ateapi.SnapshotFidelity
 	// FailResume, when set, makes ResumeActor fail with it.
 	FailResume error
+	// FailResumeTimes, when positive, limits FailResume to that many calls.
+	FailResumeTimes int
 
 	version int64
 }
@@ -186,7 +188,13 @@ func (s *Server) ResumeActor(_ context.Context, req *ateapi.ResumeActorRequest) 
 	defer s.mu.Unlock()
 	s.record("ResumeActor", req.GetActor())
 	if s.FailResume != nil {
-		return nil, s.FailResume
+		err := s.FailResume
+		if s.FailResumeTimes > 0 {
+			if s.FailResumeTimes--; s.FailResumeTimes == 0 {
+				s.FailResume = nil
+			}
+		}
+		return nil, err
 	}
 	a, ok := s.Actors[key(req.GetActor())]
 	if !ok {

@@ -107,6 +107,13 @@ spec:
             secretKeyRef:
               name: api
               key: secret
+        - name: DEVBOX_STREAM_TOKEN_KEY
+          valueFrom:
+            secretKeyRef:
+              {{- with .Values.kas.devbox.streamTokenSecret }}
+              name: {{ .name | default "api" }}
+              key: {{ if .name }}{{ .key }}{{ else }}secret{{ end }}
+              {{- end }}
         {{- end }}
         - name: REPLICAS
           value: {{ .Values.replicaCount | quote }}

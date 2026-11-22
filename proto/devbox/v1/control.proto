@@ -72,6 +72,8 @@ service Control {
   rpc Prompt(PromptRequest) returns (PromptResponse);
   // CancelPrompt sends `session/cancel` for the thread's current turn.
   rpc CancelPrompt(CancelPromptRequest) returns (CancelPromptResponse);
+  // UpdateQueuedPrompt edits, drops or promotes a prompt still held in the thread's queue.
+  rpc UpdateQueuedPrompt(UpdateQueuedPromptRequest) returns (UpdateQueuedPromptResponse);
   // SetThreadConfigOption: `session/set_config_option`. Returns the agent's reported options.
   rpc SetThreadConfigOption(SetThreadConfigOptionRequest) returns (SetThreadConfigOptionResponse);
   // RespondInteraction answers a pending permission request or elicitation.
@@ -99,6 +101,8 @@ service Control {
   rpc ReadFile(ReadFileRequest) returns (ReadFileResponse);
   rpc WriteFile(WriteFileRequest) returns (WriteFileResponse);
   rpc GetChanges(GetChangesRequest) returns (GetChangesResponse);
+  // PreparePullRequest readies a checkout for a pull request in the box (see PreparePullRequestRequest).
+  rpc PreparePullRequest(PreparePullRequestRequest) returns (PreparePullRequestResponse);
 
   // ---- Interactive streams ----
 
@@ -357,6 +361,31 @@ message CancelPromptResponse {
   bool cancelled = 1;
 }
 
+enum QueuedPromptAction {
+  QUEUED_PROMPT_ACTION_UNSPECIFIED = 0;
+  // Replace the prompt's text; its attachments stay.
+  QUEUED_PROMPT_ACTION_EDIT = 1;
+  // Drop the prompt from the queue.
+  QUEUED_PROMPT_ACTION_CANCEL = 2;
+  // Move the prompt to the front and cancel the current turn, so it runs next.
+  QUEUED_PROMPT_ACTION_SEND_NOW = 3;
+}
+
+message UpdateQueuedPromptRequest {
+  ThreadRef thread = 1;
+  string prompt_id = 2;
+  QueuedPromptAction action = 3;
+  // The new text, for EDIT.
+  string text = 4;
+  Principal requested_by = 5;
+}
+
+message UpdateQueuedPromptResponse {
+  // False when the prompt had already left the queue (started or dropped).
+  bool updated = 1;
+  repeated QueuedPrompt queued_prompts = 2;
+}
+
 message SetThreadConfigOptionRequest {
   ThreadRef thread = 1;
   ConfigOptionSetting option = 2;
@@ -423,6 +452,9 @@ message GetTimelineResponse {
   uint64 delta_offset = 4;
   reserved 5;
   reserved "archive_degraded";
+  // The session's last Delta.seq (and its stream) this page reflects: apply live deltas from seq + 1, in order.
+  uint64 seq = 6;
+  string stream = 7;
 }
 
 message GetSessionsRequest {

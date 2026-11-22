@@ -138,10 +138,12 @@ func TestDevboxPoolView(t *testing.T) {
 		}
 		return p
 	}
-	pods := []corev1.Pod{pod("busy", false), pod("idle", false), pod("drained", false), pod("pinned", false), pod("draining", false), pod("starting", false), pod("gone", true)}
+	pods := []corev1.Pod{pod("busy", false), pod("idle", false), pod("drained", false), pod("pinned", false), pod("draining", false), pod("starting", false), pod("gone", true), pod("broken", false), pod("lost", false)}
 	workers := []*ateapi.Worker{
 		testWorker("pool", "busy", ateapi.WorkerState_WORKER_STATE_ACTIVE, 2),
 		testWorker("pool", "idle", ateapi.WorkerState_WORKER_STATE_ACTIVE, 0),
+		testWorker("pool", "broken", ateapi.WorkerState_WORKER_STATE_UNAVAILABLE, 0),
+		testWorker("pool", "lost", ateapi.WorkerState_WORKER_STATE_UNAVAILABLE, 1),
 		testWorker("pool", "drained", ateapi.WorkerState_WORKER_STATE_DRAINING, 0),
 		testWorker("pool", "pinned", ateapi.WorkerState_WORKER_STATE_DRAINING, 0),
 		testWorker("pool", "draining", ateapi.WorkerState_WORKER_STATE_DRAINING, 1),
@@ -153,9 +155,9 @@ func TestDevboxPoolView(t *testing.T) {
 	names := func(ps []devboxWorkerPod) []string {
 		return lo.Map(ps, func(p devboxWorkerPod, _ int) string { return p.pod.Name })
 	}
-	g.Expect(names(view.schedulable)).To(ConsistOf("busy", "idle", "starting"))
+	g.Expect(names(view.schedulable)).To(ConsistOf("busy", "idle", "starting", "broken"), "an empty unavailable worker is pending capacity")
 	g.Expect(names(view.drainedIdle)).To(ConsistOf("drained"))
-	g.Expect(names(view.held)).To(ConsistOf("draining", "pinned"), "a drained worker whose node holds undurable snapshots is kept")
+	g.Expect(names(view.held)).To(ConsistOf("draining", "pinned", "lost"), "a drained worker whose node holds undurable snapshots is kept")
 	g.Expect(view.used()).To(Equal(int64(2)), "a worker of another pool sharing a pod UID is not counted")
 }
 
@@ -176,7 +178,7 @@ func TestUndurableSnapshotNodes(t *testing.T) {
 func TestDrainIdleWorkersSkipsPinnedNodes(t *testing.T) {
 	g := NewWithT(t)
 	fake := newFakeSubstrate()
-	r := &DevboxRunnerReconciler{Substrate: fake}
+	r := &DevboxRunnerReconciler{}
 	var view devboxPoolView
 	for _, name := range []string{"a", "b"} {
 		w := testWorker("pool", name, ateapi.WorkerState_WORKER_STATE_ACTIVE, 0)
@@ -187,11 +189,39 @@ func TestDrainIdleWorkersSkipsPinnedNodes(t *testing.T) {
 		})
 	}
 
-	drained, err := r.drainIdleWorkers(context.Background(), &view, 2, map[string]bool{"node-b": true})
+	drained, err := r.drainIdleWorkers(context.Background(), fake, &view, 2, map[string]bool{"node-b": true})
 	g.Expect(err).NotTo(HaveOccurred())
 	g.Expect(drained).To(Equal(int64(1)))
 	g.Expect(fake.workers["w-a"].Status.State).To(Equal(ateapi.WorkerState_WORKER_STATE_DRAINING))
 	g.Expect(fake.workers["w-b"].Status.State).To(Equal(ateapi.WorkerState_WORKER_STATE_ACTIVE))
+}
+
+func TestDrainIdleWorkersPrefersUnavailable(t *testing.T) {
+	g := NewWithT(t)
+	fake := newFakeSubstrate()
+	r := &DevboxRunnerReconciler{}
+	var view devboxPoolView
+	for name, state := range map[string]ateapi.WorkerState{"a": ateapi.WorkerState_WORKER_STATE_ACTIVE, "b": ateapi.WorkerState_WORKER_STATE_UNAVAILABLE} {
+		w := testWorker("pool", name, state, 0)
+		fake.workers[w.GetMetadata().GetName()] = w
+		view.schedulable = append(view.schedulable, devboxWorkerPod{
+			pod:    corev1.Pod{ObjectMeta: metav1.ObjectMeta{Name: name, UID: types.UID(name)}, Spec: corev1.PodSpec{NodeName: "node-" + name}},
+			worker: w,
+		})
+	}
+
+	drained, err := r.drainIdleWorkers(context.Background(), fake, &view, 1, nil)
+	g.Expect(err).NotTo(HaveOccurred())
+	g.Expect(drained).To(Equal(int64(1)))
+	g.Expect(fake.workers["w-b"].Status.State).To(Equal(ateapi.WorkerState_WORKER_STATE_DRAINING))
+	g.Expect(fake.workers["w-a"].Status.State).To(Equal(ateapi.WorkerState_WORKER_STATE_ACTIVE))
+}
+
+func TestScaleUpWorkers(t *testing.T) {
+	g := NewWithT(t)
+	g.Expect(scaleUpWorkers(3, 1, 0, 10)).To(Equal(int64(3)))
+	g.Expect(scaleUpWorkers(3, 1, 8, 10)).To(Equal(int64(2)), "retained pods count toward maxReplicas")
+	g.Expect(scaleUpWorkers(3, 1, 10, 10)).To(Equal(int64(1)), "never removes running workers to fit")
 }
 
 func TestDesiredDevboxWorkers(t *testing.T) {

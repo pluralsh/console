@@ -77,34 +77,53 @@ export function WorkbenchGroupedList<K extends string>({
 
         return (
           <GroupSC key={group.key}>
-            <GroupHeaderSC
-              type="button"
-              $color={group.color}
-              onClick={() =>
+            <ListGroupHeader
+              group={group}
+              collapsed={isCollapsed}
+              onToggle={() =>
                 setCollapsed((prev) => ({
                   ...prev,
                   [group.key]: !prev[group.key],
                 }))
               }
-              aria-expanded={!isCollapsed}
-            >
-              <CaretDownIcon
-                size={10}
-                color="icon-xlight"
-                css={{
-                  transform: isCollapsed ? 'rotate(-90deg)' : undefined,
-                  transition: 'transform 0.15s ease',
-                }}
-              />
-              {group.icon}
-              <span>{group.label}</span>
-              <GroupCountSC>{group.count}</GroupCountSC>
-            </GroupHeaderSC>
+            />
             {!isCollapsed && renderGroup(group, scrollEl)}
           </GroupSC>
         )
       })}
     </ListSC>
+  )
+}
+
+// a group's sticky header, tinted with its color
+export function ListGroupHeader<K extends string>({
+  group,
+  collapsed,
+  onToggle,
+}: {
+  group: ListGroup<K>
+  collapsed: boolean
+  onToggle: () => void
+}) {
+  return (
+    <GroupHeaderSC
+      type="button"
+      $color={group.color}
+      onClick={onToggle}
+      aria-expanded={!collapsed}
+    >
+      <CaretDownIcon
+        size={10}
+        color="icon-xlight"
+        css={{
+          transform: collapsed ? 'rotate(-90deg)' : undefined,
+          transition: 'transform 0.15s ease',
+        }}
+      />
+      {group.icon}
+      <span>{group.label}</span>
+      <GroupCountSC>{group.count}</GroupCountSC>
+    </GroupHeaderSC>
   )
 }
 

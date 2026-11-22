@@ -17,6 +17,11 @@ import {
 import { AgentRunPatchView } from 'components/ai/agent-runs/details/AgentRunPatchView'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
+import {
+  FILE_TREE_GLYPH_SIZE,
+  FILE_TREE_ICON_SIZE,
+  FILE_TREE_TEXT,
+} from 'components/utils/fileTree'
 import { CaptionP } from 'components/utils/typography/Text'
 import { TRUNCATE, TRUNCATE_LEFT } from 'components/utils/truncate'
 import { parsePatch } from 'diff'
@@ -48,7 +53,7 @@ type TreeNodeBuilder = Omit<TreeNode, 'children'> & {
 
 const muiTheme = createTheme()
 const FILE_TYPE_ICON_PATH = '/file-type-icons' as const
-const FILE_ICON_SIZE = 18
+const FILE_ICON_SIZE = FILE_TREE_ICON_SIZE
 
 const FILE_TYPE_ICONS: Readonly<Record<string, string>> = {
   dockerfile: `${FILE_TYPE_ICON_PATH}/file_type_docker.svg`,
@@ -466,7 +471,8 @@ function FileTreeItemTextIcon({
         color: theme.colors['text-success'],
         fontFamily: 'Inter',
         fontWeight: 600,
-        fontSize: '0.625rem',
+        fontSize: Math.round(FILE_ICON_SIZE / 2),
+        lineHeight: 1,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -507,7 +513,7 @@ function renderTree(
                 {node.file ? (
                   <FileTreeItemIcon fileName={node.name} />
                 ) : (
-                  <FolderIcon size={14} />
+                  <FolderIcon size={FILE_TREE_GLYPH_SIZE} />
                 )}
               </TreeIconSC>
               <TreeTextSC>{node.name}</TreeTextSC>
@@ -692,6 +698,7 @@ const StyledTreeView = styled(SimpleTreeView)(({ theme }) => ({
     borderRadius: theme.borderRadiuses.medium,
     padding: `${theme.spacing.xxsmall} ${theme.spacing.xsmall}`,
     ...theme.partials.text.body2,
+    ...FILE_TREE_TEXT,
     color: theme.colors['text-light'],
     width: '100%',
     minWidth: 0,
@@ -735,6 +742,8 @@ const TreeLabelSC = styled.div({
 const TreeIconSC = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
+  justifyContent: 'center',
+  width: FILE_TREE_ICON_SIZE,
   marginRight: theme.spacing.xsmall,
   color: theme.colors['icon-default'],
   flexShrink: 0,

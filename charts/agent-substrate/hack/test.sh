@@ -25,7 +25,7 @@ API_VERSIONS=(--api-versions postgresql.cnpg.io/v1/Cluster --api-versions postgr
 
 # JSON schemas for the ate.dev kinds, from the CRDs this chart ships.
 mkdir -p "$OUT/schemas"
-for crd in files/crds/*.yaml; do
+for crd in crds/*.yaml; do
   kind="$(yq '.spec.names.kind | downcase' "$crd")"
   for version in $(yq '.spec.versions[].name' "$crd"); do
     yq -o json ".spec.versions[] | select(.name == \"$version\") | .schema.openAPIV3Schema" "$crd" \

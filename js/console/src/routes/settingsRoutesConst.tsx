@@ -28,6 +28,12 @@ export const AI_SETTINGS_AI_INSIGHTS_ABS_PATH =
 export const AI_SETTINGS_AGENT_RUNTIMES_REL_PATH = 'agent-runtimes' as const
 export const AI_SETTINGS_AGENT_RUNTIMES_ABS_PATH =
   `${AI_SETTINGS_ABS_PATH}/${AI_SETTINGS_AGENT_RUNTIMES_REL_PATH}` as const
+export const AI_SETTINGS_DEVBOXES_REL_PATH = 'devboxes' as const
+export const AI_SETTINGS_DEVBOXES_ABS_PATH =
+  `${AI_SETTINGS_ABS_PATH}/${AI_SETTINGS_DEVBOXES_REL_PATH}` as const
+export const AI_SETTINGS_DEVBOX_PARAM_ID = 'devboxId' as const
+export const getAiSettingsDevboxAbsPath = (devboxId: Nullable<string>) =>
+  `${AI_SETTINGS_DEVBOXES_ABS_PATH}/${devboxId ?? ''}`
 export const AI_SETTINGS_MCP_SERVERS_REL_PATH = 'mcp-servers' as const
 export const AI_SETTINGS_MCP_SERVERS_ABS_PATH =
   `${AI_SETTINGS_ABS_PATH}/${AI_SETTINGS_MCP_SERVERS_REL_PATH}` as const

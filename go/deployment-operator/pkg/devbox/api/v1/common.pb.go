@@ -370,6 +370,9 @@ const (
 	ErrorReason_ERROR_REASON_INVALID_AGENT_OR_MODEL ErrorReason = 13
 	// A file write precondition (expected sha256) did not match (code FAILED_PRECONDITION).
 	ErrorReason_ERROR_REASON_FILE_CONFLICT ErrorReason = 14
+	// The instance is waking (or otherwise starting) and the call gave up waiting; the operation continues in the
+	// background, so retry shortly (code UNAVAILABLE).
+	ErrorReason_ERROR_REASON_INSTANCE_STARTING ErrorReason = 15
 )
 
 // Enum value maps for ErrorReason.
@@ -389,6 +392,7 @@ var (
 		12: "ERROR_REASON_PLAN_LIMIT_REACHED",
 		13: "ERROR_REASON_INVALID_AGENT_OR_MODEL",
 		14: "ERROR_REASON_FILE_CONFLICT",
+		15: "ERROR_REASON_INSTANCE_STARTING",
 	}
 	ErrorReason_value = map[string]int32{
 		"ERROR_REASON_UNSPECIFIED":             0,
@@ -405,6 +409,7 @@ var (
 		"ERROR_REASON_PLAN_LIMIT_REACHED":      12,
 		"ERROR_REASON_INVALID_AGENT_OR_MODEL":  13,
 		"ERROR_REASON_FILE_CONFLICT":           14,
+		"ERROR_REASON_INSTANCE_STARTING":       15,
 	}
 )
 
@@ -1328,8 +1333,10 @@ type AgentLaunch struct {
 	AcpV2 bool `protobuf:"varint,5,opt,name=acp_v2,json=acpV2,proto3" json:"acp_v2,omitempty"`
 	// Owner opted in to let collaborators prompt threads on this subscription-backed agent.
 	AllowCollaborators bool `protobuf:"varint,6,opt,name=allow_collaborators,json=allowCollaborators,proto3" json:"allow_collaborators,omitempty"`
-	unknownFields      protoimpl.UnknownFields
-	sizeCache          protoimpl.SizeCache
+	// Models the console AI proxy serves this agent, set when billing is PROXY. Unset leaves the harness defaults.
+	ProxyModels   *ProxyModels `protobuf:"bytes,7,opt,name=proxy_models,json=proxyModels,proto3" json:"proxy_models,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *AgentLaunch) Reset() {
@@ -1404,6 +1411,79 @@ func (x *AgentLaunch) GetAllowCollaborators() bool {
 	return false
 }
 
+func (x *AgentLaunch) GetProxyModels() *ProxyModels {
+	if x != nil {
+		return x.ProxyModels
+	}
+	return nil
+}
+
+// ProxyModels are the console AI proxy models one agent may use, as `provider/model` IDs the proxy routes on
+// (`anthropic/claude-sonnet-4-5`, `bedrock/us.anthropic.claude-opus-4-1-v1:0`). Console derives them from the
+// deployment settings' AI providers, the same list the proxy allows.
+type ProxyModels struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Model used when neither the thread nor the box picks one.
+	DefaultModel string `protobuf:"bytes,1,opt,name=default_model,json=defaultModel,proto3" json:"default_model,omitempty"`
+	// Every model the agent may use, default first.
+	Models []string `protobuf:"bytes,2,rep,name=models,proto3" json:"models,omitempty"`
+	// Harness model aliases resolved to proxy models, e.g. Claude Code's `opus`, `sonnet` and `haiku`.
+	Aliases       map[string]string `protobuf:"bytes,3,rep,name=aliases,proto3" json:"aliases,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ProxyModels) Reset() {
+	*x = ProxyModels{}
+	mi := &file_devbox_v1_common_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ProxyModels) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProxyModels) ProtoMessage() {}
+
+func (x *ProxyModels) ProtoReflect() protoreflect.Message {
+	mi := &file_devbox_v1_common_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ProxyModels.ProtoReflect.Descriptor instead.
+func (*ProxyModels) Descriptor() ([]byte, []int) {
+	return file_devbox_v1_common_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *ProxyModels) GetDefaultModel() string {
+	if x != nil {
+		return x.DefaultModel
+	}
+	return ""
+}
+
+func (x *ProxyModels) GetModels() []string {
+	if x != nil {
+		return x.Models
+	}
+	return nil
+}
+
+func (x *ProxyModels) GetAliases() map[string]string {
+	if x != nil {
+		return x.Aliases
+	}
+	return nil
+}
+
 // ConfigOptionSetting sets one ACP session config option (model, mode, thought level, ...).
 type ConfigOptionSetting struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -1418,7 +1498,7 @@ type ConfigOptionSetting struct {
 
 func (x *ConfigOptionSetting) Reset() {
 	*x = ConfigOptionSetting{}
-	mi := &file_devbox_v1_common_proto_msgTypes[10]
+	mi := &file_devbox_v1_common_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1430,7 +1510,7 @@ func (x *ConfigOptionSetting) String() string {
 func (*ConfigOptionSetting) ProtoMessage() {}
 
 func (x *ConfigOptionSetting) ProtoReflect() protoreflect.Message {
-	mi := &file_devbox_v1_common_proto_msgTypes[10]
+	mi := &file_devbox_v1_common_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1443,7 +1523,7 @@ func (x *ConfigOptionSetting) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConfigOptionSetting.ProtoReflect.Descriptor instead.
 func (*ConfigOptionSetting) Descriptor() ([]byte, []int) {
-	return file_devbox_v1_common_proto_rawDescGZIP(), []int{10}
+	return file_devbox_v1_common_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *ConfigOptionSetting) GetConfigId() string {
@@ -1527,14 +1607,22 @@ const file_devbox_v1_common_proto_rawDesc = "" +
 	"\fbusy_reasons\x18\x03 \x03(\v2\x15.devbox.v1.BusyReasonR\vbusyReasons\x129\n" +
 	"\n" +
 	"suspend_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\tsuspendAt\x12=\n" +
-	"\fevaluated_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\vevaluatedAt\"\x81\x02\n" +
+	"\fevaluated_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\vevaluatedAt\"\xbc\x02\n" +
 	"\vAgentLaunch\x12*\n" +
 	"\x05agent\x18\x01 \x01(\x0e2\x14.devbox.v1.AgentTypeR\x05agent\x120\n" +
 	"\abilling\x18\x02 \x01(\x0e2\x16.devbox.v1.BillingModeR\abilling\x12#\n" +
 	"\rcredential_id\x18\x03 \x01(\tR\fcredentialId\x12'\n" +
 	"\x0fcredential_kind\x18\x04 \x01(\tR\x0ecredentialKind\x12\x15\n" +
 	"\x06acp_v2\x18\x05 \x01(\bR\x05acpV2\x12/\n" +
-	"\x13allow_collaborators\x18\x06 \x01(\bR\x12allowCollaborators\"H\n" +
+	"\x13allow_collaborators\x18\x06 \x01(\bR\x12allowCollaborators\x129\n" +
+	"\fproxy_models\x18\a \x01(\v2\x16.devbox.v1.ProxyModelsR\vproxyModels\"\xc5\x01\n" +
+	"\vProxyModels\x12#\n" +
+	"\rdefault_model\x18\x01 \x01(\tR\fdefaultModel\x12\x16\n" +
+	"\x06models\x18\x02 \x03(\tR\x06models\x12=\n" +
+	"\aaliases\x18\x03 \x03(\v2#.devbox.v1.ProxyModels.AliasesEntryR\aaliases\x1a:\n" +
+	"\fAliasesEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"H\n" +
 	"\x13ConfigOptionSetting\x12\x1b\n" +
 	"\tconfig_id\x18\x01 \x01(\tR\bconfigId\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value*\x97\x01\n" +
@@ -1567,7 +1655,7 @@ const file_devbox_v1_common_proto_rawDesc = "" +
 	"\x10SnapshotFidelity\x12!\n" +
 	"\x1dSNAPSHOT_FIDELITY_UNSPECIFIED\x10\x00\x12\x1c\n" +
 	"\x18SNAPSHOT_FIDELITY_MEMORY\x10\x01\x12 \n" +
-	"\x1cSNAPSHOT_FIDELITY_FILESYSTEM\x10\x02*\xad\x04\n" +
+	"\x1cSNAPSHOT_FIDELITY_FILESYSTEM\x10\x02*\xd1\x04\n" +
 	"\vErrorReason\x12\x1c\n" +
 	"\x18ERROR_REASON_UNSPECIFIED\x10\x00\x12\x1c\n" +
 	"\x18ERROR_REASON_UNSUPPORTED\x10\x01\x12 \n" +
@@ -1583,7 +1671,8 @@ const file_devbox_v1_common_proto_rawDesc = "" +
 	"\x1eERROR_REASON_AGENT_AUTH_FAILED\x10\v\x12#\n" +
 	"\x1fERROR_REASON_PLAN_LIMIT_REACHED\x10\f\x12'\n" +
 	"#ERROR_REASON_INVALID_AGENT_OR_MODEL\x10\r\x12\x1e\n" +
-	"\x1aERROR_REASON_FILE_CONFLICT\x10\x0e\"\x04\b\t\x10\t* ERROR_REASON_ARCHIVE_UNAVAILABLE*W\n" +
+	"\x1aERROR_REASON_FILE_CONFLICT\x10\x0e\x12\"\n" +
+	"\x1eERROR_REASON_INSTANCE_STARTING\x10\x0f\"\x04\b\t\x10\t* ERROR_REASON_ARCHIVE_UNAVAILABLE*W\n" +
 	"\tLeaseKind\x12\x1a\n" +
 	"\x16LEASE_KIND_UNSPECIFIED\x10\x00\x12\x15\n" +
 	"\x11LEASE_KIND_VIEWER\x10\x01\x12\x17\n" +
@@ -1619,7 +1708,7 @@ func file_devbox_v1_common_proto_rawDescGZIP() []byte {
 }
 
 var file_devbox_v1_common_proto_enumTypes = make([]protoimpl.EnumInfo, 9)
-var file_devbox_v1_common_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
+var file_devbox_v1_common_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_devbox_v1_common_proto_goTypes = []any{
 	(AgentType)(0),                // 0: devbox.v1.AgentType
 	(InstanceStatus)(0),           // 1: devbox.v1.InstanceStatus
@@ -1640,38 +1729,42 @@ var file_devbox_v1_common_proto_goTypes = []any{
 	(*BusyReason)(nil),            // 16: devbox.v1.BusyReason
 	(*IdleState)(nil),             // 17: devbox.v1.IdleState
 	(*AgentLaunch)(nil),           // 18: devbox.v1.AgentLaunch
-	(*ConfigOptionSetting)(nil),   // 19: devbox.v1.ConfigOptionSetting
-	nil,                           // 20: devbox.v1.ErrorDetail.MetadataEntry
-	(*durationpb.Duration)(nil),   // 21: google.protobuf.Duration
-	(*timestamppb.Timestamp)(nil), // 22: google.protobuf.Timestamp
+	(*ProxyModels)(nil),           // 19: devbox.v1.ProxyModels
+	(*ConfigOptionSetting)(nil),   // 20: devbox.v1.ConfigOptionSetting
+	nil,                           // 21: devbox.v1.ErrorDetail.MetadataEntry
+	nil,                           // 22: devbox.v1.ProxyModels.AliasesEntry
+	(*durationpb.Duration)(nil),   // 23: google.protobuf.Duration
+	(*timestamppb.Timestamp)(nil), // 24: google.protobuf.Timestamp
 }
 var file_devbox_v1_common_proto_depIdxs = []int32{
 	3,  // 0: devbox.v1.AutonomyPolicy.default:type_name -> devbox.v1.Autonomy
 	3,  // 1: devbox.v1.AutonomyPolicy.max:type_name -> devbox.v1.Autonomy
 	5,  // 2: devbox.v1.ErrorDetail.reason:type_name -> devbox.v1.ErrorReason
-	20, // 3: devbox.v1.ErrorDetail.metadata:type_name -> devbox.v1.ErrorDetail.MetadataEntry
-	21, // 4: devbox.v1.IdlePolicy.activity_window:type_name -> google.protobuf.Duration
-	21, // 5: devbox.v1.IdlePolicy.grace_period:type_name -> google.protobuf.Duration
-	21, // 6: devbox.v1.IdlePolicy.max_deferral:type_name -> google.protobuf.Duration
-	21, // 7: devbox.v1.IdlePolicy.max_continuous_awake:type_name -> google.protobuf.Duration
-	21, // 8: devbox.v1.IdlePolicy.complete_after:type_name -> google.protobuf.Duration
+	21, // 3: devbox.v1.ErrorDetail.metadata:type_name -> devbox.v1.ErrorDetail.MetadataEntry
+	23, // 4: devbox.v1.IdlePolicy.activity_window:type_name -> google.protobuf.Duration
+	23, // 5: devbox.v1.IdlePolicy.grace_period:type_name -> google.protobuf.Duration
+	23, // 6: devbox.v1.IdlePolicy.max_deferral:type_name -> google.protobuf.Duration
+	23, // 7: devbox.v1.IdlePolicy.max_continuous_awake:type_name -> google.protobuf.Duration
+	23, // 8: devbox.v1.IdlePolicy.complete_after:type_name -> google.protobuf.Duration
 	6,  // 9: devbox.v1.Lease.kind:type_name -> devbox.v1.LeaseKind
 	11, // 10: devbox.v1.Lease.holder:type_name -> devbox.v1.Principal
-	22, // 11: devbox.v1.Lease.expires_at:type_name -> google.protobuf.Timestamp
-	22, // 12: devbox.v1.Lease.requested_until:type_name -> google.protobuf.Timestamp
+	24, // 11: devbox.v1.Lease.expires_at:type_name -> google.protobuf.Timestamp
+	24, // 12: devbox.v1.Lease.requested_until:type_name -> google.protobuf.Timestamp
 	7,  // 13: devbox.v1.BusyReason.kind:type_name -> devbox.v1.BusyReasonKind
-	22, // 14: devbox.v1.BusyReason.until:type_name -> google.protobuf.Timestamp
-	22, // 15: devbox.v1.IdleState.idle_since:type_name -> google.protobuf.Timestamp
+	24, // 14: devbox.v1.BusyReason.until:type_name -> google.protobuf.Timestamp
+	24, // 15: devbox.v1.IdleState.idle_since:type_name -> google.protobuf.Timestamp
 	16, // 16: devbox.v1.IdleState.busy_reasons:type_name -> devbox.v1.BusyReason
-	22, // 17: devbox.v1.IdleState.suspend_at:type_name -> google.protobuf.Timestamp
-	22, // 18: devbox.v1.IdleState.evaluated_at:type_name -> google.protobuf.Timestamp
+	24, // 17: devbox.v1.IdleState.suspend_at:type_name -> google.protobuf.Timestamp
+	24, // 18: devbox.v1.IdleState.evaluated_at:type_name -> google.protobuf.Timestamp
 	0,  // 19: devbox.v1.AgentLaunch.agent:type_name -> devbox.v1.AgentType
 	2,  // 20: devbox.v1.AgentLaunch.billing:type_name -> devbox.v1.BillingMode
-	21, // [21:21] is the sub-list for method output_type
-	21, // [21:21] is the sub-list for method input_type
-	21, // [21:21] is the sub-list for extension type_name
-	21, // [21:21] is the sub-list for extension extendee
-	0,  // [0:21] is the sub-list for field type_name
+	19, // 21: devbox.v1.AgentLaunch.proxy_models:type_name -> devbox.v1.ProxyModels
+	22, // 22: devbox.v1.ProxyModels.aliases:type_name -> devbox.v1.ProxyModels.AliasesEntry
+	23, // [23:23] is the sub-list for method output_type
+	23, // [23:23] is the sub-list for method input_type
+	23, // [23:23] is the sub-list for extension type_name
+	23, // [23:23] is the sub-list for extension extendee
+	0,  // [0:23] is the sub-list for field type_name
 }
 
 func init() { file_devbox_v1_common_proto_init() }
@@ -1685,7 +1778,7 @@ func file_devbox_v1_common_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_devbox_v1_common_proto_rawDesc), len(file_devbox_v1_common_proto_rawDesc)),
 			NumEnums:      9,
-			NumMessages:   12,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

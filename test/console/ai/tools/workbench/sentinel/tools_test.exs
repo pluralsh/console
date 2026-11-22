@@ -126,7 +126,7 @@ defmodule Console.AI.Tools.Workbench.Sentinel.ToolsTest do
       cluster = insert(:cluster, handle: "prod-usw2")
       job = insert(:sentinel_run_job, sentinel_run: run, cluster: cluster, status: :failed, error: "pod was OOMKilled")
       insert(:sentinel_run_job, sentinel_run: run, status: :failed)
-      insert(:sentinel_run_job, sentinel_run: run, cluster: cluster, status: :success)
+      insert(:sentinel_run_job, sentinel_run: run, cluster: cluster, check: "smoke", status: :success)
 
       assert {:ok, parsed} =
                Tool.validate(%ListSentinelRunJobs{user: user}, %{

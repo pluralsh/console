@@ -42,6 +42,13 @@ import {
 } from '../input/autocomplete/mentionTypes'
 import { plrlChipComponents } from '../input/autocomplete/PlrlChipMdRenderers'
 import {
+  DEVBOX_COMMAND_ATTRIBUTES,
+  DEVBOX_COMMAND_TAG,
+  DEVBOX_FILE_ATTRIBUTES,
+  DEVBOX_FILE_TAG,
+  devboxFileChipComponents,
+} from '../DevboxFileChip'
+import {
   PLRL_FILE_ATTRIBUTES,
   PLRL_FILE_TAG,
   plrlFileChipComponents,
@@ -53,11 +60,15 @@ const chipSanitizeSchema = {
     ...(markdownSanitizeSchema.tagNames ?? []),
     ...PLRL_CHIP_TAG_NAMES,
     PLRL_FILE_TAG,
+    DEVBOX_FILE_TAG,
+    DEVBOX_COMMAND_TAG,
   ],
   attributes: {
     ...markdownSanitizeSchema.attributes,
     ...CHIP_ATTRIBUTE_SCHEMA,
     [PLRL_FILE_TAG]: PLRL_FILE_ATTRIBUTES,
+    [DEVBOX_FILE_TAG]: DEVBOX_FILE_ATTRIBUTES,
+    [DEVBOX_COMMAND_TAG]: DEVBOX_COMMAND_ATTRIBUTES,
   },
 }
 
@@ -742,6 +753,7 @@ const SIMPLIFIED_MARKDOWN_COMPONENTS: ComponentProps<
 >['components'] = {
   ...plrlChipComponents,
   ...plrlFileChipComponents,
+  ...devboxFileChipComponents,
   ...simpleHeadingComponents,
   // Fenced code — inline, no language chrome (header was redundant).
   pre: ({ children }) => {

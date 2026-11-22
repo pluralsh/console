@@ -35,6 +35,10 @@ const (
 	rescanEvery = 30 * time.Second
 	// debounce coalesces top-level filesystem events.
 	debounce = 2 * time.Second
+	// DefaultCloneRetry is how long hydration keeps retrying clones that can't reach their remote.
+	DefaultCloneRetry = 3 * time.Minute
+	cloneBackoff      = time.Second
+	maxCloneBackoff   = 20 * time.Second
 )
 
 // Options configure a Manager.
@@ -48,6 +52,9 @@ type Options struct {
 	Condition func(typ, severity, msg string, active bool)
 	// OnChange is called after the checkout list changed.
 	OnChange func()
+	// CloneRetry bounds how long hydration retries clones that can't reach their remote (DefaultCloneRetry when
+	// zero, none when negative).
+	CloneRetry time.Duration
 }
 
 type repoRecord struct {
@@ -58,11 +65,13 @@ type repoRecord struct {
 }
 
 type state struct {
-	Hydrated    bool              `json:"hydrated"`
-	HydratedAt  time.Time         `json:"hydratedAt,omitempty"`
-	SkelApplied bool              `json:"skelApplied"`
-	Repos       []repoRecord      `json:"repos,omitempty"`
-	AddKeys     map[string]string `json:"addKeys,omitempty"`
+	Hydrated   bool      `json:"hydrated"`
+	HydratedAt time.Time `json:"hydratedAt,omitempty"`
+	// ClonesFailed records a hydration that left clones behind, so the boot that finishes them clears the condition.
+	ClonesFailed bool              `json:"clonesFailed,omitempty"`
+	SkelApplied  bool              `json:"skelApplied"`
+	Repos        []repoRecord      `json:"repos,omitempty"`
+	AddKeys      map[string]string `json:"addKeys,omitempty"`
 }
 
 // Manager maintains the workspace.
@@ -81,6 +90,9 @@ type Manager struct {
 func New(opts Options) (*Manager, error) {
 	if opts.Log == nil {
 		opts.Log = slog.Default()
+	}
+	if opts.CloneRetry == 0 {
+		opts.CloneRetry = DefaultCloneRetry
 	}
 	m := &Manager{opts: opts, log: opts.Log.With("component", "workspace")}
 	if _, err := fsutil.ReadJSON(m.statePath(), &m.st); err != nil {
@@ -273,15 +285,23 @@ func (m *Manager) Hydrate(ctx context.Context, repos []*devboxv1.RepositorySpec)
 	m.mu.Unlock()
 	var errs []error
 	if !already {
+		failed, transient := m.cloneAll(ctx, repos)
 		for _, r := range repos {
-			if _, err := m.Clone(ctx, r); err != nil {
+			if err, ok := failed[r]; ok {
 				errs = append(errs, err)
 				m.condition("workspace_hydration_failed", "warning", fmt.Sprintf("clone %s: %v", r.GetUrl(), err), true)
 			}
 		}
 		m.mu.Lock()
-		m.st.Hydrated = true
-		m.st.HydratedAt = time.Now()
+		if len(failed) == 0 && m.st.ClonesFailed {
+			m.condition("workspace_hydration_failed", "warning", "", false)
+		}
+		m.st.ClonesFailed = len(failed) > 0
+		// a clone that never reached the remote is retried on the next boot rather than given up on
+		if !transient {
+			m.st.Hydrated = true
+			m.st.HydratedAt = time.Now()
+		}
 		_ = m.saveLocked()
 		m.mu.Unlock()
 	}
@@ -292,6 +312,42 @@ func (m *Manager) Hydrate(ctx context.Context, repos []*devboxv1.RepositorySpec)
 	m.hydrated = true
 	m.mu.Unlock()
 	return errors.Join(errs...)
+}
+
+// cloneAll clones every repository, retrying ones that couldn't reach the remote with backoff for up to
+// CloneRetry: a box restored from a snapshot can run this before its network (DNS first) is back. It returns the
+// clones that still failed and whether any of those failures may yet clear.
+func (m *Manager) cloneAll(ctx context.Context, repos []*devboxv1.RepositorySpec) (map[*devboxv1.RepositorySpec]error, bool) {
+	deadline := time.Now().Add(m.opts.CloneRetry)
+	backoff := cloneBackoff
+	pending := repos
+	failed := map[*devboxv1.RepositorySpec]error{}
+	for {
+		var retry []*devboxv1.RepositorySpec
+		for _, r := range pending {
+			_, err := m.Clone(ctx, r)
+			switch {
+			case err == nil:
+				delete(failed, r)
+			case derr.Code(err) == codes.Unavailable:
+				failed[r] = err
+				retry = append(retry, r)
+			default:
+				failed[r] = err
+			}
+		}
+		if len(retry) == 0 || !time.Now().Add(backoff).Before(deadline) {
+			return failed, len(retry) > 0
+		}
+		m.log.Info("retrying clones", "repos", len(retry), "in", backoff.String(), "err", failed[retry[0]])
+		select {
+		case <-ctx.Done():
+			return failed, true
+		case <-time.After(backoff):
+		}
+		pending = retry
+		backoff = min(backoff*2, maxCloneBackoff)
+	}
 }
 
 // scan lists checkouts directly under the home directory.

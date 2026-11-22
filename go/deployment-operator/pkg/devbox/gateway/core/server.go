@@ -205,6 +205,14 @@ func (g *Gateway) CancelPrompt(ctx context.Context, req *devboxv1.CancelPromptRe
 	return d.CancelPrompt(ctx, req)
 }
 
+func (g *Gateway) UpdateQueuedPrompt(ctx context.Context, req *devboxv1.UpdateQueuedPromptRequest) (*devboxv1.UpdateQueuedPromptResponse, error) {
+	_, d, err := g.running(ctx, req.GetThread().GetInstanceId(), false)
+	if err != nil {
+		return nil, err
+	}
+	return d.UpdateQueuedPrompt(ctx, req)
+}
+
 func (g *Gateway) SetThreadConfigOption(ctx context.Context, req *devboxv1.SetThreadConfigOptionRequest) (*devboxv1.SetThreadConfigOptionResponse, error) {
 	_, d, err := g.running(ctx, req.GetThread().GetInstanceId(), req.GetResumeIfSuspended())
 	if err != nil {
@@ -277,6 +285,22 @@ func (g *Gateway) GetChanges(ctx context.Context, req *devboxv1.GetChangesReques
 		return nil, err
 	}
 	return d.GetChanges(ctx, req)
+}
+
+func (g *Gateway) GetBranchDiffStat(ctx context.Context, req *devboxv1.BranchDiffStatRequest) (*devboxv1.BranchDiffStatResponse, error) {
+	_, d, err := g.running(ctx, req.GetInstanceId(), false)
+	if err != nil {
+		return nil, err
+	}
+	return d.GetBranchDiffStat(ctx, req)
+}
+
+func (g *Gateway) PreparePullRequest(ctx context.Context, req *devboxv1.PreparePullRequestRequest) (*devboxv1.PreparePullRequestResponse, error) {
+	_, d, err := g.running(ctx, req.GetInstanceId(), false)
+	if err != nil {
+		return nil, err
+	}
+	return d.PreparePullRequest(ctx, req)
 }
 
 // ---- history (served by the box) ----

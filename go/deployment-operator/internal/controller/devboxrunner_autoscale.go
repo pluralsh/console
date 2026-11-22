@@ -15,6 +15,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate/ateapi"
 )
 
@@ -48,12 +49,14 @@ func (p devboxWorkerPod) ready() bool {
 
 // devboxPoolView splits the managed pool's live pods by what the autoscaler may do with them.
 type devboxPoolView struct {
-	// schedulable pods take new instances, or will once their worker registers.
+	// schedulable pods take new instances, or will once their worker registers or becomes available again. An
+	// empty unavailable worker counts here, so a pool whose workers can't come up waits on them rather than
+	// adding more.
 	schedulable []devboxWorkerPod
 	// drainedIdle pods are drained and empty, and are removed by lowering replicas.
 	drainedIdle []devboxWorkerPod
-	// held pods are drained with instances still on them, or marked unavailable. They are kept and don't count
-	// toward capacity.
+	// held pods are drained or unavailable with instances still on them. They are kept and don't count toward
+	// capacity.
 	held []devboxWorkerPod
 }
 
@@ -94,7 +97,8 @@ func newDevboxPoolView(pods []corev1.Pod, workers []*ateapi.Worker, namespace, p
 		switch {
 		case p.state() == ateapi.WorkerState_WORKER_STATE_DRAINING && p.actors() == 0 && !pinned[pod.Spec.NodeName]:
 			view.drainedIdle = append(view.drainedIdle, p)
-		case p.state() == ateapi.WorkerState_WORKER_STATE_DRAINING, p.state() == ateapi.WorkerState_WORKER_STATE_UNAVAILABLE:
+		case p.state() == ateapi.WorkerState_WORKER_STATE_DRAINING,
+			p.state() == ateapi.WorkerState_WORKER_STATE_UNAVAILABLE && p.actors() > 0:
 			view.held = append(view.held, p)
 		default:
 			view.schedulable = append(view.schedulable, p)
@@ -129,12 +133,18 @@ func desiredDevboxWorkers(as *v1alpha1.DevboxWorkerAutoscaling, perWorker, used,
 	return min(max(workers, int64(lo.FromPtrOr(as.MinReplicas, 1))), int64(as.MaxReplicas))
 }
 
+// scaleUpWorkers is the schedulable workers to run for desired, adding pods only while the pool's live pods,
+// retained ones included, stay within maxReplicas. It never drops below the schedulable pods already running.
+func scaleUpWorkers(desired, schedulable, retained int64, maxReplicas int32) int64 {
+	return max(schedulable, min(desired, int64(maxReplicas)-retained))
+}
+
 // autoscaleWorkerPool returns the replicas for the managed WorkerPool. Scaling up is immediate. Scaling down
 // waits ScaleDownDelay after the last scaling event, and only ever removes workers that host no instance and whose
 // node holds no snapshot that is yet to be uploaded (once the worker goes, the node autoscaler may remove it): it
 // drains them in Substrate so nothing new lands on them, re-checks they are still empty, and gives their pods
 // the lowest deletion cost before lowering replicas so the ReplicaSet removes exactly those pods.
-func (r *DevboxRunnerReconciler) autoscaleWorkerPool(ctx context.Context, runner *v1alpha1.DevboxRunner, pool *unstructured.Unstructured, class v1alpha1.DevboxSandboxClass, capacity devboxCapacity) (int64, error) {
+func (r *DevboxRunnerReconciler) autoscaleWorkerPool(ctx context.Context, api substrate.API, runner *v1alpha1.DevboxRunner, pool *unstructured.Unstructured, class v1alpha1.DevboxSandboxClass, capacity devboxCapacity) (int64, error) {
 	wp := lo.FromPtr(runner.Spec.WorkerPool)
 	as := wp.Autoscaling
 	status := lo.FromPtr(runner.Status.Capacity)
@@ -158,13 +168,13 @@ func (r *DevboxRunnerReconciler) autoscaleWorkerPool(ctx context.Context, runner
 	if err := r.APIReader.List(ctx, pods, client.InNamespace(pool.GetNamespace()), client.MatchingLabelsSelector{Selector: parsed}); err != nil {
 		return current, fmt.Errorf("listing worker pods: %w", err)
 	}
-	workers, err := r.Substrate.ListWorkers(ctx)
+	workers, err := api.ListWorkers(ctx)
 	if err != nil {
 		return current, fmt.Errorf("listing Substrate workers: %w", err)
 	}
 	var pinned map[string]bool
 	if atespace := lo.FromPtr(runner.Status.Atespace); atespace != "" {
-		actors, err := r.Substrate.ListActors(ctx, atespace)
+		actors, err := api.ListActors(ctx, atespace)
 		if err != nil {
 			return current, fmt.Errorf("listing actors: %w", err)
 		}
@@ -182,9 +192,10 @@ func (r *DevboxRunnerReconciler) autoscaleWorkerPool(ctx context.Context, runner
 	active := int64(len(view.schedulable))
 	switch {
 	case desired > active:
-		active, scaled = desired, true
+		next := scaleUpWorkers(desired, active, int64(len(view.held)+len(view.drainedIdle)), as.MaxReplicas)
+		active, scaled = next, next > active
 	case desired < active && cooledDown:
-		drained, err := r.drainIdleWorkers(ctx, &view, active-desired, pinned)
+		drained, err := r.drainIdleWorkers(ctx, api, &view, active-desired, pinned)
 		if err != nil {
 			return current, err
 		}
@@ -215,18 +226,25 @@ func (r *DevboxRunnerReconciler) autoscaleWorkerPool(ctx context.Context, runner
 	return replicas, nil
 }
 
-// drainIdleWorkers drains up to n active workers that host no instance and whose node holds no undurable
-// snapshot, moving them to view.drainedIdle, or to view.held if an instance landed on one before the drain took
+// drainIdleWorkers drains up to n active or unavailable workers that host no instance and whose node holds no
+// undurable snapshot, unavailable ones first, moving them to view.drainedIdle, or to view.held if an instance landed on one before the drain took
 // effect. It returns how many left schedulable.
-func (r *DevboxRunnerReconciler) drainIdleWorkers(ctx context.Context, view *devboxPoolView, n int64, pinned map[string]bool) (int64, error) {
+func (r *DevboxRunnerReconciler) drainIdleWorkers(ctx context.Context, api substrate.API, view *devboxPoolView, n int64, pinned map[string]bool) (int64, error) {
 	idle := lo.Filter(view.schedulable, func(p devboxWorkerPod, _ int) bool {
-		return p.state() == ateapi.WorkerState_WORKER_STATE_ACTIVE && p.actors() == 0 && !pinned[p.pod.Spec.NodeName]
+		state := p.state()
+		return (state == ateapi.WorkerState_WORKER_STATE_ACTIVE || state == ateapi.WorkerState_WORKER_STATE_UNAVAILABLE) &&
+			p.actors() == 0 && !pinned[p.pod.Spec.NodeName]
 	})
-	sort.Slice(idle, func(i, j int) bool { return idle[i].pod.Name > idle[j].pod.Name })
+	sort.Slice(idle, func(i, j int) bool {
+		if a, b := idle[i].state() == ateapi.WorkerState_WORKER_STATE_UNAVAILABLE, idle[j].state() == ateapi.WorkerState_WORKER_STATE_UNAVAILABLE; a != b {
+			return a
+		}
+		return idle[i].pod.Name > idle[j].pod.Name
+	})
 
 	drained := map[types.UID]bool{}
 	for _, p := range idle[:min(int(n), len(idle))] {
-		worker, err := r.Substrate.DrainWorker(ctx, p.worker.GetMetadata().GetName())
+		worker, err := api.DrainWorker(ctx, p.worker.GetMetadata().GetName())
 		if err != nil {
 			return 0, fmt.Errorf("draining worker %s: %w", p.worker.GetMetadata().GetName(), err)
 		}

@@ -5,6 +5,7 @@ defmodule Console.PubSub.DevboxThreadUpdated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.DevboxInstanceDeltaCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.DevboxInstanceIndexUpdated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.DevboxSnapshotUpdated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.DevboxPullRequestJobUpdated, do: use Piazza.PubSub.Event
 
 defimpl Console.PubSub.Rtc, for: Console.PubSub.DevboxInstanceCreated do
   def deliver(%{item: inst}), do: {inst, :create}
@@ -14,7 +15,8 @@ defimpl Console.PubSub.Rtc, for: [
   Console.PubSub.DevboxInstanceUpdated,
   Console.PubSub.DevboxInstanceEnded,
   Console.PubSub.DevboxThreadUpdated,
-  Console.PubSub.DevboxSnapshotUpdated
+  Console.PubSub.DevboxSnapshotUpdated,
+  Console.PubSub.DevboxPullRequestJobUpdated
 ] do
   def deliver(%{item: item}), do: {item, :update}
 end
@@ -41,6 +43,10 @@ end
 
 defimpl Console.GraphQl.Topic, for: Console.Schema.DevboxInstance.IndexDelta do
   def infer(%@for{instance_id: id}, _), do: [devbox_instance_index_delta: "devbox_instances:#{id}:index"]
+end
+
+defimpl Console.GraphQl.Topic, for: Console.Devboxes.PullRequests.Job do
+  def infer(%@for{instance_id: id}, _), do: [devbox_pull_request_job_delta: "devbox_instances:#{id}:pull_request_jobs"]
 end
 
 defimpl Console.GraphQl.Topic, for: Console.Schema.DevboxSnapshot do

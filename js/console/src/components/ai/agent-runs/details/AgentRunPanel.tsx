@@ -1,4 +1,5 @@
 import {
+  AiSparkleOutlineIcon,
   ArrowTopRightIcon,
   CloseIcon,
   FileDiffIcon,
@@ -24,6 +25,7 @@ import {
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { isJobRunning } from 'components/workbenches/workbench/job/WorkbenchJobActivity'
 import {
+  AgentRunFragment,
   AgentRunMode,
   AgentRunStatus,
   useAgentRunQuery,
@@ -58,6 +60,41 @@ export enum AgentRunPanelTab {
   Diff = 'Diff',
   Analysis = 'Analysis',
   PullRequests = 'Pull requests',
+}
+
+export const AGENT_RUN_PANEL_TAB_ICONS: Record<
+  AgentRunPanelTab,
+  (size: number) => ReactNode
+> = {
+  [AgentRunPanelTab.ImplementationPlan]: (size) => (
+    <HourglassIcon size={size} />
+  ),
+  [AgentRunPanelTab.Diff]: (size) => <FileDiffIcon size={size} />,
+  [AgentRunPanelTab.Analysis]: (size) => <AiSparkleOutlineIcon size={size} />,
+  [AgentRunPanelTab.PullRequests]: (size) => <PrIcon size={size} />,
+}
+
+const hasRunPullRequests = (run: Nullable<AgentRunFragment>) =>
+  (run?.pullRequests ?? []).some((pr) => !!pr?.id && !!pr.url)
+
+// the tabs a loaded run has content for, in display order
+export function getAgentRunPanelTabs(
+  run: Nullable<AgentRunFragment>
+): AgentRunPanelTab[] {
+  if (!run) return []
+  const hasPullRequests = hasRunPullRequests(run)
+  const terminal =
+    run.status === AgentRunStatus.Successful ||
+    run.status === AgentRunStatus.Failed ||
+    run.status === AgentRunStatus.Cancelled
+  return [
+    AgentRunPanelTab.ImplementationPlan,
+    !!run.upload?.patch && AgentRunPanelTab.Diff,
+    !!run.analysis &&
+      (run.mode !== AgentRunMode.Write || (!hasPullRequests && terminal)) &&
+      AgentRunPanelTab.Analysis,
+    hasPullRequests && AgentRunPanelTab.PullRequests,
+  ].filter((tab): tab is AgentRunPanelTab => !!tab)
 }
 
 type AgentRunApprovalActions = {
@@ -157,7 +194,11 @@ export function AgentRunPanelContent() {
   const isDiffMaximized =
     diffFullscreen && selectedTab === AgentRunPanelTab.Diff
 
+  // a tab requested while opening the panel must survive its first mount
+  const prevRunIdRef = useRef(runId)
   useEffect(() => {
+    if (prevRunIdRef.current === runId) return
+    prevRunIdRef.current = runId
     clearRequestedTab()
   }, [runId, clearRequestedTab])
 
@@ -182,14 +223,9 @@ export function AgentRunPanelContent() {
     [run?.pullRequests]
   )
   const hasPullRequests = !isEmpty(pullRequests)
-  const isTerminalStatus =
-    run?.status === AgentRunStatus.Successful ||
-    run?.status === AgentRunStatus.Failed ||
-    run?.status === AgentRunStatus.Cancelled
-  const showAnalysisTab =
-    !!run?.analysis &&
-    (run.mode !== AgentRunMode.Write || (!hasPullRequests && isTerminalStatus))
-  const showDiffTab = !!run?.upload?.patch
+  const runTabs = getAgentRunPanelTabs(run)
+  const showAnalysisTab = runTabs.includes(AgentRunPanelTab.Analysis)
+  const showDiffTab = runTabs.includes(AgentRunPanelTab.Diff)
   const isDiffTabShowingPatch =
     selectedTab === AgentRunPanelTab.Diff && showDiffTab
   const todos = useAgentRunTodos(run)
@@ -235,24 +271,39 @@ export function AgentRunPanelContent() {
       hasRun) ||
     (showPrsTab && selectedTab === AgentRunPanelTab.PullRequests && !!run)
   const showContentPlaceholder = showTabSkeleton && !showingTabContent
-  const defaultTab = useMemo((): Nullable<AgentRunPanelTab> => {
-    if (showWorkingTheoryTab) return AgentRunPanelTab.ImplementationPlan
-    if (showDiffTab) return AgentRunPanelTab.Diff
-    if (showAnalysisTab) return AgentRunPanelTab.Analysis
-    if (showPrsTab) return AgentRunPanelTab.PullRequests
-    return null
-  }, [showDiffTab, showAnalysisTab, showWorkingTheoryTab, showPrsTab])
+  const defaultTab: Nullable<AgentRunPanelTab> = showWorkingTheoryTab
+    ? AgentRunPanelTab.ImplementationPlan
+    : showDiffTab
+      ? AgentRunPanelTab.Diff
+      : showAnalysisTab
+        ? AgentRunPanelTab.Analysis
+        : showPrsTab
+          ? AgentRunPanelTab.PullRequests
+          : null
 
+  const isRequestedTabShown = !!requestedTab && runTabs.includes(requestedTab)
+  // only fall back to the default tab when the run or its default changes,
+  // so clearing a requested tab doesn't overwrite it
+  const appliedDefaultRef = useRef<Nullable<string>>(null)
   useEffect(() => {
     if (!runId || !defaultTab) return
     if (requestedTab === AgentRunPanelTab.Diff && !showDiffTab) return
-    if (requestedTab) clearRequestedTab()
+    const key = `${runId}:${defaultTab}`
+    if (requestedTab) {
+      clearRequestedTab()
+      appliedDefaultRef.current = key
+      setSelectedTab(isRequestedTabShown ? requestedTab : defaultTab)
+      return
+    }
+    if (appliedDefaultRef.current === key) return
+    appliedDefaultRef.current = key
     setSelectedTab(defaultTab)
   }, [
     runId,
     defaultTab,
     showDiffTab,
     requestedTab,
+    isRequestedTabShown,
     clearRequestedTab,
     setSelectedTab,
   ])

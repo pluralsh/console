@@ -195,6 +195,16 @@ console:
     clientId: ~
     # clientSecret is used to configure the client secret for the custom oidc authentication.
     clientSecret: ~
+    # privateKey is a PEM-encoded RSA private key.  If set, console authenticates to the token endpoint with a signed jwt client assertion (private_key_jwt) instead of clientSecret.
+    privateKey: ~
+    # keyId is the key id/certificate thumbprint of privateKey registered with your idp, sent as the kid and x5t headers of the client assertion.
+    keyId: ~
+    # assertionAudience overrides the aud claim of the client assertion (defaults to the provider's token endpoint).
+    assertionAudience: ~
+    # authMethod pins the token endpoint auth method to one of none, client_secret_basic, client_secret_post or client_secret_jwt (defaults to the strongest method your idp advertises).  Use none for public clients, ideally alongside pkce.
+    authMethod: ~
+    # pkce enables PKCE on the authorization code flow, which public clients should always use.
+    pkce: false
     # discoveryUrl is used to configure the discovery url for the custom oidc authentication. It is usually something like https://{your-idp-domain}/.well-known/openid-configuration
     discoveryUrl: ~
     # scopes is used to configure the scopes for the custom oidc authentication. (defaults to "openid email")
@@ -1086,15 +1096,15 @@ kas:
   # tunnels (wss://<console_dns><path> by default), console's
   # devbox.v1.Control calls (on the internal api port) and browser streams (<path>/streams/<stream_id>).
   devbox:
-    enabled: false
+    enabled: true
     path: /ext/devbox
     # consoleGrpcAddress is console's gRPC server, where gateways' devbox.v1.Ingest calls are forwarded.
     # Defaults to console.<namespace>:50051.
     consoleGrpcAddress: ""
-    # streamTokenSecret holds console's DEVBOX_STREAM_TOKEN_KEY (console reads the same key from console-env);
-    # it must exist when devbox is enabled.
+    # streamTokenSecret is the key console signs browser stream tokens with and KAS verifies them with. When
+    # name is empty, both reuse KAS's existing api secret; set name and key to use a dedicated secret instead.
     streamTokenSecret:
-      name: console-env
+      name: ""
       key: DEVBOX_STREAM_TOKEN_KEY
     # connectionsPerTokenPerMinute limits gateway gRPC calls per deploy token; 0 disables the limit.
     connectionsPerTokenPerMinute: 0

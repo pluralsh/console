@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/url"
 	"strings"
 	"time"
 
@@ -188,14 +189,14 @@ func (g *Gateway) wake(ctx context.Context, inst *Instance) error {
 	ref := inst.ref()
 	ctx, cancel := context.WithTimeout(ctx, g.cfg.ReadyTimeout)
 	defer cancel()
-	if err := g.deps.Actors.Resume(ctx, ref); err != nil {
+	if err := g.resumeActor(ctx, ref); err != nil {
 		return fmt.Errorf("resuming actor %s: %w", ref, err)
 	}
 	if _, err := g.deps.Actors.WaitState(ctx, ref, ateapi.ActorState_ACTOR_STATE_RUNNING); err != nil {
 		return err
 	}
 	daemon := g.deps.Router.Daemon(ref.String())
-	if err := waitHealthy(ctx, daemon); err != nil {
+	if err := waitServing(ctx, daemon); err != nil {
 		return fmt.Errorf("waiting for the daemon of %s: %w", ref, err)
 	}
 	g.refreshRunner(ctx, inst)
@@ -203,6 +204,34 @@ func (g *Gateway) wake(ctx context.Context, inst *Instance) error {
 		return fmt.Errorf("initializing the daemon of %s: %w", ref, err)
 	}
 	return nil
+}
+
+var (
+	resumeBackoff    = 2 * time.Second
+	maxResumeBackoff = 15 * time.Second
+)
+
+// resumeActor retries Unavailable until ctx ends. Substrate can place a restore on a worker that just went away
+// (its worker.sock is gone) before it marks the worker unavailable; a later attempt lands on a live one. A restore
+// that failed that way can leave the actor crashed, so it is reverted before the next attempt.
+func (g *Gateway) resumeActor(ctx context.Context, ref actors.Ref) error {
+	backoff := resumeBackoff
+	for {
+		err := g.deps.Actors.Resume(ctx, ref)
+		if status.Code(err) != codes.Unavailable {
+			return err
+		}
+		g.log.Info("resume unavailable; retrying", "actor", ref.String(), "error", err.Error())
+		if a, gerr := g.deps.Actors.GetActor(ctx, ref); gerr == nil && a.GetStatus().GetState() == ateapi.ActorState_ACTOR_STATE_CRASHED {
+			_ = g.deps.Actors.Revert(ctx, ref)
+		}
+		select {
+		case <-ctx.Done():
+			return err
+		case <-time.After(backoff):
+		}
+		backoff = min(backoff*2, maxResumeBackoff)
+	}
 }
 
 // refreshRunner rereads the instance's runner so Initialize carries current secret env; on failure the instance
@@ -221,25 +250,21 @@ func (g *Gateway) refreshRunner(ctx context.Context, inst *Instance) {
 	inst.mu.Unlock()
 }
 
-func waitHealthy(ctx context.Context, d devboxv1.DaemonClient) error {
+// waitServing waits for the daemon to answer Health. It doesn't wait for Ready: a daemon is only Ready after
+// Initialize, which needs it serving.
+func waitServing(ctx context.Context, d devboxv1.DaemonClient) error {
 	t := time.NewTicker(500 * time.Millisecond)
 	defer t.Stop()
-	var last error
 	for {
 		hctx, cancel := context.WithTimeout(ctx, 5*time.Second)
-		resp, err := d.Health(hctx, &devboxv1.HealthRequest{})
+		_, err := d.Health(hctx, &devboxv1.HealthRequest{})
 		cancel()
-		if err == nil && resp.GetReady() {
+		if err == nil {
 			return nil
-		}
-		if err != nil {
-			last = err
-		} else {
-			last = fmt.Errorf("daemon not ready: %s", resp.GetStatus())
 		}
 		select {
 		case <-ctx.Done():
-			return errors.Join(ctx.Err(), last)
+			return errors.Join(ctx.Err(), err)
 		case <-t.C:
 		}
 	}
@@ -275,18 +300,21 @@ func (g *Gateway) initRequest(inst *Instance) *devboxv1.InitializeRequest {
 		Env:                  env,
 		Autonomy:             autonomy,
 		DecisionReview:       req.GetDecisionReview(),
-		Endpoints:            g.endpoints(),
+		Endpoints:            g.endpoints(req.GetWorkbenchId()),
 		RestoredFromSnapshot: inst.rec.RestoredFrom != "",
 		RestoreFidelity:      devboxv1.SnapshotFidelity(devboxv1.SnapshotFidelity_value[inst.rec.RestoreFidelity]),
 		RequestTokenJwks:     g.cfg.RequestTokenJWKS,
 	}
 }
 
-func (g *Gateway) endpoints() *devboxv1.HarnessEndpoints {
+func (g *Gateway) endpoints(workbenchID string) *devboxv1.HarnessEndpoints {
 	ep := &devboxv1.HarnessEndpoints{
-		ConsoleUrl:      g.cfg.ConsoleURL,
-		AiProxyUrl:      g.cfg.AIProxyURL,
-		WorkbenchMcpUrl: g.cfg.WorkbenchMCPURL,
+		ConsoleUrl: g.cfg.ConsoleURL,
+		AiProxyUrl: g.cfg.AIProxyURL,
+	}
+	// console serves each workbench's MCP at <base>/<workbench-id>
+	if base := strings.TrimSuffix(g.cfg.WorkbenchMCPURL, "/"); base != "" && workbenchID != "" {
+		ep.WorkbenchMcpUrl = base + "/" + url.PathEscape(workbenchID)
 	}
 	if gw := strings.TrimSuffix(g.cfg.GatewayURL, "/"); gw != "" {
 		ep.DevboxMcpUrl = gw + egress.MCPPath
@@ -381,10 +409,43 @@ func (i *Instance) sharedSnapshot() bool {
 }
 
 // resume wakes a suspended instance (DBX-61).
+type wakeOp struct {
+	done   chan struct{}
+	status devboxv1.InstanceStatus
+	err    error
+}
+
+// resume wakes inst in the background, bounded by ReadyTimeout rather than the caller's deadline: a cold restore
+// can outlast a control call, and cancelling it midway left the actor half resumed for the next caller to restart.
+// Concurrent callers share one wake; a caller whose context ends first gets errStarting while the wake continues.
 func (g *Gateway) resume(ctx context.Context, inst *Instance) (devboxv1.InstanceStatus, error) {
-	inst.op.Lock()
-	defer inst.op.Unlock()
-	return g.resumeLocked(ctx, inst)
+	op := g.startWake(inst)
+	select {
+	case <-op.done:
+		return op.status, op.err
+	case <-ctx.Done():
+		return inst.status(), errStarting(inst.ID)
+	}
+}
+
+func (g *Gateway) startWake(inst *Instance) *wakeOp {
+	inst.mu.Lock()
+	defer inst.mu.Unlock()
+	if inst.waking != nil {
+		return inst.waking
+	}
+	op := &wakeOp{done: make(chan struct{})}
+	inst.waking = op
+	g.goBackground(func(ctx context.Context) {
+		inst.op.Lock()
+		op.status, op.err = g.resumeLocked(ctx, inst)
+		inst.op.Unlock()
+		inst.mu.Lock()
+		inst.waking = nil
+		inst.mu.Unlock()
+		close(op.done)
+	})
+	return op
 }
 
 func (g *Gateway) resumeLocked(ctx context.Context, inst *Instance) (devboxv1.InstanceStatus, error) {
@@ -399,7 +460,8 @@ func (g *Gateway) resumeLocked(ctx context.Context, inst *Instance) (devboxv1.In
 		if errors.Is(err, actors.ErrCrashed) {
 			_ = g.deps.Actors.Revert(ctx, inst.ref())
 		}
-		return devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED, status.Errorf(codes.Unavailable, "resuming instance %s: %v", inst.ID, err)
+		// not Unavailable: console reads that as the cluster being offline, which hides the real failure
+		return devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED, status.Errorf(codes.Internal, "resuming instance %s: %v", inst.ID, err)
 	}
 	g.setStatus(ctx, inst, statusUpdate{status: devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING})
 	g.startForwarder(inst)
@@ -425,7 +487,7 @@ func (g *Gateway) running(ctx context.Context, id string, resumeIfSuspended bool
 	case devboxv1.InstanceStatus_INSTANCE_STATUS_PROVISIONING, devboxv1.InstanceStatus_INSTANCE_STATUS_PENDING,
 		devboxv1.InstanceStatus_INSTANCE_STATUS_SNAPSHOTTING:
 		if !resumeIfSuspended {
-			return inst, nil, status.Errorf(codes.Unavailable, "instance %s is %s", id, st)
+			return inst, nil, statusError(codes.Unavailable, devboxv1.ErrorReason_ERROR_REASON_INSTANCE_STARTING, "instance %s is %s", id, st)
 		}
 		// Wait for the operation in flight, then re-check.
 		inst.op.Lock()

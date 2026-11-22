@@ -64,6 +64,118 @@ const page = (entities: DevboxEntityFragment[], deltaOffset = 10) =>
     page: { entities, deltaOffset, hasMore: true },
   }) as const
 
+const numberedPage = (
+  entities: DevboxEntityFragment[],
+  seq: number,
+  stream = 'run-1'
+) =>
+  ({
+    type: 'page',
+    sessionId: SESSION,
+    page: { entities, deltaOffset: 100, seq, stream, hasMore: false },
+  }) as const
+
+// numbered appends to message `a`; offsets deliberately run backwards, since
+// they're instance-wide and don't order a session's deltas
+const chunk = (seq: number, text: string, stream = 'run-1') =>
+  ({
+    type: 'delta',
+    change: change({
+      op: DevboxDeltaOp.Append,
+      entityType: DevboxEntityType.AgentMessage,
+      entityId: 'a',
+      offset: 100 - seq,
+      seq,
+      stream,
+      payload: { content: { type: 'text', text } },
+    }),
+  }) as const
+
+describe('devboxTimelineReducer ordering', () => {
+  it('reconstructs a session from deltas delivered out of order', () => {
+    const store = reduce([
+      numberedPage([agentMessage('a', 'a')], 2),
+      chunk(5, ' d'),
+      chunk(4, ' c'),
+      chunk(3, ' b'),
+    ])
+    const session = store.sessions[SESSION]
+    expect(textOf(store, 'a')).toBe('a b c d')
+    expect(session.seq).toBe(5)
+    expect(session.pending).toEqual({})
+    expect(session.stale).toBe(false)
+  })
+
+  it('holds deltas past a gap and drops ones the page already has', () => {
+    const loaded = reduce([numberedPage([agentMessage('a', 'a b')], 3)])
+    expect(reduce([chunk(3, ' b')], loaded)).toBe(loaded)
+
+    const held = reduce([chunk(5, ' d')], loaded)
+    expect(textOf(held, 'a')).toBe('a b')
+    expect(Object.keys(held.sessions[SESSION].pending)).toEqual(['5'])
+
+    // the reloaded page covers the gap; the held delta applies on top of it
+    const resynced = reduce(
+      [numberedPage([agentMessage('a', 'a b c')], 4)],
+      held
+    )
+    expect(textOf(resynced, 'a')).toBe('a b c d')
+    expect(resynced.sessions[SESSION].seq).toBe(5)
+  })
+
+  it('replays only the buffered deltas past the first page', () => {
+    const store = reduce([
+      chunk(3, ' c'),
+      chunk(2, ' b'),
+      numberedPage([agentMessage('a', 'a b')], 2),
+    ])
+    expect(textOf(store, 'a')).toBe('a b c')
+    expect(store.sessions[SESSION].seq).toBe(3)
+  })
+
+  it('reloads when a new daemon run starts numbering again', () => {
+    const loaded = reduce([
+      numberedPage([agentMessage('a', 'a')], 7),
+      chunk(9, ' x'),
+    ])
+    const restarted = reduce([chunk(1, ' new', 'run-2')], loaded)
+    expect(restarted.sessions[SESSION].stale).toBe(true)
+    expect(textOf(restarted, 'a')).toBe('a')
+
+    const reloaded = reduce(
+      [
+        numberedPage([agentMessage('a', 'a new')], 1, 'run-2'),
+        chunk(2, '!', 'run-2'),
+      ],
+      restarted
+    )
+    const session = reloaded.sessions[SESSION]
+    expect(session.stale).toBe(false)
+    expect(session.stream).toBe('run-2')
+    expect(session.pending).toEqual({})
+    expect(textOf(reloaded, 'a')).toBe('a new!')
+  })
+
+  it('keeps older pages from moving where deltas resume', () => {
+    const loaded = reduce([
+      numberedPage([agentMessage('a', 'a')], 4),
+      chunk(6, ' x'),
+    ])
+    const older = devboxTimelineReducer(loaded, {
+      type: 'page',
+      sessionId: SESSION,
+      page: {
+        entities: [agentMessage('z', 'old', { position: 0 })],
+        seq: 1,
+        stream: 'run-1',
+      },
+      older: true,
+    })
+    expect(older.sessions[SESSION].seq).toBe(4)
+    expect(Object.keys(older.sessions[SESSION].pending)).toEqual(['6'])
+  })
+})
+
 describe('devboxTimelineReducer', () => {
   it('loads a page of entities in position order', () => {
     const store = reduce([
@@ -198,6 +310,43 @@ describe('devboxTimelineReducer', () => {
     expect(entity.settled).toBe(true)
     expect(textOf(store, 'a')).toBe('final text')
     expect(store.sessions[SESSION].deltaOffset).toBe(12)
+  })
+
+  it('repairs an entity whose chunks were missed with a settle that arrives late', () => {
+    const append = (offset: number, text: string) =>
+      ({
+        type: 'delta',
+        change: change({
+          op: DevboxDeltaOp.Append,
+          entityType: DevboxEntityType.AgentMessage,
+          entityId: 'a',
+          offset,
+          payload: { content: { type: 'text', text } },
+        }),
+      }) as const
+    const store = reduce([
+      page([]),
+      append(12, '.'),
+      append(11, 'I added a comment'),
+      {
+        type: 'delta',
+        change: change({
+          op: DevboxDeltaOp.State,
+          stateKind: 'state_update',
+          offset: 14,
+        }),
+      },
+      {
+        type: 'delta',
+        change: change({
+          op: DevboxDeltaOp.Settle,
+          offset: 13,
+          entity: agentMessage('a', 'I added a comment.', { revision: 1 }),
+        }),
+      },
+    ])
+    expect(textOf(store, 'a')).toBe('I added a comment.')
+    expect(store.sessions[SESSION].deltaOffset).toBe(14)
   })
 
   it('keeps a newer live revision over an older settle or page', () => {

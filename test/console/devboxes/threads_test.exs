@@ -162,6 +162,31 @@ defmodule Console.Devboxes.ThreadsTest do
     end
   end
 
+  describe "#update_queued_prompt/5" do
+    test "it stores the queue the box reports back" do
+      thread = owned_thread()
+      expect(Control.Test, :update_queued_prompt, fn _, %{id: id}, "p2", :edit, "rewritten" ->
+        assert id == thread.id
+        {:ok, %{updated: true, queued_prompts: [%{prompt_id: "p2", content: [%{text: %{text: "rewritten"}}]}]}}
+      end)
+
+      {:ok, updated} = Threads.update_queued_prompt(thread.id, "p2", :edit, "rewritten", thread.user)
+      assert [%{prompt_id: "p2", text: "rewritten"}] = updated.queued_prompts
+    end
+
+    test "an edit needs text" do
+      thread = owned_thread()
+
+      {:error, "a queued prompt needs text"} = Threads.update_queued_prompt(thread.id, "p2", :edit, "  ", thread.user)
+    end
+
+    test "only those who can prompt the thread can change its queue" do
+      thread = owned_thread()
+
+      {:error, _} = Threads.update_queued_prompt(thread.id, "p2", :cancel, nil, insert(:user))
+    end
+  end
+
   describe "#set_config_option/4" do
     test "it validates against the thread's reported options" do
       thread = owned_thread(config_options: [
@@ -186,6 +211,25 @@ defmodule Console.Devboxes.ThreadsTest do
       {:ok, _} = Threads.set_config_option(thread.id, "autonomy", "auto", thread.user)
       {:error, msg} = Threads.set_config_option(thread.id, "autonomy", "full", thread.user)
       assert msg =~ "above this devbox's max of auto"
+    end
+
+    test "a proxy-billed model option accepts the AI proxy's models" do
+      deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key", model: "gpt-5"}})
+      thread = owned_thread(
+        agent: :claude,
+        config_options: [
+          %DevboxInstanceSession.ConfigOption{
+            config_id: "model",
+            category: "model",
+            options: [%DevboxInstanceSession.ConfigOption.Value{value: "default"}]
+          }
+        ],
+        devbox_attrs: [agents: [%Devbox.Agent{type: :claude}]]
+      )
+
+      {:ok, _} = Threads.set_config_option(thread.id, "model", "openai/gpt-5", thread.user)
+      {:ok, _} = Threads.set_config_option(thread.id, "model", "default", thread.user)
+      {:error, _} = Threads.set_config_option(thread.id, "model", "anthropic/claude-opus-4-1", thread.user)
     end
 
     test "auto needs subscription billing" do

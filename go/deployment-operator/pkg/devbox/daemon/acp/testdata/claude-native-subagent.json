@@ -1,0 +1,144 @@
+[
+  {
+    "sessionUpdate": "subagent_spawned",
+    "subagentSessionId": "a0aa9e5d37e932105",
+    "name": "Explore files",
+    "task": "List the files in the repo",
+    "capabilities": {}
+  },
+  {
+    "_meta": {
+      "claudeCode": {
+        "toolResponse": {
+          "isAsync": true,
+          "status": "async_launched",
+          "agentId": "a0aa9e5d37e932105",
+          "description": "Explore files",
+          "resolvedModel": "claude-opus-5[1m]",
+          "prompt": "List the files in the repo",
+          "outputFile": "/private/tmp/claude-501/-private-tmp-claude-e2e-work/dc1eb53d-c033-4a4e-98ec-84481e956f19/tasks/a0aa9e5d37e932105.output",
+          "canReadOutputFile": true
+        },
+        "toolName": "Agent"
+      }
+    },
+    "toolCallId": "toolu_parent_2",
+    "sessionUpdate": "tool_call_update"
+  },
+  {
+    "sessionId": "a0aa9e5d37e932105",
+    "update": {
+      "_meta": {
+        "claudeCode": {
+          "toolName": "Bash",
+          "title": "List files",
+          "parentToolUseId": "toolu_parent_2"
+        }
+      },
+      "toolCallId": "toolu_child_4",
+      "sessionUpdate": "tool_call",
+      "rawInput": {
+        "command": "ls",
+        "description": "List files"
+      },
+      "status": "pending",
+      "title": "ls",
+      "kind": "execute",
+      "content": [
+        {
+          "type": "content",
+          "content": {
+            "type": "text",
+            "text": "List files"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "sessionUpdate": "agent_message_chunk",
+    "content": {
+      "type": "text",
+      "text": "parent done"
+    },
+    "messageId": "msg_6"
+  },
+  {
+    "sessionId": "a0aa9e5d37e932105",
+    "update": {
+      "_meta": {
+        "claudeCode": {
+          "toolResponse": {
+            "stdout": "README.md",
+            "stderr": "",
+            "interrupted": false,
+            "isImage": false,
+            "noOutputExpected": false
+          },
+          "toolName": "Bash",
+          "parentToolUseId": "toolu_parent_2"
+        }
+      },
+      "toolCallId": "toolu_child_4",
+      "sessionUpdate": "tool_call_update"
+    }
+  },
+  {
+    "sessionId": "a0aa9e5d37e932105",
+    "update": {
+      "_meta": {
+        "claudeCode": {
+          "toolName": "Bash",
+          "parentToolUseId": "toolu_parent_2"
+        }
+      },
+      "toolCallId": "toolu_child_4",
+      "sessionUpdate": "tool_call_update",
+      "status": "completed",
+      "rawOutput": "README.md",
+      "content": [
+        {
+          "type": "content",
+          "content": {
+            "type": "text",
+            "text": "```console\nREADME.md\n```"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "sessionId": "a0aa9e5d37e932105",
+    "update": {
+      "sessionUpdate": "agent_message_chunk",
+      "content": {
+        "type": "text",
+        "text": "child done"
+      },
+      "_meta": {
+        "claudeCode": {
+          "parentToolUseId": "toolu_parent_2"
+        }
+      },
+      "messageId": "msg_10"
+    }
+  },
+  {
+    "sessionUpdate": "subagent_state_update",
+    "subagentSessionId": "a0aa9e5d37e932105",
+    "state": "completed"
+  },
+  {
+    "sessionUpdate": "agent_message_chunk",
+    "content": {
+      "type": "text",
+      "text": "parent done"
+    },
+    "messageId": "msg_12"
+  },
+  {
+    "sessionUpdate": "session_info_update",
+    "title": "use a subagent to explore",
+    "updatedAt": "2026-11-21T22:24:10.124Z"
+  }
+]

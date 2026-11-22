@@ -155,10 +155,17 @@ func providerDecisionModels(cfg *pb.AiConfig, provider schemas.ModelProvider) de
 	return decisionModels{}
 }
 
-// bedrockModelName is the client-facing model registered for a Bedrock runtime model or 3-part inference profile ID.
+// bedrockProfileGeos are the geography prefixes of AWS cross-region inference profile IDs.
+var bedrockProfileGeos = map[string]bool{
+	"us": true, "us-gov": true, "eu": true, "apac": true, "jp": true, "au": true, "ca": true, "global": true,
+}
+
+// bedrockModelName is the client-facing model registered for a Bedrock runtime model or cross-region inference
+// profile ID (<geo>.<provider>.<model>).  Model IDs may themselves contain dots (openai.gpt-5.6), so only a known
+// geography prefix marks a profile.
 func bedrockModelName(modelID string) string {
-	if parts := strings.Split(modelID, "."); len(parts) == 3 {
-		return strings.Join(parts[1:], ".")
+	if geo, model, ok := strings.Cut(modelID, "."); ok && bedrockProfileGeos[geo] && strings.Contains(model, ".") {
+		return model
 	}
 	return modelID
 }

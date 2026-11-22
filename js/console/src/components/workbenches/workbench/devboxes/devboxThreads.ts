@@ -2,9 +2,12 @@ import {
   DevboxAgentFragment,
   DevboxAgentType,
   DevboxForegroundState,
+  DevboxInteractionFragment,
+  DevboxInteractionKind,
   DevboxSessionCapabilitiesFragment,
   DevboxThreadFragment,
   DevboxThreadKind,
+  DevboxThreadStage,
   DevboxThreadStatus,
 } from 'generated/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
@@ -18,29 +21,92 @@ export type DevboxThreadAction =
 
 export type DevboxThreadState =
   | 'running'
+  | 'awaiting approval'
   | 'needs you'
   | 'waiting'
   | 'idle'
   | 'closed'
 
+// the thread param while composing a new session
+export const NEW_SESSION = 'new'
+
+// the thread in the URL, else the first live top-level one
+export function selectedThread(
+  threads: Nullable<Nullable<DevboxThreadFragment>[]>,
+  threadId: Nullable<string>
+) {
+  if (threadId === NEW_SESSION) return undefined
+  const all = (threads ?? []).filter(isNonNullable)
+  return (
+    all.find((t) => t.id === threadId) ??
+    all.find(
+      (t) =>
+        t.kind !== DevboxThreadKind.Subagent &&
+        t.status !== DevboxThreadStatus.Deleted
+    )
+  )
+}
+
+// the top-level thread a subagent (at any depth) works for
+export function rootThread(
+  threads: Nullable<Nullable<DevboxThreadFragment>[]>,
+  thread: Nullable<DevboxThreadFragment>
+) {
+  const byId = new Map(
+    (threads ?? []).filter(isNonNullable).map((t) => [t.id, t])
+  )
+  const seen = new Set<string>()
+  let root = thread
+  while (
+    root?.kind === DevboxThreadKind.Subagent &&
+    root.parent?.id &&
+    !seen.has(root.id)
+  ) {
+    seen.add(root.id)
+    const parent = byId.get(root.parent.id)
+    if (!parent) break
+    root = parent
+  }
+  return root ?? undefined
+}
+
+// a thread's pending interactions count over its foreground state, which a
+// subagent idled by its parent no longer reports
 export function threadState(
-  thread: Pick<DevboxThreadFragment, 'status' | 'foregroundState'>
+  thread: Pick<DevboxThreadFragment, 'status' | 'foregroundState'>,
+  pending: Pick<DevboxInteractionFragment, 'kind'>[] = []
 ): DevboxThreadState {
   if (
     thread.status === DevboxThreadStatus.Closed ||
     thread.status === DevboxThreadStatus.Deleted
   )
     return 'closed'
-  if (thread.foregroundState === DevboxForegroundState.RequiresAction)
+  if (pending.some((i) => i.kind === DevboxInteractionKind.Permission))
+    return 'awaiting approval'
+  if (
+    pending.length ||
+    thread.foregroundState === DevboxForegroundState.RequiresAction
+  )
     return 'needs you'
   if (thread.status === DevboxThreadStatus.Waiting) return 'waiting'
   if (thread.foregroundState === DevboxForegroundState.Running) return 'running'
   return 'idle'
 }
 
+// titles taken from a prompt carry its file mention tags
+const FILE_MENTION_TAG =
+  /<plrl-devbox-file\s+path="([^"]*)"\s*(?:\/>|><\/plrl-devbox-file>)/g
+
+// prompt text with file mention tags shown as @name
+export const promptPreview = (text: string) =>
+  text.replace(
+    FILE_MENTION_TAG,
+    (_, path: string) => `@${path.replace(/\/$/, '').split('/').pop() || path}`
+  )
+
 export const threadTitle = (
   thread: Pick<DevboxThreadFragment, 'title' | 'agentTitle' | 'id'>
-) => thread.title || thread.agentTitle || 'Untitled thread'
+) => promptPreview(thread.title || thread.agentTitle || 'Untitled thread')
 
 export function capabilitiesFor(
   agents: Nullable<Nullable<DevboxAgentFragment>[]>,
@@ -98,6 +164,26 @@ export function buildThreadTree(
       )
     )
     .map((t) => ({ ...t, children: children.get(t.id) ?? [] }))
+}
+
+export const THREAD_STAGES = [
+  { stage: DevboxThreadStage.NeedsReview, label: 'Needs review' },
+  { stage: DevboxThreadStage.Running, label: 'Running' },
+  { stage: DevboxThreadStage.Completed, label: 'Completed' },
+] as const
+
+export type DevboxThreadGroup = (typeof THREAD_STAGES)[number] & {
+  threads: DevboxThreadNode[]
+}
+
+// the thread tree split by the server-computed stage, empty stages dropped
+export function groupThreadsByStage(
+  tree: DevboxThreadNode[]
+): DevboxThreadGroup[] {
+  return THREAD_STAGES.map((group) => ({
+    ...group,
+    threads: tree.filter((t) => t.stage === group.stage),
+  })).filter((group) => group.threads.length)
 }
 
 export const ALL_REPOSITORIES_CWD = '~'

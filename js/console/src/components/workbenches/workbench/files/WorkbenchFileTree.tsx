@@ -11,6 +11,8 @@ import {
 } from '@pluralsh/design-system'
 import { WorkbenchEmptyText } from 'components/workbenches/common/WorkbenchEmptyState'
 import {
+  FILE_TREE_GLYPH_SIZE,
+  FILE_TREE_ICON_SIZE,
   FileTypeIcon,
   fileTreeMuiTheme,
   StyledTreeView,
@@ -213,7 +215,7 @@ function DirectoryEntries({
         label={
           <EntryLabel
             name={file.name}
-            icon={<FolderIcon size={14} />}
+            icon={<FolderIcon size={FILE_TREE_GLYPH_SIZE} />}
             onDelete={() => onDelete(file)}
             deleteLabel={`Delete folder ${file.name}`}
           />
@@ -244,7 +246,12 @@ function DirectoryEntries({
         label={
           <EntryLabel
             name={file.name}
-            icon={<FileTypeIcon fileName={file.name} />}
+            icon={
+              <FileTypeIcon
+                fileName={file.name}
+                size={FILE_TREE_ICON_SIZE}
+              />
+            }
             onDelete={() => onDelete(file)}
             deleteLabel={`Delete ${file.name}`}
           />

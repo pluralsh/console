@@ -86,6 +86,11 @@ type PullRequestOwner interface {
 	DevboxForPullRequest(ctx context.Context, url string) (boxID string, err error)
 }
 
+// BranchDiffs sizes a pull request's branch in the instance's checkout (the core, through the daemon).
+type BranchDiffs interface {
+	GetBranchDiffStat(ctx context.Context, req *devboxv1.BranchDiffStatRequest) (*devboxv1.BranchDiffStatResponse, error)
+}
+
 // Deps are the collaborators the gateway core provides.
 type Deps struct {
 	Ingest devboxv1.IngestClient
@@ -94,6 +99,8 @@ type Deps struct {
 
 	// PullRequests is optional; see PullRequestOwner.
 	PullRequests PullRequestOwner
+	// Diffs is optional; without it devbox PRs carry no line counts or commit SHAs.
+	Diffs BranchDiffs
 }
 
 // Config configures the three listeners. An empty address disables that listener.
@@ -218,6 +225,18 @@ type Rule struct {
 	// ExtraHeaders are further headers the rule replaces, each from its own secret. Substrate replaces a header
 	// only when the request carries it, so a client picks its credential by the header it sends.
 	ExtraHeaders []HeaderSecret
+}
+
+// EffectivePort is Port, or the scheme's default when it is unset.
+func (r Rule) EffectivePort() int32 {
+	switch {
+	case r.Port != 0:
+		return r.Port
+	case r.Scheme == SchemeHTTP:
+		return 80
+	default:
+		return 443
+	}
 }
 
 // HeaderSecret replaces Header with the credential SecretURI resolves to.

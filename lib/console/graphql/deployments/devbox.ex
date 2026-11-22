@@ -34,6 +34,18 @@ defmodule Console.GraphQl.Deployments.Devbox do
     value :subscription, description: "billed to the instance owner's linked subscription"
   end
 
+  enum :devbox_thread_stage do
+    value :running,      description: "a turn is in flight or queued"
+    value :needs_review, description: "the agent is waiting on a person to answer a permission request or question"
+    value :completed,    description: "the last turn finished or failed, or the thread was closed"
+  end
+
+  enum :devbox_queued_prompt_action do
+    value :edit,     description: "replace the prompt's text"
+    value :cancel,   description: "drop the prompt from the queue"
+    value :send_now, description: "run the prompt next, stopping the current turn"
+  end
+
   enum :devbox_stream_kind do
     value :terminal
     value :vnc
@@ -112,6 +124,8 @@ defmodule Console.GraphQl.Deployments.Devbox do
     field :conditions,           list_of(:devbox_condition_attributes)
     field :cloud_identities,     list_of(:devbox_cloud_identity_attributes),
       description: "cloud identities instances get workload identity tokens for"
+    field :create_bindings,      list_of(:agent_binding_attributes),
+      description: "who may attach this box to a workbench and start instances on it, falling back to the global create policy if empty"
   end
 
   input_object :devbox_cloud_identity_attributes do
@@ -318,6 +332,8 @@ defmodule Console.GraphQl.Deployments.Devbox do
 
     field :cluster,         :cluster, resolve: dataloader(Deployments)
     field :scm_connections, list_of(:scm_connection), resolve: dataloader(Deployments)
+    field :create_bindings, list_of(:policy_binding), resolve: dataloader(Deployments),
+      description: "who may attach this box to a workbench and start instances on it"
 
     @desc "the box's workload identity issuer and how to trust it from cloud accounts"
     field :workload_identity, :devbox_workload_identity, resolve: &Deployments.devbox_workload_identity/3
@@ -368,11 +384,15 @@ defmodule Console.GraphQl.Deployments.Devbox do
     field :session_capabilities, :devbox_session_capabilities
 
     field :models, list_of(:devbox_model),
-      description: "the models offered: probed values narrowed by the box's allowlist",
-      resolve: &Deployments.offered_models/3
+      description: "the models offered under a billing mode (proxy by default): the AI proxy's models, or on a subscription the probed values narrowed by the box's allowlist" do
+      arg :billing, :devbox_billing_mode
+      resolve &Deployments.offered_models/3
+    end
     field :default_model, :string,
-      description: "the model preselected when starting an instance",
-      resolve: &Deployments.devbox_default_model/3
+      description: "the model preselected when starting an instance under a billing mode (proxy by default)" do
+      arg :billing, :devbox_billing_mode
+      resolve &Deployments.devbox_default_model/3
+    end
   end
 
   object :devbox_model do
@@ -482,8 +502,9 @@ defmodule Console.GraphQl.Deployments.Devbox do
     field :user,          :user, resolve: dataloader(User)
     field :keep_awake_by, :user, resolve: dataloader(User)
 
-    field :threads, list_of(:devbox_thread) do
+    field :threads, list_of(:devbox_thread), description: "the instance's threads and their subagents (kind SUBAGENT, under their parent)" do
       arg :include_deleted, :boolean
+      arg :stages,          list_of(:devbox_thread_stage), description: "only threads in these stages"
       resolve &Deployments.devbox_instance_threads/3
     end
 
@@ -648,6 +669,8 @@ defmodule Console.GraphQl.Deployments.Devbox do
     field :cwd,               :string
     field :worktree_repos,    list_of(:string)
     field :status,            non_null(:devbox_thread_status)
+    field :stage,             non_null(:devbox_thread_stage), description: "where the thread sits in its lifecycle, for grouping",
+      resolve: fn s, _, _ -> {:ok, DevboxInstanceSession.stage(s)} end
     field :imported,          :boolean
     field :last_activity_at,  :datetime
     field :entity_count,      :integer
@@ -660,6 +683,8 @@ defmodule Console.GraphQl.Deployments.Devbox do
     field :config_options,    list_of(:devbox_config_option)
     field :available_commands, list_of(:devbox_command)
     field :usage,             :devbox_usage
+    field :queued_prompts,    list_of(:devbox_queued_prompt), description: "prompts held until the running turn ends, in the order they'll run"
+    field :parent_tool_call_id, :string, description: "for subagents, the parent's tool call that spawned it"
 
     field :instance,     :devbox_instance, resolve: dataloader(Deployments)
     field :parent,       :devbox_thread, resolve: dataloader(Deployments)
@@ -669,6 +694,14 @@ defmodule Console.GraphQl.Deployments.Devbox do
     field :interactions, list_of(:devbox_interaction), resolve: dataloader(Deployments)
 
     timestamps()
+  end
+
+  @desc "A prompt sent while the thread was busy, waiting for its turn"
+  object :devbox_queued_prompt do
+    field :prompt_id,   non_null(:string)
+    field :text,        :string
+    field :attachments, list_of(:string), description: "names of the files attached to the prompt"
+    field :queued_at,   :datetime
   end
 
   object :devbox_usage do
@@ -695,6 +728,12 @@ defmodule Console.GraphQl.Deployments.Devbox do
     field :requested_schema, :map, description: "json schema for a form elicitation"
     field :url,              :string, description: "the url of a url elicitation"
     field :options,          list_of(:devbox_permission_option)
+    field :tool_call,        :devbox_tool_call,
+      description: "the tool call a permission request asks about, for when its session's transcript isn't loaded",
+      resolve: fn
+        %{tool_call: %{} = tc}, _, _ -> {:ok, Console.Devboxes.Acp.tool_call(tc)}
+        _, _, _ -> {:ok, nil}
+      end
     field :response,         :map
     field :answered_at,      :datetime
     field :expires_at,       :datetime
@@ -760,6 +799,8 @@ defmodule Console.GraphQl.Deployments.Devbox do
   object :devbox_timeline do
     field :entities,     list_of(:devbox_entity)
     field :delta_offset, :long, description: "apply live deltas with a greater offset on top of this page"
+    field :seq,          :long, description: "the session's last delta seq this page reflects: apply its deltas from seq + 1, in order"
+    field :stream,       :string, description: "the daemon run numbering seq; deltas from another stream need a reload"
     field :has_more,     :boolean, description: "more entities lie in the paging direction (older ones, unless paging with after)"
   end
 
@@ -956,10 +997,30 @@ defmodule Console.GraphQl.Deployments.Devbox do
     field :payload,     :map, description: "the verbatim ACP chunk, patch, notice or state update"
     field :entity,      :devbox_entity, description: "for settle deltas, the final entity"
     field :offset,      :long
+    field :seq,         :long, description: "dense per-session order within stream; unset for notices and console-made deltas"
+    field :stream,      :string
     field :emitted_at,  :datetime
   end
 
   @desc "The index rows an UpsertInstanceIndex call changed (revision and foreground state only when the instance aggregate changed)"
+  enum :devbox_pull_request_job_status do
+    value :running
+    value :succeeded
+    value :failed
+  end
+
+  @desc "A pull request a devbox instance is preparing for one of its checkouts (never stored)"
+  object :devbox_pull_request_job do
+    field :id,          non_null(:id)
+    field :instance_id, non_null(:id)
+    field :repository,  non_null(:string), description: "the checkout's name or path"
+    field :status,      non_null(:devbox_pull_request_job_status)
+    field :url,         :string, description: "the pull request, once created"
+    field :title,       :string
+    field :error,       :string
+    field :writer,      :string, description: "who wrote the text: ai_proxy, claude, codex or template"
+  end
+
   object :devbox_index_change do
     field :instance_id,      non_null(:id)
     field :revision,         :long
@@ -977,6 +1038,7 @@ defmodule Console.GraphQl.Deployments.Devbox do
   delta :devbox_snapshot
   delta :devbox_entity_change
   delta :devbox_index_change
+  delta :devbox_pull_request_job
 
   object :public_devbox_queries do
     field :devbox, :devbox do
@@ -1235,6 +1297,17 @@ defmodule Console.GraphQl.Deployments.Devbox do
       resolve &Deployments.keep_devbox_instance_awake/2
     end
 
+    @desc "Starts a pull request for a checkout: the box writes the title, body and commit message, commits and pushes"
+    field :create_devbox_pull_request, :devbox_pull_request_job do
+      middleware Authenticated
+      middleware Scope, resource: :workbench, action: :write
+      arg :instance_id, non_null(:id)
+      arg :repository,  non_null(:string), description: "a checkout's name or path; a thread worktree's path picks that worktree"
+      arg :thread_id,   :id, description: "a thread whose recent prompts explain the change"
+
+      resolve &Deployments.create_devbox_pull_request/2
+    end
+
     field :cancel_devbox_keep_awake, :devbox_instance do
       middleware Authenticated
       middleware Scope, resource: :workbench, action: :write
@@ -1338,6 +1411,17 @@ defmodule Console.GraphQl.Deployments.Devbox do
       arg :id, non_null(:id)
 
       resolve &Deployments.cancel_devbox_prompt/2
+    end
+
+    field :update_devbox_queued_prompt, :devbox_thread do
+      middleware Authenticated
+      middleware Scope, resource: :workbench, action: :write
+      arg :id,        non_null(:id), description: "the thread id"
+      arg :prompt_id, non_null(:string)
+      arg :action,    non_null(:devbox_queued_prompt_action)
+      arg :text,      :string, description: "the new text, for edit"
+
+      resolve &Deployments.update_devbox_queued_prompt/2
     end
 
     field :set_devbox_thread_config_option, :devbox_thread do
@@ -1471,6 +1555,16 @@ defmodule Console.GraphQl.Deployments.Devbox do
       config fn %{instance_id: id}, ctx ->
         with {:ok, inst} <- Deployments.devbox_instance(%{id: id}, ctx),
           do: {:ok, topic: "devbox_instances:#{inst.id}:deltas"}
+      end
+    end
+
+    @desc "Pull requests the instance is preparing"
+    field :devbox_pull_request_job_delta, :devbox_pull_request_job_delta do
+      arg :instance_id, non_null(:id)
+
+      config fn %{instance_id: id}, ctx ->
+        with {:ok, inst} <- Deployments.devbox_instance(%{id: id}, ctx),
+          do: {:ok, topic: "devbox_instances:#{inst.id}:pull_request_jobs"}
       end
     end
 

@@ -71,6 +71,11 @@ func (d *fakeDaemon) note(ctx context.Context) {
 }
 
 func (d *fakeDaemon) Health(context.Context, *devboxv1.HealthRequest) (*devboxv1.HealthResponse, error) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	if len(d.initialized) == 0 {
+		return &devboxv1.HealthResponse{Status: "booting"}, nil
+	}
 	return &devboxv1.HealthResponse{Ready: true, Status: "ready"}, nil
 }
 
@@ -415,7 +420,7 @@ func newHarness(t *testing.T, handler http.Handler) *harness {
 	h.records = &MemoryRecords{}
 	h.g, err = New(Config{
 		ConsoleURL:          "https://console.example.com",
-		AIProxyURL:          "https://console.example.com/ext/v1/ai",
+		AIProxyURL:          "https://console.example.com/ext/ai",
 		GatewayURL:          "http://devbox-gateway.ns.svc:8080",
 		ReadyTimeout:        5 * time.Second,
 		PrepareTimeout:      2 * time.Second,
