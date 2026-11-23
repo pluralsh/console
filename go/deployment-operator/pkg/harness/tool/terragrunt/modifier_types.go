@@ -43,7 +43,7 @@ type ApplyArgsModifier struct {
 	// refresh
 	refresh *bool
 
-	// runAll applies saved plans for every unit and filters out no-op units.
+	// runAll reuses the saved plan directory. Changed units are selected later.
 	runAll bool
 
 	// outDir is the terragrunt --out-dir for a runAll apply.

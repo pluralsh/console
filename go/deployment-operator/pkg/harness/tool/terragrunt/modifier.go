@@ -5,7 +5,6 @@ import (
 	"path"
 
 	"github.com/samber/lo"
-	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
 	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/harness/tool/v1"
@@ -53,15 +52,10 @@ func (in *ApplyArgsModifier) Args(args []string) []string {
 		return args
 	}
 
+	// Filters are added after the plan writes JSON. Building them here would
+	// see an empty directory and apply every unit.
 	if in.runAll {
-		args = insertBeforeSubcommand(args, "--out-dir", in.outDir)
-		filters, err := changedUnitFilters(in.jsonOutDir)
-		if err != nil {
-			klog.ErrorS(err, "could not determine changed terragrunt units")
-			return args
-		}
-
-		return insertBeforeSubcommand(args, filters...)
+		return insertBeforeSubcommand(args, "--out-dir", in.outDir)
 	}
 
 	if !helpers.Exists(path.Join(in.dir, in.planFileName)) || lo.Contains(args, in.planFileName) {

@@ -285,12 +285,18 @@ func (in *stackRunController) afterPlan() error {
 	// Run tool plan
 	state, err := in.tool.Plan()
 	if err != nil {
+		if in.stackRun.RunAll {
+			return fmt.Errorf("could not prepare plan: %w", err)
+		}
 		klog.ErrorS(err, "could not prepare plan")
 	}
 
 	// Run security scan if enabled
 	violations, err := in.tool.Scan()
 	if err != nil {
+		if in.stackRun.RunAll {
+			return fmt.Errorf("could not run security scan: %w", err)
+		}
 		klog.ErrorS(err, "could not run security scan")
 	}
 

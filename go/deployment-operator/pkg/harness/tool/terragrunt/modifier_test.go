@@ -42,7 +42,7 @@ func TestPlanArgsRunAll(t *testing.T) {
 	assert.NotContains(t, args, "-out=terraform.tfplan")
 }
 
-func TestApplyArgsRunAllFiltersChangedUnits(t *testing.T) {
+func TestApplyArgsRunAllDefersFilters(t *testing.T) {
 	jsonDir := t.TempDir()
 	writePlan(t, filepath.Join(jsonDir, "network", planJSONBase), false)
 	writePlan(t, filepath.Join(jsonDir, "nested", "storage", planJSONBase), true)
@@ -53,9 +53,43 @@ func TestApplyArgsRunAllFiltersChangedUnits(t *testing.T) {
 	assert.Equal(t, []string{
 		"run", "--all", "--non-interactive", "--queue-exclude-external",
 		"--out-dir", "/tmp/plans",
+		"apply",
+	}, args)
+	assert.NotContains(t, args, "--filter")
+}
+
+func TestApplyArgsSelectsChangedUnits(t *testing.T) {
+	jsonDir := t.TempDir()
+	writePlan(t, filepath.Join(jsonDir, "network", planJSONBase), false)
+	writePlan(t, filepath.Join(jsonDir, "nested", "storage", planJSONBase), true)
+
+	tool := &Terragrunt{runAll: true, jsonOutDir: jsonDir}
+	args, err := tool.ApplyArgs([]string{"run", "--all", "--non-interactive", "--queue-exclude-external", "--out-dir", "/tmp/plans", "apply"})
+
+	require.NoError(t, err)
+	assert.Equal(t, []string{
+		"run", "--all", "--non-interactive", "--queue-exclude-external",
+		"--out-dir", "/tmp/plans",
 		"--filter", "./nested/storage",
 		"apply",
 	}, args)
+}
+
+func TestApplyArgsErrorsWithoutChangedUnits(t *testing.T) {
+	jsonDir := t.TempDir()
+	writePlan(t, filepath.Join(jsonDir, "network", planJSONBase), false)
+
+	tool := &Terragrunt{runAll: true, jsonOutDir: jsonDir}
+	_, err := tool.ApplyArgs([]string{"apply"})
+
+	assert.Error(t, err)
+}
+
+func TestApplyArgsErrorsWhenPlansMissing(t *testing.T) {
+	tool := &Terragrunt{runAll: true, jsonOutDir: filepath.Join(t.TempDir(), "missing")}
+	_, err := tool.ApplyArgs([]string{"apply"})
+
+	assert.Error(t, err)
 }
 
 func writePlan(t *testing.T, path string, changed bool) {

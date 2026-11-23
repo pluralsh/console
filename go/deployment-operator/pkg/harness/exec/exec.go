@@ -86,6 +86,17 @@ func (in *executable) Command() string {
 	return fmt.Sprintf("%s %s", in.command, strings.Join(in.args, " "))
 }
 
+// Args returns a copy of the arguments that will be passed to the command.
+func (in *executable) Args() []string {
+	return append([]string(nil), in.args...)
+}
+
+// SetArgs replaces the command arguments. The harness uses this after the
+// plan step, once per-unit plans exist and the apply filters can be built.
+func (in *executable) SetArgs(args []string) {
+	in.args = append([]string(nil), args...)
+}
+
 func (in *executable) ID() string {
 	if len(in.id) == 0 {
 		in.id = string(uuid.NewUUID())

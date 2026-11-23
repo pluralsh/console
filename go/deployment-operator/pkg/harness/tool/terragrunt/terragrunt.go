@@ -138,6 +138,10 @@ func (in *Terragrunt) Scan() ([]*console.StackPolicyViolationAttributes, error) 
 		return result, nil
 	}
 
+	if in.runAll {
+		return in.scanAll()
+	}
+
 	result, err := in.Scanner.Scan(console.StackTypeTerragrunt, securityv1.WithTerraform(securityv1.TerraformScanOptions{
 		WorkDir:           in.workDir,
 		Dir:               in.dir,
@@ -147,6 +151,52 @@ func (in *Terragrunt) Scan() ([]*console.StackPolicyViolationAttributes, error) 
 	klog.V(log.LogLevelTrace).InfoS("terragrunt scanner scan", "result", result)
 
 	return result, err
+}
+
+// scanAll scans each unit plan. A failure stops the run so apply cannot
+// proceed when a required scan did not complete.
+func (in *Terragrunt) scanAll() ([]*console.StackPolicyViolationAttributes, error) {
+	plans, err := planFiles(in.jsonOutDir, planJSONBase)
+	if err != nil {
+		return nil, fmt.Errorf("could not list terragrunt plans to scan: %w", err)
+	}
+
+	result := make([]*console.StackPolicyViolationAttributes, 0)
+	for _, plan := range plans {
+		violations, err := in.Scanner.Scan(console.StackTypeTerragrunt, securityv1.WithTerraform(securityv1.TerraformScanOptions{
+			WorkDir:           in.workDir,
+			Dir:               filepath.Join(in.dir, filepath.FromSlash(plan.rel)),
+			PlanFileName:      plan.path,
+			VariablesFileName: in.variablesFileName,
+		}))
+		if err != nil {
+			return nil, fmt.Errorf("security scan failed for %s: %w", plan.rel, err)
+		}
+
+		result = append(result, violations...)
+	}
+
+	klog.V(log.LogLevelTrace).InfoS("terragrunt scanner scan", "units", len(plans), "violations", len(result))
+	return result, nil
+}
+
+// ApplyArgs implements [v1.ApplyArgumentPreparer]. It adds --filter flags for
+// units whose saved JSON plans contain changes. The plan directory is empty
+// until the plan step finishes, so this must run immediately before apply.
+func (in *Terragrunt) ApplyArgs(args []string) ([]string, error) {
+	if !in.runAll {
+		return args, nil
+	}
+
+	filters, err := changedUnitFilters(in.jsonOutDir)
+	if err != nil {
+		return nil, fmt.Errorf("could not determine changed terragrunt units: %w", err)
+	}
+	if len(filters) == 0 {
+		return nil, fmt.Errorf("could not determine changed terragrunt units: no units with changes")
+	}
+
+	return insertBeforeSubcommand(args, filters...), nil
 }
 
 func (in *Terragrunt) plan() (string, error) {
@@ -175,13 +225,16 @@ func (in *Terragrunt) planAll() (string, error) {
 
 	var b strings.Builder
 	for _, plan := range plans {
+		// Show from the unit directory so Terragrunt loads that unit's
+		// provider schemas and the terraform or tofu binary it selected.
+		unitDir := filepath.Join(in.dir, filepath.FromSlash(plan.rel))
 		output, err := exec.NewExecutable(
-			"terraform",
+			"terragrunt",
 			exec.WithArgs([]string{"show", "-no-color", plan.path}),
-			exec.WithDir(in.dir),
+			exec.WithDir(unitDir),
 		).RunWithOutput(context.Background())
 		if err != nil {
-			return "", fmt.Errorf("failed executing terraform show for %s: %s: %w", plan.rel, string(output), err)
+			return "", fmt.Errorf("failed executing terragrunt show for %s: %s: %w", plan.rel, string(output), err)
 		}
 
 		fmt.Fprintf(&b, "# %s\n%s\n", plan.rel, output)

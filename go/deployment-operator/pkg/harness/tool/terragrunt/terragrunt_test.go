@@ -2,11 +2,14 @@ package terragrunt
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
 
 	tfjson "github.com/hashicorp/terraform-json"
+	console "github.com/pluralsh/console/go/client"
+	securityv1 "github.com/pluralsh/console/go/deployment-operator/pkg/harness/security/v1"
 	stackrunv1 "github.com/pluralsh/console/go/deployment-operator/pkg/harness/stackrun/v1"
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/harness/tool/v1"
 	"github.com/stretchr/testify/assert"
@@ -112,6 +115,102 @@ func TestRunAllWritesVariablesToUnits(t *testing.T) {
 	assert.True(t, os.IsNotExist(err))
 	_, err = os.Stat(filepath.Join(dir, "network", ".terragrunt-cache", "mod", "plural.auto.tfvars.json"))
 	assert.True(t, os.IsNotExist(err))
+}
+
+func TestPlanAllShowsFromUnitDirectory(t *testing.T) {
+	parent := t.TempDir()
+	outDir := t.TempDir()
+	logFile := filepath.Join(t.TempDir(), "show.log")
+	unit := filepath.Join(parent, "nested", "storage")
+	require.NoError(t, os.MkdirAll(unit, 0o755))
+
+	planPath := filepath.Join(outDir, "nested", "storage", planFileBase)
+	writeFile(t, planPath, "binary-plan")
+	installTerragruntShow(t, logFile)
+
+	tool := &Terragrunt{runAll: true, dir: parent, outDir: outDir}
+	state, err := tool.Plan()
+
+	require.NoError(t, err)
+	require.NotNil(t, state.Plan)
+	assert.Contains(t, *state.Plan, "# nested/storage")
+	assert.Contains(t, *state.Plan, "shown plan")
+
+	log := readFile(t, logFile)
+	assert.Contains(t, log, unit)
+	assert.Contains(t, log, planPath)
+	assert.NotContains(t, log, parent+"\n")
+}
+
+func TestScanAllUsesEachUnitPlan(t *testing.T) {
+	parent := t.TempDir()
+	jsonDir := t.TempDir()
+	writeFile(t, filepath.Join(jsonDir, "network", planJSONBase), "{}")
+	writeFile(t, filepath.Join(jsonDir, "nested", "storage", planJSONBase), "{}")
+
+	scanner := &fakeScanner{}
+	tool := &Terragrunt{
+		DefaultTool:       toolv1.DefaultTool{Scanner: scanner},
+		runAll:            true,
+		dir:               parent,
+		workDir:           parent,
+		jsonOutDir:        jsonDir,
+		variablesFileName: "plural.auto.tfvars.json",
+	}
+
+	violations, err := tool.Scan()
+
+	require.NoError(t, err)
+	require.Len(t, scanner.calls, 2)
+	assert.Equal(t, filepath.Join(parent, "nested", "storage"), scanner.calls[0].Dir)
+	assert.Equal(t, filepath.Join(jsonDir, "nested", "storage", planJSONBase), scanner.calls[0].PlanFileName)
+	assert.Equal(t, filepath.Join(parent, "network"), scanner.calls[1].Dir)
+	assert.Equal(t, "plural.auto.tfvars.json", scanner.calls[1].VariablesFileName)
+	assert.Len(t, violations, 2)
+}
+
+func TestScanAllReturnsScanError(t *testing.T) {
+	parent := t.TempDir()
+	jsonDir := t.TempDir()
+	writeFile(t, filepath.Join(jsonDir, "network", planJSONBase), "{}")
+
+	tool := &Terragrunt{
+		DefaultTool: toolv1.DefaultTool{Scanner: &fakeScanner{err: fmt.Errorf("trivy failed")}},
+		runAll:      true,
+		dir:         parent,
+		jsonOutDir:  jsonDir,
+	}
+
+	_, err := tool.Scan()
+
+	assert.Error(t, err)
+}
+
+type fakeScanner struct {
+	calls []securityv1.TerraformScanOptions
+	err   error
+}
+
+func (f *fakeScanner) Scan(_ console.StackType, options ...securityv1.ScanOption) ([]*console.StackPolicyViolationAttributes, error) {
+	opts := &securityv1.ScanOptions{}
+	for _, option := range options {
+		option(opts)
+	}
+	f.calls = append(f.calls, opts.Terraform)
+	if f.err != nil {
+		return nil, f.err
+	}
+
+	return []*console.StackPolicyViolationAttributes{{Title: opts.Terraform.Dir}}, nil
+}
+
+func installTerragruntShow(t *testing.T, logFile string) {
+	t.Helper()
+
+	bin := t.TempDir()
+	script := fmt.Sprintf("#!/bin/sh\npwd >> %q\nprintf '%%s\\n' \"$*\" >> %q\nprintf 'shown plan\\n'\n", logFile, logFile)
+	require.NoError(t, os.WriteFile(filepath.Join(bin, "terragrunt"), []byte(script), 0o755))
+	t.Setenv("PATH", bin+string(os.PathListSeparator)+os.Getenv("PATH"))
 }
 
 func writeFile(t *testing.T, path, content string) {
