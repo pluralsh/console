@@ -9,11 +9,7 @@ import {
   Modal,
 } from '@pluralsh/design-system'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
-import {
-  Body2P,
-  InlineA,
-  shimmerWithinCss,
-} from 'components/utils/typography/Text'
+import { Body2P, shimmerWithinCss } from 'components/utils/typography/Text'
 import { ChatFragment, ChatType } from 'generated/graphql'
 import { isNil } from 'lodash'
 import { ComponentProps, memo, ReactElement, ReactNode, useState } from 'react'
@@ -46,6 +42,7 @@ import {
   DEVBOX_COMMAND_TAG,
   DEVBOX_FILE_ATTRIBUTES,
   DEVBOX_FILE_TAG,
+  DevboxMarkdownLink,
   devboxFileChipComponents,
 } from '../DevboxFileChip'
 import {
@@ -783,15 +780,7 @@ const SIMPLIFIED_MARKDOWN_COMPONENTS: ComponentProps<
   p: ({ children }) => <ParagraphSC>{children}</ParagraphSC>,
   strong: ({ children }) => <strong>{children}</strong>,
   em: ({ children }) => <span>{children}</span>,
-  a: ({ children, href }) => (
-    <InlineA
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      {children}
-    </InlineA>
-  ),
+  a: DevboxMarkdownLink,
   ul: ({ children }) => <ListSC>{children}</ListSC>,
   ol: ({ children }) => <ListSC as="ol">{children}</ListSC>,
   li: ({ children }) => <li>{children}</li>,

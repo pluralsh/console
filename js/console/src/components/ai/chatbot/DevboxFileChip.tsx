@@ -1,5 +1,6 @@
 import { FolderIcon, Tooltip } from '@pluralsh/design-system'
 import { FileTypeIcon } from 'components/utils/fileTree'
+import { InlineA } from 'components/utils/typography/Text'
 import escape from 'lodash/escape'
 import { createContext, ReactNode, useContext } from 'react'
 import type { ExtraProps } from 'react-markdown'
@@ -11,14 +12,84 @@ import { ChipBody } from './input/autocomplete/PlrlChipMdRenderers'
 export const DEVBOX_FILE_TAG = 'plrl-devbox-file'
 export const DEVBOX_FILE_ATTRIBUTES = ['path']
 
-// opens a path in the devbox files panel, unset outside a devbox transcript
+// opens a path in the devbox files panel, unset outside a devbox transcript;
+// `cwd` is the agent's working directory, which its relative links resolve against
+export type DevboxFileOpener = {
+  openFile: (path: string) => void
+  cwd?: Nullable<string>
+}
+
 export const DevboxFileOpenContext =
-  createContext<Nullable<(path: string) => void>>(null)
+  createContext<Nullable<DevboxFileOpener>>(null)
+
+const URL_SCHEME = /^[a-z][a-z\d+.-]*:/i
+
+// the absolute workspace path a markdown link points at, or null for external
+// links and in-page anchors. Agents suffix paths with `#L12` or `:12:3` for a
+// line, which the files panel can't target, so those are dropped.
+export function devboxLinkPath(
+  href: Nullable<string>,
+  cwd: Nullable<string>
+): Nullable<string> {
+  if (!href || href.startsWith('#') || href.startsWith('//')) return null
+  let path = href
+  if (URL_SCHEME.test(path)) {
+    if (!/^file:/i.test(path)) return null
+    path = path.replace(/^file:(\/\/[^/]*)?/i, '')
+  }
+  path = path.replace(/[?#].*$/, '')
+  try {
+    path = decodeURIComponent(path)
+  } catch {
+    // keep a malformed escape as written
+  }
+  path = path.replace(/:\d+(:\d+)?$/, '')
+  if (!path) return null
+  if (!path.startsWith('/')) {
+    if (!cwd) return null
+    path = `${cwd.replace(/\/$/, '')}/${path}`
+  }
+
+  const parts: string[] = []
+  for (const part of path.split('/')) {
+    if (part === '..') parts.pop()
+    else if (part && part !== '.') parts.push(part)
+  }
+  const directory = /\/\.{0,2}$/.test(path) && parts.length > 0
+
+  return `/${parts.join('/')}${directory ? '/' : ''}`
+}
+
+// a markdown link that opens workspace paths in the devbox files panel
+export function DevboxMarkdownLink({
+  href,
+  children,
+}: { href?: string; children?: ReactNode } & ExtraProps) {
+  const opener = useContext(DevboxFileOpenContext)
+  const path = opener && devboxLinkPath(href, opener.cwd)
+
+  return (
+    <InlineA
+      href={href}
+      {...(path && {
+        title: path,
+        target: undefined,
+        onClick: (e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          opener.openFile(path)
+        },
+      })}
+    >
+      {children}
+    </InlineA>
+  )
+}
 
 export function DevboxFileChip({
   path,
 }: { path?: string; children?: ReactNode } & ExtraProps) {
-  const openFile = useContext(DevboxFileOpenContext)
+  const openFile = useContext(DevboxFileOpenContext)?.openFile
   if (!path) return null
 
   const directory = path.endsWith('/')

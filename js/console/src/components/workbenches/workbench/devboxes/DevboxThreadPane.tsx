@@ -206,7 +206,9 @@ export function DevboxThreadPane({
           </CaptionP>
         </Flex>
       )}
-      <DevboxFileOpenContext value={live ? openFile : null}>
+      <DevboxFileOpenContext
+        value={live ? { openFile, cwd: thread.cwd } : null}
+      >
         <ScrollSC ref={scrollRef}>
           <ContentSC ref={contentRef}>
             {sessionError && <GqlError error={sessionError} />}

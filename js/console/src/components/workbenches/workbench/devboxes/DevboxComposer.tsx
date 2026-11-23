@@ -1,7 +1,7 @@
 import {
   FolderIcon,
   ListBoxItem,
-  PaperclipIcon,
+  PlusIcon,
   Tooltip,
 } from '@pluralsh/design-system'
 import {
@@ -440,7 +440,7 @@ export function DevboxComposer({
       <OptionsRowSC>
         <WorkbenchPromptOptionsGroup>
           <ChatInputIconFrame
-            icon={<PaperclipIcon />}
+            icon={<PlusIcon />}
             tooltip="Attach files"
             aria-label="Attach files"
             disabled={disabled}
