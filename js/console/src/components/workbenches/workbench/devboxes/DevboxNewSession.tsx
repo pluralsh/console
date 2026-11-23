@@ -78,7 +78,9 @@ export function DevboxNewSession({
   const { start, error } = useStartDevboxThread(instance)
   const live = isInstanceLive(instance.status)
   const terminal = isInstanceTerminal(instance.status)
-  const { listFiles } = useDevboxWorkspaceApi(live ? instance.id : null)
+  const { listFiles, searchFiles } = useDevboxWorkspaceApi(
+    live ? instance.id : null
+  )
 
   return (
     <CenterSC>
@@ -91,6 +93,7 @@ export function DevboxNewSession({
         <DevboxComposer
           commands={agentEntry?.commands}
           listFiles={listFiles}
+          searchFiles={searchFiles}
           autoFocus
           disabled={!live || !agent}
           placeholder={

@@ -180,7 +180,9 @@ export function DevboxThreadPane({
     thread.status === DevboxThreadStatus.Closed ||
     thread.status === DevboxThreadStatus.Deleted
   const subagent = thread.kind === DevboxThreadKind.Subagent
-  const { listFiles } = useDevboxWorkspaceApi(live ? instance.id : null)
+  const { listFiles, searchFiles } = useDevboxWorkspaceApi(
+    live ? instance.id : null
+  )
 
   const sessionError = sessionId ? timeline.errors[sessionId] : undefined
   const { openFile } = useDevboxPanel()
@@ -229,6 +231,7 @@ export function DevboxThreadPane({
                 ) : null
               }}
               subagents={subagents}
+              complete={!!session?.loaded && !session.hasMore}
               renderSubagent={(s, spawner) => (
                 <SubagentCard
                   subagent={s}
@@ -282,6 +285,7 @@ export function DevboxThreadPane({
                 : null
             }
             listFiles={listFiles}
+            searchFiles={searchFiles}
             toolbar={
               thread.agent && (
                 <PillSelect

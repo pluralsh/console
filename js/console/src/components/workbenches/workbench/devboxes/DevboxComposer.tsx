@@ -41,9 +41,12 @@ import {
   fileMentionChip,
   getMentionQuery,
   matchFiles,
+  mentionPath,
+  mentionRoot,
   replaceAtCaret,
   resolveMentionDir,
   useDevboxDirectory,
+  useDevboxFileSearch,
 } from './devboxFileMentions'
 import { AutonomyPillSelect, PillSelect } from './DevboxPromptPills'
 import {
@@ -127,6 +130,7 @@ export function DevboxComposer({
   modelSwitchable = true,
   proxyModels,
   listFiles,
+  searchFiles,
   running = false,
   disabled = false,
   placeholder = 'Message the agent, / for commands or @ for files',
@@ -145,7 +149,14 @@ export function DevboxComposer({
   // replaces the agent's own model values, which needn't list the proxy's
   proxyModels?: Nullable<string[]>
   // completes `@path` mentions against the instance's files
-  listFiles?: Nullable<(path: string) => Promise<DevboxFileEntry[]>>
+  listFiles?: Nullable<
+    (path: string, opts?: { brief?: boolean }) => Promise<DevboxFileEntry[]>
+  >
+  // searches beneath the directory being completed once a name is typed;
+  // without it, names are matched against the directory's listing
+  searchFiles?: Nullable<
+    (path: string, query: string) => Promise<DevboxFileEntry[]>
+  >
   running?: boolean
   disabled?: boolean
   placeholder?: string
@@ -210,9 +221,23 @@ export function DevboxComposer({
     : []
   const mention = !slash && listFiles ? getMentionQuery(text, caret) : null
   const directory = useDevboxDirectory(listFiles, mention?.dir)
-  const fileMatches = mention
-    ? matchFiles(directory.entries, mention.leaf).slice(0, MAX_SUGGESTIONS)
-    : []
+  // a typed name searches everything beneath the directory, not just its listing
+  const searching = !!searchFiles && !!mention?.leaf
+  const search = useDevboxFileSearch(
+    searchFiles,
+    searching ? mention.dir : null,
+    mention?.leaf ?? ''
+  )
+  const listing = searching ? search : directory
+  const root = mention
+    ? mentionRoot(mention.dir, mentions, directory.entries)
+    : null
+  const fileMatches = !mention
+    ? []
+    : (searching
+        ? search.entries
+        : matchFiles(directory.entries, mention.leaf)
+      ).slice(0, MAX_SUGGESTIONS)
   // browsing into a directory offers it first, so folders can be mentioned too
   const folder =
     mention && !mention.leaf && !directory.loading && !directory.error
@@ -241,7 +266,10 @@ export function DevboxComposer({
         ...fileMatches.map((entry) => ({
           key: entry.path,
           title: isDirectory(entry) ? `${entry.name}/` : entry.name,
-          subtitle: entry.path,
+          subtitle:
+            searching && mention
+              ? mentionPath(mention, root, entry.path)
+              : entry.path,
           icon: isDirectory(entry) ? (
             <FolderIcon size={14} />
           ) : (
@@ -299,7 +327,7 @@ export function DevboxComposer({
         mention.end,
         fileMentionChip(entry.path)
       )
-    const { token, path } = directoryToken(mention, entry)
+    const { token, path } = directoryToken(mention, entry, root)
     setMentions((cur) => ({ ...cur, [token]: path }))
     replaceToken(mention.start, mention.end, `@${token}`)
   }
@@ -370,8 +398,14 @@ export function DevboxComposer({
           label={slash ? 'Slash commands' : 'Files'}
           items={suggestions}
           active={active}
-          loading={directory.loading}
-          empty={directory.error ? "Couldn't list this directory" : undefined}
+          loading={listing.loading}
+          empty={
+            !listing.error
+              ? undefined
+              : searching
+                ? "Couldn't search files"
+                : "Couldn't list this directory"
+          }
           onPick={pick}
           onHover={setActive}
         />

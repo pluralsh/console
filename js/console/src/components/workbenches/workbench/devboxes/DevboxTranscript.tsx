@@ -61,10 +61,14 @@ export function DevboxTranscript({
   approvalFor,
   subagents = [],
   renderSubagent,
+  complete = true,
   empty,
 }: {
   entities: DevboxEntityFragment[]
   terminal?: TerminalLookup
+  // whether every page of the transcript is loaded: until then, a subagent
+  // nothing loaded spawned may belong to a page still to come
+  complete?: boolean
   // the approval a tool call awaits, answered under it; such a call stays out
   // of tool groups so it can't be collapsed away
   approvalFor?: (toolCallId: string) => ReactNode
@@ -143,7 +147,7 @@ export function DevboxTranscript({
       else rows.push({ kind: 'tools', entities: [entity] })
     } else rows.push({ kind: 'entity', entity })
   }
-  if (renderSubagent)
+  if (renderSubagent && complete)
     for (const subagent of subagents)
       if (!placed.has(subagent.id)) rows.push({ kind: 'subagent', subagent })
 

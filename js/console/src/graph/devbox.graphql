@@ -877,8 +877,18 @@ query DevboxPullRequests(
   }
 }
 
-query DevboxFiles($instanceId: ID!, $path: String) {
-  devboxFiles(instanceId: $instanceId, path: $path) {
+query DevboxFiles(
+  $instanceId: ID!
+  $path: String
+  $query: String
+  $brief: Boolean
+) {
+  devboxFiles(
+    instanceId: $instanceId
+    path: $path
+    query: $query
+    brief: $brief
+  ) {
     ...DevboxFileEntry
   }
 }

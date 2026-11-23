@@ -17,6 +17,7 @@ import (
 
 	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/gitutil"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/internal/fsutil"
 )
 
 const (
@@ -48,11 +49,14 @@ type repoWatch struct {
 	// gen advances on every change under the checkout or its git directory; entries from older gens are stale.
 	gen     uint64
 	watched bool
+	// indexed is whether every path the watch sees is in the file index
+	indexed bool
 }
 
 // ChangesCache keeps each checkout's changes current in the background: a watch on the work tree and git
 // directory marks a checkout stale as it changes, and a debounced recompute refreshes what was last asked for,
-// so GetChanges is usually served without running git.
+// so GetChanges is usually served without running git. The same watch keeps a file index of the work trees'
+// paths for search.
 type ChangesCache struct {
 	log *slog.Logger
 	// compute is gitutil.Changes (swappable in tests).
@@ -69,6 +73,14 @@ type ChangesCache struct {
 	pending map[string]bool
 	sf      singleflight.Group
 	refresh chan struct{}
+
+	index *FileIndex
+	// created holds files created since the last refresh, by checkout, for indexing once git says they aren't ignored
+	created map[string][]string
+	// ignoresChanged holds the checkouts whose .gitignore changed since the last refresh, to rebuild in the index
+	ignoresChanged map[string]bool
+	// rewatching holds the checkouts being walked again, true when another walk was asked for meanwhile
+	rewatching map[string]bool
 }
 
 // NewChangesCache returns a cache; Run starts its watch.
@@ -82,6 +94,11 @@ func NewChangesCache(log *slog.Logger) *ChangesCache {
 		entries: map[changesKey]*changesEntry{},
 		pending: map[string]bool{},
 		refresh: make(chan struct{}, 1),
+		index:   newFileIndex(MaxIndexEntries),
+		created: map[string][]string{},
+
+		ignoresChanged: map[string]bool{},
+		rewatching:     map[string]bool{},
 	}
 }
 
@@ -124,6 +141,7 @@ func (c *ChangesCache) Run(ctx context.Context) {
 			fire = time.After(refreshDebounce)
 		case <-fire:
 			fire = nil
+			c.indexChanges(ctx)
 			c.refreshPending(ctx)
 		}
 	}
@@ -196,30 +214,24 @@ func (c *ChangesCache) register(ctx context.Context, repo string) {
 	}
 }
 
-// watch adds a checkout's work tree (minus git-ignored directories) and git directories to the watch.
+// watch adds a checkout's work tree (minus git-ignored directories) and git directories to the watch, and
+// rebuilds its part of the file index from the work tree's paths that aren't git-ignored.
 func (c *ChangesCache) watch(ctx context.Context, repo string) {
-	full := true
-	skip := ignoredDirs(ctx, repo)
-	_ = filepath.WalkDir(repo, func(p string, d fs.DirEntry, err error) error {
-		if err != nil || !d.IsDir() {
-			return nil
-		}
-		if p != repo && (skipDirs[d.Name()] || skip[p]) {
-			return filepath.SkipDir
-		}
-		if !c.add(p, repo) {
-			full = false
-			return filepath.SkipAll
-		}
-		return nil
-	})
+	fresh := newFileIndex(MaxIndexEntries)
+	fresh.addRepo(repo)
+	full, indexed := c.walkTree(ctx, repo, repo, fresh)
 	for _, dir := range gitDirs(ctx, repo) {
 		if !c.add(dir, repo) {
 			full = false
 		}
 	}
+	if !c.index.graft(repo, fresh) {
+		c.index.remove(repo)
+		indexed = false
+	}
 	c.mu.Lock()
 	if st := c.repos[repo]; st != nil {
+		st.indexed = full && indexed
 		st.watched = full
 		// anything computed before the watch existed may have missed a change
 		st.gen++
@@ -230,6 +242,37 @@ func (c *ChangesCache) watch(ctx context.Context, repo string) {
 	if !full {
 		c.log.Warn("changes watch incomplete; serving with a short ttl", "repo", repo)
 	}
+}
+
+// walkTree watches dir and the directories beneath it that git doesn't ignore, adding to idx, when it's set (dir
+// is in the work tree), every path it doesn't ignore. It reports whether it watched every directory and indexed
+// every path.
+func (c *ChangesCache) walkTree(ctx context.Context, repo, dir string, idx *FileIndex) (watched, indexed bool) {
+	watched, indexed = true, true
+	var skip map[string]bool
+	if idx != nil {
+		skip = ignoredPaths(ctx, repo, dir)
+	}
+	_ = filepath.WalkDir(dir, func(p string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return nil
+		}
+		if p != dir && (skip[p] || (d.IsDir() && skipDirs[d.Name()])) {
+			if d.IsDir() {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		if idx != nil && p != repo {
+			indexed = indexed && idx.add(p, fileType(d.Type()))
+		}
+		if d.IsDir() && !c.add(p, repo) {
+			watched = false
+			return filepath.SkipAll
+		}
+		return nil
+	})
+	return watched, indexed && watched
 }
 
 func (c *ChangesCache) add(dir, repo string) bool {
@@ -247,10 +290,11 @@ func (c *ChangesCache) add(dir, repo string) bool {
 	return true
 }
 
-// handle marks the checkouts an event belongs to stale, reporting whether any were.
+// handle marks the checkouts an event belongs to stale and keeps the file index current, reporting whether
+// anything needs the debounced refresh.
 func (c *ChangesCache) handle(ctx context.Context, ev fsnotify.Event) bool {
 	// git's own reads surface as attribute changes on some platforms, which would recompute in a loop
-	if ev.Op == fsnotify.Chmod || strings.HasSuffix(ev.Name, ".lock") {
+	if ev.Op == fsnotify.Chmod {
 		return false
 	}
 	c.mu.Lock()
@@ -262,47 +306,160 @@ func (c *ChangesCache) handle(ctx context.Context, ev fsnotify.Event) bool {
 		}
 	}
 	owners := c.dirs[filepath.Dir(ev.Name)]
-	repos := make([]string, 0, len(owners))
+	trees := map[string]string{}
+	refresh := false
 	for repo := range owners {
-		repos = append(repos, repo)
+		rel, inTree := workTreePath(repo, ev.Name)
+		if inTree {
+			trees[repo] = rel
+			if filepath.Base(ev.Name) == ".gitignore" {
+				c.ignoresChanged[repo] = true
+			}
+		} else if strings.HasSuffix(ev.Name, ".lock") {
+			// git takes lock files in its own directory as it works, which would recompute in a loop
+			continue
+		}
 		if st := c.repos[repo]; st != nil {
 			st.gen++
 		}
 		c.pending[repo] = true
+		refresh = true
 	}
 	c.mu.Unlock()
-	if ev.Has(fsnotify.Create) && len(repos) > 0 {
-		if info, err := os.Lstat(ev.Name); err == nil && info.IsDir() && !skipDirs[filepath.Base(ev.Name)] {
-			for _, repo := range repos {
-				if rel, err := filepath.Rel(repo, ev.Name); err == nil && !strings.HasPrefix(rel, "..") &&
-					gitutil.IgnoredFilter(ctx, repo, []string{rel})[rel] {
-					continue
+	if ev.Has(fsnotify.Remove) || ev.Has(fsnotify.Rename) {
+		c.index.remove(ev.Name)
+	}
+	if !ev.Has(fsnotify.Create) || len(owners) == 0 {
+		return refresh
+	}
+	info, err := os.Lstat(ev.Name)
+	if err != nil {
+		return refresh
+	}
+	for repo := range owners {
+		rel, inTree := trees[repo]
+		switch {
+		case info.IsDir() && skipDirs[filepath.Base(ev.Name)]:
+		case info.IsDir() && !inTree:
+			c.addTree(ctx, repo, ev.Name, nil)
+		case info.IsDir():
+			if !gitutil.IgnoredFilter(ctx, repo, []string{rel})[rel] {
+				c.addTree(ctx, repo, ev.Name, c.index)
+			}
+		case inTree:
+			c.mu.Lock()
+			c.created[repo] = append(c.created[repo], rel)
+			c.mu.Unlock()
+			refresh = true
+		}
+	}
+	return refresh
+}
+
+// workTreePath is p relative to the checkout, if it's in its work tree rather than outside it or in a skipped
+// directory like .git.
+func workTreePath(repo, p string) (string, bool) {
+	rel, err := filepath.Rel(repo, p)
+	if err != nil || rel == "." || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+		return "", false
+	}
+	for _, seg := range strings.Split(rel, string(filepath.Separator)) {
+		if skipDirs[seg] {
+			return "", false
+		}
+	}
+	return rel, true
+}
+
+// addTree watches (and with idx, indexes) a directory that appeared, as the checkout's first walk would have.
+func (c *ChangesCache) addTree(ctx context.Context, repo, dir string, idx *FileIndex) {
+	watched, indexed := c.walkTree(ctx, repo, dir, idx)
+	if watched && (idx == nil || indexed) {
+		return
+	}
+	c.mu.Lock()
+	if st := c.repos[repo]; st != nil {
+		st.watched = st.watched && watched
+		st.indexed = false
+	}
+	c.mu.Unlock()
+}
+
+// indexChanges brings the file index up to date with what the watch saw since the last refresh: the files created
+// that git doesn't ignore, and the checkouts whose ignore rules changed, which are rebuilt.
+func (c *ChangesCache) indexChanges(ctx context.Context) {
+	c.mu.Lock()
+	created, rebuild := c.created, c.ignoresChanged
+	c.created, c.ignoresChanged = map[string][]string{}, map[string]bool{}
+	c.mu.Unlock()
+	for repo := range rebuild {
+		c.rewatch(ctx, repo)
+	}
+	for repo, rels := range created {
+		if rebuild[repo] {
+			continue
+		}
+		ignored := gitutil.IgnoredFilter(ctx, repo, rels)
+		for _, rel := range rels {
+			p := filepath.Join(repo, rel)
+			if info, err := os.Lstat(p); err != nil || ignored[rel] || info.IsDir() {
+				continue
+			} else if !c.index.add(p, fileType(info.Mode())) {
+				c.mu.Lock()
+				if st := c.repos[repo]; st != nil {
+					st.indexed = false
 				}
-				c.addTree(ev.Name, repo)
+				c.mu.Unlock()
+				break
 			}
 		}
 	}
-	return len(repos) > 0
 }
 
-func (c *ChangesCache) addTree(dir, repo string) {
-	_ = filepath.WalkDir(dir, func(p string, d fs.DirEntry, err error) error {
-		if err != nil || !d.IsDir() {
-			return nil
-		}
-		if p != dir && skipDirs[d.Name()] {
-			return filepath.SkipDir
-		}
-		if !c.add(p, repo) {
+// rewatch walks a checkout again in the background, and once more if asked again meanwhile.
+func (c *ChangesCache) rewatch(ctx context.Context, repo string) {
+	c.mu.Lock()
+	if _, running := c.rewatching[repo]; running {
+		c.rewatching[repo] = true
+		c.mu.Unlock()
+		return
+	}
+	c.rewatching[repo] = false
+	c.mu.Unlock()
+	go func() {
+		for {
+			c.watch(ctx, repo)
 			c.mu.Lock()
-			if st := c.repos[repo]; st != nil {
-				st.watched = false
+			if !c.rewatching[repo] {
+				delete(c.rewatching, repo)
+				c.mu.Unlock()
+				return
 			}
+			c.rewatching[repo] = false
 			c.mu.Unlock()
-			return filepath.SkipAll
 		}
-		return nil
-	})
+	}()
+}
+
+// Children lists dir from the index, when the index covers it.
+func (c *ChangesCache) Children(dir string, hidden bool, limit int) ([]*devboxv1.FileEntry, bool, bool) {
+	if !c.covers(dir) {
+		return nil, false, false
+	}
+	entries, truncated := c.index.children(dir, hidden, limit)
+	return entries, truncated, true
+}
+
+// covers is whether p is inside a checkout whose every path is indexed.
+func (c *ChangesCache) covers(p string) bool {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	for repo, st := range c.repos {
+		if st.indexed && fsutil.Within(repo, p) {
+			return true
+		}
+	}
+	return false
 }
 
 // Invalidate marks checkouts stale, for changes the watch can't see.
@@ -353,15 +510,20 @@ func (c *ChangesCache) refreshPending(ctx context.Context) {
 	}()
 }
 
-// ignoredDirs are the checkout's git-ignored directories (build output, dependencies), which never affect changes.
-func ignoredDirs(ctx context.Context, repo string) map[string]bool {
-	out, err := gitutil.Run(ctx, repo, "ls-files", "-z", "--others", "--ignored", "--exclude-standard", "--directory")
+// ignoredPaths are the checkout's git-ignored paths beneath dir (build output, dependencies), which never affect
+// changes and aren't searched; a wholly ignored directory is listed rather than its contents.
+func ignoredPaths(ctx context.Context, repo, dir string) map[string]bool {
 	res := map[string]bool{}
+	rel, err := filepath.Rel(repo, dir)
+	if err != nil {
+		return res
+	}
+	out, err := gitutil.Run(ctx, repo, "ls-files", "-z", "--others", "--ignored", "--exclude-standard", "--directory", "--", rel)
 	if err != nil {
 		return res
 	}
 	for _, p := range strings.Split(string(out), "\x00") {
-		if strings.HasSuffix(p, "/") {
+		if p != "" {
 			res[filepath.Join(repo, p)] = true
 		}
 	}

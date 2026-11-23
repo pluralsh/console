@@ -415,4 +415,43 @@ describe('DevboxTranscript', () => {
     ])
     expect(screen.getByText('card thread-child')).toBeTruthy()
   })
+
+  it('holds back subagents nothing loaded spawned until the transcript is complete', () => {
+    const subagents = [{ id: 'early', sessionId: 'p/subagent/call-0' } as never]
+    const props = {
+      entities: [
+        entity({
+          type: DevboxEntityType.AgentMessage,
+          position: 9,
+          message: { content: [text('later work')] },
+        }),
+      ],
+      subagents,
+      renderSubagent: (s: { id: string }) => <span>card {s.id}</span>,
+    }
+    const partial = renderTranscript(
+      <DevboxTranscript
+        {...props}
+        complete={false}
+      />
+    )
+    expect(screen.getByText('later work')).toBeTruthy()
+    expect(screen.queryByText('card early')).toBeNull()
+    partial.unmount()
+
+    const loading = renderTranscript(
+      <DevboxTranscript
+        {...props}
+        entities={[]}
+        complete={false}
+        empty={<span>Loading transcript…</span>}
+      />
+    )
+    expect(screen.getByText('Loading transcript…')).toBeTruthy()
+    expect(screen.queryByText('card early')).toBeNull()
+    loading.unmount()
+
+    renderTranscript(<DevboxTranscript {...props} />)
+    expect(screen.getByText('card early')).toBeTruthy()
+  })
 })

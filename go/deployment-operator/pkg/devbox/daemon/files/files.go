@@ -172,6 +172,9 @@ func (s *Service) List(ctx context.Context, req *devboxv1.ListFilesRequest) (*de
 	if !st.IsDir() {
 		return nil, invalid(req.GetPath() + " is not a directory")
 	}
+	if q := req.GetQuery(); q != "" {
+		return s.search(ctx, root, q, req.GetIncludeHidden(), int(req.GetLimit())), nil
+	}
 	depth := int(req.GetDepth())
 	if depth <= 0 {
 		depth = 1
@@ -180,6 +183,20 @@ func (s *Service) List(ctx context.Context, req *devboxv1.ListFilesRequest) (*de
 	if limit <= 0 || limit > MaxListEntries {
 		limit = MaxListEntries
 	}
+	if req.GetBrief() && depth == 1 && s.ChangesCache != nil {
+		if entries, truncated, ok := s.ChangesCache.Children(root, req.GetIncludeHidden(), limit); ok {
+			return &devboxv1.ListFilesResponse{Entries: entries, Truncated: truncated}, nil
+		}
+	}
+	resp, err := s.listDisk(ctx, req, root, depth, limit)
+	if err != nil {
+		return nil, ioError(err, req.GetPath())
+	}
+	return resp, nil
+}
+
+// listDisk lists root by reading it, depth levels deep.
+func (s *Service) listDisk(ctx context.Context, req *devboxv1.ListFilesRequest, root string, depth, limit int) (*devboxv1.ListFilesResponse, error) {
 	resp := &devboxv1.ListFilesResponse{}
 	si := &statusIndex{ctx: ctx, cache: map[string]map[string]string{}}
 	var walk func(dir string, level int) error
@@ -199,21 +216,7 @@ func (s *Service) List(ctx context.Context, req *devboxv1.ListFilesRequest) (*de
 			names = append(names, de.Name())
 		}
 		if req.GetRespectGitignore() {
-			if repo := s.repoOf(dir); repo != "" {
-				rels := make([]string, 0, len(names))
-				for _, n := range names {
-					rel, _ := filepath.Rel(repo, filepath.Join(dir, n))
-					rels = append(rels, filepath.ToSlash(rel))
-				}
-				ignored := gitutil.IgnoredFilter(ctx, repo, rels)
-				kept := names[:0]
-				for i, n := range names {
-					if !ignored[rels[i]] {
-						kept = append(kept, n)
-					}
-				}
-				names = kept
-			}
+			names = s.notIgnored(ctx, dir, names)
 		}
 		sort.Strings(names)
 		for _, n := range names {
@@ -227,7 +230,11 @@ func (s *Service) List(ctx context.Context, req *devboxv1.ListFilesRequest) (*de
 				continue
 			}
 			e := entryOf(abs, info)
-			si.annotate(s, e)
+			if !req.GetBrief() {
+				si.annotate(s, e)
+			} else if repo := s.repoOf(abs); repo != "" {
+				e.Repository = filepath.Base(repo)
+			}
 			resp.Entries = append(resp.Entries, e)
 			if info.IsDir() && level < depth {
 				if err := walk(abs, level+1); err != nil && !errors.Is(err, fs.ErrPermission) {
@@ -241,9 +248,30 @@ func (s *Service) List(ctx context.Context, req *devboxv1.ListFilesRequest) (*de
 		return nil
 	}
 	if err := walk(root, 1); err != nil {
-		return nil, ioError(err, req.GetPath())
+		return nil, err
 	}
 	return resp, nil
+}
+
+// notIgnored drops the names in dir its checkout's gitignore matches.
+func (s *Service) notIgnored(ctx context.Context, dir string, names []string) []string {
+	repo := s.repoOf(dir)
+	if repo == "" {
+		return names
+	}
+	rels := make([]string, 0, len(names))
+	for _, n := range names {
+		rel, _ := filepath.Rel(repo, filepath.Join(dir, n))
+		rels = append(rels, filepath.ToSlash(rel))
+	}
+	ignored := gitutil.IgnoredFilter(ctx, repo, rels)
+	kept := names[:0]
+	for i, n := range names {
+		if !ignored[rels[i]] {
+			kept = append(kept, n)
+		}
+	}
+	return kept
 }
 
 // Stat implements StatFile.

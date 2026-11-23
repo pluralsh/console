@@ -57,8 +57,12 @@ defmodule Console.Devboxes.Control do
   @callback add_repository(instance, repository :: binary) :: result
   @doc "Checkouts in the workspace; resolves to `{:ok, [%{path, remote, branch, sha}]}`"
   @callback list_repositories(instance) :: result
-  @doc "One directory level; resolves to `{:ok, [%{path, name, type, size, modified_at, repository, git_status}]}`"
-  @callback list_files(instance, path :: binary) :: result
+  @doc """
+  One directory level, or with `opts.query` the best fuzzy matches anywhere beneath it (`opts.brief` drops all but
+  path, name, type and repository, for a listing from memory); resolves to
+  `{:ok, [%{path, name, type, size, modified_at, repository, git_status}]}`
+  """
+  @callback list_files(instance, path :: binary, opts :: map) :: result
   @doc "Resolves to `{:ok, %{entry, content, sha256, truncated, mime_type, binary}}`"
   @callback read_file(instance, path :: binary, opts :: map) :: result
   @doc "Writes a file, compare-and-swap on `opts.expected_sha256`; resolves to `{:ok, %{entry, sha256}}`"
@@ -105,7 +109,7 @@ defmodule Console.Devboxes.Control do
     set_instance_leases: 2,
     add_repository: 2,
     list_repositories: 1,
-    list_files: 2,
+    list_files: 3,
     read_file: 3,
     write_file: 4,
     get_changes: 2,
