@@ -51,6 +51,12 @@ query GetSentinel($id: ID!) {
     }
 }
 
+query GetSentinelByName($name: String!) {
+    sentinel(name: $name) {
+        ...SentinelFragment
+    }
+}
+
 query GetSentinelTiny($id: ID!) {
     sentinel(id: $id) {
         id

@@ -314,6 +314,7 @@ type ConsoleClient interface {
 	UpdateSentinel(ctx context.Context, id string, attributes *SentinelAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateSentinel, error)
 	DeleteSentinel(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteSentinel, error)
 	GetSentinel(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetSentinel, error)
+	GetSentinelByName(ctx context.Context, name string, interceptors ...clientv2.RequestInterceptor) (*GetSentinelByName, error)
 	GetSentinelTiny(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetSentinelTiny, error)
 	RunSentinel(ctx context.Context, id string, overrides *SentinelRunOverrides, interceptors ...clientv2.RequestInterceptor) (*RunSentinel, error)
 	ServiceAccounts(ctx context.Context, after *string, first *int64, before *string, last *int64, q *string, interceptors ...clientv2.RequestInterceptor) (*ServiceAccounts, error)
@@ -36600,6 +36601,242 @@ func (t *GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Conf
 	return t.Yaml
 }
 
+type GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets struct {
+	Key   string  "json:\"key\" graphql:\"key\""
+	Value *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets) GetKey() string {
+	if t == nil {
+		t = &GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets{}
+	}
+	return t.Key
+}
+func (t *GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets) GetValue() *string {
+	if t == nil {
+		t = &GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets{}
+	}
+	return t.Value
+}
+
+type GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Gotestsum struct {
+	P        *string "json:\"p,omitempty\" graphql:\"p\""
+	Parallel *string "json:\"parallel,omitempty\" graphql:\"parallel\""
+}
+
+func (t *GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Gotestsum) GetP() *string {
+	if t == nil {
+		t = &GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Gotestsum{}
+	}
+	return t.P
+}
+func (t *GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Gotestsum) GetParallel() *string {
+	if t == nil {
+		t = &GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Gotestsum{}
+	}
+	return t.Parallel
+}
+
+type GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
+	Name  string "json:\"name\" graphql:\"name\""
+	Value string "json:\"value\" graphql:\"value\""
+}
+
+func (t *GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env) GetName() string {
+	if t == nil {
+		t = &GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env{}
+	}
+	return t.Name
+}
+func (t *GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env) GetValue() string {
+	if t == nil {
+		t = &GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env{}
+	}
+	return t.Value
+}
+
+type GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom struct {
+	ConfigMap string "json:\"configMap\" graphql:\"configMap\""
+	Secret    string "json:\"secret\" graphql:\"secret\""
+}
+
+func (t *GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetConfigMap() string {
+	if t == nil {
+		t = &GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
+	}
+	return t.ConfigMap
+}
+func (t *GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetSecret() string {
+	if t == nil {
+		t = &GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
+	}
+	return t.Secret
+}
+
+type GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
+}
+
+type GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Coredns struct {
+	Delay     *string   "json:\"delay,omitempty\" graphql:\"delay\""
+	DialFqdns []*string "json:\"dialFqdns,omitempty\" graphql:\"dialFqdns\""
+	Retries   *int64    "json:\"retries,omitempty\" graphql:\"retries\""
+}
+
+func (t *GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Coredns) GetDelay() *string {
+	if t == nil {
+		t = &GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Coredns{}
+	}
+	return t.Delay
+}
+func (t *GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Coredns) GetDialFqdns() []*string {
+	if t == nil {
+		t = &GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Coredns{}
+	}
+	return t.DialFqdns
+}
+func (t *GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Coredns) GetRetries() *int64 {
+	if t == nil {
+		t = &GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Coredns{}
+	}
+	return t.Retries
+}
+
+type GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer_DNSProbe struct {
+	Delay   *string "json:\"delay,omitempty\" graphql:\"delay\""
+	Fqdn    string  "json:\"fqdn\" graphql:\"fqdn\""
+	Retries *int64  "json:\"retries,omitempty\" graphql:\"retries\""
+}
+
+func (t *GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer_DNSProbe) GetDelay() *string {
+	if t == nil {
+		t = &GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer_DNSProbe{}
+	}
+	return t.Delay
+}
+func (t *GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer_DNSProbe) GetFqdn() string {
+	if t == nil {
+		t = &GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer_DNSProbe{}
+	}
+	return t.Fqdn
+}
+func (t *GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer_DNSProbe) GetRetries() *int64 {
+	if t == nil {
+		t = &GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer_DNSProbe{}
+	}
+	return t.Retries
+}
+
+type GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer struct {
+	Annotations map[string]any                                                                                                                                                                                                                                         "json:\"annotations,omitempty\" graphql:\"annotations\""
+	DNSProbe    *GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer_DNSProbe "json:\"dnsProbe,omitempty\" graphql:\"dnsProbe\""
+	Labels      map[string]any                                                                                                                                                                                                                                         "json:\"labels,omitempty\" graphql:\"labels\""
+	NamePrefix  string                                                                                                                                                                                                                                                 "json:\"namePrefix\" graphql:\"namePrefix\""
+	Namespace   string                                                                                                                                                                                                                                                 "json:\"namespace\" graphql:\"namespace\""
+}
+
+func (t *GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetAnnotations() map[string]any {
+	if t == nil {
+		t = &GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer{}
+	}
+	return t.Annotations
+}
+func (t *GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetDNSProbe() *GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer_DNSProbe {
+	if t == nil {
+		t = &GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer{}
+	}
+	return t.DNSProbe
+}
+func (t *GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetLabels() map[string]any {
+	if t == nil {
+		t = &GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer{}
+	}
+	return t.Labels
+}
+func (t *GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetNamePrefix() string {
+	if t == nil {
+		t = &GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer{}
+	}
+	return t.NamePrefix
+}
+func (t *GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetNamespace() string {
+	if t == nil {
+		t = &GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer{}
+	}
+	return t.Namespace
+}
+
+type GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Pvc struct {
+	NamePrefix   string "json:\"namePrefix\" graphql:\"namePrefix\""
+	Size         string "json:\"size\" graphql:\"size\""
+	StorageClass string "json:\"storageClass\" graphql:\"storageClass\""
+}
+
+func (t *GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Pvc) GetNamePrefix() string {
+	if t == nil {
+		t = &GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Pvc{}
+	}
+	return t.NamePrefix
+}
+func (t *GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Pvc) GetSize() string {
+	if t == nil {
+		t = &GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Pvc{}
+	}
+	return t.Size
+}
+func (t *GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Pvc) GetStorageClass() string {
+	if t == nil {
+		t = &GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Pvc{}
+	}
+	return t.StorageClass
+}
+
+type GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw struct {
+	ExpectedResult *SentinelRawResult "json:\"expectedResult,omitempty\" graphql:\"expectedResult\""
+	Yaml           string             "json:\"yaml\" graphql:\"yaml\""
+}
+
+func (t *GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw) GetExpectedResult() *SentinelRawResult {
+	if t == nil {
+		t = &GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw{}
+	}
+	return t.ExpectedResult
+}
+func (t *GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw) GetYaml() string {
+	if t == nil {
+		t = &GetSentinelByName_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw{}
+	}
+	return t.Yaml
+}
+
 type GetSentinelTiny_Sentinel struct {
 	ID   string "json:\"id\" graphql:\"id\""
 	Name string "json:\"name\" graphql:\"name\""
@@ -54968,6 +55205,17 @@ type GetSentinel struct {
 func (t *GetSentinel) GetSentinel() *SentinelFragment {
 	if t == nil {
 		t = &GetSentinel{}
+	}
+	return t.Sentinel
+}
+
+type GetSentinelByName struct {
+	Sentinel *SentinelFragment "json:\"sentinel,omitempty\" graphql:\"sentinel\""
+}
+
+func (t *GetSentinelByName) GetSentinel() *SentinelFragment {
+	if t == nil {
+		t = &GetSentinelByName{}
 	}
 	return t.Sentinel
 }
@@ -76822,6 +77070,204 @@ func (c *Client) GetSentinel(ctx context.Context, id string, interceptors ...cli
 	return &res, nil
 }
 
+const GetSentinelByNameDocument = `query GetSentinelByName ($name: String!) {
+	sentinel(name: $name) {
+		... SentinelFragment
+	}
+}
+fragment SentinelFragment on Sentinel {
+	id
+	name
+	description
+	git {
+		... GitRefFragment
+	}
+	repository {
+		... GitRepositoryFragment
+	}
+	project {
+		... TinyProjectFragment
+	}
+	checks {
+		... SentinelCheckFragment
+	}
+}
+fragment GitRefFragment on GitRef {
+	folder
+	ref
+}
+fragment GitRepositoryFragment on GitRepository {
+	id
+	error
+	health
+	authMethod
+	url
+	decrypt
+	recurseSubmodules
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+fragment SentinelCheckFragment on SentinelCheck {
+	id
+	name
+	type
+	ruleFile
+	configuration {
+		... SentinelCheckConfigurationFragment
+	}
+}
+fragment SentinelCheckConfigurationFragment on SentinelCheckConfiguration {
+	log {
+		... SentinelCheckLogConfigurationFragment
+	}
+	kubernetes {
+		... SentinelCheckKubernetesConfigurationFragment
+	}
+	integrationTest {
+		... SentinelCheckIntegrationTestConfigurationFragment
+	}
+}
+fragment SentinelCheckLogConfigurationFragment on SentinelCheckLogConfiguration {
+	namespaces
+	query
+	clusterId
+	facets {
+		key
+		value
+	}
+	duration
+}
+fragment SentinelCheckKubernetesConfigurationFragment on SentinelCheckKubernetesConfiguration {
+	group
+	version
+	kind
+	name
+	namespace
+}
+fragment SentinelCheckIntegrationTestConfigurationFragment on SentinelCheckIntegrationTestConfiguration {
+	distro
+	tags
+	rerunFailures
+	rerunFailuresCount
+	postrunScript
+	gotestsum {
+		p
+		parallel
+	}
+	job {
+		... JobSpecFragment
+	}
+	cases {
+		... TestCaseConfigurationFragment
+	}
+	default {
+		... SentinelCheckIntegrationTestDefaultConfigurationFragment
+	}
+}
+fragment JobSpecFragment on JobGateSpec {
+	namespace
+	raw
+	containers {
+		... ContainerSpecFragment
+	}
+	labels
+	annotations
+	serviceAccount
+	requests {
+		... ContainerResourcesFragment
+	}
+	nodeSelector
+	tolerations {
+		key
+		operator
+		value
+		effect
+	}
+}
+fragment ContainerSpecFragment on ContainerSpec {
+	name
+	image
+	args
+	env {
+		name
+		value
+	}
+	envFrom {
+		configMap
+		secret
+	}
+}
+fragment ContainerResourcesFragment on ContainerResources {
+	requests {
+		... ResourceRequestFragment
+	}
+	limits {
+		... ResourceRequestFragment
+	}
+}
+fragment ResourceRequestFragment on ResourceRequest {
+	cpu
+	memory
+}
+fragment TestCaseConfigurationFragment on SentinelCheckIntegrationTestCaseConfiguration {
+	name
+	type
+	coredns {
+		dialFqdns
+		delay
+		retries
+	}
+	loadbalancer {
+		annotations
+		labels
+		namePrefix
+		namespace
+		dnsProbe {
+			fqdn
+			delay
+			retries
+		}
+	}
+	pvc {
+		namePrefix
+		storageClass
+		size
+	}
+	raw {
+		yaml
+		expectedResult
+	}
+}
+fragment SentinelCheckIntegrationTestDefaultConfigurationFragment on SentinelCheckIntegrationTestDefaultConfiguration {
+	ignore
+	namespaceAnnotations
+	namespaceLabels
+	registry
+	resourceAnnotations
+	resourceLabels
+}
+`
+
+func (c *Client) GetSentinelByName(ctx context.Context, name string, interceptors ...clientv2.RequestInterceptor) (*GetSentinelByName, error) {
+	vars := map[string]any{
+		"name": name,
+	}
+
+	var res GetSentinelByName
+	if err := c.Client.Post(ctx, "GetSentinelByName", GetSentinelByNameDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const GetSentinelTinyDocument = `query GetSentinelTiny ($id: ID!) {
 	sentinel(id: $id) {
 		id
@@ -84683,6 +85129,7 @@ var DocumentOperationNames = map[string]string{
 	UpdateSentinelDocument:                            "UpdateSentinel",
 	DeleteSentinelDocument:                            "DeleteSentinel",
 	GetSentinelDocument:                               "GetSentinel",
+	GetSentinelByNameDocument:                         "GetSentinelByName",
 	GetSentinelTinyDocument:                           "GetSentinelTiny",
 	RunSentinelDocument:                               "RunSentinel",
 	ServiceAccountsDocument:                           "ServiceAccounts",

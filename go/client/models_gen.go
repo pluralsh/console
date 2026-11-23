@@ -3905,9 +3905,9 @@ type DevboxAgent struct {
 	Commands            []*DevboxCommand           `json:"commands,omitempty"`
 	ConfigOptions       []*DevboxConfigOption      `json:"configOptions,omitempty"`
 	SessionCapabilities *DevboxSessionCapabilities `json:"sessionCapabilities,omitempty"`
-	// the models offered: probed values narrowed by the box's allowlist
+	// the models offered under a billing mode (proxy by default): the AI proxy's models, or on a subscription the probed values narrowed by the box's allowlist
 	Models []*DevboxModel `json:"models,omitempty"`
-	// the model preselected when starting an instance
+	// the model preselected when starting an instance under a billing mode (proxy by default)
 	DefaultModel *string `json:"defaultModel,omitempty"`
 }
 
@@ -4187,9 +4187,12 @@ type DevboxEntityChange struct {
 	// the verbatim ACP chunk, patch, notice or state update
 	Payload map[string]any `json:"payload,omitempty"`
 	// for settle deltas, the final entity
-	Entity    *DevboxEntity `json:"entity,omitempty"`
-	Offset    *string       `json:"offset,omitempty"`
-	EmittedAt *string       `json:"emittedAt,omitempty"`
+	Entity *DevboxEntity `json:"entity,omitempty"`
+	Offset *string       `json:"offset,omitempty"`
+	// dense per-session order within stream; unset for notices and console-made deltas
+	Seq       *string `json:"seq,omitempty"`
+	Stream    *string `json:"stream,omitempty"`
+	EmittedAt *string `json:"emittedAt,omitempty"`
 }
 
 type DevboxEntityChangeDelta struct {
@@ -4316,7 +4319,6 @@ type DevboxImportableSession struct {
 	UpdatedAt *string          `json:"updatedAt,omitempty"`
 }
 
-// The index rows an UpsertInstanceIndex call changed (revision and foreground state only when the instance aggregate changed)
 type DevboxIndexChange struct {
 	InstanceID      string                 `json:"instanceId"`
 	Revision        *string                `json:"revision,omitempty"`
@@ -4366,10 +4368,11 @@ type DevboxInstance struct {
 	Snapshot         *DevboxSnapshot          `json:"snapshot,omitempty"`
 	User             *User                    `json:"user,omitempty"`
 	KeepAwakeBy      *User                    `json:"keepAwakeBy,omitempty"`
-	Threads          []*DevboxThread          `json:"threads,omitempty"`
-	Interactions     []*DevboxInteraction     `json:"interactions,omitempty"`
-	InsertedAt       *string                  `json:"insertedAt,omitempty"`
-	UpdatedAt        *string                  `json:"updatedAt,omitempty"`
+	// the instance's threads and their subagents (kind SUBAGENT, under their parent)
+	Threads      []*DevboxThread      `json:"threads,omitempty"`
+	Interactions []*DevboxInteraction `json:"interactions,omitempty"`
+	InsertedAt   *string              `json:"insertedAt,omitempty"`
+	UpdatedAt    *string              `json:"updatedAt,omitempty"`
 }
 
 type DevboxInstanceAttributes struct {
@@ -4420,14 +4423,16 @@ type DevboxInteraction struct {
 	// json schema for a form elicitation
 	RequestedSchema map[string]any `json:"requestedSchema,omitempty"`
 	// the url of a url elicitation
-	URL        *string                   `json:"url,omitempty"`
-	Options    []*DevboxPermissionOption `json:"options,omitempty"`
-	Response   map[string]any            `json:"response,omitempty"`
-	AnsweredAt *string                   `json:"answeredAt,omitempty"`
-	ExpiresAt  *string                   `json:"expiresAt,omitempty"`
-	Instance   *DevboxInstance           `json:"instance,omitempty"`
-	Thread     *DevboxThread             `json:"thread,omitempty"`
-	AnsweredBy *User                     `json:"answeredBy,omitempty"`
+	URL     *string                   `json:"url,omitempty"`
+	Options []*DevboxPermissionOption `json:"options,omitempty"`
+	// the tool call a permission request asks about, for when its session's transcript isn't loaded
+	ToolCall   *DevboxToolCall `json:"toolCall,omitempty"`
+	Response   map[string]any  `json:"response,omitempty"`
+	AnsweredAt *string         `json:"answeredAt,omitempty"`
+	ExpiresAt  *string         `json:"expiresAt,omitempty"`
+	Instance   *DevboxInstance `json:"instance,omitempty"`
+	Thread     *DevboxThread   `json:"thread,omitempty"`
+	AnsweredBy *User           `json:"answeredBy,omitempty"`
 	// set when the devbox answered by policy, e.g. autonomy:full
 	AnsweredByPolicy *string `json:"answeredByPolicy,omitempty"`
 	// the devbox reviewer's verdict at autonomy auto
@@ -4521,6 +4526,35 @@ type DevboxPromptBlockAttributes struct {
 	MimeType *string `json:"mimeType,omitempty"`
 	URI      *string `json:"uri,omitempty"`
 	Name     *string `json:"name,omitempty"`
+}
+
+// A pull request a devbox instance is preparing for one of its checkouts (never stored)
+type DevboxPullRequestJob struct {
+	ID         string `json:"id"`
+	InstanceID string `json:"instanceId"`
+	// the checkout's name or path
+	Repository string                     `json:"repository"`
+	Status     DevboxPullRequestJobStatus `json:"status"`
+	// the pull request, once created
+	URL   *string `json:"url,omitempty"`
+	Title *string `json:"title,omitempty"`
+	Error *string `json:"error,omitempty"`
+	// who wrote the text: ai_proxy, claude, codex or template
+	Writer *string `json:"writer,omitempty"`
+}
+
+type DevboxPullRequestJobDelta struct {
+	Delta   *Delta                `json:"delta,omitempty"`
+	Payload *DevboxPullRequestJob `json:"payload,omitempty"`
+}
+
+// A prompt sent while the thread was busy, waiting for its turn
+type DevboxQueuedPrompt struct {
+	PromptID string  `json:"promptId"`
+	Text     *string `json:"text,omitempty"`
+	// names of the files attached to the prompt
+	Attachments []*string `json:"attachments,omitempty"`
+	QueuedAt    *string   `json:"queuedAt,omitempty"`
 }
 
 type DevboxRepository struct {
@@ -4684,10 +4718,12 @@ type DevboxThread struct {
 	// the agent-owned title
 	AgentTitle *string `json:"agentTitle,omitempty"`
 	// the current model-category config value
-	Model             *string                `json:"model,omitempty"`
-	Cwd               *string                `json:"cwd,omitempty"`
-	WorktreeRepos     []*string              `json:"worktreeRepos,omitempty"`
-	Status            DevboxThreadStatus     `json:"status"`
+	Model         *string            `json:"model,omitempty"`
+	Cwd           *string            `json:"cwd,omitempty"`
+	WorktreeRepos []*string          `json:"worktreeRepos,omitempty"`
+	Status        DevboxThreadStatus `json:"status"`
+	// where the thread sits in its lifecycle, for grouping
+	Stage             DevboxThreadStage      `json:"stage"`
 	Imported          *bool                  `json:"imported,omitempty"`
 	LastActivityAt    *string                `json:"lastActivityAt,omitempty"`
 	EntityCount       *int64                 `json:"entityCount,omitempty"`
@@ -4700,9 +4736,13 @@ type DevboxThread struct {
 	ConfigOptions     []*DevboxConfigOption  `json:"configOptions,omitempty"`
 	AvailableCommands []*DevboxCommand       `json:"availableCommands,omitempty"`
 	Usage             *DevboxUsage           `json:"usage,omitempty"`
-	Instance          *DevboxInstance        `json:"instance,omitempty"`
-	Parent            *DevboxThread          `json:"parent,omitempty"`
-	User              *User                  `json:"user,omitempty"`
+	// prompts held until the running turn ends, in the order they'll run
+	QueuedPrompts []*DevboxQueuedPrompt `json:"queuedPrompts,omitempty"`
+	// for subagents, the parent's tool call that spawned it
+	ParentToolCallID *string         `json:"parentToolCallId,omitempty"`
+	Instance         *DevboxInstance `json:"instance,omitempty"`
+	Parent           *DevboxThread   `json:"parent,omitempty"`
+	User             *User           `json:"user,omitempty"`
 	// subagent sessions spawned by this one
 	Subagents    []*DevboxThread      `json:"subagents,omitempty"`
 	Interactions []*DevboxInteraction `json:"interactions,omitempty"`
@@ -4736,6 +4776,10 @@ type DevboxTimeline struct {
 	Entities []*DevboxEntity `json:"entities,omitempty"`
 	// apply live deltas with a greater offset on top of this page
 	DeltaOffset *string `json:"deltaOffset,omitempty"`
+	// the session's last delta seq this page reflects: apply its deltas from seq + 1, in order
+	Seq *string `json:"seq,omitempty"`
+	// the daemon run numbering seq; deltas from another stream need a reload
+	Stream *string `json:"stream,omitempty"`
 	// more entities lie in the paging direction (older ones, unless paging with after)
 	HasMore *bool `json:"hasMore,omitempty"`
 }
@@ -9151,7 +9195,7 @@ type PullRequest struct {
 	Cluster *Cluster `json:"cluster,omitempty"`
 	// the service this pr is meant to modify
 	Service *ServiceDeployment `json:"service,omitempty"`
-	// how a devbox pr was recorded: through the devbox mcp, or observed at egress
+	// how a devbox pr was recorded: through the devbox mcp, the create pr button, or observed at egress
 	Source *PullRequestSource `json:"source,omitempty"`
 	// devbox attribution details, e.g. the subagent session and tool call that created it
 	Metadata map[string]any `json:"metadata,omitempty"`
@@ -17715,6 +17759,124 @@ func (e DevboxProbeStatus) MarshalJSON() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+// The index rows an UpsertInstanceIndex call changed (revision and foreground state only when the instance aggregate changed)
+type DevboxPullRequestJobStatus string
+
+const (
+	DevboxPullRequestJobStatusRunning   DevboxPullRequestJobStatus = "RUNNING"
+	DevboxPullRequestJobStatusSucceeded DevboxPullRequestJobStatus = "SUCCEEDED"
+	DevboxPullRequestJobStatusFailed    DevboxPullRequestJobStatus = "FAILED"
+)
+
+var AllDevboxPullRequestJobStatus = []DevboxPullRequestJobStatus{
+	DevboxPullRequestJobStatusRunning,
+	DevboxPullRequestJobStatusSucceeded,
+	DevboxPullRequestJobStatusFailed,
+}
+
+func (e DevboxPullRequestJobStatus) IsValid() bool {
+	switch e {
+	case DevboxPullRequestJobStatusRunning, DevboxPullRequestJobStatusSucceeded, DevboxPullRequestJobStatusFailed:
+		return true
+	}
+	return false
+}
+
+func (e DevboxPullRequestJobStatus) String() string {
+	return string(e)
+}
+
+func (e *DevboxPullRequestJobStatus) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DevboxPullRequestJobStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid DevboxPullRequestJobStatus", str)
+	}
+	return nil
+}
+
+func (e DevboxPullRequestJobStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *DevboxPullRequestJobStatus) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e DevboxPullRequestJobStatus) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type DevboxQueuedPromptAction string
+
+const (
+	// replace the prompt's text
+	DevboxQueuedPromptActionEdit DevboxQueuedPromptAction = "EDIT"
+	// drop the prompt from the queue
+	DevboxQueuedPromptActionCancel DevboxQueuedPromptAction = "CANCEL"
+	// run the prompt next, stopping the current turn
+	DevboxQueuedPromptActionSendNow DevboxQueuedPromptAction = "SEND_NOW"
+)
+
+var AllDevboxQueuedPromptAction = []DevboxQueuedPromptAction{
+	DevboxQueuedPromptActionEdit,
+	DevboxQueuedPromptActionCancel,
+	DevboxQueuedPromptActionSendNow,
+}
+
+func (e DevboxQueuedPromptAction) IsValid() bool {
+	switch e {
+	case DevboxQueuedPromptActionEdit, DevboxQueuedPromptActionCancel, DevboxQueuedPromptActionSendNow:
+		return true
+	}
+	return false
+}
+
+func (e DevboxQueuedPromptAction) String() string {
+	return string(e)
+}
+
+func (e *DevboxQueuedPromptAction) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DevboxQueuedPromptAction(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid DevboxQueuedPromptAction", str)
+	}
+	return nil
+}
+
+func (e DevboxQueuedPromptAction) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *DevboxQueuedPromptAction) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e DevboxQueuedPromptAction) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
 type DevboxSnapshotFidelity string
 
 const (
@@ -18050,6 +18212,66 @@ func (e *DevboxThreadKind) UnmarshalJSON(b []byte) error {
 }
 
 func (e DevboxThreadKind) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type DevboxThreadStage string
+
+const (
+	// a turn is in flight or queued
+	DevboxThreadStageRunning DevboxThreadStage = "RUNNING"
+	// the agent is waiting on a person to answer a permission request or question
+	DevboxThreadStageNeedsReview DevboxThreadStage = "NEEDS_REVIEW"
+	// the last turn finished or failed, or the thread was closed
+	DevboxThreadStageCompleted DevboxThreadStage = "COMPLETED"
+)
+
+var AllDevboxThreadStage = []DevboxThreadStage{
+	DevboxThreadStageRunning,
+	DevboxThreadStageNeedsReview,
+	DevboxThreadStageCompleted,
+}
+
+func (e DevboxThreadStage) IsValid() bool {
+	switch e {
+	case DevboxThreadStageRunning, DevboxThreadStageNeedsReview, DevboxThreadStageCompleted:
+		return true
+	}
+	return false
+}
+
+func (e DevboxThreadStage) String() string {
+	return string(e)
+}
+
+func (e *DevboxThreadStage) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DevboxThreadStage(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid DevboxThreadStage", str)
+	}
+	return nil
+}
+
+func (e DevboxThreadStage) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *DevboxThreadStage) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e DevboxThreadStage) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil
@@ -21074,16 +21296,18 @@ type PullRequestSource string
 const (
 	PullRequestSourceMcp    PullRequestSource = "MCP"
 	PullRequestSourceEgress PullRequestSource = "EGRESS"
+	PullRequestSourceDevbox PullRequestSource = "DEVBOX"
 )
 
 var AllPullRequestSource = []PullRequestSource{
 	PullRequestSourceMcp,
 	PullRequestSourceEgress,
+	PullRequestSourceDevbox,
 }
 
 func (e PullRequestSource) IsValid() bool {
 	switch e {
-	case PullRequestSourceMcp, PullRequestSourceEgress:
+	case PullRequestSourceMcp, PullRequestSourceEgress, PullRequestSourceDevbox:
 		return true
 	}
 	return false
