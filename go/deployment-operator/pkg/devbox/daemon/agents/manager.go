@@ -273,10 +273,13 @@ func (m *Manager) Flush() {
 func (m *Manager) flushLocked() {
 	now := m.clock.Now()
 	m.writeTranscriptLocked()
+	// Revisions and entity positions must stay monotonic across restarts, so a flush that moves them persists.
+	// Rows go dirty whenever their session gains an entity, so this covers positions too.
 	for _, t := range m.threads {
 		if t.dirty || activityDue(t.session) {
 			t.dirty = false
 			t.rev++
+			m.dirty = true
 			m.emitLocked(&devboxv1.DaemonEvent{Event: &devboxv1.DaemonEvent_Session{Session: m.threadRowLocked(t)}})
 			reported(t.session)
 		}
@@ -285,6 +288,7 @@ func (m *Manager) flushLocked() {
 		if s.kind == devboxv1.SessionKind_SESSION_KIND_SUBAGENT && (s.dirty || activityDue(s)) {
 			s.dirty = false
 			s.rev++
+			m.dirty = true
 			m.emitLocked(&devboxv1.DaemonEvent{Event: &devboxv1.DaemonEvent_Session{Session: m.subagentRowLocked(s)}})
 			reported(s)
 		}
@@ -299,6 +303,7 @@ func (m *Manager) flushLocked() {
 	if string(key) != m.lastAgg {
 		m.lastAgg = string(key)
 		m.aggRevision++
+		m.dirty = true
 		agg.Revision = m.aggRevision
 		m.emitLocked(&devboxv1.DaemonEvent{Event: &devboxv1.DaemonEvent_Aggregate{Aggregate: agg}})
 	}

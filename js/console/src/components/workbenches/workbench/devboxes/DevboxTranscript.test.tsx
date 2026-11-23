@@ -10,7 +10,7 @@ import { ReactNode } from 'react'
 import { ThemeProvider } from 'styled-components'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 
-import { DevboxTranscript } from './DevboxTranscript'
+import { DevboxTranscript, TranscriptPlacement } from './DevboxTranscript'
 import { acpContentBlock, acpToolCallContent } from './devboxTimeline'
 
 vi.mock('components/ai/chatbot/ChatMarkdown', async (importOriginal) => ({
@@ -453,5 +453,60 @@ describe('DevboxTranscript', () => {
 
     renderTranscript(<DevboxTranscript {...props} />)
     expect(screen.getByText('card early')).toBeTruthy()
+  })
+
+  it("answers an approval for a spawning call under it, beside the subagents' cards", () => {
+    const placements: TranscriptPlacement[] = []
+    renderTranscript(
+      <DevboxTranscript
+        entities={[
+          entity({
+            type: DevboxEntityType.ToolCall,
+            position: 1,
+            toolCall: {
+              toolCallId: 'task-1',
+              title: 'Explore the repo',
+              kind: 'think',
+              status: 'pending',
+              content: [],
+            },
+          }),
+        ]}
+        approvalFor={(id) =>
+          id === 'task-1' ? <button type="button">Allow</button> : null
+        }
+        subagents={[{ id: 'child', parentToolCallId: 'task-1' } as never]}
+        renderSubagent={(s) => <span>card {s.id}</span>}
+        renderUnplaced={(placed) => {
+          placements.push(placed)
+          return null
+        }}
+      />
+    )
+    expect(screen.getByRole('button', { name: 'Allow' })).toBeTruthy()
+    expect(screen.getByText('card child')).toBeTruthy()
+    expect([...placements[0].approvals]).toEqual(['task-1'])
+    expect([...placements[0].subagents]).toEqual(['child'])
+  })
+
+  it('reports what it placed, so the rest can be shown after it, even when empty', () => {
+    const subagents = [{ id: 'early', sessionId: 'p/subagent/call-0' } as never]
+    renderTranscript(
+      <DevboxTranscript
+        entities={[]}
+        complete={false}
+        subagents={subagents}
+        renderSubagent={(s) => <span>card {s.id}</span>}
+        approvalFor={() => <button type="button">Allow</button>}
+        empty={<span>Loading transcript…</span>}
+        renderUnplaced={({ approvals, subagents }) => (
+          <span>
+            unplaced {approvals.size}/{subagents.size}
+          </span>
+        )}
+      />
+    )
+    expect(screen.getByText('Loading transcript…')).toBeTruthy()
+    expect(screen.getByText('unplaced 0/0')).toBeTruthy()
   })
 })

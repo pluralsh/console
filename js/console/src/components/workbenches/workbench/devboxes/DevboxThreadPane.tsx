@@ -58,11 +58,12 @@ import {
   latestToolCall,
   subagentState,
   subagentSummary,
+  subtreeIds,
 } from './devboxSubagentState'
 import { threadTitle } from './devboxThreads'
 import { agentLabel, findAgent, isProxyBilled } from './devboxStartForm'
 import { selectOrderedEntities, selectTerminalOutput } from './devboxTimeline'
-import { DevboxTranscript } from './DevboxTranscript'
+import { DevboxTranscript, TranscriptPlacement } from './DevboxTranscript'
 import { useDevboxWorkspaceApi } from './devboxWorkspaceApi'
 import { DevboxTimelineStoreApi } from './useDevboxTimeline'
 
@@ -104,12 +105,15 @@ export function DevboxThreadPane({
   const parent = thread.parent?.id
     ? threads.find((t) => t.id === thread.parent?.id)
     : undefined
-  const threadIds = new Set([thread.id, ...subagents.map((s) => s.id)])
+  const threadIds = subtreeIds(thread.id, threads)
+  // one with no thread to file it under is shown here rather than nowhere
   const interactions = attributeInteractions(
     (instance.interactions ?? []).filter(isNonNullable),
     threads,
     timeline.store
-  ).filter((i) => i.thread?.id && threadIds.has(i.thread.id))
+  ).filter((i) => !i.thread?.id || threadIds.has(i.thread.id))
+  const ownThread = (i: DevboxInteractionFragment) =>
+    !i.thread?.id || i.thread.id === thread.id
   // a permission request is answered under its tool call, and a subagent's
   // under its row; a card is left for questions (forms, links) and for requests
   // whose call isn't in the loaded transcript
@@ -124,20 +128,27 @@ export function DevboxThreadPane({
     interactions
       .filter(
         (i) =>
-          i.thread?.id === thread.id &&
+          ownThread(i) &&
           isInlineApproval(i) &&
           !!i.toolCallId &&
           transcriptCalls.has(i.toolCallId)
       )
       .map((i) => [i.toolCallId ?? '', i])
   )
-  const ownInteractions = interactions.filter(
-    (i) =>
-      i.thread?.id === thread.id &&
-      !(i.toolCallId && inlineApprovals.has(i.toolCallId)) &&
-      (i.kind !== DevboxInteractionKind.Permission ||
-        i.state === DevboxInteractionState.Pending)
-  )
+  // the transcript answers what it can place, under the tool call or on the
+  // subagent's card; every other request gets a card of its own
+  const unplacedInteractions = ({
+    approvals,
+    subagents,
+  }: TranscriptPlacement) =>
+    interactions.filter((i) =>
+      ownThread(i)
+        ? !(i.toolCallId && approvals.has(i.toolCallId)) &&
+          (i.kind !== DevboxInteractionKind.Permission ||
+            i.state === DevboxInteractionState.Pending)
+        : i.state === DevboxInteractionState.Pending &&
+          !subagents.has(i.thread?.id ?? '')
+    )
   const toolCall = (id: Nullable<string>) => findToolCall(timeline.store, id)
   const [, setParams] = useSearchParams()
   const openThread = (id: string) =>
@@ -254,14 +265,18 @@ export function DevboxThreadPane({
                       : 'Loading transcript…'}
                 </CaptionP>
               }
+              renderUnplaced={(placed) =>
+                unplacedInteractions(placed).map((interaction) => (
+                  <DevboxInteraction
+                    key={interaction.id}
+                    interaction={interaction}
+                    toolCall={
+                      toolCall(interaction.toolCallId) ?? interaction.toolCall
+                    }
+                  />
+                ))
+              }
             />
-            {ownInteractions.map((interaction) => (
-              <DevboxInteraction
-                key={interaction.id}
-                interaction={interaction}
-                toolCall={toolCall(interaction.toolCallId)}
-              />
-            ))}
           </ContentSC>
         </ScrollSC>
       </DevboxFileOpenContext>

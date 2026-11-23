@@ -64,6 +64,13 @@ func NewStore(sessionID string, nextPosition uint64) *Store {
 // NextPosition is the position the next new entity will get.
 func (s *Store) NextPosition() uint64 { return s.nextPosition }
 
+// ReserveThrough makes every position up to last taken, so new entities are placed after it.
+func (s *Store) ReserveThrough(last uint64) {
+	if last >= s.nextPosition {
+		s.nextPosition = last + 1
+	}
+}
+
 // Count is the number of distinct entities seen by this store.
 func (s *Store) Count() uint64 { return s.count }
 

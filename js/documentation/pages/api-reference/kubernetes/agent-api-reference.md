@@ -1041,15 +1041,15 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `go` _boolean_ | Go: proxy.golang.org and sum.golang.org. | true | Optional: \{\} <br /> |
-| `rust` _boolean_ | Rust: crates.io and rustup's static.rust-lang.org. | true | Optional: \{\} <br /> |
-| `javascript` _boolean_ | JavaScript: the npm and yarn registries and nodejs.org. | true | Optional: \{\} <br /> |
-| `java` _boolean_ | Java: Maven Central and the Gradle plugin portal and distributions. | true | Optional: \{\} <br /> |
+| `go` _boolean_ | Go: the module proxy and checksum database, the storage its downloads redirect to, and Go releases. | true | Optional: \{\} <br /> |
+| `rust` _boolean_ | Rust: crates.io and rustup. | true | Optional: \{\} <br /> |
+| `javascript` _boolean_ | JavaScript: the npm and yarn registries, JSR, and the Node.js, Bun and Deno downloads. | true | Optional: \{\} <br /> |
+| `java` _boolean_ | Java: Maven Central, Google's Maven repository, and the Gradle plugin portal and distributions. | true | Optional: \{\} <br /> |
 | `elixir` _boolean_ | Elixir: hex.pm and its package and build repositories. | true | Optional: \{\} <br /> |
 | `python` _boolean_ | Python: PyPI. | true | Optional: \{\} <br /> |
-| `ruby` _boolean_ | Ruby: rubygems.org. |  | Optional: \{\} <br /> |
-| `php` _boolean_ | PHP: Packagist. |  | Optional: \{\} <br /> |
-| `dotnet` _boolean_ | Dotnet: NuGet. |  | Optional: \{\} <br /> |
+| `ruby` _boolean_ | Ruby: rubygems.org and Ruby releases. | true | Optional: \{\} <br /> |
+| `php` _boolean_ | PHP: Packagist and Composer. | true | Optional: \{\} <br /> |
+| `dotnet` _boolean_ | Dotnet: NuGet and .NET releases. | true | Optional: \{\} <br /> |
 
 
 #### DevboxResources

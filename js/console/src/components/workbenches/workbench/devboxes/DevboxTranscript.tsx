@@ -55,6 +55,12 @@ type TranscriptRow =
       spawner?: DevboxEntityFragment
     }
 
+// the tool calls whose approvals, and the subagents whose cards, a transcript shows
+export type TranscriptPlacement = {
+  approvals: ReadonlySet<string>
+  subagents: ReadonlySet<string>
+}
+
 export function DevboxTranscript({
   entities,
   terminal = () => null,
@@ -63,6 +69,7 @@ export function DevboxTranscript({
   renderSubagent,
   complete = true,
   empty,
+  renderUnplaced,
 }: {
   entities: DevboxEntityFragment[]
   terminal?: TerminalLookup
@@ -79,6 +86,9 @@ export function DevboxTranscript({
     spawner?: DevboxEntityFragment
   ) => ReactNode
   empty?: ReactNode
+  // what follows the transcript, given what it placed: anything awaiting an
+  // answer that found no place in it still needs to be shown
+  renderUnplaced?: (placed: TranscriptPlacement) => ReactNode
 }) {
   const embeddedTerminals = new Set(
     entities.flatMap((e) =>
@@ -94,6 +104,7 @@ export function DevboxTranscript({
   const bySession = new Map(subagents.map((s) => [s.sessionId, s]))
   const bySpawner = subagentsBySpawner(subagents)
   const placed = new Set<string>()
+  const placedApprovals = new Set<string>()
 
   // consecutive tool calls collapse into one group, as in agent run transcripts
   const rows: TranscriptRow[] = []
@@ -105,6 +116,14 @@ export function DevboxTranscript({
     )
       continue
     const toolCallId = entity.toolCall?.toolCallId
+    const approval =
+      entity.type === DevboxEntityType.ToolCall && toolCallId
+        ? approvalFor?.(toolCallId)
+        : null
+    if (approval && toolCallId) {
+      placedApprovals.add(toolCallId)
+      rows.push({ kind: 'approval', entity, approval })
+    }
     const spawned = (
       toolCallId ? bySpawner.get(toolCallId) : undefined
     )?.filter((s) => !placed.has(s.id))
@@ -115,14 +134,7 @@ export function DevboxTranscript({
       }
       continue
     }
-    const approval =
-      entity.type === DevboxEntityType.ToolCall && toolCallId
-        ? approvalFor?.(toolCallId)
-        : null
-    if (approval) {
-      rows.push({ kind: 'approval', entity, approval })
-      continue
-    }
+    if (approval) continue
 
     // the first message to or from a subagent is where it starts: its card stands in for it, and the subagent's
     // own transcript opens with the task
@@ -151,71 +163,84 @@ export function DevboxTranscript({
     for (const subagent of subagents)
       if (!placed.has(subagent.id)) rows.push({ kind: 'subagent', subagent })
 
-  if (!rows.length) return <>{empty}</>
+  const rest = renderUnplaced?.({
+    approvals: placedApprovals,
+    subagents: placed,
+  })
+  if (!rows.length)
+    return (
+      <>
+        {empty}
+        {rest}
+      </>
+    )
   return (
-    <TranscriptSC>
-      {rows.map((row) => {
-        switch (row.kind) {
-          case 'subagent':
-            return (
-              <div
-                key={`subagent:${row.subagent.id}`}
-                data-entity="subagent"
-              >
-                {renderSubagent?.(row.subagent, row.spawner)}
-              </div>
-            )
-          case 'approval':
-            return (
-              <Flex
-                key={`approval:${row.entity.id}`}
-                direction="column"
-                gap="small"
-                data-position={row.entity.position ?? undefined}
-              >
-                <ToolCallView
-                  entity={row.entity}
-                  terminal={terminal}
-                />
-                {row.approval}
-              </Flex>
-            )
-          case 'tools': {
-            const [first] = row.entities
-            return (
-              <div
-                key={`tools:${first.id}`}
-                data-position={first.position ?? undefined}
-              >
-                {row.entities.length === 1 ? (
+    <>
+      <TranscriptSC>
+        {rows.map((row) => {
+          switch (row.kind) {
+            case 'subagent':
+              return (
+                <div
+                  key={`subagent:${row.subagent.id}`}
+                  data-entity="subagent"
+                >
+                  {renderSubagent?.(row.subagent, row.spawner)}
+                </div>
+              )
+            case 'approval':
+              return (
+                <Flex
+                  key={`approval:${row.entity.id}`}
+                  direction="column"
+                  gap="small"
+                  data-position={row.entity.position ?? undefined}
+                >
                   <ToolCallView
-                    entity={first}
+                    entity={row.entity}
                     terminal={terminal}
                   />
-                ) : (
-                  <ToolCallGroup
-                    entities={row.entities}
+                  {row.approval}
+                </Flex>
+              )
+            case 'tools': {
+              const [first] = row.entities
+              return (
+                <div
+                  key={`tools:${first.id}`}
+                  data-position={first.position ?? undefined}
+                >
+                  {row.entities.length === 1 ? (
+                    <ToolCallView
+                      entity={first}
+                      terminal={terminal}
+                    />
+                  ) : (
+                    <ToolCallGroup
+                      entities={row.entities}
+                      terminal={terminal}
+                    />
+                  )}
+                </div>
+              )
+            }
+            default:
+              return (
+                <div
+                  key={`${row.entity.type}:${row.entity.id}`}
+                  data-position={row.entity.position ?? undefined}
+                >
+                  <DevboxEntityView
+                    entity={row.entity}
                     terminal={terminal}
                   />
-                )}
-              </div>
-            )
+                </div>
+              )
           }
-          default:
-            return (
-              <div
-                key={`${row.entity.type}:${row.entity.id}`}
-                data-position={row.entity.position ?? undefined}
-              >
-                <DevboxEntityView
-                  entity={row.entity}
-                  terminal={terminal}
-                />
-              </div>
-            )
-        }
-      })}
-    </TranscriptSC>
+        })}
+      </TranscriptSC>
+      {rest}
+    </>
   )
 }
 

@@ -550,22 +550,22 @@ type DevboxECRRegistries struct {
 
 // DevboxPackageServers enables egress to each ecosystem's public registries (see PackageServerHosts).
 type DevboxPackageServers struct {
-	// Go: proxy.golang.org and sum.golang.org.
+	// Go: the module proxy and checksum database, the storage its downloads redirect to, and Go releases.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
 	Go *bool `json:"go,omitempty"`
 
-	// Rust: crates.io and rustup's static.rust-lang.org.
+	// Rust: crates.io and rustup.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
 	Rust *bool `json:"rust,omitempty"`
 
-	// JavaScript: the npm and yarn registries and nodejs.org.
+	// JavaScript: the npm and yarn registries, JSR, and the Node.js, Bun and Deno downloads.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
 	JavaScript *bool `json:"javascript,omitempty"`
 
-	// Java: Maven Central and the Gradle plugin portal and distributions.
+	// Java: Maven Central, Google's Maven repository, and the Gradle plugin portal and distributions.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
 	Java *bool `json:"java,omitempty"`
@@ -580,16 +580,19 @@ type DevboxPackageServers struct {
 	// +kubebuilder:default=true
 	Python *bool `json:"python,omitempty"`
 
-	// Ruby: rubygems.org.
+	// Ruby: rubygems.org and Ruby releases.
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=true
 	Ruby *bool `json:"ruby,omitempty"`
 
-	// PHP: Packagist.
+	// PHP: Packagist and Composer.
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=true
 	PHP *bool `json:"php,omitempty"`
 
-	// Dotnet: NuGet.
+	// Dotnet: NuGet and .NET releases.
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=true
 	Dotnet *bool `json:"dotnet,omitempty"`
 }
 
@@ -948,17 +951,31 @@ func (in *DevboxRunner) LatestRevision() *DevboxRevision {
 	return latest
 }
 
-// packageServerHosts are the registry hosts each ecosystem needs, all on 443.
+// packageServerHosts are the hosts each ecosystem's whole download chain touches, all on 443: registry indexes,
+// the hosts their artifacts redirect to, and the toolchain and package manager downloads. Sources hosted on an
+// SCM (Composer dists, git dependencies) come with the instance's SCM hosts instead.
 var packageServerHosts = map[string][]string{
-	"go":         {"proxy.golang.org", "sum.golang.org"},
-	"rust":       {"crates.io", "index.crates.io", "static.crates.io", "static.rust-lang.org"},
-	"javascript": {"registry.npmjs.org", "registry.yarnpkg.com", "repo.yarnpkg.com", "nodejs.org"},
-	"java":       {"repo.maven.apache.org", "repo1.maven.org", "plugins.gradle.org", "services.gradle.org", "downloads.gradle.org"},
-	"elixir":     {"hex.pm", "repo.hex.pm", "builds.hex.pm"},
-	"python":     {"pypi.org", "files.pythonhosted.org"},
-	"ruby":       {"rubygems.org", "index.rubygems.org"},
-	"php":        {"packagist.org", "repo.packagist.org"},
-	"dotnet":     {"api.nuget.org", "globalcdn.nuget.org"},
+	// proxy.golang.org answers module zips and toolchains with redirects to storage.googleapis.com; go.dev and
+	// dl.google.com serve Go releases
+	"go":   {"proxy.golang.org", "sum.golang.org", "storage.googleapis.com", "go.dev", "golang.org", "dl.google.com"},
+	"rust": {"crates.io", "index.crates.io", "static.crates.io", "static.rust-lang.org", "sh.rustup.rs"},
+	// corepack fetches pnpm and yarn from the npm registry and yarn berry from repo.yarnpkg.com; JSR serves
+	// npm-compatible packages from npm.jsr.io
+	"javascript": {
+		"registry.npmjs.org", "registry.yarnpkg.com", "repo.yarnpkg.com", "nodejs.org", "bun.sh",
+		"jsr.io", "npm.jsr.io", "deno.land", "dl.deno.land",
+	},
+	// the plugin portal redirects artifacts to plugins-artifacts.gradle.org; Android and many Gradle builds pull
+	// Google's Maven repository
+	"java": {
+		"repo.maven.apache.org", "repo1.maven.org", "plugins.gradle.org", "plugins-artifacts.gradle.org",
+		"services.gradle.org", "downloads.gradle.org", "maven.google.com", "dl.google.com",
+	},
+	"elixir": {"hex.pm", "repo.hex.pm", "builds.hex.pm"},
+	"python": {"pypi.org", "files.pythonhosted.org"},
+	"ruby":   {"rubygems.org", "index.rubygems.org", "cache.ruby-lang.org"},
+	"php":    {"packagist.org", "repo.packagist.org", "getcomposer.org"},
+	"dotnet": {"api.nuget.org", "globalcdn.nuget.org", "builds.dotnet.microsoft.com", "dot.net"},
 }
 
 // PackageServerHosts returns the registry hosts the enabled ecosystems need, in a stable order. Unset fields
@@ -975,6 +992,7 @@ func (in *DevboxRunnerSpec) PackageServerHosts() []string {
 		return *v
 	}
 	var out []string
+	seen := map[string]bool{}
 	for _, eco := range []struct {
 		name    string
 		enabled bool
@@ -985,12 +1003,18 @@ func (in *DevboxRunnerSpec) PackageServerHosts() []string {
 		{"java", on(ps.Java, true)},
 		{"elixir", on(ps.Elixir, true)},
 		{"python", on(ps.Python, true)},
-		{"ruby", on(ps.Ruby, false)},
-		{"php", on(ps.PHP, false)},
-		{"dotnet", on(ps.Dotnet, false)},
+		{"ruby", on(ps.Ruby, true)},
+		{"php", on(ps.PHP, true)},
+		{"dotnet", on(ps.Dotnet, true)},
 	} {
-		if eco.enabled {
-			out = append(out, packageServerHosts[eco.name]...)
+		if !eco.enabled {
+			continue
+		}
+		for _, h := range packageServerHosts[eco.name] {
+			if !seen[h] {
+				seen[h] = true
+				out = append(out, h)
+			}
 		}
 	}
 	return out

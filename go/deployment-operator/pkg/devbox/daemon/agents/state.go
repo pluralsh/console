@@ -464,6 +464,15 @@ func (m *Manager) load() error {
 		p.AnsweredAt = now
 		m.emitLocked(&devboxv1.DaemonEvent{Event: &devboxv1.DaemonEvent_Interaction{Interaction: p}})
 	}
+	// The state can lag the transcript (a crash between flushes); positions the transcript holds must not be reused.
+	for _, s := range m.sessions {
+		last, err := m.opts.Transcript.LastPosition(m.ctx, s.id)
+		if err != nil {
+			m.log.Warn("reading transcript head", "session", s.id, "err", err)
+			continue
+		}
+		s.store.ReserveThrough(last)
+	}
 	for _, t := range m.threads {
 		t.dirty = true
 	}

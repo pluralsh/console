@@ -60,6 +60,28 @@ func TestOCIRegistryHostsAreValidSubstratePatterns(t *testing.T) {
 	}
 }
 
+func TestPackageServerHostsCoverEveryEcosystemByDefault(t *testing.T) {
+	got := (&DevboxRunnerSpec{}).PackageServerHosts()
+	// one host per ecosystem, plus the redirect targets a registry alone wouldn't reach
+	for _, h := range []string{
+		"proxy.golang.org", "storage.googleapis.com", "static.crates.io", "registry.npmjs.org", "plugins-artifacts.gradle.org",
+		"repo.hex.pm", "files.pythonhosted.org", "rubygems.org", "repo.packagist.org", "api.nuget.org",
+	} {
+		if !slices.Contains(got, h) {
+			t.Errorf("PackageServerHosts() = %v, missing %s", got, h)
+		}
+	}
+	if len(slices.Compact(slices.Sorted(slices.Values(got)))) != len(got) {
+		t.Errorf("PackageServerHosts() = %v, has duplicates", got)
+	}
+
+	off := false
+	got = (&DevboxRunnerSpec{PackageServers: &DevboxPackageServers{Go: &off}}).PackageServerHosts()
+	if slices.Contains(got, "storage.googleapis.com") || !slices.Contains(got, "dl.google.com") {
+		t.Errorf("with Go off, PackageServerHosts() = %v, want Go's own hosts gone and shared ones kept", got)
+	}
+}
+
 func TestEgressPresetHostsIncludeEveryPreset(t *testing.T) {
 	spec := &DevboxRunnerSpec{CloudIdentities: []DevboxCloudIdentity{{Name: "aws", AWS: &DevboxAWSIdentity{}}}}
 	got := spec.EgressPresetHosts()

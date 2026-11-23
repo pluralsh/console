@@ -489,7 +489,8 @@ spec:
                   and Python are on unless set to false.
                 properties:
                   dotnet:
-                    description: 'Dotnet: NuGet.'
+                    default: true
+                    description: 'Dotnet: NuGet and .NET releases.'
                     type: boolean
                   elixir:
                     default: true
@@ -497,30 +498,34 @@ spec:
                     type: boolean
                   go:
                     default: true
-                    description: 'Go: proxy.golang.org and sum.golang.org.'
+                    description: 'Go: the module proxy and checksum database, the
+                      storage its downloads redirect to, and Go releases.'
                     type: boolean
                   java:
                     default: true
-                    description: 'Java: Maven Central and the Gradle plugin portal
-                      and distributions.'
+                    description: 'Java: Maven Central, Google''s Maven repository,
+                      and the Gradle plugin portal and distributions.'
                     type: boolean
                   javascript:
                     default: true
-                    description: 'JavaScript: the npm and yarn registries and nodejs.org.'
+                    description: 'JavaScript: the npm and yarn registries, JSR, and
+                      the Node.js, Bun and Deno downloads.'
                     type: boolean
                   php:
-                    description: 'PHP: Packagist.'
+                    default: true
+                    description: 'PHP: Packagist and Composer.'
                     type: boolean
                   python:
                     default: true
                     description: 'Python: PyPI.'
                     type: boolean
                   ruby:
-                    description: 'Ruby: rubygems.org.'
+                    default: true
+                    description: 'Ruby: rubygems.org and Ruby releases.'
                     type: boolean
                   rust:
                     default: true
-                    description: 'Rust: crates.io and rustup''s static.rust-lang.org.'
+                    description: 'Rust: crates.io and rustup.'
                     type: boolean
                 type: object
               resources:
