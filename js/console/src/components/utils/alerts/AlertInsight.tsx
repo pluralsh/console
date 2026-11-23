@@ -98,6 +98,7 @@ export function AlertInsight({
             type="secondary"
             size="large"
             tooltip="Back to alerts"
+            textValue="Back to alerts"
             icon={<ReturnIcon />}
             css={{ flexShrink: 0 }}
           />
