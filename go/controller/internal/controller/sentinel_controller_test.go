@@ -13,6 +13,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
@@ -334,6 +335,7 @@ var _ = Describe("Sentinel Controller", Ordered, func() {
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			fakeConsoleClient.On("GetSentinelByName", mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, integrationTestName))
 			fakeConsoleClient.On("CreateSentinel", mock.Anything, mock.Anything).Return(test.fragment, nil)
 
 			nr := &controller.SentinelReconciler{
@@ -355,6 +357,43 @@ var _ = Describe("Sentinel Controller", Ordered, func() {
 			Expect(common.SanitizeStatusConditions(f.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
 
 			By("Cleanup the specific resource instance Sentinel")
+			Expect(k8sClient.Delete(ctx, f)).To(Succeed())
+		})
+
+		It("should adopt an existing sentinel with the same name instead of creating one", func() {
+			const adoptName = "test-adopt"
+			adoptNamespacedName := types.NamespacedName{Name: adoptName, Namespace: namespace}
+
+			resource := &v1alpha1.Sentinel{
+				ObjectMeta: metav1.ObjectMeta{Name: adoptName, Namespace: namespace},
+				Spec: v1alpha1.SentinelSpec{
+					Name:        lo.ToPtr(adoptName),
+					Description: lo.ToPtr("An adopted sentinel"),
+				},
+			}
+			Expect(common.MaybeCreate(k8sClient, resource, nil)).To(Succeed())
+
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			fakeConsoleClient.On("GetSentinelByName", mock.Anything, adoptName).Return(&gqlclient.SentinelFragment{ID: "adopted-id"}, nil)
+			fakeConsoleClient.On("UpdateSentinel", mock.Anything, "adopted-id", mock.Anything).Return(&gqlclient.SentinelFragment{ID: "adopted-id"}, nil)
+
+			nr := &controller.SentinelReconciler{
+				Client:        k8sClient,
+				Scheme:        k8sClient.Scheme(),
+				ConsoleClient: fakeConsoleClient,
+			}
+
+			_, err := nr.Reconcile(ctx, reconcile.Request{NamespacedName: adoptNamespacedName})
+			Expect(err).NotTo(HaveOccurred())
+
+			f := &v1alpha1.Sentinel{}
+			Expect(k8sClient.Get(ctx, adoptNamespacedName, f)).To(Succeed())
+			Expect(f.Status.GetID()).To(Equal("adopted-id"))
+
+			fakeConsoleClient.AssertNotCalled(GinkgoT(), "CreateSentinel", mock.Anything, mock.Anything)
+			fakeConsoleClient.AssertCalled(GinkgoT(), "UpdateSentinel", mock.Anything, "adopted-id", mock.Anything)
+
 			Expect(k8sClient.Delete(ctx, f)).To(Succeed())
 		})
 	})
