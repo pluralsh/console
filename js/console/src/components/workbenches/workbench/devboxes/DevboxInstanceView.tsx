@@ -39,6 +39,7 @@ import { DEVBOX_HEADER_HEIGHT } from './DevboxSessionsSidebar'
 import { DevboxThreadPane } from './DevboxThreadPane'
 import { ImportThreadModal } from './DevboxThreadList'
 import { selectedThread } from './devboxThreads'
+import { useSubscriptionRecovery } from 'components/hooks/useSubscriptionRecovery'
 import { useDevboxPresence } from './useDevboxPresence'
 import { DevboxTimelineStoreApi } from './useDevboxTimeline'
 import { useDevboxWorkspaceApi } from './devboxWorkspaceApi'
@@ -74,11 +75,11 @@ export function DevboxInstanceView({
     poll: true,
   })
 
-  const { error: statusError } = useDevboxInstanceStatusDeltaSubscription({
+  const statusDeltas = useDevboxInstanceStatusDeltaSubscription({
     variables: { id: instanceId },
     skip: !instanceId,
   })
-  useDevboxThreadDeltaSubscription({
+  const threadDeltas = useDevboxThreadDeltaSubscription({
     variables: { instanceId },
     skip: !instanceId,
     onData: ({ data: { data } }) => {
@@ -89,7 +90,7 @@ export function DevboxInstanceView({
 
   // approvals and questions the agent is blocked on arrive here, not as thread
   // deltas, as do the threads and subagents the agent starts itself
-  useDevboxInstanceIndexDeltaSubscription({
+  const indexDeltas = useDevboxInstanceIndexDeltaSubscription({
     variables: { instanceId },
     skip: !instanceId,
     onData: ({ client, data: { data } }) => {
@@ -106,6 +107,15 @@ export function DevboxInstanceView({
       )
     },
   })
+
+  // each delta subscription missed updates while it was down, so a recovery
+  // refetches the instance (the timeline store reloads its own sessions)
+  const recovery = { skip: !instanceId, onRecover: refetch }
+  const deltasDown = [
+    useSubscriptionRecovery(statusDeltas, recovery),
+    useSubscriptionRecovery(threadDeltas, recovery),
+    useSubscriptionRecovery(indexDeltas, recovery),
+  ].some(Boolean)
 
   const live = isInstanceLive(instance?.status)
   const { viewedFile, selectFile, change, selectChange, openFile } =
@@ -212,9 +222,7 @@ export function DevboxInstanceView({
     workbenchData?.workbench?.configuration?.devbox?.maxDeferral
   )
   const disconnected =
-    !!statusError ||
-    !!timeline.subscriptionError ||
-    isClusterOfflineError(error)
+    deltasDown || timeline.subscriptionDown || isClusterOfflineError(error)
 
   return (
     <ViewSC>
@@ -267,6 +275,13 @@ export function DevboxInstanceView({
                     secondary
                     startIcon={<ReloadIcon />}
                     onClick={() => {
+                      for (const deltas of [
+                        statusDeltas,
+                        threadDeltas,
+                        indexDeltas,
+                      ])
+                        deltas.restart()
+                      timeline.restartSubscription()
                       refetch()
                       timeline.reload()
                     }}
