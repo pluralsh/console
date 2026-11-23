@@ -3255,6 +3255,44 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert agg["pullRequests"] == 2
     end
 
+    test "hours saved and merge rates survive job pruning and bucket by the PR's date" do
+      wb = insert(:workbench)
+      job_at = Timex.now() |> Timex.shift(days: -5)
+      pr_at = Timex.now() |> Timex.shift(days: -2)
+      job = insert(:workbench_job, workbench: wb, inserted_at: job_at)
+
+      difficulty = %Console.Schema.PullRequest.Difficulty{type: :gitops, lines: 300}
+      insert(:pull_request, workbench_job: job, workbench: wb, status: :merged, difficulty: difficulty, inserted_at: pr_at)
+      insert(:pull_request, workbench_job: job, workbench: wb, status: :closed, inserted_at: pr_at)
+
+      Console.Repo.delete!(job)
+
+      {:ok, %{data: %{"workbenchAggregates" => agg}}} = run_query("""
+        query { workbenchAggregates { pullRequests hoursSaved } }
+      """, %{}, %{current_user: admin_user()})
+
+      assert agg["pullRequests"] == 1
+      assert agg["hoursSaved"] == 2.0
+
+      {:ok, %{data: %{"workbenchPrMergeRates" => [global]}}} = run_query("""
+        query { workbenchPrMergeRates(period: DAY) { timestamp merge_rate } }
+      """, %{}, %{current_user: admin_user()})
+
+      {:ok, %{data: %{"workbenchPrMergeRatesByWorkbench" => [by_wb]}}} = run_query("""
+        query { workbenchPrMergeRatesByWorkbench(period: DAY) { timestamp merge_rate workbench { id } } }
+      """, %{}, %{current_user: admin_user()})
+
+      expected = DateTime.to_date(pr_at)
+
+      for row <- [global, by_wb] do
+        assert row["merge_rate"] == 0.5
+        {:ok, ts, _} = DateTime.from_iso8601(row["timestamp"])
+        assert DateTime.to_date(ts) == expected
+      end
+
+      assert by_wb["workbench"]["id"] == wb.id
+    end
+
     test "workbenchAggregates only includes workbenches the user can read" do
       user = insert(:user)
       project = insert(:project, read_bindings: [%{user_id: user.id}])
