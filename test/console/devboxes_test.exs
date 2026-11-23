@@ -378,6 +378,16 @@ defmodule Console.DevboxesTest do
       assert refetch(inst).status == :suspended
     end
 
+    test "it answers with the status the gateway reported during the call, not the suspended copy" do
+      inst = owned_instance(status: :suspended)
+      expect(Control.Test, :resume_instance, fn resumed ->
+        resumed |> Console.Schema.DevboxInstance.changeset(%{status: :running}) |> Console.Repo.update!()
+        :ok
+      end)
+
+      {:ok, %{status: :running}} = Devboxes.resume_instance(inst.id, inst.user)
+    end
+
     test "a wake that outlasts the call is accepted, while failures stay errors" do
       inst = owned_instance(status: :suspended)
       expect(Control.Test, :resume_instance, fn _ -> {:error, :starting} end)
