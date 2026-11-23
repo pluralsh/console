@@ -128,9 +128,22 @@ defmodule Console.Deployments.Stacks.Commands do
     do: "tofu"
   defp tf_command(_), do: "terraform"
 
+  defp terragrunt_commands(%Stack{configuration: %{terragrunt: %{run_all: true}}}, true) do
+    indexed([
+      cmd("plan", tg_command(), run_all_args(["plan"]), :plan),
+    ])
+  end
+
   defp terragrunt_commands(%Stack{}, true) do
     indexed([
       cmd("plan", tg_command(), ["plan"], :plan),
+    ])
+  end
+
+  defp terragrunt_commands(%Stack{configuration: %{terragrunt: %{run_all: true}}, deleted_at: d}, _) when not is_nil(d) do
+    indexed([
+      cmd("plan", tg_command(), run_all_args(["plan", "-destroy"]), :plan),
+      cmd("destroy", tg_command(), run_all_args(["destroy"]), :destroy)
     ])
   end
 
@@ -141,12 +154,21 @@ defmodule Console.Deployments.Stacks.Commands do
     ])
   end
 
+  defp terragrunt_commands(%Stack{configuration: %{terragrunt: %{run_all: true}}}, _) do
+    indexed([
+      cmd("plan", tg_command(), run_all_args(["plan"]), :plan),
+      cmd("apply", tg_command(), run_all_args(["apply"]), :apply)
+    ])
+  end
+
   defp terragrunt_commands(%Stack{}, _) do
     indexed([
       cmd("plan", tg_command(), ["plan"], :plan),
       cmd("apply", tg_command(), ["apply", "terraform.tfplan"], :apply)
     ])
   end
+
+  defp run_all_args(args), do: ["run", "--all", "--non-interactive", "--queue-exclude-external" | args]
 
   defp tg_command(), do: "terragrunt"
 

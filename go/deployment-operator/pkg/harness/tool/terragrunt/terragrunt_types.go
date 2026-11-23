@@ -33,4 +33,13 @@ type Terragrunt struct {
 	// refresh is a flag to refresh the state.
 	// Default: true
 	refresh *bool
+
+	// runAll runs terragrunt across every unit under dir.
+	runAll bool
+
+	// outDir stores per-unit plan files for a runAll plan.
+	outDir string
+
+	// jsonOutDir stores per-unit JSON plans for a runAll plan.
+	jsonOutDir string
 }

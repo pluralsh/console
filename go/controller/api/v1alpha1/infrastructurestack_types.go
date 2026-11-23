@@ -272,6 +272,11 @@ type TerragruntConfiguration struct {
 	// ApproveEmpty is whether to auto-approve a plan if there are no changes, preventing a stack from being blocked.
 	// +kubebuilder:validation:Optional
 	ApproveEmpty *bool `json:"approveEmpty,omitempty"`
+
+	// RunAll runs terragrunt across every unit under the stack folder.
+	// Units whose plans are empty are not applied.
+	// +kubebuilder:validation:Optional
+	RunAll *bool `json:"runAll,omitempty"`
 }
 
 type PulumiConfiguration struct {

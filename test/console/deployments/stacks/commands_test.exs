@@ -25,6 +25,43 @@ defmodule Console.Deployments.Stacks.CommandsTest do
         %{name: "destroy", cmd: "terragrunt", args: ["destroy", "-auto-approve"], stage: :destroy}
       ]
     end
+
+    test "runs terragrunt across every unit when run_all is set" do
+      stack = %Stack{
+        type: :terragrunt,
+        configuration: %Stack.Configuration{
+          terragrunt: %Stack.Configuration.Terragrunt{run_all: true}
+        }
+      }
+
+      assert Enum.map(Commands.commands(stack), &Map.take(&1, [:name, :cmd, :args, :stage])) == [
+        %{name: "plan", cmd: "terragrunt", args: ["run", "--all", "--non-interactive", "--queue-exclude-external", "plan"], stage: :plan},
+        %{name: "apply", cmd: "terragrunt", args: ["run", "--all", "--non-interactive", "--queue-exclude-external", "apply"], stage: :apply}
+      ]
+
+      assert Enum.map(Commands.commands(stack, true), &Map.take(&1, [:name, :cmd, :args, :stage])) == [
+        %{name: "plan", cmd: "terragrunt", args: ["run", "--all", "--non-interactive", "--queue-exclude-external", "plan"], stage: :plan}
+      ]
+
+      stack = %{stack | deleted_at: DateTime.utc_now()}
+      assert Enum.map(Commands.commands(stack), &Map.take(&1, [:name, :cmd, :args, :stage])) == [
+        %{name: "plan", cmd: "terragrunt", args: ["run", "--all", "--non-interactive", "--queue-exclude-external", "plan", "-destroy"], stage: :plan},
+        %{name: "destroy", cmd: "terragrunt", args: ["run", "--all", "--non-interactive", "--queue-exclude-external", "destroy"], stage: :destroy}
+      ]
+    end
+
+    test "rejects managed state when terragrunt runs every unit" do
+      changeset = Stack.changeset(%Stack{}, %{
+        name: "nested",
+        type: :terragrunt,
+        status: :queued,
+        project_id: Ecto.UUID.generate(),
+        manage_state: true,
+        configuration: %{terragrunt: %{run_all: true}}
+      })
+
+      assert %{manage_state: ["cannot manage state when terragrunt runAll is enabled"]} = errors_on(changeset)
+    end
     test "uses pulumi for pulumi stacks" do
       commands =
         %Stack{type: :pulumi}

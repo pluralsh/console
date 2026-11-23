@@ -240,6 +240,11 @@ spec:
                           Refresh is whether to refresh the state of the stack,
                           equivalent to the -refresh flag passed through to the underlying Terraform/OpenTofu invocation.
                         type: boolean
+                      runAll:
+                        description: |-
+                          RunAll runs terragrunt across every unit under the stack folder.
+                          Units whose plans are empty are not applied.
+                        type: boolean
                     type: object
                   version:
                     description: Version of the IaC tool to use.

@@ -36,6 +36,7 @@ type StackRun struct {
 	Parallel     *int64
 	Refresh      *bool
 	ApproveEmpty *bool
+	RunAll       bool
 
 	PulumiStack      *string
 	PulumiBackendURL *string
@@ -93,6 +94,7 @@ func (in *StackRun) FromStackRunBaseFragment(fragment *gqlclient.StackRunBaseFra
 		run.Parallelism = tg.Parallelism
 		run.Refresh = tg.Refresh
 		run.ApproveEmpty = tg.ApproveEmpty
+		run.RunAll = tg.RunAll != nil && *tg.RunAll
 	}
 	if pl := fragment.Configuration.Pulumi; pl != nil {
 		run.Parallel = pl.Parallel

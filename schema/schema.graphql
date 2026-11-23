@@ -11557,6 +11557,9 @@ input TerragruntConfigurationAttributes {
 
   "whether to auto-approve a plan if there are no changes, preventing a stack from being blocked"
   approveEmpty: Boolean
+
+  "whether to run terragrunt across every unit under the stack folder"
+  runAll: Boolean
 }
 
 input PulumiConfigurationAttributes {
@@ -12081,6 +12084,9 @@ type TerragruntConfiguration {
 
   "whether to auto-approve a plan if there are no changes, preventing a stack from being blocked"
   approveEmpty: Boolean
+
+  "whether to run terragrunt across every unit under the stack folder"
+  runAll: Boolean
 }
 
 type PulumiConfiguration {

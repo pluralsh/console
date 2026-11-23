@@ -5665,6 +5665,7 @@ export const StackFragmentDoc = /*#__PURE__*/ gql`
     terragrunt {
       parallelism
       refresh
+      runAll
     }
     pulumi {
       parallel
@@ -5748,6 +5749,7 @@ export const StackConfigurationFragmentDoc = /*#__PURE__*/ gql`
   terragrunt {
     parallelism
     refresh
+    runAll
   }
   pulumi {
     parallel

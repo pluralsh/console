@@ -15737,6 +15737,7 @@ type InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configurat
 	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	RunAll       *bool  "json:\"runAll,omitempty\" graphql:\"runAll\""
 }
 
 func (t *InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
@@ -15756,6 +15757,12 @@ func (t *InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Config
 		t = &InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
+}
+func (t *InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRunAll() *bool {
+	if t == nil {
+		t = &InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.RunAll
 }
 
 type InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi struct {
@@ -15980,6 +15987,7 @@ type StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragmen
 	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	RunAll       *bool  "json:\"runAll,omitempty\" graphql:\"runAll\""
 }
 
 func (t *StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
@@ -15999,6 +16007,12 @@ func (t *StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFra
 		t = &StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
+}
+func (t *StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRunAll() *bool {
+	if t == nil {
+		t = &StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.RunAll
 }
 
 type StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi struct {
@@ -16169,6 +16183,7 @@ type StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfiguration
 	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	RunAll       *bool  "json:\"runAll,omitempty\" graphql:\"runAll\""
 }
 
 func (t *StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
@@ -16188,6 +16203,12 @@ func (t *StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigura
 		t = &StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
+}
+func (t *StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRunAll() *bool {
+	if t == nil {
+		t = &StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.RunAll
 }
 
 type StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi struct {
@@ -16358,6 +16379,7 @@ type MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_Stac
 	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	RunAll       *bool  "json:\"runAll,omitempty\" graphql:\"runAll\""
 }
 
 func (t *MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
@@ -16377,6 +16399,12 @@ func (t *MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_
 		t = &MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
+}
+func (t *MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRunAll() *bool {
+	if t == nil {
+		t = &MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.RunAll
 }
 
 type MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi struct {
@@ -16547,6 +16575,7 @@ type InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terrag
 	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	RunAll       *bool  "json:\"runAll,omitempty\" graphql:\"runAll\""
 }
 
 func (t *InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
@@ -16566,6 +16595,12 @@ func (t *InfrastructureStackFragment_Configuration_StackConfigurationFragment_Te
 		t = &InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
+}
+func (t *InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRunAll() *bool {
+	if t == nil {
+		t = &InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.RunAll
 }
 
 type InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi struct {
@@ -16790,6 +16825,7 @@ type StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfi
 	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	RunAll       *bool  "json:\"runAll,omitempty\" graphql:\"runAll\""
 }
 
 func (t *StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
@@ -16809,6 +16845,12 @@ func (t *StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackC
 		t = &StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
+}
+func (t *StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRunAll() *bool {
+	if t == nil {
+		t = &StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.RunAll
 }
 
 type StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi struct {
@@ -16979,6 +17021,7 @@ type StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt struct
 	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	RunAll       *bool  "json:\"runAll,omitempty\" graphql:\"runAll\""
 }
 
 func (t *StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
@@ -16998,6 +17041,12 @@ func (t *StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt) G
 		t = &StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
+}
+func (t *StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRunAll() *bool {
+	if t == nil {
+		t = &StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.RunAll
 }
 
 type StackRunFragment_Configuration_StackConfigurationFragment_Pulumi struct {
@@ -17168,6 +17217,7 @@ type StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt
 	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	RunAll       *bool  "json:\"runAll,omitempty\" graphql:\"runAll\""
 }
 
 func (t *StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
@@ -17187,6 +17237,12 @@ func (t *StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terrag
 		t = &StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
+}
+func (t *StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRunAll() *bool {
+	if t == nil {
+		t = &StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.RunAll
 }
 
 type StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi struct {
@@ -17361,6 +17417,7 @@ type StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt st
 	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	RunAll       *bool  "json:\"runAll,omitempty\" graphql:\"runAll\""
 }
 
 func (t *StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
@@ -17380,6 +17437,12 @@ func (t *StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrun
 		t = &StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
+}
+func (t *StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRunAll() *bool {
+	if t == nil {
+		t = &StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.RunAll
 }
 
 type StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi struct {
@@ -17482,6 +17545,7 @@ type StackConfigurationFragment_Terragrunt struct {
 	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	RunAll       *bool  "json:\"runAll,omitempty\" graphql:\"runAll\""
 }
 
 func (t *StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
@@ -17501,6 +17565,12 @@ func (t *StackConfigurationFragment_Terragrunt) GetRefresh() *bool {
 		t = &StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
+}
+func (t *StackConfigurationFragment_Terragrunt) GetRunAll() *bool {
+	if t == nil {
+		t = &StackConfigurationFragment_Terragrunt{}
+	}
+	return t.RunAll
 }
 
 type StackConfigurationFragment_Pulumi struct {
@@ -37084,6 +37154,7 @@ type ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRun
 	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	RunAll       *bool  "json:\"runAll,omitempty\" graphql:\"runAll\""
 }
 
 func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
@@ -37103,6 +37174,12 @@ func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_Stac
 		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
+}
+func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRunAll() *bool {
+	if t == nil {
+		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.RunAll
 }
 
 type ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi struct {
@@ -37273,6 +37350,7 @@ type ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRun
 	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	RunAll       *bool  "json:\"runAll,omitempty\" graphql:\"runAll\""
 }
 
 func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
@@ -37292,6 +37370,12 @@ func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_Stac
 		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
+}
+func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRunAll() *bool {
+	if t == nil {
+		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.RunAll
 }
 
 type ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi struct {
@@ -37498,6 +37582,7 @@ type ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment
 	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	RunAll       *bool  "json:\"runAll,omitempty\" graphql:\"runAll\""
 }
 
 func (t *ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
@@ -37517,6 +37602,12 @@ func (t *ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFrag
 		t = &ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
+}
+func (t *ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRunAll() *bool {
+	if t == nil {
+		t = &ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.RunAll
 }
 
 type ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi struct {
@@ -37705,6 +37796,7 @@ type ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdge
 	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	RunAll       *bool  "json:\"runAll,omitempty\" graphql:\"runAll\""
 }
 
 func (t *ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
@@ -37724,6 +37816,12 @@ func (t *ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStack
 		t = &ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
+}
+func (t *ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRunAll() *bool {
+	if t == nil {
+		t = &ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.RunAll
 }
 
 type ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi struct {
@@ -37912,6 +38010,7 @@ type GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConf
 	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	RunAll       *bool  "json:\"runAll,omitempty\" graphql:\"runAll\""
 }
 
 func (t *GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
@@ -37931,6 +38030,12 @@ func (t *GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_Stack
 		t = &GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
+}
+func (t *GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRunAll() *bool {
+	if t == nil {
+		t = &GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.RunAll
 }
 
 type GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi struct {
@@ -38184,6 +38289,7 @@ type GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_Con
 	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	RunAll       *bool  "json:\"runAll,omitempty\" graphql:\"runAll\""
 }
 
 func (t *GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
@@ -38203,6 +38309,12 @@ func (t *GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment
 		t = &GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
+}
+func (t *GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRunAll() *bool {
+	if t == nil {
+		t = &GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.RunAll
 }
 
 type GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi struct {
@@ -38373,6 +38485,7 @@ type GetStackRun_StackRun_StackRunFragment_Configuration_StackConfigurationFragm
 	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	RunAll       *bool  "json:\"runAll,omitempty\" graphql:\"runAll\""
 }
 
 func (t *GetStackRun_StackRun_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
@@ -38392,6 +38505,12 @@ func (t *GetStackRun_StackRun_StackRunFragment_Configuration_StackConfigurationF
 		t = &GetStackRun_StackRun_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
+}
+func (t *GetStackRun_StackRun_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRunAll() *bool {
+	if t == nil {
+		t = &GetStackRun_StackRun_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.RunAll
 }
 
 type GetStackRun_StackRun_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi struct {
@@ -38566,6 +38685,7 @@ type GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurat
 	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	RunAll       *bool  "json:\"runAll,omitempty\" graphql:\"runAll\""
 }
 
 func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
@@ -38585,6 +38705,12 @@ func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfig
 		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
+}
+func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRunAll() *bool {
+	if t == nil {
+		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.RunAll
 }
 
 type GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi struct {
@@ -38755,6 +38881,7 @@ type CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConf
 	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	RunAll       *bool  "json:\"runAll,omitempty\" graphql:\"runAll\""
 }
 
 func (t *CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
@@ -38774,6 +38901,12 @@ func (t *CreateStack_CreateStack_InfrastructureStackFragment_Configuration_Stack
 		t = &CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
+}
+func (t *CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRunAll() *bool {
+	if t == nil {
+		t = &CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.RunAll
 }
 
 type CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi struct {
@@ -38944,6 +39077,7 @@ type UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConf
 	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	RunAll       *bool  "json:\"runAll,omitempty\" graphql:\"runAll\""
 }
 
 func (t *UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
@@ -38963,6 +39097,12 @@ func (t *UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_Stack
 		t = &UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
+}
+func (t *UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRunAll() *bool {
+	if t == nil {
+		t = &UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.RunAll
 }
 
 type UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi struct {
@@ -39133,6 +39273,7 @@ type GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Conf
 	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	RunAll       *bool  "json:\"runAll,omitempty\" graphql:\"runAll\""
 }
 
 func (t *GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
@@ -39152,6 +39293,12 @@ func (t *GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_
 		t = &GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
+}
+func (t *GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRunAll() *bool {
+	if t == nil {
+		t = &GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.RunAll
 }
 
 type GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi struct {
@@ -39431,6 +39578,7 @@ type ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_In
 	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	RunAll       *bool  "json:\"runAll,omitempty\" graphql:\"runAll\""
 }
 
 func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
@@ -39450,6 +39598,12 @@ func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stac
 		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
+}
+func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRunAll() *bool {
+	if t == nil {
+		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.RunAll
 }
 
 type ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi struct {
@@ -39620,6 +39774,7 @@ type ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Configur
 	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	RunAll       *bool  "json:\"runAll,omitempty\" graphql:\"runAll\""
 }
 
 func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
@@ -39639,6 +39794,12 @@ func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Conf
 		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
+}
+func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRunAll() *bool {
+	if t == nil {
+		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.RunAll
 }
 
 type ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi struct {
@@ -39853,6 +40014,7 @@ type TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfiguration
 	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	RunAll       *bool  "json:\"runAll,omitempty\" graphql:\"runAll\""
 }
 
 func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
@@ -39872,6 +40034,12 @@ func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigura
 		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
+}
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRunAll() *bool {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.RunAll
 }
 
 type TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi struct {
@@ -77388,6 +77556,7 @@ fragment StackConfigurationFragment on StackConfiguration {
 		parallelism
 		refresh
 		approveEmpty
+		runAll
 	}
 	pulumi {
 		parallel
@@ -77685,6 +77854,7 @@ fragment StackConfigurationFragment on StackConfiguration {
 		parallelism
 		refresh
 		approveEmpty
+		runAll
 	}
 	pulumi {
 		parallel
@@ -77860,6 +78030,7 @@ fragment StackConfigurationFragment on StackConfiguration {
 		parallelism
 		refresh
 		approveEmpty
+		runAll
 	}
 	pulumi {
 		parallel
@@ -78062,6 +78233,7 @@ fragment StackConfigurationFragment on StackConfiguration {
 		parallelism
 		refresh
 		approveEmpty
+		runAll
 	}
 	pulumi {
 		parallel
@@ -78342,6 +78514,7 @@ fragment StackConfigurationFragment on StackConfiguration {
 		parallelism
 		refresh
 		approveEmpty
+		runAll
 	}
 	pulumi {
 		parallel
@@ -78573,6 +78746,7 @@ fragment StackConfigurationFragment on StackConfiguration {
 		parallelism
 		refresh
 		approveEmpty
+		runAll
 	}
 	pulumi {
 		parallel
@@ -78796,6 +78970,7 @@ fragment StackConfigurationFragment on StackConfiguration {
 		parallelism
 		refresh
 		approveEmpty
+		runAll
 	}
 	pulumi {
 		parallel
@@ -79032,6 +79207,7 @@ fragment StackConfigurationFragment on StackConfiguration {
 		parallelism
 		refresh
 		approveEmpty
+		runAll
 	}
 	pulumi {
 		parallel
@@ -79323,6 +79499,7 @@ fragment StackConfigurationFragment on StackConfiguration {
 		parallelism
 		refresh
 		approveEmpty
+		runAll
 	}
 	pulumi {
 		parallel
@@ -80031,6 +80208,7 @@ fragment StackConfigurationFragment on StackConfiguration {
 		parallelism
 		refresh
 		approveEmpty
+		runAll
 	}
 	pulumi {
 		parallel
@@ -80266,6 +80444,7 @@ fragment StackConfigurationFragment on StackConfiguration {
 		parallelism
 		refresh
 		approveEmpty
+		runAll
 	}
 	pulumi {
 		parallel
