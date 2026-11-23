@@ -18,12 +18,16 @@ defmodule Console.Devboxes.Error do
   @spec suspended() :: {:error, t}
   def suspended(), do: error("INSTANCE_SUSPENDED", "the devbox is suspended; resume it to do this")
 
+  @spec interrupted() :: {:error, t}
+  def interrupted(), do: error("CONNECTION_INTERRUPTED", "the connection to the devbox's cluster dropped mid-request; try again")
+
   @doc """
   Maps a `Console.Devboxes.Control` failure to a typed error.
   """
   @spec control(term) :: {:error, term}
   def control({:error, :not_connected}), do: cluster_offline()
   def control({:error, :unavailable}), do: cluster_offline()
+  def control({:error, :interrupted}), do: interrupted()
   def control({:error, :starting}), do: starting()
   def control({:error, :suspended}), do: suspended()
   def control({:error, :unsupported}), do: unsupported("the agent doesn't support this operation")
