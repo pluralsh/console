@@ -301,7 +301,11 @@ export function DevboxPanelContent() {
       </PanelHeaderSC>
       {instance && (
         <PanelBodySC
-          $flush={active.key === 'changes' || active.key === 'files'}
+          $flush={
+            active.key === 'changes' ||
+            active.key === 'files' ||
+            active.key === 'terminal'
+          }
         >
           {active.key === 'files' && (
             <DevboxFilesTab
@@ -325,6 +329,8 @@ export function DevboxPanelContent() {
           )}
           {active.key === 'terminal' && (
             <DevboxTerminalTab
+              key={instanceId}
+              instanceId={instanceId}
               api={api}
               live={live}
               headerActions={headerActions}
