@@ -478,6 +478,7 @@ func TestDevboxRunnerController(t *testing.T) {
 		g.Expect(atespace).To(HavePrefix("devbox-platform-"))
 		g.Expect(env.substrate.hasAtespace(atespace)).To(BeTrue())
 		g.Expect(env.substrate.policies[atespace]["editor"]).To(ContainElement("user:system:serviceaccount:" + devboxTestNamespace + ":devbox-gateway"))
+		g.Expect(env.substrate.policies[globalPolicy]["viewer"]).To(ContainElement("user:system:serviceaccount:" + devboxTestNamespace + ":devbox-gateway"))
 
 		g.Expect(runner.Status.Revisions).To(HaveLen(1))
 		g.Expect(runner.Status.Revisions[0].Phase).To(Equal(v1alpha1.DevboxRevisionBuilding))
@@ -715,7 +716,7 @@ func TestDevboxRunnerController(t *testing.T) {
 			r.Spec.WorkerPool = &v1alpha1.DevboxWorkerPool{
 				NodeSelector:   map[string]string{"plural.sh/devbox": "scheduled"},
 				NodeAffinity:   affinity,
-				PodAnnotations: map[string]string{"karpenter.sh/do-not-disrupt": "true"},
+				PodAnnotations: map[string]string{"example.com/team": "devbox"},
 			}
 		})
 		env.reconcile(t, "scheduled", 2)
@@ -724,7 +725,12 @@ func TestDevboxRunnerController(t *testing.T) {
 		pool.SetGroupVersionKind(workerPoolGVK)
 		g.Expect(env.client.Get(ctx, client.ObjectKey{Name: "devbox-scheduled", Namespace: devboxTestNamespace}, pool)).To(Succeed())
 		annotations, _, _ := unstructured.NestedStringMap(pool.Object, "spec", "template", "annotations")
-		g.Expect(annotations).To(HaveKeyWithValue("karpenter.sh/do-not-disrupt", "true"))
+		g.Expect(annotations).To(Equal(map[string]string{
+			"example.com/team": "devbox",
+			"cluster-autoscaler.kubernetes.io/safe-to-evict": "false",
+			"karpenter.sh/do-not-disrupt":                    "true",
+			"karpenter.sh/do-not-evict":                      "true",
+		}))
 		selector, _, _ := unstructured.NestedStringMap(pool.Object, "spec", "template", "nodeSelector")
 		g.Expect(selector).To(HaveKeyWithValue("plural.sh/devbox", "scheduled"))
 		terms, _, _ := unstructured.NestedSlice(pool.Object, "spec", "template", "nodeAffinity", "requiredDuringSchedulingIgnoredDuringExecution", "nodeSelectorTerms")

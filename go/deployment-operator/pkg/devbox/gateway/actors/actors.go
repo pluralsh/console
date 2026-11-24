@@ -57,6 +57,7 @@ type Client struct {
 	control ateapi.ControlClient
 	conn    *grpc.ClientConn
 	poll    time.Duration
+	backoff time.Duration
 }
 
 // Dial connects to ate-api-server like substrate.Dial: TLS with the servicedns CA bundle, plus the projected
@@ -90,12 +91,14 @@ func Dial(cfg substrate.Config) (*Client, error) {
 
 // New wraps an existing Control client.
 func New(control ateapi.ControlClient) *Client {
-	return &Client{control: control, poll: pollInterval}
+	return &Client{control: control, poll: pollInterval, backoff: retryBackoff}
 }
 
-// WithPollInterval sets how often the Wait* helpers poll; tests shorten it.
+// WithPollInterval sets how often the Wait* helpers poll and, at most, how long Suspend and Resume back off
+// between attempts; tests shorten it.
 func (c *Client) WithPollInterval(d time.Duration) *Client {
 	c.poll = d
+	c.backoff = min(c.backoff, d)
 	return c
 }
 
@@ -172,39 +175,125 @@ func (c *Client) SetTemplate(ctx context.Context, ref Ref, template string) erro
 	return err
 }
 
-// Suspend suspends an actor. Synchronous suspends return once the snapshot is durable (needed before eviction and
-// tagging); asynchronous ones once the actor is suspended locally.
+// Substrate's actor workflows are re-entrant: a suspend or resume that failed midway leaves the actor SUSPENDING or
+// RESUMING, and calling the same RPC again finishes it. An operation in flight holds the actor's lease, and others
+// get Aborted until it ends. Suspend and Resume converge on that: they retry until the actor reaches the state or
+// ctx ends, repairing whatever an interrupted operation left behind.
+const (
+	retryBackoff    = 2 * time.Second
+	maxRetryBackoff = 15 * time.Second
+)
+
+// retryable is an error another attempt can get past: an operation in flight, or Substrate or the worker briefly
+// unreachable (it can place a restore on a worker that just went away).
+func retryable(err error) bool {
+	switch status.Code(err) {
+	case codes.Aborted, codes.Unavailable:
+		return true
+	}
+	return false
+}
+
+// converge runs step until it reports done, backing off between attempts. step returns done, or the error to
+// end with when it isn't retryable; the last error is returned when ctx ends.
+func (c *Client) converge(ctx context.Context, step func() (bool, error)) error {
+	backoff := c.backoff
+	for {
+		done, err := step()
+		if done {
+			return nil
+		}
+		if err != nil && !retryable(err) {
+			return err
+		}
+		select {
+		case <-ctx.Done():
+			return errors.Join(err, ctx.Err())
+		case <-time.After(backoff):
+		}
+		backoff = min(backoff*2, maxRetryBackoff)
+	}
+}
+
+// Suspend suspends an actor and finishes one an earlier suspend left SUSPENDING. Synchronous suspends return once
+// the snapshot is durable (needed before eviction and tagging); asynchronous ones once the actor is suspended
+// locally.
 func (c *Client) Suspend(ctx context.Context, ref Ref, synchronous bool) error {
+	return c.converge(ctx, func() (bool, error) {
+		err := c.suspendOnce(ctx, ref, synchronous)
+		if err == nil {
+			return true, nil
+		}
+		if status.Code(err) == codes.FailedPrecondition {
+			a, gerr := c.GetActor(ctx, ref)
+			switch {
+			case gerr != nil:
+				return false, gerr
+			case a.GetStatus().GetState() == ateapi.ActorState_ACTOR_STATE_SUSPENDED:
+				return true, nil
+			case transient(a.GetStatus().GetState()):
+				// another operation is moving it; check again once it's done
+				return false, status.Error(codes.Aborted, err.Error())
+			}
+		}
+		return false, err
+	})
+}
+
+func (c *Client) suspendOnce(ctx context.Context, ref Ref, synchronous bool) error {
 	mode := ateapi.DurabilityMode_DURABILITY_MODE_ASYNCHRONOUS
 	if synchronous {
 		mode = ateapi.DurabilityMode_DURABILITY_MODE_SYNCHRONOUS
 	}
 	_, err := c.control.SuspendActor(ctx, &ateapi.SuspendActorRequest{Actor: ref.object(), Options: &ateapi.SuspendOptions{Mode: mode}})
-	if status.Code(err) == codes.FailedPrecondition {
-		// Already suspended (or suspending): fine if that's where it ends up.
-		if a, gerr := c.GetActor(ctx, ref); gerr == nil && isSuspendedish(a.GetStatus().GetState()) {
-			return nil
-		}
-	}
 	return err
 }
 
-func isSuspendedish(s ateapi.ActorState) bool {
-	return s == ateapi.ActorState_ACTOR_STATE_SUSPENDED || s == ateapi.ActorState_ACTOR_STATE_SUSPENDING
+// transient states end on their own, or when the operation that left them is re-entered.
+func transient(s ateapi.ActorState) bool {
+	switch s {
+	case ateapi.ActorState_ACTOR_STATE_RESUMING, ateapi.ActorState_ACTOR_STATE_SUSPENDING, ateapi.ActorState_ACTOR_STATE_REVERTING:
+		return true
+	}
+	return false
 }
 
-// Resume resumes an actor. It returns once Substrate accepted the request; WaitState waits for RUNNING.
+// Resume resumes an actor, first finishing a suspend that was interrupted and reverting a crashed actor to its
+// last snapshot. It returns once Substrate accepted the resume; WaitState waits for RUNNING.
 func (c *Client) Resume(ctx context.Context, ref Ref) error {
-	_, err := c.control.ResumeActor(ctx, &ateapi.ResumeActorRequest{Actor: ref.object()})
-	if status.Code(err) == codes.FailedPrecondition {
-		if a, gerr := c.GetActor(ctx, ref); gerr == nil {
-			switch a.GetStatus().GetState() {
-			case ateapi.ActorState_ACTOR_STATE_RUNNING, ateapi.ActorState_ACTOR_STATE_RESUMING:
-				return nil
-			}
+	return c.converge(ctx, func() (bool, error) {
+		_, err := c.control.ResumeActor(ctx, &ateapi.ResumeActorRequest{Actor: ref.object()})
+		if err == nil {
+			return true, nil
 		}
-	}
-	return err
+		if status.Code(err) != codes.FailedPrecondition && !retryable(err) {
+			return false, err
+		}
+		a, gerr := c.GetActor(ctx, ref)
+		if gerr != nil {
+			return false, err
+		}
+		// a retry re-enters the resume, so a RESUMING actor whose resume died gets finished rather than waited on
+		again := status.Error(codes.Aborted, err.Error())
+		switch st := a.GetStatus().GetState(); {
+		case st == ateapi.ActorState_ACTOR_STATE_RUNNING:
+			return true, nil
+		case st == ateapi.ActorState_ACTOR_STATE_SUSPENDING:
+			// a suspend that didn't finish; re-entering it lands the actor SUSPENDED
+			if serr := c.suspendOnce(ctx, ref, false); serr != nil && !retryable(serr) {
+				return false, serr
+			}
+			return false, again
+		case st == ateapi.ActorState_ACTOR_STATE_CRASHED:
+			if rerr := c.Revert(ctx, ref); rerr != nil && !retryable(rerr) {
+				return false, rerr
+			}
+			return false, again
+		case transient(st), retryable(err):
+			return false, again
+		}
+		return false, err
+	})
 }
 
 // Revert returns a crashed actor to its last good snapshot (suspended).

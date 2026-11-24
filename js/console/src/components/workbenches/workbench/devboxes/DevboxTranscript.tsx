@@ -68,11 +68,15 @@ export function DevboxTranscript({
   subagents = [],
   renderSubagent,
   complete = true,
+  running = false,
   empty,
   renderUnplaced,
 }: {
   entities: DevboxEntityFragment[]
   terminal?: TerminalLookup
+  // whether the thread's turn is in progress: its newest entity, if a
+  // thought, is still being thought
+  running?: boolean
   // whether every page of the transcript is loaded: until then, a subagent
   // nothing loaded spawned may belong to a page still to come
   complete?: boolean
@@ -177,7 +181,7 @@ export function DevboxTranscript({
   return (
     <>
       <TranscriptSC>
-        {rows.map((row, i) => {
+        {rows.map((row) => {
           switch (row.kind) {
             case 'subagent':
               return (
@@ -233,7 +237,7 @@ export function DevboxTranscript({
                   <DevboxEntityView
                     entity={row.entity}
                     terminal={terminal}
-                    streaming={i === rows.length - 1 && !row.entity.settled}
+                    streaming={running && row.entity === entities.at(-1)}
                   />
                 </div>
               )
@@ -252,7 +256,7 @@ export function DevboxEntityView({
 }: {
   entity: DevboxEntityFragment
   terminal?: TerminalLookup
-  // still being written: the newest entity of the transcript, not yet settled
+  // still being written: the newest entity of a turn in progress
   streaming?: boolean
 }) {
   switch (entity.type) {
@@ -279,6 +283,7 @@ export function DevboxEntityView({
       return (
         <ThoughtSC
           data-entity="agent-thought"
+          data-streaming={streaming || undefined}
           $streaming={streaming}
         >
           <AccordionSection
@@ -294,7 +299,7 @@ export function DevboxEntityView({
           >
             <SimplifiedMarkdown
               text={blocksText(entity.message.content)}
-              tone="meta"
+              tone="faint"
             />
           </AccordionSection>
         </ThoughtSC>

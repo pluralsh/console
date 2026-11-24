@@ -37,6 +37,11 @@ type Server struct {
 	FailResume error
 	// FailResumeTimes, when positive, limits FailResume to that many calls.
 	FailResumeTimes int
+	// FailSuspend, when set, makes SuspendActor fail with it after marking the actor SUSPENDING, like a checkpoint
+	// cut off midway.
+	FailSuspend error
+	// FailSuspendTimes, when positive, limits FailSuspend to that many calls.
+	FailSuspendTimes int
 
 	version int64
 }
@@ -176,32 +181,51 @@ func (s *Server) SuspendActor(_ context.Context, req *ateapi.SuspendActorRequest
 	if !ok {
 		return nil, status.Error(codes.NotFound, "actor not found")
 	}
-	if a.GetStatus().GetState() != ateapi.ActorState_ACTOR_STATE_RUNNING {
-		return nil, status.Errorf(codes.FailedPrecondition, "actor is %s", a.GetStatus().GetState())
+	// like Substrate's workflow: a SUSPENDED actor is done, and a re-entered suspend finishes a SUSPENDING one
+	switch st := a.GetStatus().GetState(); st {
+	case ateapi.ActorState_ACTOR_STATE_SUSPENDED:
+		return &ateapi.SuspendActorResponse{}, nil
+	case ateapi.ActorState_ACTOR_STATE_RUNNING, ateapi.ActorState_ACTOR_STATE_SUSPENDING:
+	default:
+		return nil, status.Errorf(codes.FailedPrecondition, "MarkSuspending prerequisite not met (got: %s, want ACTOR_STATE_RUNNING)", st)
+	}
+	if err := takeFailure(&s.FailSuspend, &s.FailSuspendTimes); err != nil {
+		a.Status = &ateapi.ActorStatus{State: ateapi.ActorState_ACTOR_STATE_SUSPENDING, WorkerAssignment: a.GetStatus().GetWorkerAssignment()}
+		return nil, err
 	}
 	a.Status = &ateapi.ActorStatus{State: ateapi.ActorState_ACTOR_STATE_SUSPENDED}
 	return &ateapi.SuspendActorResponse{}, nil
+}
+
+// takeFailure returns *fail, clearing it once *times runs out.
+func takeFailure(fail *error, times *int) error {
+	err := *fail
+	if err != nil && *times > 0 {
+		if *times--; *times == 0 {
+			*fail = nil
+		}
+	}
+	return err
 }
 
 func (s *Server) ResumeActor(_ context.Context, req *ateapi.ResumeActorRequest) (*ateapi.ResumeActorResponse, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.record("ResumeActor", req.GetActor())
-	if s.FailResume != nil {
-		err := s.FailResume
-		if s.FailResumeTimes > 0 {
-			if s.FailResumeTimes--; s.FailResumeTimes == 0 {
-				s.FailResume = nil
-			}
-		}
+	if err := takeFailure(&s.FailResume, &s.FailResumeTimes); err != nil {
 		return nil, err
 	}
 	a, ok := s.Actors[key(req.GetActor())]
 	if !ok {
 		return nil, status.Error(codes.NotFound, "actor not found")
 	}
-	if a.GetStatus().GetState() != ateapi.ActorState_ACTOR_STATE_SUSPENDED {
-		return nil, status.Errorf(codes.FailedPrecondition, "actor is %s", a.GetStatus().GetState())
+	// like Substrate's workflow: a RUNNING actor is done, and a re-entered resume finishes a RESUMING one
+	switch st := a.GetStatus().GetState(); st {
+	case ateapi.ActorState_ACTOR_STATE_RUNNING:
+		return &ateapi.ResumeActorResponse{}, nil
+	case ateapi.ActorState_ACTOR_STATE_SUSPENDED, ateapi.ActorState_ACTOR_STATE_RESUMING:
+	default:
+		return nil, status.Errorf(codes.FailedPrecondition, "AssignWorker prerequisite not met for Actor: %s (got: %s, want ACTOR_STATE_SUSPENDED)", key(req.GetActor()), st)
 	}
 	a.Status = &ateapi.ActorStatus{
 		State:            ateapi.ActorState_ACTOR_STATE_RUNNING,

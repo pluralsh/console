@@ -245,6 +245,7 @@ export function DevboxThreadPane({
               }}
               subagents={subagents}
               complete={!!session?.loaded && !session.hasMore}
+              running={thread.foregroundState === DevboxForegroundState.Running}
               renderSubagent={(s, spawner) => (
                 <SubagentCard
                   subagent={s}

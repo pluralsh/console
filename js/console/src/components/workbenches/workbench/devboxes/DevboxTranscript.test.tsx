@@ -54,6 +54,51 @@ const kindsOf = (container: HTMLElement) =>
   )
 
 describe('DevboxTranscript', () => {
+  it('marks the newest thought as thinking only while the turn runs', () => {
+    const thought = (position: number) =>
+      entity({
+        type: DevboxEntityType.AgentThought,
+        position,
+        message: { content: [text(`thought ${position}`)] },
+      })
+    const thinking = (container: HTMLElement) =>
+      [...container.querySelectorAll('[data-entity="agent-thought"]')].map(
+        (n) => n.hasAttribute('data-streaming')
+      )
+
+    const { container, rerender } = renderTranscript(
+      <DevboxTranscript
+        running
+        entities={[thought(1), thought(2)]}
+      />
+    )
+    expect(thinking(container)).toEqual([false, true])
+
+    rerender(
+      <ThemeProvider theme={styledThemeDark}>
+        <DevboxTranscript entities={[thought(1), thought(2)]} />
+      </ThemeProvider>
+    )
+    expect(thinking(container)).toEqual([false, false])
+
+    rerender(
+      <ThemeProvider theme={styledThemeDark}>
+        <DevboxTranscript
+          running
+          entities={[
+            thought(1),
+            entity({
+              type: DevboxEntityType.AgentMessage,
+              position: 2,
+              message: { content: [text('done')] },
+            }),
+          ]}
+        />
+      </ThemeProvider>
+    )
+    expect(thinking(container)).toEqual([false])
+  })
+
   it('renders each known entity kind', () => {
     const { container } = renderTranscript(
       <DevboxTranscript

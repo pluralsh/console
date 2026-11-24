@@ -435,16 +435,14 @@ func fillSessionRow(row *devboxv1.Session, s *session) {
 	row.Meta = acp.StructOf(s.meta)
 }
 
-// BusyReasons reports agent activity for idle detection: running turns and fresh pending interactions.
+// BusyReasons reports agent activity for idle detection: running turns and fresh pending interactions. A turn
+// that has waited on an answer for PendingInteractionBusy without its transcript moving isn't running: nothing
+// happens until someone answers, the box suspends with the turn intact, and answering wakes it.
 func (m *Manager) BusyReasons(now time.Time) []*devboxv1.BusyReason {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	var out []*devboxv1.BusyReason
-	for _, t := range m.threads {
-		if t.running || t.waiting || len(t.queue) > 0 {
-			out = append(out, &devboxv1.BusyReason{Kind: devboxv1.BusyReasonKind_BUSY_REASON_KIND_AGENT_TURN, Detail: t.displayTitle(), ThreadId: t.id})
-		}
-	}
+	unanswered := map[*thread]bool{}
 	for _, in := range m.interactions {
 		if in.proto.GetState() != devboxv1.InteractionState_INTERACTION_STATE_PENDING {
 			continue
@@ -455,10 +453,31 @@ func (m *Manager) BusyReasons(now time.Time) []*devboxv1.BusyReason {
 				Kind: devboxv1.BusyReasonKind_BUSY_REASON_KIND_PENDING_INTERACTION, Detail: in.proto.GetTitle(),
 				ThreadId: in.proto.GetThreadId(), Until: timestamppb.New(created.Add(PendingInteractionBusy)),
 			})
+		} else if in.session != nil && in.session.thread != nil {
+			unanswered[in.session.thread] = true
+		}
+	}
+	for _, t := range m.threads {
+		if t.running && unanswered[t] && now.Sub(m.lastChangeLocked(t)) >= PendingInteractionBusy {
+			continue
+		}
+		if t.running || t.waiting || len(t.queue) > 0 {
+			out = append(out, &devboxv1.BusyReason{Kind: devboxv1.BusyReasonKind_BUSY_REASON_KIND_AGENT_TURN, Detail: t.displayTitle(), ThreadId: t.id})
 		}
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].GetThreadId() < out[j].GetThreadId() })
 	return out
+}
+
+// lastChangeLocked is when anything in the thread's transcript, or its subagents', last changed.
+func (m *Manager) lastChangeLocked(t *thread) time.Time {
+	var last time.Time
+	for _, s := range m.sessions {
+		if s.thread == t && s.store != nil && s.store.LastChange().After(last) {
+			last = s.store.LastChange()
+		}
+	}
+	return last
 }
 
 func (m *Manager) statePath() string { return filepath.Join(m.opts.StateDir, "threads.json") }

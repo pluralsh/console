@@ -106,6 +106,8 @@ func newProbeFixture(t *testing.T, holder string, objs ...client.Object) *probeF
 		AIProxyURL: "https://console.example.com/ext/ai",
 		RetryDelay: time.Millisecond,
 		Resync:     50 * time.Millisecond,
+		// an attempt retries an unavailable Substrate until its deadline
+		AttemptTimeout: 100 * time.Millisecond,
 	}, Deps{
 		Client:      f.client,
 		Actors:      actors.New(ateapi.NewControlClient(f.substrate.Dial(t))).WithPollInterval(time.Millisecond),
@@ -279,14 +281,14 @@ func TestProberFailsAfterRetries(t *testing.T) {
 	if cm.Annotations[probe.StateAnnotation] != probe.StateFailed || !strings.Contains(cm.Data[probe.ErrorKey], "no workers") {
 		t.Fatalf("state %q error %q", cm.Annotations[probe.StateAnnotation], cm.Data[probe.ErrorKey])
 	}
-	resumes := 0
+	creates := 0
 	for _, c := range f.substrate.CallsSnapshot() {
-		if strings.HasPrefix(c, "ResumeActor") {
-			resumes++
+		if strings.HasPrefix(c, "CreateActor ") {
+			creates++
 		}
 	}
-	if resumes != defaultAttempts {
-		t.Fatalf("want %d attempts, got %d", defaultAttempts, resumes)
+	if creates != defaultAttempts {
+		t.Fatalf("want %d attempts, got %d", defaultAttempts, creates)
 	}
 }
 

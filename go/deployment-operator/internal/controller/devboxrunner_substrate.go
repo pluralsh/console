@@ -36,6 +36,15 @@ var workerPoolGVK = schema.GroupVersionKind{Group: "ate.dev", Version: "v1", Kin
 // refuses the multi-range uid_map and `docker` fails to start any container.
 var devboxCapabilities = []string{"SETUID", "SETGID", "SETFCAP"}
 
+// workerPodAnnotations keep node autoscalers from evicting workers: a worker's boxes run outside any pod, so a
+// node with only a worker on it looks underused, and evicting the worker kills every box on it unsaved.
+var workerPodAnnotations = map[string]string{
+	"cluster-autoscaler.kubernetes.io/safe-to-evict": "false",
+	"karpenter.sh/do-not-disrupt":                    "true",
+	// do-not-disrupt's name before Karpenter v0.32
+	"karpenter.sh/do-not-evict": "true",
+}
+
 const (
 	devboxContainerName = "devbox"
 	devboxHomeVolume    = "home"
@@ -179,9 +188,9 @@ func (r *DevboxRunnerReconciler) reconcileWorkerPool(ctx context.Context, api su
 		sandboxClass["configRef"] = map[string]any{"name": *wp.SandboxConfig}
 	}
 
-	template := map[string]any{"labels": stringMapToAny(devboxSelectorLabels(runner))}
-	if len(wp.PodAnnotations) > 0 {
-		template["annotations"] = stringMapToAny(wp.PodAnnotations)
+	template := map[string]any{
+		"labels":      stringMapToAny(devboxSelectorLabels(runner)),
+		"annotations": stringMapToAny(lo.Assign(workerPodAnnotations, wp.PodAnnotations)),
 	}
 	if len(wp.NodeSelector) > 0 {
 		template["nodeSelector"] = stringMapToAny(wp.NodeSelector)
@@ -403,8 +412,9 @@ func toUnstructured(v any) (any, error) {
 }
 
 // ensureAtespace creates the runner's atespace and grants the gateway editor on it, so the gateway can create
-// instance actors, tags and egress policies. The operator itself creates atespaces as a global owner, a
-// Substrate install setting (DBX-23).
+// instance actors, tags and egress policies, and global viewer, which listing workers needs: without it the
+// gateway can't see a worker draining, and the boxes on it die unsaved with the worker. The operator itself
+// creates atespaces as a global owner, a Substrate install setting (DBX-23).
 func (r *DevboxRunnerReconciler) ensureAtespace(ctx context.Context, api substrate.API, runner *v1alpha1.DevboxRunner) (string, error) {
 	atespace := lo.FromPtr(runner.Status.Atespace)
 	if atespace == "" {
@@ -415,6 +425,9 @@ func (r *DevboxRunnerReconciler) ensureAtespace(ctx context.Context, api substra
 	}
 	if err := api.EnsureAtespaceAccessPolicy(ctx, atespace, substrate.RoleEditor, r.Config.GatewayPrincipal()); err != nil {
 		return "", fmt.Errorf("granting the gateway editor on atespace %s: %w", atespace, err)
+	}
+	if err := api.EnsureGlobalAccessPolicy(ctx, substrate.RoleViewer, r.Config.GatewayPrincipal()); err != nil {
+		return "", fmt.Errorf("granting the gateway global viewer: %w", err)
 	}
 	runner.Status.Atespace = &atespace
 	return atespace, nil

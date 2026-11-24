@@ -515,6 +515,28 @@ func TestSubagentPermissionBelongsToTheSubagent(t *testing.T) {
 	eventually(t, "outcome", func() bool { return contains(h.agentText(s.GetSessionId()), "outcome:selected:allow") })
 }
 
+func TestTurnBlockedOnAnUnansweredPermissionStopsKeepingTheBoxAwake(t *testing.T) {
+	h := newManager(t, 4)
+	s := h.create(t, "t1")
+	h.prompt(t, s, "p1", "subagent-permission")
+	eventually(t, "pending interaction", func() bool { return len(h.m.Interactions()) > 0 })
+	kinds := func(reasons []*devboxv1.BusyReason) []devboxv1.BusyReasonKind {
+		out := []devboxv1.BusyReasonKind{}
+		for _, r := range reasons {
+			out = append(out, r.GetKind())
+		}
+		return out
+	}
+
+	now := kinds(h.m.BusyReasons(time.Now()))
+	if !slices.Contains(now, devboxv1.BusyReasonKind_BUSY_REASON_KIND_AGENT_TURN) || !slices.Contains(now, devboxv1.BusyReasonKind_BUSY_REASON_KIND_PENDING_INTERACTION) {
+		t.Fatalf("fresh permission: %v", now)
+	}
+	if later := h.m.BusyReasons(time.Now().Add(PendingInteractionBusy + time.Minute)); len(later) != 0 {
+		t.Fatalf("a turn blocked on an answer for %s still keeps the box awake: %v", PendingInteractionBusy, kinds(later))
+	}
+}
+
 // specLauncher adjusts the fake agent's launch.
 type specLauncher struct {
 	testLauncher

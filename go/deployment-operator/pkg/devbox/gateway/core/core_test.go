@@ -93,9 +93,6 @@ func TestCreateInstanceProvisionsAndInitializes(t *testing.T) {
 // A restore routed to a worker that just went away fails Unavailable; provisioning retries instead of failing the
 // instance.
 func TestProvisionRetriesUnavailableResume(t *testing.T) {
-	prev := resumeBackoff
-	resumeBackoff = 5 * time.Millisecond
-	t.Cleanup(func() { resumeBackoff = prev })
 	h := newHarness(t, nil)
 	h.ate.FailResume = status.Error(codes.Unavailable, "dial unix /var/lib/ate/workers/w/worker.sock: connect: no such file or directory")
 	h.ate.FailResumeTimes = 2
@@ -444,7 +441,7 @@ func TestSuspendDrainsEventsBeforeSuspending(t *testing.T) {
 	default:
 		t.Fatal("offset 7 was never acknowledged")
 	}
-	if modes := h.ate.SuspendModesSnapshot(); len(modes) != 1 || modes[0] != ateapi.DurabilityMode_DURABILITY_MODE_ASYNCHRONOUS {
+	if modes := h.ate.SuspendModesSnapshot(); len(modes) != 1 || modes[0] != ateapi.DurabilityMode_DURABILITY_MODE_SYNCHRONOUS {
 		t.Fatalf("suspend modes = %v", modes)
 	}
 	// Opening a suspended instance's timeline wakes the box, which serves it.
@@ -454,6 +451,40 @@ func TestSuspendDrainsEventsBeforeSuspending(t *testing.T) {
 	}
 	if h.ate.State(testAtespace, "dbx-inst-1") != ateapi.ActorState_ACTOR_STATE_RUNNING {
 		t.Fatal("GetTimeline with resume_if_suspended left the box suspended")
+	}
+}
+
+func TestBusyBoxRefusesAutomaticSuspends(t *testing.T) {
+	h := newHarness(t, nil)
+	inst := h.running("inst-1")
+	h.daemon.mu.Lock()
+	h.daemon.busy = true
+	h.daemon.mu.Unlock()
+
+	for _, reason := range []devboxv1.SuspendReason{devboxv1.SuspendReason_SUSPEND_REASON_IDLE, devboxv1.SuspendReason_SUSPEND_REASON_MAX_CONTINUOUS_AWAKE} {
+		resp, err := h.g.SuspendInstance(context.Background(), &devboxv1.InstanceActionRequest{InstanceId: "inst-1", Reason: reason})
+		if err != nil || resp.GetStatus() != devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING {
+			t.Fatalf("%s suspend of a busy box = %v, %v", reason, resp, err)
+		}
+	}
+	if st := h.ate.State(testAtespace, "dbx-inst-1"); st != ateapi.ActorState_ACTOR_STATE_RUNNING {
+		t.Fatalf("actor %s after refused suspends", st)
+	}
+	// Still forwarding events.
+	h.daemon.events <- &devboxv1.DaemonEvent{Offset: 1, Event: &devboxv1.DaemonEvent_Session{Session: &devboxv1.Session{ThreadId: "th-1", SessionId: "s1", Revision: 1}}}
+	h.eventually("events still acknowledged", func() bool {
+		h.daemon.mu.Lock()
+		defer h.daemon.mu.Unlock()
+		return h.daemon.acked >= 1
+	})
+
+	// The user's own suspend isn't refused.
+	resp, err := h.g.SuspendInstance(context.Background(), &devboxv1.InstanceActionRequest{InstanceId: "inst-1", Reason: devboxv1.SuspendReason_SUSPEND_REASON_USER})
+	if err != nil || resp.GetStatus() != devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED {
+		t.Fatalf("user suspend = %v, %v", resp, err)
+	}
+	if inst.status() != devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED {
+		t.Fatalf("status %s", inst.status())
 	}
 }
 
@@ -557,9 +588,19 @@ func TestCompleteAfterBackstopLosesToResume(t *testing.T) {
 	}
 }
 
+func fastProbes(t *testing.T) {
+	interval := unresponsiveProbeInterval
+	unresponsiveProbeInterval = time.Millisecond
+	t.Cleanup(func() { unresponsiveProbeInterval = interval })
+}
+
 func TestUnresponsiveDaemonBackstop(t *testing.T) {
+	fastProbes(t)
 	h := newHarness(t, nil)
 	inst := h.running("inst-1")
+	h.daemon.mu.Lock()
+	h.daemon.unhealthy = true
+	h.daemon.mu.Unlock()
 	h.clock.advance(10 * time.Minute)
 	h.g.backstops(context.Background())
 	h.eventually("suspended", func() bool { return inst.status() == devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED })
@@ -571,6 +612,44 @@ func TestUnresponsiveDaemonBackstop(t *testing.T) {
 	h.daemon.mu.Unlock()
 	if prepares != 0 {
 		t.Fatal("PrepareSuspend called on an unresponsive daemon")
+	}
+}
+
+func TestSilentStreamToAHealthyDaemonIsNotSuspended(t *testing.T) {
+	fastProbes(t)
+	h := newHarness(t, nil)
+	inst := h.running("inst-1")
+	h.clock.advance(10 * time.Minute)
+	h.g.backstops(context.Background())
+	h.eventually("contact refreshed", func() bool {
+		inst.mu.Lock()
+		defer inst.mu.Unlock()
+		return h.clock.now().Sub(inst.lastContact) < time.Minute && !inst.probing
+	})
+	if inst.status() != devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING {
+		t.Fatalf("healthy daemon suspended: %s", inst.status())
+	}
+	if n := len(h.ate.SuspendModesSnapshot()); n != 0 {
+		t.Fatalf("suspended %d times", n)
+	}
+	h.daemon.events <- &devboxv1.DaemonEvent{Offset: 1, Event: &devboxv1.DaemonEvent_Session{Session: &devboxv1.Session{ThreadId: "th-1", SessionId: "s1", Revision: 1}}}
+	h.eventually("restarted forwarder delivers events", func() bool {
+		h.daemon.mu.Lock()
+		defer h.daemon.mu.Unlock()
+		return h.daemon.acked >= 1
+	})
+}
+
+func TestCrashDuringSuspendReportsLostWork(t *testing.T) {
+	h := newHarness(t, nil)
+	inst := h.running("inst-1")
+	h.ate.SetState(testAtespace, "dbx-inst-1", ateapi.ActorState_ACTOR_STATE_CRASHED, "")
+	if _, err := h.g.SuspendInstance(context.Background(), &devboxv1.InstanceActionRequest{InstanceId: "inst-1", Reason: devboxv1.SuspendReason_SUSPEND_REASON_IDLE}); err != nil {
+		t.Fatal(err)
+	}
+	h.eventually("suspended", func() bool { return inst.status() == devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED })
+	if msg := h.ingest.lastStatus().GetMessage(); !strings.Contains(msg, "work since then was lost") {
+		t.Fatalf("status message = %q", msg)
 	}
 }
 
@@ -756,18 +835,62 @@ func TestEndpointsScopeWorkbenchMCPToTheInstance(t *testing.T) {
 	}
 }
 
+// A checkpoint cut off by its deadline leaves the actor SUSPENDING; the instance is recorded suspended and the next
+// resume finishes the suspend instead of failing "AssignWorker prerequisite not met (got: ACTOR_STATE_SUSPENDING)".
+func TestResumeAfterASuspendCutOffMidway(t *testing.T) {
+	h := newHarness(t, nil)
+	h.running("inst-1")
+	h.ate.FailSuspend = status.Error(codes.DeadlineExceeded, "workflow failed at step CallAteletSuspend: while calling atelet Checkpoint: context deadline exceeded")
+	h.ate.FailSuspendTimes = 1
+
+	req := &devboxv1.InstanceActionRequest{InstanceId: "inst-1"}
+	resp, err := h.g.SuspendInstance(context.Background(), req)
+	if err != nil || resp.GetStatus() != devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED {
+		t.Fatalf("suspend = %v, %v", resp, err)
+	}
+	if got := h.ate.State(testAtespace, "dbx-inst-1"); got != ateapi.ActorState_ACTOR_STATE_SUSPENDING {
+		t.Fatalf("actor state = %s", got)
+	}
+
+	resp, err = h.g.ResumeInstance(context.Background(), req)
+	if err != nil || resp.GetStatus() != devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING {
+		t.Fatalf("resume = %v, %v", resp, err)
+	}
+	if got := h.ate.State(testAtespace, "dbx-inst-1"); got != ateapi.ActorState_ACTOR_STATE_RUNNING {
+		t.Fatalf("actor state = %s", got)
+	}
+}
+
+// Console calls SuspendInstance with a 30s deadline, shorter than a prepare, drain and memory checkpoint can take;
+// the suspend carries on past it rather than abandoning the checkpoint midway.
+func TestSuspendOutlivesTheCallersDeadline(t *testing.T) {
+	h := newHarness(t, nil)
+	h.running("inst-1")
+	// substrate is busy for the first attempts (backing off 5+10+20+40ms)
+	h.ate.FailSuspend = status.Error(codes.Aborted, "another operation is in progress for this actor")
+	h.ate.FailSuspendTimes = 4
+
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Millisecond)
+	defer cancel()
+	resp, err := h.g.SuspendInstance(ctx, &devboxv1.InstanceActionRequest{InstanceId: "inst-1"})
+	if err != nil || resp.GetStatus() != devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING {
+		t.Fatalf("an impatient suspend = %v, %v", resp, err)
+	}
+	h.eventually("the suspend to land", func() bool {
+		return h.ate.State(testAtespace, "dbx-inst-1") == ateapi.ActorState_ACTOR_STATE_SUSPENDED &&
+			slices.Contains(h.ingest.statusList(), "SUSPENDED")
+	})
+}
+
 func TestResumeOutlivesTheCallersDeadline(t *testing.T) {
-	prev := resumeBackoff
-	resumeBackoff = 100 * time.Millisecond
-	t.Cleanup(func() { resumeBackoff = prev })
 	h := newHarness(t, nil)
 	h.running("inst-1")
 	if _, err := h.g.SuspendInstance(context.Background(), &devboxv1.InstanceActionRequest{InstanceId: "inst-1"}); err != nil {
 		t.Fatal(err)
 	}
-	// a slow restore: substrate is unavailable for the first two attempts
+	// a slow restore: substrate is unavailable for the first attempts (backing off 5+10+20+40ms)
 	h.ate.FailResume = status.Error(codes.Unavailable, "worker gone")
-	h.ate.FailResumeTimes = 2
+	h.ate.FailResumeTimes = 4
 
 	req := &devboxv1.InstanceActionRequest{InstanceId: "inst-1"}
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Millisecond)

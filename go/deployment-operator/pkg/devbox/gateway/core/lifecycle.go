@@ -189,7 +189,7 @@ func (g *Gateway) wake(ctx context.Context, inst *Instance) error {
 	ref := inst.ref()
 	ctx, cancel := context.WithTimeout(ctx, g.cfg.ReadyTimeout)
 	defer cancel()
-	if err := g.resumeActor(ctx, ref); err != nil {
+	if err := g.deps.Actors.Resume(ctx, ref); err != nil {
 		return fmt.Errorf("resuming actor %s: %w", ref, err)
 	}
 	if _, err := g.deps.Actors.WaitState(ctx, ref, ateapi.ActorState_ACTOR_STATE_RUNNING); err != nil {
@@ -204,34 +204,6 @@ func (g *Gateway) wake(ctx context.Context, inst *Instance) error {
 		return fmt.Errorf("initializing the daemon of %s: %w", ref, err)
 	}
 	return nil
-}
-
-var (
-	resumeBackoff    = 2 * time.Second
-	maxResumeBackoff = 15 * time.Second
-)
-
-// resumeActor retries Unavailable until ctx ends. Substrate can place a restore on a worker that just went away
-// (its worker.sock is gone) before it marks the worker unavailable; a later attempt lands on a live one. A restore
-// that failed that way can leave the actor crashed, so it is reverted before the next attempt.
-func (g *Gateway) resumeActor(ctx context.Context, ref actors.Ref) error {
-	backoff := resumeBackoff
-	for {
-		err := g.deps.Actors.Resume(ctx, ref)
-		if status.Code(err) != codes.Unavailable {
-			return err
-		}
-		g.log.Info("resume unavailable; retrying", "actor", ref.String(), "error", err.Error())
-		if a, gerr := g.deps.Actors.GetActor(ctx, ref); gerr == nil && a.GetStatus().GetState() == ateapi.ActorState_ACTOR_STATE_CRASHED {
-			_ = g.deps.Actors.Revert(ctx, ref)
-		}
-		select {
-		case <-ctx.Done():
-			return err
-		case <-time.After(backoff):
-		}
-		backoff = min(backoff*2, maxResumeBackoff)
-	}
 }
 
 // refreshRunner rereads the instance's runner so Initialize carries current secret env; on failure the instance
@@ -327,11 +299,31 @@ func (g *Gateway) endpoints(workbenchID string) *devboxv1.HarnessEndpoints {
 
 // suspend suspends a running instance (DBX-64): PrepareSuspend settles the daemon, the forwarder drains up to
 // the settled offset (so console has indexed everything and the daemon has it acknowledged), then Substrate suspends the actor.
-// Evictions and snapshots suspend synchronously so the snapshot is durable before the worker goes away.
+// The box may refuse an automatic suspend (idle, max awake) that would cut off a running agent turn.
+//
+// Like resume, it runs in the background bounded by SuspendTimeout rather than the caller's deadline: a checkpoint
+// cut off midway leaves the actor SUSPENDING. A caller whose context ends first gets the current status while the
+// suspend continues; the new status is reported when it lands.
 func (g *Gateway) suspend(ctx context.Context, inst *Instance, reason devboxv1.SuspendReason) (devboxv1.InstanceStatus, error) {
-	inst.op.Lock()
-	defer inst.op.Unlock()
-	return g.suspendLocked(ctx, inst, reason, devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED)
+	type result struct {
+		status devboxv1.InstanceStatus
+		err    error
+	}
+	done := make(chan result, 1)
+	g.goBackground(func(ctx context.Context) {
+		ctx, cancel := context.WithTimeout(ctx, g.cfg.SuspendTimeout)
+		defer cancel()
+		inst.op.Lock()
+		defer inst.op.Unlock()
+		st, err := g.suspendLocked(ctx, inst, reason, devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED)
+		done <- result{st, err}
+	})
+	select {
+	case r := <-done:
+		return r.status, r.err
+	case <-ctx.Done():
+		return inst.status(), nil
+	}
 }
 
 func (g *Gateway) suspendLocked(ctx context.Context, inst *Instance, reason devboxv1.SuspendReason, final devboxv1.InstanceStatus) (devboxv1.InstanceStatus, error) {
@@ -350,9 +342,13 @@ func (g *Gateway) suspendLocked(ctx context.Context, inst *Instance, reason devb
 			SharedSnapshot: reason == devboxv1.SuspendReason_SUSPEND_REASON_SNAPSHOT && inst.sharedSnapshot(),
 		})
 		cancel()
-		if err != nil {
+		switch {
+		case status.Code(err) == codes.FailedPrecondition && automatic(reason):
+			g.log.Info("box refused an automatic suspend; it stays running", "instance", inst.ID, "reason", reason, "why", status.Convert(err).Message())
+			return devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING, nil
+		case err != nil:
 			g.log.Error(err, "PrepareSuspend failed; suspending anyway", "instance", inst.ID, "reason", reason)
-		} else {
+		default:
 			settled = resp.GetSettledOffset()
 		}
 	}
@@ -365,10 +361,12 @@ func (g *Gateway) suspendLocked(ctx context.Context, inst *Instance, reason devb
 	}
 	inst.stopForwarder()
 
-	sync := reason == devboxv1.SuspendReason_SUSPEND_REASON_EVICTION || reason == devboxv1.SuspendReason_SUSPEND_REASON_SNAPSHOT
-	if err := g.deps.Actors.Suspend(ctx, ref, sync); err != nil {
-		if g.recoverSuspend(ctx, inst, err) {
-			g.setStatus(ctx, inst, statusUpdate{status: final, reason: reason, message: "recovered after: " + err.Error()})
+	// Always durable: an async suspend leaves the snapshot node-local until atelet uploads it, and a revert in that
+	// window (an actor crashing on resume, say) returns the box to the previous uploaded snapshot, discarding
+	// everything since. The wait is the gateway's; suspend runs in the background.
+	if err := g.deps.Actors.Suspend(ctx, ref, true); err != nil {
+		if msg, ok := g.recoverSuspend(ctx, inst, err); ok {
+			g.setStatus(ctx, inst, statusUpdate{status: final, reason: reason, message: msg})
 			return final, nil
 		}
 		// Still running: keep forwarding events.
@@ -381,25 +379,42 @@ func (g *Gateway) suspendLocked(ctx context.Context, inst *Instance, reason devb
 	return final, nil
 }
 
-// recoverSuspend handles a failed SuspendActor: an actor that is suspended anyway is fine, and a crashed one is
-// reverted to its last snapshot.
-func (g *Gateway) recoverSuspend(ctx context.Context, inst *Instance, cause error) bool {
+// automatic reports the suspend reasons the box may refuse: nobody asked for them, and nothing is lost by waiting.
+func automatic(reason devboxv1.SuspendReason) bool {
+	return reason == devboxv1.SuspendReason_SUSPEND_REASON_IDLE || reason == devboxv1.SuspendReason_SUSPEND_REASON_MAX_CONTINUOUS_AWAKE
+}
+
+// recoverSuspend handles a failed SuspendActor, returning the status message to record: an actor that is
+// suspended anyway is fine, as is one left SUSPENDING, which the next resume finishes suspending first, and a
+// crashed one is reverted to its last snapshot, losing what it did since.
+func (g *Gateway) recoverSuspend(ctx context.Context, inst *Instance, cause error) (string, bool) {
 	ref := inst.ref()
 	a, err := g.deps.Actors.GetActor(ctx, ref)
 	if err != nil {
-		return false
+		return "", false
 	}
 	switch a.GetStatus().GetState() {
 	case ateapi.ActorState_ACTOR_STATE_SUSPENDED, ateapi.ActorState_ACTOR_STATE_SUSPENDING:
-		return true
+		return "suspended after: " + cause.Error(), true
 	case ateapi.ActorState_ACTOR_STATE_CRASHED:
+		crash := a.GetStatus().GetCrash().GetMessage()
 		if err := g.deps.Actors.Revert(ctx, ref); err != nil {
 			g.log.Error(errors.Join(cause, err), "reverting crashed actor", "instance", inst.ID)
-			return false
+			return "", false
 		}
-		return true
+		g.log.Error(cause, "actor crashed; reverted to its last snapshot", "instance", inst.ID, "crash", crash)
+		return crashedMessage(crash), true
 	}
-	return false
+	return "", false
+}
+
+// crashedMessage tells the user a crashed box was rolled back, which loses its work since the last suspend.
+func crashedMessage(crash string) string {
+	msg := "the box crashed and was restored to its last suspend; work since then was lost"
+	if crash != "" {
+		msg += " (" + crash + ")"
+	}
+	return msg
 }
 
 func (i *Instance) sharedSnapshot() bool {
@@ -655,7 +670,7 @@ func (g *Gateway) adopt(ctx context.Context, inst *Instance) {
 		if err := g.deps.Actors.Revert(ctx, inst.ref()); err != nil {
 			g.log.Error(err, "reverting crashed actor", "instance", inst.ID)
 		}
-		g.setStatus(ctx, inst, statusUpdate{status: devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED, reason: devboxv1.SuspendReason_SUSPEND_REASON_DAEMON_UNRESPONSIVE, message: "actor crashed and was reverted"})
+		g.setStatus(ctx, inst, statusUpdate{status: devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED, reason: devboxv1.SuspendReason_SUSPEND_REASON_DAEMON_UNRESPONSIVE, message: crashedMessage(a.GetStatus().GetCrash().GetMessage())})
 	default:
 		reason := devboxv1.SuspendReason(devboxv1.SuspendReason_value[rec.SuspendReason])
 		if rec.status() != devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED {

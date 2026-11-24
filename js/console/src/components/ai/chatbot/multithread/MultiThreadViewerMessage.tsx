@@ -348,8 +348,9 @@ export const SimplifiedMarkdown = memo(function SimplifiedMarkdown({
    * - major — findings / conclusions (`text`)
    * - thought — reasoning / prompts (`text-long-form`)
    * - meta — tools / status (`text-xlight`)
+   * - faint — reasoning under a meta header (`text-input-disabled`)
    */
-  tone?: 'major' | 'thought' | 'meta'
+  tone?: 'major' | 'thought' | 'meta' | 'faint'
 }) {
   const Root = rootLayout === 'block' ? SimpleMarkdownBlockSC : SimpleMarkdownSC
   const resolvedTone = tone ?? 'thought'
@@ -568,7 +569,7 @@ export const ClickableLabelSC = styled.button(() => ({
 
 const SimpleMarkdownSC = styled.div<{
   $size?: 'body1' | 'body2'
-  $tone?: 'major' | 'thought' | 'meta'
+  $tone?: 'major' | 'thought' | 'meta' | 'faint'
 }>(({ theme, $size = 'body2', $tone }) => ({
   ...($size === 'body1'
     ? theme.partials.text.body1
@@ -579,9 +580,11 @@ const SimpleMarkdownSC = styled.div<{
         ? 'text'
         : $tone === 'meta'
           ? 'text-xlight'
-          : $tone === 'thought'
-            ? 'text-long-form'
-            : 'text-light'
+          : $tone === 'faint'
+            ? 'text-input-disabled'
+            : $tone === 'thought'
+              ? 'text-long-form'
+              : 'text-light'
     ],
   display: 'flex',
   flexDirection: 'column',
@@ -591,7 +594,7 @@ const SimpleMarkdownSC = styled.div<{
 /** Normal block flow so inline chips stay in the same `<p>`; typography comes from size/tone props. */
 const SimpleMarkdownBlockSC = styled.div<{
   $size?: 'body1' | 'body2'
-  $tone?: 'major' | 'thought' | 'meta'
+  $tone?: 'major' | 'thought' | 'meta' | 'faint'
 }>(({ theme, $size = 'body2', $tone }) => ({
   ...($size === 'body1'
     ? theme.partials.text.body1
@@ -602,9 +605,11 @@ const SimpleMarkdownBlockSC = styled.div<{
         ? 'text'
         : $tone === 'meta'
           ? 'text-xlight'
-          : $tone === 'thought'
-            ? 'text-long-form'
-            : 'text-light'
+          : $tone === 'faint'
+            ? 'text-input-disabled'
+            : $tone === 'thought'
+              ? 'text-long-form'
+              : 'text-light'
     ],
   display: 'block',
   '& > *:not(:last-child)': {

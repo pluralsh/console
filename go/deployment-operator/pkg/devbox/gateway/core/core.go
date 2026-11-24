@@ -65,6 +65,7 @@ type Config struct {
 
 	HeartbeatInterval   time.Duration
 	ReadyTimeout        time.Duration
+	SuspendTimeout      time.Duration
 	PrepareTimeout      time.Duration
 	DrainTimeout        time.Duration
 	SnapshotTimeout     time.Duration
@@ -87,6 +88,7 @@ func (c *Config) defaults() {
 	}
 	set(&c.HeartbeatInterval, 30*time.Second)
 	set(&c.ReadyTimeout, 5*time.Minute)
+	set(&c.SuspendTimeout, 10*time.Minute)
 	set(&c.PrepareTimeout, 30*time.Second)
 	set(&c.DrainTimeout, 30*time.Second)
 	set(&c.SnapshotTimeout, 30*time.Minute)
