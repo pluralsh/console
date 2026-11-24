@@ -47,6 +47,13 @@ service Control {
   // SetAgentBilling restarts one agent connection with different billing ("Switch to Plural AI proxy") and
   // resumes its threads.
   rpc SetAgentBilling(SetAgentBillingRequest) returns (SetAgentBillingResponse);
+  // RebaseInstance moves an instance to another template revision of its runner, normally the current one: a
+  // new environment image or a new devbox-daemon. A running instance is suspended (synchronously), pointed at
+  // the revision's template and resumed, which cold-boots it: processes and root filesystem changes are lost,
+  // the home volume and agent threads are kept. A suspended instance is only pointed at the template and
+  // cold-boots at its next resume. If it doesn't start on the new revision it is returned to the one it had,
+  // from its last snapshot. Returns when accepted; the result arrives through Ingest.ReportInstanceStatus.
+  rpc RebaseInstance(RebaseInstanceRequest) returns (RebaseInstanceResponse);
 
   // ---- Threads (each maps to an ACP built-in, section 4.6b) ----
 
@@ -194,6 +201,25 @@ message InstanceActionResponse {
   string instance_id = 1;
   InstanceStatus status = 2;
   string message = 3;
+}
+
+message RebaseInstanceRequest {
+  string instance_id = 1;
+  // The runner revision to move to. Zero is the runner's current revision.
+  int64 target_revision = 2;
+  // Why, for the log and the instance's status message (e.g. "requested by the owner", "remediation <id>").
+  string reason = 3;
+  Principal requested_by = 4;
+}
+
+message RebaseInstanceResponse {
+  string instance_id = 1;
+  // False when there is nothing to do: the instance is already on the target revision.
+  bool accepted = 2;
+  InstanceStatus status = 3;
+  // The revision the instance is on (not accepted) or moving to (accepted).
+  int64 target_revision = 4;
+  string message = 5;
 }
 
 message SnapshotInstanceRequest {

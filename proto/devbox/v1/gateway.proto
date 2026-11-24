@@ -36,6 +36,7 @@ service Gateway {
   rpc SnapshotInstance(SnapshotInstanceRequest) returns (SnapshotInstanceResponse);
   rpc DeleteSnapshot(DeleteSnapshotRequest) returns (DeleteSnapshotResponse);
   rpc SetAgentBilling(SetAgentBillingRequest) returns (SetAgentBillingResponse);
+  rpc RebaseInstance(RebaseInstanceRequest) returns (RebaseInstanceResponse);
 
   rpc CreateThread(CreateThreadRequest) returns (ThreadResponse);
   rpc ListThreads(ListThreadsRequest) returns (ListThreadsResponse);

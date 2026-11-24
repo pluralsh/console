@@ -42,6 +42,7 @@ const (
 	Control_SnapshotInstance_FullMethodName      = "/devbox.v1.Control/SnapshotInstance"
 	Control_DeleteSnapshot_FullMethodName        = "/devbox.v1.Control/DeleteSnapshot"
 	Control_SetAgentBilling_FullMethodName       = "/devbox.v1.Control/SetAgentBilling"
+	Control_RebaseInstance_FullMethodName        = "/devbox.v1.Control/RebaseInstance"
 	Control_CreateThread_FullMethodName          = "/devbox.v1.Control/CreateThread"
 	Control_ListThreads_FullMethodName           = "/devbox.v1.Control/ListThreads"
 	Control_ImportThread_FullMethodName          = "/devbox.v1.Control/ImportThread"
@@ -94,6 +95,13 @@ type ControlClient interface {
 	// SetAgentBilling restarts one agent connection with different billing ("Switch to Plural AI proxy") and
 	// resumes its threads.
 	SetAgentBilling(ctx context.Context, in *SetAgentBillingRequest, opts ...grpc.CallOption) (*SetAgentBillingResponse, error)
+	// RebaseInstance moves an instance to another template revision of its runner, normally the current one: a
+	// new environment image or a new devbox-daemon. A running instance is suspended (synchronously), pointed at
+	// the revision's template and resumed, which cold-boots it: processes and root filesystem changes are lost,
+	// the home volume and agent threads are kept. A suspended instance is only pointed at the template and
+	// cold-boots at its next resume. If it doesn't start on the new revision it is returned to the one it had,
+	// from its last snapshot. Returns when accepted; the result arrives through Ingest.ReportInstanceStatus.
+	RebaseInstance(ctx context.Context, in *RebaseInstanceRequest, opts ...grpc.CallOption) (*RebaseInstanceResponse, error)
 	// CreateThread: `session/new` (plus `session/set_config_option` for model and initial options).
 	CreateThread(ctx context.Context, in *CreateThreadRequest, opts ...grpc.CallOption) (*ThreadResponse, error)
 	// ListThreads: the daemon's threads plus, when requested, importable sessions from `session/list`.
@@ -225,6 +233,16 @@ func (c *controlClient) SetAgentBilling(ctx context.Context, in *SetAgentBilling
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(SetAgentBillingResponse)
 	err := c.cc.Invoke(ctx, Control_SetAgentBilling_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *controlClient) RebaseInstance(ctx context.Context, in *RebaseInstanceRequest, opts ...grpc.CallOption) (*RebaseInstanceResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RebaseInstanceResponse)
+	err := c.cc.Invoke(ctx, Control_RebaseInstance_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -506,6 +524,13 @@ type ControlServer interface {
 	// SetAgentBilling restarts one agent connection with different billing ("Switch to Plural AI proxy") and
 	// resumes its threads.
 	SetAgentBilling(context.Context, *SetAgentBillingRequest) (*SetAgentBillingResponse, error)
+	// RebaseInstance moves an instance to another template revision of its runner, normally the current one: a
+	// new environment image or a new devbox-daemon. A running instance is suspended (synchronously), pointed at
+	// the revision's template and resumed, which cold-boots it: processes and root filesystem changes are lost,
+	// the home volume and agent threads are kept. A suspended instance is only pointed at the template and
+	// cold-boots at its next resume. If it doesn't start on the new revision it is returned to the one it had,
+	// from its last snapshot. Returns when accepted; the result arrives through Ingest.ReportInstanceStatus.
+	RebaseInstance(context.Context, *RebaseInstanceRequest) (*RebaseInstanceResponse, error)
 	// CreateThread: `session/new` (plus `session/set_config_option` for model and initial options).
 	CreateThread(context.Context, *CreateThreadRequest) (*ThreadResponse, error)
 	// ListThreads: the daemon's threads plus, when requested, importable sessions from `session/list`.
@@ -586,6 +611,9 @@ func (UnimplementedControlServer) DeleteSnapshot(context.Context, *DeleteSnapsho
 }
 func (UnimplementedControlServer) SetAgentBilling(context.Context, *SetAgentBillingRequest) (*SetAgentBillingResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method SetAgentBilling not implemented")
+}
+func (UnimplementedControlServer) RebaseInstance(context.Context, *RebaseInstanceRequest) (*RebaseInstanceResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RebaseInstance not implemented")
 }
 func (UnimplementedControlServer) CreateThread(context.Context, *CreateThreadRequest) (*ThreadResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateThread not implemented")
@@ -823,6 +851,24 @@ func _Control_SetAgentBilling_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ControlServer).SetAgentBilling(ctx, req.(*SetAgentBillingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Control_RebaseInstance_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RebaseInstanceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControlServer).RebaseInstance(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Control_RebaseInstance_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControlServer).RebaseInstance(ctx, req.(*RebaseInstanceRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1315,6 +1361,10 @@ var Control_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SetAgentBilling",
 			Handler:    _Control_SetAgentBilling_Handler,
+		},
+		{
+			MethodName: "RebaseInstance",
+			Handler:    _Control_RebaseInstance_Handler,
 		},
 		{
 			MethodName: "CreateThread",

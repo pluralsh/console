@@ -153,6 +153,22 @@ defmodule Devbox.V1.SuspendReason do
   field :SUSPEND_REASON_DAEMON_UNRESPONSIVE, 4
   field :SUSPEND_REASON_EVICTION, 5
   field :SUSPEND_REASON_SNAPSHOT, 6
+  field :SUSPEND_REASON_UPDATE, 7
+end
+
+defmodule Devbox.V1.RebaseState do
+  @moduledoc false
+
+  use Protobuf,
+    enum: true,
+    full_name: "devbox.v1.RebaseState",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :REBASE_STATE_UNSPECIFIED, 0
+  field :REBASE_STATE_IN_PROGRESS, 1
+  field :REBASE_STATE_SUCCEEDED, 2
+  field :REBASE_STATE_FAILED, 3
 end
 
 defmodule Devbox.V1.AutonomyPolicy do

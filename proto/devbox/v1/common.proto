@@ -255,6 +255,20 @@ enum SuspendReason {
   SUSPEND_REASON_DAEMON_UNRESPONSIVE = 4;
   SUSPEND_REASON_EVICTION = 5;
   SUSPEND_REASON_SNAPSHOT = 6;
+  // Suspended to move the instance to another template revision (RebaseInstance).
+  SUSPEND_REASON_UPDATE = 7;
+}
+
+// RebaseState is the outcome of the last move of an instance to another template revision, by RebaseInstance or
+// by the runner's onResume update policy.
+enum RebaseState {
+  REBASE_STATE_UNSPECIFIED = 0;
+  // Accepted; the instance is being suspended and moved.
+  REBASE_STATE_IN_PROGRESS = 1;
+  // The instance is on the target revision. A suspended instance cold-boots on it at its next resume.
+  REBASE_STATE_SUCCEEDED = 2;
+  // The instance did not start on the target revision and is back on the one it had, with nothing lost.
+  REBASE_STATE_FAILED = 3;
 }
 
 // AgentLaunch configures one agent connection in an instance. Billing is fixed per agent connection because the

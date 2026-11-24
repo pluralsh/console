@@ -567,6 +567,8 @@ const (
 	SuspendReason_SUSPEND_REASON_DAEMON_UNRESPONSIVE  SuspendReason = 4
 	SuspendReason_SUSPEND_REASON_EVICTION             SuspendReason = 5
 	SuspendReason_SUSPEND_REASON_SNAPSHOT             SuspendReason = 6
+	// Suspended to move the instance to another template revision (RebaseInstance).
+	SuspendReason_SUSPEND_REASON_UPDATE SuspendReason = 7
 )
 
 // Enum value maps for SuspendReason.
@@ -579,6 +581,7 @@ var (
 		4: "SUSPEND_REASON_DAEMON_UNRESPONSIVE",
 		5: "SUSPEND_REASON_EVICTION",
 		6: "SUSPEND_REASON_SNAPSHOT",
+		7: "SUSPEND_REASON_UPDATE",
 	}
 	SuspendReason_value = map[string]int32{
 		"SUSPEND_REASON_UNSPECIFIED":          0,
@@ -588,6 +591,7 @@ var (
 		"SUSPEND_REASON_DAEMON_UNRESPONSIVE":  4,
 		"SUSPEND_REASON_EVICTION":             5,
 		"SUSPEND_REASON_SNAPSHOT":             6,
+		"SUSPEND_REASON_UPDATE":               7,
 	}
 )
 
@@ -616,6 +620,63 @@ func (x SuspendReason) Number() protoreflect.EnumNumber {
 // Deprecated: Use SuspendReason.Descriptor instead.
 func (SuspendReason) EnumDescriptor() ([]byte, []int) {
 	return file_devbox_v1_common_proto_rawDescGZIP(), []int{8}
+}
+
+// RebaseState is the outcome of the last move of an instance to another template revision, by RebaseInstance or
+// by the runner's onResume update policy.
+type RebaseState int32
+
+const (
+	RebaseState_REBASE_STATE_UNSPECIFIED RebaseState = 0
+	// Accepted; the instance is being suspended and moved.
+	RebaseState_REBASE_STATE_IN_PROGRESS RebaseState = 1
+	// The instance is on the target revision. A suspended instance cold-boots on it at its next resume.
+	RebaseState_REBASE_STATE_SUCCEEDED RebaseState = 2
+	// The instance did not start on the target revision and is back on the one it had, with nothing lost.
+	RebaseState_REBASE_STATE_FAILED RebaseState = 3
+)
+
+// Enum value maps for RebaseState.
+var (
+	RebaseState_name = map[int32]string{
+		0: "REBASE_STATE_UNSPECIFIED",
+		1: "REBASE_STATE_IN_PROGRESS",
+		2: "REBASE_STATE_SUCCEEDED",
+		3: "REBASE_STATE_FAILED",
+	}
+	RebaseState_value = map[string]int32{
+		"REBASE_STATE_UNSPECIFIED": 0,
+		"REBASE_STATE_IN_PROGRESS": 1,
+		"REBASE_STATE_SUCCEEDED":   2,
+		"REBASE_STATE_FAILED":      3,
+	}
+)
+
+func (x RebaseState) Enum() *RebaseState {
+	p := new(RebaseState)
+	*p = x
+	return p
+}
+
+func (x RebaseState) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (RebaseState) Descriptor() protoreflect.EnumDescriptor {
+	return file_devbox_v1_common_proto_enumTypes[9].Descriptor()
+}
+
+func (RebaseState) Type() protoreflect.EnumType {
+	return &file_devbox_v1_common_proto_enumTypes[9]
+}
+
+func (x RebaseState) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use RebaseState.Descriptor instead.
+func (RebaseState) EnumDescriptor() ([]byte, []int) {
+	return file_devbox_v1_common_proto_rawDescGZIP(), []int{9}
 }
 
 // AutonomyPolicy is a runner's autonomy setting for new threads and the highest level a thread may use.
@@ -1685,7 +1746,7 @@ const file_devbox_v1_common_proto_rawDesc = "" +
 	"#BUSY_REASON_KIND_INTERACTIVE_STREAM\x10\x04\x12!\n" +
 	"\x1dBUSY_REASON_KIND_VIEWER_LEASE\x10\x05\x12#\n" +
 	"\x1fBUSY_REASON_KIND_DEFERRAL_LEASE\x10\x06\x12(\n" +
-	"$BUSY_REASON_KIND_PENDING_INTERACTION\x10\a*\xec\x01\n" +
+	"$BUSY_REASON_KIND_PENDING_INTERACTION\x10\a*\x87\x02\n" +
 	"\rSuspendReason\x12\x1e\n" +
 	"\x1aSUSPEND_REASON_UNSPECIFIED\x10\x00\x12\x17\n" +
 	"\x13SUSPEND_REASON_IDLE\x10\x01\x12\x17\n" +
@@ -1693,7 +1754,13 @@ const file_devbox_v1_common_proto_rawDesc = "" +
 	"#SUSPEND_REASON_MAX_CONTINUOUS_AWAKE\x10\x03\x12&\n" +
 	"\"SUSPEND_REASON_DAEMON_UNRESPONSIVE\x10\x04\x12\x1b\n" +
 	"\x17SUSPEND_REASON_EVICTION\x10\x05\x12\x1b\n" +
-	"\x17SUSPEND_REASON_SNAPSHOT\x10\x06BOZMgithub.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1;devboxv1b\x06proto3"
+	"\x17SUSPEND_REASON_SNAPSHOT\x10\x06\x12\x19\n" +
+	"\x15SUSPEND_REASON_UPDATE\x10\a*~\n" +
+	"\vRebaseState\x12\x1c\n" +
+	"\x18REBASE_STATE_UNSPECIFIED\x10\x00\x12\x1c\n" +
+	"\x18REBASE_STATE_IN_PROGRESS\x10\x01\x12\x1a\n" +
+	"\x16REBASE_STATE_SUCCEEDED\x10\x02\x12\x17\n" +
+	"\x13REBASE_STATE_FAILED\x10\x03BOZMgithub.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1;devboxv1b\x06proto3"
 
 var (
 	file_devbox_v1_common_proto_rawDescOnce sync.Once
@@ -1707,7 +1774,7 @@ func file_devbox_v1_common_proto_rawDescGZIP() []byte {
 	return file_devbox_v1_common_proto_rawDescData
 }
 
-var file_devbox_v1_common_proto_enumTypes = make([]protoimpl.EnumInfo, 9)
+var file_devbox_v1_common_proto_enumTypes = make([]protoimpl.EnumInfo, 10)
 var file_devbox_v1_common_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_devbox_v1_common_proto_goTypes = []any{
 	(AgentType)(0),                // 0: devbox.v1.AgentType
@@ -1719,47 +1786,48 @@ var file_devbox_v1_common_proto_goTypes = []any{
 	(LeaseKind)(0),                // 6: devbox.v1.LeaseKind
 	(BusyReasonKind)(0),           // 7: devbox.v1.BusyReasonKind
 	(SuspendReason)(0),            // 8: devbox.v1.SuspendReason
-	(*AutonomyPolicy)(nil),        // 9: devbox.v1.AutonomyPolicy
-	(*ErrorDetail)(nil),           // 10: devbox.v1.ErrorDetail
-	(*Principal)(nil),             // 11: devbox.v1.Principal
-	(*RepositorySpec)(nil),        // 12: devbox.v1.RepositorySpec
-	(*Checkout)(nil),              // 13: devbox.v1.Checkout
-	(*IdlePolicy)(nil),            // 14: devbox.v1.IdlePolicy
-	(*Lease)(nil),                 // 15: devbox.v1.Lease
-	(*BusyReason)(nil),            // 16: devbox.v1.BusyReason
-	(*IdleState)(nil),             // 17: devbox.v1.IdleState
-	(*AgentLaunch)(nil),           // 18: devbox.v1.AgentLaunch
-	(*ProxyModels)(nil),           // 19: devbox.v1.ProxyModels
-	(*ConfigOptionSetting)(nil),   // 20: devbox.v1.ConfigOptionSetting
-	nil,                           // 21: devbox.v1.ErrorDetail.MetadataEntry
-	nil,                           // 22: devbox.v1.ProxyModels.AliasesEntry
-	(*durationpb.Duration)(nil),   // 23: google.protobuf.Duration
-	(*timestamppb.Timestamp)(nil), // 24: google.protobuf.Timestamp
+	(RebaseState)(0),              // 9: devbox.v1.RebaseState
+	(*AutonomyPolicy)(nil),        // 10: devbox.v1.AutonomyPolicy
+	(*ErrorDetail)(nil),           // 11: devbox.v1.ErrorDetail
+	(*Principal)(nil),             // 12: devbox.v1.Principal
+	(*RepositorySpec)(nil),        // 13: devbox.v1.RepositorySpec
+	(*Checkout)(nil),              // 14: devbox.v1.Checkout
+	(*IdlePolicy)(nil),            // 15: devbox.v1.IdlePolicy
+	(*Lease)(nil),                 // 16: devbox.v1.Lease
+	(*BusyReason)(nil),            // 17: devbox.v1.BusyReason
+	(*IdleState)(nil),             // 18: devbox.v1.IdleState
+	(*AgentLaunch)(nil),           // 19: devbox.v1.AgentLaunch
+	(*ProxyModels)(nil),           // 20: devbox.v1.ProxyModels
+	(*ConfigOptionSetting)(nil),   // 21: devbox.v1.ConfigOptionSetting
+	nil,                           // 22: devbox.v1.ErrorDetail.MetadataEntry
+	nil,                           // 23: devbox.v1.ProxyModels.AliasesEntry
+	(*durationpb.Duration)(nil),   // 24: google.protobuf.Duration
+	(*timestamppb.Timestamp)(nil), // 25: google.protobuf.Timestamp
 }
 var file_devbox_v1_common_proto_depIdxs = []int32{
 	3,  // 0: devbox.v1.AutonomyPolicy.default:type_name -> devbox.v1.Autonomy
 	3,  // 1: devbox.v1.AutonomyPolicy.max:type_name -> devbox.v1.Autonomy
 	5,  // 2: devbox.v1.ErrorDetail.reason:type_name -> devbox.v1.ErrorReason
-	21, // 3: devbox.v1.ErrorDetail.metadata:type_name -> devbox.v1.ErrorDetail.MetadataEntry
-	23, // 4: devbox.v1.IdlePolicy.activity_window:type_name -> google.protobuf.Duration
-	23, // 5: devbox.v1.IdlePolicy.grace_period:type_name -> google.protobuf.Duration
-	23, // 6: devbox.v1.IdlePolicy.max_deferral:type_name -> google.protobuf.Duration
-	23, // 7: devbox.v1.IdlePolicy.max_continuous_awake:type_name -> google.protobuf.Duration
-	23, // 8: devbox.v1.IdlePolicy.complete_after:type_name -> google.protobuf.Duration
+	22, // 3: devbox.v1.ErrorDetail.metadata:type_name -> devbox.v1.ErrorDetail.MetadataEntry
+	24, // 4: devbox.v1.IdlePolicy.activity_window:type_name -> google.protobuf.Duration
+	24, // 5: devbox.v1.IdlePolicy.grace_period:type_name -> google.protobuf.Duration
+	24, // 6: devbox.v1.IdlePolicy.max_deferral:type_name -> google.protobuf.Duration
+	24, // 7: devbox.v1.IdlePolicy.max_continuous_awake:type_name -> google.protobuf.Duration
+	24, // 8: devbox.v1.IdlePolicy.complete_after:type_name -> google.protobuf.Duration
 	6,  // 9: devbox.v1.Lease.kind:type_name -> devbox.v1.LeaseKind
-	11, // 10: devbox.v1.Lease.holder:type_name -> devbox.v1.Principal
-	24, // 11: devbox.v1.Lease.expires_at:type_name -> google.protobuf.Timestamp
-	24, // 12: devbox.v1.Lease.requested_until:type_name -> google.protobuf.Timestamp
+	12, // 10: devbox.v1.Lease.holder:type_name -> devbox.v1.Principal
+	25, // 11: devbox.v1.Lease.expires_at:type_name -> google.protobuf.Timestamp
+	25, // 12: devbox.v1.Lease.requested_until:type_name -> google.protobuf.Timestamp
 	7,  // 13: devbox.v1.BusyReason.kind:type_name -> devbox.v1.BusyReasonKind
-	24, // 14: devbox.v1.BusyReason.until:type_name -> google.protobuf.Timestamp
-	24, // 15: devbox.v1.IdleState.idle_since:type_name -> google.protobuf.Timestamp
-	16, // 16: devbox.v1.IdleState.busy_reasons:type_name -> devbox.v1.BusyReason
-	24, // 17: devbox.v1.IdleState.suspend_at:type_name -> google.protobuf.Timestamp
-	24, // 18: devbox.v1.IdleState.evaluated_at:type_name -> google.protobuf.Timestamp
+	25, // 14: devbox.v1.BusyReason.until:type_name -> google.protobuf.Timestamp
+	25, // 15: devbox.v1.IdleState.idle_since:type_name -> google.protobuf.Timestamp
+	17, // 16: devbox.v1.IdleState.busy_reasons:type_name -> devbox.v1.BusyReason
+	25, // 17: devbox.v1.IdleState.suspend_at:type_name -> google.protobuf.Timestamp
+	25, // 18: devbox.v1.IdleState.evaluated_at:type_name -> google.protobuf.Timestamp
 	0,  // 19: devbox.v1.AgentLaunch.agent:type_name -> devbox.v1.AgentType
 	2,  // 20: devbox.v1.AgentLaunch.billing:type_name -> devbox.v1.BillingMode
-	19, // 21: devbox.v1.AgentLaunch.proxy_models:type_name -> devbox.v1.ProxyModels
-	22, // 22: devbox.v1.ProxyModels.aliases:type_name -> devbox.v1.ProxyModels.AliasesEntry
+	20, // 21: devbox.v1.AgentLaunch.proxy_models:type_name -> devbox.v1.ProxyModels
+	23, // 22: devbox.v1.ProxyModels.aliases:type_name -> devbox.v1.ProxyModels.AliasesEntry
 	23, // [23:23] is the sub-list for method output_type
 	23, // [23:23] is the sub-list for method input_type
 	23, // [23:23] is the sub-list for extension type_name
@@ -1777,7 +1845,7 @@ func file_devbox_v1_common_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_devbox_v1_common_proto_rawDesc), len(file_devbox_v1_common_proto_rawDesc)),
-			NumEnums:      9,
+			NumEnums:      10,
 			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   0,
