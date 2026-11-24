@@ -33,13 +33,41 @@ The golden boot checks these, and stops the template revision with a clear
 condition if one fails:
 
 - The image keeps the `sh.plural.devbox/contract=v1` label (inherited from the
-  base) and `devbox-daemon` as its entrypoint. Don't override `ENTRYPOINT`; use
-  the runner's bootstrap script for startup work.
-- The daemon comes from the same console release line as the operator. Images
-  more than one minor release behind are flagged; rebuild on the new base.
+  base).
+- It has a POSIX shell at `/bin/sh`. The operator starts the container with it
+  to launch `devbox-daemon`, so `ENTRYPOINT` and `CMD` are not used. If your
+  image keeps its shell elsewhere, set `spec.runtime.shell` on the runner.
 - Every agent in `spec.agents` is present and passes the ACP probe.
 - The `dev` user is UID 1000, and the trust directory `/var/lib/devbox/trust` is
   writable by it.
+
+## The daemon is not yours to maintain
+
+`devbox-daemon` is delivered by the deployment operator, in a sidecar next to
+your image, so you never rebuild to pick up a daemon fix: upgrading the operator
+is enough. The daemon in the base image is ignored.
+
+When the daemon or your image changes, the runner rolls a new template
+revision. New instances start on it. Existing instances are **updated**, which
+restarts them on the new revision:
+
+- Kept: the home directory (`/home/dev`: repositories, dotfiles, agent
+  history) and the instance's threads.
+- Lost: running processes, and anything changed outside the home directory
+  since the instance started (packages installed with `sudo apt`, files under
+  `/usr/local` or `/opt`). The root filesystem is the image's again.
+
+`spec.instanceUpdatePolicy.mode` on the runner says when that happens:
+`onResume` (the default) updates a suspended instance the next time it is
+resumed; `manual` leaves instances alone until a user updates theirs or an admin
+updates the box from Settings. An admin can also force an update for a
+security fix, which restarts instances in use after warning their users.
+
+Users who need something outside their home after every restart can put the
+commands in `~/.config/devbox/boot.sh`. The daemon runs it with `sh`, as `dev`,
+whenever an existing instance cold-boots (5 minute limit, output in
+`~/.plural/boot.log`); a failure is reported on the instance and never stops
+it from starting. Better still, put it in the image.
 
 ## Rules of thumb
 

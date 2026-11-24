@@ -24,7 +24,8 @@ RUN apt-get update && \
 # the user's own files.
 COPY --chown=1000:1000 dotfiles/ /etc/devbox/skel/
 
-# Back to the dev user. Don't override ENTRYPOINT: devbox-daemon must stay PID 1.
-# For startup work, use the DevboxRunner's bootstrap script instead.
+# Back to the dev user (UID 1000). The operator starts the container itself, with
+# /bin/sh, to launch the devbox-daemon it delivers, so ENTRYPOINT and CMD are
+# not used; keep a POSIX shell at /bin/sh.
 ENV HOME=/home/dev
 USER dev
