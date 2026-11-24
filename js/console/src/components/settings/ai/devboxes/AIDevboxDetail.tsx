@@ -53,6 +53,7 @@ import {
 import { devboxSizing } from 'components/workbenches/workbench/devboxes/devboxSizing'
 import { modelsOf } from 'components/workbenches/workbench/devboxes/devboxStartForm'
 import { SETTINGS_BREADCRUMBS } from '../../Settings'
+import { AIDevboxUpdates } from './AIDevboxUpdates'
 
 export function devboxIssuerOf(
   box: Nullable<Pick<DevboxFragment, 'workloadIdentity'>>
@@ -128,6 +129,9 @@ export function AIDevboxDetail() {
               <DevboxAgentCatalog agents={box.agents} />
             </Section>
             <DevboxPolicies box={box} />
+            <Section title="Instance updates">
+              <AIDevboxUpdates devboxId={box.id} />
+            </Section>
             <Section title="Cloud identity">
               <DevboxCloudIdentity
                 boxName={box.name}

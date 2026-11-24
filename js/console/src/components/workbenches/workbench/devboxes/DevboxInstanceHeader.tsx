@@ -16,6 +16,7 @@ import {
   PlayIcon,
   StopIcon,
   Tooltip,
+  UpdatesIcon,
 } from '@pluralsh/design-system'
 import dayjs from 'dayjs'
 import { GqlError } from 'components/utils/Alert'
@@ -30,6 +31,7 @@ import {
   useCancelDevboxKeepAwakeMutation,
   useCreateDevboxSnapshotMutation,
   useKeepDevboxInstanceAwakeMutation,
+  useRebaseDevboxInstanceMutation,
   useSuspendDevboxInstanceMutation,
 } from 'generated/graphql'
 import { ReactNode, useState } from 'react'
@@ -47,6 +49,7 @@ import { useDevboxPullRequests } from './devboxPullRequests'
 import { rootThread, selectedThread } from './devboxThreads'
 import { isInstanceLive, isInstanceTerminal } from './devboxIdle'
 import { devboxSizing } from './devboxSizing'
+import { canUpdate, updateChip, updateConfirmText } from './devboxUpdates'
 import { useKeepAwakeActions } from './DevboxKeepAwakeMenu'
 
 type InstanceDetail = { label: string; value: string; tooltip?: string }
@@ -153,6 +156,7 @@ export function DevboxInstanceHeader({
 }) {
   const { popToast } = useSimpleToast()
   const [stopOpen, setStopOpen] = useState(false)
+  const [updateOpen, setUpdateOpen] = useState(false)
   const [snapshotOpen, setSnapshotOpen] = useState(false)
   const [submenu, setSubmenu] = useState(false)
   const live = isInstanceLive(instance.status)
@@ -170,6 +174,13 @@ export function DevboxInstanceHeader({
   const [stop, stopState] = useCancelDevboxInstanceMutation({
     onCompleted: () => setStopOpen(false),
   })
+  const [update, updateState] = useRebaseDevboxInstanceMutation({
+    onCompleted: () => {
+      setUpdateOpen(false)
+      popToast({ content: 'Update started', severity: 'success' })
+    },
+  })
+  const updateStatus = updateChip(instance)
 
   const billing = (instance.agentBilling ?? []).filter(isNonNullable)
   const badges = (
@@ -227,6 +238,12 @@ export function DevboxInstanceHeader({
         label: 'Suspend',
         icon: <MoonIcon size={ICON_FRAME_ICON_SIZE.small} />,
       },
+      canUpdate(instance) && {
+        key: 'update',
+        label: 'Update instance',
+        description: updateStatus?.tooltip,
+        icon: <UpdatesIcon size={ICON_FRAME_ICON_SIZE.small} />,
+      },
       !terminal && {
         key: 'stop',
         label: 'Stop instance',
@@ -283,7 +300,7 @@ export function DevboxInstanceHeader({
             })}
           </DetailsSC>
         )}
-        {!!badges.length && (
+        {(!!badges.length || updateStatus) && (
           <Flex
             gap="xsmall"
             align="center"
@@ -298,6 +315,19 @@ export function DevboxInstanceHeader({
                 {badge}
               </Chip>
             ))}
+            {updateStatus && (
+              <Tooltip
+                label={updateStatus.tooltip}
+                placement="bottom"
+              >
+                <Chip
+                  size="small"
+                  severity={updateStatus.severity}
+                >
+                  {updateStatus.label}
+                </Chip>
+              </Tooltip>
+            )}
           </Flex>
         )}
       </Flex>
@@ -337,6 +367,7 @@ export function DevboxInstanceHeader({
               if (key === 'snapshot') setSnapshotOpen(true)
               if (key === 'import') onImportSession?.()
               if (key === 'suspend') suspend({ variables: { id: instance.id } })
+              if (key === 'update') setUpdateOpen(true)
               if (key === 'stop') setStopOpen(true)
             }}
           >
@@ -364,6 +395,16 @@ export function DevboxInstanceHeader({
         loading={stopState.loading}
         error={stopState.error}
         submit={() => stop({ variables: { id: instance.id } })}
+      />
+      <Confirm
+        open={updateOpen}
+        close={() => setUpdateOpen(false)}
+        label="Update"
+        title="Update instance"
+        text={updateConfirmText(instance)}
+        loading={updateState.loading}
+        error={updateState.error}
+        submit={() => update({ variables: { id: instance.id } })}
       />
       {keepAwakeActions.modal}
       {snapshotOpen && (

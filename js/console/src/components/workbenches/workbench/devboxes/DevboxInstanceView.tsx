@@ -34,6 +34,7 @@ import {
   isInstanceLive,
 } from './devboxIdle'
 import { DevboxInstanceHeader } from './DevboxInstanceHeader'
+import { DevboxUpdateNotice } from './DevboxUpdateNotice'
 import { DevboxNewSession } from './DevboxNewSession'
 import { DEVBOX_HEADER_HEIGHT } from './DevboxSessionsSidebar'
 import { DevboxThreadPane } from './DevboxThreadPane'
@@ -276,6 +277,7 @@ export function DevboxInstanceView({
                 </Flex>
               </Callout>
             )}
+            <DevboxUpdateNotice instance={instance} />
             {instance.statusReason &&
               instance.status === DevboxInstanceStatus.Failed && (
                 <Callout
