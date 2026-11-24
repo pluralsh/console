@@ -7024,6 +7024,65 @@ func (_c *ConsoleClientMock_GetSentinel_Call) RunAndReturn(run func(context.Cont
 	return _c
 }
 
+// GetSentinelByName provides a mock function with given fields: ctx, name
+func (_m *ConsoleClientMock) GetSentinelByName(ctx context.Context, name string) (*client.SentinelFragment, error) {
+	ret := _m.Called(ctx, name)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetSentinelByName")
+	}
+
+	var r0 *client.SentinelFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*client.SentinelFragment, error)); ok {
+		return rf(ctx, name)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *client.SentinelFragment); ok {
+		r0 = rf(ctx, name)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.SentinelFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, name)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetSentinelByName_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetSentinelByName'
+type ConsoleClientMock_GetSentinelByName_Call struct {
+	*mock.Call
+}
+
+// GetSentinelByName is a helper method to define mock.On call
+//   - ctx context.Context
+//   - name string
+func (_e *ConsoleClientMock_Expecter) GetSentinelByName(ctx interface{}, name interface{}) *ConsoleClientMock_GetSentinelByName_Call {
+	return &ConsoleClientMock_GetSentinelByName_Call{Call: _e.mock.On("GetSentinelByName", ctx, name)}
+}
+
+func (_c *ConsoleClientMock_GetSentinelByName_Call) Run(run func(ctx context.Context, name string)) *ConsoleClientMock_GetSentinelByName_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetSentinelByName_Call) Return(_a0 *client.SentinelFragment, _a1 error) *ConsoleClientMock_GetSentinelByName_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetSentinelByName_Call) RunAndReturn(run func(context.Context, string) (*client.SentinelFragment, error)) *ConsoleClientMock_GetSentinelByName_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetSentinelRun provides a mock function with given fields: ctx, id
 func (_m *ConsoleClientMock) GetSentinelRun(ctx context.Context, id string) (*client.SentinelRunFragment, error) {
 	ret := _m.Called(ctx, id)
