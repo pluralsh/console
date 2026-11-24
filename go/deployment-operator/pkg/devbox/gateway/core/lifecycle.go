@@ -318,12 +318,28 @@ func (g *Gateway) suspend(ctx context.Context, inst *Instance, reason devboxv1.S
 		st, err := g.suspendLocked(ctx, inst, reason, devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED)
 		done <- result{st, err}
 	})
+	wait, cancel := answerBy(ctx)
+	defer cancel()
 	select {
 	case r := <-done:
 		return r.status, r.err
-	case <-ctx.Done():
+	case <-wait.Done():
 		return inst.status(), nil
 	}
+}
+
+// replyMargin is how long before the caller's deadline a wait gives up and answers, at most a tenth of the call.
+const replyMargin = 3 * time.Second
+
+// answerBy ends replyMargin before ctx's deadline. An answer sent at the deadline itself loses the race to the
+// proxy in between (KAS), which answers DeadlineExceeded in its place, so console never hears that the operation
+// carries on.
+func answerBy(ctx context.Context) (context.Context, context.CancelFunc) {
+	dl, ok := ctx.Deadline()
+	if !ok {
+		return context.WithCancel(ctx)
+	}
+	return context.WithDeadline(ctx, dl.Add(-min(replyMargin, time.Until(dl)/10)))
 }
 
 func (g *Gateway) suspendLocked(ctx context.Context, inst *Instance, reason devboxv1.SuspendReason, final devboxv1.InstanceStatus) (devboxv1.InstanceStatus, error) {
@@ -435,10 +451,12 @@ type wakeOp struct {
 // Concurrent callers share one wake; a caller whose context ends first gets errStarting while the wake continues.
 func (g *Gateway) resume(ctx context.Context, inst *Instance) (devboxv1.InstanceStatus, error) {
 	op := g.startWake(inst)
+	wait, cancel := answerBy(ctx)
+	defer cancel()
 	select {
 	case <-op.done:
 		return op.status, op.err
-	case <-ctx.Done():
+	case <-wait.Done():
 		return inst.status(), errStarting(inst.ID)
 	}
 }

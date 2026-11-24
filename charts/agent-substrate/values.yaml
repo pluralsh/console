@@ -3,6 +3,7 @@
 # The chart installs Agent Substrate into the release namespace, which must be
 # `ate-system`: the Substrate binaries default every in-cluster address and
 # SPIFFE ID to it. Install with `--namespace ate-system --create-namespace`.
+# README.md documents every value below.
 
 # -- Substrate release this chart installs. Image tags default to it, and the
 # chart gates features on it (Azure Blob needs substrate.objectstore.v1, first

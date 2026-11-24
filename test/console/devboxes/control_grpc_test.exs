@@ -187,6 +187,11 @@ defmodule Console.Devboxes.Control.GrpcTest do
       assert Grpc.result({:error, %GRPC.RPCError{status: unavailable, message: "no route"}}) == {:error, :not_connected}
     end
 
+    test "a call that ran out of time on the way is a timeout" do
+      deadline = GRPC.Status.deadline_exceeded()
+      assert Grpc.result({:error, %GRPC.RPCError{status: deadline, message: "context deadline exceeded"}}) == {:error, :timeout}
+    end
+
     test "a connection closed under the call is an interruption" do
       internal = GRPC.Status.internal()
       for msg <- ["stream_error: :closed", "stream_error: {:closed, :einval}", ~s(stream_error: {:goaway, :no_error, ~c"The connection is going away."})] do

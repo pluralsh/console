@@ -882,6 +882,27 @@ func TestSuspendOutlivesTheCallersDeadline(t *testing.T) {
 	})
 }
 
+func TestResumeAnswersBeforeTheCallersDeadline(t *testing.T) {
+	h := newHarness(t, nil)
+	h.running("inst-1")
+	if _, err := h.g.SuspendInstance(context.Background(), &devboxv1.InstanceActionRequest{InstanceId: "inst-1"}); err != nil {
+		t.Fatal(err)
+	}
+	h.ate.FailResume = status.Error(codes.Unavailable, "worker gone")
+	h.ate.FailResumeTimes = 1 << 20
+
+	deadline := time.Now().Add(time.Second)
+	ctx, cancel := context.WithDeadline(context.Background(), deadline)
+	defer cancel()
+	_, err := h.g.ResumeInstance(ctx, &devboxv1.InstanceActionRequest{InstanceId: "inst-1"})
+	if reasonOf(err) != devboxv1.ErrorReason_ERROR_REASON_INSTANCE_STARTING {
+		t.Fatalf("resume = %v", err)
+	}
+	if left := time.Until(deadline); left < 50*time.Millisecond {
+		t.Fatalf("answered %s before the deadline, too late to make it back through a proxy", left)
+	}
+}
+
 func TestResumeOutlivesTheCallersDeadline(t *testing.T) {
 	h := newHarness(t, nil)
 	h.running("inst-1")

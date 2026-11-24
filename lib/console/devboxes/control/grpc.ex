@@ -9,7 +9,8 @@ defmodule Console.Devboxes.Control.Grpc do
   and `ErrorDetail{CLUSTER_OFFLINE}` become `{:error, :not_connected}`, `ErrorDetail{INSTANCE_STARTING}` (a wake
   that outlasted the call, still running on the gateway) becomes `{:error, :starting}`, `UNIMPLEMENTED` and
   `ErrorDetail{UNSUPPORTED}` become `{:error, :unsupported}`.  A connection that closes under a call is
-  `{:error, :interrupted}`, retried once for calls that are safe to repeat.
+  `{:error, :interrupted}`, retried once for calls that are safe to repeat, and `DEADLINE_EXCEEDED` is
+  `{:error, :timeout}`.
   """
   @behaviour Console.Devboxes.Control
   require Logger
@@ -33,6 +34,7 @@ defmodule Console.Devboxes.Control.Grpc do
   @unavailable GRPC.Status.unavailable()
   @unimplemented GRPC.Status.unimplemented()
   @internal GRPC.Status.internal()
+  @deadline_exceeded GRPC.Status.deadline_exceeded()
   # safe to send again when the connection drops before they answer
   @retryable ~w(
     resume_instance resume_thread open_stream get_timeline get_sessions list_threads list_commands
@@ -465,6 +467,8 @@ defmodule Console.Devboxes.Control.Grpc do
   defp rpc_error(%GRPC.RPCError{status: @unavailable}, %V1.ErrorDetail{message: msg}) when byte_size(msg) > 0, do: {:error, msg}
   defp rpc_error(%GRPC.RPCError{status: @unavailable}, _), do: {:error, :not_connected}
   defp rpc_error(%GRPC.RPCError{status: @unimplemented}, _), do: {:error, :unsupported}
+  # the call ran out of time on the way (here or in kas); the gateway may still be working on it
+  defp rpc_error(%GRPC.RPCError{status: @deadline_exceeded}, _), do: {:error, :timeout}
   # the gun adapter's report of a connection that closed under the call
   defp rpc_error(%GRPC.RPCError{status: @internal, message: "stream_error: :closed"}, _), do: {:error, :interrupted}
   defp rpc_error(%GRPC.RPCError{status: @internal, message: "stream_error: {:closed" <> _}, _), do: {:error, :interrupted}

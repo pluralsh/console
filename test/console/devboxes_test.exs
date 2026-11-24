@@ -368,6 +368,14 @@ defmodule Console.DevboxesTest do
       {:ok, _} = Devboxes.resume_instance(suspended.id, suspended.user)
     end
 
+    test "a resume that outlasts the call isn't a failure: the gateway reports running when it's up" do
+      for reason <- [:starting, :timeout] do
+        inst = owned_instance(status: :suspended)
+        expect(Control.Test, :resume_instance, fn _ -> {:error, reason} end)
+        {:ok, %{status: :suspended}} = Devboxes.resume_instance(inst.id, inst.user)
+      end
+    end
+
     test "resuming restarts the completeAfter clock, so cleanup can't end an instance mid-resume" do
       inst = owned_instance(status: :suspended, suspended_at: Timex.now() |> Timex.shift(days: -15))
       expect(Control.Test, :resume_instance, fn _ -> :ok end)
