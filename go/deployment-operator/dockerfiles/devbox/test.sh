@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Builds and tests the devbox images.
 #
-#   ./test.sh [step...]     steps: versions lint minimal gateway fat fat-check example all
-#                           (default: versions lint minimal gateway fat-check)
+#   ./test.sh [step...]     steps: versions lint minimal gateway runtime fat fat-check example all
+#                           (default: versions lint minimal gateway runtime fat-check)
 #
 # Environment:
 #   DAEMON_SOURCE   build | stub   (default: build if cmd/devbox-daemon exists, else stub)
@@ -13,7 +13,7 @@
 #                   --load), so their cache can be dropped with the builder. fat and
 #                   example build FROM a local image and always use the default builder.
 #   KEEP_IMAGES=1   keep the built images instead of removing them at exit
-#   MINIMAL_IMAGE, FAT_IMAGE, GATEWAY_IMAGE
+#   MINIMAL_IMAGE, FAT_IMAGE, GATEWAY_IMAGE, RUNTIME_IMAGE
 #                   test these published images (pulled if missing) instead of
 #                   building them; CD sets them to the digests it pushed
 set -euo pipefail
@@ -31,6 +31,7 @@ HADOLINT_IMAGE="${HADOLINT_IMAGE:-hadolint/hadolint:v2.14.0}"
 minimal_image="${MINIMAL_IMAGE:-devbox-minimal:${TAG}}"
 fat_image="${FAT_IMAGE:-devbox-fat:${TAG}}"
 gateway_image="${GATEWAY_IMAGE:-devbox-gateway:${TAG}}"
+runtime_image="${RUNTIME_IMAGE:-devbox-runtime-core:${TAG}}"
 example_image="devbox-example:${TAG}"
 built=()
 
@@ -164,7 +165,7 @@ step_versions() {
 step_lint() {
   log "hadolint"
   local f rc=0
-  for f in minimal.Dockerfile fat.Dockerfile gateway.Dockerfile examples/Dockerfile; do
+  for f in minimal.Dockerfile fat.Dockerfile gateway.Dockerfile runtime-core.Dockerfile examples/Dockerfile; do
     echo "  ${f}"
     docker run --rm -i -v "${here}/.hadolint.yaml:/.hadolint.yaml:ro" "${HADOLINT_IMAGE}" \
       hadolint --config /.hadolint.yaml - < "${here}/${f}" || rc=1
@@ -191,6 +192,41 @@ step_gateway() {
       --build-arg GATEWAY_SOURCE="${GATEWAY_SOURCE}" --build-arg VERSION="0.0.0-${TAG}"
   fi
   structure_test "${gateway_image}" gateway.yaml
+}
+
+# The sidecar next to an environment image, as the operator runs them: the installer puts the daemon into a
+# shared home volume and publishes the marker, a second run keeps it, and the daemon then starts from the home
+# volume in an image that only has a POSIX shell.
+step_runtime() {
+  if [ -n "${RUNTIME_IMAGE:-}" ]; then
+    pull "${runtime_image}"
+  else
+    build_isolated "${runtime_image}" runtime-core.Dockerfile --build-arg VERSION="0.0.0-${TAG}"
+  fi
+  structure_test "${runtime_image}" runtime-core.yaml
+
+  local volume="devbox-runtime-test-$$" digest="sha256:test" out size
+  log "Install test ${runtime_image}"
+  docker volume create "${volume}" >/dev/null
+  # shellcheck disable=SC2064
+  trap "docker volume rm -f ${volume} >/dev/null 2>&1 || true; cleanup" EXIT
+  run_installer() {
+    docker run --rm ${platform_args[@]+"${platform_args[@]}"} -v "${volume}:/mnt/home" "${runtime_image}" --digest "${digest}" --stay=false 2>&1
+  }
+  out="$(run_installer)"
+  echo "${out}" | grep -q '"msg":"runtime installed"' || { echo "first run did not install: ${out}"; return 1; }
+  out="$(run_installer)"
+  echo "${out}" | grep -q '"msg":"runtime kept"' || { echo "second run did not keep the runtime: ${out}"; return 1; }
+  out="$(docker run --rm ${platform_args[@]+"${platform_args[@]}"} --user 1000:1000 -v "${volume}:/home/dev" busybox:1.37 sh -c \
+    '[ "$(cat /home/dev/.plural-runtime/ready)" = "sha256:test" ] && /home/dev/.plural-runtime/sha256-test/bin/devbox-daemon -version')"
+  [ -n "${out}" ] || { echo "the daemon did not run from the home volume as UID 1000"; return 1; }
+  echo "installed, kept, and devbox-daemon ${out} runs from the home volume as UID 1000"
+
+  # Everything in the payload is copied into every instance's home volume and snapshots.
+  size="$(docker image inspect "${runtime_image}" --format '{{.Size}}')"
+  [ "${size}" -lt $((64 * 1024 * 1024)) ] || { echo "${runtime_image} is ${size} bytes, over the 64MiB budget"; return 1; }
+  docker volume rm -f "${volume}" >/dev/null
+  trap cleanup EXIT
 }
 
 ensure_minimal() {
@@ -230,8 +266,8 @@ step_example() {
 }
 
 steps=("$@")
-[ "${#steps[@]}" -eq 0 ] && steps=(versions lint minimal gateway fat-check)
-[ "${steps[*]}" = "all" ] && steps=(versions lint minimal gateway fat example)
+[ "${#steps[@]}" -eq 0 ] && steps=(versions lint minimal gateway runtime fat-check)
+[ "${steps[*]}" = "all" ] && steps=(versions lint minimal gateway runtime fat example)
 
 echo "daemon source: ${DAEMON_SOURCE}, gateway source: ${GATEWAY_SOURCE}"
 for s in "${steps[@]}"; do

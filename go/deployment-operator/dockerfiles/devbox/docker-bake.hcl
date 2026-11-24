@@ -8,6 +8,11 @@
 # files under its working directory without extra entitlements.
 #
 # CD sets the platform, outputs and caches with --set, and labels with docker/metadata-action's bake files.
+#
+# runtime-core (the plural-runtime sidecar) is not in the default group: CD builds it once per source hash, see
+# runtime-src-hash.sh. To build it here:
+#
+#   cd go && SOURCE_DATE_EPOCH=0 docker buildx bake -f deployment-operator/dockerfiles/devbox/docker-bake.hcl runtime-core
 
 variable "VERSION" {
   default = "dev"
@@ -15,6 +20,11 @@ variable "VERSION" {
 
 variable "DAEMON_SOURCE" {
   default = "build"
+}
+
+# The source hash of runtime-core, from runtime-src-hash.sh.
+variable "SRC_HASH" {
+  default = "unknown"
 }
 
 group "default" {
@@ -45,4 +55,17 @@ target "fat" {
   args = {
     BASE_IMAGE = "devbox-minimal"
   }
+}
+
+# Reproducible: no metadata-action labels (they carry the build time and commit), no attestations, and
+# rewrite-timestamp with SOURCE_DATE_EPOCH=0 from the environment.
+target "runtime-core" {
+  context    = "."
+  dockerfile = "deployment-operator/dockerfiles/devbox/runtime-core.Dockerfile"
+  args = {
+    VERSION  = VERSION
+    SRC_HASH = SRC_HASH
+  }
+  attest = ["type=provenance,disabled=true", "type=sbom,disabled=true"]
+  output = ["type=image,name=devbox-runtime-core,rewrite-timestamp=true"]
 }

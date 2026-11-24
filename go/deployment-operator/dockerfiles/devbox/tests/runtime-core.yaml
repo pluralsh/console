@@ -1,0 +1,26 @@
+schemaVersion: 2.0.0
+
+metadataTest:
+  labels:
+    - key: sh.plural.devbox/runtime-contract
+      value: v1
+    - key: sh.plural.devbox/flavor
+      value: core
+    - key: sh.plural.devbox/daemon-version
+      value: .+
+      isRegex: true
+  entrypoint: ["/devbox-runtime-installer"]
+
+fileExistenceTests:
+  - name: the installer
+    path: /devbox-runtime-installer
+    shouldExist: true
+    permissions: "-rwxr-xr-x"
+  - name: devbox-daemon payload
+    path: /payload/bin/devbox-daemon
+    shouldExist: true
+    permissions: "-rwxr-xr-x"
+  # The payload is copied into every instance's home volume, so the image has nothing else: no shell, no libc.
+  - name: no shell
+    path: /bin/sh
+    shouldExist: false
