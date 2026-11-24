@@ -25,7 +25,7 @@ import {
 } from 'components/ai/chatbot/toolCallDisplay'
 import { useQuietToolCodeCss } from 'components/ai/chatbot/ToolCallContent'
 import { EaseIn } from 'components/utils/EaseIn'
-import { Body2P } from 'components/utils/typography/Text'
+import { Body2P, shimmerWithinCss } from 'components/utils/typography/Text'
 import {
   AiRole,
   DevboxEntityFragment,
@@ -177,7 +177,7 @@ export function DevboxTranscript({
   return (
     <>
       <TranscriptSC>
-        {rows.map((row) => {
+        {rows.map((row, i) => {
           switch (row.kind) {
             case 'subagent':
               return (
@@ -233,6 +233,7 @@ export function DevboxTranscript({
                   <DevboxEntityView
                     entity={row.entity}
                     terminal={terminal}
+                    streaming={i === rows.length - 1 && !row.entity.settled}
                   />
                 </div>
               )
@@ -247,9 +248,12 @@ export function DevboxTranscript({
 export function DevboxEntityView({
   entity,
   terminal = () => null,
+  streaming = false,
 }: {
   entity: DevboxEntityFragment
   terminal?: TerminalLookup
+  // still being written: the newest entity of the transcript, not yet settled
+  streaming?: boolean
 }) {
   switch (entity.type) {
     case DevboxEntityType.UserMessage:
@@ -273,14 +277,27 @@ export function DevboxEntityView({
     case DevboxEntityType.AgentThought:
       if (!entity.message) break
       return (
-        <div data-entity="agent-thought">
-          <AccordionSection label="Thinking">
+        <ThoughtSC
+          data-entity="agent-thought"
+          $streaming={streaming}
+        >
+          <AccordionSection
+            label={
+              <Body2P
+                as="span"
+                $color="text-xlight"
+                $shimmer={streaming}
+              >
+                Thinking
+              </Body2P>
+            }
+          >
             <SimplifiedMarkdown
               text={blocksText(entity.message.content)}
-              tone="thought"
+              tone="meta"
             />
           </AccordionSection>
-        </div>
+        </ThoughtSC>
       )
     case DevboxEntityType.ToolCall:
       if (!entity.toolCall) break
@@ -776,12 +793,16 @@ function PlanView({
   )
 }
 
+const ThoughtSC = styled.div<{ $streaming: boolean }>(
+  ({ theme, $streaming }) => ($streaming ? shimmerWithinCss(theme) : {})
+)
+
 function AccordionSection({
   label,
   defaultOpen,
   children,
 }: {
-  label: string
+  label: ReactNode
   defaultOpen?: boolean
   children: ReactNode
 }) {
