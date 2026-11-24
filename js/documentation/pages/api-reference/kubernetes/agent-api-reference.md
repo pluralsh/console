@@ -1050,6 +1050,7 @@ _Appears in:_
 | `ruby` _boolean_ | Ruby: rubygems.org and Ruby releases. | true | Optional: \{\} <br /> |
 | `php` _boolean_ | PHP: Packagist and Composer. | true | Optional: \{\} <br /> |
 | `dotnet` _boolean_ | Dotnet: NuGet and .NET releases. | true | Optional: \{\} <br /> |
+| `mise` _boolean_ | Mise: what `mise use` needs for languages and tools the image doesn't ship: mise's version and Java<br />metadata, GitHub releases (most tools are released there) and the other common release hosts. On boxes<br />without a GitHub SCM connection this opens github.com unauthenticated. | false | Optional: \{\} <br /> |
 
 
 #### DevboxResources

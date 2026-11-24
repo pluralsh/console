@@ -71,7 +71,7 @@ func (m *Manager) worktreeContent(t *thread, content []*devboxv1.ContentBlock) [
 			}
 		case b.GetResourceLink() != nil:
 			u, err := url.Parse(b.GetResourceLink().GetUri())
-			if err != nil || u.Scheme != "file" {
+			if err != nil || u.Scheme != fileScheme {
 				continue
 			}
 			if p := m.inWorktree(t, u.Path); p != u.Path {
