@@ -90,3 +90,42 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].args
           content: --bucket-url=s3://ate-assets
+
+  - it: assetStaging stages the specOverrides-merged SandboxConfig
+    template: templates/microvm-assets-job.yaml
+    set:
+      sandboxConfigs.microvm.enabled: true
+      sandboxConfigs.microvm.assetScheme: s3
+      sandboxConfigs.microvm.assetBucket: ate-assets
+      sandboxConfigs.microvm.specOverrides.defaultVersion: custom
+      assetStaging.enabled: true
+    documentSelector:
+      path: kind
+      value: ConfigMap
+    asserts:
+      - matchRegex:
+          path: data["microvm.yaml"]
+          pattern: "defaultVersion: custom"
+
+  - it: assetStaging mounts the Azure workload identity token
+    template: templates/microvm-assets-job.yaml
+    set:
+      sandboxConfigs.microvm.enabled: true
+      sandboxConfigs.microvm.assetScheme: azblob
+      sandboxConfigs.microvm.assetBucket: assets
+      assetStaging.enabled: true
+      objectStore.backend: azureBlob
+      objectStore.azureBlob.tenantId: tenant
+      objectStore.azureBlob.controlClientId: client
+    documentSelector:
+      path: kind
+      value: Job
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: AZURE_FEDERATED_TOKEN_FILE
+            value: /var/run/secrets/azure/tokens/azure-identity-token
+      - equal:
+          path: spec.template.spec.volumes[3].name
+          value: azure-identity-token

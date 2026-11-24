@@ -11,6 +11,8 @@ staging too and there is a single identity to grant bucket access to.
 */ -}}
 {{- $a := .Values.assetStaging -}}
 {{- $m := .Values.sandboxConfigs.microvm -}}
+{{- $os := .Values.objectStore -}}
+{{- $azure := eq $os.backend "azureBlob" -}}
 {{- if and $m.enabled $a.enabled }}
 {{- $ns := include "substrate.namespace" . -}}
 {{- $name := "agent-substrate-microvm-assets" -}}
@@ -28,7 +30,7 @@ metadata:
     helm.sh/hook-delete-policy: before-hook-creation
 data:
   microvm.yaml: |
-    {{- .Files.Get "files/sandboxconfig/microvm.yaml" | replace "${BUCKET_SCHEME}" $m.assetScheme | replace "${ASSET_BUCKET_NAME}" $m.assetBucket | nindent 4 }}
+    {{- include "substrate.microvmSandboxConfig" . | nindent 4 }}
 ---
 apiVersion: batch/v1
 kind: Job
@@ -72,9 +74,19 @@ spec:
             {{- with $a.extraArgs }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
-          {{- with $a.extraEnv }}
+          {{- if or $azure $a.extraEnv }}
           env:
+            {{- if $azure }}
+            - name: AZURE_CLIENT_ID
+              value: {{ $os.azureBlob.controlClientId | quote }}
+            - name: AZURE_TENANT_ID
+              value: {{ $os.azureBlob.tenantId | quote }}
+            - name: AZURE_FEDERATED_TOKEN_FILE
+              value: /var/run/secrets/azure/tokens/azure-identity-token
+            {{- end }}
+            {{- with $a.extraEnv }}
             {{- toYaml . | nindent 12 }}
+            {{- end }}
           {{- end }}
           resources:
             {{- toYaml $a.resources | nindent 12 }}
@@ -90,6 +102,11 @@ spec:
               mountPath: /work
             - name: tmp
               mountPath: /tmp
+            {{- if $azure }}
+            - name: azure-identity-token
+              mountPath: /var/run/secrets/azure/tokens
+              readOnly: true
+            {{- end }}
       volumes:
         - name: config
           configMap:
@@ -99,4 +116,7 @@ spec:
             sizeLimit: {{ $a.workSize }}
         - name: tmp
           emptyDir: {}
+        {{- if $azure }}
+        {{- include "substrate.azureTokenVolume" . | nindent 8 }}
+        {{- end }}
 {{- end }}
