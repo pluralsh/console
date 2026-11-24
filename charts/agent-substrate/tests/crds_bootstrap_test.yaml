@@ -72,3 +72,22 @@ tests:
       - equal:
           path: spec.versions[0].assets.arm64.cloud-hypervisor.url
           value: s3://ate-assets/microvm-assets/arm64/f192b510eea1c710cbc439d716bb0573c223fc463dbe3e6523788a2b7ef62850
+
+  - it: assetStaging renders the stager Job for microvm
+    template: templates/microvm-assets-job.yaml
+    set:
+      sandboxConfigs.microvm.enabled: true
+      sandboxConfigs.microvm.assetScheme: s3
+      sandboxConfigs.microvm.assetBucket: ate-assets
+      assetStaging.enabled: true
+      assetStaging.serviceAccount.name: ate-api-server
+    documentSelector:
+      path: kind
+      value: Job
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: ate-api-server
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --bucket-url=s3://ate-assets
