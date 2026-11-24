@@ -19,6 +19,10 @@ metadataTest:
       value: /usr/local/share/corepack
     - key: DOTNET_CLI_TELEMETRY_OPTOUT
       value: "1"
+    - key: MISE_ERLANG_COMPILE
+      value: "false"
+    - key: MISE_ERLANG_PRECOMPILED_OS
+      value: ubuntu-24.04
 
 fileExistenceTests:
   - name: writable Java cacerts in the trust dir

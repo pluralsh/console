@@ -488,6 +488,7 @@ func TestDevboxRunnerController(t *testing.T) {
 		g.Expect(tmpl.WorkerSelector.MatchLabels).To(Equal(map[string]string{"devboxes.plural.sh/runner.platform": "true"}))
 		g.Expect(pool.GetLabels()).To(HaveKeyWithValue("devboxes.plural.sh/runner.platform", "true"))
 		g.Expect(tmpl.Containers[0].WakeupProbe.HttpGet.Path).To(Equal("/readyz"))
+		g.Expect(tmpl.Containers[0].GetSecurityContext().GetCapabilities().GetAdd()).To(ConsistOf("SETUID", "SETGID", "SETFCAP"))
 		g.Expect(tmpl.Resources.Limits.MemoryBytes).To(Equal(int64(4 << 30)))
 		g.Expect(tmpl.GoldenEgressPolicy).To(BeNil())
 

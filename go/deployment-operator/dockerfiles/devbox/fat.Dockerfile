@@ -293,6 +293,8 @@ ENV HOME=/home/dev \
     CLOUDSDK_COMPONENT_MANAGER_DISABLE_UPDATE_CHECK=1 \
     AZURE_CORE_COLLECT_TELEMETRY=false \
     AWS_PAGER="" \
+    MISE_ERLANG_COMPILE=false \
+    MISE_ERLANG_PRECOMPILED_OS=ubuntu-24.04 \
     PATH=/home/dev/.local/share/mise/shims:/home/dev/.local/bin:/home/dev/go/bin:/home/dev/.cargo/bin:/home/dev/.dotnet/tools:/usr/local/sbin:/usr/local/bin:/usr/local/cargo/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 USER 1000:1000

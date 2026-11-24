@@ -30,6 +30,12 @@ import (
 // WorkerPools are managed as unstructured objects so the operator doesn't depend on go.ate.dev/substrate.
 var workerPoolGVK = schema.GroupVersionKind{Group: "ate.dev", Version: "v1", Kind: "WorkerPool"}
 
+// devboxCapabilities are added to the devbox container's capability set. The box runs as dev (non-root), so its
+// processes hold none of them; they only bound what setuid-root helpers gain. newuidmap/newgidmap need SETUID,
+// SETGID and (to map uid 0) SETFCAP to give rootless Podman its subuid/subgid ranges; without them the kernel
+// refuses the multi-range uid_map and `docker` fails to start any container.
+var devboxCapabilities = []string{"SETUID", "SETGID", "SETFCAP"}
+
 const (
 	devboxContainerName = "devbox"
 	devboxHomeVolume    = "home"
@@ -455,6 +461,7 @@ func (r *DevboxRunnerReconciler) buildActorTemplate(runner *v1alpha1.DevboxRunne
 				{Name: devboxTrustVolume, MountPath: devboxEgressTrustMount},
 				{Name: devboxActorVolume, MountPath: devboxActorMetaMount},
 			},
+			SecurityContext: &ateapi.SecurityContext{Capabilities: &ateapi.Capabilities{Add: devboxCapabilities}},
 		}},
 		Volumes: []*ateapi.Volume{
 			{Name: devboxHomeVolume, DurableDir: &ateapi.DurableDirVolumeSource{}},
