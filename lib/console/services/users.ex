@@ -421,6 +421,10 @@ defmodule Console.Services.Users do
   defp token_attrs(%{"admin" => true} = attrs), do: Map.put(attrs, "roles", %{"admin" => true})
   defp token_attrs(attrs), do: maybe_admin(attrs)
 
+  # the oidc `profile` claim is a profile page url, the avatar is the `picture` claim.
+  # some idps (including plural) send the avatar in `profile`, so keep it as a fallback.
+  defp clean_profile(%{"picture" => picture} = attrs) when is_binary(picture) and byte_size(picture) > 0,
+    do: Map.put(attrs, "profile", picture)
   defp clean_profile(%{"profile" => profile} = attrs) when is_binary(profile),
     do: Map.put(attrs, "profile", profile)
   defp clean_profile(attrs), do: Map.delete(attrs, "profile")
