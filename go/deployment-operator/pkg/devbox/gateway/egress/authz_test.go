@@ -152,6 +152,7 @@ func TestAuthzRequestVerdicts(t *testing.T) {
 		{name: "org wide", identity: devboxWorker, method: "GET", authority: "api.github.com", path: "/orgs/pluralsh/repos", status: 403, body: "can't be tied to a repository"},
 		{name: "safe endpoint", identity: devboxWorker, method: "GET", authority: "api.github.com", path: "/rate_limit"},
 		{name: "signed storage host", identity: devboxWorker, method: "GET", authority: "objects.githubusercontent.com", path: "/github-production-lfs/abc?X-Amz-Signature=x"},
+		{name: "actions log storage host", identity: devboxWorker, method: "GET", authority: "productionresultssa16.blob.core.windows.net", path: "/actions-results/log?sig=x"},
 		{name: "non-SCM host", identity: devboxWorker, method: "POST", authority: "pypi.org", path: "/simple/requests/"},
 		{name: "gitlab path allowed", identity: devboxWorker, method: "GET", authority: "gitlab.example.com", path: "/team/svc.git/info/refs"},
 		{name: "gitlab path denied", identity: devboxWorker, method: "GET", authority: "gitlab.example.com", path: "/team/other.git/info/refs", status: 403},
