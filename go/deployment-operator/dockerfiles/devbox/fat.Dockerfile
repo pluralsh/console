@@ -23,6 +23,8 @@ ARG GRADLE_TAG=9.9.1-jdk25-noble
 ARG DOTNET_SDK_TAG=10.0.404
 # renovate: datasource=docker depName=ghcr.io/astral-sh/uv
 ARG UV_VERSION=0.13.8
+# renovate: datasource=docker depName=erlang
+ARG ERLANG_TAG=28.5.0.8-slim
 
 FROM golang:${GO_VERSION}-trixie AS go
 # renovate: datasource=go depName=golang.org/x/tools/gopls
@@ -34,6 +36,7 @@ FROM maven:${MAVEN_TAG} AS maven
 FROM gradle:${GRADLE_TAG} AS gradle
 FROM mcr.microsoft.com/dotnet/sdk:${DOTNET_SDK_TAG} AS dotnet
 FROM ghcr.io/astral-sh/uv:${UV_VERSION} AS uv
+FROM erlang:${ERLANG_TAG} AS erlang
 
 # ---------------------------------------------------------------------------
 # DevOps CLIs (static binaries)
@@ -113,6 +116,9 @@ ARG GO_VERSION
 ARG TEMURIN_TAG
 ARG DOTNET_SDK_TAG
 ARG UV_VERSION
+ARG ERLANG_TAG
+# renovate: datasource=github-releases depName=elixir-lang/elixir extractVersion=^v(?<version>.*)$
+ARG ELIXIR_VERSION=1.19.4
 # renovate: datasource=npm depName=typescript
 ARG TYPESCRIPT_VERSION=6.0.3
 # renovate: datasource=npm depName=typescript-language-server
@@ -139,12 +145,12 @@ USER root
 ENV HOME=/root
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-# Python 3 plus native libraries the .NET SDK needs.
+# Python 3 plus native libraries the .NET SDK and Erlang/OTP need.
 # hadolint ignore=DL3008
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
       python3 python3-venv python3-pip python3-dev \
-      libicu76 zlib1g && \
+      libicu76 zlib1g libodbc2 libssl3t64 libsctp1 && \
     rm -rf /var/lib/apt/lists/*
 
 COPY --from=go /usr/local/go /usr/local/go
@@ -154,6 +160,8 @@ COPY --from=maven /usr/share/maven /opt/maven
 COPY --from=gradle /opt/gradle /opt/gradle
 COPY --from=dotnet /usr/share/dotnet /usr/share/dotnet
 COPY --from=uv /uv /uvx /usr/local/bin/
+COPY --from=erlang /usr/local/lib/erlang /usr/local/lib/erlang
+COPY --from=erlang /usr/local/bin/rebar3 /usr/local/bin/rebar3
 COPY --from=devops /out/ /usr/local/bin/
 COPY --chmod=0755 deployment-operator/dockerfiles/devbox/rootfs/fat/usr/local/bin/ /usr/local/bin/
 
@@ -176,6 +184,29 @@ RUN set -eux; \
     install -o 1000 -g 1000 -m 0644 /opt/java/openjdk/lib/security/cacerts /var/lib/devbox/trust/java-cacerts; \
     ln -sf /var/lib/devbox/trust/java-cacerts /opt/java/openjdk/lib/security/cacerts; \
     go version; java -version; mvn --version; gradle --version --quiet; dotnet --info > /dev/null; uv --version
+
+# Erlang/OTP (kept at its build prefix, which erl has baked in) and Elixir, also
+# registered as mise system installs so repositories pinning these versions in
+# .tool-versions or mise.toml use them instead of installing their own. Hex
+# lives in a shared, dev-writable archives dir since MIX_HOME is per-user.
+ENV MIX_REBAR3=/usr/local/bin/rebar3 \
+    MIX_ARCHIVES=/usr/local/share/mix/archives
+RUN set -eux; \
+    otp="${ERLANG_TAG%-slim}"; \
+    for bin in erl erlc escript ct_run dialyzer typer run_erl to_erl epmd; do ln -s "/usr/local/lib/erlang/bin/${bin}" "/usr/local/bin/${bin}"; done; \
+    f="elixir-otp-${otp%%.*}.zip"; base="https://github.com/elixir-lang/elixir/releases/download/v${ELIXIR_VERSION}"; \
+    curl -fsSLo "/tmp/${f}" "${base}/${f}"; \
+    echo "$(curl -fsSL "${base}/${f}.sha256sum" | awk '{print $1}')  /tmp/${f}" | sha256sum -c -; \
+    unzip -q "/tmp/${f}" -d /usr/local/lib/elixir; rm "/tmp/${f}"; \
+    for bin in elixir elixirc iex mix; do ln -s "/usr/local/lib/elixir/bin/${bin}" "/usr/local/bin/${bin}"; done; \
+    mkdir -p /usr/local/share/mise/installs/erlang /usr/local/share/mise/installs/elixir; \
+    ln -s /usr/local/lib/erlang "/usr/local/share/mise/installs/erlang/${otp}"; \
+    ln -s /usr/local/lib/elixir "/usr/local/share/mise/installs/elixir/${ELIXIR_VERSION}"; \
+    mix local.hex --force; \
+    chown -R 1000:1000 /usr/local/share/mix; \
+    rm -rf /root/.mix /root/.hex /root/.cache; \
+    erl -noshell -eval 'io:format("~s~n", [erlang:system_info(otp_release)]), halt().'; \
+    rebar3 version; elixir --version; mix hex.info > /dev/null
 
 # Node: TypeScript, its language server, and pnpm/yarn through corepack.
 RUN set -eux; \
@@ -276,7 +307,8 @@ RUN set -eux; \
 RUN jq --arg flavor fat \
       --arg go "${GO_VERSION}" --arg rust "${RUST_VERSION}" --arg java "${TEMURIN_TAG}" \
       --arg dotnet "${DOTNET_SDK_TAG}" --arg typescript "${TYPESCRIPT_VERSION}" --arg uv "${UV_VERSION}" \
-      '.flavor = $flavor | .toolchains = {go: $go, rust: $rust, java: $java, dotnet: $dotnet, typescript: $typescript, uv: $uv}' \
+      --arg erlang "${ERLANG_TAG%-slim}" --arg elixir "${ELIXIR_VERSION}" \
+      '.flavor = $flavor | .toolchains = {go: $go, rust: $rust, java: $java, dotnet: $dotnet, typescript: $typescript, uv: $uv, erlang: $erlang, elixir: $elixir}' \
       /etc/devbox/image.json > /tmp/image.json && mv /tmp/image.json /etc/devbox/image.json && chmod 0644 /etc/devbox/image.json && \
     if [ -n "$(ls -A /home/dev)" ]; then echo "build wrote into /home/dev:" >&2; ls -A /home/dev >&2; exit 1; fi
 

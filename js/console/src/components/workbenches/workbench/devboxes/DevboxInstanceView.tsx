@@ -28,11 +28,7 @@ import { mergePendingInteractions } from './devboxInteractions'
 import { mergeNewThreads } from './devboxThreadsCache'
 import { DevboxChangesViewer } from './DevboxChangesViewer'
 import { DevboxFileViewer } from './DevboxFileViewer'
-import {
-  effectiveMaxDeferral,
-  getDevboxAwakeStatus,
-  isInstanceLive,
-} from './devboxIdle'
+import { effectiveMaxDeferral, isInstanceLive } from './devboxIdle'
 import { DevboxInstanceHeader } from './DevboxInstanceHeader'
 import { DevboxNewSession } from './DevboxNewSession'
 import { DEVBOX_HEADER_HEIGHT } from './DevboxSessionsSidebar'
@@ -148,11 +144,6 @@ export function DevboxInstanceView({
     const timer = setInterval(() => setNow(new Date()), 1000)
     return () => clearInterval(timer)
   }, [])
-  const awake = instance
-    ? getDevboxAwakeStatus(instance, { now, resuming })
-    : null
-
-  useSuspendingSoonToast(awake?.suspendingSoon ?? false, instance?.name)
 
   // surface live-only notices once
   const { dispatch: timelineDispatch } = timeline
@@ -359,30 +350,6 @@ function useStatusFallback(
     if (live && !wasLive.current) refetch()
     wasLive.current = live
   }, [live, refetch])
-}
-
-function useSuspendingSoonToast(
-  suspendingSoon: boolean,
-  name: Nullable<string>
-) {
-  const { popToast } = useSimpleToast()
-  const shown = useRef(false)
-  useEffect(() => {
-    if (!suspendingSoon) {
-      shown.current = false
-      return
-    }
-    if (shown.current) return
-    shown.current = true
-    const message = `${name || 'This instance'} is suspending soon. Keep it awake from the status menu.`
-    popToast({ content: message, severity: 'danger' })
-    if (
-      document.visibilityState === 'hidden' &&
-      typeof Notification !== 'undefined' &&
-      Notification.permission === 'granted'
-    )
-      new Notification('Devbox suspending soon', { body: message })
-  }, [name, popToast, suspendingSoon])
 }
 
 const ViewSC = styled.div({
