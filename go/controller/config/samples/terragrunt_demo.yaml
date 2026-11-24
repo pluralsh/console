@@ -1,0 +1,42 @@
+# https://github.com/zreigz/terragrunt-demo
+# Harness image from https://github.com/pluralsh/console/pull/4725 (sha-b467fe0)
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Cluster
+metadata:
+  name: target-cluster
+  namespace: default
+spec:
+  handle: mgmt
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: GitRepository
+metadata:
+  name: terragrunt-demo
+  namespace: default
+spec:
+  url: https://github.com/zreigz/terragrunt-demo.git
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: InfrastructureStack
+metadata:
+  name: terragrunt-demo-live
+  namespace: default
+spec:
+  type: TERRAGRUNT
+  approval: true
+  manageState: false
+  repositoryRef:
+    name: terragrunt-demo
+  clusterRef:
+    name: target-cluster
+  git:
+    ref: main
+    folder: live
+  configuration:
+    tag: sha-a04a5b2-terragrunt-1.8
+    terragrunt:
+      runAll: true
+  jobSpec:
+    namespace: plrl-deploy-operator
+    serviceAccount: stacks
