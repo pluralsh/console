@@ -117,29 +117,18 @@ func TestRunAllWritesVariablesToUnits(t *testing.T) {
 	assert.True(t, os.IsNotExist(err))
 }
 
-func TestPlanAllShowsFromUnitDirectory(t *testing.T) {
-	parent := t.TempDir()
-	outDir := t.TempDir()
-	logFile := filepath.Join(t.TempDir(), "show.log")
-	unit := filepath.Join(parent, "nested", "storage")
-	require.NoError(t, os.MkdirAll(unit, 0o755))
+func TestPlanAllRendersSavedJSON(t *testing.T) {
+	jsonDir := t.TempDir()
+	writePlan(t, filepath.Join(jsonDir, "network", planJSONBase), false)
+	writePlan(t, filepath.Join(jsonDir, "app", planJSONBase), true)
 
-	planPath := filepath.Join(outDir, "nested", "storage", planFileBase)
-	writeFile(t, planPath, "binary-plan")
-	installTerragruntShow(t, logFile)
-
-	tool := &Terragrunt{runAll: true, dir: parent, outDir: outDir}
+	tool := &Terragrunt{runAll: true, jsonOutDir: jsonDir}
 	state, err := tool.Plan()
 
 	require.NoError(t, err)
 	require.NotNil(t, state.Plan)
-	assert.Contains(t, *state.Plan, "# nested/storage")
-	assert.Contains(t, *state.Plan, "shown plan")
-
-	log := readFile(t, logFile)
-	assert.Contains(t, log, unit)
-	assert.Contains(t, log, planPath)
-	assert.NotContains(t, log, parent+"\n")
+	assert.Contains(t, *state.Plan, "# app\n  # local_file.demo will be created\nPlan: 1 to add, 0 to change, 0 to destroy.")
+	assert.Contains(t, *state.Plan, "# network\nNo changes.")
 }
 
 func TestScanAllUsesEachUnitPlan(t *testing.T) {
@@ -202,15 +191,6 @@ func (f *fakeScanner) Scan(_ console.StackType, options ...securityv1.ScanOption
 	}
 
 	return []*console.StackPolicyViolationAttributes{{Title: opts.Terraform.Dir}}, nil
-}
-
-func installTerragruntShow(t *testing.T, logFile string) {
-	t.Helper()
-
-	bin := t.TempDir()
-	script := fmt.Sprintf("#!/bin/sh\npwd >> %q\nprintf '%%s\\n' \"$*\" >> %q\nprintf 'shown plan\\n'\n", logFile, logFile)
-	require.NoError(t, os.WriteFile(filepath.Join(bin, "terragrunt"), []byte(script), 0o755))
-	t.Setenv("PATH", bin+string(os.PathListSeparator)+os.Getenv("PATH"))
 }
 
 func writeFile(t *testing.T, path, content string) {

@@ -218,26 +218,17 @@ func (in *Terragrunt) plan() (string, error) {
 }
 
 func (in *Terragrunt) planAll() (string, error) {
-	plans, err := planFiles(in.outDir, planFileBase)
+	// Use the JSON written by run --all. terragrunt show re-evaluates each
+	// unit and fails when a dependency has not been applied yet.
+	units, err := loadUnitPlans(in.jsonOutDir)
 	if err != nil {
 		return "", err
 	}
 
 	var b strings.Builder
-	for _, plan := range plans {
-		// Show from the unit directory so Terragrunt loads that unit's
-		// provider schemas and the terraform or tofu binary it selected.
-		unitDir := filepath.Join(in.dir, filepath.FromSlash(plan.rel))
-		output, err := exec.NewExecutable(
-			"terragrunt",
-			exec.WithArgs([]string{"show", "-no-color", plan.path}),
-			exec.WithDir(unitDir),
-		).RunWithOutput(context.Background())
-		if err != nil {
-			return "", fmt.Errorf("failed executing terragrunt show for %s: %s: %w", plan.rel, string(output), err)
-		}
-
-		fmt.Fprintf(&b, "# %s\n%s\n", plan.rel, output)
+	for _, unit := range units {
+		b.WriteString(formatUnitPlan(unit.rel, unit.plan))
+		b.WriteByte('\n')
 	}
 
 	return b.String(), nil

@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 
 	tfjson "github.com/hashicorp/terraform-json"
 	"k8s.io/klog/v2"
@@ -108,6 +109,71 @@ func unitFilter(rel string) string {
 		return "."
 	}
 	return "./" + rel
+}
+
+// formatUnitPlan renders one saved JSON plan. Terragrunt already produced this
+// JSON during plan, so rendering it does not evaluate dependency blocks again.
+func formatUnitPlan(rel string, plan *tfjson.Plan) string {
+	var b strings.Builder
+	fmt.Fprintf(&b, "# %s\n", rel)
+	if plan == nil {
+		b.WriteString("No changes.\n")
+		return b.String()
+	}
+
+	adds, changes, destroys := 0, 0, 0
+	for _, rc := range plan.ResourceChanges {
+		if rc == nil || rc.Change == nil || rc.Change.Actions.NoOp() {
+			continue
+		}
+		verb, add, change, destroy := actionSummary(rc.Change.Actions)
+		adds += add
+		changes += change
+		destroys += destroy
+		fmt.Fprintf(&b, "  # %s %s\n", rc.Address, verb)
+	}
+
+	names := make([]string, 0, len(plan.OutputChanges))
+	for name, oc := range plan.OutputChanges {
+		if oc == nil || oc.Actions.NoOp() {
+			continue
+		}
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	for _, name := range names {
+		verb, _, _, _ := actionSummary(plan.OutputChanges[name].Actions)
+		fmt.Fprintf(&b, "  # output.%s %s\n", name, verb)
+	}
+
+	if len(plan.DeferredChanges) > 0 {
+		fmt.Fprintf(&b, "  # %d deferred changes\n", len(plan.DeferredChanges))
+	}
+
+	if adds == 0 && changes == 0 && destroys == 0 && len(names) == 0 && len(plan.DeferredChanges) == 0 {
+		b.WriteString("No changes.\n")
+		return b.String()
+	}
+
+	fmt.Fprintf(&b, "Plan: %d to add, %d to change, %d to destroy.\n", adds, changes, destroys)
+	return b.String()
+}
+
+func actionSummary(actions tfjson.Actions) (verb string, add, change, destroy int) {
+	switch {
+	case actions.Replace():
+		return "must be replaced", 1, 0, 1
+	case actions.Create():
+		return "will be created", 1, 0, 0
+	case actions.Delete():
+		return "will be destroyed", 0, 0, 1
+	case actions.Update():
+		return "will be updated in-place", 0, 1, 0
+	case actions.Read():
+		return "will be read", 0, 0, 0
+	default:
+		return "will change", 0, 1, 0
+	}
 }
 
 func planHasChanges(plan *tfjson.Plan) bool {
