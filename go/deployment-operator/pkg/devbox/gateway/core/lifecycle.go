@@ -139,6 +139,7 @@ func (g *Gateway) doProvision(ctx context.Context, inst *Instance, src *startSou
 	inst.rec.Template = template
 	inst.rec.TemplateRevision = revision
 	inst.rec.ImageDigest = runner.ImageDigest
+	inst.rec.DaemonVersion = runner.DaemonVersion
 	if src != nil && src.snapshot != nil {
 		inst.rec.RestoredFrom = src.snapshot.GetSnapshotId()
 		inst.rec.RestoreFidelity = fidelity.String()
@@ -365,7 +366,9 @@ func (g *Gateway) suspendLocked(ctx context.Context, inst *Instance, reason devb
 	}
 	inst.stopForwarder()
 
-	sync := reason == devboxv1.SuspendReason_SUSPEND_REASON_EVICTION || reason == devboxv1.SuspendReason_SUSPEND_REASON_SNAPSHOT
+	// An update restores from the snapshot's volumes on another template, so it must be durable too.
+	sync := reason == devboxv1.SuspendReason_SUSPEND_REASON_EVICTION || reason == devboxv1.SuspendReason_SUSPEND_REASON_SNAPSHOT ||
+		reason == devboxv1.SuspendReason_SUSPEND_REASON_UPDATE
 	if err := g.deps.Actors.Suspend(ctx, ref, sync); err != nil {
 		if g.recoverSuspend(ctx, inst, err) {
 			g.setStatus(ctx, inst, statusUpdate{status: final, reason: reason, message: "recovered after: " + err.Error()})
@@ -438,7 +441,7 @@ func (g *Gateway) startWake(inst *Instance) *wakeOp {
 	inst.waking = op
 	g.goBackground(func(ctx context.Context) {
 		inst.op.Lock()
-		op.status, op.err = g.resumeLocked(ctx, inst)
+		op.status, op.err = g.resumeLocked(ctx, inst, true)
 		inst.op.Unlock()
 		inst.mu.Lock()
 		inst.waking = nil
@@ -448,7 +451,13 @@ func (g *Gateway) startWake(inst *Instance) *wakeOp {
 	return op
 }
 
-func (g *Gateway) resumeLocked(ctx context.Context, inst *Instance) (devboxv1.InstanceStatus, error) {
+// resumeLocked wakes a suspended instance. With applyUpdatePolicy, the runner's onResume policy first moves an
+// instance that is behind to the current revision; the resumes inside other operations (a snapshot's) pass
+// false, since they must bring back exactly what they suspended.
+//
+// An instance that was moved to another revision and crashes on its first start there is returned to the
+// revision it had and woken from its last snapshot.
+func (g *Gateway) resumeLocked(ctx context.Context, inst *Instance, applyUpdatePolicy bool) (devboxv1.InstanceStatus, error) {
 	switch st := inst.status(); st {
 	case devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING:
 		return st, nil
@@ -456,16 +465,305 @@ func (g *Gateway) resumeLocked(ctx context.Context, inst *Instance) (devboxv1.In
 	default:
 		return st, status.Errorf(codes.FailedPrecondition, "instance %s is %s and can't be resumed", inst.ID, st)
 	}
-	if err := g.wake(ctx, inst); err != nil {
-		if errors.Is(err, actors.ErrCrashed) {
-			_ = g.deps.Actors.Revert(ctx, inst.ref())
-		}
-		// not Unavailable: console reads that as the cluster being offline, which hides the real failure
-		return devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED, status.Errorf(codes.Internal, "resuming instance %s: %v", inst.ID, err)
+	if applyUpdatePolicy {
+		g.updateOnResume(ctx, inst)
 	}
-	g.setStatus(ctx, inst, statusUpdate{status: devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING})
+	message := ""
+	if err := g.wake(ctx, inst); err != nil {
+		if !g.rollbackRebase(ctx, inst, err) {
+			if errors.Is(err, actors.ErrCrashed) {
+				_ = g.deps.Actors.Revert(ctx, inst.ref())
+			}
+			if failed := inst.record(); failed.rebaseState() == devboxv1.RebaseState_REBASE_STATE_FAILED {
+				g.reportRecord(ctx, inst)
+			}
+			// not Unavailable: console reads that as the cluster being offline, which hides the real failure
+			return devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED, status.Errorf(codes.Internal, "resuming instance %s: %v", inst.ID, err)
+		}
+		rolledBack := inst.record()
+		message = fmt.Sprintf("update to revision %d failed and was rolled back: %s", rolledBack.RebaseRevision, rolledBack.RebaseMessage)
+		if err := g.wake(ctx, inst); err != nil {
+			if errors.Is(err, actors.ErrCrashed) {
+				_ = g.deps.Actors.Revert(ctx, inst.ref())
+			}
+			g.reportRecord(ctx, inst)
+			return devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED, status.Errorf(codes.Internal, "resuming instance %s after rolling back its update: %v", inst.ID, err)
+		}
+	} else if rev, ok := g.completeRebase(inst); ok {
+		message = fmt.Sprintf("updated to revision %d", rev)
+	}
+	g.setStatus(ctx, inst, statusUpdate{status: devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING, message: message})
 	g.startForwarder(inst)
 	return devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING, nil
+}
+
+// ---- moving instances between template revisions (PROD-5487) ----
+
+// retarget points a suspended instance's actor at another revision's template; its next resume cold-boots there
+// with its home volume. The record keeps the revision the instance last started on, so it can go back if it
+// doesn't start on the new one. The record is written first: adopt reconciles it with the actor if the gateway
+// stops in between.
+func (g *Gateway) retarget(ctx context.Context, inst *Instance, to revisionTarget) error {
+	ref := inst.ref()
+	inst.mu.Lock()
+	before := inst.rec
+	rec := &inst.rec
+	if rec.Rebase == nil {
+		rec.Rebase = &RebaseIntent{
+			FromTemplate:      rec.Template,
+			FromRevision:      rec.TemplateRevision,
+			FromImageDigest:   rec.ImageDigest,
+			FromDaemonVersion: rec.DaemonVersion,
+		}
+	} else {
+		// Moved again before it started on the last target: where to go back to stays the same.
+		intent := *rec.Rebase
+		rec.Rebase = &intent
+	}
+	rec.Rebase.ToTemplate, rec.Rebase.ToRevision = to.template, to.revision
+	rec.Template, rec.TemplateRevision, rec.ImageDigest, rec.DaemonVersion = to.template, to.revision, to.imageDigest, to.daemonVersion
+	if rec.Rebase.FromTemplate == to.template {
+		// Back where it last started: nothing is pending.
+		rec.Rebase = nil
+	}
+	after := *rec
+	inst.mu.Unlock()
+
+	if err := g.persist(ctx, &after); err != nil {
+		inst.mu.Lock()
+		inst.rec = before
+		inst.mu.Unlock()
+		return errRecord(err)
+	}
+	if err := g.deps.Actors.SetTemplate(ctx, ref, to.template); err != nil {
+		// The update may have landed although the call failed (a timeout): the record follows the actor.
+		if a, gerr := g.deps.Actors.GetActor(ctx, ref); gerr == nil && a.GetActorTemplate().GetName() == to.template {
+			return nil
+		}
+		inst.mu.Lock()
+		before.Status, before.SuspendReason, before.SuspendedAt = inst.rec.Status, inst.rec.SuspendReason, inst.rec.SuspendedAt
+		inst.rec = before
+		inst.mu.Unlock()
+		if perr := g.persist(ctx, &before); perr != nil {
+			g.log.Error(perr, "persisting instance record", "instance", inst.ID)
+		}
+		return fmt.Errorf("moving actor %s to template %s: %w", ref, to.template, err)
+	}
+	return nil
+}
+
+// completeRebase records that the instance started on the revision it was moved to.
+func (g *Gateway) completeRebase(inst *Instance) (int64, bool) {
+	inst.mu.Lock()
+	defer inst.mu.Unlock()
+	if inst.rec.Rebase == nil {
+		return 0, false
+	}
+	inst.rec.Rebase = nil
+	inst.rec.SkipRevision = 0
+	inst.rec.RebaseState = devboxv1.RebaseState_REBASE_STATE_SUCCEEDED.String()
+	inst.rec.RebaseMessage = ""
+	inst.rec.RebaseRevision = inst.rec.TemplateRevision
+	return inst.rec.TemplateRevision, true
+}
+
+// rollbackRebase handles an instance that didn't start on the revision it was moved to, and reports whether it is
+// back on the revision it had, suspended, ready to be resumed there.
+//
+// A crashed actor is reverted to its last snapshot, taken on the revision it had, so resuming there loses
+// nothing. An actor that started but whose daemon never became usable (it doesn't answer, or refuses Initialize)
+// is suspended instead; resuming it on the old template then cold-boots, keeping the home volume. An actor that is
+// still suspended was never placed (no worker had room): that says nothing about the revision, so it stays on it
+// and starts there on a later resume.
+func (g *Gateway) rollbackRebase(ctx context.Context, inst *Instance, cause error) bool {
+	rec := inst.record()
+	if rec.Rebase == nil {
+		return false
+	}
+	ref := inst.ref()
+	a, err := g.deps.Actors.GetActor(ctx, ref)
+	if err != nil {
+		return false
+	}
+	intent := *rec.Rebase
+	fail := func(step string, err error) bool {
+		g.log.Error(err, step, "instance", inst.ID, "template", intent.FromTemplate)
+		inst.mu.Lock()
+		inst.rec.RebaseState = devboxv1.RebaseState_REBASE_STATE_FAILED.String()
+		inst.rec.RebaseMessage = fmt.Sprintf("%v; rolling back failed, the instance is still on revision %d: %s: %v", cause, intent.ToRevision, step, err)
+		inst.rec.RebaseRevision = intent.ToRevision
+		inst.rec.SkipRevision = intent.ToRevision
+		inst.mu.Unlock()
+		return false
+	}
+
+	workerLost := false
+	switch a.GetStatus().GetState() {
+	case ateapi.ActorState_ACTOR_STATE_SUSPENDED, ateapi.ActorState_ACTOR_STATE_SUSPENDING:
+		return false
+	case ateapi.ActorState_ACTOR_STATE_CRASHED:
+		workerLost = crashedWithoutFault(a)
+		g.log.Error(cause, "instance crashed on the revision it was moved to; rolling back", "instance", inst.ID,
+			"from", intent.FromRevision, "to", intent.ToRevision)
+		if err := g.deps.Actors.Revert(ctx, ref); err != nil {
+			return fail("reverting the crashed actor", err)
+		}
+	default:
+		g.log.Error(cause, "instance did not become usable on the revision it was moved to; rolling back", "instance", inst.ID,
+			"from", intent.FromRevision, "to", intent.ToRevision)
+		if err := g.deps.Actors.Suspend(ctx, ref, true); err != nil {
+			return fail("suspending the actor", err)
+		}
+		if _, err := g.deps.Actors.WaitState(ctx, ref, ateapi.ActorState_ACTOR_STATE_SUSPENDED); err != nil {
+			if !errors.Is(err, actors.ErrCrashed) {
+				return fail("suspending the actor", err)
+			}
+			if err := g.deps.Actors.Revert(ctx, ref); err != nil {
+				return fail("reverting the crashed actor", err)
+			}
+		}
+	}
+	if err := g.deps.Actors.SetTemplate(ctx, ref, intent.FromTemplate); err != nil {
+		// The actor is suspended, still pointed at the new template.
+		return fail("moving the actor back to its previous template", err)
+	}
+	inst.mu.Lock()
+	r := &inst.rec
+	r.Template, r.TemplateRevision, r.ImageDigest, r.DaemonVersion = intent.FromTemplate, intent.FromRevision, intent.FromImageDigest, intent.FromDaemonVersion
+	r.Rebase = nil
+	if !workerLost {
+		// Losing its worker says nothing about the revision, so the onResume policy may try it again.
+		r.SkipRevision = intent.ToRevision
+	}
+	r.RebaseState = devboxv1.RebaseState_REBASE_STATE_FAILED.String()
+	r.RebaseMessage = cause.Error()
+	r.RebaseRevision = intent.ToRevision
+	after := *r
+	inst.mu.Unlock()
+	if err := g.persist(ctx, &after); err != nil {
+		g.log.Error(err, "persisting instance record", "instance", inst.ID)
+	}
+	return true
+}
+
+// workerLossCrashes are Substrate's crash messages for losing the worker or node, which are no fault of the
+// template the actor ran (the controller's goldenWorkerLossCrashes).
+var workerLossCrashes = []string{
+	"worker pod went away while hosting the actor",
+	"worker restarted while hosting the actor",
+	"assigned worker is draining",
+	"assigned worker no longer satisfies the actor's placement constraints",
+	"node holding the actor's latest snapshot no longer exists",
+}
+
+func crashedWithoutFault(a *ateapi.Actor) bool {
+	crash := a.GetStatus().GetCrash().String()
+	for _, msg := range workerLossCrashes {
+		if strings.Contains(crash, msg) {
+			return true
+		}
+	}
+	return false
+}
+
+// updateOnResume applies the runner's onResume update policy to a suspended instance about to be resumed: when
+// the runner's current revision is newer than the instance's, the instance moves to it. A revision the instance
+// already failed to start on is skipped. Failing to move is not failing to resume: the instance then resumes on
+// the revision it has.
+func (g *Gateway) updateOnResume(ctx context.Context, inst *Instance) {
+	rec := inst.record()
+	runner, err := g.deps.Runners.Get(ctx, rec.Runner)
+	if err != nil || !runner.UpdateOnResume {
+		return
+	}
+	to, err := runner.target(0)
+	if err != nil || to.revision <= rec.TemplateRevision || to.revision == rec.SkipRevision {
+		return
+	}
+	if err := g.retarget(ctx, inst, to); err != nil {
+		g.log.Error(err, "updating instance on resume; resuming on its current revision", "instance", inst.ID, "revision", to.revision)
+		return
+	}
+	g.log.Info("updating instance on resume", "instance", inst.ID, "from", rec.TemplateRevision, "to", to.revision)
+}
+
+// rebase moves an instance to another revision on request (RebaseInstance). A running instance is suspended
+// synchronously, moved and resumed; a suspended one is only moved and starts on the revision at its next resume.
+func (g *Gateway) rebase(ctx context.Context, inst *Instance, to revisionTarget, reason string) {
+	inst.op.Lock()
+	defer inst.op.Unlock()
+
+	st := inst.status()
+	wasRunning := st == devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING
+	fail := func(err error) {
+		g.log.Error(err, "moving instance to another revision", "instance", inst.ID, "revision", to.revision, "reason", reason)
+		inst.mu.Lock()
+		inst.rec.RebaseState = devboxv1.RebaseState_REBASE_STATE_FAILED.String()
+		inst.rec.RebaseMessage = err.Error()
+		inst.rec.RebaseRevision = to.revision
+		inst.mu.Unlock()
+		g.reportRecord(ctx, inst)
+	}
+	if !wasRunning && st != devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED {
+		fail(fmt.Errorf("instance %s is %s", inst.ID, st))
+		return
+	}
+	if inst.record().TemplateRevision == to.revision {
+		return
+	}
+	g.log.Info("moving instance to another revision", "instance", inst.ID, "revision", to.revision, "running", wasRunning, "reason", reason)
+	inst.mu.Lock()
+	inst.rec.RebaseState = devboxv1.RebaseState_REBASE_STATE_IN_PROGRESS.String()
+	inst.rec.RebaseMessage = ""
+	inst.rec.RebaseRevision = to.revision
+	// An explicit request retries a revision the onResume policy gave up on.
+	inst.rec.SkipRevision = 0
+	inst.mu.Unlock()
+
+	if wasRunning {
+		if _, err := g.suspendLocked(ctx, inst, devboxv1.SuspendReason_SUSPEND_REASON_UPDATE, devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED); err != nil {
+			fail(err)
+			return
+		}
+		// A recovered suspend can still be on its way; Substrate only repoints a suspended actor.
+		wctx, cancel := context.WithTimeout(ctx, g.cfg.ReadyTimeout)
+		_, err := g.deps.Actors.WaitState(wctx, inst.ref(), ateapi.ActorState_ACTOR_STATE_SUSPENDED)
+		cancel()
+		if err != nil {
+			fail(err)
+			return
+		}
+	}
+	if err := g.retarget(ctx, inst, to); err != nil {
+		fail(err)
+		if wasRunning {
+			if _, rerr := g.resumeLocked(ctx, inst, false); rerr != nil {
+				g.log.Error(rerr, "resuming after a failed update", "instance", inst.ID)
+			}
+		}
+		return
+	}
+	if !wasRunning {
+		inst.mu.Lock()
+		inst.rec.RebaseState = devboxv1.RebaseState_REBASE_STATE_SUCCEEDED.String()
+		inst.mu.Unlock()
+		g.reportRecord(ctx, inst)
+		return
+	}
+	if _, err := g.resumeLocked(ctx, inst, false); err != nil {
+		g.log.Error(err, "resuming after an update", "instance", inst.ID)
+		inst.mu.Lock()
+		if inst.rec.Rebase != nil && inst.rec.rebaseState() != devboxv1.RebaseState_REBASE_STATE_FAILED {
+			// It was never placed (most likely no worker had room): it is on the new revision, suspended, and
+			// starts there on the next resume. Anything else was rolled back, or failed to be.
+			inst.rec.RebaseState = devboxv1.RebaseState_REBASE_STATE_SUCCEEDED.String()
+			inst.rec.Message = "updated, but could not be resumed: " + err.Error()
+		} else {
+			inst.rec.Message = err.Error()
+		}
+		inst.mu.Unlock()
+		g.reportRecord(ctx, inst)
+	}
 }
 
 // running returns the daemon of a running instance, resuming it first when resumeIfSuspended is set
@@ -549,7 +847,7 @@ func (g *Gateway) takeSnapshot(ctx context.Context, inst *Instance, req *devboxv
 			inst.rec.Status = devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED.String()
 			inst.sharedSnap = false
 			inst.mu.Unlock()
-			if _, err := g.resumeLocked(context.WithoutCancel(ctx), inst); err != nil {
+			if _, err := g.resumeLocked(context.WithoutCancel(ctx), inst, false); err != nil {
 				g.log.Error(err, "resuming after snapshot", "instance", inst.ID)
 				g.setStatus(ctx, inst, statusUpdate{status: devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED, reason: devboxv1.SuspendReason_SUSPEND_REASON_SNAPSHOT, message: err.Error()})
 			}
@@ -568,10 +866,16 @@ func (g *Gateway) takeSnapshot(ctx context.Context, inst *Instance, req *devboxv
 	if actors.TagFidelity(tag) == ateapi.SnapshotFidelity_SNAPSHOT_FIDELITY_MEMORY {
 		fidelity = devboxv1.SnapshotFidelity_SNAPSHOT_FIDELITY_MEMORY
 	}
+	// A suspended instance moved to a revision it hasn't started on yet still has its snapshot from the one before.
+	rec := inst.record()
+	revision := rec.TemplateRevision
+	if !wasRunning && rec.Rebase != nil {
+		revision = rec.Rebase.FromRevision
+	}
 	return &devboxv1.SnapshotRef{
 		SnapshotId:       req.GetSnapshotId(),
 		Tag:              tagRef.String(),
-		TemplateRevision: inst.record().TemplateRevision,
+		TemplateRevision: revision,
 		Fidelity:         fidelity,
 	}, nil
 }
@@ -644,10 +948,14 @@ func (g *Gateway) adopt(ctx context.Context, inst *Instance) {
 		g.log.Error(err, "adopting instance", "instance", inst.ID)
 		return
 	}
+	g.adoptRebase(ctx, inst, a)
 	switch a.GetStatus().GetState() {
 	case ateapi.ActorState_ACTOR_STATE_RUNNING, ateapi.ActorState_ACTOR_STATE_RESUMING:
 		if err := g.wake(ctx, inst); err != nil {
 			g.log.Error(err, "re-initializing adopted instance", "instance", inst.ID)
+		} else {
+			// It runs on the revision it was moved to: the move is done, whatever the gateway got to record.
+			g.completeRebase(inst)
 		}
 		g.setStatus(ctx, inst, statusUpdate{status: devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING})
 		g.startForwarder(inst)
@@ -661,6 +969,29 @@ func (g *Gateway) adopt(ctx context.Context, inst *Instance) {
 		if rec.status() != devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED {
 			g.setStatus(ctx, inst, statusUpdate{status: devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED, reason: reason})
 		}
+	}
+}
+
+// adoptRebase reconciles a pending move with the actor: the record is written before the actor is repointed, so
+// a gateway that stopped in between left a record that is ahead of the actor.
+func (g *Gateway) adoptRebase(ctx context.Context, inst *Instance, a *ateapi.Actor) {
+	inst.mu.Lock()
+	r := &inst.rec
+	if r.Rebase == nil || a.GetActorTemplate().GetName() != r.Rebase.FromTemplate {
+		inst.mu.Unlock()
+		return
+	}
+	intent := *r.Rebase
+	r.Template, r.TemplateRevision, r.ImageDigest, r.DaemonVersion = intent.FromTemplate, intent.FromRevision, intent.FromImageDigest, intent.FromDaemonVersion
+	r.Rebase = nil
+	if r.rebaseState() == devboxv1.RebaseState_REBASE_STATE_IN_PROGRESS {
+		r.RebaseState = devboxv1.RebaseState_REBASE_STATE_FAILED.String()
+		r.RebaseMessage = "the gateway restarted before the instance was moved"
+	}
+	after := *r
+	inst.mu.Unlock()
+	if err := g.persist(ctx, &after); err != nil {
+		g.log.Error(err, "persisting instance record", "instance", inst.ID)
 	}
 }
 

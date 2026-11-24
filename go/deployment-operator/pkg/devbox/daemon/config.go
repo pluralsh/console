@@ -35,6 +35,10 @@ type Config struct {
 	Contract string
 	// Shell is the terminals' login shell.
 	Shell string
+	// BootScript is the user's script run when an existing instance cold-boots (~/.config/devbox/boot.sh).
+	BootScript string
+	// BootScriptTimeout bounds BootScript.
+	BootScriptTimeout time.Duration
 
 	Chromium    string
 	Xvfb        string
@@ -76,6 +80,12 @@ func (c *Config) defaults() {
 	}
 	if c.TrustDir == "" {
 		c.TrustDir = filepath.Join(c.StateDir, "trust")
+	}
+	if c.BootScript == "" {
+		c.BootScript = filepath.Join(c.Home, ".config", "devbox", "boot.sh")
+	}
+	if c.BootScriptTimeout <= 0 {
+		c.BootScriptTimeout = 5 * time.Minute
 	}
 	if c.IdentityDir == "" {
 		c.IdentityDir = "/run/plural/identity"

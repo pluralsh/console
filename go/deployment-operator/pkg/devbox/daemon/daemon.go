@@ -63,8 +63,16 @@ const (
 	loginCheck  = 5 * time.Minute
 )
 
+// instanceSchema is the version of instanceFile this daemon writes. The file lives on the home volume and so
+// outlives the daemon that wrote it: an instance moved to another template revision is read by a newer daemon,
+// and one rolled back by an older one. Fields may be added freely (unknown ones are ignored on read); bump the
+// version only for a change an older daemon would misread.
+const instanceSchema = 1
+
 // instanceFile persists Initialize so a restarted daemon resumes with the same configuration.
 type instanceFile struct {
+	// Schema is instanceSchema when written; zero in files from daemons that didn't write it.
+	Schema          int    `json:"schema,omitempty"`
 	Request         []byte `json:"request"`
 	FirstThreadDone bool   `json:"firstThreadDone"`
 }
@@ -262,6 +270,8 @@ func (d *Daemon) Serve(ctx context.Context, ln net.Listener) error {
 	d.mu.Unlock()
 	if req != nil {
 		d.bg.Go(func() { d.hydrate(req) })
+		// The daemon of an existing instance starting is a cold boot: the root filesystem is the image's again.
+		d.bg.Go(func() { d.runBootScript(d.ctx) })
 	}
 
 	var protocols http.Protocols
@@ -602,8 +612,12 @@ func (d *Daemon) loadInstance() error {
 	if err != nil || !ok {
 		return err
 	}
+	if f.Schema > instanceSchema {
+		d.log.Warn("instance state was written by a newer devbox-daemon; reading what this one understands",
+			"schema", f.Schema, "supported", instanceSchema)
+	}
 	req := &devboxv1.InitializeRequest{}
-	if err := protojson.Unmarshal(f.Request, req); err != nil {
+	if err := (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(f.Request, req); err != nil {
 		return err
 	}
 	d.inst = f
@@ -619,6 +633,7 @@ func (d *Daemon) saveInstanceLocked() error {
 		return err
 	}
 	d.inst.Request = raw
+	d.inst.Schema = instanceSchema
 	return fsutil.WriteJSON(d.instancePath(), d.inst, 0o600)
 }
 

@@ -10,6 +10,8 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 )
 
 // Records persists instance records so a restarted gateway can reconcile with console's RegisterGateway
@@ -22,8 +24,8 @@ type Records interface {
 }
 
 const (
-	recordLabel = "devboxes.plural.sh/instance-record"
-	recordKey   = "instance.json"
+	recordLabel = v1alpha1.DevboxInstanceRecordLabel
+	recordKey   = v1alpha1.DevboxInstanceRecordKey
 )
 
 // KubeRecords keeps one ConfigMap per instance in the gateway's namespace. Records hold no credentials.

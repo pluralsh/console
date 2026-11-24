@@ -29,8 +29,13 @@ type Runner struct {
 	Revision    int64
 	GoldenTag   string
 	ImageDigest string
+	// DaemonVersion is the devbox-daemon of Revision's runtime sidecar; empty when the daemon is the image's own.
+	DaemonVersion string
 	// Revisions maps every revision that still exists to its template and golden tag.
 	Revisions map[int64]RunnerRevision
+	// UpdateOnResume is the runner's instance update policy: a suspended instance behind Revision moves to it
+	// when it is resumed.
+	UpdateOnResume bool
 
 	AllowedRepositories []string
 	HTTPAllowlist       []egress.AllowEntry
@@ -43,8 +48,31 @@ type Runner struct {
 }
 
 type RunnerRevision struct {
-	Template  string
-	GoldenTag string
+	Template      string
+	GoldenTag     string
+	ImageDigest   string
+	DaemonVersion string
+}
+
+// revisionTarget is a revision an instance can be moved to.
+type revisionTarget struct {
+	revision      int64
+	template      string
+	imageDigest   string
+	daemonVersion string
+}
+
+// target resolves the revision instances move to, which is the runner's current one; revision is zero or names
+// it. A newer revision hasn't passed its probe, and an older one would undo an update (and the onResume policy
+// would move the instance forward again).
+func (r *Runner) target(revision int64) (revisionTarget, error) {
+	if r.Revision == 0 || r.Template == "" {
+		return revisionTarget{}, fmt.Errorf("%w: %s", ErrRunnerNotReady, r.Name)
+	}
+	if revision != 0 && revision != r.Revision {
+		return revisionTarget{}, fmt.Errorf("devbox runner %s serves revision %d, instances can't be moved to revision %d", r.Name, r.Revision, revision)
+	}
+	return revisionTarget{revision: r.Revision, template: r.Template, imageDigest: r.ImageDigest, daemonVersion: r.DaemonVersion}, nil
 }
 
 // ErrRunnerNotReady means the runner has no ready revision to start instances from.
@@ -152,14 +180,21 @@ func RunnerFromCRD(obj *v1alpha1.DevboxRunner) *Runner {
 		ImageDigest:         digestOf(deref(st.ResolvedImage)),
 		Revisions:           map[int64]RunnerRevision{},
 		AllowedRepositories: obj.Spec.AllowedRepositories,
+		UpdateOnResume:      obj.InstanceUpdateMode() == v1alpha1.DevboxInstanceUpdateOnResume,
 	}
 	if st.TemplateRevision != nil {
 		r.Revision = *st.TemplateRevision
 	}
 	for _, rev := range st.Revisions {
-		r.Revisions[rev.Revision] = RunnerRevision{Template: rev.Name, GoldenTag: deref(rev.GoldenTag)}
+		r.Revisions[rev.Revision] = RunnerRevision{
+			Template:      rev.Name,
+			GoldenTag:     deref(rev.GoldenTag),
+			ImageDigest:   digestOf(rev.Image),
+			DaemonVersion: deref(rev.DaemonVersion),
+		}
 		if rev.Revision == r.Revision {
 			r.GoldenTag = deref(rev.GoldenTag)
+			r.DaemonVersion = deref(rev.DaemonVersion)
 			if r.Template == "" {
 				r.Template = rev.Name
 			}

@@ -542,7 +542,7 @@ func TestCompleteAfterBackstopLosesToResume(t *testing.T) {
 	h.clock.advance(15 * 24 * time.Hour)
 	inst.op.Lock()
 	h.g.backstops(context.Background())
-	_, err := h.g.resumeLocked(context.Background(), inst)
+	_, err := h.g.resumeLocked(context.Background(), inst, true)
 	inst.op.Unlock()
 	if err != nil {
 		t.Fatal(err)

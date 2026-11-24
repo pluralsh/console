@@ -37,6 +37,11 @@ type Server struct {
 	FailResume error
 	// FailResumeTimes, when positive, limits FailResume to that many calls.
 	FailResumeTimes int
+	// CrashOnTemplate makes an actor of this template crash when it is resumed.
+	CrashOnTemplate string
+	// FailUpdate, when set, makes the next FailUpdateTimes UpdateActor calls fail with it.
+	FailUpdate      error
+	FailUpdateTimes int
 
 	version int64
 }
@@ -159,9 +164,17 @@ func (s *Server) UpdateActor(_ context.Context, req *ateapi.UpdateActorRequest) 
 	defer s.mu.Unlock()
 	ref := &ateapi.ObjectRef{Atespace: req.GetActor().GetMetadata().GetAtespace(), Name: req.GetActor().GetMetadata().GetName()}
 	s.record("UpdateActor", ref)
+	if s.FailUpdate != nil && s.FailUpdateTimes > 0 {
+		s.FailUpdateTimes--
+		return nil, s.FailUpdate
+	}
 	a, ok := s.Actors[key(ref)]
 	if !ok {
 		return nil, status.Error(codes.NotFound, "actor not found")
+	}
+	// Like Substrate, which only lets a suspended actor change template.
+	if a.GetStatus().GetState() != ateapi.ActorState_ACTOR_STATE_SUSPENDED {
+		return nil, status.Errorf(codes.FailedPrecondition, "actor is %s", a.GetStatus().GetState())
 	}
 	a.ActorTemplate = req.GetActor().GetActorTemplate()
 	return proto.Clone(a).(*ateapi.Actor), nil
@@ -202,6 +215,10 @@ func (s *Server) ResumeActor(_ context.Context, req *ateapi.ResumeActorRequest) 
 	}
 	if a.GetStatus().GetState() != ateapi.ActorState_ACTOR_STATE_SUSPENDED {
 		return nil, status.Errorf(codes.FailedPrecondition, "actor is %s", a.GetStatus().GetState())
+	}
+	if s.CrashOnTemplate != "" && a.GetActorTemplate().GetName() == s.CrashOnTemplate {
+		a.Status = &ateapi.ActorStatus{State: ateapi.ActorState_ACTOR_STATE_CRASHED}
+		return &ateapi.ResumeActorResponse{}, nil
 	}
 	a.Status = &ateapi.ActorStatus{
 		State:            ateapi.ActorState_ACTOR_STATE_RUNNING,

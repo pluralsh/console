@@ -11,8 +11,10 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 	"google.golang.org/grpc/test/bufconn"
 
 	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
@@ -49,6 +51,8 @@ type fakeDaemon struct {
 	events   chan *devboxv1.DaemonEvent
 	breakSub chan struct{}
 	settled  uint64
+	// failInitialize makes the next that many Initialize calls fail.
+	failInitialize int
 	// onPrepare runs inside PrepareSuspend, before it returns settled.
 	onPrepare func()
 	onAck     func(offset uint64)
@@ -83,6 +87,10 @@ func (d *fakeDaemon) Initialize(ctx context.Context, req *devboxv1.InitializeReq
 	d.note(ctx)
 	d.mu.Lock()
 	defer d.mu.Unlock()
+	if d.failInitialize > 0 {
+		d.failInitialize--
+		return nil, status.Error(codes.Internal, "state directory is from a newer daemon")
+	}
 	d.initialized = append(d.initialized, req)
 	return &devboxv1.InitializeResponse{AlreadyInitialized: len(d.initialized) > 1}, nil
 }
