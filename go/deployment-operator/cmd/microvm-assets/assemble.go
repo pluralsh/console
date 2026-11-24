@@ -5,19 +5,18 @@
 package main
 
 import (
-	"archive/tar"
 	"bufio"
 	"context"
 	"fmt"
 	"io"
-	"io/fs"
+	iofs "io/fs"
 	"net/http"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 
 	"github.com/klauspost/compress/zstd"
+	"github.com/pluralsh/console/go/polly/fs"
 	"k8s.io/klog/v2"
 )
 
@@ -99,15 +98,30 @@ func downloadAndExtractKataAssets(ctx context.Context, kataURL, workDir, outDir 
 		return fmt.Errorf("downloading %s: unexpected HTTP status %s", kataURL, resp.Status)
 	}
 
-	links, err := extractKataTarZst(ctx, resp.Body, workDir)
+	zr, err := zstd.NewReader(bufio.NewReader(resp.Body))
+	if err != nil {
+		return fmt.Errorf("creating zstd reader: %w", err)
+	}
+	defer zr.Close()
+
+	// Cap the decompressed size; a truncated tar fails extraction.
+	err = fs.UntarStream(workDir, io.LimitReader(zr, maxAssetBytes),
+		fs.WithTarSymlinks(),
+		fs.WithTarFilter(func(name string) bool {
+			return strings.HasPrefix(name, kataSharePrefix) || name == kataLibexecVirtiofsd
+		}))
 	if err != nil {
 		return fmt.Errorf("extracting %s: %w", kataURL, err)
 	}
 
+	root, err := filepath.EvalSymlinks(workDir)
+	if err != nil {
+		return err
+	}
 	for _, item := range []struct {
 		archivePath string
 		outName     string
-		mode        fs.FileMode
+		mode        iofs.FileMode
 	}{
 		{archivePath: kataKernelSymlink, outName: "vmlinux", mode: 0o644},
 		// rootfs.img is attached over virtio-pmem and mounted with DAX, so it must be a multiple of 2 MiB with a
@@ -115,17 +129,15 @@ func downloadAndExtractKataAssets(ctx context.Context, kataURL, workDir, outDir 
 		{archivePath: kataRootfsSymlink, outName: "rootfs.img", mode: 0o644},
 		{archivePath: kataLibexecVirtiofsd, outName: "virtiofsd", mode: 0o755},
 	} {
-		resolved := item.archivePath
-		for range 8 {
-			target, ok := links[resolved]
-			if !ok {
-				break
-			}
-			resolved = target
+		src, err := filepath.EvalSymlinks(filepath.Join(workDir, filepath.FromSlash(item.archivePath)))
+		if err != nil {
+			return fmt.Errorf("resolving %s in kata archive: %w", item.archivePath, err)
 		}
-		src := filepath.Join(workDir, filepath.FromSlash(resolved))
+		if rel, err := filepath.Rel(root, src); err != nil || !filepath.IsLocal(rel) {
+			return fmt.Errorf("resolving %s in kata archive: points outside the archive", item.archivePath)
+		}
 		if fi, err := os.Stat(src); err != nil || !fi.Mode().IsRegular() {
-			return fmt.Errorf("resolving %s in kata archive: missing regular file %s", item.archivePath, resolved)
+			return fmt.Errorf("resolving %s in kata archive: %s is not a regular file", item.archivePath, src)
 		}
 		if err := os.Chmod(src, item.mode); err != nil {
 			return err
@@ -137,65 +149,7 @@ func downloadAndExtractKataAssets(ctx context.Context, kataURL, workDir, outDir 
 	return nil
 }
 
-// extractKataTarZst writes the regular files under opt/kata/share/kata-containers/ and opt/kata/libexec/virtiofsd
-// of a zstd-compressed tar into workDir, and returns the archive's symlinks as path -> cleaned target.
-func extractKataTarZst(ctx context.Context, r io.Reader, workDir string) (map[string]string, error) {
-	zr, err := zstd.NewReader(bufio.NewReader(r))
-	if err != nil {
-		return nil, fmt.Errorf("creating zstd reader: %w", err)
-	}
-	defer zr.Close()
-
-	links := map[string]string{}
-	tr := tar.NewReader(zr)
-	var totalBytes int64
-	for {
-		if err := ctx.Err(); err != nil {
-			return nil, err
-		}
-		hdr, err := tr.Next()
-		if err == io.EOF {
-			return links, nil
-		}
-		if err != nil {
-			return nil, err
-		}
-
-		raw := strings.TrimPrefix(strings.TrimPrefix(hdr.Name, "./"), "/")
-		if !strings.HasPrefix(raw, kataSharePrefix) && raw != kataLibexecVirtiofsd {
-			continue
-		}
-		name := strings.TrimPrefix(path.Clean(raw), "/")
-		if !filepath.IsLocal(filepath.FromSlash(name)) {
-			return nil, fmt.Errorf("tar entry %q escapes the extraction directory", hdr.Name)
-		}
-		if !strings.HasPrefix(name, kataSharePrefix) && name != kataLibexecVirtiofsd {
-			continue
-		}
-
-		switch hdr.Typeflag {
-		case tar.TypeReg:
-			totalBytes += hdr.Size
-			if totalBytes > maxAssetBytes {
-				return nil, fmt.Errorf("kata archive exceeds %d-byte limit", maxAssetBytes)
-			}
-			if err := writeStreamToFile(filepath.Join(workDir, filepath.FromSlash(name)), 0o600, tr); err != nil {
-				return nil, err
-			}
-		case tar.TypeSymlink:
-			if path.IsAbs(hdr.Linkname) {
-				return nil, fmt.Errorf("tar symlink %q has absolute target %q", hdr.Name, hdr.Linkname)
-			}
-			target := path.Clean(path.Join(path.Dir(name), hdr.Linkname))
-			if !filepath.IsLocal(filepath.FromSlash(target)) {
-				return nil, fmt.Errorf("tar symlink %q target %q escapes the extraction directory", hdr.Name, hdr.Linkname)
-			}
-			links[name] = target
-		}
-	}
-}
-
-func writeStreamToFile(dstPath string, mode fs.FileMode, r io.Reader) error {
+func writeStreamToFile(dstPath string, mode iofs.FileMode, r io.Reader) error {
 	if err := os.MkdirAll(filepath.Dir(dstPath), 0o755); err != nil {
 		return err
 	}
@@ -214,7 +168,7 @@ func writeStreamToFile(dstPath string, mode fs.FileMode, r io.Reader) error {
 	return closeErr
 }
 
-func downloadToFile(ctx context.Context, url, dstPath string, mode fs.FileMode) error {
+func downloadToFile(ctx context.Context, url, dstPath string, mode iofs.FileMode) error {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return err

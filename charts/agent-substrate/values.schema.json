@@ -454,7 +454,6 @@
         "image": { "type": "string", "minLength": 1 },
         "bucketUrl": { "type": "string" },
         "arches": { "type": "array", "items": { "type": "string", "enum": ["amd64", "arm64"] } },
-        "serviceAccount": { "type": "object" },
         "activeDeadlineSeconds": { "type": "integer" },
         "workSize": { "type": "string" },
         "resources": { "type": "object" },

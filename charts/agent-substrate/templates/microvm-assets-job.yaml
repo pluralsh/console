@@ -5,31 +5,16 @@ GCS/Kind), so atelet can fetch them. Backend-agnostic: it uploads through
 gocloud.dev blob, so S3, GCS and Azure Blob all work. The pinned digests come
 from the microvm SandboxConfig rendered below, and the Job fails if the
 upstream releases don't match them. Idempotent: existing objects are skipped.
+Runs as ate-api-server, so its object store access (apiServer.serviceAccount
+annotations, or the EKS Pod Identity / IRSA binding for that name) covers
+staging too and there is a single identity to grant bucket access to.
 */ -}}
 {{- $a := .Values.assetStaging -}}
 {{- $m := .Values.sandboxConfigs.microvm -}}
 {{- if and $m.enabled $a.enabled }}
 {{- $ns := include "substrate.namespace" . -}}
 {{- $name := "agent-substrate-microvm-assets" -}}
-{{- $sa := $a.serviceAccount.name | default $name -}}
 {{- $bucketUrl := $a.bucketUrl | default (printf "%s://%s" $m.assetScheme $m.assetBucket) -}}
-{{- if not $a.serviceAccount.name }}
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: {{ $sa }}
-  namespace: {{ $ns }}
-  labels:
-    {{- include "substrate.labels" . | nindent 4 }}
-  annotations:
-    helm.sh/hook: post-install,post-upgrade
-    helm.sh/hook-weight: "-5"
-    helm.sh/hook-delete-policy: before-hook-creation
-    {{- with $a.serviceAccount.annotations }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
----
-{{- end }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -64,7 +49,7 @@ spec:
       labels:
         app: {{ $name }}
     spec:
-      serviceAccountName: {{ $sa }}
+      serviceAccountName: ate-api-server
       restartPolicy: OnFailure
       {{- include "substrate.imagePullSecrets" . | nindent 6 }}
       {{- include "substrate.systemInfraScheduling" . | nindent 6 }}

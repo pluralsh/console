@@ -455,9 +455,8 @@ bootstrapJob:
 
 # Stages the microvm sandbox binaries into sandboxConfigs.microvm.assetBucket
 # with a post-install/upgrade Job, on any object store (S3, GCS, Azure Blob).
-# The Job needs write access to the bucket through its ServiceAccount: reuse
-# one that already has it (serviceAccount.name, e.g. ate-api-server), or let
-# the chart create one and annotate it for workload identity.
+# The Job runs as ate-api-server, so grant that identity (apiServer.serviceAccount
+# annotations, or a Pod Identity association) write access to the bucket.
 assetStaging:
   enabled: false
   # -- An image that ships /usr/local/bin/microvm-assets. The deployment-operator
@@ -467,11 +466,6 @@ assetStaging:
   # for options like s3://bucket?region=us-east-1.
   bucketUrl: ""
   arches: [amd64]
-  serviceAccount:
-    # -- Run as this existing ServiceAccount instead of creating one.
-    name: ""
-    # -- Annotations for the created ServiceAccount (IRSA, GKE Workload Identity).
-    annotations: {}
   activeDeadlineSeconds: 1800
   # -- Scratch space for the Kata release (about 1Gi per arch, unpacked).
   workSize: 6Gi
