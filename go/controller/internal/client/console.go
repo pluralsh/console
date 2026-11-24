@@ -196,6 +196,7 @@ type ConsoleClient interface {
 	DeleteFederatedCredential(ctx context.Context, id string) (*console.DeleteFederatedCredential_DeleteFederatedCredential, error)
 	IsFederatedCredentialExists(ctx context.Context, id string) (bool, error)
 	GetSentinel(ctx context.Context, id string) (*console.SentinelFragment, error)
+	GetSentinelByName(ctx context.Context, name string) (*console.SentinelFragment, error)
 	IsSentinelExists(ctx context.Context, id string) (bool, error)
 	DeleteSentinel(ctx context.Context, id string) error
 	CreateSentinel(ctx context.Context, attr *console.SentinelAttributes) (*console.SentinelFragment, error)

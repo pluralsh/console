@@ -26,6 +26,22 @@ func (c *client) GetSentinel(ctx context.Context, id string) (*console.SentinelF
 	return response.Sentinel, err
 }
 
+func (c *client) GetSentinelByName(ctx context.Context, name string) (*console.SentinelFragment, error) {
+	response, err := c.consoleClient.GetSentinelByName(ctx, name)
+	if internalerror.IsNotFound(err) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, name)
+	}
+
+	if err == nil && (response == nil || response.Sentinel == nil) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, name)
+	}
+
+	if response == nil {
+		return nil, err
+	}
+	return response.Sentinel, err
+}
+
 func (c *client) GetSentinelTiny(ctx context.Context, id string) (*console.GetSentinelTiny_Sentinel, error) {
 	response, err := c.consoleClient.GetSentinelTiny(ctx, id)
 	if internalerror.IsNotFound(err) {

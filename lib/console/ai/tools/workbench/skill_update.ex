@@ -78,7 +78,7 @@ defmodule Console.AI.Tools.Workbench.SkillUpdate do
   defp context_attrs(ctx) do
     Map.from_struct(ctx)
     |> Enum.reduce(%{}, fn
-      {:job, %{id: id}}, acc -> Map.put(acc, :workbench_job_id, id)
+      {:job, %{id: id, workbench_id: wid}}, acc -> Map.merge(acc, %{workbench_job_id: id, workbench_id: wid})
       {:stack, %{id: id}}, acc -> Map.put(acc, :stack_id, id)
       {:cluster, %{id: id}}, acc -> Map.put(acc, :cluster_id, id)
       {:service, %{id: id}}, acc -> Map.put(acc, :service_id, id)
