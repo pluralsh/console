@@ -250,7 +250,7 @@ spec:
             matchExpressions:
               - key: app
                 operator: In
-                values: [ate-api-server, atelet]
+                values: [ate-api-server, atelet, agent-substrate-microvm-assets]
         - podSelector:
             matchLabels:
               batch.kubernetes.io/job-name: rustfs-bucket-init

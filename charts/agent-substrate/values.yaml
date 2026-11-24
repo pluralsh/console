@@ -300,9 +300,9 @@ sandboxConfigs:
     # -- Merged over the upstream spec (files/sandboxconfig/gvisor.yaml).
     specOverrides: {}
   microvm:
-    # -- Install the microvm SandboxConfig. Its assets must already be staged
-    # at <scheme>://<bucket>/microvm-assets/<arch>/<sha256> (ate-setup's
-    # `deploy sandboxconfig` does that); this chart does not stage them.
+    # -- Install the microvm SandboxConfig. Its assets must be staged at
+    # <scheme>://<bucket>/microvm-assets/<arch>/<sha256>: either with
+    # assetStaging below, or ate-setup's `deploy sandboxconfig` (GCS/Kind only).
     enabled: false
     assetScheme: ""
     assetBucket: ""
@@ -452,6 +452,27 @@ secretsHook:
 # their CRDs (installed by this release) aren't served yet at render time.
 bootstrapJob:
   image: alpine/kubectl:1.37.2
+
+# Stages the microvm sandbox binaries into sandboxConfigs.microvm.assetBucket
+# with a post-install/upgrade Job, on any object store (S3, GCS, Azure Blob).
+# The Job runs as ate-api-server, so grant that identity (apiServer.serviceAccount
+# annotations, or a Pod Identity association) write access to the bucket.
+assetStaging:
+  enabled: false
+  # -- An image that ships /usr/local/bin/microvm-assets. The deployment-operator
+  # image does, so installs that already vendor it need nothing extra. Pin a tag.
+  image: ghcr.io/pluralsh/deployment-operator:latest
+  # -- gocloud.dev blob URL. Defaults to <assetScheme>://<assetBucket>; set it
+  # for options like s3://bucket?region=us-east-1.
+  bucketUrl: ""
+  arches: [amd64]
+  activeDeadlineSeconds: 1800
+  # -- Scratch space for the Kata release (about 1Gi per arch, unpacked).
+  workSize: 6Gi
+  resources: {}
+  extraArgs: []
+  # -- e.g. AWS_REGION, which the s3 driver needs when the pod has none.
+  extraEnv: []
 
 # The CloudNativePG operator. Disable where it already runs: it's cluster-wide,
 # and two copies conflict.
