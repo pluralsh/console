@@ -6,6 +6,7 @@ defmodule Console.GraphQl.Deployments.Devbox do
     DevboxInstanceSession,
     DevboxInstanceInteraction,
     DevboxSnapshot,
+    DevboxUpdateCampaign,
     PullRequest,
     AgentCredential
   }
@@ -25,6 +26,9 @@ defmodule Console.GraphQl.Deployments.Devbox do
   ecto_enum :pull_request_source, PullRequest.Source
   ecto_enum :devbox_cloud_provider, Devbox.CloudProvider
   ecto_enum :devbox_autonomy, Devbox.Autonomy
+  ecto_enum :devbox_update_mode, Devbox.UpdateMode
+  ecto_enum :devbox_rebase_state, DevboxInstance.RebaseState
+  ecto_enum :devbox_update_campaign_status, DevboxUpdateCampaign.Status
   ecto_enum :agent_credential_provider, AgentCredential.Provider
   ecto_enum :agent_credential_kind, AgentCredential.Kind
   ecto_enum :agent_credential_status, AgentCredential.Status
@@ -111,6 +115,10 @@ defmodule Console.GraphQl.Deployments.Devbox do
     field :image,                :string, description: "the box image as specified on the DevboxRunner"
     field :resolved_image,       :string, description: "the image pinned by digest"
     field :template_revision,    :string, description: "the golden template revision instances boot from"
+    field :revision,             :integer, description: "the number of the template revision, which instances report as theirs"
+    field :runtime_image,        :string, description: "the runtime sidecar image, pinned by digest, that delivers devbox-daemon"
+    field :daemon_version,       :string, description: "the devbox-daemon version of the runtime image"
+    field :update_mode,          :devbox_update_mode, description: "how instances move to a new template revision"
     field :status,               :devbox_status
     field :resources,            :json, description: "the resources for each instance"
     field :allowed_repositories, list_of(:string), description: "repositories instances may check out, all if unset"
@@ -232,7 +240,18 @@ defmodule Console.GraphQl.Deployments.Devbox do
     field :status,            :devbox_status
     field :resolved_image,    :string
     field :template_revision, :string
+    field :revision,          :integer
+    field :runtime_image,     :string
+    field :daemon_version,    :string
     field :conditions,        list_of(:devbox_condition_attributes)
+  end
+
+  input_object :devbox_update_campaign_attributes do
+    field :force,           :boolean, description: "also restart instances that are in use, after the notice period (admins only)"
+    field :reason,          :string, description: "shown to the users whose instances are restarted"
+    field :starts_at,       :datetime, description: "when to start, now if unset"
+    field :notice_minutes,  :integer, description: "how long users of a forced campaign are warned before their instance restarts, 10 to 30, default 15"
+    field :max_concurrency, :integer, description: "how many instances update at once, default 5"
   end
 
   input_object :devbox_config_value_attributes do
@@ -311,6 +330,10 @@ defmodule Console.GraphQl.Deployments.Devbox do
     field :image,                :string
     field :resolved_image,       :string
     field :template_revision,    :string
+    field :revision,             :integer, description: "the number of the template revision new instances start from"
+    field :runtime_image,        :string, description: "the runtime sidecar image, pinned by digest, that delivers devbox-daemon"
+    field :daemon_version,       :string, description: "the devbox-daemon version new and updated instances run"
+    field :update_mode,          :devbox_update_mode, description: "on_resume moves an outdated instance to the current revision when it is next resumed"
     field :status,               :devbox_status
     field :resources,            :map
     field :allowed_repositories, list_of(:string)
@@ -338,7 +361,43 @@ defmodule Console.GraphQl.Deployments.Devbox do
     @desc "the box's workload identity issuer and how to trust it from cloud accounts"
     field :workload_identity, :devbox_workload_identity, resolve: &Deployments.devbox_workload_identity/3
 
+    @desc "how many live instances are behind the box's current template revision"
+    field :outdated_instances, :integer, resolve: &Deployments.devbox_outdated_instances/3
+
+    @desc "the box's update campaigns, newest first"
+    field :update_campaigns, list_of(:devbox_update_campaign) do
+      arg :first, :integer, description: "how many to return, 10 by default"
+      resolve &Deployments.devbox_update_campaigns/3
+    end
+
     timestamps()
+  end
+
+  @desc "An admin's request to move every outdated instance of a box to its current template revision"
+  object :devbox_update_campaign do
+    field :id,              non_null(:id)
+    field :force,           non_null(:boolean), description: "whether instances in use are restarted too, once the deadline passes"
+    field :status,          non_null(:devbox_update_campaign_status)
+    field :reason,          :string
+    field :starts_at,       :datetime
+    field :notice_minutes,  :integer
+    field :deadline_at,     :datetime, description: "when a forced campaign starts restarting instances that are in use"
+    field :expires_at,      :datetime, description: "when the campaign stops waiting for instances to become idle"
+    field :max_concurrency, :integer
+    field :completed_at,    :datetime
+
+    field :progress, :devbox_update_campaign_progress, resolve: &Deployments.devbox_update_campaign_progress/3
+
+    field :devbox, :devbox, resolve: dataloader(Deployments)
+    field :user,   :user, resolve: dataloader(User)
+
+    timestamps()
+  end
+
+  object :devbox_update_campaign_progress do
+    field :outdated, non_null(:integer), description: "live instances of the box still behind its current revision"
+    field :updated,  non_null(:integer), description: "instances this campaign updated"
+    field :failed,   non_null(:integer), description: "instances whose update failed and was rolled back"
   end
 
   object :devbox_cloud_identity do
@@ -477,6 +536,17 @@ defmodule Console.GraphQl.Deployments.Devbox do
     field :status_reason,       :string
     field :template_revision,   :string
     field :image_digest,        :string
+    field :daemon_version,      :string, description: "the devbox-daemon version the instance runs"
+    field :outdated,            :boolean,
+      description: "whether the box has a newer template revision (a new image or daemon) than the instance runs",
+      resolve: dataloader(Deployments, :devbox, callback: fn devbox, inst, _ -> {:ok, DevboxInstance.outdated?(%{inst | devbox: devbox})} end)
+    field :rebase_state,        :devbox_rebase_state, description: "the outcome of the last update to another template revision"
+    field :rebase_error,        :string, description: "why the last update failed; the instance was returned to the revision it had"
+    field :rebase_revision,     :string, description: "the revision the last update was to"
+    field :last_rebased_at,     :datetime
+    field :update_deadline_at,  :datetime,
+      description: "when a forced update will restart this instance; its processes and anything outside the home directory are lost"
+    field :update_campaign,     :devbox_update_campaign, resolve: dataloader(Deployments)
     field :restore_fidelity,    :devbox_snapshot_fidelity,
       description: "filesystem if the box's template changed since the snapshot, so the instance cold-boots"
     field :foreground_state,    :devbox_foreground_state, description: "requires_action if any thread needs you"
@@ -1268,6 +1338,33 @@ defmodule Console.GraphQl.Deployments.Devbox do
       arg :id, non_null(:id)
 
       resolve &Deployments.resume_devbox_instance/2
+    end
+
+    @desc "Moves an outdated instance to its box's current template revision. A running instance restarts: its processes and anything outside the home directory are lost, the home directory and threads are kept"
+    field :rebase_devbox_instance, :devbox_instance do
+      middleware Authenticated
+      middleware Scope, resource: :workbench, action: :write
+      arg :id, non_null(:id)
+
+      resolve &Deployments.rebase_devbox_instance/2
+    end
+
+    @desc "Starts updating every outdated instance of a box. Forcing it (admins only) also restarts instances in use after the notice period"
+    field :create_devbox_update_campaign, :devbox_update_campaign do
+      middleware Authenticated
+      middleware Scope, resource: :workbench, action: :write
+      arg :devbox_id,  non_null(:id)
+      arg :attributes, :devbox_update_campaign_attributes
+
+      resolve &Deployments.create_devbox_update_campaign/2
+    end
+
+    field :cancel_devbox_update_campaign, :devbox_update_campaign do
+      middleware Authenticated
+      middleware Scope, resource: :workbench, action: :write
+      arg :id, non_null(:id)
+
+      resolve &Deployments.cancel_devbox_update_campaign/2
     end
 
     @desc "Marks you as viewing an instance (call about every 30s while its tab is visible), which keeps it awake and resumes it if suspended"

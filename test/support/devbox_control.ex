@@ -17,6 +17,8 @@ defmodule Console.Devboxes.Control.Test do
   @impl true
   def delete_snapshot(_), do: :ok
   @impl true
+  def rebase_instance(_, _), do: {:ok, %{accepted: true}}
+  @impl true
   def set_agent_billing(_, _), do: :ok
   @impl true
   def push_credential(_, _), do: :ok

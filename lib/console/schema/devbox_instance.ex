@@ -6,6 +6,7 @@ defmodule Console.Schema.DevboxInstance do
     DevboxSnapshot,
     DevboxInstanceSession,
     DevboxInstanceInteraction,
+    DevboxUpdateCampaign,
     PullRequest,
     User
   }
@@ -22,6 +23,7 @@ defmodule Console.Schema.DevboxInstance do
 
   defenum ForegroundState, idle: 0, running: 1, requires_action: 2
   defenum Fidelity, memory: 0, filesystem: 1
+  defenum RebaseState, in_progress: 0, succeeded: 1, failed: 2
 
   @terminal ~w(completed failed cancelled)a
 
@@ -119,6 +121,14 @@ defmodule Console.Schema.DevboxInstance do
     field :actor_ref,              :string
     field :template_revision,      :string
     field :image_digest,           :string
+    field :daemon_version,         :string
+    field :rebase_state,           RebaseState
+    field :rebase_error,           :string
+    field :rebase_revision,        :string
+    field :rebase_attempts,        :integer, default: 0
+    field :rebase_requested_at,    :utc_datetime_usec
+    field :last_rebased_at,        :utc_datetime_usec
+    field :update_deadline_at,     :utc_datetime_usec
     field :restore_fidelity,       Fidelity
     field :foreground_state,       ForegroundState, default: :idle
     field :viewers,                :map
@@ -171,6 +181,7 @@ defmodule Console.Schema.DevboxInstance do
     belongs_to :snapshot,      DevboxSnapshot
     belongs_to :user,          User
     belongs_to :keep_awake_by, User
+    belongs_to :update_campaign, DevboxUpdateCampaign
 
     has_many :sessions,      DevboxInstanceSession, foreign_key: :instance_id
     has_many :threads,       DevboxInstanceSession, foreign_key: :instance_id, where: [kind: :thread]
@@ -206,6 +217,38 @@ defmodule Console.Schema.DevboxInstance do
   def for_status(query \\ __MODULE__, status) do
     from(i in query, where: i.status == ^status)
   end
+
+  def for_campaign(query \\ __MODULE__, campaign_id) do
+    from(i in query, where: i.update_campaign_id == ^campaign_id)
+  end
+
+  @doc """
+  Instances on another template revision than the one their box serves.  The gateway reports an instance's revision
+  by number, which is what `Devbox.revision` is (`Devbox.template_revision` is the template's name).  An instance
+  moves to the serving revision or stays where it is, so a different one is an older one.  Nothing is outdated
+  until both sides have reported a number: an instance holds its box's template name from when it is created
+  until the gateway first reports, and a box whose operator predates this doesn't send one.
+  """
+  def outdated(query \\ __MODULE__) do
+    from(i in query,
+      join: d in assoc(i, :devbox),
+      as: :outdated_devbox,
+      where: not is_nil(d.revision) and fragment("? ~ '^[0-9]+$'", i.template_revision)
+        and i.template_revision != fragment("?::text", d.revision)
+    )
+  end
+
+  @doc "Whether the instance is behind the template revision its (preloaded) box serves"
+  @spec outdated?(t) :: boolean
+  def outdated?(%__MODULE__{status: status}) when status in @terminal, do: false
+  def outdated?(%__MODULE__{template_revision: rev, devbox: %Devbox{revision: current}})
+    when is_binary(rev) and is_integer(current) do
+    case Integer.parse(rev) do
+      {number, ""} -> number != current
+      _ -> false
+    end
+  end
+  def outdated?(_), do: false
 
   def for_statuses(query \\ __MODULE__, statuses) do
     from(i in query, where: i.status in ^statuses)
@@ -246,7 +289,9 @@ defmodule Console.Schema.DevboxInstance do
             status_reason actor_ref template_revision image_digest restore_fidelity foreground_state viewers
             viewer_lease_until keep_awake_until keep_awake_by_id awake_since index_revision status_generation
             lease_generation running_threads waiting_threads started_at suspended_at completed_at last_activity_at
-            credentials_revoked_at workbench_id devbox_id snapshot_id user_id)a
+            credentials_revoked_at workbench_id devbox_id snapshot_id user_id daemon_version rebase_state
+            rebase_error rebase_revision rebase_attempts rebase_requested_at last_rebased_at update_deadline_at
+            update_campaign_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -258,6 +303,7 @@ defmodule Console.Schema.DevboxInstance do
     |> foreign_key_constraint(:devbox_id)
     |> foreign_key_constraint(:snapshot_id)
     |> validate_number(:max_running_threads, greater_than: 0)
+    |> update_change(:rebase_error, &Console.truncate(&1, 2000))
     |> validate_transition()
     |> status_timestamps()
     |> validate_required([:workbench_id, :devbox_id, :agent, :status])

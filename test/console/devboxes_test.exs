@@ -300,13 +300,48 @@ defmodule Console.DevboxesTest do
       for _ <- 1..3, do: {:error, "boom"} = Devboxes.create_instance(%{devbox_id: devbox.id}, wb.id, user)
     end
 
-    test "it restores snapshots, falling back to filesystem fidelity on a new template", %{user: user, workbench: wb, devbox: devbox} do
-      src = insert(:devbox_instance, devbox: devbox, workbench: wb)
-      snapshot = insert(:devbox_snapshot, workbench: wb, devbox: devbox, instance: src, fidelity: :memory, template_revision: "rev-0")
+    # the operator reports a box's template by name and by number, the gateway reports an instance's by number,
+    # and a snapshot copies its instance's
+    test "it restores snapshots with their fidelity while the box serves the same revision", %{user: user, workbench: wb, devbox: devbox} do
+      devbox = serving(devbox, "platform-r3", 3)
+      src = insert(:devbox_instance, devbox: devbox, workbench: wb, template_revision: "3")
+      snapshot = insert(:devbox_snapshot, workbench: wb, devbox: devbox, instance: src, fidelity: :memory, template_revision: "3")
 
       {:ok, inst} = Devboxes.create_instance(%{snapshot_id: snapshot.id}, wb.id, user)
 
       assert inst.snapshot_id == snapshot.id
+      assert inst.devbox_id == devbox.id
+      assert inst.restore_fidelity == :memory
+    end
+
+    test "it restores snapshots, falling back to filesystem fidelity on a new template", %{user: user, workbench: wb, devbox: devbox} do
+      devbox = serving(devbox, "platform-r3", 3)
+      src = insert(:devbox_instance, devbox: devbox, workbench: wb, template_revision: "2")
+      snapshot = insert(:devbox_snapshot, workbench: wb, devbox: devbox, instance: src, fidelity: :memory, template_revision: "2")
+
+      {:ok, inst} = Devboxes.create_instance(%{snapshot_id: snapshot.id}, wb.id, user)
+
+      assert inst.snapshot_id == snapshot.id
+      assert inst.devbox_id == devbox.id
+      assert inst.restore_fidelity == :filesystem
+    end
+
+    test "it falls back to filesystem fidelity when the box hasn't reported a revision number", %{user: user, workbench: wb, devbox: devbox} do
+      devbox = serving(devbox, "platform-r3", nil)
+      snapshot = insert(:devbox_snapshot, workbench: wb, devbox: devbox, fidelity: :memory, template_revision: "3")
+
+      {:ok, inst} = Devboxes.create_instance(%{snapshot_id: snapshot.id}, wb.id, user)
+
+      assert inst.restore_fidelity == :filesystem
+    end
+
+    test "it falls back to filesystem fidelity for another box's snapshot on the same revision number", %{user: user, workbench: wb, devbox: devbox} do
+      devbox = serving(devbox, "platform-r3", 3)
+      other = insert(:devbox, template_revision: "other-r3", revision: 3)
+      snapshot = insert(:devbox_snapshot, workbench: wb, devbox: other, fidelity: :memory, template_revision: "3")
+
+      {:ok, inst} = Devboxes.create_instance(%{snapshot_id: snapshot.id, devbox_id: devbox.id}, wb.id, user)
+
       assert inst.devbox_id == devbox.id
       assert inst.restore_fidelity == :filesystem
     end
@@ -532,6 +567,12 @@ defmodule Console.DevboxesTest do
 
   defp devbox_config(attrs) do
     %Console.Schema.Workbench.Configuration{devbox: struct(Console.Schema.Workbench.Configuration.Devbox, attrs)}
+  end
+
+  defp serving(devbox, template, revision) do
+    devbox
+    |> Ecto.Changeset.change(%{template_revision: template, revision: revision})
+    |> Console.Repo.update!()
   end
 
   defp attached(_) do

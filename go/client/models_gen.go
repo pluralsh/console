@@ -3861,11 +3861,19 @@ type DeprecatedCustomResourceEdge struct {
 }
 
 type Devbox struct {
-	ID                  string             `json:"id"`
-	Name                string             `json:"name"`
-	Image               *string            `json:"image,omitempty"`
-	ResolvedImage       *string            `json:"resolvedImage,omitempty"`
-	TemplateRevision    *string            `json:"templateRevision,omitempty"`
+	ID               string  `json:"id"`
+	Name             string  `json:"name"`
+	Image            *string `json:"image,omitempty"`
+	ResolvedImage    *string `json:"resolvedImage,omitempty"`
+	TemplateRevision *string `json:"templateRevision,omitempty"`
+	// the number of the template revision new instances start from
+	Revision *int64 `json:"revision,omitempty"`
+	// the runtime sidecar image, pinned by digest, that delivers devbox-daemon
+	RuntimeImage *string `json:"runtimeImage,omitempty"`
+	// the devbox-daemon version new and updated instances run
+	DaemonVersion *string `json:"daemonVersion,omitempty"`
+	// on_resume moves an outdated instance to the current revision when it is next resumed
+	UpdateMode          *DevboxUpdateMode  `json:"updateMode,omitempty"`
 	Status              *DevboxStatus      `json:"status,omitempty"`
 	Resources           map[string]any     `json:"resources,omitempty"`
 	AllowedRepositories []*string          `json:"allowedRepositories,omitempty"`
@@ -3887,8 +3895,12 @@ type Devbox struct {
 	CreateBindings []*PolicyBinding `json:"createBindings,omitempty"`
 	// the box's workload identity issuer and how to trust it from cloud accounts
 	WorkloadIdentity *DevboxWorkloadIdentity `json:"workloadIdentity,omitempty"`
-	InsertedAt       *string                 `json:"insertedAt,omitempty"`
-	UpdatedAt        *string                 `json:"updatedAt,omitempty"`
+	// how many live instances are behind the box's current template revision
+	OutdatedInstances *int64 `json:"outdatedInstances,omitempty"`
+	// the box's update campaigns, newest first
+	UpdateCampaigns []*DevboxUpdateCampaign `json:"updateCampaigns,omitempty"`
+	InsertedAt      *string                 `json:"insertedAt,omitempty"`
+	UpdatedAt       *string                 `json:"updatedAt,omitempty"`
 }
 
 type DevboxAgent struct {
@@ -3974,8 +3986,16 @@ type DevboxAttributes struct {
 	// the image pinned by digest
 	ResolvedImage *string `json:"resolvedImage,omitempty"`
 	// the golden template revision instances boot from
-	TemplateRevision *string       `json:"templateRevision,omitempty"`
-	Status           *DevboxStatus `json:"status,omitempty"`
+	TemplateRevision *string `json:"templateRevision,omitempty"`
+	// the number of the template revision, which instances report as theirs
+	Revision *int64 `json:"revision,omitempty"`
+	// the runtime sidecar image, pinned by digest, that delivers devbox-daemon
+	RuntimeImage *string `json:"runtimeImage,omitempty"`
+	// the devbox-daemon version of the runtime image
+	DaemonVersion *string `json:"daemonVersion,omitempty"`
+	// how instances move to a new template revision
+	UpdateMode *DevboxUpdateMode `json:"updateMode,omitempty"`
+	Status     *DevboxStatus     `json:"status,omitempty"`
 	// the resources for each instance
 	Resources *string `json:"resources,omitempty"`
 	// repositories instances may check out, all if unset
@@ -4248,6 +4268,9 @@ type DevboxHeartbeatAttributes struct {
 	Status           *DevboxStatus                `json:"status,omitempty"`
 	ResolvedImage    *string                      `json:"resolvedImage,omitempty"`
 	TemplateRevision *string                      `json:"templateRevision,omitempty"`
+	Revision         *int64                       `json:"revision,omitempty"`
+	RuntimeImage     *string                      `json:"runtimeImage,omitempty"`
+	DaemonVersion    *string                      `json:"daemonVersion,omitempty"`
 	Conditions       []*DevboxConditionAttributes `json:"conditions,omitempty"`
 }
 
@@ -4345,6 +4368,20 @@ type DevboxInstance struct {
 	StatusReason      *string              `json:"statusReason,omitempty"`
 	TemplateRevision  *string              `json:"templateRevision,omitempty"`
 	ImageDigest       *string              `json:"imageDigest,omitempty"`
+	// the devbox-daemon version the instance runs
+	DaemonVersion *string `json:"daemonVersion,omitempty"`
+	// whether the box has a newer template revision (a new image or daemon) than the instance runs
+	Outdated *bool `json:"outdated,omitempty"`
+	// the outcome of the last update to another template revision
+	RebaseState *DevboxRebaseState `json:"rebaseState,omitempty"`
+	// why the last update failed; the instance was returned to the revision it had
+	RebaseError *string `json:"rebaseError,omitempty"`
+	// the revision the last update was to
+	RebaseRevision *string `json:"rebaseRevision,omitempty"`
+	LastRebasedAt  *string `json:"lastRebasedAt,omitempty"`
+	// when a forced update will restart this instance; its processes and anything outside the home directory are lost
+	UpdateDeadlineAt *string               `json:"updateDeadlineAt,omitempty"`
+	UpdateCampaign   *DevboxUpdateCampaign `json:"updateCampaign,omitempty"`
 	// filesystem if the box's template changed since the snapshot, so the instance cold-boots
 	RestoreFidelity *DevboxSnapshotFidelity `json:"restoreFidelity,omitempty"`
 	// requires_action if any thread needs you
@@ -4849,6 +4886,50 @@ type DevboxUnknownContent struct {
 }
 
 func (DevboxUnknownContent) IsDevboxContentBlock() {}
+
+// An admin's request to move every outdated instance of a box to its current template revision
+type DevboxUpdateCampaign struct {
+	ID string `json:"id"`
+	// whether instances in use are restarted too, once the deadline passes
+	Force         bool                       `json:"force"`
+	Status        DevboxUpdateCampaignStatus `json:"status"`
+	Reason        *string                    `json:"reason,omitempty"`
+	StartsAt      *string                    `json:"startsAt,omitempty"`
+	NoticeMinutes *int64                     `json:"noticeMinutes,omitempty"`
+	// when a forced campaign starts restarting instances that are in use
+	DeadlineAt *string `json:"deadlineAt,omitempty"`
+	// when the campaign stops waiting for instances to become idle
+	ExpiresAt      *string                       `json:"expiresAt,omitempty"`
+	MaxConcurrency *int64                        `json:"maxConcurrency,omitempty"`
+	CompletedAt    *string                       `json:"completedAt,omitempty"`
+	Progress       *DevboxUpdateCampaignProgress `json:"progress,omitempty"`
+	Devbox         *Devbox                       `json:"devbox,omitempty"`
+	User           *User                         `json:"user,omitempty"`
+	InsertedAt     *string                       `json:"insertedAt,omitempty"`
+	UpdatedAt      *string                       `json:"updatedAt,omitempty"`
+}
+
+type DevboxUpdateCampaignAttributes struct {
+	// also restart instances that are in use, after the notice period (admins only)
+	Force *bool `json:"force,omitempty"`
+	// shown to the users whose instances are restarted
+	Reason *string `json:"reason,omitempty"`
+	// when to start, now if unset
+	StartsAt *string `json:"startsAt,omitempty"`
+	// how long users of a forced campaign are warned before their instance restarts, 10 to 30, default 15
+	NoticeMinutes *int64 `json:"noticeMinutes,omitempty"`
+	// how many instances update at once, default 5
+	MaxConcurrency *int64 `json:"maxConcurrency,omitempty"`
+}
+
+type DevboxUpdateCampaignProgress struct {
+	// live instances of the box still behind its current revision
+	Outdated int64 `json:"outdated"`
+	// instances this campaign updated
+	Updated int64 `json:"updated"`
+	// instances whose update failed and was rolled back
+	Failed int64 `json:"failed"`
+}
 
 type DevboxUsage struct {
 	InputTokens     *int64   `json:"inputTokens,omitempty"`
@@ -17877,6 +17958,63 @@ func (e DevboxQueuedPromptAction) MarshalJSON() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+type DevboxRebaseState string
+
+const (
+	DevboxRebaseStateInProgress DevboxRebaseState = "IN_PROGRESS"
+	DevboxRebaseStateSucceeded  DevboxRebaseState = "SUCCEEDED"
+	DevboxRebaseStateFailed     DevboxRebaseState = "FAILED"
+)
+
+var AllDevboxRebaseState = []DevboxRebaseState{
+	DevboxRebaseStateInProgress,
+	DevboxRebaseStateSucceeded,
+	DevboxRebaseStateFailed,
+}
+
+func (e DevboxRebaseState) IsValid() bool {
+	switch e {
+	case DevboxRebaseStateInProgress, DevboxRebaseStateSucceeded, DevboxRebaseStateFailed:
+		return true
+	}
+	return false
+}
+
+func (e DevboxRebaseState) String() string {
+	return string(e)
+}
+
+func (e *DevboxRebaseState) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DevboxRebaseState(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid DevboxRebaseState", str)
+	}
+	return nil
+}
+
+func (e DevboxRebaseState) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *DevboxRebaseState) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e DevboxRebaseState) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
 type DevboxSnapshotFidelity string
 
 const (
@@ -18390,6 +18528,120 @@ func (e *DevboxToolCallContentType) UnmarshalJSON(b []byte) error {
 }
 
 func (e DevboxToolCallContentType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type DevboxUpdateCampaignStatus string
+
+const (
+	DevboxUpdateCampaignStatusPending   DevboxUpdateCampaignStatus = "PENDING"
+	DevboxUpdateCampaignStatusRunning   DevboxUpdateCampaignStatus = "RUNNING"
+	DevboxUpdateCampaignStatusCompleted DevboxUpdateCampaignStatus = "COMPLETED"
+	DevboxUpdateCampaignStatusCancelled DevboxUpdateCampaignStatus = "CANCELLED"
+)
+
+var AllDevboxUpdateCampaignStatus = []DevboxUpdateCampaignStatus{
+	DevboxUpdateCampaignStatusPending,
+	DevboxUpdateCampaignStatusRunning,
+	DevboxUpdateCampaignStatusCompleted,
+	DevboxUpdateCampaignStatusCancelled,
+}
+
+func (e DevboxUpdateCampaignStatus) IsValid() bool {
+	switch e {
+	case DevboxUpdateCampaignStatusPending, DevboxUpdateCampaignStatusRunning, DevboxUpdateCampaignStatusCompleted, DevboxUpdateCampaignStatusCancelled:
+		return true
+	}
+	return false
+}
+
+func (e DevboxUpdateCampaignStatus) String() string {
+	return string(e)
+}
+
+func (e *DevboxUpdateCampaignStatus) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DevboxUpdateCampaignStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid DevboxUpdateCampaignStatus", str)
+	}
+	return nil
+}
+
+func (e DevboxUpdateCampaignStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *DevboxUpdateCampaignStatus) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e DevboxUpdateCampaignStatus) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type DevboxUpdateMode string
+
+const (
+	DevboxUpdateModeOnResume DevboxUpdateMode = "ON_RESUME"
+	DevboxUpdateModeManual   DevboxUpdateMode = "MANUAL"
+)
+
+var AllDevboxUpdateMode = []DevboxUpdateMode{
+	DevboxUpdateModeOnResume,
+	DevboxUpdateModeManual,
+}
+
+func (e DevboxUpdateMode) IsValid() bool {
+	switch e {
+	case DevboxUpdateModeOnResume, DevboxUpdateModeManual:
+		return true
+	}
+	return false
+}
+
+func (e DevboxUpdateMode) String() string {
+	return string(e)
+}
+
+func (e *DevboxUpdateMode) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DevboxUpdateMode(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid DevboxUpdateMode", str)
+	}
+	return nil
+}
+
+func (e DevboxUpdateMode) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *DevboxUpdateMode) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e DevboxUpdateMode) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

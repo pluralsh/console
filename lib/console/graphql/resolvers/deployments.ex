@@ -260,6 +260,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(Console.Schema.DevboxScmConnection, _), do: Console.Schema.DevboxScmConnection
   def query(Console.Schema.DevboxInstance, _), do: Console.Schema.DevboxInstance
   def query(Console.Schema.DevboxSnapshot, _), do: Console.Schema.DevboxSnapshot
+  def query(Console.Schema.DevboxUpdateCampaign, _), do: Console.Schema.DevboxUpdateCampaign
   def query(Console.Schema.DevboxInstanceSession, _), do: Console.Schema.DevboxInstanceSession.ordered()
   def query(Console.Schema.DevboxInstanceInteraction, _), do: Console.Schema.DevboxInstanceInteraction.ordered()
   def query(_, _), do: Cluster

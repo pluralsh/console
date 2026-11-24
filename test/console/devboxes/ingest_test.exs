@@ -117,6 +117,76 @@ defmodule Console.Devboxes.IngestTest do
       assert %{idle: false, suspends_at: nil} = updated.idle_state
     end
 
+    test "it records the daemon version and the outcome of an update to another revision" do
+      inst = insert(:devbox_instance, status: :suspended, template_revision: "2", rebase_attempts: 2, update_deadline_at: DateTime.utc_now())
+      cluster = inst.devbox.cluster
+
+      {:ok, moving} = Ingest.report_instance_status(%{
+        instance_id: inst.id,
+        status: :INSTANCE_STATUS_SUSPENDED,
+        generation: 1,
+        template_revision: 2,
+        rebase_state: :REBASE_STATE_IN_PROGRESS,
+        rebase_revision: 3
+      }, cluster)
+      assert moving.rebase_state == :in_progress
+      assert moving.rebase_revision == "3"
+      assert moving.update_deadline_at
+
+      {:ok, updated} = Ingest.report_instance_status(%{
+        instance_id: inst.id,
+        status: :INSTANCE_STATUS_RUNNING,
+        generation: 2,
+        template_revision: 3,
+        daemon_version: "0.12.1",
+        rebase_state: :REBASE_STATE_SUCCEEDED,
+        rebase_revision: 3
+      }, cluster)
+      assert updated.template_revision == "3"
+      assert updated.daemon_version == "0.12.1"
+      assert updated.rebase_state == :succeeded
+      assert updated.rebase_attempts == 0
+      assert updated.last_rebased_at
+      refute updated.update_deadline_at
+      refute updated.rebase_error
+
+      # the gateway repeats the outcome with every report, which isn't another update
+      {:ok, again} = Ingest.report_instance_status(%{
+        instance_id: inst.id,
+        status: :INSTANCE_STATUS_SUSPENDED,
+        generation: 3,
+        template_revision: 3,
+        rebase_state: :REBASE_STATE_SUCCEEDED,
+        rebase_revision: 3
+      }, cluster)
+      assert DateTime.compare(again.last_rebased_at, updated.last_rebased_at) == :eq
+
+      # and a report without one leaves it alone
+      {:ok, same} = Ingest.report_instance_status(%{instance_id: inst.id, status: :INSTANCE_STATUS_RUNNING, generation: 4}, cluster)
+      assert same.rebase_state == :succeeded
+      assert same.daemon_version == "0.12.1"
+    end
+
+    test "a failed update keeps its reason and the revision the instance went back to" do
+      inst = insert(:devbox_instance, status: :suspended, template_revision: "2", rebase_state: :in_progress)
+
+      {:ok, failed} = Ingest.report_instance_status(%{
+        instance_id: inst.id,
+        status: :INSTANCE_STATUS_RUNNING,
+        generation: 1,
+        template_revision: 2,
+        rebase_state: :REBASE_STATE_FAILED,
+        rebase_message: "actor crashed: exit code 1",
+        rebase_revision: 3
+      }, inst.devbox.cluster)
+
+      assert failed.template_revision == "2"
+      assert failed.rebase_state == :failed
+      assert failed.rebase_error == "actor crashed: exit code 1"
+      assert failed.rebase_revision == "3"
+      refute failed.last_rebased_at
+    end
+
     test "it ignores stale generations" do
       inst = insert(:devbox_instance, status: :running, status_generation: 5)
 

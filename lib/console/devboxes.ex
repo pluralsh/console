@@ -413,8 +413,16 @@ defmodule Console.Devboxes do
   defp resolve_repositories(_, _, _), do: {:ok, []}
 
   defp restore_fidelity(nil, _), do: nil
-  defp restore_fidelity(%DevboxSnapshot{template_revision: rev, fidelity: fidelity}, %Devbox{template_revision: rev}),
-    do: fidelity || :memory
+  # A snapshot holds the revision number its instance ran on (what the gateway reports), which is the box's
+  # `revision`; the box's `template_revision` is the template's name.  Numbers repeat across boxes, so the snapshot
+  # has to be of this box too.
+  defp restore_fidelity(%DevboxSnapshot{devbox_id: id, template_revision: rev, fidelity: fidelity}, %Devbox{id: id, revision: current})
+    when is_binary(rev) and is_integer(current) do
+    case Integer.parse(rev) do
+      {^current, ""} -> fidelity || :memory
+      _ -> :filesystem
+    end
+  end
   defp restore_fidelity(%DevboxSnapshot{}, _), do: :filesystem
 
   @doc """

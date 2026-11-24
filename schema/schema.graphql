@@ -1877,6 +1877,14 @@ type RootMutationType {
 
   resumeDevboxInstance(id: ID!): DevboxInstance
 
+  "Moves an outdated instance to its box's current template revision. A running instance restarts: its processes and anything outside the home directory are lost, the home directory and threads are kept"
+  rebaseDevboxInstance(id: ID!): DevboxInstance
+
+  "Starts updating every outdated instance of a box. Forcing it (admins only) also restarts instances in use after the notice period"
+  createDevboxUpdateCampaign(devboxId: ID!, attributes: DevboxUpdateCampaignAttributes): DevboxUpdateCampaign
+
+  cancelDevboxUpdateCampaign(id: ID!): DevboxUpdateCampaign
+
   "Marks you as viewing an instance (call about every 30s while its tab is visible), which keeps it awake and resumes it if suspended"
   pingDevboxInstance(id: ID!): DevboxInstance
 
@@ -2326,6 +2334,24 @@ enum DevboxAutonomy {
   FULL
 }
 
+enum DevboxUpdateMode {
+  ON_RESUME
+  MANUAL
+}
+
+enum DevboxRebaseState {
+  IN_PROGRESS
+  SUCCEEDED
+  FAILED
+}
+
+enum DevboxUpdateCampaignStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  CANCELLED
+}
+
 enum AgentCredentialProvider {
   CLAUDE
   CODEX
@@ -2458,6 +2484,18 @@ input DevboxAttributes {
 
   "the golden template revision instances boot from"
   templateRevision: String
+
+  "the number of the template revision, which instances report as theirs"
+  revision: Int
+
+  "the runtime sidecar image, pinned by digest, that delivers devbox-daemon"
+  runtimeImage: String
+
+  "the devbox-daemon version of the runtime image"
+  daemonVersion: String
+
+  "how instances move to a new template revision"
+  updateMode: DevboxUpdateMode
 
   status: DevboxStatus
 
@@ -2652,7 +2690,27 @@ input DevboxHeartbeatAttributes {
   status: DevboxStatus
   resolvedImage: String
   templateRevision: String
+  revision: Int
+  runtimeImage: String
+  daemonVersion: String
   conditions: [DevboxConditionAttributes]
+}
+
+input DevboxUpdateCampaignAttributes {
+  "also restart instances that are in use, after the notice period (admins only)"
+  force: Boolean
+
+  "shown to the users whose instances are restarted"
+  reason: String
+
+  "when to start, now if unset"
+  startsAt: DateTime
+
+  "how long users of a forced campaign are warned before their instance restarts, 10 to 30, default 15"
+  noticeMinutes: Int
+
+  "how many instances update at once, default 5"
+  maxConcurrency: Int
 }
 
 input DevboxConfigValueAttributes {
@@ -2791,6 +2849,18 @@ type Devbox {
 
   templateRevision: String
 
+  "the number of the template revision new instances start from"
+  revision: Int
+
+  "the runtime sidecar image, pinned by digest, that delivers devbox-daemon"
+  runtimeImage: String
+
+  "the devbox-daemon version new and updated instances run"
+  daemonVersion: String
+
+  "on_resume moves an outdated instance to the current revision when it is next resumed"
+  updateMode: DevboxUpdateMode
+
   status: DevboxStatus
 
   resources: Map
@@ -2829,9 +2899,65 @@ type Devbox {
   "the box's workload identity issuer and how to trust it from cloud accounts"
   workloadIdentity: DevboxWorkloadIdentity
 
+  "how many live instances are behind the box's current template revision"
+  outdatedInstances: Int
+
+  "the box's update campaigns, newest first"
+  updateCampaigns(
+    "how many to return, 10 by default"
+    first: Int
+  ): [DevboxUpdateCampaign]
+
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+"An admin's request to move every outdated instance of a box to its current template revision"
+type DevboxUpdateCampaign {
+  id: ID!
+
+  "whether instances in use are restarted too, once the deadline passes"
+  force: Boolean!
+
+  status: DevboxUpdateCampaignStatus!
+
+  reason: String
+
+  startsAt: DateTime
+
+  noticeMinutes: Int
+
+  "when a forced campaign starts restarting instances that are in use"
+  deadlineAt: DateTime
+
+  "when the campaign stops waiting for instances to become idle"
+  expiresAt: DateTime
+
+  maxConcurrency: Int
+
+  completedAt: DateTime
+
+  progress: DevboxUpdateCampaignProgress
+
+  devbox: Devbox
+
+  user: User
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type DevboxUpdateCampaignProgress {
+  "live instances of the box still behind its current revision"
+  outdated: Int!
+
+  "instances this campaign updated"
+  updated: Int!
+
+  "instances whose update failed and was rolled back"
+  failed: Int!
 }
 
 type DevboxCloudIdentity {
@@ -3005,6 +3131,28 @@ type DevboxInstance {
   templateRevision: String
 
   imageDigest: String
+
+  "the devbox-daemon version the instance runs"
+  daemonVersion: String
+
+  "whether the box has a newer template revision (a new image or daemon) than the instance runs"
+  outdated: Boolean
+
+  "the outcome of the last update to another template revision"
+  rebaseState: DevboxRebaseState
+
+  "why the last update failed; the instance was returned to the revision it had"
+  rebaseError: String
+
+  "the revision the last update was to"
+  rebaseRevision: String
+
+  lastRebasedAt: DateTime
+
+  "when a forced update will restart this instance; its processes and anything outside the home directory are lost"
+  updateDeadlineAt: DateTime
+
+  updateCampaign: DevboxUpdateCampaign
 
   "filesystem if the box's template changed since the snapshot, so the instance cold-boots"
   restoreFidelity: DevboxSnapshotFidelity

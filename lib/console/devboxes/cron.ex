@@ -4,7 +4,7 @@ defmodule Console.Devboxes.Cron do
   """
   require Logger
   alias Console.{Devboxes, WorkloadIdentity}
-  alias Console.Devboxes.AgentCredentials
+  alias Console.Devboxes.{AgentCredentials, Updates}
 
   @doc "Completes instances suspended longer than their box's `completeAfter`"
   def complete_stale_instances() do
@@ -13,6 +13,9 @@ defmodule Console.Devboxes.Cron do
     failed = Devboxes.fail_unstarted_instances()
     Logger.info("failed #{length(failed)} devbox instances that never reached their cluster")
   end
+
+  @doc "Advances devbox update campaigns: deadlines, then updates of outdated instances within each campaign's concurrency"
+  def advance_update_campaigns(), do: Updates.run()
 
   @doc "Runs a scheduled key rotation step for every enabled workload identity issuer"
   def rotate_workload_identity_keys(), do: WorkloadIdentity.rotate_all()

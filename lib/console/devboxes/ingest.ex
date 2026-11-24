@@ -134,8 +134,10 @@ defmodule Console.Devboxes.Ingest do
       actor_ref: blank(attrs[:actor_id]),
       image_digest: blank(attrs[:image_digest]),
       template_revision: attrs[:template_revision] && to_string(attrs[:template_revision]),
+      daemon_version: blank(attrs[:daemon_version]),
       idle_state: attrs[:idle] && this_run?(inst, attrs[:idle]) && idle_state(attrs[:idle]) || nil
     })
+    |> Map.merge(rebase_attrs(inst, attrs))
 
     case status && DevboxInstance.can_transition?(inst.status, status) do
       true ->
@@ -154,6 +156,23 @@ defmodule Console.Devboxes.Ingest do
         |> when_ok(& {:unchanged, &1})
     end
   end
+
+  # The gateway repeats the outcome of the instance's last move to another template revision with every report,
+  # and leaves it unspecified when there never was one.
+  defp rebase_attrs(%DevboxInstance{} = inst, attrs) do
+    revision = attrs[:rebase_revision] && to_string(attrs[:rebase_revision])
+    case enum(attrs[:rebase_state], "rebase_state_") do
+      :in_progress -> %{rebase_state: :in_progress, rebase_revision: revision, rebase_error: nil}
+      :succeeded ->
+        %{rebase_state: :succeeded, rebase_revision: revision, rebase_error: nil, rebase_attempts: 0, update_deadline_at: nil}
+        |> Map.merge(rebased_at(inst, revision))
+      :failed -> %{rebase_state: :failed, rebase_revision: revision, rebase_error: blank(attrs[:rebase_message]) || "the update failed"}
+      _ -> %{}
+    end
+  end
+
+  defp rebased_at(%DevboxInstance{rebase_state: :succeeded, rebase_revision: revision}, revision), do: %{}
+  defp rebased_at(_, _), do: %{last_rebased_at: DateTime.utc_now()}
 
   defp revoke_if_ended(%DevboxInstance{} = inst) do
     case DevboxInstance.terminal?(inst) do

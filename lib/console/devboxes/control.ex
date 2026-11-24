@@ -22,6 +22,13 @@ defmodule Console.Devboxes.Control do
   @doc "Suspends with synchronous durability, tags the actor as `snapshot`, and resumes it"
   @callback snapshot_instance(instance, DevboxSnapshot.t) :: result
   @callback delete_snapshot(DevboxSnapshot.t) :: result
+  @doc """
+  Moves the instance to its box's current template revision: a running instance is suspended, moved and cold-booted
+  (processes and root filesystem changes are lost, the home volume and threads are kept), a suspended one is moved
+  and cold-boots at its next resume.  Resolves to `{:ok, %{accepted: boolean}}`; the outcome arrives with the
+  instance's status.  `opts`: `reason`, `principal`.
+  """
+  @callback rebase_instance(instance, opts :: map) :: result
   @doc "Restarts one agent connection with new billing (`launch` is a normalized `Console.Devboxes.Billing` launch)"
   @callback set_agent_billing(instance, launch :: map) :: result
   @doc "Installs a refreshed subscription credential bundle on a running instance"
@@ -85,6 +92,7 @@ defmodule Console.Devboxes.Control do
     resume_instance: 1,
     snapshot_instance: 2,
     delete_snapshot: 1,
+    rebase_instance: 2,
     set_agent_billing: 2,
     push_credential: 2,
     create_thread: 3,
