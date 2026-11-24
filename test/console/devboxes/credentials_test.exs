@@ -1,5 +1,6 @@
 defmodule Console.Devboxes.CredentialsTest do
   use Console.DataCase, async: true
+  use Mimic
   alias Console.Devboxes.Credentials
   alias Console.Schema.{ScmConnection, Workbench}
 
@@ -122,6 +123,24 @@ defmodule Console.Devboxes.CredentialsTest do
       assert cred.metadata == %{"scheme" => "basic", "username" => "x-access-token"}
 
       {:ok, []} = Credentials.instance_credentials(inst, [%{kind: :scm, host: "gitlab.com"}])
+    end
+
+    test "github app credentials expire when github says, not an hour from when they were served" do
+      {:ok, pem, _} = Console.keypair("console@plural.sh")
+      inst_id = Ecto.UUID.generate()
+      conn = insert(:scm_connection, type: :github, token: nil, github: %{app_id: "123", installation_id: inst_id, private_key: pem})
+      devbox = insert(:devbox)
+      insert(:devbox_scm_connection, devbox: devbox, connection: conn)
+      inst = insert(:devbox_instance, devbox: devbox)
+      exp = DateTime.utc_now() |> DateTime.add(20, :minute) |> DateTime.truncate(:second)
+      expect(Tentacat.App.Installations, :token, fn _, ^inst_id ->
+        {:ok, %{"token" => "app-pat", "expires_at" => DateTime.to_iso8601(exp)}, %HTTPoison.Response{}}
+      end)
+
+      {:ok, [cred]} = Credentials.instance_credentials(inst, [%{kind: :scm, host: "github.com"}])
+      assert Base.decode64!(cred.token) == "x-access-token:app-pat"
+      assert DateTime.compare(cred.expires_at, exp) == :eq
+      assert DateTime.compare(cred.refresh_after, DateTime.add(exp, -10, :minute)) == :eq
     end
 
     test "it picks the connection matching the selector host on boxes with several connections" do

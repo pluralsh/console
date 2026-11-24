@@ -82,6 +82,22 @@ func TestPackageServerHostsCoverEveryEcosystemByDefault(t *testing.T) {
 	}
 }
 
+func TestPackageServerHostsOpenMiseOnlyWhenAskedFor(t *testing.T) {
+	if got := (&DevboxRunnerSpec{}).PackageServerHosts(); slices.Contains(got, "mise-versions.jdx.dev") || slices.Contains(got, "github.com") {
+		t.Errorf("by default, PackageServerHosts() = %v, want no mise hosts", got)
+	}
+	on := true
+	got := (&DevboxRunnerSpec{PackageServers: &DevboxPackageServers{Mise: &on}}).PackageServerHosts()
+	for _, h := range []string{"mise-versions.jdx.dev", "github.com", "release-assets.githubusercontent.com"} {
+		if !slices.Contains(got, h) {
+			t.Errorf("with mise on, PackageServerHosts() = %v, missing %s", got, h)
+		}
+	}
+	if len(slices.Compact(slices.Sorted(slices.Values(got)))) != len(got) {
+		t.Errorf("PackageServerHosts() = %v, has duplicates", got)
+	}
+}
+
 func TestEgressPresetHostsIncludeEveryPreset(t *testing.T) {
 	spec := &DevboxRunnerSpec{CloudIdentities: []DevboxCloudIdentity{{Name: "aws", AWS: &DevboxAWSIdentity{}}}}
 	got := spec.EgressPresetHosts()

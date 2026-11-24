@@ -17,7 +17,7 @@ defmodule Console.Devboxes.Credentials do
       for agents billed to it.
   """
   use Console.Services.Base
-  import Console.Deployments.Pr.Git, only: [backfill_token: 1, normalize_url: 1]
+  import Console.Deployments.Pr.Git, only: [backfill_token_with_expiry: 1, normalize_url: 1]
   alias Console.AI.Tool
   alias Console.Devboxes.{AgentCredentials, Error}
   alias Console.WorkloadIdentity
@@ -202,10 +202,10 @@ defmodule Console.Devboxes.Credentials do
     inst
     |> scm_connections(selector[:host])
     |> Enum.reduce_while({:ok, []}, fn conn, {:ok, acc} ->
-      case backfill_token(conn) do
-        {:ok, %ScmConnection{token: token} = conn} when is_binary(token) ->
-          {:cont, {:ok, acc ++ [scm_credential(conn)]}}
-        {:ok, _} -> {:cont, {:ok, acc}}
+      case backfill_token_with_expiry(conn) do
+        {:ok, %ScmConnection{token: token} = conn, exp} when is_binary(token) ->
+          {:cont, {:ok, acc ++ [scm_credential(conn, exp || expiry())]}}
+        {:ok, _, _} -> {:cont, {:ok, acc}}
         err -> {:halt, err}
       end
     end)
@@ -303,9 +303,10 @@ defmodule Console.Devboxes.Credentials do
 
   # egress writes Sprintf(header_format, token) on the SCM host and all its companions (api.github.com, ...), so one
   # value has to serve git smart-HTTP and the REST API: basic auth where the provider's git endpoint requires it,
-  # with the user:token pair as the token
-  defp scm_credential(%ScmConnection{token: token} = conn) do
-    cred = %{credential(:scm, token, expiry()) | host: scm_host(conn)}
+  # with the user:token pair as the token. Egress caches it until expires_at, so app installation tokens carry
+  # github's expiry
+  defp scm_credential(%ScmConnection{token: token} = conn, expires_at) do
+    cred = %{credential(:scm, token, expires_at) | host: scm_host(conn)}
     case basic_user(conn) do
       user when is_binary(user) ->
         %{cred | token: Base.encode64("#{user}:#{token}"), header_format: "Basic %s"}

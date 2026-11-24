@@ -19,6 +19,7 @@ import (
 	"unicode/utf8"
 
 	"google.golang.org/grpc/codes"
+	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
@@ -45,6 +46,8 @@ type Checkouts interface {
 	Checkouts() []string
 	// ThreadWorktrees returns a thread's worktree paths.
 	ThreadWorktrees(threadID string) []string
+	// AllThreadWorktrees returns every thread's worktree paths, each mapped to its thread's id.
+	AllThreadWorktrees() map[string]string
 }
 
 // Service implements the filesystem RPCs.
@@ -457,14 +460,7 @@ func (s *Service) Write(ctx context.Context, req *devboxv1.WriteFileRequest) (*d
 
 // Changes implements GetChanges: one entry per checkout (or per thread worktree).
 func (s *Service) Changes(ctx context.Context, req *devboxv1.GetChangesRequest) (*devboxv1.GetChangesResponse, error) {
-	var repos []string
-	if s.Checkouts != nil {
-		if req.GetThreadId() != "" {
-			repos = s.Checkouts.ThreadWorktrees(req.GetThreadId())
-		} else {
-			repos = s.Checkouts.Checkouts()
-		}
-	}
+	repos, owners := s.changeScope(req.GetThreadId())
 	if len(req.GetRepositories()) > 0 {
 		want := map[string]bool{}
 		for _, r := range req.GetRepositories() {
@@ -508,14 +504,43 @@ func (s *Service) Changes(ctx context.Context, req *devboxv1.GetChangesRequest) 
 			if err != nil {
 				rc = &devboxv1.RepositoryChanges{Checkout: &devboxv1.Checkout{Path: repo, Name: filepath.Base(repo)}}
 			}
-			if req.GetThreadId() != "" {
-				rc.Checkout.WorktreeThreadId = req.GetThreadId()
+			if owner := owners[repo]; owner != "" {
+				rc.Checkout = proto.Clone(rc.Checkout).(*devboxv1.Checkout)
+				rc.Checkout.WorktreeThreadId = owner
 			}
 			results[i] = rc
 		}()
 	}
 	wg.Wait()
 	return &devboxv1.GetChangesResponse{Repositories: results}, nil
+}
+
+// changeScope is what GetChanges looks at, with the thread owning each worktree: a thread's own worktrees, or the
+// main checkouts for a thread working in them; without a thread, the main checkouts and every thread's worktrees.
+func (s *Service) changeScope(threadID string) ([]string, map[string]string) {
+	if s.Checkouts == nil {
+		return nil, nil
+	}
+	owners := map[string]string{}
+	if threadID != "" {
+		wts := s.Checkouts.ThreadWorktrees(threadID)
+		if len(wts) == 0 {
+			return s.Checkouts.Checkouts(), owners
+		}
+		for _, p := range wts {
+			owners[p] = threadID
+		}
+		return wts, owners
+	}
+	repos := s.Checkouts.Checkouts()
+	all := s.Checkouts.AllThreadWorktrees()
+	wts := make([]string, 0, len(all))
+	for p, id := range all {
+		wts = append(wts, p)
+		owners[p] = id
+	}
+	sort.Strings(wts)
+	return append(repos, wts...), owners
 }
 
 // changesConcurrency bounds the checkouts GetChanges inspects at once.

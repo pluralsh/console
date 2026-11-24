@@ -133,7 +133,8 @@ func inlineFile(b *devboxv1.ContentBlock, n int) (attachmentFile, bool, error) {
 
 // agentPrompt is the prompt sent to the agent for content as recorded: each staged image an agent accepts also
 // goes inline, ahead of its link, so the agent sees it while still knowing where the file is.
-func (m *Manager) agentPrompt(c *agentConn, content []*devboxv1.ContentBlock) []any {
+func (m *Manager) agentPrompt(c *agentConn, t *thread, content []*devboxv1.ContentBlock) []any {
+	content = m.worktreeContent(t, content)
 	blocks, _ := acp.ContentBlocksJSON(content)
 	if !c.caps.promptImage {
 		return blocks

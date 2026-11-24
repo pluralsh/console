@@ -499,7 +499,8 @@ func devboxGoldenEgressPolicy(runner *v1alpha1.DevboxRunner) *ateapi.EgressPolic
 	https := map[int32][]string{}
 	var passthrough []*ateapi.EgressRule
 	if hasMise {
-		https[443] = append(https[443], "mise.jdx.dev", "github.com", "*.github.com", "*.githubusercontent.com")
+		https[443] = append(https[443], "*.github.com", "*.githubusercontent.com")
+		https[443] = append(https[443], v1alpha1.MiseHosts...)
 	}
 	https[443] = append(https[443], runner.Spec.PackageServerHosts()...)
 	https[443] = append(https[443], runner.Spec.OCIRegistryHosts()...)

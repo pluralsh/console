@@ -196,7 +196,7 @@ func (m *Manager) runTurn(ctx context.Context, t *thread, qp *queuedPrompt) {
 	sid := s.id
 	m.mu.Unlock()
 
-	params := map[string]any{"sessionId": sid, "prompt": m.agentPrompt(c, qp.content)}
+	params := map[string]any{"sessionId": sid, "prompt": m.agentPrompt(c, t, qp.content)}
 	if c.caps.protocolVersion >= 2 {
 		params["messageId"] = qp.messageID
 	}

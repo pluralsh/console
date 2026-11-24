@@ -594,6 +594,13 @@ type DevboxPackageServers struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
 	Dotnet *bool `json:"dotnet,omitempty"`
+
+	// Mise: what `mise use` needs for languages and tools the image doesn't ship: mise's version and Java
+	// metadata, GitHub releases (most tools are released there) and the other common release hosts. On boxes
+	// without a GitHub SCM connection this opens github.com unauthenticated.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=false
+	Mise *bool `json:"mise,omitempty"`
 }
 
 // +kubebuilder:validation:XValidation:rule="has(self.value) != has(self.valueFrom)",message="set exactly one of value and valueFrom"
@@ -976,6 +983,17 @@ var packageServerHosts = map[string][]string{
 	"ruby":   {"rubygems.org", "index.rubygems.org", "cache.ruby-lang.org"},
 	"php":    {"packagist.org", "repo.packagist.org", "getcomposer.org"},
 	"dotnet": {"api.nuget.org", "globalcdn.nuget.org", "builds.dotnet.microsoft.com", "dot.net"},
+	"mise":   MiseHosts,
+}
+
+// MiseHosts are what mise installs from beyond the ecosystems' own hosts: its version, Java and download
+// metadata, GitHub releases and the object storage their assets redirect to, and the release hosts of common
+// tools (HashiCorp, Zig, Kubernetes, Helm). When github.com is an SCM host its SCM rules take precedence.
+var MiseHosts = []string{
+	"mise.jdx.dev", "mise-versions.jdx.dev", "mise-java.jdx.dev",
+	"github.com", "api.github.com", "codeload.github.com", "raw.githubusercontent.com",
+	"objects.githubusercontent.com", "github-releases.githubusercontent.com", "release-assets.githubusercontent.com",
+	"releases.hashicorp.com", "ziglang.org", "dl.k8s.io", "cdn.dl.k8s.io", "get.helm.sh",
 }
 
 // PackageServerHosts returns the registry hosts the enabled ecosystems need, in a stable order. Unset fields
@@ -1006,6 +1024,7 @@ func (in *DevboxRunnerSpec) PackageServerHosts() []string {
 		{"ruby", on(ps.Ruby, true)},
 		{"php", on(ps.PHP, true)},
 		{"dotnet", on(ps.Dotnet, true)},
+		{"mise", on(ps.Mise, false)},
 	} {
 		if !eco.enabled {
 			continue

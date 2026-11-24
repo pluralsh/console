@@ -4594,6 +4594,9 @@ type ScmCreds {
 
   token: String!
 
+  "when the token expires, for short-lived tokens like github app installation tokens"
+  expiresAt: DateTime
+
   "the proxy to use for git and SCM API requests"
   proxy: HttpProxyConfiguration
 

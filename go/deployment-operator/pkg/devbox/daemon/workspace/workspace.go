@@ -514,6 +514,18 @@ func (m *Manager) ThreadWorktrees(threadID string) []string {
 	return out
 }
 
+// AllThreadWorktrees returns every thread's worktree paths, each mapped to its thread's id.
+func (m *Manager) AllThreadWorktrees() map[string]string {
+	out := map[string]string{}
+	threads, _ := os.ReadDir(filepath.Join(m.opts.Home, ThreadsDir))
+	for _, t := range threads {
+		for _, p := range m.ThreadWorktrees(t.Name()) {
+			out[p] = t.Name()
+		}
+	}
+	return out
+}
+
 // List implements ListRepositories.
 func (m *Manager) List(ctx context.Context, includeWorktrees bool) *devboxv1.ListRepositoriesResponse {
 	resp := &devboxv1.ListRepositoriesResponse{Checkouts: m.scan(ctx), ProjectMdPath: m.ProjectMDPath()}
@@ -563,6 +575,9 @@ func (m *Manager) AddRepository(ctx context.Context, spec *devboxv1.RepositorySp
 	return gitutil.Inspect(ctx, dir)
 }
 
+// WorktreeBranch is the branch a thread's worktrees start on; a pull request renames it.
+func WorktreeBranch(threadID string) string { return "devbox/" + threadID }
+
 // Worktrees creates ~/.threads/<id>/<repo> worktrees (branch devbox/<id>) and returns the session cwd: the
 // worktree itself for one repository, else ~/.threads/<id>. ~/.threads/<id> gets Project.md and AGENTS.md
 // symlinks so the thread still sees the cross-repo map.
@@ -586,7 +601,7 @@ func (m *Manager) Worktrees(threadID string, repos []string) (string, error) {
 		if gitutil.IsRepo(dst) {
 			continue
 		}
-		branch := "devbox/" + threadID
+		branch := WorktreeBranch(threadID)
 		args := []string{"worktree", "add", "--quiet", "-b", branch, dst}
 		if _, err := gitutil.Run(ctx, src, "rev-parse", "--verify", "-q", "refs/heads/"+branch); err == nil {
 			args = []string{"worktree", "add", "--quiet", dst, branch}

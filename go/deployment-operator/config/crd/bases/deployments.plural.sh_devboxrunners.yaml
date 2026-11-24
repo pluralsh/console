@@ -511,6 +511,13 @@ spec:
                     description: 'JavaScript: the npm and yarn registries, JSR, and
                       the Node.js, Bun and Deno downloads.'
                     type: boolean
+                  mise:
+                    default: false
+                    description: |-
+                      Mise: what `mise use` needs for languages and tools the image doesn't ship: mise's version and Java
+                      metadata, GitHub releases (most tools are released there) and the other common release hosts. On boxes
+                      without a GitHub SCM connection this opens github.com unauthenticated.
+                    type: boolean
                   php:
                     default: true
                     description: 'PHP: Packagist and Composer.'

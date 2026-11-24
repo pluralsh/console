@@ -711,6 +711,24 @@ defmodule Console.Deployments.AgentsTest do
       assert creds.proxy.url == "http://proxy.example.com:8080"
       assert creds.proxy.noproxy == "github.internal"
       refute creds.token == default.token
+      refute creds.expires_at
+    end
+
+    test "github app tokens carry github's expiry" do
+      cluster = insert(:cluster)
+      {:ok, pem, _} = Console.keypair("console@plural.sh")
+      inst_id = Ecto.UUID.generate()
+      conn = insert(:scm_connection, token: nil, github: %{app_id: "123", installation_id: inst_id, private_key: pem})
+      run = insert(:agent_run, runtime: insert(:agent_runtime, cluster: cluster, connection: conn))
+      exp = DateTime.utc_now() |> DateTime.add(20, :minute) |> DateTime.truncate(:second)
+      expect(Tentacat.App.Installations, :token, fn _, ^inst_id ->
+        {:ok, %{"token" => "app-pat", "expires_at" => DateTime.to_iso8601(exp)}, %HTTPoison.Response{}}
+      end)
+
+      {:ok, creds} = Agents.scm_creds(run, cluster)
+
+      assert creds.token == "app-pat"
+      assert DateTime.compare(creds.expires_at, exp) == :eq
     end
   end
 
