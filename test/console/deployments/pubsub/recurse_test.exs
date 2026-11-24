@@ -948,7 +948,57 @@ defmodule Console.Deployments.PubSub.RecurseSyncTest do
       assert job.status == :pending
       assert job.user_id == bot.id
       assert job.alert_id == alert.id
+      assert job.flow_id == nil
       assert_receive {:event, %PubSub.WorkbenchJobCreated{item: ^job}}
+    end
+
+    test "sets the job's flow when the alert's service flow is associated with the workbench" do
+      insert(:user, bot_name: "console", roles: %{admin: true})
+      bot = insert(:user, roles: %{admin: true})
+      workbench = insert(:workbench, bot_user: bot)
+      flow = insert(:flow)
+      insert(:flow_workbench, flow: flow, workbench: workbench)
+      service = insert(:service, flow: flow)
+      alert =
+        insert(:alert,
+          workbench: workbench,
+          service: service,
+          workbench_webhook: insert(:workbench_webhook, workbench: workbench, user: bot),
+          project: workbench.project,
+          title: "High CPU",
+          message: "CPU above 80%"
+        )
+
+      event = %PubSub.AlertCreated{item: %{alert | state_changed: true}}
+      {:ok, job} = Recurse.handle_event(event)
+
+      assert job.workbench_id == workbench.id
+      assert job.alert_id == alert.id
+      assert job.flow_id == flow.id
+    end
+
+    test "leaves the job's flow unset when the service's flow is not associated with the workbench" do
+      insert(:user, bot_name: "console", roles: %{admin: true})
+      bot = insert(:user, roles: %{admin: true})
+      workbench = insert(:workbench, bot_user: bot)
+      flow = insert(:flow)
+      service = insert(:service, flow: flow)
+      alert =
+        insert(:alert,
+          workbench: workbench,
+          service: service,
+          workbench_webhook: insert(:workbench_webhook, workbench: workbench, user: bot),
+          project: workbench.project,
+          title: "High CPU",
+          message: "CPU above 80%"
+        )
+
+      event = %PubSub.AlertCreated{item: %{alert | state_changed: true}}
+      {:ok, job} = Recurse.handle_event(event)
+
+      assert job.workbench_id == workbench.id
+      assert job.alert_id == alert.id
+      assert job.flow_id == nil
     end
 
     test "does not create a job when the workbench has no bot user" do
