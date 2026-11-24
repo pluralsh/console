@@ -79,6 +79,9 @@ func UntarStream(dst string, r io.Reader, opts ...TarOption) error {
 
 		// the target location where the dir/file should be created
 		target := filepath.Join(dst, filepath.FromSlash(name))
+		if err := rejectSymlinkParents(dst, name); err != nil {
+			return err
+		}
 
 		// check the file type
 		switch header.Typeflag {
@@ -94,7 +97,11 @@ func UntarStream(dst string, r io.Reader, opts ...TarOption) error {
 				return err
 			}
 
-			f, err := os.OpenFile(target, os.O_CREATE|os.O_RDWR, os.FileMode(header.Mode))
+			// Remove first so a symlink already at target is replaced rather than followed.
+			if err := os.Remove(target); err != nil && !os.IsNotExist(err) {
+				return err
+			}
+			f, err := os.OpenFile(target, os.O_CREATE|os.O_EXCL|os.O_RDWR, os.FileMode(header.Mode))
 			if err != nil {
 				fmt.Println("could not open file")
 				return err
@@ -126,6 +133,30 @@ func UntarStream(dst string, r io.Reader, opts ...TarOption) error {
 			}
 		}
 	}
+}
+
+// rejectSymlinkParents fails when a directory component of name already exists under dst as a symlink, because writing
+// through it could leave dst even though every link target was checked on its own.
+func rejectSymlinkParents(dst, name string) error {
+	parts := strings.Split(path.Dir(name), "/")
+	cur := dst
+	for _, p := range parts {
+		if p == "." {
+			continue
+		}
+		cur = filepath.Join(cur, p)
+		fi, err := os.Lstat(cur)
+		if os.IsNotExist(err) {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		if fi.Mode()&os.ModeSymlink != 0 {
+			return fmt.Errorf("tar entry %q is under a symlink", name)
+		}
+	}
+	return nil
 }
 
 func makeDir(target string, made map[string]bool) error {

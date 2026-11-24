@@ -83,3 +83,33 @@ func TestUntarStreamRejectsEscapes(t *testing.T) {
 		})
 	}
 }
+
+func TestUntarStreamRejectsWritesThroughSymlinks(t *testing.T) {
+	for name, entries := range map[string][]tar.Header{
+		"file under link": {
+			{Name: "d/a", Typeflag: tar.TypeSymlink, Linkname: ".."},
+			{Name: "d/a/victim", Typeflag: tar.TypeReg, Mode: 0o644},
+		},
+		"link chain": {
+			{Name: "d/e/a", Typeflag: tar.TypeSymlink, Linkname: "../.."},
+			{Name: "d/e/a/b", Typeflag: tar.TypeSymlink, Linkname: ".."},
+			{Name: "d/e/a/b/victim", Typeflag: tar.TypeReg, Mode: 0o644},
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			parent := t.TempDir()
+			dst := filepath.Join(parent, "dst")
+			if err := os.Mkdir(dst, 0o755); err != nil {
+				t.Fatal(err)
+			}
+			if err := UntarStream(dst, buildTar(t, entries, nil), WithTarSymlinks()); err == nil {
+				t.Fatal("expected an error")
+			}
+			for _, p := range []string{filepath.Join(parent, "victim"), filepath.Join(dst, "victim")} {
+				if _, err := os.Stat(p); !os.IsNotExist(err) {
+					t.Errorf("%s was written", p)
+				}
+			}
+		})
+	}
+}
