@@ -24,8 +24,10 @@ var scmCompanions = map[string][]string{
 	"bitbucket.org": {"api.bitbucket.org"},
 }
 
-// signedStorageHosts are the object-storage hosts LFS objects and release assets redirect to. Their URLs are
-// signed and minted only after an allowed request, so they get no injection and the ext_proc lets them through.
+// signedStorageHosts are the object-storage hosts LFS objects, release assets and Actions logs redirect to. Their URLs
+// are signed and minted only after an allowed request, so they get no injection and the ext_proc lets them through.
+// Actions logs live on productionresultssa<N>.blob.core.windows.net, but only *.suffix wildcards exist, so the whole
+// Azure blob suffix is allowed.
 var signedStorageHosts = map[string][]string{
 	"github.com": {
 		"objects.githubusercontent.com",
@@ -33,6 +35,7 @@ var signedStorageHosts = map[string][]string{
 		"release-assets.githubusercontent.com",
 		"github-cloud.githubusercontent.com",
 		"github-cloud.s3.amazonaws.com",
+		"*.blob.core.windows.net",
 	},
 	"bitbucket.org": {"bbuseruploads.s3.amazonaws.com"},
 }
