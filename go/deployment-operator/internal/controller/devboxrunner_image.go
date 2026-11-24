@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"path"
 	"regexp"
 	"strings"
 	"sync"
@@ -15,7 +14,6 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/Masterminds/semver/v3"
 	awsconfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ecr"
 	"github.com/google/go-containerregistry/pkg/authn"
@@ -28,8 +26,6 @@ import (
 
 	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 )
-
-const devboxDaemonEntrypoint = "/usr/local/bin/devbox-daemon"
 
 // ResolvedDevboxImage is spec.image pinned by digest, plus the config fields the image contract checks.
 type ResolvedDevboxImage struct {
@@ -298,12 +294,11 @@ func (k *acrKeychain) Resolve(target authn.Resource) (authn.Authenticator, error
 	return authn.FromConfig(auth), nil
 }
 
-// DevboxImageContractResult is the outcome of checking a resolved image against contract v1 (section 4.1a).
+// DevboxImageContractResult is the outcome of checking a resolved image against its contract.
 type DevboxImageContractResult struct {
 	// Violations make the image unusable; the template revision is not built.
 	Violations []string
-	// Outdated is set when the daemon is more than one minor release behind the operator.
-	Outdated      string
+	// DaemonVersion is only set for runtime images.
 	DaemonVersion string
 }
 
@@ -311,21 +306,17 @@ func (r DevboxImageContractResult) OK() bool {
 	return len(r.Violations) == 0
 }
 
-// CheckDevboxImageContract checks what can be checked from the image config without pulling layers:
-// the contract label, the devbox-daemon entrypoint, UID 1000, the trust directory, and daemon/operator
-// version compatibility. Agent presence and trust-store writability are verified in the guest by the
-// golden-boot agent probe.
-func CheckDevboxImageContract(img *ResolvedDevboxImage, operatorVersion string) DevboxImageContractResult {
-	res := DevboxImageContractResult{DaemonVersion: img.Labels[v1alpha1.DevboxImageDaemonVersionLabel]}
+// CheckDevboxImageContract checks an environment image (spec.image) against contract v1, as far as the image
+// config shows without pulling layers: the contract label, UID 1000 and the trust directory. The image's
+// ENTRYPOINT and any devbox-daemon in it are ignored, since the devbox container runs the daemon the runtime
+// sidecar installs. The shell that starts it, agent presence and trust-store writability are verified in the
+// guest, by the golden boot and its agent probe.
+func CheckDevboxImageContract(img *ResolvedDevboxImage) DevboxImageContractResult {
+	res := DevboxImageContractResult{}
 
 	if contract := img.Labels[v1alpha1.DevboxImageContractLabel]; contract != v1alpha1.DevboxImageContractV1 {
 		res.Violations = append(res.Violations, fmt.Sprintf("label %s is %q, want %q; build FROM ghcr.io/pluralsh/devbox-minimal or devbox-fat",
 			v1alpha1.DevboxImageContractLabel, contract, v1alpha1.DevboxImageContractV1))
-	}
-
-	if len(img.Entrypoint) != 1 || path.Base(img.Entrypoint[0]) != "devbox-daemon" {
-		res.Violations = append(res.Violations, fmt.Sprintf("ENTRYPOINT is %q, want [%q]; custom images must not override ENTRYPOINT, use spec.bootstrapScript to run something at startup",
-			img.Entrypoint, devboxDaemonEntrypoint))
 	}
 
 	if uid := strings.Split(img.User, ":")[0]; uid != "1000" {
@@ -335,34 +326,21 @@ func CheckDevboxImageContract(img *ResolvedDevboxImage, operatorVersion string) 
 	if dir, ok := img.Env["DEVBOX_TRUST_DIR"]; !ok || !strings.HasPrefix(dir, "/") {
 		res.Violations = append(res.Violations, fmt.Sprintf("DEVBOX_TRUST_DIR is %q, want an absolute path such as /var/lib/devbox/trust", dir))
 	}
-
-	violation, outdated := compareDaemonVersion(res.DaemonVersion, operatorVersion)
-	if violation != "" {
-		res.Violations = append(res.Violations, violation)
-	}
-	res.Outdated = outdated
 	return res
 }
 
-// compareDaemonVersion requires the same major release line and a daemon no newer than the operator's minor
-// release, and flags daemons more than one minor behind. Non-semver versions (dev builds) skip the check.
-func compareDaemonVersion(daemon, operator string) (violation, outdated string) {
-	if daemon == "" {
-		return fmt.Sprintf("label %s is missing", v1alpha1.DevboxImageDaemonVersionLabel), ""
-	}
-	d, derr := semver.NewVersion(daemon)
-	o, oerr := semver.NewVersion(operator)
-	if derr != nil || oerr != nil {
-		return "", ""
-	}
+// CheckDevboxRuntimeContract checks the runtime image the operator resolved for itself. Its daemon version is
+// not compared with the operator's: the image is selected by the operator's version, and its daemon keeps the
+// version of the release that last changed it.
+func CheckDevboxRuntimeContract(img *ResolvedDevboxImage) DevboxImageContractResult {
+	res := DevboxImageContractResult{DaemonVersion: img.Labels[v1alpha1.DevboxImageDaemonVersionLabel]}
 
-	switch {
-	case d.Major() != o.Major():
-		return fmt.Sprintf("devbox-daemon %s is from a different release line than the operator (%s)", daemon, operator), ""
-	case d.Minor() > o.Minor():
-		return fmt.Sprintf("devbox-daemon %s is newer than the operator (%s); upgrade the deployment operator", daemon, operator), ""
-	case o.Minor()-d.Minor() > 1:
-		return "", fmt.Sprintf("devbox-daemon %s is more than one minor release behind the operator (%s); rebuild on the new base image", daemon, operator)
+	if contract := img.Labels[v1alpha1.DevboxRuntimeContractLabel]; contract != v1alpha1.DevboxRuntimeContractV1 {
+		res.Violations = append(res.Violations, fmt.Sprintf("label %s is %q, want %q; the runtime image must be ghcr.io/pluralsh/devbox-runtime-core or a mirror of it",
+			v1alpha1.DevboxRuntimeContractLabel, contract, v1alpha1.DevboxRuntimeContractV1))
 	}
-	return "", ""
+	if res.DaemonVersion == "" {
+		res.Violations = append(res.Violations, fmt.Sprintf("label %s is missing", v1alpha1.DevboxImageDaemonVersionLabel))
+	}
+	return res
 }

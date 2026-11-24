@@ -384,10 +384,11 @@ spec:
                 type: object
               image:
                 description: |-
-                  Image is the devbox image. Defaults to ghcr.io/pluralsh/devbox-fat at the operator's version;
-                  ghcr.io/pluralsh/devbox-minimal is the lean alternative. Custom images must meet the image
-                  contract (sh.plural.devbox/contract=v1 label, devbox-daemon entrypoint, UID 1000) and are
-                  normally built FROM one of these.
+                  Image is the devbox environment image: the tools, agents and browser an instance runs with. Defaults to
+                  ghcr.io/pluralsh/devbox-fat at the operator's version; ghcr.io/pluralsh/devbox-minimal is the lean
+                  alternative. Custom images must meet the image contract (sh.plural.devbox/contract=v1 label, UID 1000,
+                  a POSIX shell at spec.runtime.shell) and are normally built FROM one of these. devbox-daemon is not taken
+                  from this image: the operator delivers it through the runtime sidecar, see spec.runtime.
                 type: string
               imagePullSecrets:
                 description: |-
@@ -423,6 +424,23 @@ spec:
                     enum:
                     - pinned
                     - poll
+                    type: string
+                type: object
+              instanceUpdatePolicy:
+                description: |-
+                  InstanceUpdatePolicy controls how existing instances move to a new template revision, which a new
+                  environment image digest, a new daemon (an operator upgrade) or a template change rolls. Updating
+                  restarts the instance's processes and resets its root filesystem to the image; the home directory
+                  and agent threads are kept.
+                properties:
+                  mode:
+                    default: onResume
+                    description: |-
+                      Mode is onResume (default) or manual. Console-driven updates (a user's or admin's update, a forced
+                      remediation) apply in both modes.
+                    enum:
+                    - onResume
+                    - manual
                     type: string
                 type: object
               mise:
@@ -555,6 +573,25 @@ spec:
                       way as CPU.
                     pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                     x-kubernetes-int-or-string: true
+                type: object
+              runtime:
+                description: Runtime configures how the operator's devbox-daemon runs
+                  next to the environment image.
+                properties:
+                  flavor:
+                    default: core
+                    description: Flavor of the runtime. Only core (devbox-daemon alone)
+                      exists.
+                    enum:
+                    - core
+                    type: string
+                  shell:
+                    description: |-
+                      Shell is the absolute path of a POSIX shell in the environment image. The devbox container starts with
+                      it, waits for the runtime sidecar to install devbox-daemon into the home volume and then execs the
+                      daemon. Defaults to /bin/sh.
+                    pattern: ^/[^\s]+$
+                    type: string
                 type: object
               scmConnections:
                 description: ScmConnections are names of console SCM connections instances
@@ -1188,7 +1225,7 @@ spec:
                 x-kubernetes-list-type: map
               daemonVersion:
                 description: DaemonVersion is the devbox-daemon version from the resolved
-                  image's labels.
+                  runtime image's labels.
                 type: string
               id:
                 description: ID of the resource in the Console API.
@@ -1208,6 +1245,13 @@ spec:
               resolvedImage:
                 description: ResolvedImage is spec.image pinned by digest.
                 type: string
+              resolvedRuntime:
+                description: ResolvedRuntime is the runtime image pinned by digest.
+                type: string
+              resolvedRuntimeFrom:
+                description: ResolvedRuntimeFrom is the image reference ResolvedRuntime
+                  was resolved from.
+                type: string
               revisions:
                 description: Revisions are the ActorTemplate revisions that still
                   exist, newest first.
@@ -1215,6 +1259,9 @@ spec:
                   properties:
                     createdAt:
                       format: date-time
+                      type: string
+                    daemonVersion:
+                      description: DaemonVersion is the devbox-daemon version of Runtime.
                       type: string
                     goldenTag:
                       type: string
@@ -1235,6 +1282,11 @@ spec:
                     revision:
                       format: int64
                       type: integer
+                    runtime:
+                      description: |-
+                        Runtime is the runtime image of the revision. Empty for revisions from before the runtime sidecar,
+                        whose daemon is the one baked into Image.
+                      type: string
                   required:
                   - hash
                   - image
@@ -1243,6 +1295,11 @@ spec:
                   - revision
                   type: object
                 type: array
+              runtimeResolvedAt:
+                description: RuntimeResolvedAt is when the runtime image was last
+                  resolved.
+                format: date-time
+                type: string
               sha:
                 description: SHA of last applied configuration.
                 type: string

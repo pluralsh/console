@@ -12,6 +12,7 @@ import (
 
 	"github.com/samber/lo"
 	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -31,10 +32,17 @@ import (
 var workerPoolGVK = schema.GroupVersionKind{Group: "ate.dev", Version: "v1", Kind: "WorkerPool"}
 
 const (
-	devboxContainerName = "devbox"
-	devboxHomeVolume    = "home"
-	devboxTrustVolume   = "egress-trust"
-	devboxActorVolume   = "actor-metadata"
+	devboxContainerName  = "devbox"
+	runtimeContainerName = "plural-runtime"
+	devboxHomeVolume     = "home"
+	devboxHomeMount      = "/home/dev"
+	// runtimeHomeMount is where the runtime sidecar mounts the home volume. It differs from devboxHomeMount on
+	// purpose: gVisor keys a volume's checkpoint by the first container mounting it and its mount path.
+	runtimeHomeMount = "/mnt/home"
+	// runtimeInstallDir is where the sidecar installs the runtime, relative to the home volume.
+	runtimeInstallDir = ".plural-runtime"
+	devboxTrustVolume = "egress-trust"
+	devboxActorVolume = "actor-metadata"
 	// devboxEgressTrustMount is the first of the daemon's DefaultEgressCAGlobs.
 	devboxEgressTrustMount = "/run/ate/egress-trust-bundle"
 	devboxActorMetaMount   = "/run/ate/actor"
@@ -414,9 +422,44 @@ func (r *DevboxRunnerReconciler) ensureAtespace(ctx context.Context, api substra
 	return atespace, nil
 }
 
-// buildActorTemplate renders the immutable ActorTemplate for the runner's current spec and resolved image.
-// The returned hash covers everything but the template name, and keys the revision.
-func (r *DevboxRunnerReconciler) buildActorTemplate(runner *v1alpha1.DevboxRunner, atespace, image string) (*ateapi.ActorTemplate, string, error) {
+// devboxWaitAndExec is the devbox container's command: it waits for the runtime sidecar to publish the ready
+// marker for the template's runtime digest, then execs the daemon the sidecar installed in the home volume, so
+// the daemon is PID 1 as before. Arguments: the runtime digest, the install root and the digest's directory.
+// It is POSIX sh with builtins only, apart from sleep, so it runs in any environment image with a shell. The
+// marker is compared with the digest because the home volume outlives a template change: after an update it
+// still holds the previous runtime until the sidecar replaces it.
+const devboxWaitAndExec = `d=$1; r=$2; i=0
+while [ "$i" -lt 300 ]; do
+  v=; [ -r "$r/ready" ] && read -r v < "$r/ready"
+  [ "$v" = "$d" ] && exec "$r/$3/bin/devbox-daemon"
+  sleep 0.2 2>/dev/null || sleep 1
+  i=$((i+1))
+done
+echo "plural runtime $d was not installed in $r" >&2
+exit 1`
+
+// runtimeDirName is the directory devbox-runtime-installer installs a runtime digest into.
+func runtimeDirName(digest string) string {
+	return strings.ReplaceAll(digest, ":", "-")
+}
+
+// buildActorTemplate renders the immutable ActorTemplate for the runner's current spec, resolved environment
+// image and resolved runtime image. The returned hash covers everything but the template name, and keys the
+// revision.
+//
+// Substrate only lets an existing actor move to a template with the same volumes and, for the containers it
+// already has, the same mounts. What follows from that and from how gVisor checkpoints, all found by testing
+// (PROD-5487), must hold for every revision:
+//   - the devbox container is first: gVisor files the home volume's checkpoint under the first container that
+//     mounts it, and an actor moved to a template with another container first loses its home
+//   - the volumes and the devbox container's mounts never change
+//   - the runtime sidecar stays alive (devbox-runtime-installer blocks): an actor with an exited container
+//     can't be restored from a memory snapshot
+func (r *DevboxRunnerReconciler) buildActorTemplate(runner *v1alpha1.DevboxRunner, atespace, image, runtime string) (*ateapi.ActorTemplate, string, error) {
+	_, runtimeDigest, ok := strings.Cut(runtime, "@")
+	if !ok || runtimeDigest == "" {
+		return nil, "", fmt.Errorf("runtime image %q is not pinned by digest", runtime)
+	}
 	guest := DevboxRunnerGuestConfig{
 		Runner:  runner.ConsoleName(),
 		Browser: runner.Spec.Browser != nil && runner.Spec.Browser.Enabled,
@@ -445,16 +488,26 @@ func (r *DevboxRunnerReconciler) buildActorTemplate(runner *v1alpha1.DevboxRunne
 		Containers: []*ateapi.Container{{
 			Name:  devboxContainerName,
 			Image: image,
-			Env:   append([]*ateapi.EnvVar{{Name: devboxRunnerConfigEnv, Value: string(guestJSON)}}, devboxPlainEnv(runner)...),
+			Command: []string{runner.RuntimeShell(), "-c", devboxWaitAndExec, "devbox-runtime",
+				runtimeDigest, devboxHomeMount + "/" + runtimeInstallDir, runtimeDirName(runtimeDigest)},
+			Env: append([]*ateapi.EnvVar{{Name: devboxRunnerConfigEnv, Value: string(guestJSON)}}, devboxPlainEnv(runner)...),
 			WakeupProbe: &ateapi.WakeupProbe{
 				HttpGet:        &ateapi.HttpGetAction{Path: "/readyz", Port: devboxReadyzPort},
 				TimeoutSeconds: 120,
 			},
 			VolumeMounts: []*ateapi.VolumeMount{
-				{Name: devboxHomeVolume, MountPath: "/home/dev"},
+				{Name: devboxHomeVolume, MountPath: devboxHomeMount},
 				{Name: devboxTrustVolume, MountPath: devboxEgressTrustMount},
 				{Name: devboxActorVolume, MountPath: devboxActorMetaMount},
 			},
+		}, {
+			Name:  runtimeContainerName,
+			Image: runtime,
+			// The image's entrypoint is devbox-runtime-installer, which installs into runtimeHomeMount and blocks.
+			Args:         []string{"--digest", runtimeDigest, "--dst", runtimeHomeMount + "/" + runtimeInstallDir},
+			VolumeMounts: []*ateapi.VolumeMount{{Name: devboxHomeVolume, MountPath: runtimeHomeMount}},
+			// It runs as root to write into a home owned by the environment image's user.
+			SecurityContext: &ateapi.SecurityContext{Capabilities: &ateapi.Capabilities{Add: []string{"DAC_OVERRIDE", "FOWNER"}}},
 		}},
 		Volumes: []*ateapi.Volume{
 			{Name: devboxHomeVolume, DurableDir: &ateapi.DurableDirVolumeSource{}},
@@ -533,8 +586,8 @@ func devboxGoldenEgressPolicy(runner *v1alpha1.DevboxRunner) *ateapi.EgressPolic
 // in-flight revision: Building (waiting for the golden tag), Probing (waiting for the gateway's agent probe),
 // and finally Ready or Failed. The newest Ready revision is the one new instances start from; older Ready
 // revisions are Retired and kept until garbage collection finds nothing references them.
-func (r *DevboxRunnerReconciler) reconcileRevisions(ctx context.Context, api substrate.API, runner *v1alpha1.DevboxRunner, atespace, image string) error {
-	template, hash, err := r.buildActorTemplate(runner, atespace, image)
+func (r *DevboxRunnerReconciler) reconcileRevisions(ctx context.Context, api substrate.API, runner *v1alpha1.DevboxRunner, atespace, image, runtime string) error {
+	template, hash, err := r.buildActorTemplate(runner, atespace, image, runtime)
 	if err != nil {
 		utils.MarkCondition(runner.SetCondition, v1alpha1.DevboxTemplateReadyConditionType, metav1.ConditionFalse, v1alpha1.DevboxMisconfiguredReason, err.Error())
 		return err
@@ -566,12 +619,14 @@ func (r *DevboxRunnerReconciler) reconcileRevisions(ctx context.Context, api sub
 			}
 		}
 		runner.Status.Revisions = append([]v1alpha1.DevboxRevision{{
-			Revision:  next,
-			Name:      name,
-			Hash:      hash,
-			Image:     image,
-			Phase:     v1alpha1.DevboxRevisionBuilding,
-			CreatedAt: lo.ToPtr(metav1.Now()),
+			Revision:      next,
+			Name:          name,
+			Hash:          hash,
+			Image:         image,
+			Runtime:       &runtime,
+			DaemonVersion: runner.Status.DaemonVersion,
+			Phase:         v1alpha1.DevboxRevisionBuilding,
+			CreatedAt:     lo.ToPtr(metav1.Now()),
 		}}, runner.Status.Revisions...)
 	}
 
@@ -612,7 +667,7 @@ func (r *DevboxRunnerReconciler) advanceBuilding(ctx context.Context, api substr
 			return nil
 		}
 		rev.Phase = v1alpha1.DevboxRevisionFailed
-		rev.Message = lo.ToPtr("golden boot failed: " + msg)
+		rev.Message = lo.ToPtr("golden boot failed: " + msg + goldenFailureHint(runner, msg))
 		return nil
 	}
 	tag := golden.GetGoldenTag().GetName()
@@ -633,6 +688,22 @@ var goldenWorkerLossCrashes = []string{
 	"assigned worker is draining",
 	"assigned worker no longer satisfies the actor's placement constraints",
 	"node holding the actor's latest snapshot no longer exists",
+}
+
+// goldenFailureHint explains the golden boot failures that come from the environment image not being able to
+// start the daemon the runtime sidecar installs.
+func goldenFailureHint(runner *v1alpha1.DevboxRunner, msg string) string {
+	shell := runner.RuntimeShell()
+	switch {
+	// Substrate v1.0.0 reports a command that can't be executed only as the devbox container failing to start
+	// ("while starting \"devbox\" application container: while running `runsc start`: exit status 128").
+	case strings.Contains(msg, `while starting "`+devboxContainerName+`" application container`),
+		strings.Contains(msg, shell) && (strings.Contains(msg, "no such file") || strings.Contains(msg, "not found")):
+		return fmt.Sprintf("; the devbox container could not start, most likely because the environment image has no POSIX shell at %s (set spec.runtime.shell if it is elsewhere)", shell)
+	case strings.Contains(msg, "plural runtime"):
+		return "; the " + runtimeContainerName + " container did not install devbox-daemon into the home volume in time"
+	}
+	return ""
 }
 
 func goldenLostWorker(msg string) bool {
@@ -733,6 +804,9 @@ func (r *DevboxRunnerReconciler) promoteCurrentRevision(runner *v1alpha1.DevboxR
 // truth for references: each instance is an actor of a template, and each snapshot is a tag whose status
 // records the template UID. A revision's own golden tag does not count, and is deleted with it. The newest
 // revision is always kept, since its hash is what stops a failed spec from being rebuilt on every reconcile.
+// An instance that was moved to another revision and hasn't started there yet references two: the template its
+// actor points at, and the one it had, which the gateway moves it back to if it doesn't start. The second is only
+// in the gateway's instance record (see pendingRollbackTemplates).
 func (r *DevboxRunnerReconciler) gcRevisions(ctx context.Context, api substrate.API, runner *v1alpha1.DevboxRunner, atespace string) error {
 	latest := runner.LatestRevision()
 	collectable := lo.Filter(runner.Status.Revisions, func(rev v1alpha1.DevboxRevision, _ int) bool {
@@ -806,6 +880,14 @@ func (r *DevboxRunnerReconciler) referencedTemplates(ctx context.Context, api su
 			goldenTags[*rev.GoldenTag] = true
 		}
 	}
+	rollbacks, err := r.pendingRollbackTemplates(ctx, runner)
+	if err != nil {
+		return nil, err
+	}
+	for _, name := range rollbacks {
+		referenced[name] = true
+	}
+
 	tags, err := api.ListTags(ctx, atespace)
 	if err != nil {
 		return nil, fmt.Errorf("listing tags: %w", err)
@@ -819,6 +901,33 @@ func (r *DevboxRunnerReconciler) referencedTemplates(ctx context.Context, api su
 		}
 	}
 	return referenced, nil
+}
+
+// pendingRollbackTemplates are the templates the runner's instances would be moved back to if they don't start on
+// the revision they were moved to. The gateway keeps that in each instance's record (gateway/core.Record.Rebase,
+// of which this reads the two fields it needs), written before it repoints the actor and cleared once the
+// instance has started on the new revision.
+func (r *DevboxRunnerReconciler) pendingRollbackTemplates(ctx context.Context, runner *v1alpha1.DevboxRunner) ([]string, error) {
+	var records corev1.ConfigMapList
+	if err := r.List(ctx, &records, client.InNamespace(r.Config.OperatorNamespace), client.MatchingLabels{v1alpha1.DevboxInstanceRecordLabel: "true"}); err != nil {
+		return nil, fmt.Errorf("listing devbox instance records: %w", err)
+	}
+	var out []string
+	for i := range records.Items {
+		var rec struct {
+			Runner string `json:"runner"`
+			Rebase *struct {
+				FromTemplate string `json:"fromTemplate"`
+			} `json:"rebase"`
+		}
+		if err := json.Unmarshal([]byte(records.Items[i].Data[v1alpha1.DevboxInstanceRecordKey]), &rec); err != nil {
+			continue
+		}
+		if rec.Runner == runner.Name && rec.Rebase != nil && rec.Rebase.FromTemplate != "" {
+			out = append(out, rec.Rebase.FromTemplate)
+		}
+	}
+	return out, nil
 }
 
 // runningActors counts actors that are not suspended or crashed, i.e. instances a delete would interrupt.

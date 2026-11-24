@@ -21,12 +21,23 @@ const (
 	DevboxImageFlavorLabel = "sh.plural.devbox/flavor"
 	// DevboxImageContractV1 is the only contract version this operator understands.
 	DevboxImageContractV1 = "v1"
+	// DevboxRuntimeContractLabel is the runtime image label carrying its contract version.
+	DevboxRuntimeContractLabel = "sh.plural.devbox/runtime-contract"
+	// DevboxRuntimeContractV1 is the only runtime contract version this operator understands.
+	DevboxRuntimeContractV1 = "v1"
+	// DevboxInstanceRecordLabel marks the ConfigMaps in which the gateway keeps its instance records, and
+	// DevboxInstanceRecordKey is the record's key in them. The controller reads them for the templates pending
+	// instance updates may roll back to.
+	DevboxInstanceRecordLabel = "devboxes.plural.sh/instance-record"
+	DevboxInstanceRecordKey   = "instance.json"
+	// DevboxDefaultShell runs the devbox container's startup command when spec.runtime.shell is unset.
+	DevboxDefaultShell = "/bin/sh"
 )
 
 const (
 	DevboxImageResolvedConditionType    ConditionType = "ImageResolved"
 	DevboxImageContractConditionType    ConditionType = "ImageContract"
-	DevboxImageOutdatedConditionType    ConditionType = "ImageOutdated"
+	DevboxRuntimeResolvedConditionType  ConditionType = "RuntimeResolved"
 	DevboxWorkerPoolReadyConditionType  ConditionType = "WorkerPoolReady"
 	DevboxTemplateReadyConditionType    ConditionType = "TemplateReady"
 	DevboxAgentProbeConditionType       ConditionType = "AgentProbe"
@@ -39,8 +50,6 @@ const (
 
 const (
 	DevboxImageContractViolatedReason ConditionReason = "ContractViolated"
-	DevboxImageOutdatedReason         ConditionReason = "Outdated"
-	DevboxImageCurrentReason          ConditionReason = "Current"
 	DevboxPendingReason               ConditionReason = "Pending"
 	DevboxFailedReason                ConditionReason = "Failed"
 	DevboxAgentMissingReason          ConditionReason = "AgentMissing"
@@ -71,6 +80,26 @@ const (
 	DevboxImageUpdatePinned DevboxImageUpdateMode = "pinned"
 	// DevboxImageUpdatePoll re-resolves the tag every interval and rolls a new revision when the digest changes.
 	DevboxImageUpdatePoll DevboxImageUpdateMode = "poll"
+)
+
+// DevboxRuntimeFlavor names what the runtime image delivers next to the environment image.
+// +kubebuilder:validation:Enum=core
+type DevboxRuntimeFlavor string
+
+const (
+	// DevboxRuntimeCore is devbox-daemon alone; agents, browser and tools come from the environment image.
+	DevboxRuntimeCore DevboxRuntimeFlavor = "core"
+)
+
+// DevboxInstanceUpdateMode controls how existing instances move to a new template revision.
+// +kubebuilder:validation:Enum=onResume;manual
+type DevboxInstanceUpdateMode string
+
+const (
+	// DevboxInstanceUpdateOnResume moves a suspended instance to the current revision when it is next resumed.
+	DevboxInstanceUpdateOnResume DevboxInstanceUpdateMode = "onResume"
+	// DevboxInstanceUpdateManual leaves instances on their revision until a user or admin updates them.
+	DevboxInstanceUpdateManual DevboxInstanceUpdateMode = "manual"
 )
 
 // DevboxSandboxClass is the Substrate sandbox class backing the runner's WorkerPool.
@@ -113,12 +142,24 @@ type DevboxRunnerSpec struct {
 	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty"`
 
-	// Image is the devbox image. Defaults to ghcr.io/pluralsh/devbox-fat at the operator's version;
-	// ghcr.io/pluralsh/devbox-minimal is the lean alternative. Custom images must meet the image
-	// contract (sh.plural.devbox/contract=v1 label, devbox-daemon entrypoint, UID 1000) and are
-	// normally built FROM one of these.
+	// Image is the devbox environment image: the tools, agents and browser an instance runs with. Defaults to
+	// ghcr.io/pluralsh/devbox-fat at the operator's version; ghcr.io/pluralsh/devbox-minimal is the lean
+	// alternative. Custom images must meet the image contract (sh.plural.devbox/contract=v1 label, UID 1000,
+	// a POSIX shell at spec.runtime.shell) and are normally built FROM one of these. devbox-daemon is not taken
+	// from this image: the operator delivers it through the runtime sidecar, see spec.runtime.
 	// +kubebuilder:validation:Optional
 	Image *string `json:"image,omitempty"`
+
+	// Runtime configures how the operator's devbox-daemon runs next to the environment image.
+	// +kubebuilder:validation:Optional
+	Runtime *DevboxRuntime `json:"runtime,omitempty"`
+
+	// InstanceUpdatePolicy controls how existing instances move to a new template revision, which a new
+	// environment image digest, a new daemon (an operator upgrade) or a template change rolls. Updating
+	// restarts the instance's processes and resets its root filesystem to the image; the home directory
+	// and agent threads are kept.
+	// +kubebuilder:validation:Optional
+	InstanceUpdatePolicy *DevboxInstanceUpdatePolicy `json:"instanceUpdatePolicy,omitempty"`
 
 	// ImageUpdatePolicy controls re-resolution of spec.image. Defaults to pinned for digest
 	// references and to poll every hour for tag references.
@@ -244,6 +285,31 @@ type DevboxSubstrate struct {
 	// Defaults to servicedns.podcert.ate.dev/identity.
 	// +kubebuilder:validation:Optional
 	CASignerName *string `json:"caSignerName,omitempty"`
+}
+
+// DevboxRuntime configures the plural-runtime sidecar. The runtime image is not configurable here: it is
+// ghcr.io/pluralsh/devbox-runtime-core at the operator's version (through the operator's registry mirror
+// settings), so every operator upgrade delivers its daemon to every runner.
+type DevboxRuntime struct {
+	// Flavor of the runtime. Only core (devbox-daemon alone) exists.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=core
+	Flavor *DevboxRuntimeFlavor `json:"flavor,omitempty"`
+
+	// Shell is the absolute path of a POSIX shell in the environment image. The devbox container starts with
+	// it, waits for the runtime sidecar to install devbox-daemon into the home volume and then execs the
+	// daemon. Defaults to /bin/sh.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Pattern=`^/[^\s]+$`
+	Shell *string `json:"shell,omitempty"`
+}
+
+type DevboxInstanceUpdatePolicy struct {
+	// Mode is onResume (default) or manual. Console-driven updates (a user's or admin's update, a forced
+	// remediation) apply in both modes.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=onResume
+	Mode *DevboxInstanceUpdateMode `json:"mode,omitempty"`
 }
 
 type DevboxImageUpdatePolicy struct {
@@ -786,7 +852,19 @@ type DevboxRunnerStatus struct {
 	// +kubebuilder:validation:Optional
 	ImageResolvedAt *metav1.Time `json:"imageResolvedAt,omitempty"`
 
-	// DaemonVersion is the devbox-daemon version from the resolved image's labels.
+	// ResolvedRuntime is the runtime image pinned by digest.
+	// +kubebuilder:validation:Optional
+	ResolvedRuntime *string `json:"resolvedRuntime,omitempty"`
+
+	// ResolvedRuntimeFrom is the image reference ResolvedRuntime was resolved from.
+	// +kubebuilder:validation:Optional
+	ResolvedRuntimeFrom *string `json:"resolvedRuntimeFrom,omitempty"`
+
+	// RuntimeResolvedAt is when the runtime image was last resolved.
+	// +kubebuilder:validation:Optional
+	RuntimeResolvedAt *metav1.Time `json:"runtimeResolvedAt,omitempty"`
+
+	// DaemonVersion is the devbox-daemon version from the resolved runtime image's labels.
 	// +kubebuilder:validation:Optional
 	DaemonVersion *string `json:"daemonVersion,omitempty"`
 
@@ -833,9 +911,16 @@ type DevboxRevision struct {
 	// Name is the ActorTemplate name.
 	Name string `json:"name"`
 	// Hash of the inputs that produced this revision.
-	Hash  string              `json:"hash"`
-	Image string              `json:"image"`
-	Phase DevboxRevisionPhase `json:"phase"`
+	Hash  string `json:"hash"`
+	Image string `json:"image"`
+	// Runtime is the runtime image of the revision. Empty for revisions from before the runtime sidecar,
+	// whose daemon is the one baked into Image.
+	// +kubebuilder:validation:Optional
+	Runtime *string `json:"runtime,omitempty"`
+	// DaemonVersion is the devbox-daemon version of Runtime.
+	// +kubebuilder:validation:Optional
+	DaemonVersion *string             `json:"daemonVersion,omitempty"`
+	Phase         DevboxRevisionPhase `json:"phase"`
 	// +kubebuilder:validation:Optional
 	GoldenTag *string `json:"goldenTag,omitempty"`
 	// +kubebuilder:validation:Optional
@@ -925,6 +1010,22 @@ func (in *DevboxRunner) UpdateMode(image string) DevboxImageUpdateMode {
 		return DevboxImageUpdatePinned
 	}
 	return DevboxImageUpdatePoll
+}
+
+// InstanceUpdateMode is spec.instanceUpdatePolicy.mode, onResume when unset.
+func (in *DevboxRunner) InstanceUpdateMode() DevboxInstanceUpdateMode {
+	if p := in.Spec.InstanceUpdatePolicy; p != nil && p.Mode != nil {
+		return *p.Mode
+	}
+	return DevboxInstanceUpdateOnResume
+}
+
+// RuntimeShell is spec.runtime.shell, /bin/sh when unset.
+func (in *DevboxRunner) RuntimeShell() string {
+	if r := in.Spec.Runtime; r != nil && r.Shell != nil && *r.Shell != "" {
+		return *r.Shell
+	}
+	return DevboxDefaultShell
 }
 
 // RevisionByNumber returns the status entry for a revision, or nil.

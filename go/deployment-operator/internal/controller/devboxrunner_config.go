@@ -14,6 +14,7 @@ import (
 
 const (
 	defaultDevboxImageRepository  = "ghcr.io/pluralsh/devbox-fat"
+	defaultRuntimeImageRepository = "ghcr.io/pluralsh/devbox-runtime-core"
 	defaultGatewayImageRepository = "ghcr.io/pluralsh/devbox-gateway"
 	defaultSubstrateNamespace     = "ate-system"
 	defaultPollInterval           = time.Hour
@@ -36,6 +37,10 @@ type DevboxConfig struct {
 	// DefaultImage is DEVBOX_DEFAULT_IMAGE, the image for runners without spec.image. When unset, DevboxImage
 	// falls back to devbox-fat at OperatorVersion on the agent's base registry.
 	DefaultImage string
+	// RuntimeImage is DEVBOX_RUNTIME_IMAGE, the plural-runtime sidecar image holding devbox-daemon, for registries
+	// the base registry swap can't express. When unset, RuntimeImageRef falls back to devbox-runtime-core at
+	// OperatorVersion on the agent's base registry, which is how an operator upgrade delivers a new daemon.
+	RuntimeImage string
 	// GatewayImage is DEVBOX_GATEWAY_IMAGE. When unset, GatewayImageRef falls back like DefaultImage.
 	GatewayImage string
 	// GatewayReplicas is DEVBOX_GATEWAY_REPLICAS.
@@ -76,6 +81,7 @@ func LoadDevboxConfig(operatorNamespace, consoleURL, deployToken, clusterID stri
 		OperatorNamespace:                operatorNamespace,
 		OperatorServiceAccount:           envOr("DEVBOX_OPERATOR_SERVICE_ACCOUNT", "deployment-operator"),
 		DefaultImage:                     os.Getenv("DEVBOX_DEFAULT_IMAGE"),
+		RuntimeImage:                     os.Getenv("DEVBOX_RUNTIME_IMAGE"),
 		GatewayImage:                     os.Getenv("DEVBOX_GATEWAY_IMAGE"),
 		GatewayReplicas:                  int32(envInt("DEVBOX_GATEWAY_REPLICAS", 1)),
 		GatewayServiceAccountAnnotations: parseKeyValues(os.Getenv("DEVBOX_GATEWAY_SA_ANNOTATIONS")),
@@ -116,6 +122,11 @@ func (c DevboxConfig) OperatorPrincipal() string {
 // agent configuration can change it at runtime.
 func (c DevboxConfig) DevboxImage() string {
 	return c.imageOrDefault(c.DefaultImage, defaultDevboxImageRepository)
+}
+
+// RuntimeImageRef is the runtime image of every runner; it is not configurable per runner.
+func (c DevboxConfig) RuntimeImageRef() string {
+	return c.imageOrDefault(c.RuntimeImage, defaultRuntimeImageRepository)
 }
 
 func (c DevboxConfig) GatewayImageRef() string {

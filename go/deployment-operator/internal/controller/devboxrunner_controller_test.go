@@ -21,6 +21,7 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/samber/lo"
 	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
@@ -119,6 +120,7 @@ func startDevboxEnv(t *testing.T) *devboxEnv {
 			OperatorVersion:     devboxTestVersion,
 			OperatorNamespace:   devboxTestNamespace,
 			DefaultImage:        env.registry + "/devbox-fat:" + devboxTestVersion,
+			RuntimeImage:        env.registry + "/devbox-runtime-core:" + devboxTestVersion,
 			GatewayImage:        "ghcr.io/pluralsh/devbox-gateway:" + devboxTestVersion,
 			GatewayReplicas:     1,
 			WorkerImages:        map[v1alpha1.DevboxSandboxClass]string{v1alpha1.DevboxSandboxGVisor: "ghcr.io/example/ateworker-gvisor@sha256:abc"},
@@ -138,6 +140,7 @@ func startDevboxEnv(t *testing.T) *devboxEnv {
 		Images:    &RegistryImageResolver{Client: c, SecretNamespace: devboxTestNamespace},
 		Probe:     &ConfigMapProbeClient{Client: c, Reader: c, Namespace: devboxTestNamespace, Tokens: env.console},
 	}
+	env.pushRuntime(t, devboxTestVersion)
 	return env
 }
 
@@ -149,9 +152,27 @@ func goodDevboxImage(c *v1.Config) {
 		v1alpha1.DevboxImageDaemonVersionLabel: devboxTestVersion,
 		v1alpha1.DevboxImageFlavorLabel:        "minimal",
 	}
-	c.Entrypoint = []string{devboxDaemonEntrypoint}
 	c.User = "1000:1000"
 	c.Env = []string{"DEVBOX_TRUST_DIR=/var/lib/devbox/trust"}
+}
+
+func runtimeImage(daemonVersion string) imageConfig {
+	return func(c *v1.Config) {
+		c.Labels = map[string]string{
+			v1alpha1.DevboxRuntimeContractLabel:    v1alpha1.DevboxRuntimeContractV1,
+			v1alpha1.DevboxImageDaemonVersionLabel: daemonVersion,
+			v1alpha1.DevboxImageFlavorLabel:        "core",
+		}
+		c.Entrypoint = []string{"/devbox-runtime-installer"}
+		c.User = ""
+		c.Env = nil
+	}
+}
+
+// pushRuntime writes a fresh runtime image under the tag the reconciler resolves, and returns its digest.
+func (e *devboxEnv) pushRuntime(t *testing.T, daemonVersion string) string {
+	t.Helper()
+	return e.push(t, "devbox-runtime-core:"+devboxTestVersion, runtimeImage(daemonVersion))
 }
 
 // push writes a fresh random image to the test registry and returns its digest.
@@ -399,7 +420,9 @@ func TestDevboxRunnerController(t *testing.T) {
 		g.Expect(runner.Finalizers).To(ContainElement(DevboxRunnerFinalizer))
 		g.Expect(*runner.Status.ResolvedImage).To(Equal(env.registry + "/devbox@" + digest))
 		g.Expect(condition(runner, v1alpha1.DevboxImageContractConditionType).Status).To(Equal(metav1.ConditionTrue))
-		g.Expect(condition(runner, v1alpha1.DevboxImageOutdatedConditionType).Status).To(Equal(metav1.ConditionFalse))
+		g.Expect(condition(runner, v1alpha1.DevboxRuntimeResolvedConditionType).Status).To(Equal(metav1.ConditionTrue))
+		g.Expect(*runner.Status.ResolvedRuntime).To(HavePrefix(env.registry + "/devbox-runtime-core@sha256:"))
+		g.Expect(*runner.Status.DaemonVersion).To(Equal(devboxTestVersion))
 
 		pool := &unstructured.Unstructured{}
 		pool.SetGroupVersionKind(workerPoolGVK)
@@ -483,8 +506,14 @@ func TestDevboxRunnerController(t *testing.T) {
 		g.Expect(runner.Status.Revisions[0].Phase).To(Equal(v1alpha1.DevboxRevisionBuilding))
 		tmpl := env.substrate.template(atespace, "platform-r1")
 		g.Expect(tmpl).NotTo(BeNil())
+		g.Expect(tmpl.Containers).To(HaveLen(2))
+		g.Expect(tmpl.Containers[0].Name).To(Equal("devbox"), "the devbox container must be first, or an updated instance loses its home")
 		g.Expect(tmpl.Containers[0].Image).To(Equal(*runner.Status.ResolvedImage))
-		g.Expect(tmpl.Containers[0].Command).To(BeEmpty())
+		g.Expect(tmpl.Containers[0].Command[:2]).To(Equal([]string{"/bin/sh", "-c"}))
+		g.Expect(tmpl.Containers[1].Name).To(Equal("plural-runtime"))
+		g.Expect(tmpl.Containers[1].Image).To(Equal(*runner.Status.ResolvedRuntime))
+		g.Expect(*runner.Status.Revisions[0].Runtime).To(Equal(*runner.Status.ResolvedRuntime))
+		g.Expect(*runner.Status.Revisions[0].DaemonVersion).To(Equal(devboxTestVersion))
 		g.Expect(tmpl.WorkerSelector.MatchLabels).To(Equal(map[string]string{"devboxes.plural.sh/runner.platform": "true"}))
 		g.Expect(pool.GetLabels()).To(HaveKeyWithValue("devboxes.plural.sh/runner.platform", "true"))
 		g.Expect(tmpl.Containers[0].WakeupProbe.HttpGet.Path).To(Equal("/readyz"))
@@ -544,6 +573,10 @@ func TestDevboxRunnerController(t *testing.T) {
 
 		upsert := env.console.lastUpsert("platform")
 		g.Expect(*upsert.TemplateRevision).To(Equal("platform-r1"))
+		g.Expect(*upsert.Revision).To(Equal(int64(1)), "instances report their revision by number")
+		g.Expect(*upsert.RuntimeImage).To(Equal(*runner.Status.ResolvedRuntime))
+		g.Expect(*upsert.DaemonVersion).To(Equal(devboxTestVersion))
+		g.Expect(*upsert.UpdateMode).To(Equal(console.DevboxUpdateModeOnResume))
 		g.Expect(*upsert.Agents[0].ProbeStatus).To(Equal(console.DevboxProbeStatusOk))
 		g.Expect(*upsert.Agents[0].AdapterName).To(Equal("claude-code-acp"))
 		g.Expect(upsert.Agents[0].Models).To(ConsistOf(&console.DevboxModelAttributes{ID: "claude-sonnet-4-5", Name: lo.ToPtr("Sonnet 4.5")}))
@@ -613,6 +646,22 @@ func TestDevboxRunnerController(t *testing.T) {
 		g.Expect(runner.RevisionByNumber(1).Phase).To(Equal(v1alpha1.DevboxRevisionRetired))
 		g.Expect(env.substrate.template(atespace, "platform-r1")).NotTo(BeNil(), "an instance still references r1")
 
+		// The instance was moved to r2 and hasn't started there: the gateway's record names r1 as where it goes
+		// back to, which keeps r1 although no actor points at it.
+		g.Expect(env.substrate.DeleteActor(ctx, atespace, "instance-1")).To(Succeed())
+		env.substrate.addActor(atespace, "instance-1", "platform-r2", ateapi.ActorState_ACTOR_STATE_SUSPENDED)
+		record := &corev1.ConfigMap{
+			ObjectMeta: metav1.ObjectMeta{Name: "devbox-instance-1", Namespace: devboxTestNamespace, Labels: map[string]string{v1alpha1.DevboxInstanceRecordLabel: "true"}},
+			Data:       map[string]string{v1alpha1.DevboxInstanceRecordKey: `{"instanceId":"instance-1","runner":"platform","rebase":{"fromTemplate":"platform-r1","fromRevision":1,"toTemplate":"platform-r2","toRevision":2}}`},
+		}
+		g.Expect(env.client.Create(ctx, record)).To(Succeed())
+		runner = env.reconcile(t, "platform", 1)
+		g.Expect(runner.RevisionByNumber(1)).NotTo(BeNil(), "r1 is where a pending update rolls back to")
+		g.Expect(env.substrate.template(atespace, "platform-r1")).NotTo(BeNil())
+
+		// It started on r2: the record no longer needs r1.
+		record.Data[v1alpha1.DevboxInstanceRecordKey] = `{"instanceId":"instance-1","runner":"platform"}`
+		g.Expect(env.client.Update(ctx, record)).To(Succeed())
 		g.Expect(env.substrate.DeleteActor(ctx, atespace, "instance-1")).To(Succeed())
 		runner = env.reconcile(t, "platform", 1)
 		g.Expect(runner.RevisionByNumber(1)).To(BeNil(), "r1's own golden actor is no reference")
@@ -686,16 +735,16 @@ func TestDevboxRunnerController(t *testing.T) {
 		g.Expect(runner.LatestRevision()).To(SatisfyAll(HaveField("Revision", int64(2)), HaveField("Phase", v1alpha1.DevboxRevisionFailed)))
 	})
 
-	t.Run("an image that overrides ENTRYPOINT fails the contract", func(t *testing.T) {
+	t.Run("an image that doesn't run as UID 1000 fails the contract", func(t *testing.T) {
 		g := NewWithT(t)
-		env.push(t, "custom:bad", func(c *v1.Config) { c.Entrypoint = []string{"/bin/bash"} })
+		env.push(t, "custom:bad", func(c *v1.Config) { c.User = "root" })
 		env.newRunner(t, "custom", "custom:bad")
 
 		runner := env.reconcile(t, "custom", 2)
 		contract := condition(runner, v1alpha1.DevboxImageContractConditionType)
 		g.Expect(contract.Status).To(Equal(metav1.ConditionFalse))
 		g.Expect(contract.Reason).To(Equal(string(v1alpha1.DevboxImageContractViolatedReason)))
-		g.Expect(contract.Message).To(ContainSubstring("must not override ENTRYPOINT"))
+		g.Expect(contract.Message).To(ContainSubstring("want UID 1000"))
 		g.Expect(runner.Status.ResolvedImage).To(BeNil())
 		g.Expect(runner.Status.Revisions).To(BeEmpty())
 		g.Expect(condition(runner, v1alpha1.ReadyConditionType).Status).To(Equal(metav1.ConditionFalse))
@@ -864,24 +913,95 @@ func TestDevboxRunnerController(t *testing.T) {
 		g.Expect(shared.GetLabels()).NotTo(HaveKey("devboxes.plural.sh/runner.elastic"))
 	})
 
-	t.Run("an old daemon is flagged outdated, a newer one fails the contract", func(t *testing.T) {
+	t.Run("the daemon baked into the environment image is ignored", func(t *testing.T) {
 		g := NewWithT(t)
-		env.push(t, "custom:old", func(c *v1.Config) { c.Labels[v1alpha1.DevboxImageDaemonVersionLabel] = "0.9.3" })
+		env.push(t, "custom:old", func(c *v1.Config) {
+			c.Labels[v1alpha1.DevboxImageDaemonVersionLabel] = "0.9.3"
+			c.Entrypoint = []string{"/usr/local/bin/devbox-daemon"}
+		})
 		env.newRunner(t, "old", "custom:old")
 		runner := env.reconcile(t, "old", 2)
 		g.Expect(condition(runner, v1alpha1.DevboxImageContractConditionType).Status).To(Equal(metav1.ConditionTrue))
-		outdated := condition(runner, v1alpha1.DevboxImageOutdatedConditionType)
-		g.Expect(outdated.Status).To(Equal(metav1.ConditionTrue))
-		g.Expect(outdated.Message).To(ContainSubstring("rebuild on the new base image"))
-
-		goodDigest := *runner.Status.ResolvedImage
-		env.push(t, "custom:new", func(c *v1.Config) { c.Labels[v1alpha1.DevboxImageDaemonVersionLabel] = "0.13.0" })
-		runner.Spec.Image = lo.ToPtr(env.registry + "/custom:new")
-		g.Expect(env.client.Update(ctx, runner)).To(Succeed())
-		runner = env.reconcile(t, "old", 1)
-		g.Expect(condition(runner, v1alpha1.DevboxImageContractConditionType).Message).To(ContainSubstring("newer than the operator"))
-		g.Expect(*runner.Status.ResolvedImage).To(Equal(goodDigest), "the last good digest is kept")
+		g.Expect(*runner.Status.DaemonVersion).To(Equal(devboxTestVersion), "the daemon version is the runtime's")
 		g.Expect(runner.Status.Revisions).To(HaveLen(1))
+	})
+
+	t.Run("a new runtime digest rolls a revision with the same environment image, a bad one keeps the old", func(t *testing.T) {
+		g := NewWithT(t)
+		env.push(t, "devbox:v1")
+		env.newRunner(t, "daemon", "devbox:v1", func(r *v1alpha1.DevboxRunner) {
+			r.Spec.ImageUpdatePolicy = &v1alpha1.DevboxImageUpdatePolicy{Mode: lo.ToPtr(v1alpha1.DevboxImageUpdatePinned)}
+		})
+		runner := env.reconcile(t, "daemon", 2)
+		g.Expect(runner.Status.Revisions).To(HaveLen(1))
+		first := *runner.LatestRevision()
+		atespace := *runner.Status.Atespace
+		// r1 is superseded while it builds, and collected with its template.
+		r1 := env.substrate.template(atespace, first.Name)
+
+		// The same runtime tag at the same digest: nothing rolls, however often it is re-resolved.
+		expire := func() {
+			runner = env.get(t, "daemon")
+			runner.Status.RuntimeResolvedAt = &metav1.Time{Time: time.Now().Add(-2 * time.Hour)}
+			g.Expect(env.client.Status().Update(ctx, runner)).To(Succeed())
+		}
+		expire()
+		runner = env.reconcile(t, "daemon", 1)
+		g.Expect(runner.Status.Revisions).To(HaveLen(1), "an unchanged runtime digest does not roll a revision")
+
+		// A runtime that fails its contract keeps the digest in use.
+		env.push(t, "devbox-runtime-core:"+devboxTestVersion)
+		expire()
+		runner = env.reconcile(t, "daemon", 1)
+		resolved := condition(runner, v1alpha1.DevboxRuntimeResolvedConditionType)
+		g.Expect(resolved.Status).To(Equal(metav1.ConditionFalse))
+		g.Expect(resolved.Message).To(ContainSubstring(v1alpha1.DevboxRuntimeContractLabel))
+		g.Expect(*runner.Status.ResolvedRuntime).To(Equal(*first.Runtime))
+		g.Expect(runner.Status.Revisions).To(HaveLen(1))
+
+		// A new daemon: same environment image, new runtime, new revision.
+		newDigest := env.pushRuntime(t, "0.12.1")
+		runner = env.reconcile(t, "daemon", 1)
+		g.Expect(condition(runner, v1alpha1.DevboxRuntimeResolvedConditionType).Status).To(Equal(metav1.ConditionTrue))
+		g.Expect(*runner.Status.ResolvedRuntime).To(HaveSuffix(newDigest))
+		g.Expect(*runner.Status.DaemonVersion).To(Equal("0.12.1"))
+		latest := runner.LatestRevision()
+		g.Expect(latest.Revision).To(Equal(int64(2)))
+		g.Expect(latest.Image).To(Equal(first.Image))
+		g.Expect(*latest.Runtime).To(HaveSuffix(newDigest))
+		g.Expect(*latest.DaemonVersion).To(Equal("0.12.1"))
+
+		// Substrate only moves an actor between templates with the same volumes and devbox mounts.
+		r2 := env.substrate.template(atespace, latest.Name)
+		g.Expect(r2.Volumes).To(HaveLen(len(r1.Volumes)))
+		for i := range r1.Volumes {
+			g.Expect(proto.Equal(r1.Volumes[i], r2.Volumes[i])).To(BeTrue())
+		}
+		g.Expect(r2.Containers[0].VolumeMounts).To(HaveLen(len(r1.Containers[0].VolumeMounts)))
+		for i := range r1.Containers[0].VolumeMounts {
+			g.Expect(proto.Equal(r1.Containers[0].VolumeMounts[i], r2.Containers[0].VolumeMounts[i])).To(BeTrue())
+		}
+
+		// Later tests share the registry: restore the runtime they were written against.
+		env.pushRuntime(t, devboxTestVersion)
+	})
+
+	t.Run("without a resolvable runtime no revision is built", func(t *testing.T) {
+		g := NewWithT(t)
+		env.push(t, "devbox:v1")
+		env.newRunner(t, "no-runtime", "devbox:v1")
+		image := env.r.Config.RuntimeImage
+		env.r.Config.RuntimeImage = env.registry + "/missing-runtime:1"
+		t.Cleanup(func() { env.r.Config.RuntimeImage = image })
+
+		runner := env.reconcile(t, "no-runtime", 2)
+		g.Expect(runner.Status.ResolvedImage).NotTo(BeNil())
+		g.Expect(runner.Status.ResolvedRuntime).To(BeNil())
+		g.Expect(condition(runner, v1alpha1.DevboxRuntimeResolvedConditionType).Status).To(Equal(metav1.ConditionFalse))
+		g.Expect(runner.Status.Revisions).To(BeEmpty())
+		g.Expect(condition(runner, v1alpha1.ReadyConditionType).Status).To(Equal(metav1.ConditionFalse))
+		g.Expect(runner.Status.WorkerPool).NotTo(BeNil(), "the worker pool is reconciled without a runtime")
+		g.Expect(runner.Status.ID).NotTo(BeNil(), "and so is the console registration")
 	})
 
 	t.Run("delete drains running instances, waits for snapshots, then cleans up", func(t *testing.T) {
@@ -941,7 +1061,7 @@ func TestDevboxRunnerController(t *testing.T) {
 
 	t.Run("deleting the last runner removes the gateway", func(t *testing.T) {
 		g := NewWithT(t)
-		for _, name := range []string{"custom", "old", "scheduled", "elastic", "rebuild"} {
+		for _, name := range []string{"custom", "old", "daemon", "no-runtime", "scheduled", "elastic", "rebuild"} {
 			g.Expect(env.client.Delete(ctx, env.get(t, name))).To(Succeed())
 			_, err := env.r.Reconcile(ctx, ctrl.Request{NamespacedName: client.ObjectKey{Name: name}})
 			g.Expect(err).NotTo(HaveOccurred())
