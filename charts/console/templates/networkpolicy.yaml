@@ -33,8 +33,8 @@ spec:
       port: 4369
     - protocol: TCP
       port: 6000
-  {{- /* gRPC is only reachable from Nexus and observability-proxy pods; Nexus HTTP stays unscoped here. */}}
-  {{- if or .Values.aiProxy.enabled .Values.observabilityProxy.enabled }}
+  {{- /* gRPC is only reachable from Nexus, observability-proxy and KAS pods (KAS forwards devbox gateways' Ingest calls); Nexus HTTP stays unscoped here. */}}
+  {{- if or .Values.aiProxy.enabled .Values.observabilityProxy.enabled .Values.kas.devbox.enabled }}
   - from:
     {{- if .Values.aiProxy.enabled }}
     - podSelector:
@@ -47,6 +47,11 @@ spec:
         matchLabels:
           app.kubernetes.io/name: observability-proxy
           app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- end }}
+    {{- if .Values.kas.devbox.enabled }}
+    - podSelector:
+        matchLabels:
+          {{- include "kas.selectorLabels" . | nindent 10 }}
     {{- end }}
       namespaceSelector:
         matchLabels:
