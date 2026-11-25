@@ -12,6 +12,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -250,6 +251,29 @@ func TestDevbox_StreamProxy(t *testing.T) {
 			require.NoError(t, err)
 			assert.Equal(t, msg, string(buf))
 		}
+	})
+
+	t.Run("binary websocket subprotocol", func(t *testing.T) {
+		token := mintDevboxStreamToken(t, nil)
+		conn, err := net.Dial("tcp", kas2.devboxAddr)
+		require.NoError(t, err)
+		defer conn.Close() // nolint: errcheck
+		require.NoError(t, conn.SetDeadline(time.Now().Add(10*time.Second)))
+		_, err = fmt.Fprintf(conn, "GET /ext/devbox/streams/stream-1?instance=inst-1 HTTP/1.1\r\nHost: kas\r\n"+
+			"Authorization: Bearer %s\r\nConnection: Upgrade\r\nUpgrade: websocket\r\nSec-WebSocket-Protocol: binary\r\n\r\n", token)
+		require.NoError(t, err)
+		br := bufio.NewReader(conn)
+		resp, err := http.ReadResponse(br, nil)
+		require.NoError(t, err)
+		require.Equal(t, http.StatusSwitchingProtocols, resp.StatusCode)
+		assert.Equal(t, "binary", resp.Header.Get("Sec-WebSocket-Protocol"))
+		frame := []byte{0x00, 0xff, 0x01, 0x10}
+		_, err = conn.Write(frame)
+		require.NoError(t, err)
+		buf := make([]byte, len(frame))
+		_, err = io.ReadFull(br, buf)
+		require.NoError(t, err)
+		assert.Equal(t, frame, buf)
 	})
 }
 
@@ -752,7 +776,7 @@ func (g *fakeDevboxGateway) ProxyStream(stream grpc.BidiStreamingServer[devboxv1
 			break
 		}
 	}
-	upgrade := line.Header["Upgrade"] != nil
+	upgrade := headerValues(line.Header, "Upgrade") != nil
 	if !upgrade {
 		return sendAll(stream,
 			&devboxv1.HttpResponse{Message: &devboxv1.HttpResponse_Header_{Header: &devboxv1.HttpResponse_Header{
@@ -766,12 +790,16 @@ func (g *fakeDevboxGateway) ProxyStream(stream grpc.BidiStreamingServer[devboxv1
 			&devboxv1.HttpResponse{Message: &devboxv1.HttpResponse_Trailer_{Trailer: &devboxv1.HttpResponse_Trailer{}}},
 		)
 	}
+	switched := map[string]*devboxv1.MetadataValues{
+		"Upgrade":    {Value: []string{"websocket"}},
+		"Connection": {Value: []string{"Upgrade"}},
+	}
+	if proto := headerValues(line.Header, "Sec-WebSocket-Protocol"); len(proto) > 0 {
+		switched["Sec-WebSocket-Protocol"] = &devboxv1.MetadataValues{Value: proto}
+	}
 	err = sendAll(stream,
 		&devboxv1.HttpResponse{Message: &devboxv1.HttpResponse_Header_{Header: &devboxv1.HttpResponse_Header{
-			Response: &devboxv1.HttpResponseLine{StatusCode: http.StatusSwitchingProtocols, Status: "101 Switching Protocols", Header: map[string]*devboxv1.MetadataValues{
-				"Upgrade":    {Value: []string{"echo"}},
-				"Connection": {Value: []string{"Upgrade"}},
-			}},
+			Response: &devboxv1.HttpResponseLine{StatusCode: http.StatusSwitchingProtocols, Status: "101 Switching Protocols", Header: switched},
 		}}},
 		&devboxv1.HttpResponse{Message: &devboxv1.HttpResponse_Trailer_{Trailer: &devboxv1.HttpResponse_Trailer{}}},
 	)
@@ -791,6 +819,15 @@ func (g *fakeDevboxGateway) ProxyStream(stream grpc.BidiStreamingServer[devboxv1
 			return err
 		}
 	}
+}
+
+func headerValues(h map[string]*devboxv1.MetadataValues, name string) []string {
+	for k, v := range h {
+		if strings.EqualFold(k, name) {
+			return v.GetValue()
+		}
+	}
+	return nil
 }
 
 func sendAll(stream grpc.BidiStreamingServer[devboxv1.HttpRequest, devboxv1.HttpResponse], msgs ...*devboxv1.HttpResponse) error {

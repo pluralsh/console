@@ -1,6 +1,5 @@
 import {
   CliIcon,
-  MonitorIcon,
   CloseIcon,
   GitCompareIcon,
   FolderIcon,
@@ -23,11 +22,9 @@ import {
   DevboxPullRequestFragment,
   useDevboxInstanceQuery,
 } from 'generated/graphql'
-import { FeatureFlagContext } from 'components/flows/FeatureFlagContext'
 import {
   ReactElement,
   ReactNode,
-  use,
   useCallback,
   useEffect,
   useState,
@@ -39,9 +36,9 @@ import {
   WORKBENCH_DEVBOX_FILE_QUERY_PARAM,
   WORKBENCH_DEVBOX_INSTANCE_PARAM_ID,
   WORKBENCH_DEVBOX_TAB_QUERY_PARAM,
+  WORKBENCH_DEVBOX_VIEW_QUERY_PARAM,
 } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
-import { DevboxBrowserTab } from './DevboxBrowserTab'
 import { useDevboxChangeStat } from './devboxChanges'
 import {
   DevboxDiffBlock,
@@ -59,12 +56,7 @@ import { useDevboxWorkspaceApi } from './devboxWorkspaceApi'
 const SIDE_PANEL_TYPE: SidePanel = 'devbox'
 const OPEN_KEY = 'plural-devbox-panel-open'
 
-export type DevboxPanelTab =
-  | 'files'
-  | 'changes'
-  | 'prs'
-  | 'terminal'
-  | 'browser'
+export type DevboxPanelTab = 'files' | 'changes' | 'prs' | 'terminal'
 
 const PANEL_TABS: {
   key: DevboxPanelTab
@@ -75,21 +67,10 @@ const PANEL_TABS: {
   { key: 'changes', label: 'Changes', icon: <GitCompareIcon size={14} /> },
   { key: 'prs', label: 'Pull requests', icon: <PrIcon size={14} /> },
   { key: 'terminal', label: 'Terminal', icon: <CliIcon size={14} /> },
-  { key: 'browser', label: 'Browser', icon: <MonitorIcon size={14} /> },
 ]
 
 export const isPanelTab = (tab: Nullable<string>): tab is DevboxPanelTab =>
   PANEL_TABS.some((t) => t.key === tab)
-
-// the browser tab stays behind its feature flag until it works
-function usePanelTabs(instance: Nullable<DevboxInstanceFragment>) {
-  const { featureFlags } = use(FeatureFlagContext)
-  return PANEL_TABS.filter(
-    (t) =>
-      t.key !== 'browser' ||
-      (featureFlags.DevboxBrowser && instance?.devbox?.browser)
-  )
-}
 
 const readOpen = () => localStorage.getItem(OPEN_KEY) !== 'false'
 
@@ -137,16 +118,18 @@ export function useDevboxPanel() {
     )
   const setTab = (tab: DevboxPanelTab) =>
     update({ [WORKBENCH_DEVBOX_TAB_QUERY_PARAM]: tab === 'files' ? null : tab })
-  // the main view shows at most one of an open file or a change's diff
+  // the main view shows at most one of the browser, an open file, or a change's diff
   const selectFile = (path: Nullable<string>) =>
     update({
       [WORKBENCH_DEVBOX_FILE_QUERY_PARAM]: path,
       [WORKBENCH_DEVBOX_CHANGE_QUERY_PARAM]: null,
+      [WORKBENCH_DEVBOX_VIEW_QUERY_PARAM]: null,
     })
   const selectChange = (change: Nullable<string>) =>
     update({
       [WORKBENCH_DEVBOX_CHANGE_QUERY_PARAM]: change,
       [WORKBENCH_DEVBOX_FILE_QUERY_PARAM]: null,
+      [WORKBENCH_DEVBOX_VIEW_QUERY_PARAM]: null,
     })
   // a trailing `/` only reveals a directory in the tree, a file also replaces
   // the instance's main view with the file
@@ -155,12 +138,23 @@ export function useDevboxPanel() {
       [WORKBENCH_DEVBOX_TAB_QUERY_PARAM]: null,
       [WORKBENCH_DEVBOX_FILE_QUERY_PARAM]: path,
       [WORKBENCH_DEVBOX_CHANGE_QUERY_PARAM]: null,
+      [WORKBENCH_DEVBOX_VIEW_QUERY_PARAM]: null,
     })
     setOpen(true)
   }
+  const openBrowser = () =>
+    update({
+      [WORKBENCH_DEVBOX_VIEW_QUERY_PARAM]: 'browser',
+      [WORKBENCH_DEVBOX_FILE_QUERY_PARAM]: null,
+      [WORKBENCH_DEVBOX_CHANGE_QUERY_PARAM]: null,
+    })
+  const closeBrowser = () =>
+    update({ [WORKBENCH_DEVBOX_VIEW_QUERY_PARAM]: null })
 
   const file = params.get(WORKBENCH_DEVBOX_FILE_QUERY_PARAM)
   const change = params.get(WORKBENCH_DEVBOX_CHANGE_QUERY_PARAM)
+  const browserOpen =
+    params.get(WORKBENCH_DEVBOX_VIEW_QUERY_PARAM) === 'browser'
 
   return {
     isOpen: sidePanel === SIDE_PANEL_TYPE,
@@ -173,6 +167,9 @@ export function useDevboxPanel() {
     openFile,
     change,
     selectChange,
+    browserOpen,
+    openBrowser,
+    closeBrowser,
   }
 }
 
@@ -196,7 +193,7 @@ export function DevboxPanelRail({
     isInstanceLive(instance.status)
   )
   const { pullRequests, open } = useDevboxPullRequests(instance.id)
-  const tabs = usePanelTabs(instance)
+  const tabs = PANEL_TABS
   if (isOpen) return null
   return (
     <PanelRail
@@ -253,7 +250,7 @@ export function DevboxPanelContent() {
 
   const changes = useDevboxChangeStat(instanceId || null, live)
   const { pullRequests } = useDevboxPullRequests(instanceId || null)
-  const tabs = usePanelTabs(instance)
+  const tabs = PANEL_TABS
   const active = tabs.find((t) => t.key === tab) ?? tabs[0]
 
   return (
@@ -334,13 +331,6 @@ export function DevboxPanelContent() {
               api={api}
               live={live}
               headerActions={headerActions}
-            />
-          )}
-          {active.key === 'browser' && (
-            <DevboxBrowserTab
-              api={api}
-              live={live}
-              browserEnabled={!!instance.devbox?.browser}
             />
           )}
         </PanelBodySC>

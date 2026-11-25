@@ -31,7 +31,7 @@ import {
   useDevboxPanelAutoOpen,
 } from './DevboxControlPanel'
 
-const WIDE_PANEL_TABS = new Set<DevboxPanelTab>(['terminal', 'browser'])
+const WIDE_PANEL_TABS = new Set<DevboxPanelTab>(['terminal'])
 import { isInstanceTerminal } from './devboxIdle'
 import { DevboxInstanceView } from './DevboxInstanceView'
 import { DevboxNewInstance } from './DevboxNewInstance'
@@ -68,8 +68,8 @@ export function DevboxWorkspace() {
 }
 
 // an instance, outside the workbench tabs like a job: its sessions on the left,
-// the session in the middle and the VM's files, terminal and browser in the
-// app's side panel on the right
+// the session (or the browser, a file, or a diff) in the middle, and the VM's
+// files and terminal in the app's side panel on the right
 export function DevboxInstancePage() {
   const { workbenchId, workbench } = useOutletContext<WorkbenchOutletContext>()
   const instanceId = useParams()[WORKBENCH_DEVBOX_INSTANCE_PARAM_ID] ?? ''

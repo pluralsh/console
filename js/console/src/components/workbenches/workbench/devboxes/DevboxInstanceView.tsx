@@ -21,6 +21,7 @@ import {
 import styled from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import { WorkbenchEmptyState } from '../../common/WorkbenchEmptyState'
+import { DevboxBrowserView } from './DevboxBrowserTab'
 import { DevboxPanelRail, useDevboxPanel } from './DevboxControlPanel'
 import { isClusterOfflineError } from './devboxErrors'
 import { useDevboxPullRequests } from './devboxPullRequests'
@@ -114,8 +115,15 @@ export function DevboxInstanceView({
   ].some(Boolean)
 
   const live = isInstanceLive(instance?.status)
-  const { viewedFile, selectFile, change, selectChange, openFile } =
-    useDevboxPanel()
+  const {
+    viewedFile,
+    selectFile,
+    change,
+    selectChange,
+    openFile,
+    browserOpen,
+    closeBrowser,
+  } = useDevboxPanel()
   const api = useDevboxWorkspaceApi(instanceId)
   useDevboxPresence(instanceId, live)
 
@@ -228,7 +236,14 @@ export function DevboxInstanceView({
             onImportSession={() => setImportOpen(true)}
           />
         </HeaderBarSC>
-        {live && change ? (
+        {live && browserOpen ? (
+          <DevboxBrowserView
+            api={api}
+            live={live}
+            browserEnabled={!!instance.devbox?.browser}
+            onClose={closeBrowser}
+          />
+        ) : live && change ? (
           <DevboxChangesViewer
             instanceId={instanceId}
             change={change}

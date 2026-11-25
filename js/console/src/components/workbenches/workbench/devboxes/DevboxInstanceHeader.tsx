@@ -12,11 +12,13 @@ import {
   Input,
   ListBoxItem,
   Modal,
+  MonitorIcon,
   MoonIcon,
   PlayIcon,
   StopIcon,
   Tooltip,
 } from '@pluralsh/design-system'
+import { FeatureFlagContext } from 'components/flows/FeatureFlagContext'
 import dayjs from 'dayjs'
 import { GqlError } from 'components/utils/Alert'
 import { Confirm } from 'components/utils/Confirm'
@@ -32,7 +34,7 @@ import {
   useKeepDevboxInstanceAwakeMutation,
   useSuspendDevboxInstanceMutation,
 } from 'generated/graphql'
-import { ReactNode, useState } from 'react'
+import { ReactNode, use, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { WORKBENCH_DEVBOX_THREAD_QUERY_PARAM } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
@@ -306,6 +308,7 @@ export function DevboxInstanceHeader({
         align="center"
         css={{ flexShrink: 0 }}
       >
+        <BrowserButton instance={instance} />
         {live && <ChangesButton instanceId={instance.id} />}
         {live && <CreatePrButton instance={instance} />}
         {suspended && (
@@ -373,6 +376,24 @@ export function DevboxInstanceHeader({
         />
       )}
     </Flex>
+  )
+}
+
+// opens the instance browser in the main view, for boxes that run one
+function BrowserButton({ instance }: { instance: DevboxInstanceFragment }) {
+  const { featureFlags } = use(FeatureFlagContext)
+  const { openBrowser, browserOpen } = useDevboxPanel()
+  if (!featureFlags.DevboxBrowser || !instance.devbox?.browser) return null
+  return (
+    <Button
+      small
+      secondary={!browserOpen}
+      startIcon={<MonitorIcon />}
+      aria-pressed={browserOpen}
+      onClick={openBrowser}
+    >
+      Browser
+    </Button>
   )
 }
 
