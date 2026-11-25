@@ -46,7 +46,7 @@ defmodule Console.Deployments.Stacks.CommandsTest do
       stack = %{stack | deleted_at: DateTime.utc_now()}
       assert Enum.map(Commands.commands(stack), &Map.take(&1, [:name, :cmd, :args, :stage])) == [
         %{name: "plan", cmd: "terragrunt", args: ["run", "--all", "--non-interactive", "--queue-exclude-external", "plan", "-destroy"], stage: :plan},
-        %{name: "destroy", cmd: "terragrunt", args: ["run", "--all", "--non-interactive", "--queue-exclude-external", "destroy"], stage: :destroy}
+        %{name: "destroy", cmd: "terragrunt", args: ["run", "--all", "--non-interactive", "--queue-exclude-external", "--", "destroy", "-auto-approve"], stage: :destroy}
       ]
     end
 

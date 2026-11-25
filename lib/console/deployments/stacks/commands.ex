@@ -143,7 +143,7 @@ defmodule Console.Deployments.Stacks.Commands do
   defp terragrunt_commands(%Stack{configuration: %{terragrunt: %{run_all: true}}, deleted_at: d}, _) when not is_nil(d) do
     indexed([
       cmd("plan", tg_command(), run_all_args(["plan", "-destroy"]), :plan),
-      cmd("destroy", tg_command(), run_all_args(["destroy"]), :destroy)
+      cmd("destroy", tg_command(), run_all_args(["--", "destroy", "-auto-approve"]), :destroy)
     ])
   end
 

@@ -29,7 +29,7 @@ func (in *PlanArgsModifier) Args(args []string) []string {
 	}
 
 	if in.runAll {
-		return args
+		return forwardCommand(args)
 	}
 
 	return append(args, fmt.Sprintf("-out=%s", in.planFileName))
@@ -98,4 +98,35 @@ func insertBeforeSubcommand(args []string, flags ...string) []string {
 	}
 
 	return append(args, flags...)
+}
+
+// forwardCommand puts "--" immediately before plan, apply, or destroy.
+// Terragrunt flags stay in front of it, and OpenTofu flags stay behind the command.
+func forwardCommand(args []string) []string {
+	index := -1
+	for i, arg := range args {
+		if arg == "plan" || arg == "apply" || arg == "destroy" {
+			index = i
+			break
+		}
+	}
+	if index < 0 {
+		return args
+	}
+
+	head := make([]string, 0, len(args)+1)
+	for _, arg := range args[:index] {
+		if arg != "--" {
+			head = append(head, arg)
+		}
+	}
+	tail := make([]string, 0, len(args)-index)
+	tail = append(tail, args[index])
+	for _, arg := range args[index+1:] {
+		if arg != "--" {
+			tail = append(tail, arg)
+		}
+	}
+
+	return append(append(head, "--"), tail...)
 }

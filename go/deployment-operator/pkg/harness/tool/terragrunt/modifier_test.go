@@ -35,7 +35,7 @@ func TestPlanArgsRunAll(t *testing.T) {
 		"run", "--all", "--non-interactive", "--queue-exclude-external",
 		"--out-dir", "/tmp/plans",
 		"--json-out-dir", "/tmp/json",
-		"plan", "-destroy",
+		"--", "plan", "-destroy",
 		"-parallelism=4",
 		"-refresh=false",
 	}, args)
@@ -71,7 +71,7 @@ func TestApplyArgsSelectsChangedUnits(t *testing.T) {
 		"run", "--all", "--non-interactive", "--queue-exclude-external",
 		"--out-dir", "/tmp/plans",
 		"--filter", "./nested/storage",
-		"apply",
+		"--", "apply",
 	}, args)
 }
 

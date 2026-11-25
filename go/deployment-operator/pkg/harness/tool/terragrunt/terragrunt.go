@@ -224,7 +224,7 @@ func (in *Terragrunt) ApplyArgs(args []string) ([]string, error) {
 		return nil, fmt.Errorf("could not determine changed terragrunt units: no units with changes")
 	}
 
-	return insertBeforeSubcommand(args, filters...), nil
+	return forwardCommand(insertBeforeSubcommand(args, filters...)), nil
 }
 
 func (in *Terragrunt) plan() (string, error) {
