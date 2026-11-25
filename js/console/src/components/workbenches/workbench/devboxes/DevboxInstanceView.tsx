@@ -1,4 +1,5 @@
 import { Button, Callout, Flex, ReloadIcon } from '@pluralsh/design-system'
+import { FeatureFlagContext } from 'components/flows/FeatureFlagContext'
 import { GqlError } from 'components/utils/Alert'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
@@ -12,7 +13,7 @@ import {
   useResumeDevboxInstanceMutation,
   useWorkbenchDevboxesQuery,
 } from 'generated/graphql'
-import { useEffect, useRef, useState } from 'react'
+import { use, useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import {
   WORKBENCH_DEVBOX_POSITION_QUERY_PARAM,
@@ -115,6 +116,7 @@ export function DevboxInstanceView({
   ].some(Boolean)
 
   const live = isInstanceLive(instance?.status)
+  const { featureFlags } = use(FeatureFlagContext)
   const {
     viewedFile,
     selectFile,
@@ -236,7 +238,7 @@ export function DevboxInstanceView({
             onImportSession={() => setImportOpen(true)}
           />
         </HeaderBarSC>
-        {live && browserOpen ? (
+        {live && browserOpen && featureFlags.DevboxBrowser ? (
           <DevboxBrowserView
             api={api}
             live={live}
