@@ -91,6 +91,40 @@ func TestFetchSecretAuthorization(t *testing.T) {
 	}
 }
 
+func TestFetchSecretGoldenBoot(t *testing.T) {
+	var reqs []*devboxv1.GetInstanceCredentialsRequest
+	creds := tokenCreds(time.Now, time.Hour)
+	ingest := &fakeIngest{creds: func(req *devboxv1.GetInstanceCredentialsRequest) (*devboxv1.GetInstanceCredentialsResponse, error) {
+		reqs = append(reqs, req)
+		return creds(req)
+	}}
+	id := GoldenInstanceID("platform")
+	p := newTestProvider(t, ingest, &InstanceInfo{InstanceID: id, Golden: true, BoxID: "box-9", SCMHosts: []string{"github.com"}})
+	fetch := func(kind string) (string, error) {
+		resp, err := p.FetchSecret(context.Background(), &credproviderv1.FetchSecretRequest{Uri: SecretURI(id, kind, "github.com"), ActorSpiffeId: devboxActor})
+		return string(resp.GetOpaqueBytes()), err
+	}
+
+	if v, err := fetch(KindSCM); err != nil || v == "" {
+		t.Fatalf("golden scm = %q, %v", v, err)
+	}
+	if len(reqs) != 1 || reqs[0].GetDevboxId() != "box-9" || reqs[0].GetInstanceId() != "" {
+		t.Fatalf("console requests = %v, want one for devbox box-9 and no instance", reqs)
+	}
+	if v, err := fetch(KindSCMToken); err != nil || v == "" {
+		t.Fatalf("golden scm-token = %q, %v", v, err)
+	}
+	resp, err := p.FetchSecret(context.Background(), &credproviderv1.FetchSecretRequest{Uri: SecretURI(id, KindConsole, ""), ActorSpiffeId: devboxActor})
+	if status.Code(err) != codes.PermissionDenied {
+		t.Fatalf("golden console credential = %v, %v; want PermissionDenied", resp, err)
+	}
+
+	p = newTestProvider(t, ingest, &InstanceInfo{InstanceID: id, Golden: true, SCMHosts: []string{"github.com"}})
+	if _, err := fetch(KindSCM); err == nil {
+		t.Fatal("a golden boot without a console devbox got a credential")
+	}
+}
+
 func TestFetchSecretSCMTokenIsTheBareToken(t *testing.T) {
 	ingest := &fakeIngest{creds: basicSCMCreds("oauth2", tokenCreds(time.Now, time.Hour))}
 	p := newTestProvider(t, ingest, credInstance())

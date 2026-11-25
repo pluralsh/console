@@ -1,5 +1,6 @@
 import { omit } from 'lodash'
 import { useApolloClient } from '@apollo/client'
+import { useSubscriptionRecovery } from 'components/hooks/useSubscriptionRecovery'
 import { DevboxTimelineDocument } from 'generated/graphql-documents'
 import {
   DevboxTimelineQuery,
@@ -40,16 +41,14 @@ export function useDevboxTimelineStore(instanceId: Nullable<string>) {
     dispatch({ type: 'reset' })
   }, [instanceId])
 
-  const { error: subscriptionError } = useDevboxInstanceEntityDeltaSubscription(
-    {
-      variables: { instanceId: instanceId ?? '' },
-      skip: !instanceId,
-      onData: ({ data: { data } }) => {
-        const change = data?.devboxInstanceDelta?.payload
-        if (change) dispatch({ type: 'delta', change })
-      },
-    }
-  )
+  const entityDeltas = useDevboxInstanceEntityDeltaSubscription({
+    variables: { instanceId: instanceId ?? '' },
+    skip: !instanceId,
+    onData: ({ data: { data } }) => {
+      const change = data?.devboxInstanceDelta?.payload
+      if (change) dispatch({ type: 'delta', change })
+    },
+  })
 
   const fetchPage = useCallback(
     (sessionId: string, older: boolean) => {
@@ -101,6 +100,10 @@ export function useDevboxTimelineStore(instanceId: Nullable<string>) {
   const reload = useCallback(() => {
     for (const sessionId of requested.current) fetchPage(sessionId, false)
   }, [fetchPage])
+  const subscriptionDown = useSubscriptionRecovery(entityDeltas, {
+    skip: !instanceId,
+    onRecover: reload,
+  })
 
   // a gap in a session's deltas that doesn't fill, or a delta its page can't
   // order, means deltas were lost: reload the newest page and resume from it
@@ -158,7 +161,8 @@ export function useDevboxTimelineStore(instanceId: Nullable<string>) {
     reload,
     errors,
     loading,
-    subscriptionError,
+    subscriptionDown,
+    restartSubscription: entityDeltas.restart,
   }
 }
 

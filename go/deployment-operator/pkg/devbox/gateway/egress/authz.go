@@ -21,6 +21,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/egress/rules"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/egress/scmpath"
 )
 
@@ -185,7 +186,7 @@ func (s *authzServer) onRequestHeaders(ctx context.Context, req *extprocv3.Proce
 		return immediate(typev3.StatusCode_Forbidden, fmt.Sprintf("repository %s is not on this devbox's allowlist (allowed: %s)", res.Repos[0], listRepos(info.AllowedRepositories))), nil
 	}
 
-	if res.PullRequest == nil {
+	if res.PullRequest == nil || info.Golden {
 		return continueRequest(), nil
 	}
 	resp := continueRequest()
@@ -261,14 +262,7 @@ func allowlist(info *InstanceInfo) (map[string]bool, bool) {
 	return set, false
 }
 
-// canonicalRepo folds companion hosts into their primary host, so api.github.com/o/r and github.com/o/r match.
-func canonicalRepo(id string) string {
-	host, path, ok := strings.Cut(id, "/")
-	if !ok {
-		return id
-	}
-	return canonicalSCMHost(host) + "/" + path
-}
+func canonicalRepo(id string) string { return rules.CanonicalRepo(id) }
 
 func anyAllowed(repos []string, allowed map[string]bool) bool {
 	for _, r := range repos {

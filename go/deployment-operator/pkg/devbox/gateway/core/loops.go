@@ -226,7 +226,7 @@ func (g *Gateway) backstops(ctx context.Context) {
 			case !awakeSince.IsZero() && now.Sub(awakeSince) > maxAwake && !inst.viewerLease(now):
 				g.requestSuspend(inst, devboxv1.SuspendReason_SUSPEND_REASON_MAX_CONTINUOUS_AWAKE)
 			case !lastContact.IsZero() && now.Sub(lastContact) > g.cfg.UnresponsiveAfter && !inst.activeLease(now):
-				g.requestSuspend(inst, devboxv1.SuspendReason_SUSPEND_REASON_DAEMON_UNRESPONSIVE)
+				g.confirmUnresponsive(inst)
 			}
 		case devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED:
 			completeAfter := policyDuration(policy, (*devboxv1.IdlePolicy).GetCompleteAfter)
@@ -239,6 +239,60 @@ func (g *Gateway) backstops(ctx context.Context) {
 			}
 		}
 	}
+}
+
+// unresponsiveProbes is how many Health calls, unresponsiveProbeInterval apart, a daemon whose event stream went
+// silent gets before it is suspended as unresponsive.
+var (
+	unresponsiveProbes        = 3
+	unresponsiveProbeInterval = 10 * time.Second
+)
+
+// confirmUnresponsive asks the daemon directly before suspending it as unresponsive: silence on the event stream
+// can be the stream's fault, and suspending a box mid-turn without PrepareSuspend loses the agents' work. A daemon
+// that answers gets a fresh forwarder instead.
+func (g *Gateway) confirmUnresponsive(inst *Instance) {
+	inst.mu.Lock()
+	if inst.probing || inst.suspending {
+		inst.mu.Unlock()
+		return
+	}
+	inst.probing = true
+	inst.mu.Unlock()
+	g.goBackground(func(ctx context.Context) {
+		defer func() {
+			inst.mu.Lock()
+			inst.probing = false
+			inst.mu.Unlock()
+		}()
+		daemon := g.deps.Router.Daemon(inst.ActorID())
+		var err error
+		for i := range unresponsiveProbes {
+			if i > 0 && !sleep(ctx, unresponsiveProbeInterval) {
+				return
+			}
+			hctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+			_, err = daemon.Health(hctx, &devboxv1.HealthRequest{})
+			cancel()
+			if err == nil {
+				break
+			}
+		}
+		if inst.status() != devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING {
+			return
+		}
+		if err == nil {
+			g.log.Info("daemon answers but its event stream went silent; restarting the forwarder", "instance", inst.ID)
+			inst.mu.Lock()
+			inst.lastContact = g.now()
+			inst.mu.Unlock()
+			inst.stopForwarder()
+			g.startForwarder(inst)
+			return
+		}
+		g.log.Error(err, "daemon unresponsive; suspending", "instance", inst.ID)
+		g.requestSuspend(inst, devboxv1.SuspendReason_SUSPEND_REASON_DAEMON_UNRESPONSIVE)
+	})
 }
 
 func (i *Instance) viewerLease(now time.Time) bool {

@@ -10,6 +10,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -143,5 +144,92 @@ func TestWebSocketAttachReplay(t *testing.T) {
 	}
 	if got := term.Info(); got.GetCols() != 100 || got.GetRows() != 30 {
 		t.Fatalf("resize not applied: %v", got)
+	}
+}
+
+func TestWebSocketCloseEndsTerminal(t *testing.T) {
+	m := newManager(t)
+	if _, err := m.Create(&devboxv1.CreateTerminalRequest{TerminalId: "ws2", Command: "/bin/sh"}); err != nil {
+		t.Fatal(err)
+	}
+	srv := httptest.NewServer(http.HandlerFunc(m.ServeWS))
+	defer srv.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	c, _, err := websocket.Dial(ctx, "ws"+strings.TrimPrefix(srv.URL, "http")+"/terminals/ws2/ws", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer c.CloseNow()
+
+	if err := c.Write(ctx, websocket.MessageText, []byte(`{"type":"close"}`)); err != nil {
+		t.Fatal(err)
+	}
+	for {
+		typ, data, err := c.Read(ctx)
+		if err != nil {
+			t.Fatalf("closed without an exit frame: %v", err)
+		}
+		if typ != websocket.MessageText {
+			continue
+		}
+		var ctl map[string]any
+		_ = json.Unmarshal(data, &ctl)
+		if ctl["type"] == "exit" {
+			break
+		}
+	}
+	if term, _ := m.Get("ws2"); !term.Info().GetExited() {
+		t.Fatal("terminal still running after close")
+	}
+}
+
+func TestWebSocketPushesCwdChanges(t *testing.T) {
+	var cwd atomic.Value
+	cwd.Store("/home/devbox")
+	m := newManager(t)
+	m.opts.InfoInterval = 10 * time.Millisecond
+	m.opts.Cwd = func(int) string { return cwd.Load().(string) }
+	if _, err := m.Create(&devboxv1.CreateTerminalRequest{TerminalId: "ws3", Command: "/bin/sh"}); err != nil {
+		t.Fatal(err)
+	}
+	srv := httptest.NewServer(http.HandlerFunc(m.ServeWS))
+	defer srv.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	c, _, err := websocket.Dial(ctx, "ws"+strings.TrimPrefix(srv.URL, "http")+"/terminals/ws3/ws", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer c.CloseNow()
+
+	infos := make(chan string, 8)
+	go func() {
+		for {
+			typ, data, err := c.Read(ctx)
+			if err != nil {
+				return
+			}
+			var ctl map[string]any
+			if typ == websocket.MessageText && json.Unmarshal(data, &ctl) == nil && ctl["type"] == "info" {
+				infos <- ctl["cwd"].(string)
+			}
+		}
+	}()
+	next := func() string {
+		select {
+		case got := <-infos:
+			return got
+		case <-ctx.Done():
+			t.Fatal("no info frame")
+			return ""
+		}
+	}
+	if got := next(); got != "/home/devbox" {
+		t.Fatalf("attach info cwd = %q", got)
+	}
+	cwd.Store("/home/devbox/console")
+	if got := next(); got != "/home/devbox/console" {
+		t.Fatalf("pushed info cwd = %q", got)
 	}
 }

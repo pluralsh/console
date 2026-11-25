@@ -10,7 +10,7 @@ import { ReactNode } from 'react'
 import { ThemeProvider } from 'styled-components'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 
-import { DevboxTranscript } from './DevboxTranscript'
+import { DevboxTranscript, TranscriptPlacement } from './DevboxTranscript'
 import { acpContentBlock, acpToolCallContent } from './devboxTimeline'
 
 vi.mock('components/ai/chatbot/ChatMarkdown', async (importOriginal) => ({
@@ -54,6 +54,51 @@ const kindsOf = (container: HTMLElement) =>
   )
 
 describe('DevboxTranscript', () => {
+  it('marks the newest thought as thinking only while the turn runs', () => {
+    const thought = (position: number) =>
+      entity({
+        type: DevboxEntityType.AgentThought,
+        position,
+        message: { content: [text(`thought ${position}`)] },
+      })
+    const thinking = (container: HTMLElement) =>
+      [...container.querySelectorAll('[data-entity="agent-thought"]')].map(
+        (n) => n.hasAttribute('data-streaming')
+      )
+
+    const { container, rerender } = renderTranscript(
+      <DevboxTranscript
+        running
+        entities={[thought(1), thought(2)]}
+      />
+    )
+    expect(thinking(container)).toEqual([false, true])
+
+    rerender(
+      <ThemeProvider theme={styledThemeDark}>
+        <DevboxTranscript entities={[thought(1), thought(2)]} />
+      </ThemeProvider>
+    )
+    expect(thinking(container)).toEqual([false, false])
+
+    rerender(
+      <ThemeProvider theme={styledThemeDark}>
+        <DevboxTranscript
+          running
+          entities={[
+            thought(1),
+            entity({
+              type: DevboxEntityType.AgentMessage,
+              position: 2,
+              message: { content: [text('done')] },
+            }),
+          ]}
+        />
+      </ThemeProvider>
+    )
+    expect(thinking(container)).toEqual([false])
+  })
+
   it('renders each known entity kind', () => {
     const { container } = renderTranscript(
       <DevboxTranscript
@@ -414,5 +459,99 @@ describe('DevboxTranscript', () => {
       'session-message',
     ])
     expect(screen.getByText('card thread-child')).toBeTruthy()
+  })
+
+  it('holds back subagents nothing loaded spawned until the transcript is complete', () => {
+    const subagents = [{ id: 'early', sessionId: 'p/subagent/call-0' } as never]
+    const props = {
+      entities: [
+        entity({
+          type: DevboxEntityType.AgentMessage,
+          position: 9,
+          message: { content: [text('later work')] },
+        }),
+      ],
+      subagents,
+      renderSubagent: (s: { id: string }) => <span>card {s.id}</span>,
+    }
+    const partial = renderTranscript(
+      <DevboxTranscript
+        {...props}
+        complete={false}
+      />
+    )
+    expect(screen.getByText('later work')).toBeTruthy()
+    expect(screen.queryByText('card early')).toBeNull()
+    partial.unmount()
+
+    const loading = renderTranscript(
+      <DevboxTranscript
+        {...props}
+        entities={[]}
+        complete={false}
+        empty={<span>Loading transcript…</span>}
+      />
+    )
+    expect(screen.getByText('Loading transcript…')).toBeTruthy()
+    expect(screen.queryByText('card early')).toBeNull()
+    loading.unmount()
+
+    renderTranscript(<DevboxTranscript {...props} />)
+    expect(screen.getByText('card early')).toBeTruthy()
+  })
+
+  it("answers an approval for a spawning call under it, beside the subagents' cards", () => {
+    const placements: TranscriptPlacement[] = []
+    renderTranscript(
+      <DevboxTranscript
+        entities={[
+          entity({
+            type: DevboxEntityType.ToolCall,
+            position: 1,
+            toolCall: {
+              toolCallId: 'task-1',
+              title: 'Explore the repo',
+              kind: 'think',
+              status: 'pending',
+              content: [],
+            },
+          }),
+        ]}
+        approvalFor={(id) =>
+          id === 'task-1' ? <button type="button">Allow</button> : null
+        }
+        subagents={[{ id: 'child', parentToolCallId: 'task-1' } as never]}
+        renderSubagent={(s) => <span>card {s.id}</span>}
+        renderUnplaced={(placed) => {
+          placements.push(placed)
+          return null
+        }}
+      />
+    )
+    expect(screen.getByRole('button', { name: 'Allow' })).toBeTruthy()
+    expect(screen.getByText('card child')).toBeTruthy()
+    expect([...placements[0].approvals]).toEqual(['task-1'])
+    expect([...placements[0].subagents]).toEqual(['child'])
+  })
+
+  it('reports what it placed, so the rest can be shown after it, even when empty', () => {
+    const subagents = [{ id: 'early', sessionId: 'p/subagent/call-0' } as never]
+    renderTranscript(
+      <DevboxTranscript
+        entities={[]}
+        complete={false}
+        subagents={subagents}
+        renderSubagent={(s) => <span>card {s.id}</span>}
+        approvalFor={() => <button type="button">Allow</button>}
+        empty={<span>Loading transcript…</span>}
+        renderUnplaced={({ approvals, subagents }) => (
+          <span>
+            unplaced {approvals.size}/{subagents.size}
+          </span>
+        )}
+      />
+    )
+    expect(screen.getByText('Loading transcript…')).toBeTruthy()
+    expect(screen.getByText('unplaced 0/0')).toBeTruthy()
   })
 })

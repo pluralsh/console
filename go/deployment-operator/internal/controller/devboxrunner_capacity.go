@@ -71,7 +71,7 @@ func largestActorMemory(class v1alpha1.DevboxSandboxClass, budget int64) int64 {
 }
 
 // devboxInstanceCapacity sizes instances against the managed WorkerPool. spec.resources are each instance's
-// minimum, and a slot's disk need is the durable home dir plus memory-sized snapshots: the instance's own and
+// minimum, and a slot's disk need is the durable home dir (unless it's on JuiceFS) plus memory-sized snapshots: the instance's own and
 // those of SuspendedSnapshotsPerInstance suspended instances still on the node. The instances per worker is
 // the most that fit the worker's CPU and memory limits and its budgeted disk, and each instance is then given
 // an even share of the worker's CPU and memory, so Substrate, which places by limits, never puts more instances
@@ -80,6 +80,11 @@ func devboxInstanceCapacity(runner *v1alpha1.DevboxRunner, class v1alpha1.Devbox
 	res := lo.FromPtr(runner.Spec.Resources)
 	cpuQ, memoryQ, diskQ := lo.FromPtrOr(res.CPU, resource.MustParse("2")), lo.FromPtrOr(res.Memory, resource.MustParse("4Gi")), lo.FromPtrOr(res.Disk, resource.MustParse("20Gi"))
 	minCPU, minMemory, disk := cpuQ.MilliValue(), memoryQ.Value(), diskQ.Value()
+	if runner.Spec.HomeStorage() == v1alpha1.DevboxHomeJuiceFS {
+		// The home lives in object storage. Its node cache is bounded by JuiceFS, which stops caching before the
+		// disk fills, so it takes no budget.
+		disk = 0
+	}
 	out := devboxCapacity{CPU: minCPU, Memory: minMemory}
 
 	wp := lo.FromPtr(runner.Spec.WorkerPool)

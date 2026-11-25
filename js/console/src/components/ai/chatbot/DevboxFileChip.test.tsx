@@ -5,13 +5,21 @@ import { ThemeProvider } from 'styled-components'
 import { describe, expect, it, vi } from 'vitest'
 
 import { ChatMarkdown } from './ChatMarkdown'
-import { DevboxFileOpenContext, withSlashCommandChip } from './DevboxFileChip'
+import {
+  DevboxFileOpenContext,
+  devboxLinkPath,
+  withSlashCommandChip,
+} from './DevboxFileChip'
 
-const renderMarkdown = (text: string, openFile?: (path: string) => void) =>
+const renderMarkdown = (
+  text: string,
+  openFile?: (path: string) => void,
+  cwd = '/home/devbox/console'
+) =>
   render(
     <MemoryRouter>
       <ThemeProvider theme={styledThemeDark}>
-        <DevboxFileOpenContext value={openFile ?? null}>
+        <DevboxFileOpenContext value={openFile ? { openFile, cwd } : null}>
           <ChatMarkdown text={text} />
         </DevboxFileOpenContext>
       </ThemeProvider>
@@ -49,5 +57,66 @@ describe('DevboxFileChip', () => {
     )
     expect(screen.getByText('main.go')).toBeTruthy()
     expect(screen.queryByRole('button')).toBeNull()
+  })
+})
+
+describe('devboxLinkPath', () => {
+  const cwd = '/home/devbox/console'
+
+  it('resolves relative links against the working directory', () => {
+    expect(devboxLinkPath('src/main.go', cwd)).toBe(
+      '/home/devbox/console/src/main.go'
+    )
+    expect(devboxLinkPath('./src/../go.mod', `${cwd}/`)).toBe(
+      '/home/devbox/console/go.mod'
+    )
+    expect(devboxLinkPath('../other/', cwd)).toBe('/home/devbox/other/')
+    expect(devboxLinkPath('src/main.go', null)).toBeNull()
+  })
+
+  it('keeps absolute and file:// paths, dropping line suffixes', () => {
+    expect(devboxLinkPath('/etc/hosts', null)).toBe('/etc/hosts')
+    expect(devboxLinkPath('file:///home/devbox/a%20b.go', null)).toBe(
+      '/home/devbox/a b.go'
+    )
+    expect(devboxLinkPath('src/main.go#L12', cwd)).toBe(
+      '/home/devbox/console/src/main.go'
+    )
+    expect(devboxLinkPath('src/main.go:12:3', cwd)).toBe(
+      '/home/devbox/console/src/main.go'
+    )
+  })
+
+  it('leaves external links and anchors alone', () => {
+    for (const href of [
+      'https://plural.sh/docs',
+      'mailto:hi@plural.sh',
+      '//cdn.example.com/x.js',
+      '#usage',
+      '',
+    ])
+      expect(devboxLinkPath(href, cwd)).toBeNull()
+  })
+})
+
+describe('DevboxMarkdownLink', () => {
+  it('opens workspace links in the files panel', () => {
+    const openFile = vi.fn()
+    renderMarkdown(
+      'see [main.go](src/main.go:4) and [docs](https://plural.sh)',
+      openFile
+    )
+    fireEvent.click(screen.getByText('main.go'))
+    expect(openFile).toHaveBeenCalledWith('/home/devbox/console/src/main.go')
+
+    const external = screen.getByText('docs')
+    expect(external.getAttribute('target')).toBe('_blank')
+    fireEvent.click(external)
+    expect(openFile).toHaveBeenCalledTimes(1)
+  })
+
+  it('renders relative links as plain links outside a devbox', () => {
+    renderMarkdown('see [main.go](src/main.go)')
+    expect(screen.getByText('main.go').getAttribute('target')).toBe('_blank')
   })
 })

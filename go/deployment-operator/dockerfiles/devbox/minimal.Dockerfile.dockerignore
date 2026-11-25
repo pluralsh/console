@@ -8,4 +8,5 @@
 !deployment-operator/internal
 !deployment-operator/api
 !deployment-operator/dockerfiles/devbox/stub
+!deployment-operator/dockerfiles/devbox/patches
 !deployment-operator/dockerfiles/devbox/rootfs/minimal

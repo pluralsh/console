@@ -1,0 +1,280 @@
+suite: juicefs homes
+release:
+  name: ate
+  namespace: ate-system
+capabilities:
+  majorVersion: 1
+  minorVersion: 34
+templates:
+  - templates/*.yaml
+set:
+  objectStore.snapshotLocation: s3://ate-snapshots/substrate/
+  objectStore.s3.region: us-east-2
+  juicefs.enabled: true
+  juicefs.image.tag: "1.2.3"
+tests:
+  - it: renders nothing unless enabled
+    template: templates/juicefs.yaml
+    set:
+      juicefs.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: formats the filesystem into the snapshot bucket, virtual-hosted on AWS
+    template: templates/juicefs.yaml
+    documentSelector:
+      path: metadata.name
+      value: devbox-juicefs-controller
+      kind: Deployment
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --bucket=https://ate-snapshots.s3.us-east-2.amazonaws.com
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --storage=s3
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --allowed-clients=spiffe://cluster.local/ns/ate-system/sa/ate-api-server
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: JUICEFS_META_URL
+            value: postgres://juicefs@ate-postgres-rw.ate-system.svc:5432/juicefs?sslmode=verify-full&sslrootcert=/run/postgres-server-ca/server-ca.pem
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: META_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: ate-postgres-juicefs
+                key: password
+      - equal:
+          path: spec.strategy.type
+          value: Recreate
+
+  - it: lets the devbox-gateway seed homes
+    template: templates/juicefs.yaml
+    documentSelector:
+      path: metadata.name
+      value: devbox-juicefs-controller
+      kind: Deployment
+    set:
+      devboxes.enabled: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --allowed-clients=spiffe://cluster.local/ns/ate-system/sa/ate-api-server,spiffe://cluster.local/ns/plrl-deploy-operator/sa/devbox-gateway
+
+  - it: addresses RustFS path style
+    template: templates/juicefs.yaml
+    documentSelector:
+      path: metadata.name
+      value: devbox-juicefs-controller
+      kind: Deployment
+    set:
+      objectStore.snapshotLocation: ""
+      rustfs.enabled: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --bucket=http://rustfs.ate-system.svc:9000/ate-snapshots
+
+  - it: uses gs:// on GCS
+    template: templates/juicefs.yaml
+    documentSelector:
+      path: metadata.name
+      value: devbox-juicefs-controller
+      kind: Deployment
+    set:
+      objectStore.backend: gcs
+      objectStore.snapshotLocation: gs://ate-snapshots/substrate/
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --bucket=gs://ate-snapshots
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --storage=gs
+
+  - it: mounts homes with Bidirectional propagation and the node's cache
+    template: templates/juicefs.yaml
+    documentSelector:
+      path: kind
+      value: DaemonSet
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: ate-base
+            mountPath: /var/lib/ate
+            mountPropagation: Bidirectional
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: plugin-dir
+            hostPath:
+              path: /var/lib/kubelet/plugins/juicefs.devbox.plural.sh
+              type: DirectoryOrCreate
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --mount-flag=--attr-cache=3600
+      - equal:
+          path: spec.updateStrategy.type
+          value: OnDelete
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            key: ate.dev/sandboxClass
+            operator: Exists
+            effect: NoSchedule
+
+  - it: points Substrate at the controller over mTLS
+    template: templates/juicefs.yaml
+    capabilities:
+      apiVersions:
+        - ate.dev/v1/CSIDriverConfig
+    documentSelector:
+      path: kind
+      value: CSIDriverConfig
+    asserts:
+      - equal:
+          path: spec
+          value:
+            driverName: juicefs.devbox.plural.sh
+            controllerEndpoint: tcp://devbox-juicefs.ate-system.svc:9820
+            tls:
+              enabled: true
+              usePodIdentity: true
+              serverName: devbox-juicefs.ate-system.svc
+
+  - it: defers the CSIDriverConfig to the bootstrap Job on first install
+    template: templates/bootstrap-job.yaml
+    documentSelector:
+      path: kind
+      value: ConfigMap
+    asserts:
+      - exists:
+          path: data["02-database-ate-postgres-juicefs.yaml"]
+      - exists:
+          path: data["03-csidriverconfig-juicefs.devbox.plural.sh.yaml"]
+
+  - it: gives the filesystem its own role and database on the CNPG cluster
+    template: templates/custom-resources.yaml
+    capabilities:
+      apiVersions:
+        - postgresql.cnpg.io/v1/Cluster
+        - postgresql.cnpg.io/v1/Database
+    asserts:
+      - contains:
+          path: spec.managed.roles
+          content:
+            name: juicefs
+            ensure: present
+            login: true
+            passwordSecret:
+              name: ate-postgres-juicefs
+        documentSelector:
+          path: kind
+          value: Cluster
+      - equal:
+          path: spec
+          value:
+            name: juicefs
+            owner: juicefs
+            cluster:
+              name: ate-postgres
+            ensure: present
+            databaseReclaimPolicy: retain
+        documentSelector:
+          path: kind
+          value: Database
+
+  - it: generates the role's password in the secrets hook
+    template: templates/secrets-hook.yaml
+    documentSelector:
+      path: kind
+      value: Job
+    asserts:
+      - contains:
+          path: spec.template.spec.initContainers[0].env
+          content:
+            name: PG_JUICEFS_SECRET
+            value: ate-postgres-juicefs
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: PG_JUICEFS_SECRET
+            value: ate-postgres-juicefs
+
+  - it: turns on the ExternalVolumes preview gate
+    template: templates/api-server.yaml
+    documentSelector:
+      path: kind
+      value: Deployment
+    set:
+      previewGates: [PerTemplateSnapshotLocation]
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --preview=PerTemplateSnapshotLocation,ExternalVolumes
+
+  - it: leaves ALL alone
+    template: templates/api-server.yaml
+    documentSelector:
+      path: kind
+      value: Deployment
+    set:
+      previewGates: [ALL]
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --preview=ALL
+
+  - it: lets the plugins reach Postgres
+    template: templates/networkpolicies.yaml
+    documentSelector:
+      path: metadata.name
+      value: postgres
+    asserts:
+      - contains:
+          path: spec.ingress[0].from
+          content:
+            podSelector:
+              matchExpressions:
+                - key: app
+                  operator: In
+                  values: [devbox-juicefs-controller, devbox-juicefs-node]
+
+  - it: needs an image
+    template: templates/validate.yaml
+    set:
+      juicefs.image.tag: ""
+    asserts:
+      - failedTemplate:
+          errorPattern: juicefs.image.tag
+
+  - it: needs a workload identity client on Azure Blob
+    template: templates/validate.yaml
+    set:
+      objectStore.backend: azureBlob
+      objectStore.snapshotLocation: azblob://snapshots/ate/
+      objectstoreV1Support: "true"
+      objectStore.azureBlob.accountUrl: https://pluralate.blob.core.windows.net
+      objectStore.azureBlob.containers: [snapshots]
+      objectStore.azureBlob.tenantId: t
+      objectStore.azureBlob.nodeClientId: n
+      objectStore.azureBlob.controlClientId: c
+      objectStore.azureBlob.image.tag: "1"
+    asserts:
+      - failedTemplate:
+          errorPattern: juicefs.azureClientId
+
+  - it: refuses writeback
+    template: templates/validate.yaml
+    set:
+      juicefs.node.mountFlags: [--writeback]
+    asserts:
+      - failedTemplate:
+          errorPattern: writeback

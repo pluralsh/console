@@ -60,6 +60,41 @@ func (f *accessPolicyControl) UpdateAtespaceAccessPolicy(_ context.Context, in *
 	return f.policy, nil
 }
 
+func (f *accessPolicyControl) GetGlobalAccessPolicy(_ context.Context, in *ateapi.GetGlobalAccessPolicyRequest, _ ...grpc.CallOption) (*ateapi.AccessPolicy, error) {
+	return f.GetAtespaceAccessPolicy(context.Background(), &ateapi.GetAtespaceAccessPolicyRequest{Name: in.GetName()})
+}
+
+func (f *accessPolicyControl) CreateGlobalAccessPolicy(_ context.Context, in *ateapi.CreateGlobalAccessPolicyRequest, _ ...grpc.CallOption) (*ateapi.AccessPolicy, error) {
+	return f.CreateAtespaceAccessPolicy(context.Background(), &ateapi.CreateAtespaceAccessPolicyRequest{AccessPolicy: in.GetAccessPolicy()})
+}
+
+func (f *accessPolicyControl) UpdateGlobalAccessPolicy(_ context.Context, in *ateapi.UpdateGlobalAccessPolicyRequest, _ ...grpc.CallOption) (*ateapi.AccessPolicy, error) {
+	return f.UpdateAtespaceAccessPolicy(context.Background(), &ateapi.UpdateAtespaceAccessPolicyRequest{AccessPolicy: in.GetAccessPolicy()})
+}
+
+func TestEnsureGlobalAccessPolicyKeepsOtherBindings(t *testing.T) {
+	ctx := context.Background()
+	control := &accessPolicyControl{policy: &ateapi.AccessPolicy{
+		Metadata: &ateapi.ResourceMetadata{Name: accessPolicyName},
+		Bindings: []*ateapi.Binding{{Role: RoleOwner, Members: []string{"user:admin"}}},
+	}}
+	client := &Client{control: control}
+	gateway := "user:system:serviceaccount:plrl-deploy-operator:devbox-gateway"
+
+	for range 2 {
+		if err := client.EnsureGlobalAccessPolicy(ctx, RoleViewer, gateway); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if control.updates != 1 {
+		t.Fatalf("expected one update, got %d", control.updates)
+	}
+	bindings := control.policy.GetBindings()
+	if len(bindings) != 2 || bindings[0].GetMembers()[0] != "user:admin" || bindings[1].GetRole() != RoleViewer || bindings[1].GetMembers()[0] != gateway {
+		t.Fatalf("bindings = %v", bindings)
+	}
+}
+
 func TestEnsureAtespaceAccessPolicy(t *testing.T) {
 	ctx := context.Background()
 	control := &accessPolicyControl{}

@@ -96,6 +96,12 @@ func (g *Gateway) DeleteSnapshot(ctx context.Context, req *devboxv1.DeleteSnapsh
 	if ref.Atespace == "" {
 		return nil, status.Errorf(codes.InvalidArgument, "snapshot tag %q must be <atespace>/<name>", tag)
 	}
+	// The seed goes first, so a deleted tag never leaves its home behind.
+	if g.deps.Seeds != nil {
+		if err := g.deps.Seeds.DeleteSeed(ctx, SnapshotSeedID(ref)); err != nil {
+			return nil, status.Errorf(codes.Unavailable, "deleting the home of snapshot %s: %v", ref, err)
+		}
+	}
 	if err := g.deps.Actors.DeleteTag(ctx, ref); err != nil {
 		if substrate.IsNotFound(err) {
 			return &devboxv1.DeleteSnapshotResponse{Deleted: false}, nil

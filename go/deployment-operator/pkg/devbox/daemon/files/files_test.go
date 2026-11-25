@@ -18,8 +18,9 @@ import (
 
 type checkouts []string
 
-func (c checkouts) Checkouts() []string             { return c }
-func (c checkouts) ThreadWorktrees(string) []string { return nil }
+func (c checkouts) Checkouts() []string                   { return c }
+func (c checkouts) ThreadWorktrees(string) []string       { return nil }
+func (c checkouts) AllThreadWorktrees() map[string]string { return nil }
 
 func TestMultiRepoChanges(t *testing.T) {
 	t.Setenv("GIT_CONFIG_GLOBAL", "/dev/null")

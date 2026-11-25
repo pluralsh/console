@@ -61,7 +61,8 @@ type IngestClient interface {
 	// ReportSnapshot reports the outcome of SnapshotInstance.
 	ReportSnapshot(ctx context.Context, in *ReportSnapshotRequest, opts ...grpc.CallOption) (*ReportSnapshotResponse, error)
 	// GetInstanceCredentials mints or returns instance-scoped credentials for the credential provider cache
-	// (scm, ai-proxy, console, claude-oauth) and for daemon delivery (oidc, codex).
+	// (scm, ai-proxy, console, claude-oauth) and for daemon delivery (oidc, codex). With devbox_id instead of
+	// instance_id it mints the devbox's own SCM credentials, for the golden boot of its template.
 	GetInstanceCredentials(ctx context.Context, in *GetInstanceCredentialsRequest, opts ...grpc.CallOption) (*GetInstanceCredentialsResponse, error)
 	// UpdateAgentCredential writes back a refreshed Codex auth.json, compare-and-swap on the credential version.
 	UpdateAgentCredential(ctx context.Context, in *UpdateAgentCredentialRequest, opts ...grpc.CallOption) (*UpdateAgentCredentialResponse, error)
@@ -202,7 +203,8 @@ type IngestServer interface {
 	// ReportSnapshot reports the outcome of SnapshotInstance.
 	ReportSnapshot(context.Context, *ReportSnapshotRequest) (*ReportSnapshotResponse, error)
 	// GetInstanceCredentials mints or returns instance-scoped credentials for the credential provider cache
-	// (scm, ai-proxy, console, claude-oauth) and for daemon delivery (oidc, codex).
+	// (scm, ai-proxy, console, claude-oauth) and for daemon delivery (oidc, codex). With devbox_id instead of
+	// instance_id it mints the devbox's own SCM credentials, for the golden boot of its template.
 	GetInstanceCredentials(context.Context, *GetInstanceCredentialsRequest) (*GetInstanceCredentialsResponse, error)
 	// UpdateAgentCredential writes back a refreshed Codex auth.json, compare-and-swap on the credential version.
 	UpdateAgentCredential(context.Context, *UpdateAgentCredentialRequest) (*UpdateAgentCredentialResponse, error)

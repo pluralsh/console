@@ -111,13 +111,13 @@ func TestAgentPromptWithoutImageSupport(t *testing.T) {
 	content := []*devboxv1.ContentBlock{{Block: &devboxv1.ContentBlock_ResourceLink{ResourceLink: &devboxv1.ResourceLink{
 		Uri: fileURI(path), Name: "a.png", MimeType: "image/png", Size: &size,
 	}}}}
-	if got := m.agentPrompt(&agentConn{}, content); len(got) != 1 || acp.Str(got[0].(map[string]any), "type") != "resource_link" {
+	if got := m.agentPrompt(&agentConn{}, nil, content); len(got) != 1 || acp.Str(got[0].(map[string]any), "type") != "resource_link" {
 		t.Fatalf("agent without image support got %v", got)
 	}
 	outside := []*devboxv1.ContentBlock{{Block: &devboxv1.ContentBlock_ResourceLink{ResourceLink: &devboxv1.ResourceLink{
 		Uri: "file:///etc/passwd", Name: "passwd", MimeType: "image/png", Size: &size,
 	}}}}
-	if got := m.agentPrompt(&agentConn{caps: caps{promptImage: true}}, outside); len(got) != 1 {
+	if got := m.agentPrompt(&agentConn{caps: caps{promptImage: true}}, nil, outside); len(got) != 1 {
 		t.Fatalf("a link outside the attachments dir was inlined: %v", got)
 	}
 }

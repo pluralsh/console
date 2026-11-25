@@ -79,7 +79,14 @@ export type DevboxChangeGroup = {
 // state for any operation left undefined
 export type DevboxWorkspaceApi = {
   openStream?: (opts: DevboxOpenStreamOptions) => Promise<DevboxStreamTicket>
-  listFiles?: (path: string) => Promise<DevboxFileEntry[]>
+  // brief entries carry no size or git status, which lets the instance list
+  // from memory rather than disk
+  listFiles?: (
+    path: string,
+    opts?: { brief?: boolean }
+  ) => Promise<DevboxFileEntry[]>
+  // the best fuzzy matches for query anywhere under path
+  searchFiles?: (path: string, query: string) => Promise<DevboxFileEntry[]>
   // the last listing of a directory, if any, to show while listFiles refreshes it
   cachedFiles?: (path: string) => Nullable<DevboxFileEntry[]>
   readFile?: (path: string) => Promise<DevboxFileContent>
@@ -137,14 +144,27 @@ export function createWorkspaceApi(
       if (!stream) throw new Error('Console returned no stream')
       return stream
     },
-    listFiles: async (path) => {
+    listFiles: async (path, opts) => {
       const { data } = await client.query<
         DevboxFilesQuery,
         DevboxFilesQueryVariables
       >({
         query: DevboxFilesDocument,
-        variables: filesVariables(path),
-        fetchPolicy: 'network-only',
+        variables: opts?.brief
+          ? { ...filesVariables(path), brief: true }
+          : filesVariables(path),
+        fetchPolicy: opts?.brief ? 'no-cache' : 'network-only',
+      })
+      return toFileEntries(data)
+    },
+    searchFiles: async (path, query) => {
+      const { data } = await client.query<
+        DevboxFilesQuery,
+        DevboxFilesQueryVariables
+      >({
+        query: DevboxFilesDocument,
+        variables: { ...filesVariables(path), query },
+        fetchPolicy: 'no-cache',
       })
       return toFileEntries(data)
     },

@@ -109,40 +109,39 @@ func TestRunnerFromCRDPackageServers(t *testing.T) {
 	}
 
 	defaults := hosts(RunnerFromCRD(&v1alpha1.DevboxRunner{}))
-	for _, h := range []string{"proxy.golang.org", "index.crates.io", "registry.npmjs.org", "repo.maven.apache.org", "repo.hex.pm", "files.pythonhosted.org"} {
+	for _, h := range []string{
+		"proxy.golang.org", "storage.googleapis.com", "index.crates.io", "registry.npmjs.org", "repo.maven.apache.org", "repo.hex.pm",
+		"files.pythonhosted.org", "rubygems.org", "packagist.org", "api.nuget.org",
+	} {
 		if !slices.Contains(defaults, h) {
 			t.Errorf("default allowlist missing %s: %v", h, defaults)
 		}
 	}
-	for _, h := range []string{"rubygems.org", "packagist.org", "api.nuget.org"} {
-		if slices.Contains(defaults, h) {
-			t.Errorf("default allowlist includes opt-in %s", h)
-		}
-	}
 
 	custom := hosts(RunnerFromCRD(&v1alpha1.DevboxRunner{Spec: v1alpha1.DevboxRunnerSpec{
-		PackageServers: &v1alpha1.DevboxPackageServers{Go: ptr.To(false), Ruby: ptr.To(true)},
+		PackageServers: &v1alpha1.DevboxPackageServers{Go: ptr.To(false), Ruby: ptr.To(false)},
 	}}))
-	if slices.Contains(custom, "proxy.golang.org") || !slices.Contains(custom, "rubygems.org") || !slices.Contains(custom, "pypi.org") {
-		t.Fatalf("go disabled, ruby enabled, python defaulted: %v", custom)
+	if slices.Contains(custom, "proxy.golang.org") || slices.Contains(custom, "rubygems.org") || !slices.Contains(custom, "pypi.org") {
+		t.Fatalf("go and ruby disabled, python defaulted: %v", custom)
 	}
 
 	none := RunnerFromCRD(&v1alpha1.DevboxRunner{Spec: v1alpha1.DevboxRunnerSpec{
-		HTTPAllowlist: []v1alpha1.DevboxHTTPAllowlistEntry{{Host: "example.com"}},
-		PackageServers: &v1alpha1.DevboxPackageServers{Go: ptr.To(false), Rust: ptr.To(false), JavaScript: ptr.To(false),
-			Java: ptr.To(false), Elixir: ptr.To(false), Python: ptr.To(false)},
-		OCIRegistries: noRegistries,
+		HTTPAllowlist:  []v1alpha1.DevboxHTTPAllowlistEntry{{Host: "example.com"}},
+		PackageServers: noPackages,
+		OCIRegistries:  noRegistries,
 	}})
 	if want := []egress.AllowEntry{{Host: "example.com"}}; !slices.Equal(none.HTTPAllowlist, want) {
 		t.Fatalf("all package servers off: %v, want %v", none.HTTPAllowlist, want)
 	}
 }
 
-var noRegistries = &v1alpha1.DevboxOCIRegistries{DockerHub: ptr.To(false), GitHub: ptr.To(false)}
+var (
+	noRegistries = &v1alpha1.DevboxOCIRegistries{DockerHub: ptr.To(false), GitHub: ptr.To(false)}
+	noPackages   = &v1alpha1.DevboxPackageServers{Go: ptr.To(false), Rust: ptr.To(false), JavaScript: ptr.To(false),
+		Java: ptr.To(false), Elixir: ptr.To(false), Python: ptr.To(false), Ruby: ptr.To(false), PHP: ptr.To(false), Dotnet: ptr.To(false)}
+)
 
 func TestRunnerFromCRDOCIRegistries(t *testing.T) {
-	noPackages := &v1alpha1.DevboxPackageServers{Go: ptr.To(false), Rust: ptr.To(false), JavaScript: ptr.To(false),
-		Java: ptr.To(false), Elixir: ptr.To(false), Python: ptr.To(false)}
 	hosts := func(oci *v1alpha1.DevboxOCIRegistries) []string {
 		var out []string
 		for _, e := range RunnerFromCRD(&v1alpha1.DevboxRunner{Spec: v1alpha1.DevboxRunnerSpec{PackageServers: noPackages, OCIRegistries: oci}}).HTTPAllowlist {
@@ -173,8 +172,6 @@ func TestRunnerFromCRDOCIRegistries(t *testing.T) {
 }
 
 func TestRunnerFromCRDCloudProviders(t *testing.T) {
-	noPackages := &v1alpha1.DevboxPackageServers{Go: ptr.To(false), Rust: ptr.To(false), JavaScript: ptr.To(false),
-		Java: ptr.To(false), Elixir: ptr.To(false), Python: ptr.To(false)}
 	hosts := func(spec v1alpha1.DevboxRunnerSpec) []string {
 		spec.PackageServers = noPackages
 		spec.OCIRegistries = noRegistries

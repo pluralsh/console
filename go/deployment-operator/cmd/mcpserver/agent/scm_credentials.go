@@ -16,7 +16,14 @@ import (
 	"k8s.io/klog/v2"
 )
 
-const scmCredentialsRefreshInterval = 30 * time.Minute
+const (
+	scmCredentialsRefreshInterval = 30 * time.Minute
+	// scmCredentialsRefreshAhead is how long before a short-lived token (github app installation tokens) expires
+	// it's replaced, so pushes never present an expired one.
+	scmCredentialsRefreshAhead = 10 * time.Minute
+	// scmCredentialsRetryInterval is the floor between refreshes, and the wait after a failed one.
+	scmCredentialsRetryInterval = time.Minute
+)
 
 type agentRunFetcher interface {
 	GetAgentRunCredentials(context.Context, string) (*consoleclient.AgentRunCredentialsFragment, error)
@@ -28,9 +35,10 @@ type credentialStore struct {
 }
 
 type scmCredential struct {
-	token    string
-	proxyURL string
-	noProxy  string
+	token     string
+	proxyURL  string
+	noProxy   string
+	expiresAt time.Time
 }
 
 func newCredentialStore(pluralToken string) *credentialStore {
@@ -64,11 +72,35 @@ func (s *credentialStore) updateSCMCredentials(agentRun *consoleclient.AgentRunC
 
 	proxyURL, noProxy := scmProxy(agentRun)
 	s.scmCredential.Store(scmCredential{
-		token:    agentRun.ScmCreds.Token,
-		proxyURL: proxyURL,
-		noProxy:  noProxy,
+		token:     agentRun.ScmCreds.Token,
+		proxyURL:  proxyURL,
+		noProxy:   noProxy,
+		expiresAt: scmExpiry(agentRun.ScmCreds),
 	})
 	return nil
+}
+
+func scmExpiry(creds *consoleclient.ScmCredentialFragment) time.Time {
+	if creds.ExpiresAt == nil {
+		return time.Time{}
+	}
+	t, err := time.Parse(time.RFC3339, *creds.ExpiresAt)
+	if err != nil {
+		klog.V(log.LogLevelDefault).ErrorS(err, "ignoring unparseable SCM token expiry", "expiresAt", *creds.ExpiresAt)
+		return time.Time{}
+	}
+	return t
+}
+
+// nextRefresh is how long until the credentials should be refetched: the regular interval, or sooner when the SCM
+// token expires before then.
+func (s *credentialStore) nextRefresh(now time.Time, interval time.Duration) time.Duration {
+	credential, _ := s.scmCredential.Load().(scmCredential)
+	wait := interval
+	if !credential.expiresAt.IsZero() {
+		wait = min(wait, credential.expiresAt.Add(-scmCredentialsRefreshAhead).Sub(now))
+	}
+	return max(wait, scmCredentialsRetryInterval)
 }
 
 func (s *credentialStore) SCMClient() scm.Client {
@@ -96,17 +128,21 @@ func scmProxy(agentRun *consoleclient.AgentRunCredentialsFragment) (string, stri
 // because scmCreds is only resolved for the runner cluster.
 func startCredentialsRefresh(ctx context.Context, client agentRunFetcher, runID string, interval time.Duration, credentials *credentialStore) {
 	go func() {
-		ticker := time.NewTicker(interval)
-		defer ticker.Stop()
+		timer := time.NewTimer(credentials.nextRefresh(time.Now(), interval))
+		defer timer.Stop()
 
 		for {
 			select {
 			case <-ctx.Done():
 				return
-			case <-ticker.C:
+			case <-timer.C:
+				wait := scmCredentialsRetryInterval
 				if err := refreshCredentials(ctx, client, runID, credentials); err != nil {
-					klog.V(log.LogLevelDefault).ErrorS(err, "could not refresh agent credentials")
+					klog.V(log.LogLevelDefault).ErrorS(err, "could not refresh agent credentials", "retryIn", wait)
+				} else {
+					wait = credentials.nextRefresh(time.Now(), interval)
 				}
+				timer.Reset(wait)
 			}
 		}
 	}()

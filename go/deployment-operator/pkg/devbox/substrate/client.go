@@ -49,6 +49,8 @@ type API interface {
 	DeleteAtespace(ctx context.Context, name string) error
 	// EnsureAtespaceAccessPolicy makes sure every member holds the given role, keeping existing bindings.
 	EnsureAtespaceAccessPolicy(ctx context.Context, atespace, role string, members ...string) error
+	// EnsureGlobalAccessPolicy is EnsureAtespaceAccessPolicy for the install-wide policy.
+	EnsureGlobalAccessPolicy(ctx context.Context, role string, members ...string) error
 
 	CreateActorTemplate(ctx context.Context, template *ateapi.ActorTemplate, preview bool) (*ateapi.ActorTemplate, error)
 	GetActorTemplate(ctx context.Context, atespace, name string) (*ateapi.ActorTemplate, error)
@@ -205,6 +207,32 @@ func (c *Client) EnsureAtespaceAccessPolicy(ctx context.Context, atespace, role 
 		return nil
 	}
 	_, err = c.control.UpdateAtespaceAccessPolicy(ctx, &ateapi.UpdateAtespaceAccessPolicyRequest{Atespace: ref, AccessPolicy: policy})
+	return err
+}
+
+func (c *Client) EnsureGlobalAccessPolicy(ctx context.Context, role string, members ...string) error {
+	get := &ateapi.GetGlobalAccessPolicyRequest{Name: accessPolicyName}
+	policy, err := c.control.GetGlobalAccessPolicy(ctx, get)
+	if IsNotFound(err) {
+		_, err = c.control.CreateGlobalAccessPolicy(ctx, &ateapi.CreateGlobalAccessPolicyRequest{
+			AccessPolicy: &ateapi.AccessPolicy{
+				Metadata: &ateapi.ResourceMetadata{Name: accessPolicyName},
+				Bindings: []*ateapi.Binding{{Role: role, Members: members}},
+			},
+		})
+		if !IsAlreadyExists(err) {
+			return err
+		}
+		policy, err = c.control.GetGlobalAccessPolicy(ctx, get)
+	}
+	if err != nil {
+		return err
+	}
+
+	if !MergeBinding(policy, role, members...) {
+		return nil
+	}
+	_, err = c.control.UpdateGlobalAccessPolicy(ctx, &ateapi.UpdateGlobalAccessPolicyRequest{AccessPolicy: policy})
 	return err
 }
 

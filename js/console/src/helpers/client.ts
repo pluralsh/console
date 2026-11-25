@@ -47,6 +47,9 @@ export const authenticatedCacheConfig: InMemoryCacheConfig = {
     WorkbenchDevboxConfig: { merge: true },
     WorkbenchInfrastructure: { merge: true },
     WorkbenchObservability: { merge: true },
+    // an entity is only unique by session, type and id (claude's thinking and
+    // its reply share an api message id), and the timeline reducer owns them
+    DevboxEntity: { keyFields: false },
     Command: {
       fields: {
         exitCode: {

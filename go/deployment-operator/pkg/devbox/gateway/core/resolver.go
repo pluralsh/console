@@ -81,7 +81,7 @@ func (g *Gateway) instanceInfo(ctx context.Context, inst *Instance) (*egress.Ins
 	for _, h := range g.boxSCMHosts(ctx, inst, false) {
 		addHost(h)
 	}
-	for _, r := range repos {
+	for _, r := range append(repos, runner.Repositories...) {
 		addHost(repoHost(r))
 	}
 	return info, nil

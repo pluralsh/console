@@ -8,6 +8,7 @@ import {
 } from '@pluralsh/design-system'
 import { DevboxFileOpenContext } from 'components/ai/chatbot/DevboxFileChip'
 import { GqlError } from 'components/utils/Alert'
+import { Confirm } from 'components/utils/Confirm'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { CaptionP } from 'components/utils/typography/Text'
 import {
@@ -58,11 +59,17 @@ import {
   latestToolCall,
   subagentState,
   subagentSummary,
+  subtreeIds,
 } from './devboxSubagentState'
 import { threadTitle } from './devboxThreads'
-import { agentLabel, findAgent, isProxyBilled } from './devboxStartForm'
+import {
+  agentLabel,
+  findAgent,
+  isProxyBilled,
+  proxyModelOf,
+} from './devboxStartForm'
 import { selectOrderedEntities, selectTerminalOutput } from './devboxTimeline'
-import { DevboxTranscript } from './DevboxTranscript'
+import { DevboxTranscript, TranscriptPlacement } from './DevboxTranscript'
 import { useDevboxWorkspaceApi } from './devboxWorkspaceApi'
 import { DevboxTimelineStoreApi } from './useDevboxTimeline'
 
@@ -104,12 +111,15 @@ export function DevboxThreadPane({
   const parent = thread.parent?.id
     ? threads.find((t) => t.id === thread.parent?.id)
     : undefined
-  const threadIds = new Set([thread.id, ...subagents.map((s) => s.id)])
+  const threadIds = subtreeIds(thread.id, threads)
+  // one with no thread to file it under is shown here rather than nowhere
   const interactions = attributeInteractions(
     (instance.interactions ?? []).filter(isNonNullable),
     threads,
     timeline.store
-  ).filter((i) => i.thread?.id && threadIds.has(i.thread.id))
+  ).filter((i) => !i.thread?.id || threadIds.has(i.thread.id))
+  const ownThread = (i: DevboxInteractionFragment) =>
+    !i.thread?.id || i.thread.id === thread.id
   // a permission request is answered under its tool call, and a subagent's
   // under its row; a card is left for questions (forms, links) and for requests
   // whose call isn't in the loaded transcript
@@ -124,20 +134,27 @@ export function DevboxThreadPane({
     interactions
       .filter(
         (i) =>
-          i.thread?.id === thread.id &&
+          ownThread(i) &&
           isInlineApproval(i) &&
           !!i.toolCallId &&
           transcriptCalls.has(i.toolCallId)
       )
       .map((i) => [i.toolCallId ?? '', i])
   )
-  const ownInteractions = interactions.filter(
-    (i) =>
-      i.thread?.id === thread.id &&
-      !(i.toolCallId && inlineApprovals.has(i.toolCallId)) &&
-      (i.kind !== DevboxInteractionKind.Permission ||
-        i.state === DevboxInteractionState.Pending)
-  )
+  // the transcript answers what it can place, under the tool call or on the
+  // subagent's card; every other request gets a card of its own
+  const unplacedInteractions = ({
+    approvals,
+    subagents,
+  }: TranscriptPlacement) =>
+    interactions.filter((i) =>
+      ownThread(i)
+        ? !(i.toolCallId && approvals.has(i.toolCallId)) &&
+          (i.kind !== DevboxInteractionKind.Permission ||
+            i.state === DevboxInteractionState.Pending)
+        : i.state === DevboxInteractionState.Pending &&
+          !subagents.has(i.thread?.id ?? '')
+    )
   const toolCall = (id: Nullable<string>) => findToolCall(timeline.store, id)
   const [, setParams] = useSearchParams()
   const openThread = (id: string) =>
@@ -163,6 +180,12 @@ export function DevboxThreadPane({
 
   const agent = findAgent(instance.devbox, thread.agent)
   const proxyBilled = isProxyBilled(instance, thread.agent)
+  const proxyModelIds = agent?.models?.filter(isNonNullable).map((m) => m.id)
+  const switchToProxy = useSwitchToProxy()
+  const { popToast } = useSimpleToast()
+  const [switchingModel, setSwitchingModel] =
+    useState<Nullable<{ configId: string; value: string }>>(null)
+  const [switchState, setSwitchState] = useState({ loading: false })
   const { data: commandsData } = useDevboxInstanceCommandsQuery({
     variables: { threadId: thread.id },
     skip: !live || thread.status === DevboxThreadStatus.Closed,
@@ -180,7 +203,9 @@ export function DevboxThreadPane({
     thread.status === DevboxThreadStatus.Closed ||
     thread.status === DevboxThreadStatus.Deleted
   const subagent = thread.kind === DevboxThreadKind.Subagent
-  const { listFiles } = useDevboxWorkspaceApi(live ? instance.id : null)
+  const { listFiles, searchFiles } = useDevboxWorkspaceApi(
+    live ? instance.id : null
+  )
 
   const sessionError = sessionId ? timeline.errors[sessionId] : undefined
   const { openFile } = useDevboxPanel()
@@ -204,7 +229,9 @@ export function DevboxThreadPane({
           </CaptionP>
         </Flex>
       )}
-      <DevboxFileOpenContext value={live ? openFile : null}>
+      <DevboxFileOpenContext
+        value={live ? { openFile, cwd: thread.cwd } : null}
+      >
         <ScrollSC ref={scrollRef}>
           <ContentSC ref={contentRef}>
             {sessionError && <GqlError error={sessionError} />}
@@ -229,6 +256,8 @@ export function DevboxThreadPane({
                 ) : null
               }}
               subagents={subagents}
+              complete={!!session?.loaded && !session.hasMore}
+              running={thread.foregroundState === DevboxForegroundState.Running}
               renderSubagent={(s, spawner) => (
                 <SubagentCard
                   subagent={s}
@@ -249,14 +278,18 @@ export function DevboxThreadPane({
                       : 'Loading transcript…'}
                 </CaptionP>
               }
+              renderUnplaced={(placed) =>
+                unplacedInteractions(placed).map((interaction) => (
+                  <DevboxInteraction
+                    key={interaction.id}
+                    interaction={interaction}
+                    toolCall={
+                      toolCall(interaction.toolCallId) ?? interaction.toolCall
+                    }
+                  />
+                ))
+              }
             />
-            {ownInteractions.map((interaction) => (
-              <DevboxInteraction
-                key={interaction.id}
-                interaction={interaction}
-                toolCall={toolCall(interaction.toolCallId)}
-              />
-            ))}
           </ContentSC>
         </ScrollSC>
       </DevboxFileOpenContext>
@@ -276,12 +309,13 @@ export function DevboxThreadPane({
             configOptions={thread.configOptions}
             autonomyPolicy={instance.devbox?.autonomy}
             proxyBilled={proxyBilled}
-            proxyModels={
-              proxyBilled
-                ? agent?.models?.filter(isNonNullable).map((m) => m.id)
-                : null
+            proxyModels={proxyBilled ? proxyModelIds : null}
+            switchModels={proxyBilled ? null : proxyModelIds}
+            onSwitchModel={(configId, value) =>
+              setSwitchingModel({ configId, value })
             }
             listFiles={listFiles}
+            searchFiles={searchFiles}
             toolbar={
               thread.agent && (
                 <PillSelect
@@ -330,6 +364,28 @@ export function DevboxThreadPane({
           />
         </ComposerStackSC>
       )}
+      <Confirm
+        open={!!switchingModel}
+        close={() => setSwitchingModel(null)}
+        label="Switch"
+        title="Switch to the Plural AI proxy"
+        text={`${proxyModelOf(switchingModel?.value)?.slug ?? switchingModel?.value} runs on the Plural AI proxy, not your ${agentLabel(thread.agent)} subscription. Switching restarts this instance's ${agentLabel(thread.agent)} agent on the proxy, resuming its open threads there, and bills its usage to the proxy until you switch back.`}
+        loading={switchState.loading}
+        submit={() => {
+          if (!switchingModel || !thread.agent) return
+          const { configId, value } = switchingModel
+          setSwitchState({ loading: true })
+          switchToProxy(instance.id, thread.agent)
+            .then(() =>
+              setOption({ variables: { id: thread.id, configId, value } })
+            )
+            .then(() => setSwitchingModel(null))
+            .catch((e) =>
+              popToast({ content: (e as Error).message, severity: 'danger' })
+            )
+            .then(() => setSwitchState({ loading: false }))
+        }}
+      />
     </PaneSC>
   )
 }

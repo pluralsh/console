@@ -19,6 +19,14 @@ metadataTest:
       value: /usr/local/share/corepack
     - key: DOTNET_CLI_TELEMETRY_OPTOUT
       value: "1"
+    - key: MISE_ERLANG_COMPILE
+      value: "false"
+    - key: MISE_ERLANG_PRECOMPILED_OS
+      value: ubuntu-24.04
+    - key: MIX_REBAR3
+      value: /usr/local/bin/rebar3
+    - key: MIX_ARCHIVES
+      value: /usr/local/share/mix/archives
 
 fileExistenceTests:
   - name: writable Java cacerts in the trust dir
@@ -105,6 +113,27 @@ commandTests:
     command: uv
     args: ["--version"]
     expectedOutput: ["uv 0\\.13\\.8"]
+  - name: erlang
+    command: erl
+    args: ["-noshell", "-eval", "io:format(\"~s~n\", [erlang:system_info(otp_release)]), halt()."]
+    expectedOutput: ["(?m)^28$"]
+  - name: rebar3
+    command: rebar3
+    args: ["version"]
+    expectedOutput: ["rebar 3\\.27\\.0"]
+  - name: elixir
+    command: elixir
+    args: ["--version"]
+    expectedOutput: ["Elixir 1\\.19\\.4"]
+    excludedError: ["latin1"]
+  - name: hex is installed and its archives dir is writable
+    command: sh
+    args: ["-c", "mix hex.info && test -w /usr/local/share/mix/archives && echo archives-writable"]
+    expectedOutput: ["Hex: ", "(?m)^archives-writable$"]
+  - name: mise resolves erlang and elixir pins to the system installs
+    command: sh
+    args: ["-c", "cd \"$(mktemp -d)\" && printf 'erlang 28.5\\nelixir 1.19.4\\n' > .tool-versions && MISE_OFFLINE=1 mise exec -- sh -c 'command -v elixir && elixir --version'"]
+    expectedOutput: ["/usr/local/share/mise/installs/elixir/1\\.19\\.4/bin/elixir", "Elixir 1\\.19\\.4"]
   - name: corepack home writable
     command: sh
     args: ["-c", "test -w /usr/local/share/corepack && echo ok"]

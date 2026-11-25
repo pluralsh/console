@@ -5,15 +5,11 @@ package router
 
 import (
 	"context"
-	"crypto/tls"
-	"crypto/x509"
 	"errors"
 	"fmt"
 	"net"
 	"net/http"
-	"os"
 	"strings"
-	"sync"
 	"time"
 
 	"google.golang.org/grpc"
@@ -23,6 +19,7 @@ import (
 	"google.golang.org/grpc/metadata"
 
 	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/podcert"
 )
 
 const (
@@ -32,7 +29,6 @@ const (
 	DefaultAddress = "atenet-router.ate-system.svc:443"
 
 	maxMessageSize = 64 << 20
-	reloadEvery    = time.Minute
 )
 
 // Config locates atenet-router and the gateway's identity.
@@ -80,7 +76,7 @@ func Dial(cfg Config) (*Router, error) {
 	if cfg.Insecure {
 		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	} else {
-		tlsCfg, err := clientTLS(cfg)
+		tlsCfg, err := podcert.ClientTLS(cfg.CredentialBundle, cfg.TrustBundle, cfg.ServerName)
 		if err != nil {
 			return nil, err
 		}
@@ -159,80 +155,4 @@ func (c *targetConn) Invoke(ctx context.Context, method string, args, reply any,
 
 func (c *targetConn) NewStream(ctx context.Context, desc *grpc.StreamDesc, method string, opts ...grpc.CallOption) (grpc.ClientStream, error) {
 	return c.conn.NewStream(c.ctx(ctx), desc, method, opts...)
-}
-
-// ---- TLS ----
-
-func clientTLS(cfg Config) (*tls.Config, error) {
-	roots := &reloadingPool{file: cfg.TrustBundle}
-	if _, err := roots.get(); err != nil {
-		return nil, err
-	}
-	if _, err := loadBundle(cfg.CredentialBundle); err != nil {
-		return nil, err
-	}
-	return &tls.Config{
-		MinVersion: tls.VersionTLS12,
-		ServerName: cfg.ServerName,
-		GetClientCertificate: func(*tls.CertificateRequestInfo) (*tls.Certificate, error) {
-			return loadBundle(cfg.CredentialBundle)
-		},
-		// Verified in VerifyConnection against the current trust bundle, which rotates.
-		InsecureSkipVerify: true, // nolint: gosec
-		VerifyConnection: func(cs tls.ConnectionState) error {
-			pool, err := roots.get()
-			if err != nil {
-				return err
-			}
-			if len(cs.PeerCertificates) == 0 {
-				return errors.New("router presented no certificate")
-			}
-			inter := x509.NewCertPool()
-			for _, c := range cs.PeerCertificates[1:] {
-				inter.AddCert(c)
-			}
-			_, err = cs.PeerCertificates[0].Verify(x509.VerifyOptions{DNSName: cs.ServerName, Roots: pool, Intermediates: inter})
-			return err
-		},
-	}, nil
-}
-
-func loadBundle(file string) (*tls.Certificate, error) {
-	data, err := os.ReadFile(file)
-	if err != nil {
-		return nil, fmt.Errorf("reading credential bundle: %w", err)
-	}
-	cert, err := tls.X509KeyPair(data, data)
-	if err != nil {
-		return nil, fmt.Errorf("parsing credential bundle %s: %w", file, err)
-	}
-	return &cert, nil
-}
-
-type reloadingPool struct {
-	file string
-	mu   sync.Mutex
-	pool *x509.CertPool
-	at   time.Time
-}
-
-func (p *reloadingPool) get() (*x509.CertPool, error) {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-	if p.pool != nil && time.Since(p.at) < reloadEvery {
-		return p.pool, nil
-	}
-	data, err := os.ReadFile(p.file)
-	if err != nil {
-		if p.pool != nil {
-			return p.pool, nil
-		}
-		return nil, fmt.Errorf("reading router trust bundle: %w", err)
-	}
-	pool := x509.NewCertPool()
-	if !pool.AppendCertsFromPEM(data) {
-		return nil, fmt.Errorf("no certificates in router trust bundle %s", p.file)
-	}
-	p.pool, p.at = pool, time.Now()
-	return pool, nil
 }

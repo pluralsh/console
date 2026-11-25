@@ -8,7 +8,7 @@ import {
   serializeRange,
 } from 'components/utils/contentEditableChips'
 import Fuse from 'fuse.js'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { DevboxFileEntry, isDirectory } from './devboxWorkspaceApi'
 
 export type DevboxMentionQuery = {
@@ -130,14 +130,37 @@ export function fileMentionChip(path: string): HTMLElement {
   return chip
 }
 
+// a path as typed after the `@`: relative to the directory being completed
+// when it's beneath it, else absolute
+export const mentionPath = (
+  query: DevboxMentionQuery,
+  root: Nullable<string>,
+  path: string
+) =>
+  root && path.startsWith(root)
+    ? `${query.dir}${path.slice(root.length)}`
+    : path
+
 // a picked directory is browsed into as typed text, keeping the menu open on its contents
 export const directoryToken = (
   query: DevboxMentionQuery,
-  entry: DevboxFileEntry
-) => ({
-  token: `${query.dir}${entry.name}/`,
-  path: `${entry.path.replace(/\/$/, '')}/`,
-})
+  entry: DevboxFileEntry,
+  root: Nullable<string>
+) => {
+  const path = `${entry.path.replace(/\/$/, '')}/`
+  return { token: mentionPath(query, root, path), path }
+}
+
+// the absolute directory being completed, if known; home's is its entries' parent
+export const mentionRoot = (
+  dir: string,
+  mentions: Record<string, string>,
+  entries: DevboxFileEntry[]
+): Nullable<string> =>
+  dir ? resolveMentionDir(dir, mentions, entries) : parentOf(entries[0]?.path)
+
+const parentOf = (path: Nullable<string>) =>
+  path ? `${path.slice(0, path.lastIndexOf('/'))}/` : null
 
 // the absolute path of the directory being browsed: as recorded when it was
 // picked, else the parent of its entries, else the typed path when absolute
@@ -148,29 +171,76 @@ export function resolveMentionDir(
 ): Nullable<string> {
   if (!dir) return null
   if (mentions[dir]) return mentions[dir]
-  const child = entries[0]?.path
-  if (child) return `${child.slice(0, child.lastIndexOf('/'))}/`
-  return dir.startsWith('/') ? dir : null
+  return parentOf(entries[0]?.path) ?? (dir.startsWith('/') ? dir : null)
 }
 
 type Listing = { entries: DevboxFileEntry[]; error?: boolean }
 
-// lists the directory being completed, caching each one for the composer's lifetime
+const directoryKey = (dir: string) => dir.replace(/\/$/, '') || '~'
+
+// a failure only replaces a key's listing when there's none to keep showing
+const settled = (
+  cur: Record<string, Listing>,
+  key: string,
+  listing: Listing
+): Record<string, Listing> => ({
+  ...cur,
+  [key]: listing.error && cur[key] && !cur[key].error ? cur[key] : listing,
+})
+
+// searches everything beneath the directory being completed, afresh each time
+// a query comes up, keeping the last results up while the next ones load
+export function useDevboxFileSearch(
+  searchFiles: Nullable<
+    (path: string, query: string) => Promise<DevboxFileEntry[]>
+  >,
+  dir: Nullable<string>,
+  query: string
+): { entries: DevboxFileEntry[]; loading: boolean; error: boolean } {
+  const [results, setResults] = useState<Record<string, Listing>>({})
+  const [last, setLast] = useState<Nullable<Listing & { path: string }>>(null)
+  const path = dir == null || !query ? null : directoryKey(dir)
+  const key = path && `${path}\n${query}`
+
+  useEffect(() => {
+    if (!searchFiles || !path || !key) return
+    const settle = (listing: Listing) => {
+      setResults((cur) => settled(cur, key, listing))
+      if (!listing.error) setLast({ ...listing, path })
+    }
+    searchFiles(path, query).then(
+      (entries) => settle({ entries }),
+      () => settle({ entries: [], error: true })
+    )
+  }, [searchFiles, path, query, key])
+
+  const listing = key
+    ? (results[key] ?? (last?.path === path ? last : null))
+    : null
+  return {
+    entries: listing?.entries ?? [],
+    loading: !!key && !!searchFiles && !listing,
+    error: !!listing?.error,
+  }
+}
+
+// lists the directory being completed afresh each time it comes up, showing
+// its last listing meanwhile
 export function useDevboxDirectory(
-  listFiles: Nullable<(path: string) => Promise<DevboxFileEntry[]>>,
+  listFiles: Nullable<
+    (path: string, opts?: { brief?: boolean }) => Promise<DevboxFileEntry[]>
+  >,
   dir: Nullable<string>
 ): { entries: DevboxFileEntry[]; loading: boolean; error: boolean } {
   const [listings, setListings] = useState<Record<string, Listing>>({})
-  const requested = useRef(new Set<string>())
-  const key = dir == null ? null : dir.replace(/\/$/, '') || '~'
+  const key = dir == null ? null : directoryKey(dir)
 
   useEffect(() => {
-    if (!listFiles || !key || requested.current.has(key)) return
-    requested.current.add(key)
-    listFiles(key).then(
-      (entries) => setListings((cur) => ({ ...cur, [key]: { entries } })),
+    if (!listFiles || !key) return
+    listFiles(key, { brief: true }).then(
+      (entries) => setListings((cur) => settled(cur, key, { entries })),
       () =>
-        setListings((cur) => ({ ...cur, [key]: { entries: [], error: true } }))
+        setListings((cur) => settled(cur, key, { entries: [], error: true }))
     )
   }, [listFiles, key])
 
