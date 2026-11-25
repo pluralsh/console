@@ -122,6 +122,21 @@ export function proxyModelValues(
     : values
 }
 
+// the agent's own model values, then the proxy's models it doesn't list, which
+// a subscription-billed agent only reaches by switching to the proxy
+export function withSwitchModels(
+  option: DevboxConfigOptionFragment,
+  switchModels: string[]
+): { values: ConfigValue[]; switching: Set<string> } {
+  const values = (option.options ?? []).filter(isNonNullable)
+  const known = new Set(values.map((o) => o.value))
+  const extra = switchModels.filter((id) => !known.has(id))
+  return {
+    values: [...values, ...extra.map((value) => ({ value }))],
+    switching: new Set(extra),
+  }
+}
+
 export function DevboxComposer({
   commands,
   configOptions,
@@ -129,6 +144,7 @@ export function DevboxComposer({
   proxyBilled = false,
   modelSwitchable = true,
   proxyModels,
+  switchModels,
   listFiles,
   searchFiles,
   running = false,
@@ -140,6 +156,7 @@ export function DevboxComposer({
   onSubmit,
   onCancel,
   onSetConfigOption,
+  onSwitchModel,
 }: {
   commands: Nullable<Nullable<DevboxCommandFragment>[]>
   configOptions?: Nullable<Nullable<DevboxConfigOptionFragment>[]>
@@ -148,6 +165,9 @@ export function DevboxComposer({
   modelSwitchable?: boolean
   // replaces the agent's own model values, which needn't list the proxy's
   proxyModels?: Nullable<string[]>
+  // listed after the agent's own models; picking one calls onSwitchModel
+  // instead of onSetConfigOption
+  switchModels?: Nullable<string[]>
   // completes `@path` mentions against the instance's files
   listFiles?: Nullable<
     (path: string, opts?: { brief?: boolean }) => Promise<DevboxFileEntry[]>
@@ -171,6 +191,7 @@ export function DevboxComposer({
   ) => void | boolean | Promise<boolean>
   onCancel?: () => void
   onSetConfigOption?: (configId: string, value: string) => void
+  onSwitchModel?: (configId: string, value: string) => void
 }) {
   const [text, setText] = useState('')
   const [caret, setCaret] = useState(0)
@@ -453,8 +474,17 @@ export function DevboxComposer({
               (option.category === MODEL_CATEGORY && !modelSwitchable) ||
               !onSetConfigOption ||
               disabled
+            const switchable =
+              option.category === MODEL_CATEGORY &&
+              !proxyModels?.length &&
+              switchModels?.length &&
+              onSwitchModel
+                ? withSwitchModels(option, switchModels)
+                : null
             const select = (value: string) =>
-              onSetConfigOption?.(option.configId, value)
+              switchable?.switching.has(value)
+                ? onSwitchModel?.(option.configId, value)
+                : onSetConfigOption?.(option.configId, value)
             if (isAutonomyOption(option))
               return (
                 <AutonomyPillSelect
@@ -465,8 +495,9 @@ export function DevboxComposer({
                   disabled={locked}
                 />
               )
-            const values =
-              option.category === MODEL_CATEGORY && proxyModels?.length
+            const values = switchable
+              ? switchable.values
+              : option.category === MODEL_CATEGORY && proxyModels?.length
                 ? proxyModelValues(option, proxyModels)
                 : (option.options ?? []).filter(isNonNullable)
             const current = values.find((o) => o.value === option.currentValue)
@@ -503,7 +534,11 @@ export function DevboxComposer({
                       key={o.value}
                       label={proxy?.slug ?? o.name ?? o.value}
                       description={
-                        proxy ? undefined : (o.description ?? undefined)
+                        switchable?.switching.has(o.value)
+                          ? 'Switches this agent to the Plural AI proxy'
+                          : proxy
+                            ? undefined
+                            : (o.description ?? undefined)
                       }
                       leftContent={
                         proxy ? (

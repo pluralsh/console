@@ -16,6 +16,7 @@ import {
   DevboxComposer,
   MAX_ATTACHMENTS,
   proxyModelValues,
+  withSwitchModels,
 } from './DevboxComposer'
 import {
   applySlashCommand,
@@ -396,6 +397,35 @@ describe('proxyModelValues', () => {
       { value: 'default', name: 'Default (recommended)' },
       { value: 'plural/openai/gpt-5', name: 'gpt-5' },
       { value: 'anthropic/claude-opus-4-1' },
+    ])
+  })
+})
+
+describe('withSwitchModels', () => {
+  it("lists the proxy's models after the agent's own, marking them as switching", () => {
+    const option = {
+      configId: 'model',
+      category: 'model',
+      currentValue: 'sonnet',
+      options: [
+        { value: 'default', name: 'Default (recommended)' },
+        { value: 'sonnet', name: 'Sonnet' },
+      ],
+    }
+    const { values, switching } = withSwitchModels(option, [
+      'anthropic/claude-sonnet-5-5',
+      'sonnet',
+      'openai/gpt-5.4',
+    ])
+    expect(values).toEqual([
+      { value: 'default', name: 'Default (recommended)' },
+      { value: 'sonnet', name: 'Sonnet' },
+      { value: 'anthropic/claude-sonnet-5-5' },
+      { value: 'openai/gpt-5.4' },
+    ])
+    expect([...switching]).toEqual([
+      'anthropic/claude-sonnet-5-5',
+      'openai/gpt-5.4',
     ])
   })
 })

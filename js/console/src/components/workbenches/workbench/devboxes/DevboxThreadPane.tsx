@@ -8,6 +8,7 @@ import {
 } from '@pluralsh/design-system'
 import { DevboxFileOpenContext } from 'components/ai/chatbot/DevboxFileChip'
 import { GqlError } from 'components/utils/Alert'
+import { Confirm } from 'components/utils/Confirm'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { CaptionP } from 'components/utils/typography/Text'
 import {
@@ -61,7 +62,12 @@ import {
   subtreeIds,
 } from './devboxSubagentState'
 import { threadTitle } from './devboxThreads'
-import { agentLabel, findAgent, isProxyBilled } from './devboxStartForm'
+import {
+  agentLabel,
+  findAgent,
+  isProxyBilled,
+  proxyModelOf,
+} from './devboxStartForm'
 import { selectOrderedEntities, selectTerminalOutput } from './devboxTimeline'
 import { DevboxTranscript, TranscriptPlacement } from './DevboxTranscript'
 import { useDevboxWorkspaceApi } from './devboxWorkspaceApi'
@@ -174,6 +180,12 @@ export function DevboxThreadPane({
 
   const agent = findAgent(instance.devbox, thread.agent)
   const proxyBilled = isProxyBilled(instance, thread.agent)
+  const proxyModelIds = agent?.models?.filter(isNonNullable).map((m) => m.id)
+  const switchToProxy = useSwitchToProxy()
+  const { popToast } = useSimpleToast()
+  const [switchingModel, setSwitchingModel] =
+    useState<Nullable<{ configId: string; value: string }>>(null)
+  const [switchState, setSwitchState] = useState({ loading: false })
   const { data: commandsData } = useDevboxInstanceCommandsQuery({
     variables: { threadId: thread.id },
     skip: !live || thread.status === DevboxThreadStatus.Closed,
@@ -297,10 +309,10 @@ export function DevboxThreadPane({
             configOptions={thread.configOptions}
             autonomyPolicy={instance.devbox?.autonomy}
             proxyBilled={proxyBilled}
-            proxyModels={
-              proxyBilled
-                ? agent?.models?.filter(isNonNullable).map((m) => m.id)
-                : null
+            proxyModels={proxyBilled ? proxyModelIds : null}
+            switchModels={proxyBilled ? null : proxyModelIds}
+            onSwitchModel={(configId, value) =>
+              setSwitchingModel({ configId, value })
             }
             listFiles={listFiles}
             searchFiles={searchFiles}
@@ -352,6 +364,28 @@ export function DevboxThreadPane({
           />
         </ComposerStackSC>
       )}
+      <Confirm
+        open={!!switchingModel}
+        close={() => setSwitchingModel(null)}
+        label="Switch"
+        title="Switch to the Plural AI proxy"
+        text={`${proxyModelOf(switchingModel?.value)?.slug ?? switchingModel?.value} runs on the Plural AI proxy, not your ${agentLabel(thread.agent)} subscription. Switching restarts this instance's ${agentLabel(thread.agent)} agent on the proxy, resuming its open threads there, and bills its usage to the proxy until you switch back.`}
+        loading={switchState.loading}
+        submit={() => {
+          if (!switchingModel || !thread.agent) return
+          const { configId, value } = switchingModel
+          setSwitchState({ loading: true })
+          switchToProxy(instance.id, thread.agent)
+            .then(() =>
+              setOption({ variables: { id: thread.id, configId, value } })
+            )
+            .then(() => setSwitchingModel(null))
+            .catch((e) =>
+              popToast({ content: (e as Error).message, severity: 'danger' })
+            )
+            .then(() => setSwitchState({ loading: false }))
+        }}
+      />
     </PaneSC>
   )
 }
