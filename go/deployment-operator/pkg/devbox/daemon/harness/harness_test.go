@@ -320,6 +320,36 @@ func TestCodexProxyLivesInConfig(t *testing.T) {
 	}
 }
 
+func TestHarnessesLeaveSandboxingToTheBox(t *testing.T) {
+	c := testConfig(t)
+	codex := &devboxv1.AgentLaunch{Agent: devboxv1.AgentType_AGENT_TYPE_CODEX}
+	if _, err := c.Spec(codex, proxyEndpoints, ""); err != nil {
+		t.Fatal(err)
+	}
+	if got := codexConfig(t, c)["sandbox_mode"]; got != "danger-full-access" {
+		t.Errorf("codex sandbox_mode = %v", got)
+	}
+
+	cfg := codexConfig(t, c)
+	cfg["sandbox_mode"] = "workspace-write"
+	out, _ := toml.Marshal(cfg)
+	if err := os.WriteFile(c.CodexHome()+"/config.toml", out, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := c.Spec(codex, proxyEndpoints, ""); err != nil {
+		t.Fatal(err)
+	}
+	if got := codexConfig(t, c)["sandbox_mode"]; got != "workspace-write" {
+		t.Errorf("codex sandbox_mode = %v, want the user's kept", got)
+	}
+
+	gemini, err := c.Spec(&devboxv1.AgentLaunch{Agent: devboxv1.AgentType_AGENT_TYPE_GEMINI}, proxyEndpoints, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	envIs(t, gemini.Env, "GEMINI_SANDBOX", "false")
+}
+
 func TestCodexKeepsAModelTheUserPicked(t *testing.T) {
 	c := testConfig(t)
 	launch := &devboxv1.AgentLaunch{

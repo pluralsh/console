@@ -76,6 +76,13 @@ message ListFilesRequest {
   bool respect_gitignore = 5;
   // Maximum entries returned; the daemon caps it.
   int32 limit = 6;
+  // When set, fuzzy-searches everything under path for files and directories matching it, best match first,
+  // instead of listing (depth and respect_gitignore don't apply: git-ignored paths are never searched). Results
+  // carry path, name, type and repository only.
+  string query = 7;
+  // Entries carry path, name, type and repository only, which lets the daemon answer a direct listing from its file
+  // index, without touching disk, where it covers path. Query results are always brief.
+  bool brief = 8;
 }
 
 message ListFilesResponse {

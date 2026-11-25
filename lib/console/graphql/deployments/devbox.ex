@@ -1240,12 +1240,14 @@ defmodule Console.GraphQl.Deployments.Devbox do
       resolve &Deployments.devbox_importable_sessions/2
     end
 
-    @desc "One directory level of an instance's workspace"
+    @desc "One directory level of an instance's workspace, or with a query the best fuzzy matches anywhere beneath it"
     field :devbox_files, list_of(:devbox_file_entry) do
       middleware Authenticated
       middleware Scope, resource: :workbench, action: :read
       arg :instance_id, non_null(:id)
       arg :path,        :string, description: "relative to ~, the home directory if unset"
+      arg :query,       :string, description: "fuzzy-matched against paths beneath path, best first"
+      arg :brief,       :boolean, description: "only path, name, type and repository, served from the instance's in-memory file index where it can be"
 
       resolve &Deployments.devbox_files/2
     end

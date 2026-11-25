@@ -44,3 +44,12 @@ postgres:
     backup:
       enabled: true
       destinationPath: s3://plural-ate-pg-backups/ate-postgres/
+
+# JuiceFS homes in the snapshot bucket through IRSA.
+juicefs:
+  enabled: true
+  image:
+    digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
+  serviceAccount:
+    annotations:
+      eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/devbox-juicefs

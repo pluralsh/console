@@ -1,7 +1,7 @@
 import {
   FolderIcon,
   ListBoxItem,
-  PaperclipIcon,
+  PlusIcon,
   Tooltip,
 } from '@pluralsh/design-system'
 import {
@@ -41,9 +41,12 @@ import {
   fileMentionChip,
   getMentionQuery,
   matchFiles,
+  mentionPath,
+  mentionRoot,
   replaceAtCaret,
   resolveMentionDir,
   useDevboxDirectory,
+  useDevboxFileSearch,
 } from './devboxFileMentions'
 import { AutonomyPillSelect, PillSelect } from './DevboxPromptPills'
 import {
@@ -119,6 +122,21 @@ export function proxyModelValues(
     : values
 }
 
+// the agent's own model values, then the proxy's models it doesn't list, which
+// a subscription-billed agent only reaches by switching to the proxy
+export function withSwitchModels(
+  option: DevboxConfigOptionFragment,
+  switchModels: string[]
+): { values: ConfigValue[]; switching: Set<string> } {
+  const values = (option.options ?? []).filter(isNonNullable)
+  const known = new Set(values.map((o) => o.value))
+  const extra = switchModels.filter((id) => !known.has(id))
+  return {
+    values: [...values, ...extra.map((value) => ({ value }))],
+    switching: new Set(extra),
+  }
+}
+
 export function DevboxComposer({
   commands,
   configOptions,
@@ -126,7 +144,9 @@ export function DevboxComposer({
   proxyBilled = false,
   modelSwitchable = true,
   proxyModels,
+  switchModels,
   listFiles,
+  searchFiles,
   running = false,
   disabled = false,
   placeholder = 'Message the agent, / for commands or @ for files',
@@ -136,6 +156,7 @@ export function DevboxComposer({
   onSubmit,
   onCancel,
   onSetConfigOption,
+  onSwitchModel,
 }: {
   commands: Nullable<Nullable<DevboxCommandFragment>[]>
   configOptions?: Nullable<Nullable<DevboxConfigOptionFragment>[]>
@@ -144,8 +165,18 @@ export function DevboxComposer({
   modelSwitchable?: boolean
   // replaces the agent's own model values, which needn't list the proxy's
   proxyModels?: Nullable<string[]>
+  // listed after the agent's own models; picking one calls onSwitchModel
+  // instead of onSetConfigOption
+  switchModels?: Nullable<string[]>
   // completes `@path` mentions against the instance's files
-  listFiles?: Nullable<(path: string) => Promise<DevboxFileEntry[]>>
+  listFiles?: Nullable<
+    (path: string, opts?: { brief?: boolean }) => Promise<DevboxFileEntry[]>
+  >
+  // searches beneath the directory being completed once a name is typed;
+  // without it, names are matched against the directory's listing
+  searchFiles?: Nullable<
+    (path: string, query: string) => Promise<DevboxFileEntry[]>
+  >
   running?: boolean
   disabled?: boolean
   placeholder?: string
@@ -160,6 +191,7 @@ export function DevboxComposer({
   ) => void | boolean | Promise<boolean>
   onCancel?: () => void
   onSetConfigOption?: (configId: string, value: string) => void
+  onSwitchModel?: (configId: string, value: string) => void
 }) {
   const [text, setText] = useState('')
   const [caret, setCaret] = useState(0)
@@ -210,9 +242,23 @@ export function DevboxComposer({
     : []
   const mention = !slash && listFiles ? getMentionQuery(text, caret) : null
   const directory = useDevboxDirectory(listFiles, mention?.dir)
-  const fileMatches = mention
-    ? matchFiles(directory.entries, mention.leaf).slice(0, MAX_SUGGESTIONS)
-    : []
+  // a typed name searches everything beneath the directory, not just its listing
+  const searching = !!searchFiles && !!mention?.leaf
+  const search = useDevboxFileSearch(
+    searchFiles,
+    searching ? mention.dir : null,
+    mention?.leaf ?? ''
+  )
+  const listing = searching ? search : directory
+  const root = mention
+    ? mentionRoot(mention.dir, mentions, directory.entries)
+    : null
+  const fileMatches = !mention
+    ? []
+    : (searching
+        ? search.entries
+        : matchFiles(directory.entries, mention.leaf)
+      ).slice(0, MAX_SUGGESTIONS)
   // browsing into a directory offers it first, so folders can be mentioned too
   const folder =
     mention && !mention.leaf && !directory.loading && !directory.error
@@ -241,7 +287,10 @@ export function DevboxComposer({
         ...fileMatches.map((entry) => ({
           key: entry.path,
           title: isDirectory(entry) ? `${entry.name}/` : entry.name,
-          subtitle: entry.path,
+          subtitle:
+            searching && mention
+              ? mentionPath(mention, root, entry.path)
+              : entry.path,
           icon: isDirectory(entry) ? (
             <FolderIcon size={14} />
           ) : (
@@ -299,7 +348,7 @@ export function DevboxComposer({
         mention.end,
         fileMentionChip(entry.path)
       )
-    const { token, path } = directoryToken(mention, entry)
+    const { token, path } = directoryToken(mention, entry, root)
     setMentions((cur) => ({ ...cur, [token]: path }))
     replaceToken(mention.start, mention.end, `@${token}`)
   }
@@ -370,8 +419,14 @@ export function DevboxComposer({
           label={slash ? 'Slash commands' : 'Files'}
           items={suggestions}
           active={active}
-          loading={directory.loading}
-          empty={directory.error ? "Couldn't list this directory" : undefined}
+          loading={listing.loading}
+          empty={
+            !listing.error
+              ? undefined
+              : searching
+                ? "Couldn't search files"
+                : "Couldn't list this directory"
+          }
           onPick={pick}
           onHover={setActive}
         />
@@ -406,7 +461,7 @@ export function DevboxComposer({
       <OptionsRowSC>
         <WorkbenchPromptOptionsGroup>
           <ChatInputIconFrame
-            icon={<PaperclipIcon />}
+            icon={<PlusIcon />}
             tooltip="Attach files"
             aria-label="Attach files"
             disabled={disabled}
@@ -419,8 +474,17 @@ export function DevboxComposer({
               (option.category === MODEL_CATEGORY && !modelSwitchable) ||
               !onSetConfigOption ||
               disabled
+            const switchable =
+              option.category === MODEL_CATEGORY &&
+              !proxyModels?.length &&
+              switchModels?.length &&
+              onSwitchModel
+                ? withSwitchModels(option, switchModels)
+                : null
             const select = (value: string) =>
-              onSetConfigOption?.(option.configId, value)
+              switchable?.switching.has(value)
+                ? onSwitchModel?.(option.configId, value)
+                : onSetConfigOption?.(option.configId, value)
             if (isAutonomyOption(option))
               return (
                 <AutonomyPillSelect
@@ -431,8 +495,9 @@ export function DevboxComposer({
                   disabled={locked}
                 />
               )
-            const values =
-              option.category === MODEL_CATEGORY && proxyModels?.length
+            const values = switchable
+              ? switchable.values
+              : option.category === MODEL_CATEGORY && proxyModels?.length
                 ? proxyModelValues(option, proxyModels)
                 : (option.options ?? []).filter(isNonNullable)
             const current = values.find((o) => o.value === option.currentValue)
@@ -469,7 +534,11 @@ export function DevboxComposer({
                       key={o.value}
                       label={proxy?.slug ?? o.name ?? o.value}
                       description={
-                        proxy ? undefined : (o.description ?? undefined)
+                        switchable?.switching.has(o.value)
+                          ? 'Switches this agent to the Plural AI proxy'
+                          : proxy
+                            ? undefined
+                            : (o.description ?? undefined)
                       }
                       leftContent={
                         proxy ? (

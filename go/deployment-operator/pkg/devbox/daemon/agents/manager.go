@@ -273,10 +273,13 @@ func (m *Manager) Flush() {
 func (m *Manager) flushLocked() {
 	now := m.clock.Now()
 	m.writeTranscriptLocked()
+	// Revisions and entity positions must stay monotonic across restarts, so a flush that moves them persists.
+	// Rows go dirty whenever their session gains an entity, so this covers positions too.
 	for _, t := range m.threads {
 		if t.dirty || activityDue(t.session) {
 			t.dirty = false
 			t.rev++
+			m.dirty = true
 			m.emitLocked(&devboxv1.DaemonEvent{Event: &devboxv1.DaemonEvent_Session{Session: m.threadRowLocked(t)}})
 			reported(t.session)
 		}
@@ -285,6 +288,7 @@ func (m *Manager) flushLocked() {
 		if s.kind == devboxv1.SessionKind_SESSION_KIND_SUBAGENT && (s.dirty || activityDue(s)) {
 			s.dirty = false
 			s.rev++
+			m.dirty = true
 			m.emitLocked(&devboxv1.DaemonEvent{Event: &devboxv1.DaemonEvent_Session{Session: m.subagentRowLocked(s)}})
 			reported(s)
 		}
@@ -299,6 +303,7 @@ func (m *Manager) flushLocked() {
 	if string(key) != m.lastAgg {
 		m.lastAgg = string(key)
 		m.aggRevision++
+		m.dirty = true
 		agg.Revision = m.aggRevision
 		m.emitLocked(&devboxv1.DaemonEvent{Event: &devboxv1.DaemonEvent_Aggregate{Aggregate: agg}})
 	}
@@ -430,16 +435,14 @@ func fillSessionRow(row *devboxv1.Session, s *session) {
 	row.Meta = acp.StructOf(s.meta)
 }
 
-// BusyReasons reports agent activity for idle detection: running turns and fresh pending interactions.
+// BusyReasons reports agent activity for idle detection: running turns and fresh pending interactions. A turn
+// that has waited on an answer for PendingInteractionBusy without its transcript moving isn't running: nothing
+// happens until someone answers, the box suspends with the turn intact, and answering wakes it.
 func (m *Manager) BusyReasons(now time.Time) []*devboxv1.BusyReason {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	var out []*devboxv1.BusyReason
-	for _, t := range m.threads {
-		if t.running || t.waiting || len(t.queue) > 0 {
-			out = append(out, &devboxv1.BusyReason{Kind: devboxv1.BusyReasonKind_BUSY_REASON_KIND_AGENT_TURN, Detail: t.displayTitle(), ThreadId: t.id})
-		}
-	}
+	unanswered := map[*thread]bool{}
 	for _, in := range m.interactions {
 		if in.proto.GetState() != devboxv1.InteractionState_INTERACTION_STATE_PENDING {
 			continue
@@ -450,10 +453,31 @@ func (m *Manager) BusyReasons(now time.Time) []*devboxv1.BusyReason {
 				Kind: devboxv1.BusyReasonKind_BUSY_REASON_KIND_PENDING_INTERACTION, Detail: in.proto.GetTitle(),
 				ThreadId: in.proto.GetThreadId(), Until: timestamppb.New(created.Add(PendingInteractionBusy)),
 			})
+		} else if in.session != nil && in.session.thread != nil {
+			unanswered[in.session.thread] = true
+		}
+	}
+	for _, t := range m.threads {
+		if t.running && unanswered[t] && now.Sub(m.lastChangeLocked(t)) >= PendingInteractionBusy {
+			continue
+		}
+		if t.running || t.waiting || len(t.queue) > 0 {
+			out = append(out, &devboxv1.BusyReason{Kind: devboxv1.BusyReasonKind_BUSY_REASON_KIND_AGENT_TURN, Detail: t.displayTitle(), ThreadId: t.id})
 		}
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].GetThreadId() < out[j].GetThreadId() })
 	return out
+}
+
+// lastChangeLocked is when anything in the thread's transcript, or its subagents', last changed.
+func (m *Manager) lastChangeLocked(t *thread) time.Time {
+	var last time.Time
+	for _, s := range m.sessions {
+		if s.thread == t && s.store != nil && s.store.LastChange().After(last) {
+			last = s.store.LastChange()
+		}
+	}
+	return last
 }
 
 func (m *Manager) statePath() string { return filepath.Join(m.opts.StateDir, "threads.json") }

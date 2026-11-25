@@ -339,7 +339,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Devbox do
     do: Workspace.open_stream(id, kind, Map.take(args, [:terminal_id, :port, :url]), user)
 
   def devbox_files(%{instance_id: id} = args, %{context: %{current_user: user}}),
-    do: Workspace.list_files(id, args[:path], user)
+    do: Workspace.list_files(id, args[:path], args, user)
 
   def devbox_file(%{instance_id: id, path: path}, %{context: %{current_user: user}}) do
     with {:ok, file} <- Workspace.read_file(id, path, user),

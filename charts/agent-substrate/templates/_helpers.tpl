@@ -52,9 +52,16 @@ imagePullSecrets:
 {{- end }}
 {{- end -}}
 
-{{/* --preview, as ate-setup injects it into every Substrate container. */}}
+{{/*
+--preview, as ate-setup injects it into every Substrate container, with the
+gates the chart's own features need.
+*/}}
 {{- define "substrate.previewArg" -}}
-{{- printf "--preview=%s" (join "," .Values.previewGates) -}}
+{{- $gates := .Values.previewGates | default list -}}
+{{- if and .Values.juicefs.enabled (not (has "ALL" $gates)) -}}
+{{- $gates = append $gates "ExternalVolumes" -}}
+{{- end -}}
+{{- printf "--preview=%s" (join "," (uniq $gates)) -}}
 {{- end -}}
 
 {{/* Log level of a component: (list $ .Values.atelet.logLevel). */}}

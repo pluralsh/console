@@ -90,6 +90,9 @@ func (g *Gateway) RebaseInstance(ctx context.Context, req *devboxv1.RebaseInstan
 		resp.Message = "already on this revision"
 		return resp, nil
 	}
+	if err := runner.movable(rec.TemplateRevision, to); err != nil {
+		return nil, statusError(codes.FailedPrecondition, devboxv1.ErrorReason_ERROR_REASON_UNSUPPORTED, "instance %s can't be moved: %v", inst.ID, err)
+	}
 	switch st := rec.status(); st {
 	case devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING, devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED:
 	case devboxv1.InstanceStatus_INSTANCE_STATUS_PROVISIONING, devboxv1.InstanceStatus_INSTANCE_STATUS_PENDING,
@@ -130,6 +133,12 @@ func (g *Gateway) DeleteSnapshot(ctx context.Context, req *devboxv1.DeleteSnapsh
 	ref := actors.ParseRef(tag, "")
 	if ref.Atespace == "" {
 		return nil, status.Errorf(codes.InvalidArgument, "snapshot tag %q must be <atespace>/<name>", tag)
+	}
+	// The seed goes first, so a deleted tag never leaves its home behind.
+	if g.deps.Seeds != nil {
+		if err := g.deps.Seeds.DeleteSeed(ctx, SnapshotSeedID(ref)); err != nil {
+			return nil, status.Errorf(codes.Unavailable, "deleting the home of snapshot %s: %v", ref, err)
+		}
 	}
 	if err := g.deps.Actors.DeleteTag(ctx, ref); err != nil {
 		if substrate.IsNotFound(err) {

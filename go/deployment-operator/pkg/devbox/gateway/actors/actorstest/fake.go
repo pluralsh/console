@@ -11,10 +11,12 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"google.golang.org/grpc/test/bufconn"
 	"google.golang.org/protobuf/proto"
 
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate/ateapi"
 )
 
@@ -26,9 +28,11 @@ type Server struct {
 	mu       sync.Mutex
 	Actors   map[string]*ateapi.Actor
 	Policies map[string]*ateapi.EgressPolicy
-	Tags     map[string]*ateapi.Tag
-	Workers  []*ateapi.Worker
-	Calls    []string
+	// Templates are served by GetActorTemplate, keyed "<atespace>/<name>".
+	Templates map[string]*ateapi.ActorTemplate
+	Tags      map[string]*ateapi.Tag
+	Workers   []*ateapi.Worker
+	Calls     []string
 	// SuspendModes records the durability mode of each SuspendActor call.
 	SuspendModes []ateapi.DurabilityMode
 	// TagFidelity is the fidelity of tags created from actors, MEMORY by default.
@@ -42,6 +46,15 @@ type Server struct {
 	// FailUpdate, when set, makes the next FailUpdateTimes UpdateActor calls fail with it.
 	FailUpdate      error
 	FailUpdateTimes int
+	// FailSuspend, when set, makes SuspendActor fail with it after marking the actor SUSPENDING, like a checkpoint
+	// cut off midway.
+	FailSuspend error
+	// FailSuspendTimes, when positive, limits FailSuspend to that many calls.
+	FailSuspendTimes int
+	// Previews records the actors created with the preview header.
+	Previews map[string]bool
+	// ExternalHomes makes GetActor report an external "home" volume, named like Substrate's, on every actor.
+	ExternalHomes bool
 
 	version int64
 }
@@ -50,6 +63,7 @@ func New() *Server {
 	return &Server{
 		Actors:      map[string]*ateapi.Actor{},
 		Policies:    map[string]*ateapi.EgressPolicy{},
+		Templates:   map[string]*ateapi.ActorTemplate{},
 		Tags:        map[string]*ateapi.Tag{},
 		TagFidelity: ateapi.SnapshotFidelity_SNAPSHOT_FIDELITY_MEMORY,
 	}
@@ -140,16 +154,48 @@ func (s *Server) GetActor(_ context.Context, req *ateapi.GetActorRequest) (*atea
 	if !ok {
 		return nil, status.Errorf(codes.NotFound, "actor %s not found", key(req.GetActor()))
 	}
-	return proto.Clone(a).(*ateapi.Actor), nil
+	out := proto.Clone(a).(*ateapi.Actor)
+	if s.ExternalHomes {
+		if out.Status == nil {
+			out.Status = &ateapi.ActorStatus{}
+		}
+		out.Status.ExternalVolumes = &ateapi.ExternalVolumes{Volumes: []*ateapi.ExternalVolumeStatus{
+			{Name: "home", StorageVolumeId: "substrate-" + a.GetMetadata().GetUid() + "-home"},
+		}}
+	}
+	return out, nil
 }
 
-func (s *Server) CreateActor(_ context.Context, req *ateapi.CreateActorRequest) (*ateapi.Actor, error) {
+func (s *Server) GetActorTemplate(_ context.Context, req *ateapi.GetActorTemplateRequest) (*ateapi.ActorTemplate, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	t, ok := s.Templates[key(req.GetActorTemplate())]
+	if !ok {
+		return nil, status.Errorf(codes.NotFound, "actor template %s not found", key(req.GetActorTemplate()))
+	}
+	return proto.Clone(t).(*ateapi.ActorTemplate), nil
+}
+
+// Preview reports whether an actor was created with the preview header.
+func (s *Server) Preview(atespace, name string) bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.Previews[atespace+"/"+name]
+}
+
+func (s *Server) CreateActor(ctx context.Context, req *ateapi.CreateActorRequest) (*ateapi.Actor, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	ref := &ateapi.ObjectRef{Atespace: req.GetActor().GetMetadata().GetAtespace(), Name: req.GetActor().GetMetadata().GetName()}
 	s.record("CreateActor", ref)
 	if _, ok := s.Actors[key(ref)]; ok {
 		return nil, status.Error(codes.AlreadyExists, "actor exists")
+	}
+	if md, _ := metadata.FromIncomingContext(ctx); len(md.Get(substrate.PreviewHeader)) > 0 {
+		if s.Previews == nil {
+			s.Previews = map[string]bool{}
+		}
+		s.Previews[key(ref)] = true
 	}
 	a := proto.Clone(req.GetActor()).(*ateapi.Actor)
 	a.Metadata.Uid = fmt.Sprintf("uid-%d", s.nextVersion())
@@ -189,32 +235,51 @@ func (s *Server) SuspendActor(_ context.Context, req *ateapi.SuspendActorRequest
 	if !ok {
 		return nil, status.Error(codes.NotFound, "actor not found")
 	}
-	if a.GetStatus().GetState() != ateapi.ActorState_ACTOR_STATE_RUNNING {
-		return nil, status.Errorf(codes.FailedPrecondition, "actor is %s", a.GetStatus().GetState())
+	// like Substrate's workflow: a SUSPENDED actor is done, and a re-entered suspend finishes a SUSPENDING one
+	switch st := a.GetStatus().GetState(); st {
+	case ateapi.ActorState_ACTOR_STATE_SUSPENDED:
+		return &ateapi.SuspendActorResponse{}, nil
+	case ateapi.ActorState_ACTOR_STATE_RUNNING, ateapi.ActorState_ACTOR_STATE_SUSPENDING:
+	default:
+		return nil, status.Errorf(codes.FailedPrecondition, "MarkSuspending prerequisite not met (got: %s, want ACTOR_STATE_RUNNING)", st)
+	}
+	if err := takeFailure(&s.FailSuspend, &s.FailSuspendTimes); err != nil {
+		a.Status = &ateapi.ActorStatus{State: ateapi.ActorState_ACTOR_STATE_SUSPENDING, WorkerAssignment: a.GetStatus().GetWorkerAssignment()}
+		return nil, err
 	}
 	a.Status = &ateapi.ActorStatus{State: ateapi.ActorState_ACTOR_STATE_SUSPENDED}
 	return &ateapi.SuspendActorResponse{}, nil
+}
+
+// takeFailure returns *fail, clearing it once *times runs out.
+func takeFailure(fail *error, times *int) error {
+	err := *fail
+	if err != nil && *times > 0 {
+		if *times--; *times == 0 {
+			*fail = nil
+		}
+	}
+	return err
 }
 
 func (s *Server) ResumeActor(_ context.Context, req *ateapi.ResumeActorRequest) (*ateapi.ResumeActorResponse, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.record("ResumeActor", req.GetActor())
-	if s.FailResume != nil {
-		err := s.FailResume
-		if s.FailResumeTimes > 0 {
-			if s.FailResumeTimes--; s.FailResumeTimes == 0 {
-				s.FailResume = nil
-			}
-		}
+	if err := takeFailure(&s.FailResume, &s.FailResumeTimes); err != nil {
 		return nil, err
 	}
 	a, ok := s.Actors[key(req.GetActor())]
 	if !ok {
 		return nil, status.Error(codes.NotFound, "actor not found")
 	}
-	if a.GetStatus().GetState() != ateapi.ActorState_ACTOR_STATE_SUSPENDED {
-		return nil, status.Errorf(codes.FailedPrecondition, "actor is %s", a.GetStatus().GetState())
+	// like Substrate's workflow: a RUNNING actor is done, and a re-entered resume finishes a RESUMING one
+	switch st := a.GetStatus().GetState(); st {
+	case ateapi.ActorState_ACTOR_STATE_RUNNING:
+		return &ateapi.ResumeActorResponse{}, nil
+	case ateapi.ActorState_ACTOR_STATE_SUSPENDED, ateapi.ActorState_ACTOR_STATE_RESUMING:
+	default:
+		return nil, status.Errorf(codes.FailedPrecondition, "AssignWorker prerequisite not met for Actor: %s (got: %s, want ACTOR_STATE_SUSPENDED)", key(req.GetActor()), st)
 	}
 	if s.CrashOnTemplate != "" && a.GetActorTemplate().GetName() == s.CrashOnTemplate {
 		a.Status = &ateapi.ActorStatus{State: ateapi.ActorState_ACTOR_STATE_CRASHED}

@@ -9973,8 +9973,8 @@ export const DevboxPullRequestsDocument = /*#__PURE__*/ gql`
 }
     ${DevboxPullRequestFragmentDoc}` as unknown as DocumentNode<Types.DevboxPullRequestsQuery, Types.DevboxPullRequestsQueryVariables>;
 export const DevboxFilesDocument = /*#__PURE__*/ gql`
-    query DevboxFiles($instanceId: ID!, $path: String) {
-  devboxFiles(instanceId: $instanceId, path: $path) {
+    query DevboxFiles($instanceId: ID!, $path: String, $query: String, $brief: Boolean) {
+  devboxFiles(instanceId: $instanceId, path: $path, query: $query, brief: $brief) {
     ...DevboxFileEntry
   }
 }

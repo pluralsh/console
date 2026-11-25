@@ -65,6 +65,21 @@ func (m *Manager) resolveCwd(cwd string) string {
 	}
 }
 
+// defaultWorktreeRepos are the repositories a thread started without a directory of its own gets worktrees of:
+// every checkout, so concurrent threads never share a working tree or a branch.
+func (m *Manager) defaultWorktreeRepos() []string {
+	if m.opts.Worktrees == nil || m.opts.Checkouts == nil {
+		return nil
+	}
+	var out []string
+	for _, c := range m.opts.Checkouts() {
+		if c.GetWorktreeThreadId() == "" && c.GetName() != "" {
+			out = append(out, c.GetName())
+		}
+	}
+	return out
+}
+
 func (m *Manager) threadLocked(ref *devboxv1.ThreadRef) (*thread, error) {
 	if ref.GetThreadId() != "" {
 		if t, ok := m.threads[ref.GetThreadId()]; ok && !t.deleted {
@@ -216,11 +231,15 @@ func (m *Manager) CreateThread(ctx context.Context, req *devboxv1.CreateThreadRe
 	m.mu.Unlock()
 
 	cwd := m.resolveCwd(req.GetCwd())
-	if len(req.GetWorktreeRepos()) > 0 {
+	repos := req.GetWorktreeRepos()
+	if len(repos) == 0 && cwd == m.opts.Home {
+		repos = m.defaultWorktreeRepos()
+	}
+	if len(repos) > 0 {
 		if m.opts.Worktrees == nil {
 			return nil, derr.Unsupported("worktrees")
 		}
-		wt, err := m.opts.Worktrees(id, req.GetWorktreeRepos())
+		wt, err := m.opts.Worktrees(id, repos)
 		if err != nil {
 			return nil, err
 		}
@@ -241,7 +260,7 @@ func (m *Manager) CreateThread(ctx context.Context, req *devboxv1.CreateThreadRe
 
 	m.mu.Lock()
 	t := &thread{
-		id: id, agent: agent, cwd: cwd, worktrees: req.GetWorktreeRepos(), createdBy: req.GetCreatedBy(),
+		id: id, agent: agent, cwd: cwd, worktrees: repos, createdBy: req.GetCreatedBy(),
 		createdAt: m.clock.Now(), title: req.GetTitle(), model: model, dirty: true,
 	}
 	if old, ok := m.threads[id]; ok {

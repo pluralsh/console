@@ -71,7 +71,11 @@ func (d *Daemon) serveHealth(w http.ResponseWriter, _ *http.Request) {
 	h := d.health()
 	data, _ := protojson.Marshal(h)
 	w.Header().Set("Content-Type", "application/json")
-	// Always 200 once serving: Substrate's wakeup probe gates routing, and Initialize must be able to arrive.
+	// 200 once serving, since Substrate's wakeup probe gates routing and Initialize must be able to arrive; but not
+	// during a golden boot's work, which Substrate would otherwise snapshot before it's done.
+	if h.GetStatus() == StatusBootstrapping || h.GetStatus() == StatusBootstrapFailed {
+		w.WriteHeader(http.StatusServiceUnavailable)
+	}
 	_, _ = w.Write(data)
 }
 

@@ -51,8 +51,20 @@ func Run(ctx context.Context, dir string, args ...string) ([]byte, error) {
 
 // RunEnv runs git with extra environment.
 func RunEnv(ctx context.Context, dir string, env []string, args ...string) ([]byte, error) {
-	ctx, cancel := context.WithTimeout(ctx, timeout)
-	defer cancel()
+	return run(ctx, timeout, dir, env, args...)
+}
+
+// RunTimeout is Run bounded by d instead of the default per-invocation timeout; zero leaves only ctx's.
+func RunTimeout(ctx context.Context, d time.Duration, dir string, args ...string) ([]byte, error) {
+	return run(ctx, d, dir, nil, args...)
+}
+
+func run(ctx context.Context, d time.Duration, dir string, env []string, args ...string) ([]byte, error) {
+	if d > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, d)
+		defer cancel()
+	}
 	cmd := exec.CommandContext(ctx, "git", args...)
 	cmd.Dir = dir
 	cmd.Env = append(append(os.Environ(), Env...), env...)

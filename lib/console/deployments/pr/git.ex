@@ -94,11 +94,21 @@ defmodule Console.Deployments.Pr.Git do
   def to_http(%ScmConnection{type: :azure_devops} = conn, url), do: String.trim_trailing(_to_http(conn, url), ".git")
   def to_http(conn, url), do: "#{String.trim_trailing(_to_http(conn, url), ".git")}.git"
 
-  def backfill_token(%ScmConnection{api_url: api_url, base_url: url, github: %{app_id: app_id, installation_id: inst_id, private_key: pk}} = conn) when is_binary(pk) do
-    with {:ok, token} <- Github.app_token(api_url || url, app_id, inst_id, pk, request_options(conn)),
-      do: {:ok, %{conn | token: token}}
+  def backfill_token(%ScmConnection{} = conn) do
+    with {:ok, conn, _} <- backfill_token_with_expiry(conn),
+      do: {:ok, conn}
   end
-  def backfill_token(%ScmConnection{} = conn), do: {:ok, conn}
+
+  @doc """
+  `backfill_token/1`, also answering when the token expires: github's expiry for app installation tokens, nil for
+  static tokens.
+  """
+  @spec backfill_token_with_expiry(ScmConnection.t) :: {:ok, ScmConnection.t, DateTime.t | nil} | Console.error
+  def backfill_token_with_expiry(%ScmConnection{api_url: api_url, base_url: url, github: %{app_id: app_id, installation_id: inst_id, private_key: pk}} = conn) when is_binary(pk) do
+    with {:ok, token, exp} <- Github.app_token_with_expiry(api_url || url, app_id, inst_id, pk, request_options(conn)),
+      do: {:ok, %{conn | token: token}, exp}
+  end
+  def backfill_token_with_expiry(%ScmConnection{} = conn), do: {:ok, conn, nil}
 
   def request_options(%ScmConnection{proxy: %ScmConnection.Proxy{enabled: enabled, url: url}})
     when enabled != false and is_binary(url),

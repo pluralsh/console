@@ -14121,7 +14121,7 @@ export type RootQueryType = {
   /** Uncommitted changes of an instance, grouped by repository */
   devboxChanges?: Maybe<Array<Maybe<DevboxRepositoryChanges>>>;
   devboxFile?: Maybe<DevboxFile>;
-  /** One directory level of an instance's workspace */
+  /** One directory level of an instance's workspace, or with a query the best fuzzy matches anywhere beneath it */
   devboxFiles?: Maybe<Array<Maybe<DevboxFileEntry>>>;
   devboxImportableSessions?: Maybe<Array<Maybe<DevboxImportableSession>>>;
   devboxInstance?: Maybe<DevboxInstance>;
@@ -14818,8 +14818,10 @@ export type RootQueryTypeDevboxFileArgs = {
 
 
 export type RootQueryTypeDevboxFilesArgs = {
+  brief?: InputMaybe<Scalars['Boolean']['input']>;
   instanceId: Scalars['ID']['input'];
   path?: InputMaybe<Scalars['String']['input']>;
+  query?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -24600,6 +24602,8 @@ export type DevboxPullRequestsQuery = { __typename?: 'RootQueryType', pullReques
 export type DevboxFilesQueryVariables = Exact<{
   instanceId: Scalars['ID']['input'];
   path?: InputMaybe<Scalars['String']['input']>;
+  query?: InputMaybe<Scalars['String']['input']>;
+  brief?: InputMaybe<Scalars['Boolean']['input']>;
 }>;
 
 
@@ -35821,6 +35825,8 @@ export type DevboxPullRequestsQueryResult = Apollo.QueryResult<DevboxPullRequest
  *   variables: {
  *      instanceId: // value for 'instanceId'
  *      path: // value for 'path'
+ *      query: // value for 'query'
+ *      brief: // value for 'brief'
  *   },
  * });
  */

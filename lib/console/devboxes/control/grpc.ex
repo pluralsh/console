@@ -8,7 +8,9 @@ defmodule Console.Devboxes.Control.Grpc do
   `KAS_DEVBOX_GRPC_ADDR` is set.  Failures map to the behaviour's errors: `UNAVAILABLE` (or an unreachable KAS)
   and `ErrorDetail{CLUSTER_OFFLINE}` become `{:error, :not_connected}`, `ErrorDetail{INSTANCE_STARTING}` (a wake
   that outlasted the call, still running on the gateway) becomes `{:error, :starting}`, `UNIMPLEMENTED` and
-  `ErrorDetail{UNSUPPORTED}` become `{:error, :unsupported}`.
+  `ErrorDetail{UNSUPPORTED}` become `{:error, :unsupported}`.  A connection that closes under a call is
+  `{:error, :interrupted}`, retried once for calls that are safe to repeat, and `DEADLINE_EXCEEDED` is
+  `{:error, :timeout}`.
   """
   @behaviour Console.Devboxes.Control
   require Logger
@@ -31,10 +33,19 @@ defmodule Console.Devboxes.Control.Grpc do
   @prepare_timeout :timer.minutes(6)
   @unavailable GRPC.Status.unavailable()
   @unimplemented GRPC.Status.unimplemented()
+  @internal GRPC.Status.internal()
+  @deadline_exceeded GRPC.Status.deadline_exceeded()
+  # safe to send again when the connection drops before they answer
+  @retryable ~w(
+    resume_instance resume_thread open_stream get_timeline get_sessions list_threads list_commands
+    list_repositories list_files read_file get_changes
+  )a
 
   def adapter, do: GRPC.Client.Adapters.Gun
 
-  def adapter_opts, do: [connect_timeout: :timer.seconds(5), http2_opts: %{keepalive: :timer.seconds(15), keepalive_tolerance: 2}]
+  # kas enforces a 20s minimum ping interval and answers faster pings on a quiet call (e.g. one waiting out a wake)
+  # with GOAWAY too_many_pings, killing every in-flight call on the connection
+  def adapter_opts, do: [connect_timeout: :timer.seconds(5), http2_opts: %{keepalive: :timer.seconds(30), keepalive_tolerance: 2}]
 
   @doc "The child spec for the supervised KAS connection, or none if no address is configured"
   @spec child_specs(binary | nil) :: [term]
@@ -318,8 +329,9 @@ defmodule Console.Devboxes.Control.Grpc do
   end
 
   @impl true
-  def list_files(inst, path) do
-    req = %V1.ListFilesRequest{instance_id: inst.id, path: Proto.str(path), depth: 1, respect_gitignore: true}
+  def list_files(inst, path, opts) do
+    req = %V1.ListFilesRequest{instance_id: inst.id, path: Proto.str(path), depth: 1, respect_gitignore: true,
+                                query: Proto.str(opts[:query]), brief: !!opts[:brief]}
     with {:ok, %V1.ListFilesResponse{entries: entries}} <- call(cluster_id(inst), :list_files, req),
       do: {:ok, Enum.map(entries, &file_entry/1)}
   end
@@ -414,6 +426,15 @@ defmodule Console.Devboxes.Control.Grpc do
 
   @doc false
   def call(cluster_id, rpc, req, timeout \\ @timeout) do
+    case {attempt(cluster_id, rpc, req, timeout), rpc in @retryable} do
+      {{:error, :interrupted}, true} ->
+        Logger.info("devbox control #{rpc} lost its connection to kas, retrying")
+        attempt(cluster_id, rpc, req, timeout)
+      {res, _} -> res
+    end
+  end
+
+  defp attempt(cluster_id, rpc, req, timeout) do
     with {:ok, channel} <- connect(),
          {:ok, metadata} <- Auth.control_metadata(cluster_id) do
       apply(Stub, rpc, [channel, req, [metadata: metadata, timeout: timeout]])
@@ -452,6 +473,12 @@ defmodule Console.Devboxes.Control.Grpc do
   defp rpc_error(%GRPC.RPCError{status: @unavailable}, %V1.ErrorDetail{message: msg}) when byte_size(msg) > 0, do: {:error, msg}
   defp rpc_error(%GRPC.RPCError{status: @unavailable}, _), do: {:error, :not_connected}
   defp rpc_error(%GRPC.RPCError{status: @unimplemented}, _), do: {:error, :unsupported}
+  # the call ran out of time on the way (here or in kas); the gateway may still be working on it
+  defp rpc_error(%GRPC.RPCError{status: @deadline_exceeded}, _), do: {:error, :timeout}
+  # the gun adapter's report of a connection that closed under the call
+  defp rpc_error(%GRPC.RPCError{status: @internal, message: "stream_error: :closed"}, _), do: {:error, :interrupted}
+  defp rpc_error(%GRPC.RPCError{status: @internal, message: "stream_error: {:closed" <> _}, _), do: {:error, :interrupted}
+  defp rpc_error(%GRPC.RPCError{status: @internal, message: "stream_error: {:goaway" <> _}, _), do: {:error, :interrupted}
   defp rpc_error(_, %V1.ErrorDetail{message: msg}) when byte_size(msg) > 0, do: {:error, msg}
   defp rpc_error(%GRPC.RPCError{message: msg}, _), do: {:error, msg}
 

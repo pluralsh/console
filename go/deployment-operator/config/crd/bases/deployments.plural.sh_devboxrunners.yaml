@@ -169,8 +169,16 @@ spec:
                     type: array
                 type: object
               bootstrapScript:
-                description: BootstrapScript runs once during the golden boot, so
-                  its results are baked into the snapshot.
+                description: |-
+                  BootstrapScript runs once during the golden boot, from the home directory and after repositories are cloned
+                  and mise has installed its tools, so its results are baked into the snapshot. It runs with `bash -e` unless
+                  it starts with a #! line, and a failure fails the revision; its output is in ~/.plural/golden.log.
+                type: string
+              bootstrapTimeout:
+                description: |-
+                  BootstrapTimeout bounds the golden boot when it has work to do (repositories, mise or bootstrapScript):
+                  past it, Substrate crashes the boot and the revision fails. It's also how long a waking instance may take to
+                  report ready. Defaults to 30m.
                 type: string
               browser:
                 description: Browser enables the in-box headless browser.
@@ -323,6 +331,31 @@ spec:
                 x-kubernetes-list-map-keys:
                 - name
                 x-kubernetes-list-type: map
+              home:
+                description: Home selects where instances keep /home/dev.
+                properties:
+                  size:
+                    anyOf:
+                    - type: integer
+                    - type: string
+                    description: Size is the most a JuiceFS home may hold, enforced
+                      as a JuiceFS quota. Defaults to spec.resources.disk.
+                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                    x-kubernetes-int-or-string: true
+                  storage:
+                    default: Snapshot
+                    description: |-
+                      Storage defaults to Snapshot. Changing it rolls a new revision, and instances moved to it start with a fresh
+                      home.
+                    enum:
+                    - Snapshot
+                    - JuiceFS
+                    type: string
+                  storageClassName:
+                    description: StorageClassName is the JuiceFS StorageClass. Defaults
+                      to the agent-substrate chart's devbox-juicefs.
+                    type: string
+                type: object
               httpAllowlist:
                 description: HTTPAllowlist are extra hosts instances may reach, on
                   top of the built-in ones.
@@ -508,7 +541,8 @@ spec:
                   and Python are on unless set to false.
                 properties:
                   dotnet:
-                    description: 'Dotnet: NuGet.'
+                    default: true
+                    description: 'Dotnet: NuGet and .NET releases.'
                     type: boolean
                   elixir:
                     default: true
@@ -516,32 +550,69 @@ spec:
                     type: boolean
                   go:
                     default: true
-                    description: 'Go: proxy.golang.org and sum.golang.org.'
+                    description: 'Go: the module proxy and checksum database, the
+                      storage its downloads redirect to, and Go releases.'
                     type: boolean
                   java:
                     default: true
-                    description: 'Java: Maven Central and the Gradle plugin portal
-                      and distributions.'
+                    description: 'Java: Maven Central, Google''s Maven repository,
+                      and the Gradle plugin portal and distributions.'
                     type: boolean
                   javascript:
                     default: true
-                    description: 'JavaScript: the npm and yarn registries and nodejs.org.'
+                    description: 'JavaScript: the npm and yarn registries, JSR, and
+                      the Node.js, Bun and Deno downloads.'
+                    type: boolean
+                  mise:
+                    default: false
+                    description: |-
+                      Mise: what `mise use` needs for languages and tools the image doesn't ship: mise's version and Java
+                      metadata, GitHub releases (most tools are released there) and the other common release hosts. On boxes
+                      without a GitHub SCM connection this opens github.com unauthenticated.
                     type: boolean
                   php:
-                    description: 'PHP: Packagist.'
+                    default: true
+                    description: 'PHP: Packagist and Composer.'
                     type: boolean
                   python:
                     default: true
                     description: 'Python: PyPI.'
                     type: boolean
                   ruby:
-                    description: 'Ruby: rubygems.org.'
+                    default: true
+                    description: 'Ruby: rubygems.org and Ruby releases.'
                     type: boolean
                   rust:
                     default: true
-                    description: 'Rust: crates.io and rustup''s static.rust-lang.org.'
+                    description: 'Rust: crates.io and rustup.'
                     type: boolean
                 type: object
+              repositories:
+                description: |-
+                  Repositories are cloned into the home during the golden boot, with the box's SCM connections, so every
+                  instance starts with them checked out, along with whatever bootstrapScript builds in them. Each instance
+                  fetches them again when it first boots. When allowedRepositories is set, each must be on it.
+                items:
+                  description: DevboxRepository is a repository the golden boot clones.
+                  properties:
+                    branch:
+                      description: Branch is checked out instead of the default branch.
+                      type: string
+                    description:
+                      description: Description is shown to agents in the home's Project.md.
+                      type: string
+                    url:
+                      description: URL is the https clone URL, e.g. https://github.com/pluralsh/console.git.
+                      pattern: ^https://[^/]+/.+
+                      type: string
+                  required:
+                  - url
+                  type: object
+                maxItems: 32
+                type: array
+                x-kubernetes-list-map-keys:
+                - url
+                x-kubernetes-list-type: map
               resources:
                 description: Resources are the per-instance limits.
                 properties:
@@ -1268,6 +1339,13 @@ spec:
                       type: string
                     hash:
                       description: Hash of the inputs that produced this revision.
+                      type: string
+                    homeStorage:
+                      description: HomeStorage is where this revision's template keeps
+                        /home/dev; unset means Snapshot.
+                      enum:
+                      - Snapshot
+                      - JuiceFS
                       type: string
                     image:
                       type: string

@@ -24,6 +24,8 @@ import (
 type Runner struct {
 	Name     string
 	Atespace string
+	// ConsoleID is the runner's console Devbox (status.id), which golden boots fetch credentials as.
+	ConsoleID string
 	// Template, Revision and GoldenTag describe the revision new instances start from.
 	Template    string
 	Revision    int64
@@ -31,6 +33,8 @@ type Runner struct {
 	ImageDigest string
 	// DaemonVersion is the devbox-daemon of Revision's runtime sidecar; empty when the daemon is the image's own.
 	DaemonVersion string
+	// JuiceFSHome means the current revision keeps homes on JuiceFS.
+	JuiceFSHome bool
 	// Revisions maps every revision that still exists to its template and golden tag.
 	Revisions map[int64]RunnerRevision
 	// UpdateOnResume is the runner's instance update policy: a suspended instance behind Revision moves to it
@@ -38,11 +42,13 @@ type Runner struct {
 	UpdateOnResume bool
 
 	AllowedRepositories []string
-	HTTPAllowlist       []egress.AllowEntry
-	CloudIdentities     []*devboxv1.CloudIdentity
-	CloudIdentityHosts  []string
-	IdlePolicy          *devboxv1.IdlePolicy
-	Autonomy            *devboxv1.AutonomyPolicy
+	// Repositories are the URLs golden boots preclone; instances refetch them on boot.
+	Repositories       []string
+	HTTPAllowlist      []egress.AllowEntry
+	CloudIdentities    []*devboxv1.CloudIdentity
+	CloudIdentityHosts []string
+	IdlePolicy         *devboxv1.IdlePolicy
+	Autonomy           *devboxv1.AutonomyPolicy
 	// Env is the runner's resolved secret env vars, sent with every Initialize.
 	Env map[string]string
 }
@@ -52,6 +58,7 @@ type RunnerRevision struct {
 	GoldenTag     string
 	ImageDigest   string
 	DaemonVersion string
+	JuiceFSHome   bool
 }
 
 // revisionTarget is a revision an instance can be moved to.
@@ -60,6 +67,21 @@ type revisionTarget struct {
 	template      string
 	imageDigest   string
 	daemonVersion string
+	juiceFSHome   bool
+}
+
+// errHomeNotMovable is moving an instance whose home is a JuiceFS volume, which Substrate can't carry to another
+// template: the volume differs between revisions (each JuiceFS revision has its own StorageClass), and a template
+// with other volumes than the actor's is refused.
+var errHomeNotMovable = errors.New("its home is on JuiceFS, which can't move between revisions yet; create a new instance to use the new revision")
+
+// movable reports whether an instance on revision from can move to to: both must keep the home in the instance's
+// snapshots (a durable dir), the only home Substrate moves between templates.
+func (r *Runner) movable(from int64, to revisionTarget) error {
+	if to.juiceFSHome || r.Revisions[from].JuiceFSHome {
+		return errHomeNotMovable
+	}
+	return nil
 }
 
 // target resolves the revision instances move to, which is the runner's current one; revision is zero or names
@@ -72,7 +94,8 @@ func (r *Runner) target(revision int64) (revisionTarget, error) {
 	if revision != 0 && revision != r.Revision {
 		return revisionTarget{}, fmt.Errorf("devbox runner %s serves revision %d, instances can't be moved to revision %d", r.Name, r.Revision, revision)
 	}
-	return revisionTarget{revision: r.Revision, template: r.Template, imageDigest: r.ImageDigest, daemonVersion: r.DaemonVersion}, nil
+	return revisionTarget{revision: r.Revision, template: r.Template, imageDigest: r.ImageDigest, daemonVersion: r.DaemonVersion,
+		juiceFSHome: r.JuiceFSHome}, nil
 }
 
 // ErrRunnerNotReady means the runner has no ready revision to start instances from.
@@ -93,6 +116,15 @@ func (s StaticRunners) Get(_ context.Context, name string) (*Runner, error) {
 	return nil, fmt.Errorf("devbox runner %q not found", name)
 }
 
+func (s StaticRunners) ByAtespace(_ context.Context, atespace string) (*Runner, error) {
+	for _, r := range s {
+		if r.Atespace == atespace {
+			return r, nil
+		}
+	}
+	return nil, nil
+}
+
 // KubeRunners reads DevboxRunners (cluster-scoped) with a short cache.
 type KubeRunners struct {
 	Client client.Reader
@@ -102,6 +134,9 @@ type KubeRunners struct {
 
 	mu    sync.Mutex
 	cache map[string]cachedRunner
+	// atespaces maps atespaces to runner names as of listedAt.
+	atespaces map[string]string
+	listedAt  time.Time
 }
 
 type cachedRunner struct {
@@ -109,11 +144,15 @@ type cachedRunner struct {
 	at     time.Time
 }
 
-func (k *KubeRunners) Get(ctx context.Context, name string) (*Runner, error) {
-	ttl := k.TTL
-	if ttl <= 0 {
-		ttl = 15 * time.Second
+func (k *KubeRunners) ttl() time.Duration {
+	if k.TTL <= 0 {
+		return 15 * time.Second
 	}
+	return k.TTL
+}
+
+func (k *KubeRunners) Get(ctx context.Context, name string) (*Runner, error) {
+	ttl := k.ttl()
 	k.mu.Lock()
 	if c, ok := k.cache[name]; ok && time.Since(c.at) < ttl {
 		k.mu.Unlock()
@@ -163,6 +202,45 @@ func (k *KubeRunners) secretEnv(ctx context.Context, runner string) (map[string]
 	return env, nil
 }
 
+// ByAtespace returns the runner whose templates and actors live in atespace, or nil when none does. Runners are
+// relisted at most once per TTL, so actors outside any runner's atespace don't each cost a list.
+func (k *KubeRunners) ByAtespace(ctx context.Context, atespace string) (*Runner, error) {
+	k.mu.Lock()
+	name, ok := k.atespaces[atespace]
+	stale := time.Since(k.listedAt) >= k.ttl()
+	k.mu.Unlock()
+	if !ok && stale {
+		list := &v1alpha1.DevboxRunnerList{}
+		if err := k.Client.List(ctx, list); err != nil {
+			return nil, fmt.Errorf("listing devbox runners: %w", err)
+		}
+		atespaces := map[string]string{}
+		for _, obj := range list.Items {
+			if a := deref(obj.Status.Atespace); a != "" {
+				atespaces[a] = obj.Name
+			}
+		}
+		k.mu.Lock()
+		k.atespaces, k.listedAt = atespaces, time.Now()
+		k.mu.Unlock()
+		name, ok = atespaces[atespace]
+	}
+	if !ok {
+		return nil, nil
+	}
+	r, err := k.Get(ctx, name)
+	if err != nil {
+		if apierrors.IsNotFound(errors.Unwrap(err)) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	if r.Atespace != atespace {
+		return nil, nil
+	}
+	return r, nil
+}
+
 // Invalidate drops a cached runner.
 func (k *KubeRunners) Invalidate(name string) {
 	k.mu.Lock()
@@ -176,6 +254,7 @@ func RunnerFromCRD(obj *v1alpha1.DevboxRunner) *Runner {
 	r := &Runner{
 		Name:                obj.Name,
 		Atespace:            deref(st.Atespace),
+		ConsoleID:           deref(st.ID),
 		Template:            deref(st.TemplateName),
 		ImageDigest:         digestOf(deref(st.ResolvedImage)),
 		Revisions:           map[int64]RunnerRevision{},
@@ -186,15 +265,18 @@ func RunnerFromCRD(obj *v1alpha1.DevboxRunner) *Runner {
 		r.Revision = *st.TemplateRevision
 	}
 	for _, rev := range st.Revisions {
+		juiceFS := deref(rev.HomeStorage) == v1alpha1.DevboxHomeJuiceFS
 		r.Revisions[rev.Revision] = RunnerRevision{
 			Template:      rev.Name,
 			GoldenTag:     deref(rev.GoldenTag),
 			ImageDigest:   digestOf(rev.Image),
 			DaemonVersion: deref(rev.DaemonVersion),
+			JuiceFSHome:   juiceFS,
 		}
 		if rev.Revision == r.Revision {
 			r.GoldenTag = deref(rev.GoldenTag)
 			r.DaemonVersion = deref(rev.DaemonVersion)
+			r.JuiceFSHome = juiceFS
 			if r.Template == "" {
 				r.Template = rev.Name
 			}
@@ -202,6 +284,9 @@ func RunnerFromCRD(obj *v1alpha1.DevboxRunner) *Runner {
 				r.ImageDigest = d
 			}
 		}
+	}
+	for _, repo := range obj.Spec.Repositories {
+		r.Repositories = append(r.Repositories, repo.URL)
 	}
 	for _, e := range obj.Spec.HTTPAllowlist {
 		entry := egress.AllowEntry{Host: e.Host}

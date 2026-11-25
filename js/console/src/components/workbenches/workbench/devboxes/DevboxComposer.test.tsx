@@ -1,5 +1,6 @@
 import { styledThemeDark } from '@pluralsh/design-system'
 import {
+  act,
   fireEvent,
   render,
   screen,
@@ -15,6 +16,7 @@ import {
   DevboxComposer,
   MAX_ATTACHMENTS,
   proxyModelValues,
+  withSwitchModels,
 } from './DevboxComposer'
 import {
   applySlashCommand,
@@ -187,7 +189,7 @@ describe('DevboxComposer file mentions', () => {
 
     fireEvent.keyDown(prompt, { key: 'Enter' })
     expect(valueOf(prompt)).toBe('look at @src/')
-    expect(listFiles).toHaveBeenLastCalledWith('src')
+    expect(listFiles).toHaveBeenLastCalledWith('src', { brief: true })
 
     await screen.findByText('main.go')
     fireEvent.keyDown(prompt, { key: 'ArrowDown' })
@@ -213,6 +215,69 @@ describe('DevboxComposer file mentions', () => {
     expect(onSubmit).toHaveBeenCalledWith(
       'refactor <plrl-devbox-file path="/home/devbox/src/"></plrl-devbox-file>',
       []
+    )
+  })
+
+  it('searches beneath the directory once a name is typed', async () => {
+    const found = {
+      but: [
+        {
+          path: '/home/devbox/src/ui/Button.tsx',
+          name: 'Button.tsx',
+          type: 'file',
+        },
+        { path: '/home/devbox/src/ui', name: 'ui', type: 'directory' },
+      ],
+    }
+    let release = () => {}
+    const searchFiles = vi.fn(
+      (_path: string, query: string) =>
+        new Promise<typeof found.but>((resolve) => {
+          release = () => resolve(found[query] ?? [])
+        })
+    )
+    const { prompt } = renderComposer({ listFiles, searchFiles })
+    type(prompt, 'see @')
+    await screen.findByText('README.md')
+    type(prompt, 'see @but')
+    expect(searchFiles).toHaveBeenLastCalledWith('~', 'but')
+    release()
+    const files = await screen.findByRole('listbox', { name: 'Files' })
+    await within(files).findByText('Button.tsx')
+    expect(within(files).getByText('src/ui/Button.tsx')).toBeTruthy()
+
+    // the last results stay up while the next search runs
+    type(prompt, 'see @butt')
+    expect(searchFiles).toHaveBeenLastCalledWith('~', 'butt')
+    expect(within(files).getByText('Button.tsx')).toBeTruthy()
+    release()
+    await waitFor(() =>
+      expect(within(files).queryByText('Button.tsx')).toBeNull()
+    )
+
+    // a found directory is browsed into by its path beneath the one searched
+    type(prompt, 'see @but')
+    await within(files).findByText('ui/')
+    fireEvent.mouseDown(within(files).getByText('ui/'))
+    expect(valueOf(prompt)).toBe('see @src/ui/')
+    await act(async () => release())
+  })
+
+  it('searches again when a query comes back, recovering from a failure', async () => {
+    const searchFiles = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('offline'))
+      .mockResolvedValue([
+        { path: '/home/devbox/src/main.go', name: 'main.go', type: 'file' },
+      ])
+    const { prompt } = renderComposer({ listFiles, searchFiles })
+    type(prompt, 'see @main')
+    await screen.findByText("Couldn't search files")
+    type(prompt, 'see @mai')
+    type(prompt, 'see @main')
+    await screen.findByText('main.go')
+    expect(searchFiles.mock.calls.filter(([, q]) => q === 'main')).toHaveLength(
+      2
     )
   })
 
@@ -332,6 +397,35 @@ describe('proxyModelValues', () => {
       { value: 'default', name: 'Default (recommended)' },
       { value: 'plural/openai/gpt-5', name: 'gpt-5' },
       { value: 'anthropic/claude-opus-4-1' },
+    ])
+  })
+})
+
+describe('withSwitchModels', () => {
+  it("lists the proxy's models after the agent's own, marking them as switching", () => {
+    const option = {
+      configId: 'model',
+      category: 'model',
+      currentValue: 'sonnet',
+      options: [
+        { value: 'default', name: 'Default (recommended)' },
+        { value: 'sonnet', name: 'Sonnet' },
+      ],
+    }
+    const { values, switching } = withSwitchModels(option, [
+      'anthropic/claude-sonnet-5-5',
+      'sonnet',
+      'openai/gpt-5.4',
+    ])
+    expect(values).toEqual([
+      { value: 'default', name: 'Default (recommended)' },
+      { value: 'sonnet', name: 'Sonnet' },
+      { value: 'anthropic/claude-sonnet-5-5' },
+      { value: 'openai/gpt-5.4' },
+    ])
+    expect([...switching]).toEqual([
+      'anthropic/claude-sonnet-5-5',
+      'openai/gpt-5.4',
     ])
   })
 })

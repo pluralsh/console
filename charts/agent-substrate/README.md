@@ -260,6 +260,37 @@ End to end on a cluster (e.g. `hack/kind-up.sh`), in this order:
 `hack/test.sh` runs the same three checks as the operator against every `ci/` file with
 `devboxes.enabled: true`.
 
+### JuiceFS homes
+
+`juicefs.enabled: true` (opt-in, needs `juicefs.image.tag` or `.digest`) adds a JuiceFS filesystem a
+DevboxRunner can keep `/home/dev` in instead of in its snapshots (`spec.home.storage: JuiceFS`,
+capped at `spec.home.size`, default `spec.resources.disk`). It reuses the chart's Postgres and
+bucket:
+
+- **Metadata** lives in its own database and login role (`juicefs.postgres.{database,user}`) on the
+  CNPG cluster, or in a database you created with `postgres.mode: external`
+  (`juicefs.postgres.external`).
+- **Data** goes under `<juicefs.name>/` in the snapshot bucket (or `juicefs.bucket`) on every
+  `objectStore.backend`. It authenticates as ServiceAccount `devbox-juicefs` (annotate
+  `juicefs.serviceAccount.annotations`; `juicefs.azureClientId` for Azure) or with the static S3
+  keys.
+- **`devbox-juicefs`** is a CSI driver (`juicefs.devbox.plural.sh`) that holds those credentials
+  itself, so its StorageClass `juicefs.storageClassName` carries no secrets. A controller Deployment
+  creates, clones and deletes homes over one root mount. A node DaemonSet (`updateStrategy:
+  OnDelete`, because restarting it unmounts every home on the node) gives each home its own
+  `juicefs mount` with its cache under `juicefs.node.cacheDir`. The chart turns on Substrate's
+  `ExternalVolumes` preview gate.
+
+For each template revision, the operator creates a StorageClass `devbox-home.<atespace>.<template>`
+that copies this one and adds a `seed` parameter. The first home provisioned from it belongs to the
+revision's golden boot. When Substrate deletes the golden actor after tagging it, the driver clones
+that home into the seed, and every later instance of the revision starts from a clone of it, with
+the bootstrap script's clones and builds already there. Snapshots also save the home as a seed, but
+starting from a snapshot fails with `UNSUPPORTED` until Substrate can restore tags of templates
+with external volumes.
+
+The operator needs `get`, `create` and `delete` on `storageclasses.storage.k8s.io` for these.
+
 ## Values
 
 Every value is documented in [`values.yaml`](values.yaml) and typed in
@@ -296,6 +327,7 @@ Every value is documented in [`values.yaml`](values.yaml) and typed in
 | `objectStore.backend`, `objectStore.snapshotLocation` | `s3`, `""` | snapshot storage |
 | `objectStore.s3.*`, `objectStore.azureBlob.*` | | backend settings |
 | `rustfs.*` | disabled | embedded RustFS |
+| `juicefs.*` | disabled | [JuiceFS homes](#juicefs-homes): image, `name`, `storageClassName`, `bucket`, `postgres`, `home.{uid,gid,mode}`, controller and node `mountFlags`/`resources` |
 | `secretsHook.{opensslImage,kubectlImage,caValidityDays}` | `alpine/openssl:3.5.9`, `alpine/kubectl:1.37.2`, 365 | secrets hook |
 | `bootstrapJob.image` | `alpine/kubectl:1.37.2` | first-install bootstrap Job |
 | `cloudnative-pg.enabled` | `true` | bundle the CNPG operator |

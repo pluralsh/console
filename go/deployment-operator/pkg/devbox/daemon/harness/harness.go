@@ -361,7 +361,7 @@ func (c *Config) Spec(launch *devboxv1.AgentLaunch, endpoints *devboxv1.HarnessE
 			spec.OpenCodeServer = srv
 		}
 	case devboxv1.AgentType_AGENT_TYPE_GEMINI:
-		set("GEMINI_CLI_TRUST_WORKSPACE", "true")
+		set("GEMINI_CLI_TRUST_WORKSPACE", "true", "GEMINI_SANDBOX", "false")
 		if aiProxy != "" {
 			set("GEMINI_API_KEY", PlaceholderKey, "GOOGLE_GEMINI_BASE_URL", aiProxy+"/gemini")
 		}
@@ -421,7 +421,8 @@ func (c *Config) codexSpec(set func(kv ...string), d agentDefaults, subscription
 	if path, err := exec.LookPath(d.binary); err == nil {
 		set("CODEX_PATH", path)
 	}
-	want := map[string]any{}
+	// the box is the sandbox; Codex's own cuts off the network and writes outside the workspace (package caches)
+	want := map[string]any{"sandbox_mode": "danger-full-access"}
 	if subscription {
 		// auth.json is a symlink into the tmpfs; keep Codex off the OS keyring so it reads and rewrites it.
 		want["cli_auth_credentials_store"] = "file"
@@ -627,7 +628,7 @@ var codexKeys = []struct {
 	soft bool
 }{
 	{key: "model_provider"}, {key: "model_providers." + codexProvider}, {key: "model_catalog_json"},
-	{key: "cli_auth_credentials_store"}, {key: "model", soft: true},
+	{key: "cli_auth_credentials_store"}, {key: "model", soft: true}, {key: "sandbox_mode", soft: true},
 }
 
 // syncCodexConfig sets the managed keys in want and removes the others it wrote, leaving the rest of the file

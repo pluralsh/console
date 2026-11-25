@@ -25,7 +25,7 @@ import {
 } from 'components/ai/chatbot/toolCallDisplay'
 import { useQuietToolCodeCss } from 'components/ai/chatbot/ToolCallContent'
 import { EaseIn } from 'components/utils/EaseIn'
-import { Body2P } from 'components/utils/typography/Text'
+import { Body2P, shimmerWithinCss } from 'components/utils/typography/Text'
 import {
   AiRole,
   DevboxEntityFragment,
@@ -55,16 +55,31 @@ type TranscriptRow =
       spawner?: DevboxEntityFragment
     }
 
+// the tool calls whose approvals, and the subagents whose cards, a transcript shows
+export type TranscriptPlacement = {
+  approvals: ReadonlySet<string>
+  subagents: ReadonlySet<string>
+}
+
 export function DevboxTranscript({
   entities,
   terminal = () => null,
   approvalFor,
   subagents = [],
   renderSubagent,
+  complete = true,
+  running = false,
   empty,
+  renderUnplaced,
 }: {
   entities: DevboxEntityFragment[]
   terminal?: TerminalLookup
+  // whether the thread's turn is in progress: its newest entity, if a
+  // thought, is still being thought
+  running?: boolean
+  // whether every page of the transcript is loaded: until then, a subagent
+  // nothing loaded spawned may belong to a page still to come
+  complete?: boolean
   // the approval a tool call awaits, answered under it; such a call stays out
   // of tool groups so it can't be collapsed away
   approvalFor?: (toolCallId: string) => ReactNode
@@ -75,6 +90,9 @@ export function DevboxTranscript({
     spawner?: DevboxEntityFragment
   ) => ReactNode
   empty?: ReactNode
+  // what follows the transcript, given what it placed: anything awaiting an
+  // answer that found no place in it still needs to be shown
+  renderUnplaced?: (placed: TranscriptPlacement) => ReactNode
 }) {
   const embeddedTerminals = new Set(
     entities.flatMap((e) =>
@@ -90,6 +108,7 @@ export function DevboxTranscript({
   const bySession = new Map(subagents.map((s) => [s.sessionId, s]))
   const bySpawner = subagentsBySpawner(subagents)
   const placed = new Set<string>()
+  const placedApprovals = new Set<string>()
 
   // consecutive tool calls collapse into one group, as in agent run transcripts
   const rows: TranscriptRow[] = []
@@ -101,6 +120,14 @@ export function DevboxTranscript({
     )
       continue
     const toolCallId = entity.toolCall?.toolCallId
+    const approval =
+      entity.type === DevboxEntityType.ToolCall && toolCallId
+        ? approvalFor?.(toolCallId)
+        : null
+    if (approval && toolCallId) {
+      placedApprovals.add(toolCallId)
+      rows.push({ kind: 'approval', entity, approval })
+    }
     const spawned = (
       toolCallId ? bySpawner.get(toolCallId) : undefined
     )?.filter((s) => !placed.has(s.id))
@@ -111,14 +138,7 @@ export function DevboxTranscript({
       }
       continue
     }
-    const approval =
-      entity.type === DevboxEntityType.ToolCall && toolCallId
-        ? approvalFor?.(toolCallId)
-        : null
-    if (approval) {
-      rows.push({ kind: 'approval', entity, approval })
-      continue
-    }
+    if (approval) continue
 
     // the first message to or from a subagent is where it starts: its card stands in for it, and the subagent's
     // own transcript opens with the task
@@ -143,84 +163,101 @@ export function DevboxTranscript({
       else rows.push({ kind: 'tools', entities: [entity] })
     } else rows.push({ kind: 'entity', entity })
   }
-  if (renderSubagent)
+  if (renderSubagent && complete)
     for (const subagent of subagents)
       if (!placed.has(subagent.id)) rows.push({ kind: 'subagent', subagent })
 
-  if (!rows.length) return <>{empty}</>
+  const rest = renderUnplaced?.({
+    approvals: placedApprovals,
+    subagents: placed,
+  })
+  if (!rows.length)
+    return (
+      <>
+        {empty}
+        {rest}
+      </>
+    )
   return (
-    <TranscriptSC>
-      {rows.map((row) => {
-        switch (row.kind) {
-          case 'subagent':
-            return (
-              <div
-                key={`subagent:${row.subagent.id}`}
-                data-entity="subagent"
-              >
-                {renderSubagent?.(row.subagent, row.spawner)}
-              </div>
-            )
-          case 'approval':
-            return (
-              <Flex
-                key={`approval:${row.entity.id}`}
-                direction="column"
-                gap="small"
-                data-position={row.entity.position ?? undefined}
-              >
-                <ToolCallView
-                  entity={row.entity}
-                  terminal={terminal}
-                />
-                {row.approval}
-              </Flex>
-            )
-          case 'tools': {
-            const [first] = row.entities
-            return (
-              <div
-                key={`tools:${first.id}`}
-                data-position={first.position ?? undefined}
-              >
-                {row.entities.length === 1 ? (
+    <>
+      <TranscriptSC>
+        {rows.map((row) => {
+          switch (row.kind) {
+            case 'subagent':
+              return (
+                <div
+                  key={`subagent:${row.subagent.id}`}
+                  data-entity="subagent"
+                >
+                  {renderSubagent?.(row.subagent, row.spawner)}
+                </div>
+              )
+            case 'approval':
+              return (
+                <Flex
+                  key={`approval:${row.entity.id}`}
+                  direction="column"
+                  gap="small"
+                  data-position={row.entity.position ?? undefined}
+                >
                   <ToolCallView
-                    entity={first}
+                    entity={row.entity}
                     terminal={terminal}
                   />
-                ) : (
-                  <ToolCallGroup
-                    entities={row.entities}
+                  {row.approval}
+                </Flex>
+              )
+            case 'tools': {
+              const [first] = row.entities
+              return (
+                <div
+                  key={`tools:${first.id}`}
+                  data-position={first.position ?? undefined}
+                >
+                  {row.entities.length === 1 ? (
+                    <ToolCallView
+                      entity={first}
+                      terminal={terminal}
+                    />
+                  ) : (
+                    <ToolCallGroup
+                      entities={row.entities}
+                      terminal={terminal}
+                    />
+                  )}
+                </div>
+              )
+            }
+            default:
+              return (
+                <div
+                  key={`${row.entity.type}:${row.entity.id}`}
+                  data-position={row.entity.position ?? undefined}
+                >
+                  <DevboxEntityView
+                    entity={row.entity}
                     terminal={terminal}
+                    streaming={running && row.entity === entities.at(-1)}
                   />
-                )}
-              </div>
-            )
+                </div>
+              )
           }
-          default:
-            return (
-              <div
-                key={`${row.entity.type}:${row.entity.id}`}
-                data-position={row.entity.position ?? undefined}
-              >
-                <DevboxEntityView
-                  entity={row.entity}
-                  terminal={terminal}
-                />
-              </div>
-            )
-        }
-      })}
-    </TranscriptSC>
+        })}
+      </TranscriptSC>
+      {rest}
+    </>
   )
 }
 
 export function DevboxEntityView({
   entity,
   terminal = () => null,
+  streaming = false,
 }: {
   entity: DevboxEntityFragment
   terminal?: TerminalLookup
+  // still being written: the newest entity of a turn in progress
+  streaming?: boolean
 }) {
   switch (entity.type) {
     case DevboxEntityType.UserMessage:
@@ -244,14 +281,28 @@ export function DevboxEntityView({
     case DevboxEntityType.AgentThought:
       if (!entity.message) break
       return (
-        <div data-entity="agent-thought">
-          <AccordionSection label="Thinking">
+        <ThoughtSC
+          data-entity="agent-thought"
+          data-streaming={streaming || undefined}
+          $streaming={streaming}
+        >
+          <AccordionSection
+            label={
+              <Body2P
+                as="span"
+                $color="text-xlight"
+                $shimmer={streaming}
+              >
+                Thinking
+              </Body2P>
+            }
+          >
             <SimplifiedMarkdown
               text={blocksText(entity.message.content)}
-              tone="thought"
+              tone="faint"
             />
           </AccordionSection>
-        </div>
+        </ThoughtSC>
       )
     case DevboxEntityType.ToolCall:
       if (!entity.toolCall) break
@@ -747,12 +798,16 @@ function PlanView({
   )
 }
 
+const ThoughtSC = styled.div<{ $streaming: boolean }>(
+  ({ theme, $streaming }) => ($streaming ? shimmerWithinCss(theme) : {})
+)
+
 function AccordionSection({
   label,
   defaultOpen,
   children,
 }: {
-  label: string
+  label: ReactNode
   defaultOpen?: boolean
   children: ReactNode
 }) {

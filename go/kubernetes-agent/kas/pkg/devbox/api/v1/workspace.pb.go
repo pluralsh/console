@@ -599,7 +599,14 @@ type ListFilesRequest struct {
 	IncludeHidden    bool  `protobuf:"varint,4,opt,name=include_hidden,json=includeHidden,proto3" json:"include_hidden,omitempty"`
 	RespectGitignore bool  `protobuf:"varint,5,opt,name=respect_gitignore,json=respectGitignore,proto3" json:"respect_gitignore,omitempty"`
 	// Maximum entries returned; the daemon caps it.
-	Limit         int32 `protobuf:"varint,6,opt,name=limit,proto3" json:"limit,omitempty"`
+	Limit int32 `protobuf:"varint,6,opt,name=limit,proto3" json:"limit,omitempty"`
+	// When set, fuzzy-searches everything under path for files and directories matching it, best match first,
+	// instead of listing (depth and respect_gitignore don't apply: git-ignored paths are never searched). Results
+	// carry path, name, type and repository only.
+	Query string `protobuf:"bytes,7,opt,name=query,proto3" json:"query,omitempty"`
+	// Entries carry path, name, type and repository only, which lets the daemon answer a direct listing from its file
+	// index, without touching disk, where it covers path. Query results are always brief.
+	Brief         bool `protobuf:"varint,8,opt,name=brief,proto3" json:"brief,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -674,6 +681,20 @@ func (x *ListFilesRequest) GetLimit() int32 {
 		return x.Limit
 	}
 	return 0
+}
+
+func (x *ListFilesRequest) GetQuery() string {
+	if x != nil {
+		return x.Query
+	}
+	return ""
+}
+
+func (x *ListFilesRequest) GetBrief() bool {
+	if x != nil {
+		return x.Brief
+	}
+	return false
 }
 
 type ListFilesResponse struct {
@@ -3087,7 +3108,7 @@ const file_devbox_v1_workspace_proto_rawDesc = "" +
 	"repository\x18\b \x01(\tR\n" +
 	"repository\x12\x1d\n" +
 	"\n" +
-	"git_status\x18\t \x01(\tR\tgitStatus\"\xc7\x01\n" +
+	"git_status\x18\t \x01(\tR\tgitStatus\"\xf3\x01\n" +
 	"\x10ListFilesRequest\x12\x1f\n" +
 	"\vinstance_id\x18\x01 \x01(\tR\n" +
 	"instanceId\x12\x12\n" +
@@ -3095,7 +3116,9 @@ const file_devbox_v1_workspace_proto_rawDesc = "" +
 	"\x05depth\x18\x03 \x01(\x05R\x05depth\x12%\n" +
 	"\x0einclude_hidden\x18\x04 \x01(\bR\rincludeHidden\x12+\n" +
 	"\x11respect_gitignore\x18\x05 \x01(\bR\x10respectGitignore\x12\x14\n" +
-	"\x05limit\x18\x06 \x01(\x05R\x05limit\"a\n" +
+	"\x05limit\x18\x06 \x01(\x05R\x05limit\x12\x14\n" +
+	"\x05query\x18\a \x01(\tR\x05query\x12\x14\n" +
+	"\x05brief\x18\b \x01(\bR\x05brief\"a\n" +
 	"\x11ListFilesResponse\x12.\n" +
 	"\aentries\x18\x01 \x03(\v2\x14.devbox.v1.FileEntryR\aentries\x12\x1c\n" +
 	"\ttruncated\x18\x02 \x01(\bR\ttruncated\"F\n" +

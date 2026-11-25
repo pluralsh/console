@@ -13,7 +13,7 @@ versions:
     chart_updates: []
     features: []
     breaking_changes: []
-  chart_version: 42.4.1
+  chart_version: 42.4.2
   images: ['docker.io/traefik:v3.7.19']
 - version: 3.7.4
   kube: ['1.37', '1.36', '1.35', '1.34']

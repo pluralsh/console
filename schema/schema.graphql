@@ -857,12 +857,18 @@ type RootQueryType {
 
   devboxImportableSessions(instanceId: ID!): [DevboxImportableSession]
 
-  "One directory level of an instance's workspace"
+  "One directory level of an instance's workspace, or with a query the best fuzzy matches anywhere beneath it"
   devboxFiles(
     instanceId: ID!
 
     "relative to ~, the home directory if unset"
     path: String
+
+    "fuzzy-matched against paths beneath path, best first"
+    query: String
+
+    "only path, name, type and repository, served from the instance's in-memory file index where it can be"
+    brief: Boolean
   ): [DevboxFileEntry]
 
   devboxFile(instanceId: ID!, path: String!): DevboxFile
@@ -4735,6 +4741,9 @@ type ScmCreds {
   username: String!
 
   token: String!
+
+  "when the token expires, for short-lived tokens like github app installation tokens"
+  expiresAt: DateTime
 
   "the proxy to use for git and SCM API requests"
   proxy: HttpProxyConfiguration

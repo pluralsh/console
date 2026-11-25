@@ -457,3 +457,32 @@ func TestAdoptReconcilesAPendingRebaseWithTheActor(t *testing.T) {
 		t.Fatalf("record = %+v", rec)
 	}
 }
+
+// A home on JuiceFS can't move between revisions (each revision has its own volume class), so neither an explicit
+// rebase nor the onResume policy tries.
+func TestRebaseRefusesJuiceFSHomes(t *testing.T) {
+	h := newHarness(t, nil)
+	inst := h.running("inst-1")
+	h.release(true)
+	runners := h.g.deps.Runners.(StaticRunners)
+	next := *runners[testRunner]
+	next.JuiceFSHome = true
+	next.Revisions = map[int64]RunnerRevision{
+		2: {Template: "tmpl-r2", GoldenTag: "golden-r2", JuiceFSHome: true},
+		3: {Template: "tmpl-r3", GoldenTag: "golden-r3", JuiceFSHome: true},
+	}
+	runners[testRunner] = &next
+
+	_, err := h.g.RebaseInstance(context.Background(), &devboxv1.RebaseInstanceRequest{InstanceId: inst.ID, TargetRevision: 3, Reason: "test"})
+	if status.Code(err) != codes.FailedPrecondition || !strings.Contains(err.Error(), "JuiceFS") {
+		t.Fatalf("rebase of a JuiceFS home: %v, want FailedPrecondition naming JuiceFS", err)
+	}
+
+	h.suspended(inst)
+	if _, err := h.g.ResumeInstance(context.Background(), &devboxv1.InstanceActionRequest{InstanceId: inst.ID}); err != nil {
+		t.Fatal(err)
+	}
+	if got := h.template(testActor); got != "tmpl-r2" {
+		t.Errorf("resumed on %s, want the instance's own tmpl-r2", got)
+	}
+}

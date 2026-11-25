@@ -16,7 +16,7 @@ describe('getDevboxAwakeStatus', () => {
       },
       { now }
     )
-    expect(status.suspendingSoon).toBe(true)
+    expect(status.tone).toBe('warning')
     expect(status.label).toBe('Idle · suspends in 30s')
   })
 
@@ -28,7 +28,6 @@ describe('getDevboxAwakeStatus', () => {
       },
       { now }
     )
-    expect(status.suspendingSoon).toBe(false)
     expect(status.label).toBe('Awake')
   })
 
@@ -41,7 +40,6 @@ describe('getDevboxAwakeStatus', () => {
       },
       { now }
     )
-    expect(status.suspendingSoon).toBe(false)
     expect(status.label).toBe('Awake')
   })
 })

@@ -47,6 +47,10 @@ type fakeDaemon struct {
 	// acked is what GetInfo reports; AckEvents advances it.
 	acked  uint64
 	bootID string
+	// unhealthy makes Health fail, like a wedged box.
+	unhealthy bool
+	// busy makes PrepareSuspend refuse automatic suspends, as a daemon with an agent turn running does.
+	busy bool
 
 	events   chan *devboxv1.DaemonEvent
 	breakSub chan struct{}
@@ -77,6 +81,9 @@ func (d *fakeDaemon) note(ctx context.Context) {
 func (d *fakeDaemon) Health(context.Context, *devboxv1.HealthRequest) (*devboxv1.HealthResponse, error) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
+	if d.unhealthy {
+		return nil, status.Error(codes.Unavailable, "daemon unreachable")
+	}
 	if len(d.initialized) == 0 {
 		return &devboxv1.HealthResponse{Status: "booting"}, nil
 	}
@@ -118,10 +125,13 @@ func (d *fakeDaemon) CreateTerminal(_ context.Context, req *devboxv1.CreateTermi
 func (d *fakeDaemon) PrepareSuspend(_ context.Context, req *devboxv1.PrepareSuspendRequest) (*devboxv1.PrepareSuspendResponse, error) {
 	d.mu.Lock()
 	d.prepares = append(d.prepares, req)
-	hook, settled := d.onPrepare, d.settled
+	hook, settled, busy := d.onPrepare, d.settled, d.busy
 	d.mu.Unlock()
 	if hook != nil {
 		hook()
+	}
+	if busy && req.GetReason() != devboxv1.SuspendReason_SUSPEND_REASON_USER {
+		return nil, status.Error(codes.FailedPrecondition, "agent running: agent_turn fix the build")
 	}
 	return &devboxv1.PrepareSuspendResponse{SettledOffset: settled}, nil
 }

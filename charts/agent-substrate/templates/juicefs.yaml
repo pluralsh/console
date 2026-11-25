@@ -1,0 +1,215 @@
+{{- if .Values.juicefs.enabled }}
+{{- $ns := include "substrate.namespace" . -}}
+{{- $j := .Values.juicefs -}}
+{{- $driver := include "substrate.juicefs.driverName" . -}}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: devbox-juicefs
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+  {{- with $j.serviceAccount.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+---
+# Created before the controller's pods: the servicedns signer only issues a
+# serving certificate to a pod some Service selects.
+apiVersion: v1
+kind: Service
+metadata:
+  name: devbox-juicefs
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+spec:
+  selector:
+    app: devbox-juicefs-controller
+  ports:
+    - name: grpc
+      port: 9820
+      targetPort: grpc
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: {{ $j.storageClassName }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+provisioner: {{ $driver }}
+reclaimPolicy: Delete
+volumeBindingMode: Immediate
+parameters:
+  uid: {{ $j.home.uid | toString | quote }}
+  gid: {{ $j.home.gid | toString | quote }}
+  mode: {{ $j.home.mode | toString | quote }}
+---
+# One replica: volume and snapshot operations are serialized per id in
+# process, so two controllers could race on the same home.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devbox-juicefs-controller
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: devbox-juicefs-controller
+  template:
+    metadata:
+      labels:
+        app: devbox-juicefs-controller
+        {{- include "substrate.systemInfraPodLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: devbox-juicefs
+      {{- include "substrate.imagePullSecrets" . | nindent 6 }}
+      {{- include "substrate.systemInfraScheduling" . | nindent 6 }}
+      containers:
+        - name: controller
+          image: {{ include "substrate.juicefs.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - --mode=controller
+            - --name={{ $j.name }}
+            - --storage={{ include "substrate.juicefs.storage" . }}
+            - --bucket={{ include "substrate.juicefs.bucket" . }}
+            {{- with include "substrate.juicefs.accessKey" . }}
+            - --access-key={{ . }}
+            {{- end }}
+            {{- range $j.formatFlags }}
+            - --format-flag={{ . }}
+            {{- end }}
+            {{- range $j.controller.mountFlags }}
+            - --mount-flag={{ . }}
+            {{- end }}
+            - --allowed-clients={{ include "substrate.juicefs.allowedClients" . }}
+          env:
+            {{- include "substrate.juicefs.env" . | nindent 12 }}
+          ports:
+            - name: grpc
+              containerPort: 9820
+            - name: healthz
+              containerPort: 9821
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: healthz
+            periodSeconds: 5
+          {{- with $j.controller.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          # FUSE needs /dev/fuse and CAP_SYS_ADMIN.
+          securityContext:
+            privileged: true
+          volumeMounts:
+            {{- include "substrate.juicefs.volumeMounts" . | nindent 12 }}
+            - name: servicedns
+              mountPath: /run/servicedns.podcert.ate.dev
+              readOnly: true
+            - name: podidentity-ca
+              mountPath: /run/podidentity.podcert.ate.dev
+              readOnly: true
+            - name: state
+              mountPath: /var/lib/juicefs
+      volumes:
+        {{- include "substrate.juicefs.volumes" . | nindent 8 }}
+        {{- include "substrate.podCertVolume" (dict "name" "servicedns" "signer" "servicedns") | nindent 8 }}
+        {{- include "substrate.podCertVolume" (dict "name" "podidentity-ca" "signer" "podidentity" "caOnly" true) | nindent 8 }}
+        - name: state
+          emptyDir: {}
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: devbox-juicefs-node
+  namespace: {{ $ns }}
+  labels:
+    {{- include "substrate.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app: devbox-juicefs-node
+  # A restart ends every home the plugin serves on the node, so roll by hand.
+  updateStrategy:
+    type: OnDelete
+  template:
+    metadata:
+      labels:
+        app: devbox-juicefs-node
+    spec:
+      serviceAccountName: devbox-juicefs
+      priorityClassName: {{ $j.node.priorityClassName }}
+      {{- include "substrate.imagePullSecrets" . | nindent 6 }}
+      {{- with $j.node.nodeSelector | default .Values.atelet.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $j.node.tolerations | default .Values.atelet.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $j.node.affinity | default .Values.atelet.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: node
+          image: {{ include "substrate.juicefs.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - --mode=node
+            - --endpoint=/csi/csi.sock
+            - --target-root=/var/lib/ate
+            - --cache-root={{ $j.node.cacheDir }}
+            {{- range $j.node.mountFlags }}
+            - --mount-flag={{ . }}
+            {{- end }}
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            {{- include "substrate.juicefs.env" . | nindent 12 }}
+          ports:
+            - name: healthz
+              containerPort: 9821
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: healthz
+            periodSeconds: 5
+          {{- with $j.node.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          securityContext:
+            privileged: true
+          volumeMounts:
+            {{- include "substrate.juicefs.volumeMounts" . | nindent 12 }}
+            - name: ate-base
+              mountPath: /var/lib/ate
+              mountPropagation: Bidirectional
+            - name: plugin-dir
+              mountPath: /csi
+      volumes:
+        {{- include "substrate.juicefs.volumes" . | nindent 8 }}
+        - name: ate-base
+          hostPath:
+            path: /var/lib/ate
+            type: DirectoryOrCreate
+        - name: plugin-dir
+          hostPath:
+            path: /var/lib/kubelet/plugins/{{ $driver }}
+            type: DirectoryOrCreate
+{{- if include "substrate.csiDriverConfigCRDServed" . }}
+---
+{{ include "substrate.juicefs.csiDriverConfig" . }}
+{{- end }}
+{{- end }}

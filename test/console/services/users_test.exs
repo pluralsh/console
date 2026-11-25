@@ -262,6 +262,53 @@ defmodule Console.Services.UsersTest do
       assert found.plural_id == "abcdef-123456789-ghijkl"
     end
 
+    test "it prefers the picture claim over the profile page url for the avatar" do
+      {:ok, user} = Users.bootstrap_user(%{
+        "email" => "gitlab@example.com",
+        "name" => "Git Lab",
+        "profile" => "https://gitlab.example.com/gitlab-user",
+        "picture" => "https://gitlab.example.com/uploads/avatar.png",
+      })
+
+      assert user.profile == "https://gitlab.example.com/uploads/avatar.png"
+    end
+
+    test "it uses the picture claim when no profile claim is present" do
+      {:ok, user} = Users.bootstrap_user(%{
+        "email" => "picture@example.com",
+        "name" => "Picture",
+        "picture" => "https://some.image.com/avatar.png",
+      })
+
+      assert user.profile == "https://some.image.com/avatar.png"
+    end
+
+    test "it replaces a stale profile page url with the picture claim on re-login" do
+      user = insert(:user, email: "stale@example.com", profile: "https://gitlab.example.com/stale")
+
+      {:ok, found} = Users.bootstrap_user(%{
+        "email" => "stale@example.com",
+        "name" => user.name,
+        "profile" => "https://gitlab.example.com/stale",
+        "picture" => "https://gitlab.example.com/uploads/avatar.png",
+      })
+
+      assert found.id == user.id
+      assert found.profile == "https://gitlab.example.com/uploads/avatar.png"
+    end
+
+    test "it does not clobber an existing profile when no avatar claims are present" do
+      user = insert(:user, email: "keep@example.com", profile: "https://some.image.com")
+
+      {:ok, found} = Users.bootstrap_user(%{
+        "email" => "keep@example.com",
+        "name" => user.name,
+      })
+
+      assert found.id == user.id
+      assert found.profile == "https://some.image.com"
+    end
+
     test "it can infer a valid email from the sub claim" do
       {:ok, user} = Users.bootstrap_user(%{
         "sub" => "Some User",

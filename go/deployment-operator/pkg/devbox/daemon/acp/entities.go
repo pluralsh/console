@@ -51,6 +51,7 @@ type Store struct {
 	live         map[entityKey]*Entity
 	evicted      map[entityKey]tombstone
 	count        uint64
+	lastChange   time.Time
 }
 
 // NewStore returns a store whose next position is nextPosition (persisted across daemon restarts).
@@ -63,6 +64,13 @@ func NewStore(sessionID string, nextPosition uint64) *Store {
 
 // NextPosition is the position the next new entity will get.
 func (s *Store) NextPosition() uint64 { return s.nextPosition }
+
+// ReserveThrough makes every position up to last taken, so new entities are placed after it.
+func (s *Store) ReserveThrough(last uint64) {
+	if last >= s.nextPosition {
+		s.nextPosition = last + 1
+	}
+}
 
 // Count is the number of distinct entities seen by this store.
 func (s *Store) Count() uint64 { return s.count }
@@ -111,8 +119,12 @@ func (s *Store) Apply(c Change, now time.Time) (*Entity, bool) {
 	e.Settled = false
 	e.UpdatedAt = now
 	e.lastChange = now
+	s.lastChange = now
 	return e, created
 }
+
+// LastChange is when any of the session's entities last changed; zero before the first change.
+func (s *Store) LastChange() time.Time { return s.lastChange }
 
 // appendChunk appends a chunk's content to a message body. Adjacent plain text chunks are joined into one text
 // block; every other block (and text carrying annotations or _meta) is kept as its own block.

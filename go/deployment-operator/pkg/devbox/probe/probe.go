@@ -67,6 +67,9 @@ type Request struct {
 	ActorTemplate string `json:"actorTemplate"`
 	Revision      int64  `json:"revision"`
 	GoldenTag     string `json:"goldenTag"`
+	// JuiceFSHome means the template's home is a JuiceFS volume, which Substrate won't seed from an explicit tag:
+	// the probe actor starts from the template's golden tag by default instead.
+	JuiceFSHome bool `json:"juiceFSHome,omitempty"`
 	// DevboxID is the console Devbox the probe token is scoped to.
 	DevboxID string `json:"devboxId"`
 	// Probe is a protojson devbox.v1.ProbeAgentsRequest.

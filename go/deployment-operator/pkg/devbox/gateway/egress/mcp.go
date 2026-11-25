@@ -109,7 +109,7 @@ func (m *mcpServer) authenticate(next http.Handler) http.Handler {
 		}
 		info, err := m.actors.resolve(r.Context(), actor)
 		switch {
-		case errors.Is(err, ErrUnknownActor):
+		case errors.Is(err, ErrUnknownActor), err == nil && info.Golden:
 			http.Error(w, "devbox mcp: caller is not a devbox instance", http.StatusForbidden)
 			return
 		case err != nil:

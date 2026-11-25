@@ -90,6 +90,15 @@ func TestParseGitHub(t *testing.T) {
 		{name: "empty segment", host: "api.github.com", path: "/repos//pluralsh/console", deny: true},
 		{name: "backslash", host: "github.com", path: "/pluralsh\\console", deny: true},
 		{name: "relative", host: "github.com", path: "pluralsh/console", deny: true},
+		{name: "release download", host: "github.com", path: "/astral-sh/python-build-standalone/releases/download/20261101/cpython.tar.gz", safe: true},
+		{name: "latest release redirect", host: "github.com", method: "HEAD", path: "/jdx/mise/releases/latest", safe: true},
+		{name: "api releases", host: "api.github.com", path: "/repos/oven-sh/bun/releases?per_page=100", safe: true},
+		{name: "api release asset", host: "api.github.com", path: "/repos/oven-sh/bun/releases/assets/1", safe: true},
+		{name: "api release edit is repo scoped", host: "api.github.com", method: "PATCH", path: "/repos/pluralsh/console/releases/1", repos: gh},
+		{name: "api release create is repo scoped", host: "api.github.com", method: "POST", path: "/repos/pluralsh/console/releases", repos: gh},
+		{name: "release delete is repo scoped", host: "github.com", method: "DELETE", path: "/pluralsh/console/releases/tag/v1", repos: gh},
+		{name: "release with encoded slash", host: "github.com", path: "/pluralsh%2Fconsole/x/releases/latest", deny: true},
+		{name: "api release with encoded slash", host: "api.github.com", path: "/repos/pluralsh%2Fconsole/x/releases", deny: true},
 	})
 }
 
@@ -103,6 +112,8 @@ func TestParseGitHubEnterprise(t *testing.T) {
 		{name: "api search", host: "ghe.example.com", path: "/api/v3/search/issues", deny: true},
 		{name: "uploads", host: "ghe.example.com", path: "/api/uploads/repos/team/svc/releases/1/assets", repos: repo},
 		{name: "raw", host: "ghe.example.com", path: "/raw/team/svc/main/file", repos: repo},
+		{name: "release download", host: "ghe.example.com", path: "/tools/cli/releases/download/v1/cli.tgz", safe: true},
+		{name: "api releases", host: "ghe.example.com", path: "/api/v3/repos/tools/cli/releases/latest", safe: true},
 	})
 }
 

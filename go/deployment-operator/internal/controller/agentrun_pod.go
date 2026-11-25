@@ -241,6 +241,8 @@ func buildAgentRunPod(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime) *c
 
 	enableRepositoryPrebake(runtime, pod)
 
+	common.ApplySpawnedCAToPodSpec(&pod.Spec)
+
 	return pod
 }
 

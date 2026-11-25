@@ -11,7 +11,25 @@ import {
   subagentState,
   subagentsBySpawner,
   subagentSummary,
+  subtreeIds,
 } from './devboxSubagentState'
+
+describe('subtreeIds', () => {
+  it('collects every subagent under a thread, however nested, and nothing else', () => {
+    const threads = [
+      { id: 'grandchild', parent: { id: 'child' } },
+      { id: 'child', parent: { id: 'root' } },
+      { id: 'root', parent: null },
+      { id: 'other', parent: null },
+      { id: 'other-child', parent: { id: 'other' } },
+    ]
+    expect([...subtreeIds('root', threads as never)].sort()).toEqual([
+      'child',
+      'grandchild',
+      'root',
+    ])
+  })
+})
 
 const subagent = (
   id: string,

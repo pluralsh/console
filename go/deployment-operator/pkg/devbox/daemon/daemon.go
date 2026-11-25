@@ -268,10 +268,15 @@ func (d *Daemon) Serve(ctx context.Context, ln net.Listener) error {
 	d.mu.Lock()
 	req := d.req
 	d.mu.Unlock()
-	if req != nil {
+	switch {
+	case req != nil:
 		d.bg.Go(func() { d.hydrate(req) })
 		// The daemon of an existing instance starting is a cold boot: the root filesystem is the image's again.
 		d.bg.Go(func() { d.runBootScript(d.ctx) })
+	case d.needsGolden():
+		// set before /readyz is served, so Substrate can't snapshot the golden boot before its work
+		d.setStatus(StatusBootstrapping)
+		d.bg.Go(func() { d.golden(d.cfg.Guest) })
 	}
 
 	var protocols http.Protocols

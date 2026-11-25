@@ -29,7 +29,13 @@ spec:
     sandboxClass: gvisor
   scmConnections: [github]
   allowedRepositories:
-    - pluralsh/console
+    - github.com/pluralsh/console
+  # Cloned at the golden boot (before mise and bootstrapScript), and fetched again by each instance's first boot.
+  repositories:
+    - url: https://github.com/pluralsh/console
+      branch: master
+      description: Plural's console
+  bootstrapTimeout: 45m
   httpAllowlist:
     - host: registry.npmjs.org
     - host: proxy.golang.org

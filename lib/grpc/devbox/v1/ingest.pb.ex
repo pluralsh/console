@@ -267,6 +267,7 @@ defmodule Devbox.V1.GetInstanceCredentialsRequest do
 
   field :instance_id, 1, type: :string, json_name: "instanceId"
   field :credentials, 2, repeated: true, type: Devbox.V1.CredentialSelector
+  field :devbox_id, 3, type: :string, json_name: "devboxId"
 end
 
 defmodule Devbox.V1.GetInstanceCredentialsResponse do

@@ -117,7 +117,7 @@
   },
   "/api-reference/kubernetes/agent-api-reference": {
     "relPath": "/api-reference/kubernetes/agent-api-reference.md",
-    "lastmod": "2026-11-22T17:10:11.000Z"
+    "lastmod": "2026-11-25T15:08:12.000Z"
   },
   "/api-reference/graphql": {
     "relPath": "/api-reference/graphql.md",
@@ -393,11 +393,11 @@
   },
   "/plural-features/devboxes": {
     "relPath": "/plural-features/devboxes/index.md",
-    "lastmod": "2026-11-25T13:25:25.572Z"
+    "lastmod": "2026-11-25T15:08:12.000Z"
   },
   "/plural-features/devboxes/environment-images": {
     "relPath": "/plural-features/devboxes/environment-images.md",
-    "lastmod": "2026-11-25T13:25:25.676Z"
+    "lastmod": "2026-11-25T15:08:12.000Z"
   },
   "/plural-features/continuous-deployment": {
     "relPath": "/plural-features/continuous-deployment/index.md",
@@ -445,11 +445,11 @@
   },
   "/plural-features/continuous-deployment/service-templating": {
     "relPath": "/plural-features/continuous-deployment/service-templating/index.md",
-    "lastmod": "2026-11-25T13:25:25.945Z"
+    "lastmod": "2026-11-25T15:13:29.312Z"
   },
   "/plural-features/continuous-deployment/service-templating/supporting-liquid-filters": {
     "relPath": "/plural-features/continuous-deployment/service-templating/supporting-liquid-filters.md",
-    "lastmod": "2026-11-25T13:25:26.046Z"
+    "lastmod": "2026-11-25T15:13:29.343Z"
   },
   "/plural-features/continuous-deployment/lua": {
     "relPath": "/plural-features/continuous-deployment/lua.md",
@@ -725,7 +725,7 @@
   },
   "/getting-started/agent-api-reference": {
     "relPath": "/api-reference/kubernetes/agent-api-reference.md",
-    "lastmod": "2026-11-22T17:10:11.000Z"
+    "lastmod": "2026-11-25T15:08:12.000Z"
   },
   "/getting-started/readme": {
     "relPath": "/getting-started/index.md",
@@ -941,7 +941,7 @@
   },
   "/deployments/templating": {
     "relPath": "/plural-features/continuous-deployment/service-templating/index.md",
-    "lastmod": "2026-11-25T13:25:27.957Z"
+    "lastmod": "2026-11-25T15:13:30.411Z"
   },
   "/deployments/multi-tenancy": {
     "relPath": "/plural-features/projects-and-multi-tenancy/index.md",
@@ -969,7 +969,7 @@
   },
   "/agent-api-reference": {
     "relPath": "/api-reference/kubernetes/agent-api-reference.md",
-    "lastmod": "2026-11-22T17:10:11.000Z"
+    "lastmod": "2026-11-25T15:08:12.000Z"
   },
   "/plural-features/workbenches/tools": {
     "relPath": "/plural-features/workbenches/integrations/tools.md",

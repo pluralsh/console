@@ -648,6 +648,24 @@ defmodule Console.Devboxes.Ingest do
     end
   end
 
+  @doc """
+  `Ingest.GetInstanceCredentials` with a `devbox_id`: the scm credentials of the devbox's golden boot.
+  """
+  @spec get_devbox_credentials(binary, [map], Cluster.t) :: {:ok, [Credentials.credential]} | error
+  def get_devbox_credentials(devbox_id, selectors, %Cluster{id: cluster_id}) do
+    with {:ok, id} <- Ecto.UUID.cast(devbox_id) |> ok_or(:not_found),
+         %Devbox{cluster_id: ^cluster_id} = devbox <- Devboxes.get_devbox(id) do
+      Credentials.devbox_credentials(devbox, Enum.map(selectors, &selector/1))
+    else
+      %Devbox{} -> {:error, "clusters can only get credentials of their own devboxes"}
+      nil -> {:error, :not_found}
+      err -> err
+    end
+  end
+
+  defp ok_or(:error, err), do: {:error, err}
+  defp ok_or(ok, _), do: ok
+
   @credential_kinds Map.new(~w(scm ai_proxy console oidc claude_oauth codex)a, & {to_string(&1), &1})
 
   defp selector(%{kind: kind} = sel) do

@@ -59,7 +59,9 @@ defmodule Console.Devboxes.Control.Test do
   @impl true
   def list_repositories(_), do: {:ok, []}
   @impl true
-  def list_files(_, _), do: {:ok, []}
+  def list_files(_, _, %{query: q}) when is_binary(q), do: {:ok, [%{path: "/home/devbox/api/#{q}.ex", name: "#{q}.ex", type: :file}]}
+  def list_files(_, path, %{brief: true}), do: {:ok, [%{path: "/home/devbox/#{path}/lib", name: "lib", type: :directory}]}
+  def list_files(_, _, _), do: {:ok, []}
   @impl true
   def read_file(_, path, _), do: {:ok, %{entry: %{path: path, name: Path.basename(path), type: :file}, content: "", sha256: nil, truncated: false, binary: false}}
   @impl true

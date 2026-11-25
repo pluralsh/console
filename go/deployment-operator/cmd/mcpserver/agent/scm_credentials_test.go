@@ -5,6 +5,9 @@ import (
 	"errors"
 	"os"
 	"testing"
+	"time"
+
+	"github.com/samber/lo"
 
 	consoleclient "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/environment"
@@ -94,6 +97,38 @@ func TestRefreshCredentialsRequiresPluralCreds(t *testing.T) {
 	}
 	if token := os.Getenv(environment.EnvGitAccessToken); token != "new-token" {
 		t.Fatalf("GIT_ACCESS_TOKEN = %q, want %q despite missing Plural creds", token, "new-token")
+	}
+}
+
+func TestNextRefreshFollowsTokenExpiry(t *testing.T) {
+	now := time.Date(2026, 11, 23, 12, 0, 0, 0, time.UTC)
+	at := func(d time.Duration) *string {
+		s := now.Add(d).Format(time.RFC3339)
+		return &s
+	}
+	cases := []struct {
+		name      string
+		expiresAt *string
+		want      time.Duration
+	}{
+		{name: "static token", want: scmCredentialsRefreshInterval},
+		{name: "fresh app token", expiresAt: at(time.Hour), want: scmCredentialsRefreshInterval},
+		{name: "half-used app token", expiresAt: at(30 * time.Minute), want: 20 * time.Minute},
+		{name: "nearly expired app token", expiresAt: at(5 * time.Minute), want: scmCredentialsRetryInterval},
+		{name: "garbage expiry", expiresAt: lo.ToPtr("soon"), want: scmCredentialsRefreshInterval},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			credentials := newCredentialStore("plural-token")
+			if err := credentials.updateSCMCredentials(&consoleclient.AgentRunCredentialsFragment{
+				ScmCreds: &consoleclient.ScmCredentialFragment{Token: "token", ExpiresAt: tc.expiresAt},
+			}); err != nil {
+				t.Fatalf("updateSCMCredentials() error = %v", err)
+			}
+			if got := credentials.nextRefresh(now, scmCredentialsRefreshInterval); got != tc.want {
+				t.Fatalf("nextRefresh() = %v, want %v", got, tc.want)
+			}
+		})
 	}
 }
 

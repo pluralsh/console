@@ -31,3 +31,9 @@ sandboxConfigs:
 
 cloudnative-pg:
   enabled: true
+
+# JuiceFS homes on RustFS and the CNPG cluster.
+juicefs:
+  enabled: true
+  image:
+    tag: "0.0.0"

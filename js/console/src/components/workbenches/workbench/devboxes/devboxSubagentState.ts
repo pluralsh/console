@@ -25,6 +25,23 @@ export function pendingInteractionsFor<T extends Interaction>(
   )
 }
 
+// a thread and every subagent under it, however deeply nested
+export function subtreeIds(
+  rootId: string,
+  threads: Pick<DevboxThreadFragment, 'id' | 'parent'>[]
+): Set<string> {
+  const ids = new Set([rootId])
+  for (let grew = true; grew; ) {
+    grew = false
+    for (const t of threads)
+      if (t.parent?.id && ids.has(t.parent.id) && !ids.has(t.id)) {
+        ids.add(t.id)
+        grew = true
+      }
+  }
+  return ids
+}
+
 export function subagentState(
   subagent: Pick<
     DevboxThreadFragment,

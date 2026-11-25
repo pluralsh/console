@@ -1335,9 +1335,13 @@ func (*ReportSnapshotResponse) Descriptor() ([]byte, []int) {
 }
 
 type GetInstanceCredentialsRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	InstanceId    string                 `protobuf:"bytes,1,opt,name=instance_id,json=instanceId,proto3" json:"instance_id,omitempty"`
-	Credentials   []*CredentialSelector  `protobuf:"bytes,2,rep,name=credentials,proto3" json:"credentials,omitempty"`
+	state       protoimpl.MessageState `protogen:"open.v1"`
+	InstanceId  string                 `protobuf:"bytes,1,opt,name=instance_id,json=instanceId,proto3" json:"instance_id,omitempty"`
+	Credentials []*CredentialSelector  `protobuf:"bytes,2,rep,name=credentials,proto3" json:"credentials,omitempty"`
+	// Set instead of instance_id by the golden boot of the devbox's template, which clones the DevboxRunner's
+	// repositories before any instance exists. Only SCM selectors are allowed, answered from the devbox's SCM
+	// connections (or console's default one).
+	DevboxId      string `protobuf:"bytes,3,opt,name=devbox_id,json=devboxId,proto3" json:"devbox_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1384,6 +1388,13 @@ func (x *GetInstanceCredentialsRequest) GetCredentials() []*CredentialSelector {
 		return x.Credentials
 	}
 	return nil
+}
+
+func (x *GetInstanceCredentialsRequest) GetDevboxId() string {
+	if x != nil {
+		return x.DevboxId
+	}
+	return ""
 }
 
 type GetInstanceCredentialsResponse struct {
@@ -2221,11 +2232,12 @@ const file_devbox_v1_ingest_proto_rawDesc = "" +
 	"size_bytes\x18\x05 \x01(\x03R\tsizeBytes\x12,\n" +
 	"\x05error\x18\x06 \x01(\v2\x16.devbox.v1.ErrorDetailR\x05error\x12=\n" +
 	"\fcompleted_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\vcompletedAt\"\x18\n" +
-	"\x16ReportSnapshotResponse\"\x81\x01\n" +
+	"\x16ReportSnapshotResponse\"\x9e\x01\n" +
 	"\x1dGetInstanceCredentialsRequest\x12\x1f\n" +
 	"\vinstance_id\x18\x01 \x01(\tR\n" +
 	"instanceId\x12?\n" +
-	"\vcredentials\x18\x02 \x03(\v2\x1d.devbox.v1.CredentialSelectorR\vcredentials\"a\n" +
+	"\vcredentials\x18\x02 \x03(\v2\x1d.devbox.v1.CredentialSelectorR\vcredentials\x12\x1b\n" +
+	"\tdevbox_id\x18\x03 \x01(\tR\bdevboxId\"a\n" +
 	"\x1eGetInstanceCredentialsResponse\x12?\n" +
 	"\vcredentials\x18\x01 \x03(\v2\x1d.devbox.v1.InstanceCredentialR\vcredentials\"\xef\x01\n" +
 	"\x1cUpdateAgentCredentialRequest\x12\x1f\n" +

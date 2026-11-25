@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/coder/websocket"
 	"google.golang.org/grpc/codes"
@@ -45,9 +47,19 @@ func (t *Terminal) serve(ctx context.Context, from uint64, recv func() (*devboxv
 	}()
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
-	if err := send(&devboxv1.TerminalOutput{Output: &devboxv1.TerminalOutput_Info{Info: t.Info()}}); err != nil {
+	// output and info updates are sent from separate goroutines, and a gRPC stream allows one sender at a time
+	var sendMu sync.Mutex
+	unsafeSend := send
+	send = func(out *devboxv1.TerminalOutput) error {
+		sendMu.Lock()
+		defer sendMu.Unlock()
+		return unsafeSend(out)
+	}
+	info := t.Info()
+	if err := send(&devboxv1.TerminalOutput{Output: &devboxv1.TerminalOutput_Info{Info: info}}); err != nil {
 		return err
 	}
+	go t.watchInfo(ctx, info, send)
 	inErr := make(chan error, 1)
 	go func() {
 		for {
@@ -99,10 +111,36 @@ func (t *Terminal) serve(ctx context.Context, from uint64, recv func() (*devboxv
 	}
 }
 
+// watchInfo resends the terminal's info when what clients label it by changes, until ctx ends.
+func (t *Terminal) watchInfo(ctx context.Context, last *devboxv1.TerminalInfo, send func(*devboxv1.TerminalOutput) error) {
+	tick := time.NewTicker(t.m.opts.InfoInterval)
+	defer tick.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-tick.C:
+		}
+		info := t.Info()
+		if info.GetExited() {
+			return
+		}
+		if info.GetCwd() == last.GetCwd() && info.GetForegroundCommand() == last.GetForegroundCommand() {
+			continue
+		}
+		last = info
+		if send(&devboxv1.TerminalOutput{Output: &devboxv1.TerminalOutput_Info{Info: info}}) != nil {
+			return
+		}
+	}
+}
+
 // wsControl is a JSON text frame on /terminals/<id>/ws. Binary frames carry raw terminal bytes both ways.
 //
-// Client -> daemon: {"type":"resize","cols":120,"rows":32}.
-// Daemon -> client: {"type":"info", ...TerminalInfo}, {"type":"output","offset":N} before each binary output
+// Client -> daemon: {"type":"resize","cols":120,"rows":32}, and {"type":"close","signal":"HUP"} to end the terminal
+// (signal optional, SIGHUP by default).
+// Daemon -> client: {"type":"info", ...TerminalInfo} on attach and whenever its cwd or foreground command changes,
+// {"type":"output","offset":N} before each binary output
 // frame whose offset isn't contiguous, and {"type":"exit","exitCode":0,"signal":""}.
 type wsControl struct {
 	Type     string `json:"type"`
@@ -165,8 +203,12 @@ func (m *Manager) ServeWS(w http.ResponseWriter, r *http.Request) {
 			if json.Unmarshal(data, &ctl) != nil {
 				continue
 			}
-			if ctl.Type == "resize" {
+			switch ctl.Type {
+			case "resize":
 				return &devboxv1.TerminalInput{Input: &devboxv1.TerminalInput_Resize{Resize: &devboxv1.TerminalSize{Cols: ctl.Cols, Rows: ctl.Rows}}}, nil
+			case "close":
+				// the exit frame follows once the shell is gone, closing the socket
+				_, _ = m.Close(id, ctl.Signal)
 			}
 		}
 	}

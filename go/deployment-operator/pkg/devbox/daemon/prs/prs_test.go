@@ -124,6 +124,54 @@ func TestPrepareFallsBackToTheTemplate(t *testing.T) {
 	}
 }
 
+func TestPrepareUsesTheThreadsWorktree(t *testing.T) {
+	dir, origin := checkout(t)
+	threads := filepath.Join(filepath.Dir(dir), ".threads")
+	wt := map[string]string{}
+	for _, id := range []string{"t1", "t2"} {
+		wt[id] = filepath.Join(threads, id, "api")
+		git(t, dir, "worktree", "add", "--quiet", "-b", "devbox/"+id, wt[id])
+	}
+	if err := os.WriteFile(filepath.Join(wt["t1"], "t1.go"), []byte("package main\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(wt["t2"], "t2.go"), []byte("package main\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	p := preparer(dir, "")
+	p.opts.Checkouts = func(context.Context) []*devboxv1.Checkout {
+		return []*devboxv1.Checkout{
+			{Path: wt["t2"], Name: "api", WorktreeThreadId: "t2"},
+			{Path: dir, Name: "api"},
+			{Path: wt["t1"], Name: "api", WorktreeThreadId: "t1"},
+		}
+	}
+
+	resp, err := p.Prepare(context.Background(), &devboxv1.PreparePullRequestRequest{Repository: "api", ThreadId: "t1"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	branch := resp.GetHeadBranch()
+	if resp.GetCheckoutPath() != wt["t1"] || branch == "devbox/t1" || !strings.HasPrefix(branch, "devbox/") {
+		t.Fatalf("t1's pull request came from %s on %s", resp.GetCheckoutPath(), branch)
+	}
+	if files := git(t, origin, "show", "--name-only", "--format=", branch); files != "t1.go" {
+		t.Fatalf("t1's branch carries %q", files)
+	}
+	if got := git(t, wt["t1"], "branch", "--show-current"); got != branch {
+		t.Fatalf("t1's worktree is on %s, not the pull request's branch %s", got, branch)
+	}
+	if got := git(t, dir, "branch", "--show-current"); got != "main" {
+		t.Fatalf("the main checkout moved to %s", got)
+	}
+
+	// a thread without a worktree of api gets the main checkout, never another thread's worktree
+	if _, err := p.Prepare(context.Background(), &devboxv1.PreparePullRequestRequest{Repository: "api", ThreadId: "t3"}); err == nil ||
+		!strings.Contains(err.Error(), "no changes") {
+		t.Fatalf("want the clean main checkout's no-changes error, got %v", err)
+	}
+}
+
 func TestPrepareRefusesWithoutChanges(t *testing.T) {
 	dir, _ := checkout(t)
 	_, err := preparer(dir, "").Prepare(context.Background(), &devboxv1.PreparePullRequestRequest{Repository: "api"})
