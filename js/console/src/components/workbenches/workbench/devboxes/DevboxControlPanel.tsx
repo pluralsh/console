@@ -38,6 +38,7 @@ import {
   WORKBENCH_DEVBOX_INSTANCE_ABS_PATH,
   WORKBENCH_DEVBOX_FILE_QUERY_PARAM,
   WORKBENCH_DEVBOX_INSTANCE_PARAM_ID,
+  WORKBENCH_DEVBOX_PR_QUERY_PARAM,
   WORKBENCH_DEVBOX_TAB_QUERY_PARAM,
 } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
@@ -136,7 +137,18 @@ export function useDevboxPanel() {
       { replace: true }
     )
   const setTab = (tab: DevboxPanelTab) =>
-    update({ [WORKBENCH_DEVBOX_TAB_QUERY_PARAM]: tab === 'files' ? null : tab })
+    update({
+      [WORKBENCH_DEVBOX_TAB_QUERY_PARAM]: tab === 'files' ? null : tab,
+      [WORKBENCH_DEVBOX_PR_QUERY_PARAM]: null,
+    })
+  // opens the pull requests tab on one pr, which stays highlighted until the tab changes
+  const showPullRequest = (url: string) => {
+    update({
+      [WORKBENCH_DEVBOX_TAB_QUERY_PARAM]: 'prs',
+      [WORKBENCH_DEVBOX_PR_QUERY_PARAM]: url,
+    })
+    setOpen(true)
+  }
   // the main view shows at most one of an open file or a change's diff
   const selectFile = (path: Nullable<string>) =>
     update({
@@ -167,6 +179,8 @@ export function useDevboxPanel() {
     setOpen,
     tab: isPanelTab(tabParam) ? tabParam : 'files',
     setTab,
+    highlightedPr: params.get(WORKBENCH_DEVBOX_PR_QUERY_PARAM),
+    showPullRequest,
     file,
     viewedFile: file && !file.endsWith('/') ? file : null,
     selectFile,
@@ -242,6 +256,7 @@ export function DevboxPanelContent() {
     setOpen,
     tab,
     setTab,
+    highlightedPr,
     file: filePath,
     selectFile,
     change,
@@ -325,7 +340,10 @@ export function DevboxPanelContent() {
             />
           )}
           {active.key === 'prs' && (
-            <DevboxPullRequestsTab instance={instance} />
+            <DevboxPullRequestsTab
+              instance={instance}
+              highlighted={highlightedPr}
+            />
           )}
           {active.key === 'terminal' && (
             <DevboxTerminalTab

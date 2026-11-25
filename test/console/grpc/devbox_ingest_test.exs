@@ -24,7 +24,7 @@ defmodule Console.GRPC.DevboxIngestTest do
 
   describe "authentication" do
     test "it rejects calls without a bearer token" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
       err = assert_raise GRPC.RPCError, fn ->
         Ingest.heartbeat(%V1.HeartbeatRequest{}, stream(%{"devbox-cluster-id" => cluster.id}))
       end
@@ -33,7 +33,7 @@ defmodule Console.GRPC.DevboxIngestTest do
     end
 
     test "it rejects tokens signed with another secret" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
       signer = Joken.Signer.create("HS256", "not-the-secret")
       {:ok, token, _} = Joken.encode_and_sign(%{"exp" => System.system_time(:second) + 60}, signer)
 
@@ -45,7 +45,7 @@ defmodule Console.GRPC.DevboxIngestTest do
     end
 
     test "it rejects expired tokens, tokens without expiry and tokens for kas" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
       now = System.system_time(:second)
 
       for claims <- [%{"exp" => now - 10}, %{"iat" => now}, %{"exp" => now + 60, "aud" => "gitlab-kas"}] do
@@ -75,7 +75,7 @@ defmodule Console.GRPC.DevboxIngestTest do
 
   describe "heartbeat/2" do
     test "it reports instances console no longer knows about" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
       devbox = insert(:devbox, cluster: cluster)
       inst = insert(:devbox_instance, devbox: devbox)
       unknown = Ecto.UUID.generate()
@@ -91,7 +91,7 @@ defmodule Console.GRPC.DevboxIngestTest do
 
   describe "report_instance_status/2" do
     test "it updates an instance of the cluster" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
       inst = insert(:devbox_instance, status: :pending, devbox: build(:devbox, cluster: cluster))
 
       %V1.ReportInstanceStatusResponse{status: status} = Ingest.report_instance_status(
@@ -120,7 +120,7 @@ defmodule Console.GRPC.DevboxIngestTest do
 
   describe "get_instance_credentials/2" do
     test "it mints proxy credentials for a live instance" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
       inst = insert(:devbox_instance, devbox: build(:devbox, cluster: cluster))
 
       %V1.GetInstanceCredentialsResponse{credentials: [cred]} = Ingest.get_instance_credentials(
@@ -134,7 +134,7 @@ defmodule Console.GRPC.DevboxIngestTest do
     end
 
     test "it mints oidc tokens for the box's cloud identities" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
       devbox = insert(:devbox, cluster: cluster, cloud_identities: [
         %Console.Schema.Devbox.CloudIdentity{name: "aws", provider: :aws, role_arn: "arn:aws:iam::123456789012:role/devbox"}
       ])
@@ -153,7 +153,7 @@ defmodule Console.GRPC.DevboxIngestTest do
     end
 
     test "unknown kinds are unimplemented" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
       inst = insert(:devbox_instance, devbox: build(:devbox, cluster: cluster))
 
       err = assert_raise GRPC.RPCError, fn ->
@@ -169,7 +169,7 @@ defmodule Console.GRPC.DevboxIngestTest do
 
   describe "get_instance_credentials/2 for scm" do
     test "it returns the credential of the connection on the selector's host" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
       github = insert(:scm_connection, type: :github)
       gitlab = insert(:scm_connection, type: :gitlab, base_url: "https://gitlab.example.com")
       devbox = insert(:devbox, cluster: cluster)
@@ -200,7 +200,7 @@ defmodule Console.GRPC.DevboxIngestTest do
 
   describe "get_instance_credentials/2 for a devbox's golden boot" do
     test "it mints the devbox's scm credentials" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
       conn = insert(:scm_connection, type: :github)
       devbox = insert(:devbox, cluster: cluster)
       insert(:devbox_scm_connection, devbox: devbox, connection: conn)
@@ -216,7 +216,7 @@ defmodule Console.GRPC.DevboxIngestTest do
     end
 
     test "it serves nothing but scm" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
       devbox = insert(:devbox, cluster: cluster)
 
       err = assert_raise GRPC.RPCError, fn ->
@@ -249,7 +249,7 @@ defmodule Console.GRPC.DevboxIngestTest do
 
   describe "report_pull_request/2" do
     test "it records egress-observed pull requests against the instance" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
       inst = insert(:devbox_instance, devbox: build(:devbox, cluster: cluster))
       url = "https://github.com/pluralsh/console/pull/7"
 
@@ -282,7 +282,7 @@ defmodule Console.GRPC.DevboxIngestTest do
 
   describe "devbox_pull_request/2" do
     setup do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
       insert(:scm_connection, default: true)
       inst = insert(:devbox_instance, devbox: build(:devbox, cluster: cluster))
       thread = insert(:devbox_instance_session, instance: inst)
@@ -331,9 +331,51 @@ defmodule Console.GRPC.DevboxIngestTest do
     end
   end
 
+  describe "list_devbox_pull_requests/2" do
+    test "it lists the instance's pull requests however they were opened, and finds the devbox's by url" do
+      cluster = insert(:cluster, allow_agents: true)
+      devbox = insert(:devbox, cluster: cluster)
+      inst = insert(:devbox_instance, devbox: devbox)
+      older = insert(:devbox_instance, devbox: devbox)
+      thread = insert(:devbox_instance_session, instance: inst)
+      button = insert(:pull_request, devbox: devbox, devbox_instance: inst, devbox_instance_session: thread, source: :devbox,
+                                     url: "https://github.com/pluralsh/console/pull/12")
+      mcp = insert(:pull_request, devbox: devbox, devbox_instance: inst, source: :mcp, url: "https://github.com/pluralsh/console/pull/13")
+      from_older = insert(:pull_request, devbox: devbox, devbox_instance: older, url: "https://github.com/pluralsh/console/pull/9")
+      other = insert(:pull_request, devbox: build(:devbox, cluster: cluster), url: "https://github.com/pluralsh/console/pull/1")
+
+      %V1.ListDevboxPullRequestsResponse{pull_requests: prs} =
+        Ingest.list_devbox_pull_requests(%V1.ListDevboxPullRequestsRequest{instance_id: inst.id}, authed(cluster))
+
+      assert Enum.map(prs, & &1.url) |> Enum.sort() == Enum.sort([button.url, mcp.url])
+      record = Enum.find(prs, & &1.url == button.url)
+      assert record.number == 12
+      assert record.source == "devbox"
+      assert record.status == "open"
+      assert record.devbox_id == devbox.id
+      assert record.instance_id == inst.id
+      assert record.thread_id == thread.id
+
+      %V1.ListDevboxPullRequestsResponse{pull_requests: [%V1.DevboxPullRequestRecord{url: url}]} =
+        Ingest.list_devbox_pull_requests(%V1.ListDevboxPullRequestsRequest{instance_id: inst.id, url: from_older.url}, authed(cluster))
+      assert url == from_older.url
+
+      %V1.ListDevboxPullRequestsResponse{pull_requests: []} =
+        Ingest.list_devbox_pull_requests(%V1.ListDevboxPullRequestsRequest{instance_id: inst.id, url: other.url}, authed(cluster))
+    end
+
+    test "it rejects instances of other clusters" do
+      inst = insert(:devbox_instance)
+
+      assert_raise GRPC.RPCError, fn ->
+        Ingest.list_devbox_pull_requests(%V1.ListDevboxPullRequestsRequest{instance_id: inst.id}, authed(insert(:cluster)))
+      end
+    end
+  end
+
   describe "update_agent_credential/2" do
     test "the lease holder's refresh is applied" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
       user = insert(:user)
       cred = insert(:agent_credential, user: user, provider: :codex, kind: :codex_chatgpt_auth, secret: codex_bundle("old"))
       inst = insert(:devbox_instance, user: user, devbox: build(:devbox, cluster: cluster), agent_billing: %{

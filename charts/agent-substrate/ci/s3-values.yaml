@@ -53,3 +53,10 @@ juicefs:
   serviceAccount:
     annotations:
       eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/devbox-juicefs
+zerofs:
+  enabled: true
+  image:
+    digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
+  serviceAccount:
+    annotations:
+      eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/devbox-zerofs

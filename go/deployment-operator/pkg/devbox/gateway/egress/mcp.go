@@ -64,7 +64,6 @@ type mcpServer struct {
 	ingest   devboxv1.IngestClient
 	creds    *credentialCache
 	prs      *prRegistry
-	owner    PullRequestOwner
 	diffs    BranchDiffs
 	scmOpts  []scm.ClientOption
 	log      logr.Logger
@@ -165,7 +164,7 @@ func (m *mcpServer) installPullRequestTools(s *server.MCPServer) {
 	), m.createLinkedPullRequests)
 
 	s.AddTool(mcp.NewTool(ListPullRequestsTool,
-		mcp.WithDescription("List the pull requests opened from this devbox instance, across repositories."),
+		mcp.WithDescription("List the pull requests opened from this devbox instance, across repositories: by these tools, the Create PR button, or observed when you opened them directly."),
 	), m.listPullRequests)
 }
 
@@ -348,9 +347,58 @@ func (m *mcpServer) listPullRequests(ctx context.Context, _ mcp.CallToolRequest)
 	if !ok {
 		return mcp.NewToolResultError("unauthenticated"), nil
 	}
+	local := m.prs.forInstance(caller.Instance.InstanceID)
+	resp, err := m.ingest.ListDevboxPullRequests(ctx, &devboxv1.ListDevboxPullRequestsRequest{InstanceId: caller.Instance.InstanceID})
+	if err != nil {
+		m.log.Info("couldn't list the instance's pull requests from console", "instance", caller.Instance.InstanceID, "error", err.Error())
+		return mcp.NewToolResultJSON(struct {
+			PullRequests []trackedPR `json:"pullRequests"`
+			Warning      string      `json:"warning"`
+		}{PullRequests: local, Warning: "console is unreachable, so this lists only pull requests this gateway opened recently"})
+	}
 	return mcp.NewToolResultJSON(struct {
 		PullRequests []trackedPR `json:"pullRequests"`
-	}{PullRequests: m.prs.forInstance(caller.Instance.InstanceID)})
+	}{PullRequests: mergePullRequests(caller.Instance, resp.GetPullRequests(), local)})
+}
+
+// mergePullRequests is console's records of an instance's PRs, plus any this replica opened that console doesn't
+// list yet.
+func mergePullRequests(info *InstanceInfo, records []*devboxv1.DevboxPullRequestRecord, local []trackedPR) []trackedPR {
+	out := make([]trackedPR, 0, len(records)+len(local))
+	seen := map[string]bool{}
+	for _, r := range records {
+		seen[prKey(r.GetUrl())] = true
+		out = append(out, trackedPR{
+			URL:        r.GetUrl(),
+			Repository: repositoryOf(r.GetUrl()),
+			Number:     r.GetNumber(),
+			Title:      r.GetTitle(),
+			Status:     r.GetStatus(),
+			Source:     r.GetSource(),
+			ThreadID:   r.GetThreadId(),
+			InstanceID: info.InstanceID,
+			BoxID:      info.BoxID,
+			CreatedAt:  r.GetCreatedAt().AsTime(),
+		})
+	}
+	for _, pr := range local {
+		if !seen[prKey(pr.URL)] {
+			out = append(out, pr)
+		}
+	}
+	slices.SortFunc(out, func(a, b trackedPR) int { return a.CreatedAt.Compare(b.CreatedAt) })
+	return out
+}
+
+// repositoryOf is a PR URL's https repository URL: everything before /pull/ (GitHub, Bitbucket) or /-/merge_requests/
+// (GitLab), or "" for other shapes.
+func repositoryOf(prURL string) string {
+	for _, sep := range []string{"/-/merge_requests/", "/pull/", "/pullrequest/", "/pull-requests/"} {
+		if repo, _, ok := strings.Cut(prURL, sep); ok {
+			return repo
+		}
+	}
+	return ""
 }
 
 // toolCallID picks the client's tool call ID out of _meta, when the harness sends one.
@@ -475,12 +523,13 @@ func (m *mcpServer) authorizePR(ctx context.Context, info *InstanceInfo, prURL s
 		}
 		return fmt.Errorf("pull request %s belongs to another devbox", prURL)
 	}
-	if m.owner != nil {
-		box, err := m.owner.DevboxForPullRequest(ctx, key)
-		if err != nil {
-			return fmt.Errorf("couldn't check who owns pull request %s: %w", prURL, err)
-		}
-		if box == info.BoxID && box != "" {
+	// Console knows every PR of the box, including ones from the Create PR button, other replicas and earlier runs.
+	resp, err := m.ingest.ListDevboxPullRequests(ctx, &devboxv1.ListDevboxPullRequestsRequest{InstanceId: info.InstanceID, Url: key})
+	if err != nil {
+		return fmt.Errorf("couldn't check who owns pull request %s: %w", prURL, err)
+	}
+	for _, pr := range resp.GetPullRequests() {
+		if pr.GetDevboxId() == info.BoxID && info.BoxID != "" {
 			return nil
 		}
 	}
@@ -488,7 +537,7 @@ func (m *mcpServer) authorizePR(ctx context.Context, info *InstanceInfo, prURL s
 }
 
 // prRegistry remembers PRs opened through the MCP or observed at egress, keyed by URL, for box ownership checks
-// and list_pull_requests. It's per replica and in memory; Deps.PullRequests covers the rest.
+// and list_pull_requests. It's per replica and in memory, a cache in front of console's records.
 type prRegistry struct {
 	mu  sync.Mutex
 	prs map[string]trackedPR
@@ -498,6 +547,9 @@ type trackedPR struct {
 	URL        string    `json:"url"`
 	Repository string    `json:"repository,omitempty"`
 	Number     int64     `json:"number,omitempty"`
+	Title      string    `json:"title,omitempty"`
+	Status     string    `json:"status,omitempty"`
+	Source     string    `json:"source,omitempty"`
 	ThreadID   string    `json:"threadId,omitempty"`
 	InstanceID string    `json:"instanceId"`
 	BoxID      string    `json:"-"`

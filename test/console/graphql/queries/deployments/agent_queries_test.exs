@@ -81,7 +81,7 @@ defmodule Console.GraphQL.Queries.Deployments.AgentQueriesTest do
     end
 
     test "a cluster can fetch a run they are the runner cluster for" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
       runtime = insert(:agent_runtime, cluster: cluster)
       run = insert(:agent_run, runtime: runtime)
       conn = insert(:scm_connection,
@@ -125,7 +125,7 @@ defmodule Console.GraphQL.Queries.Deployments.AgentQueriesTest do
     end
 
     test "clusters only get download urls for attachments of agent runs they run" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
       run = insert(:agent_run, runtime: insert(:agent_runtime, cluster: cluster))
       prompt = Console.Repo.insert!(%Console.Schema.AgentPrompt{agent_run_id: run.id, prompt: "more", seq: 1})
       other = insert(:agent_run, runtime: insert(:agent_runtime, cluster: insert(:cluster)))
@@ -152,7 +152,7 @@ defmodule Console.GraphQL.Queries.Deployments.AgentQueriesTest do
     end
 
     test "a runner cluster can download run and prompt attachments as the run's user" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
       user = insert(:user)
       runtime = insert(:agent_runtime, cluster: cluster)
       run = insert(:agent_run, runtime: runtime, user: user)
@@ -183,7 +183,7 @@ defmodule Console.GraphQL.Queries.Deployments.AgentQueriesTest do
     end
 
     test "a cluster receives scm creds from the runtime's bound connection" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
       insert(:scm_connection, default: true, token: "default-token")
       runtime_conn = insert(:scm_connection, name: "runtime-github", token: "runtime-token")
       runtime = insert(:agent_runtime, cluster: cluster, connection: runtime_conn)
@@ -204,7 +204,7 @@ defmodule Console.GraphQL.Queries.Deployments.AgentQueriesTest do
     end
 
     test "a cluster cannot fetch a run if its not the runner cluster" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
       run = insert(:agent_run)
 
       {:ok, %{errors: [_ | _]}} = run_query("""
@@ -292,7 +292,7 @@ defmodule Console.GraphQL.Queries.Deployments.AgentQueriesTest do
 
     test "a user can fetch a runtime by name and cluster id" do
       user    = insert(:user)
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
       runtime = insert(:agent_runtime, cluster: cluster, create_bindings: [%{user_id: user.id}])
 
       {:ok, %{data: %{"agentRuntime" => found}}} = run_query("""
@@ -305,7 +305,7 @@ defmodule Console.GraphQL.Queries.Deployments.AgentQueriesTest do
     end
 
     test "a cluster can fetch their own runtime" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
       runtime = insert(:agent_runtime, cluster: cluster)
       ignore = insert(:agent_runtime)
 
@@ -325,7 +325,7 @@ defmodule Console.GraphQL.Queries.Deployments.AgentQueriesTest do
     end
 
     test "a cluster sideload pending runs" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
       runtime = insert(:agent_runtime, cluster: cluster)
       runs = insert_list(3, :agent_run, runtime: runtime, status: :pending)
       insert_list(3, :agent_run, runtime: runtime, status: :running)

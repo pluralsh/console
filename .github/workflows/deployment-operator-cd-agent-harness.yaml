@@ -42,11 +42,11 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NODE_VERSION: 24.11.1
-      CLAUDE_VERSION: 2.1.236
-      GEMINI_VERSION: 0.44.1
-      OPENCODE_VERSION: 1.18.23
-      CODEX_VERSION: 0.153.4
-      PI_VERSION: 0.84.1
+      CLAUDE_VERSION: 2.1.332
+      GEMINI_VERSION: 0.71.1
+      OPENCODE_VERSION: 1.19.6
+      CODEX_VERSION: 0.172.0
+      PI_VERSION: 1.6.1
     outputs:
       node: ${{ env.NODE_VERSION }}
       claude: ${{ env.CLAUDE_VERSION }}
@@ -205,15 +205,15 @@ jobs:
       matrix:
         agents:
           - name: claude
-            version: 2.1.236
+            version: 2.1.332
           - name: gemini
-            version: 0.44.1
+            version: 0.71.1
           - name: opencode
-            version: 1.18.23
+            version: 1.19.6
           - name: codex
-            version: 0.153.4
+            version: 0.172.0
           - name: pi
-            version: 0.84.1
+            version: 1.6.1
     permissions:
       contents: write
       discussions: write

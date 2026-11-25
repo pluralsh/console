@@ -144,6 +144,32 @@
 {{- end -}}
 {{- end -}}
 
+{{- /* ZeroFS devbox homes */ -}}
+{{- $z := .Values.zerofs -}}
+{{- if $z.enabled -}}
+{{- if not (or $z.image.digest $z.image.tag) -}}
+{{- fail "zerofs.image.tag (or digest) is required" -}}
+{{- end -}}
+{{- if and (not $z.storageUrl) (not (include "substrate.juicefs.snapshotBucket" .)) -}}
+{{- fail "zerofs.storageUrl is required when objectStore.snapshotLocation doesn't name a bucket" -}}
+{{- end -}}
+{{- if not (regexMatch "^(s3|gs|azure)://[^/?]+(/[^?]*)?$" (include "substrate.zerofs.storageUrl" .)) -}}
+{{- fail (printf "zerofs.storageUrl must be s3://, gs:// or azure://<bucket>/<path>, got %q" (include "substrate.zerofs.storageUrl" .)) -}}
+{{- end -}}
+{{- if and (eq $os.backend "azureBlob") (not $z.azureClientId) -}}
+{{- fail "zerofs.azureClientId is required with objectStore.backend=azureBlob: ZeroFS reaches the container through Entra workload identity" -}}
+{{- end -}}
+{{- if and $z.encryption.existingSecret.name (not $z.encryption.existingSecret.key) -}}
+{{- fail "zerofs.encryption.existingSecret.key is required with zerofs.encryption.existingSecret.name" -}}
+{{- end -}}
+{{- if lt (int $z.defaultCapacityGiB) 1 -}}
+{{- fail "zerofs.defaultCapacityGiB must be at least 1" -}}
+{{- end -}}
+{{- if and $.Values.juicefs.enabled (eq $z.storageClassName $.Values.juicefs.storageClassName) -}}
+{{- fail "zerofs.storageClassName and juicefs.storageClassName must differ" -}}
+{{- end -}}
+{{- end -}}
+
 {{- if .Values.sandboxConfigs.microvm.enabled -}}
 {{- if not (and .Values.sandboxConfigs.microvm.assetScheme .Values.sandboxConfigs.microvm.assetBucket) -}}
 {{- fail "sandboxConfigs.microvm needs assetScheme (s3, gs or https) and assetBucket, where the microVM assets are staged" -}}

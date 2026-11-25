@@ -8,7 +8,7 @@ defmodule Console.Deployments.AgentsTest do
 
   describe "upsert_agent_runtime/3" do
     test "it can create a new agent run" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
       user    = insert(:user)
       group   = insert(:group)
 
@@ -28,7 +28,7 @@ defmodule Console.Deployments.AgentsTest do
     end
 
     test "it can handle existing agent runtimes" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
       user = insert(:user)
       group = insert(:group)
       runtime = insert(:agent_runtime,
@@ -62,7 +62,7 @@ defmodule Console.Deployments.AgentsTest do
     end
 
     test "it resolves an scm connection name to a connection id" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
       conn = insert(:scm_connection, name: "github")
 
       {:ok, runtime} = Agents.upsert_agent_runtime(%{
@@ -75,7 +75,7 @@ defmodule Console.Deployments.AgentsTest do
     end
 
     test "it rejects unknown scm connection names" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
 
       {:error, msg} = Agents.upsert_agent_runtime(%{
         name: "test",
@@ -84,6 +84,34 @@ defmodule Console.Deployments.AgentsTest do
       }, cluster)
 
       assert msg == "could not find scm connection missing"
+    end
+
+    test "clusters not configured for agents cannot create or update runtimes" do
+      cluster = insert(:cluster)
+      runtime = insert(:agent_runtime, cluster: cluster)
+
+      {:error, msg} = Agents.upsert_agent_runtime(%{name: "test", type: :claude}, cluster)
+      assert msg == "this cluster has not been configured to support agent workloads"
+
+      {:error, ^msg} = Agents.upsert_agent_runtime(%{name: runtime.name}, cluster)
+    end
+
+    test "a project can allow agents for all its clusters" do
+      cluster = insert(:cluster, project: insert(:project, allow_agents: true))
+
+      {:ok, _} = Agents.upsert_agent_runtime(%{name: "test", type: :claude}, cluster)
+    end
+
+    test "the management cluster allows agents by default" do
+      cluster = insert(:cluster, self: true)
+
+      {:ok, _} = Agents.upsert_agent_runtime(%{name: "test", type: :claude}, cluster)
+    end
+
+    test "an explicit setting overrides the management cluster default" do
+      cluster = insert(:cluster, self: true, allow_agents: false)
+
+      {:error, _} = Agents.upsert_agent_runtime(%{name: "test", type: :claude}, cluster)
     end
   end
 
@@ -694,7 +722,7 @@ defmodule Console.Deployments.AgentsTest do
 
   describe "scm_creds/2" do
     test "it uses the runtime's bound scm connection" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
       default = insert(:scm_connection, default: true, token: "default-token")
       runtime_conn = insert(:scm_connection,
         name: "runtime-github",
@@ -715,7 +743,7 @@ defmodule Console.Deployments.AgentsTest do
     end
 
     test "github app tokens carry github's expiry" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
       {:ok, pem, _} = Console.keypair("console@plural.sh")
       inst_id = Ecto.UUID.generate()
       conn = insert(:scm_connection, token: nil, github: %{app_id: "123", installation_id: inst_id, private_key: pem})
@@ -729,6 +757,15 @@ defmodule Console.Deployments.AgentsTest do
 
       assert creds.token == "app-pat"
       assert DateTime.compare(creds.expires_at, exp) == :eq
+    end
+
+    test "clusters not configured for agents get no scm credentials" do
+      cluster = insert(:cluster)
+      insert(:scm_connection, default: true, token: "default-token")
+      run = insert(:agent_run, runtime: insert(:agent_runtime, cluster: cluster))
+
+      {:error, msg} = Agents.scm_creds(run, cluster)
+      assert msg == "this cluster has not been configured to support agent workloads"
     end
   end
 

@@ -58,7 +58,7 @@ gates the chart's own features need.
 */}}
 {{- define "substrate.previewArg" -}}
 {{- $gates := .Values.previewGates | default list -}}
-{{- if and .Values.juicefs.enabled (not (has "ALL" $gates)) -}}
+{{- if and (or .Values.juicefs.enabled .Values.zerofs.enabled) (not (has "ALL" $gates)) -}}
 {{- $gates = append $gates "ExternalVolumes" -}}
 {{- end -}}
 {{- printf "--preview=%s" (join "," (uniq $gates)) -}}

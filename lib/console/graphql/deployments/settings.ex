@@ -25,6 +25,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :name, non_null(:string)
     field :description, :string
     field :disable_insights, :boolean
+    field :allow_agents, :boolean, description: "whether every cluster in this project can run agent workloads (AgentRuntimes and DevboxRunners), admin only"
     field :read_bindings, list_of(:policy_binding_attributes)
     field :write_bindings, list_of(:policy_binding_attributes)
   end
@@ -466,6 +467,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :description, :string
     field :default, :boolean
     field :disable_insights, :boolean
+    field :allow_agents, :boolean, description: "whether every cluster in this project can run agent workloads (AgentRuntimes and DevboxRunners)"
 
     @desc "list all alerts discovered for this project"
     connection field :alerts, node_type: :alert do

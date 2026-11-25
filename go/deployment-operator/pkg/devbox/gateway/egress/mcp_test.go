@@ -23,6 +23,7 @@ import (
 
 	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/scm"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 const mcpAudience = "http://devbox-gateway.plrl.svc:8080"
@@ -168,13 +169,9 @@ type mcpFixture struct {
 	scmToks []string
 }
 
-type fakeOwner map[string]string
-
-func (o fakeOwner) DevboxForPullRequest(_ context.Context, url string) (string, error) {
-	return o[url], nil
-}
-
-func newMCPFixture(t *testing.T, owner PullRequestOwner) *mcpFixture {
+// newMCPFixture serves the MCP for box-1 (instance i1) and box-2 (instance i2); consolePRs are the PR records console
+// already holds.
+func newMCPFixture(t *testing.T, consolePRs []*devboxv1.DevboxPullRequestRecord) *mcpFixture {
 	t.Helper()
 	iss := newTestIssuer(t)
 	v, err := newActorVerifier(iss.srv.URL, mcpAudience, "")
@@ -189,7 +186,7 @@ func newMCPFixture(t *testing.T, owner PullRequestOwner) *mcpFixture {
 		},
 		"devboxes/box-2-i2": {InstanceID: "i2", BoxID: "box-2", SCMHosts: []string{"github.com"}, AllowedRepositories: allow},
 	}}
-	ingest := &fakeIngest{creds: tokenCreds(time.Now, time.Hour)}
+	ingest := &fakeIngest{creds: tokenCreds(time.Now, time.Hour), records: consolePRs}
 	f := &mcpFixture{issuer: iss, ingest: ingest}
 	f.mcp = newMCPServer(&mcpServer{
 		verifier: v,
@@ -197,7 +194,6 @@ func newMCPFixture(t *testing.T, owner PullRequestOwner) *mcpFixture {
 		ingest:   ingest,
 		creds:    newCredentialCache(ingest, logr.Discard()),
 		prs:      newPRRegistry(),
-		owner:    owner,
 		log:      logr.Discard(),
 		scmClient: func(token string) scm.Client {
 			f.scmToks = append(f.scmToks, token)
@@ -456,7 +452,10 @@ func TestMCPSCMClientGetsRawTokenFromBasicCredential(t *testing.T) {
 }
 
 func TestMCPPullRequestToolsAreScopedToTheCallersBox(t *testing.T) {
-	f := newMCPFixture(t, fakeOwner{"https://github.com/pluralsh/console/pull/99": "box-1"})
+	f := newMCPFixture(t, []*devboxv1.DevboxPullRequestRecord{
+		{Url: "https://github.com/pluralsh/console/pull/99", DevboxId: "box-1", InstanceId: "i0"},
+		{Url: "https://github.com/pluralsh/console/pull/98", DevboxId: "box-2", InstanceId: "i2"},
+	})
 
 	// box-2 opens a PR; box-1 opens another.
 	if res := f.call(t, f.box2Token(t), "", CreatePullRequestTool, map[string]any{
@@ -477,8 +476,9 @@ func TestMCPPullRequestToolsAreScopedToTheCallersBox(t *testing.T) {
 		error string
 	}{
 		{"own PR", box1PR, ""},
-		{"own PR known to console", "https://github.com/pluralsh/console/pull/99", ""},
+		{"own box's PR known only to console", "https://github.com/pluralsh/console/pull/99", ""},
 		{"another box's PR", box2PR, "belongs to another devbox"},
+		{"another box's PR known only to console", "https://github.com/pluralsh/console/pull/98", "wasn't opened from this devbox"},
 		{"unknown PR", "https://github.com/pluralsh/console/pull/500", "wasn't opened from this devbox"},
 		{"PR off the allowlist", "https://github.com/pluralsh/secret/pull/1", "allowlist"},
 		{"PR on another SCM", "https://gitlab.com/pluralsh/console/-/merge_requests/1", "SCM connections"},
@@ -504,6 +504,57 @@ func TestMCPPullRequestToolsAreScopedToTheCallersBox(t *testing.T) {
 	}
 	if len(f.scmToks) != 2 {
 		t.Fatalf("only authorized calls should reach the SCM, got %d", len(f.scmToks))
+	}
+}
+
+// A PR from the Create PR button, or one this replica opened before a restart, exists only in console: the MCP
+// lists it and its PR tools accept it.
+func TestMCPSeesPullRequestsOnlyConsoleKnows(t *testing.T) {
+	button := "https://github.com/pluralsh/console/pull/42"
+	f := newMCPFixture(t, []*devboxv1.DevboxPullRequestRecord{
+		{Url: button, Number: 42, Title: "From the button", Status: "open", Source: "devbox", DevboxId: "box-1", InstanceId: "i1", ThreadId: "thread-1", CreatedAt: timestamppb.Now()},
+		{Url: "https://github.com/pluralsh/console/pull/43", DevboxId: "box-2", InstanceId: "i2"},
+	})
+	if res := f.call(t, f.box1Token(t), "", CreatePullRequestTool, map[string]any{
+		"repository": "console", "title": "t", "body": "b", "head": "box1", "changeType": "APPLICATION",
+	}, nil); res.IsError {
+		t.Fatal(res.text())
+	}
+
+	list := f.call(t, f.box1Token(t), "", ListPullRequestsTool, map[string]any{}, nil)
+	var got struct {
+		PullRequests []trackedPR `json:"pullRequests"`
+	}
+	if err := json.Unmarshal([]byte(list.text()), &got); err != nil {
+		t.Fatalf("%v: %s", err, list.text())
+	}
+	if len(got.PullRequests) != 2 || got.PullRequests[0].URL != button ||
+		got.PullRequests[0].Source != "devbox" || got.PullRequests[0].Repository != "https://github.com/pluralsh/console" ||
+		got.PullRequests[1].URL != "https://github.com/pluralsh/console/pull/1" {
+		t.Fatalf("want the button's PR from console, then the MCP's own, got %s", list.text())
+	}
+
+	if res := f.call(t, f.box1Token(t), "", "getPRState", map[string]any{"prUrl": button, "sideload": false}, nil); res.IsError {
+		t.Fatalf("getPRState on the button's PR: %s", res.text())
+	}
+	if res := f.call(t, f.box2Token(t), "", "getPRState", map[string]any{"prUrl": button, "sideload": false}, nil); !res.IsError {
+		t.Fatal("another box read the button's PR")
+	}
+}
+
+func TestMCPListPullRequestsFallsBackWhenConsoleIsDown(t *testing.T) {
+	f := newMCPFixture(t, nil)
+	if res := f.call(t, f.box1Token(t), "", CreatePullRequestTool, map[string]any{
+		"repository": "console", "title": "t", "body": "b", "head": "box1", "changeType": "APPLICATION",
+	}, nil); res.IsError {
+		t.Fatal(res.text())
+	}
+	f.ingest.mu.Lock()
+	f.ingest.listErr = errors.New("unavailable")
+	f.ingest.mu.Unlock()
+	list := f.call(t, f.box1Token(t), "", ListPullRequestsTool, map[string]any{}, nil)
+	if list.IsError || !strings.Contains(list.text(), "pull/1") || !strings.Contains(list.text(), "unreachable") {
+		t.Fatalf("want the local PRs with a warning, got %s", list.text())
 	}
 }
 

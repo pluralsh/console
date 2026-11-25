@@ -291,6 +291,31 @@ with external volumes.
 
 The operator needs `get`, `create` and `delete` on `storageclasses.storage.k8s.io` for these.
 
+### ZeroFS homes
+
+`zerofs.enabled: true` (opt-in, needs `zerofs.image.tag` or `.digest`) adds a second home driver,
+`zerofs.devbox.plural.sh` (StorageClass `zerofs.storageClassName`), with no metadata database. Each
+home is its own [ZeroFS](https://www.zerofs.net) filesystem under
+`<zerofs.prefix>/homes/<volume>/` in the snapshot bucket (or `zerofs.storageUrl`), encrypted with
+the password in `devbox-zerofs-encryption`. The secrets hook generates that secret once, or you can
+supply your own with `zerofs.encryption.existingSecret`. Losing the password loses every home.
+
+- **The controller** (`devbox-zerofs-controller`, unprivileged) passes a home's size and owner to
+  the node and deletes the home's objects when Substrate deletes the volume. Only ate-api-server can
+  call it.
+- **The node plugin** (`devbox-zerofs-node`) is a privileged DaemonSet that runs only where atelet
+  runs: it defaults to atelet's `nodeSelector`, `tolerations` and `affinity`, so nodes without
+  devboxes pay nothing for it. Atelet reaches it through the plugin socket on its own node. Staging a
+  home starts a `zerofs run` writer for it, with its own cache under `zerofs.node.stateDir`. The
+  plugin attaches the home's block device to a free `/dev/nbdN`, formats it as ext4 the first time,
+  and mounts it at atelet's staging path. Publishing bind-mounts that into the actor. Unstaging
+  unmounts the home, disconnects the device and stops the writer, which flushes to the bucket, so
+  the home can be staged on any other node. `updateStrategy` is `OnDelete`, because restarting the
+  plugin ends every home on the node.
+
+Seeds and snapshots aren't supported yet: CreateVolume with a content source or `seed` parameter
+fails with `UNIMPLEMENTED`.
+
 ## Values
 
 Every value is documented in [`values.yaml`](values.yaml) and typed in
@@ -328,6 +353,7 @@ Every value is documented in [`values.yaml`](values.yaml) and typed in
 | `objectStore.s3.*`, `objectStore.azureBlob.*` | | backend settings |
 | `rustfs.*` | disabled | embedded RustFS |
 | `juicefs.*` | disabled | [JuiceFS homes](#juicefs-homes): image, `name`, `storageClassName`, `bucket`, `postgres`, `home.{uid,gid,mode}`, controller and node `mountFlags`/`resources` |
+| `zerofs.*` | disabled | [ZeroFS homes](#zerofs-homes): image, `storageClassName`, `storageUrl`/`prefix`, `encryption.existingSecret`, `home.{uid,gid,mode}`, node cache sizes, `nbdClientFlags`, `objectStoreOptions` and scheduling |
 | `secretsHook.{opensslImage,kubectlImage,caValidityDays}` | `alpine/openssl:3.5.9`, `alpine/kubectl:1.37.2`, 365 | secrets hook |
 | `bootstrapJob.image` | `alpine/kubectl:1.37.2` | first-install bootstrap Job |
 | `cloudnative-pg.enabled` | `true` | bundle the CNPG operator |

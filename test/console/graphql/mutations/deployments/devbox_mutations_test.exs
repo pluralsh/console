@@ -5,7 +5,7 @@ defmodule Console.GraphQl.Deployments.DevboxMutationsTest do
 
   describe "upsertDevbox" do
     test "a cluster can upsert its devbox with the probed catalog" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
 
       {:ok, %{data: %{"upsertDevbox" => devbox}}} = run_query("""
         mutation Upsert($attrs: DevboxAttributes!) {

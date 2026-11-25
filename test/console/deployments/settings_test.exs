@@ -287,6 +287,31 @@ defmodule Console.Deployments.SettingsTest do
           user
         )
     end
+
+    test "only admins can allow agents in a project" do
+      user = insert(:user)
+      proj = insert(:project, write_bindings: [%{user_id: user.id}])
+
+      {:error, "only admins can configure agent workloads"} =
+        Settings.update_project(%{name: "test", allow_agents: true}, proj.id, user)
+
+      {:ok, updated} = Settings.update_project(%{name: "test", allow_agents: false}, proj.id, user)
+      assert updated.name == "test"
+
+      {:ok, updated} = Settings.update_project(%{name: "test", allow_agents: true}, proj.id, admin_user())
+      assert updated.allow_agents
+
+      {:error, "only admins can configure agent workloads"} =
+        Settings.update_project(%{allow_agents: nil}, proj.id, user)
+    end
+
+    test "project writers can clear an unset agent workloads setting" do
+      user = insert(:user)
+      proj = insert(:project, write_bindings: [%{user_id: user.id}])
+
+      {:ok, updated} = Settings.update_project(%{allow_agents: nil}, proj.id, user)
+      refute updated.allow_agents
+    end
   end
 
   describe "#delete_project/2" do

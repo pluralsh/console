@@ -9,6 +9,7 @@ import {
   Switch,
 } from '@pluralsh/design-system'
 
+import { useLogin } from 'components/contexts'
 import { useUpdateState } from 'components/hooks/useUpdateState'
 
 import { GqlError } from 'components/utils/Alert'
@@ -113,6 +114,8 @@ function ClusterSettingsModalInner({
       ),
     [cluster?.tags]
   )
+  const { me } = useLogin()
+  const isAdmin = !!me?.roles?.admin
 
   const {
     state: {
@@ -120,6 +123,7 @@ function ClusterSettingsModalInner({
       protect,
       tags,
       disableAi,
+      allowAgents,
       autoRemediate,
       remediationWorkbenchId,
       minPriority,
@@ -137,6 +141,7 @@ function ClusterSettingsModalInner({
       protect: !!cluster?.protect,
       tags: initialTags,
       disableAi: !!cluster?.disableAi,
+      allowAgents: !!cluster?.allowAgents,
       autoRemediate: !!cluster?.remediationWorkbench?.id,
       remediationWorkbenchId: cluster?.remediationWorkbench?.id ?? null,
       minPriority:
@@ -175,6 +180,9 @@ function ClusterSettingsModalInner({
                   protect,
                   tags: tagsToNameValue(tags),
                   disableAi,
+                  ...(allowAgents !== initialState.allowAgents && {
+                    allowAgents,
+                  }),
                   ...changedRemediationAttributes(
                     {
                       autoRemediate,
@@ -247,6 +255,14 @@ function ClusterSettingsModalInner({
         >
           Disable AI insights
         </Switch>
+        {isAdmin && (
+          <Switch
+            checked={allowAgents}
+            onChange={(checked) => updateState({ allowAgents: checked })}
+          >
+            Allow agent workloads (AgentRuntimes and DevboxRunners)
+          </Switch>
+        )}
         <Switch
           checked={autoRemediate}
           onChange={(checked) => updateState({ autoRemediate: checked })}

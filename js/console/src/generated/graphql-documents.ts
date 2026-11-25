@@ -1655,6 +1655,7 @@ export const ClustersRowFragmentDoc = /*#__PURE__*/ gql`
     extendedFrom
   }
   disableAi
+  allowAgents
   remediation {
     minPriority
     window

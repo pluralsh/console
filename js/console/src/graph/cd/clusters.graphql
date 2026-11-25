@@ -218,6 +218,7 @@ fragment ClustersRow on Cluster {
     extendedFrom
   }
   disableAi
+  allowAgents
   remediation {
     minPriority
     window

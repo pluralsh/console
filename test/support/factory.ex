@@ -1194,7 +1194,7 @@ defmodule Console.Factory do
     %Schema.AgentRuntime{
       name: sequence(:agent_runtime, & "agent-runtime-#{&1}"),
       create_policy_id: Ecto.UUID.generate(),
-      cluster: build(:cluster),
+      cluster: build(:cluster, allow_agents: true),
       type: :claude
     }
   end
@@ -1520,7 +1520,7 @@ defmodule Console.Factory do
       template_revision: "rev-1",
       status: :ready,
       create_policy_id: Ecto.UUID.generate(),
-      cluster: build(:cluster),
+      cluster: build(:cluster, allow_agents: true),
       agents: [
         %Schema.Devbox.Agent{
           type: :claude,

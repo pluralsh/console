@@ -9216,9 +9216,16 @@ enum Provider {
 
 input ProjectAttributes {
   name: String!
+
   description: String
+
   disableInsights: Boolean
+
+  "whether every cluster in this project can run agent workloads (AgentRuntimes and DevboxRunners), admin only"
+  allowAgents: Boolean
+
   readBindings: [PolicyBindingAttributes]
+
   writeBindings: [PolicyBindingAttributes]
 }
 
@@ -9774,6 +9781,9 @@ type Project {
   default: Boolean
 
   disableInsights: Boolean
+
+  "whether every cluster in this project can run agent workloads (AgentRuntimes and DevboxRunners)"
+  allowAgents: Boolean
 
   "list all alerts discovered for this project"
   alerts(after: String, first: Int, before: String, last: Int): AlertConnection
@@ -15421,6 +15431,9 @@ input ClusterAttributes {
   "whether to disable ai insights for this cluster"
   disableAi: Boolean
 
+  "whether this cluster can run agent workloads (AgentRuntimes and DevboxRunners), admin only"
+  allowAgents: Boolean
+
   "workbench that receives auto-remediation jobs for this cluster"
   remediationWorkbenchId: ID
 
@@ -15537,6 +15550,9 @@ input ClusterUpdateAttributes {
 
   "whether to disable ai insights for this cluster"
   disableAi: Boolean
+
+  "whether this cluster can run agent workloads (AgentRuntimes and DevboxRunners), admin only"
+  allowAgents: Boolean
 
   "workbench that receives auto-remediation jobs for this cluster. Clear to disable auto-remediation"
   remediationWorkbenchId: ID
@@ -16316,6 +16332,12 @@ type Cluster {
 
   "auto-remediation policy, run-as user, and job modes"
   remediation: ClusterRemediation
+
+  "whether this cluster itself is configured for agent workloads (AgentRuntimes and DevboxRunners), defaults to true only for the management cluster"
+  allowAgents: Boolean
+
+  "whether this cluster can run agent workloads, from either its own allowAgents setting or its project's"
+  agentsEnabled: Boolean
 
   "The version of OpenShift this cluster is running"
   openshiftVersion: String

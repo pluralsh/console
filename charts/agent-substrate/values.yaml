@@ -350,6 +350,78 @@ juicefs:
     affinity: {}
     priorityClassName: system-node-critical
 
+# ZeroFS devbox homes: each home is its own ZeroFS filesystem in the bucket, served on the node its box runs on as
+# an ext4 block device. No metadata database; seeds and snapshots aren't supported yet.
+zerofs:
+  enabled: false
+  image:
+    repository: ghcr.io/pluralsh/devbox-zerofs
+    # -- Required unless digest is set.
+    tag: ""
+    digest: ""
+  # -- The StorageClass DevboxRunners name (provisioner zerofs.devbox.plural.sh).
+  storageClassName: devbox-zerofs
+  # -- Where homes live: s3://, gs:// or azure://<bucket>/<path>. Defaults to <prefix> in the bucket of
+  # objectStore.snapshotLocation (or rustfs.bucket).
+  storageUrl: ""
+  prefix: devbox-homes-zerofs
+  # -- The size of a home created without one. Devices are thin, so this is a ceiling, not an allocation.
+  defaultCapacityGiB: 100
+  # Owner and mode of a new, empty home: the devbox images' dev user.
+  home:
+    uid: 1000
+    gid: 1000
+    mode: "0755"
+  encryption:
+    # -- The Secret and key holding the password every home is encrypted with. Empty: the secrets hook generates
+    # devbox-zerofs-encryption once and never rotates it. Losing the password loses every home.
+    existingSecret:
+      name: ""
+      key: password
+  # -- SPIFFE IDs allowed to call the controller. Empty: ate-api-server.
+  allowedClients: []
+  serviceAccount:
+    # -- Workload identity for the bucket (IRSA, GKE Workload Identity). The controller deletes homes; every node
+    # plugin reads and writes them.
+    annotations: {}
+  # -- objectStore.backend=azureBlob: the Entra client ID federated to system:serviceaccount:ate-system:devbox-zerofs.
+  azureClientId: ""
+  controller:
+    resources: {}
+  node:
+    # -- Each staged home's config and cache, on the node's data disk. Removed when the home is unstaged.
+    stateDir: /var/lib/ate/zerofs
+    # -- Each home's writer caches this much on disk and in memory. Both are per staged home, not per node.
+    cacheDiskGB: 10
+    cacheMemoryGB: 0.25
+    # -- NBD devices to ask for when the plugin loads the nbd module: the most homes one node can stage.
+    nbdsMax: 128
+    # -- nbd-client flags for every device.
+    nbdClientFlags:
+      - -connections
+      - "4"
+      - -timeout
+      - "600"
+      - -block-size
+      - "4096"
+    # -- ext4 mount options. discard returns freed blocks to the bucket as they're freed.
+    mountOptions: discard
+    # -- Extra object_store options for every writer, e.g. {region: us-east-2}. allow_http is set for RustFS and
+    # http:// S3 endpoints.
+    objectStoreOptions: {}
+    # -- Every writer runs in this pod, so its usage grows with the homes staged on the node; size the request
+    # for the node's expected homes and leave memory unlimited.
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+    terminationGracePeriodSeconds: 120
+    # -- Defaults to atelet's scheduling, since homes are mounted wherever atelet runs actors.
+    tolerations: []
+    nodeSelector: {}
+    affinity: {}
+    priorityClassName: system-node-critical
+
 # The bundled Kubernetes Secrets credential provider (`k8s.io`).
 k8sCredentialProvider:
   # -- Atespace allow-list (namespace-policy.yaml `policies`).
