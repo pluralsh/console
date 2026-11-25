@@ -5,6 +5,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"reflect"
 	"slices"
 	"strings"
 	"testing"
@@ -26,6 +27,8 @@ func testConfig(t *testing.T) *Config {
 			return []string{"PATH=/usr/bin", "ANTHROPIC_DEFAULT_OPUS_MODEL=stale"}
 		},
 		CodexBundledModels: func() ([]byte, error) { return nil, errors.New("no codex in tests") },
+		// Not the machine's: tests run the same inside a devbox image, which has managed settings.
+		ClaudeManagedSettings: filepath.Join(dir, "no-managed-settings.json"),
 	}
 }
 
@@ -682,5 +685,51 @@ func TestPiSubagentsReplacesEarlierCopies(t *testing.T) {
 	want := []string{"/home/dev/mine.ts", filepath.Join(c.PiSubagentExtension, "index.ts")}
 	if !slices.Equal(got.Extensions, want) {
 		t.Errorf("extensions = %v, want %v", got.Extensions, want)
+	}
+}
+
+// Without the devbox images' managed settings, Claude's own sandbox is turned off in the user's settings, unless
+// the user chose otherwise.
+func TestClaudeSandboxOffWithoutManagedSettings(t *testing.T) {
+	c := testConfig(t)
+	c.ClaudeManagedSettings = filepath.Join(t.TempDir(), "missing.json")
+	settings := filepath.Join(c.Home, ".claude", "settings.json")
+	read := func() map[string]any {
+		t.Helper()
+		data, err := os.ReadFile(settings)
+		if err != nil {
+			t.Fatal(err)
+		}
+		out := map[string]any{}
+		if err := json.Unmarshal(data, &out); err != nil {
+			t.Fatal(err)
+		}
+		return out
+	}
+	if _, err := c.Spec(&devboxv1.AgentLaunch{Agent: devboxv1.AgentType_AGENT_TYPE_CLAUDE}, nil, ""); err != nil {
+		t.Fatal(err)
+	}
+	if got := read()["sandbox"]; !reflect.DeepEqual(got, map[string]any{"enabled": false}) {
+		t.Errorf("sandbox = %v, want disabled", got)
+	}
+
+	if err := os.WriteFile(settings, []byte(`{"sandbox": {"enabled": true}}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := c.Spec(&devboxv1.AgentLaunch{Agent: devboxv1.AgentType_AGENT_TYPE_CLAUDE}, nil, ""); err != nil {
+		t.Fatal(err)
+	}
+	if got := read()["sandbox"]; !reflect.DeepEqual(got, map[string]any{"enabled": true}) {
+		t.Errorf("sandbox = %v, the user's choice was overwritten", got)
+	}
+
+	// The image's managed settings already turn it off.
+	c.ClaudeManagedSettings = settings
+	c.Home = t.TempDir()
+	if _, err := c.Spec(&devboxv1.AgentLaunch{Agent: devboxv1.AgentType_AGENT_TYPE_CLAUDE}, nil, ""); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(filepath.Join(c.Home, ".claude", "settings.json")); err == nil {
+		t.Error("user settings were written although the image has managed settings")
 	}
 }

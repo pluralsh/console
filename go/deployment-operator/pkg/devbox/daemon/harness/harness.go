@@ -181,6 +181,8 @@ type Config struct {
 	CodexBundledModels func() ([]byte, error)
 	// PiSubagentExtension overrides where pi's subagent extension is (PiSubagentDir).
 	PiSubagentExtension string
+	// ClaudeManagedSettings overrides where Claude Code's managed settings are (tests).
+	ClaudeManagedSettings string
 }
 
 // Spec is everything needed to start one agent's ACP process.
@@ -407,6 +409,9 @@ func (c *Config) claudeSpec(set func(kv ...string), d agentDefaults, subscriptio
 	if bootModel != "" {
 		set(d.modelEnv, bootModel)
 	}
+	if err := c.defaultClaudeSandboxOff(); err != nil {
+		return err
+	}
 	return c.syncClaudeAvailableModels(proxyModels.GetModels())
 }
 
@@ -540,6 +545,32 @@ func (c *Config) writeOpenCodeConfig(aiProxy, model string, proxyModels []string
 		return "", err
 	}
 	return path, nil
+}
+
+// claudeManagedSettings is where the devbox images turn Claude Code's own sandbox off: the devbox is the
+// sandbox, and Claude's (no network but its own proxy) breaks package downloads through the box's egress proxy.
+const claudeManagedSettings = "/etc/claude-code/managed-settings.json"
+
+// defaultClaudeSandboxOff turns Claude Code's sandbox off in the user's settings for an environment image without
+// the devbox images' managed settings, unless the user set it.
+func (c *Config) defaultClaudeSandboxOff() error {
+	managed := c.ClaudeManagedSettings
+	if managed == "" {
+		managed = claudeManagedSettings
+	}
+	if _, err := os.Stat(managed); err == nil {
+		return nil
+	}
+	path := filepath.Join(c.Home, ".claude", "settings.json")
+	settings := map[string]any{}
+	if _, err := fsutil.ReadJSON(path, &settings); err != nil {
+		return err
+	}
+	if _, set := settings["sandbox"]; set {
+		return nil
+	}
+	settings["sandbox"] = map[string]any{"enabled": false}
+	return fsutil.WriteJSON(path, settings, 0o644)
 }
 
 // syncClaudeAvailableModels makes Claude Code's model picker offer the proxy's models: claude-agent-acp lists
