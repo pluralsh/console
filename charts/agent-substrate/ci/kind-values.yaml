@@ -37,3 +37,9 @@ juicefs:
   enabled: true
   image:
     tag: "0.0.0"
+
+# ZeroFS homes on RustFS.
+zerofs:
+  enabled: true
+  image:
+    tag: "0.0.0"

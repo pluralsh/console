@@ -34,3 +34,8 @@ juicefs:
   image:
     tag: "0.0.0"
   azureClientId: 00000000-0000-0000-0000-000000000004
+zerofs:
+  enabled: true
+  image:
+    tag: "0.0.0"
+  azureClientId: 00000000-0000-0000-0000-000000000005

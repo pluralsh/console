@@ -74,6 +74,11 @@ fi
 if [ -n "${PG_JUICEFS_SECRET:-}" ]; then
   create_secret "$NS" "$PG_JUICEFS_SECRET" kubernetes.io/basic-auth username password
 fi
+# Every ZeroFS home is encrypted with this password; create_secret never
+# replaces it, and uninstalling the chart leaves it.
+if [ -n "${ZEROFS_SECRET:-}" ]; then
+  create_secret "$NS" "$ZEROFS_SECRET" kubernetes.io/basic-auth username password
+fi
 
 # actor-id-ca-certs publishes just the root of actor-id-ca-pool, which the
 # egress gateway verifies actor client certificates against. Kept in sync.

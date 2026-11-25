@@ -42,3 +42,10 @@ juicefs:
   serviceAccount:
     annotations:
       iam.gke.io/gcp-service-account: devbox-juicefs@plural-dev.iam.gserviceaccount.com
+zerofs:
+  enabled: true
+  image:
+    tag: "0.0.0"
+  serviceAccount:
+    annotations:
+      iam.gke.io/gcp-service-account: devbox-zerofs@plural-dev.iam.gserviceaccount.com
