@@ -1,10 +1,20 @@
 # Builds Agent Substrate's Azure Blob objectstore plugin, which upstream doesn't publish, into the image the
 # agent-substrate chart defaults to (objectStore.azureBlob.image.repository). Bump PLUGIN_REF and VERSION to pick up
-# an upstream change.
+# an upstream change; the manual run's inputs override them for one-off builds, and reusing a published version
+# overwrites its tag.
 name: CD / Publish objectstore-azure-blob
 
 on:
   workflow_dispatch:
+    inputs:
+      ref:
+        description: Upstream commit to build (defaults to the pinned PLUGIN_REF)
+        required: false
+        type: string
+      version:
+        description: Version tag (defaults to VERSION)
+        required: false
+        type: string
   push:
     branches:
       - master
@@ -16,8 +26,8 @@ permissions:
 
 env:
   PLUGIN_REPOSITORY: agent-substrate-plugins/objectstore-azure-blob
-  PLUGIN_REF: d960af490bc8a3a72902543a420d0f857f4633d3
-  VERSION: 0.1.0
+  PLUGIN_REF: ${{ inputs.ref || 'd960af490bc8a3a72902543a420d0f857f4633d3' }}
+  VERSION: ${{ inputs.version || '0.1.0' }}
   KO_DOCKER_REPO: ghcr.io/pluralsh/objectstore-azure-blob
 
 jobs:
