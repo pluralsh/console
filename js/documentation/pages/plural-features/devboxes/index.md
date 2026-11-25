@@ -29,4 +29,6 @@ spec:
 
 The deployment operator delivers the devbox daemon and the agents with each release, independently of the environment image. When a runner changes, or a new operator release ships a new daemon or agent version, existing instances move to the new revision in place: by default when they next resume, and always when an update is triggered from Plural (see `spec.instanceUpdatePolicy`). An update keeps the instance's home and agent threads, but restarts its processes and resets the rest of its filesystem to the image, so anything installed outside the home, for example with `apt-get`, is gone afterwards.
 
+Instances whose home is on JuiceFS (`spec.home.storage: JuiceFS`) can't move between revisions yet: they keep the daemon and agents of the revision they were created on, and an update triggered from Plural is refused. Create a new instance to use a newer revision.
+
 See [Environment images](/plural-features/devboxes/environment-images) for building your own image, and the [Agent API reference](/api-reference/kubernetes/agent-api-reference#devboxrunner) for every `DevboxRunner` field.

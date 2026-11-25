@@ -12,7 +12,7 @@ A devbox instance runs two images side by side:
 
 When an instance starts, the runtime installs the daemon and the agents listed in the runner's `spec.agents` into the instance's home volume, and the environment image runs them from there. Your image therefore doesn't need to ship any agent, and agent updates don't require rebuilding it.
 
-Only the runner's own agents are installed, because everything installed lands in every instance's home and snapshots. As a rough guide on amd64, Claude Code and Codex take about 320 MB each, OpenCode 180 MB, pi 180 MB, Gemini CLI 100 MB, and the Node.js they share 120 MB. The daemon adds about 20 MB, and Playwright MCP about 20 MB with the browser enabled.
+Only the runner's own agents are installed, because everything installed lands in every instance's home and snapshots, and counts against a JuiceFS home's quota (`spec.home.size`). As a rough guide on amd64, Claude Code and Codex take about 320 MB each, OpenCode 180 MB, pi 180 MB, Gemini CLI 100 MB, and the Node.js they share 120 MB. The daemon adds about 20 MB, and Playwright MCP about 20 MB with the browser enabled.
 
 
 ## Requirements
@@ -35,6 +35,7 @@ These are optional but recommended:
 * **The devbox shell setup.** Copy `/etc/profile.d/devbox.sh` and `/usr/local/lib/devbox/devbox.sh` from one of the images below. Login shells reset `PATH`; the setup puts the agents back on it in terminals and loads the instance's cloud identities. Without it, agents still work, but `claude`, `codex` and the other CLIs are missing from terminals, or resolve to copies of your own.
 * **Chromium and Xvfb**, if the runner enables the browser: Chromium at `$DEVBOX_CHROMIUM` (default `/usr/bin/chromium`), plus `Xvfb` and `x11vnc`. Playwright MCP comes from the runtime.
 * **A system CA bundle at `/etc/ssl/certs/ca-certificates.crt`**, or `DEVBOX_SYSTEM_CA_BUNDLE` pointing at yours (for example `/etc/pki/tls/certs/ca-bundle.crt` on RHEL).
+* **Claude Code's managed settings** at `/etc/claude-code/managed-settings.json`, turning Claude's own sandbox off (`{"sandbox": {"enabled": false}}`): the devbox is the sandbox, and Claude's breaks downloads through the egress proxy. Without the file, the daemon sets the same default in the user's Claude settings, which users can change.
 * **Skeleton dotfiles** in `/etc/devbox/skel` (or `$DEVBOX_SKEL_DIR`). They're copied into the home on first boot without overwriting your files.
 
 Nothing in the image's `ENTRYPOINT` or `CMD` is used, and nothing should be written under `/home/dev` at build time: the home is a volume, so it hides whatever the image puts there.
