@@ -71,6 +71,8 @@ func TestDevboxInstanceUpdatesOnSubstrate(t *testing.T) {
 
 	runner := func(mutate ...func(*v1alpha1.DevboxRunner)) *v1alpha1.DevboxRunner {
 		r := &v1alpha1.DevboxRunner{ObjectMeta: metav1.ObjectMeta{Name: "e2e", UID: types.UID("e2e")}}
+		// The runtime installs these into every instance's home, from the runtime image.
+		r.Spec.Agents = []v1alpha1.DevboxAgent{{Type: v1alpha1.DevboxAgentClaude, Default: lo.ToPtr(true)}, {Type: v1alpha1.DevboxAgentCodex}}
 		r.Spec.Resources = &v1alpha1.DevboxResources{CPU: lo.ToPtr(resource.MustParse("500m")), Memory: lo.ToPtr(resource.MustParse("1Gi"))}
 		if shell := os.Getenv("E2E_SHELL"); shell != "" {
 			r.Spec.Runtime = &v1alpha1.DevboxRuntime{Shell: &shell}
@@ -99,18 +101,22 @@ func TestDevboxInstanceUpdatesOnSubstrate(t *testing.T) {
 	a2 := build("a2", cfg["E2E_RUNTIME_A"], runner(func(r *v1alpha1.DevboxRunner) {
 		r.Spec.Env = []v1alpha1.DevboxEnvVar{{Name: "E2E_TEMPLATE", Value: lo.ToPtr("a2")}}
 	}))
+	// The same runtime for another agent selection, which is another install in the home.
+	withPi := build("pi", cfg["E2E_RUNTIME_A"], runner(func(r *v1alpha1.DevboxRunner) {
+		r.Spec.Agents = append(r.Spec.Agents, v1alpha1.DevboxAgent{Type: v1alpha1.DevboxAgentPi})
+	}))
 	b := build("b", cfg["E2E_RUNTIME_B"], runner())
 	broken := build("broken", cfg["E2E_RUNTIME_B"], runner(func(r *v1alpha1.DevboxRunner) {
 		r.Spec.Runtime = &v1alpha1.DevboxRuntime{Shell: lo.ToPtr("/no/such/shell")}
 	}))
-	for _, tmpl := range []*ateapi.ActorTemplate{old, a, a2, b, broken} {
+	for _, tmpl := range []*ateapi.ActorTemplate{old, a, a2, withPi, b, broken} {
 		if _, err := e.api.CreateActorTemplate(ctx, tmpl, false); err != nil {
 			t.Fatalf("creating template %s: %v", tmpl.Metadata.Name, err)
 		}
 	}
 
 	t.Run("golden boots", func(t *testing.T) {
-		for _, name := range []string{"old", "a", "a2", "b"} {
+		for _, name := range []string{"old", "a", "a2", "pi", "b"} {
 			tag, msg := e.golden(name)
 			if tag == "" {
 				t.Fatalf("template %s has no golden snapshot: %s", name, msg)
@@ -136,6 +142,8 @@ func TestDevboxInstanceUpdatesOnSubstrate(t *testing.T) {
 		e.resume("i1", "plain resume on the sidecar template", ateapi.ActorState_ACTOR_STATE_RUNNING)
 		e.move("i1", "b", "daemon release")
 		e.move("i1", "a", "back to the previous daemon")
+		e.move("i1", "pi", "another agent selection, same runtime")
+		e.move("i1", "a", "back to the first selection")
 		for i := range 5 {
 			e.move("i1", lo.Ternary(i%2 == 0, "a2", "a"), "template change, same runtime")
 		}

@@ -294,6 +294,9 @@ func (k *acrKeychain) Resolve(target authn.Resource) (authn.Authenticator, error
 	return authn.FromConfig(auth), nil
 }
 
+// devboxEnvironmentImageDocs documents the environment image requirements and the base images to build from.
+const devboxEnvironmentImageDocs = "https://docs.plural.sh/plural-features/devboxes/environment-images"
+
 // DevboxImageContractResult is the outcome of checking a resolved image against its contract.
 type DevboxImageContractResult struct {
 	// Violations make the image unusable; the template revision is not built.
@@ -315,8 +318,8 @@ func CheckDevboxImageContract(img *ResolvedDevboxImage) DevboxImageContractResul
 	res := DevboxImageContractResult{}
 
 	if contract := img.Labels[v1alpha1.DevboxImageContractLabel]; contract != v1alpha1.DevboxImageContractV1 {
-		res.Violations = append(res.Violations, fmt.Sprintf("label %s is %q, want %q; build FROM ghcr.io/pluralsh/devbox-minimal or devbox-fat",
-			v1alpha1.DevboxImageContractLabel, contract, v1alpha1.DevboxImageContractV1))
+		res.Violations = append(res.Violations, fmt.Sprintf("label %s is %q, want %q; see %s",
+			v1alpha1.DevboxImageContractLabel, contract, v1alpha1.DevboxImageContractV1, devboxEnvironmentImageDocs))
 	}
 
 	if uid := strings.Split(img.User, ":")[0]; uid != "1000" {

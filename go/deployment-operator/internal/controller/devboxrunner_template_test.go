@@ -14,6 +14,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/runtimemanifest"
 )
 
 const (
@@ -38,7 +39,8 @@ func TestDevboxActorTemplateContainers(t *testing.T) {
 	devbox, runtime := tmpl.Containers[0], tmpl.Containers[1]
 	g.Expect(devbox.Name).To(Equal("devbox"))
 	g.Expect(devbox.Image).To(Equal(testEnvImage))
-	g.Expect(devbox.Command).To(Equal([]string{"/bin/sh", "-c", devboxWaitAndExec, "devbox-runtime", "sha256:aaaa", "/home/dev/.plural-runtime", "sha256-aaaa"}))
+	id := runtimemanifest.InstallID("sha256:aaaa", nil, false)
+	g.Expect(devbox.Command).To(Equal([]string{"/bin/sh", "-c", devboxWaitAndExec, "devbox-runtime", id, "/home/dev/.plural-runtime", runtimemanifest.InstallDirName(id)}))
 	g.Expect(devbox.Args).To(BeEmpty())
 	g.Expect(devbox.WakeupProbe).NotTo(BeNil())
 	g.Expect(devbox.VolumeMounts[0].Name).To(Equal("home"))
@@ -47,14 +49,27 @@ func TestDevboxActorTemplateContainers(t *testing.T) {
 	g.Expect(runtime.Name).To(Equal("plural-runtime"))
 	g.Expect(runtime.Image).To(Equal(testRuntimeA))
 	g.Expect(runtime.Command).To(BeEmpty(), "the image's installer entrypoint runs")
-	g.Expect(runtime.Args).To(Equal([]string{"--digest", "sha256:aaaa", "--dst", "/mnt/home/.plural-runtime"}))
+	g.Expect(runtime.Args).To(Equal([]string{"--digest", "sha256:aaaa", "--dst", "/mnt/home/.plural-runtime", "--agents", ""}))
 	g.Expect(runtime.WakeupProbe).To(BeNil())
 	g.Expect(runtime.VolumeMounts).To(HaveLen(1))
 	g.Expect(runtime.VolumeMounts[0].Name).To(Equal("home"))
 	g.Expect(runtime.VolumeMounts[0].MountPath).To(Equal("/mnt/home"))
 	g.Expect(runtime.SecurityContext.Capabilities.Add).To(ConsistOf("DAC_OVERRIDE", "FOWNER"))
 
+	// The runner's agents and browser pick what the sidecar installs.
 	runner := templateRunner()
+	runner.Spec.Agents = []v1alpha1.DevboxAgent{{Type: v1alpha1.DevboxAgentClaude, Default: lo.ToPtr(true)}, {Type: v1alpha1.DevboxAgentPi}}
+	runner.Spec.Browser = &v1alpha1.DevboxBrowser{Enabled: true}
+	withAgents, hashAgents, err := r.buildActorTemplate(runner, "space", testEnvImage, testRuntimeA)
+	g.Expect(err).NotTo(HaveOccurred())
+	g.Expect(withAgents.Containers[1].Args).To(Equal([]string{"--digest", "sha256:aaaa", "--dst", "/mnt/home/.plural-runtime", "--agents", "claude,pi", "--browser"}))
+	// The devbox container waits for the install of exactly these agents, which the sidecar names the same way.
+	g.Expect(withAgents.Containers[0].Command[4]).To(Equal(runtimemanifest.InstallID("sha256:aaaa", []string{"claude", "pi"}, true)))
+	_, hashNone, err := r.buildActorTemplate(templateRunner(), "space", testEnvImage, testRuntimeA)
+	g.Expect(err).NotTo(HaveOccurred())
+	g.Expect(hashAgents).NotTo(Equal(hashNone), "other agents are another revision")
+
+	runner = templateRunner()
 	runner.Spec.Runtime = &v1alpha1.DevboxRuntime{Shell: lo.ToPtr("/busybox/sh")}
 	tmpl, _, err = r.buildActorTemplate(runner, "space", testEnvImage, testRuntimeA)
 	g.Expect(err).NotTo(HaveOccurred())
@@ -99,15 +114,15 @@ func TestDevboxWaitAndExec(t *testing.T) {
 	if err != nil {
 		t.Skip("no sh on PATH")
 	}
-	const digest = "sha256:aaaa"
+	digest := runtimemanifest.InstallID("sha256:aaaa", []string{"claude"}, false)
 
 	setup := func(t *testing.T) (root string, run func() *exec.Cmd) {
 		root = filepath.Join(t.TempDir(), ".plural-runtime")
-		bin := filepath.Join(root, runtimeDirName(digest), "bin")
+		bin := filepath.Join(root, runtimemanifest.InstallDirName(digest), "bin")
 		NewWithT(t).Expect(os.MkdirAll(bin, 0o755)).To(Succeed())
-		NewWithT(t).Expect(os.WriteFile(filepath.Join(bin, "devbox-daemon"), []byte("#!/bin/sh\necho daemon started as $0\n"), 0o755)).To(Succeed())
+		NewWithT(t).Expect(os.WriteFile(filepath.Join(bin, "devbox-daemon"), []byte("#!/bin/sh\necho daemon started as $0 in $DEVBOX_RUNTIME_DIR\n"), 0o755)).To(Succeed())
 		return root, func() *exec.Cmd {
-			return exec.Command(sh, "-c", devboxWaitAndExec, "devbox-runtime", digest, root, runtimeDirName(digest))
+			return exec.Command(sh, "-c", devboxWaitAndExec, "devbox-runtime", digest, root, runtimemanifest.InstallDirName(digest))
 		}
 	}
 
@@ -117,7 +132,8 @@ func TestDevboxWaitAndExec(t *testing.T) {
 		g.Expect(os.WriteFile(filepath.Join(root, "ready"), []byte(digest+"\n"), 0o644)).To(Succeed())
 		out, err := run().CombinedOutput()
 		g.Expect(err).NotTo(HaveOccurred(), string(out))
-		g.Expect(string(out)).To(ContainSubstring("daemon started as " + filepath.Join(root, "sha256-aaaa", "bin", "devbox-daemon")))
+		g.Expect(string(out)).To(ContainSubstring("daemon started as " + filepath.Join(root, runtimemanifest.InstallDirName(digest), "bin", "devbox-daemon") +
+			" in " + filepath.Join(root, runtimemanifest.InstallDirName(digest))))
 	})
 
 	// After an update the home volume still holds the previous runtime's marker until the sidecar replaces it.

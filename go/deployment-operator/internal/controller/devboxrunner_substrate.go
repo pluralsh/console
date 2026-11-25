@@ -24,6 +24,7 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 	"github.com/pluralsh/console/go/deployment-operator/internal/utils"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/probe"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/runtimemanifest"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate/ateapi"
 )
@@ -41,8 +42,13 @@ const (
 	runtimeHomeMount = "/mnt/home"
 	// runtimeInstallDir is where the sidecar installs the runtime, relative to the home volume.
 	runtimeInstallDir = ".plural-runtime"
-	devboxTrustVolume = "egress-trust"
-	devboxActorVolume = "actor-metadata"
+	// devboxWakeupTimeout bounds how long Substrate waits for the daemon's /readyz after a boot. It outlasts the
+	// devbox container's wait for the runtime (devboxWaitAndExec, about 270 s) by a minute, for the polls' own
+	// cost and the daemon's start, so a runtime that never installed is reported as such. Copying claude and
+	// codex into a home takes about 10 s under gVisor; several installs on one worker at once took up to 108 s.
+	devboxWakeupTimeout = 330
+	devboxTrustVolume   = "egress-trust"
+	devboxActorVolume   = "actor-metadata"
 	// devboxEgressTrustMount is the first of the daemon's DefaultEgressCAGlobs.
 	devboxEgressTrustMount = "/run/ate/egress-trust-bundle"
 	devboxActorMetaMount   = "/run/ate/actor"
@@ -423,24 +429,39 @@ func (r *DevboxRunnerReconciler) ensureAtespace(ctx context.Context, api substra
 }
 
 // devboxWaitAndExec is the devbox container's command: it waits for the runtime sidecar to publish the ready
-// marker for the template's runtime digest, then execs the daemon the sidecar installed in the home volume, so
-// the daemon is PID 1 as before. Arguments: the runtime digest, the install root and the digest's directory.
-// It is POSIX sh with builtins only, apart from sleep, so it runs in any environment image with a shell. The
-// marker is compared with the digest because the home volume outlives a template change: after an update it
-// still holds the previous runtime until the sidecar replaces it.
+// marker for the template's install ID (runtimemanifest.InstallID: the runtime digest and the runner's agents),
+// then execs the daemon the sidecar installed in the home volume, so the daemon is PID 1 as before, and tells it
+// where the runtime (and its agents) is. Arguments: the install ID, the install root and the ID's directory.
+// It is POSIX sh with builtins only, apart from sleep, so it runs in any environment image with a shell. It waits
+// about 270 s (1350 polls of 0.2 s, or of 1 s counted as 5 where sleep takes whole seconds) for the first install
+// of the runner's agents into a home, and then says so, before Substrate's wakeup probe gives up. The marker is
+// compared with the ID because the home volume outlives a template change: after an update it still holds the
+// previous install until the sidecar replaces it.
 const devboxWaitAndExec = `d=$1; r=$2; i=0
-while [ "$i" -lt 300 ]; do
+while [ "$i" -lt 1350 ]; do
   v=; [ -r "$r/ready" ] && read -r v < "$r/ready"
-  [ "$v" = "$d" ] && exec "$r/$3/bin/devbox-daemon"
-  sleep 0.2 2>/dev/null || sleep 1
-  i=$((i+1))
+  [ "$v" = "$d" ] && export DEVBOX_RUNTIME_DIR="$r/$3" && exec "$r/$3/bin/devbox-daemon"
+  if sleep 0.2 2>/dev/null; then i=$((i+1)); else sleep 1; i=$((i+5)); fi
 done
 echo "plural runtime $d was not installed in $r" >&2
 exit 1`
 
-// runtimeDirName is the directory devbox-runtime-installer installs a runtime digest into.
-func runtimeDirName(digest string) string {
-	return strings.ReplaceAll(digest, ":", "-")
+// devboxRuntimeSelection is what the runner's runtime sidecar installs besides the daemon: the runner's agents
+// and, with the browser enabled, its tools.
+func devboxRuntimeSelection(runner *v1alpha1.DevboxRunner) (agents []string, browser bool) {
+	agents = lo.Map(runner.Spec.Agents, func(a v1alpha1.DevboxAgent, _ int) string { return string(a.Type) })
+	return agents, runner.Spec.Browser != nil && runner.Spec.Browser.Enabled
+}
+
+// devboxRuntimeArgs are the runtime sidecar's arguments: the digest it installs and the runner's agents (and
+// browser), so each instance's home holds only the components the runner uses.
+func devboxRuntimeArgs(runner *v1alpha1.DevboxRunner, digest string) []string {
+	agents, browser := devboxRuntimeSelection(runner)
+	args := []string{"--digest", digest, "--dst", runtimeHomeMount + "/" + runtimeInstallDir, "--agents", strings.Join(agents, ",")}
+	if browser {
+		args = append(args, "--browser")
+	}
+	return args
 }
 
 // buildActorTemplate renders the immutable ActorTemplate for the runner's current spec, resolved environment
@@ -460,6 +481,8 @@ func (r *DevboxRunnerReconciler) buildActorTemplate(runner *v1alpha1.DevboxRunne
 	if !ok || runtimeDigest == "" {
 		return nil, "", fmt.Errorf("runtime image %q is not pinned by digest", runtime)
 	}
+	agents, browser := devboxRuntimeSelection(runner)
+	installID := runtimemanifest.InstallID(runtimeDigest, agents, browser)
 	guest := DevboxRunnerGuestConfig{
 		Runner:  runner.ConsoleName(),
 		Browser: runner.Spec.Browser != nil && runner.Spec.Browser.Enabled,
@@ -489,11 +512,11 @@ func (r *DevboxRunnerReconciler) buildActorTemplate(runner *v1alpha1.DevboxRunne
 			Name:  devboxContainerName,
 			Image: image,
 			Command: []string{runner.RuntimeShell(), "-c", devboxWaitAndExec, "devbox-runtime",
-				runtimeDigest, devboxHomeMount + "/" + runtimeInstallDir, runtimeDirName(runtimeDigest)},
+				installID, devboxHomeMount + "/" + runtimeInstallDir, runtimemanifest.InstallDirName(installID)},
 			Env: append([]*ateapi.EnvVar{{Name: devboxRunnerConfigEnv, Value: string(guestJSON)}}, devboxPlainEnv(runner)...),
 			WakeupProbe: &ateapi.WakeupProbe{
 				HttpGet:        &ateapi.HttpGetAction{Path: "/readyz", Port: devboxReadyzPort},
-				TimeoutSeconds: 120,
+				TimeoutSeconds: devboxWakeupTimeout,
 			},
 			VolumeMounts: []*ateapi.VolumeMount{
 				{Name: devboxHomeVolume, MountPath: devboxHomeMount},
@@ -504,7 +527,7 @@ func (r *DevboxRunnerReconciler) buildActorTemplate(runner *v1alpha1.DevboxRunne
 			Name:  runtimeContainerName,
 			Image: runtime,
 			// The image's entrypoint is devbox-runtime-installer, which installs into runtimeHomeMount and blocks.
-			Args:         []string{"--digest", runtimeDigest, "--dst", runtimeHomeMount + "/" + runtimeInstallDir},
+			Args:         devboxRuntimeArgs(runner, runtimeDigest),
 			VolumeMounts: []*ateapi.VolumeMount{{Name: devboxHomeVolume, MountPath: runtimeHomeMount}},
 			// It runs as root to write into a home owned by the environment image's user.
 			SecurityContext: &ateapi.SecurityContext{Capabilities: &ateapi.Capabilities{Add: []string{"DAC_OVERRIDE", "FOWNER"}}},
@@ -701,7 +724,7 @@ func goldenFailureHint(runner *v1alpha1.DevboxRunner, msg string) string {
 		strings.Contains(msg, shell) && (strings.Contains(msg, "no such file") || strings.Contains(msg, "not found")):
 		return fmt.Sprintf("; the devbox container could not start, most likely because the environment image has no POSIX shell at %s (set spec.runtime.shell if it is elsewhere)", shell)
 	case strings.Contains(msg, "plural runtime"):
-		return "; the " + runtimeContainerName + " container did not install devbox-daemon into the home volume in time"
+		return "; the " + runtimeContainerName + " container did not install devbox-daemon and the agents into the home volume in time"
 	}
 	return ""
 }

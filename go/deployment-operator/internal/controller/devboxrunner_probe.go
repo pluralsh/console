@@ -306,13 +306,28 @@ func EvaluateDevboxProbe(runner *v1alpha1.DevboxRunner, result *DevboxProbeResul
 	for _, agent := range runner.Spec.Agents {
 		entry, ok := byType[agent.Type]
 		switch {
-		case !ok || entry.GetProbeStatus() == devboxv1.ProbeStatus_PROBE_STATUS_MISSING:
-			eval.Violations = append(eval.Violations, fmt.Sprintf("agent %s is not installed in the image", agent.Type))
+		case !ok || (entry.GetProbeStatus() == devboxv1.ProbeStatus_PROBE_STATUS_MISSING && entry.GetProbeError() == ""):
+			eval.Violations = append(eval.Violations, fmt.Sprintf("agent %s is not installed in the runtime or the image", agent.Type))
+		case entry.GetProbeStatus() == devboxv1.ProbeStatus_PROBE_STATUS_MISSING:
+			// The daemon's reason, which says why the runtime's agents can't run (no glibc).
+			eval.Violations = append(eval.Violations, fmt.Sprintf("agent %s: %s", agent.Type, entry.GetProbeError()))
 		case entry.GetProbeStatus() == devboxv1.ProbeStatus_PROBE_STATUS_FAILED:
-			eval.Warnings = append(eval.Warnings, fmt.Sprintf("agent %s probe failed: %s", agent.Type, entry.GetProbeError()))
+			eval.Warnings = append(eval.Warnings, fmt.Sprintf("agent %s probe failed: %s%s", agent.Type, entry.GetProbeError(), libcHint(entry.GetProbeError())))
 		}
 	}
 	return eval
+}
+
+// libcHint explains an agent that failed because the environment image's C libraries don't meet the runtime's
+// requirements: glibc 2.28 or newer, and libstdc++ for the runtime's Node.
+func libcHint(msg string) string {
+	switch {
+	case strings.Contains(msg, "GLIBC_") || strings.Contains(msg, "GLIBCXX_"):
+		return " (the environment image's glibc or libstdc++ is too old: the runtime's agents need glibc 2.28 or newer)"
+	case strings.Contains(msg, "libstdc++") || strings.Contains(msg, "libgcc_s"):
+		return " (the environment image has no libstdc++, which the runtime's Node needs)"
+	}
+	return ""
 }
 
 // devboxAgentStatuses summarizes a probe result for status.agents.

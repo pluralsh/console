@@ -87,7 +87,8 @@ const (
 type DevboxRuntimeFlavor string
 
 const (
-	// DevboxRuntimeCore is devbox-daemon alone; agents, browser and tools come from the environment image.
+	// DevboxRuntimeCore is devbox-daemon with the coding agents, their ACP adapters and Playwright MCP; the
+	// browser and the tools come from the environment image.
 	DevboxRuntimeCore DevboxRuntimeFlavor = "core"
 )
 
@@ -142,11 +143,12 @@ type DevboxRunnerSpec struct {
 	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty"`
 
-	// Image is the devbox environment image: the tools, agents and browser an instance runs with. Defaults to
-	// ghcr.io/pluralsh/devbox-fat at the operator's version; ghcr.io/pluralsh/devbox-minimal is the lean
-	// alternative. Custom images must meet the image contract (sh.plural.devbox/contract=v1 label, UID 1000,
-	// a POSIX shell at spec.runtime.shell) and are normally built FROM one of these. devbox-daemon is not taken
-	// from this image: the operator delivers it through the runtime sidecar, see spec.runtime.
+	// Image is the devbox environment image: the distribution, tools and browser an instance runs with. Defaults
+	// to ghcr.io/pluralsh/devbox-fat at the operator's version; ghcr.io/pluralsh/devbox-minimal is the lean
+	// alternative. devbox-daemon and the agents are not taken from this image: the operator delivers them through
+	// the runtime sidecar (see spec.runtime). Custom images must meet the requirements at
+	// https://docs.plural.sh/plural-features/devboxes/environment-images (glibc 2.28 or newer, the
+	// sh.plural.devbox/contract=v1 label, UID 1000, a POSIX shell at spec.runtime.shell).
 	// +kubebuilder:validation:Optional
 	Image *string `json:"image,omitempty"`
 
@@ -289,16 +291,17 @@ type DevboxSubstrate struct {
 
 // DevboxRuntime configures the plural-runtime sidecar. The runtime image is not configurable here: it is
 // ghcr.io/pluralsh/devbox-runtime-core at the operator's version (through the operator's registry mirror
-// settings), so every operator upgrade delivers its daemon to every runner.
+// settings), so every operator upgrade delivers its daemon and agents to every runner. Each instance gets the
+// agents of spec.agents (and Playwright MCP with the browser enabled) installed into its home.
 type DevboxRuntime struct {
-	// Flavor of the runtime. Only core (devbox-daemon alone) exists.
+	// Flavor of the runtime. Only core (devbox-daemon, the coding agents and their ACP adapters) exists.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=core
 	Flavor *DevboxRuntimeFlavor `json:"flavor,omitempty"`
 
 	// Shell is the absolute path of a POSIX shell in the environment image. The devbox container starts with
-	// it, waits for the runtime sidecar to install devbox-daemon into the home volume and then execs the
-	// daemon. Defaults to /bin/sh.
+	// it, waits for the runtime sidecar to install devbox-daemon and the agents into the home volume and then
+	// execs the daemon. Defaults to /bin/sh.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Pattern=`^/[^\s]+$`
 	Shell *string `json:"shell,omitempty"`
