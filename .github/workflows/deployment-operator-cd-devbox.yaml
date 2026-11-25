@@ -308,8 +308,10 @@ jobs:
   # new template revision, which would cold-boot every instance on its next update. Pull requests build under
   # their own pr-src-<hash> tags, and a release only reuses a digest that a release signed.
   publish-runtime:
-    name: Build or reuse, test and publish devbox-runtime-core
+    name: Build or reuse devbox-runtime-core
     needs: [version]
+    outputs:
+      digest: ${{ steps.inspect.outputs.digest }}
     permissions:
       contents: read
       id-token: write
@@ -336,12 +338,6 @@ jobs:
           if [ "${EVENT_NAME}" = "pull_request" ]; then prefix=pr-src; fi
           echo "hash=${hash}" >> "$GITHUB_OUTPUT"
           echo "ref=${IMAGE}:${prefix}-${hash}" >> "$GITHUB_OUTPUT"
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@v6
-        with:
-          images: ${{ env.IMAGE }}
-          tags: ${{ env.IMAGE_TAGS }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
       - name: Login to GHCR
@@ -414,15 +410,82 @@ jobs:
           fi
           echo "digest=${DIGEST}" >> "$GITHUB_OUTPUT"
           echo "${IMAGE}@${DIGEST}" >> "$GITHUB_STEP_SUMMARY"
-      - name: Test
+
+  # The runtime on each platform it is built for: the install test, and every agent's ACP handshake from the
+  # runtime in the environment images README.md says are supported (and the glibc message in one that isn't).
+  test-runtime:
+    name: Test devbox-runtime-core (${{ matrix.platforms.platform }})
+    needs: [publish-runtime]
+    permissions:
+      contents: read
+      packages: read
+    strategy:
+      fail-fast: false
+      matrix:
+        platforms:
+          - platform: linux/amd64
+            runner: ubuntu-24.04
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.platforms.runner }}
+    defaults:
+      run:
         working-directory: go/deployment-operator/dockerfiles/devbox
+    env:
+      RUNTIME_IMAGE: ghcr.io/pluralsh/devbox-runtime-core@${{ needs.publish-runtime.outputs.digest }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Login to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install test
         run: ./test.sh runtime
+      - name: Probe the agents
         env:
-          RUNTIME_IMAGE: ${{ env.IMAGE }}@${{ steps.inspect.outputs.digest }}
+          PLATFORM: ${{ matrix.platforms.platform }}
+        run: |
+          docker pull --platform "${PLATFORM}" "${RUNTIME_IMAGE}"
+          ./runtime/probe-matrix.sh "${RUNTIME_IMAGE}" "${PLATFORM}"
+
+  # Tags and signs the runtime once it passed on every platform.
+  tag-runtime:
+    name: Publish devbox-runtime-core
+    needs: [version, publish-runtime, test-runtime]
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+    runs-on: ubuntu-latest
+    env:
+      IMAGE: ghcr.io/pluralsh/devbox-runtime-core
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.IMAGE }}
+          tags: ${{ env.IMAGE_TAGS }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      - name: Login to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install Cosign
+        if: github.event_name != 'pull_request'
+        uses: sigstore/cosign-installer@v3.8.2
       # The operator resolves devbox-runtime-core:<its own tag>, so every tag of this run must name the digest.
       - name: Tag
         env:
-          DIGEST: ${{ steps.inspect.outputs.digest }}
+          DIGEST: ${{ needs.publish-runtime.outputs.digest }}
           VERSION: ${{ needs.version.outputs.version }}
         run: |
           docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") "${IMAGE}@${DIGEST}"
@@ -434,5 +497,5 @@ jobs:
       - name: Cosign sign
         uses: ./.github/actions/cosign-sign
         with:
-          digest: ${{ steps.inspect.outputs.digest }}
+          digest: ${{ needs.publish-runtime.outputs.digest }}
           images: ${{ env.IMAGE }}
