@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/samber/lo"
 	appsv1 "k8s.io/api/apps/v1"
@@ -22,6 +23,9 @@ import (
 
 	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 	"github.com/pluralsh/console/go/deployment-operator/internal/utils"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/egress/rules"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/egress/scmpath"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/guest"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/probe"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate/ateapi"
@@ -54,38 +58,18 @@ const (
 	devboxEgressTrustMount = "/run/ate/egress-trust-bundle"
 	devboxActorMetaMount   = "/run/ate/actor"
 	devboxReadyzPort       = 80
-	// devboxRunnerConfigEnv carries the runner config the daemon applies during the golden boot.
-	devboxRunnerConfigEnv = "DEVBOX_RUNNER_CONFIG"
+	// devboxReadyzTimeout is how long a box without golden boot work may take to answer its wakeup probe.
+	devboxReadyzTimeout = 2 * time.Minute
 	// substrateEnvValueLimit is Substrate's per-value env limit.
 	substrateEnvValueLimit = 32 * 1024
 	// dns1123Limit bounds atespace, template and WorkerPool names.
 	dns1123Limit = 63
 )
 
-// DevboxRunnerGuestConfig is DEVBOX_RUNNER_CONFIG, the part of the runner spec the daemon applies inside the
-// guest during the golden boot. Everything else (allowlist, identities, idle policy) is enforced by the gateway
-// and console, so changing it does not roll a new template revision.
-type DevboxRunnerGuestConfig struct {
-	Runner          string                 `json:"runner"`
-	BootstrapScript string                 `json:"bootstrapScript,omitempty"`
-	Mise            string                 `json:"mise,omitempty"`
-	Browser         bool                   `json:"browser"`
-	Agents          []DevboxGuestAgentSpec `json:"agents"`
-}
-
-type DevboxGuestAgentSpec struct {
-	Type           v1alpha1.DevboxAgentType `json:"type"`
-	Default        bool                     `json:"default"`
-	AdapterVersion string                   `json:"adapterVersion,omitempty"`
-	Models         []string                 `json:"models,omitempty"`
-	DefaultModel   string                   `json:"defaultModel,omitempty"`
-	ACPV2          bool                     `json:"acpV2"`
-}
-
-func devboxGuestAgents(runner *v1alpha1.DevboxRunner) []DevboxGuestAgentSpec {
-	return lo.Map(runner.Spec.Agents, func(a v1alpha1.DevboxAgent, _ int) DevboxGuestAgentSpec {
-		return DevboxGuestAgentSpec{
-			Type:           a.Type,
+func devboxGuestAgents(runner *v1alpha1.DevboxRunner) []guest.Agent {
+	return lo.Map(runner.Spec.Agents, func(a v1alpha1.DevboxAgent, _ int) guest.Agent {
+		return guest.Agent{
+			Type:           string(a.Type),
 			Default:        lo.FromPtr(a.Default),
 			AdapterVersion: lo.FromPtr(a.AdapterVersion),
 			Models:         a.Models,
@@ -436,21 +420,31 @@ func (r *DevboxRunnerReconciler) ensureAtespace(ctx context.Context, api substra
 // buildActorTemplate renders the immutable ActorTemplate for the runner's current spec and resolved image.
 // The returned hash covers everything but the template name, and keys the revision.
 func (r *DevboxRunnerReconciler) buildActorTemplate(runner *v1alpha1.DevboxRunner, atespace, image string) (*ateapi.ActorTemplate, string, error) {
-	guest := DevboxRunnerGuestConfig{
+	if err := validateDevboxRepositories(runner); err != nil {
+		return nil, "", err
+	}
+	cfg := guest.Config{
 		Runner:  runner.ConsoleName(),
 		Browser: runner.Spec.Browser != nil && runner.Spec.Browser.Enabled,
 		Agents:  devboxGuestAgents(runner),
+		Repositories: lo.Map(runner.Spec.Repositories, func(r v1alpha1.DevboxRepository, _ int) guest.Repository {
+			return guest.Repository{URL: r.URL, Branch: lo.FromPtr(r.Branch), Description: lo.FromPtr(r.Description)}
+		}),
 	}
-	guest.BootstrapScript = lo.FromPtr(runner.Spec.BootstrapScript)
+	cfg.BootstrapScript = lo.FromPtr(runner.Spec.BootstrapScript)
 	if runner.Spec.Mise != nil {
-		guest.Mise = lo.FromPtr(runner.Spec.Mise.Config)
+		cfg.Mise = lo.FromPtr(runner.Spec.Mise.Config)
 	}
-	guestJSON, err := json.Marshal(guest)
+	guestJSON, err := json.Marshal(cfg)
 	if err != nil {
 		return nil, "", err
 	}
 	if len(guestJSON) > substrateEnvValueLimit {
-		return nil, "", fmt.Errorf("bootstrapScript, mise and agents add up to %d bytes, over Substrate's %d byte env limit", len(guestJSON), substrateEnvValueLimit)
+		return nil, "", fmt.Errorf("bootstrapScript, mise, repositories and agents add up to %d bytes, over Substrate's %d byte env limit", len(guestJSON), substrateEnvValueLimit)
+	}
+	readyz := devboxReadyzTimeout
+	if runner.Spec.HasGoldenBootWork() {
+		readyz = runner.Spec.GoldenBootTimeout()
 	}
 
 	capacity, err := devboxInstanceCapacity(runner, r.sandboxClass(runner))
@@ -464,10 +458,10 @@ func (r *DevboxRunnerReconciler) buildActorTemplate(runner *v1alpha1.DevboxRunne
 		Containers: []*ateapi.Container{{
 			Name:  devboxContainerName,
 			Image: image,
-			Env:   append([]*ateapi.EnvVar{{Name: devboxRunnerConfigEnv, Value: string(guestJSON)}}, devboxPlainEnv(runner)...),
+			Env:   append([]*ateapi.EnvVar{{Name: guest.EnvVar, Value: string(guestJSON)}}, devboxPlainEnv(runner)...),
 			WakeupProbe: &ateapi.WakeupProbe{
 				HttpGet:        &ateapi.HttpGetAction{Path: "/readyz", Port: devboxReadyzPort},
-				TimeoutSeconds: 120,
+				TimeoutSeconds: int32(readyz / time.Second),
 			},
 			VolumeMounts: []*ateapi.VolumeMount{
 				{Name: devboxHomeVolume, MountPath: "/home/dev"},
@@ -507,6 +501,23 @@ func (r *DevboxRunnerReconciler) buildActorTemplate(runner *v1alpha1.DevboxRunne
 	return template, hash, nil
 }
 
+// validateDevboxRepositories rejects repositories the golden boot couldn't clone: off the allowlist, which egress
+// enforces on the golden boot too, or listed twice.
+func validateDevboxRepositories(runner *v1alpha1.DevboxRunner) error {
+	seen := map[string]bool{}
+	for _, repo := range runner.Spec.Repositories {
+		if !rules.RepositoryAllowed(runner.Spec.AllowedRepositories, repo.URL) {
+			return fmt.Errorf("repository %s isn't on allowedRepositories (entries name the host, like github.com/owner/repo)", repo.URL)
+		}
+		id := scmpath.Normalize(repo.URL)
+		if seen[id] {
+			return fmt.Errorf("repository %s is listed twice", repo.URL)
+		}
+		seen[id] = true
+	}
+	return nil
+}
+
 // devboxHomeVolumeSource is /home/dev: a durable dir carried in the instance's snapshots, or a JuiceFS volume
 // whose quota is the home's size. A JuiceFS home names the runner's StorageClass here, which keys the template
 // hash; ensureHomeStorageClass swaps in the revision's own class once the template is named.
@@ -529,14 +540,28 @@ func devboxTemplateNeedsPreview(template *ateapi.ActorTemplate) bool {
 	return lo.ContainsBy(template.Volumes, func(v *ateapi.Volume) bool { return v.External != nil })
 }
 
-// devboxGoldenEgressPolicy lets the golden boot reach what the bootstrap script and mise need: the runner's
-// package servers, OCI registries and HTTP allowlist plus mise's own download hosts. Without customization the golden boot needs
-// no egress.
+// devboxGoldenEgressPolicy lets the golden boot reach what it needs: the hosts of spec.repositories with the box's
+// SCM credentials injected (through the gateway's credential provider), then for the bootstrap script and mise the
+// runner's package servers, OCI registries and HTTP allowlist plus mise's own download hosts. Without customization
+// the golden boot needs no egress.
 func devboxGoldenEgressPolicy(runner *v1alpha1.DevboxRunner) *ateapi.EgressPolicyTemplate {
-	hasMise := runner.Spec.Mise != nil && lo.FromPtr(runner.Spec.Mise.Config) != ""
-	if lo.FromPtr(runner.Spec.BootstrapScript) == "" && !hasMise {
+	if !runner.Spec.HasGoldenBootWork() {
 		return nil
 	}
+	hasMise := runner.Spec.Mise != nil && lo.FromPtr(runner.Spec.Mise.Config) != ""
+
+	repos := lo.Map(runner.Spec.Repositories, func(r v1alpha1.DevboxRepository, _ int) string { return r.URL })
+	scm := rules.ATE(rules.BuildGoldenPolicy(runner.Name, repos))
+	// Substrate rejects two rules on one host and port, and the SCM rule must win where they meet.
+	taken := map[string]bool{}
+	for _, r := range scm {
+		for _, host := range r.GetHttps().GetHostnames() {
+			for _, port := range r.GetHttps().GetPorts().GetNumbers() {
+				taken[fmt.Sprintf("%s:%d", strings.ToLower(host), port)] = true
+			}
+		}
+	}
+	free := func(host string, port int32) bool { return !taken[fmt.Sprintf("%s:%d", strings.ToLower(host), port)] }
 
 	https := map[int32][]string{}
 	var passthrough []*ateapi.EgressRule
@@ -548,6 +573,9 @@ func devboxGoldenEgressPolicy(runner *v1alpha1.DevboxRunner) *ateapi.EgressPolic
 	https[443] = append(https[443], runner.Spec.OCIRegistryHosts()...)
 	for _, entry := range runner.Spec.HTTPAllowlist {
 		port := lo.FromPtrOr(entry.Port, 443)
+		if !free(entry.Host, port) {
+			continue
+		}
 		if lo.FromPtr(entry.Passthrough) {
 			passthrough = append(passthrough, &ateapi.EgressRule{TlsPassthrough: &ateapi.TlsPassthroughRule{
 				Hostnames: []string{entry.Host}, Ports: &ateapi.Ports{Numbers: []int32{port}},
@@ -561,11 +589,15 @@ func devboxGoldenEgressPolicy(runner *v1alpha1.DevboxRunner) *ateapi.EgressPolic
 	sort.Slice(ports, func(i, j int) bool { return ports[i] < ports[j] })
 	var rules []*ateapi.EgressRule
 	for _, port := range ports {
+		hosts := lo.Filter(lo.Uniq(https[port]), func(h string, _ int) bool { return free(h, port) })
+		if len(hosts) == 0 {
+			continue
+		}
 		rules = append(rules, &ateapi.EgressRule{Https: &ateapi.HttpsRule{
-			Hostnames: lo.Uniq(https[port]), Ports: &ateapi.Ports{Numbers: []int32{port}},
+			Hostnames: hosts, Ports: &ateapi.Ports{Numbers: []int32{port}},
 		}})
 	}
-	rules = append(rules, passthrough...)
+	rules = append(append(rules, scm...), passthrough...)
 	if len(rules) == 0 {
 		return nil
 	}

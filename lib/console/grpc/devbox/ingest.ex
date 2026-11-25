@@ -60,13 +60,17 @@ defmodule Console.GRPC.Devbox.Ingest do
     |> reply!()
   end
 
-  def get_instance_credentials(%V1.GetInstanceCredentialsRequest{instance_id: id, credentials: selectors}, stream) do
+  def get_instance_credentials(%V1.GetInstanceCredentialsRequest{instance_id: id, devbox_id: devbox_id, credentials: selectors}, stream) do
     cluster = Auth.authenticate!(stream)
-    with {:ok, creds} <- Ingest.get_instance_credentials(id, Proto.to_map(selectors), cluster) do
+    with {:ok, creds} <- credentials(id, devbox_id, Proto.to_map(selectors), cluster) do
       %V1.GetInstanceCredentialsResponse{credentials: Enum.map(creds, &credential/1)}
     end
     |> reply!()
   end
+
+  defp credentials("", devbox_id, selectors, cluster) when devbox_id not in [nil, ""],
+    do: Ingest.get_devbox_credentials(devbox_id, selectors, cluster)
+  defp credentials(id, _, selectors, cluster), do: Ingest.get_instance_credentials(id, selectors, cluster)
 
   def update_agent_credential(req, stream) do
     cluster = Auth.authenticate!(stream)

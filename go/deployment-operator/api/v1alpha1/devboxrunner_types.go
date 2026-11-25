@@ -2,6 +2,7 @@ package v1alpha1
 
 import (
 	"strings"
+	"time"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -200,13 +201,30 @@ type DevboxRunnerSpec struct {
 	// +kubebuilder:validation:Optional
 	Browser *DevboxBrowser `json:"browser,omitempty"`
 
-	// BootstrapScript runs once during the golden boot, so its results are baked into the snapshot.
+	// BootstrapScript runs once during the golden boot, from the home directory and after repositories are cloned
+	// and mise has installed its tools, so its results are baked into the snapshot. It runs with `bash -e` unless
+	// it starts with a #! line, and a failure fails the revision; its output is in ~/.plural/golden.log.
 	// +kubebuilder:validation:Optional
 	BootstrapScript *string `json:"bootstrapScript,omitempty"`
 
 	// Mise is an inline mise.toml installed during the golden boot.
 	// +kubebuilder:validation:Optional
 	Mise *MiseSpec `json:"mise,omitempty"`
+
+	// Repositories are cloned into the home during the golden boot, with the box's SCM connections, so every
+	// instance starts with them checked out, along with whatever bootstrapScript builds in them. Each instance
+	// fetches them again when it first boots. When allowedRepositories is set, each must be on it.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:MaxItems=32
+	// +listType=map
+	// +listMapKey=url
+	Repositories []DevboxRepository `json:"repositories,omitempty"`
+
+	// BootstrapTimeout bounds the golden boot when it has work to do (repositories, mise or bootstrapScript):
+	// past it, Substrate crashes the boot and the revision fails. It's also how long a waking instance may take to
+	// report ready. Defaults to 30m.
+	// +kubebuilder:validation:Optional
+	BootstrapTimeout *metav1.Duration `json:"bootstrapTimeout,omitempty"`
 
 	// IdlePolicy bounds idle suspension. Workbenches can only lower these values.
 	// +kubebuilder:validation:Optional
@@ -306,6 +324,44 @@ type DevboxResources struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default="20Gi"
 	Disk *resource.Quantity `json:"disk,omitempty"`
+}
+
+// DevboxRepository is a repository the golden boot clones.
+type DevboxRepository struct {
+	// URL is the https clone URL, e.g. https://github.com/pluralsh/console.git.
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Pattern=`^https://[^/]+/.+`
+	URL string `json:"url"`
+
+	// Branch is checked out instead of the default branch.
+	// +kubebuilder:validation:Optional
+	Branch *string `json:"branch,omitempty"`
+
+	// Description is shown to agents in the home's Project.md.
+	// +kubebuilder:validation:Optional
+	Description *string `json:"description,omitempty"`
+}
+
+const (
+	// DevboxDefaultBootstrapTimeout is spec.bootstrapTimeout's default.
+	DevboxDefaultBootstrapTimeout = 30 * time.Minute
+	// DevboxMaxBootstrapTimeout is Substrate's limit on a wakeup probe.
+	DevboxMaxBootstrapTimeout = time.Hour
+)
+
+// GoldenBootTimeout is how long the golden boot may take (spec.bootstrapTimeout), capped at Substrate's limit.
+func (s *DevboxRunnerSpec) GoldenBootTimeout() time.Duration {
+	d := DevboxDefaultBootstrapTimeout
+	if s.BootstrapTimeout != nil && s.BootstrapTimeout.Duration > 0 {
+		d = s.BootstrapTimeout.Duration
+	}
+	return min(d, DevboxMaxBootstrapTimeout)
+}
+
+// HasGoldenBootWork reports whether the golden boot clones, installs or runs anything.
+func (s *DevboxRunnerSpec) HasGoldenBootWork() bool {
+	return len(s.Repositories) > 0 || (s.BootstrapScript != nil && *s.BootstrapScript != "") ||
+		(s.Mise != nil && s.Mise.Config != nil && *s.Mise.Config != "")
 }
 
 // DevboxHomeStorage is where an instance's /home/dev lives.

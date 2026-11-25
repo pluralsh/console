@@ -188,6 +188,38 @@ defmodule Console.Devboxes.CredentialsTest do
     end
   end
 
+  describe "#devbox_credentials/2" do
+    test "it mints the box's scm credentials, filtered by host" do
+      github = insert(:scm_connection, type: :github)
+      gitlab = insert(:scm_connection, type: :gitlab, base_url: "https://gitlab.example.com")
+      devbox = insert(:devbox)
+      insert(:devbox_scm_connection, devbox: devbox, connection: github)
+      insert(:devbox_scm_connection, devbox: devbox, connection: gitlab)
+
+      {:ok, [cred]} = Credentials.devbox_credentials(devbox, [%{kind: :scm, host: "github.com"}])
+      assert cred.host == "github.com"
+      assert Base.decode64!(cred.token) == "x-access-token:#{github.token}"
+
+      {:ok, creds} = Credentials.devbox_credentials(devbox, [%{kind: :scm}])
+      assert Enum.map(creds, & &1.host) |> Enum.sort() == ["github.com", "gitlab.example.com"]
+    end
+
+    test "it falls back to the default connection" do
+      conn = insert(:scm_connection, type: :github, default: true)
+
+      {:ok, [cred]} = Credentials.devbox_credentials(insert(:devbox), [%{kind: :scm}])
+      assert Base.decode64!(cred.token) == "x-access-token:#{conn.token}"
+    end
+
+    test "every other kind is instance-scoped" do
+      devbox = insert(:devbox)
+
+      for kind <- ~w(ai_proxy console oidc claude_oauth codex)a do
+        {:error, %{extensions: %{code: "UNSUPPORTED"}}} = Credentials.devbox_credentials(devbox, [%{kind: :scm}, %{kind: kind}])
+      end
+    end
+  end
+
   describe "#verify_ai_proxy/1 with console tokens" do
     test "it accepts the instance's console token while the instance is live" do
       inst = insert(:devbox_instance)

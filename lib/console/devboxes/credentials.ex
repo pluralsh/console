@@ -10,7 +10,8 @@ defmodule Console.Devboxes.Credentials do
       instance can make;
     * scm tokens come from the box's scm connections (or the default one), as for agent runs, one per connection
       host, as the complete `Authorization` credential for git and the provider's API (basic `user:token` for
-      github, gitlab, bitbucket and azure devops);
+      github, gitlab, bitbucket and azure devops).  They're the only credential also minted for the box itself
+      (`devbox_credentials/2`), for the golden boot of its template, which clones the runner's repositories;
     * oidc tokens are workload identity JWTs from the box's issuer (`Console.WorkloadIdentity`), one per cloud
       identity, which cloud accounts exchange directly for their own short-lived credentials;
     * `claude_oauth` and `codex` are the instance owner's linked subscription (`Console.Devboxes.AgentCredentials`),
@@ -188,6 +189,23 @@ defmodule Console.Devboxes.Credentials do
     end
   end
 
+  @doc """
+  Mints the scm credentials of a box's golden boot (`Ingest.GetInstanceCredentials` with a `devbox_id`), which
+  clones the runner's repositories before any instance exists.  Every other kind is instance-scoped.
+  """
+  @spec devbox_credentials(Devbox.t, [map]) :: {:ok, [credential]} | Console.error
+  def devbox_credentials(%Devbox{} = devbox, selectors) do
+    Enum.reduce_while(selectors, {:ok, []}, fn
+      %{kind: :scm} = selector, {:ok, acc} ->
+        case scm_credentials(devbox, selector) do
+          {:ok, creds} -> {:cont, {:ok, acc ++ creds}}
+          err -> {:halt, err}
+        end
+      %{kind: kind}, _ ->
+        {:halt, Error.unsupported("only scm credentials are minted for a devbox's golden boot, not #{kind}")}
+    end)
+  end
+
   defp credentials(inst, %{kind: :ai_proxy}) do
     with {:ok, token, exp} <- mint_ai_proxy_token(inst),
       do: {:ok, [credential(:ai_proxy, token, exp)]}
@@ -198,18 +216,7 @@ defmodule Console.Devboxes.Credentials do
       do: {:ok, [credential(:console, token, exp)]}
   end
 
-  defp credentials(inst, %{kind: :scm} = selector) do
-    inst
-    |> scm_connections(selector[:host])
-    |> Enum.reduce_while({:ok, []}, fn conn, {:ok, acc} ->
-      case backfill_token_with_expiry(conn) do
-        {:ok, %ScmConnection{token: token} = conn, exp} when is_binary(token) ->
-          {:cont, {:ok, acc ++ [scm_credential(conn, exp || expiry())]}}
-        {:ok, _, _} -> {:cont, {:ok, acc}}
-        err -> {:halt, err}
-      end
-    end)
-  end
+  defp credentials(inst, %{kind: :scm} = selector), do: scm_credentials(inst, selector)
 
   defp credentials(inst, %{kind: :oidc} = selector) do
     %{devbox: devbox} = inst = Repo.preload(inst, [:devbox, :workbench, :user])
@@ -229,6 +236,19 @@ defmodule Console.Devboxes.Credentials do
     do: AgentCredentials.deliver(inst, kind)
 
   defp credentials(_, %{kind: kind}), do: Error.unsupported("#{kind} credentials are not supported for devboxes yet")
+
+  defp scm_credentials(resource, selector) do
+    resource
+    |> scm_connections(selector[:host])
+    |> Enum.reduce_while({:ok, []}, fn conn, {:ok, acc} ->
+      case backfill_token_with_expiry(conn) do
+        {:ok, %ScmConnection{token: token} = conn, exp} when is_binary(token) ->
+          {:cont, {:ok, acc ++ [scm_credential(conn, exp || expiry())]}}
+        {:ok, _, _} -> {:cont, {:ok, acc}}
+        err -> {:halt, err}
+      end
+    end)
+  end
 
   defp cloud_identities(%Devbox{cloud_identities: ids}, name) when name in [nil, ""], do: ids || []
   defp cloud_identities(%Devbox{cloud_identities: ids}, name), do: Enum.filter(ids || [], & &1.name == name)

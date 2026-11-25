@@ -28,9 +28,11 @@ type Server struct {
 	mu       sync.Mutex
 	Actors   map[string]*ateapi.Actor
 	Policies map[string]*ateapi.EgressPolicy
-	Tags     map[string]*ateapi.Tag
-	Workers  []*ateapi.Worker
-	Calls    []string
+	// Templates are served by GetActorTemplate, keyed "<atespace>/<name>".
+	Templates map[string]*ateapi.ActorTemplate
+	Tags      map[string]*ateapi.Tag
+	Workers   []*ateapi.Worker
+	Calls     []string
 	// SuspendModes records the durability mode of each SuspendActor call.
 	SuspendModes []ateapi.DurabilityMode
 	// TagFidelity is the fidelity of tags created from actors, MEMORY by default.
@@ -56,6 +58,7 @@ func New() *Server {
 	return &Server{
 		Actors:      map[string]*ateapi.Actor{},
 		Policies:    map[string]*ateapi.EgressPolicy{},
+		Templates:   map[string]*ateapi.ActorTemplate{},
 		Tags:        map[string]*ateapi.Tag{},
 		TagFidelity: ateapi.SnapshotFidelity_SNAPSHOT_FIDELITY_MEMORY,
 	}
@@ -156,6 +159,16 @@ func (s *Server) GetActor(_ context.Context, req *ateapi.GetActorRequest) (*atea
 		}}
 	}
 	return out, nil
+}
+
+func (s *Server) GetActorTemplate(_ context.Context, req *ateapi.GetActorTemplateRequest) (*ateapi.ActorTemplate, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	t, ok := s.Templates[key(req.GetActorTemplate())]
+	if !ok {
+		return nil, status.Errorf(codes.NotFound, "actor template %s not found", key(req.GetActorTemplate()))
+	}
+	return proto.Clone(t).(*ateapi.ActorTemplate), nil
 }
 
 // Preview reports whether an actor was created with the preview header.

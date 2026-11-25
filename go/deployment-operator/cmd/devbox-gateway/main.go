@@ -298,6 +298,7 @@ func run(ctx context.Context, o *options, log logr.Logger) error {
 		}
 	}
 
+	runners := &core.KubeRunners{Client: kube, Namespace: o.podNamespace}
 	gw, err := core.New(core.Config{
 		GatewayID:                    o.podName,
 		Version:                      version,
@@ -314,7 +315,7 @@ func run(ctx context.Context, o *options, log logr.Logger) error {
 		Actors:  ate,
 		Router:  rt,
 		Records: &core.KubeRecords{Client: kube, Namespace: o.podNamespace},
-		Runners: &core.KubeRunners{Client: kube, Namespace: o.podNamespace},
+		Runners: runners,
 		Seeds:   seeds,
 		Log:     log.WithName("core"),
 	})
@@ -323,7 +324,8 @@ func run(ctx context.Context, o *options, log logr.Logger) error {
 	}
 
 	var prb *prober.Prober
-	var resolver egress.ActorResolver = gw
+	golden := &core.GoldenResolver{Runners: runners, Actors: ate}
+	resolver := prober.Chain(gw, golden)
 	if o.probeNamespace != "" {
 		prb, err = prober.New(prober.Config{
 			Namespace:  o.probeNamespace,
@@ -334,7 +336,7 @@ func run(ctx context.Context, o *options, log logr.Logger) error {
 		if err != nil {
 			return err
 		}
-		resolver = prober.Chain(prb, gw)
+		resolver = prober.Chain(prb, gw, golden)
 	} else {
 		log.Info("WARNING: DEVBOX_PROBE_NAMESPACE is not set; agent probes requested by the operator won't run")
 	}

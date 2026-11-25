@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	goruntime "runtime"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -42,6 +43,7 @@ import (
 
 	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/guest"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/juicefs"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate/ateapi"
 )
@@ -562,6 +564,7 @@ func TestDevboxRunnerController(t *testing.T) {
 		runner := env.get(t, "platform")
 		atespace := *runner.Status.Atespace
 		runner.Spec.BootstrapScript = lo.ToPtr("npm i -g pnpm")
+		runner.Spec.Repositories = []v1alpha1.DevboxRepository{{URL: "https://github.com/pluralsh/console", Branch: lo.ToPtr("master")}}
 		runner.Spec.HTTPAllowlist = []v1alpha1.DevboxHTTPAllowlistEntry{{Host: "registry.npmjs.org"}}
 		runner.Spec.PackageServers = &v1alpha1.DevboxPackageServers{Rust: lo.ToPtr(false)}
 		runner.Spec.Env = []v1alpha1.DevboxEnvVar{
@@ -603,9 +606,17 @@ func TestDevboxRunnerController(t *testing.T) {
 		g.Expect(string(mirror.Data["platform"])).To(Equal(`{"API_TOKEN":"t0k"}`))
 		g.Expect(runner.Status.Revisions).To(HaveLen(2), "resolving secret env does not roll a revision")
 		g.Expect(env.substrate.previews["platform-r2"]).To(BeTrue())
-		var guest DevboxRunnerGuestConfig
-		g.Expect(json.Unmarshal([]byte(r2.Containers[0].Env[0].Value), &guest)).To(Succeed())
-		g.Expect(guest.BootstrapScript).To(Equal("npm i -g pnpm"))
+		var cfg guest.Config
+		g.Expect(r2.Containers[0].Env[0].Name).To(Equal(guest.EnvVar))
+		g.Expect(json.Unmarshal([]byte(r2.Containers[0].Env[0].Value), &cfg)).To(Succeed())
+		g.Expect(cfg.BootstrapScript).To(Equal("npm i -g pnpm"))
+		g.Expect(cfg.Repositories).To(Equal([]guest.Repository{{URL: "https://github.com/pluralsh/console", Branch: "master"}}))
+		g.Expect(r2.Containers[0].WakeupProbe.TimeoutSeconds).To(Equal(int32(1800)), "golden boot work gets the bootstrap timeout")
+		scm := lo.Filter(r2.GoldenEgressPolicy.Rules, func(r *ateapi.EgressRule, _ int) bool {
+			return slices.Equal(r.GetHttps().GetHostnames(), []string{"github.com"})
+		})
+		g.Expect(scm).To(HaveLen(1))
+		g.Expect(scm[0].Https.Effects.ReplaceHeaders[0].CredentialUri).To(Equal("ate-secret://plural.sh/instances/golden.platform/scm/github.com"))
 
 		runner = env.reconcile(t, "platform", 1)
 		g.Expect(runner.Status.Revisions).To(HaveLen(2))

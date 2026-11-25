@@ -23,6 +23,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/egress"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/egress/rules"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate/ateapi"
 )
@@ -164,6 +165,10 @@ func (c *Client) CreateActor(ctx context.Context, spec Spec) (*ateapi.Actor, err
 
 func (c *Client) GetActor(ctx context.Context, ref Ref) (*ateapi.Actor, error) {
 	return c.control.GetActor(ctx, &ateapi.GetActorRequest{Actor: ref.object()})
+}
+
+func (c *Client) GetActorTemplate(ctx context.Context, ref Ref) (*ateapi.ActorTemplate, error) {
+	return c.control.GetActorTemplate(ctx, &ateapi.GetActorTemplateRequest{ActorTemplate: ref.object()})
 }
 
 // SetTemplate points a (suspended) actor at another template; its next resume restores volume data and
@@ -415,35 +420,7 @@ func (c *Client) DeleteEgressPolicy(ctx context.Context, ref Ref) error {
 }
 
 // EgressRules converts an egress policy to Substrate rules.
-func EgressRules(p egress.Policy) []*ateapi.EgressRule {
-	out := make([]*ateapi.EgressRule, 0, len(p.Rules))
-	for _, r := range p.Rules {
-		ports := &ateapi.Ports{Numbers: []int32{r.EffectivePort()}}
-		var effects *ateapi.HttpRuleEffects
-		if r.InjectHeader != "" && (r.SecretURI != "" || r.ActorJWT) {
-			h := &ateapi.CredentialHeader{Header: r.InjectHeader, Prefix: r.Prefix}
-			if r.ActorJWT {
-				h.ActorJwt = &ateapi.ActorJwtSource{Audiences: r.ActorJWTAudiences, ExpirationSeconds: r.ActorJWTExpirationSeconds}
-			} else {
-				h.CredentialUri = r.SecretURI
-			}
-			effects = &ateapi.HttpRuleEffects{ReplaceHeaders: []*ateapi.CredentialHeader{h}}
-			for _, x := range r.ExtraHeaders {
-				effects.ReplaceHeaders = append(effects.ReplaceHeaders, &ateapi.CredentialHeader{Header: x.Header, CredentialUri: x.SecretURI})
-			}
-		}
-		hosts := []string{r.Host}
-		switch r.Scheme {
-		case egress.SchemeHTTP:
-			out = append(out, &ateapi.EgressRule{Http: &ateapi.HttpRule{Hostnames: hosts, Ports: ports, Effects: effects}})
-		case egress.SchemeTLSPassthrough:
-			out = append(out, &ateapi.EgressRule{TlsPassthrough: &ateapi.TlsPassthroughRule{Hostnames: hosts, Ports: ports}})
-		default:
-			out = append(out, &ateapi.EgressRule{Https: &ateapi.HttpsRule{Hostnames: hosts, Ports: ports, Effects: effects}})
-		}
-	}
-	return out
-}
+func EgressRules(p egress.Policy) []*ateapi.EgressRule { return rules.ATE(p) }
 
 // ---- tags ----
 

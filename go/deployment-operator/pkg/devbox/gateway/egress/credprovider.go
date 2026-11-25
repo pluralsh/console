@@ -107,6 +107,12 @@ func (p *credentialProvider) FetchSecret(ctx context.Context, req *credproviderv
 // authorizeCredential checks that the instance may have the credential it names, and returns its cache key.
 func authorizeCredential(info *InstanceInfo, ref secretRef) (credKey, error) {
 	key := credKey{instanceID: ref.instanceID, kind: ref.kind}
+	if info.Golden {
+		if (ref.kind != KindSCM && ref.kind != KindSCMToken) || info.BoxID == "" {
+			return key, fmt.Errorf("the golden boot of %s only gets the box's SCM credentials", info.InstanceID)
+		}
+		key.boxID = info.BoxID
+	}
 	switch ref.kind {
 	case KindSCM:
 		hosts := make([]string, 0, len(info.SCMHosts))

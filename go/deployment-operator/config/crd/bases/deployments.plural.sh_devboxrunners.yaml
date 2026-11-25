@@ -169,8 +169,16 @@ spec:
                     type: array
                 type: object
               bootstrapScript:
-                description: BootstrapScript runs once during the golden boot, so
-                  its results are baked into the snapshot.
+                description: |-
+                  BootstrapScript runs once during the golden boot, from the home directory and after repositories are cloned
+                  and mise has installed its tools, so its results are baked into the snapshot. It runs with `bash -e` unless
+                  it starts with a #! line, and a failure fails the revision; its output is in ~/.plural/golden.log.
+                type: string
+              bootstrapTimeout:
+                description: |-
+                  BootstrapTimeout bounds the golden boot when it has work to do (repositories, mise or bootstrapScript):
+                  past it, Substrate crashes the boot and the revision fails. It's also how long a waking instance may take to
+                  report ready. Defaults to 30m.
                 type: string
               browser:
                 description: Browser enables the in-box headless browser.
@@ -560,6 +568,32 @@ spec:
                     description: 'Rust: crates.io and rustup.'
                     type: boolean
                 type: object
+              repositories:
+                description: |-
+                  Repositories are cloned into the home during the golden boot, with the box's SCM connections, so every
+                  instance starts with them checked out, along with whatever bootstrapScript builds in them. Each instance
+                  fetches them again when it first boots. When allowedRepositories is set, each must be on it.
+                items:
+                  description: DevboxRepository is a repository the golden boot clones.
+                  properties:
+                    branch:
+                      description: Branch is checked out instead of the default branch.
+                      type: string
+                    description:
+                      description: Description is shown to agents in the home's Project.md.
+                      type: string
+                    url:
+                      description: URL is the https clone URL, e.g. https://github.com/pluralsh/console.git.
+                      pattern: ^https://[^/]+/.+
+                      type: string
+                  required:
+                  - url
+                  type: object
+                maxItems: 32
+                type: array
+                x-kubernetes-list-map-keys:
+                - url
+                x-kubernetes-list-type: map
               resources:
                 description: Resources are the per-instance limits.
                 properties:

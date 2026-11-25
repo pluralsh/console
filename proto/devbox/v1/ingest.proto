@@ -39,7 +39,8 @@ service Ingest {
   rpc ReportSnapshot(ReportSnapshotRequest) returns (ReportSnapshotResponse);
 
   // GetInstanceCredentials mints or returns instance-scoped credentials for the credential provider cache
-  // (scm, ai-proxy, console, claude-oauth) and for daemon delivery (oidc, codex).
+  // (scm, ai-proxy, console, claude-oauth) and for daemon delivery (oidc, codex). With devbox_id instead of
+  // instance_id it mints the devbox's own SCM credentials, for the golden boot of its template.
   rpc GetInstanceCredentials(GetInstanceCredentialsRequest) returns (GetInstanceCredentialsResponse);
   // UpdateAgentCredential writes back a refreshed Codex auth.json, compare-and-swap on the credential version.
   rpc UpdateAgentCredential(UpdateAgentCredentialRequest) returns (UpdateAgentCredentialResponse);
@@ -236,6 +237,10 @@ message ReportSnapshotResponse {
 message GetInstanceCredentialsRequest {
   string instance_id = 1;
   repeated CredentialSelector credentials = 2;
+  // Set instead of instance_id by the golden boot of the devbox's template, which clones the DevboxRunner's
+  // repositories before any instance exists. Only SCM selectors are allowed, answered from the devbox's SCM
+  // connections (or console's default one).
+  string devbox_id = 3;
 }
 
 message GetInstanceCredentialsResponse {
