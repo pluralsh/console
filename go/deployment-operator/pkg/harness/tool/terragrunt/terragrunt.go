@@ -48,6 +48,10 @@ func (in *Terragrunt) State() (*console.StackStateAttributes, error) {
 
 // Plan implements [v1.Tool] interface.
 func (in *Terragrunt) Plan() (*console.StackStateAttributes, error) {
+	if in.runAll {
+		return in.planAllState()
+	}
+
 	plan, err := in.plan()
 	if err != nil {
 		return nil, err
@@ -55,6 +59,30 @@ func (in *Terragrunt) Plan() (*console.StackStateAttributes, error) {
 
 	return &console.StackStateAttributes{
 		Plan: &plan,
+	}, nil
+}
+
+func (in *Terragrunt) planAllState() (*console.StackStateAttributes, error) {
+	units, err := loadUnitPlans(in.jsonOutDir)
+	if err != nil {
+		return nil, err
+	}
+
+	var b strings.Builder
+	for _, unit := range units {
+		b.WriteString(formatUnitPlan(unit.rel, unit.plan))
+		b.WriteByte('\n')
+	}
+
+	raw, err := combinedPlanJSON(units)
+	if err != nil {
+		return nil, err
+	}
+
+	text := b.String()
+	return &console.StackStateAttributes{
+		Plan:     &text,
+		PlanJSON: &raw,
 	}, nil
 }
 

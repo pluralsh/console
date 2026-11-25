@@ -129,6 +129,64 @@ func TestPlanAllRendersSavedJSON(t *testing.T) {
 	require.NotNil(t, state.Plan)
 	assert.Contains(t, *state.Plan, "# app\n  # local_file.demo will be created\nPlan: 1 to add, 0 to change, 0 to destroy.")
 	assert.Contains(t, *state.Plan, "# network\nNo changes.")
+	require.NotNil(t, state.PlanJSON)
+
+	var doc struct {
+		ResourceChanges []struct {
+			Address string `json:"address"`
+		} `json:"resource_changes"`
+	}
+	require.NoError(t, json.Unmarshal([]byte(*state.PlanJSON), &doc))
+	require.Len(t, doc.ResourceChanges, 1)
+	assert.Equal(t, "app.local_file.demo", doc.ResourceChanges[0].Address)
+}
+
+func TestCombinedPlanJSONPrefixesUnitAddresses(t *testing.T) {
+	raw, err := combinedPlanJSON([]unitPlan{
+		{rel: ".", plan: &tfjson.Plan{
+			TerraformVersion: "1.8.2",
+			ResourceChanges: []*tfjson.ResourceChange{{
+				Address: "local_file.root",
+				Type:    "local_file",
+				Name:    "root",
+			}},
+		}},
+		{rel: "nested/storage", plan: &tfjson.Plan{
+			ResourceChanges: []*tfjson.ResourceChange{{
+				Address:      "local_file.storage",
+				Type:         "local_file",
+				Name:         "storage",
+				ProviderName: "registry.terraform.io/hashicorp/local",
+				Change: &tfjson.Change{
+					Actions: tfjson.Actions{tfjson.ActionCreate},
+				},
+			}},
+		}},
+	})
+
+	require.NoError(t, err)
+
+	var doc struct {
+		TerraformVersion string `json:"terraform_version"`
+		ResourceChanges  []struct {
+			Address      string `json:"address"`
+			Type         string `json:"type"`
+			Name         string `json:"name"`
+			ProviderName string `json:"provider_name"`
+			Change       struct {
+				Actions []string `json:"actions"`
+			} `json:"change"`
+		} `json:"resource_changes"`
+	}
+	require.NoError(t, json.Unmarshal([]byte(raw), &doc))
+	assert.Equal(t, "1.8.2", doc.TerraformVersion)
+	require.Len(t, doc.ResourceChanges, 2)
+	assert.Equal(t, "local_file.root", doc.ResourceChanges[0].Address)
+	assert.Equal(t, "nested/storage.local_file.storage", doc.ResourceChanges[1].Address)
+	assert.Equal(t, "local_file", doc.ResourceChanges[1].Type)
+	assert.Equal(t, "storage", doc.ResourceChanges[1].Name)
+	assert.Equal(t, "registry.terraform.io/hashicorp/local", doc.ResourceChanges[1].ProviderName)
+	assert.Equal(t, []string{"create"}, doc.ResourceChanges[1].Change.Actions)
 }
 
 func TestScanAllUsesEachUnitPlan(t *testing.T) {

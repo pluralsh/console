@@ -1,6 +1,7 @@
 package terragrunt
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -85,6 +86,54 @@ func loadUnitPlans(jsonOutDir string) ([]unitPlan, error) {
 	}
 
 	return units, nil
+}
+
+// combinedPlanJSON merges unit plans into one Terraform plan document.
+// Approval policies read resource_changes, so each address is prefixed
+// with the unit path. Other resource fields are copied unchanged.
+func combinedPlanJSON(units []unitPlan) (string, error) {
+	combined := &tfjson.Plan{
+		FormatVersion:   "1.0",
+		ResourceChanges: []*tfjson.ResourceChange{},
+	}
+
+	for _, unit := range units {
+		if unit.plan == nil {
+			continue
+		}
+		if combined.TerraformVersion == "" {
+			combined.TerraformVersion = unit.plan.TerraformVersion
+		}
+		if unit.plan.FormatVersion != "" {
+			combined.FormatVersion = unit.plan.FormatVersion
+		}
+
+		for _, change := range unit.plan.ResourceChanges {
+			if change == nil {
+				continue
+			}
+			copied := *change
+			copied.Address = prefixPlanAddress(unit.rel, change.Address)
+			combined.ResourceChanges = append(combined.ResourceChanges, &copied)
+		}
+	}
+
+	raw, err := json.Marshal(combined)
+	if err != nil {
+		return "", fmt.Errorf("encode terragrunt plan JSON: %w", err)
+	}
+
+	return string(raw), nil
+}
+
+func prefixPlanAddress(rel, address string) string {
+	if rel == "" || rel == "." {
+		return address
+	}
+	if address == "" {
+		return rel
+	}
+	return rel + "." + address
 }
 
 func changedUnitFilters(jsonOutDir string) ([]string, error) {
