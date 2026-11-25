@@ -235,6 +235,29 @@ defmodule Console.Deployments.SentinelTest do
       assert MapSet.new(handles)
              |> MapSet.equal?(MapSet.new(clusters, & &1.handle))
     end
+
+    test "a second spawn does not duplicate jobs for the same cluster" do
+      sentinel = insert(:sentinel,
+        checks: [%{
+          type: :integration_test,
+          name: "test",
+          configuration: %{
+            integration_test: %{
+              format: :junit,
+              tags: %{"tier" => "dev"},
+              distro: :eks
+            }
+          }
+        }]
+      )
+      run = insert(:sentinel_run, sentinel: sentinel, checks: Console.mapify(sentinel.checks))
+      insert(:cluster, distro: :eks, tags: [%{name: "tier", value: "dev"}])
+
+      {:ok, 1} = Sentinels.spawn_jobs(run, "test")
+      {:ok, 0} = Sentinels.spawn_jobs(run, "test")
+
+      assert Repo.aggregate(SentinelRunJob, :count) == 1
+    end
   end
 
   describe "#update_sentinel_job/3" do

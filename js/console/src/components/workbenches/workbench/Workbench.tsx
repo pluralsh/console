@@ -41,10 +41,12 @@ import {
 import { PageToolbar } from 'components/layout/PageToolbar'
 import { useWorkbenchOptions } from 'components/workbenches/useWorkbenchOptions'
 import { getTabCrumb } from 'utils/getTabCrumb'
+import { FeatureFlagContext } from 'components/flows/FeatureFlagContext'
 import {
   createContext,
   Key,
   ReactNode,
+  use,
   useCallback,
   useContext,
   useLayoutEffect,
@@ -303,6 +305,7 @@ export function WorkbenchTabs() {
   const workbenchBasePath = getWorkbenchAbsPath(workbenchId)
   const jobsTabPath = `${workbenchBasePath}/${WORKBENCH_JOBS_REL_PATH}`
   const hasInProgressJobs = useWorkbenchHasInProgressJobs(workbenchId)
+  const { featureFlags } = use(FeatureFlagContext)
 
   const subTabDirectory = useMemo(
     () => [
@@ -319,10 +322,14 @@ export function WorkbenchTabs() {
         ),
         path: jobsTabPath,
       },
-      {
-        label: 'Devboxes',
-        path: `${workbenchBasePath}/${WORKBENCH_DEVBOXES_REL_PATH}`,
-      },
+      ...(featureFlags.Devboxes
+        ? [
+            {
+              label: 'Devboxes',
+              path: `${workbenchBasePath}/${WORKBENCH_DEVBOXES_REL_PATH}`,
+            },
+          ]
+        : []),
       {
         label: 'Monitoring',
         path: `${workbenchBasePath}/${WORKBENCHES_MONITORING_REL_PATH}`,
@@ -353,6 +360,7 @@ export function WorkbenchTabs() {
       jobsTabPath,
       hasInProgressJobs,
       workbench?.filesystemEnabled,
+      featureFlags.Devboxes,
     ]
   )
 

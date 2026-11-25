@@ -228,7 +228,7 @@ defmodule Console.Schema.WorkbenchJob do
     from(j in query, where: j.id not in subquery(pr_job_ids()))
   end
 
-  defp pr_job_ids(), do: PullRequest.with_workbench() |> PullRequest.workbench_job_ids()
+  defp pr_job_ids(), do: PullRequest.for_workbench_jobs() |> PullRequest.workbench_job_ids()
 
   def count_by_status(query \\ __MODULE__) do
     from(j in query, group_by: j.status, select: %{status: j.status, count: count(j.id)})

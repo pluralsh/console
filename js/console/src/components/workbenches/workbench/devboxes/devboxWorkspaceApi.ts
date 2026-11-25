@@ -71,6 +71,7 @@ export type DevboxChangeGroup = {
   repository: string
   path?: Nullable<string>
   branch?: Nullable<string>
+  remoteUrl?: Nullable<string>
   files: DevboxChangedFile[]
 }
 
@@ -78,7 +79,16 @@ export type DevboxChangeGroup = {
 // state for any operation left undefined
 export type DevboxWorkspaceApi = {
   openStream?: (opts: DevboxOpenStreamOptions) => Promise<DevboxStreamTicket>
-  listFiles?: (path: string) => Promise<DevboxFileEntry[]>
+  // brief entries carry no size or git status, which lets the instance list
+  // from memory rather than disk
+  listFiles?: (
+    path: string,
+    opts?: { brief?: boolean }
+  ) => Promise<DevboxFileEntry[]>
+  // the best fuzzy matches for query anywhere under path
+  searchFiles?: (path: string, query: string) => Promise<DevboxFileEntry[]>
+  // the last listing of a directory, if any, to show while listFiles refreshes it
+  cachedFiles?: (path: string) => Nullable<DevboxFileEntry[]>
   readFile?: (path: string) => Promise<DevboxFileContent>
   writeFile?: (
     path: string,
@@ -111,6 +121,10 @@ export function createWorkspaceApi(
   client: ApolloClient<unknown>,
   instanceId: string
 ): DevboxWorkspaceApi {
+  const filesVariables = (path: string) => ({
+    instanceId,
+    path: path === '~' ? null : path,
+  })
   return {
     openStream: async ({ kind, port, terminalId, url }) => {
       const { data } = await client.mutate<
@@ -130,22 +144,36 @@ export function createWorkspaceApi(
       if (!stream) throw new Error('Console returned no stream')
       return stream
     },
-    listFiles: async (path) => {
+    listFiles: async (path, opts) => {
       const { data } = await client.query<
         DevboxFilesQuery,
         DevboxFilesQueryVariables
       >({
         query: DevboxFilesDocument,
-        variables: { instanceId, path: path === '~' ? null : path },
-        fetchPolicy: 'network-only',
+        variables: opts?.brief
+          ? { ...filesVariables(path), brief: true }
+          : filesVariables(path),
+        fetchPolicy: opts?.brief ? 'no-cache' : 'network-only',
       })
-      return (data?.devboxFiles ?? []).filter(isNonNullable).map((e) => ({
-        path: e.path,
-        name: e.name ?? e.path.split('/').pop() ?? e.path,
-        type: e.type ?? 'file',
-        size: e.size,
-        gitStatus: e.gitStatus,
-      }))
+      return toFileEntries(data)
+    },
+    searchFiles: async (path, query) => {
+      const { data } = await client.query<
+        DevboxFilesQuery,
+        DevboxFilesQueryVariables
+      >({
+        query: DevboxFilesDocument,
+        variables: { ...filesVariables(path), query },
+        fetchPolicy: 'no-cache',
+      })
+      return toFileEntries(data)
+    },
+    cachedFiles: (path) => {
+      const data = client.readQuery<
+        DevboxFilesQuery,
+        DevboxFilesQueryVariables
+      >({ query: DevboxFilesDocument, variables: filesVariables(path) })
+      return data ? toFileEntries(data) : null
     },
     readFile: async (path) => {
       const { data } = await client.query<
@@ -185,25 +213,40 @@ export function createWorkspaceApi(
         variables: { instanceId, threadId, includeDiff: true },
         fetchPolicy: 'network-only',
       })
-      return (data?.devboxChanges ?? []).filter(isNonNullable).map((g) => ({
-        repository: g.checkout?.name ?? g.checkout?.path ?? 'workspace',
-        path: g.checkout?.path,
-        branch: g.checkout?.branch,
-        files: (g.files ?? []).filter(isNonNullable).map((f) => ({
-          path: f.path,
-          oldPath: f.oldPath,
-          status: f.status,
-          additions: f.additions,
-          deletions: f.deletions,
-          binary: f.binary,
-          patch:
-            f.diffTruncated && f.diff
-              ? `${f.diff}\n… (diff truncated)`
-              : f.diff,
-        })),
-      }))
+      return toChangeGroups(data)
     },
   }
+}
+
+function toFileEntries(data: Nullable<DevboxFilesQuery>): DevboxFileEntry[] {
+  return (data?.devboxFiles ?? []).filter(isNonNullable).map((e) => ({
+    path: e.path,
+    name: e.name ?? e.path.split('/').pop() ?? e.path,
+    type: e.type ?? 'file',
+    size: e.size,
+    gitStatus: e.gitStatus,
+  }))
+}
+
+export function toChangeGroups(
+  data: Nullable<DevboxChangesQuery>
+): DevboxChangeGroup[] {
+  return (data?.devboxChanges ?? []).filter(isNonNullable).map((g) => ({
+    repository: g.checkout?.name ?? g.checkout?.path ?? 'workspace',
+    path: g.checkout?.path,
+    branch: g.checkout?.branch,
+    remoteUrl: g.checkout?.remoteUrl,
+    files: (g.files ?? []).filter(isNonNullable).map((f) => ({
+      path: f.path,
+      oldPath: f.oldPath,
+      status: f.status,
+      additions: f.additions,
+      deletions: f.deletions,
+      binary: f.binary,
+      patch:
+        f.diffTruncated && f.diff ? `${f.diff}\n… (diff truncated)` : f.diff,
+    })),
+  }))
 }
 
 // browsers can't set headers on WebSockets, so the token rides in the query

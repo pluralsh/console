@@ -21,11 +21,12 @@ fi
 # The CRs this chart creates are only rendered inline when their CRDs are
 # served; claim they are so the templates and kubeconform see them.
 API_VERSIONS=(--api-versions postgresql.cnpg.io/v1/Cluster --api-versions postgresql.cnpg.io/v1/ScheduledBackup
-  --api-versions ate.dev/v1/SandboxConfig)
+  --api-versions postgresql.cnpg.io/v1/Database --api-versions ate.dev/v1/SandboxConfig
+  --api-versions ate.dev/v1/CSIDriverConfig)
 
 # JSON schemas for the ate.dev kinds, from the CRDs this chart ships.
 mkdir -p "$OUT/schemas"
-for crd in files/crds/*.yaml; do
+for crd in crds/*.yaml; do
   kind="$(yq '.spec.names.kind | downcase' "$crd")"
   for version in $(yq '.spec.versions[].name' "$crd"); do
     yq -o json ".spec.versions[] | select(.name == \"$version\") | .schema.openAPIV3Schema" "$crd" \

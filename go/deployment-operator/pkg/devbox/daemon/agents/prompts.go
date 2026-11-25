@@ -3,6 +3,8 @@ package agents
 import (
 	"context"
 	"errors"
+	"slices"
+	"strings"
 	"time"
 
 	"google.golang.org/grpc/codes"
@@ -60,7 +62,7 @@ func (m *Manager) Prompt(ctx context.Context, req *devboxv1.PromptRequest) (*dev
 		t.closed = false
 		t.dirty = true
 	}
-	qp := &queuedPrompt{promptID: req.GetPromptId(), messageID: promptMessageID(req.GetPromptId()), content: content, sentBy: req.GetSentBy()}
+	qp := &queuedPrompt{promptID: req.GetPromptId(), messageID: promptMessageID(req.GetPromptId()), content: content, sentBy: req.GetSentBy(), queuedAt: m.clock.Now()}
 	t.rememberPrompt(qp.promptID, qp.messageID)
 	t.notePromptText(req.GetContent())
 	m.dirty = true
@@ -76,6 +78,7 @@ func (m *Manager) Prompt(ctx context.Context, req *devboxv1.PromptRequest) (*dev
 // enqueueLocked queues a prompt and starts it if the thread and the instance allow; reports whether it started.
 func (m *Manager) enqueueLocked(t *thread, qp *queuedPrompt) bool {
 	t.queue = append(t.queue, qp)
+	t.dirty = true
 	if t.running || t.waiting {
 		return false
 	}
@@ -193,7 +196,7 @@ func (m *Manager) runTurn(ctx context.Context, t *thread, qp *queuedPrompt) {
 	sid := s.id
 	m.mu.Unlock()
 
-	params := map[string]any{"sessionId": sid, "prompt": m.agentPrompt(c, qp.content)}
+	params := map[string]any{"sessionId": sid, "prompt": m.agentPrompt(c, t, qp.content)}
 	if c.caps.protocolVersion >= 2 {
 		params["messageId"] = qp.messageID
 	}
@@ -230,6 +233,66 @@ func (m *Manager) runTurn(ctx context.Context, t *thread, qp *queuedPrompt) {
 		}
 	}
 	m.turnDoneLocked(t)
+}
+
+// UpdateQueuedPrompt edits, drops or promotes a held prompt. A prompt that already started (or was dropped) is
+// left alone and reported as not updated, so a stale shelf can't touch a turn in progress.
+func (m *Manager) UpdateQueuedPrompt(ctx context.Context, req *devboxv1.UpdateQueuedPromptRequest) (*devboxv1.UpdateQueuedPromptResponse, error) {
+	m.mu.Lock()
+	t, err := m.threadLocked(req.GetThread())
+	if err != nil {
+		m.mu.Unlock()
+		return nil, err
+	}
+	i := t.queuedIndex(req.GetPromptId())
+	if i < 0 {
+		resp := &devboxv1.UpdateQueuedPromptResponse{QueuedPrompts: t.queuedProtos()}
+		m.mu.Unlock()
+		return resp, nil
+	}
+	var interrupt *agentConn
+	switch req.GetAction() {
+	case devboxv1.QueuedPromptAction_QUEUED_PROMPT_ACTION_EDIT:
+		content := withText(t.queue[i].content, strings.TrimSpace(req.GetText()))
+		if len(content) == 0 {
+			m.mu.Unlock()
+			return nil, derr.New(codes.InvalidArgument, devboxv1.ErrorReason_ERROR_REASON_UNSPECIFIED, "prompt has no content", nil)
+		}
+		t.queue[i].content = content
+	case devboxv1.QueuedPromptAction_QUEUED_PROMPT_ACTION_CANCEL:
+		t.queue = slices.Delete(t.queue, i, i+1)
+		if len(t.queue) == 0 {
+			m.removeFromWaitLocked(t)
+			m.pumpLocked()
+		}
+	case devboxv1.QueuedPromptAction_QUEUED_PROMPT_ACTION_SEND_NOW:
+		qp := t.queue[i]
+		t.queue = append([]*queuedPrompt{qp}, slices.Delete(t.queue, i, i+1)...)
+		switch {
+		case t.running:
+			// the turn's end starts the front of the queue
+			interrupt = m.conns[t.agent]
+		case !t.waiting && t.open():
+			if m.running < m.opts.MaxRunning && len(m.waitQ) == 0 {
+				m.startTurnLocked(t)
+			} else {
+				m.waitLocked(t)
+			}
+		}
+	default:
+		m.mu.Unlock()
+		return nil, derr.New(codes.InvalidArgument, devboxv1.ErrorReason_ERROR_REASON_UNSPECIFIED, "unknown queued prompt action", nil)
+	}
+	t.dirty = true
+	m.dirty = true
+	resp := &devboxv1.UpdateQueuedPromptResponse{Updated: true, QueuedPrompts: t.queuedProtos()}
+	m.mu.Unlock()
+	if interrupt != nil {
+		if err := m.cancelTurn(ctx, interrupt, t); err != nil {
+			return nil, err
+		}
+	}
+	return resp, nil
 }
 
 // CancelPrompt cancels the thread's current turn (`session/cancel`). Held prompts stay queued.

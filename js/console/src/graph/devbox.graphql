@@ -48,6 +48,10 @@ fragment DevboxAgent on DevboxAgent {
   models {
     ...DevboxModel
   }
+  subscriptionDefaultModel: defaultModel(billing: SUBSCRIPTION)
+  subscriptionModels: models(billing: SUBSCRIPTION) {
+    ...DevboxModel
+  }
   commands {
     ...DevboxCommand
   }
@@ -67,6 +71,7 @@ fragment DevboxTiny on Devbox {
   resolvedImage
   templateRevision
   browser
+  resources
   maxInstances
   lastHeartbeatAt
   autonomy {
@@ -165,6 +170,7 @@ fragment DevboxThread on DevboxThread {
   cwd
   worktreeRepos
   status
+  stage
   imported
   lastActivityAt
   entityCount
@@ -183,6 +189,13 @@ fragment DevboxThread on DevboxThread {
   usage {
     ...DevboxUsage
   }
+  queuedPrompts {
+    promptId
+    text
+    attachments
+    queuedAt
+  }
+  parentToolCallId
   parent {
     id
     sessionId
@@ -210,6 +223,9 @@ fragment DevboxInteraction on DevboxInteraction {
     optionId
     name
     kind
+  }
+  toolCall {
+    ...DevboxToolCall
   }
   response
   answeredAt
@@ -618,6 +634,8 @@ fragment DevboxEntityChange on DevboxEntityChange {
   stateKind
   payload
   offset
+  seq
+  stream
   emittedAt
   entity {
     ...DevboxEntity
@@ -713,6 +731,7 @@ query WorkbenchDevboxInstances(
   $after: String
   $statuses: [DevboxInstanceStatus]
   $mine: Boolean
+  $includeEnded: Boolean
 ) {
   workbench(id: $id) {
     id
@@ -721,6 +740,7 @@ query WorkbenchDevboxInstances(
       after: $after
       statuses: $statuses
       mine: $mine
+      includeEnded: $includeEnded
     ) {
       pageInfo {
         ...PageInfo
@@ -804,6 +824,8 @@ query DevboxTimeline(
     limit: $limit
   ) {
     deltaOffset
+    seq
+    stream
     hasMore
     entities {
       ...DevboxEntity
@@ -855,8 +877,18 @@ query DevboxPullRequests(
   }
 }
 
-query DevboxFiles($instanceId: ID!, $path: String) {
-  devboxFiles(instanceId: $instanceId, path: $path) {
+query DevboxFiles(
+  $instanceId: ID!
+  $path: String
+  $query: String
+  $brief: Boolean
+) {
+  devboxFiles(
+    instanceId: $instanceId
+    path: $path
+    query: $query
+    brief: $brief
+  ) {
     ...DevboxFileEntry
   }
 }
@@ -1152,6 +1184,22 @@ mutation CancelDevboxPrompt($id: ID!) {
   }
 }
 
+mutation UpdateDevboxQueuedPrompt(
+  $id: ID!
+  $promptId: String!
+  $action: DevboxQueuedPromptAction!
+  $text: String
+) {
+  updateDevboxQueuedPrompt(
+    id: $id
+    promptId: $promptId
+    action: $action
+    text: $text
+  ) {
+    ...DevboxThread
+  }
+}
+
 mutation SetDevboxThreadConfigOption(
   $id: ID!
   $configId: String!
@@ -1220,6 +1268,40 @@ subscription DevboxInstanceEntityDelta($instanceId: ID!) {
     delta
     payload {
       ...DevboxEntityChange
+    }
+  }
+}
+
+fragment DevboxPullRequestJob on DevboxPullRequestJob {
+  id
+  instanceId
+  repository
+  status
+  url
+  title
+  error
+  writer
+}
+
+mutation CreateDevboxPullRequest(
+  $instanceId: ID!
+  $repository: String!
+  $threadId: ID
+) {
+  createDevboxPullRequest(
+    instanceId: $instanceId
+    repository: $repository
+    threadId: $threadId
+  ) {
+    ...DevboxPullRequestJob
+  }
+}
+
+subscription DevboxPullRequestJobDelta($instanceId: ID!) {
+  devboxPullRequestJobDelta(instanceId: $instanceId) {
+    delta
+    payload {
+      ...DevboxPullRequestJob
     }
   }
 }

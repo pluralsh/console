@@ -7,6 +7,14 @@ import {
 import { ComponentProps, HTMLAttributes, ReactElement, ReactNode } from 'react'
 import styled, { type DefaultTheme } from 'styled-components'
 import {
+  DEVBOX_COMMAND_ATTRIBUTES,
+  DEVBOX_COMMAND_TAG,
+  DEVBOX_FILE_ATTRIBUTES,
+  DEVBOX_FILE_TAG,
+  DevboxMarkdownLink,
+  devboxFileChipComponents,
+} from './DevboxFileChip'
+import {
   PLRL_FILE_ATTRIBUTES,
   PLRL_FILE_TAG,
   plrlFileChipComponents,
@@ -16,10 +24,17 @@ type ChatMarkdownProps = ComponentProps<typeof Markdown>
 
 const chatSanitizeSchema = {
   ...markdownSanitizeSchema,
-  tagNames: [...(markdownSanitizeSchema.tagNames ?? []), PLRL_FILE_TAG],
+  tagNames: [
+    ...(markdownSanitizeSchema.tagNames ?? []),
+    PLRL_FILE_TAG,
+    DEVBOX_FILE_TAG,
+    DEVBOX_COMMAND_TAG,
+  ],
   attributes: {
     ...markdownSanitizeSchema.attributes,
     [PLRL_FILE_TAG]: PLRL_FILE_ATTRIBUTES,
+    [DEVBOX_FILE_TAG]: DEVBOX_FILE_ATTRIBUTES,
+    [DEVBOX_COMMAND_TAG]: DEVBOX_COMMAND_ATTRIBUTES,
   },
 }
 
@@ -44,6 +59,7 @@ export function ChatMarkdown({
         text={text}
         components={{
           ...plrlFileChipComponents,
+          ...devboxFileChipComponents,
           h1: ChatH1,
           h2: ChatH2,
           h3: ChatH3,
@@ -61,6 +77,7 @@ export function ChatMarkdown({
           table: ChatTable,
           th: ChatTh,
           td: ChatTd,
+          a: DevboxMarkdownLink,
           ...components,
         }}
       />

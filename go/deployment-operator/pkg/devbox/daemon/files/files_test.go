@@ -18,8 +18,9 @@ import (
 
 type checkouts []string
 
-func (c checkouts) Checkouts() []string             { return c }
-func (c checkouts) ThreadWorktrees(string) []string { return nil }
+func (c checkouts) Checkouts() []string                   { return c }
+func (c checkouts) ThreadWorktrees(string) []string       { return nil }
+func (c checkouts) AllThreadWorktrees() map[string]string { return nil }
 
 func TestMultiRepoChanges(t *testing.T) {
 	t.Setenv("GIT_CONFIG_GLOBAL", "/dev/null")
@@ -127,5 +128,38 @@ func TestWriteCAS(t *testing.T) {
 	read, err := s.Read(ctx, &devboxv1.ReadFileRequest{Path: "~/notes/a.txt"})
 	if err != nil || string(read.GetContent()) != "v2" || read.GetSha256() != sum([]byte("v2")) {
 		t.Fatalf("read: %v %v", read, err)
+	}
+}
+
+func TestBranchDiffStatSizesTheBranchAgainstItsMergeBase(t *testing.T) {
+	t.Setenv("GIT_CONFIG_GLOBAL", "/dev/null")
+	home := t.TempDir()
+	api := gittest.Repo(t, filepath.Join(home, "api"), map[string]string{"README.md": "one\ntwo\n"})
+	gittest.Git(t, api, "remote", "add", "origin", "git@github.com:acme/api.git")
+	base := strings.TrimSpace(gittest.Git(t, api, "rev-parse", "--abbrev-ref", "HEAD"))
+
+	gittest.Git(t, api, "checkout", "-q", "-b", "feat/x")
+	gittest.Write(t, api, map[string]string{"README.md": "one\nTWO\nthree\n", "new.go": "package x\n"})
+	gittest.Git(t, api, "add", "-A")
+	gittest.Git(t, api, "commit", "-q", "-m", "feat")
+	// later work on the base branch isn't part of the PR
+	gittest.Git(t, api, "checkout", "-q", base)
+	gittest.Write(t, api, map[string]string{"other.txt": "a\nb\nc\n"})
+	gittest.Git(t, api, "add", "-A")
+	gittest.Git(t, api, "commit", "-q", "-m", "base")
+
+	s := &Service{Home: home, Checkouts: checkouts{api}}
+	for _, repo := range []string{"api", api, "https://github.com/acme/api"} {
+		st, err := s.BranchDiffStat(context.Background(), &devboxv1.BranchDiffStatRequest{Repository: repo, Base: base, Head: "feat/x"})
+		if err != nil {
+			t.Fatalf("%s: %v", repo, err)
+		}
+		// README: +2 -1, new.go: +1
+		if st.GetAdditions() != 3 || st.GetDeletions() != 1 || st.GetFiles() != 2 || st.GetHeadSha() == "" || st.GetBaseSha() == "" {
+			t.Fatalf("%s: diff stat %v", repo, st)
+		}
+	}
+	if _, err := s.BranchDiffStat(context.Background(), &devboxv1.BranchDiffStatRequest{Repository: "web", Base: base, Head: "feat/x"}); err == nil {
+		t.Fatal("an unknown repository should fail")
 	}
 }

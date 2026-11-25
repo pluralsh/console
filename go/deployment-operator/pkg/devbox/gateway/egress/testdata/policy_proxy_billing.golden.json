@@ -146,6 +146,18 @@
       "ExtraHeaders": null
     },
     {
+      "Host": "*.blob.core.windows.net",
+      "Port": 443,
+      "Scheme": "https",
+      "InjectHeader": "",
+      "SecretURI": "",
+      "ActorJWT": false,
+      "Prefix": "",
+      "ActorJWTAudiences": null,
+      "ActorJWTExpirationSeconds": 0,
+      "ExtraHeaders": null
+    },
+    {
       "Host": "gitlab.example.com",
       "Port": 443,
       "Scheme": "https",
@@ -176,6 +188,20 @@
     },
     {
       "Host": "devbox-gateway.plrl-deploy-operator.svc",
+      "Port": 8080,
+      "Scheme": "http",
+      "InjectHeader": "Authorization",
+      "SecretURI": "",
+      "ActorJWT": true,
+      "Prefix": "Bearer ",
+      "ActorJWTAudiences": [
+        "http://devbox-gateway.plrl-deploy-operator.svc:8080"
+      ],
+      "ActorJWTExpirationSeconds": 900,
+      "ExtraHeaders": null
+    },
+    {
+      "Host": "devbox-gateway.plrl-deploy-operator.svc.cluster.local",
       "Port": 8080,
       "Scheme": "http",
       "InjectHeader": "Authorization",

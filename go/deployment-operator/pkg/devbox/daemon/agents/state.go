@@ -20,6 +20,33 @@ type queuedPrompt struct {
 	messageID string
 	content   []*devboxv1.ContentBlock
 	sentBy    *devboxv1.Principal
+	queuedAt  time.Time
+}
+
+// proto is the queued prompt as shown to console: its text and attachment links. Inline image data is left out,
+// it duplicates the attachment's link.
+func (qp *queuedPrompt) proto() *devboxv1.QueuedPrompt {
+	out := &devboxv1.QueuedPrompt{PromptId: qp.promptID, SentBy: qp.sentBy, QueuedAt: timestamppb.New(qp.queuedAt)}
+	for _, b := range qp.content {
+		if b.GetText() != nil || b.GetResourceLink() != nil {
+			out.Content = append(out.Content, b)
+		}
+	}
+	return out
+}
+
+// withText replaces a prompt's text blocks with text, keeping its other blocks (attachments) after it.
+func withText(content []*devboxv1.ContentBlock, text string) []*devboxv1.ContentBlock {
+	var out []*devboxv1.ContentBlock
+	if text != "" {
+		out = append(out, &devboxv1.ContentBlock{Block: &devboxv1.ContentBlock_Text{Text: &devboxv1.TextContent{Text: text}}})
+	}
+	for _, b := range content {
+		if b.GetText() == nil {
+			out = append(out, b)
+		}
+	}
+	return out
 }
 
 // thread is a console thread: a top-level ACP session plus its prompt queue.
@@ -78,6 +105,23 @@ func (t *thread) displayTitle() string {
 	return t.id
 }
 
+func (t *thread) queuedProtos() []*devboxv1.QueuedPrompt {
+	out := make([]*devboxv1.QueuedPrompt, 0, len(t.queue))
+	for _, qp := range t.queue {
+		out = append(out, qp.proto())
+	}
+	return out
+}
+
+func (t *thread) queuedIndex(promptID string) int {
+	for i, qp := range t.queue {
+		if qp.promptID == promptID {
+			return i
+		}
+	}
+	return -1
+}
+
 func (t *thread) rememberPrompt(promptID, messageID string) {
 	if t.prompts == nil {
 		t.prompts = map[string]string{}
@@ -104,16 +148,18 @@ func (o *cfgOption) category() string              { return acp.Str(o.raw, "cate
 
 // session is an ACP session: a thread's or a subagent's.
 type session struct {
-	id      string
-	kind    devboxv1.SessionKind
-	parent  string
-	agent   devboxv1.AgentType
-	thread  *thread
-	cwd     string
-	title   string
-	meta    acp.Object
-	store   *acp.Store
-	options []*cfgOption
+	id     string
+	kind   devboxv1.SessionKind
+	parent string
+	agent  devboxv1.AgentType
+	thread *thread
+	cwd    string
+	title  string
+	meta   acp.Object
+	// parentToolCall is the parent's tool call that spawned a subagent, when the agent says which.
+	parentToolCall string
+	store          *acp.Store
+	options        []*cfgOption
 	// modeView replaces the mode option in reported options: its values within the runner's autonomy cap, or
 	// hidden (an empty object) when autonomy covers every mode. Nil reports the mode option as is.
 	modeView acp.Object
@@ -191,6 +237,7 @@ type persistedSession struct {
 	Agent        int32           `json:"agent"`
 	Cwd          string          `json:"cwd"`
 	Title        string          `json:"title,omitempty"`
+	ParentTool   string          `json:"parentToolCall,omitempty"`
 	NextPosition uint64          `json:"nextPosition"`
 	Revision     uint64          `json:"revision"`
 	Options      []acp.Object    `json:"options,omitempty"`
@@ -217,6 +264,44 @@ type persistedThread struct {
 	Revision  uint64            `json:"revision"`
 	PromptIDs []string          `json:"promptIds,omitempty"`
 	Messages  []string          `json:"messages,omitempty"`
+	Queue     []persistedPrompt `json:"queue,omitempty"`
+}
+
+type persistedPrompt struct {
+	PromptID  string            `json:"promptId"`
+	MessageID string            `json:"messageId"`
+	Content   []json.RawMessage `json:"content"`
+	SentBy    json.RawMessage   `json:"sentBy,omitempty"`
+	QueuedAt  time.Time         `json:"queuedAt"`
+}
+
+func persistPrompt(qp *queuedPrompt) persistedPrompt {
+	pp := persistedPrompt{PromptID: qp.promptID, MessageID: qp.messageID, QueuedAt: qp.queuedAt}
+	for _, b := range qp.content {
+		raw, _ := protojson.Marshal(b)
+		pp.Content = append(pp.Content, raw)
+	}
+	if qp.sentBy != nil {
+		pp.SentBy, _ = protojson.Marshal(qp.sentBy)
+	}
+	return pp
+}
+
+func restorePrompt(pp persistedPrompt) *queuedPrompt {
+	qp := &queuedPrompt{promptID: pp.PromptID, messageID: pp.MessageID, queuedAt: pp.QueuedAt}
+	for _, raw := range pp.Content {
+		b := &devboxv1.ContentBlock{}
+		if protojson.Unmarshal(raw, b) == nil {
+			qp.content = append(qp.content, b)
+		}
+	}
+	if len(pp.SentBy) > 0 {
+		p := &devboxv1.Principal{}
+		if protojson.Unmarshal(pp.SentBy, p) == nil {
+			qp.sentBy = p
+		}
+	}
+	return qp
 }
 
 type persistedInteraction struct {
@@ -232,7 +317,7 @@ type persistedState struct {
 
 func persistSession(s *session) *persistedSession {
 	ps := &persistedSession{
-		ID: s.id, Kind: int32(s.kind), Parent: s.parent, Agent: int32(s.agent), Cwd: s.cwd, Title: s.title,
+		ID: s.id, Kind: int32(s.kind), Parent: s.parent, Agent: int32(s.agent), Cwd: s.cwd, Title: s.title, ParentTool: s.parentToolCall,
 		NextPosition: s.store.NextPosition(), Revision: s.rev, CreatedAt: s.createdAt, LastActivity: s.lastActivity,
 	}
 	for _, o := range s.options {
@@ -253,7 +338,7 @@ func persistSession(s *session) *persistedSession {
 func restoreSession(ps *persistedSession) *session {
 	s := &session{
 		id: ps.ID, kind: devboxv1.SessionKind(ps.Kind), parent: ps.Parent, agent: devboxv1.AgentType(ps.Agent), cwd: ps.Cwd,
-		title: ps.Title, store: acp.NewStore(ps.ID, ps.NextPosition), rev: ps.Revision, createdAt: ps.CreatedAt,
+		title: ps.Title, parentToolCall: ps.ParentTool, store: acp.NewStore(ps.ID, ps.NextPosition), rev: ps.Revision, createdAt: ps.CreatedAt,
 		lastActivity: ps.LastActivity,
 		foreground:   &devboxv1.ForegroundState{State: devboxv1.ForegroundStateKind_FOREGROUND_STATE_KIND_IDLE, UpdatedAt: timestamppb.Now()},
 	}
@@ -294,6 +379,9 @@ func (m *Manager) saveLocked() error {
 		for _, id := range t.promptIDs {
 			pt.PromptIDs = append(pt.PromptIDs, id)
 			pt.Messages = append(pt.Messages, t.prompts[id])
+		}
+		for _, qp := range t.queue {
+			pt.Queue = append(pt.Queue, persistPrompt(qp))
 		}
 		if t.session != nil {
 			pt.Session = persistSession(t.session)
@@ -347,6 +435,9 @@ func (m *Manager) load() error {
 			}
 			t.rememberPrompt(id, msg)
 		}
+		for _, pp := range pt.Queue {
+			t.queue = append(t.queue, restorePrompt(pp))
+		}
 		if pt.Session != nil {
 			s := restoreSession(pt.Session)
 			s.thread = t
@@ -372,6 +463,15 @@ func (m *Manager) load() error {
 		p.Revision++
 		p.AnsweredAt = now
 		m.emitLocked(&devboxv1.DaemonEvent{Event: &devboxv1.DaemonEvent_Interaction{Interaction: p}})
+	}
+	// The state can lag the transcript (a crash between flushes); positions the transcript holds must not be reused.
+	for _, s := range m.sessions {
+		last, err := m.opts.Transcript.LastPosition(m.ctx, s.id)
+		if err != nil {
+			m.log.Warn("reading transcript head", "session", s.id, "err", err)
+			continue
+		}
+		s.store.ReserveThrough(last)
 	}
 	for _, t := range m.threads {
 		t.dirty = true

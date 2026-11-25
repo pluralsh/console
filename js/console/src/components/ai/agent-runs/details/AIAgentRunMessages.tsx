@@ -19,7 +19,7 @@ import {
 import { produce } from 'immer'
 import { isEmpty } from 'lodash'
 import { useEffect, useMemo, useState } from 'react'
-import styled, { useTheme } from 'styled-components'
+import styled, { DefaultTheme, StyledObject, useTheme } from 'styled-components'
 import { AILoadingText } from 'components/utils/AILoadingText'
 import { duration } from 'utils/datetime'
 import {
@@ -30,7 +30,8 @@ import {
 const MAX_STREAMED_OUTPUT_LENGTH = 1 << 20
 
 export function AIAgentRunMessages({ run }: { run: AgentRunFragment }) {
-  const { spacing, colors, mode, borders, boxShadows } = useTheme()
+  const theme = useTheme()
+  const { spacing } = theme
 
   const [subscribedMessages, setSubscribedMessages] = useState<
     AgentMessageFragment[]
@@ -178,18 +179,7 @@ export function AIAgentRunMessages({ run }: { run: AgentRunFragment }) {
               {...chatMessagePropsShared}
               {...getToolMessageProps(rowData.id)}
               standaloneCommand={isCommandToolMessage(rowData)}
-              userMsgWrapperStyle={{
-                backgroundColor:
-                  mode === 'light' ? colors['fill-two'] : colors['fill-one'],
-                ...(mode === 'light'
-                  ? {
-                      border: borders.input,
-                      borderColor: colors['border-input'],
-                      boxShadow: boxShadows.slight,
-                    }
-                  : { borderColor: colors['border-fill-one'] }),
-                '& *': { color: colors.text },
-              }}
+              userMsgWrapperStyle={agentRunUserMsgStyle(theme)}
             />
           )
         }
@@ -210,11 +200,28 @@ const MessagesStreamWrapperSC = styled.div(({ theme }) => ({
   background: theme.colors['fill-zero'],
 }))
 
-const chatMessagePropsShared = {
+export const chatMessagePropsShared = {
   disableActions: 'no-spacing' as const,
   toolDisplayType: 'simple' as const,
   style: { padding: 0, overflow: 'visible' },
 }
+
+export const agentRunUserMsgStyle = ({
+  colors,
+  mode,
+  borders,
+  boxShadows,
+}: DefaultTheme): StyledObject => ({
+  backgroundColor: mode === 'light' ? colors['fill-two'] : colors['fill-one'],
+  ...(mode === 'light'
+    ? {
+        border: borders.input,
+        borderColor: colors['border-input'],
+        boxShadow: boxShadows.slight,
+      }
+    : { borderColor: colors['border-fill-one'] }),
+  '& *': { color: colors.text },
+})
 
 const isHiddenAgentMessage = (msg: AgentMessageFragment) =>
   msg.message === '__plrl_ignore__' &&

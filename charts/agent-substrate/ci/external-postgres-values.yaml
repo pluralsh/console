@@ -46,3 +46,14 @@ atelet:
 # No CNPG in external mode.
 cloudnative-pg:
   enabled: false
+
+# JuiceFS homes with metadata in a managed database.
+juicefs:
+  enabled: true
+  image:
+    tag: "0.0.0"
+  postgres:
+    external:
+      url: postgres://juicefs@ate.example.internal:5432/juicefs?sslmode=verify-full&sslrootcert=/run/postgres-server-ca/server-ca.pem
+      passwordSecret:
+        name: ate-juicefs-postgres

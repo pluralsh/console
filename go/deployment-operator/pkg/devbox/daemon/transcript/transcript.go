@@ -401,6 +401,15 @@ func (s *Store) TimelineBefore(ctx context.Context, session string, before uint6
 	return nil, lastErr
 }
 
+// LastPosition is the highest position stored for a session, 0 when it has none.
+func (s *Store) LastPosition(ctx context.Context, session string) (uint64, error) {
+	page, err := s.TimelineBefore(ctx, session, 0, 1, nil)
+	if err != nil || len(page.Entities) == 0 {
+		return 0, err
+	}
+	return page.Entities[len(page.Entities)-1].GetPosition(), nil
+}
+
 func (s *Store) timelineBefore(ctx context.Context, session string, before uint64, limit int, overlay []*devboxv1.AcpEntity) (*Page, error) {
 	idx, err := s.readIndex(ctx, session)
 	if err != nil {

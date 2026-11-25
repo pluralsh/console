@@ -10,14 +10,15 @@ defmodule Console.Devboxes.Credentials do
       instance can make;
     * scm tokens come from the box's scm connections (or the default one), as for agent runs, one per connection
       host, as the complete `Authorization` credential for git and the provider's API (basic `user:token` for
-      github, gitlab, bitbucket and azure devops);
+      github, gitlab, bitbucket and azure devops).  They're the only credential also minted for the box itself
+      (`devbox_credentials/2`), for the golden boot of its template, which clones the runner's repositories;
     * oidc tokens are workload identity JWTs from the box's issuer (`Console.WorkloadIdentity`), one per cloud
       identity, which cloud accounts exchange directly for their own short-lived credentials;
     * `claude_oauth` and `codex` are the instance owner's linked subscription (`Console.Devboxes.AgentCredentials`),
       for agents billed to it.
   """
   use Console.Services.Base
-  import Console.Deployments.Pr.Git, only: [backfill_token: 1, normalize_url: 1]
+  import Console.Deployments.Pr.Git, only: [backfill_token_with_expiry: 1, normalize_url: 1]
   alias Console.AI.Tool
   alias Console.Devboxes.{AgentCredentials, Error}
   alias Console.WorkloadIdentity
@@ -26,6 +27,8 @@ defmodule Console.Devboxes.Credentials do
 
   @ttl 60 * 60
   @refresh_ahead 10 * 60
+  @cache Console.conf(:cache_adapter)
+  @proxy_ttl :timer.minutes(1)
   @typ "devbox"
   @scopes ~w(ai_proxy workbench_mcp)
 
@@ -81,16 +84,33 @@ defmodule Console.Devboxes.Credentials do
   """
   @spec verify(binary, binary) :: {:ok, DevboxInstance.t} | Console.error
   def verify(token, scope) when scope in @scopes do
+    with {:ok, inst} <- verified_instance(token, scope, &Repo.get(DevboxInstance, &1)) do
+      if live?(inst), do: {:ok, Repo.preload(inst, [:workbench, :user])}, else: {:error, "devbox instance has ended"}
+    end
+  end
+
+  defp verified_instance(token, scope, fetch) do
     with {:ok, %{"sub" => "devbox_instance:" <> id, "scopes" => scopes} = claims} <-
            Console.Guardian.decode_and_verify(token, %{"typ" => @typ}),
          true <- scope in scopes,
-         %DevboxInstance{workbench_id: wb_id} = inst <- Repo.get(DevboxInstance, id),
+         %DevboxInstance{workbench_id: wb_id} = inst <- fetch.(id),
          true <- claims["workbench_id"] == wb_id do
-      if live?(inst), do: {:ok, Repo.preload(inst, [:workbench, :user])}, else: {:error, "devbox instance has ended"}
+      {:ok, inst}
     else
       _ -> {:error, "invalid devbox token"}
     end
   end
+
+  # the proxy authenticates every model call, so the instance and its workbench are cached in the partitioned
+  # cache; `revoke/1` evicts it cluster-wide, so only budget changes can lag, by up to the ttl
+  defp proxy_instance(id) do
+    Console.Cache.fetch_or_store(@cache, proxy_key(id), fn ->
+      with %DevboxInstance{} = inst <- Repo.get(DevboxInstance, id),
+        do: Repo.preload(inst, [:workbench])
+    end, ttl: @proxy_ttl, negative_ttl: @proxy_ttl)
+  end
+
+  defp proxy_key(id), do: {:devbox_proxy_auth, id}
 
   @doc """
   Verifies a token presented to the AI proxy by a devbox instance, returning the instance with the workbench
@@ -100,7 +120,7 @@ defmodule Console.Devboxes.Credentials do
   """
   @spec verify_ai_proxy(binary) :: {:ok, DevboxInstance.t} | Console.error
   def verify_ai_proxy(token) when is_binary(token) do
-    with {:ok, inst} <- verify(token, "ai_proxy"),
+    with {:ok, inst} <- verified_instance(token, "ai_proxy", &proxy_instance/1),
       do: verify_instance(inst)
   end
   def verify_ai_proxy(_), do: {:error, "invalid devbox token"}
@@ -142,10 +162,14 @@ defmodule Console.Devboxes.Credentials do
   """
   @spec revoke(DevboxInstance.t) :: {:ok, DevboxInstance.t} | Console.error
   def revoke(%DevboxInstance{credentials_revoked_at: %DateTime{}} = inst), do: {:ok, inst}
-  def revoke(%DevboxInstance{} = inst) do
+  def revoke(%DevboxInstance{id: id} = inst) do
     inst
     |> DevboxInstance.changeset(%{credentials_revoked_at: DateTime.utc_now()})
     |> Repo.update()
+    |> when_ok(fn revoked ->
+      @cache.delete(proxy_key(id))
+      revoked
+    end)
   end
 
   @doc """
@@ -165,6 +189,23 @@ defmodule Console.Devboxes.Credentials do
     end
   end
 
+  @doc """
+  Mints the scm credentials of a box's golden boot (`Ingest.GetInstanceCredentials` with a `devbox_id`), which
+  clones the runner's repositories before any instance exists.  Every other kind is instance-scoped.
+  """
+  @spec devbox_credentials(Devbox.t, [map]) :: {:ok, [credential]} | Console.error
+  def devbox_credentials(%Devbox{} = devbox, selectors) do
+    Enum.reduce_while(selectors, {:ok, []}, fn
+      %{kind: :scm} = selector, {:ok, acc} ->
+        case scm_credentials(devbox, selector) do
+          {:ok, creds} -> {:cont, {:ok, acc ++ creds}}
+          err -> {:halt, err}
+        end
+      %{kind: kind}, _ ->
+        {:halt, Error.unsupported("only scm credentials are minted for a devbox's golden boot, not #{kind}")}
+    end)
+  end
+
   defp credentials(inst, %{kind: :ai_proxy}) do
     with {:ok, token, exp} <- mint_ai_proxy_token(inst),
       do: {:ok, [credential(:ai_proxy, token, exp)]}
@@ -175,18 +216,7 @@ defmodule Console.Devboxes.Credentials do
       do: {:ok, [credential(:console, token, exp)]}
   end
 
-  defp credentials(inst, %{kind: :scm} = selector) do
-    inst
-    |> scm_connections(selector[:host])
-    |> Enum.reduce_while({:ok, []}, fn conn, {:ok, acc} ->
-      case backfill_token(conn) do
-        {:ok, %ScmConnection{token: token} = conn} when is_binary(token) ->
-          {:cont, {:ok, acc ++ [scm_credential(conn)]}}
-        {:ok, _} -> {:cont, {:ok, acc}}
-        err -> {:halt, err}
-      end
-    end)
-  end
+  defp credentials(inst, %{kind: :scm} = selector), do: scm_credentials(inst, selector)
 
   defp credentials(inst, %{kind: :oidc} = selector) do
     %{devbox: devbox} = inst = Repo.preload(inst, [:devbox, :workbench, :user])
@@ -206,6 +236,19 @@ defmodule Console.Devboxes.Credentials do
     do: AgentCredentials.deliver(inst, kind)
 
   defp credentials(_, %{kind: kind}), do: Error.unsupported("#{kind} credentials are not supported for devboxes yet")
+
+  defp scm_credentials(resource, selector) do
+    resource
+    |> scm_connections(selector[:host])
+    |> Enum.reduce_while({:ok, []}, fn conn, {:ok, acc} ->
+      case backfill_token_with_expiry(conn) do
+        {:ok, %ScmConnection{token: token} = conn, exp} when is_binary(token) ->
+          {:cont, {:ok, acc ++ [scm_credential(conn, exp || expiry())]}}
+        {:ok, _, _} -> {:cont, {:ok, acc}}
+        err -> {:halt, err}
+      end
+    end)
+  end
 
   defp cloud_identities(%Devbox{cloud_identities: ids}, name) when name in [nil, ""], do: ids || []
   defp cloud_identities(%Devbox{cloud_identities: ids}, name), do: Enum.filter(ids || [], & &1.name == name)
@@ -280,9 +323,10 @@ defmodule Console.Devboxes.Credentials do
 
   # egress writes Sprintf(header_format, token) on the SCM host and all its companions (api.github.com, ...), so one
   # value has to serve git smart-HTTP and the REST API: basic auth where the provider's git endpoint requires it,
-  # with the user:token pair as the token
-  defp scm_credential(%ScmConnection{token: token} = conn) do
-    cred = %{credential(:scm, token, expiry()) | host: scm_host(conn)}
+  # with the user:token pair as the token. Egress caches it until expires_at, so app installation tokens carry
+  # github's expiry
+  defp scm_credential(%ScmConnection{token: token} = conn, expires_at) do
+    cred = %{credential(:scm, token, expires_at) | host: scm_host(conn)}
     case basic_user(conn) do
       user when is_binary(user) ->
         %{cred | token: Base.encode64("#{user}:#{token}"), header_format: "Basic %s"}

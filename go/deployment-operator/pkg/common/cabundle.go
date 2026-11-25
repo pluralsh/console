@@ -2,6 +2,8 @@ package common
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"os"
 	"sync"
@@ -36,7 +38,7 @@ var (
 )
 
 // SpawnedCAConfig controls automatic CA ConfigMap replication and pod mounts
-// for operator-created AgentRun / Stack / Sentinel workloads.
+// for operator-created AgentRun / Stack / Sentinel / Devbox workloads.
 type SpawnedCAConfig struct {
 	Enabled    bool
 	ConfigMap  string
@@ -101,6 +103,22 @@ func readSpawnedCAPEM(cfg SpawnedCAConfig) ([]byte, error) {
 		return nil, fmt.Errorf("spawned CA source %q is empty", cfg.SourceFile)
 	}
 	return pem, nil
+}
+
+// SpawnedCASourceChecksum returns a stable hash of the mounted CA source so
+// callers (e.g. Devbox gateway) can roll pods when the bundle rotates. Empty
+// when spawned CA injection is disabled.
+func SpawnedCASourceChecksum() (string, error) {
+	cfg := GetSpawnedCAConfig()
+	if !cfg.Enabled {
+		return "", nil
+	}
+	pem, err := readSpawnedCAPEM(cfg)
+	if err != nil {
+		return "", err
+	}
+	sum := sha256.Sum256(pem)
+	return hex.EncodeToString(sum[:]), nil
 }
 
 func isOperatorManagedCAConfigMap(cm *corev1.ConfigMap) bool {

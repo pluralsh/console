@@ -36,6 +36,10 @@ import { isNonNullable } from 'utils/isNonNullable'
 import { getWorkbenchBreadcrumbs } from '../Workbench'
 import { modesFormValue } from '../WorkbenchPromptModeSelector/workbenchPromptModes'
 import {
+  useSyncWorkbenchDevboxes,
+  WorkbenchDevboxesDraft,
+} from '../devboxes/useSyncWorkbenchDevboxes'
+import {
   WORKBENCH_STEP_LABELS,
   workbenchFormSteps,
   WorkbenchStepLabel,
@@ -122,6 +126,9 @@ export type WorkbenchFormState = Omit<
   workbenchSkills: WorkbenchFormSkill[]
   workbenchKnowledge: WorkbenchFormKnowledge[]
   filesystemEnabled: boolean
+  // attachments are separate mutations, applied on save; null until the
+  // devboxes subtab loads the attached ones
+  devboxes: WorkbenchDevboxesDraft
 }
 
 export function WorkbenchCreateOrEdit({ mode }: { mode: 'create' | 'edit' }) {
@@ -244,29 +251,32 @@ function WorkbenchForm({
 
   const StepComponent = workbenchFormSteps[curStepIndex]?.component
 
-  const [createWorkbench, { loading: createLoading, error: createError }] =
-    useCreateWorkbenchMutation({
-      onCompleted: () => {
+  const [syncDevboxes, { loading: devboxesLoading, error: devboxesError }] =
+    useSyncWorkbenchDevboxes()
+  const onSaved = (savedId: Nullable<string>) =>
+    syncDevboxes(savedId, formState.devboxes).then(
+      () =>
         navigate(
           workbenchId ? getWorkbenchAbsPath(workbenchId) : WORKBENCHES_ABS_PATH
-        )
-      },
+        ),
+      () => undefined
+    )
+
+  const [createWorkbench, { loading: createLoading, error: createError }] =
+    useCreateWorkbenchMutation({
+      onCompleted: (data) => onSaved(data.createWorkbench?.id),
       refetchQueries: ['Workbenches'],
       awaitRefetchQueries: true,
     })
 
   const [updateWorkbench, { loading: updateLoading, error: updateError }] =
     useUpdateWorkbenchMutation({
-      onCompleted: () => {
-        navigate(
-          workbenchId ? getWorkbenchAbsPath(workbenchId) : WORKBENCHES_ABS_PATH
-        )
-      },
+      onCompleted: () => onSaved(workbenchId),
       refetchQueries: ['Workbenches'],
       awaitRefetchQueries: true,
     })
-  const mutationLoading = createLoading || updateLoading
-  const mutationError = createError || updateError
+  const mutationLoading = createLoading || updateLoading || devboxesLoading
+  const mutationError = createError || updateError || devboxesError
 
   const onSave = () => {
     const attributes = formStateToAttributes(formState, isCreateMode)
@@ -496,6 +506,7 @@ function formStateToAttributes(
     workbenchSkills,
     workbenchKnowledge: _workbenchKnowledge,
     filesystemEnabled: _filesystemEnabled,
+    devboxes: _devboxes,
     ...rest
   } = state
 
@@ -651,5 +662,6 @@ function sanitizeInitialForm({
     workbenchSkills: resolvedWorkbenchSkills,
     workbenchKnowledge: resolvedWorkbenchKnowledge,
     filesystemEnabled: !!filesystemEnabled,
+    devboxes: null,
   }
 }

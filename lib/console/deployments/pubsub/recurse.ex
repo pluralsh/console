@@ -162,6 +162,9 @@ defimpl Console.PubSub.Recurse, for: [Console.PubSub.PullRequestCreated, Console
   def process(%@for{item: %PullRequest{agent_run_id: id, fresh: true} = pr}) when is_binary(id),
     do: Agents.pr_review(pr)
 
+  def process(%@for{item: %PullRequest{devbox_instance_id: id, fresh: true} = pr}) when is_binary(id),
+    do: Console.Devboxes.PullRequests.pr_review(pr)
+
   def process(_), do: :ok
 
   defp sleep(%GitRepository{pulled_at: pulled}) when not is_nil(pulled) do

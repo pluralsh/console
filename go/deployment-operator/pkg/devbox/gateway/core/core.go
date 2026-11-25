@@ -41,6 +41,12 @@ type CredentialService interface {
 	InstanceCredential(ctx context.Context, instanceID string, sel *devboxv1.CredentialSelector) (*devboxv1.InstanceCredential, error)
 }
 
+// Seeds saves the JuiceFS homes of snapshotted instances (juicefs.Client).
+type Seeds interface {
+	SaveSeed(ctx context.Context, seedID, volumeID string) error
+	DeleteSeed(ctx context.Context, seedID string) error
+}
+
 // Config tunes the core. Zero values take the defaults below.
 type Config struct {
 	GatewayID        string
@@ -53,8 +59,9 @@ type Config struct {
 	EgressAuthzRegistered        bool
 
 	// Harness endpoints handed to daemons in Initialize.
-	ConsoleURL      string
-	AIProxyURL      string
+	ConsoleURL string
+	AIProxyURL string
+	// WorkbenchMCPURL is the base of console's workbench MCP; each instance gets <base>/<workbench-id>.
 	WorkbenchMCPURL string
 	// GatewayURL is where sandboxes reach the gateway's devbox MCP (GatewayURL + /mcp) and SandboxCredentials
 	// (GatewayURL), through egress which injects the actor JWT.
@@ -64,6 +71,7 @@ type Config struct {
 
 	HeartbeatInterval   time.Duration
 	ReadyTimeout        time.Duration
+	SuspendTimeout      time.Duration
 	PrepareTimeout      time.Duration
 	DrainTimeout        time.Duration
 	SnapshotTimeout     time.Duration
@@ -86,6 +94,7 @@ func (c *Config) defaults() {
 	}
 	set(&c.HeartbeatInterval, 30*time.Second)
 	set(&c.ReadyTimeout, 5*time.Minute)
+	set(&c.SuspendTimeout, 10*time.Minute)
 	set(&c.PrepareTimeout, 30*time.Second)
 	set(&c.DrainTimeout, 30*time.Second)
 	set(&c.SnapshotTimeout, 30*time.Minute)
@@ -118,8 +127,10 @@ type Deps struct {
 	Egress Egress
 	// Credentials is optional; SandboxCredentials needs it.
 	Credentials CredentialService
-	Log         logr.Logger
-	Now         func() time.Time
+	// Seeds is optional; without it snapshots of JuiceFS homes keep no copy of the home.
+	Seeds Seeds
+	Log   logr.Logger
+	Now   func() time.Time
 }
 
 // Gateway is the core.
@@ -308,6 +319,10 @@ type statusUpdate struct {
 func (g *Gateway) setStatus(ctx context.Context, inst *Instance, u statusUpdate) {
 	now := g.now()
 	inst.mu.Lock()
+	// idleness is the awake daemon's: it doesn't outlive a suspend, and a resumed daemon reports its own
+	if !awake(inst.rec.status()) || !awake(u.status) {
+		inst.idle = nil
+	}
 	inst.rec.Status = u.status.String()
 	inst.rec.SuspendReason = ""
 	if u.status == devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED {
@@ -374,6 +389,12 @@ func ActorName(instanceID string) string {
 		n = strings.TrimRight(n[:63], "-")
 	}
 	return n
+}
+
+// SnapshotSeedID is the JuiceFS seed holding a snapshot's home. Seeds are global, so it carries the atespace, and
+// its "tag" segment keeps it apart from the operator's <atespace>.<template> golden seeds.
+func SnapshotSeedID(tag actors.Ref) string {
+	return tag.Atespace + ".tag." + tag.Name
 }
 
 // SnapshotTagName is the Substrate tag of a snapshot.

@@ -9,6 +9,7 @@ import {
   ListBoxItem,
   Select,
 } from '@pluralsh/design-system'
+import { GqlError } from 'components/utils/Alert'
 import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
 import {
   DevboxElicitationAction,
@@ -16,28 +17,61 @@ import {
   DevboxInteractionKind,
   DevboxInteractionResponseAttributes,
   DevboxInteractionState,
+  DevboxToolCallFragment,
+  useRespondDevboxInteractionMutation,
 } from 'generated/graphql'
 import { FormEvent, ReactNode, useState } from 'react'
 import styled from 'styled-components'
 import { fromNow } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
+import { DevboxApprovalPreview } from './DevboxApprovalPreview'
+import { approvalPreview } from './devboxApprovals'
 
 export type DevboxRespond = (
   response: DevboxInteractionResponseAttributes
 ) => void
 
+export function DevboxInteraction({
+  interaction,
+  toolCall,
+}: {
+  interaction: DevboxInteractionFragment
+  toolCall?: Nullable<DevboxToolCallFragment>
+}) {
+  const [respond, { loading, error }] = useRespondDevboxInteractionMutation()
+  return (
+    <DevboxInteractionCard
+      interaction={interaction}
+      toolCall={toolCall}
+      loading={loading}
+      error={error && <GqlError error={error} />}
+      onRespond={(response) =>
+        respond({ variables: { id: interaction.id, response } })
+      }
+    />
+  )
+}
+
 export function DevboxInteractionCard({
   interaction,
+  toolCall,
   onRespond,
   loading = false,
   error,
 }: {
   interaction: DevboxInteractionFragment
+  // the call a permission request was raised for, to show what it would do
+  toolCall?: Nullable<DevboxToolCallFragment>
   onRespond: DevboxRespond
   loading?: boolean
   error?: ReactNode
 }) {
   const pending = interaction.state === DevboxInteractionState.Pending
+  // once answered, the transcript's own tool call shows what ran
+  const preview =
+    pending && interaction.kind === DevboxInteractionKind.Permission
+      ? approvalPreview(toolCall ?? interaction.toolCall)
+      : null
   return (
     <InteractionSC
       $pending={pending}
@@ -71,6 +105,11 @@ export function DevboxInteractionCard({
       </Flex>
       {interaction.message && (
         <CaptionP $color="text-light">{interaction.message}</CaptionP>
+      )}
+      {preview && (
+        <PreviewSC>
+          <DevboxApprovalPreview preview={preview} />
+        </PreviewSC>
       )}
       {interaction.review && (
         <CaptionP $color="text-xlight">
@@ -109,6 +148,51 @@ export function DevboxInteractionCard({
       )}
       {error}
     </InteractionSC>
+  )
+}
+
+export const isInlineApproval = (interaction: DevboxInteractionFragment) =>
+  interaction.state === DevboxInteractionState.Pending &&
+  interaction.kind === DevboxInteractionKind.Permission
+
+// a permission request answered in place, under the tool call it's for (or the
+// subagent asking), rather than as a card of its own
+export function DevboxInlineApproval({
+  interaction,
+  subject,
+}: {
+  interaction: DevboxInteractionFragment
+  // what's being approved, when the tool call isn't already shown above
+  subject?: ReactNode
+}) {
+  const [respond, { loading, error }] = useRespondDevboxInteractionMutation()
+  return (
+    <Flex
+      direction="column"
+      gap="xsmall"
+      data-interaction={interaction.kind}
+    >
+      <Flex
+        gap="small"
+        align="center"
+        wrap="wrap"
+      >
+        {subject}
+        <PermissionForm
+          interaction={interaction}
+          loading={loading}
+          onRespond={(response) =>
+            respond({ variables: { id: interaction.id, response } })
+          }
+        />
+      </Flex>
+      {interaction.review && (
+        <CaptionP $color="text-xlight">
+          {reviewSummary(interaction.review)}
+        </CaptionP>
+      )}
+      {error && <GqlError error={error} />}
+    </Flex>
   )
 }
 
@@ -156,7 +240,7 @@ function PermissionForm({
         return (
           <Button
             key={option.optionId}
-            small
+            xsmall
             secondary={reject || `${option.kind}`.endsWith('always')}
             destructive={reject && `${option.kind}`.endsWith('always')}
             disabled={loading}
@@ -167,7 +251,7 @@ function PermissionForm({
         )
       })}
       <Button
-        small
+        xsmall
         tertiary
         disabled={loading}
         onClick={() => onRespond({ cancelled: true })}
@@ -338,6 +422,7 @@ function ElicitationForm({
             >
               {choices ? (
                 <Select
+                  size="small"
                   label={`Pick ${label.toLowerCase()}`}
                   selectedKey={(values[key] as string) ?? null}
                   onSelectionChange={(k) => set(`${k}`)}
@@ -351,6 +436,7 @@ function ElicitationForm({
                 </Select>
               ) : (
                 <Input
+                  small
                   inputProps={{ 'aria-label': label }}
                   type={
                     prop.type === 'number' || prop.type === 'integer'
@@ -368,7 +454,7 @@ function ElicitationForm({
         })}
         <Flex gap="small">
           <Button
-            small
+            xsmall
             type="submit"
             loading={loading}
             disabled={touched && invalid}
@@ -403,7 +489,7 @@ function UrlElicitation({
       {url && <UrlSC>{url}</UrlSC>}
       <Flex gap="small">
         <Button
-          small
+          xsmall
           as="a"
           href={safe ? url : undefined}
           target="_blank"
@@ -414,7 +500,7 @@ function UrlElicitation({
           Open link
         </Button>
         <Button
-          small
+          xsmall
           secondary
           disabled={loading}
           onClick={() => onRespond({ action: DevboxElicitationAction.Accept })}
@@ -440,7 +526,7 @@ function ElicitationActions({
   return (
     <>
       <Button
-        small
+        xsmall
         secondary
         type="button"
         disabled={loading}
@@ -449,7 +535,7 @@ function ElicitationActions({
         Decline
       </Button>
       <Button
-        small
+        xsmall
         tertiary
         type="button"
         disabled={loading}
@@ -474,6 +560,8 @@ const InteractionSC = styled.div<{ $pending: boolean }>(
     backgroundColor: theme.colors['fill-one'],
   })
 )
+
+const PreviewSC = styled.div({ minWidth: 0 })
 
 const UrlSC = styled.code(({ theme }) => ({
   ...theme.partials.text.code,

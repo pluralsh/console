@@ -1,13 +1,15 @@
 import { Outlet, useMatch } from 'react-router-dom'
 
-import { Suspense, useMemo } from 'react'
+import { Suspense, use, useMemo } from 'react'
 import { useDeploymentSettingsSuspenseQuery } from 'generated/graphql'
+import { FeatureFlagContext } from 'components/flows/FeatureFlagContext'
 
 import {
   AI_SETTINGS_ABS_PATH,
   AI_SETTINGS_AGENT_RUNTIMES_REL_PATH,
   AI_SETTINGS_AI_INSIGHTS_REL_PATH,
   AI_SETTINGS_AI_PROVIDER_REL_PATH,
+  AI_SETTINGS_DEVBOXES_REL_PATH,
   AI_SETTINGS_MCP_SERVERS_REL_PATH,
   AI_SETTINGS_MODEL_ROUTING_REL_PATH,
 } from 'routes/settingsRoutesConst'
@@ -36,6 +38,7 @@ const directory = [
     requiresAi: true,
   },
   { path: AI_SETTINGS_AGENT_RUNTIMES_REL_PATH, label: 'Agent runtimes' },
+  { path: AI_SETTINGS_DEVBOXES_REL_PATH, label: 'Devboxes' },
   { path: AI_SETTINGS_MCP_SERVERS_REL_PATH, label: 'MCP servers' },
 ]
 
@@ -43,15 +46,21 @@ export function AISettings() {
   const tab = useMatch(`${AI_SETTINGS_ABS_PATH}/:tab`)?.params.tab ?? ''
   const { data: deploymentSettings } = useDeploymentSettingsSuspenseQuery()
   const aiEnabled = deploymentSettings.deploymentSettings?.ai?.enabled ?? false
+  const { featureFlags } = use(FeatureFlagContext)
 
   const tabs = useMemo(
     () =>
-      directory.map(({ path, label, requiresAi }) => ({
-        label,
-        path: getAISettingsAbsPath(path),
-        enabled: !requiresAi || aiEnabled || path === tab,
-      })),
-    [aiEnabled, tab]
+      directory
+        .filter(
+          ({ path }) =>
+            path !== AI_SETTINGS_DEVBOXES_REL_PATH || featureFlags.Devboxes
+        )
+        .map(({ path, label, requiresAi }) => ({
+          label,
+          path: getAISettingsAbsPath(path),
+          enabled: !requiresAi || aiEnabled || path === tab,
+        })),
+    [aiEnabled, tab, featureFlags.Devboxes]
   )
 
   useSetBreadcrumbs(useMemo(() => getAISettingsBreadcrumbs(tab ?? ''), [tab]))

@@ -11,12 +11,12 @@ defmodule Console.Deployments.Pr.Impl.Github do
     with {:ok, client} <- client(pr),
          {:ok, owner, repo} <- identifier(pr),
          {:ok, title, body} <- description(pr, ctx) do
-      Tentacat.Pulls.create(client, owner, repo, %{
+      Tentacat.Pulls.create(client, owner, repo, Map.merge(%{
         head: branch,
         title: title,
         body: body,
         base: pr.branch || "main",
-      })
+      }, if(pr.draft, do: %{draft: true}, else: %{})))
       |> case do
         {_, %{"html_url" => url} = result, _} ->
           maybe_add_labels(client, owner, repo, result["number"], labels)

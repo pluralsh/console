@@ -9,7 +9,7 @@ It installs:
 
 | Component | Objects |
 | --- | --- |
-| CRDs | `WorkerPool`, `SandboxConfig`, `CSIDriverConfig` as templates with `helm.sh/resource-policy: keep` |
+| CRDs | `WorkerPool`, `SandboxConfig`, `CSIDriverConfig` from `crds/` (installed before the templates, never deleted by Helm) |
 | ate-api-server | Deployment with the `objectstore-plugin` control sidecar, headless `api` Service, PDB, RBAC, `ate-api-config` / `ate-api-server-envvars` ConfigMaps |
 | ate-controller | Deployment, `ate-controller` and `ate-client` service accounts, RBAC |
 | ate-idp-server | Deployment, `idp` Service, PDB |
@@ -29,9 +29,12 @@ There is no Redis: Substrate keeps all its state in Postgres and object storage.
 
 ## Requirements
 
-- Kubernetes 1.34+ with the `ClusterTrustBundle`, `ClusterTrustBundleProjection` and
-  `PodCertificateRequest` feature gates and `certificates.k8s.io/v1beta1` (the pod-certificate
-  controller issues every workload certificate).
+- Pod certificates: the pod-certificate controller issues every workload certificate. They are on
+  by default from Kubernetes 1.37. On 1.34-1.36 they need the `ClusterTrustBundle`,
+  `ClusterTrustBundleProjection` and `PodCertificateRequest` feature gates and
+  `certificates.k8s.io/v1beta1`, which managed clusters (EKS, GKE, AKS) can't enable, so those
+  need 1.37+. The secrets hook fails the install when `certificates.k8s.io` doesn't serve
+  `podcertificaterequests` and `clustertrustbundles`.
 - The release namespace **must be `ate-system`**: the Substrate binaries default every in-cluster
   address and SPIFFE ID to it. The chart fails to render anywhere else.
 - Helm 3.14+.
@@ -47,7 +50,7 @@ helm upgrade --install ate charts/agent-substrate -n ate-system --create-namespa
   -f charts/agent-substrate/ci/kind-values.yaml --wait --wait-for-jobs --timeout 20m
 
 # or from the OCI registry:
-helm upgrade --install ate oci://ghcr.io/pluralsh/agent-substrate-chart/agent-substrate \
+helm upgrade --install ate oci://ghcr.io/pluralsh/charts/agent-substrate \
   --version 0.1.0 -n ate-system --create-namespace -f my-values.yaml --wait --wait-for-jobs
 ```
 
@@ -81,11 +84,14 @@ for gVisor) and runs the first command. `ci/` has reference values for EKS (`s3`
    both containers run as non-root with read-only root filesystems. The hook resources are deleted
    once it succeeds. Secrets it creates aren't Helm-managed, so `helm uninstall` keeps them.
 
-2. **Resources.** The ate.dev CRDs, workloads and, with `cloudnative-pg.enabled`, the CNPG operator
-   and its CRDs.
+2. **Resources.** The ate.dev CRDs (from `crds/`, ahead of everything else), workloads and, with
+   `cloudnative-pg.enabled`, the CNPG operator and its CRDs. Helm only creates `crds/` CRDs that
+   don't exist yet; upgrade them with `kubectl apply --server-side -f crds/` when bumping
+   `appVersion`. Plural's agent applies them on every sync.
 
-3. **Bootstrap Job.** Helm can't render a custom resource whose CRD the same release installs. On a
-   first install the `SandboxConfig`s and the CNPG `Cluster`/`ScheduledBackup` are therefore applied
+3. **Bootstrap Job.** A custom resource only renders inline when its CRD is served at render time,
+   which on a first install (and under a plain `helm template`) it isn't. The
+   `SandboxConfig`s and the CNPG `Cluster`/`ScheduledBackup` are then applied
    by the `agent-substrate-bootstrap` Job, which waits for the CRDs to be established and retries
    until CNPG's webhook serves. The objects carry Helm ownership metadata, so the next
    `helm upgrade` (when the CRDs are served at render time) renders them inline and adopts them, and
@@ -97,7 +103,8 @@ for gVisor) and runs the first command. `ci/` has reference values for EKS (`s3`
 
 `helm uninstall ate -n ate-system` keeps the CRDs (and so every WorkerPool and SandboxConfig), the
 CNPG `Cluster` and its volumes, the pod-certificate namespace and the generated secrets. Set
-`crds.keep=false` and `postgres.cnpg.keepOnUninstall=false` before uninstalling to drop them.
+`postgres.cnpg.keepOnUninstall=false` before uninstalling to drop the `Cluster`, and delete the
+CRDs with `kubectl delete -f crds/` afterwards.
 
 ## Postgres
 
@@ -253,6 +260,37 @@ End to end on a cluster (e.g. `hack/kind-up.sh`), in this order:
 `hack/test.sh` runs the same three checks as the operator against every `ci/` file with
 `devboxes.enabled: true`.
 
+### JuiceFS homes
+
+`juicefs.enabled: true` (opt-in, needs `juicefs.image.tag` or `.digest`) adds a JuiceFS filesystem a
+DevboxRunner can keep `/home/dev` in instead of in its snapshots (`spec.home.storage: JuiceFS`,
+capped at `spec.home.size`, default `spec.resources.disk`). It reuses the chart's Postgres and
+bucket:
+
+- **Metadata** lives in its own database and login role (`juicefs.postgres.{database,user}`) on the
+  CNPG cluster, or in a database you created with `postgres.mode: external`
+  (`juicefs.postgres.external`).
+- **Data** goes under `<juicefs.name>/` in the snapshot bucket (or `juicefs.bucket`) on every
+  `objectStore.backend`. It authenticates as ServiceAccount `devbox-juicefs` (annotate
+  `juicefs.serviceAccount.annotations`; `juicefs.azureClientId` for Azure) or with the static S3
+  keys.
+- **`devbox-juicefs`** is a CSI driver (`juicefs.devbox.plural.sh`) that holds those credentials
+  itself, so its StorageClass `juicefs.storageClassName` carries no secrets. A controller Deployment
+  creates, clones and deletes homes over one root mount. A node DaemonSet (`updateStrategy:
+  OnDelete`, because restarting it unmounts every home on the node) gives each home its own
+  `juicefs mount` with its cache under `juicefs.node.cacheDir`. The chart turns on Substrate's
+  `ExternalVolumes` preview gate.
+
+For each template revision, the operator creates a StorageClass `devbox-home.<atespace>.<template>`
+that copies this one and adds a `seed` parameter. The first home provisioned from it belongs to the
+revision's golden boot. When Substrate deletes the golden actor after tagging it, the driver clones
+that home into the seed, and every later instance of the revision starts from a clone of it, with
+the bootstrap script's clones and builds already there. Snapshots also save the home as a seed, but
+starting from a snapshot fails with `UNSUPPORTED` until Substrate can restore tags of templates
+with external volumes.
+
+The operator needs `get`, `create` and `delete` on `storageclasses.storage.k8s.io` for these.
+
 ## Values
 
 Every value is documented in [`values.yaml`](values.yaml) and typed in
@@ -283,13 +321,13 @@ Every value is documented in [`values.yaml`](values.yaml) and typed in
 | `podCertificateController.*` | | namespace, workers, QPS/burst |
 | `sandboxConfigs.gvisor.enabled` / `.microvm.*` | `true` / `false` | SandboxConfigs (microVM assets must already be staged) |
 | `networkPolicies.enabled` | `true` | NetworkPolicies |
-| `crds.install`, `crds.keep` | `true`, `true` | CRDs |
 | `postgres.mode` | `cnpg` | `cnpg` or `external` |
 | `postgres.cnpg.{instances,storage,walStorage,preset,resources,parameters,affinity,backup,keepOnUninstall}` | 1 instance, 20Gi | CNPG Cluster |
 | `postgres.external.{readWrite,owner,serverCA}` | | external DSNs and CA |
 | `objectStore.backend`, `objectStore.snapshotLocation` | `s3`, `""` | snapshot storage |
 | `objectStore.s3.*`, `objectStore.azureBlob.*` | | backend settings |
 | `rustfs.*` | disabled | embedded RustFS |
+| `juicefs.*` | disabled | [JuiceFS homes](#juicefs-homes): image, `name`, `storageClassName`, `bucket`, `postgres`, `home.{uid,gid,mode}`, controller and node `mountFlags`/`resources` |
 | `secretsHook.{opensslImage,kubectlImage,caValidityDays}` | `alpine/openssl:3.5.9`, `alpine/kubectl:1.37.2`, 365 | secrets hook |
 | `bootstrapJob.image` | `alpine/kubectl:1.37.2` | first-install bootstrap Job |
 | `cloudnative-pg.enabled` | `true` | bundle the CNPG operator |
@@ -307,8 +345,9 @@ Every value is documented in [`values.yaml`](values.yaml) and typed in
 
 ## Development
 
-- `hack/sync-upstream.sh [SUBSTRATE_DIR] [REF]` copies the CRDs, Envoy configs and SandboxConfigs
-  from a Substrate checkout into `files/` (recorded in `files/UPSTREAM`); `--check` fails on drift.
+- `hack/sync-upstream.sh [SUBSTRATE_DIR] [REF]` copies the CRDs into `crds/` and the Envoy
+  configs and SandboxConfigs into `files/` from a Substrate checkout (recorded in `files/UPSTREAM`);
+  `--check` fails on drift.
 - `hack/test.sh` runs `helm lint`, `helm template` and kubeconform for every `ci/` file, the
   helm-unittest suites in `tests/`, and the secrets hook scripts against a fake kubectl
   (`hack/test-hook-scripts.sh`).

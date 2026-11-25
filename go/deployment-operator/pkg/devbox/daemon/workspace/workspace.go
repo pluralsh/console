@@ -35,6 +35,15 @@ const (
 	rescanEvery = 30 * time.Second
 	// debounce coalesces top-level filesystem events.
 	debounce = 2 * time.Second
+	// DefaultCloneRetry is how long hydration keeps retrying clones that can't reach their remote.
+	DefaultCloneRetry = 3 * time.Minute
+	// DefaultPrecloneRetry is how long the golden boot keeps retrying clones that fail for any reason: egress may
+	// not know the golden actor yet when it first boots.
+	DefaultPrecloneRetry = 5 * time.Minute
+	cloneBackoff         = time.Second
+	maxCloneBackoff      = 20 * time.Second
+	// refetchTimeout bounds each git command refreshing a precloned repository on an instance's first boot.
+	refetchTimeout = 5 * time.Minute
 )
 
 // Options configure a Manager.
@@ -48,6 +57,12 @@ type Options struct {
 	Condition func(typ, severity, msg string, active bool)
 	// OnChange is called after the checkout list changed.
 	OnChange func()
+	// CloneRetry bounds how long hydration retries clones that can't reach their remote (DefaultCloneRetry when
+	// zero, none when negative).
+	CloneRetry time.Duration
+	// PrecloneRetry bounds how long Preclone retries failed clones (DefaultPrecloneRetry when zero, none when
+	// negative).
+	PrecloneRetry time.Duration
 }
 
 type repoRecord struct {
@@ -55,14 +70,18 @@ type repoRecord struct {
 	Dir         string `json:"dir"`
 	Branch      string `json:"branch,omitempty"`
 	Description string `json:"description,omitempty"`
+	// Precloned marks a clone made by the golden boot, which instances refetch when they first boot.
+	Precloned bool `json:"precloned,omitempty"`
 }
 
 type state struct {
-	Hydrated    bool              `json:"hydrated"`
-	HydratedAt  time.Time         `json:"hydratedAt,omitempty"`
-	SkelApplied bool              `json:"skelApplied"`
-	Repos       []repoRecord      `json:"repos,omitempty"`
-	AddKeys     map[string]string `json:"addKeys,omitempty"`
+	Hydrated   bool      `json:"hydrated"`
+	HydratedAt time.Time `json:"hydratedAt,omitempty"`
+	// ClonesFailed records a hydration that left clones behind, so the boot that finishes them clears the condition.
+	ClonesFailed bool              `json:"clonesFailed,omitempty"`
+	SkelApplied  bool              `json:"skelApplied"`
+	Repos        []repoRecord      `json:"repos,omitempty"`
+	AddKeys      map[string]string `json:"addKeys,omitempty"`
 }
 
 // Manager maintains the workspace.
@@ -81,6 +100,12 @@ type Manager struct {
 func New(opts Options) (*Manager, error) {
 	if opts.Log == nil {
 		opts.Log = slog.Default()
+	}
+	if opts.CloneRetry == 0 {
+		opts.CloneRetry = DefaultCloneRetry
+	}
+	if opts.PrecloneRetry == 0 {
+		opts.PrecloneRetry = DefaultPrecloneRetry
 	}
 	m := &Manager{opts: opts, log: opts.Log.With("component", "workspace")}
 	if _, err := fsutil.ReadJSON(m.statePath(), &m.st); err != nil {
@@ -227,6 +252,12 @@ func (m *Manager) DirFor(spec *devboxv1.RepositorySpec) (string, error) {
 
 // Clone clones a repository into its directory (idempotent when it's already there).
 func (m *Manager) Clone(ctx context.Context, spec *devboxv1.RepositorySpec) (string, error) {
+	return m.clone(ctx, spec, false)
+}
+
+// clone is Clone; a preclone has no per-command timeout (the golden boot's deadline bounds it) and is recorded as
+// precloned.
+func (m *Manager) clone(ctx context.Context, spec *devboxv1.RepositorySpec, preclone bool) (string, error) {
 	m.cloneMu.Lock()
 	defer m.cloneMu.Unlock()
 	dir, err := m.DirFor(spec)
@@ -234,6 +265,9 @@ func (m *Manager) Clone(ctx context.Context, spec *devboxv1.RepositorySpec) (str
 		return "", err
 	}
 	if gitutil.IsRepo(dir) {
+		if preclone {
+			return dir, m.markPrecloned(spec, dir)
+		}
 		return dir, nil
 	}
 	if _, err := os.Stat(dir); err == nil {
@@ -244,7 +278,13 @@ func (m *Manager) Clone(ctx context.Context, spec *devboxv1.RepositorySpec) (str
 		args = append(args, "--branch", spec.GetBranch())
 	}
 	args = append(args, "--", spec.GetUrl(), dir)
-	if _, err := gitutil.Run(ctx, m.opts.Home, args...); err != nil {
+	run := gitutil.Run
+	if preclone {
+		run = func(ctx context.Context, dir string, args ...string) ([]byte, error) {
+			return gitutil.RunTimeout(ctx, 0, dir, args...)
+		}
+	}
+	if _, err := run(ctx, m.opts.Home, args...); err != nil {
 		_ = os.RemoveAll(dir)
 		var ge *gitutil.Error
 		if errors.As(err, &ge) && (strings.Contains(ge.Stderr, "403") || strings.Contains(strings.ToLower(ge.Stderr), "forbidden")) {
@@ -253,14 +293,35 @@ func (m *Manager) Clone(ctx context.Context, spec *devboxv1.RepositorySpec) (str
 		return "", derr.New(codes.Unavailable, devboxv1.ErrorReason_ERROR_REASON_UNSPECIFIED, err.Error(), map[string]string{"url": spec.GetUrl()})
 	}
 	m.mu.Lock()
-	m.st.Repos = append(m.st.Repos, repoRecord{URL: spec.GetUrl(), Dir: filepath.Base(dir), Branch: spec.GetBranch(), Description: spec.GetDescription()})
+	m.st.Repos = append(m.st.Repos, repoRecord{URL: spec.GetUrl(), Dir: filepath.Base(dir), Branch: spec.GetBranch(),
+		Description: spec.GetDescription(), Precloned: preclone})
 	err = m.saveLocked()
 	m.mu.Unlock()
 	return dir, err
 }
 
+// markPrecloned records a checkout the golden boot found already in place (from the image's skeleton, or an
+// earlier attempt) as precloned.
+func (m *Manager) markPrecloned(spec *devboxv1.RepositorySpec, dir string) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	name := filepath.Base(dir)
+	for i, r := range m.st.Repos {
+		if r.Dir == name {
+			if r.Precloned {
+				return nil
+			}
+			m.st.Repos[i].Precloned = true
+			return m.saveLocked()
+		}
+	}
+	m.st.Repos = append(m.st.Repos, repoRecord{URL: spec.GetUrl(), Dir: name, Branch: spec.GetBranch(),
+		Description: spec.GetDescription(), Precloned: true})
+	return m.saveLocked()
+}
+
 // Hydrate prepares the workspace at boot: skeleton, instructions, clones (first boot only: a snapshot's
-// workspace is already hydrated), and Project.md.
+// workspace is already hydrated, and the golden boot's clones are refetched instead), and Project.md.
 func (m *Manager) Hydrate(ctx context.Context, repos []*devboxv1.RepositorySpec) error {
 	if err := m.ApplySkel(); err != nil {
 		m.log.Warn("apply skeleton", "err", err)
@@ -273,15 +334,24 @@ func (m *Manager) Hydrate(ctx context.Context, repos []*devboxv1.RepositorySpec)
 	m.mu.Unlock()
 	var errs []error
 	if !already {
+		m.refetch(ctx, repos)
+		failed, transient := m.cloneAll(ctx, repos, false)
 		for _, r := range repos {
-			if _, err := m.Clone(ctx, r); err != nil {
+			if err, ok := failed[r]; ok {
 				errs = append(errs, err)
 				m.condition("workspace_hydration_failed", "warning", fmt.Sprintf("clone %s: %v", r.GetUrl(), err), true)
 			}
 		}
 		m.mu.Lock()
-		m.st.Hydrated = true
-		m.st.HydratedAt = time.Now()
+		if len(failed) == 0 && m.st.ClonesFailed {
+			m.condition("workspace_hydration_failed", "warning", "", false)
+		}
+		m.st.ClonesFailed = len(failed) > 0
+		// a clone that never reached the remote is retried on the next boot rather than given up on
+		if !transient {
+			m.st.Hydrated = true
+			m.st.HydratedAt = time.Now()
+		}
 		_ = m.saveLocked()
 		m.mu.Unlock()
 	}
@@ -292,6 +362,115 @@ func (m *Manager) Hydrate(ctx context.Context, repos []*devboxv1.RepositorySpec)
 	m.hydrated = true
 	m.mu.Unlock()
 	return errors.Join(errs...)
+}
+
+// Preclone clones the golden boot's repositories, retrying any failure for up to PrecloneRetry, and records them
+// as precloned without hydrating the workspace: each instance still hydrates on its first boot.
+func (m *Manager) Preclone(ctx context.Context, repos []*devboxv1.RepositorySpec) error {
+	failed, _ := m.cloneAll(ctx, repos, true)
+	var errs []error
+	for _, r := range repos {
+		if err, ok := failed[r]; ok {
+			errs = append(errs, fmt.Errorf("clone %s: %w", r.GetUrl(), err))
+		}
+	}
+	if err := m.Refresh(ctx); err != nil {
+		errs = append(errs, err)
+	}
+	return errors.Join(errs...)
+}
+
+// refetch brings the golden boot's clones up to date on an instance's first boot, since their remotes have moved
+// on since the revision was built: each is fetched, switched to the branch the instance asks for when that's
+// another, and fast-forwarded. Checkouts with local changes or diverged branches, and remotes egress won't reach
+// for this instance, are left as the golden boot made them.
+func (m *Manager) refetch(ctx context.Context, repos []*devboxv1.RepositorySpec) {
+	m.mu.Lock()
+	var precloned []repoRecord
+	for _, r := range m.st.Repos {
+		if r.Precloned {
+			precloned = append(precloned, r)
+		}
+	}
+	m.mu.Unlock()
+	for _, r := range precloned {
+		dir := filepath.Join(m.opts.Home, r.Dir)
+		if !gitutil.IsRepo(dir) {
+			continue
+		}
+		log := m.log.With("repo", r.Dir)
+		if _, err := gitutil.RunTimeout(ctx, refetchTimeout, dir, "fetch", "--quiet", "--prune", "origin"); err != nil {
+			log.Warn("refetching precloned repository; keeping the golden boot's checkout", "err", err)
+			continue
+		}
+		if out, err := gitutil.Run(ctx, dir, "status", "--porcelain", "--untracked-files=no"); err != nil || len(strings.TrimSpace(string(out))) > 0 {
+			log.Info("precloned repository has local changes; leaving its checkout alone")
+			continue
+		}
+		branch := r.Branch
+		for _, spec := range repos {
+			if SameRemote(spec.GetUrl(), r.URL) && spec.GetBranch() != "" {
+				branch = spec.GetBranch()
+			}
+		}
+		out, _ := gitutil.Run(ctx, dir, "symbolic-ref", "--short", "-q", "HEAD")
+		current := strings.TrimSpace(string(out))
+		if branch != "" && branch != current {
+			if _, err := gitutil.Run(ctx, dir, "checkout", "--quiet", branch); err != nil {
+				log.Warn("switching precloned repository to the requested branch", "branch", branch, "err", err)
+				continue
+			}
+			current = branch
+		}
+		if current == "" {
+			continue
+		}
+		if _, err := gitutil.Run(ctx, dir, "merge", "--ff-only", "--quiet", "@{upstream}"); err != nil {
+			log.Warn("fast-forwarding precloned repository", "branch", current, "err", err)
+		}
+	}
+}
+
+// cloneAll clones every repository, retrying ones that couldn't reach the remote with backoff for up to
+// CloneRetry: a box restored from a snapshot can run this before its network (DNS first) is back. A preclone
+// retries every failure, for up to PrecloneRetry. It returns the clones that still failed and whether any of
+// those failures may yet clear.
+func (m *Manager) cloneAll(ctx context.Context, repos []*devboxv1.RepositorySpec, preclone bool) (map[*devboxv1.RepositorySpec]error, bool) {
+	window := m.opts.CloneRetry
+	if preclone {
+		window = m.opts.PrecloneRetry
+	}
+	deadline := time.Now().Add(window)
+	backoff := cloneBackoff
+	pending := repos
+	failed := map[*devboxv1.RepositorySpec]error{}
+	for {
+		var retry []*devboxv1.RepositorySpec
+		for _, r := range pending {
+			_, err := m.clone(ctx, r, preclone)
+			switch {
+			case err == nil:
+				delete(failed, r)
+			case derr.Code(err) == codes.Unavailable ||
+				preclone && derr.Code(err) != codes.InvalidArgument && derr.Code(err) != codes.AlreadyExists:
+				failed[r] = err
+				retry = append(retry, r)
+			default:
+				failed[r] = err
+			}
+		}
+		if len(retry) == 0 || !time.Now().Add(backoff).Before(deadline) {
+			return failed, len(retry) > 0
+		}
+		m.log.Info("retrying clones", "repos", len(retry), "in", backoff.String(), "err", failed[retry[0]])
+		select {
+		case <-ctx.Done():
+			return failed, true
+		case <-time.After(backoff):
+		}
+		pending = retry
+		backoff = min(backoff*2, maxCloneBackoff)
+	}
 }
 
 // scan lists checkouts directly under the home directory.
@@ -458,6 +637,18 @@ func (m *Manager) ThreadWorktrees(threadID string) []string {
 	return out
 }
 
+// AllThreadWorktrees returns every thread's worktree paths, each mapped to its thread's id.
+func (m *Manager) AllThreadWorktrees() map[string]string {
+	out := map[string]string{}
+	threads, _ := os.ReadDir(filepath.Join(m.opts.Home, ThreadsDir))
+	for _, t := range threads {
+		for _, p := range m.ThreadWorktrees(t.Name()) {
+			out[p] = t.Name()
+		}
+	}
+	return out
+}
+
 // List implements ListRepositories.
 func (m *Manager) List(ctx context.Context, includeWorktrees bool) *devboxv1.ListRepositoriesResponse {
 	resp := &devboxv1.ListRepositoriesResponse{Checkouts: m.scan(ctx), ProjectMdPath: m.ProjectMDPath()}
@@ -507,6 +698,9 @@ func (m *Manager) AddRepository(ctx context.Context, spec *devboxv1.RepositorySp
 	return gitutil.Inspect(ctx, dir)
 }
 
+// WorktreeBranch is the branch a thread's worktrees start on; a pull request renames it.
+func WorktreeBranch(threadID string) string { return "devbox/" + threadID }
+
 // Worktrees creates ~/.threads/<id>/<repo> worktrees (branch devbox/<id>) and returns the session cwd: the
 // worktree itself for one repository, else ~/.threads/<id>. ~/.threads/<id> gets Project.md and AGENTS.md
 // symlinks so the thread still sees the cross-repo map.
@@ -530,7 +724,7 @@ func (m *Manager) Worktrees(threadID string, repos []string) (string, error) {
 		if gitutil.IsRepo(dst) {
 			continue
 		}
-		branch := "devbox/" + threadID
+		branch := WorktreeBranch(threadID)
 		args := []string{"worktree", "add", "--quiet", "-b", branch, dst}
 		if _, err := gitutil.Run(ctx, src, "rev-parse", "--verify", "-q", "refs/heads/"+branch); err == nil {
 			args = []string{"worktree", "add", "--quiet", dst, branch}

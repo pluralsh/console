@@ -55,14 +55,15 @@ defmodule Console.GraphQl.Resolvers.Deployments.Devbox do
     end
   end
 
-  def offered_models(%Devbox.Agent{} = agent, _, _) do
+  def offered_models(%Devbox.Agent{} = agent, args, _) do
     names = Map.new(agent.models || [], & {&1.id, &1})
-    Devbox.Agent.offered_models(agent)
+    Devboxes.offered_models(agent, args[:billing] || :proxy)
     |> Enum.map(fn id -> Map.get(names, id, %{id: id, name: id, description: nil}) end)
     |> ok()
   end
 
-  def devbox_default_model(%Devbox.Agent{} = agent, _, _), do: {:ok, Devbox.Agent.default_model(agent)}
+  def devbox_default_model(%Devbox.Agent{} = agent, args, _),
+    do: {:ok, Devboxes.default_model(agent, args[:billing] || :proxy)}
 
   def upsert_devbox(%{attributes: attrs}, ctx),
     do: Devboxes.upsert_devbox(attrs, fetch_cluster(attrs, ctx), actor(ctx))
@@ -97,6 +98,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Devbox do
   end
 
   defp instance_filters(query, args, %User{id: user_id}) do
+    query = case args do
+      %{statuses: [_ | _]} -> query
+      %{include_ended: true} -> query
+      _ -> DevboxInstance.live(query)
+    end
+
     Enum.reduce(args, query, fn
       {:statuses, [_ | _] = statuses}, q -> DevboxInstance.for_statuses(q, statuses)
       {:mine, true}, q -> DevboxInstance.for_user(q, user_id)
@@ -120,15 +127,21 @@ defmodule Console.GraphQl.Resolvers.Deployments.Devbox do
 
   def devbox_instance_threads(%DevboxInstance{id: id}, args, _) do
     DevboxInstanceSession.for_instance(id)
-    |> DevboxInstanceSession.for_kind(:thread)
     |> thread_filters(args)
     |> DevboxInstanceSession.ordered(desc: :inserted_at)
     |> Console.Repo.all()
     |> ok()
   end
 
-  defp thread_filters(query, %{include_deleted: true}), do: query
-  defp thread_filters(query, _), do: DevboxInstanceSession.visible(query)
+  defp thread_filters(query, args) do
+    Enum.reduce(args, maybe_visible(query, args), fn
+      {:stages, [_ | _] = stages}, q -> DevboxInstanceSession.for_stages(q, stages)
+      _, q -> q
+    end)
+  end
+
+  defp maybe_visible(query, %{include_deleted: true}), do: query
+  defp maybe_visible(query, _), do: DevboxInstanceSession.visible(query)
 
   def devbox_instance_interactions(%DevboxInstance{id: id}, args, _) do
     DevboxInstanceInteraction.for_instance(id)
@@ -177,6 +190,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Devbox do
   def keep_devbox_instance_awake(%{id: id, until: until}, %{context: %{current_user: user}}),
     do: Devboxes.keep_awake(id, until, user)
 
+  def create_devbox_pull_request(%{instance_id: id} = args, %{context: %{current_user: user}}),
+    do: Console.Devboxes.PullRequests.create(id, args, user)
+
   def cancel_devbox_keep_awake(%{id: id}, %{context: %{current_user: user}}),
     do: Devboxes.cancel_keep_awake(id, user)
 
@@ -223,6 +239,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Devbox do
   defp prompt(_), do: ""
 
   def cancel_devbox_prompt(%{id: id}, %{context: %{current_user: user}}), do: Threads.cancel_prompt(id, user)
+
+  def update_devbox_queued_prompt(%{id: id, prompt_id: prompt_id, action: action} = args, %{context: %{current_user: user}}),
+    do: Threads.update_queued_prompt(id, prompt_id, action, args[:text], user)
 
   def set_devbox_thread_config_option(%{id: id, config_id: cid, value: v}, %{context: %{current_user: user}}),
     do: Threads.set_config_option(id, cid, v, user)
@@ -301,7 +320,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Devbox do
     do: Workspace.open_stream(id, kind, Map.take(args, [:terminal_id, :port, :url]), user)
 
   def devbox_files(%{instance_id: id} = args, %{context: %{current_user: user}}),
-    do: Workspace.list_files(id, args[:path], user)
+    do: Workspace.list_files(id, args[:path], args, user)
 
   def devbox_file(%{instance_id: id, path: path}, %{context: %{current_user: user}}) do
     with {:ok, file} <- Workspace.read_file(id, path, user),

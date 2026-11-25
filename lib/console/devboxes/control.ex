@@ -40,6 +40,8 @@ defmodule Console.Devboxes.Control do
   @doc "`session/prompt`; `attachments` are `%{name, mime_type, data}` files the daemon writes into the box"
   @callback send_prompt(instance, thread, prompt :: [map], attachments :: [map]) :: result
   @callback cancel_prompt(instance, thread) :: result
+  @doc "Edits (`:edit`, with `text`), drops (`:cancel`) or promotes (`:send_now`) a held prompt; resolves to `{:ok, %{updated, queued_prompts}}`"
+  @callback update_queued_prompt(instance, thread, prompt_id :: binary, action :: :edit | :cancel | :send_now, text :: binary | nil) :: result
   @callback set_config_option(instance, thread, config_id :: binary, value :: binary) :: result
   @callback respond(instance, DevboxInstanceInteraction.t, response :: map) :: result
   @doc "Live slash commands for a running thread; resolves to `{:ok, [%{name, description, input_hint}]}`"
@@ -55,14 +57,25 @@ defmodule Console.Devboxes.Control do
   @callback add_repository(instance, repository :: binary) :: result
   @doc "Checkouts in the workspace; resolves to `{:ok, [%{path, remote, branch, sha}]}`"
   @callback list_repositories(instance) :: result
-  @doc "One directory level; resolves to `{:ok, [%{path, name, type, size, modified_at, repository, git_status}]}`"
-  @callback list_files(instance, path :: binary) :: result
+  @doc """
+  One directory level, or with `opts.query` the best fuzzy matches anywhere beneath it (`opts.brief` drops all but
+  path, name, type and repository, for a listing from memory); resolves to
+  `{:ok, [%{path, name, type, size, modified_at, repository, git_status}]}`
+  """
+  @callback list_files(instance, path :: binary, opts :: map) :: result
   @doc "Resolves to `{:ok, %{entry, content, sha256, truncated, mime_type, binary}}`"
   @callback read_file(instance, path :: binary, opts :: map) :: result
   @doc "Writes a file, compare-and-swap on `opts.expected_sha256`; resolves to `{:ok, %{entry, sha256}}`"
   @callback write_file(instance, path :: binary, content :: binary, opts :: map) :: result
   @doc "Uncommitted changes per checkout; resolves to `{:ok, [%{checkout, base_ref, base_sha, files, additions, deletions}]}`"
   @callback get_changes(instance, opts :: map) :: result
+  @doc """
+  Writes, commits and pushes a checkout's changes for a pull request in the box, which can take minutes; resolves to
+  `{:ok, %{remote_url, checkout_path, head_branch, base_branch, title, body, base_sha, head_sha, additions, deletions,
+  committed, writer}}`.  `opts`: `repository` (a checkout name or path), and `model` (an AI proxy model) or `agent`
+  (a subscription agent whose CLI writes the text), plus an optional `thread_id` for context.
+  """
+  @callback prepare_pull_request(instance, opts :: map) :: result
   @doc """
   Opens a terminal, vnc or preview stream on the daemon; resolves to
   `{:ok, %{stream_id, kind, daemon_path, expires_at, subprotocols, terminal}}`.  Console mints the stream token.
@@ -87,6 +100,7 @@ defmodule Console.Devboxes.Control do
     fork_thread: 3,
     send_prompt: 4,
     cancel_prompt: 2,
+    update_queued_prompt: 5,
     set_config_option: 4,
     respond: 3,
     list_commands: 2,
@@ -95,10 +109,11 @@ defmodule Console.Devboxes.Control do
     set_instance_leases: 2,
     add_repository: 2,
     list_repositories: 1,
-    list_files: 2,
+    list_files: 3,
     read_file: 3,
     write_file: 4,
     get_changes: 2,
+    prepare_pull_request: 2,
     open_stream: 3
   ]
 

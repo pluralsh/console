@@ -713,8 +713,9 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
     connection field :devbox_instances, node_type: :devbox_instance do
       middleware Nested, check: true, msg: "workbench devbox instances cannot be fetched through a policy"
-      arg :statuses, list_of(:devbox_instance_status), description: "filter instances by status"
-      arg :mine,     :boolean, description: "only show instances you started"
+      arg :statuses,      list_of(:devbox_instance_status), description: "filter instances by status (overrides include_ended)"
+      arg :mine,          :boolean, description: "only show instances you started"
+      arg :include_ended, :boolean, default_value: false, description: "also list completed, failed and cancelled instances"
 
       resolve &Deployments.list_workbench_devbox_instances/3
     end

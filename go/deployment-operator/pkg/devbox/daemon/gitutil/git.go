@@ -51,8 +51,20 @@ func Run(ctx context.Context, dir string, args ...string) ([]byte, error) {
 
 // RunEnv runs git with extra environment.
 func RunEnv(ctx context.Context, dir string, env []string, args ...string) ([]byte, error) {
-	ctx, cancel := context.WithTimeout(ctx, timeout)
-	defer cancel()
+	return run(ctx, timeout, dir, env, args...)
+}
+
+// RunTimeout is Run bounded by d instead of the default per-invocation timeout; zero leaves only ctx's.
+func RunTimeout(ctx context.Context, d time.Duration, dir string, args ...string) ([]byte, error) {
+	return run(ctx, d, dir, nil, args...)
+}
+
+func run(ctx context.Context, d time.Duration, dir string, env []string, args ...string) ([]byte, error) {
+	if d > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, d)
+		defer cancel()
+	}
 	cmd := exec.CommandContext(ctx, "git", args...)
 	cmd.Dir = dir
 	cmd.Env = append(append(os.Environ(), Env...), env...)
@@ -83,6 +95,11 @@ func IsRepo(dir string) bool {
 
 // Inspect describes a checkout.
 func Inspect(ctx context.Context, dir string) (*devboxv1.Checkout, error) {
+	return inspect(ctx, dir, true)
+}
+
+// inspect skips the status scan (and so Dirty) unless status is set.
+func inspect(ctx context.Context, dir string, status bool) (*devboxv1.Checkout, error) {
 	if !IsRepo(dir) {
 		return nil, fmt.Errorf("%s is not a git checkout", dir)
 	}
@@ -93,8 +110,10 @@ func Inspect(ctx context.Context, dir string) (*devboxv1.Checkout, error) {
 		c.Branch = b
 	}
 	c.DefaultBranch = DefaultBranch(ctx, dir)
-	if st, err := Run(ctx, dir, "status", "--porcelain=v1", "-z", "--untracked-files=normal"); err == nil {
-		c.Dirty = len(bytes.TrimSpace(st)) > 0
+	if status {
+		if st, err := Run(ctx, dir, "status", "--porcelain=v1", "-z", "--untracked-files=normal"); err == nil {
+			c.Dirty = len(bytes.TrimSpace(st)) > 0
+		}
 	}
 	if out, err := runString(ctx, dir, "rev-list", "--left-right", "--count", "HEAD...@{upstream}"); err == nil {
 		if f := strings.Fields(out); len(f) == 2 {
@@ -207,11 +226,15 @@ type ChangesOptions struct {
 
 // Changes lists a checkout's changed files against a base, with line counts and optional diffs.
 func Changes(ctx context.Context, dir string, opts ChangesOptions) (*devboxv1.RepositoryChanges, error) {
-	co, err := Inspect(ctx, dir)
+	if !IsRepo(dir) {
+		return nil, fmt.Errorf("%s is not a git checkout", dir)
+	}
+	ref, sha, workTree, err := Base(ctx, dir, opts.Base)
 	if err != nil {
 		return nil, err
 	}
-	ref, sha, workTree, err := Base(ctx, dir, opts.Base)
+	// a work-tree comparison runs status itself, which also tells whether the checkout is dirty
+	co, err := inspect(ctx, dir, !workTree)
 	if err != nil {
 		return nil, err
 	}
@@ -246,60 +269,156 @@ func Changes(ctx context.Context, dir string, opts ChangesOptions) (*devboxv1.Re
 		if err != nil {
 			return nil, err
 		}
-		for _, e := range entries {
-			if e.XY == "??" {
-				if opts.Path == "" || e.Path == opts.Path || strings.HasPrefix(e.Path, strings.TrimSuffix(opts.Path, "/")+"/") {
-					untracked = append(untracked, e.Path)
-				}
-				continue
-			}
-			if e.XY[0] != ' ' && e.XY[0] != '?' {
-				staged[e.Path] = true
-			}
-		}
+		co.Dirty = len(entries) > 0
+		staged, untracked = splitStatus(entries, opts.Path)
 	}
-	for _, fc := range parseNameStatus(nameStatus) {
+	tracked := parseNameStatus(nameStatus)
+	var patches [][]byte
+	if opts.IncludeDiff && len(tracked) > 0 {
+		patches = filePatches(ctx, dir, rev, pathspec, tracked)
+	}
+	for i, fc := range tracked {
 		if n, ok := counts[fc.GetPath()]; ok {
 			fc.Additions, fc.Deletions, fc.Binary = n.add, n.del, n.binary
 		}
 		fc.Staged = staged[fc.GetPath()]
-		if opts.IncludeDiff {
-			paths := []string{fc.GetPath()}
-			if fc.GetOldPath() != "" {
-				paths = append([]string{fc.GetOldPath()}, paths...)
-			}
-			out, err := Run(ctx, dir, append(append(append([]string{"diff", "--no-color", "--no-ext-diff", "-M"}, rev...), "--"), paths...)...)
-			if err == nil {
-				fc.Diff, fc.DiffTruncated = capDiff(out, opts.MaxDiffBytes)
-			}
+		if patches != nil {
+			fc.Diff, fc.DiffTruncated = capDiff(patches[i], opts.MaxDiffBytes)
 		}
 		rc.Files = append(rc.Files, fc)
 	}
 	for _, p := range untracked {
-		fc := &devboxv1.FileChange{Path: p, Status: devboxv1.ChangeStatus_CHANGE_STATUS_UNTRACKED}
-		full := filepath.Join(dir, p)
-		if data, err := os.ReadFile(full); err == nil {
-			if bytes.IndexByte(data[:min(len(data), 8000)], 0) >= 0 {
-				fc.Binary = true
-			} else {
-				fc.Additions = int32(bytes.Count(data, []byte("\n")))
-				if len(data) > 0 && data[len(data)-1] != '\n' {
-					fc.Additions++
-				}
-			}
-		}
-		if opts.IncludeDiff {
-			// --no-index exits 1 when the files differ.
-			out, _ := Run(ctx, dir, "diff", "--no-color", "--no-ext-diff", "--no-index", "--", "/dev/null", p)
-			fc.Diff, fc.DiffTruncated = capDiff(out, opts.MaxDiffBytes)
-		}
-		rc.Files = append(rc.Files, fc)
+		rc.Files = append(rc.Files, untrackedChange(dir, p, opts))
 	}
 	for _, f := range rc.Files {
 		rc.Additions += f.GetAdditions()
 		rc.Deletions += f.GetDeletions()
 	}
 	return rc, nil
+}
+
+// splitStatus picks the staged paths and the untracked paths under path (all of them when path is empty).
+func splitStatus(entries []StatusEntry, path string) (staged map[string]bool, untracked []string) {
+	staged = map[string]bool{}
+	for _, e := range entries {
+		if e.XY == "??" {
+			if path == "" || e.Path == path || strings.HasPrefix(e.Path, strings.TrimSuffix(path, "/")+"/") {
+				untracked = append(untracked, e.Path)
+			}
+			continue
+		}
+		if e.XY[0] != ' ' && e.XY[0] != '?' {
+			staged[e.Path] = true
+		}
+	}
+	return staged, untracked
+}
+
+// untrackedChange describes an untracked file, counting its lines as additions.
+func untrackedChange(dir, p string, opts ChangesOptions) *devboxv1.FileChange {
+	fc := &devboxv1.FileChange{Path: p, Status: devboxv1.ChangeStatus_CHANGE_STATUS_UNTRACKED}
+	data, err := os.ReadFile(filepath.Join(dir, p))
+	if err != nil {
+		return fc
+	}
+	if bytes.IndexByte(data[:min(len(data), 8000)], 0) >= 0 {
+		fc.Binary = true
+	} else {
+		fc.Additions = int32(bytes.Count(data, []byte("\n")))
+		if len(data) > 0 && data[len(data)-1] != '\n' {
+			fc.Additions++
+		}
+	}
+	if opts.IncludeDiff {
+		fc.Diff, fc.DiffTruncated = capDiff(untrackedPatch(p, data, fc.Binary), opts.MaxDiffBytes)
+	}
+	return fc
+}
+
+// filePatches diffs every tracked change in one git call and splits the patch per file. git emits file
+// sections in the same order as --name-status; if the sections don't line up, each file is diffed separately.
+func filePatches(ctx context.Context, dir string, rev, pathspec []string, files []*devboxv1.FileChange) [][]byte {
+	out, err := Run(ctx, dir, append(append([]string{"-c", "core.quotePath=false", "diff", "--no-color", "--no-ext-diff", "-M"}, rev...), pathspec...)...)
+	if err == nil {
+		if sections := splitPatch(out); len(sections) == len(files) && sectionsMatch(sections, files) {
+			return sections
+		}
+	}
+	res := make([][]byte, len(files))
+	for i, fc := range files {
+		paths := []string{fc.GetPath()}
+		if fc.GetOldPath() != "" {
+			paths = append([]string{fc.GetOldPath()}, paths...)
+		}
+		if out, err := Run(ctx, dir, append(append(append([]string{"diff", "--no-color", "--no-ext-diff", "-M"}, rev...), "--"), paths...)...); err == nil {
+			res[i] = out
+		}
+	}
+	return res
+}
+
+var diffHeader = []byte("diff --git ")
+
+func splitPatch(out []byte) [][]byte {
+	var sections [][]byte
+	start := -1
+	for i := 0; i < len(out); {
+		if bytes.HasPrefix(out[i:], diffHeader) {
+			if start >= 0 {
+				sections = append(sections, out[start:i])
+			}
+			start = i
+		}
+		next := bytes.IndexByte(out[i:], '\n')
+		if next < 0 {
+			break
+		}
+		i += next + 1
+	}
+	if start >= 0 {
+		sections = append(sections, out[start:])
+	}
+	return sections
+}
+
+func sectionsMatch(sections [][]byte, files []*devboxv1.FileChange) bool {
+	for i, fc := range files {
+		header, _, _ := bytes.Cut(sections[i], []byte("\n"))
+		if !bytes.HasSuffix(header, []byte(" b/"+fc.GetPath())) {
+			return false
+		}
+	}
+	return true
+}
+
+// untrackedPatch renders an untracked file as git would diff it against /dev/null.
+func untrackedPatch(p string, data []byte, binary bool) []byte {
+	var b bytes.Buffer
+	fmt.Fprintf(&b, "diff --git a/%s b/%s\nnew file mode 100644\n", p, p)
+	if binary {
+		fmt.Fprintf(&b, "Binary files /dev/null and b/%s differ\n", p)
+		return b.Bytes()
+	}
+	if len(data) == 0 {
+		return b.Bytes()
+	}
+	lines := bytes.SplitAfter(data, []byte("\n"))
+	if len(lines[len(lines)-1]) == 0 {
+		lines = lines[:len(lines)-1]
+	}
+	fmt.Fprintf(&b, "--- /dev/null\n+++ b/%s\n@@ -0,0 +1", p)
+	if len(lines) != 1 {
+		fmt.Fprintf(&b, ",%d", len(lines))
+	}
+	b.WriteString(" @@\n")
+	for _, l := range lines {
+		b.WriteByte('+')
+		b.Write(l)
+	}
+	if data[len(data)-1] != '\n' {
+		b.WriteString("\n\\ No newline at end of file\n")
+	}
+	return b.Bytes()
 }
 
 func capDiff(out []byte, max int) (string, bool) {

@@ -13,6 +13,20 @@
       ],
       "ActorJWTExpirationSeconds": 900,
       "ExtraHeaders": null
+    },
+    {
+      "Host": "devbox-gateway.plrl-deploy-operator.svc.cluster.local",
+      "Port": 8080,
+      "Scheme": "http",
+      "InjectHeader": "Authorization",
+      "SecretURI": "",
+      "ActorJWT": true,
+      "Prefix": "Bearer ",
+      "ActorJWTAudiences": [
+        "http://devbox-gateway.plrl-deploy-operator.svc:8080"
+      ],
+      "ActorJWTExpirationSeconds": 900,
+      "ExtraHeaders": null
     }
   ]
 }

@@ -21,6 +21,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
@@ -37,9 +38,8 @@ import (
 )
 
 const (
-	ServiceFinalizer       = "deployments.plural.sh/service-protection"
-	InventoryAnnotation    = "config.k8s.io/owning-inventory"
-	ServiceOwnerAnnotation = "deployments.plural.sh/service-owner"
+	ServiceFinalizer    = "deployments.plural.sh/service-protection"
+	InventoryAnnotation = "config.k8s.io/owning-inventory"
 )
 
 // ServiceDeploymentReconciler reconciles a Service object
@@ -582,8 +582,6 @@ func (r *ServiceDeploymentReconciler) MergeHelmValues(ctx context.Context, secre
 }
 
 func (r *ServiceDeploymentReconciler) addOwnerReferences(ctx context.Context, service *v1alpha1.ServiceDeployment) error {
-	logger := log.FromContext(ctx)
-
 	if err := r.addConfigurationSecretRefs(ctx, service); err != nil {
 		return err
 	}
@@ -608,36 +606,6 @@ func (r *ServiceDeploymentReconciler) addOwnerReferences(ctx context.Context, se
 		err = utils.TryAddOwnerRef(ctx, r.Client, service, configMap, r.Scheme)
 		if err != nil {
 			return err
-		}
-	}
-
-	if len(service.Spec.Imports) > 0 {
-		for _, imp := range service.Spec.Imports {
-			stack := &v1alpha1.InfrastructureStack{}
-			name := types.NamespacedName{Name: imp.StackRef.Name, Namespace: imp.StackRef.Namespace}
-			err := r.Get(ctx, name, stack)
-			if err != nil {
-				return err
-			}
-
-			if stack.Annotations == nil {
-				stack.Annotations = map[string]string{}
-			}
-
-			serviceNameNamespace := fmt.Sprintf("%s/%s", service.GetNamespace(), service.GetName())
-			if stack.Annotations[ServiceOwnerAnnotation] == serviceNameNamespace {
-				continue
-			}
-			stack.Annotations[ServiceOwnerAnnotation] = serviceNameNamespace
-
-			// ignore error. It's for the backward compatibility
-			if err := controllerutil.RemoveOwnerReference(service, stack, r.Scheme); err != nil {
-				logger.V(5).Info(err.Error())
-			}
-			err = utils.TryToUpdate(ctx, r.Client, stack)
-			if err != nil {
-				return err
-			}
 		}
 	}
 
@@ -738,10 +706,14 @@ func isServiceReady(components []v1alpha1.ServiceComponent) bool {
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *ServiceDeploymentReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	if err := mgr.GetFieldIndexer().IndexField(context.Background(), &v1alpha1.ServiceDeployment{}, ServiceImportsIndex, importedStacks); err != nil {
+		return err
+	}
+
 	return ctrl.NewControllerManagedBy(mgr).
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                               // Requirement for credentials implementation.
 		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(r.Client, new(v1alpha1.ServiceDeploymentList))). // Reconcile objects on credentials change.
-		Watches(&v1alpha1.InfrastructureStack{}, OnInfrastructureStackChange(r.Client, new(v1alpha1.ServiceDeployment))).
+		Watches(&v1alpha1.InfrastructureStack{}, OnInfrastructureStackChange(r.Client), builder.WithPredicates(stackIDChanged)).
 		Watches(&corev1.Secret{}, utils.OwnerRefAnnotationEventHandler(r.Client, new(v1alpha1.ServiceDeployment))).
 		For(&v1alpha1.ServiceDeployment{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Owns(&corev1.Secret{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
@@ -749,27 +721,47 @@ func (r *ServiceDeploymentReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func OnInfrastructureStackChange[T client.Object](c client.Client, obj T) handler.EventHandler {
-	return handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, stack client.Object) []reconcile.Request {
-		requests := make([]reconcile.Request, 0)
-		if stack.GetAnnotations() == nil {
-			return requests
-		}
-		service, ok := stack.GetAnnotations()[ServiceOwnerAnnotation]
-		if !ok {
-			return requests
-		}
-		s := strings.Split(service, "/")
-		if len(s) != 2 {
-			return requests
-		}
-		namespace := s[0]
-		name := s[1]
+// ServiceImportsIndex indexes services by the stacks they import, as namespace/name keys.
+const ServiceImportsIndex = "spec.imports.stackRef"
 
-		if err := c.Get(ctx, client.ObjectKey{Name: name, Namespace: namespace}, obj); err == nil {
-			requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: name, Namespace: namespace}})
-		}
+func importedStacks(obj client.Object) []string {
+	service, ok := obj.(*v1alpha1.ServiceDeployment)
+	if !ok {
+		return nil
+	}
+	return lo.Uniq(lo.Map(service.Spec.Imports, func(imp v1alpha1.ServiceImport, _ int) string {
+		return stackKey(imp.StackRef.Namespace, imp.StackRef.Name)
+	}))
+}
 
-		return requests
-	})
+func stackKey(namespace, name string) string {
+	return namespace + "/" + name
+}
+
+// stackIDChanged passes the only stack changes a service reads: the stack appearing, going away, or getting its
+// console ID. Everything else a stack does (runs, status churn) is irrelevant to the services importing it.
+var stackIDChanged = predicate.Funcs{
+	UpdateFunc: func(e event.UpdateEvent) bool {
+		old, okOld := e.ObjectOld.(*v1alpha1.InfrastructureStack)
+		cur, okNew := e.ObjectNew.(*v1alpha1.InfrastructureStack)
+		return !okOld || !okNew || lo.FromPtr(old.Status.ID) != lo.FromPtr(cur.Status.ID)
+	},
+}
+
+// OnInfrastructureStackChange enqueues every service importing the stack. Any number of services may import one stack.
+func OnInfrastructureStackChange(c client.Client) handler.EventHandler {
+	return handler.EnqueueRequestsFromMapFunc(servicesImporting(c))
+}
+
+func servicesImporting(c client.Client) handler.MapFunc {
+	return func(ctx context.Context, stack client.Object) []reconcile.Request {
+		services := &v1alpha1.ServiceDeploymentList{}
+		if err := c.List(ctx, services, client.MatchingFields{ServiceImportsIndex: stackKey(stack.GetNamespace(), stack.GetName())}); err != nil {
+			log.FromContext(ctx).Error(err, "listing services importing stack", "stack", client.ObjectKeyFromObject(stack))
+			return nil
+		}
+		return lo.Map(services.Items, func(s v1alpha1.ServiceDeployment, _ int) reconcile.Request {
+			return reconcile.Request{NamespacedName: client.ObjectKeyFromObject(&s)}
+		})
+	}
 }

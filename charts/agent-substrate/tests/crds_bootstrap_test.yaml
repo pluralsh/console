@@ -1,4 +1,4 @@
-suite: CRDs and first-install bootstrap
+suite: first-install bootstrap
 release:
   name: ate
   namespace: ate-system
@@ -10,33 +10,6 @@ templates:
 set:
   objectStore.snapshotLocation: s3://snapshots/ate/
 tests:
-  - it: renders the three ate.dev CRDs with resource-policy keep
-    template: templates/crds.yaml
-    asserts:
-      - hasDocuments:
-          count: 3
-      - isKind:
-          of: CustomResourceDefinition
-      - equal:
-          path: metadata.annotations["helm.sh/resource-policy"]
-          value: keep
-
-  - it: crds.keep=false drops the keep annotation
-    template: templates/crds.yaml
-    set:
-      crds.keep: false
-    asserts:
-      - notExists:
-          path: metadata.annotations["helm.sh/resource-policy"]
-
-  - it: crds.install=false renders no CRDs
-    template: templates/crds.yaml
-    set:
-      crds.install: false
-    asserts:
-      - hasDocuments:
-          count: 0
-
   - it: defers SandboxConfig and Cluster to the bootstrap Job on first install
     template: templates/bootstrap-job.yaml
     asserts:
@@ -99,3 +72,65 @@ tests:
       - equal:
           path: spec.versions[0].assets.arm64.cloud-hypervisor.url
           value: s3://ate-assets/microvm-assets/arm64/f192b510eea1c710cbc439d716bb0573c223fc463dbe3e6523788a2b7ef62850
+
+  - it: assetStaging renders the stager Job for microvm
+    template: templates/microvm-assets-job.yaml
+    set:
+      sandboxConfigs.microvm.enabled: true
+      sandboxConfigs.microvm.assetScheme: s3
+      sandboxConfigs.microvm.assetBucket: ate-assets
+      assetStaging.enabled: true
+    documentSelector:
+      path: kind
+      value: Job
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: ate-api-server
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --bucket-url=s3://ate-assets
+
+  - it: assetStaging stages the specOverrides-merged SandboxConfig
+    template: templates/microvm-assets-job.yaml
+    set:
+      sandboxConfigs.microvm.enabled: true
+      sandboxConfigs.microvm.assetScheme: s3
+      sandboxConfigs.microvm.assetBucket: ate-assets
+      sandboxConfigs.microvm.specOverrides.defaultVersion: custom
+      assetStaging.enabled: true
+    documentSelector:
+      path: kind
+      value: ConfigMap
+    asserts:
+      - matchRegex:
+          path: data["microvm.yaml"]
+          pattern: "defaultVersion: custom"
+
+  - it: assetStaging mounts the Azure workload identity token
+    template: templates/microvm-assets-job.yaml
+    set:
+      sandboxConfigs.microvm.enabled: true
+      sandboxConfigs.microvm.assetScheme: azblob
+      sandboxConfigs.microvm.assetBucket: assets
+      assetStaging.enabled: true
+      objectStore.backend: azureBlob
+      objectStore.snapshotLocation: azblob://snapshots/ate/
+      objectStore.azureBlob.accountUrl: https://acct.blob.core.windows.net
+      objectStore.azureBlob.image.digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
+      objectStore.azureBlob.containers: [snapshots, assets]
+      objectStore.azureBlob.tenantId: tenant
+      objectStore.azureBlob.nodeClientId: node
+      objectStore.azureBlob.controlClientId: client
+    documentSelector:
+      path: kind
+      value: Job
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: AZURE_FEDERATED_TOKEN_FILE
+            value: /var/run/secrets/azure/tokens/azure-identity-token
+      - equal:
+          path: spec.template.spec.volumes[3].name
+          value: azure-identity-token

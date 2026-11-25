@@ -118,6 +118,32 @@
 {{- end -}}
 {{- end -}}
 
+{{- /* JuiceFS devbox homes */ -}}
+{{- $j := .Values.juicefs -}}
+{{- if $j.enabled -}}
+{{- if not (or $j.image.digest $j.image.tag) -}}
+{{- fail "juicefs.image.tag (or digest) is required" -}}
+{{- end -}}
+{{- if not (regexMatch "^[a-z0-9][-a-z0-9]{1,61}[a-z0-9]$" ($j.name | default "")) -}}
+{{- fail (printf "juicefs.name must be 3-63 lowercase letters, digits and dashes, got %q" ($j.name | default "")) -}}
+{{- end -}}
+{{- if and (not $j.bucket) (not (include "substrate.juicefs.snapshotBucket" .)) -}}
+{{- fail "juicefs.bucket is required when objectStore.snapshotLocation doesn't name a bucket" -}}
+{{- end -}}
+{{- if and (eq $os.backend "s3") (not $j.bucket) (not .Values.rustfs.enabled) (not $os.s3.endpoint) (not $os.s3.region) -}}
+{{- fail "juicefs needs objectStore.s3.region (or juicefs.bucket) to address the S3 bucket" -}}
+{{- end -}}
+{{- if and (eq $os.backend "azureBlob") (not $j.azureClientId) -}}
+{{- fail "juicefs.azureClientId is required with objectStore.backend=azureBlob: JuiceFS reaches the container through Entra workload identity" -}}
+{{- end -}}
+{{- if and (eq $pg.mode "external") (not (and $j.postgres.external.url $j.postgres.external.passwordSecret.name)) -}}
+{{- fail "juicefs with postgres.mode=external needs juicefs.postgres.external.url and juicefs.postgres.external.passwordSecret.name" -}}
+{{- end -}}
+{{- if contains "--writeback" (join " " $j.node.mountFlags) -}}
+{{- fail "juicefs.node.mountFlags must not include --writeback: a home's staged writes would be lost when its box moves node" -}}
+{{- end -}}
+{{- end -}}
+
 {{- if .Values.sandboxConfigs.microvm.enabled -}}
 {{- if not (and .Values.sandboxConfigs.microvm.assetScheme .Values.sandboxConfigs.microvm.assetBucket) -}}
 {{- fail "sandboxConfigs.microvm needs assetScheme (s3, gs or https) and assetBucket, where the microVM assets are staged" -}}

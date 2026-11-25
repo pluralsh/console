@@ -78,7 +78,9 @@ defmodule Console.Devboxes.WorkspaceTest do
     test "readers can list and read, writes need prompt access" do
       inst = instance()
 
-      {:ok, []} = Workspace.list_files(inst.id, nil, inst.user)
+      {:ok, []} = Workspace.list_files(inst.id, nil, %{}, inst.user)
+      {:ok, [%{name: "handler.ex"}]} = Workspace.list_files(inst.id, "api", %{query: "handler"}, inst.user)
+      {:ok, [%{name: "lib"}]} = Workspace.list_files(inst.id, "api", %{brief: true, ignored: true}, inst.user)
       {:ok, %{entry: %{path: "README.md"}}} = Workspace.read_file(inst.id, "README.md", inst.user)
       {:ok, %{sha256: sha}} = Workspace.write_file(inst.id, "a.txt", "hi", nil, inst.user)
       assert sha == Base.encode16(:crypto.hash(:sha256, "hi"), case: :lower)

@@ -1,0 +1,434 @@
+[
+ {
+  "sessionUpdate": "tool_call",
+  "toolCallId": "call_subagent_1",
+  "title": "subagent",
+  "kind": "other",
+  "status": "pending",
+  "rawInput": {
+   "agent": "scout",
+   "task": "List the files"
+  }
+ },
+ {
+  "sessionUpdate": "tool_call_update",
+  "toolCallId": "call_subagent_1",
+  "status": "in_progress",
+  "rawInput": {
+   "agent": "scout",
+   "task": "List the files"
+  }
+ },
+ {
+  "sessionUpdate": "tool_call_update",
+  "toolCallId": "call_subagent_1",
+  "status": "in_progress",
+  "content": [
+   {
+    "type": "content",
+    "content": {
+     "type": "text",
+     "text": "(running...)"
+    }
+   }
+  ],
+  "rawOutput": {
+   "content": [
+    {
+     "type": "text",
+     "text": "(running...)"
+    }
+   ],
+   "details": {
+    "mode": "single",
+    "agentScope": "user",
+    "projectAgentsDir": null,
+    "results": [
+     {
+      "agent": "scout",
+      "agentSource": "user",
+      "task": "List the files",
+      "exitCode": 0,
+      "messages": [
+       {
+        "role": "user",
+        "content": [
+         {
+          "type": "text",
+          "text": "Task: List the files"
+         }
+        ]
+       }
+      ],
+      "stderr": "",
+      "usage": {
+       "input": 0,
+       "output": 0,
+       "cacheRead": 0,
+       "cacheWrite": 0,
+       "cost": 0,
+       "contextTokens": 0,
+       "turns": 0
+      }
+     }
+    ]
+   }
+  }
+ },
+ {
+  "sessionUpdate": "tool_call_update",
+  "toolCallId": "call_subagent_1",
+  "status": "in_progress",
+  "content": [
+   {
+    "type": "content",
+    "content": {
+     "type": "text",
+     "text": "(running...)"
+    }
+   }
+  ],
+  "rawOutput": {
+   "content": [
+    {
+     "type": "text",
+     "text": "(running...)"
+    }
+   ],
+   "details": {
+    "mode": "single",
+    "agentScope": "user",
+    "projectAgentsDir": null,
+    "results": [
+     {
+      "agent": "scout",
+      "agentSource": "user",
+      "task": "List the files",
+      "exitCode": 0,
+      "messages": [
+       {
+        "role": "user",
+        "content": [
+         {
+          "type": "text",
+          "text": "Task: List the files"
+         }
+        ]
+       },
+       {
+        "role": "assistant",
+        "content": [
+         {
+          "type": "toolCall",
+          "id": "call_ls_2",
+          "name": "ls",
+          "arguments": {
+           "path": "."
+          }
+         }
+        ],
+        "provider": "plural",
+        "model": "m1",
+        "stopReason": "toolUse"
+       }
+      ],
+      "stderr": "",
+      "usage": {
+       "input": 0,
+       "output": 0,
+       "cacheRead": 0,
+       "cacheWrite": 0,
+       "cost": 0,
+       "contextTokens": 0,
+       "turns": 1
+      },
+      "model": "m1",
+      "stopReason": "toolUse"
+     }
+    ]
+   }
+  }
+ },
+ {
+  "sessionUpdate": "tool_call_update",
+  "toolCallId": "call_subagent_1",
+  "status": "in_progress",
+  "content": [
+   {
+    "type": "content",
+    "content": {
+     "type": "text",
+     "text": "(running...)"
+    }
+   }
+  ],
+  "rawOutput": {
+   "content": [
+    {
+     "type": "text",
+     "text": "(running...)"
+    }
+   ],
+   "details": {
+    "mode": "single",
+    "agentScope": "user",
+    "projectAgentsDir": null,
+    "results": [
+     {
+      "agent": "scout",
+      "agentSource": "user",
+      "task": "List the files",
+      "exitCode": 0,
+      "messages": [
+       {
+        "role": "user",
+        "content": [
+         {
+          "type": "text",
+          "text": "Task: List the files"
+         }
+        ]
+       },
+       {
+        "role": "assistant",
+        "content": [
+         {
+          "type": "toolCall",
+          "id": "call_ls_2",
+          "name": "ls",
+          "arguments": {
+           "path": "."
+          }
+         }
+        ],
+        "provider": "plural",
+        "model": "m1",
+        "stopReason": "toolUse"
+       },
+       {
+        "role": "toolResult",
+        "toolCallId": "call_ls_2",
+        "toolName": "ls",
+        "content": [
+         {
+          "type": "text",
+          "text": "(empty directory)"
+         }
+        ],
+        "isError": false
+       }
+      ],
+      "stderr": "",
+      "usage": {
+       "input": 0,
+       "output": 0,
+       "cacheRead": 0,
+       "cacheWrite": 0,
+       "cost": 0,
+       "contextTokens": 0,
+       "turns": 1
+      },
+      "model": "m1",
+      "stopReason": "toolUse"
+     }
+    ]
+   }
+  }
+ },
+ {
+  "sessionUpdate": "tool_call_update",
+  "toolCallId": "call_subagent_1",
+  "status": "in_progress",
+  "content": [
+   {
+    "type": "content",
+    "content": {
+     "type": "text",
+     "text": "child done"
+    }
+   }
+  ],
+  "rawOutput": {
+   "content": [
+    {
+     "type": "text",
+     "text": "child done"
+    }
+   ],
+   "details": {
+    "mode": "single",
+    "agentScope": "user",
+    "projectAgentsDir": null,
+    "results": [
+     {
+      "agent": "scout",
+      "agentSource": "user",
+      "task": "List the files",
+      "exitCode": 0,
+      "messages": [
+       {
+        "role": "user",
+        "content": [
+         {
+          "type": "text",
+          "text": "Task: List the files"
+         }
+        ]
+       },
+       {
+        "role": "assistant",
+        "content": [
+         {
+          "type": "toolCall",
+          "id": "call_ls_2",
+          "name": "ls",
+          "arguments": {
+           "path": "."
+          }
+         }
+        ],
+        "provider": "plural",
+        "model": "m1",
+        "stopReason": "toolUse"
+       },
+       {
+        "role": "toolResult",
+        "toolCallId": "call_ls_2",
+        "toolName": "ls",
+        "content": [
+         {
+          "type": "text",
+          "text": "(empty directory)"
+         }
+        ],
+        "isError": false
+       },
+       {
+        "role": "assistant",
+        "content": [
+         {
+          "type": "text",
+          "text": "child done"
+         }
+        ],
+        "provider": "plural",
+        "model": "m1",
+        "stopReason": "stop"
+       }
+      ],
+      "stderr": "",
+      "usage": {
+       "input": 0,
+       "output": 0,
+       "cacheRead": 0,
+       "cacheWrite": 0,
+       "cost": 0,
+       "contextTokens": 0,
+       "turns": 2
+      },
+      "model": "m1",
+      "stopReason": "stop"
+     }
+    ]
+   }
+  }
+ },
+ {
+  "sessionUpdate": "tool_call_update",
+  "toolCallId": "call_subagent_1",
+  "status": "completed",
+  "content": [
+   {
+    "type": "content",
+    "content": {
+     "type": "text",
+     "text": "child done"
+    }
+   }
+  ],
+  "rawOutput": {
+   "content": [
+    {
+     "type": "text",
+     "text": "child done"
+    }
+   ],
+   "details": {
+    "mode": "single",
+    "agentScope": "user",
+    "projectAgentsDir": null,
+    "results": [
+     {
+      "agent": "scout",
+      "agentSource": "user",
+      "task": "List the files",
+      "exitCode": 0,
+      "messages": [
+       {
+        "role": "user",
+        "content": [
+         {
+          "type": "text",
+          "text": "Task: List the files"
+         }
+        ]
+       },
+       {
+        "role": "assistant",
+        "content": [
+         {
+          "type": "toolCall",
+          "id": "call_ls_2",
+          "name": "ls",
+          "arguments": {
+           "path": "."
+          }
+         }
+        ],
+        "provider": "plural",
+        "model": "m1",
+        "stopReason": "toolUse"
+       },
+       {
+        "role": "toolResult",
+        "toolCallId": "call_ls_2",
+        "toolName": "ls",
+        "content": [
+         {
+          "type": "text",
+          "text": "(empty directory)"
+         }
+        ],
+        "isError": false
+       },
+       {
+        "role": "assistant",
+        "content": [
+         {
+          "type": "text",
+          "text": "child done"
+         }
+        ],
+        "provider": "plural",
+        "model": "m1",
+        "stopReason": "stop"
+       }
+      ],
+      "stderr": "",
+      "usage": {
+       "input": 0,
+       "output": 0,
+       "cacheRead": 0,
+       "cacheWrite": 0,
+       "cost": 0,
+       "contextTokens": 0,
+       "turns": 2
+      },
+      "model": "m1",
+      "stopReason": "stop"
+     }
+    ]
+   }
+  }
+ }
+]

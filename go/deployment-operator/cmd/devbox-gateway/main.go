@@ -41,6 +41,8 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/prober"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/router"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/tunnel"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/juicefs"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/podcert"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate"
 )
 
@@ -66,6 +68,7 @@ type options struct {
 	serviceDNSDir  string
 	serviceDNSCA   string
 	routerAddress  string
+	juicefsAddress string
 	credProvider   string
 	extProc        string
 	mcpAddr        string
@@ -124,6 +127,7 @@ func register(fs *flag.FlagSet) *options {
 	fs.StringVar(&o.serviceDNSDir, "service-dns-dir", env("DEVBOX_SERVICE_DNS_DIR", "/run/servicedns.podcert.ate.dev"), "servicedns serving credential bundle (DEVBOX_SERVICE_DNS_DIR)")
 	fs.StringVar(&o.serviceDNSCA, "service-dns-ca-dir", env("DEVBOX_SERVICE_DNS_CA_DIR", "/run/servicedns-ca.podcert.ate.dev"), "servicedns trust bundle (DEVBOX_SERVICE_DNS_CA_DIR)")
 	fs.StringVar(&o.routerAddress, "router-address", env("DEVBOX_ROUTER_ADDRESS", router.DefaultAddress), "atenet-router address (DEVBOX_ROUTER_ADDRESS)")
+	fs.StringVar(&o.juicefsAddress, "juicefs-address", env("DEVBOX_JUICEFS_ADDRESS", ""), "JuiceFS CSI controller address, <service>.<namespace>.svc:<port>, for saving the homes of snapshots (DEVBOX_JUICEFS_ADDRESS; empty disables)")
 	fs.StringVar(&o.credProvider, "credential-provider-addr", env("DEVBOX_CREDENTIAL_PROVIDER_ADDR", egress.DefaultCredentialProviderAddr), "credential provider listen address (DEVBOX_CREDENTIAL_PROVIDER_ADDR)")
 	fs.StringVar(&o.extProc, "extproc-addr", env("DEVBOX_EXTPROC_ADDR", egress.DefaultAuthzAddr), "egress ext_proc listen address (DEVBOX_EXTPROC_ADDR)")
 	fs.StringVar(&o.mcpAddr, "mcp-addr", env("DEVBOX_MCP_ADDR", egress.DefaultMCPAddr), "devbox MCP and SandboxCredentials listen address (DEVBOX_MCP_ADDR)")
@@ -138,8 +142,8 @@ func register(fs *flag.FlagSet) *options {
 	fs.StringVar(&o.gatewayHost, "gateway-host", env("DEVBOX_GATEWAY_HOST", ""), "Service host sandboxes reach the gateway at (DEVBOX_GATEWAY_HOST; default devbox-gateway.<namespace>.svc)")
 	fs.StringVar(&o.gatewayURL, "gateway-url", env("DEVBOX_GATEWAY_URL", ""), "override the MCP/SandboxCredentials URL handed to daemons (DEVBOX_GATEWAY_URL)")
 	fs.StringVar(&o.jwksFile, "request-token-jwks-file", env("DEVBOX_REQUEST_TOKEN_JWKS_FILE", ""), "JWKS daemons validate devbox-request-token with (DEVBOX_REQUEST_TOKEN_JWKS_FILE; empty disables)")
-	fs.StringVar(&o.aiProxyURL, "ai-proxy-url", env("DEVBOX_AI_PROXY_URL", ""), "AI proxy base URL (DEVBOX_AI_PROXY_URL; default <console>/ext/v1/ai)")
-	fs.StringVar(&o.workbenchMCP, "workbench-mcp-url", env("DEVBOX_WORKBENCH_MCP_URL", ""), "workbench MCP URL (DEVBOX_WORKBENCH_MCP_URL; default <console>/mcp/workbench)")
+	fs.StringVar(&o.aiProxyURL, "ai-proxy-url", env("DEVBOX_AI_PROXY_URL", ""), "AI proxy base URL (DEVBOX_AI_PROXY_URL; default <console>/ext/ai)")
+	fs.StringVar(&o.workbenchMCP, "workbench-mcp-url", env("DEVBOX_WORKBENCH_MCP_URL", ""), "workbench MCP base URL, each instance gets <base>/<workbench-id> (DEVBOX_WORKBENCH_MCP_URL; default <console>/mcp/workbench)")
 	fs.IntVar(&o.minIdle, "min-idle-tunnels", envInt("DEVBOX_MIN_IDLE_TUNNELS", tunnel.DefaultMinIdle), "idle KAS tunnels to keep open (DEVBOX_MIN_IDLE_TUNNELS)")
 	fs.StringVar(&o.logLevel, "log-level", env("DEVBOX_LOG_LEVEL", "info"), "debug, info, warn or error (DEVBOX_LOG_LEVEL)")
 	fs.BoolVar(&o.insecureEgress, "insecure-egress-listeners", envBool("DEVBOX_INSECURE_EGRESS_LISTENERS"), "serve the credential provider and ext_proc without mTLS; local development only")
@@ -170,7 +174,10 @@ func main() {
 }
 
 func (o *options) resolve() error {
+	// The operator hands out its GraphQL endpoint (…/ext/gql); everything derived here hangs off the console base.
 	o.consoleURL = strings.TrimSuffix(o.consoleURL, "/")
+	o.consoleURL = strings.TrimSuffix(o.consoleURL, "/ext/gql")
+	o.consoleURL = strings.TrimSuffix(o.consoleURL, "/gql")
 	if o.kasURL == "" && o.consoleURL != "" {
 		// The console chart routes KAS's devbox listener on the console host, as it does agentk's.
 		if u, err := url.Parse(o.consoleURL); err == nil && u.Host != "" {
@@ -191,7 +198,7 @@ func (o *options) resolve() error {
 		return fmt.Errorf("missing required configuration: %s", strings.Join(missing, ", "))
 	}
 	if o.aiProxyURL == "" && o.consoleURL != "" {
-		o.aiProxyURL = o.consoleURL + "/ext/v1/ai"
+		o.aiProxyURL = o.consoleURL + "/ext/ai"
 	}
 	if o.workbenchMCP == "" && o.consoleURL != "" {
 		o.workbenchMCP = o.consoleURL + "/mcp/workbench"
@@ -234,6 +241,24 @@ func run(ctx context.Context, o *options, log logr.Logger) error {
 	}
 	defer rt.Close() // nolint: errcheck
 
+	var seeds core.Seeds
+	if o.juicefsAddress != "" {
+		host, _, err := net.SplitHostPort(o.juicefsAddress)
+		if err != nil {
+			return fmt.Errorf("parsing DEVBOX_JUICEFS_ADDRESS: %w", err)
+		}
+		tlsCfg, err := podcert.ClientTLS(filepath.Join(o.podIdentityDir, "credential-bundle.pem"), filepath.Join(o.serviceDNSCA, "trust-bundle.pem"), host)
+		if err != nil {
+			return fmt.Errorf("configuring the JuiceFS controller client: %w", err)
+		}
+		jfs, err := juicefs.Dial(o.juicefsAddress, tlsCfg)
+		if err != nil {
+			return err
+		}
+		defer jfs.Close() // nolint: errcheck
+		seeds = jfs
+	}
+
 	token := o.deployToken
 	kas, err := tunnel.Dial(tunnel.DialConfig{
 		URL:       o.kasURL,
@@ -273,6 +298,7 @@ func run(ctx context.Context, o *options, log logr.Logger) error {
 		}
 	}
 
+	runners := &core.KubeRunners{Client: kube, Namespace: o.podNamespace}
 	gw, err := core.New(core.Config{
 		GatewayID:                    o.podName,
 		Version:                      version,
@@ -289,7 +315,8 @@ func run(ctx context.Context, o *options, log logr.Logger) error {
 		Actors:  ate,
 		Router:  rt,
 		Records: &core.KubeRecords{Client: kube, Namespace: o.podNamespace},
-		Runners: &core.KubeRunners{Client: kube, Namespace: o.podNamespace},
+		Runners: runners,
+		Seeds:   seeds,
 		Log:     log.WithName("core"),
 	})
 	if err != nil {
@@ -297,7 +324,8 @@ func run(ctx context.Context, o *options, log logr.Logger) error {
 	}
 
 	var prb *prober.Prober
-	var resolver egress.ActorResolver = gw
+	golden := &core.GoldenResolver{Runners: runners, Actors: ate}
+	resolver := prober.Chain(gw, golden)
 	if o.probeNamespace != "" {
 		prb, err = prober.New(prober.Config{
 			Namespace:  o.probeNamespace,
@@ -308,7 +336,7 @@ func run(ctx context.Context, o *options, log logr.Logger) error {
 		if err != nil {
 			return err
 		}
-		resolver = prober.Chain(prb, gw)
+		resolver = prober.Chain(prb, gw, golden)
 	} else {
 		log.Info("WARNING: DEVBOX_PROBE_NAMESPACE is not set; agent probes requested by the operator won't run")
 	}
@@ -327,7 +355,7 @@ func run(ctx context.Context, o *options, log logr.Logger) error {
 		ActorJWTIssuer:         o.actorIssuer,
 		ActorJWTIssuerCAFile:   o.actorIssuerCA,
 	}
-	egressSvc, err := egress.New(egressCfg, egress.Deps{Ingest: ingest, Actors: resolver, Logger: log.WithName("egress")})
+	egressSvc, err := egress.New(egressCfg, egress.Deps{Ingest: ingest, Actors: resolver, Diffs: gw, Logger: log.WithName("egress")})
 	if err != nil {
 		return fmt.Errorf("configuring egress: %w", err)
 	}

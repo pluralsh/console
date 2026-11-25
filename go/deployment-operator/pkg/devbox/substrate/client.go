@@ -11,7 +11,6 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
-	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -37,6 +36,9 @@ const (
 	RoleEditor = "editor"
 	RoleViewer = "viewer"
 
+	// accessPolicyName is the name of every access policy, a singleton under its parent.
+	accessPolicyName = "default"
+
 	pageSize = 500
 )
 
@@ -47,6 +49,8 @@ type API interface {
 	DeleteAtespace(ctx context.Context, name string) error
 	// EnsureAtespaceAccessPolicy makes sure every member holds the given role, keeping existing bindings.
 	EnsureAtespaceAccessPolicy(ctx context.Context, atespace, role string, members ...string) error
+	// EnsureGlobalAccessPolicy is EnsureAtespaceAccessPolicy for the install-wide policy.
+	EnsureGlobalAccessPolicy(ctx context.Context, role string, members ...string) error
 
 	CreateActorTemplate(ctx context.Context, template *ateapi.ActorTemplate, preview bool) (*ateapi.ActorTemplate, error)
 	GetActorTemplate(ctx context.Context, atespace, name string) (*ateapi.ActorTemplate, error)
@@ -86,25 +90,30 @@ type Client struct {
 var _ API = &Client{}
 
 func Dial(cfg Config) (*Client, error) {
-	if cfg.Address == "" {
-		cfg.Address = DefaultAddress
-	}
-	if cfg.ServerName == "" {
-		cfg.ServerName = strings.Split(cfg.Address, ":")[0]
-	}
-
-	pool := x509.NewCertPool()
 	ca, err := os.ReadFile(cfg.CAFile)
 	if err != nil {
 		return nil, fmt.Errorf("reading substrate CA bundle: %w", err)
 	}
+	pool := x509.NewCertPool()
 	if !pool.AppendCertsFromPEM(ca) {
 		return nil, fmt.Errorf("no certificates in substrate CA bundle %s", cfg.CAFile)
 	}
+	return DialWith(cfg.Address, cfg.ServerName, pool, tokenFileCredentials(cfg.TokenFile))
+}
 
-	conn, err := grpc.NewClient(cfg.Address,
-		grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{RootCAs: pool, ServerName: cfg.ServerName, MinVersion: tls.VersionTLS12})),
-		grpc.WithPerRPCCredentials(tokenFileCredentials(cfg.TokenFile)),
+// DialWith connects to ate-api-server at address (DefaultAddress when empty), verifying it against roots and
+// authenticating every call with creds. serverName defaults to the host of address.
+func DialWith(address, serverName string, roots *x509.CertPool, creds credentials.PerRPCCredentials) (*Client, error) {
+	if address == "" {
+		address = DefaultAddress
+	}
+	if serverName == "" {
+		serverName = strings.Split(address, ":")[0]
+	}
+
+	conn, err := grpc.NewClient(address,
+		grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{RootCAs: roots, ServerName: serverName, MinVersion: tls.VersionTLS12})),
+		grpc.WithPerRPCCredentials(creds),
 	)
 	if err != nil {
 		return nil, err
@@ -175,16 +184,20 @@ func (c *Client) DeleteAtespace(ctx context.Context, name string) error {
 
 func (c *Client) EnsureAtespaceAccessPolicy(ctx context.Context, atespace, role string, members ...string) error {
 	ref := &ateapi.ObjectRef{Name: atespace}
-	policy, err := c.control.GetAtespaceAccessPolicy(ctx, &ateapi.GetAtespaceAccessPolicyRequest{Atespace: ref})
+	get := &ateapi.GetAtespaceAccessPolicyRequest{Atespace: ref, Name: accessPolicyName}
+	policy, err := c.control.GetAtespaceAccessPolicy(ctx, get)
 	if IsNotFound(err) {
 		_, err = c.control.CreateAtespaceAccessPolicy(ctx, &ateapi.CreateAtespaceAccessPolicyRequest{
-			Atespace:     ref,
-			AccessPolicy: &ateapi.AccessPolicy{Bindings: []*ateapi.Binding{{Role: role, Members: members}}},
+			Atespace: ref,
+			AccessPolicy: &ateapi.AccessPolicy{
+				Metadata: &ateapi.ResourceMetadata{Name: accessPolicyName},
+				Bindings: []*ateapi.Binding{{Role: role, Members: members}},
+			},
 		})
 		if !IsAlreadyExists(err) {
 			return err
 		}
-		policy, err = c.control.GetAtespaceAccessPolicy(ctx, &ateapi.GetAtespaceAccessPolicyRequest{Atespace: ref})
+		policy, err = c.control.GetAtespaceAccessPolicy(ctx, get)
 	}
 	if err != nil {
 		return err
@@ -194,6 +207,32 @@ func (c *Client) EnsureAtespaceAccessPolicy(ctx context.Context, atespace, role 
 		return nil
 	}
 	_, err = c.control.UpdateAtespaceAccessPolicy(ctx, &ateapi.UpdateAtespaceAccessPolicyRequest{Atespace: ref, AccessPolicy: policy})
+	return err
+}
+
+func (c *Client) EnsureGlobalAccessPolicy(ctx context.Context, role string, members ...string) error {
+	get := &ateapi.GetGlobalAccessPolicyRequest{Name: accessPolicyName}
+	policy, err := c.control.GetGlobalAccessPolicy(ctx, get)
+	if IsNotFound(err) {
+		_, err = c.control.CreateGlobalAccessPolicy(ctx, &ateapi.CreateGlobalAccessPolicyRequest{
+			AccessPolicy: &ateapi.AccessPolicy{
+				Metadata: &ateapi.ResourceMetadata{Name: accessPolicyName},
+				Bindings: []*ateapi.Binding{{Role: role, Members: members}},
+			},
+		})
+		if !IsAlreadyExists(err) {
+			return err
+		}
+		policy, err = c.control.GetGlobalAccessPolicy(ctx, get)
+	}
+	if err != nil {
+		return err
+	}
+
+	if !MergeBinding(policy, role, members...) {
+		return nil
+	}
+	_, err = c.control.UpdateGlobalAccessPolicy(ctx, &ateapi.UpdateGlobalAccessPolicyRequest{AccessPolicy: policy})
 	return err
 }
 
@@ -332,44 +371,4 @@ func (c *Client) DrainWorker(ctx context.Context, name string) (*ateapi.Worker, 
 		return nil, err
 	}
 	return res.GetWorker(), nil
-}
-
-// ErrNotConfigured is returned by Unconfigured, used when the operator has no Substrate credentials mounted.
-var ErrNotConfigured = errors.New("substrate API client is not configured")
-
-// Unconfigured is an API that fails every call with ErrNotConfigured.
-type Unconfigured struct{}
-
-var _ API = Unconfigured{}
-
-func (Unconfigured) EnsureAtespace(context.Context, string) error { return ErrNotConfigured }
-func (Unconfigured) DeleteAtespace(context.Context, string) error { return ErrNotConfigured }
-func (Unconfigured) EnsureAtespaceAccessPolicy(context.Context, string, string, ...string) error {
-	return ErrNotConfigured
-}
-func (Unconfigured) CreateActorTemplate(context.Context, *ateapi.ActorTemplate, bool) (*ateapi.ActorTemplate, error) {
-	return nil, ErrNotConfigured
-}
-func (Unconfigured) GetActorTemplate(context.Context, string, string) (*ateapi.ActorTemplate, error) {
-	return nil, ErrNotConfigured
-}
-func (Unconfigured) ListActorTemplates(context.Context, string) ([]*ateapi.ActorTemplate, error) {
-	return nil, ErrNotConfigured
-}
-func (Unconfigured) DeleteActorTemplate(context.Context, string, string) error {
-	return ErrNotConfigured
-}
-func (Unconfigured) ListActors(context.Context, string) ([]*ateapi.Actor, error) {
-	return nil, ErrNotConfigured
-}
-func (Unconfigured) DeleteActor(context.Context, string, string) error { return ErrNotConfigured }
-func (Unconfigured) ListTags(context.Context, string) ([]*ateapi.Tag, error) {
-	return nil, ErrNotConfigured
-}
-func (Unconfigured) DeleteTag(context.Context, string, string) error { return ErrNotConfigured }
-func (Unconfigured) ListWorkers(context.Context) ([]*ateapi.Worker, error) {
-	return nil, ErrNotConfigured
-}
-func (Unconfigured) DrainWorker(context.Context, string) (*ateapi.Worker, error) {
-	return nil, ErrNotConfigured
 }

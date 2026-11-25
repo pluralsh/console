@@ -227,9 +227,9 @@ func (in *Account) bedrockEmbeddingDeployments(config *pb.BedrockConfig) schemas
 
 // toBedrockModels returns client-facing model IDs registered on the Bifrost key.
 // Configured values may be foundation model IDs (e.g. anthropic.claude-3-5-sonnet-20241022-v2:0)
-// or regional inference profile IDs with three dot-separated segments (e.g.
+// or cross-region inference profile IDs prefixed by a geography (e.g.
 // us.anthropic.claude-3-5-sonnet-20241022-v2:0, global.anthropic.claude-haiku-4-5-20251001-v1:0).
-// For 3-part profile IDs, the bare model ID (provider.model) is registered for clients:
+// For profile IDs, both the profile ID and the bare model ID (provider.model) are registered for clients:
 //
 // Inference Profile ID: global.anthropic.claude-haiku-4-5-20251001-v1:0
 // Model ID: anthropic.claude-haiku-4-5-20251001-v1:0
@@ -241,11 +241,12 @@ func (in *Account) toBedrockModels(config *pb.BedrockConfig) []string {
 			continue
 		}
 
-		_, model := in.parseModelID(modelID)
-		result = append(result, model)
+		// clients may name a profile by its full ID too, which Bedrock takes as-is
+		profileID, model := in.parseModelID(modelID)
+		result = append(result, model, profileID)
 	}
 
-	return result
+	return lo.Uniq(result)
 }
 
 // toBedrockDeployments returns Bifrost aliases (client model ID -> inference profile ID).
@@ -317,15 +318,7 @@ func (in *Account) parseModelID(modelID string) (inferenceProfileID string, mode
 		return "", ""
 	}
 
-	parts := strings.Split(modelID, ".")
-
-	// inference profiles should always have 3 parts <region>.<provider>.<model>
-	// if it doesn't just use as-is
-	if len(parts) != 3 {
-		return modelID, modelID
-	}
-
-	return modelID, strings.Join(parts[1:], ".")
+	return modelID, bedrockModelName(modelID)
 }
 
 func (in *Account) handleAzureKeys(config *pb.AzureOpenAiConfig) ([]schemas.Key, error) {

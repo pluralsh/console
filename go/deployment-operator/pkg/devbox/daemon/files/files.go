@@ -19,12 +19,14 @@ import (
 	"unicode/utf8"
 
 	"google.golang.org/grpc/codes"
+	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/derr"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/gitutil"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/internal/fsutil"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/egress/scmpath"
 )
 
 const (
@@ -44,12 +46,16 @@ type Checkouts interface {
 	Checkouts() []string
 	// ThreadWorktrees returns a thread's worktree paths.
 	ThreadWorktrees(threadID string) []string
+	// AllThreadWorktrees returns every thread's worktree paths, each mapped to its thread's id.
+	AllThreadWorktrees() map[string]string
 }
 
 // Service implements the filesystem RPCs.
 type Service struct {
 	Home      string
 	Checkouts Checkouts
+	// ChangesCache, when set, serves GetChanges from checkouts' background-maintained changes.
+	ChangesCache *ChangesCache
 
 	writeMu sync.Mutex
 }
@@ -169,6 +175,9 @@ func (s *Service) List(ctx context.Context, req *devboxv1.ListFilesRequest) (*de
 	if !st.IsDir() {
 		return nil, invalid(req.GetPath() + " is not a directory")
 	}
+	if q := req.GetQuery(); q != "" {
+		return s.search(ctx, root, q, req.GetIncludeHidden(), int(req.GetLimit())), nil
+	}
 	depth := int(req.GetDepth())
 	if depth <= 0 {
 		depth = 1
@@ -177,6 +186,20 @@ func (s *Service) List(ctx context.Context, req *devboxv1.ListFilesRequest) (*de
 	if limit <= 0 || limit > MaxListEntries {
 		limit = MaxListEntries
 	}
+	if req.GetBrief() && depth == 1 && s.ChangesCache != nil {
+		if entries, truncated, ok := s.ChangesCache.Children(root, req.GetIncludeHidden(), limit); ok {
+			return &devboxv1.ListFilesResponse{Entries: entries, Truncated: truncated}, nil
+		}
+	}
+	resp, err := s.listDisk(ctx, req, root, depth, limit)
+	if err != nil {
+		return nil, ioError(err, req.GetPath())
+	}
+	return resp, nil
+}
+
+// listDisk lists root by reading it, depth levels deep.
+func (s *Service) listDisk(ctx context.Context, req *devboxv1.ListFilesRequest, root string, depth, limit int) (*devboxv1.ListFilesResponse, error) {
 	resp := &devboxv1.ListFilesResponse{}
 	si := &statusIndex{ctx: ctx, cache: map[string]map[string]string{}}
 	var walk func(dir string, level int) error
@@ -196,21 +219,7 @@ func (s *Service) List(ctx context.Context, req *devboxv1.ListFilesRequest) (*de
 			names = append(names, de.Name())
 		}
 		if req.GetRespectGitignore() {
-			if repo := s.repoOf(dir); repo != "" {
-				rels := make([]string, 0, len(names))
-				for _, n := range names {
-					rel, _ := filepath.Rel(repo, filepath.Join(dir, n))
-					rels = append(rels, filepath.ToSlash(rel))
-				}
-				ignored := gitutil.IgnoredFilter(ctx, repo, rels)
-				kept := names[:0]
-				for i, n := range names {
-					if !ignored[rels[i]] {
-						kept = append(kept, n)
-					}
-				}
-				names = kept
-			}
+			names = s.notIgnored(ctx, dir, names)
 		}
 		sort.Strings(names)
 		for _, n := range names {
@@ -224,7 +233,11 @@ func (s *Service) List(ctx context.Context, req *devboxv1.ListFilesRequest) (*de
 				continue
 			}
 			e := entryOf(abs, info)
-			si.annotate(s, e)
+			if !req.GetBrief() {
+				si.annotate(s, e)
+			} else if repo := s.repoOf(abs); repo != "" {
+				e.Repository = filepath.Base(repo)
+			}
 			resp.Entries = append(resp.Entries, e)
 			if info.IsDir() && level < depth {
 				if err := walk(abs, level+1); err != nil && !errors.Is(err, fs.ErrPermission) {
@@ -238,9 +251,30 @@ func (s *Service) List(ctx context.Context, req *devboxv1.ListFilesRequest) (*de
 		return nil
 	}
 	if err := walk(root, 1); err != nil {
-		return nil, ioError(err, req.GetPath())
+		return nil, err
 	}
 	return resp, nil
+}
+
+// notIgnored drops the names in dir its checkout's gitignore matches.
+func (s *Service) notIgnored(ctx context.Context, dir string, names []string) []string {
+	repo := s.repoOf(dir)
+	if repo == "" {
+		return names
+	}
+	rels := make([]string, 0, len(names))
+	for _, n := range names {
+		rel, _ := filepath.Rel(repo, filepath.Join(dir, n))
+		rels = append(rels, filepath.ToSlash(rel))
+	}
+	ignored := gitutil.IgnoredFilter(ctx, repo, rels)
+	kept := names[:0]
+	for i, n := range names {
+		if !ignored[rels[i]] {
+			kept = append(kept, n)
+		}
+	}
+	return kept
 }
 
 // Stat implements StatFile.
@@ -426,14 +460,7 @@ func (s *Service) Write(ctx context.Context, req *devboxv1.WriteFileRequest) (*d
 
 // Changes implements GetChanges: one entry per checkout (or per thread worktree).
 func (s *Service) Changes(ctx context.Context, req *devboxv1.GetChangesRequest) (*devboxv1.GetChangesResponse, error) {
-	var repos []string
-	if s.Checkouts != nil {
-		if req.GetThreadId() != "" {
-			repos = s.Checkouts.ThreadWorktrees(req.GetThreadId())
-		} else {
-			repos = s.Checkouts.Checkouts()
-		}
-	}
+	repos, owners := s.changeScope(req.GetThreadId())
 	if len(req.GetRepositories()) > 0 {
 		want := map[string]bool{}
 		for _, r := range req.GetRepositories() {
@@ -455,26 +482,123 @@ func (s *Service) Changes(ctx context.Context, req *devboxv1.GetChangesRequest) 
 		}
 		pathAbs = p
 	}
-	resp := &devboxv1.GetChangesResponse{}
-	for _, repo := range repos {
-		opts := gitutil.ChangesOptions{Base: req.GetBase(), IncludeDiff: req.GetIncludeDiff(), MaxDiffBytes: int(req.GetMaxDiffBytes())}
-		if pathAbs != "" {
-			if !fsutil.Within(repo, pathAbs) {
-				continue
-			}
-			rel, _ := filepath.Rel(repo, pathAbs)
-			if rel != "." {
-				opts.Path = filepath.ToSlash(rel)
+	if pathAbs != "" {
+		kept := repos[:0:0]
+		for _, r := range repos {
+			if fsutil.Within(r, pathAbs) {
+				kept = append(kept, r)
 			}
 		}
-		rc, err := gitutil.Changes(ctx, repo, opts)
-		if err != nil {
-			rc = &devboxv1.RepositoryChanges{Checkout: &devboxv1.Checkout{Path: repo, Name: filepath.Base(repo)}}
-		}
-		if req.GetThreadId() != "" {
-			rc.Checkout.WorktreeThreadId = req.GetThreadId()
-		}
-		resp.Repositories = append(resp.Repositories, rc)
+		repos = kept
 	}
-	return resp, nil
+
+	results := make([]*devboxv1.RepositoryChanges, len(repos))
+	var wg sync.WaitGroup
+	sem := make(chan struct{}, changesConcurrency)
+	for i, repo := range repos {
+		wg.Add(1)
+		sem <- struct{}{}
+		go func() {
+			defer func() { <-sem; wg.Done() }()
+			rc, err := s.repoChanges(ctx, repo, req, pathAbs)
+			if err != nil {
+				rc = &devboxv1.RepositoryChanges{Checkout: &devboxv1.Checkout{Path: repo, Name: filepath.Base(repo)}}
+			}
+			if owner := owners[repo]; owner != "" {
+				rc.Checkout = proto.Clone(rc.Checkout).(*devboxv1.Checkout)
+				rc.Checkout.WorktreeThreadId = owner
+			}
+			results[i] = rc
+		}()
+	}
+	wg.Wait()
+	return &devboxv1.GetChangesResponse{Repositories: results}, nil
+}
+
+// changeScope is what GetChanges looks at, with the thread owning each worktree: a thread's own worktrees, or the
+// main checkouts for a thread working in them; without a thread, the main checkouts and every thread's worktrees.
+func (s *Service) changeScope(threadID string) ([]string, map[string]string) {
+	if s.Checkouts == nil {
+		return nil, nil
+	}
+	owners := map[string]string{}
+	if threadID != "" {
+		wts := s.Checkouts.ThreadWorktrees(threadID)
+		if len(wts) == 0 {
+			return s.Checkouts.Checkouts(), owners
+		}
+		for _, p := range wts {
+			owners[p] = threadID
+		}
+		return wts, owners
+	}
+	repos := s.Checkouts.Checkouts()
+	all := s.Checkouts.AllThreadWorktrees()
+	wts := make([]string, 0, len(all))
+	for p, id := range all {
+		wts = append(wts, p)
+		owners[p] = id
+	}
+	sort.Strings(wts)
+	return append(repos, wts...), owners
+}
+
+// changesConcurrency bounds the checkouts GetChanges inspects at once.
+const changesConcurrency = 8
+
+func (s *Service) repoChanges(ctx context.Context, repo string, req *devboxv1.GetChangesRequest, pathAbs string) (*devboxv1.RepositoryChanges, error) {
+	opts := gitutil.ChangesOptions{Base: req.GetBase(), IncludeDiff: req.GetIncludeDiff(), MaxDiffBytes: int(req.GetMaxDiffBytes())}
+	if pathAbs != "" {
+		if rel, _ := filepath.Rel(repo, pathAbs); rel != "." {
+			opts.Path = filepath.ToSlash(rel)
+		}
+	}
+	// path-scoped lookups are cheap and rare; whole-checkout views are what the cache keeps
+	if s.ChangesCache == nil || opts.Path != "" {
+		return gitutil.Changes(ctx, repo, opts)
+	}
+	return s.ChangesCache.Get(ctx, changesKey{repo: repo, base: opts.Base, diff: opts.IncludeDiff, maxDiff: opts.MaxDiffBytes})
+}
+
+// BranchDiffStat sizes a pull request's branch in the checkout req.Repository names, matched by name, path or remote.
+func (s *Service) BranchDiffStat(ctx context.Context, req *devboxv1.BranchDiffStatRequest) (*devboxv1.BranchDiffStatResponse, error) {
+	if req.GetRepository() == "" || req.GetBase() == "" || req.GetHead() == "" {
+		return nil, invalid("repository, base and head are required")
+	}
+	dir := s.checkoutFor(ctx, req.GetRepository())
+	if dir == "" {
+		return nil, derr.New(codes.NotFound, devboxv1.ErrorReason_ERROR_REASON_UNSPECIFIED,
+			"no checkout of "+req.GetRepository(), map[string]string{"repository": req.GetRepository()})
+	}
+	st, err := gitutil.BranchDiffStat(ctx, dir, req.GetBase(), req.GetHead())
+	if err != nil {
+		return nil, derr.New(codes.FailedPrecondition, devboxv1.ErrorReason_ERROR_REASON_UNSPECIFIED, err.Error(), nil)
+	}
+	return &devboxv1.BranchDiffStatResponse{
+		Additions: int32(st.Additions),
+		Deletions: int32(st.Deletions),
+		Files:     int32(st.Files),
+		BaseSha:   st.BaseSHA,
+		HeadSha:   st.HeadSHA,
+	}, nil
+}
+
+func (s *Service) checkoutFor(ctx context.Context, repository string) string {
+	if s.Checkouts == nil {
+		return ""
+	}
+	repos := s.Checkouts.Checkouts()
+	want := strings.TrimSuffix(repository, "/")
+	for _, r := range repos {
+		if r == want || filepath.Base(r) == want {
+			return r
+		}
+	}
+	id := scmpath.Normalize(repository)
+	for _, r := range repos {
+		if remote, err := gitutil.Run(ctx, r, "remote", "get-url", "origin"); err == nil && scmpath.Normalize(string(remote)) == id {
+			return r
+		}
+	}
+	return ""
 }

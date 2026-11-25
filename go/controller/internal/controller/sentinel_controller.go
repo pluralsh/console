@@ -14,6 +14,7 @@ import (
 	"github.com/pluralsh/console/go/controller/internal/utils"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -133,13 +134,13 @@ func (r *SentinelReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 		return ctrl.Result{}, err
 	}
 
-	existingSentinel, err := r.sync(ctx, sentinel, attr)
+	existingSentinel, created, err := r.sync(ctx, sentinel, attr)
 	if err != nil {
 		utils.MarkCondition(sentinel.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 
-	if sentinel.Status.HasSHA() && !sentinel.Status.IsSHAEqual(sha) {
+	if !created && !sentinel.Status.IsSHAEqual(sha) {
 		if _, err := r.ConsoleClient.UpdateSentinel(ctx, existingSentinel.ID, attr); err != nil {
 			utils.MarkCondition(sentinel.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 			return ctrl.Result{}, err
@@ -155,12 +156,22 @@ func (r *SentinelReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 	return sentinel.Spec.Reconciliation.Requeue(), nil
 }
 
-func (r *SentinelReconciler) sync(ctx context.Context, sentinel *v1alpha1.Sentinel, attr *console.SentinelAttributes) (*console.SentinelFragment, error) {
+func (r *SentinelReconciler) sync(ctx context.Context, sentinel *v1alpha1.Sentinel, attr *console.SentinelAttributes) (*console.SentinelFragment, bool, error) {
 	if sentinel.Status.HasID() {
-		return r.ConsoleClient.GetSentinel(ctx, sentinel.Status.GetID())
+		existing, err := r.ConsoleClient.GetSentinel(ctx, sentinel.Status.GetID())
+		return existing, false, err
 	}
 
-	return r.ConsoleClient.CreateSentinel(ctx, attr)
+	existing, err := r.ConsoleClient.GetSentinelByName(ctx, sentinel.ConsoleName())
+	if err != nil && !apierrors.IsNotFound(err) {
+		return nil, false, err
+	}
+	if existing != nil {
+		return existing, false, nil
+	}
+
+	created, err := r.ConsoleClient.CreateSentinel(ctx, attr)
+	return created, true, err
 }
 
 func (r *SentinelReconciler) attributes(ctx context.Context, sentinel *v1alpha1.Sentinel, repositoryId *string, project *v1alpha1.Project) (*console.SentinelAttributes, error) {

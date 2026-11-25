@@ -3,6 +3,7 @@
 # The chart installs Agent Substrate into the release namespace, which must be
 # `ate-system`: the Substrate binaries default every in-cluster address and
 # SPIFFE ID to it. Install with `--namespace ate-system --create-namespace`.
+# README.md documents every value below.
 
 # -- Substrate release this chart installs. Image tags default to it, and the
 # chart gates features on it (Azure Blob needs substrate.objectstore.v1, first
@@ -276,6 +277,79 @@ devboxes:
   #   atenet.router.routeTimeout: devboxes.routeTimeout
   #   atenet.egress.additionalExtprocAllowModeOverride: true
 
+# Opt-in JuiceFS devbox homes: a CSI driver (the deployment-operator's devbox-juicefs) that serves each actor's
+# home as a directory of one shared JuiceFS filesystem, its metadata in the chart's Postgres and its data in the
+# snapshot bucket, so a home follows its box from node to node without riding in the checkpoint. DevboxRunners
+# opt in with spec.home.storage: JuiceFS. Enabling it adds the ExternalVolumes preview gate.
+juicefs:
+  enabled: false
+  image:
+    repository: ghcr.io/pluralsh/devbox-juicefs
+    # -- Required unless digest is set.
+    tag: ""
+    digest: ""
+  # -- The filesystem's name; its objects live under <name>/ in the bucket.
+  name: devbox-homes
+  # -- The StorageClass DevboxRunners name (provisioner juicefs.devbox.plural.sh).
+  storageClassName: devbox-juicefs
+  # -- `juicefs format --bucket`. Defaults to the bucket of objectStore.snapshotLocation (or rustfs.bucket),
+  # addressed the way JuiceFS expects for objectStore.backend.
+  bucket: ""
+  # -- Extra `juicefs format` flags. They only apply when the filesystem is first created.
+  formatFlags:
+    - --trash-days=0
+  # Owner and mode of a new, empty home: the devbox images' dev user.
+  home:
+    uid: 1000
+    gid: 1000
+    mode: "0755"
+  # -- SPIFFE IDs allowed to call the controller. Empty: ate-api-server and, with devboxes.enabled, the
+  # devbox-gateway, which seeds homes from snapshots.
+  allowedClients: []
+  serviceAccount:
+    # -- Workload identity for the bucket (IRSA, GKE Workload Identity). The controller and every node plugin
+    # read and write it.
+    annotations: {}
+  # -- objectStore.backend=azureBlob: the Entra client ID federated to system:serviceaccount:ate-system:devbox-juicefs.
+  azureClientId: ""
+  postgres:
+    # -- The metadata database, created on the CNPG cluster (postgres.mode=cnpg) with its own login role.
+    database: juicefs
+    user: juicefs
+    # postgres.mode=external: a database you created, reached with the server CA of postgres.external.serverCA.
+    external:
+      # -- postgres://<user>@<host>:5432/<database>?sslmode=verify-full&sslrootcert=/run/postgres-server-ca/server-ca.pem
+      url: ""
+      # -- Secret and key holding that user's password.
+      passwordSecret:
+        name: ""
+        key: password
+  controller:
+    resources: {}
+    # -- Extra `juicefs mount` flags for the controller's root mount, which only clones and deletes.
+    mountFlags: []
+  node:
+    # -- Where each mount keeps its cache, on the node's data disk. One directory per home, removed on unmount.
+    cacheDir: /var/lib/ate/juicefs/cache
+    # -- Extra `juicefs mount` flags for every home. Each home has exactly one mount, so the kernel can cache its
+    # metadata for long; never add --writeback, whose staged writes are lost when a box moves node.
+    mountFlags:
+      - --cache-size=10240
+      - --attr-cache=3600
+      - --entry-cache=3600
+      - --dir-entry-cache=3600
+      - --negative-entry-cache=60
+      - --open-cache=3600
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+    # -- Defaults to atelet's scheduling, since homes are mounted wherever atelet runs actors.
+    tolerations: []
+    nodeSelector: {}
+    affinity: {}
+    priorityClassName: system-node-critical
+
 # The bundled Kubernetes Secrets credential provider (`k8s.io`).
 k8sCredentialProvider:
   # -- Atespace allow-list (namespace-policy.yaml `policies`).
@@ -300,9 +374,9 @@ sandboxConfigs:
     # -- Merged over the upstream spec (files/sandboxconfig/gvisor.yaml).
     specOverrides: {}
   microvm:
-    # -- Install the microvm SandboxConfig. Its assets must already be staged
-    # at <scheme>://<bucket>/microvm-assets/<arch>/<sha256> (ate-setup's
-    # `deploy sandboxconfig` does that); this chart does not stage them.
+    # -- Install the microvm SandboxConfig. Its assets must be staged at
+    # <scheme>://<bucket>/microvm-assets/<arch>/<sha256>: either with
+    # assetStaging below, or ate-setup's `deploy sandboxconfig` (GCS/Kind only).
     enabled: false
     assetScheme: ""
     assetBucket: ""
@@ -318,13 +392,6 @@ networkPolicies:
   apiAccessNamespaceSelector:
     matchLabels:
       ate.dev/api-access: "true"
-
-crds:
-  # -- Render the ate.dev CRDs.
-  install: true
-  # -- Annotate the CRDs with helm.sh/resource-policy: keep so uninstall keeps
-  # them (and every WorkerPool/SandboxConfig).
-  keep: true
 
 postgres:
   # -- cnpg (CloudNativePG Cluster, the default) or external.
@@ -459,6 +526,27 @@ secretsHook:
 # their CRDs (installed by this release) aren't served yet at render time.
 bootstrapJob:
   image: alpine/kubectl:1.37.2
+
+# Stages the microvm sandbox binaries into sandboxConfigs.microvm.assetBucket
+# with a post-install/upgrade Job, on any object store (S3, GCS, Azure Blob).
+# The Job runs as ate-api-server, so grant that identity (apiServer.serviceAccount
+# annotations, or a Pod Identity association) write access to the bucket.
+assetStaging:
+  enabled: false
+  # -- An image that ships /usr/local/bin/microvm-assets. The deployment-operator
+  # image does, so installs that already vendor it need nothing extra. Pin a tag.
+  image: ghcr.io/pluralsh/deployment-operator:latest
+  # -- gocloud.dev blob URL. Defaults to <assetScheme>://<assetBucket>; set it
+  # for options like s3://bucket?region=us-east-1.
+  bucketUrl: ""
+  arches: [amd64]
+  activeDeadlineSeconds: 1800
+  # -- Scratch space for the Kata release (about 1Gi per arch, unpacked).
+  workSize: 6Gi
+  resources: {}
+  extraArgs: []
+  # -- e.g. AWS_REGION, which the s3 driver needs when the pod has none.
+  extraEnv: []
 
 # The CloudNativePG operator. Disable where it already runs: it's cluster-wide,
 # and two copies conflict.

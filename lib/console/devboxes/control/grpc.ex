@@ -6,13 +6,16 @@ defmodule Console.Devboxes.Control.Grpc do
 
   The connection is a supervised `GRPC.Client.Connection` registered under this module's name and started when
   `KAS_DEVBOX_GRPC_ADDR` is set.  Failures map to the behaviour's errors: `UNAVAILABLE` (or an unreachable KAS)
-  and `ErrorDetail{CLUSTER_OFFLINE}` become `{:error, :not_connected}`, `UNIMPLEMENTED` and
-  `ErrorDetail{UNSUPPORTED}` become `{:error, :unsupported}`.
+  and `ErrorDetail{CLUSTER_OFFLINE}` become `{:error, :not_connected}`, `ErrorDetail{INSTANCE_STARTING}` (a wake
+  that outlasted the call, still running on the gateway) becomes `{:error, :starting}`, `UNIMPLEMENTED` and
+  `ErrorDetail{UNSUPPORTED}` become `{:error, :unsupported}`.  A connection that closes under a call is
+  `{:error, :interrupted}`, retried once for calls that are safe to repeat, and `DEADLINE_EXCEEDED` is
+  `{:error, :timeout}`.
   """
   @behaviour Console.Devboxes.Control
   require Logger
   alias Console.Repo
-  alias Console.Devboxes.Ingest
+  alias Console.Devboxes.{Billing, Ingest, ProxyModels}
   alias Console.GRPC.Devbox.{Auth, Proto}
   alias Console.Schema.{
     Devbox,
@@ -26,12 +29,23 @@ defmodule Console.Devboxes.Control.Grpc do
   alias :"Elixir.Devbox.V1.Control.Stub", as: Stub
 
   @timeout :timer.seconds(30)
+  # the box writes, commits and pushes, and the writer may be an agent CLI
+  @prepare_timeout :timer.minutes(6)
   @unavailable GRPC.Status.unavailable()
   @unimplemented GRPC.Status.unimplemented()
+  @internal GRPC.Status.internal()
+  @deadline_exceeded GRPC.Status.deadline_exceeded()
+  # safe to send again when the connection drops before they answer
+  @retryable ~w(
+    resume_instance resume_thread open_stream get_timeline get_sessions list_threads list_commands
+    list_repositories list_files read_file get_changes
+  )a
 
   def adapter, do: GRPC.Client.Adapters.Gun
 
-  def adapter_opts, do: [connect_timeout: :timer.seconds(5), http2_opts: %{keepalive: :timer.seconds(15), keepalive_tolerance: 2}]
+  # kas enforces a 20s minimum ping interval and answers faster pings on a quiet call (e.g. one waiting out a wake)
+  # with GOAWAY too_many_pings, killing every in-flight call on the connection
+  def adapter_opts, do: [connect_timeout: :timer.seconds(5), http2_opts: %{keepalive: :timer.seconds(30), keepalive_tolerance: 2}]
 
   @doc "The child spec for the supervised KAS connection, or none if no address is configured"
   @spec child_specs(binary | nil) :: [term]
@@ -55,7 +69,7 @@ defmodule Console.Devboxes.Control.Grpc do
       agent: Proto.enum(inst.agent, V1.AgentType),
       model: Proto.str(inst.requested_model),
       config_options: config_settings(inst.config_options),
-      agents: agent_launches(inst),
+      agents: agent_launches(inst, devbox),
       repositories: Enum.map(inst.repositories || [], &%V1.RepositorySpec{url: &1}),
       allowed_repositories: devbox.allowed_repositories || [],
       idle_policy: idle_policy(opts[:idle_policy] || Devbox.idle_policy(devbox)),
@@ -206,6 +220,19 @@ defmodule Console.Devboxes.Control.Grpc do
   def cancel_prompt(inst, thread),
     do: call(cluster_id(inst), :cancel_prompt, %V1.CancelPromptRequest{thread: thread_ref(inst, thread)}) |> to_map()
 
+  @queued_actions %{edit: :QUEUED_PROMPT_ACTION_EDIT, cancel: :QUEUED_PROMPT_ACTION_CANCEL, send_now: :QUEUED_PROMPT_ACTION_SEND_NOW}
+
+  @impl true
+  def update_queued_prompt(inst, thread, prompt_id, action, text) do
+    req = %V1.UpdateQueuedPromptRequest{
+      thread: thread_ref(inst, thread),
+      prompt_id: prompt_id,
+      action: Map.fetch!(@queued_actions, action),
+      text: text || ""
+    }
+    call(cluster_id(inst), :update_queued_prompt, req) |> to_map()
+  end
+
   @impl true
   def set_config_option(inst, thread, config_id, value) do
     req = %V1.SetThreadConfigOptionRequest{
@@ -296,8 +323,9 @@ defmodule Console.Devboxes.Control.Grpc do
   end
 
   @impl true
-  def list_files(inst, path) do
-    req = %V1.ListFilesRequest{instance_id: inst.id, path: Proto.str(path), depth: 1, respect_gitignore: true}
+  def list_files(inst, path, opts) do
+    req = %V1.ListFilesRequest{instance_id: inst.id, path: Proto.str(path), depth: 1, respect_gitignore: true,
+                                query: Proto.str(opts[:query]), brief: !!opts[:brief]}
     with {:ok, %V1.ListFilesResponse{entries: entries}} <- call(cluster_id(inst), :list_files, req),
       do: {:ok, Enum.map(entries, &file_entry/1)}
   end
@@ -347,6 +375,19 @@ defmodule Console.Devboxes.Control.Grpc do
     end
   end
 
+  @impl true
+  def prepare_pull_request(inst, opts) do
+    req = %V1.PreparePullRequestRequest{
+      instance_id: inst.id,
+      repository: opts[:repository],
+      model: Proto.str(opts[:model]),
+      agent: opts[:agent] && Proto.enum(opts[:agent], V1.AgentType) || :AGENT_TYPE_UNSPECIFIED,
+      thread_id: Proto.str(opts[:thread_id])
+    }
+    with {:ok, %V1.PreparePullRequestResponse{} = resp} <- call(cluster_id(inst), :prepare_pull_request, req, @prepare_timeout),
+      do: {:ok, Proto.to_map(resp)}
+  end
+
   ## streams
 
   @impl true
@@ -378,10 +419,19 @@ defmodule Console.Devboxes.Control.Grpc do
   ## transport
 
   @doc false
-  def call(cluster_id, rpc, req) do
+  def call(cluster_id, rpc, req, timeout \\ @timeout) do
+    case {attempt(cluster_id, rpc, req, timeout), rpc in @retryable} do
+      {{:error, :interrupted}, true} ->
+        Logger.info("devbox control #{rpc} lost its connection to kas, retrying")
+        attempt(cluster_id, rpc, req, timeout)
+      {res, _} -> res
+    end
+  end
+
+  defp attempt(cluster_id, rpc, req, timeout) do
     with {:ok, channel} <- connect(),
          {:ok, metadata} <- Auth.control_metadata(cluster_id) do
-      apply(Stub, rpc, [channel, req, [metadata: metadata, timeout: @timeout]])
+      apply(Stub, rpc, [channel, req, [metadata: metadata, timeout: timeout]])
       |> result()
     end
   end
@@ -408,12 +458,21 @@ defmodule Console.Devboxes.Control.Grpc do
   end
 
   defp rpc_error(_, %V1.ErrorDetail{reason: :ERROR_REASON_CLUSTER_OFFLINE}), do: {:error, :not_connected}
+  defp rpc_error(_, %V1.ErrorDetail{reason: :ERROR_REASON_INSTANCE_STARTING}), do: {:error, :starting}
   defp rpc_error(_, %V1.ErrorDetail{reason: :ERROR_REASON_INSTANCE_SUSPENDED}), do: {:error, :suspended}
   defp rpc_error(_, %V1.ErrorDetail{reason: :ERROR_REASON_UNSUPPORTED, message: msg}) when byte_size(msg) > 0,
     do: {:error, {:unsupported, msg}}
   defp rpc_error(_, %V1.ErrorDetail{reason: :ERROR_REASON_UNSUPPORTED}), do: {:error, :unsupported}
+  # an UNAVAILABLE that explains itself (e.g. credentials) is that failure, not an unreachable cluster
+  defp rpc_error(%GRPC.RPCError{status: @unavailable}, %V1.ErrorDetail{message: msg}) when byte_size(msg) > 0, do: {:error, msg}
   defp rpc_error(%GRPC.RPCError{status: @unavailable}, _), do: {:error, :not_connected}
   defp rpc_error(%GRPC.RPCError{status: @unimplemented}, _), do: {:error, :unsupported}
+  # the call ran out of time on the way (here or in kas); the gateway may still be working on it
+  defp rpc_error(%GRPC.RPCError{status: @deadline_exceeded}, _), do: {:error, :timeout}
+  # the gun adapter's report of a connection that closed under the call
+  defp rpc_error(%GRPC.RPCError{status: @internal, message: "stream_error: :closed"}, _), do: {:error, :interrupted}
+  defp rpc_error(%GRPC.RPCError{status: @internal, message: "stream_error: {:closed" <> _}, _), do: {:error, :interrupted}
+  defp rpc_error(%GRPC.RPCError{status: @internal, message: "stream_error: {:goaway" <> _}, _), do: {:error, :interrupted}
   defp rpc_error(_, %V1.ErrorDetail{message: msg}) when byte_size(msg) > 0, do: {:error, msg}
   defp rpc_error(%GRPC.RPCError{message: msg}, _), do: {:error, msg}
 
@@ -478,10 +537,10 @@ defmodule Console.Devboxes.Control.Grpc do
     end
   end
 
-  defp agent_launches(%DevboxInstance{agent_billing: %{} = billing}) do
-    Enum.map(billing, fn {agent, launch} -> agent_launch(Console.Devboxes.Billing.launch(agent, launch)) end)
+  # every agent the box offers gets a launch, so proxy-billed ones learn the proxy's models too
+  defp agent_launches(%DevboxInstance{} = inst, %Devbox{agents: agents}) do
+    Enum.map(agents || [], &agent_launch(Billing.for_agent(inst, &1.type)))
   end
-  defp agent_launches(_), do: []
 
   defp agent_launch(launch) do
     %V1.AgentLaunch{
@@ -489,9 +548,18 @@ defmodule Console.Devboxes.Control.Grpc do
       billing: Proto.enum(launch[:billing], V1.BillingMode),
       credential_id: Proto.str(launch[:credential_id]),
       credential_kind: Proto.str(launch[:credential_kind]),
-      allow_collaborators: !!launch[:allow_collaborators]
+      allow_collaborators: !!launch[:allow_collaborators],
+      proxy_models: proxy_models(launch)
     }
   end
+
+  defp proxy_models(%{billing: :proxy, agent: agent}) do
+    case ProxyModels.for_agent(agent) do
+      %{} = m -> %V1.ProxyModels{default_model: m.default_model, models: m.models, aliases: m.aliases}
+      nil -> nil
+    end
+  end
+  defp proxy_models(_), do: nil
 
   defp interaction_response(%{option_id: id}),
     do: %V1.InteractionResponse{response: {:permission, %V1.PermissionOutcome{outcome: {:selected_option_id, id}}}}

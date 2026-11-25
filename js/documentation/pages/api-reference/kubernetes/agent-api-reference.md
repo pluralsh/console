@@ -308,6 +308,7 @@ Binding ...
 _Appears in:_
 - [AgentRuntimeBindings](#agentruntimebindings)
 - [Bindings](#bindings)
+- [DevboxRunnerBindings](#devboxrunnerbindings)
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
@@ -863,6 +864,23 @@ _Appears in:_
 | `azure` _boolean_ | Azure: Resource Manager, Entra ID sign-in, Microsoft Graph, Key Vault and Storage. |  | Optional: \{\} <br /> |
 
 
+#### DevboxECRRegistries
+
+
+
+DevboxECRRegistries enables egress to private Amazon ECR registries. ECR hosts are regional, so each region
+is listed. Pulling still needs credentials, such as an AWS cloud identity and `aws ecr get-login-password`.
+
+
+
+_Appears in:_
+- [DevboxOCIRegistries](#devboxociregistries)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `regions` _string array_ | Regions opens, per region, the registry API (<account>.dkr.ecr.<region>.amazonaws.com), the ECR API<br />that issues login tokens, and the S3 bucket image layers download from. |  | MaxItems: 32 <br />Optional: \{\} <br />items:Pattern: ^[a-z]\{2\}(-[a-z]+)+-[0-9]+$ <br /> |
+
+
 #### DevboxEnvVar
 
 
@@ -932,6 +950,48 @@ _Appears in:_
 | `passthrough` _boolean_ | Passthrough tunnels TLS without interception (no credential injection or request authz). |  | Optional: \{\} <br /> |
 
 
+#### DevboxHome
+
+
+
+DevboxHome selects how instances store /home/dev.
+
+With JuiceFS, an instance's home is seeded from the golden boot's, so what the bootstrap script and mise
+installed is there from the start, and every snapshot also saves the home as a JuiceFS clone. Starting an
+instance from a snapshot isn't supported yet: Substrate can't restore a tag of a template with external
+volumes.
+
+
+
+_Appears in:_
+- [DevboxRunnerSpec](#devboxrunnerspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `storage` _[DevboxHomeStorage](#devboxhomestorage)_ | Storage defaults to Snapshot. Changing it rolls a new revision, and instances moved to it start with a fresh<br />home. | Snapshot | Enum: [Snapshot JuiceFS] <br />Optional: \{\} <br /> |
+| `size` _[Quantity](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#quantity-resource-api)_ | Size is the most a JuiceFS home may hold, enforced as a JuiceFS quota. Defaults to spec.resources.disk. |  | Optional: \{\} <br /> |
+| `storageClassName` _string_ | StorageClassName is the JuiceFS StorageClass. Defaults to the agent-substrate chart's devbox-juicefs. |  | Optional: \{\} <br /> |
+
+
+#### DevboxHomeStorage
+
+_Underlying type:_ _string_
+
+DevboxHomeStorage is where an instance's /home/dev lives.
+
+_Validation:_
+- Enum: [Snapshot JuiceFS]
+
+_Appears in:_
+- [DevboxHome](#devboxhome)
+- [DevboxRevision](#devboxrevision)
+
+| Field | Description |
+| --- | --- |
+| `Snapshot` | DevboxHomeSnapshot keeps the home on the instance's node and carries it in every snapshot.<br /> |
+| `JuiceFS` | DevboxHomeJuiceFS keeps the home in the agent-substrate chart's JuiceFS filesystem (juicefs.enabled), mounted<br />wherever the instance runs, so snapshots carry only memory and moving node doesn't copy the home.<br /> |
+
+
 #### DevboxIdlePolicy
 
 
@@ -988,6 +1048,28 @@ _Appears in:_
 | `interval` _[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#duration-v1-meta)_ | Interval between re-resolutions in poll mode. Defaults to 1h. |  | Optional: \{\} <br /> |
 
 
+#### DevboxOCIRegistries
+
+
+
+DevboxOCIRegistries enables egress to each container registry's API and blob hosts (see OCIRegistryHosts).
+
+
+
+_Appears in:_
+- [DevboxRunnerSpec](#devboxrunnerspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `dockerHub` _boolean_ | DockerHub: docker.io, its auth service and its Cloudflare blob CDN. Unqualified image names resolve here. | true | Optional: \{\} <br /> |
+| `github` _boolean_ | GitHub: ghcr.io and its blob host. | true | Optional: \{\} <br /> |
+| `quay` _boolean_ | Quay: quay.io, its CDN and its S3 blob bucket. |  | Optional: \{\} <br /> |
+| `google` _boolean_ | Google: Container Registry (gcr.io and its regional hosts) and Artifact Registry (*.pkg.dev). |  | Optional: \{\} <br /> |
+| `microsoft` _boolean_ | Microsoft: the Microsoft Artifact Registry, mcr.microsoft.com, and its regional data endpoints. |  | Optional: \{\} <br /> |
+| `kubernetes` _boolean_ | Kubernetes: registry.k8s.io and the Artifact Registry mirrors it redirects to. From AWS addresses it<br />redirects to regional S3 buckets instead, which need httpAllowlist entries. |  | Optional: \{\} <br /> |
+| `ecr` _[DevboxECRRegistries](#devboxecrregistries)_ | ECR opens private Amazon ECR registries, for any account, in the listed regions. |  | Optional: \{\} <br /> |
+
+
 #### DevboxPackageServers
 
 
@@ -1001,15 +1083,34 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `go` _boolean_ | Go: proxy.golang.org and sum.golang.org. | true | Optional: \{\} <br /> |
-| `rust` _boolean_ | Rust: crates.io and rustup's static.rust-lang.org. | true | Optional: \{\} <br /> |
-| `javascript` _boolean_ | JavaScript: the npm and yarn registries and nodejs.org. | true | Optional: \{\} <br /> |
-| `java` _boolean_ | Java: Maven Central and the Gradle plugin portal and distributions. | true | Optional: \{\} <br /> |
+| `go` _boolean_ | Go: the module proxy and checksum database, the storage its downloads redirect to, and Go releases. | true | Optional: \{\} <br /> |
+| `rust` _boolean_ | Rust: crates.io and rustup. | true | Optional: \{\} <br /> |
+| `javascript` _boolean_ | JavaScript: the npm and yarn registries, JSR, and the Node.js, Bun and Deno downloads. | true | Optional: \{\} <br /> |
+| `java` _boolean_ | Java: Maven Central, Google's Maven repository, and the Gradle plugin portal and distributions. | true | Optional: \{\} <br /> |
 | `elixir` _boolean_ | Elixir: hex.pm and its package and build repositories. | true | Optional: \{\} <br /> |
 | `python` _boolean_ | Python: PyPI. | true | Optional: \{\} <br /> |
-| `ruby` _boolean_ | Ruby: rubygems.org. |  | Optional: \{\} <br /> |
-| `php` _boolean_ | PHP: Packagist. |  | Optional: \{\} <br /> |
-| `dotnet` _boolean_ | Dotnet: NuGet. |  | Optional: \{\} <br /> |
+| `ruby` _boolean_ | Ruby: rubygems.org and Ruby releases. | true | Optional: \{\} <br /> |
+| `php` _boolean_ | PHP: Packagist and Composer. | true | Optional: \{\} <br /> |
+| `dotnet` _boolean_ | Dotnet: NuGet and .NET releases. | true | Optional: \{\} <br /> |
+| `mise` _boolean_ | Mise: what `mise use` needs for languages and tools the image doesn't ship: mise's version and Java<br />metadata, GitHub releases (most tools are released there) and the other common release hosts. On boxes<br />without a GitHub SCM connection this opens github.com unauthenticated. | false | Optional: \{\} <br /> |
+
+
+#### DevboxRepository
+
+
+
+DevboxRepository is a repository the golden boot clones.
+
+
+
+_Appears in:_
+- [DevboxRunnerSpec](#devboxrunnerspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `url` _string_ | URL is the https clone URL, e.g. https://github.com/pluralsh/console.git. |  | Pattern: `^https://[^/]+/.+` <br />Required: \{\} <br /> |
+| `branch` _string_ | Branch is checked out instead of the default branch. |  | Optional: \{\} <br /> |
+| `description` _string_ | Description is shown to agents in the home's Project.md. |  | Optional: \{\} <br /> |
 
 
 #### DevboxResources
@@ -1049,6 +1150,7 @@ _Appears in:_
 | `image` _string_ |  |  |  |
 | `phase` _[DevboxRevisionPhase](#devboxrevisionphase)_ |  |  |  |
 | `goldenTag` _string_ |  |  | Optional: \{\} <br /> |
+| `homeStorage` _[DevboxHomeStorage](#devboxhomestorage)_ | HomeStorage is where this revision's template keeps /home/dev; unset means Snapshot. |  | Enum: [Snapshot JuiceFS] <br />Optional: \{\} <br /> |
 | `message` _string_ |  |  | Optional: \{\} <br /> |
 | `createdAt` _[Time](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#time-v1-meta)_ |  |  | Optional: \{\} <br /> |
 
@@ -1070,7 +1172,7 @@ _Appears in:_
 | `Probing` | DevboxRevisionProbing means the golden snapshot is ready and the agent probe is running.<br /> |
 | `Ready` | DevboxRevisionReady means the revision passed the probe and may serve new instances.<br /> |
 | `Failed` | DevboxRevisionFailed is terminal: the golden boot, image contract or agent probe failed.<br /> |
-| `Retired` | DevboxRevisionRetired means a newer revision is current; the revision stays until nothing references it.<br /> |
+| `Retired` | DevboxRevisionRetired means a newer revision is current, or its golden boot lost its worker and it is rebuilt as<br />a new revision; the revision stays until nothing references it.<br /> |
 
 
 #### DevboxRunner
@@ -1092,6 +1194,22 @@ DevboxRunner is the Schema for the devboxrunners API. It defines one kind of dev
 | `spec` _[DevboxRunnerSpec](#devboxrunnerspec)_ |  |  |  |
 
 
+#### DevboxRunnerBindings
+
+
+
+
+
+
+
+_Appears in:_
+- [DevboxRunnerSpec](#devboxrunnerspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `create` _[Binding](#binding) array_ | Create bindings control who can attach this devbox to a workbench and start instances on it.<br />Only users and groups resolvable by userEmail or groupName apply. If none are set, console falls<br />back to its global create policy, which admins always pass. |  | Optional: \{\} <br /> |
+
+
 #### DevboxRunnerSpec
 
 
@@ -1111,19 +1229,25 @@ _Appears in:_
 | `imagePullSecrets` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core) array_ | ImagePullSecrets are dockerconfigjson secrets used only to resolve spec.image to a digest.<br />Nodes pull with their own credentials (Substrate's image credential provider). |  | Optional: \{\} <br /> |
 | `agents` _[DevboxAgent](#devboxagent) array_ | Agents are the coding-agent harnesses this devbox supports. Exactly one must be the default. |  | MaxItems: 5 <br />MinItems: 1 <br />Required: \{\} <br /> |
 | `resources` _[DevboxResources](#devboxresources)_ | Resources are the per-instance limits. |  | Optional: \{\} <br /> |
+| `home` _[DevboxHome](#devboxhome)_ | Home selects where instances keep /home/dev. |  | Optional: \{\} <br /> |
 | `workerPool` _[DevboxWorkerPool](#devboxworkerpool)_ | WorkerPool sizes the Substrate WorkerPool backing this runner. |  | Optional: \{\} <br /> |
 | `scmConnections` _string array_ | ScmConnections are names of console SCM connections instances may use for git credentials. |  | Optional: \{\} <br /> |
+| `bindings` _[DevboxRunnerBindings](#devboxrunnerbindings)_ | Bindings control who can use this devbox in console. |  | Optional: \{\} <br /> |
 | `allowedRepositories` _string array_ | AllowedRepositories the git repositories allowed to be used with this devbox,<br />with the same semantics as AgentRuntime.spec.allowedRepositories. |  | Optional: \{\} <br /> |
 | `httpAllowlist` _[DevboxHTTPAllowlistEntry](#devboxhttpallowlistentry) array_ | HTTPAllowlist are extra hosts instances may reach, on top of the built-in ones. |  | MaxItems: 256 <br />Optional: \{\} <br /> |
 | `packageServers` _[DevboxPackageServers](#devboxpackageservers)_ | PackageServers opens egress to public package registries by ecosystem. Go, Rust, JavaScript, Java, Elixir<br />and Python are on unless set to false. | \{  \} | Optional: \{\} <br /> |
 | `cloudProviders` _[DevboxCloudProviders](#devboxcloudproviders)_ | CloudProviders opens egress to cloud providers' API endpoints. A provider is on when the runner has a cloud<br />identity for it, unless set to false. | \{  \} | Optional: \{\} <br /> |
+| `ociRegistries` _[DevboxOCIRegistries](#devboxociregistries)_ | OCIRegistries opens egress to public container registries, for pulling images with podman, docker,<br />crane or helm. Docker Hub and GitHub Container Registry are on unless set to false. | \{  \} | Optional: \{\} <br /> |
 | `env` _[DevboxEnvVar](#devboxenvvar) array_ | Env are environment variables for every process the box starts: agents, terminals and git. Plain values<br />are part of the template, so changing them rolls a new revision. Secret values are read when an instance<br />wakes and are never baked into the template, the golden snapshot or the workspace volume. |  | MaxItems: 128 <br />Optional: \{\} <br /> |
 | `browser` _[DevboxBrowser](#devboxbrowser)_ | Browser enables the in-box headless browser. |  | Optional: \{\} <br /> |
-| `bootstrapScript` _string_ | BootstrapScript runs once during the golden boot, so its results are baked into the snapshot. |  | Optional: \{\} <br /> |
+| `bootstrapScript` _string_ | BootstrapScript runs once during the golden boot, from the home directory and after repositories are cloned<br />and mise has installed its tools, so its results are baked into the snapshot. It runs with `bash -e` unless<br />it starts with a #! line, and a failure fails the revision; its output is in ~/.plural/golden.log. |  | Optional: \{\} <br /> |
 | `mise` _[MiseSpec](#misespec)_ | Mise is an inline mise.toml installed during the golden boot. |  | Optional: \{\} <br /> |
+| `repositories` _[DevboxRepository](#devboxrepository) array_ | Repositories are cloned into the home during the golden boot, with the box's SCM connections, so every<br />instance starts with them checked out, along with whatever bootstrapScript builds in them. Each instance<br />fetches them again when it first boots. When allowedRepositories is set, each must be on it. |  | MaxItems: 32 <br />Optional: \{\} <br /> |
+| `bootstrapTimeout` _[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#duration-v1-meta)_ | BootstrapTimeout bounds the golden boot when it has work to do (repositories, mise or bootstrapScript):<br />past it, Substrate crashes the boot and the revision fails. It's also how long a waking instance may take to<br />report ready. Defaults to 30m. |  | Optional: \{\} <br /> |
 | `idlePolicy` _[DevboxIdlePolicy](#devboxidlepolicy)_ | IdlePolicy bounds idle suspension. Workbenches can only lower these values. |  | Optional: \{\} <br /> |
 | `autonomy` _[DevboxAutonomy](#devboxautonomy)_ | Autonomy sets how agents' permission requests are answered: the level new threads start at and the highest<br />level users can switch a thread to. Defaults to auto for both, so full autonomy needs an explicit max: full. |  | Optional: \{\} <br /> |
 | `cloudIdentities` _[DevboxCloudIdentity](#devboxcloudidentity) array_ | CloudIdentities are named cloud identities instances can assume. At most one is the default. |  | MaxItems: 16 <br />Optional: \{\} <br /> |
+| `substrate` _[DevboxSubstrate](#devboxsubstrate)_ | Substrate overrides where the operator reaches the Substrate API and the identity it calls it as. The<br />operator mints the token and reads the CA bundle from the cluster when it reconciles the runner, so<br />nothing is mounted into the operator. |  | Optional: \{\} <br /> |
 
 
 
@@ -1162,6 +1286,24 @@ _Appears in:_
 | `namespace` _string_ | Namespace of the Secret; defaults to the operator's namespace. |  | Optional: \{\} <br /> |
 | `name` _string_ |  |  | MinLength: 1 <br />Required: \{\} <br /> |
 | `key` _string_ |  |  | MinLength: 1 <br />Required: \{\} <br /> |
+
+
+#### DevboxSubstrate
+
+
+
+DevboxSubstrate locates the Substrate API credentials the operator loads for a runner.
+
+
+
+_Appears in:_
+- [DevboxRunnerSpec](#devboxrunnerspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `address` _string_ | Address of ate-api-server. Defaults to the deployment-operator chart's devboxes.substrate.apiAddress. |  | Optional: \{\} <br /> |
+| `serviceAccountName` _string_ | ServiceAccountName is a ServiceAccount in the operator's namespace that the operator mints Substrate API<br />tokens for. It must be a Substrate global owner, since it creates atespaces and drains workers. Defaults<br />to the operator's own ServiceAccount. |  | Optional: \{\} <br /> |
+| `caSignerName` _string_ | CASignerName is the signer of the ClusterTrustBundles that verify ate-api-server's serving certificate.<br />Defaults to servicedns.podcert.ate.dev/identity. |  | Optional: \{\} <br /> |
 
 
 #### DevboxWorkerAutoscaling

@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	goruntime "runtime"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -24,6 +25,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
+	storagev1 "k8s.io/api/storage/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -41,6 +43,8 @@ import (
 
 	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/guest"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/juicefs"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate/ateapi"
 )
 
@@ -74,6 +78,7 @@ func startDevboxEnv(t *testing.T) *devboxEnv {
 	testEnv.ControlPlane.GetAPIServer().Configure().Set("advertise-address", "127.0.0.1")
 	// Substrate needs pod certificates; without the gate the API server drops the gateway's podCertificate volumes.
 	testEnv.ControlPlane.GetAPIServer().Configure().Set("feature-gates", "PodCertificateRequest=true,ClusterTrustBundle=true,ClusterTrustBundleProjection=true")
+	testEnv.ControlPlane.GetAPIServer().Configure().Set("runtime-config", "certificates.k8s.io/v1beta1=true")
 	cfg, err := testEnv.Start()
 	if err != nil {
 		t.Fatalf("starting envtest: %v", err)
@@ -411,11 +416,22 @@ func TestDevboxRunnerController(t *testing.T) {
 		g.Expect(classes).To(ConsistOf(HaveKeyWithValue("name", "gvisor")))
 		workerImage, _, _ := unstructured.NestedString(pool.Object, "spec", "workerImage")
 		g.Expect(workerImage).To(Equal("ghcr.io/example/ateworker-gvisor@sha256:abc"))
+		g.Expect(condition(runner, v1alpha1.DevboxWorkerPoolReadyConditionType).Status).To(Equal(metav1.ConditionFalse))
+
+		g.Expect(unstructured.SetNestedField(pool.Object, map[string]any{"replicas": int64(1), "readyReplicas": int64(1)}, "status")).To(Succeed())
+		g.Expect(env.client.Status().Update(ctx, pool)).To(Succeed())
+		runner = env.reconcile(t, "platform", 2)
+		g.Expect(condition(runner, v1alpha1.DevboxWorkerPoolReadyConditionType)).To(HaveField("Status", metav1.ConditionTrue),
+			"an unchanged WorkerPool still reports its ready workers")
 
 		deployment := &appsv1.Deployment{}
 		g.Expect(env.client.Get(ctx, client.ObjectKey{Name: devboxGatewayName, Namespace: devboxTestNamespace}, deployment)).To(Succeed())
 		g.Expect(deployment.Spec.Template.Spec.Containers[0].Image).To(Equal("ghcr.io/pluralsh/devbox-gateway:" + devboxTestVersion))
 		g.Expect(deployment.Spec.Template.Spec.ServiceAccountName).To(Equal(devboxGatewayName))
+		platform := env.get(t, "platform")
+		g.Expect(deployment.GetOwnerReferences()).To(ContainElement(SatisfyAll(
+			HaveField("UID", platform.UID), HaveField("Kind", "DevboxRunner"), HaveField("Controller", BeNil()),
+		)), "the shared gateway is owned by, but not controlled by, each runner")
 		g.Expect(deployment.Spec.Template.Spec.Containers[0].Env).To(ContainElements(
 			corev1.EnvVar{Name: "CONSOLE_URL", Value: "https://console.example.com/ext/gql"},
 			corev1.EnvVar{Name: "CLUSTER_ID", Value: "cluster-id"},
@@ -465,7 +481,8 @@ func TestDevboxRunnerController(t *testing.T) {
 		atespace := *runner.Status.Atespace
 		g.Expect(atespace).To(HavePrefix("devbox-platform-"))
 		g.Expect(env.substrate.hasAtespace(atespace)).To(BeTrue())
-		g.Expect(env.substrate.policies[atespace]["editor"]).To(ContainElement("system:serviceaccount:" + devboxTestNamespace + ":devbox-gateway"))
+		g.Expect(env.substrate.policies[atespace]["editor"]).To(ContainElement("user:system:serviceaccount:" + devboxTestNamespace + ":devbox-gateway"))
+		g.Expect(env.substrate.policies[globalPolicy]["viewer"]).To(ContainElement("user:system:serviceaccount:" + devboxTestNamespace + ":devbox-gateway"))
 
 		g.Expect(runner.Status.Revisions).To(HaveLen(1))
 		g.Expect(runner.Status.Revisions[0].Phase).To(Equal(v1alpha1.DevboxRevisionBuilding))
@@ -476,6 +493,7 @@ func TestDevboxRunnerController(t *testing.T) {
 		g.Expect(tmpl.WorkerSelector.MatchLabels).To(Equal(map[string]string{"devboxes.plural.sh/runner.platform": "true"}))
 		g.Expect(pool.GetLabels()).To(HaveKeyWithValue("devboxes.plural.sh/runner.platform", "true"))
 		g.Expect(tmpl.Containers[0].WakeupProbe.HttpGet.Path).To(Equal("/readyz"))
+		g.Expect(tmpl.Containers[0].GetSecurityContext().GetCapabilities().GetAdd()).To(ConsistOf("SETUID", "SETGID", "SETFCAP"))
 		g.Expect(tmpl.Resources.Limits.MemoryBytes).To(Equal(int64(4 << 30)))
 		g.Expect(tmpl.GoldenEgressPolicy).To(BeNil())
 
@@ -546,6 +564,7 @@ func TestDevboxRunnerController(t *testing.T) {
 		runner := env.get(t, "platform")
 		atespace := *runner.Status.Atespace
 		runner.Spec.BootstrapScript = lo.ToPtr("npm i -g pnpm")
+		runner.Spec.Repositories = []v1alpha1.DevboxRepository{{URL: "https://github.com/pluralsh/console", Branch: lo.ToPtr("master")}}
 		runner.Spec.HTTPAllowlist = []v1alpha1.DevboxHTTPAllowlistEntry{{Host: "registry.npmjs.org"}}
 		runner.Spec.PackageServers = &v1alpha1.DevboxPackageServers{Rust: lo.ToPtr(false)}
 		runner.Spec.Env = []v1alpha1.DevboxEnvVar{
@@ -587,14 +606,23 @@ func TestDevboxRunnerController(t *testing.T) {
 		g.Expect(string(mirror.Data["platform"])).To(Equal(`{"API_TOKEN":"t0k"}`))
 		g.Expect(runner.Status.Revisions).To(HaveLen(2), "resolving secret env does not roll a revision")
 		g.Expect(env.substrate.previews["platform-r2"]).To(BeTrue())
-		var guest DevboxRunnerGuestConfig
-		g.Expect(json.Unmarshal([]byte(r2.Containers[0].Env[0].Value), &guest)).To(Succeed())
-		g.Expect(guest.BootstrapScript).To(Equal("npm i -g pnpm"))
+		var cfg guest.Config
+		g.Expect(r2.Containers[0].Env[0].Name).To(Equal(guest.EnvVar))
+		g.Expect(json.Unmarshal([]byte(r2.Containers[0].Env[0].Value), &cfg)).To(Succeed())
+		g.Expect(cfg.BootstrapScript).To(Equal("npm i -g pnpm"))
+		g.Expect(cfg.Repositories).To(Equal([]guest.Repository{{URL: "https://github.com/pluralsh/console", Branch: "master"}}))
+		g.Expect(r2.Containers[0].WakeupProbe.TimeoutSeconds).To(Equal(int32(1800)), "golden boot work gets the bootstrap timeout")
+		scm := lo.Filter(r2.GoldenEgressPolicy.Rules, func(r *ateapi.EgressRule, _ int) bool {
+			return slices.Equal(r.GetHttps().GetHostnames(), []string{"github.com"})
+		})
+		g.Expect(scm).To(HaveLen(1))
+		g.Expect(scm[0].Https.Effects.ReplaceHeaders[0].CredentialUri).To(Equal("ate-secret://plural.sh/instances/golden.platform/scm/github.com"))
 
 		runner = env.reconcile(t, "platform", 1)
 		g.Expect(runner.Status.Revisions).To(HaveLen(2))
 
 		env.substrate.addActor(atespace, "instance-1", "platform-r1", ateapi.ActorState_ACTOR_STATE_SUSPENDED)
+		env.substrate.addActor(atespace, env.substrate.template(atespace, "platform-r1").GetMetadata().GetUid(), "platform-r1", ateapi.ActorState_ACTOR_STATE_RESUMING)
 		runner = env.buildRevision(t, "platform", 2, claudeOK())
 		g.Expect(*runner.Status.TemplateRevision).To(Equal(int64(2)))
 		g.Expect(runner.RevisionByNumber(1).Phase).To(Equal(v1alpha1.DevboxRevisionRetired))
@@ -602,7 +630,7 @@ func TestDevboxRunnerController(t *testing.T) {
 
 		g.Expect(env.substrate.DeleteActor(ctx, atespace, "instance-1")).To(Succeed())
 		runner = env.reconcile(t, "platform", 1)
-		g.Expect(runner.RevisionByNumber(1)).To(BeNil())
+		g.Expect(runner.RevisionByNumber(1)).To(BeNil(), "r1's own golden actor is no reference")
 		g.Expect(env.substrate.template(atespace, "platform-r1")).To(BeNil())
 		err := env.client.Get(ctx, client.ObjectKey{Name: DevboxProbeConfigMapName("platform", 1), Namespace: devboxTestNamespace}, &corev1.ConfigMap{})
 		g.Expect(apierrors.IsNotFound(err)).To(BeTrue())
@@ -651,6 +679,28 @@ func TestDevboxRunnerController(t *testing.T) {
 		g.Expect(template.Status).To(Equal(metav1.ConditionFalse))
 	})
 
+	t.Run("a golden boot that lost its worker is rebuilt, one that crashed fails", func(t *testing.T) {
+		g := NewWithT(t)
+		env.push(t, "devbox:v1")
+		env.newRunner(t, "rebuild", "devbox:v1")
+		runner := env.reconcile(t, "rebuild", 2)
+		g.Expect(runner.LatestRevision()).To(HaveField("Phase", v1alpha1.DevboxRevisionBuilding))
+
+		first := *runner.LatestRevision()
+		env.substrate.failGoldenBoot(*runner.Status.Atespace, first.Name,
+			"GoldenActorCrashed: golden actor crashed before its snapshot was taken: resume failed: worker pod went away while hosting the actor")
+		runner = env.reconcile(t, "rebuild", 2)
+		g.Expect(runner.RevisionByNumber(1)).To(BeNil(), "the retired r1 was collected")
+		latest := runner.LatestRevision()
+		g.Expect(latest.Revision).To(Equal(int64(2)))
+		g.Expect(latest.Hash).To(Equal(first.Hash), "the same template is rebuilt")
+		g.Expect(latest.Phase).To(Equal(v1alpha1.DevboxRevisionBuilding))
+
+		env.substrate.failGoldenBoot(*runner.Status.Atespace, latest.Name, "GoldenActorCrashed: golden actor crashed before its snapshot was taken: exited with code 1")
+		runner = env.reconcile(t, "rebuild", 2)
+		g.Expect(runner.LatestRevision()).To(SatisfyAll(HaveField("Revision", int64(2)), HaveField("Phase", v1alpha1.DevboxRevisionFailed)))
+	})
+
 	t.Run("an image that overrides ENTRYPOINT fails the contract", func(t *testing.T) {
 		g := NewWithT(t)
 		env.push(t, "custom:bad", func(c *v1.Config) { c.Entrypoint = []string{"/bin/bash"} })
@@ -679,7 +729,7 @@ func TestDevboxRunnerController(t *testing.T) {
 			r.Spec.WorkerPool = &v1alpha1.DevboxWorkerPool{
 				NodeSelector:   map[string]string{"plural.sh/devbox": "scheduled"},
 				NodeAffinity:   affinity,
-				PodAnnotations: map[string]string{"karpenter.sh/do-not-disrupt": "true"},
+				PodAnnotations: map[string]string{"example.com/team": "devbox"},
 			}
 		})
 		env.reconcile(t, "scheduled", 2)
@@ -688,7 +738,12 @@ func TestDevboxRunnerController(t *testing.T) {
 		pool.SetGroupVersionKind(workerPoolGVK)
 		g.Expect(env.client.Get(ctx, client.ObjectKey{Name: "devbox-scheduled", Namespace: devboxTestNamespace}, pool)).To(Succeed())
 		annotations, _, _ := unstructured.NestedStringMap(pool.Object, "spec", "template", "annotations")
-		g.Expect(annotations).To(HaveKeyWithValue("karpenter.sh/do-not-disrupt", "true"))
+		g.Expect(annotations).To(Equal(map[string]string{
+			"example.com/team": "devbox",
+			"cluster-autoscaler.kubernetes.io/safe-to-evict": "false",
+			"karpenter.sh/do-not-disrupt":                    "true",
+			"karpenter.sh/do-not-evict":                      "true",
+		}))
 		selector, _, _ := unstructured.NestedStringMap(pool.Object, "spec", "template", "nodeSelector")
 		g.Expect(selector).To(HaveKeyWithValue("plural.sh/devbox", "scheduled"))
 		terms, _, _ := unstructured.NestedSlice(pool.Object, "spec", "template", "nodeAffinity", "requiredDuringSchedulingIgnoredDuringExecution", "nodeSelectorTerms")
@@ -886,13 +941,80 @@ func TestDevboxRunnerController(t *testing.T) {
 		pool.SetGroupVersionKind(workerPoolGVK)
 		err = env.client.Get(ctx, client.ObjectKey{Name: "devbox-platform", Namespace: devboxTestNamespace}, pool)
 		g.Expect(apierrors.IsNotFound(err)).To(BeTrue())
-		g.Expect(env.client.Get(ctx, client.ObjectKey{Name: devboxGatewayName, Namespace: devboxTestNamespace}, &appsv1.Deployment{})).
+		gateway := &appsv1.Deployment{}
+		g.Expect(env.client.Get(ctx, client.ObjectKey{Name: devboxGatewayName, Namespace: devboxTestNamespace}, gateway)).
 			To(Succeed(), "other runners still need the gateway")
+		g.Expect(lo.Map(gateway.GetOwnerReferences(), func(ref metav1.OwnerReference, _ int) string { return ref.Name })).
+			To(ContainElements("custom", "old", "scheduled", "elastic"), "every runner sharing the gateway owns it")
+		for name, obj := range map[string]client.Object{
+			devboxGatewayName:       &corev1.ServiceAccount{},
+			devboxGatewaySecretName: &corev1.Secret{},
+			devboxEgressAuthzName:   &corev1.Service{},
+		} {
+			g.Expect(env.client.Get(ctx, client.ObjectKey{Name: name, Namespace: devboxTestNamespace}, obj)).To(Succeed())
+			g.Expect(obj.GetOwnerReferences()).To(HaveLen(len(gateway.GetOwnerReferences())), "%T %s has the gateway's owners", obj, name)
+		}
+		policy := &networkingv1.NetworkPolicy{}
+		g.Expect(env.client.Get(ctx, client.ObjectKey{Name: devboxGatewayName, Namespace: devboxTestNamespace}, policy)).To(Succeed())
+		g.Expect(policy.GetOwnerReferences()).To(HaveLen(len(gateway.GetOwnerReferences())))
+	})
+
+	t.Run("a JuiceFS home gets a StorageClass per revision seeded by its golden boot", func(t *testing.T) {
+		g := NewWithT(t)
+		env.push(t, "devbox:v1")
+		env.newRunner(t, "juicefs", "devbox:v1", func(r *v1alpha1.DevboxRunner) {
+			r.Spec.Home = &v1alpha1.DevboxHome{Storage: lo.ToPtr(v1alpha1.DevboxHomeJuiceFS), Size: lo.ToPtr(resource.MustParse("100Gi"))}
+		})
+		env.reconcile(t, "juicefs", 1)
+		_, _ = env.r.Reconcile(ctx, ctrl.Request{NamespacedName: client.ObjectKey{Name: "juicefs"}})
+		runner := env.get(t, "juicefs")
+		g.Expect(condition(runner, v1alpha1.DevboxTemplateReadyConditionType).Message).To(ContainSubstring("StorageClass devbox-juicefs for JuiceFS homes doesn't exist"))
+		g.Expect(runner.Status.Revisions).To(BeEmpty())
+
+		g.Expect(env.client.Create(ctx, &storagev1.StorageClass{
+			ObjectMeta:  metav1.ObjectMeta{Name: v1alpha1.DevboxDefaultJuiceFSStorageClass},
+			Provisioner: juicefs.DriverName,
+			Parameters:  map[string]string{juicefs.ParamUID: "1000"},
+		})).To(Succeed())
+		runner = env.reconcile(t, "juicefs", 1)
+		g.Expect(runner.Status.Revisions).To(HaveLen(1))
+		rev := runner.Status.Revisions[0]
+		g.Expect(rev.HomeStorage).To(HaveValue(Equal(v1alpha1.DevboxHomeJuiceFS)))
+		atespace := *runner.Status.Atespace
+
+		tmpl := env.substrate.template(atespace, rev.Name)
+		home, _ := lo.Find(tmpl.Volumes, func(v *ateapi.Volume) bool { return v.Name == devboxHomeVolume })
+		g.Expect(home.GetExternal().GetTemplate().GetCapacityBytes()).To(Equal(int64(100 << 30)))
+		className := home.GetExternal().GetTemplate().GetStorageClassName()
+		g.Expect(className).To(Equal("devbox-home." + atespace + "." + rev.Name))
+		g.Expect(env.substrate.previews[rev.Name]).To(BeTrue())
+
+		sc := &storagev1.StorageClass{}
+		g.Expect(env.client.Get(ctx, client.ObjectKey{Name: className}, sc)).To(Succeed())
+		g.Expect(sc.Provisioner).To(Equal(juicefs.DriverName))
+		g.Expect(sc.Parameters).To(Equal(map[string]string{juicefs.ParamUID: "1000", juicefs.ParamSeed: atespace + "." + rev.Name}))
+		g.Expect(sc.GetOwnerReferences()).To(ContainElement(HaveField("UID", runner.UID)))
+
+		hash := rev.Hash
+		gatewayEnv := func() []corev1.EnvVar {
+			d := &appsv1.Deployment{}
+			g.Expect(env.client.Get(ctx, client.ObjectKey{Name: devboxGatewayName, Namespace: devboxTestNamespace}, d)).To(Succeed())
+			return d.Spec.Template.Spec.Containers[0].Env
+		}
+		g.Expect(gatewayEnv()).NotTo(ContainElement(HaveField("Name", "DEVBOX_JUICEFS_ADDRESS")), "no JuiceFS controller, no seeds")
+		g.Expect(env.client.Create(ctx, &corev1.Service{
+			ObjectMeta: metav1.ObjectMeta{Name: devboxJuiceFSService, Namespace: "ate-system"},
+			Spec:       corev1.ServiceSpec{Ports: []corev1.ServicePort{{Name: "grpc", Port: devboxJuiceFSPort}}},
+		})).To(Succeed())
+		runner = env.reconcile(t, "juicefs", 1)
+		g.Expect(runner.Status.Revisions).To(HaveLen(1), "the per-revision class doesn't change the template hash")
+		g.Expect(runner.Status.Revisions[0].Hash).To(Equal(hash))
+		g.Expect(gatewayEnv()).To(ContainElement(corev1.EnvVar{Name: "DEVBOX_JUICEFS_ADDRESS", Value: "devbox-juicefs.ate-system.svc:9820"}))
 	})
 
 	t.Run("deleting the last runner removes the gateway", func(t *testing.T) {
 		g := NewWithT(t)
-		for _, name := range []string{"custom", "old", "scheduled", "elastic"} {
+		for _, name := range []string{"custom", "old", "scheduled", "elastic", "rebuild", "juicefs"} {
 			g.Expect(env.client.Delete(ctx, env.get(t, name))).To(Succeed())
 			_, err := env.r.Reconcile(ctx, ctrl.Request{NamespacedName: client.ObjectKey{Name: name}})
 			g.Expect(err).NotTo(HaveOccurred())

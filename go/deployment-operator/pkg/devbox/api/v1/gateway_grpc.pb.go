@@ -54,6 +54,7 @@ const (
 	Gateway_ForkThread_FullMethodName            = "/devbox.v1.Gateway/ForkThread"
 	Gateway_Prompt_FullMethodName                = "/devbox.v1.Gateway/Prompt"
 	Gateway_CancelPrompt_FullMethodName          = "/devbox.v1.Gateway/CancelPrompt"
+	Gateway_UpdateQueuedPrompt_FullMethodName    = "/devbox.v1.Gateway/UpdateQueuedPrompt"
 	Gateway_SetThreadConfigOption_FullMethodName = "/devbox.v1.Gateway/SetThreadConfigOption"
 	Gateway_RespondInteraction_FullMethodName    = "/devbox.v1.Gateway/RespondInteraction"
 	Gateway_ListCommands_FullMethodName          = "/devbox.v1.Gateway/ListCommands"
@@ -66,6 +67,7 @@ const (
 	Gateway_ReadFile_FullMethodName              = "/devbox.v1.Gateway/ReadFile"
 	Gateway_WriteFile_FullMethodName             = "/devbox.v1.Gateway/WriteFile"
 	Gateway_GetChanges_FullMethodName            = "/devbox.v1.Gateway/GetChanges"
+	Gateway_PreparePullRequest_FullMethodName    = "/devbox.v1.Gateway/PreparePullRequest"
 	Gateway_OpenStream_FullMethodName            = "/devbox.v1.Gateway/OpenStream"
 	Gateway_InvalidateAllowlist_FullMethodName   = "/devbox.v1.Gateway/InvalidateAllowlist"
 	Gateway_ProxyStream_FullMethodName           = "/devbox.v1.Gateway/ProxyStream"
@@ -95,6 +97,7 @@ type GatewayClient interface {
 	ForkThread(ctx context.Context, in *ForkThreadRequest, opts ...grpc.CallOption) (*ThreadResponse, error)
 	Prompt(ctx context.Context, in *PromptRequest, opts ...grpc.CallOption) (*PromptResponse, error)
 	CancelPrompt(ctx context.Context, in *CancelPromptRequest, opts ...grpc.CallOption) (*CancelPromptResponse, error)
+	UpdateQueuedPrompt(ctx context.Context, in *UpdateQueuedPromptRequest, opts ...grpc.CallOption) (*UpdateQueuedPromptResponse, error)
 	SetThreadConfigOption(ctx context.Context, in *SetThreadConfigOptionRequest, opts ...grpc.CallOption) (*SetThreadConfigOptionResponse, error)
 	RespondInteraction(ctx context.Context, in *RespondInteractionRequest, opts ...grpc.CallOption) (*RespondInteractionResponse, error)
 	ListCommands(ctx context.Context, in *ListCommandsRequest, opts ...grpc.CallOption) (*ListCommandsResponse, error)
@@ -107,6 +110,7 @@ type GatewayClient interface {
 	ReadFile(ctx context.Context, in *ReadFileRequest, opts ...grpc.CallOption) (*ReadFileResponse, error)
 	WriteFile(ctx context.Context, in *WriteFileRequest, opts ...grpc.CallOption) (*WriteFileResponse, error)
 	GetChanges(ctx context.Context, in *GetChangesRequest, opts ...grpc.CallOption) (*GetChangesResponse, error)
+	PreparePullRequest(ctx context.Context, in *PreparePullRequestRequest, opts ...grpc.CallOption) (*PreparePullRequestResponse, error)
 	OpenStream(ctx context.Context, in *OpenStreamRequest, opts ...grpc.CallOption) (*OpenStreamResponse, error)
 	InvalidateAllowlist(ctx context.Context, in *InvalidateAllowlistRequest, opts ...grpc.CallOption) (*InvalidateAllowlistResponse, error)
 	// ProxyStream carries one browser WebSocket (terminal, VNC or preview) from KAS to the sandbox, as
@@ -295,6 +299,16 @@ func (c *gatewayClient) CancelPrompt(ctx context.Context, in *CancelPromptReques
 	return out, nil
 }
 
+func (c *gatewayClient) UpdateQueuedPrompt(ctx context.Context, in *UpdateQueuedPromptRequest, opts ...grpc.CallOption) (*UpdateQueuedPromptResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateQueuedPromptResponse)
+	err := c.cc.Invoke(ctx, Gateway_UpdateQueuedPrompt_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *gatewayClient) SetThreadConfigOption(ctx context.Context, in *SetThreadConfigOptionRequest, opts ...grpc.CallOption) (*SetThreadConfigOptionResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(SetThreadConfigOptionResponse)
@@ -415,6 +429,16 @@ func (c *gatewayClient) GetChanges(ctx context.Context, in *GetChangesRequest, o
 	return out, nil
 }
 
+func (c *gatewayClient) PreparePullRequest(ctx context.Context, in *PreparePullRequestRequest, opts ...grpc.CallOption) (*PreparePullRequestResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PreparePullRequestResponse)
+	err := c.cc.Invoke(ctx, Gateway_PreparePullRequest_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *gatewayClient) OpenStream(ctx context.Context, in *OpenStreamRequest, opts ...grpc.CallOption) (*OpenStreamResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(OpenStreamResponse)
@@ -472,6 +496,7 @@ type GatewayServer interface {
 	ForkThread(context.Context, *ForkThreadRequest) (*ThreadResponse, error)
 	Prompt(context.Context, *PromptRequest) (*PromptResponse, error)
 	CancelPrompt(context.Context, *CancelPromptRequest) (*CancelPromptResponse, error)
+	UpdateQueuedPrompt(context.Context, *UpdateQueuedPromptRequest) (*UpdateQueuedPromptResponse, error)
 	SetThreadConfigOption(context.Context, *SetThreadConfigOptionRequest) (*SetThreadConfigOptionResponse, error)
 	RespondInteraction(context.Context, *RespondInteractionRequest) (*RespondInteractionResponse, error)
 	ListCommands(context.Context, *ListCommandsRequest) (*ListCommandsResponse, error)
@@ -484,6 +509,7 @@ type GatewayServer interface {
 	ReadFile(context.Context, *ReadFileRequest) (*ReadFileResponse, error)
 	WriteFile(context.Context, *WriteFileRequest) (*WriteFileResponse, error)
 	GetChanges(context.Context, *GetChangesRequest) (*GetChangesResponse, error)
+	PreparePullRequest(context.Context, *PreparePullRequestRequest) (*PreparePullRequestResponse, error)
 	OpenStream(context.Context, *OpenStreamRequest) (*OpenStreamResponse, error)
 	InvalidateAllowlist(context.Context, *InvalidateAllowlistRequest) (*InvalidateAllowlistResponse, error)
 	// ProxyStream carries one browser WebSocket (terminal, VNC or preview) from KAS to the sandbox, as
@@ -553,6 +579,9 @@ func (UnimplementedGatewayServer) Prompt(context.Context, *PromptRequest) (*Prom
 func (UnimplementedGatewayServer) CancelPrompt(context.Context, *CancelPromptRequest) (*CancelPromptResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CancelPrompt not implemented")
 }
+func (UnimplementedGatewayServer) UpdateQueuedPrompt(context.Context, *UpdateQueuedPromptRequest) (*UpdateQueuedPromptResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateQueuedPrompt not implemented")
+}
 func (UnimplementedGatewayServer) SetThreadConfigOption(context.Context, *SetThreadConfigOptionRequest) (*SetThreadConfigOptionResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method SetThreadConfigOption not implemented")
 }
@@ -588,6 +617,9 @@ func (UnimplementedGatewayServer) WriteFile(context.Context, *WriteFileRequest) 
 }
 func (UnimplementedGatewayServer) GetChanges(context.Context, *GetChangesRequest) (*GetChangesResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetChanges not implemented")
+}
+func (UnimplementedGatewayServer) PreparePullRequest(context.Context, *PreparePullRequestRequest) (*PreparePullRequestResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method PreparePullRequest not implemented")
 }
 func (UnimplementedGatewayServer) OpenStream(context.Context, *OpenStreamRequest) (*OpenStreamResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method OpenStream not implemented")
@@ -925,6 +957,24 @@ func _Gateway_CancelPrompt_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Gateway_UpdateQueuedPrompt_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateQueuedPromptRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GatewayServer).UpdateQueuedPrompt(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Gateway_UpdateQueuedPrompt_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GatewayServer).UpdateQueuedPrompt(ctx, req.(*UpdateQueuedPromptRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Gateway_SetThreadConfigOption_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SetThreadConfigOptionRequest)
 	if err := dec(in); err != nil {
@@ -1141,6 +1191,24 @@ func _Gateway_GetChanges_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Gateway_PreparePullRequest_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PreparePullRequestRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GatewayServer).PreparePullRequest(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Gateway_PreparePullRequest_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GatewayServer).PreparePullRequest(ctx, req.(*PreparePullRequestRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Gateway_OpenStream_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(OpenStreamRequest)
 	if err := dec(in); err != nil {
@@ -1260,6 +1328,10 @@ var Gateway_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Gateway_CancelPrompt_Handler,
 		},
 		{
+			MethodName: "UpdateQueuedPrompt",
+			Handler:    _Gateway_UpdateQueuedPrompt_Handler,
+		},
+		{
 			MethodName: "SetThreadConfigOption",
 			Handler:    _Gateway_SetThreadConfigOption_Handler,
 		},
@@ -1306,6 +1378,10 @@ var Gateway_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetChanges",
 			Handler:    _Gateway_GetChanges_Handler,
+		},
+		{
+			MethodName: "PreparePullRequest",
+			Handler:    _Gateway_PreparePullRequest_Handler,
 		},
 		{
 			MethodName: "OpenStream",

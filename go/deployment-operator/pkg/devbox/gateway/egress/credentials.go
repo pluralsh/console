@@ -34,15 +34,17 @@ var kindToProto = map[string]devboxv1.CredentialKind{
 	KindOIDC:        devboxv1.CredentialKind_CREDENTIAL_KIND_OIDC,
 }
 
-// credKey names one cached credential. selector is the SCM host for scm and the identity name for oidc.
+// credKey names one cached credential. selector is the SCM host for scm and the identity name for oidc. boxID is
+// set for a golden boot's credentials, which console mints for the box rather than an instance.
 type credKey struct {
 	instanceID string
 	kind       string
 	selector   string
+	boxID      string
 }
 
 func (k credKey) String() string {
-	return k.instanceID + "/" + k.kind + "/" + k.selector
+	return k.instanceID + "/" + k.kind + "/" + k.selector + "/" + k.boxID
 }
 
 type credEntry struct {
@@ -172,10 +174,11 @@ func (c *credentialCache) fetch(key credKey) (*credEntry, error) {
 	case KindOIDC:
 		sel.Identity = key.selector
 	}
-	resp, err := c.ingest.GetInstanceCredentials(ctx, &devboxv1.GetInstanceCredentialsRequest{
-		InstanceId:  key.instanceID,
-		Credentials: []*devboxv1.CredentialSelector{sel},
-	})
+	req := &devboxv1.GetInstanceCredentialsRequest{InstanceId: key.instanceID, Credentials: []*devboxv1.CredentialSelector{sel}}
+	if key.boxID != "" {
+		req.InstanceId, req.DevboxId = "", key.boxID
+	}
+	resp, err := c.ingest.GetInstanceCredentials(ctx, req)
 	if err != nil {
 		return nil, mapIngestError(key, err)
 	}

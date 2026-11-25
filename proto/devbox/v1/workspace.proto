@@ -76,6 +76,13 @@ message ListFilesRequest {
   bool respect_gitignore = 5;
   // Maximum entries returned; the daemon caps it.
   int32 limit = 6;
+  // When set, fuzzy-searches everything under path for files and directories matching it, best match first,
+  // instead of listing (depth and respect_gitignore don't apply: git-ignored paths are never searched). Results
+  // carry path, name, type and repository only.
+  string query = 7;
+  // Entries carry path, name, type and repository only, which lets the daemon answer a direct listing from its file
+  // index, without touching disk, where it covers path. Query results are always brief.
+  bool brief = 8;
 }
 
 message ListFilesResponse {
@@ -187,6 +194,54 @@ message GetChangesRequest {
   int32 max_diff_bytes = 6;
   // Restrict to one path (for a single-file diff view).
   string path = 7;
+}
+
+message BranchDiffStatRequest {
+  string instance_id = 1;
+  // A checkout's name or path, or its remote URL.
+  string repository = 2;
+  string base = 3;
+  string head = 4;
+}
+
+message BranchDiffStatResponse {
+  int32 additions = 1;
+  int32 deletions = 2;
+  int32 files = 3;
+  string base_sha = 4;
+  string head_sha = 5;
+}
+
+// PreparePullRequestRequest readies one checkout for a pull request: the box writes the title, body and (for
+// uncommitted changes) commit message from the changes it holds, branches off the default branch if needed,
+// commits and pushes. Console then opens the pull request from the response.
+message PreparePullRequestRequest {
+  string instance_id = 1;
+  // A checkout's name or path; a thread worktree's path selects that worktree.
+  string repository = 2;
+  // The AI proxy model (provider/model) that writes the text. Empty when console AI is off.
+  string model = 3;
+  // The subscription agent whose CLI writes the text when model is empty. Unspecified falls back to a template.
+  AgentType agent = 4;
+  // A thread whose recent prompts explain the change. The checkout's worktree thread, if any, wins.
+  string thread_id = 5;
+}
+
+message PreparePullRequestResponse {
+  string remote_url = 1;
+  string checkout_path = 2;
+  string head_branch = 3;
+  string base_branch = 4;
+  string title = 5;
+  string body = 6;
+  string base_sha = 7;
+  string head_sha = 8;
+  int32 additions = 9;
+  int32 deletions = 10;
+  // Whether the box committed uncommitted changes.
+  bool committed = 11;
+  // Who wrote the text: ai_proxy, claude, codex or template.
+  string writer = 12;
 }
 
 message GetChangesResponse {

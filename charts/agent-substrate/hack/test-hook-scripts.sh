@@ -26,7 +26,8 @@ cp "$CHART_DIR/hack/fake-kubectl.sh" "$TMP/bin/kubectl"
 chmod +x "$TMP/bin/kubectl"
 PATH="$TMP/bin:$PATH"
 export FAKE_STATE="$TMP/state" NAMESPACE=ate-system PODCERT_NAMESPACE=podcertificate-controller-system \
-  PG_READ_WRITE_SECRET=ate-postgres-readwrite PG_READ_WRITE_USER=substrate_readwrite_user
+  PG_READ_WRITE_SECRET=ate-postgres-readwrite PG_READ_WRITE_USER=substrate_readwrite_user \
+  PG_JUICEFS_SECRET=ate-postgres-juicefs PG_JUICEFS_USER=juicefs
 mkdir -p "$FAKE_STATE"
 
 failures=0
@@ -35,7 +36,7 @@ pass() { echo "ok: $*"; }
 
 secrets="ate-system/actor-id-jwt-pool ate-system/actor-id-ca-pool ate-system/egress-mitm-ca-pool
 podcertificate-controller-system/service-dns-ca-pool podcertificate-controller-system/pod-identity-ca-pool
-podcertificate-controller-system/postgres-ca-pool ate-system/ate-postgres-readwrite"
+podcertificate-controller-system/postgres-ca-pool ate-system/ate-postgres-readwrite ate-system/ate-postgres-juicefs"
 
 run_hook() {
   rm -rf "$TMP/work" && mkdir -p "$TMP/work"
@@ -88,13 +89,15 @@ cmp -s "$FAKE_STATE/secret/ate-system/actor-id-ca-certs/ca.crt" "$pool/tls.crt" 
   fail "actor-id-ca-certs isn't actor-id-ca-pool's root"
 [ "$(cat "$FAKE_STATE/secret/ate-system/ate-postgres-readwrite/username")" = substrate_readwrite_user ] ||
   fail "read-write username"
+[ "$(cat "$FAKE_STATE/secret/ate-system/ate-postgres-juicefs/username")" = juicefs ] ||
+  fail "juicefs username"
 pass "pools are well formed"
 
 # 3. Re-running (helm upgrade) keeps every secret.
 before="$(fingerprint)"
 run_hook || fail "second run failed"
 [ "$(fingerprint)" = "$before" ] || fail "second run changed existing secrets"
-[ "$(grep -c 'exists; keeping it' "$TMP/apply.log")" -eq 7 ] || fail "second run didn't keep all 7 secrets"
+[ "$(grep -c 'exists; keeping it' "$TMP/apply.log")" -eq 8 ] || fail "second run didn't keep all 8 secrets"
 pass "upgrade keeps existing secrets"
 
 # 4. A deleted secret is recreated; the others stay.
@@ -129,6 +132,16 @@ grep -q 'issuer: https://container.googleapis.com/v1/projects/p/locations/l/clus
 run_hook
 grep -q '  issuer: https://kubernetes.default.svc$' "$auth" || fail "no discovery doesn't fall back to the in-cluster issuer"
 pass "authentication config follows the issuer"
+
+# 7. Pod certificates are required, from certificates.k8s.io v1 or v1beta1.
+(export FAKE_PODCERT_VERSION=v1beta1 && run_hook) || fail "v1beta1 pod certificates rejected"
+rm -rf "$FAKE_STATE" && mkdir -p "$FAKE_STATE"
+if (export FAKE_PODCERT_VERSION= && run_hook) >/dev/null; then
+  fail "install proceeded without pod certificates"
+fi
+grep -q "doesn't serve: podcertificaterequests clustertrustbundles" "$TMP/apply.log" || fail "missing APIs not reported"
+[ ! -d "$FAKE_STATE/secret" ] || fail "secrets created without pod certificates"
+pass "pod certificate APIs are required"
 
 if [ "$failures" -gt 0 ]; then
   echo "$failures failure(s)"

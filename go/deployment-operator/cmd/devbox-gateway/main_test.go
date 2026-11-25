@@ -15,7 +15,7 @@ import (
 )
 
 func TestResolveDefaults(t *testing.T) {
-	t.Setenv("CONSOLE_URL", "https://console.example.com/")
+	t.Setenv("CONSOLE_URL", "https://console.example.com/ext/gql/")
 	t.Setenv("DEPLOY_TOKEN", "tok")
 	t.Setenv("POD_NAMESPACE", "plrl")
 	t.Setenv("DEVBOX_KAS_URL", "")
@@ -26,7 +26,10 @@ func TestResolveDefaults(t *testing.T) {
 	if o.kasURL != "wss://console.example.com/ext/devbox" {
 		t.Errorf("kas = %s", o.kasURL)
 	}
-	if o.aiProxyURL != "https://console.example.com/ext/v1/ai" || o.workbenchMCP != "https://console.example.com/mcp/workbench" {
+	if o.consoleURL != "https://console.example.com" {
+		t.Errorf("console = %s", o.consoleURL)
+	}
+	if o.aiProxyURL != "https://console.example.com/ext/ai" || o.workbenchMCP != "https://console.example.com/mcp/workbench" {
 		t.Errorf("endpoints = %s, %s", o.aiProxyURL, o.workbenchMCP)
 	}
 	if o.gatewayHost != "devbox-gateway.plrl.svc" {

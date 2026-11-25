@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 	"time"
@@ -62,6 +63,21 @@ func (m *Manager) resolveCwd(cwd string) string {
 	default:
 		return filepath.Join(m.opts.Home, cwd)
 	}
+}
+
+// defaultWorktreeRepos are the repositories a thread started without a directory of its own gets worktrees of:
+// every checkout, so concurrent threads never share a working tree or a branch.
+func (m *Manager) defaultWorktreeRepos() []string {
+	if m.opts.Worktrees == nil || m.opts.Checkouts == nil {
+		return nil
+	}
+	var out []string
+	for _, c := range m.opts.Checkouts() {
+		if c.GetWorktreeThreadId() == "" && c.GetName() != "" {
+			out = append(out, c.GetName())
+		}
+	}
+	return out
 }
 
 func (m *Manager) threadLocked(ref *devboxv1.ThreadRef) (*thread, error) {
@@ -215,11 +231,15 @@ func (m *Manager) CreateThread(ctx context.Context, req *devboxv1.CreateThreadRe
 	m.mu.Unlock()
 
 	cwd := m.resolveCwd(req.GetCwd())
-	if len(req.GetWorktreeRepos()) > 0 {
+	repos := req.GetWorktreeRepos()
+	if len(repos) == 0 && cwd == m.opts.Home {
+		repos = m.defaultWorktreeRepos()
+	}
+	if len(repos) > 0 {
 		if m.opts.Worktrees == nil {
 			return nil, derr.Unsupported("worktrees")
 		}
-		wt, err := m.opts.Worktrees(id, req.GetWorktreeRepos())
+		wt, err := m.opts.Worktrees(id, repos)
 		if err != nil {
 			return nil, err
 		}
@@ -240,7 +260,7 @@ func (m *Manager) CreateThread(ctx context.Context, req *devboxv1.CreateThreadRe
 
 	m.mu.Lock()
 	t := &thread{
-		id: id, agent: agent, cwd: cwd, worktrees: req.GetWorktreeRepos(), createdBy: req.GetCreatedBy(),
+		id: id, agent: agent, cwd: cwd, worktrees: repos, createdBy: req.GetCreatedBy(),
 		createdAt: m.clock.Now(), title: req.GetTitle(), model: model, dirty: true,
 	}
 	if old, ok := m.threads[id]; ok {
@@ -286,7 +306,7 @@ func (m *Manager) applyInitialConfig(ctx context.Context, c *agentConn, t *threa
 		m.mu.Unlock()
 		switch {
 		case opt != nil:
-			if acp.Str(opt.raw, "currentValue") != model && acp.Str(opt.raw, "currentValue") != harness.ProxyModel(t.agent, model) {
+			if !slices.Contains(harness.ModelIDs(t.agent, model), acp.Str(opt.raw, "currentValue")) {
 				if _, err := m.setConfig(ctx, c, s, opt.id(), model); err != nil {
 					errs = append(errs, err)
 				}
@@ -335,13 +355,20 @@ func (m *Manager) setConfig(ctx context.Context, c *agentConn, s *session, confi
 		return nil, derr.InvalidAgentOrModel(fmt.Sprintf("unknown config option %q", configID))
 	}
 	if !optionAllows(opt.raw, value) {
-		alt := harness.ProxyModel(s.agent, value)
-		if opt.category() == modelCategory && optionAllows(opt.raw, alt) {
-			value = alt
-		} else {
+		alt := ""
+		if opt.category() == modelCategory {
+			for _, id := range harness.ModelIDs(s.agent, value)[1:] {
+				if optionAllows(opt.raw, id) {
+					alt = id
+					break
+				}
+			}
+		}
+		if alt == "" {
 			m.mu.Unlock()
 			return nil, derr.InvalidAgentOrModel(fmt.Sprintf("%q is not a valid value for %s", value, opt.id()))
 		}
+		value = alt
 	}
 	if opt.category() == modeCategory {
 		if err := m.modeAllowedLocked(s.agent, s, value); err != nil {

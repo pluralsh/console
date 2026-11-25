@@ -373,13 +373,17 @@ func pipeToTunnel(tun devboxv1.Tunnel_ConnectClient, stream grpc.ClientStream) e
 		var frame RawFrame
 		recvErr := stream.RecvMsg(&frame)
 		if recvErr != nil {
-			if !errors.Is(recvErr, io.EOF) {
-				return sendError(tun, recvErr)
-			}
+			// KAS only accepts an error after the trailer once a header was sent.
 			if err := tun.Send(&devboxv1.TunnelConnectRequest{Msg: &devboxv1.TunnelConnectRequest_Trailer{
 				Trailer: &devboxv1.TunnelTrailer{Meta: fromMD(stream.Trailer())},
-			}}); err != nil && !errors.Is(err, io.EOF) {
+			}}); err != nil {
+				if errors.Is(err, io.EOF) {
+					return nil
+				}
 				return fmt.Errorf("send trailer: %w", err)
+			}
+			if !errors.Is(recvErr, io.EOF) {
+				return sendError(tun, recvErr)
 			}
 			return tun.CloseSend()
 		}

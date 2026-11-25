@@ -146,6 +146,18 @@
       "ExtraHeaders": null
     },
     {
+      "Host": "*.blob.core.windows.net",
+      "Port": 443,
+      "Scheme": "https",
+      "InjectHeader": "",
+      "SecretURI": "",
+      "ActorJWT": false,
+      "Prefix": "",
+      "ActorJWTAudiences": null,
+      "ActorJWTExpirationSeconds": 0,
+      "ExtraHeaders": null
+    },
+    {
       "Host": "bitbucket.org",
       "Port": 443,
       "Scheme": "https",
@@ -217,6 +229,20 @@
     },
     {
       "Host": "devbox-gateway.plrl.svc",
+      "Port": 443,
+      "Scheme": "https",
+      "InjectHeader": "Authorization",
+      "SecretURI": "",
+      "ActorJWT": true,
+      "Prefix": "Bearer ",
+      "ActorJWTAudiences": [
+        "devbox-mcp"
+      ],
+      "ActorJWTExpirationSeconds": 600,
+      "ExtraHeaders": null
+    },
+    {
+      "Host": "devbox-gateway.plrl.svc.cluster.local",
       "Port": 443,
       "Scheme": "https",
       "InjectHeader": "Authorization",

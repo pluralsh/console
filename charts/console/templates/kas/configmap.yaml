@@ -45,10 +45,12 @@ data:
       url_path_prefix: "{{ .Values.kas.devbox.path }}"
       console:
         address: "{{ .Values.kas.devbox.consoleGrpcAddress | default (printf "console.%s:50051" .Release.Namespace) }}"
-      {{- with .Values.kas.devbox.streamTokenSecret }}
       streams:
+        {{- if .Values.kas.devbox.streamTokenSecret.name }}
         token_secret_file: "/etc/kas/devbox_stream_token"
-      {{- end }}
+        {{- else }}
+        token_secret_file: "/etc/kas/.api_secret"
+        {{- end }}
     {{- end }}
     {{- if .Values.console.tls.enabled }}
     plural_url: "https://console.{{ .Release.Namespace }}:{{ .Values.service.port }}/gql"

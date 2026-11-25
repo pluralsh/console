@@ -171,6 +171,8 @@ defmodule Devbox.V1.Delta do
   field :entity, 9, type: Devbox.V1.AcpEntity
   field :offset, 10, type: :uint64
   field :emitted_at, 11, type: Google.Protobuf.Timestamp, json_name: "emittedAt"
+  field :seq, 12, type: :uint64
+  field :stream, 13, type: :string
 end
 
 defmodule Devbox.V1.PushInstanceDeltasRequest do
@@ -261,6 +263,7 @@ defmodule Devbox.V1.GetInstanceCredentialsRequest do
 
   field :instance_id, 1, type: :string, json_name: "instanceId"
   field :credentials, 2, repeated: true, type: Devbox.V1.CredentialSelector
+  field :devbox_id, 3, type: :string, json_name: "devboxId"
 end
 
 defmodule Devbox.V1.GetInstanceCredentialsResponse do
@@ -349,6 +352,32 @@ defmodule Devbox.V1.PullRequestAttributes do
   field :labels, 7, repeated: true, type: :string
   field :related_urls, 8, repeated: true, type: :string, json_name: "relatedUrls"
   field :extra, 9, type: Google.Protobuf.Struct
+  field :difficulty, 10, type: Devbox.V1.PullRequestDifficulty
+  field :commit_shas, 11, repeated: true, type: Devbox.V1.CommitSha, json_name: "commitShas"
+end
+
+defmodule Devbox.V1.PullRequestDifficulty do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "devbox.v1.PullRequestDifficulty",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :change_type, 1, type: :string, json_name: "changeType"
+  field :lines, 2, type: :int32
+end
+
+defmodule Devbox.V1.CommitSha do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "devbox.v1.CommitSha",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :branch, 1, type: :string
+  field :sha, 2, type: :string
 end
 
 defmodule Devbox.V1.DevboxPullRequestRequest do

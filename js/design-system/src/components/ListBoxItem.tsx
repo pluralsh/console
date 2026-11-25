@@ -39,7 +39,9 @@ const ListBoxItemInner = styled.div<Partial<ListBoxItemProps>>(
     alignItems: 'center',
     position: 'relative',
     width: 'auto',
-    padding: `${theme.spacing.xsmall} ${theme.spacing.medium}`,
+    margin: `0 ${theme.spacing.xxsmall}`,
+    padding: `${theme.spacing.xsmall} ${theme.spacing.small}`,
+    borderRadius: theme.borderRadiuses.medium,
     backgroundColor: 'none',
     cursor: 'pointer',
     '&:hover': {
@@ -58,6 +60,7 @@ const ListBoxItemInner = styled.div<Partial<ListBoxItemProps>>(
       left: 0,
       right: 0,
       bottom: 0,
+      borderRadius: 'inherit',
       ...theme.partials.focus.outline,
     },
     ...(focused ? { '&': { ...theme.partials.focus.outline } } : {}),
@@ -140,8 +143,10 @@ const ListBoxFooterInner = styled.button<{ $focused?: boolean }>(
     ...theme.partials.reset.button,
     display: 'flex',
     position: 'relative',
-    width: '100%',
-    padding: `${theme.spacing.small} ${theme.spacing.medium}`,
+    width: `calc(100% - 2 * ${theme.spacing.xxsmall})`,
+    margin: theme.spacing.xxsmall,
+    padding: `${theme.spacing.xsmall} ${theme.spacing.small}`,
+    borderRadius: theme.borderRadiuses.medium,
     '&:hover': {
       backgroundColor: theme.colors['fill-one-hover'],
     },
@@ -161,10 +166,14 @@ const ListBoxFooterInner = styled.button<{ $focused?: boolean }>(
     },
     '&:focus-visible::after': {
       ...theme.partials.focus.insetAbsolute,
+      borderRadius: 'inherit',
     },
     ...(focused
       ? {
-          '&::after': { ...theme.partials.focus.insetAbsolute },
+          '&::after': {
+            ...theme.partials.focus.insetAbsolute,
+            borderRadius: 'inherit',
+          },
         }
       : {}),
   })

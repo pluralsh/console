@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/url"
 	"strings"
 	"time"
 
@@ -49,6 +50,10 @@ func (g *Gateway) create(ctx context.Context, req *devboxv1.CreateInstanceReques
 	if runner.Atespace == "" {
 		return nil, status.Errorf(codes.FailedPrecondition, "%v: %s", ErrRunnerNotReady, runner.Name)
 	}
+	if src != nil && src.snapshot != nil && (runner.JuiceFSHome || runner.Revisions[src.snapshot.GetTemplateRevision()].JuiceFSHome) {
+		return nil, statusError(codes.Unimplemented, devboxv1.ErrorReason_ERROR_REASON_UNSUPPORTED,
+			"devbox runner %s keeps homes on JuiceFS, and starting from a snapshot isn't supported for them yet", runner.Name)
+	}
 	now := g.now()
 	rec := Record{
 		InstanceID:  req.GetInstanceId(),
@@ -73,8 +78,10 @@ func (g *Gateway) create(ctx context.Context, req *devboxv1.CreateInstanceReques
 		return nil, errRecord(err)
 	}
 	g.setStatus(ctx, inst, statusUpdate{status: devboxv1.InstanceStatus_INSTANCE_STATUS_PROVISIONING})
+	// Read before provisioning starts, which can otherwise move the record past PROVISIONING before the reply.
+	resp := g.createResponse(inst)
 	g.goBackground(func(ctx context.Context) { g.provision(ctx, inst, src) })
-	return g.createResponse(inst), nil
+	return resp, nil
 }
 
 func (g *Gateway) createResponse(inst *Instance) *devboxv1.CreateInstanceResponse {
@@ -144,7 +151,12 @@ func (g *Gateway) doProvision(ctx context.Context, inst *Instance, src *startSou
 	}
 	inst.mu.Unlock()
 
-	if _, err := g.deps.Actors.CreateActor(ctx, actors.Spec{Ref: ref, Template: template, SourceTag: tag}); err != nil {
+	spec := actors.Spec{Ref: ref, Template: template, SourceTag: tag}
+	if runner.JuiceFSHome && src == nil {
+		// Substrate refuses an explicit tag for templates with external volumes; the default is the golden tag.
+		spec.SourceTag, spec.Preview = "", true
+	}
+	if _, err := g.deps.Actors.CreateActor(ctx, spec); err != nil {
 		return fmt.Errorf("creating actor %s: %w", ref, err)
 	}
 	if retarget != "" {
@@ -195,7 +207,7 @@ func (g *Gateway) wake(ctx context.Context, inst *Instance) error {
 		return err
 	}
 	daemon := g.deps.Router.Daemon(ref.String())
-	if err := waitHealthy(ctx, daemon); err != nil {
+	if err := waitServing(ctx, daemon); err != nil {
 		return fmt.Errorf("waiting for the daemon of %s: %w", ref, err)
 	}
 	g.refreshRunner(ctx, inst)
@@ -221,25 +233,21 @@ func (g *Gateway) refreshRunner(ctx context.Context, inst *Instance) {
 	inst.mu.Unlock()
 }
 
-func waitHealthy(ctx context.Context, d devboxv1.DaemonClient) error {
+// waitServing waits for the daemon to answer Health. It doesn't wait for Ready: a daemon is only Ready after
+// Initialize, which needs it serving.
+func waitServing(ctx context.Context, d devboxv1.DaemonClient) error {
 	t := time.NewTicker(500 * time.Millisecond)
 	defer t.Stop()
-	var last error
 	for {
 		hctx, cancel := context.WithTimeout(ctx, 5*time.Second)
-		resp, err := d.Health(hctx, &devboxv1.HealthRequest{})
+		_, err := d.Health(hctx, &devboxv1.HealthRequest{})
 		cancel()
-		if err == nil && resp.GetReady() {
+		if err == nil {
 			return nil
-		}
-		if err != nil {
-			last = err
-		} else {
-			last = fmt.Errorf("daemon not ready: %s", resp.GetStatus())
 		}
 		select {
 		case <-ctx.Done():
-			return errors.Join(ctx.Err(), last)
+			return errors.Join(ctx.Err(), err)
 		case <-t.C:
 		}
 	}
@@ -275,18 +283,21 @@ func (g *Gateway) initRequest(inst *Instance) *devboxv1.InitializeRequest {
 		Env:                  env,
 		Autonomy:             autonomy,
 		DecisionReview:       req.GetDecisionReview(),
-		Endpoints:            g.endpoints(),
+		Endpoints:            g.endpoints(req.GetWorkbenchId()),
 		RestoredFromSnapshot: inst.rec.RestoredFrom != "",
 		RestoreFidelity:      devboxv1.SnapshotFidelity(devboxv1.SnapshotFidelity_value[inst.rec.RestoreFidelity]),
 		RequestTokenJwks:     g.cfg.RequestTokenJWKS,
 	}
 }
 
-func (g *Gateway) endpoints() *devboxv1.HarnessEndpoints {
+func (g *Gateway) endpoints(workbenchID string) *devboxv1.HarnessEndpoints {
 	ep := &devboxv1.HarnessEndpoints{
-		ConsoleUrl:      g.cfg.ConsoleURL,
-		AiProxyUrl:      g.cfg.AIProxyURL,
-		WorkbenchMcpUrl: g.cfg.WorkbenchMCPURL,
+		ConsoleUrl: g.cfg.ConsoleURL,
+		AiProxyUrl: g.cfg.AIProxyURL,
+	}
+	// console serves each workbench's MCP at <base>/<workbench-id>
+	if base := strings.TrimSuffix(g.cfg.WorkbenchMCPURL, "/"); base != "" && workbenchID != "" {
+		ep.WorkbenchMcpUrl = base + "/" + url.PathEscape(workbenchID)
 	}
 	if gw := strings.TrimSuffix(g.cfg.GatewayURL, "/"); gw != "" {
 		ep.DevboxMcpUrl = gw + egress.MCPPath
@@ -299,11 +310,47 @@ func (g *Gateway) endpoints() *devboxv1.HarnessEndpoints {
 
 // suspend suspends a running instance (DBX-64): PrepareSuspend settles the daemon, the forwarder drains up to
 // the settled offset (so console has indexed everything and the daemon has it acknowledged), then Substrate suspends the actor.
-// Evictions and snapshots suspend synchronously so the snapshot is durable before the worker goes away.
+// The box may refuse an automatic suspend (idle, max awake) that would cut off a running agent turn.
+//
+// Like resume, it runs in the background bounded by SuspendTimeout rather than the caller's deadline: a checkpoint
+// cut off midway leaves the actor SUSPENDING. A caller whose context ends first gets the current status while the
+// suspend continues; the new status is reported when it lands.
 func (g *Gateway) suspend(ctx context.Context, inst *Instance, reason devboxv1.SuspendReason) (devboxv1.InstanceStatus, error) {
-	inst.op.Lock()
-	defer inst.op.Unlock()
-	return g.suspendLocked(ctx, inst, reason, devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED)
+	type result struct {
+		status devboxv1.InstanceStatus
+		err    error
+	}
+	done := make(chan result, 1)
+	g.goBackground(func(ctx context.Context) {
+		ctx, cancel := context.WithTimeout(ctx, g.cfg.SuspendTimeout)
+		defer cancel()
+		inst.op.Lock()
+		defer inst.op.Unlock()
+		st, err := g.suspendLocked(ctx, inst, reason, devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED)
+		done <- result{st, err}
+	})
+	wait, cancel := answerBy(ctx)
+	defer cancel()
+	select {
+	case r := <-done:
+		return r.status, r.err
+	case <-wait.Done():
+		return inst.status(), nil
+	}
+}
+
+// replyMargin is how long before the caller's deadline a wait gives up and answers, at most a tenth of the call.
+const replyMargin = 3 * time.Second
+
+// answerBy ends replyMargin before ctx's deadline. An answer sent at the deadline itself loses the race to the
+// proxy in between (KAS), which answers DeadlineExceeded in its place, so console never hears that the operation
+// carries on.
+func answerBy(ctx context.Context) (context.Context, context.CancelFunc) {
+	dl, ok := ctx.Deadline()
+	if !ok {
+		return context.WithCancel(ctx)
+	}
+	return context.WithDeadline(ctx, dl.Add(-min(replyMargin, time.Until(dl)/10)))
 }
 
 func (g *Gateway) suspendLocked(ctx context.Context, inst *Instance, reason devboxv1.SuspendReason, final devboxv1.InstanceStatus) (devboxv1.InstanceStatus, error) {
@@ -322,9 +369,13 @@ func (g *Gateway) suspendLocked(ctx context.Context, inst *Instance, reason devb
 			SharedSnapshot: reason == devboxv1.SuspendReason_SUSPEND_REASON_SNAPSHOT && inst.sharedSnapshot(),
 		})
 		cancel()
-		if err != nil {
+		switch {
+		case status.Code(err) == codes.FailedPrecondition && automatic(reason):
+			g.log.Info("box refused an automatic suspend; it stays running", "instance", inst.ID, "reason", reason, "why", status.Convert(err).Message())
+			return devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING, nil
+		case err != nil:
 			g.log.Error(err, "PrepareSuspend failed; suspending anyway", "instance", inst.ID, "reason", reason)
-		} else {
+		default:
 			settled = resp.GetSettledOffset()
 		}
 	}
@@ -337,10 +388,12 @@ func (g *Gateway) suspendLocked(ctx context.Context, inst *Instance, reason devb
 	}
 	inst.stopForwarder()
 
-	sync := reason == devboxv1.SuspendReason_SUSPEND_REASON_EVICTION || reason == devboxv1.SuspendReason_SUSPEND_REASON_SNAPSHOT
-	if err := g.deps.Actors.Suspend(ctx, ref, sync); err != nil {
-		if g.recoverSuspend(ctx, inst, err) {
-			g.setStatus(ctx, inst, statusUpdate{status: final, reason: reason, message: "recovered after: " + err.Error()})
+	// Always durable: an async suspend leaves the snapshot node-local until atelet uploads it, and a revert in that
+	// window (an actor crashing on resume, say) returns the box to the previous uploaded snapshot, discarding
+	// everything since. The wait is the gateway's; suspend runs in the background.
+	if err := g.deps.Actors.Suspend(ctx, ref, true); err != nil {
+		if msg, ok := g.recoverSuspend(ctx, inst, err); ok {
+			g.setStatus(ctx, inst, statusUpdate{status: final, reason: reason, message: msg})
 			return final, nil
 		}
 		// Still running: keep forwarding events.
@@ -353,25 +406,42 @@ func (g *Gateway) suspendLocked(ctx context.Context, inst *Instance, reason devb
 	return final, nil
 }
 
-// recoverSuspend handles a failed SuspendActor: an actor that is suspended anyway is fine, and a crashed one is
-// reverted to its last snapshot.
-func (g *Gateway) recoverSuspend(ctx context.Context, inst *Instance, cause error) bool {
+// automatic reports the suspend reasons the box may refuse: nobody asked for them, and nothing is lost by waiting.
+func automatic(reason devboxv1.SuspendReason) bool {
+	return reason == devboxv1.SuspendReason_SUSPEND_REASON_IDLE || reason == devboxv1.SuspendReason_SUSPEND_REASON_MAX_CONTINUOUS_AWAKE
+}
+
+// recoverSuspend handles a failed SuspendActor, returning the status message to record: an actor that is
+// suspended anyway is fine, as is one left SUSPENDING, which the next resume finishes suspending first, and a
+// crashed one is reverted to its last snapshot, losing what it did since.
+func (g *Gateway) recoverSuspend(ctx context.Context, inst *Instance, cause error) (string, bool) {
 	ref := inst.ref()
 	a, err := g.deps.Actors.GetActor(ctx, ref)
 	if err != nil {
-		return false
+		return "", false
 	}
 	switch a.GetStatus().GetState() {
 	case ateapi.ActorState_ACTOR_STATE_SUSPENDED, ateapi.ActorState_ACTOR_STATE_SUSPENDING:
-		return true
+		return "suspended after: " + cause.Error(), true
 	case ateapi.ActorState_ACTOR_STATE_CRASHED:
+		crash := a.GetStatus().GetCrash().GetMessage()
 		if err := g.deps.Actors.Revert(ctx, ref); err != nil {
 			g.log.Error(errors.Join(cause, err), "reverting crashed actor", "instance", inst.ID)
-			return false
+			return "", false
 		}
-		return true
+		g.log.Error(cause, "actor crashed; reverted to its last snapshot", "instance", inst.ID, "crash", crash)
+		return crashedMessage(crash), true
 	}
-	return false
+	return "", false
+}
+
+// crashedMessage tells the user a crashed box was rolled back, which loses its work since the last suspend.
+func crashedMessage(crash string) string {
+	msg := "the box crashed and was restored to its last suspend; work since then was lost"
+	if crash != "" {
+		msg += " (" + crash + ")"
+	}
+	return msg
 }
 
 func (i *Instance) sharedSnapshot() bool {
@@ -381,10 +451,45 @@ func (i *Instance) sharedSnapshot() bool {
 }
 
 // resume wakes a suspended instance (DBX-61).
+type wakeOp struct {
+	done   chan struct{}
+	status devboxv1.InstanceStatus
+	err    error
+}
+
+// resume wakes inst in the background, bounded by ReadyTimeout rather than the caller's deadline: a cold restore
+// can outlast a control call, and cancelling it midway left the actor half resumed for the next caller to restart.
+// Concurrent callers share one wake; a caller whose context ends first gets errStarting while the wake continues.
 func (g *Gateway) resume(ctx context.Context, inst *Instance) (devboxv1.InstanceStatus, error) {
-	inst.op.Lock()
-	defer inst.op.Unlock()
-	return g.resumeLocked(ctx, inst)
+	op := g.startWake(inst)
+	wait, cancel := answerBy(ctx)
+	defer cancel()
+	select {
+	case <-op.done:
+		return op.status, op.err
+	case <-wait.Done():
+		return inst.status(), errStarting(inst.ID)
+	}
+}
+
+func (g *Gateway) startWake(inst *Instance) *wakeOp {
+	inst.mu.Lock()
+	defer inst.mu.Unlock()
+	if inst.waking != nil {
+		return inst.waking
+	}
+	op := &wakeOp{done: make(chan struct{})}
+	inst.waking = op
+	g.goBackground(func(ctx context.Context) {
+		inst.op.Lock()
+		op.status, op.err = g.resumeLocked(ctx, inst)
+		inst.op.Unlock()
+		inst.mu.Lock()
+		inst.waking = nil
+		inst.mu.Unlock()
+		close(op.done)
+	})
+	return op
 }
 
 func (g *Gateway) resumeLocked(ctx context.Context, inst *Instance) (devboxv1.InstanceStatus, error) {
@@ -399,7 +504,8 @@ func (g *Gateway) resumeLocked(ctx context.Context, inst *Instance) (devboxv1.In
 		if errors.Is(err, actors.ErrCrashed) {
 			_ = g.deps.Actors.Revert(ctx, inst.ref())
 		}
-		return devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED, status.Errorf(codes.Unavailable, "resuming instance %s: %v", inst.ID, err)
+		// not Unavailable: console reads that as the cluster being offline, which hides the real failure
+		return devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED, status.Errorf(codes.Internal, "resuming instance %s: %v", inst.ID, err)
 	}
 	g.setStatus(ctx, inst, statusUpdate{status: devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING})
 	g.startForwarder(inst)
@@ -425,7 +531,7 @@ func (g *Gateway) running(ctx context.Context, id string, resumeIfSuspended bool
 	case devboxv1.InstanceStatus_INSTANCE_STATUS_PROVISIONING, devboxv1.InstanceStatus_INSTANCE_STATUS_PENDING,
 		devboxv1.InstanceStatus_INSTANCE_STATUS_SNAPSHOTTING:
 		if !resumeIfSuspended {
-			return inst, nil, status.Errorf(codes.Unavailable, "instance %s is %s", id, st)
+			return inst, nil, statusError(codes.Unavailable, devboxv1.ErrorReason_ERROR_REASON_INSTANCE_STARTING, "instance %s is %s", id, st)
 		}
 		// Wait for the operation in flight, then re-check.
 		inst.op.Lock()
@@ -502,6 +608,12 @@ func (g *Gateway) takeSnapshot(ctx context.Context, inst *Instance, req *devboxv
 	if err != nil {
 		return nil, err
 	}
+	if err := g.saveHomeSeed(ctx, ref, tagRef); err != nil {
+		if derr := g.deps.Actors.DeleteTag(ctx, tagRef); derr != nil {
+			g.log.Error(derr, "deleting the tag of a failed snapshot", "instance", inst.ID, "tag", tagRef.String())
+		}
+		return nil, err
+	}
 	fidelity := devboxv1.SnapshotFidelity_SNAPSHOT_FIDELITY_FILESYSTEM
 	if actors.TagFidelity(tag) == ateapi.SnapshotFidelity_SNAPSHOT_FIDELITY_MEMORY {
 		fidelity = devboxv1.SnapshotFidelity_SNAPSHOT_FIDELITY_MEMORY
@@ -513,6 +625,29 @@ func (g *Gateway) takeSnapshot(ctx context.Context, inst *Instance, req *devboxv
 		Fidelity:         fidelity,
 	}, nil
 }
+
+// saveHomeSeed copies a JuiceFS home, which isn't in the tag, into the snapshot's seed while the actor is still
+// suspended, so the copy matches the tag.
+func (g *Gateway) saveHomeSeed(ctx context.Context, ref, tag actors.Ref) error {
+	if g.deps.Seeds == nil {
+		return nil
+	}
+	a, err := g.deps.Actors.GetActor(ctx, ref)
+	if err != nil {
+		return fmt.Errorf("reading actor %s: %w", ref, err)
+	}
+	volume := actors.ExternalVolumeID(a, homeVolume)
+	if volume == "" {
+		return nil
+	}
+	if err := g.deps.Seeds.SaveSeed(ctx, SnapshotSeedID(tag), volume); err != nil {
+		return fmt.Errorf("saving the home of %s: %w", ref, err)
+	}
+	return nil
+}
+
+// homeVolume is the template volume mounted at /home/dev.
+const homeVolume = "home"
 
 // ---- cancel and complete (DBX-60) ----
 
@@ -593,7 +728,7 @@ func (g *Gateway) adopt(ctx context.Context, inst *Instance) {
 		if err := g.deps.Actors.Revert(ctx, inst.ref()); err != nil {
 			g.log.Error(err, "reverting crashed actor", "instance", inst.ID)
 		}
-		g.setStatus(ctx, inst, statusUpdate{status: devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED, reason: devboxv1.SuspendReason_SUSPEND_REASON_DAEMON_UNRESPONSIVE, message: "actor crashed and was reverted"})
+		g.setStatus(ctx, inst, statusUpdate{status: devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED, reason: devboxv1.SuspendReason_SUSPEND_REASON_DAEMON_UNRESPONSIVE, message: crashedMessage(a.GetStatus().GetCrash().GetMessage())})
 	default:
 		reason := devboxv1.SuspendReason(devboxv1.SuspendReason_value[rec.SuspendReason])
 		if rec.status() != devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED {

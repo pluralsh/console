@@ -90,8 +90,10 @@ func (in *Account) GetConfiguredProviders() ([]schemas.ModelProvider, error) {
 		return nil, fmt.Errorf("failed to get AI config: %w", err)
 	}
 
+	// Bifrost calls this once at startup and creates provider queues lazily per request, so an error here would
+	// crash Nexus until AI is configured. Requests made while AI is disabled still fail in GetKeysForProvider.
 	if !aiConfig.GetEnabled() {
-		return nil, fmt.Errorf("AI is disabled in Console")
+		return nil, nil
 	}
 
 	var providers []schemas.ModelProvider

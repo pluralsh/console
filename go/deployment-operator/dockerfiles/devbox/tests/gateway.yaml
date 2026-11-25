@@ -7,6 +7,12 @@ metadataTest:
   entrypoint: ["/devbox-gateway"]
   user: "65532:65532"
 
+commandTests:
+  - name: the binary executes
+    command: /devbox-gateway
+    args: ["-version"]
+    exitCode: 0
+
 fileExistenceTests:
   - name: devbox-gateway
     path: /devbox-gateway
@@ -15,9 +21,6 @@ fileExistenceTests:
   - name: CA certificates
     path: /etc/ssl/certs/ca-certificates.crt
     shouldExist: true
-  - name: distroless, no shell
-    path: /bin/sh
-    shouldExist: false
   - name: no daemon or harnesses
     path: /usr/local/bin/devbox-daemon
     shouldExist: false

@@ -11,8 +11,8 @@ spec:
   agents:
     - type: claude
       default: true
-      models: [claude-sonnet-4-5, claude-opus-4-1]
-      defaultModel: claude-sonnet-4-5
+      models: [claude-sonnet-5-5, claude-opus-5-5]
+      defaultModel: claude-sonnet-5-5
     - type: codex
       acpV2: true
   resources:
@@ -25,7 +25,13 @@ spec:
     sandboxClass: gvisor
   scmConnections: [github]
   allowedRepositories:
-    - pluralsh/console
+    - github.com/pluralsh/console
+  # Cloned at the golden boot (before mise and bootstrapScript), and fetched again by each instance's first boot.
+  repositories:
+    - url: https://github.com/pluralsh/console
+      branch: master
+      description: Plural's console
+  bootstrapTimeout: 45m
   httpAllowlist:
     - host: registry.npmjs.org
     - host: proxy.golang.org

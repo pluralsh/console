@@ -19,12 +19,17 @@ import (
 	"github.com/go-logr/logr"
 
 	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/egress/rules"
 )
 
 // InstanceInfo is everything the egress components need to know about one running devbox instance. The gateway
 // core builds it from the box (DevboxRunner), the instance and its workbench.
 type InstanceInfo struct {
-	InstanceID  string
+	InstanceID string
+	// Golden marks the golden boot of one of the box's templates, which clones the runner's repositories before
+	// any instance exists: InstanceID is the runner's GoldenInstanceID, and its only credentials are the box's
+	// (BoxID) SCM ones.
+	Golden      bool
 	BoxID       string
 	WorkbenchID string
 	UserID      string
@@ -86,6 +91,11 @@ type PullRequestOwner interface {
 	DevboxForPullRequest(ctx context.Context, url string) (boxID string, err error)
 }
 
+// BranchDiffs sizes a pull request's branch in the instance's checkout (the core, through the daemon).
+type BranchDiffs interface {
+	GetBranchDiffStat(ctx context.Context, req *devboxv1.BranchDiffStatRequest) (*devboxv1.BranchDiffStatResponse, error)
+}
+
 // Deps are the collaborators the gateway core provides.
 type Deps struct {
 	Ingest devboxv1.IngestClient
@@ -94,6 +104,8 @@ type Deps struct {
 
 	// PullRequests is optional; see PullRequestOwner.
 	PullRequests PullRequestOwner
+	// Diffs is optional; without it devbox PRs carry no line counts or commit SHAs.
+	Diffs BranchDiffs
 }
 
 // Config configures the three listeners. An empty address disables that listener.
@@ -161,7 +173,7 @@ const (
 	// DefaultEgressSPIFFEID is atenet-egress's pod identity in a default Substrate install.
 	DefaultEgressSPIFFEID = "spiffe://cluster.local/ns/ate-system/sa/atenet-egress"
 	// CredentialProviderName is the provider class registered with Substrate.
-	CredentialProviderName = "plural.sh"
+	CredentialProviderName = rules.CredentialProviderName
 )
 
 // Ports of the devbox-gateway Services the operator creates (internal/controller/devboxrunner_gateway.go): the
@@ -179,57 +191,33 @@ const (
 
 // Credential kinds as they appear in ate-secret://plural.sh/instances/<id>/<kind> URIs.
 const (
-	KindSCM = "scm"
-	// KindSCMToken resolves the same SCM credential as KindSCM, but as the bare token rather than an Authorization
-	// value, for APIs that take it in their own header (GitLab's PRIVATE-TOKEN).
-	KindSCMToken    = "scm-token"
-	KindAIProxy     = "ai-proxy"
-	KindConsole     = "console"
-	KindClaudeOAuth = "claude-oauth"
-	KindOIDC        = "oidc"
+	KindSCM         = rules.KindSCM
+	KindSCMToken    = rules.KindSCMToken
+	KindAIProxy     = rules.KindAIProxy
+	KindConsole     = rules.KindConsole
+	KindClaudeOAuth = rules.KindClaudeOAuth
+	KindOIDC        = rules.KindOIDC
 )
 
-// Policy is an instance's egress policy, in a shape close to Substrate's EgressPolicy.
-type Policy struct {
-	Rules []Rule
+// GoldenInstanceID is the egress pseudo-instance of a runner's golden boots.
+func GoldenInstanceID(runner string) string { return rules.GoldenInstanceID(runner) }
+
+// RepositoryAllowed reports whether repo is on allowed with the matching the ext_proc enforces; an empty allowlist
+// allows every repository.
+func RepositoryAllowed(allowed []string, repo string) bool {
+	return rules.RepositoryAllowed(allowed, repo)
 }
 
-// Rule is one egress rule. Rules are unique by (Host, Port).
-type Rule struct {
-	Host string
-	// Port is 443 for https and tls_passthrough, 80 for http, unless set.
-	Port int32
-	// Scheme is "https", "http" or "tls_passthrough".
-	Scheme string
-	// InjectHeader, when set, is replaced with Prefix plus a credential: SecretURI's, or the actor JWT.
-	InjectHeader string
-	// SecretURI is ate-secret://plural.sh/instances/<id>/<kind>[/<host>]. The credential provider returns the
-	// complete header value (console's header_format applied), so Prefix is empty for these rules.
-	SecretURI string
-	// ActorJWT injects a Substrate-minted actor JWT instead of a secret.
-	ActorJWT bool
-
-	// Prefix is prepended to the credential (Substrate's CredentialHeader.prefix).
-	Prefix string
-	// ActorJWTAudiences and ActorJWTExpirationSeconds configure the actor JWT when ActorJWT is set.
-	ActorJWTAudiences         []string
-	ActorJWTExpirationSeconds int64
-
-	// ExtraHeaders are further headers the rule replaces, each from its own secret. Substrate replaces a header
-	// only when the request carries it, so a client picks its credential by the header it sends.
-	ExtraHeaders []HeaderSecret
-}
-
-// HeaderSecret replaces Header with the credential SecretURI resolves to.
-type HeaderSecret struct {
-	Header    string
-	SecretURI string
-}
+type (
+	Policy       = rules.Policy
+	Rule         = rules.Rule
+	HeaderSecret = rules.HeaderSecret
+)
 
 const (
-	SchemeHTTPS          = "https"
-	SchemeHTTP           = "http"
-	SchemeTLSPassthrough = "tls_passthrough"
+	SchemeHTTPS          = rules.SchemeHTTPS
+	SchemeHTTP           = rules.SchemeHTTP
+	SchemeTLSPassthrough = rules.SchemeTLSPassthrough
 )
 
 // Run starts the credential provider, the ext_proc authz server and the devbox MCP, and blocks until ctx is done

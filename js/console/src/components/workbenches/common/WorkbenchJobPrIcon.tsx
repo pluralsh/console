@@ -47,7 +47,13 @@ function jobPrStatus(prs: ReadonlyArray<{ status?: Nullable<PrStatus> }>) {
         : PrStatus.Open
 }
 
-function PrStatusIcon({ status, size }: { status: PrStatus; size?: number }) {
+export function PrStatusIcon({
+  status,
+  size,
+}: {
+  status: PrStatus
+  size?: number
+}) {
   const theme = useTheme()
 
   return status === PrStatus.Merged ? (

@@ -18,6 +18,7 @@ import (
 
 	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/guest"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/probe"
 )
 
@@ -46,7 +47,7 @@ const (
 type DevboxProbeRequest struct {
 	probe.Request `json:",inline"`
 	// Agents are the declared agents; Probe carries the same as a ProbeAgentsRequest.
-	Agents []DevboxGuestAgentSpec `json:"agents"`
+	Agents []guest.Agent `json:"agents"`
 }
 
 // DevboxProbeTokenMinter mints the box-scoped AI proxy token the probe runs with (console's mintDevboxProbeToken).
@@ -253,10 +254,10 @@ func (c *ConfigMapProbeClient) ReleaseToken(ctx context.Context, runner string, 
 	return c.patchTokens(ctx, func(data map[string][]byte) { delete(data, key) })
 }
 
-func devboxProbeSpecs(agents []DevboxGuestAgentSpec) []*devboxv1.AgentProbeSpec {
-	return lo.Map(agents, func(a DevboxGuestAgentSpec, _ int) *devboxv1.AgentProbeSpec {
+func devboxProbeSpecs(agents []guest.Agent) []*devboxv1.AgentProbeSpec {
+	return lo.Map(agents, func(a guest.Agent, _ int) *devboxv1.AgentProbeSpec {
 		return &devboxv1.AgentProbeSpec{
-			Type:           devboxProtoAgentType(a.Type),
+			Type:           devboxProtoAgentType(v1alpha1.DevboxAgentType(a.Type)),
 			IsDefault:      a.Default,
 			AdapterVersion: a.AdapterVersion,
 			Models:         a.Models,

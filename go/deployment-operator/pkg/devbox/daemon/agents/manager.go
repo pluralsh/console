@@ -14,6 +14,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/google/uuid"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
@@ -123,6 +124,9 @@ type Manager struct {
 	dirty          bool
 	// unwritten are settled revisions not yet in the transcript; timelines merge them in until the next flush.
 	unwritten map[entityRef]*devboxv1.AcpEntity
+	// stream names this run's numbering of seqs, each session's last Delta.seq.
+	stream string
+	seqs   map[string]uint64
 
 	termMu sync.Mutex
 	terms  map[string]*clientTerminal
@@ -160,6 +164,7 @@ func New(opts Options) *Manager {
 		launches: map[devboxv1.AgentType]*devboxv1.AgentLaunch{}, conns: map[devboxv1.AgentType]*agentConn{},
 		starting: map[devboxv1.AgentType]chan struct{}{}, threads: map[string]*thread{}, sessions: map[string]*session{},
 		interactions: map[string]*interaction{}, unwritten: map[entityRef]*devboxv1.AcpEntity{},
+		stream: uuid.NewString(), seqs: map[string]uint64{},
 	}
 }
 
@@ -241,8 +246,13 @@ func (m *Manager) emitLocked(ev *devboxv1.DaemonEvent) {
 	}
 }
 
+// emitDeltaLocked numbers a delta in its session's sequence (notices are live-only and stay unnumbered) and emits it.
 func (m *Manager) emitDeltaLocked(d *devboxv1.Delta) {
 	d.InstanceId = m.instanceID
+	if d.GetSessionId() != "" && d.GetOp() != devboxv1.DeltaOp_DELTA_OP_NOTICE {
+		m.seqs[d.GetSessionId()]++
+		d.Seq, d.Stream = m.seqs[d.GetSessionId()], m.stream
+	}
 	m.emitLocked(&devboxv1.DaemonEvent{Event: &devboxv1.DaemonEvent_Delta{Delta: d}})
 }
 
@@ -263,10 +273,13 @@ func (m *Manager) Flush() {
 func (m *Manager) flushLocked() {
 	now := m.clock.Now()
 	m.writeTranscriptLocked()
+	// Revisions and entity positions must stay monotonic across restarts, so a flush that moves them persists.
+	// Rows go dirty whenever their session gains an entity, so this covers positions too.
 	for _, t := range m.threads {
 		if t.dirty || activityDue(t.session) {
 			t.dirty = false
 			t.rev++
+			m.dirty = true
 			m.emitLocked(&devboxv1.DaemonEvent{Event: &devboxv1.DaemonEvent_Session{Session: m.threadRowLocked(t)}})
 			reported(t.session)
 		}
@@ -275,6 +288,7 @@ func (m *Manager) flushLocked() {
 		if s.kind == devboxv1.SessionKind_SESSION_KIND_SUBAGENT && (s.dirty || activityDue(s)) {
 			s.dirty = false
 			s.rev++
+			m.dirty = true
 			m.emitLocked(&devboxv1.DaemonEvent{Event: &devboxv1.DaemonEvent_Session{Session: m.subagentRowLocked(s)}})
 			reported(s)
 		}
@@ -289,6 +303,7 @@ func (m *Manager) flushLocked() {
 	if string(key) != m.lastAgg {
 		m.lastAgg = string(key)
 		m.aggRevision++
+		m.dirty = true
 		agg.Revision = m.aggRevision
 		m.emitLocked(&devboxv1.DaemonEvent{Event: &devboxv1.DaemonEvent_Aggregate{Aggregate: agg}})
 	}
@@ -383,6 +398,7 @@ func (m *Manager) threadRowLocked(t *thread) *devboxv1.Session {
 		Imported:      t.imported,
 		Revision:      t.rev,
 		Title:         t.title,
+		QueuedPrompts: t.queuedProtos(),
 	}
 	if s := t.session; s != nil {
 		fillSessionRow(row, s)
@@ -392,13 +408,14 @@ func (m *Manager) threadRowLocked(t *thread) *devboxv1.Session {
 
 func (m *Manager) subagentRowLocked(s *session) *devboxv1.Session {
 	row := &devboxv1.Session{
-		Kind:            devboxv1.SessionKind_SESSION_KIND_SUBAGENT,
-		ParentSessionId: s.parent,
-		Agent:           s.agent,
-		Cwd:             s.cwd,
-		Status:          devboxv1.ThreadStatus_THREAD_STATUS_ACTIVE,
-		CreatedAt:       timestamppb.New(s.createdAt),
-		Revision:        s.rev,
+		Kind:             devboxv1.SessionKind_SESSION_KIND_SUBAGENT,
+		ParentSessionId:  s.parent,
+		ParentToolCallId: s.parentToolCall,
+		Agent:            s.agent,
+		Cwd:              s.cwd,
+		Status:           devboxv1.ThreadStatus_THREAD_STATUS_ACTIVE,
+		CreatedAt:        timestamppb.New(s.createdAt),
+		Revision:         s.rev,
 	}
 	fillSessionRow(row, s)
 	return row
@@ -418,16 +435,14 @@ func fillSessionRow(row *devboxv1.Session, s *session) {
 	row.Meta = acp.StructOf(s.meta)
 }
 
-// BusyReasons reports agent activity for idle detection: running turns and fresh pending interactions.
+// BusyReasons reports agent activity for idle detection: running turns and fresh pending interactions. A turn
+// that has waited on an answer for PendingInteractionBusy without its transcript moving isn't running: nothing
+// happens until someone answers, the box suspends with the turn intact, and answering wakes it.
 func (m *Manager) BusyReasons(now time.Time) []*devboxv1.BusyReason {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	var out []*devboxv1.BusyReason
-	for _, t := range m.threads {
-		if t.running || t.waiting || len(t.queue) > 0 {
-			out = append(out, &devboxv1.BusyReason{Kind: devboxv1.BusyReasonKind_BUSY_REASON_KIND_AGENT_TURN, Detail: t.displayTitle(), ThreadId: t.id})
-		}
-	}
+	unanswered := map[*thread]bool{}
 	for _, in := range m.interactions {
 		if in.proto.GetState() != devboxv1.InteractionState_INTERACTION_STATE_PENDING {
 			continue
@@ -438,10 +453,31 @@ func (m *Manager) BusyReasons(now time.Time) []*devboxv1.BusyReason {
 				Kind: devboxv1.BusyReasonKind_BUSY_REASON_KIND_PENDING_INTERACTION, Detail: in.proto.GetTitle(),
 				ThreadId: in.proto.GetThreadId(), Until: timestamppb.New(created.Add(PendingInteractionBusy)),
 			})
+		} else if in.session != nil && in.session.thread != nil {
+			unanswered[in.session.thread] = true
+		}
+	}
+	for _, t := range m.threads {
+		if t.running && unanswered[t] && now.Sub(m.lastChangeLocked(t)) >= PendingInteractionBusy {
+			continue
+		}
+		if t.running || t.waiting || len(t.queue) > 0 {
+			out = append(out, &devboxv1.BusyReason{Kind: devboxv1.BusyReasonKind_BUSY_REASON_KIND_AGENT_TURN, Detail: t.displayTitle(), ThreadId: t.id})
 		}
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].GetThreadId() < out[j].GetThreadId() })
 	return out
+}
+
+// lastChangeLocked is when anything in the thread's transcript, or its subagents', last changed.
+func (m *Manager) lastChangeLocked(t *thread) time.Time {
+	var last time.Time
+	for _, s := range m.sessions {
+		if s.thread == t && s.store != nil && s.store.LastChange().After(last) {
+			last = s.store.LastChange()
+		}
+	}
+	return last
 }
 
 func (m *Manager) statePath() string { return filepath.Join(m.opts.StateDir, "threads.json") }

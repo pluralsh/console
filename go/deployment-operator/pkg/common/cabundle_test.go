@@ -94,6 +94,26 @@ func TestLoadSpawnedCAConfigReadsSettings(t *testing.T) {
 	require.Contains(t, string(pem), "BEGIN CERTIFICATE")
 }
 
+func TestSpawnedCASourceChecksum(t *testing.T) {
+	SetSpawnedCAConfigForTest(SpawnedCAConfig{})
+	sum, err := SpawnedCASourceChecksum()
+	require.NoError(t, err)
+	require.Empty(t, sum)
+
+	path := filepath.Join(t.TempDir(), "ca.crt")
+	require.NoError(t, os.WriteFile(path, []byte("pem-bytes"), 0o644))
+	SetSpawnedCAConfigForTest(SpawnedCAConfig{
+		Enabled:    true,
+		SourceFile: path,
+		Key:        DefaultSpawnedCAKey,
+	})
+	t.Cleanup(func() { SetSpawnedCAConfigForTest(SpawnedCAConfig{}) })
+
+	sum, err = SpawnedCASourceChecksum()
+	require.NoError(t, err)
+	require.NotEmpty(t, sum)
+}
+
 func TestReadSpawnedCAPEMReportsMissingFile(t *testing.T) {
 	_, err := readSpawnedCAPEM(SpawnedCAConfig{
 		Enabled:    true,

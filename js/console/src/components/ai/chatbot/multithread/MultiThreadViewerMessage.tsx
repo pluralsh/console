@@ -9,11 +9,7 @@ import {
   Modal,
 } from '@pluralsh/design-system'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
-import {
-  Body2P,
-  InlineA,
-  shimmerWithinCss,
-} from 'components/utils/typography/Text'
+import { Body2P, shimmerWithinCss } from 'components/utils/typography/Text'
 import { ChatFragment, ChatType } from 'generated/graphql'
 import { isNil } from 'lodash'
 import { ComponentProps, memo, ReactElement, ReactNode, useState } from 'react'
@@ -42,6 +38,14 @@ import {
 } from '../input/autocomplete/mentionTypes'
 import { plrlChipComponents } from '../input/autocomplete/PlrlChipMdRenderers'
 import {
+  DEVBOX_COMMAND_ATTRIBUTES,
+  DEVBOX_COMMAND_TAG,
+  DEVBOX_FILE_ATTRIBUTES,
+  DEVBOX_FILE_TAG,
+  DevboxMarkdownLink,
+  devboxFileChipComponents,
+} from '../DevboxFileChip'
+import {
   PLRL_FILE_ATTRIBUTES,
   PLRL_FILE_TAG,
   plrlFileChipComponents,
@@ -53,11 +57,15 @@ const chipSanitizeSchema = {
     ...(markdownSanitizeSchema.tagNames ?? []),
     ...PLRL_CHIP_TAG_NAMES,
     PLRL_FILE_TAG,
+    DEVBOX_FILE_TAG,
+    DEVBOX_COMMAND_TAG,
   ],
   attributes: {
     ...markdownSanitizeSchema.attributes,
     ...CHIP_ATTRIBUTE_SCHEMA,
     [PLRL_FILE_TAG]: PLRL_FILE_ATTRIBUTES,
+    [DEVBOX_FILE_TAG]: DEVBOX_FILE_ATTRIBUTES,
+    [DEVBOX_COMMAND_TAG]: DEVBOX_COMMAND_ATTRIBUTES,
   },
 }
 
@@ -340,8 +348,9 @@ export const SimplifiedMarkdown = memo(function SimplifiedMarkdown({
    * - major — findings / conclusions (`text`)
    * - thought — reasoning / prompts (`text-long-form`)
    * - meta — tools / status (`text-xlight`)
+   * - faint — reasoning under a meta header (`text-input-disabled`)
    */
-  tone?: 'major' | 'thought' | 'meta'
+  tone?: 'major' | 'thought' | 'meta' | 'faint'
 }) {
   const Root = rootLayout === 'block' ? SimpleMarkdownBlockSC : SimpleMarkdownSC
   const resolvedTone = tone ?? 'thought'
@@ -560,7 +569,7 @@ export const ClickableLabelSC = styled.button(() => ({
 
 const SimpleMarkdownSC = styled.div<{
   $size?: 'body1' | 'body2'
-  $tone?: 'major' | 'thought' | 'meta'
+  $tone?: 'major' | 'thought' | 'meta' | 'faint'
 }>(({ theme, $size = 'body2', $tone }) => ({
   ...($size === 'body1'
     ? theme.partials.text.body1
@@ -571,9 +580,11 @@ const SimpleMarkdownSC = styled.div<{
         ? 'text'
         : $tone === 'meta'
           ? 'text-xlight'
-          : $tone === 'thought'
-            ? 'text-long-form'
-            : 'text-light'
+          : $tone === 'faint'
+            ? 'text-input-disabled'
+            : $tone === 'thought'
+              ? 'text-long-form'
+              : 'text-light'
     ],
   display: 'flex',
   flexDirection: 'column',
@@ -583,7 +594,7 @@ const SimpleMarkdownSC = styled.div<{
 /** Normal block flow so inline chips stay in the same `<p>`; typography comes from size/tone props. */
 const SimpleMarkdownBlockSC = styled.div<{
   $size?: 'body1' | 'body2'
-  $tone?: 'major' | 'thought' | 'meta'
+  $tone?: 'major' | 'thought' | 'meta' | 'faint'
 }>(({ theme, $size = 'body2', $tone }) => ({
   ...($size === 'body1'
     ? theme.partials.text.body1
@@ -594,9 +605,11 @@ const SimpleMarkdownBlockSC = styled.div<{
         ? 'text'
         : $tone === 'meta'
           ? 'text-xlight'
-          : $tone === 'thought'
-            ? 'text-long-form'
-            : 'text-light'
+          : $tone === 'faint'
+            ? 'text-input-disabled'
+            : $tone === 'thought'
+              ? 'text-long-form'
+              : 'text-light'
     ],
   display: 'block',
   '& > *:not(:last-child)': {
@@ -742,6 +755,7 @@ const SIMPLIFIED_MARKDOWN_COMPONENTS: ComponentProps<
 >['components'] = {
   ...plrlChipComponents,
   ...plrlFileChipComponents,
+  ...devboxFileChipComponents,
   ...simpleHeadingComponents,
   // Fenced code — inline, no language chrome (header was redundant).
   pre: ({ children }) => {
@@ -771,15 +785,7 @@ const SIMPLIFIED_MARKDOWN_COMPONENTS: ComponentProps<
   p: ({ children }) => <ParagraphSC>{children}</ParagraphSC>,
   strong: ({ children }) => <strong>{children}</strong>,
   em: ({ children }) => <span>{children}</span>,
-  a: ({ children, href }) => (
-    <InlineA
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      {children}
-    </InlineA>
-  ),
+  a: DevboxMarkdownLink,
   ul: ({ children }) => <ListSC>{children}</ListSC>,
   ol: ({ children }) => <ListSC as="ol">{children}</ListSC>,
   li: ({ children }) => <li>{children}</li>,

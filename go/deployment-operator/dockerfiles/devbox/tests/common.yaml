@@ -21,6 +21,10 @@ metadataTest:
       value: v1
     - key: DEVBOX_SKEL_DIR
       value: /etc/devbox/skel
+    - key: DEVBOX_SHELL
+      value: /bin/zsh
+    - key: SHELL
+      value: /bin/bash
     - key: DEVBOX_TRUST_DIR
       value: /var/lib/devbox/trust
     - key: DEVBOX_IDENTITY_DIR
@@ -100,6 +104,13 @@ fileExistenceTests:
   - name: pi MCP adapter
     path: /opt/pi-mcp-adapter/node_modules/pi-mcp-adapter/package.json
     shouldExist: true
+  # the daemon loads pi's bundled subagent extension and seeds its agents from here
+  - name: pi subagent extension
+    path: /usr/local/lib/node_modules/@earendil-works/pi-coding-agent/examples/extensions/subagent/index.ts
+    shouldExist: true
+  - name: pi subagent agents
+    path: /usr/local/lib/node_modules/@earendil-works/pi-coding-agent/examples/extensions/subagent/agents/scout.md
+    shouldExist: true
   - name: no agent-harness binary
     path: /agent-harness
     shouldExist: false
@@ -108,9 +119,6 @@ fileExistenceTests:
     shouldExist: false
   - name: no agent-run prompt templates
     path: /plural/system
-    shouldExist: false
-  - name: no podman store
-    path: /etc/containers
     shouldExist: false
 
 # container-structure-test expands $VAR in arguments with the image environment
@@ -153,6 +161,15 @@ commandTests:
     expectedOutput:
       - "(?m)^DEVBOX_TEST_ROLE=arn:aws:iam::1:role/x$"
       - "(?m)^CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE=/run/plural/identity/gcp/config.json$"
+  - name: the skel .zshrc loads oh-my-zsh in a fresh home
+    command: sh
+    # no $ here: container-structure-test expands variables in args itself
+    args: ["-c", "mkdir -p /tmp/zhome && cp /etc/devbox/skel/.zshrc /tmp/zhome/ && env HOME=/tmp/zhome zsh -i -c 'typeset ZSH ZSH_THEME; whence git_prompt_info >/dev/null && echo plugins-ok' 2>&1"]
+    expectedOutput:
+      - "(?m)^(export )?ZSH=/usr/share/oh-my-zsh$"
+      - "(?m)^ZSH_THEME=robbyrussell$"
+      - "(?m)^plugins-ok$"
+    excludedOutput: ["(?i)error|not found|insecure|permission denied"]
   - name: manifest declares contract v1
     command: jq
     args: ["-r", ".contract", "/etc/devbox/image.json"]
@@ -191,6 +208,14 @@ commandTests:
     command: codex-acp
     args: ["--version"]
     expectedOutput: ["1\\.10\\.0"]
+  - name: codex-acp modes leave sandboxing to the box
+    command: sh
+    args: ["-c", "grep -c 'type: \"dangerFullAccess\"' /usr/local/lib/node_modules/@agentclientprotocol/codex-acp/dist/index.js; grep -c 'type: \"workspaceWrite\",' /usr/local/lib/node_modules/@agentclientprotocol/codex-acp/dist/index.js || true"]
+    expectedOutput: ["\\A2\\n0\\n?\\z"]
+  - name: Claude Code's sandbox is off
+    command: jq
+    args: ["-e", ".sandbox.enabled == false", "/etc/claude-code/managed-settings.json"]
+    expectedOutput: ["true"]
   - name: opencode
     command: opencode
     args: ["--version"]
@@ -255,6 +280,6 @@ commandTests:
   # Left out on purpose (DBX-49).
   - name: excluded tools are absent
     command: sh
-    args: ["-c", "which agent-harness agent-mcpserver agent-bootstrap codebase-memory-mcp podman docker dockerd containerd fuse-overlayfs newuidmap newgidmap; true"]
+    args: ["-c", "which agent-harness agent-mcpserver agent-bootstrap codebase-memory-mcp dockerd containerd; true"]
     excludedOutput: [".+"]
 

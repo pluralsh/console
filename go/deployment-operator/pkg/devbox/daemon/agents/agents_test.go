@@ -6,8 +6,10 @@ import (
 	"encoding/json"
 	"io"
 	"log/slog"
+	"net"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"sync"
 	"testing"
@@ -21,6 +23,7 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/fakeacp"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/harness"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/proc"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/transcript"
 )
 
 const (
@@ -81,7 +84,7 @@ type testLauncher struct{ log string }
 func (l testLauncher) Spec(launch *devboxv1.AgentLaunch, _ *devboxv1.HarnessEndpoints, _ string) (*harness.Spec, error) {
 	return &harness.Spec{Agent: launch.GetAgent(), Path: os.Args[0], Args: []string{"-test.run=^$"},
 		Env: append(os.Environ(), fakeacp.EnvVar+"=1", fakeacp.LogEnv+"="+l.log), Lineage: acp.ClaudeLineage,
-		Billing: launch.GetBilling()}, nil
+		NativeSubagents: true, Billing: launch.GetBilling()}, nil
 }
 
 type harnessT struct {
@@ -405,6 +408,23 @@ func TestPermissionInteraction(t *testing.T) {
 	}
 }
 
+func TestResolvingAfterTheTurnEndedLeavesTheThreadIdle(t *testing.T) {
+	h := newManager(t, 4)
+	s := h.create(t, "t1")
+	h.prompt(t, s, "p1", "permission")
+	eventually(t, "pending interaction", func() bool { return len(h.m.Interactions()) > 0 })
+
+	h.m.mu.Lock()
+	for _, in := range h.m.interactions {
+		in.session.thread.running = false
+		h.m.resolveInteractionLocked(in, devboxv1.InteractionState_INTERACTION_STATE_CANCELLED, nil, nil)
+	}
+	h.m.mu.Unlock()
+	if st := h.thread("t1").GetForeground().GetState(); st != devboxv1.ForegroundStateKind_FOREGROUND_STATE_KIND_IDLE {
+		t.Fatalf("foreground after the last interaction resolved on an ended turn: %v", st)
+	}
+}
+
 func TestActivityAloneReemitsTheRowOnlyEveryInterval(t *testing.T) {
 	h := newManager(t, 4)
 	s := h.create(t, "t1")
@@ -459,6 +479,489 @@ func TestSubagentLineage(t *testing.T) {
 	}
 	if row == nil || row.GetKind() != devboxv1.SessionKind_SESSION_KIND_SUBAGENT || row.GetParentSessionId() != s.GetSessionId() || row.GetThreadId() != "" {
 		t.Fatalf("subagent session row %v", row)
+	}
+	if row.GetParentToolCallId() != "task-1" || row.GetTitle() != "Explore the repo" {
+		t.Fatalf("subagent not tied to its spawning call: tool call %q, title %q", row.GetParentToolCallId(), row.GetTitle())
+	}
+	if row.GetForeground().GetState() != devboxv1.ForegroundStateKind_FOREGROUND_STATE_KIND_IDLE {
+		t.Fatalf("subagent still %v after its spawning call completed", row.GetForeground().GetState())
+	}
+}
+
+func TestSubagentPermissionBelongsToTheSubagent(t *testing.T) {
+	h := newManager(t, 4)
+	s := h.create(t, "t1")
+	h.prompt(t, s, "p1", "subagent-permission")
+	child := s.GetSessionId() + acp.SubagentSeparator + "task-1"
+	var in *devboxv1.Interaction
+	eventually(t, "pending interaction", func() bool {
+		for _, i := range h.m.Interactions() {
+			in = i
+			return true
+		}
+		return false
+	})
+	if in.GetSessionId() != child || in.GetThreadId() != "t1" {
+		t.Fatalf("subagent's permission filed under session %q, thread %q", in.GetSessionId(), in.GetThreadId())
+	}
+	if _, ok := h.entities(s.GetSessionId())["ENTITY_TYPE_TOOL_CALL/tc-child"]; ok {
+		t.Fatal("the subagent's call leaked into the parent transcript")
+	}
+	resp := &devboxv1.InteractionResponse{Response: &devboxv1.InteractionResponse_Permission{
+		Permission: &devboxv1.PermissionOutcome{Outcome: &devboxv1.PermissionOutcome_SelectedOptionId{SelectedOptionId: "allow"}}}}
+	if _, err := h.m.RespondInteraction(&devboxv1.RespondInteractionRequest{InteractionId: in.GetInteractionId(), Response: resp}); err != nil {
+		t.Fatal(err)
+	}
+	eventually(t, "outcome", func() bool { return contains(h.agentText(s.GetSessionId()), "outcome:selected:allow") })
+}
+
+func TestTurnBlockedOnAnUnansweredPermissionStopsKeepingTheBoxAwake(t *testing.T) {
+	h := newManager(t, 4)
+	s := h.create(t, "t1")
+	h.prompt(t, s, "p1", "subagent-permission")
+	eventually(t, "pending interaction", func() bool { return len(h.m.Interactions()) > 0 })
+	kinds := func(reasons []*devboxv1.BusyReason) []devboxv1.BusyReasonKind {
+		out := []devboxv1.BusyReasonKind{}
+		for _, r := range reasons {
+			out = append(out, r.GetKind())
+		}
+		return out
+	}
+
+	now := kinds(h.m.BusyReasons(time.Now()))
+	if !slices.Contains(now, devboxv1.BusyReasonKind_BUSY_REASON_KIND_AGENT_TURN) || !slices.Contains(now, devboxv1.BusyReasonKind_BUSY_REASON_KIND_PENDING_INTERACTION) {
+		t.Fatalf("fresh permission: %v", now)
+	}
+	if later := h.m.BusyReasons(time.Now().Add(PendingInteractionBusy + time.Minute)); len(later) != 0 {
+		t.Fatalf("a turn blocked on an answer for %s still keeps the box awake: %v", PendingInteractionBusy, kinds(later))
+	}
+}
+
+// specLauncher adjusts the fake agent's launch.
+type specLauncher struct {
+	testLauncher
+	adjust func(*harness.Spec)
+}
+
+func (l specLauncher) Spec(launch *devboxv1.AgentLaunch, endpoints *devboxv1.HarnessEndpoints, model string) (*harness.Spec, error) {
+	spec, err := l.testLauncher.Spec(launch, endpoints, model)
+	if err != nil {
+		return nil, err
+	}
+	l.adjust(spec)
+	return spec, nil
+}
+
+func newManagerAdjusting(t *testing.T, adjust func(*harness.Spec)) *harnessT {
+	t.Helper()
+	return newManagerWith(t, 4, devboxv1.BillingMode_BILLING_MODE_PROXY, func(o *Options) {
+		o.Launcher = specLauncher{testLauncher: o.Launcher.(testLauncher), adjust: adjust}
+	})
+}
+
+func TestPiTranscriptSubagents(t *testing.T) {
+	fixture, err := filepath.Abs("../acp/testdata/pi-subagent-parallel.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	h := newManagerAdjusting(t, func(s *harness.Spec) { s.TranscriptTool = "subagent" })
+	s := h.create(t, "t1")
+	h.prompt(t, s, "p1", "replay:"+fixture)
+	eventually(t, "replayed", func() bool { return contains(h.agentText(s.GetSessionId()), "replayed") })
+	h.m.Flush()
+	rows := map[string]*devboxv1.Session{}
+	for _, ev := range h.rec.snapshot() {
+		if r := ev.GetSession(); r != nil && r.GetKind() == devboxv1.SessionKind_SESSION_KIND_SUBAGENT {
+			rows[r.GetSessionId()] = r
+		}
+	}
+	if len(rows) != 2 {
+		t.Fatalf("subagent sessions %v", rows)
+	}
+	for id, r := range rows {
+		if r.GetParentSessionId() != s.GetSessionId() || r.GetParentToolCallId() != "call_subagent_1" ||
+			r.GetForeground().GetState() != devboxv1.ForegroundStateKind_FOREGROUND_STATE_KIND_IDLE {
+			t.Fatalf("subagent %s: %v", id, r)
+		}
+		if !contains(h.agentText(id), "child done") {
+			t.Fatalf("subagent %s text %v", id, h.agentText(id))
+		}
+	}
+}
+
+func TestOpenCodeTaskSubagent(t *testing.T) {
+	l, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	addr := l.Addr().String()
+	_ = l.Close()
+	h := newManagerAdjusting(t, func(s *harness.Spec) {
+		s.Env = append(s.Env, fakeacp.OpenCodeEnv+"="+addr, "OPENCODE_SERVER_PASSWORD=pw")
+		s.OpenCodeServer = &harness.OpenCodeServer{URL: "http://" + addr, Username: "opencode", Password: "pw"}
+	})
+	s := h.create(t, "t1")
+	h.prompt(t, s, "p1", "opencode-subagent")
+	child := fakeacp.OpenCodeChild
+	var in *devboxv1.Interaction
+	eventually(t, "the subagent's permission request", func() bool {
+		for _, i := range h.m.Interactions() {
+			in = i
+			return true
+		}
+		return contains(h.agentText(s.GetSessionId()), "child never opened")
+	})
+	if in == nil {
+		t.Fatalf("the child was never opened: %v", h.agentText(s.GetSessionId()))
+	}
+	if in.GetSessionId() != child || in.GetThreadId() != "t1" {
+		t.Fatalf("subagent's permission filed under session %q, thread %q", in.GetSessionId(), in.GetThreadId())
+	}
+	resp := &devboxv1.InteractionResponse{Response: &devboxv1.InteractionResponse_Permission{
+		Permission: &devboxv1.PermissionOutcome{Outcome: &devboxv1.PermissionOutcome_SelectedOptionId{SelectedOptionId: "once"}}}}
+	if _, err := h.m.RespondInteraction(&devboxv1.RespondInteractionRequest{InteractionId: in.GetInteractionId(), Response: resp}); err != nil {
+		t.Fatal(err)
+	}
+	eventually(t, "outcome", func() bool { return contains(h.agentText(s.GetSessionId()), "outcome:selected:once") })
+
+	if !contains(h.agentText(child), "child says hi") {
+		t.Fatalf("child text %v", h.agentText(child))
+	}
+	if task := h.entities(child)["ENTITY_TYPE_USER_MESSAGE/task-"+child]; task.GetMessage().GetContent()[0].GetText().GetText() != "Find the entrypoints" {
+		t.Fatalf("child doesn't open with its task: %v", task)
+	}
+	for _, r := range h.calls(t, acp.MethodSessionResume) {
+		if acp.Str(r, "sessionId") == child && len(acp.Arr(r, "mcpServers")) != 0 {
+			t.Fatalf("child opened with the thread's MCP servers: %v", r)
+		}
+	}
+	h.m.Flush()
+	var row *devboxv1.Session
+	for _, ev := range h.rec.snapshot() {
+		if r := ev.GetSession(); r != nil && r.GetSessionId() == child {
+			row = r
+		}
+	}
+	if row == nil || row.GetKind() != devboxv1.SessionKind_SESSION_KIND_SUBAGENT || row.GetParentSessionId() != s.GetSessionId() ||
+		row.GetParentToolCallId() != "call-task" || row.GetTitle() != "Explore the repo" {
+		t.Fatalf("subagent session row %v", row)
+	}
+	if row.GetForeground().GetState() != devboxv1.ForegroundStateKind_FOREGROUND_STATE_KIND_IDLE {
+		t.Fatalf("the finished task didn't idle its child: %v", row.GetForeground())
+	}
+}
+
+func TestNativeSubagentSession(t *testing.T) {
+	h := newManager(t, 4)
+	s := h.create(t, "t1")
+	init := h.calls(t, acp.MethodInitialize)
+	if len(init) == 0 {
+		t.Fatal("no initialize")
+	}
+	caps := acp.Obj(init[0], "clientCapabilities")
+	air := acp.Obj(acp.Obj(acp.Obj(caps, "_meta"), "jetbrains"), "air")
+	if acp.Obj(caps, "subagents") == nil || !slices.Contains(acp.Arr(air, "capabilities"), any("nativeSubagentSessions")) {
+		t.Fatalf("initialize didn't advertise native subagents both ways: %v", caps)
+	}
+	h.prompt(t, s, "p1", "native-subagent")
+	const child = "task-native"
+	var in *devboxv1.Interaction
+	eventually(t, "pending interaction", func() bool {
+		for _, i := range h.m.Interactions() {
+			in = i
+			return true
+		}
+		return false
+	})
+	if in.GetSessionId() != child || in.GetThreadId() != "t1" {
+		t.Fatalf("subagent's permission filed under session %q, thread %q", in.GetSessionId(), in.GetThreadId())
+	}
+	if cmd := in.GetPermission().GetToolCall().GetRawInput().GetStructValue().GetFields()["command"].GetStringValue(); cmd != "ls -la" {
+		t.Fatalf("permission request lost the command from the earlier tool_call: %v", in.GetPermission().GetToolCall())
+	}
+	resp := &devboxv1.InteractionResponse{Response: &devboxv1.InteractionResponse_Permission{
+		Permission: &devboxv1.PermissionOutcome{Outcome: &devboxv1.PermissionOutcome_SelectedOptionId{SelectedOptionId: "allow"}}}}
+	if _, err := h.m.RespondInteraction(&devboxv1.RespondInteractionRequest{InteractionId: in.GetInteractionId(), Response: resp}); err != nil {
+		t.Fatal(err)
+	}
+	eventually(t, "outcome", func() bool { return contains(h.agentText(s.GetSessionId()), "outcome:selected:allow") })
+
+	if !contains(h.agentText(child), "child says hi") || contains(h.agentText(s.GetSessionId()), "child says hi") {
+		t.Fatalf("child text: child %v, parent %v", h.agentText(child), h.agentText(s.GetSessionId()))
+	}
+	task := h.entities(child)["ENTITY_TYPE_USER_MESSAGE/task-"+child]
+	if task.GetMessage().GetContent()[0].GetText().GetText() != "Find the entrypoints" {
+		t.Fatalf("child doesn't open with its task: %v", task)
+	}
+	anchor := h.entities(s.GetSessionId())["ENTITY_TYPE_SESSION_MESSAGE/"+acp.SubagentSpawnPrefix+child]
+	if anchor.GetSessionMessage().GetToSessionId() != child || anchor.GetSessionMessage().GetFromSessionId() != s.GetSessionId() {
+		t.Fatalf("parent has no anchor for the subagent: %v", anchor)
+	}
+	h.m.Flush()
+	var row *devboxv1.Session
+	for _, ev := range h.rec.snapshot() {
+		if r := ev.GetSession(); r != nil {
+			if strings.Contains(r.GetSessionId(), acp.SubagentSeparator) {
+				t.Fatalf("lineage tags on the child's own updates nested another session: %s", r.GetSessionId())
+			}
+			if r.GetSessionId() == child {
+				row = r
+			}
+		}
+	}
+	if row == nil || row.GetKind() != devboxv1.SessionKind_SESSION_KIND_SUBAGENT || row.GetParentSessionId() != s.GetSessionId() || row.GetTitle() != "Explore the repo" {
+		t.Fatalf("subagent session row %v", row)
+	}
+	if row.GetForeground().GetState() != devboxv1.ForegroundStateKind_FOREGROUND_STATE_KIND_IDLE || row.GetForeground().GetStopReason() != "end_turn" {
+		t.Fatalf("subagent_state_update didn't finish the child: %v", row.GetForeground())
+	}
+
+	// Reattaching replays every child's history onto its own session; the transcript already has it.
+	h.m.StopAgents(func(devboxv1.AgentType, devboxv1.BillingMode) bool { return true })
+	if _, err := h.m.ResumeThread(context.Background(), &devboxv1.ThreadRef{InstanceId: instance, ThreadId: "t1"}, false); err != nil {
+		t.Fatal(err)
+	}
+	if got := h.agentText(child); strings.Count(strings.Join(got, ""), "child says hi") != 1 {
+		t.Fatalf("replay re-appended the child's history: %v", got)
+	}
+	h.m.mu.Lock()
+	unseen := h.m.sessions["task-unseen"]
+	h.m.mu.Unlock()
+	if unseen != nil {
+		t.Fatal("replay created a child the transcript never had")
+	}
+}
+
+func TestDeltasAreNumberedPerSession(t *testing.T) {
+	fixture, err := filepath.Abs("../acp/testdata/claude-native-subagent.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	h := newManager(t, 4)
+	s := h.create(t, "t1")
+	h.prompt(t, s, "p1", "replay:"+fixture)
+	eventually(t, "replayed", func() bool { return contains(h.agentText(s.GetSessionId()), "replayed") })
+	h.m.Flush()
+
+	last := map[string]uint64{}
+	var stream string
+	for _, ev := range h.rec.snapshot() {
+		d := ev.GetDelta()
+		if d == nil {
+			continue
+		}
+		if d.GetOp() == devboxv1.DeltaOp_DELTA_OP_NOTICE {
+			if d.GetSeq() != 0 {
+				t.Fatalf("notice numbered: %v", d)
+			}
+			continue
+		}
+		if stream == "" {
+			stream = d.GetStream()
+		}
+		if d.GetStream() == "" || d.GetStream() != stream {
+			t.Fatalf("delta stream %q, want %q", d.GetStream(), stream)
+		}
+		if d.GetSeq() != last[d.GetSessionId()]+1 {
+			t.Fatalf("session %s: seq %d after %d", d.GetSessionId(), d.GetSeq(), last[d.GetSessionId()])
+		}
+		last[d.GetSessionId()] = d.GetSeq()
+	}
+	if len(last) < 2 {
+		t.Fatalf("expected deltas for the thread and its subagent: %v", last)
+	}
+	for session, seq := range last {
+		page, err := h.m.Timeline(context.Background(), &devboxv1.GetTimelineRequest{SessionId: session})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if page.GetSeq() != seq || page.GetStream() != stream {
+			t.Fatalf("session %s timeline at seq %d/%s, its deltas at %d/%s", session, page.GetSeq(), page.GetStream(), seq, stream)
+		}
+	}
+}
+
+// TestClaudeNativeSubagentCapture replays claude-agent-acp 0.75.1 running an async Agent subagent in native mode.
+func TestClaudeNativeSubagentCapture(t *testing.T) {
+	fixture, err := filepath.Abs("../acp/testdata/claude-native-subagent.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	h := newManager(t, 4)
+	s := h.create(t, "t1")
+	h.prompt(t, s, "p1", "replay:"+fixture)
+	eventually(t, "replayed", func() bool { return contains(h.agentText(s.GetSessionId()), "replayed") })
+	const child = "a0aa9e5d37e932105"
+	if !contains(h.agentText(child), "child done") || contains(h.agentText(s.GetSessionId()), "child done") {
+		t.Fatalf("child text: child %v, parent %v", h.agentText(child), h.agentText(s.GetSessionId()))
+	}
+	parent := h.entities(s.GetSessionId())
+	if _, ok := parent["ENTITY_TYPE_TOOL_CALL/toolu_parent_2"]; ok {
+		t.Fatal("the hidden Agent call's update surfaced in the parent as a bare tool call")
+	}
+	if _, ok := parent["ENTITY_TYPE_SESSION_MESSAGE/"+acp.SubagentSpawnPrefix+child]; !ok {
+		t.Fatalf("parent has no anchor for the subagent: %v", parent)
+	}
+	if _, ok := h.entities(child)["ENTITY_TYPE_TOOL_CALL/toolu_child_4"]; !ok {
+		t.Fatalf("the child's own tool call is missing: %v", h.entities(child))
+	}
+	h.m.Flush()
+	var row *devboxv1.Session
+	for _, ev := range h.rec.snapshot() {
+		if r := ev.GetSession(); r != nil {
+			if strings.Contains(r.GetSessionId(), acp.SubagentSeparator) {
+				t.Fatalf("lineage tags nested another session: %s", r.GetSessionId())
+			}
+			if r.GetSessionId() == child {
+				row = r
+			}
+		}
+	}
+	if row == nil || row.GetKind() != devboxv1.SessionKind_SESSION_KIND_SUBAGENT || row.GetParentSessionId() != s.GetSessionId() || row.GetTitle() != "Explore files" {
+		t.Fatalf("subagent session row %v", row)
+	}
+	if row.GetForeground().GetState() != devboxv1.ForegroundStateKind_FOREGROUND_STATE_KIND_IDLE {
+		t.Fatalf("the completed subagent is still %v", row.GetForeground())
+	}
+}
+
+func TestQueuedPromptsSurviveARestart(t *testing.T) {
+	qp := &queuedPrompt{
+		promptID: "p1", messageID: promptMessageID("p1"), queuedAt: time.Unix(100, 0).UTC(),
+		sentBy: &devboxv1.Principal{UserId: "u1"},
+		content: []*devboxv1.ContentBlock{
+			{Block: &devboxv1.ContentBlock_Text{Text: &devboxv1.TextContent{Text: "hi"}}},
+			{Block: &devboxv1.ContentBlock_ResourceLink{ResourceLink: &devboxv1.ResourceLink{Uri: "file:///a.png", Name: "a.png"}}},
+		},
+	}
+	got := restorePrompt(persistPrompt(qp))
+	if !proto.Equal(got.proto(), qp.proto()) || got.messageID != qp.messageID {
+		t.Fatalf("restored %v, want %v", got.proto(), qp.proto())
+	}
+}
+
+// A restarted daemon (resume after suspend, or after a crash that left threads.json behind the transcript) keeps
+// placing new entities after the ones already in the transcript, so later turns don't interleave with earlier ones.
+func TestPositionsStayAfterTheTranscriptAcrossRestarts(t *testing.T) {
+	for _, tc := range []struct {
+		name  string
+		crash bool
+	}{{"clean stop", false}, {"stale state", true}} {
+		t.Run(tc.name, func(t *testing.T) {
+			dir := t.TempDir()
+			home := filepath.Join(dir, "home")
+			if err := os.MkdirAll(home, 0o755); err != nil {
+				t.Fatal(err)
+			}
+			tr := transcript.Memory()
+			shared := func(o *Options) { o.StateDir, o.Home, o.Transcript = filepath.Join(dir, "state"), home, tr }
+
+			h := newManagerWith(t, 2, devboxv1.BillingMode_BILLING_MODE_PROXY, shared)
+			s := h.create(t, "t1")
+			h.prompt(t, s, "p1", "first")
+			eventually(t, "first reply", func() bool { return contains(h.agentText(s.GetSessionId()), "echo:first") })
+			eventually(t, "idle", func() bool { return h.idle("t1") })
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			h.m.Stop(ctx)
+
+			if tc.crash {
+				path := filepath.Join(dir, "state", "threads.json")
+				var st persistedState
+				raw, err := os.ReadFile(path)
+				if err != nil || json.Unmarshal(raw, &st) != nil {
+					t.Fatalf("reading state: %v", err)
+				}
+				st.Threads[0].Session.NextPosition = 1
+				raw, _ = json.Marshal(st)
+				if err := os.WriteFile(path, raw, 0o600); err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			h = newManagerWith(t, 2, devboxv1.BillingMode_BILLING_MODE_PROXY, shared)
+			h.prompt(t, s, "p2", "second")
+			eventually(t, "second reply", func() bool { return contains(h.agentText(s.GetSessionId()), "echo:second") })
+
+			entities := h.entities(s.GetSessionId())
+			byPosition := map[uint64]string{}
+			var firstTurn uint64
+			for key, e := range entities {
+				if prev, ok := byPosition[e.GetPosition()]; ok {
+					t.Fatalf("%s and %s share position %d", prev, key, e.GetPosition())
+				}
+				byPosition[e.GetPosition()] = key
+				var body strings.Builder
+				for _, c := range e.GetMessage().GetContent() {
+					body.WriteString(c.GetText().GetText())
+				}
+				if !strings.Contains(body.String(), "second") {
+					firstTurn = max(firstTurn, e.GetPosition())
+				}
+			}
+			if p := entities["ENTITY_TYPE_USER_MESSAGE/prompt-p2"].GetPosition(); p <= firstTurn {
+				t.Fatalf("the second prompt is at %d, inside the first turn (through %d): %v", p, firstTurn, byPosition)
+			}
+		})
+	}
+}
+
+func TestQueuedPromptsAreShownAndEditable(t *testing.T) {
+	h := newManager(t, 4)
+	s := h.create(t, "t1")
+	ref := &devboxv1.ThreadRef{InstanceId: instance, ThreadId: "t1"}
+	h.prompt(t, s, "p1", "block")
+	eventually(t, "running", func() bool {
+		return h.thread("t1").GetForeground().GetState() == devboxv1.ForegroundStateKind_FOREGROUND_STATE_KIND_RUNNING
+	})
+	h.prompt(t, s, "p2", "second")
+	h.prompt(t, s, "p3", "third")
+	h.prompt(t, s, "p4", "fourth")
+	queued := func() []string {
+		h.m.Flush()
+		var ids []string
+		for _, qp := range h.thread("t1").GetQueuedPrompts() {
+			ids = append(ids, qp.GetPromptId()+":"+qp.GetContent()[0].GetText().GetText())
+		}
+		return ids
+	}
+	if got := queued(); !slices.Equal(got, []string{"p2:second", "p3:third", "p4:fourth"}) {
+		t.Fatalf("queued prompts on the row: %v", got)
+	}
+
+	update := func(id string, action devboxv1.QueuedPromptAction, text string) *devboxv1.UpdateQueuedPromptResponse {
+		resp, err := h.m.UpdateQueuedPrompt(context.Background(), &devboxv1.UpdateQueuedPromptRequest{Thread: ref, PromptId: id, Action: action, Text: text})
+		if err != nil {
+			t.Fatal(err)
+		}
+		return resp
+	}
+	update("p2", devboxv1.QueuedPromptAction_QUEUED_PROMPT_ACTION_EDIT, "edited")
+	update("p4", devboxv1.QueuedPromptAction_QUEUED_PROMPT_ACTION_CANCEL, "")
+	if got := queued(); !slices.Equal(got, []string{"p2:edited", "p3:third"}) {
+		t.Fatalf("after edit and cancel: %v", got)
+	}
+	if _, err := h.m.UpdateQueuedPrompt(context.Background(), &devboxv1.UpdateQueuedPromptRequest{
+		Thread: ref, PromptId: "p2", Action: devboxv1.QueuedPromptAction_QUEUED_PROMPT_ACTION_EDIT, Text: "  ",
+	}); err == nil {
+		t.Fatal("emptied a queued prompt")
+	}
+
+	// Send now jumps the queue and interrupts the running turn.
+	update("p3", devboxv1.QueuedPromptAction_QUEUED_PROMPT_ACTION_SEND_NOW, "")
+	eventually(t, "promoted prompt to run", func() bool { return contains(h.agentText(s.GetSessionId()), "echo:third") })
+	if len(h.calls(t, acp.MethodSessionCancel)) == 0 {
+		t.Fatal("send now didn't cancel the running turn")
+	}
+	eventually(t, "rest of the queue", func() bool { return contains(h.agentText(s.GetSessionId()), "echo:edited") })
+	if contains(h.agentText(s.GetSessionId()), "echo:fourth") {
+		t.Fatal("cancelled prompt ran")
+	}
+	if got := queued(); len(got) != 0 {
+		t.Fatalf("queue after it drained: %v", got)
+	}
+	if resp := update("p2", devboxv1.QueuedPromptAction_QUEUED_PROMPT_ACTION_CANCEL, ""); resp.GetUpdated() {
+		t.Fatal("updated a prompt that already ran")
 	}
 }
 

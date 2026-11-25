@@ -9,8 +9,10 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/samber/lo"
+	appsv1 "k8s.io/api/apps/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -21,6 +23,10 @@ import (
 
 	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 	"github.com/pluralsh/console/go/deployment-operator/internal/utils"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/egress/rules"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/egress/scmpath"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/guest"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/probe"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate/ateapi"
@@ -28,6 +34,21 @@ import (
 
 // WorkerPools are managed as unstructured objects so the operator doesn't depend on go.ate.dev/substrate.
 var workerPoolGVK = schema.GroupVersionKind{Group: "ate.dev", Version: "v1", Kind: "WorkerPool"}
+
+// devboxCapabilities are added to the devbox container's capability set. The box runs as dev (non-root), so its
+// processes hold none of them; they only bound what setuid-root helpers gain. newuidmap/newgidmap need SETUID,
+// SETGID and (to map uid 0) SETFCAP to give rootless Podman its subuid/subgid ranges; without them the kernel
+// refuses the multi-range uid_map and `docker` fails to start any container.
+var devboxCapabilities = []string{"SETUID", "SETGID", "SETFCAP"}
+
+// workerPodAnnotations keep node autoscalers from evicting workers: a worker's boxes run outside any pod, so a
+// node with only a worker on it looks underused, and evicting the worker kills every box on it unsaved.
+var workerPodAnnotations = map[string]string{
+	"cluster-autoscaler.kubernetes.io/safe-to-evict": "false",
+	"karpenter.sh/do-not-disrupt":                    "true",
+	// do-not-disrupt's name before Karpenter v0.32
+	"karpenter.sh/do-not-evict": "true",
+}
 
 const (
 	devboxContainerName = "devbox"
@@ -38,38 +59,18 @@ const (
 	devboxEgressTrustMount = "/run/ate/egress-trust-bundle"
 	devboxActorMetaMount   = "/run/ate/actor"
 	devboxReadyzPort       = 80
-	// devboxRunnerConfigEnv carries the runner config the daemon applies during the golden boot.
-	devboxRunnerConfigEnv = "DEVBOX_RUNNER_CONFIG"
+	// devboxReadyzTimeout is how long a box without golden boot work may take to answer its wakeup probe.
+	devboxReadyzTimeout = 2 * time.Minute
 	// substrateEnvValueLimit is Substrate's per-value env limit.
 	substrateEnvValueLimit = 32 * 1024
 	// dns1123Limit bounds atespace, template and WorkerPool names.
 	dns1123Limit = 63
 )
 
-// DevboxRunnerGuestConfig is DEVBOX_RUNNER_CONFIG, the part of the runner spec the daemon applies inside the
-// guest during the golden boot. Everything else (allowlist, identities, idle policy) is enforced by the gateway
-// and console, so changing it does not roll a new template revision.
-type DevboxRunnerGuestConfig struct {
-	Runner          string                 `json:"runner"`
-	BootstrapScript string                 `json:"bootstrapScript,omitempty"`
-	Mise            string                 `json:"mise,omitempty"`
-	Browser         bool                   `json:"browser"`
-	Agents          []DevboxGuestAgentSpec `json:"agents"`
-}
-
-type DevboxGuestAgentSpec struct {
-	Type           v1alpha1.DevboxAgentType `json:"type"`
-	Default        bool                     `json:"default"`
-	AdapterVersion string                   `json:"adapterVersion,omitempty"`
-	Models         []string                 `json:"models,omitempty"`
-	DefaultModel   string                   `json:"defaultModel,omitempty"`
-	ACPV2          bool                     `json:"acpV2"`
-}
-
-func devboxGuestAgents(runner *v1alpha1.DevboxRunner) []DevboxGuestAgentSpec {
-	return lo.Map(runner.Spec.Agents, func(a v1alpha1.DevboxAgent, _ int) DevboxGuestAgentSpec {
-		return DevboxGuestAgentSpec{
-			Type:           a.Type,
+func devboxGuestAgents(runner *v1alpha1.DevboxRunner) []guest.Agent {
+	return lo.Map(runner.Spec.Agents, func(a v1alpha1.DevboxAgent, _ int) guest.Agent {
+		return guest.Agent{
+			Type:           string(a.Type),
 			Default:        lo.FromPtr(a.Default),
 			AdapterVersion: lo.FromPtr(a.AdapterVersion),
 			Models:         a.Models,
@@ -135,7 +136,7 @@ func (r *DevboxRunnerReconciler) sandboxClass(runner *v1alpha1.DevboxRunner) v1a
 // reconcileWorkerPool creates or updates the runner's WorkerPool and labels its AdditionalPools. The
 // ActorTemplate worker_selector matches WorkerPool metadata labels, so every pool carries the runner's worker
 // selector.
-func (r *DevboxRunnerReconciler) reconcileWorkerPool(ctx context.Context, runner *v1alpha1.DevboxRunner) error {
+func (r *DevboxRunnerReconciler) reconcileWorkerPool(ctx context.Context, api substrate.API, runner *v1alpha1.DevboxRunner) error {
 	class := r.sandboxClass(runner)
 	wp := lo.FromPtr(runner.Spec.WorkerPool)
 
@@ -158,7 +159,13 @@ func (r *DevboxRunnerReconciler) reconcileWorkerPool(ctx context.Context, runner
 		image = r.Config.WorkerImages[class]
 	}
 	if image == "" {
-		return fmt.Errorf("no Substrate worker image configured for sandbox class %s, set devboxes.workerImages.%s in the deployment-operator chart or spec.workerPool.workerImage", class, class)
+		if image, err = r.installedWorkerImage(ctx, class); err != nil {
+			return err
+		}
+	}
+	if image == "" {
+		return fmt.Errorf("no Substrate worker image configured for sandbox class %s and none derivable from %s/%s, set devboxes.workerImages.%s in the deployment-operator chart or spec.workerPool.workerImage",
+			class, r.Config.SubstrateNamespace, ateControllerName, class)
 	}
 
 	sandboxClass := map[string]any{"name": string(class)}
@@ -166,9 +173,9 @@ func (r *DevboxRunnerReconciler) reconcileWorkerPool(ctx context.Context, runner
 		sandboxClass["configRef"] = map[string]any{"name": *wp.SandboxConfig}
 	}
 
-	template := map[string]any{"labels": stringMapToAny(devboxSelectorLabels(runner))}
-	if len(wp.PodAnnotations) > 0 {
-		template["annotations"] = stringMapToAny(wp.PodAnnotations)
+	template := map[string]any{
+		"labels":      stringMapToAny(devboxSelectorLabels(runner)),
+		"annotations": stringMapToAny(lo.Assign(workerPodAnnotations, wp.PodAnnotations)),
 	}
 	if len(wp.NodeSelector) > 0 {
 		template["nodeSelector"] = stringMapToAny(wp.NodeSelector)
@@ -198,6 +205,10 @@ func (r *DevboxRunnerReconciler) reconcileWorkerPool(ctx context.Context, runner
 		template["priorityClassName"] = *wp.PriorityClassName
 	}
 
+	if err := common.EnsureSpawnedCAConfigMap(ctx, r.Client, r.Config.WorkerPoolNamespace); err != nil {
+		return fmt.Errorf("ensuring spawned CA configmap for worker pool namespace: %w", err)
+	}
+
 	pool := &unstructured.Unstructured{}
 	pool.SetGroupVersionKind(workerPoolGVK)
 	if err := r.Get(ctx, client.ObjectKey{Name: devboxWorkerPoolName(runner), Namespace: r.Config.WorkerPoolNamespace}, pool); err != nil && !apierrors.IsNotFound(err) {
@@ -206,11 +217,13 @@ func (r *DevboxRunnerReconciler) reconcileWorkerPool(ctx context.Context, runner
 	pool.SetGroupVersionKind(workerPoolGVK)
 	pool.SetName(devboxWorkerPoolName(runner))
 	pool.SetNamespace(r.Config.WorkerPoolNamespace)
+	// Read before CreateOrPatch, which strips status from an unstructured object it doesn't patch.
+	ready, _, _ := unstructured.NestedInt64(pool.Object, "status", "readyReplicas")
 
 	replicas := int64(lo.FromPtrOr(wp.Replicas, 1))
 	var autoscaleErr error
 	if wp.Autoscaling != nil {
-		replicas, autoscaleErr = r.autoscaleWorkerPool(ctx, runner, pool, class, capacity)
+		replicas, autoscaleErr = r.autoscaleWorkerPool(ctx, api, runner, pool, class, capacity)
 	}
 
 	_, err = controllerutil.CreateOrPatch(ctx, r.Client, pool, func() error {
@@ -246,7 +259,6 @@ func (r *DevboxRunnerReconciler) reconcileWorkerPool(ctx context.Context, runner
 		utils.MarkCondition(runner.SetCondition, v1alpha1.DevboxWorkerPoolReadyConditionType, metav1.ConditionFalse, v1alpha1.ErrorConditionReason, err.Error())
 		return nil
 	}
-	ready, _, _ := unstructured.NestedInt64(pool.Object, "status", "readyReplicas")
 	if replicas > 0 && ready == 0 {
 		utils.MarkCondition(runner.SetCondition, v1alpha1.DevboxWorkerPoolReadyConditionType, metav1.ConditionFalse, v1alpha1.DevboxPendingReason,
 			fmt.Sprintf("WorkerPool %s has no ready workers yet", pool.GetName()))
@@ -266,6 +278,32 @@ func devboxWorkerPoolRefs(runner *v1alpha1.DevboxRunner, defaultNamespace string
 
 // reconcileAdditionalPools puts the runner's worker selector on its AdditionalPools and takes it off pools that
 // left the list. Status keeps the pools labeled, so a missing pool is retried and a removed one cleaned up.
+// installedWorkerImage derives a sandbox class's worker image from the installed ate-controller's, so workers
+// match the Substrate release and registry: <registry>/atecontroller:<tag> becomes <registry>/ateworker-<class>:<tag>.
+// It returns "" when ate-controller is missing or its image isn't a tagged atecontroller reference.
+func (r *DevboxRunnerReconciler) installedWorkerImage(ctx context.Context, class v1alpha1.DevboxSandboxClass) (string, error) {
+	controller := &appsv1.Deployment{}
+	if err := r.Get(ctx, client.ObjectKey{Name: ateControllerName, Namespace: r.Config.SubstrateNamespace}, controller); err != nil {
+		return "", client.IgnoreNotFound(err)
+	}
+	for _, c := range controller.Spec.Template.Spec.Containers {
+		if image := workerImageFor(c.Image, class); image != "" {
+			return image, nil
+		}
+	}
+	return "", nil
+}
+
+func workerImageFor(controllerImage string, class v1alpha1.DevboxSandboxClass) string {
+	ref, _, _ := strings.Cut(controllerImage, "@")
+	slash := strings.LastIndex(ref, "/")
+	name, tag, ok := strings.Cut(ref[slash+1:], ":")
+	if !ok || tag == "" || name != "atecontroller" {
+		return ""
+	}
+	return ref[:slash+1] + "ateworker-" + string(class) + ":" + tag
+}
+
 func (r *DevboxRunnerReconciler) reconcileAdditionalPools(ctx context.Context, runner *v1alpha1.DevboxRunner) error {
 	desired := devboxWorkerPoolRefs(runner, r.Config.WorkerPoolNamespace)
 	var errs []error
@@ -363,18 +401,22 @@ func toUnstructured(v any) (any, error) {
 }
 
 // ensureAtespace creates the runner's atespace and grants the gateway editor on it, so the gateway can create
-// instance actors, tags and egress policies. The operator itself creates atespaces as a global owner, a
-// Substrate install setting (DBX-23).
-func (r *DevboxRunnerReconciler) ensureAtespace(ctx context.Context, runner *v1alpha1.DevboxRunner) (string, error) {
+// instance actors, tags and egress policies, and global viewer, which listing workers needs: without it the
+// gateway can't see a worker draining, and the boxes on it die unsaved with the worker. The operator itself
+// creates atespaces as a global owner, a Substrate install setting (DBX-23).
+func (r *DevboxRunnerReconciler) ensureAtespace(ctx context.Context, api substrate.API, runner *v1alpha1.DevboxRunner) (string, error) {
 	atespace := lo.FromPtr(runner.Status.Atespace)
 	if atespace == "" {
 		atespace = devboxAtespaceName(runner)
 	}
-	if err := r.Substrate.EnsureAtespace(ctx, atespace); err != nil {
+	if err := api.EnsureAtespace(ctx, atespace); err != nil {
 		return "", fmt.Errorf("ensuring atespace %s: %w", atespace, err)
 	}
-	if err := r.Substrate.EnsureAtespaceAccessPolicy(ctx, atespace, substrate.RoleEditor, r.Config.GatewayPrincipal()); err != nil {
+	if err := api.EnsureAtespaceAccessPolicy(ctx, atespace, substrate.RoleEditor, r.Config.GatewayPrincipal()); err != nil {
 		return "", fmt.Errorf("granting the gateway editor on atespace %s: %w", atespace, err)
+	}
+	if err := api.EnsureGlobalAccessPolicy(ctx, substrate.RoleViewer, r.Config.GatewayPrincipal()); err != nil {
+		return "", fmt.Errorf("granting the gateway global viewer: %w", err)
 	}
 	runner.Status.Atespace = &atespace
 	return atespace, nil
@@ -383,21 +425,31 @@ func (r *DevboxRunnerReconciler) ensureAtespace(ctx context.Context, runner *v1a
 // buildActorTemplate renders the immutable ActorTemplate for the runner's current spec and resolved image.
 // The returned hash covers everything but the template name, and keys the revision.
 func (r *DevboxRunnerReconciler) buildActorTemplate(runner *v1alpha1.DevboxRunner, atespace, image string) (*ateapi.ActorTemplate, string, error) {
-	guest := DevboxRunnerGuestConfig{
+	if err := validateDevboxRepositories(runner); err != nil {
+		return nil, "", err
+	}
+	cfg := guest.Config{
 		Runner:  runner.ConsoleName(),
 		Browser: runner.Spec.Browser != nil && runner.Spec.Browser.Enabled,
 		Agents:  devboxGuestAgents(runner),
+		Repositories: lo.Map(runner.Spec.Repositories, func(r v1alpha1.DevboxRepository, _ int) guest.Repository {
+			return guest.Repository{URL: r.URL, Branch: lo.FromPtr(r.Branch), Description: lo.FromPtr(r.Description)}
+		}),
 	}
-	guest.BootstrapScript = lo.FromPtr(runner.Spec.BootstrapScript)
+	cfg.BootstrapScript = lo.FromPtr(runner.Spec.BootstrapScript)
 	if runner.Spec.Mise != nil {
-		guest.Mise = lo.FromPtr(runner.Spec.Mise.Config)
+		cfg.Mise = lo.FromPtr(runner.Spec.Mise.Config)
 	}
-	guestJSON, err := json.Marshal(guest)
+	guestJSON, err := json.Marshal(cfg)
 	if err != nil {
 		return nil, "", err
 	}
 	if len(guestJSON) > substrateEnvValueLimit {
-		return nil, "", fmt.Errorf("bootstrapScript, mise and agents add up to %d bytes, over Substrate's %d byte env limit", len(guestJSON), substrateEnvValueLimit)
+		return nil, "", fmt.Errorf("bootstrapScript, mise, repositories and agents add up to %d bytes, over Substrate's %d byte env limit", len(guestJSON), substrateEnvValueLimit)
+	}
+	readyz := devboxReadyzTimeout
+	if runner.Spec.HasGoldenBootWork() {
+		readyz = runner.Spec.GoldenBootTimeout()
 	}
 
 	capacity, err := devboxInstanceCapacity(runner, r.sandboxClass(runner))
@@ -411,19 +463,20 @@ func (r *DevboxRunnerReconciler) buildActorTemplate(runner *v1alpha1.DevboxRunne
 		Containers: []*ateapi.Container{{
 			Name:  devboxContainerName,
 			Image: image,
-			Env:   append([]*ateapi.EnvVar{{Name: devboxRunnerConfigEnv, Value: string(guestJSON)}}, devboxPlainEnv(runner)...),
+			Env:   append([]*ateapi.EnvVar{{Name: guest.EnvVar, Value: string(guestJSON)}}, devboxPlainEnv(runner)...),
 			WakeupProbe: &ateapi.WakeupProbe{
 				HttpGet:        &ateapi.HttpGetAction{Path: "/readyz", Port: devboxReadyzPort},
-				TimeoutSeconds: 120,
+				TimeoutSeconds: int32(readyz / time.Second),
 			},
 			VolumeMounts: []*ateapi.VolumeMount{
 				{Name: devboxHomeVolume, MountPath: "/home/dev"},
 				{Name: devboxTrustVolume, MountPath: devboxEgressTrustMount},
 				{Name: devboxActorVolume, MountPath: devboxActorMetaMount},
 			},
+			SecurityContext: &ateapi.SecurityContext{Capabilities: &ateapi.Capabilities{Add: devboxCapabilities}},
 		}},
 		Volumes: []*ateapi.Volume{
-			{Name: devboxHomeVolume, DurableDir: &ateapi.DurableDirVolumeSource{}},
+			devboxHomeVolumeSource(runner),
 			{Name: devboxTrustVolume, SystemInfo: &ateapi.SystemInfoVolumeSource{DataSources: []*ateapi.SystemInfoDataSource{{
 				TrustBundle: &ateapi.TrustBundleDataSource{Names: []string{"egress-mitm.ate.dev"}, Path: "egress-mitm.pem"},
 			}}}},
@@ -453,23 +506,81 @@ func (r *DevboxRunnerReconciler) buildActorTemplate(runner *v1alpha1.DevboxRunne
 	return template, hash, nil
 }
 
-// devboxGoldenEgressPolicy lets the golden boot reach what the bootstrap script and mise need: the runner's
-// package servers and HTTP allowlist plus mise's own download hosts. Without customization the golden boot needs
-// no egress.
+// validateDevboxRepositories rejects repositories the golden boot couldn't clone: off the allowlist, which egress
+// enforces on the golden boot too, or listed twice.
+func validateDevboxRepositories(runner *v1alpha1.DevboxRunner) error {
+	seen := map[string]bool{}
+	for _, repo := range runner.Spec.Repositories {
+		if !rules.RepositoryAllowed(runner.Spec.AllowedRepositories, repo.URL) {
+			return fmt.Errorf("repository %s isn't on allowedRepositories (entries name the host, like github.com/owner/repo)", repo.URL)
+		}
+		id := scmpath.Normalize(repo.URL)
+		if seen[id] {
+			return fmt.Errorf("repository %s is listed twice", repo.URL)
+		}
+		seen[id] = true
+	}
+	return nil
+}
+
+// devboxHomeVolumeSource is /home/dev: a durable dir carried in the instance's snapshots, or a JuiceFS volume
+// whose quota is the home's size. A JuiceFS home names the runner's StorageClass here, which keys the template
+// hash; ensureHomeStorageClass swaps in the revision's own class once the template is named.
+func devboxHomeVolumeSource(runner *v1alpha1.DevboxRunner) *ateapi.Volume {
+	if runner.Spec.HomeStorage() != v1alpha1.DevboxHomeJuiceFS {
+		return &ateapi.Volume{Name: devboxHomeVolume, DurableDir: &ateapi.DurableDirVolumeSource{}}
+	}
+	size := runner.Spec.HomeSize()
+	return &ateapi.Volume{Name: devboxHomeVolume, External: &ateapi.ExternalVolumeSource{Template: &ateapi.ExternalVolumeTemplate{
+		CapacityBytes:    size.Value(),
+		StorageClassName: runner.Spec.HomeStorageClass(),
+	}}}
+}
+
+// devboxTemplateNeedsPreview reports whether creating the template uses Substrate preview features.
+func devboxTemplateNeedsPreview(template *ateapi.ActorTemplate) bool {
+	if template.GoldenEgressPolicy != nil {
+		return true
+	}
+	return lo.ContainsBy(template.Volumes, func(v *ateapi.Volume) bool { return v.External != nil })
+}
+
+// devboxGoldenEgressPolicy lets the golden boot reach what it needs: the hosts of spec.repositories with the box's
+// SCM credentials injected (through the gateway's credential provider), then for the bootstrap script and mise the
+// runner's package servers, OCI registries and HTTP allowlist plus mise's own download hosts. Without customization
+// the golden boot needs no egress.
 func devboxGoldenEgressPolicy(runner *v1alpha1.DevboxRunner) *ateapi.EgressPolicyTemplate {
-	hasMise := runner.Spec.Mise != nil && lo.FromPtr(runner.Spec.Mise.Config) != ""
-	if lo.FromPtr(runner.Spec.BootstrapScript) == "" && !hasMise {
+	if !runner.Spec.HasGoldenBootWork() {
 		return nil
 	}
+	hasMise := runner.Spec.Mise != nil && lo.FromPtr(runner.Spec.Mise.Config) != ""
+
+	repos := lo.Map(runner.Spec.Repositories, func(r v1alpha1.DevboxRepository, _ int) string { return r.URL })
+	scm := rules.ATE(rules.BuildGoldenPolicy(runner.Name, repos))
+	// Substrate rejects two rules on one host and port, and the SCM rule must win where they meet.
+	taken := map[string]bool{}
+	for _, r := range scm {
+		for _, host := range r.GetHttps().GetHostnames() {
+			for _, port := range r.GetHttps().GetPorts().GetNumbers() {
+				taken[fmt.Sprintf("%s:%d", strings.ToLower(host), port)] = true
+			}
+		}
+	}
+	free := func(host string, port int32) bool { return !taken[fmt.Sprintf("%s:%d", strings.ToLower(host), port)] }
 
 	https := map[int32][]string{}
 	var passthrough []*ateapi.EgressRule
 	if hasMise {
-		https[443] = append(https[443], "mise.jdx.dev", "github.com", "*.github.com", "*.githubusercontent.com")
+		https[443] = append(https[443], "*.github.com", "*.githubusercontent.com")
+		https[443] = append(https[443], v1alpha1.MiseHosts...)
 	}
 	https[443] = append(https[443], runner.Spec.PackageServerHosts()...)
+	https[443] = append(https[443], runner.Spec.OCIRegistryHosts()...)
 	for _, entry := range runner.Spec.HTTPAllowlist {
 		port := lo.FromPtrOr(entry.Port, 443)
+		if !free(entry.Host, port) {
+			continue
+		}
 		if lo.FromPtr(entry.Passthrough) {
 			passthrough = append(passthrough, &ateapi.EgressRule{TlsPassthrough: &ateapi.TlsPassthroughRule{
 				Hostnames: []string{entry.Host}, Ports: &ateapi.Ports{Numbers: []int32{port}},
@@ -483,11 +594,15 @@ func devboxGoldenEgressPolicy(runner *v1alpha1.DevboxRunner) *ateapi.EgressPolic
 	sort.Slice(ports, func(i, j int) bool { return ports[i] < ports[j] })
 	var rules []*ateapi.EgressRule
 	for _, port := range ports {
+		hosts := lo.Filter(lo.Uniq(https[port]), func(h string, _ int) bool { return free(h, port) })
+		if len(hosts) == 0 {
+			continue
+		}
 		rules = append(rules, &ateapi.EgressRule{Https: &ateapi.HttpsRule{
-			Hostnames: lo.Uniq(https[port]), Ports: &ateapi.Ports{Numbers: []int32{port}},
+			Hostnames: hosts, Ports: &ateapi.Ports{Numbers: []int32{port}},
 		}})
 	}
-	rules = append(rules, passthrough...)
+	rules = append(append(rules, scm...), passthrough...)
 	if len(rules) == 0 {
 		return nil
 	}
@@ -498,7 +613,7 @@ func devboxGoldenEgressPolicy(runner *v1alpha1.DevboxRunner) *ateapi.EgressPolic
 // in-flight revision: Building (waiting for the golden tag), Probing (waiting for the gateway's agent probe),
 // and finally Ready or Failed. The newest Ready revision is the one new instances start from; older Ready
 // revisions are Retired and kept until garbage collection finds nothing references them.
-func (r *DevboxRunnerReconciler) reconcileRevisions(ctx context.Context, runner *v1alpha1.DevboxRunner, atespace, image string) error {
+func (r *DevboxRunnerReconciler) reconcileRevisions(ctx context.Context, api substrate.API, runner *v1alpha1.DevboxRunner, atespace, image string) error {
 	template, hash, err := r.buildActorTemplate(runner, atespace, image)
 	if err != nil {
 		utils.MarkCondition(runner.SetCondition, v1alpha1.DevboxTemplateReadyConditionType, metav1.ConditionFalse, v1alpha1.DevboxMisconfiguredReason, err.Error())
@@ -506,14 +621,19 @@ func (r *DevboxRunnerReconciler) reconcileRevisions(ctx context.Context, runner 
 	}
 
 	latest := runner.LatestRevision()
-	if latest == nil || latest.Hash != hash {
+	// The latest revision is only Retired without a newer one when its golden boot lost its worker.
+	if latest == nil || latest.Hash != hash || latest.Phase == v1alpha1.DevboxRevisionRetired {
 		next := int64(1)
 		if latest != nil {
 			next = latest.Revision + 1
 		}
 		name := devboxTemplateName(runner, next)
 		template.Metadata.Name = name
-		if _, err := r.Substrate.CreateActorTemplate(ctx, template, template.GoldenEgressPolicy != nil); err != nil {
+		if err := r.ensureHomeStorageClass(ctx, runner, template); err != nil {
+			utils.MarkCondition(runner.SetCondition, v1alpha1.DevboxTemplateReadyConditionType, metav1.ConditionFalse, v1alpha1.DevboxMisconfiguredReason, err.Error())
+			return err
+		}
+		if _, err := api.CreateActorTemplate(ctx, template, devboxTemplateNeedsPreview(template)); err != nil {
 			utils.MarkCondition(runner.SetCondition, v1alpha1.DevboxTemplateReadyConditionType, metav1.ConditionFalse, v1alpha1.DevboxFailedReason,
 				fmt.Sprintf("creating ActorTemplate %s: %s", name, err))
 			return err
@@ -529,21 +649,25 @@ func (r *DevboxRunnerReconciler) reconcileRevisions(ctx context.Context, runner 
 				}
 			}
 		}
-		runner.Status.Revisions = append([]v1alpha1.DevboxRevision{{
+		rev := v1alpha1.DevboxRevision{
 			Revision:  next,
 			Name:      name,
 			Hash:      hash,
 			Image:     image,
 			Phase:     v1alpha1.DevboxRevisionBuilding,
 			CreatedAt: lo.ToPtr(metav1.Now()),
-		}}, runner.Status.Revisions...)
+		}
+		if storage := runner.Spec.HomeStorage(); storage != v1alpha1.DevboxHomeSnapshot {
+			rev.HomeStorage = &storage
+		}
+		runner.Status.Revisions = append([]v1alpha1.DevboxRevision{rev}, runner.Status.Revisions...)
 	}
 
 	for i := range runner.Status.Revisions {
 		rev := &runner.Status.Revisions[i]
 		switch rev.Phase {
 		case v1alpha1.DevboxRevisionBuilding:
-			if err := r.advanceBuilding(ctx, runner, atespace, rev); err != nil {
+			if err := r.advanceBuilding(ctx, api, runner, atespace, rev); err != nil {
 				return err
 			}
 		case v1alpha1.DevboxRevisionProbing:
@@ -557,8 +681,8 @@ func (r *DevboxRunnerReconciler) reconcileRevisions(ctx context.Context, runner 
 	return nil
 }
 
-func (r *DevboxRunnerReconciler) advanceBuilding(ctx context.Context, runner *v1alpha1.DevboxRunner, atespace string, rev *v1alpha1.DevboxRevision) error {
-	tmpl, err := r.Substrate.GetActorTemplate(ctx, atespace, rev.Name)
+func (r *DevboxRunnerReconciler) advanceBuilding(ctx context.Context, api substrate.API, runner *v1alpha1.DevboxRunner, atespace string, rev *v1alpha1.DevboxRevision) error {
+	tmpl, err := api.GetActorTemplate(ctx, atespace, rev.Name)
 	if substrate.IsNotFound(err) {
 		rev.Phase = v1alpha1.DevboxRevisionFailed
 		rev.Message = lo.ToPtr("ActorTemplate no longer exists in Substrate")
@@ -570,6 +694,11 @@ func (r *DevboxRunnerReconciler) advanceBuilding(ctx context.Context, runner *v1
 
 	golden := tmpl.GetStatus().GetGoldenSnapshotStatus()
 	if msg := golden.GetErrorMessage(); msg != "" {
+		if goldenLostWorker(msg) {
+			rev.Phase = v1alpha1.DevboxRevisionRetired
+			rev.Message = lo.ToPtr("golden boot lost its worker, rebuilding: " + msg)
+			return nil
+		}
 		rev.Phase = v1alpha1.DevboxRevisionFailed
 		rev.Message = lo.ToPtr("golden boot failed: " + msg)
 		return nil
@@ -584,6 +713,20 @@ func (r *DevboxRunnerReconciler) advanceBuilding(ctx context.Context, runner *v1
 	return r.Probe.Request(ctx, probeRequest(runner, atespace, rev))
 }
 
+// goldenWorkerLossCrashes are Substrate's fixed actor crash messages for losing the worker or node, not a fault of
+// the image, so a golden boot that failed with one is rebuilt rather than failing the revision.
+var goldenWorkerLossCrashes = []string{
+	"worker pod went away while hosting the actor",
+	"worker restarted while hosting the actor",
+	"assigned worker is draining",
+	"assigned worker no longer satisfies the actor's placement constraints",
+	"node holding the actor's latest snapshot no longer exists",
+}
+
+func goldenLostWorker(msg string) bool {
+	return lo.SomeBy(goldenWorkerLossCrashes, func(crash string) bool { return strings.Contains(msg, crash) })
+}
+
 func probeRequest(runner *v1alpha1.DevboxRunner, atespace string, rev *v1alpha1.DevboxRevision) DevboxProbeRequest {
 	return DevboxProbeRequest{
 		Request: probe.Request{
@@ -592,6 +735,7 @@ func probeRequest(runner *v1alpha1.DevboxRunner, atespace string, rev *v1alpha1.
 			ActorTemplate: rev.Name,
 			Revision:      rev.Revision,
 			GoldenTag:     lo.FromPtr(rev.GoldenTag),
+			JuiceFSHome:   lo.FromPtr(rev.HomeStorage) == v1alpha1.DevboxHomeJuiceFS,
 			DevboxID:      lo.FromPtr(runner.Status.ID),
 		},
 		Agents: devboxGuestAgents(runner),
@@ -678,7 +822,7 @@ func (r *DevboxRunnerReconciler) promoteCurrentRevision(runner *v1alpha1.DevboxR
 // truth for references: each instance is an actor of a template, and each snapshot is a tag whose status
 // records the template UID. A revision's own golden tag does not count, and is deleted with it. The newest
 // revision is always kept, since its hash is what stops a failed spec from being rebuilt on every reconcile.
-func (r *DevboxRunnerReconciler) gcRevisions(ctx context.Context, runner *v1alpha1.DevboxRunner, atespace string) error {
+func (r *DevboxRunnerReconciler) gcRevisions(ctx context.Context, api substrate.API, runner *v1alpha1.DevboxRunner, atespace string) error {
 	latest := runner.LatestRevision()
 	collectable := lo.Filter(runner.Status.Revisions, func(rev v1alpha1.DevboxRevision, _ int) bool {
 		if latest != nil && rev.Revision == latest.Revision {
@@ -690,7 +834,7 @@ func (r *DevboxRunnerReconciler) gcRevisions(ctx context.Context, runner *v1alph
 		return nil
 	}
 
-	referenced, err := r.referencedTemplates(ctx, atespace, runner)
+	referenced, err := r.referencedTemplates(ctx, api, atespace, runner)
 	if err != nil {
 		return err
 	}
@@ -701,12 +845,17 @@ func (r *DevboxRunnerReconciler) gcRevisions(ctx context.Context, runner *v1alph
 			continue
 		}
 		if rev.GoldenTag != nil {
-			if err := r.Substrate.DeleteTag(ctx, atespace, *rev.GoldenTag); err != nil {
+			if err := api.DeleteTag(ctx, atespace, *rev.GoldenTag); err != nil {
 				return fmt.Errorf("deleting golden tag %s: %w", *rev.GoldenTag, err)
 			}
 		}
-		if err := r.Substrate.DeleteActorTemplate(ctx, atespace, rev.Name); err != nil {
+		if err := api.DeleteActorTemplate(ctx, atespace, rev.Name); err != nil {
 			return fmt.Errorf("deleting ActorTemplate %s: %w", rev.Name, err)
+		}
+		if rev.HomeStorage != nil && *rev.HomeStorage == v1alpha1.DevboxHomeJuiceFS {
+			if err := r.deleteHomeStorageClass(ctx, atespace, rev.Name); err != nil {
+				return err
+			}
 		}
 		if err := r.Probe.Cleanup(ctx, runner.Name, rev.Revision); err != nil {
 			return err
@@ -720,18 +869,10 @@ func (r *DevboxRunnerReconciler) gcRevisions(ctx context.Context, runner *v1alph
 	return nil
 }
 
-func (r *DevboxRunnerReconciler) referencedTemplates(ctx context.Context, atespace string, runner *v1alpha1.DevboxRunner) (map[string]bool, error) {
+func (r *DevboxRunnerReconciler) referencedTemplates(ctx context.Context, api substrate.API, atespace string, runner *v1alpha1.DevboxRunner) (map[string]bool, error) {
 	referenced := map[string]bool{}
 
-	actors, err := r.Substrate.ListActors(ctx, atespace)
-	if err != nil {
-		return nil, fmt.Errorf("listing actors: %w", err)
-	}
-	for _, actor := range actors {
-		referenced[actor.GetActorTemplate().GetName()] = true
-	}
-
-	templates, err := r.Substrate.ListActorTemplates(ctx, atespace)
+	templates, err := api.ListActorTemplates(ctx, atespace)
 	if err != nil {
 		return nil, fmt.Errorf("listing ActorTemplates: %w", err)
 	}
@@ -740,13 +881,26 @@ func (r *DevboxRunnerReconciler) referencedTemplates(ctx context.Context, atespa
 		nameByUID[t.GetMetadata().GetUid()] = t.GetMetadata().GetName()
 	}
 
+	actors, err := api.ListActors(ctx, atespace)
+	if err != nil {
+		return nil, fmt.Errorf("listing actors: %w", err)
+	}
+	for _, actor := range actors {
+		// Substrate names a template's golden actor after the template's UID and deletes it with the template, so
+		// it is no reference: counting it would keep a stuck golden boot holding a worker slot forever.
+		if nameByUID[actor.GetMetadata().GetName()] == actor.GetActorTemplate().GetName() {
+			continue
+		}
+		referenced[actor.GetActorTemplate().GetName()] = true
+	}
+
 	goldenTags := map[string]bool{}
 	for _, rev := range runner.Status.Revisions {
 		if rev.GoldenTag != nil {
 			goldenTags[*rev.GoldenTag] = true
 		}
 	}
-	tags, err := r.Substrate.ListTags(ctx, atespace)
+	tags, err := api.ListTags(ctx, atespace)
 	if err != nil {
 		return nil, fmt.Errorf("listing tags: %w", err)
 	}

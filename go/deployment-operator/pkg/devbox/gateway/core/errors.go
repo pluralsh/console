@@ -27,6 +27,12 @@ func errSuspended(id string) error {
 	return statusError(codes.FailedPrecondition, devboxv1.ErrorReason_ERROR_REASON_INSTANCE_SUSPENDED, "instance %s is suspended", id)
 }
 
+// errStarting tells a caller that gave up waiting that the wake carries on; console retries rather than reporting
+// the cluster offline.
+func errStarting(id string) error {
+	return statusError(codes.Unavailable, devboxv1.ErrorReason_ERROR_REASON_INSTANCE_STARTING, "instance %s is still starting", id)
+}
+
 func errRecord(err error) error {
 	return status.Errorf(codes.Unavailable, "persisting the instance record: %v", err)
 }

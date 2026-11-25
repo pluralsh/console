@@ -109,39 +109,72 @@ func TestRunnerFromCRDPackageServers(t *testing.T) {
 	}
 
 	defaults := hosts(RunnerFromCRD(&v1alpha1.DevboxRunner{}))
-	for _, h := range []string{"proxy.golang.org", "index.crates.io", "registry.npmjs.org", "repo.maven.apache.org", "repo.hex.pm", "files.pythonhosted.org"} {
+	for _, h := range []string{
+		"proxy.golang.org", "storage.googleapis.com", "index.crates.io", "registry.npmjs.org", "repo.maven.apache.org", "repo.hex.pm",
+		"files.pythonhosted.org", "rubygems.org", "packagist.org", "api.nuget.org",
+	} {
 		if !slices.Contains(defaults, h) {
 			t.Errorf("default allowlist missing %s: %v", h, defaults)
 		}
 	}
-	for _, h := range []string{"rubygems.org", "packagist.org", "api.nuget.org"} {
-		if slices.Contains(defaults, h) {
-			t.Errorf("default allowlist includes opt-in %s", h)
-		}
-	}
 
 	custom := hosts(RunnerFromCRD(&v1alpha1.DevboxRunner{Spec: v1alpha1.DevboxRunnerSpec{
-		PackageServers: &v1alpha1.DevboxPackageServers{Go: ptr.To(false), Ruby: ptr.To(true)},
+		PackageServers: &v1alpha1.DevboxPackageServers{Go: ptr.To(false), Ruby: ptr.To(false)},
 	}}))
-	if slices.Contains(custom, "proxy.golang.org") || !slices.Contains(custom, "rubygems.org") || !slices.Contains(custom, "pypi.org") {
-		t.Fatalf("go disabled, ruby enabled, python defaulted: %v", custom)
+	if slices.Contains(custom, "proxy.golang.org") || slices.Contains(custom, "rubygems.org") || !slices.Contains(custom, "pypi.org") {
+		t.Fatalf("go and ruby disabled, python defaulted: %v", custom)
 	}
 
 	none := RunnerFromCRD(&v1alpha1.DevboxRunner{Spec: v1alpha1.DevboxRunnerSpec{
-		HTTPAllowlist: []v1alpha1.DevboxHTTPAllowlistEntry{{Host: "example.com"}},
-		PackageServers: &v1alpha1.DevboxPackageServers{Go: ptr.To(false), Rust: ptr.To(false), JavaScript: ptr.To(false),
-			Java: ptr.To(false), Elixir: ptr.To(false), Python: ptr.To(false)},
+		HTTPAllowlist:  []v1alpha1.DevboxHTTPAllowlistEntry{{Host: "example.com"}},
+		PackageServers: noPackages,
+		OCIRegistries:  noRegistries,
 	}})
 	if want := []egress.AllowEntry{{Host: "example.com"}}; !slices.Equal(none.HTTPAllowlist, want) {
 		t.Fatalf("all package servers off: %v, want %v", none.HTTPAllowlist, want)
 	}
 }
 
+var (
+	noRegistries = &v1alpha1.DevboxOCIRegistries{DockerHub: ptr.To(false), GitHub: ptr.To(false)}
+	noPackages   = &v1alpha1.DevboxPackageServers{Go: ptr.To(false), Rust: ptr.To(false), JavaScript: ptr.To(false),
+		Java: ptr.To(false), Elixir: ptr.To(false), Python: ptr.To(false), Ruby: ptr.To(false), PHP: ptr.To(false), Dotnet: ptr.To(false)}
+)
+
+func TestRunnerFromCRDOCIRegistries(t *testing.T) {
+	hosts := func(oci *v1alpha1.DevboxOCIRegistries) []string {
+		var out []string
+		for _, e := range RunnerFromCRD(&v1alpha1.DevboxRunner{Spec: v1alpha1.DevboxRunnerSpec{PackageServers: noPackages, OCIRegistries: oci}}).HTTPAllowlist {
+			if e.Port != 443 {
+				t.Fatalf("registry %s on port %d, want 443", e.Host, e.Port)
+			}
+			out = append(out, e.Host)
+		}
+		return out
+	}
+
+	defaults := hosts(nil)
+	for _, h := range []string{"registry-1.docker.io", "auth.docker.io", "production.cloudflare.docker.com", "ghcr.io"} {
+		if !slices.Contains(defaults, h) {
+			t.Errorf("default allowlist missing %s: %v", h, defaults)
+		}
+	}
+	for _, h := range []string{"quay.io", "gcr.io", "mcr.microsoft.com", "registry.k8s.io"} {
+		if slices.Contains(defaults, h) {
+			t.Errorf("default allowlist includes opt-in %s", h)
+		}
+	}
+
+	custom := hosts(&v1alpha1.DevboxOCIRegistries{DockerHub: ptr.To(false), Quay: ptr.To(true)})
+	if slices.Contains(custom, "registry-1.docker.io") || !slices.Contains(custom, "quay.io") || !slices.Contains(custom, "ghcr.io") {
+		t.Fatalf("docker hub disabled, quay enabled, ghcr defaulted: %v", custom)
+	}
+}
+
 func TestRunnerFromCRDCloudProviders(t *testing.T) {
-	noPackages := &v1alpha1.DevboxPackageServers{Go: ptr.To(false), Rust: ptr.To(false), JavaScript: ptr.To(false),
-		Java: ptr.To(false), Elixir: ptr.To(false), Python: ptr.To(false)}
 	hosts := func(spec v1alpha1.DevboxRunnerSpec) []string {
 		spec.PackageServers = noPackages
+		spec.OCIRegistries = noRegistries
 		var out []string
 		for _, e := range RunnerFromCRD(&v1alpha1.DevboxRunner{Spec: spec}).HTTPAllowlist {
 			out = append(out, e.Host)

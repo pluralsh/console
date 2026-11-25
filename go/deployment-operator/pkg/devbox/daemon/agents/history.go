@@ -21,7 +21,8 @@ func (m *Manager) writeTranscriptLocked() {
 	for _, e := range m.unwritten {
 		batch = append(batch, e)
 	}
-	if err := m.opts.Transcript.Append(m.ctx, batch); err != nil {
+	// Stop's final flush runs after the manager's context is cancelled.
+	if err := m.opts.Transcript.Append(context.WithoutCancel(m.ctx), batch); err != nil {
 		m.log.Error("writing transcript", "entities", len(batch), "err", err)
 		return
 	}
@@ -54,8 +55,9 @@ func (m *Manager) Timeline(ctx context.Context, req *devboxv1.GetTimelineRequest
 			overlay = append(overlay, p)
 		}
 	}
-	// Events are emitted under m.mu, so nothing reflected in the overlay is past this offset.
+	// Events are emitted under m.mu, so nothing reflected in the overlay is past this offset (or seq).
 	head := m.opts.Head()
+	seq, stream := m.seqs[sessionID], m.stream
 	m.mu.Unlock()
 
 	var page *transcript.Page
@@ -76,6 +78,8 @@ func (m *Manager) Timeline(ctx context.Context, req *devboxv1.GetTimelineRequest
 		NextPosition: page.NextPosition,
 		HasMore:      page.HasMore,
 		DeltaOffset:  head,
+		Seq:          seq,
+		Stream:       stream,
 	}, nil
 }
 

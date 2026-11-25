@@ -1,0 +1,7 @@
+This PR was opened from a Plural devbox.  Open the <%= if @session, do: "session", else: "instance" %> to see the prompting behind it, or to keep working on it:
+
+| Name        | Details |
+| ----------- | ------- |
+| :package: Devbox | <%= @devbox %> |
+<%= if @session do %>| :speech_balloon: Session | [<%= @session %>](<%= @session_url %>) |
+<% end %>| :link: Instance | [<%= @instance %>](<%= @instance_url %>) |

@@ -1,53 +1,25 @@
 package egress
 
 import (
-	"fmt"
 	"net"
+	"os"
 	"strconv"
 	"strings"
 	"sync"
+
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/egress/rules"
 )
 
 const (
 	defaultActorJWTExpiration = 900
-	authorizationHeader       = "Authorization"
+	authorizationHeader       = rules.AuthorizationHeader
 	bearerPrefix              = "Bearer "
-	// PrivateTokenHeader is how GitLab API clients (glab, go-gitlab) send a token. GitLab's REST API rejects the
-	// Basic Authorization git needs, so SCM rules also replace this header, with the bare token.
-	PrivateTokenHeader = "PRIVATE-TOKEN"
+	PrivateTokenHeader        = rules.PrivateTokenHeader
 )
 
-// scmCompanions are hosts that serve a public SCM alongside its main host and accept the same token.
-var scmCompanions = map[string][]string{
-	"github.com":    {"api.github.com", "codeload.github.com", "raw.githubusercontent.com", "uploads.github.com"},
-	"bitbucket.org": {"api.bitbucket.org"},
-}
+func canonicalSCMHost(host string) string { return rules.CanonicalSCMHost(host) }
 
-// signedStorageHosts are the object-storage hosts LFS objects and release assets redirect to. Their URLs are
-// signed and minted only after an allowed request, so they get no injection and the ext_proc lets them through.
-var signedStorageHosts = map[string][]string{
-	"github.com": {
-		"objects.githubusercontent.com",
-		"github-releases.githubusercontent.com",
-		"release-assets.githubusercontent.com",
-		"github-cloud.githubusercontent.com",
-		"github-cloud.s3.amazonaws.com",
-	},
-	"bitbucket.org": {"bbuseruploads.s3.amazonaws.com"},
-}
-
-// canonicalSCMHost maps a companion host to the connection host its token belongs to.
-func canonicalSCMHost(host string) string {
-	host = normalizeHost(host)
-	for primary, companions := range scmCompanions {
-		for _, c := range companions {
-			if c == host {
-				return primary
-			}
-		}
-	}
-	return host
-}
+func normalizeHost(h string) string { return rules.NormalizeHost(h) }
 
 var (
 	defaultGatewayMu sync.RWMutex
@@ -92,13 +64,7 @@ func (ep GatewayEndpoint) JWTAudience() string {
 }
 
 // SecretURI is the credential URI for one of an instance's credentials. SCM URIs name the connection host.
-func SecretURI(instanceID, kind, host string) string {
-	uri := "ate-secret://" + CredentialProviderName + "/instances/" + instanceID + "/" + kind
-	if host != "" {
-		uri += "/" + host
-	}
-	return uri
-}
+func SecretURI(instanceID, kind, host string) string { return rules.SecretURI(instanceID, kind, host) }
 
 // BuildPolicy turns an instance into its egress rules (section 4.4). It is a pure function of info (and of the
 // default gateway endpoint when info.Gateway is zero), so the core can re-apply it whenever the box changes.
@@ -116,30 +82,16 @@ func SecretURI(instanceID, kind, host string) string {
 //   - cloud identity token-exchange and API hosts, without injection;
 //   - the runner allowlist: https, or tls_passthrough where flagged.
 func BuildPolicy(info InstanceInfo) Policy {
-	b := &policyBuilder{seen: map[string]bool{}}
+	b := &rules.Builder{}
 	id := info.InstanceID
 
-	for _, raw := range info.SCMHosts {
-		host := canonicalSCMHost(raw)
-		if host == "" {
-			continue
-		}
-		uri := SecretURI(id, KindSCM, host)
-		extra := []HeaderSecret{{Header: PrivateTokenHeader, SecretURI: SecretURI(id, KindSCMToken, host)}}
-		b.add(Rule{Host: host, Scheme: SchemeHTTPS, InjectHeader: authorizationHeader, SecretURI: uri, ExtraHeaders: extra})
-		for _, c := range scmCompanions[host] {
-			b.add(Rule{Host: c, Scheme: SchemeHTTPS, InjectHeader: authorizationHeader, SecretURI: uri, ExtraHeaders: extra})
-		}
-		for _, s := range signedStorageHosts[host] {
-			b.add(Rule{Host: s, Scheme: SchemeHTTPS})
-		}
-	}
+	b.AddSCM(id, info.SCMHosts)
 
 	if console := normalizeHost(info.ConsoleHost); console != "" {
-		b.add(Rule{Host: console, Scheme: SchemeHTTPS, InjectHeader: authorizationHeader, SecretURI: SecretURI(id, KindConsole, "")})
+		b.Add(Rule{Host: console, Scheme: SchemeHTTPS, InjectHeader: authorizationHeader, SecretURI: SecretURI(id, KindConsole, "")})
 	}
 	if ai := normalizeHost(info.AIProxyHost); ai != "" {
-		b.add(Rule{Host: ai, Scheme: SchemeHTTPS, InjectHeader: authorizationHeader, SecretURI: SecretURI(id, KindAIProxy, "")})
+		b.Add(Rule{Host: ai, Scheme: SchemeHTTPS, InjectHeader: authorizationHeader, SecretURI: SecretURI(id, KindAIProxy, "")})
 	}
 
 	ep := info.Gateway
@@ -155,7 +107,7 @@ func BuildPolicy(info InstanceInfo) Policy {
 		if exp == 0 {
 			exp = defaultActorJWTExpiration
 		}
-		b.add(Rule{
+		gateway := Rule{
 			Host:                      host,
 			Port:                      ep.Port,
 			Scheme:                    scheme,
@@ -164,19 +116,26 @@ func BuildPolicy(info InstanceInfo) Policy {
 			ActorJWT:                  true,
 			ActorJWTAudiences:         []string{ep.JWTAudience()},
 			ActorJWTExpirationSeconds: exp,
-		})
+		}
+		b.Add(gateway)
+		// Substrate's sandbox DNS only forwards names the policy allows, exactly. Cluster DNS answers a Service
+		// only by its full name, which resolvers reach through the search list, so that name needs a rule too.
+		if fqdn := serviceFQDN(host); fqdn != "" {
+			gateway.Host = fqdn
+			b.Add(gateway)
+		}
 	}
 
 	if subscriptionBilling(info.AgentBilling, "claude") {
-		b.add(Rule{Host: "api.anthropic.com", Scheme: SchemeHTTPS, InjectHeader: authorizationHeader, SecretURI: SecretURI(id, KindClaudeOAuth, "")})
+		b.Add(Rule{Host: "api.anthropic.com", Scheme: SchemeHTTPS, InjectHeader: authorizationHeader, SecretURI: SecretURI(id, KindClaudeOAuth, "")})
 	}
 	if subscriptionBilling(info.AgentBilling, "codex") {
-		b.add(Rule{Host: "chatgpt.com", Scheme: SchemeHTTPS})
-		b.add(Rule{Host: "auth.openai.com", Scheme: SchemeHTTPS})
+		b.Add(Rule{Host: "chatgpt.com", Scheme: SchemeHTTPS})
+		b.Add(Rule{Host: "auth.openai.com", Scheme: SchemeHTTPS})
 	}
 
 	for _, h := range info.CloudIdentityHosts {
-		b.add(Rule{Host: normalizeHost(h), Scheme: SchemeHTTPS})
+		b.Add(Rule{Host: normalizeHost(h), Scheme: SchemeHTTPS})
 	}
 
 	for _, e := range info.HTTPAllowlist {
@@ -184,34 +143,19 @@ func BuildPolicy(info InstanceInfo) Policy {
 		if e.Passthrough {
 			scheme = SchemeTLSPassthrough
 		}
-		b.add(Rule{Host: normalizeHost(e.Host), Port: e.Port, Scheme: scheme})
+		b.Add(Rule{Host: normalizeHost(e.Host), Port: e.Port, Scheme: scheme})
 	}
 
-	return Policy{Rules: b.rules}
+	return b.Policy()
 }
 
-type policyBuilder struct {
-	rules []Rule
-	seen  map[string]bool
+// BuildGoldenPolicy is rules.BuildGoldenPolicy.
+func BuildGoldenPolicy(runner string, repositories []string) Policy {
+	return rules.BuildGoldenPolicy(runner, repositories)
 }
 
-func (b *policyBuilder) add(r Rule) {
-	if r.Host == "" {
-		return
-	}
-	if r.Port == 0 {
-		r.Port = 443
-		if r.Scheme == SchemeHTTP {
-			r.Port = 80
-		}
-	}
-	key := fmt.Sprintf("%s:%d", r.Host, r.Port)
-	if b.seen[key] {
-		return
-	}
-	b.seen[key] = true
-	b.rules = append(b.rules, r)
-}
+// RepositoryHosts are the distinct SCM hosts of repository URLs, in order.
+func RepositoryHosts(repositories []string) []string { return rules.RepositoryHosts(repositories) }
 
 // subscriptionBilling reports whether agent ("claude" or "codex") bills through the user's own plan.
 func subscriptionBilling(billing map[string]string, agent string) bool {
@@ -240,20 +184,32 @@ func normalizeBilling(s string) string {
 	return strings.TrimPrefix(s, "billing_mode_")
 }
 
-// normalizeHost lowercases a host and strips any scheme, path, port and trailing dot.
-func normalizeHost(h string) string {
-	h = strings.ToLower(strings.TrimSpace(h))
-	if i := strings.Index(h, "://"); i >= 0 {
-		h = h[i+3:]
+// serviceFQDN is a `<svc>.<ns>.svc` host's fully qualified name in the cluster's DNS domain, or "".
+func serviceFQDN(host string) string {
+	if !strings.HasSuffix(host, ".svc") {
+		return ""
 	}
-	if i := strings.IndexAny(h, "/?#"); i >= 0 {
-		h = h[:i]
+	return host + "." + clusterDomain()
+}
+
+// clusterDomain is the cluster's DNS domain, read from the `svc.<domain>` entry of the pod's resolv.conf search
+// list.
+var clusterDomain = sync.OnceValue(func() string {
+	data, _ := os.ReadFile("/etc/resolv.conf")
+	return clusterDomainOf(string(data))
+})
+
+func clusterDomainOf(resolvConf string) string {
+	for _, line := range strings.Split(resolvConf, "\n") {
+		fields := strings.Fields(line)
+		if len(fields) == 0 || fields[0] != "search" {
+			continue
+		}
+		for _, d := range fields[1:] {
+			if domain, ok := strings.CutPrefix(strings.TrimSuffix(d, "."), "svc."); ok && domain != "" {
+				return domain
+			}
+		}
 	}
-	if i := strings.LastIndex(h, "@"); i >= 0 {
-		h = h[i+1:]
-	}
-	if host, _, err := net.SplitHostPort(h); err == nil {
-		h = host
-	}
-	return strings.TrimSuffix(h, ".")
+	return "cluster.local"
 }

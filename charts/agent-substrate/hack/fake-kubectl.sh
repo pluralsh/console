@@ -6,6 +6,8 @@
 #   FAKE_RACE=<secret>  "get" reports the secret missing but "create" finds it
 #                       (a concurrent hook run won the race).
 #   FAKE_ISSUER=<url>   issuer in /.well-known/openid-configuration ("" = 404).
+#   FAKE_PODCERT_VERSION=<v>  certificates.k8s.io version serving pod
+#                       certificates (default v1, "" = none).
 set -eu
 : "${FAKE_STATE:?}"
 
@@ -37,6 +39,13 @@ obj_dir() { echo "$FAKE_STATE/$1/${2:-_}/$3"; }
 case "$1" in
   get)
     if [ -n "$raw" ]; then
+      case "$raw" in
+        /apis/certificates.k8s.io/*)
+          [ "$raw" = "/apis/certificates.k8s.io/${FAKE_PODCERT_VERSION-v1}" ] || exit 1
+          printf '{"kind":"APIResourceList","resources":[{"name":"podcertificaterequests"},{"name":"clustertrustbundles"}]}'
+          exit 0
+          ;;
+      esac
       [ -n "${FAKE_ISSUER:-}" ] || exit 1
       printf '{"issuer":"%s","jwks_uri":"%s/openid/v1/jwks"}' "$FAKE_ISSUER" "$FAKE_ISSUER"
       exit 0

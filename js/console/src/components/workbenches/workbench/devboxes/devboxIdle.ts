@@ -81,12 +81,14 @@ const BUSY_REASON_LABELS: Record<string, string> = {
   pending_interaction: 'waiting on you',
 }
 
+// a reason's detail can be a bare thread id, so it's only the last resort
 export function busyReasonLabel(reason: Record<string, unknown>) {
   const kind = `${reason.kind ?? ''}`.toLowerCase()
   return (
     BUSY_REASON_LABELS[kind] ||
-    (reason.detail as string) ||
+    (reason.thread_id ? BUSY_REASON_LABELS.agent_turn : '') ||
     kind.replace(/_/g, ' ') ||
+    (reason.detail as string) ||
     'busy'
   )
 }
@@ -101,40 +103,37 @@ export type DevboxAwakeTone =
 export type DevboxAwakeStatus = {
   label: string
   tone: DevboxAwakeTone
-  suspendingSoon: boolean
-  suspendsInSeconds: Nullable<number>
 }
 
 type AwakeInput = Pick<
   DevboxInstanceTinyFragment,
   'status' | 'keepAwakeUntil' | 'foregroundState' | 'statusReason'
-> & {
-  idleState?: DevboxInstanceFragment['idleState']
-  keepAwakeBy?: DevboxInstanceFragment['keepAwakeBy']
-}
+> &
+  Partial<Pick<DevboxInstanceTinyFragment, 'awakeSince'>> & {
+    idleState?: DevboxInstanceFragment['idleState']
+    keepAwakeBy?: DevboxInstanceFragment['keepAwakeBy']
+  }
 
 export function getDevboxAwakeStatus(
   instance: AwakeInput,
   { now = new Date(), resuming = false } = {}
 ): DevboxAwakeStatus {
-  const base = { suspendingSoon: false, suspendsInSeconds: null }
-  if (resuming) return { ...base, label: 'Resuming…', tone: 'info' }
+  if (resuming) return { label: 'Resuming…', tone: 'info' }
 
   switch (instance.status) {
     case DevboxInstanceStatus.Pending:
     case DevboxInstanceStatus.Provisioning:
-      return { ...base, label: 'Starting…', tone: 'info' }
+      return { label: 'Starting…', tone: 'info' }
     case DevboxInstanceStatus.Snapshotting:
-      return { ...base, label: 'Snapshotting…', tone: 'info' }
+      return { label: 'Snapshotting…', tone: 'info' }
     case DevboxInstanceStatus.Suspended:
-      return { ...base, label: 'Suspended', tone: 'neutral' }
+      return { label: 'Suspended', tone: 'neutral' }
     case DevboxInstanceStatus.Completed:
-      return { ...base, label: 'Completed', tone: 'neutral' }
+      return { label: 'Completed', tone: 'neutral' }
     case DevboxInstanceStatus.Cancelled:
-      return { ...base, label: 'Stopped', tone: 'neutral' }
+      return { label: 'Stopped', tone: 'neutral' }
     case DevboxInstanceStatus.Failed:
       return {
-        ...base,
         label: instance.statusReason
           ? `Failed · ${instance.statusReason}`
           : 'Failed',
@@ -145,19 +144,25 @@ export function getDevboxAwakeStatus(
   }
 
   if (instance.foregroundState === DevboxForegroundState.RequiresAction)
-    return { ...base, label: 'Awake · needs you', tone: 'warning' }
+    return { label: 'Awake · needs you', tone: 'warning' }
 
   if (isKeptAwake(instance, now)) {
     const by = instance.keepAwakeBy?.name
     return {
-      ...base,
       label: `Kept awake until ${dayjs(instance.keepAwakeUntil).format('h:mm A')}${by ? ` by ${by}` : ''}`,
       tone: 'success',
     }
   }
 
   const idle = instance.idleState
-  if (idle?.idle && idle.suspendsAt) {
+  // a deadline from before the instance woke, or long past, belongs to an
+  // earlier suspend, not to this run
+  const stale =
+    !!idle?.suspendsAt &&
+    ((!!instance.awakeSince &&
+      dayjs(idle.suspendsAt).isBefore(instance.awakeSince)) ||
+      dayjs(now).diff(idle.suspendsAt, 'second') > SUSPENDING_SOON_SECONDS)
+  if (idle?.idle && idle.suspendsAt && !stale) {
     const seconds = Math.max(0, dayjs(idle.suspendsAt).diff(now, 'second'))
     const mins = Math.ceil(seconds / 60)
     return {
@@ -166,23 +171,20 @@ export function getDevboxAwakeStatus(
           ? `Idle · suspends in ${seconds}s`
           : `Idle · suspends in ${mins} min`,
       tone: seconds <= SUSPENDING_SOON_SECONDS ? 'warning' : 'neutral',
-      suspendingSoon: seconds <= SUSPENDING_SOON_SECONDS,
-      suspendsInSeconds: seconds,
     }
   }
 
   const reason = idle?.busyReasons?.find(Boolean)
   if (reason)
     return {
-      ...base,
       label: `Awake · ${busyReasonLabel(reason)}`,
       tone: 'success',
     }
   if (instance.foregroundState === DevboxForegroundState.Running)
-    return { ...base, label: 'Awake · agent working', tone: 'success' }
+    return { label: 'Awake · agent working', tone: 'success' }
   if (idle?.message)
-    return { ...base, label: `Awake · ${idle.message}`, tone: 'success' }
-  return { ...base, label: 'Awake', tone: 'success' }
+    return { label: `Awake · ${idle.message}`, tone: 'success' }
+  return { label: 'Awake', tone: 'success' }
 }
 
 export const isInstanceLive = (status: Nullable<DevboxInstanceStatus>) =>

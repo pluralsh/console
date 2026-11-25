@@ -198,6 +198,55 @@ defmodule Console.GRPC.DevboxIngestTest do
     end
   end
 
+  describe "get_instance_credentials/2 for a devbox's golden boot" do
+    test "it mints the devbox's scm credentials" do
+      cluster = insert(:cluster)
+      conn = insert(:scm_connection, type: :github)
+      devbox = insert(:devbox, cluster: cluster)
+      insert(:devbox_scm_connection, devbox: devbox, connection: conn)
+
+      %V1.GetInstanceCredentialsResponse{credentials: [cred]} = Ingest.get_instance_credentials(
+        %V1.GetInstanceCredentialsRequest{devbox_id: devbox.id, credentials: [%V1.CredentialSelector{kind: :CREDENTIAL_KIND_SCM, host: "github.com"}]},
+        authed(cluster)
+      )
+
+      assert cred.kind == :CREDENTIAL_KIND_SCM
+      assert cred.host == "github.com"
+      assert Base.decode64!(cred.token) == "x-access-token:#{conn.token}"
+    end
+
+    test "it serves nothing but scm" do
+      cluster = insert(:cluster)
+      devbox = insert(:devbox, cluster: cluster)
+
+      err = assert_raise GRPC.RPCError, fn ->
+        Ingest.get_instance_credentials(
+          %V1.GetInstanceCredentialsRequest{devbox_id: devbox.id, credentials: [%V1.CredentialSelector{kind: :CREDENTIAL_KIND_CONSOLE}]},
+          authed(cluster)
+        )
+      end
+
+      assert err.status == GRPC.Status.unimplemented()
+    end
+
+    test "other clusters' and unknown devboxes get nothing" do
+      devbox = insert(:devbox)
+      selectors = [%V1.CredentialSelector{kind: :CREDENTIAL_KIND_SCM}]
+
+      err = assert_raise GRPC.RPCError, fn ->
+        Ingest.get_instance_credentials(%V1.GetInstanceCredentialsRequest{devbox_id: devbox.id, credentials: selectors}, authed(insert(:cluster)))
+      end
+      assert err.status == GRPC.Status.permission_denied()
+
+      for id <- [Ecto.UUID.generate(), "not-a-uuid"] do
+        err = assert_raise GRPC.RPCError, fn ->
+          Ingest.get_instance_credentials(%V1.GetInstanceCredentialsRequest{devbox_id: id, credentials: selectors}, authed(insert(:cluster)))
+        end
+        assert err.status == GRPC.Status.not_found()
+      end
+    end
+  end
+
   describe "report_pull_request/2" do
     test "it records egress-observed pull requests against the instance" do
       cluster = insert(:cluster)
@@ -257,7 +306,7 @@ defmodule Console.GRPC.DevboxIngestTest do
 
     test "it attributes the pull request to the X-Devbox-Thread thread", %{cluster: cluster, inst: inst, thread: thread} do
       subagent = insert(:devbox_instance_session, instance: inst, kind: :subagent, parent: thread)
-      expect(Console.Deployments.Pr.Dispatcher, :pr, fn _, "a pr", "a body", _, "main", "devbox/branch" ->
+      expect(Console.Deployments.Pr.Dispatcher, :pr, fn _, "a pr", "a body", _, "main", "devbox/branch", _ ->
         {:ok, %{url: "https://github.com/pluralsh/console/pull/12", title: "a pr"}}
       end)
 

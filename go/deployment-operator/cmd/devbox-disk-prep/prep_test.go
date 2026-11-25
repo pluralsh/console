@@ -2,15 +2,19 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
+	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes/fake"
 )
 
@@ -65,7 +69,7 @@ const lsblk = `{"blockdevices": [
   {"path": "/dev/sr0", "type": "rom", "ro": true, "model": "Amazon EC2 NVMe Instance Storage"}
 ]}`
 
-func newPrep(t *testing.T, ex *fakeExec, node *corev1.Node) (*prep, *fake.Clientset) {
+func newPrep(t *testing.T, ex *fakeExec, node *corev1.Node, objects ...runtime.Object) (*prep, *fake.Clientset) {
 	t.Helper()
 	host := t.TempDir()
 	require.NoError(t, os.MkdirAll(filepath.Join(host, "var/lib"), 0o755))
@@ -79,7 +83,7 @@ func newPrep(t *testing.T, ex *fakeExec, node *corev1.Node) (*prep, *fake.Client
 		require.NoError(t, err)
 	}
 
-	clientset := fake.NewSimpleClientset(node)
+	clientset := fake.NewSimpleClientset(append([]runtime.Object{node}, objects...)...)
 	return &prep{
 		config: config{
 			nodeName:     node.Name,
@@ -93,7 +97,9 @@ func newPrep(t *testing.T, ex *fakeExec, node *corev1.Node) (*prep, *fake.Client
 		},
 		exec:      ex,
 		nodes:     clientset.CoreV1().Nodes(),
+		pods:      clientset.CoreV1(),
 		mountinfo: mountinfo,
+		birthTime: func(string) (time.Time, error) { return time.Time{}, errors.ErrUnsupported },
 	}, clientset
 }
 
@@ -194,6 +200,96 @@ func TestReconcileWithoutDiskModelStaysOnBootDisk(t *testing.T) {
 	node, err := clientset.CoreV1().Nodes().Get(context.Background(), "node-1", metav1.GetOptions{})
 	require.NoError(t, err)
 	require.Len(t, node.Spec.Taints, 1)
+}
+
+func TestReconcileRestartsPodsStartedBeforeTheMount(t *testing.T) {
+	early := metav1.NewTime(time.Now().Add(-time.Hour).Truncate(time.Second))
+	pod := func(name, node, hostPath string) *corev1.Pod {
+		return &corev1.Pod{
+			ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: "ns"},
+			Spec: corev1.PodSpec{NodeName: node, Volumes: []corev1.Volume{{
+				Name: "host", VolumeSource: corev1.VolumeSource{HostPath: &corev1.HostPathVolumeSource{Path: hostPath}},
+			}}},
+			Status: corev1.PodStatus{StartTime: &early},
+		}
+	}
+	ex := &fakeExec{results: map[string]result{labelLookup: {out: "/dev/md127"}}}
+	p, clientset := newPrep(t, ex, devboxNode(),
+		pod("worker", "node-1", "/var/lib/ate"),
+		pod("nested", "node-1", "/var/lib/ate/workers/"),
+		pod("sibling", "node-1", "/var/lib/ate-other"),
+		pod("disk-prep", "node-1", "/"),
+		pod("elsewhere", "node-2", "/var/lib/ate"),
+	)
+	require.NoError(t, os.WriteFile(p.marker(), nil, 0o644))
+	ctx := context.Background()
+
+	require.NoError(t, p.reconcile(ctx))
+	pods, err := clientset.CoreV1().Pods("ns").List(ctx, metav1.ListOptions{})
+	require.NoError(t, err)
+	names := make([]string, 0, len(pods.Items))
+	for _, p := range pods.Items {
+		names = append(names, p.Name)
+	}
+	require.ElementsMatch(t, []string{"sibling", "disk-prep", "elsewhere"}, names)
+
+	late := metav1.NewTime(time.Now().Add(time.Hour))
+	replacement := pod("worker", "node-1", "/var/lib/ate")
+	replacement.Status.StartTime = &late
+	_, err = clientset.CoreV1().Pods("ns").Create(ctx, replacement, metav1.CreateOptions{})
+	require.NoError(t, err)
+	require.NoError(t, p.reconcile(ctx))
+	_, err = clientset.CoreV1().Pods("ns").Get(ctx, "worker", metav1.GetOptions{})
+	require.NoError(t, err, "a pod started after the mount is kept")
+}
+
+func TestReconcileDatesALegacyMountFromItsFilesystem(t *testing.T) {
+	at := func(ago time.Duration) *metav1.Time { return lo.ToPtr(metav1.NewTime(time.Now().Add(-ago).Truncate(time.Second))) }
+	pod := func(name string, started *metav1.Time) *corev1.Pod {
+		return &corev1.Pod{
+			ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: "ns"},
+			Spec: corev1.PodSpec{NodeName: "node-1", Volumes: []corev1.Volume{{
+				Name: "host", VolumeSource: corev1.VolumeSource{HostPath: &corev1.HostPathVolumeSource{Path: "/var/lib/ate"}},
+			}}},
+			Status: corev1.PodStatus{StartTime: started},
+		}
+	}
+	legacy := func(t *testing.T, birthTime func(string) (time.Time, error)) (*prep, *fake.Clientset) {
+		p, clientset := newPrep(t, &fakeExec{}, devboxNode(), pod("hidden", at(time.Hour)), pod("healthy", at(10*time.Minute)))
+		p.birthTime = birthTime
+		require.NoError(t, os.WriteFile(p.marker(), nil, 0o644))
+		require.NoError(t, os.MkdirAll(p.target(), 0o755))
+		f, err := os.OpenFile(p.mountinfo, os.O_APPEND|os.O_WRONLY, 0)
+		require.NoError(t, err)
+		_, err = fmt.Fprintf(f, "90 22 9:127 / %s rw,noatime - xfs /dev/nvme1n1 rw\n", p.target())
+		require.NoError(t, err)
+		require.NoError(t, f.Close())
+		return p, clientset
+	}
+	podNames := func(t *testing.T, clientset *fake.Clientset) []string {
+		pods, err := clientset.CoreV1().Pods("ns").List(context.Background(), metav1.ListOptions{})
+		require.NoError(t, err)
+		return lo.Map(pods.Items, func(p corev1.Pod, _ int) string { return p.Name })
+	}
+
+	t.Run("restarts the pods its mount hid", func(t *testing.T) {
+		madeAt := time.Now().Add(-30 * time.Minute).Truncate(time.Second)
+		p, clientset := legacy(t, func(string) (time.Time, error) { return madeAt, nil })
+
+		require.NoError(t, p.reconcile(context.Background()))
+		info, err := os.Stat(p.mountedMarker())
+		require.NoError(t, err)
+		require.True(t, info.ModTime().Equal(madeAt))
+		require.ElementsMatch(t, []string{"healthy"}, podNames(t, clientset))
+	})
+
+	t.Run("leaves every pod alone without a birth time", func(t *testing.T) {
+		p, clientset := legacy(t, func(string) (time.Time, error) { return time.Time{}, errors.ErrUnsupported })
+
+		require.NoError(t, p.reconcile(context.Background()))
+		require.NoFileExists(t, p.mountedMarker())
+		require.ElementsMatch(t, []string{"hidden", "healthy"}, podNames(t, clientset))
+	})
 }
 
 func TestReconcileKeepsTaintWhenMountFails(t *testing.T) {

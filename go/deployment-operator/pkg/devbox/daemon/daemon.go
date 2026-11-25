@@ -38,6 +38,7 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/idle"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/internal/fsutil"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/proc"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/prs"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/terminal"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/transcript"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/trust"
@@ -87,6 +88,7 @@ type Daemon struct {
 	terms      *terminal.Manager
 	files      *files.Service
 	ws         *workspace.Manager
+	prs        *prs.Preparer
 	browser    *browser.Browser
 	idle       *idle.Detector
 	creds      *creds.Manager
@@ -160,6 +162,9 @@ func New(cfg Config) (*Daemon, error) {
 	d.ws, err = workspace.New(workspace.Options{Home: cfg.Home, StateDir: cfg.StateDir, SkelDir: cfg.SkelDir,
 		Log: d.log.With("component", "workspace"), Condition: d.condition, OnChange: func() {
 			d.writeGitAuth()
+			if d.files != nil {
+				d.files.ChangesCache.Warm(d.ctx, d.ws.Checkouts())
+			}
 			if d.agents != nil {
 				d.agents.Flush()
 			}
@@ -177,7 +182,8 @@ func New(cfg Config) (*Daemon, error) {
 	if err := d.harness.LinkInstructions(); err != nil {
 		d.log.Warn("harness instruction links", "err", err)
 	}
-	d.files = &files.Service{Home: cfg.Home, Checkouts: d.ws}
+	d.files = &files.Service{Home: cfg.Home, Checkouts: d.ws,
+		ChangesCache: files.NewChangesCache(d.log.With("component", "changes"))}
 	d.terms = terminal.New(terminal.Options{Home: cfg.Home, Shell: cfg.Shell, Env: d.baseEnv, Clock: cfg.Clock,
 		Log: d.log.With("component", "terminal")})
 	d.browser = browser.New(browser.Options{Chromium: cfg.Chromium, Xvfb: cfg.Xvfb, X11VNC: cfg.X11VNC,
@@ -191,6 +197,10 @@ func New(cfg Config) (*Daemon, error) {
 		Head: d.events.Head, Transcript: d.transcript, Launcher: launcher{d}, Supervisor: d.sup, Clock: cfg.Clock, Log: d.log.With("component", "agents"),
 		MaxRunning: cfg.MaxRunningThreads, Endpoints: d.endpoints, Worktrees: d.ws.Worktrees,
 		Checkouts: d.ws.CheckoutInfo, ExtraMCPServers: d.extraMCPServers, ReviewClient: d.reviewClient()})
+	d.prs = prs.New(prs.Options{
+		Checkouts: func(ctx context.Context) []*devboxv1.Checkout { return d.ws.List(ctx, true).GetCheckouts() },
+		Env:       d.baseEnv, Endpoints: d.endpoints, Client: d.reviewClient(), Harness: d.harness,
+		RecentPrompts: d.agents.RecentPrompts, Log: d.log.With("component", "prs")})
 
 	sampler := &cpuSampler{d: d, inner: &idle.ProcSampler{Root: "/proc"}}
 	d.idle = idle.New(cfg.Clock, idle.PolicyOf(nil), idle.Sources{
@@ -232,6 +242,8 @@ func (d *Daemon) Serve(ctx context.Context, ln net.Listener) error {
 	}
 	d.bg.Go(func() { d.events.SyncEvery(d.ctx, time.Second) })
 	d.bg.Go(func() { d.ws.Watch(d.ctx) })
+	d.bg.Go(func() { d.files.ChangesCache.Run(d.ctx) })
+	d.files.ChangesCache.Warm(d.ctx, d.ws.Checkouts())
 	d.bg.Go(func() { d.browser.IdleLoop(d.ctx) })
 	d.bg.Go(func() {
 		if err := d.browser.ServeCDP(d.ctx); err != nil && d.ctx.Err() == nil {
@@ -248,8 +260,13 @@ func (d *Daemon) Serve(ctx context.Context, ln net.Listener) error {
 	d.mu.Lock()
 	req := d.req
 	d.mu.Unlock()
-	if req != nil {
+	switch {
+	case req != nil:
 		d.bg.Go(func() { d.hydrate(req) })
+	case d.needsGolden():
+		// set before /readyz is served, so Substrate can't snapshot the golden boot before its work
+		d.setStatus(StatusBootstrapping)
+		d.bg.Go(func() { d.golden(d.cfg.Guest) })
 	}
 
 	var protocols http.Protocols
@@ -384,9 +401,15 @@ func (d *Daemon) sandboxCredentials() devboxv1.SandboxCredentialsClient {
 func (d *Daemon) baseEnv() []string {
 	d.mu.Lock()
 	set := maps.Clone(d.req.GetEnv())
+	owner := d.req.GetOwner()
 	d.mu.Unlock()
 	if set == nil {
 		set = map[string]string{}
+	}
+	for k, v := range gitIdentityEnv(owner, filepath.Join(d.cfg.Home, ".gitconfig")) {
+		if _, ok := set[k]; !ok {
+			set[k] = v
+		}
 	}
 	set["HOME"], set["DISPLAY"] = d.cfg.Home, d.cfg.Display
 	for _, k := range scmTokenEnv {

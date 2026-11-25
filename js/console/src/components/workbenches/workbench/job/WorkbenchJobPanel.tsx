@@ -19,6 +19,7 @@ import {
 import {
   SidePanel,
   SidePanelAutoOpen,
+  SidePanelTab,
   useSidePanelAutoOpen,
   useTopLevelSidePanel,
 } from 'components/layout/TopLevelSidePanelState'
@@ -64,7 +65,7 @@ import { usePollWhileRunning } from './usePollWhileRunning'
 import { useWorkbenchJobActivityDeltas } from './useWorkbenchJobStreams'
 
 const SIDE_PANEL_TYPE: SidePanel = 'workbench-job'
-type JobPanelTab =
+export type JobPanelTab =
   | 'Result'
   | 'Dashboard'
   | 'Topology'
@@ -80,12 +81,15 @@ export function WorkbenchJobPanelContent() {
     matchPath(WORKBENCH_JOB_ABS_PATH, pathname)?.params[
       WORKBENCH_JOBS_PARAM_JOB
     ] ?? ''
-  const { setOpen } = useWorkbenchJobPanel()
+  const { setOpen, panelTab, setPanelTab } = useWorkbenchJobPanel()
   const tabStateRef = useRef<any>(null)
   const data = useWorkbenchJobTabsData(jobId)
   const { job, isLoading, areActionsLoading } = data
-  const tabs = useMemo(() => getPanelTabs(data), [data])
-  const [selectedTab, setSelectedTab] = useSelectedJobTab(tabs, 'Result')
+  const tabs = useMemo(() => getWorkbenchJobPanelTabs(data), [data])
+  const requested = panelTab?.key === jobId ? panelTab.tab : 'Result'
+  const selectedTab =
+    tabs.find(({ label }) => label === requested)?.label ?? tabs[0]?.label
+  const setSelectedTab = (tab: JobPanelTab) => setPanelTab({ tab, key: jobId })
 
   useEffect(() => {
     if (isLoading || areActionsLoading) return
@@ -113,18 +117,12 @@ export function WorkbenchJobPanelContent() {
                 textValue={label}
               >
                 {icon}
-                {label !== 'Result' ? (
-                  showDot ? (
-                    <TabLabelWithIndicatorDot showDot>
-                      {label}
-                    </TabLabelWithIndicatorDot>
-                  ) : (
-                    label
-                  )
-                ) : !isJobRunning(job?.status) && job?.result?.conclusion ? (
-                  'Conclusion'
+                {showDot ? (
+                  <TabLabelWithIndicatorDot showDot>
+                    {jobPanelTabLabel(label, job)}
+                  </TabLabelWithIndicatorDot>
                 ) : (
-                  'Working theory'
+                  jobPanelTabLabel(label, job)
                 )}
               </PanelSubTabSC>
             ))}
@@ -341,7 +339,8 @@ export function WorkbenchJobCommonTabContent({
 }
 
 export function useWorkbenchJobPanel(autoOpen?: Nullable<SidePanelAutoOpen>) {
-  const { sidePanel, setSidePanel, closeSidePanel } = useTopLevelSidePanel()
+  const { sidePanel, setSidePanel, closeSidePanel, panelTabs, setPanelTab } =
+    useTopLevelSidePanel()
   const isOpen = sidePanel === SIDE_PANEL_TYPE
   const setOpen = useCallback(
     (open: boolean) =>
@@ -350,12 +349,31 @@ export function useWorkbenchJobPanel(autoOpen?: Nullable<SidePanelAutoOpen>) {
   )
   useSidePanelAutoOpen(SIDE_PANEL_TYPE, autoOpen)
 
-  return { isOpen, setOpen }
+  return {
+    isOpen,
+    setOpen,
+    panelTab: panelTabs[SIDE_PANEL_TYPE],
+    setPanelTab: useCallback(
+      (tab: SidePanelTab) => setPanelTab(SIDE_PANEL_TYPE, tab),
+      [setPanelTab]
+    ),
+  }
 }
 
-// Whether the panel has a tab to show once loaded, matching `getPanelTabs`.
+// 'Result' reads as the job's conclusion once it has one
+export function jobPanelTabLabel(
+  tab: JobPanelTab,
+  job: Nullable<WorkbenchJobFragment>
+) {
+  if (tab !== 'Result') return tab
+  return !isJobRunning(job?.status) && job?.result?.conclusion
+    ? 'Conclusion'
+    : 'Working theory'
+}
+
+// Whether the panel has a tab to show once loaded, matching `getWorkbenchJobPanelTabs`.
 export function hasWorkbenchJobPanelTabs(data: WorkbenchJobTabsData) {
-  return !isEmpty(getPanelTabs({ ...data, isLoading: false }))
+  return !isEmpty(getWorkbenchJobPanelTabs({ ...data, isLoading: false }))
 }
 
 const ContentWrapperSC = styled.div(() => ({
@@ -411,42 +429,45 @@ const PanelSubTabSC = styled(SubTab)(({ theme }) => ({
   },
 }))
 
-const getPanelTabs = ({
-  job,
-  isLoading,
-  draftPrs,
-  hasActions,
-  hasActionsAwaitingApproval,
-}: WorkbenchJobTabsData) =>
+export const getWorkbenchJobPanelTabs = (
+  {
+    job,
+    isLoading,
+    draftPrs,
+    hasActions,
+    hasActionsAwaitingApproval,
+  }: WorkbenchJobTabsData,
+  iconSize = 12
+) =>
   [
     (isLoading || hasWorkbenchJobResultContent(job)) && {
       label: 'Result',
-      icon: <PaperCheckIcon size={12} />,
+      icon: <PaperCheckIcon size={iconSize} />,
     },
     !isEmpty(job?.result?.canvas) && {
       label: 'Dashboard',
-      icon: <DashboardIcon size={12} />,
+      icon: <DashboardIcon size={iconSize} />,
     },
     !!job?.result?.topology && {
       label: 'Topology',
-      icon: <GraphIcon size={12} />,
+      icon: <GraphIcon size={iconSize} />,
     },
     (!isEmpty(job?.pullRequests) || !isEmpty(draftPrs)) && {
       label: 'Pull requests',
-      icon: <PrIcon size={12} />,
+      icon: <PrIcon size={iconSize} />,
       showDot: !isEmpty(draftPrs),
     },
     job?.evalResult && {
       label: 'Eval',
-      icon: <GaugeIcon size={12} />,
+      icon: <GaugeIcon size={iconSize} />,
     },
     job?.usage && {
       label: 'Usage',
-      icon: <CostManagementIcon size={12} />,
+      icon: <CostManagementIcon size={iconSize} />,
     },
     hasActions && {
       label: 'Actions',
-      icon: <LightningIcon size={12} />,
+      icon: <LightningIcon size={iconSize} />,
       showDot: hasActionsAwaitingApproval,
     },
   ].filter(

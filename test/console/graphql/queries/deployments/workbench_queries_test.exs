@@ -3158,9 +3158,9 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       job_allowed = insert(:workbench_job, workbench: allowed_wb)
       job_denied = insert(:workbench_job, workbench: denied_wb)
 
-      insert(:pull_request, workbench_job: job_allowed, status: :merged)
-      insert(:pull_request, workbench_job: job_allowed, status: :closed)
-      insert(:pull_request, workbench_job: job_denied, status: :merged)
+      insert(:pull_request, workbench_job: job_allowed, workbench: job_allowed.workbench, status: :merged)
+      insert(:pull_request, workbench_job: job_allowed, workbench: job_allowed.workbench, status: :closed)
+      insert(:pull_request, workbench_job: job_denied, workbench: job_denied.workbench, status: :merged)
 
       {:ok, %{data: %{"workbenchPullRequests" => total}}} = run_query("""
         query {
@@ -3174,8 +3174,8 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
     test "workbenchAggregates returns merged PR stats and average eval grade" do
       wb = insert(:workbench)
       job = insert(:workbench_job, workbench: wb)
-      insert(:pull_request, workbench_job: job, status: :merged)
-      insert(:pull_request, workbench_job: job, status: :closed)
+      insert(:pull_request, workbench_job: job, workbench: job.workbench, status: :merged)
+      insert(:pull_request, workbench_job: job, workbench: job.workbench, status: :closed)
 
       eval = insert(:workbench_eval, workbench: wb)
       insert(:workbench_eval_result,
@@ -3214,14 +3214,16 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       insert(:workbench_job, workbench: wb, usage: %{total_tokens: 100})
 
       difficulty = &%Console.Schema.PullRequest.Difficulty{type: &1, lines: &2}
-      insert(:pull_request, workbench_job: job, status: :merged, difficulty: difficulty.(:gitops, 300))
-      insert(:pull_request, workbench_job: job, status: :merged, difficulty: difficulty.(:application, 100))
-      insert(:pull_request, workbench_job: job, status: :merged, difficulty: difficulty.(:configuration, 4))
-      insert(:pull_request, workbench_job: job, status: :merged)
-      insert(:pull_request, workbench_job: job, status: :closed, difficulty: difficulty.(:application, 1000))
+      insert(:pull_request, workbench_job: job, workbench: job.workbench, status: :merged, difficulty: difficulty.(:gitops, 300))
+      insert(:pull_request, workbench_job: job, workbench: job.workbench, status: :merged, difficulty: difficulty.(:application, 100))
+      insert(:pull_request, workbench_job: job, workbench: job.workbench, status: :merged, difficulty: difficulty.(:configuration, 4))
+      insert(:pull_request, workbench_job: job, workbench: job.workbench, status: :merged)
+      insert(:pull_request, workbench_job: job, workbench: job.workbench, status: :closed, difficulty: difficulty.(:application, 1000))
+      # a devbox PR, linked only by workbench
+      insert(:pull_request, workbench: wb, status: :merged, difficulty: difficulty.(:gitops, 150))
 
       other = insert(:workbench_job, usage: %{total_tokens: 1000})
-      insert(:pull_request, workbench_job: other, status: :merged, difficulty: difficulty.(:application, 1000))
+      insert(:pull_request, workbench_job: other, workbench: other.workbench, status: :merged, difficulty: difficulty.(:application, 1000))
 
       {:ok, %{data: %{"workbenchAggregates" => agg}}} = run_query("""
         query Aggregates($projectId: ID) {
@@ -3233,17 +3235,71 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
         }
       """, %{"projectId" => project.id}, %{current_user: admin_user()})
 
-      assert agg["pullRequests"] == 4
-      assert agg["hoursSaved"] == 4.25
+      assert agg["pullRequests"] == 5
+      assert agg["hoursSaved"] == 5.25
       assert agg["totalTokens"] == 165
+    end
+
+    test "workbenchAggregates keeps counting pull requests after their job is pruned" do
+      wb = insert(:workbench)
+      job = insert(:workbench_job, workbench: wb)
+      insert(:pull_request, workbench_job: job, workbench: wb, status: :merged)
+      insert(:pull_request, workbench: wb, status: :merged)
+
+      Console.Repo.delete!(job)
+
+      {:ok, %{data: %{"workbenchAggregates" => agg}}} = run_query("""
+        query { workbenchAggregates { pullRequests } }
+      """, %{}, %{current_user: admin_user()})
+
+      assert agg["pullRequests"] == 2
+    end
+
+    test "hours saved and merge rates survive job pruning and bucket by the PR's date" do
+      wb = insert(:workbench)
+      job_at = Timex.now() |> Timex.shift(days: -5)
+      pr_at = Timex.now() |> Timex.shift(days: -2)
+      job = insert(:workbench_job, workbench: wb, inserted_at: job_at)
+
+      difficulty = %Console.Schema.PullRequest.Difficulty{type: :gitops, lines: 300}
+      insert(:pull_request, workbench_job: job, workbench: wb, status: :merged, difficulty: difficulty, inserted_at: pr_at)
+      insert(:pull_request, workbench_job: job, workbench: wb, status: :closed, inserted_at: pr_at)
+
+      Console.Repo.delete!(job)
+
+      {:ok, %{data: %{"workbenchAggregates" => agg}}} = run_query("""
+        query { workbenchAggregates { pullRequests hoursSaved } }
+      """, %{}, %{current_user: admin_user()})
+
+      assert agg["pullRequests"] == 1
+      assert agg["hoursSaved"] == 2.0
+
+      {:ok, %{data: %{"workbenchPrMergeRates" => [global]}}} = run_query("""
+        query { workbenchPrMergeRates(period: DAY) { timestamp merge_rate } }
+      """, %{}, %{current_user: admin_user()})
+
+      {:ok, %{data: %{"workbenchPrMergeRatesByWorkbench" => [by_wb]}}} = run_query("""
+        query { workbenchPrMergeRatesByWorkbench(period: DAY) { timestamp merge_rate workbench { id } } }
+      """, %{}, %{current_user: admin_user()})
+
+      expected = DateTime.to_date(pr_at)
+
+      for row <- [global, by_wb] do
+        assert row["merge_rate"] == 0.5
+        {:ok, ts, _} = DateTime.from_iso8601(row["timestamp"])
+        assert DateTime.to_date(ts) == expected
+      end
+
+      assert by_wb["workbench"]["id"] == wb.id
     end
 
     test "workbenchAggregates only includes workbenches the user can read" do
       user = insert(:user)
       project = insert(:project, read_bindings: [%{user_id: user.id}])
       readable = insert(:workbench_job, workbench: insert(:workbench, project: project))
-      insert(:pull_request, workbench_job: readable, status: :merged)
-      insert(:pull_request, workbench_job: insert(:workbench_job), status: :merged)
+      insert(:pull_request, workbench_job: readable, workbench: readable.workbench, status: :merged)
+      other = insert(:workbench_job)
+      insert(:pull_request, workbench_job: other, workbench: other.workbench, status: :merged)
 
       {:ok, %{data: %{"workbenchAggregates" => agg}}} = run_query("""
         query { workbenchAggregates { pullRequests totalTokens } }
@@ -3259,8 +3315,8 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       job1 = insert(:workbench_job, workbench: wb1)
       job2 = insert(:workbench_job, workbench: wb2)
 
-      insert(:pull_request, workbench_job: job1, status: :merged)
-      insert(:pull_request, workbench_job: job2, status: :closed)
+      insert(:pull_request, workbench_job: job1, workbench: job1.workbench, status: :merged)
+      insert(:pull_request, workbench_job: job2, workbench: job2.workbench, status: :closed)
 
       {:ok, %{data: %{"workbenchPrMergeRates" => rows}}} = run_query("""
         query WorkbenchPrMergeRates($period: EvalResultsPeriod) {
@@ -3288,8 +3344,8 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       job_allowed = insert(:workbench_job, workbench: allowed_wb)
       job_denied = insert(:workbench_job, workbench: denied_wb)
 
-      insert(:pull_request, workbench_job: job_allowed, status: :merged)
-      insert(:pull_request, workbench_job: job_denied, status: :merged)
+      insert(:pull_request, workbench_job: job_allowed, workbench: job_allowed.workbench, status: :merged)
+      insert(:pull_request, workbench_job: job_denied, workbench: job_denied.workbench, status: :merged)
 
       {:ok, %{data: %{"workbenchPrMergeRatesByWorkbench" => rows}}} = run_query("""
         query WorkbenchPrMergeRatesByWb($period: EvalResultsPeriod) {

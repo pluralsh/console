@@ -1,5 +1,6 @@
 import { omit } from 'lodash'
 import { useApolloClient } from '@apollo/client'
+import { useSubscriptionRecovery } from 'components/hooks/useSubscriptionRecovery'
 import { DevboxTimelineDocument } from 'generated/graphql-documents'
 import {
   DevboxTimelineQuery,
@@ -14,6 +15,10 @@ import {
 } from './devboxTimeline'
 
 const PAGE_SIZE = 200
+// how long a gap in a session's deltas may stay open before the page reloads
+const GAP_RESYNC_MS = 2000
+
+type Timeout = ReturnType<typeof setTimeout>
 
 // one live store per instance: a single delta subscription feeds every
 // session (threads and subagents), and pages load per session on demand
@@ -36,16 +41,14 @@ export function useDevboxTimelineStore(instanceId: Nullable<string>) {
     dispatch({ type: 'reset' })
   }, [instanceId])
 
-  const { error: subscriptionError } = useDevboxInstanceEntityDeltaSubscription(
-    {
-      variables: { instanceId: instanceId ?? '' },
-      skip: !instanceId,
-      onData: ({ data: { data } }) => {
-        const change = data?.devboxInstanceDelta?.payload
-        if (change) dispatch({ type: 'delta', change })
-      },
-    }
-  )
+  const entityDeltas = useDevboxInstanceEntityDeltaSubscription({
+    variables: { instanceId: instanceId ?? '' },
+    skip: !instanceId,
+    onData: ({ data: { data } }) => {
+      const change = data?.devboxInstanceDelta?.payload
+      if (change) dispatch({ type: 'delta', change })
+    },
+  })
 
   const fetchPage = useCallback(
     (sessionId: string, older: boolean) => {
@@ -97,6 +100,58 @@ export function useDevboxTimelineStore(instanceId: Nullable<string>) {
   const reload = useCallback(() => {
     for (const sessionId of requested.current) fetchPage(sessionId, false)
   }, [fetchPage])
+  const subscriptionDown = useSubscriptionRecovery(entityDeltas, {
+    skip: !instanceId,
+    onRecover: reload,
+  })
+
+  // a gap in a session's deltas that doesn't fill, or a delta its page can't
+  // order, means deltas were lost: reload the newest page and resume from it
+  const resyncing = useRef(new Set<string>())
+  const gaps = useRef(
+    new Map<string, { seq: Nullable<number>; timer: Timeout }>()
+  )
+  const resync = useCallback(
+    (sessionId: string) => {
+      if (resyncing.current.has(sessionId)) return
+      resyncing.current.add(sessionId)
+      Promise.resolve(fetchPage(sessionId, false)).then(() =>
+        setTimeout(() => resyncing.current.delete(sessionId), GAP_RESYNC_MS)
+      )
+    },
+    [fetchPage]
+  )
+  useEffect(() => {
+    for (const [sessionId, session] of Object.entries(store.sessions)) {
+      if (session.loaded && session.stale) resync(sessionId)
+      const gap =
+        session.loaded &&
+        !session.stale &&
+        Object.keys(session.pending).length > 0
+      const timer = gaps.current.get(sessionId)
+      if (timer && (!gap || timer.seq !== session.seq)) {
+        clearTimeout(timer.timer)
+        gaps.current.delete(sessionId)
+      }
+      if (gap && !gaps.current.has(sessionId))
+        gaps.current.set(sessionId, {
+          seq: session.seq,
+          timer: setTimeout(() => {
+            gaps.current.delete(sessionId)
+            resync(sessionId)
+          }, GAP_RESYNC_MS),
+        })
+    }
+  }, [store.sessions, resync])
+  useEffect(() => {
+    const timers = gaps.current
+    const inFlight = resyncing.current
+    return () => {
+      for (const { timer } of timers.values()) clearTimeout(timer)
+      timers.clear()
+      inFlight.clear()
+    }
+  }, [instanceId])
 
   return {
     store,
@@ -106,7 +161,8 @@ export function useDevboxTimelineStore(instanceId: Nullable<string>) {
     reload,
     errors,
     loading,
-    subscriptionError,
+    subscriptionDown,
+    restartSubscription: entityDeltas.restart,
   }
 }
 

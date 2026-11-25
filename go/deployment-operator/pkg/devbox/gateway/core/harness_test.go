@@ -11,8 +11,10 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 	"google.golang.org/grpc/test/bufconn"
 
 	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
@@ -45,6 +47,10 @@ type fakeDaemon struct {
 	// acked is what GetInfo reports; AckEvents advances it.
 	acked  uint64
 	bootID string
+	// unhealthy makes Health fail, like a wedged box.
+	unhealthy bool
+	// busy makes PrepareSuspend refuse automatic suspends, as a daemon with an agent turn running does.
+	busy bool
 
 	events   chan *devboxv1.DaemonEvent
 	breakSub chan struct{}
@@ -71,6 +77,14 @@ func (d *fakeDaemon) note(ctx context.Context) {
 }
 
 func (d *fakeDaemon) Health(context.Context, *devboxv1.HealthRequest) (*devboxv1.HealthResponse, error) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	if d.unhealthy {
+		return nil, status.Error(codes.Unavailable, "daemon unreachable")
+	}
+	if len(d.initialized) == 0 {
+		return &devboxv1.HealthResponse{Status: "booting"}, nil
+	}
 	return &devboxv1.HealthResponse{Ready: true, Status: "ready"}, nil
 }
 
@@ -105,10 +119,13 @@ func (d *fakeDaemon) CreateTerminal(_ context.Context, req *devboxv1.CreateTermi
 func (d *fakeDaemon) PrepareSuspend(_ context.Context, req *devboxv1.PrepareSuspendRequest) (*devboxv1.PrepareSuspendResponse, error) {
 	d.mu.Lock()
 	d.prepares = append(d.prepares, req)
-	hook, settled := d.onPrepare, d.settled
+	hook, settled, busy := d.onPrepare, d.settled, d.busy
 	d.mu.Unlock()
 	if hook != nil {
 		hook()
+	}
+	if busy && req.GetReason() != devboxv1.SuspendReason_SUSPEND_REASON_USER {
+		return nil, status.Error(codes.FailedPrecondition, "agent running: agent_turn fix the build")
 	}
 	return &devboxv1.PrepareSuspendResponse{SettledOffset: settled}, nil
 }
@@ -415,7 +432,7 @@ func newHarness(t *testing.T, handler http.Handler) *harness {
 	h.records = &MemoryRecords{}
 	h.g, err = New(Config{
 		ConsoleURL:          "https://console.example.com",
-		AIProxyURL:          "https://console.example.com/ext/v1/ai",
+		AIProxyURL:          "https://console.example.com/ext/ai",
 		GatewayURL:          "http://devbox-gateway.ns.svc:8080",
 		ReadyTimeout:        5 * time.Second,
 		PrepareTimeout:      2 * time.Second,

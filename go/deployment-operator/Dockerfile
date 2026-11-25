@@ -22,12 +22,16 @@ RUN go mod download
 
 # Copy the go source
 COPY deployment-operator/cmd/agent cmd/agent
+COPY deployment-operator/cmd/microvm-assets cmd/microvm-assets
 COPY deployment-operator/pkg pkg/
 COPY deployment-operator/api api/
 COPY deployment-operator/internal internal/
 
 # Build
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=${TARGETARCH} GO111MODULE=on GOEXPERIMENT=greenteagc go build -tags musl -a -o deployment-agent cmd/agent/*.go
+
+# microvm sandbox asset stager, run as a Job by the agent-substrate chart
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=${TARGETARCH} GO111MODULE=on go build -trimpath -ldflags="-s -w" -o microvm-assets ./cmd/microvm-assets
 
 # Get helm binary for kustomize helm inflate to work
 RUN curl -L https://get.helm.sh/helm-${HELM_VERSION}-linux-${TARGETARCH}.tar.gz | tar xz && \
@@ -48,6 +52,7 @@ RUN apk upgrade --no-cache && \
     chown 65532:65532 /tmp/gomonty
 
 COPY --from=builder /workspace/deployment-operator/deployment-agent .
+COPY --from=builder /workspace/deployment-operator/microvm-assets /usr/local/bin/microvm-assets
 # Copy Helm binary from builder
 COPY --from=builder /usr/local/bin/helm /usr/local/bin/helm
 

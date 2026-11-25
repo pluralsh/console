@@ -154,9 +154,56 @@ func TestLeases(t *testing.T) {
 	}
 }
 
+func TestCeilingWaitsForTheAgentTurn(t *testing.T) {
+	f := newFixture()
+	f.agent = []*devboxv1.BusyReason{{Kind: devboxv1.BusyReasonKind_BUSY_REASON_KIND_AGENT_TURN, Detail: "fix the build"}}
+	f.step(30 * time.Hour)
+	if len(f.ev.requests) != 0 {
+		t.Fatalf("ceiling cut off a running turn: %v", f.ev.requests)
+	}
+	if why := f.d.Veto(devboxv1.SuspendReason_SUSPEND_REASON_MAX_CONTINUOUS_AWAKE); why == "" {
+		t.Fatal("max-awake suspend not vetoed during a turn")
+	}
+	f.agent = nil
+	f.step(time.Minute)
+	if len(f.ev.requests) != 1 || f.ev.requests[0].GetReason() != devboxv1.SuspendReason_SUSPEND_REASON_MAX_CONTINUOUS_AWAKE {
+		t.Fatalf("ceiling after the turn: %v", f.ev.requests)
+	}
+	if why := f.d.Veto(devboxv1.SuspendReason_SUSPEND_REASON_MAX_CONTINUOUS_AWAKE); why != "" {
+		t.Fatalf("vetoed with no turn running: %s", why)
+	}
+}
+
+func TestVetoesAnIdleSuspendOnceBusy(t *testing.T) {
+	f := newFixture()
+	f.d.Evaluate()
+	f.step(5 * time.Minute)
+	if len(f.ev.requests) != 1 {
+		t.Fatalf("requests %v", f.ev.requests)
+	}
+	if why := f.d.Veto(devboxv1.SuspendReason_SUSPEND_REASON_IDLE); why != "" {
+		t.Fatalf("idle box vetoed: %s", why)
+	}
+	// A prompt lands between the request and the suspend.
+	f.agent = []*devboxv1.BusyReason{{Kind: devboxv1.BusyReasonKind_BUSY_REASON_KIND_AGENT_TURN, Detail: "next task"}}
+	if why := f.d.Veto(devboxv1.SuspendReason_SUSPEND_REASON_IDLE); why == "" {
+		t.Fatal("idle suspend not vetoed once a turn started")
+	}
+	if why := f.d.Veto(devboxv1.SuspendReason_SUSPEND_REASON_USER); why != "" {
+		t.Fatalf("user suspend vetoed: %s", why)
+	}
+	// The turn ends: a fresh grace period, then a new request.
+	f.agent = nil
+	f.d.Evaluate()
+	f.step(5 * time.Minute)
+	if len(f.ev.requests) != 2 {
+		t.Fatalf("requests after the turn %v", f.ev.requests)
+	}
+}
+
 func TestMaxContinuousAwakeAndReset(t *testing.T) {
 	f := newFixture()
-	f.agent = []*devboxv1.BusyReason{{Kind: devboxv1.BusyReasonKind_BUSY_REASON_KIND_AGENT_TURN}}
+	f.cpu.total = 50
 	f.step(23 * time.Hour)
 	if len(f.ev.requests) != 0 {
 		t.Fatal("ceiling fired early")
@@ -171,7 +218,7 @@ func TestMaxContinuousAwakeAndReset(t *testing.T) {
 	}
 
 	// A memory restore: the wall clock jumps; Reset restarts the timers so stale activity doesn't count.
-	f.agent = nil
+	f.cpu.total = 0
 	f.streams["browser"] = f.clk.Now()
 	f.clk.Set(f.clk.Now().Add(30 * time.Second))
 	f.d.Reset()

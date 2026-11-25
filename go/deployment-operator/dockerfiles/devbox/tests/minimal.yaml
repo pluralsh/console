@@ -16,3 +16,12 @@ commandTests:
     command: sh
     args: ["-c", "which go cargo rustc java dotnet python3 uv kubectl helm terraform aws gcloud az; true"]
     excludedOutput: [".+"]
+  - name: no container engine (devbox-fat has rootless podman)
+    command: sh
+    args: ["-c", "which podman docker docker-compose newuidmap newgidmap; true"]
+    excludedOutput: [".+"]
+
+fileExistenceTests:
+  - name: no podman config
+    path: /etc/containers
+    shouldExist: false

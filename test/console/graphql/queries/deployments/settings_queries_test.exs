@@ -44,6 +44,7 @@ defmodule Console.GraphQl.Deployments.SettingsQueriesTest do
   describe "defaultModels" do
     test "it lists the configured provider defaults" do
       openai_defaults = Provider.defaults(:openai)
+      anthropic_defaults = Provider.defaults(:anthropic)
 
       {:ok, %{data: %{"defaultModels" => found}}} =
         run_query(
@@ -65,8 +66,8 @@ defmodule Console.GraphQl.Deployments.SettingsQueriesTest do
 
       assert Enum.find(found, &(&1["provider"] == "ANTHROPIC")) == %{
                "provider" => "ANTHROPIC",
-               "model" => "claude-4-5-haiku-latest",
-               "toolModel" => "claude-sonnet-5-latest",
+               "model" => anthropic_defaults[:model],
+               "toolModel" => anthropic_defaults[:tool_model],
                "embeddingModel" => nil
              }
 
@@ -128,6 +129,8 @@ defmodule Console.GraphQl.Deployments.SettingsQueriesTest do
           bedrock: %{region: "us-east-1"}
         }
       )
+      anthropic_defaults = Provider.defaults(:anthropic)
+      bedrock_defaults = Provider.defaults(:bedrock)
 
       {:ok, %{data: %{"availableModels" => found}}} =
         run_query(
@@ -141,13 +144,10 @@ defmodule Console.GraphQl.Deployments.SettingsQueriesTest do
         )
 
       assert found == [
-               %{"provider" => "ANTHROPIC", "model" => "claude-4-5-haiku-latest"},
-               %{"provider" => "ANTHROPIC", "model" => "claude-sonnet-5-latest"},
-               %{
-                 "provider" => "BEDROCK",
-                 "model" => "global.anthropic.claude-haiku-4-5-20251001-v1:0"
-               },
-               %{"provider" => "BEDROCK", "model" => "global.anthropic.claude-sonnet-5"}
+               %{"provider" => "ANTHROPIC", "model" => anthropic_defaults[:model]},
+               %{"provider" => "ANTHROPIC", "model" => anthropic_defaults[:tool_model]},
+               %{"provider" => "BEDROCK", "model" => bedrock_defaults[:model]},
+               %{"provider" => "BEDROCK", "model" => bedrock_defaults[:tool_model]}
              ]
     end
 

@@ -14,6 +14,8 @@ defmodule Console.Schema.DevboxInstanceInteraction do
     field :message,          :string
     field :requested_schema, :map
     field :url,              :string
+    # The permission request's tool call as the daemon sent it, read through Console.Devboxes.Acp.tool_call/1.
+    field :tool_call,        :map
     field :state,            State, default: :pending
     field :answered_at,      :utc_datetime_usec
     field :response,         :map
@@ -63,7 +65,7 @@ defmodule Console.Schema.DevboxInstanceInteraction do
     from(i in query, order_by: ^order)
   end
 
-  @valid ~w(instance_id session_id external_id jsonrpc_id tool_call_id kind title message requested_schema url state
+  @valid ~w(instance_id session_id external_id jsonrpc_id tool_call_id tool_call kind title message requested_schema url state
             answered_by_id answered_by_policy answered_at response expires_at revision)a
 
   def changeset(model, attrs \\ %{}) do

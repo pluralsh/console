@@ -36,7 +36,7 @@ With that set:
 
 1. Console and KAS pods mount `/etc/ssl/certs/ca-certificates.crt` from a chart ConfigMap.
 2. Console merges the same `certs` and `spawnedWorkloads.caBundle.enabled: true` into agent bootstrap values (alongside any `console.config.agentHelmValues` such as vendored agent images). Explicit keys in `agentHelmValues` win over these CA defaults.
-3. Agents mount the bundle on the operator and agentk containers, and replicate a ConfigMap (`plural-ca-bundle` by default) into namespaces where they create pods, mounting it on AgentRun / Stack / Sentinel workloads.
+3. Agents mount the bundle on the operator and agentk containers, and replicate a ConfigMap (`plural-ca-bundle` by default) into namespaces where they create pods, mounting it on AgentRun / Stack / Sentinel workloads and Devbox gateway pods (and ensuring the same ConfigMap in the Devbox worker-pool namespace).
 
 No per-AgentRuntime or InfrastructureStack volume templates are required for PKI when this path is used.
 

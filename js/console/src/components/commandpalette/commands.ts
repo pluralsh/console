@@ -14,6 +14,7 @@ import {
   IconProps,
   KeyIcon,
   KubernetesAltIcon,
+  MonitorIcon,
   PeopleIcon,
   PodContainerIcon,
   PrOpenIcon,
@@ -189,6 +190,44 @@ export function useCommands({
                   deps: [setFeatureFlag],
                 },
               ]),
+          ...(!featureFlags.Devboxes
+            ? [
+                {
+                  id: 'enable-devboxes',
+                  label: 'Enable Devboxes',
+                  icon: WorkbenchIcon,
+                  callback: () => setFeatureFlag('Devboxes', true),
+                  deps: [setFeatureFlag],
+                },
+              ]
+            : [
+                {
+                  id: 'disable-devboxes',
+                  label: 'Disable Devboxes',
+                  icon: WorkbenchIcon,
+                  callback: () => setFeatureFlag('Devboxes', false),
+                  deps: [setFeatureFlag],
+                },
+              ]),
+          ...(!featureFlags.DevboxBrowser
+            ? [
+                {
+                  id: 'enable-devbox-browser',
+                  label: 'Enable Devbox browser',
+                  icon: MonitorIcon,
+                  callback: () => setFeatureFlag('DevboxBrowser', true),
+                  deps: [setFeatureFlag],
+                },
+              ]
+            : [
+                {
+                  id: 'disable-devbox-browser',
+                  label: 'Disable Devbox browser',
+                  icon: MonitorIcon,
+                  callback: () => setFeatureFlag('DevboxBrowser', false),
+                  deps: [setFeatureFlag],
+                },
+              ]),
           ...(openServiceAccountImpersonation
             ? [
                 {
@@ -203,7 +242,13 @@ export function useCommands({
         ],
       },
     ],
-    [featureFlags.Edge, openServiceAccountImpersonation, setFeatureFlag]
+    [
+      featureFlags.Edge,
+      featureFlags.Devboxes,
+      featureFlags.DevboxBrowser,
+      openServiceAccountImpersonation,
+      setFeatureFlag,
+    ]
   )
 
   const commands = useMemo(

@@ -2,7 +2,11 @@ package core
 
 import (
 	"context"
+	"errors"
+	"maps"
 	"slices"
+	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -12,6 +16,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/actors"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/egress"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate/ateapi"
 )
@@ -66,7 +71,7 @@ func TestCreateInstanceProvisionsAndInitializes(t *testing.T) {
 	init := h.daemon.initialized[0]
 	h.daemon.mu.Unlock()
 	if init.GetInstanceId() != "inst-1" || init.GetEndpoints().GetDevboxMcpUrl() != "http://devbox-gateway.ns.svc:8080/mcp" ||
-		init.GetEndpoints().GetAiProxyUrl() != "https://console.example.com/ext/v1/ai" {
+		init.GetEndpoints().GetAiProxyUrl() != "https://console.example.com/ext/ai" {
 		t.Fatalf("unexpected Initialize: %v", init)
 	}
 	if got := h.ingest.statusList(); !slices.Equal(got, []string{"PROVISIONING", "RUNNING"}) {
@@ -89,6 +94,28 @@ func TestCreateInstanceProvisionsAndInitializes(t *testing.T) {
 	}
 }
 
+// A restore routed to a worker that just went away fails Unavailable; provisioning retries instead of failing the
+// instance.
+func TestProvisionRetriesUnavailableResume(t *testing.T) {
+	h := newHarness(t, nil)
+	h.ate.FailResume = status.Error(codes.Unavailable, "dial unix /var/lib/ate/workers/w/worker.sock: connect: no such file or directory")
+	h.ate.FailResumeTimes = 2
+	h.running("inst-1")
+
+	resumes := 0
+	for _, c := range h.ate.CallsSnapshot() {
+		if strings.HasPrefix(c, "ResumeActor") {
+			resumes++
+		}
+	}
+	if resumes != 3 {
+		t.Fatalf("want 3 resume attempts, got %d", resumes)
+	}
+	if got := h.ingest.statusList(); !slices.Equal(got, []string{"PROVISIONING", "RUNNING"}) {
+		t.Fatalf("status reports = %v", got)
+	}
+}
+
 // SCM connection hosts come from console, so egress allows and injects for a self-hosted SCM before any repository
 // on it is named; the devbox MCP / SandboxCredentials rule stays a cleartext http rule, which Substrate serves as
 // HTTP/1.1 and h2c (gRPC).
@@ -103,13 +130,20 @@ func TestEgressPolicyUsesBoxSCMHostsAndH2CGatewayRule(t *testing.T) {
 
 	var https []string
 	var gw *ateapi.HttpRule
+	var gwHosts []string
 	for _, r := range h.ate.Policy(testAtespace, "dbx-inst-1").GetRules() {
 		if r.GetHttps() != nil {
 			https = append(https, r.GetHttps().GetHostnames()...)
 		}
 		if r.GetHttp() != nil {
-			gw = r.GetHttp()
+			if gw == nil {
+				gw = r.GetHttp()
+			}
+			gwHosts = append(gwHosts, r.GetHttp().GetHostnames()...)
 		}
+	}
+	if !slices.Contains(gwHosts, "devbox-gateway.ns.svc.cluster.local") {
+		t.Errorf("gateway hosts %v lack the name sandbox DNS resolves", gwHosts)
 	}
 	for _, want := range []string{"gitlab.example.com", "ghe.example.com", "github.com"} {
 		if !slices.Contains(https, want) {
@@ -217,6 +251,31 @@ func TestForwardingAndResumeIfSuspended(t *testing.T) {
 
 	if _, err := h.g.Prompt(ctx, &devboxv1.PromptRequest{Thread: &devboxv1.ThreadRef{InstanceId: "nope"}}); reasonOf(err) != devboxv1.ErrorReason_ERROR_REASON_INSTANCE_NOT_FOUND {
 		t.Fatalf("unknown instance = %v", err)
+	}
+}
+
+func TestIdlenessDoesNotOutliveASuspend(t *testing.T) {
+	h := newHarness(t, nil)
+	h.running("inst-1")
+	inst := h.g.get("inst-1")
+	inst.mu.Lock()
+	inst.idle = &devboxv1.IdleState{Idle: true, SuspendAt: timestamppb.Now()}
+	inst.mu.Unlock()
+
+	if _, err := h.g.SuspendInstance(context.Background(), &devboxv1.InstanceActionRequest{InstanceId: "inst-1"}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := h.g.ResumeInstance(context.Background(), &devboxv1.InstanceActionRequest{InstanceId: "inst-1"}); err != nil {
+		t.Fatal(err)
+	}
+	if last := h.ingest.lastStatus(); last.GetStatus() != devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING || last.GetIdle() != nil {
+		t.Fatalf("resume reported the suspended run's idleness: %v", last)
+	}
+	inst.mu.Lock()
+	idle := inst.idle
+	inst.mu.Unlock()
+	if idle != nil {
+		t.Fatalf("heartbeats would still carry the suspended run's idleness: %v", idle)
 	}
 }
 
@@ -386,7 +445,7 @@ func TestSuspendDrainsEventsBeforeSuspending(t *testing.T) {
 	default:
 		t.Fatal("offset 7 was never acknowledged")
 	}
-	if modes := h.ate.SuspendModesSnapshot(); len(modes) != 1 || modes[0] != ateapi.DurabilityMode_DURABILITY_MODE_ASYNCHRONOUS {
+	if modes := h.ate.SuspendModesSnapshot(); len(modes) != 1 || modes[0] != ateapi.DurabilityMode_DURABILITY_MODE_SYNCHRONOUS {
 		t.Fatalf("suspend modes = %v", modes)
 	}
 	// Opening a suspended instance's timeline wakes the box, which serves it.
@@ -396,6 +455,40 @@ func TestSuspendDrainsEventsBeforeSuspending(t *testing.T) {
 	}
 	if h.ate.State(testAtespace, "dbx-inst-1") != ateapi.ActorState_ACTOR_STATE_RUNNING {
 		t.Fatal("GetTimeline with resume_if_suspended left the box suspended")
+	}
+}
+
+func TestBusyBoxRefusesAutomaticSuspends(t *testing.T) {
+	h := newHarness(t, nil)
+	inst := h.running("inst-1")
+	h.daemon.mu.Lock()
+	h.daemon.busy = true
+	h.daemon.mu.Unlock()
+
+	for _, reason := range []devboxv1.SuspendReason{devboxv1.SuspendReason_SUSPEND_REASON_IDLE, devboxv1.SuspendReason_SUSPEND_REASON_MAX_CONTINUOUS_AWAKE} {
+		resp, err := h.g.SuspendInstance(context.Background(), &devboxv1.InstanceActionRequest{InstanceId: "inst-1", Reason: reason})
+		if err != nil || resp.GetStatus() != devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING {
+			t.Fatalf("%s suspend of a busy box = %v, %v", reason, resp, err)
+		}
+	}
+	if st := h.ate.State(testAtespace, "dbx-inst-1"); st != ateapi.ActorState_ACTOR_STATE_RUNNING {
+		t.Fatalf("actor %s after refused suspends", st)
+	}
+	// Still forwarding events.
+	h.daemon.events <- &devboxv1.DaemonEvent{Offset: 1, Event: &devboxv1.DaemonEvent_Session{Session: &devboxv1.Session{ThreadId: "th-1", SessionId: "s1", Revision: 1}}}
+	h.eventually("events still acknowledged", func() bool {
+		h.daemon.mu.Lock()
+		defer h.daemon.mu.Unlock()
+		return h.daemon.acked >= 1
+	})
+
+	// The user's own suspend isn't refused.
+	resp, err := h.g.SuspendInstance(context.Background(), &devboxv1.InstanceActionRequest{InstanceId: "inst-1", Reason: devboxv1.SuspendReason_SUSPEND_REASON_USER})
+	if err != nil || resp.GetStatus() != devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED {
+		t.Fatalf("user suspend = %v, %v", resp, err)
+	}
+	if inst.status() != devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED {
+		t.Fatalf("status %s", inst.status())
 	}
 }
 
@@ -499,9 +592,19 @@ func TestCompleteAfterBackstopLosesToResume(t *testing.T) {
 	}
 }
 
+func fastProbes(t *testing.T) {
+	interval := unresponsiveProbeInterval
+	unresponsiveProbeInterval = time.Millisecond
+	t.Cleanup(func() { unresponsiveProbeInterval = interval })
+}
+
 func TestUnresponsiveDaemonBackstop(t *testing.T) {
+	fastProbes(t)
 	h := newHarness(t, nil)
 	inst := h.running("inst-1")
+	h.daemon.mu.Lock()
+	h.daemon.unhealthy = true
+	h.daemon.mu.Unlock()
 	h.clock.advance(10 * time.Minute)
 	h.g.backstops(context.Background())
 	h.eventually("suspended", func() bool { return inst.status() == devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED })
@@ -513,6 +616,44 @@ func TestUnresponsiveDaemonBackstop(t *testing.T) {
 	h.daemon.mu.Unlock()
 	if prepares != 0 {
 		t.Fatal("PrepareSuspend called on an unresponsive daemon")
+	}
+}
+
+func TestSilentStreamToAHealthyDaemonIsNotSuspended(t *testing.T) {
+	fastProbes(t)
+	h := newHarness(t, nil)
+	inst := h.running("inst-1")
+	h.clock.advance(10 * time.Minute)
+	h.g.backstops(context.Background())
+	h.eventually("contact refreshed", func() bool {
+		inst.mu.Lock()
+		defer inst.mu.Unlock()
+		return h.clock.now().Sub(inst.lastContact) < time.Minute && !inst.probing
+	})
+	if inst.status() != devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING {
+		t.Fatalf("healthy daemon suspended: %s", inst.status())
+	}
+	if n := len(h.ate.SuspendModesSnapshot()); n != 0 {
+		t.Fatalf("suspended %d times", n)
+	}
+	h.daemon.events <- &devboxv1.DaemonEvent{Offset: 1, Event: &devboxv1.DaemonEvent_Session{Session: &devboxv1.Session{ThreadId: "th-1", SessionId: "s1", Revision: 1}}}
+	h.eventually("restarted forwarder delivers events", func() bool {
+		h.daemon.mu.Lock()
+		defer h.daemon.mu.Unlock()
+		return h.daemon.acked >= 1
+	})
+}
+
+func TestCrashDuringSuspendReportsLostWork(t *testing.T) {
+	h := newHarness(t, nil)
+	inst := h.running("inst-1")
+	h.ate.SetState(testAtespace, "dbx-inst-1", ateapi.ActorState_ACTOR_STATE_CRASHED, "")
+	if _, err := h.g.SuspendInstance(context.Background(), &devboxv1.InstanceActionRequest{InstanceId: "inst-1", Reason: devboxv1.SuspendReason_SUSPEND_REASON_IDLE}); err != nil {
+		t.Fatal(err)
+	}
+	h.eventually("suspended", func() bool { return inst.status() == devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED })
+	if msg := h.ingest.lastStatus().GetMessage(); !strings.Contains(msg, "work since then was lost") {
+		t.Fatalf("status message = %q", msg)
 	}
 }
 
@@ -607,6 +748,110 @@ func TestSnapshotAndStartFromSnapshot(t *testing.T) {
 	}
 }
 
+type fakeSeeds struct {
+	mu      sync.Mutex
+	saved   map[string]string
+	deleted []string
+	failErr error
+}
+
+func (f *fakeSeeds) SaveSeed(_ context.Context, seedID, volumeID string) error {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if f.failErr != nil {
+		return f.failErr
+	}
+	if f.saved == nil {
+		f.saved = map[string]string{}
+	}
+	f.saved[seedID] = volumeID
+	return nil
+}
+
+func (f *fakeSeeds) DeleteSeed(_ context.Context, seedID string) error {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.deleted = append(f.deleted, seedID)
+	return nil
+}
+
+func TestJuiceFSHomes(t *testing.T) {
+	h := newHarness(t, nil)
+	h.g.deps.Runners.(StaticRunners)[testRunner].JuiceFSHome = true
+	seeds := &fakeSeeds{}
+	h.g.deps.Seeds = seeds
+	h.ate.ExternalHomes = true
+	ctx := context.Background()
+
+	h.running("inst-1")
+	ref := actors.Ref{Atespace: testAtespace, Name: "dbx-inst-1"}
+	actor, err := h.g.deps.Actors.GetActor(ctx, ref)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if actor.GetSourceTag() != nil || !h.ate.Preview(ref.Atespace, ref.Name) {
+		t.Fatalf("the actor must take the template's golden tag with the preview header: source %v", actor.GetSourceTag())
+	}
+
+	snapshot := func(id string) *devboxv1.ReportSnapshotRequest {
+		t.Helper()
+		if _, err := h.g.SnapshotInstance(ctx, &devboxv1.SnapshotInstanceRequest{InstanceId: "inst-1", SnapshotId: id}); err != nil {
+			t.Fatal(err)
+		}
+		var report *devboxv1.ReportSnapshotRequest
+		h.eventually("snapshot "+id, func() bool {
+			h.ingest.mu.Lock()
+			defer h.ingest.mu.Unlock()
+			for _, r := range h.ingest.snapshots {
+				if r.GetSnapshotId() == id {
+					report = r
+				}
+			}
+			return report != nil
+		})
+		h.eventually("running again", func() bool { return h.g.get("inst-1").status() == devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING })
+		return report
+	}
+	if r := snapshot("snap-1"); r.GetState() != devboxv1.SnapshotState_SNAPSHOT_STATE_SUCCEEDED {
+		t.Fatalf("snapshot report = %v", r)
+	}
+	seeds.mu.Lock()
+	saved := maps.Clone(seeds.saved)
+	seeds.mu.Unlock()
+	if want := map[string]string{testAtespace + ".tag.snap-snap-1": "substrate-" + actor.GetMetadata().GetUid() + "-home"}; !maps.Equal(saved, want) {
+		t.Fatalf("seeds = %v, want %v", saved, want)
+	}
+
+	_, err = h.g.StartFromSnapshot(ctx, &devboxv1.StartFromSnapshotRequest{
+		Instance: &devboxv1.CreateInstanceRequest{InstanceId: "inst-2", RunnerName: testRunner},
+		Snapshot: &devboxv1.SnapshotRef{SnapshotId: "snap-1", Tag: testAtespace + "/snap-snap-1", TemplateRevision: 2},
+	})
+	if status.Code(err) != codes.Unimplemented || detailOf(err, 0).GetReason() != devboxv1.ErrorReason_ERROR_REASON_UNSUPPORTED {
+		t.Fatalf("StartFromSnapshot = %v, want UNSUPPORTED", err)
+	}
+	if h.g.get("inst-2") != nil {
+		t.Fatal("a rejected start registered an instance")
+	}
+
+	if _, err := h.g.DeleteSnapshot(ctx, &devboxv1.DeleteSnapshotRequest{Snapshot: &devboxv1.SnapshotRef{Tag: testAtespace + "/snap-snap-1"}}); err != nil {
+		t.Fatal(err)
+	}
+	seeds.mu.Lock()
+	deleted := slices.Clone(seeds.deleted)
+	seeds.failErr = errors.New("juicefs controller unavailable")
+	seeds.mu.Unlock()
+	if !slices.Equal(deleted, []string{testAtespace + ".tag.snap-snap-1"}) {
+		t.Fatalf("deleted seeds = %v", deleted)
+	}
+
+	if r := snapshot("snap-2"); r.GetState() != devboxv1.SnapshotState_SNAPSHOT_STATE_FAILED {
+		t.Fatalf("a snapshot whose home wasn't saved = %v, want FAILED", r)
+	}
+	if _, err := h.g.deps.Actors.GetTag(ctx, actors.Ref{Atespace: testAtespace, Name: "snap-snap-2"}); status.Code(err) != codes.NotFound {
+		t.Fatalf("the failed snapshot's tag is left behind: %v", err)
+	}
+}
+
 func TestCancelDeletesActorAndCollectsTheRecord(t *testing.T) {
 	h := newHarness(t, nil)
 	h.running("inst-1")
@@ -686,4 +931,112 @@ func TestRegistrationReconcilesAndHeartbeats(t *testing.T) {
 		}
 		return false
 	})
+}
+
+func TestEndpointsScopeWorkbenchMCPToTheInstance(t *testing.T) {
+	g := &Gateway{cfg: Config{WorkbenchMCPURL: "https://console.example.com/mcp/workbench/"}}
+	if got := g.endpoints("wb-1").GetWorkbenchMcpUrl(); got != "https://console.example.com/mcp/workbench/wb-1" {
+		t.Fatalf("workbench mcp = %q", got)
+	}
+	if got := g.endpoints("").GetWorkbenchMcpUrl(); got != "" {
+		t.Fatalf("workbench mcp without a workbench = %q", got)
+	}
+}
+
+// A checkpoint cut off by its deadline leaves the actor SUSPENDING; the instance is recorded suspended and the next
+// resume finishes the suspend instead of failing "AssignWorker prerequisite not met (got: ACTOR_STATE_SUSPENDING)".
+func TestResumeAfterASuspendCutOffMidway(t *testing.T) {
+	h := newHarness(t, nil)
+	h.running("inst-1")
+	h.ate.FailSuspend = status.Error(codes.DeadlineExceeded, "workflow failed at step CallAteletSuspend: while calling atelet Checkpoint: context deadline exceeded")
+	h.ate.FailSuspendTimes = 1
+
+	req := &devboxv1.InstanceActionRequest{InstanceId: "inst-1"}
+	resp, err := h.g.SuspendInstance(context.Background(), req)
+	if err != nil || resp.GetStatus() != devboxv1.InstanceStatus_INSTANCE_STATUS_SUSPENDED {
+		t.Fatalf("suspend = %v, %v", resp, err)
+	}
+	if got := h.ate.State(testAtespace, "dbx-inst-1"); got != ateapi.ActorState_ACTOR_STATE_SUSPENDING {
+		t.Fatalf("actor state = %s", got)
+	}
+
+	resp, err = h.g.ResumeInstance(context.Background(), req)
+	if err != nil || resp.GetStatus() != devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING {
+		t.Fatalf("resume = %v, %v", resp, err)
+	}
+	if got := h.ate.State(testAtespace, "dbx-inst-1"); got != ateapi.ActorState_ACTOR_STATE_RUNNING {
+		t.Fatalf("actor state = %s", got)
+	}
+}
+
+// Console calls SuspendInstance with a 30s deadline, shorter than a prepare, drain and memory checkpoint can take;
+// the suspend carries on past it rather than abandoning the checkpoint midway.
+func TestSuspendOutlivesTheCallersDeadline(t *testing.T) {
+	h := newHarness(t, nil)
+	h.running("inst-1")
+	// substrate is busy for the first attempts (backing off 5+10+20+40ms)
+	h.ate.FailSuspend = status.Error(codes.Aborted, "another operation is in progress for this actor")
+	h.ate.FailSuspendTimes = 4
+
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Millisecond)
+	defer cancel()
+	resp, err := h.g.SuspendInstance(ctx, &devboxv1.InstanceActionRequest{InstanceId: "inst-1"})
+	if err != nil || resp.GetStatus() != devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING {
+		t.Fatalf("an impatient suspend = %v, %v", resp, err)
+	}
+	h.eventually("the suspend to land", func() bool {
+		return h.ate.State(testAtespace, "dbx-inst-1") == ateapi.ActorState_ACTOR_STATE_SUSPENDED &&
+			slices.Contains(h.ingest.statusList(), "SUSPENDED")
+	})
+}
+
+func TestResumeAnswersBeforeTheCallersDeadline(t *testing.T) {
+	h := newHarness(t, nil)
+	h.running("inst-1")
+	if _, err := h.g.SuspendInstance(context.Background(), &devboxv1.InstanceActionRequest{InstanceId: "inst-1"}); err != nil {
+		t.Fatal(err)
+	}
+	h.ate.FailResume = status.Error(codes.Unavailable, "worker gone")
+	h.ate.FailResumeTimes = 1 << 20
+
+	deadline := time.Now().Add(time.Second)
+	ctx, cancel := context.WithDeadline(context.Background(), deadline)
+	defer cancel()
+	_, err := h.g.ResumeInstance(ctx, &devboxv1.InstanceActionRequest{InstanceId: "inst-1"})
+	if reasonOf(err) != devboxv1.ErrorReason_ERROR_REASON_INSTANCE_STARTING {
+		t.Fatalf("resume = %v", err)
+	}
+	if left := time.Until(deadline); left < 50*time.Millisecond {
+		t.Fatalf("answered %s before the deadline, too late to make it back through a proxy", left)
+	}
+}
+
+func TestResumeOutlivesTheCallersDeadline(t *testing.T) {
+	h := newHarness(t, nil)
+	h.running("inst-1")
+	if _, err := h.g.SuspendInstance(context.Background(), &devboxv1.InstanceActionRequest{InstanceId: "inst-1"}); err != nil {
+		t.Fatal(err)
+	}
+	// a slow restore: substrate is unavailable for the first attempts (backing off 5+10+20+40ms)
+	h.ate.FailResume = status.Error(codes.Unavailable, "worker gone")
+	h.ate.FailResumeTimes = 4
+
+	req := &devboxv1.InstanceActionRequest{InstanceId: "inst-1"}
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Millisecond)
+	defer cancel()
+	_, err := h.g.ResumeInstance(ctx, req)
+	if status.Code(err) != codes.Unavailable || reasonOf(err) != devboxv1.ErrorReason_ERROR_REASON_INSTANCE_STARTING {
+		t.Fatalf("an impatient resume = %v", err)
+	}
+	// a second caller joins the wake in flight rather than starting another
+	resp, err := h.g.ResumeInstance(context.Background(), req)
+	if err != nil || resp.GetStatus() != devboxv1.InstanceStatus_INSTANCE_STATUS_RUNNING {
+		t.Fatalf("joined resume = %v, %v", resp, err)
+	}
+	if got := h.ate.State(testAtespace, "dbx-inst-1"); got != ateapi.ActorState_ACTOR_STATE_RUNNING {
+		t.Fatalf("actor state = %s", got)
+	}
+	if inits, _, _, _ := h.daemon.snapshot(); inits != 2 {
+		t.Fatalf("the daemon should be initialized once per wake, got %d inits", inits)
+	}
 }

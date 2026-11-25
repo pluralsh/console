@@ -3,6 +3,38 @@ git_url: https://github.com/kubernetes-sigs/external-dns
 release_url: https://github.com/kubernetes-sigs/external-dns/releases/tag/v{vsn}
 helm_repository_url: https://kubernetes-sigs.github.io/external-dns
 versions:
+- version: 0.24.0
+  kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+    '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Gateway API: `gateway-tcproute` now watches TCPRoute v1; requires
+        Gateway API CRDs >= v1.6.0.', '`--namespace` now supports multiple comma-separated
+        namespaces for `service` and `crd` sources.', 'Kubeconfig handling improved:
+        honors `$KUBECONFIG` and applies `--server` even when running in-cluster.',
+      'CRDs: DNSEndpoint/DNSRecord schema validation at admission; plus status-writer
+        reporting sync outcome (log-only wiring present).', 'Provider improvements:
+        Scaleway supports/reads back `ALIAS` records (incl. apex), AWS SD dual-stack
+        LB aliases, RFC2136 supports TLSA and insecure AXFR upstream.']
+    breaking_changes: ['Gateway: hostname from annotation/FQDN template now suppresses
+        listener hostname fallback; with `--policy=sync` this can delete previously
+        created wildcard/listener-derived records.', 'Gateway API: TCPRoute source
+        migrated to v1; clusters must have Gateway API CRDs >= v1.6.0.', 'Skipper
+        RouteGroup source refactored to use informers; the RouteGroup CRD must be
+        installed. Also `.Metadata` in `--fqdn-template` is deprecated in favor of
+        `{{.Name}}`.', 'CRDs: DNSEndpoint and DNSRecord CRDs are now validated at
+        admission; you must re-apply CRDs and fix non-conforming existing objects
+        before updates will succeed.', 'Config/API: `--namespace` multi-value change
+        means `Config.Namespace` became `Config.Namespaces []string` for consumers
+        of `pkg/apis/externaldns`.', 'Packaging: version ldflags moved to `sigs.k8s.io/external-dns/pkg/version.{Version,GitCommit}`;
+        old path compiles but reports version `unknown`.', 'Scaleway: ALIAS record
+        behavior changes; with `--registry=noop` and `--policy=sync`, pre-existing
+        ALIAS records may be updated/deleted.']
+  chart_version: 1.24.0
+  images: []
 - version: 0.23.0
   kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
     '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']

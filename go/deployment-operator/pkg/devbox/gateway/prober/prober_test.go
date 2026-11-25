@@ -39,7 +39,7 @@ type fakeDaemon struct {
 }
 
 func (d fakeDaemon) Health(context.Context, *devboxv1.HealthRequest, ...grpc.CallOption) (*devboxv1.HealthResponse, error) {
-	return &devboxv1.HealthResponse{Ready: true}, nil
+	return &devboxv1.HealthResponse{Status: "booting"}, nil
 }
 
 func (d fakeDaemon) ProbeAgents(ctx context.Context, in *devboxv1.ProbeAgentsRequest, _ ...grpc.CallOption) (*devboxv1.ProbeAgentsResponse, error) {
@@ -103,9 +103,11 @@ func newProbeFixture(t *testing.T, holder string, objs ...client.Object) *probeF
 		Namespace:  ns,
 		Holder:     holder,
 		ConsoleURL: "https://console.example.com",
-		AIProxyURL: "https://console.example.com/ext/v1/ai",
+		AIProxyURL: "https://console.example.com/ext/ai",
 		RetryDelay: time.Millisecond,
 		Resync:     50 * time.Millisecond,
+		// an attempt retries an unavailable Substrate until its deadline
+		AttemptTimeout: 100 * time.Millisecond,
 	}, Deps{
 		Client:      f.client,
 		Actors:      actors.New(ateapi.NewControlClient(f.substrate.Dial(t))).WithPollInterval(time.Millisecond),
@@ -199,7 +201,7 @@ func TestProberRunsRequestAndWritesResult(t *testing.T) {
 	f.mu.Lock()
 	reqs := f.probeReqs
 	f.mu.Unlock()
-	if len(reqs) != 1 || reqs[0].GetEndpoints().GetAiProxyUrl() != "https://console.example.com/ext/v1/ai" || len(reqs[0].GetAgents()) != 1 {
+	if len(reqs) != 1 || reqs[0].GetEndpoints().GetAiProxyUrl() != "https://console.example.com/ext/ai" || len(reqs[0].GetAgents()) != 1 {
 		t.Fatalf("ProbeAgents requests: %v", reqs)
 	}
 	id := InstanceID(f.cmName)
@@ -244,6 +246,39 @@ func TestProberAppliesAIProxyOnlyPolicy(t *testing.T) {
 	}
 }
 
+func TestProberStartsJuiceFSHomesFromTheTemplatesGoldenTag(t *testing.T) {
+	objs := requestObjects(t, nil)
+	cm := objs[0].(*corev1.ConfigMap)
+	var req probe.Request
+	if err := json.Unmarshal([]byte(cm.Data[probe.RequestKey]), &req); err != nil {
+		t.Fatal(err)
+	}
+	req.JuiceFSHome = true
+	raw, _ := json.Marshal(req)
+	cm.Data[probe.RequestKey] = string(raw)
+
+	f := newProbeFixture(t, "gw-0", objs...)
+	var spec actors.Spec
+	f.prober.deps.Actors = recordSpec{Actors: f.prober.deps.Actors, got: &spec}
+	f.run(t)
+	if cm := f.waitState(t); cm.Annotations[probe.StateAnnotation] != probe.StateDone {
+		t.Fatalf("state %q, error %q", cm.Annotations[probe.StateAnnotation], cm.Data[probe.ErrorKey])
+	}
+	if spec.SourceTag != "" || !spec.Preview {
+		t.Fatalf("probe actor spec = %+v, want no source tag and the preview header", spec)
+	}
+}
+
+type recordSpec struct {
+	Actors
+	got *actors.Spec
+}
+
+func (r recordSpec) CreateActor(ctx context.Context, spec actors.Spec) (*ateapi.Actor, error) {
+	*r.got = spec
+	return r.Actors.CreateActor(ctx, spec)
+}
+
 type recordPolicy struct {
 	Actors
 	got **ateapi.EgressPolicy
@@ -279,14 +314,14 @@ func TestProberFailsAfterRetries(t *testing.T) {
 	if cm.Annotations[probe.StateAnnotation] != probe.StateFailed || !strings.Contains(cm.Data[probe.ErrorKey], "no workers") {
 		t.Fatalf("state %q error %q", cm.Annotations[probe.StateAnnotation], cm.Data[probe.ErrorKey])
 	}
-	resumes := 0
+	creates := 0
 	for _, c := range f.substrate.CallsSnapshot() {
-		if strings.HasPrefix(c, "ResumeActor") {
-			resumes++
+		if strings.HasPrefix(c, "CreateActor ") {
+			creates++
 		}
 	}
-	if resumes != defaultAttempts {
-		t.Fatalf("want %d attempts, got %d", defaultAttempts, resumes)
+	if creates != defaultAttempts {
+		t.Fatalf("want %d attempts, got %d", defaultAttempts, creates)
 	}
 }
 

@@ -2,6 +2,7 @@ package v1alpha1
 
 import (
 	"strings"
+	"time"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -94,9 +95,18 @@ const (
 	DevboxRevisionReady DevboxRevisionPhase = "Ready"
 	// DevboxRevisionFailed is terminal: the golden boot, image contract or agent probe failed.
 	DevboxRevisionFailed DevboxRevisionPhase = "Failed"
-	// DevboxRevisionRetired means a newer revision is current; the revision stays until nothing references it.
+	// DevboxRevisionRetired means a newer revision is current, or its golden boot lost its worker and it is rebuilt as
+	// a new revision; the revision stays until nothing references it.
 	DevboxRevisionRetired DevboxRevisionPhase = "Retired"
 )
+
+type DevboxRunnerBindings struct {
+	// Create bindings control who can attach this devbox to a workbench and start instances on it.
+	// Only users and groups resolvable by userEmail or groupName apply. If none are set, console falls
+	// back to its global create policy, which admins always pass.
+	// +kubebuilder:validation:Optional
+	Create []Binding `json:"create,omitempty"`
+}
 
 // DevboxRunnerSpec defines the desired state of DevboxRunner.
 type DevboxRunnerSpec struct {
@@ -134,6 +144,10 @@ type DevboxRunnerSpec struct {
 	// +kubebuilder:validation:Optional
 	Resources *DevboxResources `json:"resources,omitempty"`
 
+	// Home selects where instances keep /home/dev.
+	// +kubebuilder:validation:Optional
+	Home *DevboxHome `json:"home,omitempty"`
+
 	// WorkerPool sizes the Substrate WorkerPool backing this runner.
 	// +kubebuilder:validation:Optional
 	WorkerPool *DevboxWorkerPool `json:"workerPool,omitempty"`
@@ -141,6 +155,10 @@ type DevboxRunnerSpec struct {
 	// ScmConnections are names of console SCM connections instances may use for git credentials.
 	// +kubebuilder:validation:Optional
 	ScmConnections []string `json:"scmConnections,omitempty"`
+
+	// Bindings control who can use this devbox in console.
+	// +kubebuilder:validation:Optional
+	Bindings *DevboxRunnerBindings `json:"bindings,omitempty"`
 
 	// AllowedRepositories the git repositories allowed to be used with this devbox,
 	// with the same semantics as AgentRuntime.spec.allowedRepositories.
@@ -164,6 +182,12 @@ type DevboxRunnerSpec struct {
 	// +kubebuilder:default={}
 	CloudProviders *DevboxCloudProviders `json:"cloudProviders,omitempty"`
 
+	// OCIRegistries opens egress to public container registries, for pulling images with podman, docker,
+	// crane or helm. Docker Hub and GitHub Container Registry are on unless set to false.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default={}
+	OCIRegistries *DevboxOCIRegistries `json:"ociRegistries,omitempty"`
+
 	// Env are environment variables for every process the box starts: agents, terminals and git. Plain values
 	// are part of the template, so changing them rolls a new revision. Secret values are read when an instance
 	// wakes and are never baked into the template, the golden snapshot or the workspace volume.
@@ -177,13 +201,30 @@ type DevboxRunnerSpec struct {
 	// +kubebuilder:validation:Optional
 	Browser *DevboxBrowser `json:"browser,omitempty"`
 
-	// BootstrapScript runs once during the golden boot, so its results are baked into the snapshot.
+	// BootstrapScript runs once during the golden boot, from the home directory and after repositories are cloned
+	// and mise has installed its tools, so its results are baked into the snapshot. It runs with `bash -e` unless
+	// it starts with a #! line, and a failure fails the revision; its output is in ~/.plural/golden.log.
 	// +kubebuilder:validation:Optional
 	BootstrapScript *string `json:"bootstrapScript,omitempty"`
 
 	// Mise is an inline mise.toml installed during the golden boot.
 	// +kubebuilder:validation:Optional
 	Mise *MiseSpec `json:"mise,omitempty"`
+
+	// Repositories are cloned into the home during the golden boot, with the box's SCM connections, so every
+	// instance starts with them checked out, along with whatever bootstrapScript builds in them. Each instance
+	// fetches them again when it first boots. When allowedRepositories is set, each must be on it.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:MaxItems=32
+	// +listType=map
+	// +listMapKey=url
+	Repositories []DevboxRepository `json:"repositories,omitempty"`
+
+	// BootstrapTimeout bounds the golden boot when it has work to do (repositories, mise or bootstrapScript):
+	// past it, Substrate crashes the boot and the revision fails. It's also how long a waking instance may take to
+	// report ready. Defaults to 30m.
+	// +kubebuilder:validation:Optional
+	BootstrapTimeout *metav1.Duration `json:"bootstrapTimeout,omitempty"`
 
 	// IdlePolicy bounds idle suspension. Workbenches can only lower these values.
 	// +kubebuilder:validation:Optional
@@ -201,6 +242,30 @@ type DevboxRunnerSpec struct {
 	// +listMapKey=name
 	// +kubebuilder:validation:XValidation:rule="self.filter(i, has(i.default) && i.default).size() <= 1",message="at most one cloud identity can be marked default"
 	CloudIdentities []DevboxCloudIdentity `json:"cloudIdentities,omitempty"`
+
+	// Substrate overrides where the operator reaches the Substrate API and the identity it calls it as. The
+	// operator mints the token and reads the CA bundle from the cluster when it reconciles the runner, so
+	// nothing is mounted into the operator.
+	// +kubebuilder:validation:Optional
+	Substrate *DevboxSubstrate `json:"substrate,omitempty"`
+}
+
+// DevboxSubstrate locates the Substrate API credentials the operator loads for a runner.
+type DevboxSubstrate struct {
+	// Address of ate-api-server. Defaults to the deployment-operator chart's devboxes.substrate.apiAddress.
+	// +kubebuilder:validation:Optional
+	Address *string `json:"address,omitempty"`
+
+	// ServiceAccountName is a ServiceAccount in the operator's namespace that the operator mints Substrate API
+	// tokens for. It must be a Substrate global owner, since it creates atespaces and drains workers. Defaults
+	// to the operator's own ServiceAccount.
+	// +kubebuilder:validation:Optional
+	ServiceAccountName *string `json:"serviceAccountName,omitempty"`
+
+	// CASignerName is the signer of the ClusterTrustBundles that verify ate-api-server's serving certificate.
+	// Defaults to servicedns.podcert.ate.dev/identity.
+	// +kubebuilder:validation:Optional
+	CASignerName *string `json:"caSignerName,omitempty"`
 }
 
 type DevboxImageUpdatePolicy struct {
@@ -259,6 +324,108 @@ type DevboxResources struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default="20Gi"
 	Disk *resource.Quantity `json:"disk,omitempty"`
+}
+
+// DevboxRepository is a repository the golden boot clones.
+type DevboxRepository struct {
+	// URL is the https clone URL, e.g. https://github.com/pluralsh/console.git.
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Pattern=`^https://[^/]+/.+`
+	URL string `json:"url"`
+
+	// Branch is checked out instead of the default branch.
+	// +kubebuilder:validation:Optional
+	Branch *string `json:"branch,omitempty"`
+
+	// Description is shown to agents in the home's Project.md.
+	// +kubebuilder:validation:Optional
+	Description *string `json:"description,omitempty"`
+}
+
+const (
+	// DevboxDefaultBootstrapTimeout is spec.bootstrapTimeout's default.
+	DevboxDefaultBootstrapTimeout = 30 * time.Minute
+	// DevboxMaxBootstrapTimeout is Substrate's limit on a wakeup probe.
+	DevboxMaxBootstrapTimeout = time.Hour
+)
+
+// GoldenBootTimeout is how long the golden boot may take (spec.bootstrapTimeout), capped at Substrate's limit.
+func (s *DevboxRunnerSpec) GoldenBootTimeout() time.Duration {
+	d := DevboxDefaultBootstrapTimeout
+	if s.BootstrapTimeout != nil && s.BootstrapTimeout.Duration > 0 {
+		d = s.BootstrapTimeout.Duration
+	}
+	return min(d, DevboxMaxBootstrapTimeout)
+}
+
+// HasGoldenBootWork reports whether the golden boot clones, installs or runs anything.
+func (s *DevboxRunnerSpec) HasGoldenBootWork() bool {
+	return len(s.Repositories) > 0 || (s.BootstrapScript != nil && *s.BootstrapScript != "") ||
+		(s.Mise != nil && s.Mise.Config != nil && *s.Mise.Config != "")
+}
+
+// DevboxHomeStorage is where an instance's /home/dev lives.
+// +kubebuilder:validation:Enum=Snapshot;JuiceFS
+type DevboxHomeStorage string
+
+const (
+	// DevboxHomeSnapshot keeps the home on the instance's node and carries it in every snapshot.
+	DevboxHomeSnapshot DevboxHomeStorage = "Snapshot"
+	// DevboxHomeJuiceFS keeps the home in the agent-substrate chart's JuiceFS filesystem (juicefs.enabled), mounted
+	// wherever the instance runs, so snapshots carry only memory and moving node doesn't copy the home.
+	DevboxHomeJuiceFS DevboxHomeStorage = "JuiceFS"
+
+	// DevboxDefaultJuiceFSStorageClass is the agent-substrate chart's juicefs.storageClassName default.
+	DevboxDefaultJuiceFSStorageClass = "devbox-juicefs"
+)
+
+// DevboxHome selects how instances store /home/dev.
+//
+// With JuiceFS, an instance's home is seeded from the golden boot's, so what the bootstrap script and mise
+// installed is there from the start, and every snapshot also saves the home as a JuiceFS clone. Starting an
+// instance from a snapshot isn't supported yet: Substrate can't restore a tag of a template with external
+// volumes.
+type DevboxHome struct {
+	// Storage defaults to Snapshot. Changing it rolls a new revision, and instances moved to it start with a fresh
+	// home.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=Snapshot
+	Storage *DevboxHomeStorage `json:"storage,omitempty"`
+
+	// Size is the most a JuiceFS home may hold, enforced as a JuiceFS quota. Defaults to spec.resources.disk.
+	// +kubebuilder:validation:Optional
+	Size *resource.Quantity `json:"size,omitempty"`
+
+	// StorageClassName is the JuiceFS StorageClass. Defaults to the agent-substrate chart's devbox-juicefs.
+	// +kubebuilder:validation:Optional
+	StorageClassName *string `json:"storageClassName,omitempty"`
+}
+
+// HomeStorage is where instances keep /home/dev.
+func (s *DevboxRunnerSpec) HomeStorage() DevboxHomeStorage {
+	if s.Home == nil || s.Home.Storage == nil {
+		return DevboxHomeSnapshot
+	}
+	return *s.Home.Storage
+}
+
+// HomeSize is the most an instance's home may hold.
+func (s *DevboxRunnerSpec) HomeSize() resource.Quantity {
+	if s.Home != nil && s.Home.Size != nil {
+		return *s.Home.Size
+	}
+	if s.Resources != nil && s.Resources.Disk != nil {
+		return *s.Resources.Disk
+	}
+	return resource.MustParse("20Gi")
+}
+
+// HomeStorageClass is the StorageClass of a JuiceFS home.
+func (s *DevboxRunnerSpec) HomeStorageClass() string {
+	if s.Home != nil && s.Home.StorageClassName != nil && *s.Home.StorageClassName != "" {
+		return *s.Home.StorageClassName
+	}
+	return DevboxDefaultJuiceFSStorageClass
 }
 
 // DevboxWorkerPool is the Substrate WorkerPool the operator runs for the runner. Each worker is expected to have a
@@ -460,24 +627,69 @@ type DevboxCloudProviders struct {
 	Azure *bool `json:"azure,omitempty"`
 }
 
+// DevboxOCIRegistries enables egress to each container registry's API and blob hosts (see OCIRegistryHosts).
+type DevboxOCIRegistries struct {
+	// DockerHub: docker.io, its auth service and its Cloudflare blob CDN. Unqualified image names resolve here.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=true
+	DockerHub *bool `json:"dockerHub,omitempty"`
+
+	// GitHub: ghcr.io and its blob host.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=true
+	GitHub *bool `json:"github,omitempty"`
+
+	// Quay: quay.io, its CDN and its S3 blob bucket.
+	// +kubebuilder:validation:Optional
+	Quay *bool `json:"quay,omitempty"`
+
+	// Google: Container Registry (gcr.io and its regional hosts) and Artifact Registry (*.pkg.dev).
+	// +kubebuilder:validation:Optional
+	Google *bool `json:"google,omitempty"`
+
+	// Microsoft: the Microsoft Artifact Registry, mcr.microsoft.com, and its regional data endpoints.
+	// +kubebuilder:validation:Optional
+	Microsoft *bool `json:"microsoft,omitempty"`
+
+	// Kubernetes: registry.k8s.io and the Artifact Registry mirrors it redirects to. From AWS addresses it
+	// redirects to regional S3 buckets instead, which need httpAllowlist entries.
+	// +kubebuilder:validation:Optional
+	Kubernetes *bool `json:"kubernetes,omitempty"`
+
+	// ECR opens private Amazon ECR registries, for any account, in the listed regions.
+	// +kubebuilder:validation:Optional
+	ECR *DevboxECRRegistries `json:"ecr,omitempty"`
+}
+
+// DevboxECRRegistries enables egress to private Amazon ECR registries. ECR hosts are regional, so each region
+// is listed. Pulling still needs credentials, such as an AWS cloud identity and `aws ecr get-login-password`.
+type DevboxECRRegistries struct {
+	// Regions opens, per region, the registry API (<account>.dkr.ecr.<region>.amazonaws.com), the ECR API
+	// that issues login tokens, and the S3 bucket image layers download from.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:MaxItems=32
+	// +kubebuilder:validation:items:Pattern=`^[a-z]{2}(-[a-z]+)+-[0-9]+$`
+	Regions []string `json:"regions,omitempty"`
+}
+
 // DevboxPackageServers enables egress to each ecosystem's public registries (see PackageServerHosts).
 type DevboxPackageServers struct {
-	// Go: proxy.golang.org and sum.golang.org.
+	// Go: the module proxy and checksum database, the storage its downloads redirect to, and Go releases.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
 	Go *bool `json:"go,omitempty"`
 
-	// Rust: crates.io and rustup's static.rust-lang.org.
+	// Rust: crates.io and rustup.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
 	Rust *bool `json:"rust,omitempty"`
 
-	// JavaScript: the npm and yarn registries and nodejs.org.
+	// JavaScript: the npm and yarn registries, JSR, and the Node.js, Bun and Deno downloads.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
 	JavaScript *bool `json:"javascript,omitempty"`
 
-	// Java: Maven Central and the Gradle plugin portal and distributions.
+	// Java: Maven Central, Google's Maven repository, and the Gradle plugin portal and distributions.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:default=true
 	Java *bool `json:"java,omitempty"`
@@ -492,17 +704,27 @@ type DevboxPackageServers struct {
 	// +kubebuilder:default=true
 	Python *bool `json:"python,omitempty"`
 
-	// Ruby: rubygems.org.
+	// Ruby: rubygems.org and Ruby releases.
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=true
 	Ruby *bool `json:"ruby,omitempty"`
 
-	// PHP: Packagist.
+	// PHP: Packagist and Composer.
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=true
 	PHP *bool `json:"php,omitempty"`
 
-	// Dotnet: NuGet.
+	// Dotnet: NuGet and .NET releases.
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=true
 	Dotnet *bool `json:"dotnet,omitempty"`
+
+	// Mise: what `mise use` needs for languages and tools the image doesn't ship: mise's version and Java
+	// metadata, GitHub releases (most tools are released there) and the other common release hosts. On boxes
+	// without a GitHub SCM connection this opens github.com unauthenticated.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=false
+	Mise *bool `json:"mise,omitempty"`
 }
 
 // +kubebuilder:validation:XValidation:rule="has(self.value) != has(self.valueFrom)",message="set exactly one of value and valueFrom"
@@ -750,6 +972,9 @@ type DevboxRevision struct {
 	Phase DevboxRevisionPhase `json:"phase"`
 	// +kubebuilder:validation:Optional
 	GoldenTag *string `json:"goldenTag,omitempty"`
+	// HomeStorage is where this revision's template keeps /home/dev; unset means Snapshot.
+	// +kubebuilder:validation:Optional
+	HomeStorage *DevboxHomeStorage `json:"homeStorage,omitempty"`
 	// +kubebuilder:validation:Optional
 	Message *string `json:"message,omitempty"`
 	// +kubebuilder:validation:Optional
@@ -860,17 +1085,42 @@ func (in *DevboxRunner) LatestRevision() *DevboxRevision {
 	return latest
 }
 
-// packageServerHosts are the registry hosts each ecosystem needs, all on 443.
+// packageServerHosts are the hosts each ecosystem's whole download chain touches, all on 443: registry indexes,
+// the hosts their artifacts redirect to, and the toolchain and package manager downloads. Sources hosted on an
+// SCM (Composer dists, git dependencies) come with the instance's SCM hosts instead.
 var packageServerHosts = map[string][]string{
-	"go":         {"proxy.golang.org", "sum.golang.org"},
-	"rust":       {"crates.io", "index.crates.io", "static.crates.io", "static.rust-lang.org"},
-	"javascript": {"registry.npmjs.org", "registry.yarnpkg.com", "repo.yarnpkg.com", "nodejs.org"},
-	"java":       {"repo.maven.apache.org", "repo1.maven.org", "plugins.gradle.org", "services.gradle.org", "downloads.gradle.org"},
-	"elixir":     {"hex.pm", "repo.hex.pm", "builds.hex.pm"},
-	"python":     {"pypi.org", "files.pythonhosted.org"},
-	"ruby":       {"rubygems.org", "index.rubygems.org"},
-	"php":        {"packagist.org", "repo.packagist.org"},
-	"dotnet":     {"api.nuget.org", "globalcdn.nuget.org"},
+	// proxy.golang.org answers module zips and toolchains with redirects to storage.googleapis.com; go.dev and
+	// dl.google.com serve Go releases
+	"go":   {"proxy.golang.org", "sum.golang.org", "storage.googleapis.com", "go.dev", "golang.org", "dl.google.com"},
+	"rust": {"crates.io", "index.crates.io", "static.crates.io", "static.rust-lang.org", "sh.rustup.rs"},
+	// corepack fetches pnpm and yarn from the npm registry and yarn berry from repo.yarnpkg.com; JSR serves
+	// npm-compatible packages from npm.jsr.io
+	"javascript": {
+		"registry.npmjs.org", "registry.yarnpkg.com", "repo.yarnpkg.com", "nodejs.org", "bun.sh",
+		"jsr.io", "npm.jsr.io", "deno.land", "dl.deno.land",
+	},
+	// the plugin portal redirects artifacts to plugins-artifacts.gradle.org; Android and many Gradle builds pull
+	// Google's Maven repository
+	"java": {
+		"repo.maven.apache.org", "repo1.maven.org", "plugins.gradle.org", "plugins-artifacts.gradle.org",
+		"services.gradle.org", "downloads.gradle.org", "maven.google.com", "dl.google.com",
+	},
+	"elixir": {"hex.pm", "repo.hex.pm", "builds.hex.pm"},
+	"python": {"pypi.org", "files.pythonhosted.org"},
+	"ruby":   {"rubygems.org", "index.rubygems.org", "cache.ruby-lang.org"},
+	"php":    {"packagist.org", "repo.packagist.org", "getcomposer.org"},
+	"dotnet": {"api.nuget.org", "globalcdn.nuget.org", "builds.dotnet.microsoft.com", "dot.net"},
+	"mise":   MiseHosts,
+}
+
+// MiseHosts are what mise installs from beyond the ecosystems' own hosts: its version, Java and download
+// metadata, GitHub releases and the object storage their assets redirect to, and the release hosts of common
+// tools (HashiCorp, Zig, Kubernetes, Helm). When github.com is an SCM host its SCM rules take precedence.
+var MiseHosts = []string{
+	"mise.jdx.dev", "mise-versions.jdx.dev", "mise-java.jdx.dev",
+	"github.com", "api.github.com", "codeload.github.com", "raw.githubusercontent.com",
+	"objects.githubusercontent.com", "github-releases.githubusercontent.com", "release-assets.githubusercontent.com",
+	"releases.hashicorp.com", "ziglang.org", "dl.k8s.io", "cdn.dl.k8s.io", "get.helm.sh",
 }
 
 // PackageServerHosts returns the registry hosts the enabled ecosystems need, in a stable order. Unset fields
@@ -887,6 +1137,7 @@ func (in *DevboxRunnerSpec) PackageServerHosts() []string {
 		return *v
 	}
 	var out []string
+	seen := map[string]bool{}
 	for _, eco := range []struct {
 		name    string
 		enabled bool
@@ -897,12 +1148,19 @@ func (in *DevboxRunnerSpec) PackageServerHosts() []string {
 		{"java", on(ps.Java, true)},
 		{"elixir", on(ps.Elixir, true)},
 		{"python", on(ps.Python, true)},
-		{"ruby", on(ps.Ruby, false)},
-		{"php", on(ps.PHP, false)},
-		{"dotnet", on(ps.Dotnet, false)},
+		{"ruby", on(ps.Ruby, true)},
+		{"php", on(ps.PHP, true)},
+		{"dotnet", on(ps.Dotnet, true)},
+		{"mise", on(ps.Mise, false)},
 	} {
-		if eco.enabled {
-			out = append(out, packageServerHosts[eco.name]...)
+		if !eco.enabled {
+			continue
+		}
+		for _, h := range packageServerHosts[eco.name] {
+			if !seen[h] {
+				seen[h] = true
+				out = append(out, h)
+			}
 		}
 	}
 	return out
@@ -946,6 +1204,79 @@ func (in *DevboxRunnerSpec) CloudProviderHosts() []string {
 		}
 	}
 	return out
+}
+
+// EgressPresetHosts are every host the runner's presets open on 443: package servers, cloud providers and OCI
+// registries.
+func (in *DevboxRunnerSpec) EgressPresetHosts() []string {
+	return append(append(in.PackageServerHosts(), in.CloudProviderHosts()...), in.OCIRegistryHosts()...)
+}
+
+// ociRegistryHosts are the API and blob hosts each registry's pulls touch, all on 443. Substrate wildcards
+// cover exactly one label.
+var ociRegistryHosts = map[string][]string{
+	"dockerHub":  {"docker.io", "index.docker.io", "registry-1.docker.io", "auth.docker.io", "production.cloudflare.docker.com"},
+	"github":     {"ghcr.io", "pkg-containers.githubusercontent.com"},
+	"quay":       {"quay.io", "cdn.quay.io", "cdn01.quay.io", "cdn02.quay.io", "cdn03.quay.io", "quayio-production-s3.s3.amazonaws.com"},
+	"google":     {"gcr.io", "*.gcr.io", "*.pkg.dev"},
+	"microsoft":  {"mcr.microsoft.com", "*.data.mcr.microsoft.com"},
+	"kubernetes": {"registry.k8s.io", "*.pkg.dev"},
+}
+
+// OCIRegistryHosts returns the hosts the enabled container registries need, in a stable order without
+// duplicates. Unset fields take the CRD defaults, so runners stored before the field existed behave the same.
+func (in *DevboxRunnerSpec) OCIRegistryHosts() []string {
+	oci := in.OCIRegistries
+	if oci == nil {
+		oci = &DevboxOCIRegistries{}
+	}
+	on := func(v *bool, def bool) bool {
+		if v == nil {
+			return def
+		}
+		return *v
+	}
+	var hosts, out []string
+	seen := map[string]bool{}
+	for _, registry := range []struct {
+		name    string
+		enabled bool
+	}{
+		{"dockerHub", on(oci.DockerHub, true)},
+		{"github", on(oci.GitHub, true)},
+		{"quay", on(oci.Quay, false)},
+		{"google", on(oci.Google, false)},
+		{"microsoft", on(oci.Microsoft, false)},
+		{"kubernetes", on(oci.Kubernetes, false)},
+	} {
+		if registry.enabled {
+			hosts = append(hosts, ociRegistryHosts[registry.name]...)
+		}
+	}
+	if oci.ECR != nil {
+		for _, region := range oci.ECR.Regions {
+			hosts = append(hosts, ecrHosts(region)...)
+		}
+	}
+	for _, h := range hosts {
+		if !seen[h] {
+			seen[h] = true
+			out = append(out, h)
+		}
+	}
+	return out
+}
+
+// ecrHosts are the hosts a private ECR pull in region touches: the registry API under any account, the ECR API
+// for login tokens, and the layer bucket in both S3 addressing styles.
+func ecrHosts(region string) []string {
+	bucket := "prod-" + region + "-starport-layer-bucket"
+	return []string{
+		"*.dkr.ecr." + region + ".amazonaws.com",
+		"api.ecr." + region + ".amazonaws.com",
+		bucket + ".s3." + region + ".amazonaws.com",
+		bucket + ".s3.amazonaws.com",
+	}
 }
 
 // DevboxRunnerEnvSecret, in the operator namespace, holds every runner's resolved secretKeyRef env vars as one JSON

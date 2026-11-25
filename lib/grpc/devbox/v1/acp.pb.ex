@@ -623,6 +623,27 @@ defmodule Devbox.V1.Session do
   field :imported, 18, type: :bool
   field :revision, 19, type: :uint64
   field :meta, 20, type: Google.Protobuf.Struct
+
+  field :queued_prompts, 21,
+    repeated: true,
+    type: Devbox.V1.QueuedPrompt,
+    json_name: "queuedPrompts"
+
+  field :parent_tool_call_id, 22, type: :string, json_name: "parentToolCallId"
+end
+
+defmodule Devbox.V1.QueuedPrompt do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "devbox.v1.QueuedPrompt",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :prompt_id, 1, type: :string, json_name: "promptId"
+  field :content, 2, repeated: true, type: Devbox.V1.ContentBlock
+  field :sent_by, 3, type: Devbox.V1.Principal, json_name: "sentBy"
+  field :queued_at, 4, type: Google.Protobuf.Timestamp, json_name: "queuedAt"
 end
 
 defmodule Devbox.V1.ImportableSession do
