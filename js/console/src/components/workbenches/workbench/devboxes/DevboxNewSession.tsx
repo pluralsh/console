@@ -91,6 +91,7 @@ export function DevboxNewSession({
         </CaptionP>
       ) : (
         <DevboxComposer
+          draftKey={`new:${instance.id}`}
           commands={agentEntry?.commands}
           listFiles={listFiles}
           searchFiles={searchFiles}

@@ -116,6 +116,14 @@ func (d *fakeDaemon) CreateTerminal(_ context.Context, req *devboxv1.CreateTermi
 	return &devboxv1.TerminalInfo{TerminalId: id}, nil
 }
 
+func (d *fakeDaemon) GetBrowser(context.Context, *devboxv1.GetBrowserRequest) (*devboxv1.BrowserInfo, error) {
+	return &devboxv1.BrowserInfo{VncPath: "/browser/vnc"}, nil
+}
+
+func (d *fakeDaemon) StartBrowser(_ context.Context, req *devboxv1.StartBrowserRequest) (*devboxv1.BrowserInfo, error) {
+	return &devboxv1.BrowserInfo{Running: true, VncPath: "/browser/vnc", Width: req.GetWidth(), Height: req.GetHeight()}, nil
+}
+
 func (d *fakeDaemon) PrepareSuspend(_ context.Context, req *devboxv1.PrepareSuspendRequest) (*devboxv1.PrepareSuspendResponse, error) {
 	d.mu.Lock()
 	d.prepares = append(d.prepares, req)

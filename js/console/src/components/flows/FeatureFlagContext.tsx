@@ -190,9 +190,8 @@ function DevboxesBodyContent() {
 function DevboxBrowserBodyContent() {
   return (
     <span>
-      <strong>Devbox browser</strong> shows the instance's browser in the devbox
-      side panel, for boxes with a browser enabled. It's unfinished and may not
-      work.
+      <strong>Devbox browser</strong> shows the instance's browser in the main
+      view, for boxes with a browser enabled. It's unfinished and may not work.
     </span>
   )
 }
