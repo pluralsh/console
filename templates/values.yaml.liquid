@@ -14,6 +14,11 @@ ingress:
 provider: {{ configuration.provider }}
 {% endif %}
 
+# Nexus, the AI proxy that devboxes and agent runtimes send model traffic through (/ext/ai), using the console's AI
+# settings
+aiProxy:
+  enabled: true
+
 secrets:
   jwt: {{ configuration.jwt }}
   admin_name: {{ configuration.adminName }}
