@@ -21,6 +21,7 @@ import (
 
 	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 	"github.com/pluralsh/console/go/deployment-operator/internal/utils"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/substrate"
 )
 
@@ -131,12 +132,21 @@ func (r *DevboxRunnerReconciler) reconcileGateway(ctx context.Context, runner *v
 	if err != nil {
 		return err
 	}
+	if err := common.EnsureSpawnedCAConfigMap(ctx, r.Client, ns); err != nil {
+		return fmt.Errorf("ensuring spawned CA configmap for gateway: %w", err)
+	}
+	caChecksum, err := common.SpawnedCASourceChecksum()
+	if err != nil {
+		return fmt.Errorf("hashing spawned CA source for gateway: %w", err)
+	}
 	// The serving names are hashed too, so pods re-request their certificate if a Service is renamed.
+	// CA checksum rolls the gateway when the private CA bundle rotates (subPath mounts do not hot-reload).
 	checksum, err := utils.HashObject(struct {
 		Token        string
 		Env          []corev1.EnvVar
 		ServingNames []string
-	}{r.Config.DeployToken, env, []string{r.gatewayHost(devboxGatewayName), r.gatewayHost(devboxEgressAuthzName)}})
+		CA           string
+	}{r.Config.DeployToken, env, []string{r.gatewayHost(devboxGatewayName), r.gatewayHost(devboxEgressAuthzName)}, caChecksum})
 	if err != nil {
 		return err
 	}
@@ -251,7 +261,7 @@ func (r *DevboxRunnerReconciler) gatewayPodTemplate(checksum string, env []corev
 	)
 	live := &metav1.LabelSelector{MatchLabels: map[string]string{podcertCanaryingLabel: "live"}}
 
-	return corev1.PodTemplateSpec{
+	tpl := corev1.PodTemplateSpec{
 		ObjectMeta: metav1.ObjectMeta{
 			Labels:      devboxGatewayLabels(),
 			Annotations: map[string]string{"devboxes.plural.sh/config-checksum": checksum},
@@ -316,6 +326,8 @@ func (r *DevboxRunnerReconciler) gatewayPodTemplate(checksum string, env []corev
 			},
 		},
 	}
+	common.ApplySpawnedCAToPodSpec(&tpl.Spec)
+	return tpl
 }
 
 func (r *DevboxRunnerReconciler) gatewayNetworkPolicySpec() networkingv1.NetworkPolicySpec {

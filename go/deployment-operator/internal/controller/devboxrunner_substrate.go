@@ -23,6 +23,7 @@ import (
 
 	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 	"github.com/pluralsh/console/go/deployment-operator/internal/utils"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/egress/rules"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/gateway/egress/scmpath"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/guest"
@@ -202,6 +203,10 @@ func (r *DevboxRunnerReconciler) reconcileWorkerPool(ctx context.Context, api su
 	}
 	if wp.PriorityClassName != nil {
 		template["priorityClassName"] = *wp.PriorityClassName
+	}
+
+	if err := common.EnsureSpawnedCAConfigMap(ctx, r.Client, r.Config.WorkerPoolNamespace); err != nil {
+		return fmt.Errorf("ensuring spawned CA configmap for worker pool namespace: %w", err)
 	}
 
 	pool := &unstructured.Unstructured{}
