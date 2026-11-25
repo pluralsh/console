@@ -1,0 +1,21 @@
+We've found an unhealthy kubernetes resource on the <%= @cluster.name %> cluster (<%= @cluster.handle %>). Investigate its root cause and remediate it if you can confirm the issue.
+
+## <%= @component.kind %> <%= @component.name %>
+
+- apiVersion: <%= @api_version %>
+- namespace: <%= @component.namespace || "cluster-scoped" %>
+- priority: <%= @component.priority %>
+
+## Insight
+
+<%= @insight.text %>
+<%= if @services != [] do %>
+
+## Related services
+
+These services run in the same namespace on this cluster and may be useful context:
+
+<%= for svc <- @services do %>
+- <%= svc.name %> (id: <%= svc.id %>)
+<% end %>
+<% end %>

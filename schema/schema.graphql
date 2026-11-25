@@ -6460,6 +6460,9 @@ type WorkbenchJob {
   "the issue this run was spawned from"
   issue: Issue
 
+  "the cluster this job was spawned to remediate"
+  cluster: Cluster
+
   "the original job this job was spawned from (e.g. eval skill jobs) (sideloadable)"
   referencedJob: WorkbenchJob
 
@@ -15418,6 +15421,12 @@ input ClusterAttributes {
   "whether to disable ai insights for this cluster"
   disableAi: Boolean
 
+  "workbench that receives auto-remediation jobs for this cluster"
+  remediationWorkbenchId: ID
+
+  "auto-remediation policy, run-as user, and job modes"
+  remediation: ClusterRemediationAttributes
+
   cloudSettings: CloudSettingsAttributes
 
   "the project id this cluster will belong to"
@@ -15528,6 +15537,12 @@ input ClusterUpdateAttributes {
 
   "whether to disable ai insights for this cluster"
   disableAi: Boolean
+
+  "workbench that receives auto-remediation jobs for this cluster. Clear to disable auto-remediation"
+  remediationWorkbenchId: ID
+
+  "auto-remediation policy, run-as user, and job modes. Omitted fields are left unchanged"
+  remediation: ClusterRemediationAttributes
 
   nodePools: [NodePoolAttributes]
 
@@ -16209,6 +16224,43 @@ type ClusterNodeMetrics {
   memoryUsage: [MetricResponse]
 }
 
+input ClusterRemediationAttributes {
+  "minimum insight component priority required before auto-remediation starts a job"
+  minPriority: InsightComponentPriority
+
+  "seconds to suppress another auto-remediation job for the same finding"
+  window: Int
+
+  "maximum auto-remediation jobs to start for this cluster within the throttle window"
+  maxJobs: Int
+
+  "user auto-remediation jobs run as. Leave unset to run as the workbench bot user. Must be able to read the workbench, and only admins can choose someone other than themselves"
+  userId: ID
+
+  "job mode overrides, matching the options on workbench webhooks and crons"
+  modes: WorkbenchJobModesAttributes
+}
+
+type ClusterRemediation {
+  "minimum insight component priority required before auto-remediation starts a job"
+  minPriority: InsightComponentPriority
+
+  "seconds to suppress another auto-remediation job for the same finding"
+  window: Int
+
+  "maximum auto-remediation jobs to start for this cluster within the throttle window"
+  maxJobs: Int
+
+  "user auto-remediation jobs run as when set. Unset jobs run as the workbench bot user"
+  userId: ID
+
+  "user auto-remediation jobs run as when set"
+  user: User
+
+  "job mode overrides applied to auto-remediation jobs"
+  modes: WorkbenchJobModes
+}
+
 "a representation of a cluster you can deploy to"
 type Cluster {
   "internal id of this cluster"
@@ -16261,6 +16313,9 @@ type Cluster {
 
   "whether to disable ai insights for this cluster"
   disableAi: Boolean
+
+  "auto-remediation policy, run-as user, and job modes"
+  remediation: ClusterRemediation
 
   "The version of OpenShift this cluster is running"
   openshiftVersion: String
@@ -16387,6 +16442,9 @@ type Cluster {
 
   "an ai insight generated about issues discovered which might impact the health of this cluster"
   insight: AiInsight
+
+  "workbench that receives auto-remediation jobs when cluster insights clear this cluster's policy"
+  remediationWorkbench: Workbench
 
   "the current upgrade attempt for this cluster"
   currentUpgrade: ClusterUpgrade
@@ -19448,6 +19506,15 @@ type AiInsight {
 
   "any errors generated when compiling this insight"
   error: [ServiceError]
+
+  "sha of this insight when auto-remediation last started a job for it"
+  remediatedSha: String
+
+  "when auto-remediation last started a job for this insight"
+  remediatedAt: DateTime
+
+  "the workbench job auto-remediation last started for this insight"
+  remediationJob: WorkbenchJob
 
   freshness: InsightFreshness
 

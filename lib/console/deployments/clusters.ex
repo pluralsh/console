@@ -35,6 +35,7 @@ defmodule Console.Deployments.Clusters do
     DeploymentSettings,
     DeprecatedCustomResource,
     UpgradePlanCallout,
+    Workbench,
     CustomCompatibilityMatrix,
     ClusterUpgrade
   }
@@ -458,6 +459,9 @@ defmodule Console.Deployments.Clusters do
 
   def create_cluster_raw(attrs, %User{} = user) do
     start_transaction()
+    |> add_operation(:remediation_workbench, fn _ ->
+      authorize_remediation_workbench(attrs, user)
+    end)
     |> add_operation(:cloud, fn _ -> {:ok, Console.cloud?()} end)
     |> add_operation(:limit, fn _ ->
       case !attrs[:ignore_limit] && cluster_limit?() do
@@ -529,6 +533,9 @@ defmodule Console.Deployments.Clusters do
   @spec upsert_virtual_cluster(map, binary, User.t) :: cluster_resp
   def upsert_virtual_cluster(attrs, parent_id, %User{} = user) do
     start_transaction()
+    |> add_operation(:remediation_workbench, fn _ ->
+      authorize_remediation_workbench(attrs, user)
+    end)
     |> add_operation(:parent, fn _ ->
       get_cluster!(parent_id)
       |> Repo.preload([:read_bindings, :write_bindings])
@@ -579,6 +586,9 @@ defmodule Console.Deployments.Clusters do
       get_cluster!(id)
       |> allow(user, :write)
     end)
+    |> add_operation(:remediation_workbench, fn %{auth: cluster} ->
+      authorize_remediation_workbench(attrs, cluster, user)
+    end)
     |> add_operation(:cluster, fn %{auth: auth} ->
       auth
       |> Console.Repo.preload([:node_pools, :service, :tags, :read_bindings, :write_bindings])
@@ -602,9 +612,74 @@ defmodule Console.Deployments.Clusters do
     |> notify(:update, user)
   end
 
-  defp clean_cluster_attrs(%{project_id: nil} = attrs), do: Map.delete(attrs, :project_id)
-  defp clean_cluster_attrs(%{project_id: ""} = attrs), do: Map.delete(attrs, :project_id)
+  defp clean_cluster_attrs(%{project_id: nil} = attrs), do: Map.delete(attrs, :project_id) |> clean_cluster_attrs()
+  defp clean_cluster_attrs(%{project_id: ""} = attrs), do: Map.delete(attrs, :project_id) |> clean_cluster_attrs()
+  defp clean_cluster_attrs(%{remediation_workbench_id: ""} = attrs),
+    do: %{attrs | remediation_workbench_id: nil}
   defp clean_cluster_attrs(attrs), do: attrs
+
+  defp authorize_remediation_workbench(attrs, %User{} = user),
+    do: authorize_remediation_workbench(attrs, nil, user)
+  defp authorize_remediation_workbench(attrs, cluster, %User{} = user) do
+    with {:ok, _} <- authorize_workbench_target(attrs, user),
+         do: authorize_remediation_actor(attrs, cluster, user)
+  end
+
+  defp authorize_workbench_target(%{remediation_workbench_id: id}, %User{} = user) when is_binary(id) and id != "" do
+    case Repo.get(Workbench, id) do
+      %Workbench{} = bench -> allow(bench, user, :write)
+      _ -> {:error, "workbench not found"}
+    end
+  end
+  defp authorize_workbench_target(_, _), do: {:ok, nil}
+
+  defp authorize_remediation_actor(attrs, cluster, %User{} = user) do
+    case remediation_user_id(attrs) do
+      id when is_binary(id) ->
+        case target_workbench(attrs, cluster) do
+          %Workbench{} = bench -> authorize_remediation_user(id, bench, user)
+          _ -> {:error, "a remediation user requires a remediation workbench"}
+        end
+      _ -> {:ok, nil}
+    end
+  end
+
+  defp authorize_remediation_user(id, %Workbench{} = bench, %User{} = actor) do
+    with %User{} = run_as <- preload_remediation_user(Repo.get(User, id)),
+         :ok <- same_remediation_actor(actor, run_as),
+         {:ok, _} <- allow(preload_remediation_workbench(bench), run_as, :read) do
+      {:ok, run_as}
+    else
+      nil -> {:error, "remediation user not found"}
+      {:error, "you can only run remediation as yourself"} = error -> error
+      _ -> {:error, "remediation user cannot read this workbench"}
+    end
+  end
+
+  defp preload_remediation_user(nil), do: nil
+  defp preload_remediation_user(%User{} = user) do
+    user
+    |> Console.Services.Rbac.preload()
+    |> Repo.preload(:groups)
+  end
+
+  defp same_remediation_actor(%User{roles: %{admin: true}}, _), do: :ok
+  defp same_remediation_actor(%User{id: id}, %User{id: id}), do: :ok
+  defp same_remediation_actor(_, _), do: {:error, "you can only run remediation as yourself"}
+
+  defp remediation_user_id(%{remediation: %{user_id: id}}) when is_binary(id) and id != "", do: id
+  defp remediation_user_id(_), do: nil
+
+  defp target_workbench(%{remediation_workbench_id: id}, _) when is_binary(id) and id != "",
+    do: Repo.get(Workbench, id)
+  defp target_workbench(%{remediation_workbench_id: id}, _) when id in [nil, ""], do: nil
+  defp target_workbench(_, %Cluster{remediation_workbench_id: id}) when is_binary(id),
+    do: Repo.get(Workbench, id)
+  defp target_workbench(_, _), do: nil
+
+  defp preload_remediation_workbench(%Workbench{} = bench) do
+    Repo.preload(bench, [:read_bindings, :write_bindings, project: [:read_bindings, :write_bindings]])
+  end
 
   @doc """
   Determines whether the current cluster's version displays kubelet version skew
