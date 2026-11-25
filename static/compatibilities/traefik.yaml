@@ -4,17 +4,48 @@ release_url: https://github.com/traefik/traefik/releases/tag/v{vsn}
 helm_repository_url: https://traefik.github.io/charts
 eolApiSlug: traefik
 versions:
-- version: 3.7.19
+- version: 3.8.0
   kube: ['1.37', '1.36', '1.35', '1.34']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
     chart_updates: []
-    features: []
-    breaking_changes: []
-  chart_version: 42.4.2
-  images: ['docker.io/traefik:v3.7.19']
+    features: ['Security update: v3.8.0 fixes three CVEs (GHSA-3rh5-223h-cpwr, GHSA-42x2-976f-ph52,
+        GHSA-9657-c2gv-wjpj).', 'ACME enhancement: new `reusePrivateKey` option to
+        reuse an existing private key when renewing/rotating certificates.', 'Timeout
+        controls expanded: per-router responding timeouts added across Docker/Kubernetes
+        (Ingress/CRD/Gateway API) and middleware; Gateway API also gains backendRequest
+        timeout support.', 'Kubernetes Gateway API capabilities expanded: ListenerSet
+        (GEP-1713), listener filters, GatewayClass option, client cert validation,
+        backend client certs, CORS, retry, request mirror, and better status update
+        behavior.', 'Kubernetes CRD improvements: new ServersTransport forwarding
+        timeouts and plugin config can now resolve `urn:k8s:configmap:` references.',
+      'Routing and TLS improvements: double-wildcard support for Host/HostSNI matchers
+        and TLS/BackendTLSPolicy SAN validation support.', 'New middleware options:
+        tap middleware, buffering middleware can disable request/response buffering,
+        circuit breaker can require a minimum request count, and forwarded headers
+        middleware can optionally add `X-Forwarded-Scheme`/`X-Scheme`.', 'Plugins:
+        experimental Yaegi v2 runtime and additional Yaegi settings (`fileMapping`,
+        `mounts`).', 'Ingress/Ingress-NGINX provider enhancements: option to report
+        node internal IPs in Ingress status, additional supported annotations/options,
+        and various performance/behavior fixes.']
+    breaking_changes: [Migration guide is required reading for v3.8.0; assume there
+        are behavioral changes that may impact routing/security defaults (plan a staged
+        rollout)., 'Kubernetes Gateway API: Traefik now consumes TCPRoute via its
+        v1 API and drops Gateway API v1.5.x support; clusters/controllers pinned to
+        older Gateway API CRDs must be upgraded first (v1.7.0 minimum per docs).',
+      "ACME DNS-01 behavior change: recursive nameserver propagation checks are no\
+        \ longer required by default and recursive NSS propagation is disabled by\
+        \ default\u2014may affect environments that relied on the previous propagation\
+        \ assumptions.", HTTP CONNECT handling was tightened (multiple changes around
+        rejecting/deferring CONNECT); if you proxy tunnels (CONNECT) validate behavior
+        with your clients/backends after upgrade., Kubernetes cross-namespace/cross-provider
+        references gained stricter controls (`CrossProviderNamespaces` / crossProviderNamespace
+        enforcement in Ingress); existing setups that referenced resources across
+        namespaces/providers may need explicit enablement/config updates.]
+  chart_version: 43.0.0
+  images: ['docker.io/traefik:v3.8.0']
 - version: 3.7.4
   kube: ['1.37', '1.36', '1.35', '1.34']
   requirements: []
@@ -37,6 +68,7 @@ versions:
         if you are coming from <3.7.0 (not the case for 3.7.0 -> 3.7.4).']
   chart_version: 40.3.0
   images: ['docker.io/traefik:v3.7.4']
+  eolAt: '2026-11-23'
 - version: 3.7.0
   kube: ['1.36', '1.35', '1.34', '1.33']
   requirements: []
@@ -72,6 +104,7 @@ versions:
         changed/fixed and should be validated against your current annotations/config.']
   chart_version: 40.0.1
   images: ['docker.io/traefik:v3.7.0']
+  eolAt: '2026-11-23'
 - version: 3.6.0
   kube: ['1.35', '1.34', '1.33', '1.32']
   requirements: []

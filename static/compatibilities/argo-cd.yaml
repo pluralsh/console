@@ -4,22 +4,30 @@ release_url: https://github.com/argoproj/argo-cd/releases/tag/v{vsn}
 helm_repository_url: https://argoproj.github.io/argo-helm
 eolApiSlug: argocd
 versions:
-- version: 3.6.2
+- version: 3.6.3
   kube: ['1.37', '1.36', '1.35']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
-    chart_updates: [No Helm chart changelog was provided in the notes you shared;
-        this summary only covers Argo CD application (upstream) changes between v3.6.0
-        and v3.6.2.]
-    features: ['No new features are introduced in v3.6.2 relative to v3.6.0; v3.6.2
-        is a patch release focused on fixes, docs, and dependency/security updates.']
-    breaking_changes: [No breaking changes are called out in the v3.6.2 release notes
-        you provided (patch release).]
-  chart_version: 10.18.3
+    chart_updates: []
+    features: ['v3.6.0 introduced a large set of new features across ApplicationSet
+        progressive sync (new metrics, annotations to force reconciliation, and workqueue
+        rate-limiter flags), new built-in health checks for many CRDs (Kyverno, ACK,
+        CloudNativePG, Prometheus Operator, Tekton, Velero, cert-manager, etc.), performance
+        improvements in caching/serialization, and multiple UI improvements like virtual
+        scrolling, lazy loading, regex search, and a resources explorer view.', 'v3.6.3
+        is primarily a security + stability patch release on top of 3.6.2, with fixes
+        in controller behavior, git/GitHub App installation discovery concurrency,
+        OCI fallback behavior, UI polish, and known-hosts updates (adds ssh.bitbucket.org).']
+    breaking_changes: ['In v3.6.3 Helm release names (spec.source.helm.releaseName,
+        including values coming from .argocd-source.yaml) are no longer treated as
+        templates and are passed to Helm literally; they must be valid Helm release
+        names (lowercase letters/digits/-/., start/end alphanumeric, max 53 chars)
+        or manifest generation will fail.']
+  chart_version: 10.19.1
   images: ['ecr-public.aws.com/docker/library/redis:8.6.4-alpine', 'ghcr.io/dexidp/dex:v2.46.1',
-    'quay.io/argoproj/argocd:v3.6.2']
+    'quay.io/argoproj/argocd:v3.6.3']
 - version: 3.6.0
   kube: ['1.37', '1.36', '1.35']
   requirements: []
