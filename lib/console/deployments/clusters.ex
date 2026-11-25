@@ -37,7 +37,8 @@ defmodule Console.Deployments.Clusters do
     UpgradePlanCallout,
     Workbench,
     CustomCompatibilityMatrix,
-    ClusterUpgrade
+    ClusterUpgrade,
+    Project
   }
   alias Console.Deployments.Compatibilities
   require Logger
@@ -435,6 +436,41 @@ defmodule Console.Deployments.Clusters do
 
   def local_cluster(), do: Console.Repo.get_by!(Cluster, self: true)
 
+  @doc """
+  Whether a cluster may run agent workloads, see `Cluster.allow_agents/2`.  Always reads the db, since clusters
+  authenticated by deploy token are cached for hours.
+  """
+  @spec allow_agents?(Cluster.t | binary) :: boolean
+  def allow_agents?(%Cluster{id: id}), do: allow_agents?(id)
+  def allow_agents?(id) when is_binary(id), do: !!Repo.one(Cluster.allow_agents(id))
+
+  @spec agents_allowed(Cluster.t | binary) :: :ok | Console.error
+  def agents_allowed(cluster) do
+    case allow_agents?(cluster) do
+      true -> :ok
+      false -> {:error, agents_disabled_error()}
+    end
+  end
+
+  def agents_disabled_error(), do: "this cluster has not been configured to support agent workloads"
+
+  @doc """
+  Only admins can grant agent workloads to a cluster or project, since they run with the instance's scm credentials.
+  """
+  @spec authorize_allow_agents(map, Cluster.t | Project.t | nil, User.t) :: {:ok, term} | Console.error
+  def authorize_allow_agents(_, _, %User{roles: %{admin: true}}), do: {:ok, true}
+  def authorize_allow_agents(%{allow_agents: allow} = attrs, %Cluster{} = cluster, user) when is_nil(allow) or is_boolean(allow) do
+    case Cluster.allow_agents?(%{cluster | allow_agents: allow}) == Cluster.allow_agents?(cluster) do
+      true -> {:ok, true}
+      false -> authorize_allow_agents(attrs, :changed, user)
+    end
+  end
+  def authorize_allow_agents(%{allow_agents: allow}, %Project{allow_agents: prev}, _)
+    when (is_nil(allow) or is_boolean(allow)) and (allow == true) == (prev == true), do: {:ok, true}
+  def authorize_allow_agents(%{allow_agents: allow}, nil, _) when allow in [nil, false], do: {:ok, true}
+  def authorize_allow_agents(%{allow_agents: _}, _, _), do: {:error, "only admins can configure agent workloads"}
+  def authorize_allow_agents(_, _, _), do: {:ok, true}
+
   def services(%Cluster{id: id}) do
     Service.for_cluster(id)
     |> Console.Repo.all()
@@ -462,6 +498,7 @@ defmodule Console.Deployments.Clusters do
     |> add_operation(:remediation_workbench, fn _ ->
       authorize_remediation_workbench(attrs, user)
     end)
+    |> add_operation(:allow_agents, fn _ -> authorize_allow_agents(attrs, nil, user) end)
     |> add_operation(:cloud, fn _ -> {:ok, Console.cloud?()} end)
     |> add_operation(:limit, fn _ ->
       case !attrs[:ignore_limit] && cluster_limit?() do
@@ -546,6 +583,7 @@ defmodule Console.Deployments.Clusters do
       |> get_cluster_by_handle()
       |> ok()
     end)
+    |> add_operation(:allow_agents, fn %{prior: prior} -> authorize_allow_agents(attrs, prior, user) end)
     |> add_operation(:cluster, fn
       %{
         prior: %Cluster{parent_cluster_id: id, virtual: true} = prior,
@@ -589,6 +627,7 @@ defmodule Console.Deployments.Clusters do
     |> add_operation(:remediation_workbench, fn %{auth: cluster} ->
       authorize_remediation_workbench(attrs, cluster, user)
     end)
+    |> add_operation(:allow_agents, fn %{auth: cluster} -> authorize_allow_agents(attrs, cluster, user) end)
     |> add_operation(:cluster, fn %{auth: auth} ->
       auth
       |> Console.Repo.preload([:node_pools, :service, :tags, :read_bindings, :write_bindings])

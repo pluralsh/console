@@ -35,9 +35,9 @@ type writerConfig struct {
 // backendSection is the config section ZeroFS reads a storage scheme's object_store options from.
 func backendSection(scheme string) string {
 	switch scheme {
-	case "gs":
+	case schemeGS:
 		return "gcp"
-	case "azure":
+	case schemeAzure:
 		return "azure"
 	}
 	return "aws"

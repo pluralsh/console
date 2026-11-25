@@ -9,6 +9,7 @@ defmodule Console.Repo.Migrations.AddProjects do
       add :description,      :string
       add :default,          :boolean
       add :disable_insights, :boolean, default: false
+      add :allow_agents,     :boolean, default: false
 
       add :read_policy_id,  :uuid
       add :write_policy_id, :uuid

@@ -1768,6 +1768,74 @@ defmodule Console.Deployments.ClustersTest do
     end
   end
 
+  describe "allow_agents" do
+    test "cluster writers cannot change whether a cluster allows agents" do
+      user = insert(:user)
+      cluster = insert(:cluster, write_bindings: [%{user_id: user.id}])
+
+      {:error, "only admins can configure agent workloads"} =
+        Clusters.update_cluster(%{allow_agents: true}, cluster.id, user)
+
+      {:ok, updated} = Clusters.update_cluster(%{allow_agents: false, protect: true}, cluster.id, user)
+      assert updated.protect
+      refute Clusters.allow_agents?(updated)
+    end
+
+    test "cluster creators cannot allow agents" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+
+      {:error, "only admins can configure agent workloads"} =
+        Clusters.create_cluster(%{name: "test", project_id: project.id, allow_agents: true}, user)
+    end
+
+    test "admins can allow agents on a cluster" do
+      cluster = insert(:cluster)
+
+      {:ok, updated} = Clusters.update_cluster(%{allow_agents: true}, cluster.id, admin_user())
+
+      assert updated.allow_agents
+      assert Clusters.allow_agents?(updated)
+    end
+
+    test "clusters don't allow agents by default" do
+      refute Clusters.allow_agents?(insert(:cluster))
+    end
+
+    test "the management cluster allows agents unless configured otherwise" do
+      cluster = insert(:cluster, self: true)
+      assert Clusters.allow_agents?(cluster)
+
+      {:ok, cluster} = Clusters.update_cluster(%{allow_agents: false}, cluster.id, admin_user())
+      refute Clusters.allow_agents?(cluster)
+    end
+
+    test "cluster writers cannot clear a disabled management cluster back to its default" do
+      user = insert(:user)
+      cluster = insert(:cluster, self: true, allow_agents: false, write_bindings: [%{user_id: user.id}])
+
+      {:error, "only admins can configure agent workloads"} =
+        Clusters.update_cluster(%{allow_agents: nil}, cluster.id, user)
+
+      refute Clusters.allow_agents?(cluster)
+    end
+
+    test "cluster writers can clear a setting when it leaves agent workloads unchanged" do
+      user = insert(:user)
+      cluster = insert(:cluster, allow_agents: false, write_bindings: [%{user_id: user.id}])
+
+      {:ok, updated} = Clusters.update_cluster(%{allow_agents: nil}, cluster.id, user)
+      refute Clusters.allow_agents?(updated)
+    end
+
+    test "a project allows agents for all its clusters" do
+      project = insert(:project, allow_agents: true)
+
+      assert Clusters.allow_agents?(insert(:cluster, project: project))
+      assert Clusters.allow_agents?(insert(:cluster, project: project, allow_agents: false))
+    end
+  end
+
   describe "#create_cluster_upgrade/2" do
     test "it can create an upgrade with addon and cloud addon steps" do
       user = admin_user()

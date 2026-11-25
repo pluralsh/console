@@ -452,6 +452,16 @@ defmodule Console.Devboxes.IngestTest do
 
       {:error, _} = Ingest.get_instance_credentials(inst.id, [%{kind: :ai_proxy}], inst.devbox.cluster)
     end
+
+    test "clusters no longer configured for agents get no credentials" do
+      inst = insert(:devbox_instance)
+      {:ok, cluster} = Console.Repo.update(Ecto.Changeset.change(inst.devbox.cluster, allow_agents: false))
+
+      {:error, msg} = Ingest.get_instance_credentials(inst.id, [%{kind: :ai_proxy}], cluster)
+      assert msg == "this cluster has not been configured to support agent workloads"
+
+      {:error, ^msg} = Ingest.get_devbox_credentials(inst.devbox_id, [%{kind: :scm}], cluster)
+    end
   end
 
   describe "#devbox_pull_request/4" do

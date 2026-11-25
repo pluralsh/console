@@ -126,6 +126,7 @@ defmodule Console.Schema.Cluster do
     field :health_score,    :integer
     field :ping_interval,   :integer
     field :disable_ai,      :boolean, default: false
+    field :allow_agents,    :boolean
 
     field :version,         :string
     field :current_version, :string
@@ -496,6 +497,22 @@ defmodule Console.Schema.Cluster do
     )
   end
 
+  @doc """
+  Whether a cluster may run agent workloads (`AgentRuntime`s and `DevboxRunner`s): granted by the cluster's own
+  `allow_agents` or its project's.  An unset cluster setting defaults to true only for the management cluster.
+  """
+  def allow_agents(query \\ __MODULE__, id) do
+    from(c in query,
+      left_join: p in assoc(c, :project),
+      where: c.id == ^id,
+      select: coalesce(c.allow_agents, coalesce(c.self, false)) or coalesce(p.allow_agents, false)
+    )
+  end
+
+  @spec allow_agents?(t) :: boolean
+  def allow_agents?(%__MODULE__{allow_agents: allow}) when is_boolean(allow), do: allow
+  def allow_agents?(%__MODULE__{self: self}), do: !!self
+
   def installable(query \\ __MODULE__) do
     from(c in query, where: (not is_nil(c.provider_id) or c.self) and is_nil(c.deleted_at))
   end
@@ -521,7 +538,7 @@ defmodule Console.Schema.Cluster do
 
   def preloaded(query \\ __MODULE__, preloads \\ [:provider, :credential]), do: from(c in query, preload: ^preloads)
 
-  @valid ~w(provider_id ai_poll_at disable_ai remediation_workbench_id distro metadata protect project_id service_id credential_id self version current_version name handle installed ignore_limit)a
+  @valid ~w(provider_id ai_poll_at disable_ai allow_agents remediation_workbench_id distro metadata protect project_id service_id credential_id self version current_version name handle installed ignore_limit)a
 
   def changeset(model, attrs \\ %{}) do
     model

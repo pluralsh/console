@@ -28,6 +28,10 @@ const (
 	homesDir = "homes"
 	// deviceName is the NBD export, and the file under .nbd/ that backs it.
 	deviceName = "home"
+
+	schemeS3    = "s3"
+	schemeGS    = "gs"
+	schemeAzure = "azure"
 )
 
 var idPattern = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._-]{0,191}$`)
@@ -52,7 +56,7 @@ func ParseStorage(raw string) (Storage, error) {
 		return Storage{}, fmt.Errorf("parsing the storage URL: %w", err)
 	}
 	switch u.Scheme {
-	case "s3", "gs", "azure":
+	case schemeS3, schemeGS, schemeAzure:
 	default:
 		return Storage{}, fmt.Errorf("storage URL %q must be s3://, gs:// or azure://", raw)
 	}
@@ -85,9 +89,9 @@ func (s Storage) VolumeURL(id string) string {
 // ZeroFS reads; pathStyle addresses an S3-compatible endpoint, such as RustFS, by path.
 func (s Storage) BucketURL(pathStyle bool) string {
 	switch s.Scheme {
-	case "gs":
+	case schemeGS:
 		return "gs://" + s.Bucket
-	case "azure":
+	case schemeAzure:
 		return "azblob://" + s.Bucket
 	}
 	if pathStyle {

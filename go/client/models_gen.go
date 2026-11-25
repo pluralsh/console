@@ -2203,6 +2203,10 @@ type Cluster struct {
 	DisableAi *bool `json:"disableAi,omitempty"`
 	// auto-remediation policy, run-as user, and job modes
 	Remediation *ClusterRemediation `json:"remediation,omitempty"`
+	// whether this cluster itself is configured for agent workloads (AgentRuntimes and DevboxRunners), defaults to true only for the management cluster
+	AllowAgents *bool `json:"allowAgents,omitempty"`
+	// whether this cluster can run agent workloads, from either its own allowAgents setting or its project's
+	AgentsEnabled *bool `json:"agentsEnabled,omitempty"`
 	// The version of OpenShift this cluster is running
 	OpenshiftVersion *string `json:"openshiftVersion,omitempty"`
 	// The number of nodes in this cluster
@@ -2355,6 +2359,8 @@ type ClusterAttributes struct {
 	Kubeconfig   *KubeconfigAttributes `json:"kubeconfig,omitempty"`
 	// whether to disable ai insights for this cluster
 	DisableAi *bool `json:"disableAi,omitempty"`
+	// whether this cluster can run agent workloads (AgentRuntimes and DevboxRunners), admin only
+	AllowAgents *bool `json:"allowAgents,omitempty"`
 	// workbench that receives auto-remediation jobs for this cluster
 	RemediationWorkbenchID *string `json:"remediationWorkbenchId,omitempty"`
 	// auto-remediation policy, run-as user, and job modes
@@ -2368,34 +2374,6 @@ type ClusterAttributes struct {
 	ReadBindings  []*PolicyBindingAttributes `json:"readBindings,omitempty"`
 	WriteBindings []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
 	Tags          []*TagAttributes           `json:"tags,omitempty"`
-}
-
-type ClusterRemediation struct {
-	// minimum insight component priority required before auto-remediation starts a job
-	MinPriority *InsightComponentPriority `json:"minPriority,omitempty"`
-	// seconds to suppress another auto-remediation job for the same finding
-	Window *int64 `json:"window,omitempty"`
-	// maximum auto-remediation jobs to start for this cluster within the throttle window
-	MaxJobs *int64 `json:"maxJobs,omitempty"`
-	// user auto-remediation jobs run as when set. Unset jobs run as the workbench bot user
-	UserID *string `json:"userId,omitempty"`
-	// user auto-remediation jobs run as when set
-	User *User `json:"user,omitempty"`
-	// job mode overrides applied to auto-remediation jobs
-	Modes *WorkbenchJobModes `json:"modes,omitempty"`
-}
-
-type ClusterRemediationAttributes struct {
-	// minimum insight component priority required before auto-remediation starts a job
-	MinPriority *InsightComponentPriority `json:"minPriority,omitempty"`
-	// seconds to suppress another auto-remediation job for the same finding
-	Window *int64 `json:"window,omitempty"`
-	// maximum auto-remediation jobs to start for this cluster within the throttle window
-	MaxJobs *int64 `json:"maxJobs,omitempty"`
-	// user auto-remediation jobs run as. Leave unset to run as the workbench bot user. Must be able to read the workbench, and only admins can choose someone other than themselves
-	UserID *string `json:"userId,omitempty"`
-	// job mode overrides, matching the options on workbench webhooks and crons
-	Modes *WorkbenchJobModesAttributes `json:"modes,omitempty"`
 }
 
 type ClusterAuditAttributes struct {
@@ -2775,6 +2753,34 @@ type ClusterRegistrationUpdateAttributes struct {
 	Metadata *string `json:"metadata,omitempty"`
 }
 
+type ClusterRemediation struct {
+	// minimum insight component priority required before auto-remediation starts a job
+	MinPriority *InsightComponentPriority `json:"minPriority,omitempty"`
+	// seconds to suppress another auto-remediation job for the same finding
+	Window *int64 `json:"window,omitempty"`
+	// maximum auto-remediation jobs to start for this cluster within the throttle window
+	MaxJobs *int64 `json:"maxJobs,omitempty"`
+	// user auto-remediation jobs run as when set. Unset jobs run as the workbench bot user
+	UserID *string `json:"userId,omitempty"`
+	// user auto-remediation jobs run as when set
+	User *User `json:"user,omitempty"`
+	// job mode overrides applied to auto-remediation jobs
+	Modes *WorkbenchJobModes `json:"modes,omitempty"`
+}
+
+type ClusterRemediationAttributes struct {
+	// minimum insight component priority required before auto-remediation starts a job
+	MinPriority *InsightComponentPriority `json:"minPriority,omitempty"`
+	// seconds to suppress another auto-remediation job for the same finding
+	Window *int64 `json:"window,omitempty"`
+	// maximum auto-remediation jobs to start for this cluster within the throttle window
+	MaxJobs *int64 `json:"maxJobs,omitempty"`
+	// user auto-remediation jobs run as. Leave unset to run as the workbench bot user. Must be able to read the workbench, and only admins can choose someone other than themselves
+	UserID *string `json:"userId,omitempty"`
+	// job mode overrides, matching the options on workbench webhooks and crons
+	Modes *WorkbenchJobModesAttributes `json:"modes,omitempty"`
+}
+
 type ClusterRestore struct {
 	ID         string         `json:"id"`
 	Status     RestoreStatus  `json:"status"`
@@ -2900,6 +2906,8 @@ type ClusterUpdateAttributes struct {
 	Metadata    *string                `json:"metadata,omitempty"`
 	// whether to disable ai insights for this cluster
 	DisableAi *bool `json:"disableAi,omitempty"`
+	// whether this cluster can run agent workloads (AgentRuntimes and DevboxRunners), admin only
+	AllowAgents *bool `json:"allowAgents,omitempty"`
 	// workbench that receives auto-remediation jobs for this cluster. Clear to disable auto-remediation
 	RemediationWorkbenchID *string `json:"remediationWorkbenchId,omitempty"`
 	// auto-remediation policy, run-as user, and job modes. Omitted fields are left unchanged
@@ -9065,6 +9073,8 @@ type Project struct {
 	Description     *string `json:"description,omitempty"`
 	Default         *bool   `json:"default,omitempty"`
 	DisableInsights *bool   `json:"disableInsights,omitempty"`
+	// whether every cluster in this project can run agent workloads (AgentRuntimes and DevboxRunners)
+	AllowAgents *bool `json:"allowAgents,omitempty"`
 	// list all alerts discovered for this project
 	Alerts *AlertConnection `json:"alerts,omitempty"`
 	// read policy across this project
@@ -9076,11 +9086,13 @@ type Project struct {
 }
 
 type ProjectAttributes struct {
-	Name            string                     `json:"name"`
-	Description     *string                    `json:"description,omitempty"`
-	DisableInsights *bool                      `json:"disableInsights,omitempty"`
-	ReadBindings    []*PolicyBindingAttributes `json:"readBindings,omitempty"`
-	WriteBindings   []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
+	Name            string  `json:"name"`
+	Description     *string `json:"description,omitempty"`
+	DisableInsights *bool   `json:"disableInsights,omitempty"`
+	// whether every cluster in this project can run agent workloads (AgentRuntimes and DevboxRunners), admin only
+	AllowAgents   *bool                      `json:"allowAgents,omitempty"`
+	ReadBindings  []*PolicyBindingAttributes `json:"readBindings,omitempty"`
+	WriteBindings []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
 }
 
 type ProjectConnection struct {

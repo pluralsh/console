@@ -138,6 +138,7 @@ func startDevboxEnv(t *testing.T) *devboxEnv {
 			HeartbeatInterval:   time.Minute,
 		},
 		Console:   env.console,
+		Agents:    staticAgentsGate(true),
 		Substrate: env.substrate,
 		Images:    &RegistryImageResolver{Client: c, SecretNamespace: devboxTestNamespace},
 		Probe:     &ConfigMapProbeClient{Client: c, Reader: c, Namespace: devboxTestNamespace, Tokens: env.console},
@@ -1024,6 +1025,26 @@ func TestDevboxRunnerController(t *testing.T) {
 		err = env.client.Get(ctx, client.ObjectKey{Name: devboxEgressAuthzName, Namespace: devboxTestNamespace}, &corev1.Service{})
 		g.Expect(apierrors.IsNotFound(err)).To(BeTrue())
 	})
+}
+
+func TestDevboxRunnerAgentsNotAllowed(t *testing.T) {
+	g := NewWithT(t)
+	env := startDevboxEnv(t)
+	env.r.Agents = staticAgentsGate(false)
+	env.push(t, "devbox:v1")
+	env.newRunner(t, "blocked", "devbox:v1")
+
+	runner := env.reconcile(t, "blocked", 2)
+	for _, ct := range []v1alpha1.ConditionType{v1alpha1.ReadyConditionType, v1alpha1.SynchronizedConditionType} {
+		cond := condition(runner, ct)
+		g.Expect(cond).NotTo(BeNil())
+		g.Expect(cond.Status).To(Equal(metav1.ConditionFalse))
+		g.Expect(cond.Reason).To(Equal(AgentsNotAllowedReason.String()))
+		g.Expect(cond.Message).To(Equal(AgentsNotAllowedMessage))
+	}
+	g.Expect(runner.Status.ID).To(BeNil())
+	g.Expect(env.console.upserts).To(BeEmpty())
+	g.Expect(runner.Status.Atespace).To(BeNil())
 }
 
 func TestDevboxSubstrateInstallCheck(t *testing.T) {

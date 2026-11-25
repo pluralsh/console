@@ -15,7 +15,7 @@ defmodule Console.Devboxes.Ingest do
   alias Console.Prom.Tokens
   alias Console.Devboxes.{Acp, AgentCredentials, Credentials}
   alias Console.Deployments.Pr.Dispatcher
-  alias Console.Deployments.Workbenches
+  alias Console.Deployments.{Clusters, Workbenches}
   alias Console.Schema.{
     Cluster,
     Devbox,
@@ -623,7 +623,8 @@ defmodule Console.Devboxes.Ingest do
   """
   @spec get_instance_credentials(binary, [map], Cluster.t) :: {:ok, [Credentials.credential]} | error
   def get_instance_credentials(instance_id, selectors, %Cluster{} = cluster) do
-    with {:ok, _} <- owned(instance_id, cluster) do
+    with {:ok, _} <- owned(instance_id, cluster),
+         :ok <- Clusters.agents_allowed(cluster) do
       Devboxes.get_instance!(instance_id)
       |> Credentials.instance_credentials(Enum.map(selectors, &selector/1))
     end
@@ -635,7 +636,8 @@ defmodule Console.Devboxes.Ingest do
   @spec get_devbox_credentials(binary, [map], Cluster.t) :: {:ok, [Credentials.credential]} | error
   def get_devbox_credentials(devbox_id, selectors, %Cluster{id: cluster_id}) do
     with {:ok, id} <- Ecto.UUID.cast(devbox_id) |> ok_or(:not_found),
-         %Devbox{cluster_id: ^cluster_id} = devbox <- Devboxes.get_devbox(id) do
+         %Devbox{cluster_id: ^cluster_id} = devbox <- Devboxes.get_devbox(id),
+         :ok <- Clusters.agents_allowed(cluster_id) do
       Credentials.devbox_credentials(devbox, Enum.map(selectors, &selector/1))
     else
       %Devbox{} -> {:error, "clusters can only get credentials of their own devboxes"}

@@ -25,10 +25,9 @@ type AgentRuntimePolicyList struct {
 // +kubebuilder:printcolumn:name="Runtime",type="string",JSONPath=".spec.runtime",description="Name of the AgentRuntime this policy applies to."
 // +kubebuilder:printcolumn:name="ID",type="string",JSONPath=".status.id",description="ID of the AgentRuntime in the Console API."
 
-// AgentRuntimePolicy centrally defines who can create agent runs on an AgentRuntime.
-// Bindings must be managed from the management cluster: if a target cluster could set
-// its own bindings, cluster operators could grant themselves clone/PR access against
-// any repository reachable by the runtime's SCM credentials.
+// AgentRuntimePolicy centrally defines who can create agent runs on an AgentRuntime from the management cluster.
+// Runtimes can also set their own bindings on the AgentRuntime itself, since only clusters an admin has configured
+// to allow agent workloads can register runtimes; leave those unset when this policy manages them.
 type AgentRuntimePolicy struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

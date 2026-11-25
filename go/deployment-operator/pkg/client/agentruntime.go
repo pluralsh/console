@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"encoding/json"
 	stderrors "errors"
 	"fmt"
 
@@ -63,11 +64,41 @@ func (c *client) GetAgentRuntimeByName(ctx context.Context, name, clusterID stri
 }
 
 func (c *client) UpsertAgentRuntime(ctx context.Context, attrs console.AgentRuntimeAttributes) (*console.AgentRuntimeFragment, error) {
-	response, err := c.consoleClient.UpsertAgentRuntime(ctx, attrs)
+	gqlClient, ok := c.consoleClient.(*console.Client)
+	if !ok {
+		response, err := c.consoleClient.UpsertAgentRuntime(ctx, attrs)
+		if err != nil {
+			return nil, err
+		}
+		return response.UpsertAgentRuntime, nil
+	}
+
+	vars, err := agentRuntimeAttributesVars(attrs)
 	if err != nil {
 		return nil, err
 	}
-	return response.UpsertAgentRuntime, nil
+	var res console.UpsertAgentRuntime
+	if err := gqlClient.Client.Post(ctx, "UpsertAgentRuntime", console.UpsertAgentRuntimeDocument, &res, map[string]any{"attributes": vars}); err != nil {
+		return nil, err
+	}
+	return res.UpsertAgentRuntime, nil
+}
+
+// agentRuntimeAttributesVars encodes upsert attributes so a non-nil empty createBindings is sent as [] (clear them)
+// while a nil one is omitted (leave them, eg to an AgentRuntimePolicy). The generated struct's omitempty can't express that.
+func agentRuntimeAttributesVars(attrs console.AgentRuntimeAttributes) (map[string]any, error) {
+	raw, err := json.Marshal(attrs)
+	if err != nil {
+		return nil, err
+	}
+	vars := map[string]any{}
+	if err := json.Unmarshal(raw, &vars); err != nil {
+		return nil, err
+	}
+	if attrs.CreateBindings != nil {
+		vars["createBindings"] = attrs.CreateBindings
+	}
+	return vars, nil
 }
 
 func (c *client) DeleteAgentRuntime(ctx context.Context, id string) error {

@@ -58,6 +58,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :protect,        :boolean
     field :kubeconfig,     :kubeconfig_attributes
     field :disable_ai,     :boolean, description: "whether to disable ai insights for this cluster"
+    field :allow_agents,   :boolean, description: "whether this cluster can run agent workloads (AgentRuntimes and DevboxRunners), admin only"
     field :remediation_workbench_id, :id, description: "workbench that receives auto-remediation jobs for this cluster"
     field :remediation, :cluster_remediation_attributes, description: "auto-remediation policy, run-as user, and job modes"
     field :cloud_settings, :cloud_settings_attributes
@@ -125,6 +126,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :distro,       :cluster_distro
     field :metadata,     :json
     field :disable_ai,   :boolean, description: "whether to disable ai insights for this cluster"
+    field :allow_agents, :boolean, description: "whether this cluster can run agent workloads (AgentRuntimes and DevboxRunners), admin only"
     field :remediation_workbench_id, :id, description: "workbench that receives auto-remediation jobs for this cluster. Clear to disable auto-remediation"
     field :remediation, :cluster_remediation_attributes, description: "auto-remediation policy, run-as user, and job modes. Omitted fields are left unchanged"
     field :node_pools,   list_of(:node_pool_attributes)
@@ -592,6 +594,14 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :ping_interval,      :integer, description: "the interval in seconds between pings to the cluster"
     field :disable_ai,         :boolean, description: "whether to disable ai insights for this cluster"
     field :remediation,        :cluster_remediation, description: "auto-remediation policy, run-as user, and job modes"
+
+    field :allow_agents, :boolean,
+      description: "whether this cluster itself is configured for agent workloads (AgentRuntimes and DevboxRunners), defaults to true only for the management cluster",
+      resolve: fn cluster, _, _ -> {:ok, Cluster.allow_agents?(cluster)} end
+
+    field :agents_enabled, :boolean,
+      description: "whether this cluster can run agent workloads, from either its own allowAgents setting or its project's",
+      resolve: fn cluster, _, _ -> {:ok, Clusters.allow_agents?(cluster)} end
 
     field :openshift_version,  :string, description: "The version of OpenShift this cluster is running"
     field :node_count,         :integer, description: "The number of nodes in this cluster"

@@ -8,6 +8,7 @@ defmodule Console.Schema.Project do
     field :description,      :string
     field :default,          :boolean
     field :disable_insights, :boolean, default: false
+    field :allow_agents,     :boolean, default: false
 
     field :write_policy_id,  :binary_id
     field :read_policy_id,   :binary_id
@@ -47,7 +48,7 @@ defmodule Console.Schema.Project do
 
   def changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, ~w(name description default disable_insights)a)
+    |> cast(attrs, ~w(name description default disable_insights allow_agents)a)
     |> cast_assoc(:read_bindings)
     |> cast_assoc(:write_bindings)
     |> foreign_key_constraint(:id, name: :stacks, match: :prefix, message: "there is an active stack in this project")

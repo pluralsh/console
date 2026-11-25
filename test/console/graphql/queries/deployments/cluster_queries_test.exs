@@ -982,6 +982,26 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
       assert found["id"] == cluster.id
       assert found["supportedAddons"] == addons
     end
+
+    test "it resolves whether agents are enabled from the cluster and its project" do
+      for {cluster, allow, enabled} <- [
+        {insert(:cluster), false, false},
+        {insert(:cluster, self: true), true, true},
+        {insert(:cluster, project: insert(:project, allow_agents: true)), false, true}
+      ] do
+        {:ok, %{data: %{"myCluster" => found}}} = run_query("""
+          query {
+            myCluster {
+              allowAgents
+              agentsEnabled
+            }
+          }
+        """, %{}, %{cluster: cluster})
+
+        assert found["allowAgents"] == allow
+        assert found["agentsEnabled"] == enabled
+      end
+    end
   end
 
   describe "tokenExchange" do

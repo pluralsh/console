@@ -630,7 +630,7 @@ func waitFor(ctx context.Context, p *process, timeout time.Duration, cond func()
 		}
 		select {
 		case <-p.done:
-			return fmt.Errorf("%s exited: %v", filepath.Base(p.cmd.Path), p.err)
+			return fmt.Errorf("%s exited: %w", filepath.Base(p.cmd.Path), p.err)
 		case <-deadline:
 			return fmt.Errorf("timed out after %s", timeout)
 		case <-ctx.Done():

@@ -367,8 +367,6 @@ jobs:
       id-token: write
       packages: write
     runs-on: ubuntu-latest
-    outputs:
-      digest: ${{ steps.build.outputs.digest }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -427,9 +425,9 @@ jobs:
 
   # Releases are copied, by digest, from GHCR to the registries clusters without GHCR access pull from. Pull
   # requests stay on GHCR.
-  mirror-zerofs:
-    name: Mirror devbox-zerofs to ${{ matrix.registry }}
-    needs: [version, publish-zerofs]
+  mirror:
+    name: Mirror ${{ matrix.image }} to ${{ matrix.registry }}
+    needs: [version, publish, publish-gateway, publish-juicefs, publish-zerofs]
     if: github.event_name != 'pull_request'
     permissions:
       contents: read
@@ -438,6 +436,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        image: [devbox-minimal, devbox-fat, devbox-gateway, devbox-juicefs, devbox-zerofs]
         registry: [gcr.io, docker.io]
     runs-on: ubuntu-latest
     steps:
@@ -477,17 +476,22 @@ jobs:
         id: meta
         uses: docker/metadata-action@v6
         with:
-          images: ${{ matrix.registry }}/pluralsh/devbox-zerofs
+          images: ${{ matrix.registry }}/pluralsh/${{ matrix.image }}
           tags: ${{ env.IMAGE_TAGS }}
+      - name: Resolve digest
+        id: inspect
+        run: |
+          digest=$(docker buildx imagetools inspect ghcr.io/pluralsh/${{ matrix.image }}:${{ needs.version.outputs.version }} --format '{{.Manifest.Digest}}')
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
       - name: Copy the manifest list
         env:
-          DIGEST: ${{ needs.publish-zerofs.outputs.digest }}
+          DIGEST: ${{ steps.inspect.outputs.digest }}
         run: |
           docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
-            "ghcr.io/pluralsh/devbox-zerofs@${DIGEST}"
-          echo "${{ matrix.registry }}/pluralsh/devbox-zerofs@${DIGEST}" >> "$GITHUB_STEP_SUMMARY"
+            "ghcr.io/pluralsh/${{ matrix.image }}@${DIGEST}"
+          echo "${{ matrix.registry }}/pluralsh/${{ matrix.image }}@${DIGEST}" >> "$GITHUB_STEP_SUMMARY"
       - name: Cosign sign
         uses: ./.github/actions/cosign-sign
         with:
-          digest: ${{ needs.publish-zerofs.outputs.digest }}
-          images: ${{ matrix.registry }}/pluralsh/devbox-zerofs
+          digest: ${{ steps.inspect.outputs.digest }}
+          images: ${{ matrix.registry }}/pluralsh/${{ matrix.image }}

@@ -13,7 +13,7 @@ import (
 // registerDevboxRunner starts the DevboxRunner controller when the chart enabled devboxes and the CRD exists.
 // Substrate credentials are loaded per runner when it is reconciled, so the controller runs without Substrate and
 // reports the API errors on each runner.
-func registerDevboxRunner(manager ctrl.Manager, operatorNamespace, consoleURL, deployToken, clusterID string) {
+func registerDevboxRunner(manager ctrl.Manager, operatorNamespace, consoleURL, deployToken, clusterID string, agents controller.AgentsGate) {
 	cfg := controller.LoadDevboxConfig(operatorNamespace, consoleURL, deployToken, clusterID)
 	if !cfg.Enabled {
 		return
@@ -41,6 +41,7 @@ func registerDevboxRunner(manager ctrl.Manager, operatorNamespace, consoleURL, d
 		Scheme:    manager.GetScheme(),
 		Config:    cfg,
 		Console:   consoleClient,
+		Agents:    agents,
 		Substrate: &controller.ClusterSubstrateClients{
 			Client:                manager.GetClient(),
 			Reader:                manager.GetAPIReader(),

@@ -94,6 +94,7 @@ defmodule Console.Deployments.Agents do
     runtime = get_agent_runtime(cid, name) |> Repo.preload([:create_bindings])
 
     with {:ok, _} <- allow(runtime || %AgentRuntime{cluster_id: cid}, actor, :write),
+         :ok <- Clusters.agents_allowed(cid),
          {:ok, attrs} <- resolve_scm_connection(attrs) do
       case runtime do
         %AgentRuntime{} = runtime -> runtime
@@ -755,6 +756,7 @@ defmodule Console.Deployments.Agents do
 
   def scm_creds(%AgentRun{} = run, actor) do
     with {:ok, _} <- allow(run, actor, :creds),
+         :ok <- runtime_agents_allowed(run, actor),
          %ScmConnection{username: username, type: provider} = conn <- scm_connection(run),
          {:ok, conn, expires_at} <- backfill_token_with_expiry(conn) do
       ok(%{
@@ -770,6 +772,14 @@ defmodule Console.Deployments.Agents do
       err -> err
     end
   end
+
+  defp runtime_agents_allowed(%AgentRun{} = run, %Cluster{}) do
+    case Repo.preload(run, [:runtime]) do
+      %AgentRun{runtime: %AgentRuntime{cluster_id: cid}} -> Clusters.agents_allowed(cid)
+      _ -> {:error, Clusters.agents_disabled_error()}
+    end
+  end
+  defp runtime_agents_allowed(_, _), do: :ok
 
   @doc """
   Converts the repository URL to a http URL

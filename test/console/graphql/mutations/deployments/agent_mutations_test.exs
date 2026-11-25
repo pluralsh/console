@@ -5,7 +5,7 @@ defmodule Console.GraphQL.Mutations.Deployments.AgentMutationsTest do
 
   describe "upsertAgentRuntime" do
     test "a cluster can upsert an agent runtime" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
       user = insert(:user)
 
       {:ok, %{data: %{"upsertAgentRuntime" => runtime}}} = run_query("""
@@ -30,7 +30,7 @@ defmodule Console.GraphQL.Mutations.Deployments.AgentMutationsTest do
     end
 
     test "a cluster can upsert an agent runtime with an scm connection" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
       conn = insert(:scm_connection, name: "github")
 
       {:ok, %{data: %{"upsertAgentRuntime" => runtime}}} = run_query("""
@@ -51,7 +51,7 @@ defmodule Console.GraphQL.Mutations.Deployments.AgentMutationsTest do
     end
 
     test "an admin can upsert an agent runtime" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
       admin = insert(:user, roles: %{admin: true})
       user = insert(:user)
 
@@ -80,7 +80,7 @@ defmodule Console.GraphQL.Mutations.Deployments.AgentMutationsTest do
     end
 
     test "a non-admin user cannot upsert an agent runtime" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
       user = insert(:user)
 
       {:ok, %{errors: [error | _]}} = run_query("""
@@ -99,7 +99,7 @@ defmodule Console.GraphQL.Mutations.Deployments.AgentMutationsTest do
     end
 
     test "upserting an agent runtime rejects unknown scm connections" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
 
       {:ok, %{errors: [error | _]}} = run_query("""
         mutation Upsert($attrs: AgentRuntimeAttributes!) {
@@ -119,7 +119,7 @@ defmodule Console.GraphQL.Mutations.Deployments.AgentMutationsTest do
 
   describe "deleteAgentRuntime" do
     test "a cluster can delete an agent runtime" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
       runtime = insert(:agent_runtime, cluster: cluster)
 
       {:ok, %{data: %{"deleteAgentRuntime" => del}}} = run_query("""
@@ -135,7 +135,7 @@ defmodule Console.GraphQL.Mutations.Deployments.AgentMutationsTest do
     end
 
     test "cannot delete an agent runtime still referenced by a workbench" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
       runtime = insert(:agent_runtime, cluster: cluster)
       insert(:workbench, agent_runtime: runtime)
 
@@ -208,7 +208,7 @@ defmodule Console.GraphQL.Mutations.Deployments.AgentMutationsTest do
 
   describe "updateAgentRun" do
     test "a cluster can update an agent run" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
       runtime = insert(:agent_runtime, cluster: cluster)
       run = insert(:agent_run, runtime: runtime)
 
@@ -227,7 +227,7 @@ defmodule Console.GraphQL.Mutations.Deployments.AgentMutationsTest do
     end
 
     test "a cluster can set the agent run head branch" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
       runtime = insert(:agent_runtime, cluster: cluster)
       run = insert(:agent_run, runtime: runtime)
 
@@ -250,7 +250,7 @@ defmodule Console.GraphQL.Mutations.Deployments.AgentMutationsTest do
     end
 
     test "a cluster can set agent run usage" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
       runtime = insert(:agent_runtime, cluster: cluster)
       run = insert(:agent_run, runtime: runtime)
 
@@ -570,7 +570,7 @@ defmodule Console.GraphQL.Mutations.Deployments.AgentMutationsTest do
 
   describe "createAgentRunUpload" do
     test "a cluster can create an agent run upload" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, allow_agents: true)
       runtime = insert(:agent_runtime, cluster: cluster)
       run = insert(:agent_run, runtime: runtime)
 

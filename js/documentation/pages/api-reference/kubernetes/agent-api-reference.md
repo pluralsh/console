@@ -214,7 +214,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `create` _[Binding](#binding) array_ | Create bindings control who can generate new agent runtimes. |  | Optional: \{\} <br /> |
+| `create` _[Binding](#binding) array_ | Create bindings control who can create agent runs on this runtime. |  | Optional: \{\} <br /> |
 
 
 #### AgentRuntimeConfig
@@ -272,7 +272,7 @@ _Appears in:_
 | `default` _boolean_ | Default indicates whether this is the default agent runtime for coding agents. |  | Optional: \{\} <br /> |
 | `targetNamespace` _string_ |  |  | Required: \{\} <br /> |
 | `type` _[AgentRuntimeType](#agentruntimetype)_ | Type specifies the agent runtime to use for executing the stack.<br />One of CLAUDE, OPENCODE, GEMINI, CODEX, PI, CUSTOM. |  | Enum: [CLAUDE OPENCODE GEMINI CODEX PI CUSTOM] <br />Required: \{\} <br /> |
-| `bindings` _[AgentRuntimeBindings](#agentruntimebindings)_ | Bindings define the creation permissions for this agent runtime. |  | Optional: \{\} <br /> |
+| `bindings` _[AgentRuntimeBindings](#agentruntimebindings)_ | Bindings define who can create agent runs on this runtime. Omit them to leave the runtime's bindings<br />unchanged in console (eg managed by an AgentRuntimePolicy), or set an empty create list to clear them.<br />Only applied on clusters configured to allow agent workloads. |  | Optional: \{\} <br /> |
 | `template` _[PodTemplateSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#podtemplatespec-v1-core)_ | Template defines the pod template for this agent runtime. |  |  |
 | `config` _[AgentRuntimeConfig](#agentruntimeconfig)_ | Config contains typed configuration depending on the chosen runtime type. |  | Optional: \{\} <br /> |
 | `aiProxy` _boolean_ | AiProxy routes LLM requests through the Console AI proxy (/ext/ai) using the deploy token,<br />which the in-pod mcpserver sidecar adds, so provider API keys in spec.config are optional.<br />Set the model on the runtime-specific config block (for example spec.config.codex.model).<br />The proxy expects models in provider/name format (for example openai/gpt-5.4,<br />anthropic/claude-sonnet-4-5, vertex/gemini-2.5-pro). Values that already include a "/"<br />are passed through unchanged.<br />When only a bare model id is given, the harness may prefix it by runtime type:<br />  - CLAUDE: anthropic/\{model\} (for example claude-sonnet-4-5 -> anthropic/claude-sonnet-4-5)<br />  - CODEX, OPENCODE: openai/\{model\} (for example gpt-5.4 -> openai/gpt-5.4)<br />  - GEMINI: vertex/\{model\}<br />  - CUSTOM: no automatic prefix; use provider/name explicitly |  |  |
