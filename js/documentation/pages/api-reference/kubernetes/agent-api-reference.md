@@ -1006,6 +1006,40 @@ _Appears in:_
 | `interval` _[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#duration-v1-meta)_ | Interval between re-resolutions in poll mode. Defaults to 1h. |  | Optional: \{\} <br /> |
 
 
+#### DevboxInstanceUpdateMode
+
+_Underlying type:_ _string_
+
+DevboxInstanceUpdateMode controls how existing instances move to a new template revision.
+
+_Validation:_
+- Enum: [onResume manual]
+
+_Appears in:_
+- [DevboxInstanceUpdatePolicy](#devboxinstanceupdatepolicy)
+
+| Field | Description |
+| --- | --- |
+| `onResume` | DevboxInstanceUpdateOnResume moves a suspended instance to the current revision when it is next resumed.<br /> |
+| `manual` | DevboxInstanceUpdateManual leaves instances on their revision until a user or admin updates them.<br /> |
+
+
+#### DevboxInstanceUpdatePolicy
+
+
+
+
+
+
+
+_Appears in:_
+- [DevboxRunnerSpec](#devboxrunnerspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `mode` _[DevboxInstanceUpdateMode](#devboxinstanceupdatemode)_ | Mode is onResume (default) or manual. Console-driven updates (a user's or admin's update, a forced<br />remediation) apply in both modes. | onResume | Enum: [onResume manual] <br />Optional: \{\} <br /> |
+
+
 #### DevboxOCIRegistries
 
 
@@ -1087,6 +1121,8 @@ _Appears in:_
 | `name` _string_ | Name is the ActorTemplate name. |  |  |
 | `hash` _string_ | Hash of the inputs that produced this revision. |  |  |
 | `image` _string_ |  |  |  |
+| `runtime` _string_ | Runtime is the runtime image of the revision. Empty for revisions from before the runtime sidecar,<br />whose daemon is the one baked into Image. |  | Optional: \{\} <br /> |
+| `daemonVersion` _string_ | DaemonVersion is the devbox-daemon version of Runtime. |  | Optional: \{\} <br /> |
 | `phase` _[DevboxRevisionPhase](#devboxrevisionphase)_ |  |  |  |
 | `goldenTag` _string_ |  |  | Optional: \{\} <br /> |
 | `message` _string_ |  |  | Optional: \{\} <br /> |
@@ -1162,7 +1198,9 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `name` _string_ | Name of the Devbox in console. Defaults to metadata.name. |  | Optional: \{\} <br /> |
-| `image` _string_ | Image is the devbox image. Defaults to ghcr.io/pluralsh/devbox-fat at the operator's version;<br />ghcr.io/pluralsh/devbox-minimal is the lean alternative. Custom images must meet the image<br />contract (sh.plural.devbox/contract=v1 label, devbox-daemon entrypoint, UID 1000) and are<br />normally built FROM one of these. |  | Optional: \{\} <br /> |
+| `image` _string_ | Image is the devbox environment image: the distribution, tools and browser an instance runs with. Defaults<br />to ghcr.io/pluralsh/devbox-fat at the operator's version; ghcr.io/pluralsh/devbox-minimal is the lean<br />alternative. devbox-daemon and the agents are not taken from this image: the operator delivers them through<br />the runtime sidecar (see spec.runtime). Custom images must meet the requirements at<br />https://docs.plural.sh/plural-features/devboxes/environment-images (glibc 2.28 or newer, the<br />sh.plural.devbox/contract=v1 label, UID 1000, a POSIX shell at spec.runtime.shell). |  | Optional: \{\} <br /> |
+| `runtime` _[DevboxRuntime](#devboxruntime)_ | Runtime configures how the operator's devbox-daemon runs next to the environment image. |  | Optional: \{\} <br /> |
+| `instanceUpdatePolicy` _[DevboxInstanceUpdatePolicy](#devboxinstanceupdatepolicy)_ | InstanceUpdatePolicy controls how existing instances move to a new template revision, which a new<br />environment image digest, a new daemon (an operator upgrade) or a template change rolls. Updating<br />restarts the instance's processes and resets its root filesystem to the image; the home directory<br />and agent threads are kept. |  | Optional: \{\} <br /> |
 | `imageUpdatePolicy` _[DevboxImageUpdatePolicy](#devboximageupdatepolicy)_ | ImageUpdatePolicy controls re-resolution of spec.image. Defaults to pinned for digest<br />references and to poll every hour for tag references. |  | Optional: \{\} <br /> |
 | `imagePullSecrets` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core) array_ | ImagePullSecrets are dockerconfigjson secrets used only to resolve spec.image to a digest.<br />Nodes pull with their own credentials (Substrate's image credential provider). |  | Optional: \{\} <br /> |
 | `agents` _[DevboxAgent](#devboxagent) array_ | Agents are the coding-agent harnesses this devbox supports. Exactly one must be the default. |  | MaxItems: 5 <br />MinItems: 1 <br />Required: \{\} <br /> |
@@ -1185,6 +1223,43 @@ _Appears in:_
 | `substrate` _[DevboxSubstrate](#devboxsubstrate)_ | Substrate overrides where the operator reaches the Substrate API and the identity it calls it as. The<br />operator mints the token and reads the CA bundle from the cluster when it reconciles the runner, so<br />nothing is mounted into the operator. |  | Optional: \{\} <br /> |
 
 
+
+
+#### DevboxRuntime
+
+
+
+DevboxRuntime configures the plural-runtime sidecar. The runtime image is not configurable here: it is
+ghcr.io/pluralsh/devbox-runtime-core at the operator's version (through the operator's registry mirror
+settings), so every operator upgrade delivers its daemon and agents to every runner. Each instance gets the
+agents of spec.agents (and Playwright MCP with the browser enabled) installed into its home.
+
+
+
+_Appears in:_
+- [DevboxRunnerSpec](#devboxrunnerspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `flavor` _[DevboxRuntimeFlavor](#devboxruntimeflavor)_ | Flavor of the runtime. Only core (devbox-daemon, the coding agents and their ACP adapters) exists. | core | Enum: [core] <br />Optional: \{\} <br /> |
+| `shell` _string_ | Shell is the absolute path of a POSIX shell in the environment image. The devbox container starts with<br />it, waits for the runtime sidecar to install devbox-daemon and the agents into the home volume and then<br />execs the daemon. Defaults to /bin/sh. |  | Optional: \{\} <br />Pattern: `^/[^\s]+$` <br /> |
+
+
+#### DevboxRuntimeFlavor
+
+_Underlying type:_ _string_
+
+DevboxRuntimeFlavor names what the runtime image delivers next to the environment image.
+
+_Validation:_
+- Enum: [core]
+
+_Appears in:_
+- [DevboxRuntime](#devboxruntime)
+
+| Field | Description |
+| --- | --- |
+| `core` | DevboxRuntimeCore is devbox-daemon with the coding agents, their ACP adapters and Playwright MCP; the<br />browser and the tools come from the environment image.<br /> |
 
 
 #### DevboxSandboxClass

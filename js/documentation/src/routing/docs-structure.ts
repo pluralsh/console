@@ -217,6 +217,11 @@ export const docsStructure: DocSection[] = [
         ],
       },
       {
+        path: 'devboxes',
+        title: 'Devboxes',
+        sections: [{ path: 'environment-images', title: 'Environment images' }],
+      },
+      {
         path: 'continuous-deployment',
         title: 'Continuous deployment',
         sections: [
