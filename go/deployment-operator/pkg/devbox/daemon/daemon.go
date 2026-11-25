@@ -150,7 +150,7 @@ func New(cfg Config) (*Daemon, error) {
 		}
 	}
 
-	img, err := harness.LoadImageInfo(cfg.ImageInfo)
+	img, err := LoadImage(cfg)
 	if err != nil {
 		return nil, err
 	}

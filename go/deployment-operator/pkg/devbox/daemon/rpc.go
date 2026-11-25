@@ -220,7 +220,7 @@ func (d *Daemon) probe(ctx context.Context, specs []*devboxv1.AgentProbeSpec, ep
 	defer os.RemoveAll(scratch)
 	return agents.Probe(ctx, agents.ProbeOptions{Launcher: d.harness, Supervisor: d.sup, Log: d.log.With("component", "probe"),
 		Present:        func(t devboxv1.AgentType) bool { _, ok := d.harness.Present(t); return ok },
-		AdapterVersion: d.harness.AdapterVersion, ScratchDir: scratch, Endpoints: ep}, specs)
+		AdapterVersion: d.harness.AdapterVersion, ScratchDir: scratch, Endpoints: ep, MissingReason: d.image.RuntimeUnavailable}, specs)
 }
 
 func (d *Daemon) PrepareSuspend(ctx context.Context, req *devboxv1.PrepareSuspendRequest) (*devboxv1.PrepareSuspendResponse, error) {

@@ -16,3 +16,12 @@ unset _devbox_identity_env
 if [ -n "${GOOGLE_APPLICATION_CREDENTIALS:-}" ] && [ -z "${CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE:-}" ]; then
   export CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE="$GOOGLE_APPLICATION_CREDENTIALS"
 fi
+
+# The agents the plural-runtime sidecar installed (claude, codex, ...). The daemon puts them first on PATH, and
+# login shells reset PATH, so terminals put them back.
+if [ -n "${DEVBOX_RUNTIME_DIR:-}" ] && [ -d "$DEVBOX_RUNTIME_DIR/bin" ]; then
+  case ":$PATH:" in
+    *":$DEVBOX_RUNTIME_DIR/bin:"*) ;;
+    *) PATH="$DEVBOX_RUNTIME_DIR/bin:$PATH"; export PATH ;;
+  esac
+fi

@@ -7,9 +7,12 @@ import (
 	"fmt"
 	"io"
 	"os/exec"
+	"slices"
 	"strings"
 	"sync"
 	"time"
+	"unicode"
+	"unicode/utf8"
 
 	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/acp"
@@ -112,6 +115,8 @@ type agentConn struct {
 	lastErr *devboxv1.AgentError
 	stdin   io.Closer
 	stopped bool
+	// stderr keeps the harness's last dynamic loader errors, which say why a harness that won't start exited.
+	stderr *logWriter
 }
 
 func (c *agentConn) info() *devboxv1.AgentConnection {
@@ -232,7 +237,8 @@ func (m *Manager) startConn(ctx context.Context, launch *devboxv1.AgentLaunch, b
 	if err != nil {
 		return nil, err
 	}
-	cmd.Stderr = &logWriter{log: m.log.With("agent", harness.AgentName(c.agent)), prefix: "stderr"}
+	c.stderr = &logWriter{log: m.log.With("agent", harness.AgentName(c.agent)), prefix: "stderr"}
+	cmd.Stderr = c.stderr
 	name := "agent-" + harness.AgentName(c.agent)
 	p, err := m.opts.Supervisor.Spawn(name, cmd, cmd.Start, false)
 	if err != nil {
@@ -262,8 +268,19 @@ func (m *Manager) startConn(ctx context.Context, launch *devboxv1.AgentLaunch, b
 		"clientInfo":         map[string]any{"name": "devbox-daemon", "title": "Plural DevBox", "version": Version},
 	})
 	if err != nil {
+		exited := c.exitedOnItsOwn()
 		c.stop(time.Second)
-		return nil, agentFailure(err, "initialize")
+		failure := agentFailure(err, "initialize")
+		if tail := c.stderr.Tail(); exited && tail != "" {
+			// A harness that can't start (a missing library, an older glibc) only says why on stderr. Only the
+			// loader's lines are kept: other stderr can quote the user's config, and this message reaches the
+			// runner's status and console.
+			var ae *AgentCallError
+			if errors.As(failure, &ae) && ae.Err != nil {
+				ae.Err.Message += " (stderr: " + tail + ")"
+			}
+		}
+		return nil, failure
 	}
 	c.caps = parseCaps(res)
 	if c.caps.protocolVersion == 0 {
@@ -298,6 +315,18 @@ func hasAuthMethod(methods []acp.Object, id string) bool {
 		}
 	}
 	return false
+}
+
+// exitedOnItsOwn reports whether a call failed because the harness exited, not because it answered with an error.
+// The connection reports both as a request error, so it is the process that tells: one that exited closed its
+// stdout first, and is reaped shortly after.
+func (c *agentConn) exitedOnItsOwn() bool {
+	select {
+	case <-c.process.Done():
+		return true
+	case <-time.After(500 * time.Millisecond):
+		return false
+	}
 }
 
 // watch marks the connection failed when the harness exits and fails its running turns.
@@ -442,12 +471,69 @@ func containsAny(s string, subs ...string) bool {
 	return false
 }
 
-// logWriter logs harness stderr line by line.
+// stderrTailLines and stderrTailLen bound what logWriter keeps for error messages.
+const (
+	stderrTailLines = 5
+	stderrTailLen   = 300
+)
+
+// loaderErrors mark the lines of a dynamic loader that can't start a binary: the reason a runtime agent fails
+// in an environment image with an older glibc or without libstdc++.
+var loaderErrors = []string{"error while loading shared libraries", "GLIBC_", "GLIBCXX_", "not found (required by", "cannot open shared object file"}
+
+// logWriter logs harness stderr line by line, and keeps the last dynamic loader errors.
 type logWriter struct {
 	log    interface{ Debug(string, ...any) }
 	prefix string
 	mu     sync.Mutex
 	buf    []byte
+	tail   []string
+}
+
+// Tail is the last few loader errors written, joined with "; ", including a last line without a newline.
+func (w *logWriter) Tail() string {
+	if w == nil {
+		return ""
+	}
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	lines := w.tail
+	if last, ok := loaderError(string(w.buf)); ok {
+		lines = append(slices.Clone(lines), last)
+	}
+	return strings.Join(lines, "; ")
+}
+
+func (w *logWriter) keep(line string) {
+	if line, ok := loaderError(line); ok {
+		w.tail = append(w.tail, line)
+		if len(w.tail) > stderrTailLines {
+			w.tail = w.tail[len(w.tail)-stderrTailLines:]
+		}
+	}
+}
+
+// loaderError returns line, made safe for an error message, if it is a dynamic loader error: valid UTF-8 (proto
+// strings must be), printable, and cut to stderrTailLen on a character boundary.
+func loaderError(line string) (string, bool) {
+	if !containsAny(line, loaderErrors...) {
+		return "", false
+	}
+	line = strings.Map(func(r rune) rune {
+		if unicode.IsPrint(r) {
+			return r
+		}
+		return -1
+	}, strings.ToValidUTF8(line, "\uFFFD"))
+	line = strings.TrimSpace(line)
+	if len(line) > stderrTailLen {
+		cut := stderrTailLen
+		for cut > 0 && !utf8.RuneStart(line[cut]) {
+			cut--
+		}
+		line = line[:cut] + "..."
+	}
+	return line, line != ""
 }
 
 func (w *logWriter) Write(p []byte) (int, error) {
@@ -460,10 +546,12 @@ func (w *logWriter) Write(p []byte) (int, error) {
 			break
 		}
 		w.log.Debug(w.prefix, "line", string(w.buf[:i]))
+		w.keep(string(w.buf[:i]))
 		w.buf = w.buf[i+1:]
 	}
 	if len(w.buf) > 64<<10 {
 		w.log.Debug(w.prefix, "line", string(w.buf))
+		w.keep(string(w.buf))
 		w.buf = w.buf[:0]
 	}
 	return len(p), nil

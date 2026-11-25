@@ -31,6 +31,11 @@ type Config struct {
 	AgentAuthDir string
 	// ImageInfo is /etc/devbox/image.json.
 	ImageInfo string
+	// RuntimeDir is the runtime the plural-runtime sidecar installed into the home volume, whose agents win over
+	// the image's (DEVBOX_RUNTIME_DIR, set by the devbox container's command). Empty: only the image's.
+	RuntimeDir string
+	// LoaderRoot prefixes the glibc loader path checked before using the runtime's agents (tests).
+	LoaderRoot string
 	// Contract overrides the image contract version (DEVBOX_CONTRACT).
 	Contract string
 	// Shell is the terminals' login shell.

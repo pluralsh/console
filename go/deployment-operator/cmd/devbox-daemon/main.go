@@ -88,6 +88,7 @@ func register(fs *flag.FlagSet) *options {
 	fs.StringVar(&c.IdentityDir, "identity-dir", env("DEVBOX_IDENTITY_DIR", "/run/plural/identity"), "federated token files and cloud SDK config")
 	fs.StringVar(&c.AgentAuthDir, "agent-auth-dir", env("DEVBOX_AGENT_AUTH_DIR", "/run/plural/agent-auth"), "tmpfs for subscription credentials")
 	fs.StringVar(&c.ImageInfo, "image-info", env("DEVBOX_IMAGE_INFO", "/etc/devbox/image.json"), "image description written by the image build")
+	fs.StringVar(&c.RuntimeDir, "runtime-dir", env("DEVBOX_RUNTIME_DIR", ""), "runtime installed by the plural-runtime sidecar, whose agents win over the image's")
 	fs.StringVar(&c.Contract, "contract", env("DEVBOX_CONTRACT", ""), "image contract version (default: image.json)")
 	fs.StringVar(&c.Shell, "shell", env("DEVBOX_SHELL", env("SHELL", "/bin/bash")), "terminal login shell")
 	fs.StringVar(&c.BootScript, "boot-script", env("DEVBOX_BOOT_SCRIPT", filepath.Join(home, ".config", "devbox", "boot.sh")), "user script run when an existing instance cold-boots")
@@ -200,7 +201,7 @@ func runProbe(args []string, stdout, stderr io.Writer) int {
 	o.logFormat = "text"
 	o.finish(stderr)
 
-	img, err := harness.LoadImageInfo(o.cfg.ImageInfo)
+	img, err := daemon.LoadImage(o.cfg)
 	if err != nil {
 		fmt.Fprintln(stderr, err)
 		return 1

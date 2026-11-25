@@ -25,6 +25,7 @@ import (
 	devboxv1 "github.com/pluralsh/console/go/deployment-operator/pkg/devbox/api/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/acp"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/daemon/internal/fsutil"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/devbox/runtimemanifest"
 )
 
 // PlaceholderKey is the API key harnesses send; atenet-egress replaces the auth header with the instance's AI
@@ -35,7 +36,8 @@ const PlaceholderKey = "plural-devbox-placeholder"
 // owner's token for api.anthropic.com (section 4.11).
 const ClaudeOAuthPlaceholder = "sk-ant-oat01-plural-devbox-placeholder"
 
-// ImageAgent is one agent entry in /etc/devbox/image.json, written by the devbox image build (DBX-49).
+// ImageAgent is one agent entry in /etc/devbox/image.json, written by the devbox image build (DBX-49), or one the
+// runtime sidecar installed (MergeRuntime).
 type ImageAgent struct {
 	Command string `json:"command"`
 	Version string `json:"version"`
@@ -44,15 +46,50 @@ type ImageAgent struct {
 		Args    []string `json:"args"`
 		Version string   `json:"version"`
 	} `json:"acp"`
+	// Env is set for the agent's ACP process.
+	Env map[string]string `json:"env,omitempty"`
+	// Dir is the directory of a runtime agent's CLI component.
+	Dir string `json:"-"`
 }
 
-// ImageInfo is /etc/devbox/image.json.
+// ImageInfo is /etc/devbox/image.json, with the runtime sidecar's agents merged in.
 type ImageInfo struct {
 	Contract      string                `json:"contract"`
 	Flavor        string                `json:"flavor"`
 	DaemonVersion string                `json:"daemonVersion"`
 	PlaywrightMCP string                `json:"playwrightMcp"`
 	Agents        map[string]ImageAgent `json:"agents"`
+	// RuntimeUnavailable says why the runtime sidecar's agents can't run here, if they can't.
+	RuntimeUnavailable string `json:"-"`
+}
+
+// MergeRuntime makes the agents (and Playwright MCP) the runtime sidecar installed in dir win over the image's:
+// their commands become absolute paths into dir's bin directory, and their env is set for their ACP process.
+// The image's own entries remain for agents the runtime doesn't carry.
+func (i *ImageInfo) MergeRuntime(dir string, m *runtimemanifest.Manifest) {
+	bin := func(command string) string { return filepath.Join(dir, runtimemanifest.BinDir, command) }
+	if i.Agents == nil {
+		i.Agents = map[string]ImageAgent{}
+	}
+	for name, a := range m.Agents {
+		agent := ImageAgent{Command: bin(a.Command), Version: m.Components[a.Component].Version,
+			Dir: filepath.Join(dir, m.Components[a.Component].Dir)}
+		agent.ACP.Command, agent.ACP.Args = bin(a.ACP.Command), a.ACP.Args
+		// An agent that speaks ACP itself (opencode, gemini) has no adapter version.
+		if a.ACP.Component != a.Component {
+			agent.ACP.Version = m.Components[a.ACP.Component].Version
+		}
+		for k, v := range a.Env {
+			if agent.Env == nil {
+				agent.Env = map[string]string{}
+			}
+			agent.Env[k] = m.Expand(dir, v)
+		}
+		i.Agents[name] = agent
+	}
+	if m.PlaywrightMCP != nil {
+		i.PlaywrightMCP = bin(m.PlaywrightMCP.Command)
+	}
 }
 
 // LoadImageInfo reads the image description. A missing file yields built-in defaults.
@@ -186,7 +223,7 @@ func (c *Config) CodexHome() string { return filepath.Join(c.Home, ".codex") }
 // CodexAuthDir is the tmpfs CODEX_HOME holding auth.json for subscription billing.
 func (c *Config) CodexAuthDir() string { return filepath.Join(c.AgentAuthDir, "codex") }
 
-// Present reports whether the agent's ACP command is on PATH.
+// Present reports whether the agent's ACP command is on PATH (or, for an absolute path, exists).
 func (c *Config) Present(t devboxv1.AgentType) (string, bool) {
 	path, _ := c.command(t)
 	if filepath.IsAbs(path) {
@@ -275,6 +312,11 @@ func (c *Config) Spec(launch *devboxv1.AgentLaunch, endpoints *devboxv1.HarnessE
 		BootModel: bootModel, Billing: billing,
 	}
 	env := c.baseEnv()
+	if c.Image != nil {
+		for k, v := range c.Image.Agents[AgentName(t)].Env {
+			env = setEnv(env, k, v)
+		}
+	}
 	aiProxy := strings.TrimSuffix(endpoints.GetAiProxyUrl(), "/")
 	subscription := billing == devboxv1.BillingMode_BILLING_MODE_SUBSCRIPTION
 	var proxyModels *devboxv1.ProxyModels
@@ -371,6 +413,10 @@ func (c *Config) claudeSpec(set func(kv ...string), d agentDefaults, subscriptio
 // codexSpec sets Codex's environment and syncs its config.toml.
 func (c *Config) codexSpec(set func(kv ...string), d agentDefaults, subscription bool, aiProxy, model string, proxyModels *devboxv1.ProxyModels) error {
 	set("CODEX_HOME", c.CodexHome(), "NO_BROWSER", "1")
+	// Codex exits when CODEX_HOME doesn't exist, and nothing else creates it in a fresh home without a config.
+	if err := os.MkdirAll(c.CodexHome(), 0o700); err != nil {
+		return err
+	}
 	// codex-acp otherwise runs the Codex bundled with it, whose models needn't match the image's catalog
 	if path, err := exec.LookPath(d.binary); err == nil {
 		set("CODEX_PATH", path)
@@ -797,10 +843,15 @@ const piSubagentTool = "subagent"
 // piSubagentExtension is where pi's npm package ships its subagent extension.
 const piSubagentExtension = "@earendil-works/pi-coding-agent/examples/extensions/subagent"
 
-// PiSubagentDir is the image's copy of pi's subagent extension, under the global node_modules.
+// PiSubagentDir is pi's subagent extension: in the runtime's pi component, or in the image's global node_modules.
 func (c *Config) PiSubagentDir() string {
 	if c.PiSubagentExtension != "" {
 		return c.PiSubagentExtension
+	}
+	if c.Image != nil {
+		if dir := c.Image.Agents[AgentName(devboxv1.AgentType_AGENT_TYPE_PI)].Dir; dir != "" {
+			return filepath.Join(dir, "node_modules", piSubagentExtension)
+		}
 	}
 	root := "/usr/local/lib/node_modules"
 	if p, ok := EnvValue(c.baseEnv(), "NODE_PATH"); ok && p != "" {
@@ -829,9 +880,18 @@ func (c *Config) syncPiSubagents() error {
 	if _, err := fsutil.ReadJSON(path, &settings); err != nil {
 		return err
 	}
+	// The extension moves with pi: from the image's node_modules to the runtime's pi component, whose directory
+	// changes with every pi update. Earlier copies would register the subagent tool twice, or fail to load.
 	exts, _ := settings["extensions"].([]any)
-	if !slices.Contains(exts, any(index)) {
-		settings["extensions"] = append(exts, index)
+	kept := slices.DeleteFunc(slices.Clone(exts), func(e any) bool {
+		s, _ := e.(string)
+		return s != index && strings.HasSuffix(filepath.ToSlash(s), "/examples/extensions/subagent/index.ts")
+	})
+	if !slices.Contains(kept, any(index)) {
+		kept = append(kept, index)
+	}
+	if !slices.Equal(kept, exts) {
+		settings["extensions"] = kept
 		if err := fsutil.WriteJSON(path, settings, 0o644); err != nil {
 			return err
 		}
