@@ -1,0 +1,57 @@
+# Builds Agent Substrate's Azure Blob objectstore plugin, which upstream doesn't publish, into the image the
+# agent-substrate chart defaults to (objectStore.azureBlob.image.repository). Bump PLUGIN_REF and VERSION to pick up
+# an upstream change.
+name: CD / Publish objectstore-azure-blob
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+    paths:
+      - .github/workflows/objectstore-azure-blob.yaml
+
+permissions:
+  contents: read
+
+env:
+  PLUGIN_REPOSITORY: agent-substrate-plugins/objectstore-azure-blob
+  PLUGIN_REF: d960af490bc8a3a72902543a420d0f857f4633d3
+  VERSION: 0.1.0
+  KO_DOCKER_REPO: ghcr.io/pluralsh/objectstore-azure-blob
+
+jobs:
+  publish:
+    name: Build and push
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout plugin
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ env.PLUGIN_REPOSITORY }}
+          ref: ${{ env.PLUGIN_REF }}
+      - name: Setup Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - name: Login to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      # upstream's .ko.yaml pins the base image and builds linux/amd64 and linux/arm64; --bare keeps the image at
+      # KO_DOCKER_REPO itself (upstream's Makefile appends the import path)
+      - name: Build and push
+        run: |
+          go run github.com/google/ko@v0.19.1 build --bare \
+            --tags "${VERSION},sha-${PLUGIN_REF:0:7}" \
+            --image-label "org.opencontainers.image.source=https://github.com/${PLUGIN_REPOSITORY}" \
+            --image-label "org.opencontainers.image.revision=${PLUGIN_REF}" \
+            --image-label "org.opencontainers.image.version=${VERSION}" \
+            --image-refs image.txt \
+            ./cmd/azure-blob-objectstore-plugin
+          echo "Pushed $(cat image.txt)" >> "$GITHUB_STEP_SUMMARY"
