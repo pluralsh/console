@@ -139,14 +139,14 @@ runtime_test() {
   echo "PID 1 ok, /readyz $([ -n "${ready}" ] && echo ok || echo skipped), SIGTERM exit in $((end - start))s"
 }
 
-# Harness pins must match the agent-run images.
+# The runtime's agent pins (runtime-core.Dockerfile) must match the agent-run images.
 step_versions() {
-  log "Checking harness versions against dockerfiles/agent-harness"
+  log "Checking the runtime's agent versions against dockerfiles/agent-harness"
   local ah="${operator_dir}/dockerfiles/agent-harness" fail=0
   arg() { sed -n "s/^ARG $2=\(.*\)$/\1/p" "$1" | head -1; }
   check() {
     local name="$1" want="$2" got
-    got="$(arg "${here}/minimal.Dockerfile" "${name}")"
+    got="$(arg "${here}/runtime-core.Dockerfile" "${name}")"
     if [ "${got}" = "${want}" ]; then echo "  ${name}=${got}"; else echo "  ${name}=${got}, agent-run images use ${want}"; fail=1; fi
   }
   check CLAUDE_VERSION "$(arg "${ah}/claude.Dockerfile" AGENT_VERSION)"
@@ -159,6 +159,14 @@ step_versions() {
   check PI_ACP_VERSION "$(arg "${ah}/pi.Dockerfile" ACP_VERSION)"
   check PI_MCP_ADAPTER_VERSION "$(arg "${ah}/pi.Dockerfile" MCP_ADAPTER_VERSION)"
   check NODE_VERSION "$(sed -n 's/^ *NODE_VERSION: *//p' "${go_dir}/../.github/workflows/deployment-operator-cd-agent-harness.yaml" | head -1)"
+  # devbox-minimal keeps its own agents for one more release; they must match the runtime's.
+  local name
+  for name in CLAUDE_VERSION CLAUDE_ACP_VERSION CODEX_VERSION CODEX_ACP_VERSION OPENCODE_VERSION GEMINI_VERSION \
+    PI_VERSION PI_ACP_VERSION PI_MCP_ADAPTER_VERSION PLAYWRIGHT_MCP_VERSION; do
+    if [ "$(arg "${here}/minimal.Dockerfile" "${name}")" != "$(arg "${here}/runtime-core.Dockerfile" "${name}")" ]; then
+      echo "  ${name} differs between minimal.Dockerfile and runtime-core.Dockerfile"; fail=1
+    fi
+  done
   return "${fail}"
 }
 
@@ -194,9 +202,10 @@ step_gateway() {
   structure_test "${gateway_image}" gateway.yaml
 }
 
-# The sidecar next to an environment image, as the operator runs them: the installer puts the daemon into a
-# shared home volume and publishes the marker, a second run keeps it, and the daemon then starts from the home
-# volume in an image that only has a POSIX shell.
+# The sidecar next to an environment image, as the operator runs them: the installer puts the daemon and the
+# runner's agents into a shared home volume and publishes the marker, a second run keeps them, and they then run
+# from the home volume as UID 1000 in an environment image that has nothing of its own. The probe matrix
+# (runtime/probe-matrix.sh) checks every agent's ACP handshake across environment images.
 step_runtime() {
   if [ -n "${RUNTIME_IMAGE:-}" ]; then
     pull "${runtime_image}"
@@ -205,26 +214,39 @@ step_runtime() {
   fi
   structure_test "${runtime_image}" runtime-core.yaml
 
-  local volume="devbox-runtime-test-$$" digest="sha256:test" out size
+  local volume="devbox-runtime-test-$$" digest="sha256:test" agents="claude,codex" id dir out size
+  # runtimemanifest.InstallID: the digest and a hash of the agent selection.
+  id="${digest}+$(printf 'agents=%s\nbrowser=false\n' "$(echo "${agents}" | tr , '\n' | LC_ALL=C sort -u | paste -sd, -)" | sha256sum | cut -c1-12)"
+  dir="/home/dev/.plural-runtime/$(echo "${id}" | tr ':+' '--')"
   log "Install test ${runtime_image}"
   docker volume create "${volume}" >/dev/null
   # shellcheck disable=SC2064
   trap "docker volume rm -f ${volume} >/dev/null 2>&1 || true; cleanup" EXIT
   run_installer() {
-    docker run --rm ${platform_args[@]+"${platform_args[@]}"} -v "${volume}:/mnt/home" "${runtime_image}" --digest "${digest}" --stay=false 2>&1
+    docker run --rm ${platform_args[@]+"${platform_args[@]}"} -v "${volume}:/mnt/home" "${runtime_image}" \
+      --digest "${digest}" --agents "${agents}" --stay=false 2>&1
   }
   out="$(run_installer)"
   echo "${out}" | grep -q '"msg":"runtime installed"' || { echo "first run did not install: ${out}"; return 1; }
   out="$(run_installer)"
   echo "${out}" | grep -q '"msg":"runtime kept"' || { echo "second run did not keep the runtime: ${out}"; return 1; }
-  out="$(docker run --rm ${platform_args[@]+"${platform_args[@]}"} --user 1000:1000 -v "${volume}:/home/dev" busybox:1.37 sh -c \
-    '[ "$(cat /home/dev/.plural-runtime/ready)" = "sha256:test" ] && /home/dev/.plural-runtime/sha256-test/bin/devbox-daemon -version')"
-  [ -n "${out}" ] || { echo "the daemon did not run from the home volume as UID 1000"; return 1; }
-  echo "installed, kept, and devbox-daemon ${out} runs from the home volume as UID 1000"
+  out="$(docker run --rm ${platform_args[@]+"${platform_args[@]}"} --user 1000:1000 -v "${volume}:/home/dev" \
+    -e ID="${id}" -e DIR="${dir}" "${RUNTIME_ENV_IMAGE:-debian:trixie-20261104-slim}" sh -c \
+    '[ "$(cat /home/dev/.plural-runtime/ready)" = "${ID}" ] && "${DIR}/bin/devbox-daemon" -version &&
+     "${DIR}/bin/claude" --version && "${DIR}/bin/codex" --version && "${DIR}/bin/codex-acp" --version')"
+  [ -n "${out}" ] || { echo "the runtime did not run from the home volume as UID 1000"; return 1; }
+  echo "installed, kept, and runs from the home volume as UID 1000:"
+  echo "${out}" | sed 's/^/  /'
 
-  # Everything in the payload is copied into every instance's home volume and snapshots.
-  size="$(docker image inspect "${runtime_image}" --format '{{.Size}}')"
-  [ "${size}" -lt $((64 * 1024 * 1024)) ] || { echo "${runtime_image} is ${size} bytes, over the 64MiB budget"; return 1; }
+  # Everything a runner selects is copied into each of its instances' home volume and snapshots: budget what a
+  # runner with every agent and the browser installs (the installer's count, whatever Docker's image store reports).
+  docker volume rm -f "${volume}" >/dev/null && docker volume create "${volume}" >/dev/null
+  size="$(docker run --rm ${platform_args[@]+"${platform_args[@]}"} -v "${volume}:/mnt/home" "${runtime_image}" \
+    --digest "${digest}" --agents claude,codex,gemini,opencode,pi --browser --stay=false 2>&1 |
+    sed -n 's/.*"bytes":\([0-9]*\).*/\1/p')"
+  [ -n "${size}" ] || { echo "the full install did not report its size"; return 1; }
+  [ "${size}" -lt $((1536 * 1024 * 1024)) ] || { echo "every agent installs ${size} bytes, over the 1.5GiB budget"; return 1; }
+  echo "every agent and the browser install $((size / 1024 / 1024)) MiB"
   docker volume rm -f "${volume}" >/dev/null
   trap cleanup EXIT
 }

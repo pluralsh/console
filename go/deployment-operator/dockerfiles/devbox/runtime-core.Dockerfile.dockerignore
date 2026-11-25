@@ -7,3 +7,4 @@
 !deployment-operator/pkg
 !deployment-operator/internal
 !deployment-operator/api
+!deployment-operator/dockerfiles/devbox/runtime

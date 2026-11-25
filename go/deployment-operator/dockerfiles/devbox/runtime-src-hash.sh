@@ -7,10 +7,11 @@
 #   ./runtime-src-hash.sh --files    the hashed files, relative to ./go
 #   ./runtime-src-hash.sh --modules  the hashed module versions
 #
-# Hashed: the Go, assembly, object and embedded files of every package devbox-daemon and devbox-runtime-installer
-# import from this repository (for linux/amd64 and linux/arm64), the version of every other module they link (not
-# go.mod and go.sum, which change with dependencies the daemon doesn't use), the module's go directive, the
-# Dockerfile (which pins the Go toolchain), its dockerignore, the bake file and this script. Too narrow a hash
+# Hashed: the Go, assembly, object and embedded files of every package devbox-daemon, devbox-runtime-installer and
+# devbox-runtime-manifest import from this repository (for linux/amd64 and linux/arm64), the version of every other
+# module they link (not go.mod and go.sum, which change with dependencies the daemon doesn't use), the module's go
+# directive, the Dockerfile (which pins the Go toolchain, the Node image and the agents' versions), its
+# dockerignore, the bake file, this script and everything under runtime/ (the component spec and build script). Too narrow a hash
 # ships a stale daemon, so anything else that reaches the image must be added here.
 set -euo pipefail
 
@@ -24,12 +25,13 @@ files() {
   for arch in amd64 arm64; do
     (cd "${operator_dir}" && CGO_ENABLED=0 GOOS=linux GOARCH="${arch}" GOFLAGS=-mod=readonly GOWORK=off go list -deps \
       -f '{{if not .Standard}}{{$d := .Dir}}{{range .GoFiles}}{{$d}}/{{.}}{{"\n"}}{{end}}{{range .SFiles}}{{$d}}/{{.}}{{"\n"}}{{end}}{{range .SysoFiles}}{{$d}}/{{.}}{{"\n"}}{{end}}{{range .EmbedFiles}}{{$d}}/{{.}}{{"\n"}}{{end}}{{end}}' \
-      ./cmd/devbox-daemon ./cmd/devbox-runtime-installer)
+      ./cmd/devbox-daemon ./cmd/devbox-runtime-installer ./cmd/devbox-runtime-manifest)
   done | sed -n "s|^${go_dir}/||p"
   echo "${rel}/runtime-core.Dockerfile"
   echo "${rel}/runtime-core.Dockerfile.dockerignore"
   echo "${rel}/docker-bake.hcl"
   echo "${rel}/runtime-src-hash.sh"
+  (cd "${go_dir}" && find "${rel}/runtime" -type f)
 }
 
 # The modules linked into the binaries, as "path version" (with what replaces them, if anything). Modules of this
@@ -39,7 +41,7 @@ modules() {
   for arch in amd64 arm64; do
     (cd "${operator_dir}" && CGO_ENABLED=0 GOOS=linux GOARCH="${arch}" GOFLAGS=-mod=readonly GOWORK=off go list -deps \
       -f '{{with .Module}}{{.Path}} {{.Version}}{{with .Replace}} => {{.Path}} {{.Version}}{{end}}{{end}}' \
-      ./cmd/devbox-daemon ./cmd/devbox-runtime-installer)
+      ./cmd/devbox-daemon ./cmd/devbox-runtime-installer ./cmd/devbox-runtime-manifest)
   done | LC_ALL=C sort -u
   grep -E '^(go|toolchain) ' "${operator_dir}/go.mod"
 }
