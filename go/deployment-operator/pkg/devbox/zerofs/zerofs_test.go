@@ -124,17 +124,22 @@ func TestFreeNBDSkipsConnectedDevices(t *testing.T) {
 	device("nbd2", "0", false)
 	device("loop0", "0", false)
 
-	got, err := freeNBD(sys)
+	held := func(dev string) bool { return dev == "/dev/nbd2" }
+	got, err := freeNBD(sys, func(string) bool { return false })
 	if err != nil {
 		t.Fatal(err)
 	}
 	if got != "/dev/nbd2" {
 		t.Fatalf("freeNBD = %s, want /dev/nbd2", got)
 	}
+	// A disconnected device a lazily detached filesystem still holds is skipped.
+	if got, err := freeNBD(sys, held); err != nil || got != "/dev/nbd10" {
+		t.Fatalf("freeNBD = %s, %v, want /dev/nbd10", got, err)
+	}
 
 	device("nbd2", "8", false)
 	device("nbd10", "8", false)
-	if _, err := freeNBD(sys); err == nil || !strings.Contains(err.Error(), "nbds_max") {
+	if _, err := freeNBD(sys, held); err == nil || !strings.Contains(err.Error(), "nbds_max") {
 		t.Fatalf("err = %v", err)
 	}
 }

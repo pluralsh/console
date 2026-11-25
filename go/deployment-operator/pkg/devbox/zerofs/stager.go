@@ -34,6 +34,8 @@ const (
 	configFile = "config.toml"
 	deviceFile = "device"
 	cacheDir   = "cache"
+	// stoppedFile marks a volume whose writer flushed and exited cleanly when the plugin shut down.
+	stoppedFile = "stopped"
 )
 
 var nbdDevice = regexp.MustCompile(`^/dev/nbd[0-9]+$`)
@@ -86,16 +88,21 @@ func (m *Manager) socketDir(id string) string {
 }
 
 func (m *Manager) Stage(ctx context.Context, v Volume, staging string) (err error) {
-	if ok, err := m.Mounted(staging); err != nil {
+	mounted, err := m.Mounted(staging)
+	if err != nil {
 		return err
-	} else if ok {
-		if m.writer(v.ID) != nil {
-			return nil
-		}
-		// A mount without a writer is a leftover of an earlier plugin run whose device is gone.
-		m.Log.Info("detaching a stale staging mount", "volume", v.ID, "staging", staging)
-		if err := detach(staging); err != nil {
-			return fmt.Errorf("detaching the stale mount at %s: %w", staging, err)
+	}
+	p := m.writer(v.ID)
+	switch {
+	case mounted && p != nil && !p.exited():
+		return nil
+	case mounted:
+		// Writes to the home have been failing since its writer died; serving it again would hide that.
+		return fmt.Errorf("the writer of volume %s has exited, so its home has lost writes; unstage it to recover", v.ID)
+	case exists(m.stateDir(v.ID)):
+		// What a failed stage or unstage left behind: finish tearing it down first.
+		if err := m.Unstage(ctx, v.ID, staging); err != nil {
+			return fmt.Errorf("cleaning up an earlier stage: %w", err)
 		}
 	}
 
@@ -141,30 +148,95 @@ func (m *Manager) Stage(ctx context.Context, v Volume, staging string) (err erro
 	return nil
 }
 
-// Unstage stops serving a volume, in the reverse order of Stage: unmount, which writes back the page cache,
-// then disconnect the device, then stop the writer, which flushes to object storage.
+// Unstage stops serving a volume so another node can open it, in the reverse order of Stage: unmount, which
+// writes back the page cache to the device; flush the writer to object storage; disconnect the device; stop the
+// writer. Every step must succeed before the next, and the volume's state is only removed once the writer has
+// exited cleanly, so a failed Unstage leaves everything in place for a retry.
 func (m *Manager) Unstage(ctx context.Context, id, staging string) error {
-	var errs []error
 	if ok, err := m.Mounted(staging); err != nil {
-		errs = append(errs, err)
+		return err
 	} else if ok {
 		if err := unmount(staging); err != nil {
-			errs = append(errs, fmt.Errorf("unmounting %s: %w", staging, err))
+			return fmt.Errorf("unmounting %s: %w", staging, err)
 		}
+	}
+	dev, err := m.device(id)
+	if err != nil {
+		return err
+	}
+	if dev != "" {
+		if busy, err := deviceBusy(dev); err != nil {
+			return err
+		} else if busy {
+			return fmt.Errorf("%s is still in use by a mount outside %s", dev, staging)
+		}
+	}
+
+	return m.closeVolume(ctx, id)
+}
+
+// closeVolume flushes a volume's writer, disconnects its device and stops the writer, restarting a writer that
+// died first. It removes the volume's state only once all of that succeeded.
+func (m *Manager) closeVolume(ctx context.Context, id string) error {
+	p := m.writer(id)
+	if p == nil || p.exited() {
+		if err := m.detachDevice(ctx, id); err != nil {
+			return err
+		}
+		if !exists(m.stateDir(id)) {
+			return os.RemoveAll(m.socketDir(id))
+		}
+		if exists(filepath.Join(m.stateDir(id), stoppedFile)) {
+			return errors.Join(os.RemoveAll(m.stateDir(id)), os.RemoveAll(m.socketDir(id)))
+		}
+		// The writer died, or an earlier stop failed: reopen the database and close it cleanly. Whatever the dead
+		// writer hadn't flushed is lost, but the next node opens what it did.
+		m.Log.Error(nil, "recovering a volume whose writer didn't stop cleanly; writes since its last flush may be lost", "volume", id)
+		if p != nil {
+			m.forgetWriter(id, p)
+		}
+		if _, err := m.startWriter(ctx, id); err != nil {
+			return fmt.Errorf("restarting the writer to recover: %w", err)
+		}
+		p = m.writer(id)
+	}
+	if err := m.flush(ctx, id); err != nil {
+		return err
 	}
 	if err := m.detachDevice(ctx, id); err != nil {
-		errs = append(errs, err)
+		return err
 	}
-	if p := m.takeWriter(id); p != nil {
-		stop(p, writerExitGrace)
-		if p.err != nil && !isSignaled(p.err) {
-			m.Log.Error(p.err, "writer exited with an error while stopping", "volume", id)
-		}
-	}
-	if err := errors.Join(errs...); err != nil {
+	if err := m.stopWriter(id, p); err != nil {
 		return err
 	}
 	return errors.Join(os.RemoveAll(m.stateDir(id)), os.RemoveAll(m.socketDir(id)))
+}
+
+// flush makes the writer persist everything it acknowledged to object storage.
+func (m *Manager) flush(ctx context.Context, id string) error {
+	ctx, cancel := context.WithTimeout(ctx, writerExitGrace)
+	defer cancel()
+	if _, err := m.run(ctx, m.Binary, "flush", "-c", filepath.Join(m.stateDir(id), configFile)); err != nil {
+		return fmt.Errorf("flushing volume %s: %w", id, err)
+	}
+	return nil
+}
+
+// stopWriter ends a writer and reports whether it exited cleanly. A writer that fails or has to be killed leaves
+// its volume's state behind, which the next Stage, Unstage or plugin start recovers.
+func (m *Manager) stopWriter(id string, p *process) error {
+	m.mu.Lock()
+	p.stopping = true
+	m.mu.Unlock()
+	killed := stop(p, writerExitGrace)
+	m.forgetWriter(id, p)
+	switch {
+	case killed:
+		return fmt.Errorf("the writer of volume %s didn't exit within %s and was killed", id, writerExitGrace)
+	case p.err != nil:
+		return fmt.Errorf("the writer of volume %s exited uncleanly: %w", id, p.err)
+	}
+	return nil
 }
 
 func (m *Manager) Mounted(path string) (bool, error) {
@@ -181,8 +253,10 @@ func (m *Manager) startWriter(ctx context.Context, id string) (writerSockets, er
 		ninep: filepath.Join(sock, "9p.sock"),
 		rpc:   filepath.Join(sock, "rpc.sock"),
 	}
-	if p := m.writer(id); p != nil {
+	if p := m.writer(id); p != nil && !p.exited() {
 		return s, nil
+	} else if p != nil {
+		m.forgetWriter(id, p)
 	}
 	if err := os.RemoveAll(sock); err != nil {
 		return s, err
@@ -191,6 +265,9 @@ func (m *Manager) startWriter(ctx context.Context, id string) (writerSockets, er
 		if err := os.MkdirAll(dir, 0o700); err != nil {
 			return s, err
 		}
+	}
+	if err := os.Remove(filepath.Join(state, stoppedFile)); err != nil && !errors.Is(err, fs.ErrNotExist) {
+		return s, err
 	}
 	cfg := writerConfig{
 		StorageURL: m.Storage.VolumeURL(id),
@@ -232,7 +309,7 @@ func (m *Manager) startWriter(ctx context.Context, id string) (writerSockets, er
 	}()
 
 	err := waitFor(ctx, p, writerStartTimeout, func() (bool, error) {
-		return exists(s.nbd) && exists(s.ninep), nil
+		return exists(s.nbd) && exists(s.ninep) && exists(s.rpc), nil
 	})
 	if err != nil {
 		return s, fmt.Errorf("waiting for the writer: %w", err)
@@ -246,15 +323,21 @@ func (m *Manager) writer(id string) *process {
 	return m.writers[id]
 }
 
-func (m *Manager) takeWriter(id string) *process {
+func (m *Manager) forgetWriter(id string, p *process) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	p := m.writers[id]
-	if p != nil {
-		p.stopping = true
+	if m.writers[id] == p {
 		delete(m.writers, id)
 	}
-	return p
+}
+
+func (p *process) exited() bool {
+	select {
+	case <-p.done:
+		return true
+	default:
+		return false
+	}
 }
 
 // ensureDevice creates .nbd/home at the volume's capacity, or grows it, through a short-lived 9P mount. It
@@ -315,7 +398,10 @@ func (m *Manager) ensureDevice(ctx context.Context, v Volume, s writerSockets) (
 func (m *Manager) attachDevice(ctx context.Context, id, socket string) (string, error) {
 	m.attach.Lock()
 	defer m.attach.Unlock()
-	dev, err := freeNBD(m.SysBlock)
+	dev, err := freeNBD(m.SysBlock, func(dev string) bool {
+		busy, err := deviceBusy(dev)
+		return busy || err != nil
+	})
 	if err != nil {
 		return "", err
 	}
@@ -332,23 +418,32 @@ func (m *Manager) attachDevice(ctx context.Context, id, socket string) (string, 
 	return dev, nil
 }
 
-func (m *Manager) detachDevice(ctx context.Context, id string) error {
+// device is the NBD device recorded for a volume, or "" if it has none.
+func (m *Manager) device(id string) (string, error) {
 	record := filepath.Join(m.stateDir(id), deviceFile)
 	raw, err := os.ReadFile(record)
 	if errors.Is(err, fs.ErrNotExist) {
-		return nil
+		return "", nil
 	}
 	if err != nil {
-		return err
+		return "", err
 	}
 	dev := strings.TrimSpace(string(raw))
 	if !nbdDevice.MatchString(dev) {
-		return fmt.Errorf("%s names %q, not an NBD device", record, dev)
+		return "", fmt.Errorf("%s names %q, not an NBD device", record, dev)
+	}
+	return dev, nil
+}
+
+func (m *Manager) detachDevice(ctx context.Context, id string) error {
+	dev, err := m.device(id)
+	if err != nil || dev == "" {
+		return err
 	}
 	if err := m.disconnect(ctx, dev); err != nil {
 		return err
 	}
-	return os.Remove(record)
+	return os.Remove(filepath.Join(m.stateDir(id), deviceFile))
 }
 
 func (m *Manager) disconnect(ctx context.Context, dev string) error {
@@ -382,7 +477,8 @@ func (m *Manager) formatIfBlank(ctx context.Context, dev string) (bool, error) {
 }
 
 // DetachStale clears what an earlier run of the plugin left behind: its writers died with it, so the ext4 mounts
-// on their devices under root only return I/O errors, and the devices are dead.
+// on their devices under root only return I/O errors, and the devices are dead. A volume whose writer didn't
+// flush and exit cleanly is recovered; one that fails to recover keeps its state for the next Stage or Unstage.
 func (m *Manager) DetachStale(ctx context.Context, root string) error {
 	entries, err := readMountinfo(m.Mountinfo)
 	if err != nil {
@@ -405,30 +501,32 @@ func (m *Manager) DetachStale(ctx context.Context, root string) error {
 	if err != nil && !errors.Is(err, fs.ErrNotExist) {
 		return errors.Join(append(errs, err)...)
 	}
+	var mu sync.Mutex
+	var wg sync.WaitGroup
 	for _, d := range dirs {
 		if !d.IsDir() || !validID(d.Name()) {
 			continue
 		}
-		if err := m.detachDevice(ctx, d.Name()); err != nil {
-			errs = append(errs, fmt.Errorf("disconnecting the device of %s: %w", d.Name(), err))
-			continue
-		}
-		if err := os.RemoveAll(m.stateDir(d.Name())); err != nil {
-			errs = append(errs, err)
-		}
+		wg.Go(func() {
+			if err := m.closeVolume(ctx, d.Name()); err != nil {
+				mu.Lock()
+				errs = append(errs, fmt.Errorf("closing volume %s: %w", d.Name(), err))
+				mu.Unlock()
+			}
+		})
 	}
+	wg.Wait()
 	return errors.Join(errs...)
 }
 
 // Shutdown is for the plugin's own exit, which ends every writer: it writes back the homes' page caches, then
-// stops the writers so they flush to object storage, leaving the mounts for DetachStale.
+// flushes and stops the writers, leaving the mounts for DetachStale. A writer that does both cleanly marks its
+// volume stopped, so the next run needn't recover it.
 func (m *Manager) Shutdown() {
 	m.mu.Lock()
-	procs := make([]*process, 0, len(m.writers))
+	procs := make(map[string]*process, len(m.writers))
 	for id, p := range m.writers {
-		p.stopping = true
-		procs = append(procs, p)
-		delete(m.writers, id)
+		procs[id] = p
 	}
 	m.mu.Unlock()
 	if len(procs) == 0 {
@@ -436,8 +534,19 @@ func (m *Manager) Shutdown() {
 	}
 	syscall.Sync()
 	var wg sync.WaitGroup
-	for _, p := range procs {
-		wg.Go(func() { stop(p, writerExitGrace) })
+	for id, p := range procs {
+		wg.Go(func() {
+			err := m.flush(context.Background(), id)
+			if serr := m.stopWriter(id, p); err == nil {
+				err = serr
+			}
+			if err == nil {
+				err = os.WriteFile(filepath.Join(m.stateDir(id), stoppedFile), nil, 0o600)
+			}
+			if err != nil {
+				m.Log.Error(err, "stopping a writer uncleanly; the next run recovers its volume", "volume", id)
+			}
+		})
 	}
 	wg.Wait()
 	m.Log.Info("stopped writers", "count", len(procs))
@@ -462,8 +571,9 @@ func (m *Manager) run(ctx context.Context, name string, args ...string) (string,
 	return stdout.String(), nil
 }
 
-// freeNBD is the lowest-numbered NBD device with no connection.
-func freeNBD(sysBlock string) (string, error) {
+// freeNBD is the lowest-numbered NBD device with no connection that isn't held: a lazily detached filesystem can
+// outlive its device's connection, and would write into whatever volume the device was attached to next.
+func freeNBD(sysBlock string, held func(dev string) bool) (string, error) {
 	entries, err := os.ReadDir(sysBlock)
 	if err != nil {
 		return "", err
@@ -474,7 +584,7 @@ func freeNBD(sysBlock string) (string, error) {
 		if !strings.HasPrefix(e.Name(), "nbd") || err != nil || n < 0 {
 			continue
 		}
-		if !nbdInUse(sysBlock, e.Name()) {
+		if !nbdInUse(sysBlock, e.Name()) && !held("/dev/"+e.Name()) {
 			free = append(free, n)
 		}
 	}
@@ -530,24 +640,17 @@ func waitFor(ctx context.Context, p *process, timeout time.Duration, cond func()
 	}
 }
 
-// stop ends a process politely first, so it can flush and unmount itself.
-func stop(p *process, grace time.Duration) {
+// stop ends a process politely first, so it can flush and unmount itself, and reports whether it had to be killed.
+func stop(p *process, grace time.Duration) bool {
 	_ = p.cmd.Process.Signal(syscall.SIGTERM)
 	select {
 	case <-p.done:
+		return false
 	case <-time.After(grace):
 		_ = p.cmd.Process.Kill()
 		<-p.done
+		return true
 	}
-}
-
-func isSignaled(err error) bool {
-	var exit *exec.ExitError
-	if !errors.As(err, &exit) {
-		return false
-	}
-	ws, ok := exit.Sys().(syscall.WaitStatus)
-	return ok && ws.Signaled()
 }
 
 func exists(path string) bool {

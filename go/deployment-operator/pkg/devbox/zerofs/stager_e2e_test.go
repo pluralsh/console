@@ -4,6 +4,7 @@ package zerofs
 
 import (
 	"context"
+	"io"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -102,6 +103,54 @@ func TestStageRoundTrip(t *testing.T) {
 	}
 	if size := int64(fs.Blocks) * fs.Bsize; size < 3<<29 {
 		t.Fatalf("the filesystem is %d bytes after growing to 2GiB", size)
+	}
+
+	// A busy home fails to unstage and keeps serving, rather than being detached from under its user.
+	held, err := os.Open(filepath.Join(staging, "note"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := m.Unstage(ctx, v.ID, staging); err == nil {
+		t.Fatal("unstaged a busy home")
+	}
+	if p := m.writer(v.ID); p == nil || p.exited() {
+		t.Fatal("a failed unstage stopped the writer")
+	}
+	if got, err := io.ReadAll(held); err != nil || string(got) != string(payload) {
+		t.Fatalf("read %q, %v from the busy home", got, err)
+	}
+	held.Close()
+
+	// A writer that dies takes the home down: staging it again fails until an unstage recovers the volume, which
+	// keeps what was synced before the crash.
+	durable := []byte("synced before the crash\n")
+	f, err := os.Create(filepath.Join(staging, "durable"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := f.Write(durable); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.Sync(); err != nil {
+		t.Fatal(err)
+	}
+	f.Close()
+	p := m.writer(v.ID)
+	if err := p.cmd.Process.Kill(); err != nil {
+		t.Fatal(err)
+	}
+	<-p.done
+	if err := m.Stage(ctx, v, staging); err == nil {
+		t.Fatal("restaged a home whose writer died")
+	}
+	if err := m.Unstage(ctx, v.ID, staging); err != nil {
+		t.Fatalf("recovering a dead writer: %v", err)
+	}
+	if err := m.Stage(ctx, v, staging); err != nil {
+		t.Fatal(err)
+	}
+	if got, err := os.ReadFile(filepath.Join(staging, "durable")); err != nil || string(got) != string(durable) {
+		t.Fatalf("read back %q, %v after the crash", got, err)
 	}
 	if err := m.Unstage(ctx, v.ID, staging); err != nil {
 		t.Fatal(err)

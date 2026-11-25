@@ -13,3 +13,5 @@ func bindMount(string, string, bool) error { return errUnsupported }
 func unmount(string) error { return errUnsupported }
 
 func detach(string) error { return errUnsupported }
+
+func deviceBusy(string) (bool, error) { return false, errUnsupported }
